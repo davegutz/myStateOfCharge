@@ -1,4 +1,4 @@
-c:/Users/Dave/Documents/GitHub/myVentilator/Vent_Photon/target/3.0.0-beta.1/photon//obj/src/user_export.o: \
+c:/Users/Dave/Documents/GitHub/myStateOfCharge/SOC_Photon/target/3.0.0-beta.1/photon//obj/src/user_export.o: \
  src/user_export.c \
  ../../../modules/shared/stm32f2xx/inc/user_part_export.c \
  ../../../modules/shared/stm32f2xx/inc/module_user_init.h \

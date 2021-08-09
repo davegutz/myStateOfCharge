@@ -3,7 +3,7 @@
 /******************************************************/
 
 #include "Particle.h"
-#line 1 "c:/Users/Dave/Documents/GitHub/myVentilator/Vent_Photon/src/Vent_Photon.ino"
+#line 1 "c:/Users/Dave/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
 // main.h is used so editors visual studio reliably applies file associations.   main.cpp does not work
 #include "main.h"
-#line 3 "c:/Users/Dave/Documents/GitHub/myVentilator/Vent_Photon/src/Vent_Photon.ino"
+#line 3 "c:/Users/Dave/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"

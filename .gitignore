@@ -17,3 +17,8 @@ SOC_Photon/dataReduction/debug.csv
 *.csv
 *.o
 *.o
+*.d
+*.d
+*.d
+SOC_Photon/target/3.0.0-beta.1/photon/obj/src/user_export.o.d
+SOC_Photon/target/3.0.0-beta.1/photon/SOC_Photon.bin.crc_block

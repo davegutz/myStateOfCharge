@@ -1,4 +1,4 @@
-c:/Users/Dave/Documents/GitHub/myVentilator/Vent_Photon/target/3.0.0-beta.1/photon//obj/src/newlib_stubs.o: \
+c:/Users/Dave/Documents/GitHub/myStateOfCharge/SOC_Photon/target/3.0.0-beta.1/photon//obj/src/newlib_stubs.o: \
  src/newlib_stubs.cpp \
  c:\users\dave\.particle\toolchains\gcc-arm\9.2.1\arm-none-eabi\include\sys\types.h \
  c:\users\dave\.particle\toolchains\gcc-arm\9.2.1\arm-none-eabi\include\_ansi.h \

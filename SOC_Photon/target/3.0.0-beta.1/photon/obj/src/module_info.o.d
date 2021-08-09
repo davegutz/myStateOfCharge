@@ -1,4 +1,4 @@
-c:/Users/Dave/Documents/GitHub/myVentilator/Vent_Photon/target/3.0.0-beta.1/photon//obj/src/module_info.o: \
+c:/Users/Dave/Documents/GitHub/myStateOfCharge/SOC_Photon/target/3.0.0-beta.1/photon//obj/src/module_info.o: \
  src/module_info.c ../../../dynalib/inc/module_info.inc \
  ../../../dynalib/inc/module_info.h ../../../services/inc/static_assert.h \
  c:\users\dave\.particle\toolchains\gcc-arm\9.2.1\arm-none-eabi\include\assert.h \
