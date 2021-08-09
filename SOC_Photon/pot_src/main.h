@@ -145,7 +145,7 @@ void serial_print_inputs(unsigned long now, double run_time, double T);
 void serial_print(int cmd);
 int pot_write(int step);
 boolean load(int reset, double T, unsigned int time_ms);
-DS18 sensor_plenum(pin_1_wire);
+DS18 sensor_tbatt(pin_1_wire);
 
 #ifndef NO_CLOUD
 int particleHold(String command)
@@ -371,7 +371,7 @@ void loop()
       Ta_Sense = (float(rawTemp)*165.0/16383.0 - 40.0)*1.8 + 32.0 + TA_TEMPCAL; // convert to fahrenheit and calibrate
 
       // MAXIM conversion
-      if (sensor_plenum.read()) Tp_Sense = sensor_plenum.fahrenheit() + TP_TEMPCAL;
+      if (sensor_tbatt.read()) Tp_Sense = sensor_tbatt.fahrenheit() + TP_TEMPCAL;
 
     }
     else

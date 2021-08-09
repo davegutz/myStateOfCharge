@@ -47,12 +47,8 @@ using namespace std;
 #undef min
 #endif
 
-/*
 #include "constants.h"
 #include "myAuth.h"
-#include "myFilters.h"
-#include "myRoom.h"
-*/
 /* This file myAuth.h is not in Git repository because it contains personal information.
 Make it yourself.   It should look like this, with your personal authorizations:
 (Note:  you don't need a valid number for one of the blynkAuth if not using it.)
@@ -63,9 +59,7 @@ Make it yourself.   It should look like this, with your personal authorizations:
 #endif
 */
 
-/*
 // Dependent includes.   Easier to debug code if remove unused include files
-#include "myInsolation.h"
 #include "mySync.h"
 #include "mySubs.h"
 #include "myCloud.h"
@@ -92,11 +86,8 @@ String hmString = "00:00";      // time, hh:mm
 double controlTime = 0.0;       // Decimal time, seconds since 1/1/2021
 unsigned long lastSync = millis();// Sync time occassionally.   Recommended by Particle.
 Pins *myPins;                   // Photon hardware pin mapping used
-*/
 
-#include <Adafruit_ADS1X15.h>
-//Adafruit_ADS1115 ads;  /* Use this for the 16-bit version */
-Adafruit_ADS1015 ads;     /* Use this for the 12-bit version */
+Adafruit_ADS1015 ads;     /* Use this for the 12-bit version; 1115 for 16-bit */
 
 // Setup
 void setup()
@@ -109,26 +100,12 @@ void setup()
 
   Serial.println("Getting single-ended readings from AIN0..3");
   Serial.println("ADC Range: +/- 0.256V (1 bit = 0.125mV/ADS1015, 0.1875mV/ADS1115)");
-
-  // The ADC input range (or gain) can be changed via the following
-  // functions, but be careful never to exceed VDD +0.3V max, or to
-  // exceed the upper and lower limits if you adjust the input range!
-  // Setting these values incorrectly may destroy your ADC!
-  //                                                                ADS1015  ADS1115
-  //                                                                -------  -------
-  // ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV      0.1875mV (default)
-  // ads.setGain(GAIN_ONE);        // 1x gain   +/- 4.096V  1 bit = 2mV      0.125mV
-  // ads.setGain(GAIN_TWO);        // 2x gain   +/- 2.048V  1 bit = 1mV      0.0625mV
-  // ads.setGain(GAIN_FOUR);       // 4x gain   +/- 1.024V  1 bit = 0.5mV    0.03125mV
-  // ads.setGain(GAIN_EIGHT);      // 8x gain   +/- 0.512V  1 bit = 0.25mV   0.015625mV
   ads.setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
-
   if (!ads.begin()) {
     Serial.println("Failed to initialize ADS.");
     while (1);
   }
 
-/*
   // Peripherals
   myPins = new Pins(D6, D2, D7, A1, A2, A3);
   if ( !bare )
@@ -137,20 +114,12 @@ void setup()
     pinMode(myPins->status_led, OUTPUT);
     digitalWrite(myPins->status_led, LOW);
 
-    // PWM Control
-    pinMode(myPins->pwm_pin, OUTPUT);
-
-    // Initialize schedule
-    saveTemperature(NOMSET, int(NOMSET), false, EEPROM_ADDR, NOMSET);
-
     // I2C
     if ( !bare )
     {
       Wire.setSpeed(CLOCK_SPEED_100KHZ);
       Wire.begin();
     }
-    // Initialize output
-    pwm_write(0, myPins);
   }
   else
   {
@@ -158,10 +127,6 @@ void setup()
     pinMode(myPins->status_led, OUTPUT);
     digitalWrite(myPins->status_led, LOW);
   }
-
-  // OAT
-  // Lets listen for the hook response
-  Particle.subscribe("hook-response/get_weather", gotWeatherData, MY_DEVICES);
 
   // Begin
   Particle.connect();
@@ -186,7 +151,6 @@ void setup()
   }
 
   if ( debug>3 ) { Serial.print(F("End setup debug message=")); Serial.println(F(", "));};
-*/
 
 } // setup
 
@@ -194,29 +158,14 @@ void setup()
 // Loop
 void loop()
 {
-  int16_t adc0_1 = ads.readADC_Differential_0_1();
-  float volts0_1 = ads.computeVolts(adc0_1);
-
   Serial.println("-----------------------------------------------------------");
   Serial.print("AIN0_1: "); Serial.print(adc0_1); Serial.print("  "); Serial.printf("%7.6f", volts0_1); Serial.println("V");
-
-  delay(1000);
-} // loop
-
-  /*
+  static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 120.);       // Sensor noise and general loop filter
+  static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 120.);       // Sensor noise and general loop filter
+  static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 120.);       // Sensor noise and general loop filter
+  static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);
   static Sensors *sen = new Sensors(NOMSET, NOMSET, NOMSET, NOMSET, 32, 0, 0, 0, NOMSET, 0,
                               NOMSET, 999, true, true, true, NOMSET, POT, 0, 0, 0);                                      // Sensors
-  static Control *con = new Control(0.0, 0.0, 0, 0.0, NOMSET, NOMSET, 0, NOMSET);                               // Control
-  static PID *pid = new PID(C_G, C_TAU, C_MAX, C_MIN, C_LLMAX, C_LLMIN, 0, 0, C_DB, 0, 0, 0);                   // Main PID
-  static PID *pid_o = new PID(C_G, C_TAU, C_MAX_O, C_MIN_O, C_LLMAX_O, C_LLMIN_O, 0, 0, C_DB_O, 0, 0, 0);       // Observer PID
-  static DuctTherm* duct = new DuctTherm("duct", M_AP_0, M_AP_1, M_AP_2, M_AQ_0, M_AQ_1, M_AQ_2, M_CPA, M_DUCT_DIA,
-    M_DUCT_TEMP_DROP, M_GLKD, M_QLKD, M_MDOTL_DECR, M_MDOTL_INCR, M_MUA, M_RHOA, M_SMDOT);                                               // Duct model
-  static RoomTherm* room = new RoomTherm("room", M_CPA, M_DN_TADOT, M_DN_TWDOT, M_GCONV,
-    M_GLK, M_QLK, M_RSA, M_RSAI, M_RSAO, M_TRANS_CONV_LOW, M_TRANS_CONV_HIGH);                                                               // Room model
-  static General2_Pole* TaSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 120.);       // Sensor noise and general loop filter
-  static Insolation* sun_wall = new Insolation(SUN_WALL_AREA, SUN_WALL_REFLECTIVITY, GMT);                      // Solar insolation effects
-  static DS18* sensor_plenum = new DS18(myPins->pin_1_wire);
-
 
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
@@ -229,9 +178,7 @@ void loop()
   bool publishP;                            // Particle publish, T/F
   static Sync *publishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
   bool readTp;                              // Special sequence to read Tp affected by PWM noise with duty>0, T/F
-  static Sync *readPlenum = new Sync(READ_TP_DELAY);
-  static bool dwellTp;                      // Special hold to read Tp T/F
-  static Sync *dwellPlenum = new Sync(DWELL_TP_DELAY);
+  static Sync *readPlenum = new Sync(READ_TBATT_DELAY);
   bool read;                                // Read, T/F
   static Sync *readSensors = new Sync(READ_DELAY);
   bool query;                               // Query schedule and OAT, T/F
@@ -253,17 +200,8 @@ void loop()
   }
 
   // Frame control
-  // Stop every READ_TP_DELAY to read Tp, because it is corrupted by noise when running.
-  // If Tp has changed since last
-  if ( abs(sen->Tp-sen->last_Tp)>0.01 )
-  {
-    if ( debug>1 ) Serial.printf("TP:   Tp=%7.3f, last_Tp=%7.3f\n", sen->Tp, sen->last_Tp);
-    sen->last_Tp = sen->Tp;
-    readPlenum->update(now, true);
-  }
   publishP = publishParticle->update(now, false);
-  readTp = readPlenum->update(now, reset);
-  dwellTp = dwellPlenum->updateN(now, false, readTp);
+  readTbatt = readTbatt->update(now, reset);
   read = readSensors->update(now, reset, !publishP);
   sen->T =  double(readSensors->updateTime())/1000.0;
   query = queryWeb->update(reset, now, !read);
@@ -274,155 +212,19 @@ void loop()
   now = millis();
   T = (now - past)/1e3;
   control = controlFrame->update(reset, now, true);
-  if ( control  )
-  {
-    char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
-    controlTime = decimalTime(&currentTime, tempStr);
-    hmString = String(tempStr);
-    con->T = float(controlFrame->updateTime())/1000.0 + float(numTimeouts)/100.0;
-  }
-  delay(5);
   if ( bare )
   {
     delay ( bare_wait );
   }
 
-  // Temperature setpoint logic
-  // 1.  Pot has highest priority
-  //     a.  Pot will not hold past next schedule change
-  //     b.  Web change will override it
-  // 2.  Web Blynk has next highest priority
-  //     a.  Web will hold only if HOLD is on
-  //     b.  Web will HOLD indefinitely.
-  //     c.  When Web is HELD, all other inputs are ignored
-  // 3.  Finally the schedule gets it's say
-  //     a.  Holds last number until time at next change
-  //
-  // Notes:
-  // i.  webDmd is transmitted by Blynk to Photon only when it changes
-  // ii. sen->webHold is transmitted periodically by Blynk to Photon
-
-  // Initialize scheduling logic - don't change on boot
-  static int lastChangedPot = sen->potValue;
-  // If user has adjusted the potentiometer (overrides schedule until next schedule change)
-  // Use potValue for checking because it has more resolution than the integer potDmd
-  if ( fabsf(sen->potValue-lastChangedPot)>16 && checkPot )  // adjust from 64 because my range is 1214 not 4095
-  {
-      sen->controlMode     = POT;
-      double t = min(max(MINSET, sen->potDmd), MAXSET);
-      setSaveDisplayTemp(t, sen, con);
-      sen->held = false;  // allow the pot to override the web demands.  HELD allows web to override schd.
-      if ( debug>6 ) Serial.printf("Setpoint based on pot:  %f\n", t);
-      lastChangedPot = sen->potValue;
-  }
-  //
-  // Otherwise if web Blynk has adjusted setpoint (overridden temporarily by pot, until next web adjust)
-  // The held construct ensures that temp setting latched in by HOLD in Blynk cannot be accidentally changed
-  // The sen->webHold construct ensures that pushing HOLD in Blynk causes control to snap to the web demand
-  else if ( ((abs(con->webDmd-con->lastChangedWebDmd)>0)  & (!sen->held)) | (sen->webHold & (sen->webHold!=sen->lastHold)) )
-  {
-    sen->controlMode     = WEB;
-    double t = min(max(MINSET, con->webDmd), MAXSET);
-    setSaveDisplayTemp(t, sen, con);
-    con->lastChangedWebDmd   = con->webDmd;
-  }
-  else if ( !sen->held )
-  {
-    sen->controlMode = AUTO;
-    double t = min(max(MINSET, NOMSET), MAXSET);
-    setSaveDisplayTemp(t, sen, con);
-  }
-  if ( sen->webHold!=sen->lastHold )
-  {
-    sen->lastHold = sen->webHold;
-    sen->held = sen->webHold;
-    saveTemperature(int(con->set), int(con->webDmd), sen->held, EEPROM_ADDR, sen->Ta_obs);
-  }
-  if ( debug>3 )
-  {
-    if ( sen->controlMode==AUTO ) Serial.printf("*******************Setpoint AUTO, set=%7.1f\n", con->set);
-    else if ( sen->controlMode==WEB ) Serial.printf("*******************Setpoint WEB, set=%7.1f\n", con->set);
-    else if ( sen->controlMode==POT ) Serial.printf("*******************Setpoint POT, set=%7.1f\n", con->set);
-    else Serial.printf("*******************unknown controlMode %d\n", sen->controlMode);
-  }
-
-  // Get OAT webhook and time it 
-  if ( query    )
-  {
-    unsigned long then = millis();
-    getWeather();
-    unsigned long now = millis();
-    if ( debug>0 ) Serial.printf("weather update=%f\n", float(now-then)/1000.0);
-    if ( weatherGood )
-    {
-      if (pubList.weatherData.locationStr != "" && debug>3)
-      {
-        if(debug>3) Serial.println("");
-        Serial.println("At location: " + pubList.weatherData.locationStr);
-      }
-
-      // Solar
-      if ( pubList.weatherData.weatherStr!= "" )  sun_wall->getWeather(pubList.weatherData.weatherStr);
-      if ( pubList.weatherData.visStr!= "" ) sun_wall->getVisibility(pubList.weatherData.visStr);
-      if ( debug>3 ) Serial.printf("The weather is %d: %s, cover=%7.3f, visibility=%7.3f, solar heat = %7.3f\n",
-        sun_wall->the_weather(), sun_wall->weatherStr().c_str(), sun_wall->cover(), sun_wall->visibility(), sun_wall->solar_heat());
-
-      // Temperature
-      if ( pubList.weatherData.tempStr != "" )
-      {
-        sen->OAT = atof(pubList.weatherData.tempStr);
-        if (debug>2)
-        {
-          if (debug<4) Serial.println("");
-          Serial.println("The temp is: " + pubList.weatherData.tempStr + String(" *F"));
-          Serial.flush();
-          Serial.printf("raw OAT=%f\n", sen->OAT);
-          Serial.flush();
-        }
-      }
-      if (pubList.weatherData.windStr != "" && debug>3)
-      {
-          Serial.println("The wind is: " + pubList.weatherData.windStr);
-      }
-    }
-    if ( debug>4 ) Serial.printf("OAT=%f at %s\n", sen->OAT, hmString.c_str());
-  }
-
-  // Control and outputs
-  if ( control )
-  {
-    if ( !dwellTp )  // Freeze control if dwellTp
-    {
-      // Main CLAW
-      pid->update((reset>0) & bare, con->set, sen->Ta_filt, con->T, 100, sen->pcnt_pot);
-
-      // Observer CLAW
-      pid_o->update((reset>0) & bare, sen->Ta_filt, sen->Ta_obs, con->T, 0, C_MAX_O);
-
-    }
-    con->cmd = max(min(min(sen->pcnt_pot, pid->cont), C_MAX), C_MIN);
-    con->cmd_o = max(min(pid_o->cont, C_MAX_O), C_MIN_O);
-    if ( !bare ) con->heat_o = con->cmd_o * M_GAIN_O;
-    else con->heat_o = 0;
-
-    // Latch on fan enable.   If temperature high, turn on.  If low, turn off.   If in-between and already on, leave on.
-    // Latch prevents cycling of fan as Tp cools on startup of fan.
-    if ( sen->Tp>74.0 || ((sen->Tp>73.0) & (con->duty>0)) ) con->duty = min(uint32_t(con->cmd*255.0/100.0), uint32_t(255));
-    else con->duty = 0;
-    if ( Time.hour(currentTime)<4 || Time.hour(currentTime)>=23 ) con->duty = 0;
-    if ( dwellTp ) con->duty = 0;
-    if ( sen->Tp>110.0 ) con->duty = 0;  // Fire shutoff
-    
-    pwm_write(con->duty, myPins);
-    if ( con->duty>0 ) digitalWrite(myPins->status_led, HIGH);
-    else  digitalWrite(myPins->status_led, LOW);
-  }
+  if ( true ) digitalWrite(myPins->status_led, HIGH);
+  else  digitalWrite(myPins->status_led, LOW);
 
   // Read sensors
   if ( read )
   {
     if ( debug>2 ) Serial.printf("Read update=%7.3f\n", sen->T);
-    load(reset, sen->T, sen, con, duct, room, TaSenseFilt, sun_wall, sensor_plenum, myPins);
+    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins);
     if ( bare ) delay(41);  // Usual I2C time
   }
 
@@ -435,34 +237,21 @@ void loop()
     pubList.unit = unit;
     pubList.hmString =hmString;
     pubList.controlTime = controlTime;
-    pubList.set = con->set;
     pubList.Tp = sen->Tp;
     pubList.Ta = sen->Ta;
-    pubList.cmd = con->cmd;
-    pubList.T = con->T;
+    pubList.T = sen->T;
     pubList.OAT = sen->OAT;
     pubList.Ta_obs = sen->Ta_obs;
     pubList.I2C_status = sen->I2C_status;
-    pubList.err = pid->err;
-    pubList.prop = pid->prop;
-    pubList.integ = pid->integ;
-    pubList.cont = pid->cont;
     pubList.pcnt_pot = sen->pcnt_pot;
-    pubList.duty = con->duty;
     pubList.Ta_filt = sen->Ta_filt;
-    pubList.solar_heat = sun_wall->solar_heat();
-    pubList.heat_o = con->heat_o;
     pubList.hum = sen->hum;
     pubList.numTimeouts = numTimeouts;
     pubList.held = sen->held;
-    pubList.potDmd = sen->potDmd;
-    pubList.lastChangedWebDmd = con->lastChangedWebDmd;
-    pubList.qduct = sen->qduct;
     pubList.mdot = sen->mdot;
     pubList.mdot_lag = sen->mdot_lag;
     sen->webHold = pubList.webHold;
-    con->webDmd = pubList.webDmd;
-
+ 
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
     {
@@ -474,7 +263,6 @@ void loop()
     if ( debug>0 && serial )
     {
       serial_print_inputs(now, T);
-      serial_print(con->cmd);
     }
 
   }
@@ -484,4 +272,3 @@ void loop()
 
 
 } // loop
-*/

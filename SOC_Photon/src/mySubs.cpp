@@ -97,70 +97,23 @@ void serial_print(double cmd)
 
 // Load and filter
 // TODO:   move 'read' stuff here
-boolean load(int reset, double T, Sensors *sen, Control *con, DuctTherm *duct, RoomTherm *room,
-    General2_Pole* TaSenseFilt, Insolation *sun_wall, DS18 *sensor_plenum, Pins *myPins)
+boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFilt, 
+    General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads)
 {
   static boolean done_testing = false;
 
   // Read Sensor
-  if ( !bare )
-  {
-    // Honeywell Read
-    Wire.beginTransmission(TA_SENSOR);
-    Wire.endTransmission();
-    delay(40);
-    Wire.requestFrom(TA_SENSOR, 4);
-    Wire.write(byte(0));
-    uint8_t b = Wire.read();
-    sen->I2C_status = b >> 6;
+  // ADS1015 conversion
+  int16_t adc0_1 = ads->readADC_Differential_0_1();
+  float volts0_1 = ads->computeVolts(adc0_1);
 
-    // Honeywell conversion
-    int rawHum  = (b << 8) & 0x3f00;
-    rawHum |=Wire.read();
-    sen->hum = roundf(rawHum / 163.83) + (HW_HUMCAL);
-    int rawTemp = (Wire.read() << 6) & 0x3fc0;
-    rawTemp |=Wire.read() >> 2;
-    sen->Ta = (float(rawTemp)*165.0/16383.0 - 40.0)*1.8 + 32.0 + (TA_TEMPCAL); // convert to fahrenheit and calibrate
+  // MAXIM conversion 1-wire Tp plenum temperature
+  if ( sensor_tbatt->read() ) sen->Tbatt = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);
 
-    // Model
-    duct->update(reset, T, sen->Tp,  con->duty, sen->OAT);
-    room->update(reset, T, duct->Qduct(), duct->mdot(), duct->mdot_lag(), M_TK, sen->OAT,
-      (con->heat_o + sun_wall->solar_heat()), sen->Ta);
-    sen->Ta_obs = room->Ta();
-    sen->qduct = duct->Qduct();
-    sen->mdot = duct->mdot();
-    sen->mdot_lag = duct->mdot_lag();
-
-    // MAXIM conversion 1-wire Tp plenum temperature
-    if ( sensor_plenum->read() ) sen->Tp = sensor_plenum->fahrenheit() + (TP_TEMPCAL);
-
-    // Pot input
-    int raw_pot_trim = analogRead(myPins->pot_trim);
-    int raw_pot_control = analogRead(myPins->pot_control);
-    sen->pcnt_pot = min(max(double(raw_pot_trim)/40.96*1.1, double(raw_pot_control)/40.96*1.6), 100);
-
-    // Tach input
-    int raw_tach = analogRead(myPins->tach_sense);
-    sen->pcnt_tach = double(raw_tach)/40.96;
-  }
-  else
-  {
-    // Pots
-    int raw_pot_control = analogRead(myPins->pot_control);
-    sen->Tp =  double(raw_pot_control)/4096. * 10 + 70;
-    sen->pcnt_pot = 100.;
-
-    // Model
-    duct->update(reset, T, sen->Tp,  con->duty, sen->OAT);
-    room->update(reset, T, duct->Qduct(), duct->mdot(), duct->mdot_lag(), M_TK, sen->OAT,
-        (con->heat_o+sun_wall->solar_heat()), con->set);
-    sen->Ta_obs = room->Ta();
-    sen->Ta = room->Ta();
-    sen->qduct = duct->Qduct();
-    sen->mdot = duct->mdot();
-    sen->mdot_lag = duct->mdot_lag();
-  }
-  sen->Ta_filt = TaSenseFilt->calculate( sen->Ta, reset, T);
+  // Vbatt
+  int raw_Vbatt = analogRead(myPins->Vbatt_sense);
+  sen->Vbatt =  double(raw_Vbatt)/4096. * 10 + 70;
+  sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset, T);
 
   // Built-in-test logic.   Run until finger detected
   if ( true && !done_testing )
