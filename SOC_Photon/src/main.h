@@ -47,10 +47,12 @@ using namespace std;
 #undef min
 #endif
 
+/*
 #include "constants.h"
 #include "myAuth.h"
 #include "myFilters.h"
 #include "myRoom.h"
+*/
 /* This file myAuth.h is not in Git repository because it contains personal information.
 Make it yourself.   It should look like this, with your personal authorizations:
 (Note:  you don't need a valid number for one of the blynkAuth if not using it.)
@@ -60,6 +62,8 @@ Make it yourself.   It should look like this, with your personal authorizations:
   const   String      blynkAuth     = "d2140898f7b94373a78XXX158a3403a1"; // Bare photon
 #endif
 */
+
+/*
 // Dependent includes.   Easier to debug code if remove unused include files
 #include "myInsolation.h"
 #include "mySync.h"
@@ -88,7 +92,11 @@ String hmString = "00:00";      // time, hh:mm
 double controlTime = 0.0;       // Decimal time, seconds since 1/1/2021
 unsigned long lastSync = millis();// Sync time occassionally.   Recommended by Particle.
 Pins *myPins;                   // Photon hardware pin mapping used
+*/
 
+#include <Adafruit_ADS1X15.h>
+//Adafruit_ADS1115 ads;  /* Use this for the 16-bit version */
+Adafruit_ADS1015 ads;     /* Use this for the 12-bit version */
 
 // Setup
 void setup()
@@ -97,7 +105,30 @@ void setup()
   Serial.begin(115200); // initialize serial communication at 115200 bits per second:
   Serial.flush();
   delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
+  Serial.println("Hello!");
 
+  Serial.println("Getting single-ended readings from AIN0..3");
+  Serial.println("ADC Range: +/- 0.256V (1 bit = 0.125mV/ADS1015, 0.1875mV/ADS1115)");
+
+  // The ADC input range (or gain) can be changed via the following
+  // functions, but be careful never to exceed VDD +0.3V max, or to
+  // exceed the upper and lower limits if you adjust the input range!
+  // Setting these values incorrectly may destroy your ADC!
+  //                                                                ADS1015  ADS1115
+  //                                                                -------  -------
+  // ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV      0.1875mV (default)
+  // ads.setGain(GAIN_ONE);        // 1x gain   +/- 4.096V  1 bit = 2mV      0.125mV
+  // ads.setGain(GAIN_TWO);        // 2x gain   +/- 2.048V  1 bit = 1mV      0.0625mV
+  // ads.setGain(GAIN_FOUR);       // 4x gain   +/- 1.024V  1 bit = 0.5mV    0.03125mV
+  // ads.setGain(GAIN_EIGHT);      // 8x gain   +/- 0.512V  1 bit = 0.25mV   0.015625mV
+  ads.setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+
+  if (!ads.begin()) {
+    Serial.println("Failed to initialize ADS.");
+    while (1);
+  }
+
+/*
   // Peripherals
   myPins = new Pins(D6, D2, D7, A1, A2, A3);
   if ( !bare )
@@ -155,6 +186,7 @@ void setup()
   }
 
   if ( debug>3 ) { Serial.print(F("End setup debug message=")); Serial.println(F(", "));};
+*/
 
 } // setup
 
@@ -162,6 +194,16 @@ void setup()
 // Loop
 void loop()
 {
+  int16_t adc0_1 = ads.readADC_Differential_0_1();
+  float volts0_1 = ads.computeVolts(adc0_1);
+
+  Serial.println("-----------------------------------------------------------");
+  Serial.print("AIN0_1: "); Serial.print(adc0_1); Serial.print("  "); Serial.printf("%7.6f", volts0_1); Serial.println("V");
+
+  delay(1000);
+} // loop
+
+  /*
   static Sensors *sen = new Sensors(NOMSET, NOMSET, NOMSET, NOMSET, 32, 0, 0, 0, NOMSET, 0,
                               NOMSET, 999, true, true, true, NOMSET, POT, 0, 0, 0);                                      // Sensors
   static Control *con = new Control(0.0, 0.0, 0, 0.0, NOMSET, NOMSET, 0, NOMSET);                               // Control
@@ -442,3 +484,4 @@ void loop()
 
 
 } // loop
+*/

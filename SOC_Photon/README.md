@@ -36,6 +36,10 @@ When you're ready to compile your project, make sure you have the correct Partic
 
 ## Redo Loop
 
+***********************
+Ctrl-Shift-P - Particle:Cloud Flash
+
+
 Desktop settings
     .json has "particle.targetDevice": "proto"
     local_config.h has 
