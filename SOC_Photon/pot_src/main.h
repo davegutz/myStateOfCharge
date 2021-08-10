@@ -128,8 +128,7 @@ using namespace std;
 char buffer[256];           // Serial print buffer
 int hum = 0;                // Relative humidity integer value, %
 int I2C_Status = 0;         // Bus status
-double Ta_Sense = NOMSET;   // Sensed ambient room temp, F
-double Tp_Sense = NOMSET;   // Sensed plenum temp, F
+double Tbatt_Sense = NOMSET;   // Sensed plenum temp, F
 double updateTime = 0.0;    // Control law update time, sec
 int numTimeouts = 0;        // Number of Particle.connect() needed to unfreeze
 bool webHold = false;       // Web permanence request
@@ -142,7 +141,7 @@ byte vdd_supply = D7;  // Power the MCP4151
 
 // Utilities
 void serial_print_inputs(unsigned long now, double run_time, double T);
-void serial_print(int cmd);
+void serial_print(void);
 int pot_write(int step);
 boolean load(int reset, double T, unsigned int time_ms);
 DS18 sensor_tbatt(pin_1_wire);
@@ -228,7 +227,7 @@ void setup()
   // Header for debug print
   if ( debug>1 )
   { 
-    Serial.print(F("flag,time_ms,run_time,T,I2C_Status,Tp_Sense,Ta_Sense,hum,cmd,")); Serial.println("");
+    Serial.print(F("flag,time_ms,run_time,T,I2C_Status,Tbatt_Sense,hum,cmd,")); Serial.println("");
   }
 
   if ( debug>3 ) { Serial.print(F("End setup debug message=")); Serial.println(F(", "));};
@@ -368,16 +367,14 @@ void loop()
       hum = roundf(rawHum / 163.83) + HW_HUMCAL;
       int rawTemp = (Wire.read() << 6) & 0x3fc0;
       rawTemp |=Wire.read() >> 2;
-      Ta_Sense = (float(rawTemp)*165.0/16383.0 - 40.0)*1.8 + 32.0 + TA_TEMPCAL; // convert to fahrenheit and calibrate
 
       // MAXIM conversion
-      if (sensor_tbatt.read()) Tp_Sense = sensor_tbatt.fahrenheit() + TP_TEMPCAL;
+      if (sensor_tbatt.read()) Tbatt_Sense = sensor_tbatt.fahrenheit() + TP_TEMPCAL;
 
     }
     else
     {
       delay(41); // Usual I2C time
-      if ( reset>0 ) Ta_Sense = NOMSET;
     }
   }
 
@@ -392,7 +389,7 @@ void loop()
   if ( debug>1 )
   {
     serial_print_inputs(now, run_time, T);
-    serial_print(cmd);
+    serial_print();
   }
 
   // Initialize complete
@@ -408,17 +405,16 @@ void serial_print_inputs(unsigned long now, double run_time, double T)
   Serial.print(run_time, 3); Serial.print(", ");
   Serial.print(T, 6); Serial.print(", ");  
   Serial.print(I2C_Status, DEC); Serial.print(", ");
-  Serial.print(Tp_Sense, 1); Serial.print(", ");
-  Serial.print(Ta_Sense, 1); Serial.print(", ");
+  Serial.print(Tbatt_Sense, 1); Serial.print(", ");
   Serial.print(hum, 1); Serial.print(", ");
 }
 
 // Normal serial print
-void serial_print(int cmd)
+void serial_print()
 {
   if ( debug>0 )
   {
-    Serial.print(cmd, DEC); Serial.print(F(", "));   Serial.println(F(""));
+    Serial.print(0, DEC); Serial.print(F(", "));   Serial.println(F(""));
   }
   else
   {

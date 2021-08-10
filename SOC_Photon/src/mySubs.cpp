@@ -36,12 +36,10 @@ extern char buffer[256];
 // Check connection and publish Particle
 void publish_particle(unsigned long now)
 {
-  sprintf(buffer, "%s,%s,%18.3f,   %4.1f,%7.3f,%7.3f,%5.1f,   %5.2f,%4.1f,%7.3f,  %7.3f,%7.3f,%7.3f,%7.3f,\
-  %7.3f,%ld, %7.3f, %7.1f, %7.1f, %7.1f, %7.3f, %7.3f, %c", \
-    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime, pubList.set-HYST, pubList.Tp,
-    pubList.Ta, pubList.cmd, pubList.T, pubList.OAT, pubList.Ta_obs, pubList.err, pubList.prop,
-    pubList.integ, pubList.cont, pubList.pcnt_pot, pubList.duty, pubList.Ta_filt, pubList.solar_heat, pubList.heat_o,
-    pubList.qduct, pubList.mdot, pubList.mdot_lag, '\0');
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %7.6f,%7.6f,\
+  %c", \
+    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime, pubList.Vbatt, pubList.Vbatt_filt,
+    pubList.Tbatt, pubList.Tbatt_filt, pubList.Vshunt, pubList.Vshunt_filt, '\0');
   
   if ( debug>2 ) Serial.println(buffer);
   if ( Particle.connected() )
@@ -68,28 +66,26 @@ void publish_particle(unsigned long now)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime, set,Tp,Ta,cmd,  T,OAT,Ta_o,  err,prop,integ,cont,  pcnt_pot,duty,Ta_filt,  solar,  heat_o, qduct, mdot, mdot_lag,"));
+  Serial.println(F("unit,hm, cTime,  Vbatt,Vbatt_filt,  Tbatt,Tbatt_filt,   Vshunt,Vshunt_filt,"));
 }
 
 // Inputs serial print
 void serial_print_inputs(unsigned long now, double T)
 {
-  sprintf(buffer, "%s,%s,%18.3f,   %4.1f,%7.3f,%7.3f,%5.1f,   %5.2f,%4.1f,%7.3f,  %7.3f,%7.3f,%7.3f,%7.3f,\
-  %7.3f,%ld, %7.3f, %7.1f, %7.1f, %7.1f, %7.3f, %7.3f, %c", \
-    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime, pubList.set-HYST, pubList.Tp,
-    pubList.Ta, pubList.cmd, pubList.T, pubList.OAT, pubList.Ta_obs, pubList.err, pubList.prop,
-    pubList.integ, pubList.cont, pubList.pcnt_pot, pubList.duty, pubList.Ta_filt, pubList.solar_heat, pubList.heat_o, 
-    pubList.qduct, pubList.mdot, pubList.mdot_lag, '\0');
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %7.6f,%7.6f,\
+  %c", \
+    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime, pubList.Vbatt, pubList.Vbatt_filt,
+    pubList.Tbatt, pubList.Tbatt_filt, pubList.Vshunt, pubList.Vshunt_filt, '\0');
   Serial.println(buffer);
 }
 
 // Normal serial print
-void serial_print(double cmd)
+void serial_print(void)
 {
   if ( debug>2 )
   {
-    Serial.print(cmd, 2); Serial.print(F(", "));
-    Serial.print(pubList.duty, DEC); Serial.print(F(", "));
+    Serial.print(0, 2); Serial.print(F(", "));   // placeholder SOC?
+    Serial.print(0, DEC); Serial.print(F(", "));  // placeholder SOC?
     Serial.println("");
   }
 }
@@ -104,14 +100,15 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
 
   // Read Sensor
   // ADS1015 conversion
-  int16_t adc0_1 = ads->readADC_Differential_0_1();
-  float volts0_1 = ads->computeVolts(adc0_1);
+  sen->Vshunt_int = ads->readADC_Differential_0_1();
+  sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
+  sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset, T);
 
   // MAXIM conversion 1-wire Tp plenum temperature
   if ( sensor_tbatt->read() ) sen->Tbatt = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);
 
   // Vbatt
-  int raw_Vbatt = analogRead(myPins->Vbatt_sense);
+  int raw_Vbatt = analogRead(myPins->Vbatt_pin);
   sen->Vbatt =  double(raw_Vbatt)/4096. * 10 + 70;
   sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset, T);
 
@@ -131,24 +128,6 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   }
 
   return ( !done_testing );
-}
-
-// Write to the D/A converter
-uint32_t pwm_write(uint32_t duty, Pins *myPins)
-{
-    analogWrite(myPins->pwm_pin, duty, pwm_frequency);
-    return duty;
-}
-
-
-// Save temperature setpoint to flash for next startup.   During power
-// failures the thermostat will reset to the condition it was in before
-// the power failure.   Filter initialized to sensed temperature (lose anticipation briefly
-// following recovery from power failure).
-void saveTemperature(const int set, const int webDmd, const int held, const int addr, double Ta_obs)
-{
-    uint8_t values[4] = { (uint8_t)set, (uint8_t)held, (uint8_t)webDmd, (uint8_t)(roundf(Ta_obs)) };
-    EEPROM.put(addr, values);
 }
 
 
@@ -212,21 +191,3 @@ double decimalTime(unsigned long *currentTime, char* tempStr)
     return (((( (float(year-2021)*12 + float(month))*30.4375 + float(day))*24.0 + float(hours))*60.0 + float(minutes))*60.0 + \
                         float(seconds));
 }
-
-
-// Process a new temperature setting
-int setSaveDisplayTemp(double t, Sensors *sen, Control *con)
-{
-    con->set = t;
-    // Serial.printf("setSave:   set=%7.1f\n", con->set);
-    switch(sen->controlMode)
-    {
-        case POT:   
-           break;
-        case WEB:   break;
-        case SCHD:  break;
-    }
-    saveTemperature(con->set, int(con->webDmd), sen->held, EEPROM_ADDR, sen->Ta_obs);
-    return con->set;
-}
-

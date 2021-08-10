@@ -36,13 +36,13 @@ struct Pins
 {
   byte pin_1_wire;     // 1-wire Plenum temperature sensor
   byte status_led;     // On-board led
-  byte Vbatt_sense;    // Battery voltage
+  byte Vbatt_pin;      // Battery voltage
   Pins(void) {}
-  Pins(byte pin_1_wire, byte status_led, byte Vbatt_sense)
+  Pins(byte pin_1_wire, byte status_led, byte Vbatt_pin)
   {
     this->pin_1_wire = pin_1_wire;
     this->status_led = status_led;
-    this->Vbatt_sense = Vbatt_sense;
+    this->Vbatt_pin = Vbatt_pin;
   }
 };
 
@@ -50,22 +50,25 @@ struct Pins
 // Sensors
 struct Sensors
 {
-  double Vbatt;          // Sensed battery voltage, V
-  double Vbatt_filt;     // Filtered, sensed battery voltage, V
-  double Tbatt;          // Sensed battery temp, F
-  double Tbatt_filt;     // Filtered, sensed battery temp, F
-  double Vshunt;         // Sensed shunt voltage, V
-  double Vshunt_filt;    // Sensed shunt voltage, V
+  double Vbatt;           // Sensed battery voltage, V
+  double Vbatt_filt;      // Filtered, sensed battery voltage, V
+  double Tbatt;           // Sensed battery temp, F
+  double Tbatt_filt;      // Filtered, sensed battery temp, F
+  int16_t Vshunt_int;     // Sensed shunt voltage, count
+  double Vshunt;          // Sensed shunt voltage, V
+  double Vshunt_filt;     // Filtered, sensed shunt voltage, V
   int I2C_status;
   double T;
   Sensors(void) {}
-  Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt, double Vshunt, double Vshunt_filt,
+  Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
+          int16_t Vshunt_int, double Vshunt, double Vshunt_filt,
           int I2C_status, double T)
   {
     this->Vbatt = Vbatt;
     this->Vbatt_filt = Vbatt_filt;
     this->Tbatt = Tbatt;
     this->Tbatt_filt = Tbatt_filt;
+    this->Vshunt_int = Vshunt_int;
     this->Vshunt = Vshunt;
     this->Vshunt_filt = Vshunt_filt;
     this->I2C_status = I2C_status;
@@ -88,19 +91,18 @@ struct Publish
   int I2C_status;
   double Vbatt_filt;
   double Tbatt_filt;
-  double Tshunt_filt;
+  double Vshunt_filt;
   int numTimeouts;
 };
 
 
 void publish_particle(unsigned long now);
 void serial_print_inputs(unsigned long now, double T);
-void serial_print(double cmd);
+void serial_print(void);
 boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFilt, 
     General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *currentTime, char* tempStr);
-int setSaveDisplayTemp(double t, Sensors *sen, Control *con);
 void print_serial_header(void);
 
 #endif

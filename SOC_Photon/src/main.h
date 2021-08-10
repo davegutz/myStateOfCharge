@@ -86,8 +86,7 @@ String hmString = "00:00";      // time, hh:mm
 double controlTime = 0.0;       // Decimal time, seconds since 1/1/2021
 unsigned long lastSync = millis();// Sync time occassionally.   Recommended by Particle.
 Pins *myPins;                   // Photon hardware pin mapping used
-
-Adafruit_ADS1015 ads;     /* Use this for the 12-bit version; 1115 for 16-bit */
+Adafruit_ADS1015 *ads;          // Use this for the 12-bit version; 1115 for 16-bit
 
 // Setup
 void setup()
@@ -100,14 +99,15 @@ void setup()
 
   Serial.println("Getting single-ended readings from AIN0..3");
   Serial.println("ADC Range: +/- 0.256V (1 bit = 0.125mV/ADS1015, 0.1875mV/ADS1115)");
-  ads.setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
-  if (!ads.begin()) {
+  ads->setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+  if (!ads->begin()) {
     Serial.println("Failed to initialize ADS.");
     while (1);
   }
 
   // Peripherals
-  myPins = new Pins(D6, D2, D7, A1, A2, A3);
+  myPins = new Pins(D6, D7, A1);
+  ads = new Adafruit_ADS1015;
   if ( !bare )
   {
     // Status
@@ -159,34 +159,25 @@ void setup()
 void loop()
 {
   Serial.println("-----------------------------------------------------------");
-  Serial.print("AIN0_1: "); Serial.print(adc0_1); Serial.print("  "); Serial.printf("%7.6f", volts0_1); Serial.println("V");
   static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 120.);       // Sensor noise and general loop filter
   static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 120.);       // Sensor noise and general loop filter
   static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 120.);       // Sensor noise and general loop filter
   static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);
-  static Sensors *sen = new Sensors(NOMSET, NOMSET, NOMSET, NOMSET, 32, 0, 0, 0, NOMSET, 0,
-                              NOMSET, 999, true, true, true, NOMSET, POT, 0, 0, 0);                                      // Sensors
-
-  unsigned long currentTime;                // Time result
+  static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0);                                      // Sensors
   static unsigned long now = millis();      // Keep track of time
   static unsigned long past = millis();     // Keep track of time
   static int reset = 1;                     // Dynamic reset
   double T = 0;                             // Present update time, s
   const int bare_wait = int(1);             // To simulate peripherals sample time
-  bool checkPot = false;                    // Read the POT, T/F
   // Synchronization
   bool publishP;                            // Particle publish, T/F
   static Sync *publishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
-  bool readTp;                              // Special sequence to read Tp affected by PWM noise with duty>0, T/F
-  static Sync *readPlenum = new Sync(READ_TBATT_DELAY);
   bool read;                                // Read, T/F
   static Sync *readSensors = new Sync(READ_DELAY);
   bool query;                               // Query schedule and OAT, T/F
   static Sync *queryWeb = new Sync(QUERY_DELAY);
   bool serial;                              // Serial print, T/F
   static Sync *serialDebug = new Sync(SERIAL_DELAY);
-  bool control;                             // Control sequence, T/F
-  static Sync *controlFrame = new Sync(CONTROL_DELAY);
 
   // Top of loop
   // Start Blynk
@@ -201,7 +192,6 @@ void loop()
 
   // Frame control
   publishP = publishParticle->update(now, false);
-  readTbatt = readTbatt->update(now, reset);
   read = readSensors->update(now, reset, !publishP);
   sen->T =  double(readSensors->updateTime())/1000.0;
   query = queryWeb->update(reset, now, !read);
@@ -211,7 +201,6 @@ void loop()
   past = now;
   now = millis();
   T = (now - past)/1e3;
-  control = controlFrame->update(reset, now, true);
   if ( bare )
   {
     delay ( bare_wait );
@@ -224,7 +213,7 @@ void loop()
   if ( read )
   {
     if ( debug>2 ) Serial.printf("Read update=%7.3f\n", sen->T);
-    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins);
+    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads);
     if ( bare ) delay(41);  // Usual I2C time
   }
 
@@ -237,20 +226,13 @@ void loop()
     pubList.unit = unit;
     pubList.hmString =hmString;
     pubList.controlTime = controlTime;
-    pubList.Tp = sen->Tp;
-    pubList.Ta = sen->Ta;
-    pubList.T = sen->T;
-    pubList.OAT = sen->OAT;
-    pubList.Ta_obs = sen->Ta_obs;
-    pubList.I2C_status = sen->I2C_status;
-    pubList.pcnt_pot = sen->pcnt_pot;
-    pubList.Ta_filt = sen->Ta_filt;
-    pubList.hum = sen->hum;
+    pubList.Vbatt = sen->Vbatt;
+    pubList.Vbatt_filt = sen->Vbatt_filt;
+    pubList.Tbatt = sen->Tbatt;
+    pubList.Tbatt_filt = sen->Tbatt_filt;
+    pubList.Vshunt = sen->Vshunt;
+    pubList.Vshunt_filt = sen->Vshunt_filt;
     pubList.numTimeouts = numTimeouts;
-    pubList.held = sen->held;
-    pubList.mdot = sen->mdot;
-    pubList.mdot_lag = sen->mdot_lag;
-    sen->webHold = pubList.webHold;
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )

@@ -46,11 +46,11 @@ extern BlynkParticle Blynk;
 void publish1(void)
 {
   if (debug>4) Serial.printf("Blynk write1\n");
-  Blynk.virtualWrite(V0,  pubList.cmd);
-  Blynk.virtualWrite(V2,  pubList.Ta);
-  Blynk.virtualWrite(V3,  pubList.hum);
+  Blynk.virtualWrite(V0,  pubList.Vbatt);
+  Blynk.virtualWrite(V2,  pubList.Vbatt_filt);
+  //Blynk.virtualWrite(V3,  pubList.hum);
   // Blynk.virtualWrite(V4,  intentionally blank; used elsewhere);
-  Blynk.virtualWrite(V5,  pubList.Tp);
+  //Blynk.virtualWrite(V5,  pubList.Tp);
 }
 
 
@@ -58,11 +58,10 @@ void publish1(void)
 void publish2(void)
 {
   if (debug>4) Serial.printf("Blynk write2\n");
-  Blynk.virtualWrite(V7,  pubList.held);
+  //Blynk.virtualWrite(V7,  pubList.held);
   Blynk.virtualWrite(V8,  pubList.T);
-  Blynk.virtualWrite(V9,  pubList.potDmd);
-  Blynk.virtualWrite(V10, pubList.lastChangedWebDmd);
-  Blynk.virtualWrite(V11, pubList.set);
+  Blynk.virtualWrite(V9,  pubList.Tbatt);
+  Blynk.virtualWrite(V10, pubList.Tbatt_filt);
 }
 
 
@@ -70,11 +69,11 @@ void publish2(void)
 void publish3(void)
 {
   if (debug>4) Serial.printf("Blynk write3\n");
-  Blynk.virtualWrite(V12, pubList.solar_heat);
-  Blynk.virtualWrite(V13, pubList.Ta);
+  Blynk.virtualWrite(V12, pubList.Vshunt);
+  Blynk.virtualWrite(V13, pubList.Vshunt_filt);
   Blynk.virtualWrite(V14, pubList.I2C_status);
   Blynk.virtualWrite(V15, pubList.hmString);
-  Blynk.virtualWrite(V16, pubList.duty);
+  //Blynk.virtualWrite(V16, pubList.duty);
 }
 
 
@@ -83,9 +82,9 @@ void publish4(void)
 {
   if (debug>4) Serial.printf("Blynk write4\n");
   Blynk.virtualWrite(V17, false);
-  Blynk.virtualWrite(V18, pubList.OAT);
-  Blynk.virtualWrite(V19, pubList.Ta_obs);
-  Blynk.virtualWrite(V20, pubList.heat_o);
+  //Blynk.virtualWrite(V18, pubList.OAT);
+  //Blynk.virtualWrite(V19, pubList.Ta_obs);
+  //Blynk.virtualWrite(V20, pubList.heat_o);
 }
 
 
@@ -95,7 +94,7 @@ void publish4(void)
 BLYNK_WRITE(V4) {
     if (param.asInt() > 0)
     {
-        pubList.webDmd = param.asDouble();
+        //pubList.webDmd = param.asDouble();
     }
 }
 
@@ -103,9 +102,9 @@ BLYNK_WRITE(V4) {
 int particleSet(String command)
 {
   int possibleSet = atoi(command);
-  if (possibleSet >= MINSET && possibleSet <= MAXSET)
+  if (possibleSet >= 0 && possibleSet <= 100)
   {
-    pubList.webDmd = double(possibleSet);
+    //pubList.webDmd = double(possibleSet);
     return possibleSet;
   }
   else return -1;
@@ -115,83 +114,19 @@ int particleSet(String command)
 // Attach a switch widget to the Virtual pin 6 in your Blynk app - and demand continuous web control
 // Note:  there are separate virtual IN and OUT in Blynk.
 BLYNK_WRITE(V6) {
-    pubList.webHold = param.asInt();
+//    pubList.webHold = param.asInt();
 }
 
 int particleHold(String command)
 {
   if (command == "HOLD")
   {
-    pubList.webHold = true;
+    //pubList.webHold = true;
     return 1;
   }
   else
   {
-    pubList.webHold = false;
+   // pubList.webHold = false;
     return 0;
-  }
-}
-
-
-//Updates Weather Forecast Data
-void getWeather()
-{
-  if (debug>2)
-  {
-    Serial.print("Requesting Weather from webhook...");
-    Serial.flush();
-  }
-  weatherGood = false;
-  Particle.publish("get_weather");  // publish the event that will trigger our webhook
-
-  unsigned long wait = millis();
-  while ( !weatherGood && (millis()<wait+WEATHER_WAIT) ) //wait for subscribe to kick in or WEATHER_WAIT secs
-  {
-    //Tells the core to check for incoming messages from partile cloud
-    Particle.process();
-    delay(50);
-  }
-  if (!weatherGood)
-  {
-    if (debug>3) Serial.print("Weather update failed.  ");
-    badWeatherCall++;
-    if (badWeatherCall > 2)
-    {
-      //If 3 webhook calls fail in a row, Print fail
-      if (debug>0) Serial.println("Webhook Weathercall failed!");
-      badWeatherCall = 0;
-    }
-  }
-  else
-  {
-    badWeatherCall = 0;
-  }
-} //End of getWeather function
-
-
-// This function will get called when weather data comes in
-void gotWeatherData(const char *name, const char *data)
-{
-  // Important note!  -- Right now the response comes in 512 byte chunks.
-  //  This code assumes we're getting the response in large chunks, and this
-  //  assumption breaks down if a line happens to be split across response chunks.
-  //
-  // Sample data:
-  //  <location>Minneapolis, Minneapolis-St. Paul International Airport, MN</location>
-  //  <weather>Overcast</weather>
-  //  <temperature_string>26.0 F (-3.3 C)</temperature_string>
-  //  <temp_f>26.0</temp_f>
-  //  <visibility_mi>10.00</visibility_mi>
-  String str          = String(data);
-  pubList.weatherData.locationStr = tryExtractString(str, "<location>", "</location>");
-  pubList.weatherData.weatherStr = tryExtractString(str, "<weather>", "</weather>");
-  pubList.weatherData.tempStr = tryExtractString(str, "<temp_f>", "</temp_f>");
-  pubList.weatherData.windStr = tryExtractString(str, "<wind_string>", "</wind_string>");
-  pubList.weatherData.visStr = tryExtractString(str, "<visibility_mi>", "</visibility_mi>");
-
-  if ( pubList.weatherData.tempStr != "" )
-  {
-    weatherGood = true;
-    updateweatherhour = Time.hour();  // To check once per hour
   }
 }
