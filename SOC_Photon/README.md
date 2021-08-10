@@ -55,6 +55,7 @@ On desktop (has curlParticle.py running in cygwin)
     after observing outputs from long cURL run, Modify main.h etc.   Make sure it compiles.
     flast to target 'proto' and test
     push into GitHub repository
+    get address of curl from particle.io console - pick device - click on 'view events in terminal' --> edit curl??.py file
     cd /cygdrive/c/Users/Dave/Documents/GitHub/myStateOfCharge/SOC_Photon/dataReduction/
     python curlParticleProto.py
 
