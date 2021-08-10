@@ -96,6 +96,7 @@ void setup()
   Serial.flush();
   delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
   Serial.println("Hello!");
+  ads = new Adafruit_ADS1015;
   ads->setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
   if (!ads->begin()) {
     Serial.println("Failed to initialize ADS.");
@@ -104,7 +105,6 @@ void setup()
 
   // Peripherals
   myPins = new Pins(D6, D7, A1);
-  ads = new Adafruit_ADS1015;
   if ( !bare )
   {
     // Status
@@ -155,9 +155,9 @@ void setup()
 // Loop
 void loop()
 {
-  static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 120.);       // Sensor noise and general loop filter
-  static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 120.);       // Sensor noise and general loop filter
-  static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 120.);       // Sensor noise and general loop filter
+  static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.1, 20.);       // Sensor noise and general loop filter
+  static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 150.);       // Sensor noise and general loop filter
+  static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, -0.100, 0.100);       // Sensor noise and general loop filter
   static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);
   static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0);                                      // Sensors
   static unsigned long now = millis();      // Keep track of time

@@ -58,6 +58,12 @@
 #define STAT_RESERVE      200     // Space to reserve for status string publish (150)
 #define GMT               -5      // Enter time different to zulu (does not respect DST)
 #define USE_DST           1       // Whether to apply DST or not, 0 or 1
+#define VBATT_SENSE_R_LO  4700    // Vbatt low sense resistor, ohm
+#define VBATT_SENSE_R_HI  20000   // Vbatt high sense resistor, ohm
+#define VBATT_S           1.017   // Vbatt sense scalar
+#define VBATT_A           0.0     // Vbatt sense adder, V
+#define PHOTON_ADC_COUNT  4096    // Photon ADC range, counts
+#define PHOTON_ADC_VOLT   3.3     // Photon ADC range, V
 //const int EEPROM_ADDR = 1;          // Flash address
 
 #ifdef BARE
@@ -67,5 +73,12 @@ const boolean bare = true;  // Force continuous calibration mode to run with bar
 #undef BARE_PHOTON
 const boolean bare = false;  // Force continuous calibration mode to run with bare boards (false)
 #endif
+
+const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
+                              double(VBATT_SENSE_R_LO) / double(PHOTON_ADC_COUNT) * double(VBATT_S);
+
+#define VBATT_SENSE_R_HI  20000   // Vbatt high sense resistor, ohm
+#define PHOTON_ADC_COUNT  4096    // Photon ADC range, counts
+
 
 #endif // CONSTANTS_H_
