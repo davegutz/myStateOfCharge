@@ -28,7 +28,7 @@ except ImportError:
     from io import StringIO, BytesIO
 import json
 
-STREAM_URL = "https://api.particle.io/v1/devices/events?access_token=7cab32b80bbbfdf8e1e83220c7479343a53e826e"
+STREAM_URL = "https://api.particle.io/v1/devices/31001f000e47393132343438/events?access_token=6ceb8538b0ba054aa7e1f4d2dc04c6f6c9a2180b"
 DEVICE_NAME = 'proto'
 cts = datetime.datetime.now().isoformat()
 cts = cts.replace(':', '-')

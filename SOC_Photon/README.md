@@ -55,6 +55,8 @@ On desktop (has curlParticle.py running in cygwin)
     after observing outputs from long cURL run, Modify main.h etc.   Make sure it compiles.
     flast to target 'proto' and test
     push into GitHub repository
+    cd /cygdrive/c/Users/Dave/Documents/GitHub/myStateOfCharge/SOC_Photon/dataReduction/
+    python curlParticleProto.py
 
 On laptop (has curl "kjejt" running in cygwin)
     pull from GitHub repository changes just made on desktop

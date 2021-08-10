@@ -160,6 +160,8 @@ void loop()
   static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, -0.100, 0.100);       // Sensor noise and general loop filter
   static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);
   static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0);                                      // Sensors
+
+  unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
   static unsigned long past = millis();     // Keep track of time
   static int reset = 1;                     // Dynamic reset
@@ -218,6 +220,10 @@ void loop()
   // to get a curl command to run
   if ( publishP || serial)
   {
+    char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
+    controlTime = decimalTime(&currentTime, tempStr);
+    hmString = String(tempStr);
+
     pubList.now = now;
     pubList.unit = unit;
     pubList.hmString =hmString;
