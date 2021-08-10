@@ -100,17 +100,17 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
 
   // Read Sensor
   // ADS1015 conversion
-  sen->Vshunt_int = ads->readADC_Differential_0_1();
-  sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
-  sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset, T);
+  //sen->Vshunt_int = ads->readADC_Differential_0_1();
+  //sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
+  //sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset, T);
 
   // MAXIM conversion 1-wire Tp plenum temperature
   if ( sensor_tbatt->read() ) sen->Tbatt = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);
 
   // Vbatt
-  int raw_Vbatt = analogRead(myPins->Vbatt_pin);
-  sen->Vbatt =  double(raw_Vbatt)/4096. * 10 + 70;
-  sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset, T);
+  //int raw_Vbatt = analogRead(myPins->Vbatt_pin);
+  //sen->Vbatt =  double(raw_Vbatt)/4096. * 10 + 70;
+  //sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset, T);
 
   // Built-in-test logic.   Run until finger detected
   if ( true && !done_testing )

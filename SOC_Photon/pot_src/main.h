@@ -243,7 +243,6 @@ void loop()
   bool control;            // Control sequence, T/F
   bool display;            // LED display sequence, T/F
   bool filter;             // Filter for temperature, T/F
-  bool model;              // Run model, T/F
   bool publishAny;         // Publish, T/F
   bool publish1;           // Publish, T/F
   bool publish2;           // Publish, T/F
@@ -270,13 +269,6 @@ void loop()
     tFilter     = float(now-lastFilter)/1000.0;
     if ( debug > 3 ) Serial.printf("Filter update=%7.3f\n", tFilter);
     lastFilter    = now;
-  }
-
-  model     = ((now-lastModel)>=MODEL_DELAY) || reset>0;
-  if ( model )
-  {
-    if ( debug > 3 ) Serial.printf("Model update=%7.3f\n", float(now-lastModel)/1000.0);
-    lastModel    = now;
   }
 
   publish1  = ((now-lastPublish1) >= PUBLISH_DELAY*4);

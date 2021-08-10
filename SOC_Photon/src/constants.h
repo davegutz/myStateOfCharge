@@ -68,6 +68,4 @@ const boolean bare = true;  // Force continuous calibration mode to run with bar
 const boolean bare = false;  // Force continuous calibration mode to run with bare boards (false)
 #endif
 
-const uint32_t pwm_frequency = 5000;    // Photon pwm driver frequency, Hz. (ECMF needs 1-10kHz)
-
 #endif // CONSTANTS_H_
