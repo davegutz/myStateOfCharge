@@ -194,14 +194,6 @@ void setup()
   // Peripherals
   if ( !bare )
   {
-    // MCP4151 power supply
-    pinMode(vdd_supply, OUTPUT);
-
-    // MCP4151 using SPI1 and Digtial output 
-    SPI1.setBitOrder(MSBFIRST);
-    SPI1.setClockSpeed(10,MHZ);
-    SPI1.setDataMode(SPI_MODE0);
-    SPI1.begin();
 
     // I2C
     Wire.setSpeed(CLOCK_SPEED_100KHZ);
@@ -212,8 +204,8 @@ void setup()
   // Begin
   Particle.connect();
   #ifndef NO_CLOUD
-    Particle.function("HOLD", particleHold);
-    Particle.function("SET",  particleSet);
+//    Particle.function("HOLD", particleHold);
+//    Particle.function("SET",  particleSet);
   #endif
 
   
@@ -227,7 +219,7 @@ void setup()
   // Header for debug print
   if ( debug>1 )
   { 
-    Serial.print(F("flag,time_ms,run_time,T,I2C_Status,Tbatt_Sense,hum,cmd,")); Serial.println("");
+    Serial.print(F("flag,time_ms,run_time,T,I2C_Status,")); Serial.println("");
   }
 
   if ( debug>3 ) { Serial.print(F("End setup debug message=")); Serial.println(F(", "));};
