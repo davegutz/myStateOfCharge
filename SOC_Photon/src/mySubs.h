@@ -26,10 +26,10 @@
 #define _MY_SUBS_H
 
 #include "myFilters.h"
+#include "constants.h"
 #include <OneWire.h>
 #include <DS18.h>
 #include <Adafruit_ADS1X15.h>
-#include <constants.h>
 
 
 // Pins

@@ -57,7 +57,7 @@
 #define SERIAL_DELAY      5000UL  // Serial print interval (5000UL)
 #define STAT_RESERVE      200     // Space to reserve for status string publish (150)
 #define GMT               -5      // Enter time different to zulu (does not respect DST)
-#define USE_DST           0       // Whether to apply DST or not, 0 or 1
+#define USE_DST           1       // Whether to apply DST or not, 0 or 1
 #define VBATT_SENSE_R_LO  4700    // Vbatt low sense resistor, ohm
 #define VBATT_SENSE_R_HI  20000   // Vbatt high sense resistor, ohm
 #define VBATT_S           1.017   // Vbatt sense scalar

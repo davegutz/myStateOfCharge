@@ -26,7 +26,6 @@
 #endif
 #include "mySubs.h"
 #include "local_config.h"
-#include "constants.h"
 #include <math.h>
 
 extern const int8_t debug;
@@ -182,6 +181,7 @@ double decimalTime(unsigned long *currentTime, char* tempStr)
         {
           Time.zone(GMT+1);
           *currentTime = Time.now();
+          hours = Time.hour(*currentTime);
         }
     }
     #ifndef FAKETIME
