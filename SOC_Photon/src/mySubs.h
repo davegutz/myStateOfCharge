@@ -29,6 +29,7 @@
 #include <OneWire.h>
 #include <DS18.h>
 #include <Adafruit_ADS1X15.h>
+#include <constants.h>
 
 
 // Pins
@@ -57,6 +58,10 @@ struct Sensors
   int16_t Vshunt_int;     // Sensed shunt voltage, count
   double Vshunt;          // Sensed shunt voltage, V
   double Vshunt_filt;     // Filtered, sensed shunt voltage, V
+  double Ishunt;          // Sensed shunt current, A
+  double Ishunt_filt;     // Filtered, sensed shunt current, A
+  double Wshunt;          // Sensed shunt power, W
+  double Wshunt_filt;     // Filtered, sensed shunt power, W
   int I2C_status;
   double T;
   Sensors(void) {}
@@ -71,6 +76,10 @@ struct Sensors
     this->Vshunt_int = Vshunt_int;
     this->Vshunt = Vshunt;
     this->Vshunt_filt = Vshunt_filt;
+    this->Ishunt = Vshunt * SHUNT_V2A_S + double(SHUNT_V2A_A);
+    this->Ishunt_filt = Vshunt_filt * SHUNT_V2A_S + SHUNT_V2A_A;
+    this->Wshunt = Vshunt * Ishunt;
+    this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
     this->I2C_status = I2C_status;
     this->T = T;
   }
@@ -87,11 +96,15 @@ struct Publish
   double Vbatt;
   double Tbatt;
   double Vshunt;
+  double Ishunt;
+  double Wshunt;
   double T;
   int I2C_status;
   double Vbatt_filt;
   double Tbatt_filt;
   double Vshunt_filt;
+  double Ishunt_filt;
+  double Wshunt_filt;
   int numTimeouts;
 };
 

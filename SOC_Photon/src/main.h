@@ -234,6 +234,10 @@ void loop()
     pubList.Tbatt_filt = sen->Tbatt_filt;
     pubList.Vshunt = sen->Vshunt;
     pubList.Vshunt_filt = sen->Vshunt_filt;
+    pubList.Ishunt = sen->Ishunt;
+    pubList.Ishunt_filt = sen->Ishunt_filt;
+    pubList.Wshunt = sen->Wshunt;
+    pubList.Wshunt_filt = sen->Wshunt_filt;
     pubList.numTimeouts = numTimeouts;
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction

@@ -36,10 +36,12 @@ extern char buffer[256];
 // Check connection and publish Particle
 void publish_particle(unsigned long now)
 {
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %7.6f,%7.6f,\
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,\
   %c", \
-    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime, pubList.Vbatt, pubList.Vbatt_filt,
-    pubList.Tbatt, pubList.Tbatt_filt, pubList.Vshunt, pubList.Vshunt_filt, '\0');
+    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
+    pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
+    pubList.Vshunt, pubList.Vshunt_filt,
+    pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,  '\0');
   
   if ( debug>2 ) Serial.println(buffer);
   if ( Particle.connected() )
@@ -72,10 +74,12 @@ void print_serial_header(void)
 // Inputs serial print
 void serial_print_inputs(unsigned long now, double T)
 {
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %7.6f,%7.6f,\
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,\
   %c", \
-    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime, pubList.Vbatt, pubList.Vbatt_filt,
-    pubList.Tbatt, pubList.Tbatt_filt, pubList.Vshunt, pubList.Vshunt_filt, '\0');
+    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
+    pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
+    pubList.Vshunt, pubList.Vshunt_filt,
+    pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,  '\0');
   Serial.println(buffer);
 }
 
@@ -103,6 +107,10 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   sen->Vshunt_int = ads->readADC_Differential_0_1();
   sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
   sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset, T);
+  sen->Ishunt = sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
+  sen->Ishunt_filt = sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A;
+  sen->Wshunt = sen->Vbatt*sen->Ishunt;
+  sen->Wshunt_filt = sen->Vbatt_filt*sen->Ishunt_filt;
 
   // MAXIM conversion 1-wire Tp plenum temperature
   if ( sensor_tbatt->read() ) sen->Tbatt = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);
