@@ -27,10 +27,17 @@
 
 #include "myFilters.h"
 #include "constants.h"
+
+// Temp sensor
 #include <OneWire.h>
 #include <DS18.h>
+
+// AD
 #include <Adafruit_ADS1X15.h>
 
+// Display
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 // Pins
 struct Pins
