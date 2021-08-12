@@ -48,13 +48,13 @@
 #define NOMVSHUNT         0       // Nominal shunt reading, V
 #define ONE_DAY_MILLIS    86400000 // Number of milliseconds in one day (24*60*60*1000)
 //#define CONTROL_DELAY     2000UL  // Control law wait, ms (5000)
-#define PUBLISH_DELAY     10000UL // Time between cloud updates, ms (30000UL)
+#define PUBLISH_DELAY     10000UL // Time between cloud updates, ms (10000UL)
 #define PUBLISH_PARTICLE_DELAY 2000UL // Particle cloud updates (2000UL)
-#define READ_DELAY        5000UL  // Sensor read wait (5000, 100 for stress test), ms (1000UL)
-#define READ_TBATT_DELAY  5000UL  // Sensor read wait (5000, 100 for stress test), ms (1000UL)
+#define READ_DELAY        1000UL  // Sensor read wait (5000, 100 for stress test), ms (1000UL)
+#define READ_TBATT_DELAY  1000UL  // Sensor read wait (5000, 100 for stress test), ms (1000UL)
 #define QUERY_DELAY       900000UL  // Web query wait (15000, 100 for stress test), ms (900000UL)
 #define DISPLAY_DELAY     300UL   // Serial display scheduling frame time, ms (300UL)
-#define SERIAL_DELAY      5000UL  // Serial print interval (5000UL)
+#define SERIAL_DELAY      4000UL  // Serial print interval (5000UL)
 #define STAT_RESERVE      200     // Space to reserve for status string publish (150)
 #define GMT               -5      // Enter time different to zulu (does not respect DST)
 #define USE_DST           1       // Whether to apply DST or not, 0 or 1
@@ -74,6 +74,8 @@
 #define NUMFLAKES     10 // Number of snowflakes in the animation example
 #define LOGO_HEIGHT   16
 #define LOGO_WIDTH    16
+#define DISCONNECT_DELAY  15000 // After fifteen seconds of no WiFi, disconnect
+#define CHECK_INTERVAL    60000 // How often to check for WiFi once disconnected
 
 
 #ifdef BARE

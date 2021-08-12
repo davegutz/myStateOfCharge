@@ -33,8 +33,27 @@ extern Publish pubList;
 extern char buffer[256];
 
 // Check connection and publish Particle
-void publish_particle(unsigned long now)
+void publish_particle(unsigned long now, Wifi *wifi)
 {
+
+  // Forgiving wifi connection logic
+  if ( !Particle.connected && millis()-wifi->lastDisconnect>=DISCONNECT_DELAY )
+  {
+    wifi->lastDisconnect = millis();
+    WiFi.off();
+    wifi->connected = false;
+  }
+  if ( millis()-wifi->lastAttempt>=CHECK_INTERVAL )
+  {
+    WiFi.on();
+    Particle.connect();
+    wifi->lastAttempt = millis();
+  }
+  if ( millis()-wifi->lastAttempt>=DISCONNECT_DELAY )
+  {
+    wifi->connected = Particle.connected();
+  }
+
   sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,\
   %c", \
     pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
@@ -42,10 +61,9 @@ void publish_particle(unsigned long now)
     pubList.Vshunt, pubList.Vshunt_filt,
     pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,  '\0');
   
-  if ( debug>2 ) Serial.println(buffer);
-  if ( Particle.connected() )
+  if ( wifi->connected )
   {
-    if ( debug>2 ) Serial.printf("Particle write\n");
+    if ( debug>2 ) Serial.printf("Particle write:  ");
     unsigned nowSec = now/1000UL;
     unsigned sec = nowSec%60;
     unsigned min = (nowSec%3600)/60;
@@ -58,8 +76,7 @@ void publish_particle(unsigned long now)
   }
   else
   {
-    if ( debug>1 ) Serial.printf("Particle not connected....connecting\n");
-    Particle.connect();
+    if ( debug>2 ) Serial.printf("Particle write:  wifi disconnected\n");
     pubList.numTimeouts++;
   }
 }
@@ -79,6 +96,7 @@ void serial_print_inputs(unsigned long now, double T)
     pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
     pubList.Vshunt, pubList.Vshunt_filt,
     pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,  '\0');
+  if ( debug > 2 ) Serial.printf("serial_print_inputs:  ");
   Serial.println(buffer);
 }
 
@@ -103,7 +121,14 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
 
   // Read Sensor
   // ADS1015 conversion
-  sen->Vshunt_int = ads->readADC_Differential_0_1();
+  if (!sen->bare_ads)
+  {
+    sen->Vshunt_int = ads->readADC_Differential_0_1();
+  }
+  else
+  {
+    sen->Vshunt_int = 0;
+  }
   sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
   sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset, T);
   sen->Ishunt = sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;

@@ -1117,5 +1117,3 @@ void Adafruit_SSD1306::dim(bool dim) {
   ssd1306_command1(dim ? 0 : contrast);
   TRANSACTION_END
 }
-
-

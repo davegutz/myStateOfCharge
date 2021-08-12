@@ -55,6 +55,24 @@ struct Pins
 };
 
 
+// Wifi
+struct Wifi
+{
+  unsigned int lastAttempt;
+  unsigned int lastDisconnect;
+  bool connected = false;
+  bool blynk_started = false;
+  Wifi(void) {}
+  Wifi(unsigned int lastAttempt, unsigned int lastDisconnect, bool connected, bool blynk_started)
+  {
+    this->lastAttempt = lastAttempt;
+    this->lastDisconnect = lastDisconnect;
+    this->connected = connected;
+    this->blynk_started = blynk_started;
+  }
+};
+
+
 // Sensors
 struct Sensors
 {
@@ -70,11 +88,12 @@ struct Sensors
   double Wshunt;          // Sensed shunt power, W
   double Wshunt_filt;     // Filtered, sensed shunt power, W
   int I2C_status;
+  bool bare_ads;          // If no ADS detected
   double T;
   Sensors(void) {}
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
           int16_t Vshunt_int, double Vshunt, double Vshunt_filt,
-          int I2C_status, double T)
+          int I2C_status, double T, bool bare_ads)
   {
     this->Vbatt = Vbatt;
     this->Vbatt_filt = Vbatt_filt;
@@ -89,6 +108,7 @@ struct Sensors
     this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
     this->I2C_status = I2C_status;
     this->T = T;
+    this->bare_ads = bare_ads;
   }
 };
 
@@ -116,7 +136,8 @@ struct Publish
 };
 
 
-void publish_particle(unsigned long now);
+// Headers
+void publish_particle(unsigned long now, Wifi *wifi);
 void serial_print_inputs(unsigned long now, double T);
 void serial_print(void);
 boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFilt, 

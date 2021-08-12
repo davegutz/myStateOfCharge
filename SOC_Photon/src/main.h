@@ -38,6 +38,7 @@
 #if (PLATFORM_ID == 6)
 #define PHOTON
 #include "application.h" // Should not be needed if file ino or Arduino
+//SYSTEM_MODE(SEMI_AUTOMATIC);
 SYSTEM_THREAD(ENABLED); // Make sure code always run regardless of network status
 #include <Arduino.h>     // Used instead of Print.h - breaks Serial
 #else
@@ -88,6 +89,8 @@ unsigned long lastSync = millis();// Sync time occassionally.   Recommended by P
 Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_ADS1015 *ads;          // Use this for the 12-bit version; 1115 for 16-bit
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+bool bare_ads = false;          // If ADS to be ignored
+Wifi *myWifi;                     // Manage Wifi
 
 // Setup
 void setup()
@@ -124,59 +127,38 @@ void setup()
   ads->setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
   if (!ads->begin()) {
     Serial.println("Failed to initialize ADS.");
-    while (1);
+    bare_ads = true;
+    // while (1);
   }
   // Display
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+  Serial.println("Initializing DISPLAY.");
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
-  // Show initial display buffer contents on the screen --
-  // the library initializes this with an Adafruit splash screen.
-  display.display();
+  Serial.println("DISPLAY allocated.");
+  display.display();   // Adafruit splash
   delay(2000); // Pause for 2 seconds
-  // Clear the buffer
   display.clearDisplay();
-  // Draw a single pixel in white
-  display.drawPixel(10, 10, SSD1306_WHITE);
-  // Show the display buffer on the screen. You MUST call display() after
-  // drawing commands to make them visible on screen!
-  display.display();
-  delay(2000);
-  // display.display() is NOT necessary after every single drawing command,
-  // unless that's what you want...rather, you can batch up a bunch of
-  // drawing operations and then update the screen all at once by calling
-  // display.display(). These examples demonstrate both approaches...
-  testdrawline();      // Draw many lines
-  testdrawrect();      // Draw rectangles (outlines)
-  testfillrect();      // Draw rectangles (filled)
-  testdrawcircle();    // Draw circles (outlines)
-  testfillcircle();    // Draw circles (filled)
-  testdrawroundrect(); // Draw rounded rectangles (outlines)
-  testfillroundrect(); // Draw rounded rectangles (filled)
-  testdrawtriangle();  // Draw triangles (outlines)
-  testfilltriangle();  // Draw triangles (filled)
-  testdrawchar();      // Draw characters of the default font
   testdrawstyles();    // Draw 'stylized' characters
-  testscrolltext();    // Draw scrolling text
-  testdrawbitmap();    // Draw a small bitmap image
-  // Invert and restore display, pausing in-between
-  display.invertDisplay(true);
   delay(1000);
-  display.invertDisplay(false);
-  delay(1000);
-  //testanimate(logo_bmp, LOGO_WIDTH, LOGO_HEIGHT); // Animate bitmaps
 
   // Cloud
-  Particle.connect();
-  Particle.function("HOLD", particleHold);
-  Particle.function("SET",  particleSet);
+  Particle.disconnect();
+  myWifi = new Wifi(millis()-CHECK_INTERVAL, millis(), Particle.connected(), false);  // make publish_particle check right away
+  Serial.println("Setup blynk.");
   blynk_timer_1.setInterval(PUBLISH_DELAY, publish1);
   blynk_timer_2.setTimeout(1*PUBLISH_DELAY/4, [](){blynk_timer_2.setInterval(PUBLISH_DELAY, publish2);});
   blynk_timer_3.setTimeout(2*PUBLISH_DELAY/4, [](){blynk_timer_3.setInterval(PUBLISH_DELAY, publish3);});
   blynk_timer_4.setTimeout(3*PUBLISH_DELAY/4, [](){blynk_timer_4.setInterval(PUBLISH_DELAY, publish4);});
-  Blynk.begin(blynkAuth.c_str());
+  if ( myWifi->connected )
+  {
+    Serial.println("Begin blynk");
+    Blynk.begin(blynkAuth.c_str());
+    myWifi->blynk_started = true;
+  }
+  Serial.println("Started CLOUD.");
 
   #ifdef PHOTON
     if ( debug>1 ) { sprintf(buffer, "Particle Photon.  bare = %d,\n", bare); Serial.print(buffer); };
@@ -202,7 +184,7 @@ void loop()
   static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 150.);       // Sensor noise and general loop filter
   static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, -0.100, 0.100);       // Sensor noise and general loop filter
   static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);
-  static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0);                                      // Sensors
+  static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads);                                      // Sensors
 
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
@@ -222,7 +204,15 @@ void loop()
 
   // Top of loop
   // Start Blynk
-  Blynk.run(); blynk_timer_1.run(); blynk_timer_2.run(); blynk_timer_3.run(); blynk_timer_4.run(); 
+  if ( myWifi->connected && !myWifi->blynk_started )
+  {
+    Blynk.begin(blynkAuth.c_str());
+    myWifi->blynk_started = true;
+  }
+  if ( myWifi->blynk_started )
+  {
+    Blynk.run(); blynk_timer_1.run(); blynk_timer_2.run(); blynk_timer_3.run(); blynk_timer_4.run(); 
+  }
 
   // Request time synchronization from the Particle Cloud once per day
   if (millis() - lastSync > ONE_DAY_MILLIS)
@@ -286,8 +276,7 @@ void loop()
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
     {
-      if ( debug>2 ) Serial.println(F("publish"));
-      publish_particle(now);
+      publish_particle(now, myWifi);
     }
 
     // Monitor for debug
@@ -303,6 +292,7 @@ void loop()
 
 
 } // loop
+
 
 
 
@@ -489,9 +479,8 @@ void testdrawchar(void) {
     if(i == '\n') display.write(' ');
     else          display.write(i);
   }
-
   display.display();
-  delay(2000);
+  delay(2000);  
 }
 
 void testdrawstyles(void) {
@@ -500,14 +489,13 @@ void testdrawstyles(void) {
   display.setTextSize(1);             // Normal 1:1 pixel scale
   display.setTextColor(SSD1306_WHITE);        // Draw white text
   display.setCursor(0,0);             // Start at top-left corner
-  display.println(F("Hello, world!"));
+  display.println(F("72 F  13.31 V  31.2 A"));
 
-  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' text
-  display.println(3.141592);
+  display.println(F(""));
 
   display.setTextSize(2);             // Draw 2X-scale text
   display.setTextColor(SSD1306_WHITE);
-  display.print(F("0x")); display.println(0xDEADBEEF, HEX);
+  display.println(F("SoC->99.2"));
 
   display.display();
   delay(2000);
