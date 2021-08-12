@@ -225,3 +225,25 @@ double decimalTime(unsigned long *currentTime, char* tempStr)
     return (((( (float(year-2021)*12 + float(month))*30.4375 + float(day))*24.0 + float(hours))*60.0 + float(minutes))*60.0 + \
                         float(seconds));
 }
+
+
+void myDisplay(Adafruit_SSD1306 *display)
+{
+  display->clearDisplay();
+
+  display->setTextSize(1);             // Normal 1:1 pixel scale
+  display->setTextColor(SSD1306_WHITE);        // Draw white text
+  display->setCursor(0,0);             // Start at top-left corner
+  char dispString[21];
+  sprintf(dispString, "%3.0f %5.2f %5.1f", pubList.Tbatt, pubList.Vbatt, pubList.Ishunt_filt);
+  display->println(dispString);
+
+  display->println(F(""));
+
+  display->setTextSize(2);             // Draw 2X-scale text
+  display->setTextColor(SSD1306_WHITE);
+  char dispStringS[10];
+  sprintf(dispStringS, "SoC->%4.1f", pubList.SoC);
+  display->println(dispStringS);
+  display->display();
+}

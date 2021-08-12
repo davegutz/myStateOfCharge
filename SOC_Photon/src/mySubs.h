@@ -133,6 +133,7 @@ struct Publish
   double Ishunt_filt;
   double Wshunt_filt;
   int numTimeouts;
+  double SoC;
 };
 
 
@@ -145,5 +146,6 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *currentTime, char* tempStr);
 void print_serial_header(void);
+void myDisplay(Adafruit_SSD1306 *display);
 
 #endif
