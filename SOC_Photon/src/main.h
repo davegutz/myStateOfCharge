@@ -211,8 +211,10 @@ void loop()
   // Start Blynk
   if ( Particle.connected() && !myWifi->blynk_started )
   {
+    if ( debug>2 ) Serial.printf("Starting Blynk at %ld...\n", millis());
     Blynk.begin(blynkAuth.c_str());   // blocking if no connection
     myWifi->blynk_started = true;
+    if ( debug>2 ) Serial.printf("     completed at %ld\n", millis());
   }
   if ( myWifi->blynk_started )
   {
@@ -248,9 +250,10 @@ void loop()
   // Read sensors
   if ( read )
   {
+    if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld\n", sen->T, millis());
     load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads);
-    if ( debug>2 ) Serial.printf("Read update=%7.3f\n", sen->T);
     if ( bare ) delay(41);  // Usual I2C time
+    if ( debug>2 ) Serial.printf("                           completed load at %ld\n", millis());
     myDisplay(display);
   }
 
