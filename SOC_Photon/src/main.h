@@ -66,7 +66,7 @@ Make it yourself.   It should look like this, with your personal authorizations:
 #include "myCloud.h"
 #include "blynk.h"              // Only place this can appear is top level main.h
 
-extern const int8_t debug = 2;  // Level of debug printing (3)
+extern const int8_t debug = 3;  // Level of debug printing (3)
 extern Publish pubList;
 Publish pubList = Publish();
 extern int badWeatherCall;      // webhook lookup counter
@@ -133,31 +133,38 @@ void setup()
   // Display
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-  Serial.println("Initializing DISPLAY.");
+  Serial.println("Initializing DISPLAY");
   if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
-  Serial.println("DISPLAY allocated.");
+  Serial.println("DISPLAY allocated");
   display->display();   // Adafruit splash
   delay(2000); // Pause for 2 seconds
   display->clearDisplay();
 
   // Cloud
+  unsigned long now = millis();
+  //  myWifi = new Wifi(now-CHECK_INTERVAL, now, false, false);
+  myWifi = new Wifi(now-CHECK_INTERVAL+CONNECT_WAIT, now, false, false);  // lastAttempt, lastDisconnect, connected, blynk_started
+  Serial.printf("Initializing CLOUD...");
   Particle.disconnect();
-  myWifi = new Wifi(millis()-CHECK_INTERVAL, millis(), Particle.connected(), false);  // make publish_particle check right away
-  Serial.println("Setup blynk.");
+  myWifi->lastDisconnect = now;
+  WiFi.off();
+  myWifi->connected = false;
+  if ( debug > 2 ) Serial.printf("wifi disconnect...");
+  Serial.printf("Setting up blynk...");
   blynk_timer_1.setInterval(PUBLISH_DELAY, publish1);
   blynk_timer_2.setTimeout(1*PUBLISH_DELAY/4, [](){blynk_timer_2.setInterval(PUBLISH_DELAY, publish2);});
   blynk_timer_3.setTimeout(2*PUBLISH_DELAY/4, [](){blynk_timer_3.setInterval(PUBLISH_DELAY, publish3);});
   blynk_timer_4.setTimeout(3*PUBLISH_DELAY/4, [](){blynk_timer_4.setInterval(PUBLISH_DELAY, publish4);});
   if ( myWifi->connected )
   {
-    Serial.println("Begin blynk");
+    Serial.printf("Begin blynk...");
     Blynk.begin(blynkAuth.c_str());
     myWifi->blynk_started = true;
   }
-  Serial.println("Started CLOUD.");
+  Serial.printf("done CLOUD\n");
 
   #ifdef PHOTON
     if ( debug>1 ) { sprintf(buffer, "Particle Photon.  bare = %d,\n", bare); Serial.print(buffer); };
@@ -203,9 +210,9 @@ void loop()
 
   // Top of loop
   // Start Blynk
-  if ( myWifi->connected && !myWifi->blynk_started )
+  if ( Particle.connected() && !myWifi->blynk_started )
   {
-    Blynk.begin(blynkAuth.c_str());
+    Blynk.begin(blynkAuth.c_str());   // blocking if no connection
     myWifi->blynk_started = true;
   }
   if ( myWifi->blynk_started )

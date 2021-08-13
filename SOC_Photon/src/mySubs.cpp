@@ -37,21 +37,30 @@ void publish_particle(unsigned long now, Wifi *wifi)
 {
 
   // Forgiving wifi connection logic
-  if ( !Particle.connected && millis()-wifi->lastDisconnect>=DISCONNECT_DELAY )
+  if ( debug > 2 )
   {
-    wifi->lastDisconnect = millis();
+    Serial.printf("P.connected=%i, disconnect check=%ld >=? %i, turn on check=%ld >=? %i / turn on check=%ld >=? %i, connected=%i, blynk_started=%i,\n",
+      Particle.connected(), now-wifi->lastDisconnect, DISCONNECT_DELAY, now-wifi->lastAttempt,  CHECK_INTERVAL, now-wifi->lastAttempt, DISCONNECT_DELAY, wifi->connected, wifi->blynk_started);
+  }
+  if ( !Particle.connected() && now-wifi->lastDisconnect>=DISCONNECT_DELAY )
+  {
+    wifi->lastDisconnect = now;
     WiFi.off();
     wifi->connected = false;
+    if ( debug > 2 ) Serial.printf("wifi turned off\n");
   }
-  if ( millis()-wifi->lastAttempt>=CHECK_INTERVAL )
+  if ( now-wifi->lastAttempt>=CHECK_INTERVAL )
   {
+    wifi->lastDisconnect = now;   // Give it a chance
+    wifi->lastAttempt = now;
     WiFi.on();
     Particle.connect();
-    wifi->lastAttempt = millis();
+    if ( debug > 2 ) Serial.printf("wifi reattempted\n");
   }
-  if ( millis()-wifi->lastAttempt>=DISCONNECT_DELAY )
+  if ( now-wifi->lastAttempt>=CONFIRMATION_DELAY )
   {
     wifi->connected = Particle.connected();
+    if ( debug > 2 ) Serial.printf("wifi disconnect check\n");
   }
 
   sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,\
@@ -61,9 +70,9 @@ void publish_particle(unsigned long now, Wifi *wifi)
     pubList.Vshunt, pubList.Vshunt_filt,
     pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,  '\0');
   
+  if ( debug>2 ) Serial.printf("Particle write:  ");
   if ( wifi->connected )
   {
-    if ( debug>2 ) Serial.printf("Particle write:  ");
     unsigned nowSec = now/1000UL;
     unsigned sec = nowSec%60;
     unsigned min = (nowSec%3600)/60;
@@ -76,7 +85,7 @@ void publish_particle(unsigned long now, Wifi *wifi)
   }
   else
   {
-    if ( debug>2 ) Serial.printf("Particle write:  wifi disconnected\n");
+    if ( debug>2 ) Serial.printf("nothing to do\n");
     pubList.numTimeouts++;
   }
 }

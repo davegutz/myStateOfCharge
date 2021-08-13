@@ -74,9 +74,10 @@
 #define NUMFLAKES     10 // Number of snowflakes in the animation example
 #define LOGO_HEIGHT   16
 #define LOGO_WIDTH    16
-#define DISCONNECT_DELAY  15000 // After fifteen seconds of no WiFi, disconnect
-#define CHECK_INTERVAL    60000 // How often to check for WiFi once disconnected
-
+#define DISCONNECT_DELAY  90000   // After these milliseconds no WiFi, disconnect
+#define CHECK_INTERVAL    240000  // How often to check for WiFi once disconnected
+#define CONNECT_WAIT      10000   // How long after setup that we try WiFi for first time
+#define CONFIRMATION_DELAY 10000  // How long to confirm WiFi on before streaming
 
 #ifdef BARE
 #define BARE_PHOTON
