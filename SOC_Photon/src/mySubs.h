@@ -62,13 +62,18 @@ struct Wifi
   unsigned int lastDisconnect;
   bool connected = false;
   bool blynk_started = false;
+  bool particle_connected_last = false;
+  bool particle_connected_now = false;
   Wifi(void) {}
-  Wifi(unsigned int lastAttempt, unsigned int lastDisconnect, bool connected, bool blynk_started)
+  Wifi(unsigned int lastAttempt, unsigned int lastDisconnect, bool connected, bool blynk_started,
+        bool particle_connected)
   {
     this->lastAttempt = lastAttempt;
     this->lastDisconnect = lastDisconnect;
     this->connected = connected;
     this->blynk_started = blynk_started;
+    this->particle_connected_last = particle_connected;
+    this->particle_connected_now = particle_connected;
   }
 };
 
@@ -138,6 +143,7 @@ struct Publish
 
 
 // Headers
+void manage_wifi(unsigned long now, Wifi *wifi);
 void publish_particle(unsigned long now, Wifi *wifi);
 void serial_print_inputs(unsigned long now, double T);
 void serial_print(void);

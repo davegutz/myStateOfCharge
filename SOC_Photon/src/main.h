@@ -145,8 +145,7 @@ void setup()
 
   // Cloud
   unsigned long now = millis();
-  //  myWifi = new Wifi(now-CHECK_INTERVAL, now, false, false);
-  myWifi = new Wifi(now-CHECK_INTERVAL+CONNECT_WAIT, now, false, false);  // lastAttempt, lastDisconnect, connected, blynk_started
+  myWifi = new Wifi(now-CHECK_INTERVAL+CONNECT_WAIT, now, false, false, Particle.connected());  // lastAttempt, lastDisconnect, connected, blynk_started, Particle.connected
   Serial.printf("Initializing CLOUD...");
   Particle.disconnect();
   myWifi->lastDisconnect = now;
@@ -249,8 +248,8 @@ void loop()
   // Read sensors
   if ( read )
   {
-    if ( debug>2 ) Serial.printf("Read update=%7.3f\n", sen->T);
     load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads);
+    if ( debug>2 ) Serial.printf("Read update=%7.3f\n", sen->T);
     if ( bare ) delay(41);  // Usual I2C time
     myDisplay(display);
   }

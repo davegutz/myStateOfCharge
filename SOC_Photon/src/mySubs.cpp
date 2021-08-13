@@ -32,17 +32,19 @@ extern const int8_t debug;
 extern Publish pubList;
 extern char buffer[256];
 
-// Check connection and publish Particle
-void publish_particle(unsigned long now, Wifi *wifi)
+void manage_wifi(unsigned long now, Wifi *wifi)
 {
-
-  // Forgiving wifi connection logic
   if ( debug > 2 )
   {
-    Serial.printf("P.connected=%i, disconnect check=%ld >=? %i, turn on check=%ld >=? %i / turn on check=%ld >=? %i, connected=%i, blynk_started=%i,\n",
-      Particle.connected(), now-wifi->lastDisconnect, DISCONNECT_DELAY, now-wifi->lastAttempt,  CHECK_INTERVAL, now-wifi->lastAttempt, DISCONNECT_DELAY, wifi->connected, wifi->blynk_started);
+    Serial.printf("P.connected=%i, disconnect check=%ld >=? %i, turn on check=%ld >=? %i, confirmation check=%ld >=? %i, connected=%i, blynk_started=%i,\n",
+      Particle.connected(), now-wifi->lastDisconnect, DISCONNECT_DELAY, now-wifi->lastAttempt,  CHECK_INTERVAL, now-wifi->lastAttempt, CONFIRMATION_DELAY, wifi->connected, wifi->blynk_started);
   }
-  if ( !Particle.connected() && now-wifi->lastDisconnect>=DISCONNECT_DELAY )
+  wifi->particle_connected_now = Particle.connected();
+  if ( wifi->particle_connected_last && !wifi->particle_connected_now )  // reset timer
+  {
+    wifi->lastDisconnect = now;
+  }
+  if ( !wifi->particle_connected_now && now-wifi->lastDisconnect>=DISCONNECT_DELAY )
   {
     wifi->lastDisconnect = now;
     WiFi.off();
@@ -62,17 +64,28 @@ void publish_particle(unsigned long now, Wifi *wifi)
     wifi->connected = Particle.connected();
     if ( debug > 2 ) Serial.printf("wifi disconnect check\n");
   }
+  wifi->particle_connected_last = wifi->particle_connected_now;
+}
 
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,\
-  %c", \
-    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
-    pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
-    pubList.Vshunt, pubList.Vshunt_filt,
-    pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,  '\0');
-  
+
+// Check connection and publish Particle
+void publish_particle(unsigned long now, Wifi *wifi)
+{
+  // Forgiving wifi connection logic
+  manage_wifi(now, wifi);
+
+  // Publish if valid
   if ( debug>2 ) Serial.printf("Particle write:  ");
   if ( wifi->connected )
   {
+    // Create print string
+    sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,\
+  %c", \
+      pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
+      pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
+      pubList.Vshunt, pubList.Vshunt_filt,
+      pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,  '\0');
+  
     unsigned nowSec = now/1000UL;
     unsigned sec = nowSec%60;
     unsigned min = (nowSec%3600)/60;
