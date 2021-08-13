@@ -36,7 +36,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 {
   if ( debug > 2 )
   {
-    Serial.printf("P.connected=%i, disconnect check=%ld >=? %i, turn on check=%ld >=? %i, confirmation check=%ld >=? %i, connected=%i, blynk_started=%i,\n",
+    Serial.printf("P.connected=%i, disconnect check: %ld >=? %ld, turn on check: %ld >=? %ld, confirmation check: %ld >=? %ld, connected=%i, blynk_started=%i,\n",
       Particle.connected(), now-wifi->lastDisconnect, DISCONNECT_DELAY, now-wifi->lastAttempt,  CHECK_INTERVAL, now-wifi->lastAttempt, CONFIRMATION_DELAY, wifi->connected, wifi->blynk_started);
   }
   wifi->particle_connected_now = Particle.connected();

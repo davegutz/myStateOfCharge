@@ -153,10 +153,10 @@ void setup()
   myWifi->connected = false;
   if ( debug > 2 ) Serial.printf("wifi disconnect...");
   Serial.printf("Setting up blynk...");
-  blynk_timer_1.setInterval(PUBLISH_DELAY, publish1);
-  blynk_timer_2.setTimeout(1*PUBLISH_DELAY/4, [](){blynk_timer_2.setInterval(PUBLISH_DELAY, publish2);});
-  blynk_timer_3.setTimeout(2*PUBLISH_DELAY/4, [](){blynk_timer_3.setInterval(PUBLISH_DELAY, publish3);});
-  blynk_timer_4.setTimeout(3*PUBLISH_DELAY/4, [](){blynk_timer_4.setInterval(PUBLISH_DELAY, publish4);});
+  blynk_timer_1.setInterval(PUBLISH_BLYNK_DELAY, publish1);
+  blynk_timer_2.setTimeout(1*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_2.setInterval(PUBLISH_BLYNK_DELAY, publish2);});
+  blynk_timer_3.setTimeout(2*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_3.setInterval(PUBLISH_BLYNK_DELAY, publish3);});
+  blynk_timer_4.setTimeout(3*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_4.setInterval(PUBLISH_BLYNK_DELAY, publish4);});
   if ( myWifi->connected )
   {
     Serial.printf("Begin blynk...");
@@ -202,21 +202,19 @@ void loop()
   static Sync *publishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
   bool read;                                // Read, T/F
   static Sync *readSensors = new Sync(READ_DELAY);
-  bool query;                               // Query schedule and OAT, T/F
-  static Sync *queryWeb = new Sync(QUERY_DELAY);
-  bool serial;                              // Serial print, T/F
-  static Sync *serialDebug = new Sync(SERIAL_DELAY);
+  bool publishS;                              // Serial print, T/F
+  static Sync *publishSerial = new Sync(PUBLISH_SERIAL_DELAY);
 
   // Top of loop
   // Start Blynk
   if ( Particle.connected() && !myWifi->blynk_started )
   {
-    if ( debug>2 ) Serial.printf("Starting Blynk at %ld...\n", millis());
+    if ( debug>2 ) Serial.printf("Starting Blynk at %ld...  ", millis());
     Blynk.begin(blynkAuth.c_str());   // blocking if no connection
     myWifi->blynk_started = true;
-    if ( debug>2 ) Serial.printf("     completed at %ld\n", millis());
+    if ( debug>2 ) Serial.printf("completed at %ld\n", millis());
   }
-  if ( myWifi->blynk_started )
+  if ( myWifi->blynk_started && myWifi->connected )
   {
     Blynk.run(); blynk_timer_1.run(); blynk_timer_2.run(); blynk_timer_3.run(); blynk_timer_4.run(); 
   }
@@ -229,11 +227,10 @@ void loop()
   }
 
   // Frame control
-  publishP = publishParticle->update(now, false);
-  read = readSensors->update(now, reset, !publishP);
+  publishP = publishParticle->update(now, false);       //  now || false
+  publishS = publishSerial->update(now, reset);         //  now || reset
+  read = readSensors->update(now, reset);               //  now || reset
   sen->T =  double(readSensors->updateTime())/1000.0;
-  query = queryWeb->update(reset, now, !read);
-  serial = serialDebug->update(false, now, !query);
 
   // Control References
   past = now;
@@ -244,23 +241,20 @@ void loop()
     delay ( bare_wait );
   }
 
-  if ( true ) digitalWrite(myPins->status_led, HIGH);
-  else  digitalWrite(myPins->status_led, LOW);
-
   // Read sensors
   if ( read )
   {
-    if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld\n", sen->T, millis());
+    if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
     load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads);
     if ( bare ) delay(41);  // Usual I2C time
-    if ( debug>2 ) Serial.printf("                           completed load at %ld\n", millis());
+    if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
     myDisplay(display);
   }
 
   // Publish to Particle cloud if desired (different than Blynk)
   // Visit https://console.particle.io/events.   Click on "view events on a terminal"
   // to get a curl command to run
-  if ( publishP || serial)
+  if ( publishP || publishS)
   {
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
     controlTime = decimalTime(&currentTime, tempStr);
@@ -286,11 +280,15 @@ void loop()
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
     {
+      static bool led_on = false;
+      led_on = !led_on;
+      if ( led_on ) digitalWrite(myPins->status_led, HIGH);
+      else  digitalWrite(myPins->status_led, LOW);
       publish_particle(now, myWifi);
     }
 
     // Monitor for debug
-    if ( debug>0 && serial )
+    if ( debug>0 && publishS )
     {
       serial_print_inputs(now, T);
     }
