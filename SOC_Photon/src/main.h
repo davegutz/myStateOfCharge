@@ -66,7 +66,7 @@ Make it yourself.   It should look like this, with your personal authorizations:
 #include "myCloud.h"
 #include "blynk.h"              // Only place this can appear is top level main.h
 
-extern const int8_t debug = 3;  // Level of debug printing (3)
+extern const int8_t debug = 2;  // Level of debug printing (2)
 extern Publish pubList;
 Publish pubList = Publish();
 extern int badWeatherCall;      // webhook lookup counter
@@ -90,7 +90,7 @@ Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_ADS1015 *ads;          // Use this for the 12-bit version; 1115 for 16-bit
 Adafruit_SSD1306 *display;
 bool bare_ads = false;          // If ADS to be ignored
-Wifi *myWifi;                     // Manage Wifi
+Wifi *myWifi;                   // Manage Wifi
 
 // Setup
 void setup()
@@ -123,19 +123,21 @@ void setup()
     digitalWrite(myPins->status_led, LOW);
   }
   // AD
+  Serial.println("Initializing SHUNT MONITOR");
   ads = new Adafruit_ADS1015;
   ads->setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
   if (!ads->begin()) {
-    Serial.println("Failed to initialize ADS.");
+    Serial.println("FAILE to initialize ADS SHUNT MONITOR.");
     bare_ads = true;
     // while (1);
   }
+  Serial.println("SHUNT MONITOR initialized");
   // Display
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
   Serial.println("Initializing DISPLAY");
   if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-    Serial.println(F("SSD1306 allocation failed"));
+    Serial.println(F("SSD1306 DISPLAY allocation FAILED"));
     for(;;); // Don't proceed, loop forever
   }
   Serial.println("DISPLAY allocated");

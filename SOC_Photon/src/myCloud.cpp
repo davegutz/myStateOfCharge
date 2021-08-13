@@ -45,7 +45,7 @@ void publish1(void)
   if (debug>4) Serial.printf("Blynk write1\n");
   Blynk.virtualWrite(V0,  pubList.Vbatt);
   Blynk.virtualWrite(V2,  pubList.Vbatt_filt);
-  //Blynk.virtualWrite(V3,  pubList.hum);
+  Blynk.virtualWrite(V3,  pubList.SoC);
   // Blynk.virtualWrite(V4,  intentionally blank; used elsewhere);
   //Blynk.virtualWrite(V5,  pubList.Tp);
 }
@@ -78,10 +78,10 @@ void publish3(void)
 void publish4(void)
 {
   if (debug>4) Serial.printf("Blynk write4\n");
-  Blynk.virtualWrite(V17, false);
-  //Blynk.virtualWrite(V18, pubList.OAT);
-  //Blynk.virtualWrite(V19, pubList.Ta_obs);
-  //Blynk.virtualWrite(V20, pubList.heat_o);
+  Blynk.virtualWrite(V17, pubList.Ishunt);
+  Blynk.virtualWrite(V18, pubList.Ishunt_filt);
+  Blynk.virtualWrite(V19, pubList.Wshunt);
+  Blynk.virtualWrite(V20, pubList.Wshunt_filt);
 }
 
 
