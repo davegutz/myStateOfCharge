@@ -29,7 +29,8 @@
         "xtr1common": "cpp",
         "xutility": "cpp",
         "algorithm": "cpp",
-        "istream": "cpp"
+        "istream": "cpp",
+        "glcdfont.c": "cpp"
     },
     "particle.firmwareVersion": "3.0.0-beta.1",
     "particle.targetPlatform": "photon",

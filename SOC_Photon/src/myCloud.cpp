@@ -35,9 +35,6 @@
 extern const int8_t debug;
 extern Publish pubList;
 extern char buffer[256];
-extern int badWeatherCall;        // webhook lookup counter
-extern long updateweatherhour;    // Last hour weather updated
-extern bool weatherGood;          // webhook OAT lookup successful, T/F
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;     // Time Blynk events
 extern BlynkParticle Blynk;
 //extern BlynkParticle Blynk;
@@ -48,9 +45,9 @@ void publish1(void)
   if (debug>4) Serial.printf("Blynk write1\n");
   Blynk.virtualWrite(V0,  pubList.Vbatt);
   Blynk.virtualWrite(V2,  pubList.Vbatt_filt);
-  //Blynk.virtualWrite(V3,  pubList.hum);
+  Blynk.virtualWrite(V3,  pubList.SoC);
   // Blynk.virtualWrite(V4,  intentionally blank; used elsewhere);
-  //Blynk.virtualWrite(V5,  pubList.Tp);
+  Blynk.virtualWrite(V5,  pubList.Vbatt_model);
 }
 
 
@@ -81,10 +78,10 @@ void publish3(void)
 void publish4(void)
 {
   if (debug>4) Serial.printf("Blynk write4\n");
-  Blynk.virtualWrite(V17, false);
-  //Blynk.virtualWrite(V18, pubList.OAT);
-  //Blynk.virtualWrite(V19, pubList.Ta_obs);
-  //Blynk.virtualWrite(V20, pubList.heat_o);
+  Blynk.virtualWrite(V17, pubList.Ishunt);
+  Blynk.virtualWrite(V18, pubList.Ishunt_filt);
+  Blynk.virtualWrite(V19, pubList.Wshunt);
+  Blynk.virtualWrite(V20, pubList.Wshunt_filt);
 }
 
 
@@ -99,34 +96,8 @@ BLYNK_WRITE(V4) {
 }
 
 
-int particleSet(String command)
-{
-  int possibleSet = atoi(command);
-  if (possibleSet >= 0 && possibleSet <= 100)
-  {
-    //pubList.webDmd = double(possibleSet);
-    return possibleSet;
-  }
-  else return -1;
-}
-
-
 // Attach a switch widget to the Virtual pin 6 in your Blynk app - and demand continuous web control
 // Note:  there are separate virtual IN and OUT in Blynk.
 BLYNK_WRITE(V6) {
 //    pubList.webHold = param.asInt();
-}
-
-int particleHold(String command)
-{
-  if (command == "HOLD")
-  {
-    //pubList.webHold = true;
-    return 1;
-  }
-  else
-  {
-   // pubList.webHold = false;
-    return 0;
-  }
 }

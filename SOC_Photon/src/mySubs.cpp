@@ -32,20 +32,61 @@ extern const int8_t debug;
 extern Publish pubList;
 extern char buffer[256];
 
-// Check connection and publish Particle
-void publish_particle(unsigned long now)
+void manage_wifi(unsigned long now, Wifi *wifi)
 {
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,\
-  %c", \
-    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
-    pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
-    pubList.Vshunt, pubList.Vshunt_filt,
-    pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,  '\0');
-  
-  if ( debug>2 ) Serial.println(buffer);
-  if ( Particle.connected() )
+  if ( debug > 2 )
   {
-    if ( debug>2 ) Serial.printf("Particle write\n");
+    Serial.printf("P.connected=%i, disconnect check: %ld >=? %ld, turn on check: %ld >=? %ld, confirmation check: %ld >=? %ld, connected=%i, blynk_started=%i,\n",
+      Particle.connected(), now-wifi->lastDisconnect, DISCONNECT_DELAY, now-wifi->lastAttempt,  CHECK_INTERVAL, now-wifi->lastAttempt, CONFIRMATION_DELAY, wifi->connected, wifi->blynk_started);
+  }
+  wifi->particle_connected_now = Particle.connected();
+  if ( wifi->particle_connected_last && !wifi->particle_connected_now )  // reset timer
+  {
+    wifi->lastDisconnect = now;
+  }
+  if ( !wifi->particle_connected_now && now-wifi->lastDisconnect>=DISCONNECT_DELAY )
+  {
+    wifi->lastDisconnect = now;
+    WiFi.off();
+    wifi->connected = false;
+    if ( debug > 2 ) Serial.printf("wifi turned off\n");
+  }
+  if ( now-wifi->lastAttempt>=CHECK_INTERVAL )
+  {
+    wifi->lastDisconnect = now;   // Give it a chance
+    wifi->lastAttempt = now;
+    WiFi.on();
+    Particle.connect();
+    if ( debug > 2 ) Serial.printf("wifi reattempted\n");
+  }
+  if ( now-wifi->lastAttempt>=CONFIRMATION_DELAY )
+  {
+    wifi->connected = Particle.connected();
+    if ( debug > 2 ) Serial.printf("wifi disconnect check\n");
+  }
+  wifi->particle_connected_last = wifi->particle_connected_now;
+}
+
+
+// Check connection and publish Particle
+void publish_particle(unsigned long now, Wifi *wifi)
+{
+  // Forgiving wifi connection logic
+  manage_wifi(now, wifi);
+
+  // Publish if valid
+  if ( debug>2 ) Serial.printf("Particle write:  ");
+  if ( wifi->connected )
+  {
+    // Create print string
+    sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,\
+  %c", \
+      pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
+      pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
+      pubList.Vshunt, pubList.Vshunt_filt,
+      pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,
+      pubList.SoC, pubList.Vbatt_model, '\0');
+  
     unsigned nowSec = now/1000UL;
     unsigned sec = nowSec%60;
     unsigned min = (nowSec%3600)/60;
@@ -58,8 +99,7 @@ void publish_particle(unsigned long now)
   }
   else
   {
-    if ( debug>1 ) Serial.printf("Particle not connected....connecting\n");
-    Particle.connect();
+    if ( debug>2 ) Serial.printf("nothing to do\n");
     pubList.numTimeouts++;
   }
 }
@@ -67,18 +107,20 @@ void publish_particle(unsigned long now)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Vbatt,Vbatt_filt,  Tbatt,Tbatt_filt,   Vshunt,Vshunt_filt,"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt,   Wshunt,Wshunt_filt,   SoC,Vbatt_model"));
 }
 
 // Inputs serial print
 void serial_print_inputs(unsigned long now, double T)
 {
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,\
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,\
   %c", \
     pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
     pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
     pubList.Vshunt, pubList.Vshunt_filt,
-    pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,  '\0');
+    pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,
+    pubList.SoC, pubList.Vbatt_model, '\0');
+  if ( debug > 2 ) Serial.printf("serial_print_inputs:  ");
   Serial.println(buffer);
 }
 
@@ -97,17 +139,25 @@ void serial_print(void)
 // Load and filter
 // TODO:   move 'read' stuff here
 boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFilt, 
-    General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads)
+    General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads,
+    Battery *cell, double soc_model)
 {
   static boolean done_testing = false;
 
   // Read Sensor
   // ADS1015 conversion
-  sen->Vshunt_int = ads->readADC_Differential_0_1();
+  if (!sen->bare_ads)
+  {
+    sen->Vshunt_int = ads->readADC_Differential_0_1();
+  }
+  else
+  {
+    sen->Vshunt_int = 0;
+  }
   sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
   sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset, T);
-  sen->Ishunt = sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
-  sen->Ishunt_filt = sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A;
+  sen->Ishunt = -(sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A);
+  sen->Ishunt_filt = -(sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A);
   sen->Wshunt = sen->Vbatt*sen->Ishunt;
   sen->Wshunt_filt = sen->Vbatt_filt*sen->Ishunt_filt;
 
@@ -119,6 +169,9 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
   sen->Vbatt =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A);
   sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset, T);
+
+  // Battery model 4 cells
+  sen->Vbatt_model = 4.*cell->calculate((sen->Tbatt-32.)*5./9., soc_model);
 
   // Built-in-test logic.   Run until finger detected
   if ( true && !done_testing )
@@ -199,4 +252,26 @@ double decimalTime(unsigned long *currentTime, char* tempStr)
     sprintf(tempStr, "%4u-%02u-%02uT%02u:%02u:%02u", int(year), month, day, hours, minutes, seconds);
     return (((( (float(year-2021)*12 + float(month))*30.4375 + float(day))*24.0 + float(hours))*60.0 + float(minutes))*60.0 + \
                         float(seconds));
+}
+
+
+void myDisplay(Adafruit_SSD1306 *display)
+{
+  display->clearDisplay();
+
+  display->setTextSize(1);             // Normal 1:1 pixel scale
+  display->setTextColor(SSD1306_WHITE);        // Draw white text
+  display->setCursor(0,0);             // Start at top-left corner
+  char dispString[21];
+  sprintf(dispString, "%3.0f %5.2f %5.1f", pubList.Tbatt, pubList.Vbatt, pubList.Ishunt_filt);
+  display->println(dispString);
+
+  display->println(F(""));
+
+  display->setTextSize(2);             // Draw 2X-scale text
+  display->setTextColor(SSD1306_WHITE);
+  char dispStringS[10];
+  sprintf(dispStringS, "SoC->%4.1f", pubList.SoC);
+  display->println(dispStringS);
+  display->display();
 }

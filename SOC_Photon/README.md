@@ -2,28 +2,32 @@
 
 A Particle project named Vent_Photon
 
-## Welcome to your project!
+## Welcome to your project
 
 Every new Particle project is composed of 3 important elements that you'll see have been created in your project directory for Vent_Photon.
 
-#### ```/src``` folder:  
-This is the source folder that contains the firmware files for your project. It should *not* be renamed. 
-Anything that is in this folder when you compile your project will be sent to our compile service and compiled into a firmware binary for the Particle device that you have targeted.
+### ```/src``` folder
+
+This is the source folder that contains the firmware files for your project. It should *not* be renamed.  Anything that is in this folder when you compile your project will be sent to our compile service and compiled into a firmware binary for the Particle device that you have targeted.
 
 If your application contains multiple files, they should all be included in the `src` folder. If your firmware depends on Particle libraries, those dependencies are specified in the `project.properties` file referenced below.
 
-#### ```.ino``` file:
+### ```.ino``` file
+
 This file is the firmware that will run as the primary application on your Particle device. It contains a `setup()` and `loop()` function, and can be written in Wiring or C/C++. For more information about using the Particle firmware API to create firmware for your Particle device, refer to the [Firmware Reference](https://docs.particle.io/reference/firmware/) section of the Particle documentation.
 
-#### ```project.properties``` file:  
+### ```project.properties``` file
+
 This is the file that specifies the name and version number of the libraries that your project depends on. Dependencies are added automatically to your `project.properties` file when you add a library to a project using the `particle library add` command in the CLI or add a library in the Desktop IDE.
 
 ## Adding additional files to your project
 
-#### Projects with multiple sources
+### Projects with multiple sources
+
 If you would like add additional files to your application, they should be added to the `/src` folder. All files in the `/src` folder will be sent to the Particle Cloud to produce a compiled binary.
 
-#### Projects with external libraries
+### Projects with external libraries
+
 If your project includes a library that has not been registered in the Particle libraries system, you should create a new folder named `/lib/<libraryname>/src` under `/<project dir>` and add the `.h`, `.cpp` & `library.properties` files for your library there. Read the [Firmware Libraries guide](https://docs.particle.io/guide/tools-and-features/libraries/) for more details on how to develop libraries. Note that all contents of the `/lib` folder and subfolders will also be sent to the Cloud for compilation.
 
 ## Compiling your project
@@ -37,165 +41,115 @@ When you're ready to compile your project, make sure you have the correct Partic
 ## Redo Loop
 
 ***********************
-Ctrl-Shift-P - Particle:Cloud Flash
-
+Ctrl-Shift-P - Particle:Clean Application and Device OS (local)
+Ctrl-Shift-P - Particle:Compile Application (local) or Check button in Visual Studio upper rc when select a source file
+Ctrl-Shift-P - Particle:Cloud Flash or Ctrl-Shift-P - Particle:Local Flash
+Ctrl-Shift-P - Particle:Serial Monitor
 
 Desktop settings
     .json has "particle.targetDevice": "proto"
-    local_config.h has 
+    local_config.h has
         const   String    unit = "proto";
-        #define BARE                  // Run without peripherals, except maybe a POT
+        //#define BARE
 
-Laptop settings.json has  "particle.targetDevice": "vent"
-    .json has "particle.targetDevice": "vent"
-    local_config.h has 
-        const   String    unit = "vent";
+Laptop settings.json has  "particle.targetDevice": "proto"
+    .json has "particle.targetDevice": "proto"
+    local_config.h has
+        const   String    unit = "proto";
+        //#define BARE
 
-On desktop (has curlParticle.py running in cygwin)
+On desktop (has curlParticleProto.py running in cygwin)
     after observing outputs from long cURL run, Modify main.h etc.   Make sure it compiles.
-    flast to target 'proto' and test
+    flash to target 'proto' and test
     push into GitHub repository
     get address of curl from particle.io console - pick device - click on 'view events in terminal' --> edit curl??.py file
     cd /cygdrive/c/Users/Dave/Documents/GitHub/myStateOfCharge/SOC_Photon/dataReduction/
     python curlParticleProto.py
+    (add to .bashrc the above two lines as [emacs .bashrc]:
+    alias soc='cd ...; python cur...'
+    )
 
-On laptop (has curl "kjejt" running in cygwin)
+On laptop (same as desktop?)
     pull from GitHub repository changes just made on desktop
     compile
-    flash to target 'vent'
+    flash to target 'proto'
 
 View results
-    Prototype realtime using Blynk (ExpThermo)
-    Target realtime using Blynk (Sunshine Room)
-    Target post-process using Vent_data_reduce.sce in sciLab
+    Prototype realtime using Blynk (SoC)
+    Target post-process using SoC_data_reduce.sce in sciLab
 
 ## Hardware notes
 
-The PLC  mounted in Sunshine Room at knee level by window where Kathy's feet reside.  Most effective place to measure temperature.
+Grounds all tied together to solar ground and also to chassis.
+Typically operate for data with laptop plugged into inverter and connected to microusb on Photon
+Can run 500 W discharge using flood light plugged into inverter
+Can run 500 W charge from alternator DC-DC converter (breaker under hood; start engine)
 
-The PWM signal from the PLC in the Sunshine Room goes up the 6-wire instrumentation line.   Not only unshielded by not possible to combine the PWM signals in twisted pairs.   So the Tp_Sense signal is corrupt unless PWM is off.   So every 30 minutes, which is about time constant of the wood stove, the application stops the blower to read Tp_Sense.
+### ASD 1015 12-bit 
 
-Potential solutions of PWM noise issue:
-    separate shielded Tp_Sense wire.  Old antenna coax would be good for this.
-    Separate shielded PWM signals line (the three POT signals: 10v, GND, 0-10v)
+- HiLetgo ADS1015 12 Bit Analog to Digital Development Board ADC Converter Module ADC Development Board for Arduino
+  $8.29 in Aug 2021
+  I2C used.
+  Code from Adafruit ADS1X15 library.   Differential = A0-A1
+  1-V 3v3
+  2-G = Gnd
+  3-SCL = Photon D1
+  4-SDA  = Photon D0
+  5-ADDR = NC
+  6-ALERT = NC
+  7-A0 = Green from shunt
+  8-A1 = Yellow from shunt
+  9-A2 = NC
+  10-A3 = NC
 
-Grounds all tied together, so 0-10V signal can be generated by 0-3.3v PWM output of the PLC using 10V power source for PWM.
+### Particle Photon 1A max
 
-System gain ~3 deg F for 100% fan
-
-~30 sec duct heat soak
-
-~4500 sec room heat soak
-
-/*
-****digipot not used
-* Found MCP4151 POT how to at
-  https://community.particle.io/t/photon-controlling-5v-output-using-mcp4151-pot-and-photon-spi-api/25001/2
-
-* There is a POT library here.   Haven't used it yet
-  https://github.com/jmalloc/arduino-mcp4xxx
-
-****Note about ground
-* For ICs to work, I believe ECMF B (ground) needs to be connected to
-  Photon and IC ground.  Need to try this.  Will have to find an isolation scheme if this doesn't work,
-  using ECMF 10V and it's ground for one supply and 5v and Photon for other.
-
-* ECMF-150 remote brushless DC-motor fan. 300 mA max with auto protect.  (Photon is 1000 mA max)
-  R Red wire 10V supply generated by ECMF to PWM Driver Circuit 210 ohm resistor-H
-  B Black wire GND.   ????Don't know if this is earth.  I guess it floats.  Try tie to Photon
-  C Blue wire 0-10V control signal used by ECMF to modulate fan speed 0-100%.   Can either be  
-        1-10kHz PWM or 10K pot wiper connected H to R and L to B
-  Y Tach signal 0-10V for 0-100%. Isink_max 10mA.  I don't know what that means.
-
-* Pot Analog Connections
-  POHa    ECMF R 10 V supply
-  POWa    Photon A2 (BOM = ECMF C Blue Control Signal)
-  POLa    System GND to GND Rail
-
-* PWM Driver Circuit
-  - npn1 (2n2222A)
-    C - B of npn2 and L of 4k7 that goes to 10V
-    B - H of 10k
-    E - GND Rail
-  - npn2 (2n2222A)
-    C - ECMF C and diode anode?? and pullup that goes to 10V
-    B - C of npn1 and 4k7 that goes to 10V
-    E - GND Rail
-  - pullup 4k7
-    H - ECMF 10V
-    L - C of npn2 and H of diode
-  - 10k1 npn1 base driver
-    H - Photon D2
-    L - B of npn1
-  - 10k2 npn2 base driver
-    H - C of npn1
-    L - B of npn2
-  - diode (1N4148) signal diode to protect npn2 from load transients
-    Anode?? - ECMF C
-    Cathode?? - GND Rail
-
-* Tach Voltage Divider Circuit
-  - 200K ohm resistor
-    H - ECMF Y - Tach
-    L - Photon A8
-  - 100K ohm resistor
-    H - Photon A1
-    L - Ground Rail
-
-* Honeywell temp/humidity Hardware Connections (Humidistat with temp SOIC  HIH6131-021-001)
-  Wire.h and I2C used.   
-  Code originally developed for gitHub davegutz/myThermostat-Particle-Photon/myThermostat_Particle_DEV/myThermostat.ino.
-  1-VCORE= 0.1uF jumper to GND
-  2-VSS  = GND Rail
-  3-SCL  = D1
-  4-SCA  = D0
-  5-AL_H = NC
-  6-AL_L = NC
-  7-NC   = NC
-  8-VDD  = 3v3
-
-* Particle Photon 1A max
-* Particle Photon boards have 9 PWM pins: D0, D1, D2, D3, A4, A5, WKP, RX, TX
+- Particle Photon boards have 9 PWM pins: D0, D1, D2, D3, A4, A5, WKP, RX, TX
   GND = to 2 GND rails
-  A1  = L of 200k ohm from ECMF Y Tach and H of 100k ohm to ground (0-3.3v from 0-10v)
-  A2  = POWa of analog POT
-  D0  = 4-SCA of Honeywell and 4k7 3v3 jumper I2C pullup
-  D1  = 3-SCL of Honeywell and 4k7 3v3 jumper I2C pullup
-  D2  = H of 10k1 for PWM 5kHz
-  D6  = Y-C of DS18 for Tp and 4k7 3v3 jumper pullup
-  VIN = 5V Rail 1A maximum and 0.1uF to GND and 100uF to GND
+  A1  = L of 20k ohm from 12v and H of 4k7 ohm to ground
+  D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
+  D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
+  D6  = Y-C of DS18 for Tbatt and 4k7 3v3 jumper pullup
+  VIN = 5V Rail 1A maximum
   3v3 = 3v3 rail out
-  micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm) 
+  micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm)
 
-* Voltage spike protection spec'd by Particle
-  - 0.1uF
-    H - VIN and 5V Rail
-    L - GND Rail
-  - 100uF
-    H - VIN and 5V Rail
-    L - GND Rail
+### 1-wire Temp (MAXIM DS18B20)  library at "https://github.com/particle-iot/OneWireLibrary"
 
-* 1-wire Temp (MAXIM DS18B20)  library at https://github.com/particle-iot/OneWireLibrary
   Y-C   = Photon D6
   R-VDD = 5V Rail
   B-GND = GND Rail
 
-* 5v
-  5v to 5V Rail.  From wall wart in attic. 1 A max sized for Photon wifi transients
-  Gnd to GND Rail.   from wall wart in attic.  1 A max sized for Photon wifi transients
+### Used Elego power module mounted to 5V and 3v3 and GND rails
 
-* *****not used Elego power module mounted to 5V and 3v3 and GND rails
   5V jumper = 5V RAIL on "A-side" of Photon
   Jumper "D-side" of Photon set to OFF
   Round power supply = round power supply plug 12 VDC x 1.0A Csec CS12b20100FUF
-  
- * Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myVentilator
- 
+  Use Photon to power 3v3 so can still use microusb to power everything from laptop
+
+### Display SSD1306-compatible OLED 128x32
+
+  Amazon:  5 Pieces I2C Display Module 0.91 Inch I2C OLED Display Module Blue I2C OLED Screen Driver DC 3.3V~5V(Blue Display Color) 
+  Code from Adafruit SSD1306 library
+  1-GND = Gnd
+  2-VCC = 3v3
+  3-SCL = Photon D1
+  4-SDA = Photon D0
+
+### Shunt 75mv = 100A
+
+  Use custom box that contains Shunt as junction box to obtain 12v, Gnd, Vshunts
+  1-12v
+  2-Gnd
+  3-Yellow shunt high
+  4-Green shunt low
+
+- Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
+
   To get debug data
-  1.  Set debug = 2 in constants.h
-  2.  Rebuild and upload
-  3.  Start CoolTerm_0.stc
+  1. Set debug = 2 in main.h
+  2. Rebuild and upload
+  3. Start CoolTerm_0.stc
 
   Requirements:
   1.  
-

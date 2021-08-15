@@ -38,6 +38,7 @@
 #if (PLATFORM_ID == 6)
 #define PHOTON
 #include "application.h" // Should not be needed if file ino or Arduino
+//SYSTEM_MODE(SEMI_AUTOMATIC);
 SYSTEM_THREAD(ENABLED); // Make sure code always run regardless of network status
 #include <Arduino.h>     // Used instead of Print.h - breaks Serial
 #else
@@ -65,16 +66,9 @@ Make it yourself.   It should look like this, with your personal authorizations:
 #include "myCloud.h"
 #include "blynk.h"              // Only place this can appear is top level main.h
 
-extern const int8_t debug = 2;  // Level of debug printing (3)
+extern const int8_t debug = 2;  // Level of debug printing (2)
 extern Publish pubList;
 Publish pubList = Publish();
-extern int badWeatherCall;      // webhook lookup counter
-extern long updateweatherhour;  // Last hour weather updated
-extern bool weatherGood;        // webhook OAT lookup successful, T/F
-int badWeatherCall  = 0;
-long updateweatherhour;         // Last hour weather updated
-bool weatherGood;               // webhook OAT lookup successful, T/F
-
 extern BlynkParticle Blynk;      // Blynk object
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4; // Time Blynk events
 BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;        // Time Blynk events
@@ -87,6 +81,9 @@ double controlTime = 0.0;       // Decimal time, seconds since 1/1/2021
 unsigned long lastSync = millis();// Sync time occassionally.   Recommended by Particle.
 Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_ADS1015 *ads;          // Use this for the 12-bit version; 1115 for 16-bit
+Adafruit_SSD1306 *display;
+bool bare_ads = false;          // If ADS to be ignored
+Wifi *myWifi;                   // Manage Wifi
 
 // Setup
 void setup()
@@ -96,12 +93,6 @@ void setup()
   Serial.flush();
   delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
   Serial.println("Hello!");
-  ads = new Adafruit_ADS1015;
-  ads->setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
-  if (!ads->begin()) {
-    Serial.println("Failed to initialize ADS.");
-    while (1);
-  }
 
   // Peripherals
   myPins = new Pins(D6, D7, A1);
@@ -124,16 +115,50 @@ void setup()
     pinMode(myPins->status_led, OUTPUT);
     digitalWrite(myPins->status_led, LOW);
   }
+  // AD
+  Serial.println("Initializing SHUNT MONITOR");
+  ads = new Adafruit_ADS1015;
+  ads->setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+  if (!ads->begin()) {
+    Serial.println("FAILE to initialize ADS SHUNT MONITOR.");
+    bare_ads = true;
+    // while (1);
+  }
+  Serial.println("SHUNT MONITOR initialized");
+  // Display
+  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+  display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+  Serial.println("Initializing DISPLAY");
+  if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    Serial.println(F("SSD1306 DISPLAY allocation FAILED"));
+    for(;;); // Don't proceed, loop forever
+  }
+  Serial.println("DISPLAY allocated");
+  display->display();   // Adafruit splash
+  delay(2000); // Pause for 2 seconds
+  display->clearDisplay();
 
-  // Begin
-  Particle.connect();
-  Particle.function("HOLD", particleHold);
-  Particle.function("SET",  particleSet);
-  blynk_timer_1.setInterval(PUBLISH_DELAY, publish1);
-  blynk_timer_2.setTimeout(1*PUBLISH_DELAY/4, [](){blynk_timer_2.setInterval(PUBLISH_DELAY, publish2);});
-  blynk_timer_3.setTimeout(2*PUBLISH_DELAY/4, [](){blynk_timer_3.setInterval(PUBLISH_DELAY, publish3);});
-  blynk_timer_4.setTimeout(3*PUBLISH_DELAY/4, [](){blynk_timer_4.setInterval(PUBLISH_DELAY, publish4);});
-  Blynk.begin(blynkAuth.c_str());
+  // Cloud
+  unsigned long now = millis();
+  myWifi = new Wifi(now-CHECK_INTERVAL+CONNECT_WAIT, now, false, false, Particle.connected());  // lastAttempt, lastDisconnect, connected, blynk_started, Particle.connected
+  Serial.printf("Initializing CLOUD...");
+  Particle.disconnect();
+  myWifi->lastDisconnect = now;
+  WiFi.off();
+  myWifi->connected = false;
+  if ( debug > 2 ) Serial.printf("wifi disconnect...");
+  Serial.printf("Setting up blynk...");
+  blynk_timer_1.setInterval(PUBLISH_BLYNK_DELAY, publish1);
+  blynk_timer_2.setTimeout(1*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_2.setInterval(PUBLISH_BLYNK_DELAY, publish2);});
+  blynk_timer_3.setTimeout(2*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_3.setInterval(PUBLISH_BLYNK_DELAY, publish3);});
+  blynk_timer_4.setTimeout(3*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_4.setInterval(PUBLISH_BLYNK_DELAY, publish4);});
+  if ( myWifi->connected )
+  {
+    Serial.printf("Begin blynk...");
+    Blynk.begin(blynkAuth.c_str());
+    myWifi->blynk_started = true;
+  }
+  Serial.printf("done CLOUD\n");
 
   #ifdef PHOTON
     if ( debug>1 ) { sprintf(buffer, "Particle Photon.  bare = %d,\n", bare); Serial.print(buffer); };
@@ -158,8 +183,9 @@ void loop()
   static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.1, 20.);       // Sensor noise and general loop filter
   static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 150.);       // Sensor noise and general loop filter
   static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, -0.100, 0.100);       // Sensor noise and general loop filter
-  static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);
-  static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0);                                      // Sensors
+  static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);      // 1-wire temp sensor battery temp
+  static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
+  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb);  // Battery model
 
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
@@ -172,14 +198,22 @@ void loop()
   static Sync *publishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
   bool read;                                // Read, T/F
   static Sync *readSensors = new Sync(READ_DELAY);
-  bool query;                               // Query schedule and OAT, T/F
-  static Sync *queryWeb = new Sync(QUERY_DELAY);
-  bool serial;                              // Serial print, T/F
-  static Sync *serialDebug = new Sync(SERIAL_DELAY);
+  bool publishS;                              // Serial print, T/F
+  static Sync *publishSerial = new Sync(PUBLISH_SERIAL_DELAY);
 
   // Top of loop
-  // Start Blynk
-  Blynk.run(); blynk_timer_1.run(); blynk_timer_2.run(); blynk_timer_3.run(); blynk_timer_4.run(); 
+  // Start Blynk, only if connected since it is blocking
+  if ( Particle.connected() && !myWifi->blynk_started )
+  {
+    if ( debug>2 ) Serial.printf("Starting Blynk at %ld...  ", millis());
+    Blynk.begin(blynkAuth.c_str());   // blocking if no connection
+    myWifi->blynk_started = true;
+    if ( debug>2 ) Serial.printf("completed at %ld\n", millis());
+  }
+  if ( myWifi->blynk_started && myWifi->connected )
+  {
+    Blynk.run(); blynk_timer_1.run(); blynk_timer_2.run(); blynk_timer_3.run(); blynk_timer_4.run(); 
+  }
 
   // Request time synchronization from the Particle Cloud once per day
   if (millis() - lastSync > ONE_DAY_MILLIS)
@@ -189,11 +223,10 @@ void loop()
   }
 
   // Frame control
-  publishP = publishParticle->update(now, false);
-  read = readSensors->update(now, reset, !publishP);
+  publishP = publishParticle->update(now, false);       //  now || false
+  publishS = publishSerial->update(now, reset);         //  now || reset
+  read = readSensors->update(now, reset);               //  now || reset
   sen->T =  double(readSensors->updateTime())/1000.0;
-  query = queryWeb->update(reset, now, !read);
-  serial = serialDebug->update(false, now, !query);
 
   // Control References
   past = now;
@@ -204,21 +237,20 @@ void loop()
     delay ( bare_wait );
   }
 
-  if ( true ) digitalWrite(myPins->status_led, HIGH);
-  else  digitalWrite(myPins->status_led, LOW);
-
   // Read sensors
   if ( read )
   {
-    if ( debug>2 ) Serial.printf("Read update=%7.3f\n", sen->T);
-    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads);
+    if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
+    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads, myBatt, 0.5);
     if ( bare ) delay(41);  // Usual I2C time
+    if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
+    myDisplay(display);
   }
 
   // Publish to Particle cloud if desired (different than Blynk)
   // Visit https://console.particle.io/events.   Click on "view events on a terminal"
   // to get a curl command to run
-  if ( publishP || serial)
+  if ( publishP || publishS)
   {
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
     controlTime = decimalTime(&currentTime, tempStr);
@@ -239,16 +271,21 @@ void loop()
     pubList.Wshunt = sen->Wshunt;
     pubList.Wshunt_filt = sen->Wshunt_filt;
     pubList.numTimeouts = numTimeouts;
+    pubList.SoC = myBatt->soc()*100.0;
+    pubList.Vbatt_model = sen->Vbatt_model;
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
     {
-      if ( debug>2 ) Serial.println(F("publish"));
-      publish_particle(now);
+      static bool led_on = false;
+      led_on = !led_on;
+      if ( led_on ) digitalWrite(myPins->status_led, HIGH);
+      else  digitalWrite(myPins->status_led, LOW);
+      publish_particle(now, myWifi);
     }
 
     // Monitor for debug
-    if ( debug>0 && serial )
+    if ( debug>0 && publishS )
     {
       serial_print_inputs(now, T);
     }

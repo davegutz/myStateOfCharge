@@ -26,11 +26,19 @@
 #define _MY_SUBS_H
 
 #include "myFilters.h"
+#include "Battery.h"
 #include "constants.h"
+
+// Temp sensor
 #include <OneWire.h>
 #include <DS18.h>
+
+// AD
 #include <Adafruit_ADS1X15.h>
 
+// Display
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 // Pins
 struct Pins
@@ -44,6 +52,29 @@ struct Pins
     this->pin_1_wire = pin_1_wire;
     this->status_led = status_led;
     this->Vbatt_pin = Vbatt_pin;
+  }
+};
+
+
+// Wifi
+struct Wifi
+{
+  unsigned int lastAttempt;
+  unsigned int lastDisconnect;
+  bool connected = false;
+  bool blynk_started = false;
+  bool particle_connected_last = false;
+  bool particle_connected_now = false;
+  Wifi(void) {}
+  Wifi(unsigned int lastAttempt, unsigned int lastDisconnect, bool connected, bool blynk_started,
+        bool particle_connected)
+  {
+    this->lastAttempt = lastAttempt;
+    this->lastDisconnect = lastDisconnect;
+    this->connected = connected;
+    this->blynk_started = blynk_started;
+    this->particle_connected_last = particle_connected;
+    this->particle_connected_now = particle_connected;
   }
 };
 
@@ -64,10 +95,12 @@ struct Sensors
   double Wshunt_filt;     // Filtered, sensed shunt power, W
   int I2C_status;
   double T;
+  bool bare_ads;          // If no ADS detected
+  double Vbatt_model;     // Modeled battery voltage
   Sensors(void) {}
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
           int16_t Vshunt_int, double Vshunt, double Vshunt_filt,
-          int I2C_status, double T)
+          int I2C_status, double T, bool bare_ads)
   {
     this->Vbatt = Vbatt;
     this->Vbatt_filt = Vbatt_filt;
@@ -82,6 +115,8 @@ struct Sensors
     this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
     this->I2C_status = I2C_status;
     this->T = T;
+    this->bare_ads = bare_ads;
+    this->Vbatt_model = 0;
   }
 };
 
@@ -106,16 +141,22 @@ struct Publish
   double Ishunt_filt;
   double Wshunt_filt;
   int numTimeouts;
+  double SoC;
+  double Vbatt_model;
 };
 
 
-void publish_particle(unsigned long now);
+// Headers
+void manage_wifi(unsigned long now, Wifi *wifi);
+void publish_particle(unsigned long now, Wifi *wifi);
 void serial_print_inputs(unsigned long now, double T);
 void serial_print(void);
 boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFilt, 
-    General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads);
+    General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads,
+    Battery *batt, double soc_model);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *currentTime, char* tempStr);
 void print_serial_header(void);
+void myDisplay(Adafruit_SSD1306 *display);
 
 #endif
