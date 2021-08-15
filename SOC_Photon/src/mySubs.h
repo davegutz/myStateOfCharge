@@ -26,6 +26,7 @@
 #define _MY_SUBS_H
 
 #include "myFilters.h"
+#include "Battery.h"
 #include "constants.h"
 
 // Temp sensor
@@ -93,8 +94,9 @@ struct Sensors
   double Wshunt;          // Sensed shunt power, W
   double Wshunt_filt;     // Filtered, sensed shunt power, W
   int I2C_status;
-  bool bare_ads;          // If no ADS detected
   double T;
+  bool bare_ads;          // If no ADS detected
+  double Vbatt_model;     // Modeled battery voltage
   Sensors(void) {}
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
           int16_t Vshunt_int, double Vshunt, double Vshunt_filt,
@@ -114,6 +116,7 @@ struct Sensors
     this->I2C_status = I2C_status;
     this->T = T;
     this->bare_ads = bare_ads;
+    this->Vbatt_model = 0;
   }
 };
 
@@ -139,6 +142,7 @@ struct Publish
   double Wshunt_filt;
   int numTimeouts;
   double SoC;
+  double Vbatt_model;
 };
 
 
@@ -148,7 +152,8 @@ void publish_particle(unsigned long now, Wifi *wifi);
 void serial_print_inputs(unsigned long now, double T);
 void serial_print(void);
 boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFilt, 
-    General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads);
+    General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads,
+    Battery *batt, double soc_model);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *currentTime, char* tempStr);
 void print_serial_header(void);

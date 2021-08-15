@@ -47,7 +47,7 @@ void publish1(void)
   Blynk.virtualWrite(V2,  pubList.Vbatt_filt);
   Blynk.virtualWrite(V3,  pubList.SoC);
   // Blynk.virtualWrite(V4,  intentionally blank; used elsewhere);
-  //Blynk.virtualWrite(V5,  pubList.Tp);
+  Blynk.virtualWrite(V5,  pubList.Vbatt_model);
 }
 
 

@@ -64,8 +64,8 @@
 #define VBATT_A               0.0       // Vbatt sense adder, V
 #define PHOTON_ADC_COUNT      4096      // Photon ADC range, counts
 #define PHOTON_ADC_VOLT       3.3       // Photon ADC range, V
-#define SHUNT_V2A_S           1162.42   // Shunt V2A scalar, A/V
-#define SHUNT_V2A_A           0.127     // Shunt V2A adder, A
+#define SHUNT_V2A_S           1189.3    // Shunt V2A scalar, A/V
+#define SHUNT_V2A_A           -2.46     // Shunt V2A adder, A
 //const int EEPROM_ADDR = 1;            // Flash address
 #define SCREEN_WIDTH          128       // OLED display width, in pixels
 #define SCREEN_HEIGHT         32        // OLED display height, in pixels
@@ -83,5 +83,6 @@ const boolean bare = false;  // Force continuous calibration mode to run with ba
 // Battery voltage gain
 const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
                               double(VBATT_SENSE_R_LO) / double(PHOTON_ADC_COUNT) * double(VBATT_S);
+
 
 #endif // CONSTANTS_H_

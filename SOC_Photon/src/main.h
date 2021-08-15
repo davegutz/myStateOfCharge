@@ -69,13 +69,6 @@ Make it yourself.   It should look like this, with your personal authorizations:
 extern const int8_t debug = 2;  // Level of debug printing (2)
 extern Publish pubList;
 Publish pubList = Publish();
-extern int badWeatherCall;      // webhook lookup counter
-extern long updateweatherhour;  // Last hour weather updated
-extern bool weatherGood;        // webhook OAT lookup successful, T/F
-int badWeatherCall  = 0;
-long updateweatherhour;         // Last hour weather updated
-bool weatherGood;               // webhook OAT lookup successful, T/F
-
 extern BlynkParticle Blynk;      // Blynk object
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4; // Time Blynk events
 BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;        // Time Blynk events
@@ -190,8 +183,9 @@ void loop()
   static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.1, 20.);       // Sensor noise and general loop filter
   static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 150.);       // Sensor noise and general loop filter
   static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, -0.100, 0.100);       // Sensor noise and general loop filter
-  static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);
-  static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads);                                      // Sensors
+  static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);      // 1-wire temp sensor battery temp
+  static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
+  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb);  // Battery model
 
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
@@ -208,7 +202,7 @@ void loop()
   static Sync *publishSerial = new Sync(PUBLISH_SERIAL_DELAY);
 
   // Top of loop
-  // Start Blynk
+  // Start Blynk, only if connected since it is blocking
   if ( Particle.connected() && !myWifi->blynk_started )
   {
     if ( debug>2 ) Serial.printf("Starting Blynk at %ld...  ", millis());
@@ -247,7 +241,7 @@ void loop()
   if ( read )
   {
     if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
-    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads);
+    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads, myBatt, 0.5);
     if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
     myDisplay(display);
@@ -277,7 +271,8 @@ void loop()
     pubList.Wshunt = sen->Wshunt;
     pubList.Wshunt_filt = sen->Wshunt_filt;
     pubList.numTimeouts = numTimeouts;
-    pubList.SoC = 99.2;
+    pubList.SoC = myBatt->soc()*100.0;
+    pubList.Vbatt_model = sen->Vbatt_model;
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
