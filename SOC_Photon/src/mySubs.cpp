@@ -79,12 +79,13 @@ void publish_particle(unsigned long now, Wifi *wifi)
   if ( wifi->connected )
   {
     // Create print string
-    sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,\
+    sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,\
   %c", \
       pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
       pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
       pubList.Vshunt, pubList.Vshunt_filt,
-      pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,  '\0');
+      pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,
+      pubList.SoC, pubList.Vbatt_model, '\0');
   
     unsigned nowSec = now/1000UL;
     unsigned sec = nowSec%60;
@@ -106,18 +107,19 @@ void publish_particle(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Vbatt,Vbatt_filt,  Tbatt,Tbatt_filt,   Vshunt,Vshunt_filt,"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt,   Wshunt,Wshunt_filt,   SoC,Vbatt_model"));
 }
 
 // Inputs serial print
 void serial_print_inputs(unsigned long now, double T)
 {
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,\
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,\
   %c", \
     pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
     pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
     pubList.Vshunt, pubList.Vshunt_filt,
-    pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,  '\0');
+    pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,
+    pubList.SoC, pubList.Vbatt_model, '\0');
   if ( debug > 2 ) Serial.printf("serial_print_inputs:  ");
   Serial.println(buffer);
 }
@@ -137,7 +139,8 @@ void serial_print(void)
 // Load and filter
 // TODO:   move 'read' stuff here
 boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFilt, 
-    General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads)
+    General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads,
+    Battery *cell, double soc_model)
 {
   static boolean done_testing = false;
 
@@ -153,8 +156,8 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   }
   sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
   sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset, T);
-  sen->Ishunt = sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
-  sen->Ishunt_filt = sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A;
+  sen->Ishunt = -(sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A);
+  sen->Ishunt_filt = -(sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A);
   sen->Wshunt = sen->Vbatt*sen->Ishunt;
   sen->Wshunt_filt = sen->Vbatt_filt*sen->Ishunt_filt;
 
@@ -166,6 +169,9 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
   sen->Vbatt =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A);
   sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset, T);
+
+  // Battery model 4 cells
+  sen->Vbatt_model = 4.*cell->calculate((sen->Tbatt-32.)*5./9., soc_model);
 
   // Built-in-test logic.   Run until finger detected
   if ( true && !done_testing )
