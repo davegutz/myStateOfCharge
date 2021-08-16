@@ -185,7 +185,7 @@ void loop()
   static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, -0.100, 0.100);       // Sensor noise and general loop filter
   static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);      // 1-wire temp sensor battery temp
   static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
-  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb);  // Battery model
+  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb);  // Battery model
 
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time

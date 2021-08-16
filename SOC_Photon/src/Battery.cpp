@@ -39,8 +39,8 @@ extern char buffer[256];
 Battery::Battery()
     : b_(0), a_(0), c_(0), m_(0), n_(0), d_(0), nz_(1), soc_(1.0) {}
 Battery::  Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
-    const double m, const double n, const double d)
-    : b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(sizeof(*x_tab)/sizeof(double)), soc_(1.0)
+    const double m, const double n, const double d, const unsigned int nz)
+    : b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(nz), soc_(1.0)
 {
   B_T_ = new TableInterp1Dclip(nz_, x_tab, b_tab);
   A_T_ = new TableInterp1Dclip(nz_, x_tab, a_tab);

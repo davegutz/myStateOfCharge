@@ -32,7 +32,7 @@ class Battery
 public:
   Battery();
   Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
-    const double m, const double n, const double d);
+    const double m, const double n, const double d, const unsigned int nz);
   ~Battery();
   // operators
   // functions
@@ -57,8 +57,9 @@ static const double t_bb[7] = {-10.,	 0.,	10.,	20.,	30.,	40.,	50.};
 const double m_bb = 0.478;
 static const double b_bb[7] = {-1.143251503,	-1.143251503,	-1.143251503,	-0.5779554,	-0.553297988,	-0.557104757,	-0.45551626};
 static const double a_bb[7] = {3.348339977,	3.5247557,	3.553964435,	2.778271021,	2.806905998,	2.851255776,	2.731041762};
-static const double c_bb[7] = {-1.770434633	-1.770434633	-1.770434633	-1.099451796	-1.125467829	-1.159227563	-1.059028383};
+static const double c_bb[7] = {-1.770434633,	-1.770434633,	-1.770434633,	-1.099451796,	-1.125467829,	-1.159227563,	-1.059028383};
 const double n_bb = 0.4;
 const double d_bb = 1.734;
+const unsigned int nz_bb = 7;
 							
 #endif
