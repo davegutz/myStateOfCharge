@@ -242,7 +242,15 @@ void loop()
   if ( read )
   {
     if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
-    soc_est = max(min(soc_est+sen->Wshunt/12.0*sen->T/100.0, 100.0), 0.0);
+    // Very simple soc estimation
+    if ( sen->Vbatt_filt<=13.7 )
+    {
+      soc_est = max(min( soc_est + sen->Wshunt/12.0*sen->T/3600./100.0, 1.0), 0.0);
+    }
+    else   // >13.7 V is decent approximation for SoC>99.7
+    {
+      soc_est = max(min( 0.997 + (sen->Vbatt_filt-13.7)/(14.3-13.7)*(1.0-0.997), 1.0), 0.0);
+    }
     load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads, myBatt, soc_est);
     if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
