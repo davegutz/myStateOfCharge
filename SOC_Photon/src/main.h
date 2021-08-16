@@ -200,6 +200,7 @@ void loop()
   static Sync *readSensors = new Sync(READ_DELAY);
   bool publishS;                              // Serial print, T/F
   static Sync *publishSerial = new Sync(PUBLISH_SERIAL_DELAY);
+  static double soc_est = 1.0;
 
   // Top of loop
   // Start Blynk, only if connected since it is blocking
@@ -241,7 +242,8 @@ void loop()
   if ( read )
   {
     if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
-    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads, myBatt, 0.5);
+    soc_est = max(min(soc_est+sen->Wshunt/12.0*sen->T/100.0, 100.0), 0.0);
+    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads, myBatt, soc_est);
     if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
     myDisplay(display);

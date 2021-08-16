@@ -64,8 +64,8 @@
 #define VBATT_A               0.0       // Vbatt sense adder, V
 #define PHOTON_ADC_COUNT      4096      // Photon ADC range, counts
 #define PHOTON_ADC_VOLT       3.3       // Photon ADC range, V
-#define SHUNT_V2A_S           1189.3    // Shunt V2A scalar, A/V
-#define SHUNT_V2A_A           -2.46     // Shunt V2A adder, A
+#define SHUNT_V2A_S           1189.3    // Shunt V2A scalar, A/V (1333 is 100A/0.075V)
+#define SHUNT_V2A_A           -0.86     // Shunt V2A adder, A derived from charge-discharge integral match (0 in theory)
 //const int EEPROM_ADDR = 1;            // Flash address
 #define SCREEN_WIDTH          128       // OLED display width, in pixels
 #define SCREEN_HEIGHT         32        // OLED display height, in pixels

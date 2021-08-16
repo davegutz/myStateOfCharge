@@ -234,6 +234,7 @@ double decimalTime(unsigned long *currentTime, char* tempStr)
         {
           Time.zone(GMT+1);
           *currentTime = Time.now();
+          day = Time.day(*currentTime);
           hours = Time.hour(*currentTime);
         }
     }

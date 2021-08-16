@@ -85,6 +85,21 @@ Typically operate for data with laptop plugged into inverter and connected to mi
 Can run 500 W discharge using flood light plugged into inverter
 Can run 500 W charge from alternator DC-DC converter (breaker under hood; start engine)
 
+### Calibrating mV - A
+
+You need a clamping ammeter.  Basic.   Best way to get the slope of the
+conversion.   A 100A/.075V shunt is nominally 1333 A/V.
+
+Do a discharge-charge cycle to get a good practical value for the bias of the conversion.    Calculate integral of A over cycle and get endpoint to match start point.   This will also provide a good estimate for battery capacity to populate the model.  (R1 visible easily).
+
+PI tracking filter should be used to get rid of drift of small A measurement.
+
+>13.7 V is decent approximation for SoC>99.7
+
+The ADS module is delicate (ESD and handling).   I burned one out by
+accidentally touching terminals to back of OLED board.   I now mount the
+OLED board carefully off to the side.   Will need a hobby box to contain the final device.
+
 ### ASD 1015 12-bit 
 
 - HiLetgo ADS1015 12 Bit Analog to Digital Development Board ADC Converter Module ADC Development Board for Arduino
