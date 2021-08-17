@@ -96,7 +96,10 @@ struct Sensors
   int I2C_status;
   double T;
   bool bare_ads;          // If no ADS detected
-  double Vbatt_model;     // Modeled battery voltage
+  double Vbatt_model_static;  // Modeled quiescent battery voltage, V
+  double Vbatt_model;         // Modeled battery voltage including steady current draw, V
+  double Vbatt_model_filt;    // Filtered modeled battery voltage including steady current draw, V
+  double Vbatt_model_tracked; // Tracked modeled battery voltage including steady current draw, V
   Sensors(void) {}
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
           int16_t Vshunt_int, double Vshunt, double Vshunt_filt,
@@ -116,7 +119,10 @@ struct Sensors
     this->I2C_status = I2C_status;
     this->T = T;
     this->bare_ads = bare_ads;
+    this->Vbatt_model_static = 0;
     this->Vbatt_model = 0;
+    this->Vbatt_model_filt = 0;
+    this->Vbatt_model_tracked = 0;
   }
 };
 
@@ -141,8 +147,12 @@ struct Publish
   double Ishunt_filt;
   double Wshunt_filt;
   int numTimeouts;
-  double SoC;
+  double SOC;
+  double SOC_tracked;
+  double Vbatt_model_static;
   double Vbatt_model;
+  double Vbatt_model_filt;
+  double Vbatt_model_tracked;
 };
 
 
@@ -153,7 +163,7 @@ void serial_print_inputs(unsigned long now, double T);
 void serial_print(void);
 boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFilt, 
     General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads,
-    Battery *batt, double soc_model);
+    Battery *cell, Battery *cell_tracked, double soc_model, double soc_tracked);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *currentTime, char* tempStr);
 void print_serial_header(void);

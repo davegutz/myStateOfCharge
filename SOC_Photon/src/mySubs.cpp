@@ -79,13 +79,14 @@ void publish_particle(unsigned long now, Wifi *wifi)
   if ( wifi->connected )
   {
     // Create print string
-    sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,\
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,\
   %c", \
-      pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
-      pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
-      pubList.Vshunt, pubList.Vshunt_filt,
-      pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,
-      pubList.SoC, pubList.Vbatt_model, '\0');
+    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
+    pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
+    pubList.Vshunt, pubList.Vshunt_filt,
+    pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,
+    pubList.SOC, pubList.Vbatt_model,
+    pubList.SOC_tracked, pubList.Vbatt_model_tracked, '\0');
   
     unsigned nowSec = now/1000UL;
     unsigned sec = nowSec%60;
@@ -107,19 +108,20 @@ void publish_particle(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt,   Wshunt,Wshunt_filt,   SoC,Vbatt_model"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt,   Wshunt,Wshunt_filt,   SOC,Vbatt_model, SOC_tracked,Vbatt_model_tracked"));
 }
 
 // Inputs serial print
 void serial_print_inputs(unsigned long now, double T)
 {
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,\
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,\
   %c", \
     pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
     pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
     pubList.Vshunt, pubList.Vshunt_filt,
     pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,
-    pubList.SoC, pubList.Vbatt_model, '\0');
+    pubList.SOC, pubList.Vbatt_model,
+    pubList.SOC_tracked, pubList.Vbatt_model_tracked, '\0');
   if ( debug > 2 ) Serial.printf("serial_print_inputs:  ");
   Serial.println(buffer);
 }
@@ -140,7 +142,7 @@ void serial_print(void)
 // TODO:   move 'read' stuff here
 boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFilt, 
     General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads,
-    Battery *cell, double soc_model)
+    Battery *cell, Battery *cell_tracked, double soc_model, double soc_tracked)
 {
   static boolean done_testing = false;
 
@@ -156,8 +158,8 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   }
   sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
   sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset, T);
-  sen->Ishunt = -(sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A);
-  sen->Ishunt_filt = -(sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A);
+  sen->Ishunt = sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
+  sen->Ishunt_filt = sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A;
   sen->Wshunt = sen->Vbatt*sen->Ishunt;
   sen->Wshunt_filt = sen->Vbatt_filt*sen->Ishunt_filt;
 
@@ -170,8 +172,11 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   sen->Vbatt =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A);
   sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset, T);
 
-  // Battery model 4 cells
-  sen->Vbatt_model = 4.*cell->calculate((sen->Tbatt-32.)*5./9., soc_model);
+  // Battery model 
+  sen->Vbatt_model_static = double(batt_num_cells)*cell->calculate((sen->Tbatt-32.)*5./9., soc_model);
+  sen->Vbatt_model = sen->Vbatt_model_static + sen->Ishunt*batt_r1;
+  sen->Vbatt_model_filt = sen->Vbatt_model_static + sen->Ishunt_filt*batt_r1;
+  sen->Vbatt_model_tracked = double(batt_num_cells)*cell_tracked->calculate((sen->Tbatt-32.)*5./9., soc_tracked);
 
   // Built-in-test logic.   Run until finger detected
   if ( true && !done_testing )
@@ -272,7 +277,7 @@ void myDisplay(Adafruit_SSD1306 *display)
   display->setTextSize(2);             // Draw 2X-scale text
   display->setTextColor(SSD1306_WHITE);
   char dispStringS[10];
-  sprintf(dispStringS, "SoC->%4.1f", pubList.SoC);
+  sprintf(dispStringS, "SOC->%4.1f", pubList.SOC);
   display->println(dispStringS);
   display->display();
 }

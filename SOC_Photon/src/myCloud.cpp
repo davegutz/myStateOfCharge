@@ -45,8 +45,8 @@ void publish1(void)
   if (debug>4) Serial.printf("Blynk write1\n");
   Blynk.virtualWrite(V0,  pubList.Vbatt);
   Blynk.virtualWrite(V2,  pubList.Vbatt_filt);
-  Blynk.virtualWrite(V3,  pubList.SoC);
-  // Blynk.virtualWrite(V4,  intentionally blank; used elsewhere);
+  Blynk.virtualWrite(V3,  pubList.SOC);
+  Blynk.virtualWrite(V4,  pubList.Vbatt_model_static);
   Blynk.virtualWrite(V5,  pubList.Vbatt_model);
 }
 
@@ -55,7 +55,8 @@ void publish1(void)
 void publish2(void)
 {
   if (debug>4) Serial.printf("Blynk write2\n");
-  //Blynk.virtualWrite(V7,  pubList.held);
+  Blynk.virtualWrite(V6,  pubList.SOC_tracked);
+  Blynk.virtualWrite(V7,  pubList.Vbatt_model_filt);
   Blynk.virtualWrite(V8,  pubList.T);
   Blynk.virtualWrite(V9,  pubList.Tbatt);
   Blynk.virtualWrite(V10, pubList.Tbatt_filt);

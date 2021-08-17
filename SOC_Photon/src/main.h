@@ -186,6 +186,7 @@ void loop()
   static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);      // 1-wire temp sensor battery temp
   static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
   static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb);  // Battery model
+  static Battery *myBatt_tracked = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb);  // Tracked battery model
 
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
@@ -201,6 +202,7 @@ void loop()
   bool publishS;                              // Serial print, T/F
   static Sync *publishSerial = new Sync(PUBLISH_SERIAL_DELAY);
   static double soc_est = 1.0;
+  static double soc_tracked = 1.0;
 
   // Top of loop
   // Start Blynk, only if connected since it is blocking
@@ -243,15 +245,16 @@ void loop()
   {
     if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
     // Very simple soc estimation
-    if ( sen->Vbatt_filt<=13.7 )
+    if ( sen->Vbatt_filt<=batt_vsat )
     {
-      soc_est = max(min( soc_est + sen->Wshunt/12.0*sen->T/3600./100.0, 1.0), 0.0);
+      soc_est = max(min( soc_est + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.0), 0.0);
     }
-    else   // >13.7 V is decent approximation for SoC>99.7
+    else   // >13.7 V is decent approximation for SOC>99.7 for prototype system (constants calculated)
     {
-      soc_est = max(min( 0.997 + (sen->Vbatt_filt-13.7)/(14.3-13.7)*(1.0-0.997), 1.0), 0.0);
+      soc_est = max(min( BATT_SOC_SAT + (sen->Vbatt_filt-batt_vsat)/(batt_vmax-batt_vsat)*(1.0-BATT_SOC_SAT), 1.0), 0.0);
     }
-    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads, myBatt, soc_est);
+    soc_tracked = soc_est;
+    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads, myBatt, myBatt_tracked, soc_est, soc_tracked);
     if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
     myDisplay(display);
@@ -281,8 +284,12 @@ void loop()
     pubList.Wshunt = sen->Wshunt;
     pubList.Wshunt_filt = sen->Wshunt_filt;
     pubList.numTimeouts = numTimeouts;
-    pubList.SoC = myBatt->soc()*100.0;
+    pubList.SOC = myBatt->soc()*100.0;
+    pubList.SOC_tracked = myBatt_tracked->soc()*100.0;
+    pubList.Vbatt_model_static = sen->Vbatt_model_static;
     pubList.Vbatt_model = sen->Vbatt_model;
+    pubList.Vbatt_model_filt = sen->Vbatt_model_filt;
+    pubList.Vbatt_model_tracked = sen->Vbatt_model_tracked;
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
