@@ -77,7 +77,9 @@
 // >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 60-95 F
 #define BATT_V_SAT            3.425     // Normal battery cell saturation for SOC=99.7, V (3.425)
 #define BATT_SOC_SAT          0.997     // Normal battery cell saturation, fraction (0.997)
-#define BATT_R1               0.004     // Battery Randels static resistance, Ohms (0.004)
+#define BATT_R1               0.0018    // Battery Randels static resistance, Ohms (0.0018)
+#define BATT_R2               0.0024    // Battery Randels dynamic resistance, Ohms (0.0024)
+#define BATT_R2C2             100       // Battery Randels dynamic term, Ohms-Farads (100)
 
 #ifdef BARE
 #define BARE_PHOTON
@@ -96,5 +98,7 @@ const int batt_num_cells = NOM_SYS_VOLT/3;  // Number of standard 3 volt LiFePO4
 const double batt_vsat = double(batt_num_cells)*double(BATT_V_SAT);  // Total bank saturation for 0.997=soc, V
 const double batt_vmax = (14.3/4)*double(batt_num_cells); // Observed max voltage of 14.3 V for 12V prototype bank, V
 const double batt_r1 = double(BATT_R1)*double(batt_num_cells);
+const double batt_r2 = double(BATT_R2)*double(batt_num_cells);
+const double batt_c2 = double(BATT_R2C2)/batt_r2;
 
 #endif // CONSTANTS_H_
