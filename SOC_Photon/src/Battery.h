@@ -39,6 +39,9 @@ public:
   // functions
   double calculate(const double temp_C, const double soc_frac, const double curr_in);
   double soc() { return (soc_); };
+  double vstat() { return (vstat_); };
+  double vdyn() { return (vdyn_); };
+  double v() { return (v_); };
 protected:
   TableInterp1Dclip *B_T_;  // Battery coeff
   TableInterp1Dclip *A_T_;  // Battery coeff

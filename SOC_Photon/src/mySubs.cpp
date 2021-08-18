@@ -139,6 +139,7 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   sen->Vbatt_model = batt->calculate((sen->Tbatt-32.)*5./9., soc_model, sen->Ishunt);
   sen->Vbatt_model_filt = batt->calculate((sen->Tbatt-32.)*5./9., soc_model, sen->Ishunt_filt);
   sen->Vbatt_model_tracked = batt_tracked->calculate((sen->Tbatt-32.)*5./9., soc_tracked, sen->Ishunt);
+  Serial.printf("%7.3f,%7.3f,    %7.3f,%7.3f,%7.3f,\n", soc_tracked, sen->Ishunt, batt_tracked->vstat(), batt_tracked->vdyn(), batt_tracked->v());
 
   // Built-in-test logic.   Run until finger detected
   if ( true && !done_testing )
