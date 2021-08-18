@@ -34,6 +34,7 @@ extern char buffer[256];
 extern String inputString;     // a string to hold incoming data
 extern boolean stringComplete; // whether the string is complete
 extern boolean stepping;       // active step adder
+extern double stepVal;                  // Step size
 
 
 void manage_wifi(unsigned long now, Wifi *wifi)
@@ -107,7 +108,7 @@ void serial_print(void)
 
 // Load and filter
 // TODO:   move 'read' stuff here
-boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFilt, 
+boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFiltObs, General2_Pole* VbattSenseFilt, 
     General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads,
     Battery *batt, Battery *batt_tracked, double soc_model, double soc_tracked)
 {
@@ -137,6 +138,7 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   // Vbatt
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
   sen->Vbatt =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A);
+  sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate( sen->Vbatt, reset, T);
   sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset, T);
 
   // Battery model 
@@ -144,7 +146,8 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   sen->Vbatt_model_filt = batt->calculate((sen->Tbatt-32.)*5./9., soc_model, sen->Ishunt_filt);
   sen->Vbatt_model_tracked = batt_tracked->calculate((sen->Tbatt-32.)*5./9., soc_tracked, sen->Ishunt);
   if ( debug==-1 )
-  Serial.printf("%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", soc_tracked, sen->Ishunt, sen->Vbatt, batt_tracked->vstat(), batt_tracked->vdyn(), batt_tracked->v());
+  Serial.printf("%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", soc_tracked, sen->Ishunt,
+        sen->Vbatt_filt_obs+double(stepping*stepVal), batt_tracked->vstat(), batt_tracked->vdyn(), batt_tracked->v());
 
   // Built-in-test logic.   Run until finger detected
   if ( true && !done_testing )

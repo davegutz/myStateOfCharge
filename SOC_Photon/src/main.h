@@ -74,6 +74,7 @@ BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;        //
 extern String inputString;              // a string to hold incoming data
 extern boolean stringComplete;          // whether the string is complete
 extern boolean stepping;                // active step adder
+extern double stepVal;                  // Step size
 
 // Global locals
 int8_t debug = 2;
@@ -176,9 +177,10 @@ void setup()
 // Loop
 void loop()
 {
+  static General2_Pole* VbattSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., 0.5, 0.80, 0.1, 20.);       // Sensor noise and general loop filter
   static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.1, 20.);       // Sensor noise and general loop filter
-  static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 150.);       // Sensor noise and general loop filter
-  static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, -0.100, 0.100);       // Sensor noise and general loop filter
+  static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 150.);      // Sensor noise and general loop filter
+  static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, -0.100, 0.100); // Sensor noise and general loop filter
   static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);      // 1-wire temp sensor battery temp
   static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
   static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, r1_bb, r2_bb, r2c2_bb);  // Battery model
@@ -247,10 +249,11 @@ void loop()
       soc_est = max(min( BATT_SOC_SAT + (sen->Vbatt_filt-batt_vsat)/(batt_vmax-batt_vsat)*(1.0-BATT_SOC_SAT), 1.0), 0.0);
     }
     // Observer
-    pid_o->update((reset>0), sen->Vbatt+double(stepping*stepVal), sen->Vbatt_model_tracked, sen->T, 1.0, C_MAX);
+    pid_o->update((reset>0), sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked, sen->T, 1.0, C_MAX);
     soc_tracked = pid_o->cont;
     if ( reset_soc ) soc_est = soc_tracked;
-    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads, myBatt, myBatt_tracked, soc_est, soc_tracked);
+    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, 
+        myPins, ads, myBatt, myBatt_tracked, soc_est, soc_tracked);
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
     myDisplay(display);
