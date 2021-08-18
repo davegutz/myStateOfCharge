@@ -42,11 +42,10 @@
 
 // Constants always defined
 #define ONE_DAY_MILLIS        86400000  // Number of milliseconds in one day (24*60*60*1000)
-//#define CONTROL_DELAY     2000UL    // Control law wait, ms (2000)
 #define PUBLISH_BLYNK_DELAY   10000UL   // Blynk cloud updates, ms (10000UL)
 #define PUBLISH_PARTICLE_DELAY 2000UL   // Particle cloud updates (2000UL)
 #define READ_DELAY            1000UL    // Sensor read wait (5000, 100 for stress test), ms (1000UL)
-#define PUBLISH_SERIAL_DELAY  2000UL    // Serial print interval (4000UL)
+#define PUBLISH_SERIAL_DELAY  1000UL    // Serial print interval (1000UL)
 #define DISCONNECT_DELAY      75000UL   // After these milliseconds no WiFi, disconnect (75000UL)
 #define CHECK_INTERVAL        180000UL  // How often to check for WiFi once disconnected (180000UL)
 #define CONNECT_WAIT          10000UL   // How long after setup that we try WiFi for first time (10000UL)
@@ -82,9 +81,9 @@
 #define BATT_R2C2             100       // Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
                                         // test so using with R2 and then multiplying by 4 for total result is valid,
                                         // though probably not for an individual cell
-#define C_G             0.150       // Control gain, r/s = %/F ( )
+#define C_G             0.050       // Control gain, r/s = %/F ( )
 #define C_TAU           1           // Control lead, s  (1)
-#define C_DB            0           // Deadband in error, F (0)
+#define C_DB            0           // Deadband in error, V (0)
 #define C_MAX           1           // Integral and overall max limit, frac (1)
 #define C_MIN           0           // Integral and overall min limit, frac (0)
 #define C_LLMAX         0.1         // Proportional path max limit, frac (0.1)

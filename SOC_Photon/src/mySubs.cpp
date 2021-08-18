@@ -68,43 +68,6 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 }
 
 
-// Check connection and publish Particle
-void publish_particle(unsigned long now, Wifi *wifi)
-{
-  // Forgiving wifi connection logic
-  manage_wifi(now, wifi);
-
-  // Publish if valid
-  if ( debug>2 ) Serial.printf("Particle write:  ");
-  if ( wifi->connected )
-  {
-    // Create print string
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,\
-  %c", \
-    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
-    pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
-    pubList.Vshunt, pubList.Vshunt_filt,
-    pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,
-    pubList.SOC, pubList.Vbatt_model,
-    pubList.SOC_tracked, pubList.Vbatt_model_tracked, '\0');
-  
-    unsigned nowSec = now/1000UL;
-    unsigned sec = nowSec%60;
-    unsigned min = (nowSec%3600)/60;
-    unsigned hours = (nowSec%86400)/3600;
-    char publishString[40];     // For uptime recording
-    sprintf(publishString,"%u:%u:%u",hours,min,sec);
-    Particle.publish("Uptime",publishString);
-    Particle.publish("stat", buffer);
-    if ( debug>2 ) Serial.println(buffer);
-  }
-  else
-  {
-    if ( debug>2 ) Serial.printf("nothing to do\n");
-    pubList.numTimeouts++;
-  }
-}
-
 // Text header
 void print_serial_header(void)
 {
@@ -142,7 +105,7 @@ void serial_print(void)
 // TODO:   move 'read' stuff here
 boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFilt, 
     General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads,
-    Battery *cell, Battery *cell_tracked, double soc_model, double soc_tracked)
+    Battery *batt, Battery *batt_tracked, double soc_model, double soc_tracked)
 {
   static boolean done_testing = false;
 
@@ -173,11 +136,9 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset, T);
 
   // Battery model 
-  sen->Vbatt_model_static = double(batt_num_cells)*cell->calculate((sen->Tbatt-32.)*5./9., soc_model);
-  sen->Vbatt_model = sen->Vbatt_model_static + sen->Ishunt*(batt_r1 + batt_r2);
-  sen->Vbatt_model_filt = sen->Vbatt_model_static + sen->Ishunt_filt*(batt_r1+batt_r2);
-  sen->Vbatt_model_tracked_static = double(batt_num_cells)*cell_tracked->calculate((sen->Tbatt-32.)*5./9., soc_tracked);
-  sen->Vbatt_model_tracked = sen->Vbatt_model_tracked_static + sen->Ishunt*(batt_r1 + batt_r2);
+  sen->Vbatt_model = batt->calculate((sen->Tbatt-32.)*5./9., soc_model, sen->Ishunt);
+  sen->Vbatt_model_filt = batt->calculate((sen->Tbatt-32.)*5./9., soc_model, sen->Ishunt_filt);
+  sen->Vbatt_model_tracked = batt_tracked->calculate((sen->Tbatt-32.)*5./9., soc_tracked, sen->Ishunt);
 
   // Built-in-test logic.   Run until finger detected
   if ( true && !done_testing )
@@ -278,7 +239,8 @@ void myDisplay(Adafruit_SSD1306 *display)
   display->setTextSize(2);             // Draw 2X-scale text
   display->setTextColor(SSD1306_WHITE);
   char dispStringS[10];
-  sprintf(dispStringS, "SOC->%4.1f", pubList.SOC);
+  // sprintf(dispStringS, "SOC->%4.1f", pubList.SOC);
+  sprintf(dispStringS, "%4.1f %4.1f", pubList.SOC, pubList.SOC_tracked);
   display->println(dispStringS);
   display->display();
 }

@@ -46,7 +46,7 @@ void publish1(void)
   Blynk.virtualWrite(V0,  pubList.Vbatt);
   Blynk.virtualWrite(V2,  pubList.Vbatt_filt);
   Blynk.virtualWrite(V3,  pubList.SOC);
-  Blynk.virtualWrite(V4,  pubList.Vbatt_model_static);
+  Blynk.virtualWrite(V4,  pubList.Vbatt_model);  // TODO spare?
   Blynk.virtualWrite(V5,  pubList.Vbatt_model);
 }
 
@@ -101,4 +101,42 @@ BLYNK_WRITE(V4) {
 // Note:  there are separate virtual IN and OUT in Blynk.
 BLYNK_WRITE(V6) {
 //    pubList.webHold = param.asInt();
+}
+
+
+// Check connection and publish Particle
+void publish_particle(unsigned long now, Wifi *wifi)
+{
+  // Forgiving wifi connection logic
+  manage_wifi(now, wifi);
+
+  // Publish if valid
+  if ( debug>2 ) Serial.printf("Particle write:  ");
+  if ( wifi->connected )
+  {
+    // Create print string
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,\
+  %c", \
+    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
+    pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
+    pubList.Vshunt, pubList.Vshunt_filt,
+    pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,
+    pubList.SOC, pubList.Vbatt_model,
+    pubList.SOC_tracked, pubList.Vbatt_model_tracked, '\0');
+  
+    unsigned nowSec = now/1000UL;
+    unsigned sec = nowSec%60;
+    unsigned min = (nowSec%3600)/60;
+    unsigned hours = (nowSec%86400)/3600;
+    char publishString[40];     // For uptime recording
+    sprintf(publishString,"%u:%u:%u",hours,min,sec);
+    Particle.publish("Uptime",publishString);
+    Particle.publish("stat", buffer);
+    if ( debug>2 ) Serial.println(buffer);
+  }
+  else
+  {
+    if ( debug>2 ) Serial.printf("nothing to do\n");
+    pubList.numTimeouts++;
+  }
 }

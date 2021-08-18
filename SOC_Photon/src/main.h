@@ -63,7 +63,6 @@ Make it yourself.   It should look like this, with your personal authorizations:
 // Dependent includes.   Easier to debug code if remove unused include files
 #include "mySync.h"
 #include "mySubs.h"
-#include "myCloud.h"
 #include "blynk.h"              // Only place this can appear is top level main.h
 
 extern const int8_t debug = 2;  // Level of debug printing (2)
@@ -185,9 +184,8 @@ void loop()
   static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, -0.100, 0.100);       // Sensor noise and general loop filter
   static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);      // 1-wire temp sensor battery temp
   static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
-  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb);  // Battery model
-  static Battery *myBatt_tracked = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb);  // Tracked battery model
-
+  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, r1_bb, r2_bb, r2c2_bb);  // Battery model
+  static Battery *myBatt_tracked = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, r1_bb, r2_bb, r2c2_bb);  // Tracked battery model
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
   static unsigned long past = millis();     // Keep track of time
@@ -204,7 +202,8 @@ void loop()
   static double soc_est = 1.0;
   static double soc_tracked = 1.0;
   static PID *pid_o = new PID(C_G, C_TAU, C_MAX, C_MIN, C_LLMAX, C_LLMIN, 0, 1, C_DB, 0, 0, 1);       // Observer PID
- 
+  static bool reset_soc = true;
+  
   // Top of loop
   // Start Blynk, only if connected since it is blocking
   if ( Particle.connected() && !myWifi->blynk_started )
@@ -212,6 +211,7 @@ void loop()
     if ( debug>2 ) Serial.printf("Starting Blynk at %ld...  ", millis());
     Blynk.begin(blynkAuth.c_str());   // blocking if no connection
     myWifi->blynk_started = true;
+    reset_soc = false;
     if ( debug>2 ) Serial.printf("completed at %ld\n", millis());
   }
   if ( myWifi->blynk_started && myWifi->connected )
@@ -257,6 +257,7 @@ void loop()
     // Observer CLAW
     pid_o->update((reset>0), sen->Vbatt, sen->Vbatt_model_tracked, sen->T, 1.0, C_MAX);
     soc_tracked = pid_o->cont;
+    if ( reset_soc ) soc_est = soc_tracked;
     load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads, myBatt, myBatt_tracked, soc_est, soc_tracked);
     if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
@@ -289,7 +290,6 @@ void loop()
     pubList.numTimeouts = numTimeouts;
     pubList.SOC = myBatt->soc()*100.0;
     pubList.SOC_tracked = myBatt_tracked->soc()*100.0;
-    pubList.Vbatt_model_static = sen->Vbatt_model_static;
     pubList.Vbatt_model = sen->Vbatt_model;
     pubList.Vbatt_model_filt = sen->Vbatt_model_filt;
     pubList.Vbatt_model_tracked = sen->Vbatt_model_tracked;

@@ -32,11 +32,12 @@ class Battery
 public:
   Battery();
   Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
-    const double m, const double n, const double d, const unsigned int nz);
+    const double m, const double n, const double d, const unsigned int nz, const int num_cells,
+    const double r1, const double r2, const double r2c2);
   ~Battery();
   // operators
   // functions
-  double calculate(const double temp_C, const double soc_frac);
+  double calculate(const double temp_C, const double soc_frac, const double curr_in);
   double soc() { return (soc_); };
 protected:
   TableInterp1Dclip *B_T_;  // Battery coeff
@@ -50,9 +51,17 @@ protected:
   double d_;  // Battery coeff
   unsigned int nz_;  // Number of breakpoints
   double soc_; // State of charge
+  double r1_;   // Randels resistance, Ohms
+  double r2_;   // Randels resistance, Ohms
+  double c2_;   // Randels capacitance, Farads
+  double vstat_;  // Static model voltage, V
+  double vdyn_;   // Model current induced back emf, V
+  double v_;      // Total model voltage, V
+  double curr_in_;// Current into battery, A
+  int num_cells_; // Number of cells
 };
 
-// Battery model LiFePO4 BattleBorn.xlsx
+// Battery model LiFePO4 BattleBorn.xlsx and 'GeneralizedSOC-OCV Model Zhang etal.pdf'
 static const double t_bb[7] = {-10.,	 0.,	10.,	20.,	30.,	40.,	50.};
 const double m_bb = 0.478;
 static const double b_bb[7] = {-1.143251503,	-1.143251503,	-1.143251503,	-0.5779554,	-0.553297988,	-0.557104757,	-0.45551626};
@@ -61,5 +70,11 @@ static const double c_bb[7] = {-1.770434633,	-1.770434633,	-1.770434633,	-1.0994
 const double n_bb = 0.4;
 const double d_bb = 1.734;
 const unsigned int nz_bb = 7;
+const double r1_bb = 0.0018;  // Battery Randels static resistance, Ohms (0.0018)
+const double r2_bb = 0.0024;  // Battery Randels dynamic resistance, Ohms (0.0024)
+const double r2c2_bb = 100.0; // Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
+                              // test so using with R2 and then multiplying by 4 for total result is valid,
+                              // though probably not for an individual cell
+const int num_cells_bb = 1;   // Above values for single cell (~3 volts)
 							
 #endif
