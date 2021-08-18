@@ -115,4 +115,8 @@ double  decimalTime(unsigned long *currentTime, char* tempStr);
 void print_serial_header(void);
 void myDisplay(Adafruit_SSD1306 *display);
 
+// Talk Declarations
+void talkT(bool *stepping, double *stepVal);  // Transient Inputs
+void talkh(PID *pid, double *stepVal);
+void talk(bool *stepping, PID* pid, double *stepVal);
 #endif

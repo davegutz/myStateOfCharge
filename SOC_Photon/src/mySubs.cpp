@@ -28,9 +28,13 @@
 #include "local_config.h"
 #include <math.h>
 
-extern const int8_t debug;
+extern int8_t debug;
 extern Publish pubList;
 extern char buffer[256];
+extern String inputString;     // a string to hold incoming data
+extern boolean stringComplete; // whether the string is complete
+extern boolean stepping;       // active step adder
+
 
 void manage_wifi(unsigned long now, Wifi *wifi)
 {
@@ -139,7 +143,8 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   sen->Vbatt_model = batt->calculate((sen->Tbatt-32.)*5./9., soc_model, sen->Ishunt);
   sen->Vbatt_model_filt = batt->calculate((sen->Tbatt-32.)*5./9., soc_model, sen->Ishunt_filt);
   sen->Vbatt_model_tracked = batt_tracked->calculate((sen->Tbatt-32.)*5./9., soc_tracked, sen->Ishunt);
-  Serial.printf("%7.3f,%7.3f,    %7.3f,%7.3f,%7.3f,\n", soc_tracked, sen->Ishunt, batt_tracked->vstat(), batt_tracked->vdyn(), batt_tracked->v());
+  if ( debug==-1 )
+  Serial.printf("%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", soc_tracked, sen->Ishunt, sen->Vbatt, batt_tracked->vstat(), batt_tracked->vdyn(), batt_tracked->v());
 
   // Built-in-test logic.   Run until finger detected
   if ( true && !done_testing )
@@ -244,4 +249,93 @@ void myDisplay(Adafruit_SSD1306 *display)
   sprintf(dispStringS, "%4.1f %4.1f", pubList.SOC, pubList.SOC_tracked);
   display->println(dispStringS);
   display->display();
+}
+
+
+// Talk Executive
+void talk(bool *stepping, PID* pid, double *stepVal)
+{
+  // Serial event  (terminate Send String data with 0A using CoolTerm)
+  if (stringComplete)
+  {
+    switch ( inputString.charAt(0) )
+    {
+      case ( 'S' ):
+        switch ( inputString.charAt(1) )
+        {
+          case ( 'd' ):
+            pid->Sd(inputString.substring(2).toFloat());
+            break;
+          case ( 'g' ):
+            pid->Sg(inputString.substring(2).toFloat());
+            break;
+          case ( 't' ):
+            pid->St(inputString.substring(2).toFloat());
+            break;
+        }
+        break;
+      case ( 'A' ):
+        switch ( inputString.charAt(1) )
+        {
+          case ( 'd' ):
+            pid->Ad(inputString.substring(2).toFloat());
+            break;
+          case ( 'g' ):
+            pid->Ag(inputString.substring(2).toFloat());
+            break;
+          case ( 't' ):
+            pid->At(inputString.substring(2).toFloat());
+            break;
+        }
+        break;
+      case ( 'v' ):
+        debug = inputString.substring(1).toInt();
+        break;
+      case ( 'T' ):
+        talkT(stepping, stepVal);
+        break;
+      case ('h'): 
+        talkh(pid, stepVal);
+        break;
+      default:
+        Serial.print(inputString.charAt(0)); Serial.println(" unknown");
+        break;
+    }
+    inputString = "";
+    stringComplete = false;
+  }
+}
+
+// Talk Tranient Input Settings
+void talkT(bool *stepping, double *stepVal)
+{
+  *stepping = false;
+  switch ( inputString.charAt(1) )
+  {
+    case ( 's' ): 
+      *stepping = true;
+      *stepVal = inputString.substring(2).toFloat();
+      break;
+    default:
+      Serial.print(inputString); Serial.println(" unknown.  Try typing 'h'");
+  }
+}
+
+// Talk Help
+void talkh(PID *pid, double *stepVal)
+{
+  Serial.print("Sd= "); Serial.print(pid->Sd());  Serial.println("    : PID derivative deadband scalar [1]");
+  Serial.print("Ad= "); Serial.print(pid->Ad());  Serial.println("    : PID derivative deadband adder [0]");
+  Serial.print("   ref:   DB= "); Serial.print(pid->DB,3); Serial.println("    : present PID deadband");
+  Serial.print("   ref:   tau= "); Serial.print(pid->tau,3); Serial.println("    : present PID lead");
+  Serial.print("Sg= "); Serial.print(pid->Sg());  Serial.println("    : PID loopgain (integral) scalar [1]");
+  Serial.print("Ag= "); Serial.print(pid->Ag());  Serial.println("    : PID loopgain (integral) adder [0]");
+  Serial.print("   ref:   G= "); Serial.print(pid->G); Serial.println("    : present PID gain, frac/V");
+  Serial.print("St= "); Serial.print(pid->St());  Serial.println("    : PID lead (proportional) tlead scalar [1]");
+  Serial.print("At="); Serial.print(pid->At());  Serial.println("    : PID lead (proportional) tlead adder [0]");
+  Serial.print("v=  "); Serial.print(debug);     Serial.println("    : verbosity, 0-10. 2 for save csv [0]");
+  Serial.print("T<?>=  "); 
+  Serial.println("Transient performed with input");
+  Serial.print("          :   stepVal="); Serial.println(*stepVal);
+  Serial.print(", stepping=");  Serial.print(stepping);
 }

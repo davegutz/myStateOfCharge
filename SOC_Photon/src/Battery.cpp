@@ -27,7 +27,7 @@
 #include "Battery.h"
 #include <math.h>
 
-extern const int8_t debug;
+extern int8_t debug;
 extern char buffer[256];
 
 /*

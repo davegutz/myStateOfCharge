@@ -32,13 +32,8 @@
 #undef PHOTON
 #endif
 
-
 // Disable flags if needed for debugging, usually commented
-//#define BARE                  // ****** see local_config.h  ****Don't change it here
 #include "local_config.h"       // this is not in GitHub repository.  Normally empty file
-
-// Test feature usually commented
-//#define  FAKETIME                         // For simulating rapid time passing of schedule
 
 // Constants always defined
 #define ONE_DAY_MILLIS        86400000  // Number of milliseconds in one day (24*60*60*1000)
@@ -88,14 +83,6 @@
 #define C_MIN           0           // Integral and overall min limit, frac (0)
 #define C_LLMAX         0.1         // Proportional path max limit, frac (0.1)
 #define C_LLMIN         -0.2        // Proportional path min limit, frac (-0.2)
-
-#ifdef BARE
-#define BARE_PHOTON
-const boolean bare = true;  // Force continuous calibration mode to run with bare boards (false)
-#else
-#undef BARE_PHOTON
-const boolean bare = false;  // Force continuous calibration mode to run with bare boards (false)
-#endif
 
 // Battery voltage gain
 const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /

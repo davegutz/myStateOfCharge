@@ -414,6 +414,24 @@ struct PID
   double err;   // Error, F
   double err_comp; // Compensated error, F
   double cont;  // Total control output, %
+  double sd_;   // Derivative tlead lookup scalar
+  double sg_;   // Integral lookup scalar
+  double st_;   // Proportional lookup scalar
+  double ad_;   // Derivative tlead adder
+  double ag_;   // Integral lookup adder
+  double at_;   // Proportional lookup adder
+  double Sd(void) { return(sd_);};  // Der Tld scalar
+  double Sg(void) { return(sg_);};  // Gain scalar
+  double St(void) { return(st_);};  // Prop Tld scalar
+  double Ad(void) { return(ad_);}; 
+  double Ag(void) { return(ag_);};
+  double At(void) { return(at_);};
+  void Sd(const double S) { sd_ = S; };
+  void Ad(const double A) { ad_ = A; };
+  void Sg(const double S) { sg_ = S; };
+  void Ag(const double A) { ag_ = A; };
+  void St(const double S) { st_ = S; };
+  void At(const double A) { at_ = A; };
   PID(double G, double tau, double MAX, double MIN, double LLMAX, double LLMIN, double prop, double integ, double DB,
     double err, double err_comp, double cont)
   {
@@ -429,12 +447,18 @@ struct PID
     this->err = err;
     this->err_comp = err_comp;
     this->cont = cont;
+    this->sd_ = 1;
+    this->ad_ = 0;
+    this->sg_ = 1;
+    this->ag_ = 0;
+    this->st_ = 1;
+    this->at_ = 0;
   }
   void update(bool reset, double ref, double fb, double updateTime, double init, double dyn_max)
   {
     err = ref - fb;
-    err_comp = DEAD(err, DB)*G;
-    prop = max(min(err_comp * tau, LLMAX), LLMIN);
+    err_comp = DEAD(err, (DB*sd_+ad_)) * (G*sg_+ag_);
+    prop = max(min(err_comp * (tau*st_+at_), LLMAX), LLMIN);
     integ = max(min(integ + updateTime*err_comp, dyn_max-prop), MIN-prop);
     if ( reset ) integ = init;
     cont = max(min(integ + prop, dyn_max), MIN);

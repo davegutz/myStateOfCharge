@@ -65,14 +65,22 @@ Make it yourself.   It should look like this, with your personal authorizations:
 #include "mySubs.h"
 #include "blynk.h"              // Only place this can appear is top level main.h
 
-extern const int8_t debug = 2;  // Level of debug printing (2)
+extern int8_t debug;              // Level of debug printing (2)
 extern Publish pubList;
 Publish pubList = Publish();
 extern BlynkParticle Blynk;      // Blynk object
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4; // Time Blynk events
 BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;        // Time Blynk events
+extern String inputString;              // a string to hold incoming data
+extern boolean stringComplete;          // whether the string is complete
+extern boolean stepping;                // active step adder
 
 // Global locals
+int8_t debug = 2;
+String inputString = "";
+boolean stringComplete = false;
+boolean stepping = false;
+double stepVal = -2;
 char buffer[256];               // Serial print buffer
 int numTimeouts = 0;            // Number of Particle.connect() needed to unfreeze
 String hmString = "00:00";      // time, hh:mm
@@ -95,25 +103,15 @@ void setup()
 
   // Peripherals
   myPins = new Pins(D6, D7, A1);
-  if ( !bare )
-  {
-    // Status
-    pinMode(myPins->status_led, OUTPUT);
-    digitalWrite(myPins->status_led, LOW);
 
-    // I2C
-    if ( !bare )
-    {
-      Wire.setSpeed(CLOCK_SPEED_100KHZ);
-      Wire.begin();
-    }
-  }
-  else
-  {
-    // Status
-    pinMode(myPins->status_led, OUTPUT);
-    digitalWrite(myPins->status_led, LOW);
-  }
+  // Status
+  pinMode(myPins->status_led, OUTPUT);
+  digitalWrite(myPins->status_led, LOW);
+
+  // I2C
+  Wire.setSpeed(CLOCK_SPEED_100KHZ);
+  Wire.begin();
+
   // AD
   Serial.println("Initializing SHUNT MONITOR");
   ads = new Adafruit_ADS1015;
@@ -121,7 +119,6 @@ void setup()
   if (!ads->begin()) {
     Serial.println("FAILE to initialize ADS SHUNT MONITOR.");
     bare_ads = true;
-    // while (1);
   }
   Serial.println("SHUNT MONITOR initialized");
   // Display
@@ -160,9 +157,9 @@ void setup()
   Serial.printf("done CLOUD\n");
 
   #ifdef PHOTON
-    if ( debug>1 ) { sprintf(buffer, "Particle Photon.  bare = %d,\n", bare); Serial.print(buffer); };
+    if ( debug>1 ) { sprintf(buffer, "Particle Photon\n"); Serial.print(buffer); };
   #else
-    if ( debug>1 ) { sprintf(buffer, "Arduino Mega2560.  bare = %d,\n", bare); Serial.print(buffer); };
+    if ( debug>1 ) { sprintf(buffer, "Arduino Mega2560\n"); Serial.print(buffer); };
   #endif
 
   // Header for debug print
@@ -191,7 +188,6 @@ void loop()
   static unsigned long past = millis();     // Keep track of time
   static int reset = 1;                     // Dynamic reset
   double T = 0;                             // Present update time, s
-  const int bare_wait = int(1);             // To simulate peripherals sample time
   // Synchronization
   bool publishP;                            // Particle publish, T/F
   static Sync *publishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
@@ -236,10 +232,6 @@ void loop()
   past = now;
   now = millis();
   T = (now - past)/1e3;
-  if ( bare )
-  {
-    delay ( bare_wait );
-  }
 
   // Read sensors
   if ( read )
@@ -254,12 +246,12 @@ void loop()
     {
       soc_est = max(min( BATT_SOC_SAT + (sen->Vbatt_filt-batt_vsat)/(batt_vmax-batt_vsat)*(1.0-BATT_SOC_SAT), 1.0), 0.0);
     }
-    // Observer CLAW
-    pid_o->update((reset>0), sen->Vbatt, sen->Vbatt_model_tracked, sen->T, 1.0, C_MAX);
+    // Observer
+    pid_o->update((reset>0), sen->Vbatt+double(stepping*stepVal), sen->Vbatt_model_tracked, sen->T, 1.0, C_MAX);
     soc_tracked = pid_o->cont;
     if ( reset_soc ) soc_est = soc_tracked;
     load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads, myBatt, myBatt_tracked, soc_est, soc_tracked);
-    if ( bare ) delay(41);  // Usual I2C time
+    //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
     myDisplay(display);
   }
@@ -295,5 +287,41 @@ void loop()
   // Initialize complete once sensors and models started
   if ( read ) reset = 0;
 
+  // Discuss things with the user
+  // When open interactive serial monitor such as CoolTerm
+  // then can enter commands by sending strings.   End the strings with a real carriage return
+  // right in the "Send String" box then press "Send."
+  // String definitions are below.
+  talk(&stepping, pid_o, &stepVal);
 
 } // loop
+
+
+/*
+  Special handler that uses built-in callback.
+  SerialEvent occurs whenever a new data comes in the
+  hardware serial RX.  This routine is run between each
+  time loop() runs, so using delay inside loop can delay
+  response.  Multiple bytes of data may be available.
+ */
+void serialEvent()
+{
+  while (Serial.available())
+  {
+    // get the new byte:
+    char inChar = (char)Serial.read();
+    // add it to the inputString:
+    inputString += inChar;
+    // if the incoming character is a newline, set a flag
+    // so the main loop can do something about it:
+    if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',')
+    {
+      stringComplete = true;
+     // Remove whitespace
+      inputString.trim();
+      inputString.replace(" ","");
+      inputString.replace("=","");
+      Serial.println(inputString);
+    }
+  }
+}
