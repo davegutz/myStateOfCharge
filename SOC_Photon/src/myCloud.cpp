@@ -140,3 +140,30 @@ void publish_particle(unsigned long now, Wifi *wifi)
     pubList.numTimeouts++;
   }
 }
+
+
+// Assignments
+void assignPubList(Publish* pubList, const unsigned long now, const String unit, const String hmString,
+  const double controlTime, struct Sensors* sen, const int numTimeouts, Battery* myBatt, Battery* myBatt_tracked)
+{
+  pubList->now = now;
+  pubList->unit = unit;
+  pubList->hmString =hmString;
+  pubList->controlTime = controlTime;
+  pubList->Vbatt = sen->Vbatt;
+  pubList->Vbatt_filt = sen->Vbatt_filt;
+  pubList->Tbatt = sen->Tbatt;
+  pubList->Tbatt_filt = sen->Tbatt_filt;
+  pubList->Vshunt = sen->Vshunt;
+  pubList->Vshunt_filt = sen->Vshunt_filt;
+  pubList->Ishunt = sen->Ishunt;
+  pubList->Ishunt_filt = sen->Ishunt_filt;
+  pubList->Wshunt = sen->Wshunt;
+  pubList->Wshunt_filt = sen->Wshunt_filt;
+  pubList->numTimeouts = numTimeouts;
+  pubList->SOC = myBatt->soc()*100.0;
+  pubList->SOC_tracked = myBatt_tracked->soc()*100.0;
+  pubList->Vbatt_model = sen->Vbatt_model;
+  pubList->Vbatt_model_filt = sen->Vbatt_model_filt;
+  pubList->Vbatt_model_tracked = sen->Vbatt_model_tracked;
+}

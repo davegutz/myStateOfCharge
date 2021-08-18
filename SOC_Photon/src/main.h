@@ -203,7 +203,7 @@ void loop()
   static double soc_tracked = 1.0;
   static PID *pid_o = new PID(C_G, C_TAU, C_MAX, C_MIN, C_LLMAX, C_LLMIN, 0, 1, C_DB, 0, 0, 1);       // Observer PID
   static bool reset_soc = true;
-  
+
   // Top of loop
   // Start Blynk, only if connected since it is blocking
   if ( Particle.connected() && !myWifi->blynk_started )
@@ -272,27 +272,7 @@ void loop()
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
     controlTime = decimalTime(&currentTime, tempStr);
     hmString = String(tempStr);
-
-    pubList.now = now;
-    pubList.unit = unit;
-    pubList.hmString =hmString;
-    pubList.controlTime = controlTime;
-    pubList.Vbatt = sen->Vbatt;
-    pubList.Vbatt_filt = sen->Vbatt_filt;
-    pubList.Tbatt = sen->Tbatt;
-    pubList.Tbatt_filt = sen->Tbatt_filt;
-    pubList.Vshunt = sen->Vshunt;
-    pubList.Vshunt_filt = sen->Vshunt_filt;
-    pubList.Ishunt = sen->Ishunt;
-    pubList.Ishunt_filt = sen->Ishunt_filt;
-    pubList.Wshunt = sen->Wshunt;
-    pubList.Wshunt_filt = sen->Wshunt_filt;
-    pubList.numTimeouts = numTimeouts;
-    pubList.SOC = myBatt->soc()*100.0;
-    pubList.SOC_tracked = myBatt_tracked->soc()*100.0;
-    pubList.Vbatt_model = sen->Vbatt_model;
-    pubList.Vbatt_model_filt = sen->Vbatt_model_filt;
-    pubList.Vbatt_model_tracked = sen->Vbatt_model_tracked;
+    assignPubList(&pubList, now, unit, hmString, controlTime, sen, numTimeouts, myBatt, myBatt_tracked);
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
