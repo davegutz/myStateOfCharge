@@ -203,7 +203,8 @@ void loop()
   static Sync *publishSerial = new Sync(PUBLISH_SERIAL_DELAY);
   static double soc_est = 1.0;
   static double soc_tracked = 1.0;
-
+  static PID *pid_o = new PID(C_G, C_TAU, C_MAX, C_MIN, C_LLMAX, C_LLMIN, 0, 1, C_DB, 0, 0, 1);       // Observer PID
+ 
   // Top of loop
   // Start Blynk, only if connected since it is blocking
   if ( Particle.connected() && !myWifi->blynk_started )
@@ -253,7 +254,9 @@ void loop()
     {
       soc_est = max(min( BATT_SOC_SAT + (sen->Vbatt_filt-batt_vsat)/(batt_vmax-batt_vsat)*(1.0-BATT_SOC_SAT), 1.0), 0.0);
     }
-    soc_tracked = soc_est;
+    // Observer CLAW
+    pid_o->update((reset>0), sen->Vbatt, sen->Vbatt_model_tracked, sen->T, 1.0, C_MAX);
+    soc_tracked = pid_o->cont;
     load(reset, sen->T, sen, sensor_tbatt, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, myPins, ads, myBatt, myBatt_tracked, soc_est, soc_tracked);
     if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());

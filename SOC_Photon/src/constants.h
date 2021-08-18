@@ -79,7 +79,16 @@
 #define BATT_SOC_SAT          0.997     // Normal battery cell saturation, fraction (0.997)
 #define BATT_R1               0.0018    // Battery Randels static resistance, Ohms (0.0018)
 #define BATT_R2               0.0024    // Battery Randels dynamic resistance, Ohms (0.0024)
-#define BATT_R2C2             100       // Battery Randels dynamic term, Ohms-Farads (100)
+#define BATT_R2C2             100       // Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
+                                        // test so using with R2 and then multiplying by 4 for total result is valid,
+                                        // though probably not for an individual cell
+#define C_G             0.150       // Control gain, r/s = %/F ( )
+#define C_TAU           1           // Control lead, s  (1)
+#define C_DB            0           // Deadband in error, F (0)
+#define C_MAX           1           // Integral and overall max limit, frac (1)
+#define C_MIN           0           // Integral and overall min limit, frac (0)
+#define C_LLMAX         0.1         // Proportional path max limit, frac (0.1)
+#define C_LLMIN         -0.2        // Proportional path min limit, frac (-0.2)
 
 #ifdef BARE
 #define BARE_PHOTON

@@ -71,7 +71,7 @@ void publish3(void)
   Blynk.virtualWrite(V13, pubList.Vshunt_filt);
   Blynk.virtualWrite(V14, pubList.I2C_status);
   Blynk.virtualWrite(V15, pubList.hmString);
-  //Blynk.virtualWrite(V16, pubList.duty);
+  Blynk.virtualWrite(V16, pubList.Vbatt_model_tracked);
 }
 
 

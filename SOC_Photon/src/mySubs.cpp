@@ -174,10 +174,10 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
 
   // Battery model 
   sen->Vbatt_model_static = double(batt_num_cells)*cell->calculate((sen->Tbatt-32.)*5./9., soc_model);
-  sen->Vbatt_model = sen->Vbatt_model_static + sen->Ishunt*(batt_r1+batt_r2);
+  sen->Vbatt_model = sen->Vbatt_model_static + sen->Ishunt*(batt_r1 + batt_r2);
   sen->Vbatt_model_filt = sen->Vbatt_model_static + sen->Ishunt_filt*(batt_r1+batt_r2);
   sen->Vbatt_model_tracked_static = double(batt_num_cells)*cell_tracked->calculate((sen->Tbatt-32.)*5./9., soc_tracked);
-  sen->Vbatt_model_tracked = sen->Vbatt_model_tracked_static + sen->Ishunt*(batt_r1+batt_r2);
+  sen->Vbatt_model_tracked = sen->Vbatt_model_tracked_static + sen->Ishunt*(batt_r1 + batt_r2);
 
   // Built-in-test logic.   Run until finger detected
   if ( true && !done_testing )
