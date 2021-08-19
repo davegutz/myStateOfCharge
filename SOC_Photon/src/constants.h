@@ -44,7 +44,7 @@
 #define DISCONNECT_DELAY      75000UL   // After these milliseconds no WiFi, disconnect (75000UL)
 #define CHECK_INTERVAL        180000UL  // How often to check for WiFi once disconnected (180000UL)
 #define CONNECT_WAIT          10000UL   // How long after setup that we try WiFi for first time (10000UL)
-#define INIT_WAIT             60000UL   // How long after setup that we wait for convergence of observer before setting integrator (60000UL)
+#define INIT_WAIT             120000UL  // How long after setup that we wait for convergence of observer before setting integrator (120000UL)
 #define CONFIRMATION_DELAY    10000UL   // How long to confirm WiFi on before streaming (10000UL)
 #define GMT                   -5        // Enter time different to zulu (does not respect DST) (-5)
 #define USE_DST               1         // Whether to apply DST or not, 0 or 1 (1)
@@ -77,14 +77,13 @@
 #define BATT_R2C2             100       // Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
                                         // test so using with R2 and then multiplying by 4 for total result is valid,
                                         // though probably not for an individual cell
-#define C_G             0.010       // Control gain, r/s = %/F (about 0.1 is instability point for C_TAU=1)
+#define C_G             0.010       // Control gain, r/s = %/F (about 0.1 is instability point for C_TAU=1) (0.010)
 #define C_TAU           0           // Control lead, s  (0)
-#define C_DB            0.02        // Deadband in error, V (0.02)
+#define C_DB            0.002       // Deadband in error, V (0.0020)
 #define C_MAX           1           // Integral and overall max limit, frac (1)
 #define C_MIN           0           // Integral and overall min limit, frac (0)
 #define C_LLMAX         0.1         // Proportional path max limit, frac (0.1)
 #define C_LLMIN         -0.2        // Proportional path min limit, frac (-0.2)
-#define SOC_INIT_TOL    0.01        // Convergance of soc to soc_est before allowing soc integration, V
 
 // Battery voltage gain
 const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
