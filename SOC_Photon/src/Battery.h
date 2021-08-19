@@ -73,8 +73,8 @@ static const double c_bb[7] = {-1.770434633,	-1.770434633,	-1.770434633,	-1.0994
 const double n_bb = 0.4;
 const double d_bb = 1.734;
 const unsigned int nz_bb = 7;
-const double r1_bb = 0.0018;  // Battery Randels static resistance, Ohms (0.0018)
-const double r2_bb = 0.0024;  // Battery Randels dynamic resistance, Ohms (0.0024)
+const double r1_bb = 0.0018*0.7;  // Battery Randels static resistance, Ohms (0.0018) 0.7 to match transients
+const double r2_bb = 0.0024*0.7;  // Battery Randels dynamic resistance, Ohms (0.0024) 0.7 to match transients
 const double r2c2_bb = 100.0; // Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
                               // test so using with R2 and then multiplying by 4 for total result is valid,
                               // though probably not for an individual cell

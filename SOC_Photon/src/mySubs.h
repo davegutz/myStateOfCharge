@@ -68,8 +68,10 @@ struct Sensors
   int16_t Vshunt_int;     // Sensed shunt voltage, count
   double Vshunt;          // Sensed shunt voltage, V
   double Vshunt_filt;     // Filtered, sensed shunt voltage, V
+  double Vshunt_filt_obs; // Filtered, sensed shunt voltage for  observer, V
   double Ishunt;          // Sensed shunt current, A
   double Ishunt_filt;     // Filtered, sensed shunt current, A
+  double Ishunt_filt_obs; // Filtered, sensed shunt current for observer, A
   double Wshunt;          // Sensed shunt power, W
   double Wshunt_filt;     // Filtered, sensed shunt power, W
   int I2C_status;
@@ -109,9 +111,9 @@ struct Sensors
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print_inputs(unsigned long now, double T);
 void serial_print(void);
-boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFiltObs, General2_Pole* VbattSenseFilt, 
-    General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads,
-    Battery *batt, Battery *batt_tracked, double soc_model, double soc_tracked);
+boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
+  General2_Pole* VbattSenseFilt,  General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads,
+  Battery *batt, Battery *batt_tracked, double soc_model, double soc_tracked);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *currentTime, char* tempStr);
 void print_serial_header(void);

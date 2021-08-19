@@ -177,17 +177,25 @@ void setup()
 // Loop
 void loop()
 {
-  static General2_Pole* VbattSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., 0.5, 0.80, 0.1, 20.);       // Sensor noise and general loop filter
-  static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.1, 20.);       // Sensor noise and general loop filter
-  static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.0, 150.);      // Sensor noise and general loop filter
-  static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, -0.100, 0.100); // Sensor noise and general loop filter
-  static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);      // 1-wire temp sensor battery temp
+  // Sensor noise filters
+  static General2_Pole* VbattSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., 0.5, 0.80, 0.1, 2.*double(NOM_SYS_VOLT));
+  static General2_Pole* VshuntSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., 0.5, 0.80, -0.100, 0.100);
+  static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.1, 2.*double(NOM_SYS_VOLT));
+  static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, -20.0, 150.);
+  static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, -0.100, 0.100);
+  // 1-wire temp sensor battery temp
+  static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);
+  // Sensor conversions
   static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
+  // Battery  models
   static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, r1_bb, r2_bb, r2c2_bb);  // Battery model
   static Battery *myBatt_tracked = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, r1_bb, r2_bb, r2c2_bb);  // Tracked battery model
+
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
   static unsigned long past = millis();     // Keep track of time
+  static unsigned long start = millis();    // Keep track of time
+  unsigned long elapsed = 0;                // Keep track of time
   static int reset = 1;                     // Dynamic reset
   double T = 0;                             // Present update time, s
   // Synchronization
@@ -209,7 +217,6 @@ void loop()
     if ( debug>2 ) Serial.printf("Starting Blynk at %ld...  ", millis());
     Blynk.begin(blynkAuth.c_str());   // blocking if no connection
     myWifi->blynk_started = true;
-    reset_soc = false;
     if ( debug>2 ) Serial.printf("completed at %ld\n", millis());
   }
   if ( myWifi->blynk_started && myWifi->connected )
@@ -230,16 +237,30 @@ void loop()
   read = readSensors->update(now, reset);               //  now || reset
   sen->T =  double(readSensors->updateTime())/1000.0;
 
-  // Control References
+  // Keep track of time
   past = now;
   now = millis();
+  elapsed = now - start;
   T = (now - past)/1e3;
 
-  // Read sensors
+  // Read sensors and update filters
   if ( read )
   {
     if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
-    // Very simple soc estimation
+
+    // SOC Observer
+    pid_o->update((reset>0), sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked, sen->T, 1.0, C_MAX);
+    soc_tracked = pid_o->cont;
+
+    // SOC Integrator
+    if ( reset_soc )
+    {
+      if ( fabs(sen->Vbatt_filt_obs-sen->Vbatt_model_tracked)<SOC_INIT_TOL || elapsed>INIT_WAIT ) // Wait for convergence of observer
+      {
+        reset_soc = false;
+        soc_est = soc_tracked;
+      }
+    }
     if ( sen->Vbatt_filt<=batt_vsat )
     {
       soc_est = max(min( soc_est + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.0), 0.0);
@@ -248,14 +269,14 @@ void loop()
     {
       soc_est = max(min( BATT_SOC_SAT + (sen->Vbatt_filt-batt_vsat)/(batt_vmax-batt_vsat)*(1.0-BATT_SOC_SAT), 1.0), 0.0);
     }
-    // Observer
-    pid_o->update((reset>0), sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked, sen->T, 1.0, C_MAX);
-    soc_tracked = pid_o->cont;
-    if ( reset_soc ) soc_est = soc_tracked;
-    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, 
+
+    // Load and filter
+    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, 
         myPins, ads, myBatt, myBatt_tracked, soc_est, soc_tracked);
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
+
+    // Update display
     myDisplay(display);
   }
 

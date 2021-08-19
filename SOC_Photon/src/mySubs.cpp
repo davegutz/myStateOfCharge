@@ -108,9 +108,9 @@ void serial_print(void)
 
 // Load and filter
 // TODO:   move 'read' stuff here
-boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFiltObs, General2_Pole* VbattSenseFilt, 
-    General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads,
-    Battery *batt, Battery *batt_tracked, double soc_model, double soc_tracked)
+boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
+  General2_Pole* VbattSenseFilt,  General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads,
+  Battery *batt, Battery *batt_tracked, double soc_model, double soc_tracked)
 {
   static boolean done_testing = false;
 
@@ -126,8 +126,10 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   }
   sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
   sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset, T);
+  sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( sen->Vshunt, reset, T);
   sen->Ishunt = sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
   sen->Ishunt_filt = sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A;
+  sen->Ishunt_filt_obs = sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A;
   sen->Wshunt = sen->Vbatt*sen->Ishunt;
   sen->Wshunt_filt = sen->Vbatt_filt*sen->Ishunt_filt;
 
@@ -144,10 +146,10 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   // Battery model 
   sen->Vbatt_model = batt->calculate((sen->Tbatt-32.)*5./9., soc_model, sen->Ishunt);
   sen->Vbatt_model_filt = batt->calculate((sen->Tbatt-32.)*5./9., soc_model, sen->Ishunt_filt);
-  sen->Vbatt_model_tracked = batt_tracked->calculate((sen->Tbatt-32.)*5./9., soc_tracked, sen->Ishunt);
+  sen->Vbatt_model_tracked = batt_tracked->calculate((sen->Tbatt-32.)*5./9., soc_tracked, sen->Ishunt_filt_obs);
   if ( debug==-1 )
-  Serial.printf("%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", soc_tracked, sen->Ishunt,
-        sen->Vbatt_filt_obs+double(stepping*stepVal), batt_tracked->vstat(), batt_tracked->vdyn(), batt_tracked->v());
+  Serial.printf("%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", soc_tracked+12., sen->Vbatt_filt_obs+double(stepping*stepVal),
+   batt_tracked->vstat(), batt_tracked->vdyn()+12., batt_tracked->v());
 
   // Built-in-test logic.   Run until finger detected
   if ( true && !done_testing )
