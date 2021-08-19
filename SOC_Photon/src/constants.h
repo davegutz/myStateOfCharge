@@ -78,7 +78,7 @@
                                         // test so using with R2 and then multiplying by 4 for total result is valid,
                                         // though probably not for an individual cell
 #define C_G             0.010       // Control gain, r/s = %/F (about 0.1 is instability point for C_TAU=1)
-#define C_TAU           1           // Control lead, s  (1)
+#define C_TAU           0           // Control lead, s  (0)
 #define C_DB            0.02        // Deadband in error, V (0.02)
 #define C_MAX           1           // Integral and overall max limit, frac (1)
 #define C_MIN           0           // Integral and overall min limit, frac (0)
