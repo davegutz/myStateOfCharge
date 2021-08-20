@@ -115,14 +115,14 @@ void publish_particle(unsigned long now, Wifi *wifi)
   if ( wifi->connected )
   {
     // Create print string
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,\
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f, %7.3f,\
   %c", \
     pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
     pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt_obs,
     pubList.Vshunt, pubList.Vshunt_filt,
     pubList.Ishunt, pubList.Ishunt_filt_obs, pubList.Wshunt, pubList.Wshunt_filt,
     pubList.SOC, pubList.Vbatt_model,
-    pubList.SOC_tracked, pubList.Vbatt_model_tracked, '\0');
+    pubList.SOC_tracked, pubList.Vbatt_model_tracked, pubList.T, '\0');
   
     unsigned nowSec = now/1000UL;
     unsigned sec = nowSec%60;
@@ -168,4 +168,5 @@ void assignPubList(Publish* pubList, const unsigned long now, const String unit,
   pubList->Vbatt_model = sen->Vbatt_model;
   pubList->Vbatt_model_filt = sen->Vbatt_model_filt;
   pubList->Vbatt_model_tracked = sen->Vbatt_model_tracked;
+  pubList->T = sen->T;
 }

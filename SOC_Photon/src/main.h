@@ -258,8 +258,8 @@ void loop()
     }
     pid_o->update((reset>0), sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
                 min(sen->T, F_O_MAX_T), 1.0, dyn_max, dyn_min);
-    if ( debug == -2 ) Serial.printf("T,Vb_f_o,Vb_t_o,prop,integ,soc_t,  %ld,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
-      elapsed, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked, pid_o->prop, pid_o->integ, pid_o->cont);
+    if ( debug == -2 ) Serial.printf("T,Vb_f_o,Vb_t_o,prop,integ,soc_t,T,  %ld,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+      elapsed, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked, pid_o->prop, pid_o->integ, pid_o->cont, sen->T);
     soc_tracked = pid_o->cont;
 
     // SOC Integrator

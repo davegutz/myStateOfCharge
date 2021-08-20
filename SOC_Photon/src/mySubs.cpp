@@ -76,20 +76,20 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,   Wshunt,Wshunt_filt,   SOC,Vbatt_model, SOC_tracked,Vbatt_model_tracked"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,   Wshunt,Wshunt_filt,   SOC,Vbatt_model, SOC_tracked,Vbatt_model_tracked,T_filt"));
 }
 
 // Inputs serial print
 void serial_print_inputs(unsigned long now, double T)
 {
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,\
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f, %7.3f,\
   %c", \
     pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
     pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt_obs,
     pubList.Vshunt, pubList.Vshunt_filt,
     pubList.Ishunt, pubList.Ishunt_filt_obs, pubList.Wshunt, pubList.Wshunt_filt,
     pubList.SOC, pubList.Vbatt_model,
-    pubList.SOC_tracked, pubList.Vbatt_model_tracked, '\0');
+    pubList.SOC_tracked, pubList.Vbatt_model_tracked, pubList.T, '\0');
   if ( debug > 2 ) Serial.printf("serial_print_inputs:  ");
   Serial.println(buffer);
 }
