@@ -30,7 +30,8 @@
         "xutility": "cpp",
         "algorithm": "cpp",
         "istream": "cpp",
-        "glcdfont.c": "cpp"
+        "glcdfont.c": "cpp",
+        "memory": "cpp"
     },
     "particle.firmwareVersion": "3.0.0-beta.1",
     "particle.targetPlatform": "photon",

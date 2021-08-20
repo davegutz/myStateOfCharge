@@ -52,6 +52,7 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
 Battery::~Battery() {}
 // operators
 // functions
+// SOC-OCV curve fit method per Zhang, et al
 double Battery::calculate(const double temp_C, const double soc_frac, const double curr_in)
 {
   b_ = B_T_ ->interp(temp_C);

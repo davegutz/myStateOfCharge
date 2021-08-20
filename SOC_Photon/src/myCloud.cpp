@@ -44,7 +44,7 @@ void publish1(void)
 {
   if (debug>4) Serial.printf("Blynk write1\n");
   Blynk.virtualWrite(V0,  pubList.Vbatt);
-  Blynk.virtualWrite(V2,  pubList.Vbatt_filt);
+  Blynk.virtualWrite(V2,  pubList.Vbatt_filt_obs);
   Blynk.virtualWrite(V3,  pubList.SOC);
   Blynk.virtualWrite(V4,  pubList.Vbatt_model);  // TODO spare?
   Blynk.virtualWrite(V5,  pubList.Vbatt_model);
@@ -80,7 +80,7 @@ void publish4(void)
 {
   if (debug>4) Serial.printf("Blynk write4\n");
   Blynk.virtualWrite(V17, pubList.Ishunt);
-  Blynk.virtualWrite(V18, pubList.Ishunt_filt);
+  Blynk.virtualWrite(V18, pubList.Ishunt_filt_obs);
   Blynk.virtualWrite(V19, pubList.Wshunt);
   Blynk.virtualWrite(V20, pubList.Wshunt_filt);
 }
@@ -118,9 +118,9 @@ void publish_particle(unsigned long now, Wifi *wifi)
   sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,\
   %c", \
     pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
-    pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt,
+    pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt_obs,
     pubList.Vshunt, pubList.Vshunt_filt,
-    pubList.Ishunt, pubList.Ishunt_filt, pubList.Wshunt, pubList.Wshunt_filt,
+    pubList.Ishunt, pubList.Ishunt_filt_obs, pubList.Wshunt, pubList.Wshunt_filt,
     pubList.SOC, pubList.Vbatt_model,
     pubList.SOC_tracked, pubList.Vbatt_model_tracked, '\0');
   
@@ -152,12 +152,14 @@ void assignPubList(Publish* pubList, const unsigned long now, const String unit,
   pubList->controlTime = controlTime;
   pubList->Vbatt = sen->Vbatt;
   pubList->Vbatt_filt = sen->Vbatt_filt;
+  pubList->Vbatt_filt_obs = sen->Vbatt_filt_obs;
   pubList->Tbatt = sen->Tbatt;
   pubList->Tbatt_filt = sen->Tbatt_filt;
   pubList->Vshunt = sen->Vshunt;
   pubList->Vshunt_filt = sen->Vshunt_filt;
   pubList->Ishunt = sen->Ishunt;
   pubList->Ishunt_filt = sen->Ishunt_filt;
+  pubList->Ishunt_filt_obs = sen->Ishunt_filt_obs;
   pubList->Wshunt = sen->Wshunt;
   pubList->Wshunt_filt = sen->Wshunt_filt;
   pubList->numTimeouts = numTimeouts;

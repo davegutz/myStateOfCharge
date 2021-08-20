@@ -65,6 +65,7 @@ protected:
 };
 
 // Battery model LiFePO4 BattleBorn.xlsx and 'GeneralizedSOC-OCV Model Zhang etal.pdf'
+// SOC-OCV curve fit
 static const double t_bb[7] = {-10.,	 0.,	10.,	20.,	30.,	40.,	50.};
 const double m_bb = 0.478;
 static const double b_bb[7] = {-1.143251503,	-1.143251503,	-1.143251503,	-0.5779554,	-0.553297988,	-0.557104757,	-0.45551626};

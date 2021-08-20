@@ -177,10 +177,10 @@ void setup()
 // Loop
 void loop()
 {
-  // Sensor noise filters
-  static General2_Pole* VbattSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., 0.5, 0.80, 0.1, 2.*double(NOM_SYS_VOLT));
-  static General2_Pole* VshuntSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., 0.5, 0.80, -0.100, 0.100);
-  static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.1, 2.*double(NOM_SYS_VOLT));
+  // Sensor noise filters.   Obs filters 0.5 --> 0.1 to eliminate digital instability.   Also rate limited the observer belts+suspenders
+  static General2_Pole* VbattSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., 0.1, 0.80, 0.833*double(NOM_SYS_VOLT), 1.16*double(NOM_SYS_VOLT));
+  static General2_Pole* VshuntSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., 0.1, 0.80, -0.100, 0.100);
+  static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, 0.833*double(NOM_SYS_VOLT), 1.15*double(NOM_SYS_VOLT));
   static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, -20.0, 150.);
   static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., 0.05, 0.80, -0.100, 0.100);
   // 1-wire temp sensor battery temp
@@ -249,7 +249,16 @@ void loop()
     if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
 
     // SOC Observer
-    pid_o->update((reset>0), sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked, sen->T, 1.0, C_MAX);
+    double dyn_max = C_MAX;
+    double dyn_min = C_MIN;
+    if ( !reset_soc )
+    {
+      dyn_max = pid_o->cont + C_SOC_R_MAX * sen->T; // Limit invalid excursions
+      dyn_min = pid_o->cont - C_SOC_R_MAX * sen->T; // Limit invalid excursions
+    }
+    pid_o->update((reset>0), sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked, sen->T, 1.0, dyn_max, dyn_min);
+    if ( debug == -2 ) Serial.printf("T,Vb_f_o,Vb_t_o,prop,integ,soc_t,  %ld,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
+      elapsed, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked, pid_o->prop, pid_o->integ, pid_o->cont);
     soc_tracked = pid_o->cont;
 
     // SOC Integrator

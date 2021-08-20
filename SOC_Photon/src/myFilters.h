@@ -454,12 +454,12 @@ struct PID
     this->st_ = 1;
     this->at_ = 0;
   }
-  void update(bool reset, double ref, double fb, double updateTime, double init, double dyn_max)
+  void update(bool reset, double ref, double fb, double updateTime, double init, double dyn_max, double dyn_min)
   {
     err = ref - fb;
     err_comp = DEAD(err, (DB*sd_+ad_)) * (G*sg_+ag_);
     prop = max(min(err_comp * (tau*st_+at_), LLMAX), LLMIN);
-    integ = max(min(integ + updateTime*err_comp, dyn_max-prop), MIN-prop);
+    integ = max(min(integ + updateTime*err_comp, dyn_max-prop), dyn_min-prop);
     if ( reset ) integ = init;
     cont = max(min(integ + prop, dyn_max), MIN);
   }

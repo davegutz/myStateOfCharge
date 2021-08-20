@@ -84,6 +84,7 @@
 #define C_MIN           0           // Integral and overall min limit, frac (0)
 #define C_LLMAX         0.1         // Proportional path max limit, frac (0.1)
 #define C_LLMIN         -0.2        // Proportional path min limit, frac (-0.2)
+#define C_SOC_R_MAX     0.01        // Maximum integrating tf rate, frac/sec (0.01)
 
 // Battery voltage gain
 const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /

@@ -40,9 +40,11 @@ struct Publish
   double T;
   int I2C_status;
   double Vbatt_filt;
+  double Vbatt_filt_obs;
   double Tbatt_filt;
   double Vshunt_filt;
   double Ishunt_filt;
+  double Ishunt_filt_obs;
   double Wshunt_filt;
   int numTimeouts;
   double SOC;
