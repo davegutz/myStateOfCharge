@@ -125,8 +125,8 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
     sen->Vshunt_int = 0;
   }
   sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
-  sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset, T);
-  sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( sen->Vshunt, reset, T);
+  sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset, min(T, F_MAX_T));
+  sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( sen->Vshunt, reset, min(T, F_O_MAX_T));
   sen->Ishunt = sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
   sen->Ishunt_filt = sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A;
   sen->Ishunt_filt_obs = sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A;
@@ -135,13 +135,13 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
 
   // MAXIM conversion 1-wire Tp plenum temperature
   if ( sensor_tbatt->read() ) sen->Tbatt = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);
-  sen->Tbatt_filt = TbattSenseFilt->calculate( sen->Tbatt, reset, T);
+  sen->Tbatt_filt = TbattSenseFilt->calculate( sen->Tbatt, reset,  min(T, F_MAX_T));
 
   // Vbatt
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
   sen->Vbatt =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A);
-  sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate( sen->Vbatt, reset, T);
-  sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset, T);
+  sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate( sen->Vbatt, reset, min(T, F_O_MAX_T));
+  sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset,  min(T, F_MAX_T));
 
   // Battery model 
   sen->Vbatt_model = batt->calculate((sen->Tbatt-32.)*5./9., soc_model, sen->Ishunt);
