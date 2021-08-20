@@ -271,9 +271,10 @@ void loop()
         soc_est = soc_tracked;
       }
     }
+    // Coulomb Counting method
     if ( sen->Vbatt_filt<=batt_vsat )
     {
-      soc_est = max(min( soc_est + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.0), 0.0);
+      soc_est = max(min( soc_est + sen->Wbatt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.0), 0.0);
     }
     else   // >13.7 V is decent approximation for SOC>99.7 for prototype system (constants calculated)
     {

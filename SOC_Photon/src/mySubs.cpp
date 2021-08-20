@@ -132,6 +132,10 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   sen->Ishunt_filt_obs = sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A;
   sen->Wshunt = sen->Vbatt*sen->Ishunt;
   sen->Wshunt_filt = sen->Vbatt_filt*sen->Ishunt_filt;
+  if ( sen->Ishunt>0 )
+    sen->Wbatt = sen->Vbatt*sen->Ishunt - sen->Ishunt*sen->Ishunt*(batt_r1+batt_r2);  // charging
+  else
+    sen->Wbatt = sen->Vbatt*sen->Ishunt + sen->Ishunt*sen->Ishunt*(batt_r1+batt_r2);  // discharging
 
   // MAXIM conversion 1-wire Tp plenum temperature
   if ( sensor_tbatt->read() ) sen->Tbatt = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);

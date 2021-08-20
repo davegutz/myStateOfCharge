@@ -74,6 +74,7 @@ struct Sensors
   double Ishunt_filt_obs; // Filtered, sensed shunt current for observer, A
   double Wshunt;          // Sensed shunt power, W
   double Wshunt_filt;     // Filtered, sensed shunt power, W
+  double Wbatt;          // Battery power, W
   int I2C_status;
   double T;
   bool bare_ads;          // If no ADS detected
@@ -97,6 +98,7 @@ struct Sensors
     this->Ishunt_filt = Vshunt_filt * SHUNT_V2A_S + SHUNT_V2A_A;
     this->Wshunt = Vshunt * Ishunt;
     this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
+    this->Wbatt = Vshunt * Ishunt;
     this->I2C_status = I2C_status;
     this->T = T;
     this->bare_ads = bare_ads;
