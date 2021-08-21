@@ -132,10 +132,7 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
   sen->Ishunt_filt_obs = sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A;
   sen->Wshunt = sen->Vbatt*sen->Ishunt;
   sen->Wshunt_filt = sen->Vbatt_filt*sen->Ishunt_filt;
-  if ( sen->Ishunt>0 )
-    sen->Wbatt = sen->Vbatt*sen->Ishunt - sen->Ishunt*sen->Ishunt*(batt_r1+batt_r2);  // charging
-  else
-    sen->Wbatt = sen->Vbatt*sen->Ishunt + sen->Ishunt*sen->Ishunt*(batt_r1+batt_r2);  // discharging
+  sen->Wbatt = sen->Vbatt*sen->Ishunt - sen->Ishunt*sen->Ishunt*(batt_r1+batt_r2); 
 
   // MAXIM conversion 1-wire Tp plenum temperature
   if ( sensor_tbatt->read() ) sen->Tbatt = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);
@@ -242,21 +239,23 @@ void myDisplay(Adafruit_SSD1306 *display)
 {
   display->clearDisplay();
 
-  display->setTextSize(1);             // Normal 1:1 pixel scale
-  display->setTextColor(SSD1306_WHITE);        // Draw white text
-  display->setCursor(0,0);             // Start at top-left corner
+  display->setTextSize(1);              // Normal 1:1 pixel scale
+  display->setTextColor(SSD1306_WHITE); // Draw white text
+  display->setCursor(0,0);              // Start at top-left corner
   char dispString[21];
   sprintf(dispString, "%3.0f %5.2f %5.1f", pubList.Tbatt, pubList.Vbatt, pubList.Ishunt_filt);
   display->println(dispString);
 
   display->println(F(""));
 
-  display->setTextSize(2);             // Draw 2X-scale text
   display->setTextColor(SSD1306_WHITE);
-  char dispStringS[10];
-  // sprintf(dispStringS, "SOC->%4.1f", pubList.SOC);
-  sprintf(dispStringS, "%3.0f  %3.0f", pubList.SOC, pubList.SOC_tracked);
-  display->println(dispStringS);
+  char dispStringS[5];
+  sprintf(dispStringS, "%3.0f ", pubList.SOC);
+  display->print(dispStringS);
+  display->setTextSize(2);             // Draw 2X-scale text
+  sprintf(dispStringS, " %3.0f", pubList.SOC_tracked);
+  display->print(dispStringS);
+
   display->display();
 }
 
