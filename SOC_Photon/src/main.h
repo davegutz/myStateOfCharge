@@ -64,6 +64,8 @@ Make it yourself.   It should look like this, with your personal authorizations:
 #include "mySync.h"
 #include "mySubs.h"
 #include "blynk.h"              // Only place this can appear is top level main.h
+#include "mySummary.h"
+#include "myRetained.h"
 
 extern int8_t debug;              // Level of debug printing (2)
 extern Publish pubList;
@@ -92,6 +94,11 @@ Adafruit_ADS1015 *ads;          // Use this for the 12-bit version; 1115 for 16-
 Adafruit_SSD1306 *display;
 bool bare_ads = false;          // If ADS to be ignored
 Wifi *myWifi;                   // Manage Wifi
+class Summary summ_curr;     // Manage current summary information
+class Summary summ_prev;     // Manage previous summary information
+retained double test;
+retained Retained summ_currR;   // Manage current summary information
+retained Retained summ_prevR;   // Manage current summary information
 
 // Setup
 void setup()
@@ -163,6 +170,13 @@ void setup()
   #else
     if ( debug>1 ) { sprintf(buffer, "Arduino Mega2560\n"); Serial.print(buffer); };
   #endif
+
+  // print summary
+  summ_curr.print();
+  summ_prev.print();
+  Serial.printf("test=%7.3f\n", test);
+  summ_currR.print();
+  summ_prevR.print();
 
   // Header for debug print
   if ( debug>1 )
@@ -329,6 +343,31 @@ void loop()
   // then can enter commands by sending strings.   End the strings with a real carriage return
   // right in the "Send String" box then press "Send."
   // String definitions are below.
+  int debug_saved = debug;
   talk(&stepping, pid_o, &stepVal);
+
+  // Summary management
+  if ( debug == -3 )
+  {
+    debug = debug_saved;
+    summ_curr.print();
+    Serial.printf("test=%7.3f\n", test);
+    summ_curr.load_from(summ_currR);
+    summ_curr.print();
+    Retained sum(1, 1, 1, 1, 1);
+    sum.add_from(summ_currR);
+    summ_curr.load_from(sum);
+    test = 99.;
+    summ_curr.print();
+    summ_prev.load_from(summ_prevR);
+    summ_prev.print();
+    summ_prev = summ_curr;
+    summ_prev.print();
+    Serial.printf("test=%7.3f\n", test);
+    summ_curr.load_to(&summ_currR);
+    summ_currR.print();
+    summ_prev.load_to(&summ_prevR);
+    summ_prevR.print();
+  }
 
 } // loop
