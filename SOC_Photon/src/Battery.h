@@ -64,7 +64,7 @@ protected:
   int num_cells_; // Number of cells
 };
 
-// Battery model LiFePO4 BattleBorn.xlsx and 'GeneralizedSOC-OCV Model Zhang etal.pdf'
+// Battery model LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang etal.pdf'
 // SOC-OCV curve fit
 static const double t_bb[7] = {-10.,	 0.,	10.,	20.,	30.,	40.,	50.};
 const double m_bb = 0.478;

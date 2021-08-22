@@ -13,6 +13,7 @@
 #define _myFilters_H
 
 #include "application.h" // Should not be needed if file ino or Arduino
+#include <math.h>
 
 #define DEAD(X, HDB)  ( max(X-HDB, 0) + min(X+HDB, 0) )
 
@@ -420,6 +421,8 @@ struct PID
   double ad_;   // Derivative tlead adder
   double ag_;   // Integral lookup adder
   double at_;   // Proportional lookup adder
+  double kick_th_; // Threshold to kick
+  double kick_; // Kick scalar
   double Sd(void) { return(sd_);};  // Der Tld scalar
   double Sg(void) { return(sg_);};  // Gain scalar
   double St(void) { return(st_);};  // Prop Tld scalar
@@ -433,7 +436,7 @@ struct PID
   void St(const double S) { st_ = S; };
   void At(const double A) { at_ = A; };
   PID(double G, double tau, double MAX, double MIN, double LLMAX, double LLMIN, double prop, double integ, double DB,
-    double err, double err_comp, double cont)
+    double err, double err_comp, double cont, double kick_th, double kick)
   {
     this->G = G;
     this->tau = tau;
@@ -453,15 +456,18 @@ struct PID
     this->ag_ = 0;
     this->st_ = 1;
     this->at_ = 0;
+    this->kick_th_ = kick_th;
+    this->kick_ = kick;
   }
   void update(bool reset, double ref, double fb, double updateTime, double init, double dyn_max, double dyn_min)
   {
     err = ref - fb;
     err_comp = DEAD(err, (DB*sd_+ad_)) * (G*sg_+ag_);
+    if ( fabs(err)>kick_th_ ) err_comp *= kick_;
     prop = max(min(err_comp * (tau*st_+at_), LLMAX), LLMIN);
     integ = max(min(integ + updateTime*err_comp, dyn_max-prop), dyn_min-prop);
     if ( reset ) integ = init;
-    cont = max(min(integ + prop, dyn_max), MIN);
+    cont = max(min(integ + prop, dyn_max), dyn_min);
   }
 };
 

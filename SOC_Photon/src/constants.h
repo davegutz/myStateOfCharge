@@ -85,6 +85,8 @@
 #define C_LLMAX         0.1         // Proportional path max limit, frac (0.1)
 #define C_LLMIN         -0.2        // Proportional path min limit, frac (-0.2)
 #define C_SOC_R_MAX     0.01        // Maximum integrating tf rate to limit invalid excursions, frac/sec (0.01)
+#define C_KICK_TH       0.2         // Voltage error to kick pid, V
+#define C_KICK          8           // Amount to kick pid gain, frac
 
 #define F_O_MAX_T       3.0         // Maximum call update time filters (3.0)
 #define F_MAX_T         3.0         // Maximum call update time filters (3.0)

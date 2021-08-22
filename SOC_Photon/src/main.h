@@ -126,7 +126,8 @@ void setup()
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
   Serial.println("Initializing DISPLAY");
-  if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+  if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // Seems to return true even if depowered
+  {
     Serial.println(F("SSD1306 DISPLAY allocation FAILED"));
     for(;;); // Don't proceed, loop forever
   }
@@ -207,7 +208,7 @@ void loop()
   static Sync *publishSerial = new Sync(PUBLISH_SERIAL_DELAY);
   static double soc_est = 1.0;
   static double soc_tracked = 1.0;
-  static PID *pid_o = new PID(C_G, C_TAU, C_MAX, C_MIN, C_LLMAX, C_LLMIN, 0, 1, C_DB, 0, 0, 1);       // Observer PID
+  static PID *pid_o = new PID(C_G, C_TAU, C_MAX, C_MIN, C_LLMAX, C_LLMIN, 0, 1, C_DB, 0, 0, 1, C_KICK_TH, C_KICK);  // Observer PID
   static bool reset_soc = true;
 
   // Top of loop
@@ -258,14 +259,15 @@ void loop()
     }
     pid_o->update((reset>0), sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
                 min(sen->T, F_O_MAX_T), 1.0, dyn_max, dyn_min);
-    if ( debug == -2 ) Serial.printf("T,Vb_f_o,Vb_t_o,prop,integ,soc_t,T,  %ld,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-      elapsed, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked, pid_o->prop, pid_o->integ, pid_o->cont, sen->T);
+    if ( debug == -2 ) Serial.printf("T,reset,Vb_f_o,Vb_t_o,prop,integ,soc_t,soc,T,  %ld,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+      elapsed, reset_soc, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
+      pid_o->err, pid_o->prop, pid_o->integ, pid_o->cont, soc_est, sen->T);
     soc_tracked = pid_o->cont;
 
     // SOC Integrator
     if ( reset_soc )
     {
-      if ( fabs(sen->Vbatt_filt_obs-sen->Vbatt_model_tracked)<C_DB || elapsed>INIT_WAIT ) // Wait for convergence of observer
+      if ( fabs(pid_o->err)<C_DB*1.5 || elapsed>INIT_WAIT ) // Wait for convergence of observer
       {
         reset_soc = false;
         soc_est = soc_tracked;
