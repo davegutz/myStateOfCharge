@@ -172,6 +172,7 @@ void setup()
   #endif
 
   // print summary
+  System.enableFeature(FEATURE_RETAINED_MEMORY);
   summ_curr.print();
   summ_prev.print();
   Serial.printf("test=%7.3f\n", test);
