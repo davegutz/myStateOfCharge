@@ -77,8 +77,9 @@ class Summary
 {
 public:
   Summary();
-  Summary(const double soc_delta, const double curr_charge_max, const double curr_discharge_max, const double temp_max,
-   const double temp_min, const double cycle_dura);
+  Summary(const double absorption_th, const double absorption_pers,
+    const double soc_delta, const double curr_charge_max, const double curr_discharge_max, 
+    const double temp_max, const double temp_min, const double cycle_dura);
   ~Summary();
   // operators
   void operator=(const Summary & s);
@@ -86,7 +87,7 @@ public:
   void load_from(struct PickelJar & R);
   void load_to(class PickelJar *r);
   void print(void);
-  void update(const double soc, const double curr, const double temp, const unsigned now);
+  void update(const double soc, const double curr, const double temp, const unsigned now, const bool RESET, const double T);
 protected:
   // Settings
   double absorption_th_;        // Absorption detection, frac
@@ -99,6 +100,9 @@ protected:
   double charge_pers_;          // Discharge detection persistence, sec
   double dwell_dura_th_;        // Full cycle detection, sec
   // Calculations
+  class TFDelay *Cycling_TF_;   // TF delay cycling detect
+  bool cycling_detect_;         // Cycling detected
+  bool cycling_;                // Cycling detected and persisted
   double soc_delta_;            // Delta soc observed
   double curr_charge_max_;      // Maximum charge current, A
   double curr_discharge_max_;   // Maximum discharge current, A
@@ -112,7 +116,6 @@ protected:
   double soc_max_;              // Maximum soc observed, frac
   bool falling_;                // soc is falling
   bool rising_;                 // soc is rising
-  bool cycling_;                // state of charge/discharge cycling
   bool absorbing_;              // state of charge absorption
   bool dying_;                  // state of total discharge
   bool cycle_cpt_;              // A cycle is declared complete...store it

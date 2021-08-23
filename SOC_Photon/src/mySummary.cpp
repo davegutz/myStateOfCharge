@@ -22,9 +22,12 @@
 // SOFTWARE.
 
 #include "mySummary.h"
+#include "myFilters.h"
 
-Summary::Summary(const double soc_delta, const double curr_charge_max, const double curr_discharge_max, 
+Summary::Summary(const double absorption_th, const double absorption_pers,
+    const double soc_delta, const double curr_charge_max, const double curr_discharge_max, 
     const double temp_max, const double temp_min, const double cycle_dura)
+      : absorption_th_(absorption_th), absorption_pers_(absorption_pers)
 {
   this->soc_delta_ = soc_delta;
   this->curr_charge_max_ = curr_charge_max;
@@ -32,9 +35,15 @@ Summary::Summary(const double soc_delta, const double curr_charge_max, const dou
   this->temp_max_ = temp_max;
   this->temp_min_ = temp_min;
   this->cycle_dura_ = cycle_dura;
+  this->Cycling_TF_ = new TFDelay(false, absorption_pers_, absorption_pers_, 1.);
 }
 Summary::Summary(){}  // Must be empty to avoid re-init on power up for instances 'retained'
 Summary::~Summary() {}
+void Summary::update(const double soc, const double curr, const double temp, const unsigned now, const bool RESET, const double T)
+{
+  cycling_detect_ = soc<absorption_th_;
+  cycling_ = Cycling_TF_->calculate(cycling_detect_, absorption_th_, absorption_th_, T, RESET);
+}
 void Summary::operator=(const Summary & s)
 {
   soc_delta_ = s.soc_delta_;
@@ -61,10 +70,6 @@ void Summary::load_from(struct PickelJar & r)
   temp_max_ = double(r.temp_max);
   temp_min_ = double(r.temp_min);
   cycle_dura_ = double(r.cycle_dura);
-}
-void Summary::update(const double soc, const double curr, const double temp, const unsigned now)
-{
-
 }
 void Summary::print(void)
 {

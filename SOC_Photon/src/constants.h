@@ -40,6 +40,7 @@
 #define PUBLISH_BLYNK_DELAY   10000UL   // Blynk cloud updates, ms (10000UL)
 #define PUBLISH_PARTICLE_DELAY 2000UL   // Particle cloud updates (2000UL)
 #define READ_DELAY            1000UL    // Sensor read wait (5000, 100 for stress test), ms (1000UL)
+#define SUMMARIZE_DELAY       2000UL   // Battery state tracking and reporting, ms (100000UL)
 #define PUBLISH_SERIAL_DELAY  1000UL    // Serial print interval (1000UL)
 #define DISCONNECT_DELAY      75000UL   // After these milliseconds no WiFi, disconnect (75000UL)
 #define CHECK_INTERVAL        180000UL  // How often to check for WiFi once disconnected (180000UL)

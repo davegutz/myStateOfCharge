@@ -216,8 +216,10 @@ void loop()
   static Sync *publishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
   bool read;                                // Read, T/F
   static Sync *readSensors = new Sync(READ_DELAY);
-  bool publishS;                              // Serial print, T/F
+  bool publishS;                            // Serial print, T/F
   static Sync *publishSerial = new Sync(PUBLISH_SERIAL_DELAY);
+  bool summarizing;                         // Summarize, T/F
+  static Sync *summarize = new Sync(SUMMARIZE_DELAY);
   static double soc_est = 1.0;
   static double soc_tracked = 1.0;
   static PID *pid_o = new PID(C_G, C_TAU, C_MAX, C_MIN, C_LLMAX, C_LLMIN, 0, 1, C_DB, 0, 0, 1, C_KICK_TH, C_KICK);  // Observer PID
@@ -344,18 +346,23 @@ void loop()
   talk(&stepping, pid_o, &stepVal);
 
   // Summary management
-  if ( debug == -3 )
+  summarizing = summarize->update(millis(), reset);               //  now || reset
+  if ( summarizing )
   {
-    debug = debug_saved;
-    summ.print();
-    summ.load_from(summ_currR);
-    summ.print();
-    PickelJar sum(1, 1, 1, 1, 1, 1);  sum.add_from(summ_currR);
-    summ.load_from(sum);
-    summ.print();
-    summ.load_to(&summ_currR);
-    summ.print();
-    summ_currR.print();
+    summ.update(soc_tracked, sen->Ishunt_filt_obs, sen->Tbatt_filt, millis(), reset, double(summarize->updateTime())/1000.0);
+    if ( debug == -3 )
+    {
+      debug = debug_saved;
+      summ.print();
+      summ.load_from(summ_currR);
+      summ.print();
+      PickelJar sum(1, 1, 1, 1, 1, 1);  sum.add_from(summ_currR);
+      summ.load_from(sum);
+      summ.print();
+      summ.load_to(&summ_currR);
+      summ.print();
+      summ_currR.print();
+    }
   }
 
 } // loop
