@@ -26,38 +26,42 @@
 
 // Constructors
 Sync::Sync()
-  : delay_(0), last_(0UL), stat_(false), updateTime_(0)
+  : delay_(0), last_(0UL), now_(0UL), stat_(false), updateTime_(0)
 {}
 Sync::Sync(unsigned long delay)
-    : delay_(delay), last_(0UL), stat_(false), updateTime_(0)
+    : delay_(delay), last_(0UL), now_(0UL), stat_(false), updateTime_(0)
 {}
 
 // Check and count 
 bool Sync::update(bool reset, unsigned long now, bool andCheck)
 {
-  updateTime_ = now - last_;
+  now_ = now;
+  updateTime_ = now_ - last_;
   stat_ = reset || ((updateTime_>=delay_) && andCheck);
-  if ( stat_ ) last_ = now;
+  if ( stat_ ) last_ = now_;
   return( stat_ );
 }
 bool Sync::update(unsigned long now, bool reset, bool andCheck)
 {
-  updateTime_ = now - last_;
+  now_ = now;
+  updateTime_ = now_ - last_;
   stat_ = ((updateTime_>=delay_) || reset) && andCheck;
-  if ( stat_ ) last_ = now;
+  if ( stat_ ) last_ = now_;
   return( stat_ );
 }
 bool Sync::update(unsigned long now, bool reset)
 {
-  updateTime_ = now - last_;
+  now_ = now;
+  updateTime_ = now_ - last_;
   stat_ = (updateTime_>=delay_) || reset;
-  if ( stat_ ) last_ = now;
+  if ( stat_ ) last_ = now_;
   return( stat_ );
 }
 bool Sync::updateN(unsigned long now, bool reset, bool orCheck)
 {
-  updateTime_ = now - last_;
+  now_ = now;
+  updateTime_ = now_ - last_;
   stat_ = reset || ((stat_ && (updateTime_<delay_)) || orCheck);
-  if ( !stat_ ) last_ = now;
+  if ( !stat_ ) last_ = now_;
   return( stat_ );
 }

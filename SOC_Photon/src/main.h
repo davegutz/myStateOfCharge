@@ -247,19 +247,15 @@ void loop()
     lastSync = millis();
   }
 
-  // Frame control
-  publishP = publishParticle->update(now, false);       //  now || false
-  publishS = publishSerial->update(now, reset);         //  now || reset
-  read = readSensors->update(now, reset);               //  now || reset
-  sen->T =  double(readSensors->updateTime())/1000.0;
-
   // Keep track of time
   past = now;
   now = millis();
-  elapsed = now - start;
   T = (now - past)/1e3;
 
   // Read sensors and update filters
+  read = readSensors->update(millis(), reset);               //  now || reset
+  sen->T =  double(readSensors->updateTime())/1000.0;
+  elapsed = readSensors->now() - start;
   if ( read )
   {
     if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
@@ -311,12 +307,14 @@ void loop()
   // Publish to Particle cloud if desired (different than Blynk)
   // Visit https://console.particle.io/events.   Click on "view events on a terminal"
   // to get a curl command to run
+  publishP = publishParticle->update(millis(), false);       //  now || false
+  publishS = publishSerial->update(millis(), reset);         //  now || reset
   if ( publishP || publishS)
   {
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
     controlTime = decimalTime(&currentTime, tempStr);
     hmString = String(tempStr);
-    assignPubList(&pubList, now, unit, hmString, controlTime, sen, numTimeouts, myBatt, myBatt_tracked);
+    assignPubList(&pubList, publishParticle->now(), unit, hmString, controlTime, sen, numTimeouts, myBatt, myBatt_tracked);
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
@@ -325,13 +323,13 @@ void loop()
       led_on = !led_on;
       if ( led_on ) digitalWrite(myPins->status_led, HIGH);
       else  digitalWrite(myPins->status_led, LOW);
-      publish_particle(now, myWifi);
+      publish_particle(publishParticle->now(), myWifi);
     }
 
     // Monitor for debug
     if ( debug>0 && publishS )
     {
-      serial_print_inputs(now, T);
+      serial_print_inputs(publishSerial->now(), T);
     }
 
   }
