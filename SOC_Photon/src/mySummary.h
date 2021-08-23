@@ -25,27 +25,80 @@
 #ifndef _MY_SUMMARY_H
 #define _MY_SUMMARY_H
 
-#include "myRetained.h"
+#include "application.h"
+
+// SRAM retention class
+struct PickelJar
+{
+  int8_t soc_delta;           // Cycle height, frac
+  int8_t curr_charge_max;     // Maximum charge current, A
+  int8_t curr_discharge_max;  // Maximum discharge current, A
+  int8_t temp_max;            // Maximum tbatt observed, F
+  int8_t temp_min;            // Minimum tbatt observed, F
+  int8_t cycle_dura;          // Cycle duration, 10xHr
+  PickelJar(void){}       // This must be empty so that 'PickelJar' declaration is not over-written on reboot
+  PickelJar(const int8_t soc_delta, const int8_t curr_charge_max, const int8_t curr_discharge_max,
+      const int8_t temp_max, const int8_t temp_min, const int8_t cycle_dura)
+  {
+    this->soc_delta = soc_delta;
+    this->curr_charge_max = curr_charge_max;
+    this->curr_discharge_max = curr_discharge_max;
+    this->temp_max = temp_max;
+    this->temp_min = temp_min;
+    this->cycle_dura = cycle_dura;
+  }
+  void operator=(const PickelJar & s)
+  {
+    soc_delta = s.soc_delta;
+    curr_charge_max = s.curr_charge_max;
+    curr_discharge_max = s.curr_discharge_max;
+    temp_max = s.temp_max;
+    temp_min = s.temp_min;
+    cycle_dura = s.cycle_dura;
+  }
+  void add_from(const PickelJar & s)
+  {
+    soc_delta += s.soc_delta;
+    curr_charge_max += s.curr_charge_max;
+    curr_discharge_max += s.curr_discharge_max;
+    temp_max += s.temp_max;
+    temp_min += s.temp_min;
+    cycle_dura += s.cycle_dura;
+  }
+  void print(void)
+  {
+    Serial.printf("PickelJar ( soc_delta, curr_charge_max, curr_discharge_max, temp_max, temp_min, cycle_dura):  %3d,%3d,%3d,%3d,%3d,%3d,\n",
+      soc_delta, curr_charge_max, curr_discharge_max, temp_max, temp_min, cycle_dura);
+  }
+};
 
 // Summary
 class Summary
 {
 public:
   Summary();
-  Summary(const double soc_min, const double curr_charge_max, const double curr_discharge_max, const double temp_max, const double temp_min);
+  Summary(const double soc_delta, const double curr_charge_max, const double curr_discharge_max, const double temp_max,
+   const double temp_min, const double cycle_dura);
   ~Summary();
   // operators
   void operator=(const Summary & s);
   // functions
-  void load_from(struct Retained & R);
-  void load_to(class Retained *r);
+  void load_from(struct PickelJar & R);
+  void load_to(class PickelJar *r);
   void print(void);
 protected:
-  double soc_min;             // Minimum soc observed
-  double curr_charge_max;     // Maximum charge current, A
-  double curr_discharge_max;  // Maximum discharge current, A
-  double temp_max;            // Maximum tbatt observed, F
-  double temp_min;            // Minimum tbatt observed, F
+  double soc_delta_;           // Delta soc observed
+  double curr_charge_max_;     // Maximum charge current, A
+  double curr_discharge_max_;  // Maximum discharge current, A
+  double temp_max_;            // Maximum tbatt observed, F
+  double temp_min_;            // Minimum tbatt observed, F
+  double cycle_dura_;          // Duration of cycle, Hr
+  // TODO
+  double charge_dura_;         // Charge duration, Hr
+  double discharge_dura_;      // Discharge duration, Hr
+  double dwell_dura_;          // Dwell duration, Hr
+  double soc_min_;             // Minimum soc observed, frac
+  double soc_max_;             // Maximum soc observed, frac
 };
 
 #endif

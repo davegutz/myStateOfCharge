@@ -65,7 +65,6 @@ Make it yourself.   It should look like this, with your personal authorizations:
 #include "mySubs.h"
 #include "blynk.h"              // Only place this can appear is top level main.h
 #include "mySummary.h"
-#include "myRetained.h"
 
 extern int8_t debug;              // Level of debug printing (2)
 extern Publish pubList;
@@ -97,8 +96,8 @@ Wifi *myWifi;                   // Manage Wifi
 class Summary summ_curr;     // Manage current summary information
 class Summary summ_prev;     // Manage previous summary information
 retained double test;
-retained Retained summ_currR;   // Manage current summary information
-retained Retained summ_prevR;   // Manage current summary information
+retained PickelJar summ_currR;   // Manage current summary information
+retained PickelJar summ_prevR;   // Manage current summary information
 
 // Setup
 void setup()
@@ -353,7 +352,7 @@ void loop()
     Serial.printf("test=%7.3f\n", test);
     summ_curr.load_from(summ_currR);
     summ_curr.print();
-    Retained sum(1, 1, 1, 1, 1);
+    PickelJar sum(1, 1, 1, 1, 1, 1);
     sum.add_from(summ_currR);
     summ_curr.load_from(sum);
     test = 99.;

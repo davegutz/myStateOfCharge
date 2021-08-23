@@ -22,44 +22,48 @@
 // SOFTWARE.
 
 #include "mySummary.h"
-#include "myRetained.h"
 
-Summary::Summary(const double soc_min, const double curr_charge_max, const double curr_discharge_max, const double temp_max, const double temp_min)
+Summary::Summary(const double soc_delta, const double curr_charge_max, const double curr_discharge_max, 
+    const double temp_max, const double temp_min, const double cycle_dura)
 {
-  this->soc_min = soc_min;
-  this->curr_charge_max = curr_charge_max;
-  this->curr_discharge_max = curr_discharge_max;
-  this->temp_max = temp_max;
-  this->temp_min = temp_min;
+  this->soc_delta_ = soc_delta;
+  this->curr_charge_max_ = curr_charge_max;
+  this->curr_discharge_max_ = curr_discharge_max;
+  this->temp_max_ = temp_max;
+  this->temp_min_ = temp_min;
+  this->cycle_dura_ = cycle_dura;
 }
-Summary::Summary(){}
+Summary::Summary(){}  // Must be empty to avoid re-init on power up for instances 'retained'
 Summary::~Summary() {}
 void Summary::operator=(const Summary & s)
 {
-  soc_min = s.soc_min;
-  curr_charge_max = s.curr_charge_max;
-  curr_discharge_max = s.curr_discharge_max;
-  temp_max = s.temp_max;
-  temp_min = s.temp_min;
+  soc_delta_ = s.soc_delta_;
+  curr_charge_max_ = s.curr_charge_max_;
+  curr_discharge_max_ = s.curr_discharge_max_;
+  temp_max_ = s.temp_max_;
+  temp_min_ = s.temp_min_;
+  cycle_dura_ = s.cycle_dura_;
 }
-void Summary::load_to(struct Retained *r)
+void Summary::load_to(struct PickelJar *r)
 {
-  r->soc_min = soc_min;
-  r->curr_charge_max = curr_charge_max;
-  r->curr_discharge_max = curr_discharge_max;
-  r->temp_max = temp_max;
-  r->temp_min = temp_min;
+  r->soc_delta = soc_delta_;
+  r->curr_charge_max = curr_charge_max_;
+  r->curr_discharge_max = curr_discharge_max_;
+  r->temp_max = temp_max_;
+  r->temp_min = temp_min_;
+  r->cycle_dura = cycle_dura_;
 }
-void Summary::load_from(struct Retained & r)
+void Summary::load_from(struct PickelJar & r)
 {
-  soc_min = double(r.soc_min);
-  curr_charge_max = double(r.curr_charge_max);
-  curr_discharge_max = double(r.curr_discharge_max);
-  temp_max = double(r.temp_max);
-  temp_min = double(r.temp_min);
+  soc_delta_ = double(r.soc_delta);
+  curr_charge_max_ = double(r.curr_charge_max);
+  curr_discharge_max_ = double(r.curr_discharge_max);
+  temp_max_ = double(r.temp_max);
+  temp_min_ = double(r.temp_min);
+  cycle_dura_ = double(r.cycle_dura);
 }
 void Summary::print(void)
 {
-  Serial.printf("summ ( soc_min, curr_charge_max, curr_discharge_max, temp_max, temp_min):  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-    soc_min, curr_charge_max, curr_discharge_max, temp_max, temp_min);
+  Serial.printf("summ ( soc_delta, curr_charge_max, curr_discharge_max, temp_max, temp_min, cycle_dura):  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+    soc_delta_, curr_charge_max_, curr_discharge_max_, temp_max_, temp_min_, cycle_dura_);
 }
