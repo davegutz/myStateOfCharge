@@ -86,19 +86,36 @@ public:
   void load_from(struct PickelJar & R);
   void load_to(class PickelJar *r);
   void print(void);
+  void update(const double soc, const double curr, const double temp, const unsigned now);
 protected:
-  double soc_delta_;           // Delta soc observed
-  double curr_charge_max_;     // Maximum charge current, A
-  double curr_discharge_max_;  // Maximum discharge current, A
-  double temp_max_;            // Maximum tbatt observed, F
-  double temp_min_;            // Minimum tbatt observed, F
-  double cycle_dura_;          // Duration of cycle, Hr
-  // TODO
-  double charge_dura_;         // Charge duration, Hr
-  double discharge_dura_;      // Discharge duration, Hr
-  double dwell_dura_;          // Dwell duration, Hr
-  double soc_min_;             // Minimum soc observed, frac
-  double soc_max_;             // Maximum soc observed, frac
+  // Settings
+  double absorption_th_;        // Absorption detection, frac
+  double absorption_pers_;      // Absorption detection persistence, sce
+  double dying_th_;             // Absorption detection, frac
+  double dying_pers_;           // Dying detection persistence, sce
+  double discharge_th_;         // Discharge detection, frac/sec
+  double discharge_pers_;       // Discharge detection persistence, sec
+  double charge_th_;            // Charge detection, frac/sec
+  double charge_pers_;          // Discharge detection persistence, sec
+  double dwell_dura_th_;        // Full cycle detection, sec
+  // Calculations
+  double soc_delta_;            // Delta soc observed
+  double curr_charge_max_;      // Maximum charge current, A
+  double curr_discharge_max_;   // Maximum discharge current, A
+  double temp_max_;             // Maximum tbatt observed, F
+  double temp_min_;             // Minimum tbatt observed, F
+  double cycle_dura_;           // Duration of cycle, Hr
+  double charge_dura_;          // Charge duration, Hr
+  double discharge_dura_;       // Discharge duration, Hr
+  double dwell_dura_;           // Dwell duration, Hr
+  double soc_min_;              // Minimum soc observed, frac
+  double soc_max_;              // Maximum soc observed, frac
+  bool falling_;                // soc is falling
+  bool rising_;                 // soc is rising
+  bool cycling_;                // state of charge/discharge cycling
+  bool absorbing_;              // state of charge absorption
+  bool dying_;                  // state of total discharge
+  bool cycle_cpt_;              // A cycle is declared complete...store it
 };
 
 #endif

@@ -62,6 +62,10 @@ void Summary::load_from(struct PickelJar & r)
   temp_min_ = double(r.temp_min);
   cycle_dura_ = double(r.cycle_dura);
 }
+void Summary::update(const double soc, const double curr, const double temp, const unsigned now)
+{
+
+}
 void Summary::print(void)
 {
   Serial.printf("summ ( soc_delta, curr_charge_max, curr_discharge_max, temp_max, temp_min, cycle_dura):  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",

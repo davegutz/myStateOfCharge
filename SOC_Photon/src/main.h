@@ -93,11 +93,8 @@ Adafruit_ADS1015 *ads;          // Use this for the 12-bit version; 1115 for 16-
 Adafruit_SSD1306 *display;
 bool bare_ads = false;          // If ADS to be ignored
 Wifi *myWifi;                   // Manage Wifi
-class Summary summ_curr;     // Manage current summary information
-class Summary summ_prev;     // Manage previous summary information
-retained double test;
-retained PickelJar summ_currR;   // Manage current summary information
-retained PickelJar summ_prevR;   // Manage current summary information
+retained PickelJar summ_currR;  // Manage current summary information
+retained class Summary summ;    // Manage summary information
 
 // Setup
 void setup()
@@ -170,13 +167,10 @@ void setup()
     if ( debug>1 ) { sprintf(buffer, "Arduino Mega2560\n"); Serial.print(buffer); };
   #endif
 
-  // print summary
+  // Summary
+  summ.print();
   System.enableFeature(FEATURE_RETAINED_MEMORY);
-  summ_curr.print();
-  summ_prev.print();
-  Serial.printf("test=%7.3f\n", test);
   summ_currR.print();
-  summ_prevR.print();
 
   // Header for debug print
   if ( debug>1 )
@@ -198,10 +192,13 @@ void loop()
   static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, 0.833*double(NOM_SYS_VOLT), 1.15*double(NOM_SYS_VOLT));
   static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -20.0, 150.);
   static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -0.100, 0.100);
+
   // 1-wire temp sensor battery temp
   static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);
+
   // Sensor conversions
   static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
+
   // Battery  models
   static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, r1_bb, r2_bb, r2c2_bb);  // Battery model
   static Battery *myBatt_tracked = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, r1_bb, r2_bb, r2c2_bb);  // Tracked battery model
@@ -213,6 +210,7 @@ void loop()
   unsigned long elapsed = 0;                // Keep track of time
   static int reset = 1;                     // Dynamic reset
   double T = 0;                             // Present update time, s
+
   // Synchronization
   bool publishP;                            // Particle publish, T/F
   static Sync *publishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
@@ -225,7 +223,8 @@ void loop()
   static PID *pid_o = new PID(C_G, C_TAU, C_MAX, C_MIN, C_LLMAX, C_LLMIN, 0, 1, C_DB, 0, 0, 1, C_KICK_TH, C_KICK);  // Observer PID
   static bool reset_soc = true;
 
-  // Top of loop
+  ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
+
   // Start Blynk, only if connected since it is blocking
   if ( Particle.connected() && !myWifi->blynk_started )
   {
@@ -348,24 +347,15 @@ void loop()
   if ( debug == -3 )
   {
     debug = debug_saved;
-    summ_curr.print();
-    Serial.printf("test=%7.3f\n", test);
-    summ_curr.load_from(summ_currR);
-    summ_curr.print();
-    PickelJar sum(1, 1, 1, 1, 1, 1);
-    sum.add_from(summ_currR);
-    summ_curr.load_from(sum);
-    test = 99.;
-    summ_curr.print();
-    summ_prev.load_from(summ_prevR);
-    summ_prev.print();
-    summ_prev = summ_curr;
-    summ_prev.print();
-    Serial.printf("test=%7.3f\n", test);
-    summ_curr.load_to(&summ_currR);
+    summ.print();
+    summ.load_from(summ_currR);
+    summ.print();
+    PickelJar sum(1, 1, 1, 1, 1, 1);  sum.add_from(summ_currR);
+    summ.load_from(sum);
+    summ.print();
+    summ.load_to(&summ_currR);
+    summ.print();
     summ_currR.print();
-    summ_prev.load_to(&summ_prevR);
-    summ_prevR.print();
   }
 
 } // loop
