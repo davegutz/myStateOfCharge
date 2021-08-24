@@ -76,13 +76,17 @@ extern String inputString;              // a string to hold incoming data
 extern boolean stringComplete;          // whether the string is complete
 extern boolean stepping;                // active step adder
 extern double stepVal;                  // Step size
+extern boolean vectoring;       // Active battery test vector
+extern int8_t vec_num;          // Active vector number
 
 // Global locals
-int8_t debug = 2;
+int8_t debug = -2;
 String inputString = "";
 boolean stringComplete = false;
 boolean stepping = false;
 double stepVal = -2;
+boolean vectoring = false;
+int8_t vec_num = 1;
 char buffer[256];               // Serial print buffer
 int numTimeouts = 0;            // Number of Particle.connect() needed to unfreeze
 String hmString = "00:00";      // time, hh:mm
@@ -270,12 +274,12 @@ void loop()
     }
     pid_o->update((reset>0), sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
                 min(sen->T, F_O_MAX_T), 1.0, dyn_max, dyn_min);
-    if ( debug == -2 ) Serial.printf("T,reset,Vb_f_o,Vb_t_o,prop,integ,soc_t,soc,T,  %ld,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+    if ( debug == -2 ) Serial.printf("T,reset,Vb_f_o,Vb_t_o,err,prop,integ,soc_t,soc,T,  %ld,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
       elapsed, reset_soc, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
       pid_o->err, pid_o->prop, pid_o->integ, pid_o->cont, soc_est, sen->T);
     soc_tracked = pid_o->cont;
 
-    // SOC Integrator
+    // SOC Integrator - Coulomb Counting method
     if ( reset_soc )
     {
       if ( fabs(pid_o->err)<C_DB*1.5 || elapsed>INIT_WAIT ) // Wait for convergence of observer
@@ -284,7 +288,6 @@ void loop()
         soc_est = soc_tracked;
       }
     }
-    // Coulomb Counting method
     if ( sen->Vbatt_filt<=batt_vsat )
     {
       soc_est = max(min( soc_est + sen->Wbatt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.0), 0.0);
@@ -295,10 +298,23 @@ void loop()
     }
 
     // Load and filter
-    load(reset, sen->T, sen, sensor_tbatt, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt, 
-        myPins, ads, myBatt, myBatt_tracked, soc_est, soc_tracked);
+    load(sen, sensor_tbatt, myPins, ads);
+    filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt);
+   
+    // Battery model
+    sen->Vbatt_model = myBatt->calculate((sen->Tbatt-32.)*5./9., soc_est, sen->Ishunt);
+    sen->Vbatt_model_filt = myBatt->calculate((sen->Tbatt-32.)*5./9., soc_est, sen->Ishunt_filt);
+    sen->Vbatt_model_tracked = myBatt_tracked->calculate((sen->Tbatt-32.)*5./9., soc_tracked, sen->Ishunt_filt_obs);
+    if ( debug==-1 )
+      Serial.printf("%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", soc_tracked+12., sen->Vbatt_filt_obs+double(stepping*stepVal),
+        myBatt_tracked->vstat(), myBatt_tracked->vdyn()+12., myBatt_tracked->v());
+
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
+    if ( vectoring ) // over-write load
+    {
+      
+    }
 
     // Update display
     myDisplay(display);
@@ -343,7 +359,7 @@ void loop()
   // right in the "Send String" box then press "Send."
   // String definitions are below.
   int debug_saved = debug;
-  talk(&stepping, pid_o, &stepVal);
+  talk(&stepping, pid_o, &stepVal, &vectoring, &vec_num);
 
   // Summary management
   summarizing = summarize->update(millis(), reset);               //  now || reset

@@ -31,11 +31,12 @@
 extern int8_t debug;
 extern Publish pubList;
 extern char buffer[256];
-extern String inputString;     // a string to hold incoming data
-extern boolean stringComplete; // whether the string is complete
-extern boolean stepping;       // active step adder
-extern double stepVal;                  // Step size
-
+extern String inputString;      // A string to hold incoming data
+extern boolean stringComplete;  // Whether the string is complete
+extern boolean stepping;        // Active step adder
+extern double stepVal;          // Step size
+extern boolean vectoring;       // Active battery test vector
+extern int8_t vec_num;          // Active vector number
 
 void manage_wifi(unsigned long now, Wifi *wifi)
 {
@@ -106,14 +107,9 @@ void serial_print(void)
 }
 
 
-// Load and filter
-// TODO:   move 'read' stuff here
-boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
-  General2_Pole* VbattSenseFilt,  General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads,
-  Battery *batt, Battery *batt_tracked, double soc_model, double soc_tracked)
+// Load
+void load(Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads)
 {
-  static boolean done_testing = false;
-
   // Read Sensor
   // ADS1015 conversion
   if (!sen->bare_ads)
@@ -125,49 +121,38 @@ boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pol
     sen->Vshunt_int = 0;
   }
   sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
-  sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset, min(T, F_MAX_T));
-  sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( sen->Vshunt, reset, min(T, F_O_MAX_T));
   sen->Ishunt = sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
-  sen->Ishunt_filt = sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A;
-  sen->Ishunt_filt_obs = sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A;
   sen->Wshunt = sen->Vbatt*sen->Ishunt;
-  sen->Wshunt_filt = sen->Vbatt_filt*sen->Ishunt_filt;
   sen->Wbatt = sen->Vbatt*sen->Ishunt - sen->Ishunt*sen->Ishunt*(batt_r1+batt_r2); 
 
   // MAXIM conversion 1-wire Tp plenum temperature
   if ( sensor_tbatt->read() ) sen->Tbatt = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);
-  sen->Tbatt_filt = TbattSenseFilt->calculate( sen->Tbatt, reset,  min(T, F_MAX_T));
 
   // Vbatt
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
   sen->Vbatt =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A);
-  sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate( sen->Vbatt, reset, min(T, F_O_MAX_T));
-  sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset,  min(T, F_MAX_T));
 
-  // Battery model 
-  sen->Vbatt_model = batt->calculate((sen->Tbatt-32.)*5./9., soc_model, sen->Ishunt);
-  sen->Vbatt_model_filt = batt->calculate((sen->Tbatt-32.)*5./9., soc_model, sen->Ishunt_filt);
-  sen->Vbatt_model_tracked = batt_tracked->calculate((sen->Tbatt-32.)*5./9., soc_tracked, sen->Ishunt_filt_obs);
-  if ( debug==-1 )
-    Serial.printf("%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", soc_tracked+12., sen->Vbatt_filt_obs+double(stepping*stepVal),
-      batt_tracked->vstat(), batt_tracked->vdyn()+12., batt_tracked->v());
+}
 
-  // Built-in-test logic.   Run until finger detected
-  if ( true && !done_testing )
-  {
-    done_testing = true;
-  }
-  else                    // Possible finger detected
-  {
-    done_testing = false;
-  }
+// Filter inputs
+void filter(int reset, Sensors *sen, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
+  General2_Pole* VbattSenseFilt,  General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt)
+{
+  // Shunt
+  sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset, min(sen->T, F_MAX_T));
+  sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( sen->Vshunt, reset, min(sen->T, F_O_MAX_T));
+  sen->Ishunt_filt = sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A;
+  sen->Ishunt_filt_obs = sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A;
 
-  // Built-in-test signal replaces sensor
-  if ( !done_testing )
-  {
-  }
+  // Temperature
+  sen->Tbatt_filt = TbattSenseFilt->calculate( sen->Tbatt, reset,  min(sen->T, F_MAX_T));
 
-  return ( !done_testing );
+  // Voltage
+  sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate( sen->Vbatt, reset, min(sen->T, F_O_MAX_T));
+  sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset,  min(sen->T, F_MAX_T));
+
+  // Power
+  sen->Wshunt_filt = sen->Vbatt_filt*sen->Ishunt_filt;
 }
 
 
@@ -261,7 +246,7 @@ void myDisplay(Adafruit_SSD1306 *display)
 
 
 // Talk Executive
-void talk(bool *stepping, PID* pid, double *stepVal)
+void talk(bool *stepping, PID* pid, double *stepVal, bool *vectoring, int8_t *vec_num)
 {
   // Serial event  (terminate Send String data with 0A using CoolTerm)
   if (stringComplete)
@@ -300,10 +285,10 @@ void talk(bool *stepping, PID* pid, double *stepVal)
         debug = inputString.substring(1).toInt();
         break;
       case ( 'T' ):
-        talkT(stepping, stepVal);
+        talkT(stepping, stepVal, vectoring, vec_num);
         break;
       case ('h'): 
-        talkh(pid, stepVal);
+        talkH(pid, stepVal, vec_num);
         break;
       default:
         Serial.print(inputString.charAt(0)); Serial.println(" unknown");
@@ -315,14 +300,19 @@ void talk(bool *stepping, PID* pid, double *stepVal)
 }
 
 // Talk Tranient Input Settings
-void talkT(bool *stepping, double *stepVal)
+void talkT(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num)
 {
   *stepping = false;
+  *vectoring = false;
   switch ( inputString.charAt(1) )
   {
     case ( 's' ): 
       *stepping = true;
       *stepVal = inputString.substring(2).toFloat();
+      break;
+    case ( 'v' ): 
+      *vectoring = true;
+      *vec_num = inputString.substring(2).toInt();
       break;
     default:
       Serial.print(inputString); Serial.println(" unknown.  Try typing 'h'");
@@ -330,7 +320,7 @@ void talkT(bool *stepping, double *stepVal)
 }
 
 // Talk Help
-void talkh(PID *pid, double *stepVal)
+void talkH(PID *pid, double *stepVal, int8_t *vec_num)
 {
   Serial.print("Sd= "); Serial.print(pid->Sd());  Serial.println("    : PID derivative deadband scalar [1]");
   Serial.print("Ad= "); Serial.print(pid->Ad());  Serial.println("    : PID derivative deadband adder [0]");
@@ -344,8 +334,11 @@ void talkh(PID *pid, double *stepVal)
   Serial.print("v=  "); Serial.print(debug);     Serial.println("    : verbosity, 0-10. 2 for save csv [0]");
   Serial.print("T<?>=  "); 
   Serial.println("Transient performed with input");
-  Serial.print("          :   stepVal="); Serial.println(*stepVal);
+  Serial.print("  Ts=<stepVal>  :   stepVal="); Serial.println(*stepVal);
   Serial.print(", stepping=");  Serial.print(stepping);
+  Serial.print("  Tv=<vec_num>  :   vec_num="); Serial.println(*vec_num);
+  Serial.print(", vectoringing=");  Serial.print(vectoring);
+  Serial.println("");
 }
 
 

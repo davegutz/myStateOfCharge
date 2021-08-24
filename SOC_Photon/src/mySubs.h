@@ -113,16 +113,16 @@ struct Sensors
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print_inputs(unsigned long now, double T);
 void serial_print(void);
-boolean load(int reset, double T, Sensors *sen, DS18 *sensor_tbatt, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
-  General2_Pole* VbattSenseFilt,  General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt, Pins *myPins, Adafruit_ADS1015 *ads,
-  Battery *batt, Battery *batt_tracked, double soc_model, double soc_tracked);
+void load(Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads);
+void filter(int reset, Sensors *sen, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
+  General2_Pole* VbattSenseFilt,  General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *currentTime, char* tempStr);
 void print_serial_header(void);
 void myDisplay(Adafruit_SSD1306 *display);
 
 // Talk Declarations
-void talkT(bool *stepping, double *stepVal);  // Transient Inputs
-void talkh(PID *pid, double *stepVal);
-void talk(bool *stepping, PID* pid, double *stepVal);
+void talk(bool *stepping, PID* pid, double *stepVal, bool *vectoring, int8_t *vec_num);
+void talkT(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num);  // Transient inputs
+void talkH(PID *pid, double *stepVal, int8_t *vec_num); // Help
 #endif

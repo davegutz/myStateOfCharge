@@ -64,6 +64,23 @@ protected:
   int num_cells_; // Number of cells
 };
 
+// BattleBorn 100 Ah, 12v LiFePO4
+#define NOM_SYS_VOLT          12        // Nominal system output, V, at which the reported amps are used (12)
+#define NOM_BATT_CAP          100       // Nominal battery bank capacity, Ah (100)
+// >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 60-95 F
+#define BATT_V_SAT            3.425     // Normal battery cell saturation for SOC=99.7, V (3.425)
+#define BATT_SOC_SAT          0.997     // Normal battery cell saturation, fraction (0.997)
+#define BATT_R1               0.0018    // Battery Randels static resistance, Ohms (0.0018)
+#define BATT_R2               0.0024    // Battery Randels dynamic resistance, Ohms (0.0024)
+#define BATT_R2C2             100       // Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
+                                        // test so using with R2 and then multiplying by 4 for total result is valid,
+                                        // though probably not for an individual cell
+const int batt_num_cells = NOM_SYS_VOLT/3;  // Number of standard 3 volt LiFePO4 cells
+const double batt_vsat = double(batt_num_cells)*double(BATT_V_SAT);  // Total bank saturation for 0.997=soc, V
+const double batt_vmax = (14.3/4)*double(batt_num_cells); // Observed max voltage of 14.3 V for 12V prototype bank, V
+const double batt_r1 = double(BATT_R1)*double(batt_num_cells);
+const double batt_r2 = double(BATT_R2)*double(batt_num_cells);
+const double batt_c2 = double(BATT_R2C2)/batt_r2;
 // Battery model LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang etal.pdf'
 // SOC-OCV curve fit
 static const double t_bb[7] = {-10.,	 0.,	10.,	20.,	30.,	40.,	50.};
@@ -80,5 +97,11 @@ const double r2c2_bb = 100.0; // Battery Randels dynamic term, Ohms-Farads (100)
                               // test so using with R2 and then multiplying by 4 for total result is valid,
                               // though probably not for an individual cell
 const int num_cells_bb = 1;   // Above values for single cell (~3 volts)
-							
+
+// Charge test profiles
+static const double t_min_v1[] =  {0,     0.2,  0.4,  1.4,  1.5,  2.5,  2.7,  3.0};
+static const double v_v1[] =      {14.0,  14.0, 13.7, 11.8, 11.8, 13.7, 14.0, 14.0};
+static const double i_v1[] =      {0.,    0.,   -500.,-500.,0.,   500., 500., 0.};
+static const double T_v1[] =      {72.,   72.,  72.,  72.,  72.,  72.,  72.,  72.};
+
 #endif

@@ -68,16 +68,6 @@
 #define SCREEN_HEIGHT         32        // OLED display height, in pixels (4)
 #define OLED_RESET            4         // Reset pin # (or -1 if sharing Arduino reset pin) (4)
 #define SCREEN_ADDRESS        0x3C      // See datasheet for Address; 0x3D for 128x64, (0x3C for 128x32)
-#define NOM_SYS_VOLT          12        // Nominal system output, V, at which the reported amps are used (12)
-#define NOM_BATT_CAP          100       // Nominal battery bank capacity, Ah (100)
-// >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 60-95 F
-#define BATT_V_SAT            3.425     // Normal battery cell saturation for SOC=99.7, V (3.425)
-#define BATT_SOC_SAT          0.997     // Normal battery cell saturation, fraction (0.997)
-#define BATT_R1               0.0018    // Battery Randels static resistance, Ohms (0.0018)
-#define BATT_R2               0.0024    // Battery Randels dynamic resistance, Ohms (0.0024)
-#define BATT_R2C2             100       // Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
-                                        // test so using with R2 and then multiplying by 4 for total result is valid,
-                                        // though probably not for an individual cell
 #define C_G             0.010       // Control gain, r/s = %/F (about 0.1 is instability point for C_TAU=1) (0.010)
 #define C_TAU           0           // Control lead, s  (0)
 #define C_DB            0.002       // Deadband in error, V (0.0020)
@@ -97,16 +87,8 @@
 #define F_Z             0.80        // Filter zeta (0.80)
 
 
-// Battery voltage gain
+// Battery voltage measurement gain
 const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
                               double(VBATT_SENSE_R_LO) / double(PHOTON_ADC_COUNT) * double(VBATT_S);
-
-// Battery constants
-const int batt_num_cells = NOM_SYS_VOLT/3;  // Number of standard 3 volt LiFePO4 cells
-const double batt_vsat = double(batt_num_cells)*double(BATT_V_SAT);  // Total bank saturation for 0.997=soc, V
-const double batt_vmax = (14.3/4)*double(batt_num_cells); // Observed max voltage of 14.3 V for 12V prototype bank, V
-const double batt_r1 = double(BATT_R1)*double(batt_num_cells);
-const double batt_r2 = double(BATT_R2)*double(batt_num_cells);
-const double batt_c2 = double(BATT_R2C2)/batt_r2;
 
 #endif // CONSTANTS_H_
