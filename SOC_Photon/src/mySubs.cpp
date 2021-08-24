@@ -37,6 +37,7 @@ extern boolean stepping;        // Active step adder
 extern double stepVal;          // Step size
 extern boolean vectoring;       // Active battery test vector
 extern int8_t vec_num;          // Active vector number
+extern unsigned int vec_start;  // Start of active vector
 
 void manage_wifi(unsigned long now, Wifi *wifi)
 {
@@ -108,7 +109,7 @@ void serial_print(void)
 
 
 // Load
-void load(Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads)
+void load(Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, Battery *batt, const unsigned int now)
 {
   // Read Sensor
   // ADS1015 conversion
@@ -122,8 +123,6 @@ void load(Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads)
   }
   sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
   sen->Ishunt = sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
-  sen->Wshunt = sen->Vbatt*sen->Ishunt;
-  sen->Wbatt = sen->Vbatt*sen->Ishunt - sen->Ishunt*sen->Ishunt*(batt_r1+batt_r2); 
 
   // MAXIM conversion 1-wire Tp plenum temperature
   if ( sensor_tbatt->read() ) sen->Tbatt = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);
@@ -132,24 +131,45 @@ void load(Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads)
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
   sen->Vbatt =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A);
 
+  // Vector model
+  if ( vectoring )
+  {
+    double elapsed = double(now - vec_start)/1000./60.;
+    if ( elapsed > t_min_v1[n_v1] )
+    {
+      vec_start = now;
+      elapsed = 0.;
+    }
+    sen->Vbatt =  V_T1->interp(elapsed);
+    sen->Ishunt =  I_T1->interp(elapsed);
+    sen->Vshunt = (sen->Ishunt - SHUNT_V2A_A) / SHUNT_V2A_S;
+    sen->Vshunt_int = -999;
+    sen->Tbatt =  T_T1->interp(elapsed);
+  }
+
+  // Power calculation
+  sen->Wshunt = sen->Vbatt*sen->Ishunt;
+  sen->Wbatt = sen->Vbatt*sen->Ishunt - sen->Ishunt*sen->Ishunt*(batt_r1+batt_r2); 
 }
 
 // Filter inputs
 void filter(int reset, Sensors *sen, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
   General2_Pole* VbattSenseFilt,  General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt)
 {
+  int reset_loc = reset || vectoring;
+
   // Shunt
-  sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset, min(sen->T, F_MAX_T));
-  sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( sen->Vshunt, reset, min(sen->T, F_O_MAX_T));
+  sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset_loc, min(sen->T, F_MAX_T));
+  sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( sen->Vshunt, reset_loc, min(sen->T, F_O_MAX_T));
   sen->Ishunt_filt = sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A;
   sen->Ishunt_filt_obs = sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A;
 
   // Temperature
-  sen->Tbatt_filt = TbattSenseFilt->calculate( sen->Tbatt, reset,  min(sen->T, F_MAX_T));
+  sen->Tbatt_filt = TbattSenseFilt->calculate( sen->Tbatt, reset_loc,  min(sen->T, F_MAX_T));
 
   // Voltage
-  sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate( sen->Vbatt, reset, min(sen->T, F_O_MAX_T));
-  sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset,  min(sen->T, F_MAX_T));
+  sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate( sen->Vbatt, reset_loc, min(sen->T, F_O_MAX_T));
+  sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset_loc,  min(sen->T, F_MAX_T));
 
   // Power
   sen->Wshunt_filt = sen->Vbatt_filt*sen->Ishunt_filt;
@@ -304,15 +324,25 @@ void talkT(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num)
 {
   *stepping = false;
   *vectoring = false;
+  int num_try = 0;
   switch ( inputString.charAt(1) )
   {
     case ( 's' ): 
       *stepping = true;
       *stepVal = inputString.substring(2).toFloat();
       break;
-    case ( 'v' ): 
-      *vectoring = true;
-      *vec_num = inputString.substring(2).toInt();
+    case ( 'v' ):
+      num_try = inputString.substring(2).toInt();
+      if ( num_try && num_try>0 && num_try<=NUM_VEC )
+      {
+        *vectoring = true;
+        *vec_num = num_try;
+      }
+      else
+      {
+        *vectoring = false;
+        *vec_num = 0;
+      }
       break;
     default:
       Serial.print(inputString); Serial.println(" unknown.  Try typing 'h'");

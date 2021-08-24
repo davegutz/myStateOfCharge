@@ -78,6 +78,7 @@ extern boolean stepping;                // active step adder
 extern double stepVal;                  // Step size
 extern boolean vectoring;       // Active battery test vector
 extern int8_t vec_num;          // Active vector number
+extern unsigned int vec_start;  // Start of active vector
 
 // Global locals
 int8_t debug = -2;
@@ -87,6 +88,7 @@ boolean stepping = false;
 double stepVal = -2;
 boolean vectoring = false;
 int8_t vec_num = 1;
+unsigned int vec_start = 0UL;
 char buffer[256];               // Serial print buffer
 int numTimeouts = 0;            // Number of Particle.connect() needed to unfreeze
 String hmString = "00:00";      // time, hh:mm
@@ -274,8 +276,8 @@ void loop()
     }
     pid_o->update((reset>0), sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
                 min(sen->T, F_O_MAX_T), 1.0, dyn_max, dyn_min);
-    if ( debug == -2 ) Serial.printf("T,reset,Vb_f_o,Vb_t_o,err,prop,integ,soc_t,soc,T,  %ld,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-      elapsed, reset_soc, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
+    if ( debug == -2 ) Serial.printf("T,reset,vectoring,Vb_f_o,Vb_t_o,err,prop,integ,soc_t,soc,T,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+      elapsed, reset_soc, vectoring, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
       pid_o->err, pid_o->prop, pid_o->integ, pid_o->cont, soc_est, sen->T);
     soc_tracked = pid_o->cont;
 
@@ -298,7 +300,7 @@ void loop()
     }
 
     // Load and filter
-    load(sen, sensor_tbatt, myPins, ads);
+    load(sen, sensor_tbatt, myPins, ads, myBatt, readSensors->now());
     filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt);
    
     // Battery model

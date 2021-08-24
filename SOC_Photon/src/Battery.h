@@ -99,9 +99,14 @@ const double r2c2_bb = 100.0; // Battery Randels dynamic term, Ohms-Farads (100)
 const int num_cells_bb = 1;   // Above values for single cell (~3 volts)
 
 // Charge test profiles
-static const double t_min_v1[] =  {0,     0.2,  0.4,  1.4,  1.5,  2.5,  2.7,  3.0};
-static const double v_v1[] =      {14.0,  14.0, 13.7, 11.8, 11.8, 13.7, 14.0, 14.0};
-static const double i_v1[] =      {0.,    0.,   -500.,-500.,0.,   500., 500., 0.};
-static const double T_v1[] =      {72.,   72.,  72.,  72.,  72.,  72.,  72.,  72.};
+#define NUM_VEC           1   // Number of vectors defined here
+static const unsigned int n_v1 = 8;
+static const double t_min_v1[8] =  {0,     0.2,  0.4,  1.4,  1.5,  2.5,  2.7,  3.0};
+static const double v_v1[8] =      {14.0,  14.0, 13.7, 11.8, 11.8, 13.7, 14.0, 14.0};
+static const double i_v1[8] =      {0.,    0.,   -500.,-500.,0.,   500., 500., 0.};
+static const double T_v1[8] =      {72.,   72.,  72.,  72.,  72.,  72.,  72.,  72.};
+static TableInterp1Dclip  *V_T1 = new TableInterp1Dclip(n_v1, t_min_v1, v_v1);
+static TableInterp1Dclip  *I_T1 = new TableInterp1Dclip(n_v1, t_min_v1, i_v1);
+static TableInterp1Dclip  *T_T1 = new TableInterp1Dclip(n_v1, t_min_v1, T_v1);
 
 #endif
