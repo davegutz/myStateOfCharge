@@ -60,7 +60,7 @@ double Battery::calculate(const double temp_C, const double soc_frac, const doub
   c_ = C_T_ ->interp(temp_C);
   soc_ = max(min(soc_frac, 1.0), 0.0);
   curr_in_ = curr_in;
-  vstat_ = double(num_cells_) * ( a_ + b_*pow(-log(soc_frac), m_) + c_*soc_frac + d_*exp(n_*(soc_frac-1)) );
+  vstat_ = double(num_cells_) * ( a_ + b_*pow(-log(soc_), m_) + c_*soc_ + d_*exp(n_*(soc_-1)) );
   vdyn_ = curr_in*(r1_ + r2_);
   v_ = vstat_ + vdyn_;
   return ( v_ );

@@ -78,7 +78,7 @@ extern boolean stepping;                // active step adder
 extern double stepVal;                  // Step size
 extern boolean vectoring;       // Active battery test vector
 extern int8_t vec_num;          // Active vector number
-extern unsigned int vec_start;  // Start of active vector
+extern unsigned long vec_start;  // Start of active vector
 
 // Global locals
 int8_t debug = -2;
@@ -88,7 +88,7 @@ boolean stepping = false;
 double stepVal = -2;
 boolean vectoring = false;
 int8_t vec_num = 1;
-unsigned int vec_start = 0UL;
+unsigned long vec_start = 0UL;
 char buffer[256];               // Serial print buffer
 int numTimeouts = 0;            // Number of Particle.connect() needed to unfreeze
 String hmString = "00:00";      // time, hh:mm
@@ -194,10 +194,10 @@ void loop()
 {
   // Sensor noise filters.   Obs filters 0.5 --> 0.1 to eliminate digital instability.   Also rate limited the observer belts+suspenders
   static General2_Pole* VbattSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, 0.833*double(NOM_SYS_VOLT), 1.16*double(NOM_SYS_VOLT));
-  static General2_Pole* VshuntSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, -0.100, 0.100);
+  static General2_Pole* VshuntSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, -0.500, 0.500);
   static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, 0.833*double(NOM_SYS_VOLT), 1.15*double(NOM_SYS_VOLT));
   static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -20.0, 150.);
-  static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -0.100, 0.100);
+  static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -0.500, 0.500);
 
   // 1-wire temp sensor battery temp
   static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);
@@ -271,20 +271,23 @@ void loop()
     double dyn_min = C_MIN;
     if ( !reset_soc )
     {
-      dyn_max = pid_o->cont + C_SOC_R_MAX * sen->T; // Limit invalid excursions
-      dyn_min = pid_o->cont - C_SOC_R_MAX * sen->T; // Limit invalid excursions
+      dyn_max = min(pid_o->cont + C_SOC_R_MAX * sen->T, 1.); // Limit invalid excursions
+      dyn_min = max(pid_o->cont - C_SOC_R_MAX * sen->T, 0.); // Limit invalid excursions
     }
-    pid_o->update((reset>0), sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
-                min(sen->T, F_O_MAX_T), 1.0, dyn_max, dyn_min);
-    if ( debug == -2 ) Serial.printf("T,reset,vectoring,Vb_f_o,Vb_t_o,err,prop,integ,soc_t,soc,T,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-      elapsed, reset_soc, vectoring, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
+    double vbatt = sen->Vbatt_filt_obs+double(stepping*stepVal);
+    double vbatt_fb = sen->Vbatt_model_tracked;
+    double T = min(sen->T, F_O_MAX_T);
+    pid_o->update((reset>0), vbatt, vbatt_fb, T, 1.0, dyn_max, dyn_min, (reset>0 || vectoring));
+    if ( debug == -2 ) Serial.printf("T,reset_soc,vectoring,Ishunt,Vb_f_o,Vb_t_o,err,prop,integ,soc_t,soc,T,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+      elapsed, reset_soc, vectoring, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
       pid_o->err, pid_o->prop, pid_o->integ, pid_o->cont, soc_est, sen->T);
     soc_tracked = pid_o->cont;
 
     // SOC Integrator - Coulomb Counting method
     if ( reset_soc )
     {
-      if ( fabs(pid_o->err)<C_DB*1.5 || elapsed>INIT_WAIT ) // Wait for convergence of observer
+      if ( (fabs(pid_o->err)<C_DB*1.5 || elapsed>INIT_WAIT) ||
+           ( vectoring && (fabs(pid_o->err)<C_DB*4.0 || elapsed>INIT_WAIT) )  ) // Wait for convergence of observer
       {
         reset_soc = false;
         soc_est = soc_tracked;
@@ -300,7 +303,7 @@ void loop()
     }
 
     // Load and filter
-    load(sen, sensor_tbatt, myPins, ads, myBatt, readSensors->now());
+    load(reset_soc, sen, sensor_tbatt, myPins, ads, myBatt, readSensors->now());
     filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt);
    
     // Battery model

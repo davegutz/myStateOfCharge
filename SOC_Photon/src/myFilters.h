@@ -459,10 +459,12 @@ struct PID
     this->kick_th_ = kick_th;
     this->kick_ = kick;
   }
-  void update(bool reset, double ref, double fb, double updateTime, double init, double dyn_max, double dyn_min)
+  void update(bool reset, double ref, double fb, double updateTime, double init, double dyn_max, double dyn_min, bool kill_db)
   {
     err = ref - fb;
-    err_comp = DEAD(err, (DB*sd_+ad_)) * (G*sg_+ag_);
+    double DB_loc = DB;
+    if ( kill_db ) DB_loc = 0.;
+    err_comp = DEAD(err, (DB_loc*sd_+ad_)) * (G*sg_+ag_);
     if ( fabs(err)>kick_th_ ) err_comp *= kick_;
     prop = max(min(err_comp * (tau*st_+at_), LLMAX), LLMIN);
     integ = max(min(integ + updateTime*err_comp, dyn_max-prop), dyn_min-prop);

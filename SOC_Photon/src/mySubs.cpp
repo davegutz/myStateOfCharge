@@ -37,7 +37,7 @@ extern boolean stepping;        // Active step adder
 extern double stepVal;          // Step size
 extern boolean vectoring;       // Active battery test vector
 extern int8_t vec_num;          // Active vector number
-extern unsigned int vec_start;  // Start of active vector
+extern unsigned long vec_start;  // Start of active vector
 
 void manage_wifi(unsigned long now, Wifi *wifi)
 {
@@ -109,7 +109,7 @@ void serial_print(void)
 
 
 // Load
-void load(Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, Battery *batt, const unsigned int now)
+void load(const bool reset_soc, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, Battery *batt, const unsigned long now)
 {
   // Read Sensor
   // ADS1015 conversion
@@ -132,24 +132,26 @@ void load(Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads,
   sen->Vbatt =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A);
 
   // Vector model
+  double elapsed = double(now - vec_start)/1000./60.;
   if ( vectoring )
   {
-    double elapsed = double(now - vec_start)/1000./60.;
-    if ( elapsed > t_min_v1[n_v1] )
+    if ( reset_soc || (elapsed > t_min_v1[n_v1-1]) )
     {
       vec_start = now;
       elapsed = 0.;
     }
-    sen->Vbatt =  V_T1->interp(elapsed);
     sen->Ishunt =  I_T1->interp(elapsed);
     sen->Vshunt = (sen->Ishunt - SHUNT_V2A_A) / SHUNT_V2A_S;
     sen->Vshunt_int = -999;
     sen->Tbatt =  T_T1->interp(elapsed);
+    sen->Vbatt =  V_T1->interp(elapsed) + sen->Ishunt*(r1_bb + r2_bb);
   }
 
   // Power calculation
   sen->Wshunt = sen->Vbatt*sen->Ishunt;
   sen->Wbatt = sen->Vbatt*sen->Ishunt - sen->Ishunt*sen->Ishunt*(batt_r1+batt_r2); 
+
+  if ( debug == -5 ) Serial.printf("vectoring,reset_soc,vec_start,now,elapsed,Vbatt,Ishunt,Tbatt:  %d,%d,%ld,%ld,%7.3f,%7.3f,%7.3f,%7.3f\n", vectoring, reset_soc, vec_start, now, elapsed, sen->Vbatt, sen->Ishunt, sen->Tbatt);
 }
 
 // Filter inputs
@@ -165,11 +167,11 @@ void filter(int reset, Sensors *sen, General2_Pole* VbattSenseFiltObs, General2_
   sen->Ishunt_filt_obs = sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A;
 
   // Temperature
-  sen->Tbatt_filt = TbattSenseFilt->calculate( sen->Tbatt, reset_loc,  min(sen->T, F_MAX_T));
+  sen->Tbatt_filt = TbattSenseFilt->calculate(sen->Tbatt, reset_loc,  min(sen->T, F_MAX_T));
 
   // Voltage
-  sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate( sen->Vbatt, reset_loc, min(sen->T, F_O_MAX_T));
-  sen->Vbatt_filt = VbattSenseFilt->calculate( sen->Vbatt, reset_loc,  min(sen->T, F_MAX_T));
+  sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate(sen->Vbatt, reset_loc, min(sen->T, F_O_MAX_T));
+  sen->Vbatt_filt = VbattSenseFilt->calculate(sen->Vbatt, reset_loc,  min(sen->T, F_MAX_T));
 
   // Power
   sen->Wshunt_filt = sen->Vbatt_filt*sen->Ishunt_filt;

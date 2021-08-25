@@ -113,7 +113,7 @@ struct Sensors
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print_inputs(unsigned long now, double T);
 void serial_print(void);
-void load(Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, Battery *batt, const unsigned int now);
+void load(const bool reset_soc, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, Battery *batt, const unsigned long now);
 void filter(int reset, Sensors *sen, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
   General2_Pole* VbattSenseFilt,  General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt);
 String tryExtractString(String str, const char* start, const char* end);
