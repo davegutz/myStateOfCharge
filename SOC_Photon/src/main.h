@@ -193,7 +193,7 @@ void setup()
 void loop()
 {
   // Sensor noise filters.   Obs filters 0.5 --> 0.1 to eliminate digital instability.   Also rate limited the observer belts+suspenders
-  static General2_Pole* VbattSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, 0.833*double(NOM_SYS_VOLT), 1.16*double(NOM_SYS_VOLT));
+  static General2_Pole* VbattSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, 0.4*double(NOM_SYS_VOLT), 1.5*double(NOM_SYS_VOLT));
   static General2_Pole* VshuntSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, -0.500, 0.500);
   static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, 0.833*double(NOM_SYS_VOLT), 1.15*double(NOM_SYS_VOLT));
   static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -20.0, 150.);
@@ -206,8 +206,8 @@ void loop()
   static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
 
   // Battery  models
-  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, r1_bb, r2_bb, r2c2_bb);  // Battery model
-  static Battery *myBatt_tracked = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, r1_bb, r2_bb, r2c2_bb);  // Tracked battery model
+  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Battery model
+  static Battery *myBatt_tracked = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Tracked battery model
 
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time

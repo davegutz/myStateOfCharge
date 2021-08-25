@@ -42,7 +42,7 @@ Battery::Battery()
 Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2)
-    : b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(nz), soc_(1.0), r1_(r1*num_cells), r2_(r2*num_cells), c2_(r2c2/r2_),
+    : b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(nz), soc_(1.0), r1_(r1), r2_(r2), c2_(r2c2/r2_),
     vstat_(0), vdyn_(0), v_(0), curr_in_(0), num_cells_(num_cells)
 {
   B_T_ = new TableInterp1Dclip(nz_, x_tab, b_tab);
@@ -61,7 +61,7 @@ double Battery::calculate(const double temp_C, const double soc_frac, const doub
   soc_ = max(min(soc_frac, 1.0), 0.0);
   curr_in_ = curr_in;
   vstat_ = double(num_cells_) * ( a_ + b_*pow(-log(soc_), m_) + c_*soc_ + d_*exp(n_*(soc_-1)) );
-  vdyn_ = curr_in*(r1_ + r2_);
+  vdyn_ = double(num_cells_) * curr_in*(r1_ + r2_);
   v_ = vstat_ + vdyn_;
   return ( v_ );
 }

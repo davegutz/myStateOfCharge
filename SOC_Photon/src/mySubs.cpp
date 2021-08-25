@@ -144,12 +144,12 @@ void load(const bool reset_soc, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, 
     sen->Vshunt = (sen->Ishunt - SHUNT_V2A_A) / SHUNT_V2A_S;
     sen->Vshunt_int = -999;
     sen->Tbatt =  T_T1->interp(elapsed);
-    sen->Vbatt =  V_T1->interp(elapsed) + sen->Ishunt*(r1_bb + r2_bb);
+    sen->Vbatt =  V_T1->interp(elapsed) + sen->Ishunt*(batt_r1 + batt_r2)*batt_num_cells;
   }
 
   // Power calculation
   sen->Wshunt = sen->Vbatt*sen->Ishunt;
-  sen->Wbatt = sen->Vbatt*sen->Ishunt - sen->Ishunt*sen->Ishunt*(batt_r1+batt_r2); 
+  sen->Wbatt = sen->Vbatt*sen->Ishunt - sen->Ishunt*sen->Ishunt*(batt_r1 + batt_r2)*batt_num_cells; 
 
   if ( debug == -5 ) Serial.printf("vectoring,reset_soc,vec_start,now,elapsed,Vbatt,Ishunt,Tbatt:  %d,%d,%ld,%ld,%7.3f,%7.3f,%7.3f,%7.3f\n", vectoring, reset_soc, vec_start, now, elapsed, sen->Vbatt, sen->Ishunt, sen->Tbatt);
 }
