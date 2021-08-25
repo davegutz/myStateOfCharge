@@ -49,9 +49,11 @@ struct Publish
   int numTimeouts;
   double SOC;
   double SOC_tracked;
+  double SOC_solved;
   double Vbatt_model;
   double Vbatt_model_filt;
   double Vbatt_model_tracked;
+  double Vbatt_model_solved;
 };
 
 void publish1(void);
@@ -60,6 +62,7 @@ void publish3(void);
 void publish4(void);
 void publish_particle(unsigned long now, Wifi *wifi);
 void assignPubList(Publish* pubList, const unsigned long now, const String unit, const String hmString,
-  const double controlTime, struct Sensors* sen, const int numTimeouts, Battery* myBatt, Battery* myBatt_tracked);
+  const double controlTime, struct Sensors* sen, const int numTimeouts,
+  Battery* myBatt, Battery* myBatt_tracked, Battery* myBatt_solved);
 
 #endif

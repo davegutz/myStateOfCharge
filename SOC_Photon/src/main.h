@@ -208,6 +208,7 @@ void loop()
   // Battery  models
   static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Battery model
   static Battery *myBatt_tracked = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Tracked battery model
+  static Battery *myBatt_solved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Tracked battery model
 
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
@@ -228,6 +229,7 @@ void loop()
   static Sync *summarize = new Sync(SUMMARIZE_DELAY);
   static double soc_est = 1.0;
   static double soc_tracked = 1.0;
+  static double soc_solved = 1.0;
   static PID *pid_o = new PID(C_G, C_TAU, C_MAX, C_MIN, C_LLMAX, C_LLMIN, 0, 1, C_DB, 0, 0, 1, C_KICK_TH, C_KICK);  // Observer PID
   static bool reset_soc = true;
 
@@ -278,9 +280,9 @@ void loop()
     double vbatt_fb = sen->Vbatt_model_tracked;
     double T = min(sen->T, F_O_MAX_T);
     pid_o->update((reset>0), vbatt, vbatt_fb, T, 1.0, dyn_max, dyn_min, (reset>0 || vectoring));
-    if ( debug == -2 ) Serial.printf("T,reset_soc,vectoring,Ishunt,Vb_f_o,Vb_t_o,err,prop,integ,soc_t,soc,T,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+    if ( debug == -2 ) Serial.printf("T,reset_soc,vectoring,Ishunt,Vb_f_o,Vb_t_o,err,prop,integ,soc_t,soc,dvdsoc,T,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
       elapsed, reset_soc, vectoring, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
-      pid_o->err, pid_o->prop, pid_o->integ, pid_o->cont, soc_est, sen->T);
+      pid_o->err, pid_o->prop, pid_o->integ, pid_o->cont, soc_est, myBatt_solved->dv_dsoc(), sen->T);
     soc_tracked = pid_o->cont;
 
     // SOC Integrator - Coulomb Counting method
@@ -307,9 +309,12 @@ void loop()
     filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt);
    
     // Battery model
-    sen->Vbatt_model = myBatt->calculate((sen->Tbatt-32.)*5./9., soc_est, sen->Ishunt);
-    sen->Vbatt_model_filt = myBatt->calculate((sen->Tbatt-32.)*5./9., soc_est, sen->Ishunt_filt);
-    sen->Vbatt_model_tracked = myBatt_tracked->calculate((sen->Tbatt-32.)*5./9., soc_tracked, sen->Ishunt_filt_obs);
+    double TbattC = (sen->Tbatt-32.)*5./9.;
+    sen->Vbatt_model = myBatt->calculate(TbattC, soc_est, sen->Ishunt);
+    sen->Vbatt_model_filt = myBatt->calculate(TbattC, soc_est, sen->Ishunt_filt);
+    sen->Vbatt_model_tracked = myBatt_tracked->calculate(TbattC, soc_tracked, sen->Ishunt_filt_obs);
+    soc_solved = soc_tracked;
+    sen->Vbatt_model_solved = myBatt_solved->calculate(TbattC, soc_solved, sen->Ishunt_filt_obs);
     if ( debug==-1 )
       Serial.printf("%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", soc_tracked+12., sen->Vbatt_filt_obs+double(stepping*stepVal),
         myBatt_tracked->vstat(), myBatt_tracked->vdyn()+12., myBatt_tracked->v());
@@ -335,7 +340,7 @@ void loop()
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
     controlTime = decimalTime(&currentTime, tempStr);
     hmString = String(tempStr);
-    assignPubList(&pubList, publishParticle->now(), unit, hmString, controlTime, sen, numTimeouts, myBatt, myBatt_tracked);
+    assignPubList(&pubList, publishParticle->now(), unit, hmString, controlTime, sen, numTimeouts, myBatt, myBatt_tracked, myBatt_solved);
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )

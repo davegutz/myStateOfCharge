@@ -43,6 +43,7 @@ public:
   double vstat() { return (vstat_); };
   double vdyn() { return (vdyn_); };
   double v() { return (v_); };
+  double dv_dsoc() { return (dv_dsoc_); };
 protected:
   TableInterp1Dclip *B_T_;  // Battery coeff
   TableInterp1Dclip *A_T_;  // Battery coeff
@@ -61,8 +62,9 @@ protected:
   double vstat_;  // Static model voltage, V
   double vdyn_;   // Model current induced back emf, V
   double v_;      // Total model voltage, V
-  double curr_in_;// Current into battery, A
-  int num_cells_; // Number of cells
+  double curr_in_;  // Current into battery, A
+  int num_cells_;   // Number of cells
+  double dv_dsoc_;  // Derivative, V/fraction
 };
 
 // BattleBorn 100 Ah, 12v LiFePO4

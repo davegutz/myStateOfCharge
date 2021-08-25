@@ -30,10 +30,6 @@
 extern int8_t debug;
 extern char buffer[256];
 
-/*
- KI_T_ = new TableInterp1Dclip(sizeof(xALL[myKit_]) / sizeof(double), xALL[myKit_], yKI);
-*/
-
 // class Battery
 // constructors
 Battery::Battery()
@@ -58,9 +54,10 @@ double Battery::calculate(const double temp_C, const double soc_frac, const doub
   b_ = B_T_ ->interp(temp_C);
   a_ = A_T_ ->interp(temp_C);
   c_ = C_T_ ->interp(temp_C);
-  soc_ = max(min(soc_frac, 1.0), 0.0);
+  soc_ = max(min(soc_frac, 1.0-1e-6), 1e-6);
   curr_in_ = curr_in;
   vstat_ = double(num_cells_) * ( a_ + b_*pow(-log(soc_), m_) + c_*soc_ + d_*exp(n_*(soc_-1)) );
+  dv_dsoc_ = double(num_cells_) * ( -b_*m_*pow(-log(soc_), m_-1)/soc_ + c_ + d_*n_*exp(n_*(soc_-1)) );
   vdyn_ = double(num_cells_) * curr_in*(r1_ + r2_);
   v_ = vstat_ + vdyn_;
   return ( v_ );

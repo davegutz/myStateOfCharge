@@ -81,6 +81,7 @@ struct Sensors
   double Vbatt_model;         // Modeled battery voltage including steady current draw, V
   double Vbatt_model_filt;    // Filtered modeled battery voltage including steady current draw, V
   double Vbatt_model_tracked; // Tracked modeled battery voltage including steady current draw, V
+  double Vbatt_model_solved;  // Solved modeled battery voltage including steady current draw, V
   Sensors(void) {}
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
           int16_t Vshunt_int, double Vshunt, double Vshunt_filt,
@@ -105,6 +106,7 @@ struct Sensors
     this->Vbatt_model = 0;
     this->Vbatt_model_filt = 0;
     this->Vbatt_model_tracked = 0;
+    this->Vbatt_model_solved = 0;
   }
 };
 
