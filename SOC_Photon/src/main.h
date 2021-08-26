@@ -306,7 +306,7 @@ void loop()
     filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt);
    
     // Battery model
-    double TbattC = (sen->Tbatt-32.)*5./9.;
+    double TbattC = (sen->Tbatt_filt-32.)*5./9.;
     sen->Vbatt_model = myBatt->calculate(TbattC, soc_est, sen->Ishunt);
     sen->Vbatt_model_filt = myBatt->calculate(TbattC, soc_est, sen->Ishunt_filt);
     sen->Vbatt_model_tracked = myBatt_tracked->calculate(TbattC, soc_tracked, sen->Ishunt_filt_obs);

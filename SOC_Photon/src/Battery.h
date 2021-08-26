@@ -106,7 +106,7 @@ const unsigned int nz_bb = 7;
 #define NUM_VEC           1   // Number of vectors defined here
 static const unsigned int n_v1 = 10;
 static const double t_min_v1[n_v1] =  {0,     0.2,   0.2001, 1.4,   1.4001, 2.4999, 2.5,    3.6999, 3.7,    4.5};
-static const double v_v1[n_v1] =      {13.65, 13.65, 13.65,  12.2,  12.2,   12.2,   12.2,   13.65,  13.65,  13.65};
+static const double v_v1[n_v1] =      {13.65, 13.65, 13.65,  13.0,  13.0,   13.0,   13.0,   13.65,  13.65,  13.65};
 static const double i_v1[n_v1] =      {0.,    0.,    -500.,  -500., 0.,     0.,     500.,   500.,   0.,     0.};
 static const double T_v1[n_v1] =      {72.,   72.,   72.,    72.,   72.,    72.,    72.,    72.,    72.,    72.};
 static TableInterp1Dclip  *V_T1 = new TableInterp1Dclip(n_v1, t_min_v1, v_v1);
