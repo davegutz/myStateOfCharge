@@ -41,8 +41,8 @@ Summary::Summary(){}  // Must be empty to avoid re-init on power up for instance
 Summary::~Summary() {}
 void Summary::update(const double soc, const double curr, const double temp, const unsigned now, const bool RESET, const double T)
 {
-  cycling_detect_ = soc<absorption_th_;
-  cycling_ = Cycling_TF_->calculate(cycling_detect_, absorption_th_, absorption_th_, T, RESET);
+  cycling_detect_ = soc < absorption_th_;
+  cycling_ = Cycling_TF_->calculate(cycling_detect_, absorption_pers_, absorption_pers_, T, RESET);
 }
 void Summary::operator=(const Summary & s)
 {

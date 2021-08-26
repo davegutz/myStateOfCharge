@@ -65,7 +65,8 @@ double Battery::calculate(const double temp_C, const double soc_frac, const doub
 
   // VOC-OCV model
   vstat_ = double(num_cells_) * ( a_ + b_*pow_log_soc + c_*soc_ + d_*exp_n_soc );
-  dv_dsoc_ = double(num_cells_) * ( b_*m_*pow_log_soc/log_soc/soc_ + c_ + d_*n_*exp_n_soc );
+  dv_dsoc_ = double(num_cells_) * ( b_*m_/soc_*pow_log_soc/log_soc + c_ + d_*n_*exp_n_soc );
+  // d2v_dsoc2_ = double(num_cells_) * ( b_*m_/soc_/soc_*pow_log_soc/log_soc*((m_-1.)/log_soc - 1.) + d_*n_*n_*exp_n_soc );
 
   // Dynamic emf
   vdyn_ = double(num_cells_) * curr_in*(r1_ + r2_);

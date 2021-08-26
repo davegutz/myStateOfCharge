@@ -429,6 +429,7 @@ struct PID
   double Ad(void) { return(ad_);}; 
   double Ag(void) { return(ag_);};
   double At(void) { return(at_);};
+  void GN(const double g)  { G = g; };
   void Sd(const double S) { sd_ = S; };
   void Ad(const double A) { ad_ = A; };
   void Sg(const double S) { sg_ = S; };
