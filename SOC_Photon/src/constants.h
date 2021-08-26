@@ -76,16 +76,19 @@
 #define C_LLMAX         0.1         // Proportional path max limit, frac (0.1)
 #define C_LLMIN         -0.2        // Proportional path min limit, frac (-0.2)
 #define C_SOC_R_MAX     0.01        // Maximum integrating tf rate to limit invalid excursions, frac/sec (0.01)
-#define C_KICK_TH       0.2         // Voltage error to kick pid, V
-#define C_KICK          8           // Amount to kick pid gain, frac
+#define C_KICK_TH       0.2         // Voltage error to kick pid, V (0.2)
+#define C_KICK          8           // Amount to kick pid gain, frac (8)
 
 #define F_O_MAX_T       3.0         // Maximum call update time filters (3.0)
 #define F_MAX_T         3.0         // Maximum call update time filters (3.0)
-#define F_O_W           0.50        // Observer filter wn, r/s (0.1)   
+#define F_O_W           0.50        // Observer filter wn, r/s (0.5)   
 #define F_O_Z           0.80        // Observer filter zeta (0.80)
-#define F_W             0.05        // Filter wn, r/s (0.1)   
+#define F_W             0.05        // Filter wn, r/s (0.05)   
 #define F_Z             0.80        // Filter zeta (0.80)
 
+#define SOLV_ERR        1e-6        // Solver error tolerance, V (1e-6)
+#define SOLV_MAX_COUNTS 10          // Solver maximum number of steps (10)
+#define SOLV_MAX_STEP   0.2         // Solver maximum step size, frac soc
 
 // Battery voltage measurement gain
 const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /

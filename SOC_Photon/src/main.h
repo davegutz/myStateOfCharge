@@ -318,9 +318,9 @@ void loop()
     sen->Vbatt_model_solved = myBatt_solved->calculate(TbattC, soc_solved, sen->Ishunt_filt_obs);
     double err = vbatt - sen->Vbatt_model_solved;
     double meps = 1-1e-6;
-    while( fabs(err)>1e-4 && count++<20 )
+    while( fabs(err)>SOLV_ERR && count++<SOLV_MAX_COUNTS )
     {
-      soc_solved = max(min(soc_solved + max(min( err / myBatt_solved->dv_dsoc(), 0.2), -0.2), meps), 1e-6);
+      soc_solved = max(min(soc_solved + max(min( err / myBatt_solved->dv_dsoc(), SOLV_MAX_STEP), -SOLV_MAX_STEP), meps), 1e-6);
       sen->Vbatt_model_solved = myBatt_solved->calculate(TbattC, soc_solved, sen->Ishunt_filt_obs);
       err = vbatt - sen->Vbatt_model_solved;
       if ( debug == -5 ) Serial.printf("Tbatt,Ishunt_f_o,count,soc_s,vbatt,Vbatt_m_s,err, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n",
