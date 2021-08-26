@@ -258,11 +258,12 @@ void myDisplay(Adafruit_SSD1306 *display)
   display->println(F(""));
 
   display->setTextColor(SSD1306_WHITE);
-  char dispStringS[5];
-  sprintf(dispStringS, "%3.0f ", pubList.SOC);
-  display->print(dispStringS);
+  char dispStringT[8];
+  sprintf(dispStringT, "%3.0f %3.0f", pubList.SOC, pubList.SOC_tracked);
+  display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
-  sprintf(dispStringS, " %3.0f", pubList.SOC_tracked);
+  char dispStringS[5];
+  sprintf(dispStringS, " %3.0f", pubList.SOC_solved);
   display->print(dispStringS);
 
   display->display();
