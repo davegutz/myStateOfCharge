@@ -193,7 +193,7 @@ void setup()
 void loop()
 {
   // Sensor noise filters.   Obs filters 0.5 --> 0.1 to eliminate digital instability.   Also rate limited the observer belts+suspenders
-  static General2_Pole* VbattSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, 0.4*double(NOM_SYS_VOLT), 1.5*double(NOM_SYS_VOLT));
+  static General2_Pole* VbattSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, 0.4*double(NOM_SYS_VOLT), 2.0*double(NOM_SYS_VOLT));
   static General2_Pole* VshuntSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, -0.500, 0.500);
   static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, 0.833*double(NOM_SYS_VOLT), 1.15*double(NOM_SYS_VOLT));
   static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -20.0, 150.);
@@ -280,9 +280,6 @@ void loop()
     double vbatt_fb = sen->Vbatt_model_tracked;
     double T = min(sen->T, F_O_MAX_T);
     pid_o->update((reset>0), vbatt, vbatt_fb, T, 1.0, dyn_max, dyn_min, (reset>0 || vectoring));
-    if ( debug == -2 ) Serial.printf("T,reset_soc,vectoring,Ishunt,Vb_f_o,Vb_t_o,err,prop,integ,soc_t,soc,dvdsoc,T,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-      elapsed, reset_soc, vectoring, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
-      pid_o->err, pid_o->prop, pid_o->integ, pid_o->cont, soc_est, myBatt_solved->dv_dsoc(), sen->T);
     soc_tracked = pid_o->cont;
 
     // SOC Integrator - Coulomb Counting method
@@ -313,11 +310,33 @@ void loop()
     sen->Vbatt_model = myBatt->calculate(TbattC, soc_est, sen->Ishunt);
     sen->Vbatt_model_filt = myBatt->calculate(TbattC, soc_est, sen->Ishunt_filt);
     sen->Vbatt_model_tracked = myBatt_tracked->calculate(TbattC, soc_tracked, sen->Ishunt_filt_obs);
-    soc_solved = soc_tracked;
+
+
+    // Solver
+    vbatt = sen->Vbatt_filt_obs+double(stepping*stepVal);
+    int8_t count = 0;
     sen->Vbatt_model_solved = myBatt_solved->calculate(TbattC, soc_solved, sen->Ishunt_filt_obs);
-    if ( debug==-1 )
+    double err = vbatt - sen->Vbatt_model_solved;
+    double meps = 1-1e-6;
+    while( fabs(err)>1e-4 && count++<20 )
+    {
+      soc_solved = max(min(soc_solved + max(min( err / myBatt_solved->dv_dsoc(), 0.2), -0.2), meps), 1e-6);
+      sen->Vbatt_model_solved = myBatt_solved->calculate(TbattC, soc_solved, sen->Ishunt_filt_obs);
+      err = vbatt - sen->Vbatt_model_solved;
+      if ( debug == -5 ) Serial.printf("Tbatt,Ishunt_f_o,count,soc_s,vbatt,Vbatt_m_s,err, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+          sen->Tbatt, sen->Ishunt_filt_obs, count, soc_solved, vbatt, sen->Vbatt_model_solved, err);
+    }
+    
+    
+            
+    if ( debug == -1 )
       Serial.printf("%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", soc_tracked+12., sen->Vbatt_filt_obs+double(stepping*stepVal),
         myBatt_tracked->vstat(), myBatt_tracked->vdyn()+12., myBatt_tracked->v());
+
+    if ( debug == -2 )
+      Serial.printf("T,reset_soc,vectoring,Tbatt,Ishunt,Vb_f_o,Vb_t_o,err,prop,integ,soc_t,soc,soc_s,Vb_m_s,dvdsoc,T,count,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n",
+      elapsed, reset_soc, vectoring, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
+      pid_o->err, pid_o->prop, pid_o->integ, pid_o->cont, soc_est, soc_solved, sen->Vbatt_model_solved, myBatt_solved->dv_dsoc(), sen->T, count);
 
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());

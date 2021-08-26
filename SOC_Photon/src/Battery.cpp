@@ -48,6 +48,7 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
 Battery::~Battery() {}
 // operators
 // functions
+
 // SOC-OCV curve fit method per Zhang, et al
 double Battery::calculate(const double temp_C, const double soc_frac, const double curr_in)
 {
@@ -56,12 +57,19 @@ double Battery::calculate(const double temp_C, const double soc_frac, const doub
   c_ = C_T_ ->interp(temp_C);
   soc_ = max(min(soc_frac, 1.0-1e-6), 1e-6);
   curr_in_ = curr_in;
+
+  // Perform computationally expensive steps one time
   double log_soc = log(soc_);
   double exp_n_soc = exp(n_*(soc_-1));
   double pow_log_soc = pow(-log_soc, m_);
+
+  // VOC-OCV model
   vstat_ = double(num_cells_) * ( a_ + b_*pow_log_soc + c_*soc_ + d_*exp_n_soc );
   dv_dsoc_ = double(num_cells_) * ( b_*m_*pow_log_soc/log_soc/soc_ + c_ + d_*n_*exp_n_soc );
+
+  // Dynamic emf
   vdyn_ = double(num_cells_) * curr_in*(r1_ + r2_);
+
   v_ = vstat_ + vdyn_;
   return ( v_ );
 }
