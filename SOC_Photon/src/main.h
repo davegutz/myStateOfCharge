@@ -336,9 +336,9 @@ void loop()
         myBatt_tracked->vstat(), myBatt_tracked->vdyn()+12., myBatt_tracked->v());
 
     if ( debug == -2 )
-      Serial.printf("T,reset_soc,vectoring,Tbatt,Ishunt,Vb_f_o,Vb_t_o,err,prop,integ,soc_t,soc,soc_s,Vb_m_s,dvdsoc,d2vdsoc2,T,count,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n",
+      Serial.printf("T,reset_soc,vectoring,Tbatt,Ishunt,Vb_f_o,Vb_t_o,err,prop,integ,soc_t,soc,soc_s,Vb_m_s,dvdsoc,T,count,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n",
       elapsed, reset_soc, vectoring, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
-      pid_o->err, pid_o->prop, pid_o->integ, pid_o->cont, soc_est, soc_solved, sen->Vbatt_model_solved, myBatt_solved->dv_dsoc(), myBatt_solved->d2v_dsoc2(), sen->T, count);
+      pid_o->err, pid_o->prop, pid_o->integ, pid_o->cont, soc_est, soc_solved, sen->Vbatt_model_solved, myBatt_solved->dv_dsoc(), sen->T, count);
 
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
