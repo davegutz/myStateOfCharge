@@ -324,14 +324,12 @@ void loop()
     if ( count<SOLV_MAX_COUNTS ) solver_valid = true; 
     
     // SOC Integrator - Coulomb Counting method
+    if ( vectoring && !reset_soc ) reset_soc = true;
     if ( reset_soc )
     {
-      // if ( (fabs(pid_o->err)<C_DB*1.5 || elapsed>INIT_WAIT) ||
-      //      ( vectoring && (fabs(pid_o->err)<C_DB*4.0 || elapsed>INIT_WAIT) )  ) // Wait for convergence of observer
-      if ( solver_valid )
+      if ( (solver_valid || elapsed>INIT_WAIT) || (vectoring && (solver_valid || elapsed>INIT_WAIT))  )
       {
         reset_soc = false;
-        // soc_est = soc_tracked;
         soc_est = soc_solved;
       }
     }
