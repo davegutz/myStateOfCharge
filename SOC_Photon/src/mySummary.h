@@ -54,12 +54,15 @@ struct Sum_st
 };
 
 //
-void print_all(struct Sum_st *sum, const int n)
+void print_all(struct Sum_st *sum, const int isum, const int nsum)
 {
   Serial.printf("i,  time,      Tbatt,  Vbatt, Ishunt,  SOC\n");
-  for ( int i=0; i<n; i++ )
+  int i = isum;  // Last one written was isum
+  int n = -1;
+  while ( ++n < nsum )
   {
-    Serial.printf("%d,  ", i);
+    if ( ++i>nsum-1 ) i = 0;  // Increment beyond last one written
+    Serial.printf("%d,  ", n);
     sum[i].print();
     Serial.printf("\n");
   }
