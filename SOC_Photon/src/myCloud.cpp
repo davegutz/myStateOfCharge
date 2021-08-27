@@ -46,7 +46,7 @@ void publish1(void)
   Blynk.virtualWrite(V0,  pubList.Vbatt);
   Blynk.virtualWrite(V2,  pubList.Vbatt_filt_obs);
   Blynk.virtualWrite(V3,  pubList.SOC);
-  Blynk.virtualWrite(V4,  pubList.Vbatt_model);  // TODO spare?
+  Blynk.virtualWrite(V4,  pubList.Vbatt_model_solved);
   Blynk.virtualWrite(V5,  pubList.Vbatt_model);
 }
 

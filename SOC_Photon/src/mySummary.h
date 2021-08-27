@@ -27,6 +27,29 @@
 
 #include "application.h"
 
+// SRAM retention summary
+struct Sum_st
+{
+  unsigned long time;         // Timestamp
+  int16_t Tbatt;              // Battery temperature, filtered, F
+  float Vbatt;                // Battery measured potential, filtered, V
+  int8_t Ishunt;              // Batter measured input current, filtered, A
+  int8_t SOC;                 // Battery state of charge, %
+  Sum_st(void){}
+  void assign(const unsigned long now, const double Tbatt, const double Vbatt, const double Ishunt, const double soc)
+  {
+    this->time = now;
+    this->Tbatt = Tbatt;
+    this->Vbatt = float(Vbatt);
+    this->Ishunt = Ishunt;
+    this->SOC = soc*100;
+  }
+  void print(void)
+  {
+    Serial.printf("%ld, %4d, %7.3f, %4d, %7d,", time, Tbatt, Vbatt, Ishunt, SOC);
+  }
+};
+
 // SRAM retention class
 struct PickelJar
 {

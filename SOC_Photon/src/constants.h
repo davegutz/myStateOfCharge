@@ -40,7 +40,7 @@
 #define PUBLISH_BLYNK_DELAY   10000UL   // Blynk cloud updates, ms (10000UL)
 #define PUBLISH_PARTICLE_DELAY 2000UL   // Particle cloud updates (2000UL)
 #define READ_DELAY            1000UL    // Sensor read wait (5000, 100 for stress test), ms (1000UL)
-#define SUMMARIZE_DELAY       2000UL   // Battery state tracking and reporting, ms (100000UL)
+#define SUMMARIZE_DELAY       3600000UL // Battery state tracking and reporting, ms (3600000UL)
 #define PUBLISH_SERIAL_DELAY  1000UL    // Serial print interval (1000UL)
 #define DISCONNECT_DELAY      75000UL   // After these milliseconds no WiFi, disconnect (75000UL)
 #define CHECK_INTERVAL        180000UL  // How often to check for WiFi once disconnected (180000UL)
@@ -78,6 +78,8 @@
 #define C_SOC_R_MAX     0.01        // Maximum integrating tf rate to limit invalid excursions, frac/sec (0.01)
 #define C_KICK_TH       0.2         // Voltage error to kick pid, V (0.2)
 #define C_KICK          8           // Amount to kick pid gain, frac (8)
+#define C_CC_TRIM_G     0.015       // How much to trim coulomb counter to nudge it to solver (frac/sec/frac) (0.015  1%/min at 1% error)
+#define C_CC_TRIM_IMAX  2           // Current below which solver allowed to trim the coulomb counter
 
 #define F_O_MAX_T       3.0         // Maximum call update time filters (3.0)
 #define F_MAX_T         3.0         // Maximum call update time filters (3.0)

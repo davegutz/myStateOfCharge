@@ -102,6 +102,10 @@ Wifi *myWifi;                   // Manage Wifi
 retained PickelJar summ_currR;  // Manage current summary information
 retained class Summary summ;    // Manage summary information
 
+const int nsum = 20;            // Number of summary strings
+retained int isum;              // Summary location
+retained Sum_st mySum[nsum];    // Summaries
+
 // Setup
 void setup()
 {
@@ -177,6 +181,13 @@ void setup()
   summ.print();
   System.enableFeature(FEATURE_RETAINED_MEMORY);
   summ_currR.print();
+  Serial.printf("i,  time,      Tbatt,  Vbatt, Ishunt,  SOC\n");
+  for ( int i=0; i<nsum; i++ )
+  {
+    Serial.printf("%d,  ", i);
+    mySum[i].print();
+    Serial.printf("\n");
+  }
 
   // Header for debug print
   if ( debug>1 )
@@ -283,61 +294,65 @@ void loop()
     pid_o->update((reset>0), vbatt, vbatt_fb, T, 1.0, dyn_max, dyn_min, (reset>0 || vectoring));
     soc_tracked = pid_o->cont;
 
-    // SOC Integrator - Coulomb Counting method
-    if ( reset_soc )
-    {
-      if ( (fabs(pid_o->err)<C_DB*1.5 || elapsed>INIT_WAIT) ||
-           ( vectoring && (fabs(pid_o->err)<C_DB*4.0 || elapsed>INIT_WAIT) )  ) // Wait for convergence of observer
-      {
-        reset_soc = false;
-        soc_est = soc_tracked;
-      }
-    }
-    if ( sen->Vbatt_filt<=batt_vsat )
-    {
-      soc_est = max(min( soc_est + sen->Wbatt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.0), 0.0);
-    }
-    else   // >13.7 V is decent approximation for SOC>99.7 for prototype system (constants calculated)
-    {
-      soc_est = max(min( BATT_SOC_SAT + (sen->Vbatt_filt-batt_vsat)/(batt_vmax-batt_vsat)*(1.0-BATT_SOC_SAT), 1.0), 0.0);
-    }
-
     // Load and filter
     load(reset_soc, sen, sensor_tbatt, myPins, ads, myBatt, readSensors->now());
     filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt);
    
     // Battery model
-    double TbattC = (sen->Tbatt_filt-32.)*5./9.;
-    sen->Vbatt_model = myBatt->calculate(TbattC, soc_est, sen->Ishunt);
-    sen->Vbatt_model_filt = myBatt->calculate(TbattC, soc_est, sen->Ishunt_filt);
-    sen->Vbatt_model_tracked = myBatt_tracked->calculate(TbattC, soc_tracked, sen->Ishunt_filt_obs);
+    double Tbatt_filt_C = (sen->Tbatt_filt-32.)*5./9.;
+    sen->Vbatt_model = myBatt->calculate(Tbatt_filt_C, soc_est, sen->Ishunt);
+    sen->Vbatt_model_filt = myBatt->calculate(Tbatt_filt_C, soc_est, sen->Ishunt_filt);
+    sen->Vbatt_model_tracked = myBatt_tracked->calculate(Tbatt_filt_C, soc_tracked, sen->Ishunt_filt_obs);
 
 
     // Solver
     vbatt = sen->Vbatt_filt_obs+double(stepping*stepVal);
     int8_t count = 0;
-    sen->Vbatt_model_solved = myBatt_solved->calculate(TbattC, soc_solved, sen->Ishunt_filt_obs);
+    sen->Vbatt_model_solved = myBatt_solved->calculate(Tbatt_filt_C, soc_solved, sen->Ishunt_filt_obs);
     double err = vbatt - sen->Vbatt_model_solved;
     double meps = 1-1e-6;
+    bool solver_valid = false;
     while( fabs(err)>SOLV_ERR && count++<SOLV_MAX_COUNTS )
     {
       // soc_solved = max(min(soc_solved + max(min( err*( 1./myBatt_solved->dv_dsoc() + err/myBatt_solved->d2v_dsoc2() ),
       soc_solved = max(min(soc_solved + max(min( err/myBatt_solved->dv_dsoc(), SOLV_MAX_STEP), -SOLV_MAX_STEP), meps), 1e-6);
-      sen->Vbatt_model_solved = myBatt_solved->calculate(TbattC, soc_solved, sen->Ishunt_filt_obs);
+      sen->Vbatt_model_solved = myBatt_solved->calculate(Tbatt_filt_C, soc_solved, sen->Ishunt_filt_obs);
       err = vbatt - sen->Vbatt_model_solved;
-      if ( debug == -5 ) Serial.printf("Tbatt,Ishunt_f_o,count,soc_s,vbatt,Vbatt_m_s,err, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-          sen->Tbatt, sen->Ishunt_filt_obs, count, soc_solved, vbatt, sen->Vbatt_model_solved, err);
+      if ( debug == -5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,soc_s,vbatt,Vbatt_m_s,err, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+          sen->Tbatt_filt, sen->Ishunt_filt_obs, count, soc_solved, vbatt, sen->Vbatt_model_solved, err);
     }
+    if ( count<SOLV_MAX_COUNTS ) solver_valid = true; 
     
-    
-            
+    // SOC Integrator - Coulomb Counting method
+    if ( reset_soc )
+    {
+      // if ( (fabs(pid_o->err)<C_DB*1.5 || elapsed>INIT_WAIT) ||
+      //      ( vectoring && (fabs(pid_o->err)<C_DB*4.0 || elapsed>INIT_WAIT) )  ) // Wait for convergence of observer
+      if ( solver_valid )
+      {
+        reset_soc = false;
+        // soc_est = soc_tracked;
+        soc_est = soc_solved;
+      }
+    }
+    if ( sen->Vbatt_filt<=batt_vsat )
+    {
+      double soc_trim = 0;
+      if ( fabs(sen->Ishunt_filt_obs)<C_CC_TRIM_IMAX ) soc_trim = sen->T * C_CC_TRIM_G * ( soc_solved - soc_est );
+      soc_est = max(min( soc_est + sen->Wbatt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP + soc_trim, 1.0), 0.0);
+    }
+    else   // >13.7 V is decent approximation for SOC>99.7 for prototype system (constants calculated)
+    {
+      soc_est = max(min( BATT_SOC_SAT + (sen->Vbatt_filt-batt_vsat)/(batt_vmax-batt_vsat)*(1.0-BATT_SOC_SAT), 1.0), 0.0);
+    }
+     
     if ( debug == -1 )
       Serial.printf("%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", soc_tracked+12., sen->Vbatt_filt_obs+double(stepping*stepVal),
-        myBatt_tracked->vstat(), myBatt_tracked->vdyn()+12., myBatt_tracked->v());
+        myBatt->vstat(), myBatt->vdyn()+12., myBatt->v());
 
     if ( debug == -2 )
-      Serial.printf("T,reset_soc,vectoring,Tbatt,Ishunt,Vb_f_o,Vb_t_o,err,prop,integ,soc_t,soc,soc_s,Vb_m_s,dvdsoc,T,count,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n",
-      elapsed, reset_soc, vectoring, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model_tracked,
+      Serial.printf("T,reset_soc,vectoring,Tbatt,Ishunt,Vb_f_o,Vb_e,err,prop,integ,soc_t,soc_e,soc_s,Vb_m_s,dvdsoc,T,count,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n",
+      elapsed, reset_soc, vectoring, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model,
       pid_o->err, pid_o->prop, pid_o->integ, pid_o->cont, soc_est, soc_solved, sen->Vbatt_model_solved, myBatt_solved->dv_dsoc(), sen->T, count);
 
     //if ( bare ) delay(41);  // Usual I2C time
@@ -396,7 +411,7 @@ void loop()
   summarizing = summarize->update(millis(), reset);               //  now || reset
   if ( summarizing )
   {
-    summ.update(soc_tracked, sen->Ishunt_filt_obs, sen->Tbatt_filt, millis(), reset, double(summarize->updateTime())/1000.0);
+    summ.update(soc_est, sen->Ishunt_filt_obs, sen->Tbatt_filt, millis(), reset, double(summarize->updateTime())/1000.0);
     if ( debug == -3 )
     {
       debug = debug_saved;
@@ -410,6 +425,8 @@ void loop()
       summ.print();
       summ_currR.print();
     }
+    if ( ++isum>nsum-1 ) isum = 0;
+    mySum[isum].assign(currentTime, sen->Tbatt_filt, sen->Vbatt_filt_obs, sen->Ishunt_filt_obs, soc_est);
   }
 
 } // loop
