@@ -122,6 +122,7 @@ String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *currentTime, char* tempStr);
 void print_serial_header(void);
 void myDisplay(Adafruit_SSD1306 *display);
+String time_long_2_str(const unsigned long currentTime, char *tempStr);
 
 // Talk Declarations
 void talk(bool *stepping, PID* pid, double *stepVal, bool *vectoring, int8_t *vec_num);

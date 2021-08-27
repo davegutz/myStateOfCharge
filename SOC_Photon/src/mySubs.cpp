@@ -226,19 +226,15 @@ double decimalTime(unsigned long *currentTime, char* tempStr)
           hours = Time.hour(*currentTime);
         }
     }
-    #ifndef FAKETIME
-        uint8_t dayOfWeek = Time.weekday(*currentTime)-1;  // 0-6
-        uint8_t minutes   = Time.minute(*currentTime);
-        uint8_t seconds   = Time.second(*currentTime);
-        if ( debug>5 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
-    #else
-        // Rapid time passage simulation to test schedule functions
-        uint8_t dayOfWeek = (Time.weekday(*currentTime)-1)*7/6;// minutes = days
-        uint8_t hours     = Time.hour(*currentTime)*24/60; // seconds = hours
-        uint8_t minutes   = 0; // forget minutes
-        uint8_t seconds   = 0; // forget seconds
-    #endif
-    sprintf(tempStr, "%4u-%02u-%02uT%02u:%02u:%02u", int(year), month, day, hours, minutes, seconds);
+    uint8_t dayOfWeek = Time.weekday(*currentTime)-1;  // 0-6
+    uint8_t minutes   = Time.minute(*currentTime);
+    uint8_t seconds   = Time.second(*currentTime);
+
+    // Convert the string
+    time_long_2_str(*currentTime, tempStr);
+
+    // Convert the decimal
+    if ( debug>5 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
     return (((( (float(year-2021)*12 + float(month))*30.4375 + float(day))*24.0 + float(hours))*60.0 + float(minutes))*60.0 + \
                         float(seconds));
 }
@@ -404,4 +400,41 @@ void serialEvent()
       Serial.println(inputString);
     }
   }
+}
+
+// For summary prints
+String time_long_2_str(const unsigned long currentTime, char *tempStr)
+{
+    uint32_t year = Time.year(currentTime);
+    uint8_t month = Time.month(currentTime);
+    uint8_t day = Time.day(currentTime);
+    uint8_t hours = Time.hour(currentTime);
+
+    // Second Sunday Mar and First Sunday Nov; 2:00 am; crude DST handling
+    if ( USE_DST)
+    {
+      uint8_t dayOfWeek = Time.weekday(currentTime);     // 1-7
+      if (  month>2   && month<12 &&
+        !(month==3  && ((day-dayOfWeek)<7 ) && hours>1) &&  // <second Sunday Mar
+        !(month==11 && ((day-dayOfWeek)>=0) && hours>0) )  // >=first Sunday Nov
+        {
+          Time.zone(GMT+1);
+          day = Time.day(currentTime);
+          hours = Time.hour(currentTime);
+        }
+    }
+    #ifndef FAKETIME
+        uint8_t dayOfWeek = Time.weekday(currentTime)-1;  // 0-6
+        uint8_t minutes   = Time.minute(currentTime);
+        uint8_t seconds   = Time.second(currentTime);
+        if ( debug>5 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
+    #else
+        // Rapid time passage simulation to test schedule functions
+        uint8_t dayOfWeek = (Time.weekday(currentTime)-1)*7/6;// minutes = days
+        uint8_t hours     = Time.hour(currentTime)*24/60; // seconds = hours
+        uint8_t minutes   = 0; // forget minutes
+        uint8_t seconds   = 0; // forget seconds
+    #endif
+    sprintf(tempStr, "%4u-%02u-%02uT%02u:%02u:%02u", int(year), month, day, hours, minutes, seconds);
+    return ( String(tempStr) );
 }

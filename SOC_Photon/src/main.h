@@ -99,10 +99,7 @@ Adafruit_ADS1015 *ads;          // Use this for the 12-bit version; 1115 for 16-
 Adafruit_SSD1306 *display;
 bool bare_ads = false;          // If ADS to be ignored
 Wifi *myWifi;                   // Manage Wifi
-retained PickelJar summ_currR;  // Manage current summary information
-retained class Summary summ;    // Manage summary information
-
-const int nsum = 20;            // Number of summary strings
+const int nsum = 191;            // Number of summary strings, 16 Bytes per isum
 retained int isum;              // Summary location
 retained Sum_st mySum[nsum];    // Summaries
 
@@ -178,23 +175,11 @@ void setup()
   #endif
 
   // Summary
-  summ.print();
   System.enableFeature(FEATURE_RETAINED_MEMORY);
-  summ_currR.print();
-  Serial.printf("i,  time,      Tbatt,  Vbatt, Ishunt,  SOC\n");
-  for ( int i=0; i<nsum; i++ )
-  {
-    Serial.printf("%d,  ", i);
-    mySum[i].print();
-    Serial.printf("\n");
-  }
+  print_all(mySum, nsum);
 
   // Header for debug print
-  if ( debug>1 )
-  { 
-    print_serial_header();
-  }
-
+  if ( debug>1 ) print_serial_header();
   if ( debug>3 ) { Serial.print(F("End setup debug message=")); Serial.println(F(", "));};
 
 } // setup
@@ -304,7 +289,6 @@ void loop()
     sen->Vbatt_model_filt = myBatt->calculate(Tbatt_filt_C, soc_est, sen->Ishunt_filt);
     sen->Vbatt_model_tracked = myBatt_tracked->calculate(Tbatt_filt_C, soc_tracked, sen->Ishunt_filt_obs);
 
-
     // Solver
     vbatt = sen->Vbatt_filt_obs+double(stepping*stepVal);
     int8_t count = 0;
@@ -314,7 +298,6 @@ void loop()
     bool solver_valid = false;
     while( fabs(err)>SOLV_ERR && count++<SOLV_MAX_COUNTS )
     {
-      // soc_solved = max(min(soc_solved + max(min( err*( 1./myBatt_solved->dv_dsoc() + err/myBatt_solved->d2v_dsoc2() ),
       soc_solved = max(min(soc_solved + max(min( err/myBatt_solved->dv_dsoc(), SOLV_MAX_STEP), -SOLV_MAX_STEP), meps), 1e-6);
       sen->Vbatt_model_solved = myBatt_solved->calculate(Tbatt_filt_C, soc_solved, sen->Ishunt_filt_obs);
       err = vbatt - sen->Vbatt_model_solved;
@@ -327,7 +310,7 @@ void loop()
     if ( vectoring && !reset_soc ) reset_soc = true;
     if ( reset_soc )
     {
-      if ( (solver_valid || elapsed>INIT_WAIT) || (vectoring && (solver_valid || elapsed>INIT_WAIT))  )
+      if ( (solver_valid && elapsed>EST_WAIT) || (vectoring && (solver_valid || elapsed>INIT_WAIT))  )
       {
         reset_soc = false;
         soc_est = soc_solved;
@@ -355,10 +338,6 @@ void loop()
 
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
-    if ( vectoring ) // over-write load
-    {
-      
-    }
 
     // Update display
     myDisplay(display);
@@ -394,9 +373,6 @@ void loop()
 
   }
 
-  // Initialize complete once sensors and models started
-  if ( read ) reset = 0;
-
   // Discuss things with the user
   // When open interactive serial monitor such as CoolTerm
   // then can enter commands by sending strings.   End the strings with a real carriage return
@@ -406,25 +382,19 @@ void loop()
   talk(&stepping, pid_o, &stepVal, &vectoring, &vec_num);
 
   // Summary management
+  if ( debug == -3 )
+  {
+    debug = debug_saved;
+    print_all(mySum, nsum);
+  }
   summarizing = summarize->update(millis(), reset);               //  now || reset
   if ( summarizing )
   {
-    summ.update(soc_est, sen->Ishunt_filt_obs, sen->Tbatt_filt, millis(), reset, double(summarize->updateTime())/1000.0);
-    if ( debug == -3 )
-    {
-      debug = debug_saved;
-      summ.print();
-      summ.load_from(summ_currR);
-      summ.print();
-      PickelJar sum(1, 1, 1, 1, 1, 1);  sum.add_from(summ_currR);
-      summ.load_from(sum);
-      summ.print();
-      summ.load_to(&summ_currR);
-      summ.print();
-      summ_currR.print();
-    }
     if ( ++isum>nsum-1 ) isum = 0;
     mySum[isum].assign(currentTime, sen->Tbatt_filt, sen->Vbatt_filt_obs, sen->Ishunt_filt_obs, soc_est);
   }
+
+  // Initialize complete once sensors and models started and summary written
+  if ( read ) reset = 0;
 
 } // loop
