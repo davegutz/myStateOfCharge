@@ -124,7 +124,8 @@ String time_long_2_str(const unsigned long currentTime, char *tempStr);
 void create_print_string(char *buffer, Publish *pubList);
 
 // Talk Declarations
-void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num);
+void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num,
+  Battery *myBatt, Battery *myBatt_solved, Battery *myBatt_free);
 void talkT(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num);  // Transient inputs
 void talkH(double *stepVal, int8_t *vec_num); // Help
 #endif

@@ -202,9 +202,9 @@ void loop()
   static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
 
   // Battery  models
-  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Battery model
-  static Battery *myBatt_solved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Solved battery model
-  static Battery *myBatt_free = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Free battery model
+  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, BATT_TS, batt_r1, batt_r2, batt_r2c2);  // Battery model
+  static Battery *myBatt_solved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, BATT_TS, batt_r1, batt_r2, batt_r2c2);  // Solved battery model
+  static Battery *myBatt_free = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, BATT_TS, batt_r1, batt_r2, batt_r2c2);  // Free battery model
 
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
@@ -364,7 +364,7 @@ void loop()
   // right in the "Send String" box then press "Send."
   // String definitions are below.
   int debug_saved = debug;
-  talk(&stepping, &stepVal, &vectoring, &vec_num);
+  talk(&stepping, &stepVal, &vectoring, &vec_num, myBatt, myBatt_solved, myBatt_free);
 
   // Summary management
   if ( debug == -3 )

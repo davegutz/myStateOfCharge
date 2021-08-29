@@ -273,7 +273,8 @@ void myDisplay(Adafruit_SSD1306 *display)
 
 
 // Talk Executive
-void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num)
+void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num,
+  Battery *myBatt, Battery *myBatt_solved, Battery *myBatt_free)
 {
   // Serial event  (terminate Send String data with 0A using CoolTerm)
   if (stringComplete)
@@ -283,8 +284,11 @@ void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num)
       case ( 'S' ):
         switch ( inputString.charAt(1) )
         {
-          case ( 'g' ):
-//            pid->Sg(inputString.substring(2).toFloat());
+          case ( 'r' ):
+            double rscale = inputString.substring(2).toFloat();
+            myBatt->Sr(rscale);
+            myBatt_solved->Sr(rscale);
+            myBatt_free->Sr(rscale);
             break;
         }
         break;

@@ -33,14 +33,15 @@ public:
   Battery();
   Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
-    const double r1, const double r2, const double r2c2);
+    const double ts, const double r1, const double r2, const double r2c2);
   ~Battery();
   // operators
   // functions
+  void Sr(const double sr) { sr_ = sr; };
   double calculate(const double temp_C, const double soc_frac, const double curr_in);
   double num_cells() { return (num_cells_); };
   double soc() { return (soc_); };
-  double vstat() { return (vstat_); };
+  double voc() { return (voc_); };
   double vdyn() { return (vdyn_); };
   double v() { return (v_); };
   double tcharge() { return (tcharge_); };
@@ -58,10 +59,11 @@ protected:
   double d_;  // Battery coeff
   unsigned int nz_;  // Number of breakpoints
   double soc_; // State of charge
+  double ts_;   // Severity scalar discharging
   double r1_;   // Randels resistance, Ohms per cell
   double r2_;   // Randels resistance, Ohms per cell
   double c2_;   // Randels capacitance, Farads per cell
-  double vstat_;  // Static model voltage, V
+  double voc_;  // Static model open circuit voltage, V
   double vdyn_;   // Model current induced back emf, V
   double v_;      // Total model voltage, V
   double curr_in_;  // Current into battery, A
@@ -70,6 +72,7 @@ protected:
   // double d2v_dsoc2_; // Derivative, V^2/fraction^2
   double tcharge_;  // Charging time to 100%, hr
   double pow_in_;  // Charging power, w
+  double sr_;     // Resistance scalar
 };
 
 // BattleBorn 100 Ah, 12v LiFePO4
@@ -78,6 +81,7 @@ protected:
 // >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 60-95 F
 #define BATT_V_SAT            3.425     // Normal battery cell saturation for SOC=99.7, V (3.425)
 #define BATT_SOC_SAT          0.997     // Normal battery cell saturation, fraction (0.997)
+#define BATT_TS               1.5       // Severity scalar for discharging
 #define BATT_R1               0.00126   // Battery Randels static resistance, Ohms (0.00126) for 3v cell matches transients
 #define BATT_R2               0.00168   // Battery Randels dynamic resistance, Ohms (0.00168) for 3v cell matches transients
 #define BATT_R2C2             100       // Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
