@@ -78,22 +78,28 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,   Wshunt,Wshunt_filt,   SOC,Vbatt_model, SOC_tracked,Vbatt_model_tracked,T_filt"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,   Wshunt,Wshunt_filt,   SOC,Vbatt_m,   SOC_s,Vbatt_m_s, T_filt"));
+}
+
+// Print strings
+void create_print_string(char *buffer, Publish *pubList)
+{
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,  %7.3f,\
+  %c", \
+    pubList->unit.c_str(), pubList->hmString.c_str(), pubList->controlTime,
+    pubList->Tbatt, pubList->Tbatt_filt,     pubList->Vbatt, pubList->Vbatt_filt_obs,
+    pubList->Vshunt, pubList->Vshunt_filt,
+    pubList->Ishunt, pubList->Ishunt_filt_obs, pubList->Wshunt, pubList->Wshunt_filt,
+    pubList->SOC, pubList->Vbatt_model,
+    pubList->SOC_solved, pubList->Vbatt_model_solved,
+    pubList->SOC_free,
+    pubList->T, '\0');
 }
 
 // Inputs serial print
 void serial_print_inputs(unsigned long now, double T)
 {
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,\
-  %c", \
-    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
-    pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt_obs,
-    pubList.Vshunt, pubList.Vshunt_filt,
-    pubList.Ishunt, pubList.Ishunt_filt_obs, pubList.Wshunt, pubList.Wshunt_filt,
-    pubList.SOC, pubList.Vbatt_model,
-    pubList.SOC_tracked, pubList.Vbatt_model_tracked, 
-    pubList.SOC_solved, pubList.Vbatt_model_solved,
-    pubList.T, '\0');
+  create_print_string(buffer, &pubList);
   if ( debug > 2 ) Serial.printf("serial_print_inputs:  ");
   Serial.println(buffer);
 }
@@ -255,7 +261,7 @@ void myDisplay(Adafruit_SSD1306 *display)
 
   display->setTextColor(SSD1306_WHITE);
   char dispStringT[8];
-  sprintf(dispStringT, "%3.0f %3.0f", pubList.SOC_solved, pubList.SOC_tracked);
+  sprintf(dispStringT, "%3.0f %3.0f", pubList.SOC_solved, pubList.SOC_free);
   display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[5];
@@ -267,7 +273,7 @@ void myDisplay(Adafruit_SSD1306 *display)
 
 
 // Talk Executive
-void talk(bool *stepping, PID* pid, double *stepVal, bool *vectoring, int8_t *vec_num)
+void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num)
 {
   // Serial event  (terminate Send String data with 0A using CoolTerm)
   if (stringComplete)
@@ -277,28 +283,8 @@ void talk(bool *stepping, PID* pid, double *stepVal, bool *vectoring, int8_t *ve
       case ( 'S' ):
         switch ( inputString.charAt(1) )
         {
-          case ( 'd' ):
-            pid->Sd(inputString.substring(2).toFloat());
-            break;
           case ( 'g' ):
-            pid->Sg(inputString.substring(2).toFloat());
-            break;
-          case ( 't' ):
-            pid->St(inputString.substring(2).toFloat());
-            break;
-        }
-        break;
-      case ( 'A' ):
-        switch ( inputString.charAt(1) )
-        {
-          case ( 'd' ):
-            pid->Ad(inputString.substring(2).toFloat());
-            break;
-          case ( 'g' ):
-            pid->Ag(inputString.substring(2).toFloat());
-            break;
-          case ( 't' ):
-            pid->At(inputString.substring(2).toFloat());
+//            pid->Sg(inputString.substring(2).toFloat());
             break;
         }
         break;
@@ -309,7 +295,7 @@ void talk(bool *stepping, PID* pid, double *stepVal, bool *vectoring, int8_t *ve
         talkT(stepping, stepVal, vectoring, vec_num);
         break;
       case ('h'): 
-        talkH(pid, stepVal, vec_num);
+        talkH(stepVal, vec_num);
         break;
       default:
         Serial.print(inputString.charAt(0)); Serial.println(" unknown");
@@ -351,17 +337,8 @@ void talkT(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num)
 }
 
 // Talk Help
-void talkH(PID *pid, double *stepVal, int8_t *vec_num)
+void talkH(double *stepVal, int8_t *vec_num)
 {
-  Serial.print("Sd= "); Serial.print(pid->Sd());  Serial.println("    : PID derivative deadband scalar [1]");
-  Serial.print("Ad= "); Serial.print(pid->Ad());  Serial.println("    : PID derivative deadband adder [0]");
-  Serial.print("   ref:   DB= "); Serial.print(pid->DB,3); Serial.println("    : present PID deadband");
-  Serial.print("   ref:   tau= "); Serial.print(pid->tau,3); Serial.println("    : present PID lead");
-  Serial.print("Sg= "); Serial.print(pid->Sg());  Serial.println("    : PID loopgain (integral) scalar [1]");
-  Serial.print("Ag= "); Serial.print(pid->Ag());  Serial.println("    : PID loopgain (integral) adder [0]");
-  Serial.print("   ref:   G= "); Serial.print(pid->G); Serial.println("    : present PID gain, frac/V");
-  Serial.print("St= "); Serial.print(pid->St());  Serial.println("    : PID lead (proportional) tlead scalar [1]");
-  Serial.print("At="); Serial.print(pid->At());  Serial.println("    : PID lead (proportional) tlead adder [0]");
   Serial.print("v=  "); Serial.print(debug);     Serial.println("    : verbosity, 0-10. 2 for save csv [0]");
   Serial.print("T<?>=  "); 
   Serial.println("Transient performed with input");

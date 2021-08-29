@@ -203,8 +203,8 @@ void loop()
 
   // Battery  models
   static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Battery model
-  static Battery *myBatt_tracked = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Tracked battery model
-  static Battery *myBatt_solved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Tracked battery model
+  static Battery *myBatt_solved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Solved battery model
+ static Battery *myBatt_free = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Free battery model
 
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
@@ -224,9 +224,8 @@ void loop()
   bool summarizing;                         // Summarize, T/F
   static Sync *summarize = new Sync(SUMMARIZE_DELAY);
   static double soc_est = 1.0;
-  static double soc_tracked = 1.0;
+  static double soc_free = 1.0;
   static double soc_solved = 1.0;
-  static PID *pid_o = new PID(C_G, C_TAU, C_MAX, C_MIN, C_LLMAX, C_LLMIN, 0, 1, C_DB, 0, 0, 1, C_KICK_TH, C_KICK);  // Observer PID
   static bool reset_soc = true;
 
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
@@ -264,21 +263,6 @@ void loop()
   {
     if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
 
-    // SOC Observer
-    double dyn_max = C_MAX;
-    double dyn_min = C_MIN;
-    if ( !reset_soc )
-    {
-      dyn_max = min(pid_o->cont + C_SOC_R_MAX * sen->T, 1.); // Limit invalid excursions
-      dyn_min = max(pid_o->cont - C_SOC_R_MAX * sen->T, 0.); // Limit invalid excursions
-    }
-    double vbatt = sen->Vbatt_filt_obs+double(stepping*stepVal);
-    double vbatt_fb = sen->Vbatt_model_tracked;
-    double T = min(sen->T, F_O_MAX_T);
-    pid_o->GN(C_G * min(max(5./myBatt_tracked->dv_dsoc(), 0.2), 2.0));
-    pid_o->update((reset>0), vbatt, vbatt_fb, T, 1.0, dyn_max, dyn_min, (reset>0 || vectoring));
-    soc_tracked = pid_o->cont;
-
     // Load and filter
     load(reset_soc, sen, sensor_tbatt, myPins, ads, myBatt, readSensors->now());
     filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt);
@@ -287,10 +271,10 @@ void loop()
     double Tbatt_filt_C = (sen->Tbatt_filt-32.)*5./9.;
     sen->Vbatt_model = myBatt->calculate(Tbatt_filt_C, soc_est, sen->Ishunt);
     sen->Vbatt_model_filt = myBatt->calculate(Tbatt_filt_C, soc_est, sen->Ishunt_filt);
-    sen->Vbatt_model_tracked = myBatt_tracked->calculate(Tbatt_filt_C, soc_tracked, sen->Ishunt_filt_obs);
+    myBatt_free->calculate(Tbatt_filt_C, soc_free, sen->Ishunt);
 
     // Solver
-    vbatt = sen->Vbatt_filt_obs+double(stepping*stepVal);
+    double vbatt = sen->Vbatt_filt_obs + double(stepping*stepVal);
     int8_t count = 0;
     sen->Vbatt_model_solved = myBatt_solved->calculate(Tbatt_filt_C, soc_solved, sen->Ishunt_filt_obs);
     double err = vbatt - sen->Vbatt_model_solved;
@@ -310,34 +294,28 @@ void loop()
     if ( vectoring && !reset_soc ) reset_soc = true;
     if ( reset_soc )
     {
-      if ( (solver_valid && elapsed>EST_WAIT) || (vectoring && (solver_valid || elapsed>INIT_WAIT))  )
+      if ( (solver_valid && elapsed>EST_WAIT) || (vectoring && (solver_valid && elapsed>INIT_WAIT))  )
       {
         reset_soc = false;
         soc_est = soc_solved;
+        soc_free = soc_solved;
       }
     }
-    if ( sen->Vbatt_filt<=batt_vsat )
-    {
-      double soc_trim = 0;
-      if ( fabs(sen->Ishunt_filt_obs)<C_CC_TRIM_IMAX ) soc_trim = sen->T * C_CC_TRIM_G * ( soc_solved - soc_est );
-      soc_est = max(min( soc_est + sen->Wbatt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP + soc_trim, 1.0), 0.0);
-    }
-    else   // >13.7 V is decent approximation for SOC>99.7 for prototype system (constants calculated)
-    {
-      soc_est = max(min( BATT_SOC_SAT + (sen->Vbatt_filt-batt_vsat)/(batt_vmax-batt_vsat)*(1.0-BATT_SOC_SAT), 1.0), 0.0);
-    }
-     
-    if ( debug == -1 )
-      Serial.printf("%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", soc_tracked+12., sen->Vbatt_filt_obs+double(stepping*stepVal),
-        myBatt->vstat(), myBatt->vdyn()+12., myBatt->v());
+    double soc_trim = 0;
+    if ( fabs(sen->Ishunt_filt_obs)<C_CC_TRIM_IMAX ) soc_trim = sen->T * C_CC_TRIM_G * ( soc_solved - soc_est );
+    soc_est = max(min( soc_est + sen->Wbatt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP + soc_trim, 1.0), 0.0);
+    soc_free = max(min( soc_free + sen->Wbatt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.0), 0.0);
 
+
+    // Debug print statements
     if ( debug == -2 )
-      Serial.printf("T,reset_soc,vectoring,Tbatt,Ishunt,Vb_f_o,Vb_e,err,prop,integ,soc_t,soc_e,soc_s,Vb_m_s,dvdsoc,T,count,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n",
+      Serial.printf("T,reset_soc,vectoring,Tbatt,Ishunt,Vb_f_o,Vb_e,soc_s,soc_f,soc_e,Vb_m_s,dvdsoc,T,count,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n",
       elapsed, reset_soc, vectoring, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model,
-      pid_o->err, pid_o->prop, pid_o->integ, pid_o->cont, soc_est, soc_solved, sen->Vbatt_model_solved, myBatt_solved->dv_dsoc(), sen->T, count);
+      soc_solved, soc_free, soc_est, sen->Vbatt_model_solved, myBatt_solved->dv_dsoc(), sen->T, count);
 
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
+
 
     // Update display
     myDisplay(display);
@@ -353,7 +331,7 @@ void loop()
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
     controlTime = decimalTime(&currentTime, tempStr);
     hmString = String(tempStr);
-    assignPubList(&pubList, publishParticle->now(), unit, hmString, controlTime, sen, numTimeouts, myBatt, myBatt_tracked, myBatt_solved);
+    assignPubList(&pubList, publishParticle->now(), unit, hmString, controlTime, sen, numTimeouts, myBatt_solved, myBatt_free, myBatt);
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
@@ -379,7 +357,7 @@ void loop()
   // right in the "Send String" box then press "Send."
   // String definitions are below.
   int debug_saved = debug;
-  talk(&stepping, pid_o, &stepVal, &vectoring, &vec_num);
+  talk(&stepping, &stepVal, &vectoring, &vec_num);
 
   // Summary management
   if ( debug == -3 )

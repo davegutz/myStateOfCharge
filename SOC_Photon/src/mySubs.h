@@ -80,7 +80,6 @@ struct Sensors
   bool bare_ads;          // If no ADS detected
   double Vbatt_model;         // Modeled battery voltage including steady current draw, V
   double Vbatt_model_filt;    // Filtered modeled battery voltage including steady current draw, V
-  double Vbatt_model_tracked; // Tracked modeled battery voltage including steady current draw, V
   double Vbatt_model_solved;  // Solved modeled battery voltage including steady current draw, V
   Sensors(void) {}
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
@@ -105,7 +104,6 @@ struct Sensors
     this->bare_ads = bare_ads;
     this->Vbatt_model = 0;
     this->Vbatt_model_filt = 0;
-    this->Vbatt_model_tracked = 0;
     this->Vbatt_model_solved = 0;
   }
 };
@@ -123,9 +121,10 @@ double  decimalTime(unsigned long *currentTime, char* tempStr);
 void print_serial_header(void);
 void myDisplay(Adafruit_SSD1306 *display);
 String time_long_2_str(const unsigned long currentTime, char *tempStr);
+void create_print_string(char *buffer, Publish *pubList);
 
 // Talk Declarations
-void talk(bool *stepping, PID* pid, double *stepVal, bool *vectoring, int8_t *vec_num);
+void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num);
 void talkT(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num);  // Transient inputs
-void talkH(PID *pid, double *stepVal, int8_t *vec_num); // Help
+void talkH(double *stepVal, int8_t *vec_num); // Help
 #endif

@@ -55,7 +55,7 @@ void publish1(void)
 void publish2(void)
 {
   if (debug>4) Serial.printf("Blynk write2\n");
-  Blynk.virtualWrite(V6,  pubList.SOC_tracked);
+  Blynk.virtualWrite(V6,  pubList.SOC_free);
   Blynk.virtualWrite(V7,  pubList.Vbatt_model_filt);
   Blynk.virtualWrite(V8,  pubList.T);
   Blynk.virtualWrite(V9,  pubList.Tbatt);
@@ -71,7 +71,7 @@ void publish3(void)
   Blynk.virtualWrite(V13, pubList.Vshunt_filt);
   Blynk.virtualWrite(V14, pubList.I2C_status);
   Blynk.virtualWrite(V15, pubList.hmString);
-  Blynk.virtualWrite(V16, pubList.Vbatt_model_tracked);
+  //  Blynk.virtualWrite(V16, pubList.Vbatt_model_tracked);
 }
 
 
@@ -83,6 +83,7 @@ void publish4(void)
   Blynk.virtualWrite(V18, pubList.Ishunt_filt_obs);
   Blynk.virtualWrite(V19, pubList.Wshunt);
   Blynk.virtualWrite(V20, pubList.Wshunt_filt);
+  Blynk.virtualWrite(V21, pubList.SOC_solved);
 }
 
 
@@ -115,17 +116,8 @@ void publish_particle(unsigned long now, Wifi *wifi)
   if ( wifi->connected )
   {
     // Create print string
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,\
-  %c", \
-    pubList.unit.c_str(), pubList.hmString.c_str(), pubList.controlTime,
-    pubList.Tbatt, pubList.Tbatt_filt,     pubList.Vbatt, pubList.Vbatt_filt_obs,
-    pubList.Vshunt, pubList.Vshunt_filt,
-    pubList.Ishunt, pubList.Ishunt_filt_obs, pubList.Wshunt, pubList.Wshunt_filt,
-    pubList.SOC, pubList.Vbatt_model,
-    pubList.SOC_tracked, pubList.Vbatt_model_tracked, 
-    pubList.SOC_solved, pubList.Vbatt_model_solved,
-    pubList.T, '\0');
-  
+    create_print_string(buffer, &pubList);
+ 
     unsigned nowSec = now/1000UL;
     unsigned sec = nowSec%60;
     unsigned min = (nowSec%3600)/60;
@@ -147,7 +139,7 @@ void publish_particle(unsigned long now, Wifi *wifi)
 // Assignments
 void assignPubList(Publish* pubList, const unsigned long now, const String unit, const String hmString,
   const double controlTime, struct Sensors* sen, const int numTimeouts,
-  Battery* myBatt, Battery* myBatt_tracked, Battery* myBatt_solved)
+  Battery* myBatt_solved, Battery* myBatt_free, Battery* myBatt)
 {
   pubList->now = now;
   pubList->unit = unit;
@@ -166,12 +158,11 @@ void assignPubList(Publish* pubList, const unsigned long now, const String unit,
   pubList->Wshunt = sen->Wshunt;
   pubList->Wshunt_filt = sen->Wshunt_filt;
   pubList->numTimeouts = numTimeouts;
-  pubList->SOC = myBatt->soc()*100.0;
-  pubList->SOC_tracked = myBatt_tracked->soc()*100.0;
   pubList->SOC_solved = myBatt_solved->soc()*100.0;
+  pubList->SOC_free = myBatt_free->soc()*100.0;
+  pubList->SOC = myBatt->soc()*100.0;
   pubList->Vbatt_model = sen->Vbatt_model;
   pubList->Vbatt_model_filt = sen->Vbatt_model_filt;
-  pubList->Vbatt_model_tracked = sen->Vbatt_model_tracked;
   pubList->Vbatt_model_solved = sen->Vbatt_model_solved;
   pubList->T = sen->T;
 }

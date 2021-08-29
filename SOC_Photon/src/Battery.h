@@ -83,8 +83,8 @@ protected:
 const int batt_num_cells = NOM_SYS_VOLT/3;  // Number of standard 3 volt LiFePO4 cells
 const double batt_vsat = double(batt_num_cells)*double(BATT_V_SAT);  // Total bank saturation for 0.997=soc, V
 const double batt_vmax = (14.3/4)*double(batt_num_cells); // Observed max voltage of 14.3 V for 12V prototype bank, V
-const double batt_r1 = double(BATT_R1);
-const double batt_r2 = double(BATT_R2);
+const double batt_r1 = double(BATT_R1);     // Randels static resistance per cell, Ohms
+const double batt_r2 = double(BATT_R2);     // Randels dynamic resistance per cell, Ohms
 const double batt_r2c2 = double(BATT_R2C2);// Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
                               // test so using with R2 and then multiplying by 4 for total result is valid,
                               // though probably not for an individual cell
@@ -107,7 +107,7 @@ const unsigned int nz_bb = 7;
 // Charge test profiles
 #define NUM_VEC           1   // Number of vectors defined here
 static const unsigned int n_v1 = 10;
-static const double t_min_v1[n_v1] =  {0,     0.2,   0.2001, 1.4,   1.4001, 2.4999, 2.5,    3.6999, 3.7,    4.5};
+static const double t_min_v1[n_v1] =  {0,     0.2,   0.2001, 1.4,   1.4001, 2.0999, 2.0,    3.1999, 3.2,    3.6};
 static const double v_v1[n_v1] =      {13.65, 13.65, 13.65,  13.0,  13.0,   13.0,   13.0,   13.65,  13.65,  13.65};
 static const double i_v1[n_v1] =      {0.,    0.,    -500.,  -500., 0.,     0.,     500.,   500.,   0.,     0.};
 static const double T_v1[n_v1] =      {72.,   72.,   72.,    72.,   72.,    72.,    72.,    72.,    72.,    72.};

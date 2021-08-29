@@ -64,21 +64,10 @@
 #define SHUNT_V2A_S           -1189.3   // Shunt V2A scalar, A/V (1333 is 100A/0.075V)  (-1189.3)
 #define SHUNT_V2A_A           0         // Shunt V2A adder, A derived from charge-discharge integral match (0 in theory)  (0)
                                         // observed on prototype over time that 0 V really is 0 A.   Not much bias in ADS device
-//const int EEPROM_ADDR = 1;            // Flash address (1)
 #define SCREEN_WIDTH          128       // OLED display width, in pixels (128)
 #define SCREEN_HEIGHT         32        // OLED display height, in pixels (4)
 #define OLED_RESET            4         // Reset pin # (or -1 if sharing Arduino reset pin) (4)
 #define SCREEN_ADDRESS        0x3C      // See datasheet for Address; 0x3D for 128x64, (0x3C for 128x32)
-#define C_G             0.010       // Control gain, r/s = %/F (about 0.1 is instability point for C_TAU=1) (0.010)
-#define C_TAU           0           // Control lead, s  (0)
-#define C_DB            0.002       // Deadband in error, V (0.0020)
-#define C_MAX           1           // Integral and overall max limit, frac (1)
-#define C_MIN           0           // Integral and overall min limit, frac (0)
-#define C_LLMAX         0.1         // Proportional path max limit, frac (0.1)
-#define C_LLMIN         -0.2        // Proportional path min limit, frac (-0.2)
-#define C_SOC_R_MAX     0.01        // Maximum integrating tf rate to limit invalid excursions, frac/sec (0.01)
-#define C_KICK_TH       0.2         // Voltage error to kick pid, V (0.2)
-#define C_KICK          8           // Amount to kick pid gain, frac (8)
 #define C_CC_TRIM_G     0.015       // How much to trim coulomb counter to nudge it to solver (frac/sec/frac) (0.015  1%/min at 1% error)
 #define C_CC_TRIM_IMAX  2           // Current below which solver allowed to trim the coulomb counter
 
