@@ -43,6 +43,7 @@ public:
   double vstat() { return (vstat_); };
   double vdyn() { return (vdyn_); };
   double v() { return (v_); };
+  double tcharge() { return (tcharge_); };
   double dv_dsoc() { return (dv_dsoc_); };
   // double d2v_dsoc2() { return (d2v_dsoc2_); };
 protected:
@@ -67,6 +68,8 @@ protected:
   int num_cells_;   // Number of cells
   double dv_dsoc_;  // Derivative, V/fraction
   // double d2v_dsoc2_; // Derivative, V^2/fraction^2
+  double tcharge_;  // Charging time to 100%, hr
+  double pow_in_;  // Charging power, w
 };
 
 // BattleBorn 100 Ah, 12v LiFePO4

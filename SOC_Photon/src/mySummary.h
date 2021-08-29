@@ -49,14 +49,14 @@ struct Sum_st
   {
     char tempStr[50];
     time_long_2_str(time, tempStr);
-    Serial.printf("%s, %4d, %7.3f, %4d, %7d,", tempStr, Tbatt, Vbatt, Ishunt, SOC);
+    Serial.printf("%s, %ld, %4d, %7.3f, %4d, %7d,", tempStr, time, Tbatt, Vbatt, Ishunt, SOC);
   }
 };
 
 //
 void print_all(struct Sum_st *sum, const int isum, const int nsum)
 {
-  Serial.printf("i,  time,      Tbatt,  Vbatt, Ishunt,  SOC\n");
+  Serial.printf("i,  date,  time,    Tbatt,  Vbatt, Ishunt,  SOC\n");
   int i = isum;  // Last one written was isum
   int n = -1;
   while ( ++n < nsum )

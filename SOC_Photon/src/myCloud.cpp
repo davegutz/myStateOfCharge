@@ -165,4 +165,5 @@ void assignPubList(Publish* pubList, const unsigned long now, const String unit,
   pubList->Vbatt_model_filt = sen->Vbatt_model_filt;
   pubList->Vbatt_model_solved = sen->Vbatt_model_solved;
   pubList->T = sen->T;
+  pubList->tcharge = myBatt->tcharge();
 }

@@ -78,21 +78,20 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,   Wshunt,Wshunt_filt,   SOC,Vbatt_m,   SOC_s,Vbatt_m_s, T_filt"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,   Wshunt,Wshunt_filt,   SOC,Vbatt_m,   SOC_s,Vbatt_m_s, tcharge,  T_filt"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,  %7.3f,\
-  %c", \
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,  %7.3f,  %7.3f, %c", \
     pubList->unit.c_str(), pubList->hmString.c_str(), pubList->controlTime,
     pubList->Tbatt, pubList->Tbatt_filt,     pubList->Vbatt, pubList->Vbatt_filt_obs,
     pubList->Vshunt, pubList->Vshunt_filt,
     pubList->Ishunt, pubList->Ishunt_filt_obs, pubList->Wshunt, pubList->Wshunt_filt,
     pubList->SOC, pubList->Vbatt_model,
     pubList->SOC_solved, pubList->Vbatt_model_solved,
-    pubList->SOC_free,
+    pubList->SOC_free, pubList->tcharge,
     pubList->T, '\0');
 }
 
@@ -289,6 +288,9 @@ void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num)
             break;
         }
         break;
+      case ( 'd' ):
+        debug = -3;
+        break;
       case ( 'v' ):
         debug = inputString.substring(1).toInt();
         break;
@@ -340,9 +342,11 @@ void talkT(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num)
 // Talk Help
 void talkH(double *stepVal, int8_t *vec_num)
 {
+  Serial.println("Help for serial talk.   Entries and current values.  All entries follwed by CR");
+  Serial.printf("d   dump the summary log"); 
   Serial.print("v=  "); Serial.print(debug);     Serial.println("    : verbosity, 0-10. 2 for save csv [0]");
   Serial.print("T<?>=  "); 
-  Serial.println("Transient performed with input");
+  Serial.println("Transient performed with input.   For example:");
   Serial.print("  Ts=<stepVal>  :   stepVal="); Serial.println(*stepVal);
   Serial.print(", stepping=");  Serial.print(stepping);
   Serial.print("  Tv=<vec_num>  :   vec_num="); Serial.println(*vec_num);

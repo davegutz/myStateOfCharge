@@ -53,6 +53,7 @@ struct Publish
   double Vbatt_model;
   double Vbatt_model_filt;
   double Vbatt_model_solved;
+  double tcharge;
 };
 
 void publish1(void);

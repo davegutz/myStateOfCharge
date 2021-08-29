@@ -316,9 +316,9 @@ void loop()
 
     // Debug print statements
     if ( debug == -2 )
-      Serial.printf("T,reset_soc,vectoring,Tbatt,Ishunt,Vb_f_o,Vb_e,soc_s,soc_f,soc_e,Vb_m_s,dvdsoc,T,count,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n",
+      Serial.printf("T,reset_soc,vectoring,Tbatt,Ishunt,Vb_f_o,Vb_e,soc_s,soc_f,soc_e,Vb_m_s,dvdsoc,T,count,tcharge,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
       elapsed, reset_soc, vectoring, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model,
-      soc_solved, soc_free, soc_est, sen->Vbatt_model_solved, myBatt_solved->dv_dsoc(), sen->T, count);
+      soc_solved, soc_free, soc_est, sen->Vbatt_model_solved, myBatt_solved->dv_dsoc(), sen->T, count, myBatt->tcharge());
 
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());

@@ -34,12 +34,12 @@ extern char buffer[256];
 // constructors
 Battery::Battery()
     : b_(0), a_(0), c_(0), m_(0), n_(0), d_(0), nz_(1), soc_(1.0), r1_(0), r2_(0), c2_(0), vstat_(0),
-    vdyn_(0), v_(0), curr_in_(0), num_cells_(4) {}
+    vdyn_(0), v_(0), curr_in_(0), num_cells_(4), dv_dsoc_(0), tcharge_(24.), pow_in_(0.0) {}
 Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2)
     : b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(nz), soc_(1.0), r1_(r1), r2_(r2), c2_(r2c2/r2_),
-    vstat_(0), vdyn_(0), v_(0), curr_in_(0), num_cells_(num_cells)
+    vstat_(0), vdyn_(0), v_(0), curr_in_(0), num_cells_(num_cells), dv_dsoc_(0), tcharge_(24.), pow_in_(0.0)
 {
   B_T_ = new TableInterp1Dclip(nz_, x_tab, b_tab);
   A_T_ = new TableInterp1Dclip(nz_, x_tab, a_tab);
@@ -56,6 +56,7 @@ double Battery::calculate(const double temp_C, const double soc_frac, const doub
   a_ = A_T_ ->interp(temp_C);
   c_ = C_T_ ->interp(temp_C);
   soc_ = max(min(soc_frac, 1.0-1e-6), 1e-6);
+  double soc_frac_lim = max(min(soc_frac, 1.), 0.);
   curr_in_ = curr_in;
 
   // Perform computationally expensive steps one time
@@ -72,5 +73,14 @@ double Battery::calculate(const double temp_C, const double soc_frac, const doub
   vdyn_ = double(num_cells_) * curr_in*(r1_ + r2_);
 
   v_ = vstat_ + vdyn_;
+  pow_in_ = v_*curr_in_ - curr_in_*curr_in_*(r1_+r2_)*num_cells_;  // Internal resistance of battery is a loss
+  if ( pow_in_>1. )  tcharge_ = min(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * (1.-soc_frac_lim), 24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
+  else if ( pow_in_<-1. ) tcharge_ = max(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * soc_frac_lim, -24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
+  else if ( pow_in_>=0. ) tcharge_ = 24.*(1.-soc_frac_lim);
+  else tcharge_ = -24.*soc_frac_lim;
+
+  if ( debug == -8 ) Serial.printf("soc_frac_lim,v,curr,pow,tcharge, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
+      soc_frac_lim, v_, curr_in_, pow_in_, tcharge_);
+
   return ( v_ );
 }
