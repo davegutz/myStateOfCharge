@@ -204,7 +204,7 @@ void loop()
   // Battery  models
   static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Battery model
   static Battery *myBatt_solved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Solved battery model
- static Battery *myBatt_free = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Free battery model
+  static Battery *myBatt_free = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, batt_r1, batt_r2, batt_r2c2);  // Free battery model
 
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
@@ -291,10 +291,17 @@ void loop()
     if ( count<SOLV_MAX_COUNTS ) solver_valid = true; 
     
     // SOC Integrator - Coulomb Counting method
-    if ( vectoring && !reset_soc ) reset_soc = true;
+    static boolean vectoring_past = vectoring;
+    if ( vectoring_past != vectoring )
+    {
+      reset_soc = true;
+      start = readSensors->now();
+      elapsed = 0UL;
+    }
+    vectoring_past = vectoring;
     if ( reset_soc )
     {
-      if ( (solver_valid && elapsed>EST_WAIT) || (vectoring && (solver_valid && elapsed>INIT_WAIT))  )
+      if ( solver_valid && ( (elapsed>EST_WAIT) || (vectoring && elapsed>INIT_WAIT)  ))
       {
         reset_soc = false;
         soc_est = soc_solved;

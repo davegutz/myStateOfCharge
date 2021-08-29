@@ -140,26 +140,27 @@ void load(const bool reset_soc, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, 
   sen->Vbatt =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A);
 
   // Vector model
-  double elapsed = double(now - vec_start)/1000./60.;
+  double elapsed_loc = 0.;
   if ( vectoring )
   {
-    if ( reset_soc || (elapsed > t_min_v1[n_v1-1]) )
+    if ( reset_soc || (elapsed_loc > t_min_v1[n_v1-1]) )
     {
       vec_start = now;
-      elapsed = 0.;
     }
-    sen->Ishunt =  I_T1->interp(elapsed);
+    elapsed_loc = double(now - vec_start)/1000./60.;
+    sen->Ishunt =  I_T1->interp(elapsed_loc);
     sen->Vshunt = (sen->Ishunt - SHUNT_V2A_A) / SHUNT_V2A_S;
     sen->Vshunt_int = -999;
-    sen->Tbatt =  T_T1->interp(elapsed);
-    sen->Vbatt =  V_T1->interp(elapsed) + sen->Ishunt*(batt_r1 + batt_r2)*batt_num_cells;
+    sen->Tbatt =  T_T1->interp(elapsed_loc);
+    sen->Vbatt =  V_T1->interp(elapsed_loc) + sen->Ishunt*(batt_r1 + batt_r2)*batt_num_cells;
   }
+  else elapsed_loc = 0.;
 
   // Power calculation
   sen->Wshunt = sen->Vbatt*sen->Ishunt;
   sen->Wbatt = sen->Vbatt*sen->Ishunt - sen->Ishunt*sen->Ishunt*(batt_r1 + batt_r2)*batt_num_cells; 
 
-  if ( debug == -5 ) Serial.printf("vectoring,reset_soc,vec_start,now,elapsed,Vbatt,Ishunt,Tbatt:  %d,%d,%ld,%ld,%7.3f,%7.3f,%7.3f,%7.3f\n", vectoring, reset_soc, vec_start, now, elapsed, sen->Vbatt, sen->Ishunt, sen->Tbatt);
+  if ( debug == -6 ) Serial.printf("vectoring,reset_soc,vec_start,now,elapsed_loc,Vbatt,Ishunt,Tbatt:  %d,%d,%ld,%ld,%7.3f,%7.3f,%7.3f,%7.3f\n", vectoring, reset_soc, vec_start, now, elapsed_loc, sen->Vbatt, sen->Ishunt, sen->Tbatt);
 }
 
 // Filter inputs
