@@ -81,7 +81,7 @@ extern int8_t vec_num;          // Active vector number
 extern unsigned long vec_start;  // Start of active vector
 
 // Global locals
-int8_t debug = -2;
+int8_t debug = 2;
 String inputString = "";
 boolean stringComplete = false;
 boolean stepping = false;
@@ -310,8 +310,8 @@ void loop()
     }
     double soc_trim = 0;
     if ( fabs(sen->Ishunt_filt_obs)<C_CC_TRIM_IMAX ) soc_trim = sen->T * C_CC_TRIM_G * ( soc_solved - soc_est );
-    soc_est = max(min( soc_est + sen->Wbatt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP + soc_trim, 1.0), 0.0);
-    soc_free = max(min( soc_free + sen->Wbatt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.0), 0.0);
+    soc_est = max(min( soc_est + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP + soc_trim, 1.0), 0.0);
+    soc_free = max(min( soc_free + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.0), 0.0);
 
 
     // Debug print statements
