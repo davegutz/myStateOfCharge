@@ -81,7 +81,7 @@ protected:
 // >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 60-95 F
 #define BATT_V_SAT            3.425     // Normal battery cell saturation for SOC=99.7, V (3.425)
 #define BATT_SOC_SAT          0.997     // Normal battery cell saturation, fraction (0.997)
-#define BATT_TS               1.5       // Severity scalar for discharging
+#define BATT_TS               1.0       // Severity scalar for discharging
 #define BATT_R1               0.00126   // Battery Randels static resistance, Ohms (0.00126) for 3v cell matches transients
 #define BATT_R2               0.00168   // Battery Randels dynamic resistance, Ohms (0.00168) for 3v cell matches transients
 #define BATT_R2C2             100       // Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
