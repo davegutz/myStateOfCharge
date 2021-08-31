@@ -37,7 +37,7 @@ extern Publish pubList;
 extern char buffer[256];
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;     // Time Blynk events
 extern BlynkParticle Blynk;
-//extern BlynkParticle Blynk;
+extern boolean enable_wifi;
 
 // Publish1 Blynk
 void publish1(void)
@@ -106,7 +106,7 @@ BLYNK_WRITE(V6) {
 
 
 // Check connection and publish Particle
-void publish_particle(unsigned long now, Wifi *wifi)
+void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
 {
   // Forgiving wifi connection logic
   manage_wifi(now, wifi);

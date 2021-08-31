@@ -37,7 +37,8 @@ extern boolean stepping;        // Active step adder
 extern double stepVal;          // Step size
 extern boolean vectoring;       // Active battery test vector
 extern int8_t vec_num;          // Active vector number
-extern unsigned long vec_start;  // Start of active vector
+extern unsigned long vec_start; // Start of active vector
+extern boolean enable_wifi;     // Enable wifi
 
 void manage_wifi(unsigned long now, Wifi *wifi)
 {
@@ -58,7 +59,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
     wifi->connected = false;
     if ( debug > 2 ) Serial.printf("wifi turned off\n");
   }
-  if ( now-wifi->lastAttempt>=CHECK_INTERVAL )
+  if ( now-wifi->lastAttempt>=CHECK_INTERVAL && enable_wifi )
   {
     wifi->lastDisconnect = now;   // Give it a chance
     wifi->lastAttempt = now;
@@ -249,7 +250,7 @@ void myDisplay(Adafruit_SSD1306 *display)
 
   display->setTextColor(SSD1306_WHITE);
   char dispStringT[8];
-  sprintf(dispStringT, "%3.0f %3.0f", min(pubList.SOC_solved, 101.), min(pubList.SOC_free, 101.));
+  sprintf(dispStringT, "%3.0f %3.0f", min(pubList.SOC_solved, 101.), pubList.SOC_free);
   display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[5];
@@ -288,6 +289,9 @@ void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num,
         break;
       case ( 'T' ):
         talkT(stepping, stepVal, vectoring, vec_num);
+        break;
+      case ('w'): 
+        enable_wifi = true;
         break;
       case ('h'): 
         talkH(stepVal, vec_num);
@@ -342,7 +346,9 @@ void talkH(double *stepVal, int8_t *vec_num)
   Serial.print("  Ts=<stepVal>  :   stepVal="); Serial.println(*stepVal);
   Serial.print(", stepping=");  Serial.print(stepping);
   Serial.print("  Tv=<vec_num>  :   vec_num="); Serial.println(*vec_num);
-  Serial.print(", vectoringing=");  Serial.print(vectoring);
+  Serial.print(", vectoringing=");  Serial.println(vectoring);
+  Serial.printf("w   turn on wifi = "); Serial.println(enable_wifi);
+  Serial.println("h   this menu");
   Serial.println("");
 }
 

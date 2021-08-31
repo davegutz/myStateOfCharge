@@ -69,16 +69,17 @@ Make it yourself.   It should look like this, with your personal authorizations:
 extern int8_t debug;              // Level of debug printing (2)
 extern Publish pubList;
 Publish pubList = Publish();
-extern BlynkParticle Blynk;      // Blynk object
+extern BlynkParticle Blynk;       // Blynk object
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4; // Time Blynk events
 BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;        // Time Blynk events
-extern String inputString;              // a string to hold incoming data
-extern boolean stringComplete;          // whether the string is complete
-extern boolean stepping;                // active step adder
-extern double stepVal;                  // Step size
-extern boolean vectoring;       // Active battery test vector
-extern int8_t vec_num;          // Active vector number
-extern unsigned long vec_start;  // Start of active vector
+extern String inputString;        // a string to hold incoming data
+extern boolean stringComplete;    // whether the string is complete
+extern boolean stepping;          // active step adder
+extern double stepVal;            // Step size
+extern boolean vectoring;         // Active battery test vector
+extern int8_t vec_num;            // Active vector number
+extern unsigned long vec_start;   // Start of active vector
+extern boolean enable_wifi;       // Enable wifi
 
 // Global locals
 int8_t debug = 2;
@@ -89,6 +90,8 @@ double stepVal = -2;
 boolean vectoring = false;
 int8_t vec_num = 1;
 unsigned long vec_start = 0UL;
+boolean enable_wifi = false;
+
 char buffer[256];               // Serial print buffer
 int numTimeouts = 0;            // Number of Particle.connect() needed to unfreeze
 String hmString = "00:00";      // time, hh:mm
@@ -316,7 +319,7 @@ void loop()
     double soc_trim = 0;
     if ( fabs(sen->Ishunt_filt_obs)<C_CC_TRIM_IMAX ) soc_trim = sen->T * C_CC_TRIM_G * ( soc_solved - soc_est );
     soc_est = max(min( soc_est + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP + soc_trim, 1.0), 0.0);
-    soc_free = max(min( soc_free + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.0), 0.0);
+    soc_free = max(min( soc_free + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 10.0), -10.0);
 
 
     // Debug print statements
@@ -352,7 +355,7 @@ void loop()
       led_on = !led_on;
       if ( led_on ) digitalWrite(myPins->status_led, HIGH);
       else  digitalWrite(myPins->status_led, LOW);
-      publish_particle(publishParticle->now(), myWifi);
+      publish_particle(publishParticle->now(), myWifi, enable_wifi);
     }
 
     // Monitor for debug
