@@ -111,6 +111,12 @@ void setup()
   Serial.flush();
   delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
   Serial.println("Hello!");
+/*
+  Serial1.begin(115200); // initialize serial communication at 115200 bits per second:
+  Serial1.flush();
+  delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
+  Serial1.println("Hello!");
+*/
 
   // Peripherals
   myPins = new Pins(D6, D7, A1);
@@ -169,9 +175,9 @@ void setup()
   Serial.printf("done CLOUD\n");
 
   #ifdef PHOTON
-    if ( debug>1 ) { sprintf(buffer, "Particle Photon\n"); Serial.print(buffer); };
+    if ( debug>1 ) { sprintf(buffer, "Particle Photon\n"); Serial.print(buffer); } //Serial1.print(buffer); }
   #else
-    if ( debug>1 ) { sprintf(buffer, "Arduino Mega2560\n"); Serial.print(buffer); };
+    if ( debug>1 ) { sprintf(buffer, "Arduino Mega2560\n"); Serial.print(buffer); } //Serial1.print(buffer); }
   #endif
 
   // Summary
@@ -278,11 +284,10 @@ void loop()
     int8_t count = 0;
     sen->Vbatt_model_solved = myBatt_solved->calculate(Tbatt_filt_C, soc_solved, sen->Ishunt_filt_obs);
     double err = vbatt - sen->Vbatt_model_solved;
-    double meps = 1-1e-6;
     bool solver_valid = false;
     while( fabs(err)>SOLV_ERR && count++<SOLV_MAX_COUNTS )
     {
-      soc_solved = max(min(soc_solved + max(min( err/myBatt_solved->dv_dsoc(), SOLV_MAX_STEP), -SOLV_MAX_STEP), meps), 1e-6);
+      soc_solved = max(min(soc_solved + max(min( err/myBatt_solved->dv_dsoc(), SOLV_MAX_STEP), -SOLV_MAX_STEP), 1.2), 1e-6);
       sen->Vbatt_model_solved = myBatt_solved->calculate(Tbatt_filt_C, soc_solved, sen->Ishunt_filt_obs);
       err = vbatt - sen->Vbatt_model_solved;
       if ( debug == -5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,soc_s,vbatt,Vbatt_m_s,err, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n",
@@ -353,7 +358,7 @@ void loop()
     // Monitor for debug
     if ( debug>0 && publishS )
     {
-      serial_print_inputs(publishSerial->now(), T);
+      serial_print(publishSerial->now(), T);
     }
 
   }

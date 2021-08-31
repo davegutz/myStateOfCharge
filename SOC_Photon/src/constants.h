@@ -68,9 +68,9 @@
 #define SCREEN_HEIGHT         32        // OLED display height, in pixels (4)
 #define OLED_RESET            4         // Reset pin # (or -1 if sharing Arduino reset pin) (4)
 #define SCREEN_ADDRESS        0x3C      // See datasheet for Address; 0x3D for 128x64, (0x3C for 128x32)
-#define C_CC_TRIM_G     0.003       // How much to trim coulomb counter to nudge it to solver (frac/sec/frac) (0.015  0.2%/min at 1% error)
-#define C_CC_TRIM_IMAX  2           // Current below which solver allowed to trim the coulomb counter
 
+#define C_CC_TRIM_G     0.003       // How much to trim coulomb counter to nudge it to solver (frac/sec/frac)
+#define C_CC_TRIM_IMAX  50          // Current below which solver allowed to trim the coulomb counter
 #define F_O_MAX_T       3.0         // Maximum call update time filters (3.0)
 #define F_MAX_T         3.0         // Maximum call update time filters (3.0)
 #define F_O_W           0.50        // Observer filter wn, r/s (0.5)   

@@ -78,7 +78,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,   Wshunt,Wshunt_filt,   SOC,Vbatt_m,   SOC_s,Vbatt_m_s, tcharge,  T_filt"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,   Wshunt,Wshunt_filt,   SOC,Vbatt_m,   SOC_s,Vbatt_m_s, SOC_e, tcharge,  T_filt"));
 }
 
 // Print strings
@@ -96,24 +96,12 @@ void create_print_string(char *buffer, Publish *pubList)
 }
 
 // Inputs serial print
-void serial_print_inputs(unsigned long now, double T)
+void serial_print(unsigned long now, double T)
 {
   create_print_string(buffer, &pubList);
-  if ( debug > 2 ) Serial.printf("serial_print_inputs:  ");
-  Serial.println(buffer);
+  if ( debug > 2 ) Serial.printf("serial_print:  ");
+  Serial.println(buffer);  //Serial1.println(buffer);
 }
-
-// Normal serial print
-void serial_print(void)
-{
-  if ( debug>2 )
-  {
-    Serial.print(0, 2); Serial.print(F(", "));   // placeholder SOC?
-    Serial.print(0, DEC); Serial.print(F(", "));  // placeholder SOC?
-    Serial.println("");
-  }
-}
-
 
 // Load
 void load(const bool reset_soc, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, Battery *batt, const unsigned long now)
@@ -261,11 +249,11 @@ void myDisplay(Adafruit_SSD1306 *display)
 
   display->setTextColor(SSD1306_WHITE);
   char dispStringT[8];
-  sprintf(dispStringT, "%3.0f %3.0f", pubList.SOC_solved, pubList.SOC_free);
+  sprintf(dispStringT, "%3.0f %3.0f", min(pubList.SOC_solved, 101.), min(pubList.SOC_free, 101.));
   display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[5];
-  sprintf(dispStringS, " %3.0f", pubList.SOC);
+  sprintf(dispStringS, " %3.0f", min(pubList.SOC, 101.));
   display->print(dispStringS);
 
   display->display();
@@ -387,6 +375,30 @@ void serialEvent()
     }
   }
 }
+// Copy for bluetooth connected to TX/RX
+/*
+void serialEvent1()
+{
+  while (Serial1.available())
+  {
+    // get the new byte:
+    char inChar = (char)Serial1.read();
+    // add it to the inputString:
+    inputString += inChar;
+    // if the incoming character is a newline, set a flag
+    // so the main loop can do something about it:
+    if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',')
+    {
+      stringComplete = true;
+     // Remove whitespace
+      inputString.trim();
+      inputString.replace(" ","");
+      inputString.replace("=","");
+      Serial1.println(inputString);
+    }
+  }
+}
+*/
 
 // For summary prints
 String time_long_2_str(const unsigned long currentTime, char *tempStr)

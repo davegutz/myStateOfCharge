@@ -51,23 +51,25 @@ Battery::~Battery() {}
 // functions
 
 // SOC-OCV curve fit method per Zhang, et al
-double Battery::calculate(const double temp_C, const double soc_frac, const double curr_in)
+double Battery::calculate(const double temp_C, const double soc_in, const double curr_in)
 {
   b_ = B_T_ ->interp(temp_C);
   a_ = A_T_ ->interp(temp_C);
   c_ = C_T_ ->interp(temp_C);
-  soc_ = max(min(soc_frac, 1.0-1e-6), 1e-6);
-  double soc_frac_lim = max(min(soc_frac, 1.), 0.);
+  double meps = 1-1e-6;
+  soc_ = soc_in;
+  double soc_in_lim = max(min(soc_in, meps), 1e-6);
   curr_in_ = curr_in;
 
   // Perform computationally expensive steps one time
-  double log_soc = log(soc_);
-  double exp_n_soc = exp(n_*(soc_-1));
+  double log_soc = log(soc_in_lim);
+  double exp_n_soc = exp(n_*(soc_in_lim-1));
   double pow_log_soc = pow(-log_soc, m_);
 
   // VOC-OCV model
-  voc_ = double(num_cells_) * ( a_ + b_*pow_log_soc + c_*soc_ + d_*exp_n_soc );
-  dv_dsoc_ = double(num_cells_) * ( b_*m_/soc_*pow_log_soc/log_soc + c_ + d_*n_*exp_n_soc );
+  dv_dsoc_ = double(num_cells_) * ( b_*m_/soc_in_lim*pow_log_soc/log_soc + c_ + d_*n_*exp_n_soc );
+  voc_ = double(num_cells_) * ( a_ + b_*pow_log_soc + c_*soc_in_lim + d_*exp_n_soc )
+                                                  + (soc_in - soc_in_lim) * dv_dsoc_;  // slightly beyond
   // d2v_dsoc2_ = double(num_cells_) * ( b_*m_/soc_/soc_*pow_log_soc/log_soc*((m_-1.)/log_soc - 1.) + d_*n_*n_*exp_n_soc );
 
   // Dynamic emf
@@ -77,13 +79,13 @@ double Battery::calculate(const double temp_C, const double soc_frac, const doub
   // Summarize
   v_ = voc_ + vdyn_;
   pow_in_ = v_*curr_in_ - curr_in_*curr_in_*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
-  if ( pow_in_>1. )  tcharge_ = min(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * (1.-soc_frac_lim), 24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
-  else if ( pow_in_<-1. ) tcharge_ = max(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * soc_frac_lim, -24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
-  else if ( pow_in_>=0. ) tcharge_ = 24.*(1.-soc_frac_lim);
-  else tcharge_ = -24.*soc_frac_lim;
+  if ( pow_in_>1. )  tcharge_ = min(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * (1.-soc_in_lim), 24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
+  else if ( pow_in_<-1. ) tcharge_ = max(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * soc_in_lim, -24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
+  else if ( pow_in_>=0. ) tcharge_ = 24.*(1.-soc_in_lim);
+  else tcharge_ = -24.*soc_in_lim;
 
-  if ( debug == -8 ) Serial.printf("soc_frac_lim,v,curr,pow,tcharge, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
-      soc_frac_lim, v_, curr_in_, pow_in_, tcharge_);
+  if ( debug == -8 ) Serial.printf("soc_in,v,curr,pow,tcharge, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
+      soc_in, v_, curr_in_, pow_in_, tcharge_);
 
   if ( debug == -9 )Serial.printf("tempC,tempF,curr,a,b,c,d,n,m,r,ts,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v\n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      temp_C, temp_C*9./5.+32., curr_in_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , ts_, soc_, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_,v_);
