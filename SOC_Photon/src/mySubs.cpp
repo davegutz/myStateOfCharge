@@ -250,12 +250,12 @@ void myDisplay(Adafruit_SSD1306 *display)
   display->println(F(""));
 
   display->setTextColor(SSD1306_WHITE);
-  char dispStringT[8];
-  sprintf(dispStringT, "%3.0f %3.0f", min(pubList.SOC_solved, 101.), min(pubList.SOC_free, 999.));
+  char dispStringT[9];
+  sprintf(dispStringT, "%3.0f%5.1f", min(pubList.SOC_solved, 101.), pubList.tcharge);
   display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
-  char dispStringS[5];
-  sprintf(dispStringS, " %3.0f", min(pubList.SOC, 101.));
+  char dispStringS[4];
+  sprintf(dispStringS, "%3.0f", min(pubList.SOC_free, 999.));
   display->print(dispStringS);
 
   display->display();
@@ -345,16 +345,17 @@ void talkT(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num)
 // Talk Help
 void talkH(double *stepVal, int8_t *vec_num)
 {
-  Serial.printf("Help for serial talk.   Entries and current values.  All entries follwed by CR\n");
+  Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
   Serial.printf("d   dump the summary log\n"); 
   Serial.printf("m=  assign a free memory state in percent - '('truncated 0-100')'\n"); 
-  Serial.printf("v=  "); Serial.print(debug); Serial.println("    : verbosity, 0-10. 2 for save csv [0]");
+  Serial.printf("v=  "); Serial.print(debug); Serial.println("    : verbosity, -128 - +128. 2 for save csv [2]");
   Serial.printf("T<?>=  "); 
   Serial.printf("Transient performed with input.   For example:\n");
-  Serial.printf("  Ts=<stepVal>  :   stepVal="); Serial.println(*stepVal);
+  Serial.printf("  Ts=<index>  :   index="); Serial.print(*stepVal);
   Serial.printf(", stepping=");  Serial.println(stepping);
   Serial.printf("  Tv=<vec_num>  :   vec_num="); Serial.println(*vec_num);
-  Serial.printf(", vectoringing=");  Serial.println(vectoring);
+  Serial.printf("    ******Send Tv0 to cancel vector*****\n");
+  Serial.printf("   INFO:  vectoringing=");  Serial.println(vectoring);
   Serial.printf("w   turn on wifi = "); Serial.println(enable_wifi);
   Serial.printf("h   this menu\n");
 }

@@ -159,6 +159,14 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   3-Yellow shunt high
   4-Green shunt low
 
+### Bluetooth Adapter HC-95
+
+  B = 3v3 Rail
+  W = GND Rail
+  G-TXD = Photon RX
+  P-RXD = Photon TX
+
+
 - Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
 
   To get debug data

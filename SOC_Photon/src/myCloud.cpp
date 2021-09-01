@@ -71,7 +71,7 @@ void publish3(void)
   Blynk.virtualWrite(V13, pubList.Vshunt_filt);
   Blynk.virtualWrite(V14, pubList.I2C_status);
   Blynk.virtualWrite(V15, pubList.hmString);
-  //  Blynk.virtualWrite(V16, pubList.Vbatt_model_tracked);
+  Blynk.virtualWrite(V16, pubList.tcharge);
 }
 
 
@@ -165,5 +165,5 @@ void assignPubList(Publish* pubList, const unsigned long now, const String unit,
   pubList->Vbatt_model_filt = sen->Vbatt_model_filt;
   pubList->Vbatt_model_solved = sen->Vbatt_model_solved;
   pubList->T = sen->T;
-  pubList->tcharge = myBatt->tcharge();
+  pubList->tcharge = myBatt_free->tcharge();
 }

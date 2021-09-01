@@ -116,12 +116,10 @@ void setup()
   Serial.flush();
   delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
   Serial.println("Hello!");
-/*
-  Serial1.begin(115200); // initialize serial communication at 115200 bits per second:
-  Serial1.flush();
-  delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
-  Serial1.println("Hello!");
-*/
+  // Serial1.begin(9600); // initialize serial communication at 115200 bits per second:
+  // Serial1.flush();
+  // delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
+  // Serial1.println("Hello!");
 
   // Peripherals
   myPins = new Pins(D6, D7, A1);
