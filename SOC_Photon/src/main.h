@@ -80,6 +80,7 @@ extern boolean vectoring;         // Active battery test vector
 extern int8_t vec_num;            // Active vector number
 extern unsigned long vec_start;   // Start of active vector
 extern boolean enable_wifi;       // Enable wifi
+extern double soc_free;           // Free integrator state
 
 // Global locals
 int8_t debug = 2;
@@ -91,6 +92,7 @@ boolean vectoring = false;
 int8_t vec_num = 1;
 unsigned long vec_start = 0UL;
 boolean enable_wifi = false;
+double soc_free = 1.0;
 
 char buffer[256];               // Serial print buffer
 int numTimeouts = 0;            // Number of Particle.connect() needed to unfreeze
@@ -211,9 +213,12 @@ void loop()
   static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
 
   // Battery  models
-  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, BATT_TS, batt_r1, batt_r2, batt_r2c2);  // Battery model
-  static Battery *myBatt_solved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, BATT_TS, batt_r1, batt_r2, batt_r2c2);  // Solved battery model
-  static Battery *myBatt_free = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, BATT_TS, batt_r1, batt_r2, batt_r2c2);  // Free battery model
+  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, BATT_TS, batt_r1, batt_r2, batt_r2c2, batt_vsat);  // Battery model
+  static Battery *myBatt_solved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, BATT_TS, batt_r1, batt_r2, batt_r2c2, batt_vsat);  // Solved battery model
+  static Battery *myBatt_free = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, BATT_TS, batt_r1, batt_r2, batt_r2c2, batt_vsat);  // Free battery model
+
+  // Battery saturation
+  static Debounce *saturated_obj = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
 
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
@@ -233,7 +238,6 @@ void loop()
   bool summarizing;                         // Summarize, T/F
   static Sync *summarize = new Sync(SUMMARIZE_DELAY);
   static double soc_est = 1.0;
-  static double soc_free = 1.0;
   static double soc_solved = 1.0;
   static bool reset_soc = true;
 
@@ -275,8 +279,10 @@ void loop()
     // Load and filter
     load(reset_soc, sen, sensor_tbatt, myPins, ads, myBatt, readSensors->now());
     filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt);
-   
-    // Battery model
+    boolean saturated_test = myBatt_free->sat(sen->Vbatt_filt_obs);
+    boolean saturated = saturated_obj->calculate(saturated_test, reset);
+
+    // Battery models
     double Tbatt_filt_C = (sen->Tbatt_filt-32.)*5./9.;
     sen->Vbatt_model = myBatt->calculate(Tbatt_filt_C, soc_est, sen->Ishunt);
     sen->Vbatt_model_filt = myBatt->calculate(Tbatt_filt_C, soc_est, sen->Ishunt_filt);
@@ -319,13 +325,18 @@ void loop()
     double soc_trim = 0;
     if ( fabs(sen->Ishunt_filt_obs)<C_CC_TRIM_IMAX ) soc_trim = sen->T * C_CC_TRIM_G * ( soc_solved - soc_est );
     soc_est = max(min( soc_est + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP + soc_trim, 1.0), 0.0);
-    soc_free = max(min( soc_free + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 10.0), -10.0);
-
+    soc_free = max(min( soc_free + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
+    if ( saturated ) // Force initialization/reinitialization whenever saturated.   Keeps estimates close to reality
+    {
+      soc_est = 1.;
+      soc_free = 1.;
+      soc_trim = 0.;
+    }
 
     // Debug print statements
     if ( debug == -2 )
-      Serial.printf("T,reset_soc,vectoring,Tbatt,Ishunt,Vb_f_o,Vb_e,soc_s,soc_f,soc_e,Vb_m_s,dvdsoc,T,count,tcharge,  %ld,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
-      elapsed, reset_soc, vectoring, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model,
+      Serial.printf("T,reset_soc,vectoring,saturated,Tbatt,Ishunt,Vb_f_o,Vb_e,soc_s,soc_f,soc_e,Vb_m_s,dvdsoc,T,count,tcharge,  %ld,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
+      elapsed, reset_soc, vectoring, saturated, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model,
       soc_solved, soc_free, soc_est, sen->Vbatt_model_solved, myBatt_solved->dv_dsoc(), sen->T, count, myBatt->tcharge());
 
     //if ( bare ) delay(41);  // Usual I2C time

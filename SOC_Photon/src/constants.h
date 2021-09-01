@@ -77,6 +77,7 @@
 #define F_O_Z           0.80        // Observer filter zeta (0.80)
 #define F_W             0.05        // Filter wn, r/s (0.05)   
 #define F_Z             0.80        // Filter zeta (0.80)
+#define SAT_PERSISTENCE 5           // Updates persistence on saturation tests (5)
 
 #define SOLV_ERR        1e-6        // Solver error tolerance, V (1e-6)
 #define SOLV_MAX_COUNTS 10          // Solver maximum number of steps (10)

@@ -33,7 +33,7 @@ public:
   Battery();
   Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
-    const double ts, const double r1, const double r2, const double r2c2);
+    const double ts, const double r1, const double r2, const double r2c2, const double vbatt_sat);
   ~Battery();
   // operators
   // functions
@@ -46,33 +46,37 @@ public:
   double v() { return (v_); };
   double tcharge() { return (tcharge_); };
   double dv_dsoc() { return (dv_dsoc_); };
+  boolean sat() { return (sat_); };
+  boolean sat(const double v) { return (v>= vsat_); };
   // double d2v_dsoc2() { return (d2v_dsoc2_); };
 protected:
   TableInterp1Dclip *B_T_;  // Battery coeff
   TableInterp1Dclip *A_T_;  // Battery coeff
   TableInterp1Dclip *C_T_;  // Battery coeff
-  double b_;  // Battery coeff
-  double a_;  // Battery coeff
-  double c_;  // Battery coeff
-  double m_;  // Battery coeff
-  double n_;  // Battery coeff
-  double d_;  // Battery coeff
-  unsigned int nz_;  // Number of breakpoints
-  double soc_; // State of charge
-  double ts_;   // Severity scalar discharging
-  double r1_;   // Randels resistance, Ohms per cell
-  double r2_;   // Randels resistance, Ohms per cell
-  double c2_;   // Randels capacitance, Farads per cell
-  double voc_;  // Static model open circuit voltage, V
-  double vdyn_;   // Model current induced back emf, V
-  double v_;      // Total model voltage, V
+  double b_;        // Battery coeff
+  double a_;        // Battery coeff
+  double c_;        // Battery coeff
+  double m_;        // Battery coeff
+  double n_;        // Battery coeff
+  double d_;        // Battery coeff
+  unsigned int nz_; // Number of breakpoints
+  double soc_;      // State of charge
+  double ts_;       // Severity scalar discharging
+  double r1_;       // Randels resistance, Ohms per cell
+  double r2_;       // Randels resistance, Ohms per cell
+  double c2_;       // Randels capacitance, Farads per cell
+  double voc_;      // Static model open circuit voltage, V
+  double vdyn_;     // Model current induced back emf, V
+  double v_;        // Total model voltage, V
   double curr_in_;  // Current into battery, A
   int num_cells_;   // Number of cells
   double dv_dsoc_;  // Derivative, V/fraction
   // double d2v_dsoc2_; // Derivative, V^2/fraction^2
   double tcharge_;  // Charging time to 100%, hr
-  double pow_in_;  // Charging power, w
-  double sr_;     // Resistance scalar
+  double pow_in_;   // Charging power, w
+  double sr_;       // Resistance scalar
+  double vsat_; // Saturation threshold
+  boolean sat_;     // Saturation status
 };
 
 // BattleBorn 100 Ah, 12v LiFePO4
@@ -117,7 +121,7 @@ const unsigned int nz_bb = 7;
 #define NUM_VEC           1   // Number of vectors defined here
 static const unsigned int n_v1 = 10;
 static const double t_min_v1[n_v1] =  {0,     0.2,   0.2001, 1.4,   1.4001, 2.0999, 2.0,    3.1999, 3.2,    3.6};
-static const double v_v1[n_v1] =      {13.65, 13.65, 13.65,  13.0,  13.0,   13.0,   13.0,   13.65,  13.65,  13.65};
+static const double v_v1[n_v1] =      {13.75, 13.75, 13.75,  13.0,  13.0,   13.0,   13.0,   13.75,  13.75,  13.75}; // Saturation 13.7
 static const double i_v1[n_v1] =      {0.,    0.,    -500.,  -500., 0.,     0.,     500.,   500.,   0.,     0.};
 static const double T_v1[n_v1] =      {72.,   72.,   72.,    72.,   72.,    72.,    72.,    72.,    72.,    72.};
 static TableInterp1Dclip  *V_T1 = new TableInterp1Dclip(n_v1, t_min_v1, v_v1);

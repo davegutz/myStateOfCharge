@@ -39,6 +39,7 @@ extern boolean vectoring;       // Active battery test vector
 extern int8_t vec_num;          // Active vector number
 extern unsigned long vec_start; // Start of active vector
 extern boolean enable_wifi;     // Enable wifi
+extern double soc_free;           // Free integrator state
 
 void manage_wifi(unsigned long now, Wifi *wifi)
 {
@@ -265,6 +266,7 @@ void myDisplay(Adafruit_SSD1306 *display)
 void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num,
   Battery *myBatt, Battery *myBatt_solved, Battery *myBatt_free)
 {
+  double SOC_in = -99.;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
   if (stringComplete)
   {
@@ -284,16 +286,21 @@ void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num,
       case ( 'd' ):
         debug = -3;
         break;
+      case ( 'm' ):
+        SOC_in = inputString.substring(1).toFloat();
+        Serial.printf("SOC_in=%7.3f\n", SOC_in);
+        if ( SOC_in > 0. && SOC_in <= 100. ) soc_free = max(min(SOC_in/100., 1.), 0.);
+        break;
       case ( 'v' ):
         debug = inputString.substring(1).toInt();
         break;
       case ( 'T' ):
         talkT(stepping, stepVal, vectoring, vec_num);
         break;
-      case ('w'): 
+      case ( 'w' ): 
         enable_wifi = true;
         break;
-      case ('h'): 
+      case ( 'h' ): 
         talkH(stepVal, vec_num);
         break;
       default:
@@ -338,18 +345,18 @@ void talkT(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num)
 // Talk Help
 void talkH(double *stepVal, int8_t *vec_num)
 {
-  Serial.println("Help for serial talk.   Entries and current values.  All entries follwed by CR");
-  Serial.printf("d   dump the summary log"); 
-  Serial.print("v=  "); Serial.print(debug);     Serial.println("    : verbosity, 0-10. 2 for save csv [0]");
-  Serial.print("T<?>=  "); 
-  Serial.println("Transient performed with input.   For example:");
-  Serial.print("  Ts=<stepVal>  :   stepVal="); Serial.println(*stepVal);
-  Serial.print(", stepping=");  Serial.print(stepping);
-  Serial.print("  Tv=<vec_num>  :   vec_num="); Serial.println(*vec_num);
-  Serial.print(", vectoringing=");  Serial.println(vectoring);
+  Serial.printf("Help for serial talk.   Entries and current values.  All entries follwed by CR\n");
+  Serial.printf("d   dump the summary log\n"); 
+  Serial.printf("m=  assign a free memory state in percent - '('truncated 0-100')'\n"); 
+  Serial.printf("v=  "); Serial.print(debug); Serial.println("    : verbosity, 0-10. 2 for save csv [0]");
+  Serial.printf("T<?>=  "); 
+  Serial.printf("Transient performed with input.   For example:\n");
+  Serial.printf("  Ts=<stepVal>  :   stepVal="); Serial.println(*stepVal);
+  Serial.printf(", stepping=");  Serial.println(stepping);
+  Serial.printf("  Tv=<vec_num>  :   vec_num="); Serial.println(*vec_num);
+  Serial.printf(", vectoringing=");  Serial.println(vectoring);
   Serial.printf("w   turn on wifi = "); Serial.println(enable_wifi);
-  Serial.println("h   this menu");
-  Serial.println("");
+  Serial.printf("h   this menu\n");
 }
 
 
