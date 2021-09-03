@@ -80,7 +80,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,   Wshunt,Wshunt_filt,   SOC,Vbatt_m,   SOC_s,Vbatt_m_s, SOC_e, tcharge,  T_filt"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,   Wshunt,Wshunt_filt,  SOC_e,Vbatt_m,   SOC_s,Vbatt_m_s, SOC_f, tcharge,  T_filt"));
 }
 
 // Print strings

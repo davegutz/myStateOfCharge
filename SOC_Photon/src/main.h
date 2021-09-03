@@ -211,9 +211,16 @@ void loop()
   static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
 
   // Battery  models
-  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, BATT_TS, batt_r1, batt_r2, batt_r2c2, batt_vsat);  // Battery model
-  static Battery *myBatt_solved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, BATT_TS, batt_r1, batt_r2, batt_r2c2, batt_vsat);  // Solved battery model
-  static Battery *myBatt_free = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells, BATT_TS, batt_r1, batt_r2, batt_r2c2, batt_vsat);  // Free battery model
+  // Nominal, driven by SOC_e
+  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
+    batt_r1, batt_r2, batt_r2c2, batt_vsat, x_dV, y_dV, t_dV, n_dV, m_dV);
+
+  // Solved, driven by SOC_s
+  static Battery *myBatt_solved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
+    batt_r1, batt_r2, batt_r2c2, batt_vsat, x_dV, y_dV, t_dV, n_dV, m_dV);
+  // Free, driven by SOC_f
+  static Battery *myBatt_free = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
+    batt_r1, batt_r2, batt_r2c2, batt_vsat, x_dV, y_dV, t_dV, n_dV, m_dV);
 
   // Battery saturation
   static Debounce *saturated_obj = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
@@ -277,7 +284,7 @@ void loop()
     // Load and filter
     load(reset_soc, sen, sensor_tbatt, myPins, ads, myBatt, readSensors->now());
     filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt);
-    boolean saturated_test = myBatt_free->sat(sen->Vbatt_filt_obs);
+    boolean saturated_test = myBatt_free->sat(sen->Vbatt_filt_obs, sen->Ishunt_filt_obs);
     boolean saturated = saturated_obj->calculate(saturated_test, reset);
 
     // Battery models
@@ -285,6 +292,23 @@ void loop()
     sen->Vbatt_model = myBatt->calculate(Tbatt_filt_C, soc_est, sen->Ishunt);
     sen->Vbatt_model_filt = myBatt->calculate(Tbatt_filt_C, soc_est, sen->Ishunt_filt);
     myBatt_free->calculate(Tbatt_filt_C, soc_free, sen->Ishunt);
+
+/*
+    static int print_count = 0;
+    if ( debug == -11 && ++print_count<2 )
+    {
+      Serial.printf("\n\n******************Tab 2******************\n");
+      for ( double tc = -10; tc<=50; tc+=10  )
+      {
+        Serial.printf("tc=%5.0f:", tc);
+        for ( double soc = 0.; soc<=1.; soc+=0.2 )
+        {
+          Serial.printf("(%3.1f --> %5.2f), ", soc, myBatt_free->fudge(soc, tc));
+        }
+        Serial.printf("\n");
+      }
+    }
+*/
 
     // Solver
     double vbatt = sen->Vbatt_filt_obs + double(stepping*stepVal);

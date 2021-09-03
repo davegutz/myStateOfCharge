@@ -33,11 +33,13 @@ public:
   Battery();
   Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
-    const double ts, const double r1, const double r2, const double r2c2, const double vbatt_sat);
+    const double r1, const double r2, const double r2c2, const double batt_vsat,
+    const double *x_dv_tab, const double *y_dv_tab, const double *dv_tab, const unsigned int nd, const unsigned int md);
   ~Battery();
   // operators
   // functions
   void Sr(const double sr) { sr_ = sr; };
+  double fudge(const double soc, const double tc);
   double calculate(const double temp_C, const double soc_frac, const double curr_in);
   double num_cells() { return (num_cells_); };
   double soc() { return (soc_); };
@@ -47,12 +49,13 @@ public:
   double tcharge() { return (tcharge_); };
   double dv_dsoc() { return (dv_dsoc_); };
   boolean sat() { return (sat_); };
-  boolean sat(const double v) { return (v>= vsat_); };
+  boolean sat(const double v, const double i) { return (v-i*(r1_+r2_)>= vsat_); };
   // double d2v_dsoc2() { return (d2v_dsoc2_); };
 protected:
   TableInterp1Dclip *B_T_;  // Battery coeff
   TableInterp1Dclip *A_T_;  // Battery coeff
   TableInterp1Dclip *C_T_;  // Battery coeff
+  TableInterp2D *dV_T_;     // Real-life fudge facto
   double b_;        // Battery coeff
   double a_;        // Battery coeff
   double c_;        // Battery coeff
@@ -61,7 +64,6 @@ protected:
   double d_;        // Battery coeff
   unsigned int nz_; // Number of breakpoints
   double soc_;      // State of charge
-  double ts_;       // Severity scalar discharging
   double r1_;       // Randels resistance, Ohms per cell
   double r2_;       // Randels resistance, Ohms per cell
   double c2_;       // Randels capacitance, Farads per cell
@@ -77,6 +79,9 @@ protected:
   double sr_;       // Resistance scalar
   double vsat_; // Saturation threshold
   boolean sat_;     // Saturation status
+  unsigned int nd_; // Number x breakpoints in dV_T
+  unsigned int md_; // Number y breakpoints in dV_T
+  double fudge_;    // Fudge factor from test data table, V
 };
 
 // BattleBorn 100 Ah, 12v LiFePO4
@@ -85,9 +90,7 @@ protected:
                                         // what gets delivered, e.g. Wshunt/NOM_SYS_VOLT.  Also varies 0.2-0.4C currents
                                         // or 20-40 A for a 100 Ah battery
 // >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 60-95 F
-#define BATT_V_SAT            3.425     // Normal battery cell saturation for SOC=99.7, V (3.425)
-#define BATT_SOC_SAT          0.997     // Normal battery cell saturation, fraction (0.997)
-#define BATT_TS               1.0       // Severity scalar for discharging
+#define BATT_V_SAT            3.4625    // Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
 #define BATT_R1               0.00126   // Battery Randels static resistance, Ohms (0.00126) for 3v cell matches transients
 #define BATT_R2               0.00168   // Battery Randels dynamic resistance, Ohms (0.00168) for 3v cell matches transients
 #define BATT_R2C2             100       // Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
@@ -113,15 +116,32 @@ static const double c_bb[7] = {-1.770434633,	-1.770434633,	-1.770434633,	-1.0994
 const double n_bb = 0.4;
 const double d_bb = 1.734;
 const unsigned int nz_bb = 7;
-// const double r1_bb = BATT_R1;  // Battery Randels static resistance 3v cell, Ohms (0.0018)*0.7 to match transients
-// const double r2_bb = BATT_R2;  // Battery Randels dynamic resistance 3v cel, Ohms (0.0024)*0.7 to match transients
-// const double r2c2_bb = BATT_R2C2; 
+
+// Fudge factor to OCV calculation to match data
+static const unsigned int n_dV = 6;
+static const double x_dV[n_dV] = {0,  0.2,  0.4,  0.6,  0.8,  1.0};
+static const unsigned int m_dV = 7;
+static const double y_dV[m_dV] =      {-10., 0.,	10., 20.,	30., 40.,	50.};
+static const double t_dV[m_dV*n_dV] = { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5,
+                                        0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5,
+                                        0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5,
+                                        0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5,
+                                        0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5,
+                                        0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
+/*
+static const double t_dV[m_dV*n_dV] = { -10, 0, 10, 20, 30, 40, 50,
+                                        -12, 2, 12, 22, 32, 42, 52,
+                                        -14, 4, 14, 24, 34, 44, 54,
+                                        -16, 6, 16, 26, 36, 46, 56,
+                                        -18, 8, 18, 28, 38, 48, 58,
+                                        -19.999, 9.999, 19.999, 29.999, 39.999, 49.999, 59.999};
+*/
 
 // Charge test profiles
 #define NUM_VEC           1   // Number of vectors defined here
 static const unsigned int n_v1 = 10;
 static const double t_min_v1[n_v1] =  {0,     0.2,   0.2001, 1.4,   1.4001, 2.0999, 2.0,    3.1999, 3.2,    3.6};
-static const double v_v1[n_v1] =      {13.75, 13.75, 13.75,  13.0,  13.0,   13.0,   13.0,   13.75,  13.75,  13.75}; // Saturation 13.7
+static const double v_v1[n_v1] =      {13.95, 13.95, 13.95,  13.0,  13.0,   13.0,   13.0,   13.95,  13.95,  13.95}; // Saturation 13.7
 static const double i_v1[n_v1] =      {0.,    0.,    -500.,  -500., 0.,     0.,     500.,   500.,   0.,     0.};
 static const double T_v1[n_v1] =      {72.,   72.,   72.,    72.,   72.,    72.,    72.,    72.,    72.,    72.};
 static TableInterp1Dclip  *V_T1 = new TableInterp1Dclip(n_v1, t_min_v1, v_v1);
