@@ -35,28 +35,31 @@ struct Sum_st
   int16_t Tbatt;              // Battery temperature, filtered, F
   float Vbatt;                // Battery measured potential, filtered, V
   int8_t Ishunt;              // Batter measured input current, filtered, A
-  int8_t SOC;                 // Battery state of charge, %
+  int8_t SOC_f;               // Battery state of charge, free Coulomb counting algorithm, %
+  int8_t dV;                  // Estimated adjustment to SOC-VOC algorithm to match free, V*100
   Sum_st(void){}
-  void assign(const unsigned long now, const double Tbatt, const double Vbatt, const double Ishunt, const double soc)
+  void assign(const unsigned long now, const double Tbatt, const double Vbatt, const double Ishunt,
+    const double soc_s, const double soc_f, const double dV_dsoc)
   {
     this->time = now;
     this->Tbatt = Tbatt;
     this->Vbatt = float(Vbatt);
     this->Ishunt = Ishunt;
-    this->SOC = soc*100;
+    this->SOC_f = soc_f*100;
+    this->dV = int8_t(min(max((soc_s - soc_f) * dV_dsoc, -1.2), 1.2) * 100.);
   }
   void print(void)
   {
     char tempStr[50];
     time_long_2_str(time, tempStr);
-    Serial.printf("%s, %ld, %4d, %7.3f, %4d, %7d,", tempStr, time, Tbatt, Vbatt, Ishunt, SOC);
+    Serial.printf("%s, %ld, %4d, %7.3f, %4d, %7d, %5d,", tempStr, time, Tbatt, Vbatt, Ishunt, SOC_f, dV);
   }
 };
 
 //
 void print_all(struct Sum_st *sum, const int isum, const int nsum)
 {
-  Serial.printf("i,  date,  time,    Tbatt,  Vbatt, Ishunt,  SOC\n");
+  Serial.printf("i,  date,  time,    Tbatt,  Vbatt, Ishunt,  SOC_f,  dV,\n");
   int i = isum;  // Last one written was isum
   int n = -1;
   while ( ++n < nsum )

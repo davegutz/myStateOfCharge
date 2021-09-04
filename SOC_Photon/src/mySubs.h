@@ -126,5 +126,5 @@ void create_print_string(char *buffer, Publish *pubList);
 void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num,
   Battery *myBatt, Battery *myBatt_solved, Battery *myBatt_free);
 void talkT(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num);  // Transient inputs
-void talkH(double *stepVal, int8_t *vec_num); // Help
+void talkH(double *stepVal, int8_t *vec_num, Battery *batt_solved); // Help
 #endif

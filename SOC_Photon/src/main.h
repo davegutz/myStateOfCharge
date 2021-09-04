@@ -104,7 +104,7 @@ Adafruit_ADS1015 *ads;          // Use this for the 12-bit version; 1115 for 16-
 Adafruit_SSD1306 *display;
 bool bare_ads = false;          // If ADS to be ignored
 Wifi *myWifi;                   // Manage Wifi
-const int nsum = 191;           // Number of summary strings, 16 Bytes per isum
+const int nsum = 154;           // Number of summary strings, 17 Bytes per isum
 retained int isum = -1;         // Summary location.   Begins at -1 because first action is to increment isum
 retained Sum_st mySum[nsum];    // Summaries
 
@@ -417,7 +417,8 @@ void loop()
   if ( summarizing )
   {
     if ( ++isum>nsum-1 ) isum = 0;
-    mySum[isum].assign(currentTime, sen->Tbatt_filt, sen->Vbatt_filt_obs, sen->Ishunt_filt_obs, soc_est);
+    mySum[isum].assign(currentTime, sen->Tbatt_filt, sen->Vbatt_filt_obs, sen->Ishunt_filt_obs,
+      soc_solved, soc_free, myBatt_solved->dv_dsoc());
   }
 
   // Initialize complete once sensors and models started and summary written

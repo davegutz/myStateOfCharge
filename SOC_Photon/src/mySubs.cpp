@@ -272,6 +272,15 @@ void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num,
   {
     switch ( inputString.charAt(0) )
     {
+      case ( 'D' ):
+        switch ( inputString.charAt(1) )
+        {
+          case ( 'v' ):
+            double dv = inputString.substring(2).toFloat();
+            myBatt_solved->Dv(dv);
+            break;
+        }
+        break;
       case ( 'S' ):
         switch ( inputString.charAt(1) )
         {
@@ -301,7 +310,7 @@ void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num,
         enable_wifi = true;
         break;
       case ( 'h' ): 
-        talkH(stepVal, vec_num);
+        talkH(stepVal, vec_num, myBatt_solved);
         break;
       default:
         Serial.print(inputString.charAt(0)); Serial.println(" unknown");
@@ -343,12 +352,14 @@ void talkT(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num)
 }
 
 // Talk Help
-void talkH(double *stepVal, int8_t *vec_num)
+void talkH(double *stepVal, int8_t *vec_num, Battery *batt_solved)
 {
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
   Serial.printf("d   dump the summary log\n"); 
   Serial.printf("m=  assign a free memory state in percent - '('truncated 0-100')'\n"); 
   Serial.printf("v=  "); Serial.print(debug); Serial.println("    : verbosity, -128 - +128. 2 for save csv [2]");
+  Serial.printf("Dv= "); Serial.print(batt_solved->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
+  Serial.printf("Sr= "); Serial.print(batt_solved->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("T<?>=  "); 
   Serial.printf("Transient performed with input.   For example:\n");
   Serial.printf("  Ts=<index>  :   index="); Serial.print(*stepVal);

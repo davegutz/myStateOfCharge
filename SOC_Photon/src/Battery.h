@@ -38,6 +38,7 @@ public:
   ~Battery();
   // operators
   // functions
+  void Dv(const double dv) { dv_ = dv; };
   void Sr(const double sr) { sr_ = sr; };
   double fudge(const double soc, const double tc);
   double calculate(const double temp_C, const double soc_frac, const double curr_in);
@@ -48,6 +49,8 @@ public:
   double v() { return (v_); };
   double tcharge() { return (tcharge_); };
   double dv_dsoc() { return (dv_dsoc_); };
+  double Dv() { return (dv_); };
+  double Sr() { return (sr_); };
   boolean sat() { return (sat_); };
   boolean sat(const double v, const double i) { return (v-i*(r1_+r2_)>= vsat_); };
   // double d2v_dsoc2() { return (d2v_dsoc2_); };
@@ -82,6 +85,7 @@ protected:
   unsigned int nd_; // Number x breakpoints in dV_T
   unsigned int md_; // Number y breakpoints in dV_T
   double fudge_;    // Fudge factor from test data table, V
+  double dv_;       // Adjustment, V
 };
 
 // BattleBorn 100 Ah, 12v LiFePO4
