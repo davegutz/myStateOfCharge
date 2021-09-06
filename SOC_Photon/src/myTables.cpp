@@ -227,6 +227,22 @@ double TableInterp1Dclip::interp(const double x)
 }
 
 // 2-D Interpolation Table Lookup
+/* Example usage
+static const unsigned int n_dV = 8;
+static const double x_dV[n_dV] = {0,  0.50,  0.70,  0.80,  0.85,  0.90,  0.95,  1.00}; // soc
+static const unsigned int m_dV = 5;
+static const double y_dV[m_dV] =      { 0.,     15.,	  25.,    35.,	  50.}; // tc
+static const double t_dV[m_dV*n_dV] = { 0.5,    0.5,    0.5,    0.5,    0.5,   // dV_T
+                                        0.485,  0.485,  0.485,  0.485,  0.485,
+                                        0.42,   0.42,   0.42,   0.42,   0.42,
+                                        0.34,   0.34,   0.34,   0.34,   0.34,
+                                        0.29,   0.29,   0.29,   0.29,   0.29,
+                                        0.20,   0.20,   0.20,   0.20,   0.20,
+                                        0.18,   0.18,   0.18,   0.18,   0.18,
+                                        0.90,   0.90,   0.90,   0.90,   0.90};
+  dV_T_ = new TableInterp2D(nd_, md_, x_dv_tab, y_dv_tab, dv_tab);
+  fudge_ = dV_T_->interp(soc, tc);
+*/
 // constructors
 TableInterp2D::TableInterp2D() : TableInterp() {}
 TableInterp2D::TableInterp2D(const unsigned int n, const unsigned int m, const double x[],

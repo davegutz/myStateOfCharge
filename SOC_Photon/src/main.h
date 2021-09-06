@@ -213,14 +213,14 @@ void loop()
   // Battery  models
   // Nominal, driven by SOC_e
   static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
-    batt_r1, batt_r2, batt_r2c2, batt_vsat, x_dV, y_dV, t_dV, n_dV, m_dV);
+    batt_r1, batt_r2, batt_r2c2, batt_vsat);
 
   // Solved, driven by SOC_s
   static Battery *myBatt_solved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
-    batt_r1, batt_r2, batt_r2c2, batt_vsat, x_dV, y_dV, t_dV, n_dV, m_dV);
+    batt_r1, batt_r2, batt_r2c2, batt_vsat);
   // Free, driven by SOC_f
   static Battery *myBatt_free = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
-    batt_r1, batt_r2, batt_r2c2, batt_vsat, x_dV, y_dV, t_dV, n_dV, m_dV);
+    batt_r1, batt_r2, batt_r2c2, batt_vsat);
 
   // Battery saturation
   static Debounce *saturated_obj = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
@@ -321,9 +321,10 @@ void loop()
       soc_solved = max(min(soc_solved + max(min( err/myBatt_solved->dv_dsoc(), SOLV_MAX_STEP), -SOLV_MAX_STEP), 1.2), 1e-6);
       sen->Vbatt_model_solved = myBatt_solved->calculate(Tbatt_filt_C, soc_solved, sen->Ishunt_filt_obs);
       err = vbatt - sen->Vbatt_model_solved;
-      if ( debug == -5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,soc_s,vbatt,Vbatt_m_s,err, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-          sen->Tbatt_filt, sen->Ishunt_filt_obs, count, soc_solved, vbatt, sen->Vbatt_model_solved, err);
+      if ( debug == -5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,soc_s,vbatt,Vbatt_m_s,err,dv_dsoc, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+          sen->Tbatt_filt, sen->Ishunt_filt_obs, count, soc_solved, vbatt, sen->Vbatt_model_solved, err, myBatt_solved->dv_dsoc());
     }
+  
     if ( count<SOLV_MAX_COUNTS ) solver_valid = true; 
     
     // SOC Integrator - Coulomb Counting method
