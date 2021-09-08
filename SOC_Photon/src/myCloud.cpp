@@ -163,4 +163,5 @@ void assignPubList(Publish* pubList, const unsigned long now, const String unit,
   pubList->T = sen->T;
   pubList->tcharge = myBatt_free->tcharge();
   pubList->VOC_free = myBatt_free->voc();
+  pubList->Vbatt_solved = sen->Vbatt_solved;
 }
