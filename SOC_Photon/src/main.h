@@ -106,7 +106,7 @@ Wifi *myWifi;                   // Manage Wifi
 const int nsum = 154;           // Number of summary strings, 17 Bytes per isum
 retained int isum = -1;         // Summary location.   Begins at -1 because first action is to increment isum
 retained Sum_st mySum[nsum];    // Summaries
-retained double socu_free = mxepu_bb; // Coulomb Counter state
+retained double socu_free = 0.5;// Coulomb Counter state
 
 // Setup
 void setup()
@@ -211,14 +211,10 @@ void loop()
   static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
 
   // Battery  models
-  // Nominal, driven by SOC_e
-  static Battery *myBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
-    batt_r1, batt_r2, batt_r2c2, batt_vsat);
-
-  // Solved, driven by SOC_s
+  // Solved, driven by socu_s
   static Battery *myBatt_solved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat);
-  // Free, driven by SOC_f
+  // Free, driven by socu_free
   static Battery *myBatt_free = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat);
 
@@ -281,29 +277,27 @@ void loop()
     if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
 
     // Load and filter
-    load(reset_free, sen, sensor_tbatt, myPins, ads, myBatt, readSensors->now());
+    load(reset_free, sen, sensor_tbatt, myPins, ads, readSensors->now());
     filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt);
     boolean saturated_test = myBatt_free->sat(sen->Vbatt_filt_obs, sen->Ishunt_filt_obs);
     boolean saturated = saturated_obj->calculate(saturated_test, reset);
 
     // Battery models
     double Tbatt_filt_C = (sen->Tbatt_filt-32.)*5./9.;
-    sen->Vbatt_model = myBatt->calculate(Tbatt_filt_C, socu_solved, sen->Ishunt);
-    sen->Vbatt_model_filt = myBatt->calculate(Tbatt_filt_C, socu_solved, sen->Ishunt_filt);
     myBatt_free->calculate(Tbatt_filt_C, socu_free, sen->Ishunt);
 
     // Solver
     double vbatt_f_o = sen->Vbatt_filt_obs + double(stepping*stepVal);
     int8_t count = 0;
-    sen->Vbatt_model_solved = myBatt_solved->calculate(Tbatt_filt_C, socu_solved, sen->Ishunt_filt_obs);
-    double err = vbatt_f_o - sen->Vbatt_model_solved;
+    sen->Vbatt_solved = myBatt_solved->calculate(Tbatt_filt_C, socu_solved, sen->Ishunt_filt_obs);
+    double err = vbatt_f_o - sen->Vbatt_solved;
     while( fabs(err)>SOLV_MAX_ERR && count++<SOLV_MAX_COUNTS )
     {
       socu_solved = max(min(socu_solved + max(min( err/myBatt_solved->dv_dsocu(), SOLV_MAX_STEP), -SOLV_MAX_STEP), mxepu_bb), mnepu_bb);
-      sen->Vbatt_model_solved = myBatt_solved->calculate(Tbatt_filt_C, socu_solved, sen->Ishunt_filt_obs);
-      err = vbatt_f_o - sen->Vbatt_model_solved;
+      sen->Vbatt_solved = myBatt_solved->calculate(Tbatt_filt_C, socu_solved, sen->Ishunt_filt_obs);
+      err = vbatt_f_o - sen->Vbatt_solved;
       if ( debug == -5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,socu_s,vbatt_f_o,Vbatt_m_s,err,dv_dsocu, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-          sen->Tbatt_filt, sen->Ishunt_filt_obs, count, socu_solved, vbatt_f_o, sen->Vbatt_model_solved, err, myBatt_solved->dv_dsocu());
+          sen->Tbatt_filt, sen->Ishunt_filt_obs, count, socu_solved, vbatt_f_o, sen->Vbatt_solved, err, myBatt_solved->dv_dsocu());
     }
     // boolean solver_valid = count<SOLV_MAX_COUNTS; 
     
@@ -333,9 +327,9 @@ void loop()
 
     // Debug print statements
     if ( debug == -2 )
-      Serial.printf("T,reset_free,vectoring,saturated,Tbatt,Ishunt,Vb_f_o,Vb_e,soc_s,soc_f,Vb_m_s,dvdsoc,T,count,tcharge,  %ld,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
-      elapsed, reset_free, vectoring, saturated, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model,
-      socu_solved, socu_free, sen->Vbatt_model_solved, myBatt_solved->dv_dsocu(), sen->T, count, myBatt->tcharge());
+      Serial.printf("T,reset_free,vectoring,saturated,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,dvdsoc,T,count,tcharge,  %ld,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
+      elapsed, reset_free, vectoring, saturated, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal),
+      socu_solved, socu_free, sen->Vbatt_solved, myBatt_solved->dv_dsocu(), sen->T, count, myBatt_free->tcharge());
 
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
@@ -355,15 +349,15 @@ void loop()
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
     controlTime = decimalTime(&currentTime, tempStr);
     hmString = String(tempStr);
-    assignPubList(&pubList, publishParticle->now(), unit, hmString, controlTime, sen, numTimeouts, myBatt_solved, myBatt_free, myBatt);
+    assignPubList(&pubList, publishParticle->now(), unit, hmString, controlTime, sen, numTimeouts, myBatt_solved, myBatt_free);
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
     {
-      static bool led_on = false;
-      led_on = !led_on;
-      if ( led_on ) digitalWrite(myPins->status_led, HIGH);
-      else  digitalWrite(myPins->status_led, LOW);
+      // static bool led_on = false;
+      // led_on = !led_on;
+      // if ( led_on ) digitalWrite(myPins->status_led, HIGH);
+      // else  digitalWrite(myPins->status_led, LOW);
       publish_particle(publishParticle->now(), myWifi, enable_wifi);
     }
 
@@ -381,7 +375,7 @@ void loop()
   // right in the "Send String" box then press "Send."
   // String definitions are below.
   int debug_saved = debug;
-  talk(&stepping, &stepVal, &vectoring, &vec_num, myBatt, myBatt_solved, myBatt_free);
+  talk(&stepping, &stepVal, &vectoring, &vec_num, myBatt_solved, myBatt_free);
 
   // Summary management
   if ( debug == -3 )

@@ -46,8 +46,8 @@ void publish1(void)
   Blynk.virtualWrite(V0,  pubList.Vbatt);
   Blynk.virtualWrite(V2,  pubList.Vbatt_filt_obs);
   Blynk.virtualWrite(V3,  pubList.VOC_free);
-  Blynk.virtualWrite(V4,  pubList.Vbatt_model_solved);
-  Blynk.virtualWrite(V5,  pubList.Vbatt_model);
+  Blynk.virtualWrite(V4,  pubList.Vbatt_solved);
+  //Blynk.virtualWrite(V5,  pubList.Vbatt_model);
 }
 
 
@@ -56,7 +56,7 @@ void publish2(void)
 {
   if (debug>4) Serial.printf("Blynk write2\n");
   Blynk.virtualWrite(V6,  pubList.socu_free);
-  Blynk.virtualWrite(V7,  pubList.Vbatt_model_filt);
+  Blynk.virtualWrite(V7,  pubList.Vbatt_solved);
   Blynk.virtualWrite(V8,  pubList.T);
   Blynk.virtualWrite(V9,  pubList.Tbatt);
   Blynk.virtualWrite(V10, pubList.Tbatt_filt);
@@ -139,7 +139,7 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
 // Assignments
 void assignPubList(Publish* pubList, const unsigned long now, const String unit, const String hmString,
   const double controlTime, struct Sensors* sen, const int numTimeouts,
-  Battery* myBatt_solved, Battery* myBatt_free, Battery* myBatt)
+  Battery* myBatt_solved, Battery* myBatt_free)
 {
   pubList->now = now;
   pubList->unit = unit;
@@ -160,9 +160,6 @@ void assignPubList(Publish* pubList, const unsigned long now, const String unit,
   pubList->numTimeouts = numTimeouts;
   pubList->socu_solved = myBatt_solved->socu()*100.0;
   pubList->socu_free = myBatt_free->socu()*100.0;
-  pubList->Vbatt_model = sen->Vbatt_model;
-  pubList->Vbatt_model_filt = sen->Vbatt_model_filt;
-  pubList->Vbatt_model_solved = sen->Vbatt_model_solved;
   pubList->T = sen->T;
   pubList->tcharge = myBatt_free->tcharge();
   pubList->VOC_free = myBatt_free->voc();

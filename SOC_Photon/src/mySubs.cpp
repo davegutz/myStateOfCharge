@@ -80,19 +80,19 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,   Wshunt,Wshunt_filt,  Vbatt_m,   SOCU_s,Vbatt_m_s, SOCU_f, tcharge,  T_filt"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,   Wshunt,Wshunt_filt,  VOC_f,   SOCU_s,Vbatt_s, SOCU_f, tcharge,  T_filt"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,  %7.3f, %c", \
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,  %7.3f,   %7.3f,%7.3f,  %7.3f,  %7.3f, %c", \
     pubList->unit.c_str(), pubList->hmString.c_str(), pubList->controlTime,
     pubList->Tbatt, pubList->Tbatt_filt,     pubList->Vbatt, pubList->Vbatt_filt_obs,
     pubList->Vshunt, pubList->Vshunt_filt,
     pubList->Ishunt, pubList->Ishunt_filt_obs, pubList->Wshunt, pubList->Wshunt_filt,
-    pubList->VOC_free, pubList->Vbatt_model,
-    pubList->socu_solved, pubList->Vbatt_model_solved,
+    pubList->VOC_free,
+    pubList->socu_solved, pubList->Vbatt_solved,
     pubList->socu_free, pubList->tcharge,
     pubList->T, '\0');
 }
@@ -106,7 +106,7 @@ void serial_print(unsigned long now, double T)
 }
 
 // Load
-void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, Battery *batt, const unsigned long now)
+void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now)
 {
   // Read Sensor
   // ADS1015 conversion
@@ -264,7 +264,7 @@ void myDisplay(Adafruit_SSD1306 *display)
 
 // Talk Executive
 void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num,
-  Battery *myBatt, Battery *myBatt_solved, Battery *myBatt_free)
+  Battery *myBatt_solved, Battery *myBatt_free)
 {
   double SOCU_in = -99.;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
@@ -286,7 +286,6 @@ void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num,
         {
           case ( 'r' ):
             double rscale = inputString.substring(2).toFloat();
-            myBatt->Sr(rscale);
             myBatt_solved->Sr(rscale);
             myBatt_free->Sr(rscale);
             break;

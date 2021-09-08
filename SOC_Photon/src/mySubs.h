@@ -61,6 +61,7 @@ struct Pins
 struct Sensors
 {
   double Vbatt;           // Sensed battery voltage, V
+  double Vbatt_solved;    // Solved coefficient model battery voltage, V
   double Vbatt_filt;      // Filtered, sensed battery voltage, V
   double Vbatt_filt_obs;  // Filtered, sensed battery voltage for observer, V
   double Tbatt;           // Sensed battery temp, F
@@ -78,9 +79,6 @@ struct Sensors
   int I2C_status;
   double T;
   bool bare_ads;          // If no ADS detected
-  double Vbatt_model;         // Modeled battery voltage including steady current draw, V
-  double Vbatt_model_filt;    // Filtered modeled battery voltage including steady current draw, V
-  double Vbatt_model_solved;  // Solved modeled battery voltage including steady current draw, V
   Sensors(void) {}
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
           int16_t Vshunt_int, double Vshunt, double Vshunt_filt,
@@ -89,6 +87,7 @@ struct Sensors
     this->Vbatt = Vbatt;
     this->Vbatt_filt = Vbatt_filt;
     this->Vbatt_filt_obs = Vbatt_filt;
+    this->Vbatt_solved = Vbatt;
     this->Tbatt = Tbatt;
     this->Tbatt_filt = Tbatt_filt;
     this->Vshunt_int = Vshunt_int;
@@ -102,9 +101,6 @@ struct Sensors
     this->I2C_status = I2C_status;
     this->T = T;
     this->bare_ads = bare_ads;
-    this->Vbatt_model = 0;
-    this->Vbatt_model_filt = 0;
-    this->Vbatt_model_solved = 0;
   }
 };
 
@@ -112,7 +108,7 @@ struct Sensors
 // Headers
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);
-void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, Battery *batt, const unsigned long now);
+void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now);
 void filter(int reset, Sensors *sen, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
   General2_Pole* VbattSenseFilt,  General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt);
 String tryExtractString(String str, const char* start, const char* end);
@@ -124,7 +120,7 @@ void create_print_string(char *buffer, Publish *pubList);
 
 // Talk Declarations
 void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num,
-  Battery *myBatt, Battery *myBatt_solved, Battery *myBatt_free);
+  Battery *myBatt_solved, Battery *myBatt_free);
 void talkT(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num);  // Transient inputs
 void talkH(double *stepVal, int8_t *vec_num, Battery *batt_solved); // Help
 #endif
