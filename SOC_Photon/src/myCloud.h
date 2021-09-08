@@ -39,6 +39,7 @@ struct Publish
   double Wshunt;
   double T;
   int I2C_status;
+  double VOC_free;
   double Vbatt_filt;
   double Vbatt_filt_obs;
   double Tbatt_filt;
@@ -47,9 +48,8 @@ struct Publish
   double Ishunt_filt_obs;
   double Wshunt_filt;
   int numTimeouts;
-  double SOC;
-  double SOC_solved;
-  double SOC_free;
+  double socu_solved;
+  double socu_free;
   double Vbatt_model;
   double Vbatt_model_filt;
   double Vbatt_model_solved;

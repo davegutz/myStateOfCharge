@@ -45,7 +45,7 @@
 #define DISCONNECT_DELAY      75000UL   // After these milliseconds no WiFi, disconnect (75000UL)
 #define CHECK_INTERVAL        180000UL  // How often to check for WiFi once disconnected (180000UL)
 #define CONNECT_WAIT          10000UL   // How long after setup that we try WiFi for first time (10000UL)
-#define EST_WAIT              5000UL    // How long after init that we hold estimator integrate (5000UL)
+#define EST_WAIT              20000UL   // How long after init that we hold estimator integrate to let filters settle (20000UL)
 #define INIT_WAIT             120000UL  // How long after setup that we wait for convergence of observer before setting integrator (120000UL)
 #define CONFIRMATION_DELAY    10000UL   // How long to confirm WiFi on before streaming (10000UL)
 #define GMT                   -5        // Enter time different to zulu (does not respect DST) (-5)
@@ -79,7 +79,7 @@
 #define F_Z             0.80        // Filter zeta (0.80)
 #define SAT_PERSISTENCE 5           // Updates persistence on saturation tests (5)
 
-#define SOLV_ERR        1e-6        // Solver error tolerance, V (1e-6)
+#define SOLV_MAX_ERR    1e-6        // Solver error tolerance, V (1e-6)
 #define SOLV_MAX_COUNTS 10          // Solver maximum number of steps (10)
 #define SOLV_MAX_STEP   0.2         // Solver maximum step size, frac soc
 

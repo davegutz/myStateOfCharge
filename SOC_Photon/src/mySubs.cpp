@@ -39,7 +39,7 @@ extern boolean vectoring;       // Active battery test vector
 extern int8_t vec_num;          // Active vector number
 extern unsigned long vec_start; // Start of active vector
 extern boolean enable_wifi;     // Enable wifi
-extern double soc_free;           // Free integrator state
+extern double socu_free;           // Free integrator state
 
 void manage_wifi(unsigned long now, Wifi *wifi)
 {
@@ -80,20 +80,20 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,   Wshunt,Wshunt_filt,  SOC_e,Vbatt_m,   SOC_s,Vbatt_m_s, SOC_f, tcharge,  T_filt"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,   Wshunt,Wshunt_filt,  Vbatt_m,   SOCU_s,Vbatt_m_s, SOCU_f, tcharge,  T_filt"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,  %7.3f,  %7.3f, %c", \
+  sprintf(buffer, "%s,%s,%18.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,  %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,  %7.3f, %c", \
     pubList->unit.c_str(), pubList->hmString.c_str(), pubList->controlTime,
     pubList->Tbatt, pubList->Tbatt_filt,     pubList->Vbatt, pubList->Vbatt_filt_obs,
     pubList->Vshunt, pubList->Vshunt_filt,
     pubList->Ishunt, pubList->Ishunt_filt_obs, pubList->Wshunt, pubList->Wshunt_filt,
-    pubList->SOC, pubList->Vbatt_model,
-    pubList->SOC_solved, pubList->Vbatt_model_solved,
-    pubList->SOC_free, pubList->tcharge,
+    pubList->VOC_free, pubList->Vbatt_model,
+    pubList->socu_solved, pubList->Vbatt_model_solved,
+    pubList->socu_free, pubList->tcharge,
     pubList->T, '\0');
 }
 
@@ -106,7 +106,7 @@ void serial_print(unsigned long now, double T)
 }
 
 // Load
-void load(const bool reset_soc, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, Battery *batt, const unsigned long now)
+void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, Battery *batt, const unsigned long now)
 {
   // Read Sensor
   // ADS1015 conversion
@@ -132,7 +132,7 @@ void load(const bool reset_soc, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, 
   double elapsed_loc = 0.;
   if ( vectoring )
   {
-    if ( reset_soc || (elapsed_loc > t_min_v1[n_v1-1]) )
+    if ( reset_free || (elapsed_loc > t_min_v1[n_v1-1]) )
     {
       vec_start = now;
     }
@@ -149,7 +149,7 @@ void load(const bool reset_soc, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, 
   sen->Wshunt = sen->Vbatt*sen->Ishunt;
   sen->Wbatt = sen->Vbatt*sen->Ishunt - sen->Ishunt*sen->Ishunt*(batt_r1 + batt_r2)*batt_num_cells; 
 
-  if ( debug == -6 ) Serial.printf("vectoring,reset_soc,vec_start,now,elapsed_loc,Vbatt,Ishunt,Tbatt:  %d,%d,%ld,%ld,%7.3f,%7.3f,%7.3f,%7.3f\n", vectoring, reset_soc, vec_start, now, elapsed_loc, sen->Vbatt, sen->Ishunt, sen->Tbatt);
+  if ( debug == -6 ) Serial.printf("vectoring,reset_free,vec_start,now,elapsed_loc,Vbatt,Ishunt,Tbatt:  %d,%d,%ld,%ld,%7.3f,%7.3f,%7.3f,%7.3f\n", vectoring, reset_free, vec_start, now, elapsed_loc, sen->Vbatt, sen->Ishunt, sen->Tbatt);
 }
 
 // Filter inputs
@@ -251,11 +251,11 @@ void myDisplay(Adafruit_SSD1306 *display)
 
   display->setTextColor(SSD1306_WHITE);
   char dispStringT[9];
-  sprintf(dispStringT, "%3.0f%5.1f", min(pubList.SOC_solved, 101.), pubList.tcharge);
+  sprintf(dispStringT, "%3.0f%5.1f", min(pubList.socu_solved, 101.), pubList.tcharge);
   display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[4];
-  sprintf(dispStringS, "%3.0f", min(pubList.SOC_free, 999.));
+  sprintf(dispStringS, "%3.0f", min(pubList.socu_free, 999.));
   display->print(dispStringS);
 
   display->display();
@@ -266,7 +266,7 @@ void myDisplay(Adafruit_SSD1306 *display)
 void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num,
   Battery *myBatt, Battery *myBatt_solved, Battery *myBatt_free)
 {
-  double SOC_in = -99.;
+  double SOCU_in = -99.;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
   if (stringComplete)
   {
@@ -296,9 +296,9 @@ void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num,
         debug = -3;
         break;
       case ( 'm' ):
-        SOC_in = inputString.substring(1).toFloat();
-        Serial.printf("SOC_in=%7.3f\n", SOC_in);
-        if ( SOC_in > 0. && SOC_in <= 100. ) soc_free = max(min(SOC_in/100., 1.), 0.);
+        SOCU_in = inputString.substring(1).toFloat()/100.;
+        Serial.printf("SOCU_in=%7.3f\n", SOCU_in);
+        if ( SOCU_in > mnepu_bb && SOCU_in <= mxepu_bb ) socu_free = max(min(SOCU_in, mxepu_bb), mnepu_bb);
         break;
       case ( 'v' ):
         debug = inputString.substring(1).toInt();

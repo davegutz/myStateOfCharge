@@ -45,7 +45,7 @@ void publish1(void)
   if (debug>4) Serial.printf("Blynk write1\n");
   Blynk.virtualWrite(V0,  pubList.Vbatt);
   Blynk.virtualWrite(V2,  pubList.Vbatt_filt_obs);
-  Blynk.virtualWrite(V3,  pubList.SOC);
+  Blynk.virtualWrite(V3,  pubList.VOC_free);
   Blynk.virtualWrite(V4,  pubList.Vbatt_model_solved);
   Blynk.virtualWrite(V5,  pubList.Vbatt_model);
 }
@@ -55,7 +55,7 @@ void publish1(void)
 void publish2(void)
 {
   if (debug>4) Serial.printf("Blynk write2\n");
-  Blynk.virtualWrite(V6,  pubList.SOC_free);
+  Blynk.virtualWrite(V6,  pubList.socu_free);
   Blynk.virtualWrite(V7,  pubList.Vbatt_model_filt);
   Blynk.virtualWrite(V8,  pubList.T);
   Blynk.virtualWrite(V9,  pubList.Tbatt);
@@ -83,7 +83,7 @@ void publish4(void)
   Blynk.virtualWrite(V18, pubList.Ishunt_filt_obs);
   Blynk.virtualWrite(V19, pubList.Wshunt);
   Blynk.virtualWrite(V20, pubList.Wshunt_filt);
-  Blynk.virtualWrite(V21, pubList.SOC_solved);
+  Blynk.virtualWrite(V21, pubList.socu_solved);
 }
 
 
@@ -158,12 +158,12 @@ void assignPubList(Publish* pubList, const unsigned long now, const String unit,
   pubList->Wshunt = sen->Wshunt;
   pubList->Wshunt_filt = sen->Wshunt_filt;
   pubList->numTimeouts = numTimeouts;
-  pubList->SOC_solved = myBatt_solved->soc()*100.0;
-  pubList->SOC_free = myBatt_free->soc()*100.0;
-  pubList->SOC = myBatt->soc()*100.0;
+  pubList->socu_solved = myBatt_solved->socu()*100.0;
+  pubList->socu_free = myBatt_free->socu()*100.0;
   pubList->Vbatt_model = sen->Vbatt_model;
   pubList->Vbatt_model_filt = sen->Vbatt_model_filt;
   pubList->Vbatt_model_solved = sen->Vbatt_model_solved;
   pubList->T = sen->T;
   pubList->tcharge = myBatt_free->tcharge();
+  pubList->VOC_free = myBatt_free->voc();
 }

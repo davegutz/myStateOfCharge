@@ -80,7 +80,7 @@ extern boolean vectoring;         // Active battery test vector
 extern int8_t vec_num;            // Active vector number
 extern unsigned long vec_start;   // Start of active vector
 extern boolean enable_wifi;       // Enable wifi
-extern double soc_free;           // Free integrator state
+extern double socu_free;           // Free integrator state
 
 // Global locals
 int8_t debug = 2;
@@ -92,7 +92,6 @@ boolean vectoring = false;
 int8_t vec_num = 1;
 unsigned long vec_start = 0UL;
 boolean enable_wifi = false;
-double soc_free = 1.0;
 
 char buffer[256];               // Serial print buffer
 int numTimeouts = 0;            // Number of Particle.connect() needed to unfreeze
@@ -107,6 +106,7 @@ Wifi *myWifi;                   // Manage Wifi
 const int nsum = 154;           // Number of summary strings, 17 Bytes per isum
 retained int isum = -1;         // Summary location.   Begins at -1 because first action is to increment isum
 retained Sum_st mySum[nsum];    // Summaries
+retained double socu_free = mxepu_bb; // Coulomb Counter state
 
 // Setup
 void setup()
@@ -242,9 +242,8 @@ void loop()
   static Sync *publishSerial = new Sync(PUBLISH_SERIAL_DELAY);
   bool summarizing;                         // Summarize, T/F
   static Sync *summarize = new Sync(SUMMARIZE_DELAY);
-  static double soc_est = 1.0;
-  static double soc_solved = 1.0;
-  static bool reset_soc = true;
+  static double socu_solved = 1.0;
+  static bool reset_free = false;
 
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
@@ -282,85 +281,61 @@ void loop()
     if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
 
     // Load and filter
-    load(reset_soc, sen, sensor_tbatt, myPins, ads, myBatt, readSensors->now());
+    load(reset_free, sen, sensor_tbatt, myPins, ads, myBatt, readSensors->now());
     filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt);
     boolean saturated_test = myBatt_free->sat(sen->Vbatt_filt_obs, sen->Ishunt_filt_obs);
     boolean saturated = saturated_obj->calculate(saturated_test, reset);
 
     // Battery models
     double Tbatt_filt_C = (sen->Tbatt_filt-32.)*5./9.;
-    sen->Vbatt_model = myBatt->calculate(Tbatt_filt_C, soc_est, sen->Ishunt);
-    sen->Vbatt_model_filt = myBatt->calculate(Tbatt_filt_C, soc_est, sen->Ishunt_filt);
-    myBatt_free->calculate(Tbatt_filt_C, soc_free, sen->Ishunt);
-
-/*
-    static int print_count = 0;
-    if ( debug == -11 && ++print_count<2 )
-    {
-      Serial.printf("\n\n******************Tab 2******************\n");
-      for ( double tc = -10; tc<=50; tc+=10  )
-      {
-        Serial.printf("tc=%5.0f:", tc);
-        for ( double soc = 0.; soc<=1.; soc+=0.2 )
-        {
-          Serial.printf("(%3.1f --> %5.2f), ", soc, myBatt_free->fudge(soc, tc));
-        }
-        Serial.printf("\n");
-      }
-    }
-*/
+    sen->Vbatt_model = myBatt->calculate(Tbatt_filt_C, socu_solved, sen->Ishunt);
+    sen->Vbatt_model_filt = myBatt->calculate(Tbatt_filt_C, socu_solved, sen->Ishunt_filt);
+    myBatt_free->calculate(Tbatt_filt_C, socu_free, sen->Ishunt);
 
     // Solver
-    double vbatt = sen->Vbatt_filt_obs + double(stepping*stepVal);
+    double vbatt_f_o = sen->Vbatt_filt_obs + double(stepping*stepVal);
     int8_t count = 0;
-    sen->Vbatt_model_solved = myBatt_solved->calculate(Tbatt_filt_C, soc_solved, sen->Ishunt_filt_obs);
-    double err = vbatt - sen->Vbatt_model_solved;
-    bool solver_valid = false;
-    while( fabs(err)>SOLV_ERR && count++<SOLV_MAX_COUNTS )
+    sen->Vbatt_model_solved = myBatt_solved->calculate(Tbatt_filt_C, socu_solved, sen->Ishunt_filt_obs);
+    double err = vbatt_f_o - sen->Vbatt_model_solved;
+    while( fabs(err)>SOLV_MAX_ERR && count++<SOLV_MAX_COUNTS )
     {
-      soc_solved = max(min(soc_solved + max(min( err/myBatt_solved->dv_dsoc(), SOLV_MAX_STEP), -SOLV_MAX_STEP), 1.2), 1e-6);
-      sen->Vbatt_model_solved = myBatt_solved->calculate(Tbatt_filt_C, soc_solved, sen->Ishunt_filt_obs);
-      err = vbatt - sen->Vbatt_model_solved;
-      if ( debug == -5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,soc_s,vbatt,Vbatt_m_s,err,dv_dsoc, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-          sen->Tbatt_filt, sen->Ishunt_filt_obs, count, soc_solved, vbatt, sen->Vbatt_model_solved, err, myBatt_solved->dv_dsoc());
+      socu_solved = max(min(socu_solved + max(min( err/myBatt_solved->dv_dsocu(), SOLV_MAX_STEP), -SOLV_MAX_STEP), mxepu_bb), mnepu_bb);
+      sen->Vbatt_model_solved = myBatt_solved->calculate(Tbatt_filt_C, socu_solved, sen->Ishunt_filt_obs);
+      err = vbatt_f_o - sen->Vbatt_model_solved;
+      if ( debug == -5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,socu_s,vbatt_f_o,Vbatt_m_s,err,dv_dsocu, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+          sen->Tbatt_filt, sen->Ishunt_filt_obs, count, socu_solved, vbatt_f_o, sen->Vbatt_model_solved, err, myBatt_solved->dv_dsocu());
     }
-  
-    if ( count<SOLV_MAX_COUNTS ) solver_valid = true; 
+    // boolean solver_valid = count<SOLV_MAX_COUNTS; 
     
-    // SOC Integrator - Coulomb Counting method
+    // SOC Free Integrator - Coulomb Counting method
     static boolean vectoring_past = vectoring;
     if ( vectoring_past != vectoring )
     {
-      reset_soc = true;
+      reset_free = true;
       start = readSensors->now();
       elapsed = 0UL;
     }
     vectoring_past = vectoring;
-    if ( reset_soc )
-    {
-      if ( solver_valid && ( (elapsed>EST_WAIT) || (vectoring && elapsed>INIT_WAIT)  ))
-      {
-        reset_soc = false;
-        soc_est = soc_solved;
-        soc_free = soc_solved;
-      }
-    }
-    double soc_trim = 0;
-    if ( fabs(sen->Ishunt_filt_obs)<C_CC_TRIM_IMAX ) soc_trim = sen->T * C_CC_TRIM_G * ( soc_solved - soc_est );
-    soc_est = max(min( soc_est + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP + soc_trim, 1.0), 0.0);
-    soc_free = max(min( soc_free + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
+    
+    socu_free = max(min( socu_free + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
     if ( saturated ) // Force initialization/reinitialization whenever saturated.   Keeps estimates close to reality
     {
-      soc_est = 1.;
-      soc_free = 1.;
-      soc_trim = 0.;
+      socu_free = mxepu_bb;
     }
+    else if ( reset_free )
+    {
+      if ( vectoring && elapsed>INIT_WAIT )
+      {
+        reset_free = false;
+        socu_free = socu_solved;
+      }
+    } 
 
     // Debug print statements
     if ( debug == -2 )
-      Serial.printf("T,reset_soc,vectoring,saturated,Tbatt,Ishunt,Vb_f_o,Vb_e,soc_s,soc_f,soc_e,Vb_m_s,dvdsoc,T,count,tcharge,  %ld,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
-      elapsed, reset_soc, vectoring, saturated, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model,
-      soc_solved, soc_free, soc_est, sen->Vbatt_model_solved, myBatt_solved->dv_dsoc(), sen->T, count, myBatt->tcharge());
+      Serial.printf("T,reset_free,vectoring,saturated,Tbatt,Ishunt,Vb_f_o,Vb_e,soc_s,soc_f,Vb_m_s,dvdsoc,T,count,tcharge,  %ld,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
+      elapsed, reset_free, vectoring, saturated, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal), sen->Vbatt_model,
+      socu_solved, socu_free, sen->Vbatt_model_solved, myBatt_solved->dv_dsocu(), sen->T, count, myBatt->tcharge());
 
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
@@ -419,7 +394,7 @@ void loop()
   {
     if ( ++isum>nsum-1 ) isum = 0;
     mySum[isum].assign(currentTime, sen->Tbatt_filt, sen->Vbatt_filt_obs, sen->Ishunt_filt_obs,
-      soc_solved, soc_free, myBatt_solved->dv_dsoc());
+      socu_solved, socu_free, myBatt_solved->dv_dsocu());
   }
 
   // Initialize complete once sensors and models started and summary written
