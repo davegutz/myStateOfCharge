@@ -45,7 +45,7 @@ void publish1(void)
   if (debug>4) Serial.printf("Blynk write1\n");
   Blynk.virtualWrite(V0,  pubList.Vbatt);
   Blynk.virtualWrite(V2,  pubList.Vbatt_filt_obs);
-  Blynk.virtualWrite(V3,  pubList.VOC_free);
+  Blynk.virtualWrite(V3,  pubList.VOC_solved);
   Blynk.virtualWrite(V4,  pubList.Vbatt_solved);
   //Blynk.virtualWrite(V5,  pubList.Vbatt_model);
 }
@@ -163,5 +163,6 @@ void assignPubList(Publish* pubList, const unsigned long now, const String unit,
   pubList->T = sen->T;
   pubList->tcharge = myBatt_free->tcharge();
   pubList->VOC_free = myBatt_free->voc();
+  pubList->VOC_solved = myBatt_solved->voc();
   pubList->Vbatt_solved = sen->Vbatt_solved;
 }

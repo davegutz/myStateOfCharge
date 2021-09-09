@@ -279,7 +279,7 @@ void loop()
     // Load and filter
     load(reset_free, sen, sensor_tbatt, myPins, ads, readSensors->now());
     filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt);
-    boolean saturated_test = myBatt_free->sat(sen->Vbatt_filt_obs, sen->Ishunt_filt_obs);
+    boolean saturated_test = myBatt_solved->sat();
     boolean saturated = saturated_obj->calculate(saturated_test, reset);
 
     // Battery models
@@ -310,8 +310,7 @@ void loop()
       elapsed = 0UL;
     }
     vectoring_past = vectoring;
-    
-    socu_free = max(min( socu_free + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
+    socu_free = max(min( socu_free + sen->Wshunt/NOM_SYS_VOLT*min(sen->T, F_MAX_T)/3600./NOM_BATT_CAP, 1.5), 0.);
     if ( saturated ) // Force initialization/reinitialization whenever saturated.   Keeps estimates close to reality
     {
       socu_free = mxepu_bb;

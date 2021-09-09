@@ -41,6 +41,7 @@ struct Publish
   double T;
   int I2C_status;
   double VOC_free;
+  double VOC_solved;
   double Vbatt_filt;
   double Vbatt_filt_obs;
   double Tbatt_filt;

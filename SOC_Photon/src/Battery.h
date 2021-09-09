@@ -52,7 +52,7 @@ public:
   double Dv() { return (dv_); };
   double Sr() { return (sr_); };
   boolean sat() { return (sat_); };
-  boolean sat(const double v, const double i) { return (v-i*(r1_+r2_)>= vsat_); };
+  boolean sat(const double v, const double i) { return (v-i*(r1_+r2_)*num_cells_>= vsat_); };
 protected:
   TableInterp1Dclip *B_T_;  // Battery coeff
   TableInterp1Dclip *A_T_;  // Battery coeff
