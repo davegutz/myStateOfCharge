@@ -213,10 +213,10 @@ void loop()
   // Battery  models
   // Solved, driven by socu_s
   static Battery *myBatt_solved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
-    batt_r1, batt_r2, batt_r2c2, batt_vsat);
+    batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
   // Free, driven by socu_free
   static Battery *myBatt_free = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
-    batt_r1, batt_r2, batt_r2c2, batt_vsat);
+    batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
 
   // Battery saturation
   static Debounce *saturated_obj = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
@@ -251,7 +251,7 @@ void loop()
     myWifi->blynk_started = true;
     if ( debug>2 ) Serial.printf("completed at %ld\n", millis());
   }
-  if ( myWifi->blynk_started && myWifi->connected )
+  if ( myWifi->blynk_started && myWifi->connected && !vectoring )
   {
     Blynk.run(); blynk_timer_1.run(); blynk_timer_2.run(); blynk_timer_3.run(); blynk_timer_4.run(); 
   }
@@ -301,34 +301,35 @@ void loop()
     }
     // boolean solver_valid = count<SOLV_MAX_COUNTS; 
     
-    // SOC Free Integrator - Coulomb Counting method
+    // Initialize SOC Free Integrator - Coulomb Counting method
     static boolean vectoring_past = vectoring;
+    static double socu_free_saved = socu_free;
     if ( vectoring_past != vectoring )
     {
       reset_free = true;
       start = readSensors->now();
       elapsed = 0UL;
+      if ( vectoring ) socu_free_saved = socu_free;
+      else socu_free = socu_free_saved;
     }
     vectoring_past = vectoring;
-    socu_free = max(min( socu_free + sen->Wshunt/NOM_SYS_VOLT*min(sen->T, F_MAX_T)/3600./NOM_BATT_CAP, 1.5), 0.);
-    if ( saturated ) // Force initialization/reinitialization whenever saturated.   Keeps estimates close to reality
+    if ( reset_free )
     {
-      socu_free = mxepu_bb;
+      if ( vectoring ) socu_free = socu_solved;
+      else socu_free = socu_free_saved;  // Only way to reach this line is resetting from vector test
+      if ( elapsed>INIT_WAIT ) reset_free = false;
     }
-    else if ( reset_free )
-    {
-      if ( vectoring && elapsed>INIT_WAIT )
-      {
-        reset_free = false;
-        socu_free = socu_solved;
-      }
-    } 
+    // Force initialization/reinitialization whenever saturated.   Keeps estimates close to reality
+    if ( saturated ) socu_free = mxepu_bb;
+
+    // Coulomb Count integrator
+    socu_free = max(min( socu_free + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
 
     // Debug print statements
     if ( debug == -2 )
-      Serial.printf("T,reset_free,vectoring,saturated,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,dvdsoc,T,count,tcharge,  %ld,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
+      Serial.printf("T,reset_free,vectoring,saturated,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,voc,dvdsoc,T,count,tcharge,  %ld,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
       elapsed, reset_free, vectoring, saturated, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal),
-      socu_solved, socu_free, sen->Vbatt_solved, myBatt_solved->dv_dsocu(), sen->T, count, myBatt_free->tcharge());
+      socu_solved, socu_free, sen->Vbatt_solved, myBatt_solved->voc(), myBatt_solved->dv_dsocu(), sen->T, count, myBatt_free->tcharge());
 
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
@@ -359,6 +360,8 @@ void loop()
       // else  digitalWrite(myPins->status_led, LOW);
       publish_particle(publishParticle->now(), myWifi, enable_wifi);
     }
+    if ( reset_free || reset ) digitalWrite(myPins->status_led, HIGH);
+    else  digitalWrite(myPins->status_led, LOW);
 
     // Monitor for debug
     if ( debug>0 && publishS )
@@ -382,7 +385,7 @@ void loop()
     debug = debug_saved;
     print_all(mySum, isum, nsum);
   }
-  summarizing = summarize->update(millis(), reset);               //  now || reset
+  summarizing = summarize->update(millis(), reset, !vectoring);               //  now || reset && !vectoring
   if ( summarizing )
   {
     if ( ++isum>nsum-1 ) isum = 0;

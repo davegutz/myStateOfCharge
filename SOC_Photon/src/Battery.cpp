@@ -35,13 +35,13 @@ extern char buffer[256];
 Battery::Battery()
     : b_(0), a_(0), c_(0), m_(0), n_(0), d_(0), nz_(1), socs_(1.0), socu_(1.0), r1_(0), r2_(0), c2_(0), voc_(0),
     vdyn_(0), v_(0), curr_in_(0), num_cells_(4), dv_dsocs_(0), dv_dsocu_(0), tcharge_(24), pow_in_(0.0), sr_(1), vsat_(13.7),
-    sat_(false), dv_(0) {}
+    sat_(false), dv_(0), dvoc_dt_(0) {}
 Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
-    const double r1, const double r2, const double r2c2, const double batt_vsat)
+    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt)
     : b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(nz), socs_(1.0), socu_(1.0), r1_(r1), r2_(r2), c2_(r2c2/r2_),
     voc_(0), vdyn_(0), v_(0), curr_in_(0), num_cells_(num_cells), dv_dsocs_(0), dv_dsocu_(0), tcharge_(24.), pow_in_(0.0),
-    sr_(1.), vsat_(batt_vsat), sat_(false), dv_(0)
+    sr_(1.), nom_vsat_(batt_vsat), sat_(false), dv_(0), dvoc_dt_(dvoc_dt)
 {
   B_T_ = new TableInterp1Dclip(nz_, x_tab, b_tab);
   A_T_ = new TableInterp1Dclip(nz_, x_tab, a_tab);
@@ -87,6 +87,7 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
   else if ( pow_in_<-1. ) tcharge_ = max(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * socs_lim, -24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
   else if ( pow_in_>=0. ) tcharge_ = 24.*(1.-socs_lim);
   else tcharge_ = -24.*socs_lim;
+  vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
   sat_ = voc_ >= vsat_;
 
   if ( debug == -8 ) Serial.printf("SOCU_in,v,curr,pow,tcharge, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
