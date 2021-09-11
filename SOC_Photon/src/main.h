@@ -232,6 +232,8 @@ void loop()
   // Synchronization
   bool publishP;                            // Particle publish, T/F
   static Sync *publishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
+  bool publishB;                            // Particle publish, T/F
+  static Sync *publishBlynk = new Sync(PUBLISH_BLYNK_DELAY);
   bool read;                                // Read, T/F
   static Sync *readSensors = new Sync(READ_DELAY);
   bool publishS;                            // Serial print, T/F
@@ -342,8 +344,9 @@ void loop()
   // Publish to Particle cloud if desired (different than Blynk)
   // Visit https://console.particle.io/events.   Click on "view events on a terminal"
   // to get a curl command to run
-  publishP = publishParticle->update(millis(), false);       //  now || false
-  publishS = publishSerial->update(millis(), reset);         //  now || reset
+  publishP = publishParticle->update(millis(), false);        //  now || false
+  publishB = publishBlynk->update(millis(), false);           //  now || false
+  publishS = publishSerial->update(millis(), reset);          //  now || reset
   if ( publishP || publishS)
   {
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
@@ -385,12 +388,18 @@ void loop()
     debug = debug_saved;
     print_all(mySum, isum, nsum);
   }
-  summarizing = summarize->update(millis(), reset, !vectoring);               //  now || reset && !vectoring
+  summarizing = summarize->update(millis(), reset, !vectoring) || (debug == -11 && publishB);               //  now || reset && !vectoring
   if ( summarizing )
   {
     if ( ++isum>nsum-1 ) isum = 0;
     mySum[isum].assign(currentTime, sen->Tbatt_filt, sen->Vbatt_filt_obs, sen->Ishunt_filt_obs,
       socu_solved, socu_free, myBatt_solved->dv_dsocu());
+    if ( debug == -11 )
+    {
+      Serial.printf("Summm***********************\n");
+      print_all(mySum, isum, nsum);
+      Serial.printf("*********************** %d \n", isum);
+    }
   }
 
   // Initialize complete once sensors and models started and summary written
