@@ -159,20 +159,23 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   3-Yellow shunt high
   4-Green shunt low
 
-### Bluetooth Adapter HC-95
+## FAQ
 
-  B = 3v3 Rail
-  W = GND Rail
-  G-TXD = Photon RX
-  P-RXD = Photon TX
+### Problem:  CLI starts acting funny:  cannot login, gives strange errors ("cannot find module semver")
 
+    Solution:  Manually reset CLI installation.  https://community.particle.io/t/how-to-manually-reset-your-cli-installation/54018
 
-- Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
+### Problem:
 
-  To get debug data
+    Solution:  
+
+## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
+
+## To get debug data
+
   1. Set debug = 2 in main.h
   2. Rebuild and upload
   3. Start CoolTerm_0.stc
 
-  Requirements:
+## Requirements:
   1.  

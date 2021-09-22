@@ -35,5 +35,5 @@
     },
     "particle.firmwareVersion": "3.0.0-beta.1",
     "particle.targetPlatform": "photon",
-    "particle.targetDevice": "proto"
+    "particle.targetDevice": "soc0"
 }
