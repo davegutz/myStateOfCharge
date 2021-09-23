@@ -35,8 +35,10 @@ struct Publish
   double Vbatt;
   double Vbatt_solved;
   double Tbatt;
-  double Vshunt;
-  double Ishunt;
+  double Vshunt_01;
+  double Vshunt_23;
+  double Ishunt_01;
+  double Ishunt_23;
   double Wshunt;
   double T;
   int I2C_status;

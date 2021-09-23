@@ -61,11 +61,14 @@ struct Sensors
   double Vbatt_filt_obs;  // Filtered, sensed battery voltage for observer, V
   double Tbatt;           // Sensed battery temp, F
   double Tbatt_filt;      // Filtered, sensed battery temp, F
-  int16_t Vshunt_int;     // Sensed shunt voltage, count
-  double Vshunt;          // Sensed shunt voltage, V
+  int16_t Vshunt_int_01;  // Sensed shunt voltage, count
+  int16_t Vshunt_int_23;  // Sensed shunt voltage, count
+  double Vshunt_01;       // Sensed shunt voltage, V
+  double Vshunt_23;       // Sensed shunt voltage, V
   double Vshunt_filt;     // Filtered, sensed shunt voltage, V
   double Vshunt_filt_obs; // Filtered, sensed shunt voltage for  observer, V
-  double Ishunt;          // Sensed shunt current, A
+  double Ishunt_01;       // Sensed shunt current, A
+  double Ishunt_23;       // Sensed shunt current, A
   double Ishunt_filt;     // Filtered, sensed shunt current, A
   double Ishunt_filt_obs; // Filtered, sensed shunt current for observer, A
   double Wshunt;          // Sensed shunt power, W
@@ -85,14 +88,17 @@ struct Sensors
     this->Vbatt_solved = Vbatt;
     this->Tbatt = Tbatt;
     this->Tbatt_filt = Tbatt_filt;
-    this->Vshunt_int = Vshunt_int;
-    this->Vshunt = Vshunt;
+    this->Vshunt_int_01 = Vshunt_int;
+    this->Vshunt_int_23 = Vshunt_int;
+    this->Vshunt_01 = Vshunt;
+    this->Vshunt_23 = Vshunt;
     this->Vshunt_filt = Vshunt_filt;
-    this->Ishunt = Vshunt * SHUNT_V2A_S + double(SHUNT_V2A_A);
+    this->Ishunt_01 = Vshunt_01 * SHUNT_V2A_S + double(SHUNT_V2A_A);
+    this->Ishunt_23 = Vshunt_23 * SHUNT_V2A_S + double(SHUNT_V2A_A);
     this->Ishunt_filt = Vshunt_filt * SHUNT_V2A_S + SHUNT_V2A_A;
-    this->Wshunt = Vshunt * Ishunt;
+    this->Wshunt = Vshunt * Ishunt_01;
     this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
-    this->Wbatt = Vshunt * Ishunt;
+    this->Wbatt = Vshunt * Ishunt_01;
     this->I2C_status = I2C_status;
     this->T = T;
     this->bare_ads = bare_ads;

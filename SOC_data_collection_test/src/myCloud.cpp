@@ -44,8 +44,10 @@ void assignPubList(Publish* pubList, const unsigned long now, const String unit,
   pubList->controlTime = controlTime;
   pubList->Vbatt = sen->Vbatt;
   pubList->Tbatt = sen->Tbatt;
-  pubList->Vshunt = sen->Vshunt;
-  pubList->Ishunt = sen->Ishunt;
+  pubList->Vshunt_01 = sen->Vshunt_01;
+  pubList->Vshunt_23 = sen->Vshunt_23;
+  pubList->Ishunt_01 = sen->Ishunt_01;
+  pubList->Ishunt_23 = sen->Ishunt_23;
   pubList->Wshunt = sen->Wshunt;
   pubList->numTimeouts = numTimeouts;
   pubList->socu_solved = -9;

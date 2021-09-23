@@ -74,16 +74,16 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt, Vbatt, Vshunt, Ishunt, T_filt"));
+  Serial.println(F("unit,hm, cTime,  Tbatt, Vbatt, Vshunt_01, Vshunt_23, Ishunt_01, Ishunt_23, T_filt"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s,%18.3f,  %7.3f,  %7.3f, %10.6f, %7.3f, %7.3f, %c", \
+  sprintf(buffer, "%s,%s,%18.3f,  %7.3f,  %7.3f, %10.6f, %7.3f, %7.3f, %7.3f, %7.3f, %c", \
     pubList->unit.c_str(), pubList->hmString.c_str(), pubList->controlTime,
     pubList->Tbatt,  pubList->Vbatt,
-    pubList->Vshunt, pubList->Ishunt,
+    pubList->Vshunt_01, pubList->Vshunt_23, pubList->Ishunt_01, pubList->Ishunt_23,
     pubList->T, '\0');
 }
 
@@ -102,14 +102,18 @@ void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins,
   // ADS1015 conversion
   if (!sen->bare_ads)
   {
-    sen->Vshunt_int = ads->readADC_Differential_0_1();
+    sen->Vshunt_int_01 = ads->readADC_Differential_0_1();
+    sen->Vshunt_int_23 = ads->readADC_Differential_2_3();
   }
   else
   {
-    sen->Vshunt_int = 0;
+    sen->Vshunt_int_01 = 0;
+    sen->Vshunt_int_23 = 0;
   }
-  sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
-  sen->Ishunt = sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
+  sen->Vshunt_01 = ads->computeVolts(sen->Vshunt_int_01);
+  sen->Vshunt_23 = ads->computeVolts(sen->Vshunt_int_23);
+  sen->Ishunt_01 = sen->Vshunt_01*SHUNT_V2A_S + SHUNT_V2A_A;
+  sen->Ishunt_23 = sen->Vshunt_23*SHUNT_V2A_S + SHUNT_V2A_A;
 
   // MAXIM conversion 1-wire Tp plenum temperature  (0.750 seconds blocking update)
   //if ( sensor_tbatt->read() ) sen->Tbatt = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);
