@@ -83,7 +83,11 @@ extern boolean enable_wifi;       // Enable wifi
 extern double socu_free;           // Free integrator state
 
 // Global locals
-int8_t debug = 2;
+const int nsum = 154;           // Number of summary strings, 17 Bytes per isum
+retained int isum = -1;         // Summary location.   Begins at -1 because first action is to increment isum
+retained Sum_st mySum[nsum];    // Summaries
+retained double socu_free = 0.5;// Coulomb Counter state
+retained int8_t debug = 2;
 String inputString = "";
 boolean stringComplete = false;
 boolean stepping = false;
@@ -103,10 +107,6 @@ Adafruit_ADS1015 *ads;          // Use this for the 12-bit version; 1115 for 16-
 Adafruit_SSD1306 *display;
 bool bare_ads = false;          // If ADS to be ignored
 Wifi *myWifi;                   // Manage Wifi
-const int nsum = 154;           // Number of summary strings, 17 Bytes per isum
-retained int isum = -1;         // Summary location.   Begins at -1 because first action is to increment isum
-retained Sum_st mySum[nsum];    // Summaries
-retained double socu_free = 0.5;// Coulomb Counter state
 
 // Setup
 void setup()
@@ -227,6 +227,7 @@ void loop()
   static unsigned long start = millis();    // Keep track of time
   unsigned long elapsed = 0;                // Keep track of time
   static int reset = 1;                     // Dynamic reset
+  static int reset_temp = 1;                // Dynamic reset
   double T = 0;                             // Present update time, s
 
   // Synchronization
@@ -280,8 +281,8 @@ void loop()
     if ( debug>2 ) Serial.printf("Read temp update=%7.3f and performing load_temp() at %ld...  ", sen->T_temp, millis());
 
     // Load and filter temperature only
-    load_temp(reset_free, sen, sensor_tbatt, myPins, readSensors->now());
-    filter_temp(reset, sen, TbattSenseFilt);
+    load_temp(sen, sensor_tbatt);
+    filter_temp(reset_temp, sen, TbattSenseFilt);
   }
 
   // Input all other sensors
@@ -293,7 +294,7 @@ void loop()
     if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
 
     // Load and filter
-    load(reset_free, sen, myPins, ads, readSensors->now());
+    load(reset, sen, myPins, ads, readSensors->now());
     filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, VshuntSenseFilt);
     boolean saturated_test = myBatt_solved->sat();
     boolean saturated = saturated_obj->calculate(saturated_test, reset);
@@ -418,5 +419,6 @@ void loop()
 
   // Initialize complete once sensors and models started and summary written
   if ( read ) reset = 0;
+  if ( read_temp ) reset_temp = 0;
 
 } // loop

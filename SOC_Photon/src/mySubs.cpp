@@ -106,7 +106,7 @@ void serial_print(unsigned long now, double T)
 }
 
 // Load temperature only
-void load_temp(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, const unsigned long now)
+void load_temp(Sensors *sen, DS18 *sensor_tbatt)
 {
   // Read Sensor
   // MAXIM conversion 1-wire Tp plenum temperature
