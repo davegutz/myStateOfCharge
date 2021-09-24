@@ -170,7 +170,7 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   This can happen with a new Particle device first time.   This can happen with a feature added to code that requires certain
   OS configuration.
 
-    Solution:  run  Particle: Flash Application and Device OS (local)
+    Solution:  run  Particle: Flash Application and Device OS (local).   You may have to compile same before running this.
 
 ## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
 

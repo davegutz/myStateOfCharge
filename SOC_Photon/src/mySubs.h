@@ -77,12 +77,13 @@ struct Sensors
   double Wshunt_filt;     // Filtered, sensed shunt power, W
   double Wbatt;          // Battery power, W
   int I2C_status;
-  double T;
+  double T;               // Update time, s
+  double T_temp;          // Temperature update time, s
   bool bare_ads;          // If no ADS detected
   Sensors(void) {}
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
           int16_t Vshunt_int, double Vshunt, double Vshunt_filt,
-          int I2C_status, double T, bool bare_ads)
+          int I2C_status, double T, double T_temp, bool bare_ads)
   {
     this->Vbatt = Vbatt;
     this->Vbatt_filt = Vbatt_filt;
@@ -100,6 +101,7 @@ struct Sensors
     this->Wbatt = Vshunt * Ishunt;
     this->I2C_status = I2C_status;
     this->T = T;
+    this->T_temp = T_temp;
     this->bare_ads = bare_ads;
   }
 };
@@ -108,9 +110,11 @@ struct Sensors
 // Headers
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);
-void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now);
+void load(const bool reset_free, Sensors *sen, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now);
+void load_temp(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, const unsigned long now);
 void filter(int reset, Sensors *sen, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
-  General2_Pole* VbattSenseFilt,  General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt);
+  General2_Pole* VbattSenseFilt,  General2_Pole* VshuntSenseFilt);
+void filter_temp(int reset, Sensors *sen, General2_Pole* TbattSenseFilt);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *currentTime, char* tempStr);
 void print_serial_header(void);

@@ -39,7 +39,8 @@
 #define ONE_DAY_MILLIS        86400000  // Number of milliseconds in one day (24*60*60*1000)
 #define PUBLISH_BLYNK_DELAY   10000UL   // Blynk cloud updates, ms (10000UL)
 #define PUBLISH_PARTICLE_DELAY 2000UL   // Particle cloud updates (2000UL)
-#define READ_DELAY            1000UL    // Sensor read wait (5000, 100 for stress test), ms (1000UL)
+#define READ_DELAY            100UL     // Sensor read wait (5000, 100 for stress test), ms (1000UL)
+#define READ_TEMP_DELAY       60000UL   // Sensor read wait (5000, 100 for stress test), ms (60000UL)
 #define SUMMARIZE_DELAY       1800000UL // Battery state tracking and reporting, ms (3600000UL)
 #define PUBLISH_SERIAL_DELAY  1000UL    // Serial print interval (1000UL)
 #define DISCONNECT_DELAY      75000UL   // After these milliseconds no WiFi, disconnect (75000UL)
@@ -73,6 +74,7 @@
 #define C_CC_TRIM_IMAX  50          // Current below which solver allowed to trim the coulomb counter
 #define F_O_MAX_T       3.0         // Maximum call update time filters (3.0)
 #define F_MAX_T         3.0         // Maximum call update time filters (3.0)
+#define F_MAX_T_TEMP    6.0         // Maximum call update time filters (6.0)
 #define F_O_W           0.50        // Observer filter wn, r/s (0.5)   
 #define F_O_Z           0.80        // Observer filter zeta (0.80)
 #define F_W             0.05        // Filter wn, r/s (0.05)   

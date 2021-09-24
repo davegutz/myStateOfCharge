@@ -105,8 +105,16 @@ void serial_print(unsigned long now, double T)
   Serial.println(buffer);  //Serial1.println(buffer);
 }
 
-// Load
-void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now)
+// Load temperature only
+void load_temp(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, const unsigned long now)
+{
+  // Read Sensor
+  // MAXIM conversion 1-wire Tp plenum temperature
+  if ( sensor_tbatt->read() ) sen->Tbatt = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);
+}
+
+// Load all others
+void load(const bool reset_free, Sensors *sen, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now)
 {
   // Read Sensor
   // ADS1015 conversion
@@ -120,9 +128,6 @@ void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins,
   }
   sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
   sen->Ishunt = sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
-
-  // MAXIM conversion 1-wire Tp plenum temperature
-  if ( sensor_tbatt->read() ) sen->Tbatt = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);
 
   // Vbatt
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
@@ -152,9 +157,18 @@ void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins,
   if ( debug == -6 ) Serial.printf("vectoring,reset_free,vec_start,now,elapsed_loc,Vbatt,Ishunt,Tbatt:  %d,%d,%ld,%ld,%7.3f,%7.3f,%7.3f,%7.3f\n", vectoring, reset_free, vec_start, now, elapsed_loc, sen->Vbatt, sen->Ishunt, sen->Tbatt);
 }
 
-// Filter inputs
+// Filter temperature only
+void filter_temp(int reset, Sensors *sen, General2_Pole* TbattSenseFilt)
+{
+  int reset_loc = reset || vectoring;
+
+  // Temperature
+  sen->Tbatt_filt = TbattSenseFilt->calculate(sen->Tbatt, reset_loc,  min(sen->T_temp, F_MAX_T_TEMP));
+}
+
+// Filter all other inputs
 void filter(int reset, Sensors *sen, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
-  General2_Pole* VbattSenseFilt,  General2_Pole* TbattSenseFilt, General2_Pole* VshuntSenseFilt)
+  General2_Pole* VbattSenseFilt,  General2_Pole* VshuntSenseFilt)
 {
   int reset_loc = reset || vectoring;
 
@@ -163,9 +177,6 @@ void filter(int reset, Sensors *sen, General2_Pole* VbattSenseFiltObs, General2_
   sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( sen->Vshunt, reset_loc, min(sen->T, F_O_MAX_T));
   sen->Ishunt_filt = sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A;
   sen->Ishunt_filt_obs = sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A;
-
-  // Temperature
-  sen->Tbatt_filt = TbattSenseFilt->calculate(sen->Tbatt, reset_loc,  min(sen->T, F_MAX_T));
 
   // Voltage
   sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate(sen->Vbatt, reset_loc, min(sen->T, F_O_MAX_T));

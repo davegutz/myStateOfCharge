@@ -208,7 +208,7 @@ void loop()
   static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);
 
   // Sensor conversions
-  static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
+  static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, 0, bare_ads); // Manage sensor data    
 
   // Battery  models
   // Solved, driven by socu_s
@@ -236,6 +236,8 @@ void loop()
   static Sync *publishBlynk = new Sync(PUBLISH_BLYNK_DELAY);
   bool read;                                // Read, T/F
   static Sync *readSensors = new Sync(READ_DELAY);
+  bool read_temp;                                // Read, T/F
+  static Sync *readTemp = new Sync(READ_TEMP_DELAY);
   bool publishS;                            // Serial print, T/F
   static Sync *publishSerial = new Sync(PUBLISH_SERIAL_DELAY);
   bool summarizing;                         // Summarize, T/F
@@ -270,7 +272,19 @@ void loop()
   now = millis();
   T = (now - past)/1e3;
 
-  // Read sensors and update filters
+  // Input temperature only
+  read_temp = readTemp->update(millis(), reset);               //  now || reset
+  sen->T_temp =  double(readTemp->updateTime())/1000.0;
+  if ( read_temp )
+  {
+    if ( debug>2 ) Serial.printf("Read temp update=%7.3f and performing load_temp() at %ld...  ", sen->T_temp, millis());
+
+    // Load and filter temperature only
+    load_temp(reset_free, sen, sensor_tbatt, myPins, readSensors->now());
+    filter_temp(reset, sen, TbattSenseFilt);
+  }
+
+  // Input all other sensors
   read = readSensors->update(millis(), reset);               //  now || reset
   sen->T =  double(readSensors->updateTime())/1000.0;
   elapsed = readSensors->now() - start;
@@ -279,8 +293,8 @@ void loop()
     if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
 
     // Load and filter
-    load(reset_free, sen, sensor_tbatt, myPins, ads, readSensors->now());
-    filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, TbattSenseFilt, VshuntSenseFilt);
+    load(reset_free, sen, myPins, ads, readSensors->now());
+    filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, VshuntSenseFilt);
     boolean saturated_test = myBatt_solved->sat();
     boolean saturated = saturated_obj->calculate(saturated_test, reset);
 
