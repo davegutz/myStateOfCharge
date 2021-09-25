@@ -161,6 +161,7 @@ void assignPubList(Publish* pubList, const unsigned long now, const String unit,
   pubList->socu_solved = myBatt_solved->socu()*100.0;
   pubList->socu_free = myBatt_free->socu()*100.0;
   pubList->T = sen->T;
+  if ( debug==-13 ) Serial.printf("sen->T=%6.3f\n", sen->T);
   pubList->tcharge = myBatt_free->tcharge();
   pubList->VOC_free = myBatt_free->voc();
   pubList->VOC_solved = myBatt_solved->voc();

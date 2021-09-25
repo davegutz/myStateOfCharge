@@ -287,9 +287,9 @@ void loop()
 
   // Input temperature only
   read_temp = readTemp->update(millis(), reset);               //  now || reset
-  sen->T_temp =  double(readTemp->updateTime())/1000.0;
   if ( read_temp )
   {
+    sen->T_temp =  readTemp->updateTime();
     if ( debug>2 ) Serial.printf("Read temp update=%7.3f and performing load_temp() at %ld...  ", sen->T_temp, millis());
 
     // Load and filter temperature only
@@ -299,12 +299,12 @@ void loop()
 
   // Input all other sensors
   read = readSensors->update(millis(), reset);               //  now || reset
-  sen->T =  double(readSensors->updateTime())/1000.0;
   elapsed = readSensors->now() - start;
   boolean saturated = false;
   if ( read )
   {
-    if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
+    sen->T =  readSensors->updateTime();
+    if ( debug>2 || debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
 
     // Load and filter
     load(reset, sen, myPins, ads, readSensors->now());
@@ -341,10 +341,12 @@ void loop()
 
   // Run filters on other signals
   filt = filterSync->update(millis(), reset);               //  now || reset
-  sen->T_filt =  double(filterSync->updateTime())/1000.0;
   if ( filt )
   {
+    sen->T_filt =  filterSync->updateTime();
     if ( debug>2 ) Serial.printf("Filter update=%7.3f and performing load() at %ld...  ", sen->T_filt, millis());
+
+    // Filter
     filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, VshuntSenseFilt);
     saturated = saturated_obj->calculate(myBatt_solved->sat(), reset);
 

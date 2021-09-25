@@ -40,14 +40,15 @@ public:
   unsigned long delay() { return(delay_); };
   unsigned long last() { return(last_); };
   bool stat() { return(stat_); };
-  unsigned long updateTime() { return(updateTime_); };
+  double updateTime() { return(updateTime_); };
   unsigned long now() { return(now_); };
 private:
   unsigned long delay_;
   unsigned long last_;
   unsigned long now_;
   bool stat_;
-  unsigned long updateTime_;
+  unsigned long updateDiff_;
+  double updateTime_;
 };
 
 #endif

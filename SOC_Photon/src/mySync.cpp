@@ -21,47 +21,68 @@
 // SOFTWARE.
 //
 // 17-Feb-2021  Dave Gutz   Create
-
+#ifndef ARDUINO
+#include "application.h" // Should not be needed if file .ino or Arduino
+#endif
 #include "mySync.h"
+extern int8_t debug;
 
 // Constructors
 Sync::Sync()
-  : delay_(0), last_(0UL), now_(0UL), stat_(false), updateTime_(0)
+  : delay_(0), last_(0UL), now_(0UL), stat_(false), updateDiff_(0), updateTime_(0)
 {}
 Sync::Sync(unsigned long delay)
-    : delay_(delay), last_(0UL), now_(0UL), stat_(false), updateTime_(0)
+    : delay_(delay), last_(0UL), now_(0UL), stat_(false), updateDiff_(0), updateTime_(0)
 {}
 
 // Check and count 
 bool Sync::update(bool reset, unsigned long now, bool andCheck)
 {
   now_ = now;
-  updateTime_ = now_ - last_;
-  stat_ = reset || ((updateTime_>=delay_) && andCheck);
-  if ( stat_ ) last_ = now_;
+  updateDiff_ = now_ - last_;
+  stat_ = reset || ((updateDiff_>=delay_) && andCheck);
+  if ( stat_ )
+  {
+    last_ = now_;
+    updateTime_ = double(updateDiff_)/1000.;
+  }
   return( stat_ );
 }
 bool Sync::update(unsigned long now, bool reset, bool andCheck)
 {
   now_ = now;
-  updateTime_ = now_ - last_;
-  stat_ = ((updateTime_>=delay_) || reset) && andCheck;
-  if ( stat_ ) last_ = now_;
+  updateDiff_ = now_ - last_;
+  stat_ = ((updateDiff_>=delay_) || reset) && andCheck;
+  if ( stat_ )
+  {
+    last_ = now_;
+    updateTime_ = double(updateDiff_)/1000.;
+  }
   return( stat_ );
 }
 bool Sync::update(unsigned long now, bool reset)
 {
   now_ = now;
-  updateTime_ = now_ - last_;
-  stat_ = (updateTime_>=delay_) || reset;
-  if ( stat_ ) last_ = now_;
+  updateDiff_ = now_ - last_;
+  stat_ = (updateDiff_>=delay_) || reset;
+  if ( stat_ )
+  {
+    last_ = now_;
+    updateTime_ = double(updateDiff_)/1000.;
+  }
+  if ( debug==-13 ) Serial.printf("reset,now,last,updateDiff,updateTime,delay,stat,%d,%ld,%ld,%ld,%7.3f,%ld,%d,\n",
+            reset, now_, last_, updateDiff_, updateTime_, delay_, int(stat_));
   return( stat_ );
 }
 bool Sync::updateN(unsigned long now, bool reset, bool orCheck)
 {
   now_ = now;
-  updateTime_ = now_ - last_;
-  stat_ = reset || ((stat_ && (updateTime_<delay_)) || orCheck);
-  if ( !stat_ ) last_ = now_;
+  updateDiff_ = now_ - last_;
+  stat_ = reset || ((stat_ && (updateDiff_<delay_)) || orCheck);
+  if ( stat_ )
+  {
+    last_ = now_;
+    updateTime_ = double(updateDiff_)/1000.;
+  }
   return( stat_ );
 }
