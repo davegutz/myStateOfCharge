@@ -110,7 +110,22 @@ void load_temp(Sensors *sen, DS18 *sensor_tbatt)
 {
   // Read Sensor
   // MAXIM conversion 1-wire Tp plenum temperature
-  if ( sensor_tbatt->read() ) sen->Tbatt = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);
+  uint8_t count = 0;
+  double temp = 0.;
+  while ( ++count<MAX_TEMP_READS && temp==0)
+  {
+    if ( sensor_tbatt->read() ) temp = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);
+  }
+  if ( count<MAX_TEMP_READS )
+  {
+    sen->Tbatt = temp;
+    if ( debug>2 ) Serial.printf("Temperature read on count=%d\n", count);
+  }
+  else
+  {
+    if ( debug>2 ) Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value\n");
+    // Using last-good-value:  no assignment
+  }
 }
 
 // Load all others

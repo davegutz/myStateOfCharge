@@ -54,6 +54,7 @@
 #define TBATT_TEMPCAL         1         // Maxim 1-wire plenum temp sense calibrate (1), F
 #define NOMVBATT              13.1      // Nominal battery voltage, V (13.1)
 #define NOMTBATT              72        // Nominal battery temp, F (72)
+#define MAX_TEMP_READS        10        // Number of consequetive temp queries allowed (10)
 #define NOMVSHUNTI            0         // Nominal shunt reading, integer (0)
 #define NOMVSHUNT             0         // Nominal shunt reading, V (0)
 #define VBATT_SENSE_R_LO      4700      // Vbatt low sense resistor, ohm (4700)
