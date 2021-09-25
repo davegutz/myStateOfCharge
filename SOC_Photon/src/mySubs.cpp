@@ -189,14 +189,14 @@ void filter(int reset, Sensors *sen, General2_Pole* VbattSenseFiltObs, General2_
   int reset_loc = reset || vectoring;
 
   // Shunt
-  sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset_loc, min(sen->T, F_MAX_T));
-  sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( sen->Vshunt, reset_loc, min(sen->T, F_O_MAX_T));
+  sen->Vshunt_filt = VshuntSenseFilt->calculate( sen->Vshunt, reset_loc, min(sen->T_filt, F_MAX_T));
+  sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( sen->Vshunt, reset_loc, min(sen->T_filt, F_O_MAX_T));
   sen->Ishunt_filt = sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A;
   sen->Ishunt_filt_obs = sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A;
 
   // Voltage
-  sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate(sen->Vbatt, reset_loc, min(sen->T, F_O_MAX_T));
-  sen->Vbatt_filt = VbattSenseFilt->calculate(sen->Vbatt, reset_loc,  min(sen->T, F_MAX_T));
+  sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate(sen->Vbatt, reset_loc, min(sen->T_filt, F_O_MAX_T));
+  sen->Vbatt_filt = VbattSenseFilt->calculate(sen->Vbatt, reset_loc,  min(sen->T_filt, F_MAX_T));
 
   // Power
   sen->Wshunt_filt = sen->Vbatt_filt*sen->Ishunt_filt;
@@ -226,9 +226,8 @@ String tryExtractString(String str, const char* start, const char* end)
 
 
 // Convert time to decimal for easy lookup
-double decimalTime(unsigned long *currentTime, char* tempStr)
+double decimalTime(unsigned long *currentTime, char* tempStr, unsigned long now, unsigned long millis_flip)
 {
-    Time.zone(GMT);
     *currentTime = Time.now();
     uint32_t year = Time.year(*currentTime);
     uint8_t month = Time.month(*currentTime);
@@ -259,7 +258,7 @@ double decimalTime(unsigned long *currentTime, char* tempStr)
     // Convert the decimal
     if ( debug>5 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
     return (((( (float(year-2021)*12 + float(month))*30.4375 + float(day))*24.0 + float(hours))*60.0 + float(minutes))*60.0 + \
-                        float(seconds));
+                        float(seconds) + float((now-millis_flip)%1000)/1000. );
 }
 
 

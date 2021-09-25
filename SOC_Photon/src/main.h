@@ -96,6 +96,7 @@ boolean vectoring = false;
 int8_t vec_num = 1;
 unsigned long vec_start = 0UL;
 boolean enable_wifi = false;
+unsigned long millis_flip = millis();
 
 char buffer[256];               // Serial print buffer
 int numTimeouts = 0;            // Number of Particle.connect() needed to unfreeze
@@ -156,6 +157,7 @@ void setup()
   display->clearDisplay();
 
   // Cloud
+  Time.zone(GMT);
   unsigned long now = millis();
   myWifi = new Wifi(now-CHECK_INTERVAL+CONNECT_WAIT, now, false, false, Particle.connected());  // lastAttempt, lastDisconnect, connected, blynk_started, Particle.connected
   Serial.printf("Initializing CLOUD...");
@@ -182,6 +184,14 @@ void setup()
   #else
     if ( debug>1 ) { sprintf(buffer, "Arduino Mega2560\n"); Serial.print(buffer); } //Serial1.print(buffer); }
   #endif
+
+  // Determine millis() at turn of Time.now
+  long time_begin = Time.now();
+  while ( Time.now() == time_begin )
+  {
+    delay(1);
+    millis_flip = millis()%1000;
+  }
 
   // Summary
   System.enableFeature(FEATURE_RETAINED_MEMORY);
@@ -223,12 +233,12 @@ void loop()
 
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
-  static unsigned long past = millis();     // Keep track of time
+  //  static unsigned long past = millis();     // Keep track of time
   static unsigned long start = millis();    // Keep track of time
   unsigned long elapsed = 0;                // Keep track of time
   static int reset = 1;                     // Dynamic reset
   static int reset_temp = 1;                // Dynamic reset
-  double T = 0;                             // Present update time, s
+  //double T = 0;                             // Present update time, s
 
   // Synchronization
   bool publishP;                            // Particle publish, T/F
@@ -237,7 +247,9 @@ void loop()
   static Sync *publishBlynk = new Sync(PUBLISH_BLYNK_DELAY);
   bool read;                                // Read, T/F
   static Sync *readSensors = new Sync(READ_DELAY);
-  bool read_temp;                                // Read, T/F
+  bool filt;                                // Filter, T/F
+  static Sync *filterSync = new Sync(FILTER_DELAY);
+  bool read_temp;                           // Read temp, T/F
   static Sync *readTemp = new Sync(READ_TEMP_DELAY);
   bool publishS;                            // Serial print, T/F
   static Sync *publishSerial = new Sync(PUBLISH_SERIAL_DELAY);
@@ -269,9 +281,9 @@ void loop()
   }
 
   // Keep track of time
-  past = now;
+  //past = now;
   now = millis();
-  T = (now - past)/1e3;
+  //T = (now - past)/1e3;
 
   // Input temperature only
   read_temp = readTemp->update(millis(), reset);               //  now || reset
@@ -289,15 +301,52 @@ void loop()
   read = readSensors->update(millis(), reset);               //  now || reset
   sen->T =  double(readSensors->updateTime())/1000.0;
   elapsed = readSensors->now() - start;
+  boolean saturated = false;
   if ( read )
   {
     if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
 
     // Load and filter
     load(reset, sen, myPins, ads, readSensors->now());
+
+    // Initialize SOC Free Integrator - Coulomb Counting method
+    // Runs unfiltered and fast to capture most data
+    static boolean vectoring_past = vectoring;
+    static double socu_free_saved = socu_free;
+    if ( vectoring_past != vectoring )
+    {
+      reset_free = true;
+      start = readSensors->now();
+      elapsed = 0UL;
+      if ( vectoring ) socu_free_saved = socu_free;
+      else socu_free = socu_free_saved;
+    }
+    vectoring_past = vectoring;
+    if ( reset_free )
+    {
+      if ( vectoring ) socu_free = socu_solved;
+      else socu_free = socu_free_saved;  // Only way to reach this line is resetting from vector test
+      if ( elapsed>INIT_WAIT ) reset_free = false;
+    }
+
+    // Coulomb Count integrator
+    socu_free = max(min( socu_free + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
+    // Force initialization/reinitialization whenever saturated.   Keeps estimates close to reality
+    if ( saturated ) socu_free = mxepu_bb;
+    if ( debug == -2 )
+      Serial.printf("fast,t,reset_free,Wshunt,soc_f,T,%ld,%d,%7.3f,%7.3f,%7.3f,\n",
+      elapsed, reset_free, sen->Wshunt, socu_free, sen->T_filt);
+
+  }
+
+  // Run filters on other signals
+  filt = filterSync->update(millis(), reset);               //  now || reset
+  sen->T_filt =  double(filterSync->updateTime())/1000.0;
+  if ( filt )
+  {
+    if ( debug>2 ) Serial.printf("Filter update=%7.3f and performing load() at %ld...  ", sen->T_filt, millis());
     filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, VshuntSenseFilt);
-    boolean saturated_test = myBatt_solved->sat();
-    boolean saturated = saturated_obj->calculate(saturated_test, reset);
+    saturated = saturated_obj->calculate(myBatt_solved->sat(), reset);
 
     // Battery models
     double Tbatt_filt_C = (sen->Tbatt_filt-32.)*5./9.;
@@ -318,33 +367,9 @@ void loop()
     }
     // boolean solver_valid = count<SOLV_MAX_COUNTS; 
     
-    // Initialize SOC Free Integrator - Coulomb Counting method
-    static boolean vectoring_past = vectoring;
-    static double socu_free_saved = socu_free;
-    if ( vectoring_past != vectoring )
-    {
-      reset_free = true;
-      start = readSensors->now();
-      elapsed = 0UL;
-      if ( vectoring ) socu_free_saved = socu_free;
-      else socu_free = socu_free_saved;
-    }
-    vectoring_past = vectoring;
-    if ( reset_free )
-    {
-      if ( vectoring ) socu_free = socu_solved;
-      else socu_free = socu_free_saved;  // Only way to reach this line is resetting from vector test
-      if ( elapsed>INIT_WAIT ) reset_free = false;
-    }
-    // Force initialization/reinitialization whenever saturated.   Keeps estimates close to reality
-    if ( saturated ) socu_free = mxepu_bb;
-
-    // Coulomb Count integrator
-    socu_free = max(min( socu_free + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
-
     // Debug print statements
     if ( debug == -2 )
-      Serial.printf("T,reset_free,vectoring,saturated,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,voc,dvdsoc,T,count,tcharge,  %ld,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
+      Serial.printf("slow,t,reset_free,vectoring,saturated,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,voc,dvdsoc,T,count,tcharge,  %ld,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
       elapsed, reset_free, vectoring, saturated, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal),
       socu_solved, socu_free, sen->Vbatt_solved, myBatt_solved->voc(), myBatt_solved->dv_dsocu(), sen->T, count, myBatt_free->tcharge());
 
@@ -365,7 +390,7 @@ void loop()
   if ( publishP || publishS)
   {
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
-    controlTime = decimalTime(&currentTime, tempStr);
+    controlTime = decimalTime(&currentTime, tempStr, now, millis_flip);
     hmString = String(tempStr);
     assignPubList(&pubList, publishParticle->now(), unit, hmString, controlTime, sen, numTimeouts, myBatt_solved, myBatt_free);
  
@@ -384,7 +409,7 @@ void loop()
     // Monitor for debug
     if ( debug>0 && publishS )
     {
-      serial_print(publishSerial->now(), T);
+      serial_print(publishSerial->now(), sen->T);
     }
 
   }

@@ -78,6 +78,7 @@ struct Sensors
   double Wbatt;          // Battery power, W
   int I2C_status;
   double T;               // Update time, s
+  double T_filt;          // Filter update time, s
   double T_temp;          // Temperature update time, s
   bool bare_ads;          // If no ADS detected
   Sensors(void) {}
@@ -101,6 +102,7 @@ struct Sensors
     this->Wbatt = Vshunt * Ishunt;
     this->I2C_status = I2C_status;
     this->T = T;
+    this->T_filt = T;
     this->T_temp = T_temp;
     this->bare_ads = bare_ads;
   }
@@ -116,7 +118,7 @@ void filter(int reset, Sensors *sen, General2_Pole* VbattSenseFiltObs, General2_
   General2_Pole* VbattSenseFilt,  General2_Pole* VshuntSenseFilt);
 void filter_temp(int reset, Sensors *sen, General2_Pole* TbattSenseFilt);
 String tryExtractString(String str, const char* start, const char* end);
-double  decimalTime(unsigned long *currentTime, char* tempStr);
+double  decimalTime(unsigned long *currentTime, char* tempStr, unsigned long now, unsigned long millis_flip);
 void print_serial_header(void);
 void myDisplay(Adafruit_SSD1306 *display);
 String time_long_2_str(const unsigned long currentTime, char *tempStr);
