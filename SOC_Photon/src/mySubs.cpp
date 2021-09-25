@@ -115,6 +115,7 @@ void load_temp(Sensors *sen, DS18 *sensor_tbatt)
   while ( ++count<MAX_TEMP_READS && temp==0)
   {
     if ( sensor_tbatt->read() ) temp = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);
+    delay(1);
   }
   if ( count<MAX_TEMP_READS )
   {
