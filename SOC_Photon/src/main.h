@@ -281,9 +281,7 @@ void loop()
   }
 
   // Keep track of time
-  //past = now;
   now = millis();
-  //T = (now - past)/1e3;
 
   // Input temperature only
   read_temp = readTemp->update(millis(), reset);               //  now || reset
@@ -334,8 +332,8 @@ void loop()
     // Force initialization/reinitialization whenever saturated.   Keeps estimates close to reality
     if ( saturated ) socu_free = mxepu_bb;
     if ( debug == -2 )
-      Serial.printf("fast,t,reset_free,Wshunt,soc_f,T,%ld,%d,%7.3f,%7.3f,%7.3f,\n",
-      elapsed, reset_free, sen->Wshunt, socu_free, sen->T_filt);
+      Serial.printf("fast,t,reset_free,Wshunt,soc_f,T,%7.3f,%d,%7.3f,%7.3f,%7.3f,\n",
+      double(elapsed)/1000., reset_free, sen->Wshunt, socu_free, sen->T_filt);
 
   }
 
@@ -371,8 +369,8 @@ void loop()
     
     // Debug print statements
     if ( debug == -2 )
-      Serial.printf("slow,t,reset_free,vectoring,saturated,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,voc,dvdsoc,T,count,tcharge,  %ld,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
-      elapsed, reset_free, vectoring, saturated, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal),
+      Serial.printf("slow,t,reset_free,vectoring,saturated,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,voc,dvdsoc,T,count,tcharge,  %7.3f,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
+      double(elapsed)/1000., reset_free, vectoring, saturated, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal),
       socu_solved, socu_free, sen->Vbatt_solved, myBatt_solved->voc(), myBatt_solved->dv_dsocu(), sen->T, count, myBatt_free->tcharge());
 
     //if ( bare ) delay(41);  // Usual I2C time
