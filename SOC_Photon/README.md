@@ -100,7 +100,7 @@ The ADS module is delicate (ESD and handling).   I burned one out by
 accidentally touching terminals to back of OLED board.   I now mount the
 OLED board carefully off to the side.   Will need a hobby box to contain the final device.
 
-### ASD 1015 12-bit 
+### ASD 1015 12-bit
 
 - HiLetgo ADS1015 12 Bit Analog to Digital Development Board ADC Converter Module ADC Development Board for Arduino
   $8.29 in Aug 2021
@@ -144,7 +144,7 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
 
 ### Display SSD1306-compatible OLED 128x32
 
-  Amazon:  5 Pieces I2C Display Module 0.91 Inch I2C OLED Display Module Blue I2C OLED Screen Driver DC 3.3V~5V(Blue Display Color) 
+  Amazon:  5 Pieces I2C Display Module 0.91 Inch I2C OLED Display Module Blue I2C OLED Screen Driver DC 3.3V~5V(Blue Display Color)
   Code from Adafruit SSD1306 library
   1-GND = Gnd
   2-VCC = 3v3
@@ -165,7 +165,7 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
 
     Solution:  Manually reset CLI installation.  https://community.particle.io/t/how-to-manually-reset-your-cli-installation/54018
 
-### Problem:  Software loads but does nothing or doesn't work sensibly at all.
+### Problem:  Software loads but does nothing or doesn't work sensibly at all
 
   This can happen with a new Particle device first time.   This can happen with a feature added to code that requires certain
   OS configuration.   Its easy to be fooled by this because it appears that the application loads correctly and some stuff even works.
@@ -184,5 +184,42 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   2. Rebuild and upload
   3. Start CoolTerm_0.stc
 
-## Requirements:
-  1.  
+## Requirements
+
+  1. Calculate state of charge of 100 Ah Battleborn LiFePO4 battery.   The state of charge is percentage of 100 Ah available.
+    a.  Nominally the battery may have more than 100 Ah capacity.   This should be confirmed.
+    b.  Displayed SOC may exceed 100 but should not go below 0.
+  2. Displayed values when sitting either charging slightly or discharging DC ciruits (no inverter) should appear constant after filter rise.
+    a.  Estimate and display hours to 100 SOC. (charge is positive).   This is the main use of this device:  to assure sleeper that CPAP, once turned on, will last longer than expected sleep time.
+    b.  Measure and display shunt current (charge is positive), A.
+    c.  Measure and display battery voltage, V.
+    d.  Measure and display battery temperature, F.
+  3. Implement an adjustment 'talk' function.  Along with general debugging it must be capable of
+    a.  Setting SOC state for those times that the
+  4. CPU hard and soft resets must not change the state of operation, either SOC, display, or serial bus.
+  5. Serial streams shall have an absolute Julien time for easy plotting and comparison.
+  6. Built-in test vector function, engaged using 'talk' function.
+  7. Load software using USB.  Wifi to truck will not be reliable.
+  8. Likewise, monitor USB using laptop or phone.  'Talk' function should change serial monitor for debugging.
+  9. Device shall have no effect on system operation.   Monitor function only.
+  10. Bluetooth serial interface required.  ***This did not work due to age of Android phone (6 yrs) not compatible with the latest bluetooth devices.
+  11. Keep as much summary as possible of SOC every half hour:  Tbatt, Vbatt, SOC.   Save as SRAM battery backup memory. Print out to serial automatically on boot and as requested by 'Talk.'  This will tell users charging history.
+
+## Implementation Notes
+
+  1. A PI observer is no more accurate than the open loop OCV-SOC curves.
+  2. A Coulomb Counter implementation is very accurate but needs to calibrate every couple cycles.   This should happen naturally as the battery charges fully each day.
+  3. Blynk phone monitor implemented, as well as Particle Cloud, but found to be impractical because
+    a.  Seldom near wifi when camping.
+    b.  OLED display works well.
+    c.  'Talk' interface works well.   Can use with phone while on the go.  Need to buy dongle for the phone (Android only): Micro USB 2.0 OTG Cable ($6 on Amazon). 
+  4. Shunt monitor seems to have 0 V bias at 0 A current so this is assumed when scaling inputs.
+  5. Current calibrated using clamping ammeter turning large loads off and on.
+  6. Battleborn nominal capacity determined by load tests.
+  7. An iterative solver for SOC-VOC model works extremely well given calculatable derivative for the equations from reference.  PI observer removed in favor of solver.  The solver could be used to initialize SOC for the Coulomb Counter but probaly not worth the trouble.   Leave this device in more future possible usage.
+  8. Note that there is no effect of the device on system operation so debugging via serial can be more extensive than usual.
+  9. Two-pole filters and update time framing, determined experimentally and by experience to provide best possible Coulommb Counter and display behavior.
+  10. Wifi turned off immediately.  Can be turned on by 'Talk.'
+  11. Battery temperature changes very slowly, well within capabilities of DS18B sensor.
+  12. 12-bit AD sufficiently accurate for Coulomb Counting.  Precision is what matters and it is fine, even with bit flipping.  Even with backlash / sliding deadband to filter bit flipping.
+  13. All constants in header files (Battery.h and constants.h).
