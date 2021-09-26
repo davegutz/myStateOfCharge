@@ -165,12 +165,16 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
 
     Solution:  Manually reset CLI installation.  https://community.particle.io/t/how-to-manually-reset-your-cli-installation/54018
 
-### Problem:  Software loads but does nothing
+### Problem:  Software loads but does nothing or doesn't work sensibly at all.
 
   This can happen with a new Particle device first time.   This can happen with a feature added to code that requires certain
-  OS configuration.
+  OS configuration.   Its easy to be fooled by this because it appears that the application loads correctly and some stuff even works.
 
     Solution:  run  Particle: Flash Application and Device OS (local).   You may have to compile same before running this.
+
+### Problem:  Local flash gives message "Unable to connect to the device soc0. Make sure the device is connected to the host computer via USB"
+
+  in file .vscode/settings.json change "particle.targetDevice": "<Particle name>"
 
 ## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
 
