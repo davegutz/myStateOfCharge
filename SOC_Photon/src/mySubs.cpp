@@ -406,7 +406,7 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
   Serial.printf("d   dump the summary log\n"); 
   Serial.printf("m=  assign a free memory state in percent - '('truncated 0-100')'\n"); 
-  Serial.printf("v=  "); Serial.print(debug); Serial.println("    : verbosity, -128 - +128. 2 for save csv [2]");
+  Serial.printf("v=  "); Serial.print(debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("Dv= "); Serial.print(batt_solved->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
   Serial.printf("Sr= "); Serial.print(batt_solved->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("T<?>=  "); 

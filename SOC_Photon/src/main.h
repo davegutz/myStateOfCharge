@@ -363,6 +363,10 @@ void loop()
     // boolean solver_valid = count<SOLV_MAX_COUNTS; 
     
     // Debug print statements
+    // Useful for Arduino plotting
+    if ( debug == -1 ) Serial.printf("%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", socu_solved, Sen->Ishunt,
+        Sen->Vbatt_filt_obs, MyBattSolved->voc(), MyBattSolved->vdyn(), MyBattSolved->v());
+    // Useful for vector testing and serial data capture
     if ( debug == -2 )
       Serial.printf("slow,t,reset_free,vectoring,saturated,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,voc,dvdsoc,T,count,tcharge,  %7.3f,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
       double(elapsed)/1000., reset_free, vectoring, saturated, Sen->Tbatt, Sen->Ishunt_filt_obs, Sen->Vbatt_filt_obs+double(stepping*step_val),

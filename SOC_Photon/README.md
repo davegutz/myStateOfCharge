@@ -43,8 +43,12 @@ When you're ready to compile your project, make sure you have the correct Partic
 ***********************
 Ctrl-Shift-P - Particle:Clean Application and Device OS (local)
 Ctrl-Shift-P - Particle:Compile Application (local) or Check button in Visual Studio upper rc when select a source file
+  Ctrl-Shift-P - Particle:Compile Application and Device OS (local) first time
 Ctrl-Shift-P - Particle:Cloud Flash or Ctrl-Shift-P - Particle:Local Flash
-Ctrl-Shift-P - Particle:Serial Monitor
+  Ctrl-Shift-P - Particle:Flash application and Device OS (local) first time
+Ctrl-Shift-P - Particle:Serial Monitor or CoolTerm
+  'Talk' function using CoolTerm.  Be sure to add line feed to end of Ctrl-T dialog of CoolTerm.
+  Arduino plot function works with debug=
 
 Desktop settings
     .json has "particle.targetDevice": "proto"
@@ -52,15 +56,16 @@ Desktop settings
         const   String    unit = "proto";
         //#define BARE
 
-Laptop settings.json has  "particle.targetDevice": "proto"
-    .json has "particle.targetDevice": "proto"
+Laptop settings.json has  "particle.targetDevice": "soc0"
+    .json has "particle.targetDevice": "soc0"
     local_config.h has
-        const   String    unit = "proto";
+        const   String    unit = "soc0";
         //#define BARE
 
 On desktop (has curlParticleProto.py running in cygwin)
     after observing outputs from long cURL run, Modify main.h etc.   Make sure it compiles.
     flash to target 'proto' and test
+    be sure to build OS and flash OS too the first time
     push into GitHub repository
     get address of curl from particle.io console - pick device - click on 'view events in terminal' --> edit curl??.py file
     cd /cygdrive/c/Users/Dave/Documents/GitHub/myStateOfCharge/SOC_Photon/dataReduction/
@@ -72,7 +77,8 @@ On desktop (has curlParticleProto.py running in cygwin)
 On laptop (same as desktop?)
     pull from GitHub repository changes just made on desktop
     compile
-    flash to target 'proto'
+    flash to target 'soc0'
+    be sure to build OS and flash OS too the first time
 
 View results
     Prototype realtime using Blynk (SoC)
@@ -170,7 +176,7 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   This can happen with a new Particle device first time.   This can happen with a feature added to code that requires certain
   OS configuration.   Its easy to be fooled by this because it appears that the application loads correctly and some stuff even works.
 
-    Solution:  run  Particle: Flash Application and Device OS (local).   You may have to compile same before running this.
+    Solution:  run  Particle: Flash Application and Device OS (local).   You may have to compile same before running this.  Once this is done the redo loop is Flash Application (local) only.
 
 ### Problem:  Local flash gives red message "Unable to connect to the device <device name requested>. Make sure the device is connected to the host computer via USB"
 
