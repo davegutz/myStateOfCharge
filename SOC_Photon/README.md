@@ -172,9 +172,9 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
 
     Solution:  run  Particle: Flash Application and Device OS (local).   You may have to compile same before running this.
 
-### Problem:  Local flash gives message "Unable to connect to the device soc0. Make sure the device is connected to the host computer via USB"
+### Problem:  Local flash gives red message "Unable to connect to the device <device name requested>. Make sure the device is connected to the host computer via USB"
 
-  in file .vscode/settings.json change "particle.targetDevice": "<Particle name>"
+  Find out what device you're flashing (particle.io).  In file .vscode/settings.json change "particle.targetDevice": "<device name actual>".  It may still flash correctly even with red warning message (always did for me).
 
 ## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
 
