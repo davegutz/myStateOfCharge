@@ -254,6 +254,31 @@ double RateLimit::calculate(const double in, const double Rmax, const double Rmi
 }
 
 
+// class SlidingDeadband
+// constructors
+SlidingDeadband::SlidingDeadband()
+    : z_(0), hdb_(0) {}
+SlidingDeadband::SlidingDeadband(const double hdb)
+    : z_(0), hdb_(hdb) {}
+SlidingDeadband::~SlidingDeadband() {}
+// operators
+// functions
+double SlidingDeadband::update(const double in)
+{
+  z_ = fmax( fmin( z_, in+hdb_), in-hdb_);
+  return (z_);
+}
+double SlidingDeadband::update(const double in, const int RESET)
+{
+  if (RESET>0)
+  {
+    z_ = in;
+  }
+  double out = SlidingDeadband::update(in);
+  return(out);
+}
+
+
 // **************************** First Order Filters *************************************
 // class DiscreteFilter
 // constructors

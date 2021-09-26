@@ -130,7 +130,8 @@ void load_temp(Sensors *sen, DS18 *sensor_tbatt)
 }
 
 // Load all others
-void load(const bool reset_free, Sensors *sen, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now)
+void load(const bool reset_free, Sensors *sen, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now,
+      SlidingDeadband *sd_ishunt, SlidingDeadband *sd_vbatt)
 {
   // Read Sensor
   // ADS1015 conversion
@@ -143,11 +144,15 @@ void load(const bool reset_free, Sensors *sen, Pins *myPins, Adafruit_ADS1015 *a
     sen->Vshunt_int = 0;
   }
   sen->Vshunt = ads->computeVolts(sen->Vshunt_int);
-  sen->Ishunt = sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
+  double ishunt_free = sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
+  sen->Ishunt = sd_ishunt->update(ishunt_free, reset_free);
+  if ( debug==-14 ) Serial.printf("reset_free,ishunt_free,Ishunt,%d,%7.3f,%7.3f\n", reset_free, ishunt_free, sen->Ishunt);
 
   // Vbatt
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
-  sen->Vbatt =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A);
+  double vbatt_free =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A);
+  sen->Vbatt = sd_vbatt->update(vbatt_free, reset_free);
+  if ( debug==-15 ) Serial.printf("reset_free,vbatt_free,vbatt,%d,%7.3f,%7.3f\n", reset_free, vbatt_free, sen->Vbatt);
 
   // Vector model
   double elapsed_loc = 0.;

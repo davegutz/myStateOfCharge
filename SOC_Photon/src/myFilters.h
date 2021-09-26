@@ -122,6 +122,22 @@ protected:
 };
 
 
+class SlidingDeadband
+{
+public:
+  SlidingDeadband();
+  SlidingDeadband(const double hdb);
+  ~SlidingDeadband();
+  // operators
+  // functions
+  double update(const double in);
+  double update(const double in, const int RESET);
+protected:
+  double z_;      // State of output, units of input
+  double hdb_;    // Half of deadband width, units of input
+};
+
+
 // ************************** 1-Pole Filters ***********************************************
 class DiscreteFilter
 {

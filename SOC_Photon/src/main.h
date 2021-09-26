@@ -219,6 +219,8 @@ void loop()
 
   // Sensor conversions
   static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, 0, bare_ads); // Manage sensor data    
+  static SlidingDeadband *sd_ishunt = new SlidingDeadband(HDB_ISHUNT);
+  static SlidingDeadband *sd_vbatt = new SlidingDeadband(HDB_VBATT);
 
   // Battery  models
   // Solved, driven by socu_s
@@ -305,7 +307,7 @@ void loop()
     if ( debug>2 || debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
 
     // Load and filter
-    load(reset, sen, myPins, ads, readSensors->now());
+    load(reset, sen, myPins, ads, readSensors->now(), sd_ishunt, sd_vbatt);
 
     // Initialize SOC Free Integrator - Coulomb Counting method
     // Runs unfiltered and fast to capture most data

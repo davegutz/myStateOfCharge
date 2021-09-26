@@ -112,7 +112,8 @@ struct Sensors
 // Headers
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);
-void load(const bool reset_free, Sensors *sen, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now);
+void load(const bool reset_free, Sensors *sen, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now,
+  SlidingDeadband *sd_ishunt, SlidingDeadband *sd_vbatt);
 void load_temp(Sensors *sen, DS18 *sensor_tbatt);
 void filter(int reset, Sensors *sen, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
   General2_Pole* VbattSenseFilt,  General2_Pole* VshuntSenseFilt);
