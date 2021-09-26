@@ -7,17 +7,17 @@
 struct Wifi
 {
   unsigned int lastAttempt;
-  unsigned int lastDisconnect;
+  unsigned int last_disconnect;
   bool connected = false;
   bool blynk_started = false;
   bool particle_connected_last = false;
   bool particle_connected_now = false;
   Wifi(void) {}
-  Wifi(unsigned int lastAttempt, unsigned int lastDisconnect, bool connected, bool blynk_started,
+  Wifi(unsigned int lastAttempt, unsigned int last_disconnect, bool connected, bool blynk_started,
         bool particle_connected)
   {
     this->lastAttempt = lastAttempt;
-    this->lastDisconnect = lastDisconnect;
+    this->last_disconnect = last_disconnect;
     this->connected = connected;
     this->blynk_started = blynk_started;
     this->particle_connected_last = particle_connected;
@@ -30,8 +30,8 @@ struct Publish
 {
   uint32_t now;
   String unit;
-  String hmString;
-  double controlTime;
+  String hm_string;
+  double control_time;
   double Vbatt;
   double Vbatt_solved;
   double Tbatt;
@@ -49,7 +49,7 @@ struct Publish
   double Ishunt_filt;
   double Ishunt_filt_obs;
   double Wshunt_filt;
-  int numTimeouts;
+  int num_timeouts;
   double socu_solved;
   double socu_free;
   double tcharge;
@@ -60,8 +60,8 @@ void publish2(void);
 void publish3(void);
 void publish4(void);
 void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi);
-void assignPubList(Publish* pubList, const unsigned long now, const String unit, const String hmString,
-  const double controlTime, struct Sensors* sen, const int numTimeouts,
-  Battery* myBatt_solved, Battery* myBatt_free);
+void assign_PubList(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
+  const double control_time, struct Sensors* Sen, const int num_timeouts,
+  Battery* MyBattSolved, Battery* MyBattFree);
 
 #endif

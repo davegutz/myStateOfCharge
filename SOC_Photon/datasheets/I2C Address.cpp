@@ -79,8 +79,8 @@ pinMode(13, OUTPUT);
 void loop()
 {
 // Nothing to do here, so we'll just blink the built-in LED
-digitalWrite(13,HIGH);
+digital_write(13,HIGH);
 delay(300);
-digitalWrite(13,LOW);
+digital_write(13,LOW);
 delay(300);
 }

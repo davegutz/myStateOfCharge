@@ -112,22 +112,24 @@ struct Sensors
 // Headers
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);
-void load(const bool reset_free, Sensors *sen, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now,
-  SlidingDeadband *sd_ishunt, SlidingDeadband *sd_vbatt);
-void load_temp(Sensors *sen, DS18 *sensor_tbatt);
-void filter(int reset, Sensors *sen, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
+void load(const bool reset_free, Sensors *Sen, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now,
+  SlidingDeadband *SdIshunt, SlidingDeadband *SdVbatt);
+void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt);
+void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
   General2_Pole* VbattSenseFilt,  General2_Pole* VshuntSenseFilt);
-void filter_temp(int reset, Sensors *sen, General2_Pole* TbattSenseFilt);
+void filter_temp(int reset, Sensors *Sen, General2_Pole* TbattSenseFilt);
 String tryExtractString(String str, const char* start, const char* end);
-double  decimalTime(unsigned long *currentTime, char* tempStr, unsigned long now, unsigned long millis_flip);
+double  decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
 void print_serial_header(void);
 void myDisplay(Adafruit_SSD1306 *display);
-String time_long_2_str(const unsigned long currentTime, char *tempStr);
+String time_long_2_str(const unsigned long current_time, char *tempStr);
 void create_print_string(char *buffer, Publish *pubList);
+void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);
 
 // Talk Declarations
-void talk(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num,
-  Battery *myBatt_solved, Battery *myBatt_free);
-void talkT(bool *stepping, double *stepVal, bool *vectoring, int8_t *vec_num);  // Transient inputs
-void talkH(double *stepVal, int8_t *vec_num, Battery *batt_solved); // Help
+void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
+  Battery *MyBattSolved, Battery *MyBattFree);
+void talkT(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num);  // Transient inputs
+void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved); // Help
+
 #endif

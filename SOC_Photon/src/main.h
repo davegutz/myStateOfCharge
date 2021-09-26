@@ -72,15 +72,15 @@ Publish pubList = Publish();
 extern BlynkParticle Blynk;       // Blynk object
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4; // Time Blynk events
 BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;        // Time Blynk events
-extern String inputString;        // a string to hold incoming data
-extern boolean stringComplete;    // whether the string is complete
+extern String input_string;        // a string to hold incoming data
+extern boolean string_complete;    // whether the string is complete
 extern boolean stepping;          // active step adder
-extern double stepVal;            // Step size
+extern double step_val;            // Step size
 extern boolean vectoring;         // Active battery test vector
 extern int8_t vec_num;            // Active vector number
 extern unsigned long vec_start;   // Start of active vector
 extern boolean enable_wifi;       // Enable wifi
-extern double socu_free;           // Free integrator state
+extern double socu_free;          // Free integrator state
 
 // Global locals
 const int nsum = 154;           // Number of summary strings, 17 Bytes per isum
@@ -88,21 +88,21 @@ retained int isum = -1;         // Summary location.   Begins at -1 because firs
 retained Sum_st mySum[nsum];    // Summaries
 retained double socu_free = 0.5;// Coulomb Counter state
 retained int8_t debug = 2;
-String inputString = "";
-boolean stringComplete = false;
+String input_string = "";
+boolean string_complete = false;
 boolean stepping = false;
-double stepVal = -2;
+double step_val = -2;
 boolean vectoring = false;
 int8_t vec_num = 1;
 unsigned long vec_start = 0UL;
 boolean enable_wifi = false;
-unsigned long millis_flip = millis();
+unsigned long millis_flip = millis(); // Timekeeping
+unsigned long last_sync = millis();   // Timekeeping
 
 char buffer[256];               // Serial print buffer
-int numTimeouts = 0;            // Number of Particle.connect() needed to unfreeze
-String hmString = "00:00";      // time, hh:mm
-double controlTime = 0.0;       // Decimal time, seconds since 1/1/2021
-unsigned long lastSync = millis();// Sync time occassionally.   Recommended by Particle.
+int num_timeouts = 0;            // Number of Particle.connect() needed to unfreeze
+String hm_string = "00:00";      // time, hh:mm
+double control_time = 0.0;      // Decimal time, seconds since 1/1/2021
 Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_ADS1015 *ads;          // Use this for the 12-bit version; 1115 for 16-bit
 Adafruit_SSD1306 *display;
@@ -159,10 +159,10 @@ void setup()
   // Cloud
   Time.zone(GMT);
   unsigned long now = millis();
-  myWifi = new Wifi(now-CHECK_INTERVAL+CONNECT_WAIT, now, false, false, Particle.connected());  // lastAttempt, lastDisconnect, connected, blynk_started, Particle.connected
+  myWifi = new Wifi(now-CHECK_INTERVAL+CONNECT_WAIT, now, false, false, Particle.connected());  // lastAttempt, last_disconnect, connected, blynk_started, Particle.connected
   Serial.printf("Initializing CLOUD...");
   Particle.disconnect();
-  myWifi->lastDisconnect = now;
+  myWifi->last_disconnect = now;
   WiFi.off();
   myWifi->connected = false;
   if ( debug > 2 ) Serial.printf("wifi disconnect...");
@@ -199,7 +199,7 @@ void setup()
 
   // Header for debug print
   if ( debug>1 ) print_serial_header();
-  if ( debug>3 ) { Serial.print(F("End setup debug message=")); Serial.println(F(", "));};
+  if ( debug>3 ) { Serial.print(F("End setup debug message=")); Serial.println(F(", ")); };
 
 } // setup
 
@@ -215,48 +215,47 @@ void loop()
   static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -0.500, 0.500);
 
   // 1-wire temp sensor battery temp
-  static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);
+  static DS18* SensorTbatt = new DS18(myPins->pin_1_wire);
 
   // Sensor conversions
-  static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, 0, bare_ads); // Manage sensor data    
-  static SlidingDeadband *sd_ishunt = new SlidingDeadband(HDB_ISHUNT);
-  static SlidingDeadband *sd_vbatt = new SlidingDeadband(HDB_VBATT);
+  static Sensors *Sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, 0, bare_ads); // Manage sensor data    
+  static SlidingDeadband *SdIshunt = new SlidingDeadband(HDB_ISHUNT);
+  static SlidingDeadband *SdVbatt = new SlidingDeadband(HDB_VBATT);
+  static SlidingDeadband *SdTbatt = new SlidingDeadband(HDB_TBATT);
 
   // Battery  models
   // Solved, driven by socu_s
-  static Battery *myBatt_solved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
+  static Battery *MyBattSolved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
   // Free, driven by socu_free
-  static Battery *myBatt_free = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
+  static Battery *MyBattFree = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
 
   // Battery saturation
-  static Debounce *saturated_obj = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
+  static Debounce *SaturatedObj = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
 
-  unsigned long currentTime;                // Time result
+  unsigned long current_time;                // Time result
   static unsigned long now = millis();      // Keep track of time
-  //  static unsigned long past = millis();     // Keep track of time
   static unsigned long start = millis();    // Keep track of time
   unsigned long elapsed = 0;                // Keep track of time
   static int reset = 1;                     // Dynamic reset
   static int reset_temp = 1;                // Dynamic reset
-  //double T = 0;                             // Present update time, s
 
   // Synchronization
   bool publishP;                            // Particle publish, T/F
-  static Sync *publishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
+  static Sync *PublishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
   bool publishB;                            // Particle publish, T/F
-  static Sync *publishBlynk = new Sync(PUBLISH_BLYNK_DELAY);
+  static Sync *PublishBlynk = new Sync(PUBLISH_BLYNK_DELAY);
   bool read;                                // Read, T/F
-  static Sync *readSensors = new Sync(READ_DELAY);
+  static Sync *ReadSensors = new Sync(READ_DELAY);
   bool filt;                                // Filter, T/F
-  static Sync *filterSync = new Sync(FILTER_DELAY);
+  static Sync *FilterSync = new Sync(FILTER_DELAY);
   bool read_temp;                           // Read temp, T/F
-  static Sync *readTemp = new Sync(READ_TEMP_DELAY);
+  static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
   bool publishS;                            // Serial print, T/F
-  static Sync *publishSerial = new Sync(PUBLISH_SERIAL_DELAY);
+  static Sync *PublishSerial = new Sync(PUBLISH_SERIAL_DELAY);
   bool summarizing;                         // Summarize, T/F
-  static Sync *summarize = new Sync(SUMMARIZE_DELAY);
+  static Sync *Summarize = new Sync(SUMMARIZE_DELAY);
   static double socu_solved = 1.0;
   static bool reset_free = false;
 
@@ -275,39 +274,33 @@ void loop()
     Blynk.run(); blynk_timer_1.run(); blynk_timer_2.run(); blynk_timer_3.run(); blynk_timer_4.run(); 
   }
 
-  // Request time synchronization from the Particle Cloud once per day
-  if (millis() - lastSync > ONE_DAY_MILLIS)
-  {
-    Particle.syncTime();
-    lastSync = millis();
-  }
-
-  // Keep track of time
+  // Keep time
   now = millis();
+  sync_time(now, &last_sync, &millis_flip);      // Refresh time synchronization
 
   // Input temperature only
-  read_temp = readTemp->update(millis(), reset);               //  now || reset
+  read_temp = ReadTemp->update(millis(), reset);              //  now || reset
   if ( read_temp )
   {
-    sen->T_temp =  readTemp->updateTime();
-    if ( debug>2 ) Serial.printf("Read temp update=%7.3f and performing load_temp() at %ld...  ", sen->T_temp, millis());
+    Sen->T_temp =  ReadTemp->updateTime();
+    if ( debug>2 ) Serial.printf("Read temp update=%7.3f and performing load_temp() at %ld...  ", Sen->T_temp, millis());
 
     // Load and filter temperature only
-    load_temp(sen, sensor_tbatt);
-    filter_temp(reset_temp, sen, TbattSenseFilt);
+    load_temp(Sen, SensorTbatt, SdTbatt);
+    filter_temp(reset_temp, Sen, TbattSenseFilt);
   }
 
   // Input all other sensors
-  read = readSensors->update(millis(), reset);               //  now || reset
-  elapsed = readSensors->now() - start;
+  read = ReadSensors->update(millis(), reset);               //  now || reset
+  elapsed = ReadSensors->now() - start;
   boolean saturated = false;
   if ( read )
   {
-    sen->T =  readSensors->updateTime();
-    if ( debug>2 || debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
+    Sen->T =  ReadSensors->updateTime();
+    if ( debug>2 || debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", Sen->T, millis());
 
     // Load and filter
-    load(reset, sen, myPins, ads, readSensors->now(), sd_ishunt, sd_vbatt);
+    load(reset, Sen, myPins, ads, ReadSensors->now(), SdIshunt, SdVbatt);
 
     // Initialize SOC Free Integrator - Coulomb Counting method
     // Runs unfiltered and fast to capture most data
@@ -316,7 +309,7 @@ void loop()
     if ( vectoring_past != vectoring )
     {
       reset_free = true;
-      start = readSensors->now();
+      start = ReadSensors->now();
       elapsed = 0UL;
       if ( vectoring ) socu_free_saved = socu_free;
       else socu_free = socu_free_saved;
@@ -330,50 +323,50 @@ void loop()
     }
 
     // Coulomb Count integrator
-    socu_free = max(min( socu_free + sen->Wshunt/NOM_SYS_VOLT*sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
+    socu_free = max(min( socu_free + Sen->Wshunt/NOM_SYS_VOLT*Sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
     // Force initialization/reinitialization whenever saturated.   Keeps estimates close to reality
     if ( saturated ) socu_free = mxepu_bb;
     if ( debug == -2 )
       Serial.printf("fast,t,reset_free,Wshunt,soc_f,T,%7.3f,%d,%7.3f,%7.3f,%7.3f,\n",
-      double(elapsed)/1000., reset_free, sen->Wshunt, socu_free, sen->T_filt);
+      double(elapsed)/1000., reset_free, Sen->Wshunt, socu_free, Sen->T_filt);
 
   }
 
   // Run filters on other signals
-  filt = filterSync->update(millis(), reset);               //  now || reset
+  filt = FilterSync->update(millis(), reset);               //  now || reset
   if ( filt )
   {
-    sen->T_filt =  filterSync->updateTime();
-    if ( debug>2 ) Serial.printf("Filter update=%7.3f and performing load() at %ld...  ", sen->T_filt, millis());
+    Sen->T_filt =  FilterSync->updateTime();
+    if ( debug>2 ) Serial.printf("Filter update=%7.3f and performing load() at %ld...  ", Sen->T_filt, millis());
 
     // Filter
-    filter(reset, sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, VshuntSenseFilt);
-    saturated = saturated_obj->calculate(myBatt_solved->sat(), reset);
+    filter(reset, Sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, VshuntSenseFilt);
+    saturated = SaturatedObj->calculate(MyBattSolved->sat(), reset);
 
     // Battery models
-    double Tbatt_filt_C = (sen->Tbatt_filt-32.)*5./9.;
-    myBatt_free->calculate(Tbatt_filt_C, socu_free, sen->Ishunt);
+    double Tbatt_filt_C = (Sen->Tbatt_filt-32.)*5./9.;
+    MyBattFree->calculate(Tbatt_filt_C, socu_free, Sen->Ishunt);
 
     // Solver
-    double vbatt_f_o = sen->Vbatt_filt_obs + double(stepping*stepVal);
+    double vbatt_f_o = Sen->Vbatt_filt_obs + double(stepping*step_val);
     int8_t count = 0;
-    sen->Vbatt_solved = myBatt_solved->calculate(Tbatt_filt_C, socu_solved, sen->Ishunt_filt_obs);
-    double err = vbatt_f_o - sen->Vbatt_solved;
+    Sen->Vbatt_solved = MyBattSolved->calculate(Tbatt_filt_C, socu_solved, Sen->Ishunt_filt_obs);
+    double err = vbatt_f_o - Sen->Vbatt_solved;
     while( fabs(err)>SOLV_MAX_ERR && count++<SOLV_MAX_COUNTS )
     {
-      socu_solved = max(min(socu_solved + max(min( err/myBatt_solved->dv_dsocu(), SOLV_MAX_STEP), -SOLV_MAX_STEP), mxepu_bb), mnepu_bb);
-      sen->Vbatt_solved = myBatt_solved->calculate(Tbatt_filt_C, socu_solved, sen->Ishunt_filt_obs);
-      err = vbatt_f_o - sen->Vbatt_solved;
+      socu_solved = max(min(socu_solved + max(min( err/MyBattSolved->dv_dsocu(), SOLV_MAX_STEP), -SOLV_MAX_STEP), mxepu_bb), mnepu_bb);
+      Sen->Vbatt_solved = MyBattSolved->calculate(Tbatt_filt_C, socu_solved, Sen->Ishunt_filt_obs);
+      err = vbatt_f_o - Sen->Vbatt_solved;
       if ( debug == -5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,socu_s,vbatt_f_o,Vbatt_m_s,err,dv_dsocu, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-          sen->Tbatt_filt, sen->Ishunt_filt_obs, count, socu_solved, vbatt_f_o, sen->Vbatt_solved, err, myBatt_solved->dv_dsocu());
+          Sen->Tbatt_filt, Sen->Ishunt_filt_obs, count, socu_solved, vbatt_f_o, Sen->Vbatt_solved, err, MyBattSolved->dv_dsocu());
     }
     // boolean solver_valid = count<SOLV_MAX_COUNTS; 
     
     // Debug print statements
     if ( debug == -2 )
       Serial.printf("slow,t,reset_free,vectoring,saturated,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,voc,dvdsoc,T,count,tcharge,  %7.3f,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
-      double(elapsed)/1000., reset_free, vectoring, saturated, sen->Tbatt, sen->Ishunt_filt_obs, sen->Vbatt_filt_obs+double(stepping*stepVal),
-      socu_solved, socu_free, sen->Vbatt_solved, myBatt_solved->voc(), myBatt_solved->dv_dsocu(), sen->T, count, myBatt_free->tcharge());
+      double(elapsed)/1000., reset_free, vectoring, saturated, Sen->Tbatt, Sen->Ishunt_filt_obs, Sen->Vbatt_filt_obs+double(stepping*step_val),
+      socu_solved, socu_free, Sen->Vbatt_solved, MyBattSolved->voc(), MyBattSolved->dv_dsocu(), Sen->T, count, MyBattFree->tcharge());
 
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
@@ -386,15 +379,15 @@ void loop()
   // Publish to Particle cloud if desired (different than Blynk)
   // Visit https://console.particle.io/events.   Click on "view events on a terminal"
   // to get a curl command to run
-  publishP = publishParticle->update(millis(), false);        //  now || false
-  publishB = publishBlynk->update(millis(), false);           //  now || false
-  publishS = publishSerial->update(millis(), reset);          //  now || reset
+  publishP = PublishParticle->update(millis(), false);        //  now || false
+  publishB = PublishBlynk->update(millis(), false);           //  now || false
+  publishS = PublishSerial->update(millis(), reset);          //  now || reset
   if ( publishP || publishS)
   {
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
-    controlTime = decimalTime(&currentTime, tempStr, now, millis_flip);
-    hmString = String(tempStr);
-    assignPubList(&pubList, publishParticle->now(), unit, hmString, controlTime, sen, numTimeouts, myBatt_solved, myBatt_free);
+    control_time = decimalTime(&current_time, tempStr, now, millis_flip);
+    hm_string = String(tempStr);
+    assign_PubList(&pubList, PublishParticle->now(), unit, hm_string, control_time, Sen, num_timeouts, MyBattSolved, MyBattFree);
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
@@ -403,7 +396,7 @@ void loop()
       // led_on = !led_on;
       // if ( led_on ) digitalWrite(myPins->status_led, HIGH);
       // else  digitalWrite(myPins->status_led, LOW);
-      publish_particle(publishParticle->now(), myWifi, enable_wifi);
+      publish_particle(PublishParticle->now(), myWifi, enable_wifi);
     }
     if ( reset_free || reset ) digitalWrite(myPins->status_led, HIGH);
     else  digitalWrite(myPins->status_led, LOW);
@@ -411,7 +404,7 @@ void loop()
     // Monitor for debug
     if ( debug>0 && publishS )
     {
-      serial_print(publishSerial->now(), sen->T);
+      serial_print(PublishSerial->now(), Sen->T);
     }
 
   }
@@ -422,7 +415,7 @@ void loop()
   // right in the "Send String" box then press "Send."
   // String definitions are below.
   int debug_saved = debug;
-  talk(&stepping, &stepVal, &vectoring, &vec_num, myBatt_solved, myBatt_free);
+  talk(&stepping, &step_val, &vectoring, &vec_num, MyBattSolved, MyBattFree);
 
   // Summary management
   if ( debug == -3 )
@@ -430,12 +423,12 @@ void loop()
     debug = debug_saved;
     print_all(mySum, isum, nsum);
   }
-  summarizing = summarize->update(millis(), reset, !vectoring) || (debug == -11 && publishB);               //  now || reset && !vectoring
+  summarizing = Summarize->update(millis(), reset, !vectoring) || (debug == -11 && publishB);               //  now || reset && !vectoring
   if ( summarizing )
   {
     if ( ++isum>nsum-1 ) isum = 0;
-    mySum[isum].assign(currentTime, sen->Tbatt_filt, sen->Vbatt_filt_obs, sen->Ishunt_filt_obs,
-      socu_solved, socu_free, myBatt_solved->dv_dsocu());
+    mySum[isum].assign(current_time, Sen->Tbatt_filt, Sen->Vbatt_filt_obs, Sen->Ishunt_filt_obs,
+      socu_solved, socu_free, MyBattSolved->dv_dsocu());
     if ( debug == -11 )
     {
       Serial.printf("Summm***********************\n");

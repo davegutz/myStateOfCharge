@@ -82,8 +82,9 @@
 #define F_W             0.05        // Filter wn, r/s (0.05)   
 #define F_Z             0.80        // Filter zeta (0.80)
 #define SAT_PERSISTENCE 15          // Updates persistence on saturation tests (25)
-#define HDB_ISHUNT      0.1         // Half deadband to filter Ishunt, mA (0.1)
+#define HDB_ISHUNT      0.13        // Half deadband to filter Ishunt, mA (0.13)
 #define HDB_VBATT       0.01        // Half deadband to filter Vbatt, v (0.01)
+#define HDB_TBATT       0.06        // Half deadband to filter Tbatt, F (0.06)
 
 #define SOLV_MAX_ERR    1e-6        // Solver error tolerance, V (1e-6)
 #define SOLV_MAX_COUNTS 10          // Solver maximum number of steps (10)

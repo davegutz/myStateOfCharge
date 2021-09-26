@@ -70,7 +70,7 @@ void publish3(void)
   Blynk.virtualWrite(V12, pubList.Vshunt);
   Blynk.virtualWrite(V13, pubList.Vshunt_filt);
   Blynk.virtualWrite(V14, pubList.I2C_status);
-  Blynk.virtualWrite(V15, pubList.hmString);
+  Blynk.virtualWrite(V15, pubList.hm_string);
   Blynk.virtualWrite(V16, pubList.tcharge);
 }
 
@@ -131,39 +131,39 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
   else
   {
     if ( debug>2 ) Serial.printf("nothing to do\n");
-    pubList.numTimeouts++;
+    pubList.num_timeouts++;
   }
 }
 
 
 // Assignments
-void assignPubList(Publish* pubList, const unsigned long now, const String unit, const String hmString,
-  const double controlTime, struct Sensors* sen, const int numTimeouts,
-  Battery* myBatt_solved, Battery* myBatt_free)
+void assign_PubList(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
+  const double control_time, struct Sensors* Sen, const int num_timeouts,
+  Battery* MyBattSolved, Battery* MyBattFree)
 {
   pubList->now = now;
   pubList->unit = unit;
-  pubList->hmString =hmString;
-  pubList->controlTime = controlTime;
-  pubList->Vbatt = sen->Vbatt;
-  pubList->Vbatt_filt = sen->Vbatt_filt;
-  pubList->Vbatt_filt_obs = sen->Vbatt_filt_obs;
-  pubList->Tbatt = sen->Tbatt;
-  pubList->Tbatt_filt = sen->Tbatt_filt;
-  pubList->Vshunt = sen->Vshunt;
-  pubList->Vshunt_filt = sen->Vshunt_filt;
-  pubList->Ishunt = sen->Ishunt;
-  pubList->Ishunt_filt = sen->Ishunt_filt;
-  pubList->Ishunt_filt_obs = sen->Ishunt_filt_obs;
-  pubList->Wshunt = sen->Wshunt;
-  pubList->Wshunt_filt = sen->Wshunt_filt;
-  pubList->numTimeouts = numTimeouts;
-  pubList->socu_solved = myBatt_solved->socu()*100.0;
-  pubList->socu_free = myBatt_free->socu()*100.0;
-  pubList->T = sen->T;
-  if ( debug==-13 ) Serial.printf("sen->T=%6.3f\n", sen->T);
-  pubList->tcharge = myBatt_free->tcharge();
-  pubList->VOC_free = myBatt_free->voc();
-  pubList->VOC_solved = myBatt_solved->voc();
-  pubList->Vbatt_solved = sen->Vbatt_solved;
+  pubList->hm_string =hm_string;
+  pubList->control_time = control_time;
+  pubList->Vbatt = Sen->Vbatt;
+  pubList->Vbatt_filt = Sen->Vbatt_filt;
+  pubList->Vbatt_filt_obs = Sen->Vbatt_filt_obs;
+  pubList->Tbatt = Sen->Tbatt;
+  pubList->Tbatt_filt = Sen->Tbatt_filt;
+  pubList->Vshunt = Sen->Vshunt;
+  pubList->Vshunt_filt = Sen->Vshunt_filt;
+  pubList->Ishunt = Sen->Ishunt;
+  pubList->Ishunt_filt = Sen->Ishunt_filt;
+  pubList->Ishunt_filt_obs = Sen->Ishunt_filt_obs;
+  pubList->Wshunt = Sen->Wshunt;
+  pubList->Wshunt_filt = Sen->Wshunt_filt;
+  pubList->num_timeouts = num_timeouts;
+  pubList->socu_solved = MyBattSolved->socu()*100.0;
+  pubList->socu_free = MyBattFree->socu()*100.0;
+  pubList->T = Sen->T;
+  if ( debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
+  pubList->tcharge = MyBattFree->tcharge();
+  pubList->VOC_free = MyBattFree->voc();
+  pubList->VOC_solved = MyBattSolved->voc();
+  pubList->Vbatt_solved = Sen->Vbatt_solved;
 }
