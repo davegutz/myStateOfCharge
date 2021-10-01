@@ -52,7 +52,7 @@ void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *milli
 
     // Refresh millis() at turn of Time.now
     long time_begin = Time.now();
-    while ( Time.now() == time_begin )
+    while ( Time.now()==time_begin )
     {
       delay(1);
       *millis_flip = millis()%1000;
@@ -99,16 +99,15 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Vshunt,Vshunt_filt,  Ishunt,Ishunt_filt_obs,  Wshunt,Wshunt_filt,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,  Ishunt,Ishunt_filt_obs,  Wshunt,Wshunt_filt,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s,%18.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %10.6f,%10.6f,  %7.3f,%7.3f,  %7.3f,%7.3f, %7.3f,  %7.3f,  %7.3f,%7.3f,  %7.3f,  %6.3f, %c", \
+  sprintf(buffer, "%s,%s, %12.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f, %7.3f,  %7.3f,  %7.3f,%7.3f,  %7.3f,  %6.3f, %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time,
     pubList->Tbatt, pubList->Tbatt_filt,     pubList->Vbatt, pubList->Vbatt_filt_obs,
-    pubList->Vshunt, pubList->Vshunt_filt,
     pubList->Ishunt, pubList->Ishunt_filt_obs, pubList->Wshunt, pubList->Wshunt_filt,
     pubList->VOC_solved,
     pubList->socu_solved, pubList->Vbatt_solved,
@@ -165,16 +164,16 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins, Adafruit_ADS1015 *a
   Sen->Vshunt = ads->computeVolts(Sen->Vshunt_int);
   double ishunt_free = Sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
   Sen->Ishunt = SdIshunt->update(ishunt_free, reset_free);
-  if ( debug==-14 ) Serial.printf("reset_free,ishunt_free,Ishunt,%d,%7.3f,%7.3f\n", reset_free, ishunt_free, Sen->Ishunt);
+  if ( debug==-14 ) Serial.printf("reset_free,ishunt_free,Ishunt, %d,%7.3f,%7.3f\n", reset_free, ishunt_free, Sen->Ishunt);
 
   // Vbatt
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
   double vbatt_free =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A);
   Sen->Vbatt = SdVbatt->update(vbatt_free, reset_free);
-  if ( debug==-15 ) Serial.printf("reset_free,vbatt_free,vbatt,%d,%7.3f,%7.3f\n", reset_free, vbatt_free, Sen->Vbatt);
+  if ( debug==-15 ) Serial.printf("reset_free,vbatt_free,vbatt, %d,%7.3f,%7.3f\n", reset_free, vbatt_free, Sen->Vbatt);
 
   // Vector model
-  double elapsed_loc = 0.;
+  static double elapsed_loc = 0.;
   if ( vectoring )
   {
     if ( reset_free || (elapsed_loc > t_min_v1[n_v1-1]) )
@@ -194,7 +193,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins, Adafruit_ADS1015 *a
   Sen->Wshunt = Sen->Vbatt*Sen->Ishunt;
   Sen->Wbatt = Sen->Vbatt*Sen->Ishunt - Sen->Ishunt*Sen->Ishunt*(batt_r1 + batt_r2)*batt_num_cells; 
 
-  if ( debug == -6 ) Serial.printf("vectoring,reset_free,vec_start,now,elapsed_loc,Vbatt,Ishunt,Tbatt:  %d,%d,%ld,%ld,%7.3f,%7.3f,%7.3f,%7.3f\n", vectoring, reset_free, vec_start, now, elapsed_loc, Sen->Vbatt, Sen->Ishunt, Sen->Tbatt);
+  if ( debug==-6 ) Serial.printf("vectoring,reset_free,vec_start,now,elapsed_loc,Vbatt,Ishunt,Tbatt:  %d,%d,%ld, %ld,%7.3f,%7.3f,%7.3f,%7.3f\n", vectoring, reset_free, vec_start, now, elapsed_loc, Sen->Vbatt, Sen->Ishunt, Sen->Tbatt);
 }
 
 // Filter temperature only
@@ -231,7 +230,7 @@ void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs, General2_
 // example: startfooend  -> returns foo
 String tryExtractString(String str, const char* start, const char* end)
 {
-  if (str == "")
+  if (str=="")
   {
     return "";
   }

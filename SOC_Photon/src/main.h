@@ -35,7 +35,7 @@
 */
 
 // For Photon
-#if (PLATFORM_ID == 6)
+#if (PLATFORM_ID==6)
 #define PHOTON
 #include "application.h" // Should not be needed if file ino or Arduino
 //SYSTEM_MODE(SEMI_AUTOMATIC);
@@ -187,7 +187,7 @@ void setup()
 
   // Determine millis() at turn of Time.now
   long time_begin = Time.now();
-  while ( Time.now() == time_begin )
+  while ( Time.now()==time_begin )
   {
     delay(1);
     millis_flip = millis()%1000;
@@ -300,7 +300,7 @@ void loop()
     if ( debug>2 || debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", Sen->T, millis());
 
     // Load and filter
-    load(reset, Sen, myPins, ads, ReadSensors->now(), SdIshunt, SdVbatt);
+    load(reset_free, Sen, myPins, ads, ReadSensors->now(), SdIshunt, SdVbatt);
 
     // Initialize SOC Free Integrator - Coulomb Counting method
     // Runs unfiltered and fast to capture most data
@@ -326,9 +326,9 @@ void loop()
     socu_free = max(min( socu_free + Sen->Wshunt/NOM_SYS_VOLT*Sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
     // Force initialization/reinitialization whenever saturated.   Keeps estimates close to reality
     if ( saturated ) socu_free = mxepu_bb;
-    if ( debug == -3 )
-      Serial.printf("fast,t,reset_free,Wshunt,soc_f,T,%7.3f,%d,%7.3f,%7.3f,%7.3f,\n",
-      double(elapsed)/1000., reset_free, Sen->Wshunt, socu_free, Sen->T_filt);
+    if ( debug==-3 )
+      Serial.printf("fast,et,reset_free,Wshunt,soc_f,T, %12.3f,%7.3f, %d, %7.3f,%7.3f,%7.3f,\n",
+      control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, socu_free, Sen->T_filt);
 
   }
 
@@ -357,19 +357,19 @@ void loop()
       socu_solved = max(min(socu_solved + max(min( err/MyBattSolved->dv_dsocu(), SOLV_MAX_STEP), -SOLV_MAX_STEP), mxepu_bb), mnepu_bb);
       Sen->Vbatt_solved = MyBattSolved->calculate(Tbatt_filt_C, socu_solved, Sen->Ishunt_filt_obs);
       err = vbatt_f_o - Sen->Vbatt_solved;
-      if ( debug == -5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,socu_s,vbatt_f_o,Vbatt_m_s,err,dv_dsocu, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+      if ( debug==-5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,socu_s,vbatt_f_o,Vbatt_m_s,err,dv_dsocu, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
           Sen->Tbatt_filt, Sen->Ishunt_filt_obs, count, socu_solved, vbatt_f_o, Sen->Vbatt_solved, err, MyBattSolved->dv_dsocu());
     }
     // boolean solver_valid = count<SOLV_MAX_COUNTS; 
     
     // Debug print statements
     // Useful for Arduino plotting
-    if ( debug == -1 ) Serial.printf("%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", socu_solved, Sen->Ishunt,
+    if ( debug==-1 ) Serial.printf("%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", socu_solved, Sen->Ishunt,
         Sen->Vbatt_filt_obs, MyBattSolved->voc(), MyBattSolved->vdyn(), MyBattSolved->v());
     // Useful for vector testing and serial data capture
-    if ( debug == -2 )
-      Serial.printf("slow,t,reset_free,vectoring,saturated,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,voc,dvdsoc,T,count,tcharge,  %7.3f,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
-      double(elapsed)/1000., reset_free, vectoring, saturated, Sen->Tbatt, Sen->Ishunt_filt_obs, Sen->Vbatt_filt_obs+double(stepping*step_val),
+    if ( debug==-2 )
+      Serial.printf("slow,et,reset_f,vect,sat,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,voc,dvdsoc,T,count,tcharge,  %12.3f, %7.3f, %d,%d,%d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
+      control_time, double(elapsed)/1000., reset_free, vectoring, saturated, Sen->Tbatt, Sen->Ishunt_filt_obs, Sen->Vbatt_filt_obs+double(stepping*step_val),
       socu_solved, socu_free, Sen->Vbatt_solved, MyBattSolved->voc(), MyBattSolved->dv_dsocu(), Sen->T, count, MyBattFree->tcharge());
 
     //if ( bare ) delay(41);  // Usual I2C time
@@ -422,18 +422,18 @@ void loop()
   talk(&stepping, &step_val, &vectoring, &vec_num, MyBattSolved, MyBattFree);
 
   // Summary management
-  if ( debug == -4 )
+  if ( debug==-4 )
   {
     debug = debug_saved;
     print_all(mySum, isum, nsum);
   }
-  summarizing = Summarize->update(millis(), reset, !vectoring) || (debug == -11 && publishB);               //  now || reset && !vectoring
+  summarizing = Summarize->update(millis(), reset, !vectoring) || (debug==-11 && publishB);               //  now || reset && !vectoring
   if ( summarizing )
   {
     if ( ++isum>nsum-1 ) isum = 0;
     mySum[isum].assign(current_time, Sen->Tbatt_filt, Sen->Vbatt_filt_obs, Sen->Ishunt_filt_obs,
       socu_solved, socu_free, MyBattSolved->dv_dsocu());
-    if ( debug == -11 )
+    if ( debug==-11 )
     {
       Serial.printf("Summm***********************\n");
       print_all(mySum, isum, nsum);

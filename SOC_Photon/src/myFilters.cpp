@@ -79,8 +79,8 @@ TFDelay::TFDelay()
 TFDelay::TFDelay(const bool in, const double Tt, const double Tf, const double T)
     : timer_(0), nt_(int(fmax(round(Tt/T)+1,0))), nf_(int(fmax(round(Tf/T+1),0))), T_(T)
 {
-  if ( Tt == 0 ) nt_ = 0;
-  if ( Tf == 0 ) nf_ = 0;
+  if ( Tt==0 ) nt_ = 0;
+  if ( Tf==0 ) nf_ = 0;
   if ( in ) timer_ = nf_;
   else timer_ = -nt_;
 }
