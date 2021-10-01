@@ -258,7 +258,8 @@ void loop()
   static Sync *Summarize = new Sync(SUMMARIZE_DELAY);
   static double socu_solved = 1.0;
   static bool reset_free = false;
-
+  static boolean saturated = false;
+  
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
   // Start Blynk, only if connected since it is blocking
@@ -293,7 +294,6 @@ void loop()
   // Input all other sensors
   read = ReadSensors->update(millis(), reset);               //  now || reset
   elapsed = ReadSensors->now() - start;
-  boolean saturated = false;
   if ( read )
   {
     Sen->T =  ReadSensors->updateTime();
@@ -326,7 +326,7 @@ void loop()
     socu_free = max(min( socu_free + Sen->Wshunt/NOM_SYS_VOLT*Sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
     // Force initialization/reinitialization whenever saturated.   Keeps estimates close to reality
     if ( saturated ) socu_free = mxepu_bb;
-    if ( debug == -2 )
+    if ( debug == -3 )
       Serial.printf("fast,t,reset_free,Wshunt,soc_f,T,%7.3f,%d,%7.3f,%7.3f,%7.3f,\n",
       double(elapsed)/1000., reset_free, Sen->Wshunt, socu_free, Sen->T_filt);
 
@@ -422,7 +422,7 @@ void loop()
   talk(&stepping, &step_val, &vectoring, &vec_num, MyBattSolved, MyBattFree);
 
   // Summary management
-  if ( debug == -3 )
+  if ( debug == -4 )
   {
     debug = debug_saved;
     print_all(mySum, isum, nsum);
