@@ -1,0 +1,21 @@
+Circuit: * C:\Users\Dave\Documents\GitHub\myStateOfCharge\SOC_Photon\datasheets\lpf_Vbatt1.asc
+
+Per .tran options, skipping operating point for transient analysis.
+
+Date: Thu Oct 07 18:47:15 2021
+Total elapsed time: 0.168 seconds.
+
+tnom = 27
+temp = 27
+method = modified trap
+totiter = 22282
+traniter = 22282
+tranpoints = 11142
+accept = 10892
+rejected = 250
+matrix size = 3
+fillins = 0
+solver = Normal
+Matrix Compiler1: 50 bytes object code size  0.0/0.0/[0.0]
+Matrix Compiler2: off  [0.0]/0.0/0.0
+
