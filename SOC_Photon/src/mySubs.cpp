@@ -293,7 +293,7 @@ void myDisplay(Adafruit_SSD1306 *display)
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner
   char dispString[21];
-  sprintf(dispString, "%3.0f %5.2f %5.1f", pubList.Tbatt, pubList.Vbatt, pubList.Ishunt_filt);
+  sprintf(dispString, "%3.0f %5.2f %5.1f", pubList.Tbatt, pubList.Vbatt, pubList.Ishunt_filt_obs);
   display->println(dispString);
 
   display->println(F(""));
