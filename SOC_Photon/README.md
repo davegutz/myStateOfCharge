@@ -100,11 +100,19 @@ Do a discharge-charge cycle to get a good practical value for the bias of the co
 
 PI tracking filter should be used to get rid of drift of small A measurement.
 
->13.7 V is decent approximation for SoC>99.7
+>13.7 V is decent approximation for SoC>99.7, correct for temperature.
+
+Temperature correction in ambient range is about BATT_DVOC_DT=0.001875 V/deg C from 25 * number of cells = 4.  This is estimated from the Battleborn characterization model.
 
 The ADS module is delicate (ESD and handling).   I burned one out by
 accidentally touching terminals to back of OLED board.   I now mount the
 OLED board carefully off to the side.   Will need a hobby box to contain the final device.
+
+### Passive shunt low pass filter (LPF)
+
+1 - Green = 150K resistor from shunt high side
+1 - Green = 1uF cap to 2 - yellow
+2 - Yellow = from shunt low side
 
 ### ASD 1015 12-bit
 
@@ -118,8 +126,8 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   4-SDA  = Photon D0
   5-ADDR = NC
   6-ALERT = NC
-  7-A0 = Green from shunt
-  8-A1 = Yellow from shunt
+  7-A0 = Green from shunt lpf via 10k Resistor
+  8-A1 = Yellow from shunt lpf via 10k Resistor
   9-A2 = NC
   10-A3 = NC
 
@@ -127,7 +135,7 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
 
 - Particle Photon boards have 9 PWM pins: D0, D1, D2, D3, A4, A5, WKP, RX, TX
   GND = to 2 GND rails
-  A1  = L of 20k ohm from 12v and H of 4k7 ohm to ground
+  A1  = L of 20k ohm from 12v and H of 4k7 ohm + 47uF to ground
   D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
   D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
   D6  = Y-C of DS18 for Tbatt and 4k7 3v3 jumper pullup
