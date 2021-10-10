@@ -341,7 +341,7 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
         }
         break;
       case ( 'd' ):
-        debug = -3;
+        debug = -4;
         break;
       case ( 'm' ):
         SOCU_in = input_string.substring(1).toFloat()/100.;
