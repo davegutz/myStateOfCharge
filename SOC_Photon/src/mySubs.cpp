@@ -164,7 +164,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins, Adafruit_ADS1015 *a
   Sen->Vshunt = ads->computeVolts(Sen->Vshunt_int);
   double ishunt_free = Sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
   Sen->Ishunt = SdIshunt->update(ishunt_free, reset_free);
-  if ( debug==-14 ) Serial.printf("reset_free,ishunt_free,Ishunt, %d,%7.3f,%7.3f\n", reset_free, ishunt_free, Sen->Ishunt);
+  if ( debug==-14 ) Serial.printf("reset_free,vshunt_int,ishunt_free,Ishunt,Ishunt_filt,Ishunt_filt_obs, %d,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n", reset_free, Sen->Vshunt_int, ishunt_free, Sen->Ishunt, Sen->Ishunt_filt, Sen->Ishunt_filt_obs);
 
   // Vbatt
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
