@@ -154,9 +154,12 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins, Adafruit_ADS1015 *a
 {
   // Read Sensor
   // ADS1015 conversion
+  int16_t vshunt_int_0 = 0;
+  int16_t vshunt_int_1 = 0;
   if (!Sen->bare_ads)
   {
     Sen->Vshunt_int = ads->readADC_Differential_0_1();
+    if ( debug==-14 ){vshunt_int_0 = ads->readADC_SingleEnded(0); vshunt_int_1 = ads->readADC_SingleEnded(1);}
   }
   else
   {
@@ -165,7 +168,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins, Adafruit_ADS1015 *a
   Sen->Vshunt = ads->computeVolts(Sen->Vshunt_int);
   double ishunt_free = Sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A + curr_bias;
   Sen->Ishunt = SdIshunt->update(ishunt_free, reset_free);
-  if ( debug==-14 ) Serial.printf("reset_free,vshunt_int,ishunt_free,Ishunt,Ishunt_filt,Ishunt_filt_obs, %d,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n", reset_free, Sen->Vshunt_int, ishunt_free, Sen->Ishunt, Sen->Ishunt_filt, Sen->Ishunt_filt_obs);
+  if ( debug==-14 ) Serial.printf("reset_free,vshunt_int,0_int,1_int,ishunt_free,Ishunt,Ishunt_filt,Ishunt_filt_obs, %d,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n", reset_free, Sen->Vshunt_int, vshunt_int_0, vshunt_int_1, ishunt_free, Sen->Ishunt, Sen->Ishunt_filt, Sen->Ishunt_filt_obs);
 
   // Vbatt
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
@@ -183,7 +186,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins, Adafruit_ADS1015 *a
     }
     elapsed_loc = double(now - vec_start)/1000./60.;
     Sen->Ishunt =  I_T1->interp(elapsed_loc);
-    Sen->Vshunt = (Sen->Ishunt - SHUNT_V2A_A) / SHUNT_V2A_S;
+    Sen->Vshunt = (Sen->Ishunt - SHUNT_V2A_A - curr_bias) / SHUNT_V2A_S;
     Sen->Vshunt_int = -999;
     Sen->Tbatt =  T_T1->interp(elapsed_loc);
     Sen->Vbatt =  V_T1->interp(elapsed_loc) + Sen->Ishunt*(batt_r1 + batt_r2)*batt_num_cells;
@@ -215,8 +218,8 @@ void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs, General2_
   // Shunt
   Sen->Vshunt_filt = VshuntSenseFilt->calculate( Sen->Vshunt, reset_loc, min(Sen->T_filt, F_MAX_T));
   Sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( Sen->Vshunt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
-  Sen->Ishunt_filt = Sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A;
-  Sen->Ishunt_filt_obs = Sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A;
+  Sen->Ishunt_filt = Sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A + curr_bias;
+  Sen->Ishunt_filt_obs = Sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A + curr_bias;
 
   // Voltage
   Sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate(Sen->Vbatt, reset_loc, min(Sen->T_filt, F_O_MAX_T));

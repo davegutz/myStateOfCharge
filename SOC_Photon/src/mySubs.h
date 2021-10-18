@@ -41,6 +41,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+extern double curr_bias;        // Calibration bias, A
+
 // Pins
 struct Pins
 {
@@ -95,8 +97,8 @@ struct Sensors
     this->Vshunt_int = Vshunt_int;
     this->Vshunt = Vshunt;
     this->Vshunt_filt = Vshunt_filt;
-    this->Ishunt = Vshunt * SHUNT_V2A_S + double(SHUNT_V2A_A);
-    this->Ishunt_filt = Vshunt_filt * SHUNT_V2A_S + SHUNT_V2A_A;
+    this->Ishunt = Vshunt * SHUNT_V2A_S + double(SHUNT_V2A_A) + curr_bias;
+    this->Ishunt_filt = Vshunt_filt * SHUNT_V2A_S + SHUNT_V2A_A + curr_bias;
     this->Wshunt = Vshunt * Ishunt;
     this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
     this->Wbatt = Vshunt * Ishunt;
