@@ -75,12 +75,13 @@ BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;        //
 extern String input_string;        // a string to hold incoming data
 extern boolean string_complete;    // whether the string is complete
 extern boolean stepping;          // active step adder
-extern double step_val;            // Step size
+extern double step_val;           // Step size
 extern boolean vectoring;         // Active battery test vector
 extern int8_t vec_num;            // Active vector number
 extern unsigned long vec_start;   // Start of active vector
 extern boolean enable_wifi;       // Enable wifi
 extern double socu_free;          // Free integrator state
+extern double curr_bias;          // Calibration bias, A
 
 // Global locals
 const int nsum = 154;           // Number of summary strings, 17 Bytes per isum
@@ -88,6 +89,7 @@ retained int isum = -1;         // Summary location.   Begins at -1 because firs
 retained Sum_st mySum[nsum];    // Summaries
 retained double socu_free = 0.5;// Coulomb Counter state
 retained int8_t debug = 2;
+retained double curr_bias = 0;  // Calibrate, A 
 String input_string = "";
 boolean string_complete = false;
 boolean stepping = false;

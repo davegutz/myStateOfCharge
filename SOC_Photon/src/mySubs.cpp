@@ -31,15 +31,16 @@
 extern int8_t debug;
 extern Publish pubList;
 extern char buffer[256];
-extern String input_string;      // A string to hold incoming data
-extern boolean string_complete;  // Whether the string is complete
+extern String input_string;     // A string to hold incoming data
+extern boolean string_complete; // Whether the string is complete
 extern boolean stepping;        // Active step adder
-extern double step_val;          // Step size
+extern double step_val;         // Step size
 extern boolean vectoring;       // Active battery test vector
 extern int8_t vec_num;          // Active vector number
 extern unsigned long vec_start; // Start of active vector
 extern boolean enable_wifi;     // Enable wifi
-extern double socu_free;           // Free integrator state
+extern double socu_free;        // Free integrator state
+extern double curr_bias;        // Calibration bias, A
 
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip)
 {
@@ -162,7 +163,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins, Adafruit_ADS1015 *a
     Sen->Vshunt_int = 0;
   }
   Sen->Vshunt = ads->computeVolts(Sen->Vshunt_int);
-  double ishunt_free = Sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A;
+  double ishunt_free = Sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A + curr_bias;
   Sen->Ishunt = SdIshunt->update(ishunt_free, reset_free);
   if ( debug==-14 ) Serial.printf("reset_free,vshunt_int,ishunt_free,Ishunt,Ishunt_filt,Ishunt_filt_obs, %d,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n", reset_free, Sen->Vshunt_int, ishunt_free, Sen->Ishunt, Sen->Ishunt_filt, Sen->Ishunt_filt_obs);
 
@@ -324,9 +325,14 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
       case ( 'D' ):
         switch ( input_string.charAt(1) )
         {
+          case ( 'a' ):
+            curr_bias = input_string.substring(2).toFloat();
+            break;
           case ( 'v' ):
-            double dv = input_string.substring(2).toFloat();
-            MyBattSolved->Dv(dv);
+            MyBattSolved->Dv(input_string.substring(2).toFloat());
+            break;
+          default:
+            Serial.print(input_string.charAt(1)); Serial.println(" unknown");
             break;
         }
         break;
@@ -406,8 +412,10 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("d   dump the summary log\n"); 
   Serial.printf("m=  assign a free memory state in percent - '('truncated 0-100')'\n"); 
   Serial.printf("v=  "); Serial.print(debug); Serial.println("    : verbosity, -128 - +128. [2]");
-  Serial.printf("Dv= "); Serial.print(batt_solved->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
-  Serial.printf("Sr= "); Serial.print(batt_solved->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
+  Serial.printf("Adjustments.   For example:\n");
+  Serial.printf("  Da= "); Serial.print(curr_bias); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
+  Serial.printf("  Dv= "); Serial.print(batt_solved->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
+  Serial.printf("  Sr= "); Serial.print(batt_solved->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("T<?>=  "); 
   Serial.printf("Transient performed with input.   For example:\n");
   Serial.printf("  Ts=<index>  :   index="); Serial.print(*step_val);

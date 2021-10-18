@@ -190,16 +190,12 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
 
   Find out what device you're flashing (particle.io).  In file .vscode/settings.json change "particle.targetDevice": "((device name actual))".  It may still flash correctly even with red warning message (always did for me).
 
-### Problem:  Converted current wanders
+### Problem:  Converted current wanders (sometimes after 10 minutes).   Studying using prototype without 150k/1uF LPF.   Multimeter used to  verify constant hardware volts input.  Also create solid mV input using 10k POT + 1M ohm resistor from 5v
 
-  Try
-    - Clean voltage source.   1Mohm series with 10k pot from 5v to Gnd.  5v/100 = 0.05 v.   Better.  Still wanders.   1x - 2x on converted, printed current.  Check raw A0 and A1.   Need pull down resistors?
-    - Smaller load resistors (currently 10k) on A0 and A1.  Try 1k like TI OPA33 design example
-    - TI circuit with OPA
-    - Convert A0 and A1 separately to diagnose
-    - HFI caps CM1 and CM2 to ground  ~1/10 of Cdiff = 0.1 uF
-    - ALRT requires pullup to VDD (3.3v).   No help.
-    - Digital filter wandering for some reason?   Check raw values.   The DC raw on multimeter are constant.   Check A0 grounded.
+  Investigation found two problems:
+    - Solder joint at current sense connector failing
+    - Ground of laptop  monitoring the Photon wildly floating, biasing ADS inputs probably tripping Schottky diodes.
+  DO NOT PLUG IN LAPTOP TO ANYTHING WHILE MONITORING Photon
 
 ## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
 
