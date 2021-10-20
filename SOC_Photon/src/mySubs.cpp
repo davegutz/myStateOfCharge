@@ -416,7 +416,7 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("m=  assign a free memory state in percent - '('truncated 0-100')'\n"); 
   Serial.printf("v=  "); Serial.print(debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("Adjustments.   For example:\n");
-  Serial.printf("  Da= "); Serial.print(curr_bias); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
+  Serial.printf("  Da= "); Serial.printf("%7.3f", curr_bias); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
   Serial.printf("  Dv= "); Serial.print(batt_solved->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
   Serial.printf("  Sr= "); Serial.print(batt_solved->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("T<?>=  "); 
