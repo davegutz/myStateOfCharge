@@ -101,7 +101,7 @@ void setup()
   ads = new Adafruit_ADS1015;
   ads->setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
   ads_amp = new Adafruit_ADS1015;
-  ads_amp->setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+  ads_amp->setGain(GAIN_FOUR);    // 4x gain
   if (!ads->begin()) {
     Serial.println("FAILED to initialize ADS SHUNT MONITOR.");
     bare_ads = true;
