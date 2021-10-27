@@ -62,26 +62,20 @@ struct Sensors
   double Tbatt;           // Sensed battery temp, F
   double Tbatt_filt;      // Filtered, sensed battery temp, F
   int16_t Vshunt_int_01;  // Sensed shunt voltage, count
-  int16_t Vshunt_int_23;  // Sensed shunt voltage, count
   double Vshunt_01;       // Sensed shunt voltage, V
-  double Vshunt_23;       // Sensed shunt voltage, V
   double Vshunt_filt;     // Filtered, sensed shunt voltage, V
   double Vshunt_filt_obs; // Filtered, sensed shunt voltage for  observer, V
   double Ishunt_01;       // Sensed shunt current, A
-  double Ishunt_23;       // Sensed shunt current, A
   double Ishunt_filt;     // Filtered, sensed shunt current, A
   double Ishunt_filt_obs; // Filtered, sensed shunt current for observer, A
   double Wshunt;          // Sensed shunt power, W
   double Wshunt_filt;     // Filtered, sensed shunt power, W
   double Wbatt;           // Battery power, W
   int16_t Vshunt_amp_int_01;  // Sensed shunt voltage, count
-  int16_t Vshunt_amp_int_23;  // Sensed shunt voltage, count
   double Vshunt_amp_01;       // Sensed shunt voltage, V
-  double Vshunt_amp_23;       // Sensed shunt voltage, V
   double Vshunt_amp_filt;     // Filtered, sensed shunt voltage, V
   double Vshunt_amp_filt_obs; // Filtered, sensed shunt voltage for  observer, V
   double Ishunt_amp_01;       // Sensed shunt current, A
-  double Ishunt_amp_23;       // Sensed shunt current, A
   double Ishunt_amp_filt;     // Filtered, sensed shunt current, A
   double Ishunt_amp_filt_obs; // Filtered, sensed shunt current for observer, A
   double Wshunt_amp;          // Sensed shunt power, W
@@ -104,23 +98,17 @@ struct Sensors
     this->Tbatt = Tbatt;
     this->Tbatt_filt = Tbatt_filt;
     this->Vshunt_int_01 = Vshunt_int;
-    this->Vshunt_int_23 = Vshunt_int;
     this->Vshunt_01 = Vshunt;
-    this->Vshunt_23 = Vshunt;
     this->Vshunt_filt = Vshunt_filt;
     this->Ishunt_01 = Vshunt_01 * SHUNT_V2A_S + double(SHUNT_V2A_A);
-    this->Ishunt_23 = Vshunt_23 * SHUNT_V2A_S + double(SHUNT_V2A_A);
     this->Ishunt_filt = Vshunt_filt * SHUNT_V2A_S + SHUNT_V2A_A;
     this->Wshunt = Vshunt * Ishunt_01;
     this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
     this->Wbatt = Vshunt * Ishunt_01;
     this->Vshunt_amp_int_01 = Vshunt_amp_int;
-    this->Vshunt_amp_int_23 = Vshunt_amp_int;
     this->Vshunt_amp_01 = Vshunt_amp;
-    this->Vshunt_amp_23 = Vshunt_amp;
     this->Vshunt_amp_filt = Vshunt_amp_filt;
     this->Ishunt_amp_01 = Vshunt_amp_01 * SHUNT_AMP_V2A_S + double(SHUNT_AMP_V2A_A);
-    this->Ishunt_amp_23 = Vshunt_amp_23 * SHUNT_AMP_V2A_S + double(SHUNT_AMP_V2A_A);
     this->Ishunt_amp_filt = Vshunt_amp_filt * SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A;
     this->Wshunt_amp = Vshunt_amp * Ishunt_amp_01;
     this->Wshunt_amp_filt = Vshunt_amp_filt * Ishunt_amp_filt;

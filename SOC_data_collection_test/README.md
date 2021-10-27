@@ -125,7 +125,7 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   Code from Adafruit ADS1X15 library.   Differential = A0-A1
   Ti OPA333 Used.   $11.00 for 5 Amazon OPA333AIDBVR SOT23-5 mounted on SOT23-6
   No special code for OPA.  Hardware only.   Pre-amp for ADC 5:1.
-  1-V 3v3
+  1-V 3v3 (+ TODO:  0.1uF to ground for transient power draws of the ADC)
   2-G = Gnd
   3-SCL = Photon D1
   4-SDA  = Photon D0

@@ -59,7 +59,7 @@ extern boolean stringComplete;    // whether the string is complete
 extern boolean enable_wifi;     // Enable wifi
 
 // Global locals
-int8_t debug = 2;
+int8_t debug = 0;
 String inputString = "";
 boolean stringComplete = false;
 boolean enable_wifi = false;
