@@ -140,10 +140,11 @@ void setup()
   ads = new Adafruit_ADS1015;
   ads->setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
   if (!ads->begin()) {
-    Serial.println("FAILE to initialize ADS SHUNT MONITOR.");
+    Serial.println("FAILED to initialize ADS SHUNT MONITOR.");
     bare_ads = true;
   }
   Serial.println("SHUNT MONITOR initialized");
+  
   // Display
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);

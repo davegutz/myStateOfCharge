@@ -74,16 +74,17 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt, Vbatt, Vshunt_01, Vshunt_23, Ishunt_01, Ishunt_23, T_filt"));
+  Serial.println(F("unit,hm, cTime,  Tbatt, Vbatt, Vshunt_01, Vshunt_23, Ishunt_01, Ishunt_23, Vshunt_amp_01, Vshunt_amp_23, Ishunt_amp_01, Ishunt_amp_23, T_filt"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s,%18.3f,  %7.3f,  %7.3f, %10.6f, %7.3f, %7.3f, %7.3f, %7.3f, %c", \
+  sprintf(buffer, "%s,%s,%18.3f,  %7.3f,  %7.3f, %10.6f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %c", \
     pubList->unit.c_str(), pubList->hmString.c_str(), pubList->controlTime,
     pubList->Tbatt,  pubList->Vbatt,
     pubList->Vshunt_01, pubList->Vshunt_23, pubList->Ishunt_01, pubList->Ishunt_23,
+    pubList->Vshunt_amp_01, pubList->Vshunt_amp_23, pubList->Ishunt_amp_01, pubList->Ishunt_amp_23,
     pubList->T, '\0');
 }
 
@@ -96,7 +97,7 @@ void serial_print(unsigned long now, double T)
 }
 
 // Load
-void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now)
+void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, Adafruit_ADS1015 *ads_amp, const unsigned long now)
 {
   // Read Sensor
   // ADS1015 conversion
@@ -114,6 +115,20 @@ void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins,
   sen->Vshunt_23 = ads->computeVolts(sen->Vshunt_int_23);
   sen->Ishunt_01 = sen->Vshunt_01*SHUNT_V2A_S + SHUNT_V2A_A;
   sen->Ishunt_23 = sen->Vshunt_23*SHUNT_V2A_S + SHUNT_V2A_A;
+  if (!sen->bare_ads_amp)
+  {
+    sen->Vshunt_amp_int_01 = ads_amp->readADC_Differential_0_1();
+    sen->Vshunt_amp_int_23 = ads_amp->readADC_Differential_2_3();
+  }
+  else
+  {
+    sen->Vshunt_amp_int_01 = 0;
+    sen->Vshunt_amp_int_23 = 0;
+  }
+  sen->Vshunt_amp_01 = ads_amp->computeVolts(sen->Vshunt_amp_int_01);
+  sen->Vshunt_amp_23 = ads_amp->computeVolts(sen->Vshunt_amp_int_23);
+  sen->Ishunt_amp_01 = sen->Vshunt_amp_01*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A;
+  sen->Ishunt_amp_23 = sen->Vshunt_amp_23*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A;
 
   // MAXIM conversion 1-wire Tp plenum temperature  (0.750 seconds blocking update)
   //if ( sensor_tbatt->read() ) sen->Tbatt = sensor_tbatt->fahrenheit() + (TBATT_TEMPCAL);

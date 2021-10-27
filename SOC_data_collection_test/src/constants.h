@@ -61,6 +61,8 @@
 #define SHUNT_V2A_S           -1189.3   // Shunt V2A scalar, A/V (1333 is 100A/0.075V)  (-1189.3)
 #define SHUNT_V2A_A           0         // Shunt V2A adder, A derived from charge-discharge integral match (0 in theory)  (0)
                                         // observed on prototype over time that 0 V really is 0 A.   Not much bias in ADS device
+#define SHUNT_AMP_V2A_S       -1189.3   // Shunt amp V2A scalar, A/V (1333 is 100A/0.075V)  (-1189.3)
+#define SHUNT_AMP_V2A_A       0         // Shunt amp V2A adder, A derived from charge-discharge integral match (0 in theory)  (0)
 
 // Battery voltage measurement gain
 const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /

@@ -71,7 +71,9 @@ double controlTime = 0.0;       // Decimal time, seconds since 1/1/2021
 unsigned long lastSync = millis();// Sync time occassionally.   Recommended by Particle.
 Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_ADS1015 *ads;          // Use this for the 12-bit version; 1115 for 16-bit
+Adafruit_ADS1015 *ads_amp;      // Use this for the 12-bit version; 1115 for 16-bit; amplified; different address
 bool bare_ads = false;          // If ADS to be ignored
+bool bare_ads_amp = false;      // If ADS to be ignored
 Wifi *myWifi;                   // Manage Wifi
 
 // Setup
@@ -95,14 +97,20 @@ void setup()
   Wire.begin();
 
   // AD
-  Serial.println("Initializing SHUNT MONITOR");
+  Serial.println("Initializing SHUNT MONITORS");
   ads = new Adafruit_ADS1015;
   ads->setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+  ads_amp = new Adafruit_ADS1015;
+  ads_amp->setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
   if (!ads->begin()) {
-    Serial.println("FAILE to initialize ADS SHUNT MONITOR.");
+    Serial.println("FAILED to initialize ADS SHUNT MONITOR.");
     bare_ads = true;
   }
-  Serial.println("SHUNT MONITOR initialized");
+  if (!ads_amp->begin((0x49))) {
+    Serial.println("FAILED to initialize ADS AMPLIFIED SHUNT MONITOR.");
+    bare_ads_amp = true;
+  }
+  Serial.println("SHUNT MONITORS initialized");
 
   // Cloud
   unsigned long now = millis();
@@ -136,7 +144,10 @@ void loop()
   static DS18* sensor_tbatt = new DS18(myPins->pin_1_wire);
 
   // Sensor conversions
-  static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, bare_ads); // Manage sensor data    
+  static Sensors *sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT,
+        NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
+        NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
+        0, 0, bare_ads, bare_ads_amp); // Manage sensor data    
 
   unsigned long currentTime;                // Time result
   static unsigned long now = millis();      // Keep track of time
@@ -166,7 +177,7 @@ void loop()
     if ( debug>2 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", sen->T, millis());
 
     // Load and filter
-    load(reset_free, sen, sensor_tbatt, myPins, ads, readSensors->now());
+    load(reset_free, sen, sensor_tbatt, myPins, ads, ads_amp, readSensors->now());
 
   }
 

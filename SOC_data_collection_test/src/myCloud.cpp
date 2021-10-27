@@ -49,6 +49,11 @@ void assignPubList(Publish* pubList, const unsigned long now, const String unit,
   pubList->Ishunt_01 = sen->Ishunt_01;
   pubList->Ishunt_23 = sen->Ishunt_23;
   pubList->Wshunt = sen->Wshunt;
+  pubList->Vshunt_amp_01 = sen->Vshunt_amp_01;
+  pubList->Vshunt_amp_23 = sen->Vshunt_amp_23;
+  pubList->Ishunt_amp_01 = sen->Ishunt_amp_01;
+  pubList->Ishunt_amp_23 = sen->Ishunt_amp_23;
+  pubList->Wshunt_amp = sen->Wshunt_amp;
   pubList->numTimeouts = numTimeouts;
   pubList->socu_solved = -9;
   pubList->socu_free = -9;

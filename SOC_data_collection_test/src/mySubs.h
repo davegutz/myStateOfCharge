@@ -73,14 +73,29 @@ struct Sensors
   double Ishunt_filt_obs; // Filtered, sensed shunt current for observer, A
   double Wshunt;          // Sensed shunt power, W
   double Wshunt_filt;     // Filtered, sensed shunt power, W
-  double Wbatt;          // Battery power, W
+  double Wbatt;           // Battery power, W
+  int16_t Vshunt_amp_int_01;  // Sensed shunt voltage, count
+  int16_t Vshunt_amp_int_23;  // Sensed shunt voltage, count
+  double Vshunt_amp_01;       // Sensed shunt voltage, V
+  double Vshunt_amp_23;       // Sensed shunt voltage, V
+  double Vshunt_amp_filt;     // Filtered, sensed shunt voltage, V
+  double Vshunt_amp_filt_obs; // Filtered, sensed shunt voltage for  observer, V
+  double Ishunt_amp_01;       // Sensed shunt current, A
+  double Ishunt_amp_23;       // Sensed shunt current, A
+  double Ishunt_amp_filt;     // Filtered, sensed shunt current, A
+  double Ishunt_amp_filt_obs; // Filtered, sensed shunt current for observer, A
+  double Wshunt_amp;          // Sensed shunt power, W
+  double Wshunt_amp_filt;     // Filtered, sensed shunt power, W
+  double Wbatt_amp;           // Battery power, W
   int I2C_status;
   double T;
   bool bare_ads;          // If no ADS detected
+  bool bare_ads_amp;      // If no amplified ADS detected
   Sensors(void) {}
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
           int16_t Vshunt_int, double Vshunt, double Vshunt_filt,
-          int I2C_status, double T, bool bare_ads)
+          int16_t Vshunt_amp_int, double Vshunt_amp, double Vshunt_amp_filt,
+          int I2C_status, double T, bool bare_ads, bool bare_ads_amp)
   {
     this->Vbatt = Vbatt;
     this->Vbatt_filt = Vbatt_filt;
@@ -99,9 +114,21 @@ struct Sensors
     this->Wshunt = Vshunt * Ishunt_01;
     this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
     this->Wbatt = Vshunt * Ishunt_01;
+    this->Vshunt_amp_int_01 = Vshunt_amp_int;
+    this->Vshunt_amp_int_23 = Vshunt_amp_int;
+    this->Vshunt_amp_01 = Vshunt_amp;
+    this->Vshunt_amp_23 = Vshunt_amp;
+    this->Vshunt_amp_filt = Vshunt_amp_filt;
+    this->Ishunt_amp_01 = Vshunt_amp_01 * SHUNT_AMP_V2A_S + double(SHUNT_AMP_V2A_A);
+    this->Ishunt_amp_23 = Vshunt_amp_23 * SHUNT_AMP_V2A_S + double(SHUNT_AMP_V2A_A);
+    this->Ishunt_amp_filt = Vshunt_amp_filt * SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A;
+    this->Wshunt_amp = Vshunt_amp * Ishunt_amp_01;
+    this->Wshunt_amp_filt = Vshunt_amp_filt * Ishunt_amp_filt;
+    this->Wbatt_amp = Vshunt_amp * Ishunt_amp_01;
     this->I2C_status = I2C_status;
     this->T = T;
     this->bare_ads = bare_ads;
+    this->bare_ads_amp = bare_ads_amp;
   }
 };
 
@@ -109,7 +136,7 @@ struct Sensors
 // Headers
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);
-void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now);
+void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins, Adafruit_ADS1015 *ads, Adafruit_ADS1015 *ads_amp, const unsigned long now);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *currentTime, char* tempStr);
 void print_serial_header(void);

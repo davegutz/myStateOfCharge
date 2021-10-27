@@ -35,3 +35,8 @@ SOC_Photon/dataReduction/~$CoolTerm Capture 2021-08-14 04-02-05.xlsx
 SOC_Photon/dataReduction/CoolTerm Capture 2021-08-14 04-02-05.txt
 SOC_Photon/dataReduction/~$CoolTerm Capture 2021-08-26 04-54-37.xlsx
 SOC_Photon/.vscode/settings.json
+*.asc
+*.raw
+*.log
+*.plt
+*.asc
