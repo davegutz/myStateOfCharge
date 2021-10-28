@@ -143,7 +143,7 @@ void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins,
   vshunt_amp_1 = ads_amp->computesVolts(vshunt_amp_int_1);
   sen->Ishunt_amp_01 = sen->Vshunt_amp_01*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A;
  
-  Serial.printf("vshunt_int,0_int,1_int,v0,v1,Ishunt,|||||,vshunt_amp_int,0_amp_int,1_amp_int,v0_amp,v1_amp,Vshunt_amp,Ishunt_amp,  T, %d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f, ||||, %d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,   %7.3f,\n",
+  Serial.printf("vshunt_int,0_int,1_int,v0,v1,Vshunt,Ishunt,|||||,vshunt_amp_int,0_amp_int,1_amp_int,v0_amp,v1_amp,Vshunt_amp,Ishunt_amp,  T, %d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f, ||||, %d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,   %7.3f,\n",
       sen->Vshunt_int_01, vshunt_int_0, vshunt_int_1, vshunt_0, vshunt_1, sen->Vshunt_01, sen->Ishunt_01,
       sen->Vshunt_amp_int_01, vshunt_amp_int_0, vshunt_amp_int_1,  vshunt_amp_0, vshunt_amp_1, sen->Vshunt_amp_01, sen->Ishunt_amp_01,
       T);
