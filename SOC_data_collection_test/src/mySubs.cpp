@@ -106,7 +106,9 @@ void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins,
   // Read Sensor
   // ADS1015 conversion
   int16_t vshunt_int_0 = 0;
+  double vshunt_0 = 0;
   int16_t vshunt_int_1 = 0;
+  double vshunt_1 = 0;
   if (!sen->bare_ads)
   {
     sen->Vshunt_int_01 = ads->readADC_Differential_0_1();
@@ -118,9 +120,13 @@ void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins,
     sen->Vshunt_int_01 = 0;
   }
   sen->Vshunt_01 = ads->computeVolts(sen->Vshunt_int_01);
+  vshunt_0 = ads->computesVolts(vshunt_int_0);
+  vshunt_1 = ads->computesVolts(vshunt_int_1);
   sen->Ishunt_01 = sen->Vshunt_01*SHUNT_V2A_S + SHUNT_V2A_A;
 
   int16_t vshunt_amp_int_0 = 0;
+  double vshunt_amp_0 = 0;
+  double vshunt_amp_1 = 0;
   int16_t vshunt_amp_int_1 = 0;
   if (!sen->bare_ads_amp)
   {
@@ -133,11 +139,13 @@ void load(const bool reset_free, Sensors *sen, DS18 *sensor_tbatt, Pins *myPins,
     sen->Vshunt_amp_int_01 = 0;
   }
   sen->Vshunt_amp_01 = ads_amp->computeVolts(sen->Vshunt_amp_int_01);
+  vshunt_amp_0 = ads_amp->computesVolts(vshunt_amp_int_0);
+  vshunt_amp_1 = ads_amp->computesVolts(vshunt_amp_int_1);
   sen->Ishunt_amp_01 = sen->Vshunt_amp_01*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A;
  
-  Serial.printf("vshunt_int,0_int,1_int,Ishunt,|||||,vshunt_amp_int,0_amp_int,1_amp_int,Ishunt_amp,  T, %d,%d,%d,%7.3f, ||||, %d,%d,%d,%7.3f,   %7.3f,\n",
-      sen->Vshunt_int_01, vshunt_int_0, vshunt_int_1, sen->Ishunt_01,
-      sen->Vshunt_amp_int_01, vshunt_amp_int_0, vshunt_amp_int_1, sen->Ishunt_amp_01,
+  Serial.printf("vshunt_int,0_int,1_int,v0,v1,Ishunt,|||||,vshunt_amp_int,0_amp_int,1_amp_int,v0_amp,v1_amp,Ishunt_amp,  T, %d,%d,%d,%7.3f,%7.3f,%7.3f, ||||, %d,%d,%d,%7.3f,%7.3f,%7.3f,   %7.3f,\n",
+      sen->Vshunt_int_01, vshunt_int_0, vshunt_int_1, vshunt_0, vshunt_1, sen->Ishunt_01,
+      sen->Vshunt_amp_int_01, vshunt_amp_int_0, vshunt_amp_int_1,  vshunt_amp_0, vshunt_amp_1, sen->Ishunt_amp_01,
       T);
 
   // MAXIM conversion 1-wire Tp plenum temperature  (0.750 seconds blocking update)
