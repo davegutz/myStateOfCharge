@@ -131,6 +131,25 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   9-A2 = NC
   10-A3 = NC
 
+### ASD 1015 12-bit Amplified with OPA333 my custom board.   Avoids using negative absolute voltages on inputs - centers on 3v3 / 2
+
+- HiLetgo ADS1015 12 Bit Analog to Digital Development Board ADC Converter Module ADC Development Board for Arduino
+  $8.29 in Aug 2021
+  I2C used.
+  Code from Adafruit ADS1X15 library.   Differential = A0-A1
+  Ti OPA333 Used.   $11.00 for 5 Amazon OPA333AIDBVR SOT23-5 mounted on SOT23-6
+  No special code for OPA.  Hardware only.   Pre-amp for ADC 5:1.
+  1-V 3v3 (+ TODO:  0.1uF to ground for transient power draws of the ADC)
+  2-G = Gnd
+  3-SCL = Photon D1
+  4-SDA  = Photon D0
+  5-ADDR = 3v3
+  6-ALERT = NC
+  7-A0 = Green from shunt
+  8-A1 = Yellow from shunt
+  9-A2 = NC
+  10-A3 = NC
+
 ### Particle Photon 1A max
 
 - Particle Photon boards have 9 PWM pins: D0, D1, D2, D3, A4, A5, WKP, RX, TX

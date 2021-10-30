@@ -139,7 +139,8 @@ protected:
   // Instance-specific properties
   Adafruit_I2CDevice *m_i2c_dev; ///< I2C bus device
   uint8_t m_bitShift;            ///< bit shift amount
-  adsGain_t m_gain;              ///< ADC gain
+  adsGain_t m_gain;              ///< ADC differential gain
+  adsGain_t s_gain;              ///< ADC single-ended gain   // DAG 2021-10-28
   uint16_t m_dataRate;           ///< Data rate
 
 public:
@@ -150,8 +151,10 @@ public:
   void startComparator_SingleEnded(uint8_t channel, int16_t threshold);
   int16_t getLastConversionResults();
   float computeVolts(int16_t counts);
-  void setGain(adsGain_t gain);
+  float computesVolts(int16_t counts); // DAG 2021-10-28
+  void setGain(adsGain_t gain, adsGain_t sgain);  // DAG 2021-10-28
   adsGain_t getGain();
+  adsGain_t getsGain();  // DAG 2021-10-28
   void setDataRate(uint16_t rate);
   uint16_t getDataRate();
 

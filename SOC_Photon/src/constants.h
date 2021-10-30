@@ -64,9 +64,13 @@
 #define VBATT_A               0.0       // Vbatt sense adder, V (0)
 #define PHOTON_ADC_COUNT      4096      // Photon ADC range, counts (4096)
 #define PHOTON_ADC_VOLT       3.3       // Photon ADC range, V (3.3)
+#define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms
+#define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms
 #define SHUNT_V2A_S           -1189.3   // Shunt V2A scalar, A/V (1333 is 100A/0.075V)  (-1189.3)
 #define SHUNT_V2A_A           0         // Shunt V2A adder, A derived from charge-discharge integral match (0 in theory)  (0)
                                         // observed on prototype over time that 0 V really is 0 A.   Not much bias in ADS device
+#define SHUNT_AMP_V2A_S       (SHUNT_V2A_S*SHUNT_AMP_R1/SHUNT_AMP_R2)   // Shunt amp V2A scalar
+#define SHUNT_AMP_V2A_A       0         // Shunt amp V2A adder, A derived from charge-discharge integral match (0 in theory)  (0)
 #define SCREEN_WIDTH          128       // OLED display width, in pixels (128)
 #define SCREEN_HEIGHT         32        // OLED display height, in pixels (4)
 #define OLED_RESET            4         // Reset pin # (or -1 if sharing Arduino reset pin) (4)
@@ -83,6 +87,7 @@
 #define F_Z             0.80        // Filter zeta (0.80)
 #define SAT_PERSISTENCE 15          // Updates persistence on saturation tests (25)
 #define HDB_ISHUNT      0.13        // Half deadband to filter Ishunt, mA (0.13)
+#define HDB_ISHUNT_AMP  0.025       // Half deadband to filter Ishunt amplified, mA (0.025)
 #define HDB_VBATT       0.01        // Half deadband to filter Vbatt, v (0.01)
 #define HDB_TBATT       0.06        // Half deadband to filter Tbatt, F (0.06)
 

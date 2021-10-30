@@ -42,6 +42,7 @@
 #include <Adafruit_SSD1306.h>
 
 extern double curr_bias;        // Calibration bias, A
+extern double curr_amp_bias;    // Calibration amplified bias, A
 
 // Pins
 struct Pins
@@ -78,15 +79,27 @@ struct Sensors
   double Wshunt;          // Sensed shunt power, W
   double Wshunt_filt;     // Filtered, sensed shunt power, W
   double Wbatt;          // Battery power, W
+  int16_t Vshunt_amp_int;     // Sensed shunt voltage, count
+  double Vshunt_amp;          // Sensed shunt voltage, V
+  double Vshunt_amp_filt;     // Filtered, sensed shunt voltage, V
+  double Vshunt_amp_filt_obs; // Filtered, sensed shunt voltage for  observer, V
+  double Ishunt_amp;          // Sensed shunt current, A
+  double Ishunt_amp_filt;     // Filtered, sensed shunt current, A
+  double Ishunt_amp_filt_obs; // Filtered, sensed shunt current for observer, A
+  double Wshunt_amp;          // Sensed shunt power, W
+  double Wshunt_amp_filt;     // Filtered, sensed shunt power, W
+  double Wbatt_amp;           // Battery power, W
   int I2C_status;
   double T;               // Update time, s
   double T_filt;          // Filter update time, s
   double T_temp;          // Temperature update time, s
   bool bare_ads;          // If no ADS detected
+  bool bare_ads_amp;      // If no ADS detected
   Sensors(void) {}
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
           int16_t Vshunt_int, double Vshunt, double Vshunt_filt,
-          int I2C_status, double T, double T_temp, bool bare_ads)
+          int16_t Vshunt_amp_int, double Vshunt_amp, double Vshunt_amp_filt,
+          int I2C_status, double T, double T_temp, bool bare_ads, bool bare_ads_amp)
   {
     this->Vbatt = Vbatt;
     this->Vbatt_filt = Vbatt_filt;
@@ -100,13 +113,22 @@ struct Sensors
     this->Ishunt = Vshunt * SHUNT_V2A_S + double(SHUNT_V2A_A) + curr_bias;
     this->Ishunt_filt = Vshunt_filt * SHUNT_V2A_S + SHUNT_V2A_A + curr_bias;
     this->Wshunt = Vshunt * Ishunt;
-    this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
     this->Wbatt = Vshunt * Ishunt;
+    this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
+    this->Vshunt_amp_int = Vshunt_amp_int;
+    this->Vshunt_amp = Vshunt_amp;
+    this->Vshunt_amp_filt = Vshunt_amp_filt;
+    this->Ishunt_amp = Vshunt_amp * SHUNT_AMP_V2A_S + double(SHUNT_AMP_V2A_A) + curr_amp_bias;
+    this->Ishunt_amp_filt = Vshunt_amp_filt * SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + curr_amp_bias;
+    this->Wshunt_amp = Vshunt_amp * Ishunt_amp;
+    this->Wshunt_amp_filt = Vshunt_amp_filt * Ishunt_amp_filt;
+    this->Wbatt_amp = Vshunt_amp * Ishunt_amp;
     this->I2C_status = I2C_status;
     this->T = T;
     this->T_filt = T;
     this->T_temp = T_temp;
     this->bare_ads = bare_ads;
+    this->bare_ads_amp = bare_ads_amp;
   }
 };
 
@@ -114,11 +136,13 @@ struct Sensors
 // Headers
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);
-void load(const bool reset_free, Sensors *Sen, Pins *myPins, Adafruit_ADS1015 *ads, const unsigned long now,
-  SlidingDeadband *SdIshunt, SlidingDeadband *SdVbatt);
+void load(const bool reset_free, Sensors *Sen, Pins *myPins,
+    Adafruit_ADS1015 *ads, Adafruit_ADS1015 *ads_amp, const unsigned long now,
+    SlidingDeadband *SdIshunt, SlidingDeadband *SdIshunt_amp, SlidingDeadband *SdVbatt);
 void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt);
-void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs, General2_Pole* VshuntSenseFiltObs, 
-  General2_Pole* VbattSenseFilt,  General2_Pole* VshuntSenseFilt);
+void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs,
+  General2_Pole* VshuntSenseFiltObs,  General2_Pole* VshuntAmpSenseFiltObs, 
+  General2_Pole* VbattSenseFilt,  General2_Pole* VshuntSenseFilt,  General2_Pole* VshuntAmpSenseFilt);
 void filter_temp(int reset, Sensors *Sen, General2_Pole* TbattSenseFilt);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);

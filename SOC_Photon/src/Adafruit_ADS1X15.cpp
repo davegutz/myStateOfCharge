@@ -28,6 +28,7 @@
 Adafruit_ADS1015::Adafruit_ADS1015() {
   m_bitShift = 4;
   m_gain = GAIN_TWOTHIRDS; /* +/- 6.144V range (limited to VDD +0.3V max!) */
+  s_gain = GAIN_TWOTHIRDS; /* +/- 6.144V range (limited to VDD +0.3V max!) */
   m_dataRate = RATE_ADS1015_1600SPS;
 }
 
@@ -39,6 +40,7 @@ Adafruit_ADS1015::Adafruit_ADS1015() {
 Adafruit_ADS1115::Adafruit_ADS1115() {
   m_bitShift = 0;
   m_gain = GAIN_TWOTHIRDS; /* +/- 6.144V range (limited to VDD +0.3V max!) */
+  s_gain = GAIN_TWOTHIRDS; /* +/- 6.144V range (limited to VDD +0.3V max!) */  // DAG 2021-10-28
   m_dataRate = RATE_ADS1115_128SPS;
 }
 
@@ -61,7 +63,7 @@ bool Adafruit_ADS1X15::begin(uint8_t i2c_addr, TwoWire *wire) {
     @param gain gain setting to use
 */
 /**************************************************************************/
-void Adafruit_ADS1X15::setGain(adsGain_t gain) { m_gain = gain; }
+void Adafruit_ADS1X15::setGain(adsGain_t gain, adsGain_t sgain) { m_gain = gain; s_gain = sgain; }  // DAG 2021-10-28
 
 /**************************************************************************/
 /*!
@@ -70,6 +72,7 @@ void Adafruit_ADS1X15::setGain(adsGain_t gain) { m_gain = gain; }
 */
 /**************************************************************************/
 adsGain_t Adafruit_ADS1X15::getGain() { return m_gain; }
+adsGain_t Adafruit_ADS1X15::getsGain() { return s_gain; }   // DAG 2021-10-28
 
 /**************************************************************************/
 /*!
@@ -108,7 +111,7 @@ int16_t Adafruit_ADS1X15::readADC_SingleEnded(uint8_t channel) {
       ADS1X15_REG_CONFIG_MODE_SINGLE;   // Single-shot mode (default)
 
   // Set PGA/voltage range
-  config |= m_gain;
+  config |= s_gain;  // DAG 2021-10-28
 
   // Set data rate
   config |= m_dataRate;
@@ -248,7 +251,7 @@ void Adafruit_ADS1X15::startComparator_SingleEnded(uint8_t channel,
       ADS1X15_REG_CONFIG_MODE_CONTIN;   // Continuous conversion mode
 
   // Set PGA/voltage range
-  config |= m_gain;
+  config |= s_gain;  // DAG 2021-10-28
 
   // Set data rate
   config |= m_dataRate;
@@ -312,6 +315,33 @@ float Adafruit_ADS1X15::computeVolts(int16_t counts) {
   // see data sheet Table 3
   float fsRange;
   switch (m_gain) {
+  case GAIN_TWOTHIRDS:
+    fsRange = 6.144f;
+    break;
+  case GAIN_ONE:
+    fsRange = 4.096f;
+    break;
+  case GAIN_TWO:
+    fsRange = 2.048f;
+    break;
+  case GAIN_FOUR:
+    fsRange = 1.024f;
+    break;
+  case GAIN_EIGHT:
+    fsRange = 0.512f;
+    break;
+  case GAIN_SIXTEEN:
+    fsRange = 0.256f;
+    break;
+  default:
+    fsRange = 0.0f;
+  }
+  return counts * (fsRange / (32768 >> m_bitShift));
+}
+float Adafruit_ADS1X15::computesVolts(int16_t counts) {  // DAG 2021-10-28
+  // see data sheet Table 3
+  float fsRange;
+  switch (s_gain) {
   case GAIN_TWOTHIRDS:
     fsRange = 6.144f;
     break;

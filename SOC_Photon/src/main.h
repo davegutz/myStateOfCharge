@@ -82,6 +82,7 @@ extern unsigned long vec_start;   // Start of active vector
 extern boolean enable_wifi;       // Enable wifi
 extern double socu_free;          // Free integrator state
 extern double curr_bias;          // Calibration bias, A
+extern double curr_amp_bias;      // Calibration bias for amplified ADC, A
 
 // Global locals
 const int nsum = 154;           // Number of summary strings, 17 Bytes per isum
@@ -89,7 +90,8 @@ retained int isum = -1;         // Summary location.   Begins at -1 because firs
 retained Sum_st mySum[nsum];    // Summaries
 retained double socu_free = 0.5;// Coulomb Counter state
 retained int8_t debug = 2;
-retained double curr_bias = 0;  // Calibrate, A 
+retained double curr_bias = 0;      // Calibrate, A 
+retained double curr_amp_bias = 0;  // Calibrate amp, A 
 String input_string = "";
 boolean string_complete = false;
 boolean stepping = false;
@@ -107,8 +109,10 @@ String hm_string = "00:00";      // time, hh:mm
 double control_time = 0.0;      // Decimal time, seconds since 1/1/2021
 Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_ADS1015 *ads;          // Use this for the 12-bit version; 1115 for 16-bit
+Adafruit_ADS1015 *ads_amp;      // Use this for the 12-bit version; 1115 for 16-bit; amplified; different address
 Adafruit_SSD1306 *display;
 bool bare_ads = false;          // If ADS to be ignored
+bool bare_ads_amp = false;      // If ADS to be ignored
 Wifi *myWifi;                   // Manage Wifi
 
 // Setup
@@ -136,14 +140,24 @@ void setup()
   Wire.begin();
 
   // AD
-  Serial.println("Initializing SHUNT MONITOR");
+  Serial.println("Initializing SHUNT MONITORS");
   ads = new Adafruit_ADS1015;
-  ads->setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+  ads->setGain(GAIN_SIXTEEN, GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
   if (!ads->begin()) {
     Serial.println("FAILED to initialize ADS SHUNT MONITOR.");
     bare_ads = true;
   }
-  Serial.println("SHUNT MONITOR initialized");
+  ads_amp = new Adafruit_ADS1015;
+  ads_amp->setGain(GAIN_EIGHT, GAIN_TWO);    // Differential 8x gain
+  if (!ads->begin()) {
+    Serial.println("FAILED to initialize ADS SHUNT MONITOR.");
+    bare_ads = true;
+  }
+  if (!ads_amp->begin((0x49))) {
+    Serial.println("FAILED to initialize ADS AMPLIFIED SHUNT MONITOR.");
+    bare_ads_amp = true;
+  }
+  Serial.println("SHUNT MONITORS initialized");
   
   // Display
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
@@ -213,18 +227,24 @@ void loop()
   // Sensor noise filters.   Obs filters 0.5 --> 0.1 to eliminate digital instability.   Also rate limited the observer belts+suspenders
   static General2_Pole* VbattSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, 0.4*double(NOM_SYS_VOLT), 2.0*double(NOM_SYS_VOLT));
   static General2_Pole* VshuntSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, -0.500, 0.500);
+  static General2_Pole* VshuntAmpSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, -0.500, 0.500);
   static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, 0.833*double(NOM_SYS_VOLT), 1.15*double(NOM_SYS_VOLT));
   static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -20.0, 150.);
   static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -0.500, 0.500);
+  static General2_Pole* VshuntAmpSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -0.500, 0.500);
 
   // 1-wire temp sensor battery temp
   static DS18* SensorTbatt = new DS18(myPins->pin_1_wire);
 
   // Sensor conversions
-  static Sensors *Sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT, NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT, 0, 0, 0, bare_ads); // Manage sensor data    
+  static Sensors *Sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT,
+        NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
+        NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
+        0, 0, 0, bare_ads, bare_ads_amp); // Manage sensor data
   static SlidingDeadband *SdIshunt = new SlidingDeadband(HDB_ISHUNT);
   static SlidingDeadband *SdVbatt = new SlidingDeadband(HDB_VBATT);
   static SlidingDeadband *SdTbatt = new SlidingDeadband(HDB_TBATT);
+  static SlidingDeadband *SdIshunt_amp = new SlidingDeadband(HDB_ISHUNT_AMP);
 
   // Battery  models
   // Solved, driven by socu_s
@@ -303,7 +323,7 @@ void loop()
     if ( debug>2 || debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", Sen->T, millis());
 
     // Load and filter
-    load(reset_free, Sen, myPins, ads, ReadSensors->now(), SdIshunt, SdVbatt);
+    load(reset_free, Sen, myPins, ads, ads_amp, ReadSensors->now(), SdIshunt, SdIshunt_amp, SdVbatt);
 
     // Initialize SOC Free Integrator - Coulomb Counting method
     // Runs unfiltered and fast to capture most data
@@ -343,7 +363,8 @@ void loop()
     if ( debug>2 ) Serial.printf("Filter update=%7.3f and performing load() at %ld...  ", Sen->T_filt, millis());
 
     // Filter
-    filter(reset, Sen, VbattSenseFiltObs, VshuntSenseFiltObs, VbattSenseFilt, VshuntSenseFilt);
+    filter(reset, Sen, VbattSenseFiltObs, VshuntSenseFiltObs,  VshuntAmpSenseFiltObs,
+       VbattSenseFilt, VshuntSenseFilt, VshuntAmpSenseFilt);
     saturated = SaturatedObj->calculate(MyBattSolved->sat(), reset);
 
     // Battery models
