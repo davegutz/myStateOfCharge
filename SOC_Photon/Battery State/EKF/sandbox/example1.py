@@ -5,6 +5,7 @@ from numpy.random import randn
 import matplotlib.pyplot as plt
 import math
 from collections import namedtuple
+from kf_book.nonlinear_plots import plot_gaussians
 gaussian = namedtuple('Gaussian', ['mean', 'var'])
 gaussian.__repr__ = lambda s: '𝒩(μ={:.3f}, 𝜎²={:.3f})'.format(s[0], s[1])
 
