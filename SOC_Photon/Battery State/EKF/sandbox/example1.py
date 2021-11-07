@@ -1,5 +1,6 @@
 # Play with Kalman filters from Kalman-and-Bayesian-Filters-in-Python
 # Press the green button in the gutter to run the script.
+# install packages using 'python -m pip install numpy, matplotlib, scipy, pyfilter
 import numpy as np
 from numpy.random import randn
 import matplotlib.pyplot as plt
