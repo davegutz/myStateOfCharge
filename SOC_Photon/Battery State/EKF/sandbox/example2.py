@@ -1,20 +1,17 @@
-# -*- coding: utf-8 -*-
 # Play with Kalman filters from Kalman-and-Bayesian-Filters-in-Python
 # Press the green button in the gutter to run the script.
 # install packages using 'python -m pip install numpy, matplotlib, scipy, pyfilter
 # References:
-#   [2] Roger Labbe. "Kalman and Bayesian Filters in Python"
+#   [2] Roger Labbe. "Kalman and Bayesian Filters in Python"  -->kf_book
 #   https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Pythonimport numpy as np
+# Dependencies:  python3.10, numpy, matplotlib, math, filterpy, ./kf_book
 from numpy.random import randn
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-from collections import namedtuple
 from kf_book.nonlinear_plots import plot_gaussians
 from filterpy.kalman import KalmanFilter
 from filterpy.common import Q_discrete_white_noise
-#gaussian = namedtuple('Gaussian', ['mean', 'var'])
-#gaussian.__repr__ = lambda s: 'ðﾝﾒﾩ(μ={:.3f}, ðﾝﾜﾎ²={:.3f})'.format(s[0], s[1])
 from math import sqrt
 
 
