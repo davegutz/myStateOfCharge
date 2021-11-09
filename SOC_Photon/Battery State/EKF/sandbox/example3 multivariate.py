@@ -4,7 +4,7 @@
 # References:
 #   [2] Roger Labbe. "Kalman and Bayesian Filters in Python"  -->kf_book
 #   https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Pythonimport numpy as np
-# Dependencies:  python3.10, numpy, matplotlib, math, filterpy, ./kf_book, ./pyDAGx
+# Dependencies:  python3.10, numpy, sympy, matplotlib, math, filterpy, ./kf_book, ./pyDAGx
 from filterpy.kalman import KalmanFilter
 from filterpy.common import Q_discrete_white_noise
 import numpy as np
