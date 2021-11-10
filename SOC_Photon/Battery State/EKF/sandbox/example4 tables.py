@@ -9,7 +9,8 @@
 
 # Prepare for EKF with function call for battery
 from pyDAGx.lookup_table import LookupTable
-
+import math
+import numpy as np
 
 # Battery model LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang etal.pdf'
 # SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope constraint
@@ -51,7 +52,7 @@ class Battery:
     def __init__(self, n_cells=1, dv=0., t_t=[25], t_b=[-.836], t_a=[4.046], t_c=[-1.181],
                  d=.707, n=0.4, m=0.478, dvoc_dt=0., r1=0.00126, r2=0.00168, nom_vsat=13.85,
                  cu=100., cs = 102.):
-        self.n_cells_ = n_cells
+        self.n_cells = n_cells
         self.dv = dv
         self.lut_b = LookupTable()
         self.lut_a = LookupTable()
@@ -71,15 +72,47 @@ class Battery:
         self.nom_vsat = nom_vsat
         self.cu = cu
         self.cs = cs
+        self.dv_dsocs = 0
+        self.sr = 1.
 
+    # SOC-OCV curve fit method per Zhang, et al
     def calculate(self, t_c=25., socu_frac=1., curr_in=0.):
-        b, a, c = self.look(t_c)
+        self.b, self.a, self.c = self.look(t_c)
         self.socu = socu_frac
         self.socs = 1.-(1.-self.socu)*self.cu/self.cs
         socs_lim = max(min(self.socs, mxeps), mneps)
         self.curr_in = curr_in
-        
-        self.v
+
+        # Perform computationally expensive steps one time
+        log_socs = math.log(socs_lim)
+        exp_n_socs = math.exp(self.n*(socs_lim-1))
+        pow_log_socs = math.pow(-log_socs, self.m)
+
+        # VOC-OCV model
+        self.dv_dsocs = float(self.n_cells) * ( self.b*self.m/socs_lim*pow_log_socs/log_socs + self.c + self.d*self.n*exp_n_socs )
+        self.dv_dsocu = self.dv_dsocs * self.cu / self.cs
+        self.voc = float(self.n_cells) * ( self.a + self.b*pow_log_socs + self.c*socs_lim + self.d*exp_n_socs ) \
+                   + (self.socs - socs_lim) * self.dv_dsocs  # slightly beyond
+        self.voc +=  self.dv  # Experimentally varied
+        #  self.d2v_dsocs2 = float(self.n_cells) * ( self.b*self.m/self.soc/self.soc*pow_log_socs/log_socs*((self.m-1.)/log_socs - 1.) + self.d*self.n*self.n*exp_n_socs )
+
+        # Dynamics
+        self.vdyn = float(self.n_cells) * self.curr_in*(self.r1 + self.r2)*self.sr
+
+        # Summarize
+        self.v = self.voc + self.vdyn
+        self.pow_in = self.v*self.curr_in - self.curr_in*self.curr_in*(self.r1+self.r2)*self.sr*float(self.n_cells)  # Internal resistance of battery is a loss
+        if self.pow_in>1.:
+            self.tcharge = min( NOM_BATT_CAP / self.pow_in*NOM_SYS_VOLT * (1.-socs_lim), 24.)  # NOM_BATT_CAP is defined at NOM_SYS_VOLT
+        elif self.pow_in<-1.:
+            self.tcharge = max(NOM_BATT_CAP /self.pow_in*NOM_SYS_VOLT * socs_lim, -24.)  # NOM_BATT_CAP is defined at NOM_SYS_VOLT
+        elif self.pow_in>=0.:
+            self.tcharge = 24.*(1.-socs_lim)
+        else:
+            self.tcharge = -24.*socs_lim
+        self.vsat = self.nom_vsat + (t_c-25.)*self.dvoc_dt
+        self.sat = self.voc >= self.vsat
+
         return self.v
 
     def look(self, T_C):
@@ -92,14 +125,13 @@ class Battery:
 my_bb = Battery(n_cells=batt_num_cells, t_t=bb_t, t_b=bb_b, t_a=bb_a, t_c=bb_c, d=d_bb, n=n_bb, m=m_bb,
                 dvoc_dt=bb_dvoc_dt, cu=cu_bb, cs=cs_bb)
 
-for T in range(0, 50, 5):
-    b, a, c = my_bb.look(T_C=T)
-    print(T, b, a, c)
 
-T = 25.
-socu_frac = 1.
-curr_in = 0.
-print('my_bb.calculate = ', my_bb.calculate(t_c=T, socu_frac=socu_frac, curr_in=curr_in))
+print('socu_frac    curr    v')
+socus = np.arange(0, 1.1, 0.1)
+currs = np.arange(-50., 50, 5)
+for socu_frac in socus:
+    for curr_in in currs:
+        print("%6.2f  %6.2f %7.3f" % (socu_frac, curr_in, my_bb.calculate(t_c=25, socu_frac=socu_frac, curr_in=curr_in)))
 
 
 

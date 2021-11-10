@@ -76,11 +76,11 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
   voc_ +=  dv_;  // Experimentally varied
   // d2v_dsocs2_ = double(num_cells_) * ( b_*m_/soc_/soc_*pow_log_socs/log_socs*((m_-1.)/log_socs - 1.) + d_*n_*n_*exp_n_socs );
 
-  // Dynamic emf
+  // Dynamic emf  TODO:   aren't these the same?
   if ( curr_in_ < 0. ) vdyn_ = double(num_cells_) * curr_in*(r1_ + r2_)*sr_;
   else vdyn_ = double(num_cells_) * curr_in*(r1_ + r2_)*sr_;
 
-  // Summarize
+  // Summarize   TODO: get rid of the global defines here because they differ from one battery to another
   v_ = voc_ + vdyn_;
   pow_in_ = v_*curr_in_ - curr_in_*curr_in_*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
   if ( pow_in_>1. )  tcharge_ = min(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * (1.-socs_lim), 24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
