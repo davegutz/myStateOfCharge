@@ -25,10 +25,10 @@ BATT_R2 = 0.00168
 BATT_R2C2 = 100
 cu_bb = NOM_BATT_CAP  # Assumed capacity, Ah
 cs_bb = 102.          # Data fit to this capacity to avoid math 0, Ah
-mxeps_bb = 1-1e-6     # Numerical maximum of coefficient model with scaled socs.
-mneps_bb = 1e-6       # Numerical minimum of coefficient model without scaled socs.
-mxepu_bb = 1-1e-6     # Numerical maximum of coefficient model with scaled socs.
-mnepu_bb = 1 - (1-1e-6)*cs_bb/cu_bb  # Numerical minimum of coefficient model without scaled socs.
+mxeps = 1-1e-6     # Numerical maximum of coefficient model with scaled socs.
+mneps = 1e-6       # Numerical minimum of coefficient model without scaled socs.
+mxepu = 1-1e-6     # Numerical maximum of coefficient model with scaled socs.
+mnepu_bb = 1 - (1-mneps)*cs_bb/cu_bb  # Numerical minimum of coefficient model without scaled socs.
 bb_t = [0., 25., 50.]
 bb_b = [-0.836, -0.836, -0.836]
 bb_a = [3.999, 4.046, 4.093]
@@ -76,7 +76,10 @@ class Battery:
         b, a, c = self.look(t_c)
         self.socu = socu_frac
         self.socs = 1.-(1.-self.socu)*self.cu/self.cs
-        self.v = 0
+        socs_lim = max(min(self.socs, mxeps), mneps)
+        self.curr_in = curr_in
+        
+        self.v
         return self.v
 
     def look(self, T_C):
