@@ -9,6 +9,8 @@ from filterpy.kalman import KalmanFilter
 from filterpy.common import Q_discrete_white_noise
 import numpy as np
 from math import sqrt
+from random import random as randn
+import matplotlib.pyplot as plt
 
 def univariate_filter(x0, P, R, Q):
     kf1 = KalmanFilter(dim_x=1, dim_z=1, dim_u=1)
