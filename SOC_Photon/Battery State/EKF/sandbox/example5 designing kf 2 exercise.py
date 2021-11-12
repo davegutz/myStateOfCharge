@@ -7,6 +7,8 @@ from filterpy.stats import plot_covariance_ellipse
 from filterpy.kalman import KalmanFilter
 from scipy.linalg import block_diag
 from filterpy.common import Q_discrete_white_noise
+import book_format
+book_format.set_style()
 
 
 class PosSensor(object):
@@ -69,7 +71,6 @@ for x, P in zip(mu, cov):
     plot_covariance_ellipse(mean, cov=cov, fc='g', std=3, alpha=0.5)
 
 # plot results
-np.set_printoptions(precision=3)
 zs *= .3048  # convert to meters
 plt.clf()
 plot_filter(mu[:, 0], mu[:, 1])
@@ -77,6 +78,5 @@ plot_measurements(zs[:, 0], zs[:, 1])
 plt.legend(loc=2)
 plt.xlim(0, 20)
 plt.ylim(-3, 5)
-plt.grid()
 print(zs)
 plt.show()
