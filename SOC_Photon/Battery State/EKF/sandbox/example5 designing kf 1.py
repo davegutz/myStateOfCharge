@@ -18,7 +18,6 @@ class PosSensor(object):
     def read(self):
         self.pos[0] += self.vel[0]
         self.pos[1] += self.vel[1]
-        #np.random.seed(5)
         return [self.pos[0] + randn() * self.noise_std,
                 self.pos[1] + randn() * self.noise_std]
 
