@@ -113,7 +113,7 @@ class Battery:
         self.vsat = self.nom_vsat + (t_c-25.)*self.dvoc_dt
         self.sat = self.voc >= self.vsat
 
-        return self.v
+        return self.v, self.dv_dsocs
 
     def look(self, T_C):
         b = self.lut_b.lookup(T_degC=T_C)
@@ -126,12 +126,13 @@ my_bb = Battery(n_cells=batt_num_cells, t_t=bb_t, t_b=bb_b, t_a=bb_a, t_c=bb_c, 
                 dvoc_dt=bb_dvoc_dt, cu=cu_bb, cs=cs_bb)
 
 
-print('socu_frac    curr    v')
-socus = np.arange(0, 1.1, 0.1)
+print('socu_frac    curr    v   dv_dsoc')
+socus = np.arange(0.1, 1.2, 0.1)
 currs = np.arange(-50., 50, 5)
 for socu_frac in socus:
     for curr_in in currs:
-        print("%6.2f  %6.2f %7.3f" % (socu_frac, curr_in, my_bb.calculate(t_c=25, socu_frac=socu_frac, curr_in=curr_in)))
+        v, dv_ds = my_bb.calculate(t_c=25, socu_frac=socu_frac, curr_in=curr_in)
+        print("%6.2f  %6.2f %7.3f  %7.3f" % (socu_frac, curr_in, v, dv_ds))
 
 
 
