@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-
+# make csv file by hand from .ods by opening in openOffice and save as csv
 data_file = '../../../dataReduction/data_proto.csv'
 
 try:
