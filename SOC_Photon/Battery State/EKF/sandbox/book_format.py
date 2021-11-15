@@ -37,10 +37,10 @@ def test_installation():
     except:
         print("Please install SciPy before continuing. See chapter 0 for instructions.")
 
-    try:
-        import sympy
-    except:
-        print("Please install SymPy before continuing. See chapter 0 for instructions.")
+    # try:
+    #     import sympy
+    # except:
+    #     print("Please install SymPy before continuing. See chapter 0 for instructions.")
 
     try:
         import matplotlib

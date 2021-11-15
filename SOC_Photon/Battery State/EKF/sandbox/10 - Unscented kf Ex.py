@@ -5,7 +5,7 @@ from numpy.random import randn
 from filterpy.kalman import UnscentedKalmanFilter
 from filterpy.kalman import JulierSigmaPoints
 from filterpy.kalman import UnscentedKalmanFilter as UKF
-import kf_book.ukf_internal as ukf_internal
+#import kf_book.ukf_internal as ukf_internal
 from filterpy.kalman import unscented_transform, MerweScaledSigmaPoints
 from numpy.linalg import norm
 import math
@@ -92,6 +92,28 @@ class ACSim:
         self.pos += dx
         return self.pos
 
+def plot_radar(xs, t, plot_x=True, plot_vel=True, plot_alt=True):
+    xs = np.asarray(xs)
+    if plot_x:
+        plt.figure()
+        plt.plot(t, xs[:, 0]/1000.)
+        plt.xlabel('time(sec)')
+        plt.ylabel('position(km)')
+        plt.tight_layout()
+    if plot_vel:
+        plt.figure()
+        plt.plot(t, xs[:, 1])
+        plt.xlabel('time(sec)')
+        plt.ylabel('velocity')
+        plt.tight_layout()
+    if plot_alt:
+        plt.figure()
+        plt.plot(t, xs[:,2])
+        plt.xlabel('time(sec)')
+        plt.ylabel('altitude')
+        plt.tight_layout()
+    plt.show()
+
 
 # complete tracking ukf
 dt = 12. # 12 seconds between readings
@@ -128,9 +150,5 @@ for i in range(len(t)):
     zs.append([r[0], r[1]])
 
 xs, covs = kf.batch_filter(zs)
-ukf_internal.plot_radar(xs, t)
+plot_radar(xs, t)
 
-# rts smoother
-Ms, P, K = kf.rts_smoother(xs, covs)
-ukf_internal.plot_rts_output(xs, Ms, t)
-plt.show()
