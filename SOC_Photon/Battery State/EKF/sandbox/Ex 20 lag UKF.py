@@ -74,18 +74,19 @@ class FilterLag:
         aircraft with state vector [x, velocity, altitude]'"""
         return self.F @ x
 
-def f_calc(ins, dt):
+
+def f_calc(x, dt):
     """ innovation function """
-    print(ins)
-    pos_in = ins[0]
-    vel_in = ins[1]
-    vel = (pos_in - f_calc.pos) / f_calc.tau
-    f_calc.pos += vel_in*dt
-    return np.array([f_calc.pos, vel])
+    print(x)
+    out = np.empty_like(x)
+    out[0] = x[1]*dt + x[0]
+    out[1] = x[1] - dt/f_calc.tau*x[0]
+    return out
+
 
 def h_lag(x):
     """ feedback function """
-    return x[0]
+    return [x[0]]
 
 
 # complete tracking ukf
@@ -99,7 +100,6 @@ in_pos = 0
 in_vel = 0
 lag_pos = in_pos
 lag_vel = in_vel
-f_calc.pos = in_pos
 
 # Setup the UKF
 filter_lag = FilterLag(tau, dt, lag_pos, lag_vel)
@@ -141,5 +141,10 @@ for i in range(len(t)):
 # plt.plot(t, zs)
 # plt.show()
 xs, covs = kf.batch_filter(zs)
-plot_lag(xs, t)
+# plot_lag(xs, t)
+plt.figure()
+plt.plot(t, refs)
+plt.plot(t, zs)
+plt.plot(t, xs)
+plt.show()
 
