@@ -35,9 +35,10 @@ class LagHardwareModel:
         """ Return pos with
         simulated noise"""
 
+        old_pos = self.pos
         vel = (pos_in - self.pos) / self.tau
         self.pos += vel*self.dt + randn()*self.pos_std
-        return self.pos
+        return old_pos, vel
 
 
 def plot_lag(xs_, t_, plot_x=True, plot_vel=True):
@@ -73,14 +74,15 @@ class FilterLag:
         return self.F @ x
 
 
-def fx_calc(x, dt, u, t_=None, z_=None):
+def fx_calc(x, dt_, u, t_=None, z_=None):
     """ innovation function """
     out = np.empty_like(x)
-    out[0] = x[1]*dt + x[0]
-    out[1] = x[1] + dt/fx_calc.tau*(u - x[0])
+    out[0] = x[1]*dt_ + x[0]
+    # out[1] = x[1] + dt_/fx_calc.tau*(u - x[0])
+    out[1] = (u - out[0])/fx_calc.tau
     try:
         t_, z_
-        print("t,z,x,dt,u = %6.3f, %7.3f, %7.3f, %7.3f, %7.3f," % (t_, z_, x[0], dt, u))
+        print("t,z,x,dt,u = %6.3f, %7.3f, %7.3f, %7.3f, %7.3f," % (t_, z_, x[0], dt_, u))
     except:
         pass
     return out
@@ -95,8 +97,9 @@ def h_lag(x):
 tau = 0.159
 fx_calc.tau = tau
 dt = 0.1
-pos_std = 1  # sensor uncertainty
-q_std = 7 # process uncertainty
+pos_read_std = 0
+pos_std = 1  # sensor uncertainty (1)
+q_std = 7  # process uncertainty
 q_var = q_std*q_std
 
 in_pos = 0
@@ -114,7 +117,7 @@ kf.x = np.array([lag_pos, lag_vel])
 kf.P = np.eye(2)*10
 
 in_lag20 = INSim(lag_pos, dt)
-lag20_hardware = LagHardwareModel(lag_pos, tau, dt, pos_std)
+lag20_hardware = LagHardwareModel(lag_pos, tau, dt, pos_read_std)
 
 np.random.seed(200)
 
@@ -125,6 +128,7 @@ zs = []
 refs = []
 xs = []
 vs = []
+vhs = []
 priors = []
 for i in range(len(t)):
     if t[i] < 1:
@@ -138,12 +142,13 @@ for i in range(len(t)):
     else:
         v = 0
     ref = in_lag20.update(v)
-    z = lag20_hardware.noisy_reading(ref)
+    z, vh = lag20_hardware.noisy_reading(ref)
     kf.predict(u=ref)
     kf.update(z)
 
     refs.append(ref)
     zs.append(z)
+    vhs.append(vh)
     priors.append(kf.x[0])
     xs.append(kf.x[0])
     vs.append(kf.x[1])
@@ -161,3 +166,7 @@ plt.scatter(t, zs)
 plt.plot(t, xs)
 plt.scatter(t, priors)
 plt.show()
+plt.figure()
+plt.plot(t, vhs)
+plt.show()
+
