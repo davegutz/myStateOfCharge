@@ -10,16 +10,14 @@ book_format.set_style()
 
 
 class INSim:
-    def __init__(self, pos, dt_, vel_std_):
+    def __init__(self, pos, dt_):
         self.pos = pos
         self.dt = dt_
-        self.vel_std = vel_std_
 
     def update(self, vel):
         """ Compute and returns next position. Incorporates
         random variation in velocity. """
-
-        dx = (vel + randn()*self.vel_std)*self.dt
+        dx = vel*self.dt
         self.pos += dx
         return self.pos
 
@@ -97,9 +95,8 @@ def h_lag(x):
 tau = 0.159
 fx_calc.tau = tau
 dt = 0.1
-pos_std = 0.01  # meas noise
-vel_std = 0.000001
-q_std = 1
+pos_std = 1  # sensor uncertainty
+q_std = 7 # process uncertainty
 q_var = q_std*q_std
 
 in_pos = 0
@@ -109,15 +106,15 @@ lag_vel = in_vel
 
 # Setup the UKF
 filter_lag = FilterLag(tau, dt, lag_pos, lag_vel)
-points = MerweScaledSigmaPoints(n=2, alpha=.1, beta=2., kappa=0.)
+points = MerweScaledSigmaPoints(n=2, alpha=.001, beta=2., kappa=1.)
 kf = UKF(2, 1, dt, fx=fx_calc, hx=h_lag, points=points)
 kf.Q = Q_discrete_white_noise(dim=2, dt=dt, var=q_var)
 kf.R = pos_std**2
 kf.x = np.array([lag_pos, lag_vel])
 kf.P = np.eye(2)*10
 
-in_lag20 = INSim(lag_pos, dt, 0)
-lag20 = LagHardwareModel(lag_pos, tau, dt, pos_std)
+in_lag20 = INSim(lag_pos, dt)
+lag20_hardware = LagHardwareModel(lag_pos, tau, dt, pos_std)
 
 np.random.seed(200)
 
@@ -141,12 +138,13 @@ for i in range(len(t)):
     else:
         v = 0
     ref = in_lag20.update(v)
-    refs.append(ref)
-    z = lag20.noisy_reading(ref)
-    zs.append(z)
+    z = lag20_hardware.noisy_reading(ref)
     kf.predict(u=ref)
-    priors.append(kf.x[0])
     kf.update(z)
+
+    refs.append(ref)
+    zs.append(z)
+    priors.append(kf.x[0])
     xs.append(kf.x[0])
     vs.append(kf.x[1])
 
