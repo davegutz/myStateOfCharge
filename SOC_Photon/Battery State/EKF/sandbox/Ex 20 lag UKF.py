@@ -99,10 +99,10 @@ def h_lag(x):
 tau_hardware = 0.159 # Hardware lag (0.159 for 1 Hz -3dB bandwidth)
 tau_fx = 0.159  # Kalman lag estimate (0.159 for 1 Hz -3dB bandwidth)
 dt = 0.1
-pos_sense_std = 1    # Hardware sensor variation (1)
+pos_sense_std = 5    # Hardware sensor variation (1)
 
 # UKF settings
-r_std = 1  # Kalman sensor uncertainty (1)
+r_std = .1  # Kalman sensor uncertainty (0.1)
 q_std = 7  # Process uncertainty (7)
 
 in_pos = 0
@@ -117,15 +117,15 @@ lag20_hardware = LagHardwareModel(lag_pos, tau_hardware, dt, pos_sense_std)
 # Setup the UKF
 # filter_lag = FilterLag(tau, dt, lag_pos, lag_vel)
 points = MerweScaledSigmaPoints(n=2, alpha=.001, beta=2., kappa=1.)
-kf = UKF(2, 1, dt, fx=lag20_hardware.fx_calc, hx=h_lag, points=points)
+kf = UKF(dim_x=2, dim_z=1, dt=dt, fx=lag20_hardware.fx_calc, hx=h_lag, points=points)
 kf.Q = Q_discrete_white_noise(dim=2, dt=dt, var=q_std*q_std)
 kf.R = r_std**2
 kf.x = np.array([lag_pos, lag_vel])
-kf.P = np.eye(2)*10
+kf.P = np.eye(2)*100
 
 np.random.seed(200)
 
-t = np.arange(0, 5, dt)
+t = np.arange(0, 5+dt, dt)
 n = len(t)
 
 zs = []
@@ -133,8 +133,9 @@ refs = []
 xs = []
 vs = []
 vhs = []
-priors_x_est = []
-priors_v_est = []
+prior_x_est = []
+prior_v_est = []
+Ks = []
 for i in range(len(t)):
     if t[i] < 1:
         v = 0
@@ -154,10 +155,11 @@ for i in range(len(t)):
     refs.append(ref)
     zs.append(z)
     vhs.append(vh)
-    priors_x_est.append(kf.x[0])
-    priors_v_est.append(kf.x[1])
+    prior_x_est.append(kf.x_prior[0])
+    prior_v_est.append(kf.x_prior[1])
     xs.append(kf.x[0])
     vs.append(kf.x[1])
+    Ks.append(kf.K[0,0])
 
 # print(zs)
 # plt.plot(t, refs)
@@ -166,18 +168,22 @@ for i in range(len(t)):
 # UKF.batch_filter does not support keyword arguments fx_args, hx_args
 # xs, covs = kf.batch_filter(zs)
 # plot_lag(xs, t)
+print(kf.x, 'log-likelihood', kf.log_likelihood, 'Kalman gain', kf.K)
 plt.figure()
-plt.subplot(121); plt.title('Ex 20 lag UKF.py')
-plt.scatter(t, priors_x_est, color='green', label='Prior X', marker='o')
+plt.subplot(221); plt.title('Ex 20 lag UKF.py')
+plt.scatter(t, prior_x_est, color='green', label='Post X', marker='o')
 plt.scatter(t, zs, color='black', label='Meas X', marker='.')
 plt.plot(t, xs, color='green', label='Est X')
 plt.plot(t, refs, color='blue', linestyle='--', label='Ref X')
 plt.legend(loc=2)
 # plt.show()
 # plt.figure()
-plt.subplot(122)
+plt.subplot(222)
 plt.scatter(t, vhs, color='black', label='Meas V', marker='.')
-plt.plot(t, priors_v_est, color='green', label='Prior V')
+plt.plot(t, prior_v_est, color='green', label='Post V')
+plt.legend(loc=3)
+plt.subplot(223)
+plt.plot(t, Ks, color='green', label='K')
 plt.legend(loc=3)
 plt.show()
 
