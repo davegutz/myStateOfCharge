@@ -35,10 +35,26 @@ class LagHardwareModel:
         """ Return pos with
         simulated noise"""
 
-        old_pos = self.pos
+        pos_past = self.pos
         vel = (pos_in - self.pos) / self.tau
         self.pos += vel*self.dt + randn()*self.pos_std
-        return old_pos, vel
+        return pos_past, vel
+
+    def fx_calc(self, x, dt_, u, t_=None, z_=None, tau_=None):
+        """ innovation function """
+        out = np.empty_like(x)
+        out[0] = x[1]*dt_ + x[0]
+        # out[1] = x[1] + dt_/fx_calc.tau*(u - x[0])
+        if tau_==None:
+            out[1] = (u - out[0])/self.tau
+        else:
+            out[1] = (u - out[0])/tau_
+        try:
+            t_, z_
+            print("t,z,x,dt,u = %6.3f, %7.3f, %7.3f, %7.3f, %7.3f," % (t_, z_, x[0], dt_, u))
+        except:
+            pass
+        return out
 
 
 def plot_lag(xs_, t_, plot_x=True, plot_vel=True):
@@ -74,50 +90,38 @@ class FilterLag:
         return self.F @ x
 
 
-def fx_calc(x, dt_, u, t_=None, z_=None):
-    """ innovation function """
-    out = np.empty_like(x)
-    out[0] = x[1]*dt_ + x[0]
-    # out[1] = x[1] + dt_/fx_calc.tau*(u - x[0])
-    out[1] = (u - out[0])/fx_calc.tau
-    try:
-        t_, z_
-        print("t,z,x,dt,u = %6.3f, %7.3f, %7.3f, %7.3f, %7.3f," % (t_, z_, x[0], dt_, u))
-    except:
-        pass
-    return out
-
-
 def h_lag(x):
     """ feedback function """
     return [x[0]]
 
 
 # complete tracking ukf
-tau = 0.159
-fx_calc.tau = tau
+tau_hardware = 0.159 # Hardware lag (0.159 for 1 Hz -3dB bandwidth)
+tau_fx = 0.159  # Kalman lag estimate (0.159 for 1 Hz -3dB bandwidth)
 dt = 0.1
-pos_read_std = 0
-pos_std = 1  # sensor uncertainty (1)
-q_std = 7  # process uncertainty
-q_var = q_std*q_std
+pos_sense_std = 1    # Hardware sensor variation (1)
+
+# UKF settings
+r_std = 1  # Kalman sensor uncertainty (1)
+q_std = 7  # Process uncertainty (7)
 
 in_pos = 0
 in_vel = 0
 lag_pos = in_pos
 lag_vel = in_vel
 
+# Hardware simulation
+in_lag20 = INSim(lag_pos, dt)
+lag20_hardware = LagHardwareModel(lag_pos, tau_hardware, dt, pos_sense_std)
+
 # Setup the UKF
-filter_lag = FilterLag(tau, dt, lag_pos, lag_vel)
+# filter_lag = FilterLag(tau, dt, lag_pos, lag_vel)
 points = MerweScaledSigmaPoints(n=2, alpha=.001, beta=2., kappa=1.)
-kf = UKF(2, 1, dt, fx=fx_calc, hx=h_lag, points=points)
-kf.Q = Q_discrete_white_noise(dim=2, dt=dt, var=q_var)
-kf.R = pos_std**2
+kf = UKF(2, 1, dt, fx=lag20_hardware.fx_calc, hx=h_lag, points=points)
+kf.Q = Q_discrete_white_noise(dim=2, dt=dt, var=q_std*q_std)
+kf.R = r_std**2
 kf.x = np.array([lag_pos, lag_vel])
 kf.P = np.eye(2)*10
-
-in_lag20 = INSim(lag_pos, dt)
-lag20_hardware = LagHardwareModel(lag_pos, tau, dt, pos_read_std)
 
 np.random.seed(200)
 
@@ -129,7 +133,8 @@ refs = []
 xs = []
 vs = []
 vhs = []
-priors = []
+priors_x_est = []
+priors_v_est = []
 for i in range(len(t)):
     if t[i] < 1:
         v = 0
@@ -143,13 +148,14 @@ for i in range(len(t)):
         v = 0
     ref = in_lag20.update(v)
     z, vh = lag20_hardware.noisy_reading(ref)
-    kf.predict(u=ref)
+    kf.predict(u=ref, tau_=tau_fx)
     kf.update(z)
 
     refs.append(ref)
     zs.append(z)
     vhs.append(vh)
-    priors.append(kf.x[0])
+    priors_x_est.append(kf.x[0])
+    priors_v_est.append(kf.x[1])
     xs.append(kf.x[0])
     vs.append(kf.x[1])
 
@@ -161,12 +167,17 @@ for i in range(len(t)):
 # xs, covs = kf.batch_filter(zs)
 # plot_lag(xs, t)
 plt.figure()
-plt.plot(t, refs)
-plt.scatter(t, zs)
-plt.plot(t, xs)
-plt.scatter(t, priors)
-plt.show()
-plt.figure()
-plt.plot(t, vhs)
+plt.subplot(121); plt.title('Ex 20 lag UKF.py')
+plt.scatter(t, priors_x_est, color='green', label='Prior X', marker='o')
+plt.scatter(t, zs, color='black', label='Meas X', marker='.')
+plt.plot(t, xs, color='green', label='Est X')
+plt.plot(t, refs, color='blue', linestyle='--', label='Ref X')
+plt.legend(loc=2)
+# plt.show()
+# plt.figure()
+plt.subplot(122)
+plt.scatter(t, vhs, color='black', label='Meas V', marker='.')
+plt.plot(t, priors_v_est, color='green', label='Prior V')
+plt.legend(loc=3)
 plt.show()
 
