@@ -43,51 +43,12 @@ class LagHardwareModel:
     def fx_calc(self, x, dt_, u, t_=None, z_=None, tau_=None):
         """ innovation function """
         out = np.empty_like(x)
-        out[0] = x[1]*dt_ + x[0]
-        # out[1] = x[1] + dt_/fx_calc.tau*(u - x[0])
-        if tau_==None:
+        out[0] = x[1]*dt_ + x[0]  # adds past value like noisy_reading
+        if tau_ is None:
             out[1] = (u - out[0])/self.tau
         else:
             out[1] = (u - out[0])/tau_
-        try:
-            t_, z_
-            print("t,z,x,dt,u = %6.3f, %7.3f, %7.3f, %7.3f, %7.3f," % (t_, z_, x[0], dt_, u))
-        except:
-            pass
         return out
-
-
-def plot_lag(xs_, t_, plot_x=True, plot_vel=True):
-    xs_ = np.asarray(xs_)
-    if plot_x:
-        plt.figure()
-        plt.plot(t_, xs_[:, 0]/1000.)
-        plt.xlabel('time(sec)')
-        plt.ylabel('position()')
-        plt.tight_layout()
-    if plot_vel:
-        plt.figure()
-        plt.plot(t_, xs_[:, 1])
-        plt.xlabel('time(sec)')
-        plt.ylabel('velocity')
-        plt.tight_layout()
-    plt.show()
-
-
-class FilterLag:
-
-    def __init__(self, tau_, dt_, pos, vel):
-        self.tau = tau_
-        self.dt = dt_
-        self.pos = pos
-        self.vel = vel
-        self.F = np.array([[1, self.dt],
-                           [-self.dt/self.tau, 1]], dtype=float)
-
-    def fx_calc_lin(self, x):
-        """ state transition function for a constant velocity
-        aircraft with state vector [x, velocity, altitude]'"""
-        return self.F @ x
 
 
 def h_lag(x):
@@ -115,7 +76,6 @@ in_lag20 = INSim(lag_pos, dt)
 lag20_hardware = LagHardwareModel(lag_pos, tau_hardware, dt, pos_sense_std)
 
 # Setup the UKF
-# filter_lag = FilterLag(tau, dt, lag_pos, lag_vel)
 points = MerweScaledSigmaPoints(n=2, alpha=.001, beta=2., kappa=1.)
 kf = UKF(dim_x=2, dim_z=1, dt=dt, fx=lag20_hardware.fx_calc, hx=h_lag, points=points)
 kf.Q = Q_discrete_white_noise(dim=2, dt=dt, var=q_std*q_std)
@@ -161,14 +121,8 @@ for i in range(len(t)):
     vs.append(kf.x[1])
     Ks.append(kf.K[0,0])
 
-# print(zs)
-# plt.plot(t, refs)
-# plt.plot(t, zs)
-# plt.show()
 # UKF.batch_filter does not support keyword arguments fx_args, hx_args
-# xs, covs = kf.batch_filter(zs)
-# plot_lag(xs, t)
-print(kf.x, 'log-likelihood', kf.log_likelihood, 'Kalman gain', kf.K)
+print(kf.x, 'log-likelihood', kf.log_likelihood, 'Kalman gain', kf.K.T)
 plt.figure()
 plt.subplot(221); plt.title('Ex 20 lag UKF.py')
 plt.scatter(t, prior_x_est, color='green', label='Post X', marker='o')
@@ -176,8 +130,6 @@ plt.scatter(t, zs, color='black', label='Meas X', marker='.')
 plt.plot(t, xs, color='green', label='Est X')
 plt.plot(t, refs, color='blue', linestyle='--', label='Ref X')
 plt.legend(loc=2)
-# plt.show()
-# plt.figure()
 plt.subplot(222)
 plt.scatter(t, vhs, color='black', label='Meas V', marker='.')
 plt.plot(t, prior_v_est, color='green', label='Post V')
