@@ -13,7 +13,7 @@ dt = 0.1
 
 A = np.array([[-1/Rct/Cct,       1/Rct/Cct,                          0],
               [1/Rct/(Cct+Cdif), -(Rct+Rdif)/Rct/Rdif/(Cct+Cdif),    0],
-              [0,                1/Rdif/Cdif,                        -(Rdif+R0)/Rdif/R0/Cct]])
+              [0,                1/Rdif/Cct,                         -(Rdif+R0)/Rdif/R0/Cct]])
 B = np.array([[1/Cct,    0],
               [0,        0],
               [0,        1/Cct/R0]])
@@ -22,7 +22,9 @@ C = np.array([[1,        0,      0],
 D = np.array([[0,        0],
               [0,        -1/R0]])
 
-t = np.arange(0, 200+dt, dt)
+# time_end = 200
+time_end = 1
+t = np.arange(0, time_end+dt, dt)
 n = len(t)
 
 Is = []
@@ -35,6 +37,9 @@ I_Ccts = []
 I_Rcts = []
 I_Cdifs = []
 I_Rdifs = []
+Vb_dots = []
+Vc_dots = []
+Vd_dots = []
 x = np.array([13.5, 13.5, 13.5]).T
 for i in range(len(t)):
     if t[i] < 1:
@@ -78,18 +83,28 @@ for i in range(len(t)):
     I_Cdifs.append(I_Cdif)
     I_Rcts.append(I_Rct)
     I_Rdifs.append(I_Rdif)
+    Vb_dots.append(Vb_dot)
+    Vc_dots.append(Vc_dot)
+    Vd_dots.append(Vd_dot)
 
 plt.figure()
-plt.subplot(211)
+plt.subplot(311)
 plt.title('GP_battery.py')
 plt.plot(t, Is, color='green', label='I')
 plt.plot(t, I_Rcts, color='red', label='I_Rct')
-plt.plot(t, I_Cdifs, color='green', label='I_Cdif')
+plt.plot(t, I_Cdifs, color='cyan', label='I_Cdif')
 plt.plot(t, I_Rdifs, color='orange', linestyle='--', label='I_Rdif')
 plt.plot(t, Iocs, color='orange', label='Ioc')
 plt.legend(loc=1)
-plt.subplot(212)
+plt.subplot(312)
 plt.plot(t, Vbs, color='green', label='Vb')
-plt.plot(t, Vocs, color='red', label='Voc')
+plt.plot(t, Vcs, color='blue', label='Vc')
+plt.plot(t, Vds, color='orange', label='Vd')
+plt.plot(t, Vocs, color='blue', label='Voc')
+plt.legend(loc=3)
+plt.subplot(313)
+plt.plot(t, Vb_dots, color='green', label='Vb_dot')
+plt.plot(t, Vc_dots, color='blue', label='Vc_dot')
+plt.plot(t, Vd_dots, color='orange', label='Vd_dot')
 plt.legend(loc=3)
 plt.show()

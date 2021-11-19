@@ -1,0 +1,12 @@
+* C:\Users\Dave\Documents\GitHub\myStateOfCharge\SOC_Photon\datasheets\GP_battery.asc
+I 0 Vb PULSE(0 30 1 0.001 0 200 400)
+Rct Vb Vc {Rct}
+Rdif Vc Vd {Rdif}
+R0 Vd Vocv {R0}
+Cct Vb Vc {Cct}
+Cdif Vc Vd {Cdif}
+Vocv Vocv 0 13.5
+.param Cct=2300  Rct=0.0016  Cdif=10820  Rdif=0.0077  R0=0.003
+.tran 0 1 0 0.01
+.backanno
+.end
