@@ -11,19 +11,16 @@ Rdif = 0.0077
 R0 = 0.003
 dt = 0.1
 
-A = np.array([[-1/Rct/Cct,       1/Rct/Cct,                          0],
-              [1/Rct/(Cct+Cdif), -(Rct+Rdif)/Rct/Rdif/(Cct+Cdif),    0],
-              [0,                1/Rdif/Cct,                         -(Rdif+R0)/Rdif/R0/Cct]])
-B = np.array([[1/Cct,    0],
-              [0,        0],
-              [0,        1/Cct/R0]])
-C = np.array([[1,        0,      0],
-              [0,        0,      1/R0]])
-D = np.array([[0,        0],
-              [0,        -1/R0]])
-
+A = np.array([[-1/Rct/Cct,  0],
+              [0,           -1/Rdif/Cdif]])
+B = np.array([[1/Cct,   0],
+              [1/Cdif,  0]])
+C = np.array([[1,       1],
+              [0,       0]])
+D = np.array([[R0,      1],
+              [1,       0]])
 # time_end = 200
-time_end = 1
+time_end = 200
 t = np.arange(0, time_end+dt, dt)
 n = len(t)
 
@@ -37,9 +34,8 @@ I_Ccts = []
 I_Rcts = []
 I_Cdifs = []
 I_Rdifs = []
-Vb_dots = []
-Vc_dots = []
-Vd_dots = []
+Vbc_dots = []
+Vcd_dots = []
 x = np.array([13.5, 13.5, 13.5]).T
 for i in range(len(t)):
     if t[i] < 1:
@@ -55,23 +51,27 @@ for i in range(len(t)):
         Vb = (R0 + Rdif + Rct) * I + Voc
         Vc = (R0 + Rdif) * I + Voc
         Vd = R0 * I + Voc
-        x = np.array([Vb, Vc, Vd]).T
+        Vbc = Vb - Vc
+        Vcd = Vc - Vd
+        Vdo = Vd - Voc
+        x = np.array([Vbc, Vcd]).T
 
     x_dot = A @ x + B @ u
     x = x_dot * dt + x
     y = C @ x + D @ u
 
-    Vb_dot = x_dot[0]
-    Vc_dot = x_dot[1]
-    Vd_dot = x_dot[2]
-    Vb = y[0]
-    Vc = x[1]
-    Vd = x[2]
+    Vbc_dot = x_dot[0]
+    Vcd_dot = x_dot[1]
+    Vbc = x[0]
+    Vcd = x[1]
+    Vd = Voc + I*R0
+    Vc = Vd + Vcd
+    Vb = Vc + Vbc
     Ioc = y[1]
-    I_Cct = (Vb_dot - Vc_dot)*Cct
-    I_Cdif = (Vc_dot - Vd_dot)*Cdif
-    I_Rct = (Vb - Vc) / Rct
-    I_Rdif = (Vc - Vd) / Rdif
+    I_Cct = Vbc_dot*Cct
+    I_Cdif = Vcd_dot*Cdif
+    I_Rct = Vbc / Rct
+    I_Rdif = Vcd / Rdif
 
     Is.append(I)
     Vocs.append(Voc)
@@ -83,9 +83,8 @@ for i in range(len(t)):
     I_Cdifs.append(I_Cdif)
     I_Rcts.append(I_Rct)
     I_Rdifs.append(I_Rdif)
-    Vb_dots.append(Vb_dot)
-    Vc_dots.append(Vc_dot)
-    Vd_dots.append(Vd_dot)
+    Vbc_dots.append(Vbc_dot)
+    Vcd_dots.append(Vcd_dot)
 
 plt.figure()
 plt.subplot(311)
@@ -99,12 +98,11 @@ plt.legend(loc=1)
 plt.subplot(312)
 plt.plot(t, Vbs, color='green', label='Vb')
 plt.plot(t, Vcs, color='blue', label='Vc')
-plt.plot(t, Vds, color='orange', label='Vd')
+plt.plot(t, Vds, color='red', label='Vd')
 plt.plot(t, Vocs, color='blue', label='Voc')
-plt.legend(loc=3)
+plt.legend(loc=1)
 plt.subplot(313)
-plt.plot(t, Vb_dots, color='green', label='Vb_dot')
-plt.plot(t, Vc_dots, color='blue', label='Vc_dot')
-plt.plot(t, Vd_dots, color='orange', label='Vd_dot')
-plt.legend(loc=3)
+plt.plot(t, Vbc_dots, color='green', label='Vbc_dot')
+plt.plot(t, Vcd_dots, color='blue', label='Vcd_dot')
+plt.legend(loc=1)
 plt.show()
