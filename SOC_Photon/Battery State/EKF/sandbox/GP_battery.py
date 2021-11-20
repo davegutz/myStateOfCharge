@@ -165,6 +165,7 @@ class Battery:
         self.propagate_state_space(u, dt_=dt)
 
         # Summarize
+        TODO:  not right
         self.pow_in = self.vb * self.ib - self.ib * self.ib * (
                     self.r0 + self.r_dif + self.r_ct) * self.sr  # Internal resistance of battery is a loss
         if self.pow_in > 1.:
