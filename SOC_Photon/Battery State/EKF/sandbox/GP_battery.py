@@ -311,7 +311,7 @@ if __name__ == '__main__':
         plt.plot(t, v_cd_dot_s, color='blue', label='Vcd_dot')
         plt.legend(loc=1)
         plt.subplot(322)
-        plt.plot(t, soc_u_s, color='green', label='SOC_u')
+        plt.plot(t, soc_u_s, color='green',label='SOC_u')
         plt.plot(t, soc_s_s, color='red', label='SOC_s')
         plt.legend(loc=1)
         plt.subplot(324)
