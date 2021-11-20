@@ -317,6 +317,9 @@ if __name__ == '__main__':
         plt.subplot(324)
         plt.plot(t, pow_s, color='orange', label='Pow_in')
         plt.legend(loc=1)
+        plt.subplot(326)
+        plt.plot(soc_s_s, v_oc_s, color='black', label='voc vs soc_s')
+        plt.legend(loc=1)
         plt.show()
 
     main()
