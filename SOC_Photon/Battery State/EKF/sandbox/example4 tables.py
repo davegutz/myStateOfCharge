@@ -70,8 +70,8 @@ class Battery:
         self.r1 = r1
         self.r2 = r2
         self.nom_vsat = nom_vsat
-        self.cu = cu
-        self.cs = cs
+        self.cu = cu        # Assumed capacity, Ah
+        self.cs = cs        # Data fit to this capacity to avoid math 0, Ah
         self.dv_dsocs = 0
         self.sr = 1.
 
