@@ -116,39 +116,23 @@ class Battery:
                       [1, 0]])
         return a, b, c, d
 
-    def propagate_state_space(self, u, dt=None):
-        # Time propagation from state-space using backward Euler
-        self.u = u
-        self.ib = self.u[0]
-        self.voc = self.u[1]
-        if self.x is None:  # Initialize
-            self.x = np.array([self.ib * self.r_ct, self.ib * self.r_dif]).T
-        if dt is not None:
-            self.dt = dt
-        self.x_past = self.x
-        self.x_dot = self.A @ self.x + self.B @ self.u
-        self.x += self.x_dot * self.dt
-        self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
-        self.vb = self.y[0]
-        self.ioc = self.y[1]
-
     # SOC-OCV curve fit method per Zhang, et al
-    def calculate(self, u, temp_c=25., soc_u_fraction=1., dt=None):
+    def calculate(self, u, temp_c=25., dt=None, soc_init=0.5):
         self.u = u
         eps_max = 1 - 1e-6  # Numerical maximum of coefficient model with scaled soc_s.
         eps_min = 1e-6  # Numerical minimum of coefficient model without scaled soc_s.
-        # eps_max_unscaled = 1 - 1e-6  # Numerical maximum of coefficient model with scaled soc_s.
         # eps_min_unscaled = 1 - (
         #             1 - eps_min) * self.cs / self.cu  # Numerical minimum of coefficient model without scaled soc_s.
 
+        # Initialize
         if dt is not None:
             self.dt = dt
+            self.soc_u = soc_init
+            self.soc_s = 1. - (1. - self.soc_u) * self.cu / self.cs
         self.b, self.a, self.c = self.look(temp_c)
-        self.soc_u = soc_u_fraction
-        self.soc_s = 1. - (1. - self.soc_u) * self.cu / self.cs
-        soc_s_lim = max(min(self.soc_s, eps_max), eps_min)
 
         # Perform computationally expensive steps one time
+        soc_s_lim = max(min(self.soc_s, eps_max), eps_min)
         log_soc_s = math.log(soc_s_lim)
         exp_n_soc_s = math.exp(self.n * (soc_s_lim - 1))
         pow_log_soc_s = math.pow(-log_soc_s, self.m)
@@ -162,13 +146,20 @@ class Battery:
         self.voc += self.dv  # Experimentally varied
         # self.d2V_dSocs2 = float(self.n_cells) * ( self.b*self.m/self.soc/self.soc*pow_log_soc_s/
         # log_soc_s*((self.m-1.)/log_soc_s - 1.) + self.d*self.n*self.n*exp_n_soc_s )
+        self.v_sat = self.nom_v_sat + (temp_c - 25.) * self.dVoc_dT
+        self.sat = self.voc >= self.v_sat
+        self.u[1] = self.voc
 
         # Dynamics
         self.propagate_state_space(self.u, dt=dt)
-
-        # Summarize
         self.pow_in = self.ib*(self.vb - (self.ioc*self.r_0 + self.i_r_dif()*self.r_dif +
                                           self.i_r_ct()*self.r_ct)*self.sr)   # Internal resistance of battery is a loss
+        self.soc_u = max(min(self.soc_u + self.pow_in / self.nom_sys_volt * dt / 3600. / self.nom_bat_cap, 1.5), 0.)
+        if self.sat:
+            self.soc_u = eps_max
+        self.soc_s = 1. - (1. - self.soc_u) * self.cu / self.cs
+
+        # Summarize
         if self.pow_in > 1.:
             self.time_charge = min(self.nom_bat_cap / self.pow_in * self.nom_sys_volt * (1. - soc_s_lim),
                                    24.)  # nom_bat_cap is defined at nom_sys_volt
@@ -179,10 +170,24 @@ class Battery:
             self.time_charge = 24. * (1. - soc_s_lim)
         else:
             self.time_charge = -24. * soc_s_lim
-        self.v_sat = self.nom_v_sat + (temp_c - 25.) * self.dVoc_dT
-        self.sat = self.voc >= self.v_sat
 
         return self.vb, self.dV_dSoc_s
+
+    def propagate_state_space(self, u, dt=None):
+        # Time propagation from state-space using backward Euler
+        self.u = u
+        self.ib = self.u[0]
+        self.voc = self.u[1]
+        if self.x is None:  # Initialize
+            self.x = np.array([self.ib*self.r_ct, self.ib*self.r_dif]).T
+        if dt is not None:
+            self.dt = dt
+        self.x_past = self.x
+        self.x_dot = self.A @ self.x + self.B @ self.u
+        self.x += self.x_dot * self.dt
+        self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
+        self.vb = self.y[0]
+        self.ioc = self.y[1]
 
     def look(self, temp_c):
         b = self.lut_b.lookup(T_degC=temp_c)
@@ -235,11 +240,10 @@ if __name__ == '__main__':
     def main():
         # coefficient definition
         dt = 0.1
+        time_end = 250
+        # time_end = 1
         battery_model_o = Battery()
         battery_model_n = Battery()
-
-        # time_end = 200
-        time_end = 200
         t = np.arange(0, time_end + dt, dt)
 
         ib = []
@@ -255,14 +259,18 @@ if __name__ == '__main__':
         i_r_dif_s = []
         v_bc_dot_s = []
         v_cd_dot_s = []
+        soc_u_s = []
+        soc_s_s = []
+        pow_s = []
         for i in range(len(t)):
-            if t[i] < 1:
-                u = np.array([0, battery_model_o.nom_sys_volt]).T
+            if t[i] < 10:
+                u = np.array([0, battery_model_n.voc]).T
+            elif t[i] < 200:
+                u = np.array([30., battery_model_n.voc]).T
             else:
-                u = np.array([30., battery_model_o.nom_sys_volt]).T
-
+                u = np.array([0, battery_model_n.voc]).T
             battery_model_o.propagate_state_space(u, dt=dt)
-            battery_model_n.calculate(u, temp_c=25, dt=dt)
+            battery_model_n.calculate(u, temp_c=25, dt=dt, soc_init=0.9)
 
             ib.append(battery_model_o.ib)
             v_oc_s.append(battery_model_o.voc)
@@ -277,9 +285,12 @@ if __name__ == '__main__':
             i_r_dif_s.append(battery_model_o.i_r_dif())
             v_bc_dot_s.append(battery_model_o.vbc_dot())
             v_cd_dot_s.append(battery_model_o.vcd_dot())
+            soc_s_s.append(battery_model_n.soc_s)
+            soc_u_s.append(battery_model_n.soc_u)
+            pow_s.append(battery_model_n.pow_in)
 
         plt.figure()
-        plt.subplot(311)
+        plt.subplot(321)
         plt.title('GP_battery.py')
         plt.plot(t, ib, color='green', label='I')
         plt.plot(t, i_r_ct_s, color='red', label='I_Rct')
@@ -287,16 +298,23 @@ if __name__ == '__main__':
         plt.plot(t, i_r_dif_s, color='orange', linestyle='--', label='I_R_dif')
         plt.plot(t, i_oc_s, color='orange', label='Ioc')
         plt.legend(loc=1)
-        plt.subplot(312)
+        plt.subplot(323)
         plt.plot(t, vbs, color='green', label='Vb')
         plt.plot(t, vbs_n, color='red', linestyle='dotted', label='Vb')
         plt.plot(t, vcs, color='blue', label='Vc_o')
         plt.plot(t, vds, color='red', label='Vd')
         plt.plot(t, v_oc_s, color='blue', label='Voc')
         plt.legend(loc=1)
-        plt.subplot(313)
+        plt.subplot(325)
         plt.plot(t, v_bc_dot_s, color='green', label='Vbc_dot')
         plt.plot(t, v_cd_dot_s, color='blue', label='Vcd_dot')
+        plt.legend(loc=1)
+        plt.subplot(322)
+        plt.plot(t, soc_u_s, color='green', label='SOC_u')
+        plt.plot(t, soc_s_s, color='red', label='SOC_s')
+        plt.legend(loc=1)
+        plt.subplot(324)
+        plt.plot(t, pow_s, color='orange', label='Pow_in')
         plt.legend(loc=1)
         plt.show()
 
