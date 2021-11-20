@@ -125,10 +125,11 @@ class Battery:
         #             1 - eps_min) * self.cs / self.cu  # Numerical minimum of coefficient model without scaled soc_s.
 
         # Initialize
-        if dt is not None:
-            self.dt = dt
+        if self.pow_in is None:
             self.soc_u = soc_init
             self.soc_s = 1. - (1. - self.soc_u) * self.cu / self.cs
+        if dt is not None:
+            self.dt = dt
         self.b, self.a, self.c = self.look(temp_c)
 
         # Perform computationally expensive steps one time
@@ -240,7 +241,7 @@ if __name__ == '__main__':
     def main():
         # coefficient definition
         dt = 0.1
-        time_end = 250
+        time_end = 700
         # time_end = 1
         battery_model_o = Battery()
         battery_model_n = Battery()
@@ -265,12 +266,12 @@ if __name__ == '__main__':
         for i in range(len(t)):
             if t[i] < 10:
                 u = np.array([0, battery_model_n.voc]).T
-            elif t[i] < 200:
+            elif t[i] < 400:
                 u = np.array([30., battery_model_n.voc]).T
             else:
                 u = np.array([0, battery_model_n.voc]).T
             battery_model_o.propagate_state_space(u, dt=dt)
-            battery_model_n.calculate(u, temp_c=25, dt=dt, soc_init=0.9)
+            battery_model_n.calculate(u, temp_c=25, dt=dt, soc_init=0.95)
 
             ib.append(battery_model_o.ib)
             v_oc_s.append(battery_model_o.voc)
