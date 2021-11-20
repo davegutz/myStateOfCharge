@@ -18,15 +18,19 @@ support for simplified Mathworks' tracker. See Huria, Ceraolo, Gazzarri, & Jacke
 Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Battery Cells """
 
 import numpy as np
+import math
+from pyDAGx.lookup_table import LookupTable
 
 
 class Battery:
-    # Dynamic Battery model:  Randle's dynamics, SOC-VOC model, EKF support
+    # Battery model:  Randle's dynamics, SOC-VOC model, EKF support
 
-    def __init__(self, n_cells=4, r0=0.003, tau_ct=3.7, rct=0.0016, tau_dif=83, rdif=0.0077, dt_=0.1):
+    def __init__(self, n_cells=4, r0=0.003, tau_ct=3.7, rct=0.0016, tau_dif=83, rdif=0.0077, dt_=0.1, b=0., a=0.,
+                 c=0., n=0.4, m=0.478, d=0.707, t_t=[25.], t_b=[-0.836], t_a=[4.046], t_c=[-1.181]):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System
         """
+        # Dynamics
         self.n_cells = n_cells
         self.r_0 = r0*n_cells
         self.tau_ct = tau_ct
@@ -42,6 +46,27 @@ class Battery:
         self.x_past = self.x
         self.x_dot = self.x
         self.y = np.array([0., 0]).T
+        # SOC-VOC
+        self.lut_b = LookupTable()
+        self.lut_a = LookupTable()
+        self.lut_c = LookupTable()
+        self.lut_b.addAxis('T_degC', t_t)
+        self.lut_a.addAxis('T_degC', t_t)
+        self.lut_c.addAxis('T_degC', t_t)
+        self.lut_b.setValueTable(t_b)
+        self.lut_a.setValueTable(t_a)
+        self.lut_c.setValueTable(t_c)
+        self.b = b
+        self.a = a
+        self.c = c
+        self.d = d
+        self.n = n
+        self.m = m
+        self.socu = 0.
+        self.socs = 0.
+        self.curr_in = 0.
+        self.dv_dsocu = 0.
+        self.dv_dsocs = 0.
 
     def dynamic_state_space(self):
         """ State-space representation of dynamics
@@ -73,6 +98,52 @@ class Battery:
         self.x_dot = self.A @ self.x + self.B @ self.u
         self.x += self.x_dot * self.dt
         self.y = self.C @ self.x_past + self.D @ self.u # uses past (backward Euler)
+
+    # SOC-OCV curve fit method per Zhang, et al
+    def calculate(self, t_c=25., socu_frac=1., curr_in=0.):
+        self.b, self.a, self.c = self.look(t_c)
+        self.socu = socu_frac
+        self.socs = 1.-(1.-self.socu)*self.cu/self.cs
+        socs_lim = max(min(self.socs, mxeps), mneps)
+        self.curr_in = curr_in
+
+        # Perform computationally expensive steps one time
+        log_socs = math.log(socs_lim)
+        exp_n_socs = math.exp(self.n*(socs_lim-1))
+        pow_log_socs = math.pow(-log_socs, self.m)
+
+        # VOC-OCV model
+        self.dv_dsocs = float(self.n_cells) * ( self.b*self.m/socs_lim*pow_log_socs/log_socs + self.c + self.d*self.n*exp_n_socs )
+        self.dv_dsocu = self.dv_dsocs * self.cu / self.cs
+        self.voc = float(self.n_cells) * ( self.a + self.b*pow_log_socs + self.c*socs_lim + self.d*exp_n_socs ) \
+                   + (self.socs - socs_lim) * self.dv_dsocs  # slightly beyond
+        self.voc +=  self.dv  # Experimentally varied
+        #  self.d2v_dsocs2 = float(self.n_cells) * ( self.b*self.m/self.soc/self.soc*pow_log_socs/log_socs*((self.m-1.)/log_socs - 1.) + self.d*self.n*self.n*exp_n_socs )
+
+        # Dynamics
+        self.vdyn = float(self.n_cells) * self.curr_in*(self.r1 + self.r2)*self.sr
+
+        # Summarize
+        self.v = self.voc + self.vdyn
+        self.pow_in = self.v*self.curr_in - self.curr_in*self.curr_in*(self.r1+self.r2)*self.sr*float(self.n_cells)  # Internal resistance of battery is a loss
+        if self.pow_in>1.:
+            self.tcharge = min( NOM_BATT_CAP / self.pow_in*NOM_SYS_VOLT * (1.-socs_lim), 24.)  # NOM_BATT_CAP is defined at NOM_SYS_VOLT
+        elif self.pow_in<-1.:
+            self.tcharge = max(NOM_BATT_CAP /self.pow_in*NOM_SYS_VOLT * socs_lim, -24.)  # NOM_BATT_CAP is defined at NOM_SYS_VOLT
+        elif self.pow_in>=0.:
+            self.tcharge = 24.*(1.-socs_lim)
+        else:
+            self.tcharge = -24.*socs_lim
+        self.vsat = self.nom_vsat + (t_c-25.)*self.dvoc_dt
+        self.sat = self.voc >= self.vsat
+
+        return self.v, self.dv_dsocs
+
+    def look(self, T_C):
+        b = self.lut_b.lookup(T_degC=T_C)
+        a = self.lut_a.lookup(T_degC=T_C)
+        c = self.lut_c.lookup(T_degC=T_C)
+        return b, a, c
 
     def ib(self): return self.u[0]
     def voc(self): return self.u[1]
