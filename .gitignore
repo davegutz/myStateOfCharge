@@ -39,3 +39,4 @@ SOC_Photon/.vscode/settings.json
 *.log
 *.pyc
 SOC_Photon/datasheets/GP_battery.net
+*.net

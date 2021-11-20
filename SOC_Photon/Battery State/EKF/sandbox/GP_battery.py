@@ -1,24 +1,85 @@
-import matplotlib.pyplot as plt
 import numpy as np
+
+
+class Battery:
+    # Dynamic Battery model:  Randle's dynamics, SOC-VOC model, EKF support
+
+    def __init__(self, n_cells=4, r0=0.003, tau_ct=3.7, rct=0.0016, tau_dif=83, rdif=0.0077, dt_=0.1):
+        """ Default values from
+            Taborelli & Onori, 2013,
+            State of Charge Estimation Using Extended Kalman Filters for Battery Management System
+        """
+        self.n_cells = n_cells
+        self.r_0 = r0*n_cells
+        self.tau_ct = tau_ct
+        self.r_ct = rct*n_cells
+        self.c_ct = self.tau_ct/self.r_ct
+        self.tau_dif = tau_dif
+        self.r_dif = rdif*n_cells
+        self.c_dif = self.tau_dif/self.r_dif
+        self.A, self.B, self.C, self.D = self.dynamic_state_space()
+        self.u = np.array([0., 0]).T
+        self.dt = dt_
+        self.x = np.array([0., 0]).T
+        self.x_past = self.x
+        self.x_dot = self.x
+        self.y = np.array([0., 0]).T
+
+    def dynamic_state_space(self):
+        """ State-space representation of dynamics
+        Inputs:   Ib - current at Vbatt = Vb = current at shunt, A
+                  Vocv - internal open circuit voltage, V
+        Outputs:  Vb - voltage at positive, V
+                  Iocv  - current into storage, A
+        States:   Vbc - RC Vb-Vc, V
+                  Vcd - RC Vc-Vd, V
+        Other:    Vc - voltage downstream of charge transfer model, ct-->c
+                  Vd - voltage downstream of diffusion process model, dif-->d
+        """
+        a = np.array([[-1/self.tau_ct, 0],
+                      [0,              -1/self.tau_dif]])
+        b = np.array([[1/self.c_ct,    0],
+                      [1/self.c_dif,   0]])
+        c = np.array([[1,              1],
+                      [0,              0]])
+        d = np.array([[self.r_0,       1],
+                      [1,              0]])
+        return a, b, c, d
+
+    def propagate_state_space(self, u_, dt_=None):
+        # Time propagation from state-space using backward Euler
+        self.u = u_
+        self.x_past = self.x
+        if dt_ is not None:
+            self.dt = dt_
+        self.x_dot = self.A @ self.x + self.B @ self.u
+        self.x += self.x_dot * self.dt
+        self.y = self.C @ self.x_past + self.D @ self.u # uses past (backward Euler)
+
+    def ib(self): return self.u[0]
+    def voc(self): return self.u[1]
+    def vbc(self): return self.x[0]
+    def vcd(self): return self.x[1]
+    def vb(self): return self.y[0]
+    def ioc(self): return self.y[1]
+    def vbc_dot(self): return self.x_dot[0]
+    def vcd_dot(self): return self.x_dot[1]
+    def i_c_ct(self): return self.vbc_dot()*self.c_ct
+    def i_c_dif(self): return self.vcd_dot()*self.c_dif
+    def i_r_ct(self): return self.vbc()/self.r_ct
+    def i_r_dif(self): return self.vcd()/self.r_dif
+    def vd(self): return self.voc()+self.ioc()*self.r_0
+    def vc(self): return self.vd()+self.vcd()
+
+
+import matplotlib.pyplot as plt
 import book_format
 book_format.set_style()
 
 # coefficient definition
-Cct = 2300
-Rct = 0.0016
-Cdif = 10820
-Rdif = 0.0077
-R0 = 0.003
 dt = 0.1
+battery_model = Battery(n_cells=4)
 
-A = np.array([[-1/Rct/Cct,  0],
-              [0,           -1/Rdif/Cdif]])
-B = np.array([[1/Cct,   0],
-              [1/Cdif,  0]])
-C = np.array([[1,       1],
-              [0,       0]])
-D = np.array([[R0,      1],
-              [1,       0]])
 # time_end = 200
 time_end = 200
 t = np.arange(0, time_end+dt, dt)
@@ -36,7 +97,6 @@ I_Cdifs = []
 I_Rdifs = []
 Vbc_dots = []
 Vcd_dots = []
-x = np.array([13.5, 13.5, 13.5]).T
 for i in range(len(t)):
     if t[i] < 1:
         I = 0.0
@@ -47,44 +107,20 @@ for i in range(len(t)):
         Voc = 13.5
         u = np.array([I, Voc]).T
 
-    if i == 0:
-        Vb = (R0 + Rdif + Rct) * I + Voc
-        Vc = (R0 + Rdif) * I + Voc
-        Vd = R0 * I + Voc
-        Vbc = Vb - Vc
-        Vcd = Vc - Vd
-        Vdo = Vd - Voc
-        x = np.array([Vbc, Vcd]).T
+    battery_model.propagate_state_space(u, dt_=dt)
 
-    x_dot = A @ x + B @ u
-    x = x_dot * dt + x
-    y = C @ x + D @ u
-
-    Vbc_dot = x_dot[0]
-    Vcd_dot = x_dot[1]
-    Vbc = x[0]
-    Vcd = x[1]
-    Vd = Voc + I*R0
-    Vc = Vd + Vcd
-    Vb = Vc + Vbc
-    Ioc = y[1]
-    I_Cct = Vbc_dot*Cct
-    I_Cdif = Vcd_dot*Cdif
-    I_Rct = Vbc / Rct
-    I_Rdif = Vcd / Rdif
-
-    Is.append(I)
-    Vocs.append(Voc)
-    Vbs.append(Vb)
-    Vcs.append(Vc)
-    Vds.append(Vd)
-    Iocs.append(Ioc)
-    I_Ccts.append(I_Cct)
-    I_Cdifs.append(I_Cdif)
-    I_Rcts.append(I_Rct)
-    I_Rdifs.append(I_Rdif)
-    Vbc_dots.append(Vbc_dot)
-    Vcd_dots.append(Vcd_dot)
+    Is.append(battery_model.ioc())
+    Vocs.append(battery_model.voc())
+    Vbs.append(battery_model.vb())
+    Vcs.append(battery_model.vc())
+    Vds.append(battery_model.vd())
+    Iocs.append(battery_model.ioc())
+    I_Ccts.append(battery_model.i_c_ct())
+    I_Cdifs.append(battery_model.i_c_dif())
+    I_Rcts.append(battery_model.i_r_ct())
+    I_Rdifs.append(battery_model.i_r_dif())
+    Vbc_dots.append(battery_model.vbc_dot())
+    Vcd_dots.append(battery_model.vcd_dot())
 
 plt.figure()
 plt.subplot(311)
