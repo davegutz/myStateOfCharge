@@ -26,7 +26,8 @@ class Battery:
     # Battery model:  Randle's dynamics, SOC-VOC model, EKF support
 
     def __init__(self, n_cells=4, r0=0.003, tau_ct=3.7, rct=0.0016, tau_dif=83, rdif=0.0077, dt_=0.1, b=0., a=0.,
-                 c=0., n=0.4, m=0.478, d=0.707, t_t=[25.], t_b=[-0.836], t_a=[4.046], t_c=[-1.181]):
+                 c=0., n=0.4, m=0.478, d=0.707, t_t=[25.], t_b=[-0.836], t_a=[4.046], t_c=[-1.181], nom_batt_cap=100.,
+                 nom_sys_volt=13.):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System
         """
@@ -42,11 +43,18 @@ class Battery:
         self.A, self.B, self.C, self.D = self.dynamic_state_space()
         self.u = np.array([0., 0]).T
         self.dt = dt_
-        self.x = np.array([0., 0]).T
-        self.x_past = self.x
+        self.x = None
+        self.x_past = None
         self.x_dot = self.x
         self.y = np.array([0., 0]).T
         # SOC-VOC
+        if t_b is None:
+            t_b =[0]
+            bb_t = [0., 25., 50.]
+            bb_b = [-0.836, -0.836, -0.836]
+            bb_a = [3.999, 4.046, 4.093]
+            bb_c = [-1.181, -1.181, -1.181]
+
         self.lut_b = LookupTable()
         self.lut_a = LookupTable()
         self.lut_c = LookupTable()
@@ -61,12 +69,19 @@ class Battery:
         self.c = c
         self.d = d
         self.n = n
-        self.m = m
-        self.socu = 0.
-        self.socs = 0.
-        self.curr_in = 0.
-        self.dv_dsocu = 0.
-        self.dv_dsocs = 0.
+        self.m = m                      #
+        self.socu = 0.                  # State of charge, unscaled, %
+        self.socs = 0.                  # State of charge, scaled, %
+        self.dv_dsocu = 0.              # Slope of soc-voc curve, unscaled, V/%
+        self.dv_dsocs = 0.              # Slope of soc-voc curve, scaled, V/%
+        self.nom_batt_cap = nom_batt_cap # Nominal battery label capacity, e.g. 100, Ah
+        self.nom_sys_volt = nom_sys_volt # Nominal battery label voltage, e.g. 12, V
+        self.vsat = nom_sys_volt +1.7   # Saturation voltage, V
+        self.voc = nom_sys_volt         # Nominal battery storage voltage, V
+        self.sat = True                 # Battery is saturated, T/F
+        self.ib = 0                     # Current into battery post, A
+        self.vb = nom_sys_volt          # Battery voltage at post, V
+        self.ioc = 0                    # Current into battery storage, A
 
     def dynamic_state_space(self):
         """ State-space representation of dynamics
@@ -92,20 +107,33 @@ class Battery:
     def propagate_state_space(self, u_, dt_=None):
         # Time propagation from state-space using backward Euler
         self.u = u_
-        self.x_past = self.x
+        self.ib = self.u[0]
+        self.voc = self.u[1]
+        if self.x is None:      # Initialize
+            self.x = np.array([self.ib*self.r_ct, self.ib*self.r_dif]).T
         if dt_ is not None:
             self.dt = dt_
+        self.x_past = self.x
         self.x_dot = self.A @ self.x + self.B @ self.u
         self.x += self.x_dot * self.dt
         self.y = self.C @ self.x_past + self.D @ self.u # uses past (backward Euler)
+        self.vb = self.y[0]
+        self.ioc = self.y[1]
 
     # SOC-OCV curve fit method per Zhang, et al
-    def calculate(self, t_c=25., socu_frac=1., curr_in=0.):
+    def calculate(self, t_c=25., socu_fraction=1., ib=0., dt_=None):
+        eps_max = 1 - 1e-6  # Numerical maximum of coefficient model with scaled socs.
+        eps_min = 1e-6  # Numerical minimum of coefficient model without scaled socs.
+        eps_max_unscaled = 1 - 1e-6  # Numerical maximum of coefficient model with scaled socs.
+        eps_min_unscaled = 1 - (1 - eps_min) * self.cs / self.cu  # Numerical minimum of coefficient model without scaled socs.
+
+        if dt_ is not None:
+            self.dt = dt_
         self.b, self.a, self.c = self.look(t_c)
-        self.socu = socu_frac
+        self.socu = socu_fraction
         self.socs = 1.-(1.-self.socu)*self.cu/self.cs
-        socs_lim = max(min(self.socs, mxeps), mneps)
-        self.curr_in = curr_in
+        socs_lim = max(min(self.socs, eps_max), eps_min)
+        self.ib = ib
 
         # Perform computationally expensive steps one time
         log_socs = math.log(socs_lim)
@@ -121,15 +149,15 @@ class Battery:
         #  self.d2v_dsocs2 = float(self.n_cells) * ( self.b*self.m/self.soc/self.soc*pow_log_socs/log_socs*((self.m-1.)/log_socs - 1.) + self.d*self.n*self.n*exp_n_socs )
 
         # Dynamics
-        self.vdyn = float(self.n_cells) * self.curr_in*(self.r1 + self.r2)*self.sr
+        self.vdyn = float(self.n_cells) * self.ib*(self.r1 + self.r2)*self.sr
 
         # Summarize
         self.v = self.voc + self.vdyn
-        self.pow_in = self.v*self.curr_in - self.curr_in*self.curr_in*(self.r1+self.r2)*self.sr*float(self.n_cells)  # Internal resistance of battery is a loss
+        self.pow_in = self.v*self.ib - self.ib*self.ib*(self.r1+self.r2)*self.sr*float(self.n_cells)  # Internal resistance of battery is a loss
         if self.pow_in>1.:
-            self.tcharge = min( NOM_BATT_CAP / self.pow_in*NOM_SYS_VOLT * (1.-socs_lim), 24.)  # NOM_BATT_CAP is defined at NOM_SYS_VOLT
+            self.tcharge = min( self.nom_batt_cap / self.pow_in*self.nom_sys_volt * (1.-socs_lim), 24.)  # nom_batt_cap is defined at nom_sys_volt
         elif self.pow_in<-1.:
-            self.tcharge = max(NOM_BATT_CAP /self.pow_in*NOM_SYS_VOLT * socs_lim, -24.)  # NOM_BATT_CAP is defined at NOM_SYS_VOLT
+            self.tcharge = max(self.nom_batt_cap /self.pow_in*self.nom_sys_volt * socs_lim, -24.)  # nom_batt_cap is defined at nom_sys_volt
         elif self.pow_in>=0.:
             self.tcharge = 24.*(1.-socs_lim)
         else:
@@ -139,25 +167,21 @@ class Battery:
 
         return self.v, self.dv_dsocs
 
-    def look(self, T_C):
-        b = self.lut_b.lookup(T_degC=T_C)
-        a = self.lut_a.lookup(T_degC=T_C)
-        c = self.lut_c.lookup(T_degC=T_C)
+    def look(self, t_c):
+        b = self.lut_b.lookup(T_degC=t_c)
+        a = self.lut_a.lookup(T_degC=t_c)
+        c = self.lut_c.lookup(T_degC=t_c)
         return b, a, c
 
-    def ib(self): return self.u[0]
-    def voc(self): return self.u[1]
     def vbc(self): return self.x[0]
     def vcd(self): return self.x[1]
-    def vb(self): return self.y[0]
-    def ioc(self): return self.y[1]
     def vbc_dot(self): return self.x_dot[0]
     def vcd_dot(self): return self.x_dot[1]
     def i_c_ct(self): return self.vbc_dot()*self.c_ct
     def i_c_dif(self): return self.vcd_dot()*self.c_dif
     def i_r_ct(self): return self.vbc()/self.r_ct
     def i_r_dif(self): return self.vcd()/self.r_dif
-    def vd(self): return self.voc()+self.ioc()*self.r_0
+    def vd(self): return self.voc+self.ioc*self.r_0
     def vc(self): return self.vd()+self.vcd()
 
 
@@ -192,22 +216,18 @@ if __name__ == '__main__':
     Vcd_dots = []
     for i in range(len(t)):
         if t[i] < 1:
-            I = 0.0
-            Voc = 13.5
-            u = np.array([I, Voc]).T
+            u = np.array([0, battery_model.nom_sys_volt]).T
         else:
-            I = 30.0
-            Voc = 13.5
-            u = np.array([I, Voc]).T
+            u = np.array([30., battery_model.nom_sys_volt]).T
 
         battery_model.propagate_state_space(u, dt_=dt)
 
-        Is.append(battery_model.ioc())
-        Vocs.append(battery_model.voc())
-        Vbs.append(battery_model.vb())
+        Is.append(battery_model.ib)
+        Vocs.append(battery_model.voc)
+        Vbs.append(battery_model.vb)
         Vcs.append(battery_model.vc())
         Vds.append(battery_model.vd())
-        Iocs.append(battery_model.ioc())
+        Iocs.append(battery_model.ioc)
         I_Ccts.append(battery_model.i_c_ct())
         I_Cdifs.append(battery_model.i_c_dif())
         I_Rcts.append(battery_model.i_r_ct())
