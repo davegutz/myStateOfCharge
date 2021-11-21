@@ -102,6 +102,10 @@ class Battery:
         self.time_charge = None  # Charging time to 100%, hr
         self.nom_v_sat = bat_v_sat * self.n_cells  # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
         self.dVoc_dT = dvoc_dt * self.n_cells  # Change of VOC with operating temperature in range 0 - 50 C, V/deg C
+        self.eps_max = 1 - 1e-6  # Numerical maximum of coefficient model with scaled soc_norm.
+        self.eps_min = 1e-6  # Numerical minimum of coefficient model without scaled soc_norm.
+        # eps_min_unscaled = 1 - (
+        #       1 - eps_min) * self.cs / self.cu  # Numerical minimum of coefficient model without scaled soc_norm.
 
     def construct_state_space(self):
         """ State-space representation of dynamics
@@ -125,28 +129,20 @@ class Battery:
         return a, b, c, d
 
     # SOC-OCV curve fit method per Zhang, et al
-    def calculate(self, u, temp_c=25., dt=None, soc_init=0.5):
-        self.u = u
-        eps_max = 1 - 1e-6  # Numerical maximum of coefficient model with scaled soc_norm.
-        eps_min = 1e-6  # Numerical minimum of coefficient model without scaled soc_norm.
-        # eps_min_unscaled = 1 - (
-        #       1 - eps_min) * self.cs / self.cu  # Numerical minimum of coefficient model without scaled soc_norm.
-
+    def calc_voc(self, temp_c=25., soc_init=0.5):
         # Initialize
         if self.pow_in is None:
             self.soc = soc_init
             self.soc_norm = 1. - (1. - self.soc) * self.cu / self.cs
-        if dt is not None:
-            self.dt = dt
         self.b, self.a, self.c = self.look(temp_c)
 
         # Perform computationally expensive steps one time
-        soc_norm_lim = max(min(self.soc_norm, eps_max), eps_min)
+        soc_norm_lim = max(min(self.soc_norm, self.eps_max), self.eps_min)
         log_soc_norm = math.log(soc_norm_lim)
         exp_n_soc_norm = math.exp(self.n * (soc_norm_lim - 1))
         pow_log_soc_norm = math.pow(-log_soc_norm, self.m)
 
-        # VOC-OCV model
+        # SOC-OCV model
         self.dV_dSoc_norm = float(self.n_cells) * (self.b * self.m / soc_norm_lim * pow_log_soc_norm / log_soc_norm +
                                                    self.c + self.d * self.n * exp_n_soc_norm)
         self.dV_dSoc = self.dV_dSoc_norm * self.cu / self.cs
@@ -161,6 +157,10 @@ class Battery:
         self.sat = self.voc >= self.v_sat
         self.u[1] = self.voc
 
+    def calc_dynamics(self, u, dt=None):
+        if dt is not None:
+            self.dt = dt
+        self.u = u
         # Dynamics
         self.propagate_state_space(self.u, dt=dt)
         # Internal resistance of battery is a loss
@@ -168,10 +168,11 @@ class Battery:
                                             self.i_r_ct() * self.r_ct) * self.sr)
         self.soc = max(min(self.soc + self.pow_in / self.nom_sys_volt * dt / 3600. / self.nom_bat_cap, 1.5), 0.)
         if self.sat:
-            self.soc = eps_max
+            self.soc = self.eps_max
         self.soc_norm = 1. - (1. - self.soc) * self.cu / self.cs
 
         # Summarize
+        soc_norm_lim = max(min(self.soc_norm, self.eps_max), self.eps_min)
         if self.pow_in > 1.:
             # nom_bat_cap is defined at nom_sys_volt
             self.time_charge = min(self.nom_bat_cap / self.pow_in * self.nom_sys_volt * (1. - soc_norm_lim), 24.)
@@ -184,6 +185,16 @@ class Battery:
             self.time_charge = -24. * soc_norm_lim
 
         return self.vb, self.dV_dSoc_norm
+
+    def fx_calc(self, x, dt, u, t_=None, z_=None, tau=None):
+        """ innovation function for simple EKF per the Mathworks' paper mentioned in other comments"""
+        out = np.empty_like(x)
+        out[0] = x[1]*dt + x[0]  # adds past value like noisy_reading
+        if tau is None:
+            out[1] = (u - out[0])/self.tau
+        else:
+            out[1] = (u - out[0])/tau
+        return out
 
     def propagate_state_space(self, u, dt=None):
         # Time propagation from state-space using backward Euler
@@ -283,7 +294,8 @@ if __name__ == '__main__':
 
             # Models
             battery_model_o.propagate_state_space(u, dt=dt)
-            battery_model_n.calculate(u, temp_c=25, dt=dt, soc_init=0.95)
+            battery_model_n.calc_voc(temp_c=25, soc_init=0.95)
+            battery_model_n.calc_dynamics(u, dt=dt)
 
             # Plot stuff
             ib.append(battery_model_o.ib)
