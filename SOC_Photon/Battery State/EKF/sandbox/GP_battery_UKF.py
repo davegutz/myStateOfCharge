@@ -19,6 +19,10 @@ Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Batt
 
 import numpy as np
 import math
+from filterpy.common import Q_discrete_white_noise
+from numpy.random import randn
+from filterpy.kalman import UnscentedKalmanFilter as UKF
+from filterpy.kalman import MerweScaledSigmaPoints
 from pyDAGx.lookup_table import LookupTable
 
 
@@ -521,7 +525,7 @@ if __name__ == '__main__':
         # Plots
         plt.figure()
         plt.subplot(321)
-        plt.title('GP_battery.py')
+        plt.title('GP_battery_UKF.py')
         plt.plot(t, ib, color='green', label='I')
         plt.plot(t, i_r_ct_s, color='red', label='I_Rct')
         plt.plot(t, i_c_dif_s, color='cyan', label='I_C_dif')
