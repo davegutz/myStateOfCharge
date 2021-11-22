@@ -566,6 +566,7 @@ if __name__ == '__main__':
 
     doctest.testmod(sys.modules['__main__'])
     import matplotlib.pyplot as plt
+    import matplotlib.axis as ax
     import book_format
 
     book_format.set_style()
@@ -575,16 +576,16 @@ if __name__ == '__main__':
         # Setup to run the transients
         dt = 0.1
         dt_ekf = 0.1
-        time_end = 700
-        # time_end = 1
+        time_end = 300
+        # time_end = 700
 
         # coefficient definition
         battery_model = Battery()
         battery_ekf = BatteryEKF()
 
         # Setup the UKF
-        r_std = 1e-6  # Kalman sensor uncertainty (0.1)
-        q_std = 1e-6  # Process uncertainty (7)
+        r_std = .2  # Kalman sensor uncertainty (0.2 max)
+        q_std = .1  # Process uncertainty (0.1 max)
         points = MerweScaledSigmaPoints(n=1, alpha=.001, beta=2., kappa=1.)
         kf = UKF(dim_x=1, dim_z=1, dt=dt, fx=battery_ekf.soc_est_ekf, hx=battery_ekf.calc_voc_ekf, points=points)
         kf.Q = q_std**2
@@ -666,23 +667,24 @@ if __name__ == '__main__':
         plt.figure()
         plt.subplot(221)
         plt.title('GP_battery_UKF - Filter')
-        plt.plot(t, ib, color='green', label='ib')
-        plt.legend(loc=2)
+        plt.plot(t, ib, color='orange', label='ib')
+        plt.plot(t, vbs, color='green', label='meas vb')
+        plt.legend(loc=3)
         plt.subplot(222)
         plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
         plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm_eks')
-        plt.legend(loc=2)
+        plt.legend(loc=4)
         plt.subplot(223)
-        plt.plot(t, vbs, color='green', label='Vb')
-        plt.plot(t, v_oc_s, color='blue', label='Voc')
+        plt.plot(t, v_oc_s, color='blue', label='actual voc')
         plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn / EKF Ref')
         plt.plot(t, voc_filtered_s, color='black', linestyle='dotted', label='voc_filtered')
-        plt.scatter(t, z_s, color='black', label='Meas VOC', marker='.')
-        plt.legend(loc=2)
+        plt.ylim(13.5, 14.5)
+        plt.legend(loc=4)
         plt.subplot(224);
-        plt.scatter(t, prior_soc_s, color='green', label='Post SOC', marker='.')
-        plt.plot(t, x_s, color='green', label='Est SOC')
-        plt.legend(loc=2)
+        plt.plot(t, x_s, color='green', label='x soc_filtered')
+        plt.plot(t, prior_soc_s, color='red', linestyle='dotted', label='post soc_filtered')
+        plt.ylim(0.50, 1.01)
+        plt.legend(loc=4)
         plt.show()
         plt.figure()
         plt.subplot(321)
