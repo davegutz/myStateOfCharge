@@ -57,7 +57,7 @@ class Battery:
         self.r_dif = r_dif * n_cells
         self.c_dif = self.tau_dif / self.r_dif
         self.A, self.B, self.C, self.D = self.construct_state_space()
-        self.u = np.array([0., 0]).T
+        self.u = np.array([0., 0]).T    # For dynamics
         self.dt = dt
         self.x = None
         self.x_past = None
@@ -93,11 +93,11 @@ class Battery:
             currents or 20-40 A for a 100 Ah battery"""
         self.nom_sys_volt = nom_sys_volt  # Nominal battery label voltage, e.g. 12, V
         self.v_sat = nom_sys_volt + 1.7  # Saturation voltage, V
-        self.voc = nom_sys_volt  # Nominal battery storage voltage, V
+        self.voc = nom_sys_volt  # Battery charge voltage, V
         self.sat = True  # Battery is saturated, T/F
         self.ib = 0  # Current into battery post, A
         self.vb = nom_sys_volt  # Battery voltage at post, V
-        self.ioc = 0  # Current into battery storage, A
+        self.ioc = 0  # Battery charge current, A
         self.cu = nom_bat_cap  # Assumed capacity, Ah
         self.cs = true_bat_cap  # Data fit to this capacity to avoid math 0, Ah
         self.dv = dv  # Adjustment for voltage level, V (0)
@@ -112,13 +112,22 @@ class Battery:
         #       1 - eps_min) * self.cs / self.cu  # Numerical minimum of coefficient model without scaled soc_norm.
 
     def calc_voc(self, temp_c=25., soc_init=0.5):
-        # SOC-OCV curve fit method per Zhang, et al
-        # Inputs:  soc_norm
-        # Outputs: voc  + various other
+        """SOC-OCV curve fit method per Zhang, et al
+        Inputs:
+            soc_norm        Normalized soc (0-1), fraction
+        Outputs:
+            voc             Charge voltage, V
+            dV_dSoc_norm    SOC-VOC slope, V/fraction
+            vsat            Charge voltage at saturation, V
+            sat             Battery is saturated, T/F
+        """
+
         # Initialize
         if self.pow_in is None:
             self.soc = soc_init
             self.soc_norm = 1. - (1. - self.soc) * self.cu / self.cs
+
+        # Zhang coefficients
         self.b, self.a, self.c = self.look(temp_c)
 
         # Perform computationally expensive steps one time
@@ -143,15 +152,22 @@ class Battery:
         self.u[1] = self.voc
 
     def calc_dynamics(self, u, dt=None):
-        # Executive model dynamics
+        """Executive model dynamics
+        State-space calculation
+        Inputs:
+            ib  Battery terminal current, A
+            voc Charge voltage, V
+        Outputs:
+            vb  Battery terminal voltage, V
+            ioc Charge current, A
+            time_charge Calculated time to full charge, hr
+        """
+        # Model dynamics executive
         if dt is not None:
             self.dt = dt
         self.u = u
 
-        # Dynamics
         # State-space calculation
-        # Inputs: [ib, voc].T
-        # Outputs:[vb, ioc].T
         self.propagate_state_space(self.u, dt=dt)
 
         # Coulomb counter
@@ -170,18 +186,22 @@ class Battery:
         else:
             self.time_charge = -24. * soc_norm_lim
 
-        return self.vb, self.dV_dSoc_norm
+        return self.vb
 
     def construct_state_space(self):
         """ State-space representation of dynamics
-        Inputs:   ib - current at V_bat = Vb = current at shunt, A
-                  voc - internal open circuit voltage, V
-        Outputs:  vb - voltage at positive, V
-                  ioc  - current into storage, A
-        States:   vbc - RC vb-vc, V
-                  vcd - RC vc-vd, V
-        Other:    vc - voltage downstream of charge transfer model, ct-->c
-                  vd - voltage downstream of diffusion process model, dif-->d
+        Inputs:
+            ib      Current at V_bat = Vb = current at shunt, A
+            voc     Internal open circuit voltage, V
+        Outputs:
+            vb      Voltage at positive, V
+            ioc     Current into storage, A
+        States:
+            vbc     RC vb-vc, V
+            vcd     RC vc-vd, V
+        Other:
+            vc      Voltage downstream of charge transfer model, ct-->c
+            vd      Voltage downstream of diffusion process model, dif-->d
         """
         a = np.array([[-1 / self.tau_ct, 0],
                       [0, -1 / self.tau_dif]])
@@ -194,20 +214,37 @@ class Battery:
         return a, b, c, d
 
     def coulomb_counter(self):
-        # Coulomb counter
-        # Inputs: ib, vb, ioc, i_r_dif, i_r_ct
-        # Outputs:  soc, soc_norm
-        # Internal resistance of battery is a loss
+        """Coulomb counter
+        Internal resistance of battery is a loss
+        Inputs:
+            ioc     Charge current, A
+            voc     Charge voltage, V
+        Outputs:
+            soc     State of charge, fraction (0-1.5)
+            soc_norm    Normalized state of charge, fraction (0-1)
+        """
         self.pow_in = self.ioc * self.voc * self.sr
         self.soc = max(min(self.soc + self.pow_in / self.nom_sys_volt * self.dt / 3600. / self.nom_bat_cap, 1.5), 0.)
         if self.sat:
             self.soc = self.eps_max
         self.soc_norm = 1. - (1. - self.soc) * self.cu / self.cs
 
+    def look(self, temp_c):
+        # Table lookups of Zhang coefficients
+        b = self.lut_b.lookup(T_degC=temp_c)
+        a = self.lut_a.lookup(T_degC=temp_c)
+        c = self.lut_c.lookup(T_degC=temp_c)
+        return b, a, c
+
     def propagate_state_space(self, u, dt=None):
-        # Time propagation from state-space using backward Euler
-        # Inputs: [ib, voc].T
-        # Outputs:[vb, ioc].T
+        """Time propagation from state-space using backward Euler
+        Inputs:
+            ib      Measured battery terminal current, A
+            voc     Calculated charge voltage, V
+        Outputs:
+            vb      Calculated battery terminal voltage, V
+            ioc     Calculated charge current, A
+        """
         self.u = u
         self.ib = self.u[0]
         self.voc = self.u[1]
@@ -221,12 +258,6 @@ class Battery:
         self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
         self.vb = self.y[0]
         self.ioc = self.y[1]
-
-    def look(self, temp_c):
-        b = self.lut_b.lookup(T_degC=temp_c)
-        a = self.lut_a.lookup(T_degC=temp_c)
-        c = self.lut_c.lookup(T_degC=temp_c)
-        return b, a, c
 
     def vbc(self):
         return self.x[0]
@@ -291,15 +322,15 @@ class BatteryEKF:
         self.r_dif = r_dif * n_cells
         self.c_dif = self.tau_dif / self.r_dif
         self.A, self.B, self.C, self.D = self.construct_state_space_ekf()
-        self.u = np.array([0., 0]).T
+        self.u = np.array([0., 0]).T    # For dynamics
         self.dt = dt
         self.x = None
         self.x_past = None
         self.x_dot = self.x
         self.y = np.array([0., 0]).T
 
-        # SOC-VOC
-        # Battery coefficients
+        # SOC-VOC Battery coefficients
+        self.temp_c = None
         self.b = b
         self.a = a
         self.c = c
@@ -322,10 +353,12 @@ class BatteryEKF:
         self.r_sd = rsd
         self.tau_sd = tau_sd
         self.cq = self.tau_sd / self.r_sd
+        self.exp_t_tau = math.exp(-dt / self.tau_sd)
 
         # Other things
         self.soc = 0.  # State of charge, %
         self.soc_norm = 0.  # State of charge, normalized, %
+        self.soc_k = 0.  # EKF normalized state of charge, %
         self.dV_dSoc = 0.  # Slope of soc-voc curve, V/%
         self.dV_dSoc_norm = 0.  # Slope of soc-voc curve, normalized, V/%
         self.nom_bat_cap = nom_bat_cap
@@ -334,7 +367,9 @@ class BatteryEKF:
             currents or 20-40 A for a 100 Ah battery"""
         self.nom_sys_volt = nom_sys_volt  # Nominal battery label voltage, e.g. 12, V
         self.v_sat = nom_sys_volt + 1.7  # Saturation voltage, V
-        self.voc = nom_sys_volt  # Nominal battery storage voltage, V
+        # self.voc = nom_sys_volt  # Battery charge voltage, V
+        self.voc_dyn = nom_sys_volt  # Battery charge voltage calculated from dynamics, V
+        self.voc_filtered = nom_sys_volt  # Battery charge voltage EKF, V
         self.sat = True  # Battery is saturated, T/F
         self.ib = 0  # Current into battery post, A
         self.vb = nom_sys_volt  # Battery voltage at post, V
@@ -353,40 +388,54 @@ class BatteryEKF:
         #       1 - eps_min) * self.cs / self.cu  # Numerical minimum of coefficient model without scaled soc_norm.
 
     def calc_dynamics_ekf(self, u, dt=None):
-        # Executive model dynamics for ekf
+        """Executive model dynamics for ekf
+        State-space calculation
+        Inputs:
+            ib      Measured battery terminal current, A
+            vb      Measured battery terminal voltage, V
+        Outputs:
+            ioc     Charge current, A
+            voc_dyn Charge voltage dynamic calculation, V
+        """
         if dt is not None:
             self.dt = dt
-        # State-space calculation
-        # Inputs: [ib, vb].T
-        # Outputs: voc
+            # voc   Charge voltage, V
         self.u = u
         self.propagate_state_space_ekf(self.u, dt=dt)
 
-    def calc_voc_ekf(self, temp_c=25., soc_init=0.5):
-        # SOC-OCV curve fit method per Zhang, et al
-        # Inputs:  soc_norm
-        # Outputs: voc  + various other
+    def calc_voc_ekf(self, soc_k):
+        """SOC-OCV curve fit method per Zhang, et al
+        The non-linear 'y' function for EKF
+        Inputs:
+            soc_k           Normalized soc from ekf (0-1), fraction
+        Outputs:
+            voc             Charge voltage, V
+            dV_dSoc_norm    SOC-VOC slope, V/fraction
+        """
 
         # Initialize
-        if self.pow_in is None:
-            self.soc = soc_init
-            self.soc_norm = 1. - (1. - self.soc) * self.cu / self.cs
+        self.soc_k = soc_k
 
-        # Tables
-        self.b, self.a, self.c = self.look(temp_c)
+        # Zhang coefficients
+        self.b, self.a, self.c = self.look(self.temp_c)
 
         # Perform computationally expensive steps one time
-        soc_norm_lim = max(min(self.soc_norm, self.eps_max), self.eps_min)
+        soc_norm_lim = max(min(self.soc_k, self.eps_max), self.eps_min)
         log_soc_norm = math.log(soc_norm_lim)
         exp_n_soc_norm = math.exp(self.n * (soc_norm_lim - 1))
         pow_log_soc_norm = math.pow(-log_soc_norm, self.m)
 
         # SOC-OCV model
+        self.dV_dSoc_norm = float(self.n_cells) * (self.b * self.m / soc_norm_lim * pow_log_soc_norm / log_soc_norm +
+                                                   self.c + self.d * self.n * exp_n_soc_norm)
+        self.dV_dSoc = self.dV_dSoc_norm * self.cu / self.cs
         # slightly beyond
-        self.voc = float(self.n_cells) * (self.a + self.b * pow_log_soc_norm +
-                                          self.c * soc_norm_lim + self.d * exp_n_soc_norm) + (
+        self.voc_filtered = float(self.n_cells) * (self.a + self.b * pow_log_soc_norm +
+                                                   self.c * soc_norm_lim + self.d * exp_n_soc_norm) + (
                                self.soc_norm - soc_norm_lim) * self.dV_dSoc_norm
-        self.voc += self.dv  # Experimentally varied
+        self.voc_filtered += self.dv  # Experimentally varied
+
+        return self.voc_filtered
 
     def construct_state_space_ekf(self):
         """ State-space representation of dynamics
@@ -407,32 +456,38 @@ class BatteryEKF:
         d = np.array([-self.r_0, 1])
         return a, b, c, d
 
-    def coulomb_counter_ekf(self, temp_c=25):
-        # Coulomb counter
-        # Inputs: ib, vb, ioc, i_r_dif, i_r_ct
-        # Outputs:  soc, soc_norm
-        # Internal resistance of battery is a loss
+    def coulomb_counter_ekf(self):
+        """Coulomb counter
+        Internal resistance of battery is a loss
+        Inputs:
+            ioc     Charge current, A
+            voc     Charge voltage, V
+            i_r_dif Current in diffusion process, A
+            i_r_ct  Current in charge transfer process, A
+            sr      Experimental scalar
+        Outputs:
+            soc     State of charge, fraction (0-1.5)
+            soc_norm    Normalized state of charge, fraction (0-1)
+            vsat            Charge voltage at saturation, V
+            sat             Battery is saturated, T/F
+        """
         self.pow_in = self.ib * (self.vb - (self.ioc * self.r_0 + self.i_r_dif() * self.r_dif +
                                             self.i_r_ct() * self.r_ct) * self.sr)
         self.soc = max(min(self.soc + self.pow_in / self.nom_sys_volt * self.dt / 3600. / self.nom_bat_cap, 1.5), 0.)
         if self.sat:
             self.soc = self.eps_max
         self.soc_norm = 1. - (1. - self.soc) * self.cu / self.cs
-        self.v_sat = self.nom_v_sat + (temp_c - 25.) * self.dVoc_dT
-        self.sat = self.voc >= self.v_sat
+        self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
+        self.sat = self.voc_filtered >= self.v_sat
 
-    def soc_est_ekf(self, x, dt, u, t_=None, z_=None, tau=None):
-        """ innovation function for simple EKF per the Mathworks' paper. See Huria, Ceraolo, Gazzarri, & Jackey,
-        2013 Simplified Extended Kalman Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium
-        Battery Cells """
-        # This works for 1x1 EKF
-        out = np.empty_like(x)
-        if tau is None:
-            exp_t_tau = math.exp(-dt/self.tau_sd)
-        else:
-            exp_t_tau = math.exp(-dt/tau)
-        out[0] = exp_t_tau*x[0] + (1. - exp_t_tau)*u[0]
-        return out
+    def h_ekf(self, x):
+        """ EKF feedback function
+        Inputs:
+            x   EKF state
+        Outputs:
+            y   EKF output from non-linear function
+        """
+        return [self.calc_voc_ekf(x)]
 
     def look(self, temp_c):
         b = self.lut_b.lookup(T_degC=temp_c)
@@ -441,9 +496,14 @@ class BatteryEKF:
         return b, a, c
 
     def propagate_state_space_ekf(self, u, dt=None):
-        # Time propagation from state-space using backward Euler
-        # Inputs: [ib, vb].T
-        # Outputs: voc
+        """Time propagation from state-space using backward Euler
+        Inputs:
+            ib      Measured current into positive battery terminal, A
+            vb      Measured battery terminal voltage, V
+        Outputs:
+            ioc     Calculated charge current, A
+            voc_dyn Calculated charge voltage dynamic, V
+        """
         self.u = u
         self.ib = self.u[0]
         self.vb = self.u[1]
@@ -455,8 +515,50 @@ class BatteryEKF:
         self.x_dot = self.A @ self.x + self.B @ self.u
         self.x += self.x_dot * self.dt
         self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
-        self.voc = self.y[0]
         self.ioc = self.ib
+        self.voc_dyn = self.y
+
+    def soc_est_ekf(self, x, dt, u, tau=None):
+        """ Innovation function for simple EKF per the Mathworks' paper. See Huria, Ceraolo, Gazzarri, & Jackey,
+        2013, 'Simplified Extended Kalman Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium
+        Battery Cells'
+        This works for 1x1 EKF
+        Input:
+          ib  Measured battery terminal current, A
+        Output:
+          voc (soc)   `Estimated soc, V equivalent
+        """
+        if tau is not None:
+            self.exp_t_tau = math.exp(-dt/tau)
+        out = self.exp_t_tau*x + (1. - self.exp_t_tau)*u
+        return out
+
+    def assign_temp_c(self, temp_c):
+        self.temp_c = temp_c
+
+    def i_c_ct(self):
+        return self.vbc_dot() * self.c_ct
+
+    def i_c_dif(self):
+        return self.vcd_dot() * self.c_dif
+
+    def i_r_ct(self):
+        return self.vbc() / self.r_ct
+
+    def i_r_dif(self):
+        return self.vcd() / self.r_dif
+
+    def vbc(self):
+        return self.x[0]
+
+    def vcd(self):
+        return self.x[1]
+
+    def vbc_dot(self):
+        return self.x_dot[0]
+
+    def vcd_dot(self):
+        return self.x_dot[1]
 
 
 if __name__ == '__main__':
@@ -473,9 +575,11 @@ if __name__ == '__main__':
     def main():
         # coefficient definition
         dt = 0.1
+        dt_ekf = 0.1
         time_end = 700
         # time_end = 1
         battery_model = Battery()
+        battery_ekf = BatteryEKF()
         t = np.arange(0, time_end + dt, dt)
         ib = []
         v_oc_s = []
@@ -504,7 +608,15 @@ if __name__ == '__main__':
             battery_model.calc_voc(temp_c=25, soc_init=0.95)
             u = np.array([current_in, battery_model.voc]).T
             battery_model.calc_dynamics(u, dt=dt)
+            u_ekf = np.array([current_in, battery_model.vb]).T
 
+            # UKF
+            battery_ekf.assign_temp_c(25.)
+            battery_ekf.calc_dynamics_ekf(u_ekf, dt=dt_ekf)
+            # Test fx and hx
+            battery_ekf.soc_est_ekf(battery_model.soc_norm, dt_ekf, current_in)
+            battery_ekf.calc_voc_ekf(battery_model.soc_norm)
+            print('battery_ekf:  soc_k=', battery_ekf.soc_k, 'voc_filtered', battery_ekf.voc_filtered)
             # Plot stuff
             ib.append(battery_model.ib)
             v_oc_s.append(battery_model.voc)
