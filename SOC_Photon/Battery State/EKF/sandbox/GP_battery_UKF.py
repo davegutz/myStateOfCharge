@@ -613,6 +613,9 @@ if __name__ == '__main__':
         voc_dyn_s = []
         soc_filtered_s = []
         voc_filtered_s = []
+        prior_soc_s = []
+        x_s = []
+        z_s = []
 
         for i in range(len(t)):
             if t[i] < 10:
@@ -655,20 +658,31 @@ if __name__ == '__main__':
             voc_dyn_s.append(battery_ekf.voc_dyn)
             soc_filtered_s.append(battery_ekf.soc_filtered)
             voc_filtered_s.append(battery_ekf.voc_filtered)
+            prior_soc_s.append(kf.x_prior[0])
+            x_s.append(kf.x)
+            z_s.append(kf.z)
 
         # Plots
         plt.figure()
         plt.subplot(221)
         plt.title('GP_battery_UKF - Filter')
         plt.plot(t, ib, color='green', label='ib')
+        plt.legend(loc=2)
         plt.subplot(222)
+        plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
+        plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm_eks')
+        plt.legend(loc=2)
+        plt.subplot(223)
         plt.plot(t, vbs, color='green', label='Vb')
         plt.plot(t, v_oc_s, color='blue', label='Voc')
-        plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn')
+        plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn / EKF Ref')
         plt.plot(t, voc_filtered_s, color='black', linestyle='dotted', label='voc_filtered')
-        plt.subplot(223)
-        plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
-        plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm')
+        plt.scatter(t, z_s, color='black', label='Meas VOC', marker='.')
+        plt.legend(loc=2)
+        plt.subplot(224);
+        plt.scatter(t, prior_soc_s, color='green', label='Post SOC', marker='.')
+        plt.plot(t, x_s, color='green', label='Est SOC')
+        plt.legend(loc=2)
         plt.show()
         plt.figure()
         plt.subplot(321)
