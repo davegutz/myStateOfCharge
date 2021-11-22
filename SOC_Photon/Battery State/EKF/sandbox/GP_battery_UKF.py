@@ -358,7 +358,7 @@ class BatteryEKF:
         # Other things
         self.soc = 0.  # State of charge, %
         self.soc_norm = 0.  # State of charge, normalized, %
-        self.soc_k = 0.  # EKF normalized state of charge, %
+        self.soc_filtered = 0.  # EKF normalized state of charge, %
         self.dV_dSoc = 0.  # Slope of soc-voc curve, V/%
         self.dV_dSoc_norm = 0.  # Slope of soc-voc curve, normalized, V/%
         self.nom_bat_cap = nom_bat_cap
@@ -414,13 +414,13 @@ class BatteryEKF:
         """
 
         # Initialize
-        self.soc_k = soc_k
+        self.soc_filtered = soc_k
 
         # Zhang coefficients
         self.b, self.a, self.c = self.look(self.temp_c)
 
         # Perform computationally expensive steps one time
-        soc_norm_lim = max(min(self.soc_k, self.eps_max), self.eps_min)
+        soc_norm_lim = max(min(self.soc_filtered, self.eps_max), self.eps_min)
         log_soc_norm = math.log(soc_norm_lim)
         exp_n_soc_norm = math.exp(self.n * (soc_norm_lim - 1))
         pow_log_soc_norm = math.pow(-log_soc_norm, self.m)
@@ -429,12 +429,11 @@ class BatteryEKF:
         self.dV_dSoc_norm = float(self.n_cells) * (self.b * self.m / soc_norm_lim * pow_log_soc_norm / log_soc_norm +
                                                    self.c + self.d * self.n * exp_n_soc_norm)
         self.dV_dSoc = self.dV_dSoc_norm * self.cu / self.cs
-        # slightly beyond
         self.voc_filtered = float(self.n_cells) * (self.a + self.b * pow_log_soc_norm +
-                                                   self.c * soc_norm_lim + self.d * exp_n_soc_norm) + (
-                               self.soc_norm - soc_norm_lim) * self.dV_dSoc_norm
+                                                   self.c * soc_norm_lim + self.d * exp_n_soc_norm)
         self.voc_filtered += self.dv  # Experimentally varied
-
+        # slightly beyond
+        self.voc_filtered += (self.soc_filtered - soc_norm_lim) * self.dV_dSoc_norm
         return self.voc_filtered
 
     def construct_state_space_ekf(self):
@@ -468,8 +467,8 @@ class BatteryEKF:
         Outputs:
             soc     State of charge, fraction (0-1.5)
             soc_norm    Normalized state of charge, fraction (0-1)
-            vsat            Charge voltage at saturation, V
-            sat             Battery is saturated, T/F
+            v_sat   Charge voltage at saturation, V
+            sat     Battery is saturated, T/F
         """
         self.pow_in = self.ib * (self.vb - (self.ioc * self.r_0 + self.i_r_dif() * self.r_dif +
                                             self.i_r_ct() * self.r_ct) * self.sr)
@@ -573,13 +572,27 @@ if __name__ == '__main__':
 
 
     def main():
-        # coefficient definition
+        # Setup to run the transients
         dt = 0.1
         dt_ekf = 0.1
         time_end = 700
         # time_end = 1
+
+        # coefficient definition
         battery_model = Battery()
         battery_ekf = BatteryEKF()
+
+        # Setup the UKF
+        r_std = 1e-6  # Kalman sensor uncertainty (0.1)
+        q_std = 1e-6  # Process uncertainty (7)
+        points = MerweScaledSigmaPoints(n=1, alpha=.001, beta=2., kappa=1.)
+        kf = UKF(dim_x=1, dim_z=1, dt=dt, fx=battery_ekf.soc_est_ekf, hx=battery_ekf.calc_voc_ekf, points=points)
+        kf.Q = q_std**2
+        kf.R = r_std**2
+        kf.x = np.array([0])
+        kf.P = np.eye(1) * 100
+
+        # Executive tasks
         t = np.arange(0, time_end + dt, dt)
         ib = []
         v_oc_s = []
@@ -596,6 +609,11 @@ if __name__ == '__main__':
         soc_s = []
         soc_norm_s = []
         pow_s = []
+        soc_norm_ekf_s = []
+        voc_dyn_s = []
+        soc_filtered_s = []
+        voc_filtered_s = []
+
         for i in range(len(t)):
             if t[i] < 10:
                 current_in = 0
@@ -613,10 +631,10 @@ if __name__ == '__main__':
             # UKF
             battery_ekf.assign_temp_c(25.)
             battery_ekf.calc_dynamics_ekf(u_ekf, dt=dt_ekf)
-            # Test fx and hx
-            battery_ekf.soc_est_ekf(battery_model.soc_norm, dt_ekf, current_in)
-            battery_ekf.calc_voc_ekf(battery_model.soc_norm)
-            print('battery_ekf:  soc_k=', battery_ekf.soc_k, 'voc_filtered', battery_ekf.voc_filtered)
+            battery_ekf.coulomb_counter_ekf()
+            kf.predict(u=battery_ekf.ib)
+            kf.update(battery_ekf.voc_dyn)
+
             # Plot stuff
             ib.append(battery_model.ib)
             v_oc_s.append(battery_model.voc)
@@ -633,11 +651,28 @@ if __name__ == '__main__':
             soc_norm_s.append(battery_model.soc_norm)
             soc_s.append(battery_model.soc)
             pow_s.append(battery_model.pow_in)
+            soc_norm_ekf_s.append(battery_ekf.soc_norm)
+            voc_dyn_s.append(battery_ekf.voc_dyn)
+            soc_filtered_s.append(battery_ekf.soc_filtered)
+            voc_filtered_s.append(battery_ekf.voc_filtered)
 
         # Plots
         plt.figure()
+        plt.subplot(221)
+        plt.title('GP_battery_UKF - Filter')
+        plt.plot(t, ib, color='green', label='ib')
+        plt.subplot(222)
+        plt.plot(t, vbs, color='green', label='Vb')
+        plt.plot(t, v_oc_s, color='blue', label='Voc')
+        plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn')
+        plt.plot(t, voc_filtered_s, color='black', linestyle='dotted', label='voc_filtered')
+        plt.subplot(223)
+        plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
+        plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm')
+        plt.show()
+        plt.figure()
         plt.subplot(321)
-        plt.title('GP_battery_UKF.py')
+        plt.title('GP_battery_UKF - Model.py')
         plt.plot(t, ib, color='green', label='I')
         plt.plot(t, i_r_ct_s, color='red', label='I_Rct')
         plt.plot(t, i_c_dif_s, color='cyan', label='I_C_dif')
