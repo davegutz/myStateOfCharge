@@ -477,7 +477,7 @@ class BatteryEKF:
             self.soc = self.eps_max
         self.soc_norm = 1. - (1. - self.soc) * self.cu / self.cs
         self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
-        self.sat = self.voc_filtered >= self.v_sat
+        self.sat = self.voc_dyn >= self.v_sat
 
     def h_ekf(self, x):
         """ EKF feedback function
@@ -532,6 +532,12 @@ class BatteryEKF:
         out = self.exp_t_tau*x + (1. - self.exp_t_tau)*u
         return out
 
+    def assign_soc(self, soc, voc):
+        self.soc = soc
+        self.voc_filtered = voc
+        self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
+        self.sat = self.voc_filtered >= self.v_sat
+
     def assign_temp_c(self, temp_c):
         self.temp_c = temp_c
 
@@ -576,16 +582,18 @@ if __name__ == '__main__':
         # Setup to run the transients
         dt = 0.1
         dt_ekf = 0.1
-        time_end = 300
-        # time_end = 700
+        # time_end = 300
+        time_end = 700
+        temp_c = 25.
+        soc_init = 0.95
 
         # coefficient definition
         battery_model = Battery()
         battery_ekf = BatteryEKF()
 
         # Setup the UKF
-        r_std = .2  # Kalman sensor uncertainty (0.2 max)
-        q_std = .1  # Process uncertainty (0.1 max)
+        r_std = .2  # Kalman sensor uncertainty (0.20, 0.2 max)
+        q_std = .005  # Process uncertainty (0.005, 0.1 max)
         points = MerweScaledSigmaPoints(n=1, alpha=.001, beta=2., kappa=1.)
         kf = UKF(dim_x=1, dim_z=1, dt=dt, fx=battery_ekf.soc_est_ekf, hx=battery_ekf.calc_voc_ekf, points=points)
         kf.Q = q_std**2
@@ -625,15 +633,18 @@ if __name__ == '__main__':
                 current_in = 30
             else:
                 current_in = 0
+            init = i==0
 
             # Models
-            battery_model.calc_voc(temp_c=25, soc_init=0.95)
+            battery_model.calc_voc(temp_c=temp_c, soc_init=soc_init)
             u = np.array([current_in, battery_model.voc]).T
             battery_model.calc_dynamics(u, dt=dt)
             u_ekf = np.array([current_in, battery_model.vb]).T
 
             # UKF
-            battery_ekf.assign_temp_c(25.)
+            if init:
+                battery_ekf.assign_temp_c(temp_c)
+                battery_ekf.assign_soc(soc_init, battery_model.voc)
             battery_ekf.calc_dynamics_ekf(u_ekf, dt=dt_ekf)
             battery_ekf.coulomb_counter_ekf()
             kf.predict(u=battery_ekf.ib)
@@ -672,18 +683,20 @@ if __name__ == '__main__':
         plt.legend(loc=3)
         plt.subplot(222)
         plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
-        plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm_eks')
+        plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm_ekf')
+        plt.ylim(0.85, 1.0)
         plt.legend(loc=4)
         plt.subplot(223)
         plt.plot(t, v_oc_s, color='blue', label='actual voc')
         plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn / EKF Ref')
-        plt.plot(t, voc_filtered_s, color='black', linestyle='dotted', label='voc_filtered')
-        plt.ylim(13.5, 14.5)
+        plt.plot(t, voc_filtered_s, color='green', label='voc_filtered')
+        plt.ylim(13.4, 14.4)
         plt.legend(loc=4)
         plt.subplot(224);
         plt.plot(t, x_s, color='green', label='x soc_filtered')
         plt.plot(t, prior_soc_s, color='red', linestyle='dotted', label='post soc_filtered')
-        plt.ylim(0.50, 1.01)
+        plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm_ekf')
+        plt.ylim(0.85, 1.0)
         plt.legend(loc=4)
         plt.show()
         plt.figure()
