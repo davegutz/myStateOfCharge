@@ -612,8 +612,8 @@ if __name__ == '__main__':
         # Setup to run the transients
         dt = 0.1
         dt_ekf = 0.1
-        time_end = 700
-        # time_end = 1400
+        # time_end = 700
+        time_end = 1400
         temp_c = 25.
         soc_init = 0.975
         soc_init_ekf = 0.97
@@ -623,10 +623,10 @@ if __name__ == '__main__':
         battery_ekf = BatteryEKF()
 
         # Setup the UKF
-        r_std = .1  # Kalman sensor uncertainty (0.20, 0.2 max) belief in meas
-        q_std = .05  # Process uncertainty (0.005, 0.1 max) belief in state
-        v_std = 0.01  # batt voltage meas uncertainty ()
-        i_std = 0.1  # shunt current meas uncertainty ()
+        r_std = 0.2  # Kalman sensor uncertainty (0.20, 0.2 max) belief in meas
+        q_std = 0.005  # Process uncertainty (0.005, 0.1 max) belief in state
+        v_std = 0.01  # batt voltage meas uncertainty (0.01)
+        i_std = 0.1  # shunt current meas uncertainty (0.1)
         # points = MerweScaledSigmaPoints(n=1, alpha=.001, beta=2., kappa=1.)
         points = MerweScaledSigmaPoints(n=1, alpha=.01, beta=2., kappa=2.)
         kf = UKF(dim_x=1, dim_z=1, dt=dt, fx=battery_ekf.soc_est_ekf, hx=battery_ekf.calc_voc_ekf, points=points)
@@ -665,13 +665,13 @@ if __name__ == '__main__':
         ibatt_s = []
 
         for i in range(len(t)):
-            if t[i] < 10:
+            if t[i] < 50:
                 current_in = 0.
-            elif t[i] < 400:
+            elif t[i] < 450:
                 current_in = 40.
-            elif t[i] < 500:
+            elif t[i] < 550:
                 current_in = 0.
-            elif t[i] < 900:
+            elif t[i] < 950:
                 current_in = -40.
             else:
                 current_in = 0.
@@ -754,7 +754,7 @@ if __name__ == '__main__':
             plt.legend(loc=1)
             plt.show()
 
-        if False:
+        if True:
             plt.figure()
             plt.subplot(321)
             plt.title('GP_battery_UKF - Filter')
@@ -764,12 +764,12 @@ if __name__ == '__main__':
             plt.subplot(322)
             plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
             plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm_ekf')
-            plt.ylim(0.85, 1.0)
+            plt.ylim(0.95, 1.0)
             plt.legend(loc=4)
             plt.subplot(323)
             plt.plot(t, v_oc_s, color='blue', label='actual voc')
-            plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn / EKF Ref')
-            plt.plot(t, voc_filtered_s, color='green', label='voc_filtered')
+            plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn meas')
+            plt.plot(t, voc_filtered_s, color='green', label='voc_filtered state')
             plt.plot(t, vbs, color='black', label='vb')
             plt.plot(t, vbatt_s, color='magenta', linestyle='dotted', label='vbatt')
             plt.ylim(13, 15)
@@ -778,14 +778,14 @@ if __name__ == '__main__':
             plt.plot(t, prior_soc_s, color='red', linestyle='dotted', label='post soc_filtered')
             plt.plot(t, soc_norm_s, color='black', linestyle='dotted', label='SOC_norm')
             plt.plot(t, x_s, color='green', label='x soc_filtered')
-            plt.ylim(0.85, 1.0)
+            plt.ylim(0.95, 1.0)
             plt.legend(loc=4)
             plt.subplot(325)
             plt.plot(t, k_s, color='red', linestyle='dotted', label='K (belief state / belief meas)')
             plt.legend(loc=4)
             plt.show()
 
-        if False:
+        if True:
             plt.figure()
             plt.subplot(321)
             plt.title('GP_battery_UKF - Filter')
@@ -798,8 +798,8 @@ if __name__ == '__main__':
             plt.legend(loc=4)
             plt.subplot(323)
             plt.plot(t, v_oc_s, color='blue', label='actual voc')
-            plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn / EKF Ref')
-            plt.plot(t, voc_filtered_s, color='green', label='voc_filtered')
+            plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn meas')
+            plt.plot(t, voc_filtered_s, color='green', label='voc_filtered state')
             plt.plot(t, vbs, color='black', label='vb')
             plt.plot(t, vbatt_s, color='magenta', linestyle='dotted', label='vbatt')
             plt.ylim(13., 15)
