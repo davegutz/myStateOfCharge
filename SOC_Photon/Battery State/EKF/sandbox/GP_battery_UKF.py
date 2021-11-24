@@ -19,7 +19,6 @@ Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Batt
 
 import numpy as np
 import math
-from filterpy.common import Q_discrete_white_noise
 from numpy.random import randn
 from filterpy.kalman import UnscentedKalmanFilter as UKF
 from filterpy.kalman import MerweScaledSigmaPoints
@@ -31,7 +30,7 @@ class Battery:
 
     def __init__(self, n_cells=4, r0=0.003, tau_ct=3.7, rct=0.0016, tau_dif=83, r_dif=0.0077, dt=0.1, b=0., a=0.,
                  c=0., n=0.4, m=0.478, d=0.707, t_t=None, t_b=None, t_a=None, t_c=None, nom_bat_cap=100.,
-                 true_bat_cap=102., nom_sys_volt=13., dv=0, sr=1, bat_v_sat=3.4625, dvoc_dt=0.001875):
+                 true_bat_cap=102., nom_sys_volt=13., dv=0, sr=1, bat_v_sat=3.4625, dvoc_dt=0.001875, sat_gain=10.):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -93,6 +92,8 @@ class Battery:
             currents or 20-40 A for a 100 Ah battery"""
         self.nom_sys_volt = nom_sys_volt  # Nominal battery label voltage, e.g. 12, V
         self.v_sat = nom_sys_volt + 1.7  # Saturation voltage, V
+        self.s_sat = 0.  # Scalar feedback to mimic bms current cutback
+        self.sat_gain = sat_gain  # Multiplier on saturation anti-windup
         self.voc = nom_sys_volt  # Battery charge voltage, V
         self.sat = True  # Battery is saturated, T/F
         self.ib = 0  # Current into battery post, A
@@ -148,6 +149,8 @@ class Battery:
         # self.d2V_dSocs2 = float(self.n_cells) * ( self.b*self.m/self.soc/self.soc*pow_log_soc_norm/
         # log_soc_norm*((self.m-1.)/log_soc_norm - 1.) + self.d*self.n*self.n*exp_n_soc_norm )
         self.v_sat = self.nom_v_sat + (temp_c - 25.) * self.dVoc_dT
+        self.s_sat = max(self.voc - self.v_sat, 0.0) / self.nom_sys_volt * self.nom_bat_cap * self.sat_gain
+
         self.sat = self.voc >= self.v_sat
         self.u[1] = self.voc
 
@@ -165,7 +168,11 @@ class Battery:
         # Model dynamics executive
         if dt is not None:
             self.dt = dt
-        self.u = u
+        ib = u[0]
+        if self.sat:
+            ib -= self.s_sat
+        voc = u[1]
+        self.u = np.array([ib, voc]).T
 
         # State-space calculation
         self.propagate_state_space(self.u, dt=dt)
@@ -225,8 +232,8 @@ class Battery:
         """
         self.pow_in = self.ioc * self.voc * self.sr
         self.soc = max(min(self.soc + self.pow_in / self.nom_sys_volt * self.dt / 3600. / self.nom_bat_cap, 1.5), 0.)
-        if self.sat:
-            self.soc = self.eps_max
+        # if self.sat:
+        #     self.soc = self.eps_max
         self.soc_norm = 1. - (1. - self.soc) * self.cu / self.cs
 
     def look(self, temp_c):
@@ -473,8 +480,8 @@ class BatteryEKF:
         self.pow_in = self.ib * (self.vb - (self.ioc * self.r_0 + self.i_r_dif() * self.r_dif +
                                             self.i_r_ct() * self.r_ct) * self.sr)
         self.soc = max(min(self.soc + self.pow_in / self.nom_sys_volt * self.dt / 3600. / self.nom_bat_cap, 1.5), 0.)
-        if self.sat:
-            self.soc = self.eps_max
+        # if self.sat:
+        #     self.soc = self.eps_max
         self.soc_norm = 1. - (1. - self.soc) * self.cu / self.cs
         self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
         self.sat = self.voc_dyn >= self.v_sat
@@ -572,7 +579,6 @@ if __name__ == '__main__':
 
     doctest.testmod(sys.modules['__main__'])
     import matplotlib.pyplot as plt
-    import matplotlib.axis as ax
     import book_format
 
     book_format.set_style()
@@ -582,10 +588,11 @@ if __name__ == '__main__':
         # Setup to run the transients
         dt = 0.1
         dt_ekf = 0.1
-        # time_end = 700
-        time_end = 1400
+        time_end = 700
+        # time_end = 1400
         temp_c = 25.
-        soc_init = 0.5
+        soc_init = 0.975
+        soc_init_ekf = 0.97
 
         # coefficient definition
         battery_model = Battery()
@@ -595,7 +602,7 @@ if __name__ == '__main__':
         r_std = .1  # Kalman sensor uncertainty (0.20, 0.2 max) belief in meas
         q_std = .05  # Process uncertainty (0.005, 0.1 max) belief in state
         v_std = 0.01  # batt voltage meas uncertainty ()
-        i_std = 0.2  # shunt current meas uncertainty ()
+        i_std = 0.1  # shunt current meas uncertainty ()
         # points = MerweScaledSigmaPoints(n=1, alpha=.001, beta=2., kappa=1.)
         points = MerweScaledSigmaPoints(n=1, alpha=.01, beta=2., kappa=2.)
         kf = UKF(dim_x=1, dim_z=1, dt=dt, fx=battery_ekf.soc_est_ekf, hx=battery_ekf.calc_voc_ekf, points=points)
@@ -634,14 +641,14 @@ if __name__ == '__main__':
             if t[i] < 10:
                 current_in = 0.
             elif t[i] < 400:
-                current_in = 30.
+                current_in = 40.
             elif t[i] < 500:
                 current_in = 0.
             elif t[i] < 900:
-                current_in = -30.
+                current_in = -40.
             else:
                 current_in = 0.
-            init = i==0
+            init = (i==0)
 
             # Models
             battery_model.calc_voc(temp_c=temp_c, soc_init=soc_init)
@@ -651,7 +658,7 @@ if __name__ == '__main__':
             # UKF
             if init:
                 battery_ekf.assign_temp_c(temp_c)
-                battery_ekf.assign_soc(soc_init, battery_model.voc)
+                battery_ekf.assign_soc(soc_init_ekf, battery_model.voc)
             u_ekf = np.array([current_in+randn()*i_std, battery_model.vb+randn()*v_std]).T
             battery_ekf.calc_dynamics_ekf(u_ekf, dt=dt_ekf)
             battery_ekf.coulomb_counter_ekf()
@@ -687,8 +694,7 @@ if __name__ == '__main__':
         plt.figure()
         plt.subplot(321)
         plt.title('GP_battery_UKF - Filter')
-        plt.plot(t, ib, color='orange', label='ib')
-        plt.plot(t, vbs, color='green', label='meas vb')
+        plt.plot(t, ib, color='black', label='ib')
         plt.legend(loc=3)
         plt.subplot(322)
         plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
@@ -699,24 +705,24 @@ if __name__ == '__main__':
         plt.plot(t, v_oc_s, color='blue', label='actual voc')
         plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn / EKF Ref')
         plt.plot(t, voc_filtered_s, color='green', label='voc_filtered')
-        plt.ylim(13.4, 14.4)
+        plt.plot(t, vbs, color='black', label='meas vb')
+        plt.ylim(13, 15)
         plt.legend(loc=4)
-        plt.subplot(324);
+        plt.subplot(324)
         plt.plot(t, prior_soc_s, color='red', linestyle='dotted', label='post soc_filtered')
         plt.plot(t, soc_norm_s, color='black', linestyle='dotted', label='SOC_norm')
         plt.plot(t, x_s, color='green', label='x soc_filtered')
         plt.ylim(0.85, 1.0)
         plt.legend(loc=4)
         plt.subplot(325)
-        plt.plot(t, k_s, color='red', linestyle='dotted', label='Kalman Gain')
+        plt.plot(t, k_s, color='red', linestyle='dotted', label='K (belief state / belief meas)')
         plt.legend(loc=4)
         plt.show()
 
         plt.figure()
         plt.subplot(321)
         plt.title('GP_battery_UKF - Filter')
-        plt.plot(t, ib, color='orange', label='ib')
-        plt.plot(t, vbs, color='green', label='meas vb')
+        plt.plot(t, ib, color='black', label='ib')
         plt.legend(loc=3)
         plt.subplot(322)
         plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
@@ -726,9 +732,10 @@ if __name__ == '__main__':
         plt.plot(t, v_oc_s, color='blue', label='actual voc')
         plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn / EKF Ref')
         plt.plot(t, voc_filtered_s, color='green', label='voc_filtered')
-        plt.ylim(13., 14.4)
+        plt.plot(t, vbs, color='black', label='meas vb')
+        plt.ylim(13., 15)
         plt.legend(loc=4)
-        plt.subplot(324);
+        plt.subplot(324)
         plt.plot(t, prior_soc_s, color='red', linestyle='dotted', label='post soc_filtered')
         plt.plot(t, soc_norm_s, color='black', linestyle='dotted', label='SOC_norm')
         plt.plot(t, x_s, color='green', label='x soc_filtered')
