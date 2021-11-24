@@ -123,7 +123,7 @@ class Battery:
         Outputs:
             voc             Charge voltage, V
             dV_dSoc_norm    SOC-VOC slope, V/fraction
-            vsat            Charge voltage at saturation, V
+            v_sat           Charge voltage at saturation, V
             sat             Battery is saturated, T/F
         """
 
@@ -153,7 +153,10 @@ class Battery:
         # self.d2V_dSocs2 = float(self.n_cells) * ( self.b*self.m/self.soc/self.soc*pow_log_soc_norm/
         # log_soc_norm*((self.m-1.)/log_soc_norm - 1.) + self.d*self.n*self.n*exp_n_soc_norm )
         self.v_sat = self.nom_v_sat + (temp_c - 25.) * self.dVoc_dT
-        self.s_sat = max(self.voc - self.v_sat, 0.0) / self.nom_sys_volt * self.nom_bat_cap * self.sat_gain
+        if self.ioc > 0:
+            self.s_sat = max(self.voc - self.v_sat, 0.0) / self.nom_sys_volt * self.nom_bat_cap * self.sat_gain
+        else:
+            self.s_sat = 0.
 
         self.sat = self.voc >= self.v_sat
         self.u[1] = self.voc
@@ -176,8 +179,8 @@ class Battery:
         if dt is not None:
             self.dt = dt
         ib = u[0]
-        if self.sat:
-            ib -= self.s_sat
+        if self.sat and ib > 0:
+            ib = ib - self.s_sat
         voc = u[1]
         self.u = np.array([ib, voc]).T
 
@@ -283,7 +286,7 @@ class Battery:
         self.x += self.x_dot * self.dt
         self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
         self.vb = self.y[0]
-        self.ioc = self.y[1]
+        self.ioc = self.y[1]  # note, circuit construction constrains ioc=ib
         self.vbatt = self.y[2]
         self.ibatt = self.y[3]
 
@@ -666,13 +669,13 @@ if __name__ == '__main__':
                 current_in = 0.
             elif t[i] < 400:
                 current_in = 40.
-            elif t[i] < 5000:
+            elif t[i] < 500:
                 current_in = 0.
-            elif t[i] < 9000:
+            elif t[i] < 900:
                 current_in = -40.
             else:
                 current_in = 0.
-            init = (i==0)
+            init = (i == 0)
 
             # Models
             battery_model.calc_voc(temp_c=temp_c, soc_init=soc_init)
@@ -727,13 +730,13 @@ if __name__ == '__main__':
             plt.plot(t, i_r_ct_s, color='red', label='I_Rct')
             plt.plot(t, i_c_dif_s, color='cyan', label='I_C_dif')
             plt.plot(t, i_r_dif_s, color='orange', linestyle='--', label='I_R_dif')
-            plt.plot(t, i_oc_s, color='orange', label='Ioc')
+            plt.plot(t, i_oc_s, color='black', linestyle='--', label='Ioc')
             plt.legend(loc=1)
             plt.subplot(323)
             plt.plot(t, vbs, color='green', label='Vb')
-            plt.plot(t, vcs, color='blue', label='Vc_o')
+            plt.plot(t, vcs, color='blue', label='Vc')
             plt.plot(t, vds, color='red', label='Vd')
-            plt.plot(t, v_oc_s, color='blue', label='Voc')
+            plt.plot(t, v_oc_s, color='orange', label='Voc')
             plt.legend(loc=1)
             plt.subplot(325)
             plt.plot(t, v_bc_dot_s, color='green', label='Vbc_dot')
