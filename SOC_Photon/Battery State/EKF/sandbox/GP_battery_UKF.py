@@ -30,7 +30,8 @@ class Battery:
 
     def __init__(self, n_cells=4, r0=0.003, tau_ct=3.7, rct=0.0016, tau_dif=83, r_dif=0.0077, dt=0.1, b=0., a=0.,
                  c=0., n=0.4, m=0.478, d=0.707, t_t=None, t_b=None, t_a=None, t_c=None, nom_bat_cap=100.,
-                 true_bat_cap=102., nom_sys_volt=13., dv=0, sr=1, bat_v_sat=3.4625, dvoc_dt=0.001875, sat_gain=10.):
+                 true_bat_cap=102., nom_sys_volt=13., dv=0, sr=1, bat_v_sat=3.4625, dvoc_dt=0.001875, sat_gain=10.,
+                 tau_m=0.159):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -55,6 +56,7 @@ class Battery:
         self.tau_dif = tau_dif
         self.r_dif = r_dif * n_cells
         self.c_dif = self.tau_dif / self.r_dif
+        self.tau_m = tau_m  # Measurement time constant
         self.A, self.B, self.C, self.D = self.construct_state_space()
         self.u = np.array([0., 0]).T    # For dynamics
         self.dt = dt
@@ -111,6 +113,8 @@ class Battery:
         self.eps_min = 1e-6  # Numerical minimum of coefficient model without scaled soc_norm.
         # eps_min_unscaled = 1 - (
         #       1 - eps_min) * self.cs / self.cu  # Numerical minimum of coefficient model without scaled soc_norm.
+        self.vbatt = self.nom_sys_volt
+        self.ibatt = 0
 
     def calc_voc(self, temp_c=25., soc_init=0.5):
         """SOC-OCV curve fit method per Zhang, et al
@@ -153,6 +157,7 @@ class Battery:
 
         self.sat = self.voc >= self.v_sat
         self.u[1] = self.voc
+        return self.voc
 
     def calc_dynamics(self, u, dt=None):
         """Executive model dynamics
@@ -163,6 +168,8 @@ class Battery:
         Outputs:
             vb  Battery terminal voltage, V
             ioc Charge current, A
+            vbatt  Sensed battery terminal voltage, v
+            ibatt  Sensed battery terminal current, A
             time_charge Calculated time to full charge, hr
         """
         # Model dynamics executive
@@ -193,8 +200,6 @@ class Battery:
         else:
             self.time_charge = -24. * soc_norm_lim
 
-        return self.vb
-
     def construct_state_space(self):
         """ State-space representation of dynamics
         Inputs:
@@ -203,21 +208,33 @@ class Battery:
         Outputs:
             vb      Voltage at positive, V
             ioc     Current into storage, A
+            vbatt   Sensed battery terminal voltage, V
+            ibatt   Sensed battery terminal current, A
         States:
             vbc     RC vb-vc, V
             vcd     RC vc-vd, V
+            vbatt   Sensed circuit lag, V
+            ibatt   Sensed circuit lag, A
         Other:
             vc      Voltage downstream of charge transfer model, ct-->c
             vd      Voltage downstream of diffusion process model, dif-->d
         """
-        a = np.array([[-1 / self.tau_ct, 0],
-                      [0, -1 / self.tau_dif]])
-        b = np.array([[1 / self.c_ct, 0],
-                      [1 / self.c_dif, 0]])
-        c = np.array([[1, 1],
-                      [0, 0]])
-        d = np.array([[self.r_0, 1],
-                      [1, 0]])
+        a = np.array([[-1/self.tau_ct,  0,                  0,              0],
+                      [0,               -1/self.tau_dif,    0,              0],
+                      [1/self.tau_m,    1/self.tau_m,       -1/self.tau_m,  0],
+                      [0,               0,                  0,              -1/self.tau_m]])
+        b = np.array([[1 / self.c_ct,       0],
+                      [1 / self.c_dif,      0],
+                      [self.r_0/self.tau_m, 1/self.tau_m],
+                      [1/self.tau_m,        0]])
+        c = np.array([[1,   1,  0,  0],
+                      [0,   0,  0,  0],
+                      [0,   0,  1,  0],
+                      [0,   0,  0,  1]])
+        d = np.array([[self.r_0,    1],
+                      [1,           0],
+                      [0,           0],
+                      [0,           0]])
         return a, b, c, d
 
     def coulomb_counter(self):
@@ -251,12 +268,14 @@ class Battery:
         Outputs:
             vb      Calculated battery terminal voltage, V
             ioc     Calculated charge current, A
+            vbatt   Sensed circuit lag, V
+            ibatt  Sensed battery terminal current, A
         """
         self.u = u
         self.ib = self.u[0]
         self.voc = self.u[1]
         if self.x is None:  # Initialize
-            self.x = np.array([self.ib * self.r_ct, self.ib * self.r_dif]).T
+            self.x = np.array([self.ib*self.r_ct, self.ib*self.r_dif, self.voc, self.ib]).T
         if dt is not None:
             self.dt = dt
         self.x_past = self.x
@@ -265,6 +284,8 @@ class Battery:
         self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
         self.vb = self.y[0]
         self.ioc = self.y[1]
+        self.vbatt = self.y[2]
+        self.ibatt = self.y[3]
 
     def vbc(self):
         return self.x[0]
@@ -636,6 +657,8 @@ if __name__ == '__main__':
         x_s = []
         z_s = []
         k_s = []
+        vbatt_s = []
+        ibatt_s = []
 
         for i in range(len(t)):
             if t[i] < 10:
@@ -689,12 +712,15 @@ if __name__ == '__main__':
             x_s.append(kf.x)
             z_s.append(kf.z)
             k_s.append(kf.K[0])
+            vbatt_s.append(battery_model.vbatt)
+            ibatt_s.append(battery_model.ibatt)
 
         # Plots
         plt.figure()
         plt.subplot(321)
         plt.title('GP_battery_UKF - Filter')
         plt.plot(t, ib, color='black', label='ib')
+        plt.plot(t, ibatt_s, color='magenta', label='ibatt')
         plt.legend(loc=3)
         plt.subplot(322)
         plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
@@ -705,7 +731,8 @@ if __name__ == '__main__':
         plt.plot(t, v_oc_s, color='blue', label='actual voc')
         plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn / EKF Ref')
         plt.plot(t, voc_filtered_s, color='green', label='voc_filtered')
-        plt.plot(t, vbs, color='black', label='meas vb')
+        plt.plot(t, vbs, color='black', label='vb')
+        plt.plot(t, vbatt_s, color='magenta', label='vbatt')
         plt.ylim(13, 15)
         plt.legend(loc=4)
         plt.subplot(324)
@@ -723,6 +750,7 @@ if __name__ == '__main__':
         plt.subplot(321)
         plt.title('GP_battery_UKF - Filter')
         plt.plot(t, ib, color='black', label='ib')
+        plt.plot(t, ibatt_s, color='magenta', label='ibatt')
         plt.legend(loc=3)
         plt.subplot(322)
         plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
@@ -732,7 +760,8 @@ if __name__ == '__main__':
         plt.plot(t, v_oc_s, color='blue', label='actual voc')
         plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn / EKF Ref')
         plt.plot(t, voc_filtered_s, color='green', label='voc_filtered')
-        plt.plot(t, vbs, color='black', label='meas vb')
+        plt.plot(t, vbs, color='black', label='vb')
+        plt.plot(t, vbatt_s, color='magenta', label='vbatt')
         plt.ylim(13., 15)
         plt.legend(loc=4)
         plt.subplot(324)
