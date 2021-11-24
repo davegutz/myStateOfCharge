@@ -585,18 +585,19 @@ if __name__ == '__main__':
         # time_end = 700
         time_end = 1400
         temp_c = 25.
-        soc_init = 0.95
+        soc_init = 0.5
 
         # coefficient definition
         battery_model = Battery()
         battery_ekf = BatteryEKF()
 
         # Setup the UKF
-        r_std = .2  # Kalman sensor uncertainty (0.20, 0.2 max)
-        q_std = .005  # Process uncertainty (0.005, 0.1 max)
+        r_std = .1  # Kalman sensor uncertainty (0.20, 0.2 max) belief in meas
+        q_std = .05  # Process uncertainty (0.005, 0.1 max) belief in state
         v_std = 0.01  # batt voltage meas uncertainty ()
         i_std = 0.2  # shunt current meas uncertainty ()
-        points = MerweScaledSigmaPoints(n=1, alpha=.001, beta=2., kappa=1.)
+        # points = MerweScaledSigmaPoints(n=1, alpha=.001, beta=2., kappa=1.)
+        points = MerweScaledSigmaPoints(n=1, alpha=.01, beta=2., kappa=2.)
         kf = UKF(dim_x=1, dim_z=1, dt=dt, fx=battery_ekf.soc_est_ekf, hx=battery_ekf.calc_voc_ekf, points=points)
         kf.Q = q_std**2
         kf.R = r_std**2
@@ -627,6 +628,7 @@ if __name__ == '__main__':
         prior_soc_s = []
         x_s = []
         z_s = []
+        k_s = []
 
         for i in range(len(t)):
             if t[i] < 10:
@@ -679,32 +681,63 @@ if __name__ == '__main__':
             prior_soc_s.append(kf.x_prior[0])
             x_s.append(kf.x)
             z_s.append(kf.z)
+            k_s.append(kf.K[0])
 
         # Plots
         plt.figure()
-        plt.subplot(221)
+        plt.subplot(321)
         plt.title('GP_battery_UKF - Filter')
         plt.plot(t, ib, color='orange', label='ib')
         plt.plot(t, vbs, color='green', label='meas vb')
         plt.legend(loc=3)
-        plt.subplot(222)
+        plt.subplot(322)
         plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
         plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm_ekf')
         plt.ylim(0.85, 1.0)
         plt.legend(loc=4)
-        plt.subplot(223)
+        plt.subplot(323)
         plt.plot(t, v_oc_s, color='blue', label='actual voc')
         plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn / EKF Ref')
         plt.plot(t, voc_filtered_s, color='green', label='voc_filtered')
         plt.ylim(13.4, 14.4)
         plt.legend(loc=4)
-        plt.subplot(224);
+        plt.subplot(324);
         plt.plot(t, prior_soc_s, color='red', linestyle='dotted', label='post soc_filtered')
         plt.plot(t, soc_norm_s, color='black', linestyle='dotted', label='SOC_norm')
         plt.plot(t, x_s, color='green', label='x soc_filtered')
         plt.ylim(0.85, 1.0)
         plt.legend(loc=4)
+        plt.subplot(325)
+        plt.plot(t, k_s, color='red', linestyle='dotted', label='Kalman Gain')
+        plt.legend(loc=4)
         plt.show()
+
+        plt.figure()
+        plt.subplot(321)
+        plt.title('GP_battery_UKF - Filter')
+        plt.plot(t, ib, color='orange', label='ib')
+        plt.plot(t, vbs, color='green', label='meas vb')
+        plt.legend(loc=3)
+        plt.subplot(322)
+        plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
+        plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm_ekf')
+        plt.legend(loc=4)
+        plt.subplot(323)
+        plt.plot(t, v_oc_s, color='blue', label='actual voc')
+        plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn / EKF Ref')
+        plt.plot(t, voc_filtered_s, color='green', label='voc_filtered')
+        plt.ylim(13., 14.4)
+        plt.legend(loc=4)
+        plt.subplot(324);
+        plt.plot(t, prior_soc_s, color='red', linestyle='dotted', label='post soc_filtered')
+        plt.plot(t, soc_norm_s, color='black', linestyle='dotted', label='SOC_norm')
+        plt.plot(t, x_s, color='green', label='x soc_filtered')
+        plt.legend(loc=4)
+        plt.subplot(325)
+        plt.plot(t, k_s, color='red', linestyle='dotted', label='K (belief state / belief meas)')
+        plt.legend(loc=4)
+        plt.show()
+
         plt.figure()
         plt.subplot(321)
         plt.title('GP_battery_UKF - Model.py')
