@@ -694,7 +694,7 @@ if __name__ == '__main__':
             # UKF
             if init_ekf:
                 battery_ekf.assign_temp_c(temp_c)
-                battery_ekf.assign_soc_norm(battery_ekf.soc_norm_filtered, battery_model.voc)
+                battery_ekf.assign_soc_norm(float(battery_ekf.soc_norm_filtered), battery_model.voc)
             u_ekf = np.array([battery_model.ibatt+randn()*i_std, battery_model.vbatt+randn()*v_std]).T
             battery_ekf.calc_dynamics_ekf(u_ekf, dt=dt_ekf)
             battery_ekf.coulomb_counter_ekf()
@@ -718,7 +718,6 @@ if __name__ == '__main__':
             soc_norm_s.append(battery_model.soc_norm)
             soc_s.append(battery_model.soc)
             pow_s.append(battery_model.pow_in)
-            print(battery_ekf.soc_norm, battery_model.soc)
             soc_norm_ekf_s.append(battery_ekf.soc_norm)
             voc_dyn_s.append(battery_ekf.voc_dyn)
             soc_norm_filtered_s.append(battery_ekf.soc_norm_filtered)
