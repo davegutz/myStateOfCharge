@@ -22,7 +22,8 @@ import math
 from numpy.random import randn
 # from filterpy.kalman import UnscentedKalmanFilter as UKF
 from pyDAGx.UKFx import UnscentedKalmanFilter as UKF
-from filterpy.kalman import MerweScaledSigmaPoints
+# from filterpy.kalman import MerweScaledSigmaPoints
+from pyDAGx.sigma_pointsx import MerweScaledSigmaPoints
 from pyDAGx.lookup_table import LookupTable
 
 
@@ -437,7 +438,7 @@ class BatteryEKF:
         self.u = u
         self.propagate_state_space_ekf(self.u, dt=dt)
 
-    def calc_voc_ekf(self, soc_k):
+    def hx_calc_voc(self, soc_k):
         """SOC-OCV curve fit method per Zhang, et al
         The non-linear 'y' function for EKF
         Inputs:
@@ -521,7 +522,7 @@ class BatteryEKF:
         Outputs:
             y   EKF output from non-linear function
         """
-        return [self.calc_voc_ekf(x)]
+        return [self.hx_calc_voc(x)]
 
     def look(self, temp_c):
         b = self.lut_b.lookup(T_degC=temp_c)
@@ -552,7 +553,7 @@ class BatteryEKF:
         self.ioc = self.ib
         self.voc_dyn = self.y
 
-    def soc_est_ekf(self, x, dt, u, tau=None):
+    def fx_soc_est(self, x, dt, u, tau=None):
         """ Innovation function for simple EKF per the Mathworks' paper. See Huria, Ceraolo, Gazzarri, & Jackey,
         2013, 'Simplified Extended Kalman Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium
         Battery Cells'
@@ -623,9 +624,9 @@ if __name__ == '__main__':
         # Setup to run the transients
         dt = 0.1
         dt_ekf = 0.1
-        time_end = 13.3
+        # time_end = 13.3
         # time_end = 700
-        # time_end = 1400
+        time_end = 1400
         temp_c = 25.
         soc_init = 0.975
 
@@ -636,11 +637,10 @@ if __name__ == '__main__':
         i_std = 0.1  # shunt current meas uncertainty (0.1)
 
         # Setup the UKF
-        r_std = 0.2  # Kalman sensor uncertainty (0.20, 0.2 max) belief in meas
-        # q_std = 0.005  # Process uncertainty (0.005, 0.1 max) belief in state
-        q_std = 0.05  # Process uncertainty (0.005, 0.1 max) belief in state
+        r_std = 0.1  # Kalman sensor uncertainty (0.10, 0.2 max) belief in meas
+        q_std = 0.005  # Process uncertainty (0.005, 0.1 max) belief in state
         points = MerweScaledSigmaPoints(n=1, alpha=.01, beta=2., kappa=2.)
-        kf = UKF(dim_x=1, dim_z=1, dt=dt, fx=battery_ekf.soc_est_ekf, hx=battery_ekf.calc_voc_ekf, points=points)
+        kf = UKF(dim_x=1, dim_z=1, dt=dt, fx=battery_ekf.fx_soc_est, hx=battery_ekf.hx_calc_voc, points=points)
         kf.Q = q_std**2
         kf.R = r_std**2
         kf.x = np.array([0])
@@ -702,27 +702,8 @@ if __name__ == '__main__':
             u_ekf = np.array([battery_model.ibatt+randn()*i_std, battery_model.vbatt+randn()*v_std]).T
             battery_ekf.calc_dynamics_ekf(u_ekf, dt=dt_ekf)
             battery_ekf.coulomb_counter_ekf()
-            print(t[i], battery_ekf.ib, battery_model.ib, battery_model.voc, battery_ekf.voc_dyn, battery_model.soc_norm, kf.x, battery_ekf.voc_filtered)
             kf.predict(u=battery_ekf.ib)
-            print(t[i], battery_ekf.ib, battery_model.ib, battery_model.voc, battery_ekf.voc_dyn, battery_model.soc_norm, kf.x, battery_ekf.voc_filtered)
-            print(kf.x, kf.z, kf.y)
             kf.update(battery_ekf.voc_dyn)
-            print(kf.x, kf.z, kf.y)
-            print('Y=', kf.x, kf._dt, '0', battery_ekf.soc_est_ekf(kf.x, kf._dt, 0.))
-            L = battery_ekf.calc_voc_ekf(battery_ekf.soc_est_ekf(kf.x, kf._dt, 0.))
-            print('L=', L)
-            print('z=', kf.z)
-            Wm = kf.Wm
-            mu_z = kf.Wm[0]*L+kf.Wm[1]*L+kf.Wm[2]*L
-            print('mu_z=', mu_z)
-            from copy import deepcopy
-            sigmas_h = kf.sigmas_h.T[0]
-            print('Wm=', Wm, 'sigmas_h=', sigmas_h)
-            muzz = np.dot(Wm, sigmas_h)
-            print('y=', kf.y, 'z-mu_z=', kf.z-mu_z, 'z-muzz=', kf.z-muzz)
-            print(t[i], battery_ekf.ib, battery_model.ib, battery_model.voc, battery_ekf.voc_dyn, battery_model.soc_norm, kf.x, battery_ekf.voc_filtered)
-            # print(kf)
-            print("")
 
             # Plot stuff
             current_in_s.append(current_in)
@@ -817,7 +798,7 @@ if __name__ == '__main__':
             plt.legend(loc=4)
             plt.show()
 
-        if True:
+        if False:
             plt.figure()
             plt.clf()
             plt.subplot(321)
