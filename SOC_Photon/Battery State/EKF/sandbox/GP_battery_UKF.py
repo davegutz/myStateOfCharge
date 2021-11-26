@@ -20,7 +20,8 @@ Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Batt
 import numpy as np
 import math
 from numpy.random import randn
-from filterpy.kalman import UnscentedKalmanFilter as UKF
+# from filterpy.kalman import UnscentedKalmanFilter as UKF
+from pyDAGx.UKFx import UnscentedKalmanFilter as UKF
 from filterpy.kalman import MerweScaledSigmaPoints
 from pyDAGx.lookup_table import LookupTable
 
