@@ -332,8 +332,7 @@ class BatteryEKF:
 
     def __init__(self, n_cells=4, r0=0.003, tau_ct=3.7, rct=0.0016, tau_dif=83, r_dif=0.0077, dt=0.1, b=0., a=0.,
                  c=0., n=0.4, m=0.478, d=0.707, t_t=None, t_b=None, t_a=None, t_c=None, nom_bat_cap=100.,
-                 true_bat_cap=102., nom_sys_volt=13., dv=0, sr=1, bat_v_sat=3.4625, dvoc_dt=0.001875, rsd=70.,
-                 tau_sd=1.8e7):
+                 true_bat_cap=102., nom_sys_volt=13., dv=0, sr=1, bat_v_sat=3.4625, dvoc_dt=0.001875):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -383,14 +382,6 @@ class BatteryEKF:
         self.lut_b.setValueTable(t_b)
         self.lut_a.setValueTable(t_a)
         self.lut_c.setValueTable(t_c)
-
-        # Estimator
-        # Nominal rsd is loss of 70% charge (Dsoc=0.7) in 6 month (Dt=1.8e7 sec = tau_sd). Dsoc= i*Dt/(3600*nom_bat_cap)
-        # R=(nom_bat_volt=1=soc_max)/i = 1/Dsoc*Dt/3600/nom_bat_cap = 70 for 1v, 100 A-h.  Cq=257000 F.
-        self.r_sd = rsd
-        self.tau_sd = tau_sd
-        self.cq = self.tau_sd / self.r_sd
-        self.exp_t_tau = math.exp(-dt / self.tau_sd)
 
         # Other things
         self.soc = 0.  # State of charge, %
@@ -535,15 +526,6 @@ class BatteryEKF:
         self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
         self.sat = self.voc_dyn >= self.v_sat
 
-    def h_ekf(self, x):
-        """ EKF feedback function
-        Inputs:
-            x   EKF state
-        Outputs:
-            y   EKF output from non-linear function
-        """
-        return [self.hx_calc_voc(x)]
-
     def look(self, temp_c):
         b = self.lut_b.lookup(T_degC=temp_c)
         a = self.lut_a.lookup(T_degC=temp_c)
@@ -572,27 +554,6 @@ class BatteryEKF:
         self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
         self.ioc = self.ib
         self.voc_dyn = self.y
-
-    def fx_soc_est(self, x, dt, u, tau=None):
-        """ Innovation function for simple EKF per the Mathworks' paper. See Huria, Ceraolo, Gazzarri, & Jackey,
-        2013, 'Simplified Extended Kalman Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium
-        Battery Cells'
-        This works for 1x1 EKF
-        Input:
-          ib  Measured battery terminal current, A
-        Output:
-          voc (soc)   `Estimated soc, V equivalent
-        """
-        if tau is not None:
-            self.exp_t_tau = math.exp(-dt/tau)
-        out = self.exp_t_tau*x + (1. - self.exp_t_tau)*u
-        return out
-
-    def assign_soc(self, soc, voc):
-        self.soc = soc
-        self.voc_filtered = voc
-        self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
-        self.sat = self.voc_filtered >= self.v_sat
 
     def assign_soc_norm(self, soc_norm, voc):
         self.soc_norm = soc_norm
@@ -646,8 +607,8 @@ if __name__ == '__main__':
         dt_ekf = 0.1
         # time_end = 1
         # time_end = 13.3
-        time_end = 700
-        # time_end = 1400
+        # time_end = 700
+        time_end = 1400
         temp_c = 25.
         soc_init = 0.975
 
