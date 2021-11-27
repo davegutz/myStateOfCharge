@@ -325,8 +325,8 @@ class Battery:
         return self.vd() + self.vcd()
 
 
-class BatteryEKF:
-    # Battery model for embedded use:  Randle's dynamics, SOC-VOC model, EKF support
+class BatteryUKF:
+    # Battery model for embedded use:  Randle's dynamics, SOC-VOC model, UKF support
 
     def __init__(self, n_cells=4, r0=0.003, tau_ct=3.7, rct=0.0016, tau_dif=83, r_dif=0.0077, dt=0.1, b=0., a=0.,
                  c=0., n=0.4, m=0.478, d=0.707, t_t=None, t_b=None, t_a=None, t_c=None, nom_bat_cap=100.,
@@ -356,7 +356,7 @@ class BatteryEKF:
         self.tau_dif = tau_dif
         self.r_dif = r_dif * n_cells
         self.c_dif = self.tau_dif / self.r_dif
-        self.A, self.B, self.C, self.D = self.construct_state_space_ekf()
+        self.A, self.B, self.C, self.D = self.construct_state_space_ukf()
         self.u = np.array([0., 0]).T    # For dynamics
         self.dt = dt
         self.x = None
@@ -393,7 +393,7 @@ class BatteryEKF:
         # Other things
         self.soc = 0.  # State of charge, %
         self.soc_norm = 0.  # State of charge, normalized, %
-        self.soc_norm_filtered = 0.  # EKF normalized state of charge, %
+        self.soc_norm_filtered = 0.  # UKF normalized state of charge, %
         self.dV_dSoc = 0.  # Slope of soc-voc curve, V/%
         self.dV_dSoc_norm = 0.  # Slope of soc-voc curve, normalized, V/%
         self.nom_bat_cap = nom_bat_cap
@@ -404,7 +404,7 @@ class BatteryEKF:
         self.v_sat = nom_sys_volt + 1.7  # Saturation voltage, V
         # self.voc = nom_sys_volt  # Battery charge voltage, V
         self.voc_dyn = nom_sys_volt  # Battery charge voltage calculated from dynamics, V
-        self.voc_filtered = nom_sys_volt  # Battery charge voltage EKF, V
+        self.voc_filtered = nom_sys_volt  # Battery charge voltage UKF, V
         self.sat = True  # Battery is saturated, T/F
         self.ib = 0  # Current into battery post, A
         self.vb = nom_sys_volt  # Battery voltage at post, V
@@ -422,8 +422,8 @@ class BatteryEKF:
         # eps_min_unscaled = 1 - (
         #       1 - eps_min) * self.cs / self.cu  # Numerical minimum of coefficient model without scaled soc_norm.
 
-    def calc_dynamics_ekf(self, u, dt=None):
-        """Executive model dynamics for ekf
+    def calc_dynamics_ukf(self, u, dt=None):
+        """Executive model dynamics for ukf
         State-space calculation
         Inputs:
             ib      Measured battery terminal current, A
@@ -436,13 +436,13 @@ class BatteryEKF:
             self.dt = dt
             # voc   Charge voltage, V
         self.u = u
-        self.propagate_state_space_ekf(self.u, dt=dt)
+        self.propagate_state_space_ukf(self.u, dt=dt)
 
     def hx_calc_voc(self, soc_k):
         """SOC-OCV curve fit method per Zhang, et al
-        The non-linear 'y' function for EKF
+        The non-linear 'y' function for UKF
         Inputs:
-            soc_k           Normalized soc from ekf (0-1), fraction
+            soc_k           Normalized soc from ukf (0-1), fraction
         Outputs:
             voc             Charge voltage, V
             dV_dSoc_norm    SOC-VOC slope, V/fraction
@@ -471,7 +471,7 @@ class BatteryEKF:
         self.voc_filtered += (self.soc_norm_filtered - soc_norm_lim) * self.dV_dSoc_norm
         return self.voc_filtered
 
-    def construct_state_space_ekf(self):
+    def construct_state_space_ukf(self):
         """ State-space representation of dynamics
         Inputs:   ib - current at V_bat = Vb = current at shunt, A
                   voc - internal open circuit voltage, V
@@ -490,7 +490,7 @@ class BatteryEKF:
         d = np.array([-self.r_0, 1])
         return a, b, c, d
 
-    def coulomb_counter_ekf(self):
+    def coulomb_counter_ukf(self):
         """Coulomb counter
         Internal resistance of battery is a loss
         Inputs:
@@ -515,12 +515,12 @@ class BatteryEKF:
         self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
         self.sat = self.voc_dyn >= self.v_sat
 
-    def h_ekf(self, x):
-        """ EKF feedback function
+    def h_ukf(self, x):
+        """ UKF feedback function
         Inputs:
-            x   EKF state
+            x   UKF state
         Outputs:
-            y   EKF output from non-linear function
+            y   UKF output from non-linear function
         """
         return [self.hx_calc_voc(x)]
 
@@ -530,7 +530,7 @@ class BatteryEKF:
         c = self.lut_c.lookup(T_degC=temp_c)
         return b, a, c
 
-    def propagate_state_space_ekf(self, u, dt=None):
+    def propagate_state_space_ukf(self, u, dt=None):
         """Time propagation from state-space using backward Euler
         Inputs:
             ib      Measured current into positive battery terminal, A
@@ -554,10 +554,10 @@ class BatteryEKF:
         self.voc_dyn = self.y
 
     def fx_soc_est(self, x, dt, u, tau=None):
-        """ Innovation function for simple EKF per the Mathworks' paper. See Huria, Ceraolo, Gazzarri, & Jackey,
+        """ Innovation function for simple UKF per the Mathworks' paper. See Huria, Ceraolo, Gazzarri, & Jackey,
         2013, 'Simplified Extended Kalman Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium
         Battery Cells'
-        This works for 1x1 EKF
+        This works for 1x1 UKF
         Input:
           ib  Measured battery terminal current, A
         Output:
@@ -623,7 +623,7 @@ if __name__ == '__main__':
     def main():
         # Setup to run the transients
         dt = 0.1
-        dt_ekf = 0.1
+        dt_ukf = 0.1
         # time_end = 13.3
         # time_end = 700
         time_end = 1400
@@ -632,7 +632,7 @@ if __name__ == '__main__':
 
         # Definition
         battery_model = Battery()
-        battery_ekf = BatteryEKF()
+        battery_ukf = BatteryUKF()
         v_std = 0.01  # batt voltage meas uncertainty (0.01)
         i_std = 0.1  # shunt current meas uncertainty (0.1)
 
@@ -640,7 +640,7 @@ if __name__ == '__main__':
         r_std = 0.1  # Kalman sensor uncertainty (0.10, 0.2 max) belief in meas
         q_std = 0.005  # Process uncertainty (0.005, 0.1 max) belief in state
         points = MerweScaledSigmaPoints(n=1, alpha=.01, beta=2., kappa=2.)
-        kf = UKF(dim_x=1, dim_z=1, dt=dt, fx=battery_ekf.fx_soc_est, hx=battery_ekf.hx_calc_voc, points=points)
+        kf = UKF(dim_x=1, dim_z=1, dt=dt, fx=battery_ukf.fx_soc_est, hx=battery_ukf.hx_calc_voc, points=points)
         kf.Q = q_std**2
         kf.R = r_std**2
         kf.x = np.array([0])
@@ -664,7 +664,7 @@ if __name__ == '__main__':
         soc_s = []
         soc_norm_s = []
         pow_s = []
-        soc_norm_ekf_s = []
+        soc_norm_ukf_s = []
         voc_dyn_s = []
         soc_norm_filtered_s = []
         voc_filtered_s = []
@@ -686,7 +686,7 @@ if __name__ == '__main__':
                 current_in = -40.
             else:
                 current_in = 0.
-            init_ekf = (i <= 100)
+            init_ukf = (i <= 100)
 
             # Models
             battery_model.calc_voc(temp_c=temp_c, soc_init=soc_init)
@@ -694,16 +694,16 @@ if __name__ == '__main__':
             battery_model.calc_dynamics(u, dt=dt)
 
             # UKF
-            if init_ekf:
-                battery_ekf.assign_temp_c(temp_c)
-                # battery_ekf.assign_soc_norm(float(battery_ekf.soc_norm_filtered), battery_model.voc)
-                battery_ekf.assign_soc_norm(float(battery_model.soc_norm), battery_model.voc)
+            if init_ukf:
+                battery_ukf.assign_temp_c(temp_c)
+                # battery_ukf.assign_soc_norm(float(battery_ukf.soc_norm_filtered), battery_model.voc)
+                battery_ukf.assign_soc_norm(float(battery_model.soc_norm), battery_model.voc)
                 kf.x = np.array([battery_model.soc_norm])
-            u_ekf = np.array([battery_model.ibatt+randn()*i_std, battery_model.vbatt+randn()*v_std]).T
-            battery_ekf.calc_dynamics_ekf(u_ekf, dt=dt_ekf)
-            battery_ekf.coulomb_counter_ekf()
-            kf.predict(u=battery_ekf.ib)
-            kf.update(battery_ekf.voc_dyn)
+            u_ukf = np.array([battery_model.ibatt+randn()*i_std, battery_model.vbatt+randn()*v_std]).T
+            battery_ukf.calc_dynamics_ukf(u_ukf, dt=dt_ukf)
+            battery_ukf.coulomb_counter_ukf()
+            kf.predict(u=battery_ukf.ib)
+            kf.update(battery_ukf.voc_dyn)
 
             # Plot stuff
             current_in_s.append(current_in)
@@ -722,10 +722,10 @@ if __name__ == '__main__':
             soc_norm_s.append(battery_model.soc_norm)
             soc_s.append(battery_model.soc)
             pow_s.append(battery_model.pow_in)
-            soc_norm_ekf_s.append(battery_ekf.soc_norm)
-            voc_dyn_s.append(battery_ekf.voc_dyn)
-            soc_norm_filtered_s.append(battery_ekf.soc_norm_filtered)
-            voc_filtered_s.append(battery_ekf.voc_filtered)
+            soc_norm_ukf_s.append(battery_ukf.soc_norm)
+            voc_dyn_s.append(battery_ukf.voc_dyn)
+            soc_norm_filtered_s.append(battery_ukf.soc_norm_filtered)
+            voc_filtered_s.append(battery_ukf.voc_filtered)
             prior_soc_s.append(kf.x_prior[0])
             x_s.append(kf.x)
             z_s.append(kf.z)
@@ -776,7 +776,7 @@ if __name__ == '__main__':
             plt.legend(loc=3)
             plt.subplot(322)
             plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
-            plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm_ekf')
+            plt.plot(t, soc_norm_ukf_s, color='black', linestyle='dotted', label='SOC_norm_ukf')
             plt.ylim(0.92, 1.0)
             plt.legend(loc=4)
             plt.subplot(323)
@@ -808,7 +808,7 @@ if __name__ == '__main__':
             plt.legend(loc=3)
             plt.subplot(322)
             plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
-            plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm_ekf')
+            plt.plot(t, soc_norm_ukf_s, color='black', linestyle='dotted', label='SOC_norm_ukf')
             plt.legend(loc=4)
             plt.subplot(323)
             plt.plot(t, v_oc_s, color='blue', label='actual voc')
