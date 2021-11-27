@@ -332,7 +332,8 @@ class BatteryEKF:
 
     def __init__(self, n_cells=4, r0=0.003, tau_ct=3.7, rct=0.0016, tau_dif=83, r_dif=0.0077, dt=0.1, b=0., a=0.,
                  c=0., n=0.4, m=0.478, d=0.707, t_t=None, t_b=None, t_a=None, t_c=None, nom_bat_cap=100.,
-                 true_bat_cap=102., nom_sys_volt=13., dv=0, sr=1, bat_v_sat=3.4625, dvoc_dt=0.001875):
+                 true_bat_cap=102., nom_sys_volt=13., dv=0, sr=1, bat_v_sat=3.4625, dvoc_dt=0.001875, rsd=70.,
+                 tau_sd=1.8e7):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -382,6 +383,16 @@ class BatteryEKF:
         self.lut_b.setValueTable(t_b)
         self.lut_a.setValueTable(t_a)
         self.lut_c.setValueTable(t_c)
+
+        # Estimator
+        # Nominal rsd is loss of 70% charge (Dsoc=0.7) in 6 month (Dt=1.8e7 sec = tau_sd). Dsoc= i*Dt/(3600*nom_bat_cap)
+        # R=(nom_bat_volt=1=soc_max)/i = 1/Dsoc*Dt/3600/nom_bat_cap = 70 for 1v, 100 A-h.  Cq=257000 F.
+        self.r_sd = rsd
+        self.tau_sd = tau_sd
+        self.cq = self.tau_sd / self.r_sd
+        self.exp_t_tau = math.exp(-dt / self.tau_sd)
+        self.Fx = self.exp_t_tau
+        self.Bu = (1. - self.exp_t_tau)
 
         # Other things
         self.soc = 0.  # State of charge, %
@@ -604,8 +615,8 @@ if __name__ == '__main__':
         # Definition
         battery_model = Battery()
         battery_ekf = BatteryEKF()
-        v_std = 0.01  # batt voltage meas uncertainty (0.01)
-        i_std = 0.1  # shunt current meas uncertainty (0.1)
+        v_std = 0.01*0  # batt voltage meas uncertainty (0.01)
+        i_std = 0.1*0  # shunt current meas uncertainty (0.1)
 
         # Setup the EKF
         r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
@@ -614,6 +625,8 @@ if __name__ == '__main__':
         kf.R = r_std**2
         kf.Q = q_std**2
         kf.P *= 100
+        kf.F = np.array(battery_ekf.Fx)
+        kf.B = np.array(battery_ekf.Bu)
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)
