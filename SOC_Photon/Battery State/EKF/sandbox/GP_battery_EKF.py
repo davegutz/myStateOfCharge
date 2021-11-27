@@ -420,8 +420,8 @@ class BatteryEKF:
         self.pow_log_soc_norm = 0.
 
     def calc_dynamics_ekf(self, u, dt=None):
-        """Executive model dynamics for ekf
-        State-space calculation
+        """Executive model dynamics for ekf State-space calculation
+        Time propagation from state-space using backward Euler
         Inputs:
             ib      Measured battery terminal current, A
             vb      Measured battery terminal voltage, V
@@ -429,11 +429,23 @@ class BatteryEKF:
             ioc     Charge current, A
             voc_dyn Charge voltage dynamic calculation, V
         """
+
         if dt is not None:
             self.dt = dt
             # voc   Charge voltage, V
         self.u = u
-        self.propagate_state_space_ekf(self.u, dt=dt)
+        self.ib = self.u[0]
+        self.vb = self.u[1]
+        if self.x is None:  # Initialize
+            self.x = np.array([self.ib * self.r_ct, self.ib * self.r_dif]).T
+        if dt is not None:
+            self.dt = dt
+        self.x_past = self.x
+        self.x_dot = self.A @ self.x + self.B @ self.u
+        self.x += self.x_dot * self.dt
+        self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
+        self.ioc = self.ib
+        self.voc_dyn = self.y
 
     def calc_soc_voc_coeff(self, soc_k):
         """
@@ -531,29 +543,6 @@ class BatteryEKF:
         a = self.lut_a.lookup(T_degC=temp_c)
         c = self.lut_c.lookup(T_degC=temp_c)
         return b, a, c
-
-    def propagate_state_space_ekf(self, u, dt=None):
-        """Time propagation from state-space using backward Euler
-        Inputs:
-            ib      Measured current into positive battery terminal, A
-            vb      Measured battery terminal voltage, V
-        Outputs:
-            ioc     Calculated charge current, A
-            voc_dyn Calculated charge voltage dynamic, V
-        """
-        self.u = u
-        self.ib = self.u[0]
-        self.vb = self.u[1]
-        if self.x is None:  # Initialize
-            self.x = np.array([self.ib * self.r_ct, self.ib * self.r_dif]).T
-        if dt is not None:
-            self.dt = dt
-        self.x_past = self.x
-        self.x_dot = self.A @ self.x + self.B @ self.u
-        self.x += self.x_dot * self.dt
-        self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
-        self.ioc = self.ib
-        self.voc_dyn = self.y
 
     def assign_soc_norm(self, soc_norm, voc):
         self.soc_norm = soc_norm
