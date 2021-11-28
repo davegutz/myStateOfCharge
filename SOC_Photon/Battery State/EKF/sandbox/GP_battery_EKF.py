@@ -119,6 +119,7 @@ class Battery:
         self.log_soc_norm = 0.
         self.exp_n_soc_norm = 0.
         self.pow_log_soc_norm = 0.
+        self.i_charge = self.ioc
 
     def calc_voc(self, temp_c=25., soc_init=0.5):
         """SOC-OCV curve fit method per Zhang, et al
@@ -167,7 +168,7 @@ class Battery:
         self.u[1] = self.voc
         return self.voc
 
-    def calc_dynamics(self, u, dt=None):
+    def calc_dynamics(self, u, dt=None, i_hyst=0.):
         """Executive model dynamics
         State-space calculation
         Inputs:
@@ -191,6 +192,13 @@ class Battery:
 
         # State-space calculation
         self.propagate_state_space(self.u, dt=dt)
+
+        # Crude hysteresis model
+        if self.i_batt >= 0.:
+            self.i_batt = max(self.i_batt - i_hyst, 0.0)
+        else:
+            self.i_batt = min(self.i_batt + i_hyst, 0.0)
+        self.i_charge = self.i_batt
 
         # Coulomb counter
         self.coulomb_counter()
@@ -255,7 +263,7 @@ class Battery:
             soc     State of charge, fraction (0-1.5)
             soc_norm    Normalized state of charge, fraction (0-1)
         """
-        self.pow_in = self.ioc * self.voc * self.sr
+        self.pow_in = self.i_charge * self.voc * self.sr
         self.soc = max(min(self.soc + self.pow_in / self.nom_sys_volt * self.dt / 3600. / self.nom_bat_cap, 1.5), 0.)
         # if self.sat:
         #     self.soc = self.eps_max
@@ -613,10 +621,14 @@ if __name__ == '__main__':
         soc_init = 0.975
 
         # Definition
-        battery_model = Battery()
-        battery_ekf = BatteryEKF()
         v_std = 0.01*0  # batt voltage meas uncertainty (0.01)
         i_std = 0.1*0  # shunt current meas uncertainty (0.1)
+        i_hyst = 2.*0  # crude hysteresis model on battery SOC-VOC (2.0)
+        dv_sense = 0.05*0  # (0.05)
+        di_sense = 1.0*0  # (1.0)
+        soc_init_err = -0.2  # (-0.2)
+        battery_model = Battery(nom_bat_cap=120., true_bat_cap=120.)  # (100., 102.)
+        battery_ekf = BatteryEKF(nom_bat_cap=100., true_bat_cap=102.)  # (100., 102.)
 
         # Setup the EKF
         r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
@@ -656,6 +668,8 @@ if __name__ == '__main__':
         k_s = []
         v_batt_s = []
         i_batt_s = []
+        e_soc_ekf_s = []
+        e_voc_ekf_s = []
 
         for i in range(len(t)):
             if t[i] < 50:
@@ -668,20 +682,21 @@ if __name__ == '__main__':
                 current_in = -40.
             else:
                 current_in = 0.
-            init_ekf = (i <= 100)
+            init_ekf = (t[i] <= 10)
 
             # Models
             battery_model.calc_voc(temp_c=temp_c, soc_init=soc_init)
             u = np.array([current_in, battery_model.voc]).T
-            battery_model.calc_dynamics(u, dt=dt)
+            battery_model.calc_dynamics(u, dt=dt, i_hyst=i_hyst)
 
             # EKF
             if init_ekf:
                 battery_ekf.assign_temp_c(temp_c)
                 battery_ekf.assign_soc_norm(float(battery_model.soc_norm), battery_model.voc)
-                kf.x = np.array([battery_model.soc_norm])
+                kf.x = np.array([battery_model.soc_norm+soc_init_err])
             # Setup
-            u_ekf = np.array([battery_model.i_batt+randn()*i_std, battery_model.v_batt+randn()*v_std]).T
+            u_ekf = np.array([battery_model.i_batt+randn()*i_std+di_sense,
+                              battery_model.v_batt+randn()*v_std+dv_sense]).T
             battery_ekf.calc_dynamics_ekf(u_ekf, dt=dt_ekf)
             battery_ekf.coulomb_counter_ekf()
             # Call Kalman Filter
@@ -689,6 +704,8 @@ if __name__ == '__main__':
             kf.update(battery_ekf.voc_dyn, battery_ekf.h_jacobian, battery_ekf.hx_calc_voc)
 
             # Plot stuff
+            e_soc_ekf = (battery_ekf.soc_norm_filtered - battery_model.soc_norm) / battery_model.soc_norm
+            e_voc_ekf = (battery_ekf.voc_filtered - battery_model.voc) / battery_model.voc
             current_in_s.append(current_in)
             ib.append(battery_model.ib)
             v_oc_s.append(battery_model.voc)
@@ -715,6 +732,8 @@ if __name__ == '__main__':
             k_s.append(kf.K)
             v_batt_s.append(battery_model.v_batt)
             i_batt_s.append(battery_model.i_batt)
+            e_soc_ekf_s.append(e_soc_ekf)
+            e_voc_ekf_s.append(e_voc_ekf)
 
         # Plots
         if False:
@@ -760,7 +779,7 @@ if __name__ == '__main__':
             plt.subplot(322)
             plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
             plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm_ekf')
-            # plt.ylim(0.92, 1.0)
+            plt.ylim(0.92, 1.0)
             plt.legend(loc=4)
             plt.subplot(323)
             plt.plot(t, v_oc_s, color='blue', label='actual voc')
@@ -768,17 +787,22 @@ if __name__ == '__main__':
             plt.plot(t, voc_filtered_s, color='green', label='voc_filtered state')
             plt.plot(t, vbs, color='black', label='vb')
             plt.plot(t, v_batt_s, color='magenta', linestyle='dotted', label='v_batt')
-            # plt.ylim(13, 15)
+            plt.ylim(13, 15)
             plt.legend(loc=4)
             plt.subplot(324)
             plt.plot(t, soc_norm_s, color='black', linestyle='dotted', label='SOC_norm')
             plt.plot(t, prior_soc_s, color='red', linestyle='dotted', label='post soc_norm_filtered')
             plt.plot(t, x_s, color='green', label='x soc_norm_filtered')
-            # plt.ylim(0.92, 1.0)
+            plt.ylim(0.92, 1.0)
             plt.legend(loc=4)
             plt.subplot(325)
             plt.plot(t, k_s, color='red', linestyle='dotted', label='K (belief state / belief meas)')
             plt.legend(loc=4)
+            plt.subplot(326)
+            plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
+            plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
+            plt.ylim(-0.01, 0.01)
+            plt.legend(loc=2)
             plt.show()
 
 
