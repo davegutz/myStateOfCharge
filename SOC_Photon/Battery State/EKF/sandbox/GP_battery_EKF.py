@@ -734,7 +734,7 @@ if __name__ == '__main__':
             prior_soc_s.append(kf.x_prior[0])
             x_s.append(kf.x)
             z_s.append(kf.z)
-            k_s.append(kf.K)
+            k_s.append(float(kf.K[0]))
             v_batt_s.append(battery_model.v_batt)
             i_batt_s.append(battery_model.i_batt)
             e_soc_ekf_s.append(e_soc_ekf)
