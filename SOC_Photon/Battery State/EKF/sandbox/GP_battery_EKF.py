@@ -31,7 +31,7 @@ class Battery:
     def __init__(self, n_cells=4, r0=0.003, tau_ct=3.7, rct=0.0016, tau_dif=83, r_dif=0.0077, dt=0.1, b=0., a=0.,
                  c=0., n=0.4, m=0.478, d=0.707, t_t=None, t_b=None, t_a=None, t_c=None, nom_bat_cap=100.,
                  true_bat_cap=102., nom_sys_volt=13., dv=0, sr=1, bat_v_sat=3.4625, dvoc_dt=0.001875, sat_gain=10.,
-                 tau_m=0.159):
+                 tau_m=0.159, bat_cap_scalar=1.0):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -103,6 +103,7 @@ class Battery:
         self.ioc = 0  # Battery charge current, A
         self.cu = nom_bat_cap  # Assumed capacity, Ah
         self.cs = true_bat_cap  # Data fit to this capacity to avoid math 0, Ah
+        self.bat_cap_scalar = bat_cap_scalar # Warp the battery char, e.g. life
         self.dv = dv  # Adjustment for voltage level, V (0)
         self.sr = sr  # Adjustment for resistance scalar, fraction (1)
         self.pow_in = None  # Charging power, W
@@ -618,7 +619,6 @@ if __name__ == '__main__':
         # time_end = 700
         time_end = 1400
         temp_c = 25.
-        soc_init = 0.975
 
         # Definition
         v_std = 0.01*0  # batt voltage meas uncertainty (0.01)
@@ -626,9 +626,11 @@ if __name__ == '__main__':
         i_hyst = 2.*0  # crude hysteresis model on battery SOC-VOC (2.0)
         dv_sense = 0.05*0  # (0.05)
         di_sense = 1.0*0  # (1.0)
-        soc_init_err = -0.2  # (-0.2)
-        battery_model = Battery(nom_bat_cap=120., true_bat_cap=120.)  # (100., 102.)
-        battery_ekf = BatteryEKF(nom_bat_cap=100., true_bat_cap=102.)  # (100., 102.)
+        soc_init_err = -0.2*0.  # (-0.2)
+        model_bat_cap = 120.  # (100.)
+        soc_init = 1.0
+        battery_model = Battery(nom_bat_cap=model_bat_cap, true_bat_cap=model_bat_cap)
+        battery_ekf = BatteryEKF()
 
         # Setup the EKF
         r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
@@ -670,16 +672,17 @@ if __name__ == '__main__':
         i_batt_s = []
         e_soc_ekf_s = []
         e_voc_ekf_s = []
+        e_soc_norm_ekf_s = []
 
         for i in range(len(t)):
             if t[i] < 50:
                 current_in = 0.
             elif t[i] < 450:
-                current_in = 40.
+                current_in = -40.
             elif t[i] < 550:
                 current_in = 0.
             elif t[i] < 950:
-                current_in = -40.
+                current_in = 40.
             else:
                 current_in = 0.
             init_ekf = (t[i] <= 10)
@@ -706,6 +709,8 @@ if __name__ == '__main__':
             # Plot stuff
             e_soc_ekf = (battery_ekf.soc_norm_filtered - battery_model.soc_norm) / battery_model.soc_norm
             e_voc_ekf = (battery_ekf.voc_filtered - battery_model.voc) / battery_model.voc
+            e_soc_norm_ekf = (battery_ekf.soc_norm - battery_model.soc_norm) / battery_model.soc_norm
+
             current_in_s.append(current_in)
             ib.append(battery_model.ib)
             v_oc_s.append(battery_model.voc)
@@ -734,6 +739,7 @@ if __name__ == '__main__':
             i_batt_s.append(battery_model.i_batt)
             e_soc_ekf_s.append(e_soc_ekf)
             e_voc_ekf_s.append(e_voc_ekf)
+            e_soc_norm_ekf_s.append(e_soc_norm_ekf)
 
         # Plots
         if False:
@@ -779,7 +785,7 @@ if __name__ == '__main__':
             plt.subplot(322)
             plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
             plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm_ekf')
-            plt.ylim(0.92, 1.0)
+            plt.ylim(0.92, 1.01)
             plt.legend(loc=4)
             plt.subplot(323)
             plt.plot(t, v_oc_s, color='blue', label='actual voc')
@@ -793,7 +799,7 @@ if __name__ == '__main__':
             plt.plot(t, soc_norm_s, color='black', linestyle='dotted', label='SOC_norm')
             plt.plot(t, prior_soc_s, color='red', linestyle='dotted', label='post soc_norm_filtered')
             plt.plot(t, x_s, color='green', label='x soc_norm_filtered')
-            plt.ylim(0.92, 1.0)
+            plt.ylim(0.92, 1.01)
             plt.legend(loc=4)
             plt.subplot(325)
             plt.plot(t, k_s, color='red', linestyle='dotted', label='K (belief state / belief meas)')
@@ -801,6 +807,7 @@ if __name__ == '__main__':
             plt.subplot(326)
             plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
             plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
+            plt.plot(t, e_soc_norm_ekf_s, color='black', linestyle='dotted', label='e_soc_norm to User')
             plt.ylim(-0.01, 0.01)
             plt.legend(loc=2)
             plt.show()
