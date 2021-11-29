@@ -401,7 +401,7 @@ class BatteryEKF:
         self.cq = self.tau_sd / self.r_sd
         self.exp_t_tau = math.exp(-dt / self.tau_sd)
         self.Fx = self.exp_t_tau
-        self.Bu = (1. - self.exp_t_tau)
+        self.Bu = (1. - self.exp_t_tau)*self.r_sd
 
         # Other things
         self.soc = 0.  # State of charge, %
@@ -428,6 +428,7 @@ class BatteryEKF:
         self.sr = sr  # Adjustment for resistance scalar, fraction (1)
         self.pow_in = None  # Charging power, W
         self.time_charge = None  # Charging time to 100%, hr
+        # TODO:  need v_sat logic to take advantage of saturation reset
         # self.nom_v_sat = bat_v_sat * self.n_cells  # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
         # self.dVoc_dT = dvoc_dt * self.n_cells  # Change of VOC with operating temperature in range 0 - 50 C, V/deg C
         self.eps_max = 1 - 1e-6  # Numerical maximum of coefficient model with scaled soc_norm.
@@ -624,34 +625,34 @@ if __name__ == '__main__':
         # i-->0 provides continuous anchor to reset filter (why?)  i shifts important --> 2 current sensors, hyst in ekf
         # saturation provides periodic anchor to reset filter
         # reset soc periodically anchor user display
+        # tau_sd creating an anchor.   So large it's just a pass through.  TODO:  Why x correct??
         # TODO:  filter soc for saturation calculation in model
         # TODO:  temp sensitivities and mitigation
         dv_sense = 0.  # (0.-->0.1) ++++++++ flat curve
         di_sense = 0.  # (0.-->0.5) ++++++++  i does not go to zero steady state
         i_hyst = 0.  # (0.-->5.) ++++++++  dyn only since i->0 steady state.  But very large transiently
-        model_bat_cap = 100.  # (100.-->80) ++++++++++ dyn only provided reset soc periodically  ???????
+        model_bat_cap = 100.  # (100.-->80) ++++++++++ dyn only provided reset soc periodically  TODO:  ???????
         soc_init_err = 0.0  # (0-->-0.2)  ------ long simulation init time corrects this --> reset soc periodically
         r0 = 0.003  # (0.003-->0.006)  +++ dyn only provided reset soc periodically
         rct = 0.0016  # (0.0016-->0.0032) ++++++++++ dyn only provided reset soc periodically
         tau_dif = 83  # (83-->100)  +++++++++++ dyn only provided reset soc periodically
         r_dif = 0.0077  # (0.0077-->0.015)   ++++++++++  dyn only provided reset soc periodically
+        rsd = 70.  # (70.-->700)  ------- dyn only
+        tau_sd = 1.87e7  # (1.87e7-->1.87e6) ++++++ dyn only
         v_std = 0.01  # (0.0-0.01) ------ noise
         i_std = 0.1  # (0.0-0.1) ------ noise
         soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
-        rsd = 70.  # (70.-->700)  -------
-        tau_sd = 1.87e7  # (1.87e7-->1.87e5) -------
         tau_ct = 3.7  # (3.7-->5.)  -------
 
-        battery_model = Battery(nom_bat_cap=model_bat_cap, true_bat_cap=model_bat_cap)
-        battery_ekf = BatteryEKF(rsd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, rct=rct, tau_dif=tau_dif, r_dif=r_dif)
-
-        # Setup the EKF
+        # Setup
         r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
         q_std = 0.001  # Process uncertainty (0.001) belief in state
         kf = ExtendedKalmanFilter(dim_x=1, dim_z=1)
         kf.R = r_std**2
         kf.Q = q_std**2
         kf.P *= 100
+        battery_model = Battery(nom_bat_cap=model_bat_cap, true_bat_cap=model_bat_cap)
+        battery_ekf = BatteryEKF(rsd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, rct=rct, tau_dif=tau_dif, r_dif=r_dif)
         kf.F = np.array(battery_ekf.Fx)
         kf.B = np.array(battery_ekf.Bu)
 
