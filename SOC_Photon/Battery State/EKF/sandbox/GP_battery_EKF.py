@@ -414,11 +414,11 @@ class BatteryEKF:
             This is what gets delivered, e.g. W_shunt/NOM_SYS_VOLT.  Also varies 0.2-0.4C
             currents or 20-40 A for a 100 Ah battery"""
         self.nom_sys_volt = nom_sys_volt  # Nominal battery label voltage, e.g. 12, V
-        self.v_sat = nom_sys_volt + 1.7  # Saturation voltage, V
+        # self.v_sat = nom_sys_volt + 1.7  # Saturation voltage, V
         # self.voc = nom_sys_volt  # Battery charge voltage, V
         self.voc_dyn = nom_sys_volt  # Battery charge voltage calculated from dynamics, V
         self.voc_filtered = nom_sys_volt  # Battery charge voltage EKF, V
-        self.sat = True  # Battery is saturated, T/F
+        # self.sat = True  # Battery is saturated, T/F
         self.ib = 0  # Current into battery post, A
         self.vb = nom_sys_volt  # Battery voltage at post, V
         self.ioc = 0  # Current into battery storage, A
@@ -428,8 +428,8 @@ class BatteryEKF:
         self.sr = sr  # Adjustment for resistance scalar, fraction (1)
         self.pow_in = None  # Charging power, W
         self.time_charge = None  # Charging time to 100%, hr
-        self.nom_v_sat = bat_v_sat * self.n_cells  # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
-        self.dVoc_dT = dvoc_dt * self.n_cells  # Change of VOC with operating temperature in range 0 - 50 C, V/deg C
+        # self.nom_v_sat = bat_v_sat * self.n_cells  # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
+        # self.dVoc_dT = dvoc_dt * self.n_cells  # Change of VOC with operating temperature in range 0 - 50 C, V/deg C
         self.eps_max = 1 - 1e-6  # Numerical maximum of coefficient model with scaled soc_norm.
         self.eps_min = 1e-6  # Numerical minimum of coefficient model without scaled soc_norm.
         # eps_min_unscaled = 1 - (
@@ -555,8 +555,8 @@ class BatteryEKF:
         #     self.soc = self.eps_max
         # self.soc_norm = 1. - (1. - self.soc) * self.cu / self.cs
         self.soc_norm = self.soc * self.cu / self.cs
-        self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
-        self.sat = self.voc_dyn >= self.v_sat
+        # self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
+        # self.sat = self.voc_dyn >= self.v_sat
 
     def look(self, temp_c):
         b = self.lut_b.lookup(T_degC=temp_c)
@@ -568,8 +568,8 @@ class BatteryEKF:
         self.soc_norm = soc_norm
         self.soc = soc_norm * self.cs / self.cu
         self.voc_filtered = voc
-        self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
-        self.sat = self.voc_filtered >= self.v_sat
+        # self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
+        # self.sat = self.voc_filtered >= self.v_sat
 
     def assign_temp_c(self, temp_c):
         self.temp_c = temp_c
@@ -617,20 +617,31 @@ if __name__ == '__main__':
         # time_end = 1
         # time_end = 13.3
         # time_end = 700
-        time_end = 1400
+        time_end = 2500
         temp_c = 25.
 
-        # Definition
-        v_std = 0.01*0  # batt voltage meas uncertainty (0.01)
-        i_std = 0.1*0  # shunt current meas uncertainty (0.1)
-        i_hyst = 2.*0  # crude hysteresis model on battery SOC-VOC (2.0)
-        dv_sense = 0.05*0  # (0.05)
-        di_sense = 1.0*0  # (1.0)
-        soc_init_err = -0.2*0.  # (-0.2)
-        model_bat_cap = 120.  # (100.)
-        soc_init = 1.0
+        # Trade study inputs
+        # i-->0 provides continuous anchor to reset filter
+        # saturation provides periodic anchor to reset filter
+        # reset soc periodically anchor user display
+        dv_sense = 0.1*1  # (0.1) ++++++++ flat curve
+        di_sense = 0.5*0  # (0.5) ++++++++  i does not go to zero steady state
+        i_hyst = 5.*0  # ++++++++  dyn only since i->0 steady state.  But very large transiently
+        model_bat_cap = 100.  # (100.) ++++++++++ dyn only provided reset soc periodically  ???????
+        soc_init_err = -0.5*0.  # (-0.2)  ------ long init time corrects this --> must reset soc periodically
+        r0 = 0.003  # (0.003)  +++ dyn only provided reset soc periodically
+        rct = 0.0016  # (0.0016) ++++++++++ dyn only provided reset soc periodically
+        tau_dif = 83  # (83)  +++++++++++ dyn only provided reset soc periodically
+        r_dif = 0.0077  # (0.0077)   ++++++++++  dyn only provided reset soc periodically
+        v_std = 0.01*0  # ------ noise
+        i_std = 0.1*0  # ------ noise
+        soc_init = 1.0  # (1.0)  ------  initialization artifacts only
+        rsd = 70.  # (70.)  -------
+        tau_sd = 1.87e5  # (1.87e7) -------
+        tau_ct = 3.7  # (3.7)  -------
+
         battery_model = Battery(nom_bat_cap=model_bat_cap, true_bat_cap=model_bat_cap)
-        battery_ekf = BatteryEKF()
+        battery_ekf = BatteryEKF(rsd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, rct=rct, tau_dif=tau_dif, r_dif=r_dif)
 
         # Setup the EKF
         r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
@@ -679,9 +690,9 @@ if __name__ == '__main__':
                 current_in = 0.
             elif t[i] < 450:
                 current_in = -40.
-            elif t[i] < 550:
+            elif t[i] < 1000:
                 current_in = 0.
-            elif t[i] < 950:
+            elif t[i] < 1400:
                 current_in = 40.
             else:
                 current_in = 0.
@@ -793,7 +804,7 @@ if __name__ == '__main__':
             plt.plot(t, voc_filtered_s, color='green', label='voc_filtered state')
             plt.plot(t, vbs, color='black', label='vb')
             plt.plot(t, v_batt_s, color='magenta', linestyle='dotted', label='v_batt')
-            plt.ylim(13, 15)
+            plt.ylim(11, 16)
             plt.legend(loc=4)
             plt.subplot(324)
             plt.plot(t, soc_norm_s, color='black', linestyle='dotted', label='SOC_norm')
