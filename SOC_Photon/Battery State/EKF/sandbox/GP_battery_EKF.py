@@ -402,6 +402,19 @@ class BatteryEKF:
         self.exp_t_tau = math.exp(-dt / self.tau_sd)
         self.Fx = self.exp_t_tau
         self.Bu = (1. - self.exp_t_tau)*self.r_sd
+        self.P = 0.
+        self.H = 0.
+        self.S = 0.
+        self.K = 0.
+        self.hx = 0.
+        self.U = 0.
+        self.X = 0.
+        self.Y = 0.
+        self.Z = 0.
+        self.X_prior = self.X
+        self.P_prior = self.P
+        self.X_post = self.X
+        self.P_post = self.P
 
         # Other things
         self.soc = 0.  # State of charge, %
@@ -559,7 +572,56 @@ class BatteryEKF:
         # self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
         # self.sat = self.voc_dyn >= self.v_sat
 
+    def kf_predict_1x1(self, u=None):
+        """1x1 Extended Kalman Filter predict
+        Inputs:
+            u   1x1 input, =ib, A
+            Bu  1x1 control transition, Ohms
+            Fx  1x1 state transition, V/V
+        Outputs:
+            x   1x1 Kalman state variable = Vsoc (0-1 fraction)
+            P   1x1 Kalman probability
+        """
+        self.U = u
+        self.X = self.Fx*self.X + self.Bu*self.U
+        self.P = self.Fx * self.P * self.Fx + self.Q
+        self.X_prior = self.X
+        self.P_prior = self.P
+
+    def kf_update_1x1(self, z, h_jacobian=None, hx_calc=None):
+        """ 1x1 Extended Kalman Filter update
+            Inputs:
+                z   1x1 input, =voc, dynamic predicted by other model, V
+                R   1x1 Kalman state uncertainty
+                Q   1x1 Kalman process uncertainty
+                H   1x1 Jacobian sensitivity dV/dSOC
+            Outputs:
+                x   1x1 Kalman state variable = Vsoc (0-1 fraction)
+                y   1x1 Residual z-hx, V
+                P   1x1 Kalman uncertainty covariance
+                K   1x1 Kalman gain
+                S   1x1 system uncertainty
+                SI  1x1 system uncertainty inverse
+        """
+        if h_jacobian is None:
+            h_jacobian = self.h_jacobian
+        if hx_calc is None:
+            hx_calc = self.hx_calc_voc
+        self.Z = z
+        self.H = h_jacobian(self.X)
+        PHT = self.P*self.H
+        self.S = self.H*PHT + self.R
+        self.K = PHT/self.S
+        self.hx = hx_calc(self.X)
+        self.Y = self.Z - self.hx
+        self.X = self.X + self.K*self.Y
+        I_KH = 1 - self.K*self.H
+        self.P = I_KH*self.P
+        self.X_post = self.X
+        self.P_post = self.P
+
     def look(self, temp_c):
+        # Lookup Zhang coefficients
         b = self.lut_b.lookup(T_degC=temp_c)
         a = self.lut_a.lookup(T_degC=temp_c)
         c = self.lut_c.lookup(T_degC=temp_c)
@@ -653,8 +715,12 @@ if __name__ == '__main__':
         kf.P *= 100
         battery_model = Battery(nom_bat_cap=model_bat_cap, true_bat_cap=model_bat_cap)
         battery_ekf = BatteryEKF(rsd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, rct=rct, tau_dif=tau_dif, r_dif=r_dif)
+        battery_ekfx = BatteryEKF(rsd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, rct=rct, tau_dif=tau_dif, r_dif=r_dif)
         kf.F = np.array(battery_ekf.Fx)
         kf.B = np.array(battery_ekf.Bu)
+        battery_ekfx.R = kf.R
+        battery_ekfx.Q = kf.Q
+        battery_ekfx.P = kf.P
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)
@@ -687,6 +753,9 @@ if __name__ == '__main__':
         e_soc_ekf_s = []
         e_voc_ekf_s = []
         e_soc_norm_ekf_s = []
+        e_soc_ekfx_s = []
+        e_voc_ekfx_s = []
+        e_soc_norm_ekfx_s = []
 
         for i in range(len(t)):
             if t[i] < 50:
@@ -710,20 +779,31 @@ if __name__ == '__main__':
             if init_ekf:
                 battery_ekf.assign_temp_c(temp_c)
                 battery_ekf.assign_soc_norm(float(battery_model.soc_norm), battery_model.voc)
+                battery_ekfx.assign_temp_c(temp_c)
+                battery_ekfx.assign_soc_norm(float(battery_model.soc_norm), battery_model.voc)
                 kf.x = np.array([battery_model.soc_norm+soc_init_err])
+                battery_ekfx.X = kf.x
             # Setup
             u_ekf = np.array([battery_model.i_batt+randn()*i_std+di_sense,
                               battery_model.v_batt+randn()*v_std+dv_sense]).T
             battery_ekf.calc_dynamics_ekf(u_ekf, dt=dt_ekf)
             battery_ekf.coulomb_counter_ekf()
-            # Call Kalman Filter
+            battery_ekfx.calc_dynamics_ekf(u_ekf, dt=dt_ekf)
+            battery_ekfx.coulomb_counter_ekf()
+
+            # Call Kalman Filters
             kf.predict(u=battery_ekf.ib)
             kf.update(battery_ekf.voc_dyn, battery_ekf.h_jacobian, battery_ekf.hx_calc_voc)
+            battery_ekfx.kf_predict_1x1(u=battery_ekf.ib)
+            battery_ekfx.kf_update_1x1(battery_ekf.voc_dyn)
 
             # Plot stuff
             e_soc_ekf = (battery_ekf.soc_norm_filtered - battery_model.soc_norm) / battery_model.soc_norm
             e_voc_ekf = (battery_ekf.voc_filtered - battery_model.voc) / battery_model.voc
             e_soc_norm_ekf = (battery_ekf.soc_norm - battery_model.soc_norm) / battery_model.soc_norm
+            e_soc_ekfx = (battery_ekfx.soc_norm_filtered - battery_model.soc_norm) / battery_model.soc_norm
+            e_voc_ekfx = (battery_ekfx.voc_filtered - battery_model.voc) / battery_model.voc
+            e_soc_norm_ekfx = (battery_ekfx.soc_norm - battery_model.soc_norm) / battery_model.soc_norm
 
             current_in_s.append(current_in)
             ib.append(battery_model.ib)
@@ -754,6 +834,9 @@ if __name__ == '__main__':
             e_soc_ekf_s.append(e_soc_ekf)
             e_voc_ekf_s.append(e_voc_ekf)
             e_soc_norm_ekf_s.append(e_soc_norm_ekf)
+            e_soc_ekfx_s.append(e_soc_ekfx)
+            e_voc_ekfx_s.append(e_voc_ekfx)
+            e_soc_norm_ekfx_s.append(e_soc_norm_ekfx)
 
         # Plots
         if False:
@@ -822,6 +905,23 @@ if __name__ == '__main__':
             plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
             plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
             plt.plot(t, e_soc_norm_ekf_s, color='black', linestyle='dotted', label='e_soc_norm to User')
+            plt.plot(t, e_soc_ekfx_s, color='red', linestyle='dashed', label='e_soc_ekfx')
+            plt.plot(t, e_voc_ekfx_s, color='blue', linestyle='dashed', label='e_vocx')
+            plt.plot(t, e_soc_norm_ekfx_s, color='black', linestyle='dashed', label='e_soc_normx to User')
+            plt.ylim(-0.01, 0.01)
+            plt.legend(loc=2)
+            plt.show()
+            plt.figure()
+            plt.subplot(121)
+            plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
+            plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
+            plt.plot(t, e_soc_norm_ekf_s, color='black', linestyle='dotted', label='e_soc_norm to User')
+            plt.ylim(-0.01, 0.01)
+            plt.legend(loc=2)
+            plt.subplot(122)
+            plt.plot(t, e_soc_ekfx_s, color='red', linestyle='dashed', label='e_soc_ekfx')
+            plt.plot(t, e_voc_ekfx_s, color='blue', linestyle='dashed', label='e_vocx')
+            plt.plot(t, e_soc_norm_ekfx_s, color='black', linestyle='dashed', label='e_soc_normx to User')
             plt.ylim(-0.01, 0.01)
             plt.legend(loc=2)
             plt.show()
