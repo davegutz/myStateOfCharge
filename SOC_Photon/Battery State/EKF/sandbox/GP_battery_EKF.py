@@ -735,6 +735,8 @@ if __name__ == '__main__':
         soc_s = []
         soc_norm_s = []
         pow_s = []
+        v_batt_s = []
+        i_batt_s = []
         soc_norm_ekf_s = []
         voc_dyn_s = []
         soc_norm_filtered_s = []
@@ -743,8 +745,12 @@ if __name__ == '__main__':
         x_s = []
         z_s = []
         k_s = []
-        v_batt_s = []
-        i_batt_s = []
+        fx_s = []
+        bu_s = []
+        h_s = []
+        hx_s = []
+        y_s = []
+        p_s = []
         e_soc_ekf_s = []
         e_voc_ekf_s = []
         e_soc_norm_ekf_s = []
@@ -805,14 +811,20 @@ if __name__ == '__main__':
             pow_s.append(battery_model.pow_in)
             soc_norm_ekf_s.append(battery_ekf.soc_norm)
             voc_dyn_s.append(battery_ekf.voc_dyn)
+            v_batt_s.append(battery_model.v_batt)
+            i_batt_s.append(battery_model.i_batt)
             soc_norm_filtered_s.append(battery_ekf.soc_norm_filtered)
             voc_filtered_s.append(battery_ekf.voc_filtered)
             prior_soc_s.append(battery_ekf.x_prior)
             x_s.append(battery_ekf.x_kf)
             z_s.append(battery_ekf.z_ekf)
             k_s.append(float(battery_ekf.K))
-            v_batt_s.append(battery_model.v_batt)
-            i_batt_s.append(battery_model.i_batt)
+            fx_s.append(battery_ekf.Fx)
+            bu_s.append(battery_ekf.Bu)
+            h_s.append(float(battery_ekf.H))
+            hx_s.append(float(battery_ekf.hx))
+            y_s.append(float(battery_ekf.y_kf))
+            p_s.append(float(battery_ekf.P))
             e_soc_ekf_s.append(e_soc_ekf)
             e_voc_ekf_s.append(e_voc_ekf)
             e_soc_norm_ekf_s.append(e_soc_norm_ekf)
@@ -890,6 +902,34 @@ if __name__ == '__main__':
         plt.plot(t, e_soc_norm_ekf_s, color='black', linestyle='dotted', label='e_soc_norm to User')
         plt.ylim(-0.01, 0.01)
         plt.legend(loc=2)
+
+        plt.figure()
+        plt.subplot(331)
+        plt.plot(t, x_s, color='red', linestyle='dotted', label='x ekf')
+        plt.legend(loc=4)
+        plt.subplot(332)
+        plt.plot(t, hx_s, color='cyan', linestyle='dotted', label='hx ekf')
+        plt.plot(t, z_s, color='black', linestyle='dotted', label='z ekf')
+        plt.legend(loc=4)
+        plt.subplot(333)
+        plt.plot(t, y_s, color='green', linestyle='dotted', label='y ekf')
+        plt.legend(loc=4)
+        plt.subplot(334)
+        plt.plot(t, h_s, color='magenta', linestyle='dotted', label='H ekf')
+        plt.ylim(0, 50)
+        plt.legend(loc=3)
+        plt.subplot(335)
+        plt.plot(t, p_s, color='orange', linestyle='dotted', label='P ekf')
+        plt.legend(loc=3)
+        plt.subplot(336)
+        plt.plot(t, fx_s, color='red', linestyle='dotted', label='Fx ekf')
+        plt.legend(loc=2)
+        plt.subplot(337)
+        plt.plot(t, bu_s, color='blue', linestyle='dotted', label='Bu ekf')
+        plt.legend(loc=2)
+        plt.subplot(338)
+        plt.plot(t, k_s, color='red', linestyle='dotted', label='K ekf')
+        plt.legend(loc=4)
 
         plt.show()
 
