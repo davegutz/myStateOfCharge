@@ -22,7 +22,7 @@ import math
 from numpy.random import randn
 from pyDAGx.lookup_table import LookupTable
 # from filterpy.kalman import ExtendedKalmanFilter
-# from pyDAGx.EKFx import ExtendedKalmanFilter
+from pyDAGx.EKFx import ExtendedKalmanFilter
 
 
 class Battery:
@@ -409,13 +409,13 @@ class BatteryEKF:
         self.S = 0.
         self.K = 0.
         self.hx = 0.
-        self.u_kf = 0.
-        self.x_kf = 0.
-        self.y_kf = 0.
-        self.z_ekf = 0.
-        self.x_prior = self.x_kf
+        self.U = 0.
+        self.X = 0.
+        self.Y = 0.
+        self.Z = 0.
+        self.X_prior = self.X
         self.P_prior = self.P
-        self.x_post = self.x_kf
+        self.X_post = self.X
         self.P_post = self.P
 
         # Other things
@@ -584,10 +584,10 @@ class BatteryEKF:
             x   1x1 Kalman state variable = Vsoc (0-1 fraction)
             P   1x1 Kalman probability
         """
-        self.u_kf = u
-        self.x_kf = self.Fx*self.x_kf + self.Bu*self.u_kf
+        self.U = u
+        self.X = self.Fx*self.X + self.Bu*self.U
         self.P = self.Fx * self.P * self.Fx + self.Q
-        self.x_prior = self.x_kf
+        self.X_prior = self.X
         self.P_prior = self.P
 
     def kf_update_1x1(self, z, h_jacobian=None, hx_calc=None):
@@ -609,17 +609,17 @@ class BatteryEKF:
             h_jacobian = self.h_jacobian
         if hx_calc is None:
             hx_calc = self.hx_calc_voc
-        self.z_ekf = z
-        self.H = h_jacobian(self.x_kf)
+        self.Z = z
+        self.H = h_jacobian(self.X)
         PHT = self.P*self.H
         self.S = self.H*PHT + self.R
         self.K = PHT/self.S
-        self.hx = hx_calc(self.x_kf)
-        self.y_kf = self.z_ekf - self.hx
-        self.x_kf = self.x_kf + self.K*self.y_kf
+        self.hx = hx_calc(self.X)
+        self.Y = self.Z - self.hx
+        self.X = self.X + self.K*self.Y
         I_KH = 1 - self.K*self.H
         self.P = I_KH*self.P
-        self.x_post = self.x_kf
+        self.X_post = self.X
         self.P_post = self.P
 
     def look(self, temp_c):
@@ -711,11 +711,18 @@ if __name__ == '__main__':
         # Setup
         r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
         q_std = 0.001  # Process uncertainty (0.001) belief in state
+        kf = ExtendedKalmanFilter(dim_x=1, dim_z=1)
+        kf.R = r_std**2
+        kf.Q = q_std**2
+        kf.P *= 100
         battery_model = Battery(nom_bat_cap=model_bat_cap, true_bat_cap=model_bat_cap)
         battery_ekf = BatteryEKF(rsd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, rct=rct, tau_dif=tau_dif, r_dif=r_dif)
-        battery_ekf.R = r_std**2
-        battery_ekf.Q = q_std**2
-        battery_ekf.P = 100
+        battery_ekfx = BatteryEKF(rsd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, rct=rct, tau_dif=tau_dif, r_dif=r_dif)
+        kf.F = np.array(battery_ekf.Fx)
+        kf.B = np.array(battery_ekf.Bu)
+        battery_ekfx.R = kf.R
+        battery_ekfx.Q = kf.Q
+        battery_ekfx.P = kf.P
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)
@@ -748,6 +755,9 @@ if __name__ == '__main__':
         e_soc_ekf_s = []
         e_voc_ekf_s = []
         e_soc_norm_ekf_s = []
+        e_soc_ekfx_s = []
+        e_voc_ekfx_s = []
+        e_soc_norm_ekfx_s = []
 
         for i in range(len(t)):
             if t[i] < 50:
@@ -771,21 +781,31 @@ if __name__ == '__main__':
             if init_ekf:
                 battery_ekf.assign_temp_c(temp_c)
                 battery_ekf.assign_soc_norm(float(battery_model.soc_norm), battery_model.voc)
-                battery_ekf.x_kf = np.array([battery_model.soc_norm+soc_init_err])
+                battery_ekfx.assign_temp_c(temp_c)
+                battery_ekfx.assign_soc_norm(float(battery_model.soc_norm), battery_model.voc)
+                kf.x = np.array([battery_model.soc_norm+soc_init_err])
+                battery_ekfx.X = kf.x
             # Setup
             u_ekf = np.array([battery_model.i_batt+randn()*i_std+di_sense,
                               battery_model.v_batt+randn()*v_std+dv_sense]).T
             battery_ekf.calc_dynamics_ekf(u_ekf, dt=dt_ekf)
             battery_ekf.coulomb_counter_ekf()
+            battery_ekfx.calc_dynamics_ekf(u_ekf, dt=dt_ekf)
+            battery_ekfx.coulomb_counter_ekf()
 
             # Call Kalman Filters
-            battery_ekf.kf_predict_1x1(u=battery_ekf.ib)
-            battery_ekf.kf_update_1x1(battery_ekf.voc_dyn)
+            kf.predict(u=battery_ekf.ib)
+            kf.update(battery_ekf.voc_dyn, battery_ekf.h_jacobian, battery_ekf.hx_calc_voc)
+            battery_ekfx.kf_predict_1x1(u=battery_ekf.ib)
+            battery_ekfx.kf_update_1x1(battery_ekf.voc_dyn)
 
             # Plot stuff
             e_soc_ekf = (battery_ekf.soc_norm_filtered - battery_model.soc_norm) / battery_model.soc_norm
             e_voc_ekf = (battery_ekf.voc_filtered - battery_model.voc) / battery_model.voc
             e_soc_norm_ekf = (battery_ekf.soc_norm - battery_model.soc_norm) / battery_model.soc_norm
+            e_soc_ekfx = (battery_ekfx.soc_norm_filtered - battery_model.soc_norm) / battery_model.soc_norm
+            e_voc_ekfx = (battery_ekfx.voc_filtered - battery_model.voc) / battery_model.voc
+            e_soc_norm_ekfx = (battery_ekfx.soc_norm - battery_model.soc_norm) / battery_model.soc_norm
 
             current_in_s.append(current_in)
             ib.append(battery_model.ib)
@@ -807,90 +827,106 @@ if __name__ == '__main__':
             voc_dyn_s.append(battery_ekf.voc_dyn)
             soc_norm_filtered_s.append(battery_ekf.soc_norm_filtered)
             voc_filtered_s.append(battery_ekf.voc_filtered)
-            prior_soc_s.append(battery_ekf.x_prior)
-            x_s.append(battery_ekf.x_kf)
-            z_s.append(battery_ekf.z_ekf)
-            k_s.append(float(battery_ekf.K))
+            prior_soc_s.append(kf.x_prior[0])
+            x_s.append(kf.x)
+            z_s.append(kf.z)
+            k_s.append(float(kf.K[0]))
             v_batt_s.append(battery_model.v_batt)
             i_batt_s.append(battery_model.i_batt)
             e_soc_ekf_s.append(e_soc_ekf)
             e_voc_ekf_s.append(e_voc_ekf)
             e_soc_norm_ekf_s.append(e_soc_norm_ekf)
+            e_soc_ekfx_s.append(float(e_soc_ekfx))
+            e_voc_ekfx_s.append(float(e_voc_ekfx))
+            e_soc_norm_ekfx_s.append(float(e_soc_norm_ekfx))
 
         # Plots
-        plt.figure()
-        plt.subplot(321)
-        plt.title('GP_battery_EKF - Model.py')
-        plt.plot(t, current_in_s, color='black', label='current demand, A')
-        plt.plot(t, ib, color='green', label='ib')
-        plt.plot(t, i_r_ct_s, color='red', label='I_Rct')
-        plt.plot(t, i_c_dif_s, color='cyan', label='I_C_dif')
-        plt.plot(t, i_r_dif_s, color='orange', linestyle='--', label='I_R_dif')
-        plt.plot(t, i_oc_s, color='black', linestyle='--', label='Ioc')
-        plt.legend(loc=1)
-        plt.subplot(323)
-        plt.plot(t, vbs, color='green', label='Vb')
-        plt.plot(t, vcs, color='blue', label='Vc')
-        plt.plot(t, vds, color='red', label='Vd')
-        plt.plot(t, v_oc_s, color='orange', label='Voc')
-        plt.legend(loc=1)
-        plt.subplot(325)
-        plt.plot(t, v_bc_dot_s, color='green', label='Vbc_dot')
-        plt.plot(t, v_cd_dot_s, color='blue', label='Vcd_dot')
-        plt.legend(loc=1)
-        plt.subplot(322)
-        plt.plot(t, soc_s, color='green', label='SOC')
-        plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
-        plt.legend(loc=1)
-        plt.subplot(324)
-        plt.plot(t, pow_s, color='orange', label='Pow_in')
-        plt.legend(loc=1)
-        plt.subplot(326)
-        plt.plot(soc_norm_s, v_oc_s, color='black', label='voc vs soc_norm')
-        plt.legend(loc=1)
+        if False:
+            plt.figure()
+            plt.subplot(321)
+            plt.title('GP_battery_EKF - Model.py')
+            plt.plot(t, current_in_s, color='black', label='current demand, A')
+            plt.plot(t, ib, color='green', label='ib')
+            plt.plot(t, i_r_ct_s, color='red', label='I_Rct')
+            plt.plot(t, i_c_dif_s, color='cyan', label='I_C_dif')
+            plt.plot(t, i_r_dif_s, color='orange', linestyle='--', label='I_R_dif')
+            plt.plot(t, i_oc_s, color='black', linestyle='--', label='Ioc')
+            plt.legend(loc=1)
+            plt.subplot(323)
+            plt.plot(t, vbs, color='green', label='Vb')
+            plt.plot(t, vcs, color='blue', label='Vc')
+            plt.plot(t, vds, color='red', label='Vd')
+            plt.plot(t, v_oc_s, color='orange', label='Voc')
+            plt.legend(loc=1)
+            plt.subplot(325)
+            plt.plot(t, v_bc_dot_s, color='green', label='Vbc_dot')
+            plt.plot(t, v_cd_dot_s, color='blue', label='Vcd_dot')
+            plt.legend(loc=1)
+            plt.subplot(322)
+            plt.plot(t, soc_s, color='green', label='SOC')
+            plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
+            plt.legend(loc=1)
+            plt.subplot(324)
+            plt.plot(t, pow_s, color='orange', label='Pow_in')
+            plt.legend(loc=1)
+            plt.subplot(326)
+            plt.plot(soc_norm_s, v_oc_s, color='black', label='voc vs soc_norm')
+            plt.legend(loc=1)
+            plt.show()
 
-        plt.figure()
-        plt.subplot(321)
-        plt.title('GP_battery_EKF - Filter')
-        plt.plot(t, ib, color='black', label='ib')
-        plt.plot(t, i_batt_s, color='magenta', linestyle='dotted', label='i_batt')
-        plt.legend(loc=3)
-        plt.subplot(322)
-        plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
-        plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm_ekf')
-        plt.ylim(0.92, 1.01)
-        plt.legend(loc=4)
-        plt.subplot(323)
-        plt.plot(t, v_oc_s, color='blue', label='actual voc')
-        plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn meas')
-        plt.plot(t, voc_filtered_s, color='green', label='voc_filtered state')
-        plt.plot(t, vbs, color='black', label='vb')
-        plt.plot(t, v_batt_s, color='magenta', linestyle='dotted', label='v_batt')
-        plt.ylim(11, 16)
-        plt.legend(loc=4)
-        plt.subplot(324)
-        plt.plot(t, soc_norm_s, color='black', linestyle='dotted', label='SOC_norm')
-        plt.plot(t, prior_soc_s, color='red', linestyle='dotted', label='post soc_norm_filtered')
-        plt.plot(t, x_s, color='green', label='x soc_norm_filtered')
-        plt.ylim(0.92, 1.01)
-        plt.legend(loc=4)
-        plt.subplot(325)
-        plt.plot(t, k_s, color='red', linestyle='dotted', label='K (belief state / belief meas)')
-        plt.legend(loc=4)
-        plt.subplot(326)
-        plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
-        plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
-        plt.plot(t, e_soc_norm_ekf_s, color='black', linestyle='dotted', label='e_soc_norm to User')
-        plt.ylim(-0.01, 0.01)
-        plt.legend(loc=2)
+        if True:
+            plt.figure()
+            plt.subplot(321)
+            plt.title('GP_battery_EKF - Filter')
+            plt.plot(t, ib, color='black', label='ib')
+            plt.plot(t, i_batt_s, color='magenta', linestyle='dotted', label='i_batt')
+            plt.legend(loc=3)
+            plt.subplot(322)
+            plt.plot(t, soc_norm_s, color='red', label='SOC_norm')
+            plt.plot(t, soc_norm_ekf_s, color='black', linestyle='dotted', label='SOC_norm_ekf')
+            plt.ylim(0.92, 1.01)
+            plt.legend(loc=4)
+            plt.subplot(323)
+            plt.plot(t, v_oc_s, color='blue', label='actual voc')
+            plt.plot(t, voc_dyn_s, color='red', linestyle='dotted', label='voc_dyn meas')
+            plt.plot(t, voc_filtered_s, color='green', label='voc_filtered state')
+            plt.plot(t, vbs, color='black', label='vb')
+            plt.plot(t, v_batt_s, color='magenta', linestyle='dotted', label='v_batt')
+            plt.ylim(11, 16)
+            plt.legend(loc=4)
+            plt.subplot(324)
+            plt.plot(t, soc_norm_s, color='black', linestyle='dotted', label='SOC_norm')
+            plt.plot(t, prior_soc_s, color='red', linestyle='dotted', label='post soc_norm_filtered')
+            plt.plot(t, x_s, color='green', label='x soc_norm_filtered')
+            plt.ylim(0.92, 1.01)
+            plt.legend(loc=4)
+            plt.subplot(325)
+            plt.plot(t, k_s, color='red', linestyle='dotted', label='K (belief state / belief meas)')
+            plt.legend(loc=4)
+            plt.subplot(326)
+            plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
+            plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
+            plt.plot(t, e_soc_norm_ekf_s, color='black', linestyle='dotted', label='e_soc_norm to User')
+            plt.plot(t, e_soc_ekfx_s, color='red', linestyle='dashed', label='e_soc_ekfx')
+            plt.plot(t, e_voc_ekfx_s, color='blue', linestyle='dashed', label='e_vocx')
+            plt.plot(t, e_soc_norm_ekfx_s, color='black', linestyle='dashed', label='e_soc_normx to User')
+            plt.ylim(-0.01, 0.01)
+            plt.legend(loc=2)
 
-        plt.figure()
-        plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
-        plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
-        plt.plot(t, e_soc_norm_ekf_s, color='black', linestyle='dotted', label='e_soc_norm to User')
-        plt.ylim(-0.01, 0.01)
-        plt.legend(loc=2)
+            plt.figure()
+            plt.subplot(121)
+            plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
+            plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
+            plt.plot(t, e_soc_norm_ekf_s, color='black', linestyle='dotted', label='e_soc_norm to User')
+            plt.ylim(-0.01, 0.01)
+            plt.legend(loc=2)
+            plt.subplot(122)
+            plt.plot(t, e_soc_ekfx_s, color='red', linestyle='dashed', label='e_soc_ekfx')
+            plt.plot(t, e_voc_ekfx_s, color='blue', linestyle='dashed', label='e_vocx')
+            plt.plot(t, e_soc_norm_ekfx_s, color='black', linestyle='dashed', label='e_soc_normx to User')
+            plt.ylim(-0.01, 0.01)
+            plt.legend(loc=2)
 
-        plt.show()
+            plt.show()
 
     main()
