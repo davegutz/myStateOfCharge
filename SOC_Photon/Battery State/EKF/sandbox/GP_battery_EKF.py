@@ -695,6 +695,7 @@ if __name__ == '__main__':
         dv_sense = 0.  # (0.-->0.1) ++++++++ flat curve
         di_sense = 0.  # (0.-->0.5) ++++++++  i does not go to zero steady state
         i_hyst = 0.  # (0.-->5.) ++++++++  dyn only since i->0 steady state.  But very large transiently
+        dt_model = 0.  # (0.-->25.) +++++++  TODO:   ?????????
         model_bat_cap = 100.  # (100.-->80) ++++++++++ dyn only provided reset soc periodically  TODO:  ???????
         soc_init_err = 0.0  # (0-->-0.2)  ------ long simulation init time corrects this --> reset soc periodically
         r0 = 0.003  # (0.003-->0.006)  +++ dyn only provided reset soc periodically
@@ -769,7 +770,7 @@ if __name__ == '__main__':
             init_ekf = (t[i] <= 10)
 
             # Models
-            battery_model.calc_voc(temp_c=temp_c, soc_init=soc_init)
+            battery_model.calc_voc(temp_c=temp_c+dt_model, soc_init=soc_init)
             u = np.array([current_in, battery_model.voc]).T
             battery_model.calc_dynamics(u, dt=dt, i_hyst=i_hyst)
 
