@@ -513,6 +513,27 @@ class BatteryEKF:
         self.dV_dSoc = self.dV_dSoc_norm * self.cu / self.cs
         return self.dV_dSoc_norm
 
+    def calc_voc_solve(self, soc, dv_dsoc):
+        """SOC-OCV curve fit method per Zhang, et al
+        The non-linear 'y' function for EKF
+        Inputs:
+            soc_k           Normalized soc from ekf (0-1), fraction
+            dV_dSoc_norm    SOC-VOC slope, V/fraction
+        Outputs:
+            voc             Charge voltage, V
+        """
+        # SOC-OCV model
+        soc_norm_lim = max(min(soc, self.eps_max), self.eps_min)
+        log_soc_norm = math.log(soc_norm_lim)
+        exp_n_soc_norm = math.exp(self.n * (soc_norm_lim - 1))
+        pow_log_soc_norm = math.pow(-log_soc_norm, self.m)
+        voc_filtered = float(self.n_cells) * (self.a + self.b * pow_log_soc_norm +
+                                                   self.c * soc_norm_lim + self.d * exp_n_soc_norm)
+        voc_filtered += self.dv  # Experimentally varied
+        # slightly beyond
+        voc_filtered += (soc - soc_norm_lim) * dv_dsoc
+        return voc_filtered
+
     def hx_calc_voc(self, soc_k):
         """SOC-OCV curve fit method per Zhang, et al
         The non-linear 'y' function for EKF
@@ -692,6 +713,7 @@ if __name__ == '__main__':
         # tau_sd creating an anchor.   So large it's just a pass through.  TODO:  Why x correct??
         # TODO:  filter soc for saturation calculation in model
         # TODO:  temp sensitivities and mitigation
+        # TODO:  add solver and compare to EKF
         dv_sense = 0.  # (0.-->0.1) ++++++++ flat curve
         di_sense = 0.  # (0.-->0.5) ++++++++  i does not go to zero steady state
         i_hyst = 0.  # (0.-->5.) ++++++++  dyn only since i->0 steady state.  But very large transiently
@@ -717,6 +739,10 @@ if __name__ == '__main__':
         battery_ekf.R = r_std**2
         battery_ekf.Q = q_std**2
         battery_ekf.P = 100
+
+        SOLV_MAX_ERR = 1e-6  # Solver error tolerance, V (1e-6)
+        SOLV_MAX_COUNTS = 10  # Solver maximum number of steps (10)
+        SOLV_MAX_STEP = 0.2  # Solver maximum step size, frac soc
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)
@@ -755,6 +781,9 @@ if __name__ == '__main__':
         e_soc_ekf_s = []
         e_voc_ekf_s = []
         e_soc_norm_ekf_s = []
+        soc_solved_s = []
+        vbatt_solved_s = []
+        e_soc_solved_ekf_s = []
 
         for i in range(len(t)):
             if t[i] < 50:
@@ -778,21 +807,42 @@ if __name__ == '__main__':
             if init_ekf:
                 battery_ekf.assign_temp_c(temp_c)
                 battery_ekf.assign_soc_norm(float(battery_model.soc_norm), battery_model.voc)
-                battery_ekf.x_kf = np.array([battery_model.soc_norm+soc_init_err])
+                battery_ekf.x_kf = battery_model.soc_norm + soc_init_err
+                soc_solved = battery_model.soc_norm
             # Setup
-            u_ekf = np.array([battery_model.i_batt+randn()*i_std+di_sense,
-                              battery_model.v_batt+randn()*v_std+dv_sense]).T
-            battery_ekf.calc_dynamics_ekf(u_ekf, dt=dt_ekf)
+            u_dyn = np.array([battery_model.i_batt + randn()*i_std + di_sense,
+                              battery_model.v_batt + randn()*v_std + dv_sense]).T
+            battery_ekf.calc_dynamics_ekf(u_dyn, dt=dt_ekf)
             battery_ekf.coulomb_counter_ekf()
 
             # Call Kalman Filters
             battery_ekf.kf_predict_1x1(u=battery_ekf.ib)
             battery_ekf.kf_update_1x1(battery_ekf.voc_dyn)
 
+            # Solver
+            if True:
+                vbatt_f_o = battery_ekf.voc_dyn
+                count = 0
+                soc_solved = battery_ekf.soc
+                dv_dsoc = battery_ekf.dV_dSoc_norm
+                vbatt_solved = battery_ekf.calc_voc_solve(soc_solved, dv_dsoc)
+                solv_err = vbatt_f_o - vbatt_solved
+                while abs(solv_err) > SOLV_MAX_ERR and count < SOLV_MAX_COUNTS:
+                    count += 1
+                    soc_solved = max(min(soc_solved + max(min(solv_err/dv_dsoc, SOLV_MAX_STEP), -SOLV_MAX_STEP),
+                                         battery_ekf.eps_max), battery_ekf.eps_min)
+                    vbatt_solved = battery_ekf.calc_voc_solve(soc_solved, dv_dsoc)
+                    solv_err = vbatt_f_o - vbatt_solved
+                    # if 500 < t[i] < 500.3:
+                    #     print('t, I, count, soc, soc_solved, vbatt_f_o, vbatt_solved, solv_err, dv_dsoc',
+                    #           t[i], battery_ekf.ib, count, battery_ekf.soc, soc_solved, vbatt_f_o, vbatt_solved,
+                    #           solv_err, dv_dsoc)
+
             # Plot stuff
             e_soc_ekf = (battery_ekf.soc_norm_filtered - battery_model.soc_norm) / battery_model.soc_norm
             e_voc_ekf = (battery_ekf.voc_filtered - battery_model.voc) / battery_model.voc
             e_soc_norm_ekf = (battery_ekf.soc_norm - battery_model.soc_norm) / battery_model.soc_norm
+            e_soc_solved_ekf = (soc_solved - battery_model.soc_norm) / battery_model.soc_norm
 
             current_in_s.append(current_in)
             ib.append(battery_model.ib)
@@ -826,9 +876,12 @@ if __name__ == '__main__':
             hx_s.append(float(battery_ekf.hx))
             y_s.append(float(battery_ekf.y_kf))
             p_s.append(float(battery_ekf.P))
+            soc_solved_s.append(soc_solved)
+            vbatt_solved_s.append(vbatt_solved)
             e_soc_ekf_s.append(e_soc_ekf)
             e_voc_ekf_s.append(e_voc_ekf)
             e_soc_norm_ekf_s.append(e_soc_norm_ekf)
+            e_soc_solved_ekf_s.append(e_soc_solved_ekf)
 
         # Plots
         plt.figure()
@@ -898,13 +951,6 @@ if __name__ == '__main__':
         plt.legend(loc=2)
 
         plt.figure()
-        plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
-        plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
-        plt.plot(t, e_soc_norm_ekf_s, color='black', linestyle='dotted', label='e_soc_norm to User')
-        plt.ylim(-0.01, 0.01)
-        plt.legend(loc=2)
-
-        plt.figure()
         plt.subplot(331)
         plt.plot(t, x_s, color='red', linestyle='dotted', label='x ekf')
         plt.legend(loc=4)
@@ -931,6 +977,24 @@ if __name__ == '__main__':
         plt.subplot(338)
         plt.plot(t, k_s, color='red', linestyle='dotted', label='K ekf')
         plt.legend(loc=4)
+
+        plt.figure()
+        plt.subplot(121)
+        plt.plot(t, voc_dyn_s, color='black', label='voc_dyn')
+        plt.plot(t, vbatt_solved_s, color='green', linestyle='dotted', label='vbatt_solved')
+        plt.legend(loc=4)
+        plt.subplot(122)
+        plt.plot(t, soc_s, color='black', label='soc')
+        plt.plot(t, soc_solved_s, color='green', linestyle='dotted', label='soc_solved')
+        plt.legend(loc=4)
+
+        plt.figure()
+        plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
+        plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
+        plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
+        plt.plot(t, e_soc_norm_ekf_s, color='black', linestyle='dotted', label='e_soc_norm to User')
+        plt.ylim(-0.01, 0.01)
+        plt.legend(loc=2)
 
         plt.show()
 
