@@ -989,11 +989,18 @@ if __name__ == '__main__':
         plt.legend(loc=4)
 
         plt.figure()
-        plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
         plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
         plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
-        plt.plot(t, e_soc_norm_ekf_s, color='black', linestyle='dotted', label='e_soc_norm to User')
+        plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
+        plt.plot(t, e_soc_norm_ekf_s, color='cyan', linestyle='dotted', label='e_soc_norm to User')
         plt.ylim(-0.01, 0.01)
+        plt.legend(loc=2)
+
+        plt.figure()
+        plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
+        plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
+        plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
+        plt.plot(t, e_soc_norm_ekf_s, color='cyan', linestyle='dotted', label='e_soc_norm to User')
         plt.legend(loc=2)
 
         plt.show()
