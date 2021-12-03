@@ -35,6 +35,7 @@ class BatteryEKF:
         constraint >=0.02 V/soc.  m and n using Zhang values.   Had to scale soc because  actual capacity > NOM_BAT_CAP
         so equations error when soc<=0 to match data.
         """
+
         # Defaults for mutable arguments
         if t_t is None:
             t_t = [0., 25., 50.]
@@ -44,6 +45,7 @@ class BatteryEKF:
             t_a = [3.999, 4.046, 4.093]
         if t_c is None:
             t_c = [-1.181, -1.181, -1.181]
+
         # Dynamics
         self.n_cells = n_cells
         self.r_0 = r0 * n_cells
@@ -115,11 +117,11 @@ class BatteryEKF:
             This is what gets delivered, e.g. W_shunt/NOM_SYS_VOLT.  Also varies 0.2-0.4C
             currents or 20-40 A for a 100 Ah battery"""
         self.nom_sys_volt = nom_sys_volt  # Nominal battery label voltage, e.g. 12, V
-        # self.v_sat = nom_sys_volt + 1.7  # Saturation voltage, V
-        # self.voc = nom_sys_volt  # Battery charge voltage, V
+        self.v_sat = nom_sys_volt + 1.7  # Saturation voltage, V
+        self.voc = nom_sys_volt  # Battery charge voltage, V
         self.voc_dyn = nom_sys_volt  # Battery charge voltage calculated from dynamics, V
         self.voc_filtered = nom_sys_volt  # Battery charge voltage EKF, V
-        # self.sat = True  # Battery is saturated, T/F
+        self.sat = True  # Battery is saturated, T/F
         self.ib = 0  # Current into battery post, A
         self.vb = nom_sys_volt  # Battery voltage at post, V
         self.ioc = 0  # Current into battery storage, A
@@ -129,9 +131,8 @@ class BatteryEKF:
         self.sr = sr  # Adjustment for resistance scalar, fraction (1)
         self.pow_in = None  # Charging power, W
         self.time_charge = None  # Charging time to 100%, hr
-        # TODO:  need v_sat logic to take advantage of saturation reset
-        # self.nom_v_sat = bat_v_sat * self.n_cells  # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
-        # self.dVoc_dT = dvoc_dt * self.n_cells  # Change of VOC with operating temperature in range 0 - 50 C, V/deg C
+        self.nom_v_sat = bat_v_sat * self.n_cells  # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
+        self.dVoc_dT = dvoc_dt * self.n_cells  # Change of VOC with operating temperature in range 0 - 50 C, V/deg C
         self.eps_max = 1 - 1e-6  # Numerical maximum of coefficient model with scaled soc_norm.
         self.eps_min = 1e-6  # Numerical minimum of coefficient model without scaled soc_norm.
         # eps_min_unscaled = 1 - (
@@ -274,12 +275,12 @@ class BatteryEKF:
         self.pow_in = self.ib * (self.vb - (self.ioc * self.r_0 + self.i_r_dif() * self.r_dif +
                                             self.i_r_ct() * self.r_ct) * self.sr)
         self.soc = max(min(self.soc + self.pow_in / self.nom_sys_volt * self.dt / 3600. / self.nom_bat_cap, 1.5), 0.)
-        # if self.sat:
-        #     self.soc = self.eps_max
+        self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
+        self.sat = self.voc_dyn >= self.v_sat
+        if self.sat:
+            self.soc = self.eps_max
         # self.soc_norm = 1. - (1. - self.soc) * self.cu / self.cs
         self.soc_norm = self.soc * self.cu / self.cs
-        # self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
-        # self.sat = self.voc_dyn >= self.v_sat
 
     def kf_predict_1x1(self, u=None):
         """1x1 Extended Kalman Filter predict
@@ -340,8 +341,8 @@ class BatteryEKF:
         self.soc_norm = soc_norm
         self.soc = soc_norm * self.cs / self.cu
         self.voc_filtered = voc
-        # self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
-        # self.sat = self.voc_filtered >= self.v_sat
+        self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
+        self.sat = self.voc_filtered >= self.v_sat
 
     def assign_temp_c(self, temp_c):
         self.temp_c = temp_c
