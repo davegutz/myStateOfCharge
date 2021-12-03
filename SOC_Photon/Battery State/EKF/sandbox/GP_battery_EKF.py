@@ -23,6 +23,7 @@ from Battery import Battery
 from BatteryEKF import BatteryEKF
 from unite_pictures import unite_pictures_into_pdf
 import os
+from datetime import datetime
 
 if __name__ == '__main__':
     import sys
@@ -220,11 +221,13 @@ if __name__ == '__main__':
 
         # Plots
         n_fig = 0
+        fig_files = []
+        date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
         plt.figure()
         n_fig += 1
         plt.subplot(321)
-        plt.title('GP_battery_EKF - Model.py')
+        plt.title('GP_battery_EKF.py   ' + date_time)
         plt.plot(t, current_in_s, color='black', label='current demand, A')
         plt.plot(t, ib, color='green', label='ib')
         plt.plot(t, i_r_ct_s, color='red', label='I_Rct')
@@ -252,12 +255,14 @@ if __name__ == '__main__':
         plt.subplot(326)
         plt.plot(soc_norm_s, v_oc_s, color='black', label='voc vs soc_norm')
         plt.legend(loc=1)
-        plt.savefig("GP_battery_EKF_" + str(n_fig) + ".png", format="png")
+        fig_file_name = "GP_battery_EKF_" + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
 
         plt.figure()
         n_fig += 1
         plt.subplot(321)
-        plt.title('GP_battery_EKF - Filter')
+        plt.title('GP_battery_EKF.py   ' + date_time)
         plt.plot(t, ib, color='black', label='ib')
         plt.plot(t, i_batt_s, color='magenta', linestyle='dotted', label='i_batt')
         plt.legend(loc=3)
@@ -289,11 +294,14 @@ if __name__ == '__main__':
         plt.plot(t, e_soc_norm_ekf_s, color='black', linestyle='dotted', label='e_soc_norm to User')
         plt.ylim(-0.01, 0.01)
         plt.legend(loc=2)
-        plt.savefig("GP_battery_EKF_" + str(n_fig) + ".png", format="png")
+        fig_file_name = "GP_battery_EKF_" + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
 
         plt.figure()
         n_fig += 1
         plt.subplot(331)
+        plt.title('GP_battery_EKF.py   ' + date_time)
         plt.plot(t, x_s, color='red', linestyle='dotted', label='x ekf')
         plt.legend(loc=4)
         plt.subplot(332)
@@ -319,11 +327,14 @@ if __name__ == '__main__':
         plt.subplot(338)
         plt.plot(t, k_s, color='red', linestyle='dotted', label='K ekf')
         plt.legend(loc=4)
-        plt.savefig("GP_battery_EKF_" + str(n_fig) + ".png", format="png")
+        fig_file_name = "GP_battery_EKF_" + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
 
         plt.figure()
         n_fig += 1
         plt.subplot(121)
+        plt.title('GP_battery_EKF.py   ' + date_time)
         plt.plot(t, voc_dyn_s, color='black', label='voc_dyn')
         plt.plot(t, vbatt_solved_s, color='green', linestyle='dotted', label='vbatt_solved')
         plt.legend(loc=4)
@@ -331,35 +342,41 @@ if __name__ == '__main__':
         plt.plot(t, soc_s, color='black', label='soc')
         plt.plot(t, soc_solved_s, color='green', linestyle='dotted', label='soc_solved')
         plt.legend(loc=4)
-        plt.savefig("GP_battery_EKF_" + str(n_fig) + ".png", format="png")
+        fig_file_name = "GP_battery_EKF_" + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
 
         plt.figure()
         n_fig += 1
+        plt.title('GP_battery_EKF.py   ' + date_time)
         plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
         plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
         plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
         plt.plot(t, e_soc_norm_ekf_s, color='cyan', linestyle='dotted', label='e_soc_norm to User')
         plt.ylim(-0.01, 0.01)
         plt.legend(loc=2)
-        plt.savefig("GP_battery_EKF_" + str(n_fig) + ".png", format="png")
+        fig_file_name = "GP_battery_EKF_" + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
 
         plt.figure()
         n_fig += 1
+        plt.title('GP_battery_EKF.py   ' + date_time)
         plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
         plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
         plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
         plt.plot(t, e_soc_norm_ekf_s, color='cyan', linestyle='dotted', label='e_soc_norm to User')
         plt.legend(loc=2)
-        plt.savefig("GP_battery_EKF_" + str(n_fig) + ".png", format="png")
+        fig_file_name = "GP_battery_EKF_" + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
 
-        unite_pictures_into_pdf(outputPdfName='GP_battery_EKF.pdf', pathToSavePdfTo='figures')
-        for file in os.listdir():
-            extension = file[-3:]
-            if extension == 'png':
-                try:
-                    os.remove(file)
-                except OSError:
-                    pass
+        unite_pictures_into_pdf(outputPdfName='GP_battery_EKF'+date_time+'.pdf', pathToSavePdfTo='figures')
+        for fig_file in fig_files:
+            try:
+                os.remove(fig_file)
+            except OSError:
+                pass
         plt.show()
 
     main()
