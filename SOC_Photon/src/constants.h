@@ -91,9 +91,9 @@
 #define HDB_VBATT       0.01        // Half deadband to filter Vbatt, v (0.01)
 #define HDB_TBATT       0.06        // Half deadband to filter Tbatt, F (0.06)
 
-#define SOLV_MAX_ERR    1e-6        // Solver error tolerance, V (1e-6)
-#define SOLV_MAX_COUNTS 10          // Solver maximum number of steps (10)
-#define SOLV_MAX_STEP   0.2         // Solver maximum step size, frac soc
+#define SOLVE_MAX_ERR    1e-6        // Solver error tolerance, V (1e-6)
+#define SOLVE_MAX_COUNTS 10          // Solver maximum number of steps (10)
+#define SOLVE_MAX_STEP   0.2         // Solver maximum step size, frac soc
 
 // Battery voltage measurement gain
 const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /

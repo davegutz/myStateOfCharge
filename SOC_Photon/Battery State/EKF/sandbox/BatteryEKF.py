@@ -215,13 +215,13 @@ class BatteryEKF:
         exp_n_soc_norm = math.exp(self.n * (soc_norm_lim - 1))
         pow_log_soc_norm = math.pow(-log_soc_norm, self.m)
         voc_filtered = float(self.n_cells) * (self.a + self.b * pow_log_soc_norm +
-                                                   self.c * soc_norm_lim + self.d * exp_n_soc_norm)
+                                              self.c * soc_norm_lim + self.d * exp_n_soc_norm)
         voc_filtered += self.dv  # Experimentally varied
         # slightly beyond
         voc_filtered += (soc - soc_norm_lim) * dv_dsoc
         return voc_filtered
 
-    def hx_calc_voc(self, soc_k):
+    def hx_calc_voc(self):
         """SOC-OCV curve fit method per Zhang, et al
         The non-linear 'y' function for EKF
         Inputs:
@@ -319,14 +319,14 @@ class BatteryEKF:
             hx_calc = self.hx_calc_voc
         self.z_ekf = z
         self.H = h_jacobian(self.x_kf)
-        PHT = self.P*self.H
-        self.S = self.H*PHT + self.R
-        self.K = PHT/self.S
-        self.hx = hx_calc(self.x_kf)
+        pht = self.P*self.H
+        self.S = self.H*pht + self.R
+        self.K = pht/self.S
+        self.hx = hx_calc()
         self.y_kf = self.z_ekf - self.hx
         self.x_kf = self.x_kf + self.K*self.y_kf
-        I_KH = 1 - self.K*self.H
-        self.P = I_KH*self.P
+        i_kh = 1 - self.K*self.H
+        self.P = i_kh*self.P
         self.x_post = self.x_kf
         self.P_post = self.P
 

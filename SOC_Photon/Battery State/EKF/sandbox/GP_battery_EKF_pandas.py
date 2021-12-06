@@ -17,15 +17,16 @@
 support for simplified Mathworks' tracker. See Huria, Ceraolo, Gazzarri, & Jackey, 2013 Simplified Extended Kalman
 Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Battery Cells """
 
-import numpy as np
-from numpy.random import randn
 from Battery import Battery
 from BatteryEKF import BatteryEKF
-from unite_pictures import unite_pictures_into_pdf
-import os
-from datetime import datetime
 
 if __name__ == '__main__':
+    import numpy as np
+    from numpy.random import randn
+    from unite_pictures import unite_pictures_into_pdf
+    import os
+    from datetime import datetime
+    import pandas as pd
     import sys
     import doctest
 
@@ -37,6 +38,9 @@ if __name__ == '__main__':
 
 
     def main():
+        date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+        filename = sys.argv[0].split('/')[-1]
+
         # Setup to run the transients
         dt = 0.1
         dt_ekf = 0.1
@@ -221,12 +225,11 @@ if __name__ == '__main__':
         # Plots
         n_fig = 0
         fig_files = []
-        date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
         plt.figure()
         n_fig += 1
         plt.subplot(321)
-        plt.title('GP_battery_EKF.py   ' + date_time)
+        plt.title(filename + '   ' + date_time)
         plt.plot(t, current_in_s, color='black', label='current demand, A')
         plt.plot(t, ib, color='green', label='ib')
         plt.plot(t, i_r_ct_s, color='red', label='I_Rct')
@@ -254,14 +257,14 @@ if __name__ == '__main__':
         plt.subplot(326)
         plt.plot(soc_norm_s, v_oc_s, color='black', label='voc vs soc_norm')
         plt.legend(loc=1)
-        fig_file_name = "GP_battery_EKF_" + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
         plt.figure()
         n_fig += 1
         plt.subplot(321)
-        plt.title('GP_battery_EKF.py   ' + date_time)
+        plt.title(filename + '   ' + date_time)
         plt.plot(t, ib, color='black', label='ib')
         plt.plot(t, i_batt_s, color='magenta', linestyle='dotted', label='i_batt')
         plt.legend(loc=3)
@@ -300,7 +303,7 @@ if __name__ == '__main__':
         plt.figure()
         n_fig += 1
         plt.subplot(331)
-        plt.title('GP_battery_EKF.py   ' + date_time)
+        plt.title(filename + '   ' + date_time)
         plt.plot(t, x_s, color='red', linestyle='dotted', label='x ekf')
         plt.legend(loc=4)
         plt.subplot(332)
@@ -333,7 +336,7 @@ if __name__ == '__main__':
         plt.figure()
         n_fig += 1
         plt.subplot(121)
-        plt.title('GP_battery_EKF.py   ' + date_time)
+        plt.title(filename + '   ' + date_time)
         plt.plot(t, voc_dyn_s, color='black', label='voc_dyn')
         plt.plot(t, vbat_solved_s, color='green', linestyle='dotted', label='vbat_solved')
         plt.legend(loc=4)
@@ -347,7 +350,7 @@ if __name__ == '__main__':
 
         plt.figure()
         n_fig += 1
-        plt.title('GP_battery_EKF.py   ' + date_time)
+        plt.title(filename + '   ' + date_time)
         plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
         plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
         plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
@@ -360,7 +363,7 @@ if __name__ == '__main__':
 
         plt.figure()
         n_fig += 1
-        plt.title('GP_battery_EKF.py   ' + date_time)
+        plt.title(filename + '   ' + date_time)
         plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
         plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
         plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')

@@ -380,15 +380,15 @@ void loop()
     int8_t count = 0;
     Sen->Vbatt_solved = MyBattSolved->calculate(Tbatt_filt_C, socu_solved, Sen->Ishunt_filt_obs);
     double err = vbatt_f_o - Sen->Vbatt_solved;
-    while( fabs(err)>SOLV_MAX_ERR && count++<SOLV_MAX_COUNTS )
+    while( fabs(err)>SOLVE_MAX_ERR && count++<SOLVE_MAX_COUNTS )
     {
-      socu_solved = max(min(socu_solved + max(min( err/MyBattSolved->dv_dsocu(), SOLV_MAX_STEP), -SOLV_MAX_STEP), mxepu_bb), mnepu_bb);
+      socu_solved = max(min(socu_solved + max(min( err/MyBattSolved->dv_dsocu(), SOLVE_MAX_STEP), -SOLVE_MAX_STEP), mxepu_bb), mnepu_bb);
       Sen->Vbatt_solved = MyBattSolved->calculate(Tbatt_filt_C, socu_solved, Sen->Ishunt_filt_obs);
       err = vbatt_f_o - Sen->Vbatt_solved;
       if ( debug==-5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,socu_s,vbatt_f_o,Vbatt_m_s,err,dv_dsocu, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
           Sen->Tbatt_filt, Sen->Ishunt_filt_obs, count, socu_solved, vbatt_f_o, Sen->Vbatt_solved, err, MyBattSolved->dv_dsocu());
     }
-    // boolean solver_valid = count<SOLV_MAX_COUNTS; 
+    // boolean solver_valid = count<SOLVE_MAX_COUNTS; 
     
     // Debug print statements
     // Useful for Arduino plotting

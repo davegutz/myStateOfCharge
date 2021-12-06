@@ -329,4 +329,3 @@ class Battery:
 
     def vc(self):
         return self.vd() + self.vcd()
-
