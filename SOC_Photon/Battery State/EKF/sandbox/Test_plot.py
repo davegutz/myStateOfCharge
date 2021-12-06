@@ -42,6 +42,8 @@ class ClassWithPanda:
     def save(self, time_=None):
         if time_ is None:
             self.time = self.dt * self.i_call
+        else:
+            self.time = time_
         d = {"var1": self.var1, "var2": self.var2, "var3": self.var3, "var4": self.var4}
         df = pd.DataFrame(d, index=[self.time])
         self.df = self.df.append(df)
@@ -52,6 +54,7 @@ if __name__ == '__main__':
     from datetime import datetime
     import sys
     import doctest
+    from matplotlib import pyplot as plt
 
     doctest.testmod(sys.modules['__main__'])
     import matplotlib.pyplot as plt
@@ -78,6 +81,31 @@ if __name__ == '__main__':
             process1.save(time)
             process2.save(time)
 
-        print(process1.df)
+        # Plots
+        n_fig = 0
+        fig_files = []
+
+        plt.figure()
+        n_fig += 1
+        plt.subplot(221)
+        plt.title(filename + '  ' + date_time)
+        plt.plot(process1.df['var1'], color='black', label='process1.var1')
+        plt.plot(process2.df['var1'], color='red', label='process2.var1')
+        plt.legend(loc=2)
+        plt.subplot(222)
+        plt.plot(process1.df['var2'], color='black', label='process1.var2')
+        plt.plot(process2.df['var2'], color='red', label='process2.var2')
+        plt.legend(loc=2)
+        plt.subplot(223)
+        plt.plot(process1.df['var3'], color='black', label='process1.var3')
+        plt.plot(process2.df['var3'], color='red', label='process2.var3')
+        plt.legend(loc=2)
+
+        fig_file_name = filename + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
+
+        plt.show()
+
 
     main()
