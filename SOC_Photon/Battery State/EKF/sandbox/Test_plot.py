@@ -17,6 +17,35 @@
 import math
 import numpy as np
 import pandas as pd
+import tracemalloc, os, linecache
+
+
+def display_top(snapshot, key_type='lineno', limit=3, details=False, msg=""):
+    snapshot = snapshot.filter_traces((
+        tracemalloc.Filter(False, "<frozen importlib._bootstrap>"),
+        tracemalloc.Filter(False, "<unknown>"),
+    ))
+    top_stats = snapshot.statistics(key_type)
+
+    if details:
+        print("Top %s lines" % limit)
+        for index, stat in enumerate(top_stats[:limit], 1):
+            frame = stat.traceback[0]
+            # replace "/path/to/module/file.py" with "module/file.py"
+            filename = os.sep.join(frame.filename.split(os.sep)[-2:])
+            print("#%s: %s:%s: %.1f KiB"
+                  % (index, filename, frame.lineno, stat.size / 1024))
+            line = linecache.getline(frame.filename, frame.lineno).strip()
+            if line:
+                print('    %s' % line)
+
+    other = top_stats[limit:]
+    if other:
+        size = sum(stat.size for stat in other)
+        if details:
+            print("%s other: %.1f KiB" % (len(other), size / 1024))
+    total = sum(stat.size for stat in top_stats)
+    print(msg, "Total allocated size: %.1f KiB" % (total / 1024))
 
 
 def over_plot(sig, colors=None, title='', t_lim=None, y_lim=None, date_time='', loc=4):
@@ -98,28 +127,46 @@ if __name__ == '__main__':
 
 
     def main():
+        tracemalloc.start()
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         filename = sys.argv[0].split('/')[-1]
         dt = 0.1
-        time_end = 10.
+        time_end = 100.
+
+        # Collect data and plot
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='Before collect data only loop:  ')
         process1 = ClassWithPanda(name='proc1', multi=1)
         process2 = ClassWithPanda(name='proc2', multi=2)
-
-        # Executive tasks
-        t = np.arange(0, time_end + dt, dt)
-
         # Loop time
+        t = np.arange(0, time_end + dt, dt)
         for i in range(len(t)):
             time = t[i]
             process1.calc()
             process2.calc()
             process1.save(time)
             process2.save(time)
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='After collect data only loop:  ')
 
+        # Collect data and plot
+        process1 = ClassWithPanda(name='proc1', multi=1)
+        process2 = ClassWithPanda(name='proc2', multi=2)
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='Before collect data for plot loop:  ')
+        # Loop time
+        t = np.arange(0, time_end + dt, dt)
+        for i in range(len(t)):
+            time = t[i]
+            process1.calc()
+            process2.calc()
+            process1.save(time)
+            process2.save(time)
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='After collect data for plot loop:  ')
         # Plots
         n_fig = 0
         fig_files = []
-
         plt.figure()
         n_fig += 1
         plt.subplot(221)
@@ -133,7 +180,12 @@ if __name__ == '__main__':
         fig_file_name = filename + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
-
+        plt.show()
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='After over plot:  ')
+        plt.close()
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='After close over plot:  ')
         plt.figure()
         n_fig += 1
         plt.subplot(221)
@@ -152,8 +204,12 @@ if __name__ == '__main__':
         fig_file_name = filename + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
-
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='After plot:  ')
         plt.show()
+        plt.close()
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='After close over plot:  ')
 
 
     main()
