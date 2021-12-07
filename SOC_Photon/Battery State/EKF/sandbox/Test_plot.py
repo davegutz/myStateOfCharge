@@ -75,7 +75,7 @@ def over_plot(sig, colors=None, title='', t_lim=None, y_lim=None, date_time='', 
         plt.plot(sig[i].index, sig[i].values, colors[i], label=sig[i].name)
         if t_zooming:
             zoom_range = (sig[i].index > t_lim[0]) & (sig[i].index < t_lim[1])
-            if y_zooming:
+            if y_zooming & (max(zoom_range) == True):
                 y_min = min(y_min, sig[i].values[zoom_range].min())
                 y_max = max(y_max, sig[i].values[zoom_range].max())
     plt.title(title + '  ' + date_time)
@@ -116,6 +116,46 @@ def overplot(sig, sig_names, colors=None, title='', t_lim=None, y_lim=None, date
             if y_zooming & (max(zoom_range) == True):
                 y_min = min(y_min, min((sig[i][1])[zoom_range]))
                 y_max = max(y_max, max((sig[i][1])[zoom_range]))
+    plt.title(title + '  ' + date_time)
+    plt.grid()
+    plt.legend(loc=loc)
+    if t_zooming:
+        plt.xlim(x_min, x_max)
+    if y_zooming:
+        plt.ylim(y_min, y_max)
+
+
+def overplot_list(sig, sig_names, colors=None, title='', t_lim=None, y_lim=None, date_time='', loc=4):
+    if t_lim is None:
+        t_zooming = False
+        x_min = 0
+        x_max = sig[0][:]
+    else:
+        t_zooming = True
+        x_min = t_lim[0]
+        x_max = t_lim[1]
+
+    y_min = math.inf
+    y_max = -math.inf
+    if y_lim is None:
+        y_zooming = False
+    else:
+        y_zooming = True
+        y_min = y_lim[0]
+        y_max = y_lim[1]
+    n = len(sig)
+    # m = len(sig[0])
+    # nc = len(colors)
+
+    for i in range(0, n):
+        plt.plot(sig[i][0], sig[i][1], colors[i], label=sig_names[i])
+        if t_zooming:
+            zoom_range = (sig[i][0] > t_lim[0]) & (sig[i][0] < t_lim[1])
+            if y_zooming & (max(zoom_range) == True):
+                print('zoom_range_list=')
+                # print('zoom_range_list=', zoom_range)
+                # y_min = min(y_min, min((sig[i][1])[zoom_range]))
+                # y_max = max(y_max, max((sig[i][1])[zoom_range]))
     plt.title(title + '  ' + date_time)
     plt.grid()
     plt.legend(loc=loc)
@@ -184,9 +224,74 @@ if __name__ == '__main__':
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         filename = sys.argv[0].split('/')[-1]
         dt = 0.1
-        time_end = 10.
+        time_end = 1000.
 
+        #  ####################################################333
+        # Collect list and plot
+        print('')
+        process1 = ClassWithPanda(name='proc1', multi=1)
+        process2 = ClassWithPanda(name='proc2', multi=2)
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='Before collect list data for plot loop:  ')
+        start = perf_counter()
+        # Loop time
+        t = np.arange(0, time_end + dt, dt)
+        proc1_var1 = []
+        proc1_var2 = []
+        proc1_var3 = []
+        proc1_var4 = []
+        proc2_var1 = []
+        proc2_var2 = []
+        proc2_var3 = []
+        proc2_var4 = []
+        for i in range(len(t)):
+            time = t[i]
+            process1.calc()
+            process2.calc()
+            process1.save_np(time)
+            process2.save_np(time)
+            proc1_var1.append(process1.var1)
+            proc1_var2.append(process1.var2)
+            proc1_var3.append(process1.var3)
+            proc1_var4.append(process1.var4)
+            proc2_var1.append(process2.var1)
+            proc2_var2.append(process2.var2)
+            proc2_var3.append(process2.var3)
+            proc2_var4.append(process2.var4)
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='After collect list data for plot loop:  ')
+        end = perf_counter()
+        print('   process time=', (end - start) / float(len(t)), 'seconds per iteration')
+        # Plots
+        n_fig = 0
+        fig_files = []
+        plt.figure()
+        n_fig += 1
+        plt.subplot(221)
+        overplot_list([[t, proc1_var1], [t, proc2_var1]],
+                      sig_names=['proc1.var1', 'proc2.var1'],
+                      colors=['red', 'blue'], loc=2,
+                      t_lim=[5, 7], y_lim=[1000, 6000])
+        plt.title(filename + '  ' + date_time)
+        plt.subplot(222)
+        overplot_list([[t, proc1_var2], [t, proc2_var2]],
+                      sig_names=['proc1.var2', 'proc2.var2'],
+                      colors=['red', 'blue'], loc=2)
+        plt.subplot(223)
+        overplot_list([[t, proc1_var3], [t, proc2_var3]],
+                      sig_names=['proc1.var3', 'proc2.var3'],
+                      colors=['red', 'blue'], loc=2)
+        fig_file_name = filename + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
+        plt.show()
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='After list over plot:  ')
+        plt.close()
+
+        #  ####################################################333
         # Calculate only
+        print('')
         snapshot = tracemalloc.take_snapshot()
         display_top(snapshot, msg='Before calc only loop:  ')
         start = perf_counter()
@@ -243,6 +348,7 @@ if __name__ == '__main__':
         end = perf_counter()
         print('   process time=', (end - start) / float(len(t)), 'seconds per iteration')
 
+        #  ####################################################333
         # Collect pandas data and plot
         print('')
         process1 = ClassWithPanda(name='proc1', multi=1)
@@ -309,6 +415,7 @@ if __name__ == '__main__':
         snapshot = tracemalloc.take_snapshot()
         display_top(snapshot, msg='After close pandas over plot:  ')
 
+        #  ####################################################333
         # Collect np data and plot
         print('')
         process1 = ClassWithPanda(name='proc1', multi=1)
@@ -352,36 +459,10 @@ if __name__ == '__main__':
         fig_file_name = filename + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
-        # plt.show()
+        plt.show()
         snapshot = tracemalloc.take_snapshot()
         display_top(snapshot, msg='After np over plot:  ')
         plt.close()
-        snapshot = tracemalloc.take_snapshot()
-        display_top(snapshot, msg='After np close over plot:  ')
-        plt.figure()
-        n_fig += 1
-        # plt.subplot(221)
-        # plt.title(filename + '  ' + date_time)
-        # plt.plot(process1.df['proc1.var1'], color='black', label='proc1.var1')
-        # plt.plot(process2.df['proc2.var1'], color='red', label='proc2.var1')
-        # plt.legend(loc=2)
-        # plt.subplot(222)
-        # plt.plot(process1.df['proc1.var2'], color='black', label='proc1.var2')
-        # plt.plot(process2.df['proc2.var2'], color='red', label='proc2.var2')
-        # plt.legend(loc=2)
-        # plt.subplot(223)
-        # plt.plot(process1.df['proc1.var3'], color='black', label='proc1.var3')
-        # plt.plot(process2.df['proc2.var3'], color='red', label='proc2.var3')
-        # plt.legend(loc=2)
-        fig_file_name = filename + str(n_fig) + ".png"
-        fig_files.append(fig_file_name)
-        plt.savefig(fig_file_name, format="png")
-        snapshot = tracemalloc.take_snapshot()
-        display_top(snapshot, msg='After np plot:  ')
-        # plt.show()
-        plt.close()
-        snapshot = tracemalloc.take_snapshot()
-        display_top(snapshot, msg='After close np over plot:  ')
 
 
     main()
