@@ -68,7 +68,7 @@ class ClassWithPanda:
         self.time = 0.
         self.name = name
         self.multi = multi
-        d = {"var1": self.var1, "var2": self.var2, "var3": self.var3, "var4": self.var4}
+        d = {name+".var1": self.var1, name+".var2": self.var2, name+".var3": self.var3, name+".var4": self.var4}
         self.df = pd.DataFrame(d, index=[self.time])
 
     def calc(self):
@@ -82,7 +82,7 @@ class ClassWithPanda:
             self.time = self.dt * self.i_call
         else:
             self.time = time_
-        d = {"var1": self.var1, "var2": self.var2, "var3": self.var3, "var4": self.var4}
+        d = {self.name+".var1": self.var1, self.name+".var2": self.var2, self.name+".var3": self.var3, self.name+".var4": self.var4}
         df = pd.DataFrame(d, index=[self.time])
         self.df = self.df.append(df)
 
@@ -102,8 +102,8 @@ if __name__ == '__main__':
         filename = sys.argv[0].split('/')[-1]
         dt = 0.1
         time_end = 10.
-        process1 = ClassWithPanda(name='process 1', multi=1)
-        process2 = ClassWithPanda(name='process 2', multi=2)
+        process1 = ClassWithPanda(name='proc1', multi=1)
+        process2 = ClassWithPanda(name='proc2', multi=2)
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)
@@ -123,25 +123,31 @@ if __name__ == '__main__':
         plt.figure()
         n_fig += 1
         plt.subplot(221)
+        over_plot([process1.df['proc1.var1'], process2.df['proc2.var1']], colors=['red', 'blue'], loc=2)
         plt.title(filename + '  ' + date_time)
-        over_plot([process1.df['var1'], process2.df['var2']], colors=['red', 'blue'], loc=2)
+        plt.subplot(222)
+        over_plot([process1.df['proc1.var2'], process2.df['proc2.var2']], colors=['red', 'blue'], loc=2)
+        plt.subplot(223)
+        over_plot([process1.df['proc1.var3'], process2.df['proc2.var3']], colors=['red', 'blue'], loc=2)
+        fig_file_name = filename + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
 
         plt.figure()
         n_fig += 1
         plt.subplot(221)
         plt.title(filename + '  ' + date_time)
-        plt.plot(process1.df['var1'], color='black', label='process1.var1')
-        plt.plot(process2.df['var1'], color='red', label='process2.var1')
+        plt.plot(process1.df['proc1.var1'], color='black', label='proc1.var1')
+        plt.plot(process2.df['proc2.var1'], color='red', label='proc2.var1')
         plt.legend(loc=2)
         plt.subplot(222)
-        plt.plot(process1.df['var2'], color='black', label='process1.var2')
-        plt.plot(process2.df['var2'], color='red', label='process2.var2')
+        plt.plot(process1.df['proc1.var2'], color='black', label='proc1.var2')
+        plt.plot(process2.df['proc2.var2'], color='red', label='proc2.var2')
         plt.legend(loc=2)
         plt.subplot(223)
-        plt.plot(process1.df['var3'], color='black', label='process1.var3')
-        plt.plot(process2.df['var3'], color='red', label='process2.var3')
+        plt.plot(process1.df['proc1.var3'], color='black', label='proc1.var3')
+        plt.plot(process2.df['proc2.var3'], color='red', label='proc2.var3')
         plt.legend(loc=2)
-
         fig_file_name = filename + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
