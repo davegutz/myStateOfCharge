@@ -13,14 +13,53 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-"""Develop structure for simulation plots, including overplot capability and saving/loading to files."""
-
+"""Develop structure for simulation plots, including over plot capability and saving/loading to files."""
+import math
 import numpy as np
 import pandas as pd
 
 
+def over_plot(sig, colors=None, title='', t_lim=None, y_lim=None, date_time='', loc=4):
+    # import matplotlib as plt
+    if t_lim is not None:
+        t_zooming = True
+        x_min = t_lim[0]
+        x_max = t_lim[1]
+    else:
+        t_zooming = False
+        x_min = 0
+        x_max = sig[0].index[:]
+
+    y_min = math.inf
+    y_max = -math.inf
+    if y_lim is not None:
+        y_zooming = True
+        y_min = y_lim[0]
+        y_max = y_lim[1]
+    else:
+        y_zooming = False
+    n = len(sig)
+    # m = len(sig[0])
+    # nc = len(colors)
+
+    for i in range(0, n):
+        plt.plot(sig[i].index, sig[i].par, colors[i])
+        if t_zooming:
+            zoom_range = (sig[i].index > t_lim[0]) & (sig[i].index < t_lim[1])
+            if ~y_zooming:
+                y_min = min(y_min, sig[i].values[zoom_range].min())
+                y_max = min(y_max, sig[i].values[zoom_range].max())
+    plt.title(title + '  ' + date_time)
+    plt.grid()
+    plt.legend(loc)
+    if t_zooming:
+        plt.xlim(x_min, x_max)
+    if y_zooming:
+        plt.ylim(y_min, y_max)
+
+
 class ClassWithPanda:
-    def __init__(self, dt_=None, name=None, mult=1):
+    def __init__(self, dt_=None, name=None, multi=1):
         self.i_call = 0
         self.var1 = 0.
         self.var2 = 0
@@ -29,14 +68,14 @@ class ClassWithPanda:
         self.dt = dt_
         self.time = 0.
         self.name = name
-        self.mult = mult
+        self.multi = multi
         d = {"var1": self.var1, "var2": self.var2, "var3": self.var3, "var4": self.var4}
         self.df = pd.DataFrame(d, index=[self.time])
 
     def calc(self):
         self.i_call += 1
-        self.var1 = -0.5*self.mult + 0.5*self.mult*self.i_call**2 + 0.00002*self.mult*self.i_call**3
-        self.var2 = self.i_call * 3 * self.mult
+        self.var1 = -0.5*self.multi + 0.5*self.multi*self.i_call**2 + 0.00002*self.multi*self.i_call**3
+        self.var2 = self.i_call * 3 * self.multi
         self.var3 = (self.var2 % 2) != 0
 
     def save(self, time_=None):
@@ -50,25 +89,22 @@ class ClassWithPanda:
 
 
 if __name__ == '__main__':
-    import os
+    # import os
     from datetime import datetime
     import sys
     import doctest
     from matplotlib import pyplot as plt
 
     doctest.testmod(sys.modules['__main__'])
-    import matplotlib.pyplot as plt
 
 
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         filename = sys.argv[0].split('/')[-1]
-        time = 0.
-        ii_pass = 0
         dt = 0.1
         time_end = 10.
-        process1 = ClassWithPanda(name='process 1', mult=1)
-        process2 = ClassWithPanda(name='process 2', mult=2)
+        process1 = ClassWithPanda(name='process 1', multi=1)
+        process2 = ClassWithPanda(name='process 2', multi=2)
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)
