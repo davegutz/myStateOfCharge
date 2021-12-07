@@ -18,6 +18,7 @@ import math
 import numpy as np
 import pandas as pd
 import tracemalloc, os, linecache
+from time import perf_counter
 
 
 def display_top(snapshot, key_type='lineno', limit=3, details=False, msg=""):
@@ -133,11 +134,30 @@ if __name__ == '__main__':
         dt = 0.1
         time_end = 100.
 
-        # Collect data and plot
+        # Calculate only
         snapshot = tracemalloc.take_snapshot()
-        display_top(snapshot, msg='Before collect data only loop:  ')
+        display_top(snapshot, msg='Before calc only loop:  ')
+        start = perf_counter()
         process1 = ClassWithPanda(name='proc1', multi=1)
         process2 = ClassWithPanda(name='proc2', multi=2)
+        # Loop time
+        t = np.arange(0, time_end + dt, dt)
+        for i in range(len(t)):
+            time = t[i]
+            process1.calc()
+            process2.calc()
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='After calc only loop:  ')
+        end = perf_counter()
+        print('   process time=', (end - start) / float(len(t)), 'seconds per iteration')
+
+        # Collect data
+        print('')
+        process1 = ClassWithPanda(name='proc1', multi=1)
+        process2 = ClassWithPanda(name='proc2', multi=2)
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='Before collect data only loop:  ')
+        start = perf_counter()
         # Loop time
         t = np.arange(0, time_end + dt, dt)
         for i in range(len(t)):
@@ -148,12 +168,16 @@ if __name__ == '__main__':
             process2.save(time)
         snapshot = tracemalloc.take_snapshot()
         display_top(snapshot, msg='After collect data only loop:  ')
+        end = perf_counter()
+        print('   process time=', (end - start) / float(len(t)), 'seconds per iteration')
 
         # Collect data and plot
+        print('')
         process1 = ClassWithPanda(name='proc1', multi=1)
         process2 = ClassWithPanda(name='proc2', multi=2)
         snapshot = tracemalloc.take_snapshot()
         display_top(snapshot, msg='Before collect data for plot loop:  ')
+        start = perf_counter()
         # Loop time
         t = np.arange(0, time_end + dt, dt)
         for i in range(len(t)):
@@ -164,6 +188,8 @@ if __name__ == '__main__':
             process2.save(time)
         snapshot = tracemalloc.take_snapshot()
         display_top(snapshot, msg='After collect data for plot loop:  ')
+        end = perf_counter()
+        print('   process time=', (end - start) / float(len(t)), 'seconds per iteration')
         # Plots
         n_fig = 0
         fig_files = []
