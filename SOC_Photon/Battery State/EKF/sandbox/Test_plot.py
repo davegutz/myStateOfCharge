@@ -20,30 +20,29 @@ import pandas as pd
 
 
 def over_plot(sig, colors=None, title='', t_lim=None, y_lim=None, date_time='', loc=4):
-    # import matplotlib as plt
-    if t_lim is not None:
-        t_zooming = True
-        x_min = t_lim[0]
-        x_max = t_lim[1]
-    else:
+    if t_lim is None:
         t_zooming = False
         x_min = 0
         x_max = sig[0].index[:]
+    else:
+        t_zooming = True
+        x_min = t_lim[0]
+        x_max = t_lim[1]
 
     y_min = math.inf
     y_max = -math.inf
-    if y_lim is not None:
+    if y_lim is None:
+        y_zooming = False
+    else:
         y_zooming = True
         y_min = y_lim[0]
         y_max = y_lim[1]
-    else:
-        y_zooming = False
     n = len(sig)
     # m = len(sig[0])
     # nc = len(colors)
 
     for i in range(0, n):
-        plt.plot(sig[i].index, sig[i].par, colors[i])
+        plt.plot(sig[i].index, sig[i].values, colors[i], label=sig[i].name)
         if t_zooming:
             zoom_range = (sig[i].index > t_lim[0]) & (sig[i].index < t_lim[1])
             if ~y_zooming:
@@ -51,7 +50,7 @@ def over_plot(sig, colors=None, title='', t_lim=None, y_lim=None, date_time='', 
                 y_max = min(y_max, sig[i].values[zoom_range].max())
     plt.title(title + '  ' + date_time)
     plt.grid()
-    plt.legend(loc)
+    plt.legend(loc=loc)
     if t_zooming:
         plt.xlim(x_min, x_max)
     if y_zooming:
@@ -120,6 +119,12 @@ if __name__ == '__main__':
         # Plots
         n_fig = 0
         fig_files = []
+
+        plt.figure()
+        n_fig += 1
+        plt.subplot(221)
+        plt.title(filename + '  ' + date_time)
+        over_plot([process1.df['var1'], process2.df['var2']], colors=['red', 'blue'], loc=2)
 
         plt.figure()
         n_fig += 1
