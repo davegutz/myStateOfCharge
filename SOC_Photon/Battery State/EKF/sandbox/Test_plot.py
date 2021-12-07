@@ -113,11 +113,9 @@ def overplot(sig, sig_names, colors=None, title='', t_lim=None, y_lim=None, date
         plt.plot(sig[i][0], sig[i][1], colors[i], label=sig_names[i])
         if t_zooming:
             zoom_range = (sig[i][0] > t_lim[0]) & (sig[i][0] < t_lim[1])
-            if y_zooming:
-                print('i=', i, 'sig[i][1]=', sig[i][1])
-                print('zoom_range=', zoom_range)
-                y_min = min(y_min, sig[i][1, zoom_range].min())
-                y_max = max(y_max, sig[i][1, zoom_range].max())
+            if y_zooming & (max(zoom_range) == True):
+                y_min = min(y_min, min((sig[i][1])[zoom_range]))
+                y_max = max(y_max, max((sig[i][1])[zoom_range]))
     plt.title(title + '  ' + date_time)
     plt.grid()
     plt.legend(loc=loc)
@@ -185,7 +183,7 @@ if __name__ == '__main__':
         tracemalloc.start()
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         filename = sys.argv[0].split('/')[-1]
-        dt = 1
+        dt = 0.1
         time_end = 10.
 
         # Calculate only
@@ -341,7 +339,7 @@ if __name__ == '__main__':
         overplot([[process1.np_arr[:,0], process1.np_arr[:,1]], [process2.np_arr[:,0], process2.np_arr[:,1]]],
                  sig_names=['proc1.var1', 'proc2.var1'],
                  colors=['red', 'blue'], loc=2,
-                 t_lim=[.5, .7], y_lim=[1000, 6000])
+                 t_lim=[5, 7], y_lim=[1000, 6000])
         plt.title(filename + '  ' + date_time)
         plt.subplot(222)
         overplot([[process1.np_arr[:,0], process1.np_arr[:,2]], [process2.np_arr[:,0], process2.np_arr[:,2]]],
@@ -354,7 +352,7 @@ if __name__ == '__main__':
         fig_file_name = filename + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
-        plt.show()
+        # plt.show()
         snapshot = tracemalloc.take_snapshot()
         display_top(snapshot, msg='After np over plot:  ')
         plt.close()
@@ -380,7 +378,7 @@ if __name__ == '__main__':
         plt.savefig(fig_file_name, format="png")
         snapshot = tracemalloc.take_snapshot()
         display_top(snapshot, msg='After np plot:  ')
-        plt.show()
+        # plt.show()
         plt.close()
         snapshot = tracemalloc.take_snapshot()
         display_top(snapshot, msg='After close np over plot:  ')
