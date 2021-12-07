@@ -100,6 +100,7 @@ class ClassWithPanda:
         self.multi = multi
         d = {name+".var1": self.var1, name+".var2": self.var2, name+".var3": self.var3, name+".var4": self.var4}
         self.df = pd.DataFrame(d, index=[self.time])
+        self.np = []
 
     def calc(self):
         self.i_call += 1
@@ -115,6 +116,13 @@ class ClassWithPanda:
         d = {self.name+".var1": self.var1, self.name+".var2": self.var2, self.name+".var3": self.var3, self.name+".var4": self.var4}
         df = pd.DataFrame(d, index=[self.time])
         self.df = self.df.append(df)
+
+    def save_np(self, time_=None):
+        if time_ is None:
+            self.time = self.dt * self.i_call
+        else:
+            self.time = time_
+        self.np.append([self.time, self.var1, self.var2, self.var3])
 
 
 if __name__ == '__main__':
@@ -151,12 +159,32 @@ if __name__ == '__main__':
         end = perf_counter()
         print('   process time=', (end - start) / float(len(t)), 'seconds per iteration')
 
+        # Collect np data
+        print('')
+        process1 = ClassWithPanda(name='proc1', multi=1)
+        process2 = ClassWithPanda(name='proc2', multi=2)
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='Before collect np data loop:  ')
+        start = perf_counter()
+        # Loop time
+        t = np.arange(0, time_end + dt, dt)
+        for i in range(len(t)):
+            time = t[i]
+            process1.calc()
+            process2.calc()
+            process1.save_np(time)
+            process2.save_np(time)
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, msg='After collect np data only loop:  ')
+        end = perf_counter()
+        print('   process time=', (end - start) / float(len(t)), 'seconds per iteration')
+
         # Collect data
         print('')
         process1 = ClassWithPanda(name='proc1', multi=1)
         process2 = ClassWithPanda(name='proc2', multi=2)
         snapshot = tracemalloc.take_snapshot()
-        display_top(snapshot, msg='Before collect data only loop:  ')
+        display_top(snapshot, msg='Before collect pandas data only loop:  ')
         start = perf_counter()
         # Loop time
         t = np.arange(0, time_end + dt, dt)
@@ -167,7 +195,7 @@ if __name__ == '__main__':
             process1.save(time)
             process2.save(time)
         snapshot = tracemalloc.take_snapshot()
-        display_top(snapshot, msg='After collect data only loop:  ')
+        display_top(snapshot, msg='After collect pandas data only loop:  ')
         end = perf_counter()
         print('   process time=', (end - start) / float(len(t)), 'seconds per iteration')
 
@@ -176,7 +204,7 @@ if __name__ == '__main__':
         process1 = ClassWithPanda(name='proc1', multi=1)
         process2 = ClassWithPanda(name='proc2', multi=2)
         snapshot = tracemalloc.take_snapshot()
-        display_top(snapshot, msg='Before collect data for plot loop:  ')
+        display_top(snapshot, msg='Before collect pandas data for plot loop:  ')
         start = perf_counter()
         # Loop time
         t = np.arange(0, time_end + dt, dt)
@@ -187,7 +215,7 @@ if __name__ == '__main__':
             process1.save(time)
             process2.save(time)
         snapshot = tracemalloc.take_snapshot()
-        display_top(snapshot, msg='After collect data for plot loop:  ')
+        display_top(snapshot, msg='After collect pandas data for plot loop:  ')
         end = perf_counter()
         print('   process time=', (end - start) / float(len(t)), 'seconds per iteration')
         # Plots
@@ -231,11 +259,11 @@ if __name__ == '__main__':
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
         snapshot = tracemalloc.take_snapshot()
-        display_top(snapshot, msg='After plot:  ')
+        display_top(snapshot, msg='After pandas plot:  ')
         plt.show()
         plt.close()
         snapshot = tracemalloc.take_snapshot()
-        display_top(snapshot, msg='After close over plot:  ')
+        display_top(snapshot, msg='After close pandas over plot:  ')
 
 
     main()
