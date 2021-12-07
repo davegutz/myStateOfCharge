@@ -45,9 +45,9 @@ def over_plot(sig, colors=None, title='', t_lim=None, y_lim=None, date_time='', 
         plt.plot(sig[i].index, sig[i].values, colors[i], label=sig[i].name)
         if t_zooming:
             zoom_range = (sig[i].index > t_lim[0]) & (sig[i].index < t_lim[1])
-            if ~y_zooming:
+            if y_zooming:
                 y_min = min(y_min, sig[i].values[zoom_range].min())
-                y_max = min(y_max, sig[i].values[zoom_range].max())
+                y_max = max(y_max, sig[i].values[zoom_range].max())
     plt.title(title + '  ' + date_time)
     plt.grid()
     plt.legend(loc=loc)
@@ -123,7 +123,8 @@ if __name__ == '__main__':
         plt.figure()
         n_fig += 1
         plt.subplot(221)
-        over_plot([process1.df['proc1.var1'], process2.df['proc2.var1']], colors=['red', 'blue'], loc=2)
+        over_plot([process1.df['proc1.var1'], process2.df['proc2.var1']], colors=['red', 'blue'], loc=2,
+                  t_lim=[5, 7], y_lim=[1000, 6000])
         plt.title(filename + '  ' + date_time)
         plt.subplot(222)
         over_plot([process1.df['proc1.var2'], process2.df['proc2.var2']], colors=['red', 'blue'], loc=2)
