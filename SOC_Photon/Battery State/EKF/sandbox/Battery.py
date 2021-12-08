@@ -26,7 +26,7 @@ class Battery:
     def __init__(self, n_cells=4, r0=0.003, tau_ct=3.7, rct=0.0016, tau_dif=83, r_dif=0.0077, dt=0.1, b=0., a=0.,
                  c=0., n=0.4, m=0.478, d=0.707, t_t=None, t_b=None, t_a=None, t_c=None, nom_bat_cap=100.,
                  true_bat_cap=102., nom_sys_volt=13., dv=0, sr=1, bat_v_sat=3.4625, dvoc_dt=0.001875, sat_gain=10.,
-                 tau_m=0.159, bat_cap_scalar=1.0):
+                 tau_m=0.159, bat_cap_scalar=1.0, dqdt=0.01, temp_c=25.):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -97,6 +97,7 @@ class Battery:
         self.vb = nom_sys_volt  # Battery voltage at post, V
         self.ioc = 0  # Battery charge current, A
         self.cu = nom_bat_cap  # Assumed capacity, Ah
+        self.true_bat_cap = true_bat_cap
         self.cs = true_bat_cap  # Data fit to this capacity to avoid math 0, Ah
         self.bat_cap_scalar = bat_cap_scalar  # Warp the battery char, e.g. life
         self.dv = dv  # Adjustment for voltage level, V (0)
@@ -116,6 +117,15 @@ class Battery:
         self.exp_n_soc_norm = 0.
         self.pow_log_soc_norm = 0.
         self.i_charge = self.ioc
+
+        # New book-keep stuff (based on actual=true)
+        self.temp_c = temp_c
+        self.dqdt = dqdt  # Change of charge with temperature, soc/deg C
+        self.delta_soc = 0.
+        self.temp_c_init = self.temp_c
+        self.charge_init = (self.temp_c_init - 25.) * self.dqdt + self.true_bat_cap
+        self.soc_init = self.charge_init / self.true_bat_cap
+        self.soc_avail = 1.
 
     def calc_voc(self, temp_c=25., soc_init=0.5):
         """SOC-OCV curve fit method per Zhang, et al
@@ -164,7 +174,7 @@ class Battery:
         self.u[1] = self.voc
         return self.voc
 
-    def calc_dynamics(self, u, dt=None, i_hyst=0.):
+    def calc_dynamics(self, u, temp_c, dt=None, i_hyst=0.):
         """Executive model dynamics
         State-space calculation
         Inputs:
@@ -198,6 +208,7 @@ class Battery:
 
         # Coulomb counter
         self.coulomb_counter()
+        self.coulomb_counter_avail(temp_c)
 
         # Summarize
         soc_norm_lim = max(min(self.soc_norm, self.eps_max), self.eps_min)
@@ -265,6 +276,27 @@ class Battery:
         #     self.soc = self.eps_max
         # self.soc_norm = 1. - (1. - self.soc) * self.cu / self.cs
         self.soc_norm = self.soc * self.cu / self.cs
+
+    def coulomb_counter_avail(self, temp_c):
+        """Coulomb counter based on true
+        Internal resistance of battery is a loss
+        Inputs:
+            ioc     Charge current, A
+            voc     Charge voltage, V
+        Outputs:
+            soc_avail   State of charge, fraction (0-1.5)
+            soc_norm    Normalized state of charge, fraction (0-1)
+        """
+        self.temp_c = temp_c
+        self.pow_in = self.i_charge * self.voc * self.sr
+        self.delta_soc = max(min(self.delta_soc + self.pow_in / self.nom_sys_volt * self.dt / 3600. / self.true_bat_cap,
+                                 1.5), -1.5)
+        if self.sat:
+            self.delta_soc = 0.
+            self.temp_c_init = self.temp_c
+            self.charge_init = ((self.temp_c_init - 25.) * self.dqdt + 1.) * self.true_bat_cap
+            self.soc_init = self.charge_init / self.true_bat_cap
+        self.soc_avail = self.charge_init / self.true_bat_cap * (1. - self.dqdt * (self.temp_c - self.temp_c_init)) + self.delta_soc
 
     def look(self, temp_c):
         # Table lookups of Zhang coefficients

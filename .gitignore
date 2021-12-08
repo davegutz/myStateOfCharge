@@ -40,3 +40,6 @@ SOC_Photon/.vscode/settings.json
 *.pyc
 SOC_Photon/datasheets/GP_battery.net
 *.net
+SOC_Photon/Battery State/EKF/sandbox/Test_plot.py1.png
+SOC_Photon/Battery State/EKF/sandbox/Test_plot.py2.png
+SOC_Photon/Battery State/EKF/sandbox/Test_plot.py1.png

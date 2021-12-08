@@ -28,7 +28,7 @@ class BatteryEKF:
     def __init__(self, n_cells=4, r0=0.003, tau_ct=3.7, rct=0.0016, tau_dif=83, r_dif=0.0077, dt=0.1, b=0., a=0.,
                  c=0., n=0.4, m=0.478, d=0.707, t_t=None, t_b=None, t_a=None, t_c=None, nom_bat_cap=100.,
                  true_bat_cap=102., nom_sys_volt=13., dv=0, sr=1, bat_v_sat=3.4625, dvoc_dt=0.001875, rsd=70.,
-                 tau_sd=1.8e7):
+                 tau_sd=1.8e7, dqdt=0.01, temp_c=25., soc_offset=-0.0025):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -64,7 +64,7 @@ class BatteryEKF:
         self.y = np.array([0., 0]).T
 
         # SOC-VOC Battery coefficients
-        self.temp_c = None
+        self.temp_c = temp_c
         self.b = b
         self.a = a
         self.c = c
@@ -126,6 +126,7 @@ class BatteryEKF:
         self.vb = nom_sys_volt  # Battery voltage at post, V
         self.ioc = 0  # Current into battery storage, A
         self.cu = nom_bat_cap  # Assumed capacity, Ah
+        self.true_bat_cap = true_bat_cap
         self.cs = true_bat_cap  # Data fit to this capacity to avoid math 0, Ah
         self.dv = dv  # Adjustment for voltage level, V (0)
         self.sr = sr  # Adjustment for resistance scalar, fraction (1)
@@ -141,6 +142,15 @@ class BatteryEKF:
         self.log_soc_norm = 0.
         self.exp_n_soc_norm = 0.
         self.pow_log_soc_norm = 0.
+    
+        # New book-keep stuff (based on actual=true)
+        self.dqdt = dqdt  # Change of charge with temperature, soc/deg C
+        self.delta_soc = 0.
+        self.temp_c_init = self.temp_c
+        self.charge_init = (self.temp_c_init - 25.) * self.dqdt + self.true_bat_cap
+        self.soc_init = self.charge_init / self.true_bat_cap
+        self.soc_avail = 1.
+        self.soc_offset = soc_offset  # Control has voltage threshold for saturation with margin of at least this amount
 
     def calc_dynamics_ekf(self, u, dt=None):
         """Executive model dynamics for ekf State-space calculation
@@ -281,6 +291,37 @@ class BatteryEKF:
             self.soc = self.eps_max
         # self.soc_norm = 1. - (1. - self.soc) * self.cu / self.cs
         self.soc_norm = self.soc * self.cu / self.cs
+
+    def coulomb_counter_avail(self, temp_c):
+        """Coulomb counter based on true=actual capacity
+        Internal resistance of battery is a loss
+        Inputs:
+            ioc     Charge current, A
+            voc_dyn Charge voltage calculated from dynamics, V
+            vb      Battery terminal voltage, V
+            i_r_dif Current in diffusion process, A
+            i_r_ct  Current in charge transfer process, A
+            sr      Experimental scalar
+        Outputs:
+            soc_avail   State of charge, fraction (0-1.5)
+            # soc_norm    Normalized state of charge, fraction (0-1)
+            v_sat   Charge voltage at saturation, V
+            sat     Battery is saturated, T/F
+        """
+        self.temp_c = temp_c
+        self.pow_in = self.ib * (self.vb - (self.ioc * self.r_0 + self.i_r_dif() * self.r_dif +
+                                            self.i_r_ct() * self.r_ct) * self.sr)
+        self.delta_soc = max(min(self.delta_soc + self.pow_in / self.nom_sys_volt * self.dt / 3600. / self.true_bat_cap,
+                                 1.5), -1.5)
+        self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
+        self.sat = self.voc_dyn >= self.v_sat
+        if self.sat:
+            self.delta_soc = 0.
+            self.temp_c_init = self.temp_c
+            self.charge_init = ((self.temp_c_init - 25.) * self.dqdt + 1. + self.soc_offset) * self.true_bat_cap
+            self.soc_init = self.charge_init / self.true_bat_cap
+        self.soc_avail = self.charge_init / self.true_bat_cap * (1. - self.dqdt * (self.temp_c - self.temp_c_init))\
+                         + self.delta_soc
 
     def kf_predict_1x1(self, u=None):
         """1x1 Extended Kalman Filter predict
