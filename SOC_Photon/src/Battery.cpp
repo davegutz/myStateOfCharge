@@ -98,3 +98,27 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
 
   return ( v_ );
 }
+
+/* C <- A * B */
+void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols)
+{
+    int i, j,l;
+
+    for(i=0; i<arows; ++i)
+        for(j=0; j<bcols; ++j) {
+            c[i*bcols+j] = 0;
+            for(l=0; l<acols; ++l)
+                c[i*bcols+j] += a[i*acols+l] * b[l*bcols+j];
+        }
+}
+
+void mulvec(double * a, double * x, double * y, int m, int n)
+{
+    int i, j;
+
+    for(i=0; i<m; ++i) {
+        y[i] = 0;
+        for(j=0; j<n; ++j)
+            y[i] += x[j] * a[i*n+j];
+    }
+}

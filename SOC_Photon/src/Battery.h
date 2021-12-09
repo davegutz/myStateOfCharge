@@ -140,4 +140,8 @@ static TableInterp1Dclip  *V_T1 = new TableInterp1Dclip(n_v1, t_min_v1, v_v1);
 static TableInterp1Dclip  *I_T1 = new TableInterp1Dclip(n_v1, t_min_v1, i_v1);
 static TableInterp1Dclip  *T_T1 = new TableInterp1Dclip(n_v1, t_min_v1, T_v1);
 
+// Methods
+void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols);
+void mulvec(double * a, double * x, double * y, int m, int n);
+
 #endif
