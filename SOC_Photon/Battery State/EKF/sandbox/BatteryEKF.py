@@ -161,6 +161,9 @@ class BatteryEKF:
         Outputs:
             ioc     Charge current, A
             voc_dyn Charge voltage dynamic calculation, V
+        States:
+            vbc - RC vb-vc, V
+            vcd - RC vc-vd, V
         """
 
         if dt is not None:
@@ -179,6 +182,7 @@ class BatteryEKF:
         self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
         self.ioc = self.ib
         self.voc_dyn = self.y
+        print('A=', self.A, 'x=', self.x, 'B=', self.B, 'u=', self.u, 'xdot=', self.x_dot)
 
     def calc_soc_voc_coeff(self, soc_k):
         """
@@ -250,14 +254,18 @@ class BatteryEKF:
 
     def construct_state_space_ekf(self):
         """ State-space representation of dynamics
-        Inputs:   ib - current at V_bat = Vb = current at shunt, A
-                  voc - internal open circuit voltage, V
-        Outputs:  vb - voltage at positive, V
-                  ioc  - current into storage, A
-        States:   vbc - RC vb-vc, V
-                  vcd - RC vc-vd, V
-        Other:    vc - voltage downstream of charge transfer model, ct-->c
-                  vd - voltage downstream of diffusion process model, dif-->d
+        Inputs:
+            ib - current at V_bat = Vb = current at shunt, A
+            voc - internal open circuit voltage, V
+        Outputs:
+            vb - voltage at positive, V
+            ioc  - current into storage, A
+        States:
+            vbc - RC vb-vc, V
+            vcd - RC vc-vd, V
+        Other:
+            vc - voltage downstream of charge transfer model, ct-->c
+            vd - voltage downstream of diffusion process model, dif-->d
         """
         a = np.array([[-1 / self.tau_ct, 0],
                       [0, -1 / self.tau_dif]])
