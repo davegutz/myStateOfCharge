@@ -26,8 +26,9 @@
 #define BATTERY_H_
 
 #include "myTables.h"
+#include "EKF_1x1.h"
 
-class Battery
+class Battery: public EKF_1x1
 {
 public:
   Battery();
@@ -39,7 +40,10 @@ public:
   // functions
   void Dv(const double dv) { dv_ = dv; };
   void Sr(const double sr) { sr_ = sr; };
-  double calculate(const double temp_C, const double socu_frac, const double curr_in);
+  void calc_soc_voc_coeff(double soc, double *log_soc, double *exp_n_soc, double *pow_log_soc);
+  double calc_h_jacobian(double soc_lim, double log_soc, double exp_n_soc, double pow_log_soc);
+  double calc_voc_ocv(double soc_lim, double *dv_dsoc, double log_soc, double exp_n_soc, double pow_log_soc);
+  double calculate(const double temp_C, const double socu_frac, const double curr_in, const double dt);
   double num_cells() { return (num_cells_); };
   double socs() { return (socs_); };
   double socu() { return (socu_); };
@@ -84,6 +88,16 @@ protected:
   boolean sat_;     // Saturation status
   double dv_;       // Adjustment, V
   double dvoc_dt_;  // Change of VOC with temperature, V/deg C
+  double dt_;       // Update time
+  double r0_;       // Randles R0, ohms
+  double tau_ct_;   // Randles charge transfer time constant, s (=1/Rct/Cct)
+  double rct_;      // Randles charge transfer resistance, ohms
+  double tau_dif_;  // Randles diffusion time constant, s (=1/Rdif/Cdif)
+  double r_dif_;    // Randles diffusion resistance, ohms
+  double tau_sd_;   // Time constant of ideal battery capacitor model, input current A, output volts=soc (0-1)
+  double r_sd_;     // Trickle discharge of ideal battery capacitor model, ohms
+  void ekf_model_predict(double *Fx, double *Bu);
+  void ekf_model_update(double *hx, double *H);
 };
 
 // BattleBorn 100 Ah, 12v LiFePO4

@@ -22,36 +22,47 @@
 // SOFTWARE.
 
 
-#ifndef STATESPACE_H_
-#define STATESPACE_H_
+#ifndef EKF_1X1_H_
+#define EKF_1X1_H_
 
 // Lightweight general purpose state space for embedded application
-class StateSpace
+class EKF_1x1
 {
 public:
-  StateSpace();
-  StateSpace(double *A, double *B, double *C, double *D, const int8_t n,
-    const int8_t p, const int8_t q);
-  ~StateSpace();
+  EKF_1x1();
+  ~EKF_1x1();
   // operators
   // functions
-  void calc_x_dot(double *u);
-  void update(const double dt);
-  void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols);
-  void mulvec(double * a, double * x, double * y, int m, int n);
+  void predict(const double u);
+  void update(const double z, const double dt);
 protected:
-  double *A_; // n x n state matrix
-  double *B_; // n x p input matrix
-  double *C_; // q x n state output matrix
-  double *D_; // q x p input output matrix
-  double *x_; // 1 x n state vector
-  double *x_past_; // 1 x n state vector
-  double *x_dot_; // 1 x n state vector
-  double *u_; // 1 x p input vector
-  double *y_; // q x1 output vector
-  int8_t n_;   // Length of state vector
-  int8_t p_; // Length of input vector
-  int8_t q_; // Length of output vector
+  double Fx_; // State transition
+  double Bu_; // Control transition
+  double Q_;  // Process uncertainty
+  double R_;  // State uncertainty
+  double P_;  // Uncertainty covariance
+  double S_;  // System uncertainty
+  double K_;  // Kalman gain
+  double u_;  // Control input
+  double x_;  // Kalman state variable
+  double y_;  // Residual z- hx
+  double z_;  // Observation of state x
+  double x_prior_;  
+  double P_prior_;
+  double x_post_;
+  double P_post_;
+  double hx_; // Output of observation function h(x)
+  double H_;  // Jacobian of h(x)
+  /*
+    Implement this function for your EKF model.
+    @param fx gets output of state-transition function f(x)
+    @param F gets Jacobian of f(x)
+    @param hx gets output of observation function h(x)
+    @param H gets Jacobian of h(x)
+  */
+  // virtual void ekf_model(double *Fx, double *Bu, double *hx, double *H) = 0;
+  virtual void ekf_model_predict(double *Fx, double *Bu) = 0;
+  virtual void ekf_model_update(double *hx, double *H) = 0;
 };
 
 // Methods

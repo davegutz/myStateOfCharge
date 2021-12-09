@@ -39,7 +39,7 @@ StateSpace::~StateSpace() {}
 
 // functions
 // xdot <- A@x + B@u
-void StateSpace::calc_x_dot()
+void StateSpace::calc_x_dot(double *u)
 {
   int i;
   double AX[n_];
