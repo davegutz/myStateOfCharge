@@ -36,6 +36,7 @@ public:
   void predict_ekf(const double u);
   void update_ekf(const double z, const double dt);
   double x_ekf() { return ( x_ ); };
+  double z_ekf() { return ( z_ ); };
   void init_ekf(double soc, double Pinit);
 protected:
   double Fx_; // State transition

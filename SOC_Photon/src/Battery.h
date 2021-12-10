@@ -52,6 +52,7 @@ public:
   double socs() { return (socs_); };
   double socu() { return (socu_); };
   double voc() { return (voc_); };
+  double voc_dyn() { return (voc_dyn_); };
   double vdyn() { return (vdyn_); };
   double v() { return (v_); };
   double tcharge() { return (tcharge_); };

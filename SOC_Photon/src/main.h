@@ -394,7 +394,9 @@ void loop()
           Sen->Tbatt_filt, Sen->Ishunt_filt_obs, count, socu_solved, vbatt_f_o, Sen->Vbatt_solved, err, MyBattSolved->dv_dsocu());
     }
     // boolean solver_valid = count<SOLVE_MAX_COUNTS; 
-    
+    if ( debug==-35 ) Serial.printf("socu_solved,Vbatt_solved, soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f, %7.3f\n",
+        socu_solved, Sen->Vbatt_solved, MyBattFree->x_ekf(), MyBattFree->z_ekf());
+
     // Debug print statements
     // Useful for Arduino plotting
     if ( debug==-1 ) Serial.printf("%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", socu_solved, Sen->Ishunt,
