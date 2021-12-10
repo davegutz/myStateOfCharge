@@ -59,6 +59,13 @@ void EKF_1x1::predict_ekf(double u)
   P_prior_ = P_;
 }
 
+  // Initialize
+  void EKF_1x1::init_ekf(double soc, double Pinit)
+  {
+    x_ = soc;
+    P_ = Pinit;
+  }
+
 // y <- C@x + D@u
 // Backward Euler integration of x
 void EKF_1x1::update_ekf(const double z, const double dt)

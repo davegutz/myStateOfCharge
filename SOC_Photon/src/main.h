@@ -326,7 +326,6 @@ void loop()
     // Load and filter
     load(reset_free, Sen, myPins, ads, ads_amp, ReadSensors->now(), SdIshunt, SdIshunt_amp, SdVbatt);
     Tbatt_filt_C = (Sen->Tbatt_filt-32.)*5./9.;
-    MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5));  // TODO:  hardcoded time of 0.5 into constants
 
     // Arduino plots
     if ( debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n", socu_solved, Sen->Ishunt_amp, Sen->Ishunt,
@@ -349,8 +348,12 @@ void loop()
     {
       if ( vectoring ) socu_free = socu_solved;
       else socu_free = socu_free_saved;  // Only way to reach this line is resetting from vector test
+      MyBattFree->init_soc_ekf(socu_free);
       if ( elapsed>INIT_WAIT ) reset_free = false;
     }
+
+    // EKF
+    MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5));  // TODO:  hardcoded time of 0.5 into constants
 
     // Coulomb Count integrator
     socu_free = max(min( socu_free + Sen->Wshunt/NOM_SYS_VOLT*Sen->T/3600./NOM_BATT_CAP, 1.5), 0.);

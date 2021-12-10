@@ -52,8 +52,8 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
     C_T_ = new TableInterp1Dclip(nz_, x_tab, c_tab);
 
     // EKF
-    EKF_1x1::Q_ = 0.001*0.001;
-    EKF_1x1::R_ = 0.1*0.1;
+    this->Q_ = 0.001*0.001;
+    this->R_ = 0.1*0.1;
 
     // Randles dynamic model for EKF
     double c_ct = tau_ct_ / rct_;
@@ -151,7 +151,13 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
     return ( v_ );
 }
 
-//  MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt, Sen->T_filt);
+// Init EKF
+void Battery::init_soc_ekf(const double socu_free)
+{
+    soc_ekf_ = 1-(1-socu_free)*cu_bb/cs_bb;
+    this->init_ekf(soc_ekf_, 0.0);
+}
+
 // SOC-OCV curve fit method per Zhang, et al modified by ekf
 double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt)
 {
@@ -175,8 +181,8 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
 
     if ( debug==-34 )
     {
-        Serial.printf("dt,ib,vb,voc_dyn,   u,Fx,Bu,x_prior,p_prior,   z_,S_,K_,y_= %7.3f,%7.3f,%7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,\n",
-            dt, ib, vb, voc_dyn_, u_, Fx_, Bu_, x_prior_, P_prior_, z_, S_, K_, y_);
+        Serial.printf("dt,ib,vb,voc_dyn,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf= %7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f\n",
+            dt, ib, vb, voc_dyn_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
     }
 
     // Summarize
@@ -207,8 +213,9 @@ void Battery::ekf_model_update(double *hx, double *H)
     // Measurement function hx(x), x=soc ideal capacitor
     double b, a, c, log_soc, exp_n_soc, pow_log_soc;
     double dv_dsoc;
-    calc_soc_voc_coeff(x_, temp_c_,  &b, &a, &c, &log_soc, &exp_n_soc, &pow_log_soc);
-    *hx = calc_voc_ocv(x_, &dv_dsoc, b, a, c, log_soc, exp_n_soc, pow_log_soc);
+    double x_lim = max(min(x_, mxeps_bb), mneps_bb);
+    calc_soc_voc_coeff(x_lim, temp_c_,  &b, &a, &c, &log_soc, &exp_n_soc, &pow_log_soc);
+    *hx = calc_voc_ocv(x_lim, &dv_dsoc, b, a, c, log_soc, exp_n_soc, pow_log_soc);
 
     // Jacodian of measurement function
     *H = dv_dsoc;
