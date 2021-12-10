@@ -37,7 +37,7 @@ EKF_1x1::~EKF_1x1() {}
 
 // functions
 //1x1 Extended Kalman Filter predict
-void EKF_1x1::predict(double u)
+void EKF_1x1::predict_ekf(double u)
 {
   /*
   1x1 Extended Kalman Filter predict
@@ -59,7 +59,7 @@ void EKF_1x1::predict(double u)
 
 // y <- C@x + D@u
 // Backward Euler integration of x
-void EKF_1x1::update(const double z, const double dt)
+void EKF_1x1::update_ekf(const double z, const double dt)
 {
   /*1x1 Extended Kalman Filter update
   Inputs:

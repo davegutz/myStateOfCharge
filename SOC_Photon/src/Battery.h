@@ -27,6 +27,7 @@
 
 #include "myTables.h"
 #include "EKF_1x1.h"
+#include "StateSpace.h"
 
 class Battery: public EKF_1x1
 {
@@ -40,10 +41,12 @@ public:
   // functions
   void Dv(const double dv) { dv_ = dv; };
   void Sr(const double sr) { sr_ = sr; };
-  void calc_soc_voc_coeff(double soc, double *log_soc, double *exp_n_soc, double *pow_log_soc);
-  double calc_h_jacobian(double soc_lim, double log_soc, double exp_n_soc, double pow_log_soc);
-  double calc_voc_ocv(double soc_lim, double *dv_dsoc, double log_soc, double exp_n_soc, double pow_log_soc);
+  void calc_soc_voc_coeff(double soc, double tc, double *b, double *a, double *c, double *log_soc,
+                          double *exp_n_soc, double *pow_log_soc);
+  double calc_h_jacobian(double soc_lim, double b, double c, double log_soc, double exp_n_soc, double pow_log_soc);
+  double calc_voc_ocv(double soc_lim, double *dv_dsoc, double b, double a, double c, double log_soc, double exp_n_soc, double pow_log_soc);
   double calculate(const double temp_C, const double socu_frac, const double curr_in, const double dt);
+  double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt);
   double num_cells() { return (num_cells_); };
   double socs() { return (socs_); };
   double socu() { return (socu_); };
@@ -96,6 +99,18 @@ protected:
   double r_dif_;    // Randles diffusion resistance, ohms
   double tau_sd_;   // Time constant of ideal battery capacitor model, input current A, output volts=soc (0-1)
   double r_sd_;     // Trickle discharge of ideal battery capacitor model, ohms
+  // EKF declarations
+  StateSpace *Randles_;  // Randles model
+  double *rand_A_;
+  double *rand_B_;
+  double *rand_C_;
+  double *rand_D_;
+  int8_t rand_n_, rand_p_, rand_q_;
+  double temp_c_;   // Battery temperature, C
+  double soc_ekf_;  // Filtered state of charge from ekf (0-1)
+  double pow_in_ekf_;   // Charging power from ekf, w
+  double tcharge_ekf_;  // Charging time to 100% from ekf, hr
+  double voc_dyn_;  // Charging voltage, V
   void ekf_model_predict(double *Fx, double *Bu);
   void ekf_model_update(double *hx, double *H);
 };

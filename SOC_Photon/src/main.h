@@ -374,6 +374,7 @@ void loop()
     // Battery models
     double Tbatt_filt_C = (Sen->Tbatt_filt-32.)*5./9.;
     MyBattFree->calculate(Tbatt_filt_C, socu_free, Sen->Ishunt, Sen->T_filt);
+    MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt, Sen->T_filt);
 
     // Solver
     double vbatt_f_o = Sen->Vbatt_filt_obs + double(stepping*step_val);

@@ -39,6 +39,7 @@ public:
   void update(const double dt);
   void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols);
   void mulvec(double * a, double * x, double * y, int m, int n);
+  double y(int i) { return ( y_[i] ); };
 protected:
   double *A_; // n x n state matrix
   double *B_; // n x p input matrix

@@ -46,11 +46,38 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
     r0_(0.003), tau_ct_(3.7), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
     tau_sd_(1.8e7), r_sd_(70.)
 {
-    EKF_1x1::Q_ = 0.001*0.001;
-    EKF_1x1::R_ = 0.1*0.1;
+    // Battery characteristic tables
     B_T_ = new TableInterp1Dclip(nz_, x_tab, b_tab);
     A_T_ = new TableInterp1Dclip(nz_, x_tab, a_tab);
     C_T_ = new TableInterp1Dclip(nz_, x_tab, c_tab);
+
+    // EKF
+    EKF_1x1::Q_ = 0.001*0.001;
+    EKF_1x1::R_ = 0.1*0.1;
+
+    // Randles dynamic model for EKF
+    double c_ct = tau_ct_ / rct_;
+    double c_dif = tau_ct_ / rct_;
+    rand_n_ = 2;
+    rand_p_ = 2;
+    rand_q_ = 1;
+    rand_A_ = new double[rand_n_*rand_n_];
+    rand_A_[0] = -1./tau_ct_;
+    rand_A_[1] = 0.;
+    rand_A_[2] = 0.;
+    rand_A_[3] = -1/tau_dif_;
+    rand_B_ = new double [rand_n_*rand_p_];
+    rand_B_[0] = 1./c_ct;
+    rand_B_[1] = 0.;
+    rand_B_[2] = 1./c_dif;
+    rand_B_[3] = 0.;
+    rand_C_ = new double [rand_q_*rand_n_];
+    rand_C_[0] = -1.;
+    rand_C_[1] = -1.;
+    rand_D_ = new double [rand_q_*rand_p_];
+    rand_D_[0] = -r0_;
+    rand_D_[1] = -1.;
+    Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n_, rand_p_, rand_q_);
 }
 Battery::~Battery() {}
 // operators
@@ -58,33 +85,34 @@ Battery::~Battery() {}
 
 
 // VOC-OCV model
-void Battery::calc_soc_voc_coeff(double soc, double *log_soc, double *exp_n_soc, double *pow_log_soc)
+void Battery::calc_soc_voc_coeff(double soc, double tc, double *b, double *a, double *c, double *log_soc, double *exp_n_soc, double *pow_log_soc)
 {
+    *b = B_T_ ->interp(tc);
+    *a = A_T_ ->interp(tc);
+    *c = C_T_ ->interp(tc);
+
     *log_soc = log(soc);
     *exp_n_soc = exp(n_*(soc-1));
     *pow_log_soc = pow(-*log_soc, m_);
 }
-double Battery::calc_voc_ocv(double soc_lim, double *dv_dsoc, double log_soc, double exp_n_soc, double pow_log_soc)
+double Battery::calc_voc_ocv(double soc_lim, double *dv_dsoc, double b, double a, double c, double log_soc, double exp_n_soc, double pow_log_soc)
 {
     double voc;  // return value
-    *dv_dsoc = calc_h_jacobian(soc_lim, log_soc, exp_n_soc, pow_log_soc);
-    voc = double(num_cells_) * ( a_ + b_*pow_log_soc + c_*soc_lim + d_*exp_n_soc );
-    // d2v_dsoc2_ = double(num_cells_) * ( b_*m_/soc_/soc_*pow_log_soc/log_soc*((m_-1.)/log_soc - 1.) + d_*n_*n_*exp_n_soc );
+    *dv_dsoc = calc_h_jacobian(soc_lim, b, c, log_soc, exp_n_soc, pow_log_soc);
+    voc = double(num_cells_) * ( a + b*pow_log_soc + c*soc_lim + d_*exp_n_soc );
+    // d2v_dsoc2_ = double(num_cells_) * ( b*m_/soc_/soc_*pow_log_soc/log_soc*((m_-1.)/log_soc - 1.) + d_*n_*n_*exp_n_soc );
     return (voc);
 }
 
-double Battery::calc_h_jacobian(double soc_lim, double log_soc, double exp_n_soc, double pow_log_soc)
+double Battery::calc_h_jacobian(double soc_lim, double b, double c, double log_soc, double exp_n_soc, double pow_log_soc)
 {
-    double dv_dsoc = double(num_cells_) * ( b_*m_/soc_lim*pow_log_soc/log_soc + c_ + d_*n_*exp_n_soc );
+    double dv_dsoc = double(num_cells_) * ( b*m_/soc_lim*pow_log_soc/log_soc + c + d_*n_*exp_n_soc );
     return (dv_dsoc);
 }
 
 // SOC-OCV curve fit method per Zhang, et al
 double Battery::calculate(const double temp_C, const double socu_frac, const double curr_in, const double dt)
 {
-    b_ = B_T_ ->interp(temp_C);
-    a_ = A_T_ ->interp(temp_C);
-    c_ = C_T_ ->interp(temp_C);
     dt_ = dt;
 
     socu_ = socu_frac;
@@ -94,8 +122,8 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
 
     // VOC-OCV model
     double log_socs, exp_n_socs, pow_log_socs;
-    calc_soc_voc_coeff(socs_lim, &log_socs, &exp_n_socs, &pow_log_socs);
-    voc_ = calc_voc_ocv(socs_lim, &dv_dsocs_, log_socs, exp_n_socs, pow_log_socs)
+    calc_soc_voc_coeff(socs_lim, temp_C, &b_, &a_, &c_, &log_socs, &exp_n_socs, &pow_log_socs);
+    voc_ = calc_voc_ocv(socs_lim, &dv_dsocs_, b_, a_, c_, log_socs, exp_n_socs, pow_log_socs)
              + (socs_ - socs_lim) * dv_dsocs_;  // slightly beyond
     voc_ +=  dv_;  // Experimentally varied
     dv_dsocu_ = dv_dsocs_ * cu_bb / cs_bb;
@@ -123,6 +151,42 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
     return ( v_ );
 }
 
+//  MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt, Sen->T_filt);
+// SOC-OCV curve fit method per Zhang, et al modified by ekf
+double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt)
+{
+    // Save temperature for callbacks
+    temp_c_ = temp_c;
+
+    // VOC-OCV model
+    double b, a, c, log_soc, exp_n_soc, pow_log_soc;
+    calc_soc_voc_coeff(soc_ekf_, temp_c_, &b, &a, &c, &log_soc, &exp_n_soc, &pow_log_soc);
+
+    // Dynamic emf
+    double u[2] = {ib, vb};
+    Randles_->calc_x_dot(u);
+    Randles_->update(dt);
+    voc_dyn_ = Randles_->y(0);
+
+    // EKF 1x1
+    predict_ekf(ib);            // u = ib
+    update_ekf(voc_dyn_, dt);   // z = voc_dyn
+    soc_ekf_ = x_ekf();         // x = Vsoc (0-1 ideal capacitor voltage)
+
+    // Summarize
+    pow_in_ekf_ = vb*ib - ib*ib*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
+    if ( pow_in_ekf_>1. )  tcharge_ = min(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * (1.-soc_ekf_), 24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
+    else if ( pow_in_<-1. ) tcharge_ekf_ = max(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * soc_ekf_, -24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
+    else if ( pow_in_>=0. ) tcharge_ekf_ = 24.*(1.-soc_ekf_);
+    else tcharge_ = -24.*soc_ekf_;
+    vsat_ = nom_vsat_ + (temp_c-25.)*dvoc_dt_;
+    sat_ = voc_ >= vsat_;
+
+    if ( debug==-9 )Serial.printf("tempc=%7.3f", temp_c);
+    
+    return ( soc_ekf_ );
+}
+
 // EKF model for predict
 void Battery::ekf_model_predict(double *Fx, double *Bu)
 {
@@ -135,10 +199,10 @@ void Battery::ekf_model_predict(double *Fx, double *Bu)
 void Battery::ekf_model_update(double *hx, double *H)
 {
     // Measurement function hx(x), x=soc ideal capacitor
-    double log_socs, exp_n_socs, pow_log_socs;
+    double b, a, c, log_soc, exp_n_soc, pow_log_soc;
     double dv_dsoc;
-    calc_soc_voc_coeff(x_, &log_socs, &exp_n_socs, &pow_log_socs);
-    *hx = calc_voc_ocv(x_, &dv_dsoc, log_socs, exp_n_socs, pow_log_socs);
+    calc_soc_voc_coeff(x_, temp_c_,  &b, &a, &c, &log_soc, &exp_n_soc, &pow_log_soc);
+    *hx = calc_voc_ocv(x_, &dv_dsoc, b, a, c, log_soc, exp_n_soc, pow_log_soc);
 
     // Jacodian of measurement function
     *H = dv_dsoc;

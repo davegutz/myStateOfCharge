@@ -33,8 +33,9 @@ public:
   ~EKF_1x1();
   // operators
   // functions
-  void predict(const double u);
-  void update(const double z, const double dt);
+  void predict_ekf(const double u);
+  void update_ekf(const double z, const double dt);
+  double x_ekf() { return ( x_ ); };
 protected:
   double Fx_; // State transition
   double Bu_; // Control transition
