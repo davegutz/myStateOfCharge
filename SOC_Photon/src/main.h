@@ -149,10 +149,10 @@ void setup()
   }
   ads_amp = new Adafruit_ADS1015;
   ads_amp->setGain(GAIN_EIGHT, GAIN_TWO);    // Differential 8x gain
-  if (!ads->begin()) {
-    Serial.println("FAILED to initialize ADS SHUNT MONITOR.");
-    bare_ads = true;
-  }
+  // if (!ads->begin()) {
+  //   Serial.println("FAILED to initialize ADS AMPLIFIED SHUNT MONITOR.");
+  //   bare_ads_amp = true;
+  // }
   if (!ads_amp->begin((0x49))) {
     Serial.println("FAILED to initialize ADS AMPLIFIED SHUNT MONITOR.");
     bare_ads_amp = true;
@@ -263,6 +263,7 @@ void loop()
   unsigned long elapsed = 0;                // Keep track of time
   static int reset = 1;                     // Dynamic reset
   static int reset_temp = 1;                // Dynamic reset
+  double Tbatt_filt_C = 0;
 
   // Synchronization
   bool publishP;                            // Particle publish, T/F
@@ -324,6 +325,8 @@ void loop()
 
     // Load and filter
     load(reset_free, Sen, myPins, ads, ads_amp, ReadSensors->now(), SdIshunt, SdIshunt_amp, SdVbatt);
+    Tbatt_filt_C = (Sen->Tbatt_filt-32.)*5./9.;
+    MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5));  // TODO:  hardcoded time of 0.5 into constants
 
     // Arduino plots
     if ( debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n", socu_solved, Sen->Ishunt_amp, Sen->Ishunt,
@@ -372,9 +375,7 @@ void loop()
     saturated = SaturatedObj->calculate(MyBattSolved->sat(), reset);
 
     // Battery models
-    double Tbatt_filt_C = (Sen->Tbatt_filt-32.)*5./9.;
-    MyBattFree->calculate(Tbatt_filt_C, socu_free, Sen->Ishunt, Sen->T_filt);
-    MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt, Sen->T_filt);
+    MyBattFree->calculate(Tbatt_filt_C, socu_free, Sen->Ishunt,  min(Sen->T_filt, F_MAX_T));
 
     // Solver
     double vbatt_f_o = Sen->Vbatt_filt_obs + double(stepping*step_val);

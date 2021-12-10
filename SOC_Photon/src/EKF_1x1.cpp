@@ -27,6 +27,8 @@
 #include "EKF_1x1.h"
 #include <math.h>
 
+extern int8_t debug;
+
 
 // class EKF_1x1
 // constructors

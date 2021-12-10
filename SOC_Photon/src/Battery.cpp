@@ -76,7 +76,7 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
     rand_C_[1] = -1.;
     rand_D_ = new double [rand_q_*rand_p_];
     rand_D_[0] = -r0_;
-    rand_D_[1] = -1.;
+    rand_D_[1] = 1.;
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n_, rand_p_, rand_q_);
 }
 Battery::~Battery() {}
@@ -172,6 +172,12 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     predict_ekf(ib);            // u = ib
     update_ekf(voc_dyn_, dt);   // z = voc_dyn
     soc_ekf_ = x_ekf();         // x = Vsoc (0-1 ideal capacitor voltage)
+
+    if ( debug==-34 )
+    {
+        Serial.printf("dt,ib,vb,voc_dyn,   u,Fx,Bu,x_prior,p_prior,   z_,S_,K_,y_= %7.3f,%7.3f,%7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,\n",
+            dt, ib, vb, voc_dyn_, u_, Fx_, Bu_, x_prior_, P_prior_, z_, S_, K_, y_);
+    }
 
     // Summarize
     pow_in_ekf_ = vb*ib - ib*ib*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
