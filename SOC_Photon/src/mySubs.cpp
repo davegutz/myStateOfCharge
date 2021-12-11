@@ -195,6 +195,10 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
     Sen->Vshunt_int, vshunt_int_0, vshunt_int_1, ishunt_free, Sen->Ishunt, Sen->Ishunt_filt, Sen->Ishunt_filt_obs, 
     Sen->Vshunt_amp_int, vshunt_amp_int_0, vshunt_amp_int_1, ishunt_amp_free, Sen->Ishunt_amp, Sen->Ishunt_amp_filt, Sen->Ishunt_amp_filt_obs,
     T);
+  if ( debug==-16 ) Serial.printf("ishunt_free,Ishunt,Ishunt_filt,Ishunt_filt_obs,||,ishunt_amp_free,Ishunt_amp,Ishunt_amp_filt,Ishunt_amp_filt_obs,T, %7.3f,%7.3f,%7.3f,%7.3f,||,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
+    ishunt_free, Sen->Ishunt, Sen->Ishunt_filt, Sen->Ishunt_filt_obs, 
+    ishunt_amp_free, Sen->Ishunt_amp, Sen->Ishunt_amp_filt, Sen->Ishunt_amp_filt_obs,
+    T);
 
   // Vbatt
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
