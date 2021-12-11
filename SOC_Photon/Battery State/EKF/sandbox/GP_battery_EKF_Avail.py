@@ -68,12 +68,12 @@ if __name__ == '__main__':
         v_std = 0.01  # (0.0-0.01) ------ noise
         i_std = 0.1  # (0.0-0.1) ------ noise
         soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
-        tau_ct = 3.7  # (3.7-->5.)  -------
+        tau_ct = 0.2  # (0.1-->5.)  -------
 
         # Setup
         r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
         q_std = 0.001  # Process uncertainty (0.001) belief in state
-        battery_model = Battery(nom_bat_cap=model_bat_cap, true_bat_cap=model_bat_cap, temp_c=temp_c)
+        battery_model = Battery(nom_bat_cap=model_bat_cap, true_bat_cap=model_bat_cap, temp_c=temp_c, tau_ct=tau_ct)
         battery_ekf = BatteryEKF(rsd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, rct=rct, tau_dif=tau_dif, r_dif=r_dif,
                                  temp_c=temp_c)
         battery_ekf.R = r_std**2

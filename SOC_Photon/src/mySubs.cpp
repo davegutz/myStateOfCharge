@@ -224,9 +224,9 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
 
   // Power calculation
   Sen->Wshunt = Sen->Vbatt*Sen->Ishunt;
-  Sen->Wbatt = Sen->Vbatt*Sen->Ishunt - Sen->Ishunt*Sen->Ishunt*(batt_r1 + batt_r2)*batt_num_cells; 
+  Sen->Wcharge = Sen->Vbatt*Sen->Ishunt - Sen->Ishunt*Sen->Ishunt*(batt_r1 + batt_r2)*batt_num_cells; 
   Sen->Wshunt_amp = Sen->Vbatt*Sen->Ishunt_amp;
-  Sen->Wbatt_amp = Sen->Vbatt*Sen->Ishunt_amp - Sen->Ishunt_amp*Sen->Ishunt_amp*(batt_r1 + batt_r2)*batt_num_cells; 
+  Sen->Wcharge_amp = Sen->Vbatt*Sen->Ishunt_amp - Sen->Ishunt_amp*Sen->Ishunt_amp*(batt_r1 + batt_r2)*batt_num_cells; 
 
   if ( debug==-6 ) Serial.printf("vectoring,reset_free,vec_start,now,elapsed_loc,Vbatt,Ishunt,Ishunt_amp,Tbatt:  %d,%d,%ld, %ld,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n", vectoring, reset_free, vec_start, now, elapsed_loc, Sen->Vbatt, Sen->Ishunt, Sen->Ishunt_amp, Sen->Tbatt);
 }

@@ -78,7 +78,7 @@ struct Sensors
   double Ishunt_filt_obs; // Filtered, sensed shunt current for observer, A
   double Wshunt;          // Sensed shunt power, W
   double Wshunt_filt;     // Filtered, sensed shunt power, W
-  double Wbatt;          // Battery power, W
+  double Wcharge;          // Charge power, W
   int16_t Vshunt_amp_int;     // Sensed shunt voltage, count
   double Vshunt_amp;          // Sensed shunt voltage, V
   double Vshunt_amp_filt;     // Filtered, sensed shunt voltage, V
@@ -88,7 +88,7 @@ struct Sensors
   double Ishunt_amp_filt_obs; // Filtered, sensed shunt current for observer, A
   double Wshunt_amp;          // Sensed shunt power, W
   double Wshunt_amp_filt;     // Filtered, sensed shunt power, W
-  double Wbatt_amp;           // Battery power, W
+  double Wcharge_amp;           // Charge power, W
   int I2C_status;
   double T;               // Update time, s
   double T_filt;          // Filter update time, s
@@ -113,7 +113,7 @@ struct Sensors
     this->Ishunt = Vshunt * SHUNT_V2A_S + double(SHUNT_V2A_A) + curr_bias;
     this->Ishunt_filt = Vshunt_filt * SHUNT_V2A_S + SHUNT_V2A_A + curr_bias;
     this->Wshunt = Vshunt * Ishunt;
-    this->Wbatt = Vshunt * Ishunt;
+    this->Wcharge = Vshunt * Ishunt;
     this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
     this->Vshunt_amp_int = Vshunt_amp_int;
     this->Vshunt_amp = Vshunt_amp;
@@ -122,7 +122,7 @@ struct Sensors
     this->Ishunt_amp_filt = Vshunt_amp_filt * SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + curr_amp_bias;
     this->Wshunt_amp = Vshunt_amp * Ishunt_amp;
     this->Wshunt_amp_filt = Vshunt_amp_filt * Ishunt_amp_filt;
-    this->Wbatt_amp = Vshunt_amp * Ishunt_amp;
+    this->Wcharge_amp = Vshunt_amp * Ishunt_amp;
     this->I2C_status = I2C_status;
     this->T = T;
     this->T_filt = T;

@@ -182,7 +182,6 @@ class BatteryEKF:
         self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
         self.ioc = self.ib
         self.voc_dyn = self.y
-        print('A=', self.A, 'x=', self.x, 'B=', self.B, 'u=', self.u, 'xdot=', self.x_dot)
 
     def calc_soc_voc_coeff(self, soc_k):
         """

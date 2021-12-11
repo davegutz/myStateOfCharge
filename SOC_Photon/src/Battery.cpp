@@ -43,7 +43,7 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
     : b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(nz), socs_(1.0), socu_(1.0), r1_(r1), r2_(r2), c2_(r2c2/r2_),
     voc_(0), vdyn_(0), v_(0), curr_in_(0), num_cells_(num_cells), dv_dsocs_(0), dv_dsocu_(0), tcharge_(24.), pow_in_(0.0),
     sr_(1.), nom_vsat_(batt_vsat), sat_(false), dv_(0), dvoc_dt_(dvoc_dt),
-    r0_(0.003), tau_ct_(3.7), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
+    r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
     tau_sd_(1.8e7), r_sd_(70.)
 {
     // Battery characteristic tables
@@ -56,9 +56,13 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
     this->R_ = 0.1*0.1;
 
     // Randles dynamic model for EKF
+    // Resistance values add up to same resistance loss as matched to installed battery
+    //   i.e.  (r0_ + rct_ + rdif_) = (r1 + r2)*num_cells
+    // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
+    // the state-space stability requires at least 0.1.   Used 0.2.
     double c_ct = tau_ct_ / rct_;
     double c_dif = tau_ct_ / rct_;
-    rand_n_ = 2;
+    rand_n_ = 2;     // TODO:   don't need these
     rand_p_ = 2;
     rand_q_ = 1;
     rand_A_ = new double[rand_n_*rand_n_];

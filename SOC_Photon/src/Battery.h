@@ -107,7 +107,7 @@ protected:
   double *rand_B_;
   double *rand_C_;
   double *rand_D_;
-  int8_t rand_n_, rand_p_, rand_q_;
+  int8_t rand_n_, rand_p_, rand_q_;  // TODO:   don't need these
   double temp_c_;   // Battery temperature, C
   double soc_ekf_;  // Filtered state of charge from ekf (0-1)
   double pow_in_ekf_;   // Charging power from ekf, w
