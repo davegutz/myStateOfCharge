@@ -173,5 +173,5 @@ void assign_PubList(Publish* pubList, const unsigned long now, const String unit
   pubList->VOC_free = MyBattFree->voc();
   pubList->VOC_solved = MyBattSolved->voc();
   pubList->Vbatt_solved = Sen->Vbatt_solved;
-  pubList->soc_avail = MyBattFree->soc_avail();
+  pubList->soc_avail = MyBattFree->soc_avail()*100.0;
 }
