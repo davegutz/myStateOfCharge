@@ -101,13 +101,13 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,   Ishunt_amp,Ishunt_amp_filt_obs,  Wshunt_amp,Wshunt_amp_filt,  Ishunt,Ishunt_filt_obs,  Wshunt,Wshunt_filt,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,   Ishunt_amp,Ishunt_amp_filt_obs,  Wshunt_amp,Wshunt_amp_filt,  Ishunt,Ishunt_filt_obs,  Wshunt,Wshunt_filt,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T, soc_avail"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f, %7.3f,  %7.3f,  %7.3f,%7.3f,  %7.3f,  %6.3f, %c", \
+  sprintf(buffer, "%s,%s, %12.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f, %7.3f,  %7.3f,  %7.3f,%7.3f,  %7.3f,  %6.3f, %7.3f, %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time,
     pubList->Tbatt, pubList->Tbatt_filt,     pubList->Vbatt, pubList->Vbatt_filt_obs,
     pubList->Ishunt_amp, pubList->Ishunt_amp_filt_obs, pubList->Wshunt_amp, pubList->Wshunt_amp_filt,
@@ -115,7 +115,7 @@ void create_print_string(char *buffer, Publish *pubList)
     pubList->VOC_solved,
     pubList->socu_solved, pubList->Vbatt_solved,
     pubList->socu_free, pubList->tcharge,
-    pubList->T, '\0');
+    pubList->T, pubList->soc_avail, '\0');
 }
 
 // Inputs serial print
@@ -222,15 +222,15 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
     Sen->Vshunt_amp = Sen->Vshunt;
     Sen->Vshunt_amp_int = -999;
     Sen->Tbatt =  T_T1->interp(elapsed_loc);
-    Sen->Vbatt =  V_T1->interp(elapsed_loc) + Sen->Ishunt*(batt_r1 + batt_r2)*batt_num_cells;
+    Sen->Vbatt =  V_T1->interp(elapsed_loc) + Sen->Ishunt*(batt_r1 + batt_r2)*double(batt_num_cells);
   }
   else elapsed_loc = 0.;
 
   // Power calculation
   Sen->Wshunt = Sen->Vbatt*Sen->Ishunt;
-  Sen->Wcharge = Sen->Vbatt*Sen->Ishunt - Sen->Ishunt*Sen->Ishunt*(batt_r1 + batt_r2)*batt_num_cells; 
+  Sen->Wcharge = Sen->Vbatt*Sen->Ishunt - Sen->Ishunt*Sen->Ishunt*(batt_r1 + batt_r2)*double(batt_num_cells); 
   Sen->Wshunt_amp = Sen->Vbatt*Sen->Ishunt_amp;
-  Sen->Wcharge_amp = Sen->Vbatt*Sen->Ishunt_amp - Sen->Ishunt_amp*Sen->Ishunt_amp*(batt_r1 + batt_r2)*batt_num_cells; 
+  Sen->Wcharge_amp = Sen->Vbatt*Sen->Ishunt_amp - Sen->Ishunt_amp*Sen->Ishunt_amp*(batt_r1 + batt_r2)*double(batt_num_cells); 
 
   if ( debug==-6 ) Serial.printf("vectoring,reset_free,vec_start,now,elapsed_loc,Vbatt,Ishunt,Ishunt_amp,Tbatt:  %d,%d,%ld, %ld,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n", vectoring, reset_free, vec_start, now, elapsed_loc, Sen->Vbatt, Sen->Ishunt, Sen->Ishunt_amp, Sen->Tbatt);
 }
@@ -348,7 +348,7 @@ void myDisplay(Adafruit_SSD1306 *display)
   display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[4];
-  sprintf(dispStringS, "%3.0f", min(pubList.socu_free, 999.));
+  sprintf(dispStringS, "%3.0f", min(pubList.soc_avail, 999.));
   display->print(dispStringS);
 
   display->display();

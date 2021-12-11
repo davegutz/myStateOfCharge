@@ -60,6 +60,7 @@ struct Publish
   double socu_solved;
   double socu_free;
   double tcharge;
+  double soc_avail;
 };
 
 void publish1(void);

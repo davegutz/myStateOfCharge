@@ -354,6 +354,7 @@ void loop()
 
     // EKF
     MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5));  // TODO:  hardcoded time of 0.5 into constants
+    MyBattFree->coulomb_counter_avail(Sen->T);  // Integrator doesn't need max T protection
 
     // Coulomb Count integrator
     socu_free = max(min( socu_free + Sen->Wshunt/NOM_SYS_VOLT*Sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
@@ -394,8 +395,8 @@ void loop()
           Sen->Tbatt_filt, Sen->Ishunt_filt_obs, count, socu_solved, vbatt_f_o, Sen->Vbatt_solved, err, MyBattSolved->dv_dsocu());
     }
     // boolean solver_valid = count<SOLVE_MAX_COUNTS; 
-    if ( debug==-35 ) Serial.printf("socu_solved,Vbatt_solved, soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f, %7.3f\n",
-        socu_solved, Sen->Vbatt_solved, MyBattFree->x_ekf(), MyBattFree->z_ekf());
+    if ( debug==-35 ) Serial.printf("soc_avail,socu_solved,Vbatt_solved, soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f, %7.3f, %7.3f\n",
+        MyBattFree->soc_avail(), socu_solved, Sen->Vbatt_solved, MyBattFree->x_ekf(), MyBattFree->z_ekf());
 
     // Debug print statements
     // Useful for Arduino plotting

@@ -48,9 +48,11 @@ public:
   double calculate(const double temp_C, const double socu_frac, const double curr_in, const double dt);
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt);
   void init_soc_ekf(const double socu_free);
-  double num_cells() { return (num_cells_); };
+  double coulomb_counter_avail(const double dt);
+  double num_cells() { return (double(num_cells_)); };
   double socs() { return (socs_); };
   double socu() { return (socu_); };
+  double soc_avail() { return (soc_avail_); };
   double voc() { return (voc_); };
   double voc_dyn() { return (voc_dyn_); };
   double vdyn() { return (vdyn_); };
@@ -90,6 +92,7 @@ protected:
   double sr_;       // Resistance scalar
   double nom_vsat_; // Nominal saturation threshold at 25C
   double vsat_;     // Saturation threshold at temperature
+  double tsat_;     // Temperature observed at saturation, deg C
   boolean sat_;     // Saturation status
   double dv_;       // Adjustment, V
   double dvoc_dt_;  // Change of VOC with temperature, V/deg C
@@ -113,13 +116,18 @@ protected:
   double pow_in_ekf_;   // Charging power from ekf, w
   double tcharge_ekf_;  // Charging time to 100% from ekf, hr
   double voc_dyn_;  // Charging voltage, V
+  double delta_soc_;  // Change to available charge since saturated, (0-1)
+  double dQdT_;     // Sensitivity of battery capacity with temperature, soc/deg C
+  double qsat_;     // Charge at saturation, Ah
+  double soc_avail_;  // Temperature adjusted estimate of battery state of charge (0-1)
   void ekf_model_predict(double *Fx, double *Bu);
   void ekf_model_update(double *hx, double *H);
 };
 
 // BattleBorn 100 Ah, 12v LiFePO4
-#define NOM_SYS_VOLT          12        // Nominal system output, V, at which the reported amps are used (12)
-#define NOM_BATT_CAP          100       // Nominal battery bank capacity, Ah (100).   Accounts for internal losses.  This is 
+#define NOM_SYS_VOLT          12.       // Nominal system output, V, at which the reported amps are used (12)
+#define TRUE_BATT_CAP         102.      // True=actual battery bank capacity, Ah (102)
+#define NOM_BATT_CAP          100.      // Nominal battery bank capacity, Ah (100).   Accounts for internal losses.  This is 
                                         // what gets delivered, e.g. Wshunt/NOM_SYS_VOLT.  Also varies 0.2-0.4C currents
                                         // or 20-40 A for a 100 Ah battery
 #define BATT_DVOC_DT          0.001875  // Change of VOC with operating temperature in range 0 - 50 C (0.0075) V/deg C
@@ -127,7 +135,7 @@ protected:
 #define BATT_V_SAT            3.4625    // Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
 #define BATT_R1               0.00126   // Battery Randels static resistance, Ohms (0.00126) for 3v cell matches transients
 #define BATT_R2               0.00168   // Battery Randels dynamic resistance, Ohms (0.00168) for 3v cell matches transients
-#define BATT_R2C2             100       // Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
+#define BATT_R2C2             100.      // Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
                                         // test so using with R2 and then multiplying by 4 for total result is valid,
                                         // though probably not for an individual cell
 const int batt_num_cells = NOM_SYS_VOLT/3;  // Number of standard 3 volt LiFePO4 cells
@@ -153,7 +161,7 @@ static const double c_bb[nz_bb] = {-1.181,  -1.181, -1.181};
 const double d_bb = 0.707;
 const double n_bb = 0.4;
 const double cu_bb = NOM_BATT_CAP;  // Assumed capacity, Ah
-const double cs_bb = 102.;          // Data fit to this capacity to avoid math 0, Ah
+const double cs_bb = TRUE_BATT_CAP;          // Data fit to this capacity to avoid math 0, Ah
 const double mxeps_bb = 1-1e-6;     // Numerical maximum of coefficient model with scaled socs.
 const double mneps_bb = 1e-6;       // Numerical minimum of coefficient model without scaled socs.
 const double mxepu_bb = 1-1e-6;     // Numerical maximum of coefficient model with scaled socs.

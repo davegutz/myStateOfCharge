@@ -44,8 +44,10 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
     voc_(0), vdyn_(0), v_(0), curr_in_(0), num_cells_(num_cells), dv_dsocs_(0), dv_dsocu_(0), tcharge_(24.), pow_in_(0.0),
     sr_(1.), nom_vsat_(batt_vsat), sat_(false), dv_(0), dvoc_dt_(dvoc_dt),
     r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
-    tau_sd_(1.8e7), r_sd_(70.)
+    tau_sd_(1.8e7), r_sd_(70.), dQdT_(0.01)
 {
+    // dQdT from literature.   0.01 / deg C is commonly used.
+
     // Battery characteristic tables
     B_T_ = new TableInterp1Dclip(nz_, x_tab, b_tab);
     A_T_ = new TableInterp1Dclip(nz_, x_tab, a_tab);
@@ -82,6 +84,7 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
     rand_D_[0] = -r0_;
     rand_D_[1] = 1.;
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n_, rand_p_, rand_q_);
+
 }
 Battery::~Battery() {}
 // operators
@@ -155,12 +158,34 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
     return ( v_ );
 }
 
-// Init EKF
-void Battery::init_soc_ekf(const double socu_free)
+/* Count coulombs base on true=actual capacity
+    Internal resistance of battery is a loss
+    Inputs:
+        ioc     Charge current, A
+        voc_dyn Charge voltage calculated from dynamics, V
+        vb      Battery terminal voltage, V
+        i_r_dif Current in diffusion process, A
+        i_r_ct  Current in charge transfer process, A
+        sr      Experimental scalar
+    Outputs:
+        soc_avail   State of charge, fraction (0-1.5)
+        # soc_norm    Normalized state of charge, fraction (0-1)
+        v_sat   Charge voltage at saturation, V
+        sat     Battery is saturated, T/F
+*/
+double Battery::coulomb_counter_avail(const double dt)
 {
-    soc_ekf_ = 1-(1-socu_free)*cu_bb/cs_bb;
-    this->init_ekf(soc_ekf_, 0.0);
+    delta_soc_ = max(min(delta_soc_ + pow_in_ekf_/NOM_SYS_VOLT*dt/3600./TRUE_BATT_CAP, 1.5), -1.5);
+    if ( sat_ )
+    {
+        delta_soc_ = 0.;
+        tsat_ = temp_c_;
+        qsat_ = ((tsat_ - 25.)*dQdT_ + 1.)*TRUE_BATT_CAP;
+    }
+    soc_avail_ = qsat_/TRUE_BATT_CAP*(1. - dQdT_*(temp_c_ - tsat_));
+    return ( soc_avail_ );
 }
+
 
 // SOC-OCV curve fit method per Zhang, et al modified by ekf
 double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt)
@@ -192,8 +217,8 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     // Summarize
     pow_in_ekf_ = vb*ib - ib*ib*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
     if ( pow_in_ekf_>1. )  tcharge_ = min(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * (1.-soc_ekf_), 24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
-    else if ( pow_in_<-1. ) tcharge_ekf_ = max(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * soc_ekf_, -24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
-    else if ( pow_in_>=0. ) tcharge_ekf_ = 24.*(1.-soc_ekf_);
+    else if ( pow_in_ekf_<-1. ) tcharge_ekf_ = max(NOM_BATT_CAP /pow_in_ekf_*NOM_SYS_VOLT * soc_ekf_, -24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
+    else if ( pow_in_ekf_>=0. ) tcharge_ekf_ = 24.*(1.-soc_ekf_);
     else tcharge_ = -24.*soc_ekf_;
     vsat_ = nom_vsat_ + (temp_c-25.)*dvoc_dt_;
     sat_ = voc_ >= vsat_;
@@ -223,6 +248,14 @@ void Battery::ekf_model_update(double *hx, double *H)
 
     // Jacodian of measurement function
     *H = dv_dsoc;
+}
+
+// Init EKF
+void Battery::init_soc_ekf(const double socu_free)
+{
+    soc_ekf_ = 1-(1-socu_free)*cu_bb/cs_bb;
+    qsat_ = socu_free*TRUE_BATT_CAP;
+    this->init_ekf(soc_ekf_, 0.0);
 }
 
 /* C <- A * B */
