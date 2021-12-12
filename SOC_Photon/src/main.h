@@ -277,6 +277,8 @@ void loop()
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
   bool publishS;                            // Serial print, T/F
   static Sync *PublishSerial = new Sync(PUBLISH_SERIAL_DELAY);
+  bool display_to_user;                     // User display, T/F
+  static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
   bool summarizing;                         // Summarize, T/F
   static Sync *Summarize = new Sync(SUMMARIZE_DELAY);
   static double socu_solved = 1.0;
@@ -430,8 +432,12 @@ void loop()
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
 
+  }
 
-    // Update display
+  // Display driver
+  display_to_user = DisplayUserSync->update(millis(), reset);               //  now || reset
+  if ( display_to_user )
+  {
     myDisplay(display);
   }
 

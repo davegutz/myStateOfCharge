@@ -44,6 +44,7 @@
 #define FILTER_DELAY          1000UL    // Filter read wait, ms (1000UL)
 #define SUMMARIZE_DELAY       1800000UL // Battery state tracking and reporting, ms (3600000UL)
 #define PUBLISH_SERIAL_DELAY  400UL     // Serial print interval (400UL)
+#define DISPLAY_USER_DELAY    1200UL    // User display update (1200UL)
 #define DISCONNECT_DELAY      75000UL   // After these milliseconds no WiFi, disconnect (75000UL)
 #define CHECK_INTERVAL        180000UL  // How often to check for WiFi once disconnected (180000UL)
 #define CONNECT_WAIT          10000UL   // How long after setup that we try WiFi for first time (10000UL)
