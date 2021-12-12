@@ -25,6 +25,7 @@
 #include "application.h" // Should not be needed if file .ino or Arduino
 #endif
 #include "mySubs.h"
+#include "retained.h"
 #include "local_config.h"
 #include <math.h>
 
@@ -399,6 +400,7 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
       case ( 'm' ):
         SOCU_in = input_string.substring(1).toFloat()/100.;
         rp.socu_free = max(min(SOCU_in, mxepu_bb), mnepu_bb);
+        rp.delta_soc = max(rp.socu_free - 1., 0.0);
         Serial.printf("socu_free=%7.3f\n", rp.socu_free);
         break;
       case ( 'v' ):

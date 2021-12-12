@@ -21,13 +21,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
 #ifndef _MY_SUBS_H
 #define _MY_SUBS_H
 
 #include "myFilters.h"
 #include "Battery.h"
 #include "constants.h"
+#include "retained.h"
 #include "myCloud.h"
 
 // Temp sensor
@@ -40,6 +40,8 @@
 // Display
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+
+extern RetainedPars rp; // Various parameters to be static at system level
 
 // Pins
 struct Pins
@@ -55,17 +57,6 @@ struct Pins
     this->Vbatt_pin = Vbatt_pin;
   }
 };
-
-// Definition of structure to be saved in SRAM
-struct RetainedPars
-{
-  double curr_bias = 0;     // Calibrate current sensor, A 
-  double curr_amp_bias = 0; // Calibrate amp current sensor, A 
-  double socu_free = 0.5;   // Coulomb Counter state
-  double vbatt_bias = 0;    // Calibrate Vbatt, V
-};            
-
-extern RetainedPars rp; // Various parameters to be static at system level
 
 // Sensors
 struct Sensors

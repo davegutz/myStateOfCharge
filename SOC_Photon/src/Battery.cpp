@@ -25,11 +25,13 @@
 #include "application.h" // Should not be needed if file .ino or Arduino
 #endif
 #include "Battery.h"
+#include "retained.h"
 #include "EKF_1x1.h"
 #include <math.h>
 
 extern int8_t debug;
 extern char buffer[256];
+extern RetainedPars rp; // Various parameters to be static at system level
 
 // class Battery
 // constructors
@@ -173,22 +175,27 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
         v_sat   Charge voltage at saturation, V
         sat     Battery is saturated, T/F
 */
-double Battery::coulomb_counter_avail(const double dt)
+double Battery::coulomb_counter_avail(const double dt, const boolean saturated)
 {
-    delta_soc_ = max(min(delta_soc_ + pow_in_ekf_/NOM_SYS_VOLT*dt/3600./TRUE_BATT_CAP, 1.5), -1.5);
-    if ( sat_ )
+    rp.delta_soc = max(min(rp.delta_soc + pow_in_ekf_/NOM_SYS_VOLT*dt/3600./TRUE_BATT_CAP, 1.5), -1.5);
+    if ( saturated )
     {
-        delta_soc_ = 0.;
-        tsat_ = temp_c_;
-        qsat_ = ((tsat_ - 25.)*dQdT_ + 1.)*TRUE_BATT_CAP;
+        rp.delta_soc = 0.;
+        rp.t_sat = temp_c_;
+        rp.q_sat = ((rp.t_sat - 25.)*dQdT_ + 1.)*TRUE_BATT_CAP;
     }
-    soc_avail_ = qsat_/TRUE_BATT_CAP*(1. - dQdT_*(temp_c_ - tsat_));
+    soc_avail_ = max(rp.q_sat/TRUE_BATT_CAP*(1. - dQdT_*(temp_c_ - rp.t_sat)) + rp.delta_soc, 0.);
+    if ( debug==-36 )
+    {
+        Serial.printf("coulomb_counter_avail:  sat, pow_in_ekf, delta_soc, qsat, tsat,-->,soc_avail=%d,%7.3f,%10.6f,%7.3f,%7.3f,-->,%7.3f,\n",
+                    saturated, pow_in_ekf_, rp.delta_soc, rp.q_sat, rp.t_sat, soc_avail_);
+    }
     return ( soc_avail_ );
 }
 
 
 // SOC-OCV curve fit method per Zhang, et al modified by ekf
-double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt)
+double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated)
 {
     // Save temperature for callbacks
     temp_c_ = temp_c;
@@ -209,7 +216,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     soc_ekf_ = x_ekf();         // x = Vsoc (0-1 ideal capacitor voltage)
 
     // Coulomb counter
-    coulomb_counter_avail(dt);
+    coulomb_counter_avail(dt, saturated);
 
     if ( debug==-34 )
     {

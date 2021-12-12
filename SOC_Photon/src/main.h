@@ -355,7 +355,7 @@ void loop()
     }
 
     // EKF
-    MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5));  // TODO:  hardcoded time of 0.5 into constants
+    MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5), saturated);  // TODO:  hardcoded time of 0.5 into constants
     
     // Coulomb Count integrator
     rp.socu_free = max(min( rp.socu_free + Sen->Wshunt/NOM_SYS_VOLT*Sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
