@@ -47,7 +47,7 @@ public:
   double calc_voc_ocv(double soc_lim, double *dv_dsoc, double b, double a, double c, double log_soc, double exp_n_soc, double pow_log_soc);
   double calculate(const double temp_C, const double socu_frac, const double curr_in, const double dt);
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt);
-  void init_soc_ekf(const double socu_free);
+  void init_soc_ekf(const double socu_free_loc);
   double coulomb_counter_avail(const double dt);
   double num_cells() { return (double(num_cells_)); };
   double socs() { return (socs_); };

@@ -41,9 +41,6 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-extern double curr_bias;        // Calibration bias, A
-extern double curr_amp_bias;    // Calibration amplified bias, A
-
 // Pins
 struct Pins
 {
@@ -59,6 +56,16 @@ struct Pins
   }
 };
 
+// Definition of structure to be saved in SRAM
+struct RetainedPars
+{
+  double curr_bias = 0;     // Calibrate current sensor, A 
+  double curr_amp_bias = 0; // Calibrate amp current sensor, A 
+  double socu_free = 0.5;   // Coulomb Counter state
+  double vbatt_bias = 0;    // Calibrate Vbatt, V
+};            
+
+extern RetainedPars rp; // Various parameters to be static at system level
 
 // Sensors
 struct Sensors
@@ -110,16 +117,16 @@ struct Sensors
     this->Vshunt_int = Vshunt_int;
     this->Vshunt = Vshunt;
     this->Vshunt_filt = Vshunt_filt;
-    this->Ishunt = Vshunt * SHUNT_V2A_S + double(SHUNT_V2A_A) + curr_bias;
-    this->Ishunt_filt = Vshunt_filt * SHUNT_V2A_S + SHUNT_V2A_A + curr_bias;
+    this->Ishunt = Vshunt * SHUNT_V2A_S + double(SHUNT_V2A_A) + rp.curr_bias;
+    this->Ishunt_filt = Vshunt_filt * SHUNT_V2A_S + SHUNT_V2A_A + rp.curr_bias;
     this->Wshunt = Vshunt * Ishunt;
     this->Wcharge = Vshunt * Ishunt;
     this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
     this->Vshunt_amp_int = Vshunt_amp_int;
     this->Vshunt_amp = Vshunt_amp;
     this->Vshunt_amp_filt = Vshunt_amp_filt;
-    this->Ishunt_amp = Vshunt_amp * SHUNT_AMP_V2A_S + double(SHUNT_AMP_V2A_A) + curr_amp_bias;
-    this->Ishunt_amp_filt = Vshunt_amp_filt * SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + curr_amp_bias;
+    this->Ishunt_amp = Vshunt_amp * SHUNT_AMP_V2A_S + double(SHUNT_AMP_V2A_A) + rp.curr_amp_bias;
+    this->Ishunt_amp_filt = Vshunt_amp_filt * SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + rp.curr_amp_bias;
     this->Wshunt_amp = Vshunt_amp * Ishunt_amp;
     this->Wshunt_amp_filt = Vshunt_amp_filt * Ishunt_amp_filt;
     this->Wcharge_amp = Vshunt_amp * Ishunt_amp;

@@ -80,19 +80,14 @@ extern boolean vectoring;         // Active battery test vector
 extern int8_t vec_num;            // Active vector number
 extern unsigned long vec_start;   // Start of active vector
 extern boolean enable_wifi;       // Enable wifi
-extern double socu_free;          // Free integrator state
-extern double curr_bias;          // Calibration bias, A
-extern double curr_amp_bias;      // Calibration bias for amplified ADC, A
+extern RetainedPars rp;          // Various parameters to be static at system level
 
 // Global locals
 const int nsum = 154;           // Number of summary strings, 17 Bytes per isum
 retained int isum = -1;         // Summary location.   Begins at -1 because first action is to increment isum
 retained Sum_st mySum[nsum];    // Summaries
-retained double socu_free = 0.5;// Coulomb Counter state
+retained RetainedPars rp;       // Various control parameters static at system level
 retained int8_t debug = 2;
-retained double curr_bias = 0;      // Calibrate, A 
-retained double curr_amp_bias = 0;  // Calibrate amp, A 
-retained double vbatt_bias = 0;     // Calibrate Vbatt, V
 String input_string = "";
 boolean string_complete = false;
 boolean stepping = false;
@@ -336,26 +331,26 @@ void loop()
     // Initialize SOC Free Integrator - Coulomb Counting method
     // Runs unfiltered and fast to capture most data
     static boolean vectoring_past = vectoring;
-    static double socu_free_saved = socu_free;
+    static double socu_free_saved = rp.socu_free;
     if ( vectoring_past != vectoring )
     {
       reset_free = true;
       start = ReadSensors->now();
       elapsed = 0UL;
-      if ( vectoring ) socu_free_saved = socu_free;
-      else socu_free = socu_free_saved;
+      if ( vectoring ) socu_free_saved = rp.socu_free;
+      else rp.socu_free = socu_free_saved;
     }
     vectoring_past = vectoring;
     if ( reset_free )
     {
-      if ( vectoring ) socu_free = socu_solved;
-      else socu_free = socu_free_saved;  // Only way to reach this line is resetting from vector test
-      MyBattFree->init_soc_ekf(socu_free);
+      if ( vectoring ) rp.socu_free = socu_solved;
+      else rp.socu_free = socu_free_saved;  // Only way to reach this line is resetting from vector test
+      MyBattFree->init_soc_ekf(rp.socu_free);
       if ( elapsed>INIT_WAIT ) reset_free = false;
     }
     if ( reset_free_ekf )
     {
-      MyBattFree->init_soc_ekf(socu_free);
+      MyBattFree->init_soc_ekf(rp.socu_free);
       if ( elapsed>INIT_WAIT_EKF ) reset_free_ekf = false;
     }
 
@@ -363,12 +358,12 @@ void loop()
     MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5));  // TODO:  hardcoded time of 0.5 into constants
     
     // Coulomb Count integrator
-    socu_free = max(min( socu_free + Sen->Wshunt/NOM_SYS_VOLT*Sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
+    rp.socu_free = max(min( rp.socu_free + Sen->Wshunt/NOM_SYS_VOLT*Sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
     // Force initialization/reinitialization whenever saturated.   Keeps estimates close to reality
-    if ( saturated ) socu_free = mxepu_bb;
+    if ( saturated ) rp.socu_free = mxepu_bb;
     if ( debug==-3 )
       Serial.printf("fast,et,reset_free,Wshunt,soc_f,T, %12.3f,%7.3f, %d, %7.3f,%7.3f,%7.3f,\n",
-      control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, socu_free, Sen->T_filt);
+      control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, rp.socu_free, Sen->T_filt);
 
   }
 
@@ -385,7 +380,7 @@ void loop()
     saturated = SaturatedObj->calculate(MyBattSolved->sat(), reset);
 
     // Battery models
-    MyBattFree->calculate(Tbatt_filt_C, socu_free, Sen->Ishunt,  min(Sen->T_filt, F_MAX_T));
+    MyBattFree->calculate(Tbatt_filt_C, rp.socu_free, Sen->Ishunt,  min(Sen->T_filt, F_MAX_T));
 
     // Solver
     double vbatt_f_o = Sen->Vbatt_filt_obs + double(stepping*step_val);
@@ -412,7 +407,7 @@ void loop()
     if ( debug==-2 )
       Serial.printf("slow,et,reset_f,vect,sat,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,voc,dvdsoc,T,count,tcharge,  %12.3f, %7.3f, %d,%d,%d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
       control_time, double(elapsed)/1000., reset_free, vectoring, saturated, Sen->Tbatt, Sen->Ishunt_filt_obs, Sen->Vbatt_filt_obs+double(stepping*step_val),
-      socu_solved, socu_free, Sen->Vbatt_solved, MyBattSolved->voc(), MyBattSolved->dv_dsocu(), Sen->T, count, MyBattFree->tcharge());
+      socu_solved, rp.socu_free, Sen->Vbatt_solved, MyBattSolved->voc(), MyBattSolved->dv_dsocu(), Sen->T, count, MyBattFree->tcharge());
 
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
@@ -474,7 +469,7 @@ void loop()
   {
     if ( ++isum>nsum-1 ) isum = 0;
     mySum[isum].assign(current_time, Sen->Tbatt_filt, Sen->Vbatt_filt_obs, Sen->Ishunt_filt_obs,
-      socu_solved, socu_free, MyBattSolved->dv_dsocu());
+      socu_solved, rp.socu_free, MyBattSolved->dv_dsocu());
     if ( debug==-11 )
     {
       Serial.printf("Summm***********************\n");

@@ -254,10 +254,10 @@ void Battery::ekf_model_update(double *hx, double *H)
 }
 
 // Init EKF
-void Battery::init_soc_ekf(const double socu_free)
+void Battery::init_soc_ekf(const double socu_free_in)
 {
-    soc_ekf_ = 1-(1-socu_free)*cu_bb/cs_bb;
-    qsat_ = socu_free*TRUE_BATT_CAP;
+    soc_ekf_ = 1-(1-socu_free_in)*cu_bb/cs_bb;
+    qsat_ = socu_free_in*TRUE_BATT_CAP;
     init_ekf(soc_ekf_, 0.0);
     if ( debug==-34 )
     {

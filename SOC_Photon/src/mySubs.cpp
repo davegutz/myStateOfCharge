@@ -39,10 +39,7 @@ extern boolean vectoring;       // Active battery test vector
 extern int8_t vec_num;          // Active vector number
 extern unsigned long vec_start; // Start of active vector
 extern boolean enable_wifi;     // Enable wifi
-extern double socu_free;        // Free integrator state
-extern double curr_bias;        // Calibration bias, A
-extern double curr_amp_bias;    // Calibration bias amplified ADC, A
-extern double vbatt_bias;       // Calibration bias Vbatt, V
+extern RetainedPars rp; // Various parameters to be static at system level
 
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip)
 {
@@ -174,7 +171,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
     Sen->Vshunt_int = 0;
   }
   Sen->Vshunt = ads->computeVolts(Sen->Vshunt_int);
-  double ishunt_free = Sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A + curr_bias;
+  double ishunt_free = Sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A + rp.curr_bias;
   Sen->Ishunt = SdIshunt->update(ishunt_free, reset_free);
 
   int16_t vshunt_amp_int_0 = 0;
@@ -189,7 +186,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
     Sen->Vshunt_amp_int = 0;
   }
   Sen->Vshunt_amp = ads_amp->computeVolts(Sen->Vshunt_amp_int);
-  double ishunt_amp_free = Sen->Vshunt_amp*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + curr_amp_bias;
+  double ishunt_amp_free = Sen->Vshunt_amp*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + rp.curr_amp_bias;
   Sen->Ishunt_amp = SdIshunt_amp->update(ishunt_amp_free, reset_free);
   if ( debug==-14 ) Serial.printf("reset_free,vshunt_int,0_int,1_int,ishunt_free,Ishunt,Ishunt_filt,Ishunt_filt_obs,||,vshunt_amp_int,0_amp_int,1_amp_int,ishunt_amp_free,Ishunt_amp,Ishunt_amp_filt,Ishunt_amp_filt_obs,T, %d,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
     reset_free,
@@ -203,7 +200,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
 
   // Vbatt
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
-  double vbatt_free =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A) + vbatt_bias;
+  double vbatt_free =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A) + rp.vbatt_bias;
   Sen->Vbatt = SdVbatt->update(vbatt_free, reset_free);
   if ( debug==-15 ) Serial.printf("reset_free,vbatt_free,vbatt, %d,%7.3f,%7.3f\n", reset_free, vbatt_free, Sen->Vbatt);
 
@@ -217,7 +214,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
     }
     elapsed_loc = double(now - vec_start)/1000./60.;
     Sen->Ishunt =  I_T1->interp(elapsed_loc);
-    Sen->Vshunt = (Sen->Ishunt - SHUNT_V2A_A - curr_bias) / SHUNT_V2A_S;
+    Sen->Vshunt = (Sen->Ishunt - SHUNT_V2A_A - rp.curr_bias) / SHUNT_V2A_S;
     Sen->Vshunt_int = -999;
     Sen->Ishunt_amp =  Sen->Ishunt;
     Sen->Vshunt_amp = Sen->Vshunt;
@@ -255,12 +252,12 @@ void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs,
   // Shunt
   Sen->Vshunt_filt = VshuntSenseFilt->calculate( Sen->Vshunt, reset_loc, min(Sen->T_filt, F_MAX_T));
   Sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( Sen->Vshunt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
-  Sen->Ishunt_filt = Sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A + curr_bias;
-  Sen->Ishunt_filt_obs = Sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A + curr_bias;
+  Sen->Ishunt_filt = Sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A + rp.curr_bias;
+  Sen->Ishunt_filt_obs = Sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A + rp.curr_bias;
   Sen->Vshunt_amp_filt = VshuntAmpSenseFilt->calculate( Sen->Vshunt_amp, reset_loc, min(Sen->T_filt, F_MAX_T));
   Sen->Vshunt_amp_filt_obs = VshuntAmpSenseFiltObs->calculate( Sen->Vshunt_amp, reset_loc, min(Sen->T_filt, F_O_MAX_T));
-  Sen->Ishunt_amp_filt = Sen->Vshunt_amp_filt*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + curr_amp_bias;
-  Sen->Ishunt_amp_filt_obs = Sen->Vshunt_amp_filt_obs*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + curr_amp_bias;
+  Sen->Ishunt_amp_filt = Sen->Vshunt_amp_filt*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + rp.curr_amp_bias;
+  Sen->Ishunt_amp_filt_obs = Sen->Vshunt_amp_filt_obs*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + rp.curr_amp_bias;
 
   // Voltage
   Sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate(Sen->Vbatt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
@@ -370,13 +367,13 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
         switch ( input_string.charAt(1) )
         {
           case ( 'a' ):
-            curr_amp_bias = input_string.substring(2).toFloat();
+            rp.curr_amp_bias = input_string.substring(2).toFloat();
             break;
           case ( 'b' ):
-            curr_bias = input_string.substring(2).toFloat();
+            rp.curr_bias = input_string.substring(2).toFloat();
             break;
           case ( 'c' ):
-            vbatt_bias = input_string.substring(2).toFloat();
+            rp.vbatt_bias = input_string.substring(2).toFloat();
             break;
           case ( 'v' ):
             MyBattSolved->Dv(input_string.substring(2).toFloat());
@@ -401,8 +398,8 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
         break;
       case ( 'm' ):
         SOCU_in = input_string.substring(1).toFloat()/100.;
-        socu_free = max(min(SOCU_in, mxepu_bb), mnepu_bb);
-        Serial.printf("socu_free=%7.3f\n", socu_free);
+        rp.socu_free = max(min(SOCU_in, mxepu_bb), mnepu_bb);
+        Serial.printf("socu_free=%7.3f\n", rp.socu_free);
         break;
       case ( 'v' ):
         debug = input_string.substring(1).toInt();
@@ -463,9 +460,9 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("m=  assign a free memory state in percent - '('truncated 0-100')'\n"); 
   Serial.printf("v=  "); Serial.print(debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("Adjustments.   For example:\n");
-  Serial.printf("  Da= "); Serial.printf("%7.3f", curr_amp_bias); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
-  Serial.printf("  Db= "); Serial.printf("%7.3f", curr_bias); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
-  Serial.printf("  Dc= "); Serial.printf("%7.3f", curr_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
+  Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_amp_bias); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
+  Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
+  Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dv= "); Serial.print(batt_solved->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
   Serial.printf("  Sr= "); Serial.print(batt_solved->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("T<?>=  "); 
