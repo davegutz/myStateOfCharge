@@ -218,7 +218,8 @@ double Battery::calculate_model(const double temp_C, const double socu_frac, con
 */
 double Battery::coulomb_counter_avail(const double dt, const boolean saturated)
 {
-    rp.delta_soc = max(min(rp.delta_soc + pow_in_ekf_/NOM_SYS_VOLT*dt/3600./TRUE_BATT_CAP, 1.5), -1.5);
+    double delta_delta_soc = pow_in_ekf_/NOM_SYS_VOLT*dt/3600./TRUE_BATT_CAP;
+    rp.delta_soc = max(min(rp.delta_soc + delta_delta_soc, 1.5), -1.5);
     if ( saturated )
     {
         rp.delta_soc = 0.;
@@ -228,8 +229,8 @@ double Battery::coulomb_counter_avail(const double dt, const boolean saturated)
     soc_avail_ = max(rp.soc_sat*(1. - dQdT_*(temp_c_ - rp.t_sat)) + rp.delta_soc, 0.);
     if ( debug==-36 )
     {
-        Serial.printf("coulomb_counter_avail:  sat, pow_in_ekf, delta_soc, soc_sat, tsat,-->,soc_avail=     %d,%7.3f,%10.6f,%7.3f,%7.3f,-->,%7.3f,\n",
-                    saturated, pow_in_ekf_, rp.delta_soc, rp.soc_sat, rp.t_sat, soc_avail_);
+        Serial.printf("coulomb_counter_avail:  sat, pow_in_ekf, delta_delta_soc, delta_soc, soc_sat, tsat,-->,soc_avail=     %d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,-->,%7.3f,\n",
+                    saturated, pow_in_ekf_, delta_delta_soc, rp.delta_soc, rp.soc_sat, rp.t_sat, soc_avail_);
     }
     return ( soc_avail_ );
 }
