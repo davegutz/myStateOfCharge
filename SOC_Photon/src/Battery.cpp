@@ -119,7 +119,7 @@ double Battery::calc_h_jacobian(double soc_lim, double b, double c, double log_s
     return (dv_dsoc);
 }
 
-// SOC-OCV curve fit method per Zhang, et al
+// SOC-OCV curve fit method per Zhang, et al.
 double Battery::calculate(const double temp_C, const double socu_frac, const double curr_in, const double dt)
 {
     dt_ = dt;
@@ -151,10 +151,51 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
     sat_ = voc_ >= vsat_;
 
-    if ( debug==-8 ) Serial.printf("SOCU_in,v,curr,pow,tcharge,vsat,voc,sat= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
+    if ( debug==-8 ) Serial.printf("calculate:  SOCU_in,v,curr,pow,tcharge,vsat,voc,sat= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
       socu_frac, v_, curr_in_, pow_in_, tcharge_, vsat_, voc_, sat_);
 
-    if ( debug==-9 )Serial.printf("tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+    if ( debug==-9 )Serial.printf("calculate:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+     temp_C, temp_C*9./5.+32., curr_in_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_,v_);
+
+    return ( v_ );
+}
+
+// SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model
+double Battery::calculate_model(const double temp_C, const double socu_frac, const double curr_in, const double dt)
+{
+    dt_ = dt;
+
+    socu_ = socu_frac;
+    socs_ = 1-(1-socu_)*cu_bb/cs_bb;
+    double socs_lim = max(min(socs_, mxeps_bb), mneps_bb);
+    curr_in_ = curr_in;
+
+    // VOC-OCV model
+    double log_socs, exp_n_socs, pow_log_socs;
+    calc_soc_voc_coeff(socs_lim, temp_C, &b_, &a_, &c_, &log_socs, &exp_n_socs, &pow_log_socs);
+    voc_ = calc_voc_ocv(socs_lim, &dv_dsocs_, b_, a_, c_, log_socs, exp_n_socs, pow_log_socs)
+             + (socs_ - socs_lim) * dv_dsocs_;  // slightly beyond
+    voc_ +=  dv_;  // Experimentally varied
+    // dv_dsocu_ = dv_dsocs_ * cu_bb / cs_bb;
+
+    // Dynamic emf  TODO:   aren't these the same?
+    if ( curr_in_ < 0. ) vdyn_ = double(num_cells_) * curr_in*(r1_ + r2_)*sr_;
+    else vdyn_ = double(num_cells_) * curr_in*(r1_ + r2_)*sr_;
+
+    // Summarize   TODO: get rid of the global defines here because they differ from one battery to another
+    v_ = max(voc_ + vdyn_, 5.);
+    pow_in_ = v_*curr_in_ - curr_in_*curr_in_*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
+    // if ( pow_in_>1. )  tcharge_ = min(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * (1.-socs_lim), 24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
+    // else if ( pow_in_<-1. ) tcharge_ = max(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * socs_lim, -24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
+    // else if ( pow_in_>=0. ) tcharge_ = 24.*(1.-socs_lim);
+    // else tcharge_ = -24.*socs_lim;
+    vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
+    // sat_ = voc_ >= vsat_;
+
+    if ( debug==-38 ) Serial.printf("calculate_ model:  SOCU_in,v,curr,pow,vsat,voc= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
+      socu_frac, v_, curr_in_, pow_in_, vsat_, voc_);
+
+    if ( debug==-39 )Serial.printf("calculate_model:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      temp_C, temp_C*9./5.+32., curr_in_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_,v_);
 
     return ( v_ );
@@ -182,13 +223,13 @@ double Battery::coulomb_counter_avail(const double dt, const boolean saturated)
     {
         rp.delta_soc = 0.;
         rp.t_sat = temp_c_;
-        rp.q_sat = ((rp.t_sat - 25.)*dQdT_ + 1.)*TRUE_BATT_CAP;
+        rp.soc_sat = (rp.t_sat - 25.)*dQdT_ + 1.;
     }
-    soc_avail_ = max(rp.q_sat/TRUE_BATT_CAP*(1. - dQdT_*(temp_c_ - rp.t_sat)) + rp.delta_soc, 0.);
+    soc_avail_ = max(rp.soc_sat*(1. - dQdT_*(temp_c_ - rp.t_sat)) + rp.delta_soc, 0.);
     if ( debug==-36 )
     {
-        Serial.printf("coulomb_counter_avail:  sat, pow_in_ekf, delta_soc, qsat, tsat,-->,soc_avail=%d,%7.3f,%10.6f,%7.3f,%7.3f,-->,%7.3f,\n",
-                    saturated, pow_in_ekf_, rp.delta_soc, rp.q_sat, rp.t_sat, soc_avail_);
+        Serial.printf("coulomb_counter_avail:  sat, pow_in_ekf, delta_soc, soc_sat, tsat,-->,soc_avail=     %d,%7.3f,%10.6f,%7.3f,%7.3f,-->,%7.3f,\n",
+                    saturated, pow_in_ekf_, rp.delta_soc, rp.soc_sat, rp.t_sat, soc_avail_);
     }
     return ( soc_avail_ );
 }

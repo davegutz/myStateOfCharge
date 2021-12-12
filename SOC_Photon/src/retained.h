@@ -30,10 +30,12 @@ struct RetainedPars
   double curr_bias = 0;     // Calibrate current sensor, A 
   double curr_amp_bias = 0; // Calibrate amp current sensor, A 
   double socu_free = 0.5;   // Coulomb Counter state (0 - 1.5)
+  double socu_model = 0.5;  // Coulomb Counter state (0 - 1.5)
   double vbatt_bias = 0;    // Calibrate Vbatt, V
   double delta_soc = -0.5;  // Coulomb Counter state for ekf, (-1 - 1)
   double t_sat = 25.;       // Battery temperature at saturation, deg C
-  double q_sat = 100.;      // Battery charge at saturation, Ah
+  double soc_sat = 1.;      // Battery charge at saturation, Ah
+  boolean modeling = false; // Driving saturation calculation with model
 };            
 
 #endif

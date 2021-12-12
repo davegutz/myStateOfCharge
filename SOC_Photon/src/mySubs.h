@@ -62,6 +62,7 @@ struct Pins
 struct Sensors
 {
   double Vbatt;           // Sensed battery voltage, V
+  double Vbatt_model;     // Model coefficient model battery voltage based on filtered current, V
   double Vbatt_solved;    // Solved coefficient model battery voltage, V
   double Vbatt_filt;      // Filtered, sensed battery voltage, V
   double Vbatt_filt_obs;  // Filtered, sensed battery voltage for observer, V
@@ -152,7 +153,7 @@ void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *milli
 
 // Talk Declarations
 void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
-  Battery *MyBattSolved, Battery *MyBattFree);
+  Battery *MyBattSolved, Battery *MyBattFree, Battery *MyBattModel);
 void talkT(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num);  // Transient inputs
 void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved); // Help
 

@@ -40,7 +40,7 @@ extern boolean vectoring;       // Active battery test vector
 extern int8_t vec_num;          // Active vector number
 extern unsigned long vec_start; // Start of active vector
 extern boolean enable_wifi;     // Enable wifi
-extern RetainedPars rp; // Various parameters to be static at system level
+extern RetainedPars rp;         // Various parameters to be static at system level
 
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip)
 {
@@ -202,7 +202,8 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
   // Vbatt
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
   double vbatt_free =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A) + rp.vbatt_bias;
-  Sen->Vbatt = SdVbatt->update(vbatt_free, reset_free);
+  if ( rp.modeling ) Sen->Vbatt = Sen->Vbatt_model;
+  else Sen->Vbatt = SdVbatt->update(vbatt_free, reset_free);
   if ( debug==-15 ) Serial.printf("reset_free,vbatt_free,vbatt, %d,%7.3f,%7.3f\n", reset_free, vbatt_free, Sen->Vbatt);
 
   // Vector model
@@ -261,8 +262,16 @@ void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs,
   Sen->Ishunt_amp_filt_obs = Sen->Vshunt_amp_filt_obs*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + rp.curr_amp_bias;
 
   // Voltage
-  Sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate(Sen->Vbatt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
-  Sen->Vbatt_filt = VbattSenseFilt->calculate(Sen->Vbatt, reset_loc,  min(Sen->T_filt, F_MAX_T));
+  if ( rp.modeling )
+  {
+    Sen->Vbatt_filt_obs = Sen->Vbatt_model;
+    Sen->Vbatt_filt = Sen->Vbatt_model;
+  }
+  else
+  {
+    Sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate(Sen->Vbatt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
+    Sen->Vbatt_filt = VbattSenseFilt->calculate(Sen->Vbatt, reset_loc,  min(Sen->T_filt, F_MAX_T));
+  }
 
   // Power
   Sen->Wshunt_filt = Sen->Vbatt_filt*Sen->Ishunt_filt;
@@ -356,7 +365,7 @@ void myDisplay(Adafruit_SSD1306 *display)
 
 // Talk Executive
 void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
-  Battery *MyBattSolved, Battery *MyBattFree)
+  Battery *MyBattSolved, Battery *MyBattFree, Battery *MyBattModel)
 {
   double SOCU_in = -99.;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
@@ -400,8 +409,14 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
       case ( 'm' ):
         SOCU_in = input_string.substring(1).toFloat()/100.;
         rp.socu_free = max(min(SOCU_in, mxepu_bb), mnepu_bb);
-        rp.delta_soc = max(rp.socu_free - 1., 0.0);
-        Serial.printf("socu_free=%7.3f\n", rp.socu_free);
+        rp.socu_model = rp.socu_free;
+        rp.delta_soc = max(rp.socu_free - 1., -rp.soc_sat);
+        Serial.printf("socu_free=socu_model=%7.3f,   delta_soc=%7.3f,\n", rp.socu_free, rp.delta_soc);
+        break;
+      case ( 'n' ):
+        SOCU_in = input_string.substring(1).toFloat()/100.;
+        rp.socu_model = max(min(SOCU_in, mxepu_bb), mnepu_bb);
+        Serial.printf("socu_model=%7.3f\n", rp.socu_model);
         break;
       case ( 'v' ):
         debug = input_string.substring(1).toInt();
@@ -410,7 +425,11 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
         talkT(stepping, step_val, vectoring, vec_num);
         break;
       case ( 'w' ): 
-        enable_wifi = true;
+        enable_wifi = true; // not remembered in rp. Photon reset turns this false.
+        break;
+      case ( 'x' ): 
+        rp.modeling = !rp.modeling;
+        Serial.printf("Modeling toggled to %d\n", rp.modeling);
         break;
       case ( 'h' ): 
         talkH(step_val, vec_num, MyBattSolved);
@@ -459,7 +478,8 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
 {
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
   Serial.printf("d   dump the summary log\n"); 
-  Serial.printf("m=  assign a free memory state in percent - '('truncated 0-100')'\n"); 
+  Serial.printf("m=  assign a free memory state in percent to all versions including model- '('truncated 0-100')'\n"); 
+  Serial.printf("n=  assign a free memory state in percent to model only - '('truncated 0-100')'\n"); 
   Serial.printf("v=  "); Serial.print(debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("Adjustments.   For example:\n");
   Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_amp_bias); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
@@ -475,6 +495,7 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("    ******Send Tv0 to cancel vector*****\n");
   Serial.printf("   INFO:  vectoringing=");  Serial.println(vectoring);
   Serial.printf("w   turn on wifi = "); Serial.println(enable_wifi);
+  Serial.printf("x   toggle model use of Vbatt = "); Serial.println(rp.modeling);
   Serial.printf("h   this menu\n");
 }
 
