@@ -174,4 +174,5 @@ void assign_PubList(Publish* pubList, const unsigned long now, const String unit
   pubList->VOC_solved = MyBattSolved->voc();
   pubList->Vbatt_solved = Sen->Vbatt_solved;
   pubList->soc_avail = MyBattFree->soc_avail()*100.0;
+  pubList->socu_model = rp.socu_model*100.0;
 }

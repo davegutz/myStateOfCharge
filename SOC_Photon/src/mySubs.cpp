@@ -100,7 +100,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,   Ishunt_amp,Ishunt_amp_filt_obs,  Wshunt_amp,Wshunt_amp_filt,  Ishunt,Ishunt_filt_obs,  Wshunt,Wshunt_filt,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T, soc_avail"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,   Ishunt_amp,Ishunt_amp_filt_obs,  Wshunt_amp,Wshunt_amp_filt,  Ishunt,Ishunt_filt_obs,  Wshunt,Wshunt_filt,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T, SOCU_m"));
 }
 
 // Print strings
@@ -114,7 +114,7 @@ void create_print_string(char *buffer, Publish *pubList)
     pubList->VOC_solved,
     pubList->socu_solved, pubList->Vbatt_solved,
     pubList->socu_free, pubList->tcharge,
-    pubList->T, pubList->soc_avail, '\0');
+    pubList->T, pubList->socu_model, '\0');
 }
 
 // Inputs serial print

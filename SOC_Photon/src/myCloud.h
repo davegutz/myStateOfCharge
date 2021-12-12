@@ -61,6 +61,7 @@ struct Publish
   double socu_free;
   double tcharge;
   double soc_avail;
+  double socu_model;
 };
 
 void publish1(void);
