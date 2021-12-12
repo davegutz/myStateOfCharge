@@ -151,8 +151,8 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
     sat_ = voc_ >= vsat_;
 
-    if ( debug==-8 ) Serial.printf("SOCU_in,v,curr,pow,tcharge, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
-      socu_frac, v_, curr_in_, pow_in_, tcharge_);
+    if ( debug==-8 ) Serial.printf("SOCU_in,v,curr,pow,tcharge,vsat,voc,sat= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
+      socu_frac, v_, curr_in_, pow_in_, tcharge_, vsat_, voc_, sat_);
 
     if ( debug==-9 )Serial.printf("tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      temp_C, temp_C*9./5.+32., curr_in_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_,v_);
@@ -230,8 +230,8 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     else if ( pow_in_ekf_<-1. ) tcharge_ekf_ = max(NOM_BATT_CAP /pow_in_ekf_*NOM_SYS_VOLT * soc_ekf_, -24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
     else if ( pow_in_ekf_>=0. ) tcharge_ekf_ = 24.*(1.-soc_ekf_);
     else tcharge_ = -24.*soc_ekf_;
-    vsat_ = nom_vsat_ + (temp_c-25.)*dvoc_dt_;
-    sat_ = voc_ >= vsat_;
+    // vsat_ = nom_vsat_ + (temp_c-25.)*dvoc_dt_;
+    // sat_ = voc_ >= vsat_;
 
     if ( debug==-9 )Serial.printf("tempc=%7.3f", temp_c);
     
