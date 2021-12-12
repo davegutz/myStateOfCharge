@@ -42,6 +42,7 @@ extern boolean enable_wifi;     // Enable wifi
 extern double socu_free;        // Free integrator state
 extern double curr_bias;        // Calibration bias, A
 extern double curr_amp_bias;    // Calibration bias amplified ADC, A
+extern double vbatt_bias;       // Calibration bias Vbatt, V
 
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip)
 {
@@ -202,7 +203,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
 
   // Vbatt
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
-  double vbatt_free =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A);
+  double vbatt_free =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A) + vbatt_bias;
   Sen->Vbatt = SdVbatt->update(vbatt_free, reset_free);
   if ( debug==-15 ) Serial.printf("reset_free,vbatt_free,vbatt, %d,%7.3f,%7.3f\n", reset_free, vbatt_free, Sen->Vbatt);
 
@@ -374,6 +375,9 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
           case ( 'b' ):
             curr_bias = input_string.substring(2).toFloat();
             break;
+          case ( 'c' ):
+            vbatt_bias = input_string.substring(2).toFloat();
+            break;
           case ( 'v' ):
             MyBattSolved->Dv(input_string.substring(2).toFloat());
             break;
@@ -461,6 +465,7 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("Adjustments.   For example:\n");
   Serial.printf("  Da= "); Serial.printf("%7.3f", curr_amp_bias); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
   Serial.printf("  Db= "); Serial.printf("%7.3f", curr_bias); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
+  Serial.printf("  Dc= "); Serial.printf("%7.3f", curr_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dv= "); Serial.print(batt_solved->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
   Serial.printf("  Sr= "); Serial.print(batt_solved->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("T<?>=  "); 

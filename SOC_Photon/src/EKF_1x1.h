@@ -34,7 +34,7 @@ public:
   // operators
   // functions
   void predict_ekf(const double u);
-  void update_ekf(const double z, const double dt);
+  void update_ekf(const double z, double x_min, double x_max, const double dt);
   double x_ekf() { return ( x_ ); };
   double z_ekf() { return ( z_ ); };
   void init_ekf(double soc, double Pinit);

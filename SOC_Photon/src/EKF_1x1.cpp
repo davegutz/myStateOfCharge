@@ -68,7 +68,7 @@ void EKF_1x1::predict_ekf(double u)
 
 // y <- C@x + D@u
 // Backward Euler integration of x
-void EKF_1x1::update_ekf(const double z, const double dt)
+void EKF_1x1::update_ekf(const double z, double x_min, double x_max, const double dt)
 {
   /*1x1 Extended Kalman Filter update
   Inputs:
@@ -90,7 +90,7 @@ void EKF_1x1::update_ekf(const double z, const double dt)
   S_ = H_*pht + R_;
   K_ = pht / S_;
   y_ = z_ - hx_;
-  x_ += K_*y_;
+  x_ = max(min( x_ + K_*y_, x_max), x_min);
   double i_kh = 1. - K_*H_;
   P_ *= i_kh;
   x_post_ = x_;

@@ -205,13 +205,16 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
 
     // EKF 1x1
     predict_ekf(ib);            // u = ib
-    update_ekf(voc_dyn_, dt);   // z = voc_dyn
+    update_ekf(voc_dyn_, 0., 1., dt);   // z = voc_dyn
     soc_ekf_ = x_ekf();         // x = Vsoc (0-1 ideal capacitor voltage)
+
+    // Coulomb counter
+    coulomb_counter_avail(dt);
 
     if ( debug==-34 )
     {
-        Serial.printf("dt,ib,vb,voc_dyn,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf= %7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f\n",
-            dt, ib, vb, voc_dyn_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
+        Serial.printf("dt,ib,vb,voc_dyn,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, soc_avail= %7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,\n",
+            dt, ib, vb, voc_dyn_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, soc_avail_);
     }
 
     // Summarize
@@ -255,7 +258,11 @@ void Battery::init_soc_ekf(const double socu_free)
 {
     soc_ekf_ = 1-(1-socu_free)*cu_bb/cs_bb;
     qsat_ = socu_free*TRUE_BATT_CAP;
-    this->init_ekf(soc_ekf_, 0.0);
+    init_ekf(soc_ekf_, 0.0);
+    if ( debug==-34 )
+    {
+        Serial.printf("init_soc_ekf:  soc_ekf_, x_ekf_ = %7.3f, %7.3f,\n", soc_ekf_, x_ekf());
+    }
 }
 
 /* C <- A * B */

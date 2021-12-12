@@ -49,6 +49,7 @@
 #define CONNECT_WAIT          10000UL   // How long after setup that we try WiFi for first time (10000UL)
 #define EST_WAIT              20000UL   // How long after init that we hold estimator integrate to let filters settle (20000UL)
 #define INIT_WAIT             30000UL   // How long after setup that we wait for convergence of observer before setting integrator (30000UL)
+#define INIT_WAIT_EKF         5000UL    // How long after setup that we wait for convergence of observer before setting EKF integrator (5000UL)
 #define CONFIRMATION_DELAY    10000UL   // How long to confirm WiFi on before streaming (10000UL)
 #define GMT                   -5        // Enter time different to zulu (does not respect DST) (-5)
 #define USE_DST               1         // Whether to apply DST or not, 0 or 1 (1)

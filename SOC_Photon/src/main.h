@@ -92,6 +92,7 @@ retained double socu_free = 0.5;// Coulomb Counter state
 retained int8_t debug = 2;
 retained double curr_bias = 0;      // Calibrate, A 
 retained double curr_amp_bias = 0;  // Calibrate amp, A 
+retained double vbatt_bias = 0;     // Calibrate Vbatt, V
 String input_string = "";
 boolean string_complete = false;
 boolean stepping = false;
@@ -282,6 +283,7 @@ void loop()
   static Sync *Summarize = new Sync(SUMMARIZE_DELAY);
   static double socu_solved = 1.0;
   static bool reset_free = false;
+  static bool reset_free_ekf = true;
   static boolean saturated = false;
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
@@ -351,11 +353,15 @@ void loop()
       MyBattFree->init_soc_ekf(socu_free);
       if ( elapsed>INIT_WAIT ) reset_free = false;
     }
+    if ( reset_free_ekf )
+    {
+      MyBattFree->init_soc_ekf(socu_free);
+      if ( elapsed>INIT_WAIT_EKF ) reset_free_ekf = false;
+    }
 
     // EKF
     MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5));  // TODO:  hardcoded time of 0.5 into constants
-    MyBattFree->coulomb_counter_avail(Sen->T);  // Integrator doesn't need max T protection
-
+    
     // Coulomb Count integrator
     socu_free = max(min( socu_free + Sen->Wshunt/NOM_SYS_VOLT*Sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
     // Force initialization/reinitialization whenever saturated.   Keeps estimates close to reality
