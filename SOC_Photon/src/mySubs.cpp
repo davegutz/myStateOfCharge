@@ -158,21 +158,8 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
   double T = (now - past)/1e3;
   past = now;
 
-  // Read Sensors
-  // ADS1015 conversion
-  int16_t vshunt_int_0 = 0;
-  int16_t vshunt_int_1 = 0;
-  if (!Sen->bare_ads)
-  {
-    Sen->Vshunt_int = ads->readADC_Differential_0_1();
-    if ( debug==-14 ){vshunt_int_0 = ads->readADC_SingleEnded(0); vshunt_int_1 = ads->readADC_SingleEnded(1);}
-  }
-  else
-  {
-    Sen->Vshunt_int = 0;
-  }
-
-  // Determine injection amounts
+  // Calculate injection amounts from user inputs (talk).
+  // One-sided because PWM voltage >0.
   double t = now/1e3;
   double sin_bias = 0.;
   double tri_bias = 0.;
@@ -184,7 +171,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
   switch ( rp.type )
   {
     case ( 0 ):   // Sine wave
-      sin_bias = rp.amp*sin(rp.freq*t);
+      sin_bias = rp.amp*(1. + sin(rp.freq*t));
       square_bias = 0.;
       tri_bias = 0.;
       break;
@@ -205,7 +192,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
       }
       tri_bias = 0.;
       break;
-    case ( 2 ):   // Triangle
+    case ( 2 ):   // Triangle wave
       sin_bias = 0.;
       square_bias =  0.;
       tri_bias = 0.;
@@ -230,8 +217,21 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
   if ( debug==-41 )
   Serial.printf("type,amp,freq,sin,square,tri,inj,duty=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%ld\n",
             rp.type, rp.amp, rp.freq, sin_bias, square_bias, tri_bias, rp.duty);
-
   Sen->curr_bias = rp.curr_bias + inj_bias;
+
+  // Read Sensors
+  // ADS1015 conversion
+  int16_t vshunt_int_0 = 0;
+  int16_t vshunt_int_1 = 0;
+  if (!Sen->bare_ads)
+  {
+    Sen->Vshunt_int = ads->readADC_Differential_0_1();
+    if ( debug==-14 ){vshunt_int_0 = ads->readADC_SingleEnded(0); vshunt_int_1 = ads->readADC_SingleEnded(1);}
+  }
+  else
+  {
+    Sen->Vshunt_int = 0;
+  }
   Sen->Vshunt = ads->computeVolts(Sen->Vshunt_int);
   double ishunt_free = Sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A + Sen->curr_bias;
   Sen->Ishunt = SdIshunt->update(ishunt_free, reset_free);
