@@ -156,7 +156,6 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
 {
   static unsigned long int past = now;
   double T = (now - past)/1e3;
-  double t = now/1e3;
   past = now;
 
   // Read Sensors
@@ -172,17 +171,22 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
   {
     Sen->Vshunt_int = 0;
   }
+
+  // Determine injection amounts
+  double t = now/1e3;
   double sin_bias = 0.;
-  double dir_bias = 0.;
+  double tri_bias = 0.;
   double inj_bias = 0.;
   static double square_bias = 0.;
   static double t_last_sq = 0.;
+  static double t_last_tri = 0.;
+  double dt = 0.;
   switch ( rp.type )
   {
     case ( 0 ):   // Sine wave
       sin_bias = rp.amp*sin(rp.freq*t);
       square_bias = 0.;
-      dir_bias = 0.;
+      tri_bias = 0.;
       break;
     case ( 1 ):   // Square wave
       sin_bias = 0.;
@@ -194,25 +198,38 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
       if ( t-t_last_sq > sq_dt )
       {
         t_last_sq = t;
-        if ( square_bias < 0. )
-          square_bias = rp.amp;
+        if ( square_bias == 0. )
+          square_bias = 2.*rp.amp;
         else
-          square_bias = -rp.amp;
+          square_bias = 0.0;
       }
-      dir_bias = 0.;
+      tri_bias = 0.;
       break;
-    case ( 2 ):   // Direct
+    case ( 2 ):   // Triangle
       sin_bias = 0.;
-      square_bias = 0.;
-      dir_bias = rp.amp;
+      square_bias =  0.;
+      tri_bias = 0.;
+      double tri_dt;
+      if ( rp.freq>1e-6 )
+        tri_dt = 1./ rp.freq / 2.;
+      else
+        tri_dt = t;
+      if ( t-t_last_tri > tri_dt )
+        t_last_tri = t;
+      dt = t-t_last_tri;
+      if ( dt <= tri_dt/2. )
+        tri_bias = dt / (tri_dt/2.) * 2. * rp.amp;
+      else
+        tri_bias = (tri_dt-dt) / (tri_dt/2.) * 2. * rp.amp;
       break;
     default:
       break;
   }
-  inj_bias = sin_bias + square_bias + dir_bias;
-  rp.duty = uint32_t(inj_bias / bias_gain);
-  Serial.printf("type,amp,freq,sin,square,dir,inj,duty=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%ld\n",
-            rp.type, rp.amp, rp.freq, sin_bias, square_bias, dir_bias, rp.duty);
+  inj_bias = sin_bias + square_bias + tri_bias;
+  rp.duty = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
+  if ( debug==-41 )
+  Serial.printf("type,amp,freq,sin,square,tri,inj,duty=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%ld\n",
+            rp.type, rp.amp, rp.freq, sin_bias, square_bias, tri_bias, rp.duty);
 
   Sen->curr_bias = rp.curr_bias + inj_bias;
   Sen->Vshunt = ads->computeVolts(Sen->Vshunt_int);
@@ -511,9 +528,9 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
                 rp.type = 1;
                 Serial.printf("Setting waveform to square.  rp.type = %d\n", rp.type);
                 break;
-              case ( 'd' ):
+              case ( 't' ):
                 rp.type = 2;
-                Serial.printf("Setting waveform to direct inject.  rp.type = %d\n", rp.type);
+                Serial.printf("Setting waveform to triangle inject.  rp.type = %d\n", rp.type);
                 break;
               default:
                 Serial.print(input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
@@ -592,7 +609,7 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("  Xc= "); Serial.printf("%7.3f", double(rp.duty)/255.*100.); Serial.println("  : Injection command (0-100) [0]");
   Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Injection amplitude A pk (0-18.3) [0]");
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq); Serial.println("  : Injection frequency Hz (0-2) [0]");
-  Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  's', 'q', 'd' (0=sine, 1=square, 2=direct)");
+  Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  's', 'q', 't' (0=sine, 1=square, 2=triangle)");
   Serial.printf("h   this menu\n");
 }
 
