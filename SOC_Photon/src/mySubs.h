@@ -46,15 +46,17 @@ extern RetainedPars rp; // Various parameters to be static at system level
 // Pins
 struct Pins
 {
-  byte pin_1_wire;     // 1-wire Plenum temperature sensor
-  byte status_led;     // On-board led
-  byte Vbatt_pin;      // Battery voltage
+  byte pin_1_wire;  // 1-wire Plenum temperature sensor
+  byte status_led;  // On-board led
+  byte Vbatt_pin;   // Battery voltage
+  pin_t pwm_pin;    // External signal injection
   Pins(void) {}
-  Pins(byte pin_1_wire, byte status_led, byte Vbatt_pin)
+  Pins(byte pin_1_wire, byte status_led, byte Vbatt_pin, pin_t pwm_pin)
   {
     this->pin_1_wire = pin_1_wire;
     this->status_led = status_led;
     this->Vbatt_pin = Vbatt_pin;
+    this->pwm_pin = pwm_pin;
   }
 };
 
@@ -94,6 +96,8 @@ struct Sensors
   double T_temp;          // Temperature update time, s
   bool bare_ads;          // If no ADS detected
   bool bare_ads_amp;      // If no ADS detected
+  double curr_bias;       // Signal injection bias for current input, A
+  double amp_curr_bias;   // Signal injection bias for amplified current input, A
   Sensors(void) {}
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
           int16_t Vshunt_int, double Vshunt, double Vshunt_filt,
@@ -128,6 +132,8 @@ struct Sensors
     this->T_temp = T_temp;
     this->bare_ads = bare_ads;
     this->bare_ads_amp = bare_ads_amp;
+    this->curr_bias = 0.0;
+    this->amp_curr_bias = 0.0;
   }
 };
 
@@ -147,6 +153,7 @@ String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
 void print_serial_header(void);
 void myDisplay(Adafruit_SSD1306 *display);
+uint32_t pwm_write(uint32_t duty, Pins *myPins);
 String time_long_2_str(const unsigned long current_time, char *tempStr);
 void create_print_string(char *buffer, Publish *pubList);
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);

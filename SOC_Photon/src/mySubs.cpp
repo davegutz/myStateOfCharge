@@ -156,6 +156,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
 {
   static unsigned long int past = now;
   double T = (now - past)/1e3;
+  double t = now/1e3;
   past = now;
 
   // Read Sensors
@@ -171,8 +172,49 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
   {
     Sen->Vshunt_int = 0;
   }
+  double sin_bias = 0.;
+  double dir_bias = 0.;
+  double inj_bias = 0.;
+  static double square_bias = 0.;
+  static double t_last_sq = 0.;
+  switch ( rp.type )
+  {
+    case ( '0' ):   // Sine wave
+      sin_bias = rp.amp*sin(rp.freq*t);
+      square_bias = 0.;
+      dir_bias = 0.;
+      break;
+    case ( '1' ):   // Square wave
+      sin_bias = 0.;
+      double sq_dt;
+      if ( rp.freq>1e-6 )
+        sq_dt = 1./ rp.freq / 2.;
+      else
+        sq_dt = t;
+      if ( t-t_last_sq > sq_dt )
+      {
+        t_last_sq = t;
+        if ( square_bias < 0. )
+          square_bias = rp.amp;
+        else
+          square_bias = -rp.amp;
+      }
+      dir_bias = 0.;
+      break;
+    case ( '2' ):   // Direct
+      sin_bias = 0.;
+      square_bias = 0.;
+      dir_bias = rp.amp;
+      break;
+    default:
+      break;
+  }
+  inj_bias = sin_bias + square_bias + dir_bias;
+  rp.duty = inj_bias / bias_gain;
+
+  Sen->curr_bias = rp.curr_bias + inj_bias;
   Sen->Vshunt = ads->computeVolts(Sen->Vshunt_int);
-  double ishunt_free = Sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A + rp.curr_bias;
+  double ishunt_free = Sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A + Sen->curr_bias;
   Sen->Ishunt = SdIshunt->update(ishunt_free, reset_free);
 
   int16_t vshunt_amp_int_0 = 0;
@@ -186,8 +228,9 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
   {
     Sen->Vshunt_amp_int = 0;
   }
+  Sen->amp_curr_bias = rp.curr_amp_bias + inj_bias;
   Sen->Vshunt_amp = ads_amp->computeVolts(Sen->Vshunt_amp_int);
-  double ishunt_amp_free = Sen->Vshunt_amp*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + rp.curr_amp_bias;
+  double ishunt_amp_free = Sen->Vshunt_amp*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + Sen->amp_curr_bias;
   Sen->Ishunt_amp = SdIshunt_amp->update(ishunt_amp_free, reset_free);
   if ( debug==-14 ) Serial.printf("reset_free,vshunt_int,0_int,1_int,ishunt_free,Ishunt,Ishunt_filt,Ishunt_filt_obs,||,vshunt_amp_int,0_amp_int,1_amp_int,ishunt_amp_free,Ishunt_amp,Ishunt_amp_filt,Ishunt_amp_filt_obs,T, %d,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
     reset_free,
@@ -216,7 +259,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
     }
     elapsed_loc = double(now - vec_start)/1000./60.;
     Sen->Ishunt =  I_T1->interp(elapsed_loc);
-    Sen->Vshunt = (Sen->Ishunt - SHUNT_V2A_A - rp.curr_bias) / SHUNT_V2A_S;
+    Sen->Vshunt = (Sen->Ishunt - SHUNT_V2A_A - Sen->curr_bias) / SHUNT_V2A_S;
     Sen->Vshunt_int = -999;
     Sen->Ishunt_amp =  Sen->Ishunt;
     Sen->Vshunt_amp = Sen->Vshunt;
@@ -254,12 +297,12 @@ void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs,
   // Shunt
   Sen->Vshunt_filt = VshuntSenseFilt->calculate( Sen->Vshunt, reset_loc, min(Sen->T_filt, F_MAX_T));
   Sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( Sen->Vshunt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
-  Sen->Ishunt_filt = Sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A + rp.curr_bias;
-  Sen->Ishunt_filt_obs = Sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A + rp.curr_bias;
+  Sen->Ishunt_filt = Sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A + Sen->curr_bias;
+  Sen->Ishunt_filt_obs = Sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A + Sen->curr_bias;
   Sen->Vshunt_amp_filt = VshuntAmpSenseFilt->calculate( Sen->Vshunt_amp, reset_loc, min(Sen->T_filt, F_MAX_T));
   Sen->Vshunt_amp_filt_obs = VshuntAmpSenseFiltObs->calculate( Sen->Vshunt_amp, reset_loc, min(Sen->T_filt, F_O_MAX_T));
-  Sen->Ishunt_amp_filt = Sen->Vshunt_amp_filt*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + rp.curr_amp_bias;
-  Sen->Ishunt_amp_filt_obs = Sen->Vshunt_amp_filt_obs*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + rp.curr_amp_bias;
+  Sen->Ishunt_amp_filt = Sen->Vshunt_amp_filt*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + Sen->amp_curr_bias;
+  Sen->Ishunt_amp_filt_obs = Sen->Vshunt_amp_filt_obs*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + Sen->amp_curr_bias;
 
   // Voltage
   if ( rp.modeling )
@@ -363,11 +406,20 @@ void myDisplay(Adafruit_SSD1306 *display)
 }
 
 
+// Write to the D/A converter
+uint32_t pwm_write(uint32_t duty, Pins *myPins)
+{
+    analogWrite(myPins->pwm_pin, duty, pwm_frequency);
+    return duty;
+}
+
+
 // Talk Executive
 void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
   Battery *MyBattSolved, Battery *MyBattFree, Battery *MyBattModel)
 {
   double SOCU_in = -99.;
+  double cmd = 0.;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
   if (string_complete)
   {
@@ -389,8 +441,7 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
             MyBattSolved->Dv(input_string.substring(2).toFloat());
             break;
           default:
-            Serial.print(input_string.charAt(1)); Serial.println(" unknown");
-            break;
+            Serial.print(input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
         }
         break;
       case ( 'S' ):
@@ -427,15 +478,54 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
       case ( 'w' ): 
         enable_wifi = true; // not remembered in rp. Photon reset turns this false.
         break;
-      case ( 'x' ): 
-        rp.modeling = !rp.modeling;
-        Serial.printf("Modeling toggled to %d\n", rp.modeling);
+      case ( 'X' ):
+        switch ( input_string.charAt(1) )
+        {
+          case ( 'x' ):
+            rp.modeling = !rp.modeling;
+            Serial.printf("Modeling toggled to %d\n", rp.modeling);
+            break;
+          case ( 'a' ):
+            rp.amp = max(min(input_string.substring(2).toFloat(), 18.3), 0.0);
+            Serial.printf("Modeling injected amp set to %7.3f\n", rp.amp);
+            break;
+          case ( 'f' ):
+            rp.freq = max(min(input_string.substring(2).toFloat(), 2.0), 0.0);
+            Serial.printf("Modeling injected freq set to %7.3f\n", rp.freq);
+            break;
+          case ( 'c' ):
+            cmd = max(min(input_string.substring(2).toFloat(), 100.), 0.);
+            rp.duty = min(uint32_t(cmd*255.0/100.0), uint32_t(255));
+            Serial.printf("Modeling duty cycle set to %ld for command Xd=%7.3f\n", rp.duty, cmd);
+            break;
+          case ( 't' ):
+            switch ( input_string.charAt(2) )
+            {
+              case ( 's' ):
+                rp.type = 0;
+                Serial.printf("Setting waveform to sinusoid.  rp.type = %d\n", rp.type);
+                break;
+              case ( 'q' ):
+                rp.type = 1;
+                Serial.printf("Setting waveform to square.  rp.type = %d\n", rp.type);
+                break;
+              case ( 'd' ):
+                rp.type = 2;
+                Serial.printf("Setting waveform to direct inject.  rp.type = %d\n", rp.type);
+                break;
+              default:
+                Serial.print(input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
+            }
+            break;
+          default:
+            Serial.print(input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
+        }
         break;
       case ( 'h' ): 
         talkH(step_val, vec_num, MyBattSolved);
         break;
       default:
-        Serial.print(input_string.charAt(0)); Serial.println(" unknown");
+        Serial.print(input_string.charAt(0)); Serial.println(" unknown.  Try typing 'h'");
         break;
     }
     input_string = "";
@@ -481,21 +571,26 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("m=  assign a free memory state in percent to all versions including model- '('truncated 0-100')'\n"); 
   Serial.printf("n=  assign a free memory state in percent to model only - '('truncated 0-100')'\n"); 
   Serial.printf("v=  "); Serial.print(debug); Serial.println("    : verbosity, -128 - +128. [2]");
-  Serial.printf("Adjustments.   For example:\n");
+  Serial.printf("D/S<?> Adjustments.   For example:\n");
   Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_amp_bias); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
   Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dv= "); Serial.print(batt_solved->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
   Serial.printf("  Sr= "); Serial.print(batt_solved->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("T<?>=  "); 
-  Serial.printf("Transient performed with input.   For example:\n");
+  Serial.printf("T<?> - Transient performed with input.   For example:\n");
   Serial.printf("  Ts=<index>  :   index="); Serial.print(*step_val);
   Serial.printf(", stepping=");  Serial.println(stepping);
   Serial.printf("  Tv=<vec_num>  :   vec_num="); Serial.println(*vec_num);
   Serial.printf("    ******Send Tv0 to cancel vector*****\n");
   Serial.printf("   INFO:  vectoringing=");  Serial.println(vectoring);
   Serial.printf("w   turn on wifi = "); Serial.println(enable_wifi);
-  Serial.printf("x   toggle model use of Vbatt = "); Serial.println(rp.modeling);
+  Serial.printf("X<?> - Test Mode.   For example:\n");
+  Serial.printf("  Xx= "); Serial.printf("x   toggle model use of Vbatt = "); Serial.println(rp.modeling);
+  Serial.printf("  Xc= "); Serial.printf("%7.3f", double(rp.duty)/255.*100.); Serial.println("  : Injection command (0-100) [0]");
+  Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Injection amplitude A pk (0-18.3) [0]");
+  Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq); Serial.println("  : Injection frequency Hz (0-2) [0]");
+  Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  's', 'q', 'd' (0=sine, 1=square, 2=direct)");
   Serial.printf("h   this menu\n");
 }
 

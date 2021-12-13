@@ -36,6 +36,10 @@ struct RetainedPars
   double t_sat = 25.;       // Battery temperature at saturation, deg C
   double soc_sat = 1.;      // Battery charge at saturation, Ah
   boolean modeling = false; // Driving saturation calculation with model
+  uint32_t duty = 0;        // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
+  double amp = 0.;          // Injected amplitude, A pk (0-18.3)
+  double freq = 0.;         // Injected frequency, Hz (0-2)
+  uint8_t type = 0;         // Injected waveform type.   0=sine, 1=square, 2=triangle
 };            
 
 #endif

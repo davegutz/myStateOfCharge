@@ -125,11 +125,15 @@ void setup()
   // Serial1.println("Hello!");
 
   // Peripherals
-  myPins = new Pins(D6, D7, A1);
+  myPins = new Pins(D6, D7, A1, D2);
 
   // Status
   pinMode(myPins->status_led, OUTPUT);
   digitalWrite(myPins->status_led, LOW);
+
+  // Initialize output (Used in Test mode only)
+  pinMode(myPins->pwm_pin, OUTPUT);
+  pwm_write(0, myPins);
 
   // I2C
   Wire.setSpeed(CLOCK_SPEED_100KHZ);
@@ -281,6 +285,9 @@ void loop()
   static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
   bool summarizing;                         // Summarize, T/F
   static Sync *Summarize = new Sync(SUMMARIZE_DELAY);
+  bool control;                         // Summarize, T/F
+  static Sync *ControlSync = new Sync(CONTROL_DELAY);
+
   static double socu_solved = 1.0;
   static bool reset_free = false;
   static bool reset_free_ekf = true;
@@ -432,6 +439,14 @@ void loop()
     //if ( bare ) delay(41);  // Usual I2C time
     if ( debug>2 ) Serial.printf("completed load at %ld\n", millis());
 
+  }
+
+  // Control
+  control = ControlSync->update(millis(), reset);               //  now || reset
+  if ( control )
+  {
+    pwm_write(rp.duty, myPins);
+    if ( debug>2 ) Serial.printf("completed control at %ld.  rp.dutyy=%ld\n", millis(), rp.duty);
   }
 
   // Display driver

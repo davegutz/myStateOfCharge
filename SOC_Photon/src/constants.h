@@ -45,6 +45,7 @@
 #define SUMMARIZE_DELAY       1800000UL // Battery state tracking and reporting, ms (3600000UL)
 #define PUBLISH_SERIAL_DELAY  400UL     // Serial print interval (400UL)
 #define DISPLAY_USER_DELAY    1200UL    // User display update (1200UL)
+#define CONTROL_DELAY         100UL     // Control read wait, ms (100UL)
 #define DISCONNECT_DELAY      75000UL   // After these milliseconds no WiFi, disconnect (75000UL)
 #define CHECK_INTERVAL        180000UL  // How often to check for WiFi once disconnected (180000UL)
 #define CONNECT_WAIT          10000UL   // How long after setup that we try WiFi for first time (10000UL)
@@ -96,6 +97,9 @@
 #define SOLVE_MAX_ERR    1e-6        // Solver error tolerance, V (1e-6)
 #define SOLVE_MAX_COUNTS 10          // Solver maximum number of steps (10)
 #define SOLVE_MAX_STEP   0.2         // Solver maximum step size, frac soc
+
+const uint32_t pwm_frequency = 500;  // Photon pwm driver frequency, Hz. (>100x beyond 1 Hz RC filters on inputs)
+const double bias_gain = 0.366 * 100. / 255. / 2;   // Amps to duty cycle of pwm inection into fake signal of board,  A/duty
 
 // Battery voltage measurement gain
 const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
