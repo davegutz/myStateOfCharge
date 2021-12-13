@@ -179,12 +179,12 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
   static double t_last_sq = 0.;
   switch ( rp.type )
   {
-    case ( '0' ):   // Sine wave
+    case ( 0 ):   // Sine wave
       sin_bias = rp.amp*sin(rp.freq*t);
       square_bias = 0.;
       dir_bias = 0.;
       break;
-    case ( '1' ):   // Square wave
+    case ( 1 ):   // Square wave
       sin_bias = 0.;
       double sq_dt;
       if ( rp.freq>1e-6 )
@@ -201,7 +201,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
       }
       dir_bias = 0.;
       break;
-    case ( '2' ):   // Direct
+    case ( 2 ):   // Direct
       sin_bias = 0.;
       square_bias = 0.;
       dir_bias = rp.amp;
@@ -210,7 +210,9 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
       break;
   }
   inj_bias = sin_bias + square_bias + dir_bias;
-  rp.duty = inj_bias / bias_gain;
+  rp.duty = uint32_t(inj_bias / bias_gain);
+  Serial.printf("type,amp,freq,sin,square,dir,inj,duty=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%ld\n",
+            rp.type, rp.amp, rp.freq, sin_bias, square_bias, dir_bias, rp.duty);
 
   Sen->curr_bias = rp.curr_bias + inj_bias;
   Sen->Vshunt = ads->computeVolts(Sen->Vshunt_int);
