@@ -98,8 +98,8 @@
 #define SOLVE_MAX_COUNTS 10          // Solver maximum number of steps (10)
 #define SOLVE_MAX_STEP   0.2         // Solver maximum step size, frac soc
 
-const uint32_t pwm_frequency = 60;  // Photon pwm driver frequency, Hz. (>100x beyond 1 Hz RC filters on inputs)
-// dag try 60 to make sure rc filters work.   TODO: Need to verify that 60 actually got into the pwm signal from D2
+const uint32_t pwm_frequency = 60;  // Photon pwm driver frequency, Hz. (60 Hz is the real stuff that an inverter sends our way)
+// I confirmed using o-scope that this 60 Hz works as a pwm value on the Photon.
 const double bias_gain = 0.366 * 100. / 255.;   // Amps to duty cycle of pwm inection into fake signal of board,  A/duty
 
 // Battery voltage measurement gain
