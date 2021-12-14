@@ -428,7 +428,7 @@ void loop()
 
     // Debug print statements
     // Useful for Arduino plotting
-    if ( debug==-1 ) Serial.printf("%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,\n", socu_solved, Sen->Ishunt,
+    if ( debug==-1 ) Serial.printf("%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,%7.3f,\n", socu_solved, Sen->Ishunt, Sen->Ishunt_amp,
         Sen->Vbatt_filt_obs, MyBattSolved->voc(), MyBattSolved->vdyn(), MyBattSolved->v());
     // Useful for vector testing and serial data capture
     if ( debug==-2 )

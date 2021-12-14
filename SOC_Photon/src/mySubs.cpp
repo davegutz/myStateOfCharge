@@ -171,12 +171,17 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
   double dt = 0.;
   switch ( rp.type )
   {
-    case ( 0 ):   // Sine wave
+    case ( 0 ):   // Nothing
+      sin_bias = 0.;
+      square_bias = 0.;
+      tri_bias = 0.;
+      break;
+    case ( 1 ):   // Sine wave
       sin_bias = rp.amp*(1. + sin(rp.freq*t));
       square_bias = 0.;
       tri_bias = 0.;
       break;
-    case ( 1 ):   // Square wave
+    case ( 2 ):   // Square wave
       sin_bias = 0.;
       double sq_dt;
       if ( rp.freq>1e-6 )
@@ -193,7 +198,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
       }
       tri_bias = 0.;
       break;
-    case ( 2 ):   // Triangle wave
+    case ( 3 ):   // Triangle wave
       sin_bias = 0.;
       square_bias =  0.;
       tri_bias = 0.;
@@ -213,12 +218,14 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
     default:
       break;
   }
-  inj_bias = sin_bias + square_bias + tri_bias;
+  inj_bias = sin_bias + square_bias + tri_bias + rp.offset;
   rp.duty = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
   if ( debug==-41 )
   Serial.printf("type,amp,freq,sin,square,tri,inj,duty=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%ld\n",
             rp.type, rp.amp, rp.freq, sin_bias, square_bias, tri_bias, rp.duty);
-  Sen->curr_bias = rp.curr_bias + inj_bias;
+
+  // Current bias
+  Sen->curr_bias = rp.curr_bias;  // Feeds into signal conversion, not to duty injection
 
   // Read Sensors
   // ADS1015 conversion
@@ -507,11 +514,13 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
             break;
           case ( 'a' ):
             rp.amp = max(min(input_string.substring(2).toFloat(), 18.3), 0.0);
-            Serial.printf("Modeling injected amp set to %7.3f\n", rp.amp);
+            rp.offset = -rp.amp;
+            Serial.printf("Modeling injected amp set to %7.3f and offset set to %7.3f\n", rp.amp, rp.offset);
             break;
           case ( 'f' ):
             rp.freq = max(min(input_string.substring(2).toFloat(), 2.0), 0.0);
-            Serial.printf("Modeling injected freq set to %7.3f\n", rp.freq);
+            Serial.printf("Modeling injected freq set to %7.3f Hz\n", rp.freq);
+            rp.freq = rp.freq * 2.0 * PI;
             break;
           case ( 'c' ):
             cmd = max(min(input_string.substring(2).toFloat(), 100.), 0.);
@@ -522,16 +531,63 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
             switch ( input_string.charAt(2) )
             {
               case ( 's' ):
-                rp.type = 0;
+                rp.type = 1;
                 Serial.printf("Setting waveform to sinusoid.  rp.type = %d\n", rp.type);
                 break;
               case ( 'q' ):
-                rp.type = 1;
+                rp.type = 2;
                 Serial.printf("Setting waveform to square.  rp.type = %d\n", rp.type);
                 break;
               case ( 't' ):
-                rp.type = 2;
+                rp.type = 3;
                 Serial.printf("Setting waveform to triangle inject.  rp.type = %d\n", rp.type);
+                break;
+              default:
+                Serial.print(input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
+            }
+            break;
+          case ( 'o' ):
+            rp.offset = max(min(input_string.substring(2).toFloat(), 18.3), -18.3);
+            Serial.printf("Modeling injected offset set to %7.3f\n", rp.offset);
+            break;
+          case ( 'p' ):
+            switch ( input_string.substring(2).toInt() )
+            {
+              case ( 0 ):
+                rp.modeling = false;
+                rp.type = 0;
+                rp.freq = 0.0;
+                rp.amp = 0.0;
+                rp.offset = 0.0;
+                Serial.printf("Setting injection program to '0' = off for rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.offset = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.offset);
+                break;
+              case ( 1 ):
+                rp.modeling = true;
+                rp.type = 0;
+                rp.freq = 1. * (2. * PI);
+                rp.amp = 18.3;
+                rp.offset = -rp.amp;
+                Serial.printf("Setting injection program to '0' = off for rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.offset = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.offset);
+                break;
+              case ( 2 ):
+                rp.modeling = true;
+                rp.type = 1;
+                rp.freq = 1. * (2. * PI);
+                rp.amp = 18.3;
+                rp.offset = -rp.amp;
+                Serial.printf("Setting injection program to '0' = off for rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.offset = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.offset);
+                break;
+              case ( 3 ):
+                rp.modeling = true;
+                rp.type = 2;
+                rp.freq = 1. * (2. * PI);
+                rp.amp = 18.3;
+                rp.offset = -rp.amp;
+                Serial.printf("Setting injection program to '0' = off for rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.offset = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.offset);
                 break;
               default:
                 Serial.print(input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
@@ -598,7 +654,7 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("  Dv= "); Serial.print(batt_solved->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
   Serial.printf("  Sr= "); Serial.print(batt_solved->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("T<?>=  "); 
-  Serial.printf("T<?> - Transient performed with input.   For example:\n");
+  Serial.printf("T - Transient performed with input.   For example:\n");
   Serial.printf("  Ts=<index>  :   index="); Serial.print(*step_val);
   Serial.printf(", stepping=");  Serial.println(stepping);
   Serial.printf("  Tv=<vec_num>  :   vec_num="); Serial.println(*vec_num);
@@ -611,6 +667,12 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Injection amplitude A pk (0-18.3) [0]");
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq); Serial.println("  : Injection frequency Hz (0-2) [0]");
   Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  's', 'q', 't' (0=sine, 1=square, 2=triangle)");
+  Serial.printf("  Xo= "); Serial.printf("%7.3f", rp.offset); Serial.println("  : Injection offset A (-18.3-18.3) [0]");
+  Serial.printf("  Xp= <?>, programmed injection settings...\n"); 
+  Serial.printf("       0:  Off, modeling false\n");
+  Serial.printf("       1:  1 Hz sinusoid centered at 0 with largest supported amplitude\n");
+  Serial.printf("       2:  1 Hz square centered at 0 with largest supported amplitude\n");
+  Serial.printf("       3:  1 Hz triangle centered at 0 with largest supported amplitude\n");
   Serial.printf("h   this menu\n");
 }
 

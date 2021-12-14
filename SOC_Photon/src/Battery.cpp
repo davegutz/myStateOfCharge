@@ -201,7 +201,7 @@ double Battery::calculate_model(const double temp_C, const double socu_frac, con
     return ( v_ );
 }
 
-/* Count coulombs base on true=actual capacity
+/* Count coulombs base on true=actual capacity  TODO:  move to main
     Internal resistance of battery is a loss
     Inputs:
         ioc     Charge current, A
@@ -257,7 +257,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     update_ekf(voc_dyn_, 0., 1., dt);   // z = voc_dyn
     soc_ekf_ = x_ekf();         // x = Vsoc (0-1 ideal capacitor voltage)
 
-    // Coulomb counter
+    // Coulomb counter  TODO:  move to main and use rp.delta_soc
     coulomb_counter_avail(dt, saturated);
 
     if ( debug==-34 )
