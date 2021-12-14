@@ -221,11 +221,12 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
   inj_bias = sin_bias + square_bias + tri_bias + rp.offset;
   rp.duty = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
   if ( debug==-41 )
-  Serial.printf("type,amp,freq,sin,square,tri,inj,duty=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%ld\n",
-            rp.type, rp.amp, rp.freq, sin_bias, square_bias, tri_bias, rp.duty);
+  Serial.printf("type,amp,freq,sin,square,tri,inj,duty,tnow=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %ld,  %7.3f,\n",
+            rp.type, rp.amp, rp.freq, sin_bias, square_bias, tri_bias, rp.duty, t);
 
-  // Current bias
-  Sen->curr_bias = rp.curr_bias;  // Feeds into signal conversion, not to duty injection
+  // Current bias.  Feeds into signal conversion, not to duty injection
+  Sen->curr_bias = rp.curr_bias;
+  Sen->amp_curr_bias = rp.curr_amp_bias;
 
   // Read Sensors
   // ADS1015 conversion
@@ -255,7 +256,6 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
   {
     Sen->Vshunt_amp_int = 0;
   }
-  Sen->amp_curr_bias = rp.curr_amp_bias + inj_bias;
   Sen->Vshunt_amp = ads_amp->computeVolts(Sen->Vshunt_amp_int);
   double ishunt_amp_free = Sen->Vshunt_amp*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + Sen->amp_curr_bias;
   Sen->Ishunt_amp = SdIshunt_amp->update(ishunt_amp_free, reset_free);
@@ -446,7 +446,6 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
   Battery *MyBattSolved, Battery *MyBattFree, Battery *MyBattModel)
 {
   double SOCU_in = -99.;
-  double cmd = 0.;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
   if (string_complete)
   {
@@ -514,18 +513,13 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
             break;
           case ( 'a' ):
             rp.amp = max(min(input_string.substring(2).toFloat(), 18.3), 0.0);
-            rp.offset = -rp.amp;
             Serial.printf("Modeling injected amp set to %7.3f and offset set to %7.3f\n", rp.amp, rp.offset);
             break;
           case ( 'f' ):
             rp.freq = max(min(input_string.substring(2).toFloat(), 2.0), 0.0);
-            Serial.printf("Modeling injected freq set to %7.3f Hz\n", rp.freq);
+            Serial.printf("Modeling injected freq set to %7.3f Hz =", rp.freq);
             rp.freq = rp.freq * 2.0 * PI;
-            break;
-          case ( 'c' ):
-            cmd = max(min(input_string.substring(2).toFloat(), 100.), 0.);
-            rp.duty = min(uint32_t(cmd*255.0/100.0), uint32_t(255));
-            Serial.printf("Modeling duty cycle set to %ld for command Xd=%7.3f\n", rp.duty, cmd);
+            Serial.printf(" %7.3f r/s\n", rp.freq);
             break;
           case ( 't' ):
             switch ( input_string.charAt(2) )
@@ -558,36 +552,35 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
                 rp.type = 0;
                 rp.freq = 0.0;
                 rp.amp = 0.0;
-                rp.offset = 0.0;
-                Serial.printf("Setting injection program to '0' = off for rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.offset = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.offset);
+                Serial.printf("Setting injection program to 0:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp);
                 break;
               case ( 1 ):
                 rp.modeling = true;
-                rp.type = 0;
-                rp.freq = 1. * (2. * PI);
+                rp.type = 1;
+                rp.freq = 0.05;
                 rp.amp = 18.3;
-                rp.offset = -rp.amp;
-                Serial.printf("Setting injection program to '0' = off for rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.offset = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.offset);
+                Serial.printf("Setting injection program to 1: rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp);
+                rp.freq *= (2. * PI);
                 break;
               case ( 2 ):
                 rp.modeling = true;
-                rp.type = 1;
-                rp.freq = 1. * (2. * PI);
+                rp.type = 2;
+                rp.freq = 0.05;
                 rp.amp = 18.3;
-                rp.offset = -rp.amp;
-                Serial.printf("Setting injection program to '0' = off for rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.offset = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.offset);
+                Serial.printf("Setting injection program to 2: rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp);
+                rp.freq *= (2. * PI);
                 break;
               case ( 3 ):
                 rp.modeling = true;
-                rp.type = 2;
-                rp.freq = 1. * (2. * PI);
+                rp.type = 3;
+                rp.freq = 0.05;
                 rp.amp = 18.3;
-                rp.offset = -rp.amp;
-                Serial.printf("Setting injection program to '0' = off for rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.offset = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.offset);
+                Serial.printf("Setting injection program to 3: rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp);
+                rp.freq *= (2. * PI);
                 break;
               default:
                 Serial.print(input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
@@ -663,10 +656,9 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("w   turn on wifi = "); Serial.println(enable_wifi);
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xx= "); Serial.printf("x   toggle model use of Vbatt = "); Serial.println(rp.modeling);
-  Serial.printf("  Xc= "); Serial.printf("%7.3f", double(rp.duty)/255.*100.); Serial.println("  : Injection command (0-100) [0]");
   Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Injection amplitude A pk (0-18.3) [0]");
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq); Serial.println("  : Injection frequency Hz (0-2) [0]");
-  Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  's', 'q', 't' (0=sine, 1=square, 2=triangle)");
+  Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  's', 'q', 't' (0=none, 1=sine, 2=square, 3=triangle)");
   Serial.printf("  Xo= "); Serial.printf("%7.3f", rp.offset); Serial.println("  : Injection offset A (-18.3-18.3) [0]");
   Serial.printf("  Xp= <?>, programmed injection settings...\n"); 
   Serial.printf("       0:  Off, modeling false\n");

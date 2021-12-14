@@ -388,6 +388,9 @@ void loop()
       rp.socu_free = mxepu_bb;
       // rp.socu_model = rp.socu_free;   // Let saturation subside
     }
+    // Useful for Arduino plotting
+    if ( debug==-1 ) Serial.printf("%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,%7.3f,\n", socu_solved, Sen->Ishunt, Sen->Ishunt_amp,
+        Sen->Vbatt_filt_obs, MyBattSolved->voc(), MyBattSolved->vdyn(), MyBattSolved->v());
     if ( debug==-3 )
       Serial.printf("fast,et,reset_free,Wshunt,soc_f,T, %12.3f,%7.3f, %d, %7.3f,%7.3f,%7.3f,\n",
       control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, rp.socu_free, Sen->T_filt);
@@ -427,9 +430,6 @@ void loop()
         MyBattFree->soc_avail(), socu_solved, Sen->Vbatt_solved, MyBattFree->x_ekf(), MyBattFree->z_ekf());
 
     // Debug print statements
-    // Useful for Arduino plotting
-    if ( debug==-1 ) Serial.printf("%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,%7.3f,\n", socu_solved, Sen->Ishunt, Sen->Ishunt_amp,
-        Sen->Vbatt_filt_obs, MyBattSolved->voc(), MyBattSolved->vdyn(), MyBattSolved->v());
     // Useful for vector testing and serial data capture
     if ( debug==-2 )
       Serial.printf("slow,et,reset_f,vect,sat,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,voc,dvdsoc,T,count,tcharge,  %12.3f, %7.3f, %d,%d,%d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
