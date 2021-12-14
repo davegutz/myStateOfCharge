@@ -1,7 +1,7 @@
 #ifndef my_cloud_h
 #define my_cloud_h
 
-#include "mySubs.h"
+#include "Battery.h"
 
 // Wifi
 struct Wifi
@@ -69,7 +69,7 @@ void publish2(void);
 void publish3(void);
 void publish4(void);
 void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi);
-void assign_PubList(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
+void assign_publist(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
   const double control_time, struct Sensors* Sen, const int num_timeouts,
   Battery* MyBattSolved, Battery* MyBattFree);
 

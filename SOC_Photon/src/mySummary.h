@@ -27,8 +27,9 @@
 
 #include "application.h"
 #include "mySubs.h"
-
-extern char buffer[256];
+#include "command.h"
+extern CommandPars cp;
+// extern char buffer[256];
 
 // SRAM retention summary
 struct Sum_st
@@ -52,8 +53,8 @@ struct Sum_st
   }
   void print(void)
   {
-    time_long_2_str(time, buffer);
-    Serial.printf("%s, %ld, %4d, %7.3f, %4d, %7d, %5d,", buffer, time, Tbatt, Vbatt, Ishunt, SOC_f, dV);
+    time_long_2_str(time, cp.buffer);
+    Serial.printf("%s, %ld, %4d, %7.3f, %4d, %7d, %5d,", cp.buffer, time, Tbatt, Vbatt, Ishunt, SOC_f, dV);
   }
 };
 

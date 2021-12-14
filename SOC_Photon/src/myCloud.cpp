@@ -31,22 +31,23 @@
 #include "Blynk/BlynkHandlers.h"
 #include "Blynk/BlynkTimer.h"
 #include "BlynkParticle.h"
-
-extern const int8_t debug;
-extern Publish pubList;
-extern char buffer[256];
+#include "command.h"
+extern CommandPars cp;            // Various parameters to be common at system level (reset on PLC reset)
+// extern const int8_t debug;
+// extern Publish pubList;
+// extern char buffer[256];
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;     // Time Blynk events
 extern BlynkParticle Blynk;
-extern boolean enable_wifi;
+// extern boolean enable_wifi;
 
 // Publish1 Blynk
 void publish1(void)
 {
-  if (debug>4) Serial.printf("Blynk write1\n");
-  Blynk.virtualWrite(V0,  pubList.Vbatt);
-  Blynk.virtualWrite(V2,  pubList.Vbatt_filt_obs);
-  Blynk.virtualWrite(V3,  pubList.VOC_solved);
-  Blynk.virtualWrite(V4,  pubList.Vbatt_solved);
+  if (cp.debug>4) Serial.printf("Blynk write1\n");
+  Blynk.virtualWrite(V0,  cp.pubList.Vbatt);
+  Blynk.virtualWrite(V2,  cp.pubList.Vbatt_filt_obs);
+  Blynk.virtualWrite(V3,  cp.pubList.VOC_solved);
+  Blynk.virtualWrite(V4,  cp.pubList.Vbatt_solved);
   //Blynk.virtualWrite(V5,  pubList.Vbatt_model);
 }
 
@@ -54,36 +55,36 @@ void publish1(void)
 // Publish2 Blynk
 void publish2(void)
 {
-  if (debug>4) Serial.printf("Blynk write2\n");
-  Blynk.virtualWrite(V6,  pubList.socu_free);
-  Blynk.virtualWrite(V7,  pubList.Vbatt_solved);
-  Blynk.virtualWrite(V8,  pubList.T);
-  Blynk.virtualWrite(V9,  pubList.Tbatt);
-  Blynk.virtualWrite(V10, pubList.Tbatt_filt);
+  if (cp.debug>4) Serial.printf("Blynk write2\n");
+  Blynk.virtualWrite(V6,  cp.pubList.socu_free);
+  Blynk.virtualWrite(V7,  cp.pubList.Vbatt_solved);
+  Blynk.virtualWrite(V8,  cp.pubList.T);
+  Blynk.virtualWrite(V9,  cp.pubList.Tbatt);
+  Blynk.virtualWrite(V10, cp.pubList.Tbatt_filt);
 }
 
 
 // Publish3 Blynk
 void publish3(void)
 {
-  if (debug>4) Serial.printf("Blynk write3\n");
-  Blynk.virtualWrite(V12, pubList.Vshunt_amp);
-  Blynk.virtualWrite(V13, pubList.Vshunt_amp_filt);
-  Blynk.virtualWrite(V14, pubList.I2C_status);
-  Blynk.virtualWrite(V15, pubList.hm_string);
-  Blynk.virtualWrite(V16, pubList.tcharge);
+  if (cp.debug>4) Serial.printf("Blynk write3\n");
+  Blynk.virtualWrite(V12, cp.pubList.Vshunt_amp);
+  Blynk.virtualWrite(V13, cp.pubList.Vshunt_amp_filt);
+  Blynk.virtualWrite(V14, cp.pubList.I2C_status);
+  Blynk.virtualWrite(V15, cp.pubList.hm_string);
+  Blynk.virtualWrite(V16, cp.pubList.tcharge);
 }
 
 
 // Publish4 Blynk
 void publish4(void)
 {
-  if (debug>4) Serial.printf("Blynk write4\n");
-  Blynk.virtualWrite(V17, pubList.Ishunt_amp);
-  Blynk.virtualWrite(V18, pubList.Ishunt_amp_filt_obs);
-  Blynk.virtualWrite(V19, pubList.Wshunt_amp);
-  Blynk.virtualWrite(V20, pubList.Wshunt_amp_filt);
-  Blynk.virtualWrite(V21, pubList.socu_solved);
+  if (cp.debug>4) Serial.printf("Blynk write4\n");
+  Blynk.virtualWrite(V17, cp.pubList.Ishunt_amp);
+  Blynk.virtualWrite(V18, cp.pubList.Ishunt_amp_filt_obs);
+  Blynk.virtualWrite(V19, cp.pubList.Wshunt_amp);
+  Blynk.virtualWrite(V20, cp.pubList.Wshunt_amp_filt);
+  Blynk.virtualWrite(V21, cp.pubList.socu_solved);
 }
 
 
@@ -112,11 +113,11 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
   manage_wifi(now, wifi);
 
   // Publish if valid
-  if ( debug>2 ) Serial.printf("Particle write:  ");
+  if ( cp.debug>2 ) Serial.printf("Particle write:  ");
   if ( wifi->connected )
   {
     // Create print string
-    create_print_string(buffer, &pubList);
+    create_print_string(cp.buffer, &cp.pubList);
  
     unsigned nowSec = now/1000UL;
     unsigned sec = nowSec%60;
@@ -125,19 +126,19 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
     char publishString[40];     // For uptime recording
     sprintf(publishString,"%u:%u:%u",hours,min,sec);
     Particle.publish("Uptime",publishString);
-    Particle.publish("stat", buffer);
-    if ( debug>2 ) Serial.println(buffer);
+    Particle.publish("stat", cp.buffer);
+    if ( cp.debug>2 ) Serial.println(cp.buffer);
   }
   else
   {
-    if ( debug>2 ) Serial.printf("nothing to do\n");
-    pubList.num_timeouts++;
+    if ( cp.debug>2 ) Serial.printf("nothing to do\n");
+    cp.pubList.num_timeouts++;
   }
 }
 
 
 // Assignments
-void assign_PubList(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
+void assign_publist(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
   const double control_time, struct Sensors* Sen, const int num_timeouts,
   Battery* MyBattSolved, Battery* MyBattFree)
 {
@@ -168,7 +169,7 @@ void assign_PubList(Publish* pubList, const unsigned long now, const String unit
   pubList->socu_solved = MyBattSolved->socu()*100.0;
   pubList->socu_free = MyBattFree->socu()*100.0;
   pubList->T = Sen->T;
-  if ( debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
+  if ( cp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
   pubList->tcharge = MyBattFree->tcharge();
   pubList->VOC_free = MyBattFree->voc();
   pubList->VOC_solved = MyBattSolved->voc();

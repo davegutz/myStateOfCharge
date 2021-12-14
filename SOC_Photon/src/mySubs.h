@@ -27,7 +27,6 @@
 #include "myFilters.h"
 #include "Battery.h"
 #include "constants.h"
-#include "retained.h"
 #include "myCloud.h"
 
 // Temp sensor
@@ -41,6 +40,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+#include "retained.h"
 extern RetainedPars rp; // Various parameters to be static at system level
 
 // Pins
@@ -159,9 +159,9 @@ void create_print_string(char *buffer, Publish *pubList);
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);
 
 // Talk Declarations
-void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
+void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num,
   Battery *MyBattSolved, Battery *MyBattFree, Battery *MyBattModel);
-void talkT(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num);  // Transient inputs
+void talkT(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num);  // Transient inputs
 void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved); // Help
 
 #endif

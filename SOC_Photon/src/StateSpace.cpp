@@ -26,8 +26,8 @@
 #endif
 #include "StateSpace.h"
 #include <math.h>
-
-extern int8_t debug;
+#include "command.h"
+extern CommandPars cp;
 
 
 // class StateSpace
@@ -62,7 +62,7 @@ void StateSpace::calc_x_dot(double *u)
   mulmat(A_, x_, AX, n_, n_, 1);
   mulmat(B_, u_, BU, n_, p_, 1);
   for (i=0; i<n_; i++) x_dot_[i] = AX[i] + BU[i];
-  if ( debug==-33 )
+  if ( cp.debug==-33 )
   {
     Serial.printf("\nA_=[%10.6f, %10.6f,\n %10.6f, %10.6f,]\n", A_[0], A_[1], A_[2], A_[3]);
     Serial.printf("x_=[%10.6f, %10.6f]\n", x_[0], x_[1]);
@@ -89,7 +89,7 @@ void StateSpace::update(const double dt)
   mulmat(C_, x_past_, CX, q_, n_, 1);  // Back Euler uses past
   mulmat(D_, u_, DU, q_, p_, 1);
   for (i=0; i<q_; i++) y_[i] = CX[i] + DU[i];
-  if ( debug==-33 )
+  if ( cp.debug==-33 )
   {
     Serial.printf("C_=[%10.6f, %10.6f]\n", C_[0], C_[1]);
     Serial.printf("D_=[%10.6f, %10.6f]\n", D_[0], D_[1]);

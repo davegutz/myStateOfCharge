@@ -28,9 +28,8 @@
 #include "retained.h"
 #include "EKF_1x1.h"
 #include <math.h>
-
-extern int8_t debug;
-extern char buffer[256];
+#include "command.h"
+extern CommandPars cp;
 extern RetainedPars rp; // Various parameters to be static at system level
 
 // class Battery
@@ -151,10 +150,10 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
     sat_ = voc_ >= vsat_;
 
-    if ( debug==-8 ) Serial.printf("calculate:  SOCU_in,v,curr,pow,tcharge,vsat,voc,sat= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
+    if ( cp.debug==-8 ) Serial.printf("calculate:  SOCU_in,v,curr,pow,tcharge,vsat,voc,sat= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
       socu_frac, v_, curr_in_, pow_in_, tcharge_, vsat_, voc_, sat_);
 
-    if ( debug==-9 )Serial.printf("calculate:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+    if ( cp.debug==-9 )Serial.printf("calculate:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      temp_C, temp_C*9./5.+32., curr_in_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_,v_);
 
     return ( v_ );
@@ -192,10 +191,10 @@ double Battery::calculate_model(const double temp_C, const double socu_frac, con
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
     // sat_ = voc_ >= vsat_;
 
-    if ( debug==-38 ) Serial.printf("calculate_ model:  SOCU_in,v,curr,pow,vsat,voc= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
+    if ( cp.debug==-38 ) Serial.printf("calculate_ model:  SOCU_in,v,curr,pow,vsat,voc= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
       socu_frac, v_, curr_in_, pow_in_, vsat_, voc_);
 
-    if ( debug==-39 )Serial.printf("calculate_model:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+    if ( cp.debug==-39 )Serial.printf("calculate_model:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      temp_C, temp_C*9./5.+32., curr_in_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_,v_);
 
     return ( v_ );
@@ -227,7 +226,7 @@ double Battery::coulomb_counter_avail(const double dt, const boolean saturated)
         rp.soc_sat = (rp.t_sat - 25.)*dQdT_ + 1.;
     }
     soc_avail_ = max(rp.soc_sat*(1. - dQdT_*(temp_c_ - rp.t_sat)) + rp.delta_soc, 0.);
-    if ( debug==-36 )
+    if ( cp.debug==-36 )
     {
         Serial.printf("coulomb_counter_avail:  sat, pow_in_ekf, delta_delta_soc, delta_soc, soc_sat, tsat,-->,soc_avail=     %d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,-->,%7.3f,\n",
                     saturated, pow_in_ekf_, delta_delta_soc, rp.delta_soc, rp.soc_sat, rp.t_sat, soc_avail_);
@@ -260,7 +259,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     // Coulomb counter  TODO:  move to main and use rp.delta_soc
     coulomb_counter_avail(dt, saturated);
 
-    if ( debug==-34 )
+    if ( cp.debug==-34 )
     {
         Serial.printf("dt,ib,vb,voc_dyn,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, soc_avail= %7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,\n",
             dt, ib, vb, voc_dyn_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, soc_avail_);
@@ -275,7 +274,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     // vsat_ = nom_vsat_ + (temp_c-25.)*dvoc_dt_;
     // sat_ = voc_ >= vsat_;
 
-    if ( debug==-9 )Serial.printf("tempc=%7.3f", temp_c);
+    if ( cp.debug==-9 )Serial.printf("tempc=%7.3f", temp_c);
     
     return ( soc_ekf_ );
 }
@@ -308,7 +307,7 @@ void Battery::init_soc_ekf(const double socu_free_in)
     soc_ekf_ = 1-(1-socu_free_in)*cu_bb/cs_bb;
     qsat_ = socu_free_in*TRUE_BATT_CAP;
     init_ekf(soc_ekf_, 0.0);
-    if ( debug==-34 )
+    if ( cp.debug==-34 )
     {
         Serial.printf("init_soc_ekf:  soc_ekf_, x_ekf_ = %7.3f, %7.3f,\n", soc_ekf_, x_ekf());
     }
