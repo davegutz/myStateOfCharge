@@ -185,7 +185,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
       sin_bias = 0.;
       double sq_dt;
       if ( rp.freq>1e-6 )
-        sq_dt = 1./ rp.freq / 2.;
+        sq_dt = 1. / rp.freq * PI;
       else
         sq_dt = t;
       if ( t-t_last_sq > sq_dt )
@@ -204,7 +204,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
       tri_bias = 0.;
       double tri_dt;
       if ( rp.freq>1e-6 )
-        tri_dt = 1./ rp.freq / 2.;
+        tri_dt = 1. / rp.freq * PI;
       else
         tri_dt = t;
       if ( t-t_last_tri > tri_dt )
@@ -214,6 +214,9 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
         tri_bias = dt / (tri_dt/2.) * 2. * rp.amp;
       else
         tri_bias = (tri_dt-dt) / (tri_dt/2.) * 2. * rp.amp;
+      if ( debug==-41 )
+        Serial.printf("tri_dt,dt,t_last_tri,tri_bias=%7.3f,%7.3f,%7.3f,%7.3f,\n",
+            tri_dt, dt, t_last_tri, tri_bias);
       break;
     default:
       break;
@@ -567,7 +570,7 @@ void talk(bool *stepping, double *step_val, bool *vectoring, int8_t *vec_num,
               case ( 2 ):
                 rp.modeling = true;
                 rp.type = 2;
-                rp.freq = 0.05;
+                rp.freq = 0.10;
                 rp.amp = 18.3;
                 Serial.printf("Setting injection program to 2: rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp);
@@ -657,7 +660,7 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xx= "); Serial.printf("x   toggle model use of Vbatt = "); Serial.println(rp.modeling);
   Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Injection amplitude A pk (0-18.3) [0]");
-  Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq); Serial.println("  : Injection frequency Hz (0-2) [0]");
+  Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println("  : Injection frequency Hz (0-2) [0]");
   Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  's', 'q', 't' (0=none, 1=sine, 2=square, 3=triangle)");
   Serial.printf("  Xo= "); Serial.printf("%7.3f", rp.offset); Serial.println("  : Injection offset A (-18.3-18.3) [0]");
   Serial.printf("  Xp= <?>, programmed injection settings...\n"); 
