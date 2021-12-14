@@ -372,8 +372,10 @@ void loop()
       // rp.socu_model = rp.socu_free;   // Let saturation subside
     }
     // Useful for Arduino plotting
-    if ( cp.debug==-1 ) Serial.printf("%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,%7.3f,\n", socu_solved, Sen->Ishunt, Sen->Ishunt_amp,
-        Sen->Vbatt_filt_obs, MyBattSolved->voc(), MyBattSolved->vdyn(), MyBattSolved->v());
+    if ( cp.debug==-1 )
+      Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,%7.3f,\n",
+        socu_solved*100-90, MyBattFree->soc_avail()*100-90, Sen->Ishunt, Sen->Ishunt_amp,Sen->Vbatt_filt_obs*10-110,
+        MyBattSolved->voc()*10-110, MyBattSolved->vdyn()*10, MyBattSolved->v()*10-110);
     if ( cp.debug==-3 )
       Serial.printf("fast,et,reset_free,Wshunt,soc_f,T, %12.3f,%7.3f, %d, %7.3f,%7.3f,%7.3f,\n",
       control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, rp.socu_free, Sen->T_filt);

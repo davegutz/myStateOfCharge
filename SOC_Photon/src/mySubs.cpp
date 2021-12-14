@@ -223,15 +223,15 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
     default:
       break;
   }
-  inj_bias = sin_bias + square_bias + tri_bias + rp.offset;
+  inj_bias = sin_bias + square_bias + tri_bias;
   rp.duty = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
   if ( cp.debug==-41 )
   Serial.printf("type,amp,freq,sin,square,tri,inj,duty,tnow=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %ld,  %7.3f,\n",
             rp.type, rp.amp, rp.freq, sin_bias, square_bias, tri_bias, rp.duty, t);
 
   // Current bias.  Feeds into signal conversion, not to duty injection
-  Sen->curr_bias = rp.curr_bias;
-  Sen->amp_curr_bias = rp.curr_amp_bias;
+  Sen->curr_bias = rp.curr_bias + rp.offset;
+  Sen->amp_curr_bias = rp.curr_amp_bias + rp.offset;
 
   // Read Sensors
   // ADS1015 conversion
@@ -488,6 +488,16 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
       case ( 'd' ):
         cp.debug = -4;
         break;
+      case ( 'l' ):
+        switch ( cp.debug )
+        {
+          case ( -1 ):
+            Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt  ,Ishunt_a  ,Vbat_fo*10-110  ,voc_s*10-110  ,vdyn_s*10  ,v_s*10-110  ,,,,,,,,,,,,\n");
+            break;
+          default:
+            Serial.printf("Legend for cp.debug= %d not defined.   Edit mySubs.cpp, search for 'case ( 'l' )' and add it\n", cp.debug);
+        }
+        break;
       case ( 'm' ):
         SOCU_in = cp.input_string.substring(1).toFloat()/100.;
         rp.socu_free = max(min(SOCU_in, mxepu_bb), mnepu_bb);
@@ -557,6 +567,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.type = 0;
                 rp.freq = 0.0;
                 rp.amp = 0.0;
+                rp.offset = 0.0;
                 Serial.printf("Setting injection program to 0:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp);
                 break;
@@ -565,6 +576,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.type = 1;
                 rp.freq = 0.05;
                 rp.amp = 18.3;
+                rp.offset = -rp.amp;
                 Serial.printf("Setting injection program to 1: rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp);
                 rp.freq *= (2. * PI);
@@ -574,6 +586,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.type = 2;
                 rp.freq = 0.10;
                 rp.amp = 18.3;
+                rp.offset = -rp.amp;
                 Serial.printf("Setting injection program to 2: rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp);
                 rp.freq *= (2. * PI);
@@ -583,6 +596,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.type = 3;
                 rp.freq = 0.05;
                 rp.amp = 18.3;
+                rp.offset = -rp.amp;
                 Serial.printf("Setting injection program to 3: rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp);
                 rp.freq *= (2. * PI);
