@@ -224,7 +224,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   {
     Sen->Vshunt_amp_int = 0;
   }
-  Sen->Vshunt_amp = ads_amp->computeVolts(Sen->Vshunt_amp_int);
+  Sen->Vshunt_amp = ads->computeVolts(Sen->Vshunt_amp_int);
   double ishunt_amp_free = Sen->Vshunt_amp*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + Sen->amp_curr_bias;
   Sen->Ishunt_amp = SdIshunt_amp->update(ishunt_amp_free, reset_free);
   if ( cp.debug==-14 ) Serial.printf("reset_free,vshunt_int,0_int,1_int,ishunt_free,Ishunt,Ishunt_filt,Ishunt_filt_obs,||,vshunt_amp_int,0_amp_int,1_amp_int,ishunt_amp_free,Ishunt_amp,Ishunt_amp_filt,Ishunt_amp_filt_obs,T, %d,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",

@@ -195,7 +195,8 @@ void setup()
 
   // Summary
   System.enableFeature(FEATURE_RETAINED_MEMORY);
-  print_all(mySum, isum, nsum);
+  if ( cp.debug!=-1 )    // messes up Arduino plots if print summary after init
+    print_all(mySum, isum, nsum);
 
   // Header for cp.debug print
   if ( cp.debug>1 ) print_serial_header();
@@ -374,7 +375,7 @@ void loop()
     // Useful for Arduino plotting
     if ( cp.debug==-1 )
       Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,%7.3f,\n",
-        socu_solved*100-90, MyBattFree->soc_avail()*100-90, Sen->Ishunt, Sen->Ishunt_amp,Sen->Vbatt_filt_obs*10-110,
+        socu_solved*100-90, MyBattFree->soc_avail()*100-90, Sen->Ishunt, Sen->Ishunt_amp, Sen->Vbatt_filt_obs*10-110,
         MyBattSolved->voc()*10-110, MyBattSolved->vdyn()*10, MyBattSolved->v()*10-110);
     if ( cp.debug==-3 )
       Serial.printf("fast,et,reset_free,Wshunt,soc_f,T, %12.3f,%7.3f, %d, %7.3f,%7.3f,%7.3f,\n",
