@@ -216,6 +216,10 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
     - Ground of laptop  monitoring the Photon wildly floating, biasing ADS inputs probably tripping Schottky diodes.
   DO NOT PLUG IN LAPTOP TO ANYTHING WHILE MONITORING Photon
 
+### Problem:  Messages from devices:  "HTTP error 401 from ... - The access token provided is invalid."
+
+  This means you haven't signed into the particle cloud during this session.   Go to "Welcome to Particle Workbench" and click on "LOGIN."   Enter username and password for particle.io.  Usually hit enter for the 6-digit code - unless you set one up.
+
 ## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
 
 ## To get debug data
