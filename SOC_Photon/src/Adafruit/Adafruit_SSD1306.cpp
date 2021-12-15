@@ -52,7 +52,7 @@
 
 #include "Adafruit_SSD1306.h"
 #include "splash.h"
-#include <Adafruit_GFX.h>
+#include "Adafruit_GFX.h"
 
 // SOME DEFINES AND STATIC VARIABLES USED INTERNALLY -----------------------
 

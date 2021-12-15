@@ -1,4 +1,4 @@
-#include <Adafruit_I2CDevice.h>
+#include "Adafruit_I2CDevice.h"
 #include <Arduino.h>
 
 //#define DEBUG_SERIAL Serial

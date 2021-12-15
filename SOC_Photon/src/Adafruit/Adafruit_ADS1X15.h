@@ -12,7 +12,7 @@
 #ifndef __ADS1X15_H__
 #define __ADS1X15_H__
 
-#include <Adafruit_I2CDevice.h>
+#include "Adafruit_I2CDevice.h"
 #include <Arduino.h>
 #include <Wire.h>
 

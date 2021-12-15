@@ -24,7 +24,7 @@
 #ifndef ARDUINO
 #include "application.h" // Should not be needed if file .ino or Arduino
 #endif
-#include "StateSpace.h"
+#include "myLibrary/StateSpace.h"
 #include <math.h>
 #include "command.h"
 extern CommandPars cp;

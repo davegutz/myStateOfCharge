@@ -24,21 +24,21 @@
 #ifndef _MY_SUBS_H
 #define _MY_SUBS_H
 
-#include "myFilters.h"
+#include "myLibrary/myFilters.h"
 #include "Battery.h"
 #include "constants.h"
 #include "myCloud.h"
 
 // Temp sensor
-#include <OneWire.h>
-#include <DS18.h>
+#include <hardware/OneWire.h>
+#include <hardware/DS18.h>
 
 // AD
-#include <Adafruit_ADS1X15.h>
+#include <Adafruit/Adafruit_ADS1X15.h>
 
 // Display
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include <Adafruit/Adafruit_GFX.h>
+#include <Adafruit/Adafruit_SSD1306.h>
 
 #include "retained.h"
 extern RetainedPars rp; // Various parameters to be static at system level

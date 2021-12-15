@@ -30,7 +30,7 @@
 #include <math.h>
 #include "Blynk/BlynkHandlers.h"
 #include "Blynk/BlynkTimer.h"
-#include "BlynkParticle.h"
+#include "Blynk/BlynkParticle.h"
 #include "command.h"
 extern CommandPars cp;            // Various parameters to be common at system level (reset on PLC reset)
 // extern const int8_t debug;

@@ -63,7 +63,7 @@ Make it yourself.   It should look like this, with your personal authorizations:
 // Dependent includes.   Easier to cp.debug code if remove unused include files
 #include "mySync.h"
 #include "mySubs.h"
-#include "blynk.h"              // Only place this can appear is top level main.h
+#include "Blynk/blynk.h"              // Only place this can appear is top level main.h
 #include "mySummary.h"
 #include "myCloud.h"
 

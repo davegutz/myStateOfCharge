@@ -25,9 +25,9 @@
 #ifndef BATTERY_H_
 #define BATTERY_H_
 
-#include "myTables.h"
-#include "EKF_1x1.h"
-#include "StateSpace.h"
+#include "myLibrary/myTables.h"
+#include "myLibrary/EKF_1x1.h"
+#include "myLibrary/StateSpace.h"
 
 class Battery: public EKF_1x1
 {
