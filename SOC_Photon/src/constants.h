@@ -42,13 +42,13 @@
 #define READ_DELAY            100UL     // Sensor read wait, ms (100UL)
 #define READ_TEMP_DELAY       60000UL   // Sensor read wait, ms (60000UL)
 #define FILTER_DELAY          1000UL    // Filter read wait, ms (1000UL)
-#define SUMMARIZE_DELAY       1800000UL // Battery state tracking and reporting, ms (3600000UL)
+#define SUMMARIZE_DELAY       1800000UL // Battery state tracking and reporting, ms (1800000UL = 30:00 min)
 #define PUBLISH_SERIAL_DELAY  400UL     // Serial print interval (400UL)
 #define DISPLAY_USER_DELAY    1200UL    // User display update (1200UL)
 #define CONTROL_DELAY         100UL     // Control read wait, ms (100UL)
-#define DISCONNECT_DELAY      75000UL   // After these milliseconds no WiFi, disconnect (75000UL)
-#define CHECK_INTERVAL        180000UL  // How often to check for WiFi once disconnected (180000UL)
-#define CONNECT_WAIT          10000UL   // How long after setup that we try WiFi for first time (10000UL)
+#define DISCONNECT_DELAY      75000UL   // After these milliseconds no WiFi, disconnect (75000UL = 1:15 min)
+#define CHECK_INTERVAL        180000UL  // How often to check for WiFi once disconnected (180000UL = 3:00 min)
+#define CONNECT_WAIT          10000UL   // How long after setup that we try WiFi for first time (10000UL = 0:10 min)
 #define EST_WAIT              20000UL   // How long after init that we hold estimator integrate to let filters settle (20000UL)
 #define INIT_WAIT             30000UL   // How long after setup that we wait for convergence of observer before setting integrator (30000UL)
 #define INIT_WAIT_EKF         5000UL    // How long after setup that we wait for convergence of observer before setting EKF integrator (5000UL)
@@ -72,7 +72,7 @@
 #define SHUNT_V2A_S           -1189.3   // Shunt V2A scalar, A/V (1333 is 100A/0.075V)  (-1189.3)
 #define SHUNT_V2A_A           0         // Shunt V2A adder, A derived from charge-discharge integral match (0 in theory)  (0)
                                         // observed on prototype over time that 0 V really is 0 A.   Not much bias in ADS devices
-#define SHUNT_AMP_V2A_S       (SHUNT_V2A_S*SHUNT_AMP_R1/SHUNT_AMP_R2)   // Shunt amp V2A scalar
+#define SHUNT_AMP_V2A_S       (SHUNT_V2A_S*2.*SHUNT_AMP_R1/SHUNT_AMP_R2)   // Shunt amp V2A scalar
 #define SHUNT_AMP_V2A_A       0         // Shunt amp V2A adder, A derived from charge-discharge integral match (0 in theory)  (0)
 #define SCREEN_WIDTH          128       // OLED display width, in pixels (128)
 #define SCREEN_HEIGHT         32        // OLED display height, in pixels (4)

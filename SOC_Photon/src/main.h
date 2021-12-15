@@ -125,17 +125,16 @@ void setup()
   // AD
   Serial.println("Initializing SHUNT MONITORS");
   ads = new Adafruit_ADS1015;
-  ads->setGain(GAIN_SIXTEEN, GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+  ads->setGain(GAIN_SIXTEEN, GAIN_SIXTEEN);    // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
   if (!ads->begin()) {
     Serial.println("FAILED to initialize ADS SHUNT MONITOR.");
     bare_ads = true;
   }
   ads_amp = new Adafruit_ADS1015;
-  ads_amp->setGain(GAIN_EIGHT, GAIN_TWO);    // Differential 8x gain
-  // if (!ads->begin()) {
-  //   Serial.println("FAILED to initialize ADS AMPLIFIED SHUNT MONITOR.");
-  //   bare_ads_amp = true;
-  // }
+  ads_amp->setGain(GAIN_EIGHT, GAIN_TWO);    // First argument is differential, second is single-ended.   8 was used by
+  // Texas Instruments in their example implementation.   16 was used by another Particle user in their non-amplified
+  // implementation.   This all works out ok, I believe, because this is only software gain and also there is a factor of 
+  // 2 added to the calculation of SHUNT_AMP_V2A_S in constants.h.
   if (!ads_amp->begin((0x49))) {
     Serial.println("FAILED to initialize ADS AMPLIFIED SHUNT MONITOR.");
     bare_ads_amp = true;
@@ -374,7 +373,7 @@ void loop()
     }
     // Useful for Arduino plotting
     if ( cp.debug==-1 )
-      Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,%7.3f,%7.3f,%7.3f,\n",
+      Serial.printf("%7.3f,%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,\n",
         socu_solved*100-90, MyBattFree->soc_avail()*100-90, Sen->Ishunt, Sen->Ishunt_amp, Sen->Vbatt_filt_obs*10-110,
         MyBattSolved->voc()*10-110, MyBattSolved->vdyn()*10, MyBattSolved->v()*10-110);
     if ( cp.debug==-3 )

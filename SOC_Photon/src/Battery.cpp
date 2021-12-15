@@ -269,7 +269,7 @@ double Battery::coulomb_counter_avail(const double dt, const boolean saturated)
         rp.t_sat = temp_c_;
         rp.soc_sat = (rp.t_sat - 25.)*dQdT_ + 1.;
     }
-    soc_avail_ = max(rp.soc_sat*(1. - dQdT_*(temp_c_ - rp.t_sat)) + rp.delta_soc, 0.);
+    soc_avail_ = max(min(rp.soc_sat*(1. - dQdT_*(temp_c_ - rp.t_sat)) + rp.delta_soc, 1.5), 0.);
     if ( cp.debug==-36 )
     {
         Serial.printf("coulomb_counter_avail:  sat, pow_in_ekf, delta_delta_soc, delta_soc, soc_sat, tsat,-->,soc_avail=     %d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,-->,%7.3f,\n",

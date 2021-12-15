@@ -480,7 +480,8 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         talkT(&cp.stepping, &cp.step_val, &cp.vectoring, &cp.vec_num);
         break;
       case ( 'w' ): 
-        cp.enable_wifi = true; // not remembered in rp. Photon reset turns this false.
+        cp.enable_wifi = !cp.enable_wifi; // not remembered in rp. Photon reset turns this false.
+        Serial.printf("Wifi toggled to %d\n", cp.enable_wifi);
         break;
       case ( 'X' ):
         switch ( cp.input_string.charAt(1) )
