@@ -29,18 +29,8 @@
 #include "command.h"
 #include "local_config.h"
 #include <math.h>
+#include "myLibrary/injection.h"
 
-// extern int8_t debug;
-// extern Publish pubList;
-// extern char buffer[256];
-// extern String input_string;     // A string to hold incoming data
-// extern boolean string_complete; // Whether the string is complete
-// extern boolean stepping;        // Active step adder
-// extern double step_val;         // Step size
-// extern boolean vectoring;       // Active battery test vector
-// extern int8_t vec_num;          // Active vector number
-// extern unsigned long vec_start; // Start of active vector
-// extern boolean enable_wifi;     // Enable wifi
 extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
 
@@ -159,18 +149,18 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   static unsigned long int past = now;
   double T = (now - past)/1e3;
   past = now;
-
-  // TODO:   double inj_bias(const unsigned long now)
-  // Calculate injection amounts from user inputs (talk).
-  // One-sided because PWM voltage >0.
   double t = now/1e3;
   double sin_bias = 0.;
+  double square_bias = 0.;
   double tri_bias = 0.;
   double inj_bias = 0.;
-  static double square_bias = 0.;
-  static double t_last_sq = 0.;
-  static double t_last_tri = 0.;
-  double dt = 0.;
+  static SinInj *Sin_inj = new SinInj();
+  static SqInj *Sq_inj = new SqInj();
+  static TriInj *Tri_inj = new TriInj();
+
+
+  // Calculate injection amounts from user inputs (talk).
+  // One-sided because PWM voltage >0.  rp.offset applied in logic below.
   switch ( rp.type )
   {
     case ( 0 ):   // Nothing
@@ -179,46 +169,19 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
       tri_bias = 0.;
       break;
     case ( 1 ):   // Sine wave
-      sin_bias = rp.amp*(1. + sin(rp.freq*t));
+      sin_bias = Sin_inj->signal(rp.amp, rp.freq, t, 0.0);
       square_bias = 0.;
       tri_bias = 0.;
       break;
     case ( 2 ):   // Square wave
       sin_bias = 0.;
-      double sq_dt;
-      if ( rp.freq>1e-6 )
-        sq_dt = 1. / rp.freq * PI;
-      else
-        sq_dt = t;
-      if ( t-t_last_sq > sq_dt )
-      {
-        t_last_sq = t;
-        if ( square_bias == 0. )
-          square_bias = 2.*rp.amp;
-        else
-          square_bias = 0.0;
-      }
+      square_bias = Sq_inj->signal(rp.amp, rp.freq, t, 0.0);
       tri_bias = 0.;
       break;
     case ( 3 ):   // Triangle wave
       sin_bias = 0.;
       square_bias =  0.;
-      tri_bias = 0.;
-      double tri_dt;
-      if ( rp.freq>1e-6 )
-        tri_dt = 1. / rp.freq * PI;
-      else
-        tri_dt = t;
-      if ( t-t_last_tri > tri_dt )
-        t_last_tri = t;
-      dt = t-t_last_tri;
-      if ( dt <= tri_dt/2. )
-        tri_bias = dt / (tri_dt/2.) * 2. * rp.amp;
-      else
-        tri_bias = (tri_dt-dt) / (tri_dt/2.) * 2. * rp.amp;
-      if ( cp.debug==-41 )
-        Serial.printf("tri_dt,dt,t_last_tri,tri_bias=%7.3f,%7.3f,%7.3f,%7.3f,\n",
-            tri_dt, dt, t_last_tri, tri_bias);
+      tri_bias = Tri_inj->signal(rp.amp, rp.freq, t, 0.0);
       break;
     default:
       break;

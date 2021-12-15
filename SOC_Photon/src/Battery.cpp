@@ -159,6 +159,50 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
     return ( v_ );
 }
 
+// SOC-OCV curve fit method per Zhang, et al modified by ekf
+double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated)
+{
+    // Save temperature for callbacks
+    temp_c_ = temp_c;
+
+    // VOC-OCV model
+    double b, a, c, log_soc, exp_n_soc, pow_log_soc;
+    calc_soc_voc_coeff(soc_ekf_, temp_c_, &b, &a, &c, &log_soc, &exp_n_soc, &pow_log_soc);
+
+    // Dynamic emf
+    double u[2] = {ib, vb};
+    Randles_->calc_x_dot(u);
+    Randles_->update(dt);
+    voc_dyn_ = Randles_->y(0);
+
+    // EKF 1x1
+    predict_ekf(ib);            // u = ib
+    update_ekf(voc_dyn_, 0., 1., dt);   // z = voc_dyn
+    soc_ekf_ = x_ekf();         // x = Vsoc (0-1 ideal capacitor voltage)
+
+    // Coulomb counter  TODO:  move to main and use rp.delta_soc
+    coulomb_counter_avail(dt, saturated);
+
+    if ( cp.debug==-34 )
+    {
+        Serial.printf("dt,ib,vb,voc_dyn,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, soc_avail= %7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,\n",
+            dt, ib, vb, voc_dyn_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, soc_avail_);
+    }
+
+    // Summarize
+    pow_in_ekf_ = vb*ib - ib*ib*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
+    if ( pow_in_ekf_>1. )  tcharge_ = min(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * (1.-soc_ekf_), 24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
+    else if ( pow_in_ekf_<-1. ) tcharge_ekf_ = max(NOM_BATT_CAP /pow_in_ekf_*NOM_SYS_VOLT * soc_ekf_, -24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
+    else if ( pow_in_ekf_>=0. ) tcharge_ekf_ = 24.*(1.-soc_ekf_);
+    else tcharge_ = -24.*soc_ekf_;
+    // vsat_ = nom_vsat_ + (temp_c-25.)*dvoc_dt_;
+    // sat_ = voc_ >= vsat_;
+
+    if ( cp.debug==-9 )Serial.printf("tempc=%7.3f", temp_c);
+    
+    return ( soc_ekf_ );
+}
+
 // SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model
 double Battery::calculate_model(const double temp_C, const double socu_frac, const double curr_in, const double dt)
 {
@@ -234,50 +278,6 @@ double Battery::coulomb_counter_avail(const double dt, const boolean saturated)
     return ( soc_avail_ );
 }
 
-
-// SOC-OCV curve fit method per Zhang, et al modified by ekf
-double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated)
-{
-    // Save temperature for callbacks
-    temp_c_ = temp_c;
-
-    // VOC-OCV model
-    double b, a, c, log_soc, exp_n_soc, pow_log_soc;
-    calc_soc_voc_coeff(soc_ekf_, temp_c_, &b, &a, &c, &log_soc, &exp_n_soc, &pow_log_soc);
-
-    // Dynamic emf
-    double u[2] = {ib, vb};
-    Randles_->calc_x_dot(u);
-    Randles_->update(dt);
-    voc_dyn_ = Randles_->y(0);
-
-    // EKF 1x1
-    predict_ekf(ib);            // u = ib
-    update_ekf(voc_dyn_, 0., 1., dt);   // z = voc_dyn
-    soc_ekf_ = x_ekf();         // x = Vsoc (0-1 ideal capacitor voltage)
-
-    // Coulomb counter  TODO:  move to main and use rp.delta_soc
-    coulomb_counter_avail(dt, saturated);
-
-    if ( cp.debug==-34 )
-    {
-        Serial.printf("dt,ib,vb,voc_dyn,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, soc_avail= %7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,\n",
-            dt, ib, vb, voc_dyn_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, soc_avail_);
-    }
-
-    // Summarize
-    pow_in_ekf_ = vb*ib - ib*ib*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
-    if ( pow_in_ekf_>1. )  tcharge_ = min(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * (1.-soc_ekf_), 24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
-    else if ( pow_in_ekf_<-1. ) tcharge_ekf_ = max(NOM_BATT_CAP /pow_in_ekf_*NOM_SYS_VOLT * soc_ekf_, -24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
-    else if ( pow_in_ekf_>=0. ) tcharge_ekf_ = 24.*(1.-soc_ekf_);
-    else tcharge_ = -24.*soc_ekf_;
-    // vsat_ = nom_vsat_ + (temp_c-25.)*dvoc_dt_;
-    // sat_ = voc_ >= vsat_;
-
-    if ( cp.debug==-9 )Serial.printf("tempc=%7.3f", temp_c);
-    
-    return ( soc_ekf_ );
-}
 
 // EKF model for predict
 void Battery::ekf_model_predict(double *Fx, double *Bu)
