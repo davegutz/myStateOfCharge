@@ -78,7 +78,6 @@ struct Sensors
   double Vshunt_filt;     // Filtered, sensed shunt voltage, V
   double Vshunt_filt_obs; // Filtered, sensed shunt voltage for  observer, V
   double shunt_v2a_s;     // Selected shunt conversion gain, A/V
-  double shunt_v2a_a;     // Selected shunt conversion adder, A
   double Ishunt_amp_cal;  // Sensed, calibrated amplified ADC, A
   double Ishunt_noamp_cal;// Sensed, calibrated non-amplified ADC, A
   double Ishunt;          // Selected calibrated, shunt current, A
@@ -111,8 +110,8 @@ struct Sensors
     this->Vshunt_noamp_int = Vshunt_noamp_int;
     this->Vshunt = Vshunt;
     this->Vshunt_filt = Vshunt_filt;
-    this->Ishunt = Vshunt * SHUNT_NOAMP_V2A_S + double(SHUNT_NOAMP_V2A_A) + rp.curr_bias_noamp;
-    this->Ishunt_filt = Vshunt_filt * SHUNT_NOAMP_V2A_S + SHUNT_NOAMP_V2A_A + rp.curr_bias_noamp;
+    this->Ishunt = Vshunt * shunt_noamp_v2a_s + rp.curr_bias_noamp;
+    this->Ishunt_filt = Vshunt_filt * shunt_noamp_v2a_s + rp.curr_bias_noamp;
     this->Wshunt = Vshunt * Ishunt;
     this->Wcharge = Vshunt * Ishunt;
     this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
@@ -133,7 +132,7 @@ struct Sensors
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);
 void load(const bool reset_free, Sensors *Sen, Pins *myPins,
-    Adafruit_ADS1015 *ads, Adafruit_ADS1015 *ads_amp, const unsigned long now,
+    Adafruit_ADS1015 *ads_amp, Adafruit_ADS1015 *ads_noamp, const unsigned long now,
     SlidingDeadband *SdVbatt);
 void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt);
 void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs,

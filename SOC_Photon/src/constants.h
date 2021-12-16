@@ -67,13 +67,9 @@
 #define VBATT_A               0.0       // Vbatt sense adder, V (0)
 #define PHOTON_ADC_COUNT      4096      // Photon ADC range, counts (4096)
 #define PHOTON_ADC_VOLT       3.3       // Photon ADC range, V (3.3)
+#define SHUNT_NOAMP_V2A_S     -1189.3   // Shunt V2A scalar, A/V (1333 is 100A/0.075V)  (-1189.3)
 #define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms
 #define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms
-#define SHUNT_NOAMP_V2A_S     -1189.3   // Shunt V2A scalar, A/V (1333 is 100A/0.075V)  (-1189.3)
-#define SHUNT_NOAMP_V2A_A     0         // Shunt V2A adder, A derived from charge-discharge integral match (0 in theory)  (0)
-                                        // observed on prototype over time that 0 V really is 0 A.   Not much bias in ADS devices
-#define SHUNT_AMP_V2A_S       (SHUNT_NOAMP_V2A_S*2.*SHUNT_AMP_R1/SHUNT_AMP_R2)   // Shunt amp V2A scalar
-#define SHUNT_AMP_V2A_A       0         // Shunt amp V2A adder, A derived from charge-discharge integral match (0 in theory)  (0)
 #define SCREEN_WIDTH          128       // OLED display width, in pixels (128)
 #define SCREEN_HEIGHT         32        // OLED display height, in pixels (4)
 #define OLED_RESET            4         // Reset pin # (or -1 if sharing Arduino reset pin) (4)
@@ -97,6 +93,10 @@
 #define SOLVE_MAX_ERR    1e-6        // Solver error tolerance, V (1e-6)
 #define SOLVE_MAX_COUNTS 10          // Solver maximum number of steps (10)
 #define SOLVE_MAX_STEP   0.2         // Solver maximum step size, frac soc
+
+// Conversion gains
+const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  
+const double shunt_amp_v2a_s = shunt_noamp_v2a_s * SHUNT_AMP_R1/SHUNT_AMP_R2; // Shunt amp V2A scalar
 
 const uint32_t pwm_frequency = 60;  // Photon pwm driver frequency, Hz. (60 Hz is the real stuff that an inverter sends our way)
 // I confirmed using o-scope that this 60 Hz works as a pwm value on the Photon.

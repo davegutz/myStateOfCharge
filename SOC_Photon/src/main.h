@@ -87,8 +87,8 @@ int num_timeouts = 0;            // Number of Particle.connect() needed to unfre
 String hm_string = "00:00";      // time, hh:mm
 double control_time = 0.0;      // Decimal time, seconds since 1/1/2021
 Pins *myPins;                   // Photon hardware pin mapping used
-Adafruit_ADS1015 *ads;          // Use this for the 12-bit version; 1115 for 16-bit
 Adafruit_ADS1015 *ads_amp;      // Use this for the 12-bit version; 1115 for 16-bit; amplified; different address
+Adafruit_ADS1015 *ads_noamp;    // Use this for the 12-bit version; 1115 for 16-bit; non-amplified
 Adafruit_SSD1306 *display;
 bool bare_ads_noamp = false;          // If ADS to be ignored
 bool bare_ads_amp = false;      // If ADS to be ignored
@@ -123,21 +123,23 @@ void setup()
   Wire.begin();
 
   // AD
+  // Amped
   Serial.println("Initializing SHUNT MONITORS");
-  ads = new Adafruit_ADS1015;
-  ads->setGain(GAIN_SIXTEEN, GAIN_SIXTEEN);    // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
-  if (!ads->begin()) {
-    Serial.println("FAILED to initialize ADS SHUNT MONITOR.");
-    bare_ads_noamp = true;
-  }
   ads_amp = new Adafruit_ADS1015;
-  ads_amp->setGain(GAIN_EIGHT, GAIN_TWO);    // First argument is differential, second is single-ended.   8 was used by
-  // Texas Instruments in their example implementation.   16 was used by another Particle user in their non-amplified
-  // implementation.   This all works out ok, I believe, because this is only software gain and also there is a factor of 
-  // 2 added to the calculation of SHUNT_AMP_V2A_S in constants.h.
+  ads_amp->setGain(GAIN_EIGHT, GAIN_TWO);    // First argument is differential, second is single-ended.
+  // 8 was used by Texas Instruments in their example implementation.   16 was used by another
+  // Particle user in their non-amplified implementation.
+  // TODO:  why 8 scaled by R/R gives same result as 16 for ads_noamp?
   if (!ads_amp->begin((0x49))) {
     Serial.println("FAILED to initialize ADS AMPLIFIED SHUNT MONITOR.");
     bare_ads_amp = true;
+  }
+  // Non-amped
+  ads_noamp = new Adafruit_ADS1015;
+  ads_noamp->setGain(GAIN_SIXTEEN, GAIN_SIXTEEN); // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+  if (!ads_noamp->begin()) {
+    Serial.println("FAILED to initialize ADS SHUNT MONITOR.");
+    bare_ads_noamp = true;
   }
   Serial.println("SHUNT MONITORS initialized");
   
@@ -314,7 +316,7 @@ void loop()
     if ( rp.debug>2 || rp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", Sen->T, millis());
 
     // Load and filter
-    load(reset_free, Sen, myPins, ads, ads_amp, ReadSensors->now(), SdVbatt);
+    load(reset_free, Sen, myPins, ads_amp, ads_noamp, ReadSensors->now(), SdVbatt);
     Tbatt_filt_C = (Sen->Tbatt_filt-32.)*5./9.;
 
     // Arduino plots

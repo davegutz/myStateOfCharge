@@ -147,7 +147,7 @@ void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt)
 
 // Load all others
 void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
-    Adafruit_ADS1015 *ads_noamp, Adafruit_ADS1015 *ads_amp, const unsigned long now,
+    Adafruit_ADS1015 *ads_amp, Adafruit_ADS1015 *ads_noamp, const unsigned long now,
     SlidingDeadband *SdVbatt)
 {
   static unsigned long int past = now;
@@ -213,7 +213,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   else
     Sen->Vshunt_amp_int = 0;
   Sen->Vshunt_amp = ads_amp->computeVolts(Sen->Vshunt_amp_int);
-  Sen->Ishunt_amp_cal = Sen->Vshunt_amp*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + Sen->curr_bias_amp;
+  Sen->Ishunt_amp_cal = Sen->Vshunt_amp*shunt_amp_v2a_s + Sen->curr_bias_amp;
   // No amp
   int16_t vshunt_noamp_int_0 = 0;
   int16_t vshunt_noamp_int_1 = 0;
@@ -225,13 +225,13 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   else
     Sen->Vshunt_noamp_int = 0;
   Sen->Vshunt_noamp = ads_noamp->computeVolts(Sen->Vshunt_noamp_int);
-  Sen->Ishunt_noamp_cal = Sen->Vshunt_noamp*SHUNT_NOAMP_V2A_S + SHUNT_NOAMP_V2A_A + Sen->curr_bias_noamp;
+  Sen->Ishunt_noamp_cal = Sen->Vshunt_noamp*shunt_noamp_v2a_s + Sen->curr_bias_noamp;
 
   // Print results
-  if ( rp.debug==-14 ) Serial.printf("reset_free,select,   vshunt_noamp_int,0_noampm_int,1_noamp_int,ishunt_noamp, ||, vshunt_amp_int,0_amp_int,1_amp_int,ishunt_amp_cal,  Ishunt_filt,Ishunt_filt_obs,T, %d,%d,%d,%d,%d,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f\n",
+  if ( rp.debug==-14 ) Serial.printf("reset_free,select,   vs_na_int,0_na_int,1_na_int,vshunt_na,ishunt_na, ||, vshunt_a_int,0_a_int,1_a_int,vshunt_a,ishunt_a,  Ishunt_filt,Ishunt_filt_obs,T, %d,%d,%d,%d,%d,%7.3f,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
     reset_free, rp.curr_sel_amp,
-    Sen->Vshunt_noamp_int, vshunt_noamp_int_0, vshunt_noamp_int_1, Sen->Ishunt_noamp_cal,
-    Sen->Vshunt_amp_int, vshunt_amp_int_0, vshunt_amp_int_1, Sen->Ishunt_amp_cal,
+    Sen->Vshunt_noamp_int, vshunt_noamp_int_0, vshunt_noamp_int_1, Sen->Vshunt_noamp, Sen->Ishunt_noamp_cal,
+    Sen->Vshunt_amp_int, vshunt_amp_int_0, vshunt_amp_int_1, Sen->Vshunt_amp, Sen->Ishunt_amp_cal,
     Sen->Ishunt_filt, Sen->Ishunt_filt_obs,
     T);
 
@@ -242,24 +242,21 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
     Sen->Vshunt = Sen->Vshunt_amp;
     Sen->Ishunt = Sen->Ishunt_amp_cal;
     Sen->curr_bias = Sen->curr_bias_amp;
-    Sen->shunt_v2a_s = SHUNT_AMP_V2A_S;
-    Sen->shunt_v2a_a = SHUNT_AMP_V2A_A;
+    Sen->shunt_v2a_s = shunt_amp_v2a_s;
   }
   else if ( !Sen->bare_ads_noamp )
   {
     Sen->Vshunt = Sen->Vshunt_noamp;
     Sen->Ishunt = Sen->Ishunt_noamp_cal;
     Sen->curr_bias = Sen->curr_bias_noamp;
-    Sen->shunt_v2a_s = SHUNT_NOAMP_V2A_S;
-    Sen->shunt_v2a_a = SHUNT_NOAMP_V2A_A;
+    Sen->shunt_v2a_s = shunt_noamp_v2a_s;
   }
   else
   {
     Sen->Vshunt = 0.;
     Sen->Ishunt = 0.;
     Sen->curr_bias = 0.;
-    Sen->shunt_v2a_s = SHUNT_AMP_V2A_S; // amp preferred, default to that
-    Sen->shunt_v2a_a = SHUNT_AMP_V2A_A; // amp preferred, default to that
+    Sen->shunt_v2a_s = shunt_amp_v2a_s; // amp preferred, default to that
   }
 
 
@@ -280,7 +277,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
     }
     elapsed_loc = double(now - cp.vec_start)/1000./60.;
     Sen->Ishunt =  I_T1->interp(elapsed_loc);
-    Sen->Vshunt = (Sen->Ishunt - Sen->shunt_v2a_a - Sen->curr_bias) / Sen->shunt_v2a_s;
+    Sen->Vshunt = (Sen->Ishunt - Sen->curr_bias) / Sen->shunt_v2a_s;
     Sen->Tbatt =  T_T1->interp(elapsed_loc);
     Sen->Vbatt =  V_T1->interp(elapsed_loc) + Sen->Ishunt*(batt_r1 + batt_r2)*double(batt_num_cells);
   }
@@ -313,8 +310,8 @@ void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs,
   Sen->Vshunt_filt = VshuntSenseFilt->calculate( Sen->Vshunt, reset_loc, min(Sen->T_filt, F_MAX_T));
   Sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( Sen->Vshunt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
   if ( rp.curr_sel_amp )
-  Sen->Ishunt_filt = Sen->Vshunt_filt*Sen->shunt_v2a_s + Sen->shunt_v2a_a + Sen->curr_bias;
-  Sen->Ishunt_filt_obs = Sen->Vshunt_filt_obs*Sen->shunt_v2a_s + Sen->shunt_v2a_a + Sen->curr_bias;
+  Sen->Ishunt_filt = Sen->Vshunt_filt*Sen->shunt_v2a_s + Sen->curr_bias;
+  Sen->Ishunt_filt_obs = Sen->Vshunt_filt_obs*Sen->shunt_v2a_s + Sen->curr_bias;
   
   // Voltage
   if ( rp.modeling )
