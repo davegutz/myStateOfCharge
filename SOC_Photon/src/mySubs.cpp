@@ -312,13 +312,9 @@ void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs,
   
   // Voltage
   if ( rp.modeling )
-  {
     Sen->Vbatt_filt_obs = Sen->Vbatt_model;
-  }
   else
-  {
     Sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate(Sen->Vbatt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
-  }
 
 }
 
@@ -462,7 +458,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         switch ( rp.debug )
         {
           case ( -1 ):
-            Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt_amp  ,Ishunt_noamp  ,Vbat_fo*10-110  ,voc_s*10-110  ,vdyn_s*10  ,v_s*10-110  ,,,,,,,,,,,,\n");
+            Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt_amp  ,Ishunt_noamp  ,Vbat_fo*10-110  ,voc_s*10-110  ,vdyn_s*10  ,v_s*10-110  , voc_dyn*10-110,,,,,,,,,,,\n");
             break;
           default:
             Serial.printf("Legend for rp.debug= %d not defined.   Edit mySubs.cpp, search for 'case ( 'l' )' and add it\n", rp.debug);

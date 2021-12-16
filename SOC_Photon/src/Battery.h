@@ -54,10 +54,12 @@ public:
   double socs() { return (socs_); };
   double socu() { return (socu_); };
   double soc_avail() { return (soc_avail_); };
+  double soc_ekf() { return (soc_ekf_); };
   double voc() { return (voc_); };
   double voc_dyn() { return (voc_dyn_); };
   double vdyn() { return (vdyn_); };
-  double v() { return (v_); };
+  double vb() { return (vb_); };
+  double ib() { return (ib_); };
   double tcharge() { return (tcharge_); };
   double dv_dsocs() { return (dv_dsocs_); };
   double dv_dsocu() { return (dv_dsocu_); };
@@ -65,6 +67,8 @@ public:
   double Sr() { return (sr_); };
   boolean sat() { return (sat_); };
   boolean sat(const double v, const double i) { return (v-i*(r1_+r2_)*num_cells_>= vsat_); };
+  double K_ekf() { return (K_); };
+  double y_ekf() { return (y_); };
 protected:
   TableInterp1Dclip *B_T_;  // Battery coeff
   TableInterp1Dclip *A_T_;  // Battery coeff
@@ -83,8 +87,8 @@ protected:
   double c2_;       // Randels capacitance, Farads per cell
   double voc_;      // Static model open circuit voltage, V
   double vdyn_;     // Model current induced back emf, V
-  double v_;        // Total model voltage, V
-  double curr_in_;  // Current into battery, A
+  double vb_;        // Total model voltage, V
+  double ib_;  // Current into battery, A
   int num_cells_;   // Number of cells
   double dv_dsocs_;  // Derivative scaled, V/fraction
   double dv_dsocu_;  // Derivative unscaled, V/fraction
@@ -106,11 +110,13 @@ protected:
   double tau_sd_;   // Time constant of ideal battery capacitor model, input current A, output volts=soc (0-1)
   double r_sd_;     // Trickle discharge of ideal battery capacitor model, ohms
   // EKF declarations
-  StateSpace *Randles_;  // Randles model
+  StateSpace *Randles_;   // Randles model {ib, vb} --> {voc}, ioc=ib
+  StateSpace *RandlesInv_;// Randles model {ib, voc} --> {vb}, ioc=ib
   double *rand_A_;
   double *rand_B_;
   double *rand_C_;
   double *rand_D_;
+  double *rand_Dinv_;
   int8_t rand_n_, rand_p_, rand_q_;  // TODO:   don't need these
   double temp_c_;   // Battery temperature, C
   double soc_ekf_;  // Filtered state of charge from ekf (0-1)

@@ -36,13 +36,13 @@ extern RetainedPars rp; // Various parameters to be static at system level
 // constructors
 Battery::Battery()
     : b_(0), a_(0), c_(0), m_(0), n_(0), d_(0), nz_(1), socs_(1.0), socu_(1.0), r1_(0), r2_(0), c2_(0), voc_(0),
-    vdyn_(0), v_(0), curr_in_(0), num_cells_(4), dv_dsocs_(0), dv_dsocu_(0), tcharge_(24), pow_in_(0.0), sr_(1), vsat_(13.7),
+    vdyn_(0), vb_(0), ib_(0), num_cells_(4), dv_dsocs_(0), dv_dsocu_(0), tcharge_(24), pow_in_(0.0), sr_(1), vsat_(13.7),
     sat_(false), dv_(0), dvoc_dt_(0) {Q_ = 0.; R_ = 0.;}
 Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt)
     : b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(nz), socs_(1.0), socu_(1.0), r1_(r1), r2_(r2), c2_(r2c2/r2_),
-    voc_(0), vdyn_(0), v_(0), curr_in_(0), num_cells_(num_cells), dv_dsocs_(0), dv_dsocu_(0), tcharge_(24.), pow_in_(0.0),
+    voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsocs_(0), dv_dsocu_(0), tcharge_(24.), pow_in_(0.0),
     sr_(1.), nom_vsat_(batt_vsat), sat_(false), dv_(0), dvoc_dt_(dvoc_dt),
     r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
     tau_sd_(1.8e7), r_sd_(70.), dQdT_(0.01)
@@ -84,7 +84,11 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
     rand_D_ = new double [rand_q_*rand_p_];
     rand_D_[0] = -r0_;
     rand_D_[1] = 1.;
+    rand_Dinv_ = new double [rand_q_*rand_p_];
+    rand_Dinv_[0] = r0_;
+    rand_Dinv_[1] = 1.;
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n_, rand_p_, rand_q_);
+    RandlesInv_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_Dinv_, rand_n_, rand_p_, rand_q_);
 
 }
 Battery::~Battery() {}
@@ -126,7 +130,7 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
     socu_ = socu_frac;
     socs_ = 1-(1-socu_)*cu_bb/cs_bb;
     double socs_lim = max(min(socs_, mxeps_bb), mneps_bb);
-    curr_in_ = curr_in;
+    ib_ = curr_in;
 
     // VOC-OCV model
     double log_socs, exp_n_socs, pow_log_socs;
@@ -137,12 +141,12 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
     dv_dsocu_ = dv_dsocs_ * cu_bb / cs_bb;
 
     // Dynamic emf  TODO:   aren't these the same?
-    if ( curr_in_ < 0. ) vdyn_ = double(num_cells_) * curr_in*(r1_ + r2_)*sr_;
-    else vdyn_ = double(num_cells_) * curr_in*(r1_ + r2_)*sr_;
+    if ( ib_ < 0. ) vdyn_ = double(num_cells_) * ib_*(r1_ + r2_)*sr_;
+    else vdyn_ = double(num_cells_) * ib_*(r1_ + r2_)*sr_;
 
     // Summarize   TODO: get rid of the global defines here because they differ from one battery to another
-    v_ = voc_ + vdyn_;
-    pow_in_ = v_*curr_in_ - curr_in_*curr_in_*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
+    vb_ = voc_ + vdyn_;
+    pow_in_ = vb_*ib_ - ib_*ib_*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
     if ( pow_in_>1. )  tcharge_ = min(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * (1.-socs_lim), 24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
     else if ( pow_in_<-1. ) tcharge_ = max(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * socs_lim, -24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
     else if ( pow_in_>=0. ) tcharge_ = 24.*(1.-socs_lim);
@@ -151,12 +155,12 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
     sat_ = voc_ >= vsat_;
 
     if ( rp.debug==-8 ) Serial.printf("calculate:  SOCU_in,v,curr,pow,tcharge,vsat,voc,sat= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
-      socu_frac, v_, curr_in_, pow_in_, tcharge_, vsat_, voc_, sat_);
+      socu_frac, vb_, ib_, pow_in_, tcharge_, vsat_, voc_, sat_);
 
     if ( rp.debug==-9 )Serial.printf("calculate:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-     temp_C, temp_C*9./5.+32., curr_in_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_,v_);
+     temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_,vb_);
 
-    return ( v_ );
+    return ( vb_ );
 }
 
 // SOC-OCV curve fit method per Zhang, et al modified by ekf
@@ -170,6 +174,8 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     calc_soc_voc_coeff(soc_ekf_, temp_c_, &b, &a, &c, &log_soc, &exp_n_soc, &pow_log_soc);
 
     // Dynamic emf
+    vb_ = vb;
+    ib_ = ib;
     double u[2] = {ib, vb};
     Randles_->calc_x_dot(u);
     Randles_->update(dt);
@@ -187,6 +193,12 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     {
         Serial.printf("dt,ib,vb,voc_dyn,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, soc_avail= %7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,\n",
             dt, ib, vb, voc_dyn_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, soc_avail_);
+    }
+    if ( rp.debug==-37 )
+    {
+        Serial.printf("ib,vb*10-110,voc_dyn(z_)*10-110,  K_,y_,SOC_ekf-90, SOC_avail-90\n");
+        Serial.printf("%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f, %7.4f,\n",
+            ib, vb*10-110, voc_dyn_*10-110,     K_, y_, soc_ekf_*100-90, soc_avail_*100-90);
     }
 
     // Summarize
@@ -211,7 +223,7 @@ double Battery::calculate_model(const double temp_C, const double socu_frac, con
     socu_ = socu_frac;
     socs_ = 1-(1-socu_)*cu_bb/cs_bb;
     double socs_lim = max(min(socs_, mxeps_bb), mneps_bb);
-    curr_in_ = curr_in;
+    ib_ = curr_in;
 
     // VOC-OCV model
     double log_socs, exp_n_socs, pow_log_socs;
@@ -221,13 +233,16 @@ double Battery::calculate_model(const double temp_C, const double socu_frac, con
     voc_ +=  dv_;  // Experimentally varied
     // dv_dsocu_ = dv_dsocs_ * cu_bb / cs_bb;
 
-    // Dynamic emf  TODO:   aren't these the same?
-    if ( curr_in_ < 0. ) vdyn_ = double(num_cells_) * curr_in*(r1_ + r2_)*sr_;
-    else vdyn_ = double(num_cells_) * curr_in*(r1_ + r2_)*sr_;
+    // Dynamic emf
+    // vdyn_ = double(num_cells_) * ib_*(r1_ + r2_)*sr_;
+    double u[2] = {ib_, voc_};
+    RandlesInv_->calc_x_dot(u);
+    RandlesInv_->update(dt);
+    vb_ = max(RandlesInv_->y(0), 5.);
+
 
     // Summarize   TODO: get rid of the global defines here because they differ from one battery to another
-    v_ = max(voc_ + vdyn_, 5.);
-    pow_in_ = v_*curr_in_ - curr_in_*curr_in_*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
+    pow_in_ = vb_*ib_ - ib_*ib_*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
     // if ( pow_in_>1. )  tcharge_ = min(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * (1.-socs_lim), 24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
     // else if ( pow_in_<-1. ) tcharge_ = max(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * socs_lim, -24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
     // else if ( pow_in_>=0. ) tcharge_ = 24.*(1.-socs_lim);
@@ -236,12 +251,12 @@ double Battery::calculate_model(const double temp_C, const double socu_frac, con
     // sat_ = voc_ >= vsat_;
 
     if ( rp.debug==-38 ) Serial.printf("calculate_ model:  SOCU_in,v,curr,pow,vsat,voc= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
-      socu_frac, v_, curr_in_, pow_in_, vsat_, voc_);
+      socu_frac, vb_, ib_, pow_in_, vsat_, voc_);
 
     if ( rp.debug==-39 )Serial.printf("calculate_model:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-     temp_C, temp_C*9./5.+32., curr_in_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_,v_);
+     temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_,vb_);
 
-    return ( v_ );
+    return ( vb_ );
 }
 
 /* Count coulombs base on true=actual capacity  TODO:  move to main

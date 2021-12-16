@@ -355,11 +355,12 @@ void loop()
       rp.socu_model = rp.socu_free;
     }
 
-    Sen->Vbatt_model = MyBattModel->calculate_model(Tbatt_filt_C, rp.socu_model, Sen->Ishunt_filt_obs, min(Sen->T, 0.5));
+    // Sen->Vbatt_model = MyBattModel->calculate_model(Tbatt_filt_C, rp.socu_model, Sen->Ishunt_filt_obs, min(Sen->T, 0.5));
+    Sen->Vbatt_model = MyBattModel->calculate_model(Tbatt_filt_C, rp.socu_model, Sen->Ishunt, min(Sen->T, 0.5));
 
     // EKF
     MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5), saturated);  // TODO:  hardcoded time of 0.5 into constants
-    
+
     // Coulomb Count integrator
     rp.socu_free = max(min( rp.socu_free + Sen->Wshunt/NOM_SYS_VOLT*Sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
     rp.socu_model = max(min( rp.socu_model + Sen->Wshunt/NOM_SYS_VOLT*Sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
@@ -371,10 +372,20 @@ void loop()
     }
     // Useful for Arduino plotting
     if ( rp.debug==-1 )
-      Serial.printf("%7.3f,%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,\n",
+      Serial.printf("%7.3f,%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
         socu_solved*100-90, MyBattFree->soc_avail()*100-90,
         Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
-        Sen->Vbatt_filt_obs*10-110, MyBattSolved->voc()*10-110, MyBattSolved->vdyn()*10, MyBattSolved->v()*10-110);
+        Sen->Vbatt_filt_obs*10-110, MyBattSolved->voc()*10-110, MyBattSolved->vdyn()*10, MyBattSolved->vb()*10-110, MyBattFree->vdyn()*10-110);
+    if ( rp.debug==-12 )
+    {
+      Serial.printf("ib_free,ib_mod,   vb_free*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_mod*10-110,   K, y,    SOC_avail-90, SOC_ekf-90, SOC_mod-90\n");
+      Serial.printf("%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
+        MyBattFree->ib(), MyBattModel->ib(),
+        MyBattFree->vb()*10-110, MyBattModel->vb()*10-110,
+        MyBattFree->voc_dyn()*10-110, MyBattModel->voc()*10-110,
+        MyBattFree->K_ekf(), MyBattFree->y_ekf(),
+        MyBattFree->soc_avail()*100-90, MyBattFree->soc_ekf()*100-90, MyBattModel->socs()*100-90);
+    }
     if ( rp.debug==-3 )
       Serial.printf("fast,et,reset_free,Wshunt,soc_f,T, %12.3f,%7.3f, %d, %7.3f,%7.3f,%7.3f,\n",
       control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, rp.socu_free, Sen->T_filt);
@@ -396,17 +407,21 @@ void loop()
     MyBattFree->calculate(Tbatt_filt_C, rp.socu_free, Sen->Ishunt,  min(Sen->T_filt, F_MAX_T));
 
     // Solver
-    double vbatt_f_o = Sen->Vbatt_filt_obs + double(cp.stepping*cp.step_val);
+    // double vbatt_f_o = Sen->Vbatt_filt_obs + double(cp.stepping*cp.step_val);
+    double voc = MyBattFree->voc_dyn() + double(cp.stepping*cp.step_val);
     int8_t count = 0;
     Sen->Vbatt_solved = MyBattSolved->calculate(Tbatt_filt_C, socu_solved, Sen->Ishunt_filt_obs, Sen->T_filt);
-    double err = vbatt_f_o - Sen->Vbatt_solved;
+    // double err = vbatt_f_o - Sen->Vbatt_solved;
+    double err = voc - Sen->Vbatt_solved;
     while( fabs(err)>SOLVE_MAX_ERR && count++<SOLVE_MAX_COUNTS )
     {
       socu_solved = max(min(socu_solved + max(min( err/MyBattSolved->dv_dsocu(), SOLVE_MAX_STEP), -SOLVE_MAX_STEP), mxepu_bb), mnepu_bb);
       Sen->Vbatt_solved = MyBattSolved->calculate(Tbatt_filt_C, socu_solved, Sen->Ishunt_filt_obs, Sen->T_filt);
-      err = vbatt_f_o - Sen->Vbatt_solved;
+      // err = vbatt_f_o - Sen->Vbatt_solved;
+      err = voc - Sen->Vbatt_solved;
       if ( rp.debug==-5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,socu_s,vbatt_f_o,Vbatt_m_s,err,dv_dsocu, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-          Sen->Tbatt_filt, Sen->Ishunt_filt_obs, count, socu_solved, vbatt_f_o, Sen->Vbatt_solved, err, MyBattSolved->dv_dsocu());
+          // Sen->Tbatt_filt, Sen->Ishunt_filt_obs, count, socu_solved, vbatt_f_o, Sen->Vbatt_solved, err, MyBattSolved->dv_dsocu());
+          Sen->Tbatt_filt, Sen->Ishunt_filt_obs, count, socu_solved, voc, Sen->Vbatt_solved, err, MyBattSolved->dv_dsocu());
     }
     // boolean solver_valid = count<SOLVE_MAX_COUNTS; 
     if ( rp.debug==-35 ) Serial.printf("soc_avail,socu_solved,Vbatt_solved, soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f, %7.3f, %7.3f\n",
