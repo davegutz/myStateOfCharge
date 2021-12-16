@@ -27,10 +27,11 @@
 #include "myCloud.h"
 
 // Definition of structure for external control coordination
+// Default values below are important:  they determine behavior
+// after a reset.   Also prevent junk behavior on initial build.
 struct CommandPars
 {
   char buffer[256];         // Auxiliary print buffer
-  int8_t debug;             // Level of debug printing (2)
   Publish pubList;          // Publish object
   String input_string;      // a string to hold incoming data
   boolean string_complete;  // whether the string is complete
@@ -42,6 +43,13 @@ struct CommandPars
   boolean enable_wifi;      // Enable wifi
   CommandPars(void)
   {
+    this->string_complete = false;
+    this->stepping = false;
+    this->step_val = 0.;
+    this->vectoring = false;
+    this->vec_num = 0;
+    this->vec_start = 0;
+    this->enable_wifi = false;
     this->pubList = Publish();
   }
 };            

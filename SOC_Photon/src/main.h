@@ -60,7 +60,7 @@ Make it yourself.   It should look like this, with your personal authorizations:
 #endif
 */
 
-// Dependent includes.   Easier to cp.debug code if remove unused include files
+// Dependent includes.   Easier to rp.debug code if remove unused include files
 #include "mySync.h"
 #include "mySubs.h"
 #include "Blynk/blynk.h"              // Only place this can appear is top level main.h
@@ -77,7 +77,7 @@ extern RetainedPars rp;           // Various parameters to be static at system l
 const int nsum = 125;           // Number of summary strings, 17 Bytes per isum
 retained int isum = -1;         // Summary location.   Begins at -1 because first action is to increment isum
 retained Sum_st mySum[nsum];    // Summaries
-retained CommandPars cp;        // Various control parameters commanding at system level
+retained CommandPars cp = CommandPars();        // Various control parameters commanding at system level
 retained RetainedPars rp;       // Various control parameters static at system level
 unsigned long millis_flip = millis(); // Timekeeping
 unsigned long last_sync = millis();   // Timekeeping
@@ -164,7 +164,7 @@ void setup()
   myWifi->last_disconnect = now;
   WiFi.off();
   myWifi->connected = false;
-  if ( cp.debug > 2 ) Serial.printf("wifi disconnect...");
+  if ( rp.debug > 2 ) Serial.printf("wifi disconnect...");
   Serial.printf("Setting up blynk...");
   blynk_timer_1.setInterval(PUBLISH_BLYNK_DELAY, publish1);
   blynk_timer_2.setTimeout(1*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_2.setInterval(PUBLISH_BLYNK_DELAY, publish2);});
@@ -179,9 +179,9 @@ void setup()
   Serial.printf("done CLOUD\n");
 
   #ifdef PHOTON
-    if ( cp.debug>1 ) { sprintf(cp.buffer, "Particle Photon\n"); Serial.print(cp.buffer); } //Serial1.print(buffer); }
+    if ( rp.debug>1 ) { sprintf(cp.buffer, "Particle Photon\n"); Serial.print(cp.buffer); } //Serial1.print(buffer); }
   #else
-    if ( cp.debug>1 ) { sprintf(cp.buffer, "Arduino Mega2560\n"); Serial.print(cp.buffer); } //Serial1.print(buffer); }
+    if ( rp.debug>1 ) { sprintf(cp.buffer, "Arduino Mega2560\n"); Serial.print(cp.buffer); } //Serial1.print(buffer); }
   #endif
 
   // Determine millis() at turn of Time.now
@@ -194,12 +194,12 @@ void setup()
 
   // Summary
   System.enableFeature(FEATURE_RETAINED_MEMORY);
-  if ( cp.debug!=-1 )    // messes up Arduino plots if print summary after init
+  if ( rp.debug!=-1 )    // messes up Arduino plots if print summary after init
     print_all(mySum, isum, nsum);
 
-  // Header for cp.debug print
-  if ( cp.debug>1 ) print_serial_header();
-  if ( cp.debug>3 ) { Serial.print(F("End setup cp.debug message=")); Serial.println(F(", ")); };
+  // Header for rp.debug print
+  if ( rp.debug>1 ) print_serial_header();
+  if ( rp.debug>3 ) { Serial.print(F("End setup rp.debug message=")); Serial.println(F(", ")); };
 
 } // setup
 
@@ -281,10 +281,10 @@ void loop()
   // Start Blynk, only if connected since it is blocking
   if ( Particle.connected() && !myWifi->blynk_started )
   {
-    if ( cp.debug>2 ) Serial.printf("Starting Blynk at %ld...  ", millis());
+    if ( rp.debug>2 ) Serial.printf("Starting Blynk at %ld...  ", millis());
     Blynk.begin(blynkAuth.c_str());   // blocking if no connection
     myWifi->blynk_started = true;
-    if ( cp.debug>2 ) Serial.printf("completed at %ld\n", millis());
+    if ( rp.debug>2 ) Serial.printf("completed at %ld\n", millis());
   }
   if ( myWifi->blynk_started && myWifi->connected && !cp.vectoring )
   {
@@ -300,7 +300,7 @@ void loop()
   if ( read_temp )
   {
     Sen->T_temp =  ReadTemp->updateTime();
-    if ( cp.debug>2 ) Serial.printf("Read temp update=%7.3f and performing load_temp() at %ld...  ", Sen->T_temp, millis());
+    if ( rp.debug>2 ) Serial.printf("Read temp update=%7.3f and performing load_temp() at %ld...  ", Sen->T_temp, millis());
 
     // Load and filter temperature only
     load_temp(Sen, SensorTbatt, SdTbatt);
@@ -313,14 +313,14 @@ void loop()
   if ( read )
   {
     Sen->T =  ReadSensors->updateTime();
-    if ( cp.debug>2 || cp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", Sen->T, millis());
+    if ( rp.debug>2 || rp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", Sen->T, millis());
 
     // Load and filter
     load(reset_free, Sen, myPins, ads, ads_amp, ReadSensors->now(), SdIshunt, SdIshunt_amp, SdVbatt);
     Tbatt_filt_C = (Sen->Tbatt_filt-32.)*5./9.;
 
     // Arduino plots
-    if ( cp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n", socu_solved, Sen->Ishunt_amp, Sen->Ishunt,
+    if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n", socu_solved, Sen->Ishunt_amp, Sen->Ishunt,
         Sen->Vbatt, MyBattSolved->voc());
 
     // Initialize SOC Free Integrator - Coulomb Counting method
@@ -372,11 +372,11 @@ void loop()
       // rp.socu_model = rp.socu_free;   // Let saturation subside
     }
     // Useful for Arduino plotting
-    if ( cp.debug==-1 )
+    if ( rp.debug==-1 )
       Serial.printf("%7.3f,%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,\n",
         socu_solved*100-90, MyBattFree->soc_avail()*100-90, Sen->Ishunt, Sen->Ishunt_amp, Sen->Vbatt_filt_obs*10-110,
         MyBattSolved->voc()*10-110, MyBattSolved->vdyn()*10, MyBattSolved->v()*10-110);
-    if ( cp.debug==-3 )
+    if ( rp.debug==-3 )
       Serial.printf("fast,et,reset_free,Wshunt,soc_f,T, %12.3f,%7.3f, %d, %7.3f,%7.3f,%7.3f,\n",
       control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, rp.socu_free, Sen->T_filt);
 
@@ -387,7 +387,7 @@ void loop()
   if ( filt )
   {
     Sen->T_filt =  FilterSync->updateTime();
-    if ( cp.debug>2 ) Serial.printf("Filter update=%7.3f and performing load() at %ld...  ", Sen->T_filt, millis());
+    if ( rp.debug>2 ) Serial.printf("Filter update=%7.3f and performing load() at %ld...  ", Sen->T_filt, millis());
 
     // Filter
     filter(reset, Sen, VbattSenseFiltObs, VshuntSenseFiltObs,  VshuntAmpSenseFiltObs,
@@ -407,22 +407,22 @@ void loop()
       socu_solved = max(min(socu_solved + max(min( err/MyBattSolved->dv_dsocu(), SOLVE_MAX_STEP), -SOLVE_MAX_STEP), mxepu_bb), mnepu_bb);
       Sen->Vbatt_solved = MyBattSolved->calculate(Tbatt_filt_C, socu_solved, Sen->Ishunt_filt_obs, Sen->T_filt);
       err = vbatt_f_o - Sen->Vbatt_solved;
-      if ( cp.debug==-5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,socu_s,vbatt_f_o,Vbatt_m_s,err,dv_dsocu, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+      if ( rp.debug==-5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,socu_s,vbatt_f_o,Vbatt_m_s,err,dv_dsocu, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
           Sen->Tbatt_filt, Sen->Ishunt_filt_obs, count, socu_solved, vbatt_f_o, Sen->Vbatt_solved, err, MyBattSolved->dv_dsocu());
     }
     // boolean solver_valid = count<SOLVE_MAX_COUNTS; 
-    if ( cp.debug==-35 ) Serial.printf("soc_avail,socu_solved,Vbatt_solved, soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f, %7.3f, %7.3f\n",
+    if ( rp.debug==-35 ) Serial.printf("soc_avail,socu_solved,Vbatt_solved, soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f, %7.3f, %7.3f\n",
         MyBattFree->soc_avail(), socu_solved, Sen->Vbatt_solved, MyBattFree->x_ekf(), MyBattFree->z_ekf());
 
-    // cp.debug print statements
+    // rp.debug print statements
     // Useful for vector testing and serial data capture
-    if ( cp.debug==-2 )
+    if ( rp.debug==-2 )
       Serial.printf("slow,et,reset_f,vect,sat,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,voc,dvdsoc,T,count,tcharge,  %12.3f, %7.3f, %d,%d,%d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
       control_time, double(elapsed)/1000., reset_free, cp.vectoring, saturated, Sen->Tbatt, Sen->Ishunt_filt_obs, Sen->Vbatt_filt_obs+double(cp.stepping*cp.step_val),
       socu_solved, rp.socu_free, Sen->Vbatt_solved, MyBattSolved->voc(), MyBattSolved->dv_dsocu(), Sen->T, count, MyBattFree->tcharge());
 
     //if ( bare ) delay(41);  // Usual I2C time
-    if ( cp.debug>2 ) Serial.printf("completed load at %ld\n", millis());
+    if ( rp.debug>2 ) Serial.printf("completed load at %ld\n", millis());
 
   }
 
@@ -431,7 +431,7 @@ void loop()
   if ( control )
   {
     pwm_write(rp.duty, myPins);
-    if ( cp.debug>2 ) Serial.printf("completed control at %ld.  rp.dutyy=%ld\n", millis(), rp.duty);
+    if ( rp.debug>2 ) Serial.printf("completed control at %ld.  rp.dutyy=%ld\n", millis(), rp.duty);
   }
 
   // Display driver
@@ -466,8 +466,8 @@ void loop()
     if ( reset_free || reset ) digitalWrite(myPins->status_led, HIGH);
     else  digitalWrite(myPins->status_led, LOW);
 
-    // Monitor for cp.debug
-    if ( cp.debug>0 && publishS )
+    // Monitor for rp.debug
+    if ( rp.debug>0 && publishS )
     {
       serial_print(PublishSerial->now(), Sen->T);
     }
@@ -479,22 +479,22 @@ void loop()
   // then can enter commands by sending strings.   End the strings with a real carriage return
   // right in the "Send String" box then press "Send."
   // String definitions are below.
-  int debug_saved = cp.debug;
+  int debug_saved = rp.debug;
   talk(&cp.stepping, &cp.step_val, &cp.vectoring, &cp.vec_num, MyBattSolved, MyBattFree, MyBattModel);
 
   // Summary management
-  if ( cp.debug==-4 )
+  if ( rp.debug==-4 )
   {
-    cp.debug = debug_saved;
+    rp.debug = debug_saved;
     print_all(mySum, isum, nsum);
   }
-  summarizing = Summarize->update(millis(), reset, !cp.vectoring) || (cp.debug==-11 && publishB);               //  now || reset && !cp.vectoring
+  summarizing = Summarize->update(millis(), reset, !cp.vectoring) || (rp.debug==-11 && publishB);               //  now || reset && !cp.vectoring
   if ( summarizing )
   {
     if ( ++isum>nsum-1 ) isum = 0;
     mySum[isum].assign(current_time, Sen->Tbatt_filt, Sen->Vbatt_filt_obs, Sen->Ishunt_filt_obs,
       socu_solved, rp.socu_free, MyBattSolved->dv_dsocu());
-    if ( cp.debug==-11 )
+    if ( rp.debug==-11 )
     {
       Serial.printf("Summm***********************\n");
       print_all(mySum, isum, nsum);

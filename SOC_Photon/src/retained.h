@@ -25,8 +25,11 @@
 #define _RETAINED_H
 
 // Definition of structure to be saved in SRAM
+// Default values below are important:  they prevent junk
+// behavior on initial build.
 struct RetainedPars
 {
+  int8_t debug = 2;         // Level of debug printing
   double curr_bias = 0;     // Calibrate current sensor, A 
   double curr_amp_bias = 0; // Calibrate amp current sensor, A 
   double socu_free = 0.5;   // Coulomb Counter state (0 - 1.5)

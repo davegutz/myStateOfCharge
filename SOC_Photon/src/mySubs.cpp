@@ -55,7 +55,7 @@ void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *milli
 
 void manage_wifi(unsigned long now, Wifi *wifi)
 {
-  if ( cp.debug > 2 )
+  if ( rp.debug > 2 )
   {
     Serial.printf("P.connected=%i, disconnect check: %ld >=? %ld, turn on check: %ld >=? %ld, confirmation check: %ld >=? %ld, connected=%i, blynk_started=%i,\n",
       Particle.connected(), now-wifi->last_disconnect, DISCONNECT_DELAY, now-wifi->lastAttempt,  CHECK_INTERVAL, now-wifi->lastAttempt, CONFIRMATION_DELAY, wifi->connected, wifi->blynk_started);
@@ -70,7 +70,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
     wifi->last_disconnect = now;
     WiFi.off();
     wifi->connected = false;
-    if ( cp.debug > 2 ) Serial.printf("wifi turned off\n");
+    if ( rp.debug > 2 ) Serial.printf("wifi turned off\n");
   }
   if ( now-wifi->lastAttempt>=CHECK_INTERVAL && cp.enable_wifi )
   {
@@ -78,12 +78,12 @@ void manage_wifi(unsigned long now, Wifi *wifi)
     wifi->lastAttempt = now;
     WiFi.on();
     Particle.connect();
-    if ( cp.debug > 2 ) Serial.printf("wifi reattempted\n");
+    if ( rp.debug > 2 ) Serial.printf("wifi reattempted\n");
   }
   if ( now-wifi->lastAttempt>=CONFIRMATION_DELAY )
   {
     wifi->connected = Particle.connected();
-    if ( cp.debug > 2 ) Serial.printf("wifi disconnect check\n");
+    if ( rp.debug > 2 ) Serial.printf("wifi disconnect check\n");
   }
   wifi->particle_connected_last = wifi->particle_connected_now;
 }
@@ -113,7 +113,7 @@ void create_print_string(char *buffer, Publish *pubList)
 void serial_print(unsigned long now, double T)
 {
   create_print_string(cp.buffer, &cp.pubList);
-  if ( cp.debug > 2 ) Serial.printf("serial_print:  ");
+  if ( rp.debug > 2 ) Serial.printf("serial_print:  ");
   Serial.println(cp.buffer);  //Serial1.println(cp.buffer);
 }
 
@@ -132,11 +132,11 @@ void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt)
   if ( count<MAX_TEMP_READS )
   {
     Sen->Tbatt = SdTbatt->update(temp);
-    if ( cp.debug>2 ) Serial.printf("Temperature read on count=%d\n", count);
+    if ( rp.debug>2 ) Serial.printf("Temperature read on count=%d\n", count);
   }
   else
   {
-    if ( cp.debug>2 ) Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value\n");
+    if ( rp.debug>2 ) Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value\n");
     // Using last-good-value:  no assignment
   }
 }
@@ -188,7 +188,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   }
   inj_bias = sin_bias + square_bias + tri_bias;
   rp.duty = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
-  if ( cp.debug==-41 )
+  if ( rp.debug==-41 )
   Serial.printf("type,amp,freq,sin,square,tri,inj,duty,tnow=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %ld,  %7.3f,\n",
             rp.type, rp.amp, rp.freq, sin_bias, square_bias, tri_bias, rp.duty, t);
 
@@ -203,7 +203,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   if (!Sen->bare_ads)
   {
     Sen->Vshunt_int = ads->readADC_Differential_0_1();
-    if ( cp.debug==-14 ){vshunt_int_0 = ads->readADC_SingleEnded(0); vshunt_int_1 = ads->readADC_SingleEnded(1);}
+    if ( rp.debug==-14 ){vshunt_int_0 = ads->readADC_SingleEnded(0); vshunt_int_1 = ads->readADC_SingleEnded(1);}
   }
   else
   {
@@ -218,7 +218,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   if (!Sen->bare_ads_amp)
   {
     Sen->Vshunt_amp_int = ads_amp->readADC_Differential_0_1();
-    if ( cp.debug==-14 ){vshunt_amp_int_0 = ads_amp->readADC_SingleEnded(0); vshunt_amp_int_1 = ads_amp->readADC_SingleEnded(1);}
+    if ( rp.debug==-14 ){vshunt_amp_int_0 = ads_amp->readADC_SingleEnded(0); vshunt_amp_int_1 = ads_amp->readADC_SingleEnded(1);}
   }
   else
   {
@@ -227,12 +227,12 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   Sen->Vshunt_amp = ads->computeVolts(Sen->Vshunt_amp_int);
   double ishunt_amp_free = Sen->Vshunt_amp*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + Sen->amp_curr_bias;
   Sen->Ishunt_amp = SdIshunt_amp->update(ishunt_amp_free, reset_free);
-  if ( cp.debug==-14 ) Serial.printf("reset_free,vshunt_int,0_int,1_int,ishunt_free,Ishunt,Ishunt_filt,Ishunt_filt_obs,||,vshunt_amp_int,0_amp_int,1_amp_int,ishunt_amp_free,Ishunt_amp,Ishunt_amp_filt,Ishunt_amp_filt_obs,T, %d,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
+  if ( rp.debug==-14 ) Serial.printf("reset_free,vshunt_int,0_int,1_int,ishunt_free,Ishunt,Ishunt_filt,Ishunt_filt_obs,||,vshunt_amp_int,0_amp_int,1_amp_int,ishunt_amp_free,Ishunt_amp,Ishunt_amp_filt,Ishunt_amp_filt_obs,T, %d,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
     reset_free,
     Sen->Vshunt_int, vshunt_int_0, vshunt_int_1, ishunt_free, Sen->Ishunt, Sen->Ishunt_filt, Sen->Ishunt_filt_obs, 
     Sen->Vshunt_amp_int, vshunt_amp_int_0, vshunt_amp_int_1, ishunt_amp_free, Sen->Ishunt_amp, Sen->Ishunt_amp_filt, Sen->Ishunt_amp_filt_obs,
     T);
-  if ( cp.debug==-16 ) Serial.printf("ishunt_free,Ishunt,Ishunt_filt,Ishunt_filt_obs,||,ishunt_amp_free,Ishunt_amp,Ishunt_amp_filt,Ishunt_amp_filt_obs,T, %7.3f,%7.3f,%7.3f,%7.3f,||,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
+  if ( rp.debug==-16 ) Serial.printf("ishunt_free,Ishunt,Ishunt_filt,Ishunt_filt_obs,||,ishunt_amp_free,Ishunt_amp,Ishunt_amp_filt,Ishunt_amp_filt_obs,T, %7.3f,%7.3f,%7.3f,%7.3f,||,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
     ishunt_free, Sen->Ishunt, Sen->Ishunt_filt, Sen->Ishunt_filt_obs, 
     ishunt_amp_free, Sen->Ishunt_amp, Sen->Ishunt_amp_filt, Sen->Ishunt_amp_filt_obs,
     T);
@@ -242,7 +242,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   double vbatt_free =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A) + rp.vbatt_bias;
   if ( rp.modeling ) Sen->Vbatt = Sen->Vbatt_model;
   else Sen->Vbatt = SdVbatt->update(vbatt_free, reset_free);
-  if ( cp.debug==-15 ) Serial.printf("reset_free,vbatt_free,vbatt, %d,%7.3f,%7.3f\n", reset_free, vbatt_free, Sen->Vbatt);
+  if ( rp.debug==-15 ) Serial.printf("reset_free,vbatt_free,vbatt, %d,%7.3f,%7.3f\n", reset_free, vbatt_free, Sen->Vbatt);
 
   // Vector model
   static double elapsed_loc = 0.;
@@ -270,7 +270,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   Sen->Wshunt_amp = Sen->Vbatt*Sen->Ishunt_amp;
   Sen->Wcharge_amp = Sen->Vbatt*Sen->Ishunt_amp - Sen->Ishunt_amp*Sen->Ishunt_amp*(batt_r1 + batt_r2)*double(batt_num_cells); 
 
-  if ( cp.debug==-6 ) Serial.printf("cp.vectoring,reset_free,cp.vec_start,now,elapsed_loc,Vbatt,Ishunt,Ishunt_amp,Tbatt:  %d,%d,%ld, %ld,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n", cp.vectoring, reset_free, cp.vec_start, now, elapsed_loc, Sen->Vbatt, Sen->Ishunt, Sen->Ishunt_amp, Sen->Tbatt);
+  if ( rp.debug==-6 ) Serial.printf("cp.vectoring,reset_free,cp.vec_start,now,elapsed_loc,Vbatt,Ishunt,Ishunt_amp,Tbatt:  %d,%d,%ld, %ld,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n", cp.vectoring, reset_free, cp.vec_start, now, elapsed_loc, Sen->Vbatt, Sen->Ishunt, Sen->Ishunt_amp, Sen->Tbatt);
 }
 
 // Filter temperature only
@@ -369,7 +369,7 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
     time_long_2_str(*current_time, tempStr);
 
     // Convert the decimal
-    if ( cp.debug>5 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
+    if ( rp.debug>5 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
     return (((( (float(year-2021)*12 + float(month))*30.4375 + float(day))*24.0 + float(hours))*60.0 + float(minutes))*60.0 + \
                         float(seconds) + float((now-millis_flip)%1000)/1000. );
 }
@@ -449,16 +449,16 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         }
         break;
       case ( 'd' ):
-        cp.debug = -4;
+        rp.debug = -4;
         break;
       case ( 'l' ):
-        switch ( cp.debug )
+        switch ( rp.debug )
         {
           case ( -1 ):
             Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt  ,Ishunt_a  ,Vbat_fo*10-110  ,voc_s*10-110  ,vdyn_s*10  ,v_s*10-110  ,,,,,,,,,,,,\n");
             break;
           default:
-            Serial.printf("Legend for cp.debug= %d not defined.   Edit mySubs.cpp, search for 'case ( 'l' )' and add it\n", cp.debug);
+            Serial.printf("Legend for rp.debug= %d not defined.   Edit mySubs.cpp, search for 'case ( 'l' )' and add it\n", rp.debug);
         }
         break;
       case ( 'm' ):
@@ -474,7 +474,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         Serial.printf("socu_model=%7.3f\n", rp.socu_model);
         break;
       case ( 'v' ):
-        cp.debug = cp.input_string.substring(1).toInt();
+        rp.debug = cp.input_string.substring(1).toInt();
         break;
       case ( 'T' ):
         talkT(&cp.stepping, &cp.step_val, &cp.vectoring, &cp.vec_num);
@@ -532,6 +532,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.freq = 0.0;
                 rp.amp = 0.0;
                 rp.offset = 0.0;
+                rp.debug = 0;
                 Serial.printf("Setting injection program to 0:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp);
                 break;
@@ -541,6 +542,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.freq = 0.05;
                 rp.amp = 18.3;
                 rp.offset = -rp.amp;
+                rp.debug = -1;
                 Serial.printf("Setting injection program to 1: rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp);
                 rp.freq *= (2. * PI);
@@ -554,6 +556,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 Serial.printf("Setting injection program to 2: rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp);
                 rp.freq *= (2. * PI);
+                rp.debug = -1;
                 break;
               case ( 3 ):
                 rp.modeling = true;
@@ -564,6 +567,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 Serial.printf("Setting injection program to 3: rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp);
                 rp.freq *= (2. * PI);
+                rp.debug = -1;
                 break;
               default:
                 Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
@@ -622,7 +626,7 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("d   dump the summary log\n"); 
   Serial.printf("m=  assign a free memory state in percent to all versions including model- '('truncated 0-100')'\n"); 
   Serial.printf("n=  assign a free memory state in percent to model only - '('truncated 0-100')'\n"); 
-  Serial.printf("v=  "); Serial.print(cp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
+  Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("D/S<?> Adjustments.   For example:\n");
   Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_amp_bias); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
   Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
@@ -730,7 +734,7 @@ String time_long_2_str(const unsigned long current_time, char *tempStr)
         uint8_t dayOfWeek = Time.weekday(current_time)-1;  // 0-6
         uint8_t minutes   = Time.minute(current_time);
         uint8_t seconds   = Time.second(current_time);
-        if ( cp.debug>5 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
+        if ( rp.debug>5 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
     #else
         // Rapid time passage simulation to test schedule functions
         uint8_t dayOfWeek = (Time.weekday(current_time)-1)*7/6;// minutes = days
