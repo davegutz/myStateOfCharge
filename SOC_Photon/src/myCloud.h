@@ -47,13 +47,10 @@ struct Publish
   int I2C_status;
   double VOC_free;
   double VOC_solved;
-  double Vbatt_filt;
   double Vbatt_filt_obs;
   double Tbatt_filt;
   double Vshunt_filt;
-  double Ishunt_filt;
   double Ishunt_filt_obs;
-  double Wshunt_filt;
   int num_timeouts;
   double socu_solved;
   double socu_free;

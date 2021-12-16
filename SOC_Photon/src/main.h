@@ -213,10 +213,7 @@ void loop()
   static General2_Pole* VbattSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, 0.4*double(NOM_SYS_VOLT), 2.0*double(NOM_SYS_VOLT));
   static General2_Pole* VshuntSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, -0.500, 0.500);
   static General2_Pole* VshuntAmpSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, -0.500, 0.500);
-  static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, 0.833*double(NOM_SYS_VOLT), 1.15*double(NOM_SYS_VOLT));
   static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -20.0, 150.);
-  static General2_Pole* VshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -0.500, 0.500);
-  static General2_Pole* VshuntAmpSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -0.500, 0.500);
 
   // 1-wire temp sensor battery temp
   static DS18* SensorTbatt = new DS18(myPins->pin_1_wire);
@@ -392,8 +389,7 @@ void loop()
     if ( rp.debug>2 ) Serial.printf("Filter update=%7.3f and performing load() at %ld...  ", Sen->T_filt, millis());
 
     // Filter
-    filter(reset, Sen, VbattSenseFiltObs, VshuntSenseFiltObs,  VshuntAmpSenseFiltObs,
-       VbattSenseFilt, VshuntSenseFilt, VshuntAmpSenseFilt);
+    filter(reset, Sen, VbattSenseFiltObs, VshuntSenseFiltObs,  VshuntAmpSenseFiltObs);
     saturated = SaturatedObj->calculate(MyBattSolved->sat(), reset);
 
     // Battery models

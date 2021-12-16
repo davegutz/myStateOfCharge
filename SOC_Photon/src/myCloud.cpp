@@ -83,7 +83,7 @@ void publish4(void)
   Blynk.virtualWrite(V17, cp.pubList.Ishunt);
   Blynk.virtualWrite(V18, cp.pubList.Ishunt_filt_obs);
   Blynk.virtualWrite(V19, cp.pubList.Wshunt);
-  Blynk.virtualWrite(V20, cp.pubList.Wshunt_filt);
+  // Blynk.virtualWrite(V20, cp.pubList.Wshunt_filt);
   Blynk.virtualWrite(V21, cp.pubList.socu_solved);
 }
 
@@ -147,7 +147,6 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->hm_string =hm_string;
   pubList->control_time = control_time;
   pubList->Vbatt = Sen->Vbatt;
-  pubList->Vbatt_filt = Sen->Vbatt_filt;
   pubList->Vbatt_filt_obs = Sen->Vbatt_filt_obs;
   pubList->Tbatt = Sen->Tbatt;
   pubList->Tbatt_filt = Sen->Tbatt_filt;
@@ -158,10 +157,8 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Ishunt_amp_cal = Sen->Ishunt_amp_cal;
   pubList->Ishunt_noamp_cal = Sen->Ishunt_noamp_cal;
   pubList->Ishunt = Sen->Ishunt;
-  pubList->Ishunt_filt = Sen->Ishunt_filt;
   pubList->Ishunt_filt_obs = Sen->Ishunt_filt_obs;
   pubList->Wshunt = Sen->Wshunt;
-  pubList->Wshunt_filt = Sen->Wshunt_filt;
   pubList->Vshunt_amp = Sen->Vshunt_amp;
   pubList->num_timeouts = num_timeouts;
   pubList->socu_solved = MyBattSolved->socu()*100.0;

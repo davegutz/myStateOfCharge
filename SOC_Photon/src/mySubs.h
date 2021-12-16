@@ -81,10 +81,8 @@ struct Sensors
   double Ishunt_amp_cal;  // Sensed, calibrated amplified ADC, A
   double Ishunt_noamp_cal;// Sensed, calibrated non-amplified ADC, A
   double Ishunt;          // Selected calibrated, shunt current, A
-  double Ishunt_filt;     // Filtered, calibrated selected sensed shunt current, A
   double Ishunt_filt_obs; // Filtered, calibrated sensed shunt current for observer, A
   double Wshunt;          // Sensed shunt power, W
-  double Wshunt_filt;     // Filtered, sensed shunt power, W
   double Wcharge;          // Charge power, W
   int I2C_status;
   double T;               // Update time, s
@@ -111,10 +109,8 @@ struct Sensors
     this->Vshunt = Vshunt;
     this->Vshunt_filt = Vshunt_filt;
     this->Ishunt = Vshunt * shunt_noamp_v2a_s + rp.curr_bias_noamp;
-    this->Ishunt_filt = Vshunt_filt * shunt_noamp_v2a_s + rp.curr_bias_noamp;
     this->Wshunt = Vshunt * Ishunt;
     this->Wcharge = Vshunt * Ishunt;
-    this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
     this->Vshunt_amp_int = Vshunt_amp_int;
     this->I2C_status = I2C_status;
     this->T = T;
@@ -136,8 +132,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
     SlidingDeadband *SdVbatt);
 void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt);
 void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs,
-  General2_Pole* VshuntSenseFiltObs,  General2_Pole* VshuntAmpSenseFiltObs, 
-  General2_Pole* VbattSenseFilt,  General2_Pole* VshuntSenseFilt,  General2_Pole* VshuntAmpSenseFilt);
+  General2_Pole* VshuntSenseFiltObs,  General2_Pole* VshuntAmpSenseFiltObs);
 void filter_temp(int reset, Sensors *Sen, General2_Pole* TbattSenseFilt);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);

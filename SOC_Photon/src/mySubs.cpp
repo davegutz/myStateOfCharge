@@ -92,20 +92,20 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,Wshunt_f,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T, SOCU_m"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T, SOCU_m"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %7.3f,%7.3f,  %7.3f,  %6.3f,%7.3f,  %c", \
+  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %7.3f,  %7.3f,  %6.3f,%7.3f,  %c", \
     pubList->unit.c_str(),
     pubList->hm_string.c_str(), pubList->control_time,
     pubList->Tbatt, pubList->Tbatt_filt,
     pubList->Vbatt, pubList->Vbatt_filt_obs,
     pubList->curr_sel_amp,
     pubList->Ishunt, pubList->Ishunt_filt_obs,
-    pubList->Wshunt, pubList->Wshunt_filt,
+    pubList->Wshunt,
     pubList->VOC_solved,
     pubList->socu_solved, pubList->Vbatt_solved,
     pubList->socu_free, pubList->tcharge,
@@ -228,11 +228,11 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   Sen->Ishunt_noamp_cal = Sen->Vshunt_noamp*shunt_noamp_v2a_s + Sen->curr_bias_noamp;
 
   // Print results
-  if ( rp.debug==-14 ) Serial.printf("reset_free,select,   vs_na_int,0_na_int,1_na_int,vshunt_na,ishunt_na, ||, vshunt_a_int,0_a_int,1_a_int,vshunt_a,ishunt_a,  Ishunt_filt,Ishunt_filt_obs,T, %d,%d,%d,%d,%d,%7.3f,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
+  if ( rp.debug==-14 ) Serial.printf("reset_free,select,   vs_na_int,0_na_int,1_na_int,vshunt_na,ishunt_na, ||, vshunt_a_int,0_a_int,1_a_int,vshunt_a,ishunt_a,  Ishunt_filt_obs,T, %d,%d,%d,%d,%d,%7.3f,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n",
     reset_free, rp.curr_sel_amp,
     Sen->Vshunt_noamp_int, vshunt_noamp_int_0, vshunt_noamp_int_1, Sen->Vshunt_noamp, Sen->Ishunt_noamp_cal,
     Sen->Vshunt_amp_int, vshunt_amp_int_0, vshunt_amp_int_1, Sen->Vshunt_amp, Sen->Ishunt_amp_cal,
-    Sen->Ishunt_filt, Sen->Ishunt_filt_obs,
+    Sen->Ishunt_filt_obs,
     T);
 
   // Current signal selection, based on if there or not.
@@ -301,32 +301,25 @@ void filter_temp(int reset, Sensors *Sen, General2_Pole* TbattSenseFilt)
 
 // Filter all other inputs
 void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs,
-  General2_Pole* VshuntSenseFiltObs,  General2_Pole* VshuntAmpSenseFiltObs, 
-  General2_Pole* VbattSenseFilt,  General2_Pole* VshuntSenseFilt,  General2_Pole* VshuntAmpSenseFilt)
+  General2_Pole* VshuntSenseFiltObs,  General2_Pole* VshuntAmpSenseFiltObs)
 {
   int reset_loc = reset || cp.vectoring;
 
   // Shunt
-  Sen->Vshunt_filt = VshuntSenseFilt->calculate( Sen->Vshunt, reset_loc, min(Sen->T_filt, F_MAX_T));
   Sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( Sen->Vshunt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
   if ( rp.curr_sel_amp )
-  Sen->Ishunt_filt = Sen->Vshunt_filt*Sen->shunt_v2a_s + Sen->curr_bias;
   Sen->Ishunt_filt_obs = Sen->Vshunt_filt_obs*Sen->shunt_v2a_s + Sen->curr_bias;
   
   // Voltage
   if ( rp.modeling )
   {
     Sen->Vbatt_filt_obs = Sen->Vbatt_model;
-    Sen->Vbatt_filt = Sen->Vbatt_model;
   }
   else
   {
     Sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate(Sen->Vbatt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
-    Sen->Vbatt_filt = VbattSenseFilt->calculate(Sen->Vbatt, reset_loc,  min(Sen->T_filt, F_MAX_T));
   }
 
-  // Power
-  Sen->Wshunt_filt = Sen->Vbatt_filt*Sen->Ishunt_filt;
 }
 
 
