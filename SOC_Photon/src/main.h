@@ -90,7 +90,7 @@ Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_ADS1015 *ads;          // Use this for the 12-bit version; 1115 for 16-bit
 Adafruit_ADS1015 *ads_amp;      // Use this for the 12-bit version; 1115 for 16-bit; amplified; different address
 Adafruit_SSD1306 *display;
-bool bare_ads = false;          // If ADS to be ignored
+bool bare_ads_noamp = false;          // If ADS to be ignored
 bool bare_ads_amp = false;      // If ADS to be ignored
 Wifi *myWifi;                   // Manage Wifi
 
@@ -128,7 +128,7 @@ void setup()
   ads->setGain(GAIN_SIXTEEN, GAIN_SIXTEEN);    // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
   if (!ads->begin()) {
     Serial.println("FAILED to initialize ADS SHUNT MONITOR.");
-    bare_ads = true;
+    bare_ads_noamp = true;
   }
   ads_amp = new Adafruit_ADS1015;
   ads_amp->setGain(GAIN_EIGHT, GAIN_TWO);    // First argument is differential, second is single-ended.   8 was used by
@@ -223,11 +223,9 @@ void loop()
   static Sensors *Sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT,
         NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
         NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
-        0, 0, 0, bare_ads, bare_ads_amp); // Manage sensor data
-  static SlidingDeadband *SdIshunt = new SlidingDeadband(HDB_ISHUNT);
+        0, 0, 0, bare_ads_noamp, bare_ads_amp); // Manage sensor data
   static SlidingDeadband *SdVbatt = new SlidingDeadband(HDB_VBATT);
   static SlidingDeadband *SdTbatt = new SlidingDeadband(HDB_TBATT);
-  static SlidingDeadband *SdIshunt_amp = new SlidingDeadband(HDB_ISHUNT_AMP);
 
   // Battery  models
   // Solved, driven by socu_s
@@ -316,11 +314,12 @@ void loop()
     if ( rp.debug>2 || rp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", Sen->T, millis());
 
     // Load and filter
-    load(reset_free, Sen, myPins, ads, ads_amp, ReadSensors->now(), SdIshunt, SdIshunt_amp, SdVbatt);
+    load(reset_free, Sen, myPins, ads, ads_amp, ReadSensors->now(), SdVbatt);
     Tbatt_filt_C = (Sen->Tbatt_filt-32.)*5./9.;
 
     // Arduino plots
-    if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n", socu_solved, Sen->Ishunt_amp, Sen->Ishunt,
+    if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n",
+        socu_solved, Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
         Sen->Vbatt, MyBattSolved->voc());
 
     // Initialize SOC Free Integrator - Coulomb Counting method
@@ -374,8 +373,9 @@ void loop()
     // Useful for Arduino plotting
     if ( rp.debug==-1 )
       Serial.printf("%7.3f,%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,\n",
-        socu_solved*100-90, MyBattFree->soc_avail()*100-90, Sen->Ishunt, Sen->Ishunt_amp, Sen->Vbatt_filt_obs*10-110,
-        MyBattSolved->voc()*10-110, MyBattSolved->vdyn()*10, MyBattSolved->v()*10-110);
+        socu_solved*100-90, MyBattFree->soc_avail()*100-90,
+        Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
+        Sen->Vbatt_filt_obs*10-110, MyBattSolved->voc()*10-110, MyBattSolved->vdyn()*10, MyBattSolved->v()*10-110);
     if ( rp.debug==-3 )
       Serial.printf("fast,et,reset_free,Wshunt,soc_f,T, %12.3f,%7.3f, %d, %7.3f,%7.3f,%7.3f,\n",
       control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, rp.socu_free, Sen->T_filt);

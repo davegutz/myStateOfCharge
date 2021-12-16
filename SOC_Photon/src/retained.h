@@ -30,8 +30,9 @@
 struct RetainedPars
 {
   int8_t debug = 2;         // Level of debug printing
-  double curr_bias = 0;     // Calibrate current sensor, A 
-  double curr_amp_bias = 0; // Calibrate amp current sensor, A 
+  double curr_bias_amp = 0; // Calibrate amp current sensor, A 
+  double curr_bias_noamp = 0; // Calibrate non-amplified current sensor, A 
+  boolean curr_sel_amp = true; // Use amplified sensor
   double socu_free = 0.5;   // Coulomb Counter state (0 - 1.5)
   double socu_model = 0.5;  // Coulomb Counter state (0 - 1.5)
   double vbatt_bias = 0;    // Calibrate Vbatt, V

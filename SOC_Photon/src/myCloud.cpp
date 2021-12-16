@@ -69,7 +69,7 @@ void publish3(void)
 {
   if (rp.debug>4) Serial.printf("Blynk write3\n");
   Blynk.virtualWrite(V12, cp.pubList.Vshunt_amp);
-  Blynk.virtualWrite(V13, cp.pubList.Vshunt_amp_filt);
+  Blynk.virtualWrite(V13, cp.pubList.Vshunt_filt);
   Blynk.virtualWrite(V14, cp.pubList.I2C_status);
   Blynk.virtualWrite(V15, cp.pubList.hm_string);
   Blynk.virtualWrite(V16, cp.pubList.tcharge);
@@ -80,10 +80,10 @@ void publish3(void)
 void publish4(void)
 {
   if (rp.debug>4) Serial.printf("Blynk write4\n");
-  Blynk.virtualWrite(V17, cp.pubList.Ishunt_amp);
-  Blynk.virtualWrite(V18, cp.pubList.Ishunt_amp_filt_obs);
-  Blynk.virtualWrite(V19, cp.pubList.Wshunt_amp);
-  Blynk.virtualWrite(V20, cp.pubList.Wshunt_amp_filt);
+  Blynk.virtualWrite(V17, cp.pubList.Ishunt);
+  Blynk.virtualWrite(V18, cp.pubList.Ishunt_filt_obs);
+  Blynk.virtualWrite(V19, cp.pubList.Wshunt);
+  Blynk.virtualWrite(V20, cp.pubList.Wshunt_filt);
   Blynk.virtualWrite(V21, cp.pubList.socu_solved);
 }
 
@@ -151,20 +151,18 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Vbatt_filt_obs = Sen->Vbatt_filt_obs;
   pubList->Tbatt = Sen->Tbatt;
   pubList->Tbatt_filt = Sen->Tbatt_filt;
+  pubList->Vshunt_amp = Sen->Vshunt_amp;
+  pubList->Vshunt_noamp = Sen->Vshunt_noamp;
   pubList->Vshunt = Sen->Vshunt;
   pubList->Vshunt_filt = Sen->Vshunt_filt;
+  pubList->Ishunt_amp_cal = Sen->Ishunt_amp_cal;
+  pubList->Ishunt_noamp_cal = Sen->Ishunt_noamp_cal;
   pubList->Ishunt = Sen->Ishunt;
   pubList->Ishunt_filt = Sen->Ishunt_filt;
   pubList->Ishunt_filt_obs = Sen->Ishunt_filt_obs;
   pubList->Wshunt = Sen->Wshunt;
   pubList->Wshunt_filt = Sen->Wshunt_filt;
   pubList->Vshunt_amp = Sen->Vshunt_amp;
-  pubList->Vshunt_amp_filt = Sen->Vshunt_amp_filt;
-  pubList->Ishunt_amp = Sen->Ishunt_amp;
-  pubList->Ishunt_amp_filt = Sen->Ishunt_amp_filt;
-  pubList->Ishunt_amp_filt_obs = Sen->Ishunt_amp_filt_obs;
-  pubList->Wshunt_amp = Sen->Wshunt_amp;
-  pubList->Wshunt_amp_filt = Sen->Wshunt_amp_filt;
   pubList->num_timeouts = num_timeouts;
   pubList->socu_solved = MyBattSolved->socu()*100.0;
   pubList->socu_free = MyBattFree->socu()*100.0;
@@ -176,4 +174,5 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Vbatt_solved = Sen->Vbatt_solved;
   pubList->soc_avail = MyBattFree->soc_avail()*100.0;
   pubList->socu_model = rp.socu_model*100.0;
+  pubList->curr_sel_amp = rp.curr_sel_amp;
 }

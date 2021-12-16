@@ -69,10 +69,10 @@
 #define PHOTON_ADC_VOLT       3.3       // Photon ADC range, V (3.3)
 #define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms
 #define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms
-#define SHUNT_V2A_S           -1189.3   // Shunt V2A scalar, A/V (1333 is 100A/0.075V)  (-1189.3)
-#define SHUNT_V2A_A           0         // Shunt V2A adder, A derived from charge-discharge integral match (0 in theory)  (0)
+#define SHUNT_NOAMP_V2A_S     -1189.3   // Shunt V2A scalar, A/V (1333 is 100A/0.075V)  (-1189.3)
+#define SHUNT_NOAMP_V2A_A     0         // Shunt V2A adder, A derived from charge-discharge integral match (0 in theory)  (0)
                                         // observed on prototype over time that 0 V really is 0 A.   Not much bias in ADS devices
-#define SHUNT_AMP_V2A_S       (SHUNT_V2A_S*2.*SHUNT_AMP_R1/SHUNT_AMP_R2)   // Shunt amp V2A scalar
+#define SHUNT_AMP_V2A_S       (SHUNT_NOAMP_V2A_S*2.*SHUNT_AMP_R1/SHUNT_AMP_R2)   // Shunt amp V2A scalar
 #define SHUNT_AMP_V2A_A       0         // Shunt amp V2A adder, A derived from charge-discharge integral match (0 in theory)  (0)
 #define SCREEN_WIDTH          128       // OLED display width, in pixels (128)
 #define SCREEN_HEIGHT         32        // OLED display height, in pixels (4)

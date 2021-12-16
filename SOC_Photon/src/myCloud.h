@@ -39,8 +39,10 @@ struct Publish
   double Ishunt;
   double Wshunt;
   double Vshunt_amp;
-  double Ishunt_amp;
-  double Wshunt_amp;
+  double Ishunt_amp_cal;
+  double Vshunt_noamp;
+  double Ishunt_noamp_cal;
+  boolean curr_sel_amp; 
   double T;
   int I2C_status;
   double VOC_free;
@@ -52,10 +54,6 @@ struct Publish
   double Ishunt_filt;
   double Ishunt_filt_obs;
   double Wshunt_filt;
-  double Vshunt_amp_filt;
-  double Ishunt_amp_filt;
-  double Ishunt_amp_filt_obs;
-  double Wshunt_amp_filt;
   int num_timeouts;
   double socu_solved;
   double socu_free;

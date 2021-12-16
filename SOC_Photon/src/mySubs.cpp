@@ -92,21 +92,25 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_filt_obs,   Ishunt_amp,Ishunt_amp_filt_obs,  Wshunt_amp,Wshunt_amp_filt,  Ishunt,Ishunt_filt_obs,  Wshunt,Wshunt_filt,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T, SOCU_m"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,Wshunt_f,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T, SOCU_m"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f,  %7.3f,%7.3f, %7.3f,  %7.3f,  %7.3f,%7.3f,  %7.3f,  %6.3f, %7.3f, %c", \
-    pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time,
-    pubList->Tbatt, pubList->Tbatt_filt,     pubList->Vbatt, pubList->Vbatt_filt_obs,
-    pubList->Ishunt_amp, pubList->Ishunt_amp_filt_obs, pubList->Wshunt_amp, pubList->Wshunt_amp_filt,
-    pubList->Ishunt, pubList->Ishunt_filt_obs, pubList->Wshunt, pubList->Wshunt_filt,
+  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %7.3f,%7.3f,  %7.3f,  %6.3f,%7.3f,  %c", \
+    pubList->unit.c_str(),
+    pubList->hm_string.c_str(), pubList->control_time,
+    pubList->Tbatt, pubList->Tbatt_filt,
+    pubList->Vbatt, pubList->Vbatt_filt_obs,
+    pubList->curr_sel_amp,
+    pubList->Ishunt, pubList->Ishunt_filt_obs,
+    pubList->Wshunt, pubList->Wshunt_filt,
     pubList->VOC_solved,
     pubList->socu_solved, pubList->Vbatt_solved,
     pubList->socu_free, pubList->tcharge,
-    pubList->T, pubList->socu_model, '\0');
+    pubList->T, pubList->socu_model,
+    '\0');
 }
 
 // Inputs serial print
@@ -143,8 +147,8 @@ void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt)
 
 // Load all others
 void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
-    Adafruit_ADS1015 *ads, Adafruit_ADS1015 *ads_amp, const unsigned long now,
-    SlidingDeadband *SdIshunt, SlidingDeadband *SdIshunt_amp, SlidingDeadband *SdVbatt)
+    Adafruit_ADS1015 *ads_noamp, Adafruit_ADS1015 *ads_amp, const unsigned long now,
+    SlidingDeadband *SdVbatt)
 {
   static unsigned long int past = now;
   double T = (now - past)/1e3;
@@ -193,26 +197,12 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
             rp.type, rp.amp, rp.freq, sin_bias, square_bias, tri_bias, rp.duty, t);
 
   // Current bias.  Feeds into signal conversion, not to duty injection
-  Sen->curr_bias = rp.curr_bias + rp.offset;
-  Sen->amp_curr_bias = rp.curr_amp_bias + rp.offset;
+  Sen->curr_bias_noamp = rp.curr_bias_noamp + rp.offset;
+  Sen->curr_bias_amp = rp.curr_bias_amp + rp.offset;
 
   // Read Sensors
   // ADS1015 conversion
-  int16_t vshunt_int_0 = 0;
-  int16_t vshunt_int_1 = 0;
-  if (!Sen->bare_ads)
-  {
-    Sen->Vshunt_int = ads->readADC_Differential_0_1();
-    if ( rp.debug==-14 ){vshunt_int_0 = ads->readADC_SingleEnded(0); vshunt_int_1 = ads->readADC_SingleEnded(1);}
-  }
-  else
-  {
-    Sen->Vshunt_int = 0;
-  }
-  Sen->Vshunt = ads->computeVolts(Sen->Vshunt_int);
-  double ishunt_free = Sen->Vshunt*SHUNT_V2A_S + SHUNT_V2A_A + Sen->curr_bias;
-  Sen->Ishunt = SdIshunt->update(ishunt_free, reset_free);
-
+  // Amp
   int16_t vshunt_amp_int_0 = 0;
   int16_t vshunt_amp_int_1 = 0;
   if (!Sen->bare_ads_amp)
@@ -221,21 +211,57 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
     if ( rp.debug==-14 ){vshunt_amp_int_0 = ads_amp->readADC_SingleEnded(0); vshunt_amp_int_1 = ads_amp->readADC_SingleEnded(1);}
   }
   else
-  {
     Sen->Vshunt_amp_int = 0;
+  Sen->Vshunt_amp = ads_amp->computeVolts(Sen->Vshunt_amp_int);
+  Sen->Ishunt_amp_cal = Sen->Vshunt_amp*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + Sen->curr_bias_amp;
+  // No amp
+  int16_t vshunt_noamp_int_0 = 0;
+  int16_t vshunt_noamp_int_1 = 0;
+  if (!Sen->bare_ads_noamp)
+  {
+    Sen->Vshunt_noamp_int = ads_noamp->readADC_Differential_0_1();
+    if ( rp.debug==-14 ){vshunt_noamp_int_0 = ads_noamp->readADC_SingleEnded(0); vshunt_noamp_int_1 = ads_noamp->readADC_SingleEnded(1);}
   }
-  Sen->Vshunt_amp = ads->computeVolts(Sen->Vshunt_amp_int);
-  double ishunt_amp_free = Sen->Vshunt_amp*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + Sen->amp_curr_bias;
-  Sen->Ishunt_amp = SdIshunt_amp->update(ishunt_amp_free, reset_free);
-  if ( rp.debug==-14 ) Serial.printf("reset_free,vshunt_int,0_int,1_int,ishunt_free,Ishunt,Ishunt_filt,Ishunt_filt_obs,||,vshunt_amp_int,0_amp_int,1_amp_int,ishunt_amp_free,Ishunt_amp,Ishunt_amp_filt,Ishunt_amp_filt_obs,T, %d,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
-    reset_free,
-    Sen->Vshunt_int, vshunt_int_0, vshunt_int_1, ishunt_free, Sen->Ishunt, Sen->Ishunt_filt, Sen->Ishunt_filt_obs, 
-    Sen->Vshunt_amp_int, vshunt_amp_int_0, vshunt_amp_int_1, ishunt_amp_free, Sen->Ishunt_amp, Sen->Ishunt_amp_filt, Sen->Ishunt_amp_filt_obs,
+  else
+    Sen->Vshunt_noamp_int = 0;
+  Sen->Vshunt_noamp = ads_noamp->computeVolts(Sen->Vshunt_noamp_int);
+  Sen->Ishunt_noamp_cal = Sen->Vshunt_noamp*SHUNT_NOAMP_V2A_S + SHUNT_NOAMP_V2A_A + Sen->curr_bias_noamp;
+
+  // Print results
+  if ( rp.debug==-14 ) Serial.printf("reset_free,select,   vshunt_noamp_int,0_noampm_int,1_noamp_int,ishunt_noamp, ||, vshunt_amp_int,0_amp_int,1_amp_int,ishunt_amp_cal,  Ishunt_filt,Ishunt_filt_obs,T, %d,%d,%d,%d,%d,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f\n",
+    reset_free, rp.curr_sel_amp,
+    Sen->Vshunt_noamp_int, vshunt_noamp_int_0, vshunt_noamp_int_1, Sen->Ishunt_noamp_cal,
+    Sen->Vshunt_amp_int, vshunt_amp_int_0, vshunt_amp_int_1, Sen->Ishunt_amp_cal,
+    Sen->Ishunt_filt, Sen->Ishunt_filt_obs,
     T);
-  if ( rp.debug==-16 ) Serial.printf("ishunt_free,Ishunt,Ishunt_filt,Ishunt_filt_obs,||,ishunt_amp_free,Ishunt_amp,Ishunt_amp_filt,Ishunt_amp_filt_obs,T, %7.3f,%7.3f,%7.3f,%7.3f,||,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n",
-    ishunt_free, Sen->Ishunt, Sen->Ishunt_filt, Sen->Ishunt_filt_obs, 
-    ishunt_amp_free, Sen->Ishunt_amp, Sen->Ishunt_amp_filt, Sen->Ishunt_amp_filt_obs,
-    T);
+
+  // Current signal selection, based on if there or not.
+  // Over-ride 'permanent' with Talk(rp.curr_sel_amp) = Talk('s')
+  if ( rp.curr_sel_amp && !Sen->bare_ads_amp)
+  {
+    Sen->Vshunt = Sen->Vshunt_amp;
+    Sen->Ishunt = Sen->Ishunt_amp_cal;
+    Sen->curr_bias = Sen->curr_bias_amp;
+    Sen->shunt_v2a_s = SHUNT_AMP_V2A_S;
+    Sen->shunt_v2a_a = SHUNT_AMP_V2A_A;
+  }
+  else if ( !Sen->bare_ads_noamp )
+  {
+    Sen->Vshunt = Sen->Vshunt_noamp;
+    Sen->Ishunt = Sen->Ishunt_noamp_cal;
+    Sen->curr_bias = Sen->curr_bias_noamp;
+    Sen->shunt_v2a_s = SHUNT_NOAMP_V2A_S;
+    Sen->shunt_v2a_a = SHUNT_NOAMP_V2A_A;
+  }
+  else
+  {
+    Sen->Vshunt = 0.;
+    Sen->Ishunt = 0.;
+    Sen->curr_bias = 0.;
+    Sen->shunt_v2a_s = SHUNT_AMP_V2A_S; // amp preferred, default to that
+    Sen->shunt_v2a_a = SHUNT_AMP_V2A_A; // amp preferred, default to that
+  }
+
 
   // Vbatt
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
@@ -254,11 +280,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
     }
     elapsed_loc = double(now - cp.vec_start)/1000./60.;
     Sen->Ishunt =  I_T1->interp(elapsed_loc);
-    Sen->Vshunt = (Sen->Ishunt - SHUNT_V2A_A - Sen->curr_bias) / SHUNT_V2A_S;
-    Sen->Vshunt_int = -999;
-    Sen->Ishunt_amp =  Sen->Ishunt;
-    Sen->Vshunt_amp = Sen->Vshunt;
-    Sen->Vshunt_amp_int = -999;
+    Sen->Vshunt = (Sen->Ishunt - Sen->shunt_v2a_a - Sen->curr_bias) / Sen->shunt_v2a_s;
     Sen->Tbatt =  T_T1->interp(elapsed_loc);
     Sen->Vbatt =  V_T1->interp(elapsed_loc) + Sen->Ishunt*(batt_r1 + batt_r2)*double(batt_num_cells);
   }
@@ -267,10 +289,8 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   // Power calculation
   Sen->Wshunt = Sen->Vbatt*Sen->Ishunt;
   Sen->Wcharge = Sen->Vbatt*Sen->Ishunt - Sen->Ishunt*Sen->Ishunt*(batt_r1 + batt_r2)*double(batt_num_cells); 
-  Sen->Wshunt_amp = Sen->Vbatt*Sen->Ishunt_amp;
-  Sen->Wcharge_amp = Sen->Vbatt*Sen->Ishunt_amp - Sen->Ishunt_amp*Sen->Ishunt_amp*(batt_r1 + batt_r2)*double(batt_num_cells); 
 
-  if ( rp.debug==-6 ) Serial.printf("cp.vectoring,reset_free,cp.vec_start,now,elapsed_loc,Vbatt,Ishunt,Ishunt_amp,Tbatt:  %d,%d,%ld, %ld,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f\n", cp.vectoring, reset_free, cp.vec_start, now, elapsed_loc, Sen->Vbatt, Sen->Ishunt, Sen->Ishunt_amp, Sen->Tbatt);
+  if ( rp.debug==-6 ) Serial.printf("cp.vectoring,reset_free,cp.vec_start,now,elapsed_loc,Vbatt,Ishunt,Tbatt:  %d,%d,%ld, %ld,%7.3f,%7.3f,%7.3f,%7.3f\n", cp.vectoring, reset_free, cp.vec_start, now, elapsed_loc, Sen->Vbatt, Sen->Ishunt, Sen->Tbatt);
 }
 
 // Filter temperature only
@@ -292,13 +312,10 @@ void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs,
   // Shunt
   Sen->Vshunt_filt = VshuntSenseFilt->calculate( Sen->Vshunt, reset_loc, min(Sen->T_filt, F_MAX_T));
   Sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( Sen->Vshunt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
-  Sen->Ishunt_filt = Sen->Vshunt_filt*SHUNT_V2A_S + SHUNT_V2A_A + Sen->curr_bias;
-  Sen->Ishunt_filt_obs = Sen->Vshunt_filt_obs*SHUNT_V2A_S + SHUNT_V2A_A + Sen->curr_bias;
-  Sen->Vshunt_amp_filt = VshuntAmpSenseFilt->calculate( Sen->Vshunt_amp, reset_loc, min(Sen->T_filt, F_MAX_T));
-  Sen->Vshunt_amp_filt_obs = VshuntAmpSenseFiltObs->calculate( Sen->Vshunt_amp, reset_loc, min(Sen->T_filt, F_O_MAX_T));
-  Sen->Ishunt_amp_filt = Sen->Vshunt_amp_filt*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + Sen->amp_curr_bias;
-  Sen->Ishunt_amp_filt_obs = Sen->Vshunt_amp_filt_obs*SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + Sen->amp_curr_bias;
-
+  if ( rp.curr_sel_amp )
+  Sen->Ishunt_filt = Sen->Vshunt_filt*Sen->shunt_v2a_s + Sen->shunt_v2a_a + Sen->curr_bias;
+  Sen->Ishunt_filt_obs = Sen->Vshunt_filt_obs*Sen->shunt_v2a_s + Sen->shunt_v2a_a + Sen->curr_bias;
+  
   // Voltage
   if ( rp.modeling )
   {
@@ -423,10 +440,10 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         switch ( cp.input_string.charAt(1) )
         {
           case ( 'a' ):
-            rp.curr_amp_bias = cp.input_string.substring(2).toFloat();
+            rp.curr_bias_amp = cp.input_string.substring(2).toFloat();
             break;
           case ( 'b' ):
-            rp.curr_bias = cp.input_string.substring(2).toFloat();
+            rp.curr_bias_noamp = cp.input_string.substring(2).toFloat();
             break;
           case ( 'c' ):
             rp.vbatt_bias = cp.input_string.substring(2).toFloat();
@@ -455,7 +472,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         switch ( rp.debug )
         {
           case ( -1 ):
-            Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt  ,Ishunt_a  ,Vbat_fo*10-110  ,voc_s*10-110  ,vdyn_s*10  ,v_s*10-110  ,,,,,,,,,,,,\n");
+            Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt_amp  ,Ishunt_noamp  ,Vbat_fo*10-110  ,voc_s*10-110  ,vdyn_s*10  ,v_s*10-110  ,,,,,,,,,,,,\n");
             break;
           default:
             Serial.printf("Legend for rp.debug= %d not defined.   Edit mySubs.cpp, search for 'case ( 'l' )' and add it\n", rp.debug);
@@ -472,6 +489,10 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         SOCU_in = cp.input_string.substring(1).toFloat()/100.;
         rp.socu_model = max(min(SOCU_in, mxepu_bb), mnepu_bb);
         Serial.printf("socu_model=%7.3f\n", rp.socu_model);
+        break;
+      case ( 's' ): 
+        rp.curr_sel_amp = !rp.curr_sel_amp;
+        Serial.printf("Signal selection (1=amp, 0=no amp) toggled to %d\n", rp.curr_sel_amp);
         break;
       case ( 'v' ):
         rp.debug = cp.input_string.substring(1).toInt();
@@ -533,8 +554,8 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.amp = 0.0;
                 rp.offset = 0.0;
                 rp.debug = 0;
-                Serial.printf("Setting injection program to 0:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp);
+                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug);
                 break;
               case ( 1 ):
                 rp.modeling = true;
@@ -543,8 +564,8 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.amp = 18.3;
                 rp.offset = -rp.amp;
                 rp.debug = -1;
-                Serial.printf("Setting injection program to 1: rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp);
+                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug);
                 rp.freq *= (2. * PI);
                 break;
               case ( 2 ):
@@ -553,8 +574,8 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.freq = 0.10;
                 rp.amp = 18.3;
                 rp.offset = -rp.amp;
-                Serial.printf("Setting injection program to 2: rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp);
+                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug);
                 rp.freq *= (2. * PI);
                 rp.debug = -1;
                 break;
@@ -564,8 +585,8 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.freq = 0.05;
                 rp.amp = 18.3;
                 rp.offset = -rp.amp;
-                Serial.printf("Setting injection program to 3: rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp);
+                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug);
                 rp.freq *= (2. * PI);
                 rp.debug = -1;
                 break;
@@ -626,10 +647,11 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("d   dump the summary log\n"); 
   Serial.printf("m=  assign a free memory state in percent to all versions including model- '('truncated 0-100')'\n"); 
   Serial.printf("n=  assign a free memory state in percent to model only - '('truncated 0-100')'\n"); 
+  Serial.printf("s   curr signal select (1=amp preferred, 0=noamp) = "); Serial.println(rp.curr_sel_amp);
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("D/S<?> Adjustments.   For example:\n");
-  Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_amp_bias); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
-  Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
+  Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_bias_amp); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
+  Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias_noamp); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dv= "); Serial.print(batt_solved->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
   Serial.printf("  Sr= "); Serial.print(batt_solved->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
@@ -637,7 +659,7 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("T - Transient performed with input.   For example:\n");
   Serial.printf("  Ts=<index>  :   index="); Serial.print(*step_val);
   Serial.printf(", cp.stepping=");  Serial.println(cp.stepping);
-  Serial.printf("  Tv=<vec_num>  :   vec_num="); Serial.println(*vec_num);
+  Serial.printf("  Tv=<vec_num>  :  vec_num="); Serial.println(*vec_num);
   Serial.printf("    ******Send Tv0 to cancel vector*****\n");
   Serial.printf("   INFO:  cp.vectoringing=");  Serial.println(cp.vectoring);
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);

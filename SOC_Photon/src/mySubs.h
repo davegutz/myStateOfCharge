@@ -70,39 +70,37 @@ struct Sensors
   double Vbatt_filt_obs;  // Filtered, sensed battery voltage for observer, V
   double Tbatt;           // Sensed battery temp, F
   double Tbatt_filt;      // Filtered, sensed battery temp, F
-  int16_t Vshunt_int;     // Sensed shunt voltage, count
+  int16_t Vshunt_amp_int; // Sensed shunt voltage, count
+  int16_t Vshunt_noamp_int;// Sensed shunt voltage, count
+  double Vshunt_amp;      // Sensed shunt voltage, V
+  double Vshunt_noamp;    // Sensed shunt voltage, V
   double Vshunt;          // Sensed shunt voltage, V
   double Vshunt_filt;     // Filtered, sensed shunt voltage, V
   double Vshunt_filt_obs; // Filtered, sensed shunt voltage for  observer, V
-  double Ishunt;          // Sensed shunt current, A
-  double Ishunt_filt;     // Filtered, sensed shunt current, A
-  double Ishunt_filt_obs; // Filtered, sensed shunt current for observer, A
+  double shunt_v2a_s;     // Selected shunt conversion gain, A/V
+  double shunt_v2a_a;     // Selected shunt conversion adder, A
+  double Ishunt_amp_cal;  // Sensed, calibrated amplified ADC, A
+  double Ishunt_noamp_cal;// Sensed, calibrated non-amplified ADC, A
+  double Ishunt;          // Selected calibrated, shunt current, A
+  double Ishunt_filt;     // Filtered, calibrated selected sensed shunt current, A
+  double Ishunt_filt_obs; // Filtered, calibrated sensed shunt current for observer, A
   double Wshunt;          // Sensed shunt power, W
   double Wshunt_filt;     // Filtered, sensed shunt power, W
   double Wcharge;          // Charge power, W
-  int16_t Vshunt_amp_int;     // Sensed shunt voltage, count
-  double Vshunt_amp;          // Sensed shunt voltage, V
-  double Vshunt_amp_filt;     // Filtered, sensed shunt voltage, V
-  double Vshunt_amp_filt_obs; // Filtered, sensed shunt voltage for  observer, V
-  double Ishunt_amp;          // Sensed shunt current, A
-  double Ishunt_amp_filt;     // Filtered, sensed shunt current, A
-  double Ishunt_amp_filt_obs; // Filtered, sensed shunt current for observer, A
-  double Wshunt_amp;          // Sensed shunt power, W
-  double Wshunt_amp_filt;     // Filtered, sensed shunt power, W
-  double Wcharge_amp;           // Charge power, W
   int I2C_status;
   double T;               // Update time, s
   double T_filt;          // Filter update time, s
   double T_temp;          // Temperature update time, s
-  bool bare_ads;          // If no ADS detected
   bool bare_ads_amp;      // If no ADS detected
-  double curr_bias;       // Signal injection bias for current input, A
-  double amp_curr_bias;   // Signal injection bias for amplified current input, A
+  bool bare_ads_noamp;    // If no ADS detected
+  double curr_bias_amp;   // Signal injection bias for amplified current input, A
+  double curr_bias_noamp; // Signal injection bias for non-amplified current input, A
+  double curr_bias;       // Signal injection bias for selected current input, A
   Sensors(void) {}
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
-          int16_t Vshunt_int, double Vshunt, double Vshunt_filt,
+          int16_t Vshunt_noamp_int, double Vshunt, double Vshunt_filt,
           int16_t Vshunt_amp_int, double Vshunt_amp, double Vshunt_amp_filt,
-          int I2C_status, double T, double T_temp, bool bare_ads, bool bare_ads_amp)
+          int I2C_status, double T, double T_temp, bool bare_ads_noamp, bool bare_ads_amp)
   {
     this->Vbatt = Vbatt;
     this->Vbatt_filt = Vbatt_filt;
@@ -110,30 +108,23 @@ struct Sensors
     this->Vbatt_solved = Vbatt;
     this->Tbatt = Tbatt;
     this->Tbatt_filt = Tbatt_filt;
-    this->Vshunt_int = Vshunt_int;
+    this->Vshunt_noamp_int = Vshunt_noamp_int;
     this->Vshunt = Vshunt;
     this->Vshunt_filt = Vshunt_filt;
-    this->Ishunt = Vshunt * SHUNT_V2A_S + double(SHUNT_V2A_A) + rp.curr_bias;
-    this->Ishunt_filt = Vshunt_filt * SHUNT_V2A_S + SHUNT_V2A_A + rp.curr_bias;
+    this->Ishunt = Vshunt * SHUNT_NOAMP_V2A_S + double(SHUNT_NOAMP_V2A_A) + rp.curr_bias_noamp;
+    this->Ishunt_filt = Vshunt_filt * SHUNT_NOAMP_V2A_S + SHUNT_NOAMP_V2A_A + rp.curr_bias_noamp;
     this->Wshunt = Vshunt * Ishunt;
     this->Wcharge = Vshunt * Ishunt;
     this->Wshunt_filt = Vshunt_filt * Ishunt_filt;
     this->Vshunt_amp_int = Vshunt_amp_int;
-    this->Vshunt_amp = Vshunt_amp;
-    this->Vshunt_amp_filt = Vshunt_amp_filt;
-    this->Ishunt_amp = Vshunt_amp * SHUNT_AMP_V2A_S + double(SHUNT_AMP_V2A_A) + rp.curr_amp_bias;
-    this->Ishunt_amp_filt = Vshunt_amp_filt * SHUNT_AMP_V2A_S + SHUNT_AMP_V2A_A + rp.curr_amp_bias;
-    this->Wshunt_amp = Vshunt_amp * Ishunt_amp;
-    this->Wshunt_amp_filt = Vshunt_amp_filt * Ishunt_amp_filt;
-    this->Wcharge_amp = Vshunt_amp * Ishunt_amp;
     this->I2C_status = I2C_status;
     this->T = T;
     this->T_filt = T;
     this->T_temp = T_temp;
-    this->bare_ads = bare_ads;
+    this->bare_ads_noamp = bare_ads_noamp;
     this->bare_ads_amp = bare_ads_amp;
-    this->curr_bias = 0.0;
-    this->amp_curr_bias = 0.0;
+    this->curr_bias_noamp = 0.0;
+    this->curr_bias_amp = 0.0;
   }
 };
 
@@ -143,7 +134,7 @@ void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);
 void load(const bool reset_free, Sensors *Sen, Pins *myPins,
     Adafruit_ADS1015 *ads, Adafruit_ADS1015 *ads_amp, const unsigned long now,
-    SlidingDeadband *SdIshunt, SlidingDeadband *SdIshunt_amp, SlidingDeadband *SdVbatt);
+    SlidingDeadband *SdVbatt);
 void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt);
 void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs,
   General2_Pole* VshuntSenseFiltObs,  General2_Pole* VshuntAmpSenseFiltObs, 
