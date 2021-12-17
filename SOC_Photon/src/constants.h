@@ -84,7 +84,7 @@
 #define F_O_Z           0.80        // Observer filter zeta (0.80)
 #define F_W             0.05        // Filter wn, r/s (0.05)   
 #define F_Z             0.80        // Filter zeta (0.80)
-#define SAT_PERSISTENCE 15          // Updates persistence on saturation tests (25)
+#define SAT_PERSISTENCE 15          // Updates persistence on saturation tests (15)
 #define HDB_ISHUNT      0.13        // Half deadband to filter Ishunt, mA (0.13)
 #define HDB_ISHUNT_AMP  0.025       // Half deadband to filter Ishunt amplified, mA (0.025)
 #define HDB_VBATT       0.01        // Half deadband to filter Vbatt, v (0.01)

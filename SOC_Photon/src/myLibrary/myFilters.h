@@ -30,6 +30,7 @@ public:
   bool calculate(const bool in, const int RESET);
 protected:
   int nz_;     // Number of past consequetive states to agree with input to pass debounce
+  bool passed_out_; // latched value of output
   bool *past_; // Array(nz_-1) of past inputs
 };
 

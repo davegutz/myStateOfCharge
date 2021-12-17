@@ -20,9 +20,9 @@
 // class Debounce
 // constructors
 Debounce::Debounce()
-    : nz_(1) {}
+    : nz_(1), passed_out_(false) {}
 Debounce::  Debounce(const bool icValue, const int updates)
-    : nz_(fmax(updates-1, 1))
+    : nz_(fmax(updates-1, 1)), passed_out_(icValue)
 {
   past_ = new bool[nz_];
   for (int i=0; i<nz_; i++) past_[i] = icValue;
@@ -32,18 +32,26 @@ Debounce::~Debounce() {}
 // functions
 bool Debounce::calculate(const bool in)
 {
-  bool past = past_[nz_-1];
-  bool fail = false;
-  for ( int i=0; i<nz_; i++ ) if ( in!=past_[i] ) fail = true;
+  bool all_true = true;
+
+  for ( int i=0; i<nz_; i++ )
+     if ( !past_[i] ) all_true = false;
+
+  bool out = false;
+  if ( in && all_true ) out = true;
+  
   for ( int i=nz_-1; i>0; i-- ) past_[i] = past_[i-1];
   past_[0] = in;
-  bool out = in;
-  if ( fail ) out = past;
+
   return ( out );
 }
 bool Debounce::calculate(const bool in, const int RESET)
 {
-  if ( RESET ) for (int i=0; i<nz_; i++) past_[i] = in;
+  if ( RESET )
+  {
+    passed_out_ = in;
+    for (int i=0; i<nz_; i++) past_[i] = in;
+  }
   return ( Debounce::calculate(in) );
 }
 
