@@ -94,6 +94,7 @@ struct Sensors
   double curr_bias_amp;   // Signal injection bias for amplified current input, A
   double curr_bias_noamp; // Signal injection bias for non-amplified current input, A
   double curr_bias;       // Signal injection bias for selected current input, A
+  boolean saturated;      // Battery saturation status based on Temp and VOC
   Sensors(void) {}
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
           int16_t Vshunt_noamp_int, double Vshunt, double Vshunt_filt,

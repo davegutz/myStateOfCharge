@@ -55,7 +55,7 @@ void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *milli
 
 void manage_wifi(unsigned long now, Wifi *wifi)
 {
-  if ( rp.debug > 2 )
+  if ( rp.debug >= 100 )
   {
     Serial.printf("P.connected=%i, disconnect check: %ld >=? %ld, turn on check: %ld >=? %ld, confirmation check: %ld >=? %ld, connected=%i, blynk_started=%i,\n",
       Particle.connected(), now-wifi->last_disconnect, DISCONNECT_DELAY, now-wifi->lastAttempt,  CHECK_INTERVAL, now-wifi->lastAttempt, CONFIRMATION_DELAY, wifi->connected, wifi->blynk_started);
@@ -70,7 +70,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
     wifi->last_disconnect = now;
     WiFi.off();
     wifi->connected = false;
-    if ( rp.debug > 2 ) Serial.printf("wifi turned off\n");
+    if ( rp.debug >= 100 ) Serial.printf("wifi turned off\n");
   }
   if ( now-wifi->lastAttempt>=CHECK_INTERVAL && cp.enable_wifi )
   {
@@ -78,12 +78,12 @@ void manage_wifi(unsigned long now, Wifi *wifi)
     wifi->lastAttempt = now;
     WiFi.on();
     Particle.connect();
-    if ( rp.debug > 2 ) Serial.printf("wifi reattempted\n");
+    if ( rp.debug >= 100 ) Serial.printf("wifi reattempted\n");
   }
   if ( now-wifi->lastAttempt>=CONFIRMATION_DELAY )
   {
     wifi->connected = Particle.connected();
-    if ( rp.debug > 2 ) Serial.printf("wifi disconnect check\n");
+    if ( rp.debug >= 100 ) Serial.printf("wifi disconnect check\n");
   }
   wifi->particle_connected_last = wifi->particle_connected_now;
 }
@@ -92,13 +92,13 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T,   SOCU, SOCS, SOCS_sat"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T,   SOCU, SOCS, SOCS_sat, SOCS_ekf,"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %7.3f,  %7.3f,  %6.3f,  %7.3f,%7.3f,%7.3f,  %c", \
+  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %7.3f,  %7.3f,  %6.3f,  %7.3f,%7.3f,%7.3f,%7.3f,  %c", \
     pubList->unit.c_str(),
     pubList->hm_string.c_str(), pubList->control_time,
     pubList->Tbatt, pubList->Tbatt_filt,
@@ -110,7 +110,7 @@ void create_print_string(char *buffer, Publish *pubList)
     pubList->socu_solved, pubList->Vbatt_solved,
     pubList->socu_free, pubList->tcharge,
     pubList->T,
-    pubList->socu, pubList->socs, pubList->socs_sat,
+    pubList->socu, pubList->socs, pubList->socs_sat, pubList->socs_ekf,
     '\0');
 }
 
@@ -118,7 +118,7 @@ void create_print_string(char *buffer, Publish *pubList)
 void serial_print(unsigned long now, double T)
 {
   create_print_string(cp.buffer, &cp.pubList);
-  if ( rp.debug > 2 ) Serial.printf("serial_print:  ");
+  if ( rp.debug >= 100 ) Serial.printf("serial_print:  ");
   Serial.println(cp.buffer);  //Serial1.println(cp.buffer);
 }
 
@@ -137,11 +137,11 @@ void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt)
   if ( count<MAX_TEMP_READS )
   {
     Sen->Tbatt = SdTbatt->update(temp);
-    if ( rp.debug>2 ) Serial.printf("Temperature read on count=%d\n", count);
+    if ( rp.debug>102 ) Serial.printf("Temperature read on count=%d\n", count);
   }
   else
   {
-    if ( rp.debug>2 ) Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value\n");
+    if ( rp.debug>102 ) Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value\n");
     // Using last-good-value:  no assignment
   }
 }
@@ -198,8 +198,13 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
             rp.type, rp.amp, rp.freq, sin_bias, square_bias, tri_bias, rp.duty, t);
 
   // Current bias.  Feeds into signal conversion, not to duty injection
-  Sen->curr_bias_noamp = rp.curr_bias_noamp + rp.offset;
-  Sen->curr_bias_amp = rp.curr_bias_amp + rp.offset;
+  Sen->curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.offset;
+  Sen->curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.offset;
+
+  // Anti-windup used to bias current below (only when modeling)
+  double s_sat = 0.;
+  if ( rp.modeling && Sen->Wshunt > 0. && Sen->saturated )
+      s_sat = max(Sen->Voc - sat_voc(Sen->Tbatt), 0.) / NOM_SYS_VOLT * NOM_BATT_CAP * sat_gain;
 
   // Read Sensors
   // ADS1015 conversion
@@ -241,14 +246,14 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   if ( rp.curr_sel_amp && !Sen->bare_ads_amp)
   {
     Sen->Vshunt = Sen->Vshunt_amp;
-    Sen->Ishunt = Sen->Ishunt_amp_cal;
+    Sen->Ishunt = Sen->Ishunt_amp_cal - s_sat;
     Sen->curr_bias = Sen->curr_bias_amp;
     Sen->shunt_v2a_s = shunt_amp_v2a_s;
   }
   else if ( !Sen->bare_ads_noamp )
   {
     Sen->Vshunt = Sen->Vshunt_noamp;
-    Sen->Ishunt = Sen->Ishunt_noamp_cal;
+    Sen->Ishunt = Sen->Ishunt_noamp_cal - s_sat;
     Sen->curr_bias = Sen->curr_bias_noamp;
     Sen->shunt_v2a_s = shunt_noamp_v2a_s;
   }
@@ -259,6 +264,10 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
     Sen->curr_bias = 0.;
     Sen->shunt_v2a_s = shunt_amp_v2a_s; // amp preferred, default to that
   }
+  if ( rp.debug==51 )
+    Serial.printf("socs,sat,    VOC,v_sat,   ib, adder,%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,\n", rp.socs, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat);
+  if ( rp.debug==-51 )
+    Serial.printf("socs,sat,    VOC,v_sat,   ib, adder,\n%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,\n", rp.socs, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat);
 
 
   // Vbatt
@@ -286,7 +295,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
 
   // Power calculation
   Sen->Wshunt = Sen->Vbatt*Sen->Ishunt;
-  Sen->Wcharge = Sen->Vbatt*Sen->Ishunt - Sen->Ishunt*Sen->Ishunt*(batt_r1 + batt_r2)*double(batt_num_cells); 
+  Sen->Wcharge = Sen->Ishunt * NOM_SYS_VOLT;
 
   if ( rp.debug==-6 ) Serial.printf("cp.vectoring,reset_free,cp.vec_start,now,elapsed_loc,Vbatt,Ishunt,Tbatt:  %d,%d,%ld, %ld,%7.3f,%7.3f,%7.3f,%7.3f\n", cp.vectoring, reset_free, cp.vec_start, now, elapsed_loc, Sen->Vbatt, Sen->Ishunt, Sen->Tbatt);
 }
@@ -373,7 +382,7 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
     time_long_2_str(*current_time, tempStr);
 
     // Convert the decimal
-    if ( rp.debug>5 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
+    if ( rp.debug>105 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
     return (((( (float(year-2021)*12 + float(month))*30.4375 + float(day))*24.0 + float(hours))*60.0 + float(minutes))*60.0 + \
                         float(seconds) + float((now-millis_flip)%1000)/1000. );
 }
@@ -394,11 +403,11 @@ void myDisplay(Adafruit_SSD1306 *display)
 
   display->setTextColor(SSD1306_WHITE);
   char dispStringT[9];
-  sprintf(dispStringT, "%3.0f%5.1f", min(cp.pubList.socu_solved, 101.), cp.pubList.tcharge);
+  sprintf(dispStringT, "%3.0f%5.1f", cp.pubList.socs_ekf, cp.pubList.tcharge);
   display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[4];
-  sprintf(dispStringS, "%3.0f", min(cp.pubList.soc_avail, 999.));
+  sprintf(dispStringS, "%3.0f", min(cp.pubList.socu, 999.));
   display->print(dispStringS);
 
   display->display();
@@ -431,6 +440,9 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
             break;
           case ( 'b' ):
             rp.curr_bias_noamp = cp.input_string.substring(2).toFloat();
+            break;
+          case ( 'i' ):
+            rp.curr_bias_all = cp.input_string.substring(2).toFloat();
             break;
           case ( 'c' ):
             rp.vbatt_bias = cp.input_string.substring(2).toFloat();
@@ -634,6 +646,7 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("D/S<?> Adjustments.   For example:\n");
   Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_bias_amp); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
   Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias_noamp); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
+  Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("    : delta I adder to all sensed shunt current, A [0]"); 
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dv= "); Serial.print(batt_solved->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
   Serial.printf("  Sr= "); Serial.print(batt_solved->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
@@ -738,7 +751,7 @@ String time_long_2_str(const unsigned long current_time, char *tempStr)
         uint8_t dayOfWeek = Time.weekday(current_time)-1;  // 0-6
         uint8_t minutes   = Time.minute(current_time);
         uint8_t seconds   = Time.second(current_time);
-        if ( rp.debug>5 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
+        if ( rp.debug>105 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
     #else
         // Rapid time passage simulation to test schedule functions
         uint8_t dayOfWeek = (Time.weekday(current_time)-1)*7/6;// minutes = days

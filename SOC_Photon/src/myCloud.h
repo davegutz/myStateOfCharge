@@ -54,6 +54,7 @@ struct Publish
   int num_timeouts;
   double socu;
   double socs;
+  double socs_ekf;
   double socs_sat;
   double socu_solved;
   double socu_free;

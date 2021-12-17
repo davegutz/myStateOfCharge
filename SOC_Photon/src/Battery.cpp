@@ -193,17 +193,18 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     // Coulomb counter  TODO:  move to main and use rp.delta_soc
     coulomb_counter_avail(dt, saturated);
 
-    if ( rp.debug==-34 )
-    {
-        Serial.printf("dt,ib,voc_dyn,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, soc_avail= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,\n",
+    if ( rp.debug==34 )
+        Serial.printf("dt,ib,voc_dyn,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, soc_avail,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,\n",
             dt, ib, voc_dyn_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, soc_avail_);
-    }
+    if ( rp.debug==-34 )
+        Serial.printf("dt,ib,voc_dyn,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, soc_avail,  \n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,\n",
+            dt, ib, voc_dyn_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, soc_avail_);
+    if ( rp.debug==37 )
+        Serial.printf("ib,vb,voc_dyn(z_),  K_,y_,SOC_ekf, SOC_avail,   %7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f, %7.4f,\n",
+            ib, vb, voc_dyn_,     K_, y_, soc_ekf_, soc_avail_);
     if ( rp.debug==-37 )
-    {
-        Serial.printf("ib,vb*10-110,voc_dyn(z_)*10-110,  K_,y_,SOC_ekf-90, SOC_avail-90\n");
-        Serial.printf("%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f, %7.4f,\n",
+        Serial.printf("ib,vb*10-110,voc_dyn(z_)*10-110,  K_,y_,SOC_ekf-90, SOC_avail-90,   \n%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f, %7.4f,\n",
             ib, vb*10-110, voc_dyn_*10-110,     K_, y_, soc_ekf_*100-90, soc_avail_*100-90);
-    }
 
     // Summarize
     pow_in_ekf_ = vb*ib - ib*ib*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
@@ -242,7 +243,7 @@ double Battery::calculate_model(const double temp_C, const double socu_frac, con
     double u[2] = {ib_, voc_};
     RandlesInv_->calc_x_dot(u);
     RandlesInv_->update(dt);
-    vb_ = max(RandlesInv_->y(0), 5.);
+    vb_ = RandlesInv_->y(0);
     vdyn_ = vb_ - voc_;
 
 
@@ -276,19 +277,22 @@ double Battery::calculate_model(const double temp_C, const double socu_frac, con
     Outputs:
         soc_avail   State of charge, fraction (0-1.5)
         # soc_norm    Normalized state of charge, fraction (0-1)
-        v_sat   Charge voltage at saturation, V
         sat     Battery is saturated, T/F
 */
 double Battery::coulomb_counter_avail(const double dt, const boolean saturated)
 {
     double delta_delta_soc = pow_in_ekf_/NOM_SYS_VOLT*dt/3600./TRUE_BATT_CAP;
-    rp.delta_soc = max(min(rp.delta_soc + delta_delta_soc, 1.5), -1.5);
     if ( saturated )
     {
-        rp.delta_soc = 0.;
+        if ( delta_delta_soc > 0. )
+        {
+            delta_delta_soc = 0.;
+            rp.delta_soc = 0.;
+        }
         rp.t_sat = temp_c_;
         rp.soc_sat = (rp.t_sat - 25.)*DQDT + 1.;
     }
+    rp.delta_soc = max(min(rp.delta_soc + delta_delta_soc, 1.5), -1.5);
     soc_avail_ = max(min(rp.soc_sat*(1. - DQDT*(temp_c_ - rp.t_sat)) + rp.delta_soc, 1.5), 0.);
     if ( rp.debug==-36 )
     {
@@ -375,20 +379,25 @@ double coulombs(const double dt, const double pow_in, const boolean sat, const d
     double socs_avail = 0;   // return value
     double delta_delta_socs = pow_in/NOM_SYS_VOLT*dt/3600./NOM_BATT_CAP;
     socs_avail = *socs_sat*(1. - DQDT*(temp_c - *t_sat));
-    *delta_socs = max(min(*delta_socs + delta_delta_socs, 1.-socs_avail), -socs_avail);
-    socs_avail += *delta_socs;
     if ( sat )
     {
-        *delta_socs = 0.;
+        if ( delta_delta_socs>0 )
+        {
+            delta_delta_socs = 0.;
+            *delta_socs = 0.;
+        }
         *t_sat = temp_c;
         *socs_sat = (*t_sat - 25.)*DQDT + 1.;
         socs_avail = *socs_sat;
     }
+    *delta_socs = max(min(*delta_socs + delta_delta_socs, 1.-socs_avail), -socs_avail);
+    socs_avail += *delta_socs;
+    if ( rp.debug==36 )
+        Serial.printf("coulomb_counter:  voc, v_sat, sat, pow_in, d_d_socs, d_socs, soc_sat, tsat,socs_avail=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC_free,  sat_voc(temp_c), sat, pow_in, delta_delta_socs, *delta_socs, *socs_sat, *t_sat, socs_avail);
     if ( rp.debug==-36 )
-    {
-        Serial.printf("coulomb_counter:  sat, pow_in_ekf, delta_delta_soc, delta_soc, soc_sat, tsat,-->,soc_avail=     %d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,-->,%7.3f,\n",
-                    sat, pow_in, delta_delta_socs, *delta_socs, *socs_sat, *t_sat, socs_avail);
-    }
+        Serial.printf("voc, v_sat, sat, pow_in, d_d_socs, d_socs, soc_sat, tsat,socs_avail,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC_free, sat_voc(temp_c), sat, pow_in, delta_delta_socs, *delta_socs, *socs_sat, *t_sat, socs_avail);
     return ( socs_avail );
 }
 

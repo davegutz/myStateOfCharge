@@ -41,6 +41,7 @@ struct CommandPars
   int8_t vec_num;           // Active vector number
   unsigned long vec_start;  // Start of active vector
   boolean enable_wifi;      // Enable wifi
+  double socs_ekf;          // EKF output
   CommandPars(void)
   {
     this->string_complete = false;

@@ -43,7 +43,7 @@ extern BlynkParticle Blynk;
 // Publish1 Blynk
 void publish1(void)
 {
-  if (rp.debug>4) Serial.printf("Blynk write1\n");
+  if (rp.debug>104) Serial.printf("Blynk write1\n");
   Blynk.virtualWrite(V0,  cp.pubList.Vbatt);
   Blynk.virtualWrite(V2,  cp.pubList.Vbatt_filt_obs);
   Blynk.virtualWrite(V3,  cp.pubList.VOC_solved);
@@ -55,7 +55,7 @@ void publish1(void)
 // Publish2 Blynk
 void publish2(void)
 {
-  if (rp.debug>4) Serial.printf("Blynk write2\n");
+  if (rp.debug>104) Serial.printf("Blynk write2\n");
   Blynk.virtualWrite(V6,  cp.pubList.socu_free);
   Blynk.virtualWrite(V7,  cp.pubList.Vbatt_solved);
   Blynk.virtualWrite(V8,  cp.pubList.T);
@@ -67,7 +67,7 @@ void publish2(void)
 // Publish3 Blynk
 void publish3(void)
 {
-  if (rp.debug>4) Serial.printf("Blynk write3\n");
+  if (rp.debug>104) Serial.printf("Blynk write3\n");
   Blynk.virtualWrite(V12, cp.pubList.Vshunt_amp);
   Blynk.virtualWrite(V13, cp.pubList.Vshunt_filt);
   Blynk.virtualWrite(V14, cp.pubList.I2C_status);
@@ -79,7 +79,7 @@ void publish3(void)
 // Publish4 Blynk
 void publish4(void)
 {
-  if (rp.debug>4) Serial.printf("Blynk write4\n");
+  if (rp.debug>104) Serial.printf("Blynk write4\n");
   Blynk.virtualWrite(V17, cp.pubList.Ishunt);
   Blynk.virtualWrite(V18, cp.pubList.Ishunt_filt_obs);
   Blynk.virtualWrite(V19, cp.pubList.Wshunt);
@@ -113,7 +113,7 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
   manage_wifi(now, wifi);
 
   // Publish if valid
-  if ( rp.debug>2 ) Serial.printf("Particle write:  ");
+  if ( rp.debug>102 ) Serial.printf("Particle write:  ");
   if ( wifi->connected )
   {
     // Create print string
@@ -127,11 +127,11 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
     sprintf(publishString,"%u:%u:%u",hours,min,sec);
     Particle.publish("Uptime",publishString);
     Particle.publish("stat", cp.buffer);
-    if ( rp.debug>2 ) Serial.println(cp.buffer);
+    if ( rp.debug>102 ) Serial.println(cp.buffer);
   }
   else
   {
-    if ( rp.debug>2 ) Serial.printf("nothing to do\n");
+    if ( rp.debug>102 ) Serial.printf("nothing to do\n");
     cp.pubList.num_timeouts++;
   }
 }
@@ -165,6 +165,7 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->socu_free = MyBattFree->socu()*100.0;
   pubList->socu = rp.socu*100.;
   pubList->socs = rp.socs*100.;
+  pubList->socs_ekf = cp.socs_ekf*100.;
   pubList->socs_sat = rp.socs_sat*100.;
   pubList->T = Sen->T;
   if ( rp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);

@@ -32,6 +32,7 @@ struct RetainedPars
   int8_t debug = 2;         // Level of debug printing
   double curr_bias_amp = 0; // Calibrate amp current sensor, A 
   double curr_bias_noamp = 0; // Calibrate non-amplified current sensor, A 
+  double curr_bias_all = 0; // Bias all current sensors, A 
   boolean curr_sel_amp = true; // Use amplified sensor
   double socs = 0.5;        // Coulomb counter scaled, normalized, state (0 - 1)
   double socu = 0.5;        // Coulomb counter state (-0.1 - 1.5 approx)
