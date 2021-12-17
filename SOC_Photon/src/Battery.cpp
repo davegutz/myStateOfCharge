@@ -84,11 +84,14 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
     rand_D_ = new double [rand_q_*rand_p_];
     rand_D_[0] = -r0_;
     rand_D_[1] = 1.;
+    rand_Cinv_ = new double [rand_q_*rand_n_];
+    rand_Cinv_[0] = 1.;
+    rand_Cinv_[1] = 1.;
     rand_Dinv_ = new double [rand_q_*rand_p_];
     rand_Dinv_[0] = r0_;
     rand_Dinv_[1] = 1.;
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n_, rand_p_, rand_q_);
-    RandlesInv_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_Dinv_, rand_n_, rand_p_, rand_q_);
+    RandlesInv_ = new StateSpace(rand_A_, rand_B_, rand_Cinv_, rand_Dinv_, rand_n_, rand_p_, rand_q_);
 
 }
 Battery::~Battery() {}
@@ -180,6 +183,8 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     Randles_->calc_x_dot(u);
     Randles_->update(dt);
     voc_dyn_ = Randles_->y(0);
+    vdyn_ = vb_ - voc_dyn_;
+    voc_ = voc_dyn_;
 
     // EKF 1x1
     predict_ekf(ib);            // u = ib
@@ -191,8 +196,8 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
 
     if ( rp.debug==-34 )
     {
-        Serial.printf("dt,ib,vb,voc_dyn,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, soc_avail= %7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,\n",
-            dt, ib, vb, voc_dyn_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, soc_avail_);
+        Serial.printf("dt,ib,voc_dyn,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, soc_avail= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,\n",
+            dt, ib, voc_dyn_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, soc_avail_);
     }
     if ( rp.debug==-37 )
     {
@@ -239,6 +244,7 @@ double Battery::calculate_model(const double temp_C, const double socu_frac, con
     RandlesInv_->calc_x_dot(u);
     RandlesInv_->update(dt);
     vb_ = max(RandlesInv_->y(0), 5.);
+    vdyn_ = vb_ - voc_;
 
 
     // Summarize   TODO: get rid of the global defines here because they differ from one battery to another
@@ -254,7 +260,7 @@ double Battery::calculate_model(const double temp_C, const double socu_frac, con
       socu_frac, vb_, ib_, pow_in_, vsat_, voc_);
 
     if ( rp.debug==-39 )Serial.printf("calculate_model:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-     temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_,vb_);
+     temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_, vb_);
 
     return ( vb_ );
 }

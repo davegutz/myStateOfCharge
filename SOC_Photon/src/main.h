@@ -377,15 +377,12 @@ void loop()
         Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
         Sen->Vbatt_filt_obs*10-110, MyBattSolved->voc()*10-110, MyBattSolved->vdyn()*10, MyBattSolved->vb()*10-110, MyBattFree->vdyn()*10-110);
     if ( rp.debug==-12 )
-    {
-      Serial.printf("ib_free,ib_mod,   vb_free*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_mod*10-110,   K, y,    SOC_avail-90, SOC_ekf-90, SOC_mod-90\n");
-      Serial.printf("%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
+      Serial.printf("ib_free,ib_mod,   vb_free*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_mod*10-110,   K, y,    SOC_avail-90, SOC_ekf-90, SOC_mod-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
         MyBattFree->ib(), MyBattModel->ib(),
         MyBattFree->vb()*10-110, MyBattModel->vb()*10-110,
         MyBattFree->voc_dyn()*10-110, MyBattModel->voc()*10-110,
         MyBattFree->K_ekf(), MyBattFree->y_ekf(),
         MyBattFree->soc_avail()*100-90, MyBattFree->soc_ekf()*100-90, MyBattModel->socs()*100-90);
-    }
     if ( rp.debug==-3 )
       Serial.printf("fast,et,reset_free,Wshunt,soc_f,T, %12.3f,%7.3f, %d, %7.3f,%7.3f,%7.3f,\n",
       control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, rp.socu_free, Sen->T_filt);

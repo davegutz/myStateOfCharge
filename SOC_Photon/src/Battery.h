@@ -116,6 +116,7 @@ protected:
   double *rand_B_;
   double *rand_C_;
   double *rand_D_;
+  double *rand_Cinv_;
   double *rand_Dinv_;
   int8_t rand_n_, rand_p_, rand_q_;  // TODO:   don't need these
   double temp_c_;   // Battery temperature, C
