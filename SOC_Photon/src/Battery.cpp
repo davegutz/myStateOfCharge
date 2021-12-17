@@ -45,9 +45,8 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
     voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsocs_(0), dv_dsocu_(0), tcharge_(24.), pow_in_(0.0),
     sr_(1.), nom_vsat_(batt_vsat), sat_(false), dv_(0), dvoc_dt_(dvoc_dt),
     r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
-    tau_sd_(1.8e7), r_sd_(70.), dQdT_(0.01)
+    tau_sd_(1.8e7), r_sd_(70.)
 {
-    // dQdT from literature.   0.01 / deg C is commonly used.
 
     // Battery characteristic tables
     B_T_ = new TableInterp1Dclip(nz_, x_tab, b_tab);
@@ -288,9 +287,9 @@ double Battery::coulomb_counter_avail(const double dt, const boolean saturated)
     {
         rp.delta_soc = 0.;
         rp.t_sat = temp_c_;
-        rp.soc_sat = (rp.t_sat - 25.)*dQdT_ + 1.;
+        rp.soc_sat = (rp.t_sat - 25.)*DQDT + 1.;
     }
-    soc_avail_ = max(min(rp.soc_sat*(1. - dQdT_*(temp_c_ - rp.t_sat)) + rp.delta_soc, 1.5), 0.);
+    soc_avail_ = max(min(rp.soc_sat*(1. - DQDT*(temp_c_ - rp.t_sat)) + rp.delta_soc, 1.5), 0.);
     if ( rp.debug==-36 )
     {
         Serial.printf("coulomb_counter_avail:  sat, pow_in_ekf, delta_delta_soc, delta_soc, soc_sat, tsat,-->,soc_avail=     %d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,-->,%7.3f,\n",
@@ -346,7 +345,6 @@ void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols)
                 c[i*bcols+j] += a[i*acols+l] * b[l*bcols+j];
         }
 }
-
 void mulvec(double * a, double * x, double * y, int m, int n)
 {
     int i, j;
@@ -356,4 +354,66 @@ void mulvec(double * a, double * x, double * y, int m, int n)
         for(j=0; j<n; ++j)
             y[i] += x[j] * a[i*n+j];
     }
+}
+
+/* Count coulombs base on true=actual capacity  TODO:  move to main
+    Internal resistance of battery is a loss
+    Inputs:
+        dt      Integration step, s
+        pow_in  Charge power, W
+        saturated   Indicator that battery is saturated (VOC>threshold(temp)), T/F
+        temp_c  Battery temperature, deg C
+    Outputs:
+        socs_avail  State of charge, fraction (0-1)
+        delta_socs  Iteration rate of change, (0-1)
+        t_sat       Battery temperature at saturation, deg C
+        socs_sat    State of charge at saturation, fraction (0-1)
+*/
+double coulombs(const double dt, const double pow_in, const boolean sat, const double temp_c,
+                                double *delta_socs, double *t_sat, double *socs_sat)
+{
+    double socs_avail = 0;   // return value
+    double delta_delta_socs = pow_in/NOM_SYS_VOLT*dt/3600./NOM_BATT_CAP;
+    socs_avail = *socs_sat*(1. - DQDT*(temp_c - *t_sat));
+    *delta_socs = max(min(*delta_socs + delta_delta_socs, 1.-socs_avail), -socs_avail);
+    socs_avail += *delta_socs;
+    if ( sat )
+    {
+        *delta_socs = 0.;
+        *t_sat = temp_c;
+        *socs_sat = (*t_sat - 25.)*DQDT + 1.;
+        socs_avail = *socs_sat;
+    }
+    if ( rp.debug==-36 )
+    {
+        Serial.printf("coulomb_counter:  sat, pow_in_ekf, delta_delta_soc, delta_soc, soc_sat, tsat,-->,soc_avail=     %d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,-->,%7.3f,\n",
+                    sat, pow_in, delta_delta_socs, *delta_socs, *socs_sat, *t_sat, socs_avail);
+    }
+    return ( socs_avail );
+}
+
+/* Calculate saturation voltage
+    Inputs:
+        temp_c  Battery temperature, deg C
+        batt_vsat   Battery nominal saturation voltage, constant from Battery.h, V
+        dvoc_dt Battery saturation sensitivity with temperature, V/deg C
+    Outputs:
+        sat_voc Battery saturation open circuit voltage, V
+*/
+double sat_voc(const double temp_c)
+{
+    return ( batt_vsat + (temp_c-25.)*dvoc_dt );
+}
+
+/* Calculate saturation status
+    Inputs:
+        temp_c  Battery temperature, deg C
+        voc     Battery open circuit voltage, V
+    Outputs:
+        is_saturated Battery saturation status, T/F
+*/
+boolean is_sat(const double temp_c, const double voc)
+{
+    double vsat = sat_voc(temp_c);
+    return ( voc >= vsat );
 }

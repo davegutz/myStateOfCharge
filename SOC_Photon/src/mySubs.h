@@ -65,6 +65,7 @@ struct Sensors
 {
   double Vbatt;           // Sensed battery voltage, V
   double Vbatt_model;     // Model coefficient model battery voltage based on filtered current, V
+  double Voc;             // Model open circuit voltage based on TODO, V
   double Vbatt_solved;    // Solved coefficient model battery voltage, V
   double Vbatt_filt;      // Filtered, sensed battery voltage, V
   double Vbatt_filt_obs;  // Filtered, sensed battery voltage for observer, V

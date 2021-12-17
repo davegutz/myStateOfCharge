@@ -92,13 +92,13 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T, SOCU_m"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T,   SOCU, SOCS, SOCS_sat"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %7.3f,  %7.3f,  %6.3f,%7.3f,  %c", \
+  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %7.3f,  %7.3f,  %6.3f,  %7.3f,%7.3f,%7.3f,  %c", \
     pubList->unit.c_str(),
     pubList->hm_string.c_str(), pubList->control_time,
     pubList->Tbatt, pubList->Tbatt_filt,
@@ -109,7 +109,8 @@ void create_print_string(char *buffer, Publish *pubList)
     pubList->VOC_solved,
     pubList->socu_solved, pubList->Vbatt_solved,
     pubList->socu_free, pubList->tcharge,
-    pubList->T, pubList->socu_model,
+    pubList->T,
+    pubList->socu, pubList->socs, pubList->socs_sat,
     '\0');
 }
 
@@ -416,7 +417,7 @@ uint32_t pwm_write(uint32_t duty, Pins *myPins)
 void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num,
   Battery *MyBattSolved, Battery *MyBattFree, Battery *MyBattModel)
 {
-  double SOCU_in = -99.;
+  double SOCS_in = -99.;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
   if (cp.string_complete)
   {
@@ -465,16 +466,12 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         }
         break;
       case ( 'm' ):
-        SOCU_in = cp.input_string.substring(1).toFloat()/100.;
-        rp.socu_free = max(min(SOCU_in, mxepu_bb), mnepu_bb);
-        rp.socu_model = rp.socu_free;
+        SOCS_in = cp.input_string.substring(1).toFloat()/100.;
+        rp.socu = max(min(SOCS_in, mxepu_bb), mnepu_bb);
+        rp.socu_free = rp.socu;
         rp.delta_soc = max(rp.socu_free - 1., -rp.soc_sat);
-        Serial.printf("socu_free=socu_model=%7.3f,   delta_soc=%7.3f,\n", rp.socu_free, rp.delta_soc);
-        break;
-      case ( 'n' ):
-        SOCU_in = cp.input_string.substring(1).toFloat()/100.;
-        rp.socu_model = max(min(SOCU_in, mxepu_bb), mnepu_bb);
-        Serial.printf("socu_model=%7.3f\n", rp.socu_model);
+        rp.delta_socs = max(rp.socu - 1., -rp.socs_sat);
+        Serial.printf("socu=socu_free=%7.3f,   delta_soc=%7.3f,\n", rp.socu, rp.delta_soc);
         break;
       case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
@@ -632,7 +629,6 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
   Serial.printf("d   dump the summary log\n"); 
   Serial.printf("m=  assign a free memory state in percent to all versions including model- '('truncated 0-100')'\n"); 
-  Serial.printf("n=  assign a free memory state in percent to model only - '('truncated 0-100')'\n"); 
   Serial.printf("s   curr signal select (1=amp preferred, 0=noamp) = "); Serial.println(rp.curr_sel_amp);
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("D/S<?> Adjustments.   For example:\n");

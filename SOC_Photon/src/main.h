@@ -233,12 +233,13 @@ void loop()
   // Free, driven by socu_free
   static Battery *MyBattFree = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
-  // Model, driven by socu_model, used to get Vbatt.   Use Talk 'x' to toggle model on/off.   (n set socu_model different than)
+  // Model, driven by socs, used to get Vbatt.   Use Talk 'x' to toggle model on/off. 
   static Battery *MyBattModel = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
 
   // Battery saturation
   static Debounce *SaturatedObj = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
+  static Debounce *SatObj = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
 
   unsigned long current_time;                // Time result
   static unsigned long now = millis();      // Keep track of time
@@ -272,6 +273,7 @@ void loop()
   static bool reset_free = false;
   static bool reset_free_ekf = true;
   static boolean saturated = false;
+  static boolean sat = false;
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
@@ -332,14 +334,12 @@ void loop()
       elapsed = 0UL;
       if ( cp.vectoring ) socu_free_saved = rp.socu_free;
       else rp.socu_free = socu_free_saved;
-      rp.socu_model = rp.socu_free;
     }
     vectoring_past = cp.vectoring;
     if ( reset_free )
     {
       if ( cp.vectoring ) rp.socu_free = socu_solved;
       else rp.socu_free = socu_free_saved;  // Only way to reach this line is resetting from vector test
-      rp.socu_model = rp.socu_free;
       MyBattFree->init_soc_ekf(rp.socu_free);
       if ( elapsed>INIT_WAIT ) reset_free = false;
     }
@@ -349,27 +349,24 @@ void loop()
       if ( elapsed>INIT_WAIT_EKF ) reset_free_ekf = false;
     }
 
-    // Model driven by itself and highly filtered shunt current to keep Vbatt_model quiet
-    if ( reset_free )
-    {
-      rp.socu_model = rp.socu_free;
-    }
-
-    // Sen->Vbatt_model = MyBattModel->calculate_model(Tbatt_filt_C, rp.socu_model, Sen->Ishunt_filt_obs, min(Sen->T, 0.5));
-    Sen->Vbatt_model = MyBattModel->calculate_model(Tbatt_filt_C, rp.socu_model, Sen->Ishunt, min(Sen->T, 0.5));
+    // Model driven by itself and highly filtered (by hardware RC) shunt current to keep Vbatt_model quiet
+    Sen->Vbatt_model = MyBattModel->calculate_model(Tbatt_filt_C, rp.socs, Sen->Ishunt, min(Sen->T, 0.5));
+    Sen->Voc = MyBattFree->voc();
 
     // EKF
     MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5), saturated);  // TODO:  hardcoded time of 0.5 into constants
 
     // Coulomb Count integrator
     rp.socu_free = max(min( rp.socu_free + Sen->Wshunt/NOM_SYS_VOLT*Sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
-    rp.socu_model = max(min( rp.socu_model + Sen->Wshunt/NOM_SYS_VOLT*Sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
     // Force initialization/reinitialization whenever saturated.   Keeps estimates close to reality
     if ( saturated )
     {
       rp.socu_free = mxepu_bb;
-      // rp.socu_model = rp.socu_free;   // Let saturation subside
     }
+    sat = SatObj->calculate(is_sat(Tbatt_filt_C, Sen->Voc), reset);
+    rp.socu = coulombs(Sen->T, Sen->Wshunt, sat, Tbatt_filt_C, &rp.delta_socs, &rp.t_sat, &rp.socs_sat);
+    rp.socs = 1. + rp.delta_socs;
+
     // Useful for Arduino plotting
     if ( rp.debug==-1 )
       Serial.printf("%7.3f,%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",

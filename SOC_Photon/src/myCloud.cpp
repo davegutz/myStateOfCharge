@@ -163,6 +163,9 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->num_timeouts = num_timeouts;
   pubList->socu_solved = MyBattSolved->socu()*100.0;
   pubList->socu_free = MyBattFree->socu()*100.0;
+  pubList->socu = rp.socu*100.;
+  pubList->socs = rp.socs*100.;
+  pubList->socs_sat = rp.socs_sat*100.;
   pubList->T = Sen->T;
   if ( rp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
   pubList->tcharge = MyBattFree->tcharge();
@@ -170,6 +173,5 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->VOC_solved = MyBattSolved->voc();
   pubList->Vbatt_solved = Sen->Vbatt_solved;
   pubList->soc_avail = MyBattFree->soc_avail()*100.0;
-  pubList->socu_model = rp.socu_model*100.0;
   pubList->curr_sel_amp = rp.curr_sel_amp;
 }

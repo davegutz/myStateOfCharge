@@ -52,11 +52,13 @@ struct Publish
   double Vshunt_filt;
   double Ishunt_filt_obs;
   int num_timeouts;
+  double socu;
+  double socs;
+  double socs_sat;
   double socu_solved;
   double socu_free;
   double tcharge;
   double soc_avail;
-  double socu_model;
 };
 
 void publish1(void);

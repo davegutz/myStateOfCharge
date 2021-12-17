@@ -125,7 +125,6 @@ protected:
   double tcharge_ekf_;  // Charging time to 100% from ekf, hr
   double voc_dyn_;  // Charging voltage, V
   double delta_soc_;  // Change to available charge since saturated, (0-1)
-  double dQdT_;     // Sensitivity of battery capacity with temperature, soc/deg C
   double qsat_;     // Charge at saturation, Ah
   double soc_avail_;  // Temperature adjusted estimate of battery state of charge (0-1)
   void ekf_model_predict(double *Fx, double *Bu);
@@ -146,6 +145,8 @@ protected:
 #define BATT_R2C2             100.      // Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
                                         // test so using with R2 and then multiplying by 4 for total result is valid,
                                         // though probably not for an individual cell
+#define DQDT                  0.01      // Change of charge with temperature, fraction/deg C
+                                        // dQdT from literature.   0.01 / deg C is commonly used.
 const int batt_num_cells = NOM_SYS_VOLT/3;  // Number of standard 3 volt LiFePO4 cells
 const double batt_vsat = double(batt_num_cells)*double(BATT_V_SAT);  // Total bank saturation for 0.997=soc, V
 const double batt_vmax = (14.3/4)*double(batt_num_cells); // Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
@@ -190,5 +191,9 @@ static TableInterp1Dclip  *T_T1 = new TableInterp1Dclip(n_v1, t_min_v1, T_v1);
 // Methods
 void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols);
 void mulvec(double * a, double * x, double * y, int m, int n);
+double coulombs(const double dt, const double pow_in, const boolean saturated, const double temp_c,
+                                double *delta_socs, double *t_sat, double *socs_sat);
+double sat_voc(const double temp_c);
+boolean is_sat(const double temp_c, const double voc);
 
 #endif
