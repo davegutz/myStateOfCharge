@@ -48,7 +48,7 @@ public:
   double calculate(const double temp_C, const double socu_frac, const double curr_in, const double dt);
   double calculate_model(const double temp_C, const double socu_frac, const double curr_in, const double dt);
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated);
-  void init_soc_ekf(const double socu_free_loc);
+  void init_soc_ekf(const double socs);
   double coulomb_counter_avail(const double dt, const boolean saturated);
   double num_cells() { return (double(num_cells_)); };
   double socs() { return (socs_); };

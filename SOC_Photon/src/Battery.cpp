@@ -392,10 +392,10 @@ double coulombs(const double dt, const double pow_in, const boolean sat, const d
     socs_avail += *delta_socs;
     if ( rp.debug==36 )
         Serial.printf("coulomb_counter:  voc, v_sat, sat, pow_in, d_d_socs, d_socs, socs_sat, tsat,socs_avail=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC_free,  sat_voc(temp_c), sat, pow_in, delta_delta_socss, *delta_socs, *socs_sat, *t_sat, socs_avail);
+                    cp.pubList.VOC,  sat_voc(temp_c), sat, pow_in, delta_delta_socss, *delta_socs, *socs_sat, *t_sat, socs_avail);
     if ( rp.debug==-36 )
         Serial.printf("voc, v_sat, sat, pow_in, d_d_socs, d_socs, socs_sat, tsat,socs_avail,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC_free, sat_voc(temp_c), sat, pow_in, delta_delta_socss, *delta_socs, *socs_sat, *t_sat, socs_avail);
+                    cp.pubList.VOC, sat_voc(temp_c), sat, pow_in, delta_delta_socss, *delta_socs, *socs_sat, *t_sat, socs_avail);
     return ( socs_avail );
 }
 

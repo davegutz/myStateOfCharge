@@ -44,8 +44,7 @@ struct Publish
   boolean curr_sel_amp; 
   double T;
   int I2C_status;
-  double VOC_free;
-  double VOC_solved;
+  double VOC;
   double Vbatt_filt;
   double Tbatt_filt;
   double Vshunt_filt;
@@ -55,7 +54,6 @@ struct Publish
   double socs;
   double socs_ekf;
   double socs_sat;
-  double socu_free;
   double tcharge;
   double soc_avail;
 };
@@ -67,6 +65,6 @@ void publish4(void);
 void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi);
 void assign_publist(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
   const double control_time, struct Sensors* Sen, const int num_timeouts,
-  Battery* MyBattSolved, Battery* MyBattEKF);
+  Battery* MyBattModel, Battery* MyBattEKF);
 
 #endif

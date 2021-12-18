@@ -56,7 +56,7 @@ void publish1(void)
 void publish2(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write2\n");
-  Blynk.virtualWrite(V6,  cp.pubList.socu_free);
+  Blynk.virtualWrite(V6,  cp.pubList.socs);
   // Blynk.virtualWrite(V7,  cp.pubList.Vbatt_solved);
   Blynk.virtualWrite(V8,  cp.pubList.T);
   Blynk.virtualWrite(V9,  cp.pubList.Tbatt);
@@ -140,7 +140,7 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
 // Assignments
 void assign_publist(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
   const double control_time, struct Sensors* Sen, const int num_timeouts,
-  Battery* MyBattSolved, Battery* MyBattEKF)
+  Battery* MyBattModel, Battery* MyBattEKF)
 {
   pubList->now = now;
   pubList->unit = unit;
@@ -161,7 +161,6 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Wshunt = Sen->Wshunt;
   pubList->Vshunt_amp = Sen->Vshunt_amp;
   pubList->num_timeouts = num_timeouts;
-  pubList->socu_free = MyBattEKF->socu()*100.0;
   pubList->socu = rp.socu*100.;
   pubList->socs = rp.socs*100.;
   pubList->socs_ekf = cp.socs_ekf*100.;
@@ -169,7 +168,7 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->T = Sen->T;
   if ( rp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
   pubList->tcharge = MyBattEKF->tcharge();
-  pubList->VOC_free = MyBattEKF->voc();
+  pubList->VOC = MyBattModel->voc();
   pubList->soc_avail = MyBattEKF->soc_avail()*100.0;
   pubList->curr_sel_amp = rp.curr_sel_amp;
 }

@@ -133,7 +133,7 @@ void filter_temp(int reset, Sensors *Sen, General2_Pole* TbattSenseFilt);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
 void print_serial_header(void);
-void myDisplay(Adafruit_SSD1306 *display);
+void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen);
 uint32_t pwm_write(uint32_t duty, Pins *myPins);
 String time_long_2_str(const unsigned long current_time, char *tempStr);
 void create_print_string(char *buffer, Publish *pubList);
@@ -141,7 +141,7 @@ void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *milli
 
 // Talk Declarations
 void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num,
-  Battery *MyBattSolved, Battery *MyBattEKF, Battery *MyBattModel);
+  Battery *MyBattEKF, Battery *MyBattModel);
 void talkT(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num);  // Transient inputs
 void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved); // Help
 

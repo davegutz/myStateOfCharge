@@ -36,7 +36,6 @@ struct RetainedPars
   boolean curr_sel_amp = true; // Use amplified sensor
   double socs = 0.5;        // Coulomb counter scaled, normalized, state (0 - 1)
   double socu = 0.5;        // Coulomb counter state (-0.1 - 1.5 approx)
-  double socu_free = 0.5;   // Coulomb Counter state (0 - 1.5)
   double vbatt_bias = 0;    // Calibrate Vbatt, V
   double delta_socs = -0.5;  // Coulomb Counter state for ekf, (-1 - 1)
   double t_sat = 25.;       // Battery temperature at saturation, deg C

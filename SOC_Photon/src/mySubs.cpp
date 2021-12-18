@@ -92,24 +92,24 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,  VOC_s,  SOCU_f, tcharge,  T,   SOCU, SOCS, SOCS_sat, SOCS_ekf,"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,  VOC_s,  SOCU_f, tcharge,  T,   SOCS_sat,    SOCU, SOCS, SOCS_ekf,"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %7.3f,  %7.3f,  %6.3f,  %7.3f,%7.3f,%7.3f,%7.3f,  %c", \
-    pubList->unit.c_str(),
-    pubList->hm_string.c_str(), pubList->control_time,
+  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %7.3f,  %6.3f,  %7.3f,    %7.3f,%7.3f,%7.3f,  %c", \
+    pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time,
     pubList->Tbatt, pubList->Tbatt_filt,
     pubList->Vbatt, pubList->Vbatt_filt,
     pubList->curr_sel_amp,
     pubList->Ishunt, pubList->Ishunt_filt,
     pubList->Wshunt,
-    pubList->VOC_solved,
-    pubList->socu_free, pubList->tcharge,
+    pubList->VOC,
+    pubList->tcharge,
     pubList->T,
-    pubList->socu, pubList->socs, pubList->socs_sat, pubList->socs_ekf,
+    pubList->socs_sat,
+    pubList->socu, pubList->socs, pubList->socs_ekf,
     '\0');
 }
 
@@ -384,8 +384,9 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
 }
 
 
-void myDisplay(Adafruit_SSD1306 *display)
+void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
 {
+  static boolean pass = false;
   display->clearDisplay();
 
   display->setTextSize(1);              // Normal 1:1 pixel scale
@@ -403,10 +404,14 @@ void myDisplay(Adafruit_SSD1306 *display)
   display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[4];
-  sprintf(dispStringS, "%3.0f", min(cp.pubList.socu, 999.));
+  if ( pass || !Sen->saturated )
+    sprintf(dispStringS, "%3.0f", min(cp.pubList.socu, 999.));
+  else if (Sen->saturated)
+    sprintf(dispStringS, "SAT");
   display->print(dispStringS);
 
   display->display();
+  pass = !pass;
 }
 
 
@@ -420,7 +425,7 @@ uint32_t pwm_write(uint32_t duty, Pins *myPins)
 
 // Talk Executive
 void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num,
-  Battery *MyBattSolved, Battery *MyBattEKF, Battery *MyBattModel)
+  Battery *MyBattEKF, Battery *MyBattModel)
 {
   double SOCS_in = -99.;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
@@ -444,7 +449,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
             rp.vbatt_bias = cp.input_string.substring(2).toFloat();
             break;
           case ( 'v' ):
-            MyBattSolved->Dv(cp.input_string.substring(2).toFloat());
+            MyBattModel->Dv(cp.input_string.substring(2).toFloat());
             break;
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
@@ -455,7 +460,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         {
           case ( 'r' ):
             double rscale = cp.input_string.substring(2).toFloat();
-            MyBattSolved->Sr(rscale);
+            MyBattModel->Sr(rscale);
             MyBattEKF->Sr(rscale);
             break;
         }
@@ -475,11 +480,10 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         break;
       case ( 'm' ):
         SOCS_in = cp.input_string.substring(1).toFloat()/100.;
-        rp.socu = max(min(SOCS_in, mxepu_bb), mnepu_bb);
-        rp.socu_free = rp.socu;
-        rp.delta_socs = max(rp.socu_free - 1., -rp.socs_sat);
-        rp.delta_socs = max(rp.socu - 1., -rp.socs_sat);
-        Serial.printf("socu=socu_free=%7.3f,   delta_socs=%7.3f,\n", rp.socu, rp.delta_socs);
+        rp.socs = max(min(SOCS_in, mxepu_bb), mnepu_bb);
+        rp.delta_socs = max(rp.socs - 1., -rp.socs_sat);
+        rp.delta_socs = max(rp.socs - 1., -rp.socs_sat);
+        Serial.printf("socs=%7.3f,   delta_socs=%7.3f,\n", rp.socs, rp.delta_socs);
         break;
       case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
@@ -590,7 +594,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         }
         break;
       case ( 'h' ): 
-        talkH(&cp.step_val, &cp.vec_num, MyBattSolved);
+        talkH(&cp.step_val, &cp.vec_num, MyBattModel);
         break;
       default:
         Serial.print(cp.input_string.charAt(0)); Serial.println(" unknown.  Try typing 'h'");
