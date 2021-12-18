@@ -143,7 +143,6 @@ void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt)
     if ( rp.debug>102 ) Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value\n");
     // Using last-good-value:  no assignment
   }
-  Sen->Tbatt += rp.t_bias;
 }
 
 // Load all others
@@ -307,7 +306,8 @@ void filter_temp(int reset, Sensors *Sen, General2_Pole* TbattSenseFilt)
   int reset_loc = reset || cp.vectoring;
 
   // Temperature
-  Sen->Tbatt_filt = TbattSenseFilt->calculate(Sen->Tbatt, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP));
+  Sen->Tbatt_filt = TbattSenseFilt->calculate(Sen->Tbatt, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + rp.t_bias;
+  Sen->Tbatt += rp.t_bias;
 }
 
 // Filter all other inputs

@@ -306,7 +306,7 @@ double coulombs(const double dt, const double charge_curr, const double q_cap, c
     *delta_q = max(min(*delta_q + d_delta_q, 1.1*(q_cap-q_avail)), -q_avail);
     soc = (q_avail + *delta_q) / q_avail;
     if ( rp.debug==36 )
-        Serial.printf("coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_avail,soc=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+        Serial.printf("coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_avail,soc=     %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
                     cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_avail, soc);
     if ( rp.debug==-36 )
         Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,soc_avail,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
