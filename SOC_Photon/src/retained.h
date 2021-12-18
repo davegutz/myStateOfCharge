@@ -54,6 +54,7 @@ struct RetainedPars
   double freq = 0.;         // Injected frequency, Hz (0-2)
   uint8_t type = 0;         // Injected waveform type.   0=sine, 1=square, 2=triangle
   double offset = 0;        // Constant bias, A
+  double t_bias = 0;        // Sensed temp bias, deg C
 };            
 
 #endif

@@ -143,6 +143,7 @@ void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt)
     if ( rp.debug>102 ) Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value\n");
     // Using last-good-value:  no assignment
   }
+  Sen->Tbatt += rp.t_bias;
 }
 
 // Load all others
@@ -453,6 +454,10 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
             rp.vbatt_bias = cp.input_string.substring(2).toFloat();
             Serial.printf("rp.vbatt_bias changed to %7.3f\n", rp.vbatt_bias);
             break;
+          case ( 't' ):
+            rp.t_bias = cp.input_string.substring(2).toFloat();
+            Serial.printf("rp.t_bias changed to %7.3f\n", rp.t_bias);
+            break;
           case ( 'v' ):
             MyBattModel->Dv(cp.input_string.substring(2).toFloat());
             Serial.printf("MyBattModel.Dv changed to %7.3f\n", MyBattModel->Dv());
@@ -656,6 +661,7 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias_noamp); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("    : delta I adder to all sensed shunt current, A [0]"); 
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
+  Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.println("    : delta T adder to sensed Tbatt, deg C [0]"); 
   Serial.printf("  Dv= "); Serial.print(batt_solved->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
   Serial.printf("  Sr= "); Serial.print(batt_solved->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("T<?>=  "); 
