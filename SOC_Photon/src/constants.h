@@ -50,8 +50,8 @@
 #define CHECK_INTERVAL        180000UL  // How often to check for WiFi once disconnected (180000UL = 3:00 min)
 #define CONNECT_WAIT          10000UL   // How long after setup that we try WiFi for first time (10000UL = 0:10 min)
 #define EST_WAIT              20000UL   // How long after init that we hold estimator integrate to let filters settle (20000UL)
-#define INIT_WAIT             30000UL   // How long after setup that we wait for convergence of observer before setting integrator (30000UL)
-#define INIT_WAIT_EKF         5000UL    // How long after setup that we wait for convergence of observer before setting EKF integrator (5000UL)
+#define INIT_WAIT             30000UL   // How long after setup that we wait for convergence of filters before setting integrator (30000UL)
+#define INIT_WAIT_EKF         5000UL    // How long after setup that we wait for convergence of filters before setting EKF integrator (5000UL)
 #define CONFIRMATION_DELAY    10000UL   // How long to confirm WiFi on before streaming (10000UL)
 #define GMT                   -5        // Enter time different to zulu (does not respect DST) (-5)
 #define USE_DST               1         // Whether to apply DST or not, 0 or 1 (1)
@@ -80,10 +80,10 @@
 #define F_O_MAX_T       3.0         // Maximum call update time filters (3.0)
 #define F_MAX_T         3.0         // Maximum call update time filters (3.0)
 #define F_MAX_T_TEMP    6.0         // Maximum call update time filters (6.0)
-#define F_O_W           0.50        // Observer filter wn, r/s (0.5)   
-#define F_O_Z           0.80        // Observer filter zeta (0.80)
-#define F_W             0.05        // Filter wn, r/s (0.05)   
-#define F_Z             0.80        // Filter zeta (0.80)
+#define F_W             0.50        // General filter wn, r/s (0.5)   
+#define F_Z             0.80        // General filter zeta (0.80)
+#define F_W_T           0.05        // Temperature filter wn, r/s (0.05)   
+#define F_Z_T           0.80        // Temperature filter zeta (0.80)
 #define SAT_PERSISTENCE 15          // Updates persistence on saturation tests (15)
 #define HDB_ISHUNT      0.13        // Half deadband to filter Ishunt, mA (0.13)
 #define HDB_ISHUNT_AMP  0.025       // Half deadband to filter Ishunt amplified, mA (0.025)
@@ -92,7 +92,7 @@
 
 #define SOLVE_MAX_ERR    1e-6        // Solver error tolerance, V (1e-6)
 #define SOLVE_MAX_COUNTS 10          // Solver maximum number of steps (10)
-#define SOLVE_MAX_STEP   0.2         // Solver maximum step size, frac soc
+#define SOLVE_MAX_STEP   0.2         // Solver maximum step size, frac socs
 
 // Conversion gains
 const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  

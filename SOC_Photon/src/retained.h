@@ -38,10 +38,8 @@ struct RetainedPars
   double socu = 0.5;        // Coulomb counter state (-0.1 - 1.5 approx)
   double socu_free = 0.5;   // Coulomb Counter state (0 - 1.5)
   double vbatt_bias = 0;    // Calibrate Vbatt, V
-  double delta_soc = -0.5;  // Coulomb Counter state for ekf, (-1 - 1)
   double delta_socs = -0.5;  // Coulomb Counter state for ekf, (-1 - 1)
   double t_sat = 25.;       // Battery temperature at saturation, deg C
-  double soc_sat = 1.;      // Battery charge at saturation, Ah
   double socs_sat = 1.;      // Battery charge at saturation, Ah
   boolean modeling = false; // Driving saturation calculation with model
   uint32_t duty = 0;        // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))

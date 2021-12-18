@@ -60,9 +60,9 @@ void EKF_1x1::predict_ekf(double u)
 }
 
   // Initialize
-  void EKF_1x1::init_ekf(double soc, double Pinit)
+  void EKF_1x1::init_ekf(double socs, double Pinit)
   {
-    x_ = soc;
+    x_ = socs;
     P_ = Pinit;
   }
 

@@ -66,9 +66,7 @@ struct Sensors
   double Vbatt;           // Sensed battery voltage, V
   double Vbatt_model;     // Model coefficient model battery voltage based on filtered current, V
   double Voc;             // Model open circuit voltage based on TODO, V
-  double Vbatt_solved;    // Solved coefficient model battery voltage, V
   double Vbatt_filt;      // Filtered, sensed battery voltage, V
-  double Vbatt_filt_obs;  // Filtered, sensed battery voltage for observer, V
   double Tbatt;           // Sensed battery temp, F
   double Tbatt_filt;      // Filtered, sensed battery temp, F
   int16_t Vshunt_amp_int; // Sensed shunt voltage, count
@@ -77,12 +75,11 @@ struct Sensors
   double Vshunt_noamp;    // Sensed shunt voltage, V
   double Vshunt;          // Sensed shunt voltage, V
   double Vshunt_filt;     // Filtered, sensed shunt voltage, V
-  double Vshunt_filt_obs; // Filtered, sensed shunt voltage for  observer, V
   double shunt_v2a_s;     // Selected shunt conversion gain, A/V
   double Ishunt_amp_cal;  // Sensed, calibrated amplified ADC, A
   double Ishunt_noamp_cal;// Sensed, calibrated non-amplified ADC, A
   double Ishunt;          // Selected calibrated, shunt current, A
-  double Ishunt_filt_obs; // Filtered, calibrated sensed shunt current for observer, A
+  double Ishunt_filt; // Filtered, calibrated sensed shunt current for observer, A
   double Wshunt;          // Sensed shunt power, W
   double Wcharge;          // Charge power, W
   int I2C_status;
@@ -103,8 +100,6 @@ struct Sensors
   {
     this->Vbatt = Vbatt;
     this->Vbatt_filt = Vbatt_filt;
-    this->Vbatt_filt_obs = Vbatt_filt;
-    this->Vbatt_solved = Vbatt;
     this->Tbatt = Tbatt;
     this->Tbatt_filt = Tbatt_filt;
     this->Vshunt_noamp_int = Vshunt_noamp_int;
@@ -133,8 +128,7 @@ void load(const bool reset_free, Sensors *Sen, Pins *myPins,
     Adafruit_ADS1015 *ads_amp, Adafruit_ADS1015 *ads_noamp, const unsigned long now,
     SlidingDeadband *SdVbatt);
 void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt);
-void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs,
-  General2_Pole* VshuntSenseFiltObs,  General2_Pole* VshuntAmpSenseFiltObs);
+void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFilt, General2_Pole* IshuntSenseFilt);
 void filter_temp(int reset, Sensors *Sen, General2_Pole* TbattSenseFilt);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
@@ -147,7 +141,7 @@ void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *milli
 
 // Talk Declarations
 void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num,
-  Battery *MyBattSolved, Battery *MyBattFree, Battery *MyBattModel);
+  Battery *MyBattSolved, Battery *MyBattEKF, Battery *MyBattModel);
 void talkT(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num);  // Transient inputs
 void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved); // Help
 

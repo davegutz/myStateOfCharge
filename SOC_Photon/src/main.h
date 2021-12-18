@@ -209,11 +209,10 @@ void setup()
 // Loop
 void loop()
 {
-  // Sensor noise filters.   Obs filters 0.5 --> 0.1 to eliminate digital instability.   Also rate limited the observer belts+suspenders
-  static General2_Pole* VbattSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, 0.4*double(NOM_SYS_VOLT), 2.0*double(NOM_SYS_VOLT));
-  static General2_Pole* VshuntSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, -0.500, 0.500);
-  static General2_Pole* VshuntAmpSenseFiltObs = new General2_Pole(double(READ_DELAY)/1000., F_O_W, F_O_Z, -0.500, 0.500);
-  static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -20.0, 150.);
+  // Sensor noise filters.   There are AAF in hardware for Vbatt and VshuntAmp and VshuntNoAmp
+  static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, 0.4*double(NOM_SYS_VOLT), 2.0*double(NOM_SYS_VOLT));
+  static General2_Pole* IshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -0.500, 0.500);
+  static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
 
   // 1-wire temp sensor battery temp
   static DS18* SensorTbatt = new DS18(myPins->pin_1_wire);
@@ -231,7 +230,7 @@ void loop()
   static Battery *MyBattSolved = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
   // Free, driven by socu_free
-  static Battery *MyBattFree = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
+  static Battery *MyBattEKF = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
   // Model, driven by socs, used to get Vbatt.   Use Talk 'x' to toggle model on/off. 
   static Battery *MyBattModel = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
@@ -269,7 +268,6 @@ void loop()
   bool control;                         // Summarize, T/F
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
 
-  static double socu_solved = 1.0;
   static bool reset_free = false;
   static bool reset_free_ekf = true;
   static boolean saturated = false;
@@ -319,7 +317,7 @@ void loop()
 
     // Arduino plots
     if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n",
-        socu_solved, Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
+        rp.socs, Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
         Sen->Vbatt, MyBattSolved->voc());
 
     // Initialize SOC Free Integrator - Coulomb Counting method
@@ -337,23 +335,23 @@ void loop()
     vectoring_past = cp.vectoring;
     if ( reset_free )
     {
-      if ( cp.vectoring ) rp.socu_free = socu_solved;
+      if ( cp.vectoring ) rp.socu_free = rp.socu;
       else rp.socu_free = socu_free_saved;  // Only way to reach this line is resetting from vector test
-      MyBattFree->init_soc_ekf(rp.socu_free);
+      MyBattEKF->init_soc_ekf(rp.socs);
       if ( elapsed>INIT_WAIT ) reset_free = false;
     }
     if ( reset_free_ekf )
     {
-      MyBattFree->init_soc_ekf(rp.socu_free);
+      MyBattEKF->init_soc_ekf(rp.socs);
       if ( elapsed>INIT_WAIT_EKF ) reset_free_ekf = false;
     }
 
     // Model driven by itself and highly filtered (by hardware RC) shunt current to keep Vbatt_model quiet
     Sen->Vbatt_model = MyBattModel->calculate_model(Tbatt_filt_C, rp.socs, Sen->Ishunt, min(Sen->T, 0.5));
-    Sen->Voc = MyBattFree->voc();
+    Sen->Voc = MyBattEKF->voc();
 
     // EKF
-    cp.socs_ekf = MyBattFree->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5), saturated);  // TODO:  hardcoded time of 0.5 into constants
+    cp.socs_ekf = MyBattEKF->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5), saturated);  // TODO:  hardcoded time of 0.5 into constants
 
     // Coulomb Count integrator
     rp.socu_free = max(min( rp.socu_free + Sen->Wshunt/NOM_SYS_VOLT*Sen->T/3600./NOM_BATT_CAP, 1.5), 0.);
@@ -369,24 +367,24 @@ void loop()
 
     // Useful for Arduino plotting
     if ( rp.debug==-1 )
-      Serial.printf("%7.3f,%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-        socu_solved*100-90, MyBattFree->soc_avail()*100-90,
+      Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+        MyBattEKF->soc_avail()*100-90,
         Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
-        Sen->Vbatt_filt_obs*10-110, MyBattSolved->voc()*10-110, MyBattSolved->vdyn()*10, MyBattSolved->vb()*10-110, MyBattFree->vdyn()*10-110);
+        Sen->Vbatt_filt*10-110, MyBattSolved->voc()*10-110, MyBattSolved->vdyn()*10, MyBattSolved->vb()*10-110, MyBattEKF->vdyn()*10-110);
     if ( rp.debug==12 )
       Serial.printf("ib_free,ib_mod,   vb_free,vb_mod,  voc_dyn,voc_mod,   K, y,    SOC_avail, SOC_ekf, SOC_mod,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
-        MyBattFree->ib(), MyBattModel->ib(),
-        MyBattFree->vb(), MyBattModel->vb(),
-        MyBattFree->voc_dyn(), MyBattModel->voc(),
-        MyBattFree->K_ekf(), MyBattFree->y_ekf(),
-        MyBattFree->soc_avail(), MyBattFree->soc_ekf(), MyBattModel->socs());
+        MyBattEKF->ib(), MyBattModel->ib(),
+        MyBattEKF->vb(), MyBattModel->vb(),
+        MyBattEKF->voc_dyn(), MyBattModel->voc(),
+        MyBattEKF->K_ekf(), MyBattEKF->y_ekf(),
+        MyBattEKF->soc_avail(), MyBattEKF->soc_ekf(), MyBattModel->socs());
     if ( rp.debug==-12 )
       Serial.printf("ib_free,ib_mod,   vb_free*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_mod*10-110,   K, y,    SOC_avail-90, SOC_ekf-90, SOC_mod-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
-        MyBattFree->ib(), MyBattModel->ib(),
-        MyBattFree->vb()*10-110, MyBattModel->vb()*10-110,
-        MyBattFree->voc_dyn()*10-110, MyBattModel->voc()*10-110,
-        MyBattFree->K_ekf(), MyBattFree->y_ekf(),
-        MyBattFree->soc_avail()*100-90, MyBattFree->soc_ekf()*100-90, MyBattModel->socs()*100-90);
+        MyBattEKF->ib(), MyBattModel->ib(),
+        MyBattEKF->vb()*10-110, MyBattModel->vb()*10-110,
+        MyBattEKF->voc_dyn()*10-110, MyBattModel->voc()*10-110,
+        MyBattEKF->K_ekf(), MyBattEKF->y_ekf(),
+        MyBattEKF->soc_avail()*100-90, MyBattEKF->soc_ekf()*100-90, MyBattModel->socs()*100-90);
     if ( rp.debug==-3 )
       Serial.printf("fast,et,reset_free,Wshunt,soc_f,T, %12.3f,%7.3f, %d, %7.3f,%7.3f,%7.3f,\n",
       control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, rp.socu_free, Sen->T_filt);
@@ -401,39 +399,16 @@ void loop()
     if ( rp.debug>102 ) Serial.printf("Filter update=%7.3f and performing load() at %ld...  ", Sen->T_filt, millis());
 
     // Filter
-    filter(reset, Sen, VbattSenseFiltObs, VshuntSenseFiltObs,  VshuntAmpSenseFiltObs);
+    filter(reset, Sen, VbattSenseFilt, IshuntSenseFilt);
     saturated = SaturatedObj->calculate(MyBattSolved->sat(), reset);
 
     // Battery models
-    MyBattFree->calculate(Tbatt_filt_C, rp.socu_free, Sen->Ishunt,  min(Sen->T_filt, F_MAX_T));
-
-    // Solver
-    // double vbatt_f_o = Sen->Vbatt_filt_obs + double(cp.stepping*cp.step_val);
-    double voc = MyBattFree->voc_dyn() + double(cp.stepping*cp.step_val);
-    int8_t count = 0;
-    Sen->Vbatt_solved = MyBattSolved->calculate(Tbatt_filt_C, socu_solved, Sen->Ishunt_filt_obs, Sen->T_filt);
-    // double err = vbatt_f_o - Sen->Vbatt_solved;
-    double err = voc - Sen->Vbatt_solved;
-    while( fabs(err)>SOLVE_MAX_ERR && count++<SOLVE_MAX_COUNTS )
-    {
-      socu_solved = max(min(socu_solved + max(min( err/MyBattSolved->dv_dsocu(), SOLVE_MAX_STEP), -SOLVE_MAX_STEP), mxepu_bb), mnepu_bb);
-      Sen->Vbatt_solved = MyBattSolved->calculate(Tbatt_filt_C, socu_solved, Sen->Ishunt_filt_obs, Sen->T_filt);
-      // err = vbatt_f_o - Sen->Vbatt_solved;
-      err = voc - Sen->Vbatt_solved;
-      if ( rp.debug==-5 ) Serial.printf("Tbatt_f,Ishunt_f_o,count,socu_s,vbatt_f_o,Vbatt_m_s,err,dv_dsocu, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-          // Sen->Tbatt_filt, Sen->Ishunt_filt_obs, count, socu_solved, vbatt_f_o, Sen->Vbatt_solved, err, MyBattSolved->dv_dsocu());
-          Sen->Tbatt_filt, Sen->Ishunt_filt_obs, count, socu_solved, voc, Sen->Vbatt_solved, err, MyBattSolved->dv_dsocu());
-    }
-    // boolean solver_valid = count<SOLVE_MAX_COUNTS; 
-    if ( rp.debug==-35 ) Serial.printf("soc_avail,socu_solved,Vbatt_solved, soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f, %7.3f, %7.3f\n",
-        MyBattFree->soc_avail(), socu_solved, Sen->Vbatt_solved, MyBattFree->x_ekf(), MyBattFree->z_ekf());
+    MyBattEKF->calculate(Tbatt_filt_C, rp.socu_free, Sen->Ishunt,  min(Sen->T_filt, F_MAX_T));
 
     // rp.debug print statements
     // Useful for vector testing and serial data capture
-    if ( rp.debug==-2 )
-      Serial.printf("slow,et,reset_f,vect,sat,Tbatt,Ishunt,Vb_f_o,soc_s,soc_f,Vb_s,voc,dvdsoc,T,count,tcharge,  %12.3f, %7.3f, %d,%d,%d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,\n",
-      control_time, double(elapsed)/1000., reset_free, cp.vectoring, saturated, Sen->Tbatt, Sen->Ishunt_filt_obs, Sen->Vbatt_filt_obs+double(cp.stepping*cp.step_val),
-      socu_solved, rp.socu_free, Sen->Vbatt_solved, MyBattSolved->voc(), MyBattSolved->dv_dsocu(), Sen->T, count, MyBattFree->tcharge());
+    if ( rp.debug==-35 ) Serial.printf("soc_avail,soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f\n",
+        MyBattEKF->soc_avail(), MyBattEKF->x_ekf(), MyBattEKF->z_ekf());
 
     //if ( bare ) delay(41);  // Usual I2C time
     if ( rp.debug>102 ) Serial.printf("completed load at %ld\n", millis());
@@ -466,7 +441,7 @@ void loop()
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
     control_time = decimalTime(&current_time, tempStr, now, millis_flip);
     hm_string = String(tempStr);
-    assign_publist(&cp.pubList, PublishParticle->now(), unit, hm_string, control_time, Sen, num_timeouts, MyBattSolved, MyBattFree);
+    assign_publist(&cp.pubList, PublishParticle->now(), unit, hm_string, control_time, Sen, num_timeouts, MyBattSolved, MyBattEKF);
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
@@ -494,7 +469,7 @@ void loop()
   // right in the "Send String" box then press "Send."
   // String definitions are below.
   int debug_saved = rp.debug;
-  talk(&cp.stepping, &cp.step_val, &cp.vectoring, &cp.vec_num, MyBattSolved, MyBattFree, MyBattModel);
+  talk(&cp.stepping, &cp.step_val, &cp.vectoring, &cp.vec_num, MyBattSolved, MyBattEKF, MyBattModel);
 
   // Summary management
   if ( rp.debug==-4 )
@@ -506,8 +481,8 @@ void loop()
   if ( summarizing )
   {
     if ( ++isum>nsum-1 ) isum = 0;
-    mySum[isum].assign(current_time, Sen->Tbatt_filt, Sen->Vbatt_filt_obs, Sen->Ishunt_filt_obs,
-      socu_solved, rp.socu_free, MyBattSolved->dv_dsocu());
+    mySum[isum].assign(current_time, Sen->Tbatt_filt, Sen->Vbatt_filt, Sen->Ishunt_filt,
+      rp.socu, rp.socs, MyBattSolved->dv_dsocs());
     if ( rp.debug==-11 )
     {
       Serial.printf("Summm***********************\n");

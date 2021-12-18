@@ -92,22 +92,21 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,  VOC_s,  SOCU_s,Vbatt_s, SOCU_f, tcharge,  T,   SOCU, SOCS, SOCS_sat, SOCS_ekf,"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,  VOC_s,  SOCU_f, tcharge,  T,   SOCU, SOCS, SOCS_sat, SOCS_ekf,"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %7.3f,  %7.3f,  %6.3f,  %7.3f,%7.3f,%7.3f,%7.3f,  %c", \
+  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %7.3f,  %7.3f,  %6.3f,  %7.3f,%7.3f,%7.3f,%7.3f,  %c", \
     pubList->unit.c_str(),
     pubList->hm_string.c_str(), pubList->control_time,
     pubList->Tbatt, pubList->Tbatt_filt,
-    pubList->Vbatt, pubList->Vbatt_filt_obs,
+    pubList->Vbatt, pubList->Vbatt_filt,
     pubList->curr_sel_amp,
-    pubList->Ishunt, pubList->Ishunt_filt_obs,
+    pubList->Ishunt, pubList->Ishunt_filt,
     pubList->Wshunt,
     pubList->VOC_solved,
-    pubList->socu_solved, pubList->Vbatt_solved,
     pubList->socu_free, pubList->tcharge,
     pubList->T,
     pubList->socu, pubList->socs, pubList->socs_sat, pubList->socs_ekf,
@@ -234,11 +233,11 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   Sen->Ishunt_noamp_cal = Sen->Vshunt_noamp*shunt_noamp_v2a_s + Sen->curr_bias_noamp;
 
   // Print results
-  if ( rp.debug==-14 ) Serial.printf("reset_free,select,   vs_na_int,0_na_int,1_na_int,vshunt_na,ishunt_na, ||, vshunt_a_int,0_a_int,1_a_int,vshunt_a,ishunt_a,  Ishunt_filt_obs,T, %d,%d,%d,%d,%d,%7.3f,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+  if ( rp.debug==-14 ) Serial.printf("reset_free,select,   vs_na_int,0_na_int,1_na_int,vshunt_na,ishunt_na, ||, vshunt_a_int,0_a_int,1_a_int,vshunt_a,ishunt_a,  Ishunt_filt,T, %d,%d,%d,%d,%d,%7.3f,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n",
     reset_free, rp.curr_sel_amp,
     Sen->Vshunt_noamp_int, vshunt_noamp_int_0, vshunt_noamp_int_1, Sen->Vshunt_noamp, Sen->Ishunt_noamp_cal,
     Sen->Vshunt_amp_int, vshunt_amp_int_0, vshunt_amp_int_1, Sen->Vshunt_amp, Sen->Ishunt_amp_cal,
-    Sen->Ishunt_filt_obs,
+    Sen->Ishunt_filt,
     T);
 
   // Current signal selection, based on if there or not.
@@ -310,21 +309,18 @@ void filter_temp(int reset, Sensors *Sen, General2_Pole* TbattSenseFilt)
 }
 
 // Filter all other inputs
-void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFiltObs,
-  General2_Pole* VshuntSenseFiltObs,  General2_Pole* VshuntAmpSenseFiltObs)
+void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFilt,  General2_Pole* IshuntSenseFilt)
 {
   int reset_loc = reset || cp.vectoring;
 
   // Shunt
-  Sen->Vshunt_filt_obs = VshuntSenseFiltObs->calculate( Sen->Vshunt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
-  if ( rp.curr_sel_amp )
-  Sen->Ishunt_filt_obs = Sen->Vshunt_filt_obs*Sen->shunt_v2a_s + Sen->curr_bias;
+  Sen->Ishunt_filt = IshuntSenseFilt->calculate( Sen->Ishunt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
   
   // Voltage
   if ( rp.modeling )
-    Sen->Vbatt_filt_obs = Sen->Vbatt_model;
+    Sen->Vbatt_filt = Sen->Vbatt_model;
   else
-    Sen->Vbatt_filt_obs = VbattSenseFiltObs->calculate(Sen->Vbatt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
+    Sen->Vbatt_filt = VbattSenseFilt->calculate(Sen->Vbatt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
 
 }
 
@@ -396,7 +392,7 @@ void myDisplay(Adafruit_SSD1306 *display)
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner
   char dispString[21];
-  sprintf(dispString, "%3.0f %5.2f %5.1f", cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt_filt_obs);
+  sprintf(dispString, "%3.0f %5.2f %5.1f", cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt_filt);
   display->println(dispString);
 
   display->println(F(""));
@@ -424,7 +420,7 @@ uint32_t pwm_write(uint32_t duty, Pins *myPins)
 
 // Talk Executive
 void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num,
-  Battery *MyBattSolved, Battery *MyBattFree, Battery *MyBattModel)
+  Battery *MyBattSolved, Battery *MyBattEKF, Battery *MyBattModel)
 {
   double SOCS_in = -99.;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
@@ -460,7 +456,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
           case ( 'r' ):
             double rscale = cp.input_string.substring(2).toFloat();
             MyBattSolved->Sr(rscale);
-            MyBattFree->Sr(rscale);
+            MyBattEKF->Sr(rscale);
             break;
         }
         break;
@@ -481,9 +477,9 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         SOCS_in = cp.input_string.substring(1).toFloat()/100.;
         rp.socu = max(min(SOCS_in, mxepu_bb), mnepu_bb);
         rp.socu_free = rp.socu;
-        rp.delta_soc = max(rp.socu_free - 1., -rp.soc_sat);
+        rp.delta_socs = max(rp.socu_free - 1., -rp.socs_sat);
         rp.delta_socs = max(rp.socu - 1., -rp.socs_sat);
-        Serial.printf("socu=socu_free=%7.3f,   delta_soc=%7.3f,\n", rp.socu, rp.delta_soc);
+        Serial.printf("socu=socu_free=%7.3f,   delta_socs=%7.3f,\n", rp.socu, rp.delta_socs);
         break;
       case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
@@ -558,7 +554,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.freq = 0.05;
                 rp.amp = 18.3;
                 rp.offset = -rp.amp;
-                rp.debug = -1;
+                rp.debug = -12;
                 Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp, rp.debug);
                 rp.freq *= (2. * PI);
@@ -572,7 +568,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp, rp.debug);
                 rp.freq *= (2. * PI);
-                rp.debug = -1;
+                rp.debug = -12;
                 break;
               case ( 3 ):
                 rp.modeling = true;
@@ -583,7 +579,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp, rp.debug);
                 rp.freq *= (2. * PI);
-                rp.debug = -1;
+                rp.debug = -12;
                 break;
               default:
                 Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
