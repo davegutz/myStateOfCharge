@@ -342,7 +342,7 @@ void loop()
     }
 
     // Model driven by itself and highly filtered (by hardware RC) shunt current to keep Vbatt_model quiet
-    Sen->Vbatt_model = MyBattModel->calculate(Tbatt_filt_C, rp.socs, Sen->Ishunt, min(Sen->T, 0.5));
+    Sen->Vbatt_model = MyBattModel->calculate(Tbatt_filt_C, rp.socs_model, Sen->Ishunt, min(Sen->T, 0.5));
     boolean sat_model = is_sat(Tbatt_filt_C, MyBattModel->voc());
     rp.socu_model = MyBattModel->coulombs(Sen->T, Sen->Wcharge, sat_model, Tbatt_filt_C, &rp.delta_socs_model, &rp.t_sat_model, &rp.socs_sat_model);
     rp.socs_model = 1. + rp.delta_socs_model;

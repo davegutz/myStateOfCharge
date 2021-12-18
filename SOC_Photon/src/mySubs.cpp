@@ -438,18 +438,23 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         {
           case ( 'a' ):
             rp.curr_bias_amp = cp.input_string.substring(2).toFloat();
+            Serial.printf("rp.curr_bias_amp changed to %7.3f\n", rp.curr_bias_amp);
             break;
           case ( 'b' ):
             rp.curr_bias_noamp = cp.input_string.substring(2).toFloat();
+            Serial.printf("rp.curr_bias_noamp changed to %7.3f\n", rp.curr_bias_noamp);
             break;
           case ( 'i' ):
             rp.curr_bias_all = cp.input_string.substring(2).toFloat();
+            Serial.printf("rp.curr_bias_all changed to %7.3f\n", rp.curr_bias_all);
             break;
           case ( 'c' ):
             rp.vbatt_bias = cp.input_string.substring(2).toFloat();
+            Serial.printf("rp.vbatt_bias changed to %7.3f\n", rp.vbatt_bias);
             break;
           case ( 'v' ):
             MyBattModel->Dv(cp.input_string.substring(2).toFloat());
+            Serial.printf("MyBattModel.Dv changed to %7.3f\n", MyBattModel->Dv());
             break;
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
@@ -481,9 +486,11 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
       case ( 'm' ):
         SOCS_in = cp.input_string.substring(1).toFloat()/100.;
         rp.socs = max(min(SOCS_in, mxepu_bb), mnepu_bb);
+        rp.socs_model = max(min(SOCS_in, mxepu_bb), mnepu_bb);
         rp.delta_socs = max(rp.socs - 1., -rp.socs_sat);
-        rp.delta_socs = max(rp.socs - 1., -rp.socs_sat);
-        Serial.printf("socs=%7.3f,   delta_socs=%7.3f,\n", rp.socs, rp.delta_socs);
+        rp.delta_socs_model = max(rp.socs_model - 1., -rp.socs_sat_model);
+        Serial.printf("socs=%7.3f,   delta_socs=%7.3f, socs_model=%7.3f,   delta_socs_model=%7.3f\n",
+                        rp.socs, rp.delta_socs, rp.socs_model, rp.delta_socs_model);
         break;
       case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
@@ -772,12 +779,12 @@ BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const doubl
 {}
 
 // SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model
-double BatteryModel::calculate(const double temp_C, const double socu_frac, const double curr_in, const double dt)
+double BatteryModel::calculate(const double temp_C, const double socs, const double curr_in, const double dt)
 {
     dt_ = dt;
 
-    socu_ = socu_frac;
-    socs_ = 1-(1-socu_)*cu_bb/cs_bb;
+    socs_ = socs;
+    socu_ = ((socs_-1)*cs_bb/cu_bb)+1;
     double socs_lim = max(min(socs_, mxeps_bb), mneps_bb);
     ib_ = curr_in;
 
@@ -801,8 +808,8 @@ double BatteryModel::calculate(const double temp_C, const double socu_frac, cons
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
     // sat_ = voc_ >= vsat_;
 
-    if ( rp.debug==78 ) Serial.printf("calculate_ model:  SOCU_in,v,curr,pow,vsat,voc= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
-      socu_frac, vb_, ib_, pow_in_, vsat_, voc_);
+    if ( rp.debug==78 ) Serial.printf("calculate_ model:  socs_in,v,curr,pow,vsat,voc= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
+      socs, vb_, ib_, pow_in_, vsat_, voc_);
 
     if ( rp.debug==79 )Serial.printf("calculate_model:  tempC,tempF,curr,a,b,c,d,n,m,r,socs,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_, vb_);
@@ -827,26 +834,26 @@ double BatteryModel::coulombs(const double dt, const double pow_in, const boolea
                                 double *delta_socs, double *t_sat, double *socs_sat)
 {
     double socs_avail = 0;   // return value
-    double delta_delta_socss = pow_in/NOM_SYS_VOLT*dt/3600./NOM_BATT_CAP;
+    double delta_delta_socs = pow_in/NOM_SYS_VOLT*dt/3600./NOM_BATT_CAP;
     socs_avail = *socs_sat*(1. - DQDT*(temp_c - *t_sat));
     if ( sat )
     {
-        if ( delta_delta_socss>0 )
+        if ( delta_delta_socs>0 )
         {
-            delta_delta_socss = 0.;
+            delta_delta_socs = 0.;
             *delta_socs = 0.;
         }
         *t_sat = temp_c;
         *socs_sat = (*t_sat - 25.)*DQDT + 1.;
         socs_avail = *socs_sat;
     }
-    *delta_socs = max(min(*delta_socs + delta_delta_socss, 1.-socs_avail), -socs_avail);
+    *delta_socs = max(min(*delta_socs + delta_delta_socs, 1.-socs_avail), -socs_avail);
     socs_avail += *delta_socs;
     if ( rp.debug==76 )
         Serial.printf("BatteryModel::coulombs:  voc, v_sat, sat, pow_in, d_d_socs, d_socs, socs_sat, tsat,socs_avail=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c), sat, pow_in, delta_delta_socss, *delta_socs, *socs_sat, *t_sat, socs_avail);
+                    cp.pubList.VOC,  sat_voc(temp_c), sat, pow_in, delta_delta_socs, *delta_socs, *socs_sat, *t_sat, socs_avail);
     if ( rp.debug==-76 )
         Serial.printf("voc, v_sat, sat, pow_in, d_d_socs, d_socs, socs_sat, tsat,socs_avail,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC, sat_voc(temp_c), sat, pow_in, delta_delta_socss, *delta_socs, *socs_sat, *t_sat, socs_avail);
+                    cp.pubList.VOC, sat_voc(temp_c), sat, pow_in, delta_delta_socs, *delta_socs, *socs_sat, *t_sat, socs_avail);
     return ( socs_avail );
 }
