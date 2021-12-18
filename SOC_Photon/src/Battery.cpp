@@ -155,10 +155,10 @@ double Battery::calculate(const double temp_C, const double socu_frac, const dou
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
     sat_ = voc_ >= vsat_;
 
-    if ( rp.debug==-8 ) Serial.printf("calculate:  SOCU_in,v,curr,pow,tcharge,vsat,voc,sat= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
+    if ( rp.debug==8 ) Serial.printf("calculate:  SOCU_in,v,curr,pow,tcharge,vsat,voc,sat= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
       socu_frac, vb_, ib_, pow_in_, tcharge_, vsat_, voc_, sat_);
 
-    if ( rp.debug==-9 )Serial.printf("calculate:  tempC,tempF,curr,a,b,c,d,n,m,r,socs,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+    if ( rp.debug==9 )Serial.printf("calculate:  tempC,tempF,curr,a,b,c,d,n,m,r,socs,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_,vb_);
 
     return ( vb_ );
@@ -189,9 +189,6 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     update_ekf(voc_dyn_, 0., 1., dt);   // z = voc_dyn
     socs_ekf_ = x_ekf();         // x = Vsoc (0-1 ideal capacitor voltage)
 
-    // Coulomb counter  TODO:  move to main and use rp.delta_socs
-    coulomb_counter_avail(dt, saturated);
-
     if ( rp.debug==34 )
         Serial.printf("dt,ib,voc_dyn,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, soc_avail,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,\n",
             dt, ib, voc_dyn_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, socs_ekf_, socs_avail_);
@@ -218,88 +215,6 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     
     return ( socs_ekf_ );
 }
-
-// SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model
-double Battery::calculate_model(const double temp_C, const double socu_frac, const double curr_in, const double dt)
-{
-    dt_ = dt;
-
-    socu_ = socu_frac;
-    socs_ = 1-(1-socu_)*cu_bb/cs_bb;
-    double socs_lim = max(min(socs_, mxeps_bb), mneps_bb);
-    ib_ = curr_in;
-
-    // VOC-OCV model
-    double log_socs, exp_n_socs, pow_log_socs;
-    calc_soc_voc_coeff(socs_lim, temp_C, &b_, &a_, &c_, &log_socs, &exp_n_socs, &pow_log_socs);
-    voc_ = calc_voc_ocv(socs_lim, &dv_dsocs_, b_, a_, c_, log_socs, exp_n_socs, pow_log_socs)
-             + (socs_ - socs_lim) * dv_dsocs_;  // slightly beyond
-    voc_ +=  dv_;  // Experimentally varied
-
-    // Dynamic emf
-    // vdyn_ = double(num_cells_) * ib_*(r1_ + r2_)*sr_;
-    double u[2] = {ib_, voc_};
-    RandlesInv_->calc_x_dot(u);
-    RandlesInv_->update(dt);
-    vb_ = RandlesInv_->y(0);
-    vdyn_ = vb_ - voc_;
-
-
-    // Summarize   TODO: get rid of the global defines here because they differ from one battery to another
-    pow_in_ = vb_*ib_ - ib_*ib_*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
-    // if ( pow_in_>1. )  tcharge_ = min(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * (1.-socs_lim), 24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
-    // else if ( pow_in_<-1. ) tcharge_ = max(NOM_BATT_CAP /pow_in_*NOM_SYS_VOLT * socs_lim, -24.);  // NOM_BATT_CAP is defined at NOM_SYS_VOLT
-    // else if ( pow_in_>=0. ) tcharge_ = 24.*(1.-socs_lim);
-    // else tcharge_ = -24.*socs_lim;
-    vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
-    // sat_ = voc_ >= vsat_;
-
-    if ( rp.debug==-38 ) Serial.printf("calculate_ model:  SOCU_in,v,curr,pow,vsat,voc= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
-      socu_frac, vb_, ib_, pow_in_, vsat_, voc_);
-
-    if ( rp.debug==-39 )Serial.printf("calculate_model:  tempC,tempF,curr,a,b,c,d,n,m,r,socs,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-     temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_, vb_);
-
-    return ( vb_ );
-}
-
-/* Count coulombs base on true=actual capacity  TODO:  move to main
-    Internal resistance of battery is a loss
-    Inputs:
-        ioc     Charge current, A
-        voc_dyn Charge voltage calculated from dynamics, V
-        vb      Battery terminal voltage, V
-        i_r_dif Current in diffusion process, A
-        i_r_ct  Current in charge transfer process, A
-        sr      Experimental scalar
-    Outputs:
-        soc_avail   State of charge, fraction (0-1.5)
-        # soc_norm    Normalized state of charge, fraction (0-1)
-        sat     Battery is saturated, T/F
-*/
-double Battery::coulomb_counter_avail(const double dt, const boolean saturated)
-{
-    double delta_delta_socs = pow_in_ekf_/NOM_SYS_VOLT*dt/3600./NOM_BATT_CAP;
-    if ( saturated )
-    {
-        if ( delta_delta_socs > 0. )
-        {
-            delta_delta_socs = 0.;
-            rp.delta_socs = 0.;
-        }
-        rp.t_sat = temp_c_;
-        rp.socs_sat = (rp.t_sat - 25.)*DQDT + 1.;
-    }
-    rp.delta_socs = max(min(rp.delta_socs + delta_delta_socs, 1.5), -1.5);
-    socs_avail_ = max(min(rp.socs_sat*(1. - DQDT*(temp_c_ - rp.t_sat)) + rp.delta_socs, 1.5), 0.);
-    if ( rp.debug==-36 )
-    {
-        Serial.printf("coulomb_counter_avail:  sat, pow_in_ekf, delta_delta_socs, delta_socs, socs_sat, tsat,-->,soc_avail=     %d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,-->,%7.3f,\n",
-                    saturated, pow_in_ekf_, delta_delta_socs, rp.delta_socs, rp.socs_sat, rp.t_sat, socs_avail_);
-    }
-    return ( socs_avail_ );
-}
-
 
 // EKF model for predict
 void Battery::ekf_model_predict(double *Fx, double *Bu)

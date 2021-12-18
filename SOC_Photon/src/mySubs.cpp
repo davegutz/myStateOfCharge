@@ -762,3 +762,91 @@ String time_long_2_str(const unsigned long current_time, char *tempStr)
     sprintf(tempStr, "%4u-%02u-%02uT%02u:%02u:%02u", int(year), month, day, hours, minutes, seconds);
     return ( String(tempStr) );
 }
+
+// Battery model class for reference use mainly in jumpered hardware testing
+BatteryModel::BatteryModel() : Battery() {}
+BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
+    const double m, const double n, const double d, const unsigned int nz, const int num_cells,
+    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt) :
+    Battery(x_tab, b_tab, a_tab, c_tab, m, n, d, nz, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt)
+{}
+
+// SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model
+double BatteryModel::calculate(const double temp_C, const double socu_frac, const double curr_in, const double dt)
+{
+    dt_ = dt;
+
+    socu_ = socu_frac;
+    socs_ = 1-(1-socu_)*cu_bb/cs_bb;
+    double socs_lim = max(min(socs_, mxeps_bb), mneps_bb);
+    ib_ = curr_in;
+
+    // VOC-OCV model
+    double log_socs, exp_n_socs, pow_log_socs;
+    calc_soc_voc_coeff(socs_lim, temp_C, &b_, &a_, &c_, &log_socs, &exp_n_socs, &pow_log_socs);
+    voc_ = calc_voc_ocv(socs_lim, &dv_dsocs_, b_, a_, c_, log_socs, exp_n_socs, pow_log_socs)
+             + (socs_ - socs_lim) * dv_dsocs_;  // slightly beyond
+    voc_ +=  dv_;  // Experimentally varied
+
+    // Dynamic emf
+    double u[2] = {ib_, voc_};
+    RandlesInv_->calc_x_dot(u);
+    RandlesInv_->update(dt);
+    vb_ = RandlesInv_->y(0);
+    vdyn_ = vb_ - voc_;
+
+
+    // Summarize   TODO: get rid of the global defines here because they differ from one battery to another
+    pow_in_ = vb_*ib_ - ib_*ib_*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
+    vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
+    // sat_ = voc_ >= vsat_;
+
+    if ( rp.debug==78 ) Serial.printf("calculate_ model:  SOCU_in,v,curr,pow,vsat,voc= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
+      socu_frac, vb_, ib_, pow_in_, vsat_, voc_);
+
+    if ( rp.debug==79 )Serial.printf("calculate_model:  tempC,tempF,curr,a,b,c,d,n,m,r,socs,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+     temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_, vb_);
+
+    return ( vb_ );
+}
+
+/* Count coulombs base on true=actual capacity
+    Internal resistance of battery is a loss
+    Inputs:
+        dt      Integration step, s
+        pow_in  Charge power, W
+        saturated   Indicator that battery is saturated (VOC>threshold(temp)), T/F
+        temp_c  Battery temperature, deg C
+    Outputs:
+        socs_avail  State of charge, fraction (0-1)
+        delta_socs  Iteration rate of change, (0-1)
+        t_sat       Battery temperature at saturation, deg C
+        socs_sat    State of charge at saturation, fraction (0-1)
+*/
+double BatteryModel::coulombs(const double dt, const double pow_in, const boolean sat, const double temp_c,
+                                double *delta_socs, double *t_sat, double *socs_sat)
+{
+    double socs_avail = 0;   // return value
+    double delta_delta_socss = pow_in/NOM_SYS_VOLT*dt/3600./NOM_BATT_CAP;
+    socs_avail = *socs_sat*(1. - DQDT*(temp_c - *t_sat));
+    if ( sat )
+    {
+        if ( delta_delta_socss>0 )
+        {
+            delta_delta_socss = 0.;
+            *delta_socs = 0.;
+        }
+        *t_sat = temp_c;
+        *socs_sat = (*t_sat - 25.)*DQDT + 1.;
+        socs_avail = *socs_sat;
+    }
+    *delta_socs = max(min(*delta_socs + delta_delta_socss, 1.-socs_avail), -socs_avail);
+    socs_avail += *delta_socs;
+    if ( rp.debug==76 )
+        Serial.printf("BatteryModel::coulombs:  voc, v_sat, sat, pow_in, d_d_socs, d_socs, socs_sat, tsat,socs_avail=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC,  sat_voc(temp_c), sat, pow_in, delta_delta_socss, *delta_socs, *socs_sat, *t_sat, socs_avail);
+    if ( rp.debug==-76 )
+        Serial.printf("voc, v_sat, sat, pow_in, d_d_socs, d_socs, socs_sat, tsat,socs_avail,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC, sat_voc(temp_c), sat, pow_in, delta_delta_socss, *delta_socs, *socs_sat, *t_sat, socs_avail);
+    return ( socs_avail );
+}

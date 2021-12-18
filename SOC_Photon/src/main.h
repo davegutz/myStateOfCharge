@@ -230,7 +230,7 @@ void loop()
   static Battery *MyBattEKF = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
   // Model, driven by socs, used to get Vbatt.   Use Talk 'x' to toggle model on/off. 
-  static Battery *MyBattModel = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
+  static Battery *MyBattModel = new BatteryModel(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
 
   // Battery saturation
@@ -342,7 +342,10 @@ void loop()
     }
 
     // Model driven by itself and highly filtered (by hardware RC) shunt current to keep Vbatt_model quiet
-    Sen->Vbatt_model = MyBattModel->calculate_model(Tbatt_filt_C, rp.socs, Sen->Ishunt, min(Sen->T, 0.5));
+    Sen->Vbatt_model = MyBattModel->calculate(Tbatt_filt_C, rp.socs, Sen->Ishunt, min(Sen->T, 0.5));
+    boolean sat_model = is_sat(Tbatt_filt_C, MyBattModel->voc());
+    rp.socu_model = MyBattModel->coulombs(Sen->T, Sen->Wcharge, sat_model, Tbatt_filt_C, &rp.delta_socs_model, &rp.t_sat_model, &rp.socs_sat_model);
+    rp.socs_model = 1. + rp.delta_socs_model;
     Sen->Voc = MyBattModel->voc();
 
     // EKF

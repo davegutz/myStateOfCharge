@@ -121,6 +121,23 @@ struct Sensors
 };
 
 
+class BatteryModel: public Battery
+{
+public:
+  BatteryModel();
+  BatteryModel(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
+    const double m, const double n, const double d, const unsigned int nz, const int num_cells,
+    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt);
+  ~BatteryModel();
+  // operators
+  // functions
+  double calculate(const double temp_C, const double socu_frac, const double curr_in, const double dt);
+  double coulombs(const double dt, const double pow_in, const boolean sat, const double temp_c,
+                                double *delta_socs, double *t_sat, double *socs_sat);
+protected:
+};
+
+
 // Headers
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);

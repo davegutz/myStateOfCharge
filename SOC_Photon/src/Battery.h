@@ -45,11 +45,11 @@ public:
                           double *exp_n_socs, double *pow_log_socs);
   double calc_h_jacobian(double soc_lim, double b, double c, double log_socs, double exp_n_socs, double pow_log_socs);
   double calc_voc_ocv(double soc_lim, double *dv_dsocs, double b, double a, double c, double log_socs, double exp_n_socs, double pow_log_socs);
-  double calculate(const double temp_C, const double socu_frac, const double curr_in, const double dt);
-  double calculate_model(const double temp_C, const double socu_frac, const double curr_in, const double dt);
+  virtual double calculate(const double temp_C, const double socu_frac, const double curr_in, const double dt);
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated);
   void init_soc_ekf(const double socs);
-  double coulomb_counter_avail(const double dt, const boolean saturated);
+  virtual double coulombs(const double dt, const double pow_in, const boolean sat, const double temp_c,
+                                double *delta_socs, double *t_sat, double *socs_sat){return (0.);};
   double num_cells() { return (double(num_cells_)); };
   double socs() { return (socs_); };
   double socu() { return (socu_); };

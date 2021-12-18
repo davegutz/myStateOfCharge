@@ -30,16 +30,24 @@
 struct RetainedPars
 {
   int8_t debug = 2;         // Level of debug printing
+
+  double socs = 0.5;        // Coulomb counter scaled, normalized, state (0 - 1)
+  double socu = 0.5;        // Coulomb counter state (-0.1 - 1.5 approx)
+  double delta_socs = -0.5;  // Coulomb Counter state for ekf, (-1 - 1)
+  double t_sat = 25.;       // Battery temperature at saturation, deg C
+  double socs_sat = 1.;      // Battery charge at saturation, Ah
+
+  double socs_model = 0.5;  // Coulomb counter scaled, normalized state model (0-1)
+  double socu_model = 0.5;  // Coulomb counter state model (-0.1 - 1.5 approx)
+  double delta_socs_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
+  double t_sat_model = 25.; // Battery temperature at saturation of model, deg C
+  double socs_sat_model = 1.; // Battery charge at saturation for model, Ah
+
   double curr_bias_amp = 0; // Calibrate amp current sensor, A 
   double curr_bias_noamp = 0; // Calibrate non-amplified current sensor, A 
   double curr_bias_all = 0; // Bias all current sensors, A 
   boolean curr_sel_amp = true; // Use amplified sensor
-  double socs = 0.5;        // Coulomb counter scaled, normalized, state (0 - 1)
-  double socu = 0.5;        // Coulomb counter state (-0.1 - 1.5 approx)
   double vbatt_bias = 0;    // Calibrate Vbatt, V
-  double delta_socs = -0.5;  // Coulomb Counter state for ekf, (-1 - 1)
-  double t_sat = 25.;       // Battery temperature at saturation, deg C
-  double socs_sat = 1.;      // Battery charge at saturation, Ah
   boolean modeling = false; // Driving saturation calculation with model
   uint32_t duty = 0;        // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
   double amp = 0.;          // Injected amplitude, A pk (0-18.3)
