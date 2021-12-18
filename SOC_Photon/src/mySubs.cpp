@@ -108,8 +108,8 @@ void create_print_string(char *buffer, Publish *pubList)
     pubList->VOC,
     pubList->tcharge,
     pubList->T,
-    pubList->socs_sat,
-    pubList->socu, pubList->socs, pubList->socs_ekf,
+    pubList->soc_sat,
+    pubList->q, pubList->soc, pubList->soc_ekf,
     '\0');
 }
 
@@ -264,9 +264,9 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
     Sen->shunt_v2a_s = shunt_amp_v2a_s; // amp preferred, default to that
   }
   if ( rp.debug==51 )
-    Serial.printf("socs,sat,    VOC,v_sat,   ib, adder,%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,\n", rp.socs, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat);
+    Serial.printf("soc,sat,    VOC,v_sat,   ib, adder,%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,\n", rp.soc, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat);
   if ( rp.debug==-51 )
-    Serial.printf("socs,sat,    VOC,v_sat,   ib, adder,\n%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,\n", rp.socs, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat);
+    Serial.printf("soc,sat,    VOC,v_sat,   ib, adder,\n%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,\n", rp.soc, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat);
 
 
   // Vbatt
@@ -400,12 +400,12 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
 
   display->setTextColor(SSD1306_WHITE);
   char dispStringT[9];
-  sprintf(dispStringT, "%3.0f%5.1f", cp.pubList.socs_ekf, cp.pubList.tcharge);
+  sprintf(dispStringT, "%3.0f%5.1f", cp.pubList.soc_ekf, cp.pubList.tcharge);
   display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[4];
   if ( pass || !Sen->saturated )
-    sprintf(dispStringS, "%3.0f", min(cp.pubList.socu, 999.));
+    sprintf(dispStringS, "%3.0f", min(cp.pubList.q, 999.));
   else if (Sen->saturated)
     sprintf(dispStringS, "SAT");
   display->print(dispStringS);
@@ -485,12 +485,12 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         break;
       case ( 'm' ):
         SOCS_in = cp.input_string.substring(1).toFloat()/100.;
-        rp.socs = max(min(SOCS_in, mxepu_bb), mnepu_bb);
-        rp.socs_model = max(min(SOCS_in, mxepu_bb), mnepu_bb);
-        rp.delta_socs = max(rp.socs - 1., -rp.socs_sat);
-        rp.delta_socs_model = max(rp.socs_model - 1., -rp.socs_sat_model);
-        Serial.printf("socs=%7.3f,   delta_socs=%7.3f, socs_model=%7.3f,   delta_socs_model=%7.3f\n",
-                        rp.socs, rp.delta_socs, rp.socs_model, rp.delta_socs_model);
+        rp.soc = max(min(SOCS_in, mxepu_bb), mnepu_bb);
+        rp.soc_model = max(min(SOCS_in, mxepu_bb), mnepu_bb);
+        rp.delta_soc = max(rp.soc - 1., -rp.soc_sat);
+        rp.delta_soc_model = max(rp.soc_model - 1., -rp.soc_sat_model);
+        Serial.printf("soc=%7.3f,   delta_soc=%7.3f, soc_model=%7.3f,   delta_soc_model=%7.3f\n",
+                        rp.soc, rp.delta_soc, rp.soc_model, rp.delta_soc_model);
         break;
       case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
@@ -776,23 +776,25 @@ BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const doubl
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt) :
     Battery(x_tab, b_tab, a_tab, c_tab, m, n, d, nz, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt)
-{}
+{
+  q_cap_ = true_q_cap;
+}
 
 // SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model
-double BatteryModel::calculate(const double temp_C, const double socs, const double curr_in, const double dt)
+double BatteryModel::calculate(const double temp_C, const double soc, const double curr_in, const double dt)
 {
     dt_ = dt;
 
-    socs_ = socs;
-    socu_ = ((socs_-1)*cs_bb/cu_bb)+1;
-    double socs_lim = max(min(socs_, mxeps_bb), mneps_bb);
+    soc_ = soc;
+    q_ = soc_ * q_cap_;
+    double soc_lim = max(min(soc_, mxeps_bb), mneps_bb);
     ib_ = curr_in;
 
     // VOC-OCV model
-    double log_socs, exp_n_socs, pow_log_socs;
-    calc_soc_voc_coeff(socs_lim, temp_C, &b_, &a_, &c_, &log_socs, &exp_n_socs, &pow_log_socs);
-    voc_ = calc_voc_ocv(socs_lim, &dv_dsocs_, b_, a_, c_, log_socs, exp_n_socs, pow_log_socs)
-             + (socs_ - socs_lim) * dv_dsocs_;  // slightly beyond
+    double log_soc, exp_n_soc, pow_log_soc;
+    calc_soc_voc_coeff(soc_lim, temp_C, &b_, &a_, &c_, &log_soc, &exp_n_soc, &pow_log_soc);
+    voc_ = calc_voc_ocv(soc_lim, &dv_dsoc_, b_, a_, c_, log_soc, exp_n_soc, pow_log_soc)
+             + (soc_ - soc_lim) * dv_dsoc_;  // slightly beyond
     voc_ +=  dv_;  // Experimentally varied
 
     // Dynamic emf
@@ -808,11 +810,11 @@ double BatteryModel::calculate(const double temp_C, const double socs, const dou
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
     // sat_ = voc_ >= vsat_;
 
-    if ( rp.debug==78 ) Serial.printf("calculate_ model:  socs_in,v,curr,pow,vsat,voc= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
-      socs, vb_, ib_, pow_in_, vsat_, voc_);
+    if ( rp.debug==78 ) Serial.printf("calculate_ model:  soc_in,v,curr,pow,vsat,voc= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
+      soc, vb_, ib_, pow_in_, vsat_, voc_);
 
-    if ( rp.debug==79 )Serial.printf("calculate_model:  tempC,tempF,curr,a,b,c,d,n,m,r,socs,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-     temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , socs_, log_socs, exp_n_socs, pow_log_socs, voc_, vdyn_, vb_);
+    if ( rp.debug==79 )Serial.printf("calculate_model:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+     temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc_, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
 
     return ( vb_ );
 }
@@ -825,35 +827,35 @@ double BatteryModel::calculate(const double temp_C, const double socs, const dou
         saturated   Indicator that battery is saturated (VOC>threshold(temp)), T/F
         temp_c  Battery temperature, deg C
     Outputs:
-        socs_avail  State of charge, fraction (0-1)
-        delta_socs  Iteration rate of change, (0-1)
+        soc_avail  State of charge, fraction (0-1)
+        delta_soc  Iteration rate of change, (0-1)
         t_sat       Battery temperature at saturation, deg C
-        socs_sat    State of charge at saturation, fraction (0-1)
+        soc_sat    State of charge at saturation, fraction (0-1)
 */
-double BatteryModel::coulombs(const double dt, const double pow_in, const boolean sat, const double temp_c,
-                                double *delta_socs, double *t_sat, double *socs_sat)
+double BatteryModel::coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
+  const double temp_c, double *delta_soc, double *t_sat, double *soc_sat)
 {
-    double socs_avail = 0;   // return value
-    double delta_delta_socs = pow_in/NOM_SYS_VOLT*dt/3600./NOM_BATT_CAP;
-    socs_avail = *socs_sat*(1. - DQDT*(temp_c - *t_sat));
+    double soc_avail = 0;   // return value
+    double delta_delta_soc = charge_curr * dt / q_cap;
+    soc_avail = *soc_sat*(1. - DQDT*(temp_c - *t_sat));
     if ( sat )
     {
-        if ( delta_delta_socs>0 )
+        if ( delta_delta_soc>0 )
         {
-            delta_delta_socs = 0.;
-            *delta_socs = 0.;
+            delta_delta_soc = 0.;
+            *delta_soc = 0.;
         }
         *t_sat = temp_c;
-        *socs_sat = (*t_sat - 25.)*DQDT + 1.;
-        socs_avail = *socs_sat;
+        *soc_sat = (*t_sat - 25.)*DQDT + 1.;
+        soc_avail = *soc_sat;
     }
-    *delta_socs = max(min(*delta_socs + delta_delta_socs, 1.-socs_avail), -socs_avail);
-    socs_avail += *delta_socs;
+    *delta_soc = max(min(*delta_soc + delta_delta_soc, 1.-soc_avail), -soc_avail);
+    soc_avail += *delta_soc;
     if ( rp.debug==76 )
-        Serial.printf("BatteryModel::coulombs:  voc, v_sat, sat, pow_in, d_d_socs, d_socs, socs_sat, tsat,socs_avail=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c), sat, pow_in, delta_delta_socs, *delta_socs, *socs_sat, *t_sat, socs_avail);
+        Serial.printf("BatteryModel::coulombs:  voc, v_sat, sat, charge_curr, d_d_soc, d_soc, soc_sat, tsat,soc_avail=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, delta_delta_soc, *delta_soc, *soc_sat, *t_sat, soc_avail);
     if ( rp.debug==-76 )
-        Serial.printf("voc, v_sat, sat, pow_in, d_d_socs, d_socs, socs_sat, tsat,socs_avail,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC, sat_voc(temp_c), sat, pow_in, delta_delta_socs, *delta_socs, *socs_sat, *t_sat, socs_avail);
-    return ( socs_avail );
+        Serial.printf("voc, v_sat, sat, charge_curr, d_d_soc, d_soc, soc_sat, tsat,soc_avail,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, delta_delta_soc, *delta_soc, *soc_sat, *t_sat, soc_avail);
+    return ( soc_avail );
 }

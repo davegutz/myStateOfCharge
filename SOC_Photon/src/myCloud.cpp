@@ -56,7 +56,7 @@ void publish1(void)
 void publish2(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write2\n");
-  Blynk.virtualWrite(V6,  cp.pubList.socs);
+  Blynk.virtualWrite(V6,  cp.pubList.soc);
   // Blynk.virtualWrite(V7,  cp.pubList.Vbatt_solved);
   Blynk.virtualWrite(V8,  cp.pubList.T);
   Blynk.virtualWrite(V9,  cp.pubList.Tbatt);
@@ -84,7 +84,7 @@ void publish4(void)
   Blynk.virtualWrite(V18, cp.pubList.Ishunt_filt);
   Blynk.virtualWrite(V19, cp.pubList.Wshunt);
   // Blynk.virtualWrite(V20, cp.pubList.Wshunt_filt);
-  // Blynk.virtualWrite(V21, cp.pubList.socu_solved);
+  // Blynk.virtualWrite(V21, cp.pubList.soc_solved);
 }
 
 
@@ -161,10 +161,10 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Wshunt = Sen->Wshunt;
   pubList->Vshunt_amp = Sen->Vshunt_amp;
   pubList->num_timeouts = num_timeouts;
-  pubList->socu = rp.socu*100.;
-  pubList->socs = rp.socs*100.;
-  pubList->socs_ekf = cp.socs_ekf*100.;
-  pubList->socs_sat = rp.socs_sat*100.;
+  pubList->q = rp.q/nom_q_cap*100.;
+  pubList->soc = rp.soc*100.;
+  pubList->soc_ekf = cp.soc_ekf*100.;
+  pubList->soc_sat = rp.soc_sat*100.;
   pubList->T = Sen->T;
   if ( rp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
   pubList->tcharge = MyBattEKF->tcharge();

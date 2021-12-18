@@ -24,6 +24,8 @@
 #ifndef _RETAINED_H
 #define _RETAINED_H
 
+#include "Battery.h"
+
 // Definition of structure to be saved in SRAM
 // Default values below are important:  they prevent junk
 // behavior on initial build.
@@ -31,17 +33,17 @@ struct RetainedPars
 {
   int8_t debug = 2;         // Level of debug printing
 
-  double socs = 0.5;        // Coulomb counter scaled, normalized, state (0 - 1)
-  double socu = 0.5;        // Coulomb counter state (-0.1 - 1.5 approx)
-  double delta_socs = -0.5;  // Coulomb Counter state for ekf, (-1 - 1)
+  double soc = 0.5;        // Coulomb counter scaled, normalized, state (0 - 1)
+  double q = 0.5*nom_q_cap; // Coulomb counter state, C
+  double delta_soc = -0.5;  // Coulomb Counter state for ekf, (-1 - 1)
   double t_sat = 25.;       // Battery temperature at saturation, deg C
-  double socs_sat = 1.;      // Battery charge at saturation, Ah
+  double soc_sat = 1.;      // Battery charge at saturation, Ah
 
-  double socs_model = 0.5;  // Coulomb counter scaled, normalized state model (0-1)
-  double socu_model = 0.5;  // Coulomb counter state model (-0.1 - 1.5 approx)
-  double delta_socs_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
+  double soc_model = 0.5;  // Coulomb counter scaled, normalized state model (0-1)
+  double q_model = 0.5*true_q_cap;  // Coulomb counter state model, C
+  double delta_soc_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
   double t_sat_model = 25.; // Battery temperature at saturation of model, deg C
-  double socs_sat_model = 1.; // Battery charge at saturation for model, Ah
+  double soc_sat_model = 1.; // Battery charge at saturation for model, Ah
 
   double curr_bias_amp = 0; // Calibrate amp current sensor, A 
   double curr_bias_noamp = 0; // Calibrate non-amplified current sensor, A 

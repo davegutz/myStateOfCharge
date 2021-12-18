@@ -37,7 +37,7 @@ public:
   void update_ekf(const double z, double x_min, double x_max, const double dt);
   double x_ekf() { return ( x_ ); };
   double z_ekf() { return ( z_ ); };
-  void init_ekf(double socs, double Pinit);
+  void init_ekf(double soc, double Pinit);
 protected:
   double Fx_; // State transition
   double Bu_; // Control transition

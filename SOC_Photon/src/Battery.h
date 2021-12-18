@@ -41,27 +41,29 @@ public:
   // functions
   void Dv(const double dv) { dv_ = dv; };
   void Sr(const double sr) { sr_ = sr; };
-  void calc_soc_voc_coeff(double socs, double tc, double *b, double *a, double *c, double *log_socs,
-                          double *exp_n_socs, double *pow_log_socs);
-  double calc_h_jacobian(double soc_lim, double b, double c, double log_socs, double exp_n_socs, double pow_log_socs);
-  double calc_voc_ocv(double soc_lim, double *dv_dsocs, double b, double a, double c, double log_socs, double exp_n_socs, double pow_log_socs);
-  virtual double calculate(const double temp_C, const double socu_frac, const double curr_in, const double dt);
+  void calc_soc_voc_coeff(double soc, double tc, double *b, double *a, double *c, double *log_soc,
+                          double *exp_n_soc, double *pow_log_soc);
+  double calc_h_jacobian(double soc_lim, double b, double c, double log_soc, double exp_n_soc, double pow_log_soc);
+  double calc_voc_ocv(double soc_lim, double *dv_dsoc, double b, double a, double c, double log_soc, double exp_n_soc, double pow_log_soc);
+  virtual double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated);
-  void init_soc_ekf(const double socs);
-  virtual double coulombs(const double dt, const double pow_in, const boolean sat, const double temp_c,
-                                double *delta_socs, double *t_sat, double *socs_sat){return (0.);};
+  void init_soc_ekf(const double soc);
+  virtual double coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
+    const double temp_c, double *delta_soc, double *t_sat, double *soc_sat){return 0;};
   double num_cells() { return (double(num_cells_)); };
-  double socs() { return (socs_); };
-  double socu() { return (socu_); };
-  double soc_avail() { return (socs_avail_); };
-  double soc_ekf() { return (socs_ekf_); };
+  double soc() { return (soc_); };
+  double q() { return (q_); };
+  double q_sat() { return (q_sat_); };
+  double q_cap() { return (q_cap_); };
+  double soc_avail() { return (soc_avail_); };
+  double soc_ekf() { return (soc_ekf_); };
   double voc() { return (voc_); };
   double voc_dyn() { return (voc_dyn_); };
   double vdyn() { return (vdyn_); };
   double vb() { return (vb_); };
   double ib() { return (ib_); };
   double tcharge() { return (tcharge_); };
-  double dv_dsocs() { return (dv_dsocs_); };
+  double dv_dsoc() { return (dv_dsoc_); };
   double Dv() { return (dv_); };
   double Sr() { return (sr_); };
   boolean sat() { return (sat_); };
@@ -79,8 +81,8 @@ protected:
   double n_;        // Battery coeff
   double d_;        // Battery coeff
   unsigned int nz_; // Number of breakpoints
-  double socs_;     // State of charge scaled 0-1
-  double socu_;     // State of charge may extend <0
+  double soc_;      // State of charge scaled 0-1
+  double q_;        // State of charge, C
   double r1_;       // Randels resistance, Ohms per cell
   double r2_;       // Randels resistance, Ohms per cell
   double c2_;       // Randels capacitance, Farads per cell
@@ -89,7 +91,7 @@ protected:
   double vb_;        // Total model voltage, V
   double ib_;  // Current into battery, A
   int num_cells_;   // Number of cells
-  double dv_dsocs_;  // Derivative scaled, V/fraction
+  double dv_dsoc_;  // Derivative scaled, V/fraction
   double tcharge_;  // Charging time to 100%, hr
   double pow_in_;   // Charging power, w
   double sr_;       // Resistance scalar
@@ -105,26 +107,28 @@ protected:
   double rct_;      // Randles charge transfer resistance, ohms
   double tau_dif_;  // Randles diffusion time constant, s (=1/Rdif/Cdif)
   double r_dif_;    // Randles diffusion resistance, ohms
-  double tau_sd_;   // Time constant of ideal battery capacitor model, input current A, output volts=socs (0-1)
+  double tau_sd_;   // Time constant of ideal battery capacitor model, input current A, output volts=soc (0-1)
   double r_sd_;     // Trickle discharge of ideal battery capacitor model, ohms
   // EKF declarations
   StateSpace *Randles_;   // Randles model {ib, vb} --> {voc}, ioc=ib
   StateSpace *RandlesInv_;// Randles model {ib, voc} --> {vb}, ioc=ib
-  double *rand_A_;
-  double *rand_B_;
-  double *rand_C_;
-  double *rand_D_;
-  double *rand_Cinv_;
-  double *rand_Dinv_;
-  int8_t rand_n_, rand_p_, rand_q_;  // TODO:   don't need these
+  double *rand_A_;  // Randles model
+  double *rand_B_;  // Randles model
+  double *rand_C_;  // Randles model
+  double *rand_D_;  // Randles model
+  double *rand_Cinv_;  // Randles model
+  double *rand_Dinv_;  // Randles model
   double temp_c_;   // Battery temperature, C
-  double socs_ekf_;  // Filtered state of charge from ekf (0-1)
   double pow_in_ekf_;   // Charging power from ekf, w
   double tcharge_ekf_;  // Charging time to 100% from ekf, hr
   double voc_dyn_;  // Charging voltage, V
-  double delta_socs_;  // Change to available charge since saturated, (0-1)
-  double qsat_;     // Charge at saturation, Ah
-  double socs_avail_;  // Temperature adjusted estimate of battery state of charge (0-1)
+  double delta_soc_;// Change to available charge since saturated, (0-1)
+  double q_sat_;    // Charge at saturation, C
+  double soc_avail_;// Temperature adjusted estimate of battery state of charge (0-1)
+  double soc_ekf_;  // Filtered state of charge from ekf (0-1)
+  double q_cap_;    // Charge capability of this battery, C
+  double q_avail_;  // Charge available at this temperature, C
+  double q_ekf_;    // Filtered charge calculated by ekf, C
   void ekf_model_predict(double *Fx, double *Bu);
   void ekf_model_update(double *hx, double *H);
 };
@@ -146,7 +150,7 @@ protected:
 #define DQDT                  0.01      // Change of charge with temperature, fraction/deg C
                                         // dQdT from literature.   0.01 / deg C is commonly used.
 const int batt_num_cells = NOM_SYS_VOLT/3;  // Number of standard 3 volt LiFePO4 cells
-const double batt_vsat = double(batt_num_cells)*double(BATT_V_SAT);  // Total bank saturation for 0.997=socs, V
+const double batt_vsat = double(batt_num_cells)*double(BATT_V_SAT);  // Total bank saturation for 0.997=soc, V
 const double batt_vmax = (14.3/4)*double(batt_num_cells); // Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
 const double batt_r1 = double(BATT_R1);     // Randels static resistance per cell, Ohms
 const double batt_r2 = double(BATT_R2);     // Randels dynamic resistance per cell, Ohms
@@ -154,11 +158,13 @@ const double batt_r2c2 = double(BATT_R2C2);// Battery Randels dynamic term, Ohms
                               // test so using with R2 and then multiplying by 4 for total result is valid,
                               // though probably not for an individual cell
 const double batt_c2 = double(BATT_R2C2)/batt_r2;
+const double nom_q_cap = NOM_BATT_CAP * 3600;   // Nominal battery capacity, C
+const double true_q_cap = TRUE_BATT_CAP * 3600; // True battery capacity, C
 
 // Battery model LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang etal.pdf'
 // SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope constraint
-// >=0.02 V/socs.  m and n using Zhang values.   Had to scale socs because  actual capacity
-// > NOM_BATT_CAP so equations error when socs<=0 to match data.
+// >=0.02 V/soc.  m and n using Zhang values.   Had to scale soc because  actual capacity
+// > NOM_BATT_CAP so equations error when soc<=0 to match data.
 const unsigned int nz_bb = 3;
 const double m_bb = 0.478;
 static const double t_bb[nz_bb] = {0.,	    25.,    50.};
@@ -169,10 +175,10 @@ const double d_bb = 0.707;
 const double n_bb = 0.4;
 const double cu_bb = NOM_BATT_CAP;  // Assumed capacity, Ah
 const double cs_bb = TRUE_BATT_CAP; // Data fit to this capacity to avoid math 0, Ah
-const double mxeps_bb = 1-1e-6;     // Numerical maximum of coefficient model with scaled socs.
-const double mneps_bb = 1e-6;       // Numerical minimum of coefficient model without scaled socs.
-const double mxepu_bb = 1-1e-6;     // Numerical maximum of coefficient model with scaled socs.
-const double mnepu_bb = 1 - (1-1e-6)*cs_bb/cu_bb;  // Numerical minimum of coefficient model without scaled socs.
+const double mxeps_bb = 1-1e-6;     // Numerical maximum of coefficient model with scaled soc.
+const double mneps_bb = 1e-6;       // Numerical minimum of coefficient model without scaled soc.
+const double mxepu_bb = 1-1e-6;     // Numerical maximum of coefficient model with scaled soc.
+const double mnepu_bb = 1 - (1-1e-6)*cs_bb/cu_bb;  // Numerical minimum of coefficient model without scaled soc.
 const double dvoc_dt = BATT_DVOC_DT * double(batt_num_cells);
 const double sat_gain = 10;         // Multiplier on saturation anti-windup
 
@@ -190,8 +196,8 @@ static TableInterp1Dclip  *T_T1 = new TableInterp1Dclip(n_v1, t_min_v1, T_v1);
 // Methods
 void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols);
 void mulvec(double * a, double * x, double * y, int m, int n);
-double coulombs(const double dt, const double pow_in, const boolean saturated, const double temp_c,
-                                double *delta_socs, double *t_sat, double *socs_sat);
+double coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
+  const double temp_c, double *delta_soc, double *t_sat, double *soc_sat);
 double sat_voc(const double temp_c);
 boolean is_sat(const double temp_c, const double voc);
 

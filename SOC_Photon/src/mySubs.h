@@ -131,9 +131,9 @@ public:
   ~BatteryModel();
   // operators
   // functions
-  double calculate(const double temp_C, const double socu_frac, const double curr_in, const double dt);
-  double coulombs(const double dt, const double pow_in, const boolean sat, const double temp_c,
-                                double *delta_socs, double *t_sat, double *socs_sat);
+  double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
+  double coulombs(const double dt, const double charge_curr, const double q_sat, const boolean sat,
+    const double temp_c, double *delta_soc, double *t_sat, double *soc_sat);
 protected:
 };
 

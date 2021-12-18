@@ -50,10 +50,10 @@ struct Publish
   double Vshunt_filt;
   double Ishunt_filt;
   int num_timeouts;
-  double socu;
-  double socs;
-  double socs_ekf;
-  double socs_sat;
+  double q;
+  double soc;
+  double soc_ekf;
+  double soc_sat;
   double tcharge;
   double soc_avail;
 };

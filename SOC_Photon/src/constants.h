@@ -92,7 +92,7 @@
 
 #define SOLVE_MAX_ERR    1e-6        // Solver error tolerance, V (1e-6)
 #define SOLVE_MAX_COUNTS 10          // Solver maximum number of steps (10)
-#define SOLVE_MAX_STEP   0.2         // Solver maximum step size, frac socs
+#define SOLVE_MAX_STEP   0.2         // Solver maximum step size, frac soc
 
 // Conversion gains
 const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  
