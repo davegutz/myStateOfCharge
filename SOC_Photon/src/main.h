@@ -210,8 +210,8 @@ void setup()
 void loop()
 {
   // Sensor noise filters.   There are AAF in hardware for Vbatt and VshuntAmp and VshuntNoAmp
-  static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, 0.4*double(NOM_SYS_VOLT), 2.0*double(NOM_SYS_VOLT));
-  static General2_Pole* IshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -0.500, 0.500);
+  static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -50., 50.);
+  static General2_Pole* IshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -500., 500.);
   static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
 
   // 1-wire temp sensor battery temp
@@ -361,19 +361,19 @@ void loop()
         Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
         Sen->Vbatt_filt*10-110, MyBattModel->voc()*10-110, MyBattModel->vdyn()*10, MyBattModel->vb()*10-110, MyBattEKF->vdyn()*10-110);
     if ( rp.debug==12 )
-      Serial.printf("ib_free,ib_mod,   vb_free,vb_mod,  voc_dyn,voc_mod,   K, y,    SOC_avail, SOC_ekf, SOC_mod,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
+      Serial.printf("ib,ib_mod,   vb,vb_mod,  voc_dyn,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
         MyBattEKF->ib(), MyBattModel->ib(),
         MyBattEKF->vb(), MyBattModel->vb(),
         MyBattEKF->voc_dyn(), MyBattModel->voc(),
         MyBattEKF->K_ekf(), MyBattEKF->y_ekf(),
-        MyBattEKF->soc_avail(), MyBattEKF->soc_ekf(), MyBattModel->soc());
+        MyBattModel->soc(), MyBattEKF->soc_ekf(), rp.soc);
     if ( rp.debug==-12 )
-      Serial.printf("ib_free,ib_mod,   vb_free*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_mod*10-110,   K, y,    SOC_avail-90, SOC_ekf-90, SOC_mod-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
+      Serial.printf("ib,ib_mod,   vb*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_mod*10-110,   K, y,    SOC_mod-90, SOC_ekf-90, SOC-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
         MyBattEKF->ib(), MyBattModel->ib(),
         MyBattEKF->vb()*10-110, MyBattModel->vb()*10-110,
         MyBattEKF->voc_dyn()*10-110, MyBattModel->voc()*10-110,
         MyBattEKF->K_ekf(), MyBattEKF->y_ekf(),
-        MyBattEKF->soc_avail()*100-90, MyBattEKF->soc_ekf()*100-90, MyBattModel->soc()*100-90);
+        MyBattModel->soc()*100-90, MyBattEKF->soc_ekf()*100-90, rp.soc*100-90);
     if ( rp.debug==-3 )
       Serial.printf("fast,et,reset_free,Wshunt,q_f,q,soc,T, %12.3f,%7.3f, %d, %7.3f,    %7.3f,     %7.3f,\n",
       control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, rp.soc, Sen->T_filt);

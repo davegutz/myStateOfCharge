@@ -50,7 +50,7 @@ struct Publish
   double Vshunt_filt;
   double Ishunt_filt;
   int num_timeouts;
-  double q;
+  double soc_model;
   double soc;
   double soc_ekf;
   double soc_sat;

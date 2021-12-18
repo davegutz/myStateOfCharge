@@ -161,6 +161,7 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Wshunt = Sen->Wshunt;
   pubList->Vshunt_amp = Sen->Vshunt_amp;
   pubList->num_timeouts = num_timeouts;
+  pubList->soc_model = rp.soc_model*100.;
   pubList->soc = rp.soc*100.;
   pubList->soc_ekf = cp.soc_ekf*100.;
   pubList->soc_sat = rp.q_sat/nom_q_cap*100.;

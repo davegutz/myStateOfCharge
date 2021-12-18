@@ -92,7 +92,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,  VOC_s,  SOCU_f, tcharge,  T,   SOCS_sat,    SOCU, SOCS, SOCS_ekf,"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,  VOC_s,  tcharge,  T,   SOC_sat,    SOC_mod, SOC_ekf, SOC,"));
 }
 
 // Print strings
@@ -109,7 +109,7 @@ void create_print_string(char *buffer, Publish *pubList)
     pubList->tcharge,
     pubList->T,
     pubList->soc_sat,
-    pubList->q, pubList->soc, pubList->soc_ekf,
+    pubList->soc_model, pubList->soc_ekf, pubList->soc, 
     '\0');
 }
 
@@ -204,6 +204,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   double s_sat = 0.;
   if ( rp.modeling && Sen->Wshunt > 0. && Sen->saturated )
       s_sat = max(Sen->Voc - sat_voc(Sen->Tbatt), 0.) / NOM_SYS_VOLT * NOM_BATT_CAP * sat_gain;
+  s_sat = 0;
 
   // Read Sensors
   // ADS1015 conversion
