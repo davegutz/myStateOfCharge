@@ -405,7 +405,7 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[4];
   if ( pass || !Sen->saturated )
-    sprintf(dispStringS, "%3.0f", min(cp.pubList.q, 999.));
+    sprintf(dispStringS, "%3.0f", min(cp.pubList.soc, 999.));
   else if (Sen->saturated)
     sprintf(dispStringS, "SAT");
   display->print(dispStringS);
@@ -487,10 +487,10 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         SOCS_in = cp.input_string.substring(1).toFloat()/100.;
         rp.soc = max(min(SOCS_in, mxepu_bb), mnepu_bb);
         rp.soc_model = max(min(SOCS_in, mxepu_bb), mnepu_bb);
-        rp.delta_soc = max(rp.soc - 1., -rp.soc_sat);
-        rp.delta_soc_model = max(rp.soc_model - 1., -rp.soc_sat_model);
-        Serial.printf("soc=%7.3f,   delta_soc=%7.3f, soc_model=%7.3f,   delta_soc_model=%7.3f\n",
-                        rp.soc, rp.delta_soc, rp.soc_model, rp.delta_soc_model);
+        rp.delta_q = max((rp.soc - 1.)*nom_q_cap, -rp.q_sat);
+        rp.delta_q_model = max((rp.soc_model - 1.)*true_q_cap, -rp.q_sat_model);
+        Serial.printf("soc=%7.3f,   delta_q=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f\n",
+                        rp.soc, rp.delta_q, rp.soc_model, rp.delta_q_model);
         break;
       case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
@@ -833,29 +833,29 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
         soc_sat    State of charge at saturation, fraction (0-1)
 */
 double BatteryModel::coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
-  const double temp_c, double *delta_soc, double *t_sat, double *soc_sat)
+  const double temp_c, double *delta_q, double *t_sat, double *q_sat)
 {
-    double soc_avail = 0;   // return value
-    double delta_delta_soc = charge_curr * dt / q_cap;
-    soc_avail = *soc_sat*(1. - DQDT*(temp_c - *t_sat));
+    double soc = 0;   // return value
+    double q_avail = *q_sat*(1. - DQDT*(temp_c - *t_sat));
+    double d_delta_q = charge_curr * dt;
     if ( sat )
     {
-        if ( delta_delta_soc>0 )
+        if ( d_delta_q>0 )
         {
-            delta_delta_soc = 0.;
-            *delta_soc = 0.;
+            d_delta_q = 0.;
+            *delta_q = 0.;
         }
         *t_sat = temp_c;
-        *soc_sat = (*t_sat - 25.)*DQDT + 1.;
-        soc_avail = *soc_sat;
+        *q_sat = ((*t_sat - 25.)*DQDT + 1.)*q_cap;
+        q_avail = *q_sat;
     }
-    *delta_soc = max(min(*delta_soc + delta_delta_soc, 1.-soc_avail), -soc_avail);
-    soc_avail += *delta_soc;
+    *delta_q = max(min(*delta_q + d_delta_q, 1.1*(q_cap-q_avail)), -q_avail);
+    soc = (q_avail + *delta_q) / q_avail;
     if ( rp.debug==76 )
-        Serial.printf("BatteryModel::coulombs:  voc, v_sat, sat, charge_curr, d_d_soc, d_soc, soc_sat, tsat,soc_avail=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, delta_delta_soc, *delta_soc, *soc_sat, *t_sat, soc_avail);
+        Serial.printf("BatteryModel::coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_avail,soc=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_avail, soc);
     if ( rp.debug==-76 )
-        Serial.printf("voc, v_sat, sat, charge_curr, d_d_soc, d_soc, soc_sat, tsat,soc_avail,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, delta_delta_soc, *delta_soc, *soc_sat, *t_sat, soc_avail);
-    return ( soc_avail );
+        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_avail,soc          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_avail, soc);
+    return ( soc );
 }

@@ -330,7 +330,7 @@ void loop()
     vectoring_past = cp.vectoring;
     if ( reset_free )
     {
-      if ( cp.vectoring ) rp.soc = rp.q;
+      if ( cp.vectoring ) rp.soc = rp.soc;
       else rp.soc = soc_saved;  // Only way to reach this line is resetting from vector test
       MyBattEKF->init_soc_ekf(rp.soc);
       if ( elapsed>INIT_WAIT ) reset_free = false;
@@ -344,9 +344,7 @@ void loop()
     // Model driven by itself and highly filtered (by hardware RC) shunt current to keep Vbatt_model quiet
     Sen->Vbatt_model = MyBattModel->calculate(Tbatt_filt_C, rp.soc_model, Sen->Ishunt, min(Sen->T, 0.5));
     boolean sat_model = is_sat(Tbatt_filt_C, MyBattModel->voc());
-    rp.q_model = MyBattModel->coulombs(Sen->T, Sen->Ishunt, MyBattModel->q_cap(), sat_model,
-      Tbatt_filt_C, &rp.delta_soc_model, &rp.t_sat_model, &rp.soc_sat_model);
-    rp.soc_model = 1. + rp.delta_soc_model;
+    rp.soc_model = MyBattModel->coulombs(Sen->T, Sen->Ishunt, MyBattModel->q_cap(), sat_model, Tbatt_filt_C, &rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
     Sen->Voc = MyBattModel->voc();
 
     // EKF
@@ -354,8 +352,7 @@ void loop()
 
     // Coulomb Count integrator
     Sen->saturated = SatObj->calculate(is_sat(Tbatt_filt_C, Sen->Voc), reset);
-    rp.q = coulombs(Sen->T, Sen->Ishunt, MyBattEKF->q_cap(), Sen->saturated, Tbatt_filt_C, &rp.delta_soc, &rp.t_sat, &rp.soc_sat);
-    rp.soc = 1. + rp.delta_soc;
+    rp.soc = coulombs(Sen->T, Sen->Ishunt, MyBattEKF->q_cap(), Sen->saturated, Tbatt_filt_C, &rp.delta_q, &rp.t_sat, &rp.q_sat);
 
     // Useful for Arduino plotting
     if ( rp.debug==-1 )
@@ -378,8 +375,8 @@ void loop()
         MyBattEKF->K_ekf(), MyBattEKF->y_ekf(),
         MyBattEKF->soc_avail()*100-90, MyBattEKF->soc_ekf()*100-90, MyBattModel->soc()*100-90);
     if ( rp.debug==-3 )
-      Serial.printf("fast,et,reset_free,Wshunt,q_f,q,soc,T, %12.3f,%7.3f, %d, %7.3f,    %7.3f,%7.3f,     %7.3f,\n",
-      control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, rp.q, rp.soc, Sen->T_filt);
+      Serial.printf("fast,et,reset_free,Wshunt,q_f,q,soc,T, %12.3f,%7.3f, %d, %7.3f,    %7.3f,     %7.3f,\n",
+      control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, rp.soc, Sen->T_filt);
 
   }
 
@@ -470,7 +467,7 @@ void loop()
   {
     if ( ++isum>nsum-1 ) isum = 0;
     mySum[isum].assign(current_time, Sen->Tbatt_filt, Sen->Vbatt_filt, Sen->Ishunt_filt,
-      rp.q, rp.soc, MyBattModel->dv_dsoc());
+      rp.soc, rp.soc, MyBattModel->dv_dsoc());
     if ( rp.debug==-11 )
     {
       Serial.printf("Summm***********************\n");

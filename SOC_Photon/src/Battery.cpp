@@ -287,31 +287,31 @@ void mulvec(double * a, double * x, double * y, int m, int n)
         soc_sat    State of charge at saturation, fraction (0-1)
 */
 double coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
-    const double temp_c, double *delta_soc, double *t_sat, double *soc_sat)
+    const double temp_c, double *delta_q, double *t_sat, double *q_sat)
 {
-    double soc_avail = 0;   // return value
-    double delta_delta_socs = charge_curr * dt / q_cap;
-    soc_avail = *soc_sat*(1. - DQDT*(temp_c - *t_sat));
+    double soc = 0;   // return value
+    double q_avail = *q_sat*(1. - DQDT*(temp_c - *t_sat));
+    double d_delta_q = charge_curr * dt;
     if ( sat )
     {
-        if ( delta_delta_socs > 0 )
+        if ( d_delta_q > 0 )
         {
-            delta_delta_socs = 0.;
-            *delta_soc = 0.;
+            d_delta_q = 0.;
+            *delta_q = 0.;
         }
         *t_sat = temp_c;
-        *soc_sat = (*t_sat - 25.)*DQDT + 1.;
-        soc_avail = *soc_sat;
+        *q_sat = ((*t_sat - 25.)*DQDT + 1.)*q_cap;
+        q_avail = *q_sat;
     }
-    *delta_soc = max(min(*delta_soc + delta_delta_socs, 1.-soc_avail), -soc_avail);
-    soc_avail += *delta_soc;
+    *delta_q = max(min(*delta_q + d_delta_q, 1.1*(q_cap-q_avail)), -q_avail);
+    soc = (q_avail + *delta_q) / q_avail;
     if ( rp.debug==36 )
-        Serial.printf("coulomb_counter:  voc, v_sat, sat, charge_curr, d_d_soc, d_soc, soc_sat, tsat,soc_avail=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, delta_delta_socs, *delta_soc, *soc_sat, *t_sat, soc_avail);
+        Serial.printf("coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_avail,soc=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_avail, soc);
     if ( rp.debug==-36 )
-        Serial.printf("voc, v_sat, sat, charge_curr, d_d_soc, d_soc, soc_sat, tsat,soc_avail,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, delta_delta_socs, *delta_soc, *soc_sat, *t_sat, soc_avail);
-    return ( soc_avail );
+        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,soc_avail,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_avail, soc);
+    return ( soc );
 }
 
 /* Calculate saturation voltage

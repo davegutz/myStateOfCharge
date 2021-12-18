@@ -161,10 +161,9 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Wshunt = Sen->Wshunt;
   pubList->Vshunt_amp = Sen->Vshunt_amp;
   pubList->num_timeouts = num_timeouts;
-  pubList->q = rp.q/nom_q_cap*100.;
   pubList->soc = rp.soc*100.;
   pubList->soc_ekf = cp.soc_ekf*100.;
-  pubList->soc_sat = rp.soc_sat*100.;
+  pubList->soc_sat = rp.q_sat/nom_q_cap*100.;
   pubList->T = Sen->T;
   if ( rp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
   pubList->tcharge = MyBattEKF->tcharge();
