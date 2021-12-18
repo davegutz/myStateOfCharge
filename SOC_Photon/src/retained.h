@@ -24,25 +24,21 @@
 #ifndef _RETAINED_H
 #define _RETAINED_H
 
-#include "Battery.h"
-
 // Definition of structure to be saved in SRAM
 // Default values below are important:  they prevent junk
 // behavior on initial build.
+// ********CAUTION:  any special includes or logic in here breaks retained function
 struct RetainedPars
 {
-  int8_t debug = 2;         // Level of debug printing
-
+  int8_t debug = 2;        // Level of debug printing
   double soc = 0.5;        // Coulomb counter scaled, normalized, state (0 - 1)
-  double delta_q = -0.5;  // Coulomb Counter state for ekf, (-1 - 1)
-  double t_sat = 25.;       // Battery temperature at saturation, deg C
-  double q_sat = nom_q_cap;      // Battery charge at saturation, Ah
-
+  double delta_q = -0.5;   // Coulomb Counter state for ekf, (-1 - 1)
+  double t_sat = 25.;      // Battery temperature at saturation, deg C
+  double q_sat = 360000;   // Battery charge at saturation, Ah
   double soc_model = 0.5;  // Coulomb counter scaled, normalized state model (0-1)
   double delta_q_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
   double t_sat_model = 25.; // Battery temperature at saturation of model, deg C
-  double q_sat_model = true_q_cap; // Battery charge at saturation for model, Ah
-
+  double q_sat_model = 360000; // Battery charge at saturation for model, Ah
   double curr_bias_amp = 0; // Calibrate amp current sensor, A 
   double curr_bias_noamp = 0; // Calibrate non-amplified current sensor, A 
   double curr_bias_all = 0; // Bias all current sensors, A 

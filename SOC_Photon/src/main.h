@@ -74,11 +74,11 @@ extern CommandPars cp;            // Various parameters to be common at system l
 extern RetainedPars rp;           // Various parameters to be static at system level (don't reset on PLC reset)
 
 // Global locals
-const int nsum = 125;           // Number of summary strings, 17 Bytes per isum
+const int nsum = 100;           // Number of summary strings, 17 Bytes per isum
+retained RetainedPars rp;       // Various control parameters static at system level
+retained CommandPars cp = CommandPars(); // Various control parameters commanding at system level
 retained int isum = -1;         // Summary location.   Begins at -1 because first action is to increment isum
 retained Sum_st mySum[nsum];    // Summaries
-retained CommandPars cp = CommandPars();        // Various control parameters commanding at system level
-retained RetainedPars rp;       // Various control parameters static at system level
 unsigned long millis_flip = millis(); // Timekeeping
 unsigned long last_sync = millis();   // Timekeeping
 
@@ -196,7 +196,7 @@ void setup()
 
   // Summary
   System.enableFeature(FEATURE_RETAINED_MEMORY);
-  if ( rp.debug!=-1 )    // messes up Arduino plots if print summary after init
+  if ( rp.debug==2 )
     print_all(mySum, isum, nsum);
 
   // Header for rp.debug print
