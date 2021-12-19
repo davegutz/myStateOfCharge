@@ -56,6 +56,7 @@ struct Publish
   double soc_sat;
   double tcharge;
   double soc_avail;
+  double amp_hrs_remaining;
 };
 
 void publish1(void);

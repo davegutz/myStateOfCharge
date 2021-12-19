@@ -410,7 +410,7 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[4];
   if ( pass || !Sen->saturated )
-    sprintf(dispStringS, "%3.0f", min(cp.pubList.soc, 999.));
+    sprintf(dispStringS, "%3.0f", min(cp.pubList.amp_hrs_remaining, 999.));
   else if (Sen->saturated)
     sprintf(dispStringS, "SAT");
   display->print(dispStringS);
@@ -547,6 +547,14 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.type = 3;
                 Serial.printf("Setting waveform to triangle inject.  rp.type = %d\n", rp.type);
                 break;
+              case ( 'c' ):
+                rp.type = 4;
+                Serial.printf("Setting waveform to 1C charge.  rp.type = %d\n", rp.type);
+                break;
+              case ( 'd' ):
+                rp.type = 5;
+                Serial.printf("Setting waveform to 1C discharge.  rp.type = %d\n", rp.type);
+                break;
               default:
                 Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
             }
@@ -564,9 +572,10 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.freq = 0.0;
                 rp.amp = 0.0;
                 rp.offset = 0.0;
-                rp.debug = 0;
-                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug);
+                rp.debug = 2;
+                rp.curr_bias_all = 0;
+                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 break;
               case ( 1 ):
                 rp.modeling = true;
@@ -575,8 +584,8 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.amp = 18.3;
                 rp.offset = -rp.amp;
                 rp.debug = -12;
-                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug);
+                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 rp.freq *= (2. * PI);
                 break;
               case ( 2 ):
@@ -585,10 +594,10 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.freq = 0.10;
                 rp.amp = 18.3;
                 rp.offset = -rp.amp;
-                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug);
-                rp.freq *= (2. * PI);
                 rp.debug = -12;
+                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
+                rp.freq *= (2. * PI);
                 break;
               case ( 3 ):
                 rp.modeling = true;
@@ -596,10 +605,32 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.freq = 0.05;
                 rp.amp = 18.3;
                 rp.offset = -rp.amp;
-                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug);
-                rp.freq *= (2. * PI);
                 rp.debug = -12;
+                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
+                rp.freq *= (2. * PI);
+                break;
+              case ( 4 ):
+                rp.modeling = true;
+                rp.type = 4;
+                rp.freq = 0.0;
+                rp.amp = 0.0;
+                rp.offset = 0;
+                rp.curr_bias_all = -NOM_BATT_CAP;  // Software effect only
+                rp.debug = -12;
+                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
+                break;
+              case ( 5 ):
+                rp.modeling = true;
+                rp.type = 4;
+                rp.freq = 0.0;
+                rp.amp = 0.0;
+                rp.offset = 0;
+                rp.curr_bias_all = NOM_BATT_CAP; // Software effect only
+                rp.debug = -12;
+                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 break;
               default:
                 Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
@@ -681,11 +712,14 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println("  : Injection frequency Hz (0-2) [0]");
   Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  's', 'q', 't' (0=none, 1=sine, 2=square, 3=triangle)");
   Serial.printf("  Xo= "); Serial.printf("%7.3f", rp.offset); Serial.println("  : Injection offset A (-18.3-18.3) [0]");
+  Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("  : Injection  A (unlimited) [0]");
   Serial.printf("  Xp= <?>, programmed injection settings...\n"); 
   Serial.printf("       0:  Off, modeling false\n");
   Serial.printf("       1:  1 Hz sinusoid centered at 0 with largest supported amplitude\n");
   Serial.printf("       2:  1 Hz square centered at 0 with largest supported amplitude\n");
   Serial.printf("       3:  1 Hz triangle centered at 0 with largest supported amplitude\n");
+  Serial.printf("       4:  -1C soft discharge until reset by Xp0 or Di0\n");
+  Serial.printf("       5:  +1C soft charge until reset by Xp0 or Di0\n");
   Serial.printf("h   this menu\n");
 }
 
@@ -835,7 +869,7 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
         sat     Indicator that battery is saturated (VOC>threshold(temp)), T/F
         temp_c  Battery temperature, deg C
     Outputs:
-        q_avail Saturation charge at temperature, C
+        q_capacity Saturation charge at temperature, C
         delta_q Iteration rate of change, C
         t_sat   Battery temperature at saturation, deg C
         q_sat   Saturation charge, C
@@ -844,8 +878,8 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
 double BatteryModel::count_coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
   const double temp_c, double *delta_q, double *t_sat, double *q_sat)
 {
-    double soc = 0;   // return value
-    double q_avail = *q_sat*(1. - DQDT*(temp_c - *t_sat));
+    double soc_for_lookup = 0;   // return value
+    double q_capacity = *q_sat*(1. - DQDT*(temp_c - *t_sat));
     double d_delta_q = charge_curr * dt;
 
     // Saturation
@@ -858,21 +892,21 @@ double BatteryModel::count_coulombs(const double dt, const double charge_curr, c
         }
         *t_sat = temp_c;
         *q_sat = ((*t_sat - 25.)*DQDT + 1.)*q_cap;
-        q_avail = *q_sat;
+        q_capacity = *q_sat;
     }
 
     // Integration
-    *delta_q = max(min(*delta_q + d_delta_q, 1.1*(q_cap - q_avail)), -q_avail);
+    *delta_q = max(min(*delta_q + d_delta_q, 1.1*(q_cap - q_capacity)), -q_capacity);
 
     // Normalize
-    soc = (q_avail + *delta_q) / q_avail;
+    soc_for_lookup = (q_capacity + *delta_q) / q_capacity;
 
     if ( rp.debug==76 )
-        Serial.printf("BatteryModel::coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_avail,soc=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_avail, soc);
+        Serial.printf("BatteryModel::coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc_for_lookup=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_capacity, soc_for_lookup);
     if ( rp.debug==-76 )
-        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_avail,soc          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_avail, soc);
+        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc_for_lookup          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_capacity, soc_for_lookup);
 
-    return ( soc );
+    return ( soc_for_lookup );
 }

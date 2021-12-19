@@ -145,9 +145,6 @@ double Battery::calculate(const double temp_C, const double q, const double curr
     vdyn_ = double(num_cells_) * ib_*(r1_ + r2_)*sr_;
     vb_ = voc_ + vdyn_;
 
-    // Time calculation
-    calculate_charge_time(soc_lim);
-
     // Saturation
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
     sat_ = voc_ >= vsat_;
@@ -208,16 +205,19 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
 }
 
 // Charge time calculation
-double Battery::calculate_charge_time(const double soc)
-{
-    if ( ib_ > 0.1 )  tcharge_ = min(NOM_BATT_CAP / ib_ * (1. - soc), 24.);
-    else if ( ib_ < -0.1 ) tcharge_ = max(NOM_BATT_CAP / ib_ * soc, -24.);
-    else if ( ib_ >= 0. ) tcharge_ = 24.;
+double Battery::calculate_charge_time(const double temp_c, const double charge_curr,
+    const double delta_q, const double t_sat, const double q_sat)
+{//TODO:  0.1 should not be hard-coded here   TCHARGE_DISPLAY_DEADBAND 0.1
+    double q_capacity = calculate_capacity(temp_c, t_sat, q_sat);
+    if ( charge_curr > 0.1 )  tcharge_ = min( -delta_q / ib_ /3600., 24.);
+    else if ( charge_curr < -0.1 ) tcharge_ = max( -(q_capacity + delta_q) / ib_ * 3600., -24.);
+    else if ( charge_curr >= 0. ) tcharge_ = 24.;
     else tcharge_ = -24.;
+
+    amp_hrs_remaining_ = (q_capacity + delta_q) / 3600.;
 
     return( tcharge_ );
 }
-
 
 // EKF model for predict
 void Battery::ekf_model_predict(double *Fx, double *Bu)
@@ -284,7 +284,7 @@ void mulvec(double * a, double * x, double * y, int m, int n)
         sat     Indicator that battery is saturated (VOC>threshold(temp)), T/F
         temp_c  Battery temperature, deg C
     Outputs:
-        q_avail Saturation charge at temperature, C
+        q_capacity Saturation charge at temperature, C
         delta_q Iteration rate of change, C
         t_sat   Battery temperature at saturation, deg C
         q_sat   Saturation charge, C
@@ -293,8 +293,8 @@ void mulvec(double * a, double * x, double * y, int m, int n)
 double count_coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
     const double temp_c, double *delta_q, double *t_sat, double *q_sat)
 {
-    double soc = 0;   // return value
-    double q_avail = *q_sat*(1. - DQDT*(temp_c - *t_sat));
+    double soc_for_lookup = 0;   // return value
+    double q_capacity = calculate_capacity(temp_c, *t_sat, *q_sat);
     double d_delta_q = charge_curr * dt;
 
     // Saturation
@@ -306,24 +306,24 @@ double count_coulombs(const double dt, const double charge_curr, const double q_
             *delta_q = 0.;
         }
         *t_sat = temp_c;
-        *q_sat = ((*t_sat - 25.)*DQDT + 1.)*q_cap;
-        q_avail = *q_sat;
+        *q_sat = calculate_saturation_charge(temp_c, *t_sat, q_cap);
+        q_capacity = *q_sat;
     }
 
     // Integration
-    *delta_q = max(min(*delta_q + d_delta_q, 1.1*(q_cap - q_avail)), -q_avail);
+    *delta_q = max(min(*delta_q + d_delta_q, 1.1*(q_cap - q_capacity)), -q_capacity);
 
     // Normalize
-    soc = (q_avail + *delta_q) / q_avail;
+    soc_for_lookup = (q_capacity + *delta_q) / q_capacity;
 
     if ( rp.debug==36 )
-        Serial.printf("coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_avail,soc=     %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_avail, soc);
+        Serial.printf("coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc_for_lookup=     %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_capacity, soc_for_lookup);
     if ( rp.debug==-36 )
-        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,soc_avail,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_avail, soc);
+        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,soc_for_lookup,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_capacity, soc_for_lookup);
 
-    return ( soc );
+    return ( soc_for_lookup );
 }
 
 /* Calculate saturation voltage
@@ -350,4 +350,16 @@ boolean is_sat(const double temp_c, const double voc)
 {
     double vsat = sat_voc(temp_c);
     return ( voc >= vsat );
+}
+
+// Capacity
+double calculate_capacity(const double temp_c, const double t_sat, const double q_sat)
+{
+    return( q_sat * (1-DQDT*(temp_c - t_sat)) );
+}
+
+// Saturation charge
+double calculate_saturation_charge(const double temp_c, const double t_sat, const double q_cap)
+{
+    return( q_cap * ((t_sat - 25.)*DQDT + 1.) );
 }

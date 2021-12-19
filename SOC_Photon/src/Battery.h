@@ -47,7 +47,7 @@ public:
   double calc_soc_voc(double soc_lim, double *dv_dsoc, double b, double a, double c, double log_soc, double exp_n_soc, double pow_log_soc);
   virtual double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated);
-  double calculate_charge_time(const double soc);
+  double calculate_charge_time(const double temp_c, const double charge_curr, const double delta_q, const double t_sat, const double q_sat);
   void init_soc_ekf(const double soc);
   virtual double count_coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
     const double temp_c, double *delta_soc, double *t_sat, double *soc_sat){return 0;};
@@ -66,6 +66,7 @@ public:
   double Sr() { return (sr_); };
   double K_ekf() { return (K_); };
   double y_ekf() { return (y_); };
+  double amp_hrs_remaining() { return (amp_hrs_remaining_); };
 protected:
   TableInterp1Dclip *B_T_;  // Battery coeff
   TableInterp1Dclip *A_T_;  // Battery coeff
@@ -122,8 +123,9 @@ protected:
   double soc_avail_;// Temperature adjusted estimate of battery state of charge (0-1)
   double soc_ekf_;  // Filtered state of charge from ekf (0-1)
   double q_cap_;    // Charge capability of this battery, C
-  double q_avail_;  // Charge available at this temperature, C
+  double q_capacity_;  // Charge available at this temperature, C
   double q_ekf_;    // Filtered charge calculated by ekf, C
+  double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
   void ekf_model_predict(double *Fx, double *Bu);
   void ekf_model_update(double *hx, double *H);
 };
@@ -195,5 +197,7 @@ double count_coulombs(const double dt, const double charge_curr, const double q_
   const double temp_c, double *delta_soc, double *t_sat, double *soc_sat);
 double sat_voc(const double temp_c);
 boolean is_sat(const double temp_c, const double voc);
+double calculate_capacity(const double temp_c, const double t_sat, const double q_sat);
+double calculate_saturation_charge(const double temp_c, const double t_sat, const double q_cap);
 
 #endif

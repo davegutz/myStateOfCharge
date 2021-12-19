@@ -39,9 +39,9 @@ struct RetainedPars
   double delta_q_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
   double t_sat_model = 25.; // Battery temperature at saturation of model, deg C
   double q_sat_model = 360000; // Battery charge at saturation for model, Ah
-  double curr_bias_amp = 0; // Calibrate amp current sensor, A 
-  double curr_bias_noamp = 0; // Calibrate non-amplified current sensor, A 
-  double curr_bias_all = 0; // Bias all current sensors, A 
+  double curr_bias_amp = -1.; // Calibrate amp current sensor, A 
+  double curr_bias_noamp = -0.13; // Calibrate non-amplified current sensor, A 
+  double curr_bias_all = -0.6; // Bias all current sensors, A 
   boolean curr_sel_amp = true; // Use amplified sensor
   double vbatt_bias = 0;    // Calibrate Vbatt, V
   boolean modeling = false; // Driving saturation calculation with model

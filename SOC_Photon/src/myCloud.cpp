@@ -171,4 +171,5 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->VOC = MyBattModel->voc();
   pubList->soc_avail = MyBatt->soc_avail()*100.0;
   pubList->curr_sel_amp = rp.curr_sel_amp;
+  pubList->amp_hrs_remaining = MyBatt->amp_hrs_remaining();
 }
