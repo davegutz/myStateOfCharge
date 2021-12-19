@@ -32,6 +32,103 @@
 extern CommandPars cp;
 extern RetainedPars rp; // Various parameters to be static at system level
 
+
+// Class CoulombCounter
+// constructors
+CoulombCounter::CoulombCounter() {}
+CoulombCounter::CoulombCounter(const double nom_q_cap, const double t_rated, const double init_q, const double init_t_c, const double s_cap)
+{
+    nom_q_cap_ = nom_q_cap;
+    t_rated_ = t_rated;
+    q_ = init_q;
+    t_sat_ = init_t_c;
+    q_cap_ = nom_q_cap_ * s_cap;
+    q_sat_ = calculate_saturation_charge(t_sat_, q_cap_);
+    q_capacity_ = calculate_capacity(init_t_c);
+    soc_ = q_ / q_capacity_;
+    SOC_ = q_ / nom_q_cap_;
+}
+CoulombCounter::~CoulombCounter() {}
+
+// operators
+// functions
+
+// Scale size of battery and adjust as needed to preserve SOC.  t_sat_ unchanged.
+// Energy is not conserved.  Goal is to scale battery and see no change in SOC on screen of 
+// test comparisons
+void CoulombCounter::apply_cap_scale(const double scale)
+{
+  q_cap_ = scale * nom_q_cap_;
+  q_ = SOC_ * q_cap_;
+  q_sat_ = calculate_saturation_charge(t_sat_, q_cap_);
+  q_capacity_ = q_sat_;
+  soc_ = q_ / q_capacity_;
+};
+
+// Memory set, adjust book-keeping as needed.  q_cap_ etc unchanged
+void CoulombCounter::apply_SOC(const double SOC)
+{
+  SOC_ = SOC;
+  q_ = SOC_ * q_cap_;
+  // q_capacity_ and q_sat_ unchanged
+  soc_ = q_ / q_capacity_;
+}
+
+// Capacity
+double CoulombCounter::calculate_capacity(const double temp_c)
+{
+    return( q_sat_ * (1-DQDT*(temp_c - t_sat_)) );
+}
+
+// Saturation charge
+double CoulombCounter::calculate_saturation_charge(const double t_sat, const double q_cap)
+{
+    return( q_cap * ((t_sat - t_rated_)*DQDT + 1.) );
+}
+
+// Count coulombs based on true=actual capacity
+double CoulombCounter::count_coulombs(const double dt, const double temp_c, const double charge_curr, const boolean sat)
+{
+    /* Count coulombs based on true=actual capacity
+    Inputs:
+        dt              Integration step, s
+        charge_curr     Charge, A
+        sat             Indicator that battery is saturated (VOC>threshold(temp)), T/F
+    */
+    q_capacity_ = q_sat_*(1. - DQDT*(temp_c - t_sat_));
+    double d_delta_q = charge_curr * dt;
+
+    // Saturation
+    if ( sat )
+    {
+        if ( d_delta_q > 0 )
+        {
+            d_delta_q = 0.;
+            delta_q_ = 0.;
+        }
+        t_sat_ = temp_c;
+        q_sat_ = ((t_sat_ - 25.)*DQDT + 1.)*q_cap_;
+        q_capacity_ = q_sat_;
+    }
+
+    // Integration
+    delta_q_ = max(min(delta_q_ + d_delta_q, 1.1*(q_cap_ - q_capacity_)), -q_capacity_);
+
+    // Normalize
+    soc_ = (q_capacity_ + delta_q_) / q_capacity_;
+    SOC_ = (q_capacity_ + delta_q_) / nom_q_cap_ * 100.;
+
+    if ( rp.debug==76 )
+        Serial.printf("CoulombCounter::count_coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc,SOC=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, d_delta_q, delta_q_, q_sat_, t_sat_, q_capacity_, soc_, SOC_);
+    if ( rp.debug==-76 )
+        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc, SOC,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, d_delta_q, delta_q_, q_sat_, t_sat_, q_capacity_, soc_, SOC_);
+
+    return ( soc_ );
+}
+
+
 // class Battery
 // constructors
 Battery::Battery()

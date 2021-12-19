@@ -84,6 +84,34 @@ static TableInterp1Dclip  *V_T1 = new TableInterp1Dclip(n_v1, t_min_v1, v_v1);
 static TableInterp1Dclip  *I_T1 = new TableInterp1Dclip(n_v1, t_min_v1, i_v1);
 static TableInterp1Dclip  *T_T1 = new TableInterp1Dclip(n_v1, t_min_v1, T_v1);
 
+// Coulomb Counter Class
+class CoulombCounter
+{
+public:
+  CoulombCounter();
+  CoulombCounter(const double nom_q_cap, const double t_rate, const double init_q, const double init_t_c, const double s_cap);
+  ~CoulombCounter();
+  // operators
+  // functions
+  void apply_cap_scale(const double scale);
+  void apply_SOC(const double SOC);
+  double calculate_capacity(const double temp_c);
+  double calculate_saturation_charge(const double t_sat, const double q_cap);
+  double count_coulombs(const double dt, const double temp_c, const double charge_curr, const boolean sat);
+protected:
+  double nom_q_cap_;    // Rated capacity at t_rated_, C
+  double q_cap_;        // Capacity normalized to rated temperature, C
+  double q_capacity_;   // Saturation charge at temperature, C
+  double q_;            // Present charge available to use, C
+  double delta_q_;      // Charge since saturated, C
+  double q_sat_;        // Saturation charge, C
+  double t_sat_;        // Battery temperature at saturation, deg C
+  double soc_;          // Fraction of saturation charge (q_capacity_) available (0-1)
+  double SOC_;          // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries.
+  double t_rated_;      // Rated temperature, deg C
+};
+
+
 // Battery Class
 class Battery: public EKF_1x1
 {
