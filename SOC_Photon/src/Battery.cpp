@@ -132,7 +132,7 @@ double Battery::calculate(const double temp_C, const double q, const double curr
     ib_ = curr_in;
     q_ = q;
 
-    soc_ = 1 - (1 - q_/nom_q_cap)*cu_bb/cs_bb;
+    soc_ = 1 - (1 - q_/q_cap_);
     soc_lim = max(min(soc_, mxeps_bb), mneps_bb);
 
     // VOC-OCV model
@@ -306,7 +306,7 @@ double count_coulombs(const double dt, const double charge_curr, const double q_
             *delta_q = 0.;
         }
         *t_sat = temp_c;
-        *q_sat = calculate_saturation_charge(temp_c, *t_sat, q_cap);
+        *q_sat = calculate_saturation_charge(*t_sat, q_cap);
         q_capacity = *q_sat;
     }
 
@@ -359,7 +359,7 @@ double calculate_capacity(const double temp_c, const double t_sat, const double 
 }
 
 // Saturation charge
-double calculate_saturation_charge(const double temp_c, const double t_sat, const double q_cap)
+double calculate_saturation_charge(const double t_sat, const double q_cap)
 {
     return( q_cap * ((t_sat - 25.)*DQDT + 1.) );
 }

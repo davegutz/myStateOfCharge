@@ -158,8 +158,8 @@ void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *milli
 
 // Talk Declarations
 void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num,
-  Battery *MyBatt, Battery *MyBattModel);
+  Battery *MyBatt, BatteryModel *MyBattModel);
 void talkT(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num);  // Transient inputs
-void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved); // Help
+void talkH(double *step_val, int8_t *vec_num, Battery *batt, BatteryModel *batt_model); // Help
 
 #endif

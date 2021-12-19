@@ -153,6 +153,8 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   static unsigned long int past = now;
   double T = (now - past)/1e3;
   past = now;
+
+  // Injection   TODO:  move to BatteryModel
   double t = now/1e3;
   double sin_bias = 0.;
   double square_bias = 0.;
@@ -161,8 +163,6 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   static SinInj *Sin_inj = new SinInj();
   static SqInj *Sq_inj = new SqInj();
   static TriInj *Tri_inj = new TriInj();
-
-
   // Calculate injection amounts from user inputs (talk).
   // One-sided because PWM voltage >0.  rp.offset applied in logic below.
   switch ( rp.type )
@@ -200,6 +200,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   Sen->curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.offset;
   Sen->curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.offset;
 
+  // TODO: move this to BatteryModel::
   // Anti-windup used to bias current below (only when modeling)
   double s_sat = 0.;
   if ( rp.modeling && Sen->Wshunt > 0. && Sen->saturated )
@@ -417,6 +418,12 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
 
   display->display();
   pass = !pass;
+
+  if ( rp.debug==5 ) Serial.printf("myDisplay: Tb, Vb, Ib, SOC_ekf, tcharge, Ahrs_rem, %3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
+      cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt_filt, cp.pubList.soc_ekf, cp.pubList.tcharge, cp.pubList.amp_hrs_remaining);
+  if ( rp.debug==-5 ) Serial.printf("Tb, Vb, Ib, SOC_ekf, tcharge, Ahrs_rem,\n%3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
+      cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt_filt, cp.pubList.soc_ekf, cp.pubList.tcharge, cp.pubList.amp_hrs_remaining);
+
 }
 
 
@@ -430,9 +437,10 @@ uint32_t pwm_write(uint32_t duty, Pins *myPins)
 
 // Talk Executive
 void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num,
-  Battery *MyBatt, Battery *MyBattModel)
+  Battery *MyBatt, BatteryModel *MyBattModel)
 {
   double SOCS_in = -99.;
+  double scale = 1.;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
   if (cp.string_complete)
   {
@@ -472,10 +480,19 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
       case ( 'S' ):
         switch ( cp.input_string.charAt(1) )
         {
+          case ( 'c' ):
+            scale = cp.input_string.substring(2).toFloat();
+            Serial.printf("MyBattModel.q_cap scaled by %7.3f from %7.3f to ", scale, MyBattModel->q_cap());
+            MyBattModel->S_cap(scale);
+            Serial.printf("%7.3f\n", MyBattModel->q_cap());
+            Serial.printf("MyBattModel.q_sat scaled from %7.3f to ", rp.q_sat_model);
+            rp.q_sat_model = calculate_saturation_charge(rp.t_sat_model, MyBattModel->q_cap()*scale);
+            Serial.printf("%7.3f\n", rp.q_sat_model);
+            break;
           case ( 'r' ):
-            double rscale = cp.input_string.substring(2).toFloat();
-            MyBattModel->Sr(rscale);
-            MyBatt->Sr(rscale);
+            scale = cp.input_string.substring(2).toFloat();
+            MyBattModel->Sr(scale);
+            MyBatt->Sr(scale);
             break;
         }
         break;
@@ -494,10 +511,10 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         break;
       case ( 'm' ):
         SOCS_in = cp.input_string.substring(1).toFloat()/100.;
-        rp.soc = max(min(SOCS_in, mxepu_bb), mnepu_bb);
-        rp.soc_model = max(min(SOCS_in, mxepu_bb), mnepu_bb);
+        rp.soc = max(min(SOCS_in, mxeps_bb), mneps_bb);
+        rp.soc_model = max(min(SOCS_in, mxeps_bb*rp.s_cap), mneps_bb);
         rp.delta_q = max((rp.soc - 1.)*nom_q_cap, -rp.q_sat);
-        rp.delta_q_model = max((rp.soc_model - 1.)*true_q_cap, -rp.q_sat_model);
+        rp.delta_q_model = max((rp.soc_model - 1.)*nom_q_cap*rp.s_cap, -rp.q_sat_model);
         Serial.printf("soc=%7.3f,   delta_q=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f\n",
                         rp.soc, rp.delta_q, rp.soc_model, rp.delta_q_model);
         break;
@@ -572,7 +589,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.freq = 0.0;
                 rp.amp = 0.0;
                 rp.offset = 0.0;
-                rp.debug = 2;
+                rp.debug = 5;   // myDisplay = 5
                 rp.curr_bias_all = 0;
                 Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
@@ -641,7 +658,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         }
         break;
       case ( 'h' ): 
-        talkH(&cp.step_val, &cp.vec_num, MyBattModel);
+        talkH(&cp.step_val, &cp.vec_num, MyBatt, MyBattModel);
         break;
       default:
         Serial.print(cp.input_string.charAt(0)); Serial.println(" unknown.  Try typing 'h'");
@@ -683,7 +700,7 @@ void talkT(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_
 }
 
 // Talk Help
-void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
+void talkH(double *step_val, int8_t *vec_num, Battery *batt, BatteryModel *batt_model)
 {
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
   Serial.printf("d   dump the summary log\n"); 
@@ -696,8 +713,9 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved)
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("    : delta I adder to all sensed shunt current, A [0]"); 
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.println("    : delta T adder to sensed Tbatt, deg C [0]"); 
-  Serial.printf("  Dv= "); Serial.print(batt_solved->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
-  Serial.printf("  Sr= "); Serial.print(batt_solved->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
+  Serial.printf("  Dv= "); Serial.print(batt_model->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
+  Serial.printf("  Sc= "); Serial.print(batt_model->q_cap()/batt->q_cap()); Serial.println("    : Scalar battery model size"); 
+  Serial.printf("  Sr= "); Serial.print(batt_model->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("T<?>=  "); 
   Serial.printf("T - Transient performed with input.   For example:\n");
   Serial.printf("  Ts=<index>  :   index="); Serial.print(*step_val);
@@ -821,7 +839,7 @@ BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const doubl
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt) :
     Battery(x_tab, b_tab, a_tab, c_tab, m, n, d, nz, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt)
 {
-  q_cap_ = true_q_cap;
+  q_cap_ = nom_q_cap * rp.s_cap;
 }
 
 // SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model

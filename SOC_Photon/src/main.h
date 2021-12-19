@@ -230,7 +230,7 @@ void loop()
   static Battery *MyBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
   // Model, driven by soc, used to get Vbatt.   Use Talk 'x' to toggle model on/off. 
-  static Battery *MyBattModel = new BatteryModel(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
+  static BatteryModel *MyBattModel = new BatteryModel(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
 
   // Battery saturation
@@ -348,11 +348,17 @@ void loop()
                     Tbatt_filt_C, &rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
     Sen->Voc = MyBattModel->voc();
 
-    // EKF
+    // Main Battery calculations
+    // Over-ride Ishunt, Vbatt and Tbatt with model 
+    if ( rp.modeling )
+    {
+      // Sen->Ishunt = MyBattModel->Ishunt();
+      // Sen->Vbatt = MyBattModel->Vbatt();
+      // Tbatt_filt_C = MyBattModel->Vbatt();
+    }
+    // EKF - calculates temp_c_, voc_, voc_dyn_
     cp.soc_ekf = MyBatt->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5), Sen->saturated);  // TODO:  hardcoded time of 0.5 into constants
-
-    // Coulomb Count integrator
-    Sen->saturated = SatDebounce->calculate(is_sat(Tbatt_filt_C, Sen->Voc), reset);
+    Sen->saturated = SatDebounce->calculate(is_sat(Tbatt_filt_C, MyBatt->voc()), reset);
     rp.soc = count_coulombs(Sen->T, Sen->Ishunt, MyBatt->q_cap(), Sen->saturated,
                       Tbatt_filt_C, &rp.delta_q, &rp.t_sat, &rp.q_sat);
     MyBatt->calculate_charge_time(Tbatt_filt_C, Sen->Ishunt, rp.delta_q, rp.t_sat, rp.q_sat);

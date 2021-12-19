@@ -51,6 +51,7 @@ struct RetainedPars
   uint8_t type = 0;         // Injected waveform type.   0=sine, 1=square, 2=triangle
   double offset = 0;        // Constant bias, A
   double t_bias = 0;        // Sensed temp bias, deg C
+  double s_cap = 1.;        // Scalar on battery model size
 };            
 
 #endif
