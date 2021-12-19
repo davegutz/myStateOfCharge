@@ -234,7 +234,7 @@ void loop()
     batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
 
   // Battery saturation
-  static Debounce *SatObj = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
+  static Debounce *SatDebounce = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
 
   unsigned long current_time;                // Time result
   static unsigned long now = millis();      // Keep track of time
@@ -352,7 +352,7 @@ void loop()
     cp.soc_ekf = MyBatt->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5), Sen->saturated);  // TODO:  hardcoded time of 0.5 into constants
 
     // Coulomb Count integrator
-    Sen->saturated = SatObj->calculate(is_sat(Tbatt_filt_C, Sen->Voc), reset);
+    Sen->saturated = SatDebounce->calculate(is_sat(Tbatt_filt_C, Sen->Voc), reset);
     rp.soc = count_coulombs(Sen->T, Sen->Ishunt, MyBatt->q_cap(), Sen->saturated,
                       Tbatt_filt_C, &rp.delta_q, &rp.t_sat, &rp.q_sat);
     MyBatt->calculate_charge_time(rp.soc);

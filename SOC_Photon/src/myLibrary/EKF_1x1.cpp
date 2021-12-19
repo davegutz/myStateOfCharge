@@ -88,7 +88,7 @@ void EKF_1x1::update_ekf(const double z, double x_min, double x_max, const doubl
   z_ = z;
   double pht = P_*H_;
   S_ = H_*pht + R_;
-  K_ = pht / S_;
+  if ( abs(S_) > 1e-12) K_ = pht / S_;  // Using last-good-value if S_ = 0
   y_ = z_ - hx_;
   x_ = max(min( x_ + K_*y_, x_max), x_min);
   double i_kh = 1. - K_*H_;

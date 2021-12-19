@@ -402,7 +402,10 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
 
   display->setTextColor(SSD1306_WHITE);
   char dispStringT[9];
-  sprintf(dispStringT, "%3.0f%5.1f", cp.pubList.soc_ekf, cp.pubList.tcharge);
+  if ( abs(cp.pubList.tcharge) < 24. )
+    sprintf(dispStringT, "%3.0f%5.1f", cp.pubList.soc_ekf, cp.pubList.tcharge);
+  else
+    sprintf(dispStringT, "%3.0f --- ", cp.pubList.soc_ekf);
   display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[4];

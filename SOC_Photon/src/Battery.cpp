@@ -212,8 +212,8 @@ double Battery::calculate_charge_time(const double soc)
 {
     if ( ib_ > 0.1 )  tcharge_ = min(NOM_BATT_CAP / ib_ * (1. - soc), 24.);
     else if ( ib_ < -0.1 ) tcharge_ = max(NOM_BATT_CAP / ib_ * soc, -24.);
-    else if ( ib_ >= 0. ) tcharge_ = 24.*(1. - soc);
-    else tcharge_ = -24.*soc;
+    else if ( ib_ >= 0. ) tcharge_ = 24.;
+    else tcharge_ = -24.;
 
     return( tcharge_ );
 }
