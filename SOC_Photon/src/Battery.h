@@ -146,6 +146,7 @@ protected:
                                         // though probably not for an individual cell
 #define DQDT                  0.01      // Change of charge with temperature, fraction/deg C
                                         // dQdT from literature.   0.01 / deg C is commonly used.
+#define TCHARGE_DISPLAY_DEADBAND 0.1    // Inside this +/- deadband, charge time is displayed '---', A
 const int batt_num_cells = NOM_SYS_VOLT/3;  // Number of standard 3 volt LiFePO4 cells
 const double batt_vsat = double(batt_num_cells)*double(BATT_V_SAT);  // Total bank saturation for 0.997=soc, V
 const double batt_vmax = (14.3/4)*double(batt_num_cells); // Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
