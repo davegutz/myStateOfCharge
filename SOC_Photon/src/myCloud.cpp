@@ -140,7 +140,7 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
 // Assignments
 void assign_publist(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
   const double control_time, struct Sensors* Sen, const int num_timeouts,
-  Battery* MyBattModel, Battery* MyBattEKF)
+  Battery* MyBattModel, Battery* MyBatt)
 {
   pubList->now = now;
   pubList->unit = unit;
@@ -167,8 +167,8 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->soc_sat = rp.q_sat/nom_q_cap*100.;
   pubList->T = Sen->T;
   if ( rp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
-  pubList->tcharge = MyBattEKF->tcharge();
+  pubList->tcharge = MyBatt->tcharge();
   pubList->VOC = MyBattModel->voc();
-  pubList->soc_avail = MyBattEKF->soc_avail()*100.0;
+  pubList->soc_avail = MyBatt->soc_avail()*100.0;
   pubList->curr_sel_amp = rp.curr_sel_amp;
 }

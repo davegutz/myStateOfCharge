@@ -132,7 +132,7 @@ public:
   // operators
   // functions
   double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
-  double coulombs(const double dt, const double charge_curr, const double q_sat, const boolean sat,
+  double count_coulombs(const double dt, const double charge_curr, const double q_sat, const boolean sat,
     const double temp_c, double *delta_soc, double *t_sat, double *soc_sat);
 protected:
 };
@@ -158,7 +158,7 @@ void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *milli
 
 // Talk Declarations
 void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num,
-  Battery *MyBattEKF, Battery *MyBattModel);
+  Battery *MyBatt, Battery *MyBattModel);
 void talkT(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num);  // Transient inputs
 void talkH(double *step_val, int8_t *vec_num, Battery *batt_solved); // Help
 

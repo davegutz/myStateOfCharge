@@ -227,7 +227,7 @@ void loop()
 
   // Battery  models
   // Free, driven by soc
-  static Battery *MyBattEKF = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
+  static Battery *MyBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
   // Model, driven by soc, used to get Vbatt.   Use Talk 'x' to toggle model on/off. 
   static Battery *MyBattModel = new BatteryModel(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
@@ -332,48 +332,51 @@ void loop()
     {
       if ( cp.vectoring ) rp.soc = rp.soc;
       else rp.soc = soc_saved;  // Only way to reach this line is resetting from vector test
-      MyBattEKF->init_soc_ekf(rp.soc);
+      MyBatt->init_soc_ekf(rp.soc);
       if ( elapsed>INIT_WAIT ) reset_free = false;
     }
     if ( reset_free_ekf )
     {
-      MyBattEKF->init_soc_ekf(rp.soc);
+      MyBatt->init_soc_ekf(rp.soc);
       if ( elapsed>INIT_WAIT_EKF ) reset_free_ekf = false;
     }
 
-    // Model driven by itself and highly filtered (by hardware RC) shunt current to keep Vbatt_model quiet
+    // Model used for built-in testing (rp.modeling = true and jumper wire)
     Sen->Vbatt_model = MyBattModel->calculate(Tbatt_filt_C, rp.soc_model, Sen->Ishunt, min(Sen->T, 0.5));
     boolean sat_model = is_sat(Tbatt_filt_C, MyBattModel->voc());
-    rp.soc_model = MyBattModel->coulombs(Sen->T, Sen->Ishunt, MyBattModel->q_cap(), sat_model, Tbatt_filt_C, &rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
+    rp.soc_model = MyBattModel->count_coulombs(Sen->T, Sen->Ishunt, MyBattModel->q_cap(), sat_model,
+                    Tbatt_filt_C, &rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
     Sen->Voc = MyBattModel->voc();
 
     // EKF
-    cp.soc_ekf = MyBattEKF->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5), Sen->saturated);  // TODO:  hardcoded time of 0.5 into constants
+    cp.soc_ekf = MyBatt->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5), Sen->saturated);  // TODO:  hardcoded time of 0.5 into constants
 
     // Coulomb Count integrator
     Sen->saturated = SatObj->calculate(is_sat(Tbatt_filt_C, Sen->Voc), reset);
-    rp.soc = coulombs(Sen->T, Sen->Ishunt, MyBattEKF->q_cap(), Sen->saturated, Tbatt_filt_C, &rp.delta_q, &rp.t_sat, &rp.q_sat);
+    rp.soc = count_coulombs(Sen->T, Sen->Ishunt, MyBatt->q_cap(), Sen->saturated,
+                      Tbatt_filt_C, &rp.delta_q, &rp.t_sat, &rp.q_sat);
+    MyBatt->calculate_charge_time(rp.soc);
 
     // Useful for Arduino plotting
     if ( rp.debug==-1 )
       Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-        MyBattEKF->soc_avail()*100-90,
+        MyBatt->soc_avail()*100-90,
         Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
-        Sen->Vbatt_filt*10-110, MyBattModel->voc()*10-110, MyBattModel->vdyn()*10, MyBattModel->vb()*10-110, MyBattEKF->vdyn()*10-110);
+        Sen->Vbatt_filt*10-110, MyBattModel->voc()*10-110, MyBattModel->vdyn()*10, MyBattModel->vb()*10-110, MyBatt->vdyn()*10-110);
     if ( rp.debug==12 )
       Serial.printf("ib,ib_mod,   vb,vb_mod,  voc_dyn,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
-        MyBattEKF->ib(), MyBattModel->ib(),
-        MyBattEKF->vb(), MyBattModel->vb(),
-        MyBattEKF->voc_dyn(), MyBattModel->voc(),
-        MyBattEKF->K_ekf(), MyBattEKF->y_ekf(),
-        MyBattModel->soc(), MyBattEKF->soc_ekf(), rp.soc);
+        MyBatt->ib(), MyBattModel->ib(),
+        MyBatt->vb(), MyBattModel->vb(),
+        MyBatt->voc_dyn(), MyBattModel->voc(),
+        MyBatt->K_ekf(), MyBatt->y_ekf(),
+        MyBattModel->soc(), MyBatt->soc_ekf(), rp.soc);
     if ( rp.debug==-12 )
       Serial.printf("ib,ib_mod,   vb*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_mod*10-110,   K, y,    SOC_mod-90, SOC_ekf-90, SOC-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
-        MyBattEKF->ib(), MyBattModel->ib(),
-        MyBattEKF->vb()*10-110, MyBattModel->vb()*10-110,
-        MyBattEKF->voc_dyn()*10-110, MyBattModel->voc()*10-110,
-        MyBattEKF->K_ekf(), MyBattEKF->y_ekf(),
-        MyBattModel->soc()*100-90, MyBattEKF->soc_ekf()*100-90, rp.soc*100-90);
+        MyBatt->ib(), MyBattModel->ib(),
+        MyBatt->vb()*10-110, MyBattModel->vb()*10-110,
+        MyBatt->voc_dyn()*10-110, MyBattModel->voc()*10-110,
+        MyBatt->K_ekf(), MyBatt->y_ekf(),
+        MyBattModel->soc()*100-90, MyBatt->soc_ekf()*100-90, rp.soc*100-90);
     if ( rp.debug==-3 )
       Serial.printf("fast,et,reset_free,Wshunt,q_f,q,soc,T, %12.3f,%7.3f, %d, %7.3f,    %7.3f,     %7.3f,\n",
       control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, rp.soc, Sen->T_filt);
@@ -393,7 +396,7 @@ void loop()
     // rp.debug print statements
     // Useful for vector testing and serial data capture
     if ( rp.debug==-35 ) Serial.printf("soc_avail,soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f\n",
-        MyBattModel->soc_avail(), MyBattEKF->x_ekf(), MyBattEKF->z_ekf());
+        MyBattModel->soc_avail(), MyBatt->x_ekf(), MyBatt->z_ekf());
 
     //if ( bare ) delay(41);  // Usual I2C time
     if ( rp.debug>102 ) Serial.printf("completed load at %ld\n", millis());
@@ -426,7 +429,7 @@ void loop()
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
     control_time = decimalTime(&current_time, tempStr, now, millis_flip);
     hm_string = String(tempStr);
-    assign_publist(&cp.pubList, PublishParticle->now(), unit, hm_string, control_time, Sen, num_timeouts, MyBattModel, MyBattEKF);
+    assign_publist(&cp.pubList, PublishParticle->now(), unit, hm_string, control_time, Sen, num_timeouts, MyBattModel, MyBatt);
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
@@ -454,7 +457,7 @@ void loop()
   // right in the "Send String" box then press "Send."
   // String definitions are below.
   int debug_saved = rp.debug;
-  talk(&cp.stepping, &cp.step_val, &cp.vectoring, &cp.vec_num, MyBattEKF, MyBattModel);
+  talk(&cp.stepping, &cp.step_val, &cp.vectoring, &cp.vec_num, MyBatt, MyBattModel);
 
   // Summary management
   if ( rp.debug==-4 )

@@ -44,16 +44,14 @@ public:
   void calc_soc_voc_coeff(double soc, double tc, double *b, double *a, double *c, double *log_soc,
                           double *exp_n_soc, double *pow_log_soc);
   double calc_h_jacobian(double soc_lim, double b, double c, double log_soc, double exp_n_soc, double pow_log_soc);
-  double calc_voc_ocv(double soc_lim, double *dv_dsoc, double b, double a, double c, double log_soc, double exp_n_soc, double pow_log_soc);
+  double calc_soc_voc(double soc_lim, double *dv_dsoc, double b, double a, double c, double log_soc, double exp_n_soc, double pow_log_soc);
   virtual double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated);
+  double calculate_charge_time(const double soc);
   void init_soc_ekf(const double soc);
-  virtual double coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
+  virtual double count_coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
     const double temp_c, double *delta_soc, double *t_sat, double *soc_sat){return 0;};
-  double num_cells() { return (double(num_cells_)); };
   double soc() { return (soc_); };
-  double q() { return (q_); };
-  double q_sat() { return (q_sat_); };
   double q_cap() { return (q_cap_); };
   double soc_avail() { return (soc_avail_); };
   double soc_ekf() { return (soc_ekf_); };
@@ -66,8 +64,6 @@ public:
   double dv_dsoc() { return (dv_dsoc_); };
   double Dv() { return (dv_); };
   double Sr() { return (sr_); };
-  boolean sat() { return (sat_); };
-  boolean sat(const double v, const double i) { return (v-i*(r1_+r2_)*num_cells_>= vsat_); };
   double K_ekf() { return (K_); };
   double y_ekf() { return (y_); };
 protected:
@@ -93,7 +89,6 @@ protected:
   int num_cells_;   // Number of cells
   double dv_dsoc_;  // Derivative scaled, V/fraction
   double tcharge_;  // Charging time to 100%, hr
-  double pow_in_;   // Charging power, w
   double sr_;       // Resistance scalar
   double nom_vsat_; // Nominal saturation threshold at 25C
   double vsat_;     // Saturation threshold at temperature
@@ -196,7 +191,7 @@ static TableInterp1Dclip  *T_T1 = new TableInterp1Dclip(n_v1, t_min_v1, T_v1);
 // Methods
 void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols);
 void mulvec(double * a, double * x, double * y, int m, int n);
-double coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
+double count_coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
   const double temp_c, double *delta_soc, double *t_sat, double *soc_sat);
 double sat_voc(const double temp_c);
 boolean is_sat(const double temp_c, const double voc);

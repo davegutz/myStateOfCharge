@@ -427,7 +427,7 @@ uint32_t pwm_write(uint32_t duty, Pins *myPins)
 
 // Talk Executive
 void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num,
-  Battery *MyBattEKF, Battery *MyBattModel)
+  Battery *MyBatt, Battery *MyBattModel)
 {
   double SOCS_in = -99.;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
@@ -472,7 +472,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
           case ( 'r' ):
             double rscale = cp.input_string.substring(2).toFloat();
             MyBattModel->Sr(rscale);
-            MyBattEKF->Sr(rscale);
+            MyBatt->Sr(rscale);
             break;
         }
         break;
@@ -800,7 +800,7 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     // VOC-OCV model
     double log_soc, exp_n_soc, pow_log_soc;
     calc_soc_voc_coeff(soc_lim, temp_C, &b_, &a_, &c_, &log_soc, &exp_n_soc, &pow_log_soc);
-    voc_ = calc_voc_ocv(soc_lim, &dv_dsoc_, b_, a_, c_, log_soc, exp_n_soc, pow_log_soc)
+    voc_ = calc_soc_voc(soc_lim, &dv_dsoc_, b_, a_, c_, log_soc, exp_n_soc, pow_log_soc)
              + (soc_ - soc_lim) * dv_dsoc_;  // slightly beyond
     voc_ +=  dv_;  // Experimentally varied
 
@@ -811,14 +811,11 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     vb_ = RandlesInv_->y(0);
     vdyn_ = vb_ - voc_;
 
-
-    // Summarize   TODO: get rid of the global defines here because they differ from one battery to another
-    pow_in_ = vb_*ib_ - ib_*ib_*(r1_+r2_)*sr_*num_cells_;  // Internal resistance of battery is a loss
+    // Summarize
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
-    // sat_ = voc_ >= vsat_;
 
-    if ( rp.debug==78 ) Serial.printf("calculate_ model:  soc_in,v,curr,pow,vsat,voc= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
-      soc, vb_, ib_, pow_in_, vsat_, voc_);
+    if ( rp.debug==78 ) Serial.printf("calculate_ model:  soc_in,v,curr,pow,vsat,voc= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
+      soc, vb_, ib_, vsat_, voc_);
 
     if ( rp.debug==79 )Serial.printf("calculate_model:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc_, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
@@ -826,25 +823,29 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     return ( vb_ );
 }
 
-/* Count coulombs base on true=actual capacity
+/* Count coulombs base on true=actual capacity, sepaate for BatteryModel for 
+  independent check.
     Internal resistance of battery is a loss
     Inputs:
         dt      Integration step, s
-        pow_in  Charge power, W
-        saturated   Indicator that battery is saturated (VOC>threshold(temp)), T/F
+        charge_curr  Charge, A
+        sat     Indicator that battery is saturated (VOC>threshold(temp)), T/F
         temp_c  Battery temperature, deg C
     Outputs:
-        soc_avail  State of charge, fraction (0-1)
-        delta_soc  Iteration rate of change, (0-1)
-        t_sat       Battery temperature at saturation, deg C
-        soc_sat    State of charge at saturation, fraction (0-1)
+        q_avail Saturation charge at temperature, C
+        delta_q Iteration rate of change, C
+        t_sat   Battery temperature at saturation, deg C
+        q_sat   Saturation charge, C
+        soc     State of charge for curve lookup (0-1)
 */
-double BatteryModel::coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
+double BatteryModel::count_coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
   const double temp_c, double *delta_q, double *t_sat, double *q_sat)
 {
     double soc = 0;   // return value
     double q_avail = *q_sat*(1. - DQDT*(temp_c - *t_sat));
     double d_delta_q = charge_curr * dt;
+
+    // Saturation
     if ( sat )
     {
         if ( d_delta_q>0 )
@@ -856,13 +857,19 @@ double BatteryModel::coulombs(const double dt, const double charge_curr, const d
         *q_sat = ((*t_sat - 25.)*DQDT + 1.)*q_cap;
         q_avail = *q_sat;
     }
-    *delta_q = max(min(*delta_q + d_delta_q, 1.1*(q_cap-q_avail)), -q_avail);
+
+    // Integration
+    *delta_q = max(min(*delta_q + d_delta_q, 1.1*(q_cap - q_avail)), -q_avail);
+
+    // Normalize
     soc = (q_avail + *delta_q) / q_avail;
+
     if ( rp.debug==76 )
         Serial.printf("BatteryModel::coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_avail,soc=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
                     cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_avail, soc);
     if ( rp.debug==-76 )
         Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_avail,soc          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
                     cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_avail, soc);
+
     return ( soc );
 }
