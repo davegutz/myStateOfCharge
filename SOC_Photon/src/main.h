@@ -79,6 +79,8 @@ retained RetainedPars rp;       // Various control parameters static at system l
 retained CommandPars cp = CommandPars(); // Various control parameters commanding at system level
 retained int isum = -1;         // Summary location.   Begins at -1 because first action is to increment isum
 retained Sum_st mySum[nsum];    // Summaries
+CoulombCounter Cc;              // Calculate and remember state of charge (retained doesn't work)
+CoulombCounter CcModel;         // Calculate and remember state of charge for model (retained doesn't work)
 unsigned long millis_flip = millis(); // Timekeeping
 unsigned long last_sync = millis();   // Timekeeping
 
@@ -202,6 +204,10 @@ void setup()
   // Header for rp.debug print
   if ( rp.debug>101 ) print_serial_header();
   if ( rp.debug>103 ) { Serial.print(F("End setup rp.debug message=")); Serial.println(F(", ")); };
+
+  // Reload memorized states from retained
+  CcModel.load(rp.delta_q_model, rp.t_sat_model, rp.q_sat_model);
+  Cc.load(rp.delta_q, rp.t_sat, rp.q_sat);
 
 } // setup
 
@@ -342,27 +348,38 @@ void loop()
     }
 
     // Model used for built-in testing (rp.modeling = true and jumper wire)
+    if ( CcModel.nom_q_cap == 0 )
+      CcModel.prime(nom_q_cap, RATED_TEMP, rp.q_sat, Tbatt_filt_C, rp.s_cap);
     Sen->Vbatt_model = MyBattModel->calculate(Tbatt_filt_C, rp.soc_model, Sen->Ishunt, min(Sen->T, 0.5));
     boolean sat_model = is_sat(Tbatt_filt_C, MyBattModel->voc());
-    rp.soc_model = MyBattModel->count_coulombs(Sen->T, Sen->Ishunt, MyBattModel->q_cap(), sat_model,
-                    Tbatt_filt_C, &rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
+    // rp.soc_model = MyBattModel->count_coulombs(Sen->T, Sen->Ishunt, MyBattModel->q_cap(), sat_model,
+    //                 Tbatt_filt_C, &rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
+    rp.soc_model = CcModel.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, sat_model);
+    CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
     Sen->Voc = MyBattModel->voc();
 
-    // Main Battery calculations
-    // Over-ride Ishunt, Vbatt and Tbatt with model 
+    // Main Battery calculations:  Over-ride Ishunt, Vbatt and Tbatt with model
     if ( rp.modeling )
     {
       // Sen->Ishunt = MyBattModel->Ishunt();
       // Sen->Vbatt = MyBattModel->Vbatt();
       // Tbatt_filt_C = MyBattModel->Vbatt();
     }
-    // EKF - calculates temp_c_, voc_, voc_dyn_
+    
+    // Main Battery calculations:  Initialize Cc structure if needed
+    if ( Cc.nom_q_cap == 0 )
+      Cc.prime(nom_q_cap, RATED_TEMP, rp.q_sat, Tbatt_filt_C, 1.);
+    
+    // Main Battery calculations:  EKF - calculates temp_c_, voc_, voc_dyn_
     cp.soc_ekf = MyBatt->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5), Sen->saturated);  // TODO:  hardcoded time of 0.5 into constants
     Sen->saturated = SatDebounce->calculate(is_sat(Tbatt_filt_C, MyBatt->voc()), reset);
-    rp.soc = count_coulombs(Sen->T, Sen->Ishunt, MyBatt->q_cap(), Sen->saturated,
-                      Tbatt_filt_C, &rp.delta_q, &rp.t_sat, &rp.q_sat);
+    // rp.soc = count_coulombs(Sen->T, Sen->Ishunt, MyBatt->q_cap(), Sen->saturated,
+    //                   Tbatt_filt_C, &rp.delta_q, &rp.t_sat, &rp.q_sat);
+    rp.soc = Cc.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated);
+    Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat);
     MyBatt->calculate_charge_time(Tbatt_filt_C, Sen->Ishunt, rp.delta_q, rp.t_sat, rp.q_sat);
 
+    
     // Useful for Arduino plotting
     if ( rp.debug==-1 )
       Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",

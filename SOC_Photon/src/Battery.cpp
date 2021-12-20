@@ -33,61 +33,61 @@ extern CommandPars cp;
 extern RetainedPars rp; // Various parameters to be static at system level
 
 
-// Class CoulombCounter
-// constructors
-CoulombCounter::CoulombCounter() {}
-CoulombCounter::CoulombCounter(const double nom_q_cap, const double t_rated, const double init_q, const double init_t_c, const double s_cap)
-{
-    nom_q_cap_ = nom_q_cap;
-    t_rated_ = t_rated;
-    q_ = init_q;
-    t_sat_ = init_t_c;
-    q_cap_ = nom_q_cap_ * s_cap;
-    q_sat_ = calculate_saturation_charge(t_sat_, q_cap_);
-    q_capacity_ = calculate_capacity(init_t_c);
-    soc_ = q_ / q_capacity_;
-    SOC_ = q_ / nom_q_cap_;
-}
-CoulombCounter::~CoulombCounter() {}
+// struct CoulombCounter
+CoulombCounter::CoulombCounter(){}
 
-// operators
 // functions
+void CoulombCounter::prime(const double nom_q_cap_, const double t_rated_, const double init_q, const double init_t_c, const double s_cap)
+{
+    nom_q_cap = nom_q_cap_;
+    t_rated = t_rated_;
+    q = init_q;
+    t_sat = init_t_c;
+    q_cap = nom_q_cap * s_cap;
+    q_sat = calculate_saturation_charge(t_sat, q_cap);
+    q_capacity = calculate_capacity(init_t_c);
+    soc = q / q_capacity;
+    SOC = q / nom_q_cap;
+    Serial.printf("re-primed CoulombCounter\n");
+}
 
-// Scale size of battery and adjust as needed to preserve SOC.  t_sat_ unchanged.
-// Energy is not conserved.  Goal is to scale battery and see no change in SOC on screen of 
-// test comparisons
+// Scale size of battery and adjust as needed to preserve delta_q.  t_sat_ unchanged.
+// Goal is to scale battery and see no change in delta_q on screen of 
+// test comparisons.   The rationale for this is that the battery is frequently saturated which
+// resets all the model parameters.   This happens daily.   Then both the model and the battery
+// are discharged by the same current so the delta_q will be the same.
 void CoulombCounter::apply_cap_scale(const double scale)
 {
-  q_cap_ = scale * nom_q_cap_;
-  q_ = SOC_ * q_cap_;
-  q_sat_ = calculate_saturation_charge(t_sat_, q_cap_);
-  q_capacity_ = q_sat_;
-  soc_ = q_ / q_capacity_;
-};
+  q_cap = scale * nom_q_cap;
+  q = SOC * q_cap;
+  q_sat = calculate_saturation_charge(t_sat, q_cap);
+  q_capacity = q_sat;
+  soc = q / q_capacity;
+}
 
 // Memory set, adjust book-keeping as needed.  q_cap_ etc unchanged
-void CoulombCounter::apply_SOC(const double SOC)
+void CoulombCounter::apply_SOC(const double SOC_)
 {
-  SOC_ = SOC;
-  q_ = SOC_ * q_cap_;
+  SOC = SOC;
+  q = SOC * q_cap;
   // q_capacity_ and q_sat_ unchanged
-  soc_ = q_ / q_capacity_;
+  soc = q / q_capacity;
 }
 
 // Capacity
-double CoulombCounter::calculate_capacity(const double temp_c)
+double CoulombCounter::calculate_capacity(const double temp_c_)
 {
-    return( q_sat_ * (1-DQDT*(temp_c - t_sat_)) );
+    return( q_sat * (1-DQDT*(temp_c_ - t_sat)) );
 }
 
 // Saturation charge
-double CoulombCounter::calculate_saturation_charge(const double t_sat, const double q_cap)
+double CoulombCounter::calculate_saturation_charge(const double t_sat_, const double q_cap_)
 {
-    return( q_cap * ((t_sat - t_rated_)*DQDT + 1.) );
+    return( q_cap_ * ((t_sat_ - t_rated)*DQDT + 1.) );
 }
 
 // Count coulombs based on true=actual capacity
-double CoulombCounter::count_coulombs(const double dt, const double temp_c, const double charge_curr, const boolean sat)
+double CoulombCounter::count_coulombs(const double dt_, const double temp_c_, const double charge_curr_, const boolean sat_)
 {
     /* Count coulombs based on true=actual capacity
     Inputs:
@@ -95,37 +95,52 @@ double CoulombCounter::count_coulombs(const double dt, const double temp_c, cons
         charge_curr     Charge, A
         sat             Indicator that battery is saturated (VOC>threshold(temp)), T/F
     */
-    q_capacity_ = q_sat_*(1. - DQDT*(temp_c - t_sat_));
-    double d_delta_q = charge_curr * dt;
+    q_capacity = q_sat*(1. - DQDT*(temp_c_ - t_sat));
+    double d_delta_q_ = charge_curr_ * dt_;
 
     // Saturation
-    if ( sat )
+    if ( sat_ )
     {
-        if ( d_delta_q > 0 )
+        if ( d_delta_q_ > 0 )
         {
-            d_delta_q = 0.;
-            delta_q_ = 0.;
+            d_delta_q_ = 0.;
+            delta_q = 0.;
         }
-        t_sat_ = temp_c;
-        q_sat_ = ((t_sat_ - 25.)*DQDT + 1.)*q_cap_;
-        q_capacity_ = q_sat_;
+        t_sat = temp_c_;
+        q_sat = ((t_sat - t_rated)*DQDT + 1.)*q_cap;
+        q_capacity = q_sat;
     }
 
     // Integration
-    delta_q_ = max(min(delta_q_ + d_delta_q, 1.1*(q_cap_ - q_capacity_)), -q_capacity_);
+    delta_q = max(min(delta_q + d_delta_q_, 1.1*(q_cap - q_capacity)), -q_capacity);
 
     // Normalize
-    soc_ = (q_capacity_ + delta_q_) / q_capacity_;
-    SOC_ = (q_capacity_ + delta_q_) / nom_q_cap_ * 100.;
+    soc = (q_capacity + delta_q) / q_capacity;
+    SOC = (q_capacity + delta_q) / nom_q_cap * 100.;
 
     if ( rp.debug==76 )
-        Serial.printf("CoulombCounter::count_coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc,SOC=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, d_delta_q, delta_q_, q_sat_, t_sat_, q_capacity_, soc_, SOC_);
+        Serial.printf("CoulombCounter::count_coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc,SOC,       %7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%9.1f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC,  sat_voc(temp_c_), sat_, charge_curr_, d_delta_q_, delta_q, q_sat, t_sat, q_capacity, soc, SOC);
     if ( rp.debug==-76 )
-        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc, SOC,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, d_delta_q, delta_q_, q_sat_, t_sat_, q_capacity_, soc_, SOC_);
+        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc, SOC,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%9.1f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC,  sat_voc(temp_c_), sat_, charge_curr_, d_delta_q_, delta_q, q_sat, t_sat, q_capacity, soc, SOC);
+    return ( soc );
+}
 
-    return ( soc_ );
+// Load states from retained memory
+void CoulombCounter::load(const double delta_q_, const double t_sat_, const double q_sat_)
+{
+    delta_q = delta_q_;
+    t_sat = t_sat_;
+    q_sat = q_sat_;
+}
+
+// Update states to be saved in retained memory
+void CoulombCounter::update(double *delta_q_, double *t_sat_, double *q_sat_)
+{
+    *delta_q_ = delta_q;
+    *t_sat_ = t_sat;
+    *q_sat_ = q_sat;
 }
 
 
@@ -293,8 +308,8 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
             ib, vb*10-110, voc_dyn_*10-110,     K_, y_, soc_ekf_*100-90, soc_avail_*100-90);
 
     // Charge time if used ekf
-    if ( ib_ > 0.1 )  tcharge_ekf_ = min(NOM_BATT_CAP / ib_ * (1. - soc_ekf_), 24.);
-    else if ( ib_ < -0.1 ) tcharge_ekf_ = max(NOM_BATT_CAP / ib_ * soc_ekf_, -24.);
+    if ( ib_ > 0.1 )  tcharge_ekf_ = min(RATED_BATT_CAP / ib_ * (1. - soc_ekf_), 24.);
+    else if ( ib_ < -0.1 ) tcharge_ekf_ = max(RATED_BATT_CAP / ib_ * soc_ekf_, -24.);
     else if ( ib_ >= 0. ) tcharge_ekf_ = 24.*(1. - soc_ekf_);
     else tcharge_ekf_ = -24.*soc_ekf_;
 
@@ -413,11 +428,11 @@ double count_coulombs(const double dt, const double charge_curr, const double q_
     // Normalize
     soc_for_lookup = (q_capacity + *delta_q) / q_capacity;
 
-    if ( rp.debug==36 )
-        Serial.printf("coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc_for_lookup=     %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+    if ( rp.debug==76 )
+        Serial.printf("                count_coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc_for_lookup,%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%9.1f,%7.3f,%9.1f,%7.3f,\n",
                     cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_capacity, soc_for_lookup);
-    if ( rp.debug==-36 )
-        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,soc_for_lookup,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+    if ( rp.debug==-76 )
+        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,soc_for_lookup,     \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%9.1f,%7.3f,%9.1f,%7.3f,\n",
                     cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_capacity, soc_for_lookup);
 
     return ( soc_for_lookup );

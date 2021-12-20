@@ -33,6 +33,8 @@
 
 extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
+extern CoulombCounter CcModel;  // Remember state of charge for model
+extern CoulombCounter Cc;       // Remember state of charge
 
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip)
 {
@@ -204,7 +206,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   // Anti-windup used to bias current below (only when modeling)
   double s_sat = 0.;
   if ( rp.modeling && Sen->Wshunt > 0. && Sen->saturated )
-      s_sat = max(Sen->Voc - sat_voc(Sen->Tbatt), 0.) / NOM_SYS_VOLT * NOM_BATT_CAP * sat_gain;
+      s_sat = max(Sen->Voc - sat_voc(Sen->Tbatt), 0.) / NOM_SYS_VOLT * RATED_BATT_CAP * sat_gain;
   s_sat = 0;
 
   // Read Sensors
@@ -482,12 +484,18 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         {
           case ( 'c' ):
             scale = cp.input_string.substring(2).toFloat();
+            rp.s_cap = scale;
             Serial.printf("MyBattModel.q_cap scaled by %7.3f from %7.3f to ", scale, MyBattModel->q_cap());
             MyBattModel->S_cap(scale);
             Serial.printf("%7.3f\n", MyBattModel->q_cap());
             Serial.printf("MyBattModel.q_sat scaled from %7.3f to ", rp.q_sat_model);
             rp.q_sat_model = calculate_saturation_charge(rp.t_sat_model, MyBattModel->q_cap()*scale);
             Serial.printf("%7.3f\n", rp.q_sat_model);
+
+            Serial.printf("CcModel.q_cap scaled by %7.3f from %7.3f to ", scale, CcModel.q_cap);
+            CcModel.apply_cap_scale(scale);
+            Serial.printf("%7.3f\n", CcModel.q_cap);
+
             break;
           case ( 'r' ):
             scale = cp.input_string.substring(2).toFloat();
@@ -515,6 +523,8 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         rp.soc_model = max(min(SOCS_in, mxeps_bb*rp.s_cap), mneps_bb);
         rp.delta_q = max((rp.soc - 1.)*nom_q_cap, -rp.q_sat);
         rp.delta_q_model = max((rp.soc_model - 1.)*nom_q_cap*rp.s_cap, -rp.q_sat_model);
+        CcModel.load(rp.delta_q_model, rp.t_sat_model, rp.q_sat_model);
+        Cc.load(rp.delta_q, rp.t_sat, rp.q_sat);
         Serial.printf("soc=%7.3f,   delta_q=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f\n",
                         rp.soc, rp.delta_q, rp.soc_model, rp.delta_q_model);
         break;
@@ -633,7 +643,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.freq = 0.0;
                 rp.amp = 0.0;
                 rp.offset = 0;
-                rp.curr_bias_all = -NOM_BATT_CAP;  // Software effect only
+                rp.curr_bias_all = -RATED_BATT_CAP;  // Software effect only
                 rp.debug = -12;
                 Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
@@ -644,7 +654,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
                 rp.freq = 0.0;
                 rp.amp = 0.0;
                 rp.offset = 0;
-                rp.curr_bias_all = NOM_BATT_CAP; // Software effect only
+                rp.curr_bias_all = RATED_BATT_CAP; // Software effect only
                 rp.debug = -12;
                 Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
@@ -920,10 +930,10 @@ double BatteryModel::count_coulombs(const double dt, const double charge_curr, c
     soc_for_lookup = (q_capacity + *delta_q) / q_capacity;
 
     if ( rp.debug==76 )
-        Serial.printf("BatteryModel::coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc_for_lookup=     %7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+        Serial.printf("  BatteryModel::count_coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc_for_lookup,%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%9.1f,%7.3f,%9.1f,%7.3f,\n",
                     cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_capacity, soc_for_lookup);
     if ( rp.debug==-76 )
-        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc_for_lookup          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc_for_lookup          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%9.1f,%7.3f,%9.1f,%7.3f,\n",
                     cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_capacity, soc_for_lookup);
 
     return ( soc_for_lookup );

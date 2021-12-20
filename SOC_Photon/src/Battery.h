@@ -31,9 +31,10 @@
 
 // BattleBorn 100 Ah, 12v LiFePO4
 #define NOM_SYS_VOLT          12.       // Nominal system output, V, at which the reported amps are used (12)
-#define NOM_BATT_CAP          100.      // Nominal battery bank capacity, Ah (100).   Accounts for internal losses.  This is 
+#define RATED_BATT_CAP        100.      // Nominal battery bank capacity, Ah (100).   Accounts for internal losses.  This is 
                                         // what gets delivered, e.g. Wshunt/NOM_SYS_VOLT.  Also varies 0.2-0.4C currents
                                         // or 20-40 A for a 100 Ah battery
+#define RATED_TEMP            25.       // Temperature at RATED_BATT_CAP, deg C
 #define BATT_DVOC_DT          0.001875  // Change of VOC with operating temperature in range 0 - 50 C (0.0075) V/deg C
 // >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 60-95 F
 #define BATT_V_SAT            3.4625    // Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
@@ -54,12 +55,12 @@ const double batt_r2c2 = double(BATT_R2C2);// Battery Randels dynamic term, Ohms
                               // test so using with R2 and then multiplying by 4 for total result is valid,
                               // though probably not for an individual cell
 const double batt_c2 = double(BATT_R2C2)/batt_r2;
-const double nom_q_cap = NOM_BATT_CAP * 3600;   // Nominal battery capacity, C
+const double nom_q_cap = RATED_BATT_CAP * 3600;   // Nominal battery capacity, C
 
 // Battery model LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang etal.pdf'
 // SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope constraint
 // >=0.02 V/soc.  m and n using Zhang values.   Had to scale soc because  actual capacity
-// > NOM_BATT_CAP so equations error when soc<=0 to match data.
+// > RATED_BATT_CAP so equations error when soc<=0 to match data.
 const unsigned int nz_bb = 3;
 const double m_bb = 0.478;
 static const double t_bb[nz_bb] = {0.,	    25.,    50.};
@@ -85,30 +86,29 @@ static TableInterp1Dclip  *I_T1 = new TableInterp1Dclip(n_v1, t_min_v1, i_v1);
 static TableInterp1Dclip  *T_T1 = new TableInterp1Dclip(n_v1, t_min_v1, T_v1);
 
 // Coulomb Counter Class
-class CoulombCounter
+struct CoulombCounter
 {
-public:
+  double nom_q_cap = 0;   // Rated capacity at t_rated_, C
+  double q_cap = 0;       // Capacity normalized to rated temperature, C
+  double q_capacity = 0;  // Saturation charge at temperature, C
+  double q = 0;           // Present charge available to use, C
+  double delta_q = 0;     // Charge since saturated, C
+  double q_sat = 0;       // Saturation charge, C
+  double t_sat = 0;       // Battery temperature at saturation, deg C
+  double soc = 0;         // Fraction of saturation charge (q_capacity_) available (0-1)
+  double SOC = 0;         // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries.
+  double t_rated = 0;     // Rated temperature, deg C
   CoulombCounter();
-  CoulombCounter(const double nom_q_cap, const double t_rate, const double init_q, const double init_t_c, const double s_cap);
-  ~CoulombCounter();
+  void prime(const double nom_q_cap, const double t_rate, const double init_q, const double init_t_c, const double s_cap);
   // operators
   // functions
-  void apply_cap_scale(const double scale);
-  void apply_SOC(const double SOC);
-  double calculate_capacity(const double temp_c);
-  double calculate_saturation_charge(const double t_sat, const double q_cap);
-  double count_coulombs(const double dt, const double temp_c, const double charge_curr, const boolean sat);
-protected:
-  double nom_q_cap_;    // Rated capacity at t_rated_, C
-  double q_cap_;        // Capacity normalized to rated temperature, C
-  double q_capacity_;   // Saturation charge at temperature, C
-  double q_;            // Present charge available to use, C
-  double delta_q_;      // Charge since saturated, C
-  double q_sat_;        // Saturation charge, C
-  double t_sat_;        // Battery temperature at saturation, deg C
-  double soc_;          // Fraction of saturation charge (q_capacity_) available (0-1)
-  double SOC_;          // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries.
-  double t_rated_;      // Rated temperature, deg C
+  void apply_cap_scale(const double scale_);
+  void apply_SOC(const double SOC_);
+  double calculate_capacity(const double temp_c_);
+  double calculate_saturation_charge(const double t_sat_, const double q_cap_);
+  double count_coulombs(const double dt_, const double temp_c_, const double charge_curr_, const boolean sat_);
+  void load(const double delta_q_, const double t_sat_, const double q_sat_);
+  void update(double *delta_q_, double *t_sat_, double *q_sat_);
 };
 
 
