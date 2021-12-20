@@ -98,6 +98,7 @@ struct CoulombCounter
   double soc = 0;         // Fraction of saturation charge (q_capacity_) available (0-1)
   double SOC = 0;         // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries.
   double t_rated = 0;     // Rated temperature, deg C
+  boolean resetting = false;  // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
   CoulombCounter();
   void prime(const double nom_q_cap, const double t_rate, const double init_q, const double init_t_c, const double s_cap);
   // operators

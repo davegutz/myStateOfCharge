@@ -167,9 +167,9 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->amp_hrs_remaining = MyBatt->amp_hrs_remaining();
   pubList->amp_hrs_remaining_ekf = MyBatt->amp_hrs_remaining_ekf();
   pubList->soc_model = CcModel.soc;
-  pubList->soc = Cc.soc;
   pubList->soc_ekf = cp.soc_ekf;
+  pubList->soc = Cc.soc;
   pubList->SOC_model = CcModel.SOC;
-  pubList->SOC = Cc.SOC;
   pubList->SOC_ekf = cp.SOC_ekf;
+  pubList->SOC = Cc.SOC;
 }

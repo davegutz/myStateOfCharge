@@ -32,7 +32,6 @@
 extern CommandPars cp;
 extern RetainedPars rp; // Various parameters to be static at system level
 
-
 // struct CoulombCounter
 CoulombCounter::CoulombCounter(){}
 
@@ -72,6 +71,7 @@ void CoulombCounter::apply_SOC(const double SOC_)
   q = SOC/100.*q_cap;
   delta_q = q - q_capacity;
   soc = q / q_capacity;
+  resetting = true;
 }
 
 // Memory set, adjust book-keeping as needed.  q_cap_ etc presesrved
@@ -81,6 +81,7 @@ void CoulombCounter::apply_delta_q(const double delta_q_)
   q = q_capacity + delta_q;
   soc = q / q_capacity;
   SOC = q / q_cap * 100.;
+  resetting = true;
 }
 
 // Capacity
@@ -113,7 +114,8 @@ double CoulombCounter::count_coulombs(const double dt_, const double temp_c_, co
         if ( d_delta_q_ > 0 )
         {
             d_delta_q_ = 0.;
-            delta_q = 0.;
+            if ( !resetting ) delta_q = 0.;
+            else resetting = false;     // one pass flag.  Saturation debounce should reset next pass
         }
         t_sat = temp_c_;
         q_sat = ((t_sat - t_rated)*DQDT + 1.)*q_cap;

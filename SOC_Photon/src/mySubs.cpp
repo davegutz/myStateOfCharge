@@ -33,8 +33,8 @@
 
 extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
-extern CoulombCounter CcModel;  // Remember state of charge for model
 extern CoulombCounter Cc;       // Remember state of charge
+extern CoulombCounter CcModel;  // Remember state of charge for model
 
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip)
 {
