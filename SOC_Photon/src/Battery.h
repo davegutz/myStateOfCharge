@@ -189,14 +189,12 @@ protected:
   double tau_sd_;   // Time constant of ideal battery capacitor model, input current A, output volts=soc (0-1)
   double r_sd_;     // Trickle discharge of ideal battery capacitor model, ohms
   // EKF declarations
-  StateSpace *Randles_;   // Randles model {ib, vb} --> {voc}, ioc=ib
-  StateSpace *RandlesInv_;// Randles model {ib, voc} --> {vb}, ioc=ib
+  StateSpace *Randles_; // Randles model {ib, vb} --> {voc}, ioc=ib for Battery version
+                        // Randles model {ib, voc} --> {vb}, ioc=ib for BatteryModel version
   double *rand_A_;  // Randles model
   double *rand_B_;  // Randles model
   double *rand_C_;  // Randles model
   double *rand_D_;  // Randles model
-  double *rand_Cinv_;  // Randles model
-  double *rand_Dinv_;  // Randles model
   double temp_c_;   // Battery temperature, C
   double pow_in_ekf_;   // Charging power from ekf, w
   double tcharge_ekf_;  // Charging time to 100% from ekf, hr

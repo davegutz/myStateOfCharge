@@ -840,7 +840,36 @@ BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const doubl
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt) :
     Battery(x_tab, b_tab, a_tab, c_tab, m, n, d, nz, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt)
-{}
+{
+    // Randles dynamic model for EKF
+    // Resistance values add up to same resistance loss as matched to installed battery
+    //   i.e.  (r0_ + rct_ + rdif_) = (r1 + r2)*num_cells
+    // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
+    // the state-space stability requires at least 0.1.   Used 0.2.
+    double c_ct = tau_ct_ / rct_;
+    double c_dif = tau_ct_ / rct_;
+    int rand_n = 2; // Rows A and B
+    int rand_p = 2; // Col B    
+    int rand_q = 1; // Row C and D
+    rand_A_ = new double[rand_n*rand_n];
+    rand_A_[0] = -1./tau_ct_;
+    rand_A_[1] = 0.;
+    rand_A_[2] = 0.;
+    rand_A_[3] = -1/tau_dif_;
+    rand_B_ = new double [rand_n*rand_p];
+    rand_B_[0] = 1./c_ct;
+    rand_B_[1] = 0.;
+    rand_B_[2] = 1./c_dif;
+    rand_B_[3] = 0.;
+    rand_C_ = new double [rand_q*rand_n];
+    rand_C_[0] = 1.;
+    rand_C_[1] = 1.;
+    rand_D_ = new double [rand_q*rand_p];
+    rand_D_[0] = r0_;
+    rand_D_[1] = 1.;
+    Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
+
+}
 
 // SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model
 double BatteryModel::calculate(const double temp_C, const double soc, const double curr_in, const double dt)
@@ -858,10 +887,11 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     voc_ +=  dv_;  // Experimentally varied
 
     // Dynamic emf
+    // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
     double u[2] = {ib_, voc_};
-    RandlesInv_->calc_x_dot(u);
-    RandlesInv_->update(dt);
-    vb_ = RandlesInv_->y(0);
+    Randles_->calc_x_dot(u);
+    Randles_->update(dt);
+    vb_ = Randles_->y(0);
     vdyn_ = vb_ - voc_;
 
     // Summarize

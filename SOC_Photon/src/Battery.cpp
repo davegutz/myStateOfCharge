@@ -180,7 +180,7 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
     this->Q_ = 0.001*0.001;
     this->R_ = 0.1*0.1;
 
-    // Randles dynamic model for EKF
+    // Randles dynamic model for EKF, forward version based on sensor inputs {ib, vb} --> {voc}, ioc=ib
     // Resistance values add up to same resistance loss as matched to installed battery
     //   i.e.  (r0_ + rct_ + rdif_) = (r1 + r2)*num_cells
     // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
@@ -206,14 +206,7 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
     rand_D_ = new double [rand_q*rand_p];
     rand_D_[0] = -r0_;
     rand_D_[1] = 1.;
-    rand_Cinv_ = new double [rand_q*rand_n];
-    rand_Cinv_[0] = 1.;
-    rand_Cinv_[1] = 1.;
-    rand_Dinv_ = new double [rand_q*rand_p];
-    rand_Dinv_[0] = r0_;
-    rand_Dinv_[1] = 1.;
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
-    RandlesInv_ = new StateSpace(rand_A_, rand_B_, rand_Cinv_, rand_Dinv_, rand_n, rand_p, rand_q);
 
 }
 Battery::~Battery() {}
