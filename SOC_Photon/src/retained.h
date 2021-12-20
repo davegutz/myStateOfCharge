@@ -31,11 +31,9 @@
 struct RetainedPars
 {
   int8_t debug = 2;        // Level of debug printing
-  double soc = 0.5;        // Coulomb counter scaled, normalized, state (0 - 1)
   double delta_q = -0.5;   // Coulomb Counter state for ekf, (-1 - 1)
   double t_sat = 25.;      // Battery temperature at saturation, deg C
   double q_sat = 360000;   // Battery charge at saturation, Ah
-  double soc_model = 0.5;  // Coulomb counter scaled, normalized state model (0-1)
   double delta_q_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
   double t_sat_model = 25.; // Battery temperature at saturation of model, deg C
   double q_sat_model = 360000; // Battery charge at saturation for model, Ah

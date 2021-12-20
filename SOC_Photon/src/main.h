@@ -318,41 +318,41 @@ void loop()
 
     // Arduino plots
     if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n",
-        rp.soc, Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
+        Cc.soc, Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
         Sen->Vbatt, MyBattModel->voc());
 
     // Initialize SOC Free Integrator - Coulomb Counting method
     // Runs unfiltered and fast to capture most data
     static boolean vectoring_past = cp.vectoring;
-    static double soc_saved = rp.soc;
+    static double soc_saved = Cc.soc;
     if ( vectoring_past != cp.vectoring )
     {
       reset_free = true;
       start = ReadSensors->now();
       elapsed = 0UL;
-      if ( cp.vectoring ) soc_saved = rp.soc;
-      else rp.soc = soc_saved;
+      if ( cp.vectoring ) soc_saved = Cc.soc;
+      else Cc.soc = soc_saved;
     }
     vectoring_past = cp.vectoring;
     if ( reset_free )
     {
-      if ( cp.vectoring ) rp.soc = rp.soc;
-      else rp.soc = soc_saved;  // Only way to reach this line is resetting from vector test
-      MyBatt->init_soc_ekf(rp.soc);
+      if ( cp.vectoring ) Cc.soc = Cc.soc;
+      else Cc.soc = soc_saved;  // Only way to reach this line is resetting from vector test
+      MyBatt->init_soc_ekf(Cc.soc);
       if ( elapsed>INIT_WAIT ) reset_free = false;
     }
     if ( reset_free_ekf )
     {
-      MyBatt->init_soc_ekf(rp.soc);
+      MyBatt->init_soc_ekf(Cc.soc);
       if ( elapsed>INIT_WAIT_EKF ) reset_free_ekf = false;
     }
 
     // Model used for built-in testing (rp.modeling = true and jumper wire)
     if ( CcModel.nom_q_cap == 0 )
       CcModel.prime(nom_q_cap, RATED_TEMP, rp.q_sat, Tbatt_filt_C, rp.s_cap);
-    Sen->Vbatt_model = MyBattModel->calculate(Tbatt_filt_C, rp.soc_model, Sen->Ishunt, min(Sen->T, 0.5));
+    Sen->Vbatt_model = MyBattModel->calculate(Tbatt_filt_C, CcModel.soc, Sen->Ishunt, min(Sen->T, 0.5));
     boolean sat_model = is_sat(Tbatt_filt_C, MyBattModel->voc());
-    rp.soc_model = CcModel.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, sat_model);
+    CcModel.soc = CcModel.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, sat_model);
     CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
     Sen->Voc = MyBattModel->voc();
 
@@ -370,16 +370,17 @@ void loop()
     
     // Main Battery calculations:  EKF - calculates temp_c_, voc_, voc_dyn_
     cp.soc_ekf = MyBatt->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5), Sen->saturated);  // TODO:  hardcoded time of 0.5 into constants
+    cp.SOC_ekf = cp.soc_ekf*100.*Cc.q_capacity/Cc.q_cap;
     Sen->saturated = SatDebounce->calculate(is_sat(Tbatt_filt_C, MyBatt->voc()), reset);
-    rp.soc = Cc.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated);
+    Cc.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated);
     Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat);
-    MyBatt->calculate_charge_time(Tbatt_filt_C, Sen->Ishunt, rp.delta_q, rp.t_sat, rp.q_sat);
+    MyBatt->calculate_charge_time(Tbatt_filt_C, Sen->Ishunt, rp.delta_q, rp.t_sat, rp.q_sat, Cc.soc);
 
     
     // Useful for Arduino plotting
     if ( rp.debug==-1 )
       Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-        MyBatt->soc_avail()*100-90,
+        CcModel.SOC-90,
         Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
         Sen->Vbatt_filt*10-110, MyBattModel->voc()*10-110, MyBattModel->vdyn()*10, MyBattModel->vb()*10-110, MyBatt->vdyn()*10-110);
     if ( rp.debug==12 )
@@ -388,17 +389,17 @@ void loop()
         MyBatt->vb(), MyBattModel->vb(),
         MyBatt->voc_dyn(), MyBattModel->voc(),
         MyBatt->K_ekf(), MyBatt->y_ekf(),
-        MyBattModel->soc(), MyBatt->soc_ekf(), rp.soc);
+        CcModel.soc, MyBatt->soc_ekf(), Cc.soc);
     if ( rp.debug==-12 )
       Serial.printf("ib,ib_mod,   vb*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_mod*10-110,   K, y,    SOC_mod-90, SOC_ekf-90, SOC-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
         MyBatt->ib(), MyBattModel->ib(),
         MyBatt->vb()*10-110, MyBattModel->vb()*10-110,
         MyBatt->voc_dyn()*10-110, MyBattModel->voc()*10-110,
         MyBatt->K_ekf(), MyBatt->y_ekf(),
-        MyBattModel->soc()*100-90, MyBatt->soc_ekf()*100-90, rp.soc*100-90);
+        CcModel.soc*100-90, MyBatt->soc_ekf()*100-90, Cc.soc*100-90);
     if ( rp.debug==-3 )
       Serial.printf("fast,et,reset_free,Wshunt,q_f,q,soc,T, %12.3f,%7.3f, %d, %7.3f,    %7.3f,     %7.3f,\n",
-      control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, rp.soc, Sen->T_filt);
+      control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, Cc.soc, Sen->T_filt);
 
   }
 
@@ -414,8 +415,8 @@ void loop()
 
     // rp.debug print statements
     // Useful for vector testing and serial data capture
-    if ( rp.debug==-35 ) Serial.printf("soc_avail,soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f\n",
-        MyBattModel->soc_avail(), MyBatt->x_ekf(), MyBatt->z_ekf());
+    if ( rp.debug==-35 ) Serial.printf("soc_mod,soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f\n",
+        CcModel.soc, MyBatt->x_ekf(), MyBatt->z_ekf());
 
     //if ( bare ) delay(41);  // Usual I2C time
     if ( rp.debug>102 ) Serial.printf("completed load at %ld\n", millis());
@@ -489,7 +490,7 @@ void loop()
   {
     if ( ++isum>nsum-1 ) isum = 0;
     mySum[isum].assign(current_time, Sen->Tbatt_filt, Sen->Vbatt_filt, Sen->Ishunt_filt,
-      rp.soc, rp.soc, MyBattModel->dv_dsoc());
+      Cc.soc, Cc.soc, MyBattModel->dv_dsoc());
     if ( rp.debug==-11 )
     {
       Serial.printf("Summm***********************\n");

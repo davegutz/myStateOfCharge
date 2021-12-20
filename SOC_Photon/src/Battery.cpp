@@ -47,7 +47,7 @@ void CoulombCounter::prime(const double nom_q_cap_, const double t_rated_, const
     q_sat = calculate_saturation_charge(t_sat, q_cap);
     q_capacity = calculate_capacity(init_t_c);
     soc = q / q_capacity;
-    SOC = q / nom_q_cap;
+    SOC = q / nom_q_cap * 100.;
     Serial.printf("re-primed CoulombCounter\n");
 }
 
@@ -59,7 +59,7 @@ void CoulombCounter::prime(const double nom_q_cap_, const double t_rated_, const
 void CoulombCounter::apply_cap_scale(const double scale)
 {
   q_cap = scale * nom_q_cap;
-  q = SOC * q_cap;
+  q = SOC / 100. * q_cap;
   q_sat = calculate_saturation_charge(t_sat, q_cap);
   q_capacity = q_sat;
   soc = q / q_capacity;
@@ -69,8 +69,8 @@ void CoulombCounter::apply_cap_scale(const double scale)
 void CoulombCounter::apply_SOC(const double SOC_)
 {
   SOC = SOC_;
-  delta_q = SOC/100.*nom_q_cap - q_capacity;
-  q = SOC * q_cap;
+  q = SOC/100.*q_cap;
+  delta_q = q - q_capacity;
   soc = q / q_capacity;
 }
 
@@ -78,9 +78,9 @@ void CoulombCounter::apply_SOC(const double SOC_)
 void CoulombCounter::apply_delta_q(const double delta_q_)
 {
   delta_q = delta_q_;
-  soc = (q_capacity + delta_q) / q_capacity;
-  SOC = (q_capacity + delta_q) / nom_q_cap * 100.;
-  q = SOC * q_cap;
+  q = q_capacity + delta_q;
+  soc = q / q_capacity;
+  SOC = q / q_cap * 100.;
 }
 
 // Capacity
@@ -156,17 +156,17 @@ void CoulombCounter::update(double *delta_q_, double *t_sat_, double *q_sat_)
 // class Battery
 // constructors
 Battery::Battery()
-    : b_(0), a_(0), c_(0), m_(0), n_(0), d_(0), nz_(1), soc_(1.0), q_(nom_q_cap), r1_(0), r2_(0), c2_(0), voc_(0),
+    : b_(0), a_(0), c_(0), m_(0), n_(0), d_(0), nz_(1), q_(nom_q_cap), r1_(0), r2_(0), c2_(0), voc_(0),
     vdyn_(0), vb_(0), ib_(0), num_cells_(4), dv_dsoc_(0), tcharge_(24), sr_(1), vsat_(13.7),
     sat_(false), dv_(0), dvoc_dt_(0) {Q_ = 0.; R_ = 0.;}
 Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt)
-    : b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(nz), soc_(1.0), q_(nom_q_cap), r1_(r1), r2_(r2), c2_(r2c2/r2_),
+    : b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(nz), q_(nom_q_cap), r1_(r1), r2_(r2), c2_(r2c2/r2_),
     voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0), tcharge_(24.),
     sr_(1.), nom_vsat_(batt_vsat), sat_(false), dv_(0), dvoc_dt_(dvoc_dt),
     r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
-    tau_sd_(1.8e7), r_sd_(70.), q_cap_(nom_q_cap)
+    tau_sd_(1.8e7), r_sd_(70.)
 {
 
     // Battery characteristic tables
@@ -246,38 +246,7 @@ double Battery::calc_h_jacobian(double soc_lim, double b, double c, double log_s
 }
 
 // SOC-OCV curve fit method per Zhang, et al.
-double Battery::calculate(const double temp_C, const double q, const double curr_in, const double dt)
-{
-    double soc_lim, log_soc, exp_n_soc, pow_log_soc;
-    dt_ = dt;
-    ib_ = curr_in;
-    q_ = q;
-
-    soc_ = 1 - (1 - q_/q_cap_);
-    soc_lim = max(min(soc_, mxeps_bb), mneps_bb);
-
-    // VOC-OCV model
-    calc_soc_voc_coeff(soc_lim, temp_C, &b_, &a_, &c_, &log_soc, &exp_n_soc, &pow_log_soc);
-    voc_ = calc_soc_voc(soc_lim, &dv_dsoc_, b_, a_, c_, log_soc, exp_n_soc, pow_log_soc)
-             + (soc_ - soc_lim) * dv_dsoc_;  // slightly beyond
-    voc_ +=  dv_;  // Experimentally varied
-
-    // Dynamic emf
-    vdyn_ = double(num_cells_) * ib_*(r1_ + r2_)*sr_;
-    vb_ = voc_ + vdyn_;
-
-    // Saturation
-    vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
-    sat_ = voc_ >= vsat_;
-
-    if ( rp.debug==8 ) Serial.printf("calculate:  SOCU_in,v,curr,tcharge,vsat,voc,sat= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
-      q, vb_, ib_, tcharge_, vsat_, voc_, sat_);
-
-    if ( rp.debug==9 )Serial.printf("calculate:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-     temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc_, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_,vb_);
-
-    return ( vb_ );
-}
+double Battery::calculate(const double temp_C, const double q, const double curr_in, const double dt) { return 0.;}
 
 // SOC-OCV curve fit method per Zhang, et al modified by ekf
 double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated)
@@ -301,20 +270,20 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     // EKF 1x1
     predict_ekf(ib);      // u = ib
     update_ekf(voc_dyn_, 0., 1., dt);   // z = voc_dyn
-    soc_ekf_ = x_ekf();   // x = Vsoc (0-1 ideal capacitor voltage)
+    soc_ekf_ = x_ekf();   // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
 
     if ( rp.debug==34 )
-        Serial.printf("dt,ib,voc_dyn,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, soc_avail,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,\n",
-            dt, ib, voc_dyn_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, soc_avail_);
+        Serial.printf("dt,ib,voc_dyn,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
+            dt, ib, voc_dyn_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
     if ( rp.debug==-34 )
-        Serial.printf("dt,ib,voc_dyn,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, soc_avail,  \n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,\n",
-            dt, ib, voc_dyn_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, soc_avail_);
+        Serial.printf("dt,ib,voc_dyn,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,  \n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
+            dt, ib, voc_dyn_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
     if ( rp.debug==37 )
-        Serial.printf("ib,vb,voc_dyn(z_),  K_,y_,SOC_ekf, SOC_avail,   %7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f, %7.4f,\n",
-            ib, vb, voc_dyn_,     K_, y_, soc_ekf_, soc_avail_);
+        Serial.printf("ib,vb,voc_dyn(z_),  K_,y_,SOC_ekf,   %7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
+            ib, vb, voc_dyn_,     K_, y_, soc_ekf_);
     if ( rp.debug==-37 )
-        Serial.printf("ib,vb*10-110,voc_dyn(z_)*10-110,  K_,y_,SOC_ekf-90, SOC_avail-90,   \n%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f, %7.4f,\n",
-            ib, vb*10-110, voc_dyn_*10-110,     K_, y_, soc_ekf_*100-90, soc_avail_*100-90);
+        Serial.printf("ib,vb*10-110,voc_dyn(z_)*10-110,  K_,y_,SOC_ekf-90,   \n%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
+            ib, vb*10-110, voc_dyn_*10-110,     K_, y_, soc_ekf_*100-90);
 
     // Charge time if used ekf
     if ( ib_ > 0.1 )  tcharge_ekf_ = min(RATED_BATT_CAP / ib_ * (1. - soc_ekf_), 24.);
@@ -327,7 +296,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
 
 // Charge time calculation
 double Battery::calculate_charge_time(const double temp_c, const double charge_curr,
-    const double delta_q, const double t_sat, const double q_sat)
+    const double delta_q, const double t_sat, const double q_sat, const double soc)
 {
     double q_capacity = calculate_capacity(temp_c, t_sat, q_sat);
     if ( charge_curr > TCHARGE_DISPLAY_DEADBAND )  tcharge_ = min( -delta_q / ib_ / 3600., 24.);
@@ -336,6 +305,10 @@ double Battery::calculate_charge_time(const double temp_c, const double charge_c
     else tcharge_ = -24.;
 
     amp_hrs_remaining_ = (q_capacity + delta_q) / 3600.;
+    if ( soc > 0. )
+        amp_hrs_remaining_ekf_ = amp_hrs_remaining_ * soc_ekf_ / soc;
+    else
+        amp_hrs_remaining_ekf_ = 0.;
 
     return( tcharge_ );
 }

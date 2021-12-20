@@ -126,18 +126,16 @@ public:
   // functions
   void Dv(const double dv) { dv_ = dv; };
   void Sr(const double sr) { sr_ = sr; };
-  void S_cap(const double s_cap) { q_cap_ = nom_q_cap * s_cap; };
   void calc_soc_voc_coeff(double soc, double tc, double *b, double *a, double *c, double *log_soc,
                           double *exp_n_soc, double *pow_log_soc);
   double calc_h_jacobian(double soc_lim, double b, double c, double log_soc, double exp_n_soc, double pow_log_soc);
-  double calc_soc_voc(double soc_lim, double *dv_dsoc, double b, double a, double c, double log_soc, double exp_n_soc, double pow_log_soc);
+  double calc_soc_voc(double soc_lim, double *dv_dsoc, double b, double a, double c, double log_soc, double exp_n_soc,
+    double pow_log_soc);
   virtual double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated);
-  double calculate_charge_time(const double temp_c, const double charge_curr, const double delta_q, const double t_sat, const double q_sat);
+  double calculate_charge_time(const double temp_c, const double charge_curr, const double delta_q, const double t_sat,
+    const double q_sat, const double soc);
   void init_soc_ekf(const double soc);
-  double soc() { return (soc_); };
-  double q_cap() { return (q_cap_); };
-  double soc_avail() { return (soc_avail_); };
   double soc_ekf() { return (soc_ekf_); };
   double voc() { return (voc_); };
   double voc_dyn() { return (voc_dyn_); };
@@ -151,6 +149,7 @@ public:
   double K_ekf() { return (K_); };
   double y_ekf() { return (y_); };
   double amp_hrs_remaining() { return (amp_hrs_remaining_); };
+  double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
 protected:
   TableInterp1Dclip *B_T_;  // Battery coeff
   TableInterp1Dclip *A_T_;  // Battery coeff
@@ -162,7 +161,6 @@ protected:
   double n_;        // Battery coeff
   double d_;        // Battery coeff
   unsigned int nz_; // Number of breakpoints
-  double soc_;      // State of charge scaled 0-1
   double q_;        // State of charge, C
   double r1_;       // Randels resistance, Ohms per cell
   double r2_;       // Randels resistance, Ohms per cell
@@ -204,12 +202,10 @@ protected:
   double voc_dyn_;  // Charging voltage, V
   double delta_soc_;// Change to available charge since saturated, (0-1)
   double q_sat_;    // Charge at saturation, C
-  double soc_avail_;// Temperature adjusted estimate of battery state of charge (0-1)
   double soc_ekf_;  // Filtered state of charge from ekf (0-1)
-  double q_cap_;    // Charge capability of this battery, C
-  double q_capacity_;  // Charge available at this temperature, C
   double q_ekf_;    // Filtered charge calculated by ekf, C
   double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
+  double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
   void ekf_model_predict(double *Fx, double *Bu);
   void ekf_model_update(double *hx, double *H);
 };

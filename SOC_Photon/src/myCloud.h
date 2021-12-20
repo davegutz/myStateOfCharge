@@ -50,13 +50,15 @@ struct Publish
   double Vshunt_filt;
   double Ishunt_filt;
   int num_timeouts;
+  double tcharge;
+  double amp_hrs_remaining;
+  double amp_hrs_remaining_ekf;
   double soc_model;
   double soc;
   double soc_ekf;
-  double soc_sat;
-  double tcharge;
-  double soc_avail;
-  double amp_hrs_remaining;
+  double SOC_model;
+  double SOC;
+  double SOC_ekf;
 };
 
 void publish1(void);

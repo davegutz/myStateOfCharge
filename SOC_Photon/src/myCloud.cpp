@@ -33,12 +33,10 @@
 #include "Blynk/BlynkParticle.h"
 #include "command.h"
 extern CommandPars cp;            // Various parameters to be common at system level (reset on PLC reset)
-// extern const int8_t debug;
-// extern Publish pubList;
-// extern char buffer[256];
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;     // Time Blynk events
 extern BlynkParticle Blynk;
-// extern boolean enable_wifi;
+extern CoulombCounter Cc;
+extern CoulombCounter CcModel;
 
 // Publish1 Blynk
 void publish1(void)
@@ -161,15 +159,17 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Wshunt = Sen->Wshunt;
   pubList->Vshunt_amp = Sen->Vshunt_amp;
   pubList->num_timeouts = num_timeouts;
-  pubList->soc_model = rp.soc_model*100.;
-  pubList->soc = rp.soc*100.;
-  pubList->soc_ekf = cp.soc_ekf*100.;
-  pubList->soc_sat = rp.q_sat/nom_q_cap*100.;
   pubList->T = Sen->T;
   if ( rp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
   pubList->tcharge = MyBatt->tcharge();
   pubList->VOC = MyBattModel->voc();
-  pubList->soc_avail = MyBatt->soc_avail()*100.0;
   pubList->curr_sel_amp = rp.curr_sel_amp;
   pubList->amp_hrs_remaining = MyBatt->amp_hrs_remaining();
+  pubList->amp_hrs_remaining_ekf = MyBatt->amp_hrs_remaining_ekf();
+  pubList->soc_model = CcModel.soc;
+  pubList->soc = Cc.soc;
+  pubList->soc_ekf = cp.soc_ekf;
+  pubList->SOC_model = CcModel.SOC;
+  pubList->SOC = Cc.SOC;
+  pubList->SOC_ekf = cp.SOC_ekf;
 }

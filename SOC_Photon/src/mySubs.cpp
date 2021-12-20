@@ -94,13 +94,13 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,  VOC_s,  tcharge,  T,   SOC_sat,    SOC_mod, SOC_ekf, SOC,"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,  VOC_s,  tcharge,  T,   soc_mod, soc_ekf, soc,    SOC_mod, SOC_ekf, SOC,"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %7.3f,  %6.3f,  %7.3f,    %7.3f,%7.3f,%7.3f,  %c", \
+  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %7.3f,  %6.3f,  %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,%7.3f,  %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time,
     pubList->Tbatt, pubList->Tbatt_filt,
     pubList->Vbatt, pubList->Vbatt_filt,
@@ -110,8 +110,8 @@ void create_print_string(char *buffer, Publish *pubList)
     pubList->VOC,
     pubList->tcharge,
     pubList->T,
-    pubList->soc_sat,
     pubList->soc_model, pubList->soc_ekf, pubList->soc, 
+    pubList->SOC_model, pubList->SOC_ekf, pubList->SOC, 
     '\0');
 }
 
@@ -268,9 +268,9 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
     Sen->shunt_v2a_s = shunt_amp_v2a_s; // amp preferred, default to that
   }
   if ( rp.debug==51 )
-    Serial.printf("soc,sat,    VOC,v_sat,   ib, adder,%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,\n", rp.soc, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat);
+    Serial.printf("soc,sat,    VOC,v_sat,   ib, adder,%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,\n", Cc.soc, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat);
   if ( rp.debug==-51 )
-    Serial.printf("soc,sat,    VOC,v_sat,   ib, adder,\n%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,\n", rp.soc, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat);
+    Serial.printf("soc,sat,    VOC,v_sat,   ib, adder,\n%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,\n", Cc.soc, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat);
 
 
   // Vbatt
@@ -406,9 +406,9 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
   display->setTextColor(SSD1306_WHITE);
   char dispStringT[9];
   if ( abs(cp.pubList.tcharge) < 24. )
-    sprintf(dispStringT, "%3.0f%5.1f", cp.pubList.soc_ekf, cp.pubList.tcharge);
+    sprintf(dispStringT, "%3.0f%5.1f", cp.pubList.amp_hrs_remaining_ekf, cp.pubList.tcharge);
   else
-    sprintf(dispStringT, "%3.0f --- ", cp.pubList.soc_ekf);
+    sprintf(dispStringT, "%3.0f --- ", cp.pubList.amp_hrs_remaining_ekf);
   display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[4];
@@ -421,10 +421,10 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
   display->display();
   pass = !pass;
 
-  if ( rp.debug==5 ) Serial.printf("myDisplay: Tb, Vb, Ib, SOC_ekf, tcharge, Ahrs_rem, %3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
-      cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt_filt, cp.pubList.soc_ekf, cp.pubList.tcharge, cp.pubList.amp_hrs_remaining);
-  if ( rp.debug==-5 ) Serial.printf("Tb, Vb, Ib, SOC_ekf, tcharge, Ahrs_rem,\n%3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
-      cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt_filt, cp.pubList.soc_ekf, cp.pubList.tcharge, cp.pubList.amp_hrs_remaining);
+  if ( rp.debug==5 ) Serial.printf("myDisplay: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem, %3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
+      cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt_filt, cp.pubList.amp_hrs_remaining_ekf, cp.pubList.tcharge, cp.pubList.amp_hrs_remaining);
+  if ( rp.debug==-5 ) Serial.printf("Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem,\n%3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
+      cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt_filt, cp.pubList.amp_hrs_remaining_ekf, cp.pubList.tcharge, cp.pubList.amp_hrs_remaining);
 
 }
 
@@ -485,17 +485,9 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
           case ( 'c' ):
             scale = cp.input_string.substring(2).toFloat();
             rp.s_cap = scale;
-            Serial.printf("MyBattModel.q_cap scaled by %7.3f from %7.3f to ", scale, MyBattModel->q_cap());
-            MyBattModel->S_cap(scale);
-            Serial.printf("%7.3f\n", MyBattModel->q_cap());
-            Serial.printf("MyBattModel.q_sat scaled from %7.3f to ", rp.q_sat_model);
-            rp.q_sat_model = calculate_saturation_charge(rp.t_sat_model, MyBattModel->q_cap()*scale);
-            Serial.printf("%7.3f\n", rp.q_sat_model);
-
             Serial.printf("CcModel.q_cap scaled by %7.3f from %7.3f to ", scale, CcModel.q_cap);
             CcModel.apply_cap_scale(scale);
             Serial.printf("%7.3f\n", CcModel.q_cap);
-
             break;
           case ( 'r' ):
             scale = cp.input_string.substring(2).toFloat();
@@ -519,13 +511,14 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         break;
       case ( 'm' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
-        // Cc.SOC = max(min(SOCS_in, mxeps_bb), mneps_bb);
+        // SOCS_in = max(min(SOCS_in, mxeps_bb), mneps_bb);  TODO: is this needed?
         Cc.apply_SOC(SOCS_in);
         CcModel.apply_delta_q(Cc.delta_q);
         Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat);
         CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
-        Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f\n",
-                        Cc.SOC, rp.soc, rp.delta_q, CcModel.SOC, rp.soc_model, rp.delta_q_model);
+        MyBatt->init_soc_ekf(Cc.soc);
+        Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
+                        Cc.SOC, Cc.soc, rp.delta_q, CcModel.SOC, CcModel.soc, rp.delta_q_model, MyBatt->soc_ekf());
         break;
       case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
@@ -723,7 +716,7 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt, BatteryModel *batt_
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.println("    : delta T adder to sensed Tbatt, deg C [0]"); 
   Serial.printf("  Dv= "); Serial.print(batt_model->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
-  Serial.printf("  Sc= "); Serial.print(batt_model->q_cap()/batt->q_cap()); Serial.println("    : Scalar battery model size"); 
+  Serial.printf("  Sc= "); Serial.print(CcModel.q_cap/Cc.q_cap); Serial.println("    : Scalar battery model size"); 
   Serial.printf("  Sr= "); Serial.print(batt_model->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("T<?>=  "); 
   Serial.printf("T - Transient performed with input.   For example:\n");
@@ -847,25 +840,21 @@ BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const doubl
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt) :
     Battery(x_tab, b_tab, a_tab, c_tab, m, n, d, nz, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt)
-{
-  q_cap_ = nom_q_cap * rp.s_cap;
-}
+{}
 
 // SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model
 double BatteryModel::calculate(const double temp_C, const double soc, const double curr_in, const double dt)
 {
     dt_ = dt;
 
-    soc_ = soc;
-    q_ = soc_ * q_cap_;
-    double soc_lim = max(min(soc_, mxeps_bb), mneps_bb);
+    double soc_lim = max(min(soc, mxeps_bb), mneps_bb);
     ib_ = curr_in;
 
     // VOC-OCV model
     double log_soc, exp_n_soc, pow_log_soc;
     calc_soc_voc_coeff(soc_lim, temp_C, &b_, &a_, &c_, &log_soc, &exp_n_soc, &pow_log_soc);
     voc_ = calc_soc_voc(soc_lim, &dv_dsoc_, b_, a_, c_, log_soc, exp_n_soc, pow_log_soc)
-             + (soc_ - soc_lim) * dv_dsoc_;  // slightly beyond
+             + (soc - soc_lim) * dv_dsoc_;  // slightly beyond
     voc_ +=  dv_;  // Experimentally varied
 
     // Dynamic emf
@@ -882,7 +871,7 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
       soc, vb_, ib_, vsat_, voc_);
 
     if ( rp.debug==79 )Serial.printf("calculate_model:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-     temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc_, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
+     temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
 
     return ( vb_ );
 }
