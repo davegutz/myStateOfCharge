@@ -347,28 +347,35 @@ void loop()
       if ( elapsed>INIT_WAIT_EKF ) reset_free_ekf = false;
     }
 
-    // Model used for built-in testing (rp.modeling = true and jumper wire)
+    // Model used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
+    // to have a value for Tbatt_filt_C
     if ( CcModel.nom_q_cap == 0 )
       CcModel.prime(nom_q_cap, RATED_TEMP, rp.q_sat, Tbatt_filt_C, rp.s_cap);
+    // Model call
     Sen->Vbatt_model = MyBattModel->calculate(Tbatt_filt_C, CcModel.soc, Sen->Ishunt, min(Sen->T, 0.5));
     boolean sat_model = is_sat(Tbatt_filt_C, MyBattModel->voc());
     CcModel.soc = CcModel.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, sat_model);
     CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
     Sen->Voc = MyBattModel->voc();
-
-    // Main Battery calculations:  Over-ride Ishunt, Vbatt and Tbatt with model
+    rp.duty = MyBattModel->calc_inj_duty(now, rp.type, rp.amp, rp.freq);
+    // Over-ride Ishunt, Vbatt and Tbatt with model
     if ( rp.modeling )
     {
-      // Sen->Ishunt = MyBattModel->Ishunt();
-      // Sen->Vbatt = MyBattModel->Vbatt();
-      // Tbatt_filt_C = MyBattModel->Vbatt();
+      Sen->Ishunt = MyBattModel->ib();
+      Sen->Vbatt = MyBattModel->vb();
+      Tbatt_filt_C = MyBattModel->temp_c();
     }
     
-    // Main Battery calculations:  Initialize Cc structure if needed
+    // Main Battery
+    //  Inputs:
+    //    Sen->Ishunt     A
+    //    Sen->Vbatt      V
+    //    Tbatt_filt_C    deg C
+    //    Cc    Coulomb charge counter memory structure
+    // Initialize Cc structure if needed.   Needed here in this location to have a value for Tbatt_filt_C
     if ( Cc.nom_q_cap == 0 )
       Cc.prime(nom_q_cap, RATED_TEMP, rp.q_sat, Tbatt_filt_C, 1.);
-    
-    // Main Battery calculations:  EKF - calculates temp_c_, voc_, voc_dyn_
+    // EKF - calculates temp_c_, voc_, voc_dyn_
     cp.soc_ekf = MyBatt->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5), Sen->saturated);  // TODO:  hardcoded time of 0.5 into constants
     cp.SOC_ekf = cp.soc_ekf*100.*Cc.q_capacity/Cc.q_cap;
     Sen->saturated = SatDebounce->calculate(is_sat(Tbatt_filt_C, MyBatt->voc()), reset);

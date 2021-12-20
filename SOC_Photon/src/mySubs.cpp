@@ -29,7 +29,6 @@
 #include "command.h"
 #include "local_config.h"
 #include <math.h>
-#include "myLibrary/injection.h"
 
 extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
@@ -156,48 +155,6 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   double T = (now - past)/1e3;
   past = now;
 
-  // Injection   TODO:  move to BatteryModel
-  double t = now/1e3;
-  double sin_bias = 0.;
-  double square_bias = 0.;
-  double tri_bias = 0.;
-  double inj_bias = 0.;
-  static SinInj *Sin_inj = new SinInj();
-  static SqInj *Sq_inj = new SqInj();
-  static TriInj *Tri_inj = new TriInj();
-  // Calculate injection amounts from user inputs (talk).
-  // One-sided because PWM voltage >0.  rp.offset applied in logic below.
-  switch ( rp.type )
-  {
-    case ( 0 ):   // Nothing
-      sin_bias = 0.;
-      square_bias = 0.;
-      tri_bias = 0.;
-      break;
-    case ( 1 ):   // Sine wave
-      sin_bias = Sin_inj->signal(rp.amp, rp.freq, t, 0.0);
-      square_bias = 0.;
-      tri_bias = 0.;
-      break;
-    case ( 2 ):   // Square wave
-      sin_bias = 0.;
-      square_bias = Sq_inj->signal(rp.amp, rp.freq, t, 0.0);
-      tri_bias = 0.;
-      break;
-    case ( 3 ):   // Triangle wave
-      sin_bias = 0.;
-      square_bias =  0.;
-      tri_bias = Tri_inj->signal(rp.amp, rp.freq, t, 0.0);
-      break;
-    default:
-      break;
-  }
-  inj_bias = sin_bias + square_bias + tri_bias;
-  rp.duty = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
-  if ( rp.debug==-41 )
-  Serial.printf("type,amp,freq,sin,square,tri,inj,duty,tnow=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %ld,  %7.3f,\n",
-            rp.type, rp.amp, rp.freq, sin_bias, square_bias, tri_bias, rp.duty, t);
-
   // Current bias.  Feeds into signal conversion, not to duty injection
   Sen->curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.offset;
   Sen->curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.offset;
@@ -249,14 +206,14 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   if ( rp.curr_sel_amp && !Sen->bare_ads_amp)
   {
     Sen->Vshunt = Sen->Vshunt_amp;
-    Sen->Ishunt = Sen->Ishunt_amp_cal - s_sat;
+    Sen->Ishunt = Sen->Ishunt_amp_cal;
     Sen->curr_bias = Sen->curr_bias_amp;
     Sen->shunt_v2a_s = shunt_amp_v2a_s;
   }
   else if ( !Sen->bare_ads_noamp )
   {
     Sen->Vshunt = Sen->Vshunt_noamp;
-    Sen->Ishunt = Sen->Ishunt_noamp_cal - s_sat;
+    Sen->Ishunt = Sen->Ishunt_noamp_cal;
     Sen->curr_bias = Sen->curr_bias_noamp;
     Sen->shunt_v2a_s = shunt_noamp_v2a_s;
   }
@@ -586,7 +543,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
             switch ( cp.input_string.substring(2).toInt() )
             {
               case ( 0 ):
-                rp.modeling = false;
+                rp.modeling = true;
                 rp.type = 0;
                 rp.freq = 0.0;
                 rp.amp = 0.0;
@@ -868,6 +825,9 @@ BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const doubl
     rand_D_[0] = r0_;
     rand_D_[1] = 1.;
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
+    Sin_inj_ = new SinInj();
+    Sq_inj_ = new SqInj();
+    Tri_inj_ = new TriInj();
 
 }
 
@@ -875,6 +835,7 @@ BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const doubl
 double BatteryModel::calculate(const double temp_C, const double soc, const double curr_in, const double dt)
 {
     dt_ = dt;
+    temp_c_ = temp_C;
 
     double soc_lim = max(min(soc, mxeps_bb), mneps_bb);
     ib_ = curr_in;
@@ -904,4 +865,48 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
      temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
 
     return ( vb_ );
+}
+
+// Injection model, calculate duty
+uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq)
+{
+  double t = now/1e3;
+  double sin_bias = 0.;
+  double square_bias = 0.;
+  double tri_bias = 0.;
+  double inj_bias = 0.;
+  // Calculate injection amounts from user inputs (talk).
+  // One-sided because PWM voltage >0.  rp.offset applied in logic below.
+  switch ( type )
+  {
+    case ( 0 ):   // Nothing
+      sin_bias = 0.;
+      square_bias = 0.;
+      tri_bias = 0.;
+      break;
+    case ( 1 ):   // Sine wave
+      sin_bias = Sin_inj_->signal(amp, freq, t, 0.0);
+      square_bias = 0.;
+      tri_bias = 0.;
+      break;
+    case ( 2 ):   // Square wave
+      sin_bias = 0.;
+      square_bias = Sq_inj_->signal(amp, freq, t, 0.0);
+      tri_bias = 0.;
+      break;
+    case ( 3 ):   // Triangle wave
+      sin_bias = 0.;
+      square_bias =  0.;
+      tri_bias = Tri_inj_->signal(amp, freq, t, 0.0);
+      break;
+    default:
+      break;
+  }
+  inj_bias = sin_bias + square_bias + tri_bias;
+  duty_ = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
+  if ( rp.debug==-41 )
+  Serial.printf("type,amp,freq,sin,square,tri,inj,duty,tnow=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %ld,  %7.3f,\n",
+            type, amp, freq, sin_bias, square_bias, tri_bias, duty_, t);
+
+  return ( duty_ );
 }

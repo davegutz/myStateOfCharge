@@ -143,6 +143,7 @@ public:
   double vdyn() { return (vdyn_); };
   double vb() { return (vb_); };
   double ib() { return (ib_); };
+  double temp_c() { return (temp_c_); };
   double tcharge() { return (tcharge_); };
   double dv_dsoc() { return (dv_dsoc_); };
   double Dv() { return (dv_); };

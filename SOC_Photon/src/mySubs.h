@@ -28,6 +28,7 @@
 #include "Battery.h"
 #include "constants.h"
 #include "myCloud.h"
+#include "myLibrary/injection.h"
 
 // Temp sensor
 #include <hardware/OneWire.h>
@@ -132,7 +133,12 @@ public:
   // operators
   // functions
   double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
+  uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);
 protected:
+  SinInj *Sin_inj_;
+  SqInj *Sq_inj_;
+  TriInj *Tri_inj_;
+  uint32_t duty_;
 };
 
 
