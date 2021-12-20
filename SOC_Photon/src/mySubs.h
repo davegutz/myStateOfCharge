@@ -132,8 +132,6 @@ public:
   // operators
   // functions
   double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
-  double count_coulombs(const double dt, const double charge_curr, const double q_sat, const boolean sat,
-    const double temp_c, double *delta_soc, double *t_sat, double *soc_sat);
 protected:
 };
 

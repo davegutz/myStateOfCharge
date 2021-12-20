@@ -518,15 +518,14 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         }
         break;
       case ( 'm' ):
-        SOCS_in = cp.input_string.substring(1).toFloat()/100.;
-        rp.soc = max(min(SOCS_in, mxeps_bb), mneps_bb);
-        rp.soc_model = max(min(SOCS_in, mxeps_bb*rp.s_cap), mneps_bb);
-        rp.delta_q = max((rp.soc - 1.)*nom_q_cap, -rp.q_sat);
-        rp.delta_q_model = max((rp.soc_model - 1.)*nom_q_cap*rp.s_cap, -rp.q_sat_model);
-        CcModel.load(rp.delta_q_model, rp.t_sat_model, rp.q_sat_model);
-        Cc.load(rp.delta_q, rp.t_sat, rp.q_sat);
-        Serial.printf("soc=%7.3f,   delta_q=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f\n",
-                        rp.soc, rp.delta_q, rp.soc_model, rp.delta_q_model);
+        SOCS_in = cp.input_string.substring(1).toFloat();
+        // Cc.SOC = max(min(SOCS_in, mxeps_bb), mneps_bb);
+        Cc.apply_SOC(SOCS_in);
+        CcModel.apply_delta_q(Cc.delta_q);
+        Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat);
+        CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
+        Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f\n",
+                        Cc.SOC, rp.soc, rp.delta_q, CcModel.SOC, rp.soc_model, rp.delta_q_model);
         break;
       case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
@@ -886,55 +885,4 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
      temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc_, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
 
     return ( vb_ );
-}
-
-/* Count coulombs base on true=actual capacity, sepaate for BatteryModel for 
-  independent check.
-    Internal resistance of battery is a loss
-    Inputs:
-        dt      Integration step, s
-        charge_curr  Charge, A
-        sat     Indicator that battery is saturated (VOC>threshold(temp)), T/F
-        temp_c  Battery temperature, deg C
-    Outputs:
-        q_capacity Saturation charge at temperature, C
-        delta_q Iteration rate of change, C
-        t_sat   Battery temperature at saturation, deg C
-        q_sat   Saturation charge, C
-        soc     State of charge for curve lookup (0-1)
-*/
-double BatteryModel::count_coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
-  const double temp_c, double *delta_q, double *t_sat, double *q_sat)
-{
-    double soc_for_lookup = 0;   // return value
-    double q_capacity = *q_sat*(1. - DQDT*(temp_c - *t_sat));
-    double d_delta_q = charge_curr * dt;
-
-    // Saturation
-    if ( sat )
-    {
-        if ( d_delta_q>0 )
-        {
-            d_delta_q = 0.;
-            *delta_q = 0.;
-        }
-        *t_sat = temp_c;
-        *q_sat = ((*t_sat - 25.)*DQDT + 1.)*q_cap;
-        q_capacity = *q_sat;
-    }
-
-    // Integration
-    *delta_q = max(min(*delta_q + d_delta_q, 1.1*(q_cap - q_capacity)), -q_capacity);
-
-    // Normalize
-    soc_for_lookup = (q_capacity + *delta_q) / q_capacity;
-
-    if ( rp.debug==76 )
-        Serial.printf("  BatteryModel::count_coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc_for_lookup,%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%9.1f,%7.3f,%9.1f,%7.3f,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_capacity, soc_for_lookup);
-    if ( rp.debug==-76 )
-        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc_for_lookup          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%9.1f,%7.3f,%9.1f,%7.3f,\n",
-                    cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_capacity, soc_for_lookup);
-
-    return ( soc_for_lookup );
 }

@@ -352,8 +352,6 @@ void loop()
       CcModel.prime(nom_q_cap, RATED_TEMP, rp.q_sat, Tbatt_filt_C, rp.s_cap);
     Sen->Vbatt_model = MyBattModel->calculate(Tbatt_filt_C, rp.soc_model, Sen->Ishunt, min(Sen->T, 0.5));
     boolean sat_model = is_sat(Tbatt_filt_C, MyBattModel->voc());
-    // rp.soc_model = MyBattModel->count_coulombs(Sen->T, Sen->Ishunt, MyBattModel->q_cap(), sat_model,
-    //                 Tbatt_filt_C, &rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
     rp.soc_model = CcModel.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, sat_model);
     CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
     Sen->Voc = MyBattModel->voc();
@@ -373,8 +371,6 @@ void loop()
     // Main Battery calculations:  EKF - calculates temp_c_, voc_, voc_dyn_
     cp.soc_ekf = MyBatt->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, 0.5), Sen->saturated);  // TODO:  hardcoded time of 0.5 into constants
     Sen->saturated = SatDebounce->calculate(is_sat(Tbatt_filt_C, MyBatt->voc()), reset);
-    // rp.soc = count_coulombs(Sen->T, Sen->Ishunt, MyBatt->q_cap(), Sen->saturated,
-    //                   Tbatt_filt_C, &rp.delta_q, &rp.t_sat, &rp.q_sat);
     rp.soc = Cc.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated);
     Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat);
     MyBatt->calculate_charge_time(Tbatt_filt_C, Sen->Ishunt, rp.delta_q, rp.t_sat, rp.q_sat);

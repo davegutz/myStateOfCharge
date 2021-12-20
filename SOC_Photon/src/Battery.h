@@ -104,6 +104,7 @@ struct CoulombCounter
   // functions
   void apply_cap_scale(const double scale_);
   void apply_SOC(const double SOC_);
+  void apply_delta_q(const double delta_q_);
   double calculate_capacity(const double temp_c_);
   double calculate_saturation_charge(const double t_sat_, const double q_cap_);
   double count_coulombs(const double dt_, const double temp_c_, const double charge_curr_, const boolean sat_);
@@ -134,8 +135,6 @@ public:
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated);
   double calculate_charge_time(const double temp_c, const double charge_curr, const double delta_q, const double t_sat, const double q_sat);
   void init_soc_ekf(const double soc);
-  virtual double count_coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
-    const double temp_c, double *delta_soc, double *t_sat, double *soc_sat){return 0;};
   double soc() { return (soc_); };
   double q_cap() { return (q_cap_); };
   double soc_avail() { return (soc_avail_); };
@@ -218,8 +217,6 @@ protected:
 // Methods
 void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols);
 void mulvec(double * a, double * x, double * y, int m, int n);
-double count_coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
-  const double temp_c, double *delta_soc, double *t_sat, double *soc_sat);
 double sat_voc(const double temp_c);
 boolean is_sat(const double temp_c, const double voc);
 double calculate_capacity(const double temp_c, const double t_sat, const double q_sat);

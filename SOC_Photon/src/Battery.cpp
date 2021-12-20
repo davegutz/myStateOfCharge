@@ -65,13 +65,22 @@ void CoulombCounter::apply_cap_scale(const double scale)
   soc = q / q_capacity;
 }
 
-// Memory set, adjust book-keeping as needed.  q_cap_ etc unchanged
+// Memory set, adjust book-keeping as needed.  delta_q preserved
 void CoulombCounter::apply_SOC(const double SOC_)
 {
-  SOC = SOC;
+  SOC = SOC_;
+  delta_q = SOC/100.*nom_q_cap - q_capacity;
   q = SOC * q_cap;
-  // q_capacity_ and q_sat_ unchanged
   soc = q / q_capacity;
+}
+
+// Memory set, adjust book-keeping as needed.  q_cap_ etc presesrved
+void CoulombCounter::apply_delta_q(const double delta_q_)
+{
+  delta_q = delta_q_;
+  soc = (q_capacity + delta_q) / q_capacity;
+  SOC = (q_capacity + delta_q) / nom_q_cap * 100.;
+  q = SOC * q_cap;
 }
 
 // Capacity
@@ -386,56 +395,6 @@ void mulvec(double * a, double * x, double * y, int m, int n)
         for(j=0; j<n; ++j)
             y[i] += x[j] * a[i*n+j];
     }
-}
-
-/* Count coulombs base on true=actual capacity
-    Internal resistance of battery is a loss
-    Inputs:
-        dt      Integration step, s
-        charge_curr  Charge, A
-        sat     Indicator that battery is saturated (VOC>threshold(temp)), T/F
-        temp_c  Battery temperature, deg C
-    Outputs:
-        q_capacity Saturation charge at temperature, C
-        delta_q Iteration rate of change, C
-        t_sat   Battery temperature at saturation, deg C
-        q_sat   Saturation charge, C
-        soc     State of charge for curve lookup (0-1)
-*/
-double count_coulombs(const double dt, const double charge_curr, const double q_cap, const boolean sat,
-    const double temp_c, double *delta_q, double *t_sat, double *q_sat)
-{
-    double soc_for_lookup = 0;   // return value
-    double q_capacity = calculate_capacity(temp_c, *t_sat, *q_sat);
-    double d_delta_q = charge_curr * dt;
-
-    // Saturation
-    if ( sat )
-    {
-        if ( d_delta_q > 0 )
-        {
-            d_delta_q = 0.;
-            *delta_q = 0.;
-        }
-        *t_sat = temp_c;
-        *q_sat = calculate_saturation_charge(*t_sat, q_cap);
-        q_capacity = *q_sat;
-    }
-
-    // Integration
-    *delta_q = max(min(*delta_q + d_delta_q, 1.1*(q_cap - q_capacity)), -q_capacity);
-
-    // Normalize
-    soc_for_lookup = (q_capacity + *delta_q) / q_capacity;
-
-    if ( rp.debug==76 )
-        Serial.printf("                count_coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc_for_lookup,%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%9.1f,%7.3f,%9.1f,%7.3f,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_capacity, soc_for_lookup);
-    if ( rp.debug==-76 )
-        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,soc_for_lookup,     \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%10.6f,%9.1f,%7.3f,%9.1f,%7.3f,\n",
-                    cp.pubList.VOC, sat_voc(temp_c), sat, charge_curr, d_delta_q, *delta_q, *q_sat, *t_sat, q_capacity, soc_for_lookup);
-
-    return ( soc_for_lookup );
 }
 
 /* Calculate saturation voltage
