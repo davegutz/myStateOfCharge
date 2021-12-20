@@ -240,7 +240,8 @@ double Battery::calc_h_jacobian(double soc_lim, double b, double c, double log_s
     return (dv_dsoc);
 }
 
-// SOC-OCV curve fit method per Zhang, et al.
+// SOC-OCV curve fit method per Zhang, et al.   May write this base version if needed using BatteryModel::calculate()
+// as a starting point but use the base class Randles formulation and re-arrange the i/o for that model.
 double Battery::calculate(const double temp_C, const double q, const double curr_in, const double dt) { return 0.;}
 
 // SOC-OCV curve fit method per Zhang, et al modified by ekf
