@@ -25,7 +25,6 @@
 #include "application.h" // Should not be needed if file .ino or Arduino
 #endif
 #include "mySubs.h"
-#include "retained.h"
 #include "command.h"
 #include "local_config.h"
 #include <math.h>

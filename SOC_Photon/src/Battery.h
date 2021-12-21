@@ -85,37 +85,6 @@ static TableInterp1Dclip  *V_T1 = new TableInterp1Dclip(n_v1, t_min_v1, v_v1);
 static TableInterp1Dclip  *I_T1 = new TableInterp1Dclip(n_v1, t_min_v1, i_v1);
 static TableInterp1Dclip  *T_T1 = new TableInterp1Dclip(n_v1, t_min_v1, T_v1);
 
-// Coulomb Counter Class
-struct CoulombCounter
-{
-  double nom_q_cap = 0;   // Rated capacity at t_rated_, C
-  double q_cap = 0;       // Capacity normalized to rated temperature, C
-  double q_capacity = 0;  // Saturation charge at temperature, C
-  double q = 0;           // Present charge available to use, C
-  double delta_q = 0;     // Charge since saturated, C
-  double q_sat = 0;       // Saturation charge, C
-  double t_sat = 0;       // Battery temperature at saturation, deg C
-  double soc = 0;         // Fraction of saturation charge (q_capacity_) available (0-1)
-  double SOC = 0;         // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries.
-  double t_rated = 0;     // Rated temperature, deg C
-  double t_last = 25.;    // Last battery temperature for rate limit memory, deg C
-  double t_rat = 2.5;     // Tbatt rate limit, deg C / s
-  boolean resetting = false;  // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
-  CoulombCounter();
-  void prime(const double nom_q_cap, const double t_rate, const double init_q, const double init_t_c, const double s_cap);
-  // operators
-  // functions
-  void apply_cap_scale(const double scale_);
-  void apply_soc(const double soc_);
-  void apply_SOC(const double SOC_);
-  void apply_delta_q(const double delta_q_);
-  double calculate_capacity(const double temp_c_);
-  double calculate_saturation_charge(const double t_sat_, const double q_cap_);
-  double count_coulombs(const double dt_, const double temp_c_, const double charge_curr_, const boolean sat_, const double t_last_);
-  void load(const double delta_q_, const double t_sat_, const double q_sat_, const double t_last_);
-  void update(double *delta_q_, double *t_sat_, double *q_sat_, double *t_last_);
-};
-
 
 // Battery Class
 class Battery: public EKF_1x1

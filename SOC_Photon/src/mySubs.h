@@ -26,9 +26,12 @@
 
 #include "myLibrary/myFilters.h"
 #include "Battery.h"
+#include "Coulombs.h"
 #include "constants.h"
 #include "myCloud.h"
 #include "myLibrary/injection.h"
+#include "retained.h"
+#include "command.h"
 
 // Temp sensor
 #include <hardware/OneWire.h>

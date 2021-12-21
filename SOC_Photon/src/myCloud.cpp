@@ -31,7 +31,7 @@
 #include "Blynk/BlynkHandlers.h"
 #include "Blynk/BlynkTimer.h"
 #include "Blynk/BlynkParticle.h"
-#include "command.h"
+
 extern CommandPars cp;            // Various parameters to be common at system level (reset on PLC reset)
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;     // Time Blynk events
 extern BlynkParticle Blynk;
