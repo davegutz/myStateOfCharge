@@ -315,12 +315,11 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
 }
 
 // Charge time calculation
-double Battery::calculate_charge_time(const double temp_c, const double charge_curr,
-    const double delta_q, const double t_sat, const double q_sat, const double soc)
+double Battery::calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc)
 {
-    double q_capacity = calculate_capacity(temp_c, t_sat, q_sat);
-    if ( charge_curr > TCHARGE_DISPLAY_DEADBAND )  tcharge_ = min( -delta_q / ib_ / 3600., 24.);
-    else if ( charge_curr < -TCHARGE_DISPLAY_DEADBAND ) tcharge_ = max( (q_capacity + delta_q) / ib_ / 3600., -24.);
+    double delta_q = q - q_capacity;
+    if ( charge_curr > TCHARGE_DISPLAY_DEADBAND )  tcharge_ = min( -delta_q / charge_curr / 3600., 24.);
+    else if ( charge_curr < -TCHARGE_DISPLAY_DEADBAND ) tcharge_ = max( (q_capacity + delta_q) / charge_curr / 3600., -24.);
     else if ( charge_curr >= 0. ) tcharge_ = 24.;
     else tcharge_ = -24.;
 

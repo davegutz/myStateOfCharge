@@ -388,7 +388,7 @@ void loop()
     Sen->saturated = SatDebounce->calculate(is_sat(Tbatt_filt_C, MyBatt->voc()), reset);
     Cc.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated, rp.t_last);
     Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat, &rp.t_last);
-    MyBatt->calculate_charge_time(Tbatt_filt_C, Sen->Ishunt, rp.delta_q, rp.t_sat, rp.q_sat, Cc.soc);
+    MyBatt->calculate_charge_time(Cc.q, Cc.q_capacity, Sen->Ishunt, Cc.soc);
 
     
     // Useful for Arduino plotting

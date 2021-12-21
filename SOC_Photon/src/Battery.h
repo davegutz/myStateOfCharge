@@ -137,8 +137,7 @@ public:
     double pow_log_soc);
   virtual double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated);
-  double calculate_charge_time(const double temp_c, const double charge_curr, const double delta_q, const double t_sat,
-    const double q_sat, const double soc);
+  double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   void init_soc_ekf(const double soc);
   double soc_ekf() { return (soc_ekf_); };
   double voc() { return (voc_); };
