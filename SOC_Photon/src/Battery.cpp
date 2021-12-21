@@ -65,13 +65,23 @@ void CoulombCounter::apply_cap_scale(const double scale)
 }
 
 // Memory set, adjust book-keeping as needed.  delta_q preserved
+void CoulombCounter::apply_soc(const double soc_)
+{
+  soc = soc_;
+  q = soc*q_capacity;
+  delta_q = q - q_capacity;
+  SOC = q / q_cap * 100.;
+  resetting = true;     // momentarily turn off saturation check
+}
+
+// Memory set, adjust book-keeping as needed.  delta_q preserved
 void CoulombCounter::apply_SOC(const double SOC_)
 {
   SOC = SOC_;
-  q = SOC/100.*q_cap;
+  q = SOC / 100. * q_cap;
   delta_q = q - q_capacity;
   soc = q / q_capacity;
-  resetting = true;
+  resetting = true;     // momentarily turn off saturation check
 }
 
 // Memory set, adjust book-keeping as needed.  q_cap_ etc presesrved
@@ -108,8 +118,11 @@ double CoulombCounter::count_coulombs(const double dt_, const double temp_c_, co
     q_capacity = q_sat*(1. - DQDT*(temp_c_ - t_sat));
     double d_delta_q_ = charge_curr_ * dt_;
 
-    // Saturation
-    if ( sat_ )
+    // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
+    // TODO:   should we just use q_sat all the time in soc calculation?  (Memory behavior causes problems with saturation
+    // detection).
+    // if ( sat_ )
+    if ( false )
     {
         if ( d_delta_q_ > 0 )
         {

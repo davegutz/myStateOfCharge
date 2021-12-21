@@ -104,6 +104,7 @@ struct CoulombCounter
   // operators
   // functions
   void apply_cap_scale(const double scale_);
+  void apply_soc(const double soc_);
   void apply_SOC(const double SOC_);
   void apply_delta_q(const double delta_q_);
   double calculate_capacity(const double temp_c_);

@@ -132,13 +132,16 @@ public:
   ~BatteryModel();
   // operators
   // functions
-  double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
+  double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt,
+    const double q_capacity, const double q_cap);
   uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);
 protected:
-  SinInj *Sin_inj_;
-  SqInj *Sq_inj_;
-  TriInj *Tri_inj_;
-  uint32_t duty_;
+  SinInj *Sin_inj_;     // Class to create sine waves
+  SqInj *Sq_inj_;       // Class to create square waves
+  TriInj *Tri_inj_;     // Class to create triangle waves
+  uint32_t duty_;       // Calculated duty cycle for D2 driver to ADC cards (0-255).  Bias on rp.offset
+  double ib_cutback_;   // Current cutback to be applied to modeled ib output, A
+  double cutback_gain_; // Gain to retard ib when voc exceeds vsat, dimensionless
 };
 
 

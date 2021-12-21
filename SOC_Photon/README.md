@@ -224,6 +224,10 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
 
   These are caused by time slips.   You notice that the Arduino plot x-axis is not time rather sample number.   So if a sample is missed due to time slip in Photon then it appears to be a time slip on the plot.   Usually this is caused by running Wifi.   Turn off Wifi.
 
+### Problem:  Experimentation with 'modeling' and running near saturation results in numerical lockup
+
+  The saturation logic is a feedback loop that can overflow and/or go unstable.   To break the loop, set cutback_gain to 0 in retained.h for a re-compile.   When comfortable with settings, reset it to 1.
+
 ## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
 
 ## To get debug data

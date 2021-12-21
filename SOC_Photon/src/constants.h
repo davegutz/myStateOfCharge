@@ -78,7 +78,7 @@
 #define C_CC_TRIM_G     0.003       // How much to trim coulomb counter to nudge it to solver (frac/sec/frac)
 #define C_CC_TRIM_IMAX  50          // Current below which solver allowed to trim the coulomb counter
 #define F_O_MAX_T       3.0         // Maximum call update time filters (3.0)
-#define F_MAX_T         3.0         // Maximum call update time filters (3.0)
+#define F_MAX_T         0.5         // Maximum call update time sensors and coulomb counter (o.5)
 #define F_MAX_T_TEMP    6.0         // Maximum call update time filters (6.0)
 #define F_W             0.50        // General filter wn, r/s (0.5)   
 #define F_Z             0.80        // General filter zeta (0.80)

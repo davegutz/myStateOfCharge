@@ -451,6 +451,11 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
             MyBattModel->Sr(scale);
             MyBatt->Sr(scale);
             break;
+          case ( 'k' ):
+            scale = cp.input_string.substring(2).toFloat();
+            rp.cutback_gain_scalar = scale;
+            Serial.printf("rp.cutback_gain_scalar set to %7.3f", rp.cutback_gain_scalar);
+            break;
         }
         break;
       case ( 'd' ):
@@ -468,7 +473,21 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         break;
       case ( 'm' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
-        // SOCS_in = max(min(SOCS_in, mxeps_bb), mneps_bb);  TODO: is this needed?
+        if ( SOCS_in<1.1 )
+        {
+          Cc.apply_soc(SOCS_in);
+          CcModel.apply_delta_q(Cc.delta_q);
+          Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat);
+          CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
+          MyBatt->init_soc_ekf(Cc.soc);
+          Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
+                          Cc.SOC, Cc.soc, rp.delta_q, CcModel.SOC, CcModel.soc, rp.delta_q_model, MyBatt->soc_ekf());
+        }
+        else
+          Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'M' instead of 'm'?\n", SOCS_in);
+        break;
+      case ( 'M' ):
+        SOCS_in = cp.input_string.substring(1).toFloat();
         Cc.apply_SOC(SOCS_in);
         CcModel.apply_delta_q(Cc.delta_q);
         Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat);
@@ -663,7 +682,8 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt, BatteryModel *batt_
 {
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
   Serial.printf("d   dump the summary log\n"); 
-  Serial.printf("m=  assign a free memory state in percent to all versions including model- '('truncated 0-100')'\n"); 
+  Serial.printf("m=  assign curve charge state in fraction to all versions including model- '(0-1)'\n"); 
+  Serial.printf("M=  assign a CHARGE state in percent to all versions including model- '('truncated 0-100')'\n"); 
   Serial.printf("s   curr signal select (1=amp preferred, 0=noamp) = "); Serial.println(rp.curr_sel_amp);
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("D/S<?> Adjustments.   For example:\n");
@@ -675,6 +695,7 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt, BatteryModel *batt_
   Serial.printf("  Dv= "); Serial.print(batt_model->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
   Serial.printf("  Sc= "); Serial.print(CcModel.q_cap/Cc.q_cap); Serial.println("    : Scalar battery model size"); 
   Serial.printf("  Sr= "); Serial.print(batt_model->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
+  Serial.printf("  Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println("    : Saturation of model cutback gain scalar"); 
   Serial.printf("T<?>=  "); 
   Serial.printf("T - Transient performed with input.   For example:\n");
   Serial.printf("  Ts=<index>  :   index="); Serial.print(*step_val);
@@ -828,17 +849,19 @@ BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const doubl
     Sin_inj_ = new SinInj();
     Sq_inj_ = new SqInj();
     Tri_inj_ = new TriInj();
+    cutback_gain_ = 15.;
 
 }
 
 // SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model
-double BatteryModel::calculate(const double temp_C, const double soc, const double curr_in, const double dt)
+double BatteryModel::calculate(const double temp_C, const double soc, const double curr_in, const double dt,
+  const double q_capacity, const double q_cap)
 {
     dt_ = dt;
     temp_c_ = temp_C;
 
     double soc_lim = max(min(soc, mxeps_bb), mneps_bb);
-    ib_ = curr_in;
+    double SOC = soc * q_capacity / q_cap * 100;
 
     // VOC-OCV model
     double log_soc, exp_n_soc, pow_log_soc;
@@ -855,11 +878,14 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     vb_ = Randles_->y(0);
     vdyn_ = vb_ - voc_;
 
-    // Summarize
+    // Saturation logic
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
+    ib_cutback_ = max(min((voc_ - vsat_) / nom_vsat_ * q_capacity / 3600. * cutback_gain_ * rp.cutback_gain_scalar,
+                    curr_in), 0.);
+    ib_ = min(curr_in, curr_in - ib_cutback_);
 
-    if ( rp.debug==78 ) Serial.printf("calculate_ model:  soc_in,v,curr,pow,vsat,voc= %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
-      soc, vb_, ib_, vsat_, voc_);
+    if ( rp.debug==-78 ) Serial.printf("SOC/10,soc*10,voc,vsat,curr_in,ib_cutback,ib,\n%7.3f, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
+      SOC/10, soc*10, voc_, vsat_, curr_in, ib_cutback_, ib_);
 
     if ( rp.debug==79 )Serial.printf("calculate_model:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
