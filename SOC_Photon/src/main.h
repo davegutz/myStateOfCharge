@@ -349,8 +349,8 @@ void loop()
 
     // Model used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
     // to have availabe a value for Tbatt_filt_C when called
-    if ( CcModel.nom_q_cap == 0 )
-      CcModel.prime(nom_q_cap, RATED_TEMP, rp.q_sat, Tbatt_filt_C, rp.s_cap);
+    if ( CcModel.nom_q_cap == 0 )  CcModel.prime(nom_q_cap, RATED_TEMP, rp.q_sat, Tbatt_filt_C, rp.s_cap);
+    if ( reset_free ) MyBattModel->load(rp.delta_q_model, rp.t_last_model);
     // Model call
     Sen->Vbatt_model = MyBattModel->calculate(Tbatt_filt_C, CcModel.soc, Sen->Ishunt, min(Sen->T, F_MAX_T),
         CcModel.q_capacity, CcModel.q_cap);
@@ -363,6 +363,8 @@ void loop()
     boolean sat_model = is_sat(Tbatt_filt_C, MyBattModel->voc());
     CcModel.soc = CcModel.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, sat_model, rp.t_last_model);
     CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model, &rp.t_last_model);
+    MyBattModel->count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, sat_model, rp.t_last_model);
+    MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
     Sen->Voc = MyBattModel->voc();
     rp.duty = MyBattModel->calc_inj_duty(now, rp.type, rp.amp, rp.freq);
     // Over-ride Ishunt, Vbatt and Tbatt with model when running tests.  rp.modeling should never be set in use
@@ -380,14 +382,16 @@ void loop()
     //    Tbatt_filt_C    deg C
     //    Cc    Coulomb charge counter memory structure
     // Initialize Cc structure if needed.   Needed here in this location to have a value for Tbatt_filt_C
-    if ( Cc.nom_q_cap == 0 )
-      Cc.prime(nom_q_cap, RATED_TEMP, rp.q_sat, Tbatt_filt_C, 1.);
+    if ( Cc.nom_q_cap == 0 ) Cc.prime(nom_q_cap, RATED_TEMP, rp.q_sat, Tbatt_filt_C, 1.);
+    if ( reset_free_ekf ) MyBatt->load(rp.delta_q, rp.t_last);
     // EKF - calculates temp_c_, voc_, voc_dyn_ as functions of sensed parameters vb & ib (not soc)
     cp.soc_ekf = MyBatt->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T), Sen->saturated);
     cp.SOC_ekf = cp.soc_ekf*100.*Cc.q_capacity/Cc.q_cap;
     Sen->saturated = SatDebounce->calculate(is_sat(Tbatt_filt_C, MyBatt->voc()), reset);
     Cc.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated, rp.t_last);
     Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat, &rp.t_last);
+    MyBatt->count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated, rp.t_last);
+    MyBatt->update(&rp.delta_q, &rp.t_last);
     MyBatt->calculate_charge_time(Cc.q, Cc.q_capacity, Sen->Ishunt, Cc.soc);
 
     
