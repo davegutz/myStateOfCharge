@@ -28,6 +28,7 @@
 #include "myLibrary/myTables.h"
 #include "myLibrary/EKF_1x1.h"
 #include "myLibrary/StateSpace.h"
+#include "Coulombs.h"
 
 // BattleBorn 100 Ah, 12v LiFePO4
 #define NOM_SYS_VOLT          12.       // Nominal system output, V, at which the reported amps are used (12)
@@ -87,7 +88,7 @@ static TableInterp1Dclip  *T_T1 = new TableInterp1Dclip(n_v1, t_min_v1, T_v1);
 
 
 // Battery Class
-class Battery: public EKF_1x1
+class Battery : public Coulombs, public EKF_1x1
 {
 public:
   Battery();

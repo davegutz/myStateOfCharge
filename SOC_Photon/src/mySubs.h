@@ -26,7 +26,6 @@
 
 #include "myLibrary/myFilters.h"
 #include "Battery.h"
-#include "Coulombs.h"
 #include "constants.h"
 #include "myCloud.h"
 #include "myLibrary/injection.h"
@@ -138,6 +137,7 @@ public:
   double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt,
     const double q_capacity, const double q_cap);
   uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);
+  double count_coulombs(const double dt, const double temp_c, const double charge_curr, const boolean sat, const double t_last);
 protected:
   SinInj *Sin_inj_;     // Class to create sine waves
   SqInj *Sq_inj_;       // Class to create square waves
