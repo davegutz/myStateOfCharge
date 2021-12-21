@@ -477,8 +477,8 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         {
           Cc.apply_soc(SOCS_in);
           CcModel.apply_delta_q(Cc.delta_q);
-          Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat);
-          CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
+          Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat, &rp.t_last);
+          CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model, &rp.t_last_model);
           MyBatt->init_soc_ekf(Cc.soc);
           Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
                           Cc.SOC, Cc.soc, rp.delta_q, CcModel.SOC, CcModel.soc, rp.delta_q_model, MyBatt->soc_ekf());
@@ -490,8 +490,8 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         SOCS_in = cp.input_string.substring(1).toFloat();
         Cc.apply_SOC(SOCS_in);
         CcModel.apply_delta_q(Cc.delta_q);
-        Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat);
-        CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
+        Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat, &rp.t_last);
+        CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model, &rp.t_last_model);
         MyBatt->init_soc_ekf(Cc.soc);
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
                         Cc.SOC, Cc.soc, rp.delta_q, CcModel.SOC, CcModel.soc, rp.delta_q_model, MyBatt->soc_ekf());

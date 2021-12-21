@@ -206,8 +206,8 @@ void setup()
   if ( rp.debug>103 ) { Serial.print(F("End setup rp.debug message=")); Serial.println(F(", ")); };
 
   // Reload memorized states from retained
-  CcModel.load(rp.delta_q_model, rp.t_sat_model, rp.q_sat_model);
-  Cc.load(rp.delta_q, rp.t_sat, rp.q_sat);
+  CcModel.load(rp.delta_q_model, rp.t_sat_model, rp.q_sat_model, rp.t_last_model);
+  Cc.load(rp.delta_q, rp.t_sat, rp.q_sat, rp.t_last);
 
 } // setup
 
@@ -361,8 +361,8 @@ void loop()
       Tbatt_filt_C = MyBattModel->temp_c();
     }
     boolean sat_model = is_sat(Tbatt_filt_C, MyBattModel->voc());
-    CcModel.soc = CcModel.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, sat_model);
-    CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model);
+    CcModel.soc = CcModel.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, sat_model, rp.t_last_model);
+    CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model, &rp.t_last_model);
     Sen->Voc = MyBattModel->voc();
     rp.duty = MyBattModel->calc_inj_duty(now, rp.type, rp.amp, rp.freq);
     // Over-ride Ishunt, Vbatt and Tbatt with model when running tests.  rp.modeling should never be set in use
@@ -386,8 +386,8 @@ void loop()
     cp.soc_ekf = MyBatt->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T), Sen->saturated);
     cp.SOC_ekf = cp.soc_ekf*100.*Cc.q_capacity/Cc.q_cap;
     Sen->saturated = SatDebounce->calculate(is_sat(Tbatt_filt_C, MyBatt->voc()), reset);
-    Cc.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated);
-    Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat);
+    Cc.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated, rp.t_last);
+    Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat, &rp.t_last);
     MyBatt->calculate_charge_time(Tbatt_filt_C, Sen->Ishunt, rp.delta_q, rp.t_sat, rp.q_sat, Cc.soc);
 
     

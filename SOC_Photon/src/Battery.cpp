@@ -107,22 +107,27 @@ double CoulombCounter::calculate_saturation_charge(const double t_sat_, const do
 }
 
 // Count coulombs based on true=actual capacity
-double CoulombCounter::count_coulombs(const double dt_, const double temp_c_, const double charge_curr_, const boolean sat_)
+double CoulombCounter::count_coulombs(const double dt_, const double temp_c_, const double charge_curr_, const boolean sat_, const double t_last_)
 {
     /* Count coulombs based on true=actual capacity
     Inputs:
-        dt              Integration step, s
-        charge_curr     Charge, A
-        sat             Indicator that battery is saturated (VOC>threshold(temp)), T/F
+        dt_             Integration step, s
+        temp_c_         Battery temperature, deg C
+        charge_curr_    Charge, A
+        sat_            Indicator that battery is saturated (VOC>threshold(temp)), T/F
+        tlast_          Past value of battery temperature used for rate limit memory, deg C
     */
-    q_capacity = q_sat*(1. - DQDT*(temp_c_ - t_sat));
     double d_delta_q_ = charge_curr_ * dt_;
+    t_last = t_last_;
+
+    // Rate limit temperature
+    double temp_lim = t_last + max(min( (temp_c_-t_last), t_rat*dt_), -t_rat*dt_);
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
     // TODO:   should we just use q_sat all the time in soc calculation?  (Memory behavior causes problems with saturation
     // detection).
+    if ( false )    // TODO:  BatteryModel needs to use something different than Battery.  TODO:  add CoulombCounter to Battery and separate BatteryModel
     // if ( sat_ )
-    if ( false )
     {
         if ( d_delta_q_ > 0 )
         {
@@ -130,41 +135,47 @@ double CoulombCounter::count_coulombs(const double dt_, const double temp_c_, co
             if ( !resetting ) delta_q = 0.;
             else resetting = false;     // one pass flag.  Saturation debounce should reset next pass
         }
-        t_sat = temp_c_;
-        q_sat = ((t_sat - t_rated)*DQDT + 1.)*q_cap;
-        q_capacity = q_sat;
+        t_sat = temp_c_;  // TODO:  not used
+        q_sat = ((t_sat - t_rated)*DQDT + 1.)*q_cap; // TODO:  not used
     }
 
     // Integration
-    delta_q = max(min(delta_q + d_delta_q_, 1.1*(q_cap - q_capacity)), -q_capacity);
+    q_capacity = q_cap*(1. + DQDT*(temp_lim - t_rated));
+    delta_q = max(min(delta_q + d_delta_q_ - DQDT*q_capacity*(temp_lim-t_last), 1.1*(q_cap - q_capacity)), -q_capacity);
+    q = q_capacity + delta_q;
 
     // Normalize
-    soc = (q_capacity + delta_q) / q_capacity;
-    SOC = (q_capacity + delta_q) / nom_q_cap * 100.;
+    soc = q / q_capacity;
+    SOC = q / nom_q_cap * 100;
 
     if ( rp.debug==76 )
-        Serial.printf("CoulombCounter::count_coulombs:  voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc,SOC,       %7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%9.1f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c_), sat_, charge_curr_, d_delta_q_, delta_q, q_sat, t_sat, q_capacity, soc, SOC);
+        Serial.printf("CoulombCounter::count_coulombs:,  dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, tsat,q_capacity,soc,SOC,       %7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%9.1f,%7.3f,%7.3f,\n",
+                    dt_,cp.pubList.VOC,  sat_voc(temp_c_), temp_lim, sat_, charge_curr_, d_delta_q_, delta_q, q, t_sat, q_capacity, soc, SOC);
     if ( rp.debug==-76 )
-        Serial.printf("voc, v_sat, sat, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc, SOC,          \n%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%9.1f,%7.3f,%7.3f,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c_), sat_, charge_curr_, d_delta_q_, delta_q, q_sat, t_sat, q_capacity, soc, SOC);
+        Serial.printf("voc, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, q_sat, tsat,q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%9.1f,%7.3f,%7.3f,\n",
+                    cp.pubList.VOC,  sat_voc(temp_c_), temp_lim, sat_, charge_curr_, d_delta_q_, delta_q, q, t_sat, q_capacity, soc, SOC);
+
+    // Save and return
+    t_last = temp_lim;
     return ( soc );
 }
 
 // Load states from retained memory
-void CoulombCounter::load(const double delta_q_, const double t_sat_, const double q_sat_)
+void CoulombCounter::load(const double delta_q_, const double t_sat_, const double q_sat_, const double t_last_)
 {
     delta_q = delta_q_;
     t_sat = t_sat_;
     q_sat = q_sat_;
+    t_last = t_last_;
 }
 
 // Update states to be saved in retained memory
-void CoulombCounter::update(double *delta_q_, double *t_sat_, double *q_sat_)
+void CoulombCounter::update(double *delta_q_, double *t_sat_, double *q_sat_, double *t_last_)
 {
     *delta_q_ = delta_q;
     *t_sat_ = t_sat;
     *q_sat_ = q_sat;
+    *t_last_ = t_last;
 }
 
 
