@@ -35,8 +35,6 @@
 extern CommandPars cp;            // Various parameters to be common at system level (reset on PLC reset)
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;     // Time Blynk events
 extern BlynkParticle Blynk;
-extern CoulombCounter Cc;
-extern CoulombCounter CcModel;
 
 // Publish1 Blynk
 void publish1(void)
@@ -166,10 +164,10 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->curr_sel_amp = rp.curr_sel_amp;
   pubList->amp_hrs_remaining = MyBatt->amp_hrs_remaining();
   pubList->amp_hrs_remaining_ekf = MyBatt->amp_hrs_remaining_ekf();
-  pubList->soc_model = CcModel.soc;
+  pubList->soc_model = MyBattModel->soc();
   pubList->soc_ekf = cp.soc_ekf;
-  pubList->soc = Cc.soc;
-  pubList->SOC_model = CcModel.SOC;
+  pubList->soc = MyBatt->soc();
+  pubList->SOC_model = MyBattModel->SOC();
   pubList->SOC_ekf = cp.SOC_ekf;
-  pubList->SOC = Cc.SOC;
+  pubList->SOC = MyBatt->SOC();
 }

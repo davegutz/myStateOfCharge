@@ -31,9 +31,8 @@
 
 extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
-extern CoulombCounter Cc;       // Remember state of charge
-extern CoulombCounter CcModel;  // Remember state of charge for model
 
+// Time synchro for web information
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip)
 {
   if (now - *last_sync > ONE_DAY_MILLIS) 
@@ -429,9 +428,9 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
           case ( 'c' ):
             scale = cp.input_string.substring(2).toFloat();
             rp.s_cap = scale;
-            Serial.printf("CcModel.q_cap scaled by %7.3f from %7.3f to ", scale, CcModel.q_cap);
-            CcModel.apply_cap_scale(scale);
-            Serial.printf("%7.3f\n", CcModel.q_cap);
+            Serial.printf("MyBattModel.q_cap_rated scaled by %7.3f from %7.3f to ", scale, MyBattModel->q_cap_rated());
+            MyBattModel->apply_cap_scale(scale);
+            Serial.printf("%7.3f\n", MyBattModel->q_cap_rated());
             break;
           case ( 'r' ):
             scale = cp.input_string.substring(2).toFloat();
@@ -462,34 +461,26 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         SOCS_in = cp.input_string.substring(1).toFloat();
         if ( SOCS_in<1.1 )  // TODO:  rationale for this?
         {
-          Cc.apply_soc(SOCS_in);
           MyBatt->apply_soc(SOCS_in);
-          CcModel.apply_delta_q(Cc.delta_q);
           MyBattModel->apply_soc(SOCS_in);
-          Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat, &rp.t_last);
-          // MyBatt->update(&rp.delta_q, &rp.t_last);
-          CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model, &rp.t_last_model);
-          // MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
-          MyBatt->init_soc_ekf(Cc.soc);
+          MyBatt->update(&rp.delta_q, &rp.t_last);
+          MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
+          MyBatt->init_soc_ekf(MyBatt->soc());
           Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
-                          Cc.SOC, Cc.soc, rp.delta_q, CcModel.SOC, CcModel.soc, rp.delta_q_model, MyBatt->soc_ekf());
+              MyBatt->SOC(), MyBatt->soc(), rp.delta_q, MyBattModel->SOC(), MyBattModel->soc(), rp.delta_q_model, MyBatt->soc_ekf());
         }
         else
           Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'M' instead of 'm'?\n", SOCS_in);
         break;
       case ( 'M' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
-        Cc.apply_SOC(SOCS_in);
         MyBatt->apply_SOC(SOCS_in);
-        CcModel.apply_delta_q(Cc.delta_q);
         MyBattModel->apply_SOC(SOCS_in);
-        Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat, &rp.t_last);
-        // MyBatt->update(&rp.delta_q, &rp.t_last);
-        CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model, &rp.t_last_model);
-        // MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
-        MyBatt->init_soc_ekf(Cc.soc);
+        MyBatt->update(&rp.delta_q, &rp.t_last);
+        MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
+        MyBatt->init_soc_ekf(MyBatt->soc());
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
-                        Cc.SOC, Cc.soc, rp.delta_q, CcModel.SOC, CcModel.soc, rp.delta_q_model, MyBatt->soc_ekf());
+            MyBatt->SOC(), MyBatt->soc(), rp.delta_q, MyBattModel->SOC(), MyBattModel->soc(), rp.delta_q_model, MyBatt->soc_ekf());
         break;
       case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
@@ -688,7 +679,7 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt, BatteryModel *batt_
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.println("    : delta T adder to sensed Tbatt, deg C [0]"); 
   Serial.printf("  Dv= "); Serial.print(batt_model->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
-  Serial.printf("  Sc= "); Serial.print(CcModel.q_cap/Cc.q_cap); Serial.println("    : Scalar battery model size"); 
+  Serial.printf("  Sc= "); Serial.print(batt_model->q_capacity()/batt->q_capacity()); Serial.println("    : Scalar battery model size"); 
   Serial.printf("  Sr= "); Serial.print(batt_model->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("  Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println("    : Saturation of model cutback gain scalar"); 
   Serial.printf("T<?>=  "); 
@@ -883,11 +874,11 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     ib_ = min(curr_in, sat_ib_max_);
     model_saturated_ = (voc_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
 
+    if ( rp.debug==78 )Serial.printf("BatteryModel::calculate:,  dt,tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+     dt,temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
     if ( rp.debug==-78 ) Serial.printf("SOC/10,soc*10,voc,vsat,curr_in,sat_ib_max_,ib,sat,\n%7.3f, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
       SOC/10, soc*10, voc_, vsat_, curr_in, sat_ib_max_, ib_, model_saturated_);
 
-    if ( rp.debug==79 )Serial.printf("BatteryModel::calculate:,  dt,tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-     dt,temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
 
     return ( vb_ );
 }

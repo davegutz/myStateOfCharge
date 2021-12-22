@@ -32,12 +32,8 @@ struct RetainedPars
 {
   int8_t debug = 2;         // Level of debug printing
   double delta_q = -0.5;    // Coulomb Counter state for ekf, (-1 - 1)
-  double t_sat = 25.;       // Battery temperature at saturation, deg C
-  double q_sat = 360000;    // Battery charge at saturation, Ah
   double t_last = 25.;      // Battery temperature past value for rate limit memory, deg C
   double delta_q_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
-  double t_sat_model = 25.; // Battery temperature at saturation of model, deg C
-  double q_sat_model = 360000; // Battery charge at saturation for model, Ah
   double t_last_model = 25.;  // Battery temperature past value for rate limit memory, deg C
   double curr_bias_amp = -1.; // Calibrate amp current sensor, A 
   double curr_bias_noamp = -0.13; // Calibrate non-amplified current sensor, A 
