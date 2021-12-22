@@ -966,7 +966,7 @@ double BatteryModel::count_coulombs(const double dt, const double temp_c, const 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
     // detection).
     boolean model_sat = sat_ && d_delta_q > 0 && ib_cutback_ > 0.1 && charge_curr < 0.5;
-    Serial.printf("sat,d_delta_q,ib_cutback,charge_curr,model_sat=%d,%7.3f,%7.3f,%7.3f,%d\n", sat_, d_delta_q, ib_cutback_, charge_curr, model_sat);
+    // Serial.printf("sat,d_delta_q,ib_cutback,charge_curr,model_sat=%d,%7.3f,%7.3f,%7.3f,%d\n", sat_, d_delta_q, ib_cutback_, charge_curr, model_sat);
     if ( model_sat )
     {
       d_delta_q = 0.;
