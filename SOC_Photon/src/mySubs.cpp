@@ -193,7 +193,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   Sen->Ishunt_noamp_cal = Sen->Vshunt_noamp*shunt_noamp_v2a_s + Sen->curr_bias_noamp;
 
   // Print results
-  if ( rp.debug==-14 ) Serial.printf("reset_free,select,   vs_na_int,0_na_int,1_na_int,vshunt_na,ishunt_na, ||, vshunt_a_int,0_a_int,1_a_int,vshunt_a,ishunt_a,  Ishunt_filt,T, %d,%d,%d,%d,%d,%7.3f,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+  if ( rp.debug==14 ) Serial.printf("reset_free,select,   vs_na_int,0_na_int,1_na_int,vshunt_na,ishunt_na, ||, vshunt_a_int,0_a_int,1_a_int,vshunt_a,ishunt_a,  Ishunt_filt,T, %d,%d,%d,%d,%d,%7.3f,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n",
     reset_free, rp.curr_sel_amp,
     Sen->Vshunt_noamp_int, vshunt_noamp_int_0, vshunt_noamp_int_1, Sen->Vshunt_noamp, Sen->Ishunt_noamp_cal,
     Sen->Vshunt_amp_int, vshunt_amp_int_0, vshunt_amp_int_1, Sen->Vshunt_amp, Sen->Ishunt_amp_cal,
@@ -224,7 +224,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
     Sen->shunt_v2a_s = shunt_amp_v2a_s; // amp preferred, default to that
   }
   if ( rp.debug==51 )
-    Serial.printf("soc,sat,    VOC,v_sat,   ib, adder,%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,\n", Cc.soc, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat);
+    Serial.printf("soc,sat,    VOC,v_sat,   ib, adder,    T,%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,  %7.3f,\n", Cc.soc, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat, T);
   if ( rp.debug==-51 )
     Serial.printf("soc,sat,    VOC,v_sat,   ib, adder,\n%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,\n", Cc.soc, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat);
 
@@ -234,7 +234,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   double vbatt_free =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A) + rp.vbatt_bias;
   if ( rp.modeling ) Sen->Vbatt = Sen->Vbatt_model;
   else Sen->Vbatt = SdVbatt->update(vbatt_free, reset_free);
-  if ( rp.debug==-15 ) Serial.printf("reset_free,vbatt_free,vbatt, %d,%7.3f,%7.3f\n", reset_free, vbatt_free, Sen->Vbatt);
+  if ( rp.debug==15 ) Serial.printf("reset_free,vbatt_free,vbatt,T, %d,%7.3f,%7.3f,%7.3f,\n", reset_free, vbatt_free, Sen->Vbatt, T);
 
   // Vector model
   static double elapsed_loc = 0.;
@@ -256,7 +256,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   Sen->Wshunt = Sen->Vbatt*Sen->Ishunt;
   Sen->Wcharge = Sen->Ishunt * NOM_SYS_VOLT;
 
-  if ( rp.debug==-6 ) Serial.printf("cp.vectoring,reset_free,cp.vec_start,now,elapsed_loc,Vbatt,Ishunt,Tbatt:  %d,%d,%ld, %ld,%7.3f,%7.3f,%7.3f,%7.3f\n", cp.vectoring, reset_free, cp.vec_start, now, elapsed_loc, Sen->Vbatt, Sen->Ishunt, Sen->Tbatt);
+  if ( rp.debug==6 ) Serial.printf("cp.vectoring,reset_free,cp.vec_start,now,elapsed_loc,Vbatt,Ishunt,Tbatt,T,    %d,%d,%ld, %ld,%7.3f,%7.3f,%7.3f,%7.3f, %7.3f\n", cp.vectoring, reset_free, cp.vec_start, now, elapsed_loc, Sen->Vbatt, Sen->Ishunt, Sen->Tbatt, T);
 }
 
 // Filter temperature only
@@ -472,12 +472,16 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         break;
       case ( 'm' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
-        if ( SOCS_in<1.1 )
+        if ( SOCS_in<1.1 )  // TODO:  rationale for this?
         {
           Cc.apply_soc(SOCS_in);
+          MyBatt->apply_soc(SOCS_in);
           CcModel.apply_delta_q(Cc.delta_q);
+          MyBattModel->apply_soc(SOCS_in);
           Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat, &rp.t_last);
+          // MyBatt->update(&rp.delta_q, &rp.t_last);
           CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model, &rp.t_last_model);
+          // MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
           MyBatt->init_soc_ekf(Cc.soc);
           Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
                           Cc.SOC, Cc.soc, rp.delta_q, CcModel.SOC, CcModel.soc, rp.delta_q_model, MyBatt->soc_ekf());
@@ -488,9 +492,13 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
       case ( 'M' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
         Cc.apply_SOC(SOCS_in);
+        MyBatt->apply_SOC(SOCS_in);
         CcModel.apply_delta_q(Cc.delta_q);
+        MyBattModel->apply_SOC(SOCS_in);
         Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat, &rp.t_last);
+        // MyBatt->update(&rp.delta_q, &rp.t_last);
         CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model, &rp.t_last_model);
+        // MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
         MyBatt->init_soc_ekf(Cc.soc);
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
                         Cc.SOC, Cc.soc, rp.delta_q, CcModel.SOC, CcModel.soc, rp.delta_q_model, MyBatt->soc_ekf());
@@ -866,8 +874,8 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     // VOC-OCV model
     double log_soc, exp_n_soc, pow_log_soc;
     calc_soc_voc_coeff(soc_lim, temp_C, &b_, &a_, &c_, &log_soc, &exp_n_soc, &pow_log_soc);
-    voc_ = calc_soc_voc(soc_lim, &dv_dsoc_, b_, a_, c_, log_soc, exp_n_soc, pow_log_soc)
-             + (soc - soc_lim) * dv_dsoc_;  // slightly beyond
+    voc_ = calc_soc_voc(soc_lim, &dv_dsoc_, b_, a_, c_, log_soc, exp_n_soc, pow_log_soc);
+    voc_ = min(voc_ + (soc - soc_lim) * dv_dsoc_, max_voc);  // slightly beyond but don't windup
     voc_ +=  dv_;  // Experimentally varied
 
     // Dynamic emf
@@ -887,8 +895,8 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     if ( rp.debug==-78 ) Serial.printf("SOC/10,soc*10,voc,vsat,curr_in,ib_cutback,ib,\n%7.3f, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
       SOC/10, soc*10, voc_, vsat_, curr_in, ib_cutback_, ib_);
 
-    if ( rp.debug==79 )Serial.printf("calculate_model:  tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-     temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
+    if ( rp.debug==79 )Serial.printf("BatteryModel::calculate:,  dt,tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+     dt,temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
 
     return ( vb_ );
 }
@@ -950,22 +958,20 @@ double BatteryModel::count_coulombs(const double dt, const double temp_c, const 
     */
     double d_delta_q = charge_curr * dt;
     t_last_ = t_last;
+    sat_ = sat;
 
     // Rate limit temperature
     double temp_lim = t_last_ + max(min( (temp_c-t_last_), t_rlim_*dt), -t_rlim_*dt);
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
-    // TODO:   should we just use q_sat all the time in soc calculation?  (Memory behavior causes problems with saturation
     // detection).
-    if ( false )    // TODO:  BatteryModel needs to use something different than Battery.  TODO:  add Coulombs to Battery and separate BatteryModel
-    // if ( sat_ )
+    boolean model_sat = sat_ && d_delta_q > 0 && ib_cutback_ > 0.1 && charge_curr < 0.5;
+    Serial.printf("sat,d_delta_q,ib_cutback,charge_curr,model_sat=%d,%7.3f,%7.3f,%7.3f,%d\n", sat_, d_delta_q, ib_cutback_, charge_curr, model_sat);
+    if ( model_sat )
     {
-        if ( d_delta_q > 0 )
-        {
-            d_delta_q = 0.;
-            if ( !resetting_ ) delta_q_ = 0.;
-            else resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass
-        }
+      d_delta_q = 0.;
+      if ( !resetting_ ) delta_q_ = 0.;
+      else resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass
     }
 
     // Integration
@@ -978,11 +984,11 @@ double BatteryModel::count_coulombs(const double dt, const double temp_c, const 
     SOC_ = q_ / q_cap_rated_ * 100;
 
     if ( rp.debug==97 )
-        Serial.printf("Coulombs::count_coulombs:,  dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,       %7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%9.1f,%7.3f,\n",
-                    dt,cp.pubList.VOC,  sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
+        Serial.printf("BatteryModel::cc,  dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,  model_sat,      %7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,%d,\n",
+                    dt,cp.pubList.VOC,  sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_, model_sat);
     if ( rp.debug==-97 )
-        Serial.printf("voc, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%9.1f,%7.3f,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
+        Serial.printf("voc, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,  model_sat          \n%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,%d,\n",
+                    cp.pubList.VOC,  sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_, model_sat);
 
     // Save and return
     t_last_ = temp_lim;

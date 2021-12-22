@@ -97,8 +97,7 @@ double Coulombs::count_coulombs(const double dt, const double temp_c, const doub
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
     // TODO:   should we just use q_sat all the time in soc calculation?  (Memory behavior causes problems with saturation
     // detection).
-    if ( false )    // TODO:  BatteryModel needs to use something different than Battery.  TODO:  add Coulombs to Battery and separate BatteryModel
-    // if ( sat_ )
+    if ( sat )
     {
         if ( d_delta_q > 0 )
         {
@@ -118,10 +117,10 @@ double Coulombs::count_coulombs(const double dt, const double temp_c, const doub
     SOC_ = q_ / q_cap_rated_ * 100;
 
     if ( rp.debug==96 )
-        Serial.printf("Coulombs::count_coulombs:,  dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,       %7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%9.1f,%7.3f,\n",
+        Serial.printf("Coulombs::cc,                 dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,       %7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,\n",
                     dt,cp.pubList.VOC,  sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
     if ( rp.debug==-96 )
-        Serial.printf("voc, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%9.1f,%7.3f,\n",
+        Serial.printf("voc, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,\n",
                     cp.pubList.VOC,  sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
 
     // Save and return
