@@ -158,13 +158,6 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   Sen->curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.offset;
   Sen->curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.offset;
 
-  // TODO: move this to BatteryModel::
-  // Anti-windup used to bias current below (only when modeling)
-  double s_sat = 0.;
-  if ( rp.modeling && Sen->Wshunt > 0. && Sen->saturated )
-      s_sat = max(Sen->Voc - sat_voc(Sen->Tbatt), 0.) / NOM_SYS_VOLT * RATED_BATT_CAP * sat_gain;
-  s_sat = 0;
-
   // Read Sensors
   // ADS1015 conversion
   // Amp
@@ -223,11 +216,6 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
     Sen->curr_bias = 0.;
     Sen->shunt_v2a_s = shunt_amp_v2a_s; // amp preferred, default to that
   }
-  if ( rp.debug==51 )
-    Serial.printf("soc,sat,    VOC,v_sat,   ib, adder,    T,%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,  %7.3f,\n", Cc.soc, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat, T);
-  if ( rp.debug==-51 )
-    Serial.printf("soc,sat,    VOC,v_sat,   ib, adder,\n%7.3f,%d,   %7.3f,%7.3f,    %7.3f,%7.3f,\n", Cc.soc, Sen->saturated, Sen->Voc, sat_voc(Sen->Tbatt), Sen->Ishunt, s_sat);
-
 
   // Vbatt
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
@@ -453,7 +441,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
           case ( 'k' ):
             scale = cp.input_string.substring(2).toFloat();
             rp.cutback_gain_scalar = scale;
-            Serial.printf("rp.cutback_gain_scalar set to %7.3f", rp.cutback_gain_scalar);
+            Serial.printf("rp.cutback_gain_scalar set to %7.3f\n", rp.cutback_gain_scalar);
             break;
         }
         break;
@@ -857,7 +845,10 @@ BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const doubl
     Sin_inj_ = new SinInj();
     Sq_inj_ = new SqInj();
     Tri_inj_ = new TriInj();
-    cutback_gain_ = 15.;
+    sat_ib_null_ = 0.1 * RATED_BATT_CAP; // 0.1C discharge rate at sat_ib_null_, A
+    sat_cutback_gain_ = 4.8;  // 0.1C sat_ib_null_ and  voc_ 0.3 volts beyond vsat_
+    model_saturated_ = false;
+    ib_sat_ = 0.5;  // If smaller, takes forever to saturate the model.
 
 }
 
@@ -888,12 +879,12 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
 
     // Saturation logic
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
-    ib_cutback_ = max(min((voc_ - vsat_) / nom_vsat_ * q_capacity / 3600. * cutback_gain_ * rp.cutback_gain_scalar,
-                    curr_in), 0.);
-    ib_ = min(curr_in, curr_in - ib_cutback_);
+    sat_ib_max_ = sat_ib_null_ + (vsat_ - voc_) / nom_vsat_ * q_capacity / 3600. * sat_cutback_gain_ * rp.cutback_gain_scalar;
+    ib_ = min(curr_in, sat_ib_max_);
+    model_saturated_ = (voc_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
 
-    if ( rp.debug==-78 ) Serial.printf("SOC/10,soc*10,voc,vsat,curr_in,ib_cutback,ib,\n%7.3f, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
-      SOC/10, soc*10, voc_, vsat_, curr_in, ib_cutback_, ib_);
+    if ( rp.debug==-78 ) Serial.printf("SOC/10,soc*10,voc,vsat,curr_in,sat_ib_max_,ib,sat,\n%7.3f, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
+      SOC/10, soc*10, voc_, vsat_, curr_in, sat_ib_max_, ib_, model_saturated_);
 
     if ( rp.debug==79 )Serial.printf("BatteryModel::calculate:,  dt,tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      dt,temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
@@ -946,7 +937,7 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
 }
 
 // Count coulombs based on true=actual capacity
-double BatteryModel::count_coulombs(const double dt, const double temp_c, const double charge_curr, const boolean sat, const double t_last)
+double BatteryModel::count_coulombs(const double dt, const double temp_c, const double charge_curr, const double t_last)
 {
     /* Count coulombs based on true=actual capacity
     Inputs:
@@ -958,16 +949,15 @@ double BatteryModel::count_coulombs(const double dt, const double temp_c, const 
     */
     double d_delta_q = charge_curr * dt;
     t_last_ = t_last;
-    sat_ = sat;
 
     // Rate limit temperature
     double temp_lim = t_last_ + max(min( (temp_c-t_last_), t_rlim_*dt), -t_rlim_*dt);
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
     // detection).
-    boolean model_sat = sat_ && d_delta_q > 0 && ib_cutback_ > 0.1 && charge_curr < 0.5;
-    // Serial.printf("sat,d_delta_q,ib_cutback,charge_curr,model_sat=%d,%7.3f,%7.3f,%7.3f,%d\n", sat_, d_delta_q, ib_cutback_, charge_curr, model_sat);
-    if ( model_sat )
+    // TODO delete this boolean model_sat = sat_ && d_delta_q > 0 && sat_ib_max_ > 0.1 && charge_curr < 0.5;  // TODO:  is this robust to diff charge currents?
+    // Serial.printf("sat,d_delta_q,ib_cutback,charge_curr,model_sat=%d,%7.3f,%7.3f,%7.3f,%d\n", sat_, d_delta_q, sat_ib_max_, charge_curr, model_sat);
+    if ( model_saturated_ )
     {
       d_delta_q = 0.;
       if ( !resetting_ ) delta_q_ = 0.;
@@ -984,11 +974,11 @@ double BatteryModel::count_coulombs(const double dt, const double temp_c, const 
     SOC_ = q_ / q_cap_rated_ * 100;
 
     if ( rp.debug==97 )
-        Serial.printf("BatteryModel::cc,  dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,  model_sat,      %7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,%d,\n",
-                    dt,cp.pubList.VOC,  sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_, model_sat);
+        Serial.printf("BatteryModel::cc,  dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,      %7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,\n",
+                    dt,cp.pubList.VOC,  sat_voc(temp_c), temp_lim, model_saturated_, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
     if ( rp.debug==-97 )
-        Serial.printf("voc, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,  model_sat          \n%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,%d,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_, model_sat);
+        Serial.printf("voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,\n",
+                    cp.pubList.VOC,  sat_voc(temp_c), temp_lim, model_saturated_, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
 
     // Save and return
     t_last_ = temp_lim;

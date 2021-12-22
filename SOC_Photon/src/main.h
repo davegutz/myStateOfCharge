@@ -363,7 +363,7 @@ void loop()
     boolean sat_model = is_sat(Tbatt_filt_C, MyBattModel->voc());
     CcModel.soc = CcModel.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, sat_model, rp.t_last_model);
     CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model, &rp.t_last_model);
-    MyBattModel->count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, sat_model, rp.t_last_model);
+    MyBattModel->count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, rp.t_last_model);
     double delta_q_model, t_last_model;
     MyBattModel->update(&delta_q_model, &t_last_model);
     Sen->Voc = MyBattModel->voc();

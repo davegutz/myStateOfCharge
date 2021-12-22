@@ -76,7 +76,7 @@ const double n_bb = 0.4;
 const double mxeps_bb = 1-1e-6;     // Numerical maximum of coefficient model with scaled soc.
 const double mneps_bb = 1e-6;       // Numerical minimum of coefficient model without scaled soc.
 const double dvoc_dt = BATT_DVOC_DT * double(batt_num_cells);
-const double sat_gain = 10;         // Multiplier on saturation anti-windup
+const double sat_cutback_gain = 10;         // Multiplier on saturation anti-windup
 
 // Charge test profiles
 #define NUM_VEC           1   // Number of vectors defined here
