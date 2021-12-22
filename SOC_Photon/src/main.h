@@ -392,10 +392,15 @@ void loop()
     cp.SOC_ekf = cp.soc_ekf*100.*Cc.q_capacity/Cc.q_cap;
     Sen->saturated = SatDebounce->calculate(is_sat(Tbatt_filt_C, MyBatt->voc()), reset);
     Cc.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated, rp.t_last);
+    double delta_q, t_last;
+    MyBatt->update(&delta_q, &t_last);
     Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat, &rp.t_last);
     MyBatt->count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated, rp.t_last);
     // MyBatt->update(&rp.delta_q, &rp.t_last);
     MyBatt->calculate_charge_time(Cc.q, Cc.q_capacity, Sen->Ishunt, Cc.soc);
+
+    if ( rp.debug==0 ) Serial.printf("rp.delta_q, delta_q, rp.t_last, t_last:, %7.3f,%7.3f,%7.3f,%7.3f,\n",
+      rp.delta_q, delta_q, rp.t_last, t_last);
 
     
     // Useful for Arduino plotting
