@@ -57,6 +57,8 @@ const double batt_r2c2 = double(BATT_R2C2);// Battery Randels dynamic term, Ohms
                               // though probably not for an individual cell
 const double batt_c2 = double(BATT_R2C2)/batt_r2;
 const double nom_q_cap = RATED_BATT_CAP * 3600;   // Nominal battery capacity, C
+const double q_cap_rated = RATED_BATT_CAP * 3600;   // Nominal battery capacity, C;
+const double t_rlim = 2.5;    // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C / s
 
 // Battery model LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang etal.pdf'
 // SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope constraint
@@ -94,7 +96,8 @@ public:
   Battery();
   Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
-    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt);
+    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
+    const double q_cap_rated, const double t_rated, const double t_rlim);
   ~Battery();
   // operators
   // functions

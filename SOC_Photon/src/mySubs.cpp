@@ -815,8 +815,9 @@ String time_long_2_str(const unsigned long current_time, char *tempStr)
 BatteryModel::BatteryModel() : Battery() {}
 BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
-    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt) :
-    Battery(x_tab, b_tab, a_tab, c_tab, m, n, d, nz, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt)
+    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
+    const double q_cap_rated, const double t_rated, const double t_rlim) :
+    Battery(x_tab, b_tab, a_tab, c_tab, m, n, d, nz, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim)
 {
     // Randles dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery

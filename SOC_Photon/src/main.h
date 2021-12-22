@@ -234,10 +234,10 @@ void loop()
   // Battery  models
   // Free, driven by soc
   static Battery *MyBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
-    batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
+    batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim);
   // Model, driven by soc, used to get Vbatt.   Use Talk 'x' to toggle model on/off. 
   static BatteryModel *MyBattModel = new BatteryModel(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
-    batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt);
+    batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim);
 
   // Battery saturation
   static Debounce *SatDebounce = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
@@ -364,7 +364,8 @@ void loop()
     CcModel.soc = CcModel.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, sat_model, rp.t_last_model);
     CcModel.update(&rp.delta_q_model, &rp.t_sat_model, &rp.q_sat_model, &rp.t_last_model);
     MyBattModel->count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, sat_model, rp.t_last_model);
-    MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
+    double delta_q_model, t_last_model;
+    MyBattModel->update(&delta_q_model, &t_last_model);
     Sen->Voc = MyBattModel->voc();
     rp.duty = MyBattModel->calc_inj_duty(now, rp.type, rp.amp, rp.freq);
     // Over-ride Ishunt, Vbatt and Tbatt with model when running tests.  rp.modeling should never be set in use
@@ -374,7 +375,9 @@ void loop()
       Sen->Vbatt = MyBattModel->vb();
       Tbatt_filt_C = MyBattModel->temp_c();
     }
-    
+    if ( rp.debug==0 ) Serial.printf("rp.delta_q_model, delta_q_model, rp.t_last_model, t_last_model:, %7.3f,%7.3f,%7.3f,%7.3f,\n",
+      rp.delta_q_model, delta_q_model, rp.t_last_model, t_last_model);
+
     // Main Battery
     //  Inputs:
     //    Sen->Ishunt     A
@@ -391,7 +394,7 @@ void loop()
     Cc.count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated, rp.t_last);
     Cc.update(&rp.delta_q, &rp.t_sat, &rp.q_sat, &rp.t_last);
     MyBatt->count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated, rp.t_last);
-    MyBatt->update(&rp.delta_q, &rp.t_last);
+    // MyBatt->update(&rp.delta_q, &rp.t_last);
     MyBatt->calculate_charge_time(Cc.q, Cc.q_capacity, Sen->Ishunt, Cc.soc);
 
     
