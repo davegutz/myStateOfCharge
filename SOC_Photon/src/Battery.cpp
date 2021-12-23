@@ -145,6 +145,8 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     predict_ekf(ib);      // u = ib
     update_ekf(voc_dyn_, 0., 1., dt);   // z = voc_dyn
     soc_ekf_ = x_ekf();   // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
+    q_ekf_ = soc_ekf_ * q_capacity_;
+    SOC_ekf_ = q_ekf_ / q_cap_scaled_ * 100.;
 
     if ( rp.debug==34 )
         Serial.printf("dt,ib,voc_dyn,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
@@ -212,11 +214,12 @@ void Battery::ekf_model_update(double *hx, double *H)
 void Battery::init_soc_ekf(const double soc)
 {
     soc_ekf_ = soc;
-    q_sat_ = soc * nom_q_cap;
     init_ekf(soc_ekf_, 0.0);
+    q_ekf_ = soc_ekf_ * q_capacity_;
+    SOC_ekf_ = q_ekf_ / q_cap_scaled_ * 100.;
     if ( rp.debug==-34 )
     {
-        Serial.printf("init_soc_ekf:  soc_ekf_, x_ekf_ = %7.3f, %7.3f,\n", soc_ekf_, x_ekf());
+        Serial.printf("init_soc_ekf:  soc, soc_ekf_, x_ekf_ = %7.3f,%7.3f, %7.3f,\n", soc, soc_ekf_, x_ekf());
     }
 }
 

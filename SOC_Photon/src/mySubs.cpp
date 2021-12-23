@@ -223,33 +223,15 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   else Sen->Vbatt = SdVbatt->update(vbatt_free, reset_free);
   if ( rp.debug==15 ) Serial.printf("reset_free,vbatt_free,vbatt,T, %d,%7.3f,%7.3f,%7.3f,\n", reset_free, vbatt_free, Sen->Vbatt, T);
 
-  // Vector model
-  static double elapsed_loc = 0.;
-  if ( cp.vectoring )
-  {
-    if ( reset_free || (elapsed_loc > t_min_v1[n_v1-1]) )
-    {
-      cp.vec_start = now;
-    }
-    elapsed_loc = double(now - cp.vec_start)/1000./60.;
-    Sen->Ishunt =  I_T1->interp(elapsed_loc);
-    Sen->Vshunt = (Sen->Ishunt - Sen->curr_bias) / Sen->shunt_v2a_s;
-    Sen->Tbatt =  T_T1->interp(elapsed_loc);
-    Sen->Vbatt =  V_T1->interp(elapsed_loc) + Sen->Ishunt*(batt_r1 + batt_r2)*double(batt_num_cells);
-  }
-  else elapsed_loc = 0.;
-
   // Power calculation
   Sen->Wshunt = Sen->Vbatt*Sen->Ishunt;
   Sen->Wcharge = Sen->Ishunt * NOM_SYS_VOLT;
-
-  if ( rp.debug==6 ) Serial.printf("cp.vectoring,reset_free,cp.vec_start,now,elapsed_loc,Vbatt,Ishunt,Tbatt,T,    %d,%d,%ld, %ld,%7.3f,%7.3f,%7.3f,%7.3f, %7.3f\n", cp.vectoring, reset_free, cp.vec_start, now, elapsed_loc, Sen->Vbatt, Sen->Ishunt, Sen->Tbatt, T);
 }
 
 // Filter temperature only
 void filter_temp(int reset, Sensors *Sen, General2_Pole* TbattSenseFilt)
 {
-  int reset_loc = reset || cp.vectoring;
+  int reset_loc = reset;
 
   // Temperature
   Sen->Tbatt_filt = TbattSenseFilt->calculate(Sen->Tbatt, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + rp.t_bias;
@@ -259,7 +241,7 @@ void filter_temp(int reset, Sensors *Sen, General2_Pole* TbattSenseFilt)
 // Filter all other inputs
 void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFilt,  General2_Pole* IshuntSenseFilt)
 {
-  int reset_loc = reset || cp.vectoring;
+  int reset_loc = reset;
 
   // Shunt
   Sen->Ishunt_filt = IshuntSenseFilt->calculate( Sen->Ishunt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
@@ -341,7 +323,7 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner
   char dispString[21];
-  sprintf(dispString, "%3.0f %5.2f %5.1f", cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt_filt);
+  sprintf(dispString, "%3.0f %5.2f %5.1f", cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt);
   display->println(dispString);
 
   display->println(F(""));
@@ -381,8 +363,7 @@ uint32_t pwm_write(uint32_t duty, Pins *myPins)
 
 
 // Talk Executive
-void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num,
-  Battery *MyBatt, BatteryModel *MyBattModel)
+void talk(Battery *MyBatt, BatteryModel *MyBattModel)
 {
   double SOCS_in = -99.;
   double scale = 1.;
@@ -482,15 +463,35 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
             MyBatt->SOC(), MyBatt->soc(), rp.delta_q, MyBattModel->SOC(), MyBattModel->soc(), rp.delta_q_model, MyBatt->soc_ekf());
         break;
+      case ( 'n' ):
+        SOCS_in = cp.input_string.substring(1).toFloat();
+        if ( SOCS_in<1.1 )  // TODO:  rationale for this?
+        {
+          MyBattModel->apply_soc(SOCS_in);
+          MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
+          if ( rp.modeling )
+            MyBatt->init_soc_ekf(MyBatt->soc());
+          Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
+              MyBatt->SOC(), MyBatt->soc(), rp.delta_q, MyBattModel->SOC(), MyBattModel->soc(), rp.delta_q_model, MyBatt->soc_ekf());
+        }
+        else
+          Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'M' instead of 'm'?\n", SOCS_in);
+        break;
+      case ( 'N' ):
+        SOCS_in = cp.input_string.substring(1).toFloat();
+        MyBattModel->apply_SOC(SOCS_in);
+        MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
+        if ( rp.modeling )
+          MyBatt->init_soc_ekf(MyBatt->soc());
+        Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
+            MyBatt->SOC(), MyBatt->soc(), rp.delta_q, MyBattModel->SOC(), MyBattModel->soc(), rp.delta_q_model, MyBatt->soc_ekf());
+        break;
       case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
         Serial.printf("Signal selection (1=amp, 0=no amp) toggled to %d\n", rp.curr_sel_amp);
         break;
       case ( 'v' ):
         rp.debug = cp.input_string.substring(1).toInt();
-        break;
-      case ( 'T' ):
-        talkT(&cp.stepping, &cp.step_val, &cp.vectoring, &cp.vec_num);
         break;
       case ( 'w' ): 
         cp.enable_wifi = !cp.enable_wifi; // not remembered in rp. Photon reset turns this false.
@@ -622,7 +623,7 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
         }
         break;
       case ( 'h' ): 
-        talkH(&cp.step_val, &cp.vec_num, MyBatt, MyBattModel);
+        talkH(MyBatt, MyBattModel);
         break;
       default:
         Serial.print(cp.input_string.charAt(0)); Serial.println(" unknown.  Try typing 'h'");
@@ -633,43 +634,15 @@ void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_n
   }
 }
 
-// Talk Tranient Input Settings
-void talkT(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num)
-{
-  *stepping = false;
-  *vectoring = false;
-  int num_try = 0;
-  switch ( cp.input_string.charAt(1) )
-  {
-    case ( 's' ): 
-      *stepping = true;
-      *step_val = cp.input_string.substring(2).toFloat();
-      break;
-    case ( 'v' ):
-      num_try = cp.input_string.substring(2).toInt();
-      if ( num_try && num_try>0 && num_try<=NUM_VEC )
-      {
-        *vectoring = true;
-        *vec_num = num_try;
-      }
-      else
-      {
-        *vectoring = false;
-        *vec_num = 0;
-      }
-      break;
-    default:
-      Serial.print(cp.input_string); Serial.println(" unknown.  Try typing 'h'");
-  }
-}
-
 // Talk Help
-void talkH(double *step_val, int8_t *vec_num, Battery *batt, BatteryModel *batt_model)
+void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
 {
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
   Serial.printf("d   dump the summary log\n"); 
-  Serial.printf("m=  assign curve charge state in fraction to all versions including model- '(0-1)'\n"); 
+  Serial.printf("m=  assign curve charge state in fraction to all versions including model- '(0-1.1)'\n"); 
   Serial.printf("M=  assign a CHARGE state in percent to all versions including model- '('truncated 0-100')'\n"); 
+  Serial.printf("n=  assign curve charge state in fraction to model only (ekf if modeling)- '(0-1.1)'\n"); 
+  Serial.printf("N=  assign a CHARGE state in percent to model only (ekf if modeling)-- '('truncated 0-100')'\n"); 
   Serial.printf("s   curr signal select (1=amp preferred, 0=noamp) = "); Serial.println(rp.curr_sel_amp);
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("D/S<?> Adjustments.   For example:\n");
@@ -678,17 +651,10 @@ void talkH(double *step_val, int8_t *vec_num, Battery *batt, BatteryModel *batt_
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("    : delta I adder to all sensed shunt current, A [0]"); 
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.println("    : delta T adder to sensed Tbatt, deg C [0]"); 
-  Serial.printf("  Dv= "); Serial.print(batt_model->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
-  Serial.printf("  Sc= "); Serial.print(batt_model->q_capacity()/batt->q_capacity()); Serial.println("    : Scalar battery model size"); 
-  Serial.printf("  Sr= "); Serial.print(batt_model->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
+  Serial.printf("  Dv= "); Serial.print(MyBattModel->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
+  Serial.printf("  Sc= "); Serial.print(MyBattModel->q_capacity()/MyBatt->q_capacity()); Serial.println("    : Scalar battery model size"); 
+  Serial.printf("  Sr= "); Serial.print(MyBattModel->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("  Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println("    : Saturation of model cutback gain scalar"); 
-  Serial.printf("T<?>=  "); 
-  Serial.printf("T - Transient performed with input.   For example:\n");
-  Serial.printf("  Ts=<index>  :   index="); Serial.print(*step_val);
-  Serial.printf(", cp.stepping=");  Serial.println(cp.stepping);
-  Serial.printf("  Tv=<vec_num>  :  vec_num="); Serial.println(*vec_num);
-  Serial.printf("    ******Send Tv0 to cancel vector*****\n");
-  Serial.printf("   INFO:  cp.vectoringing=");  Serial.println(cp.vectoring);
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xx= "); Serial.printf("x   toggle model use of Vbatt = "); Serial.println(rp.modeling);

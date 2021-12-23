@@ -33,20 +33,20 @@ public:
   Sync(void);
   Sync(unsigned long delay);
   // Functions
-  bool update(bool reset, unsigned long now, bool andCheck);
-  bool update(unsigned long now, bool reset, bool andCheck);
-  bool update(unsigned long now, bool reset);
-  bool updateN(unsigned long now, bool reset, bool orCheck);
+  boolean update(boolean reset, unsigned long now, boolean andCheck);
+  boolean update(unsigned long now, boolean reset, boolean andCheck);
+  boolean update(unsigned long now, boolean reset);
+  boolean updateN(unsigned long now, boolean reset, boolean orCheck);
   unsigned long delay() { return(delay_); };
   unsigned long last() { return(last_); };
-  bool stat() { return(stat_); };
+  boolean stat() { return(stat_); };
   double updateTime() { return(updateTime_); };
   unsigned long now() { return(now_); };
 private:
   unsigned long delay_;
   unsigned long last_;
   unsigned long now_;
-  bool stat_;
+  boolean stat_;
   unsigned long updateDiff_;
   double updateTime_;
 };

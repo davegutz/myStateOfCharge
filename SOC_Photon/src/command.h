@@ -35,22 +35,10 @@ struct CommandPars
   Publish pubList;          // Publish object
   String input_string;      // a string to hold incoming data
   boolean string_complete;  // whether the string is complete
-  boolean stepping;         // active step adder
-  double step_val;          // Step size
-  boolean vectoring;        // Active battery test vector
-  int8_t vec_num;           // Active vector number
-  unsigned long vec_start;  // Start of active vector
   boolean enable_wifi;      // Enable wifi
-  double soc_ekf;          // EKF output
-  double SOC_ekf;          // EKF output
   CommandPars(void)
   {
     this->string_complete = false;
-    this->stepping = false;
-    this->step_val = 0.;
-    this->vectoring = false;
-    this->vec_num = 0;
-    this->vec_start = 0;
     this->enable_wifi = false;
     this->pubList = Publish();
   }

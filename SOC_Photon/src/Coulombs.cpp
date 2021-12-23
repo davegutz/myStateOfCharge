@@ -36,8 +36,10 @@ extern CommandPars cp;
 Coulombs::Coulombs()
   : q_cap_rated_(0), q_cap_scaled_(0), t_rated_(25), t_rlim_(2.5) {}
 Coulombs::Coulombs(const double q_cap_rated, const double t_rated, const double t_rlim)
-  : q_cap_rated_(q_cap_rated), q_cap_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(2.5) {}
+  : q_cap_rated_(q_cap_rated), q_cap_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017) {}
 Coulombs::~Coulombs() {}
+// t_rlim=0.017 allows 1 deg for 1 minute (the update time of the temp read; and the sensor has
+// 1 deg resolution).
 // operators
 // functions
 
@@ -78,9 +80,10 @@ void Coulombs::apply_SOC(const double SOC)
 }
 
 // Memory set, adjust book-keeping as needed.  q_cap_ etc presesrved
-void Coulombs::apply_delta_q(const double delta_q)
+void Coulombs::apply_delta_q_t(const double delta_q, const double temp_c)
 {
   delta_q_ = delta_q;
+  q_capacity_ = calculate_capacity(temp_c);
   q_ = q_capacity_ + delta_q;
   soc_ = q_ / q_capacity_;
   SOC_ = q_ / q_cap_scaled_ * 100.;

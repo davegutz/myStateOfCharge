@@ -8,13 +8,13 @@ struct Wifi
 {
   unsigned int lastAttempt;
   unsigned int last_disconnect;
-  bool connected = false;
-  bool blynk_started = false;
-  bool particle_connected_last = false;
-  bool particle_connected_now = false;
+  boolean connected = false;
+  boolean blynk_started = false;
+  boolean particle_connected_last = false;
+  boolean particle_connected_now = false;
   Wifi(void) {}
-  Wifi(unsigned int lastAttempt, unsigned int last_disconnect, bool connected, bool blynk_started,
-        bool particle_connected)
+  Wifi(unsigned int lastAttempt, unsigned int last_disconnect, boolean connected, boolean blynk_started,
+        boolean particle_connected)
   {
     this->lastAttempt = lastAttempt;
     this->last_disconnect = last_disconnect;

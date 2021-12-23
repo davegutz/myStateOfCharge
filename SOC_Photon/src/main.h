@@ -90,8 +90,8 @@ Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_ADS1015 *ads_amp;      // Use this for the 12-bit version; 1115 for 16-bit; amplified; different address
 Adafruit_ADS1015 *ads_noamp;    // Use this for the 12-bit version; 1115 for 16-bit; non-amplified
 Adafruit_SSD1306 *display;
-bool bare_ads_noamp = false;          // If ADS to be ignored
-bool bare_ads_amp = false;      // If ADS to be ignored
+boolean bare_ads_noamp = false;          // If ADS to be ignored
+boolean bare_ads_amp = false;      // If ADS to be ignored
 Wifi *myWifi;                   // Manage Wifi
 
 // Setup
@@ -236,36 +236,35 @@ void loop()
   // Battery saturation
   static Debounce *SatDebounce = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
 
-  unsigned long current_time;                // Time result
+  unsigned long current_time;               // Time result
   static unsigned long now = millis();      // Keep track of time
   static unsigned long start = millis();    // Keep track of time
   unsigned long elapsed = 0;                // Keep track of time
-  static int reset = 1;                     // Dynamic reset
-  static int reset_temp = 1;                // Dynamic reset
+  static boolean reset = true;              // Dynamic reset
+  static boolean reset_temp = true;         // Dynamic reset
+  static boolean reset_publish = true;      // Dynamic reset
   double Tbatt_filt_C = 0;
 
   // Synchronization
-  bool publishP;                            // Particle publish, T/F
+  boolean publishP;                            // Particle publish, T/F
   static Sync *PublishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
-  bool publishB;                            // Particle publish, T/F
+  boolean publishB;                            // Particle publish, T/F
   static Sync *PublishBlynk = new Sync(PUBLISH_BLYNK_DELAY);
-  bool read;                                // Read, T/F
+  boolean read;                                // Read, T/F
   static Sync *ReadSensors = new Sync(READ_DELAY);
-  bool filt;                                // Filter, T/F
+  boolean filt;                                // Filter, T/F
   static Sync *FilterSync = new Sync(FILTER_DELAY);
-  bool read_temp;                           // Read temp, T/F
+  boolean read_temp;                           // Read temp, T/F
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
-  bool publishS;                            // Serial print, T/F
+  boolean publishS;                            // Serial print, T/F
   static Sync *PublishSerial = new Sync(PUBLISH_SERIAL_DELAY);
-  bool display_to_user;                     // User display, T/F
+  boolean display_to_user;                     // User display, T/F
   static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
-  bool summarizing;                         // Summarize, T/F
+  boolean summarizing;                         // Summarize, T/F
   static Sync *Summarize = new Sync(SUMMARIZE_DELAY);
-  bool control;                         // Summarize, T/F
+  boolean control;                         // Summarize, T/F
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
 
-  static bool reset_free = false;
-  static bool reset_free_ekf = true;
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
@@ -277,7 +276,7 @@ void loop()
     myWifi->blynk_started = true;
     if ( rp.debug>102 ) Serial.printf("completed at %ld\n", millis());
   }
-  if ( myWifi->blynk_started && myWifi->connected && !cp.vectoring )
+  if ( myWifi->blynk_started && myWifi->connected )
   {
     Blynk.run(); blynk_timer_1.run(); blynk_timer_2.run(); blynk_timer_3.run(); blynk_timer_4.run(); 
   }
@@ -298,7 +297,7 @@ void loop()
     filter_temp(reset_temp, Sen, TbattSenseFilt);
   }
 
-  // Input all other sensors
+  // Input all other sensors and do high rate calculations
   read = ReadSensors->update(millis(), reset);               //  now || reset
   elapsed = ReadSensors->now() - start;
   if ( read )
@@ -307,7 +306,7 @@ void loop()
     if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", Sen->T, millis());
 
     // Load and filter
-    load(reset_free, Sen, myPins, ads_amp, ads_noamp, ReadSensors->now(), SdVbatt);
+    load(reset, Sen, myPins, ads_amp, ads_noamp, ReadSensors->now(), SdVbatt);
     Tbatt_filt_C = (Sen->Tbatt_filt-32.)*5./9.;
 
     // Arduino plots
@@ -315,74 +314,84 @@ void loop()
         MyBatt->soc(), Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
         Sen->Vbatt, MyBattModel->voc());
 
-    // Initialize SOC Free Integrator - Coulomb Counting method
-    // Runs unfiltered and fast to capture most data
-    static boolean vectoring_past = cp.vectoring;
-    static double soc_saved = MyBatt->soc();
-    if ( vectoring_past != cp.vectoring )
-    {
-      reset_free = true;
-      start = ReadSensors->now();
-      elapsed = 0UL;
-      if ( cp.vectoring ) soc_saved = MyBatt->soc();
-      // else MyBatt->soc(soc_saved);
-    }
-    vectoring_past = cp.vectoring;
-    if ( reset_free )
-    {
-      if ( cp.vectoring ) MyBatt->apply_soc(MyBatt->soc());
-      else MyBatt->apply_soc(soc_saved);  // Only way to reach this line is resetting from vector test
-      MyBatt->init_soc_ekf(MyBatt->soc());
-      if ( elapsed>INIT_WAIT ) reset_free = false;
-    }
-    if ( reset_free_ekf )
-    {
-      MyBatt->init_soc_ekf(MyBatt->soc());
-      if ( elapsed>INIT_WAIT_EKF ) reset_free_ekf = false;
-    }
-
+    //
     // Model used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
     // to have availabe a value for Tbatt_filt_C when called
-    if ( reset_free ) MyBattModel->load(rp.delta_q_model, rp.t_last_model);
-    // Model call
+    //  Inputs:
+    //    Sen->Ishunt     A
+    //    Sen->Vbatt      V
+    //    Tbatt_filt_C    deg C
+    //    Cc    Coulomb charge counter memory structure
+    //  Outputs:
+    //    tb              deg C
+    //    ib              A
+    //    vb              V
+    //    rp.duty         (0-255) for D2 hardware injection when rp.modeling
+
+    // Initialize as needed
+    if ( reset )
+    {
+      MyBattModel->load(rp.delta_q_model, rp.t_last_model);
+      MyBattModel->apply_delta_q_t(rp.delta_q_model, rp.t_last_model);
+    }
+
+    // Model calculation  TODO:  is Sen->Vbatt_model useful?   Access class instead?
     Sen->Vbatt_model = MyBattModel->calculate(Tbatt_filt_C, MyBattModel->soc(), Sen->Ishunt, min(Sen->T, F_MAX_T),
         MyBattModel->q_capacity(), MyBattModel->q_cap_rated());
+
+    // Use model instead of sensors when running tests as user
+    // Over-ride Ishunt, Vbatt and Tbatt with model when running tests.  rp.modeling should never be set in use
     if ( rp.modeling )
     {
       Sen->Ishunt = MyBattModel->ib();
       Sen->Vbatt = Sen->Vbatt_model;
       Tbatt_filt_C = MyBattModel->temp_c();
     }
+
+    // Charge calculation and memory store
     MyBattModel->count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, rp.t_last_model);
     MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
-    Sen->Voc = MyBattModel->voc();
-    rp.duty = MyBattModel->calc_inj_duty(now, rp.type, rp.amp, rp.freq);
-    // Over-ride Ishunt, Vbatt and Tbatt with model when running tests.  rp.modeling should never be set in use
-    if ( rp.modeling )
-    {
-      Sen->Ishunt = MyBattModel->ib();
-      Sen->Vbatt = MyBattModel->vb();
-      Tbatt_filt_C = MyBattModel->temp_c();
-    }
+    Sen->Voc = MyBattModel->voc();  // TODO:  is this needed  Sen->Voc used?  Not really a sensor
 
+    // D2 signal injection to hardware current sensors
+    rp.duty = MyBattModel->calc_inj_duty(now, rp.type, rp.amp, rp.freq);
+    ////////////////////////////////////////////////////////////////////////////
+
+    //
     // Main Battery
     //  Inputs:
     //    Sen->Ishunt     A
     //    Sen->Vbatt      V
     //    Tbatt_filt_C    deg C
     //    Cc    Coulomb charge counter memory structure
+
     // Initialize Cc structure if needed.   Needed here in this location to have a value for Tbatt_filt_C
-    if ( reset_free_ekf ) MyBatt->load(rp.delta_q, rp.t_last);
+    if ( reset )
+    {
+      MyBatt->load(rp.delta_q, rp.t_last);
+      MyBatt->apply_delta_q_t(rp.delta_q, rp.t_last);
+      if ( rp.modeling )
+        MyBatt->init_soc_ekf(MyBattModel->soc());  // When modeling, ekf wants to equal model
+      else
+        MyBatt->init_soc_ekf(MyBatt->soc());
+    }
+    
     // EKF - calculates temp_c_, voc_, voc_dyn_ as functions of sensed parameters vb & ib (not soc)
-    cp.soc_ekf = MyBatt->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T), Sen->saturated);
-    cp.SOC_ekf = cp.soc_ekf*100.*MyBatt->q_capacity()/MyBatt->q_cap_rated();
+    MyBatt->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T), Sen->saturated);
+    
+    // Debounce saturation calculation done in ekf using voc model
     Sen->saturated = SatDebounce->calculate(is_sat(Tbatt_filt_C, MyBatt->voc()), reset);
-    MyBatt->update(&rp.delta_q, &rp.t_last);
+
+    // Memory store
     MyBatt->count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated, rp.t_last);
     MyBatt->update(&rp.delta_q, &rp.t_last);
+
+    // Charge time for display
     MyBatt->calculate_charge_time(MyBatt->q(), MyBatt->q_capacity(), Sen->Ishunt,MyBatt->soc());
-   
-    // Useful for Arduino plotting
+    //////////////////////////////////////////////////////////////
+
+    //
+    // Useful for Arduino plotting  TODO:  move Arduino plots to separate sub in mySubs
     if ( rp.debug==-1 )
       Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
         MyBattModel->SOC()-90,
@@ -403,10 +412,10 @@ void loop()
         MyBatt->K_ekf(), MyBatt->y_ekf(),
         MyBattModel->soc()*100-90, MyBatt->soc_ekf()*100-90, MyBattModel->soc()*100-90);
     if ( rp.debug==-3 )
-      Serial.printf("fast,et,reset_free,Wshunt,q_f,q,soc,T, %12.3f,%7.3f, %d, %7.3f,    %7.3f,     %7.3f,\n",
-      control_time, double(elapsed)/1000., reset_free, Sen->Wshunt, MyBattModel->soc(), Sen->T_filt);
+      Serial.printf("fast,et,reset,Wshunt,q_f,q,soc,T, %12.3f,%7.3f, %d, %7.3f,    %7.3f,     %7.3f,\n",
+      control_time, double(elapsed)/1000., reset, Sen->Wshunt, MyBattModel->soc(), Sen->T_filt);
 
-  }
+  }  // end read (high speed frame)
 
   // Run filters on other signals
   filt = FilterSync->update(millis(), reset);               //  now || reset
@@ -448,7 +457,7 @@ void loop()
   // to get a curl command to run
   publishP = PublishParticle->update(millis(), false);        //  now || false
   publishB = PublishBlynk->update(millis(), false);           //  now || false
-  publishS = PublishSerial->update(millis(), reset);          //  now || reset
+  publishS = PublishSerial->update(millis(), reset_publish);          //  now || reset
   if ( publishP || publishS)
   {
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
@@ -459,13 +468,13 @@ void loop()
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
     {
-      // static bool led_on = false;
+      // static boolean led_on = false;
       // led_on = !led_on;
       // if ( led_on ) digitalWrite(myPins->status_led, HIGH);
       // else  digitalWrite(myPins->status_led, LOW);
       publish_particle(PublishParticle->now(), myWifi, cp.enable_wifi);
     }
-    if ( reset_free || reset ) digitalWrite(myPins->status_led, HIGH);
+    if ( reset_publish ) digitalWrite(myPins->status_led, HIGH);
     else  digitalWrite(myPins->status_led, LOW);
 
     // Monitor for rp.debug
@@ -482,7 +491,7 @@ void loop()
   // right in the "Send String" box then press "Send."
   // String definitions are below.
   int debug_saved = rp.debug;
-  talk(&cp.stepping, &cp.step_val, &cp.vectoring, &cp.vec_num, MyBatt, MyBattModel);
+  talk(MyBatt, MyBattModel);
 
   // Summary management
   if ( rp.debug==-4 )
@@ -490,7 +499,7 @@ void loop()
     rp.debug = debug_saved;
     print_all(mySum, isum, nsum);
   }
-  summarizing = Summarize->update(millis(), reset, !cp.vectoring) || (rp.debug==-11 && publishB);               //  now || reset && !cp.vectoring
+  summarizing = Summarize->update(millis(), reset, !rp.modeling) || (rp.debug==-11 && publishB);               //  now || reset && !rp.modeling
   if ( summarizing )
   {
     if ( ++isum>nsum-1 ) isum = 0;
@@ -505,7 +514,8 @@ void loop()
   }
 
   // Initialize complete once sensors and models started and summary written
-  if ( read ) reset = 0;
-  if ( read_temp ) reset_temp = 0;
+  if ( read ) reset = false;
+  if ( read_temp ) reset_temp = false;
+  if (publishP || publishS) reset_publish = false;
 
 } // loop

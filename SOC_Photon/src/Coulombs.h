@@ -40,15 +40,17 @@ public:
   void apply_resetting(const boolean resetting){ resetting_ = resetting; };
   void apply_soc(const double soc);
   void apply_SOC(const double SOC);
-  void apply_delta_q(const double delta_q);
+  void apply_delta_q_t(const double delta_q, const double temp_c);
   double calculate_capacity(const double temp_c);
   virtual double count_coulombs(const double dt, const double temp_c, const double charge_curr, const boolean sat, const double t_last);
+  double delta_q() { return(delta_q_); };
   void load(const double delta_q, const double t_last);
   double q(){ return (q_); };
   double q_cap_rated(){ return (q_cap_rated_); };
   double q_capacity(){ return (q_capacity_); };
   double soc() { return(soc_); };
   double SOC() { return(SOC_); };
+  double t_last() { return(t_last_); };
   void update(double *delta_q, double *t_last);
 protected:
   double q_cap_rated_;// Rated capacity at t_rated_, saved for future scaling, C

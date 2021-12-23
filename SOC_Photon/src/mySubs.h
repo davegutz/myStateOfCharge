@@ -82,15 +82,15 @@ struct Sensors
   double Ishunt_amp_cal;  // Sensed, calibrated amplified ADC, A
   double Ishunt_noamp_cal;// Sensed, calibrated non-amplified ADC, A
   double Ishunt;          // Selected calibrated, shunt current, A
-  double Ishunt_filt; // Filtered, calibrated sensed shunt current for observer, A
+  double Ishunt_filt;     // Filtered, calibrated sensed shunt current for observer, A
   double Wshunt;          // Sensed shunt power, W
-  double Wcharge;          // Charge power, W
+  double Wcharge;         // Charge power, W
   int I2C_status;
   double T;               // Update time, s
   double T_filt;          // Filter update time, s
   double T_temp;          // Temperature update time, s
-  bool bare_ads_amp;      // If no ADS detected
-  bool bare_ads_noamp;    // If no ADS detected
+  boolean bare_ads_amp;   // If no ADS detected
+  boolean bare_ads_noamp; // If no ADS detected
   double curr_bias_amp;   // Signal injection bias for amplified current input, A
   double curr_bias_noamp; // Signal injection bias for non-amplified current input, A
   double curr_bias;       // Signal injection bias for selected current input, A
@@ -99,7 +99,7 @@ struct Sensors
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
           int16_t Vshunt_noamp_int, double Vshunt, double Vshunt_filt,
           int16_t Vshunt_amp_int, double Vshunt_amp, double Vshunt_amp_filt,
-          int I2C_status, double T, double T_temp, bool bare_ads_noamp, bool bare_ads_amp)
+          int I2C_status, double T, double T_temp, boolean bare_ads_noamp, boolean bare_ads_amp)
   {
     this->Vbatt = Vbatt;
     this->Vbatt_filt = Vbatt_filt;
@@ -148,7 +148,7 @@ protected:
   double sat_ib_max_;   // Current cutback to be applied to modeled ib output, A
   double sat_ib_null_;  // Maximum cutback current for voc=vsat, A
   double sat_cutback_gain_; // Gain to retard ib when voc exceeds vsat, dimensionless
-  boolean model_saturated_;   // Indicator of maximal cutback, T = cutback = saturated
+  boolean model_saturated_; // Indicator of maximal cutback, T = cutback = saturated
   double ib_sat_;       // Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
 };
 
@@ -156,7 +156,7 @@ protected:
 // Headers
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);
-void load(const bool reset_free, Sensors *Sen, Pins *myPins,
+void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
     Adafruit_ADS1015 *ads_amp, Adafruit_ADS1015 *ads_noamp, const unsigned long now,
     SlidingDeadband *SdVbatt);
 void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt);
@@ -172,9 +172,7 @@ void create_print_string(char *buffer, Publish *pubList);
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);
 
 // Talk Declarations
-void talk(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num,
-  Battery *MyBatt, BatteryModel *MyBattModel);
-void talkT(boolean *stepping, double *step_val, boolean *vectoring, int8_t *vec_num);  // Transient inputs
-void talkH(double *step_val, int8_t *vec_num, Battery *batt, BatteryModel *batt_model); // Help
+void talk(Battery *MyBatt, BatteryModel *MyBattModel);
+void talkH(Battery *batt, BatteryModel *batt_model); // Help
 
 #endif

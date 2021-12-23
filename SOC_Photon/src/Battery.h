@@ -114,6 +114,7 @@ public:
   double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   void init_soc_ekf(const double soc);
   double soc_ekf() { return (soc_ekf_); };
+  double SOC_ekf() { return (SOC_ekf_); };
   double voc() { return (voc_); };
   double voc_dyn() { return (voc_dyn_); };
   double vdyn() { return (vdyn_); };
@@ -139,7 +140,7 @@ protected:
   double n_;        // Battery coeff
   double d_;        // Battery coeff
   unsigned int nz_; // Number of breakpoints
-  double q_;        // State of charge, C
+  double q_;        // Charge, C
   double r1_;       // Randels resistance, Ohms per cell
   double r2_;       // Randels resistance, Ohms per cell
   double c2_;       // Randels capacitance, Farads per cell
@@ -177,8 +178,8 @@ protected:
   double tcharge_ekf_;  // Charging time to 100% from ekf, hr
   double voc_dyn_;  // Charging voltage, V
   double delta_soc_;// Change to available charge since saturated, (0-1)
-  double q_sat_;    // Charge at saturation, C
   double soc_ekf_;  // Filtered state of charge from ekf (0-1)
+  double SOC_ekf_;  // Filtered state of charge from ekf (0-100)
   double q_ekf_;    // Filtered charge calculated by ekf, C
   double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
