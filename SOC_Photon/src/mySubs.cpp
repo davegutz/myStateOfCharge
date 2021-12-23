@@ -408,9 +408,9 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
         {
           case ( 'c' ):
             scale = cp.input_string.substring(2).toFloat();
-            rp.s_cap = scale;
+            rp.s_cap_model = scale;
             Serial.printf("MyBattModel.q_cap_rated scaled by %7.3f from %7.3f to ", scale, MyBattModel->q_cap_rated());
-            MyBattModel->apply_cap_scale(scale);
+            MyBattModel->apply_cap_scale(rp.s_cap_model);
             Serial.printf("%7.3f\n", MyBattModel->q_cap_rated());
             break;
           case ( 'r' ):
@@ -940,4 +940,12 @@ double BatteryModel::count_coulombs(const double dt, const double temp_c, const 
     // Save and return
     t_last_ = temp_lim;
     return ( soc_ );
+}
+
+// Load states from retained memory
+void BatteryModel::load(const double delta_q, const double t_last, const double s_cap_model)
+{
+    delta_q_ = delta_q;
+    t_last_ = t_last;
+    apply_cap_scale(s_cap_model);
 }

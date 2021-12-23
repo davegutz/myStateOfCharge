@@ -154,17 +154,6 @@ void Coulombs::load(const double delta_q, const double t_last)
     t_last_ = t_last;
 }
 
-void Coulombs::prime(const double init_q, const double init_t_c)
-// void Coulombs::prime(const double nom_q_cap_, const double t_rated_, const double init_q, const double init_t_c, const double s_cap)
-{
-    q_ = init_q;
-    q_capacity_ = calculate_capacity(init_t_c);
-    soc_ = q_ / q_capacity_;
-    SOC_ = q_ / q_cap_scaled_ * 100.;
-    Serial.printf("re-primed Coulombs\n");
-}
-
-
 // Update states to be saved in retained memory
 void Coulombs::update(double *delta_q, double *t_last)
 {

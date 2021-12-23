@@ -331,7 +331,7 @@ void loop()
     // Initialize as needed
     if ( reset )
     {
-      MyBattModel->load(rp.delta_q_model, rp.t_last_model);
+      MyBattModel->load(rp.delta_q_model, rp.t_last_model, rp.s_cap_model);
       MyBattModel->apply_delta_q_t(rp.delta_q_model, rp.t_last_model);
     }
 

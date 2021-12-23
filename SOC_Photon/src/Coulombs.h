@@ -35,7 +35,6 @@ public:
   ~Coulombs();
   // operators
   // functions
-  void prime(const double init_q, const double init_t_c);
   void apply_cap_scale(const double scale);
   void apply_resetting(const boolean resetting){ resetting_ = resetting; };
   void apply_soc(const double soc);

@@ -47,7 +47,7 @@ struct RetainedPars
   uint8_t type = 0;         // Injected waveform type.   0=sine, 1=square, 2=triangle
   double offset = 0;        // Constant bias, A
   double t_bias = 0;        // Sensed temp bias, deg C
-  double s_cap = 1.;        // Scalar on battery model size
+  double s_cap_model = 1.;  // Scalar on battery model size
   double cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function.
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop.
 };            
