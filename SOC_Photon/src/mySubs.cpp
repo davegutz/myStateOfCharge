@@ -817,7 +817,7 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     temp_c_ = temp_C;
 
     double soc_lim = max(min(soc, mxeps_bb), mneps_bb);
-    double SOC = soc * q_capacity / q_cap * 100;
+    double SOC = soc * q_capacity / q_cap_scaled_ * 100;
 
     // VOC-OCV model
     double log_soc, exp_n_soc, pow_log_soc;
@@ -928,7 +928,7 @@ double BatteryModel::count_coulombs(const double dt, const double temp_c, const 
 
     // Normalize
     soc_ = q_ / q_capacity_;
-    SOC_ = q_ / q_cap_rated_ * 100;
+    SOC_ = q_ / q_cap_scaled_ * 100;
 
     if ( rp.debug==97 )
         Serial.printf("BatteryModel::cc,  dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,      %7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,\n",
