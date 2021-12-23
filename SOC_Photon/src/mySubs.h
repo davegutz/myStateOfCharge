@@ -140,6 +140,7 @@ public:
   uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);
   double count_coulombs(const double dt, const double temp_c, const double charge_curr, const double t_last);
   void load(const double delta_q, const double t_last, const double s_cap_model);
+  boolean cutback() { return model_cutback_; };
   boolean saturated() { return model_saturated_; };
 protected:
   SinInj *Sin_inj_;     // Class to create sine waves
@@ -149,7 +150,8 @@ protected:
   double sat_ib_max_;   // Current cutback to be applied to modeled ib output, A
   double sat_ib_null_;  // Maximum cutback current for voc=vsat, A
   double sat_cutback_gain_; // Gain to retard ib when voc exceeds vsat, dimensionless
-  boolean model_saturated_; // Indicator of maximal cutback, T = cutback = saturated
+  boolean model_cutback_;   // Modeled current being limited on saturation cutback, T = cutback limited
+  boolean model_saturated_; // Indicator of maximal cutback, T = cutback saturated
   double ib_sat_;       // Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
   double s_cap_;        // Size scalar
 };

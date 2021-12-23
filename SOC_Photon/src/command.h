@@ -36,11 +36,14 @@ struct CommandPars
   String input_string;      // a string to hold incoming data
   boolean string_complete;  // whether the string is complete
   boolean enable_wifi;      // Enable wifi
+  boolean model_cutback;    // on model cutback
+  boolean model_saturated;  //  Model on cutback and saturated
   CommandPars(void)
   {
     this->string_complete = false;
     this->enable_wifi = false;
     this->pubList = Publish();
+    this->model_cutback = false;
   }
 };            
 

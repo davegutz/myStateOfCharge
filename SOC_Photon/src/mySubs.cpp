@@ -323,7 +323,10 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner
   char dispString[21];
-  sprintf(dispString, "%3.0f %5.2f %5.1f", cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt);
+  if ( !pass && cp.model_cutback && rp.modeling )
+    sprintf(dispString, "%3.0f %5.2f      ", cp.pubList.Tbatt, cp.pubList.Vbatt);
+  else
+    sprintf(dispString, "%3.0f %5.2f %5.1f", cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt);
   display->println(dispString);
 
   display->println(F(""));
@@ -409,9 +412,9 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
           case ( 'c' ):
             scale = cp.input_string.substring(2).toFloat();
             rp.s_cap_model = scale;
-            Serial.printf("MyBattModel.q_cap_rated scaled by %7.3f from %7.3f to ", scale, MyBattModel->q_cap_rated());
+            Serial.printf("MyBattModel.q_cap_rated scaled by %7.3f from %7.3f to ", scale, MyBattModel->q_cap_scaled());
             MyBattModel->apply_cap_scale(rp.s_cap_model);
-            Serial.printf("%7.3f\n", MyBattModel->q_cap_rated());
+            Serial.printf("%7.3f\n", MyBattModel->q_cap_scaled());
             break;
           case ( 'r' ):
             scale = cp.input_string.substring(2).toFloat();
@@ -838,6 +841,7 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
     sat_ib_max_ = sat_ib_null_ + (vsat_ - voc_) / nom_vsat_ * q_capacity / 3600. * sat_cutback_gain_ * rp.cutback_gain_scalar;
     ib_ = min(curr_in, sat_ib_max_);
+    model_cutback_ = (voc_ > vsat_) && (ib_ == sat_ib_max_);
     model_saturated_ = (voc_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
 
     if ( rp.debug==78 )Serial.printf("BatteryModel::calculate:,  dt,tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
@@ -912,8 +916,6 @@ double BatteryModel::count_coulombs(const double dt, const double temp_c, const 
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
     // detection).
-    // TODO delete this boolean model_sat = sat_ && d_delta_q > 0 && sat_ib_max_ > 0.1 && charge_curr < 0.5;  // TODO:  is this robust to diff charge currents?
-    // Serial.printf("sat,d_delta_q,ib_cutback,charge_curr,model_sat=%d,%7.3f,%7.3f,%7.3f,%d\n", sat_, d_delta_q, sat_ib_max_, charge_curr, model_sat);
     if ( model_saturated_ )
     {
       d_delta_q = 0.;

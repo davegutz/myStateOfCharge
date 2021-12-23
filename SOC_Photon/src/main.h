@@ -338,6 +338,8 @@ void loop()
     // Model calculation  TODO:  is Sen->Vbatt_model useful?   Access class instead?
     Sen->Vbatt_model = MyBattModel->calculate(Tbatt_filt_C, MyBattModel->soc(), Sen->Ishunt, min(Sen->T, F_MAX_T),
         MyBattModel->q_capacity(), MyBattModel->q_cap_rated());
+    cp.model_cutback = MyBattModel->cutback();
+    cp.model_saturated = MyBattModel->saturated();
 
     // Use model instead of sensors when running tests as user
     // Over-ride Ishunt, Vbatt and Tbatt with model when running tests.  rp.modeling should never be set in use

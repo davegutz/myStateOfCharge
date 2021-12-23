@@ -43,7 +43,7 @@ Coulombs::~Coulombs() {}
 // operators
 // functions
 
-// Scale size of battery and adjust as needed to preserve delta_q.  t_sat_ unchanged.
+// Scale size of battery and adjust as needed to preserve delta_q.  Tbatt unchanged.
 // Goal is to scale battery and see no change in delta_q on screen of 
 // test comparisons.   The rationale for this is that the battery is frequently saturated which
 // resets all the model parameters.   This happens daily.   Then both the model and the battery
@@ -51,9 +51,8 @@ Coulombs::~Coulombs() {}
 void Coulombs::apply_cap_scale(const double scale)
 {
   q_cap_scaled_ = scale * q_cap_rated_;
-  q_ = SOC_ / 100. * q_cap_scaled_;
   q_capacity_ = calculate_saturation_charge(t_last_, q_cap_scaled_);
-  delta_q_ = q_ - q_capacity_;
+  q_ = delta_q_ + q_capacity_;
   soc_ = q_ / q_capacity_;
   SOC_ = q_ / q_cap_scaled_ * 100.;
   resetting_ = true;     // momentarily turn off saturation check

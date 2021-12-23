@@ -46,6 +46,7 @@ public:
   void load(const double delta_q, const double t_last);
   double q(){ return (q_); };
   double q_cap_rated(){ return (q_cap_rated_); };
+  double q_cap_scaled(){ return (q_cap_scaled_); };
   double q_capacity(){ return (q_capacity_); };
   double soc() { return(soc_); };
   double SOC() { return(SOC_); };
