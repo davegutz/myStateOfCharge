@@ -37,8 +37,13 @@ public:
   // functions
   void calc_x_dot(double *u);
   void update(const double dt);
+  virtual void pretty_print();
   void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols);
   void mulvec(double * a, double * x, double * y, int m, int n);
+  void insert_A(const uint8_t i, const uint8_t j, const double value);
+  void insert_B(const uint8_t i, const uint8_t j, const double value);
+  void insert_C(const uint8_t i, const uint8_t j, const double value);
+  void insert_D(const uint8_t i, const uint8_t j, const double value);
   double y(int i) { return ( y_[i] ); };
 protected:
   double *A_; // n x n state matrix
@@ -46,11 +51,11 @@ protected:
   double *C_; // q x n state output matrix
   double *D_; // q x p input output matrix
   double *x_; // 1 x n state vector
-  double *x_past_; // 1 x n state vector
+  double *x_past_;// 1 x n state vector
   double *x_dot_; // 1 x n state vector
-  double *u_; // 1 x p input vector
-  double *y_; // q x1 output vector
-  int8_t n_;   // Length of state vector
+  double *u_;// 1 x p input vector
+  double *y_;// q x1 output vector
+  int8_t n_; // Length of state vector
   int8_t p_; // Length of input vector
   int8_t q_; // Length of output vector
 };

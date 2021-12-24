@@ -45,6 +45,7 @@ public:
   virtual double count_coulombs(const double dt, const double temp_c, const double charge_curr, const boolean sat, const double t_last);
   double delta_q() { return(delta_q_); };
   void load(const double delta_q, const double t_last);
+  virtual void pretty_print();
   double q(){ return (q_); };
   double q_cap_rated(){ return (q_cap_rated_); };
   double q_cap_scaled(){ return (q_cap_rated_scaled_); };

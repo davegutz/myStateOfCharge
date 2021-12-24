@@ -64,14 +64,38 @@ void StateSpace::calc_x_dot(double *u)
   for (i=0; i<n_; i++) x_dot_[i] = AX[i] + BU[i];
   if ( rp.debug==33 )
   {
-    Serial.printf("\nA_=[%10.6f, %10.6f,\n %10.6f, %10.6f,]\n", A_[0], A_[1], A_[2], A_[3]);
-    Serial.printf("x_=[%10.6f, %10.6f]\n", x_[0], x_[1]);
-    Serial.printf("AX=[%10.6f, %10.6f]\n", AX[0], AX[1]);
-    Serial.printf("B_=[%10.6f, %10.6f,\n %10.6f, %10.6f,]\n", B_[0], B_[1], B_[2], B_[3]);
-    Serial.printf("u_=[%10.6f, %10.6f]\n", u_[0], u_[1]);
-    Serial.printf("BU=[%10.6f, %10.6f]\n", BU[0], BU[1]);
-    Serial.printf("xdot_=[%10.6f, %10.6f]\n", x_dot_[0], x_dot_[1]);
   }
+}
+
+// Pretty Print
+void StateSpace::pretty_print(void)
+{
+  Serial.printf("StateSpace:\n");
+  Serial.printf("   A_ =  [%10.6f, %10.6f,\n          %10.6f, %10.6f,]\n", A_[0], A_[1], A_[2], A_[3]);
+  Serial.printf("   x_ =  [%10.6f, %10.6f]\n", x_[0], x_[1]);
+  Serial.printf("   B_ =  [%10.6f, %10.6f,\n          %10.6f, %10.6f,]\n", B_[0], B_[1], B_[2], B_[3]);
+  Serial.printf("   u_ =  [%10.6f, %10.6f]\n", u_[0], u_[1]);
+  Serial.printf("   C_ =  [%10.6f, %10.6f]\n", C_[0], C_[1]);
+  Serial.printf("   D_ =  [%10.6f, %10.6f]\n", D_[0], D_[1]);
+  Serial.printf("   xdot_=[%10.6f, %10.6f]\n", x_dot_[0], x_dot_[1]);
+}
+
+// Scale elements as requested
+void StateSpace::insert_A(const uint8_t i, const uint8_t j, const double value)
+{
+  A_[i*n_+j] = value;
+}
+void StateSpace::insert_B(const uint8_t i, const uint8_t j, const double value)
+{
+  B_[i*n_+j] = value;
+}
+void StateSpace::insert_C(const uint8_t i, const uint8_t j, const double value)
+{
+  C_[i*q_+j] = value;  
+}
+void StateSpace::insert_D(const uint8_t i, const uint8_t j, const double value)
+{
+  D_[i*q_+j] = value;  
 }
 
 // y <- C@x + D@u
@@ -89,14 +113,6 @@ void StateSpace::update(const double dt)
   mulmat(C_, x_past_, CX, q_, n_, 1);  // Back Euler uses past
   mulmat(D_, u_, DU, q_, p_, 1);
   for (i=0; i<q_; i++) y_[i] = CX[i] + DU[i];
-  if ( rp.debug==-33 )
-  {
-    Serial.printf("C_=[%10.6f, %10.6f]\n", C_[0], C_[1]);
-    Serial.printf("D_=[%10.6f, %10.6f]\n", D_[0], D_[1]);
-    Serial.printf("CX=[%10.6f]\n", CX[0]);
-    Serial.printf("DU=[%10.6f]\n", DU[0]);
-    Serial.printf("y=[%10.6f]\n", y_[0]);
-  }
 }
 
 // C <- A @ B  

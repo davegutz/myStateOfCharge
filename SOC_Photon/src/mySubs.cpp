@@ -431,21 +431,22 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
           case ( 'c' ):
             scale = cp.input_string.substring(2).toFloat();
             rp.s_cap_model = scale;
-            Serial.printf("\nMyBattModel:  soc=%7.3f, SOC=%7.3f, q=%7.3f, delta_q = %7.3f, q_scaled_rated = %7.3f,\
-            q_rated = %7.3f, q_capacity = %7.3f,\n\n", MyBattModel->soc(), MyBattModel->SOC(), MyBattModel->q(), MyBattModel->delta_q(),
-            MyBattModel->q_cap_scaled(), MyBattModel->q_cap_rated(), MyBattModel->q_capacity());
             Serial.printf("MyBattModel.q_cap_rated scaled by %7.3f from %7.3f to ", scale, MyBattModel->q_cap_scaled());
             MyBattModel->apply_cap_scale(rp.s_cap_model);
             if ( rp.modeling ) MyBatt->init_soc_ekf(MyBattModel->soc());
             Serial.printf("%7.3f\n", MyBattModel->q_cap_scaled());
-            Serial.printf("\nMyBattModel:  soc=%7.3f, SOC=%7.3f, q=%7.3f, delta_q = %7.3f, q_scaled_rated = %7.3f,\
-            q_rated = %7.3f, q_capacity = %7.3f,\n\n", MyBattModel->soc(), MyBattModel->SOC(), MyBattModel->q(), MyBattModel->delta_q(),
-            MyBattModel->q_cap_scaled(), MyBattModel->q_cap_rated(), MyBattModel->q_capacity());
+            Serial.printf("MyBattModel:  "); MyBattModel->pretty_print(); MyBattModel->Coulombs::pretty_print();
             break;
           case ( 'r' ):
             scale = cp.input_string.substring(2).toFloat();
+            Serial.printf("\nBefore MyBattModel::StateSpace:\n"); MyBattModel->pretty_print_ss();
+            Serial.printf("\nScaling D[0, 0] = -r0 by Sr= %7.3f\n", scale);
             MyBattModel->Sr(scale);
+            Serial.printf("\nAfter MyBattModel::StateSpace:\n"); MyBatt->pretty_print_ss();
+            Serial.printf("\nBefore MyBatt::StateSpace:\n"); MyBatt->pretty_print_ss();
+            Serial.printf("\nScaling D[0, 0] = -r0 by Sr= %7.3f\n", scale);
             MyBatt->Sr(scale);
+            Serial.printf("\nAfter MyBatt::StateSpace:\n"); MyBatt->pretty_print_ss();
             break;
           case ( 'k' ):
             scale = cp.input_string.substring(2).toFloat();

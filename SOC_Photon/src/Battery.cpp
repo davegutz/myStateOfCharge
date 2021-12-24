@@ -86,7 +86,6 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
     rand_D_[0] = -r0_;
     rand_D_[1] = 1.;
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
-
 }
 Battery::~Battery() {}
 // operators
@@ -137,6 +136,10 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     double u[2] = {ib, vb};
     Randles_->calc_x_dot(u);
     Randles_->update(dt);
+    if ( rp.debug==34 )
+    {
+        Serial.printf("Battery::calculate_ekf:"); Randles_->pretty_print();
+    }
     voc_dyn_ = Randles_->y(0);
     vdyn_ = vb_ - voc_dyn_;
     voc_ = voc_dyn_;
@@ -221,6 +224,18 @@ void Battery::init_soc_ekf(const double soc)
     {
         Serial.printf("init_soc_ekf:  soc, soc_ekf_, x_ekf_ = %7.3f,%7.3f, %7.3f,\n", soc, soc_ekf_, x_ekf());
     }
+}
+
+// Print
+void Battery::pretty_print(void)
+{
+    Serial.printf("Battery::pretty_print\n");
+}
+
+// Print State Space
+void Battery::pretty_print_ss(void)
+{
+    Randles_->pretty_print();
 }
 
 /* C <- A * B */

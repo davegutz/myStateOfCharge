@@ -59,12 +59,29 @@ void EKF_1x1::predict_ekf(double u)
   P_prior_ = P_;
 }
 
-  // Initialize
-  void EKF_1x1::init_ekf(double soc, double Pinit)
-  {
-    x_ = soc;
-    P_ = Pinit;
-  }
+// Initialize
+void EKF_1x1::init_ekf(double soc, double Pinit)
+{
+  x_ = soc;
+  P_ = Pinit;
+}
+
+// Pretty Print
+ void EKF_1x1::pretty_print(void)
+ {
+  Serial.printf("EKF_1x1:\n");
+  Serial.printf("Inputs:\n");
+  Serial.printf("  z  = %7.3f  // 1x1 input, =voc, dynamic predicted by other model, V\n", z_);
+  Serial.printf("  R  = %7.3f  // 1x1 Kalman state uncertainty\n", R_);
+  Serial.printf("  Q  = %7.3f  // 1x1 Kalman process uncertainty\n", Q_);
+  Serial.printf("  H  = %7.3f  //  1x1 Jacobian sensitivity dV/dSOC\n", H_);
+  Serial.printf("Outputs:\n");
+  Serial.printf("  x  = %7.3f  //  1x1 Kalman state variable = Vsoc (0-1 fraction)\n", x_);
+  Serial.printf("  y  = %7.3f  //  1x1 Residual z-hx, V\n", y_);
+  Serial.printf("  P  = %7.3f  //  1x1 Kalman uncertainty covariance\n", P_);
+  Serial.printf("  K  = %7.3f  //  1x1 Kalman gain\n", K_);
+  Serial.printf("  S  = %7.3f  //  1x1 system uncertainty\n", S_);
+ }
 
 // y <- C@x + D@u
 // Backward Euler integration of x

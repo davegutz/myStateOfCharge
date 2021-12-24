@@ -103,7 +103,7 @@ public:
   // operators
   // functions
   void Dv(const double dv) { dv_ = dv; };
-  void Sr(const double sr) { sr_ = sr; };
+  void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -r0_*sr_); };
   void calc_soc_voc_coeff(double soc, double tc, double *b, double *a, double *c, double *log_soc,
                           double *exp_n_soc, double *pow_log_soc);
   double calc_h_jacobian(double soc_lim, double b, double c, double log_soc, double exp_n_soc, double pow_log_soc);
@@ -113,6 +113,8 @@ public:
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated);
   double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   void init_soc_ekf(const double soc);
+  void pretty_print();
+  void pretty_print_ss();
   double soc_ekf() { return (soc_ekf_); };
   double SOC_ekf() { return (SOC_ekf_); };
   double voc() { return (voc_); };

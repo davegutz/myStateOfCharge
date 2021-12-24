@@ -40,7 +40,25 @@ Coulombs::Coulombs(const double q_cap_rated, const double t_rated, const double 
 Coulombs::~Coulombs() {}
 // t_rlim=0.017 allows 1 deg for 1 minute (the update time of the temp read; and the sensor has
 // 1 deg resolution).
+
 // operators
+// Pretty print
+void Coulombs::pretty_print(void)
+{
+  Serial.printf("Coulombs:\n");
+  Serial.printf("  q_cap_rated_ = %9.1f;        // Rated capacity at t_rated_, saved for future scaling, C\n", q_cap_rated_);
+  Serial.printf("  q_cap_rated_scaled_ = %9.1f; // Applied rated capacity at t_rated_, after scaling, C\n", q_cap_rated_scaled_);
+  Serial.printf("  q_capacity_ = %9.1f;         // Saturation charge at temperature, C\n", q_capacity_);
+  Serial.printf("  q_ =          %9.1f;         // Present charge available to use, C\n", q_);
+  Serial.printf("  delta_q_      %7.3f;         // Charge since saturated, C\n", delta_q_);
+  Serial.printf("  soc_ =        %7.3f;         // Fraction of saturation charge (q_capacity_) available (0-1)  soc_);\n", soc_);
+  Serial.printf("  SOC_ =        %7.3f;         // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries\n", SOC_);
+  Serial.printf("  t_rated_ =    %7.3f;         // Rated temperature, deg C\n", t_rated_);
+  Serial.printf("  t_last_ =     %7.3f;         // Last battery temperature for rate limit memory, deg C\n", t_last_);
+  Serial.printf("  t_rlim_ =     %7.3f;         // Tbatt rate limit, deg C / s\n", t_rlim_);
+  Serial.printf("  resetting_ =     %d;            // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter\n", resetting_);
+}
+
 // functions
 
 // Scale size of battery and adjust as needed to preserve delta_q.  Tbatt unchanged.
