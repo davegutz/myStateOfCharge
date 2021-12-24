@@ -47,9 +47,45 @@ struct RetainedPars
   uint8_t type = 0;         // Injected waveform type.   0=sine, 1=square, 2=triangle
   double offset = 0;        // Constant bias, A
   double t_bias = 0;        // Sensed temp bias, deg C
-  double s_cap_model = 1.;  // Scalar on battery model size
+  double s_cap_model = 1.02;// Scalar on battery model size
   double cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function.
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop.
+  void nominal()
+  {
+    this->debug = 2;
+    this->delta_q = -0.5;
+    this->t_last = 25.;
+    this->delta_q_model = -0.5;
+    this->t_last_model = 25.;
+    this->curr_bias_amp = -1.;      // soc0
+    this->curr_bias_noamp = -0.13;  // soc0
+    this->curr_bias_all = -0.6;     // soc0
+    this->curr_sel_amp = true;
+    this->vbatt_bias = 0;
+    this->modeling = false;
+    this->duty = 0;
+    this->amp = 0.;
+    this->freq = 0.;
+    this->type = 0;
+    this->offset = 0;
+    this->t_bias = 0;
+    this->s_cap_model = 1.02;
+    this->cutback_gain_scalar = 1.;
+  }
+  void print_part_1(char *buffer)
+  {
+    sprintf(buffer, "debug = %d, delta_q = %7.3f, t_last = %7.3f, delta_q_model = %7.3f, t_last_model = %7.3f, \n\
+    curr_bias_amp = %7.3f, curr_bias_noamp = %7.3f, curr_bias_all = %7.3f, curr_sel_amp = %d, \n",
+      this->debug, this->delta_q, this->t_last, this->delta_q_model, this->t_last_model,
+      this->curr_bias_amp, this->curr_bias_noamp, this->curr_bias_all, this->curr_sel_amp);
+  }
+  void print_part_2(char *buffer)
+  {
+    sprintf(buffer, "    vbatt_bias = %7.3f, modeling = %d, duty = %ld, amp = %7.3f, freq = %7.3f, type = %d, offset = %7.3f, \n\
+    t_bias = %7.3f, s_cap_model = %7.3f, cutback_gain_scalar = %7.3f,\n",
+      this->vbatt_bias, this->modeling, this->duty, this->amp, this->freq, this->type, this->offset,
+      this->t_bias, this->s_cap_model, this->cutback_gain_scalar);
+  }
 };            
 
 #endif

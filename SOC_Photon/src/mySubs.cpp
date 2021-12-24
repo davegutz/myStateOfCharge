@@ -375,6 +375,14 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
   {
     switch ( cp.input_string.charAt(0) )
     {
+      case ( 'A' ):
+        rp.nominal();
+        rp.print_part_1(cp.buffer);
+        Serial.printf("Force nominal rp %s", cp.buffer);
+        rp.print_part_2(cp.buffer);
+        Serial.printf("%s", cp.buffer);
+        Serial.printf("\n\n ************** now Reset to apply nominal rp ***********************\n");
+        break;
       case ( 'D' ):
         switch ( cp.input_string.charAt(1) )
         {
@@ -412,9 +420,16 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
           case ( 'c' ):
             scale = cp.input_string.substring(2).toFloat();
             rp.s_cap_model = scale;
+            Serial.printf("\nMyBattModel:  soc=%7.3f, SOC=%7.3f, q=%7.3f, delta_q = %7.3f, q_scaled_rated = %7.3f,\
+            q_rated = %7.3f, q_capacity = %7.3f,\n\n", MyBattModel->soc(), MyBattModel->SOC(), MyBattModel->q(), MyBattModel->delta_q(),
+            MyBattModel->q_cap_scaled(), MyBattModel->q_cap_rated(), MyBattModel->q_capacity());
             Serial.printf("MyBattModel.q_cap_rated scaled by %7.3f from %7.3f to ", scale, MyBattModel->q_cap_scaled());
             MyBattModel->apply_cap_scale(rp.s_cap_model);
+            if ( rp.modeling ) MyBatt->init_soc_ekf(MyBattModel->soc());
             Serial.printf("%7.3f\n", MyBattModel->q_cap_scaled());
+            Serial.printf("\nMyBattModel:  soc=%7.3f, SOC=%7.3f, q=%7.3f, delta_q = %7.3f, q_scaled_rated = %7.3f,\
+            q_rated = %7.3f, q_capacity = %7.3f,\n\n", MyBattModel->soc(), MyBattModel->SOC(), MyBattModel->q(), MyBattModel->delta_q(),
+            MyBattModel->q_cap_scaled(), MyBattModel->q_cap_rated(), MyBattModel->q_capacity());
             break;
           case ( 'r' ):
             scale = cp.input_string.substring(2).toFloat();
@@ -504,8 +519,11 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
         switch ( cp.input_string.charAt(1) )
         {
           case ( 'x' ):
-            rp.modeling = !rp.modeling;
-            Serial.printf("Modeling toggled to %d\n", rp.modeling);
+            if ( cp.input_string.substring(2).toInt()>0 )
+              rp.modeling = true;
+            else
+              rp.modeling = false;
+            Serial.printf("Modeling set to %d\n", rp.modeling);
             break;
           case ( 'a' ):
             rp.amp = max(min(cp.input_string.substring(2).toFloat(), 18.3), 0.0);
@@ -820,7 +838,7 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     temp_c_ = temp_C;
 
     double soc_lim = max(min(soc, mxeps_bb), mneps_bb);
-    double SOC = soc * q_capacity / q_cap_scaled_ * 100;
+    double SOC = soc * q_capacity / q_cap_rated_scaled_ * 100;
 
     // VOC-OCV model
     double log_soc, exp_n_soc, pow_log_soc;
@@ -924,13 +942,14 @@ double BatteryModel::count_coulombs(const double dt, const double temp_c, const 
     }
 
     // Integration
-    q_capacity_ = q_cap_rated_*(1. + DQDT*(temp_lim - t_rated_));
+    q_capacity_ = calculate_capacity(temp_lim);
+    // q_capacity_ = q_cap_rated_scaled_*(1. + DQDT*(temp_lim - t_rated_));   TODO:  delete
     delta_q_ = max(min(delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-t_last_), 1.1*(q_cap_rated_ - q_capacity_)), -q_capacity_);
     q_ = q_capacity_ + delta_q_;
 
     // Normalize
     soc_ = q_ / q_capacity_;
-    SOC_ = q_ / q_cap_scaled_ * 100;
+    SOC_ = q_ / q_cap_rated_scaled_ * 100;
 
     if ( rp.debug==97 )
         Serial.printf("BatteryModel::cc,  dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,      %7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,\n",

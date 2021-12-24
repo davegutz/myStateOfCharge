@@ -259,7 +259,7 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
 
 ## Implementation Notes
 
-  1. A PI observer is no more accurate than the open loop OCV-SOC curves.
+  1. An EKF is no more accurate than the open loop OCV-SOC curves.
   2. A Coulomb Counter implementation is very accurate but needs to calibrate every couple cycles.   This should happen naturally as the battery charges fully each day.
   3. Blynk phone monitor implemented, as well as Particle Cloud, but found to be impractical because
     a.  Seldom near wifi when camping.
@@ -268,10 +268,14 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   4. Shunt monitor seems to have 0 V bias at 0 A current so this is assumed when scaling inputs.
   5. Current calibrated using clamping ammeter turning large loads off and on.
   6. Battleborn nominal capacity determined by load tests.
-  7. An iterative solver for SOC-VOC model works extremely well given calculatable derivative for the equations from reference.  PI observer removed in favor of solver.  The solver could be used to initialize SOC for the Coulomb Counter but probaly not worth the trouble.   Leave this device in more future possible usage.
+  7. An iterative solver for SOC-VOC model works extremely well given calculatable derivative for the equations from reference.  PI observer removed in favor of solver.  The solver could be used to initialize SOC for the Coulomb Counter but probaly not worth the trouble.   Leave this device in more future possible usage.  An EKF
+  then replaced the solver because it essentially does the same thing and was much quieter.
   8. Note that there is no effect of the device on system operation so debugging via serial can be more extensive than usual.
   9. Two-pole filters and update time framing, determined experimentally and by experience to provide best possible Coulommb Counter and display behavior.
-  10. Wifi turned off immediately.  Can be turned on by 'Talk.'
+  10. Wifi turned off immediately.  Can be turned on by 'Talk('w')'
   11. Battery temperature changes very slowly, well within capabilities of DS18B sensor.
-  12. 12-bit AD sufficiently accurate for Coulomb Counting.  Precision is what matters and it is fine, even with bit flipping.  Even with backlash / sliding deadband to filter bit flipping.
-  13. All constants in header files (Battery.h and constants.h).
+  12. 12-bit AD sufficiently accurate for Coulomb Counting.  Precision is what matters and it is fine, even with bit flipping.
+  13. All constants in header files (Battery.h and constants.h and retained.h and command.h).
+  14. System can become confused with retained parameters getting off-nominal values and no way to
+  reset except by forcing a full compile reload.   So the 'Talk('A')' feature was added to re-nominalize
+  the rp structure.   You have to reset to force them to take effect.

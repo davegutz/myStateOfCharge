@@ -34,9 +34,9 @@ extern CommandPars cp;
 
 // class Coulombs
 Coulombs::Coulombs()
-  : q_cap_rated_(0), q_cap_scaled_(0), t_rated_(25), t_rlim_(2.5) {}
+  : q_cap_rated_(0), q_cap_rated_scaled_(0), t_rated_(25), t_rlim_(2.5) {}
 Coulombs::Coulombs(const double q_cap_rated, const double t_rated, const double t_rlim)
-  : q_cap_rated_(q_cap_rated), q_cap_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017) {}
+  : q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017) {}
 Coulombs::~Coulombs() {}
 // t_rlim=0.017 allows 1 deg for 1 minute (the update time of the temp read; and the sensor has
 // 1 deg resolution).
@@ -50,11 +50,12 @@ Coulombs::~Coulombs() {}
 // are discharged by the same current so the delta_q will be the same.
 void Coulombs::apply_cap_scale(const double scale)
 {
-  q_cap_scaled_ = scale * q_cap_rated_;
-  q_capacity_ = calculate_saturation_charge(t_last_, q_cap_scaled_);
-  q_ = delta_q_ + q_capacity_;
+  q_cap_rated_scaled_ = scale * q_cap_rated_;
+  q_capacity_ = calculate_capacity(t_last_);
+  // q_capacity_ = calculate_saturation_charge(t_last_, q_cap_rated_scaled_);   TODO:  delete
+  q_ = delta_q_ + q_capacity_; // preserve delta_q, deficit since last saturation (like real life)
   soc_ = q_ / q_capacity_;
-  SOC_ = q_ / q_cap_scaled_ * 100.;
+  SOC_ = q_ / q_cap_rated_scaled_ * 100.;
   resetting_ = true;     // momentarily turn off saturation check
 }
 
@@ -64,7 +65,7 @@ void Coulombs::apply_soc(const double soc)
   soc_ = soc;
   q_ = soc*q_capacity_;
   delta_q_ = q_ - q_capacity_;
-  SOC_ = q_ / q_cap_scaled_ * 100.;
+  SOC_ = q_ / q_cap_rated_scaled_ * 100.;
   resetting_ = true;     // momentarily turn off saturation check
 }
 
@@ -72,7 +73,7 @@ void Coulombs::apply_soc(const double soc)
 void Coulombs::apply_SOC(const double SOC)
 {
   SOC_ = SOC;
-  q_ = SOC / 100. * q_cap_scaled_;
+  q_ = SOC / 100. * q_cap_rated_scaled_;
   delta_q_ = q_ - q_capacity_;
   soc_ = q_ / q_capacity_;
   resetting_ = true;     // momentarily turn off saturation check
@@ -85,14 +86,14 @@ void Coulombs::apply_delta_q_t(const double delta_q, const double temp_c)
   q_capacity_ = calculate_capacity(temp_c);
   q_ = q_capacity_ + delta_q;
   soc_ = q_ / q_capacity_;
-  SOC_ = q_ / q_cap_scaled_ * 100.;
+  SOC_ = q_ / q_cap_rated_scaled_ * 100.;
   resetting_ = true;
 }
 
 // Capacity
 double Coulombs::calculate_capacity(const double temp_c)
 {
-    return( q_cap_scaled_ * (1-DQDT*(temp_c - t_rated_)) );
+    return( q_cap_rated_scaled_ * (1-DQDT*(temp_c - t_rated_)) );
 }
 
 // Count coulombs based on true=actual capacity
@@ -126,13 +127,14 @@ double Coulombs::count_coulombs(const double dt, const double temp_c, const doub
     }
 
     // Integration
-    q_capacity_ = q_cap_scaled_*(1. + DQDT*(temp_lim - t_rated_));
-    delta_q_ = max(min(delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-t_last_), 1.1*(q_cap_scaled_ - q_capacity_)), -q_capacity_);
+    q_capacity_ = calculate_capacity(temp_lim);
+    // q_capacity_ = q_cap_rated_scaled_*(1. + DQDT*(temp_lim - t_rated_));  TODO:  delete
+    delta_q_ = max(min(delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-t_last_), 1.1*(q_cap_rated_scaled_ - q_capacity_)), -q_capacity_);
     q_ = q_capacity_ + delta_q_;
 
     // Normalize
     soc_ = q_ / q_capacity_;
-    SOC_ = q_ / q_cap_scaled_ * 100;
+    SOC_ = q_ / q_cap_rated_scaled_ * 100;
 
     if ( rp.debug==96 )
         Serial.printf("Coulombs::cc,                 dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,       %7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,\n",

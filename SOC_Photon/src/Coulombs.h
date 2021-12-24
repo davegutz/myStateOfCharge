@@ -46,7 +46,7 @@ public:
   void load(const double delta_q, const double t_last);
   double q(){ return (q_); };
   double q_cap_rated(){ return (q_cap_rated_); };
-  double q_cap_scaled(){ return (q_cap_scaled_); };
+  double q_cap_scaled(){ return (q_cap_rated_scaled_); };
   double q_capacity(){ return (q_capacity_); };
   double soc() { return(soc_); };
   double SOC() { return(SOC_); };
@@ -54,7 +54,7 @@ public:
   void update(double *delta_q, double *t_last);
 protected:
   double q_cap_rated_;// Rated capacity at t_rated_, saved for future scaling, C
-  double q_cap_scaled_;// Applied rated capacity at t_rated_, after scaling, C
+  double q_cap_rated_scaled_;// Applied rated capacity at t_rated_, after scaling, C
   double q_capacity_; // Saturation charge at temperature, C
   double q_;          // Present charge available to use, C
   double delta_q_;    // Charge since saturated, C
