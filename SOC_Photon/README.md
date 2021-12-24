@@ -256,6 +256,9 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   9. Device shall have no effect on system operation.   Monitor function only.
   10. Bluetooth serial interface required.  ***This did not work due to age of Android phone (6 yrs) not compatible with the latest bluetooth devices.
   11. Keep as much summary as possible of SOC every half hour:  Tbatt, Vbatt, SOC.   Save as SRAM battery backup memory. Print out to serial automatically on boot and as requested by 'Talk.'  This will tell users charging history.
+  12. Adjustments to model using talk function should preserve delta_q between models to preserve change from
+  saturated situation.  The one 'constant' in this device is that it may be reset to reality whenever fully
+  charged.   Test it the same way.  The will be separate adjustment to bias the model away from this ('n' and 'N')
 
 ## Implementation Notes
 

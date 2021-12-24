@@ -37,6 +37,7 @@
 // For Photon
 #if (PLATFORM_ID==6)
 #define PHOTON
+//#define BOOT_CLEAN        // Use this to clear 'lockup' problems introduced during testing using Talk
 #include "application.h" // Should not be needed if file ino or Arduino
 //SYSTEM_MODE(SEMI_AUTOMATIC);
 SYSTEM_THREAD(ENABLED); // Make sure code always run regardless of network status
@@ -179,6 +180,14 @@ void setup()
     myWifi->blynk_started = true;
   }
   Serial.printf("done CLOUD\n");
+
+#ifdef BOOT_CLEAN
+  rp.nominal();
+  rp.print_part_1(cp.buffer);
+  Serial.printf("Force nominal rp %s", cp.buffer);
+  rp.print_part_2(cp.buffer);
+  Serial.printf("%s", cp.buffer);
+#endif
 
   #ifdef PHOTON
     if ( rp.debug>101 ) { sprintf(cp.buffer, "Particle Photon\n"); Serial.print(cp.buffer); } //Serial1.print(buffer); }

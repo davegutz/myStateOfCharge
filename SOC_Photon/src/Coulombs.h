@@ -36,6 +36,7 @@ public:
   // operators
   // functions
   void apply_cap_scale(const double scale);
+  void apply_delta_q(const double delta_q);
   void apply_resetting(const boolean resetting){ resetting_ = resetting; };
   void apply_soc(const double soc);
   void apply_SOC(const double SOC);

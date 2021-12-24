@@ -59,6 +59,27 @@ void Coulombs::apply_cap_scale(const double scale)
   resetting_ = true;     // momentarily turn off saturation check
 }
 
+// Memory set, adjust book-keeping as needed.  delta_q, capacity, temp preserved
+void Coulombs::apply_delta_q(const double delta_q)
+{
+  delta_q_ = delta_q;
+  q_ = delta_q_ + q_capacity_;
+  soc_ = q_ / q_capacity_;
+  SOC_ = q_ / q_cap_rated_scaled_ * 100.;
+  resetting_ = true;     // momentarily turn off saturation check
+}
+
+// Memory set, adjust book-keeping as needed.  q_cap_ etc presesrved
+void Coulombs::apply_delta_q_t(const double delta_q, const double temp_c)
+{
+  delta_q_ = delta_q;
+  q_capacity_ = calculate_capacity(temp_c);
+  q_ = q_capacity_ + delta_q;
+  soc_ = q_ / q_capacity_;
+  SOC_ = q_ / q_cap_rated_scaled_ * 100.;
+  resetting_ = true;
+}
+
 // Memory set, adjust book-keeping as needed.  delta_q preserved
 void Coulombs::apply_soc(const double soc)
 {
@@ -77,17 +98,6 @@ void Coulombs::apply_SOC(const double SOC)
   delta_q_ = q_ - q_capacity_;
   soc_ = q_ / q_capacity_;
   resetting_ = true;     // momentarily turn off saturation check
-}
-
-// Memory set, adjust book-keeping as needed.  q_cap_ etc presesrved
-void Coulombs::apply_delta_q_t(const double delta_q, const double temp_c)
-{
-  delta_q_ = delta_q;
-  q_capacity_ = calculate_capacity(temp_c);
-  q_ = q_capacity_ + delta_q;
-  soc_ = q_ / q_capacity_;
-  SOC_ = q_ / q_cap_rated_scaled_ * 100.;
-  resetting_ = true;
 }
 
 // Capacity

@@ -414,6 +414,17 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
         }
         break;
+      case ( 'E' ):
+        Serial.printf("Equalizing BatteryModel, and ekf if needed, to Battery\n");
+        Serial.printf("\nMyBattModel:  soc=%7.3f, SOC=%7.3f, q=%7.3f, delta_q = %7.3f, q_scaled_rated = %7.3f,\
+        q_rated = %7.3f, q_capacity = %7.3f,\n\n", MyBattModel->soc(), MyBattModel->SOC(), MyBattModel->q(), MyBattModel->delta_q(),
+        MyBattModel->q_cap_scaled(), MyBattModel->q_cap_rated(), MyBattModel->q_capacity());
+        MyBattModel->apply_delta_q(MyBatt->delta_q());
+        if ( rp.modeling ) MyBatt->init_soc_ekf(MyBattModel->soc());
+        Serial.printf("\nMyBattModel:  soc=%7.3f, SOC=%7.3f, q=%7.3f, delta_q = %7.3f, q_scaled_rated = %7.3f,\
+        q_rated = %7.3f, q_capacity = %7.3f,\n\n", MyBattModel->soc(), MyBattModel->SOC(), MyBattModel->q(), MyBattModel->delta_q(),
+        MyBattModel->q_cap_scaled(), MyBattModel->q_cap_rated(), MyBattModel->q_capacity());
+        break;
       case ( 'S' ):
         switch ( cp.input_string.charAt(1) )
         {
@@ -461,10 +472,10 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
         if ( SOCS_in<1.1 )  // TODO:  rationale for this?
         {
           MyBatt->apply_soc(SOCS_in);
-          MyBattModel->apply_soc(SOCS_in);
+          MyBattModel->apply_delta_q(MyBatt->delta_q());
+          if ( rp.modeling ) MyBatt->init_soc_ekf(MyBattModel->soc());
           MyBatt->update(&rp.delta_q, &rp.t_last);
           MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
-          MyBatt->init_soc_ekf(MyBatt->soc());
           Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
               MyBatt->SOC(), MyBatt->soc(), rp.delta_q, MyBattModel->SOC(), MyBattModel->soc(), rp.delta_q_model, MyBatt->soc_ekf());
         }
@@ -474,10 +485,10 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
       case ( 'M' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
         MyBatt->apply_SOC(SOCS_in);
-        MyBattModel->apply_SOC(SOCS_in);
+        MyBattModel->apply_delta_q(MyBatt->delta_q());
+        if ( rp.modeling ) MyBatt->init_soc_ekf(MyBattModel->soc());
         MyBatt->update(&rp.delta_q, &rp.t_last);
         MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
-        MyBatt->init_soc_ekf(MyBatt->soc());
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
             MyBatt->SOC(), MyBatt->soc(), rp.delta_q, MyBattModel->SOC(), MyBattModel->soc(), rp.delta_q_model, MyBatt->soc_ekf());
         break;
@@ -659,6 +670,7 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
 void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
 {
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
+  Serial.printf("A=  nominalize the rp structure for clean boots etc'\n"); 
   Serial.printf("d   dump the summary log\n"); 
   Serial.printf("m=  assign curve charge state in fraction to all versions including model- '(0-1.1)'\n"); 
   Serial.printf("M=  assign a CHARGE state in percent to all versions including model- '('truncated 0-100')'\n"); 
@@ -676,6 +688,7 @@ void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
   Serial.printf("  Sc= "); Serial.print(MyBattModel->q_capacity()/MyBatt->q_capacity()); Serial.println("    : Scalar battery model size"); 
   Serial.printf("  Sr= "); Serial.print(MyBattModel->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("  Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println("    : Saturation of model cutback gain scalar"); 
+  Serial.printf("E=  set the BatteryModel delta_q to same value as Battery'\n"); 
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xx= "); Serial.printf("x   toggle model use of Vbatt = "); Serial.println(rp.modeling);
