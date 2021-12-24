@@ -956,8 +956,7 @@ double BatteryModel::count_coulombs(const double dt, const double temp_c, const 
 
     // Integration
     q_capacity_ = calculate_capacity(temp_lim);
-    // q_capacity_ = q_cap_rated_scaled_*(1. + DQDT*(temp_lim - t_rated_));   TODO:  delete
-    delta_q_ = max(min(delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-t_last_), 1.1*(q_cap_rated_ - q_capacity_)), -q_capacity_);
+    delta_q_ = max(min(delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-t_last_), 0. ), -q_capacity_);
     q_ = q_capacity_ + delta_q_;
 
     // Normalize

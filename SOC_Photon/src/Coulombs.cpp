@@ -52,7 +52,6 @@ void Coulombs::apply_cap_scale(const double scale)
 {
   q_cap_rated_scaled_ = scale * q_cap_rated_;
   q_capacity_ = calculate_capacity(t_last_);
-  // q_capacity_ = calculate_saturation_charge(t_last_, q_cap_rated_scaled_);   TODO:  delete
   q_ = delta_q_ + q_capacity_; // preserve delta_q, deficit since last saturation (like real life)
   soc_ = q_ / q_capacity_;
   SOC_ = q_ / q_cap_rated_scaled_ * 100.;
@@ -139,7 +138,7 @@ double Coulombs::count_coulombs(const double dt, const double temp_c, const doub
     // Integration
     q_capacity_ = calculate_capacity(temp_lim);
     // q_capacity_ = q_cap_rated_scaled_*(1. + DQDT*(temp_lim - t_rated_));  TODO:  delete
-    delta_q_ = max(min(delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-t_last_), 1.1*(q_cap_rated_scaled_ - q_capacity_)), -q_capacity_);
+    delta_q_ = max(min(delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-t_last_), 0.0), -q_capacity_);
     q_ = q_capacity_ + delta_q_;
 
     // Normalize
