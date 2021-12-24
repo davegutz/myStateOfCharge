@@ -91,19 +91,18 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  Wshunt,  VOC_s,  tcharge,  T,   soc_mod, soc_ekf, soc,    SOC_mod, SOC_ekf, SOC,"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  VOC_s,  tcharge,  T,   soc_mod, soc_ekf, soc,    SOC_mod, SOC_ekf, SOC,"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %7.3f,  %6.3f,  %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,%7.3f,  %c", \
+  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %6.3f,  %6.3f,%6.3f,%6.3f,    %5.1f,%5.1f,%5.1f,  %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time,
     pubList->Tbatt, pubList->Tbatt_filt,
     pubList->Vbatt, pubList->Vbatt_filt,
     pubList->curr_sel_amp,
     pubList->Ishunt, pubList->Ishunt_filt,
-    pubList->Wshunt,
     pubList->VOC,
     pubList->tcharge,
     pubList->T,
@@ -516,7 +515,15 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
             MyBatt->SOC(), MyBatt->soc(), rp.delta_q, MyBattModel->SOC(), MyBattModel->soc(), rp.delta_q_model, MyBatt->soc_ekf());
         break;
-      case ( 's' ): 
+     case ( 'p' ):
+        Serial.printf("MyBatt:\n");
+        MyBatt->pretty_print();  MyBatt->Coulombs::pretty_print(); MyBatt->pretty_print_ss(); MyBatt->EKF_1x1::pretty_print();
+        break;
+     case ( 'q' ):
+        Serial.printf("MyBattModel:   rp.modeling = %d\n", rp.modeling);
+        MyBattModel->pretty_print();  MyBattModel->Coulombs::pretty_print(); MyBattModel->pretty_print_ss();
+        break;
+     case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
         Serial.printf("Signal selection (1=amp, 0=no amp) toggled to %d\n", rp.curr_sel_amp);
         break;
@@ -690,6 +697,8 @@ void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
   Serial.printf("  Sr= "); Serial.print(MyBattModel->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("  Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println("    : Saturation of model cutback gain scalar"); 
   Serial.printf("E=  set the BatteryModel delta_q to same value as Battery'\n"); 
+  Serial.printf("p   Print Battery values\n");
+  Serial.printf("q   Print BatteryModel values\n");
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xx= "); Serial.printf("x   toggle model use of Vbatt = "); Serial.println(rp.modeling);
@@ -952,8 +961,8 @@ double BatteryModel::count_coulombs(const double dt, const double temp_c, const 
     {
       d_delta_q = 0.;
       if ( !resetting_ ) delta_q_ = 0.;
-      else resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass
     }
+    resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass
 
     // Integration
     q_capacity_ = calculate_capacity(temp_lim);

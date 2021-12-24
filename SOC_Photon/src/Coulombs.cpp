@@ -149,9 +149,9 @@ double Coulombs::count_coulombs(const double dt, const double temp_c, const doub
         {
             d_delta_q = 0.;
             if ( !resetting_ ) delta_q_ = 0.;
-            else resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass
         }
     }
+    resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass
 
     // Integration
     q_capacity_ = calculate_capacity(temp_lim);
