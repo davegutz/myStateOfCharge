@@ -52,6 +52,7 @@ public:
   double q_capacity(){ return (q_capacity_); };
   double soc() { return(soc_); };
   double SOC() { return(SOC_); };
+  boolean sat() { return(sat_); };
   double t_last() { return(t_last_); };
   void update(double *delta_q, double *t_last);
 protected:
@@ -62,6 +63,7 @@ protected:
   double delta_q_;    // Charge since saturated, C
   double soc_;        // Fraction of saturation charge (q_capacity_) available (0-1)
   double SOC_;        // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries.
+  boolean sat_;       // Indication calculated by caller that battery is saturated, T=saturated
   double t_rated_;    // Rated temperature, deg C
   double t_last_;     // Last battery temperature for rate limit memory, deg C
   double t_rlim_;     // Tbatt rate limit, deg C / s

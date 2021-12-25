@@ -44,7 +44,9 @@ struct Publish
   boolean curr_sel_amp; 
   double T;
   int I2C_status;
-  double VOC;
+  double voc;
+  double vsat;
+  boolean sat;
   double Vbatt_filt;
   double Tbatt_filt;
   double Vshunt_filt;

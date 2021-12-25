@@ -38,14 +38,14 @@ extern CommandPars cp;
 Battery::Battery()
     : b_(0), a_(0), c_(0), m_(0), n_(0), d_(0), nz_(1), q_(nom_q_cap), r1_(0), r2_(0), c2_(0), voc_(0),
     vdyn_(0), vb_(0), ib_(0), num_cells_(4), dv_dsoc_(0), tcharge_(24), sr_(1), vsat_(13.7),
-    sat_(false), dv_(0), dvoc_dt_(0) {Q_ = 0.; R_ = 0.;}
+    dv_(0), dvoc_dt_(0) {Q_ = 0.; R_ = 0.;}
 Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim)
     : Coulombs(q_cap_rated, t_rated, t_rlim), b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(nz), q_(nom_q_cap), r1_(r1), r2_(r2), c2_(r2c2/r2_),
     voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0), tcharge_(24.),
-    sr_(1.), nom_vsat_(batt_vsat), sat_(false), dv_(0), dvoc_dt_(dvoc_dt),
+    sr_(1.), nom_vsat_(batt_vsat), dv_(0), dvoc_dt_(dvoc_dt),
     r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
     tau_sd_(1.8e7), r_sd_(70.)
 {
@@ -125,6 +125,7 @@ double Battery::calculate(const double temp_C, const double q, const double curr
 double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated)
 {
     temp_c_ = temp_c;
+    vsat_ = calc_vsat(temp_c_);
 
     // Dynamic emf
     vb_ = vb;
@@ -233,6 +234,7 @@ void Battery::pretty_print(void)
     Serial.printf("  ib =      %7.3f;  // Current into battery, A\n", ib_);
     Serial.printf("  vb =      %7.3f;  // Total model voltage, voltage at terminals, V\n", vb_);
     Serial.printf("  voc =     %7.3f;  // Static model open circuit voltage, V\n", voc_);
+    Serial.printf("  vsat =    %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
     Serial.printf("  voc_dyn = %7.3f;  // Charging voltage, V\n", voc_dyn_);
     Serial.printf("  vdyn =    %7.3f;  // Model current induced back emf, V\n", vdyn_);
     Serial.printf("  q =    %10.1f;  // Present charge, C\n", q_);
@@ -302,6 +304,12 @@ boolean is_sat(const double temp_c, const double voc)
 {
     double vsat = sat_voc(temp_c);
     return ( voc >= vsat );
+}
+
+// Saturated voltage calculation
+double calc_vsat(const double temp_c)
+{
+    return ( sat_voc(temp_c) );
 }
 
 // Capacity

@@ -91,19 +91,18 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm, cTime,  Tbatt,Tbatt_filt, Vbatt,Vbatt_f_o,   curr_sel_amp,  Ishunt,Ishunt_f_o,  VOC_s,  tcharge,  T,   soc_mod, soc_ekf, soc,    SOC_mod, SOC_ekf, SOC,"));
+  Serial.println(F("unit,hm, cTime,  Tbatt,   Vbatt,voc,vsat,   curr_sel_amp,  Ishunt,Ishunt_f_o,  VOC_s,  tcharge,  T,   soc_mod, soc_ekf, soc,    SOC_mod, SOC_ekf, SOC,"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,  %d,   %7.3f,%7.3f,   %7.3f,  %7.3f,  %6.3f,  %6.3f,%6.3f,%6.3f,    %5.1f,%5.1f,%5.1f,  %c", \
+  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,   %7.3f,%7.3f,%7.3f,%d,    %d,   %7.3f,%7.3f,   %7.3f,  %6.3f,  %6.3f,%6.3f,%6.3f,    %5.1f,%5.1f,%5.1f,  %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time,
-    pubList->Tbatt, pubList->Tbatt_filt,
-    pubList->Vbatt, pubList->Vbatt_filt,
+    pubList->Tbatt,
+    pubList->Vbatt, pubList->voc, pubList->vsat, pubList->sat,
     pubList->curr_sel_amp,
     pubList->Ishunt, pubList->Ishunt_filt,
-    pubList->VOC,
     pubList->tcharge,
     pubList->T,
     pubList->soc_model, pubList->soc_ekf, pubList->soc, 
@@ -922,6 +921,7 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     ib_ = min(curr_in, sat_ib_max_);
     model_cutback_ = (voc_ > vsat_) && (ib_ == sat_ib_max_);
     model_saturated_ = (voc_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
+    Coulombs::sat_ = model_saturated_;
 
     if ( rp.debug==78 )Serial.printf("BatteryModel::calculate:,  dt,tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      dt,temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
@@ -1013,10 +1013,10 @@ double BatteryModel::count_coulombs(const double dt, const double temp_c, const 
 
     if ( rp.debug==97 )
         Serial.printf("BatteryModel::cc,  dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,      %7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,\n",
-                    dt,cp.pubList.VOC,  sat_voc(temp_c), temp_lim, model_saturated_, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
+                    dt,cp.pubList.voc,  sat_voc(temp_c), temp_lim, model_saturated_, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
     if ( rp.debug==-97 )
         Serial.printf("voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c), temp_lim, model_saturated_, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
+                    cp.pubList.voc,  sat_voc(temp_c), temp_lim, model_saturated_, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
 
     // Save and return
     t_last_ = temp_lim;

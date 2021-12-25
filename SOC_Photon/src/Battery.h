@@ -118,6 +118,7 @@ public:
   double soc_ekf() { return (soc_ekf_); };
   double SOC_ekf() { return (SOC_ekf_); };
   double voc() { return (voc_); };
+  double vsat() { return (vsat_); };
   double voc_dyn() { return (voc_dyn_); };
   double vdyn() { return (vdyn_); };
   double vb() { return (vb_); };
@@ -155,9 +156,8 @@ protected:
   double tcharge_;  // Charging time to 100%, hr
   double sr_;       // Resistance scalar
   double nom_vsat_; // Nominal saturation threshold at 25C, V
-  double vsat_;     // Saturation threshold at temperature, V   // TODO:  delete
+  double vsat_;     // Saturation threshold at temperature, V
   double tsat_;     // Temperature observed at saturation, deg C TODO:  delete?
-  boolean sat_;     // Saturation status  TODO:  delete?
   double dv_;       // Adjustment, V
   double dvoc_dt_;  // Change of VOC with temperature, V/deg C
   double dt_;       // Update time  // TODO:  delete
@@ -193,6 +193,7 @@ protected:
 void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols);
 void mulvec(double * a, double * x, double * y, int m, int n);
 double sat_voc(const double temp_c);
+double calc_vsat(const double temp_c);
 boolean is_sat(const double temp_c, const double voc);
 double calculate_capacity(const double temp_c, const double t_sat, const double q_sat);
 double calculate_saturation_charge(const double t_sat, const double q_cap);

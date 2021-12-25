@@ -362,7 +362,6 @@ void loop()
     // Charge calculation and memory store
     MyBattModel->count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, rp.t_last_model);
     MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
-    Sen->Voc = MyBattModel->voc();  // TODO:  is this needed  Sen->Voc used?  Not really a sensor
 
     // D2 signal injection to hardware current sensors
     rp.duty = MyBattModel->calc_inj_duty(now, rp.type, rp.amp, rp.freq);

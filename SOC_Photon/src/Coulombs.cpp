@@ -53,6 +53,7 @@ void Coulombs::pretty_print(void)
   Serial.printf("  delta_q_      %9.1f;     // Charge since saturated, C\n", delta_q_);
   Serial.printf("  soc_ =        %7.3f;       // Fraction of saturation charge (q_capacity_) available (0-1)  soc_);\n", soc_);
   Serial.printf("  SOC_ =        %5.1f;         // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries\n", SOC_);
+  Serial.printf("  sat_ =          %d;          // Indication calculated by caller that battery is saturated, T=saturated\n", resetting_);
   Serial.printf("  t_rated_ =    %5.1f;         // Rated temperature, deg C\n", t_rated_);
   Serial.printf("  t_last_ =     %5.1f;         // Last battery temperature for rate limit memory, deg C\n", t_last_);
   Serial.printf("  t_rlim_ =     %7.3f;       // Tbatt rate limit, deg C / s\n", t_rlim_);
@@ -136,6 +137,7 @@ double Coulombs::count_coulombs(const double dt, const double temp_c, const doub
     */
     double d_delta_q = charge_curr * dt;
     t_last_ = t_last;
+    sat_ = sat;
 
     // Rate limit temperature
     double temp_lim = t_last_ + max(min( (temp_c-t_last_), t_rlim_*dt), -t_rlim_*dt);
@@ -165,10 +167,10 @@ double Coulombs::count_coulombs(const double dt, const double temp_c, const doub
 
     if ( rp.debug==96 )
         Serial.printf("Coulombs::cc,                 dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,       %7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,\n",
-                    dt,cp.pubList.VOC,  sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
+                    dt,cp.pubList.voc,  sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
     if ( rp.debug==-96 )
         Serial.printf("voc, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,\n",
-                    cp.pubList.VOC,  sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
+                    cp.pubList.voc,  sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
 
     // Save and return
     t_last_ = temp_lim;

@@ -68,7 +68,6 @@ struct Sensors
 {
   double Vbatt;           // Sensed battery voltage, V
   double Vbatt_model;     // Model coefficient model battery voltage based on filtered current, V
-  double Voc;             // Model open circuit voltage based on TODO, V
   double Vbatt_filt;      // Filtered, sensed battery voltage, V
   double Tbatt;           // Sensed battery temp, F
   double Tbatt_filt;      // Filtered, sensed battery temp, F
@@ -91,10 +90,10 @@ struct Sensors
   double T_temp;          // Temperature update time, s
   boolean bare_ads_amp;   // If no ADS detected
   boolean bare_ads_noamp; // If no ADS detected
-  double curr_bias_amp;   // Signal injection bias for amplified current input, A
-  double curr_bias_noamp; // Signal injection bias for non-amplified current input, A
-  double curr_bias;       // Signal injection bias for selected current input, A
-  boolean saturated;      // Battery saturation status based on Temp and VOC
+  double curr_bias_amp;   // Signal injection bias for amplified current input, A //TODO:   move to cp
+  double curr_bias_noamp; // Signal injection bias for non-amplified current input, A//TODO:   move to cp
+  double curr_bias;       // Signal injection bias for selected current input, A//TODO:   move to cp
+  boolean saturated;      // Battery saturation status based on Temp and VOC //TODO:   move to Battery
   Sensors(void) {}
   Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
           int16_t Vshunt_noamp_int, double Vshunt, double Vshunt_filt,
