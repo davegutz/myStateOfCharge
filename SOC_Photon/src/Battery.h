@@ -148,7 +148,7 @@ protected:
   double c2_;       // Randels capacitance, Farads per cell  // TODO:  delete?
   double voc_;      // Static model open circuit voltage, V
   double vdyn_;     // Model current induced back emf, V
-  double vb_;        // Total model voltage, V
+  double vb_;        // Total model voltage, voltage at terminals, V
   double ib_;  // Current into battery, A
   int num_cells_;   // Number of cells
   double dv_dsoc_;  // Derivative scaled, V/fraction

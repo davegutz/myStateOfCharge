@@ -515,13 +515,46 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
             MyBatt->SOC(), MyBatt->soc(), rp.delta_q, MyBattModel->SOC(), MyBattModel->soc(), rp.delta_q_model, MyBatt->soc_ekf());
         break;
-     case ( 'p' ):
-        Serial.printf("MyBatt:\n");
-        MyBatt->pretty_print();  MyBatt->Coulombs::pretty_print(); MyBatt->pretty_print_ss(); MyBatt->EKF_1x1::pretty_print();
-        break;
-     case ( 'q' ):
-        Serial.printf("MyBattModel:   rp.modeling = %d\n", rp.modeling);
-        MyBattModel->pretty_print();  MyBattModel->Coulombs::pretty_print(); MyBattModel->pretty_print_ss();
+     case ( 'P' ):
+        switch ( cp.input_string.charAt(1) )
+        {
+          case ( 'a' ):
+            Serial.printf("MyBatt:");         MyBatt->pretty_print();
+            Serial.printf("MyBatt::");        MyBatt->Coulombs::pretty_print();
+            Serial.printf("MyBatt::");        MyBatt->pretty_print_ss();
+            Serial.printf("MyBatt::");        MyBatt->EKF_1x1::pretty_print();
+            Serial.printf("\n");
+            Serial.printf("MyBattModel:   rp.modeling = %d\n", rp.modeling);
+            Serial.printf("MyBattModel:");    MyBattModel->pretty_print();
+            Serial.printf("MyBattModel::");   MyBattModel->Coulombs::pretty_print();
+            Serial.printf("MyBattModel::");   MyBattModel->pretty_print_ss();
+            break;
+          case ( 'b' ):
+            Serial.printf("MyBatt:");         MyBatt->pretty_print();
+            Serial.printf("MyBatt::");        MyBatt->Coulombs::pretty_print();
+            Serial.printf("MyBatt::");        MyBatt->pretty_print_ss();
+            Serial.printf("MyBatt::");        MyBatt->EKF_1x1::pretty_print();
+            break;
+          case ( 'c' ):
+            Serial.printf("MyBatt::");        MyBatt->Coulombs::pretty_print();
+            Serial.printf("MyBattModel::");   MyBattModel->Coulombs::pretty_print();
+            break;
+          case ( 'e' ):
+             Serial.printf("MyBatt::"); MyBatt->EKF_1x1::pretty_print();
+            break;
+          case ( 'm' ):
+            Serial.printf("MyBattModel:   rp.modeling = %d\n", rp.modeling);
+            Serial.printf("MyBattModel:");    MyBattModel->pretty_print();
+            Serial.printf("MyBattModel::");   MyBattModel->Coulombs::pretty_print();
+            Serial.printf("MyBattModel::");   MyBattModel->pretty_print_ss();
+            break;
+          case ( 's' ):
+            Serial.printf("MyBatt::");        MyBatt->pretty_print_ss();
+            Serial.printf("MyBattModel::");   MyBattModel->pretty_print_ss();
+            break;
+          default:
+            Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
+        }
         break;
      case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
@@ -697,8 +730,13 @@ void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
   Serial.printf("  Sr= "); Serial.print(MyBattModel->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("  Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println("    : Saturation of model cutback gain scalar"); 
   Serial.printf("E=  set the BatteryModel delta_q to same value as Battery'\n"); 
-  Serial.printf("p   Print Battery values\n");
-  Serial.printf("q   Print BatteryModel values\n");
+  Serial.printf("P<?>   Print Battery values\n");
+  Serial.printf("  Pa= "); Serial.printf("print all\n");
+  Serial.printf("  Pb= "); Serial.printf("print battery\n");
+  Serial.printf("  Pc= "); Serial.printf("print all coulombs\n");
+  Serial.printf("  Pe= "); Serial.printf("print ekf\n");
+  Serial.printf("  Pm= "); Serial.printf("print model\n");
+  Serial.printf("  Ps= "); Serial.printf("print all state-space\n");
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xx= "); Serial.printf("x   toggle model use of Vbatt = "); Serial.println(rp.modeling);
@@ -991,4 +1029,19 @@ void BatteryModel::load(const double delta_q, const double t_last, const double 
     delta_q_ = delta_q;
     t_last_ = t_last;
     apply_cap_scale(s_cap_model);
+}
+
+// Print
+void BatteryModel::pretty_print(void)
+{
+    Serial.printf("BatteryModel::");
+    this->Battery::pretty_print();
+    Serial.printf("  NOTE: for BatteryModel, voc_dyn, q_ekf, pow_in_ekf, soc_ekf, SOC_ekf, and amp_hrs* not used\n");
+    Serial.printf("  sat_ib_max_ =       %7.3f; // Current cutback to be applied to modeled ib output, A\n", sat_ib_max_);
+    Serial.printf("  sat_ib_null_ =      %7.3f; // Current cutback value for voc=vsat, A\n", sat_ib_null_);
+    Serial.printf("  sat_cutback_gain_ = %7.3f; // Gain to retard ib when voc exceeds vsat, dimensionless\n", sat_cutback_gain_);
+    Serial.printf("  model_cutback_ =      %d;     // Gain to retard ib when voc exceeds vsat, dimensionless\n", model_cutback_);
+    Serial.printf("  model_saturated_ =    %d;     // Modeled current being limited on saturation cutback, T = cutback limited\n", model_saturated_);
+    Serial.printf("  ib_sat_ =           %7.3f; // Indicator of maximal cutback, T = cutback saturated\n", ib_sat_);
+    Serial.printf("  s_cap_ =            %7.3f; // Rated capacity scalar\n", s_cap_);
 }

@@ -224,17 +224,29 @@ void Battery::init_soc_ekf(const double soc)
 // Print
 void Battery::pretty_print(void)
 {
-    Serial.printf("Battery::pretty_print\n");
-    Serial.printf("    temp, #cells, b, a, c, m, n, d, dvoc_dt = %7.1f, %d, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f;\n",
+    Serial.printf("Battery:\n");
+    Serial.printf("  temp, #cells, b, a, c, m, n, d, dvoc_dt = %7.1f, %d, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f;\n",
         temp_c_, num_cells_, b_, a_, c_, m_, n_, d_, dvoc_dt_);
-    Serial.printf("    dv_dsoc = %10.6f;\n", dv_dsoc_);
-    Serial.printf("    ib, vb, voc, voc_dyn, vsat, sat, vdyn = %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %d, %7.3f;\n", ib_, vb_, voc_, voc_dyn_, vsat_, sat_, vdyn_);
-    Serial.printf("    q, q_ekf, pow_in_ekf = %10.1f, %10.1f, %7.3f;\n", q_, q_ekf_, pow_in_ekf_);
-    Serial.printf("    r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f;\n",
+    Serial.printf("  r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f;\n",
         r0_, rct_, tau_ct_, r_dif_, tau_dif_, r_sd_, tau_sd_);
-    Serial.printf("    tcharge, tcharge_ekf, soc_ekf, SOC_ekf, q_ekf, amp_hrs_remaining, amp_hrs_remaining_ekf = %5.1f, %5.1f, %7.3f, %5.1f, %5.1f, %5.1f;\n",
-        tcharge_, tcharge_ekf_, soc_ekf_, SOC_ekf_, amp_hrs_remaining_, amp_hrs_remaining_ekf_);
-    Serial.printf("    sr, dv, dt= %7.3f, %7.3f, %7.3f;\n", sr_, dv_, dt_);
+    Serial.printf("  dv_dsoc = %10.6f;  // Derivative scaled, V/fraction\n", dv_dsoc_);
+    Serial.printf("  ib =      %7.3f;  // Current into battery, A\n", ib_);
+    Serial.printf("  vb =      %7.3f;  // Total model voltage, voltage at terminals, V\n", vb_);
+    Serial.printf("  voc =     %7.3f;  // Static model open circuit voltage, V\n", voc_);
+    Serial.printf("  voc_dyn = %7.3f;  // Charging voltage, V\n", voc_dyn_);
+    Serial.printf("  vdyn =    %7.3f;  // Model current induced back emf, V\n", vdyn_);
+    Serial.printf("  q =    %10.1f;  // Present charge, C\n", q_);
+    Serial.printf("  q_ekf =%10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
+    Serial.printf("  pow_in_ekf = %7.3f;  // Charging power from ekf, W\n", pow_in_ekf_);
+    Serial.printf("  tcharge =    %5.1f; // Charging time to full, hr\n", tcharge_);
+    Serial.printf("  tcharge_ekf =%5.1f; // Charging time to full from ekf, hr\n", tcharge_ekf_);
+    Serial.printf("  soc_ekf = %7.3f;  // Filtered state of charge from ekf (0-1)\n", soc_ekf_);
+    Serial.printf("  SOC_ekf_ =   %5.1f; // Filtered state of charge from ekf (0-100)\n", SOC_ekf_);
+    Serial.printf("  amp_hrs_remaining =       %7.3f;  // Discharge amp*time left if drain to q=0, A-h\n", amp_hrs_remaining_);
+    Serial.printf("  amp_hrs_remaining_ekf_ =  %7.3f;  // Discharge amp*time left if drain to q_ekf=0, A-h\n", amp_hrs_remaining_ekf_);
+    Serial.printf("  sr =      %7.3f;  // Resistance scalar\n", sr_);
+    Serial.printf("  dv_ =      %7.3f; // Adjustment, V\n", dv_);
+    Serial.printf("  dt_ =      %7.3f; // Update time  // TODO:  delete\n", dt_);
 }
 
 // Print State Space
