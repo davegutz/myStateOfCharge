@@ -155,12 +155,12 @@ protected:
   double tcharge_;  // Charging time to 100%, hr
   double sr_;       // Resistance scalar
   double nom_vsat_; // Nominal saturation threshold at 25C, V
-  double vsat_;     // Saturation threshold at temperature, V
+  double vsat_;     // Saturation threshold at temperature, V   // TODO:  delete
   double tsat_;     // Temperature observed at saturation, deg C TODO:  delete?
   boolean sat_;     // Saturation status  TODO:  delete?
   double dv_;       // Adjustment, V
   double dvoc_dt_;  // Change of VOC with temperature, V/deg C
-  double dt_;       // Update time
+  double dt_;       // Update time  // TODO:  delete
   double r0_;       // Randles R0, ohms
   double tau_ct_;   // Randles charge transfer time constant, s (=1/Rct/Cct)
   double rct_;      // Randles charge transfer resistance, ohms

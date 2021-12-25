@@ -124,11 +124,7 @@ double Battery::calculate(const double temp_C, const double q, const double curr
 // SOC-OCV curve fit method per Zhang, et al modified by ekf
 double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated)
 {
-    double b, a, c, log_soc, exp_n_soc, pow_log_soc;
     temp_c_ = temp_c;
-
-    // VOC-OCV model
-    calc_soc_voc_coeff(soc_ekf_, temp_c_, &b, &a, &c, &log_soc, &exp_n_soc, &pow_log_soc);
 
     // Dynamic emf
     vb_ = vb;
@@ -203,14 +199,13 @@ void Battery::ekf_model_predict(double *Fx, double *Bu)
 void Battery::ekf_model_update(double *hx, double *H)
 {
     // Measurement function hx(x), x=soc ideal capacitor
-    double b, a, c, log_soc, exp_n_soc, pow_log_soc;
-    double dv_dsoc;
+    double log_soc, exp_n_soc, pow_log_soc;
     double x_lim = max(min(x_, mxeps_bb), mneps_bb);
-    calc_soc_voc_coeff(x_lim, temp_c_,  &b, &a, &c, &log_soc, &exp_n_soc, &pow_log_soc);
-    *hx = calc_soc_voc(x_lim, &dv_dsoc, b, a, c, log_soc, exp_n_soc, pow_log_soc);
+    calc_soc_voc_coeff(x_lim, temp_c_,  &b_, &a_, &c_, &log_soc, &exp_n_soc, &pow_log_soc);
+    *hx = calc_soc_voc(x_lim, &dv_dsoc_, b_, a_, c_, log_soc, exp_n_soc, pow_log_soc);
 
     // Jacodian of measurement function
-    *H = dv_dsoc;
+    *H = dv_dsoc_;
 }
 
 // Init EKF
@@ -239,7 +234,7 @@ void Battery::pretty_print(void)
         r0_, rct_, tau_ct_, r_dif_, tau_dif_, r_sd_, tau_sd_);
     Serial.printf("    tcharge, tcharge_ekf, soc_ekf, SOC_ekf, q_ekf, amp_hrs_remaining, amp_hrs_remaining_ekf = %5.1f, %5.1f, %7.3f, %5.1f, %5.1f, %5.1f;\n",
         tcharge_, tcharge_ekf_, soc_ekf_, SOC_ekf_, amp_hrs_remaining_, amp_hrs_remaining_ekf_);
-    Serial.printf("    sr, dv, dt= %7.3f, %7.3f, %7.3f;n", sr_, dv_, dt_);
+    Serial.printf("    sr, dv, dt= %7.3f, %7.3f, %7.3f;\n", sr_, dv_, dt_);
 }
 
 // Print State Space
