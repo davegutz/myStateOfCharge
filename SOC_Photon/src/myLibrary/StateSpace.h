@@ -38,6 +38,8 @@ public:
   void calc_x_dot(double *u);
   void update(const double dt);
   virtual void pretty_print();
+  void pretty_print_mat(const String name, const uint8_t n, const uint8_t m, double *A);
+  void pretty_print_vec(const String name, const uint8_t n, double *x);
   void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols);
   void mulvec(double * a, double * x, double * y, int m, int n);
   void insert_A(const uint8_t i, const uint8_t j, const double value);

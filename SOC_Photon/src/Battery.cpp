@@ -51,9 +51,9 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
 {
 
     // Battery characteristic tables
-    B_T_ = new TableInterp1Dclip(nz_, x_tab, b_tab);
-    A_T_ = new TableInterp1Dclip(nz_, x_tab, a_tab);
-    C_T_ = new TableInterp1Dclip(nz_, x_tab, c_tab);
+    B_T_ = new TableInterp1Dclip(nz_, x_tab, b_tab);  // TODO:  delete?
+    A_T_ = new TableInterp1Dclip(nz_, x_tab, a_tab);  // TODO:  delete?
+    C_T_ = new TableInterp1Dclip(nz_, x_tab, c_tab);  // TODO:  delete?
 
     // EKF
     this->Q_ = 0.001*0.001;
@@ -230,6 +230,16 @@ void Battery::init_soc_ekf(const double soc)
 void Battery::pretty_print(void)
 {
     Serial.printf("Battery::pretty_print\n");
+    Serial.printf("    temp, #cells, b, a, c, m, n, d, dvoc_dt = %7.1f, %d, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f;\n",
+        temp_c_, num_cells_, b_, a_, c_, m_, n_, d_, dvoc_dt_);
+    Serial.printf("    dv_dsoc = %10.6f;\n", dv_dsoc_);
+    Serial.printf("    ib, vb, voc, voc_dyn, vsat, sat, vdyn = %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %d, %7.3f;\n", ib_, vb_, voc_, voc_dyn_, vsat_, sat_, vdyn_);
+    Serial.printf("    q, q_ekf, pow_in_ekf = %10.1f, %10.1f, %7.3f;\n", q_, q_ekf_, pow_in_ekf_);
+    Serial.printf("    r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f;\n",
+        r0_, rct_, tau_ct_, r_dif_, tau_dif_, r_sd_, tau_sd_);
+    Serial.printf("    tcharge, tcharge_ekf, soc_ekf, SOC_ekf, q_ekf, amp_hrs_remaining, amp_hrs_remaining_ekf = %5.1f, %5.1f, %7.3f, %5.1f, %5.1f, %5.1f;\n",
+        tcharge_, tcharge_ekf_, soc_ekf_, SOC_ekf_, amp_hrs_remaining_, amp_hrs_remaining_ekf_);
+    Serial.printf("    sr, dv, dt= %7.3f, %7.3f, %7.3f;n", sr_, dv_, dt_);
 }
 
 // Print State Space

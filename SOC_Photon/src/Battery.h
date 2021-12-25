@@ -113,7 +113,7 @@ public:
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated);
   double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   void init_soc_ekf(const double soc);
-  void pretty_print();
+  virtual void pretty_print();
   void pretty_print_ss();
   double soc_ekf() { return (soc_ekf_); };
   double SOC_ekf() { return (SOC_ekf_); };
@@ -132,20 +132,20 @@ public:
   double amp_hrs_remaining() { return (amp_hrs_remaining_); };
   double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
 protected:
-  TableInterp1Dclip *B_T_;  // Battery coeff
-  TableInterp1Dclip *A_T_;  // Battery coeff
-  TableInterp1Dclip *C_T_;  // Battery coeff
-  double b_;        // Battery coeff
-  double a_;        // Battery coeff
-  double c_;        // Battery coeff
-  double m_;        // Battery coeff
-  double n_;        // Battery coeff
-  double d_;        // Battery coeff
+  TableInterp1Dclip *B_T_;  // Battery coeff b
+  TableInterp1Dclip *A_T_;  // Battery coeff a
+  TableInterp1Dclip *C_T_;  // Battery coeff c
+  double b_;        // Battery coeff b
+  double a_;        // Battery coeff a
+  double c_;        // Battery coeff c
+  double m_;        // Battery coeff m
+  double n_;        // Battery coeff n
+  double d_;        // Battery coeff d
   unsigned int nz_; // Number of breakpoints
-  double q_;        // Charge, C
-  double r1_;       // Randels resistance, Ohms per cell
-  double r2_;       // Randels resistance, Ohms per cell
-  double c2_;       // Randels capacitance, Farads per cell
+  double q_;        // Charge, C TODO:  delete?
+  double r1_;       // Randels resistance, Ohms per cell  // TODO:  delete?
+  double r2_;       // Randels resistance, Ohms per cell  // TODO:  delete?
+  double c2_;       // Randels capacitance, Farads per cell  // TODO:  delete?
   double voc_;      // Static model open circuit voltage, V
   double vdyn_;     // Model current induced back emf, V
   double vb_;        // Total model voltage, V
@@ -154,10 +154,10 @@ protected:
   double dv_dsoc_;  // Derivative scaled, V/fraction
   double tcharge_;  // Charging time to 100%, hr
   double sr_;       // Resistance scalar
-  double nom_vsat_; // Nominal saturation threshold at 25C
-  double vsat_;     // Saturation threshold at temperature
-  double tsat_;     // Temperature observed at saturation, deg C
-  boolean sat_;     // Saturation status
+  double nom_vsat_; // Nominal saturation threshold at 25C, V
+  double vsat_;     // Saturation threshold at temperature, V
+  double tsat_;     // Temperature observed at saturation, deg C TODO:  delete?
+  boolean sat_;     // Saturation status  TODO:  delete?
   double dv_;       // Adjustment, V
   double dvoc_dt_;  // Change of VOC with temperature, V/deg C
   double dt_;       // Update time
@@ -171,18 +171,18 @@ protected:
   // EKF declarations
   StateSpace *Randles_; // Randles model {ib, vb} --> {voc}, ioc=ib for Battery version
                         // Randles model {ib, voc} --> {vb}, ioc=ib for BatteryModel version
-  double *rand_A_;  // Randles model
-  double *rand_B_;  // Randles model
-  double *rand_C_;  // Randles model
-  double *rand_D_;  // Randles model
-  double temp_c_;   // Battery temperature, C
-  double pow_in_ekf_;   // Charging power from ekf, w
+  double *rand_A_;  // Randles model A
+  double *rand_B_;  // Randles model B
+  double *rand_C_;  // Randles model C
+  double *rand_D_;  // Randles model D
+  double temp_c_;   // Battery temperature, deg C
+  double pow_in_ekf_;   // Charging power from ekf, W   TODO:  delete?
   double tcharge_ekf_;  // Charging time to 100% from ekf, hr
   double voc_dyn_;  // Charging voltage, V
-  double delta_soc_;// Change to available charge since saturated, (0-1)
+  double delta_soc_;// Change to available charge since saturated, (0-1)  // TODO:  delete?
   double soc_ekf_;  // Filtered state of charge from ekf (0-1)
   double SOC_ekf_;  // Filtered state of charge from ekf (0-100)
-  double q_ekf_;    // Filtered charge calculated by ekf, C
+  double q_ekf_;    // Filtered charge calculated by ekf, C  // TODO:  delete?
   double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
   void ekf_model_predict(double *Fx, double *Bu);

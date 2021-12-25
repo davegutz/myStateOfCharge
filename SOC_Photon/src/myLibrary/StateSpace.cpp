@@ -67,17 +67,48 @@ void StateSpace::calc_x_dot(double *u)
   }
 }
 
+// Pretty print matrix
+void StateSpace::pretty_print_mat(const String name, const uint8_t n, const uint8_t m, double *A)
+{
+  Serial.printf("   %s =  [", name.c_str());
+  for ( int i=0; i<n; i++ )
+  {
+    for ( int j=0; j<m; j++)
+    {
+      Serial.printf("%10.6f", A[i*n+j]);
+      if ( j==m-1 )
+      {
+        if ( i==n-1 ) Serial.printf("];\n");
+        else Serial.printf(",\n         ");
+      }
+      else Serial.printf(",");
+    }
+  }
+}
+
+// Pretty print vector
+void StateSpace::pretty_print_vec(const String name, const uint8_t n, double *x)
+{
+  Serial.printf("   %s =  [", name.c_str());
+  for ( int i=0; i<n; i++ )
+  {
+    Serial.printf("%10.6f", x[i]);
+    if ( i==n-1 ) Serial.printf("];\n");
+    else Serial.printf(",");
+  }
+}
+
 // Pretty Print
 void StateSpace::pretty_print(void)
 {
   Serial.printf("StateSpace:\n");
-  Serial.printf("   A_ =  [%10.6f, %10.6f,\n          %10.6f, %10.6f,]\n", A_[0], A_[1], A_[2], A_[3]);
-  Serial.printf("   x_ =  [%10.6f, %10.6f]\n", x_[0], x_[1]);
-  Serial.printf("   B_ =  [%10.6f, %10.6f,\n          %10.6f, %10.6f,]\n", B_[0], B_[1], B_[2], B_[3]);
-  Serial.printf("   u_ =  [%10.6f, %10.6f]\n", u_[0], u_[1]);
-  Serial.printf("   C_ =  [%10.6f, %10.6f]\n", C_[0], C_[1]);
-  Serial.printf("   D_ =  [%10.6f, %10.6f]\n", D_[0], D_[1]);
-  Serial.printf("   xdot_=[%10.6f, %10.6f]\n", x_dot_[0], x_dot_[1]);
+  pretty_print_mat("A ", n_, n_, A_);
+  pretty_print_vec("x ", n_, x_);
+  pretty_print_mat("B ", n_, p_, B_);
+  pretty_print_vec("u ", p_, u_);
+  pretty_print_mat("C ", q_, n_, C_);
+  pretty_print_mat("D ", q_, p_, D_);
+  pretty_print_vec("x_dot ", n_, x_dot_);
 }
 
 // Scale elements as requested
