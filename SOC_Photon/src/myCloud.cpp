@@ -163,7 +163,6 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->voc = MyBatt->voc();
   pubList->vsat = MyBatt->vsat();
   pubList->sat = MyBatt->sat();
-  // Serial.printf("mycloud:  publist->sat, myBatt->sat() = %d, %d\n", pubList->sat, MyBatt->sat());
   pubList->curr_sel_amp = rp.curr_sel_amp;
   pubList->amp_hrs_remaining = MyBatt->amp_hrs_remaining();
   pubList->amp_hrs_remaining_ekf = MyBatt->amp_hrs_remaining_ekf();

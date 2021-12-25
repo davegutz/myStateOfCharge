@@ -53,7 +53,7 @@ void Coulombs::pretty_print(void)
   Serial.printf("  delta_q_      %9.1f;     // Charge since saturated, C\n", delta_q_);
   Serial.printf("  soc_ =        %7.3f;       // Fraction of saturation charge (q_capacity_) available (0-1)  soc_);\n", soc_);
   Serial.printf("  SOC_ =        %5.1f;         // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries\n", SOC_);
-  Serial.printf("  sat_ =          %d;          // Indication calculated by caller that battery is saturated, T=saturated\n", resetting_);
+  Serial.printf("  sat_ =          %d;          // Indication calculated by caller that battery is saturated, T=saturated\n", sat_);
   Serial.printf("  t_rated_ =    %5.1f;         // Rated temperature, deg C\n", t_rated_);
   Serial.printf("  t_last_ =     %5.1f;         // Last battery temperature for rate limit memory, deg C\n", t_last_);
   Serial.printf("  t_rlim_ =     %7.3f;       // Tbatt rate limit, deg C / s\n", t_rlim_);
