@@ -381,7 +381,7 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
     case ( 6 ):   // Positve bias
       sin_bias = 0.;
       square_bias =  0.;
-      tri_bias = -amp;
+      tri_bias = amp;
       break;
     default:
       break;
