@@ -28,7 +28,7 @@
 #include "Battery.h"
 #include "constants.h"
 #include "myCloud.h"
-#include "myLibrary/injection.h"
+#include "myTalk.h"
 #include "retained.h"
 #include "command.h"
 
@@ -123,40 +123,6 @@ struct Sensors
 };
 
 
-class BatteryModel: public Battery
-{
-public:
-  BatteryModel();
-  BatteryModel(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
-    const double m, const double n, const double d, const unsigned int nz, const int num_cells,
-    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim);
-  ~BatteryModel();
-  // operators
-  // functions
-  double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt,
-    const double q_capacity, const double q_cap);
-  uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);
-  double count_coulombs(const double dt, const double temp_c, const double charge_curr, const double t_last);
-  void load(const double delta_q, const double t_last, const double s_cap_model);
-  void pretty_print(void);
-  boolean cutback() { return model_cutback_; };
-  boolean saturated() { return model_saturated_; };
-protected:
-  SinInj *Sin_inj_;     // Class to create sine waves
-  SqInj *Sq_inj_;       // Class to create square waves
-  TriInj *Tri_inj_;     // Class to create triangle waves
-  uint32_t duty_;       // Calculated duty cycle for D2 driver to ADC cards (0-255).  Bias on rp.offset
-  double sat_ib_max_;   // Current cutback to be applied to modeled ib output, A
-  double sat_ib_null_;  // Current cutback value for voc=vsat, A
-  double sat_cutback_gain_; // Gain to retard ib when voc exceeds vsat, dimensionless
-  boolean model_cutback_;   // Indicate that modeled current being limited on saturation cutback, T = cutback limited
-  boolean model_saturated_; // Indicator of maximal cutback, T = cutback saturated
-  double ib_sat_;       // Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
-  double s_cap_;        // Rated capacity scalar
-};
-
-
 // Headers
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);
@@ -174,9 +140,5 @@ uint32_t pwm_write(uint32_t duty, Pins *myPins);
 String time_long_2_str(const unsigned long current_time, char *tempStr);
 void create_print_string(char *buffer, Publish *pubList);
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);
-
-// Talk Declarations
-void talk(Battery *MyBatt, BatteryModel *MyBattModel);
-void talkH(Battery *batt, BatteryModel *batt_model); // Help
 
 #endif
