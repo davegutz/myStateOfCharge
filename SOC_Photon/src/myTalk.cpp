@@ -347,11 +347,22 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 break;
               case ( 5 ):
                 rp.modeling = true;
-                rp.type = 4;
+                rp.type = 5;
                 rp.freq = 0.0;
                 rp.amp = 0.0;
                 rp.offset = 0;
                 rp.curr_bias_all = RATED_BATT_CAP; // Software effect only
+                rp.debug = -12;
+                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
+                break;
+              case ( 6 ):
+                rp.modeling = true;
+                rp.type = 6;
+                rp.freq = 0.0;
+                rp.amp = RATED_BATT_CAP*0.2;
+                rp.offset = 0;
+                rp.curr_bias_all = 0;
                 rp.debug = -12;
                 Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
@@ -419,7 +430,8 @@ void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
   Serial.printf("       1:  1 Hz sinusoid centered at 0 with largest supported amplitude\n");
   Serial.printf("       2:  1 Hz square centered at 0 with largest supported amplitude\n");
   Serial.printf("       3:  1 Hz triangle centered at 0 with largest supported amplitude\n");
-  Serial.printf("       4:  -1C soft discharge until reset by Xp0 or Di0\n");
-  Serial.printf("       5:  +1C soft charge until reset by Xp0 or Di0\n");
+  Serial.printf("       4:  -1C soft discharge until reset by Xp0 or Di0.  Software only\n");
+  Serial.printf("       5:  +1C soft charge until reset by Xp0 or Di0.  Software only\n");
+  Serial.printf("       6:  +0.2C hard charge until reset by Xp0 or Di0\n");
   Serial.printf("h   this menu\n");
 }

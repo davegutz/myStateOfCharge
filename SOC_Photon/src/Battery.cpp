@@ -335,6 +335,8 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     model_cutback_ = (voc_ > vsat_) && (ib_ == sat_ib_max_);
     model_saturated_ = (voc_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
     Coulombs::sat_ = model_saturated_;
+    if ( rp.debug==79 ) Serial.printf("temp_C, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f,\n",
+        temp_C, dvoc_dt_, vsat_, voc_, q_capacity, sat_ib_max_, ib_);
 
     if ( rp.debug==78 )Serial.printf("BatteryModel::calculate:,  dt,tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      dt,temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
@@ -376,6 +378,10 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
       sin_bias = 0.;
       square_bias =  0.;
       tri_bias = Tri_inj_->signal(amp, freq, t, 0.0);
+    case ( 6 ):   // Positve bias
+      sin_bias = 0.;
+      square_bias =  0.;
+      tri_bias = -amp;
       break;
     default:
       break;
@@ -410,9 +416,10 @@ double BatteryModel::count_coulombs(const double dt, const boolean reset, const 
     // detection).
     if ( model_saturated_ )
     {
-      if ( !resetting_ && (sat_ib_max_ >= 0.) ) delta_q_ = 0.;
-      else if ( reset )
-          delta_q_ = 0.;
+        //   if ( !resetting_ && (sat_ib_max_ >= 0.) ) delta_q_ = 0.;
+        //   else if ( reset )
+        //       delta_q_ = 0.;
+        if ( reset ) delta_q_ = 0.;  // Model is truth.   Saturate it then restart it to reset charge
     }
     resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass
 
