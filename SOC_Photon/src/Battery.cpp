@@ -390,7 +390,7 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
 }
 
 // Count coulombs based on true=actual capacity
-double BatteryModel::count_coulombs(const double dt, const double temp_c, const double charge_curr, const double t_last)
+double BatteryModel::count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr, const double t_last)
 {
     /* Count coulombs based on true=actual capacity
     Inputs:
@@ -410,8 +410,9 @@ double BatteryModel::count_coulombs(const double dt, const double temp_c, const 
     // detection).
     if ( model_saturated_ )
     {
-      d_delta_q = 0.;
-      if ( !resetting_ ) delta_q_ = 0.;
+      if ( !resetting_ && (sat_ib_max_ >= 0.) ) delta_q_ = 0.;
+      else if ( reset )
+          delta_q_ = 0.;
     }
     resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass
 
@@ -425,10 +426,10 @@ double BatteryModel::count_coulombs(const double dt, const double temp_c, const 
     SOC_ = q_ / q_cap_rated_scaled_ * 100;
 
     if ( rp.debug==97 )
-        Serial.printf("BatteryModel::cc,  dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,      %7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,\n",
+        Serial.printf("BatteryModel::cc,  dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,      %7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,%5.1f,\n",
                     dt,cp.pubList.voc,  sat_voc(temp_c), temp_lim, model_saturated_, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
     if ( rp.debug==-97 )
-        Serial.printf("voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%7.3f,%7.4f,%7.3f,\n",
+        Serial.printf("voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,%5.1f,\n",
                     cp.pubList.voc,  sat_voc(temp_c), temp_lim, model_saturated_, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
 
     // Save and return

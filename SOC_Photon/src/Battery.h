@@ -205,7 +205,7 @@ public:
   double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt,
     const double q_capacity, const double q_cap);
   uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);
-  double count_coulombs(const double dt, const double temp_c, const double charge_curr, const double t_last);
+  double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr, const double t_last);
   void load(const double delta_q, const double t_last, const double s_cap_model);
   void pretty_print(void);
   boolean cutback() { return model_cutback_; };

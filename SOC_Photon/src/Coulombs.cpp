@@ -125,7 +125,7 @@ double Coulombs::calculate_capacity(const double temp_c)
 }
 
 // Count coulombs based on true=actual capacity
-double Coulombs::count_coulombs(const double dt, const double temp_c, const double charge_curr, const boolean sat, const double t_last)
+double Coulombs::count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr, const boolean sat, const double t_last)
 {
     /* Count coulombs based on true=actual capacity
     Inputs:
@@ -152,6 +152,8 @@ double Coulombs::count_coulombs(const double dt, const double temp_c, const doub
             d_delta_q = 0.;
             if ( !resetting_ ) delta_q_ = 0.;
         }
+        else if ( reset )
+          delta_q_ = 0.;
     }
     resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass
 

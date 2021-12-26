@@ -183,12 +183,11 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   Sen->Ishunt_noamp_cal = Sen->Vshunt_noamp*shunt_noamp_v2a_s + Sen->curr_bias_noamp;
 
   // Print results
-  if ( rp.debug==14 ) Serial.printf("reset_free,select,   vs_na_int,0_na_int,1_na_int,vshunt_na,ishunt_na, ||, vshunt_a_int,0_a_int,1_a_int,vshunt_a,ishunt_a,  Ishunt_filt,T, %d,%d,%d,%d,%d,%7.3f,%7.3f,||,%d,%d,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-    reset_free, rp.curr_sel_amp,
+  if ( rp.debug==14 ) Serial.printf("reset_free,select,duty,  ||,  vs_na_int,0_na_int,1_na_int,vshunt_na,ishunt_na, ||, vshunt_a_int,0_a_int,1_a_int,vshunt_a,ishunt_a,  ||,  Ishunt,T=,    %d,%d,%ld,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %7.3f,%7.3f,\n",
+    reset_free, rp.curr_sel_amp, rp.duty,
     Sen->Vshunt_noamp_int, vshunt_noamp_int_0, vshunt_noamp_int_1, Sen->Vshunt_noamp, Sen->Ishunt_noamp_cal,
     Sen->Vshunt_amp_int, vshunt_amp_int_0, vshunt_amp_int_1, Sen->Vshunt_amp, Sen->Ishunt_amp_cal,
-    Sen->Ishunt_filt,
-    T);
+    Sen->Ishunt, T);
 
   // Current signal selection, based on if there or not.
   // Over-ride 'permanent' with Talk(rp.curr_sel_amp) = Talk('s')

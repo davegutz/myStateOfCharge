@@ -360,7 +360,7 @@ void loop()
     }
 
     // Charge calculation and memory store
-    MyBattModel->count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, rp.t_last_model);
+    MyBattModel->count_coulombs(Sen->T, reset, Tbatt_filt_C, Sen->Ishunt, rp.t_last_model);
     MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
 
     // D2 signal injection to hardware current sensors
@@ -393,7 +393,7 @@ void loop()
     Sen->saturated = SatDebounce->calculate(is_sat(Tbatt_filt_C, MyBatt->voc()), reset);
 
     // Memory store
-    MyBatt->count_coulombs(Sen->T, Tbatt_filt_C, Sen->Ishunt, Sen->saturated, rp.t_last);
+    MyBatt->count_coulombs(Sen->T, reset, Tbatt_filt_C, Sen->Ishunt, Sen->saturated, rp.t_last);
     MyBatt->update(&rp.delta_q, &rp.t_last);
 
     // Charge time for display

@@ -42,7 +42,7 @@ public:
   void apply_SOC(const double SOC);
   void apply_delta_q_t(const double delta_q, const double temp_c);
   double calculate_capacity(const double temp_c);
-  virtual double count_coulombs(const double dt, const double temp_c, const double charge_curr, const boolean sat, const double t_last);
+  virtual double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr, const boolean sat, const double t_last);
   double delta_q() { return(delta_q_); };
   void load(const double delta_q, const double t_last);
   virtual void pretty_print();
