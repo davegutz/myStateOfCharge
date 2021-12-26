@@ -32,6 +32,27 @@
 extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
 
+// Text header
+void print_serial_header(void)
+{
+  Serial.println(F("unit,hm, cTime,T,  Tbatt,   Vbatt,voc,vsat,   curr_sel_amp,  Ishunt,Ishunt_f_o,  VOC_s,  tcharge,  T,   soc_mod, soc_ekf, soc,    SOC_mod, SOC_ekf, SOC,"));
+}
+
+// Print strings
+void create_print_string(char *buffer, Publish *pubList)
+{
+  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,   %7.3f,%7.3f,%7.3f,%d,    %d,   %7.3f,%7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,  %c", \
+    pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
+    pubList->Tbatt,
+    pubList->Vbatt, pubList->voc, pubList->vsat, pubList->sat,
+    pubList->curr_sel_amp,
+    pubList->Ishunt, pubList->Ishunt_filt,
+    pubList->tcharge,
+    pubList->soc_model, pubList->soc_ekf, pubList->soc, 
+    pubList->SOC_model, pubList->SOC_ekf, pubList->SOC, 
+    '\0');
+}
+
 // Time synchro for web information
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip)
 {
@@ -85,29 +106,6 @@ void manage_wifi(unsigned long now, Wifi *wifi)
     if ( rp.debug >= 100 ) Serial.printf("wifi disconnect check\n");
   }
   wifi->particle_connected_last = wifi->particle_connected_now;
-}
-
-
-// Text header
-void print_serial_header(void)
-{
-  Serial.println(F("unit,hm, cTime,  Tbatt,   Vbatt,voc,vsat,   curr_sel_amp,  Ishunt,Ishunt_f_o,  VOC_s,  tcharge,  T,   soc_mod, soc_ekf, soc,    SOC_mod, SOC_ekf, SOC,"));
-}
-
-// Print strings
-void create_print_string(char *buffer, Publish *pubList)
-{
-  sprintf(buffer, "%s,%s, %12.3f,   %7.3f,   %7.3f,%7.3f,%7.3f,%d,    %d,   %7.3f,%7.3f,   %7.3f,  %6.3f,  %6.3f,%6.3f,%6.3f,    %5.1f,%5.1f,%5.1f,  %c", \
-    pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time,
-    pubList->Tbatt,
-    pubList->Vbatt, pubList->voc, pubList->vsat, pubList->sat,
-    pubList->curr_sel_amp,
-    pubList->Ishunt, pubList->Ishunt_filt,
-    pubList->tcharge,
-    pubList->T,
-    pubList->soc_model, pubList->soc_ekf, pubList->soc, 
-    pubList->SOC_model, pubList->SOC_ekf, pubList->SOC, 
-    '\0');
 }
 
 // Inputs serial print
