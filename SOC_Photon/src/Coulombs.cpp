@@ -34,7 +34,7 @@ extern CommandPars cp;
 
 // class Coulombs
 Coulombs::Coulombs()
-  : q_cap_rated_(0), q_cap_rated_scaled_(0), t_rated_(25), t_rlim_(2.5) {}
+  : q_cap_rated_(0), q_cap_rated_scaled_(0), t_rated_(25), t_rlim_(0.017) {}
 Coulombs::Coulombs(const double q_cap_rated, const double t_rated, const double t_rlim)
   : q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017) {}
 Coulombs::~Coulombs() {}
@@ -136,11 +136,11 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
         tlast           Past value of battery temperature used for rate limit memory, deg C
     */
     double d_delta_q = charge_curr * dt;
-    t_last_ = t_last;
     sat_ = sat;
 
     // Rate limit temperature
-    double temp_lim = t_last_ + max(min( (temp_c-t_last_), t_rlim_*dt), -t_rlim_*dt);
+    double temp_lim = max(min( temp_c, t_last + t_rlim_*dt), t_last - t_rlim_*dt);
+    t_last_ = temp_lim;
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
     // TODO:   should we just use q_sat all the time in soc calculation?  (Memory behavior causes problems with saturation
@@ -175,7 +175,6 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
                     cp.pubList.voc,  sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
 
     // Save and return
-    t_last_ = temp_lim;
     return ( soc_ );
 }
 

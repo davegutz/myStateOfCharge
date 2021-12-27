@@ -402,6 +402,7 @@ double BatteryModel::count_coulombs(const double dt, const boolean reset, const 
 
     // Rate limit temperature
     double temp_lim = t_last_ + max(min( (temp_c-t_last_), t_rlim_*dt), -t_rlim_*dt);
+    if ( reset ) temp_lim = t_last_;
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
     // detection).

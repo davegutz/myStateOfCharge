@@ -240,6 +240,7 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             Serial.printf("Small reset.   Just reset all to soc=1.0 and delta_q = 0\n");
             MyBatt->apply_soc(1.0);
             MyBattModel->apply_soc(1.0);
+            if ( rp.modeling ) MyBatt->init_soc_ekf(MyBattModel->soc());
             break;
           case ( 'R' ):
             self_talk("Rr", MyBatt, MyBattModel);
