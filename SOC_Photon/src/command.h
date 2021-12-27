@@ -38,6 +38,7 @@ struct CommandPars
   boolean enable_wifi;      // Enable wifi
   boolean model_cutback;    // on model cutback
   boolean model_saturated;  //  Model on cutback and saturated
+  boolean soft_reset;       // Use talk to reset main
   CommandPars(void)
   {
     this->string_complete = false;
@@ -46,16 +47,21 @@ struct CommandPars
     this->model_cutback = false;
     this->model_saturated = false;
   }
+  void small_reset(void)
+  {
+    this->soft_reset = true;
+  }
   void large_reset(void)
   {
     this->enable_wifi = false;
     this->model_cutback = true;
     this->model_saturated = true;
+    this->soft_reset = true;
   }
   void pretty_print(void)
   {
-    Serial.printf("enable_wifi = %d, model_cutback = %d, model_saturated = %d\n",
-      this->enable_wifi, this->model_cutback, this->model_saturated);
+    Serial.printf("enable_wifi = %d, model_cutback = %d, model_saturated = %d, soft_reset = %d\n",
+      this->enable_wifi, this->model_cutback, this->model_saturated, this->soft_reset);
   }
 };            
 

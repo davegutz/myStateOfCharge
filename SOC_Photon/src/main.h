@@ -533,4 +533,14 @@ void loop()
   if ( read_temp ) reset_temp = false;
   if (publishP || publishS) reset_publish = false;
 
+  // Soft reset
+  if ( cp.soft_reset )
+  {
+    reset = true;
+    reset_temp = true;
+    reset_publish = true;
+    Serial.printf("soft reset initiated...\n");
+  }
+  cp.soft_reset = false;
+
 } // loop

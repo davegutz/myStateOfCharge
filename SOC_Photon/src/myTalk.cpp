@@ -248,9 +248,14 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             rp.large_reset();
             cp.large_reset();
             break;
+          case ( 's' ):
+            Serial.printf("Small reset.   Just reset the flags so filters are reinitialized\n");
+            cp.small_reset();
+            break;
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
         }
+        break;
       case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
         Serial.printf("Signal selection (1=amp, 0=no amp) toggled to %d\n", rp.curr_sel_amp);
@@ -451,6 +456,7 @@ void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
   Serial.printf("  Re= "); Serial.printf("equalize delta_q in model to battery monitor\n");
   Serial.printf("  Rr= "); Serial.printf("saturate battery monitor and equalize model to monitor\n");
   Serial.printf("  RR= "); Serial.printf("saturate, equalize, and nominalize all testing for DEPLOY\n");
+  Serial.printf("  Rs= "); Serial.printf("small reset.  reset flags to reinitialize filters\n");
   Serial.printf("T<new cmd>  Send in a new command.  Used to test calling Talk from itself.   For Example:\n");
   Serial.printf("  Tv=-78  sends v=-78 to talk\n");
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);
