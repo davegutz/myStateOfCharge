@@ -493,7 +493,7 @@ void loop()
     {
       if ( rp.debug==2 )
       {
-        if ( last_publishS_debug!=rp.debug ) print_serial_header();
+        if ( reset_publish || (last_publishS_debug != rp.debug) ) print_serial_header();
         serial_print(PublishSerial->now(), Sen->T);
       }
       last_publishS_debug = rp.debug;
