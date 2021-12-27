@@ -244,13 +244,14 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             break;
           case ( 'R' ):
             self_talk("Rr", MyBatt, MyBattModel);
-            Serial.printf("also large reset.   Initialize all variables to clean run without model at saturation.   Ready to use\n");
+            Serial.printf("also large and soft reset.   Initialize all variables to clean run without model at saturation.   Ready to use\n");
             rp.large_reset();
             cp.large_reset();
+            cp.cmd_reset();
             break;
           case ( 's' ):
             Serial.printf("Small reset.   Just reset the flags so filters are reinitialized\n");
-            cp.small_reset();
+            cp.cmd_reset();
             break;
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");

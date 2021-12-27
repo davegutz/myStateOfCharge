@@ -47,7 +47,7 @@ struct CommandPars
     this->model_cutback = false;
     this->model_saturated = false;
   }
-  void small_reset(void)
+  void cmd_reset(void)
   {
     this->soft_reset = true;
   }

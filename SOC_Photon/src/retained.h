@@ -75,10 +75,12 @@ struct RetainedPars
   void large_reset()
   {
     this->debug = 2;
-    this->curr_bias_amp = -1.;      // soc0
-    this->curr_bias_noamp = -0.13;  // soc0
-    this->curr_bias_all = -0.6;     // soc0
-    this->curr_sel_amp = true;
+    this->delta_q = 0.;           // saturate
+    this->delta_q_model = 0.;     // saturate
+    this->curr_bias_amp = -1.;    // soc0
+    this->curr_bias_noamp = -0.13;// soc0
+    this->curr_bias_all = -0.6;   // soc0
+    this->curr_sel_amp = true;    // amplified
     this->vbatt_bias = 0;
     this->modeling = false;
     this->duty = 0;
