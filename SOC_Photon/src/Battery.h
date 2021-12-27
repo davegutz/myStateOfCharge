@@ -46,7 +46,8 @@
                                         // test so using with R2 and then multiplying by 4 for total result is valid,
                                         // though probably not for an individual cell
 #define DQDT                  0.01      // Change of charge with temperature, fraction/deg C
-                                        // dQdT from literature.   0.01 / deg C is commonly used.
+                                        // DQDT from literature.   0.01 / deg C is commonly used.
+#define CAP_DROOP_C           20.       // Temperature below which a floor on q arises, C (20)
 #define TCHARGE_DISPLAY_DEADBAND 0.1    // Inside this +/- deadband, charge time is displayed '---', A
 const double max_voc = 1.2*NOM_SYS_VOLT;// Prevent windup of battery model, V
 const int batt_num_cells = NOM_SYS_VOLT/3;  // Number of standard 3 volt LiFePO4 cells

@@ -36,7 +36,8 @@ extern CommandPars cp;
 Coulombs::Coulombs()
   : q_cap_rated_(0), q_cap_rated_scaled_(0), t_rated_(25), t_rlim_(0.017) {}
 Coulombs::Coulombs(const double q_cap_rated, const double t_rated, const double t_rlim)
-  : q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017) {}
+  : q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017),
+  soc_min_(0) {}
 Coulombs::~Coulombs() {}
 // t_rlim=0.017 allows 1 deg for 1 minute (the update time of the temp read; and the sensor has
 // 1 deg resolution).
@@ -58,6 +59,7 @@ void Coulombs::pretty_print(void)
   Serial.printf("  t_last_ =     %5.1f;         // Last battery temperature for rate limit memory, deg C\n", t_last_);
   Serial.printf("  t_rlim_ =     %7.3f;       // Tbatt rate limit, deg C / s\n", t_rlim_);
   Serial.printf("  resetting_ =     %d;          // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter\n", resetting_);
+  Serial.printf("  soc_min_ =    %7.3f;       // Lowest soc for power delivery.   Arises with temp < 20 C\n", soc_min_);
 }
 
 // functions
@@ -165,6 +167,8 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
 
     // Normalize
     soc_ = q_ / q_capacity_;
+    soc_min_ = max((CAP_DROOP_C - temp_lim)*DQDT, 0.);
+    q_min_ = soc_min_ * q_capacity_;
     SOC_ = q_ / q_cap_rated_scaled_ * 100;
 
     if ( rp.debug==96 )

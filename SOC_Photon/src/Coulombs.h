@@ -68,6 +68,8 @@ protected:
   double t_last_;     // Last battery temperature for rate limit memory, deg C
   double t_rlim_;     // Tbatt rate limit, deg C / s
   boolean resetting_ = false;  // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
+  double soc_min_;    // As battery cools, the voltage drops and there appears a minimum soc it can deliver
+  double q_min_;      // Floor on charge available to use, C
 };
 
 #endif

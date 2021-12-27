@@ -176,13 +176,13 @@ double Battery::calculate_charge_time(const double q, const double q_capacity, c
 {
     double delta_q = q - q_capacity;
     if ( charge_curr > TCHARGE_DISPLAY_DEADBAND )  tcharge_ = min( -delta_q / charge_curr / 3600., 24.);
-    else if ( charge_curr < -TCHARGE_DISPLAY_DEADBAND ) tcharge_ = max( (q_capacity + delta_q) / charge_curr / 3600., -24.);
+    else if ( charge_curr < -TCHARGE_DISPLAY_DEADBAND ) tcharge_ = max( max(q_capacity + delta_q - q_min_, 0.) / charge_curr / 3600., -24.);
     else if ( charge_curr >= 0. ) tcharge_ = 24.;
     else tcharge_ = -24.;
 
-    amp_hrs_remaining_ = (q_capacity + delta_q) / 3600.;
+    amp_hrs_remaining_ = max(q_capacity - q_min_ + delta_q, 0.) / 3600.;
     if ( soc > 0. )
-        amp_hrs_remaining_ekf_ = amp_hrs_remaining_ * soc_ekf_ / soc;
+        amp_hrs_remaining_ekf_ = amp_hrs_remaining_ * (soc_ekf_ - soc_min_) / max(soc - soc_min_, 1e-8);
     else
         amp_hrs_remaining_ekf_ = 0.;
 
@@ -421,6 +421,8 @@ double BatteryModel::count_coulombs(const double dt, const boolean reset, const 
 
     // Normalize
     soc_ = q_ / q_capacity_;
+    soc_min_ = max((CAP_DROOP_C - temp_lim)*DQDT, 0.);
+    q_min_ = soc_min_ * q_capacity_;
     SOC_ = q_ / q_cap_rated_scaled_ * 100;
 
     if ( rp.debug==97 )
