@@ -273,6 +273,7 @@ void loop()
   static Sync *Summarize = new Sync(SUMMARIZE_DELAY);
   boolean control;                         // Summarize, T/F
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
+  static uint8_t last_publishS_debug = 0;    // Remember first time with new debug to print headers
 
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
@@ -488,9 +489,14 @@ void loop()
     else  digitalWrite(myPins->status_led, LOW);
 
     // Monitor for rp.debug
-    if ( rp.debug==2 && publishS )
+    if ( publishS )
     {
-      serial_print(PublishSerial->now(), Sen->T);
+      if ( rp.debug==2 )
+      {
+        if ( last_publishS_debug!=rp.debug ) print_serial_header();
+        serial_print(PublishSerial->now(), Sen->T);
+      }
+      last_publishS_debug = rp.debug;
     }
 
   }

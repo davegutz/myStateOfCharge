@@ -184,7 +184,7 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
             MyBatt->SOC(), MyBatt->soc(), rp.delta_q, MyBattModel->SOC(), MyBattModel->soc(), rp.delta_q_model, MyBatt->soc_ekf());
         break;
-     case ( 'P' ):
+      case ( 'P' ):
         switch ( cp.input_string.charAt(1) )
         {
           case ( 'a' ):
@@ -217,6 +217,12 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             Serial.printf("MyBattModel::");   MyBattModel->Coulombs::pretty_print();
             Serial.printf("MyBattModel::");   MyBattModel->pretty_print_ss();
             break;
+          case ( 'r' ):
+            Serial.printf("retained::");
+            rp.print_part_1(cp.buffer); Serial.printf("%s", cp.buffer);
+            rp.print_part_2(cp.buffer); Serial.printf("%s", cp.buffer);
+            Serial.printf("command::");       cp.pretty_print();
+            break;
           case ( 's' ):
             Serial.printf("MyBatt::");        MyBatt->pretty_print_ss();
             Serial.printf("MyBattModel::");   MyBattModel->pretty_print_ss();
@@ -225,7 +231,29 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
         }
         break;
-     case ( 's' ): 
+      case ( 'R' ):
+        switch ( cp.input_string.charAt(1) )
+        {
+          case ( 'e' ):
+            Serial.printf("Equalizing reset.   Just set delta_q in BattModel = delta_q in Batt\n");
+            MyBattModel->apply_delta_q(MyBatt->delta_q());
+            break;
+          case ( 'r' ):
+            Serial.printf("Small reset.   Just reset all to soc=1.0 and delta_q = 0\n");
+            MyBatt->apply_soc(1.0);
+            MyBattModel->apply_soc(1.0);
+            break;
+          case ( 'R' ):
+            Serial.printf("Large reset.   Initialize all variables to clean run without model at saturation.   Ready to use\n");
+            MyBatt->apply_soc(1.0);
+            MyBattModel->apply_soc(1.0);
+            rp.large_reset();
+            cp.large_reset();
+            break;
+          default:
+            Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
+        }
+      case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
         Serial.printf("Signal selection (1=amp, 0=no amp) toggled to %d\n", rp.curr_sel_amp);
         break;
@@ -416,7 +444,12 @@ void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
   Serial.printf("  Pc= "); Serial.printf("print all coulombs\n");
   Serial.printf("  Pe= "); Serial.printf("print ekf\n");
   Serial.printf("  Pm= "); Serial.printf("print model\n");
+  Serial.printf("  Pr= "); Serial.printf("print retained and command parameters\n");
   Serial.printf("  Ps= "); Serial.printf("print all state-space\n");
+  Serial.printf("R<?>   Reset\n");
+  Serial.printf("  Re= "); Serial.printf("equalize delta_q in model to battery monitor\n");
+  Serial.printf("  Rr= "); Serial.printf("saturate battery monitor and equalize model to monitor\n");
+  Serial.printf("  RR= "); Serial.printf("saturate, equalize, and nominalize all testing for DEPLOY\n");
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xx= "); Serial.printf("x   toggle model use of Vbatt = "); Serial.println(rp.modeling);

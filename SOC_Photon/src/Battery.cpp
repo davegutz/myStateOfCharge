@@ -355,42 +355,33 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
   double square_bias = 0.;
   double tri_bias = 0.;
   double inj_bias = 0.;
+  double bias = 0.;
   // Calculate injection amounts from user inputs (talk).
   // One-sided because PWM voltage >0.  rp.offset applied in logic below.
   switch ( type )
   {
     case ( 0 ):   // Nothing
-      sin_bias = 0.;
-      square_bias = 0.;
-      tri_bias = 0.;
       break;
     case ( 1 ):   // Sine wave
       sin_bias = Sin_inj_->signal(amp, freq, t, 0.0);
-      square_bias = 0.;
-      tri_bias = 0.;
       break;
     case ( 2 ):   // Square wave
-      sin_bias = 0.;
       square_bias = Sq_inj_->signal(amp, freq, t, 0.0);
-      tri_bias = 0.;
       break;
     case ( 3 ):   // Triangle wave
-      sin_bias = 0.;
-      square_bias =  0.;
       tri_bias = Tri_inj_->signal(amp, freq, t, 0.0);
+    case ( 4 ): case ( 5 ): // Software biases only
+      break;
     case ( 6 ):   // Positve bias
-      sin_bias = 0.;
-      square_bias =  0.;
-      tri_bias = amp;
+      bias = amp;
       break;
     default:
       break;
   }
-  inj_bias = sin_bias + square_bias + tri_bias;
+  inj_bias = sin_bias + square_bias + tri_bias + bias;
   duty_ = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
-  if ( rp.debug==-41 )
-  Serial.printf("type,amp,freq,sin,square,tri,inj,duty,tnow=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %ld,  %7.3f,\n",
-            type, amp, freq, sin_bias, square_bias, tri_bias, duty_, t);
+  if ( rp.debug==-41 ) Serial.printf("type,amp,freq,sin,square,tri,bias,inj,duty,tnow=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %ld,  %7.3f,\n",
+            type, amp, freq, sin_bias, square_bias, tri_bias, bias, inj_bias, duty_, t);
 
   return ( duty_ );
 }

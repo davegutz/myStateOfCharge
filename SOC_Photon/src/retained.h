@@ -72,6 +72,24 @@ struct RetainedPars
     this->s_cap_model = 1.02;
     this->cutback_gain_scalar = 1.;
   }
+  void large_reset()
+  {
+    this->debug = 2;
+    this->curr_bias_amp = -1.;      // soc0
+    this->curr_bias_noamp = -0.13;  // soc0
+    this->curr_bias_all = -0.6;     // soc0
+    this->curr_sel_amp = true;
+    this->vbatt_bias = 0;
+    this->modeling = false;
+    this->duty = 0;
+    this->amp = 0.;
+    this->freq = 0.;
+    this->type = 0;
+    this->offset = 0;
+    this->t_bias = 0;
+    this->s_cap_model = 1.02;
+    this->cutback_gain_scalar = 1.;
+  }
   void print_part_1(char *buffer)
   {
     sprintf(buffer, "debug = %d, delta_q = %7.3f, t_last = %7.3f, delta_q_model = %7.3f, t_last_model = %7.3f, \n\

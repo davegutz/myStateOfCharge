@@ -44,6 +44,18 @@ struct CommandPars
     this->enable_wifi = false;
     this->pubList = Publish();
     this->model_cutback = false;
+    this->model_saturated = false;
+  }
+  void large_reset(void)
+  {
+    this->enable_wifi = false;
+    this->model_cutback = true;
+    this->model_saturated = true;
+  }
+  void pretty_print(void)
+  {
+    Serial.printf("enable_wifi = %d, model_cutback = %d, model_saturated = %d\n",
+      this->enable_wifi, this->model_cutback, this->model_saturated);
   }
 };            
 
