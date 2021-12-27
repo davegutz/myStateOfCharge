@@ -38,7 +38,7 @@
                                         // or 20-40 A for a 100 Ah battery
 #define RATED_TEMP            25.       // Temperature at RATED_BATT_CAP, deg C
 #define BATT_DVOC_DT          0.001875  // Change of VOC with operating temperature in range 0 - 50 C (0.0075) V/deg C
-// >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 60-95 F
+// >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
 #define BATT_V_SAT            3.4625    // Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
 #define BATT_R1               0.00126   // Battery Randels static resistance, Ohms (0.00126) for 3v cell matches transients
 #define BATT_R2               0.00168   // Battery Randels dynamic resistance, Ohms (0.00168) for 3v cell matches transients
@@ -60,7 +60,7 @@ const double batt_r2c2 = double(BATT_R2C2);// Battery Randels dynamic term, Ohms
 const double batt_c2 = double(BATT_R2C2)/batt_r2;
 const double nom_q_cap = RATED_BATT_CAP * 3600;   // Nominal battery capacity, C
 const double q_cap_rated = RATED_BATT_CAP * 3600;   // Nominal battery capacity, C;
-const double t_rlim = 2.5;    // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C / s
+const double t_rlim = 0.017;    // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s
 
 // Battery model LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang etal.pdf'
 // SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope constraint

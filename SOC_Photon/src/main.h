@@ -233,6 +233,7 @@ void loop()
         0, 0, 0, bare_ads_noamp, bare_ads_amp); // Manage sensor data
   static SlidingDeadband *SdVbatt = new SlidingDeadband(HDB_VBATT);
   static SlidingDeadband *SdTbatt = new SlidingDeadband(HDB_TBATT);
+  static double t_bias_last;  // Memory for rate limiter in filter_temp call, deg C
 
   // Battery  models
   // Free, driven by soc
@@ -252,8 +253,7 @@ void loop()
   static boolean reset = true;              // Dynamic reset
   static boolean reset_temp = true;         // Dynamic reset
   static boolean reset_publish = true;      // Dynamic reset
-  double Tbatt_filt_C = 0;
-
+  
   // Synchronization
   boolean publishP;                            // Particle publish, T/F
   static Sync *PublishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
@@ -304,7 +304,7 @@ void loop()
 
     // Load and filter temperature only
     load_temp(Sen, SensorTbatt, SdTbatt);
-    filter_temp(reset_temp, Sen, TbattSenseFilt);
+    filter_temp(reset_temp, t_rlim, Sen, TbattSenseFilt, rp.t_bias, &t_bias_last);
   }
 
   // Input all other sensors and do high rate calculations
@@ -317,8 +317,7 @@ void loop()
 
     // Load and filter
     load(reset, Sen, myPins, ads_amp, ads_noamp, ReadSensors->now(), SdVbatt);
-    Tbatt_filt_C = (Sen->Tbatt_filt-32.)*5./9.;
-
+    
     // Arduino plots
     if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n",
         MyBatt->soc(), Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
@@ -326,11 +325,11 @@ void loop()
 
     //
     // Model used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
-    // to have availabe a value for Tbatt_filt_C when called
+    // to have availabe a value for Sen->Tbatt_filt when called
     //  Inputs:
     //    Sen->Ishunt     A
     //    Sen->Vbatt      V
-    //    Tbatt_filt_C    deg C
+    //    Sen->Tbatt_filt deg C
     //    Cc    Coulomb charge counter memory structure
     //  Outputs:
     //    tb              deg C
@@ -346,7 +345,7 @@ void loop()
     }
 
     // Model calculation  TODO:  is Sen->Vbatt_model useful?   Access class instead?
-    Sen->Vbatt_model = MyBattModel->calculate(Tbatt_filt_C, MyBattModel->soc(), Sen->Ishunt, min(Sen->T, F_MAX_T),
+    Sen->Vbatt_model = MyBattModel->calculate(Sen->Tbatt_filt, MyBattModel->soc(), Sen->Ishunt, min(Sen->T, F_MAX_T),
         MyBattModel->q_capacity(), MyBattModel->q_cap_rated());
     cp.model_cutback = MyBattModel->cutback();
     cp.model_saturated = MyBattModel->saturated();
@@ -357,11 +356,11 @@ void loop()
     {
       Sen->Ishunt = MyBattModel->ib();
       Sen->Vbatt = Sen->Vbatt_model;
-      Tbatt_filt_C = MyBattModel->temp_c();
+      Sen->Tbatt_filt = MyBattModel->temp_c();
     }
 
     // Charge calculation and memory store
-    MyBattModel->count_coulombs(Sen->T, reset, Tbatt_filt_C, Sen->Ishunt, rp.t_last_model);
+    MyBattModel->count_coulombs(Sen->T, reset, Sen->Tbatt_filt, Sen->Ishunt, rp.t_last_model);
     MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
 
     // D2 signal injection to hardware current sensors
@@ -373,10 +372,10 @@ void loop()
     //  Inputs:
     //    Sen->Ishunt     A
     //    Sen->Vbatt      V
-    //    Tbatt_filt_C    deg C
+    //    Sen->Tbatt_filt deg C
     //    Cc    Coulomb charge counter memory structure
 
-    // Initialize Cc structure if needed.   Needed here in this location to have a value for Tbatt_filt_C
+    // Initialize Cc structure if needed.   Needed here in this location to have a value for Sen->Tbatt_filt
     if ( reset )
     {
       MyBatt->load(rp.delta_q, rp.t_last);
@@ -388,13 +387,13 @@ void loop()
     }
     
     // EKF - calculates temp_c_, voc_, voc_dyn_ as functions of sensed parameters vb & ib (not soc)
-    MyBatt->calculate_ekf(Tbatt_filt_C, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T), Sen->saturated);
+    MyBatt->calculate_ekf(Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T), Sen->saturated);
     
     // Debounce saturation calculation done in ekf using voc model
-    Sen->saturated = SatDebounce->calculate(is_sat(Tbatt_filt_C, MyBatt->voc()), reset);
+    Sen->saturated = SatDebounce->calculate(is_sat(Sen->Tbatt_filt, MyBatt->voc()), reset);
 
     // Memory store
-    MyBatt->count_coulombs(Sen->T, reset, Tbatt_filt_C, Sen->Ishunt, Sen->saturated, rp.t_last);
+    MyBatt->count_coulombs(Sen->T, reset, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
     MyBatt->update(&rp.delta_q, &rp.t_last);
 
     // Charge time for display

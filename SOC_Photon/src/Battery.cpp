@@ -338,8 +338,8 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     if ( rp.debug==79 ) Serial.printf("temp_C, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f,\n",
         temp_C, dvoc_dt_, vsat_, voc_, q_capacity, sat_ib_max_, ib_);
 
-    if ( rp.debug==78 )Serial.printf("BatteryModel::calculate:,  dt,tempC,tempF,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-     dt,temp_C, temp_C*9./5.+32., ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
+    if ( rp.debug==78 )Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+     dt,temp_C, ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
     if ( rp.debug==-78 ) Serial.printf("SOC/10,soc*10,voc,vsat,curr_in,sat_ib_max_,ib,sat,\n%7.3f, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
       SOC/10, soc*10, voc_, vsat_, curr_in, sat_ib_max_, ib_, model_saturated_);
 
@@ -398,11 +398,10 @@ double BatteryModel::count_coulombs(const double dt, const boolean reset, const 
         tlast           Past value of battery temperature used for rate limit memory, deg C
     */
     double d_delta_q = charge_curr * dt;
-    t_last_ = t_last;
 
     // Rate limit temperature
-    double temp_lim = t_last_ + max(min( (temp_c-t_last_), t_rlim_*dt), -t_rlim_*dt);
-    if ( reset ) temp_lim = t_last_;
+    double temp_lim = max(min(temp_c, t_last + t_rlim_*dt), t_last - t_rlim_*dt);
+    if ( reset ) temp_lim = temp_c;
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
     // detection).

@@ -35,15 +35,15 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm,                  cTime,       T,  Tbatt,   Vbatt,  voc,  vsat,  sat, curr_sel_amp, modeling, Ishunt,Ishunt_f_o,  VOC_s,  soc_mod, soc_ekf, soc,    SOC_mod, SOC_ekf, SOC,"));
+  Serial.println(F("unit,hm,          cTime,       T,  Tb_f, Tb_f_m,   Vb,  voc,  vsat,  sat, sel_amp, modeling, Ib, Ib_f_o,  VOC_s,  soc_m, soc_ekf, soc,    SOC_m, SOC_ekf, SOC,"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,   %7.3f,%7.3f,%7.3f,%d,    %d,  %d,  %7.3f,%7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,  %c", \
+  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%d,    %d,  %d,  %7.3f,%7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,  %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
-    pubList->Tbatt,
+    pubList->Tbatt, pubList->Tbatt_filt_model,
     pubList->Vbatt, pubList->voc, pubList->vsat, pubList->sat,
     pubList->curr_sel_amp,
     rp.modeling,
@@ -126,7 +126,7 @@ void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt)
   double temp = 0.;
   while ( ++count<MAX_TEMP_READS && temp==0)
   {
-    if ( SensorTbatt->read() ) temp = SensorTbatt->fahrenheit() + (TBATT_TEMPCAL);
+    if ( SensorTbatt->read() ) temp = SensorTbatt->celsius() + (TBATT_TEMPCAL);
     delay(1);
   }
   if ( count<MAX_TEMP_READS )
@@ -225,13 +225,16 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
 }
 
 // Filter temperature only
-void filter_temp(int reset, Sensors *Sen, General2_Pole* TbattSenseFilt)
+void filter_temp(const int reset_loc, const double t_rlim, Sensors *Sen, General2_Pole* TbattSenseFilt, const double t_bias, double *t_bias_last)
 {
-  int reset_loc = reset;
+  // Rate limit the temperature bias
+  if ( reset_loc ) *t_bias_last = t_bias;
+  double t_bias_loc = max(min(t_bias, *t_bias_last + t_rlim*Sen->T_temp), *t_bias_last - t_rlim*Sen->T_temp);
+  *t_bias_last = t_bias_loc;
 
-  // Temperature
-  Sen->Tbatt_filt = TbattSenseFilt->calculate(Sen->Tbatt, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + rp.t_bias;
-  Sen->Tbatt += rp.t_bias;
+  // Filter and add rate limited bias
+  Sen->Tbatt_filt = TbattSenseFilt->calculate(Sen->Tbatt, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
+  Sen->Tbatt += t_bias_loc;
 }
 
 // Filter all other inputs

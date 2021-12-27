@@ -49,6 +49,7 @@ struct Publish
   boolean sat;
   double Vbatt_filt;
   double Tbatt_filt;
+  double Tbatt_filt_model;
   double Vshunt_filt;
   double Ishunt_filt;
   int num_timeouts;

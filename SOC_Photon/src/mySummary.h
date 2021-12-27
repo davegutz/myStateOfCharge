@@ -35,7 +35,7 @@ extern CommandPars cp;
 struct Sum_st
 {
   unsigned long time;         // Timestamp
-  int16_t Tbatt;              // Battery temperature, filtered, F
+  int16_t Tbatt;              // Battery temperature, filtered, C
   float Vbatt;                // Battery measured potential, filtered, V
   int8_t Ishunt;              // Batter measured input current, filtered, A
   int8_t SOC_f;               // Battery state of charge, free Coulomb counting algorithm, %

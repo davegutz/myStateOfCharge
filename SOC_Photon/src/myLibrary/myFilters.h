@@ -420,7 +420,7 @@ protected:
 // PID
 struct PID
 {
-  double G;     // Gain, r/s = %/F
+  double G;     // Gain, r/s = %/units of err
   double tau;   // Lead, s
   double MAX;   // Integrator max limit, %
   double MIN;   // Integrator min limit, %
@@ -428,9 +428,9 @@ struct PID
   double LLMIN; // Lead min, %
   double prop;  // Proportional output, %
   double integ; // Integrator output, %
-  double DB;    // Half deadband width, deg F
-  double err;   // Error, F
-  double err_comp; // Compensated error, F
+  double DB;    // Half deadband width, units of err
+  double err;   // Error, units
+  double err_comp; // Compensated error, units of err
   double cont;  // Total control output, %
   double sd_;   // Derivative tlead lookup scalar
   double sg_;   // Integral lookup scalar

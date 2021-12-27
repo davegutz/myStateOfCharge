@@ -55,9 +55,9 @@
 #define CONFIRMATION_DELAY    10000UL   // How long to confirm WiFi on before streaming (10000UL)
 #define GMT                   -5        // Enter time different to zulu (does not respect DST) (-5)
 #define USE_DST               1         // Whether to apply DST or not, 0 or 1 (1)
-#define TBATT_TEMPCAL         1         // Maxim 1-wire plenum temp sense calibrate (1), F
+#define TBATT_TEMPCAL         0.56      // Maxim 1-wire plenum temp sense calibrate (0.56), C
 #define NOMVBATT              13.1      // Nominal battery voltage, V (13.1)
-#define NOMTBATT              72        // Nominal battery temp, F (72)
+#define NOMTBATT              20        // Nominal battery temp, C (68)
 #define MAX_TEMP_READS        10        // Number of consequetive temp queries allowed (10)
 #define NOMVSHUNTI            0         // Nominal shunt reading, integer (0)
 #define NOMVSHUNT             0         // Nominal shunt reading, V (0)

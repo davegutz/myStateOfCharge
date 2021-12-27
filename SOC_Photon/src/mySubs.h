@@ -69,8 +69,8 @@ struct Sensors
   double Vbatt;           // Sensed battery voltage, V
   double Vbatt_model;     // Model coefficient model battery voltage based on filtered current, V
   double Vbatt_filt;      // Filtered, sensed battery voltage, V
-  double Tbatt;           // Sensed battery temp, F
-  double Tbatt_filt;      // Filtered, sensed battery temp, F
+  double Tbatt;           // Sensed battery temp, C
+  double Tbatt_filt;      // Filtered, sensed battery temp, C
   int16_t Vshunt_amp_int; // Sensed shunt voltage, count
   int16_t Vshunt_noamp_int;// Sensed shunt voltage, count
   double Vshunt_amp;      // Sensed shunt voltage, V
@@ -131,7 +131,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
     SlidingDeadband *SdVbatt);
 void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt);
 void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFilt, General2_Pole* IshuntSenseFilt);
-void filter_temp(int reset, Sensors *Sen, General2_Pole* TbattSenseFilt);
+void filter_temp(const int reset, const double t_rlim, Sensors *Sen, General2_Pole* TbattSenseFilt, const double t_bias, double *t_bias_last);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
 void print_serial_header(void);
