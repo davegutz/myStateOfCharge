@@ -188,15 +188,13 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
         switch ( cp.input_string.charAt(1) )
         {
           case ( 'a' ):
-            Serial.printf("MyBatt:");         MyBatt->pretty_print();
-            Serial.printf("MyBatt::");        MyBatt->Coulombs::pretty_print();
-            Serial.printf("MyBatt::");        MyBatt->pretty_print_ss();
-            Serial.printf("MyBatt::");        MyBatt->EKF_1x1::pretty_print();
+            self_talk("Pb", MyBatt, MyBattModel);
             Serial.printf("\n");
             Serial.printf("MyBattModel:   rp.modeling = %d\n", rp.modeling);
-            Serial.printf("MyBattModel:");    MyBattModel->pretty_print();
-            Serial.printf("MyBattModel::");   MyBattModel->Coulombs::pretty_print();
-            Serial.printf("MyBattModel::");   MyBattModel->pretty_print_ss();
+            self_talk("Pm", MyBatt, MyBattModel);
+            Serial.printf("\n");
+            self_talk("Pr", MyBatt, MyBattModel);
+            Serial.printf("\n");
             break;
           case ( 'b' ):
             Serial.printf("MyBatt:");         MyBatt->pretty_print();
@@ -244,9 +242,8 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             MyBattModel->apply_soc(1.0);
             break;
           case ( 'R' ):
-            Serial.printf("Large reset.   Initialize all variables to clean run without model at saturation.   Ready to use\n");
-            MyBatt->apply_soc(1.0);
-            MyBattModel->apply_soc(1.0);
+            self_talk("Rr", MyBatt, MyBattModel);
+            Serial.printf("also large reset.   Initialize all variables to clean run without model at saturation.   Ready to use\n");
             rp.large_reset();
             cp.large_reset();
             break;
@@ -256,6 +253,12 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
       case ( 's' ): 
         rp.curr_sel_amp = !rp.curr_sel_amp;
         Serial.printf("Signal selection (1=amp, 0=no amp) toggled to %d\n", rp.curr_sel_amp);
+        break;
+      case ( 'T' ):   // This is a test feature only
+        cp.input_string = cp.input_string.substring(1);
+        Serial.printf("new string = '%s'\n", cp.input_string.c_str());
+        cp.string_complete = true;
+        talk(MyBatt, MyBattModel);
         break;
       case ( 'v' ):
         rp.debug = cp.input_string.substring(1).toInt();
@@ -269,7 +272,10 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
         {
           case ( 'x' ):
             if ( cp.input_string.substring(2).toInt()>0 )
+            {
               rp.modeling = true;
+              MyBatt->init_soc_ekf(MyBattModel->soc());
+            }
             else
               rp.modeling = false;
             Serial.printf("Modeling set to %d\n", rp.modeling);
@@ -330,7 +336,8 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                                         rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 break;
               case ( 1 ):
-                rp.modeling = true;
+                self_talk("Xp0", MyBatt, MyBattModel);
+                self_talk("m0.5", MyBatt, MyBattModel);
                 rp.type = 1;
                 rp.freq = 0.05;
                 rp.amp = 18.3;
@@ -341,7 +348,8 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 rp.freq *= (2. * PI);
                 break;
               case ( 2 ):
-                rp.modeling = true;
+                self_talk("Xp0", MyBatt, MyBattModel);
+                self_talk("m0.5", MyBatt, MyBattModel);
                 rp.type = 2;
                 rp.freq = 0.10;
                 rp.amp = 18.3;
@@ -352,7 +360,8 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 rp.freq *= (2. * PI);
                 break;
               case ( 3 ):
-                rp.modeling = true;
+                self_talk("Xp0", MyBatt, MyBattModel);
+                self_talk("m0.5", MyBatt, MyBattModel);
                 rp.type = 3;
                 rp.freq = 0.05;
                 rp.amp = 18.3;
@@ -363,34 +372,25 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 rp.freq *= (2. * PI);
                 break;
               case ( 4 ):
-                rp.modeling = true;
+                self_talk("Xp0", MyBatt, MyBattModel);
                 rp.type = 4;
-                rp.freq = 0.0;
-                rp.amp = 0.0;
-                rp.offset = 0;
                 rp.curr_bias_all = -RATED_BATT_CAP;  // Software effect only
                 rp.debug = -12;
                 Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 break;
               case ( 5 ):
-                rp.modeling = true;
+                self_talk("Xp0", MyBatt, MyBattModel);
                 rp.type = 5;
-                rp.freq = 0.0;
-                rp.amp = 0.0;
-                rp.offset = 0;
                 rp.curr_bias_all = RATED_BATT_CAP; // Software effect only
                 rp.debug = -12;
                 Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 break;
               case ( 6 ):
-                rp.modeling = true;
+                self_talk("Xp0", MyBatt, MyBattModel);
                 rp.type = 6;
-                rp.freq = 0.0;
                 rp.amp = RATED_BATT_CAP*0.2;
-                rp.offset = 0;
-                rp.curr_bias_all = 0;
                 rp.debug = -12;
                 Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
@@ -450,6 +450,8 @@ void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
   Serial.printf("  Re= "); Serial.printf("equalize delta_q in model to battery monitor\n");
   Serial.printf("  Rr= "); Serial.printf("saturate battery monitor and equalize model to monitor\n");
   Serial.printf("  RR= "); Serial.printf("saturate, equalize, and nominalize all testing for DEPLOY\n");
+  Serial.printf("T<new cmd>  Send in a new command.  Used to test calling Talk from itself.   For Example:\n");
+  Serial.printf("  Tv=-78  sends v=-78 to talk\n");
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xx= "); Serial.printf("x   toggle model use of Vbatt = "); Serial.println(rp.modeling);
@@ -467,4 +469,13 @@ void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
   Serial.printf("       5:  +1C soft charge until reset by Xp0 or Di0.  Software only\n");
   Serial.printf("       6:  +0.2C hard charge until reset by Xp0 or Di0\n");
   Serial.printf("h   this menu\n");
+}
+
+// Recursion
+void self_talk(const String cmd, Battery *MyBatt, BatteryModel *MyBattModel)
+{
+  cp.input_string = cmd;
+  Serial.printf("self_talk:  new string = '%s'\n", cp.input_string.c_str());
+  cp.string_complete = true;
+  talk(MyBatt, MyBattModel);
 }

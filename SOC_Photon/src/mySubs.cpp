@@ -35,17 +35,18 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm,                  cTime,       T,  Tbatt,   Vbatt,  voc,  vsat,  sat,   curr_sel_amp,  Ishunt,Ishunt_f_o,  VOC_s,  soc_mod, soc_ekf, soc,    SOC_mod, SOC_ekf, SOC,"));
+  Serial.println(F("unit,hm,                  cTime,       T,  Tbatt,   Vbatt,  voc,  vsat,  sat, curr_sel_amp, modeling, Ishunt,Ishunt_f_o,  VOC_s,  soc_mod, soc_ekf, soc,    SOC_mod, SOC_ekf, SOC,"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,   %7.3f,%7.3f,%7.3f,%d,    %d,   %7.3f,%7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,  %c", \
+  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,   %7.3f,%7.3f,%7.3f,%d,    %d,  %d,  %7.3f,%7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,  %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
     pubList->Tbatt,
     pubList->Vbatt, pubList->voc, pubList->vsat, pubList->sat,
     pubList->curr_sel_amp,
+    rp.modeling,
     pubList->Ishunt, pubList->Ishunt_filt,
     pubList->tcharge,
     pubList->soc_model, pubList->soc_ekf, pubList->soc, 
@@ -387,6 +388,7 @@ void serialEvent()
     }
   }
 }
+
 // Copy for bluetooth connected to TX/RX
 /*
 void serialEvent1()

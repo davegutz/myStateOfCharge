@@ -27,5 +27,6 @@
 
 void talk(Battery *MyBatt, BatteryModel *MyBattModel);
 void talkH(Battery *batt, BatteryModel *batt_model); // Help
+void self_talk(const String cmd, Battery *MyBatt, BatteryModel *MyBattModel);
 
 #endif
