@@ -28,10 +28,12 @@
 #include "command.h"
 #include "Battery.h"
 #include "local_config.h"
+#include "mySummary.h"
 #include <math.h>
 
 extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
+extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 
 // Talk Executive
 void talk(Battery *MyBatt, BatteryModel *MyBattModel)
@@ -121,10 +123,25 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             rp.cutback_gain_scalar = scale;
             Serial.printf("rp.cutback_gain_scalar set to %7.3f\n", rp.cutback_gain_scalar);
             break;
+          default:
+            Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
         }
         break;
-      case ( 'd' ):
-        rp.debug = -4;
+      case ( 'H' ):
+        switch ( cp.input_string.charAt(1) )
+        {
+          case ( 'd' ):
+            print_all_summary(mySum, rp.isum, NSUM);
+            break;
+          case ( 'R' ):
+            large_reset_summary(mySum, rp.isum, NSUM);
+            break;
+          case ( 's' ):
+            cp.cmd_summarize();
+            break;
+          default:
+            Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
+        }
         break;
       case ( 'l' ):
         switch ( rp.debug )
@@ -133,7 +150,7 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt_amp  ,Ishunt_noamp  ,Vbat_fo*10-110  ,voc_s*10-110  ,vdyn_s*10  ,v_s*10-110  , voc_dyn*10-110,,,,,,,,,,,\n");
             break;
           default:
-            Serial.printf("Legend for rp.debug= %d not defined.   Edit mySubs.cpp, search for 'case ( 'l' )' and add it\n", rp.debug);
+            print_serial_header();
         }
         break;
       case ( 'm' ):
@@ -248,6 +265,7 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             rp.large_reset();
             cp.large_reset();
             cp.cmd_reset();
+            self_talk("Hr", MyBatt, MyBattModel);
             break;
           case ( 's' ):
             Serial.printf("Small reset.   Just reset the flags so filters are reinitialized\n");
@@ -427,7 +445,10 @@ void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
 {
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
   Serial.printf("A=  nominalize the rp structure for clean boots etc'\n"); 
-  Serial.printf("d   dump the summary log\n"); 
+  Serial.printf("H<?>   Manage history\n");
+  Serial.printf("  Hd= "); Serial.printf("dump the summary log to screen\n");
+  Serial.printf("  HR= "); Serial.printf("reset the summary log\n");
+  Serial.printf("  Hs= "); Serial.printf("save a data point to summary log\n");
   Serial.printf("m=  assign curve charge state in fraction to all versions including model- '(0-1.1)'\n"); 
   Serial.printf("M=  assign a CHARGE state in percent to all versions including model- '('truncated 0-100')'\n"); 
   Serial.printf("n=  assign curve charge state in fraction to model only (ekf if modeling)- '(0-1.1)'\n"); 

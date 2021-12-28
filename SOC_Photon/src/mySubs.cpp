@@ -312,7 +312,6 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
                         float(seconds) + float((now-millis_flip)%1000)/1000. );
 }
 
-
 void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
 {
   static boolean pass = false;
@@ -438,18 +437,10 @@ String time_long_2_str(const unsigned long current_time, char *tempStr)
           hours = Time.hour(current_time);
         }
     }
-    #ifndef FAKETIME
         uint8_t dayOfWeek = Time.weekday(current_time)-1;  // 0-6
         uint8_t minutes   = Time.minute(current_time);
         uint8_t seconds   = Time.second(current_time);
         if ( rp.debug>105 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
-    #else
-        // Rapid time passage simulation to test schedule functions
-        uint8_t dayOfWeek = (Time.weekday(current_time)-1)*7/6;// minutes = days
-        uint8_t hours     = Time.hour(current_time)*24/60; // seconds = hours
-        uint8_t minutes   = 0; // forget minutes
-        uint8_t seconds   = 0; // forget seconds
-    #endif
     sprintf(tempStr, "%4u-%02u-%02uT%02u:%02u:%02u", int(year), month, day, hours, minutes, seconds);
     return ( String(tempStr) );
 }

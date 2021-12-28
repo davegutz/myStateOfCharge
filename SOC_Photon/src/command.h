@@ -33,12 +33,13 @@ struct CommandPars
 {
   char buffer[256];         // Auxiliary print buffer
   Publish pubList;          // Publish object
-  String input_string;      // a string to hold incoming data
+  String input_string;      // A string to hold incoming data
   boolean string_complete;  // whether the string is complete
   boolean enable_wifi;      // Enable wifi
-  boolean model_cutback;    // on model cutback
-  boolean model_saturated;  //  Model on cutback and saturated
+  boolean model_cutback;    // On model cutback
+  boolean model_saturated;  // Model on cutback and saturated
   boolean soft_reset;       // Use talk to reset main
+  boolean write_summary;    // Use talk to issue a write command to summary
   CommandPars(void)
   {
     this->string_complete = false;
@@ -46,10 +47,16 @@ struct CommandPars
     this->pubList = Publish();
     this->model_cutback = false;
     this->model_saturated = false;
+    this->soft_reset = false;
+    this->write_summary = false;
   }
   void cmd_reset(void)
   {
     this->soft_reset = true;
+  }
+  void cmd_summarize(void)
+  {
+    this->write_summary = true;
   }
   void large_reset(void)
   {
@@ -60,8 +67,8 @@ struct CommandPars
   }
   void pretty_print(void)
   {
-    Serial.printf("enable_wifi = %d, model_cutback = %d, model_saturated = %d, soft_reset = %d\n",
-      this->enable_wifi, this->model_cutback, this->model_saturated, this->soft_reset);
+    Serial.printf("enable_wifi = %d, model_cutback = %d, model_saturated = %d, soft_reset = %d, write_summary = %d,\n",
+      this->enable_wifi, this->model_cutback, this->model_saturated, this->soft_reset, this->write_summary);
   }
 };            
 

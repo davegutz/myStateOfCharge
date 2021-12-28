@@ -50,6 +50,9 @@ struct RetainedPars
   double s_cap_model = 1.02;// Scalar on battery model size
   double cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function.
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop.
+  int isum = -1;         // Summary location.   Begins at -1 because first action is to increment isum
+
+  // Nominalize
   void nominal()
   {
     this->debug = 2;
@@ -71,6 +74,7 @@ struct RetainedPars
     this->t_bias = 0;
     this->s_cap_model = 1.02;
     this->cutback_gain_scalar = 1.;
+    this->isum = -1;
   }
   void large_reset()
   {
@@ -91,6 +95,7 @@ struct RetainedPars
     this->t_bias = 0;
     this->s_cap_model = 1.02;
     this->cutback_gain_scalar = 1.;
+    this->isum = -1;
   }
   void print_part_1(char *buffer)
   {

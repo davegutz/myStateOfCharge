@@ -71,28 +71,26 @@ Make it yourself.   It should look like this, with your personal authorizations:
 extern BlynkParticle Blynk;       // Blynk object
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4; // Time Blynk events
 BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;        // Time Blynk events
-extern CommandPars cp;            // Various parameters to be common at system level (reset on PLC reset)
-extern RetainedPars rp;           // Various parameters to be static at system level (don't reset on PLC reset)
+extern CommandPars cp;            // Various parameters to be common at system level
+extern RetainedPars rp;           // Various parameters to be static at system level
+extern Sum_st mySum[NSUM];        // Summaries for saving charge history
 
 // Global locals
-const int nsum = 100;           // Number of summary strings, 17 Bytes per isum
-retained RetainedPars rp;       // Various control parameters static at system level
+retained RetainedPars rp;             // Various control parameters static at system level
 retained CommandPars cp = CommandPars(); // Various control parameters commanding at system level
-retained int isum = -1;         // Summary location.   Begins at -1 because first action is to increment isum
-retained Sum_st mySum[nsum];    // Summaries
+retained Sum_st mySum[NSUM];          // Summaries
 unsigned long millis_flip = millis(); // Timekeeping
 unsigned long last_sync = millis();   // Timekeeping
 
-// char buffer[256];               // Serial print buffer
-int num_timeouts = 0;            // Number of Particle.connect() needed to unfreeze
-String hm_string = "00:00";      // time, hh:mm
+int num_timeouts = 0;           // Number of Particle.connect() needed to unfreeze
+String hm_string = "00:00";     // time, hh:mm
 double control_time = 0.0;      // Decimal time, seconds since 1/1/2021
 Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_ADS1015 *ads_amp;      // Use this for the 12-bit version; 1115 for 16-bit; amplified; different address
 Adafruit_ADS1015 *ads_noamp;    // Use this for the 12-bit version; 1115 for 16-bit; non-amplified
 Adafruit_SSD1306 *display;
-boolean bare_ads_noamp = false;          // If ADS to be ignored
-boolean bare_ads_amp = false;      // If ADS to be ignored
+boolean bare_ads_noamp = false; // If ADS to be ignored
+boolean bare_ads_amp = false;   // If ADS to be ignored
 Wifi *myWifi;                   // Manage Wifi
 
 // Setup
@@ -206,7 +204,7 @@ void setup()
   // Summary
   System.enableFeature(FEATURE_RETAINED_MEMORY);
   if ( rp.debug==2 )
-    print_all(mySum, isum, nsum);
+    print_all_summary(mySum, rp.isum, NSUM);
 
   // Header for rp.debug print
   if ( rp.debug>101 ) print_serial_header();
@@ -248,6 +246,7 @@ void loop()
 
   unsigned long current_time;               // Time result
   static unsigned long now = millis();      // Keep track of time
+  time32_t time_now;                        // Keep track of time
   static unsigned long start = millis();    // Keep track of time
   unsigned long elapsed = 0;                // Keep track of time
   static boolean reset = true;              // Dynamic reset
@@ -293,6 +292,7 @@ void loop()
 
   // Keep time
   now = millis();
+  time_now = Time.now();
   sync_time(now, &last_sync, &millis_flip);      // Refresh time synchronization
 
   // Input temperature only
@@ -505,27 +505,15 @@ void loop()
   // then can enter commands by sending strings.   End the strings with a real carriage return
   // right in the "Send String" box then press "Send."
   // String definitions are below.
-  int debug_saved = rp.debug;
   talk(MyBatt, MyBattModel);
 
   // Summary management
-  if ( rp.debug==-4 )
-  {
-    rp.debug = debug_saved;
-    print_all(mySum, isum, nsum);
-  }
   summarizing = Summarize->update(millis(), reset, !rp.modeling) || (rp.debug==-11 && publishB);               //  now || reset && !rp.modeling
-  if ( summarizing )
+  if ( summarizing || cp.write_summary )
   {
-    if ( ++isum>nsum-1 ) isum = 0;
-    mySum[isum].assign(current_time, Sen->Tbatt_filt, Sen->Vbatt_filt, Sen->Ishunt_filt,
-      MyBatt->soc(), MyBatt->soc(), MyBattModel->dv_dsoc());
-    if ( rp.debug==-11 )
-    {
-      Serial.printf("Summm***********************\n");
-      print_all(mySum, isum, nsum);
-      Serial.printf("*********************** %d \n", isum);
-    }
+    if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
+    mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt_filt, Sen->Ishunt_filt,
+                          MyBatt->soc_ekf(), MyBatt->soc(), MyBattModel->dv_dsoc());
   }
 
   // Initialize complete once sensors and models started and summary written
@@ -542,5 +530,6 @@ void loop()
     Serial.printf("soft reset initiated...\n");
   }
   cp.soft_reset = false;
+  cp.write_summary = false;
 
 } // loop

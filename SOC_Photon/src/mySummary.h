@@ -34,43 +34,48 @@ extern CommandPars cp;
 // SRAM retention summary
 struct Sum_st
 {
-  unsigned long time;         // Timestamp
-  int16_t Tbatt;              // Battery temperature, filtered, C
-  float Vbatt;                // Battery measured potential, filtered, V
-  int8_t Ishunt;              // Batter measured input current, filtered, A
-  int8_t SOC_f;               // Battery state of charge, free Coulomb counting algorithm, %
-  int8_t dV;                  // Estimated adjustment to SOC-VOC algorithm to match free, V*100
+  unsigned long t;    // Timestamp
+  int16_t Tbatt;      // Battery temperature, filtered, C
+  float Vbatt;        // Battery measured potential, filtered, V
+  int8_t Ishunt;      // Batter measured input current, filtered, A
+  int8_t SOC_f;       // Battery state of charge, free Coulomb counting algorithm, %
+  int8_t dV;          // Estimated adjustment to EKF-VOC algorithm to match free Coulomb Counter, V*100
   Sum_st(void){}
-  void assign(const unsigned long now, const double Tbatt, const double Vbatt, const double Ishunt,
-    const double soc_s, const double soc_f, const double dV_dsoc)
+  void assign(const time32_t now, const double Tbatt, const double Vbatt, const double Ishunt,
+    const double soc_ekf, const double soc_f, const double dV_dsoc)
   {
-    this->time = now;
+    char buffer[32];
+    this->t = now;
     this->Tbatt = Tbatt;
     this->Vbatt = float(Vbatt);
     this->Ishunt = Ishunt;
     this->SOC_f = soc_f*100;
-    this->dV = int8_t(min(max((soc_s - soc_f) * dV_dsoc, -1.2), 1.2) * 100.);
+    this->dV = int8_t(min(max((soc_ekf - soc_f) * dV_dsoc, -1.2), 1.2) * 100.);
+    time_long_2_str(now, buffer);
   }
   void print(void)
   {
-    time_long_2_str(time, cp.buffer);
-    Serial.printf("%s, %ld, %4d, %7.3f, %4d, %7d, %5d,", cp.buffer, time, Tbatt, Vbatt, Ishunt, SOC_f, dV);
+    char buffer[32] = "---";
+    if ( this->t>0 )
+    {
+      time_long_2_str(this->t, buffer);
+    }
+    Serial.printf("%s, %ld, %4d, %7.3f, %4d, %7d, %5d,",
+          buffer, this->t, this->Tbatt, this->Vbatt, this->Ishunt, this->SOC_f, this->dV);
+  }
+  void nominal()
+  {
+    this->t = 0L;
+    this->Tbatt = 0.;
+    this->Vbatt = 0.;
+    this->Ishunt = 0.;
+    this->SOC_f = 0.;
+    this->dV = 0.;
   }
 };
 
-//
-void print_all(struct Sum_st *sum, const int isum, const int nsum)
-{
-  Serial.printf("i,  date,  time,    Tbatt,  Vbatt, Ishunt,  SOC_f,  dV,\n");
-  int i = isum;  // Last one written was isum
-  int n = -1;
-  while ( ++n < nsum )
-  {
-    if ( ++i>nsum-1 ) i = 0;  // Increment beyond last one written
-    Serial.printf("%d,  ", n);
-    sum[i].print();
-    Serial.printf("\n");
-  }
-}
+// Function prototypes
+void print_all_summary(struct Sum_st *sum, const int isum, const int nsum);
+void large_reset_summary(struct Sum_st *sum, const int isum, const int nsum);
 
 #endif
