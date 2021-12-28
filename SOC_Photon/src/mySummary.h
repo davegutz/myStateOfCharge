@@ -50,7 +50,7 @@ struct Sum_st
     this->Vbatt = float(Vbatt);
     this->Ishunt = Ishunt;
     this->SOC_f = soc_f*100;
-    this->dV = int8_t(min(max((soc_ekf - soc_f) * dV_dsoc, -1.2), 1.2) * 100.);
+    this->dV = int8_t(min(max((soc_ekf - soc_f) * dV_dsoc, -1.25), 1.25) * 100.);
     time_long_2_str(now, buffer);
   }
   void print(void)
@@ -60,8 +60,8 @@ struct Sum_st
     {
       time_long_2_str(this->t, buffer);
     }
-    Serial.printf("%s, %ld, %4d, %7.3f, %4d, %7d, %5d,",
-          buffer, this->t, this->Tbatt, this->Vbatt, this->Ishunt, this->SOC_f, this->dV);
+    Serial.printf("%s, %ld, %4d, %7.3f, %4d, %7d, %5.2f,",
+          buffer, this->t, this->Tbatt, this->Vbatt, this->Ishunt, this->SOC_f, double(this->dV)/100.);
   }
   void nominal()
   {

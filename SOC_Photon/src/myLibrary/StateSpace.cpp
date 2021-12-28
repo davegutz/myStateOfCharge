@@ -39,11 +39,7 @@ StateSpace::StateSpace(double *A, double *B, double *C, double *D, const int8_t 
     x_ = new double[n_];
     x_dot_ = new double[n_];
     x_past_ = new double[n_];
-    for ( int i=0; i<n_; i++ )
-    {
-      x_[i] = 0.;
-      x_past_[i] = 0.;
-    }
+    init_state_space();
     u_ = new double[p_];
     y_ = new double[q_];
   }
@@ -64,6 +60,16 @@ void StateSpace::calc_x_dot(double *u)
   for (i=0; i<n_; i++) x_dot_[i] = AX[i] + BU[i];
   if ( rp.debug==33 )
   {
+  }
+}
+
+// Initialize
+void StateSpace::init_state_space(void)
+{
+  for ( int i=0; i<n_; i++ )
+  {
+    x_[i] = 0.;
+    x_past_[i] = 0.;
   }
 }
 

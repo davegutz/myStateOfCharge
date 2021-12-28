@@ -114,6 +114,7 @@ public:
   virtual double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated);
   double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
+  void init_battery(void);
   void init_soc_ekf(const double soc);
   virtual void pretty_print();
   void pretty_print_ss();

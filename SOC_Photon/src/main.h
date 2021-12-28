@@ -342,6 +342,7 @@ void loop()
     {
       MyBattModel->load(rp.delta_q_model, rp.t_last_model, rp.s_cap_model);
       MyBattModel->apply_delta_q_t(rp.delta_q_model, rp.t_last_model);
+      MyBattModel->init_battery();  // for cp.soft_reset
     }
 
     // Model calculation  TODO:  is Sen->Vbatt_model useful?   Access class instead?
@@ -380,6 +381,7 @@ void loop()
     {
       MyBatt->load(rp.delta_q, rp.t_last);
       MyBatt->apply_delta_q_t(rp.delta_q, rp.t_last);
+      MyBatt->init_battery();  // for cp.soft_reset
       if ( rp.modeling )
         MyBatt->init_soc_ekf(MyBattModel->soc());  // When modeling, ekf wants to equal model
       else
@@ -433,6 +435,7 @@ void loop()
   {
     Sen->T_filt =  FilterSync->updateTime();
     if ( rp.debug>102 ) Serial.printf("Filter update=%7.3f and performing load() at %ld...  ", Sen->T_filt, millis());
+    if ( rp.modeling && reset && MyBattModel->q()<=0. ) Sen->Ishunt = 0.;
 
     // Filter
     filter(reset, Sen, VbattSenseFilt, IshuntSenseFilt);

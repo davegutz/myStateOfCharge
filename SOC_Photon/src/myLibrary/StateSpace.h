@@ -36,6 +36,7 @@ public:
   // operators
   // functions
   void calc_x_dot(double *u);
+  void init_state_space(void);
   void update(const double dt);
   virtual void pretty_print();
   void pretty_print_mat(const String name, const uint8_t n, const uint8_t m, double *A);

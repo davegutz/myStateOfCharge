@@ -94,7 +94,7 @@
 #define SOLVE_MAX_COUNTS 10          // Solver maximum number of steps (10)
 #define SOLVE_MAX_STEP   0.2         // Solver maximum step size, frac soc
 
-#define NSUM             100         // Number of saved summaries.   If too large, will get compile error
+#define NSUM             140         // Number of saved summaries.   If too large, will get compile error
 
 // Conversion gains
 const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  

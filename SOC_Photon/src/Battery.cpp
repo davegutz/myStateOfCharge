@@ -210,6 +210,12 @@ void Battery::ekf_model_update(double *hx, double *H)
     *H = dv_dsoc_;
 }
 
+// Initialize
+void Battery::init_battery(void)
+{
+    Randles_->init_state_space();
+}
+
 // Init EKF
 void Battery::init_soc_ekf(const double soc)
 {
@@ -332,6 +338,7 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
     sat_ib_max_ = sat_ib_null_ + (vsat_ - voc_) / nom_vsat_ * q_capacity / 3600. * sat_cutback_gain_ * rp.cutback_gain_scalar;
     ib_ = min(curr_in, sat_ib_max_);
+    if ( q_ <= 0. ) ib_ = 0.;
     model_cutback_ = (voc_ > vsat_) && (ib_ == sat_ib_max_);
     model_saturated_ = (voc_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
     Coulombs::sat_ = model_saturated_;
