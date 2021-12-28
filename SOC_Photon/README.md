@@ -228,6 +228,10 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
 
   The saturation logic is a feedback loop that can overflow and/or go unstable.   To break the loop, set cutback_gain to 0 in retained.h for a re-compile.   When comfortable with settings, reset it to 1.
 
+### Problem:  The model is stuck at soc_m = 0 and ib=0 when asking for ib>0
+
+  The de-saturation logic is super-stupid.   Just set charge manually > 0 to unfreeze model, e.g. m.001.   This problem applies to modeling mode only.
+
 ## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
 
 ## To get debug data
