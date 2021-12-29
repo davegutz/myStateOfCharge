@@ -68,7 +68,7 @@ struct Sensors
 {
   double Vbatt;           // Sensed battery voltage, V
   double Vbatt_model;     // Model coefficient model battery voltage based on filtered current, V
-  double Vbatt_filt;      // Filtered, sensed battery voltage, V
+  // double Vbatt_filt;      // Filtered, sensed battery voltage, V
   double Tbatt;           // Sensed battery temp, C
   double Tbatt_filt;      // Filtered, sensed battery temp, C
   int16_t Vshunt_amp_int; // Sensed shunt voltage, count
@@ -95,13 +95,12 @@ struct Sensors
   double curr_bias;       // Signal injection bias for selected current input, A//TODO:   move to cp
   boolean saturated;      // Battery saturation status based on Temp and VOC //TODO:   move to Battery
   Sensors(void) {}
-  Sensors(double Vbatt, double Vbatt_filt, double Tbatt, double Tbatt_filt,
+  Sensors(double Vbatt, double Tbatt, double Tbatt_filt,  // TODO:  is this needed?
           int16_t Vshunt_noamp_int, double Vshunt, double Vshunt_filt,
           int16_t Vshunt_amp_int, double Vshunt_amp, double Vshunt_amp_filt,
           int I2C_status, double T, double T_temp, boolean bare_ads_noamp, boolean bare_ads_amp)
   {
     this->Vbatt = Vbatt;
-    this->Vbatt_filt = Vbatt_filt;
     this->Tbatt = Tbatt;
     this->Tbatt_filt = Tbatt_filt;
     this->Vshunt_noamp_int = Vshunt_noamp_int;

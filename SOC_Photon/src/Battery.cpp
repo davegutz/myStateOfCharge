@@ -334,11 +334,11 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     vb_ = Randles_->y(0);
     vdyn_ = vb_ - voc_;
 
-    // Saturation logic
+    // Saturation logic, both full and empty
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
     sat_ib_max_ = sat_ib_null_ + (vsat_ - voc_) / nom_vsat_ * q_capacity / 3600. * sat_cutback_gain_ * rp.cutback_gain_scalar;
     ib_ = min(curr_in, sat_ib_max_);
-    if ( q_ <= 0. ) ib_ = 0.;
+    if ( (q_ <= 0.) && (curr_in < 0.) ) ib_ = 0.;  //  empty
     model_cutback_ = (voc_ > vsat_) && (ib_ == sat_ib_max_);
     model_saturated_ = (voc_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
     Coulombs::sat_ = model_saturated_;

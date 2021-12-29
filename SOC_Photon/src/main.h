@@ -217,15 +217,15 @@ void setup()
 void loop()
 {
   // Sensor noise filters.   There are AAF in hardware for Vbatt and VshuntAmp and VshuntNoAmp
-  static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -50., 50.);
-  static General2_Pole* IshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -500., 500.);
+  // static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -50., 50.);
+  // static General2_Pole* IshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -500., 500.);
   static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
 
   // 1-wire temp sensor battery temp
   static DS18* SensorTbatt = new DS18(myPins->pin_1_wire);
 
   // Sensor conversions
-  static Sensors *Sen = new Sensors(NOMVBATT, NOMVBATT, NOMTBATT, NOMTBATT,
+  static Sensors *Sen = new Sensors(NOMVBATT, NOMTBATT, NOMTBATT, // TODO is this needed
         NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
         NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
         0, 0, 0, bare_ads_noamp, bare_ads_amp); // Manage sensor data
@@ -408,7 +408,7 @@ void loop()
       Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
         MyBattModel->SOC()-90,
         Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
-        Sen->Vbatt_filt*10-110, MyBattModel->voc()*10-110, MyBattModel->vdyn()*10, MyBattModel->vb()*10-110, MyBatt->vdyn()*10-110);
+        Sen->Vbatt*10-110, MyBattModel->voc()*10-110, MyBattModel->vdyn()*10, MyBattModel->vb()*10-110, MyBatt->vdyn()*10-110);
     if ( rp.debug==12 )
       Serial.printf("ib,ib_mod,   vb,vb_mod,  voc_dyn,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
         MyBatt->ib(), MyBattModel->ib(),
@@ -438,7 +438,7 @@ void loop()
     if ( rp.modeling && reset && MyBattModel->q()<=0. ) Sen->Ishunt = 0.;
 
     // Filter
-    filter(reset, Sen, VbattSenseFilt, IshuntSenseFilt);
+    // filter(reset, Sen, VbattSenseFilt, IshuntSenseFilt);
 
     // rp.debug print statements
     // Useful for vector testing and serial data capture
@@ -515,7 +515,7 @@ void loop()
   if ( summarizing || cp.write_summary )
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
-    mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt_filt, Sen->Ishunt_filt,
+    mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,
                           MyBatt->soc_ekf(), MyBatt->soc(), MyBattModel->dv_dsoc());
   }
 

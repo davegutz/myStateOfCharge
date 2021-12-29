@@ -41,10 +41,10 @@ void publish1(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write1\n");
   Blynk.virtualWrite(V0,  cp.pubList.Vbatt);
-  Blynk.virtualWrite(V2,  cp.pubList.Vbatt_filt);
+  // Blynk.virtualWrite(V2,  cp.pubList.Vbatt_filt);
   // Blynk.virtualWrite(V3,  cp.pubList.VOC_solved);
   // Blynk.virtualWrite(V4,  cp.pubList.Vbatt_solved);
-  //Blynk.virtualWrite(V5,  pubList.Vbatt_model);
+  // Blynk.virtualWrite(V5,  pubList.Vbatt_model);
 }
 
 
@@ -77,7 +77,7 @@ void publish4(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write4\n");
   Blynk.virtualWrite(V17, cp.pubList.Ishunt);
-  Blynk.virtualWrite(V18, cp.pubList.Ishunt_filt);
+  // Blynk.virtualWrite(V18, cp.pubList.Ishunt_filt);
   Blynk.virtualWrite(V19, cp.pubList.Wshunt);
   // Blynk.virtualWrite(V20, cp.pubList.Wshunt_filt);
   // Blynk.virtualWrite(V21, cp.pubList.soc_solved);
@@ -143,7 +143,6 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->hm_string =hm_string;
   pubList->control_time = control_time;
   pubList->Vbatt = Sen->Vbatt;
-  pubList->Vbatt_filt = Sen->Vbatt_filt;
   pubList->Tbatt = Sen->Tbatt;
   pubList->Tbatt_filt = Sen->Tbatt_filt;
   pubList->Tbatt_filt_model = rp.t_last_model;
@@ -154,7 +153,6 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Ishunt_amp_cal = Sen->Ishunt_amp_cal;
   pubList->Ishunt_noamp_cal = Sen->Ishunt_noamp_cal;
   pubList->Ishunt = Sen->Ishunt;
-  pubList->Ishunt_filt = Sen->Ishunt_filt;
   pubList->Wshunt = Sen->Wshunt;
   pubList->Vshunt_amp = Sen->Vshunt_amp;
   pubList->num_timeouts = num_timeouts;

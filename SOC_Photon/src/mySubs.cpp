@@ -35,19 +35,19 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm,                  cTime,        T,          Tb_f,  Tb_f_m,    Vb,     voc,    vsat,  sat,  sel, mod, Ib,     Ib_f_o,    VOC_s,   soc_m, soc_ekf, soc,   SOC_m, SOC_ekf, SOC,"));
+  Serial.println(F("unit,hm,                  cTime,        T,          Tb_f, Tb_f_m,    Vb,     voc,    vsat,  sat,  sel, mod, Ib,     VOC_s,   soc_m, soc_ekf, soc,   SOC_m, SOC_ekf, SOC,"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%d,    %d,   %d, %7.3f,%7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,  %c", \
+  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%d,    %d,   %d, %7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,  %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
     pubList->Tbatt, pubList->Tbatt_filt_model,
     pubList->Vbatt, pubList->voc, pubList->vsat, pubList->sat,
     pubList->curr_sel_amp,
     rp.modeling,
-    pubList->Ishunt, pubList->Ishunt_filt,
+    pubList->Ishunt,
     pubList->tcharge,
     pubList->soc_model, pubList->soc_ekf, pubList->soc, 
     pubList->SOC_model, pubList->SOC_ekf, pubList->SOC, 
@@ -246,10 +246,10 @@ void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFilt,  General2_Po
   Sen->Ishunt_filt = IshuntSenseFilt->calculate( Sen->Ishunt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
   
   // Voltage
-  if ( rp.modeling )
-    Sen->Vbatt_filt = Sen->Vbatt_model;
-  else
-    Sen->Vbatt_filt = VbattSenseFilt->calculate(Sen->Vbatt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
+  // if ( rp.modeling )
+  //   Sen->Vbatt_filt = Sen->Vbatt_model;
+  // else
+  //   Sen->Vbatt_filt = VbattSenseFilt->calculate(Sen->Vbatt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
 
 }
 
@@ -348,9 +348,9 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
   pass = !pass;
 
   if ( rp.debug==5 ) Serial.printf("myDisplay: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem, %3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
-      cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt_filt, cp.pubList.amp_hrs_remaining_ekf, cp.pubList.tcharge, cp.pubList.amp_hrs_remaining);
+      cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt, cp.pubList.amp_hrs_remaining_ekf, cp.pubList.tcharge, cp.pubList.amp_hrs_remaining);
   if ( rp.debug==-5 ) Serial.printf("Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem,\n%3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
-      cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt_filt, cp.pubList.amp_hrs_remaining_ekf, cp.pubList.tcharge, cp.pubList.amp_hrs_remaining);
+      cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt, cp.pubList.amp_hrs_remaining_ekf, cp.pubList.tcharge, cp.pubList.amp_hrs_remaining);
 
 }
 
