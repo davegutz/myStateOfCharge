@@ -259,7 +259,7 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   5. Serial streams shall have an absolute Julien time for easy plotting and comparison.
   6. Built-in test vector function, engaged using 'talk' function.
   7. Load software using USB.  Wifi to truck will not be reliable.
-  8. Likewise, monitor USB using laptop or phone.  'Talk' function should change serial monitor for debugging.
+  8. Likewise, monitor USB using laptop or phone.  'Talk' function should change serial monitor and inject signals for debugging.
   9. Device shall have no effect on system operation.   Monitor function only.
   10. Bluetooth serial interface required.  ***This did not work due to age of Android phone (6 yrs) not compatible with the latest bluetooth devices.
   11. Keep as much summary as possible of SOC every half hour:  Tbatt, Vbatt, SOC.   Save as SRAM battery backup memory. Print out to serial automatically on boot and as requested by 'Talk.'  This will tell users charging history.
@@ -269,6 +269,18 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   13. The 'Talk' function should let the user test a lot of stuff.   The biggest short coming is that it is a little quirky.  For example, resetting the Photon or doing any number of things sometimes requires the filters to be initialized differently, e.g. initialize to input rather than tending toward initializing to 0.   The initialization was optimized for installed use.  So the user needs to get used to rationalizing the initialization behavior they see when testing.  They can wait for the system to settle, sometimes 5 minutes.   They can run Talk('Rs') to attempt a software filter reset - won't help if the test draws a steady current after reset/reboot.
   14. Inject hardware current signal for testing purposes.   This may be implemented by reconnecting the shunt input wires to a PWM signal from the Photon.
   15. The PWM signal for injecting test signals should run at 60 Hz to better mimic the 60 Hz behavior of the inverter when installed and test the hardware AAF filters, (RC=2*pi, 1 Hz -3dB bandwidth).
+  16. There shall be a built-in model to test logic and perform regression tests.  The EKF in MyBatt needs a realistic response on current to voltage to work properly (H and hx assume a system).  The built-in model must properly represent behavior onto and off of limits of saturation and 0.
+  17. The Battery Monitor will not properly predict saturation and low shutoff.   It doesn't need to.   The prime requirement is to count Coulombs and reset the counter when saturated.   The detection of saturation may be crude but always work - this will result in saturation being declared at too low voltage which is conservative, in that the logic will display a state of charge that is lower than actual.
+  18. The Battery Model used for testing shall implement a current cutback as saturation is neared, to rougly model the BMS in the actual system.
+  19. The Battery Monitor shall implement a predicted loss of capacity with temperature.   The Battery Model does not need to implement this but should anyway.
+  20. The Battery Model shall be scaleable using Talk for capacity.   The Battery Monitor will have a nominal size and it is ok to recompile for different sizes.
+  21. The Battery Model Coulomb Counting algorithm shall be implemented with separate logic to avoid the problem of logic changes confounding regression test.
+  22. The Talk function shall have a method Talk('RR') that resets all logic to installed configuration.
+  23. The default values of sensor signal biases should remain as default values in logic.
+  24. Power loss and resets (both hard and soft) must not affect long term Coulomb counting.   This may result in adding a button-cell battery to the VBAT terminal of Photon and using 'retained' SRAM data for critical states in the logic.   It would be nice if loss and resets did not affect Battery Model and testing too.
+  25. 'soc' shall be current charge 'q' divided by current capacity 'q_capacity' that reflects changes with temperature.
+  26. Coulomb counting shall simultaneously track temperature changes to keep aligned with capacity estimates.
+  27. 'SOC' shall be current charge 'q' at the instant temperature divided by rated capacity at rated temperature.
 
 ## Implementation Notes
 
@@ -294,4 +306,7 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   the rp structure.   You have to reset to force them to take effect.
   15. The minor frame time (READ_DELAY) could be run as fast as 5.   The application runs in 0.005 seconds.  The anti-alias filters in hardware need to run at 1 Hz -3dB bandwidth (tau = 0.159 s) to filter out the PWM-like activity of the inverter that is trying to regulate 60 Hz power.   With that kind of hardware filtering, there is no value added to running the logic any faster than 10 Hz (READ_DELAY = 100).   There's lots of throughput margin available for adding more EKF logic, etc.
   16. The hardware AAF filters effectively smooth out the PWM test input to look analog.   This is desired behavior:  the system must filter 60 Hz inverter activity.   The testing is done with PWM signal to give us an opportunity to test the hardware A/D behavior.  The user must remember to move the internal jumper wire from 3-5 (testing) to 4-5 (installed).
-
+  17. Regression test:   For installed with real signal, could disconnect solar panels and inject using Talk('Di<>') or Talk('Xp5') and Talk('Xp6').  Uninstalled, should run through them all:  Talk('Xp<>,) 0-6.  Uninstalled should also run onto and off of limits (7 & 8 TODO).
+  18. In modeling mode the Battery Model passes all sensed signals on to the Battery Monitor.   The Model does things like cutting back current near saturation, and injecting test signals both hard and soft.  The Signal Sense logic needs to perform some injection especially soft so Model not needed for some regression.
+  19. All logic uses a counting scheme that debits Coulombs since last known saturation.   The prime requirement of using saturation to periodically reset logic is reflected in use of change since saturation.
+  20. The easiest way to confirm that the EKF is working correctly is to set 'modeling' using Talk('Xx1') and verify that soc_ekf equals soc_mod.
