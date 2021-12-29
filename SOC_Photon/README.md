@@ -286,3 +286,5 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   14. System can become confused with retained parameters getting off-nominal values and no way to
   reset except by forcing a full compile reload.   So the 'Talk('A')' feature was added to re-nominalize
   the rp structure.   You have to reset to force them to take effect.
+  15. The minor frame time (READ_DELAY) could be run as fast as 5.   The application runs in 0.005 seconds.  The anti-alias filters in hardware need to run at 1 Hz -3dB bandwidth (tau = 0.159 s) to filter out the PWM-like activity of the inverter that is trying to regulate 60 Hz power.   With that kind of hardware filtering, there is no value added to running the logic any faster than 10 Hz (READ_DELAY = 100).   There's lots of throughput margin available for adding more EKF logic, etc.
+

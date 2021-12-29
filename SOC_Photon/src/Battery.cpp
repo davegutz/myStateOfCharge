@@ -254,7 +254,7 @@ void Battery::pretty_print(void)
     Serial.printf("  amp_hrs_remaining_ekf_ =  %7.3f;  // Discharge amp*time left if drain to q_ekf=0, A-h\n", amp_hrs_remaining_ekf_);
     Serial.printf("  sr =      %7.3f;  // Resistance scalar\n", sr_);
     Serial.printf("  dv_ =      %7.3f; // Adjustment, V\n", dv_);
-    Serial.printf("  dt_ =      %7.3f; // Update time  // TODO:  delete\n", dt_);
+    Serial.printf("  dt_ =      %7.3f; // Update time, s\n", dt_);
 }
 
 // Print State Space

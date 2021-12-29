@@ -92,7 +92,7 @@ struct Sensors
   boolean bare_ads_noamp; // If no ADS detected
   boolean saturated;      // Battery saturation status based on Temp and VOC
   Sensors(void) {}
-  Sensors(double Vbatt, double Tbatt, double Tbatt_filt,  // TODO:  is this needed?
+  Sensors(double Vbatt, double Tbatt, double Tbatt_filt,
           int16_t Vshunt_noamp_int, double Vshunt, double Vshunt_filt,
           int16_t Vshunt_amp_int, double Vshunt_amp, double Vshunt_amp_filt,
           int I2C_status, double T, double T_temp, boolean bare_ads_noamp, boolean bare_ads_amp)

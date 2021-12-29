@@ -225,7 +225,7 @@ void loop()
   static DS18* SensorTbatt = new DS18(myPins->pin_1_wire);
 
   // Sensor conversions
-  static Sensors *Sen = new Sensors(NOMVBATT, NOMTBATT, NOMTBATT, // TODO is this needed
+  static Sensors *Sen = new Sensors(NOMVBATT, NOMTBATT, NOMTBATT,
         NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
         NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
         0, 0, 0, bare_ads_noamp, bare_ads_amp); // Manage sensor data
