@@ -40,11 +40,9 @@ extern BlynkParticle Blynk;
 void publish1(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write1\n");
-  Blynk.virtualWrite(V0,  cp.pubList.Vbatt);
-  // Blynk.virtualWrite(V2,  cp.pubList.Vbatt_filt);
-  // Blynk.virtualWrite(V3,  cp.pubList.VOC_solved);
-  // Blynk.virtualWrite(V4,  cp.pubList.Vbatt_solved);
-  // Blynk.virtualWrite(V5,  pubList.Vbatt_model);
+  Blynk.virtualWrite(V2,  cp.pubList.Vbatt);
+  Blynk.virtualWrite(V3,  cp.pubList.voc);
+  Blynk.virtualWrite(V4,  cp.pubList.Vbatt);
 }
 
 
@@ -53,10 +51,8 @@ void publish2(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write2\n");
   Blynk.virtualWrite(V6,  cp.pubList.soc);
-  // Blynk.virtualWrite(V7,  cp.pubList.Vbatt_solved);
   Blynk.virtualWrite(V8,  cp.pubList.T);
-  Blynk.virtualWrite(V9,  cp.pubList.Tbatt);
-  Blynk.virtualWrite(V10, cp.pubList.Tbatt_filt);
+  Blynk.virtualWrite(V10, cp.pubList.Tbatt);
 }
 
 
@@ -64,9 +60,6 @@ void publish2(void)
 void publish3(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write3\n");
-  Blynk.virtualWrite(V12, cp.pubList.Vshunt_amp);
-  Blynk.virtualWrite(V13, cp.pubList.Vshunt_filt);
-  Blynk.virtualWrite(V14, cp.pubList.I2C_status);
   Blynk.virtualWrite(V15, cp.pubList.hm_string);
   Blynk.virtualWrite(V16, cp.pubList.tcharge);
 }
@@ -76,11 +69,9 @@ void publish3(void)
 void publish4(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write4\n");
-  Blynk.virtualWrite(V17, cp.pubList.Ishunt);
-  // Blynk.virtualWrite(V18, cp.pubList.Ishunt_filt);
-  Blynk.virtualWrite(V19, cp.pubList.Wshunt);
-  // Blynk.virtualWrite(V20, cp.pubList.Wshunt_filt);
-  // Blynk.virtualWrite(V21, cp.pubList.soc_solved);
+  Blynk.virtualWrite(V18, cp.pubList.Ishunt);
+  Blynk.virtualWrite(V21, cp.pubList.Wshunt);
+  Blynk.virtualWrite(V21, cp.pubList.soc_ekf);
 }
 
 
