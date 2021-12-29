@@ -37,14 +37,14 @@ extern CommandPars cp;
 // class Battery
 // constructors
 Battery::Battery()
-    : b_(0), a_(0), c_(0), m_(0), n_(0), d_(0), nz_(1), q_(nom_q_cap), r1_(0), r2_(0), c2_(0), voc_(0),
+    : b_(0), a_(0), c_(0), m_(0), n_(0), d_(0), nz_(1), q_(nom_q_cap), voc_(0),
     vdyn_(0), vb_(0), ib_(0), num_cells_(4), dv_dsoc_(0), tcharge_(24), sr_(1), vsat_(13.7),
     dv_(0), dvoc_dt_(0) {Q_ = 0.; R_ = 0.;}
 Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim)
-    : Coulombs(q_cap_rated, t_rated, t_rlim), b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(nz), q_(nom_q_cap), r1_(r1), r2_(r2), c2_(r2c2/r2_),
+    : Coulombs(q_cap_rated, t_rated, t_rlim), b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(nz), q_(nom_q_cap),
     voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0), tcharge_(24.),
     sr_(1.), nom_vsat_(batt_vsat), dv_(0), dvoc_dt_(dvoc_dt),
     r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
@@ -52,9 +52,9 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
 {
 
     // Battery characteristic tables
-    B_T_ = new TableInterp1Dclip(nz_, x_tab, b_tab);  // TODO:  delete?
-    A_T_ = new TableInterp1Dclip(nz_, x_tab, a_tab);  // TODO:  delete?
-    C_T_ = new TableInterp1Dclip(nz_, x_tab, c_tab);  // TODO:  delete?
+    B_T_ = new TableInterp1Dclip(nz_, x_tab, b_tab);
+    A_T_ = new TableInterp1Dclip(nz_, x_tab, a_tab);
+    C_T_ = new TableInterp1Dclip(nz_, x_tab, c_tab);
 
     // EKF
     this->Q_ = 0.001*0.001;
@@ -246,7 +246,6 @@ void Battery::pretty_print(void)
     Serial.printf("  vdyn =    %7.3f;  // Model current induced back emf, V\n", vdyn_);
     Serial.printf("  q =    %10.1f;  // Present charge, C\n", q_);
     Serial.printf("  q_ekf =%10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
-    Serial.printf("  pow_in_ekf = %7.3f;  // Charging power from ekf, W\n", pow_in_ekf_);
     Serial.printf("  tcharge =    %5.1f; // Charging time to full, hr\n", tcharge_);
     Serial.printf("  tcharge_ekf =%5.1f; // Charging time to full from ekf, hr\n", tcharge_ekf_);
     Serial.printf("  soc_ekf = %7.3f;  // Filtered state of charge from ekf (0-1)\n", soc_ekf_);
@@ -345,8 +344,8 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     if ( rp.debug==79 ) Serial.printf("temp_C, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f,\n",
         temp_C, dvoc_dt_, vsat_, voc_, q_capacity, sat_ib_max_, ib_);
 
-    if ( rp.debug==78 )Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,a,b,c,d,n,m,r,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-     dt,temp_C, ib_, a_, b_, c_, d_, n_, m_, (r1_+r2_)*sr_ , soc, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
+    if ( rp.debug==78 )Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,a,b,c,d,n,m,soc,logsoc,expnsoc,powlogsoc,voc,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+     dt,temp_C, ib_, a_, b_, c_, d_, n_, m_, soc, log_soc, exp_n_soc, pow_log_soc, voc_, vdyn_, vb_);
     if ( rp.debug==-78 ) Serial.printf("SOC/10,soc*10,voc,vsat,curr_in,sat_ib_max_,ib,sat,\n%7.3f, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
       SOC/10, soc*10, voc_, vsat_, curr_in, sat_ib_max_, ib_, model_saturated_);
 
@@ -457,7 +456,7 @@ void BatteryModel::pretty_print(void)
 {
     Serial.printf("BatteryModel::");
     this->Battery::pretty_print();
-    Serial.printf("  NOTE: for BatteryModel, voc_dyn, q_ekf, pow_in_ekf, soc_ekf, SOC_ekf, and amp_hrs* not used\n");
+    Serial.printf("  NOTE: for BatteryModel, voc_dyn, q_ekf, soc_ekf, SOC_ekf, and amp_hrs* not used\n");
     Serial.printf("  sat_ib_max_ =       %7.3f; // Current cutback to be applied to modeled ib output, A\n", sat_ib_max_);
     Serial.printf("  sat_ib_null_ =      %7.3f; // Current cutback value for voc=vsat, A\n", sat_ib_null_);
     Serial.printf("  sat_cutback_gain_ = %7.3f; // Gain to retard ib when voc exceeds vsat, dimensionless\n", sat_cutback_gain_);

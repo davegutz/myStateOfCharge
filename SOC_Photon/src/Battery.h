@@ -146,10 +146,7 @@ protected:
   double n_;        // Battery coeff n
   double d_;        // Battery coeff d
   unsigned int nz_; // Number of breakpoints
-  double q_;        // Charge, C TODO:  delete?
-  double r1_;       // Randels resistance, Ohms per cell  // TODO:  delete?
-  double r2_;       // Randels resistance, Ohms per cell  // TODO:  delete?
-  double c2_;       // Randels capacitance, Farads per cell  // TODO:  delete?
+  double q_;        // Charge, C
   double voc_;      // Static model open circuit voltage, V
   double vdyn_;     // Model current induced back emf, V
   double vb_;        // Total model voltage, voltage at terminals, V
@@ -160,10 +157,9 @@ protected:
   double sr_;       // Resistance scalar
   double nom_vsat_; // Nominal saturation threshold at 25C, V
   double vsat_;     // Saturation threshold at temperature, V
-  double tsat_;     // Temperature observed at saturation, deg C TODO:  delete?
   double dv_;       // Adjustment, V
   double dvoc_dt_;  // Change of VOC with temperature, V/deg C
-  double dt_;       // Update time  // TODO:  delete
+  double dt_;       // Update time, s
   double r0_;       // Randles R0, ohms
   double tau_ct_;   // Randles charge transfer time constant, s (=1/Rct/Cct)
   double rct_;      // Randles charge transfer resistance, ohms
@@ -179,13 +175,11 @@ protected:
   double *rand_C_;  // Randles model C
   double *rand_D_;  // Randles model D
   double temp_c_;   // Battery temperature, deg C
-  double pow_in_ekf_;   // Charging power from ekf, W   TODO:  delete?
   double tcharge_ekf_;  // Charging time to 100% from ekf, hr
   double voc_dyn_;  // Charging voltage, V
-  double delta_soc_;// Change to available charge since saturated, (0-1)  // TODO:  delete?
   double soc_ekf_;  // Filtered state of charge from ekf (0-1)
   double SOC_ekf_;  // Filtered state of charge from ekf (0-100)
-  double q_ekf_;    // Filtered charge calculated by ekf, C  // TODO:  delete?
+  double q_ekf_;    // Filtered charge calculated by ekf, C
   double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
   void ekf_model_predict(double *Fx, double *Bu);

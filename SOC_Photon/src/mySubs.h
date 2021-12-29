@@ -90,10 +90,7 @@ struct Sensors
   double T_temp;          // Temperature update time, s
   boolean bare_ads_amp;   // If no ADS detected
   boolean bare_ads_noamp; // If no ADS detected
-  double curr_bias_amp;   // Signal injection bias for amplified current input, A //TODO:   move to cp
-  double curr_bias_noamp; // Signal injection bias for non-amplified current input, A//TODO:   move to cp
-  double curr_bias;       // Signal injection bias for selected current input, A//TODO:   move to cp
-  boolean saturated;      // Battery saturation status based on Temp and VOC //TODO:   move to Battery
+  boolean saturated;      // Battery saturation status based on Temp and VOC
   Sensors(void) {}
   Sensors(double Vbatt, double Tbatt, double Tbatt_filt,  // TODO:  is this needed?
           int16_t Vshunt_noamp_int, double Vshunt, double Vshunt_filt,
@@ -116,8 +113,6 @@ struct Sensors
     this->T_temp = T_temp;
     this->bare_ads_noamp = bare_ads_noamp;
     this->bare_ads_amp = bare_ads_amp;
-    this->curr_bias_noamp = 0.0;
-    this->curr_bias_amp = 0.0;
   }
 };
 
@@ -126,8 +121,7 @@ struct Sensors
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);
 void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
-    Adafruit_ADS1015 *ads_amp, Adafruit_ADS1015 *ads_noamp, const unsigned long now,
-    SlidingDeadband *SdVbatt);
+    Adafruit_ADS1015 *ads_amp, Adafruit_ADS1015 *ads_noamp, const unsigned long now);
 void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt);
 void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFilt, General2_Pole* IshuntSenseFilt);
 void filter_temp(const int reset, const double t_rlim, Sensors *Sen, General2_Pole* TbattSenseFilt, const double t_bias, double *t_bias_last);

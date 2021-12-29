@@ -35,7 +35,7 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm,                  cTime,        T,          Tb_f, Tb_f_m,    Vb,     voc,    vsat,  sat,  sel, mod, Ib,     VOC_s,   soc_m, soc_ekf, soc,   SOC_m, SOC_ekf, SOC,"));
+  Serial.println(F("unit,hm,                  cTime,        T,         Tb_f,   Tb_f_m,    Vb,     voc,    vsat,  sat,  sel, mod, Ib,     VOC_s,   soc_m, soc_ekf, soc,   SOC_m, SOC_ekf, SOC,"));
 }
 
 // Print strings
@@ -143,16 +143,15 @@ void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt)
 
 // Load all others
 void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
-    Adafruit_ADS1015 *ads_amp, Adafruit_ADS1015 *ads_noamp, const unsigned long now,
-    SlidingDeadband *SdVbatt)
+    Adafruit_ADS1015 *ads_amp, Adafruit_ADS1015 *ads_noamp, const unsigned long now)
 {
   static unsigned long int past = now;
   double T = (now - past)/1e3;
   past = now;
 
   // Current bias.  Feeds into signal conversion, not to duty injection
-  Sen->curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.offset;
-  Sen->curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.offset;
+  cp.curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.offset;
+  cp.curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.offset;
 
   // Read Sensors
   // ADS1015 conversion
@@ -167,7 +166,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   else
     Sen->Vshunt_amp_int = 0;
   Sen->Vshunt_amp = ads_amp->computeVolts(Sen->Vshunt_amp_int);
-  Sen->Ishunt_amp_cal = Sen->Vshunt_amp*shunt_amp_v2a_s + Sen->curr_bias_amp;
+  Sen->Ishunt_amp_cal = Sen->Vshunt_amp*shunt_amp_v2a_s + cp.curr_bias_amp;
   // No amp
   int16_t vshunt_noamp_int_0 = 0;
   int16_t vshunt_noamp_int_1 = 0;
@@ -179,7 +178,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   else
     Sen->Vshunt_noamp_int = 0;
   Sen->Vshunt_noamp = ads_noamp->computeVolts(Sen->Vshunt_noamp_int);
-  Sen->Ishunt_noamp_cal = Sen->Vshunt_noamp*shunt_noamp_v2a_s + Sen->curr_bias_noamp;
+  Sen->Ishunt_noamp_cal = Sen->Vshunt_noamp*shunt_noamp_v2a_s + cp.curr_bias_noamp;
 
   // Print results
   if ( rp.debug==14 ) Serial.printf("reset_free,select,duty,  ||,  vs_na_int,0_na_int,1_na_int,vshunt_na,ishunt_na, ||, vshunt_a_int,0_a_int,1_a_int,vshunt_a,ishunt_a,  ||,  Ishunt,T=,    %d,%d,%ld,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %7.3f,%7.3f,\n",
@@ -194,21 +193,21 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   {
     Sen->Vshunt = Sen->Vshunt_amp;
     Sen->Ishunt = Sen->Ishunt_amp_cal;
-    Sen->curr_bias = Sen->curr_bias_amp;
+    cp.curr_bias = cp.curr_bias_amp;
     Sen->shunt_v2a_s = shunt_amp_v2a_s;
   }
   else if ( !Sen->bare_ads_noamp )
   {
     Sen->Vshunt = Sen->Vshunt_noamp;
     Sen->Ishunt = Sen->Ishunt_noamp_cal;
-    Sen->curr_bias = Sen->curr_bias_noamp;
+    cp.curr_bias = cp.curr_bias_noamp;
     Sen->shunt_v2a_s = shunt_noamp_v2a_s;
   }
   else
   {
     Sen->Vshunt = 0.;
     Sen->Ishunt = 0.;
-    Sen->curr_bias = 0.;
+    cp.curr_bias = 0.;
     Sen->shunt_v2a_s = shunt_amp_v2a_s; // amp preferred, default to that
   }
 
@@ -216,8 +215,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
   double vbatt_free =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A) + rp.vbatt_bias;
   if ( rp.modeling ) Sen->Vbatt = Sen->Vbatt_model;
-  else Sen->Vbatt = SdVbatt->update(vbatt_free, reset_free);
-  if ( rp.debug==15 ) Serial.printf("reset_free,vbatt_free,vbatt,T, %d,%7.3f,%7.3f,%7.3f,\n", reset_free, vbatt_free, Sen->Vbatt, T);
+  else Sen->Vbatt = vbatt_free;
 
   // Power calculation
   Sen->Wshunt = Sen->Vbatt*Sen->Ishunt;

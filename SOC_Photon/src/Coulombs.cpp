@@ -145,8 +145,6 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
     if ( reset ) temp_lim = temp_c;
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
-    // TODO:   should we just use q_sat all the time in soc calculation?  (Memory behavior causes problems with saturation
-    // detection).
     if ( sat )
     {
         if ( d_delta_q > 0 )
@@ -161,7 +159,6 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
 
     // Integration
     q_capacity_ = calculate_capacity(temp_lim);
-    // q_capacity_ = q_cap_rated_scaled_*(1. + DQDT*(temp_lim - t_rated_));  TODO:  delete
     delta_q_ = max(min(delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-t_last_), 0.0), -q_capacity_);
     q_ = q_capacity_ + delta_q_;
 

@@ -229,7 +229,6 @@ void loop()
         NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
         NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
         0, 0, 0, bare_ads_noamp, bare_ads_amp); // Manage sensor data
-  static SlidingDeadband *SdVbatt = new SlidingDeadband(HDB_VBATT);
   static SlidingDeadband *SdTbatt = new SlidingDeadband(HDB_TBATT);
   static double t_bias_last;  // Memory for rate limiter in filter_temp call, deg C
 
@@ -316,7 +315,7 @@ void loop()
     if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", Sen->T, millis());
 
     // Load and filter
-    load(reset, Sen, myPins, ads_amp, ads_noamp, ReadSensors->now(), SdVbatt);
+    load(reset, Sen, myPins, ads_amp, ads_noamp, ReadSensors->now());
     
     // Arduino plots
     if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n",
@@ -345,7 +344,7 @@ void loop()
       MyBattModel->init_battery();  // for cp.soft_reset
     }
 
-    // Model calculation  TODO:  is Sen->Vbatt_model useful?   Access class instead?
+    // Model calculation
     Sen->Vbatt_model = MyBattModel->calculate(Sen->Tbatt_filt, MyBattModel->soc(), Sen->Ishunt, min(Sen->T, F_MAX_T),
         MyBattModel->q_capacity(), MyBattModel->q_cap_rated());
     cp.model_cutback = MyBattModel->cutback();
@@ -403,7 +402,7 @@ void loop()
     //////////////////////////////////////////////////////////////
 
     //
-    // Useful for Arduino plotting  TODO:  move Arduino plots to separate sub in mySubs
+    // Useful for Arduino plotting
     if ( rp.debug==-1 )
       Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
         MyBattModel->SOC()-90,
