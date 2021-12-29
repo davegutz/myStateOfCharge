@@ -251,7 +251,10 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
     c.  Measure and display battery voltage, V.
     d.  Measure and display battery temperature, F.
   3. Implement an adjustment 'talk' function.  Along with general debugging it must be capable of
-    a.  Setting SOC state for those times that the
+    a.  Setting SOC state
+    b.  Separately setting the model state
+    c.  Resetting pretty much anything
+    d.  Injecting test signals
   4. CPU hard and soft resets must not change the state of operation, either SOC, display, or serial bus.
   5. Serial streams shall have an absolute Julien time for easy plotting and comparison.
   6. Built-in test vector function, engaged using 'talk' function.
@@ -263,6 +266,9 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   12. Adjustments to model using talk function should preserve delta_q between models to preserve change from
   saturated situation.  The one 'constant' in this device is that it may be reset to reality whenever fully
   charged.   Test it the same way.  The will be separate adjustment to bias the model away from this ('n' and 'N')
+  13. The 'Talk' function should let the user test a lot of stuff.   The biggest short coming is that it is a little quirky.  For example, resetting the Photon or doing any number of things sometimes requires the filters to be initialized differently, e.g. initialize to input rather than tending toward initializing to 0.   The initialization was optimized for installed use.  So the user needs to get used to rationalizing the initialization behavior they see when testing.  They can wait for the system to settle, sometimes 5 minutes.   They can run Talk('Rs') to attempt a software filter reset - won't help if the test draws a steady current after reset/reboot.
+  14. Inject hardware current signal for testing purposes.   This may be implemented by reconnecting the shunt input wires to a PWM signal from the Photon.
+  15. The PWM signal for injecting test signals should run at 60 Hz to better mimic the 60 Hz behavior of the inverter when installed and test the hardware AAF filters, (RC=2*pi, 1 Hz -3dB bandwidth).
 
 ## Implementation Notes
 
@@ -287,4 +293,5 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   reset except by forcing a full compile reload.   So the 'Talk('A')' feature was added to re-nominalize
   the rp structure.   You have to reset to force them to take effect.
   15. The minor frame time (READ_DELAY) could be run as fast as 5.   The application runs in 0.005 seconds.  The anti-alias filters in hardware need to run at 1 Hz -3dB bandwidth (tau = 0.159 s) to filter out the PWM-like activity of the inverter that is trying to regulate 60 Hz power.   With that kind of hardware filtering, there is no value added to running the logic any faster than 10 Hz (READ_DELAY = 100).   There's lots of throughput margin available for adding more EKF logic, etc.
+  16. The hardware AAF filters effectively smooth out the PWM test input to look analog.   This is desired behavior:  the system must filter 60 Hz inverter activity.   The testing is done with PWM signal to give us an opportunity to test the hardware A/D behavior.  The user must remember to move the internal jumper wire from 3-5 (testing) to 4-5 (installed).
 
