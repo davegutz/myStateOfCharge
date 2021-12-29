@@ -70,7 +70,7 @@ void publish4(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write4\n");
   Blynk.virtualWrite(V18, cp.pubList.Ishunt);
-  Blynk.virtualWrite(V21, cp.pubList.Wshunt);
+  Blynk.virtualWrite(V20, cp.pubList.Wshunt);
   Blynk.virtualWrite(V21, cp.pubList.soc_ekf);
 }
 
