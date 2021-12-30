@@ -134,7 +134,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     double u[2] = {ib, vb};
     Randles_->calc_x_dot(u);
     Randles_->update(dt);
-    if ( rp.debug==34 )
+    if ( rp.debug==35 )
     {
         Serial.printf("Battery::calculate_ekf:"); Randles_->pretty_print();
     }
