@@ -359,7 +359,7 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 self_talk("m0.5", MyBatt, MyBattModel);
                 rp.modeling = false;
                 rp.curr_sel_amp = false;
-                rp.debug = 2;   // myDisplay = 2
+                rp.debug = -12;   // myDisplay = 2
                 break;
               case ( 0 ):
                 rp.modeling = true;
@@ -369,14 +369,14 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 rp.amp = 0.0;
                 rp.offset = 0.0;
                 rp.curr_bias_all = 0;
-                rp.debug = 5;   // myDisplay = 5
+                rp.debug = -12;   // myDisplay = 5
                 break;
               case ( 1 ):
                 self_talk("Xp0", MyBatt, MyBattModel);
                 self_talk("m0.5", MyBatt, MyBattModel);
                 rp.type = 1;
                 rp.freq = 0.05;
-                rp.amp = 18.3;
+                rp.amp = 6.;
                 rp.offset = -rp.amp;
                 rp.debug = -12;
                 rp.freq *= (2. * PI);
@@ -386,7 +386,7 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 self_talk("m0.5", MyBatt, MyBattModel);
                 rp.type = 2;
                 rp.freq = 0.10;
-                rp.amp = 18.3;
+                rp.amp = 6.;
                 rp.offset = -rp.amp;
                 rp.debug = -12;
                 rp.freq *= (2. * PI);
@@ -396,7 +396,7 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 self_talk("m0.5", MyBatt, MyBattModel);
                 rp.type = 3;
                 rp.freq = 0.05;
-                rp.amp = 18.3;
+                rp.amp = 6.;
                 rp.offset = -rp.amp;
                 rp.debug = -12;
                 rp.freq *= (2. * PI);
