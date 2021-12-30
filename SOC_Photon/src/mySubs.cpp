@@ -35,13 +35,13 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm,                  cTime,        T,         Tb_f,   Tb_f_m,    Vb,     voc,    vsat,  sat,  sel, mod, Ib,       VOC_s,   soc_m, soc_ekf, soc,   SOC_m, SOC_ekf, SOC,"));
+  Serial.println(F("unit,hm,                  cTime,        T,         Tb_f,   Tb_f_m,    Vb,     voc,    vsat,    sat,  sel, mod, Ib,       VOC_s,   soc_m, soc_ekf, soc,   SOC_m, SOC_ekf, SOC,"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%d,    %d,   %d, %7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,  %c", \
+  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,  %d,    %d,   %d, %7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,  %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
     pubList->Tbatt, pubList->Tbatt_filt_model,
     pubList->Vbatt, pubList->voc, pubList->vsat, pubList->sat,
@@ -150,7 +150,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   past = now;
 
   // Current bias.  Feeds into signal conversion, not to duty injection
-  cp.curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.offset;
+  cp.curr_bias_noamp = rp.curr_bias_noamp;
   cp.curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.offset;
 
   // Read Sensors
@@ -193,22 +193,19 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   {
     Sen->Vshunt = Sen->Vshunt_amp;
     Sen->Ishunt = Sen->Ishunt_amp_cal;
-    cp.curr_bias = cp.curr_bias_amp;
     Sen->shunt_v2a_s = shunt_amp_v2a_s;
   }
   else if ( !Sen->bare_ads_noamp )
   {
     Sen->Vshunt = Sen->Vshunt_noamp;
     Sen->Ishunt = Sen->Ishunt_noamp_cal;
-    cp.curr_bias = cp.curr_bias_noamp;
     Sen->shunt_v2a_s = shunt_noamp_v2a_s;
   }
   else
   {
     Sen->Vshunt = 0.;
     Sen->Ishunt = 0.;
-    cp.curr_bias = 0.;
-    Sen->shunt_v2a_s = shunt_amp_v2a_s; // amp preferred, default to that
+    Sen->shunt_v2a_s = shunt_noamp_v2a_s; // noamp preferred, default to that
   }
 
   // Vbatt

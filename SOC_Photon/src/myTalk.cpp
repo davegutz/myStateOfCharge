@@ -275,9 +275,14 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
         }
         break;
-      case ( 's' ): 
-        rp.curr_sel_amp = !rp.curr_sel_amp;
-        Serial.printf("Signal selection (1=amp, 0=no amp) toggled to %d\n", rp.curr_sel_amp);
+      case ( 's' ):
+        if ( cp.input_string.substring(1).toInt()>0 )
+        {
+          rp.curr_sel_amp = true;
+        }
+        else
+          rp.curr_sel_amp = false;
+        Serial.printf("Signal selection (1=amp, 0=no amp) set to %d\n", rp.curr_sel_amp);
         break;
       case ( 'T' ):   // This is a test feature only
         cp.input_string = cp.input_string.substring(1);
@@ -349,14 +354,24 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
           case ( 'p' ):
             switch ( cp.input_string.substring(2).toInt() )
             {
+              case ( -1 ):
+                self_talk("Xp0", MyBatt, MyBattModel);
+                self_talk("m0.5", MyBatt, MyBattModel);
+                rp.modeling = false;
+                rp.curr_sel_amp = false;
+                rp.debug = 2;   // myDisplay = 2
+                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
+                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
+                break;
               case ( 0 ):
                 rp.modeling = true;
+                rp.curr_sel_amp = true;
                 rp.type = 0;
                 rp.freq = 0.0;
                 rp.amp = 0.0;
                 rp.offset = 0.0;
-                rp.debug = 5;   // myDisplay = 5
                 rp.curr_bias_all = 0;
+                rp.debug = 5;   // myDisplay = 5
                 Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
                                         rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 break;
@@ -490,7 +505,8 @@ void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
   Serial.printf("  Xo= "); Serial.printf("%7.3f", rp.offset); Serial.println("  : Injection offset A (-18.3-18.3) [0]");
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("  : Injection  A (unlimited) [0]");
   Serial.printf("  Xp= <?>, programmed injection settings...\n"); 
-  Serial.printf("       0:  Off, modeling false\n");
+  Serial.printf("      -1:  Off, modeling false\n");
+  Serial.printf("       0:  steady-state modeling\n");
   Serial.printf("       1:  1 Hz sinusoid centered at 0 with largest supported amplitude\n");
   Serial.printf("       2:  1 Hz square centered at 0 with largest supported amplitude\n");
   Serial.printf("       3:  1 Hz triangle centered at 0 with largest supported amplitude\n");
