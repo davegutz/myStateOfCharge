@@ -24,6 +24,8 @@
 #ifndef _RETAINED_H
 #define _RETAINED_H
 
+#include "local_config.h"
+
 // Definition of structure to be saved in SRAM
 // Default values below are important:  they prevent junk
 // behavior on initial build.
@@ -35,8 +37,8 @@ struct RetainedPars
   double t_last = 25.;      // Battery temperature past value for rate limit memory, deg C
   double delta_q_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
   double t_last_model = 25.;  // Battery temperature past value for rate limit memory, deg C
-  double curr_bias_amp = -1.; // Calibrate amp current sensor, A 
-  double curr_bias_noamp = -0.13; // Calibrate non-amplified current sensor, A 
+  double curr_bias_amp = CURR_BIAS_AMP; // Calibrate amp current sensor, A 
+  double curr_bias_noamp = CURR_BIAS_NOAMP; // Calibrate non-amplified current sensor, A 
   double curr_bias_all = -0.6; // Bias all current sensors, A 
   boolean curr_sel_amp = false; // Use non-amplified sensor
   double vbatt_bias = 0;    // Calibrate Vbatt, V
@@ -60,8 +62,8 @@ struct RetainedPars
     this->t_last = 25.;
     this->delta_q_model = -0.5;
     this->t_last_model = 25.;
-    this->curr_bias_amp = -1.;      // soc0
-    this->curr_bias_noamp = -0.13;  // soc0
+    this->curr_bias_amp = CURR_BIAS_AMP;
+    this->curr_bias_noamp = CURR_BIAS_NOAMP;
     this->curr_bias_all = -0.6;     // soc0
     this->curr_sel_amp = false;
     this->vbatt_bias = 0;
@@ -81,8 +83,8 @@ struct RetainedPars
     this->debug = 2;
     this->delta_q = 0.;           // saturate
     this->delta_q_model = 0.;     // saturate
-    this->curr_bias_amp = -1.;    // soc0
-    this->curr_bias_noamp = -0.13;// soc0
+    this->curr_bias_amp = CURR_BIAS_AMP;
+    this->curr_bias_noamp = CURR_BIAS_NOAMP;
     this->curr_bias_all = -0.6;   // soc0
     this->curr_sel_amp = false;   // non-amplified
     this->vbatt_bias = 0;
