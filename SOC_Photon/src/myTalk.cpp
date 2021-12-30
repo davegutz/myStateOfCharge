@@ -360,8 +360,6 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 rp.modeling = false;
                 rp.curr_sel_amp = false;
                 rp.debug = 2;   // myDisplay = 2
-                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 break;
               case ( 0 ):
                 rp.modeling = true;
@@ -372,8 +370,6 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 rp.offset = 0.0;
                 rp.curr_bias_all = 0;
                 rp.debug = 5;   // myDisplay = 5
-                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 break;
               case ( 1 ):
                 self_talk("Xp0", MyBatt, MyBattModel);
@@ -383,8 +379,6 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 rp.amp = 18.3;
                 rp.offset = -rp.amp;
                 rp.debug = -12;
-                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 rp.freq *= (2. * PI);
                 break;
               case ( 2 ):
@@ -395,8 +389,6 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 rp.amp = 18.3;
                 rp.offset = -rp.amp;
                 rp.debug = -12;
-                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 rp.freq *= (2. * PI);
                 break;
               case ( 3 ):
@@ -407,8 +399,6 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 rp.amp = 18.3;
                 rp.offset = -rp.amp;
                 rp.debug = -12;
-                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 rp.freq *= (2. * PI);
                 break;
               case ( 4 ):
@@ -416,28 +406,24 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 rp.type = 4;
                 rp.curr_bias_all = -RATED_BATT_CAP;  // Software effect only
                 rp.debug = -12;
-                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 break;
               case ( 5 ):
                 self_talk("Xp0", MyBatt, MyBattModel);
                 rp.type = 5;
                 rp.curr_bias_all = RATED_BATT_CAP; // Software effect only
                 rp.debug = -12;
-                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 break;
               case ( 6 ):
                 self_talk("Xp0", MyBatt, MyBattModel);
                 rp.type = 6;
                 rp.amp = RATED_BATT_CAP*0.2;
                 rp.debug = -12;
-                Serial.printf("Setting injection program to:  rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
-                                        rp.modeling, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
                 break;
               default:
                 Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
             }
+            Serial.printf("Setting injection program to:  rp.curr_sel_amp = %d, rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
+                                    rp.modeling, rp.curr_sel_amp, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
             break;
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
