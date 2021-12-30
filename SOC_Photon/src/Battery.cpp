@@ -144,7 +144,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
 
     // EKF 1x1
     predict_ekf(ib);      // u = ib
-    update_ekf(voc_dyn_, 0., 1., dt);   // z = voc_dyn
+    update_ekf(voc_dyn_, mneps_bb, mxeps_bb, dt);   // z = voc_dyn
     soc_ekf_ = x_ekf();   // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
     q_ekf_ = soc_ekf_ * q_capacity_;
     SOC_ekf_ = q_ekf_ / q_cap_rated_scaled_ * 100.;
