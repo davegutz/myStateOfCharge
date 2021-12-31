@@ -4,7 +4,6 @@
 const   String    unit = "proto";
 #define CURR_BIAS_AMP       -1.8
 #define CURR_BIAS_NOAMP     -3.4
-  
-//#define BARE                  // Run without peripherals, except maybe a POT
+#define CURR_BIAS_ALL       -0.6
 
 #endif

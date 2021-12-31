@@ -4,5 +4,6 @@
 const   String    unit = "soc0";
 #define CURR_BIAS_AMP       -1.
 #define CURR_BIAS_NOAMP     -0.5
+#define CURR_BIAS_ALL       -0.6
 
 #endif

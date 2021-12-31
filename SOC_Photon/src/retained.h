@@ -39,7 +39,7 @@ struct RetainedPars
   double t_last_model = 25.;  // Battery temperature past value for rate limit memory, deg C
   double curr_bias_amp = CURR_BIAS_AMP; // Calibrate amp current sensor, A 
   double curr_bias_noamp = CURR_BIAS_NOAMP; // Calibrate non-amplified current sensor, A 
-  double curr_bias_all = -0.6; // Bias all current sensors, A 
+  double curr_bias_all = CURR_BIAS_ALL; // Bias all current sensors, A 
   boolean curr_sel_amp = false; // Use non-amplified sensor
   double vbatt_bias = 0;    // Calibrate Vbatt, V
   boolean modeling = false; // Driving saturation calculation with model
@@ -64,7 +64,7 @@ struct RetainedPars
     this->t_last_model = 25.;
     this->curr_bias_amp = CURR_BIAS_AMP;
     this->curr_bias_noamp = CURR_BIAS_NOAMP;
-    this->curr_bias_all = -0.6;     // soc0
+    this->curr_bias_all = CURR_BIAS_ALL;
     this->curr_sel_amp = false;
     this->vbatt_bias = 0;
     this->modeling = false;
@@ -85,7 +85,7 @@ struct RetainedPars
     this->delta_q_model = 0.;     // saturate
     this->curr_bias_amp = CURR_BIAS_AMP;
     this->curr_bias_noamp = CURR_BIAS_NOAMP;
-    this->curr_bias_all = -0.6;   // soc0
+    this->curr_bias_all = CURR_BIAS_ALL;
     this->curr_sel_amp = false;   // non-amplified
     this->vbatt_bias = 0;
     this->modeling = false;
