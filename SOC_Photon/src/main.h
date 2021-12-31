@@ -234,10 +234,10 @@ void loop()
 
   // Battery  models
   // Free, driven by soc
-  static Battery *MyBatt = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
+  static Battery *Monitor = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim);
   // Model, driven by soc, used to get Vbatt.   Use Talk 'x' to toggle model on/off. 
-  static BatteryModel *MyBattModel = new BatteryModel(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
+  static BatteryModel *Model = new BatteryModel(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
     batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim);
 
   // Battery saturation
@@ -319,8 +319,8 @@ void loop()
     
     // Arduino plots
     if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n",
-        MyBatt->soc(), Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
-        Sen->Vbatt, MyBattModel->voc());
+        Monitor->soc(), Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
+        Sen->Vbatt, Model->voc());
 
     //
     // Model used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
@@ -339,32 +339,32 @@ void loop()
     // Initialize as needed
     if ( reset )
     {
-      MyBattModel->load(rp.delta_q_model, rp.t_last_model, rp.s_cap_model);
-      MyBattModel->apply_delta_q_t(rp.delta_q_model, rp.t_last_model);
-      MyBattModel->init_battery();  // for cp.soft_reset
+      Model->load(rp.delta_q_model, rp.t_last_model, rp.s_cap_model);
+      Model->apply_delta_q_t(rp.delta_q_model, rp.t_last_model);
+      Model->init_battery();  // for cp.soft_reset
     }
 
     // Model calculation
-    Sen->Vbatt_model = MyBattModel->calculate(Sen->Tbatt_filt, MyBattModel->soc(), Sen->Ishunt, min(Sen->T, F_MAX_T),
-        MyBattModel->q_capacity(), MyBattModel->q_cap_rated());
-    cp.model_cutback = MyBattModel->cutback();
-    cp.model_saturated = MyBattModel->saturated();
+    Sen->Vbatt_model = Model->calculate(Sen->Tbatt_filt, Model->soc(), Sen->Ishunt, min(Sen->T, F_MAX_T),
+        Model->q_capacity(), Model->q_cap_rated());
+    cp.model_cutback = Model->cutback();
+    cp.model_saturated = Model->saturated();
 
     // Use model instead of sensors when running tests as user
     // Over-ride Ishunt, Vbatt and Tbatt with model when running tests.  rp.modeling should never be set in use
     if ( rp.modeling )
     {
-      Sen->Ishunt = MyBattModel->ib();
+      Sen->Ishunt = Model->ib();
       Sen->Vbatt = Sen->Vbatt_model;
-      Sen->Tbatt_filt = MyBattModel->temp_c();
+      Sen->Tbatt_filt = Model->temp_c();
     }
 
     // Charge calculation and memory store
-    MyBattModel->count_coulombs(Sen->T, reset, Sen->Tbatt_filt, Sen->Ishunt, rp.t_last_model);
-    MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
+    Model->count_coulombs(Sen->T, reset, Sen->Tbatt_filt, Sen->Ishunt, rp.t_last_model);
+    Model->update(&rp.delta_q_model, &rp.t_last_model);
 
     // D2 signal injection to hardware current sensors
-    rp.duty = MyBattModel->calc_inj_duty(now, rp.type, rp.amp, rp.freq);
+    rp.duty = Model->calc_inj_duty(now, rp.type, rp.amp, rp.freq);
     ////////////////////////////////////////////////////////////////////////////
 
     //
@@ -378,53 +378,53 @@ void loop()
     // Initialize Cc structure if needed.   Needed here in this location to have a value for Sen->Tbatt_filt
     if ( reset )
     {
-      MyBatt->load(rp.delta_q, rp.t_last);
-      MyBatt->apply_delta_q_t(rp.delta_q, rp.t_last);
-      MyBatt->init_battery();  // for cp.soft_reset
+      Monitor->load(rp.delta_q, rp.t_last);
+      Monitor->apply_delta_q_t(rp.delta_q, rp.t_last);
+      Monitor->init_battery();  // for cp.soft_reset
       if ( rp.modeling )
-        MyBatt->init_soc_ekf(MyBattModel->soc());  // When modeling, ekf wants to equal model
+        Monitor->init_soc_ekf(Model->soc());  // When modeling, ekf wants to equal model
       else
-        MyBatt->init_soc_ekf(MyBatt->soc());
+        Monitor->init_soc_ekf(Monitor->soc());
     }
     
     // EKF - calculates temp_c_, voc_, voc_dyn_ as functions of sensed parameters vb & ib (not soc)
-    MyBatt->calculate_ekf(Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T), Sen->saturated);
+    Monitor->calculate_ekf(Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T), Sen->saturated);
     
     // Debounce saturation calculation done in ekf using voc model
-    Sen->saturated = SatDebounce->calculate(is_sat(Sen->Tbatt_filt, MyBatt->voc()), reset);
+    Sen->saturated = SatDebounce->calculate(is_sat(Sen->Tbatt_filt, Monitor->voc()), reset);
 
     // Memory store
-    MyBatt->count_coulombs(Sen->T, reset, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
-    MyBatt->update(&rp.delta_q, &rp.t_last);
+    Monitor->count_coulombs(Sen->T, reset, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
+    Monitor->update(&rp.delta_q, &rp.t_last);
 
     // Charge time for display
-    MyBatt->calculate_charge_time(MyBatt->q(), MyBatt->q_capacity(), Sen->Ishunt,MyBatt->soc());
+    Monitor->calculate_charge_time(Monitor->q(), Monitor->q_capacity(), Sen->Ishunt,Monitor->soc());
     //////////////////////////////////////////////////////////////
 
     //
     // Useful for Arduino plotting
     if ( rp.debug==-1 )
       Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-        MyBattModel->SOC()-90,
+        Model->SOC()-90,
         Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
-        Sen->Vbatt*10-110, MyBattModel->voc()*10-110, MyBattModel->vdyn()*10, MyBattModel->vb()*10-110, MyBatt->vdyn()*10-110);
+        Sen->Vbatt*10-110, Model->voc()*10-110, Model->vdyn()*10, Model->vb()*10-110, Monitor->vdyn()*10-110);
     if ( rp.debug==12 )
       Serial.printf("ib,ib_mod,   vb,vb_mod,  voc_dyn,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
-        MyBatt->ib(), MyBattModel->ib(),
-        MyBatt->vb(), MyBattModel->vb(),
-        MyBatt->voc_dyn(), MyBattModel->voc(),
-        MyBatt->K_ekf(), MyBatt->y_ekf(),
-        MyBattModel->soc(), MyBatt->soc_ekf(), MyBatt->soc());
+        Monitor->ib(), Model->ib(),
+        Monitor->vb(), Model->vb(),
+        Monitor->voc_dyn(), Model->voc(),
+        Monitor->K_ekf(), Monitor->y_ekf(),
+        Model->soc(), Monitor->soc_ekf(), Monitor->soc());
     if ( rp.debug==-12 )
       Serial.printf("ib,ib_mod,   vb*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_mod*10-110,   K, y,    SOC_mod-90, SOC_ekf-90, SOC-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
-        MyBatt->ib(), MyBattModel->ib(),
-        MyBatt->vb()*10-110, MyBattModel->vb()*10-110,
-        MyBatt->voc_dyn()*10-110, MyBattModel->voc()*10-110,
-        MyBatt->K_ekf(), MyBatt->y_ekf(),
-        MyBattModel->soc()*100-90, MyBatt->soc_ekf()*100-90, MyBattModel->soc()*100-90);
+        Monitor->ib(), Model->ib(),
+        Monitor->vb()*10-110, Model->vb()*10-110,
+        Monitor->voc_dyn()*10-110, Model->voc()*10-110,
+        Monitor->K_ekf(), Monitor->y_ekf(),
+        Model->soc()*100-90, Monitor->soc_ekf()*100-90, Model->soc()*100-90);
     if ( rp.debug==-3 )
       Serial.printf("fast,et,reset,Wshunt,q_f,q,soc,T, %12.3f,%7.3f, %d, %7.3f,    %7.3f,     %7.3f,\n",
-      control_time, double(elapsed)/1000., reset, Sen->Wshunt, MyBattModel->soc(), Sen->T_filt);
+      control_time, double(elapsed)/1000., reset, Sen->Wshunt, Model->soc(), Sen->T_filt);
 
   }  // end read (high speed frame)
 
@@ -434,7 +434,7 @@ void loop()
   {
     Sen->T_filt =  FilterSync->updateTime();
     if ( rp.debug>102 ) Serial.printf("Filter update=%7.3f and performing load() at %ld...  ", Sen->T_filt, millis());
-    if ( rp.modeling && reset && MyBattModel->q()<=0. ) Sen->Ishunt = 0.;
+    if ( rp.modeling && reset && Model->q()<=0. ) Sen->Ishunt = 0.;
 
     // Filter
     // filter(reset, Sen, VbattSenseFilt, IshuntSenseFilt);
@@ -442,7 +442,7 @@ void loop()
     // rp.debug print statements
     // Useful for vector testing and serial data capture
     if ( rp.debug==-35 ) Serial.printf("soc_mod,soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f\n",
-        MyBattModel->soc(), MyBatt->x_ekf(), MyBatt->z_ekf());
+        Model->soc(), Monitor->x_ekf(), Monitor->z_ekf());
 
     //if ( bare ) delay(41);  // Usual I2C time
     if ( rp.debug>102 ) Serial.printf("completed load at %ld\n", millis());
@@ -475,7 +475,7 @@ void loop()
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
     control_time = decimalTime(&current_time, tempStr, now, millis_flip);
     hm_string = String(tempStr);
-    assign_publist(&cp.pubList, PublishParticle->now(), unit, hm_string, control_time, Sen, num_timeouts, MyBattModel, MyBatt);
+    assign_publist(&cp.pubList, PublishParticle->now(), unit, hm_string, control_time, Sen, num_timeouts, Model, Monitor);
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
@@ -507,7 +507,7 @@ void loop()
   // then can enter commands by sending strings.   End the strings with a real carriage return
   // right in the "Send String" box then press "Send."
   // String definitions are below.
-  talk(MyBatt, MyBattModel);
+  talk(Monitor, Model);
 
   // Summary management
   summarizing = Summarize->update(millis(), reset, !rp.modeling) || (rp.debug==-11 && publishB);               //  now || reset && !rp.modeling
@@ -515,7 +515,7 @@ void loop()
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
     mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,
-                          MyBatt->soc_ekf(), MyBatt->soc(), MyBattModel->dv_dsoc());
+                          Monitor->soc_ekf(), Monitor->soc(), Model->dv_dsoc());
   }
 
   // Initialize complete once sensors and models started and summary written

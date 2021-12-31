@@ -25,8 +25,8 @@
 #define _MY_TALK_H
 #include "Battery.h"
 
-void talk(Battery *MyBatt, BatteryModel *MyBattModel);
+void talk(Battery *Monitor, BatteryModel *Model);
 void talkH(Battery *batt, BatteryModel *batt_model); // Help
-void self_talk(const String cmd, Battery *MyBatt, BatteryModel *MyBattModel);
+void self_talk(const String cmd, Battery *Monitor, BatteryModel *Model);
 
 #endif

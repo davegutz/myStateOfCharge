@@ -36,7 +36,7 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 
 // Talk Executive
-void talk(Battery *MyBatt, BatteryModel *MyBattModel)
+void talk(Battery *Monitor, BatteryModel *Model)
 {
   double SOCS_in = -99.;
   double scale = 1.;
@@ -77,8 +77,8 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             Serial.printf("rp.t_bias changed to %7.3f\n", rp.t_bias);
             break;
           case ( 'v' ):
-            MyBattModel->Dv(cp.input_string.substring(2).toFloat());
-            Serial.printf("MyBattModel.Dv changed to %7.3f\n", MyBattModel->Dv());
+            Model->Dv(cp.input_string.substring(2).toFloat());
+            Serial.printf("Model.Dv changed to %7.3f\n", Model->Dv());
             break;
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
@@ -87,13 +87,13 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
       case ( 'E' ):
         Serial.printf("Equalizing BatteryModel, and ekf if needed, to Battery\n");
         Serial.printf("\nMyBattModel:  soc=%7.3f, SOC=%7.3f, q=%7.3f, delta_q = %7.3f, q_scaled_rated = %7.3f,\
-        q_rated = %7.3f, q_capacity = %7.3f,\n\n", MyBattModel->soc(), MyBattModel->SOC(), MyBattModel->q(), MyBattModel->delta_q(),
-        MyBattModel->q_cap_scaled(), MyBattModel->q_cap_rated(), MyBattModel->q_capacity());
-        MyBattModel->apply_delta_q(MyBatt->delta_q());
-        if ( rp.modeling ) MyBatt->init_soc_ekf(MyBattModel->soc());
+        q_rated = %7.3f, q_capacity = %7.3f,\n\n", Model->soc(), Model->SOC(), Model->q(), Model->delta_q(),
+        Model->q_cap_scaled(), Model->q_cap_rated(), Model->q_capacity());
+        Model->apply_delta_q(Monitor->delta_q());
+        if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
         Serial.printf("\nMyBattModel:  soc=%7.3f, SOC=%7.3f, q=%7.3f, delta_q = %7.3f, q_scaled_rated = %7.3f,\
-        q_rated = %7.3f, q_capacity = %7.3f,\n\n", MyBattModel->soc(), MyBattModel->SOC(), MyBattModel->q(), MyBattModel->delta_q(),
-        MyBattModel->q_cap_scaled(), MyBattModel->q_cap_rated(), MyBattModel->q_capacity());
+        q_rated = %7.3f, q_capacity = %7.3f,\n\n", Model->soc(), Model->SOC(), Model->q(), Model->delta_q(),
+        Model->q_cap_scaled(), Model->q_cap_rated(), Model->q_capacity());
         break;
       case ( 'S' ):
         switch ( cp.input_string.charAt(1) )
@@ -101,22 +101,22 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
           case ( 'c' ):
             scale = cp.input_string.substring(2).toFloat();
             rp.s_cap_model = scale;
-            Serial.printf("MyBattModel.q_cap_rated scaled by %7.3f from %7.3f to ", scale, MyBattModel->q_cap_scaled());
-            MyBattModel->apply_cap_scale(rp.s_cap_model);
-            if ( rp.modeling ) MyBatt->init_soc_ekf(MyBattModel->soc());
-            Serial.printf("%7.3f\n", MyBattModel->q_cap_scaled());
-            Serial.printf("MyBattModel:  "); MyBattModel->pretty_print(); MyBattModel->Coulombs::pretty_print();
+            Serial.printf("Model.q_cap_rated scaled by %7.3f from %7.3f to ", scale, Model->q_cap_scaled());
+            Model->apply_cap_scale(rp.s_cap_model);
+            if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
+            Serial.printf("%7.3f\n", Model->q_cap_scaled());
+            Serial.printf("Model:  "); Model->pretty_print(); Model->Coulombs::pretty_print();
             break;
           case ( 'r' ):
             scale = cp.input_string.substring(2).toFloat();
-            Serial.printf("\nBefore MyBattModel::StateSpace:\n"); MyBattModel->pretty_print_ss();
+            Serial.printf("\nBefore Model::StateSpace:\n"); Model->pretty_print_ss();
             Serial.printf("\nScaling D[0, 0] = -r0 by Sr= %7.3f\n", scale);
-            MyBattModel->Sr(scale);
-            Serial.printf("\nAfter MyBattModel::StateSpace:\n"); MyBatt->pretty_print_ss();
-            Serial.printf("\nBefore MyBatt::StateSpace:\n"); MyBatt->pretty_print_ss();
+            Model->Sr(scale);
+            Serial.printf("\nAfter Model::StateSpace:\n"); Monitor->pretty_print_ss();
+            Serial.printf("\nBefore Monitor::StateSpace:\n"); Monitor->pretty_print_ss();
             Serial.printf("\nScaling D[0, 0] = -r0 by Sr= %7.3f\n", scale);
-            MyBatt->Sr(scale);
-            Serial.printf("\nAfter MyBatt::StateSpace:\n"); MyBatt->pretty_print_ss();
+            Monitor->Sr(scale);
+            Serial.printf("\nAfter Monitor::StateSpace:\n"); Monitor->pretty_print_ss();
             break;
           case ( 'k' ):
             scale = cp.input_string.substring(2).toFloat();
@@ -157,80 +157,80 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
         SOCS_in = cp.input_string.substring(1).toFloat();
         if ( SOCS_in<1.1 )  // TODO:  rationale for this?
         {
-          MyBatt->apply_soc(SOCS_in);
-          MyBattModel->apply_delta_q(MyBatt->delta_q());
-          if ( rp.modeling ) MyBatt->init_soc_ekf(MyBattModel->soc());
-          MyBatt->update(&rp.delta_q, &rp.t_last);
-          MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
+          Monitor->apply_soc(SOCS_in);
+          Model->apply_delta_q(Monitor->delta_q());
+          if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
+          Monitor->update(&rp.delta_q, &rp.t_last);
+          Model->update(&rp.delta_q_model, &rp.t_last_model);
           Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
-              MyBatt->SOC(), MyBatt->soc(), rp.delta_q, MyBattModel->SOC(), MyBattModel->soc(), rp.delta_q_model, MyBatt->soc_ekf());
+              Monitor->SOC(), Monitor->soc(), rp.delta_q, Model->SOC(), Model->soc(), rp.delta_q_model, Monitor->soc_ekf());
         }
         else
           Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'M' instead of 'm'?\n", SOCS_in);
         break;
       case ( 'M' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
-        MyBatt->apply_SOC(SOCS_in);
-        MyBattModel->apply_delta_q(MyBatt->delta_q());
-        if ( rp.modeling ) MyBatt->init_soc_ekf(MyBattModel->soc());
-        MyBatt->update(&rp.delta_q, &rp.t_last);
-        MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
+        Monitor->apply_SOC(SOCS_in);
+        Model->apply_delta_q(Monitor->delta_q());
+        if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
+        Monitor->update(&rp.delta_q, &rp.t_last);
+        Model->update(&rp.delta_q_model, &rp.t_last_model);
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
-            MyBatt->SOC(), MyBatt->soc(), rp.delta_q, MyBattModel->SOC(), MyBattModel->soc(), rp.delta_q_model, MyBatt->soc_ekf());
+            Monitor->SOC(), Monitor->soc(), rp.delta_q, Model->SOC(), Model->soc(), rp.delta_q_model, Monitor->soc_ekf());
         break;
       case ( 'n' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
         if ( SOCS_in<1.1 )  // TODO:  rationale for this?
         {
-          MyBattModel->apply_soc(SOCS_in);
-          MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
+          Model->apply_soc(SOCS_in);
+          Model->update(&rp.delta_q_model, &rp.t_last_model);
           if ( rp.modeling )
-            MyBatt->init_soc_ekf(MyBatt->soc());
+            Monitor->init_soc_ekf(Monitor->soc());
           Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
-              MyBatt->SOC(), MyBatt->soc(), rp.delta_q, MyBattModel->SOC(), MyBattModel->soc(), rp.delta_q_model, MyBatt->soc_ekf());
+              Monitor->SOC(), Monitor->soc(), rp.delta_q, Model->SOC(), Model->soc(), rp.delta_q_model, Monitor->soc_ekf());
         }
         else
           Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'M' instead of 'm'?\n", SOCS_in);
         break;
       case ( 'N' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
-        MyBattModel->apply_SOC(SOCS_in);
-        MyBattModel->update(&rp.delta_q_model, &rp.t_last_model);
+        Model->apply_SOC(SOCS_in);
+        Model->update(&rp.delta_q_model, &rp.t_last_model);
         if ( rp.modeling )
-          MyBatt->init_soc_ekf(MyBatt->soc());
+          Monitor->init_soc_ekf(Monitor->soc());
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
-            MyBatt->SOC(), MyBatt->soc(), rp.delta_q, MyBattModel->SOC(), MyBattModel->soc(), rp.delta_q_model, MyBatt->soc_ekf());
+            Monitor->SOC(), Monitor->soc(), rp.delta_q, Model->SOC(), Model->soc(), rp.delta_q_model, Monitor->soc_ekf());
         break;
       case ( 'P' ):
         switch ( cp.input_string.charAt(1) )
         {
           case ( 'a' ):
-            self_talk("Pb", MyBatt, MyBattModel);
+            self_talk("Pb", Monitor, Model);
             Serial.printf("\n");
-            Serial.printf("MyBattModel:   rp.modeling = %d\n", rp.modeling);
-            self_talk("Pm", MyBatt, MyBattModel);
+            Serial.printf("Model:   rp.modeling = %d\n", rp.modeling);
+            self_talk("Pm", Monitor, Model);
             Serial.printf("\n");
-            self_talk("Pr", MyBatt, MyBattModel);
+            self_talk("Pr", Monitor, Model);
             Serial.printf("\n");
             break;
           case ( 'b' ):
-            Serial.printf("MyBatt:");         MyBatt->pretty_print();
-            Serial.printf("MyBatt::");        MyBatt->Coulombs::pretty_print();
-            Serial.printf("MyBatt::");        MyBatt->pretty_print_ss();
-            Serial.printf("MyBatt::");        MyBatt->EKF_1x1::pretty_print();
+            Serial.printf("Monitor:");         Monitor->pretty_print();
+            Serial.printf("Monitor::");        Monitor->Coulombs::pretty_print();
+            Serial.printf("Monitor::");        Monitor->pretty_print_ss();
+            Serial.printf("Monitor::");        Monitor->EKF_1x1::pretty_print();
             break;
           case ( 'c' ):
-            Serial.printf("MyBatt::");        MyBatt->Coulombs::pretty_print();
-            Serial.printf("MyBattModel::");   MyBattModel->Coulombs::pretty_print();
+            Serial.printf("Monitor::");        Monitor->Coulombs::pretty_print();
+            Serial.printf("Model::");   Model->Coulombs::pretty_print();
             break;
           case ( 'e' ):
-             Serial.printf("MyBatt::"); MyBatt->EKF_1x1::pretty_print();
+             Serial.printf("Monitor::"); Monitor->EKF_1x1::pretty_print();
             break;
           case ( 'm' ):
-            Serial.printf("MyBattModel:   rp.modeling = %d\n", rp.modeling);
-            Serial.printf("MyBattModel:");    MyBattModel->pretty_print();
-            Serial.printf("MyBattModel::");   MyBattModel->Coulombs::pretty_print();
-            Serial.printf("MyBattModel::");   MyBattModel->pretty_print_ss();
+            Serial.printf("Model:   rp.modeling = %d\n", rp.modeling);
+            Serial.printf("Model:");    Model->pretty_print();
+            Serial.printf("Model::");   Model->Coulombs::pretty_print();
+            Serial.printf("Model::");   Model->pretty_print_ss();
             break;
           case ( 'r' ):
             Serial.printf("retained::");
@@ -239,8 +239,8 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             Serial.printf("command::");       cp.pretty_print();
             break;
           case ( 's' ):
-            Serial.printf("MyBatt::");        MyBatt->pretty_print_ss();
-            Serial.printf("MyBattModel::");   MyBattModel->pretty_print_ss();
+            Serial.printf("Monitor::");        Monitor->pretty_print_ss();
+            Serial.printf("Model::");   Model->pretty_print_ss();
             break;
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
@@ -251,21 +251,21 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
         {
           case ( 'e' ):
             Serial.printf("Equalizing reset.   Just set delta_q in BattModel = delta_q in Batt\n");
-            MyBattModel->apply_delta_q(MyBatt->delta_q());
+            Model->apply_delta_q(Monitor->delta_q());
             break;
           case ( 'r' ):
             Serial.printf("Small reset.   Just reset all to soc=1.0 and delta_q = 0\n");
-            MyBatt->apply_soc(1.0);
-            MyBattModel->apply_soc(1.0);
-            if ( rp.modeling ) MyBatt->init_soc_ekf(MyBattModel->soc());
+            Monitor->apply_soc(1.0);
+            Model->apply_soc(1.0);
+            if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
             break;
           case ( 'R' ):
-            self_talk("Rr", MyBatt, MyBattModel);
+            self_talk("Rr", Monitor, Model);
             Serial.printf("also large and soft reset.   Initialize all variables to clean run without model at saturation.   Ready to use\n");
             rp.large_reset();
             cp.large_reset();
             cp.cmd_reset();
-            self_talk("Hr", MyBatt, MyBattModel);
+            self_talk("Hr", Monitor, Model);
             break;
           case ( 's' ):
             Serial.printf("Small reset.   Just reset the flags so filters are reinitialized\n");
@@ -288,7 +288,7 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
         cp.input_string = cp.input_string.substring(1);
         Serial.printf("new string = '%s'\n", cp.input_string.c_str());
         cp.string_complete = true;
-        talk(MyBatt, MyBattModel);
+        talk(Monitor, Model);
         break;
       case ( 'v' ):
         rp.debug = cp.input_string.substring(1).toInt();
@@ -304,7 +304,7 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             if ( cp.input_string.substring(2).toInt()>0 )
             {
               rp.modeling = true;
-              MyBatt->init_soc_ekf(MyBattModel->soc());
+              Monitor->init_soc_ekf(Model->soc());
             }
             else
               rp.modeling = false;
@@ -355,8 +355,8 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
             switch ( cp.input_string.substring(2).toInt() )
             {
               case ( -1 ):
-                self_talk("Xp0", MyBatt, MyBattModel);
-                self_talk("m0.5", MyBatt, MyBattModel);
+                self_talk("Xp0", Monitor, Model);
+                self_talk("m0.5", Monitor, Model);
                 rp.modeling = false;
                 rp.curr_sel_amp = false;
                 rp.debug = -12;   // myDisplay = 2
@@ -372,8 +372,8 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 rp.debug = -12;   // myDisplay = 5
                 break;
               case ( 1 ):
-                self_talk("Xp0", MyBatt, MyBattModel);
-                self_talk("m0.5", MyBatt, MyBattModel);
+                self_talk("Xp0", Monitor, Model);
+                self_talk("m0.5", Monitor, Model);
                 rp.type = 1;
                 rp.freq = 0.05;
                 rp.amp = 6.;
@@ -382,8 +382,8 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 rp.freq *= (2. * PI);
                 break;
               case ( 2 ):
-                self_talk("Xp0", MyBatt, MyBattModel);
-                self_talk("m0.5", MyBatt, MyBattModel);
+                self_talk("Xp0", Monitor, Model);
+                self_talk("m0.5", Monitor, Model);
                 rp.type = 2;
                 rp.freq = 0.10;
                 rp.amp = 6.;
@@ -392,8 +392,8 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 rp.freq *= (2. * PI);
                 break;
               case ( 3 ):
-                self_talk("Xp0", MyBatt, MyBattModel);
-                self_talk("m0.5", MyBatt, MyBattModel);
+                self_talk("Xp0", Monitor, Model);
+                self_talk("m0.5", Monitor, Model);
                 rp.type = 3;
                 rp.freq = 0.05;
                 rp.amp = 6.;
@@ -402,19 +402,19 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
                 rp.freq *= (2. * PI);
                 break;
               case ( 4 ):
-                self_talk("Xp0", MyBatt, MyBattModel);
+                self_talk("Xp0", Monitor, Model);
                 rp.type = 4;
                 rp.curr_bias_all = -RATED_BATT_CAP;  // Software effect only
                 rp.debug = -12;
                 break;
               case ( 5 ):
-                self_talk("Xp0", MyBatt, MyBattModel);
+                self_talk("Xp0", Monitor, Model);
                 rp.type = 5;
                 rp.curr_bias_all = RATED_BATT_CAP; // Software effect only
                 rp.debug = -12;
                 break;
               case ( 6 ):
-                self_talk("Xp0", MyBatt, MyBattModel);
+                self_talk("Xp0", Monitor, Model);
                 rp.type = 6;
                 rp.amp = RATED_BATT_CAP*0.2;
                 rp.debug = -12;
@@ -430,7 +430,7 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
         }
         break;
       case ( 'h' ): 
-        talkH(MyBatt, MyBattModel);
+        talkH(Monitor, Model);
         break;
       default:
         Serial.print(cp.input_string.charAt(0)); Serial.println(" unknown.  Try typing 'h'");
@@ -442,7 +442,7 @@ void talk(Battery *MyBatt, BatteryModel *MyBattModel)
 }
 
 // Talk Help
-void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
+void talkH(Battery *Monitor, BatteryModel *Model)
 {
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
   Serial.printf("A=  nominalize the rp structure for clean boots etc'\n"); 
@@ -462,9 +462,9 @@ void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("    : delta I adder to all sensed shunt current, A [0]"); 
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.println("    : delta T adder to sensed Tbatt, deg C [0]"); 
-  Serial.printf("  Dv= "); Serial.print(MyBattModel->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
-  Serial.printf("  Sc= "); Serial.print(MyBattModel->q_capacity()/MyBatt->q_capacity()); Serial.println("    : Scalar battery model size"); 
-  Serial.printf("  Sr= "); Serial.print(MyBattModel->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
+  Serial.printf("  Dv= "); Serial.print(Model->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
+  Serial.printf("  Sc= "); Serial.print(Model->q_capacity()/Monitor->q_capacity()); Serial.println("    : Scalar battery model size"); 
+  Serial.printf("  Sr= "); Serial.print(Model->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("  Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println("    : Saturation of model cutback gain scalar"); 
   Serial.printf("E=  set the BatteryModel delta_q to same value as Battery'\n"); 
   Serial.printf("P<?>   Print Battery values\n");
@@ -503,10 +503,10 @@ void talkH(Battery *MyBatt, BatteryModel *MyBattModel)
 }
 
 // Recursion
-void self_talk(const String cmd, Battery *MyBatt, BatteryModel *MyBattModel)
+void self_talk(const String cmd, Battery *Monitor, BatteryModel *Model)
 {
   cp.input_string = cmd;
   Serial.printf("self_talk:  new string = '%s'\n", cp.input_string.c_str());
   cp.string_complete = true;
-  talk(MyBatt, MyBattModel);
+  talk(Monitor, Model);
 }
