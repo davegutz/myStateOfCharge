@@ -84,7 +84,7 @@
 #define F_Z             0.80        // General filter zeta (0.80)
 #define F_W_T           0.05        // Temperature filter wn, r/s (0.05)   
 #define F_Z_T           0.80        // Temperature filter zeta (0.80)
-#define SAT_PERSISTENCE 15          // Updates persistence on saturation tests (15)
+#define SAT_PERSISTENCE 25          // Updates persistence on saturation tests (25)
 #define HDB_ISHUNT      0.13        // Half deadband to filter Ishunt, mA (0.13)
 #define HDB_ISHUNT_AMP  0.025       // Half deadband to filter Ishunt amplified, mA (0.025)
 #define HDB_VBATT       0.01        // Half deadband to filter Vbatt, v (0.01)
