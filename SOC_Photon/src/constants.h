@@ -49,9 +49,6 @@
 #define DISCONNECT_DELAY      75000UL   // After these milliseconds no WiFi, disconnect (75000UL = 1:15 min)
 #define CHECK_INTERVAL        180000UL  // How often to check for WiFi once disconnected (180000UL = 3:00 min)
 #define CONNECT_WAIT          10000UL   // How long after setup that we try WiFi for first time (10000UL = 0:10 min)
-#define EST_WAIT              20000UL   // How long after init that we hold estimator integrate to let filters settle (20000UL)
-#define INIT_WAIT             30000UL   // How long after setup that we wait for convergence of filters before setting integrator (30000UL)
-#define INIT_WAIT_EKF         5000UL    // How long after setup that we wait for convergence of filters before setting EKF integrator (5000UL)
 #define CONFIRMATION_DELAY    10000UL   // How long to confirm WiFi on before streaming (10000UL)
 #define GMT                   -5        // Enter time different to zulu (does not respect DST) (-5)
 #define USE_DST               1         // Whether to apply DST or not, 0 or 1 (1)
@@ -75,8 +72,6 @@
 #define OLED_RESET            4         // Reset pin # (or -1 if sharing Arduino reset pin) (4)
 #define SCREEN_ADDRESS        0x3C      // See datasheet for Address; 0x3D for 128x64, (0x3C for 128x32)
 
-#define C_CC_TRIM_G     0.003       // How much to trim coulomb counter to nudge it to solver (frac/sec/frac)
-#define C_CC_TRIM_IMAX  50          // Current below which solver allowed to trim the coulomb counter
 #define F_O_MAX_T       3.0         // Maximum call update time filters (3.0)
 #define F_MAX_T         0.5         // Maximum call update time sensors and coulomb counter (o.5)
 #define F_MAX_T_TEMP    6.0         // Maximum call update time filters (6.0)
@@ -85,14 +80,7 @@
 #define F_W_T           0.05        // Temperature filter wn, r/s (0.05)   
 #define F_Z_T           0.80        // Temperature filter zeta (0.80)
 #define SAT_PERSISTENCE 25          // Updates persistence on saturation tests (25)
-#define HDB_ISHUNT      0.13        // Half deadband to filter Ishunt, mA (0.13)
-#define HDB_ISHUNT_AMP  0.025       // Half deadband to filter Ishunt amplified, mA (0.025)
-#define HDB_VBATT       0.01        // Half deadband to filter Vbatt, v (0.01)
 #define HDB_TBATT       0.06        // Half deadband to filter Tbatt, F (0.06)
-
-#define SOLVE_MAX_ERR    1e-6        // Solver error tolerance, V (1e-6)
-#define SOLVE_MAX_COUNTS 10          // Solver maximum number of steps (10)
-#define SOLVE_MAX_STEP   0.2         // Solver maximum step size, frac soc
 
 #define NSUM             140         // Number of saved summaries.   If too large, will get compile error
 
