@@ -240,12 +240,6 @@ void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFilt,  General2_Po
   // Shunt
   Sen->Ishunt_filt = IshuntSenseFilt->calculate( Sen->Ishunt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
   
-  // Voltage
-  // if ( rp.modeling )
-  //   Sen->Vbatt_filt = Sen->Vbatt_model;
-  // else
-  //   Sen->Vbatt_filt = VbattSenseFilt->calculate(Sen->Vbatt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
-
 }
 
 

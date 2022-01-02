@@ -243,10 +243,14 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
             Serial.printf("Model::");   Model->pretty_print_ss();
             break;
           case ( 'x' ):
-            Serial.printf("Amp::   ");      Serial.printf("Vshunt_int, Vshunt, cp.curr_bias, Ishunt_cal, sel_noamp, Ishunt=, %d, %7.3f, %7.3f, %7.3f,%d, %7.3f\n", 
+            Serial.printf("Amp:   ");      Serial.printf("Vshunt_int, Vshunt, cp.curr_bias, Ishunt_cal, sel_noamp, Ishunt=, %d, %7.3f, %7.3f, %7.3f,%d, %7.3f\n", 
               Sen->Vshunt_amp_int, Sen->Vshunt_amp, cp.curr_bias_amp, Sen->Ishunt_amp_cal, rp.curr_sel_noamp, Sen->Ishunt);
-            Serial.printf("No Amp::");      Serial.printf("Vshunt_int, Vshunt, cp.curr_bias, Ishunt_cal, sel_noamp, Ishunt=, %d, %7.3f, %7.3f, %7.3f, %d, %7.3f\n", 
+            Serial.printf("No Amp:");      Serial.printf("Vshunt_int, Vshunt, cp.curr_bias, Ishunt_cal, sel_noamp, Ishunt=, %d, %7.3f, %7.3f, %7.3f, %d, %7.3f\n", 
               Sen->Vshunt_noamp_int, Sen->Vshunt_noamp, cp.curr_bias_noamp, Sen->Ishunt_noamp_cal, rp.curr_sel_noamp, Sen->Ishunt);
+            break;
+          case ( 'v' ):
+            Serial.printf("Volt:   ");      Serial.printf("rp.vbatt_bias, Vbatt_model, rp.modeling, Vbatt=, %7.3f, %7.3f, %d, %7.3f,\n", 
+              rp.vbatt_bias, Sen->Vbatt_model, rp.modeling, Sen->Vbatt);
             break;
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
@@ -480,6 +484,7 @@ void talkH(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
   Serial.printf("  Pr= "); Serial.printf("print retained and command parameters\n");
   Serial.printf("  Ps= "); Serial.printf("print all state-space\n");
   Serial.printf("  Px= "); Serial.printf("print current signal selection\n");
+  Serial.printf("  Pv= "); Serial.printf("print voltage signal details\n");
   Serial.printf("R<?>   Reset\n");
   Serial.printf("  Re= "); Serial.printf("equalize delta_q in model to battery monitor\n");
   Serial.printf("  Rr= "); Serial.printf("saturate battery monitor and equalize model to monitor\n");
