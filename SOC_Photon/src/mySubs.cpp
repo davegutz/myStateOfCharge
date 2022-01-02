@@ -45,7 +45,7 @@ void create_print_string(char *buffer, Publish *pubList)
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
     pubList->Tbatt, pubList->Tbatt_filt_model,
     pubList->Vbatt, pubList->voc, pubList->vsat, pubList->sat,
-    pubList->curr_sel_amp,
+    pubList->curr_sel_noamp,
     rp.modeling,
     pubList->Ishunt,
     pubList->tcharge,
@@ -150,7 +150,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   past = now;
 
   // Current bias.  Feeds into signal conversion, not to duty injection
-  cp.curr_bias_noamp = rp.curr_bias_noamp;
+  cp.curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.offset;
   cp.curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.offset;
 
   // Read Sensors
@@ -182,14 +182,14 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
 
   // Print results
   if ( rp.debug==14 ) Serial.printf("reset_free,select,duty,  ||,  vs_na_int,0_na_int,1_na_int,vshunt_na,ishunt_na, ||, vshunt_a_int,0_a_int,1_a_int,vshunt_a,ishunt_a,  ||,  Ishunt,T=,    %d,%d,%ld,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %7.3f,%7.3f,\n",
-    reset_free, rp.curr_sel_amp, rp.duty,
+    reset_free, rp.curr_sel_noamp, rp.duty,
     Sen->Vshunt_noamp_int, vshunt_noamp_int_0, vshunt_noamp_int_1, Sen->Vshunt_noamp, Sen->Ishunt_noamp_cal,
     Sen->Vshunt_amp_int, vshunt_amp_int_0, vshunt_amp_int_1, Sen->Vshunt_amp, Sen->Ishunt_amp_cal,
     Sen->Ishunt, T);
 
   // Current signal selection, based on if there or not.
-  // Over-ride 'permanent' with Talk(rp.curr_sel_amp) = Talk('s')
-  if ( rp.curr_sel_amp && !Sen->bare_ads_amp)
+  // Over-ride 'permanent' with Talk(rp.curr_sel_noamp) = Talk('s')
+  if ( !rp.curr_sel_noamp && !Sen->bare_ads_amp)
   {
     Sen->Vshunt = Sen->Vshunt_amp;
     Sen->Ishunt = Sen->Ishunt_amp_cal;

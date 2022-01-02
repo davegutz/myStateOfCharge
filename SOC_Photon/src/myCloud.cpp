@@ -153,7 +153,7 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->voc = Monitor->voc();
   pubList->vsat = Monitor->vsat();
   pubList->sat = Monitor->sat();
-  pubList->curr_sel_amp = rp.curr_sel_amp;
+  pubList->curr_sel_noamp = rp.curr_sel_noamp;
   pubList->amp_hrs_remaining = Monitor->amp_hrs_remaining();
   pubList->amp_hrs_remaining_ekf = Monitor->amp_hrs_remaining_ekf();
   pubList->soc_model = Model->soc();

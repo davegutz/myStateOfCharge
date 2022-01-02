@@ -40,7 +40,7 @@ struct RetainedPars
   double curr_bias_amp = CURR_BIAS_AMP; // Calibrate amp current sensor, A 
   double curr_bias_noamp = CURR_BIAS_NOAMP; // Calibrate non-amplified current sensor, A 
   double curr_bias_all = CURR_BIAS_ALL; // Bias all current sensors, A 
-  boolean curr_sel_amp = false; // Use non-amplified sensor
+  boolean curr_sel_noamp = false; // Use non-amplified sensor
   double vbatt_bias = 0;    // Calibrate Vbatt, V
   boolean modeling = false; // Driving saturation calculation with model
   uint32_t duty = 0;        // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
@@ -65,7 +65,7 @@ struct RetainedPars
     this->curr_bias_amp = CURR_BIAS_AMP;
     this->curr_bias_noamp = CURR_BIAS_NOAMP;
     this->curr_bias_all = CURR_BIAS_ALL;
-    this->curr_sel_amp = false;
+    this->curr_sel_noamp = false;
     this->vbatt_bias = 0;
     this->modeling = false;
     this->duty = 0;
@@ -86,7 +86,7 @@ struct RetainedPars
     this->curr_bias_amp = CURR_BIAS_AMP;
     this->curr_bias_noamp = CURR_BIAS_NOAMP;
     this->curr_bias_all = CURR_BIAS_ALL;
-    this->curr_sel_amp = false;   // non-amplified
+    this->curr_sel_noamp = false;   // non-amplified
     this->vbatt_bias = 0;
     this->modeling = false;
     this->duty = 0;
@@ -102,9 +102,9 @@ struct RetainedPars
   void print_part_1(char *buffer)
   {
     sprintf(buffer, "debug = %d, delta_q = %7.3f, t_last = %7.3f, delta_q_model = %7.3f, t_last_model = %7.3f, \n\
-    curr_bias_amp = %7.3f, curr_bias_noamp = %7.3f, curr_bias_all = %7.3f, curr_sel_amp = %d, \n",
+    curr_bias_amp = %7.3f, curr_bias_noamp = %7.3f, curr_bias_all = %7.3f, curr_sel_noamp = %d, \n",
       this->debug, this->delta_q, this->t_last, this->delta_q_model, this->t_last_model,
-      this->curr_bias_amp, this->curr_bias_noamp, this->curr_bias_all, this->curr_sel_amp);
+      this->curr_bias_amp, this->curr_bias_noamp, this->curr_bias_all, this->curr_sel_noamp);
   }
   void print_part_2(char *buffer)
   {

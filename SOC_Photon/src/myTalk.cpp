@@ -36,7 +36,7 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 
 // Talk Executive
-void talk(Battery *Monitor, BatteryModel *Model)
+void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
 {
   double SOCS_in = -99.;
   double scale = 1.;
@@ -205,12 +205,12 @@ void talk(Battery *Monitor, BatteryModel *Model)
         switch ( cp.input_string.charAt(1) )
         {
           case ( 'a' ):
-            self_talk("Pb", Monitor, Model);
+            self_talk("Pb", Monitor, Model, Sen);
             Serial.printf("\n");
             Serial.printf("Model:   rp.modeling = %d\n", rp.modeling);
-            self_talk("Pm", Monitor, Model);
+            self_talk("Pm", Monitor, Model, Sen);
             Serial.printf("\n");
-            self_talk("Pr", Monitor, Model);
+            self_talk("Pr", Monitor, Model, Sen);
             Serial.printf("\n");
             break;
           case ( 'b' ):
@@ -239,8 +239,14 @@ void talk(Battery *Monitor, BatteryModel *Model)
             Serial.printf("command::");       cp.pretty_print();
             break;
           case ( 's' ):
-            Serial.printf("Monitor::");        Monitor->pretty_print_ss();
+            Serial.printf("Monitor::"); Monitor->pretty_print_ss();
             Serial.printf("Model::");   Model->pretty_print_ss();
+            break;
+          case ( 'x' ):
+            Serial.printf("Amp::   ");      Serial.printf("Vshunt_int, Vshunt, cp.curr_bias, Ishunt_cal, sel_noamp, Ishunt=, %d, %7.3f, %7.3f, %7.3f,%d, %7.3f\n", 
+              Sen->Vshunt_amp_int, Sen->Vshunt_amp, cp.curr_bias_amp, Sen->Ishunt_amp_cal, rp.curr_sel_noamp, Sen->Ishunt);
+            Serial.printf("No Amp::");      Serial.printf("Vshunt_int, Vshunt, cp.curr_bias, Ishunt_cal, sel_noamp, Ishunt=, %d, %7.3f, %7.3f, %7.3f, %d, %7.3f\n", 
+              Sen->Vshunt_noamp_int, Sen->Vshunt_noamp, cp.curr_bias_noamp, Sen->Ishunt_noamp_cal, rp.curr_sel_noamp, Sen->Ishunt);
             break;
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
@@ -260,12 +266,12 @@ void talk(Battery *Monitor, BatteryModel *Model)
             if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
             break;
           case ( 'R' ):
-            self_talk("Rr", Monitor, Model);
+            self_talk("Rr", Monitor, Model, Sen);
             Serial.printf("also large and soft reset.   Initialize all variables to clean run without model at saturation.   Ready to use\n");
             rp.large_reset();
             cp.large_reset();
             cp.cmd_reset();
-            self_talk("Hr", Monitor, Model);
+            self_talk("Hr", Monitor, Model, Sen);
             break;
           case ( 's' ):
             Serial.printf("Small reset.   Just reset the flags so filters are reinitialized\n");
@@ -278,17 +284,17 @@ void talk(Battery *Monitor, BatteryModel *Model)
       case ( 's' ):
         if ( cp.input_string.substring(1).toInt()>0 )
         {
-          rp.curr_sel_amp = true;
+          rp.curr_sel_noamp = false;
         }
         else
-          rp.curr_sel_amp = false;
-        Serial.printf("Signal selection (1=amp, 0=no amp) set to %d\n", rp.curr_sel_amp);
+          rp.curr_sel_noamp = true;
+        Serial.printf("Signal selection (1=noamp, 0=amp) set to %d\n", rp.curr_sel_noamp);
         break;
       case ( 'T' ):   // This is a test feature only
         cp.input_string = cp.input_string.substring(1);
         Serial.printf("new string = '%s'\n", cp.input_string.c_str());
         cp.string_complete = true;
-        talk(Monitor, Model);
+        talk(Monitor, Model, Sen);
         break;
       case ( 'v' ):
         rp.debug = cp.input_string.substring(1).toInt();
@@ -355,15 +361,13 @@ void talk(Battery *Monitor, BatteryModel *Model)
             switch ( cp.input_string.substring(2).toInt() )
             {
               case ( -1 ):
-                self_talk("Xp0", Monitor, Model);
-                self_talk("m0.5", Monitor, Model);
+                self_talk("Xp0", Monitor, Model, Sen);
+                self_talk("m0.5", Monitor, Model, Sen);
                 rp.modeling = false;
-                rp.curr_sel_amp = false;
                 rp.debug = -12;   // myDisplay = 2
                 break;
               case ( 0 ):
                 rp.modeling = true;
-                rp.curr_sel_amp = true;
                 rp.type = 0;
                 rp.freq = 0.0;
                 rp.amp = 0.0;
@@ -372,8 +376,8 @@ void talk(Battery *Monitor, BatteryModel *Model)
                 rp.debug = -12;   // myDisplay = 5
                 break;
               case ( 1 ):
-                self_talk("Xp0", Monitor, Model);
-                self_talk("m0.5", Monitor, Model);
+                self_talk("Xp0", Monitor, Model, Sen);
+                self_talk("m0.5", Monitor, Model, Sen);
                 rp.type = 1;
                 rp.freq = 0.05;
                 rp.amp = 6.;
@@ -382,8 +386,8 @@ void talk(Battery *Monitor, BatteryModel *Model)
                 rp.freq *= (2. * PI);
                 break;
               case ( 2 ):
-                self_talk("Xp0", Monitor, Model);
-                self_talk("m0.5", Monitor, Model);
+                self_talk("Xp0", Monitor, Model, Sen);
+                self_talk("m0.5", Monitor, Model, Sen);
                 rp.type = 2;
                 rp.freq = 0.10;
                 rp.amp = 6.;
@@ -392,8 +396,8 @@ void talk(Battery *Monitor, BatteryModel *Model)
                 rp.freq *= (2. * PI);
                 break;
               case ( 3 ):
-                self_talk("Xp0", Monitor, Model);
-                self_talk("m0.5", Monitor, Model);
+                self_talk("Xp0", Monitor, Model, Sen);
+                self_talk("m0.5", Monitor, Model, Sen);
                 rp.type = 3;
                 rp.freq = 0.05;
                 rp.amp = 6.;
@@ -402,19 +406,19 @@ void talk(Battery *Monitor, BatteryModel *Model)
                 rp.freq *= (2. * PI);
                 break;
               case ( 4 ):
-                self_talk("Xp0", Monitor, Model);
+                self_talk("Xp0", Monitor, Model, Sen);
                 rp.type = 4;
                 rp.curr_bias_all = -RATED_BATT_CAP;  // Software effect only
                 rp.debug = -12;
                 break;
               case ( 5 ):
-                self_talk("Xp0", Monitor, Model);
+                self_talk("Xp0", Monitor, Model, Sen);
                 rp.type = 5;
                 rp.curr_bias_all = RATED_BATT_CAP; // Software effect only
                 rp.debug = -12;
                 break;
               case ( 6 ):
-                self_talk("Xp0", Monitor, Model);
+                self_talk("Xp0", Monitor, Model, Sen);
                 rp.type = 6;
                 rp.amp = RATED_BATT_CAP*0.2;
                 rp.debug = -12;
@@ -422,15 +426,15 @@ void talk(Battery *Monitor, BatteryModel *Model)
               default:
                 Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
             }
-            Serial.printf("Setting injection program to:  rp.curr_sel_amp = %d, rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
-                                    rp.modeling, rp.curr_sel_amp, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
+            Serial.printf("Setting injection program to:  rp.curr_sel_noamp = %d, rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
+                                    rp.modeling, rp.curr_sel_noamp, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
             break;
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
         }
         break;
       case ( 'h' ): 
-        talkH(Monitor, Model);
+        talkH(Monitor, Model, Sen);
         break;
       default:
         Serial.print(cp.input_string.charAt(0)); Serial.println(" unknown.  Try typing 'h'");
@@ -442,7 +446,7 @@ void talk(Battery *Monitor, BatteryModel *Model)
 }
 
 // Talk Help
-void talkH(Battery *Monitor, BatteryModel *Model)
+void talkH(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
 {
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
   Serial.printf("A=  nominalize the rp structure for clean boots etc'\n"); 
@@ -454,7 +458,7 @@ void talkH(Battery *Monitor, BatteryModel *Model)
   Serial.printf("M=  assign a CHARGE state in percent to all versions including model- '('truncated 0-100')'\n"); 
   Serial.printf("n=  assign curve charge state in fraction to model only (ekf if modeling)- '(0-1.1)'\n"); 
   Serial.printf("N=  assign a CHARGE state in percent to model only (ekf if modeling)-- '('truncated 0-100')'\n"); 
-  Serial.printf("s   curr signal select (1=amp preferred, 0=noamp) = "); Serial.println(rp.curr_sel_amp);
+  Serial.printf("s   curr signal select (0=amp preferred, 1=noamp) = "); Serial.println(rp.curr_sel_noamp);
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("D/S<?> Adjustments.   For example:\n");
   Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_bias_amp); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
@@ -475,6 +479,7 @@ void talkH(Battery *Monitor, BatteryModel *Model)
   Serial.printf("  Pm= "); Serial.printf("print model\n");
   Serial.printf("  Pr= "); Serial.printf("print retained and command parameters\n");
   Serial.printf("  Ps= "); Serial.printf("print all state-space\n");
+  Serial.printf("  Px= "); Serial.printf("print current signal selection\n");
   Serial.printf("R<?>   Reset\n");
   Serial.printf("  Re= "); Serial.printf("equalize delta_q in model to battery monitor\n");
   Serial.printf("  Rr= "); Serial.printf("saturate battery monitor and equalize model to monitor\n");
@@ -503,10 +508,10 @@ void talkH(Battery *Monitor, BatteryModel *Model)
 }
 
 // Recursion
-void self_talk(const String cmd, Battery *Monitor, BatteryModel *Model)
+void self_talk(const String cmd, Battery *Monitor, BatteryModel *Model, Sensors *Sen)
 {
   cp.input_string = cmd;
   Serial.printf("self_talk:  new string = '%s'\n", cp.input_string.c_str());
   cp.string_complete = true;
-  talk(Monitor, Model);
+  talk(Monitor, Model, Sen);
 }

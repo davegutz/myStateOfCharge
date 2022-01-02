@@ -507,7 +507,7 @@ void loop()
   // then can enter commands by sending strings.   End the strings with a real carriage return
   // right in the "Send String" box then press "Send."
   // String definitions are below.
-  talk(Monitor, Model);
+  talk(Monitor, Model, Sen);
 
   // Summary management
   summarizing = Summarize->update(millis(), reset, !rp.modeling) || (rp.debug==-11 && publishB);               //  now || reset && !rp.modeling

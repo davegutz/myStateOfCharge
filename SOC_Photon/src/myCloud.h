@@ -41,7 +41,7 @@ struct Publish
   double Ishunt_amp_cal;
   double Vshunt_noamp;
   double Ishunt_noamp_cal;
-  boolean curr_sel_amp; 
+  boolean curr_sel_noamp; 
   double T;
   int I2C_status;
   double voc;
