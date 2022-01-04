@@ -20,7 +20,7 @@ import math
 from pyDAGx.lookup_table import LookupTable
 from EKF_1x1 import EKF_1x1
 from Coulombs import Coulombs
-
+from StateSpace import StateSpace
 
 class Retained:
 
@@ -50,37 +50,6 @@ max_voc = 1.2*NOM_SYS_VOLT  # Prevent windup of battery model, V
 batt_num_cells = int(NOM_SYS_VOLT/3)  # Number of standard 3 volt LiFePO4 cells
 batt_vsat = float(batt_num_cells)*BATT_V_SAT  # Total bank saturation for 0.997=soc, V
 batt_vmax = (14.3/4)*float(batt_num_cells)  # Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
-
-
-class StateSpace:
-    def __init__(self, n=0, p=0, q=0):
-        self.n = n
-        self.p = p
-        self.q = q
-        self.u = np.array(p, 1)
-        self.A = np.array(n, n)
-        self.B = np.array(n, p)
-        self.C = np.array(q, n)
-        self.D = np.array(q, p)
-        self.x = np.array(n, n)
-        self.x_dot = self.x
-        self.x_past = self.x
-        self.y = np.array(q, 1)
-        self.dt = 0.
-
-    def calc_x_dot(self, u):
-        self.u = u
-        self.x_dot = self.A @ self.x + self.B @ self.u
-
-    def update(self, reset, x_init, dt):
-        if reset:
-            self.x = x_init.T
-        if dt is not None:
-            self.dt = dt
-        self.x_past = self.x
-        self.x += self.x_dot * self.dt
-        self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
-        return self.y
 
 
 class Battery(Coulombs, EKF_1x1):
@@ -249,7 +218,7 @@ class Battery(Coulombs, EKF_1x1):
             vd      Voltage downstream of diffusion process model, dif-->d
         """
         c_ct = self.tau_ct / self.rct
-        c_dif = self.tau_ct / self.rct
+        c_dif = self.tau_dif / self.r_dif
         a = np.array([[-1 / self.tau_ct, 0],
                       [0, -1 / self.tau_dif]])
         b = np.array([[1 / c_ct,   0],

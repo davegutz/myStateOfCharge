@@ -66,7 +66,7 @@ Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, 
     // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
     // the state-space stability requires at least 0.1.   Used 0.2.
     double c_ct = tau_ct_ / rct_;
-    double c_dif = tau_ct_ / rct_;
+    double c_dif = tau_dif_ / r_dif_;
     int rand_n = 2; // Rows A and B
     int rand_p = 2; // Col B    
     int rand_q = 1; // Row C and D
@@ -279,7 +279,7 @@ BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const doubl
     // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
     // the state-space stability requires at least 0.1.   Used 0.2.
     double c_ct = tau_ct_ / rct_;
-    double c_dif = tau_ct_ / rct_;
+    double c_dif = tau_dif_ / r_dif_;
     int rand_n = 2; // Rows A and B
     int rand_p = 2; // Col B    
     int rand_q = 1; // Row C and D
