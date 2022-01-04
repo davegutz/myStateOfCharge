@@ -125,6 +125,7 @@ double Battery::calculate(const double temp_C, const double q, const double curr
 // SOC-OCV curve fit method per Zhang, et al modified by ekf
 double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated)
 {
+    // TODO:  saturated in arg list not used
     temp_c_ = temp_c;
     vsat_ = calc_vsat(temp_c_);
 
@@ -162,7 +163,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
         Serial.printf("ib,vb*10-110,voc_dyn(z_)*10-110,  K_,y_,SOC_ekf-90,   \n%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
             ib, vb*10-110, voc_dyn_*10-110,     K_, y_, soc_ekf_*100-90);
 
-    // Charge time if used ekf
+    // Charge time if used ekf  TODO:  why not use calculate_charge_time()
     if ( ib_ > 0.1 )  tcharge_ekf_ = min(RATED_BATT_CAP / ib_ * (1. - soc_ekf_), 24.);
     else if ( ib_ < -0.1 ) tcharge_ekf_ = max(RATED_BATT_CAP / ib_ * soc_ekf_, -24.);
     else if ( ib_ >= 0. ) tcharge_ekf_ = 24.*(1. - soc_ekf_);
@@ -413,9 +414,6 @@ double BatteryModel::count_coulombs(const double dt, const boolean reset, const 
     // detection).
     if ( model_saturated_ )
     {
-        //   if ( !resetting_ && (sat_ib_max_ >= 0.) ) delta_q_ = 0.;
-        //   else if ( reset )
-        //       delta_q_ = 0.;
         if ( reset ) delta_q_ = 0.;  // Model is truth.   Saturate it then restart it to reset charge
     }
     resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass

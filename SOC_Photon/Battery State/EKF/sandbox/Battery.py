@@ -21,6 +21,15 @@ from pyDAGx.lookup_table import LookupTable
 from EKF_1x1 import EKF_1x1
 from Coulombs import Coulombs
 
+
+class Retained:
+
+    def __init__(self):
+        self.cutback_gain_scalar = 1.
+
+
+rp = Retained()
+
 # Battery constants
 RATED_BATT_CAP = 100.
 """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
@@ -41,6 +50,37 @@ max_voc = 1.2*NOM_SYS_VOLT  # Prevent windup of battery model, V
 batt_num_cells = int(NOM_SYS_VOLT/3)  # Number of standard 3 volt LiFePO4 cells
 batt_vsat = float(batt_num_cells)*BATT_V_SAT  # Total bank saturation for 0.997=soc, V
 batt_vmax = (14.3/4)*float(batt_num_cells)  # Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
+
+
+class StateSpace:
+    def __init__(self, n=0, p=0, q=0):
+        self.n = n
+        self.p = p
+        self.q = q
+        self.u = np.array(p, 1)
+        self.A = np.array(n, n)
+        self.B = np.array(n, p)
+        self.C = np.array(q, n)
+        self.D = np.array(q, p)
+        self.x = np.array(n, n)
+        self.x_dot = self.x
+        self.x_past = self.x
+        self.y = np.array(q, 1)
+        self.dt = 0.
+
+    def calc_x_dot(self, u):
+        self.u = u
+        self.x_dot = self.A @ self.x + self.B @ self.u
+
+    def update(self, reset, x_init, dt):
+        if reset:
+            self.x = x_init.T
+        if dt is not None:
+            self.dt = dt
+        self.x_past = self.x
+        self.x += self.x_dot * self.dt
+        self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
+        return self.y
 
 
 class Battery(Coulombs, EKF_1x1):
@@ -106,7 +146,8 @@ class Battery(Coulombs, EKF_1x1):
         self.r_dif = 0.0077  # Randles diffusion resistance, ohms
         self.tau_sd = 1.8e7  # Time constant of ideal battery capacitor model, input current A, output volts=soc (0-1)
         self.r_sd = 70  # Trickle discharge of ideal battery capacitor model, ohms
-        self.A, self.B, self.C, self.D = self.construct_state_space()
+        self.Randles = StateSpace()
+        self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space()
         self.temp_c = 25.
         self.tcharge_ekf = 0.  # Charging time to 100% from ekf, hr
         self.voc_dyn = 0.  # Charging voltage, V
@@ -138,6 +179,39 @@ class Battery(Coulombs, EKF_1x1):
 
     def calculate(self):
         raise NotImplementedError
+
+    def calculate_ekf(self, temp_c, vb, ib, dt):
+        self.temp_c = temp_c
+        self.vsat = calc_vsat(self.temp_c)
+
+        # Dynamics
+        self.vb = vb
+        self.ib = ib
+        u = [ib, vb]
+        self.Randles.calc_x_dot(u)
+        self.Randles.update(dt)
+        self.voc_dyn = self.Randles.y[0]
+        self.vdyn = self.vb - self.voc_dyn
+        self.voc = self.voc_dyn
+
+        # EKF 1x1
+        self.predict_ekf(ib)
+        self.update_ekf(self.voc_dyn, mneps_bb, mxeps_bb, dt)
+        self.soc_ekf = EKF_1x1.x()
+        self.q_ekf = self.soc_ekf * self.q_capacity
+        self.SOC_ekf = self.q_ekf / self.q_cap_rated_scaled * 100.
+
+        # Charge time
+        if self.ib>0.1:
+            self.tcharge_ekf = min(RATED_BATT_CAP/self.ib * (1. - self.soc_ekf), 24.)
+        elif self.ib<-0.1:
+            self.tcharge_ekf = max(RATED_BATT_CAP/self.ib * self.soc_ekf, -24.)
+        elif self.ib>=0.:
+            self.tcharge_ekf = 24.*(1. - self.soc_ekf)
+        else:
+            self.tcharge_ekf = -24.*self.soc_ekf
+
+        return self.soc_ekf
 
     def calculate_charge_time(self, q, q_capacity, charge_curr, soc):
         delta_q = q - q_capacity
@@ -218,10 +292,47 @@ class BatteryModel(Battery):
 
         Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated,
                          t_rated, t_rlim)
-        self.model_saturated = True
+        self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
+        self.sat_ib_null = 0.  # Current cutback value for voc=vsat, A
+        self.sat_cutback_gain = 1.  # Gain to retard ib when voc exceeds vsat, dimensionless
+        self.model_cutback = True  # Indicate that modeled current being limited on saturation cutback, T = cutback limited
+        self.model_saturated = True  # Indicator of maximal cutback, T = cutback saturated
+        self.ib_sat = 0.  # Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
+        self.s_cap = 1.  # Rated capacity scalar
 
-    def calculate(self, temp_c_=0., soc_=0., curr_in_=0., dt_=0., q_capacity_=0., q_cap_=0.):
-        return#########################
+    def calculate(self, temp_c=0., soc=0., curr_in=0., dt=0., q_capacity=0., q_cap=0.):
+        self.dt = dt
+        self.temp_c = temp_c
+
+        soc_lim = max(min(soc, mxeps_bb), mneps_bb)
+        SOC = soc * q_capacity / self.q_cap_rated_scaled * 100.
+
+        # VOC - OCV model
+        b, a, c, log_soc, exp_n_soc, pow_log_soc = self.calc_soc_voc_coeff(soc_lim, temp_c)
+        self.voc, self.dv_dsoc = self.calc_soc_voc(soc_lim, b, a, c, log_soc, exp_n_soc, pow_log_soc)
+        self.voc = min(self.voc + (soc - soc_lim) * self.dv_dsoc, max_voc)  # slightly beyond but don't windup
+        self.voc += self.dv  # Experimentally varied
+
+        # Dynamic emf
+        # Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
+        u = [self.ib, self.voc]
+        Randles_->calc_x_dot(u);
+        Randles_->update(dt);
+        self.vb = Randles_->y(0);
+        self.vdyn = self.vb - self.voc
+
+        # Saturation logic, both full and empty
+        self.vsat = self.nom_vsat + (temp_c - 25.) * self.dvoc_dt
+        self.sat_ib_max = self.sat_ib_null + (self.vsat - self.voc) / self.nom_vsat * q_capacity / 3600. *\
+                          self.sat_cutback_gain * rp.cutback_gain_scalar
+        self.ib = min(curr_in, self.sat_ib_max)
+        if (self.q <= 0.) & (curr_in < 0.):
+            self.ib = 0.  # empty
+        self.model_cutback = (self.voc > self.vsat) & (self.ib == self.sat_ib_max)
+        self.model_saturated = (self.voc > self.vsat) & (self.ib < self.ib_sat) & (self.ib == self.sat_ib_max)
+        Coulombs.sat = self.model_saturated
+
+        return self.vb
 
     def count_coulombs(self, dt=0., reset=False, temp_c=25., charge_curr=0., sat=True, t_last=0.):
         """Coulomb counter based on true=actual capacity
