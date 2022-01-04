@@ -95,11 +95,10 @@ class EKF_1x1:
         self.x_post = self.x_kf
         self.P_post = self.P
 
-    def h_jacobian(self):
+    def h_jacobian(self, x_kf):
         # implemented by child
         raise NotImplementedError
 
     def hx_calc(self):
         # implemented by child
         raise NotImplementedError
-

@@ -86,6 +86,7 @@ void EKF_1x1::init_ekf(double soc, double Pinit)
 
 // y <- C@x + D@u
 // Backward Euler integration of x
+// TODO:  dt not used in argument list below
 void EKF_1x1::update_ekf(const double z, double x_min, double x_max, const double dt)
 {
   /*1x1 Extended Kalman Filter update

@@ -38,9 +38,12 @@ class StateSpace:
         self.u = u
         self.x_dot = self.A @ self.x + self.B @ self.u
 
-    def update(self, reset, x_init, dt):
-        if reset:
-            self.x = x_init.T
+    def init_state_space(self, x_init):
+        self.x = x_init
+        self.x_past = self.x
+        self.x_dot = self.x * 0.
+
+    def update(self, dt):
         if dt is not None:
             self.dt = dt
         self.x_past = self.x
