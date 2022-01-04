@@ -58,7 +58,9 @@ class Battery(Coulombs, EKF_1x1):
 
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
                  num_cells=4, bat_v_sat=3.4625, q_cap_rated=RATED_BATT_CAP*3600,
-                 t_rated=RATED_TEMP, t_rlim=0.017):  # See Battery.h
+                 t_rated=RATED_TEMP, t_rlim=0.017,
+                 rsd=None, tau_sd=None, r0=None, tau_ct=None, rct=None, tau_dif=None,
+                 r_dif=None, temp_c=None):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -109,16 +111,41 @@ class Battery(Coulombs, EKF_1x1):
         self.dvoc_dt = BATT_DVOC_DT * self.num_cells  # Change of VOC with operating temperature in
         # range 0 - 50 C, V/deg C
         self.dt = 0  # Update time, s
-        self.r0 = 0.003  # Randles R0, ohms
-        self.tau_ct = 0.2  # Randles charge transfer time constant, s (=1/Rct/Cct)
-        self.rct = 0.0016  # Randles charge transfer resistance, ohms
-        self.tau_dif = 83  # Randles diffusion time constant, s (=1/Rdif/Cdif)
-        self.r_dif = 0.0077  # Randles diffusion resistance, ohms
-        self.tau_sd = 1.8e7  # Time constant of ideal battery capacitor model, input current A, output volts=soc (0-1)
-        self.r_sd = 70  # Trickle discharge of ideal battery capacitor model, ohms
+        if r0 is None:
+            self.r0 = 0.003  # Randles R0, ohms
+        else:
+            self.r0 = r0
+        if tau_ct is None:
+            self.tau_ct = 0.2  # Randles charge transfer time constant, s (=1/Rct/Cct)
+        else:
+            self.tau_ct = tau_ct
+        if rct is None:
+            self.rct = 0.0016  # Randles charge transfer resistance, ohms
+        else:
+            self.rct = rct
+        if tau_dif is None:
+            self.tau_dif = 83  # Randles diffusion time constant, s (=1/Rdif/Cdif)
+        else:
+            self.tau_dif = tau_dif
+        if r_dif is None:
+            self.r_dif = 0.0077  # Randles diffusion resistance, ohms
+        else:
+            self.r_dif = r_dif
+        if tau_sd is None:
+            self.tau_sd = 1.8e7  # Time constant of ideal battery capacitor model, input current A,
+            # output volts=soc (0-1)
+        else:
+            self.tau_sd = tau_sd
+        if rsd is None:
+            self.r_sd = 70  # Trickle discharge of ideal battery capacitor model, ohms
+        else:
+            self.r_sd = rsd
         self.Randles = StateSpace()
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
-        self.temp_c = 25.
+        if temp_c is None:
+            self.temp_c = 25.
+        else:
+            self.temp_c = temp_c
         self.tcharge_ekf = 0.  # Charging time to 100% from ekf, hr
         self.voc_dyn = 0.  # Charging voltage, V
         self.soc_ekf = 0.  # Filtered state of charge from ekf (0-1)
@@ -258,10 +285,12 @@ class BatteryModel(Battery):
     """Extend basic monitoring class to run a model"""
 
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707, num_cells=4, bat_v_sat=3.4625,
-                 q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017):
+                 q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
+                 rsd=None, tau_sd=None, r0=None, tau_ct=None, rct=None, tau_dif=None,
+                 r_dif=None, temp_c=None, scale=None):
 
-        Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated,
-                         t_rated, t_rlim)
+        Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated, t_rated,
+                         t_rlim, rsd, tau_sd, r0, tau_ct, rct, tau_dif, r_dif, temp_c)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         self.sat_ib_null = 0.  # Current cutback value for voc=vsat, A
         self.sat_cutback_gain = 1.  # Gain to retard ib when voc exceeds vsat, dimensionless
@@ -272,6 +301,8 @@ class BatteryModel(Battery):
         # small takes too long, A
         self.s_cap = 1.  # Rated capacity scalar
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_model()
+        if scale is not None:
+            self.apply_cap_scale(scale)
 
     def calculate(self, temp_c=0., soc=0., curr_in=0., dt=0., q_capacity=0., q_cap=0.):
         self.dt = dt

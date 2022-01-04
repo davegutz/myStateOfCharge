@@ -19,7 +19,8 @@ Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Batt
 
 import numpy as np
 from numpy.random import randn
-from Battery import Battery, BatteryModel
+import Battery
+# from Battery import Battery, BatteryModel
 from BatteryOld import BatteryOld
 from BatteryEKF import BatteryEKF
 from unite_pictures import unite_pictures_into_pdf
@@ -74,6 +75,7 @@ if __name__ == '__main__':
         # Setup
         r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
         q_std = 0.001  # Process uncertainty (0.001) belief in state
+        scale = model_bat_cap / RATED_BATT_CAP
         battery_model = BatteryOld(nom_bat_cap=model_bat_cap, true_bat_cap=model_bat_cap, temp_c=temp_c, tau_ct=tau_ct)
         model = BatteryModel(nom_bat_cap=model_bat_cap, true_bat_cap=model_bat_cap, temp_c=temp_c, tau_ct=tau_ct)
         battery_ekf = BatteryEKF(rsd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, rct=rct, tau_dif=tau_dif, r_dif=r_dif,
