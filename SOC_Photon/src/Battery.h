@@ -106,14 +106,14 @@ public:
   // functions
   void Dv(const double dv) { dv_ = dv; };
   void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -r0_*sr_); };
-  void calc_soc_voc_coeff(double soc, double tc, double *b, double *a, double *c, double *log_soc,
-                          double *exp_n_soc, double *pow_log_soc);
   double calc_h_jacobian(double soc_lim, double b, double c, double log_soc, double exp_n_soc, double pow_log_soc);
   double calc_soc_voc(double soc_lim, double *dv_dsoc, double b, double a, double c, double log_soc, double exp_n_soc,
     double pow_log_soc);
+  void calc_soc_voc_coeff(double soc, double tc, double *b, double *a, double *c, double *log_soc,
+                          double *exp_n_soc, double *pow_log_soc);
   virtual double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
-  double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated);
   double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
+  double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated);
   void init_battery(void);
   void init_soc_ekf(const double soc);
   virtual void pretty_print();
