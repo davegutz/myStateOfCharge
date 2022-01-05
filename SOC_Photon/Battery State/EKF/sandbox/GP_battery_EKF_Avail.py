@@ -178,6 +178,12 @@ if __name__ == '__main__':
             battery_ekf.kf_predict_1x1(u=battery_ekf.ib)
             battery_ekf.kf_update_1x1(battery_ekf.voc_dyn)
 
+            if t[i] < 1.:
+                print("soc= %7.3f, %7.3f, %7.3f, %7.3f,    vb= %7.3f, %7.3f, %7.3f, %7.3f    ib= %7.3f, %7.3f    voc= %7.3f, %7.3f"
+                      % (battery_ekf.soc, monitor.soc, battery_model.soc, model.soc,
+                         battery_ekf.vb, monitor.vb, battery_model.vb, model.vb,
+                         battery_ekf.ib, monitor.ib, battery_ekf.voc, monitor.voc))
+
             # Solver (does same thing as EKF, noisier)
             if True:
                 vbat_f_o = battery_ekf.voc_dyn
