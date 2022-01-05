@@ -32,10 +32,10 @@ class Retained:
 rp = Retained()
 
 # Battery constants
-RATED_BATT_CAP = 100.
-"""Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
-                        what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
-                        or 20 - 40 A for a 100 Ah battery"""
+# RATED_BATT_CAP = 100.
+# """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
+#                         what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
+#                         or 20 - 40 A for a 100 Ah battery"""
 RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
 BATT_DVOC_DT = 0.001875
 """ Change of VOC with operating temperature in range 0 - 50 C (0.0075) V/deg C
@@ -56,6 +56,11 @@ batt_vmax = (14.3/4)*float(batt_num_cells)  # Observed max voltage of 14.3 V at 
 class Battery(Coulombs, EKF_1x1):
     # Battery model:  Randle's dynamics, SOC-VOC model
 
+    RATED_BATT_CAP = 100.
+    """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
+                            what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
+                            or 20 - 40 A for a 100 Ah battery"""
+
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
                  num_cells=4, bat_v_sat=3.4625, q_cap_rated=RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017,
@@ -69,6 +74,7 @@ class Battery(Coulombs, EKF_1x1):
         """
         # Parents
         Coulombs.__init__(self, q_cap_rated, t_rated, t_rlim)
+        EKF_1x1.__init__(self)
 
         # Defaults
         if t_t is None:
@@ -140,7 +146,7 @@ class Battery(Coulombs, EKF_1x1):
             self.r_sd = 70  # Trickle discharge of ideal battery capacitor model, ohms
         else:
             self.r_sd = rsd
-        self.Randles = StateSpace()
+        self.Randles = StateSpace(2, 2, 1)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
         if temp_c is None:
             self.temp_c = 25.
@@ -184,10 +190,10 @@ class Battery(Coulombs, EKF_1x1):
         # Dynamics
         self.vb = vb
         self.ib = ib
-        u = [ib, vb]
+        u = np.array([ib, vb]).T
         self.Randles.calc_x_dot(u)
         self.Randles.update(dt)
-        self.voc_dyn = self.Randles.y[0]
+        self.voc_dyn = self.Randles.y
         self.vdyn = self.vb - self.voc_dyn
         self.voc = self.voc_dyn
 
@@ -200,9 +206,9 @@ class Battery(Coulombs, EKF_1x1):
 
         # Charge time
         if self.ib > 0.1:
-            self.tcharge_ekf = min(RATED_BATT_CAP/self.ib * (1. - self.soc_ekf), 24.)
+            self.tcharge_ekf = min(Battery.RATED_BATT_CAP/self.ib * (1. - self.soc_ekf), 24.)
         elif self.ib < -0.1:
-            self.tcharge_ekf = max(RATED_BATT_CAP/self.ib * self.soc_ekf, -24.)
+            self.tcharge_ekf = max(Battery.RATED_BATT_CAP/self.ib * self.soc_ekf, -24.)
         elif self.ib >= 0.:
             self.tcharge_ekf = 24.*(1. - self.soc_ekf)
         else:
@@ -253,8 +259,8 @@ class Battery(Coulombs, EKF_1x1):
         d = np.array([-self.r0, 1])
         return a, b, c, d
 
-    def count_coulombs(self, dt=0., reset=False, temp_c=25., charge_curr=0., sat=True, t_last=0.):
-        raise NotImplementedError
+    # def count_coulombs(self, dt=0., reset=False, temp_c=25., charge_curr=0., sat=True, t_last=0.):
+    #     raise NotImplementedError
 
     def ekf_model_predict(self):
         """Process model"""
@@ -273,6 +279,12 @@ class Battery(Coulombs, EKF_1x1):
     def init_battery(self):
         self.Randles.init_state_space([0., 0.])
 
+    def init_soc_ekf(self, soc):
+        self.soc_ekf = soc
+        self.init_ekf(soc, 0.0)
+        self.q_ekf = self.soc_ekf * self.q_capacity
+        self.SOC_ekf = self.q_ekf / self.q_cap_rated_scaled * 100.
+
     def look(self, temp_c):
         # Table lookups of Zhang coefficients
         b = self.lut_b.lookup(T_degC=temp_c)
@@ -280,12 +292,21 @@ class Battery(Coulombs, EKF_1x1):
         c = self.lut_c.lookup(T_degC=temp_c)
         return b, a, c
 
+    def assign_temp_c(self, temp_c):
+        self.temp_c = temp_c
+
+    def assign_soc(self, soc, voc):
+        self.soc = soc
+        self.voc_filtered = voc
+        self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
+        self.sat = self.voc_filtered >= self.v_sat
+
 
 class BatteryModel(Battery):
     """Extend basic monitoring class to run a model"""
 
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707, num_cells=4, bat_v_sat=3.4625,
-                 q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
+                 q_cap_rated=Battery.RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  rsd=None, tau_sd=None, r0=None, tau_ct=None, rct=None, tau_dif=None,
                  r_dif=None, temp_c=None, scale=None):
 
@@ -304,7 +325,7 @@ class BatteryModel(Battery):
         if scale is not None:
             self.apply_cap_scale(scale)
 
-    def calculate(self, temp_c=0., soc=0., curr_in=0., dt=0., q_capacity=0., q_cap=0.):
+    def calculate(self, temp_c=0., soc=0., curr_in=0., dt=0., q_capacity=0.):
         self.dt = dt
         self.temp_c = temp_c
 
@@ -319,10 +340,10 @@ class BatteryModel(Battery):
 
         # Dynamic emf
         # Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
-        u = [self.ib, self.voc]
+        u = np.array([self.ib, self.voc]).T
         self.Randles.calc_x_dot(u)
         self.Randles.update(dt)
-        self.vb = self.Randles.y[0]
+        self.vb = self.Randles.y
         self.vdyn = self.vb - self.voc
 
         # Saturation logic, both full and empty

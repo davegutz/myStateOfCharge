@@ -37,16 +37,18 @@ class StateSpace:
     def calc_x_dot(self, u):
         self.u = u
         self.x_dot = self.A @ self.x + self.B @ self.u
+        Ax = self.A@self.x
+        Bu = self.B@self.u
 
     def init_state_space(self, x_init):
-        self.x = x_init
+        self.x = np.array(x_init)
         self.x_past = self.x
         self.x_dot = self.x * 0.
 
     def update(self, dt):
         if dt is not None:
             self.dt = dt
-        self.x_past = self.x
+        self.x_past = self.x  # Backwards Euler has extra delay
         self.x += self.x_dot * self.dt
         self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
         return self.y

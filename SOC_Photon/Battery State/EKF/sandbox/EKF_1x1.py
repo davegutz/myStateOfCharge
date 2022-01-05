@@ -42,6 +42,9 @@ class EKF_1x1:
         self.x_post = self.x_kf
         self.P_post = self.P
 
+    def ekf_model_update(self):
+        raise NotImplementedError
+
     def init_ekf(self, soc, p_init):
         """Initialize on demand"""
         self.x_kf = soc
@@ -63,7 +66,7 @@ class EKF_1x1:
         self.x_prior = self.x_kf
         self.P_prior = self.P
 
-    def update_ekf(self, z, h_jacobian_=None, hx_calc_=None):
+    def update_ekf(self, z, x_min, x_max):
         """ 1x1 Extended Kalman Filter update
             Inputs:
                 z   1x1 input, =voc, dynamic predicted by other model, V
@@ -78,18 +81,14 @@ class EKF_1x1:
                 S   1x1 system uncertainty
                 SI  1x1 system uncertainty inverse
         """
-        if h_jacobian_ is None:
-            h_jacobian_ = self.h_jacobian
-        if hx_calc_ is None:
-            hx_calc_ = self.hx_calc
+        self.hx, self.H = self.ekf_model_update()
         self.z_ekf = z
-        self.H = h_jacobian_(self.x_kf)
         pht = self.P*self.H
         self.S = self.H*pht + self.R
-        self.K = pht/self.S
-        self.hx = hx_calc_()
+        if abs(self.S) > 1e-12:
+            self.K = pht/self.S  # using last-good-value if S=0
         self.y_kf = self.z_ekf - self.hx
-        self.x_kf = self.x_kf + self.K*self.y_kf
+        self.x_kf = max(min(self.x_kf + self.K*self.y_kf, x_max), x_min)
         i_kh = 1 - self.K*self.H
         self.P = i_kh*self.P
         self.x_post = self.x_kf
