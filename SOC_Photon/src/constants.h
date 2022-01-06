@@ -82,7 +82,7 @@
 #define SAT_PERSISTENCE 25          // Updates persistence on saturation tests (25)
 #define HDB_TBATT       0.06        // Half deadband to filter Tbatt, F (0.06)
 
-#define NSUM             140         // Number of saved summaries.   If too large, will get compile error
+#define NSUM             141         // Number of saved summaries.   If too large, will get compile error
 
 // Conversion gains
 const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  

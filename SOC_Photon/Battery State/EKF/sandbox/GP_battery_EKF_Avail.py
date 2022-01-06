@@ -20,7 +20,7 @@ Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Batt
 import numpy as np
 from numpy.random import randn
 import Battery
-from Battery import Battery, BatteryModel, is_sat
+from Battery import Battery, BatteryModel, is_sat, rp
 from BatteryOld import BatteryOld
 from BatteryEKF import BatteryEKF
 from unite_pictures import unite_pictures_into_pdf
@@ -146,16 +146,26 @@ if __name__ == '__main__':
             init_ekf = (t[i] <= 10)
 
             if init_ekf:
+                monitor.q_capacity = monitor.calculate_capacity(temp_c)
+                monitor.apply_soc(soc_init)
+                rp.delta_q = monitor.delta_q
+                rp.t_last = temp_c
+                monitor.load(rp.delta_q, rp.t_last)
                 monitor.assign_temp_c(temp_c)
                 monitor.init_battery()
                 monitor.init_soc_ekf(model.soc)  # when modeling (assumed in python) ekf wants to equal model
+                rp.delta_q_model = rp.delta_q  # initialize the same
+                rp.t_last_model = rp.t_last+dt_model
+                model.load(rp.delta_q_model, rp.t_last_model)
                 model.init_battery()
+                model.apply_delta_q_t(rp.delta_q)
 
             # Models
             battery_model.calc_voc(temp_c=temp_c+dt_model, soc_init=soc_init)
             u = np.array([current_in, battery_model.voc]).T
             battery_model.calc_dynamics(u, dt=dt, i_hyst=i_hyst, temp_c=temp_c)
             model.calculate(temp_c=temp_c, soc=soc_init, curr_in=current_in, dt=dt, q_capacity=model.q_capacity)
+            rp.delta_q_model, rp.t_last_model = model.update()
 
             # EKF
             if init_ekf:
@@ -173,6 +183,7 @@ if __name__ == '__main__':
             monitor.count_coulombs(dt=dt_ekf, temp_c=temp_c, charge_curr=current_in,
                                    sat=is_sat(temp_c, monitor.voc), t_last=monitor.t_last)
             monitor.calculate_charge_time(monitor.q, monitor.q_capacity, current_in, monitor.soc)
+            rp.delta_q, rp.t_last = monitor.update()
 
             # Call Kalman Filters
             battery_ekf.kf_predict_1x1(u=battery_ekf.ib)
@@ -256,9 +267,9 @@ if __name__ == '__main__':
         n_fig += 1
         plt.subplot(321)
         plt.title(filename + '   ' + date_time)
-        plt.plot(t, current_in_s, color='black', label='current demand, A')
+        plt.plot(t, current_in_s, color='black', label='curr dmd, A')
         plt.plot(t, ib, color='green', label='ib')
-        plt.plot(t, i_r_ct_s, color='red', label='I_Rct')
+        plt.plot(t, i_r_ct_s, color='red', label='I_R_ct')
         plt.plot(t, i_c_dif_s, color='cyan', label='I_C_dif')
         plt.plot(t, i_r_dif_s, color='orange', linestyle='--', label='I_R_dif')
         plt.plot(t, i_oc_s, color='black', linestyle='--', label='Ioc')

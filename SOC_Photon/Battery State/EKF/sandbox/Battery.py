@@ -27,9 +27,57 @@ class Retained:
 
     def __init__(self):
         self.cutback_gain_scalar = 1.
+        self.delta_q = 0.
+        self.t_last = 25.
+        self.delta_q_model = 0.
+        self.t_last_model = 25.
+        self.modeling = True
 
 
 rp = Retained()
+
+
+class Saved:
+    # For plot savings.   A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
+    def __init__(self):
+        self.time = []
+        self.ib = []
+        self.vb = []
+        self.vc = []
+        self.vd = []
+        self.voc = []
+        self.vbc = []
+        self.vcd = []
+        self.icc = []
+        self.irc = []
+        self.icd = []
+        self.ird = []
+        self.vcd_dot = []
+        self.vbc_dot = []
+        self.soc = []
+        self.SOC = []
+        self.pow_oc = []
+        self.soc_ekf = []
+        self.SOC_ekf = []
+        self.voc_dyn = []
+        self.Fx = []
+        self.Bu = []
+        self.P = []
+        self.H = []
+        self.S = []
+        self.K = []
+        self.hx = []
+        self.u_kf = []
+        self.x_kf = []
+        self.y_kf = []
+        self.z_ekf = []
+        self.x_prior = []
+        self.P_prior = []
+        self.x_post = []
+        self.P_post = []
+        self.e_soc_ekf = []
+        self.e_voc_ekf = []
+
 
 # Battery constants
 # RATED_BATT_CAP = 100.
@@ -57,6 +105,7 @@ class Battery(Coulombs, EKF_1x1):
     # Battery model:  Randle's dynamics, SOC-VOC model
 
     RATED_BATT_CAP = 100.
+    RATED_TEMP = 25.
     """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
                             what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
                             or 20 - 40 A for a 100 Ah battery"""
@@ -64,8 +113,8 @@ class Battery(Coulombs, EKF_1x1):
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
                  num_cells=4, bat_v_sat=3.4625, q_cap_rated=RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017,
-                 rsd=None, tau_sd=None, r0=None, tau_ct=None, rct=None, tau_dif=None,
-                 r_dif=None, temp_c=None):
+                 rsd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, rct=0.0016, tau_dif=83.,
+                 r_dif=0.0077, temp_c=RATED_TEMP):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -107,6 +156,7 @@ class Battery(Coulombs, EKF_1x1):
         self.vdyn = 0.  # Model current induced back emf, V
         self.vb = NOM_SYS_VOLT  # Battery voltage at post, V
         self.ib = 0  # Current into battery post, A
+        self.pow_oc = 0.  # Charge power, W
         self.num_cells = num_cells
         self.dv_dsoc = 0.  # Slope of soc-voc curve, V/%
         self.tcharge = 0.  # Charging time to 100%, hr
@@ -117,41 +167,18 @@ class Battery(Coulombs, EKF_1x1):
         self.dvoc_dt = BATT_DVOC_DT * self.num_cells  # Change of VOC with operating temperature in
         # range 0 - 50 C, V/deg C
         self.dt = 0  # Update time, s
-        if r0 is None:
-            self.r0 = 0.003  # Randles R0, ohms
-        else:
-            self.r0 = r0
-        if tau_ct is None:
-            self.tau_ct = 0.2  # Randles charge transfer time constant, s (=1/Rct/Cct)
-        else:
-            self.tau_ct = tau_ct
-        if rct is None:
-            self.rct = 0.0016  # Randles charge transfer resistance, ohms
-        else:
-            self.rct = rct
-        if tau_dif is None:
-            self.tau_dif = 83  # Randles diffusion time constant, s (=1/Rdif/Cdif)
-        else:
-            self.tau_dif = tau_dif
-        if r_dif is None:
-            self.r_dif = 0.0077  # Randles diffusion resistance, ohms
-        else:
-            self.r_dif = r_dif
-        if tau_sd is None:
-            self.tau_sd = 1.8e7  # Time constant of ideal battery capacitor model, input current A,
-            # output volts=soc (0-1)
-        else:
-            self.tau_sd = tau_sd
-        if rsd is None:
-            self.r_sd = 70  # Trickle discharge of ideal battery capacitor model, ohms
-        else:
-            self.r_sd = rsd
+        self.rsd = rsd
+        self.tau_sd = tau_sd
+        self.r0 = r0
+        self.tau_ct = tau_ct
+        self.rct = rct
+        self.c_ct = self.tau_ct / self.rct
+        self.tau_dif = tau_dif
+        self.r_dif = r_dif
+        self.c_dif = self.tau_dif / self.r_dif
         self.Randles = StateSpace(2, 2, 1)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
-        if temp_c is None:
-            self.temp_c = 25.
-        else:
-            self.temp_c = temp_c
+        self.temp_c = temp_c
         self.tcharge_ekf = 0.  # Charging time to 100% from ekf, hr
         self.voc_dyn = 0.  # Charging voltage, V
         self.soc_ekf = 0.  # Filtered state of charge from ekf (0-1)
@@ -159,6 +186,18 @@ class Battery(Coulombs, EKF_1x1):
         self.q_ekf = 0  # Filtered charge calculated by ekf, C
         self.amp_hrs_remaining = 0  # Discharge amp*time left if drain to q=0, A-h
         self.amp_hrs_remaining_ekf = 0  # Discharge amp*time left if drain to q_ekf=0, A-h
+        self.saved = Saved()  # for plots and prints
+        self.e_soc_ekf = 0.  # analysis parameter
+        self.e_voc_ekf = 0.  # analysis parameter
+
+    def assign_temp_c(self, temp_c):
+        self.temp_c = temp_c
+
+    def assign_soc(self, soc, voc):
+        self.soc = soc
+        self.voc = voc
+        self.vsat = self.nom_vsat + (self.temp_c - RATED_TEMP) * self.dvoc_dt
+        self.sat = self.voc >= self.vsat
 
     def calc_h_jacobian(self, soc_lim=0., b=0., c=0., log_soc=0., exp_n_soc=0., pow_log_soc=0.):
         dv_dsoc = float(self.num_cells) * (b * self.m / soc_lim * pow_log_soc / log_soc + c +
@@ -196,6 +235,7 @@ class Battery(Coulombs, EKF_1x1):
         self.voc_dyn = self.Randles.y
         self.vdyn = self.vb - self.voc_dyn
         self.voc = self.voc_dyn
+        self.pow_oc = self.voc * self.ib
 
         # EKF 1x1
         self.predict_ekf(ib)
@@ -249,12 +289,10 @@ class Battery(Coulombs, EKF_1x1):
             vc      Voltage downstream of charge transfer model, ct-->c
             vd      Voltage downstream of diffusion process model, dif-->d
         """
-        c_ct = self.tau_ct / self.rct
-        c_dif = self.tau_dif / self.r_dif
         a = np.array([[-1 / self.tau_ct, 0],
                       [0, -1 / self.tau_dif]])
-        b = np.array([[1 / c_ct,   0],
-                      [1 / c_dif,  0]])
+        b = np.array([[1 / self.c_ct,   0],
+                      [1 / self.c_dif,  0]])
         c = np.array([-1., -1])
         d = np.array([-self.r0, 1])
         return a, b, c, d
@@ -265,7 +303,7 @@ class Battery(Coulombs, EKF_1x1):
     def ekf_model_predict(self):
         """Process model"""
         self.Fx = math.exp(-self.dt / self.tau_sd)
-        self.Bu = (1. - self.Fx)*self.r_sd
+        self.Bu = (1. - self.Fx)*self.rsd
 
     def ekf_model_update(self):
         # Measurement function hx(x), x = soc ideal capacitor
@@ -292,14 +330,76 @@ class Battery(Coulombs, EKF_1x1):
         c = self.lut_c.lookup(T_degC=temp_c)
         return b, a, c
 
-    def assign_temp_c(self, temp_c):
-        self.temp_c = temp_c
+    def vbc(self):
+        return self.Randles.x[0]
 
-    def assign_soc(self, soc, voc):
-        self.soc = soc
-        self.voc_filtered = voc
-        self.v_sat = self.nom_v_sat + (self.temp_c - 25.) * self.dVoc_dT
-        self.sat = self.voc_filtered >= self.v_sat
+    def vcd(self):
+        return self.Randles.x[1]
+
+    def vbc_dot(self):
+        return self.Randles.x_dot[0]
+
+    def vcd_dot(self):
+        return self.Randles.x_dot[1]
+
+    def i_c_ct(self):
+        return self.vbc_dot() * self.c_ct
+
+    def i_c_dif(self):
+        return self.vcd_dot() * self.c_dif
+
+    def i_r_ct(self):
+        return self.vbc() / self.rct
+
+    def i_r_dif(self):
+        return self.vcd() / self.r_dif
+
+    def vd(self):
+        return self.voc + self.ib * self.r0
+
+    def vc(self):
+        return self.vd() + self.vcd()
+
+    def save(self, time, soc_ref, voc_ref):
+        self.saved.time.append(time)
+        self.saved.ib.append(self.ib)
+        self.saved.vb.append(self.vb)
+        self.saved.vc.append(self.vc)
+        self.saved.vd.append(self.vd())
+        self.saved.voc.append(self.voc)
+        self.saved.vbc.append(self.vbc())
+        self.saved.vcd.append(self.vcd())
+        self.saved.icc.append(self.i_c_ct())
+        self.saved.irc.append(self.i_r_ct())
+        self.saved.icd.append(self.i_c_dif())
+        self.saved.ird.append(self.i_r_dif())
+        self.saved.vcd_dot.append(self.vcd())
+        self.saved.vbc_dot.append(self.vbc_dot())
+        self.saved.soc.append(self.soc)
+        self.saved.SOC.append(self.SOC)
+        self.saved.pow_oc.append(self.pow_oc)
+        self.saved.soc_ekf.append(self.soc_ekf)
+        self.saved.SOC_ekf.append(self.SOC_ekf)
+        self.saved.voc_dyn.append(self.voc_dyn)
+        self.saved.Fx.append(self.Fx)
+        self.saved.Bu.append(self.Bu)
+        self.saved.P.append(self.P)
+        self.saved.H.append(self.H)
+        self.saved.S.append(self.S)
+        self.saved.K.append(self.K)
+        self.saved.hx.append(self.hx)
+        self.saved.u_kf.append(self.u_kf)
+        self.saved.x_kf.append(self.x_kf)
+        self.saved.y_kf.append(self.y_kf)
+        self.saved.z_ekf.append(self.z_ekf)
+        self.saved.x_prior.append(self.x_prior)
+        self.saved.P_prior.append(self.P_prior)
+        self.saved.x_post.append(self.x_post)
+        self.saved.P_post.append(self.P_post)
+        self.e_soc_ekf = (self.soc_ekf - soc_ref) / soc_ref
+        self.e_voc_ekf = (self.voc_dyn - voc_ref) / voc_ref
+        self.saved.e_soc_ekf.append(self.e_soc_ekf)
+        self.saved.e_voc_ekf.append(self.e_voc_ekf)
 
 
 class BatteryModel(Battery):
@@ -374,12 +474,10 @@ class BatteryModel(Battery):
             vc      Voltage downstream of charge transfer model, ct-->c
             vd      Voltage downstream of diffusion process model, dif-->d
         """
-        c_ct = self.tau_ct / self.rct
-        c_dif = self.tau_dif / self.r_dif
         a = np.array([[-1 / self.tau_ct, 0],
                       [0, -1 / self.tau_dif]])
-        b = np.array([[1 / c_ct,   0],
-                      [1 / c_dif,  0]])
+        b = np.array([[1 / self.c_ct,   0],
+                      [1 / self.c_dif,  0]])
         c = np.array([-1., -1])
         d = np.array([-self.r0, 1])
         return a, b, c, d
