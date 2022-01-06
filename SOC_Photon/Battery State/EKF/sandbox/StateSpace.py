@@ -34,6 +34,18 @@ class StateSpace:
         self.x_past = self.x
         self.dt = 0.
 
+    def __str__(self):
+        '''Returns representation of the object'''
+        s = "StateSpace:\n"
+        s += "  A = \n{}\n".format(self.A)
+        s += "  x = {}\n".format(self.x)
+        s += "  B = \n{}\n".format(self.A)
+        s += "  u = {}\n".format(self.u)
+        s += "  C = \n{}\n".format(self.A)
+        s += "  D = \n{}\n".format(self.A)
+        s += "  x_dot = {}\n".format(self.x_dot)
+        return s
+
     def calc_x_dot(self, u):
         self.u = u
         self.x_dot = self.A @ self.x + self.B @ self.u

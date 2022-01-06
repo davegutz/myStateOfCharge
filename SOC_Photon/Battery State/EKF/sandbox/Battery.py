@@ -121,7 +121,7 @@ class Battery(Coulombs, EKF_1x1):
         so equations error when soc<=0 to match data.    See Battery.h
         """
         # Parents
-        Coulombs.__init__(self, q_cap_rated, t_rated, t_rlim)
+        Coulombs.__init__(self, q_cap_rated,  q_cap_rated, t_rated, t_rlim)
         EKF_1x1.__init__(self)
 
         # Defaults
@@ -189,6 +189,37 @@ class Battery(Coulombs, EKF_1x1):
         self.e_soc_ekf = 0.  # analysis parameter
         self.e_voc_ekf = 0.  # analysis parameter
 
+    def __str__(self):
+        '''Returns representation of the object'''
+        s = "Battery:  "
+        s += 'temp, #cells, b, a, c, m, n, d, dvoc_dt = {:5.1f}, {}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
+            format(self.temp_c, self.num_cells, self.b, self.a, self.c, self.m, self.n, self.d, self.dvoc_dt)
+        s += 'r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
+            format(self.r0, self.r_ct, self.tau_ct, self.r_dif, self.tau_dif, self.r_sd, self.tau_sd)
+        s += "  dv_dsoc = {:7.3f}  // Derivative scaled, V/fraction\n".format(self.dv_dsoc)
+        s += "  ib =      {:7.3f}  // Current into battery, A\n".format(self.ib)
+        s += "  vb =      {:7.3f}  // Total model voltage, voltage at terminals, V\n".format(self.vb)
+        s += "  voc =     {:7.3f}  // Static model open circuit voltage, V\n".format(self.voc)
+        s += "  vsat =    {:7.3f}  // Saturation threshold at temperature, V\n".format(self.vsat)
+        s += "  voc_dyn = {:7.3f}  // Charging voltage, V\n".format(self.voc_dyn)
+        s += "  vdyn =    {:7.3f}  // Model current induced back emf, V\n".format(self.vdyn)
+        s += "  q =       {:7.3f}  // Present charge, C\n".format(self.q)
+        s += "  q_ekf     {:7.3f}  // Filtered charge calculated by ekf, C\n".format(self.q_ekf)
+        s += "  tcharge = {:7.3f}  // Charging time to full, hr\n".format(self.tcharge)
+        s += "  tcharge_ekf = {:7.3f}   // Charging time to full from ekf, hr\n".format(self.tcharge_ekf)
+        s += "  soc_ekf = {:7.3f}  // Filtered state of charge from ekf (0-1)\n".format(self.soc_ekf)
+        s += "  SOC_ekf_ ={:7.3f}  // Filtered state of charge from ekf (0-100)\n".format(self.SOC_ekf)
+        s += "  amp_hrs_remaining =       {:7.3f}  // Discharge amp*time left if drain to q=0, A-h\n".format(self.amp_hrs_remaining,)
+        s += "  amp_hrs_remaining_ekf_ =  {:7.3f}  // Discharge amp*time left if drain to q_ekf=0, A-h\n".format(self.amp_hrs_remaining_ekf)
+        s += "  sr =      {:7.3f}  // Resistance scalar\n".format(self.sr)
+        s += "  dv_ =     {:7.3f}  / Adjustment, V\n".format(self.dv)
+        s += "  dt_ =     {:7.3f}  // Update time, s\n".format(self.dt)
+        s += "\n"
+        s += Coulombs.__str__(self)
+        s += "\n"
+        s += self.Randles.__str__()
+        return s
+
     def assign_temp_c(self, temp_c):
         self.temp_c = temp_c
 
@@ -218,7 +249,7 @@ class Battery(Coulombs, EKF_1x1):
         pow_log_soc_norm = math.pow(-log_soc_norm, m)
         return b, a, c, log_soc_norm, exp_n_soc_norm, pow_log_soc_norm
 
-    def calculate(self):
+    def calculate(self, temp_c, soc, curr_in, dt, q_capacity):
         raise NotImplementedError
 
     def calculate_ekf(self, temp_c, vb, ib, dt):
@@ -277,9 +308,9 @@ class Battery(Coulombs, EKF_1x1):
         """ State-space representation of dynamics
         Inputs:
             ib      Current at = Vb = current at shunt, A
-            voc     Voltage at storage, A
-        Outputs:
             vb      Voltage at terminal, V
+        Outputs:
+            voc     Voltage at storage, A
         States:
             vbc     RC vb-vc, V
             vcd     RC vc-vd, V
@@ -307,8 +338,8 @@ class Battery(Coulombs, EKF_1x1):
     def ekf_model_update(self):
         # Measurement function hx(x), x = soc ideal capacitor
         x_lim = max(min(self.x_kf, mxeps_bb), mneps_bb)
-        b, a, c, log_soc, exp_n_soc, pow_log_soc = self.calc_soc_voc_coeff(x_lim, self.temp_c, self.n, self.m)
-        self.hx, self.dv_dsoc = self.calc_soc_voc(x_lim, b, a, c, log_soc, exp_n_soc, pow_log_soc)
+        self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc = self.calc_soc_voc_coeff(x_lim, self.temp_c, self.n, self.m)
+        self.hx, self.dv_dsoc = self.calc_soc_voc(x_lim, self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc)
         # Jacobian of measurement function
         self.H = self.dv_dsoc
         return self.hx, self.H
@@ -419,12 +450,12 @@ class BatteryModel(Battery):
         self.model_saturated = True  # Indicator of maximal cutback, T = cutback saturated
         self.ib_sat = 0.  # Threshold to declare saturation.  This regeneratively slows down charging so if too
         # small takes too long, A
-        self.s_cap = scale  # Rated capacity scalar
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_model()
+        self.s_cap = scale  # Rated capacity scalar
         if scale is not None:
             self.apply_cap_scale(scale)
 
-    def calculate(self, temp_c=0., soc=0., curr_in=0., dt=0., q_capacity=0.):
+    def calculate(self, temp_c, soc, curr_in, dt, q_capacity):
         self.dt = dt
         self.temp_c = temp_c
 
@@ -477,11 +508,11 @@ class BatteryModel(Battery):
                       [0, -1 / self.tau_dif]])
         b = np.array([[1 / self.c_ct,   0],
                       [1 / self.c_dif,  0]])
-        c = np.array([-1., -1])
-        d = np.array([-self.r0, 1])
+        c = np.array([1., 1])
+        d = np.array([self.r0, 1])
         return a, b, c, d
 
-    def count_coulombs(self, dt=0., reset=False, temp_c=25., charge_curr=0., sat=True, t_last=0.):
+    def count_coulombs(self, dt=0., reset=False, temp_c=25., charge_curr=0., t_last=0.):
         """Coulomb counter based on true=actual capacity
         Internal resistance of battery is a loss
         Inputs:
@@ -502,7 +533,7 @@ class BatteryModel(Battery):
 
         # Saturation.   Goal is to set q_capacity and hold it so remember last saturation status
         # detection
-        if sat:
+        if self.model_saturated:
             if reset:
                 self.delta_q = 0.  # Model is truth.   Saturate it then restart it to reset charge
         self.resetting = False  # one pass flag.  Saturation debounce should reset next pass

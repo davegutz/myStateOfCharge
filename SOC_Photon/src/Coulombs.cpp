@@ -101,7 +101,7 @@ void Coulombs::apply_delta_q_t(const double delta_q, const double temp_c)
 }
 
 // Memory set, adjust book-keeping as needed.  delta_q preserved
-void Coulombs::apply_soc(const double soc)
+void Coulombs::apply_soc(const double soc) // TODO: need temp_c input to this for q_capacity
 {
   soc_ = soc;
   q_ = soc*q_capacity_;

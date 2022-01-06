@@ -42,10 +42,11 @@ if __name__ == '__main__':
         # Setup to run the transients
         dt = 0.1
         dt_ekf = 0.1
-        # time_end = 1
+        # time_end = 2
         # time_end = 13.3
         # time_end = 700
-        time_end = 2500
+        # time_end = 2500
+        time_end = 51
         temp_c = 25.
 
         # Trade study inputs
@@ -69,7 +70,7 @@ if __name__ == '__main__':
         tau_sd = 1.87e7  # (1.87e7-->1.87e6) ++++++ dyn only
         v_std = 0.01  # (0.0-0.01) ------ noise
         i_std = 0.1  # (0.0-0.1) ------ noise
-        soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
+        soc_init = 0.5  # (1.0-->0.8)  ------  initialization artifacts only
         tau_ct = 0.2  # (0.1-->5.)  -------
 
         # Setup
@@ -145,35 +146,38 @@ if __name__ == '__main__':
                 current_in = 40.
             else:
                 current_in = 0.
-            init_ekf = (t[i] <= 10)
+            init_ekf = (t[i] <= 1)
 
             if init_ekf:
-                mon.q_capacity = mon.calculate_capacity(temp_c)
-                mon.apply_soc(soc_init)
-                rp.delta_q = mon.delta_q
-                rp.t_last = temp_c
-                mon.load(rp.delta_q, rp.t_last)
-                mon.assign_temp_c(temp_c)
-                mon.init_battery()
-                mon.init_soc_ekf(sim.soc)  # when modeling (assumed in python) ekf wants to equal model
-                rp.delta_q_model = rp.delta_q  # initialize the same
-                rp.t_last_model = rp.t_last+dt_model
+                sim.apply_soc(soc_init, temp_c)
+                rp.delta_q_model = sim.delta_q
+                rp.t_last_model = temp_c+dt_model
                 sim.load(rp.delta_q_model, rp.t_last_model)
                 sim.init_battery()
-                sim.apply_delta_q_t(rp.delta_q)
+                sim.apply_delta_q_t(rp.delta_q_model, rp.t_last_model)
 
             # Models
             battery_model.calc_voc(temp_c=temp_c+dt_model, soc_init=soc_init)
             u = np.array([current_in, battery_model.voc]).T
             battery_model.calc_dynamics(u, dt=dt, i_hyst=i_hyst, temp_c=temp_c)
             sim.calculate(temp_c=temp_c, soc=soc_init, curr_in=current_in, dt=dt, q_capacity=sim.q_capacity)
+            sim.count_coulombs(dt=dt, reset=init_ekf, temp_c=temp_c, charge_curr=current_in, t_last=rp.t_last_model)
             rp.delta_q_model, rp.t_last_model = sim.update()
+
 
             # EKF
             if init_ekf:
                 battery_ekf.assign_temp_c(temp_c)
                 battery_ekf.assign_soc_norm(float(battery_model.soc_norm), battery_model.voc)
                 battery_ekf.x_kf = battery_model.soc_norm + soc_init_err
+                mon.q_capacity = mon.calculate_capacity(temp_c)
+                mon.apply_soc(soc_init, temp_c)
+                rp.delta_q = mon.delta_q
+                rp.t_last = temp_c
+                mon.load(rp.delta_q, rp.t_last)
+                mon.assign_temp_c(temp_c)
+                mon.init_battery()
+                mon.init_soc_ekf(soc_init)  # when modeling (assumed in python) ekf wants to equal model
 
             # Setup
             u_dyn = np.array([battery_model.i_batt + randn()*i_std + di_sense,
@@ -181,8 +185,10 @@ if __name__ == '__main__':
             battery_ekf.calc_dynamics_ekf(u_dyn, dt=dt_ekf)
             battery_ekf.coulomb_counter_ekf()
             battery_ekf.coulomb_counter_avail(temp_c)
+
+            # Monitor calculations including ekf
             mon.calculate_ekf(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
-            mon.count_coulombs(dt=dt_ekf, temp_c=temp_c, charge_curr=current_in,
+            mon.count_coulombs(dt=dt_ekf, reset=init_ekf, temp_c=temp_c, charge_curr=current_in,
                                    sat=is_sat(temp_c, mon.voc), t_last=mon.t_last)
             mon.calculate_charge_time(mon.q, mon.q_capacity, current_in, mon.soc)
             rp.delta_q, rp.t_last = mon.update()
@@ -191,11 +197,11 @@ if __name__ == '__main__':
             battery_ekf.kf_predict_1x1(u=battery_ekf.ib)
             battery_ekf.kf_update_1x1(battery_ekf.voc_dyn)
 
-            if t[i] < 1.:
-                print("soc= %7.3f, %7.3f, %7.3f, %7.3f,    vb= %7.3f, %7.3f, %7.3f, %7.3f    ib= %7.3f, %7.3f    voc= %7.3f, %7.3f"
-                      % (battery_ekf.soc, mon.soc, battery_model.soc, sim.soc,
-                         battery_ekf.vb, mon.vb, battery_model.vb, sim.vb,
-                         battery_ekf.ib, mon.ib, battery_ekf.voc, mon.voc))
+            # if t[i] < 1.:
+            #     print("soc= %7.3f, %7.3f, %7.3f, %7.3f,    vb= %7.3f, %7.3f, %7.3f, %7.3f    ib= %7.3f, %7.3f    voc= %7.3f, %7.3f"
+            #           % (battery_ekf.soc, mon.soc, battery_model.soc, sim.soc,
+            #              battery_ekf.vb, mon.vb, battery_model.vb, sim.vb,
+            #              battery_ekf.ib, mon.ib, battery_ekf.voc, mon.voc))
 
             # Solver (does same thing as EKF, noisier)
             if True:
@@ -260,6 +266,10 @@ if __name__ == '__main__':
             e_soc_solved_ekf_s.append(e_soc_solved_ekf)
 
             mon.save(t[i], sim.soc, sim.voc)
+
+        # Data
+        print('mon:  ', str(mon))
+        # print('mon.Coulomb: ', str(mon.Coulombs))
 
         # Plots
         n_fig = 0
@@ -342,88 +352,88 @@ if __name__ == '__main__':
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()
-        n_fig += 1
-        plt.subplot(331)
-        plt.title(plot_title)
-        plt.plot(t, x_s, color='red', linestyle='dotted', label='x ekf')
-        plt.legend(loc=4)
-        plt.subplot(332)
-        plt.plot(t, hx_s, color='cyan', linestyle='dotted', label='hx ekf')
-        plt.plot(t, z_s, color='black', linestyle='dotted', label='z ekf')
-        plt.legend(loc=4)
-        plt.subplot(333)
-        plt.plot(t, y_s, color='green', linestyle='dotted', label='y ekf')
-        plt.legend(loc=4)
-        plt.subplot(334)
-        plt.plot(t, h_s, color='magenta', linestyle='dotted', label='H ekf')
-        plt.ylim(0, 50)
-        plt.legend(loc=3)
-        plt.subplot(335)
-        plt.plot(t, p_s, color='orange', linestyle='dotted', label='P ekf')
-        plt.legend(loc=3)
-        plt.subplot(336)
-        plt.plot(t, fx_s, color='red', linestyle='dotted', label='Fx ekf')
-        plt.legend(loc=2)
-        plt.subplot(337)
-        plt.plot(t, bu_s, color='blue', linestyle='dotted', label='Bu ekf')
-        plt.legend(loc=2)
-        plt.subplot(338)
-        plt.plot(t, k_s, color='red', linestyle='dotted', label='K ekf')
-        plt.legend(loc=4)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
-        fig_files.append(fig_file_name)
-        plt.savefig(fig_file_name, format="png")
-
-        plt.figure()
-        n_fig += 1
-        plt.subplot(121)
-        plt.title(plot_title)
-        plt.plot(t, voc_dyn_s, color='black', label='voc_dyn')
-        plt.plot(t, vbat_solved_s, color='green', linestyle='dotted', label='vbat_solved')
-        plt.legend(loc=4)
-        plt.subplot(122)
-        plt.plot(t, soc_s, color='black', label='soc')
-        plt.plot(t, soc_solved_s, color='green', linestyle='dotted', label='soc_solved')
-        plt.legend(loc=4)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
-        fig_files.append(fig_file_name)
-        plt.savefig(fig_file_name, format="png")
-
-        plt.figure()
-        n_fig += 1
-        plt.title(plot_title)
-        plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
-        plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
-        plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
-        plt.plot(t, e_soc_norm_ekf_s, color='cyan', linestyle='dotted', label='e_soc_norm to User')
-        plt.ylim(-0.01, 0.01)
-        plt.legend(loc=2)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
-        fig_files.append(fig_file_name)
-        plt.savefig(fig_file_name, format="png")
-
-        plt.figure()
-        n_fig += 1
-        plt.title(plot_title)
-        plt.plot(t, soc_avail_s, color='black', linestyle='dotted', label='soc_avail')
-        plt.plot(t, soc_avail_ekf_s, color='blue', linestyle='dotted', label='soc_avail_ekf')
-        plt.legend(loc=4)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
-        fig_files.append(fig_file_name)
-        plt.savefig(fig_file_name, format="png")
-
-        plt.figure()
-        n_fig += 1
-        plt.title(plot_title)
-        plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
-        plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
-        plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
-        plt.plot(t, e_soc_norm_ekf_s, color='cyan', linestyle='dotted', label='e_soc_norm to User')
-        plt.legend(loc=2)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
-        fig_files.append(fig_file_name)
-        plt.savefig(fig_file_name, format="png")
+        # plt.figure()
+        # n_fig += 1
+        # plt.subplot(331)
+        # plt.title(plot_title)
+        # plt.plot(t, x_s, color='red', linestyle='dotted', label='x ekf')
+        # plt.legend(loc=4)
+        # plt.subplot(332)
+        # plt.plot(t, hx_s, color='cyan', linestyle='dotted', label='hx ekf')
+        # plt.plot(t, z_s, color='black', linestyle='dotted', label='z ekf')
+        # plt.legend(loc=4)
+        # plt.subplot(333)
+        # plt.plot(t, y_s, color='green', linestyle='dotted', label='y ekf')
+        # plt.legend(loc=4)
+        # plt.subplot(334)
+        # plt.plot(t, h_s, color='magenta', linestyle='dotted', label='H ekf')
+        # plt.ylim(0, 50)
+        # plt.legend(loc=3)
+        # plt.subplot(335)
+        # plt.plot(t, p_s, color='orange', linestyle='dotted', label='P ekf')
+        # plt.legend(loc=3)
+        # plt.subplot(336)
+        # plt.plot(t, fx_s, color='red', linestyle='dotted', label='Fx ekf')
+        # plt.legend(loc=2)
+        # plt.subplot(337)
+        # plt.plot(t, bu_s, color='blue', linestyle='dotted', label='Bu ekf')
+        # plt.legend(loc=2)
+        # plt.subplot(338)
+        # plt.plot(t, k_s, color='red', linestyle='dotted', label='K ekf')
+        # plt.legend(loc=4)
+        # fig_file_name = filename + '_' + str(n_fig) + ".png"
+        # fig_files.append(fig_file_name)
+        # plt.savefig(fig_file_name, format="png")
+        #
+        # plt.figure()
+        # n_fig += 1
+        # plt.subplot(121)
+        # plt.title(plot_title)
+        # plt.plot(t, voc_dyn_s, color='black', label='voc_dyn')
+        # plt.plot(t, vbat_solved_s, color='green', linestyle='dotted', label='vbat_solved')
+        # plt.legend(loc=4)
+        # plt.subplot(122)
+        # plt.plot(t, soc_s, color='black', label='soc')
+        # plt.plot(t, soc_solved_s, color='green', linestyle='dotted', label='soc_solved')
+        # plt.legend(loc=4)
+        # fig_file_name = filename + '_' + str(n_fig) + ".png"
+        # fig_files.append(fig_file_name)
+        # plt.savefig(fig_file_name, format="png")
+        #
+        # plt.figure()
+        # n_fig += 1
+        # plt.title(plot_title)
+        # plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
+        # plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
+        # plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
+        # plt.plot(t, e_soc_norm_ekf_s, color='cyan', linestyle='dotted', label='e_soc_norm to User')
+        # plt.ylim(-0.01, 0.01)
+        # plt.legend(loc=2)
+        # fig_file_name = filename + '_' + str(n_fig) + ".png"
+        # fig_files.append(fig_file_name)
+        # plt.savefig(fig_file_name, format="png")
+        #
+        # plt.figure()
+        # n_fig += 1
+        # plt.title(plot_title)
+        # plt.plot(t, soc_avail_s, color='black', linestyle='dotted', label='soc_avail')
+        # plt.plot(t, soc_avail_ekf_s, color='blue', linestyle='dotted', label='soc_avail_ekf')
+        # plt.legend(loc=4)
+        # fig_file_name = filename + '_' + str(n_fig) + ".png"
+        # fig_files.append(fig_file_name)
+        # plt.savefig(fig_file_name, format="png")
+        #
+        # plt.figure()
+        # n_fig += 1
+        # plt.title(plot_title)
+        # plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
+        # plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
+        # plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
+        # plt.plot(t, e_soc_norm_ekf_s, color='cyan', linestyle='dotted', label='e_soc_norm to User')
+        # plt.legend(loc=2)
+        # fig_file_name = filename + '_' + str(n_fig) + ".png"
+        # fig_files.append(fig_file_name)
+        # plt.savefig(fig_file_name, format="png")
 
         n_fig, fig_files = overall(mon.saved, sim.saved, filename, fig_files,
                                            plot_title=plot_title, n_fig = n_fig, ref=current_in_s)
