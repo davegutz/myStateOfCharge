@@ -111,10 +111,9 @@ class Battery(Coulombs, EKF_1x1):
                             or 20 - 40 A for a 100 Ah battery"""
 
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
-                 num_cells=4, bat_v_sat=3.4625, q_cap_rated=RATED_BATT_CAP*3600,
-                 t_rated=RATED_TEMP, t_rlim=0.017,
-                 rsd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, rct=0.0016, tau_dif=83.,
-                 r_dif=0.0077, temp_c=RATED_TEMP):
+                 num_cells=4, bat_v_sat=3.4625, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
+                 r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
+                 temp_c=RATED_TEMP):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -167,12 +166,13 @@ class Battery(Coulombs, EKF_1x1):
         self.dvoc_dt = BATT_DVOC_DT * self.num_cells  # Change of VOC with operating temperature in
         # range 0 - 50 C, V/deg C
         self.dt = 0  # Update time, s
-        self.rsd = rsd
+        self.r_sd = r_sd
         self.tau_sd = tau_sd
         self.r0 = r0
         self.tau_ct = tau_ct
-        self.rct = rct
-        self.c_ct = self.tau_ct / self.rct
+        print('r_ct=', r_ct)
+        self.r_ct = float(r_ct)
+        self.c_ct = self.tau_ct / self.r_ct
         self.tau_dif = tau_dif
         self.r_dif = r_dif
         self.c_dif = self.tau_dif / self.r_dif
@@ -303,7 +303,7 @@ class Battery(Coulombs, EKF_1x1):
     def ekf_model_predict(self):
         """Process model"""
         self.Fx = math.exp(-self.dt / self.tau_sd)
-        self.Bu = (1. - self.Fx)*self.rsd
+        self.Bu = (1. - self.Fx)*self.r_sd
 
     def ekf_model_update(self):
         # Measurement function hx(x), x = soc ideal capacitor
@@ -405,13 +405,13 @@ class Battery(Coulombs, EKF_1x1):
 class BatteryModel(Battery):
     """Extend basic monitoring class to run a model"""
 
-    def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707, num_cells=4, bat_v_sat=3.4625,
-                 q_cap_rated=Battery.RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
-                 rsd=None, tau_sd=None, r0=None, tau_ct=None, rct=None, tau_dif=None,
-                 r_dif=None, temp_c=None, scale=None):
-
+    def __init__(self, t_t = None, t_b = None, t_a = None, t_c = None, m = 0.478, n = 0.4, d = 0.707,
+        num_cells = 4, bat_v_sat = 3.4625, q_cap_rated = Battery.RATED_BATT_CAP * 3600,
+        t_rated = Battery.RATED_TEMP, t_rlim = 0.017, scale = 1.,
+        r_sd = 70., tau_sd = 1.8e7, r0 = 0.003, tau_ct = 0.2, r_ct = 0.0016, tau_dif = 83., r_dif = 0.0077,
+        temp_c = Battery.RATED_TEMP):
         Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated, t_rated,
-                         t_rlim, rsd, tau_sd, r0, tau_ct, rct, tau_dif, r_dif, temp_c)
+                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         self.sat_ib_null = 0.  # Current cutback value for voc=vsat, A
         self.sat_cutback_gain = 1.  # Gain to retard ib when voc exceeds vsat, dimensionless
@@ -420,7 +420,7 @@ class BatteryModel(Battery):
         self.model_saturated = True  # Indicator of maximal cutback, T = cutback saturated
         self.ib_sat = 0.  # Threshold to declare saturation.  This regeneratively slows down charging so if too
         # small takes too long, A
-        self.s_cap = 1.  # Rated capacity scalar
+        self.s_cap = scale  # Rated capacity scalar
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_model()
         if scale is not None:
             self.apply_cap_scale(scale)

@@ -76,11 +76,13 @@ if __name__ == '__main__':
         r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
         q_std = 0.001  # Process uncertainty (0.001) belief in state
         scale = model_bat_cap / Battery.RATED_BATT_CAP
-        battery_model = BatteryOld(nom_bat_cap=model_bat_cap, true_bat_cap=model_bat_cap, temp_c=temp_c, tau_ct=tau_ct)
+        battery_model = BatteryOld(nom_bat_cap=model_bat_cap, true_bat_cap=model_bat_cap,
+                                   temp_c=temp_c, tau_ct=tau_ct)
         model = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale)
-        battery_ekf = BatteryEKF(rsd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, rct=rct, tau_dif=tau_dif, r_dif=r_dif,
-                                 temp_c=temp_c)
-        monitor = Battery(rsd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, rct=rct, tau_dif=tau_dif, r_dif=r_dif, temp_c=temp_c)
+        battery_ekf = BatteryEKF(rsd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct,
+                                 rct=rct, tau_dif=tau_dif, r_dif=r_dif, temp_c=temp_c)
+        monitor = Battery(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
+                          r_dif=r_dif, temp_c=temp_c)
         battery_ekf.R = r_std**2
         battery_ekf.Q = q_std**2
         battery_ekf.P = 100
