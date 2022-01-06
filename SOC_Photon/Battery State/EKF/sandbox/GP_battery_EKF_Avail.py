@@ -20,7 +20,7 @@ Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Batt
 import numpy as np
 from numpy.random import randn
 import Battery
-from Battery import Battery, BatteryModel, is_sat, rp
+from Battery import Battery, BatteryModel, is_sat, rp, overall
 from BatteryOld import BatteryOld
 from BatteryEKF import BatteryEKF
 from unite_pictures import unite_pictures_into_pdf
@@ -259,16 +259,19 @@ if __name__ == '__main__':
             e_soc_norm_ekf_s.append(e_soc_norm_ekf)
             e_soc_solved_ekf_s.append(e_soc_solved_ekf)
 
+            mon.save(t[i], sim.soc, sim.voc)
+
         # Plots
         n_fig = 0
         fig_files = []
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         filename = sys.argv[0].split('/')[-1]
+        plot_title = filename + '   ' + date_time
 
         plt.figure()
         n_fig += 1
         plt.subplot(321)
-        plt.title(filename + '   ' + date_time)
+        plt.title(plot_title)
         plt.plot(t, current_in_s, color='black', label='curr dmd, A')
         plt.plot(t, ib, color='green', label='ib')
         plt.plot(t, i_r_ct_s, color='red', label='I_R_ct')
@@ -303,7 +306,7 @@ if __name__ == '__main__':
         plt.figure()
         n_fig += 1
         plt.subplot(321)
-        plt.title(filename + '   ' + date_time)
+        plt.title(plot_title)
         plt.plot(t, ib, color='black', label='ib')
         plt.plot(t, i_batt_s, color='magenta', linestyle='dotted', label='i_batt')
         plt.legend(loc=3)
@@ -342,7 +345,7 @@ if __name__ == '__main__':
         plt.figure()
         n_fig += 1
         plt.subplot(331)
-        plt.title(filename + '   ' + date_time)
+        plt.title(plot_title)
         plt.plot(t, x_s, color='red', linestyle='dotted', label='x ekf')
         plt.legend(loc=4)
         plt.subplot(332)
@@ -375,7 +378,7 @@ if __name__ == '__main__':
         plt.figure()
         n_fig += 1
         plt.subplot(121)
-        plt.title(filename + '   ' + date_time)
+        plt.title(plot_title)
         plt.plot(t, voc_dyn_s, color='black', label='voc_dyn')
         plt.plot(t, vbat_solved_s, color='green', linestyle='dotted', label='vbat_solved')
         plt.legend(loc=4)
@@ -389,7 +392,7 @@ if __name__ == '__main__':
 
         plt.figure()
         n_fig += 1
-        plt.title(filename + '   ' + date_time)
+        plt.title(plot_title)
         plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
         plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
         plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
@@ -402,7 +405,7 @@ if __name__ == '__main__':
 
         plt.figure()
         n_fig += 1
-        plt.title(filename + '   ' + date_time)
+        plt.title(plot_title)
         plt.plot(t, soc_avail_s, color='black', linestyle='dotted', label='soc_avail')
         plt.plot(t, soc_avail_ekf_s, color='blue', linestyle='dotted', label='soc_avail_ekf')
         plt.legend(loc=4)
@@ -412,7 +415,7 @@ if __name__ == '__main__':
 
         plt.figure()
         n_fig += 1
-        plt.title(filename + '   ' + date_time)
+        plt.title(plot_title)
         plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
         plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
         plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
@@ -421,6 +424,9 @@ if __name__ == '__main__':
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
+
+        n_fig, fig_files = overall(mon.saved, sim.saved, filename, fig_files,
+                                           plot_title=plot_title, n_fig = n_fig, ref=current_in_s)
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
         for fig_file in fig_files:

@@ -21,7 +21,7 @@ from pyDAGx.lookup_table import LookupTable
 from EKF_1x1 import EKF_1x1
 from Coulombs import Coulombs
 from StateSpace import StateSpace
-
+import matplotlib.pyplot as plt
 
 class Retained:
 
@@ -170,7 +170,6 @@ class Battery(Coulombs, EKF_1x1):
         self.tau_sd = tau_sd
         self.r0 = r0
         self.tau_ct = tau_ct
-        print('r_ct=', r_ct)
         self.r_ct = float(r_ct)
         self.c_ct = self.tau_ct / self.r_ct
         self.tau_dif = tau_dif
@@ -349,7 +348,7 @@ class Battery(Coulombs, EKF_1x1):
         return self.vcd_dot() * self.c_dif
 
     def i_r_ct(self):
-        return self.vbc() / self.rct
+        return self.vbc() / self.r_ct
 
     def i_r_dif(self):
         return self.vcd() / self.r_dif
@@ -364,7 +363,7 @@ class Battery(Coulombs, EKF_1x1):
         self.saved.time.append(time)
         self.saved.ib.append(self.ib)
         self.saved.vb.append(self.vb)
-        self.saved.vc.append(self.vc)
+        self.saved.vc.append(self.vc())
         self.saved.vd.append(self.vd())
         self.saved.voc.append(self.voc)
         self.saved.vbc.append(self.vbc())
@@ -547,5 +546,39 @@ def sat_voc(temp_c):
     return batt_vsat + (temp_c-25.)*BATT_DVOC_DT
 
 
-def overall(mon, sim):
-    return 1.
+def overall(ms=Battery().saved, ss=BatteryModel().saved, filename='', fig_files=[], plot_title='Battery.overall', n_fig=0, ref=[]):
+    plt.figure()
+    n_fig += 1
+    plt.subplot(321)
+    plt.title(plot_title)
+    plt.plot(ms.time, ref, color='black', label='curr dmd, A')
+    plt.plot(ms.time, ms.ib, color='green', label='ib')
+    plt.plot(ms.time, ms.irc, color='red', label='I_R_ct')
+    plt.plot(ms.time, ms.icd, color='cyan', label='I_C_dif')
+    plt.plot(ms.time, ms.ird, color='orange', linestyle='--', label='I_R_dif')
+    plt.plot(ms.time, ms.ib, color='black', linestyle='--', label='Ioc')
+    plt.legend(loc=1)
+    plt.subplot(323)
+    plt.plot(ms.time, ms.vb, color='green', label='Vb')
+    plt.plot(ms.time, ms.vc, color='blue', label='Vc')
+    plt.plot(ms.time, ms.vd, color='red', label='Vd')
+    plt.plot(ms.time, ms.voc, color='orange', label='Voc')
+    plt.legend(loc=1)
+    plt.subplot(325)
+    plt.plot(ms.time, ms.vbc_dot, color='green', label='Vbc_dot')
+    plt.plot(ms.time, ms.vcd_dot, color='blue', label='Vcd_dot')
+    plt.legend(loc=1)
+    plt.subplot(322)
+    plt.plot(ms.time, ms.soc, color='red', label='soc')
+    plt.legend(loc=1)
+    plt.subplot(324)
+    plt.plot(ms.time, ms.pow_oc, color='orange', label='Pow_charge')
+    plt.legend(loc=1)
+    plt.subplot(326)
+    plt.plot(ms.soc, ms.voc, color='black', label='voc vs soc')
+    plt.legend(loc=1)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
+    return n_fig, fig_files
