@@ -545,3 +545,7 @@ def calc_vsat(temp_c):
 
 def sat_voc(temp_c):
     return batt_vsat + (temp_c-25.)*BATT_DVOC_DT
+
+
+def overall(mon, sim):
+    return 1.

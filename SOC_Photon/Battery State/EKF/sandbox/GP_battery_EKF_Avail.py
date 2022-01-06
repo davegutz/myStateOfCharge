@@ -78,10 +78,10 @@ if __name__ == '__main__':
         scale = model_bat_cap / Battery.RATED_BATT_CAP
         battery_model = BatteryOld(nom_bat_cap=model_bat_cap, true_bat_cap=model_bat_cap,
                                    temp_c=temp_c, tau_ct=tau_ct)
-        model = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale)
+        sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale)
         battery_ekf = BatteryEKF(rsd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct,
                                  rct=rct, tau_dif=tau_dif, r_dif=r_dif, temp_c=temp_c)
-        monitor = Battery(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
+        mon = Battery(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
                           r_dif=r_dif, temp_c=temp_c)
         battery_ekf.R = r_std**2
         battery_ekf.Q = q_std**2
@@ -148,26 +148,26 @@ if __name__ == '__main__':
             init_ekf = (t[i] <= 10)
 
             if init_ekf:
-                monitor.q_capacity = monitor.calculate_capacity(temp_c)
-                monitor.apply_soc(soc_init)
-                rp.delta_q = monitor.delta_q
+                mon.q_capacity = mon.calculate_capacity(temp_c)
+                mon.apply_soc(soc_init)
+                rp.delta_q = mon.delta_q
                 rp.t_last = temp_c
-                monitor.load(rp.delta_q, rp.t_last)
-                monitor.assign_temp_c(temp_c)
-                monitor.init_battery()
-                monitor.init_soc_ekf(model.soc)  # when modeling (assumed in python) ekf wants to equal model
+                mon.load(rp.delta_q, rp.t_last)
+                mon.assign_temp_c(temp_c)
+                mon.init_battery()
+                mon.init_soc_ekf(sim.soc)  # when modeling (assumed in python) ekf wants to equal model
                 rp.delta_q_model = rp.delta_q  # initialize the same
                 rp.t_last_model = rp.t_last+dt_model
-                model.load(rp.delta_q_model, rp.t_last_model)
-                model.init_battery()
-                model.apply_delta_q_t(rp.delta_q)
+                sim.load(rp.delta_q_model, rp.t_last_model)
+                sim.init_battery()
+                sim.apply_delta_q_t(rp.delta_q)
 
             # Models
             battery_model.calc_voc(temp_c=temp_c+dt_model, soc_init=soc_init)
             u = np.array([current_in, battery_model.voc]).T
             battery_model.calc_dynamics(u, dt=dt, i_hyst=i_hyst, temp_c=temp_c)
-            model.calculate(temp_c=temp_c, soc=soc_init, curr_in=current_in, dt=dt, q_capacity=model.q_capacity)
-            rp.delta_q_model, rp.t_last_model = model.update()
+            sim.calculate(temp_c=temp_c, soc=soc_init, curr_in=current_in, dt=dt, q_capacity=sim.q_capacity)
+            rp.delta_q_model, rp.t_last_model = sim.update()
 
             # EKF
             if init_ekf:
@@ -181,11 +181,11 @@ if __name__ == '__main__':
             battery_ekf.calc_dynamics_ekf(u_dyn, dt=dt_ekf)
             battery_ekf.coulomb_counter_ekf()
             battery_ekf.coulomb_counter_avail(temp_c)
-            monitor.calculate_ekf(temp_c, model.vb+randn()*v_std+dv_sense, model.ib+randn()*i_std+di_sense, dt_ekf)
-            monitor.count_coulombs(dt=dt_ekf, temp_c=temp_c, charge_curr=current_in,
-                                   sat=is_sat(temp_c, monitor.voc), t_last=monitor.t_last)
-            monitor.calculate_charge_time(monitor.q, monitor.q_capacity, current_in, monitor.soc)
-            rp.delta_q, rp.t_last = monitor.update()
+            mon.calculate_ekf(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
+            mon.count_coulombs(dt=dt_ekf, temp_c=temp_c, charge_curr=current_in,
+                                   sat=is_sat(temp_c, mon.voc), t_last=mon.t_last)
+            mon.calculate_charge_time(mon.q, mon.q_capacity, current_in, mon.soc)
+            rp.delta_q, rp.t_last = mon.update()
 
             # Call Kalman Filters
             battery_ekf.kf_predict_1x1(u=battery_ekf.ib)
@@ -193,9 +193,9 @@ if __name__ == '__main__':
 
             if t[i] < 1.:
                 print("soc= %7.3f, %7.3f, %7.3f, %7.3f,    vb= %7.3f, %7.3f, %7.3f, %7.3f    ib= %7.3f, %7.3f    voc= %7.3f, %7.3f"
-                      % (battery_ekf.soc, monitor.soc, battery_model.soc, model.soc,
-                         battery_ekf.vb, monitor.vb, battery_model.vb, model.vb,
-                         battery_ekf.ib, monitor.ib, battery_ekf.voc, monitor.voc))
+                      % (battery_ekf.soc, mon.soc, battery_model.soc, sim.soc,
+                         battery_ekf.vb, mon.vb, battery_model.vb, sim.vb,
+                         battery_ekf.ib, mon.ib, battery_ekf.voc, mon.voc))
 
             # Solver (does same thing as EKF, noisier)
             if True:
