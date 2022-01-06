@@ -45,8 +45,8 @@ if __name__ == '__main__':
         # time_end = 2
         # time_end = 13.3
         # time_end = 700
-        # time_end = 2500
-        time_end = 51
+        time_end = 2500
+        # time_end = 51
         temp_c = 25.
 
         # Trade study inputs
@@ -170,7 +170,7 @@ if __name__ == '__main__':
                 battery_ekf.assign_temp_c(temp_c)
                 battery_ekf.assign_soc_norm(float(battery_model.soc_norm), battery_model.voc)
                 battery_ekf.x_kf = battery_model.soc_norm + soc_init_err
-                mon.q_capacity = mon.calculate_capacity(temp_c)
+
                 mon.apply_soc(soc_init, temp_c)
                 rp.delta_q = mon.delta_q
                 rp.t_last = temp_c

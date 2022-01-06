@@ -135,8 +135,8 @@ class Coulombs:
                 d_delta_q = 0.
                 if ~self.resetting:
                     self.delta_q = 0.
-        elif reset:
-            self.delta_q = 0.
+        # elif reset:
+        #     self.delta_q = 0.
         self.resetting = False  # one pass flag.  Saturation debounce should reset next pass
 
         # Integration
