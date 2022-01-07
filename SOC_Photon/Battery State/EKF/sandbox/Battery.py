@@ -189,6 +189,9 @@ class Battery(Coulombs, EKF_1x1):
         self.saved = Saved()  # for plots and prints
         self.e_soc_ekf = 0.  # analysis parameter
         self.e_voc_ekf = 0.  # analysis parameter
+        self.Q = 0.001*0.001
+        self.R = 0.1*0.1
+
 
     def __str__(self):
         """Returns representation of the object"""
