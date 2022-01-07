@@ -54,6 +54,7 @@ void EKF_1x1::predict_ekf(double u)
   u_ = u;
   this->ekf_model_predict(&Fx_, &Bu_);
   x_ = Fx_*x_ + Bu_*u_;
+  if ( isnan(P_) ) P_ = 0.;   // reset overflow
   P_ = Fx_*P_*Fx_ + Q_;
   x_prior_ = x_;
   P_prior_ = P_;
