@@ -480,8 +480,8 @@ class BatteryModel(Battery):
         # SOC = soc * q_capacity / self.q_cap_rated_scaled * 100.
 
         # VOC - OCV model
-        b, a, c, log_soc, exp_n_soc, pow_log_soc = self.calc_soc_voc_coeff(soc_lim, temp_c)
-        self.voc, self.dv_dsoc = self.calc_soc_voc(soc_lim, b, a, c, log_soc, exp_n_soc, pow_log_soc)
+        self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc = self.calc_soc_voc_coeff(soc_lim, temp_c)
+        self.voc, self.dv_dsoc = self.calc_soc_voc(soc_lim, self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc)
         self.voc = min(self.voc + (soc - soc_lim) * self.dv_dsoc, max_voc)  # slightly beyond but don't windup
         self.voc += self.dv  # Experimentally varied
 
@@ -495,7 +495,7 @@ class BatteryModel(Battery):
 
         # Saturation logic, both full and empty
         self.vsat = self.nom_vsat + (temp_c - 25.) * self.dvoc_dt
-        ib_null = self.sat_ib_null +  (1 - self.soc) * 50
+        ib_null = self.sat_ib_null +  (1 - self.soc) * (1 - self.soc) * 50
         self.sat_ib_max = ib_null + (self.vsat - self.voc) / self.nom_vsat * q_capacity / 3600. *\
             self.sat_cutback_gain * rp.cutback_gain_scalar
         self.ib = min(curr_in, self.sat_ib_max)
@@ -630,4 +630,37 @@ def overall(ms=Battery().saved, ss=BatteryModel().saved, filename='', fig_files=
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
+    plt.figure()
+    n_fig += 1
+    plt.subplot(321)
+    plt.title(plot_title+' **SIM')
+    # plt.plot(ss.time, ref, color='black', label='curr dmd, A')
+    plt.plot(ss.time, ss.ib, color='green', label='ib')
+    plt.plot(ss.time, ss.irc, color='red', label='I_R_ct')
+    plt.plot(ss.time, ss.icd, color='cyan', label='I_C_dif')
+    plt.plot(ss.time, ss.ird, color='orange', linestyle='--', label='I_R_dif')
+    # plt.plot(ss.time, ss.ib, color='black', linestyle='--', label='Ioc')
+    plt.legend(loc=1)
+    plt.subplot(323)
+    plt.plot(ss.time, ss.vb, color='green', label='Vb')
+    plt.plot(ss.time, ss.vc, color='blue', label='Vc')
+    plt.plot(ss.time, ss.vd, color='red', label='Vd')
+    plt.plot(ss.time, ss.voc, color='orange', label='Voc')
+    plt.legend(loc=1)
+    plt.subplot(325)
+    plt.plot(ss.time, ss.vbc_dot, color='green', label='Vbc_dot')
+    plt.plot(ss.time, ss.vcd_dot, color='blue', label='Vcd_dot')
+    plt.legend(loc=1)
+    plt.subplot(322)
+    plt.plot(ss.time, ss.soc, color='red', label='soc')
+    plt.legend(loc=1)
+    plt.subplot(324)
+    plt.plot(ss.time, ss.pow_oc, color='orange', label='Pow_charge')
+    plt.legend(loc=1)
+    plt.subplot(326)
+    plt.plot(ss.soc, ss.voc, color='black', label='voc vs soc')
+    plt.legend(loc=1)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
     return n_fig, fig_files

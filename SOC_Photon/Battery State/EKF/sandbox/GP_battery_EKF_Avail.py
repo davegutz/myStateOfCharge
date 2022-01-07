@@ -45,7 +45,7 @@ if __name__ == '__main__':
         # time_end = 2
         # time_end = 13.3
         # time_end = 700
-        time_end = 2500
+        time_end = 3500
         # time_end = 400
         temp_c = 25.
 
@@ -70,7 +70,7 @@ if __name__ == '__main__':
         tau_sd = 1.87e7  # (1.87e7-->1.87e6) ++++++ dyn only
         v_std = 0.01  # (0.0-0.01) ------ noise
         i_std = 0.1  # (0.0-0.1) ------ noise
-        soc_init = 0.5  # (1.0-->0.8)  ------  initialization artifacts only
+        soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
         tau_ct = 0.2  # (0.1-->5.)  -------
 
         # Setup
@@ -142,7 +142,7 @@ if __name__ == '__main__':
                 current_in = -40.
             elif t[i] < 1000:
                 current_in = 0.
-            elif t[i] < 1400:
+            elif t[i] < 3000:
                 current_in = 40.
             else:
                 current_in = 0.
@@ -161,7 +161,7 @@ if __name__ == '__main__':
             u = np.array([current_in, battery_model.voc]).T
             battery_model.calc_dynamics(u, dt=dt, i_hyst=i_hyst, temp_c=temp_c)
             sim.calculate(temp_c=temp_c, soc=soc_init, curr_in=current_in, dt=dt, q_capacity=sim.q_capacity)
-            sim.count_coulombs(dt=dt, reset=init_ekf, temp_c=temp_c, charge_curr=current_in, t_last=rp.t_last_model)
+            sim.count_coulombs(dt=dt, reset=init_ekf, temp_c=temp_c, charge_curr=sim.ib, t_last=rp.t_last_model)
             rp.delta_q_model, rp.t_last_model = sim.update()
 
 
@@ -188,9 +188,9 @@ if __name__ == '__main__':
 
             # Monitor calculations including ekf
             mon.calculate_ekf(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
-            mon.count_coulombs(dt=dt_ekf, reset=init_ekf, temp_c=temp_c, charge_curr=current_in,
+            mon.count_coulombs(dt=dt_ekf, reset=init_ekf, temp_c=temp_c, charge_curr=mon.ib,
                                    sat=is_sat(temp_c, mon.voc), t_last=mon.t_last)
-            mon.calculate_charge_time(mon.q, mon.q_capacity, current_in, mon.soc)
+            mon.calculate_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
             rp.delta_q, rp.t_last = mon.update()
 
             # Call Kalman Filters
@@ -266,6 +266,7 @@ if __name__ == '__main__':
             e_soc_solved_ekf_s.append(e_soc_solved_ekf)
 
             mon.save(t[i], sim.soc, sim.voc)
+            sim.save(t[i], sim.soc, sim.voc)
 
         # Data
         print('mon:  ', str(mon))
