@@ -23,6 +23,7 @@ from Coulombs import Coulombs
 from StateSpace import StateSpace
 import matplotlib.pyplot as plt
 
+
 class Retained:
 
     def __init__(self):
@@ -190,11 +191,13 @@ class Battery(Coulombs, EKF_1x1):
         self.e_voc_ekf = 0.  # analysis parameter
 
     def __str__(self):
-        '''Returns representation of the object'''
+        """Returns representation of the object"""
         s = "Battery:  "
-        s += 'temp, #cells, b, a, c, m, n, d, dvoc_dt = {:5.1f}, {}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
+        s += 'temp, #cells, b, a, c, m, n, d, dvoc_dt = {:5.1f}, {}, {:7.3f}, {:7.3f},' \
+             ' {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
             format(self.temp_c, self.num_cells, self.b, self.a, self.c, self.m, self.n, self.d, self.dvoc_dt)
-        s += 'r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
+        s += 'r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = {:7.3f}, {:7.3f}, {:7.3f},' \
+             ' {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
             format(self.r0, self.r_ct, self.tau_ct, self.r_dif, self.tau_dif, self.r_sd, self.tau_sd)
         s += "  dv_dsoc = {:7.3f}  // Derivative scaled, V/fraction\n".format(self.dv_dsoc)
         s += "  ib =      {:7.3f}  // Current into battery, A\n".format(self.ib)
@@ -209,8 +212,10 @@ class Battery(Coulombs, EKF_1x1):
         s += "  tcharge_ekf = {:7.3f}   // Charging time to full from ekf, hr\n".format(self.tcharge_ekf)
         s += "  soc_ekf = {:7.3f}  // Filtered state of charge from ekf (0-1)\n".format(self.soc_ekf)
         s += "  SOC_ekf_ ={:7.3f}  // Filtered state of charge from ekf (0-100)\n".format(self.SOC_ekf)
-        s += "  amp_hrs_remaining =       {:7.3f}  // Discharge amp*time left if drain to q=0, A-h\n".format(self.amp_hrs_remaining,)
-        s += "  amp_hrs_remaining_ekf_ =  {:7.3f}  // Discharge amp*time left if drain to q_ekf=0, A-h\n".format(self.amp_hrs_remaining_ekf)
+        s += "  amp_hrs_remaining =       {:7.3f}  // Discharge amp*time left if drain to q=0, A-h\n".\
+            format(self.amp_hrs_remaining,)
+        s += "  amp_hrs_remaining_ekf_ =  {:7.3f}  // Discharge amp*time left if drain to q_ekf=0, A-h\n".\
+            format(self.amp_hrs_remaining_ekf)
         s += "  sr =      {:7.3f}  // Resistance scalar\n".format(self.sr)
         s += "  dv_ =     {:7.3f}  / Adjustment, V\n".format(self.dv)
         s += "  dt_ =     {:7.3f}  // Update time, s\n".format(self.dt)
@@ -234,13 +239,13 @@ class Battery(Coulombs, EKF_1x1):
                                            self.d * self.n * exp_n_soc)
         return dv_dsoc
 
-    def calc_soc_voc(self, soc_lim=0., b=0., a=0., c=0., log_soc=0., exp_n_soc=0., pow_log_soc=0.):
+    def calc_soc_voc(self, soc_lim, b, a, c, log_soc, exp_n_soc, pow_log_soc):
         """SOC-OCV curve fit method per Zhang, et al """
         dv_dsoc = self.calc_h_jacobian(soc_lim, b, c, log_soc, exp_n_soc, pow_log_soc)
         voc = self.num_cells * (a + b * pow_log_soc + c * soc_lim + self.d * exp_n_soc)
         return voc, dv_dsoc
 
-    def calc_soc_voc_coeff(self, soc=0., tc=25., n=0., m=0.):
+    def calc_soc_voc_coeff(self, soc, tc, n, m):
         """SOC-OCV curve fit method per Zhang, et al """
         # Zhang coefficients
         b, a, c = self.look(tc)
@@ -338,7 +343,8 @@ class Battery(Coulombs, EKF_1x1):
     def ekf_model_update(self):
         # Measurement function hx(x), x = soc ideal capacitor
         x_lim = max(min(self.x_kf, mxeps_bb), mneps_bb)
-        self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc = self.calc_soc_voc_coeff(x_lim, self.temp_c, self.n, self.m)
+        self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc =\
+            self.calc_soc_voc_coeff(x_lim, self.temp_c, self.n, self.m)
         self.hx, self.dv_dsoc = self.calc_soc_voc(x_lim, self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc)
         # Jacobian of measurement function
         self.H = self.dv_dsoc
@@ -435,21 +441,21 @@ class Battery(Coulombs, EKF_1x1):
 class BatteryModel(Battery):
     """Extend basic monitoring class to run a model"""
 
-    def __init__(self, t_t = None, t_b = None, t_a = None, t_c = None, m = 0.478, n = 0.4, d = 0.707,
-        num_cells = 4, bat_v_sat = 3.4625, q_cap_rated = Battery.RATED_BATT_CAP * 3600,
-        t_rated = Battery.RATED_TEMP, t_rlim = 0.017, scale = 1.,
-        r_sd = 70., tau_sd = 1.8e7, r0 = 0.003, tau_ct = 0.2, r_ct = 0.0016, tau_dif = 83., r_dif = 0.0077,
-        temp_c = Battery.RATED_TEMP):
+    def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
+                 num_cells=4, bat_v_sat=3.4625, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
+                 t_rated=Battery.RATED_TEMP, t_rlim=0.017, scale=1.,
+                 r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
+                 temp_c=Battery.RATED_TEMP):
         print('instantiating BatteryModel-----------------------------')
         Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
-        self.sat_ib_null = 0.  # Current cutback value for voc=vsat, A
-        self.sat_cutback_gain = 1.  # Gain to retard ib when voc exceeds vsat, dimensionless
-        self.model_cutback = True  # Indicate that modeled current being limited on saturation cutback,
+        self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A
+        self.sat_cutback_gain = 4.8  # Gain to retard ib when voc exceeds vsat, dimensionless
+        self.model_cutback = False  # Indicate that modeled current being limited on saturation cutback,
         # T = cutback limited
-        self.model_saturated = True  # Indicator of maximal cutback, T = cutback saturated
-        self.ib_sat = 0.  # Threshold to declare saturation.  This regeneratively slows down charging so if too
+        self.model_saturated = False  # Indicator of maximal cutback, T = cutback saturated
+        self.ib_sat = 0.5  # Threshold to declare saturation.  This regeneratively slows down charging so if too
         # small takes too long, A
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_model()
         self.s_cap = scale  # Rated capacity scalar
@@ -457,15 +463,21 @@ class BatteryModel(Battery):
             self.apply_cap_scale(scale)
 
     def __str__(self):
-        '''Returns representation of the object'''
+        """Returns representation of the object"""
         s = "BatteryModel:  "
         s += Battery.__str__(self)
-        s += "  sat_ib_max =      {:7.3f}  // Current cutback to be applied to modeled ib output, A\n".format(self.sat_ib_max)
-        s += "  ib_null    =      {:7.3f}  // Current cutback value for voc=vsat, A\n".format(self.sat_ib_null)
-        s += "  sat_cutback_gain = {:6.2f}  // Gain to retard ib when voc exceeds vsat, dimensionless\n".format(self.sat_cutback_gain)
-        s += "  model_cutback =         {:d}  // Indicate that modeled current being limited on saturation cutback, T = cutback limited\n".format(self.model_cutback)
-        s += "  model_saturated =       {:d}  // Indicator of maximal cutback, T = cutback saturated\n".format(self.model_saturated)
-        s += "  ib_sat =          {:7.3f}  // Threshold to declare saturation.  This regeneratively slows down charging so if too\n".format(self.ib_sat)
+        s += "  sat_ib_max =      {:7.3f}  // Current cutback to be applied to modeled ib output, A\n".\
+            format(self.sat_ib_max)
+        s += "  ib_null    =      {:7.3f}  // Current cutback value for voc=vsat, A\n".\
+            format(self.sat_ib_null)
+        s += "  sat_cutback_gain = {:6.2f}  // Gain to retard ib when voc exceeds vsat, dimensionless\n".\
+            format(self.sat_cutback_gain)
+        s += "  model_cutback =         {:d}  // Indicate that modeled current being limited on" \
+             " saturation cutback, T = cutback limited\n".format(self.model_cutback)
+        s += "  model_saturated =       {:d}  // Indicator of maximal cutback, T = cutback saturated\n".\
+            format(self.model_saturated)
+        s += "  ib_sat =          {:7.3f}  // Threshold to declare saturation.  This regeneratively slows" \
+             " down charging so if too\n".format(self.ib_sat)
         s += "\n"
         return s
 
@@ -477,7 +489,8 @@ class BatteryModel(Battery):
         # SOC = soc * q_capacity / self.q_cap_rated_scaled * 100.
 
         # VOC - OCV model
-        self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc = self.calc_soc_voc_coeff(soc_lim, temp_c)
+        self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc =\
+            self.calc_soc_voc_coeff(soc_lim, temp_c, self.n, self.m)
         self.voc, self.dv_dsoc = self.calc_soc_voc(soc_lim, self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc)
         self.voc = min(self.voc + (soc - soc_lim) * self.dv_dsoc, max_voc)  # slightly beyond but don't windup
         self.voc += self.dv  # Experimentally varied
@@ -492,7 +505,8 @@ class BatteryModel(Battery):
 
         # Saturation logic, both full and empty
         self.vsat = self.nom_vsat + (temp_c - 25.) * self.dvoc_dt
-        ib_null = self.sat_ib_null +  (1 - self.soc) * (1 - self.soc) * 50
+        # ib_null = self.sat_ib_null + (1 - self.soc) * (1 - self.soc) * 50.  # TODO:  work this into design
+        ib_null = self.sat_ib_null
         self.sat_ib_max = ib_null + (self.vsat - self.voc) / self.nom_vsat * q_capacity / 3600. *\
             self.sat_cutback_gain * rp.cutback_gain_scalar
         self.ib = min(curr_in, self.sat_ib_max)
@@ -527,7 +541,7 @@ class BatteryModel(Battery):
         d = np.array([self.r0, 1])
         return a, b, c, d
 
-    def count_coulombs(self, dt=0., reset=False, temp_c=25., charge_curr=0., t_last=0.):
+    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, t_last):
         """Coulomb counter based on true=actual capacity
         Internal resistance of battery is a loss
         Inputs:
@@ -592,7 +606,11 @@ def sat_voc(temp_c):
     return batt_vsat + (temp_c-25.)*BATT_DVOC_DT
 
 
-def overall(ms, ss, filename='', fig_files=[], plot_title='Battery.overall', n_fig=0, ref=[]):
+def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None, ref=None):
+    if fig_files is None:
+        fig_files = []
+    if ref is None:
+        ref = []
     plt.figure()
     n_fig += 1
     plt.subplot(321)

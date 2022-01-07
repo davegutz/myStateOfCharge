@@ -45,8 +45,8 @@ if __name__ == '__main__':
         # time_end = 2
         # time_end = 13.3
         # time_end = 700
-        time_end = 3500
-        # time_end = 400
+        # time_end = 3500
+        time_end = 1000
         temp_c = 25.
 
         # Trade study inputs
@@ -83,7 +83,7 @@ if __name__ == '__main__':
         battery_ekf = BatteryEKF(rsd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct,
                                  rct=rct, tau_dif=tau_dif, r_dif=r_dif, temp_c=temp_c)
         mon = Battery(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
-                          r_dif=r_dif, temp_c=temp_c)
+                      r_dif=r_dif, temp_c=temp_c)
         battery_ekf.R = r_std**2
         battery_ekf.Q = q_std**2
         battery_ekf.P = 100
@@ -161,9 +161,9 @@ if __name__ == '__main__':
             u = np.array([current_in, battery_model.voc]).T
             battery_model.calc_dynamics(u, dt=dt, i_hyst=i_hyst, temp_c=temp_c)
             sim.calculate(temp_c=temp_c, soc=soc_init, curr_in=current_in, dt=dt, q_capacity=sim.q_capacity)
-            sim.count_coulombs(dt=dt, reset=init_ekf, temp_c=temp_c, charge_curr=sim.ib, t_last=rp.t_last_model)
+            sim.count_coulombs(dt=dt, reset=init_ekf, temp_c=temp_c, charge_curr=sim.ib, t_last=rp.t_last_model,
+                               sat=False)
             rp.delta_q_model, rp.t_last_model = sim.update()
-
 
             # EKF
             if init_ekf:
@@ -189,7 +189,7 @@ if __name__ == '__main__':
             # Monitor calculations including ekf
             mon.calculate_ekf(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
             mon.count_coulombs(dt=dt_ekf, reset=init_ekf, temp_c=temp_c, charge_curr=mon.ib,
-                                   sat=is_sat(temp_c, mon.voc), t_last=mon.t_last)
+                               sat=is_sat(temp_c, mon.voc), t_last=mon.t_last)
             mon.calculate_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
             rp.delta_q, rp.t_last = mon.update()
 
@@ -266,11 +266,11 @@ if __name__ == '__main__':
         print('mon:  ', str(mon))
         print('sim:  ', str(sim))
         print('monOld:  ', str(battery_ekf))
-        print("soc= %7.3f, %7.3f, %7.3f, %7.3f,    vb= %7.3f, %7.3f, %7.3f, %7.3f    ib= %7.3f, %7.3f    voc= %7.3f, %7.3f"
+        print("soc= %7.3f, %7.3f, %7.3f, %7.3f,    vb= %7.3f, %7.3f, %7.3f, %7.3f    ib= %7.3f, %7.3f"
+              "    voc= %7.3f, %7.3f"
               % (battery_model.soc, battery_ekf.soc, sim.soc, mon.soc,
                  battery_model.vb, battery_ekf.vb, sim.vb, mon.vb,
                  battery_ekf.ib, mon.ib, battery_ekf.voc_dyn, mon.voc_dyn))
-
 
         # Plots
         n_fig = 0
@@ -437,7 +437,7 @@ if __name__ == '__main__':
         # plt.savefig(fig_file_name, format="png")
 
         n_fig, fig_files = overall(mon.saved, sim.saved, filename, fig_files,
-                                           plot_title=plot_title, n_fig = n_fig, ref=current_in_s)
+                                   plot_title=plot_title, n_fig=n_fig, ref=current_in_s)
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
         for fig_file in fig_files:
