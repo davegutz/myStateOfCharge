@@ -197,12 +197,6 @@ if __name__ == '__main__':
             battery_ekf.kf_predict_1x1(u=battery_ekf.ib)
             battery_ekf.kf_update_1x1(battery_ekf.voc_dyn)
 
-            # if t[i] < 1.:
-            #     print("soc= %7.3f, %7.3f, %7.3f, %7.3f,    vb= %7.3f, %7.3f, %7.3f, %7.3f    ib= %7.3f, %7.3f    voc= %7.3f, %7.3f"
-            #           % (battery_ekf.soc, mon.soc, battery_model.soc, sim.soc,
-            #              battery_ekf.vb, mon.vb, battery_model.vb, sim.vb,
-            #              battery_ekf.ib, mon.ib, battery_ekf.voc, mon.voc))
-
             # Solver (does same thing as EKF, noisier)
             if True:
                 vbat_f_o = battery_ekf.voc_dyn
@@ -271,6 +265,12 @@ if __name__ == '__main__':
         # Data
         print('mon:  ', str(mon))
         print('sim:  ', str(sim))
+        print('monOld:  ', str(battery_ekf))
+        print("soc= %7.3f, %7.3f, %7.3f, %7.3f,    vb= %7.3f, %7.3f, %7.3f, %7.3f    ib= %7.3f, %7.3f    voc= %7.3f, %7.3f"
+              % (battery_model.soc, battery_ekf.soc, sim.soc, mon.soc,
+                 battery_model.vb, battery_ekf.vb, sim.vb, mon.vb,
+                 battery_ekf.ib, mon.ib, battery_ekf.voc_dyn, mon.voc_dyn))
+
 
         # Plots
         n_fig = 0

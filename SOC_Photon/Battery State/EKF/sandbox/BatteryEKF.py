@@ -152,6 +152,26 @@ class BatteryEKF:
         self.soc_avail = 1.
         self.soc_offset = soc_offset  # Control has voltage threshold for saturation with margin of at least this amount
 
+    def __str__(self):
+        '''Returns representation of the object'''
+        s = "Battery:  "
+        s += 'temp, a, c, m, n, d, dvoc_dt = {:5.1f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
+            format(self.temp_c, self.b, self.a, self.c, self.m, self.n, self.d)
+        s += 'r_0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
+            format(self.r_0, self.r_ct, self.tau_ct, self.r_dif, self.tau_dif, self.r_sd, self.tau_sd)
+        s += "  dv_dsoc = {:7.3f}  // Derivative scaled, V/fraction\n".format(self.dV_dSoc)
+        s += "  ib =      {:7.3f}  // Current into battery, A\n".format(self.ib)
+        s += "  vb =      {:7.3f}  // Total model voltage, voltage at terminals, V\n".format(self.vb)
+        s += "  voc =     {:7.3f}  // Static model open circuit voltage, V\n".format(self.voc)
+        s += "  vsat =    {:7.3f}  // Saturation threshold at temperature, V\n".format(self.v_sat)
+        s += "  voc_dyn = {:7.3f}  // Charging voltage, V\n".format(self.voc_dyn)
+        s += "  soc_ekf = {:7.3f}  // Filtered state of charge from ekf (0-1)\n".format(self.soc)
+        s += "  sr =      {:7.3f}  // Resistance scalar\n".format(self.sr)
+        s += "  dv_ =     {:7.3f}  / Adjustment, V\n".format(self.dv)
+        s += "  dt_ =     {:7.3f}  // Update time, s\n".format(self.dt)
+        s += "\n"
+        return s
+
     def calc_dynamics_ekf(self, u, dt=None):
         """Executive model dynamics for ekf State-space calculation
         Time propagation from state-space using backward Euler
