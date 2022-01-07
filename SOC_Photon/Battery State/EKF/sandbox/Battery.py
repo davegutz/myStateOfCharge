@@ -450,8 +450,10 @@ class BatteryModel(Battery):
         Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
-        self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A
-        self.sat_cutback_gain = 4.8  # Gain to retard ib when voc exceeds vsat, dimensionless
+        # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A
+        self.sat_ib_null = 0. # Current cutback value for soc=1, A
+        # self.sat_cutback_gain = 4.8  # Gain to retard ib when voc exceeds vsat, dimensionless
+        self.sat_cutback_gain = 400.  # Gain to retard ib when soc approaches 1, dimensionless
         self.model_cutback = False  # Indicate that modeled current being limited on saturation cutback,
         # T = cutback limited
         self.model_saturated = False  # Indicator of maximal cutback, T = cutback saturated
@@ -506,9 +508,10 @@ class BatteryModel(Battery):
         # Saturation logic, both full and empty
         self.vsat = self.nom_vsat + (temp_c - 25.) * self.dvoc_dt
         # ib_null = self.sat_ib_null + (1 - self.soc) * (1 - self.soc) * 50.  # TODO:  work this into design
-        ib_null = self.sat_ib_null
-        self.sat_ib_max = ib_null + (self.vsat - self.voc) / self.nom_vsat * q_capacity / 3600. *\
-            self.sat_cutback_gain * rp.cutback_gain_scalar
+        # ib_null = self.sat_ib_null
+        # self.sat_ib_max = ib_null + (self.vsat - self.voc) / self.nom_vsat * q_capacity / 3600. *\
+        #     self.sat_cutback_gain * rp.cutback_gain_scalar
+        self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
         self.ib = min(curr_in, self.sat_ib_max)
         if (self.q <= 0.) & (curr_in < 0.):
             self.ib = 0.  # empty
