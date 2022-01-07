@@ -192,7 +192,6 @@ class Battery(Coulombs, EKF_1x1):
         self.Q = 0.001*0.001
         self.R = 0.1*0.1
 
-
     def __str__(self):
         """Returns representation of the object"""
         s = "Battery:  "
@@ -700,7 +699,7 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None, ref=N
     plt.legend(loc=4)
     plt.subplot(334)
     plt.plot(ms.time, ms.H, color='magenta', linestyle='dotted', label='H ekf')
-    plt.ylim(0, 50)
+    plt.ylim(0, 150)
     plt.legend(loc=3)
     plt.subplot(335)
     plt.plot(ms.time, ms.P, color='orange', linestyle='dotted', label='P ekf')
@@ -714,6 +713,49 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None, ref=N
     plt.subplot(338)
     plt.plot(ms.time, ms.K, color='red', linestyle='dotted', label='K ekf')
     plt.legend(loc=4)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
+    plt.figure()
+    n_fig += 1
+    plt.title(plot_title)
+    plt.plot(ms.time, ms.e_voc_ekf, color='blue', linestyle='dotted', label='e_voc')
+    plt.plot(ms.time, ms.e_soc_ekf, color='red', linestyle='dotted', label='e_soc_ekf')
+    plt.ylim(-0.01, 0.01)
+    plt.legend(loc=2)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
+    plt.figure()
+    n_fig += 1
+    plt.title(plot_title)
+    plt.plot(ss.time, ss.voc, color='green', label='voc model')
+    plt.plot(ms.time, ms.voc_dyn, color='red', linestyle='dotted', label='voc dyn est')
+    plt.plot(ms.time, ms.voc, color='blue', linestyle='dotted', label='voc ekf')
+    plt.legend(loc=4)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
+    plt.figure()
+    n_fig += 1
+    plt.title(plot_title)
+    plt.plot(ss.time, ss.soc, color='green', label='soc model')
+    plt.plot(ms.time, ms.soc, color='red', linestyle='dotted', label='soc counted')
+    plt.plot(ms.time, ms.soc_ekf, color='blue', linestyle='dotted', label='soc ekf')
+    plt.legend(loc=4)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
+    plt.figure()
+    n_fig += 1
+    plt.title(plot_title)
+    plt.plot(ms.time, ms.e_voc_ekf, color='blue', linestyle='dotted', label='e_voc')
+    plt.plot(ms.time, ms.e_soc_ekf, color='red', linestyle='dotted', label='e_soc_ekf')
+    plt.legend(loc=2)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")

@@ -46,8 +46,8 @@ if __name__ == '__main__':
         # time_end = 13.3
         # time_end = 700
         time_end = 3500
-        # time_end = 10
-        temp_c = 25.
+        # time_end = 100
+        temp_c = 20.
 
         # Trade study inputs
         # i-->0 provides continuous anchor to reset filter (why?)  i shifts important --> 2 current sensors, hyst in ekf
@@ -386,55 +386,55 @@ if __name__ == '__main__':
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        # plt.figure()
-        # n_fig += 1
-        # plt.subplot(121)
-        # plt.title(plot_title)
-        # plt.plot(t, voc_dyn_s, color='black', label='voc_dyn')
-        # plt.plot(t, vbat_solved_s, color='green', linestyle='dotted', label='vbat_solved')
-        # plt.legend(loc=4)
-        # plt.subplot(122)
-        # plt.plot(t, soc_s, color='black', label='soc')
-        # plt.plot(t, soc_solved_s, color='green', linestyle='dotted', label='soc_solved')
-        # plt.legend(loc=4)
-        # fig_file_name = filename + '_' + str(n_fig) + ".png"
-        # fig_files.append(fig_file_name)
-        # plt.savefig(fig_file_name, format="png")
-        #
-        # plt.figure()
-        # n_fig += 1
-        # plt.title(plot_title)
-        # plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
-        # plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
-        # plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
-        # plt.plot(t, e_soc_norm_ekf_s, color='cyan', linestyle='dotted', label='e_soc_norm to User')
-        # plt.ylim(-0.01, 0.01)
-        # plt.legend(loc=2)
-        # fig_file_name = filename + '_' + str(n_fig) + ".png"
-        # fig_files.append(fig_file_name)
-        # plt.savefig(fig_file_name, format="png")
-        #
-        # plt.figure()
-        # n_fig += 1
-        # plt.title(plot_title)
-        # plt.plot(t, soc_avail_s, color='black', linestyle='dotted', label='soc_avail')
-        # plt.plot(t, soc_avail_ekf_s, color='blue', linestyle='dotted', label='soc_avail_ekf')
-        # plt.legend(loc=4)
-        # fig_file_name = filename + '_' + str(n_fig) + ".png"
-        # fig_files.append(fig_file_name)
-        # plt.savefig(fig_file_name, format="png")
-        #
-        # plt.figure()
-        # n_fig += 1
-        # plt.title(plot_title)
-        # plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
-        # plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
-        # plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
-        # plt.plot(t, e_soc_norm_ekf_s, color='cyan', linestyle='dotted', label='e_soc_norm to User')
-        # plt.legend(loc=2)
-        # fig_file_name = filename + '_' + str(n_fig) + ".png"
-        # fig_files.append(fig_file_name)
-        # plt.savefig(fig_file_name, format="png")
+        plt.figure()
+        n_fig += 1
+        plt.subplot(121)
+        plt.title(plot_title)
+        plt.plot(t, voc_dyn_s, color='black', label='voc_dyn')
+        plt.plot(t, vbat_solved_s, color='green', linestyle='dotted', label='vbat_solved')
+        plt.legend(loc=4)
+        plt.subplot(122)
+        plt.plot(t, soc_s, color='black', label='soc')
+        plt.plot(t, soc_solved_s, color='green', linestyle='dotted', label='soc_solved')
+        plt.legend(loc=4)
+        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
+
+        plt.figure()
+        n_fig += 1
+        plt.title(plot_title)
+        plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
+        plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
+        plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
+        plt.plot(t, e_soc_norm_ekf_s, color='cyan', linestyle='dotted', label='e_soc_norm to User')
+        plt.ylim(-0.01, 0.01)
+        plt.legend(loc=2)
+        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
+
+        plt.figure()
+        n_fig += 1
+        plt.title(plot_title)
+        plt.plot(t, soc_avail_s, color='black', linestyle='dotted', label='soc_avail')
+        plt.plot(t, soc_avail_ekf_s, color='blue', linestyle='dotted', label='soc_avail_ekf')
+        plt.legend(loc=4)
+        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
+
+        plt.figure()
+        n_fig += 1
+        plt.title(plot_title)
+        plt.plot(t, e_voc_ekf_s, color='blue', linestyle='dotted', label='e_voc')
+        plt.plot(t, e_soc_solved_ekf_s, color='green', linestyle='dotted', label='e_soc_norm to User')
+        plt.plot(t, e_soc_ekf_s, color='red', linestyle='dotted', label='e_soc_ekf')
+        plt.plot(t, e_soc_norm_ekf_s, color='cyan', linestyle='dotted', label='e_soc_norm to User')
+        plt.legend(loc=2)
+        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
 
         n_fig, fig_files = overall(mon.saved, sim.saved, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig, ref=current_in_s)
