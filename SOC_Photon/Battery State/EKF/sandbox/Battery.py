@@ -440,6 +440,8 @@ class BatteryModel(Battery):
         t_rated = Battery.RATED_TEMP, t_rlim = 0.017, scale = 1.,
         r_sd = 70., tau_sd = 1.8e7, r0 = 0.003, tau_ct = 0.2, r_ct = 0.0016, tau_dif = 83., r_dif = 0.0077,
         temp_c = Battery.RATED_TEMP):
+        print('instantiating BatteryModel-----------------------------')
+        print('instantiating Battery Parent-----------------------------')
         Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
@@ -450,10 +452,25 @@ class BatteryModel(Battery):
         self.model_saturated = True  # Indicator of maximal cutback, T = cutback saturated
         self.ib_sat = 0.  # Threshold to declare saturation.  This regeneratively slows down charging so if too
         # small takes too long, A
+        print('assigning Randles-----------------------------')
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_model()
+        print(self.Randles.__str__())
         self.s_cap = scale  # Rated capacity scalar
         if scale is not None:
             self.apply_cap_scale(scale)
+
+    def __str__(self):
+        '''Returns representation of the object'''
+        s = "BatteryModel:  "
+        s += Battery.__str__(self)
+        s += "  sat_ib_max =      {:7.3f}  // Current cutback to be applied to modeled ib output, A\n".format(self.sat_ib_max)
+        s += "  ib_null    =      {:7.3f}  // Current cutback value for voc=vsat, A\n".format(self.sat_ib_null)
+        s += "  sat_cutback_gain = {:6.2f}  // Gain to retard ib when voc exceeds vsat, dimensionless\n".format(self.sat_cutback_gain)
+        s += "  model_cutback =         {:d}  // Indicate that modeled current being limited on saturation cutback, T = cutback limited\n".format(self.model_cutback)
+        s += "  model_saturated =       {:d}  // Indicator of maximal cutback, T = cutback saturated\n".format(self.model_saturated)
+        s += "  ib_sat =          {:7.3f}  // Threshold to declare saturation.  This regeneratively slows down charging so if too\n".format(self.ib_sat)
+        s += "\n"
+        return s
 
     def calculate(self, temp_c, soc, curr_in, dt, q_capacity):
         self.dt = dt

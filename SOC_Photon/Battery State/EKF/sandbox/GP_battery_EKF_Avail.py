@@ -269,7 +269,7 @@ if __name__ == '__main__':
 
         # Data
         print('mon:  ', str(mon))
-        # print('mon.Coulomb: ', str(mon.Coulombs))
+        print('sim:  ', str(sim))
 
         # Plots
         n_fig = 0

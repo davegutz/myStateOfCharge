@@ -39,10 +39,10 @@ class StateSpace:
         s = "StateSpace:\n"
         s += "  A = \n{}\n".format(self.A)
         s += "  x = {}\n".format(self.x)
-        s += "  B = \n{}\n".format(self.A)
+        s += "  B = \n{}\n".format(self.B)
         s += "  u = {}\n".format(self.u)
-        s += "  C = \n{}\n".format(self.A)
-        s += "  D = \n{}\n".format(self.A)
+        s += "  C = \n{}\n".format(self.C)
+        s += "  D = \n{}\n".format(self.D)
         s += "  x_dot = {}\n".format(self.x_dot)
         return s
 
