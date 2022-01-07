@@ -28,12 +28,15 @@ class BatteryOld:
 
         # Dynamics
         self.n_cells = n_cells
-        self.r_0 = r0 * n_cells
+        # self.r_0 = r0 * n_cells   dag 20220107
+        self.r_0 = r0
         self.tau_ct = tau_ct
-        self.r_ct = rct * n_cells
+        # self.r_ct = rct * n_cells   dag 20220107
+        self.r_ct = rct
         self.c_ct = self.tau_ct / self.r_ct
         self.tau_dif = tau_dif
-        self.r_dif = r_dif * n_cells
+        # self.r_dif = r_dif * n_cells  dag 20220107
+        self.r_dif = r_dif
         self.c_dif = self.tau_dif / self.r_dif
         self.tau_m = tau_m  # Measurement time constant
         self.A, self.B, self.C, self.D = self.construct_state_space()

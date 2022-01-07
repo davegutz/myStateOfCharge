@@ -46,7 +46,7 @@ if __name__ == '__main__':
         # time_end = 13.3
         # time_end = 700
         time_end = 2500
-        # time_end = 51
+        # time_end = 400
         temp_c = 25.
 
         # Trade study inputs

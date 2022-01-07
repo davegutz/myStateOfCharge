@@ -403,7 +403,7 @@ class Battery(Coulombs, EKF_1x1):
         self.saved.irc.append(self.i_r_ct())
         self.saved.icd.append(self.i_c_dif())
         self.saved.ird.append(self.i_r_dif())
-        self.saved.vcd_dot.append(self.vcd())
+        self.saved.vcd_dot.append(self.vcd_dot())
         self.saved.vbc_dot.append(self.vbc_dot())
         self.saved.soc.append(self.soc)
         self.saved.SOC.append(self.SOC)
@@ -495,7 +495,8 @@ class BatteryModel(Battery):
 
         # Saturation logic, both full and empty
         self.vsat = self.nom_vsat + (temp_c - 25.) * self.dvoc_dt
-        self.sat_ib_max = self.sat_ib_null + (self.vsat - self.voc) / self.nom_vsat * q_capacity / 3600. *\
+        ib_null = self.sat_ib_null +  (1 - self.soc) * 50
+        self.sat_ib_max = ib_null + (self.vsat - self.voc) / self.nom_vsat * q_capacity / 3600. *\
             self.sat_cutback_gain * rp.cutback_gain_scalar
         self.ib = min(curr_in, self.sat_ib_max)
         if (self.q <= 0.) & (curr_in < 0.):
