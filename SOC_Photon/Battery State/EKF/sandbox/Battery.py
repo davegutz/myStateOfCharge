@@ -211,7 +211,7 @@ class Battery(Coulombs, EKF_1x1):
         s += "  tcharge = {:7.3f}  // Charging time to full, hr\n".format(self.tcharge)
         s += "  tcharge_ekf = {:7.3f}   // Charging time to full from ekf, hr\n".format(self.tcharge_ekf)
         s += "  soc_ekf = {:7.3f}  // Filtered state of charge from ekf (0-1)\n".format(self.soc_ekf)
-        s += "  SOC_ekf_ ={:7.3f}  // Filtered state of charge from ekf (0-100)\n".format(self.SOC_ekf)
+        s += "  SOC_ekf  ={:7.3f}  // Filtered state of charge from ekf (0-100)\n".format(self.SOC_ekf)
         s += "  amp_hrs_remaining =       {:7.3f}  // Discharge amp*time left if drain to q=0, A-h\n".\
             format(self.amp_hrs_remaining,)
         s += "  amp_hrs_remaining_ekf_ =  {:7.3f}  // Discharge amp*time left if drain to q_ekf=0, A-h\n".\
@@ -223,6 +223,9 @@ class Battery(Coulombs, EKF_1x1):
         s += Coulombs.__str__(self)
         s += "\n"
         s += self.Randles.__str__()
+        s += "\n"
+        s += EKF_1x1.__str__(self)
+        s += "\n"
         return s
 
     def assign_temp_c(self, temp_c):
@@ -273,9 +276,9 @@ class Battery(Coulombs, EKF_1x1):
         self.pow_oc = self.voc * self.ib
 
         # EKF 1x1
-        self.predict_ekf(ib)
-        self.update_ekf(self.voc_dyn, mneps_bb, mxeps_bb)
-        self.soc_ekf = self.x_kf
+        self.predict_ekf(ib)  # u = ib
+        self.update_ekf(self.voc_dyn, mneps_bb, mxeps_bb)  # z = voc_dyn, voc_filtered = hx
+        self.soc_ekf = self.x_kf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity
         self.SOC_ekf = self.q_ekf / self.q_cap_rated_scaled * 100.
 
@@ -339,6 +342,7 @@ class Battery(Coulombs, EKF_1x1):
         """Process model"""
         self.Fx = math.exp(-self.dt / self.tau_sd)
         self.Bu = (1. - self.Fx)*self.r_sd
+        return self.Fx, self.Bu
 
     def ekf_model_update(self):
         # Measurement function hx(x), x = soc ideal capacitor
@@ -446,14 +450,13 @@ class BatteryModel(Battery):
                  t_rated=Battery.RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=Battery.RATED_TEMP):
-        print('instantiating BatteryModel-----------------------------')
         Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A
-        self.sat_ib_null = 0. # Current cutback value for soc=1, A
+        self.sat_ib_null = 0.  # Current cutback value for soc=1, A
         # self.sat_cutback_gain = 4.8  # Gain to retard ib when voc exceeds vsat, dimensionless
-        self.sat_cutback_gain = 400.  # Gain to retard ib when soc approaches 1, dimensionless
+        self.sat_cutback_gain = 1000.  # Gain to retard ib when soc approaches 1, dimensionless
         self.model_cutback = False  # Indicate that modeled current being limited on saturation cutback,
         # T = cutback limited
         self.model_saturated = False  # Indicator of maximal cutback, T = cutback saturated
@@ -507,10 +510,6 @@ class BatteryModel(Battery):
 
         # Saturation logic, both full and empty
         self.vsat = self.nom_vsat + (temp_c - 25.) * self.dvoc_dt
-        # ib_null = self.sat_ib_null + (1 - self.soc) * (1 - self.soc) * 50.  # TODO:  work this into design
-        # ib_null = self.sat_ib_null
-        # self.sat_ib_max = ib_null + (self.vsat - self.voc) / self.nom_vsat * q_capacity / 3600. *\
-        #     self.sat_cutback_gain * rp.cutback_gain_scalar
         self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
         self.ib = min(curr_in, self.sat_ib_max)
         if (self.q <= 0.) & (curr_in < 0.):
@@ -518,6 +517,7 @@ class BatteryModel(Battery):
         self.model_cutback = (self.voc > self.vsat) & (self.ib == self.sat_ib_max)
         self.model_saturated = (self.voc > self.vsat) & (self.ib < self.ib_sat) & (self.ib == self.sat_ib_max)
         Coulombs.sat = self.model_saturated
+        self.pow_oc = self.voc * self.ib
 
         return self.vb
 
@@ -629,7 +629,7 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None, ref=N
     plt.plot(ms.time, ms.vb, color='green', label='Vb')
     plt.plot(ms.time, ms.vc, color='blue', label='Vc')
     plt.plot(ms.time, ms.vd, color='red', label='Vd')
-    plt.plot(ms.time, ms.voc, color='orange', label='Voc')
+    plt.plot(ms.time, ms.voc_dyn, color='orange', label='Voc_dyn')
     plt.legend(loc=1)
     plt.subplot(325)
     plt.plot(ms.time, ms.vbc_dot, color='green', label='Vbc_dot')
@@ -681,4 +681,38 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None, ref=N
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
+
+    plt.figure()
+    n_fig += 1
+    plt.subplot(331)
+    plt.title(plot_title+' **EKF')
+    plt.plot(ms.time, ms.x_kf, color='red', linestyle='dotted', label='x ekf')
+    plt.legend(loc=4)
+    plt.subplot(332)
+    plt.plot(ms.time, ms.hx, color='cyan', linestyle='dotted', label='hx ekf')
+    plt.plot(ms.time, ms.z_ekf, color='black', linestyle='dotted', label='z ekf')
+    plt.legend(loc=4)
+    plt.subplot(333)
+    plt.plot(ms.time, ms.y_kf, color='green', linestyle='dotted', label='y ekf')
+    plt.legend(loc=4)
+    plt.subplot(334)
+    plt.plot(ms.time, ms.H, color='magenta', linestyle='dotted', label='H ekf')
+    plt.ylim(0, 50)
+    plt.legend(loc=3)
+    plt.subplot(335)
+    plt.plot(ms.time, ms.P, color='orange', linestyle='dotted', label='P ekf')
+    plt.legend(loc=3)
+    plt.subplot(336)
+    plt.plot(ms.time, ms.Fx, color='red', linestyle='dotted', label='Fx ekf')
+    plt.legend(loc=2)
+    plt.subplot(337)
+    plt.plot(ms.time, ms.Bu, color='blue', linestyle='dotted', label='Bu ekf')
+    plt.legend(loc=2)
+    plt.subplot(338)
+    plt.plot(ms.time, ms.K, color='red', linestyle='dotted', label='K ekf')
+    plt.legend(loc=4)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
     return n_fig, fig_files

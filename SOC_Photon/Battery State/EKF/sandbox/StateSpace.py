@@ -35,7 +35,7 @@ class StateSpace:
         self.dt = 0.
 
     def __str__(self):
-        '''Returns representation of the object'''
+        """Returns representation of the object"""
         s = "StateSpace:\n"
         s += "  A = \n{}\n".format(self.A)
         s += "  x = {}\n".format(self.x)
@@ -49,8 +49,8 @@ class StateSpace:
     def calc_x_dot(self, u):
         self.u = u
         self.x_dot = self.A @ self.x + self.B @ self.u
-        Ax = self.A@self.x
-        Bu = self.B@self.u
+        # Ax = self.A@self.x
+        # Bu = self.B@self.u
 
     def init_state_space(self, x_init):
         self.x = np.array(x_init)

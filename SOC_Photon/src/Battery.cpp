@@ -303,10 +303,10 @@ BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const doubl
     Sin_inj_ = new SinInj();
     Sq_inj_ = new SqInj();
     Tri_inj_ = new TriInj();
-    sat_ib_null_ = 0.1 * RATED_BATT_CAP; // 0.1C discharge rate at sat_ib_null_, A
-    sat_cutback_gain_ = 4.8;  // 0.1C sat_ib_null_ and  voc_ 0.3 volts beyond vsat_
+    sat_ib_null_ = 0.;          // Current cutback value for soc=1, A
+    sat_cutback_gain_ = 1000.;  // Gain to retard ib when soc approaches 1, dimensionless
     model_saturated_ = false;
-    ib_sat_ = 0.5;  // If smaller, takes forever to saturate the model.
+    ib_sat_ = 0.5;              // deadzone for cutback actuation, A
 }
 
 // SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model
@@ -336,7 +336,7 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
 
     // Saturation logic, both full and empty
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
-    sat_ib_max_ = sat_ib_null_ + (vsat_ - voc_) / nom_vsat_ * q_capacity / 3600. * sat_cutback_gain_ * rp.cutback_gain_scalar;
+    sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
     ib_ = min(curr_in, sat_ib_max_);
     if ( (q_ <= 0.) && (curr_in < 0.) ) ib_ = 0.;  //  empty
     model_cutback_ = (voc_ > vsat_) && (ib_ == sat_ib_max_);

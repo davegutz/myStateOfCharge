@@ -42,6 +42,26 @@ class EKF_1x1:
         self.x_post = self.x_kf
         self.P_post = self.P
 
+    def __str__(self):
+        """Returns representation of the object"""
+        s = "EKF_1x1:\n"
+        s += "Inputs:\n"
+        s += "  z = {:7.3f}\n".format(self.z_ekf)
+        s += "  R = {:10.6f}\n".format(self.R)
+        s += "  Q = {:10.6f}\n".format(self.Q)
+        s += "  H = {:7.3f}\n".format(self.H)
+        s += "Outputs:\n"
+        s += "  x  = {:7.3f}\n".format(self.x_kf)
+        s += "  hx = {:7.3f}\n".format(self.hx)
+        s += "  y  = {:7.3f}\n".format(self.y_kf)
+        s += "  P  = {:10.6f}\n".format(self.P)
+        s += "  K  = {:10.6f}\n".format(self.K)
+        s += "  S  = {:10.6f}\n".format(self.S)
+        return s
+
+    def ekf_model_predict(self):
+        raise NotImplementedError
+
     def ekf_model_update(self):
         raise NotImplementedError
 
@@ -50,7 +70,7 @@ class EKF_1x1:
         self.x_kf = soc
         self.P = p_init
 
-    def predict_ekf(self, u=None):
+    def predict_ekf(self, u):
         """1x1 Extended Kalman Filter predict
         Inputs:
             u   1x1 input, =ib, A
@@ -61,6 +81,7 @@ class EKF_1x1:
             P   1x1 Kalman probability
         """
         self.u_kf = u
+        self.Fx, self.Bu = self.ekf_model_predict()
         self.x_kf = self.Fx*self.x_kf + self.Bu*self.u_kf
         self.P = self.Fx * self.P * self.Fx + self.Q
         self.x_prior = self.x_kf
