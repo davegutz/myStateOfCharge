@@ -24,18 +24,18 @@ from pyDAGx.lookup_table import LookupTable
 class Hysteresis():
     # Use variable resistor to create hysteresis from an RC circuit
 
-    def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=1.8e6):
+    def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e6):
         # Defaults
         if t_dv is None:
-            t_dv = [-10, -0.08, -1e-6, 0., 0.08, 10]
+            t_dv = [-10, -0.09, -0.08, -0.06, -1e-6, 0., 0.08, 10]
         if t_soc is None:
             t_soc = [-10, .1, .5, 1, 10]
         if t_r is None:
-            t_r = [1e-7, 1e-7, 0.003, 0.001, 1e-7, 1e-7,
-                   1e-7, 1e-7, 0.003, 0.001, 1e-7, 1e-7,
-                   1e-7, 1e-7, 0.003, 0.001, 1e-7, 1e-7,
-                   1e-7, 1e-7, 0.003, 0.001, 1e-7, 1e-7,
-                   1e-7, 1e-7, 0.003, 0.001, 1e-7, 1e-7]
+            t_r = [1e-7, 1e-7, 0.004, 0.001,  0.001, 0.001, 1e-7, 1e-7,
+                   1e-7, 1e-7, 0.004, 0.001,  0.001, 0.001, 1e-7, 1e-7,
+                   1e-7, 1e-7, 0.004, 0.001,  0.001, 0.001, 1e-7, 1e-7,
+                   1e-7, 1e-7, 0.004, 0.001,  0.001, 0.001, 1e-7, 1e-7,
+                   1e-7, 1e-7, 0.004, 0.001,  0.001, 0.001, 1e-7, 1e-7]
         self.lut = LookupTable()
         self.lut.addAxis('x', t_dv)
         self.lut.addAxis('y', t_soc)
@@ -133,14 +133,14 @@ if __name__ == '__main__':
         plt.plot(hys.time, hys.soc, color='red', label='soc')
         plt.legend(loc=3)
         plt.subplot(222)
-        plt.plot(hys.time, hys.res, color='blue', label='res, Ohm')
+        plt.plot(hys.time, hys.res, color='black', label='res, Ohm')
         plt.legend(loc=3)
         plt.subplot(223)
         plt.plot(hys.time, hys.ib, color='blue', label='ib, A')
-        plt.plot(hys.time, hys.ioc, color='red', label='ioc, A')
+        plt.plot(hys.time, hys.ioc, color='green', label='ioc, A')
         plt.legend(loc=2)
         plt.subplot(224)
-        plt.plot(hys.time, hys.dv, color='blue', label='dv, V')
+        plt.plot(hys.time, hys.dv, color='red', label='dv, V')
         plt.legend(loc=2)
         fig_file_name = filename + "_" + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -171,7 +171,7 @@ if __name__ == '__main__':
             self.dur = [0., 600., 600., 600., 600., 600., 600., 600., 600., 600., 600.,
                         600., 600., 600., 600., 600., 600., 600., 600., 600., 600.]
             self.rst = [7200., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 7200.,
-                        3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600.]
+                        3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 46800.]
             self.pulse_value = self.amp[0]
             self.end_time = self.time_end()
 
