@@ -30,11 +30,11 @@ class Hysteresis():
         if t_soc is None:
             t_soc = [-10, .1, .5, 1, 10]
         if t_r is None:
-            t_r = [1e-7, 1e-7, 0.006, 0.003, 1e-7, 1e-7,
-                   1e-7, 1e-7, 0.006, 0.003, 1e-7, 1e-7,
-                   1e-7, 1e-7, 0.006, 0.003, 1e-7, 1e-7,
-                   1e-7, 1e-7, 0.006, 0.003, 1e-7, 1e-7,
-                   1e-7, 1e-7, 0.006, 0.003, 1e-7, 1e-7]
+            t_r = [1e-7, 1e-7, 0.003, 0.001, 1e-7, 1e-7,
+                   1e-7, 1e-7, 0.003, 0.001, 1e-7, 1e-7,
+                   1e-7, 1e-7, 0.003, 0.001, 1e-7, 1e-7,
+                   1e-7, 1e-7, 0.003, 0.001, 1e-7, 1e-7,
+                   1e-7, 1e-7, 0.003, 0.001, 1e-7, 1e-7]
         self.lut = LookupTable()
         self.lut.addAxis('x', t_dv)
         self.lut.addAxis('y', t_soc)
@@ -63,13 +63,13 @@ class Hysteresis():
         s += "\n"
         return s
 
-    def calculate(self, ib, voc, soc):
+    def calculate(self, ib, voc_stat, soc):
         self.ib = ib
-        self.voc_stat = voc
+        self.voc_stat = voc_stat
         self.soc = soc
         self.res = self.look(self.dv, self.soc)
         self.ioc = self.dv / self.res
-        self.dv_dot = -self.dv / self.res / self.cap + (self.ib - self.ioc) / self.cap
+        self.dv_dot = -self.dv / self.res / self.cap + self.ib / self.cap
 
     def update(self, dt):
         self.dv += self.dv_dot * dt
@@ -144,35 +144,60 @@ if __name__ == '__main__':
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
+        plt.figure()
+        n_fig += 1
+        plt.subplot(111)
+        plt.title(plot_title)
+        plt.plot(hys.soc, hys.voc, color='red', label='voc vs soc')
+        plt.legend(loc=1)
+        fig_file_name = filename + "_" + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
+
         return n_fig, fig_files
 
 
     def main():
         # Setup to run the transients
-        dt = 0.1
+        dt = 10
         # time_end = 2
-        time_end = 35000
+        time_end = 500000
 
         hys = Hysteresis()
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)
         current_in = 0
+        soc = 0.5
         current_in_s = []
 
         # time loop
         for i in range(len(t)):
             if t[i] < 10000:
-                current_in = 20
+                current_in = 0
             elif t[i] < 20000:
-                current_in = -20
+                current_in = 40
+            elif t[i] < 30000:
+                current_in = -40
+            elif t[i] < 80000:
+                current_in = 8
+            elif t[i] < 130000:
+                current_in = -8
+            elif t[i] < 330000:
+                current_in = 2
+            elif t[i] < 440000:
+                current_in = -2
+            else:
+                current_in = 0
             init_ekf = (t[i] <= 1)
 
             if init_ekf:
                 hys.init(0.0)
 
             # Models
-            hys.calculate(ib=current_in, voc=0., soc=0.5)
+            soc += current_in / 100. * dt / 20000.
+            voc_stat = 13. + (soc - 0.5)
+            hys.calculate(ib=current_in, voc_stat=voc_stat, soc=soc)
             hys.update(dt=dt)
 
             # Plot stuff
