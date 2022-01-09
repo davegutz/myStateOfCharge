@@ -616,6 +616,7 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None, ref=N
         fig_files = []
     if ref is None:
         ref = []
+
     plt.figure()
     n_fig += 1
     plt.subplot(321)

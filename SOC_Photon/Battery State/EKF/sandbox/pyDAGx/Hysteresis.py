@@ -26,30 +26,75 @@ class Hysteresis():
     def __init__(self, t_dv=None, t_soc=None, t_r=None):
         # Defaults
         if t_dv is None:
-            t_dv = [-0.08, -1e-6, 0., 0.08]
+            t_dv = [-10, -0.08, -1e-6, 0., 0.08, 10]
         if t_soc is None:
-            t_soc = [.1, .5, 1]
+            t_soc = [-10, .1, .5, 1, 10]
         if t_r is None:
-            t_r = [1e-7, 0.006, 0.003, 1e-7,
-                   1e-7, 0.006, 0.003, 1e-7,
-                   1e-7, 0.006, 0.003, 1e-7]
-        lut = LookupTable()
-        lut.addAxis('x', t_dv)
-        lut.addAxis('y', t_soc)
-        lut.setValueTable(t_r)
-        print(lut.lookup(x=.04, y=.5))
+            t_r = [1e-7, 1e-7, 0.006, 0.003, 1e-7, 1e-7,
+                   1e-7, 1e-7, 0.006, 0.003, 1e-7, 1e-7,
+                   1e-7, 1e-7, 0.006, 0.003, 1e-7, 1e-7,
+                   1e-7, 1e-7, 0.006, 0.003, 1e-7, 1e-7,
+                   1e-7, 1e-7, 0.006, 0.003, 1e-7, 1e-7]
+        self.lut = LookupTable()
+        self.lut.addAxis('x', t_dv)
+        self.lut.addAxis('y', t_soc)
+        self.lut.setValueTable(t_r)
+        self.res = 0.
+        self.soc = 0.
+        self.ib = 0.
+        self.voc = 0.
+        self.dv = 0.
+        self.dv_dot = 0.
+        self.saved = Saved()
 
-    def init(self):
-        self.saved = Saved()  # for plots and prints
+    def __str__(self):
+        s =  "Hysteresis:\n"
+        s += "  ib  =    {:7.3f}  // Current in, A\n".format(self.ib)
+        s += "  voc =    {:7.3f}  // Discharge voltage input, V\n".format(self.voc)
+        s += "  soc =    {:7.3f}  // State of charge input, dimensionless\n".format(self.soc)
+        s += "  res =    {:7.3f}  // Variable resistance value, ohms\n".format(self.res)
+        s += "  dv_dot = {:7.3f}  // Calculated voltage rate, V/s\n".format(self.dv_dot)
+        s += "  dv =     {:7.3f}  // Delta voltage state, V\n".format(self.dv)
+        s += "\n"
+        return s
+
+    def calculate(self, ib, voc, soc, dt):
+        self.ib = ib
+        self.voc = voc
+        self.soc = max(soc, 0.1)
+        self.dv_dot = 0.
+        self.dv = ib
+        self.res = self.look(self.dv, self.soc)
+        print('dv=', self.dv, 'soc=', self.soc, 'res=', self.res)
+        self.dv += self.dv_dot * dt
+
+    def init(self, dv_init):
+        self.dv = dv_init
+
+    def look(self, dv, soc):
+        self.res = self.lut.lookup(x=dv, y=soc)
+        return self.res
+
+    def save(self, time):
+        self.saved.time.append(time)
+        self.saved.soc.append(self.soc)
+        self.saved.res.append(self.res)
+        self.saved.dv.append(self.dv)
+        self.saved.dv_dot.append(self.dv_dot)
+        self.saved.ib.append(self.ib)
+        self.saved.voc.append(self.voc)
 
 
 class Saved:
     # For plot savings.   A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
     def __init__(self):
         self.time = []
+        self.dv = []
+        self.dv_dot = []
+        self.res = []
+        self.soc = []
         self.ib = []
-        self.vb = []
-        self.vc = []
+        self.voc = []
 
 
 if __name__ == '__main__':
@@ -62,40 +107,22 @@ if __name__ == '__main__':
     doctest.testmod(sys.modules['__main__'])
     import matplotlib.pyplot as plt
 
-    def overall(hys=Hysteresis(), filename='', fig_files=None, plot_title=None, n_fig=None):
+    def overall(hys=Hysteresis().saved, filename='', fig_files=None, plot_title=None, n_fig=None, ref=None):
         if fig_files is None:
             fig_files = []
+        if ref is None:
+            ref = []
 
         plt.figure()
         n_fig += 1
-        plt.subplot(321)
+        plt.subplot(121)
         plt.title(plot_title)
-        # plt.plot(ms.time, ref, color='black', label='curr dmd, A')
-        # plt.plot(ms.time, ms.ib, color='green', label='ib')
-        # plt.plot(ms.time, ms.irc, color='red', label='I_R_ct')
-        # plt.plot(ms.time, ms.icd, color='cyan', label='I_C_dif')
-        # plt.plot(ms.time, ms.ird, color='orange', linestyle='--', label='I_R_dif')
-        # # plt.plot(ms.time, ms.ib, color='black', linestyle='--', label='Ioc')
-        # plt.legend(loc=1)
-        # plt.subplot(323)
-        # plt.plot(ms.time, ms.vb, color='green', label='Vb')
-        # plt.plot(ms.time, ms.vc, color='blue', label='Vc')
-        # plt.plot(ms.time, ms.vd, color='red', label='Vd')
-        # plt.plot(ms.time, ms.voc_dyn, color='orange', label='Voc_dyn')
-        # plt.legend(loc=1)
-        # plt.subplot(325)
-        # plt.plot(ms.time, ms.vbc_dot, color='green', label='Vbc_dot')
-        # plt.plot(ms.time, ms.vcd_dot, color='blue', label='Vcd_dot')
-        # plt.legend(loc=1)
-        # plt.subplot(322)
-        # plt.plot(ms.time, ms.soc, color='red', label='soc')
-        # plt.legend(loc=1)
-        # plt.subplot(324)
-        # plt.plot(ms.time, ms.pow_oc, color='orange', label='Pow_charge')
-        # plt.legend(loc=1)
-        # plt.subplot(326)
-        # plt.plot(ms.soc, ms.voc, color='black', label='voc vs soc')
-        # plt.legend(loc=1)
+        plt.plot(ref, hys.soc, color='red', label='soc')
+        plt.legend(loc=1)
+        plt.subplot(122)
+        plt.title(plot_title)
+        plt.plot(ref, hys.res, color='blue', label='res')
+        plt.legend(loc=1)
         fig_file_name = filename + "_" + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
@@ -106,8 +133,8 @@ if __name__ == '__main__':
     def main():
         # Setup to run the transients
         dt = 0.1
-        # time_end = 700
-        time_end = 3500
+        time_end = 2
+        # time_end = 3500
 
         hys = Hysteresis()
 
@@ -117,24 +144,14 @@ if __name__ == '__main__':
 
         # time loop
         for i in range(len(t)):
-            if t[i] < 50:
-                current_in = 0.
-            elif t[i] < 450:
-                current_in = -40.
-            elif t[i] < 1000:
-                current_in = 0.
-            elif t[i] < 3000:
-                current_in = 40.
-            else:
-                current_in = 0.
+            current_in = -.08 + t[i]/10
             init_ekf = (t[i] <= 1)
 
             if init_ekf:
-                hys.init()
+                hys.init(current_in)
 
             # Models
-            hys.calculate()
-
+            hys.calculate(ib=current_in, voc=0., soc=0., dt=dt)
 
             # Plot stuff
             current_in_s.append(current_in)
@@ -150,14 +167,7 @@ if __name__ == '__main__':
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
 
-        n_fig, fig_files = overall(hys.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
-
-        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
-        for fig_file in fig_files:
-            try:
-                os.remove(fig_file)
-            except OSError:
-                pass
+        n_fig, fig_files = overall(hys.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig, ref=current_in_s)
         plt.show()
 
     main()
