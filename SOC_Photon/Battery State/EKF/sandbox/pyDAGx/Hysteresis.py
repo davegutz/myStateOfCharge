@@ -20,6 +20,7 @@ __date__ = '$Date: 2022/01/08 13:15:02 $'
 import numpy as np
 from pyDAGx.lookup_table import LookupTable
 
+
 class Hysteresis():
     # Use variable resistor to create hysteresis from an RC circuit
 
@@ -51,7 +52,7 @@ class Hysteresis():
         self.saved = Saved()
 
     def __str__(self):
-        s =  "Hysteresis:\n"
+        s = "Hysteresis:\n"
         s += "  ib       =    {:7.3f}  // Current in, A\n".format(self.ib)
         s += "  ioc      =    {:7.3f}  // Current out, A\n".format(self.ioc)
         s += "  voc_stat =    {:7.3f}  // Battery model voltage input, V\n".format(self.voc_stat)
@@ -118,6 +119,7 @@ if __name__ == '__main__':
     doctest.testmod(sys.modules['__main__'])
     import matplotlib.pyplot as plt
 
+
     def overall(hys=Hysteresis().saved, filename='', fig_files=None, plot_title=None, n_fig=None, ref=None):
         if fig_files is None:
             fig_files = []
@@ -129,17 +131,17 @@ if __name__ == '__main__':
         plt.subplot(221)
         plt.title(plot_title)
         plt.plot(hys.time, hys.soc, color='red', label='soc')
-        plt.legend(loc=1)
+        plt.legend(loc=3)
         plt.subplot(222)
         plt.plot(hys.time, hys.res, color='blue', label='res, Ohm')
-        plt.legend(loc=1)
+        plt.legend(loc=3)
         plt.subplot(223)
         plt.plot(hys.time, hys.ib, color='blue', label='ib, A')
         plt.plot(hys.time, hys.ioc, color='red', label='ioc, A')
-        plt.legend(loc=1)
+        plt.legend(loc=2)
         plt.subplot(224)
         plt.plot(hys.time, hys.dv, color='blue', label='dv, V')
-        plt.legend(loc=1)
+        plt.legend(loc=2)
         fig_file_name = filename + "_" + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
@@ -149,7 +151,7 @@ if __name__ == '__main__':
         plt.subplot(111)
         plt.title(plot_title)
         plt.plot(hys.soc, hys.voc, color='red', label='voc vs soc')
-        plt.legend(loc=1)
+        plt.legend(loc=2)
         fig_file_name = filename + "_" + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
@@ -157,17 +159,59 @@ if __name__ == '__main__':
         return n_fig, fig_files
 
 
+    class Pulsar:
+        def __init__(self):
+            self.time_last_hold = 0.
+            self.time_last_rest = 0.
+            self.holding = False
+            self.resting = True
+            self.index = 0
+            self.amp = [0., -100., -100., -100., -100., -100., -100., -100., -100., -100., -100.,
+                        100., 100., 100., 100., 100., 100., 100., 100., 100., 100.]
+            self.dur = [0., 600., 600., 600., 600., 600., 600., 600., 600., 600., 600.,
+                        600., 600., 600., 600., 600., 600., 600., 600., 600., 600.]
+            self.rst = [7200., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 7200.,
+                        3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600.]
+            self.pulse_value = self.amp[0]
+            self.end_time = self.time_end()
+
+        def calculate(self, time):
+            if self.resting and time >= self.time_last_rest + self.rst[self.index]:
+                if time < self.end_time:
+                    self.index += 1
+                self.resting = False
+                self.holding = True
+                self.time_last_hold = time
+                self.pulse_value = self.amp[self.index]
+            elif self.holding and time >= self.time_last_hold + self.dur[self.index]:
+                self.index += 0  # only advance after resting
+                self.resting = True
+                self.holding = False
+                self.time_last_rest = time
+                self.pulse_value = 0.
+            return self.pulse_value
+
+        def time_end(self):
+            time = 0
+            for du in self.dur:
+                time += du
+            for rs in self.rst:
+                time += rs
+            return time
+
+
     def main():
         # Setup to run the transients
         dt = 10
         # time_end = 2
-        time_end = 500000
+        # time_end = 500000
+        pull = Pulsar()
+        time_end = pull.time_end()
 
         hys = Hysteresis()
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)
-        current_in = 0
         soc = 0.5
         current_in_s = []
 
@@ -189,8 +233,10 @@ if __name__ == '__main__':
                 current_in = -2
             else:
                 current_in = 0
-            init_ekf = (t[i] <= 1)
 
+            current_in = pull.calculate(t[i])
+
+            init_ekf = (t[i] <= 1)
             if init_ekf:
                 hys.init(0.0)
 
