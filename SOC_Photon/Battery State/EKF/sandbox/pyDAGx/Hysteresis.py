@@ -23,7 +23,7 @@ from pyDAGx.lookup_table import LookupTable
 class Hysteresis():
     # Use variable resistor to create hysteresis from an RC circuit
 
-    def __init__(self, t_dv=None, t_soc=None, t_r=None):
+    def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=1.8e6):
         # Defaults
         if t_dv is None:
             t_dv = [-10, -0.08, -1e-6, 0., 0.08, 10]
@@ -39,9 +39,11 @@ class Hysteresis():
         self.lut.addAxis('x', t_dv)
         self.lut.addAxis('y', t_soc)
         self.lut.setValueTable(t_r)
+        self.cap = cap
         self.res = 0.
         self.soc = 0.
         self.ib = 0.
+        self.voc_stat = 0.
         self.voc = 0.
         self.dv = 0.
         self.dv_dot = 0.
@@ -49,24 +51,26 @@ class Hysteresis():
 
     def __str__(self):
         s =  "Hysteresis:\n"
-        s += "  ib  =    {:7.3f}  // Current in, A\n".format(self.ib)
-        s += "  voc =    {:7.3f}  // Discharge voltage input, V\n".format(self.voc)
-        s += "  soc =    {:7.3f}  // State of charge input, dimensionless\n".format(self.soc)
+        s += "  ib       =    {:7.3f}  // Current in, A\n".format(self.ib)
+        s += "  voc_stat =    {:7.3f}  // Battery model voltage input, V\n".format(self.voc_stat)
+        s += "  voc      =    {:7.3f}  // Discharge voltage output, V\n".format(self.voc)
+        s += "  soc      =    {:7.3f}  // State of charge input, dimensionless\n".format(self.soc)
         s += "  res =    {:7.3f}  // Variable resistance value, ohms\n".format(self.res)
         s += "  dv_dot = {:7.3f}  // Calculated voltage rate, V/s\n".format(self.dv_dot)
         s += "  dv =     {:7.3f}  // Delta voltage state, V\n".format(self.dv)
         s += "\n"
         return s
 
-    def calculate(self, ib, voc, soc, dt):
+    def calculate(self, ib, voc, soc):
         self.ib = ib
-        self.voc = voc
-        self.soc = max(soc, 0.1)
-        self.dv_dot = 0.
-        self.dv = ib
+        self.voc_stat = voc
+        self.soc = soc
         self.res = self.look(self.dv, self.soc)
-        print('dv=', self.dv, 'soc=', self.soc, 'res=', self.res)
+        self.dv_dot = -self.dv / self.res / self.cap + self.ib / self.cap
+
+    def update(self, dt):
         self.dv += self.dv_dot * dt
+        self.voc = self.voc_stat + self.dv
 
     def init(self, dv_init):
         self.dv = dv_init
@@ -82,6 +86,7 @@ class Hysteresis():
         self.saved.dv.append(self.dv)
         self.saved.dv_dot.append(self.dv_dot)
         self.saved.ib.append(self.ib)
+        self.saved.voc_stat.append(self.voc_stat)
         self.saved.voc.append(self.voc)
 
 
@@ -95,6 +100,7 @@ class Saved:
         self.soc = []
         self.ib = []
         self.voc = []
+        self.voc_stat = []
 
 
 if __name__ == '__main__':
@@ -151,7 +157,8 @@ if __name__ == '__main__':
                 hys.init(current_in)
 
             # Models
-            hys.calculate(ib=current_in, voc=0., soc=0., dt=dt)
+            hys.calculate(ib=current_in, voc=0., soc=0.)
+            hys.update(dt=dt)
 
             # Plot stuff
             current_in_s.append(current_in)
