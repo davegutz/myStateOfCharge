@@ -43,6 +43,7 @@ class Hysteresis():
         self.res = 0.
         self.soc = 0.
         self.ib = 0.
+        self.ioc = 0.
         self.voc_stat = 0.
         self.voc = 0.
         self.dv = 0.
@@ -52,6 +53,7 @@ class Hysteresis():
     def __str__(self):
         s =  "Hysteresis:\n"
         s += "  ib       =    {:7.3f}  // Current in, A\n".format(self.ib)
+        s += "  ioc      =    {:7.3f}  // Current out, A\n".format(self.ioc)
         s += "  voc_stat =    {:7.3f}  // Battery model voltage input, V\n".format(self.voc_stat)
         s += "  voc      =    {:7.3f}  // Discharge voltage output, V\n".format(self.voc)
         s += "  soc      =    {:7.3f}  // State of charge input, dimensionless\n".format(self.soc)
@@ -66,7 +68,8 @@ class Hysteresis():
         self.voc_stat = voc
         self.soc = soc
         self.res = self.look(self.dv, self.soc)
-        self.dv_dot = -self.dv / self.res / self.cap + self.ib / self.cap
+        self.ioc = self.dv / self.res
+        self.dv_dot = -self.dv / self.res / self.cap + (self.ib - self.ioc) / self.cap
 
     def update(self, dt):
         self.dv += self.dv_dot * dt
@@ -86,6 +89,7 @@ class Hysteresis():
         self.saved.dv.append(self.dv)
         self.saved.dv_dot.append(self.dv_dot)
         self.saved.ib.append(self.ib)
+        self.saved.ioc.append(self.ioc)
         self.saved.voc_stat.append(self.voc_stat)
         self.saved.voc.append(self.voc)
 
@@ -99,6 +103,7 @@ class Saved:
         self.res = []
         self.soc = []
         self.ib = []
+        self.ioc = []
         self.voc = []
         self.voc_stat = []
 
@@ -121,13 +126,19 @@ if __name__ == '__main__':
 
         plt.figure()
         n_fig += 1
-        plt.subplot(121)
+        plt.subplot(221)
         plt.title(plot_title)
-        plt.plot(ref, hys.soc, color='red', label='soc')
+        plt.plot(hys.time, hys.soc, color='red', label='soc')
         plt.legend(loc=1)
-        plt.subplot(122)
-        plt.title(plot_title)
-        plt.plot(ref, hys.res, color='blue', label='res')
+        plt.subplot(222)
+        plt.plot(hys.time, hys.res, color='blue', label='res, Ohm')
+        plt.legend(loc=1)
+        plt.subplot(223)
+        plt.plot(hys.time, hys.ib, color='blue', label='ib, A')
+        plt.plot(hys.time, hys.ioc, color='red', label='ioc, A')
+        plt.legend(loc=1)
+        plt.subplot(224)
+        plt.plot(hys.time, hys.dv, color='blue', label='dv, V')
         plt.legend(loc=1)
         fig_file_name = filename + "_" + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -139,25 +150,29 @@ if __name__ == '__main__':
     def main():
         # Setup to run the transients
         dt = 0.1
-        time_end = 2
-        # time_end = 3500
+        # time_end = 2
+        time_end = 35000
 
         hys = Hysteresis()
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)
+        current_in = 0
         current_in_s = []
 
         # time loop
         for i in range(len(t)):
-            current_in = -.08 + t[i]/10
+            if t[i] < 10000:
+                current_in = 20
+            elif t[i] < 20000:
+                current_in = -20
             init_ekf = (t[i] <= 1)
 
             if init_ekf:
-                hys.init(current_in)
+                hys.init(0.0)
 
             # Models
-            hys.calculate(ib=current_in, voc=0., soc=0.)
+            hys.calculate(ib=current_in, voc=0., soc=0.5)
             hys.update(dt=dt)
 
             # Plot stuff
