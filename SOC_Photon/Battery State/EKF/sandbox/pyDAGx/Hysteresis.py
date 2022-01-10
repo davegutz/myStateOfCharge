@@ -27,13 +27,13 @@ class Hysteresis():
     def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e6):
         # Defaults
         if t_dv is None:
-            t_dv = [-0.07,-0.05, 0.000, 0.05, 0.07]
+            t_dv = [-0.09, -0.07,-0.05, -0.03, 0.000, 0.03, 0.05, 0.07, 0.09]
         if t_soc is None:
             t_soc = [.1, .5, 1]
         if t_r is None:
-            t_r = [1e-7, 0.0050, 0.0015, 0.0050, 1e-7,
-                   1e-7, 0.0050, 0.0015, 0.0050, 1e-7,
-                   1e-7, 0.0050, 0.0015, 0.0050, 1e-7]
+            t_r = [1e-7, 1e-7, 0.0050, 0.0036, 0.0015, 0.0024, 0.0030, 1e-7, 1e-7,
+                   1e-7, 1e-7, 0.0050, 0.0036, 0.0015, 0.0024, 0.0030, 1e-7, 1e-7,
+                   1e-7, 1e-7, 0.0050, 0.0036, 0.0015, 0.0024, 0.0030, 1e-7, 1e-7]
         self.lut = LookupTable()
         self.lut.addAxis('x', t_dv)
         self.lut.addAxis('y', t_soc)
@@ -160,15 +160,15 @@ if __name__ == '__main__':
     class Pulsar:
         def __init__(self):
             self.time_last_hold = 0.
-            self.time_last_rest = 0.
+            self.time_last_rest = -100000.
             self.holding = False
             self.resting = True
-            self.index = 0
-            self.amp = [0., -100., -100., -100., -100., -100., -100., -100., -100., -100., -100.,
+            self.index = -1
+            self.amp = [100., 0., -100., -100., -100., -100., -100., -100., -100., -100., -100., -100.,
                         100., 100., 100., 100., 100., 100., 100., 100., 100., 100.]
-            self.dur = [0., 600., 600., 600., 600., 600., 600., 600., 600., 600., 600.,
+            self.dur = [16000., 0., 600., 600., 600., 600., 600., 600., 600., 600., 600., 600.,
                         600., 600., 600., 600., 600., 600., 600., 600., 600., 600.]
-            self.rst = [7200., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 7200.,
+            self.rst = [600., 7200., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 7200.,
                         3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 46800.]
             self.pulse_value = self.amp[0]
             self.end_time = self.time_end()
@@ -210,7 +210,7 @@ if __name__ == '__main__':
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)
-        soc = 0.5
+        soc = 0.2
         current_in_s = []
 
         # time loop
@@ -239,7 +239,7 @@ if __name__ == '__main__':
                 hys.init(0.0)
 
             # Models
-            soc += current_in / 100. * dt / 20000.
+            soc = min(max(soc + current_in / 100. * dt / 20000., 0.), 1.)
             voc_stat = 13. + (soc - 0.5)
             hys.calculate(ib=current_in, voc_stat=voc_stat, soc=soc)
             hys.update(dt=dt)
