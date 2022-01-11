@@ -21,6 +21,7 @@ from pyDAGx.lookup_table import LookupTable
 from EKF_1x1 import EKF_1x1
 from Coulombs import Coulombs
 from StateSpace import StateSpace
+from Hysteresis import Hysteresis
 import matplotlib.pyplot as plt
 
 
@@ -102,7 +103,7 @@ batt_vsat = float(batt_num_cells)*BATT_V_SAT  # Total bank saturation for 0.997=
 batt_vmax = (14.3/4)*float(batt_num_cells)  # Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
 
 
-class Battery(Coulombs, EKF_1x1):
+class Battery(Coulombs, EKF_1x1, Hysteresis):
     # Battery model:  Randle's dynamics, SOC-VOC model
 
     RATED_BATT_CAP = 100.

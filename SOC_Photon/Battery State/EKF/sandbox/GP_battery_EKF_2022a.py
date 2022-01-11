@@ -21,8 +21,6 @@ import numpy as np
 from numpy.random import randn
 import Battery
 from Battery import Battery, BatteryModel, is_sat, rp, overall
-from BatteryOld import BatteryOld
-from BatteryEKF import BatteryEKF
 from unite_pictures import unite_pictures_into_pdf
 import os
 from datetime import datetime

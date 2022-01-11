@@ -66,7 +66,7 @@ class Hysteresis():
         s += "\n"
         return s
 
-    def calculate(self, ib, voc_stat, soc):
+    def calculate_hys(self, ib, voc_stat, soc):
         self.ib = ib
         self.voc_stat = voc_stat
         self.soc = soc
@@ -245,7 +245,7 @@ if __name__ == '__main__':
             # Models
             soc = min(max(soc + current_in / 100. * dt / 20000., 0.), 1.)
             voc_stat = 13. + (soc - 0.5)
-            hys.calculate(ib=current_in, voc_stat=voc_stat, soc=soc)
+            hys.calculate_hys(ib=current_in, voc_stat=voc_stat, soc=soc)
             hys.update(dt=dt)
 
             # Plot stuff
