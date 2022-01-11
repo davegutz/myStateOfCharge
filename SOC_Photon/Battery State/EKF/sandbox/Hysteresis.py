@@ -41,7 +41,7 @@ class Hysteresis():
         self.lut.addAxis('x', t_dv)
         self.lut.addAxis('y', t_soc)
         self.lut.setValueTable(t_r)
-        self.cap = cap
+        self.cap = cap / scale  # maintain time constant = R*C
         self.res = 0.
         self.soc = 0.
         self.ib = 0.
