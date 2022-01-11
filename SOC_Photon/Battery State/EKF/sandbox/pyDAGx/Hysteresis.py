@@ -51,14 +51,18 @@ class Hysteresis():
 
     def __str__(self):
         s = "Hysteresis:\n"
+        res = self.look(dv=0., soc=0.8)
+        s += "  res(median) =  {:6.4f}  // Null resistance, Ohms\n".format(res)
+        s += "  cap      = {:10.1f}  // Capacitance, Farads\n".format(self.cap)
+        s += "  tau      = {:10.1f}  // Null time constant, sec\n".format(res*self.cap)
         s += "  ib       =    {:7.3f}  // Current in, A\n".format(self.ib)
         s += "  ioc      =    {:7.3f}  // Current out, A\n".format(self.ioc)
         s += "  voc_stat =    {:7.3f}  // Battery model voltage input, V\n".format(self.voc_stat)
         s += "  voc      =    {:7.3f}  // Discharge voltage output, V\n".format(self.voc)
         s += "  soc      =    {:7.3f}  // State of charge input, dimensionless\n".format(self.soc)
-        s += "  res =    {:7.3f}  // Variable resistance value, ohms\n".format(self.res)
-        s += "  dv_dot = {:7.3f}  // Calculated voltage rate, V/s\n".format(self.dv_dot)
-        s += "  dv =     {:7.3f}  // Delta voltage state, V\n".format(self.dv)
+        s += "  res      =    {:7.3f}  // Variable resistance value, ohms\n".format(self.res)
+        s += "  dv_dot   =    {:7.3f}  // Calculated voltage rate, V/s\n".format(self.dv_dot)
+        s += "  dv       =    {:7.3f}  // Delta voltage state, V\n".format(self.dv)
         s += "\n"
         return s
 
