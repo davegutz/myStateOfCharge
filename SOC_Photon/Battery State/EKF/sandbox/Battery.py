@@ -165,7 +165,6 @@ class Battery(Coulombs, EKF_1x1):
             format(self.r0, self.r_ct, self.tau_ct, self.r_dif, self.tau_dif, self.r_sd, self.tau_sd)
         s += "  dv_dsoc = {:7.3f}  // Derivative scaled, V/fraction\n".format(self.dv_dsoc)
         s += "  ib =      {:7.3f}  // Current into battery post, A\n".format(self.ib)
-        s += "  ioc=      {:7.3f}  // Current into battery charge process, A\n".format(self.ioc)
         s += "  vb =      {:7.3f}  // Total model voltage, voltage at terminals, V\n".format(self.vb)
         s += "  voc      ={:7.3f}  // Dynamic model open circuit voltage including hysteresis, V\n".format(self.voc)
         s += "  voc_stat ={:7.3f}  // Static model open circuit voltage, V\n".format(self.voc_stat)
@@ -444,10 +443,8 @@ class BatteryModel(Battery):
 
     def __str__(self):
         """Returns representation of the object"""
-        s = Battery.__str__(self)
-        s += "\n"
+        s = "\nBatteryModel:  "
         s += self.hys.__str__()
-        s += "\nBatteryModel:  "
         s += "  sat_ib_max =      {:7.3f}  // Current cutback to be applied to modeled ib output, A\n".\
             format(self.sat_ib_max)
         s += "  ib_null    =      {:7.3f}  // Current cutback value for voc=vsat, A\n".\
@@ -461,11 +458,11 @@ class BatteryModel(Battery):
         s += "  ib_sat =          {:7.3f}  // Threshold to declare saturation.  This regeneratively slows" \
              " down charging so if too\n".format(self.ib_sat)
         s += "  ib     =        {:7.3f}  // Open circuit current into posts, A\n".format(self.ib)
-        s += "  ioc    =        {:7.3f}  // Charge process current after applying hysteresis, A\n".\
-            format(self.ioc)
         s += "  voc     =        {:7.3f}  // Open circuit voltage, V\n".format(self.voc)
         s += "  voc_stat=        {:7.3f}  // Static, table lookup value of voc before applying hysteresis, V\n".\
             format(self.voc_stat)
+        s += "\n"
+        s += Battery.__str__(self)
         return s
 
     def calculate(self, temp_c, soc, curr_in, dt, q_capacity):
