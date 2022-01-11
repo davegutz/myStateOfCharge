@@ -34,15 +34,15 @@ class StateSpace:
         self.x_past = self.x
         self.dt = 0.
 
-    def __str__(self):
+    def __str__(self, prefix=''):
         """Returns representation of the object"""
-        s = "StateSpace:\n"
-        s += "  A = \n{}\n".format(self.A)
+        s = prefix + "StateSpace:\n"
+        s += "  A = \n {}\n".format(self.A)
         s += "  x = {}\n".format(self.x)
-        s += "  B = \n{}\n".format(self.B)
+        s += "  B = \n {}\n".format(self.B)
         s += "  u = {}\n".format(self.u)
-        s += "  C = \n{}\n".format(self.C)
-        s += "  D = \n{}\n".format(self.D)
+        s += "  C = \n {}\n".format(self.C)
+        s += "  D = \n {}\n".format(self.D)
         s += "  x_dot = {}\n".format(self.x_dot)
         return s
 

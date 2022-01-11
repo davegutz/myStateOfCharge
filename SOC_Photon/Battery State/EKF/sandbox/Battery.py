@@ -154,13 +154,13 @@ class Battery(Coulombs, EKF_1x1):
         self.R = 0.1*0.1  # EKF state uncertainty
         self.dv_hys = 0.  # Placeholder so BatteryModel can be plotted
 
-    def __str__(self):
+    def __str__(self, prefix=''):
         """Returns representation of the object"""
-        s = "Battery:  "
+        s = prefix + "Battery:\n  "
         s += 'temp, #cells, b, a, c, m, n, d, dvoc_dt = {:5.1f}, {}, {:7.3f}, {:7.3f},' \
              ' {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
             format(self.temp_c, self.num_cells, self.b, self.a, self.c, self.m, self.n, self.d, self.dvoc_dt)
-        s += 'r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = {:7.3f}, {:7.3f}, {:7.3f},' \
+        s += '  r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = {:7.3f}, {:7.3f}, {:7.3f},' \
              ' {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
             format(self.r0, self.r_ct, self.tau_ct, self.r_dif, self.tau_dif, self.r_sd, self.tau_sd)
         s += "  dv_dsoc = {:7.3f}  // Derivative scaled, V/fraction\n".format(self.dv_dsoc)
@@ -184,12 +184,12 @@ class Battery(Coulombs, EKF_1x1):
         s += "  sr =      {:7.3f}  // Resistance scalar\n".format(self.sr)
         s += "  dv_ =     {:7.3f}  / Adjustment, V\n".format(self.dv)
         s += "  dt_ =     {:7.3f}  // Update time, s\n".format(self.dt)
-        s += "\n"
-        s += Coulombs.__str__(self)
-        s += "\n"
-        s += self.Randles.__str__()
-        s += "\n"
-        s += EKF_1x1.__str__(self)
+        s += "\n  "
+        s += Coulombs.__str__(self, prefix + 'Battery:')
+        s += "\n  "
+        s += self.Randles.__str__(prefix + 'Battery:')
+        s += "\n  "
+        s += EKF_1x1.__str__(self, prefix + 'Battery:')
         return s
 
     def assign_temp_c(self, temp_c):
@@ -441,10 +441,9 @@ class BatteryModel(Battery):
             self.apply_cap_scale(scale)
         self.hys = Hysteresis(scale=hys_scale)  # Battery hysteresis model - drift of voc
 
-    def __str__(self):
+    def __str__(self, prefix=''):
         """Returns representation of the object"""
-        s = "\nBatteryModel:  "
-        s += self.hys.__str__()
+        s = prefix + "BatteryModel:\n"
         s += "  sat_ib_max =      {:7.3f}  // Current cutback to be applied to modeled ib output, A\n".\
             format(self.sat_ib_max)
         s += "  ib_null    =      {:7.3f}  // Current cutback value for voc=vsat, A\n".\
@@ -461,8 +460,10 @@ class BatteryModel(Battery):
         s += "  voc     =        {:7.3f}  // Open circuit voltage, V\n".format(self.voc)
         s += "  voc_stat=        {:7.3f}  // Static, table lookup value of voc before applying hysteresis, V\n".\
             format(self.voc_stat)
-        s += "\n"
-        s += Battery.__str__(self)
+        s += "  \n  "
+        s += self.hys.__str__(prefix + 'BatteryModel:')
+        s += "  \n  "
+        s += Battery.__str__(self, prefix + 'BatteryModel:')
         return s
 
     def calculate(self, temp_c, soc, curr_in, dt, q_capacity):

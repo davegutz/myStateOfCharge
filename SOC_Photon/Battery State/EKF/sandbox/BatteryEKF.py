@@ -152,9 +152,9 @@ class BatteryEKF:
         self.soc_avail = 1.
         self.soc_offset = soc_offset  # Control has voltage threshold for saturation with margin of at least this amount
 
-    def __str__(self):
+    def __str__(self, prefix=''):
         '''Returns representation of the object'''
-        s = "Battery:  "
+        s = prefix + "Battery:  "
         s += 'temp, a, c, m, n, d, dvoc_dt = {:5.1f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
             format(self.temp_c, self.b, self.a, self.c, self.m, self.n, self.d)
         s += 'r_0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\

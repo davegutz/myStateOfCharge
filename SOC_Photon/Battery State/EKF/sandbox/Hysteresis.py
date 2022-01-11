@@ -52,8 +52,8 @@ class Hysteresis():
         self.dv_dot = 0.
         self.saved = Saved()
 
-    def __str__(self):
-        s = "Hysteresis:\n"
+    def __str__(self, prefix=''):
+        s = prefix + "Hysteresis:\n"
         res = self.look_hys(dv=0., soc=0.8)
         s += "  res(median) =  {:6.4f}  // Null resistance, Ohms\n".format(res)
         s += "  cap      = {:10.1f}  // Capacitance, Farads\n".format(self.cap)

@@ -42,15 +42,15 @@ class EKF_1x1:
         self.x_post = self.x_kf
         self.P_post = self.P
 
-    def __str__(self):
+    def __str__(self, prefix=''):
         """Returns representation of the object"""
-        s = "EKF_1x1:\n"
-        s += "Inputs:\n"
+        s = prefix + "EKF_1x1:\n"
+        s += "  Inputs:\n"
         s += "  z = {:7.3f}\n".format(self.z_ekf)
         s += "  R = {:10.6f}\n".format(self.R)
         s += "  Q = {:10.6f}\n".format(self.Q)
         s += "  H = {:7.3f}\n".format(self.H)
-        s += "Outputs:\n"
+        s += "  Outputs:\n"
         s += "  x  = {:7.3f}\n".format(self.x_kf)
         s += "  hx = {:7.3f}\n".format(self.hx)
         s += "  y  = {:7.3f}\n".format(self.y_kf)

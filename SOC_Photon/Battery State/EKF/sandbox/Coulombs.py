@@ -42,9 +42,9 @@ class Coulombs:
         self.t_last = 0.
         self.sat = True
 
-    def __str__(self):
+    def __str__(self, prefix=''):
         '''Returns representation of the object'''
-        s = "Coulombs:\n"
+        s = prefix + "Coulombs:\n"
         s += "  q_cap_rated = {:9.1f}    // Rated capacity at t_rated_, saved for future scaling, C\n".format(self.q_cap_rated)
         s += "  q_cap_rated_scaled = {:9.1f} // Applied rated capacity at t_rated_, after scaling, C\n".format(self.q_cap_rated_scaled)
         s += "  q_capacity = {:9.1f}     // Saturation charge at temperature, C\n".format(self. q_capacity)
