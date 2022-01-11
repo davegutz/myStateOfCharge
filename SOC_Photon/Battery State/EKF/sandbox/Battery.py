@@ -478,7 +478,8 @@ class BatteryModel(Battery):
         # VOC - OCV model
         self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc =\
             self.calc_soc_voc_coeff(soc_lim, temp_c, self.n, self.m)
-        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc_lim, self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc)
+        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc_lim, self.b, self.a, self.c, log_soc, exp_n_soc,
+                                                        pow_log_soc)
         self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, max_voc)  # slightly beyond but don't windup
         self.voc_stat += self.dv  # Experimentally varied
 
@@ -504,7 +505,7 @@ class BatteryModel(Battery):
         self.model_cutback = (self.voc_stat > self.vsat) & (self.ib == self.sat_ib_max)
         self.model_saturated = (self.voc_stat > self.vsat) & (self.ib < self.ib_sat) & (self.ib == self.sat_ib_max)
         Coulombs.sat = self.model_saturated
-        self.pow_oc = self.voc * self.ioc
+        self.pow_oc = self.vb * self.ib
 
         return self.vb
 
@@ -641,18 +642,16 @@ class Saved:
         self.e_voc_ekf = []
 
 
-def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None, ref=None):
+def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None):
     if fig_files is None:
         fig_files = []
-    if ref is None:
-        ref = []
-
     plt.figure()
     n_fig += 1
     plt.subplot(321)
     plt.title(plot_title)
     # plt.plot(ms.time, ref, color='black', label='curr dmd, A')
     plt.plot(ms.time, ms.ib, color='green', label='ib')
+    plt.plot(ss.time, ss.ioc, color='magenta', label='ioc')
     plt.plot(ms.time, ms.irc, color='red', label='I_R_ct')
     plt.plot(ms.time, ms.icd, color='cyan', label='I_C_dif')
     plt.plot(ms.time, ms.ird, color='orange', linestyle='--', label='I_R_dif')
@@ -798,11 +797,11 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None, ref=N
     plt.subplot(221)
     plt.title(plot_title)
     plt.plot(ss.time, ss.soc, color='red', label='soc')
-    plt.legend(loc=3)
+    plt.legend(loc=1)
     plt.subplot(223)
     plt.plot(ss.time, ss.ib, color='blue', label='ib, A')
-    plt.plot(ss.time, ss.ioc, color='green', label='ioc, A')
-    plt.legend(loc=2)
+    plt.plot(ss.time, ss.ioc, color='green', label='ioc hys indicator, A')
+    plt.legend(loc=1)
     plt.subplot(224)
     plt.plot(ss.time, ss.dv_hys, color='red', label='dv_hys, V')
     plt.legend(loc=2)

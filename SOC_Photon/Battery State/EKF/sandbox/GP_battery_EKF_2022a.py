@@ -150,7 +150,7 @@ if __name__ == '__main__':
         plot_title = filename + '   ' + date_time
 
         n_fig, fig_files = overall(mon.saved, sim.saved, filename, fig_files,
-                                   plot_title=plot_title, n_fig=n_fig, ref=current_in_s)
+                                   plot_title=plot_title, n_fig=n_fig)
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
         for fig_file in fig_files:
