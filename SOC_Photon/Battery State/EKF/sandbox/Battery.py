@@ -39,48 +39,6 @@ class Retained:
 rp = Retained()
 
 
-class Saved:
-    # For plot savings.   A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
-    def __init__(self):
-        self.time = []
-        self.ib = []
-        self.vb = []
-        self.vc = []
-        self.vd = []
-        self.voc = []
-        self.vbc = []
-        self.vcd = []
-        self.icc = []
-        self.irc = []
-        self.icd = []
-        self.ird = []
-        self.vcd_dot = []
-        self.vbc_dot = []
-        self.soc = []
-        self.SOC = []
-        self.pow_oc = []
-        self.soc_ekf = []
-        self.SOC_ekf = []
-        self.voc_dyn = []
-        self.Fx = []
-        self.Bu = []
-        self.P = []
-        self.H = []
-        self.S = []
-        self.K = []
-        self.hx = []
-        self.u_kf = []
-        self.x_kf = []
-        self.y_kf = []
-        self.z_ekf = []
-        self.x_prior = []
-        self.P_prior = []
-        self.x_post = []
-        self.P_post = []
-        self.e_soc_ekf = []
-        self.e_voc_ekf = []
-
-
 # Battery constants
 # RATED_BATT_CAP = 100.
 # """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
@@ -103,7 +61,7 @@ batt_vsat = float(batt_num_cells)*BATT_V_SAT  # Total bank saturation for 0.997=
 batt_vmax = (14.3/4)*float(batt_num_cells)  # Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
 
 
-class Battery(Coulombs, EKF_1x1, Hysteresis):
+class Battery(Coulombs, EKF_1x1):
     # Battery model:  Randle's dynamics, SOC-VOC model
 
     RATED_BATT_CAP = 100.
@@ -153,10 +111,12 @@ class Battery(Coulombs, EKF_1x1, Hysteresis):
         self.lut_a.setValueTable(t_a)
         self.lut_c.setValueTable(t_c)
         self.q = 0  # Charge, C
-        self.voc = NOM_SYS_VOLT  # Static model open circuit voltage, V
+        self.voc = NOM_SYS_VOLT  # Model open circuit voltage, V
+        self.voc_stat = self.voc  # Static model open circuit voltage from charge process, V
         self.vdyn = 0.  # Model current induced back emf, V
         self.vb = NOM_SYS_VOLT  # Battery voltage at post, V
         self.ib = 0  # Current into battery post, A
+        self.ioc = 0  # Current into battery process accounting for hysteresis, A
         self.pow_oc = 0.  # Charge power, W
         self.num_cells = num_cells
         self.dv_dsoc = 0.  # Slope of soc-voc curve, V/%
@@ -190,8 +150,9 @@ class Battery(Coulombs, EKF_1x1, Hysteresis):
         self.saved = Saved()  # for plots and prints
         self.e_soc_ekf = 0.  # analysis parameter
         self.e_voc_ekf = 0.  # analysis parameter
-        self.Q = 0.001*0.001
-        self.R = 0.1*0.1
+        self.Q = 0.001*0.001  # EKF process uncertainty
+        self.R = 0.1*0.1  # EKF state uncertainty
+        self.dv_hys = 0.  # Placeholder so BatteryModel can be plotted
 
     def __str__(self):
         """Returns representation of the object"""
@@ -203,9 +164,11 @@ class Battery(Coulombs, EKF_1x1, Hysteresis):
              ' {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
             format(self.r0, self.r_ct, self.tau_ct, self.r_dif, self.tau_dif, self.r_sd, self.tau_sd)
         s += "  dv_dsoc = {:7.3f}  // Derivative scaled, V/fraction\n".format(self.dv_dsoc)
-        s += "  ib =      {:7.3f}  // Current into battery, A\n".format(self.ib)
+        s += "  ib =      {:7.3f}  // Current into battery post, A\n".format(self.ib)
+        s += "  ioc=      {:7.3f}  // Current into battery charge process, A\n".format(self.ioc)
         s += "  vb =      {:7.3f}  // Total model voltage, voltage at terminals, V\n".format(self.vb)
-        s += "  voc =     {:7.3f}  // Static model open circuit voltage, V\n".format(self.voc)
+        s += "  voc      ={:7.3f}  // Dynamic model open circuit voltage including hysteresis, V\n".format(self.voc)
+        s += "  voc_stat ={:7.3f}  // Static model open circuit voltage, V\n".format(self.voc_stat)
         s += "  vsat =    {:7.3f}  // Saturation threshold at temperature, V\n".format(self.vsat)
         s += "  voc_dyn = {:7.3f}  // Charging voltage, V\n".format(self.voc_dyn)
         s += "  vdyn =    {:7.3f}  // Model current induced back emf, V\n".format(self.vdyn)
@@ -228,7 +191,6 @@ class Battery(Coulombs, EKF_1x1, Hysteresis):
         s += self.Randles.__str__()
         s += "\n"
         s += EKF_1x1.__str__(self)
-        s += "\n"
         return s
 
     def assign_temp_c(self, temp_c):
@@ -237,6 +199,7 @@ class Battery(Coulombs, EKF_1x1, Hysteresis):
     def assign_soc(self, soc, voc):
         self.soc = soc
         self.voc = voc
+        self.voc_stat = voc
         self.vsat = self.nom_vsat + (self.temp_c - RATED_TEMP) * self.dvoc_dt
         self.sat = self.voc >= self.vsat
 
@@ -270,12 +233,14 @@ class Battery(Coulombs, EKF_1x1, Hysteresis):
         # Dynamics
         self.vb = vb
         self.ib = ib
+        self.ioc = ib
         u = np.array([ib, vb]).T
         self.Randles.calc_x_dot(u)
         self.Randles.update(dt)
         self.voc_dyn = self.Randles.y
         self.vdyn = self.vb - self.voc_dyn
         self.voc = self.voc_dyn
+        self.voc_stat = self.voc_dyn
         self.pow_oc = self.voc * self.ib
 
         # EKF 1x1
@@ -373,6 +338,9 @@ class Battery(Coulombs, EKF_1x1, Hysteresis):
         c = self.lut_c.lookup(T_degC=temp_c)
         return b, a, c
 
+    def look_hys(self, dv, soc):
+        return NotImplementedError
+
     def vbc(self):
         return self.Randles.x[0]
 
@@ -406,10 +374,13 @@ class Battery(Coulombs, EKF_1x1, Hysteresis):
     def save(self, time, soc_ref, voc_ref):
         self.saved.time.append(time)
         self.saved.ib.append(self.ib)
+        self.saved.ioc.append(self.ioc)
         self.saved.vb.append(self.vb)
         self.saved.vc.append(self.vc())
         self.saved.vd.append(self.vd())
+        self.saved.dv_hys.append(self.dv_hys)
         self.saved.voc.append(self.voc)
+        self.saved.voc_stat.append(self.voc_stat)
         self.saved.vbc.append(self.vbc())
         self.saved.vcd.append(self.vcd())
         self.saved.icc.append(self.i_c_ct())
@@ -452,7 +423,7 @@ class BatteryModel(Battery):
                  num_cells=4, bat_v_sat=3.4625, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
                  t_rated=Battery.RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=Battery.RATED_TEMP):
+                 temp_c=Battery.RATED_TEMP, hys_scale=1.):
         Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
@@ -469,11 +440,14 @@ class BatteryModel(Battery):
         self.s_cap = scale  # Rated capacity scalar
         if scale is not None:
             self.apply_cap_scale(scale)
+        self.hys = Hysteresis(scale=hys_scale)  # Battery hysteresis model - drift of voc
 
     def __str__(self):
         """Returns representation of the object"""
-        s = "BatteryModel:  "
-        s += Battery.__str__(self)
+        s = Battery.__str__(self)
+        s += "\n"
+        s += self.hys.__str__()
+        s += "\nBatteryModel:  "
         s += "  sat_ib_max =      {:7.3f}  // Current cutback to be applied to modeled ib output, A\n".\
             format(self.sat_ib_max)
         s += "  ib_null    =      {:7.3f}  // Current cutback value for voc=vsat, A\n".\
@@ -486,7 +460,12 @@ class BatteryModel(Battery):
             format(self.model_saturated)
         s += "  ib_sat =          {:7.3f}  // Threshold to declare saturation.  This regeneratively slows" \
              " down charging so if too\n".format(self.ib_sat)
-        s += "\n"
+        s += "  ib     =        {:7.3f}  // Open circuit current into posts, A\n".format(self.ib)
+        s += "  ioc    =        {:7.3f}  // Charge process current after applying hysteresis, A\n".\
+            format(self.ioc)
+        s += "  voc     =        {:7.3f}  // Open circuit voltage, V\n".format(self.voc)
+        s += "  voc_stat=        {:7.3f}  // Static, table lookup value of voc before applying hysteresis, V\n".\
+            format(self.voc_stat)
         return s
 
     def calculate(self, temp_c, soc, curr_in, dt, q_capacity):
@@ -499,11 +478,16 @@ class BatteryModel(Battery):
         # VOC - OCV model
         self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc =\
             self.calc_soc_voc_coeff(soc_lim, temp_c, self.n, self.m)
-        self.voc, self.dv_dsoc = self.calc_soc_voc(soc_lim, self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc)
-        self.voc = min(self.voc + (soc - soc_lim) * self.dv_dsoc, max_voc)  # slightly beyond but don't windup
-        self.voc += self.dv  # Experimentally varied
+        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc_lim, self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc)
+        self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, max_voc)  # slightly beyond but don't windup
+        self.voc_stat += self.dv  # Experimentally varied
 
         # Dynamic emf
+        # Hysteresis model
+        self.hys.calculate_hys(curr_in, self.voc_stat, self.soc)
+        self.voc = self.hys.update(self.dt)
+        self.ioc = self.hys.ioc
+        self.dv_hys = self.hys.dv_hys
         # Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
         u = np.array([self.ib, self.voc]).T
         self.Randles.calc_x_dot(u)
@@ -517,10 +501,10 @@ class BatteryModel(Battery):
         self.ib = min(curr_in, self.sat_ib_max)
         if (self.q <= 0.) & (curr_in < 0.):
             self.ib = 0.  # empty
-        self.model_cutback = (self.voc > self.vsat) & (self.ib == self.sat_ib_max)
-        self.model_saturated = (self.voc > self.vsat) & (self.ib < self.ib_sat) & (self.ib == self.sat_ib_max)
+        self.model_cutback = (self.voc_stat > self.vsat) & (self.ib == self.sat_ib_max)
+        self.model_saturated = (self.voc_stat > self.vsat) & (self.ib < self.ib_sat) & (self.ib == self.sat_ib_max)
         Coulombs.sat = self.model_saturated
-        self.pow_oc = self.voc * self.ib
+        self.pow_oc = self.voc * self.ioc
 
         return self.vb
 
@@ -612,6 +596,51 @@ def sat_voc(temp_c):
     return batt_vsat + (temp_c-25.)*BATT_DVOC_DT
 
 
+class Saved:
+    # For plot savings.   A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
+    def __init__(self):
+        self.time = []
+        self.ib = []
+        self.ioc = []
+        self.vb = []
+        self.vc = []
+        self.vd = []
+        self.voc = []
+        self.voc_stat = []
+        self.dv_hys = []
+        self.vbc = []
+        self.vcd = []
+        self.icc = []
+        self.irc = []
+        self.icd = []
+        self.ird = []
+        self.vcd_dot = []
+        self.vbc_dot = []
+        self.soc = []
+        self.SOC = []
+        self.pow_oc = []
+        self.soc_ekf = []
+        self.SOC_ekf = []
+        self.voc_dyn = []
+        self.Fx = []
+        self.Bu = []
+        self.P = []
+        self.H = []
+        self.S = []
+        self.K = []
+        self.hx = []
+        self.u_kf = []
+        self.x_kf = []
+        self.y_kf = []
+        self.z_ekf = []
+        self.x_prior = []
+        self.P_prior = []
+        self.x_post = []
+        self.P_post = []
+        self.e_soc_ekf = []
+        self.e_voc_ekf = []
+
+
 def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None, ref=None):
     if fig_files is None:
         fig_files = []
@@ -646,7 +675,8 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None, ref=N
     plt.plot(ms.time, ms.pow_oc, color='orange', label='Pow_charge')
     plt.legend(loc=1)
     plt.subplot(326)
-    plt.plot(ms.soc, ms.voc, color='black', label='voc vs soc')
+    plt.plot(ss.soc, ss.voc, color='black', linestyle='dotted', label='SIM voc vs soc')
+    plt.plot(ms.soc, ms.voc, color='green', linestyle='dotted', label='MON voc vs soc')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -668,6 +698,7 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None, ref=N
     plt.plot(ss.time, ss.vc, color='blue', label='Vc')
     plt.plot(ss.time, ss.vd, color='red', label='Vd')
     plt.plot(ss.time, ss.voc, color='orange', label='Voc')
+    plt.plot(ss.time, ss.voc_stat, color='magenta', linestyle='dotted', label='Voc Charge')
     plt.legend(loc=1)
     plt.subplot(325)
     plt.plot(ss.time, ss.vbc_dot, color='green', label='Vbc_dot')
@@ -733,9 +764,9 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None, ref=N
     plt.figure()
     n_fig += 1
     plt.title(plot_title)
-    plt.plot(ss.time, ss.voc, color='green', label='voc model')
     plt.plot(ms.time, ms.voc_dyn, color='red', linestyle='dotted', label='voc dyn est')
     plt.plot(ms.time, ms.voc, color='blue', linestyle='dotted', label='voc ekf')
+    plt.plot(ss.time, ss.voc, color='green', label='voc model')
     plt.legend(loc=4)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -744,9 +775,9 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None, ref=N
     plt.figure()
     n_fig += 1
     plt.title(plot_title)
+    plt.plot(ms.time, ms.soc_ekf, color='blue', linestyle='dotted', label='soc ekf')
     plt.plot(ss.time, ss.soc, color='green', label='soc model')
     plt.plot(ms.time, ms.soc, color='red', linestyle='dotted', label='soc counted')
-    plt.plot(ms.time, ms.soc_ekf, color='blue', linestyle='dotted', label='soc ekf')
     plt.legend(loc=4)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -759,6 +790,33 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None, ref=N
     plt.plot(ms.time, ms.e_soc_ekf, color='red', linestyle='dotted', label='e_soc_ekf')
     plt.legend(loc=2)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
+    plt.figure()
+    n_fig += 1
+    plt.subplot(221)
+    plt.title(plot_title)
+    plt.plot(ss.time, ss.soc, color='red', label='soc')
+    plt.legend(loc=3)
+    plt.subplot(223)
+    plt.plot(ss.time, ss.ib, color='blue', label='ib, A')
+    plt.plot(ss.time, ss.ioc, color='green', label='ioc, A')
+    plt.legend(loc=2)
+    plt.subplot(224)
+    plt.plot(ss.time, ss.dv_hys, color='red', label='dv_hys, V')
+    plt.legend(loc=2)
+    fig_file_name = filename + "_" + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
+    plt.figure()
+    n_fig += 1
+    plt.subplot(111)
+    plt.title(plot_title)
+    plt.plot(ss.soc, ss.voc, color='black', linestyle='dotted', label='SIM voc vs soc')
+    plt.legend(loc=2)
+    fig_file_name = filename + "_" + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 

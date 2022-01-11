@@ -24,7 +24,7 @@ from pyDAGx.lookup_table import LookupTable
 class Hysteresis():
     # Use variable resistor to create hysteresis from an RC circuit
 
-    def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e6):
+    def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e6, scale=1.):
         # Defaults
         if t_dv is None:
             t_dv = [-0.09, -0.07,-0.05, -0.03, 0.000, 0.03, 0.05, 0.07, 0.09]
@@ -34,6 +34,9 @@ class Hysteresis():
             t_r = [1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.0030, 0.0046, 1e-7,
                    1e-7, 1e-7,   0.0050, 0.0036, 0.0015, 0.0024, 0.0030,   1e-7, 1e-7,
                    1e-7, 1e-7,     1e-7, 0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7]
+        for i in range(len(t_dv)):
+            t_dv[i] *= scale
+            t_r[i] *= scale
         self.lut = LookupTable()
         self.lut.addAxis('x', t_dv)
         self.lut.addAxis('y', t_soc)
@@ -45,13 +48,13 @@ class Hysteresis():
         self.ioc = 0.
         self.voc_stat = 0.
         self.voc = 0.
-        self.dv = 0.
+        self.dv_hys = 0.
         self.dv_dot = 0.
         self.saved = Saved()
 
     def __str__(self):
         s = "Hysteresis:\n"
-        res = self.look(dv=0., soc=0.8)
+        res = self.look_hys(dv=0., soc=0.8)
         s += "  res(median) =  {:6.4f}  // Null resistance, Ohms\n".format(res)
         s += "  cap      = {:10.1f}  // Capacitance, Farads\n".format(self.cap)
         s += "  tau      = {:10.1f}  // Null time constant, sec\n".format(res*self.cap)
@@ -62,26 +65,21 @@ class Hysteresis():
         s += "  soc      =    {:7.3f}  // State of charge input, dimensionless\n".format(self.soc)
         s += "  res      =    {:7.3f}  // Variable resistance value, ohms\n".format(self.res)
         s += "  dv_dot   =    {:7.3f}  // Calculated voltage rate, V/s\n".format(self.dv_dot)
-        s += "  dv       =    {:7.3f}  // Delta voltage state, V\n".format(self.dv)
-        s += "\n"
+        s += "  dv_hys       =    {:7.3f}  // Delta voltage state, V\n".format(self.dv_hys)
         return s
 
     def calculate_hys(self, ib, voc_stat, soc):
         self.ib = ib
         self.voc_stat = voc_stat
         self.soc = soc
-        self.res = self.look(self.dv, self.soc)
-        self.ioc = self.dv / self.res
-        self.dv_dot = -self.dv / self.res / self.cap + self.ib / self.cap
-
-    def update(self, dt):
-        self.dv += self.dv_dot * dt
-        self.voc = self.voc_stat + self.dv
+        self.res = self.look_hys(self.dv_hys, self.soc)
+        self.ioc = self.dv_hys / self.res
+        self.dv_dot = -self.dv_hys / self.res / self.cap + self.ib / self.cap
 
     def init(self, dv_init):
-        self.dv = dv_init
+        self.dv_hys = dv_init
 
-    def look(self, dv, soc):
+    def look_hys(self, dv, soc):
         self.res = self.lut.lookup(x=dv, y=soc)
         return self.res
 
@@ -89,19 +87,24 @@ class Hysteresis():
         self.saved.time.append(time)
         self.saved.soc.append(self.soc)
         self.saved.res.append(self.res)
-        self.saved.dv.append(self.dv)
+        self.saved.dv_hys.append(self.dv_hys)
         self.saved.dv_dot.append(self.dv_dot)
         self.saved.ib.append(self.ib)
         self.saved.ioc.append(self.ioc)
         self.saved.voc_stat.append(self.voc_stat)
         self.saved.voc.append(self.voc)
 
+    def update(self, dt):
+        self.dv_hys += self.dv_dot * dt
+        self.voc = self.voc_stat + self.dv_hys
+        return self.voc
+
 
 class Saved:
     # For plot savings.   A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
     def __init__(self):
         self.time = []
-        self.dv = []
+        self.dv_hys = []
         self.dv_dot = []
         self.res = []
         self.soc = []
@@ -142,7 +145,7 @@ if __name__ == '__main__':
         plt.plot(hys.time, hys.ioc, color='green', label='ioc, A')
         plt.legend(loc=2)
         plt.subplot(224)
-        plt.plot(hys.time, hys.dv, color='red', label='dv, V')
+        plt.plot(hys.time, hys.dv_hys, color='red', label='dv_hys, V')
         plt.legend(loc=2)
         fig_file_name = filename + "_" + str(n_fig) + ".png"
         fig_files.append(fig_file_name)

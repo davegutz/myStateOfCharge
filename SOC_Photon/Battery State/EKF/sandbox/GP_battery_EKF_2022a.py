@@ -70,12 +70,13 @@ if __name__ == '__main__':
         i_std = 0.1  # (0.0-0.1) ------ noise
         soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
         tau_ct = 0.2  # (0.1-->5.)  -------
+        hys_scale = 10.  #(1.-->10.)
 
         # Setup
         r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
         q_std = 0.001  # Process uncertainty (0.001) belief in state
         scale = model_bat_cap / Battery.RATED_BATT_CAP
-        sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale)
+        sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale)
         mon = Battery(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
                       r_dif=r_dif, temp_c=temp_c)
 
