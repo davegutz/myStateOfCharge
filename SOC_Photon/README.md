@@ -108,6 +108,10 @@ The ADS module is delicate (ESD and handling).   I burned one out by
 accidentally touching terminals to back of OLED board.   I now mount the
 OLED board carefully off to the side.   Will need a hobby box to contain the final device.
 
+### Voltage regulator
+
+I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on 7805CT device with capacitors.
+
 ### Passive shunt low pass filter (LPF)
 
 1 - Green = 150K resistor from shunt high side
@@ -158,7 +162,7 @@ OLED board carefully off to the side.   Will need a hobby box to contain the fin
   D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
   D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
   D6  = Y-C of DS18 for Tbatt and 4k7 3v3 jumper pullup
-  VIN = 5V Rail 1A maximum
+  VIN = 5V Rail 1A maximum from 7805CT home-made 12-->5 V regulator
   3v3 = 3v3 rail out
   micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm)
 
