@@ -113,7 +113,7 @@ public:
                           double *exp_n_soc, double *pow_log_soc);
   virtual double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
   double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
-  double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated);
+  double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt);
   void init_battery(void);
   void init_soc_ekf(const double soc);
   virtual void pretty_print();
@@ -227,7 +227,5 @@ void mulvec(double * a, double * x, double * y, int m, int n);
 double sat_voc(const double temp_c);
 double calc_vsat(const double temp_c);
 boolean is_sat(const double temp_c, const double voc);
-double calculate_capacity(const double temp_c, const double t_sat, const double q_sat);
-double calculate_saturation_charge(const double t_sat, const double q_cap);
 
 #endif

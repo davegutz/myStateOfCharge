@@ -388,7 +388,7 @@ void loop()
     }
     
     // EKF - calculates temp_c_, voc_, voc_dyn_ as functions of sensed parameters vb & ib (not soc)
-    Monitor->calculate_ekf(Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T), Sen->saturated);
+    Monitor->calculate_ekf(Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T));
     
     // Debounce saturation calculation done in ekf using voc model
     Sen->saturated = SatDebounce->calculate(is_sat(Sen->Tbatt_filt, Monitor->voc()), reset);

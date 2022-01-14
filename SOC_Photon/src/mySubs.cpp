@@ -311,9 +311,9 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
   display->setCursor(0,0);              // Start at top-left corner
   char dispString[21];
   if ( !pass && cp.model_cutback && rp.modeling )
-    sprintf(dispString, "%3.0f %5.2f      ", cp.pubList.Tbatt, cp.pubList.Vbatt);
+    sprintf(dispString, "%3.0f %5.2f      ", cp.pubList.Tbatt, cp.pubList.voc);
   else
-    sprintf(dispString, "%3.0f %5.2f %5.1f", cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt);
+    sprintf(dispString, "%3.0f %5.2f %5.1f", cp.pubList.Tbatt, cp.pubList.voc, cp.pubList.Ishunt);
   display->println(dispString);
 
   display->println(F(""));

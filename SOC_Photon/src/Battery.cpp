@@ -123,9 +123,8 @@ double Battery::calc_h_jacobian(double soc_lim, double b, double c, double log_s
 double Battery::calculate(const double temp_C, const double q, const double curr_in, const double dt) { return 0.;}
 
 // SOC-OCV curve fit method per Zhang, et al modified by ekf
-double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt, const boolean saturated)
+double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt)
 {
-    // TODO:  saturated in arg list not used
     temp_c_ = temp_c;
     vsat_ = calc_vsat(temp_c_);
 
@@ -145,7 +144,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
 
     // EKF 1x1
     predict_ekf(ib);      // u = ib
-    update_ekf(voc_dyn_, mneps_bb, mxeps_bb, dt);   // z = voc_dyn, voc_filtered = hx
+    update_ekf(voc_dyn_, mneps_bb, mxeps_bb);   // z = voc_dyn, voc_filtered = hx
     soc_ekf_ = x_ekf();   // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
     q_ekf_ = soc_ekf_ * q_capacity_;
     SOC_ekf_ = q_ekf_ / q_cap_rated_scaled_ * 100.;
@@ -163,7 +162,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
         Serial.printf("ib,vb*10-110,voc_dyn(z_)*10-110,  K_,y_,SOC_ekf-90,   \n%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
             ib, vb*10-110, voc_dyn_*10-110,     K_, y_, soc_ekf_*100-90);
 
-    // Charge time if used ekf  TODO:  why not use calculate_charge_time()
+    // Charge time if used ekf 
     if ( ib_ > 0.1 )  tcharge_ekf_ = min(RATED_BATT_CAP / ib_ * (1. - soc_ekf_), 24.);
     else if ( ib_ < -0.1 ) tcharge_ekf_ = max(RATED_BATT_CAP / ib_ * soc_ekf_, -24.);
     else if ( ib_ >= 0. ) tcharge_ekf_ = 24.*(1. - soc_ekf_);
@@ -519,16 +518,4 @@ boolean is_sat(const double temp_c, const double voc)
 double calc_vsat(const double temp_c)
 {
     return ( sat_voc(temp_c) );
-}
-
-// Capacity
-double calculate_capacity(const double temp_c, const double t_sat, const double q_sat)
-{
-    return( q_sat * (1-DQDT*(temp_c - t_sat)) );
-}
-
-// Saturation charge
-double calculate_saturation_charge(const double t_sat, const double q_cap)
-{
-    return( q_cap * ((t_sat - 25.)*DQDT + 1.) );
 }

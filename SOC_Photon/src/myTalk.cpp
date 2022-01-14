@@ -155,9 +155,9 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
         break;
       case ( 'm' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
-        if ( SOCS_in<1.1 )  // TODO:  rationale for this?
+        if ( SOCS_in<1.1 )  // Apply crude limit to prevent user error
         {
-          Monitor->apply_soc(SOCS_in);
+          Monitor->apply_soc(SOCS_in, Sen->Tbatt_filt);
           Model->apply_delta_q(Monitor->delta_q());
           if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
           Monitor->update(&rp.delta_q, &rp.t_last);
@@ -170,7 +170,7 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
         break;
       case ( 'M' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
-        Monitor->apply_SOC(SOCS_in);
+        Monitor->apply_SOC(SOCS_in, Sen->Tbatt_filt);
         Model->apply_delta_q(Monitor->delta_q());
         if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
         Monitor->update(&rp.delta_q, &rp.t_last);
@@ -180,9 +180,9 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
         break;
       case ( 'n' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
-        if ( SOCS_in<1.1 )  // TODO:  rationale for this?
+        if ( SOCS_in<1.1 )   // Apply crude limit to prevent user error
         {
-          Model->apply_soc(SOCS_in);
+          Model->apply_soc(SOCS_in, Sen->Tbatt_filt);
           Model->update(&rp.delta_q_model, &rp.t_last_model);
           if ( rp.modeling )
             Monitor->init_soc_ekf(Monitor->soc());
@@ -194,7 +194,7 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
         break;
       case ( 'N' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
-        Model->apply_SOC(SOCS_in);
+        Model->apply_SOC(SOCS_in, Sen->Tbatt_filt);
         Model->update(&rp.delta_q_model, &rp.t_last_model);
         if ( rp.modeling )
           Monitor->init_soc_ekf(Monitor->soc());
@@ -265,8 +265,8 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
             break;
           case ( 'r' ):
             Serial.printf("Small reset.   Just reset all to soc=1.0 and delta_q = 0\n");
-            Monitor->apply_soc(1.0);
-            Model->apply_soc(1.0);
+            Monitor->apply_soc(1.0, Sen->Tbatt_filt);
+            Model->apply_soc(1.0, Sen->Tbatt_filt);
             if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
             break;
           case ( 'R' ):
@@ -494,7 +494,7 @@ void talkH(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
   Serial.printf("  Tv=-78  sends v=-78 to talk\n");
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);
   Serial.printf("X<?> - Test Mode.   For example:\n");
-  Serial.printf("  Xx= "); Serial.printf("x   toggle model use of Vbatt = "); Serial.println(rp.modeling);
+  Serial.printf("  Xx= "); Serial.printf("%d,   use model for Vbatt [0]\n", rp.modeling);
   Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Injection amplitude A pk (0-18.3) [0]");
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println("  : Injection frequency Hz (0-2) [0]");
   Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  's', 'q', 't' (0=none, 1=sine, 2=square, 3=triangle)");

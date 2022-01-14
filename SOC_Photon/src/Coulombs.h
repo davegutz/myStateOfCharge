@@ -38,8 +38,8 @@ public:
   void apply_cap_scale(const double scale);
   void apply_delta_q(const double delta_q);
   void apply_resetting(const boolean resetting){ resetting_ = resetting; };
-  void apply_soc(const double soc);
-  void apply_SOC(const double SOC);
+  void apply_soc(const double soc, const double temp_c);
+  void apply_SOC(const double SOC, const double temp_c);
   void apply_delta_q_t(const double delta_q, const double temp_c);
   double calculate_capacity(const double temp_c);
   virtual double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr, const boolean sat, const double t_last);
