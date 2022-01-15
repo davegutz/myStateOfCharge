@@ -38,7 +38,7 @@ void print_all_summary(struct Sum_st *sum, const int isum, const int nsum)
     sum[i].print();
     Serial.printf("\n");
   }
-  Serial.printf("i,  date,                time, Tbatt, Vbatt, Ishunt, SOC_f, dV,\n");
+  Serial.printf("i,  date,                time, Tbatt, VOC, Ishunt, SOC_f, dV,\n");
 }
 
 // reset helper
