@@ -48,7 +48,7 @@ struct Sum_st
     this->t = now;
     this->Tbatt = Tbatt;
     this->Vbatt = float(Vbatt);
-    this->Ishunt = Ishunt*4;
+    this->Ishunt = int8_t(Ishunt*4.0);
     this->SOC_f = soc_f*100;
     this->dV = int8_t(min(max((soc_ekf - soc_f) * dV_dsoc, -1.25), 1.25) * 100.);
     time_long_2_str(now, buffer);
