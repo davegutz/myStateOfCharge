@@ -123,6 +123,7 @@ public:
   double voc() { return (voc_); };
   double vsat() { return (vsat_); };
   double voc_dyn() { return (voc_dyn_); };
+  double voc_soc() { return (voc_soc_); };
   double vdyn() { return (vdyn_); };
   double vb() { return (vb_); };
   double ib() { return (ib_); };
@@ -135,6 +136,7 @@ public:
   double y_ekf() { return (y_); };
   double amp_hrs_remaining() { return (amp_hrs_remaining_); };
   double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
+  double voc_soc(const double soc, const double temp_c);
 protected:
   TableInterp1Dclip *B_T_;  // Battery coeff b
   TableInterp1Dclip *A_T_;  // Battery coeff a
@@ -182,6 +184,7 @@ protected:
   double q_ekf_;    // Filtered charge calculated by ekf, C
   double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
+  double voc_soc_;  // Model voc from soc, V
   void ekf_model_predict(double *Fx, double *Bu);
   void ekf_model_update(double *hx, double *H);
 };

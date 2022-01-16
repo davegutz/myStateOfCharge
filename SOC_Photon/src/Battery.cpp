@@ -141,6 +141,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     voc_dyn_ = Randles_->y(0);
     vdyn_ = vb_ - voc_dyn_;
     voc_ = voc_dyn_;
+    voc_soc_ = voc_soc(soc_, temp_c);
 
     // EKF 1x1
     predict_ekf(ib);      // u = ib
@@ -261,6 +262,17 @@ void Battery::pretty_print(void)
 void Battery::pretty_print_ss(void)
 {
     Randles_->pretty_print();
+}
+
+// EKF model for update
+double Battery::voc_soc(const double soc, const double temp_c)
+{
+    double voc;     // return value
+    double log_soc, exp_n_soc, pow_log_soc, dv_dsoc, b, a, c;
+    double soc_lim = max(min(soc, mxeps_bb), mneps_bb);
+    calc_soc_voc_coeff(soc_lim, temp_c,  &b, &a, &c, &log_soc, &exp_n_soc, &pow_log_soc);
+    voc = calc_soc_voc(soc_lim, &dv_dsoc, b, a, c, log_soc, exp_n_soc, pow_log_soc);
+    return ( voc );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

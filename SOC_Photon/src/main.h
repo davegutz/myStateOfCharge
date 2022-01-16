@@ -515,7 +515,7 @@ void loop()
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
     mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,
-                          Monitor->soc_ekf(), Monitor->soc(), Model->dv_dsoc());
+                          Monitor->soc_ekf(), Monitor->soc(), Monitor->voc_soc(), Monitor->voc_dyn());
   }
 
   // Initialize complete once sensors and models started and summary written

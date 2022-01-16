@@ -35,22 +35,26 @@ extern CommandPars cp;
 struct Sum_st
 {
   unsigned long t;    // Timestamp
-  int16_t Tbatt;      // Battery temperature, filtered, C
-  float Vbatt;        // Battery measured potential, filtered, V
-  int8_t Ishunt;      // Batter measured input current, filtered, A
-  int8_t SOC_f;       // Battery state of charge, free Coulomb counting algorithm, %
-  int8_t dV;          // Estimated adjustment to EKF-VOC algorithm to match free Coulomb Counter, V*100
+  int16_t tb;       // Battery temperature, filtered, C
+  int16_t vb;       // Battery measured potential, filtered, V
+  int16_t ib;       // Battery measured input current, filtered, A
+  int16_t soc;      // Battery state of charge, free Coulomb counting algorithm, %
+  int16_t soc_ekf;  // Battery state of charge, ekf, %
+  int16_t voc_soc;  // Battery modeled charge voltage at soc, V
+  int16_t voc_ekf;  // Ekf estimated charge voltage, V
   Sum_st(void){}
   void assign(const time32_t now, const double Tbatt, const double Vbatt, const double Ishunt,
-    const double soc_ekf, const double soc_f, const double dV_dsoc)
+    const double soc_ekf, const double soc, const double voc_soc, const double voc_dyn)
   {
     char buffer[32];
     this->t = now;
-    this->Tbatt = Tbatt;
-    this->Vbatt = float(Vbatt);
-    this->Ishunt = int8_t(Ishunt*4.0);
-    this->SOC_f = soc_f*100;
-    this->dV = int8_t(min(max((soc_ekf - soc_f) * dV_dsoc, -1.25), 1.25) * 100.);
+    this->tb = int16_t(Tbatt*600.);
+    this->vb = int16_t(Vbatt*1200.);
+    this->ib = int16_t(Ishunt*600.);
+    this->soc = int16_t(soc*16000.);
+    this->soc_ekf = int16_t(soc_ekf*16000.);
+    this->voc_soc = int16_t(voc_soc*1200.);
+    this->voc_ekf = int16_t(voc_dyn*1200.);
     time_long_2_str(now, buffer);
   }
   void print(void)
@@ -60,17 +64,20 @@ struct Sum_st
     {
       time_long_2_str(this->t, buffer);
     }
-    Serial.printf("%s, %ld, %4d, %7.3f, %6.2f, %7d, %5.2f,",
-          buffer, this->t, this->Tbatt, this->Vbatt, double(this->Ishunt)/4., this->SOC_f, double(this->dV)/100.);
+    Serial.printf("%s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f",
+          buffer, this->t, double(this->tb)/600., double(this->vb)/1200., double(this->ib)/600., double(this->soc)/16000., double(this->soc_ekf)/16000.,
+          double(this->voc_soc)/1200., double(this->voc_ekf)/1200.);
   }
   void nominal()
   {
     this->t = 0L;
-    this->Tbatt = 0.;
-    this->Vbatt = 0.;
-    this->Ishunt = 0.;
-    this->SOC_f = 0.;
-    this->dV = 0.;
+    this->tb = 0.;
+    this->vb = 0.;
+    this->ib = 0.;
+    this->soc = 0.;
+    this->soc_ekf = 0.;
+    this->voc_soc = 0.;
+    this->voc_ekf = 0.;
   }
 };
 
