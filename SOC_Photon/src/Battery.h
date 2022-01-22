@@ -37,7 +37,7 @@
                                         // what gets delivered, e.g. Wshunt/NOM_SYS_VOLT.  Also varies 0.2-0.4C currents
                                         // or 20-40 A for a 100 Ah battery
 #define RATED_TEMP            25.       // Temperature at RATED_BATT_CAP, deg C
-#define BATT_DVOC_DT          0.001875  // Change of VOC with operating temperature in range 0 - 50 C (0.0075) V/deg C
+#define BATT_DVOC_DT          0.0068    // Change of VOC with operating temperature in range 0 - 50 C (0.0068 on 2022-01-22) V/deg C
 // >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
 #define BATT_V_SAT            3.4625    // Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
 #define BATT_R1               0.00126   // Battery Randels static resistance, Ohms (0.00126) for 3v cell matches transients
@@ -80,6 +80,15 @@ const double mneps_bb = 1e-6;       // Numerical minimum of coefficient model wi
 const double dvoc_dt = BATT_DVOC_DT * double(batt_num_cells);
 const double sat_cutback_gain = 10;         // Multiplier on saturation anti-windup
 
+// Latest table from data.   
+// See Model Fit 202201 tab of BattleBorn Rev1.xls
+const unsigned int n_s = 12;
+const double x_soc[n_s] =     { 0,    0.1,   0.2,   0.3,   0.4,   0.5,   0.6,   0.7,   0.8,   0.9,   0.98, 1.00};
+const unsigned int m_t = 2;
+const double y_t[m_t] =  { 0., 40. };
+const double t_voc[m_t*n_s] = { 9.0,  11.8,  12.45, 12.61, 12.8,  12.83, 12.9,  13.00, 13.07, 13.11, 13.23, 13.5, 
+                                9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.4};
+
 // Charge test profiles
 #define NUM_VEC           1   // Number of vectors defined here
 static const unsigned int n_v1 = 10;
@@ -100,15 +109,17 @@ public:
   Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim);
+    const double q_cap_rated, const double t_rated, const double t_rlim, TableInterp2D *vocT);
   ~Battery();
   // operators
   // functions
   void Dv(const double dv) { dv_ = dv; };
   void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -r0_*sr_); };
   double calc_h_jacobian(double soc_lim, double b, double c, double log_soc, double exp_n_soc, double pow_log_soc);
+  double calc_h_jacobian(double soc, double temp_c);
   double calc_soc_voc(double soc_lim, double *dv_dsoc, double b, double a, double c, double log_soc, double exp_n_soc,
     double pow_log_soc);
+  double calc_soc_voc(const double soc, const double temp_c, double *dv_dsoc);
   void calc_soc_voc_coeff(double soc, double tc, double *b, double *a, double *c, double *log_soc,
                           double *exp_n_soc, double *pow_log_soc);
   virtual double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
@@ -121,8 +132,10 @@ public:
   double soc_ekf() { return (soc_ekf_); };
   double SOC_ekf() { return (SOC_ekf_); };
   double voc() { return (voc_); };
+  double voc_eqn() { return (voc_eqn_); };
   double vsat() { return (vsat_); };
   double voc_dyn() { return (voc_dyn_); };
+  double voc_soc_eqn() { return (voc_soc_eqn_); };
   double voc_soc() { return (voc_soc_); };
   double vdyn() { return (vdyn_); };
   double vb() { return (vb_); };
@@ -130,12 +143,14 @@ public:
   double temp_c() { return (temp_c_); };
   double tcharge() { return (tcharge_); };
   double dv_dsoc() { return (dv_dsoc_); };
+  double dv_dsoc_eqn() { return (dv_dsoc_eqn_); };
   double Dv() { return (dv_); };
   double Sr() { return (sr_); };
   double K_ekf() { return (K_); };
   double y_ekf() { return (y_); };
   double amp_hrs_remaining() { return (amp_hrs_remaining_); };
   double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
+  double voc_soc_eqn(const double soc, const double temp_c);
   double voc_soc(const double soc, const double temp_c);
 protected:
   TableInterp1Dclip *B_T_;  // Battery coeff b
@@ -150,11 +165,13 @@ protected:
   unsigned int nz_; // Number of breakpoints
   double q_;        // Charge, C
   double voc_;      // Static model open circuit voltage, V
+  double voc_eqn_;  // Static model open circuit voltage from equations, V
   double vdyn_;     // Model current induced back emf, V
   double vb_;        // Total model voltage, voltage at terminals, V
   double ib_;  // Current into battery, A
   int num_cells_;   // Number of cells
   double dv_dsoc_;  // Derivative scaled, V/fraction
+  double dv_dsoc_eqn_;  // Derivative scaled from equations, V/fraction
   double tcharge_;  // Charging time to 100%, hr
   double sr_;       // Resistance scalar
   double nom_vsat_; // Nominal saturation threshold at 25C, V
@@ -184,9 +201,12 @@ protected:
   double q_ekf_;    // Filtered charge calculated by ekf, C
   double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
-  double voc_soc_;  // Model voc from soc, V
+  double voc_soc_eqn_;  // Model voc from soc, V
+  double voc_soc_;  // Model voc from soc-voc table, V
+  TableInterp2D *voc_T_;   // SOC-VOC 2-D table, V
   void ekf_model_predict(double *Fx, double *Bu);
   void ekf_model_update(double *hx, double *H);
+  void ekf_model_update_eqn(double *hx, double *H);
 };
 
 
@@ -197,7 +217,7 @@ public:
   BatteryModel(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim);
+    const double q_cap_rated, const double t_rated, const double t_rlim, TableInterp2D *vocT);
   ~BatteryModel();
   // operators
   // functions

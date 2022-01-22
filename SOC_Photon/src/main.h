@@ -234,11 +234,13 @@ void loop()
 
   // Battery  models
   // Free, driven by soc
+  // Instantiate the table
+  TableInterp2D *voc_T = new TableInterp2D(n_s, m_t, x_soc, y_t, t_voc);
   static Battery *Monitor = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
-    batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim);
+    batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, voc_T);
   // Model, driven by soc, used to get Vbatt.   Use Talk 'x' to toggle model on/off. 
   static BatteryModel *Model = new BatteryModel(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
-    batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim);
+    batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, voc_T);
 
   // Battery saturation
   static Debounce *SatDebounce = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
@@ -320,7 +322,7 @@ void loop()
     // Arduino plots
     if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n",
         Monitor->soc(), Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
-        Sen->Vbatt, Model->voc());
+        Sen->Vbatt, Model->voc_eqn());
 
     //
     // Model used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
@@ -391,7 +393,7 @@ void loop()
     Monitor->calculate_ekf(Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T));
     
     // Debounce saturation calculation done in ekf using voc model
-    Sen->saturated = SatDebounce->calculate(is_sat(Sen->Tbatt_filt, Monitor->voc()), reset);
+    Sen->saturated = SatDebounce->calculate(is_sat(Sen->Tbatt_filt, Monitor->voc_eqn()), reset);
 
     // Memory store
     Monitor->count_coulombs(Sen->T, reset, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
@@ -407,19 +409,19 @@ void loop()
       Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
         Model->SOC()-90,
         Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
-        Sen->Vbatt*10-110, Model->voc()*10-110, Model->vdyn()*10, Model->vb()*10-110, Monitor->vdyn()*10-110);
+        Sen->Vbatt*10-110, Model->voc_eqn()*10-110, Model->vdyn()*10, Model->vb()*10-110, Monitor->vdyn()*10-110);
     if ( rp.debug==12 )
       Serial.printf("ib,ib_mod,   vb,vb_mod,  voc_dyn,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
         Monitor->ib(), Model->ib(),
         Monitor->vb(), Model->vb(),
-        Monitor->voc_dyn(), Model->voc(),
+        Monitor->voc_dyn(), Model->voc_eqn(),
         Monitor->K_ekf(), Monitor->y_ekf(),
         Model->soc(), Monitor->soc_ekf(), Monitor->soc());
     if ( rp.debug==-12 )
       Serial.printf("ib,ib_mod,   vb*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_mod*10-110,   K, y,    SOC_mod-90, SOC_ekf-90, SOC-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
         Monitor->ib(), Model->ib(),
         Monitor->vb()*10-110, Model->vb()*10-110,
-        Monitor->voc_dyn()*10-110, Model->voc()*10-110,
+        Monitor->voc_dyn()*10-110, Model->voc_eqn()*10-110,
         Monitor->K_ekf(), Monitor->y_ekf(),
         Model->soc()*100-90, Monitor->soc_ekf()*100-90, Model->soc()*100-90);
     if ( rp.debug==-3 )
@@ -515,7 +517,7 @@ void loop()
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
     mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,
-                          Monitor->soc_ekf(), Monitor->soc(), Monitor->voc_soc(), Monitor->voc_dyn());
+                          Monitor->soc_ekf(), Monitor->soc(), Monitor->voc_soc_eqn(), Monitor->voc_dyn());
   }
 
   // Initialize complete once sensors and models started and summary written
