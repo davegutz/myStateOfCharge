@@ -93,6 +93,10 @@ class Battery(Coulombs, EKF_1x1):
             t_a = [3.999, 4.046, 4.093]
         if t_c is None:
             t_c = [-1.181, -1.181, -1.181]
+        t_x_soc = [0,    0.1,   0.2,   0.3,   0.4,   0.5,   0.6,   0.7,   0.8,   0.9,   0.98, 1.00]
+        t_y_t = [0., 40.]
+        t_voc = [9.0,  11.8,  12.45, 12.61, 12.8,  12.83, 12.9,  13.00, 13.07, 13.11, 13.23, 13.5,
+                 9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.4]
         self.num_cells = num_cells
         self.b = 0
         self.a = 0
@@ -104,14 +108,22 @@ class Battery(Coulombs, EKF_1x1):
         self.lut_b = LookupTable()
         self.lut_a = LookupTable()
         self.lut_c = LookupTable()
+        self.lut_voc = LookupTable()
         self.lut_b.addAxis('T_degC', t_t)
         self.lut_a.addAxis('T_degC', t_t)
         self.lut_c.addAxis('T_degC', t_t)
         self.lut_b.setValueTable(t_b)
         self.lut_a.setValueTable(t_a)
         self.lut_c.setValueTable(t_c)
+        self.lut_voc.addAxis('soc', t_x_soc)
+        self.lut_voc.addAxis('T_degC', t_y_t)
+        self.lut_voc.setValueTable(t_voc)
+        for y in t_y_t:
+            for x in t_x_soc:
+                print("x,y,t=", x, y, self.lut_voc.lookup(soc=x, T_degC=y))
         self.q = 0  # Charge, C
         self.voc = NOM_SYS_VOLT  # Model open circuit voltage, V
+        self.voc_eqn = NOM_SYS_VOLT  # Model open circuit voltage, V
         self.voc_stat = self.voc  # Static model open circuit voltage from charge process, V
         self.vdyn = 0.  # Model current induced back emf, V
         self.vb = NOM_SYS_VOLT  # Battery voltage at post, V
@@ -120,6 +132,7 @@ class Battery(Coulombs, EKF_1x1):
         self.pow_oc = 0.  # Charge power, W
         self.num_cells = num_cells
         self.dv_dsoc = 0.  # Slope of soc-voc curve, V/%
+        self.dv_dsoc_eqn = 0.  # Slope of soc-voc curve, V/%
         self.tcharge = 0.  # Charging time to 100%, hr
         self.sr = 1  # Resistance scalar
         self.nom_vsat = bat_v_sat * self.num_cells  # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
@@ -164,9 +177,11 @@ class Battery(Coulombs, EKF_1x1):
              ' {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
             format(self.r0, self.r_ct, self.tau_ct, self.r_dif, self.tau_dif, self.r_sd, self.tau_sd)
         s += "  dv_dsoc = {:7.3f}  // Derivative scaled, V/fraction\n".format(self.dv_dsoc)
+        s += "  dv_dsoc_eqn = {:7.3f}  // Derivative scaled, V/fraction\n".format(self.dv_dsoc_eqn)
         s += "  ib =      {:7.3f}  // Current into battery post, A\n".format(self.ib)
         s += "  vb =      {:7.3f}  // Total model voltage, voltage at terminals, V\n".format(self.vb)
         s += "  voc      ={:7.3f}  // Dynamic model open circuit voltage including hysteresis, V\n".format(self.voc)
+        s += "  voc_eqn  ={:7.3f}  // Dynamic model open circuit voltage including hysteresis, V\n".format(self.voc_eqn)
         s += "  voc_stat ={:7.3f}  // Static model open circuit voltage, V\n".format(self.voc_stat)
         s += "  vsat =    {:7.3f}  // Saturation threshold at temperature, V\n".format(self.vsat)
         s += "  voc_dyn = {:7.3f}  // Charging voltage, V\n".format(self.voc_dyn)
@@ -198,19 +213,33 @@ class Battery(Coulombs, EKF_1x1):
     def assign_soc(self, soc, voc):
         self.soc = soc
         self.voc = voc
+        self.voc_eqn = voc
         self.voc_stat = voc
         self.vsat = self.nom_vsat + (self.temp_c - RATED_TEMP) * self.dvoc_dt
         self.sat = self.voc >= self.vsat
 
-    def calc_h_jacobian(self, soc_lim=0., b=0., c=0., log_soc=0., exp_n_soc=0., pow_log_soc=0.):
+    def calc_h_jacobian_eqn(self, soc_lim=0., b=0., c=0., log_soc=0., exp_n_soc=0., pow_log_soc=0.):
         dv_dsoc = float(self.num_cells) * (b * self.m / soc_lim * pow_log_soc / log_soc + c +
                                            self.d * self.n * exp_n_soc)
         return dv_dsoc
 
-    def calc_soc_voc(self, soc_lim, b, a, c, log_soc, exp_n_soc, pow_log_soc):
+    def calc_h_jacobian(self, soc_lim, temp_c):
+        if soc_lim > 0.5:
+            dv_dsoc = (self.look_voc(soc_lim, temp_c) - self.look_voc(soc_lim-0.01, temp_c)) / 0.01
+        else:
+            dv_dsoc = (self.look_voc(soc_lim+0.01, temp_c) - self.look_voc(soc_lim, temp_c)) / 0.01
+        return dv_dsoc
+
+    def calc_soc_voc_eqn(self, soc_lim, b, a, c, log_soc, exp_n_soc, pow_log_soc):
         """SOC-OCV curve fit method per Zhang, et al """
-        dv_dsoc = self.calc_h_jacobian(soc_lim, b, c, log_soc, exp_n_soc, pow_log_soc)
+        dv_dsoc = self.calc_h_jacobian_eqn(soc_lim, b, c, log_soc, exp_n_soc, pow_log_soc)
         voc = self.num_cells * (a + b * pow_log_soc + c * soc_lim + self.d * exp_n_soc)
+        return voc, dv_dsoc
+
+    def calc_soc_voc(self, soc, temp_c):
+        """SOC-OCV curve fit method per Zhang, et al """
+        dv_dsoc = self.calc_h_jacobian(soc, temp_c)
+        voc = self.look_voc(soc, temp_c)
         return voc, dv_dsoc
 
     def calc_soc_voc_coeff(self, soc, tc, n, m):
@@ -239,12 +268,14 @@ class Battery(Coulombs, EKF_1x1):
         self.voc_dyn = self.Randles.y
         self.vdyn = self.vb - self.voc_dyn
         self.voc = self.voc_dyn
+        self.voc_eqn = self.voc_dyn
         self.voc_stat = self.voc_dyn
         self.pow_oc = self.voc * self.ib
 
         # EKF 1x1
         self.predict_ekf(ib)  # u = ib
-        self.update_ekf(self.voc_dyn, mneps_bb, mxeps_bb)  # z = voc_dyn, voc_filtered = hx
+        # self.update_ekf(self.voc_dyn, mneps_bb, mxeps_bb)  # z = voc_dyn, voc_filtered = hx
+        self.update_ekf(self.voc_dyn, 0., 1.)  # z = voc_dyn, voc_filtered = hx
         self.soc_ekf = self.x_kf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity
         self.SOC_ekf = self.q_ekf / self.q_cap_rated_scaled * 100.
@@ -316,7 +347,9 @@ class Battery(Coulombs, EKF_1x1):
         x_lim = max(min(self.x_kf, mxeps_bb), mneps_bb)
         self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc =\
             self.calc_soc_voc_coeff(x_lim, self.temp_c, self.n, self.m)
-        self.hx, self.dv_dsoc = self.calc_soc_voc(x_lim, self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc)
+        self.hx_eqn, self.dv_dsoc_eqn = self.calc_soc_voc_eqn(x_lim, self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc)
+        self.H_eqn = self.dv_dsoc_eqn
+        self.hx, self.dv_dsoc = self.calc_soc_voc(max(min(self.x_kf, 1.), 0.), temp_c=self.temp_c)
         # Jacobian of measurement function
         self.H = self.dv_dsoc
         return self.hx, self.H
@@ -336,6 +369,11 @@ class Battery(Coulombs, EKF_1x1):
         a = self.lut_a.lookup(T_degC=temp_c)
         c = self.lut_c.lookup(T_degC=temp_c)
         return b, a, c
+
+    def look_voc(self, soc, temp_c):
+        # Table lookups of Zhang coefficients
+        voc = self.lut_voc.lookup(soc=soc, T_degC=temp_c)
+        return voc
 
     def look_hys(self, dv, soc):
         return NotImplementedError
@@ -379,6 +417,7 @@ class Battery(Coulombs, EKF_1x1):
         self.saved.vd.append(self.vd())
         self.saved.dv_hys.append(self.dv_hys)
         self.saved.voc.append(self.voc)
+        self.saved.voc_eqn.append(self.voc_eqn)
         self.saved.voc_stat.append(self.voc_stat)
         self.saved.vbc.append(self.vbc())
         self.saved.vcd.append(self.vcd())
@@ -458,6 +497,7 @@ class BatteryModel(Battery):
              " down charging so if too\n".format(self.ib_sat)
         s += "  ib     =        {:7.3f}  // Open circuit current into posts, A\n".format(self.ib)
         s += "  voc     =        {:7.3f}  // Open circuit voltage, V\n".format(self.voc)
+        s += "  voc_eqn =        {:7.3f}  // Open circuit voltage, V\n".format(self.voc_eqn)
         s += "  voc_stat=        {:7.3f}  // Static, table lookup value of voc before applying hysteresis, V\n".\
             format(self.voc_stat)
         s += "  \n  "
@@ -470,21 +510,24 @@ class BatteryModel(Battery):
         self.dt = dt
         self.temp_c = temp_c
 
-        soc_lim = max(min(soc, mxeps_bb), mneps_bb)
+        # soc_lim = max(min(soc, mxeps_bb), mneps_bb)
         # SOC = soc * q_capacity / self.q_cap_rated_scaled * 100.
 
         # VOC - OCV model
-        self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc =\
-            self.calc_soc_voc_coeff(soc_lim, temp_c, self.n, self.m)
-        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc_lim, self.b, self.a, self.c, log_soc, exp_n_soc,
-                                                        pow_log_soc)
-        self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, max_voc)  # slightly beyond but don't windup
+        # self.b, self.a, self.c, log_soc, exp_n_soc, pow_log_soc =\
+        #     self.calc_soc_voc_coeff(soc_lim, temp_c, self.n, self.m)
+        # self.voc_stat, self.dv_dsoc_eqn = self.calc_soc_voc_eqn(soc_lim, self.b, self.a, self.c, log_soc, exp_n_soc,
+        #                                                 pow_log_soc)
+        # self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc_eqn, max_voc)  # slightly beyond but don't windup
+        # self.voc_stat += self.dv  # Experimentally varied
+        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(max(min(soc, 1.), 0.), temp_c)
         self.voc_stat += self.dv  # Experimentally varied
 
         # Dynamic emf
         # Hysteresis model
         self.hys.calculate_hys(curr_in, self.voc_stat, self.soc)
         self.voc = self.hys.update(self.dt)
+        self.voc_eqn = 0.
         self.ioc = self.hys.ioc
         self.dv_hys = self.hys.dv_hys
         # Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
@@ -605,6 +648,7 @@ class Saved:
         self.vc = []
         self.vd = []
         self.voc = []
+        self.voc_eqn = []
         self.voc_stat = []
         self.dv_hys = []
         self.vbc = []

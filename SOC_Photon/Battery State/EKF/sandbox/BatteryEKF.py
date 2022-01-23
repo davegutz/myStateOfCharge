@@ -27,7 +27,7 @@ class BatteryEKF:
 
     def __init__(self, n_cells=4, r0=0.003, tau_ct=3.7, rct=0.0016, tau_dif=83, r_dif=0.0077, dt=0.1, b=0., a=0.,
                  c=0., n=0.4, m=0.478, d=0.707, t_t=None, t_b=None, t_a=None, t_c=None, nom_bat_cap=100.,
-                 true_bat_cap=102., nom_sys_volt=13., dv=0, sr=1, bat_v_sat=3.4625, dvoc_dt=0.001875, rsd=70.,
+                 true_bat_cap=102., nom_sys_volt=13., dv=0, sr=1, bat_v_sat=3.4625, dvoc_dt=0.0069, rsd=70.,
                  tau_sd=1.8e7, dqdt=0.01, temp_c=25., soc_offset=-0.0025):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
@@ -45,6 +45,10 @@ class BatteryEKF:
             t_a = [3.999, 4.046, 4.093]
         if t_c is None:
             t_c = [-1.181, -1.181, -1.181]
+        t_x_soc = [0,    0.1,   0.2,   0.3,   0.4,   0.5,   0.6,   0.7,   0.8,   0.9,   0.98, 1.00]
+        t_y_t = [0., 40.]
+        t_voc = [9.0,  11.8,  12.45, 12.61, 12.8,  12.83, 12.9,  13.00, 13.07, 13.11, 13.23, 13.5,
+                 9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.4]
 
         # Dynamics
         self.n_cells = n_cells
@@ -80,6 +84,10 @@ class BatteryEKF:
         self.lut_b.setValueTable(t_b)
         self.lut_a.setValueTable(t_a)
         self.lut_c.setValueTable(t_c)
+        self.lut_voc = LookupTable()
+        self.lut_voc.addAxis('soc', t_x_soc)
+        self.lut_voc.addAxis('T_degC', t_y_t)
+        self.lut_voc.setValueTable(t_voc)
 
         # Estimator
         # Nominal rsd is loss of 70% charge (Dsoc=0.7) in 6 month (Dt=1.8e7 sec = tau_sd). Dsoc= i*Dt/(3600*nom_bat_cap)

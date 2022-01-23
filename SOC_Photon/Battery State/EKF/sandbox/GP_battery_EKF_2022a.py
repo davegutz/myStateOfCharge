@@ -45,7 +45,7 @@ if __name__ == '__main__':
         # time_end = 700
         time_end = 3500
         # time_end = 100
-        temp_c = 20.
+        temp_c = 40.
 
         # Trade study inputs
         # i-->0 provides continuous anchor to reset filter (why?)  i shifts important --> 2 current sensors, hyst in ekf
@@ -70,7 +70,7 @@ if __name__ == '__main__':
         i_std = 0.1  # (0.0-0.1) ------ noise
         soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
         tau_ct = 0.2  # (0.1-->5.)  -------
-        hys_scale = 10.  #(1.-->10.)
+        hys_scale = 1.  #(1.-->10.)
 
         # Setup
         r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
@@ -151,6 +151,8 @@ if __name__ == '__main__':
 
         n_fig, fig_files = overall(mon.saved, sim.saved, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig)
+
+
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
         for fig_file in fig_files:
