@@ -235,12 +235,11 @@ void loop()
   // Battery  models
   // Free, driven by soc
   // Instantiate the table
-  TableInterp2D *voc_T = new TableInterp2D(n_s, m_t, x_soc, y_t, t_voc);
   static Battery *Monitor = new Battery(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
-    batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, voc_T);
+    batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim);
   // Model, driven by soc, used to get Vbatt.   Use Talk 'x' to toggle model on/off. 
   static BatteryModel *Model = new BatteryModel(t_bb, b_bb, a_bb, c_bb, m_bb, n_bb, d_bb, nz_bb, batt_num_cells,
-    batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, voc_T);
+    batt_r1, batt_r2, batt_r2c2, batt_vsat, dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim);
 
   // Battery saturation
   static Debounce *SatDebounce = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence

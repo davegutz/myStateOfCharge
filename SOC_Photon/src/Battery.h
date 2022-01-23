@@ -109,7 +109,7 @@ public:
   Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, TableInterp2D *vocT);
+    const double q_cap_rated, const double t_rated, const double t_rlim);
   ~Battery();
   // operators
   // functions
@@ -217,7 +217,7 @@ public:
   BatteryModel(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, TableInterp2D *vocT);
+    const double q_cap_rated, const double t_rated, const double t_rlim);
   ~BatteryModel();
   // operators
   // functions

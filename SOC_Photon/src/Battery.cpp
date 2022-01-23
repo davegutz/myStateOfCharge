@@ -43,18 +43,19 @@ Battery::Battery()
 Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, TableInterp2D *vocT)
+    const double q_cap_rated, const double t_rated, const double t_rlim)
     : Coulombs(q_cap_rated, t_rated, t_rlim), b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(nz), q_(nom_q_cap),
     voc_(0), voc_eqn_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0), dv_dsoc_eqn_(0), tcharge_(24.),
     sr_(1.), nom_vsat_(batt_vsat), dv_(0), dvoc_dt_(dvoc_dt),
     r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
-    tau_sd_(1.8e7), r_sd_(70.), voc_T_(vocT)
+    tau_sd_(1.8e7), r_sd_(70.)
 {
 
     // Battery characteristic tables
     B_T_ = new TableInterp1Dclip(nz_, x_tab, b_tab);
     A_T_ = new TableInterp1Dclip(nz_, x_tab, a_tab);
     C_T_ = new TableInterp1Dclip(nz_, x_tab, c_tab);
+    voc_T_ = new TableInterp2D(n_s, m_t, x_soc, y_t, t_voc);
 
     // EKF
     this->Q_ = 0.001*0.001;
@@ -131,9 +132,9 @@ double Battery::calc_h_jacobian(const double soc, const double temp_c)
 {
     double dv_dsoc;  // return value
     if ( soc > 0.5 )
-        dv_dsoc = voc_T_->interp(soc, temp_c) - voc_T_->interp(soc-0.01, temp_c) / 0.01;
+        dv_dsoc = (voc_T_->interp(soc, temp_c) - voc_T_->interp(soc-0.01, temp_c)) / 0.01;
     else
-        dv_dsoc = voc_T_->interp(soc+0.01, temp_c) - voc_T_->interp(soc, temp_c) / 0.01;
+        dv_dsoc = (voc_T_->interp(soc+0.01, temp_c) - voc_T_->interp(soc, temp_c)) / 0.01;
     return (dv_dsoc);
 }
 
@@ -160,6 +161,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     voc_dyn_ = Randles_->y(0);
     vdyn_ = vb_ - voc_dyn_;
     voc_eqn_ = voc_dyn_;
+    voc_ = voc_dyn_;
     voc_soc_eqn_ = voc_soc_eqn(soc_, temp_c);
     voc_soc_ = voc_soc(soc_, temp_c);
 
@@ -275,6 +277,7 @@ void Battery::pretty_print(void)
     Serial.printf("  ib =      %7.3f;  // Current into battery, A\n", ib_);
     Serial.printf("  vb =      %7.3f;  // Total model voltage, voltage at terminals, V\n", vb_);
     Serial.printf("  voc =     %7.3f;  // Static model open circuit voltage, V\n", voc_);
+    Serial.printf("  voc_soc = %7.3f;  // Static model open circuit voltage from table, V\n", voc_soc_);
     Serial.printf("  voc_eqn = %7.3f;  // Static model open circuit voltage from equations, V\n", voc_eqn_);
     Serial.printf("  vsat =    %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
     Serial.printf("  voc_dyn = %7.3f;  // Charging voltage, V\n", voc_dyn_);
@@ -323,8 +326,8 @@ BatteryModel::BatteryModel() : Battery() {}
 BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
     const double m, const double n, const double d, const unsigned int nz, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, TableInterp2D *vocT) :
-    Battery(x_tab, b_tab, a_tab, c_tab, m, n, d, nz, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, vocT)
+    const double q_cap_rated, const double t_rated, const double t_rlim) :
+    Battery(x_tab, b_tab, a_tab, c_tab, m, n, d, nz, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim)
 {
     // Randles dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery

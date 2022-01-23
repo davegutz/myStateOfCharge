@@ -157,10 +157,10 @@ double tab2(double x1, double x2, double *v1, double *v2, double *y, int n1,
     return y[0];
   binsearch(x1, v1, n1, &high1, &low1, &dx1);
   binsearch(x2, v2, n2, &high2, &low2, &dx2);
-  temp1 = low1 * n2 + low2;
-  temp2 = low1 * n2 + high2;
-  r0 = *(y + temp1) + dx1 * (*(y + high1 * n2 + low2) - *(y + temp1));
-  r1 = *(y + temp2) + dx1 * (*(y + high1 * n2 + high2) - *(y + temp2));
+  temp1 = low2 * n1 + low1;
+  temp2 = high2 * n1 + low1;
+  r0 = *(y + temp1) + dx1 * (*(y + low2 * n1 + high1) - *(y + temp1));
+  r1 = *(y + temp2) + dx1 * (*(y + high2 * n1 + high1) - *(y + temp2));
   return r0 + dx2 * (r1 - r0);
 } /* End tab2 */
 
