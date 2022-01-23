@@ -45,7 +45,7 @@ rp = Retained()
 #                         what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
 #                         or 20 - 40 A for a 100 Ah battery"""
 RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
-BATT_DVOC_DT = 0.001875
+BATT_DVOC_DT = 0.0069  # 1/23/2022
 """ Change of VOC with operating temperature in range 0 - 50 C (0.0075) V/deg C
                             >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C"""
 BATT_V_SAT = 3.4625  # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
@@ -95,8 +95,16 @@ class Battery(Coulombs, EKF_1x1):
             t_c = [-1.181, -1.181, -1.181]
         t_x_soc = [0,    0.1,   0.2,   0.3,   0.4,   0.5,   0.6,   0.7,   0.8,   0.9,   0.98, 1.00]
         t_y_t = [0., 40.]
-        t_voc = [9.0,  11.8,  12.45, 12.61, 12.8,  12.83, 12.9,  13.00, 13.07, 13.11, 13.23, 13.5,
-                 9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.4]
+        t_voc = [[9.0,  11.8,  12.45, 12.61, 12.8,  12.83, 12.9,  13.00, 13.07, 13.11, 13.23, 13.5],
+                 [9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.4]]
+        x = np.array(t_x_soc)
+        y = np.array(t_y_t)
+        data = np.array(t_voc)
+        from scipy.interpolate import RegularGridInterpolator as rg
+        self.lut_voc = rg((x, y), data.T)
+        # soc = 0.5
+        # temp_c = 40
+        # voc = float(voc_rg([soc, temp_c]))
         self.num_cells = num_cells
         self.b = 0
         self.a = 0
@@ -108,19 +116,19 @@ class Battery(Coulombs, EKF_1x1):
         self.lut_b = LookupTable()
         self.lut_a = LookupTable()
         self.lut_c = LookupTable()
-        self.lut_voc = LookupTable()
         self.lut_b.addAxis('T_degC', t_t)
         self.lut_a.addAxis('T_degC', t_t)
         self.lut_c.addAxis('T_degC', t_t)
         self.lut_b.setValueTable(t_b)
         self.lut_a.setValueTable(t_a)
         self.lut_c.setValueTable(t_c)
-        self.lut_voc.addAxis('soc', t_x_soc)
-        self.lut_voc.addAxis('T_degC', t_y_t)
-        self.lut_voc.setValueTable(t_voc)
-        for y in t_y_t:
-            for x in t_x_soc:
-                print("x,y,t=", x, y, self.lut_voc.lookup(soc=x, T_degC=y))
+
+        lut = LookupTable()
+        x_axis_values = [1., 2., 3., 4., 5.]
+        y_axis_values = [1., 2., 3., 4., 5.]
+        lut.addAxis('x', x_axis_values)
+        lut.addAxis('y', y_axis_values)
+
         self.q = 0  # Charge, C
         self.voc = NOM_SYS_VOLT  # Model open circuit voltage, V
         self.voc_eqn = NOM_SYS_VOLT  # Model open circuit voltage, V
@@ -372,7 +380,7 @@ class Battery(Coulombs, EKF_1x1):
 
     def look_voc(self, soc, temp_c):
         # Table lookups of Zhang coefficients
-        voc = self.lut_voc.lookup(soc=soc, T_degC=temp_c)
+        voc = float(self.lut_voc([soc, temp_c]))
         return voc
 
     def look_hys(self, dv, soc):

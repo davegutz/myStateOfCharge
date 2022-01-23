@@ -44,8 +44,8 @@ if __name__ == '__main__':
         # time_end = 13.3
         # time_end = 700
         time_end = 3500
-        # time_end = 100
-        temp_c = 40.
+        # time_end = 800
+        temp_c = 25.
 
         # Trade study inputs
         # i-->0 provides continuous anchor to reset filter (why?)  i shifts important --> 2 current sensors, hyst in ekf
@@ -66,10 +66,10 @@ if __name__ == '__main__':
         r_dif = 0.0077  # (0.0077-->0.015)   ++++++++++  dyn only provided reset soc periodically
         rsd = 70.  # (70.-->700)  ------- dyn only
         tau_sd = 1.87e7  # (1.87e7-->1.87e6) ++++++ dyn only
-        v_std = 0.01  # (0.0-0.01) ------ noise
-        i_std = 0.1  # (0.0-0.1) ------ noise
+        v_std = 0.01  # (0.01-->0) ------ noise
+        i_std = 0.1  # (0.1-->0) ------ noise
         soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
-        tau_ct = 0.2  # (0.1-->5.)  -------
+        tau_ct = 0.2  # (0.2-->5.)  -------
         hys_scale = 1.  #(1.-->10.)
 
         # Setup
@@ -79,10 +79,6 @@ if __name__ == '__main__':
         sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale)
         mon = Battery(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
                       r_dif=r_dif, temp_c=temp_c)
-
-        solve_max_err = 1e-6  # Solver error tolerance, V (1e-6)
-        solve_max_counts = 10  # Solver maximum number of steps (10)
-        solve_max_step = 0.2  # Solver maximum step size, frac soc
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)
