@@ -73,7 +73,7 @@ const unsigned int m_t = 2;
 const double y_t[m_t] =  { 0., 40. };
 const double t_voc[m_t*n_s] = { 9.0,  11.8,  12.45, 12.61, 12.8,  12.83, 12.9,  13.00, 13.07, 13.11, 13.23, 13.5, 
                                 9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.4};
-
+const double mxeps_bb = 1-1e-6;      // Level of soc that indicates saturated
 
 // Battery Class
 class Battery : public Coulombs, public EKF_1x1
@@ -198,6 +198,6 @@ void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols)
 void mulvec(double * a, double * x, double * y, int m, int n);
 double sat_voc(const double temp_c);
 double calc_vsat(const double temp_c);
-boolean is_sat(const double temp_c, const double voc);
+boolean is_sat(const double temp_c, const double voc, const double soc);
 
 #endif

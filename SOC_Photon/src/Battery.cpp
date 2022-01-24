@@ -505,10 +505,10 @@ double sat_voc(const double temp_c)
     Outputs:
         is_saturated Battery saturation status, T/F
 */
-boolean is_sat(const double temp_c, const double voc)
+boolean is_sat(const double temp_c, const double voc, const double soc)
 {
     double vsat = sat_voc(temp_c);
-    return ( voc >= vsat );
+    return ( voc >= vsat || soc >= mxeps_bb );
 }
 
 // Saturated voltage calculation
