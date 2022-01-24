@@ -101,7 +101,7 @@ class Battery(Coulombs, EKF_1x1):
         y = np.array(t_y_t)
         data = np.array(t_voc)
         from scipy.interpolate import RegularGridInterpolator as rg
-        self.lut_voc = rg((x, y), data.T)
+        self.lut_voc = rg((x, y), data.T)  # TODO:  this is slow; change this out for a roll-your-own 2-d table based on TableInterp2D myLibrary/myTables
         # soc = 0.5
         # temp_c = 40
         # voc = float(voc_rg([soc, temp_c]))
@@ -571,9 +571,9 @@ class BatteryModel(Battery):
 
 
 # Other functions
-def is_sat(temp_c, voc):
+def is_sat(temp_c, voc, soc):
     vsat = sat_voc(temp_c)
-    return voc >= vsat
+    return voc >= vsat or soc >= mxeps_bb
 
 
 def calculate_capacity(temp_c, t_sat, q_sat):
