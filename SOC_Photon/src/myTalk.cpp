@@ -214,13 +214,13 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
             Serial.printf("\n");
             break;
           case ( 'b' ):
-            Serial.printf("Monitor:");         Monitor->pretty_print();
-            Serial.printf("Monitor::");        Monitor->Coulombs::pretty_print();
-            Serial.printf("Monitor::");        Monitor->pretty_print_ss();
-            Serial.printf("Monitor::");        Monitor->EKF_1x1::pretty_print();
+            Serial.printf("Monitor:");  Monitor->pretty_print();
+            Serial.printf("Monitor::"); Monitor->Coulombs::pretty_print();
+            Serial.printf("Monitor::"); Monitor->pretty_print_ss();
+            Serial.printf("Monitor::"); Monitor->EKF_1x1::pretty_print();
             break;
           case ( 'c' ):
-            Serial.printf("Monitor::");        Monitor->Coulombs::pretty_print();
+            Serial.printf("Monitor::"); Monitor->Coulombs::pretty_print();
             Serial.printf("Model::");   Model->Coulombs::pretty_print();
             break;
           case ( 'e' ):

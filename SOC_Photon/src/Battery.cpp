@@ -37,24 +37,20 @@ extern CommandPars cp;
 // class Battery
 // constructors
 Battery::Battery()
-    : b_(0), a_(0), c_(0), m_(0), n_(0), d_(0), nz_(1), q_(nom_q_cap), voc_(0), voc_eqn_(0),
-    vdyn_(0), vb_(0), ib_(0), num_cells_(4), dv_dsoc_(0), dv_dsoc_eqn_(0), tcharge_(24), sr_(1), vsat_(13.7),
+    : q_(nom_q_cap), voc_(0),
+    vdyn_(0), vb_(0), ib_(0), num_cells_(4), dv_dsoc_(0), tcharge_(24), sr_(1), vsat_(13.7),
     dv_(0), dvoc_dt_(0) {Q_ = 0.; R_ = 0.;}
-Battery::Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
-    const double m, const double n, const double d, const unsigned int nz, const int num_cells,
+Battery::Battery(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim)
-    : Coulombs(q_cap_rated, t_rated, t_rlim), b_(0), a_(0), c_(0), m_(m), n_(n), d_(d), nz_(nz), q_(nom_q_cap),
-    voc_(0), voc_eqn_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0), dv_dsoc_eqn_(0), tcharge_(24.),
+    : Coulombs(q_cap_rated, t_rated, t_rlim), q_(nom_q_cap),
+    voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0), tcharge_(24.),
     sr_(1.), nom_vsat_(batt_vsat), dv_(0), dvoc_dt_(dvoc_dt),
     r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
     tau_sd_(1.8e7), r_sd_(70.)
 {
 
     // Battery characteristic tables
-    B_T_ = new TableInterp1Dclip(nz_, x_tab, b_tab);
-    A_T_ = new TableInterp1Dclip(nz_, x_tab, a_tab);
-    C_T_ = new TableInterp1Dclip(nz_, x_tab, c_tab);
     voc_T_ = new TableInterp2D(n_s, m_t, x_soc, y_t, t_voc);
 
     // EKF
@@ -94,38 +90,12 @@ Battery::~Battery() {}
 // functions
 
 // VOC-OCV model
-void Battery::calc_soc_voc_coeff(double soc, double tc, double *b, double *a, double *c, double *log_soc, double *exp_n_soc, double *pow_log_soc)
-{
-    *b = B_T_ ->interp(tc);
-    *a = A_T_ ->interp(tc);
-    *c = C_T_ ->interp(tc);
-
-    *log_soc = log(soc);
-    *exp_n_soc = exp(n_*(soc-1));
-    *pow_log_soc = pow(-*log_soc, m_);
-}
-
-double Battery::calc_soc_voc(double soc_lim, double *dv_dsoc, double b, double a, double c, double log_soc, double exp_n_soc, double pow_log_soc)
-{
-    double voc;  // return value
-    *dv_dsoc = calc_h_jacobian(soc_lim, b, c, log_soc, exp_n_soc, pow_log_soc);
-    voc = double(num_cells_) * ( a + b*pow_log_soc + c*soc_lim + d_*exp_n_soc );
-    // d2v_dsoc2_ = double(num_cells_) * ( b*m_/soc_/soc_*pow_log_soc/log_soc*((m_-1.)/log_soc - 1.) + d_*n_*n_*exp_n_soc );
-    return (voc);
-}
-
 double Battery::calc_soc_voc(const double soc, const double temp_c, double *dv_dsoc)
 {
     double voc;  // return value
     *dv_dsoc = calc_h_jacobian(soc, temp_c);
     voc = voc_T_->interp(soc, temp_c);
     return (voc);
-}
-
-double Battery::calc_h_jacobian(double soc_lim, double b, double c, double log_soc, double exp_n_soc, double pow_log_soc)
-{
-    double dv_dsoc = double(num_cells_) * ( b*m_/soc_lim*pow_log_soc/log_soc + c + d_*n_*exp_n_soc );
-    return (dv_dsoc);
 }
 
 double Battery::calc_h_jacobian(const double soc, const double temp_c)
@@ -160,15 +130,13 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     }
     voc_dyn_ = Randles_->y(0);
     vdyn_ = vb_ - voc_dyn_;
-    voc_eqn_ = voc_dyn_;
     voc_ = voc_dyn_;
-    voc_soc_eqn_ = voc_soc_eqn(soc_, temp_c);
     voc_soc_ = voc_soc(soc_, temp_c);
 
 
     // EKF 1x1
     predict_ekf(ib);      // u = ib
-    update_ekf(voc_dyn_, mneps_bb, mxeps_bb);   // z = voc_dyn, voc_filtered = hx
+    update_ekf(voc_dyn_, 0., 1.);   // z = voc_dyn, voc_filtered = hx
     soc_ekf_ = x_ekf();   // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
     q_ekf_ = soc_ekf_ * q_capacity_;
     SOC_ekf_ = q_ekf_ / q_cap_rated_scaled_ * 100.;
@@ -222,18 +190,6 @@ void Battery::ekf_model_predict(double *Fx, double *Bu)
 }
 
 // EKF model for update
-void Battery::ekf_model_update_eqn(double *hx, double *H)
-{
-    // Measurement function hx(x), x=soc ideal capacitor
-    double log_soc, exp_n_soc, pow_log_soc;
-    double x_lim_eqn = max(min(x_, mxeps_bb), mneps_bb);
-    calc_soc_voc_coeff(x_lim_eqn, temp_c_,  &b_, &a_, &c_, &log_soc, &exp_n_soc, &pow_log_soc);
-    *hx = calc_soc_voc(x_lim_eqn, &dv_dsoc_eqn_, b_, a_, c_, log_soc, exp_n_soc, pow_log_soc);
-
-    // Jacodian of measurement function
-    *H = dv_dsoc_eqn_;
-}
-
 // EKF model for update
 void Battery::ekf_model_update(double *hx, double *H)
 {
@@ -268,17 +224,14 @@ void Battery::init_soc_ekf(const double soc)
 void Battery::pretty_print(void)
 {
     Serial.printf("Battery:\n");
-    Serial.printf("  temp, #cells, b, a, c, m, n, d, dvoc_dt = %7.1f, %d, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f;\n",
-        temp_c_, num_cells_, b_, a_, c_, m_, n_, d_, dvoc_dt_);
+    Serial.printf("  temp, #cells, dvoc_dt = %7.1f, %d, %10.6f;\n", temp_c_, num_cells_, dvoc_dt_);
     Serial.printf("  r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f;\n",
         r0_, rct_, tau_ct_, r_dif_, tau_dif_, r_sd_, tau_sd_);
     Serial.printf("  dv_dsoc = %10.6f;  // Derivative scaled, V/fraction\n", dv_dsoc_);
-    Serial.printf("  dv_dsoc_eqn = %10.6f;  // Derivative scaled from equation, V/fraction\n", dv_dsoc_eqn_);
     Serial.printf("  ib =      %7.3f;  // Current into battery, A\n", ib_);
     Serial.printf("  vb =      %7.3f;  // Total model voltage, voltage at terminals, V\n", vb_);
     Serial.printf("  voc =     %7.3f;  // Static model open circuit voltage, V\n", voc_);
     Serial.printf("  voc_soc = %7.3f;  // Static model open circuit voltage from table, V\n", voc_soc_);
-    Serial.printf("  voc_eqn = %7.3f;  // Static model open circuit voltage from equations, V\n", voc_eqn_);
     Serial.printf("  vsat =    %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
     Serial.printf("  voc_dyn = %7.3f;  // Charging voltage, V\n", voc_dyn_);
     Serial.printf("  vdyn =    %7.3f;  // Model current induced back emf, V\n", vdyn_);
@@ -302,16 +255,6 @@ void Battery::pretty_print_ss(void)
 }
 
 // EKF model for update
-double Battery::voc_soc_eqn(const double soc, const double temp_c)
-{
-    double voc;     // return value
-    double log_soc, exp_n_soc, pow_log_soc, dv_dsoc, b, a, c;
-    double soc_lim = max(min(soc, mxeps_bb), mneps_bb);
-    calc_soc_voc_coeff(soc_lim, temp_c,  &b, &a, &c, &log_soc, &exp_n_soc, &pow_log_soc);
-    voc = calc_soc_voc(soc_lim, &dv_dsoc, b, a, c, log_soc, exp_n_soc, pow_log_soc);
-    return ( voc );
-}
-
 double Battery::voc_soc(const double soc, const double temp_c)
 {
     double voc;     // return value
@@ -323,11 +266,10 @@ double Battery::voc_soc(const double soc, const double temp_c)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
 BatteryModel::BatteryModel() : Battery() {}
-BatteryModel::BatteryModel(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
-    const double m, const double n, const double d, const unsigned int nz, const int num_cells,
+BatteryModel::BatteryModel(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim) :
-    Battery(x_tab, b_tab, a_tab, c_tab, m, n, d, nz, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim)
+    Battery(num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim)
 {
     // Randles dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery
@@ -372,43 +314,37 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     dt_ = dt;
     temp_c_ = temp_C;
 
-    double soc_lim_eqn = max(min(soc, mxeps_bb), mneps_bb);
     double soc_lim = max(min(soc, 1.0), 0.0);
     double SOC = soc * q_capacity / q_cap_rated_scaled_ * 100;
 
     // VOC-OCV model
-    double log_soc, exp_n_soc, pow_log_soc;
-    calc_soc_voc_coeff(soc_lim_eqn, temp_C, &b_, &a_, &c_, &log_soc, &exp_n_soc, &pow_log_soc);
-    voc_eqn_ = calc_soc_voc(soc_lim_eqn, &dv_dsoc_eqn_, b_, a_, c_, log_soc, exp_n_soc, pow_log_soc);
-    voc_eqn_ = min(voc_eqn_ + (soc - soc_lim_eqn) * dv_dsoc_eqn_, max_voc);  // slightly beyond but don't windup
-    voc_eqn_ +=  dv_;  // Experimentally varied
     voc_ = calc_soc_voc(soc, temp_C, &dv_dsoc_);
     voc_ = min(voc_ + (soc - soc_lim) * dv_dsoc_, max_voc);  // slightly beyond but don't windup
     voc_ +=  dv_;  // Experimentally varied
 
     // Dynamic emf
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
-    double u[2] = {ib_, voc_eqn_};
+    double u[2] = {ib_, voc_};
     Randles_->calc_x_dot(u);
     Randles_->update(dt);
     vb_ = Randles_->y(0);
-    vdyn_ = vb_ - voc_eqn_;
+    vdyn_ = vb_ - voc_;
 
     // Saturation logic, both full and empty
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
     ib_ = min(curr_in, sat_ib_max_);
     if ( (q_ <= 0.) && (curr_in < 0.) ) ib_ = 0.;  //  empty
-    model_cutback_ = (voc_eqn_ > vsat_) && (ib_ == sat_ib_max_);
-    model_saturated_ = (voc_eqn_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
+    model_cutback_ = (voc_ > vsat_) && (ib_ == sat_ib_max_);
+    model_saturated_ = (voc_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
     Coulombs::sat_ = model_saturated_;
     if ( rp.debug==79 ) Serial.printf("temp_C, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f,\n",
-        temp_C, dvoc_dt_, vsat_, voc_eqn_, q_capacity, sat_ib_max_, ib_);
+        temp_C, dvoc_dt_, vsat_, voc_, q_capacity, sat_ib_max_, ib_);
 
-    if ( rp.debug==78 )Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,a,b,c,d,n,m,soc,logsoc,expnsoc,powlogsoc,voc,voc_eqn,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-     dt,temp_C, ib_, a_, b_, c_, d_, n_, m_, soc, log_soc, exp_n_soc, pow_log_soc, voc_, voc_eqn_, vdyn_, vb_);
-    if ( rp.debug==-78 ) Serial.printf("SOC/10,soc*10,voc,voc_eqn,vsat,curr_in,sat_ib_max_,ib,sat,\n%7.3f, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
-      SOC/10, soc*10, voc_, voc_eqn_, vsat_, curr_in, sat_ib_max_, ib_, model_saturated_);
+    if ( rp.debug==78 )Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc,voc,,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+     dt,temp_C, ib_, soc, voc_, vdyn_, vb_);
+    if ( rp.debug==-78 ) Serial.printf("SOC/10,soc*10,voc,vsat,curr_in,sat_ib_max_,ib,sat,\n%7.3f, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
+      SOC/10, soc*10, voc_, vsat_, curr_in, sat_ib_max_, ib_, model_saturated_);
 
 
     return ( vb_ );

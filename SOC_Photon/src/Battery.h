@@ -62,21 +62,6 @@ const double batt_c2 = double(BATT_R2C2)/batt_r2;
 const double nom_q_cap = RATED_BATT_CAP * 3600;   // Nominal battery capacity, C
 const double q_cap_rated = RATED_BATT_CAP * 3600;   // Nominal battery capacity, C;
 const double t_rlim = 0.017;    // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s
-
-// Battery model LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang etal.pdf'
-// SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope constraint
-// >=0.02 V/soc.  m and n using Zhang values.   Had to scale soc because  actual capacity
-// > RATED_BATT_CAP so equations error when soc<=0 to match data.
-const unsigned int nz_bb = 3;
-const double m_bb = 0.478;
-static const double t_bb[nz_bb] = {0.,	    25.,    50.};
-static const double b_bb[nz_bb] = {-0.836,  -0.836, -0.836};
-static const double a_bb[nz_bb] = {3.999,   4.046,  4.093};
-static const double c_bb[nz_bb] = {-1.181,  -1.181, -1.181};
-const double d_bb = 0.707;
-const double n_bb = 0.4;
-const double mxeps_bb = 1-1e-6;     // Numerical maximum of coefficient model with scaled soc.
-const double mneps_bb = 1e-6;       // Numerical minimum of coefficient model without scaled soc.
 const double dvoc_dt = BATT_DVOC_DT * double(batt_num_cells);
 const double sat_cutback_gain = 10;         // Multiplier on saturation anti-windup
 
@@ -89,25 +74,13 @@ const double y_t[m_t] =  { 0., 40. };
 const double t_voc[m_t*n_s] = { 9.0,  11.8,  12.45, 12.61, 12.8,  12.83, 12.9,  13.00, 13.07, 13.11, 13.23, 13.5, 
                                 9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.4};
 
-// Charge test profiles
-#define NUM_VEC           1   // Number of vectors defined here
-static const unsigned int n_v1 = 10;
-static const double t_min_v1[n_v1] =  {0,     0.2,   0.2001, 1.4,   1.4001, 2.0999, 2.0,    3.1999, 3.2,    3.6};
-static const double v_v1[n_v1] =      {13.95, 13.95, 13.95,  13.0,  13.0,   13.0,   13.0,   13.95,  13.95,  13.95}; // Saturation 13.7
-static const double i_v1[n_v1] =      {0.,    0.,    -500.,  -500., 0.,     0.,     160.,   160.,   0.,     0.};
-static const double T_v1[n_v1] =      {77.,   77.,   77.,    77.,   77.,    77.,    77.,    77.,    77.,    77.};
-static TableInterp1Dclip  *V_T1 = new TableInterp1Dclip(n_v1, t_min_v1, v_v1);
-static TableInterp1Dclip  *I_T1 = new TableInterp1Dclip(n_v1, t_min_v1, i_v1);
-static TableInterp1Dclip  *T_T1 = new TableInterp1Dclip(n_v1, t_min_v1, T_v1);
-
 
 // Battery Class
 class Battery : public Coulombs, public EKF_1x1
 {
 public:
   Battery();
-  Battery(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
-    const double m, const double n, const double d, const unsigned int nz, const int num_cells,
+  Battery(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim);
   ~Battery();
@@ -115,13 +88,8 @@ public:
   // functions
   void Dv(const double dv) { dv_ = dv; };
   void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -r0_*sr_); };
-  double calc_h_jacobian(double soc_lim, double b, double c, double log_soc, double exp_n_soc, double pow_log_soc);
   double calc_h_jacobian(double soc, double temp_c);
-  double calc_soc_voc(double soc_lim, double *dv_dsoc, double b, double a, double c, double log_soc, double exp_n_soc,
-    double pow_log_soc);
   double calc_soc_voc(const double soc, const double temp_c, double *dv_dsoc);
-  void calc_soc_voc_coeff(double soc, double tc, double *b, double *a, double *c, double *log_soc,
-                          double *exp_n_soc, double *pow_log_soc);
   virtual double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
   double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt);
@@ -132,10 +100,8 @@ public:
   double soc_ekf() { return (soc_ekf_); };
   double SOC_ekf() { return (SOC_ekf_); };
   double voc() { return (voc_); };
-  double voc_eqn() { return (voc_eqn_); };
   double vsat() { return (vsat_); };
   double voc_dyn() { return (voc_dyn_); };
-  double voc_soc_eqn() { return (voc_soc_eqn_); };
   double voc_soc() { return (voc_soc_); };
   double vdyn() { return (vdyn_); };
   double vb() { return (vb_); };
@@ -143,35 +109,21 @@ public:
   double temp_c() { return (temp_c_); };
   double tcharge() { return (tcharge_); };
   double dv_dsoc() { return (dv_dsoc_); };
-  double dv_dsoc_eqn() { return (dv_dsoc_eqn_); };
   double Dv() { return (dv_); };
   double Sr() { return (sr_); };
   double K_ekf() { return (K_); };
   double y_ekf() { return (y_); };
   double amp_hrs_remaining() { return (amp_hrs_remaining_); };
   double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
-  double voc_soc_eqn(const double soc, const double temp_c);
   double voc_soc(const double soc, const double temp_c);
 protected:
-  TableInterp1Dclip *B_T_;  // Battery coeff b
-  TableInterp1Dclip *A_T_;  // Battery coeff a
-  TableInterp1Dclip *C_T_;  // Battery coeff c
-  double b_;        // Battery coeff b
-  double a_;        // Battery coeff a
-  double c_;        // Battery coeff c
-  double m_;        // Battery coeff m
-  double n_;        // Battery coeff n
-  double d_;        // Battery coeff d
-  unsigned int nz_; // Number of breakpoints
   double q_;        // Charge, C
   double voc_;      // Static model open circuit voltage, V
-  double voc_eqn_;  // Static model open circuit voltage from equations, V
   double vdyn_;     // Model current induced back emf, V
   double vb_;        // Total model voltage, voltage at terminals, V
   double ib_;  // Current into battery, A
   int num_cells_;   // Number of cells
   double dv_dsoc_;  // Derivative scaled, V/fraction
-  double dv_dsoc_eqn_;  // Derivative scaled from equations, V/fraction
   double tcharge_;  // Charging time to 100%, hr
   double sr_;       // Resistance scalar
   double nom_vsat_; // Nominal saturation threshold at 25C, V
@@ -201,12 +153,10 @@ protected:
   double q_ekf_;    // Filtered charge calculated by ekf, C
   double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
-  double voc_soc_eqn_;  // Model voc from soc, V
   double voc_soc_;  // Model voc from soc-voc table, V
   TableInterp2D *voc_T_;   // SOC-VOC 2-D table, V
   void ekf_model_predict(double *Fx, double *Bu);
   void ekf_model_update(double *hx, double *H);
-  void ekf_model_update_eqn(double *hx, double *H);
 };
 
 
@@ -214,8 +164,7 @@ class BatteryModel: public Battery
 {
 public:
   BatteryModel();
-  BatteryModel(const double *x_tab, const double *b_tab, const double *a_tab, const double *c_tab,
-    const double m, const double n, const double d, const unsigned int nz, const int num_cells,
+  BatteryModel(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim);
   ~BatteryModel();

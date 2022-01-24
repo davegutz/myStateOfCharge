@@ -67,7 +67,6 @@ protected:
   // virtual void ekf_model(double *Fx, double *Bu, double *hx, double *H) = 0;
   virtual void ekf_model_predict(double *Fx, double *Bu) = 0;
   virtual void ekf_model_update(double *hx, double *H) = 0;
-  virtual void ekf_model_update_eqn(double *hx, double *H) = 0;
 };
 
 // Methods
