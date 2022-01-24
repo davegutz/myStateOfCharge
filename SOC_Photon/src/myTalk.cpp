@@ -427,6 +427,16 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
                 rp.amp = RATED_BATT_CAP*0.2;
                 rp.debug = -12;
                 break;
+              case ( 7 ):
+                self_talk("Xp0", Monitor, Model, Sen);
+                rp.type = 7;
+                self_talk("Xx1", Monitor, Model, Sen);    // Run to model
+                self_talk("m0.5", Monitor, Model, Sen);   // Set all soc=0.5
+                self_talk("n0.987", Monitor, Model, Sen); // Set model only to near saturation
+                self_talk("v2", Monitor, Model, Sen);     // Watch sat, soc, and voc vs v_sat
+                rp.amp = RATED_BATT_CAP*0.2;              // Hard current charge
+                Serial.printf("Run 'n<val> as needed to init south of sat.  Reset this whole thing by running 'Xp-1'\n");
+                break;
               default:
                 Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
             }
