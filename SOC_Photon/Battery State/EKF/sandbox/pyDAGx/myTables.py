@@ -52,9 +52,9 @@ class TableInterp2D():
      ...............
          vm1, vm2, ...vmn}"""
 
-    def __init__(self, n, m, x, y, v):
-        self.n = n
-        self.m = m
+    def __init__(self, x, y, v):
+        self.n = len(x)
+        self.m = len(y)
         self.x = x
         self.y = y
         self.v = v
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     data_lut = np.array(t_voc_l)
 
     # local solution
-    table2 = TableInterp2D(n, m, x, y, data_interp)
+    table2 = TableInterp2D(x, y, data_interp)
 
     # scipy solution
     lut_voc = rg((x, y), data_lut.T)

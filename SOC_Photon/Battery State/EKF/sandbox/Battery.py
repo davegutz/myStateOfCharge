@@ -93,18 +93,15 @@ class Battery(Coulombs, EKF_1x1):
             t_a = [3.999, 4.046, 4.093]
         if t_c is None:
             t_c = [-1.181, -1.181, -1.181]
+        from pyDAGx import myTables
         t_x_soc = [0,    0.1,   0.2,   0.3,   0.4,   0.5,   0.6,   0.7,   0.8,   0.9,   0.98, 1.00]
         t_y_t = [0., 40.]
-        t_voc = [[9.0,  11.8,  12.45, 12.61, 12.8,  12.83, 12.9,  13.00, 13.07, 13.11, 13.23, 13.5],
-                 [9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.4]]
+        t_voc = [9.0,  11.8,  12.45, 12.61, 12.8,  12.83, 12.9,  13.00, 13.07, 13.11, 13.23, 13.5,
+                 9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.4]
         x = np.array(t_x_soc)
         y = np.array(t_y_t)
-        data = np.array(t_voc)
-        from scipy.interpolate import RegularGridInterpolator as rg
-        self.lut_voc = rg((x, y), data.T)  # TODO:  this is slow; change this out for a roll-your-own 2-d table based on TableInterp2D myLibrary/myTables
-        # soc = 0.5
-        # temp_c = 40
-        # voc = float(voc_rg([soc, temp_c]))
+        data_interp = np.array(t_voc)
+        self.lut_voc = myTables.TableInterp2D(x, y, data_interp)
         self.num_cells = num_cells
         self.nz = None
         self.q = 0  # Charge, C
@@ -200,15 +197,15 @@ class Battery(Coulombs, EKF_1x1):
 
     def calc_h_jacobian(self, soc_lim, temp_c):
         if soc_lim > 0.5:
-            dv_dsoc = (self.look_voc(soc_lim, temp_c) - self.look_voc(soc_lim-0.01, temp_c)) / 0.01
+            dv_dsoc = (self.lut_voc.interp(soc_lim, temp_c) - self.lut_voc.interp(soc_lim-0.01, temp_c)) / 0.01
         else:
-            dv_dsoc = (self.look_voc(soc_lim+0.01, temp_c) - self.look_voc(soc_lim, temp_c)) / 0.01
+            dv_dsoc = (self.lut_voc.interp(soc_lim+0.01, temp_c) - self.lut_voc.interp(soc_lim, temp_c)) / 0.01
         return dv_dsoc
 
     def calc_soc_voc(self, soc, temp_c):
         """SOC-OCV curve fit method per Zhang, et al """
         dv_dsoc = self.calc_h_jacobian(soc, temp_c)
-        voc = self.look_voc(soc, temp_c)
+        voc = self.lut_voc.interp(soc, temp_c)
         return voc, dv_dsoc
 
     def calc_soc_voc_coeff(self, soc, tc, n, m):
@@ -332,11 +329,6 @@ class Battery(Coulombs, EKF_1x1):
         a = self.lut_a.lookup(T_degC=temp_c)
         c = self.lut_c.lookup(T_degC=temp_c)
         return b, a, c
-
-    def look_voc(self, soc, temp_c):
-        # Table lookups of Zhang coefficients
-        voc = float(self.lut_voc([soc, temp_c]))
-        return voc
 
     def look_hys(self, dv, soc):
         return NotImplementedError
