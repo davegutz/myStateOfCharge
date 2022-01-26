@@ -40,6 +40,11 @@ def binsearch(x, v, n):
     return high, low, dx
 
 
+class Error(Exception):
+    """Lookup Table Error"""
+    pass
+
+
 class TableInterp2D():
     # Gridded lookup table, natively clipped
     """// 2-D Interpolation Table Lookup
@@ -57,6 +62,9 @@ class TableInterp2D():
         self.m = len(y)
         self.x = x
         self.y = y
+        if len(v) != self.n*self.m:
+            raise Error("length of array 'v' =", len(v),
+                        " inconsistent with lengths of 'x' * 'y' = ", len(x), "*", len(y))
         self.v = v
 
     def interp(self, x, y):
