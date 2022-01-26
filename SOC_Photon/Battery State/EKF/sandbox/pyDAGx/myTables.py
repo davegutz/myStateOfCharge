@@ -104,13 +104,13 @@ if __name__ == '__main__':
             print('x=', x, 'y=', y, 'table2=', table2.interp(x, y))
     start = timeit.default_timer()
     n = 0
-    while n<1000:
-        for y in t_y_t:
-            for x in t_x_soc:
-                v = table2.interp(x, y)
-        n += 1
+    for y in np.arange(t_y_t[0], t_y_t[-1], .01):
+        for x in np.arange(t_x_soc[0], t_x_soc[-1], .01):
+            n += 1
+            v = table2.interp(x, y)
     end = timeit.default_timer()
-    print('time per call=', (end - start)/float(n))
+    t_in = (end - start)/float(n)
+    print('time per call=', t_in)
     print('')
 
     print("Testing scipy interp")
@@ -119,10 +119,12 @@ if __name__ == '__main__':
             print('x=', x, 'y=', y, 'lut_voc=', lut_voc([x, y]))
     start = timeit.default_timer()
     n = 0
-    while n<1000:
-        for y in t_y_t:
-            for x in t_x_soc:
-                v = lut_voc([x, y])
-        n += 1
+    for y in np.arange(t_y_t[0], t_y_t[-1], .01):
+        for x in np.arange(t_x_soc[0], t_x_soc[-1], .01):
+            n += 1
+            v = lut_voc([x, y])
     end = timeit.default_timer()
-    print('time per call=', (end - start)/float(n))
+    t_rg = (end - start)/float(n)
+    print('time per call=', t_rg)
+
+    print('ratio=', t_rg/t_in)
