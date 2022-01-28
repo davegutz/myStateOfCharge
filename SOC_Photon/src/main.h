@@ -269,6 +269,7 @@ void loop()
   boolean display_to_user;                     // User display, T/F
   static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
   boolean summarizing;                         // Summarize, T/F
+  static boolean summarizing_waiting = true;  // waiting for a while before summarizing
   static Sync *Summarize = new Sync(SUMMARIZE_DELAY);
   boolean control;                         // Summarize, T/F
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
@@ -511,18 +512,21 @@ void loop()
   talk(Monitor, Model, Sen);
 
   // Summary management
-  summarizing = Summarize->update(millis(), reset, !rp.modeling) || (rp.debug==-11 && publishB);               //  now || reset && !rp.modeling
-  if ( summarizing || cp.write_summary )
+  boolean initial_summarize = summarizing_waiting && ( elapsed >= SUMMARIZE_WAIT );
+  if ( elapsed >= SUMMARIZE_WAIT ) summarizing_waiting = false;
+  summarizing = Summarize->update(millis(), initial_summarize, !rp.modeling) || (rp.debug==-11 && publishB);               //  now || initial_summarize && !rp.modeling
+  if ( !summarizing_waiting && (summarizing || cp.write_summary) )
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
     mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,
                           Monitor->soc_ekf(), Monitor->soc(), Monitor->voc_soc(), Monitor->voc_dyn());
+    if ( rp.debug==0 ) Serial.printf("Summarized.....................\n");
   }
 
   // Initialize complete once sensors and models started and summary written
   if ( read ) reset = false;
   if ( read_temp ) reset_temp = false;
-  if (publishP || publishS) reset_publish = false;
+  if ( publishP || publishS ) reset_publish = false;
 
   // Soft reset
   if ( cp.soft_reset )
