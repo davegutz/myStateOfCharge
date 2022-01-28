@@ -260,8 +260,10 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
         }
         break;
       case ( 'Q' ):
-        Serial.printf("tb  = %7.3f,\nvb  = %7.3f,\nvoc  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc = %7.3f,\nsoc_ekf= %7.3f,\n",
-          Monitor->temp_c(), Monitor->vb(), Monitor->voc(), Monitor->vsat(), Monitor->ib(), Monitor->soc(), Monitor->soc_ekf());
+        Serial.printf("tb  = %7.3f,\nvb  = %7.3f,\nvoc  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc = %7.3f,\n\
+soc_ekf= %7.3f,\nmodeling = %d,\n",
+          Monitor->temp_c(), Monitor->vb(), Monitor->voc(), Monitor->vsat(), Monitor->ib(), Monitor->soc(),
+          Monitor->soc_ekf(), rp.modeling);
         break;
       case ( 'R' ):
         switch ( cp.input_string.charAt(1) )
