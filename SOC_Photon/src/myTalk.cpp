@@ -137,7 +137,10 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
             large_reset_summary(mySum, rp.isum, NSUM);
             break;
           case ( 's' ):
+            self_talk("h", Monitor, Model, Sen);
             cp.cmd_summarize();
+            print_all_summary(mySum, rp.isum, NSUM);
+            self_talk("Pa", Monitor, Model, Sen);
             break;
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
@@ -255,6 +258,10 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
         }
+        break;
+      case ( 'Q' ):
+        Serial.printf("tb  = %7.3f,\nvb  = %7.3f,\nvoc  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc = %7.3f,\nsoc_ekf= %7.3f,\n",
+          Monitor->temp_c(), Monitor->vb(), Monitor->voc(), Monitor->vsat(), Monitor->ib(), Monitor->soc(), Monitor->soc_ekf());
         break;
       case ( 'R' ):
         switch ( cp.input_string.charAt(1) )
@@ -463,11 +470,11 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
 void talkH(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
 {
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
-  Serial.printf("A=  nominalize the rp structure for clean boots etc'\n"); 
+  Serial.printf("A=  nominalize the rp structure for clean boots etc'\n");
   Serial.printf("H<?>   Manage history\n");
   Serial.printf("  Hd= "); Serial.printf("dump the summary log to screen\n");
   Serial.printf("  HR= "); Serial.printf("reset the summary log\n");
-  Serial.printf("  Hs= "); Serial.printf("save a data point to summary log\n");
+  Serial.printf("  Hs= "); Serial.printf("save a data point to summary log and print log and status to screen\n");
   Serial.printf("m=  assign curve charge state in fraction to all versions including model- '(0-1.1)'\n"); 
   Serial.printf("M=  assign a CHARGE state in percent to all versions including model- '('truncated 0-100')'\n"); 
   Serial.printf("n=  assign curve charge state in fraction to model only (ekf if modeling)- '(0-1.1)'\n"); 
@@ -495,6 +502,7 @@ void talkH(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
   Serial.printf("  Ps= "); Serial.printf("print all state-space\n");
   Serial.printf("  Px= "); Serial.printf("print current signal selection\n");
   Serial.printf("  Pv= "); Serial.printf("print voltage signal details\n");
+  Serial.printf("Q      print vital stats\n");
   Serial.printf("R<?>   Reset\n");
   Serial.printf("  Re= "); Serial.printf("equalize delta_q in model to battery monitor\n");
   Serial.printf("  Rr= "); Serial.printf("saturate battery monitor and equalize model to monitor\n");
