@@ -260,8 +260,8 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
     c.  Resetting pretty much anything
     d.  Injecting test signals
   4. CPU hard and soft resets must not change the state of operation, either SOC, display, or serial bus.
-  5. Serial streams shall have an absolute Julien time for easy plotting and comparison.
-  6. Built-in test vector function, engaged using 'talk' function.
+  5. Serial streams shall have an absolute Julien-type time for easy plotting and comparison.
+  6. Built-in test function, engaged using 'talk' function.
   7. Load software using USB.  Wifi to truck will not be reliable.
   8. Likewise, monitor USB using laptop or phone.  'Talk' function should change serial monitor and inject signals for debugging.
   9. Device shall have no effect on system operation.   Monitor function only.
@@ -318,5 +318,6 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   22. Regression testing:  
     a. Saturation test.  Run Talk('Xp7').   This will initialize monitor at 0.5 and model near saturation then drive toward saturation.   Watch voc vs v_sat and sat in the v2 debug display that gets started.  Reset with 'Xp-1'.  If starting up Xp7 it initializes saturated just enter 'm<val>' with lower 'val' than what 'Xp7' started it with until it initializes without saturation.  Should saturate soon and reset soc of monitor to 1.0.  Then setting 'Di-1000' you should see it reset after a very little time. Again, reset the whole mess with 'Xp-1'.
     b.  
-
   23. 'Talk' refers to using CoolTerm to transmit commands through the myTalk.cpp functions. Talk is not threaded so can only send off a barage of commands open loop and hope for the best.
+  24. I had to add persistence to the 'log on boot' function.   When in a cold shutoff, the BMS of the battery periodically 'looks' at the state of the battery by turning it on for a few seconds. The summary filled up quickly with these useless logs.  I used a 60 second persistence.
+  
