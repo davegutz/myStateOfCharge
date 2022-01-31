@@ -67,12 +67,16 @@ const double sat_cutback_gain = 10;         // Multiplier on saturation anti-win
 
 // Latest table from data.   
 // See Model Fit 202201 tab of BattleBorn Rev1.xls
-const unsigned int n_s = 12;
-const double x_soc[n_s] =     { 0,    0.1,   0.2,   0.3,   0.4,   0.5,   0.6,   0.7,   0.8,   0.9,   0.98, 1.00};
-const unsigned int m_t = 2;
-const double y_t[m_t] =  { 0., 40. };
-const double t_voc[m_t*n_s] = { 9.0,  11.8,  12.45, 12.61, 12.8,  12.83, 12.9,  13.00, 13.07, 13.11, 13.23, 13.5, 
-                                9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.4};
+const double low_t = 8.;    // Minimum temperature for valid saturation check, because BMS shuts off battery low.
+                            // Heater should keep >8, too
+const unsigned int m_t = 4;
+const double y_t[m_t] =  { 0., 10., 20., 40. };
+const unsigned int n_s = 14;
+const double x_soc[n_s] =     { 0.00,  0.10,  0.20,  0.30,  0.40,  0.50,  0.60,  0.70,  0.76,  0.78,  0.80,  0.90,  0.98, 1.00};
+const double t_voc[m_t*n_s] = { 4.00,  4.00,  4.00,  4.00,  4.00,  4.00,  4.00,  4.00,  10.24, 11.32, 11.83, 12.63, 13.02, 13.32,
+                                4.30,  4.30,  4.30,  4.30,  4.30,  4.30,  4.30,  4.30,  10.45, 11.54, 12.04, 12.85, 13.20, 13.50,
+                                9.38,  12.18, 12.83, 12.99, 13.18, 13.21, 13.28, 13.38, 13.422,13.436,13.45, 13.49, 13.57, 13.92,
+                                9.86,  12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.902,13.916,13.93, 13.97, 14.05, 14.40};
 const double mxeps_bb = 1-1e-6;      // Level of soc that indicates saturated
 
 // Battery Class

@@ -508,7 +508,7 @@ double sat_voc(const double temp_c)
 boolean is_sat(const double temp_c, const double voc, const double soc)
 {
     double vsat = sat_voc(temp_c);
-    return ( voc >= vsat || soc >= mxeps_bb );
+    return ( temp_c > low_t && (voc >= vsat || soc >= mxeps_bb) );
 }
 
 // Saturated voltage calculation
