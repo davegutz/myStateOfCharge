@@ -45,7 +45,8 @@ if __name__ == '__main__':
         # time_end = 700
         time_end = 3500
         # time_end = 800
-        temp_c = 25.
+        # temp_c = 25.
+        temp_c = 0.
 
         # Trade study inputs
         # i-->0 provides continuous anchor to reset filter (why?)  i shifts important --> 2 current sensors, hyst in ekf
@@ -70,7 +71,8 @@ if __name__ == '__main__':
         i_std = 0.1  # (0.1-->0) ------ noise
         soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
         tau_ct = 0.2  # (0.2-->5.)  -------
-        hys_scale = 1.  #(1.-->10.)
+        hys_scale = 1.  # (1.-->10.)
+        t_dc_dc_on = 1e6  # (1e6-->0)  1e6 for never on, 0 for always on
 
         # Setup
         r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
@@ -96,6 +98,10 @@ if __name__ == '__main__':
                 current_in = 40.
             else:
                 current_in = 0.
+            if t[i] >= t_dc_dc_on:
+                dc_dc_on = True
+            else:
+                dc_dc_on = False
             init_ekf = (t[i] <= 1)
 
             if init_ekf:
@@ -107,7 +113,8 @@ if __name__ == '__main__':
                 sim.apply_delta_q_t(rp.delta_q_model, rp.t_last_model)
 
             # Models
-            sim.calculate(temp_c=temp_c, soc=sim.soc, curr_in=current_in, dt=dt, q_capacity=sim.q_capacity)
+            sim.calculate(temp_c=temp_c, soc=sim.soc, curr_in=current_in, dt=dt, q_capacity=sim.q_capacity,
+                          dc_dc_on=dc_dc_on)
             sim.count_coulombs(dt=dt, reset=init_ekf, temp_c=temp_c, charge_curr=sim.ib, t_last=rp.t_last_model,
                                sat=False)
             rp.delta_q_model, rp.t_last_model = sim.update()

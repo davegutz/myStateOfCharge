@@ -94,7 +94,7 @@ public:
   void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -r0_*sr_); };
   double calc_h_jacobian(double soc, double temp_c);
   double calc_soc_voc(const double soc, const double temp_c, double *dv_dsoc);
-  virtual double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt);
+  virtual double calculate(const double temp_C, const double soc_frac, double curr_in, const double dt, const boolean dc_dc_on);
   double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt);
   void init_battery(void);
@@ -174,8 +174,8 @@ public:
   ~BatteryModel();
   // operators
   // functions
-  double calculate(const double temp_C, const double soc_frac, const double curr_in, const double dt,
-    const double q_capacity, const double q_cap);
+  double calculate(const double temp_C, const double soc_frac, double curr_in, const double dt,
+    const double q_capacity, const double q_cap, const boolean dc_dc_on);
   uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);
   double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr, const double t_last);
   void load(const double delta_q, const double t_last, const double s_cap_model);
@@ -192,6 +192,7 @@ protected:
   double sat_cutback_gain_; // Gain to retard ib when voc exceeds vsat, dimensionless
   boolean model_cutback_;   // Indicate that modeled current being limited on saturation cutback, T = cutback limited
   boolean model_saturated_; // Indicator of maximal cutback, T = cutback saturated
+  boolean bms_off_;     // Indicator that battery management system is off, T = off preventing current flow
   double ib_sat_;       // Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
   double s_cap_;        // Rated capacity scalar
 };

@@ -348,7 +348,7 @@ void loop()
 
     // Model calculation
     Sen->Vbatt_model = Model->calculate(Sen->Tbatt_filt, Model->soc(), Sen->Ishunt, min(Sen->T, F_MAX_T),
-        Model->q_capacity(), Model->q_cap_rated());
+        Model->q_capacity(), Model->q_cap_rated(), cp.dc_dc_on);
     cp.model_cutback = Model->cutback();
     cp.model_saturated = Model->saturated();
 

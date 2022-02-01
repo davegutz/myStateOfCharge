@@ -110,7 +110,8 @@ double Battery::calc_h_jacobian(const double soc, const double temp_c)
 
 // SOC-OCV curve fit method per Zhang, et al.   May write this base version if needed using BatteryModel::calculate()
 // as a starting point but use the base class Randles formulation and re-arrange the i/o for that model.
-double Battery::calculate(const double temp_C, const double q, const double curr_in, const double dt) { return 0.;}
+double Battery::calculate(const double temp_C, const double q, const double curr_in, const double dt,
+    const boolean dc_dc_on) { return 0.;}
 
 // SOC-OCV curve fit method per Zhang, et al modified by ekf
 double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt)
@@ -308,11 +309,13 @@ BatteryModel::BatteryModel(const int num_cells,
 }
 
 // SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model
-double BatteryModel::calculate(const double temp_C, const double soc, const double curr_in, const double dt,
-  const double q_capacity, const double q_cap)
+double BatteryModel::calculate(const double temp_C, const double soc, double curr_in, const double dt,
+  const double q_capacity, const double q_cap, const boolean dc_dc_on)
 {
     dt_ = dt;
     temp_c_ = temp_C;
+    bms_off_ = temp_c_ <= low_t;
+    if ( bms_off_ ) curr_in = 0.;
 
     double soc_lim = max(min(soc, 1.0), 0.0);
     double SOC = soc * q_capacity / q_cap_rated_scaled_ * 100;
@@ -329,6 +332,11 @@ double BatteryModel::calculate(const double temp_C, const double soc, const doub
     Randles_->update(dt);
     vb_ = Randles_->y(0);
     vdyn_ = vb_ - voc_;
+    if ( bms_off_ && dc_dc_on )
+    {
+        vb_ = 13.5;
+        vdyn_ = voc_;
+    }
 
     // Saturation logic, both full and empty
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
@@ -456,6 +464,7 @@ void BatteryModel::pretty_print(void)
     Serial.printf("  sat_cutback_gain_ = %7.3f; // Gain to retard ib when voc exceeds vsat, dimensionless\n", sat_cutback_gain_);
     Serial.printf("  model_cutback_ =      %d;     // Gain to retard ib when voc exceeds vsat, dimensionless\n", model_cutback_);
     Serial.printf("  model_saturated_ =    %d;     // Modeled current being limited on saturation cutback, T = cutback limited\n", model_saturated_);
+    Serial.printf("  bms_off_       =      %d;     // BMS off, T = current prevented\n", bms_off_);
     Serial.printf("  ib_sat_ =           %7.3f; // Indicator of maximal cutback, T = cutback saturated\n", ib_sat_);
     Serial.printf("  s_cap_ =            %7.3f; // Rated capacity scalar\n", s_cap_);
 }

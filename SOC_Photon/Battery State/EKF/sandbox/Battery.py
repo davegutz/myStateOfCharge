@@ -50,6 +50,8 @@ BATT_DVOC_DT = 0.0069  # 1/23/2022
                             >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C"""
 BATT_V_SAT = 3.4625  # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
 NOM_SYS_VOLT = 12.  # Nominal system output, V, at which the reported amps are used (12)
+low_t = 8  # Minimum temperature for valid saturation check, because BMS shuts off battery low.
+# Heater should keep >8, too
 mxeps_bb = 1-1e-6  # Numerical maximum of coefficient model with scaled soc
 mneps_bb = 1e-6  # Numerical minimum of coefficient model without scaled soc
 DQDT = 0.01  # Change of charge with temperature, fraction/deg C.  From literature.  0.01 is commonly used
@@ -94,10 +96,12 @@ class Battery(Coulombs, EKF_1x1):
         if t_c is None:
             t_c = [-1.181, -1.181, -1.181]
         from pyDAGx import myTables
-        t_x_soc = [0,    0.1,   0.2,   0.3,   0.4,   0.5,   0.6,   0.7,   0.8,   0.9,   0.98, 1.00]
-        t_y_t = [0., 40.]
-        t_voc = [9.0,  11.8,  12.45, 12.61, 12.8,  12.83, 12.9,  13.00, 13.07, 13.11, 13.23, 13.5,
-                 9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.4]
+        t_x_soc = [0.00, 0.10, 0.20, 0.30, 0.40,  0.50,  0.60,  0.70,  0.76,  0.78,  0.80,  0.90,  0.98,  1.00]
+        t_y_t = [0., 10., 20., 40.]
+        t_voc = [4.00,4.00,  4.00,  4.00,  4.00,  4.00,  4.00,  4.00,  10.24, 11.32, 11.83, 12.63, 13.02, 13.32,
+                4.30, 4.30,  4.30,  4.30,  4.30,  4.30,  4.30,  4.30,  10.45, 11.54, 12.04, 12.85, 13.20, 13.50,
+                9.38, 12.18, 12.83, 12.99, 13.18, 13.21, 13.28, 13.38, 13.422,13.436,13.45, 13.49, 13.57, 13.92,
+                9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.902,13.916,13.93, 13.97, 14.05, 14.40]
         x = np.array(t_x_soc)
         y = np.array(t_y_t)
         data_interp = np.array(t_voc)
@@ -217,7 +221,7 @@ class Battery(Coulombs, EKF_1x1):
         pow_log_soc_norm = math.pow(-log_soc_norm, m)
         return b, a, c, log_soc_norm, exp_n_soc_norm, pow_log_soc_norm
 
-    def calculate(self, temp_c, soc, curr_in, dt, q_capacity):
+    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):
         raise NotImplementedError
 
     def calculate_ekf(self, temp_c, vb, ib, dt):
@@ -433,6 +437,7 @@ class BatteryModel(Battery):
         if scale is not None:
             self.apply_cap_scale(scale)
         self.hys = Hysteresis(scale=hys_scale)  # Battery hysteresis model - drift of voc
+        self.bms_off = False
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -449,6 +454,7 @@ class BatteryModel(Battery):
             format(self.model_saturated)
         s += "  ib_sat =          {:7.3f}  // Threshold to declare saturation.  This regeneratively slows" \
              " down charging so if too\n".format(self.ib_sat)
+        s += "  bms_off  =        {:d}     // BMS off\n".format(self.bms_off)
         s += "  ib     =        {:7.3f}  // Open circuit current into posts, A\n".format(self.ib)
         s += "  voc     =        {:7.3f}  // Open circuit voltage, V\n".format(self.voc)
         s += "  voc_stat=        {:7.3f}  // Static, table lookup value of voc before applying hysteresis, V\n".\
@@ -459,9 +465,12 @@ class BatteryModel(Battery):
         s += Battery.__str__(self, prefix + 'BatteryModel:')
         return s
 
-    def calculate(self, temp_c, soc, curr_in, dt, q_capacity):
+    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):
         self.dt = dt
         self.temp_c = temp_c
+        self.bms_off = self.temp_c <= low_t
+        if self.bms_off:
+            curr_in = 0.
 
         # soc_lim = max(min(soc, mxeps_bb), mneps_bb)
         # SOC = soc * q_capacity / self.q_cap_rated_scaled * 100.
@@ -482,15 +491,20 @@ class BatteryModel(Battery):
         self.Randles.update(dt)
         self.vb = self.Randles.y
         self.vdyn = self.vb - self.voc
+        if self.bms_off and dc_dc_on:
+            self.vb = 13.5
+            self.vdyn = self.voc_stat
+            self.voc = self.voc_stat
 
         # Saturation logic, both full and empty
         self.vsat = self.nom_vsat + (temp_c - 25.) * self.dvoc_dt
         self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
         self.ib = min(curr_in, self.sat_ib_max)
-        if (self.q <= 0.) & (curr_in < 0.):
+        if ((self.q <= 0.) & (curr_in < 0.)):
             self.ib = 0.  # empty
         self.model_cutback = (self.voc_stat > self.vsat) & (self.ib == self.sat_ib_max)
-        self.model_saturated = (self.voc_stat > self.vsat) & (self.ib < self.ib_sat) & (self.ib == self.sat_ib_max)
+        self.model_saturated = self.temp_c > low_t and \
+                               ((self.voc_stat > self.vsat) & (self.ib < self.ib_sat) & (self.ib == self.sat_ib_max))
         Coulombs.sat = self.model_saturated
         self.pow_oc = self.vb * self.ib
 
@@ -565,7 +579,7 @@ class BatteryModel(Battery):
 # Other functions
 def is_sat(temp_c, voc, soc):
     vsat = sat_voc(temp_c)
-    return voc >= vsat or soc >= mxeps_bb
+    return temp_c > low_t and (voc >= vsat or soc >= mxeps_bb)
 
 
 def calculate_capacity(temp_c, t_sat, q_sat):

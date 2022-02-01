@@ -42,6 +42,7 @@ struct CommandPars
   boolean write_summary;    // Use talk to issue a write command to summary
   double curr_bias_amp;     // Signal injection bias for amplified current input, A
   double curr_bias_noamp;   // Signal injection bias for non-amplified current input, A
+  boolean dc_dc_on;         // DC-DC charger is on
   CommandPars(void)
   {
     this->string_complete = false;
@@ -53,6 +54,7 @@ struct CommandPars
     this->write_summary = false;
     curr_bias_amp = 0.;
     curr_bias_noamp = 0.;
+    dc_dc_on = false;
   }
   void cmd_reset(void)
   {
@@ -72,9 +74,9 @@ struct CommandPars
   void pretty_print(void)
   {
     Serial.printf("enable_wifi = %d, model_cutback = %d, model_saturated = %d, soft_reset = %d, write_summary = %d, \
-curr_bias_amp = %7.3f, curr_bias_noamp = %7.3f\n",
+curr_bias_amp = %7.3f, curr_bias_noamp = %7.3f, dc_dc_on = %d,\n",
       this->enable_wifi, this->model_cutback, this->model_saturated, this->soft_reset, this->write_summary,
-      this->curr_bias_amp, this->curr_bias_noamp);
+      this->curr_bias_amp, this->curr_bias_noamp, this->dc_dc_on);
   }
 };            
 

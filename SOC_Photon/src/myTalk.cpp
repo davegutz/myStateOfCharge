@@ -379,6 +379,14 @@ soc_ekf= %7.3f,\nmodeling = %d,\n",
       case ( 'X' ):
         switch ( cp.input_string.charAt(1) )
         {
+          case ( 'd' ):
+            if ( cp.input_string.substring(2).toInt()>0 )
+              cp.dc_dc_on = true;
+            else
+              cp.dc_dc_on = false;
+            Serial.printf("dc_dc_on set to %d\n", cp.dc_dc_on);
+            break;
+
           case ( 'x' ):
             if ( cp.input_string.substring(2).toInt()>0 )
             {
@@ -609,6 +617,7 @@ void talkH(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);
 
   Serial.printf("X<?> - Test Mode.   For example:\n");
+  Serial.printf("  Xd= "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
   Serial.printf("  Xx= "); Serial.printf("%d,   use model for Vbatt [0]\n", rp.modeling);
   Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Injection amplitude A pk (0-18.3) [0]");
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println("  : Injection frequency Hz (0-2) [0]");
