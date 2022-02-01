@@ -17,7 +17,6 @@
 
 import numpy as np
 import math
-from pyDAGx.lookup_table import LookupTable
 from EKF_1x1 import EKF_1x1
 from Coulombs import Coulombs
 from StateSpace import StateSpace
@@ -88,14 +87,6 @@ class Battery(Coulombs, EKF_1x1):
         EKF_1x1.__init__(self)
 
         # Defaults
-        if t_t is None:
-            t_t = [0., 25., 50.]
-        if t_b is None:
-            t_b = [-0.836, -0.836, -0.836]
-        if t_a is None:
-            t_a = [3.999, 4.046, 4.093]
-        if t_c is None:
-            t_c = [-1.181, -1.181, -1.181]
         from pyDAGx import myTables
         t_x_soc = [0.00, 0.10, 0.20, 0.30, 0.40,  0.50,  0.60,  0.70,  0.76,  0.78,  0.80,  0.90,  0.98,  1.00]
         t_y_t = [0., 10., 20., 40.]
@@ -213,15 +204,6 @@ class Battery(Coulombs, EKF_1x1):
         voc = self.lut_voc.interp(soc, temp_c)
         return voc, dv_dsoc
 
-    def calc_soc_voc_coeff(self, soc, tc, n, m):
-        """SOC-OCV curve fit method per Zhang, et al """
-        # Zhang coefficients
-        b, a, c = self.look(tc)
-        log_soc_norm = math.log(soc)
-        exp_n_soc_norm = math.exp(n * (soc - 1))
-        pow_log_soc_norm = math.pow(-log_soc_norm, m)
-        return b, a, c, log_soc_norm, exp_n_soc_norm, pow_log_soc_norm
-
     def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):
         raise NotImplementedError
 
@@ -327,13 +309,6 @@ class Battery(Coulombs, EKF_1x1):
         self.init_ekf(soc, 0.0)
         self.q_ekf = self.soc_ekf * self.q_capacity
         self.SOC_ekf = self.q_ekf / self.q_cap_rated_scaled * 100.
-
-    def look(self, temp_c):
-        # Table lookups of Zhang coefficients
-        b = self.lut_b.lookup(T_degC=temp_c)
-        a = self.lut_a.lookup(T_degC=temp_c)
-        c = self.lut_c.lookup(T_degC=temp_c)
-        return b, a, c
 
     def look_hys(self, dv, soc):
         return NotImplementedError

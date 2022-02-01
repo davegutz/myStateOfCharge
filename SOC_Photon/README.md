@@ -285,6 +285,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   25. 'soc' shall be current charge 'q' divided by current capacity 'q_capacity' that reflects changes with temperature.
   26. Coulomb counting shall simultaneously track temperature changes to keep aligned with capacity estimates.
   27. 'SOC' shall be current charge 'q' at the instant temperature divided by rated capacity at rated temperature.
+  28. The monitor logic must detect and be benign that the DC-DC charger has come on setting Vb while the BMS in the battery has shutoff current.   This is to prevent falsely declaring saturation from DC-DC charger on.
 
 ## Implementation Notes
 
@@ -320,4 +321,5 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
     b.  
   23. 'Talk' refers to using CoolTerm to transmit commands through the myTalk.cpp functions. Talk is not threaded so can only send off a barage of commands open loop and hope for the best.
   24. I had to add persistence to the 'log on boot' function.   When in a cold shutoff, the BMS of the battery periodically 'looks' at the state of the battery by turning it on for a few seconds. The summary filled up quickly with these useless logs.  I used a 60 second persistence.
+  25. Use Tb<8 deg C to turn off monitoring for saturation.   This prevents false saturation trips under normal conditions.
   

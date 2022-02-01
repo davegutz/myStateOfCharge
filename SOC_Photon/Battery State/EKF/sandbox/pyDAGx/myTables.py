@@ -45,6 +45,29 @@ class Error(Exception):
     pass
 
 
+class TableInterp1D():
+    # Gridded lookup table, natively clipped
+    """// 1-D Interpolation Table Lookup
+    /* Example usage:
+    x = {x1, x2, ...xn}
+    v = {v1, v2, ...vn}"""
+
+    def __init__(self, x, v):
+        self.n = len(x)
+        self.x = x
+        if len(v) != self.n:
+            raise Error("length of array 'v' =", len(v),
+                        " inconsistent with length of 'x' = ", len(x))
+        self.v = v
+
+    def interp(self, x):
+        if self.n < 1:
+            return self.v[0]
+        high, low, dx = binsearch(x, self.x, self.n)
+        r_val = self.v[low] + dx * (self.v[high] - self.v[low])
+        return float(r_val)
+
+
 class TableInterp2D():
     # Gridded lookup table, natively clipped
     """// 2-D Interpolation Table Lookup

@@ -32,22 +32,12 @@ if __name__ == '__main__':
     doctest.testmod(sys.modules['__main__'])
     import matplotlib.pyplot as plt
     import book_format
+    from pyDAGx import myTables
 
     book_format.set_style()
 
 
     def main():
-        # Setup to run the transients
-        dt = 0.1
-        dt_ekf = 0.1
-        # time_end = 2
-        # time_end = 13.3
-        # time_end = 700
-        time_end = 3500
-        # time_end = 800
-        temp_c = 25.
-        # temp_c = 0.
-
         # Trade study inputs
         # i-->0 provides continuous anchor to reset filter (why?)  i shifts important --> 2 current sensors, hyst in ekf
         # saturation provides periodic anchor to reset filter
@@ -72,9 +62,28 @@ if __name__ == '__main__':
         soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
         tau_ct = 0.2  # (0.2-->5.)  -------
         hys_scale = 1.  # (1.-->10.)
-        t_dc_dc_on = 0  # (1e6-->0)  1e6 for never on, 0 for always on
+
+        # Transient  inputs
+        # Current time inputs representing the load.
+        t_x_i = [0.0, 49.9, 50.0, 449.9, 450., 999.9, 1000., 2999.9, 3000.]  # seconds
+        t_i   = [0.0, 0.0,  -40.0,-40.0, 0.0,  0.0,   40.0,  40.0,   0.0]  # Amperes
+        # DC-DC charger status.   0=off, 1=on
+        t_x_d = [0.0, 199., 200.0,  299.9, 300.0]
+        t_d   = [0,   0,    1,      1,     0]
+        # time_end = 2
+        # time_end = 13.3
+        # time_end = 700
+        time_end = 3500
+        # time_end = 800
+        temp_c = 25.
+        # temp_c = 0.
+
 
         # Setup
+        dt = 0.1
+        dt_ekf = 0.1
+        lut_i = myTables.TableInterp1D(np.array(t_x_i), np.array((t_i)))
+        lut_dc = myTables.TableInterp1D(np.array(t_x_d), np.array((t_d)))
         r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
         q_std = 0.001  # Process uncertainty (0.001) belief in state
         scale = model_bat_cap / Battery.RATED_BATT_CAP
@@ -88,20 +97,8 @@ if __name__ == '__main__':
 
         # time loop
         for i in range(len(t)):
-            if t[i] < 50:
-                current_in = 0.
-            elif t[i] < 450:
-                current_in = -40.
-            elif t[i] < 1000:
-                current_in = 0.
-            elif t[i] < 3000:
-                current_in = 40.
-            else:
-                current_in = 0.
-            if t[i] >= t_dc_dc_on:
-                dc_dc_on = True
-            else:
-                dc_dc_on = False
+            current_in = lut_i.interp(t[i])
+            dc_dc_on = bool(lut_dc.interp(t[i]))
             init_ekf = (t[i] <= 1)
 
             if init_ekf:
