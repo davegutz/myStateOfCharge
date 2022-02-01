@@ -67,6 +67,7 @@ const double sat_cutback_gain = 10;         // Multiplier on saturation anti-win
 
 // Latest table from data.   
 // See Model Fit 202201 tab of BattleBorn Rev1.xls
+const double low_voc = 10.; // Voltage threshold for BMS to turn off battery
 const double low_t = 8.;    // Minimum temperature for valid saturation check, because BMS shuts off battery low.
                             // Heater should keep >8, too
 const unsigned int m_t = 4;

@@ -50,6 +50,7 @@ BATT_DVOC_DT = 0.0069  # 1/23/2022
                             >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C"""
 BATT_V_SAT = 3.4625  # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
 NOM_SYS_VOLT = 12.  # Nominal system output, V, at which the reported amps are used (12)
+low_voc = 10  # Minimum voltage for battery below which BMS shutsoff current
 low_t = 8  # Minimum temperature for valid saturation check, because BMS shuts off battery low.
 # Heater should keep >8, too
 mxeps_bb = 1-1e-6  # Numerical maximum of coefficient model with scaled soc
@@ -468,7 +469,7 @@ class BatteryModel(Battery):
     def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):
         self.dt = dt
         self.temp_c = temp_c
-        self.bms_off = self.temp_c <= low_t
+        self.bms_off = (self.temp_c < low_t) or (self.voc < low_voc)
         if self.bms_off:
             curr_in = 0.
 

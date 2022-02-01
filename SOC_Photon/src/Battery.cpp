@@ -314,8 +314,6 @@ double BatteryModel::calculate(const double temp_C, const double soc, double cur
 {
     dt_ = dt;
     temp_c_ = temp_C;
-    bms_off_ = temp_c_ <= low_t;
-    if ( bms_off_ ) curr_in = 0.;
 
     double soc_lim = max(min(soc, 1.0), 0.0);
     double SOC = soc * q_capacity / q_cap_rated_scaled_ * 100;
@@ -324,6 +322,8 @@ double BatteryModel::calculate(const double temp_C, const double soc, double cur
     voc_ = calc_soc_voc(soc, temp_C, &dv_dsoc_);
     voc_ = min(voc_ + (soc - soc_lim) * dv_dsoc_, max_voc);  // slightly beyond but don't windup
     voc_ +=  dv_;  // Experimentally varied
+    bms_off_ = ( temp_c_ <= low_t ) || ( voc_ < low_voc );
+    if ( bms_off_ ) curr_in = 0.;
 
     // Dynamic emf
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib

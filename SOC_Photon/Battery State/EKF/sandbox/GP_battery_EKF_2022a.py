@@ -45,8 +45,8 @@ if __name__ == '__main__':
         # time_end = 700
         time_end = 3500
         # time_end = 800
-        # temp_c = 25.
-        temp_c = 0.
+        temp_c = 25.
+        # temp_c = 0.
 
         # Trade study inputs
         # i-->0 provides continuous anchor to reset filter (why?)  i shifts important --> 2 current sensors, hyst in ekf
@@ -72,7 +72,7 @@ if __name__ == '__main__':
         soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
         tau_ct = 0.2  # (0.2-->5.)  -------
         hys_scale = 1.  # (1.-->10.)
-        t_dc_dc_on = 1e6  # (1e6-->0)  1e6 for never on, 0 for always on
+        t_dc_dc_on = 0  # (1e6-->0)  1e6 for never on, 0 for always on
 
         # Setup
         r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
