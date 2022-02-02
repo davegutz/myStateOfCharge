@@ -122,7 +122,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     // Dynamic emf
     vb_ = vb;
     ib_ = ib;
-    double u[2] = {ib, vb};
+    double u[2] = {ib_, vb_};
     Randles_->calc_x_dot(u);
     Randles_->update(dt);
     if ( rp.debug==35 )
@@ -132,11 +132,18 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     voc_dyn_ = Randles_->y(0);
     vdyn_ = vb_ - voc_dyn_;
     voc_ = voc_dyn_;
-    voc_soc_ = voc_soc(soc_, temp_c);
-
+    voc_stat_ = voc_soc(soc_, temp_c);
+    bms_off_ = temp_c_ <= low_t;    // KISS
+    if ( bms_off_ )
+    {
+        ib_ = 0.;
+        voc_ = voc_stat_;
+        vdyn_ = voc_stat_;
+        voc_dyn_ = 0.;
+    }
 
     // EKF 1x1
-    predict_ekf(ib);      // u = ib
+    predict_ekf(ib_);      // u = ib
     update_ekf(voc_dyn_, 0., 1.);   // z = voc_dyn, voc_filtered = hx
     soc_ekf_ = x_ekf();   // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
     q_ekf_ = soc_ekf_ * q_capacity_;
@@ -144,16 +151,16 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
 
     if ( rp.debug==34 )
         Serial.printf("dt,ib,voc_dyn,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
-            dt, ib, voc_dyn_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
+            dt, ib_, voc_dyn_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
     if ( rp.debug==-34 )
         Serial.printf("dt,ib,voc_dyn,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,  \n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
-            dt, ib, voc_dyn_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
+            dt, ib_, voc_dyn_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
     if ( rp.debug==37 )
         Serial.printf("ib,vb,voc_dyn(z_),  K_,y_,SOC_ekf,   %7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
-            ib, vb, voc_dyn_,     K_, y_, soc_ekf_);
+            ib_, vb_, voc_dyn_,     K_, y_, soc_ekf_);
     if ( rp.debug==-37 )
         Serial.printf("ib,vb*10-110,voc_dyn(z_)*10-110,  K_,y_,SOC_ekf-90,   \n%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
-            ib, vb*10-110, voc_dyn_*10-110,     K_, y_, soc_ekf_*100-90);
+            ib_, vb_*10-110, voc_dyn_*10-110,     K_, y_, soc_ekf_*100-90);
 
     // Charge time if used ekf 
     if ( ib_ > 0.1 )  tcharge_ekf_ = min(RATED_BATT_CAP / ib_ * (1. - soc_ekf_), 24.);
@@ -228,11 +235,12 @@ void Battery::pretty_print(void)
     Serial.printf("  temp, #cells, dvoc_dt = %7.1f, %d, %10.6f;\n", temp_c_, num_cells_, dvoc_dt_);
     Serial.printf("  r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f;\n",
         r0_, rct_, tau_ct_, r_dif_, tau_dif_, r_sd_, tau_sd_);
+    Serial.printf("  bms_off_       =      %d;     // BMS off, T = current prevented\n", bms_off_);
     Serial.printf("  dv_dsoc = %10.6f;  // Derivative scaled, V/fraction\n", dv_dsoc_);
     Serial.printf("  ib =      %7.3f;  // Current into battery, A\n", ib_);
     Serial.printf("  vb =      %7.3f;  // Total model voltage, voltage at terminals, V\n", vb_);
     Serial.printf("  voc =     %7.3f;  // Static model open circuit voltage, V\n", voc_);
-    Serial.printf("  voc_soc = %7.3f;  // Static model open circuit voltage from table, V\n", voc_soc_);
+    Serial.printf("  voc_soc = %7.3f;  // Static model open circuit voltage from table, V\n", voc_stat_);
     Serial.printf("  vsat =    %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
     Serial.printf("  voc_dyn = %7.3f;  // Charging voltage, V\n", voc_dyn_);
     Serial.printf("  vdyn =    %7.3f;  // Model current induced back emf, V\n", vdyn_);
@@ -332,10 +340,14 @@ double BatteryModel::calculate(const double temp_C, const double soc, double cur
     Randles_->update(dt);
     vb_ = Randles_->y(0);
     vdyn_ = vb_ - voc_;
+    // Special cases override
+    if ( bms_off_ )
+    {
+        vdyn_ = voc_;
+    }
     if ( bms_off_ && dc_dc_on )
     {
-        vb_ = 13.5;
-        vdyn_ = voc_;
+        vb_ = vb_dc_dc;
     }
 
     // Saturation logic, both full and empty
@@ -429,7 +441,7 @@ double BatteryModel::count_coulombs(const double dt, const boolean reset, const 
 
     // Normalize
     soc_ = q_ / q_capacity_;
-    soc_min_ = max((CAP_DROOP_C - temp_lim)*DQDT, 0.);
+    soc_min_ = soc_min_T_->interp(temp_lim);
     q_min_ = soc_min_ * q_capacity_;
     SOC_ = q_ / q_cap_rated_scaled_ * 100;
 
@@ -464,7 +476,6 @@ void BatteryModel::pretty_print(void)
     Serial.printf("  sat_cutback_gain_ = %7.3f; // Gain to retard ib when voc exceeds vsat, dimensionless\n", sat_cutback_gain_);
     Serial.printf("  model_cutback_ =      %d;     // Gain to retard ib when voc exceeds vsat, dimensionless\n", model_cutback_);
     Serial.printf("  model_saturated_ =    %d;     // Modeled current being limited on saturation cutback, T = cutback limited\n", model_saturated_);
-    Serial.printf("  bms_off_       =      %d;     // BMS off, T = current prevented\n", bms_off_);
     Serial.printf("  ib_sat_ =           %7.3f; // Indicator of maximal cutback, T = cutback saturated\n", ib_sat_);
     Serial.printf("  s_cap_ =            %7.3f; // Rated capacity scalar\n", s_cap_);
 }

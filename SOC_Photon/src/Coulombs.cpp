@@ -37,7 +37,10 @@ Coulombs::Coulombs()
   : q_cap_rated_(0), q_cap_rated_scaled_(0), t_rated_(25), t_rlim_(0.017) {}
 Coulombs::Coulombs(const double q_cap_rated, const double t_rated, const double t_rlim)
   : q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017),
-  soc_min_(0) {}
+  soc_min_(0)
+  {
+    soc_min_T_ = new TableInterp1D(n_n, x_soc_min, t_soc_min);
+  }
 Coulombs::~Coulombs() {}
 // t_rlim=0.017 allows 1 deg for 1 minute (the update time of the temp read; and the sensor has
 // 1 deg resolution).
@@ -166,7 +169,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
 
     // Normalize
     soc_ = q_ / q_capacity_;
-    soc_min_ = max((CAP_DROOP_C - temp_lim)*DQDT, 0.);
+    soc_min_ = soc_min_T_->interp(temp_lim);
     q_min_ = soc_min_ * q_capacity_;
     SOC_ = q_ / q_cap_rated_scaled_ * 100;
 

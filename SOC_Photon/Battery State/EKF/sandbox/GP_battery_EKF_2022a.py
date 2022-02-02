@@ -47,10 +47,8 @@ if __name__ == '__main__':
         # TODO:  temp sensitivities and mitigation
         dv_sense = 0.  # (0.-->0.1) ++++++++ flat curve
         di_sense = 0.  # (0.-->0.5) ++++++++  i does not go to zero steady state
-        i_hyst = 0.  # (0.-->5.) ++++++++  dyn only since i->0 steady state.  But very large transiently
         dt_model = 0.  # (0.-->25.) +++++++  TODO:   ?????????
         model_bat_cap = 100.  # (100.-->80) ++++++++++ dyn only provided reset soc periodically  TODO:  ???????
-        soc_init_err = 0.0  # (0-->-0.2)  ------ long simulation init time corrects this --> reset soc periodically
         r0 = 0.003  # (0.003-->0.006)  +++ dyn only provided reset soc periodically
         rct = 0.0016  # (0.0016-->0.0032) ++++++++++ dyn only provided reset soc periodically
         tau_dif = 83  # (83-->100)  +++++++++++ dyn only provided reset soc periodically
@@ -65,11 +63,11 @@ if __name__ == '__main__':
 
         # Transient  inputs
         # Current time inputs representing the load.
-        t_x_i = [0.0, 49.9, 50.0, 449.9, 450., 999.9, 1000., 2999.9, 3000.]  # seconds
-        t_i   = [0.0, 0.0,  -40.0,-40.0, 0.0,  0.0,   40.0,  40.0,   0.0]  # Amperes
+        t_x_i = [0.0, 49.9, 50.0,  449.9, 450., 999.9, 1000., 2999.9, 3000.]  # seconds
+        t_i = [0.0,   0.0,  -40.0, -40.0, 0.0,  0.0,   40.0,  40.0,   0.0]  # Amperes
         # DC-DC charger status.   0=off, 1=on
         t_x_d = [0.0, 199., 200.0,  299.9, 300.0]
-        t_d   = [0,   0,    1,      1,     0]
+        t_d = [0,     0,    1,      1,     0]
         # time_end = 2
         # time_end = 13.3
         # time_end = 700
@@ -78,30 +76,24 @@ if __name__ == '__main__':
         temp_c = 25.
         # temp_c = 0.
 
-
         # Setup
         dt = 0.1
         dt_ekf = 0.1
-        lut_i = myTables.TableInterp1D(np.array(t_x_i), np.array((t_i)))
-        lut_dc = myTables.TableInterp1D(np.array(t_x_d), np.array((t_d)))
-        r_std = 0.1  # Kalman sensor uncertainty (0.1) belief in meas
-        q_std = 0.001  # Process uncertainty (0.001) belief in state
+        lut_i = myTables.TableInterp1D(np.array(t_x_i), np.array(t_i))
+        lut_dc = myTables.TableInterp1D(np.array(t_x_d), np.array(t_d))
         scale = model_bat_cap / Battery.RATED_BATT_CAP
         sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale)
         mon = Battery(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
                       r_dif=r_dif, temp_c=temp_c)
 
-        # Executive tasks
-        t = np.arange(0, time_end + dt, dt)
-        current_in_s = []
-
         # time loop
+        t = np.arange(0, time_end + dt, dt)
         for i in range(len(t)):
             current_in = lut_i.interp(t[i])
             dc_dc_on = bool(lut_dc.interp(t[i]))
-            init_ekf = (t[i] <= 1)
+            init = (t[i] <= 1)
 
-            if init_ekf:
+            if init:
                 sim.apply_soc(soc_init, temp_c)
                 rp.delta_q_model = sim.delta_q
                 rp.t_last_model = temp_c+dt_model
@@ -112,12 +104,12 @@ if __name__ == '__main__':
             # Models
             sim.calculate(temp_c=temp_c, soc=sim.soc, curr_in=current_in, dt=dt, q_capacity=sim.q_capacity,
                           dc_dc_on=dc_dc_on)
-            sim.count_coulombs(dt=dt, reset=init_ekf, temp_c=temp_c, charge_curr=sim.ib, t_last=rp.t_last_model,
+            sim.count_coulombs(dt=dt, reset=init, temp_c=temp_c, charge_curr=sim.ib, t_last=rp.t_last_model,
                                sat=False)
             rp.delta_q_model, rp.t_last_model = sim.update()
 
             # EKF
-            if init_ekf:
+            if init:
                 mon.apply_soc(soc_init, temp_c)
                 rp.delta_q = mon.delta_q
                 rp.t_last = temp_c
@@ -128,13 +120,12 @@ if __name__ == '__main__':
 
             # Monitor calculations including ekf
             mon.calculate_ekf(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
-            mon.count_coulombs(dt=dt_ekf, reset=init_ekf, temp_c=temp_c, charge_curr=sim.ib,
+            mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=temp_c, charge_curr=sim.ib,
                                sat=is_sat(temp_c, mon.voc, mon.soc), t_last=mon.t_last)
             mon.calculate_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
             rp.delta_q, rp.t_last = mon.update()
 
             # Plot stuff
-            current_in_s.append(current_in)
             mon.save(t[i], sim.soc, sim.voc)
             sim.save(t[i], sim.soc, sim.voc)
 
@@ -151,8 +142,6 @@ if __name__ == '__main__':
 
         n_fig, fig_files = overall(mon.saved, sim.saved, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig)
-
-
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
         for fig_file in fig_files:

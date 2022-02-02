@@ -47,7 +47,6 @@
                                         // though probably not for an individual cell
 #define DQDT                  0.01      // Change of charge with temperature, fraction/deg C
                                         // DQDT from literature.   0.01 / deg C is commonly used.
-#define CAP_DROOP_C           20.       // Temperature below which a floor on q arises, C (20)
 #define TCHARGE_DISPLAY_DEADBAND 0.1    // Inside this +/- deadband, charge time is displayed '---', A
 const double max_voc = 1.2*NOM_SYS_VOLT;// Prevent windup of battery model, V
 const int batt_num_cells = NOM_SYS_VOLT/3;  // Number of standard 3 volt LiFePO4 cells
@@ -63,9 +62,10 @@ const double nom_q_cap = RATED_BATT_CAP * 3600;   // Nominal battery capacity, C
 const double q_cap_rated = RATED_BATT_CAP * 3600;   // Nominal battery capacity, C;
 const double t_rlim = 0.017;    // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s
 const double dvoc_dt = BATT_DVOC_DT * double(batt_num_cells);
-const double sat_cutback_gain = 10;         // Multiplier on saturation anti-windup
+const double sat_cutback_gain = 10; // Multiplier on saturation anti-windup
+const double vb_dc_dc = 13.5;   // DC-DC charger estimated voltage, V
 
-// Latest table from data.   
+// Latest table from data
 // See Model Fit 202201 tab of BattleBorn Rev1.xls
 const double low_voc = 10.; // Voltage threshold for BMS to turn off battery
 const double low_t = 8.;    // Minimum temperature for valid saturation check, because BMS shuts off battery low.
@@ -78,6 +78,9 @@ const double t_voc[m_t*n_s] = { 4.00,  4.00,  4.00,  4.00,  4.00,  4.00,  4.00, 
                                 4.30,  4.30,  4.30,  4.30,  4.30,  4.30,  4.30,  4.30,  10.45, 11.54, 12.04, 12.85, 13.20, 13.50,
                                 9.38,  12.18, 12.83, 12.99, 13.18, 13.21, 13.28, 13.38, 13.422,13.436,13.45, 13.49, 13.57, 13.92,
                                 9.86,  12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.902,13.916,13.93, 13.97, 14.05, 14.40};
+const unsigned int n_n = 5;
+const double x_soc_min[n_n] = { 0.,   10.,  12.,  20.,  40. };
+const double t_soc_min[n_n] = { 0.75, 0.75, 0.20, 0.05, 0.05};
 const double mxeps_bb = 1-1e-6;      // Level of soc that indicates saturated
 
 // Battery Class
@@ -107,7 +110,7 @@ public:
   double voc() { return (voc_); };
   double vsat() { return (vsat_); };
   double voc_dyn() { return (voc_dyn_); };
-  double voc_soc() { return (voc_soc_); };
+  double voc_soc() { return (voc_stat_); };
   double vdyn() { return (vdyn_); };
   double vb() { return (vb_); };
   double ib() { return (ib_); };
@@ -158,7 +161,8 @@ protected:
   double q_ekf_;    // Filtered charge calculated by ekf, C
   double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
-  double voc_soc_;  // Model voc from soc-voc table, V
+  double voc_stat_; // Model voc from soc-voc table, V
+  boolean bms_off_; // Indicator that battery management system is off, T = off preventing current flow
   TableInterp2D *voc_T_;   // SOC-VOC 2-D table, V
   void ekf_model_predict(double *Fx, double *Bu);
   void ekf_model_update(double *hx, double *H);
@@ -193,7 +197,6 @@ protected:
   double sat_cutback_gain_; // Gain to retard ib when voc exceeds vsat, dimensionless
   boolean model_cutback_;   // Indicate that modeled current being limited on saturation cutback, T = cutback limited
   boolean model_saturated_; // Indicator of maximal cutback, T = cutback saturated
-  boolean bms_off_;     // Indicator that battery management system is off, T = off preventing current flow
   double ib_sat_;       // Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
   double s_cap_;        // Rated capacity scalar
 };

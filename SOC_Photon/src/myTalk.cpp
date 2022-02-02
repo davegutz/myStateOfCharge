@@ -81,6 +81,8 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
           case ( 't' ):
             rp.t_bias = cp.input_string.substring(2).toFloat();
             Serial.printf("rp.t_bias changed to %7.3f\n", rp.t_bias);
+            // TODO:  make soft reset properly reinit t filters
+            Serial.printf("****************You should perform a hard reset to initialize temp filters to new values\n");
             break;
 
           case ( 'v' ):

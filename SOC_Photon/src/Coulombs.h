@@ -70,6 +70,7 @@ protected:
   boolean resetting_ = false;  // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
   double soc_min_;    // As battery cools, the voltage drops and there appears a minimum soc it can deliver
   double q_min_;      // Floor on charge available to use, C
+  TableInterp1D *soc_min_T_;   // SOC-MIN 1-D table, V
 };
 
 #endif

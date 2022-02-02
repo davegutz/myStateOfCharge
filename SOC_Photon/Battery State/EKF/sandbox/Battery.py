@@ -143,6 +143,7 @@ class Battery(Coulombs, EKF_1x1):
         self.Q = 0.001*0.001  # EKF process uncertainty
         self.R = 0.1*0.1  # EKF state uncertainty
         self.dv_hys = 0.  # Placeholder so BatteryModel can be plotted
+        self.bms_off = False
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -152,6 +153,7 @@ class Battery(Coulombs, EKF_1x1):
         s += '  r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = {:7.3f}, {:7.3f}, {:7.3f},' \
              ' {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
             format(self.r0, self.r_ct, self.tau_ct, self.r_dif, self.tau_dif, self.r_sd, self.tau_sd)
+        s += "  bms_off  = {:d}      // BMS off\n".format(self.bms_off)
         s += "  dv_dsoc = {:7.3f}  // Derivative scaled, V/fraction\n".format(self.dv_dsoc)
         s += "  ib =      {:7.3f}  // Current into battery post, A\n".format(self.ib)
         s += "  vb =      {:7.3f}  // Total model voltage, voltage at terminals, V\n".format(self.vb)
@@ -223,9 +225,17 @@ class Battery(Coulombs, EKF_1x1):
         self.voc = self.voc_dyn
         self.voc_stat = self.voc_dyn
         self.pow_oc = self.voc * self.ib
+        self.bms_off = self.temp_c <= low_t;  # KISS
+        if self.bms_off:
+            self.voc_stat, self.dv_dsoc = self.calc_soc_voc(max(min(self.soc, 1.), 0.), temp_c)
+            self.voc_stat += self.dv  # Experimentally varied
+            self.ib = 0.
+            self.voc = self.voc_stat
+            self.vdyn = self.voc_stat
+            self.voc_dyn = 0.
 
         # EKF 1x1
-        self.predict_ekf(ib)  # u = ib
+        self.predict_ekf(self.ib)  # u = ib
         # self.update_ekf(self.voc_dyn, mneps_bb, mxeps_bb)  # z = voc_dyn, voc_filtered = hx
         self.update_ekf(self.voc_dyn, 0., 1.)  # z = voc_dyn, voc_filtered = hx
         self.soc_ekf = self.x_kf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
@@ -413,7 +423,6 @@ class BatteryModel(Battery):
         if scale is not None:
             self.apply_cap_scale(scale)
         self.hys = Hysteresis(scale=hys_scale)  # Battery hysteresis model - drift of voc
-        self.bms_off = False
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -430,7 +439,6 @@ class BatteryModel(Battery):
             format(self.model_saturated)
         s += "  ib_sat =          {:7.3f}  // Threshold to declare saturation.  This regeneratively slows" \
              " down charging so if too\n".format(self.ib_sat)
-        s += "  bms_off  =        {:d}     // BMS off\n".format(self.bms_off)
         s += "  ib     =        {:7.3f}  // Open circuit current into posts, A\n".format(self.ib)
         s += "  voc     =        {:7.3f}  // Open circuit voltage, V\n".format(self.voc)
         s += "  voc_stat=        {:7.3f}  // Static, table lookup value of voc before applying hysteresis, V\n".\
