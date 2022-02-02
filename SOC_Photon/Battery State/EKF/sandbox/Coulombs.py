@@ -19,7 +19,6 @@ of the totals and standardize the calculations."""
 # Constants
 import numpy as np
 
-cap_droop_c = 20.
 dqdt = 0.01
 
 
