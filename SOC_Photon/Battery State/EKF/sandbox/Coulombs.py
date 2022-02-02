@@ -17,7 +17,7 @@
 of the totals and standardize the calculations."""
 
 # Constants
-import Battery
+import numpy as np
 
 cap_droop_c = 20.
 dqdt = 0.01
@@ -41,6 +41,10 @@ class Coulombs:
         self.q_min = 0.
         self.t_last = 0.
         self.sat = True
+        from pyDAGx import myTables
+        t_x_soc_min = [0., 10.,  12.,  20.,  40.]
+        t_soc_min = [0.75, 0.75, 0.20, 0.05, 0.05]
+        self.lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
 
     def __str__(self, prefix=''):
         '''Returns representation of the object'''
@@ -147,7 +151,7 @@ class Coulombs:
 
         # Normalize
         self.soc = self.q / self.q_capacity
-        self.soc_min = max((cap_droop_c - temp_lim)*dqdt, 0.)
+        self.soc_min = self.lut_soc_min.interp(temp_lim)
         self.q_min = self.soc_min * self.q_capacity
         self.SOC = self.q / self.q_cap_rated_scaled * 100.
 

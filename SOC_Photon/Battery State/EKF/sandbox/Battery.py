@@ -551,7 +551,7 @@ class BatteryModel(Battery):
 
         # Normalize
         self.soc = self.q / self.q_capacity
-        self.soc_min = max((CAP_DROOP_C - temp_lim)*DQDT, 0.)
+        self.soc_min = self.lut_soc_min.interp(temp_lim)
         self.q_min = self.soc_min * self.q_capacity
         self.SOC = self.q / self.q_cap_rated_scaled * 100.
 
