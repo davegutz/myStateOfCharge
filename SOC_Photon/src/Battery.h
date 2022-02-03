@@ -70,17 +70,18 @@ const double vb_dc_dc = 13.5;   // DC-DC charger estimated voltage, V
 const double low_voc = 10.; // Voltage threshold for BMS to turn off battery
 const double low_t = 8.;    // Minimum temperature for valid saturation check, because BMS shuts off battery low.
                             // Heater should keep >8, too
-const unsigned int m_t = 4;
-const double y_t[m_t] =  { 0., 10., 20., 40. };
-const unsigned int n_s = 14;
-const double x_soc[n_s] =     { 0.00,  0.10,  0.20,  0.30,  0.40,  0.50,  0.60,  0.70,  0.76,  0.78,  0.80,  0.90,  0.98, 1.00};
-const double t_voc[m_t*n_s] = { 4.00,  4.00,  4.00,  4.00,  4.00,  4.00,  4.00,  4.00,  10.24, 11.32, 11.83, 12.63, 13.02, 13.32,
-                                4.30,  4.30,  4.30,  4.30,  4.30,  4.30,  4.30,  4.30,  10.45, 11.54, 12.04, 12.85, 13.20, 13.50,
-                                9.38,  12.18, 12.83, 12.99, 13.18, 13.21, 13.28, 13.38, 13.422,13.436,13.45, 13.49, 13.57, 13.92,
-                                9.86,  12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.902,13.916,13.93, 13.97, 14.05, 14.40};
+const unsigned int m_t = 5;
+const double y_t[m_t] =  { 0., 10., 15., 20., 40. };
+const unsigned int n_s = 15;
+const double x_soc[n_s] =     { 0.00,  0.10,  0.20,  0.30,  0.40,  0.50,  0.60,  0.70,  0.73,  0.76,  0.78,  0.80,  0.90,  0.98,  1.00};
+const double t_voc[m_t*n_s] = { 4.00,  4.00,  4.00,  4.00,  4.00,  4.00,  4.00,  4.00,  7.00,  10.24, 11.32, 11.83, 12.63, 13.02, 13.32,
+                                4.30,  4.30,  4.30,  4.30,  4.30,  4.30,  4.30,  4.30,  7.30,  10.45, 11.54, 12.04, 12.85, 13.20, 13.50,
+                                4.50,  4.50,  4.50,  4.50,  4.50,  4.50,  4.50,  10.20, 12.40, 12.60, 12.72, 12.75, 13.09, 13.35, 13.72,
+                                9.38,  12.18, 12.83, 12.99, 13.18, 13.21, 13.28, 13.38, 13.422,13.40, 13.436,13.45, 13.49, 13.57, 13.92,
+                                9.86,  12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.902,13.91, 13.916,13.93, 13.97, 14.05, 14.40};
 const unsigned int n_n = 5;
-const double x_soc_min[n_n] = { 0.,   10.,  12.,  20.,  40. };
-const double t_soc_min[n_n] = { 0.75, 0.75, 0.20, 0.05, 0.05};
+const double x_soc_min[n_n] = { 0.,   10.,  15.,  20.,  40. };
+const double t_soc_min[n_n] = { 0.75, 0.75, 0.70, 0.05, 0.05};
 const double mxeps_bb = 1-1e-6;      // Level of soc that indicates saturated
 
 // Battery Class
