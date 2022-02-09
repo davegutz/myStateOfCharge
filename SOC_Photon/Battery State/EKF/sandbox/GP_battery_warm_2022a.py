@@ -62,13 +62,13 @@ if __name__ == '__main__':
         for i in range(len(t)):
             T_ref = lut_R.interp(t[i])
             temp_c = lut_T.interp(t[i])
-            init = (t[i] <= 0.2)
+            init = (t[i] <= 1.)
 
             if init:
                 sim.assign_temp_c(temp_c)
 
             # Control
-            if T_ref >= sim.Tbs:
+            if T_ref >= sim.Tbs and not init:
                 W = W_max
 
             # Models

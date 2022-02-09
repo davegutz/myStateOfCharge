@@ -51,7 +51,7 @@ class BatteryHeat:
         self.T0 = temp_c
         self.W = 0
         self.Qn = self.W
-        self.Ti = np.zeros(shape=(n, 1))
+        self.Ti = np.zeros(shape=n)
         for i in np.arange(0, n):
             self.Ti[i] = temp_c
         self.Tbs = temp_c
@@ -63,10 +63,11 @@ class BatteryHeat:
         self.Hin = 1. / (1./(self.Hij/2.) + 1./self.He0)
         He0ij = 1. / (self.He0/(self.Hij/2.) + 1.)
         Hije0 = 1. / (1. + (self.Hij / 2.) / self.He0)
-        self.i_Tb = int(n / 2) + 1
+        self.i_Tb = int(n / 2)
         self.Tb = self.Ti[self.i_Tb]
         self.Tbs = temp_c
         self.Tw = temp_c
+        self.Tn = temp_c
 
         # Build ss arrays
         # first slice
@@ -89,7 +90,7 @@ class BatteryHeat:
         self.ss_model.C[0,n-1] = 1. - Hije0
         self.ss_model.C[2,0] = self.ss_model.C[0,n-1]
         self.ss_model.D[0,1] = -Hije0
-        self.ss_model.D[2,0] = Hije0
+        self.ss_model.D[2,0] = 1. / ( self.He0 + self.Hij/2. )
         self.ss_model.D[2,1] = -self.ss_model.D[0,1]
 
         self.saved = Saved(n=self.n, i_Tb=self.i_Tb)  # for plots and prints
@@ -98,21 +99,20 @@ class BatteryHeat:
         """Returns representation of the object"""
         s = prefix + "BatteryHeat:\n"
         s += "  mi  = {:7.3f}  // mass of slice, kg\n".format(self.mi)
-        s += "  Ci  = {:7.3f}  // Heat capacity of slice, W-hr/kg\n".format(self.Ci)
-        s += "  Hij = {:7.3f}  // Heat transfer rate of slice (=A/R), W/deg C\n".format(self.Hij)
-        s += "  Hi0 = {:7.3f}  // Heat transfer rate of slice to atm (=A/R), W/deg C\n".format(self.Hi0)
-        s += "  He0 = {:7.3f}  // Heat transfer rate of top or bottom to atm (=A/R), W/deg C\n".format(self.He0)
+        s += "  Ci  = {:7.4f}  // Heat capacity of slice, W-hr\n".format(self.Ci)
+        s += "  Hij = {:8.6f} // Heat transfer rate of slice (=A/R), W/deg C\n".format(self.Hij)
+        s += "  Hi0 = {:7.4f}  // Heat transfer rate of slice to atm (=A/R), W/deg C\n".format(self.Hi0)
+        s += "  He0 = {:7.4f}  // Heat transfer rate of top or bottom to atm (=A/R), W/deg C\n".format(self.He0)
         s += '  W   = {:5.1f}, // Power in, W\n'.format(self.W)
         s += '  Qn  = {:5.1f}, // Heat out, W\n'.format(self.Qn)
         s += '  T0  = {:5.1f}, // Ambient temp, deg C\n'.format(self.T0)
         s += '  Tw  = {:5.1f}, // Heat pad wire temp, deg C\n'.format(self.Tw)
         s += '  Ti  =  ['
-        for i in np.arange(0, self.n-1):
-            print('Ti[', i,']=',self.Ti[i])
+        for i in np.arange(0, self.n):
             s += ' {:5.1f}'.format(self.Ti[i])
             if i<self.n-1:
                 s += ','
-        s += ']  // Slice temps, deg C\n'
+        s += '  ]  // Slice temps, deg C\n'
         s += '  i_Tb= {:d},  // Slice location of battery bulk temp\n'.format(self.i_Tb)
         s += '  Tb  = {:5.1f}, // Battery bulk temp, deg C\n'.format(self.Tb)
         s += '  Tbs = {:5.1f}, // Battery temp sense, deg C\n'.format(self.Tbs)
@@ -125,7 +125,7 @@ class BatteryHeat:
         self.Tw = temp_c
         self.Tbs = temp_c
         self.Tb = temp_c
-        for i in np.arange(0, self.n-1):
+        for i in np.arange(0, self.n):
             self.Ti[i] = temp_c
 
     def calculate(self, temp_c, W, dt):
@@ -133,20 +133,18 @@ class BatteryHeat:
         self.W = W
 
         # Dynamics
-        u = np.array([self.T0, self.W]).T
-        print(self.ss_model.__str__('ss:'))
+        u = np.array([self.W, self.T0]).T
         self.ss_model.calc_x_dot(u)
         self.ss_model.update(dt)
         self.Tbs, self.Tb, self.Tw = self.ss_model.y
         self.Ti = self.ss_model.x
+        self.Qn = (self.Ti[self.n-1] - self.T0) * self.Hin
 
-        self.Qn = (self.Ti[self.n-1] - self.T0) / self.Hin
-
-        return self.Tbs
+        return
 
     def save(self, time, T_ref):
         self.saved.time.append(time)
-        self.saved.T_ref.append(self.T_ref)
+        self.saved.T_ref.append(T_ref)
         self.saved.T0.append(self.T0)
         self.saved.W.append(self.W)
         self.saved.Tw.append(self.Tw)

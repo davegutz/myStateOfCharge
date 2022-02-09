@@ -23,13 +23,13 @@ class StateSpace:
         self.n = n
         self.p = p
         self.q = q
-        self.u = np.zeros(shape=(n, p))
+        self.u = np.zeros(shape=p)
         self.A = np.zeros(shape=(n, n))
         self.B = np.zeros(shape=(n, p))
         self.C = np.zeros(shape=(q, n))
         self.D = np.zeros(shape=(q, p))
-        self.y = np.zeros(shape=(q, 1))
-        self.x = np.zeros(shape=(n, 1))
+        self.y = np.zeros(shape=q)
+        self.x = np.zeros(shape=n)
         self.x_dot = self.x
         self.x_past = self.x
         self.dt = 0.
