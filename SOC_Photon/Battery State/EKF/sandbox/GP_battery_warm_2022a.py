@@ -54,7 +54,7 @@ if __name__ == '__main__':
         dt = 0.1  # hours
         lut_R = myTables.TableInterp1D(np.array(t_x_R), np.array(t_R))
         lut_T = myTables.TableInterp1D(np.array(t_x_T), np.array(t_T))
-        sim = BatteryHeat(temp_c=T_Init, hij=0.23*1000)
+        sim = BatteryHeat(temp_c=T_Init, hij=0.23*500)
         W = 0.
         print('sim:  ', str(sim))
 
