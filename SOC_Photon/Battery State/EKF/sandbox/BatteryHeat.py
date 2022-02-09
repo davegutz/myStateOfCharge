@@ -144,7 +144,7 @@ class BatteryHeat:
 
     def save(self, time, T_ref):
         self.saved.time.append(time)
-        self.saved.T_ref.append(T_ref)
+        self.saved.T_Ref.append(T_ref)
         self.saved.T0.append(self.T0)
         self.saved.W.append(self.W)
         self.saved.Tw.append(self.Tw)
@@ -161,7 +161,7 @@ class Saved:
         self.n = n
         self.i_Tb = i_Tb
         self.time = []
-        self.T_ref = []
+        self.T_Ref = []
         self.T0 = []
         self.W = []
         self.Tw = []
@@ -187,6 +187,7 @@ def overall(ss, filename, fig_files=None, plot_title=None, n_fig=0):
     plt.plot(ss.time, ss.T1, color='red', linestyle='dashed', label='T1')
     plt.plot(ss.time, ss.Tb, color='green', label='Tb')
     plt.plot(ss.time, ss.Tn, color='cyan', label='Tn')
+    plt.plot(ss.time, ss.T_Ref, color='blue', linestyle='dotted', label='T_Ref')
     plt.plot(ss.time, ss.Tbs, color='blue', label='Tbs')
     plt.plot(ss.time, ss.T0, color='magenta', label='T0')
     plt.legend(loc=1)

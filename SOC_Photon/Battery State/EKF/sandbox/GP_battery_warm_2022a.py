@@ -43,42 +43,47 @@ if __name__ == '__main__':
         t_R = [  20.0, 20.0, 20.0]  # deg C
         # Ambient temperature - time inputs
         t_x_T = [0.00, 0.99, 1.00]  # hours
-        t_T = [  20.0, 20.0, 20.0]  # deg C
+        t_T = [   0.0,  0.0,  0.0]  # deg C
         # Heat, W inputs
         W_max = 36.
         time_end = 30.
-        T_ref = 20.
+        T_Init = 0.
+        T_Ref = T_Init
 
         # Setup
         dt = 0.1  # hours
         lut_R = myTables.TableInterp1D(np.array(t_x_R), np.array(t_R))
         lut_T = myTables.TableInterp1D(np.array(t_x_T), np.array(t_T))
-        sim = BatteryHeat(temp_c=t_T[0])
+        sim = BatteryHeat(temp_c=T_Init, hij=0.23*1000)
         W = 0.
         print('sim:  ', str(sim))
 
         # time loop
-        t = np.arange(0, time_end + dt, dt)
+        t = np.arange(0, time_end+dt, dt)
         for i in range(len(t)):
-            T_ref = lut_R.interp(t[i])
+            T_Ref = lut_R.interp(t[i])
             temp_c = lut_T.interp(t[i])
             init = (t[i] <= 1.)
 
             if init:
                 sim.assign_temp_c(temp_c)
+                T_Ref = temp_c
 
             # Control
-            if T_ref >= sim.Tbs and not init:
+            if T_Ref > sim.Tbs and not init:
                 W = W_max
+            else:
+                W = 0.
 
             # Models
             sim.calculate(temp_c=temp_c, W=W, dt=dt)
 
             # Plot stuff
-            sim.save(t[i], T_ref)
+            sim.save(time=t[i], T_ref=T_Ref)
 
         # Data
         print('sim:  ', str(sim))
+        print('T_Ref=', T_Ref)
 
         # Plots
         n_fig = 0
