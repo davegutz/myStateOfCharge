@@ -27,10 +27,9 @@ import matplotlib.pyplot as plt
 class BatteryHeat:
     # Battery heat model:  discrete lumped parameter heat flux modeling warmup of Battleborn using 36 W of heat pad
 
-    def __init__(self, temp_c, hi0=1., n=5, M=29., l=12./39., w=7./39., h=9./39., cv=0.075, hij=69, rho=2230.):
+    def __init__(self, temp_c, hi0=1., n=5, l=12./39., w=7./39., h=9./39., cv=0.075, hij=69., rho=2230.):
         """ Default values  from various for Battleborn 100 Ah LFP battery
         hi0 = 1 W/m^2/C (R1 insulation old 1/2 inch sleeping pad)
-        M = 29  kg mass of battery elements
         l = 12/39, m
         w = 7/39, m
         h = 9/39, m
@@ -45,12 +44,11 @@ class BatteryHeat:
 
         self.n = n
         Ae = l * w
-        Ai = (2.*(l*h) + 2.*(h*w) ) / n
+        Ai = (2.*(l*h) + 2.*(h*w)) / float(n)
         V = l * w * h
         M = V * rho
         self.T0 = temp_c
         self.W = 0
-        self.Qn = self.W
         self.Ti = np.zeros(shape=n)
         for i in np.arange(0, n):
             self.Ti[i] = temp_c
@@ -77,12 +75,12 @@ class BatteryHeat:
         # first slice
         self.ss_model = StateSpace(n, 2, 3)  # n slices, [T0, W] --> [Tns, Tb, Tw]
         self.ss_model.A[0,0] = (-self.Hij/2. - self.Hin - self.Hi0) / self.Ci
-        self.ss_model.A[0,1] = self.Hij/2./self.Ci
+        self.ss_model.A[0,1] = self.Hij / 2. / self.Ci
         self.ss_model.B[0,0] = He0ij /self.Ci
         self.ss_model.B[0,1] = (self.Hi0 + self.Hin) / self.Ci
         # between slices
         for i in np.arange(1, n-1):
-            self.ss_model.A[i,i-1] = self.Hij/2. / self.Ci
+            self.ss_model.A[i,i-1] = self.Hij / 2. / self.Ci
             self.ss_model.A[i,i] = (-self.Hi0 - self.Hij) / self.Ci  # note Hij not divided by 2
             self.ss_model.A[i,i+1] = self.ss_model.A[i,i-1]
             self.ss_model.B[i,1] = self.Hi0 / self.Ci
@@ -110,7 +108,10 @@ class BatteryHeat:
         s += "  Hi0 = {:7.4f}  // Heat transfer rate of slice to atm (=A/R), W/deg C\n".format(self.Hi0)
         s += "  He0 = {:7.4f}  // Heat transfer rate of top or bottom to atm (=A/R), W/deg C\n".format(self.He0)
         s += '  W   = {:5.1f}, // Power in, W\n'.format(self.W)
-        s += '  Qn  = {:5.1f}, // Heat out, W\n'.format(self.Qn)
+        s += '  Qw0 = {:5.1f}, // Heat out at wire, W\n'.format(self.Qw0)
+        s += '  Qw1 = {:5.1f}, // Heat into first slice, W\n'.format(self.Qw1)
+        s += '  Qns = {:5.1f}, // Heat last slice to sensor, W\n'.format(self.Qns)
+        s += '  Qs0 = {:5.1f}, // Heat out at sensor, W\n'.format(self.Qs0)
         s += '  T0  = {:5.1f}, // Ambient temp, deg C\n'.format(self.T0)
         s += '  Tw  = {:5.1f}, // Heat pad wire temp, deg C\n'.format(self.Tw)
         s += '  Ti  =  ['
@@ -144,7 +145,6 @@ class BatteryHeat:
         self.ss_model.update(dt)
         self.Tns, self.Tb, self.Tw = self.ss_model.y
         self.Ti = self.ss_model.x
-        self.Qn = (self.Ti[self.n-1] - self.T0) * self.Hin
         self.Qw1 = (self.Tw - self.Ti[0]) * self.Hij / 2.
         self.Qw0 = (self.Tw - self.T0) * self.He0
         self.Qns = (self.Ti[self.n-1] - self.Tns) * self.Hij / 2.
