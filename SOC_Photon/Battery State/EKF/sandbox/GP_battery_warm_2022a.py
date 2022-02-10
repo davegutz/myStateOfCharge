@@ -52,12 +52,12 @@ if __name__ == '__main__':
         t_W = [  0.0, 0.0, 36.4, 36.4, 0.0]  # Watts
         s_W = 1.0  # scalar on W lookup
         W_max = 36.4
-        matching = True
+        matching = False
         if matching:
             time_end = 28.
             T_Init = t_M[0]
         else:
-            time_end = 48.
+            time_end = 96.
             T_Init = 0.
         T_Ref = t_R[0]
 
@@ -81,11 +81,12 @@ if __name__ == '__main__':
         t = np.arange(0, time_end+dt, dt)
         for i in range(len(t)):
             T_Ref = lut_R.interp(t[i])
-            temp_c = lut_T.interp(t[i])
             if matching:
                 Tbm = lut_M.interp(t[i])
+                temp_c = lut_T.interp(t[i])
             else:
                 Tbm = 0
+                temp_c = 0
             init = (t[i] <= 0.5)
 
             if init:
