@@ -127,6 +127,18 @@ class BatteryHeat:
         s += self.ss_model.__str__(prefix + 'Battery:')
         return s
 
+    def assign_Ti(self, Ti=None):
+        if Ti is None:
+            Ti = []
+            for i in np.arange(0, self.n):
+                Ti.append(0.)
+        else:
+            for i in np.arange(0, self.n):
+                self.Ti[i] = Ti[i]
+
+    def assign_T0(self, T0):
+        self.T0 = T0
+
     def assign_temp_c(self, temp_c):
         self.T0 = temp_c
         self.Tw = temp_c
@@ -152,9 +164,10 @@ class BatteryHeat:
 
         return
 
-    def save(self, time, T_ref):
+    def save(self, time, T_ref, T_bm):
         self.saved.time.append(time)
         self.saved.T_Ref.append(T_ref)
+        self.saved.T_bm.append(T_bm)
         self.saved.T0.append(self.T0)
         self.saved.W.append(self.W)
         self.saved.Tw.append(self.Tw)
@@ -174,6 +187,7 @@ class Saved:
         self.i_Tb = i_Tb
         self.time = []
         self.T_Ref = []
+        self.T_bm = []
         self.T0 = []
         self.W = []
         self.Tw = []
@@ -210,11 +224,9 @@ def overall(ss, filename, fig_files=None, plot_title=None, n_fig=0):
     plt.plot(ss.time, ss.T0, color='magenta', label='T0')
     plt.legend(loc=1)
     plt.subplot(313)
-    plt.plot(ss.time, ss.Tn, color='cyan', label='Tn')
     plt.plot(ss.time, ss.T_Ref, color='blue', linestyle='dotted', label='T_Ref')
-    plt.plot(ss.time, ss.Tb, color='green', label='Tb')
+    plt.plot(ss.time, ss.T_bm, color='red', linestyle='dashed', label='Tbm actual')
     plt.plot(ss.time, ss.Tns, color='blue', label='Tns')
-    plt.plot(ss.time, ss.T0, color='magenta', label='T0')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)

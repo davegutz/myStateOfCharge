@@ -42,19 +42,38 @@ if __name__ == '__main__':
         t_x_R = [0.00, 0.99, 1.00]  # hours
         t_R = [  20.0, 20.0, 20.0]  # deg C
         # Ambient temperature - time inputs
-        t_x_T = [0.00,  0.99, 1.00]  # hours
-        t_T = [  -10.0, -10.0, -10.0]  # deg C
+        t_x_T = [0.0,  0.5, 6.0, 7.0, 8.0, 9.0, 14.0, 15.0, 17.0, 24.0, 26.0]  # hours
+        t_T = [  1.7,  1.7, 5.6, 2.8, 2.2, 2.8, -0.6,  0.0, -2.2,  2.8,  8.3]  # deg C
+        # Measurement for reference
+        t_x_M = [0.,   1.5,  2.,   2.5,  8.,   9.5,  10.5, 13.5, 17.5, 23.,  23.5, 26. ]  # hours
+        t_M = [  21.8, 27.1, 26.6, 25.1, 17.6, 17.3, 17.8, 19.6, 20.4, 18.9, 20.2, 22.2  ]  # deg C
         # Heat, W inputs
-        W_max = 36.
-        time_end = 48.
-        T_Init = t_T[0]
-        T_Ref = T_Init
+        t_x_W = [0.0, 5.0, 5.5,  23.5, 24.0]  # hours
+        t_W = [  0.0, 0.0, 36.4, 36.4, 0.0]  # Watts
+        s_W = 1.0  # scalar on W lookup
+        W_max = 36.4
+        matching = True
+        if matching:
+            time_end = 28.
+            T_Init = t_M[0]
+        else:
+            time_end = 48.
+            T_Init = 0.
+        T_Ref = t_R[0]
 
         # Setup
         dt = 0.1  # hours
         lut_R = myTables.TableInterp1D(np.array(t_x_R), np.array(t_R))
         lut_T = myTables.TableInterp1D(np.array(t_x_T), np.array(t_T))
-        sim = BatteryHeat(temp_c=T_Init)
+        lut_W = myTables.TableInterp1D(np.array(t_x_W), np.array(t_W))
+        lut_M = myTables.TableInterp1D(np.array(t_x_M), np.array(t_M))
+        nTi = 5
+        sim = BatteryHeat(n=nTi, temp_c=T_Init, hi0=1., hij=0.9)
+        if matching:
+            Ti_init = [90, 80, 70, 50, 35]
+        else:
+            Ti_init = [0., 0., 0., 0., 0.]
+        sim.assign_Ti(Ti_init)
         W = 0.
         print('sim:  ', str(sim))
 
@@ -63,24 +82,30 @@ if __name__ == '__main__':
         for i in range(len(t)):
             T_Ref = lut_R.interp(t[i])
             temp_c = lut_T.interp(t[i])
-            init = (t[i] <= 1.)
+            if matching:
+                Tbm = lut_M.interp(t[i])
+            else:
+                Tbm = 0
+            init = (t[i] <= 0.5)
 
             if init:
-                sim.assign_temp_c(temp_c)
-                T_Ref = temp_c
+                sim.assign_temp_c(Tbm)
+                sim.assign_Ti(Ti_init)
 
             # Control
-            if T_Ref > sim.Tns and not init:
-            # if T_Ref > sim.Tb and not init:
-                    W = W_max
+            if matching:
+                W = lut_W.interp(t[i])*s_W
             else:
-                W = 0.
+                if T_Ref > sim.Tns and not init:
+                    W = W_max
+                else:
+                    W = 0.
 
             # Models
             sim.calculate(temp_c=temp_c, W=W, dt=dt)
 
             # Plot stuff
-            sim.save(time=t[i], T_ref=T_Ref)
+            sim.save(time=t[i], T_ref=T_Ref, T_bm=Tbm)
 
         # Data
         print('sim:  ', str(sim))
