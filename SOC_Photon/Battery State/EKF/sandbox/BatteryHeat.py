@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 class BatteryHeat:
     # Battery heat model:  discrete lumped parameter heat flux modeling warmup of Battleborn using 36 W of heat pad
 
-    def __init__(self, temp_c, hi0=1., n=5, l=12./39., w=7./39., h=9./39., cv=0.075, hij=69., rho=2230.):
+    def __init__(self, temp_c, hi0=1., n=5, l=12./39., w=7./39., h=9./39., cv=0.075, hij=2., rho=2230.):
         """ Default values  from various for Battleborn 100 Ah LFP battery
         hi0 = 1 W/m^2/C (R1 insulation old 1/2 inch sleeping pad)
         l = 12/39, m
@@ -35,7 +35,7 @@ class BatteryHeat:
         h = 9/39, m
         cv = 541 J/C * 0.5 kg / 3600 s/hr = 0.075 W-hr/kg (1 J = 1 W-s)
         rho = 0.5 kg / 224 ml = 2230 kg/m^3
-        hij = 69 W/K to match 10 hr period of oscillation
+        hij = 2 W/K to match 10 hr period of oscillation
         """
 
         # Defaults
@@ -55,7 +55,7 @@ class BatteryHeat:
         self.Tns = temp_c
         self.mi = M / float(n)
         self.Ci = cv * self.mi
-        self.Hij = Ae * hij / float(n)
+        self.Hij = Ae * hij * float(n)
         self.Hi0 = hi0 * Ai
         self.He0 = l*w*hi0
         self.Hin = 1. / (1./(self.Hij/2.) + 1./self.He0)
@@ -74,20 +74,20 @@ class BatteryHeat:
         # Build ss arrays
         # first slice
         self.ss_model = StateSpace(n, 2, 3)  # n slices, [T0, W] --> [Tns, Tb, Tw]
-        self.ss_model.A[0,0] = (-self.Hij/2. - self.Hin - self.Hi0) / self.Ci
-        self.ss_model.A[0,1] = self.Hij / 2. / self.Ci
+        self.ss_model.A[0,0] = (-self.Hij - self.Hin - self.Hi0) / self.Ci
+        self.ss_model.A[0,1] = self.Hij / self.Ci
         self.ss_model.B[0,0] = He0ij /self.Ci
         self.ss_model.B[0,1] = (self.Hi0 + self.Hin) / self.Ci
         # between slices
         for i in np.arange(1, n-1):
-            self.ss_model.A[i,i-1] = self.Hij / 2. / self.Ci
-            self.ss_model.A[i,i] = (-self.Hi0 - self.Hij) / self.Ci  # note Hij not divided by 2
+            self.ss_model.A[i,i-1] = self.Hij / self.Ci
+            self.ss_model.A[i,i] = (-self.Hi0 - 2.*self.Hij) / self.Ci  # note Hij not divided by 2
             self.ss_model.A[i,i+1] = self.ss_model.A[i,i-1]
             self.ss_model.B[i,1] = self.Hi0 / self.Ci
         self.ss_model.C[1,self.i_Tb] = 1
         # last slice
-        self.ss_model.A[n-1,n-2] = self.Hij / 2. / self.Ci
-        self.ss_model.A[n-1,n-1] = (-self.Hi0 - self.Hij / 2. - self.Hin) / self.Ci
+        self.ss_model.A[n-1,n-2] = self.Hij / self.Ci
+        self.ss_model.A[n-1,n-1] = (-self.Hi0 - self.Hij - self.Hin) / self.Ci
         self.ss_model.B[n-1,1] = (self.Hin + self.Hi0) / self.Ci
         self.ss_model.C[0,n-1] = He0ij
         self.ss_model.C[2,0] = self.ss_model.C[0,n-1]
