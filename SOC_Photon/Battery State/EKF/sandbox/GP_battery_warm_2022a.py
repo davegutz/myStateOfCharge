@@ -70,7 +70,7 @@ if __name__ == '__main__':
         nTi = 5
         sim = BatteryHeat(n=nTi, temp_c=T_Init, hi0=1., hij=0.9)
         if matching:
-            Ti_init = [90, 80, 70, 50, 35]
+            Ti_init = [90, 80, 70, 60, 32]
         else:
             Ti_init = [0., 0., 0., 0., 0.]
         sim.assign_Ti(Ti_init)
