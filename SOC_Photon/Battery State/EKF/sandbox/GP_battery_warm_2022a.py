@@ -51,14 +51,14 @@ if __name__ == '__main__':
         t_x_W = [0.0, 5.0, 5.5,  23.5, 24.0]  # hours
         t_W = [  0.0, 0.0, 36.4, 36.4, 0.0]  # Watts
         s_W = 1.0  # scalar on W lookup
-        W_max = 36.4
-        matching = True
+        W_max = 36
+        matching = False
         if matching:
             time_end = 28.
             T_Init = t_M[0]
         else:
             time_end = 96.
-            T_Init = 0.
+            T_Init = -10.
         T_Ref = t_R[0]
 
         # Setup
@@ -72,7 +72,7 @@ if __name__ == '__main__':
         if matching:
             Ti_init = [120, 100, 90, 60, 25]
         else:
-            Ti_init = [0., 0., 0., 0., 0.]
+            Ti_init = [T_Init, T_Init, T_Init, T_Init, T_Init]
         sim.assign_Ti(Ti_init)
         W = 0.
         print('sim:  ', str(sim))
