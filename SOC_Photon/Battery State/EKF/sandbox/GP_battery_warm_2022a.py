@@ -52,7 +52,7 @@ if __name__ == '__main__':
         t_W = [  0.0, 0.0, 36.4, 36.4, 0.0]  # Watts
         s_W = 1.0  # scalar on W lookup
         W_max = 36.4
-        matching = False
+        matching = True
         if matching:
             time_end = 28.
             T_Init = t_M[0]
@@ -68,9 +68,9 @@ if __name__ == '__main__':
         lut_W = myTables.TableInterp1D(np.array(t_x_W), np.array(t_W))
         lut_M = myTables.TableInterp1D(np.array(t_x_M), np.array(t_M))
         nTi = 5
-        sim = BatteryHeat(n=nTi, temp_c=T_Init, hi0=1., hij=0.9)
+        sim = BatteryHeat(n=nTi, temp_c=T_Init, hi0=.5, hij=1)
         if matching:
-            Ti_init = [90, 80, 70, 60, 32]
+            Ti_init = [120, 100, 90, 60, 25]
         else:
             Ti_init = [0., 0., 0., 0., 0.]
         sim.assign_Ti(Ti_init)

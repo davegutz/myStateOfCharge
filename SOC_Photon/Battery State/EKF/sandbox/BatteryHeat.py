@@ -74,7 +74,7 @@ class BatteryHeat:
         # Build ss arrays
         # first slice
         self.ss_model = StateSpace(n, 2, 3)  # n slices, [T0, W] --> [Tns, Tb, Tw]
-        self.ss_model.A[0,0] = (-self.Hij - self.Hin - self.Hi0) / self.Ci
+        self.ss_model.A[0,0] = (-1.5*self.Hij - self.Hin - self.Hi0) / self.Ci
         self.ss_model.A[0,1] = self.Hij / self.Ci
         self.ss_model.B[0,0] = He0ij /self.Ci
         self.ss_model.B[0,1] = (self.Hi0 + self.Hin) / self.Ci
@@ -87,7 +87,7 @@ class BatteryHeat:
         self.ss_model.C[1,self.i_Tb] = 1
         # last slice
         self.ss_model.A[n-1,n-2] = self.Hij / self.Ci
-        self.ss_model.A[n-1,n-1] = (-self.Hi0 - self.Hij - self.Hin) / self.Ci
+        self.ss_model.A[n-1,n-1] = (-self.Hi0 - 1.5*self.Hij - self.Hin) / self.Ci
         self.ss_model.B[n-1,1] = (self.Hin + self.Hi0) / self.Ci
         self.ss_model.C[0,n-1] = He0ij
         self.ss_model.C[2,0] = self.ss_model.C[0,n-1]
