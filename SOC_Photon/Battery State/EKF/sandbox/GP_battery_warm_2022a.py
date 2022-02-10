@@ -42,19 +42,19 @@ if __name__ == '__main__':
         t_x_R = [0.00, 0.99, 1.00]  # hours
         t_R = [  20.0, 20.0, 20.0]  # deg C
         # Ambient temperature - time inputs
-        t_x_T = [0.00, 0.99, 1.00]  # hours
-        t_T = [   0.0,  0.0,  0.0]  # deg C
+        t_x_T = [0.00,  0.99, 1.00]  # hours
+        t_T = [  -10.0, -10.0, -10.0]  # deg C
         # Heat, W inputs
         W_max = 36.
-        time_end = 30.
-        T_Init = 0.
+        time_end = 48.
+        T_Init = t_T[0]
         T_Ref = T_Init
 
         # Setup
         dt = 0.1  # hours
         lut_R = myTables.TableInterp1D(np.array(t_x_R), np.array(t_R))
         lut_T = myTables.TableInterp1D(np.array(t_x_T), np.array(t_T))
-        sim = BatteryHeat(temp_c=T_Init, hij=0.23*500)
+        sim = BatteryHeat(temp_c=T_Init)
         W = 0.
         print('sim:  ', str(sim))
 
@@ -70,8 +70,9 @@ if __name__ == '__main__':
                 T_Ref = temp_c
 
             # Control
-            if T_Ref > sim.Tbs and not init:
-                W = W_max
+            if T_Ref > sim.Tns and not init:
+            # if T_Ref > sim.Tb and not init:
+                    W = W_max
             else:
                 W = 0.
 

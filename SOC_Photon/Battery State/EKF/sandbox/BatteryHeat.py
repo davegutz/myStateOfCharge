@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 class BatteryHeat:
     # Battery heat model:  discrete lumped parameter heat flux modeling warmup of Battleborn using 36 W of heat pad
 
-    def __init__(self, temp_c, hi0=1., n=5, M=29., l=12./39., w=7./39., h=9./39., cv=0.075, hij=0.23, rho=2230.):
+    def __init__(self, temp_c, hi0=1., n=5, M=29., l=12./39., w=7./39., h=9./39., cv=0.075, hij=69, rho=2230.):
         """ Default values  from various for Battleborn 100 Ah LFP battery
         hi0 = 1 W/m^2/C (R1 insulation old 1/2 inch sleeping pad)
         M = 29  kg mass of battery elements
@@ -36,7 +36,7 @@ class BatteryHeat:
         h = 9/39, m
         cv = 541 J/C * 0.5 kg / 3600 s/hr = 0.075 W-hr/kg (1 J = 1 W-s)
         rho = 0.5 kg / 224 ml = 2230 kg/m^3
-        hij = 0.23 W/K approximate admittance of entire battery thickness
+        hij = 69 W/K to match 10 hr period of oscillation
         """
 
         # Defaults
@@ -54,24 +54,28 @@ class BatteryHeat:
         self.Ti = np.zeros(shape=n)
         for i in np.arange(0, n):
             self.Ti[i] = temp_c
-        self.Tbs = temp_c
+        self.Tns = temp_c
         self.mi = M / float(n)
         self.Ci = cv * self.mi
         self.Hij = Ae * hij / float(n)
         self.Hi0 = hi0 * Ai
         self.He0 = l*w*hi0
         self.Hin = 1. / (1./(self.Hij/2.) + 1./self.He0)
-        He0ij = 1. / (self.He0/(self.Hij/2.) + 1.)
-        Hije0 = 1. / (1. + (self.Hij / 2.) / self.He0)
+        He0ij = 1. / (1. + self.He0/(self.Hij/2.))
+        Hije0 = 1. / (1. + (self.Hij/2.)/self.He0)
         self.i_Tb = int(n / 2)
         self.Tb = self.Ti[self.i_Tb]
-        self.Tbs = temp_c
+        self.Tns = temp_c
         self.Tw = temp_c
         self.Tn = temp_c
+        self.Qw1 = 0.
+        self.Qw0 = 0.
+        self.Qns = 0.
+        self.Qs0 = 0.
 
         # Build ss arrays
         # first slice
-        self.ss_model = StateSpace(n, 2, 3)  # n slices, [T0, W] --> [Tbs, Tb, Tw]
+        self.ss_model = StateSpace(n, 2, 3)  # n slices, [T0, W] --> [Tns, Tb, Tw]
         self.ss_model.A[0,0] = (-self.Hij/2. - self.Hin - self.Hi0) / self.Ci
         self.ss_model.A[0,1] = self.Hij/2./self.Ci
         self.ss_model.B[0,0] = He0ij /self.Ci
@@ -87,11 +91,13 @@ class BatteryHeat:
         self.ss_model.A[n-1,n-2] = self.Hij / 2. / self.Ci
         self.ss_model.A[n-1,n-1] = (-self.Hi0 - self.Hij / 2. - self.Hin) / self.Ci
         self.ss_model.B[n-1,1] = (self.Hin + self.Hi0) / self.Ci
-        self.ss_model.C[0,n-1] = 1. - Hije0
+        self.ss_model.C[0,n-1] = He0ij
         self.ss_model.C[2,0] = self.ss_model.C[0,n-1]
-        self.ss_model.D[0,1] = -Hije0
+        self.ss_model.D[0,1] = Hije0
         self.ss_model.D[2,0] = 1. / ( self.He0 + self.Hij/2. )
         self.ss_model.D[2,1] = -self.ss_model.D[0,1]
+        for i in np.arange(0, n):
+            self.ss_model.x[i] = temp_c
 
         self.saved = Saved(n=self.n, i_Tb=self.i_Tb)  # for plots and prints
 
@@ -115,7 +121,7 @@ class BatteryHeat:
         s += '  ]  // Slice temps, deg C\n'
         s += '  i_Tb= {:d},  // Slice location of battery bulk temp\n'.format(self.i_Tb)
         s += '  Tb  = {:5.1f}, // Battery bulk temp, deg C\n'.format(self.Tb)
-        s += '  Tbs = {:5.1f}, // Battery temp sense, deg C\n'.format(self.Tbs)
+        s += '  Tns = {:5.1f}, // Battery temp sense, deg C\n'.format(self.Tns)
         s += "\n  "
         s += self.ss_model.__str__(prefix + 'Battery:')
         return s
@@ -123,7 +129,7 @@ class BatteryHeat:
     def assign_temp_c(self, temp_c):
         self.T0 = temp_c
         self.Tw = temp_c
-        self.Tbs = temp_c
+        self.Tns = temp_c
         self.Tb = temp_c
         for i in np.arange(0, self.n):
             self.Ti[i] = temp_c
@@ -136,9 +142,13 @@ class BatteryHeat:
         u = np.array([self.W, self.T0]).T
         self.ss_model.calc_x_dot(u)
         self.ss_model.update(dt)
-        self.Tbs, self.Tb, self.Tw = self.ss_model.y
+        self.Tns, self.Tb, self.Tw = self.ss_model.y
         self.Ti = self.ss_model.x
         self.Qn = (self.Ti[self.n-1] - self.T0) * self.Hin
+        self.Qw1 = (self.Tw - self.Ti[0]) * self.Hij / 2.
+        self.Qw0 = (self.Tw - self.T0) * self.He0
+        self.Qns = (self.Ti[self.n-1] - self.Tns) * self.Hij / 2.
+        self.Qs0 = (self.Tns - self.T0) * self.He0
 
         return
 
@@ -151,9 +161,11 @@ class BatteryHeat:
         self.saved.T1.append(self.Ti[0])
         self.saved.Tb.append(self.Tb)
         self.saved.Tn.append(self.Ti[self.n-1])
-        self.saved.Tbs.append(self.Tbs)
-        self.saved.Qn.append(self.Qn)
-
+        self.saved.Tns.append(self.Tns)
+        self.saved.Qw1.append(self.Qw1)
+        self.saved.Qw0.append(self.Qw0)
+        self.saved.Qns.append(self.Qns)
+        self.saved.Qs0.append(self.Qs0)
 
 class Saved:
     # For plot savings.   A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
@@ -168,8 +180,11 @@ class Saved:
         self.T1 = []
         self.Tb = []
         self.Tn = []
-        self.Tbs = []
-        self.Qn = []
+        self.Tns = []
+        self.Qw1 = []
+        self.Qw0 = []
+        self.Qns = []
+        self.Qs0 = []
 
 
 def overall(ss, filename, fig_files=None, plot_title=None, n_fig=0):
@@ -180,21 +195,25 @@ def overall(ss, filename, fig_files=None, plot_title=None, n_fig=0):
     plt.subplot(311)
     plt.title(plot_title)
     plt.plot(ss.time, ss.W, color='black', label='W in')
-    plt.plot(ss.time, ss.Qn, color='blue', label='Q out')
+    plt.plot(ss.time, ss.Qw1, color='red', label='Q w 1')
+    plt.plot(ss.time, ss.Qw0, color='red', linestyle='dashed', label='Q w amb')
+    plt.plot(ss.time, ss.Qns, color='cyan', label='Q n s')
+    plt.plot(ss.time, ss.Qs0, color='cyan',  linestyle='dashed', label='Q s amb')
     plt.legend(loc=1)
     plt.subplot(312)
-    plt.plot(ss.time, ss.Tw, color='red', label='Tw')
-    plt.plot(ss.time, ss.T1, color='red', linestyle='dashed', label='T1')
+    plt.plot(ss.time, ss.Tw, color='black', label='Tw')
+    plt.plot(ss.time, ss.T1, color='red', label='T1')
     plt.plot(ss.time, ss.Tb, color='green', label='Tb')
     plt.plot(ss.time, ss.Tn, color='cyan', label='Tn')
     plt.plot(ss.time, ss.T_Ref, color='blue', linestyle='dotted', label='T_Ref')
-    plt.plot(ss.time, ss.Tbs, color='blue', label='Tbs')
+    plt.plot(ss.time, ss.Tns, color='blue', label='Tns')
     plt.plot(ss.time, ss.T0, color='magenta', label='T0')
     plt.legend(loc=1)
     plt.subplot(313)
     plt.plot(ss.time, ss.Tn, color='cyan', label='Tn')
     plt.plot(ss.time, ss.T_Ref, color='blue', linestyle='dotted', label='T_Ref')
-    plt.plot(ss.time, ss.Tbs, color='blue', label='Tbs')
+    plt.plot(ss.time, ss.Tb, color='green', label='Tb')
+    plt.plot(ss.time, ss.Tns, color='blue', label='Tns')
     plt.plot(ss.time, ss.T0, color='magenta', label='T0')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
