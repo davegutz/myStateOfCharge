@@ -54,6 +54,7 @@ public:
   double SOC() { return(SOC_); };
   boolean sat() { return(sat_); };
   double t_last() { return(t_last_); };
+  double delta_q_inf() { return(delta_q_inf_); };
   void update(double *delta_q, double *t_last);
 protected:
   double q_cap_rated_;// Rated capacity at t_rated_, saved for future scaling, C
@@ -71,6 +72,7 @@ protected:
   double soc_min_;    // As battery cools, the voltage drops and there appears a minimum soc it can deliver
   double q_min_;      // Floor on charge available to use, C
   TableInterp1D *soc_min_T_;   // SOC-MIN 1-D table, V
+  double delta_q_inf_;  // Absolute simple integration of current since large reset, C
 };
 
 #endif
