@@ -53,9 +53,10 @@ void Coulombs::pretty_print(void)
   Serial.printf("  q_cap_rated_ = %9.1f;    // Rated capacity at t_rated_, saved for future scaling, C\n", q_cap_rated_);
   Serial.printf("  q_cap_rated_scaled_ = %9.1f; // Applied rated capacity at t_rated_, after scaling, C\n", q_cap_rated_scaled_);
   Serial.printf("  q_capacity_ = %9.1f;     // Saturation charge at temperature, C\n", q_capacity_);
-  Serial.printf("  q_ =          %9.1f;     // Present charge available to use, C\n", q_);
+  Serial.printf("  q_ =          %9.1f;     // Present charge available to use, except q_min_, C\n", q_);
+  Serial.printf("  q_min_ =      %9.1f;     // Charge at low voltage shutdown, C\n", q_min_);
   Serial.printf("  delta_q_      %9.1f;     // Charge since saturated, C\n", delta_q_);
-  Serial.printf("  delta_q_inf_  %9.1f;     // Charge since saturated, C\n", delta_q_inf_);
+  Serial.printf("  delta_q_inf_  %9.1f;     // Charge since last full reset, C\n", delta_q_inf_);
   Serial.printf("  soc_ =        %7.3f;       // Fraction of saturation charge (q_capacity_) available (0-1)  soc_);\n", soc_);
   Serial.printf("  SOC_ =        %5.1f;         // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries\n", SOC_);
   Serial.printf("  sat_ =          %d;          // Indication calculated by caller that battery is saturated, T=saturated\n", sat_);
@@ -93,9 +94,16 @@ void Coulombs::apply_delta_q(const double delta_q)
   resetting_ = true;     // momentarily turn off saturation check
 }
 
-// Memory set, adjust book-keeping as needed.  q_cap_ etc presesrved
-void Coulombs::apply_delta_q_t(const double delta_q, const double temp_c)
+// Memory set, adjust book-keeping as needed.  delta_q_inf, capacity, temp preserved
+void Coulombs::apply_delta_q_inf(const double delta_q_inf)
 {
+  delta_q_inf_ = delta_q_inf;
+}
+
+// Memory set, adjust book-keeping as needed.  q_cap_ etc presesrved
+void Coulombs::apply_delta_q_t(const double delta_q, const double temp_c, const double delta_q_inf)
+{
+  delta_q_inf_ = delta_q_inf;
   delta_q_ = delta_q;
   q_capacity_ = calculate_capacity(temp_c);
   q_ = q_capacity_ + delta_q;
@@ -188,15 +196,17 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
 }
 
 // Load states from retained memory
-void Coulombs::load(const double delta_q, const double t_last)
+void Coulombs::load(const double delta_q, const double t_last, const double delta_q_inf)
 {
     delta_q_ = delta_q;
     t_last_ = t_last;
+    delta_q_inf_ = delta_q_inf;
 }
 
 // Update states to be saved in retained memory
-void Coulombs::update(double *delta_q, double *t_last)
+void Coulombs::update(double *delta_q, double *t_last, double *delta_q_inf)
 {
     *delta_q = delta_q_;
     *t_last = t_last_;
+    *delta_q_inf = delta_q_inf_;
 }

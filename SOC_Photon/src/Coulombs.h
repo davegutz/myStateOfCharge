@@ -40,11 +40,13 @@ public:
   void apply_resetting(const boolean resetting){ resetting_ = resetting; };
   void apply_soc(const double soc, const double temp_c);
   void apply_SOC(const double SOC, const double temp_c);
-  void apply_delta_q_t(const double delta_q, const double temp_c);
+  void apply_delta_q_inf(const double delta_q_inf);
+  virtual void apply_delta_q_t(const double delta_q, const double temp_c) {};
+  void apply_delta_q_t(const double delta_q, const double temp_c, const double delta_q_inf);
   double calculate_capacity(const double temp_c);
   virtual double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr, const boolean sat, const double t_last);
   double delta_q() { return(delta_q_); };
-  void load(const double delta_q, const double t_last);
+  void load(const double delta_q, const double t_last, const double delta_q_inf);
   virtual void pretty_print();
   double q(){ return (q_); };
   double q_cap_rated(){ return (q_cap_rated_); };
@@ -55,7 +57,8 @@ public:
   boolean sat() { return(sat_); };
   double t_last() { return(t_last_); };
   double delta_q_inf() { return(delta_q_inf_); };
-  void update(double *delta_q, double *t_last);
+  virtual void update(double *delta_q, double *t_last) {};
+  void update(double *delta_q, double *t_last, double *delta_q_inf);
 protected:
   double q_cap_rated_;// Rated capacity at t_rated_, saved for future scaling, C
   double q_cap_rated_scaled_;// Applied rated capacity at t_rated_, after scaling, C

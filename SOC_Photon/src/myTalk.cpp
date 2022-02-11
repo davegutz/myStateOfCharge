@@ -40,6 +40,7 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
 {
   double SOCS_in = -99.;
   double scale = 1.;
+  double Q_in = 0.;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
   if (cp.string_complete)
   {
@@ -176,6 +177,15 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
         }
         break;
+
+      case ( 'i' ):
+        Q_in = cp.input_string.substring(1).toFloat();
+        Serial.printf("Infinite coulomb counter reset from %9.1f ", rp.delta_q_inf);
+        Monitor->apply_delta_q_inf(Q_in);
+        Monitor->update(&rp.delta_q, &rp.t_last, &rp.delta_q_inf);
+        Serial.printf("to %9.1f\n", rp.delta_q_inf);
+        break;
+
       case ( 'l' ):
         switch ( rp.debug )
         {
@@ -196,7 +206,7 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
           Monitor->apply_soc(SOCS_in, Sen->Tbatt_filt);
           Model->apply_delta_q(Monitor->delta_q());
           if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
-          Monitor->update(&rp.delta_q, &rp.t_last);
+          Monitor->update(&rp.delta_q, &rp.t_last, &rp.delta_q_inf);
           Model->update(&rp.delta_q_model, &rp.t_last_model);
 
           Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
@@ -212,7 +222,7 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
         Monitor->apply_SOC(SOCS_in, Sen->Tbatt_filt);
         Model->apply_delta_q(Monitor->delta_q());
         if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
-        Monitor->update(&rp.delta_q, &rp.t_last);
+        Monitor->update(&rp.delta_q, &rp.t_last, &rp.delta_q_inf);
         Model->update(&rp.delta_q_model, &rp.t_last_model);
 
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
@@ -324,6 +334,10 @@ soc_ekf= %7.3f,\nmodeling = %d,\n",
           case ( 'e' ):
             Serial.printf("Equalizing reset.   Just set delta_q in BattModel = delta_q in Batt\n");
             Model->apply_delta_q(Monitor->delta_q());
+            break;
+
+          case ( 'i' ):
+            self_talk("i0", Monitor, Model, Sen);
             break;
 
           case ( 'r' ):

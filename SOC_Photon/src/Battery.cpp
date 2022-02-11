@@ -316,6 +316,17 @@ BatteryModel::BatteryModel(const int num_cells,
     ib_sat_ = 0.5;              // deadzone for cutback actuation, A
 }
 
+// Memory set, adjust book-keeping as needed.  q_cap_ etc presesrved
+void BatteryModel::apply_delta_q_t(const double delta_q, const double temp_c)
+{
+  delta_q_ = delta_q;
+  q_capacity_ = calculate_capacity(temp_c);
+  q_ = q_capacity_ + delta_q;
+  soc_ = q_ / q_capacity_;
+  SOC_ = q_ / q_cap_rated_scaled_ * 100.;
+  resetting_ = true;
+}
+
 // SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model
 double BatteryModel::calculate(const double temp_C, const double soc, double curr_in, const double dt,
   const double q_capacity, const double q_cap, const boolean dc_dc_on)
@@ -478,6 +489,13 @@ void BatteryModel::pretty_print(void)
     Serial.printf("  model_saturated_ =    %d;     // Modeled current being limited on saturation cutback, T = cutback limited\n", model_saturated_);
     Serial.printf("  ib_sat_ =           %7.3f; // Indicator of maximal cutback, T = cutback saturated\n", ib_sat_);
     Serial.printf("  s_cap_ =            %7.3f; // Rated capacity scalar\n", s_cap_);
+}
+
+// Update states to be saved in retained memory
+void BatteryModel::update(double *delta_q, double *t_last)
+{
+    *delta_q = delta_q_;
+    *t_last = t_last_;
 }
 
 

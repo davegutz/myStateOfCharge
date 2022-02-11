@@ -380,8 +380,8 @@ void loop()
     // Initialize Cc structure if needed.   Needed here in this location to have a value for Sen->Tbatt_filt
     if ( reset )
     {
-      Monitor->load(rp.delta_q, rp.t_last);
-      Monitor->apply_delta_q_t(rp.delta_q, rp.t_last);
+      Monitor->load(rp.delta_q, rp.t_last, rp.delta_q_inf);
+      Monitor->apply_delta_q_t(rp.delta_q, rp.t_last, rp.delta_q_inf);
       Monitor->init_battery();  // for cp.soft_reset
       if ( rp.modeling )
         Monitor->init_soc_ekf(Model->soc());  // When modeling, ekf wants to equal model
@@ -397,7 +397,7 @@ void loop()
 
     // Memory store
     Monitor->count_coulombs(Sen->T, reset, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
-    Monitor->update(&rp.delta_q, &rp.t_last);
+    Monitor->update(&rp.delta_q, &rp.t_last, &rp.delta_q_inf);
 
     // Charge time for display
     Monitor->calculate_charge_time(Monitor->q(), Monitor->q_capacity(), Sen->Ishunt,Monitor->soc());

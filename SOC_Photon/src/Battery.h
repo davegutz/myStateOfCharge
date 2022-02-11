@@ -81,7 +81,7 @@ const double t_voc[m_t*n_s] = { 4.00,  4.00,  4.00,  4.00,  4.00,  4.00,  4.00, 
                                 9.86,  12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.902,13.91, 13.916,13.93, 13.97, 14.05, 14.40};
 const unsigned int n_n = 5;
 const double x_soc_min[n_n] = { 0.,   10.,  15.,  20.,  40. };
-const double t_soc_min[n_n] = { 0.75, 0.75, 0.70, 0.05, 0.05};
+const double t_soc_min[n_n] = { 0.05, 0.05, 0.05, 0.05, 0.05};
 const double mxeps_bb = 1-1e-6;      // Level of soc that indicates saturated
 
 // Battery Class
@@ -180,11 +180,13 @@ public:
   ~BatteryModel();
   // operators
   // functions
+  void apply_delta_q_t(const double delta_q, const double temp_c);
   double calculate(const double temp_C, const double soc_frac, double curr_in, const double dt,
     const double q_capacity, const double q_cap, const boolean dc_dc_on);
   uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);
   double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr, const double t_last);
   void load(const double delta_q, const double t_last, const double s_cap_model);
+  void update(double *delta_q, double *t_last);
   void pretty_print(void);
   boolean cutback() { return model_cutback_; };
   boolean saturated() { return model_saturated_; };
