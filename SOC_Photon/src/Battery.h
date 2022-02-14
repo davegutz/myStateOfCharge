@@ -68,8 +68,8 @@ const double vb_dc_dc = 13.5;   // DC-DC charger estimated voltage, V
 // Latest table from data
 // See Model Fit 202201 tab of BattleBorn Rev1.xls
 const double low_voc = 10.; // Voltage threshold for BMS to turn off battery
-const double low_t = 8.;    // Minimum temperature for valid saturation check, because BMS shuts off battery low.
-                            // Heater should keep >8, too
+const double low_t = 0.;    // Minimum temperature for valid saturation check, because BMS shuts off battery low.
+                            // Heater should keep >4, too
 const unsigned int m_t = 3;
 const double y_t[m_t] =  { 5., 20., 40. };
 const unsigned int n_s = 14;
