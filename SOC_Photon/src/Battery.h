@@ -70,11 +70,12 @@ const double vb_dc_dc = 13.5;   // DC-DC charger estimated voltage, V
 const double low_voc = 10.; // Voltage threshold for BMS to turn off battery
 const double low_t = 0.;    // Minimum temperature for valid saturation check, because BMS shuts off battery low.
                             // Heater should keep >4, too
-const unsigned int m_t = 3;
-const double y_t[m_t] =  { 5., 20., 40. };
+const unsigned int m_t = 4;
+const double y_t[m_t] =  { 5., 11.1, 20., 40. };
 const unsigned int n_s = 14;
 const double x_soc[n_s] =     { 0.00,  0.10,  0.20,  0.23,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.98,  1.00};
 const double t_voc[m_t*n_s] = { 4.00,  4.00,  10.5,  12.00, 12.43, 12.65, 12.82, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59,
+                                4.00,  5.00,  11.6,  12.40, 12.57, 12.72, 12.91, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.60,
                                 9.38,  12.18, 12.83, 12.86, 12.90, 12.99, 13.18, 13.21, 13.28, 13.38, 13.45, 13.49, 13.57, 13.92,
                                 9.86,  12.66, 13.31, 13.35, 13.39, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.40};
 const unsigned int n_n = 5;
