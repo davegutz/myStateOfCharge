@@ -42,8 +42,6 @@ Coulombs::Coulombs(const double q_cap_rated, const double t_rated, const double 
     soc_min_T_ = new TableInterp1D(n_n, x_soc_min, t_soc_min);
   }
 Coulombs::~Coulombs() {}
-// t_rlim=0.017 allows 1 deg for 1 minute (the update time of the temp read; and the sensor has
-// 1 deg resolution).
 
 // operators
 // Pretty print

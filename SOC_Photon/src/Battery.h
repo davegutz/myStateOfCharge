@@ -61,6 +61,7 @@ const double batt_c2 = double(BATT_R2C2)/batt_r2;
 const double nom_q_cap = RATED_BATT_CAP * 3600;   // Nominal battery capacity, C
 const double q_cap_rated = RATED_BATT_CAP * 3600;   // Nominal battery capacity, C;
 const double t_rlim = 0.017;    // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s
+                                // t_rlim=0.017 allows 1 deg for 1 minute
 const double dvoc_dt = BATT_DVOC_DT * double(batt_num_cells);
 const double sat_cutback_gain = 10; // Multiplier on saturation anti-windup
 const double vb_dc_dc = 13.5;   // DC-DC charger estimated voltage, V
