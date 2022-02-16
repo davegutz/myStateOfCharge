@@ -118,6 +118,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
 {
     temp_c_ = temp_c;
     vsat_ = calc_vsat(temp_c_);
+    dt_ = dt;
 
     // Dynamic emf
     vb_ = vb;

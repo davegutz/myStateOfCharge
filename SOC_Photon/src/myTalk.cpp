@@ -209,8 +209,8 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
           Monitor->update(&rp.delta_q, &rp.t_last, &rp.delta_q_inf);
           Model->update(&rp.delta_q_model, &rp.t_last_model);
 
-          Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
-              Monitor->SOC(), Monitor->soc(), rp.delta_q, Model->SOC(), Model->soc(), rp.delta_q_model, Monitor->soc_ekf());
+          Serial.printf("SOC=%7.3f, soc=%7.3f, modeling = %d, delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
+              Monitor->SOC(), Monitor->soc(), rp.modeling, rp.delta_q, Model->SOC(), Model->soc(), rp.delta_q_model, Monitor->soc_ekf());
         }
 
         else
@@ -353,7 +353,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\n",
             rp.large_reset();
             cp.large_reset();
             cp.cmd_reset();
-            self_talk("Hr", Monitor, Model, Sen);
+            self_talk("Hs", Monitor, Model, Sen);
             break;
 
           case ( 's' ):

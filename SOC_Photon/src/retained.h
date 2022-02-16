@@ -47,13 +47,13 @@ struct RetainedPars
   double amp = 0.;          // Injected amplitude, A pk (0-18.3)
   double freq = 0.;         // Injected frequency, Hz (0-2)
   uint8_t type = 0;         // Injected waveform type.   0=sine, 1=square, 2=triangle
-  double offset = 0;        // Constant bias, A
-  double t_bias = 0;        // Sensed temp bias, deg C
+  double offset = 0.;       // Constant bias, A
+  double t_bias = 0.;       // Sensed temp bias, deg C
   double s_cap_model = 1.02;// Scalar on battery model size
   double cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function.
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop.
-  int isum = -1;         // Summary location.   Begins at -1 because first action is to increment isum
-  double delta_q_inf; // delta_q since last reset.  Simple integration of current
+  int isum = -1;            // Summary location.   Begins at -1 because first action is to increment isum
+  double delta_q_inf = 0.;  // delta_q since last reset.  Simple integration of current
 
   // Nominalize
   void nominal()
@@ -73,8 +73,8 @@ struct RetainedPars
     this->amp = 0.;
     this->freq = 0.;
     this->type = 0;
-    this->offset = 0;
-    this->t_bias = 0;
+    this->offset = 0.;
+    this->t_bias = 0.;
     this->s_cap_model = 1.02;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
@@ -95,8 +95,8 @@ struct RetainedPars
     this->amp = 0.;
     this->freq = 0.;
     this->type = 0;
-    this->offset = 0;
-    this->t_bias = 0;
+    this->offset = 0.;
+    this->t_bias = 0.;
     this->s_cap_model = 1.02;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
