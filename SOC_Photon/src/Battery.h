@@ -37,7 +37,7 @@
                                         // what gets delivered, e.g. Wshunt/NOM_SYS_VOLT.  Also varies 0.2-0.4C currents
                                         // or 20-40 A for a 100 Ah battery
 #define RATED_TEMP            25.       // Temperature at RATED_BATT_CAP, deg C
-#define BATT_DVOC_DT          0.0068    // Change of VOC with operating temperature in range 0 - 50 C (0.0068 on 2022-01-22) V/deg C
+#define BATT_DVOC_DT          0.001     // Change of VOC with operating temperature in range 0 - 50 C (0.004 for Vb on 2022-02-18) V/deg C
 // >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
 #define BATT_V_SAT            3.4625    // Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
 #define BATT_R1               0.00126   // Battery Randels static resistance, Ohms (0.00126) for 3v cell matches transients
@@ -67,7 +67,7 @@ const double sat_cutback_gain = 10; // Multiplier on saturation anti-windup
 const double vb_dc_dc = 13.5;   // DC-DC charger estimated voltage, V
 
 // Latest table from data
-// See Model Fit 202201 tab of BattleBorn Rev1.xls
+// See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
 const double low_voc = 10.; // Voltage threshold for BMS to turn off battery
 const double low_t = 0.;    // Minimum temperature for valid saturation check, because BMS shuts off battery low.
                             // Heater should keep >4, too
@@ -75,13 +75,13 @@ const unsigned int m_t = 4;
 const double y_t[m_t] =  { 5., 11.1, 20., 40. };
 const unsigned int n_s = 14;
 const double x_soc[n_s] =     { 0.00,  0.10,  0.20,  0.23,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.98,  1.00};
-const double t_voc[m_t*n_s] = { 4.00,  4.00,  10.5,  12.00, 12.43, 12.65, 12.82, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59,
-                                4.00,  5.00,  11.6,  12.40, 12.57, 12.72, 12.91, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.60,
-                                9.38,  12.18, 12.83, 12.86, 12.90, 12.99, 13.18, 13.21, 13.28, 13.38, 13.45, 13.49, 13.57, 13.92,
-                                9.86,  12.66, 13.31, 13.35, 13.39, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.40};
-const unsigned int n_n = 5;
-const double x_soc_min[n_n] = { 10.,  20.,  40. };
-const double t_soc_min[n_n] = { 0.20, 0.05, 0.00};
+const double t_voc[m_t*n_s] = { 4.00,  4.00,  10.50, 12.00, 12.43, 12.65, 12.82, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59,
+                                4.00,  8.50,  12.40, 12.60, 12.70, 12.80, 12.92, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.65,
+                                4.50,  11.00, 12.73, 12.79, 12.81, 12.89, 13.00, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72,
+                                4.58,  11.08, 12.81, 12.87, 12.89, 12.97, 13.08, 13.12, 13.17, 13.22, 13.29, 13.33, 13.35, 13.80};
+const unsigned int n_n = 4;
+const double x_soc_min[n_n] = { 5.,   11.1,  20.,  40. };
+const double t_soc_min[n_n] = { 0.18, 0.13,  0.08, 0.07};
 const double mxeps_bb = 1-1e-6;      // Level of soc that indicates saturated
 
 // Battery Class
