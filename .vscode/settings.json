@@ -1,0 +1,5 @@
+{
+    "particle.targetDevice": "soc0",
+    "particle.firmwareVersion": "3.1.0",
+    "particle.targetPlatform": "photon"
+}

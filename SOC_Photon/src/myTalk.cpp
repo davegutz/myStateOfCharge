@@ -168,8 +168,17 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
           case ( 's' ):
             self_talk("h", Monitor, Model, Sen);
             cp.cmd_summarize();
+            self_talk("Pb", Monitor, Model, Sen);
+            Serial.printf("\n");
+            if ( rp.modeling )
+            {
+              Serial.printf("Model:   rp.modeling = %d\n", rp.modeling);
+              self_talk("Pm", Monitor, Model, Sen);
+              Serial.printf("\n");
+            }
+            self_talk("Pr", Monitor, Model, Sen);
+            Serial.printf("\n");
             print_all_summary(mySum, rp.isum, NSUM);
-            self_talk("Pa", Monitor, Model, Sen);
             self_talk("Q", Monitor, Model, Sen);
             break;
 
@@ -323,9 +332,9 @@ void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
 
       case ( 'Q' ):
         Serial.printf("tb  = %7.3f,\nvb  = %7.3f,\nvoc  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc = %7.3f,\n\
-soc_ekf= %7.3f,\nmodeling = %d,\n",
+soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
           Monitor->temp_c(), Monitor->vb(), Monitor->voc(), Monitor->vsat(), Monitor->ib(), Monitor->soc(),
-          Monitor->soc_ekf(), rp.modeling);
+          Monitor->soc_ekf(), rp.modeling, Monitor->delta_q_inf());
         break;
 
       case ( 'R' ):
@@ -608,6 +617,8 @@ void talkH(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
 
   Serial.printf("E=  set the BatteryModel delta_q to same value as Battery'\n"); 
 
+  Serial.printf("i=,<inp> set the BatteryMonitor delta_q_inf to <inp> (-360000 - 3600000'\n"); 
+
   Serial.printf("P<?>   Print Battery values\n");
   Serial.printf("  Pa= "); Serial.printf("print all\n");
   Serial.printf("  Pb= "); Serial.printf("print battery\n");
@@ -623,6 +634,7 @@ void talkH(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
 
   Serial.printf("R<?>   Reset\n");
   Serial.printf("  Re= "); Serial.printf("equalize delta_q in model to battery monitor\n");
+  Serial.printf("  Ri= "); Serial.printf("reset delta_q_inf to 0.0\n");
   Serial.printf("  Rr= "); Serial.printf("saturate battery monitor and equalize model to monitor\n");
   Serial.printf("  RR= "); Serial.printf("saturate, equalize, and nominalize all testing for DEPLOY\n");
   Serial.printf("  Rs= "); Serial.printf("small reset.  reset flags to reinitialize filters\n");
