@@ -36,7 +36,7 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 
 // Talk Executive
-void talk(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
+void talk(BatteryMonitor *Monitor, BatteryModel *Model, Sensors *Sen)
 {
   double SOCS_in = -99.;
   double scale = 1.;
@@ -586,7 +586,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
 }
 
 // Talk Help
-void talkH(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
+void talkH(BatteryMonitor *Monitor, BatteryModel *Model, Sensors *Sen)
 {
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
 
@@ -666,7 +666,7 @@ void talkH(Battery *Monitor, BatteryModel *Model, Sensors *Sen)
 }
 
 // Recursion
-void self_talk(const String cmd, Battery *Monitor, BatteryModel *Model, Sensors *Sen)
+void self_talk(const String cmd, BatteryMonitor *Monitor, BatteryModel *Model, Sensors *Sen)
 {
   cp.input_string = cmd;
   Serial.printf("self_talk:  new string = '%s'\n", cp.input_string.c_str());

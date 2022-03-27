@@ -85,7 +85,7 @@ const double t_soc_min[n_n] = { 0.14, 0.12,  0.08, 0.07};
 const double mxeps_bb = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness)
 
 // Battery Class
-class Battery : public Coulombs, public EKF_1x1
+class Battery : public Coulombs
 {
 public:
   Battery();
@@ -97,33 +97,21 @@ public:
   // functions
   void Dv(const double dv) { dv_ = dv; };
   void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -r0_*sr_); };
-  double calc_h_jacobian(double soc, double temp_c);
   double calc_soc_voc(const double soc, const double temp_c, double *dv_dsoc);
+  double calc_soc_voc_slope(double soc, double temp_c);
   virtual double calculate(const double temp_C, const double soc_frac, double curr_in, const double dt, const boolean dc_dc_on);
-  double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
-  double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt);
   void init_battery(void);
-  void init_soc_ekf(const double soc);
   virtual void pretty_print();
   void pretty_print_ss();
-  double soc_ekf() { return (soc_ekf_); };
-  double SOC_ekf() { return (SOC_ekf_); };
   double voc() { return (voc_); };
   double vsat() { return (vsat_); };
-  double voc_dyn() { return (voc_dyn_); };
-  double voc_soc() { return (voc_stat_); };
   double vdyn() { return (vdyn_); };
   double vb() { return (vb_); };
   double ib() { return (ib_); };
   double temp_c() { return (temp_c_); };
-  double tcharge() { return (tcharge_); };
   double dv_dsoc() { return (dv_dsoc_); };
   double Dv() { return (dv_); };
   double Sr() { return (sr_); };
-  double K_ekf() { return (K_); };
-  double y_ekf() { return (y_); };
-  double amp_hrs_remaining() { return (amp_hrs_remaining_); };
-  double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
   double voc_soc(const double soc, const double temp_c);
 protected:
   double q_;        // Charge, C
@@ -133,7 +121,6 @@ protected:
   double ib_;  // Current into battery, A
   int num_cells_;   // Number of cells
   double dv_dsoc_;  // Derivative scaled, V/fraction
-  double tcharge_;  // Charging time to 100%, hr
   double sr_;       // Resistance scalar
   double nom_vsat_; // Nominal saturation threshold at 25C, V
   double vsat_;     // Saturation threshold at temperature, V
@@ -155,16 +142,43 @@ protected:
   double *rand_C_;  // Randles model C
   double *rand_D_;  // Randles model D
   double temp_c_;   // Battery temperature, deg C
+  boolean bms_off_; // Indicator that battery management system is off, T = off preventing current flow
+  TableInterp2D *voc_T_;   // SOC-VOC 2-D table, V
+};
+
+class BatteryMonitor: public Battery, public EKF_1x1
+{
+public:
+  BatteryMonitor();
+  BatteryMonitor(const int num_cells,
+    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
+    const double q_cap_rated, const double t_rated, const double t_rlim);
+  ~BatteryMonitor();
+  // operators
+  // functions
+  double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
+  double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt);
+  void init_soc_ekf(const double soc);
+  void pretty_print(void);
+  double K_ekf() { return (K_); };
+  double y_ekf() { return (y_); };
+  double soc_ekf() { return (soc_ekf_); };
+  double SOC_ekf() { return (SOC_ekf_); };
+  double tcharge() { return (tcharge_); };
+  double voc_dyn() { return (voc_dyn_); };
+  double voc_soc() { return (voc_stat_); };
+  double amp_hrs_remaining() { return (amp_hrs_remaining_); };
+  double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
+protected:
+  double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
+  double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
+  double voc_stat_; // Model voc from soc-voc table, V
   double tcharge_ekf_;  // Charging time to 100% from ekf, hr
   double voc_dyn_;  // Charging voltage, V
   double soc_ekf_;  // Filtered state of charge from ekf (0-1)
   double SOC_ekf_;  // Filtered state of charge from ekf (0-100)
+  double tcharge_;  // Charging time to 100%, hr
   double q_ekf_;    // Filtered charge calculated by ekf, C
-  double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
-  double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
-  double voc_stat_; // Model voc from soc-voc table, V
-  boolean bms_off_; // Indicator that battery management system is off, T = off preventing current flow
-  TableInterp2D *voc_T_;   // SOC-VOC 2-D table, V
   void ekf_model_predict(double *Fx, double *Bu);
   void ekf_model_update(double *hx, double *H);
 };

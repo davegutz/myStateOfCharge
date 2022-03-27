@@ -235,7 +235,7 @@ void loop()
   // Battery  models
   // Free, driven by soc
   // Instantiate the table
-  static Battery *Monitor = new Battery(batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
+  static BatteryMonitor *Monitor = new BatteryMonitor(batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
     dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim);
   // Model, driven by soc, used to get Vbatt.   Use Talk 'x' to toggle model on/off. 
   static BatteryModel *Model = new BatteryModel(batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,

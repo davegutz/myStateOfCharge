@@ -38,24 +38,19 @@ extern CommandPars cp;
 // constructors
 Battery::Battery()
     : q_(nom_q_cap), voc_(0),
-    vdyn_(0), vb_(0), ib_(0), num_cells_(4), dv_dsoc_(0), tcharge_(24), sr_(1), vsat_(13.7),
-    dv_(0), dvoc_dt_(0) {Q_ = 0.; R_ = 0.;}
+    vdyn_(0), vb_(0), ib_(0), num_cells_(4), dv_dsoc_(0), sr_(1), vsat_(13.7),
+    dv_(0), dvoc_dt_(0){}
 Battery::Battery(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim)
     : Coulombs(q_cap_rated, t_rated, t_rlim), q_(nom_q_cap),
-    voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0), tcharge_(24.),
+    voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0),
     sr_(1.), nom_vsat_(batt_vsat), dv_(0), dvoc_dt_(dvoc_dt),
     r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
     tau_sd_(1.8e7), r_sd_(70.)
 {
-
     // Battery characteristic tables
     voc_T_ = new TableInterp2D(n_s, m_t, x_soc, y_t, t_voc);
-
-    // EKF
-    this->Q_ = 0.001*0.001;
-    this->R_ = 0.1*0.1;
 
     // Randles dynamic model for EKF, forward version based on sensor inputs {ib, vb} --> {voc}, ioc=ib
     // Resistance values add up to same resistance loss as matched to installed battery
@@ -89,16 +84,22 @@ Battery::~Battery() {}
 // operators
 // functions
 
+// SOC-OCV curve fit method per Zhang, et al.   May write this base version if needed using BatteryModel::calculate()
+// as a starting point but use the base class Randles formulation and re-arrange the i/o for that model.
+double Battery::calculate(const double temp_C, const double q, const double curr_in, const double dt,
+    const boolean dc_dc_on) { return 0.;}
+
 // VOC-OCV model
 double Battery::calc_soc_voc(const double soc, const double temp_c, double *dv_dsoc)
 {
     double voc;  // return value
-    *dv_dsoc = calc_h_jacobian(soc, temp_c);
+    *dv_dsoc = calc_soc_voc_slope(soc, temp_c);
     voc = voc_T_->interp(soc, temp_c);
     return (voc);
 }
 
-double Battery::calc_h_jacobian(const double soc, const double temp_c)
+// Derivative model
+double Battery::calc_soc_voc_slope(const double soc, const double temp_c)
 {
     double dv_dsoc;  // return value
     if ( soc > 0.5 )
@@ -108,13 +109,71 @@ double Battery::calc_h_jacobian(const double soc, const double temp_c)
     return (dv_dsoc);
 }
 
-// SOC-OCV curve fit method per Zhang, et al.   May write this base version if needed using BatteryModel::calculate()
-// as a starting point but use the base class Randles formulation and re-arrange the i/o for that model.
-double Battery::calculate(const double temp_C, const double q, const double curr_in, const double dt,
-    const boolean dc_dc_on) { return 0.;}
+// Initialize
+void Battery::init_battery(void)
+{
+    Randles_->init_state_space();
+}
+
+// Print
+void Battery::pretty_print(void)
+{
+    Serial.printf("Battery:\n");
+    Serial.printf("  temp, #cells, dvoc_dt = %7.1f, %d, %10.6f;\n", temp_c_, num_cells_, dvoc_dt_);
+    Serial.printf("  r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f;\n",
+        r0_, rct_, tau_ct_, r_dif_, tau_dif_, r_sd_, tau_sd_);
+    Serial.printf("  bms_off_       =      %d;     // BMS off, T = current prevented\n", bms_off_);
+    Serial.printf("  dv_dsoc = %10.6f;  // Derivative scaled, V/fraction\n", dv_dsoc_);
+    Serial.printf("  ib =      %7.3f;  // Current into battery, A\n", ib_);
+    Serial.printf("  vb =      %7.3f;  // Total model voltage, voltage at terminals, V\n", vb_);
+    Serial.printf("  voc =     %7.3f;  // Static model open circuit voltage, V\n", voc_);
+    Serial.printf("  vsat =    %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
+    Serial.printf("  vdyn =    %7.3f;  // Model current induced back emf, V\n", vdyn_);
+    Serial.printf("  q =    %10.1f;  // Present charge, C\n", q_);
+    Serial.printf("  sr =      %7.3f;  // Resistance scalar\n", sr_);
+    Serial.printf("  dv_ =      %7.3f; // Adjustment, V\n", dv_);
+    Serial.printf("  dt_ =      %7.3f; // Update time, s\n", dt_);
+}
+
+// Print State Space
+void Battery::pretty_print_ss(void)
+{
+    Randles_->pretty_print();
+}
+
+// EKF model for update
+double Battery::voc_soc(const double soc, const double temp_c)
+{
+    double voc;     // return value
+    double dv_dsoc;
+    voc = calc_soc_voc(soc, temp_c, &dv_dsoc);
+    return ( voc );
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Battery monitor class
+BatteryMonitor::BatteryMonitor(): Battery()
+{
+    Q_ = 0.;
+    R_ = 0.;
+}
+BatteryMonitor::BatteryMonitor(const int num_cells,
+    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
+    const double q_cap_rated, const double t_rated, const double t_rlim) :
+    Battery(num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim), tcharge_(24)
+{
+
+    // EKF
+    this->Q_ = 0.001*0.001;
+    this->R_ = 0.1*0.1;
+}
+BatteryMonitor::~BatteryMonitor() {}
+
+// operators
+// functions
 
 // SOC-OCV curve fit method per Zhang, et al modified by ekf
-double Battery::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt)
+double BatteryMonitor::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt)
 {
     temp_c_ = temp_c;
     vsat_ = calc_vsat(temp_c_);
@@ -128,12 +187,12 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
     Randles_->update(dt);
     if ( rp.debug==35 )
     {
-        Serial.printf("Battery::calculate_ekf:"); Randles_->pretty_print();
+        Serial.printf("BatteryMonitor::calculate_ekf:"); Randles_->pretty_print();
     }
     voc_dyn_ = Randles_->y(0);
     vdyn_ = vb_ - voc_dyn_;
     voc_ = voc_dyn_;
-    voc_stat_ = voc_soc(soc_, temp_c);
+    voc_stat_ = Battery::voc_soc(soc_, temp_c);
     bms_off_ = temp_c_ <= low_t;    // KISS
     if ( bms_off_ )
     {
@@ -173,7 +232,7 @@ double Battery::calculate_ekf(const double temp_c, const double vb, const double
 }
 
 // Charge time calculation
-double Battery::calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc)
+double BatteryMonitor::calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc)
 {
     double delta_q = q - q_capacity;
     if ( charge_curr > TCHARGE_DISPLAY_DEADBAND )  tcharge_ = min( -delta_q / charge_curr / 3600., 24.);
@@ -191,7 +250,7 @@ double Battery::calculate_charge_time(const double q, const double q_capacity, c
 }
 
 // EKF model for predict
-void Battery::ekf_model_predict(double *Fx, double *Bu)
+void BatteryMonitor::ekf_model_predict(double *Fx, double *Bu)
 {
     // Process model
     *Fx = exp(-dt_ / tau_sd_);
@@ -200,24 +259,18 @@ void Battery::ekf_model_predict(double *Fx, double *Bu)
 
 // EKF model for update
 // EKF model for update
-void Battery::ekf_model_update(double *hx, double *H)
+void BatteryMonitor::ekf_model_update(double *hx, double *H)
 {
     // Measurement function hx(x), x=soc ideal capacitor
     double x_lim = max(min(x_, 1.0), 0.0);
-    *hx = calc_soc_voc(x_lim, temp_c_, &dv_dsoc_);
+    *hx = Battery::calc_soc_voc(x_lim, temp_c_, &dv_dsoc_);
 
     // Jacodian of measurement function
     *H = dv_dsoc_;
 }
 
-// Initialize
-void Battery::init_battery(void)
-{
-    Randles_->init_state_space();
-}
-
 // Init EKF
-void Battery::init_soc_ekf(const double soc)
+void BatteryMonitor::init_soc_ekf(const double soc)
 {
     soc_ekf_ = soc;
     init_ekf(soc_ekf_, 0.0);
@@ -230,22 +283,11 @@ void Battery::init_soc_ekf(const double soc)
 }
 
 // Print
-void Battery::pretty_print(void)
+void BatteryMonitor::pretty_print(void)
 {
-    Serial.printf("Battery:\n");
-    Serial.printf("  temp, #cells, dvoc_dt = %7.1f, %d, %10.6f;\n", temp_c_, num_cells_, dvoc_dt_);
-    Serial.printf("  r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f;\n",
-        r0_, rct_, tau_ct_, r_dif_, tau_dif_, r_sd_, tau_sd_);
-    Serial.printf("  bms_off_       =      %d;     // BMS off, T = current prevented\n", bms_off_);
-    Serial.printf("  dv_dsoc = %10.6f;  // Derivative scaled, V/fraction\n", dv_dsoc_);
-    Serial.printf("  ib =      %7.3f;  // Current into battery, A\n", ib_);
-    Serial.printf("  vb =      %7.3f;  // Total model voltage, voltage at terminals, V\n", vb_);
-    Serial.printf("  voc =     %7.3f;  // Static model open circuit voltage, V\n", voc_);
+    Serial.printf("BatteryMonitor:\n");
+    this->Battery::pretty_print();
     Serial.printf("  voc_soc = %7.3f;  // Static model open circuit voltage from table, V\n", voc_stat_);
-    Serial.printf("  vsat =    %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
-    Serial.printf("  voc_dyn = %7.3f;  // Charging voltage, V\n", voc_dyn_);
-    Serial.printf("  vdyn =    %7.3f;  // Model current induced back emf, V\n", vdyn_);
-    Serial.printf("  q =    %10.1f;  // Present charge, C\n", q_);
     Serial.printf("  q_ekf =%10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
     Serial.printf("  tcharge =    %5.1f; // Charging time to full, hr\n", tcharge_);
     Serial.printf("  tcharge_ekf =%5.1f; // Charging time to full from ekf, hr\n", tcharge_ekf_);
@@ -253,25 +295,8 @@ void Battery::pretty_print(void)
     Serial.printf("  SOC_ekf_ =   %5.1f; // Filtered state of charge from ekf (0-100)\n", SOC_ekf_);
     Serial.printf("  amp_hrs_remaining =       %7.3f;  // Discharge amp*time left if drain to q=0, A-h\n", amp_hrs_remaining_);
     Serial.printf("  amp_hrs_remaining_ekf_ =  %7.3f;  // Discharge amp*time left if drain to q_ekf=0, A-h\n", amp_hrs_remaining_ekf_);
-    Serial.printf("  sr =      %7.3f;  // Resistance scalar\n", sr_);
-    Serial.printf("  dv_ =      %7.3f; // Adjustment, V\n", dv_);
-    Serial.printf("  dt_ =      %7.3f; // Update time, s\n", dt_);
 }
 
-// Print State Space
-void Battery::pretty_print_ss(void)
-{
-    Randles_->pretty_print();
-}
-
-// EKF model for update
-double Battery::voc_soc(const double soc, const double temp_c)
-{
-    double voc;     // return value
-    double dv_dsoc;
-    voc = calc_soc_voc(soc, temp_c, &dv_dsoc);
-    return ( voc );
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
@@ -482,7 +507,6 @@ void BatteryModel::pretty_print(void)
 {
     Serial.printf("BatteryModel::");
     this->Battery::pretty_print();
-    Serial.printf("  NOTE: for BatteryModel, voc_dyn, q_ekf, soc_ekf, SOC_ekf, and amp_hrs* not used\n");
     Serial.printf("  sat_ib_max_ =       %7.3f; // Current cutback to be applied to modeled ib output, A\n", sat_ib_max_);
     Serial.printf("  sat_ib_null_ =      %7.3f; // Current cutback value for voc=vsat, A\n", sat_ib_null_);
     Serial.printf("  sat_cutback_gain_ = %7.3f; // Gain to retard ib when voc exceeds vsat, dimensionless\n", sat_cutback_gain_);
