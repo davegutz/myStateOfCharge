@@ -97,4 +97,8 @@ const double bias_gain = 0.366 * 100. / 255.;   // Amps to duty cycle of pwm ine
 const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
                               double(VBATT_SENSE_R_LO) / double(PHOTON_ADC_COUNT) * double(VBATT_S);
 
+// Read temp initialization constants
+const boolean temp_parasitic = true;  // DS18 sensor power. true means leave it on all the time (false)
+const uint16_t temp_delay = 10;       // Time to block temperature sensor read in DS18 routine, ms (1000)
+
 #endif // CONSTANTS_H_

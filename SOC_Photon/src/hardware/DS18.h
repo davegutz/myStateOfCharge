@@ -13,7 +13,7 @@ enum DS18Type {
 
 class DS18 {
 public:
-  DS18(uint16_t pin, bool parasitic = false);
+  DS18(uint16_t pin, bool parasitic = false, uint16_t conversion_delay = 1000);
 
   bool read();
   bool read(uint8_t addr[8]);

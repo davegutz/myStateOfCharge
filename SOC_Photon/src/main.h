@@ -222,7 +222,7 @@ void loop()
   static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
 
   // 1-wire temp sensor battery temp
-  static DS18* SensorTbatt = new DS18(myPins->pin_1_wire);
+  static DS18* SensorTbatt = new DS18(myPins->pin_1_wire, temp_parasitic, temp_delay);
 
   // Sensor conversions
   static Sensors *Sen = new Sensors(NOMVBATT, NOMTBATT, NOMTBATT,
@@ -301,10 +301,11 @@ void loop()
   if ( read_temp )
   {
     Sen->T_temp =  ReadTemp->updateTime();
-    if ( rp.debug>102 ) Serial.printf("Read temp update=%7.3f and performing load_temp() at %ld...  ", Sen->T_temp, millis());
+    if ( rp.debug>102 ) Serial.printf("Read temp update=%7.3f and performing load_temp() at %ld...  \n", Sen->T_temp, millis());
 
     // Load and filter temperature only
     load_temp(Sen, SensorTbatt, SdTbatt);
+    if ( rp.debug>102 ) Serial.printf("Read temp update=%7.3f and done       load_temp() at %ld...  \n", Sen->T_temp, millis());
     filter_temp(reset_temp, t_rlim, Sen, TbattSenseFilt, rp.t_bias, &t_bias_last);
   }
 
@@ -314,7 +315,7 @@ void loop()
   if ( read )
   {
     Sen->T =  ReadSensors->updateTime();
-    if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  ", Sen->T, millis());
+    if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  \n", Sen->T, millis());
 
     // Load and filter
     load(reset, Sen, myPins, ads_amp, ads_noamp, ReadSensors->now());
