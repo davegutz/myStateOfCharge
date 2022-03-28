@@ -285,7 +285,7 @@ void BatteryMonitor::init_soc_ekf(const double soc)
 // Print
 void BatteryMonitor::pretty_print(void)
 {
-    Serial.printf("BatteryMonitor:\n");
+    Serial.printf("BatteryMonitor::");
     this->Battery::pretty_print();
     Serial.printf("  voc_soc = %7.3f;  // Static model open circuit voltage from table, V\n", voc_stat_);
     Serial.printf("  q_ekf =%10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
