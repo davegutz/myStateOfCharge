@@ -19,8 +19,8 @@ Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Batt
 
 import numpy as np
 from numpy.random import randn
-import Battery''
-from Battery import Battery, BatteryModel, is_sat, rp, overall
+import Battery
+from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, rp, overall
 from unite_pictures import unite_pictures_into_pdf
 import os
 from datetime import datetime
@@ -83,7 +83,7 @@ if __name__ == '__main__':
         lut_dc = myTables.TableInterp1D(np.array(t_x_d), np.array(t_d))
         scale = model_bat_cap / Battery.RATED_BATT_CAP
         sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale)
-        mon = Battery(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
+        mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
                       r_dif=r_dif, temp_c=temp_c)
 
         # time loop

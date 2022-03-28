@@ -39,10 +39,6 @@ rp = Retained()
 
 
 # Battery constants
-# RATED_BATT_CAP = 100.
-# """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
-#                         what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
-#                         or 20 - 40 A for a 100 Ah battery"""
 RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
 BATT_DVOC_DT = 0.0069  # 1/23/2022
 """ Change of VOC with operating temperature in range 0 - 50 C (0.0075) V/deg C
@@ -64,10 +60,13 @@ batt_vmax = (14.3/4)*float(batt_num_cells)  # Observed max voltage of 14.3 V at 
 
 
 class Battery(Coulombs, EKF_1x1):
+    RATED_BATT_CAP = 100.
+    # """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
+    #                         what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
+    #                         or 20 - 40 A for a 100 Ah battery"""
+
     # Battery model:  Randle's dynamics, SOC-VOC model
 
-    RATED_BATT_CAP = 100.
-    RATED_TEMP = 25.
     """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
                             what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
                             or 20 - 40 A for a 100 Ah battery"""
@@ -399,14 +398,35 @@ class Battery(Coulombs, EKF_1x1):
         self.saved.e_voc_ekf.append(self.e_voc_ekf)
 
 
+class BatteryMonitor(Battery, EKF_1x1):
+    """Extend basic class to monitor"""
+
+    def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
+                 num_cells=4, bat_v_sat=3.4625, q_cap_rated=Battery.RATED_BATT_CAP*3600,
+                 t_rated=RATED_TEMP, t_rlim=0.017,
+                 r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
+                 temp_c=RATED_TEMP):
+        Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated, t_rated,
+                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
+
+        """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
+        Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
+        etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
+        constraint >=0.02 V/soc.  m and n using Zhang values.   Had to scale soc because  actual capacity > NOM_BAT_CAP
+        so equations error when soc<=0 to match data.    See Battery.h
+        """
+        # Parents
+        EKF_1x1.__init__(self)
+
+
 class BatteryModel(Battery):
-    """Extend basic monitoring class to run a model"""
+    """Extend basic class to run a model"""
 
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
                  num_cells=4, bat_v_sat=3.4625, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
-                 t_rated=Battery.RATED_TEMP, t_rlim=0.017, scale=1.,
+                 t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=Battery.RATED_TEMP, hys_scale=1.):
+                 temp_c=RATED_TEMP, hys_scale=1.):
         Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
