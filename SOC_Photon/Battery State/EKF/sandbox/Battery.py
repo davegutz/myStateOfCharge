@@ -59,7 +59,7 @@ batt_vsat = float(batt_num_cells)*BATT_V_SAT  # Total bank saturation for 0.997=
 batt_vmax = (14.3/4)*float(batt_num_cells)  # Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
 
 
-class Battery(Coulombs, EKF_1x1):
+class Battery(Coulombs):
     RATED_BATT_CAP = 100.
     # """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
     #                         what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
@@ -83,7 +83,6 @@ class Battery(Coulombs, EKF_1x1):
         """
         # Parents
         Coulombs.__init__(self, q_cap_rated,  q_cap_rated, t_rated, t_rlim)
-        EKF_1x1.__init__(self)
 
         # Defaults
         from pyDAGx import myTables
@@ -128,20 +127,9 @@ class Battery(Coulombs, EKF_1x1):
         self.r_dif = r_dif
         self.c_dif = self.tau_dif / self.r_dif
         self.Randles = StateSpace(2, 2, 1)
-        self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
+        # self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
         self.temp_c = temp_c
-        self.tcharge_ekf = 0.  # Charging time to 100% from ekf, hr
-        self.voc_dyn = 0.  # Charging voltage, V
-        self.soc_ekf = 0.  # Filtered state of charge from ekf (0-1)
-        self.SOC_ekf = 0.  # Filtered state of charge from ekf (0-100)
-        self.q_ekf = 0  # Filtered charge calculated by ekf, C
-        self.amp_hrs_remaining = 0  # Discharge amp*time left if drain to q=0, A-h
-        self.amp_hrs_remaining_ekf = 0  # Discharge amp*time left if drain to q_ekf=0, A-h
         self.saved = Saved()  # for plots and prints
-        self.e_soc_ekf = 0.  # analysis parameter
-        self.e_voc_ekf = 0.  # analysis parameter
-        self.Q = 0.001*0.001  # EKF process uncertainty
-        self.R = 0.1*0.1  # EKF state uncertainty
         self.dv_hys = 0.  # Placeholder so BatteryModel can be plotted
         self.bms_off = False
 
@@ -160,18 +148,8 @@ class Battery(Coulombs, EKF_1x1):
         s += "  voc      ={:7.3f}  // Dynamic model open circuit voltage including hysteresis, V\n".format(self.voc)
         s += "  voc_stat ={:7.3f}  // Static model open circuit voltage, V\n".format(self.voc_stat)
         s += "  vsat =    {:7.3f}  // Saturation threshold at temperature, V\n".format(self.vsat)
-        s += "  voc_dyn = {:7.3f}  // Charging voltage, V\n".format(self.voc_dyn)
         s += "  vdyn =    {:7.3f}  // Model current induced back emf, V\n".format(self.vdyn)
         s += "  q =       {:7.3f}  // Present charge, C\n".format(self.q)
-        s += "  q_ekf     {:7.3f}  // Filtered charge calculated by ekf, C\n".format(self.q_ekf)
-        s += "  tcharge = {:7.3f}  // Charging time to full, hr\n".format(self.tcharge)
-        s += "  tcharge_ekf = {:7.3f}   // Charging time to full from ekf, hr\n".format(self.tcharge_ekf)
-        s += "  soc_ekf = {:7.3f}  // Filtered state of charge from ekf (0-1)\n".format(self.soc_ekf)
-        s += "  SOC_ekf  ={:7.3f}  // Filtered state of charge from ekf (0-100)\n".format(self.SOC_ekf)
-        s += "  amp_hrs_remaining =       {:7.3f}  // Discharge amp*time left if drain to q=0, A-h\n".\
-            format(self.amp_hrs_remaining,)
-        s += "  amp_hrs_remaining_ekf_ =  {:7.3f}  // Discharge amp*time left if drain to q_ekf=0, A-h\n".\
-            format(self.amp_hrs_remaining_ekf)
         s += "  sr =      {:7.3f}  // Resistance scalar\n".format(self.sr)
         s += "  dv_ =     {:7.3f}  / Adjustment, V\n".format(self.dv)
         s += "  dt_ =     {:7.3f}  // Update time, s\n".format(self.dt)
@@ -179,8 +157,6 @@ class Battery(Coulombs, EKF_1x1):
         s += Coulombs.__str__(self, prefix + 'Battery:')
         s += "\n  "
         s += self.Randles.__str__(prefix + 'Battery:')
-        s += "\n  "
-        s += EKF_1x1.__str__(self, prefix + 'Battery:')
         return s
 
     def assign_temp_c(self, temp_c):
@@ -208,6 +184,95 @@ class Battery(Coulombs, EKF_1x1):
 
     def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):
         raise NotImplementedError
+
+    def init_battery(self):
+        self.Randles.init_state_space([0., 0.])
+
+    def look_hys(self, dv, soc):
+        return NotImplementedError
+
+    def vbc(self):
+        return self.Randles.x[0]
+
+    def vcd(self):
+        return self.Randles.x[1]
+
+    def vbc_dot(self):
+        return self.Randles.x_dot[0]
+
+    def vcd_dot(self):
+        return self.Randles.x_dot[1]
+
+    def i_c_ct(self):
+        return self.vbc_dot() * self.c_ct
+
+    def i_c_dif(self):
+        return self.vcd_dot() * self.c_dif
+
+    def i_r_ct(self):
+        return self.vbc() / self.r_ct
+
+    def i_r_dif(self):
+        return self.vcd() / self.r_dif
+
+    def vd(self):
+        return self.voc + self.ib * self.r0
+
+    def vc(self):
+        return self.vd() + self.vcd()
+
+
+class BatteryMonitor(Battery, EKF_1x1):
+    """Extend basic class to monitor"""
+
+    def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
+                 num_cells=4, bat_v_sat=3.4625, q_cap_rated=Battery.RATED_BATT_CAP*3600,
+                 t_rated=RATED_TEMP, t_rlim=0.017,
+                 r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
+                 temp_c=RATED_TEMP):
+        Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated, t_rated,
+                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
+        self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
+
+        """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
+        Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
+        etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
+        constraint >=0.02 V/soc.  m and n using Zhang values.   Had to scale soc because  actual capacity > NOM_BAT_CAP
+        so equations error when soc<=0 to match data.    See Battery.h
+        """
+        # Parents
+        EKF_1x1.__init__(self)
+        self.tcharge_ekf = 0.  # Charging time to 100% from ekf, hr
+        self.voc_dyn = 0.  # Charging voltage, V
+        self.soc_ekf = 0.  # Filtered state of charge from ekf (0-1)
+        self.SOC_ekf = 0.  # Filtered state of charge from ekf (0-100)
+        self.q_ekf = 0  # Filtered charge calculated by ekf, C
+        self.amp_hrs_remaining = 0  # Discharge amp*time left if drain to q=0, A-h
+        self.amp_hrs_remaining_ekf = 0  # Discharge amp*time left if drain to q_ekf=0, A-h
+        self.e_soc_ekf = 0.  # analysis parameter
+        self.e_voc_ekf = 0.  # analysis parameter
+        self.Q = 0.001*0.001  # EKF process uncertainty
+        self.R = 0.1*0.1  # EKF state uncertainty
+
+    def __str__(self, prefix=''):
+        """Returns representation of the object"""
+        s = prefix + "BatteryMonitor:\n"
+        s += "  voc_stat=        {:7.3f}  // Static, table lookup value of voc before applying hysteresis, V\n".\
+            format(self.voc_stat)
+        s += "  \n  "
+        s += Battery.__str__(self, prefix + 'BatteryMonitor:')
+        s += "  q_ekf     {:7.3f}  // Filtered charge calculated by ekf, C\n".format(self.q_ekf)
+        s += "  tcharge = {:7.3f}  // Charging time to full, hr\n".format(self.tcharge)
+        s += "  tcharge_ekf = {:7.3f}   // Charging time to full from ekf, hr\n".format(self.tcharge_ekf)
+        s += "  soc_ekf = {:7.3f}  // Filtered state of charge from ekf (0-1)\n".format(self.soc_ekf)
+        s += "  SOC_ekf  ={:7.3f}  // Filtered state of charge from ekf (0-100)\n".format(self.SOC_ekf)
+        s += "  amp_hrs_remaining =       {:7.3f}  // Discharge amp*time left if drain to q=0, A-h\n".\
+            format(self.amp_hrs_remaining,)
+        s += "  amp_hrs_remaining_ekf_ =  {:7.3f}  // Discharge amp*time left if drain to q_ekf=0, A-h\n".\
+            format(self.amp_hrs_remaining_ekf)
+        s += "\n  "
+        s += EKF_1x1.__str__(self, prefix + 'Battery:')
+        return s
 
     def calculate_ekf(self, temp_c, vb, ib, dt):
         self.temp_c = temp_c
@@ -272,6 +337,9 @@ class Battery(Coulombs, EKF_1x1):
             self.amp_hrs_remaining_ekf = 0.
         return self.tcharge
 
+    # def count_coulombs(self, dt=0., reset=False, temp_c=25., charge_curr=0., sat=True, t_last=0.):
+    #     raise NotImplementedError
+
     def construct_state_space_monitor(self):
         """ State-space representation of dynamics
         Inputs:
@@ -295,9 +363,6 @@ class Battery(Coulombs, EKF_1x1):
         d = np.array([-self.r0, 1])
         return a, b, c, d
 
-    # def count_coulombs(self, dt=0., reset=False, temp_c=25., charge_curr=0., sat=True, t_last=0.):
-    #     raise NotImplementedError
-
     def ekf_model_predict(self):
         """Process model"""
         self.Fx = math.exp(-self.dt / self.tau_sd)
@@ -311,47 +376,11 @@ class Battery(Coulombs, EKF_1x1):
         self.H = self.dv_dsoc
         return self.hx, self.H
 
-    def init_battery(self):
-        self.Randles.init_state_space([0., 0.])
-
     def init_soc_ekf(self, soc):
         self.soc_ekf = soc
         self.init_ekf(soc, 0.0)
         self.q_ekf = self.soc_ekf * self.q_capacity
         self.SOC_ekf = self.q_ekf / self.q_cap_rated_scaled * 100.
-
-    def look_hys(self, dv, soc):
-        return NotImplementedError
-
-    def vbc(self):
-        return self.Randles.x[0]
-
-    def vcd(self):
-        return self.Randles.x[1]
-
-    def vbc_dot(self):
-        return self.Randles.x_dot[0]
-
-    def vcd_dot(self):
-        return self.Randles.x_dot[1]
-
-    def i_c_ct(self):
-        return self.vbc_dot() * self.c_ct
-
-    def i_c_dif(self):
-        return self.vcd_dot() * self.c_dif
-
-    def i_r_ct(self):
-        return self.vbc() / self.r_ct
-
-    def i_r_dif(self):
-        return self.vcd() / self.r_dif
-
-    def vd(self):
-        return self.voc + self.ib * self.r0
-
-    def vc(self):
-        return self.vd() + self.vcd()
 
     def save(self, time, soc_ref, voc_ref):
         self.saved.time.append(time)
@@ -396,27 +425,6 @@ class Battery(Coulombs, EKF_1x1):
         self.e_voc_ekf = (self.voc_dyn - voc_ref) / voc_ref
         self.saved.e_soc_ekf.append(self.e_soc_ekf)
         self.saved.e_voc_ekf.append(self.e_voc_ekf)
-
-
-class BatteryMonitor(Battery, EKF_1x1):
-    """Extend basic class to monitor"""
-
-    def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
-                 num_cells=4, bat_v_sat=3.4625, q_cap_rated=Battery.RATED_BATT_CAP*3600,
-                 t_rated=RATED_TEMP, t_rlim=0.017,
-                 r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP):
-        Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated, t_rated,
-                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
-
-        """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
-        Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
-        etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
-        constraint >=0.02 V/soc.  m and n using Zhang values.   Had to scale soc because  actual capacity > NOM_BAT_CAP
-        so equations error when soc<=0 to match data.    See Battery.h
-        """
-        # Parents
-        EKF_1x1.__init__(self)
 
 
 class BatteryModel(Battery):
@@ -579,6 +587,28 @@ class BatteryModel(Battery):
         # Save and return
         self.t_last = temp_lim
         return self.soc
+
+    def save(self, time, soc_ref, voc_ref):
+        self.saved.time.append(time)
+        self.saved.ib.append(self.ib)
+        self.saved.ioc.append(self.ioc)
+        self.saved.vb.append(self.vb)
+        self.saved.vc.append(self.vc())
+        self.saved.vd.append(self.vd())
+        self.saved.dv_hys.append(self.dv_hys)
+        self.saved.voc.append(self.voc)
+        self.saved.voc_stat.append(self.voc_stat)
+        self.saved.vbc.append(self.vbc())
+        self.saved.vcd.append(self.vcd())
+        self.saved.icc.append(self.i_c_ct())
+        self.saved.irc.append(self.i_r_ct())
+        self.saved.icd.append(self.i_c_dif())
+        self.saved.ird.append(self.i_r_dif())
+        self.saved.vcd_dot.append(self.vcd_dot())
+        self.saved.vbc_dot.append(self.vbc_dot())
+        self.saved.soc.append(self.soc)
+        self.saved.SOC.append(self.SOC)
+        self.saved.pow_oc.append(self.pow_oc)
 
 
 # Other functions

@@ -19,7 +19,7 @@ Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Batt
 
 import numpy as np
 from numpy.random import randn
-import Battery''
+import Battery
 from Battery import Battery, BatteryModel, is_sat, rp, overall
 from unite_pictures import unite_pictures_into_pdf
 import os
