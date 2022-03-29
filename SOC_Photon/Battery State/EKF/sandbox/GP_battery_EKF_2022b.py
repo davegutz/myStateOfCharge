@@ -144,6 +144,9 @@ if __name__ == '__main__':
                                    plot_title=plot_title, n_fig=n_fig)
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
+
+        # Clean up after itself.   Other fig files already in root will get plotted by unite_pictures_into_pdf
+        # Cleanup other figures in root folder by hand
         for fig_file in fig_files:
             try:
                 os.remove(fig_file)
