@@ -153,6 +153,7 @@ class Battery(Coulombs):
         s += "  sr =      {:7.3f}  // Resistance scalar\n".format(self.sr)
         s += "  dv_ =     {:7.3f}  / Adjustment, V\n".format(self.dv)
         s += "  dt_ =     {:7.3f}  // Update time, s\n".format(self.dt)
+        s += "  dv_hys  = {:7.3f}  // Hysteresis delta v, V\n".format(self.dv_hys)
         s += "\n  "
         s += Coulombs.__str__(self, prefix + 'Battery:')
         s += "\n  "
@@ -229,7 +230,7 @@ class BatteryMonitor(Battery, EKF_1x1):
                  num_cells=4, bat_v_sat=3.4625, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP):
+                 temp_c=RATED_TEMP, hys_scale=1.):
         Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
@@ -253,6 +254,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.e_voc_ekf = 0.  # analysis parameter
         self.Q = 0.001*0.001  # EKF process uncertainty
         self.R = 0.1*0.1  # EKF state uncertainty
+        self.hys = Hysteresis(scale=hys_scale)  # Battery hysteresis model - drift of voc
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -270,8 +272,10 @@ class BatteryMonitor(Battery, EKF_1x1):
             format(self.amp_hrs_remaining,)
         s += "  amp_hrs_remaining_ekf_ =  {:7.3f}  // Discharge amp*time left if drain to q_ekf=0, A-h\n".\
             format(self.amp_hrs_remaining_ekf)
+        s += "  \n  "
+        s += self.hys.__str__(prefix + 'BatteryMonitor:')
         s += "\n  "
-        s += EKF_1x1.__str__(self, prefix + 'Battery:')
+        s += EKF_1x1.__str__(self, prefix + 'BatteryMonitor:')
         return s
 
     def calculate_ekf(self, temp_c, vb, ib, dt):
@@ -281,15 +285,18 @@ class BatteryMonitor(Battery, EKF_1x1):
         # Dynamics
         self.vb = vb
         self.ib = ib
-        self.ioc = ib
         u = np.array([ib, vb]).T
         self.Randles.calc_x_dot(u)
         self.Randles.update(dt)
         self.voc_dyn = self.Randles.y
         self.vdyn = self.vb - self.voc_dyn
-        self.voc = self.voc_dyn
         self.voc_stat = self.voc_dyn
-        self.pow_oc = self.voc * self.ib
+        # Hysteresis model
+        self.hys.calculate_hys(self.ib, self.voc_stat, self.soc)
+        self.voc = self.hys.update(dt)
+        self.ioc = self.hys.ioc
+        self.dv_hys = self.hys.dv_hys
+        self.pow_oc = self.voc * self.ioc
         self.bms_off = self.temp_c <= low_t;  # KISS
         if self.bms_off:
             self.voc_stat, self.dv_dsoc = self.calc_soc_voc(max(min(self.soc, 1.), 0.), temp_c)
@@ -301,7 +308,6 @@ class BatteryMonitor(Battery, EKF_1x1):
 
         # EKF 1x1
         self.predict_ekf(self.ib)  # u = ib
-        # self.update_ekf(self.voc_dyn, mneps_bb, mxeps_bb)  # z = voc_dyn, voc_filtered = hx
         self.update_ekf(self.voc_dyn, 0., 1.)  # z = voc_dyn, voc_filtered = hx
         self.soc_ekf = self.x_kf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity

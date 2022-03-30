@@ -37,11 +37,15 @@ class Hysteresis():
         for i in range(len(t_dv)):
             t_dv[i] *= scale
             t_r[i] *= scale
+        self.disabled = scale<1e-5
         self.lut = LookupTable()
         self.lut.addAxis('x', t_dv)
         self.lut.addAxis('y', t_soc)
         self.lut.setValueTable(t_r)
-        self.cap = cap / scale  # maintain time constant = R*C
+        if self.disabled:
+            self.cap = cap
+        else:
+            self.cap = cap / scale  # maintain time constant = R*C
         self.res = 0.
         self.soc = 0.
         self.ib = 0.
@@ -65,22 +69,31 @@ class Hysteresis():
         s += "  soc      =    {:7.3f}  // State of charge input, dimensionless\n".format(self.soc)
         s += "  res      =    {:7.3f}  // Variable resistance value, ohms\n".format(self.res)
         s += "  dv_dot   =    {:7.3f}  // Calculated voltage rate, V/s\n".format(self.dv_dot)
-        s += "  dv_hys       =    {:7.3f}  // Delta voltage state, V\n".format(self.dv_hys)
+        s += "  dv_hys   =    {:7.3f}  // Delta voltage state, V\n".format(self.dv_hys)
+        s += "  disabled =     {:2.0f}      // Hysteresis disabled by low scale input < 1e-5, T=disabled\n".format(self.disabled)
         return s
 
     def calculate_hys(self, ib, voc_stat, soc):
         self.ib = ib
         self.voc_stat = voc_stat
         self.soc = soc
-        self.res = self.look_hys(self.dv_hys, self.soc)
-        self.ioc = self.dv_hys / self.res
-        self.dv_dot = -self.dv_hys / self.res / self.cap + self.ib / self.cap
+        if self.disabled:
+            self.res = 0.
+            self.ioc = ib
+            self.dv_dot = 0.
+        else:
+            self.res = self.look_hys(self.dv_hys, self.soc)
+            self.ioc = self.dv_hys / self.res
+            self.dv_dot = -self.dv_hys / self.res / self.cap + self.ib / self.cap
 
     def init(self, dv_init):
         self.dv_hys = dv_init
 
     def look_hys(self, dv, soc):
-        self.res = self.lut.lookup(x=dv, y=soc)
+        if self.disabled:
+            self.res = 0.
+        else:
+            self.res = self.lut.lookup(x=dv, y=soc)
         return self.res
 
     def save(self, time):

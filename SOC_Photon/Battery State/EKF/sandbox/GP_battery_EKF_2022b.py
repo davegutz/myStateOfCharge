@@ -59,7 +59,8 @@ if __name__ == '__main__':
         i_std = 0.1  # (0.1-->0) ------ noise
         soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
         tau_ct = 0.2  # (0.2-->5.)  -------
-        hys_scale = 1.  # (1.-->10.)
+        hys_scale = 1.  # (1e-6<--1.-->10.) 1e-6 disables hysteresis
+        hys_scale_monitor = 50.  # (1e-6<--1.-->10.) 1e-6 disables hysteresis
 
         # Transient  inputs
         # Current time inputs representing the load.
@@ -84,7 +85,7 @@ if __name__ == '__main__':
         scale = model_bat_cap / Battery.RATED_BATT_CAP
         sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale)
         mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
-                      r_dif=r_dif, temp_c=temp_c)
+                      r_dif=r_dif, temp_c=temp_c, hys_scale=hys_scale_monitor)
 
         # time loop
         t = np.arange(0, time_end + dt, dt)
