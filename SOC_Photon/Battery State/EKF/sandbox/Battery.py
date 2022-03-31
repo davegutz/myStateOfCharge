@@ -307,8 +307,8 @@ class BatteryMonitor(Battery, EKF_1x1):
             self.voc_dyn = 0.
 
         # EKF 1x1
-        self.predict_ekf(self.ib)  # u = ib
-        self.update_ekf(self.voc_dyn, 0., 1.)  # z = voc_dyn, voc_filtered = hx
+        self.predict_ekf(u=self.ib)
+        self.update_ekf(z=self.voc, x_min=0., x_max=1.)
         self.soc_ekf = self.x_kf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity
         self.SOC_ekf = self.q_ekf / self.q_cap_rated_scaled * 100.

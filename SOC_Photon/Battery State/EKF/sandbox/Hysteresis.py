@@ -26,6 +26,9 @@ class Hysteresis():
 
     def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e6, scale=1.):
         # Defaults
+        self.reverse = scale<0.0
+        if self.reverse:
+            scale = -scale
         if t_dv is None:
             t_dv = [-0.09, -0.07,-0.05, -0.03, 0.000, 0.03, 0.05, 0.07, 0.09]
         if t_soc is None:
@@ -71,6 +74,7 @@ class Hysteresis():
         s += "  dv_dot   =    {:7.3f}  // Calculated voltage rate, V/s\n".format(self.dv_dot)
         s += "  dv_hys   =    {:7.3f}  // Delta voltage state, V\n".format(self.dv_hys)
         s += "  disabled =     {:2.0f}      // Hysteresis disabled by low scale input < 1e-5, T=disabled\n".format(self.disabled)
+        s += "  reverse  =     {:2.0f}      // If hysteresis hooked up backwards, T=reversed\n".format(self.reverse)
         return s
 
     def calculate_hys(self, ib, voc_stat, soc):
@@ -109,7 +113,10 @@ class Hysteresis():
 
     def update(self, dt):
         self.dv_hys += self.dv_dot * dt
-        self.voc = self.voc_stat + self.dv_hys
+        if self.reverse:
+            self.voc = self.voc_stat + self.dv_hys
+        else:
+            self.voc = self.voc_stat - self.dv_hys
         return self.voc
 
 

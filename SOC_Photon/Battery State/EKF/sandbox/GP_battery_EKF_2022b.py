@@ -60,7 +60,7 @@ if __name__ == '__main__':
         soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
         tau_ct = 0.2  # (0.2-->5.)  -------
         hys_scale = 1.  # (1e-6<--1.-->10.) 1e-6 disables hysteresis
-        hys_scale_monitor = 50.  # (1e-6<--1.-->10.) 1e-6 disables hysteresis
+        hys_scale_monitor = -1.  # (-1e-6<-- -1.-->-10.) -1e-6 disables hysteresis.   Negative reverses hys
 
         # Transient  inputs
         # Current time inputs representing the load.
