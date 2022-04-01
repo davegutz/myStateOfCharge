@@ -524,21 +524,33 @@ void BatteryModel::update(double *delta_q, double *t_last)
 }
 
 
-Hysteresis::Hysteresis(){};
+Hysteresis::Hysteresis()
+: reverse_(false),  disabled_(false), res_(0), soc_(0), ib_(0), ioc_(0), voc_stat_(0), voc_(0), dv_hys_(0), dv_dot_(0), tau_(0),
+   scale_(0){};
 Hysteresis::Hysteresis(const double cap, const double scale)
-: res_(0), soc_(0), ib_(0), ioc_(0), voc_stat_(0), voc_(0), dv_hys_(0), dv_dot_(0), tau_(0)
+: reverse_(false),  disabled_(false), res_(0), soc_(0), ib_(0), ioc_(0), voc_stat_(0), voc_(0), dv_hys_(0), dv_dot_(0), tau_(0),
+   scale_(0)
 {
-    // Hysteresis characteristic table
+    // Characteristic table
     hys_T_ = new TableInterp2D(n_h, m_h, x_dv, y_soc, t_r);
 
+    // Calculate scale_, reverse_ and disabed_
+    apply_scale(scale);
+
+    // Capacitance logic
+    if ( disabled_ ) cap_ = cap;
+    else cap_ = cap / scale_;    // maintain time constant = R*C
+}
+
+// Apply scale
+void Hysteresis::apply_scale(const double scale)
+{
     // Reverse polarity logic
     reverse_ = scale < 0.0;
     if ( reverse_ ) scale_ = -scale;
 
     // Disabled logic
     disabled_ = scale_ < 1e-5;
-    if ( disabled_ ) cap_ = cap;
-    else cap_ = cap / scale_;    // maintain time constant = R*C
 }
 
 // Calculate

@@ -104,6 +104,7 @@ public:
   ~Hysteresis();
   // operators
   // functions
+  void apply_scale(const double scale);
   double calculate(const double ib, const double voc_stat, const double soc);
   void init(const double dv_init);
   double look_hys(const double dv, const double soc);
