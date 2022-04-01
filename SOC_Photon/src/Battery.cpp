@@ -528,6 +528,9 @@ Hysteresis::Hysteresis(){};
 Hysteresis::Hysteresis(const double cap, const double scale)
 : res_(0), soc_(0), ib_(0), ioc_(0), voc_stat_(0), voc_(0), dv_hys_(0), dv_dot_(0), tau_(0)
 {
+    // Hysteresis characteristic table
+    hys_T_ = new TableInterp2D(n_h, m_h, x_dv, y_soc, t_r);
+
     // Reverse polarity logic
     reverse_ = scale < 0.0;
     if ( reverse_ ) scale_ = -scale;
@@ -541,23 +544,24 @@ Hysteresis::Hysteresis(const double cap, const double scale)
 // Calculate
 double Hysteresis::calculate(const double ib, const double voc_stat, const double soc)
 {
-        ib_ = ib;
-        voc_stat_ = voc_stat;
-        soc_ = soc;
+    ib_ = ib;
+    voc_stat_ = voc_stat;
+    soc_ = soc;
 
-        // Calculate
-        if ( disabled_ )
-        {
-            res_ = 0.;
-            ioc_ = ib;
-            dv_dot_ = 0.;
-        }
-        else
-        {
-            res_ = look_hys(dv_hys_, soc_);
-            ioc_ = dv_hys_ / res_;
-            dv_dot_ = -dv_hys_ / res_ / cap_ + ib_ / cap_;
-        }
+    // Calculate
+    if ( disabled_ )
+    {
+        res_ = 0.;
+        ioc_ = ib;
+        dv_dot_ = 0.;
+    }
+    else
+    {
+        res_ = look_hys(dv_hys_, soc_);
+        ioc_ = dv_hys_ / res_;
+        dv_dot_ = -dv_hys_ / res_ / cap_ + ib_ / cap_;
+    }
+    return ( dv_dot_ );
 }
 
 // Initialize
@@ -569,12 +573,12 @@ void Hysteresis::init(const double dv_init)
 // Table lookup
 double Hysteresis::look_hys(const double dv, const double soc)
 {
-        double res;         // return value
-        if ( disabled_ )
-            res = 0.;
-        else
-            res = self.lut.lookup(dv*scale_, soc) * scale_;
-        return res;
+    double res;         // return value
+    if ( disabled_ )
+        res = 0.;
+    else
+        res = hys_T_->interp(dv*scale_, soc) * scale_;
+    return res;
 }
 
 // Print
@@ -583,7 +587,6 @@ void Hysteresis::pretty_print()
     Serial.printf("Hysteresis::");
     Serial.printf("  res_ =       %6.4f; // Null resistance, Ohms\n", res_);
     Serial.printf("  cap_ =       %10.1f; // Capacitance, Farads\n", cap_);
-    Serial.printf("  sat_cutback_gain_ = %7.3f; // Gain to retard ib when voc exceeds vsat, dimensionless\n", sat_cutback_gain_);
     double res = look_hys(0., 0.8);
     Serial.printf("  tau_ =       %10.1f; // Null time constant, sec\n", res*cap_);
     Serial.printf("  ib_ =        %7.3f;  // Current in, A\n", ib_);
@@ -594,8 +597,8 @@ void Hysteresis::pretty_print()
     Serial.printf("  res_ =       %7.3f;  // Variable resistance value, ohms\n", res_);
     Serial.printf("  dv_dot_ =    %7.3f;  // Calculated voltage rate, V/s\n", dv_dot_);
     Serial.printf("  dv_hys_ =    %7.3f;  // Delta voltage state, V\n", dv_hys_);
-    Serial.printf("  disabled_ =  %2.0f;  // Hysteresis disabled by low scale input < 1e-5, T=disabled\n", disabled_);
-    Serial.printf("  reverse_ =   %2.0f;  // If hysteresis hooked up backwards, T=reversed\n", reverse_);
+    Serial.printf("  disabled_ =  %2.0d;  // Hysteresis disabled by low scale input < 1e-5, T=disabled\n", disabled_);
+    Serial.printf("  reverse_ =   %2.0d;  // If hysteresis hooked up backwards, T=reversed\n", reverse_);
 }
 
 // Dynamic update

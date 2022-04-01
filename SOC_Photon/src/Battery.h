@@ -87,8 +87,8 @@ const double mxeps_bb = 1-1e-6;      // Level of soc that indicates mathematical
 // Hysteresis constants
 const unsigned int n_h = 9;
 const unsigned int m_h = 3;
-const double t_dv[n_h]    = { -0.09, -0.07, -0.05, -0.03, 0.00, 0.03, 0.05, 0.07, 0.09};
-const double t_soc[m_h]   = { 0.0,   0.5,    1.0};
+const double x_dv[n_h]    = { -0.09, -0.07, -0.05, -0.03, 0.00, 0.03, 0.05, 0.07, 0.09};
+const double y_soc[m_h]   = { 0.0,   0.5,    1.0};
 const double t_r[m_h*n_h] = { 1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.0030, 0.0046, 1e-7,
                               1e-7, 1e-7,   0.0050, 0.0036, 0.0015, 0.0024, 0.0030,   1e-7, 1e-7,
                               1e-7, 1e-7,     1e-7, 0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7};
@@ -123,6 +123,7 @@ protected:
   double dv_dot_;       // Calculated voltage rate, V/s
   double tau_;          // Null time constant, sec
   double scale_;        // Adjustment, dimensionless
+  TableInterp2D *hys_T_;   // dv-soc 2-D table, V
 };
 
 
