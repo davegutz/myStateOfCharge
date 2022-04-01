@@ -88,7 +88,7 @@ class Hysteresis():
         else:
             self.res = self.look_hys(self.dv_hys, self.soc)
             self.ioc = self.dv_hys / self.res
-            self.dv_dot = -self.dv_hys / self.res / self.cap + self.ib / self.cap
+            self.dv_dot = (self.ib - self.dv_hys/self.res) / self.cap
 
     def init(self, dv_init):
         self.dv_hys = dv_init

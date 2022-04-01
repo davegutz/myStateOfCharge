@@ -578,7 +578,7 @@ double Hysteresis::calculate(const double ib, const double voc_stat, const doubl
     {
         res_ = look_hys(dv_hys_, soc_);
         ioc_ = dv_hys_ / res_;
-        dv_dot_ = -dv_hys_ / res_ / cap_ + ib_ / cap_;
+        dv_dot_ = (ib_ - dv_hys_/res_) / cap_;  // Capacitor ode
     }
     return ( dv_dot_ );
 }
