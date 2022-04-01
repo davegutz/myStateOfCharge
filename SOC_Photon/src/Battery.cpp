@@ -603,11 +603,12 @@ double Hysteresis::look_hys(const double dv, const double soc)
 // Print
 void Hysteresis::pretty_print()
 {
-    Serial.printf("Hysteresis::");
+    Serial.printf("Hysteresis:\n");
     Serial.printf("  res_ =       %6.4f; // Null resistance, Ohms\n", res_);
-    Serial.printf("  cap_ =       %10.1f; // Capacitance, Farads\n", cap_);
+    Serial.printf("  cap_init_ =%10.1f; // Capacitance, Farads\n", cap_init_);
+    Serial.printf("  cap_ =     %10.1f; // Capacitance, Farads\n", cap_);
     double res = look_hys(0., 0.8);
-    Serial.printf("  tau_ =       %10.1f; // Null time constant, sec\n", res*cap_);
+    Serial.printf("  tau_ =     %10.1f; // Null time constant, sec\n", res*cap_);
     Serial.printf("  ib_ =        %7.3f;  // Current in, A\n", ib_);
     Serial.printf("  ioc_ =       %7.3f;  // Current out, A\n", ioc_);
     Serial.printf("  voc_stat_ =  %7.3f;  // Battery model voltage input, V\n", voc_stat_);
@@ -616,8 +617,8 @@ void Hysteresis::pretty_print()
     Serial.printf("  res_ =       %7.3f;  // Variable resistance value, ohms\n", res_);
     Serial.printf("  dv_dot_ =    %7.3f;  // Calculated voltage rate, V/s\n", dv_dot_);
     Serial.printf("  dv_hys_ =    %7.3f;  // Delta voltage state, V\n", dv_hys_);
-    Serial.printf("  disabled_ =  %d;    // Hysteresis disabled by low scale input < 1e-5, T=disabled\n", disabled_);
-    Serial.printf("  direx_  =    %2.0f;      // If hysteresis hooked up backwards, -1.=reversed\n", direx_);
+    Serial.printf("  disabled_ =    %d;      // Hysteresis disabled by low scale input < 1e-5, T=disabled\n", disabled_);
+    Serial.printf("  direx_  =     %2.0f;      // If hysteresis hooked up backwards, -1.=reversed\n", direx_);
 }
 
 // Scale
