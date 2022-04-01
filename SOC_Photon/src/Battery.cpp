@@ -577,7 +577,7 @@ double Hysteresis::look_hys(const double dv, const double soc)
     if ( disabled_ )
         res = 0.;
     else
-        res = hys_T_->interp(dv*scale_, soc) * scale_;
+        res = hys_T_->interp(dv/scale_, soc) * scale_;
     return res;
 }
 
