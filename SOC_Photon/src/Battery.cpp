@@ -524,6 +524,92 @@ void BatteryModel::update(double *delta_q, double *t_last)
 }
 
 
+Hysteresis::Hysteresis(){};
+Hysteresis::Hysteresis(const double cap, const double scale)
+: res_(0), soc_(0), ib_(0), ioc_(0), voc_stat_(0), voc_(0), dv_hys_(0), dv_dot_(0), tau_(0)
+{
+    // Reverse polarity logic
+    reverse_ = scale < 0.0;
+    if ( reverse_ ) scale_ = -scale;
+
+    // Disabled logic
+    disabled_ = scale_ < 1e-5;
+    if ( disabled_ ) cap_ = cap;
+    else cap_ = cap / scale_;    // maintain time constant = R*C
+}
+
+// Calculate
+double Hysteresis::calculate(const double ib, const double voc_stat, const double soc)
+{
+        ib_ = ib;
+        voc_stat_ = voc_stat;
+        soc_ = soc;
+
+        // Calculate
+        if ( disabled_ )
+        {
+            res_ = 0.;
+            ioc_ = ib;
+            dv_dot_ = 0.;
+        }
+        else
+        {
+            res_ = look_hys(dv_hys_, soc_);
+            ioc_ = dv_hys_ / res_;
+            dv_dot_ = -dv_hys_ / res_ / cap_ + ib_ / cap_;
+        }
+}
+
+// Initialize
+void Hysteresis::init(const double dv_init)
+{
+    dv_hys_ = dv_init;
+}
+
+// Table lookup
+double Hysteresis::look_hys(const double dv, const double soc)
+{
+        double res;         // return value
+        if ( disabled_ )
+            res = 0.;
+        else
+            res = self.lut.lookup(dv*scale_, soc) * scale_;
+        return res;
+}
+
+// Print
+void Hysteresis::pretty_print()
+{
+    Serial.printf("Hysteresis::");
+    Serial.printf("  res_ =       %6.4f; // Null resistance, Ohms\n", res_);
+    Serial.printf("  cap_ =       %10.1f; // Capacitance, Farads\n", cap_);
+    Serial.printf("  sat_cutback_gain_ = %7.3f; // Gain to retard ib when voc exceeds vsat, dimensionless\n", sat_cutback_gain_);
+    double res = look_hys(0., 0.8);
+    Serial.printf("  tau_ =       %10.1f; // Null time constant, sec\n", res*cap_);
+    Serial.printf("  ib_ =        %7.3f;  // Current in, A\n", ib_);
+    Serial.printf("  ioc_ =       %7.3f;  // Current out, A\n", ioc_);
+    Serial.printf("  voc_stat_ =  %7.3f;  // Battery model voltage input, V\n", voc_stat_);
+    Serial.printf("  voc_ =       %7.3f;  // Battery model voltage output, V\n", voc_);
+    Serial.printf("  soc_ =       %7.3f;  // State of charge input, dimensionless\n", soc_);
+    Serial.printf("  res_ =       %7.3f;  // Variable resistance value, ohms\n", res_);
+    Serial.printf("  dv_dot_ =    %7.3f;  // Calculated voltage rate, V/s\n", dv_dot_);
+    Serial.printf("  dv_hys_ =    %7.3f;  // Delta voltage state, V\n", dv_hys_);
+    Serial.printf("  disabled_ =  %2.0f;  // Hysteresis disabled by low scale input < 1e-5, T=disabled\n", disabled_);
+    Serial.printf("  reverse_ =   %2.0f;  // If hysteresis hooked up backwards, T=reversed\n", reverse_);
+}
+
+// Dynamic update
+double Hysteresis::update(const double dt)
+{
+    dv_hys_ += dv_dot_ * dt;
+    if ( reverse_ )
+        voc_ = voc_stat_ + dv_hys_;
+    else
+        voc_ = voc_stat_ - dv_hys_;
+    return voc_;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* C <- A * B */
 void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols)
@@ -531,7 +617,8 @@ void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols)
     int i, j,l;
 
     for(i=0; i<arows; ++i)
-        for(j=0; j<bcols; ++j) {
+        for(j=0; j<bcols; ++j)
+        {
             c[i*bcols+j] = 0;
             for(l=0; l<acols; ++l)
                 c[i*bcols+j] += a[i*acols+l] * b[l*bcols+j];
@@ -541,7 +628,8 @@ void mulvec(double * a, double * x, double * y, int m, int n)
 {
     int i, j;
 
-    for(i=0; i<m; ++i) {
+    for(i=0; i<m; ++i)
+    {
         y[i] = 0;
         for(j=0; j<n; ++j)
             y[i] += x[j] * a[i*n+j];
