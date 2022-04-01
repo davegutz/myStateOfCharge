@@ -129,6 +129,7 @@ protected:
   double tau_;          // Null time constant, sec
   double direx_;        // Direction scalar
   TableInterp2D *hys_T_;   // dv-soc 2-D table, V
+  double cap_init_;     // Initial capacitance specification, Farads
 };
 
 

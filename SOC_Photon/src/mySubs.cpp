@@ -35,7 +35,7 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm,                  cTime,        T,         Tb_f,   Tb_f_m,    Vb,     voc_stat,   voc,    vsat,    sat,  sel, mod, Ib,       tcharge,   soc_m, soc_ekf, soc,   SOC_m, SOC_ekf, SOC,"));
+  Serial.println(F("unit,           hm,                  cTime,        T,         Tb_f,   Tb_f_m, Vb,     voc_stat,   voc,    vsat,    sat,  sel, mod, Ib,       tcharge,   soc_m, soc_ekf, soc,   SOC_m, SOC_ekf, SOC,"));
 }
 
 // Print strings

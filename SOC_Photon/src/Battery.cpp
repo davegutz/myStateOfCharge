@@ -277,6 +277,7 @@ void BatteryMonitor::init_soc_ekf(const double soc)
 {
     soc_ekf_ = soc;
     init_ekf(soc_ekf_, 0.0);
+    hys_->init(0.0);
     q_ekf_ = soc_ekf_ * q_capacity_;
     SOC_ekf_ = q_ekf_ / q_cap_rated_scaled_ * 100.;
     if ( rp.debug==-34 )
@@ -534,10 +535,10 @@ void BatteryModel::update(double *delta_q, double *t_last)
 
 Hysteresis::Hysteresis()
 : disabled_(false), res_(0), soc_(0), ib_(0), ioc_(0), voc_stat_(0), voc_(0), dv_hys_(0), dv_dot_(0), tau_(0),
-   direx_(0){};
+   direx_(0), cap_init_(0){};
 Hysteresis::Hysteresis(const double cap, const double direx)
 : disabled_(false), res_(0), soc_(0), ib_(0), ioc_(0), voc_stat_(0), voc_(0), dv_hys_(0), dv_dot_(0), tau_(0),
-   direx_(direx)
+   direx_(direx), cap_init_(cap)
 {
     // Characteristic table
     hys_T_ = new TableInterp2D(n_h, m_h, x_dv, y_soc, t_r);
@@ -555,6 +556,8 @@ void Hysteresis::apply_scale(const double scale)
 {
     rp.hys_scale = max(scale, 1e-6);
     disabled_ = rp.hys_scale < 1e-5;
+    if ( disabled_ ) cap_ = cap_init_;
+    else cap_ = cap_init_ / rp.hys_scale;    // maintain time constant = R*C
 }
 
 // Calculate
@@ -613,8 +616,8 @@ void Hysteresis::pretty_print()
     Serial.printf("  res_ =       %7.3f;  // Variable resistance value, ohms\n", res_);
     Serial.printf("  dv_dot_ =    %7.3f;  // Calculated voltage rate, V/s\n", dv_dot_);
     Serial.printf("  dv_hys_ =    %7.3f;  // Delta voltage state, V\n", dv_hys_);
-    Serial.printf("  disabled_ =  %2.0d;  // Hysteresis disabled by low scale input < 1e-5, T=disabled\n", disabled_);
-    Serial.printf("  direx_  =    %2.0f;  // If hysteresis hooked up backwards, -1.=reversed\n", direx_);
+    Serial.printf("  disabled_ =  %d;    // Hysteresis disabled by low scale input < 1e-5, T=disabled\n", disabled_);
+    Serial.printf("  direx_  =    %2.0f;      // If hysteresis hooked up backwards, -1.=reversed\n", direx_);
 }
 
 // Scale
