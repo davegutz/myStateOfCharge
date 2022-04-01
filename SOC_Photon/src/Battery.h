@@ -85,6 +85,7 @@ const double t_soc_min[n_n] = { 0.14, 0.12,  0.08, 0.07};
 const double mxeps_bb = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness)
 
 // Hysteresis constants
+const double hys_cap = 3.6e6;
 const unsigned int n_h = 9;
 const unsigned int m_h = 3;
 const double x_dv[n_h]    = { -0.09, -0.07, -0.05, -0.03, 0.00, 0.03, 0.05, 0.07, 0.09};
@@ -110,6 +111,8 @@ public:
   double look_hys(const double dv, const double soc);
   void pretty_print();
   double update(const double dt);
+  double ioc() { return (ioc_); };
+  double dv_hys() { return (dv_hys_); };
 protected:
   boolean reverse_;     // If hysteresis hooked up backwards, T=reversed
   boolean disabled_;    // Hysteresis disabled by low scale input < 1e-5, T=disabled
@@ -135,7 +138,7 @@ public:
   Battery();
   Battery(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim);
+    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale);
   ~Battery();
   // operators
   // functions
@@ -188,6 +191,9 @@ protected:
   double temp_c_;   // Battery temperature, deg C
   boolean bms_off_; // Indicator that battery management system is off, T = off preventing current flow
   TableInterp2D *voc_T_;   // SOC-VOC 2-D table, V
+  Hysteresis *hys_;
+  double ioc_;      // Current into charge portion of battery, A
+  double voc_stat_; // Static, table lookup value of voc before applying hysteresis, V
 };
 
 
@@ -198,7 +204,7 @@ public:
   BatteryMonitor();
   BatteryMonitor(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim);
+    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale);
   ~BatteryMonitor();
   // operators
   // functions
@@ -237,7 +243,7 @@ public:
   BatteryModel();
   BatteryModel(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim);
+    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale);
   ~BatteryModel();
   // operators
   // functions

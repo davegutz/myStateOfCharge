@@ -42,12 +42,12 @@ Battery::Battery()
     dv_(0), dvoc_dt_(0){}
 Battery::Battery(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim)
+    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale)
     : Coulombs(q_cap_rated, t_rated, t_rlim), q_(nom_q_cap),
     voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0),
     sr_(1.), nom_vsat_(batt_vsat), dv_(0), dvoc_dt_(dvoc_dt),
     r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
-    tau_sd_(1.8e7), r_sd_(70.)
+    tau_sd_(1.8e7), r_sd_(70.), ioc_(0)
 {
     // Battery characteristic tables
     voc_T_ = new TableInterp2D(n_s, m_t, x_soc, y_t, t_voc);
@@ -79,6 +79,7 @@ Battery::Battery(const int num_cells,
     rand_D_[0] = -r0_;
     rand_D_[1] = 1.;
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
+    hys_ = new Hysteresis(hys_cap, hys_scale);
 }
 Battery::~Battery() {}
 // operators
@@ -133,12 +134,14 @@ void Battery::pretty_print(void)
     Serial.printf("  sr =      %7.3f;  // Resistance scalar\n", sr_);
     Serial.printf("  dv_ =      %7.3f; // Adjustment, V\n", dv_);
     Serial.printf("  dt_ =      %7.3f; // Update time, s\n", dt_);
+    Serial.printf("  voc_stat_ =%7.3f;  // Static model open circuit voltage, V\n", voc_stat_);
 }
 
 // Print State Space
 void Battery::pretty_print_ss(void)
 {
     Randles_->pretty_print();
+    hys_->pretty_print();
 }
 
 // EKF model for update
@@ -159,8 +162,8 @@ BatteryMonitor::BatteryMonitor(): Battery()
 }
 BatteryMonitor::BatteryMonitor(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim) :
-    Battery(num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim), tcharge_(24)
+    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale) :
+    Battery(num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_scale), tcharge_(24)
 {
 
     // EKF
@@ -303,8 +306,8 @@ void BatteryMonitor::pretty_print(void)
 BatteryModel::BatteryModel() : Battery() {}
 BatteryModel::BatteryModel(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim) :
-    Battery(num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim)
+    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale) :
+    Battery(num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_scale)
 {
     // Randles dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery
@@ -364,13 +367,17 @@ double BatteryModel::calculate(const double temp_C, const double soc, double cur
     double SOC = soc * q_capacity / q_cap_rated_scaled_ * 100;
 
     // VOC-OCV model
-    voc_ = calc_soc_voc(soc, temp_C, &dv_dsoc_);
-    voc_ = min(voc_ + (soc - soc_lim) * dv_dsoc_, max_voc);  // slightly beyond but don't windup
-    voc_ +=  dv_;  // Experimentally varied
-    bms_off_ = ( temp_c_ <= low_t ) || ( voc_ < low_voc );
+    voc_stat_ = calc_soc_voc(soc, temp_C, &dv_dsoc_);
+    voc_stat_ = min(voc_stat_ + (soc - soc_lim) * dv_dsoc_, max_voc);  // slightly beyond but don't windup
+    voc_stat_ +=  dv_;  // Experimentally varied
+    bms_off_ = ( temp_c_ <= low_t ) || ( voc_stat_ < low_voc );
     if ( bms_off_ ) curr_in = 0.;
 
     // Dynamic emf
+    // Hysteresis model
+    hys_->calculate(curr_in, voc_stat_, soc);
+    voc_ = hys_->update(dt);
+    ioc_ = hys_->ioc();
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
     double u[2] = {ib_, voc_};
     Randles_->calc_x_dot(u);
@@ -380,7 +387,8 @@ double BatteryModel::calculate(const double temp_C, const double soc, double cur
     // Special cases override
     if ( bms_off_ )
     {
-        vdyn_ = voc_;
+        vdyn_ = voc_stat_;
+        voc_ = voc_stat_;
     }
     if ( bms_off_ && dc_dc_on )
     {
@@ -392,8 +400,8 @@ double BatteryModel::calculate(const double temp_C, const double soc, double cur
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
     ib_ = min(curr_in, sat_ib_max_);
     if ( (q_ <= 0.) && (curr_in < 0.) ) ib_ = 0.;  //  empty
-    model_cutback_ = (voc_ > vsat_) && (ib_ == sat_ib_max_);
-    model_saturated_ = (voc_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
+    model_cutback_ = (voc_stat_ > vsat_) && (ib_ == sat_ib_max_);
+    model_saturated_ = (voc_stat_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
     Coulombs::sat_ = model_saturated_;
     if ( rp.debug==79 ) Serial.printf("temp_C, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f,\n",
         temp_C, dvoc_dt_, vsat_, voc_, q_capacity, sat_ib_max_, ib_);

@@ -236,10 +236,10 @@ void loop()
   // Free, driven by soc
   // Instantiate the table
   static BatteryMonitor *Monitor = new BatteryMonitor(batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
-    dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim);
+    dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, -1.);
   // Model, driven by soc, used to get Vbatt.   Use Talk 'x' to toggle model on/off. 
   static BatteryModel *Model = new BatteryModel(batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
-    dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim);
+    dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, 1.);
 
   // Battery saturation
   static Debounce *SatDebounce = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
