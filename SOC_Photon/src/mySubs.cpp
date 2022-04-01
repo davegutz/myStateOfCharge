@@ -35,16 +35,17 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,hm,                  cTime,        T,         Tb_f,   Tb_f_m,    Vb,     voc,    vsat,    sat,  sel, mod, Ib,       tcharge,   soc_m, soc_ekf, soc,   SOC_m, SOC_ekf, SOC,"));
+  Serial.println(F("unit,hm,                  cTime,        T,         Tb_f,   Tb_f_m,    Vb,     voc_stat,   voc,    vsat,    sat,  sel, mod, Ib,       tcharge,   soc_m, soc_ekf, soc,   SOC_m, SOC_ekf, SOC,"));
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,  %d,    %d,   %d, %7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,  %c", \
+  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,%7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,  %d,    %d,   %d, %7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,  %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
     pubList->Tbatt, pubList->Tbatt_filt_model,
-    pubList->Vbatt, pubList->voc, pubList->vsat, pubList->sat,
+    pubList->Vbatt, pubList->voc_stat, pubList->voc,
+    pubList->vsat, pubList->sat,
     pubList->curr_sel_noamp,
     rp.modeling,
     pubList->Ishunt,

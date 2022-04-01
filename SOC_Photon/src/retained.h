@@ -50,10 +50,11 @@ struct RetainedPars
   double offset = 0.;       // Constant bias, A
   double t_bias = 0.;       // Sensed temp bias, deg C
   double s_cap_model = 1.02;// Scalar on battery model size
-  double cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function.
-          // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop.
+  double cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function
+          // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
   int isum = -1;            // Summary location.   Begins at -1 because first action is to increment isum
   double delta_q_inf = 0.;  // delta_q since last reset.  Simple integration of current
+  double hys_scale = 1.;    // Hysteresis scalar
 
   // Nominalize
   void nominal()
@@ -79,6 +80,7 @@ struct RetainedPars
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
     this->delta_q_inf = 0.;
+    this->hys_scale = 1.;
   }
   void large_reset()
   {
@@ -101,6 +103,7 @@ struct RetainedPars
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
     this->delta_q_inf = 0.;
+    this->hys_scale = 1.;
   }
   void print_part_1(char *buffer)
   {
@@ -112,9 +115,9 @@ struct RetainedPars
   void print_part_2(char *buffer)
   {
     sprintf(buffer, "    vbatt_bias = %7.3f, modeling = %d, duty = %ld, amp = %7.3f, freq = %7.3f, type = %d, offset = %7.3f, \n\
-    t_bias = %7.3f, s_cap_model = %7.3f, cutback_gain_scalar = %7.3f, delta_q_inf = %7.3f,\n",
+    t_bias = %7.3f, s_cap_model = %7.3f, cutback_gain_scalar = %7.3f, delta_q_inf = %7.3f, hys_scale = %7.3f,\n",
       this->vbatt_bias, this->modeling, this->duty, this->amp, this->freq, this->type, this->offset,
-      this->t_bias, this->s_cap_model, this->cutback_gain_scalar, this->delta_q_inf);
+      this->t_bias, this->s_cap_model, this->cutback_gain_scalar, this->delta_q_inf, this->hys_scale);
   }
 };            
 

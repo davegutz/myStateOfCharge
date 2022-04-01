@@ -127,6 +127,18 @@ void talk(BatteryMonitor *Monitor, BatteryModel *Model, Sensors *Sen)
             Serial.printf("Model:  "); Model->pretty_print(); Model->Coulombs::pretty_print();
             break;
         
+          case ( 'h' ):
+            scale = cp.input_string.substring(2).toFloat();
+            rp.hys_scale = scale;
+            Serial.printf("\nBefore Monitor::Hys::scale = %7.3f, Model::Hys::scale = %7.3f\n",
+                Monitor->hys_scale(), Model->hys_scale());
+            Serial.printf("\nChanging to Sh= %7.3f\n", scale);
+            Monitor->hys_scale(scale);
+            Model->hys_scale(scale);
+            Serial.printf("\nAfter Monitor::Hys::scale = %7.3f, Model::Hys::scale = %7.3f\n",
+                Monitor->hys_scale(), Model->hys_scale());
+            break;
+        
           case ( 'r' ):
             scale = cp.input_string.substring(2).toFloat();
         
@@ -331,10 +343,10 @@ void talk(BatteryMonitor *Monitor, BatteryModel *Model, Sensors *Sen)
         break;
 
       case ( 'Q' ):
-        Serial.printf("tb  = %7.3f,\nvb  = %7.3f,\nvoc  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc = %7.3f,\n\
+        Serial.printf("tb  = %7.3f,\nvb  = %7.3f,\nvoc_stat = %7.3f,\nvoc  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc = %7.3f,\n\
 soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
-          Monitor->temp_c(), Monitor->vb(), Monitor->voc(), Monitor->vsat(), Monitor->ib(), Monitor->soc(),
-          Monitor->soc_ekf(), rp.modeling, Monitor->delta_q_inf());
+          Monitor->temp_c(), Monitor->vb(), Monitor->voc_stat(), Monitor->voc(), Monitor->vsat(),
+          Monitor->ib(), Monitor->soc(), Monitor->soc_ekf(), rp.modeling, Monitor->delta_q_inf());
         break;
 
       case ( 'R' ):
@@ -603,6 +615,22 @@ void talkH(BatteryMonitor *Monitor, BatteryModel *Model, Sensors *Sen)
   Serial.printf("N=  assign a CHARGE state in percent to model only (ekf if modeling)-- '('truncated 0-100')'\n"); 
   Serial.printf("s   curr signal select (0=amp preferred, 1=noamp) = "); Serial.println(rp.curr_sel_noamp);
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
+  Serial.printf("    -<>:   Negative - Arduino plot compatible\n");
+  Serial.printf("     +2:   General purpose\n");
+  Serial.printf("   +/-5:   Charge time\n");
+  Serial.printf("     +6:   Vectoring\n");
+  Serial.printf("    -11:   Summary\n");
+  Serial.printf("  +/-12:   EKF summary\n");
+  Serial.printf("  +/-14:   vshunt and ishunt raw\n");
+  Serial.printf("    +15:   vb raw\n");
+  Serial.printf("    +33:   state-space\n");
+  Serial.printf("  +/-34:   EKF detailed\n");
+  Serial.printf("    +35:   Randles balance\n");
+  Serial.printf("  +/-37:   EKF short\n");
+  Serial.printf("  +/-78:   Battery model saturation\n");
+  Serial.printf("    +79:   sat_ib model\n");
+  Serial.printf("  +/-96:   CC saturation\n");
+  Serial.printf("  +/-97:   CC model saturation\n");
 
   Serial.printf("D/S<?> Adjustments.   For example:\n");
   Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_bias_amp); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
@@ -612,6 +640,7 @@ void talkH(BatteryMonitor *Monitor, BatteryModel *Model, Sensors *Sen)
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.println("    : delta T adder to sensed Tbatt, deg C [0]"); 
   Serial.printf("  Dv= "); Serial.print(Model->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
   Serial.printf("  Sc= "); Serial.print(Model->q_capacity()/Monitor->q_capacity()); Serial.println("    : Scalar battery model size"); 
+  Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.println("    : hysteresis scalar 1e-6 - 100");
   Serial.printf("  Sr= "); Serial.print(Model->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("  Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println("    : Saturation of model cutback gain scalar"); 
 

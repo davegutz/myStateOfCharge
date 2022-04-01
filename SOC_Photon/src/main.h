@@ -321,9 +321,9 @@ void loop()
     load(reset, Sen, myPins, ads_amp, ads_noamp, ReadSensors->now());
     
     // Arduino plots
-    if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n",
+    if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f, %7.3f,\n",
         Monitor->soc(), Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
-        Sen->Vbatt, Model->voc());
+        Sen->Vbatt, Model->voc_stat(), Model->voc());
 
     //
     // Model used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
@@ -394,7 +394,7 @@ void loop()
     Monitor->calculate_ekf(Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T));
     
     // Debounce saturation calculation done in ekf using voc model
-    Sen->saturated = SatDebounce->calculate(is_sat(Sen->Tbatt_filt, Monitor->voc(), Monitor->soc()), reset);
+    Sen->saturated = SatDebounce->calculate(is_sat(Sen->Tbatt_filt, Monitor->voc_stat(), Monitor->soc()), reset);
 
     // Memory store
     Monitor->count_coulombs(Sen->T, reset, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
@@ -412,17 +412,17 @@ void loop()
         Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
         Sen->Vbatt*10-110, Model->voc()*10-110, Model->vdyn()*10, Model->vb()*10-110, Monitor->vdyn()*10-110);
     if ( rp.debug==12 )
-      Serial.printf("ib,ib_mod,   vb,vb_mod,  voc_dyn,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
+      Serial.printf("ib,ib_mod,   vb,vb_mod,  voc_dyn,voc_stat_mod,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
         Monitor->ib(), Model->ib(),
         Monitor->vb(), Model->vb(),
-        Monitor->voc_dyn(), Model->voc(),
+        Monitor->voc_dyn(), Model->voc_stat(), Model->voc(),
         Monitor->K_ekf(), Monitor->y_ekf(),
         Model->soc(), Monitor->soc_ekf(), Monitor->soc());
     if ( rp.debug==-12 )
-      Serial.printf("ib,ib_mod,   vb*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_mod*10-110,   K, y,    SOC_mod-90, SOC_ekf-90, SOC-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
+      Serial.printf("ib,ib_mod,   vb*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_stat_mod*10-110,voc_mod*10-110,   K, y,    SOC_mod-90, SOC_ekf-90, SOC-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
         Monitor->ib(), Model->ib(),
         Monitor->vb()*10-110, Model->vb()*10-110,
-        Monitor->voc_dyn()*10-110, Model->voc()*10-110,
+        Monitor->voc_dyn()*10-110, Model->voc_stat()*10-110, Model->voc()*10-110,
         Monitor->K_ekf(), Monitor->y_ekf(),
         Model->soc()*100-90, Monitor->soc_ekf()*100-90, Model->soc()*100-90);
     if ( rp.debug==-3 )
@@ -520,7 +520,7 @@ void loop()
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
     mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,
-                          Monitor->soc_ekf(), Monitor->soc(), Monitor->voc_soc(), Monitor->voc_dyn(), Monitor->delta_q_inf());
+                          Monitor->soc_ekf(), Monitor->soc(), Monitor->voc_stat(), Monitor->voc_dyn(), Monitor->delta_q_inf());
     if ( rp.debug==0 ) Serial.printf("Summarized.....................\n");
   }
 

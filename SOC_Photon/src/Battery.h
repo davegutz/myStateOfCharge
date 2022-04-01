@@ -101,7 +101,7 @@ class Hysteresis
 {
 public:
   Hysteresis();
-  Hysteresis(const double cap, double scale);
+  Hysteresis(const double cap, const double direx);
   ~Hysteresis();
   // operators
   // functions
@@ -113,8 +113,9 @@ public:
   double update(const double dt);
   double ioc() { return (ioc_); };
   double dv_hys() { return (dv_hys_); };
+  double scale();
+  double direx() { return (direx_); };
 protected:
-  boolean reverse_;     // If hysteresis hooked up backwards, T=reversed
   boolean disabled_;    // Hysteresis disabled by low scale input < 1e-5, T=disabled
   double cap_;          // Capacitance, Farads
   double res_;          // Variable resistance value, ohms
@@ -126,7 +127,7 @@ protected:
   double dv_hys_;       // Delta voltage state, V
   double dv_dot_;       // Calculated voltage rate, V/s
   double tau_;          // Null time constant, sec
-  double scale_;        // Adjustment, dimensionless
+  double direx_;        // Direction scalar
   TableInterp2D *hys_T_;   // dv-soc 2-D table, V
 };
 
@@ -138,7 +139,7 @@ public:
   Battery();
   Battery(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale);
+    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx);
   ~Battery();
   // operators
   // functions
@@ -151,15 +152,19 @@ public:
   virtual void pretty_print();
   void pretty_print_ss();
   double voc() { return (voc_); };
+  double voc_stat() { return (voc_stat_); };
   double vsat() { return (vsat_); };
   double vdyn() { return (vdyn_); };
   double vb() { return (vb_); };
   double ib() { return (ib_); };
+  double ioc() { return (ioc_); };
   double temp_c() { return (temp_c_); };
   double dv_dsoc() { return (dv_dsoc_); };
   double Dv() { return (dv_); };
   double Sr() { return (sr_); };
   double voc_soc(const double soc, const double temp_c);
+  double hys_scale() { return (hys_->scale()*hys_->direx()); };
+  void hys_scale(const double scale) { hys_->apply_scale(scale); };
 protected:
   double q_;        // Charge, C
   double voc_;      // Static model open circuit voltage, V
@@ -218,7 +223,7 @@ public:
   double SOC_ekf() { return (SOC_ekf_); };
   double tcharge() { return (tcharge_); };
   double voc_dyn() { return (voc_dyn_); };
-  double voc_soc() { return (voc_stat_); };
+  double voc_stat() { return (voc_stat_); };
   double amp_hrs_remaining() { return (amp_hrs_remaining_); };
   double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
 protected:
