@@ -103,7 +103,7 @@ void talk(BatteryMonitor *Monitor, BatteryModel *Model, Sensors *Sen)
         q_rated = %7.3f, q_capacity = %7.3f,\n\n", Model->soc(), Model->SOC(), Model->q(), Model->delta_q(),
         Model->q_cap_scaled(), Model->q_cap_rated(), Model->q_capacity());
         
-        Model->apply_delta_q(Monitor->delta_q());
+        Model->apply_delta_q_t(Monitor->delta_q(), Sen->Tbatt_filt);
         if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
         Monitor->init_hys(0.0);
         
@@ -226,7 +226,7 @@ void talk(BatteryMonitor *Monitor, BatteryModel *Model, Sensors *Sen)
         if ( SOCS_in<1.1 )  // Apply crude limit to prevent user error
         {
           Monitor->apply_soc(SOCS_in, Sen->Tbatt_filt);
-          Model->apply_delta_q(Monitor->delta_q());
+          Model->apply_delta_q_t(Monitor->delta_q(), Sen->Tbatt_filt);
           if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
           Monitor->update(&rp.delta_q, &rp.t_last, &rp.delta_q_inf);
           Model->update(&rp.delta_q_model, &rp.t_last_model);
@@ -242,7 +242,7 @@ void talk(BatteryMonitor *Monitor, BatteryModel *Model, Sensors *Sen)
       case ( 'M' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
         Monitor->apply_SOC(SOCS_in, Sen->Tbatt_filt);
-        Model->apply_delta_q(Monitor->delta_q());
+        Model->apply_delta_q_t(Monitor->delta_q(), Sen->Tbatt_filt);
         if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
         Monitor->update(&rp.delta_q, &rp.t_last, &rp.delta_q_inf);
         Model->update(&rp.delta_q_model, &rp.t_last_model);
@@ -355,7 +355,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
         {
           case ( 'e' ):
             Serial.printf("Equalizing reset.   Just set delta_q in BattModel = delta_q in Batt\n");
-            Model->apply_delta_q(Monitor->delta_q());
+            Model->apply_delta_q_t(Monitor->delta_q(), Sen->Tbatt_filt);
             break;
 
           case ( 'h' ):
