@@ -521,7 +521,7 @@ void loop()
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
     mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,
-                          Mon->soc_ekf(), Mon->soc(), Mon->voc_stat(), Mon->voc_dyn(), Mon->delta_q_inf());
+                          Mon->soc_ekf(), Mon->soc(), Mon->voc_dyn(), Mon->voc(), Mon->delta_q_inf());
     if ( rp.debug==0 ) Serial.printf("Summarized.....................\n");
   }
 
