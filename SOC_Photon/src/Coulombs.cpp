@@ -135,7 +135,7 @@ void Coulombs::apply_SOC(const double SOC, const double temp_c)
 // Capacity
 double Coulombs::calculate_capacity(const double temp_c)
 {
-    return( q_cap_rated_scaled_ * (1-DQDT*(temp_c - t_rated_)) );
+  return( q_cap_rated_scaled_ * (1-DQDT*(temp_c - t_rated_)) );
 }
 
 // Count coulombs based on true=actual capacity

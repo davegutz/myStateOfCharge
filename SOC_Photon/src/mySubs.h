@@ -67,7 +67,7 @@ struct Pins
 struct Sensors
 {
   double Vbatt;           // Sensed battery voltage, V
-  double Vbatt_model;     // Model coefficient model battery voltage based on filtered current, V
+  double Vbatt_model;     // Sim coefficient model battery voltage based on filtered current, V
   // double Vbatt_filt;      // Filtered, sensed battery voltage, V
   double Tbatt;           // Sensed battery temp, C
   double Tbatt_filt;      // Filtered, sensed battery temp, C

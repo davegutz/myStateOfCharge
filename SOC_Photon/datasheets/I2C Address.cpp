@@ -10,7 +10,7 @@
 // 2. Connect the SDA of the I2C board to the SDA of your Arduino
 // 3. Connect the SCL of the I2C board to the SCL of your Arduino
 // 4. Copy this sketch to the Arduino IDE then upload it to your Arduino
-// 5. Open the IDE Serial Monitor and you should be able to see a list of the used addresses
+// 5. Open the IDE Serial Mon and you should be able to see a list of the used addresses
 // 6. Your LCD1602 will be listed here
 // 7. Once you find the the number, change your Sketch
 // 8. Example...... LiquidCrystal_I2C lcd(0x27, 16, 2);

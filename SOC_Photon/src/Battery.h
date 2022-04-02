@@ -153,7 +153,6 @@ public:
   virtual void pretty_print();
   void pretty_print_ss();
   double voc() { return (voc_); };
-  double voc_stat() { return (voc_stat_); };
   double vsat() { return (vsat_); };
   double vdyn() { return (vdyn_); };
   double vb() { return (vb_); };
@@ -170,7 +169,7 @@ public:
 protected:
   double q_;        // Charge, C
   double voc_;      // Static model open circuit voltage, V
-  double vdyn_;     // Model current induced back emf, V
+  double vdyn_;     // Sim current induced back emf, V
   double vb_;        // Total model voltage, voltage at terminals, V
   double ib_;  // Current into battery, A
   int num_cells_;   // Number of cells
@@ -231,7 +230,7 @@ public:
 protected:
   double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
-  double voc_stat_; // Model voc from soc-voc table, V
+  double voc_stat_; // Sim voc from soc-voc table, V
   double tcharge_ekf_;  // Charging time to 100% from ekf, hr
   double voc_dyn_;  // Charging voltage, V
   double soc_ekf_;  // Filtered state of charge from ekf (0-1)
@@ -264,6 +263,7 @@ public:
   void pretty_print(void);
   boolean cutback() { return model_cutback_; };
   boolean saturated() { return model_saturated_; };
+  double voc_stat() { return (voc_stat_); };
 protected:
   SinInj *Sin_inj_;     // Class to create sine waves
   SqInj *Sq_inj_;       // Class to create square waves

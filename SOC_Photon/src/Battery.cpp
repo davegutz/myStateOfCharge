@@ -129,12 +129,11 @@ void Battery::pretty_print(void)
     Serial.printf("  vb =      %7.3f;  // Total model voltage, voltage at terminals, V\n", vb_);
     Serial.printf("  voc =     %7.3f;  // Static model open circuit voltage, V\n", voc_);
     Serial.printf("  vsat =    %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
-    Serial.printf("  vdyn =    %7.3f;  // Model current induced back emf, V\n", vdyn_);
+    Serial.printf("  vdyn =    %7.3f;  // Sim current induced back emf, V\n", vdyn_);
     Serial.printf("  q =    %10.1f;  // Present charge, C\n", q_);
     Serial.printf("  sr =      %7.3f;  // Resistance scalar\n", sr_);
     Serial.printf("  dv_ =      %7.3f; // Adjustment, V\n", dv_);
     Serial.printf("  dt_ =      %7.3f; // Update time, s\n", dt_);
-    Serial.printf("  voc_stat_ =%7.3f;  // Static model open circuit voltage, V\n", voc_stat_);
 }
 
 // Print State Space
@@ -194,7 +193,7 @@ double BatteryMonitor::calculate_ekf(const double temp_c, const double vb, const
     }
     voc_dyn_ = Randles_->y(0);
     vdyn_ = vb_ - voc_dyn_;
-    voc_stat_ = Battery::voc_soc(soc_, temp_c);
+    voc_stat_ = voc_soc(soc_, temp_c);
     // Hysteresis model
     hys_->calculate(ib_, voc_dyn_, soc_);
     voc_ = hys_->update(dt);
@@ -293,7 +292,7 @@ void BatteryMonitor::pretty_print(void)
 {
     Serial.printf("BatteryMonitor::");
     this->Battery::pretty_print();
-    Serial.printf("  voc_soc = %7.3f;  // Static model open circuit voltage from table, V\n", voc_stat_);
+    Serial.printf("  voc_stat_ = %7.3f;  // Static model open circuit voltage from table, V\n", voc_stat_);
     Serial.printf("  q_ekf =%10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
     Serial.printf("  tcharge =    %5.1f; // Charging time to full, hr\n", tcharge_);
     Serial.printf("  tcharge_ekf =%5.1f; // Charging time to full from ekf, hr\n", tcharge_ekf_);
@@ -478,7 +477,7 @@ double BatteryModel::count_coulombs(const double dt, const boolean reset, const 
     // detection).
     if ( model_saturated_ )
     {
-        if ( reset ) delta_q_ = 0.;  // Model is truth.   Saturate it then restart it to reset charge
+        if ( reset ) delta_q_ = 0.;  // Sim is truth.   Saturate it then restart it to reset charge
     }
     resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass
 
@@ -625,6 +624,7 @@ void Hysteresis::pretty_print()
     Serial.printf("  dv_hys_ =    %7.3f;  // Delta voltage state, V\n", dv_hys_);
     Serial.printf("  disabled_ =    %d;      // Hysteresis disabled by low scale input < 1e-5, T=disabled\n", disabled_);
     Serial.printf("  direx_  =     %2.0f;      // If hysteresis hooked up backwards, -1.=reversed\n", direx_);
+    Serial.printf("  rp.hys_scale= %7.3f;      // Scalar on hysteresis, dimensionless\n", rp.hys_scale);
 }
 
 // Scale

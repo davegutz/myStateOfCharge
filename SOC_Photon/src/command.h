@@ -37,7 +37,7 @@ struct CommandPars
   boolean string_complete;  // whether the string is complete
   boolean enable_wifi;      // Enable wifi
   boolean model_cutback;    // On model cutback
-  boolean model_saturated;  // Model on cutback and saturated
+  boolean model_saturated;  // Sim on cutback and saturated
   boolean soft_reset;       // Use talk to reset main
   boolean write_summary;    // Use talk to issue a write command to summary
   double curr_bias_amp;     // Signal injection bias for amplified current input, A

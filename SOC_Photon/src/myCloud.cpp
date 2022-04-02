@@ -127,7 +127,7 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
 // Assignments
 void assign_publist(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
   const double control_time, struct Sensors* Sen, const int num_timeouts,
-  BatteryModel* Model, BatteryMonitor* Monitor)
+  BatteryModel* Sim, BatteryMonitor* Mon)
 {
   pubList->now = now;
   pubList->unit = unit;
@@ -149,18 +149,18 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->num_timeouts = num_timeouts;
   pubList->T = Sen->T;
   if ( rp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
-  pubList->tcharge = Monitor->tcharge();
-  pubList->voc_stat = Monitor->voc_stat();
-  pubList->voc = Monitor->voc();
-  pubList->vsat = Monitor->vsat();
-  pubList->sat = Monitor->sat();
+  pubList->tcharge = Mon->tcharge();
+  pubList->voc_stat = Mon->voc_stat();
+  pubList->voc = Mon->voc();
+  pubList->vsat = Mon->vsat();
+  pubList->sat = Mon->sat();
   pubList->curr_sel_noamp = rp.curr_sel_noamp;
-  pubList->amp_hrs_remaining = Monitor->amp_hrs_remaining();
-  pubList->amp_hrs_remaining_ekf = Monitor->amp_hrs_remaining_ekf();
-  pubList->soc_model = Model->soc();
-  pubList->soc_ekf = Monitor->soc_ekf();
-  pubList->soc = Monitor->soc();
-  pubList->SOC_model = Model->SOC();
-  pubList->SOC_ekf = Monitor->SOC_ekf();
-  pubList->SOC = Monitor->SOC();
+  pubList->amp_hrs_remaining = Mon->amp_hrs_remaining();
+  pubList->amp_hrs_remaining_ekf = Mon->amp_hrs_remaining_ekf();
+  pubList->soc_model = Sim->soc();
+  pubList->soc_ekf = Mon->soc_ekf();
+  pubList->soc = Mon->soc();
+  pubList->SOC_model = Sim->SOC();
+  pubList->SOC_ekf = Mon->SOC_ekf();
+  pubList->SOC = Mon->SOC();
 }

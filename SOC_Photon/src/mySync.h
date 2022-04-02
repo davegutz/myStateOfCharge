@@ -25,7 +25,7 @@
 #ifndef _MY_SYNC_H
 #define _MY_SYNC_H
 
-// Duct Model Class
+// Duct Sim Class
 class Sync
 {
 public:
