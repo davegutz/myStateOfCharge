@@ -344,9 +344,9 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         break;
 
       case ( 'Q' ):
-        Serial.printf("tb  = %7.3f,\nvb  = %7.3f,\nvoc_stat = %7.3f,\nvoc  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc = %7.3f,\n\
+        Serial.printf("tb  = %7.3f,\nvb  = %7.3f,\nvoc_dyn = %7.3f,\nvoc  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc = %7.3f,\n\
 soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
-          Mon->temp_c(), Mon->vb(), Mon->voc_stat(), Mon->voc(), Mon->vsat(),
+          Mon->temp_c(), Mon->vb(), Mon->voc_dyn(), Mon->voc(), Mon->vsat(),
           Mon->ib(), Mon->soc(), Mon->soc_ekf(), rp.modeling, Mon->delta_q_inf());
         break;
 

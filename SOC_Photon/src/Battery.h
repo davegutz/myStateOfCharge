@@ -152,7 +152,6 @@ public:
   void init_battery(void);
   virtual void pretty_print();
   void pretty_print_ss();
-  double voc() { return (voc_); };
   double vsat() { return (vsat_); };
   double vdyn() { return (vdyn_); };
   double vb() { return (vb_); };
@@ -223,6 +222,7 @@ public:
   double soc_ekf() { return (soc_ekf_); };
   double SOC_ekf() { return (SOC_ekf_); };
   double tcharge() { return (tcharge_); };
+  double voc() { return (voc_); };
   double voc_dyn() { return (voc_dyn_); };
   double voc_stat() { return (voc_stat_); };
   double amp_hrs_remaining() { return (amp_hrs_remaining_); };
@@ -263,6 +263,7 @@ public:
   void pretty_print(void);
   boolean cutback() { return model_cutback_; };
   boolean saturated() { return model_saturated_; };
+  double voc() { return (voc_); };
   double voc_stat() { return (voc_stat_); };
 protected:
   SinInj *Sin_inj_;     // Class to create sine waves

@@ -215,17 +215,17 @@ double BatteryMonitor::calculate_ekf(const double temp_c, const double vb, const
     SOC_ekf_ = q_ekf_ / q_cap_rated_scaled_ * 100.;
 
     if ( rp.debug==34 )
-        Serial.printf("dt,ib,voc,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
-            dt, ib_, voc_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
+        Serial.printf("dt,ib,voc_dyn,voc,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
+            dt, ib_, voc_dyn_, voc_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
     if ( rp.debug==-34 )
-        Serial.printf("dt,ib,voc,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,  \n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
-            dt, ib_, voc_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
+        Serial.printf("dt,ib,voc_dyn,voc,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,  \n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
+            dt, ib_, voc_dyn_, voc_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
     if ( rp.debug==37 )
-        Serial.printf("ib,vb,voc(z_),  K_,y_,SOC_ekf,   %7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
-            ib_, vb_, voc_,     K_, y_, soc_ekf_);
+        Serial.printf("ib,vb,voc_dyn,voc(z_),  K_,y_,SOC_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
+            ib_, vb_, voc_dyn_, voc_,     K_, y_, soc_ekf_);
     if ( rp.debug==-37 )
-        Serial.printf("ib,vb*10-110,voc(z_)*10-110,  K_,y_,SOC_ekf-90,   \n%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
-            ib_, vb_*10-110, voc_*10-110,     K_, y_, soc_ekf_*100-90);
+        Serial.printf("ib,vb*10-110,voc_dyn_,voc(z_)*10-110,  K_,y_,SOC_ekf-90,   \n%7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
+            ib_, vb_*10-110, voc_dyn_*10-110, voc_*10-110,     K_, y_, soc_ekf_*100-90);
 
     // Charge time if used ekf 
     if ( ib_ > 0.1 )  tcharge_ekf_ = min(RATED_BATT_CAP / ib_ * (1. - soc_ekf_), 24.);
@@ -624,7 +624,7 @@ void Hysteresis::pretty_print()
     Serial.printf("  dv_hys_ =    %7.3f;  // Delta voltage state, V\n", dv_hys_);
     Serial.printf("  disabled_ =    %d;      // Hysteresis disabled by low scale input < 1e-5, T=disabled\n", disabled_);
     Serial.printf("  direx_  =     %2.0f;      // If hysteresis hooked up backwards, -1.=reversed\n", direx_);
-    Serial.printf("  rp.hys_scale= %7.3f;      // Scalar on hysteresis, dimensionless\n", rp.hys_scale);
+    Serial.printf("  rp.hys_scale=%6.2f;   // Scalar on hysteresis, dimensionless\n", rp.hys_scale);
 }
 
 // Scale

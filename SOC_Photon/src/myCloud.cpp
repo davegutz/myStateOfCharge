@@ -150,7 +150,7 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->T = Sen->T;
   if ( rp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
   pubList->tcharge = Mon->tcharge();
-  pubList->voc_stat = Mon->voc_stat();
+  pubList->voc_dyn = Mon->voc_dyn();
   pubList->voc = Mon->voc();
   pubList->vsat = Mon->vsat();
   pubList->sat = Mon->sat();
