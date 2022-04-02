@@ -310,11 +310,18 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
   display->setTextSize(1);              // Normal 1:1 pixel scale
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner
+
+  boolean no_currents = Sen->bare_ads_amp && Sen->bare_ads_noamp;
   char dispString[21];
   if ( !pass && cp.model_cutback && rp.modeling )
     sprintf(dispString, "%3.0f %5.2f      ", cp.pubList.Tbatt, cp.pubList.voc);
   else
-    sprintf(dispString, "%3.0f %5.2f %5.1f", cp.pubList.Tbatt, cp.pubList.voc, cp.pubList.Ishunt);
+  {
+    if (no_currents)
+      sprintf(dispString, "%3.0f %5.2f fail", cp.pubList.Tbatt, cp.pubList.voc);
+    else
+      sprintf(dispString, "%3.0f %5.2f %5.1f", cp.pubList.Tbatt, cp.pubList.voc, cp.pubList.Ishunt);
+  }
   display->println(dispString);
 
   display->println(F(""));

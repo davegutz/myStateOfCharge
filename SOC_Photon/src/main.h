@@ -388,6 +388,7 @@ void loop()
         Monitor->init_soc_ekf(Model->soc());  // When modeling, ekf wants to equal model
       else
         Monitor->init_soc_ekf(Monitor->soc());
+      Monitor->init_hys(0.0);
     }
     
     // EKF - calculates temp_c_, voc_, voc_dyn_ as functions of sensed parameters vb & ib (not soc)

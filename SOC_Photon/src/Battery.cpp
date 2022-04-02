@@ -194,8 +194,11 @@ double BatteryMonitor::calculate_ekf(const double temp_c, const double vb, const
     }
     voc_dyn_ = Randles_->y(0);
     vdyn_ = vb_ - voc_dyn_;
-    voc_ = voc_dyn_;
     voc_stat_ = Battery::voc_soc(soc_, temp_c);
+    // Hysteresis model
+    hys_->calculate(ib_, voc_dyn_, soc_);
+    voc_ = hys_->update(dt);
+    ioc_ = hys_->ioc();
     bms_off_ = temp_c_ <= low_t;    // KISS
     if ( bms_off_ )
     {
@@ -207,23 +210,23 @@ double BatteryMonitor::calculate_ekf(const double temp_c, const double vb, const
 
     // EKF 1x1
     predict_ekf(ib_);      // u = ib
-    update_ekf(voc_dyn_, 0., 1.);   // z = voc_dyn, voc_filtered = hx
+    update_ekf(voc_, 0., 1.);   // z = voc, voc_filtered = hx
     soc_ekf_ = x_ekf();   // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
     q_ekf_ = soc_ekf_ * q_capacity_;
     SOC_ekf_ = q_ekf_ / q_cap_rated_scaled_ * 100.;
 
     if ( rp.debug==34 )
-        Serial.printf("dt,ib,voc_dyn,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
-            dt, ib_, voc_dyn_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
+        Serial.printf("dt,ib,voc,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
+            dt, ib_, voc_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
     if ( rp.debug==-34 )
-        Serial.printf("dt,ib,voc_dyn,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,  \n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
-            dt, ib_, voc_dyn_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
+        Serial.printf("dt,ib,voc,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,  \n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
+            dt, ib_, voc_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
     if ( rp.debug==37 )
-        Serial.printf("ib,vb,voc_dyn(z_),  K_,y_,SOC_ekf,   %7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
-            ib_, vb_, voc_dyn_,     K_, y_, soc_ekf_);
+        Serial.printf("ib,vb,voc(z_),  K_,y_,SOC_ekf,   %7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
+            ib_, vb_, voc_,     K_, y_, soc_ekf_);
     if ( rp.debug==-37 )
-        Serial.printf("ib,vb*10-110,voc_dyn(z_)*10-110,  K_,y_,SOC_ekf-90,   \n%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
-            ib_, vb_*10-110, voc_dyn_*10-110,     K_, y_, soc_ekf_*100-90);
+        Serial.printf("ib,vb*10-110,voc(z_)*10-110,  K_,y_,SOC_ekf-90,   \n%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
+            ib_, vb_*10-110, voc_*10-110,     K_, y_, soc_ekf_*100-90);
 
     // Charge time if used ekf 
     if ( ib_ > 0.1 )  tcharge_ekf_ = min(RATED_BATT_CAP / ib_ * (1. - soc_ekf_), 24.);
@@ -277,7 +280,6 @@ void BatteryMonitor::init_soc_ekf(const double soc)
 {
     soc_ekf_ = soc;
     init_ekf(soc_ekf_, 0.0);
-    hys_->init(0.0);
     q_ekf_ = soc_ekf_ * q_capacity_;
     SOC_ekf_ = q_ekf_ / q_cap_rated_scaled_ * 100.;
     if ( rp.debug==-34 )
@@ -534,10 +536,10 @@ void BatteryModel::update(double *delta_q, double *t_last)
 
 
 Hysteresis::Hysteresis()
-: disabled_(false), res_(0), soc_(0), ib_(0), ioc_(0), voc_stat_(0), voc_(0), dv_hys_(0), dv_dot_(0), tau_(0),
+: disabled_(false), res_(0), soc_(0), ib_(0), ioc_(0), voc_in_(0), voc_out_(0), dv_hys_(0), dv_dot_(0), tau_(0),
    direx_(0), cap_init_(0){};
 Hysteresis::Hysteresis(const double cap, const double direx)
-: disabled_(false), res_(0), soc_(0), ib_(0), ioc_(0), voc_stat_(0), voc_(0), dv_hys_(0), dv_dot_(0), tau_(0),
+: disabled_(false), res_(0), soc_(0), ib_(0), ioc_(0), voc_in_(0), voc_out_(0), dv_hys_(0), dv_dot_(0), tau_(0),
    direx_(direx), cap_init_(cap)
 {
     // Characteristic table
@@ -556,7 +558,11 @@ void Hysteresis::apply_scale(const double scale)
 {
     rp.hys_scale = max(scale, 1e-6);
     disabled_ = rp.hys_scale < 1e-5;
-    if ( disabled_ ) cap_ = cap_init_;
+    if ( disabled_ )
+    {
+        cap_ = cap_init_;
+        init(0.);
+    }
     else cap_ = cap_init_ / rp.hys_scale;    // maintain time constant = R*C
 }
 
@@ -564,7 +570,7 @@ void Hysteresis::apply_scale(const double scale)
 double Hysteresis::calculate(const double ib, const double voc_stat, const double soc)
 {
     ib_ = ib;
-    voc_stat_ = voc_stat;
+    voc_in_ = voc_stat;
     soc_ = soc;
 
     // Calculate
@@ -611,8 +617,8 @@ void Hysteresis::pretty_print()
     Serial.printf("  tau_ =     %10.1f; // Null time constant, sec\n", res*cap_);
     Serial.printf("  ib_ =        %7.3f;  // Current in, A\n", ib_);
     Serial.printf("  ioc_ =       %7.3f;  // Current out, A\n", ioc_);
-    Serial.printf("  voc_stat_ =  %7.3f;  // Battery model voltage input, V\n", voc_stat_);
-    Serial.printf("  voc_ =       %7.3f;  // Battery model voltage output, V\n", voc_);
+    Serial.printf("  voc_in_ =    %7.3f;  // Voltage input, V\n", voc_in_);
+    Serial.printf("  voc_out_ =   %7.3f;  // Voltage output, V\n", voc_out_);
     Serial.printf("  soc_ =       %7.3f;  // State of charge input, dimensionless\n", soc_);
     Serial.printf("  res_ =       %7.3f;  // Variable resistance value, ohms\n", res_);
     Serial.printf("  dv_dot_ =    %7.3f;  // Calculated voltage rate, V/s\n", dv_dot_);
@@ -631,8 +637,8 @@ double Hysteresis::scale()
 double Hysteresis::update(const double dt)
 {
     dv_hys_ += dv_dot_ * dt;
-    voc_ = voc_stat_ + dv_hys_*direx_;
-    return voc_;
+    voc_out_ = voc_in_ + dv_hys_*direx_;
+    return voc_out_;
 }
 
 

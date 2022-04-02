@@ -122,8 +122,8 @@ protected:
   double soc_;          // State of charge input, dimensionless
   double ib_;           // Current in, A
   double ioc_;          // Current out, A
-  double voc_stat_;     // Battery model voltage input, V
-  double voc_;          // Discharge voltage output, V
+  double voc_in_;       // Voltage input, V
+  double voc_out_;      // Voltage output, V
   double dv_hys_;       // Delta voltage state, V
   double dv_dot_;       // Calculated voltage rate, V/s
   double tau_;          // Null time constant, sec
@@ -166,6 +166,7 @@ public:
   double voc_soc(const double soc, const double temp_c);
   double hys_scale() { return (hys_->scale()*hys_->direx()); };
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
+  void init_hys(const double hys) { hys_->init(hys); };
 protected:
   double q_;        // Charge, C
   double voc_;      // Static model open circuit voltage, V

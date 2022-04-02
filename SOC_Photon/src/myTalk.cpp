@@ -105,6 +105,7 @@ void talk(BatteryMonitor *Monitor, BatteryModel *Model, Sensors *Sen)
         
         Model->apply_delta_q(Monitor->delta_q());
         if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
+        Monitor->init_hys(0.0);
         
         Serial.printf("\nMyBattModel:  soc=%7.3f, SOC=%7.3f, q=%7.3f, delta_q = %7.3f, q_scaled_rated = %7.3f,\
         q_rated = %7.3f, q_capacity = %7.3f,\n\n", Model->soc(), Model->SOC(), Model->q(), Model->delta_q(),
@@ -357,15 +358,27 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
             Model->apply_delta_q(Monitor->delta_q());
             break;
 
+          case ( 'h' ):
+            Serial.printf("Resetting monitor hysteresis\n");
+            Monitor->init_hys(0.0);
+            Serial.printf("Resetting model hysteresis\n");
+            Model->init_hys(0.0);
+            break;
+
           case ( 'i' ):
             self_talk("i0", Monitor, Model, Sen);
             break;
 
           case ( 'r' ):
             Serial.printf("Small reset.   Just reset all to soc=1.0 and delta_q = 0\n");
-            Monitor->apply_soc(1.0, Sen->Tbatt_filt);
             Model->apply_soc(1.0, Sen->Tbatt_filt);
-            if ( rp.modeling ) Monitor->init_soc_ekf(Model->soc());
+            Model->init_hys(0.0);
+            Monitor->apply_soc(1.0, Sen->Tbatt_filt);
+            if ( rp.modeling )
+            {
+              Monitor->init_soc_ekf(Model->soc());
+              Monitor->init_hys(0.0);
+            }
             break;
 
           case ( 'R' ):
@@ -663,6 +676,7 @@ void talkH(BatteryMonitor *Monitor, BatteryModel *Model, Sensors *Sen)
 
   Serial.printf("R<?>   Reset\n");
   Serial.printf("  Re= "); Serial.printf("equalize delta_q in model to battery monitor\n");
+  Serial.printf("  Rh= "); Serial.printf("reset monitor and model hysteresis to 0.0\n");
   Serial.printf("  Ri= "); Serial.printf("reset delta_q_inf to 0.0\n");
   Serial.printf("  Rr= "); Serial.printf("saturate battery monitor and equalize model to monitor\n");
   Serial.printf("  RR= "); Serial.printf("saturate, equalize, and nominalize all testing for DEPLOY\n");
