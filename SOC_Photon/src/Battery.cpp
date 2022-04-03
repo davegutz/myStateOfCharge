@@ -45,7 +45,7 @@ Battery::Battery(const int num_cells,
     const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx)
     : Coulombs(q_cap_rated, t_rated, t_rlim), q_(nom_q_cap),
     voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0),
-    sr_(1.), nom_vsat_(batt_vsat), dv_(0), dvoc_dt_(dvoc_dt),
+    sr_(1.), nom_vsat_(batt_vsat), dv_(0.01), dvoc_dt_(dvoc_dt),  // 0.01 to compensate for tables generated without considering hys
     r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
     tau_sd_(1.8e7), r_sd_(70.), ioc_(0)
 {
@@ -95,7 +95,7 @@ double Battery::calc_soc_voc(const double soc, const double temp_c, double *dv_d
 {
     double voc;  // return value
     *dv_dsoc = calc_soc_voc_slope(soc, temp_c);
-    voc = voc_T_->interp(soc, temp_c);
+    voc = voc_T_->interp(soc, temp_c) + dv_;
     return (voc);
 }
 
@@ -371,7 +371,6 @@ double BatteryModel::calculate(const double temp_C, const double soc, double cur
     // VOC-OCV model
     voc_stat_ = calc_soc_voc(soc, temp_C, &dv_dsoc_);
     voc_stat_ = min(voc_stat_ + (soc - soc_lim) * dv_dsoc_, max_voc);  // slightly beyond but don't windup
-    voc_stat_ +=  dv_;  // Experimentally varied
     bms_off_ = ( temp_c_ <= low_t ) || ( voc_stat_ < low_voc );
     if ( bms_off_ ) curr_in = 0.;
 
@@ -381,7 +380,7 @@ double BatteryModel::calculate(const double temp_C, const double soc, double cur
     voc_ = hys_->update(dt);
     ioc_ = hys_->ioc();
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
-    double u[2] = {ib_, voc_};
+    double u[2] = {ib_, voc_};  // past value ib_
     Randles_->calc_x_dot(u);
     Randles_->update(dt);
     vb_ = Randles_->y(0);

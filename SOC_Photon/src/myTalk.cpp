@@ -87,6 +87,8 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
             break;
 
           case ( 'v' ):
+            Mon->Dv(cp.input_string.substring(2).toFloat());
+            Serial.printf("Mon.Dv changed to %7.3f\n", Mon->Dv());
             Sim->Dv(cp.input_string.substring(2).toFloat());
             Serial.printf("Sim.Dv changed to %7.3f\n", Sim->Dv());
             break;
@@ -651,7 +653,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("    : delta I adder to all sensed shunt current, A [0]"); 
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.println("    : delta T adder to sensed Tbatt, deg C [0]"); 
-  Serial.printf("  Dv= "); Serial.print(Sim->Dv()); Serial.println("    : delta V adder to solved battery calculation, V"); 
+  Serial.printf("  Dv= "); Serial.print(Sim->Dv()); Serial.println("    : delta V adder to Vb measurement, V"); 
   Serial.printf("  Sc= "); Serial.print(Sim->q_capacity()/Mon->q_capacity()); Serial.println("    : Scalar battery model size"); 
   Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.println("    : hysteresis scalar 1e-6 - 100");
   Serial.printf("  Sr= "); Serial.print(Sim->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 

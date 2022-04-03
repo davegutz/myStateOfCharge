@@ -505,7 +505,7 @@ class BatteryModel(Battery):
         self.ioc = self.hys.ioc
         self.dv_hys = self.hys.dv_hys
         # Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
-        u = np.array([self.ib, self.voc]).T
+        u = np.array([self.ib, self.voc]).T  # past value self.ib
         self.Randles.calc_x_dot(u)
         self.Randles.update(dt)
         self.vb = self.Randles.y
