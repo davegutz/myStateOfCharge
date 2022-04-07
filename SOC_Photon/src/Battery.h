@@ -166,7 +166,6 @@ public:
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
   void init_hys(const double hys) { hys_->init(hys); };
 protected:
-  double q_;        // Charge, C
   double voc_;      // Static model open circuit voltage, V
   double vdyn_;     // Sim current induced back emf, V
   double vb_;        // Total model voltage, voltage at terminals, V
@@ -257,7 +256,8 @@ public:
   double calculate(const double temp_C, const double soc_frac, double curr_in, const double dt,
     const double q_capacity, const double q_cap, const boolean dc_dc_on);
   uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);
-  double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr, const double t_last);
+  double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
+    const double t_last);
   void load(const double delta_q, const double t_last, const double s_cap_model);
   void update(double *delta_q, double *t_last);
   void pretty_print(void);
@@ -266,6 +266,7 @@ public:
   double voc() { return (voc_); };
   double voc_stat() { return (voc_stat_); };
 protected:
+  double q_;        // Charge, C
   SinInj *Sin_inj_;     // Class to create sine waves
   SqInj *Sq_inj_;       // Class to create square waves
   TriInj *Tri_inj_;     // Class to create triangle waves

@@ -139,7 +139,8 @@ double Coulombs::calculate_capacity(const double temp_c)
 }
 
 // Count coulombs based on true=actual capacity
-double Coulombs::count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr, const boolean sat, const double t_last)
+double Coulombs::count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
+  const boolean sat, const double t_last)
 {
     /* Count coulombs based on true=actual capacity
     Inputs:

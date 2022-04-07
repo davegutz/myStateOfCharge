@@ -37,14 +37,12 @@ extern CommandPars cp;
 // class Battery
 // constructors
 Battery::Battery()
-    : q_(nom_q_cap), voc_(0),
-    vdyn_(0), vb_(0), ib_(0), num_cells_(4), dv_dsoc_(0), sr_(1), vsat_(13.7),
+    :voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(4), dv_dsoc_(0), sr_(1), vsat_(13.7),
     dv_(0), dvoc_dt_(0){}
 Battery::Battery(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx)
-    : Coulombs(q_cap_rated, t_rated, t_rlim), q_(nom_q_cap),
-    voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0),
+    : Coulombs(q_cap_rated, t_rated, t_rlim), voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0),
     sr_(1.), nom_vsat_(batt_vsat), dv_(0.01), dvoc_dt_(dvoc_dt),  // 0.01 to compensate for tables generated without considering hys
     r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
     tau_sd_(1.8e7), r_sd_(70.), ioc_(0)
@@ -130,7 +128,6 @@ void Battery::pretty_print(void)
     Serial.printf("  voc =     %7.3f;  // Static model open circuit voltage, V\n", voc_);
     Serial.printf("  vsat =    %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
     Serial.printf("  vdyn =    %7.3f;  // Sim current induced back emf, V\n", vdyn_);
-    Serial.printf("  q =    %10.1f;  // Present charge, C\n", q_);
     Serial.printf("  sr =      %7.3f;  // Resistance scalar\n", sr_);
     Serial.printf("  dv_ =      %7.3f; // Adjustment, V\n", dv_);
     Serial.printf("  dt_ =      %7.3f; // Update time, s\n", dt_);
@@ -309,7 +306,7 @@ BatteryModel::BatteryModel() : Battery() {}
 BatteryModel::BatteryModel(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx) :
-    Battery(num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_direx)
+    Battery(num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_direx), q_(q_cap_rated)
 {
     // Randles dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery
@@ -456,7 +453,8 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
 }
 
 // Count coulombs based on true=actual capacity
-double BatteryModel::count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr, const double t_last)
+double BatteryModel::count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
+    const double t_last)
 {
     /* Count coulombs based on true=actual capacity
     Inputs:

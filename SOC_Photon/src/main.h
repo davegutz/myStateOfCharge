@@ -363,7 +363,7 @@ void loop()
     }
 
     // Charge calculation and memory store
-    Sim->count_coulombs(Sen->T, reset, Sen->Tbatt_filt, Sen->Ishunt, rp.t_last_model);
+    Sim->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, rp.t_last_model);
     Sim->update(&rp.delta_q_model, &rp.t_last_model);
 
     // D2 signal injection to hardware current sensors
@@ -398,7 +398,7 @@ void loop()
     Sen->saturated = SatDebounce->calculate(is_sat(Sen->Tbatt_filt, Mon->voc_stat(), Mon->soc()), reset);
 
     // Memory store
-    Mon->count_coulombs(Sen->T, reset, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
+    Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
     Mon->update(&rp.delta_q, &rp.t_last, &rp.delta_q_inf);
 
     // Charge time for display
@@ -527,7 +527,10 @@ void loop()
 
   // Initialize complete once sensors and models started and summary written
   if ( read ) reset = false;
-  if ( read_temp ) reset_temp = false;
+  if ( read_temp && double(elapsed)/1000.>10. ){
+    Serial.printf("read_temp = false\n");
+    reset_temp = false;
+  }
   if ( publishP || publishS ) reset_publish = false;
 
   // Soft reset

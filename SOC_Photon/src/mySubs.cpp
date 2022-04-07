@@ -135,7 +135,7 @@ void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt)
   }
   else
   {
-    if ( rp.debug>102 ) Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value\n");
+    Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value\n");
     // Using last-good-value:  no assignment
   }
 }
