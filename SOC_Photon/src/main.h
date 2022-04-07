@@ -527,10 +527,7 @@ void loop()
 
   // Initialize complete once sensors and models started and summary written
   if ( read ) reset = false;
-  if ( read_temp && double(elapsed)/1000.>10. ){
-    Serial.printf("read_temp = false\n");
-    reset_temp = false;
-  }
+  if ( read_temp && double(elapsed)/1000.>first_read_temp_time ) reset_temp = false;
   if ( publishP || publishS ) reset_publish = false;
 
   // Soft reset
