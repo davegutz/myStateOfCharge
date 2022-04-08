@@ -448,6 +448,11 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
             else
               rp.modeling = false;
             Serial.printf("Modeling set to %d\n", rp.modeling);
+            if ( cp.input_string.substring(2).toInt()>1 )
+              rp.full_soft = true;
+            else
+              rp.full_soft = false;
+            Serial.printf("full_soft set to %d\n", rp.full_soft);
             break;
 
           case ( 'a' ):
@@ -517,7 +522,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
                 rp.type = 0;
                 rp.freq = 0.0;
                 rp.amp = 0.0;
-                rp.offset = 0.0;
+                if ( !rp.full_soft ) rp.offset = 0.0;
                 rp.curr_bias_all = 0;
                 rp.debug = -12;   // myDisplay = 5
                 break;
@@ -528,7 +533,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
                 rp.type = 1;
                 rp.freq = 0.05;
                 rp.amp = 6.;
-                rp.offset = -rp.amp;
+                if ( !rp.full_soft ) rp.offset = -rp.amp;
                 rp.debug = -12;
                 rp.freq *= (2. * PI);
                 break;
@@ -539,7 +544,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
                 rp.type = 2;
                 rp.freq = 0.10;
                 rp.amp = 6.;
-                rp.offset = -rp.amp;
+                if ( !rp.full_soft ) rp.offset = -rp.amp;
                 rp.debug = -12;
                 rp.freq *= (2. * PI);
                 break;
@@ -550,7 +555,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
                 rp.type = 3;
                 rp.freq = 0.05;
                 rp.amp = 6.;
-                rp.offset = -rp.amp;
+                if ( !rp.full_soft ) rp.offset = -rp.amp;
                 rp.debug = -12;
                 rp.freq *= (2. * PI);
                 break;
@@ -697,7 +702,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("  Xx= "); Serial.printf("%d,   use model for Vbatt [0]\n", rp.modeling);
   Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Injection amplitude A pk (0-18.3) [0]");
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println("  : Injection frequency Hz (0-2) [0]");
-  Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  's', 'q', 't' (0=none, 1=sine, 2=square, 3=triangle)");
+  Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  's', 'q', 't' (sine, square, triangle)");
   Serial.printf("  Xo= "); Serial.printf("%7.3f", rp.offset); Serial.println("  : Injection offset A (-18.3-18.3) [0]");
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("  : Injection  A (unlimited) [0]");
   Serial.printf("  Xp= <?>, programmed injection settings...\n"); 

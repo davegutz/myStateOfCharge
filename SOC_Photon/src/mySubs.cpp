@@ -227,8 +227,16 @@ void filter_temp(const int reset_loc, const double t_rlim, Sensors *Sen, General
   *t_bias_last = t_bias_loc;
 
   // Filter and add rate limited bias
-  Sen->Tbatt_filt = TbattSenseFilt->calculate(Sen->Tbatt, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
-  Sen->Tbatt += t_bias_loc;
+  if ( reset_loc && Sen->Tbatt>40. )
+  {
+    Sen->Tbatt = RATED_TEMP + t_bias_loc; // Cold startup T=85.5 C
+    Sen->Tbatt_filt = TbattSenseFilt->calculate(RATED_TEMP, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
+  }
+  else
+  {
+    Sen->Tbatt_filt = TbattSenseFilt->calculate(Sen->Tbatt, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
+    Sen->Tbatt += t_bias_loc;
+  }
 }
 
 // Filter all other inputs

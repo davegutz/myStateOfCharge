@@ -425,7 +425,7 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
   double inj_bias = 0.;
   double bias = 0.;
   // Calculate injection amounts from user inputs (talk).
-  // One-sided because PWM voltage >0.  rp.offset applied in logic below.
+  // One-sided because PWM voltage >0.  rp.offset applied elsewhere
   switch ( type )
   {
     case ( 0 ):   // Nothing
@@ -447,7 +447,10 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
       break;
   }
   inj_bias = sin_bias + square_bias + tri_bias + bias;
-  duty_ = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
+  if ( rp.full_soft )
+    duty_ = uint32_t(inj_bias-2.*amp);
+  else
+    duty_ = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
   if ( rp.debug==-41 ) Serial.printf("type,amp,freq,sin,square,tri,bias,inj,duty,tnow=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %ld,  %7.3f,\n",
             type, amp, freq, sin_bias, square_bias, tri_bias, bias, inj_bias, duty_, t);
 

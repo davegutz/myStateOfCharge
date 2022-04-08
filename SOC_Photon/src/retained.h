@@ -55,6 +55,7 @@ struct RetainedPars
   int isum = -1;            // Summary location.   Begins at -1 because first action is to increment isum
   double delta_q_inf = 0.;  // delta_q since last reset.  Simple integration of current
   double hys_scale = 1.;    // Hysteresis scalar
+  boolean full_soft = false;// Driving signal injection completely using software offset 
 
   // Nominalize
   void nominal()
@@ -81,6 +82,7 @@ struct RetainedPars
     this->isum = -1;
     this->delta_q_inf = 0.;
     this->hys_scale = 1.;
+    this->full_soft = false;
   }
   void large_reset()
   {
@@ -104,13 +106,14 @@ struct RetainedPars
     this->isum = -1;
     this->delta_q_inf = 0.;
     this->hys_scale = 1.;
+    this->full_soft = false;
   }
   void print_part_1(char *buffer)
   {
     sprintf(buffer, "debug = %d, delta_q = %7.3f, t_last = %7.3f, delta_q_model = %7.3f, t_last_model = %7.3f, \n\
-    curr_bias_amp = %7.3f, curr_bias_noamp = %7.3f, curr_bias_all = %7.3f, curr_sel_noamp = %d, \n",
+    curr_bias_amp = %7.3f, curr_bias_noamp = %7.3f, curr_bias_all = %7.3f, curr_sel_noamp = %d, full_soft = %d,\n",
       this->debug, this->delta_q, this->t_last, this->delta_q_model, this->t_last_model,
-      this->curr_bias_amp, this->curr_bias_noamp, this->curr_bias_all, this->curr_sel_noamp);
+      this->curr_bias_amp, this->curr_bias_noamp, this->curr_bias_all, this->curr_sel_noamp, this->full_soft);
   }
   void print_part_2(char *buffer)
   {
