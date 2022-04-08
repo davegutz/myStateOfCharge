@@ -451,7 +451,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
             break;
 
           case ( 'a' ):
-            rp.amp = max(min(cp.input_string.substring(2).toFloat(), 18.3), 0.0);
+            // rp.amp = max(min(cp.input_string.substring(2).toFloat(), 18.3), 0.0);
+            rp.amp = cp.input_string.substring(2).toFloat();
             Serial.printf("Modeling injected amp set to %7.3f and offset set to %7.3f\n", rp.amp, rp.offset);
             break;
 
@@ -607,6 +608,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
         break;
     }
 
+    Serial.printf("done with %s\n", cp.input_string.c_str());
     cp.input_string = "";
     cp.string_complete = false;
   }

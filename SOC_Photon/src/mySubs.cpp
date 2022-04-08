@@ -379,9 +379,13 @@ void serialEvent()
       cp.string_complete = true;
      // Remove whitespace
       cp.input_string.trim();
+      cp.input_string.replace("\0","");
+      cp.input_string.replace(";","");
+      cp.input_string.replace(",","");
       cp.input_string.replace(" ","");
       cp.input_string.replace("=","");
-      Serial.println(cp.input_string);
+      Serial.printf("handling %s...\n", cp.input_string.c_str());
+      break;  // enable reading multiple inputs
     }
   }
 }
