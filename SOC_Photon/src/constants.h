@@ -100,6 +100,6 @@ const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI
 // Read temp initialization constants
 const boolean temp_parasitic = true;    // DS18 sensor power. true means leave it on all the time (true)
 const uint16_t temp_delay = 1;          // Time to block temperature sensor read in DS18 routine, ms (1)
-const double first_read_temp_time = 10.;       // It takes 10 seconds first read of DS18
+#define TEMP_INIT_DELAY   10000         // It takes 10 seconds first read of DS18
 
 #endif // CONSTANTS_H_

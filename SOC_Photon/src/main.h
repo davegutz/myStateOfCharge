@@ -379,7 +379,7 @@ void loop()
     //    Cc    Coulomb charge counter memory structure
 
     // Initialize Cc structure if needed.   Needed here in this location to have a value for Sen->Tbatt_filt
-    if ( reset )
+    if ( reset_temp )
     {
       Mon->load(rp.delta_q, rp.t_last, rp.delta_q_inf);
       Mon->apply_delta_q_t(rp.delta_q, rp.t_last, rp.delta_q_inf);
@@ -527,7 +527,7 @@ void loop()
 
   // Initialize complete once sensors and models started and summary written
   if ( read ) reset = false;
-  if ( read_temp && double(elapsed)/1000.>first_read_temp_time ) reset_temp = false;
+  if ( read_temp && elapsed>TEMP_INIT_DELAY ) reset_temp = false;
   if ( publishP || publishS ) reset_publish = false;
 
   // Soft reset

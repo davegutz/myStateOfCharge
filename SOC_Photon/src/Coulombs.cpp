@@ -156,6 +156,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
     // Rate limit temperature
     double temp_lim = max(min( temp_c, t_last + t_rlim_*dt), t_last - t_rlim_*dt);
     if ( reset ) temp_lim = temp_c;
+    if ( reset ) t_last_ = temp_c;
     delta_q_inf_ = delta_q_inf_ + d_delta_q;
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
@@ -173,7 +174,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
 
     // Integration
     q_capacity_ = calculate_capacity(temp_lim);
-    delta_q_ = max(min(delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-t_last_), 0.0), -q_capacity_);
+    if ( !reset ) delta_q_ = max(min(delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-t_last_), 0.0), -q_capacity_);
     q_ = q_capacity_ + delta_q_;
 
     // Normalize

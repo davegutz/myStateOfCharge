@@ -131,7 +131,7 @@ void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt)
   if ( count<MAX_TEMP_READS )
   {
     Sen->Tbatt = SdTbatt->update(temp);
-    if ( rp.debug>102 ) Serial.printf("Temperature read on count=%d\n", count);
+    if ( rp.debug==-103 ) Serial.printf("Temperature %7.3f read on count=%d\n", temp, count);
   }
   else
   {

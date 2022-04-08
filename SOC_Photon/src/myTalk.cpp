@@ -642,6 +642,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("  +/-34:   EKF detailed\n");
   Serial.printf("    +35:   Randles balance\n");
   Serial.printf("  +/-37:   EKF short\n");
+  Serial.printf("    +76:   vb model\n");
   Serial.printf("  +/-78:   Battery model saturation\n");
   Serial.printf("    +79:   sat_ib model\n");
   Serial.printf("  +/-96:   CC saturation\n");
