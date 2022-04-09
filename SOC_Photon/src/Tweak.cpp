@@ -45,7 +45,7 @@ Tweak::~Tweak() {}
 double Tweak::adjust(const double Di)
 {
   double new_Di;
-  new_Di = Di + max(min(gain_*(delta_q_sat_present_ - delta_q_sat_past_), Di+max_change_), Di-max_change_);
+  new_Di = Di + max(min(gain_*(delta_q_sat_present_ - delta_q_sat_past_), max_change_), -max_change_);
 
   if ( rp.debug==88 ) Serial.printf("                         Tweak::adjust:, Di=%7.3f, new_Di=%7.3f,\n", Di, new_Di);
   
