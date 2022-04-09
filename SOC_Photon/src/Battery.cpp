@@ -396,6 +396,7 @@ double BatteryModel::calculate(const double temp_C, const double soc, double cur
     // Saturation logic, both full and empty
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
+    if ( rp.full_soft ) sat_ib_max_ = curr_in; // Disable cutback when doing full_soft test
     ib_ = min(curr_in, sat_ib_max_);
     if ( (q_ <= 0.) && (curr_in < 0.) ) ib_ = 0.;  //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_ == sat_ib_max_);
