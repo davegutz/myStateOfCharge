@@ -55,7 +55,8 @@ struct RetainedPars
   int isum = -1;            // Summary location.   Begins at -1 because first action is to increment isum
   double delta_q_inf = 0.;  // delta_q since last reset.  Simple integration of current
   double hys_scale = 1.;    // Hysteresis scalar
-  boolean tweak_test = false;       // Driving signal injection completely using software inj_soft_bias 
+  boolean tweak_test = false;   // Driving signal injection completely using software inj_soft_bias 
+  double tweak_bias = 0.;       // Tweak calibration
 
   // Nominalize
   void nominal()
@@ -83,6 +84,7 @@ struct RetainedPars
     this->delta_q_inf = 0.;
     this->hys_scale = 1.;
     this->tweak_test = false;
+    this->tweak_bias = 0.;
   }
   void large_reset()
   {
@@ -107,13 +109,15 @@ struct RetainedPars
     this->delta_q_inf = 0.;
     this->hys_scale = 1.;
     this->tweak_test = false;
+    this->tweak_bias = 0.;
   }
   void print_part_1(char *buffer)
   {
     sprintf(buffer, "debug = %d, delta_q = %7.3f, t_last = %7.3f, delta_q_model = %7.3f, t_last_model = %7.3f, \n\
-    curr_bias_amp = %7.3f, curr_bias_noamp = %7.3f, curr_bias_all = %7.3f, curr_sel_noamp = %d, tweak_test = %d,\n",
+    curr_bias_amp = %7.3f, curr_bias_noamp = %7.3f, curr_bias_all = %7.3f, curr_sel_noamp = %d, tweak_test = %d,\n\
+    tweak_bias = %7.3f,\n",
       this->debug, this->delta_q, this->t_last, this->delta_q_model, this->t_last_model,
-      this->curr_bias_amp, this->curr_bias_noamp, this->curr_bias_all, this->curr_sel_noamp, this->tweak_test);
+      this->curr_bias_amp, this->curr_bias_noamp, this->curr_bias_all, this->curr_sel_noamp, this->tweak_test, this->tweak_bias);
   }
   void print_part_2(char *buffer)
   {
