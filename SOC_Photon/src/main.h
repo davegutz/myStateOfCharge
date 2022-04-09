@@ -311,10 +311,6 @@ void loop()
     if ( rp.debug>102 ) Serial.printf("Read temp update=%7.3f and done       load_temp() at %ld...  \n", Sen->T_temp, millis());
     filter_temp(reset_temp, t_rlim, Sen, TbattSenseFilt, rp.t_bias, &t_bias_last);
 
-    // Adjust current
-    if ( Twk->update(rp.delta_q_inf, is_sat(Sen->Tbatt_filt, Mon->voc_stat(), Mon->soc())) )
-        rp.tweak_bias = Twk->adjust(rp.tweak_bias);
-
   }
 
   // Input all other sensors and do high rate calculations
@@ -411,6 +407,10 @@ void loop()
 
     // Charge time for display
     Mon->calculate_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ishunt,Mon->soc());
+
+    // Adjust current
+    if ( Twk->update(rp.delta_q_inf, is_sat(Sen->Tbatt_filt, Mon->voc_stat(), Mon->soc())) )
+        rp.tweak_bias = Twk->adjust(rp.tweak_bias);
     //////////////////////////////////////////////////////////////
 
     //
