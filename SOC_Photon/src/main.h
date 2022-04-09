@@ -366,17 +366,8 @@ void loop()
     Sim->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, rp.t_last_model);
     Sim->update(&rp.delta_q_model, &rp.t_last_model);
 
-    // D2 signal injection to hardware current sensors
-    if ( rp.full_soft )
-    {
-      rp.duty = 0;
-      if ( elapsed>TEMP_INIT_DELAY )
-        rp.offset = double(Sim->calc_inj_duty(elapsed-TEMP_INIT_DELAY, rp.type, rp.amp, rp.freq)) + rp.amp;
-      else
-        rp.offset = 0.;
-    }
-    else
-      rp.duty = Sim->calc_inj_duty(now, rp.type, rp.amp, rp.freq);
+    // D2 signal injection to hardware current sensors (also has rp.offset path for rp.full_soft)
+    rp.duty = Sim->calc_inj_duty(elapsed, rp.type, rp.amp, rp.freq);
     ////////////////////////////////////////////////////////////////////////////
 
     //

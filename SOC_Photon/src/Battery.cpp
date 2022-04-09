@@ -418,7 +418,19 @@ double BatteryModel::calculate(const double temp_C, const double soc, double cur
 // Injection model, calculate duty
 uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq)
 {
-  double t = now/1e3;
+  double t;
+  if ( rp.full_soft )
+  {
+      if ( now<2*TEMP_INIT_DELAY )
+      {
+          duty_ = 0UL;
+          rp.offset = 0.;
+          return(duty_);
+      }
+      else
+          t = (now - 2*TEMP_INIT_DELAY)/1e3;
+  }
+  else t = now/1e3;
   double sin_bias = 0.;
   double square_bias = 0.;
   double tri_bias = 0.;
@@ -447,12 +459,16 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
       break;
   }
   inj_bias = sin_bias + square_bias + tri_bias + bias;
-  if ( rp.full_soft )
-    duty_ = uint32_t(inj_bias-2.*amp);
+  if ( rp.full_soft )   // Use offset path, bypassing PWM that has limited hardware range
+  {
+    duty_ = 0UL;
+    rp.offset = inj_bias - rp.amp;
+  }
   else
     duty_ = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
-  if ( rp.debug==-41 ) Serial.printf("type,amp,freq,sin,square,tri,bias,inj,duty,tnow=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %ld,  %7.3f,\n",
-            type, amp, freq, sin_bias, square_bias, tri_bias, bias, inj_bias, duty_, t);
+
+  if ( rp.debug==-41 ) Serial.printf("type,amp,freq,sin,square,tri,bias,inj,duty,tnow,off=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %ld,  %7.3f, %7.3f,\n",
+            type, amp, freq, sin_bias, square_bias, tri_bias, bias, inj_bias, duty_, t, rp.offset);
 
   return ( duty_ );
 }
