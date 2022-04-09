@@ -449,16 +449,16 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
               rp.modeling = false;
             Serial.printf("Modeling set to %d\n", rp.modeling);
             if ( cp.input_string.substring(2).toInt()>1 )
-              rp.full_soft = true;
+              rp.tweak_test = true;
             else
-              rp.full_soft = false;
-            Serial.printf("full_soft set to %d\n", rp.full_soft);
+              rp.tweak_test = false;
+            Serial.printf("tweak_test set to %d\n", rp.tweak_test);
             break;
 
           case ( 'a' ):
             // rp.amp = max(min(cp.input_string.substring(2).toFloat(), 18.3), 0.0);
             rp.amp = cp.input_string.substring(2).toFloat();
-            Serial.printf("Modeling injected amp set to %7.3f and offset set to %7.3f\n", rp.amp, rp.offset);
+            Serial.printf("Modeling injected amp set to %7.3f and inj_soft_bias set to %7.3f\n", rp.amp, rp.inj_soft_bias);
             break;
 
           case ( 'f' ):
@@ -502,8 +502,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
             break;
 
           case ( 'o' ):
-            rp.offset = max(min(cp.input_string.substring(2).toFloat(), 18.3), -18.3);
-            Serial.printf("Modeling injected offset set to %7.3f\n", rp.offset);
+            rp.inj_soft_bias = max(min(cp.input_string.substring(2).toFloat(), 18.3), -18.3);
+            Serial.printf("Modeling injected inj_soft_bias set to %7.3f\n", rp.inj_soft_bias);
             break;
 
           case ( 'p' ):
@@ -522,7 +522,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
                 rp.type = 0;
                 rp.freq = 0.0;
                 rp.amp = 0.0;
-                if ( !rp.full_soft ) rp.offset = 0.0;
+                if ( !rp.tweak_test ) rp.inj_soft_bias = 0.0;
                 rp.curr_bias_all = 0;
                 rp.debug = -12;   // myDisplay = 5
                 break;
@@ -533,7 +533,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
                 rp.type = 1;
                 rp.freq = 0.05;
                 rp.amp = 6.;
-                if ( !rp.full_soft ) rp.offset = -rp.amp;
+                if ( !rp.tweak_test ) rp.inj_soft_bias = -rp.amp;
                 rp.debug = -12;
                 rp.freq *= (2. * PI);
                 break;
@@ -544,7 +544,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
                 rp.type = 2;
                 rp.freq = 0.10;
                 rp.amp = 6.;
-                if ( !rp.full_soft ) rp.offset = -rp.amp;
+                if ( !rp.tweak_test ) rp.inj_soft_bias = -rp.amp;
                 rp.debug = -12;
                 rp.freq *= (2. * PI);
                 break;
@@ -555,7 +555,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\n",
                 rp.type = 3;
                 rp.freq = 0.05;
                 rp.amp = 6.;
-                if ( !rp.full_soft ) rp.offset = -rp.amp;
+                if ( !rp.tweak_test ) rp.inj_soft_bias = -rp.amp;
                 rp.debug = -12;
                 rp.freq *= (2. * PI);
                 break;
@@ -699,11 +699,11 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xd= "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
-  Serial.printf("  Xx= "); Serial.printf("%d,   use model for Vbatt(1) and full_soft(2) [0]\n", rp.modeling + rp.full_soft);
+  Serial.printf("  Xx= "); Serial.printf("%d,   use model for Vbatt(1) and tweak_test(2) [0]\n", rp.modeling + rp.tweak_test);
   Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Injection amplitude A pk (0-18.3) [0]");
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println("  : Injection frequency Hz (0-2) [0]");
   Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  's', 'q', 't' (sine, square, triangle)");
-  Serial.printf("  Xo= "); Serial.printf("%7.3f", rp.offset); Serial.println("  : Injection offset A (-18.3-18.3) [0]");
+  Serial.printf("  Xo= "); Serial.printf("%7.3f", rp.inj_soft_bias); Serial.println("  : Injection inj_soft_bias A (-18.3-18.3) [0]");
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("  : Injection  A (unlimited) [0]");
   Serial.printf("  Xp= <?>, programmed injection settings...\n"); 
   Serial.printf("      -1:  Off, modeling false\n");

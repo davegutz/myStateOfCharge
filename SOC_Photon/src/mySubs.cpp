@@ -149,8 +149,8 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   past = now;
 
   // Current bias.  Feeds into signal conversion, not to duty injection
-  cp.curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.offset;
-  cp.curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.offset;
+  cp.curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.inj_soft_bias;
+  cp.curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.inj_soft_bias;
 
   // Read Sensors
   // ADS1015 conversion

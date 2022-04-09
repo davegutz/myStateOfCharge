@@ -366,7 +366,7 @@ void loop()
     Sim->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, rp.t_last_model);
     Sim->update(&rp.delta_q_model, &rp.t_last_model);
 
-    // D2 signal injection to hardware current sensors (also has rp.offset path for rp.full_soft)
+    // D2 signal injection to hardware current sensors (also has rp.inj_soft_bias path for rp.tweak_test)
     rp.duty = Sim->calc_inj_duty(elapsed, rp.type, rp.amp, rp.freq);
     ////////////////////////////////////////////////////////////////////////////
 

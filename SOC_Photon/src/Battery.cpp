@@ -396,7 +396,7 @@ double BatteryModel::calculate(const double temp_C, const double soc, double cur
     // Saturation logic, both full and empty
     vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
-    if ( rp.full_soft ) sat_ib_max_ = curr_in; // Disable cutback when doing full_soft test
+    if ( rp.tweak_test ) sat_ib_max_ = curr_in; // Disable cutback when doing tweak_test test
     ib_ = min(curr_in, sat_ib_max_);
     if ( (q_ <= 0.) && (curr_in < 0.) ) ib_ = 0.;  //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_ == sat_ib_max_);
@@ -420,12 +420,12 @@ double BatteryModel::calculate(const double temp_C, const double soc, double cur
 uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq)
 {
   double t;
-  if ( rp.full_soft )
+  if ( rp.tweak_test )
   {
       if ( now<2*TEMP_INIT_DELAY )
       {
           duty_ = 0UL;
-          rp.offset = 0.;
+          rp.inj_soft_bias = 0.;
           return(duty_);
       }
       else
@@ -438,7 +438,7 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
   double inj_bias = 0.;
   double bias = 0.;
   // Calculate injection amounts from user inputs (talk).
-  // One-sided because PWM voltage >0.  rp.offset applied elsewhere
+  // One-sided because PWM voltage >0.  rp.inj_soft_bias applied elsewhere
   switch ( type )
   {
     case ( 0 ):   // Nothing
@@ -460,16 +460,16 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
       break;
   }
   inj_bias = sin_bias + square_bias + tri_bias + bias;
-  if ( rp.full_soft )   // Use offset path, bypassing PWM that has limited hardware range
+  if ( rp.tweak_test )   // Use inj_soft_bias path, bypassing PWM that has limited hardware range
   {
     duty_ = 0UL;
-    rp.offset = inj_bias - rp.amp;
+    rp.inj_soft_bias = inj_bias - rp.amp;
   }
   else
     duty_ = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
 
   if ( rp.debug==-41 ) Serial.printf("type,amp,freq,sin,square,tri,bias,inj,duty,tnow,off=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %ld,  %7.3f, %7.3f,\n",
-            type, amp, freq, sin_bias, square_bias, tri_bias, bias, inj_bias, duty_, t, rp.offset);
+            type, amp, freq, sin_bias, square_bias, tri_bias, bias, inj_bias, duty_, t, rp.inj_soft_bias);
 
   return ( duty_ );
 }

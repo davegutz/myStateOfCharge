@@ -37,9 +37,9 @@ class SinInj
   public:
     SinInj(){};
     ~SinInj();
-    double signal(const double amp, const double freq_rps, const double t, const double offset)
+    double signal(const double amp, const double freq_rps, const double t, const double inj_soft_bias)
     {
-      return ( amp*(1. + sin(freq_rps*t)) + offset );
+      return ( amp*(1. + sin(freq_rps*t)) + inj_soft_bias );
     }
 
   protected:
@@ -50,7 +50,7 @@ class SqInj
   public:
     SqInj(): t_last_sq_(0), square_bias_(0){};
     ~SqInj();
-    double signal(const double amp, const double freq_rps, const double t, const double offset)
+    double signal(const double amp, const double freq_rps, const double t, const double inj_soft_bias)
     {
       double sq_dt;
       if ( freq_rps>1e-6 )
@@ -65,7 +65,7 @@ class SqInj
         else
           square_bias_ = 0.0;
       }
-      return ( square_bias_ + offset );
+      return ( square_bias_ + inj_soft_bias );
     };
   protected:
     double t_last_sq_;
@@ -77,7 +77,7 @@ class TriInj
   public:
     TriInj(): t_last_tri_(0) {};
     ~TriInj();
-    double signal(const double amp, const double freq_rps, const double t, const double offset)
+    double signal(const double amp, const double freq_rps, const double t, const double inj_soft_bias)
     {
       double tri_bias = 0.;   // return value
       double tri_dt = t;
@@ -90,7 +90,7 @@ class TriInj
         tri_bias = dt / (tri_dt/2.) * 2. * amp;
       else
         tri_bias = (tri_dt-dt) / (tri_dt/2.) * 2. * amp;
-      return ( tri_bias + offset );
+      return ( tri_bias + inj_soft_bias );
     };
   protected:
     double t_last_tri_;
