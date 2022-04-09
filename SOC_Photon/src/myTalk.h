@@ -24,9 +24,10 @@
 #ifndef _MY_TALK_H
 #define _MY_TALK_H
 #include "Battery.h"
+#include "Tweak.h"
 
-void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen);
-void talkH(BatteryMonitor *batt, BatteryModel *batt_model, Sensors *Sen); // Help
-void self_talk(const String cmd, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen);
+void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk);
+void talkH(BatteryMonitor *batt, BatteryModel *batt_model, Sensors *Sen, Tweak *Twk); // Help
+void self_talk(const String cmd, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk);
 
 #endif

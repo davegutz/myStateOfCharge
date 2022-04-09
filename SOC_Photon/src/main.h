@@ -67,6 +67,7 @@ Make it yourself.   It should look like this, with your personal authorizations:
 #include "Blynk/blynk.h"              // Only place this can appear is top level main.h
 #include "mySummary.h"
 #include "myCloud.h"
+#include "Tweak.h"
 
 extern BlynkParticle Blynk;       // Blynk object
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4; // Time Blynk events
@@ -275,6 +276,8 @@ void loop()
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
   static uint8_t last_publishS_debug = 0;    // Remember first time with new debug to print headers
 
+  // Tweak current sensing accuracy
+  static Tweak *Twk = new Tweak(TWEAK_GAIN, TWEAK_MAX_CHANGE);
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
@@ -307,6 +310,11 @@ void loop()
     load_temp(Sen, SensorTbatt, SdTbatt);
     if ( rp.debug>102 ) Serial.printf("Read temp update=%7.3f and done       load_temp() at %ld...  \n", Sen->T_temp, millis());
     filter_temp(reset_temp, t_rlim, Sen, TbattSenseFilt, rp.t_bias, &t_bias_last);
+
+    // Adjust current
+    if ( Twk->update(rp.delta_q_inf, is_sat(Sen->Tbatt_filt, Mon->voc_stat(), Mon->soc())) )
+        rp.tweak_bias = Twk->adjust(rp.tweak_bias);
+
   }
 
   // Input all other sensors and do high rate calculations
@@ -458,7 +466,7 @@ void loop()
   if ( control )
   {
     pwm_write(rp.duty, myPins);
-    if ( rp.debug>102 ) Serial.printf("completed control at %ld.  rp.dutyy=%ld\n", millis(), rp.duty);
+    if ( rp.debug>102 ) Serial.printf("completed control at %ld.  rp.duty=%ld\n", millis(), rp.duty);
   }
 
   // Display driver
@@ -511,7 +519,7 @@ void loop()
   // then can enter commands by sending strings.   End the strings with a real carriage return
   // right in the "Send String" box then press "Send."
   // String definitions are below.
-  talk(Mon, Sim, Sen);
+  talk(Mon, Sim, Sen, Twk);
 
   // Summary management
   boolean initial_summarize = summarizing_waiting && ( elapsed >= SUMMARIZE_WAIT );
@@ -521,7 +529,7 @@ void loop()
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
     mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,
-                          Mon->soc_ekf(), Mon->soc(), Mon->voc_dyn(), Mon->voc(), Mon->delta_q_inf());
+                          Mon->soc_ekf(), Mon->soc(), Mon->voc_dyn(), Mon->voc(), Mon->delta_q_inf(), rp.tweak_bias);
     if ( rp.debug==0 ) Serial.printf("Summarized.....................\n");
   }
 

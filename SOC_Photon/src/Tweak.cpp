@@ -25,20 +25,92 @@
 #include "application.h" // Should not be needed if file .ino or Arduino
 #endif
 #include "Tweak.h"
+#include "Battery.h"
+#include "retained.h"
+extern RetainedPars rp;         // Various parameters to be static at system level
 
 // class Tweak
 // constructors
 Tweak::Tweak()
-  : q_sat_present_(0.), q_sat_past_(0.){}
+  : gain_(0), max_change_(0), delta_q_inf_past_(0), delta_q_sat_present_(0), delta_q_sat_past_(0), sat_(false), delta_q_max_(0){}
 Tweak::Tweak(const double gain, const double max_change)
-  : q_sat_present_(0.), q_sat_past_(0.)
-{
-
-}
+  : gain_(-1./gain), max_change_(max_change), delta_q_inf_past_(0), delta_q_sat_present_(0), delta_q_sat_past_(0), sat_(false),
+  delta_q_max_(0) {}
 Tweak::~Tweak() {}
 // operators
 // functions
+// Process new information and return indicator of new peak found
 
-// SOC-OCV curve fit method per Zhang, et al.   May write this base version if needed using TweakModel::calculate()
-// as a starting point but use the base class Randles formulation and re-arrange the i/o for that model.
+// Do the tweak
+double Tweak::adjust(const double Di)
+{
+  double new_Di;
+  new_Di = Di + max(min(gain_*(delta_q_sat_present_ - delta_q_sat_past_), Di+max_change_), Di-max_change_);
+
+  if ( rp.debug==88 ) Serial.printf("                         Tweak::adjust:, Di=%7.3f, new_Di=%7.3f,\n", Di, new_Di);
+  
+  return ( new_Di );
+}
+
+// Print
+void Tweak::pretty_print(void)
+{
+    Serial.printf("Tweak::");
+    Serial.printf("  gain_ =                %7.3f; // Current correction to be made for charge error, A/Coulomb\n", gain_);
+    Serial.printf("  max_change_ =          %7.3f; // Maximum allowed calibration adjustment, A\n", max_change_);
+    Serial.printf("  delta_q_inf_past_ =    %7.3f; // Charge infinity at past update, Coulombs\n", delta_q_inf_past_);
+    Serial.printf("  delta_q_sat_present_ = %7.3f; // Charge infinity at saturation, present, Coulombs\n", delta_q_sat_present_);
+    Serial.printf("  delta_q_sat_past_ =    %7.3f; // Charge infinity at saturation, past, Coulombs\n", delta_q_sat_past_);
+    Serial.printf("  sat_ =                 %d;    // Saturation status, T=saturated\n", sat_);
+    Serial.printf("  tweak_bias =           %7.3f; // Bias on current, A\n", rp.tweak_bias);
+}
+
+// Reset on demand
+void Tweak::reset(void)
+{
+  delta_q_inf_past_ = 0.;
+  delta_q_sat_present_ = 0.;
+  delta_q_sat_past_ = 0.;
+  sat_ = false;
+  delta_q_max_ = 0.;
+}
+
+// Save new result
+void Tweak::save_new_sat(void)
+{
+  delta_q_sat_past_ = delta_q_sat_present_;
+  delta_q_sat_present_ = delta_q_max_;
+  delta_q_max_ = -q_cap_rated;                // Reset
+  sat_ = false;
+}
+
+// Monitor the process and return status
+boolean Tweak::update(const double delta_q_inf, const boolean is_sat)
+{
+  boolean have_new = false;
+  if ( sat_ )
+  {
+    if ( !is_sat )
+    {
+      have_new = true;
+      save_new_sat();
+    }
+    else
+    {
+      delta_q_max_ = max(delta_q_max_, delta_q_inf);
+    }
+  }
+  else
+  {
+    if ( is_sat )
+    {
+      sat_ = true;
+      delta_q_max_ = max(delta_q_max_, delta_q_inf);
+    }
+  }
+  delta_q_inf_past_ = delta_q_inf;
+  if ( rp.debug==88 ) Serial.printf("Tweak::update:,  sat=%d, delta_q_inf_past=%10.1f, delta_q_sat_past=%10.1f, delta_q_sat_present=%10.1f,\n", sat_, delta_q_inf_past_, delta_q_sat_past_, delta_q_sat_present_);
+
+  return ( have_new );
+}
 

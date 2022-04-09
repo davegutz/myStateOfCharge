@@ -83,7 +83,7 @@
 #define SAT_PERSISTENCE 50          // Updates persistence on saturation tests (50 was 25 trips)
 #define HDB_TBATT       0.06        // Half deadband to filter Tbatt, F (0.06)
 
-#define NSUM            100         // Number of saved summaries.   If too large, will get compile error
+#define NSUM            90          // Number of saved summaries.   If too large, will get compile error
 
 // Conversion gains
 const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  
@@ -101,5 +101,9 @@ const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI
 const boolean temp_parasitic = true;    // DS18 sensor power. true means leave it on all the time (true)
 const uint16_t temp_delay = 1;          // Time to block temperature sensor read in DS18 routine, ms (1)
 #define TEMP_INIT_DELAY   10000         // It takes 10 seconds first read of DS18
+
+// Tweaker
+#define TWEAK_GAIN 10000.       // Estimate of A calibration change for accumulated charge error, Coulomb/A
+#define TWEAK_MAX_CHANGE 0.05   // Maximum allowed tweak per charge cycle, A
 
 #endif // CONSTANTS_H_

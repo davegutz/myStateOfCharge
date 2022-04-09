@@ -29,7 +29,6 @@
 #include "mySubs.h"
 #include "command.h"
 extern CommandPars cp;
-// extern char buffer[256];
 
 // SRAM retention summary
 struct Sum_st
@@ -43,9 +42,11 @@ struct Sum_st
   int16_t voc_dyn;  // Battery modeled charge voltage at soc, V
   int16_t voc_ekf;  // Ekf estimated charge voltage, V
   int16_t delta_q_inf; // Simple integration of charge since large reset, C
+  int16_t tweak_bias;  // Accumulated current bias, A
   Sum_st(void){}
   void assign(const time32_t now, const double Tbatt, const double Vbatt, const double Ishunt,
-    const double soc_ekf, const double soc, const double voc_dyn, const double voc_ekf, const double delta_q_inf)
+    const double soc_ekf, const double soc, const double voc_dyn, const double voc_ekf, const double delta_q_inf,
+    const double tweak_bias)
   {
     char buffer[32];
     this->t = now;
@@ -57,6 +58,7 @@ struct Sum_st
     this->voc_dyn = int16_t(voc_dyn*1200.);
     this->voc_ekf = int16_t(voc_ekf*1200.);
     this->delta_q_inf = int16_t(delta_q_inf/24.);
+    this->tweak_bias = int16_t(tweak_bias*1200.);
     time_long_2_str(now, buffer);
   }
   void print(void)
@@ -66,9 +68,9 @@ struct Sum_st
     {
       time_long_2_str(this->t, buffer);
     }
-    Serial.printf("%s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %9.1f,",
+    Serial.printf("%s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %9.1f, %7.3f,",
           buffer, this->t, double(this->tb)/600., double(this->vb)/1200., double(this->ib)/600., double(this->soc)/16000., double(this->soc_ekf)/16000.,
-          double(this->voc_dyn)/1200., double(this->voc_ekf)/1200., double(this->delta_q_inf)*24.);
+          double(this->voc_dyn)/1200., double(this->voc_ekf)/1200., double(this->delta_q_inf)*24., double(this->tweak_bias)/1200.);
   }
   void nominal()
   {
@@ -81,6 +83,7 @@ struct Sum_st
     this->voc_dyn = 0.;
     this->voc_ekf = 0.;
     this->delta_q_inf = 0.;
+    this->tweak_bias = 0.;
   }
 };
 

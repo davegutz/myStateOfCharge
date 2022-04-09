@@ -43,7 +43,6 @@
 #include <Adafruit/Adafruit_GFX.h>
 #include <Adafruit/Adafruit_SSD1306.h>
 
-#include "retained.h"
 extern RetainedPars rp; // Various parameters to be static at system level
 
 // Pins

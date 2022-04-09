@@ -21,8 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef _MY_SUBS_H
-#define _MY_SUBS_H
+#ifndef _MY_TWEAK_H
+#define _MY_TWEAK_H
 
 // Use known saturation instances to adjust current sensor for zero net energy.
 class Tweak
@@ -33,10 +33,19 @@ public:
   ~Tweak();
   // operators
   // functions
+  double adjust(const double Di);
+  void pretty_print();
+  void reset();
+  boolean update(const double delta_q_inf, const boolean is_sat);
+  void save_new_sat(void);
 protected:
-  double q_sat_present_;
-  double q_sat_past_;
-
+  double gain_;
+  double max_change_;
+  double delta_q_inf_past_;
+  double delta_q_sat_present_;
+  double delta_q_sat_past_;
+  boolean sat_;
+  double delta_q_max_;          // Running tab since last de-saturation of potential new delta_q_sat
 };
 
 #endif
