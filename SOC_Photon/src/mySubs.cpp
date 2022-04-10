@@ -159,7 +159,9 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   int16_t vshunt_amp_int_1 = 0;
   if (!Sen->bare_ads_amp)
   {
+    if ( rp.debug>102 ) Serial.printf("begin ads_amp->readADC_Differential_0_1 at %ld...", millis());
     Sen->Vshunt_amp_int = ads_amp->readADC_Differential_0_1();
+    if ( rp.debug>102 ) Serial.printf("done at %ld\n", millis());
     if ( rp.debug==-14 ){vshunt_amp_int_0 = ads_amp->readADC_SingleEnded(0); vshunt_amp_int_1 = ads_amp->readADC_SingleEnded(1);}
   }
   else
@@ -171,7 +173,9 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   int16_t vshunt_noamp_int_1 = 0;
   if (!Sen->bare_ads_noamp)
   {
+    if ( rp.debug>102 ) Serial.printf("begin ads_amp->readADC_Differential_0_1 at %ld...", millis());
     Sen->Vshunt_noamp_int = ads_noamp->readADC_Differential_0_1();
+    if ( rp.debug>102 ) Serial.printf("done at %ld\n", millis());
     if ( rp.debug==-14 ){vshunt_noamp_int_0 = ads_noamp->readADC_SingleEnded(0); vshunt_noamp_int_1 = ads_noamp->readADC_SingleEnded(1);}
   }
   else
@@ -208,7 +212,9 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
   }
 
   // Vbatt
+  if ( rp.debug>102 ) Serial.printf("begin analogRead at %ld...", millis());
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
+  if ( rp.debug>102 ) Serial.printf("done at %ld\n", millis());
   double vbatt_free =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A) + rp.vbatt_bias;
   if ( rp.modeling ) Sen->Vbatt = Sen->Vbatt_model;
   else Sen->Vbatt = vbatt_free;
