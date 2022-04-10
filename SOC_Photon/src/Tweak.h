@@ -29,11 +29,13 @@ class Tweak
 {
 public:
   Tweak();
-  Tweak(const double gain, const double max_change);
+  Tweak(const double gain, const double max_change, const double max_tweak);
   ~Tweak();
   // operators
   // functions
   double adjust(const double Di);
+  void adjust_max(const double new_max_tweak) { max_tweak_ = max(new_max_tweak, 0.); };
+  double max_tweak() { return( max_tweak_ ); };
   void pretty_print();
   void reset();
   boolean update(const double delta_q_inf, const boolean is_sat);
@@ -41,6 +43,7 @@ public:
 protected:
   double gain_;
   double max_change_;
+  double max_tweak_;
   double delta_q_inf_past_;
   double delta_q_sat_present_;
   double delta_q_sat_past_;

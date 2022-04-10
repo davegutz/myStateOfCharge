@@ -277,7 +277,7 @@ void loop()
   static uint8_t last_publishS_debug = 0;    // Remember first time with new debug to print headers
 
   // Tweak current sensing accuracy
-  static Tweak *Twk = new Tweak(TWEAK_GAIN, TWEAK_MAX_CHANGE);
+  static Tweak *Twk = new Tweak(TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX);
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 

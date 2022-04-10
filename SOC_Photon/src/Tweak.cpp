@@ -33,9 +33,9 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // constructors
 Tweak::Tweak()
   : gain_(0), max_change_(0), delta_q_inf_past_(0), delta_q_sat_present_(0), delta_q_sat_past_(0), sat_(false), delta_q_max_(0){}
-Tweak::Tweak(const double gain, const double max_change)
-  : gain_(-1./gain), max_change_(max_change), delta_q_inf_past_(0), delta_q_sat_present_(0), delta_q_sat_past_(0), sat_(false),
-  delta_q_max_(0) {}
+Tweak::Tweak(const double gain, const double max_change, const double max_tweak)
+  : gain_(-1./gain), max_change_(max_change), max_tweak_(max_tweak), delta_q_inf_past_(0), delta_q_sat_present_(0),
+    delta_q_sat_past_(0), sat_(false), delta_q_max_(0) {}
 Tweak::~Tweak() {}
 // operators
 // functions
@@ -46,6 +46,7 @@ double Tweak::adjust(const double Di)
 {
   double new_Di;
   new_Di = Di + max(min(gain_*(delta_q_sat_present_ - delta_q_sat_past_), max_change_), -max_change_);
+  new_Di = max(min(new_Di, max_tweak_), -max_tweak_);
 
   Serial.printf("              Tweak::adjust:, Di=%7.3f, new_Di=%7.3f,\n", Di, new_Di);
   
@@ -57,7 +58,8 @@ void Tweak::pretty_print(void)
 {
     Serial.printf("Tweak::");
     Serial.printf("  gain_ =                %7.3f; // Current correction to be made for charge error, A/Coulomb\n", gain_);
-    Serial.printf("  max_change_ =          %7.3f; // Maximum allowed calibration adjustment, A\n", max_change_);
+    Serial.printf("  max_change_ =          %7.3f; // Maximum allowed change to calibration adjustment see 'Dk', A\n", max_change_);
+    Serial.printf("  max_tweak_ =           %7.3f; // Maximum allowed calibration adjustment see 'Dx', A\n", max_tweak_);
     Serial.printf("  delta_q_inf_past_ =    %7.3f; // Charge infinity at past update, Coulombs\n", delta_q_inf_past_);
     Serial.printf("  delta_q_sat_present_ = %7.3f; // Charge infinity at saturation, present, Coulombs\n", delta_q_sat_present_);
     Serial.printf("  delta_q_sat_past_ =    %7.3f; // Charge infinity at saturation, past, Coulombs\n", delta_q_sat_past_);

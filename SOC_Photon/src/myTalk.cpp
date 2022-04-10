@@ -98,6 +98,11 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
             Serial.printf("Sim.Dv changed to %7.3f\n", Sim->Dv());
             break;
 
+          case ( 'x' ):
+            Twk->adjust_max(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk->max_tweak changed to %7.3f\n", Twk->max_tweak());
+            break;
+
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
         }
@@ -694,6 +699,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
   Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias_noamp); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("    : delta I adder to all sensed shunt current, A [0]"); 
   Serial.printf("  Dk= "); Serial.printf("%7.3f", rp.tweak_bias); Serial.println("    : tweak adder to all sensed shunt current, A [0]"); 
+  Serial.printf("  Dx= "); Serial.printf("%7.3f", Twk->max_tweak()); Serial.println("    : tweak adder maximum, A [1]"); 
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.println("    : delta T adder to sensed Tbatt, deg C [0]"); 
   Serial.printf("  Dv= "); Serial.print(Sim->Dv()); Serial.println("    : delta V adder to Vb measurement, V"); 
