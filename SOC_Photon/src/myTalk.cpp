@@ -484,6 +484,11 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
           case ( 't' ):
             switch ( cp.input_string.charAt(2) )
             {
+              case ( 'o' ):
+                rp.type = 8;
+                Serial.printf("Setting waveform to cosine.  rp.type = %d\n", rp.type);
+                break;
+
               case ( 's' ):
                 rp.type = 1;
                 Serial.printf("Setting waveform to sinusoid.  rp.type = %d\n", rp.type);
@@ -605,6 +610,17 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
                 Serial.printf("Run 'n<val> as needed to init south of sat.  Reset this whole thing by running 'Xp-1'\n");
                 break;
 
+              case ( 8 ):
+                self_talk("Xp0", Mon, Sim, Sen, Twk);
+                self_talk("m0.5", Mon, Sim, Sen, Twk);
+                rp.type = 8;
+                rp.freq = 0.05;
+                rp.amp = 6.;
+                if ( !rp.tweak_test ) rp.inj_soft_bias = -rp.amp;
+                rp.debug = -12;
+                rp.freq *= (2. * PI);
+                break;
+
               default:
                 Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
             }
@@ -717,7 +733,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
   Serial.printf("  Xx= "); Serial.printf("%d,   use model for Vbatt(1) and tweak_test(2) [0]\n", rp.modeling + rp.tweak_test);
   Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Injection amplitude A pk (0-18.3) [0]");
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println("  : Injection frequency Hz (0-2) [0]");
-  Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  's', 'q', 't' (sine, square, triangle)");
+  Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  'c', 's', 'q', 't' (cosine, sine, square, triangle)");
   Serial.printf("  Xo= "); Serial.printf("%7.3f", rp.inj_soft_bias); Serial.println("  : Injection inj_soft_bias A (-18.3-18.3) [0]");
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("  : Injection  A (unlimited) [0]");
   Serial.printf("  Xp= <?>, programmed injection settings...\n"); 
@@ -729,6 +745,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
   Serial.printf("       4:  -1C soft discharge until reset by Xp0 or Di0.  Software only\n");
   Serial.printf("       5:  +1C soft charge until reset by Xp0 or Di0.  Software only\n");
   Serial.printf("       6:  +0.2C hard charge until reset by Xp0 or Di0\n");
+  Serial.printf("       8:  1 Hz cosine centered at 0 with largest supported amplitude\n");
 
   Serial.printf("h   this menu\n");
 }

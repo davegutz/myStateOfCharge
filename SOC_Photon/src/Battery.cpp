@@ -338,6 +338,7 @@ BatteryModel::BatteryModel(const int num_cells,
     Sin_inj_ = new SinInj();
     Sq_inj_ = new SqInj();
     Tri_inj_ = new TriInj();
+    Cos_inj_ = new CosInj();
     sat_ib_null_ = 0.;          // Current cutback value for soc=1, A
     sat_cutback_gain_ = 1000.;  // Gain to retard ib when soc approaches 1, dimensionless
     model_saturated_ = false;
@@ -437,6 +438,7 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
   double tri_bias = 0.;
   double inj_bias = 0.;
   double bias = 0.;
+  double cos_bias = 0.;
   // Calculate injection amounts from user inputs (talk).
   // One-sided because PWM voltage >0.  rp.inj_soft_bias applied elsewhere
   switch ( type )
@@ -456,10 +458,13 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
     case ( 6 ):   // Positve bias
       bias = amp;
       break;
+    case ( 8 ):   // Cosine wave
+      cos_bias = Cos_inj_->signal(amp, freq, t, 0.0);
+      break;
     default:
       break;
   }
-  inj_bias = sin_bias + square_bias + tri_bias + bias;
+  inj_bias = sin_bias + square_bias + tri_bias + bias + cos_bias;
   if ( rp.tweak_test )   // Use inj_soft_bias path, bypassing PWM that has limited hardware range
   {
     duty_ = 0UL;

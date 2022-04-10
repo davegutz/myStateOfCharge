@@ -270,6 +270,7 @@ protected:
   SinInj *Sin_inj_;     // Class to create sine waves
   SqInj *Sq_inj_;       // Class to create square waves
   TriInj *Tri_inj_;     // Class to create triangle waves
+  CosInj *Cos_inj_;     // Class to create sosine waves
   uint32_t duty_;       // Calculated duty cycle for D2 driver to ADC cards (0-255).  Bias on rp.inj_soft_bias
   double sat_ib_max_;   // Current cutback to be applied to modeled ib output, A
   double sat_ib_null_;  // Current cutback value for voc=vsat, A

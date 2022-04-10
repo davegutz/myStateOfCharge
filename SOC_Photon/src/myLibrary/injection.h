@@ -44,6 +44,20 @@ class SinInj
 
   protected:
 };
+// Cosine wave signal generation
+// No attempt to control phase....may need to revise later
+class CosInj
+{
+  public:
+    CosInj(){};
+    ~CosInj();
+    double signal(const double amp, const double freq_rps, const double t, const double inj_soft_bias)
+    {
+      return ( amp*(cos(freq_rps*t)) + inj_soft_bias );
+    }
+
+  protected:
+};
 // Square wave signal generation
 class SqInj
 {
