@@ -465,6 +465,7 @@ void loop()
   control = ControlSync->update(millis(), reset);               //  now || reset
   if ( control )
   {
+    if ( rp.debug>102 ) Serial.printf("started control at %ld.  rp.duty=%ld\n", millis(), rp.duty);
     pwm_write(rp.duty, myPins);
     if ( rp.debug>102 ) Serial.printf("completed control at %ld.  rp.duty=%ld\n", millis(), rp.duty);
   }

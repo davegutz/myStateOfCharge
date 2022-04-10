@@ -32,7 +32,8 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // class Tweak
 // constructors
 Tweak::Tweak()
-  : gain_(0), max_change_(0), delta_q_inf_past_(0), delta_q_sat_present_(0), delta_q_sat_past_(0), sat_(false), delta_q_max_(0){}
+  : gain_(0), max_change_(0), delta_q_inf_past_(0), delta_q_sat_present_(0), delta_q_sat_past_(0), sat_(false),
+  delta_q_max_(0) {}
 Tweak::Tweak(const double gain, const double max_change, const double max_tweak)
   : gain_(-1./gain), max_change_(max_change), max_tweak_(max_tweak), delta_q_inf_past_(0), delta_q_sat_present_(0),
     delta_q_sat_past_(0), sat_(false), delta_q_max_(0) {}
@@ -44,11 +45,12 @@ Tweak::~Tweak() {}
 // Do the tweak
 double Tweak::adjust(const double Di)
 {
+  if ( delta_q_sat_past_==0.0 ) return ( Di );
   double new_Di;
   new_Di = Di + max(min(gain_*(delta_q_sat_present_ - delta_q_sat_past_), max_change_), -max_change_);
   new_Di = max(min(new_Di, max_tweak_), -max_tweak_);
 
-  Serial.printf("              Tweak::adjust:, Di=%7.3f, new_Di=%7.3f,\n", Di, new_Di);
+  Serial.printf("              Tweak::adjust:, past=%10.1f, pres=%10.1f, Di=%7.3f, new_Di=%7.3f,\n", delta_q_sat_past_, delta_q_sat_present_, Di, new_Di);
   
   return ( new_Di );
 }
@@ -111,7 +113,8 @@ boolean Tweak::update(const double delta_q_inf, const boolean is_sat)
     }
   }
   delta_q_inf_past_ = delta_q_inf;
-  if ( rp.debug==88 ) Serial.printf("Tweak::update:,  sat=%d, delta_q_inf_past=%10.1f, delta_q_sat_past=%10.1f, delta_q_sat_present=%10.1f,\n", sat_, delta_q_inf_past_, delta_q_sat_past_, delta_q_sat_present_);
+  if ( rp.debug==88 ) Serial.printf("Tweak::update:,  sat=%d, delta_q_inf_past=%10.1f, delta_q_sat_past=%10.1f, delta_q_sat_present=%10.1f,\n",
+    sat_, delta_q_inf_past_, delta_q_sat_past_, delta_q_sat_present_);
 
   return ( have_new );
 }
