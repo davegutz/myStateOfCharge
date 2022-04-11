@@ -161,6 +161,7 @@ public:
   double dv_dsoc() { return (dv_dsoc_); };
   double Dv() { return (dv_); };
   double Sr() { return (sr_); };
+  double voc() { return (voc_); };
   double voc_soc(const double soc, const double temp_c);
   double hys_scale() { return (hys_->scale()*hys_->direx()); };
   void hys_scale(const double scale) { hys_->apply_scale(scale); };

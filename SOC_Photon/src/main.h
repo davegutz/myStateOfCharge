@@ -399,7 +399,8 @@ void loop()
     Mon->calculate_ekf(Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T));
     
     // Debounce saturation calculation done in ekf using voc model
-    Sen->saturated = SatDebounce->calculate(is_sat(Sen->Tbatt_filt, Mon->voc_stat(), Mon->soc()), reset);
+    boolean sat = is_sat(Sen->Tbatt_filt, Mon->voc(), Mon->soc());
+    Sen->saturated = SatDebounce->calculate(sat, reset);
 
     // Memory store
     Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
@@ -409,7 +410,7 @@ void loop()
     Mon->calculate_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ishunt,Mon->soc());
 
     // Adjust current
-    if ( Twk->update(rp.delta_q_inf, is_sat(Sen->Tbatt_filt, Mon->voc_stat(), Mon->soc())) )
+    if ( Twk->update(rp.delta_q_inf, sat) )
         rp.tweak_bias = Twk->adjust(rp.tweak_bias);
     //////////////////////////////////////////////////////////////
 

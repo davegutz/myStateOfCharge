@@ -19,6 +19,7 @@
 */
 /**************************************************************************/
 #include "Adafruit_ADS1X15.h"
+const uint16_t count_max = 200;
 
 /**************************************************************************/
 /*!
@@ -140,7 +141,6 @@ int16_t Adafruit_ADS1X15::readADC_SingleEnded(uint8_t channel) {
 
   // Wait for the conversion to complete
   uint16_t count = 0;
-  const uint16_t count_max = 100;
   while ( !conversionComplete() && ++count<count_max )
     ;
   if ( count==count_max ) Serial.printf("WARNING(readADC_SingleEnded):  timed out hardcoded count limit**********************\n");
@@ -184,7 +184,6 @@ int16_t Adafruit_ADS1X15::readADC_Differential_0_1() {
 
   // Wait for the conversion to complete
   uint16_t count = 0;
-  const uint16_t count_max = 100;
   while ( !conversionComplete() && ++count<count_max )
     ;
   if ( count==count_max ) Serial.printf("WARNING(readADC_Differential_0_1):  timed out hardcoded count limit**********************\n");
@@ -228,7 +227,6 @@ int16_t Adafruit_ADS1X15::readADC_Differential_2_3() {
 
   // Wait for the conversion to complete
   uint16_t count = 0;
-  const uint16_t count_max = 100;
   while ( !conversionComplete() && ++count<count_max )
     ;
   if ( count==count_max ) Serial.printf("WARNING(readADC_Differential_2_3):  timed out hardcoded count limit**********************\n");
