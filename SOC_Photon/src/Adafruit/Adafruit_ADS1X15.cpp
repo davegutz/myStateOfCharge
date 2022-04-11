@@ -139,8 +139,11 @@ int16_t Adafruit_ADS1X15::readADC_SingleEnded(uint8_t channel) {
   writeRegister(ADS1X15_REG_POINTER_CONFIG, config);
 
   // Wait for the conversion to complete
-  while (!conversionComplete())
+  uint16_t count = 0;
+  const uint16_t count_max = 100;
+  while ( !conversionComplete() && ++count<count_max )
     ;
+  if ( count==count_max ) Serial.printf("WARNING(readADC_SingleEnded):  timed out hardcoded count limit**********************\n");
 
   // Read the conversion results
   return getLastConversionResults();
@@ -224,8 +227,11 @@ int16_t Adafruit_ADS1X15::readADC_Differential_2_3() {
   writeRegister(ADS1X15_REG_POINTER_CONFIG, config);
 
   // Wait for the conversion to complete
-  while (!conversionComplete())
+  uint16_t count = 0;
+  const uint16_t count_max = 100;
+  while ( !conversionComplete() && ++count<count_max )
     ;
+  if ( count==count_max ) Serial.printf("WARNING(readADC_Differential_2_3):  timed out hardcoded count limit**********************\n");
 
   // Read the conversion results
   return getLastConversionResults();
