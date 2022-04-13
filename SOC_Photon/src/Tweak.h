@@ -29,7 +29,7 @@ class Tweak
 {
 public:
   Tweak();
-  Tweak(const double gain, const double max_change, const double max_tweak);
+  Tweak(const double gain, const double max_change, const double max_tweak, const unsigned long int time_to_wait);
   ~Tweak();
   // operators
   // functions
@@ -38,8 +38,8 @@ public:
   double max_tweak() { return( max_tweak_ ); };
   void pretty_print();
   void reset();
-  boolean update(const double delta_q_inf, const boolean is_sat);
-  void save_new_sat(void);
+  boolean update(const double delta_q_inf, const boolean is_sat, unsigned long int now);
+  void save_new_sat(unsigned long int now);
 protected:
   double gain_;
   double max_change_;
@@ -49,6 +49,8 @@ protected:
   double delta_q_sat_past_;
   boolean sat_;
   double delta_q_max_;          // Running tab since last de-saturation of potential new delta_q_sat
+  unsigned long int time_sat_past_;
+  unsigned long int time_to_wait_;
 };
 
 #endif

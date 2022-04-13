@@ -33,10 +33,10 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // constructors
 Tweak::Tweak()
   : gain_(0), max_change_(0), delta_q_inf_past_(0), delta_q_sat_present_(0), delta_q_sat_past_(0), sat_(false),
-  delta_q_max_(0) {}
-Tweak::Tweak(const double gain, const double max_change, const double max_tweak)
+  delta_q_max_(0), time_sat_past_(0UL), time_to_wait_(0UL) {}
+Tweak::Tweak(const double gain, const double max_change, const double max_tweak, const unsigned long int time_to_wait)
   : gain_(-1./gain), max_change_(max_change), max_tweak_(max_tweak), delta_q_inf_past_(0), delta_q_sat_present_(0),
-    delta_q_sat_past_(0), sat_(false), delta_q_max_(0) {}
+    delta_q_sat_past_(0), sat_(false), delta_q_max_(0), time_sat_past_(millis()), time_to_wait_(time_to_wait) {}
 Tweak::~Tweak() {}
 // operators
 // functions
@@ -66,6 +66,8 @@ void Tweak::pretty_print(void)
     Serial.printf("  delta_q_sat_present_ = %7.3f; // Charge infinity at saturation, present, Coulombs\n", delta_q_sat_present_);
     Serial.printf("  delta_q_sat_past_ =    %7.3f; // Charge infinity at saturation, past, Coulombs\n", delta_q_sat_past_);
     Serial.printf("  sat_ =                 %d;    // Saturation status, T=saturated\n", sat_);
+    Serial.printf("  now-time_sat_past_ =   %7.3f; // Time since last allowed saturation, hr\n", double(millis()-time_sat_past_)/3600000.);
+    Serial.printf("  time_to_wait =         %7.3f; // Time to wait before allowing saturation, hr\n", double(time_to_wait_)/3600000.);
     Serial.printf("  tweak_bias =           %7.3f; // Bias on current, A\n", rp.tweak_bias);
 }
 
@@ -80,24 +82,25 @@ void Tweak::reset(void)
 }
 
 // Save new result
-void Tweak::save_new_sat(void)
+void Tweak::save_new_sat(unsigned long int now)
 {
   delta_q_sat_past_ = delta_q_sat_present_;
   delta_q_sat_present_ = delta_q_max_;
   delta_q_max_ = -q_cap_rated;                // Reset
   sat_ = false;
+  time_sat_past_ = now;
 }
 
 // Monitor the process and return status
-boolean Tweak::update(const double delta_q_inf, const boolean is_sat)
+boolean Tweak::update(const double delta_q_inf, const boolean is_sat, unsigned long int now)
 {
   boolean have_new = false;
   if ( sat_ )
   {
-    if ( !is_sat )
+    if ( !is_sat && ((now-time_sat_past_)>time_to_wait_) )
     {
       have_new = true;
-      save_new_sat();
+      save_new_sat(now);
     }
     else
     {
@@ -113,8 +116,8 @@ boolean Tweak::update(const double delta_q_inf, const boolean is_sat)
     }
   }
   delta_q_inf_past_ = delta_q_inf;
-  if ( rp.debug==88 ) Serial.printf("Tweak::update:,  sat=%d, delta_q_inf_past=%10.1f, delta_q_sat_past=%10.1f, delta_q_sat_present=%10.1f,\n",
-    sat_, delta_q_inf_past_, delta_q_sat_past_, delta_q_sat_present_);
+  if ( rp.debug==88 ) Serial.printf("Tweak::update:,  delta_q_inf=%10.1f, is_sat=%d, now=%ld, sat=%d, delta_q_inf_past=%10.1f, delta_q_sat_past=%10.1f, delta_q_sat_present=%10.1f, time_sat_past=%ld,\n",
+    delta_q_inf, is_sat, now, sat_, delta_q_inf_past_, delta_q_sat_past_, delta_q_sat_present_, time_sat_past_);
 
   return ( have_new );
 }

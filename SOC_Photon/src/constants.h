@@ -106,5 +106,6 @@ const uint16_t temp_delay = 1;          // Time to block temperature sensor read
 #define TWEAK_GAIN        10000.  // Estimate of A calibration change for accumulated charge error, Coulomb/A
 #define TWEAK_MAX_CHANGE  0.05    // Maximum allowed tweak per charge cycle, A
 #define TWEAK_MAX         1.      // Maximum tweak allowed, +/- A
+#define EIGHTEEN_HRS      64800000UL // Battery state tracking and reporting, ms (64800000UL = 18 hrs)
 
 #endif // CONSTANTS_H_

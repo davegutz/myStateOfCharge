@@ -277,7 +277,7 @@ void loop()
   static uint8_t last_publishS_debug = 0;    // Remember first time with new debug to print headers
 
   // Tweak current sensing accuracy
-  static Tweak *Twk = new Tweak(TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX);
+  static Tweak *Twk = new Tweak(TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS);
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
@@ -410,7 +410,7 @@ void loop()
     Mon->calculate_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ishunt,Mon->soc());
 
     // Adjust current
-    if ( Twk->update(rp.delta_q_inf, sat) )
+    if ( Twk->update(rp.delta_q_inf, sat, now) )
         rp.tweak_bias = Twk->adjust(rp.tweak_bias);
     //////////////////////////////////////////////////////////////
 
