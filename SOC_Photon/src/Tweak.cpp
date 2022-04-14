@@ -58,17 +58,17 @@ double Tweak::adjust(const double Di)
 // Print
 void Tweak::pretty_print(void)
 {
-    Serial.printf("Tweak::");
-    Serial.printf("  gain_ =                %7.3f; // Current correction to be made for charge error, A/Coulomb\n", gain_);
-    Serial.printf("  max_change_ =          %7.3f; // Maximum allowed change to calibration adjustment see 'Dk', A\n", max_change_);
-    Serial.printf("  max_tweak_ =           %7.3f; // Maximum allowed calibration adjustment see 'Dx', A\n", max_tweak_);
-    Serial.printf("  delta_q_inf_past_ =    %7.3f; // Charge infinity at past update, Coulombs\n", delta_q_inf_past_);
-    Serial.printf("  delta_q_sat_present_ = %7.3f; // Charge infinity at saturation, present, Coulombs\n", delta_q_sat_present_);
-    Serial.printf("  delta_q_sat_past_ =    %7.3f; // Charge infinity at saturation, past, Coulombs\n", delta_q_sat_past_);
+    Serial.printf("Tweak::\n");
+    Serial.printf("  gain_ =               %10.6f; // Current correction to be made for charge error see 'Dg', A/Coulomb\n", gain_);
+    Serial.printf("  max_change_ =             %7.3f; // Maximum allowed change to calibration adjustment see 'DC', A\n", max_change_);
+    Serial.printf("  max_tweak_ =              %7.3f; // Maximum allowed calibration adjustment see 'Dx', A\n", max_tweak_);
+    Serial.printf("  delta_q_inf_past_ =    %10.1f; // Charge infinity at past update, Coulombs\n", delta_q_inf_past_);
+    Serial.printf("  delta_q_sat_present_ = %10.1f; // Charge infinity at saturation, present see 'Dp', Coulombs\n", delta_q_sat_present_);
+    Serial.printf("  delta_q_sat_past_ =    %10.1f; // Charge infinity at saturation, past see 'Dp', Coulombs\n", delta_q_sat_past_);
     Serial.printf("  sat_ =                 %d;    // Saturation status, T=saturated\n", sat_);
-    Serial.printf("  now-time_sat_past_ =   %7.3f; // Time since last allowed saturation, hr\n", double(millis()-time_sat_past_)/3600000.);
+    Serial.printf("  now-time_sat_past_ =   %7.3f; // Time since last allowed saturation see 'Dz', hr\n", double(millis()-time_sat_past_)/3600000.);
     Serial.printf("  time_to_wait =         %7.3f; // Time to wait before allowing saturation, hr\n", double(time_to_wait_)/3600000.);
-    Serial.printf("  tweak_bias =           %7.3f; // Bias on current, A\n", rp.tweak_bias);
+    Serial.printf("  tweak_bias =           %7.3f; // Bias on current see 'Dk', A\n", rp.tweak_bias);
 }
 
 // Reset on demand

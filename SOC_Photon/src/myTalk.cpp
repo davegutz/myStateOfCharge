@@ -69,6 +69,21 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
             Serial.printf("rp.curr_bias_noamp changed to %7.3f\n", rp.curr_bias_noamp);
             break;
 
+          case ( 'c' ):
+            rp.vbatt_bias = cp.input_string.substring(2).toFloat();
+            Serial.printf("rp.vbatt_bias changed to %7.3f\n", rp.vbatt_bias);
+            break;
+
+          case ( 'C' ):
+            Twk->max_change(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk->max_change_ changed to %10.6f\n", Twk->max_change());
+            break;
+
+          case ( 'g' ):
+            Twk->gain(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk->gain_ changed to %10.6f\n", Twk->gain());
+            break;
+
           case ( 'i' ):
             rp.curr_bias_all = cp.input_string.substring(2).toFloat();
             Serial.printf("rp.curr_bias_all changed to %7.3f\n", rp.curr_bias_all);
@@ -79,9 +94,11 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
             Serial.printf("rp.tweak_bias changed to %7.3f\n", rp.tweak_bias);
             break;
 
-          case ( 'c' ):
-            rp.vbatt_bias = cp.input_string.substring(2).toFloat();
-            Serial.printf("rp.vbatt_bias changed to %7.3f\n", rp.vbatt_bias);
+          case ( 'p' ):
+            Twk->delta_q_sat_present(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk->q_sat_present_ changed to %10.1f\n", Twk->delta_q_sat_present());
+            Twk->delta_q_sat_past(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk->q_sat_past_ changed to %10.1f\n", Twk->delta_q_sat_past());
             break;
 
           case ( 't' ):
@@ -99,8 +116,13 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
             break;
 
           case ( 'x' ):
-            Twk->adjust_max(cp.input_string.substring(2).toFloat());
+            Twk->max_tweak(cp.input_string.substring(2).toFloat());
             Serial.printf("Twk->max_tweak changed to %7.3f\n", Twk->max_tweak());
+            break;
+
+          case ( 'z' ):
+            Twk->time_sat_past(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk->time_sat_past changed to %7.3f\n", Twk->time_sat_past());
             break;
 
           default:
@@ -652,7 +674,6 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
         break;
     }
 
-    Serial.printf("done with %s\n", cp.input_string.c_str());
     cp.input_string = "";
     cp.string_complete = false;
   }
@@ -694,15 +715,24 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
   Serial.printf("  +/-96:   CC saturation\n");
   Serial.printf("  +/-97:   CC model saturation\n");
 
+
+
   Serial.printf("D/S<?> Adjustments.   For example:\n");
   Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_bias_amp); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
   Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias_noamp); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("    : delta I adder to all sensed shunt current, A [0]"); 
-  Serial.printf("  Dk= "); Serial.printf("%7.3f", rp.tweak_bias); Serial.println("    : tweak adder to all sensed shunt current, A [0]"); 
-  Serial.printf("  Dx= "); Serial.printf("%7.3f", Twk->max_tweak()); Serial.println("    : tweak adder maximum, A [1]"); 
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.println("    : delta T adder to sensed Tbatt, deg C [0]"); 
   Serial.printf("  Dv= "); Serial.print(Sim->Dv()); Serial.println("    : delta V adder to Vb measurement, V"); 
+
+  Serial.printf("  DC= "); Serial.printf("%7.3f", Twk->max_change()); Serial.println("    : tweak max change allowed, A [0.05]"); 
+  Serial.printf("  Dg= "); Serial.printf("%7.3f", Twk->gain()); Serial.println("    : tweak gain = correction to be made for charge, A/Coulomb [0.0001]"); 
+  Serial.printf("  Dk= "); Serial.printf("%7.3f", rp.tweak_bias); Serial.println("    : tweak adder to all sensed shunt current, A [0]"); 
+  Serial.printf("  Dp= "); Serial.printf("%10.1f", Twk->delta_q_sat_past()); Serial.println("    : tweak past charge infinity at sat, C [varies]"); 
+  Serial.printf("      %10.1f", Twk->delta_q_sat_present()); Serial.println("    : tweak present charge infinity at sat, C [varies]"); 
+  Serial.printf("  Dx= "); Serial.printf("%7.3f", Twk->max_tweak()); Serial.println("    : tweak adder maximum, A [1]"); 
+  Serial.printf("  Dz= "); Serial.printf("%7.3f", Twk->time_sat_past()); Serial.println("    : tweak time since last tweak, hr [varies]"); 
+
   Serial.printf("  Sc= "); Serial.print(Sim->q_capacity()/Mon->q_capacity()); Serial.println("    : Scalar battery model size"); 
   Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.println("    : hysteresis scalar 1e-6 - 100");
   Serial.printf("  Sr= "); Serial.print(Sim->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 

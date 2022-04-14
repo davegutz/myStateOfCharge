@@ -398,7 +398,6 @@ void serialEvent()
       cp.input_string.replace(",","");
       cp.input_string.replace(" ","");
       cp.input_string.replace("=","");
-      Serial.printf("handling %s...\n", cp.input_string.c_str());
       break;  // enable reading multiple inputs
     }
   }

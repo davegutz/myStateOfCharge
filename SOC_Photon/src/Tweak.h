@@ -34,10 +34,20 @@ public:
   // operators
   // functions
   double adjust(const double Di);
-  void adjust_max(const double new_max_tweak) { max_tweak_ = max(new_max_tweak, 0.); };
+  double delta_q_sat_past() { return( delta_q_sat_past_ ); };
+  void delta_q_sat_past(const double new_delta_q_sat_past) { delta_q_sat_past_ = new_delta_q_sat_past; };
+  double delta_q_sat_present() { return( delta_q_sat_present_ ); };
+  void delta_q_sat_present(const double new_delta_q_sat_present) { delta_q_sat_present_ = new_delta_q_sat_present; };
+  double gain() { return( gain_ ); };
+  void gain(const double new_gain) { gain_ = new_gain; };
+  double max_change() { return( max_change_ ); };
+  void max_change(const double new_max) { max_change_ = abs(new_max); };
   double max_tweak() { return( max_tweak_ ); };
+  void max_tweak(const double new_max_tweak) { max_tweak_ = max(new_max_tweak, 0.); };
   void pretty_print();
   void reset();
+  double time_sat_past() { return( double(millis()-time_sat_past_)/3600000. ); };
+  void time_sat_past(const double new_time) { time_sat_past_ = millis()-(unsigned long int)(new_time*3600000.); };
   boolean update(const double delta_q_inf, const boolean is_sat, unsigned long int now);
   void save_new_sat(unsigned long int now);
 protected:
