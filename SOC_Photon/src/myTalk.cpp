@@ -726,7 +726,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
   Serial.printf("  Dv= "); Serial.print(Sim->Dv()); Serial.println("    : delta V adder to Vb measurement, V"); 
 
   Serial.printf("  DC= "); Serial.printf("%7.3f", Twk->max_change()); Serial.println("    : tweak max change allowed, A [0.05]"); 
-  Serial.printf("  Dg= "); Serial.printf("%7.3f", Twk->gain()); Serial.println("    : tweak gain = correction to be made for charge, A/Coulomb [0.0001]"); 
+  Serial.printf("  Dg= "); Serial.printf("%7.6f", Twk->gain()); Serial.println("    : tweak gain = correction to be made for charge, A/Coulomb [0.0001]"); 
   Serial.printf("  Dk= "); Serial.printf("%7.3f", rp.tweak_bias); Serial.println("    : tweak adder to all sensed shunt current, A [0]"); 
   Serial.printf("  Dp= "); Serial.printf("%10.1f", Twk->delta_q_sat_past()); Serial.println("    : tweak past charge infinity at sat, C [varies]"); 
   Serial.printf("      %10.1f", Twk->delta_q_sat_present()); Serial.println("    : tweak present charge infinity at sat, C [varies]"); 
