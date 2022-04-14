@@ -94,9 +94,12 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
             Serial.printf("rp.tweak_bias changed to %7.3f\n", rp.tweak_bias);
             break;
 
-          case ( 'p' ):
+          case ( 'P' ):
             Twk->delta_q_sat_present(cp.input_string.substring(2).toFloat());
             Serial.printf("Twk->q_sat_present_ changed to %10.1f\n", Twk->delta_q_sat_present());
+            break;
+
+          case ( 'p' ):
             Twk->delta_q_sat_past(cp.input_string.substring(2).toFloat());
             Serial.printf("Twk->q_sat_past_ changed to %10.1f\n", Twk->delta_q_sat_past());
             break;
@@ -729,7 +732,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
   Serial.printf("  Dg= "); Serial.printf("%7.6f", Twk->gain()); Serial.println("    : tweak gain = correction to be made for charge, A/Coulomb [0.0001]"); 
   Serial.printf("  Dk= "); Serial.printf("%7.3f", rp.tweak_bias); Serial.println("    : tweak adder to all sensed shunt current, A [0]"); 
   Serial.printf("  Dp= "); Serial.printf("%10.1f", Twk->delta_q_sat_past()); Serial.println("    : tweak past charge infinity at sat, C [varies]"); 
-  Serial.printf("      %10.1f", Twk->delta_q_sat_present()); Serial.println("    : tweak present charge infinity at sat, C [varies]"); 
+  Serial.printf("  DP= "); Serial.printf("%10.1f", Twk->delta_q_sat_present()); Serial.println("    : tweak present charge infinity at sat, C [varies]"); 
   Serial.printf("  Dx= "); Serial.printf("%7.3f", Twk->max_tweak()); Serial.println("    : tweak adder maximum, A [1]"); 
   Serial.printf("  Dz= "); Serial.printf("%7.3f", Twk->time_sat_past()); Serial.println("    : tweak time since last tweak, hr [varies]"); 
 

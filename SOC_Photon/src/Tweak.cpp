@@ -63,7 +63,7 @@ void Tweak::pretty_print(void)
     Serial.printf("  max_change_ =             %7.3f; // Maximum allowed change to calibration adjustment see 'DC', A\n", max_change_);
     Serial.printf("  max_tweak_ =              %7.3f; // Maximum allowed calibration adjustment see 'Dx', A\n", max_tweak_);
     Serial.printf("  delta_q_inf_past_ =    %10.1f; // Charge infinity at past update, Coulombs\n", delta_q_inf_past_);
-    Serial.printf("  delta_q_sat_present_ = %10.1f; // Charge infinity at saturation, present see 'Dp', Coulombs\n", delta_q_sat_present_);
+    Serial.printf("  delta_q_sat_present_ = %10.1f; // Charge infinity at saturation, present see 'DP', Coulombs\n", delta_q_sat_present_);
     Serial.printf("  delta_q_sat_past_ =    %10.1f; // Charge infinity at saturation, past see 'Dp', Coulombs\n", delta_q_sat_past_);
     Serial.printf("  sat_ =                 %d;    // Saturation status, T=saturated\n", sat_);
     Serial.printf("  now-time_sat_past_ =   %7.3f; // Time since last allowed saturation see 'Dz', hr\n", double(millis()-time_sat_past_)/3600000.);
