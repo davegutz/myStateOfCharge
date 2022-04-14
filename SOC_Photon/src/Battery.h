@@ -30,6 +30,8 @@
 #include "myLibrary/StateSpace.h"
 #include "Coulombs.h"
 #include "myLibrary/injection.h"
+#include "myLibrary/myFilters.h"
+#include "constants.h"
 
 // BattleBorn 100 Ah, 12v LiFePO4
 #define NOM_SYS_VOLT          12.       // Nominal system output, V, at which the reported amps are used (12)
@@ -50,7 +52,7 @@
 #define TCHARGE_DISPLAY_DEADBAND 0.1    // Inside this +/- deadband, charge time is displayed '---', A
 const double max_voc = 1.2*NOM_SYS_VOLT;// Prevent windup of battery model, V
 const int batt_num_cells = NOM_SYS_VOLT/3;  // Number of standard 3 volt LiFePO4 cells
-const double batt_vsat = double(batt_num_cells)*double(BATT_V_SAT);  // Total bank saturation for 0.997=soc, V
+const double batt_vsat = double(batt_num_cells)*double(BATT_V_SAT) - HDB_VBATT;  // Total bank saturation for 0.997=soc, V
 const double batt_vmax = (14.3/4)*double(batt_num_cells); // Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
 const double batt_r1 = double(BATT_R1);     // Randels static resistance per cell, Ohms
 const double batt_r2 = double(BATT_R2);     // Randels dynamic resistance per cell, Ohms
@@ -209,7 +211,7 @@ public:
   BatteryMonitor();
   BatteryMonitor(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale);
+    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale, const double hdb_vbatt);
   ~BatteryMonitor();
   // operators
   // functions
@@ -223,6 +225,7 @@ public:
   double SOC_ekf() { return (SOC_ekf_); };
   double tcharge() { return (tcharge_); };
   double voc() { return (voc_); };
+  double voc_filt() { return (voc_filt_); };
   double voc_dyn() { return (voc_dyn_); };
   double voc_stat() { return (voc_stat_); };
   double amp_hrs_remaining() { return (amp_hrs_remaining_); };
@@ -239,6 +242,8 @@ protected:
   double q_ekf_;    // Filtered charge calculated by ekf, C
   void ekf_model_predict(double *Fx, double *Bu);
   void ekf_model_update(double *hx, double *H);
+  double voc_filt_; // Filtered, static model open circuit voltage, V
+  SlidingDeadband *SdVbatt_;  // Sliding deadband filter for Vbatt
 };
 
 

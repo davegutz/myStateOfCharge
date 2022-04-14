@@ -67,7 +67,6 @@ struct Sensors
 {
   double Vbatt;           // Sensed battery voltage, V
   double Vbatt_model;     // Sim coefficient model battery voltage based on filtered current, V
-  // double Vbatt_filt;      // Filtered, sensed battery voltage, V
   double Tbatt;           // Sensed battery temp, C
   double Tbatt_filt;      // Filtered, sensed battery temp, C
   int16_t Vshunt_amp_int; // Sensed shunt voltage, count

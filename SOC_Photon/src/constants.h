@@ -80,10 +80,11 @@
 #define F_Z             0.80        // General filter zeta (0.80)
 #define F_W_T           0.05        // Temperature filter wn, r/s (0.05)   
 #define F_Z_T           0.80        // Temperature filter zeta (0.80)
-#define SAT_PERSISTENCE 50          // Updates persistence on saturation tests (50 was 25 trips)
-#define HDB_TBATT       0.06        // Half deadband to filter Tbatt, F (0.06)
-
 #define NSUM            90          // Number of saved summaries.   If too large, will get compile error
+#define HDB_TBATT       0.06        // Half deadband to filter Tbatt, F (0.06)
+#define HDB_VBATT       0.05        // Half deadband to filter Vbatt, V (0.05)
+const double t_sat = 5.;            // Saturation time, sec
+const double t_desat = t_sat * 2.;  // De-saturation time, sec ('up 2 down 1')
 
 // Conversion gains
 const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  

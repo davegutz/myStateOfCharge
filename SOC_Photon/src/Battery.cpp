@@ -26,7 +26,6 @@
 #endif
 #include "Battery.h"
 #include "retained.h"
-#include "myLibrary/EKF_1x1.h"
 #include <math.h>
 #include "constants.h"
 extern RetainedPars rp; // Various parameters to be static at system level
@@ -158,13 +157,14 @@ BatteryMonitor::BatteryMonitor(): Battery()
 }
 BatteryMonitor::BatteryMonitor(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx) :
-    Battery(num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_direx), tcharge_(24)
+    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx, const double hdb_vbatt) :
+    Battery(num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_direx), tcharge_(24), voc_filt_(batt_vsat)
 {
 
     // EKF
     this->Q_ = 0.001*0.001;
     this->R_ = 0.1*0.1;
+    SdVbatt_ = new SlidingDeadband(hdb_vbatt);
 }
 BatteryMonitor::~BatteryMonitor() {}
 
@@ -194,12 +194,14 @@ double BatteryMonitor::calculate_ekf(const double temp_c, const double vb, const
     // Hysteresis model
     hys_->calculate(ib_, voc_dyn_, soc_);
     voc_ = hys_->update(dt);
+    voc_filt_ = SdVbatt_->update(voc_);
     ioc_ = hys_->ioc();
     bms_off_ = temp_c_ <= low_t;    // KISS
     if ( bms_off_ )
     {
         ib_ = 0.;
         voc_ = voc_stat_;
+        voc_filt_ = voc_stat_;
         vdyn_ = voc_stat_;
         voc_dyn_ = 0.;
     }
@@ -212,11 +214,11 @@ double BatteryMonitor::calculate_ekf(const double temp_c, const double vb, const
     SOC_ekf_ = q_ekf_ / q_cap_rated_scaled_ * 100.;
 
     if ( rp.debug==34 )
-        Serial.printf("dt,ib,voc_dyn,voc,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
-            dt, ib_, voc_dyn_, voc_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
+        Serial.printf("dt,ib,voc_dyn,voc,voc_filt,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
+            dt, ib_, voc_dyn_, voc_, voc_filt_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
     if ( rp.debug==-34 )
-        Serial.printf("dt,ib,voc_dyn,voc,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,  \n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
-            dt, ib_, voc_dyn_, voc_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
+        Serial.printf("dt,ib,voc_dyn,voc,voc_filt,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,  \n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
+            dt, ib_, voc_dyn_, voc_, voc_filt_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
     if ( rp.debug==37 )
         Serial.printf("ib,vb,voc_dyn,voc(z_),  K_,y_,SOC_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
             ib_, vb_, voc_dyn_, voc_,     K_, y_, soc_ekf_);
@@ -289,6 +291,7 @@ void BatteryMonitor::pretty_print(void)
 {
     Serial.printf("BatteryMonitor::");
     this->Battery::pretty_print();
+    Serial.printf("  voc_filt_ = %7.3f;  // Filtered open circuit voltage for saturation detect, V\n", voc_filt_);
     Serial.printf("  voc_stat_ = %7.3f;  // Static model open circuit voltage from table, V\n", voc_stat_);
     Serial.printf("  q_ekf =%10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
     Serial.printf("  tcharge =    %5.1f; // Charging time to full, hr\n", tcharge_);

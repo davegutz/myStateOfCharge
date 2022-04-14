@@ -237,13 +237,14 @@ void loop()
   // Free, driven by soc
   // Instantiate the table
   static BatteryMonitor *Mon = new BatteryMonitor(batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
-    dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, -1.);
+    dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, -1., HDB_VBATT);
   // Sim, driven by soc, used to get Vbatt.   Use Talk 'x' to toggle model on/off. 
   static BatteryModel *Sim = new BatteryModel(batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
     dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, 1.);
 
-  // Battery saturation
-  static Debounce *SatDebounce = new Debounce(true, SAT_PERSISTENCE);       // Updates persistence
+  // Battery saturation debounce
+  // static Debounce *SatDebounce = new Debounce(true, 50);       // Updates persistence
+  static TFDelay *Is_sat_delay = new TFDelay();   // Time persistence
 
   unsigned long current_time;               // Time result
   static unsigned long now = millis();      // Keep track of time
@@ -399,8 +400,10 @@ void loop()
     Mon->calculate_ekf(Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T));
     
     // Debounce saturation calculation done in ekf using voc model
-    boolean sat = is_sat(Sen->Tbatt_filt, Mon->voc(), Mon->soc());
-    Sen->saturated = SatDebounce->calculate(sat, reset);
+    // boolean sat = is_sat(Sen->Tbatt_filt, Mon->voc(), Mon->soc());
+    boolean sat = is_sat(Sen->Tbatt_filt, Mon->voc_filt(), Mon->soc());
+    // Sen->saturated = SatDebounce->calculate(sat, reset);
+    Sen->saturated = Is_sat_delay->calculate(sat, t_sat, t_desat, min(Sen->T, t_sat/2.), reset);
 
     // Memory store
     Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);

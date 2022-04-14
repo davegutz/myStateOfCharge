@@ -152,6 +152,7 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->tcharge = Mon->tcharge();
   pubList->voc_dyn = Mon->voc_dyn();
   pubList->voc = Mon->voc();
+  pubList->voc_filt = Mon->voc_filt();
   pubList->vsat = Mon->vsat();
   pubList->sat = Mon->sat();
   pubList->curr_sel_noamp = rp.curr_sel_noamp;

@@ -46,6 +46,7 @@ struct Publish
   int I2C_status;
   double voc_dyn;
   double voc;
+  double voc_filt;
   double vsat;
   boolean sat;
   double Tbatt_filt;
