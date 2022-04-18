@@ -417,7 +417,7 @@ void loop()
 
     // Adjust current
     if ( Twk_amp->update(Sen->Ishunt_amp_cal, Sen->T, sat, now) ) Twk_amp->adjust();
-    if ( Twk_noa->update(Sen->Ishunt_noamp_cal, Sen->T, sat, now) ) Twk_amp->adjust();
+    if ( Twk_noa->update(Sen->Ishunt_noamp_cal, Sen->T, sat, now) ) Twk_noa->adjust();
     //////////////////////////////////////////////////////////////
 
     //
