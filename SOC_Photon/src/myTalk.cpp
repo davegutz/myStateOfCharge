@@ -204,9 +204,14 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk_amp, 
 
       case ( 'i' ):
         Q_in = cp.input_string.substring(1).toFloat();
-        Serial.printf("Infinite coulomb counter reset from %9.1f ", Twk_amp->delta_q_inf());
+        Serial.printf("Amp infinite coulomb counter reset from %9.1f ", Twk_amp->delta_q_inf());
         Twk_amp->delta_q_inf(Q_in);
         Serial.printf("to %9.1f\n", Twk_amp->delta_q_inf());
+        self_talk("Mp0.0", Mon, Sim, Sen, Twk_amp, Twk_noa);
+        Serial.printf("No amp infinite coulomb counter reset from %9.1f ", Twk_noa->delta_q_inf());
+        Twk_noa->delta_q_inf(Q_in);
+        Serial.printf("to %9.1f\n", Twk_noa->delta_q_inf());
+        self_talk("Np0.0", Mon, Sim, Sen, Twk_amp, Twk_noa);
         break;
 
       case ( 'l' ):

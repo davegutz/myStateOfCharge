@@ -34,7 +34,6 @@ public:
   ~Tweak();
   // operators
   // functions
-  double adjust(const double Di);
   void adjust(void);
   void delta_q_inf(const double delta_q_inf) { *rp_delta_q_inf_ = delta_q_inf; };
   double delta_q_inf() { return ( *rp_delta_q_inf_ ); };

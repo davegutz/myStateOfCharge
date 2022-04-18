@@ -45,18 +45,6 @@ Tweak::~Tweak() {}
 // Process new information and return indicator of new peak found
 
 // Do the tweak
-// TODO: delete this first adjust form
-double Tweak::adjust(const double Di)
-{
-  if ( delta_q_sat_past_==0.0 ) return ( Di );
-  double new_Di;
-  new_Di = Di + max(min(gain_*(delta_q_sat_present_ - delta_q_sat_past_), max_change_), -max_change_);
-  new_Di = max(min(new_Di, max_tweak_), -max_tweak_);
-
-  Serial.printf("              Tweak::adjust:, past=%10.1f, pres=%10.1f, Di=%7.3f, new_Di=%7.3f,\n", delta_q_sat_past_, delta_q_sat_present_, Di, new_Di);
-  
-  return ( new_Di );
-}
 void Tweak::adjust(void)
 {
   if ( delta_q_sat_past_==0.0 ) return;
@@ -64,7 +52,8 @@ void Tweak::adjust(void)
   new_Di = *rp_tweak_bias_ + max(min(gain_*(delta_q_sat_present_ - delta_q_sat_past_), max_change_), -max_change_);
   new_Di = max(min(new_Di, max_tweak_), -max_tweak_);
 
-  Serial.printf("              Tweak::adjust:, past=%10.1f, pres=%10.1f, Di=%7.3f, new_Di=%7.3f,\n", delta_q_sat_past_, delta_q_sat_present_, *rp_tweak_bias_, new_Di);
+  Serial.printf("              Tweak::adjust:, past=%10.1f, pres=%10.1f, diff=%10.1f, gain=%7.3f, Di=%7.3f, new_Di=%7.3f,\n",
+    delta_q_sat_past_, delta_q_sat_present_, delta_q_sat_present_-delta_q_sat_past_, gain_, *rp_tweak_bias_, new_Di);
   
   *rp_tweak_bias_ = new_Di;
   return;
