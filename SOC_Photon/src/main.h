@@ -278,9 +278,9 @@ void loop()
   static uint8_t last_publishS_debug = 0;    // Remember first time with new debug to print headers
 
   // Tweak current sensing accuracy
-  static Tweak *Twk_amp = new Tweak(TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS,
+  static Tweak *Twk_amp = new Tweak("amp", TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS,
     &rp.delta_q_inf_amp, &rp.tweak_bias_amp);
-  static Tweak *Twk_noa = new Tweak(TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS,
+  static Tweak *Twk_noa = new Tweak("no amp", TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS,
     &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp);
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////

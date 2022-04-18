@@ -29,7 +29,7 @@ class Tweak
 {
 public:
   Tweak();
-  Tweak(const double gain, const double max_change, const double max_tweak, const unsigned long int time_to_wait,
+  Tweak(const String name, const double gain, const double max_change, const double max_tweak, const unsigned long int time_to_wait,
     double *rp_delta_q_inf, double *rp_tweak_bias);
   ~Tweak();
   // operators
@@ -37,8 +37,8 @@ public:
   void adjust(void);
   void delta_q_inf(const double delta_q_inf) { *rp_delta_q_inf_ = delta_q_inf; };
   double delta_q_inf() { return ( *rp_delta_q_inf_ ); };
-  double delta_q_sat_past() { return( delta_q_sat_past_ ); };
   void delta_q_sat_past(const double new_delta_q_sat_past) { delta_q_sat_past_ = new_delta_q_sat_past; };
+  double delta_q_sat_past() { return( delta_q_sat_past_ ); };
   double delta_q_sat_present() { return( delta_q_sat_present_ ); };
   void delta_q_sat_present(const double new_delta_q_sat_present) { delta_q_sat_present_ = new_delta_q_sat_present; };
   double gain() { return( gain_ ); };
@@ -58,10 +58,10 @@ public:
   boolean update(const double curr_in, const double T,  const boolean is_sat, unsigned long int now);
   void save_new_sat(unsigned long int now);
 protected:
+  String name_;
   double gain_;
   double max_change_;
   double max_tweak_;
-  double delta_q_inf_past_;
   double delta_q_sat_present_;
   double delta_q_sat_past_;
   boolean sat_;
