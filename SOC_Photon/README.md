@@ -327,7 +327,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   28. To run tweak test using talk function:
       Xx2; Xts; Xf0.02; Xa-4000;
       then hard reset then
-      m1; Ri; Mw0;
+      m1; Ri; Mw0; Nw0;
       To end:
       Xp0; v2;
       Transfer tweak_bias to CURR_BIAS_AMP and CURR_BIAS_NOAMP in local_config.h; otherwise max_tweak will begin to limit.

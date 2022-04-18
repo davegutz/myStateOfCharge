@@ -289,6 +289,55 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk_amp, 
         }
         break;
 
+      case ( 'N' ):
+        switch ( cp.input_string.charAt(1) )
+        {
+
+          case ( 'C' ):
+            Twk_noa->max_change(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk_noa->max_change_ changed to %10.6f\n", Twk_noa->max_change());
+            break;
+
+          case ( 'g' ):
+            Twk_noa->gain(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk_noa->gain_ changed to %10.6f\n", Twk_noa->gain());
+            break;
+
+          case ( 'k' ):
+            Twk_noa->tweak_bias(cp.input_string.substring(2).toFloat());
+            Serial.printf("rp.tweak_bias changed to %7.3f\n", Twk_noa->tweak_bias());
+            break;
+
+          case ( 'P' ):
+            Twk_noa->delta_q_sat_present(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk_noa->q_sat_present_ changed to %10.1f\n", Twk_noa->delta_q_sat_present());
+            break;
+
+          case ( 'p' ):
+            Twk_noa->delta_q_sat_past(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk_noa->q_sat_past_ changed to %10.1f\n", Twk_noa->delta_q_sat_past());
+            break;
+
+          case ( 'w' ):
+            Twk_noa->time_to_wait(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk_noa->time_to_wait changed to %7.3f\n", Twk_noa->time_to_wait());
+            break;
+
+          case ( 'x' ):
+            Twk_noa->max_tweak(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk_noa->max_tweak changed to %7.3f\n", Twk_noa->max_tweak());
+            break;
+
+          case ( 'z' ):
+            Twk_noa->time_sat_past(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk_noa->time_sat_past changed to %7.3f\n", Twk_noa->time_sat_past());
+            break;
+
+          default:
+            Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
+        }
+        break;
+
       case ( 'n' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
         if ( SOCS_in<1.1 )   // Apply crude limit to prevent user error
@@ -329,6 +378,10 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk_amp, 
             self_talk("Pr", Mon, Sim, Sen, Twk_amp, Twk_noa);
             Serial.printf("\n");
             self_talk("Pt", Mon, Sim, Sen, Twk_amp, Twk_noa);
+            Serial.printf("\n");
+            self_talk("PM", Mon, Sim, Sen, Twk_amp, Twk_noa);
+            Serial.printf("\n");
+            self_talk("PN", Mon, Sim, Sen, Twk_amp, Twk_noa);
             Serial.printf("\n");
             break;
 
@@ -394,9 +447,10 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk_amp, 
 
       case ( 'Q' ):
         Serial.printf("tb  = %7.3f,\nvb  = %7.3f,\nvoc_dyn = %7.3f,\nvoc_filt  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc = %7.3f,\n\
-soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
+soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.3f,\nno amp delta_q_inf = %10.1f,\nno amp tweak_bias = %7.3f,\n",
           Mon->temp_c(), Mon->vb(), Mon->voc_dyn(), Mon->voc_filt(), Mon->vsat(),
-          Mon->ib(), Mon->soc(), Mon->soc_ekf(), rp.modeling, Twk_amp->delta_q_inf(), Twk_amp->tweak_bias());
+          Mon->ib(), Mon->soc(), Mon->soc_ekf(), rp.modeling, Twk_amp->delta_q_inf(), Twk_amp->tweak_bias(),
+          Twk_noa->delta_q_inf(), Twk_noa->tweak_bias());
         break;
 
       case ( 'R' ):
@@ -427,8 +481,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
 
           case ( 'N' ):
             Serial.printf("Resetting no amp tweaker\n");
-            Twk_amp->reset();
-            Twk_amp->tweak_bias(0.);
+            Twk_noa->reset();
+            Twk_noa->tweak_bias(0.);
             self_talk("PN", Mon, Sim, Sen, Twk_amp, Twk_noa);
             break;
 
@@ -759,27 +813,27 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk_amp,
   Serial.printf("i=,<inp> set the BatteryMonitor delta_q_inf to <inp> (-360000 - 3600000'\n"); 
 
   Serial.printf("M<?> Amp tweaks.   For example:\n");
-  Serial.printf("  MC= "); Serial.printf("%7.3f", Twk_amp->max_change()); Serial.println("    : tweak max change allowed, A [0.05]"); 
-  Serial.printf("  Mg= "); Serial.printf("%7.6f", Twk_amp->gain()); Serial.println("    : tweak gain = correction to be made for charge, A/Coulomb [0.0001]"); 
-  Serial.printf("  Mi= "); Serial.printf("%7.3f", Twk_amp->delta_q_inf()); Serial.println("    : tweak value for state of infinite counter, C [varies]"); 
-  Serial.printf("  Mk= "); Serial.printf("%7.3f", Twk_amp->tweak_bias()); Serial.println("    : tweak adder to all sensed shunt current, A [0]"); 
-  Serial.printf("  Mp= "); Serial.printf("%10.1f", Twk_amp->delta_q_sat_past()); Serial.println("    : tweak past charge infinity at sat, C [varies]"); 
-  Serial.printf("  MP= "); Serial.printf("%10.1f", Twk_amp->delta_q_sat_present()); Serial.println("    : tweak present charge infinity at sat, C [varies]"); 
-  Serial.printf("  Mw= "); Serial.printf("%7.3f", Twk_amp->time_to_wait()); Serial.println("    : tweak time to wait for next tweak, hr [18]]"); 
-  Serial.printf("  Mx= "); Serial.printf("%7.3f", Twk_amp->max_tweak()); Serial.println("    : tweak adder maximum, A [1]"); 
-  Serial.printf("  Mz= "); Serial.printf("%7.3f", Twk_amp->time_sat_past()); Serial.println("    : tweak time since last tweak, hr [varies]"); 
+  Serial.printf("  MC= "); Serial.printf("%7.3f", Twk_amp->max_change()); Serial.println("    : tweak amp max change allowed, A [0.05]"); 
+  Serial.printf("  Mg= "); Serial.printf("%7.6f", Twk_amp->gain()); Serial.println("    : tweak amp gain = correction to be made for charge, A/Coulomb [0.0001]"); 
+  Serial.printf("  Mi= "); Serial.printf("%7.3f", Twk_amp->delta_q_inf()); Serial.println("    : tweak amp value for state of infinite counter, C [varies]"); 
+  Serial.printf("  Mk= "); Serial.printf("%7.3f", Twk_amp->tweak_bias()); Serial.println("    : tweak amp adder to all sensed shunt current, A [0]"); 
+  Serial.printf("  Mp= "); Serial.printf("%10.1f", Twk_amp->delta_q_sat_past()); Serial.println("    : tweak amp past charge infinity at sat, C [varies]"); 
+  Serial.printf("  MP= "); Serial.printf("%10.1f", Twk_amp->delta_q_sat_present()); Serial.println("    : tweak amp present charge infinity at sat, C [varies]"); 
+  Serial.printf("  Mw= "); Serial.printf("%7.3f", Twk_amp->time_to_wait()); Serial.println("    : tweak amp time to wait for next tweak, hr [18]]"); 
+  Serial.printf("  Mx= "); Serial.printf("%7.3f", Twk_amp->max_tweak()); Serial.println("    : tweak amp adder maximum, A [1]"); 
+  Serial.printf("  Mz= "); Serial.printf("%7.3f", Twk_amp->time_sat_past()); Serial.println("    : tweak amp time since last tweak, hr [varies]"); 
 
 
   Serial.printf("N<?> No amp tweaks.   For example:\n");
-  Serial.printf("  NC= "); Serial.printf("%7.3f", Twk_noa->max_change()); Serial.println("    : tweak max change allowed, A [0.05]"); 
-  Serial.printf("  Ng= "); Serial.printf("%7.6f", Twk_noa->gain()); Serial.println("    : tweak gain = correction to be made for charge, A/Coulomb [0.0001]"); 
-  Serial.printf("  Ni= "); Serial.printf("%7.3f", Twk_noa->delta_q_inf()); Serial.println("    : tweak value for state of infinite counter, C [varies]"); 
-  Serial.printf("  Nk= "); Serial.printf("%7.3f", Twk_noa->tweak_bias()); Serial.println("    : tweak adder to all sensed shunt current, A [0]"); 
-  Serial.printf("  Np= "); Serial.printf("%10.1f", Twk_noa->delta_q_sat_past()); Serial.println("    : tweak past charge infinity at sat, C [varies]"); 
-  Serial.printf("  NP= "); Serial.printf("%10.1f", Twk_noa->delta_q_sat_present()); Serial.println("    : tweak present charge infinity at sat, C [varies]"); 
-  Serial.printf("  Nw= "); Serial.printf("%7.3f", Twk_noa->time_to_wait()); Serial.println("    : tweak time to wait for next tweak, hr [18]]"); 
-  Serial.printf("  Nx= "); Serial.printf("%7.3f", Twk_noa->max_tweak()); Serial.println("    : tweak adder maximum, A [1]"); 
-  Serial.printf("  Nz= "); Serial.printf("%7.3f", Twk_noa->time_sat_past()); Serial.println("    : tweak time since last tweak, hr [varies]"); 
+  Serial.printf("  NC= "); Serial.printf("%7.3f", Twk_noa->max_change()); Serial.println("    : tweak no amp max change allowed, A [0.05]"); 
+  Serial.printf("  Ng= "); Serial.printf("%7.6f", Twk_noa->gain()); Serial.println("    : tweak no amp gain = correction to be made for charge, A/Coulomb [0.0001]"); 
+  Serial.printf("  Ni= "); Serial.printf("%7.3f", Twk_noa->delta_q_inf()); Serial.println("    : tweak no amp value for state of infinite counter, C [varies]"); 
+  Serial.printf("  Nk= "); Serial.printf("%7.3f", Twk_noa->tweak_bias()); Serial.println("    : tweak no amp adder to all sensed shunt current, A [0]"); 
+  Serial.printf("  Np= "); Serial.printf("%10.1f", Twk_noa->delta_q_sat_past()); Serial.println("    : tweak no amp past charge infinity at sat, C [varies]"); 
+  Serial.printf("  NP= "); Serial.printf("%10.1f", Twk_noa->delta_q_sat_present()); Serial.println("    : tweak no amp present charge infinity at sat, C [varies]"); 
+  Serial.printf("  Nw= "); Serial.printf("%7.3f", Twk_noa->time_to_wait()); Serial.println("    : tweak no amp time to wait for next tweak, hr [18]]"); 
+  Serial.printf("  Nx= "); Serial.printf("%7.3f", Twk_noa->max_tweak()); Serial.println("    : tweak no amp adder maximum, A [1]"); 
+  Serial.printf("  Nz= "); Serial.printf("%7.3f", Twk_noa->time_sat_past()); Serial.println("    : tweak no amp time since last tweak, hr [varies]"); 
 
   Serial.printf("P<?>   Print Battery values\n");
   Serial.printf("  Pa= "); Serial.printf("print all\n");
