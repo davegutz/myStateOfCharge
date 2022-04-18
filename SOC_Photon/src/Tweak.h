@@ -29,11 +29,15 @@ class Tweak
 {
 public:
   Tweak();
-  Tweak(const double gain, const double max_change, const double max_tweak, const unsigned long int time_to_wait);
+  Tweak(const double gain, const double max_change, const double max_tweak, const unsigned long int time_to_wait,
+    double *rp_delta_q_inf, double *rp_tweak_bias);
   ~Tweak();
   // operators
   // functions
   double adjust(const double Di);
+  void adjust(void);
+  void delta_q_inf(const double delta_q_inf) { *rp_delta_q_inf_ = delta_q_inf; };
+  double delta_q_inf() { return ( *rp_delta_q_inf_ ); };
   double delta_q_sat_past() { return( delta_q_sat_past_ ); };
   void delta_q_sat_past(const double new_delta_q_sat_past) { delta_q_sat_past_ = new_delta_q_sat_past; };
   double delta_q_sat_present() { return( delta_q_sat_present_ ); };
@@ -48,7 +52,11 @@ public:
   void reset();
   double time_sat_past() { return( double(millis()-time_sat_past_)/3600000. ); };
   void time_sat_past(const double new_time) { time_sat_past_ = millis()-(unsigned long int)(new_time*3600000.); };
-  boolean update(const double delta_q_inf, const boolean is_sat, unsigned long int now);
+  double time_to_wait() { return( double(time_to_wait_)/3600000. ); };
+  void time_to_wait(const double new_time) { time_to_wait_ = (unsigned long int)(new_time*3600000.); };
+  double tweak_bias() { return( *rp_tweak_bias_ ); };
+  void tweak_bias(const double bias) { *rp_tweak_bias_ = bias; };
+  boolean update(const double curr_in, const double T,  const boolean is_sat, unsigned long int now);
   void save_new_sat(unsigned long int now);
 protected:
   double gain_;
@@ -61,6 +69,8 @@ protected:
   double delta_q_max_;          // Running tab since last de-saturation of potential new delta_q_sat
   unsigned long int time_sat_past_;
   unsigned long int time_to_wait_;
+  double *rp_delta_q_inf_;
+  double *rp_tweak_bias_;
 };
 
 #endif

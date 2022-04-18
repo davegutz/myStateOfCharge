@@ -258,7 +258,6 @@ public:
   ~BatteryModel();
   // operators
   // functions
-  void apply_delta_q_t(const double delta_q, const double temp_c);
   double calculate(const double temp_C, const double soc_frac, double curr_in, const double dt,
     const double q_capacity, const double q_cap, const boolean dc_dc_on);
   uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);

@@ -34,15 +34,18 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 Tweak::Tweak()
   : gain_(0), max_change_(0), delta_q_inf_past_(0), delta_q_sat_present_(0), delta_q_sat_past_(0), sat_(false),
   delta_q_max_(0), time_sat_past_(0UL), time_to_wait_(0UL) {}
-Tweak::Tweak(const double gain, const double max_change, const double max_tweak, const unsigned long int time_to_wait)
+Tweak::Tweak(const double gain, const double max_change, const double max_tweak,
+  const unsigned long int time_to_wait, double *rp_delta_q_inf, double *rp_tweak_bias)
   : gain_(-1./gain), max_change_(max_change), max_tweak_(max_tweak), delta_q_inf_past_(0), delta_q_sat_present_(0),
-    delta_q_sat_past_(0), sat_(false), delta_q_max_(0), time_sat_past_(millis()), time_to_wait_(time_to_wait) {}
+    delta_q_sat_past_(0), sat_(false), delta_q_max_(0), time_sat_past_(millis()), time_to_wait_(time_to_wait),
+    rp_delta_q_inf_(rp_delta_q_inf), rp_tweak_bias_(rp_tweak_bias) {}
 Tweak::~Tweak() {}
 // operators
 // functions
 // Process new information and return indicator of new peak found
 
 // Do the tweak
+// TODO: delete this first adjust form
 double Tweak::adjust(const double Di)
 {
   if ( delta_q_sat_past_==0.0 ) return ( Di );
@@ -54,21 +57,33 @@ double Tweak::adjust(const double Di)
   
   return ( new_Di );
 }
+void Tweak::adjust(void)
+{
+  if ( delta_q_sat_past_==0.0 ) return;
+  double new_Di;
+  new_Di = *rp_tweak_bias_ + max(min(gain_*(delta_q_sat_present_ - delta_q_sat_past_), max_change_), -max_change_);
+  new_Di = max(min(new_Di, max_tweak_), -max_tweak_);
+
+  Serial.printf("              Tweak::adjust:, past=%10.1f, pres=%10.1f, Di=%7.3f, new_Di=%7.3f,\n", delta_q_sat_past_, delta_q_sat_present_, *rp_tweak_bias_, new_Di);
+  
+  *rp_tweak_bias_ = new_Di;
+  return;
+}
 
 // Print
 void Tweak::pretty_print(void)
 {
     Serial.printf("Tweak::\n");
-    Serial.printf("  gain_ =               %10.6f; // Current correction to be made for charge error see 'Dg', A/Coulomb\n", gain_);
-    Serial.printf("  max_change_ =             %7.3f; // Maximum allowed change to calibration adjustment see 'DC', A\n", max_change_);
-    Serial.printf("  max_tweak_ =              %7.3f; // Maximum allowed calibration adjustment see 'Dx', A\n", max_tweak_);
-    Serial.printf("  delta_q_inf_past_ =    %10.1f; // Charge infinity at past update, Coulombs\n", delta_q_inf_past_);
-    Serial.printf("  delta_q_sat_present_ = %10.1f; // Charge infinity at saturation, present see 'DP', Coulombs\n", delta_q_sat_present_);
-    Serial.printf("  delta_q_sat_past_ =    %10.1f; // Charge infinity at saturation, past see 'Dp', Coulombs\n", delta_q_sat_past_);
+    Serial.printf("  gain_ =               %10.6f; // Current correction to be made for charge error see 'N/Mg', A/Coulomb\n", gain_);
+    Serial.printf("  max_change_ =             %7.3f; // Maximum allowed change to calibration adjustment see 'N/MC', A\n", max_change_);
+    Serial.printf("  max_tweak_ =              %7.3f; // Maximum allowed calibration adjustment see 'N/Mx', A\n", max_tweak_);
+    Serial.printf("  delta_q_inf_ =         %10.1f; // Charge infinity at past update see 'N/Mi', Coulombs\n", *rp_delta_q_inf_);
+    Serial.printf("  delta_q_sat_present_ = %10.1f; // Charge infinity at saturation, present see 'N/MP', Coulombs\n", delta_q_sat_present_);
+    Serial.printf("  delta_q_sat_past_ =    %10.1f; // Charge infinity at saturation, past see 'N/Mp', Coulombs\n", delta_q_sat_past_);
     Serial.printf("  sat_ =                 %d;    // Saturation status, T=saturated\n", sat_);
-    Serial.printf("  now-time_sat_past_ =   %7.3f; // Time since last allowed saturation see 'Dz', hr\n", double(millis()-time_sat_past_)/3600000.);
-    Serial.printf("  time_to_wait =         %7.3f; // Time to wait before allowing saturation, hr\n", double(time_to_wait_)/3600000.);
-    Serial.printf("  tweak_bias =           %7.3f; // Bias on current see 'Dk', A\n", rp.tweak_bias);
+    Serial.printf("  now-time_sat_past_ =   %7.3f; // Time since last allowed saturation see 'N/Mz', hr\n", double(millis()-time_sat_past_)/3600000.);
+    Serial.printf("  time_to_wait =         %7.3f; // Time to wait before allowing saturation see 'N/Mw', hr\n", double(time_to_wait_)/3600000.);
+    Serial.printf("  tweak_bias =           %7.3f; // Bias on current see 'N/Mk', A\n", *rp_tweak_bias_);
 }
 
 // Reset on demand
@@ -92,8 +107,9 @@ void Tweak::save_new_sat(unsigned long int now)
 }
 
 // Monitor the process and return status
-boolean Tweak::update(const double delta_q_inf, const boolean is_sat, unsigned long int now)
+boolean Tweak::update(const double curr_in, const double T, const boolean is_sat, unsigned long int now)
 {
+  *rp_delta_q_inf_ += curr_in * T;
   boolean have_new = false;
   if ( sat_ )
   {
@@ -104,7 +120,7 @@ boolean Tweak::update(const double delta_q_inf, const boolean is_sat, unsigned l
     }
     else
     {
-      delta_q_max_ = max(delta_q_max_, delta_q_inf);
+      delta_q_max_ = max(delta_q_max_, *rp_delta_q_inf_);
     }
   }
   else
@@ -112,12 +128,12 @@ boolean Tweak::update(const double delta_q_inf, const boolean is_sat, unsigned l
     if ( is_sat )
     {
       sat_ = true;
-      delta_q_max_ = max(delta_q_max_, delta_q_inf);
+      delta_q_max_ = max(delta_q_max_, *rp_delta_q_inf_);
     }
   }
-  delta_q_inf_past_ = delta_q_inf;
+  delta_q_inf_past_ = *rp_delta_q_inf_;
   if ( rp.debug==88 ) Serial.printf("Tweak::update:,  delta_q_inf=%10.1f, is_sat=%d, now=%ld, sat=%d, delta_q_inf_past=%10.1f, delta_q_sat_past=%10.1f, delta_q_sat_present=%10.1f, time_sat_past=%ld,\n",
-    delta_q_inf, is_sat, now, sat_, delta_q_inf_past_, delta_q_sat_past_, delta_q_sat_present_, time_sat_past_);
+    *rp_delta_q_inf_, is_sat, now, sat_, delta_q_inf_past_, delta_q_sat_past_, delta_q_sat_present_, time_sat_past_);
 
   return ( have_new );
 }

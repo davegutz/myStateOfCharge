@@ -348,17 +348,6 @@ BatteryModel::BatteryModel(const int num_cells,
     ib_sat_ = 0.5;              // deadzone for cutback actuation, A
 }
 
-// Memory set, adjust book-keeping as needed.  q_cap_ etc presesrved
-void BatteryModel::apply_delta_q_t(const double delta_q, const double temp_c)
-{
-  delta_q_ = delta_q;
-  q_capacity_ = calculate_capacity(temp_c);
-  q_ = q_capacity_ + delta_q;
-  soc_ = q_ / q_capacity_;
-  SOC_ = q_ / q_cap_rated_scaled_ * 100.;
-  resetting_ = true;
-}
-
 // SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model
 double BatteryModel::calculate(const double temp_C, const double soc, double curr_in, const double dt,
   const double q_capacity, const double q_cap, const boolean dc_dc_on)

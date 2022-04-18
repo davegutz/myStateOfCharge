@@ -36,7 +36,7 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 
 // Talk Executive
-void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
+void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk_amp, Tweak *Twk_noa)
 {
   double SOCS_in = -99.;
   double scale = 1.;
@@ -74,34 +74,9 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
             Serial.printf("rp.vbatt_bias changed to %7.3f\n", rp.vbatt_bias);
             break;
 
-          case ( 'C' ):
-            Twk->max_change(cp.input_string.substring(2).toFloat());
-            Serial.printf("Twk->max_change_ changed to %10.6f\n", Twk->max_change());
-            break;
-
-          case ( 'g' ):
-            Twk->gain(cp.input_string.substring(2).toFloat());
-            Serial.printf("Twk->gain_ changed to %10.6f\n", Twk->gain());
-            break;
-
           case ( 'i' ):
             rp.curr_bias_all = cp.input_string.substring(2).toFloat();
             Serial.printf("rp.curr_bias_all changed to %7.3f\n", rp.curr_bias_all);
-            break;
-
-          case ( 'k' ):
-            rp.tweak_bias = cp.input_string.substring(2).toFloat();
-            Serial.printf("rp.tweak_bias changed to %7.3f\n", rp.tweak_bias);
-            break;
-
-          case ( 'P' ):
-            Twk->delta_q_sat_present(cp.input_string.substring(2).toFloat());
-            Serial.printf("Twk->q_sat_present_ changed to %10.1f\n", Twk->delta_q_sat_present());
-            break;
-
-          case ( 'p' ):
-            Twk->delta_q_sat_past(cp.input_string.substring(2).toFloat());
-            Serial.printf("Twk->q_sat_past_ changed to %10.1f\n", Twk->delta_q_sat_past());
             break;
 
           case ( 't' ):
@@ -116,16 +91,6 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
             Serial.printf("Mon.Dv changed to %7.3f\n", Mon->Dv());
             Sim->Dv(cp.input_string.substring(2).toFloat());
             Serial.printf("Sim.Dv changed to %7.3f\n", Sim->Dv());
-            break;
-
-          case ( 'x' ):
-            Twk->max_tweak(cp.input_string.substring(2).toFloat());
-            Serial.printf("Twk->max_tweak changed to %7.3f\n", Twk->max_tweak());
-            break;
-
-          case ( 'z' ):
-            Twk->time_sat_past(cp.input_string.substring(2).toFloat());
-            Serial.printf("Twk->time_sat_past changed to %7.3f\n", Twk->time_sat_past());
             break;
 
           default:
@@ -216,20 +181,20 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
             break;
 
           case ( 's' ):
-            self_talk("h", Mon, Sim, Sen, Twk);
+            self_talk("h", Mon, Sim, Sen, Twk_amp, Twk_noa);
             cp.cmd_summarize();
-            self_talk("Pm", Mon, Sim, Sen, Twk);
+            self_talk("Pm", Mon, Sim, Sen, Twk_amp, Twk_noa);
             Serial.printf("\n");
             if ( rp.modeling )
             {
               Serial.printf("Sim:   rp.modeling = %d\n", rp.modeling);
-              self_talk("Ps", Mon, Sim, Sen, Twk);
+              self_talk("Ps", Mon, Sim, Sen, Twk_amp, Twk_noa);
               Serial.printf("\n");
             }
-            self_talk("Pr", Mon, Sim, Sen, Twk);
+            self_talk("Pr", Mon, Sim, Sen, Twk_amp, Twk_noa);
             Serial.printf("\n");
             print_all_summary(mySum, rp.isum, NSUM);
-            self_talk("Q", Mon, Sim, Sen, Twk);
+            self_talk("Q", Mon, Sim, Sen, Twk_amp, Twk_noa);
             break;
 
           default:
@@ -239,10 +204,9 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
 
       case ( 'i' ):
         Q_in = cp.input_string.substring(1).toFloat();
-        Serial.printf("Infinite coulomb counter reset from %9.1f ", rp.delta_q_inf);
-        Mon->apply_delta_q_inf(Q_in);
-        Mon->update(&rp.delta_q, &rp.t_last, &rp.delta_q_inf);
-        Serial.printf("to %9.1f\n", rp.delta_q_inf);
+        Serial.printf("Infinite coulomb counter reset from %9.1f ", Twk_amp->delta_q_inf());
+        Twk_amp->delta_q_inf(Q_in);
+        Serial.printf("to %9.1f\n", Twk_amp->delta_q_inf());
         break;
 
       case ( 'l' ):
@@ -265,7 +229,7 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
           Mon->apply_soc(SOCS_in, Sen->Tbatt_filt);
           Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
           if ( rp.modeling ) Mon->init_soc_ekf(Sim->soc());
-          Mon->update(&rp.delta_q, &rp.t_last, &rp.delta_q_inf);
+          Mon->update(&rp.delta_q, &rp.t_last);
           Sim->update(&rp.delta_q_model, &rp.t_last_model);
 
           Serial.printf("SOC=%7.3f, soc=%7.3f, modeling = %d, delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
@@ -277,15 +241,52 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
         break;
 
       case ( 'M' ):
-        SOCS_in = cp.input_string.substring(1).toFloat();
-        Mon->apply_SOC(SOCS_in, Sen->Tbatt_filt);
-        Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
-        if ( rp.modeling ) Mon->init_soc_ekf(Sim->soc());
-        Mon->update(&rp.delta_q, &rp.t_last, &rp.delta_q_inf);
-        Sim->update(&rp.delta_q_model, &rp.t_last_model);
+        switch ( cp.input_string.charAt(1) )
+        {
 
-        Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
-            Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model, Mon->soc_ekf());
+          case ( 'C' ):
+            Twk_amp->max_change(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk_amp->max_change_ changed to %10.6f\n", Twk_amp->max_change());
+            break;
+
+          case ( 'g' ):
+            Twk_amp->gain(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk_amp->gain_ changed to %10.6f\n", Twk_amp->gain());
+            break;
+
+          case ( 'k' ):
+            Twk_amp->tweak_bias(cp.input_string.substring(2).toFloat());
+            Serial.printf("rp.tweak_bias changed to %7.3f\n", Twk_amp->tweak_bias());
+            break;
+
+          case ( 'P' ):
+            Twk_amp->delta_q_sat_present(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk_amp->q_sat_present_ changed to %10.1f\n", Twk_amp->delta_q_sat_present());
+            break;
+
+          case ( 'p' ):
+            Twk_amp->delta_q_sat_past(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk_amp->q_sat_past_ changed to %10.1f\n", Twk_amp->delta_q_sat_past());
+            break;
+
+          case ( 'w' ):
+            Twk_amp->time_to_wait(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk_amp->time_to_wait changed to %7.3f\n", Twk_amp->time_to_wait());
+            break;
+
+          case ( 'x' ):
+            Twk_amp->max_tweak(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk_amp->max_tweak changed to %7.3f\n", Twk_amp->max_tweak());
+            break;
+
+          case ( 'z' ):
+            Twk_amp->time_sat_past(cp.input_string.substring(2).toFloat());
+            Serial.printf("Twk_amp->time_sat_past changed to %7.3f\n", Twk_amp->time_sat_past());
+            break;
+
+          default:
+            Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
+        }
         break;
 
       case ( 'n' ):
@@ -304,12 +305,13 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
           Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'M' instead of 'm'?\n", SOCS_in);
         break;
 
-      case ( 'N' ):
+      case ( 'O' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
-        Sim->apply_SOC(SOCS_in, Sen->Tbatt_filt);
+        Mon->apply_SOC(SOCS_in, Sen->Tbatt_filt);
+        Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
+        if ( rp.modeling ) Mon->init_soc_ekf(Sim->soc());
+        Mon->update(&rp.delta_q, &rp.t_last);
         Sim->update(&rp.delta_q_model, &rp.t_last_model);
-        if ( rp.modeling )
-          Mon->init_soc_ekf(Mon->soc());
 
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
             Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model, Mon->soc_ekf());
@@ -319,14 +321,14 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
         switch ( cp.input_string.charAt(1) )
         {
           case ( 'a' ):
-            self_talk("Pm", Mon, Sim, Sen, Twk);
+            self_talk("Pm", Mon, Sim, Sen, Twk_amp, Twk_noa);
             Serial.printf("\n");
             Serial.printf("Sim:   rp.modeling = %d\n", rp.modeling);
-            self_talk("Ps", Mon, Sim, Sen, Twk);
+            self_talk("Ps", Mon, Sim, Sen, Twk_amp, Twk_noa);
             Serial.printf("\n");
-            self_talk("Pr", Mon, Sim, Sen, Twk);
+            self_talk("Pr", Mon, Sim, Sen, Twk_amp, Twk_noa);
             Serial.printf("\n");
-            self_talk("Pt", Mon, Sim, Sen, Twk);
+            self_talk("Pt", Mon, Sim, Sen, Twk_amp, Twk_noa);
             Serial.printf("\n");
             break;
 
@@ -339,15 +341,19 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
              Serial.printf("Mon::"); Mon->EKF_1x1::pretty_print();
             break;
 
-          case ( 'k' ):
-             Serial.printf("Tweak::"); Twk->Tweak::pretty_print();
-            break;
-
           case ( 'm' ):
             Serial.printf("Mon:");  Mon->pretty_print();
             Serial.printf("Mon::"); Mon->Coulombs::pretty_print();
             Serial.printf("Mon::"); Mon->pretty_print_ss();
             Serial.printf("Mon::"); Mon->EKF_1x1::pretty_print();
+            break;
+
+          case ( 'M' ):
+             Serial.printf("Tweak::"); Twk_amp->Tweak::pretty_print();
+            break;
+
+          case ( 'N' ):
+             Serial.printf("Tweak::"); Twk_noa->Tweak::pretty_print();
             break;
 
           case ( 'r' ):
@@ -390,7 +396,7 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
         Serial.printf("tb  = %7.3f,\nvb  = %7.3f,\nvoc_dyn = %7.3f,\nvoc_filt  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc = %7.3f,\n\
 soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
           Mon->temp_c(), Mon->vb(), Mon->voc_dyn(), Mon->voc_filt(), Mon->vsat(),
-          Mon->ib(), Mon->soc(), Mon->soc_ekf(), rp.modeling, Mon->delta_q_inf(), rp.tweak_bias);
+          Mon->ib(), Mon->soc(), Mon->soc_ekf(), rp.modeling, Twk_amp->delta_q_inf(), Twk_amp->tweak_bias());
         break;
 
       case ( 'R' ):
@@ -409,14 +415,21 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
             break;
 
           case ( 'i' ):
-            self_talk("i0", Mon, Sim, Sen, Twk);
+            self_talk("i0", Mon, Sim, Sen, Twk_amp, Twk_noa);
             break;
 
-          case ( 'k' ):
-            Serial.printf("Resetting tweaker\n");
-            Twk->reset();
-            rp.tweak_bias = 0.;
-            self_talk("Pk", Mon, Sim, Sen, Twk);
+          case ( 'M' ):
+            Serial.printf("Resetting amp tweaker\n");
+            Twk_amp->reset();
+            Twk_amp->tweak_bias(0.);
+            self_talk("PM", Mon, Sim, Sen, Twk_amp, Twk_noa);
+            break;
+
+          case ( 'N' ):
+            Serial.printf("Resetting no amp tweaker\n");
+            Twk_amp->reset();
+            Twk_amp->tweak_bias(0.);
+            self_talk("PN", Mon, Sim, Sen, Twk_amp, Twk_noa);
             break;
 
           case ( 'r' ):
@@ -432,12 +445,12 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
             break;
 
           case ( 'R' ):
-            self_talk("Rr", Mon, Sim, Sen, Twk);
+            self_talk("Rr", Mon, Sim, Sen, Twk_amp, Twk_noa);
             Serial.printf("also large and soft reset.   Initialize all variables to clean run without model at saturation.   Ready to use\n");
             rp.large_reset();
             cp.large_reset();
             cp.cmd_reset();
-            self_talk("Hs", Mon, Sim, Sen, Twk);
+            self_talk("Hs", Mon, Sim, Sen, Twk_amp, Twk_noa);
             break;
 
           case ( 's' ):
@@ -464,11 +477,22 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
         cp.input_string = cp.input_string.substring(1);
         Serial.printf("new string = '%s'\n", cp.input_string.c_str());
         cp.string_complete = true;
-        talk(Mon, Sim, Sen, Twk);
+        talk(Mon, Sim, Sen, Twk_amp, Twk_noa);
         break;
 
       case ( 'v' ):
         rp.debug = cp.input_string.substring(1).toInt();
+        break;
+
+      case ( 'W' ):
+        SOCS_in = cp.input_string.substring(1).toFloat();
+        Sim->apply_SOC(SOCS_in, Sen->Tbatt_filt);
+        Sim->update(&rp.delta_q_model, &rp.t_last_model);
+        if ( rp.modeling )
+          Mon->init_soc_ekf(Mon->soc());
+
+        Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
+            Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model, Mon->soc_ekf());
         break;
 
       case ( 'w' ): 
@@ -564,8 +588,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
             {
 
               case ( -1 ):
-                self_talk("Xp0", Mon, Sim, Sen, Twk);
-                self_talk("m0.5", Mon, Sim, Sen, Twk);
+                self_talk("Xp0", Mon, Sim, Sen, Twk_amp, Twk_noa);
+                self_talk("m0.5", Mon, Sim, Sen, Twk_amp, Twk_noa);
                 rp.modeling = false;
                 rp.debug = -12;   // myDisplay = 2
                 break;
@@ -581,8 +605,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
                 break;
 
               case ( 1 ):
-                self_talk("Xp0", Mon, Sim, Sen, Twk);
-                self_talk("m0.5", Mon, Sim, Sen, Twk);
+                self_talk("Xp0", Mon, Sim, Sen, Twk_amp, Twk_noa);
+                self_talk("m0.5", Mon, Sim, Sen, Twk_amp, Twk_noa);
                 rp.type = 1;
                 rp.freq = 0.05;
                 rp.amp = 6.;
@@ -592,8 +616,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
                 break;
 
               case ( 2 ):
-                self_talk("Xp0", Mon, Sim, Sen, Twk);
-                self_talk("m0.5", Mon, Sim, Sen, Twk);
+                self_talk("Xp0", Mon, Sim, Sen, Twk_amp, Twk_noa);
+                self_talk("m0.5", Mon, Sim, Sen, Twk_amp, Twk_noa);
                 rp.type = 2;
                 rp.freq = 0.10;
                 rp.amp = 6.;
@@ -603,8 +627,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
                 break;
 
               case ( 3 ):
-                self_talk("Xp0", Mon, Sim, Sen, Twk);
-                self_talk("m0.5", Mon, Sim, Sen, Twk);
+                self_talk("Xp0", Mon, Sim, Sen, Twk_amp, Twk_noa);
+                self_talk("m0.5", Mon, Sim, Sen, Twk_amp, Twk_noa);
                 rp.type = 3;
                 rp.freq = 0.05;
                 rp.amp = 6.;
@@ -614,40 +638,40 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
                 break;
 
               case ( 4 ):
-                self_talk("Xp0", Mon, Sim, Sen, Twk);
+                self_talk("Xp0", Mon, Sim, Sen, Twk_amp, Twk_noa);
                 rp.type = 4;
                 rp.curr_bias_all = -RATED_BATT_CAP;  // Software effect only
                 rp.debug = -12;
                 break;
 
               case ( 5 ):
-                self_talk("Xp0", Mon, Sim, Sen, Twk);
+                self_talk("Xp0", Mon, Sim, Sen, Twk_amp, Twk_noa);
                 rp.type = 5;
                 rp.curr_bias_all = RATED_BATT_CAP; // Software effect only
                 rp.debug = -12;
                 break;
 
               case ( 6 ):
-                self_talk("Xp0", Mon, Sim, Sen, Twk);
+                self_talk("Xp0", Mon, Sim, Sen, Twk_amp, Twk_noa);
                 rp.type = 6;
                 rp.amp = RATED_BATT_CAP*0.2;
                 rp.debug = -12;
                 break;
 
               case ( 7 ):
-                self_talk("Xp0", Mon, Sim, Sen, Twk);
+                self_talk("Xp0", Mon, Sim, Sen, Twk_amp, Twk_noa);
                 rp.type = 7;
-                self_talk("Xx1", Mon, Sim, Sen, Twk);    // Run to model
-                self_talk("m0.5", Mon, Sim, Sen, Twk);   // Set all soc=0.5
-                self_talk("n0.987", Mon, Sim, Sen, Twk); // Set model only to near saturation
-                self_talk("v2", Mon, Sim, Sen, Twk);     // Watch sat, soc, and voc vs v_sat
+                self_talk("Xx1", Mon, Sim, Sen, Twk_amp, Twk_noa);    // Run to model
+                self_talk("m0.5", Mon, Sim, Sen, Twk_amp, Twk_noa);   // Set all soc=0.5
+                self_talk("n0.987", Mon, Sim, Sen, Twk_amp, Twk_noa); // Set model only to near saturation
+                self_talk("v2", Mon, Sim, Sen, Twk_amp, Twk_noa);     // Watch sat, soc, and voc vs v_sat
                 rp.amp = RATED_BATT_CAP*0.2;              // Hard current charge
                 Serial.printf("Run 'n<val> as needed to init south of sat.  Reset this whole thing by running 'Xp-1'\n");
                 break;
 
               case ( 8 ):
-                self_talk("Xp0", Mon, Sim, Sen, Twk);
-                self_talk("m0.5", Mon, Sim, Sen, Twk);
+                self_talk("Xp0", Mon, Sim, Sen, Twk_amp, Twk_noa);
+                self_talk("m0.5", Mon, Sim, Sen, Twk_amp, Twk_noa);
                 rp.type = 8;
                 rp.freq = 0.05;
                 rp.amp = 6.;
@@ -669,7 +693,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
         break;
 
       case ( 'h' ): 
-        talkH(Mon, Sim, Sen, Twk);
+        talkH(Mon, Sim, Sen, Twk_amp, Twk_noa);
         break;
 
       default:
@@ -683,7 +707,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\ndelta_q_inf = %10.1f,\ntweak_bias = %7.3f,\n",
 }
 
 // Talk Help
-void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
+void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk_amp, Tweak *Twk_noa)
 {
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
 
@@ -695,9 +719,8 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
   Serial.printf("  Hs= "); Serial.printf("save a data point to summary log and print log and status to screen\n");
 
   Serial.printf("m=  assign curve charge state in fraction to all versions including model- '(0-1.1)'\n"); 
-  Serial.printf("M=  assign a CHARGE state in percent to all versions including model- '('truncated 0-100')'\n"); 
   Serial.printf("n=  assign curve charge state in fraction to model only (ekf if modeling)- '(0-1.1)'\n"); 
-  Serial.printf("N=  assign a CHARGE state in percent to model only (ekf if modeling)-- '('truncated 0-100')'\n"); 
+  Serial.printf("O=  assign a CHARGE state in percent to all versions including model- '('truncated 0-100')'\n"); 
   Serial.printf("s   curr signal select (0=amp preferred, 1=noamp) = "); Serial.println(rp.curr_sel_noamp);
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("    -<>:   Negative - Arduino plot compatible\n");
@@ -717,9 +740,8 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
   Serial.printf("    +79:   sat_ib model\n");
   Serial.printf("  +/-96:   CC saturation\n");
   Serial.printf("  +/-97:   CC model saturation\n");
-
-
-
+  Serial.printf("W=  assign a CHARGE state in percent to model only (ekf if modeling)-- '('truncated 0-100')'\n"); 
+  
   Serial.printf("D/S<?> Adjustments.   For example:\n");
   Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_bias_amp); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
   Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias_noamp); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
@@ -727,15 +749,6 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.println("    : delta T adder to sensed Tbatt, deg C [0]"); 
   Serial.printf("  Dv= "); Serial.print(Sim->Dv()); Serial.println("    : delta V adder to Vb measurement, V"); 
-
-  Serial.printf("  DC= "); Serial.printf("%7.3f", Twk->max_change()); Serial.println("    : tweak max change allowed, A [0.05]"); 
-  Serial.printf("  Dg= "); Serial.printf("%7.6f", Twk->gain()); Serial.println("    : tweak gain = correction to be made for charge, A/Coulomb [0.0001]"); 
-  Serial.printf("  Dk= "); Serial.printf("%7.3f", rp.tweak_bias); Serial.println("    : tweak adder to all sensed shunt current, A [0]"); 
-  Serial.printf("  Dp= "); Serial.printf("%10.1f", Twk->delta_q_sat_past()); Serial.println("    : tweak past charge infinity at sat, C [varies]"); 
-  Serial.printf("  DP= "); Serial.printf("%10.1f", Twk->delta_q_sat_present()); Serial.println("    : tweak present charge infinity at sat, C [varies]"); 
-  Serial.printf("  Dx= "); Serial.printf("%7.3f", Twk->max_tweak()); Serial.println("    : tweak adder maximum, A [1]"); 
-  Serial.printf("  Dz= "); Serial.printf("%7.3f", Twk->time_sat_past()); Serial.println("    : tweak time since last tweak, hr [varies]"); 
-
   Serial.printf("  Sc= "); Serial.print(Sim->q_capacity()/Mon->q_capacity()); Serial.println("    : Scalar battery model size"); 
   Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.println("    : hysteresis scalar 1e-6 - 100");
   Serial.printf("  Sr= "); Serial.print(Sim->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
@@ -745,12 +758,36 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
 
   Serial.printf("i=,<inp> set the BatteryMonitor delta_q_inf to <inp> (-360000 - 3600000'\n"); 
 
+  Serial.printf("M<?> Amp tweaks.   For example:\n");
+  Serial.printf("  MC= "); Serial.printf("%7.3f", Twk_amp->max_change()); Serial.println("    : tweak max change allowed, A [0.05]"); 
+  Serial.printf("  Mg= "); Serial.printf("%7.6f", Twk_amp->gain()); Serial.println("    : tweak gain = correction to be made for charge, A/Coulomb [0.0001]"); 
+  Serial.printf("  Mi= "); Serial.printf("%7.3f", Twk_amp->delta_q_inf()); Serial.println("    : tweak value for state of infinite counter, C [varies]"); 
+  Serial.printf("  Mk= "); Serial.printf("%7.3f", Twk_amp->tweak_bias()); Serial.println("    : tweak adder to all sensed shunt current, A [0]"); 
+  Serial.printf("  Mp= "); Serial.printf("%10.1f", Twk_amp->delta_q_sat_past()); Serial.println("    : tweak past charge infinity at sat, C [varies]"); 
+  Serial.printf("  MP= "); Serial.printf("%10.1f", Twk_amp->delta_q_sat_present()); Serial.println("    : tweak present charge infinity at sat, C [varies]"); 
+  Serial.printf("  Mw= "); Serial.printf("%7.3f", Twk_amp->time_to_wait()); Serial.println("    : tweak time to wait for next tweak, hr [18]]"); 
+  Serial.printf("  Mx= "); Serial.printf("%7.3f", Twk_amp->max_tweak()); Serial.println("    : tweak adder maximum, A [1]"); 
+  Serial.printf("  Mz= "); Serial.printf("%7.3f", Twk_amp->time_sat_past()); Serial.println("    : tweak time since last tweak, hr [varies]"); 
+
+
+  Serial.printf("N<?> No amp tweaks.   For example:\n");
+  Serial.printf("  NC= "); Serial.printf("%7.3f", Twk_noa->max_change()); Serial.println("    : tweak max change allowed, A [0.05]"); 
+  Serial.printf("  Ng= "); Serial.printf("%7.6f", Twk_noa->gain()); Serial.println("    : tweak gain = correction to be made for charge, A/Coulomb [0.0001]"); 
+  Serial.printf("  Ni= "); Serial.printf("%7.3f", Twk_noa->delta_q_inf()); Serial.println("    : tweak value for state of infinite counter, C [varies]"); 
+  Serial.printf("  Nk= "); Serial.printf("%7.3f", Twk_noa->tweak_bias()); Serial.println("    : tweak adder to all sensed shunt current, A [0]"); 
+  Serial.printf("  Np= "); Serial.printf("%10.1f", Twk_noa->delta_q_sat_past()); Serial.println("    : tweak past charge infinity at sat, C [varies]"); 
+  Serial.printf("  NP= "); Serial.printf("%10.1f", Twk_noa->delta_q_sat_present()); Serial.println("    : tweak present charge infinity at sat, C [varies]"); 
+  Serial.printf("  Nw= "); Serial.printf("%7.3f", Twk_noa->time_to_wait()); Serial.println("    : tweak time to wait for next tweak, hr [18]]"); 
+  Serial.printf("  Nx= "); Serial.printf("%7.3f", Twk_noa->max_tweak()); Serial.println("    : tweak adder maximum, A [1]"); 
+  Serial.printf("  Nz= "); Serial.printf("%7.3f", Twk_noa->time_sat_past()); Serial.println("    : tweak time since last tweak, hr [varies]"); 
+
   Serial.printf("P<?>   Print Battery values\n");
   Serial.printf("  Pa= "); Serial.printf("print all\n");
   Serial.printf("  Pc= "); Serial.printf("print all coulombs\n");
   Serial.printf("  Pe= "); Serial.printf("print ekf\n");
-  Serial.printf("  Pk= "); Serial.printf("print tweak\n");
   Serial.printf("  Pm= "); Serial.printf("print monitor\n");
+  Serial.printf("  PM= "); Serial.printf("print amp tweak\n");
+  Serial.printf("  PN= "); Serial.printf("print no amp tweak\n");
   Serial.printf("  Pr= "); Serial.printf("print retained and command parameters\n");
   Serial.printf("  Ps= "); Serial.printf("print simulation\n");
   Serial.printf("  Pt= "); Serial.printf("print all state-space\n");
@@ -763,7 +800,8 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
   Serial.printf("  Re= "); Serial.printf("equalize delta_q in model to battery monitor\n");
   Serial.printf("  Rh= "); Serial.printf("reset monitor and model hysteresis to 0.0\n");
   Serial.printf("  Ri= "); Serial.printf("reset delta_q_inf to 0.0\n");
-  Serial.printf("  Rk= "); Serial.printf("reset tweaker and tweak_bias to 0.0\n");
+  Serial.printf("  RM= "); Serial.printf("reset amp tweaker and tweak_bias to 0.0\n");
+  Serial.printf("  RN= "); Serial.printf("reset no amp tweaker and tweak_bias to 0.0\n");
   Serial.printf("  Rr= "); Serial.printf("saturate battery monitor and equalize model to monitor\n");
   Serial.printf("  RR= "); Serial.printf("saturate, equalize, and nominalize all testing for DEPLOY\n");
   Serial.printf("  Rs= "); Serial.printf("small reset.  reset flags to reinitialize filters\n");
@@ -796,10 +834,10 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
 }
 
 // Recursion
-void self_talk(const String cmd, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk)
+void self_talk(const String cmd, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, Tweak *Twk_amp, Tweak *Twk_noa)
 {
   cp.input_string = cmd;
   Serial.printf("self_talk:  new string = '%s'\n", cp.input_string.c_str());
   cp.string_complete = true;
-  talk(Mon, Sim, Sen, Twk);
+  talk(Mon, Sim, Sen, Twk_amp, Twk_noa);
 }

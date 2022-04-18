@@ -52,11 +52,13 @@ struct RetainedPars
   double s_cap_model = 1.;  // Scalar on battery model size
   double cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
-  int isum = -1;            // Summary location.   Begins at -1 because first action is to increment isum
-  double delta_q_inf = 0.;  // delta_q since last reset.  Simple integration of current
-  double hys_scale = 1.;    // Hysteresis scalar
+  int isum = -1;                // Summary location.   Begins at -1 because first action is to increment isum
+  double delta_q_inf_amp = 0.;  // delta_q since last reset.  Simple integration of amplified current
+  double delta_q_inf_noamp = 0.;// delta_q since last reset.  Simple integration of non-amplified current
+  double hys_scale = 1.;        // Hysteresis scalar
   boolean tweak_test = false;   // Driving signal injection completely using software inj_soft_bias 
-  double tweak_bias = 0.;       // Tweak calibration
+  double tweak_bias_amp = 0.;   // Tweak calibration for amplified current sensor
+  double tweak_bias_noamp = 0.; // Tweak calibration for non-amplified current sensor
 
   // Nominalize
   void nominal()
@@ -81,10 +83,12 @@ struct RetainedPars
     this->s_cap_model = 1.0;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
-    this->delta_q_inf = 0.;
+    this->delta_q_inf_amp = 0.;
+    this->delta_q_inf_noamp = 0.;
     this->hys_scale = 1.;
     this->tweak_test = false;
-    this->tweak_bias = 0.;
+    this->tweak_bias_amp = 0.;
+    this->tweak_bias_noamp = 0.;
   }
   void large_reset()
   {
@@ -106,25 +110,30 @@ struct RetainedPars
     this->s_cap_model = 1.0;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
-    this->delta_q_inf = 0.;
+    this->delta_q_inf_amp = 0.;
+    this->delta_q_inf_noamp = 0.;
     this->hys_scale = 1.;
     this->tweak_test = false;
-    this->tweak_bias = 0.;
+    this->tweak_bias_amp = 0.;
+    this->tweak_bias_noamp = 0.;
   }
   void print_part_1(char *buffer)
   {
     sprintf(buffer, "debug = %d, delta_q = %7.3f, t_last = %7.3f, delta_q_model = %7.3f, t_last_model = %7.3f, \n\
     curr_bias_amp = %7.3f, curr_bias_noamp = %7.3f, curr_bias_all = %7.3f, curr_sel_noamp = %d, tweak_test = %d,\n\
-    tweak_bias = %7.3f,\n",
+    tweak_bias_amp = %7.3f, tweak_bias_noamp = %7.3f,\n",
       this->debug, this->delta_q, this->t_last, this->delta_q_model, this->t_last_model,
-      this->curr_bias_amp, this->curr_bias_noamp, this->curr_bias_all, this->curr_sel_noamp, this->tweak_test, this->tweak_bias);
+      this->curr_bias_amp, this->curr_bias_noamp, this->curr_bias_all, this->curr_sel_noamp, this->tweak_test,
+      this->tweak_bias_amp, this->tweak_bias_noamp);
   }
   void print_part_2(char *buffer)
   {
     sprintf(buffer, "    vbatt_bias = %7.3f, modeling = %d, duty = %ld, amp = %7.3f, freq = %7.3f, type = %d, inj_soft_bias = %7.3f, \n\
-    t_bias = %7.3f, s_cap_model = %7.3f, cutback_gain_scalar = %7.3f, delta_q_inf = %7.3f, hys_scale = %7.3f,\n",
+    t_bias = %7.3f, s_cap_model = %7.3f, cutback_gain_scalar = %7.3f, delta_q_inf_amp = %7.3f, delta_q_inf_noamp = %7.3f,\
+    hys_scale = %7.3f,\n",
       this->vbatt_bias, this->modeling, this->duty, this->amp, this->freq, this->type, this->inj_soft_bias,
-      this->t_bias, this->s_cap_model, this->cutback_gain_scalar, this->delta_q_inf, this->hys_scale);
+      this->t_bias, this->s_cap_model, this->cutback_gain_scalar, this->delta_q_inf_amp,
+      this->delta_q_inf_noamp, this->hys_scale);
   }
 };            
 

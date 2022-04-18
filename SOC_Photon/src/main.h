@@ -278,7 +278,10 @@ void loop()
   static uint8_t last_publishS_debug = 0;    // Remember first time with new debug to print headers
 
   // Tweak current sensing accuracy
-  static Tweak *Twk = new Tweak(TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS);
+  static Tweak *Twk_amp = new Tweak(TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS,
+    &rp.delta_q_inf_amp, &rp.tweak_bias_amp);
+  static Tweak *Twk_noa = new Tweak(TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS,
+    &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp);
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
@@ -386,8 +389,8 @@ void loop()
     // Initialize Cc structure if needed.   Needed here in this location to have a value for Sen->Tbatt_filt
     if ( reset_temp )
     {
-      Mon->load(rp.delta_q, rp.t_last, rp.delta_q_inf);
-      Mon->apply_delta_q_t(rp.delta_q, rp.t_last, rp.delta_q_inf);
+      Mon->load(rp.delta_q, rp.t_last, rp.delta_q_inf_amp);
+      Mon->apply_delta_q_t(rp.delta_q, rp.t_last);
       Mon->init_battery();  // for cp.soft_reset
       if ( rp.modeling )
         Mon->init_soc_ekf(Sim->soc());  // When modeling, ekf wants to equal model
@@ -407,14 +410,14 @@ void loop()
 
     // Memory store
     Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
-    Mon->update(&rp.delta_q, &rp.t_last, &rp.delta_q_inf);
+    Mon->update(&rp.delta_q, &rp.t_last);
 
     // Charge time for display
     Mon->calculate_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ishunt,Mon->soc());
 
     // Adjust current
-    if ( Twk->update(rp.delta_q_inf, sat, now) )
-        rp.tweak_bias = Twk->adjust(rp.tweak_bias);
+    if ( Twk_amp->update(Sen->Ishunt_amp_cal, Sen->T, sat, now) ) Twk_amp->adjust();
+    if ( Twk_noa->update(Sen->Ishunt_noamp_cal, Sen->T, sat, now) ) Twk_amp->adjust();
     //////////////////////////////////////////////////////////////
 
     //
@@ -523,7 +526,7 @@ void loop()
   // then can enter commands by sending strings.   End the strings with a real carriage return
   // right in the "Send String" box then press "Send."
   // String definitions are below.
-  talk(Mon, Sim, Sen, Twk);
+  talk(Mon, Sim, Sen, Twk_amp, Twk_noa);
 
   // Summary management
   boolean initial_summarize = summarizing_waiting && ( elapsed >= SUMMARIZE_WAIT );
@@ -533,7 +536,7 @@ void loop()
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
     mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,
-                          Mon->soc_ekf(), Mon->soc(), Mon->voc_dyn(), Mon->voc(), Mon->delta_q_inf(), rp.tweak_bias);
+                          Mon->soc_ekf(), Mon->soc(), Mon->voc_dyn(), Mon->voc(), Twk_amp->delta_q_inf(), Twk_amp->tweak_bias());
     if ( rp.debug==0 ) Serial.printf("Summarized.....................\n");
   }
 

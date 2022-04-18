@@ -269,7 +269,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   11. Keep as much summary as possible of SOC every half hour:  Tbatt, Vbatt, SOC.   Save as SRAM battery backup memory. Print out to serial automatically on boot and as requested by 'Talk.'  This will tell users charging history.
   12. Adjustments to model using talk function should preserve delta_q between models to preserve change from
   saturated situation.  The one 'constant' in this device is that it may be reset to reality whenever fully
-  charged.   Test it the same way.  The will be separate adjustment to bias the model away from this ('n' and 'N')
+  charged.   Test it the same way.  The will be separate adjustment to bias the model away from this ('n' and 'W')
   13. The 'Talk' function should let the user test a lot of stuff.   The biggest short coming is that it is a little quirky.  For example, resetting the Photon or doing any number of things sometimes requires the filters to be initialized differently, e.g. initialize to input rather than tending toward initializing to 0.   The initialization was optimized for installed use.  So the user needs to get used to rationalizing the initialization behavior they see when testing.  They can wait for the system to settle, sometimes 5 minutes.   They can run Talk('Rs') to attempt a software filter reset - won't help if the test draws a steady current after reset/reboot.
   14. Inject hardware current signal for testing purposes.   This may be implemented by reconnecting the shunt input wires to a PWM signal from the Photon.
   15. The PWM signal for injecting test signals should run at 60 Hz to better mimic the 60 Hz behavior of the inverter when installed and test the hardware AAF filters, (RC=2*pi, 1 Hz -3dB bandwidth).
@@ -327,7 +327,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   28. To run tweak test using talk function:
       Xx2; Xts; Xf0.02; Xa-4000;
       then hard reset then
-      m1; Ri;
+      m1; Ri; Mw0;
       To end:
       Xp0; v2;
       Transfer tweak_bias to CURR_BIAS_AMP and CURR_BIAS_NOAMP in local_config.h; otherwise max_tweak will begin to limit.

@@ -40,9 +40,7 @@ public:
   void apply_resetting(const boolean resetting){ resetting_ = resetting; };
   void apply_soc(const double soc, const double temp_c);
   void apply_SOC(const double SOC, const double temp_c);
-  void apply_delta_q_inf(const double delta_q_inf);
-  virtual void apply_delta_q_t(const double delta_q, const double temp_c) {};
-  void apply_delta_q_t(const double delta_q, const double temp_c, const double delta_q_inf);
+  void apply_delta_q_t(const double delta_q, const double temp_c);
   double calculate_capacity(const double temp_c);
   virtual double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
     const boolean sat, const double t_last);
@@ -57,9 +55,7 @@ public:
   double SOC() { return(SOC_); };
   boolean sat() { return(sat_); };
   double t_last() { return(t_last_); };
-  double delta_q_inf() { return(delta_q_inf_); };
-  virtual void update(double *delta_q, double *t_last) {};
-  void update(double *delta_q, double *t_last, double *delta_q_inf);
+  virtual void update(double *delta_q, double *t_last);
 protected:
   double q_cap_rated_;// Rated capacity at t_rated_, saved for future scaling, C
   double q_cap_rated_scaled_;// Applied rated capacity at t_rated_, after scaling, C
@@ -76,7 +72,6 @@ protected:
   double soc_min_;    // As battery cools, the voltage drops and there appears a minimum soc it can deliver
   double q_min_;      // Floor on charge available to use, C
   TableInterp1D *soc_min_T_;   // SOC-MIN 1-D table, V
-  double delta_q_inf_;  // Absolute simple integration of current since large reset, C
 };
 
 #endif
