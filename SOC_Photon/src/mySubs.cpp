@@ -90,11 +90,10 @@ void Shunt::load()
   }
   else
   {
-    vshunt_int_ = 0;
-    vshunt_ = computeVolts(vshunt_int_);
-    ishunt_cal_ = vshunt_*v2a_s_ + *cp_curr_bias_;
-    vshunt_int_0_ = 0; vshunt_int_1_ = 0;
+    vshunt_int_0_ = 0; vshunt_int_1_ = 0; vshunt_int_ = 0;
   }
+  vshunt_ = computeVolts(vshunt_int_);
+  ishunt_cal_ = vshunt_*v2a_s_ + *cp_curr_bias_;
 }
 
 
@@ -218,7 +217,7 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins, Adafruit_ADS1015
   Sen->ShuntNoAmp->load();
 
   // Print results
-  if ( rp.debug==14 ) Serial.printf("reset_free,select,duty,  ||(noa),  vs_int, 0_int, 1_int, vshunt, ishunt, ||(amp), vs_int, 0_int, 1_int, vshunt, ishunt,  ||,  Ishunt,T=,    %d,%d,%ld,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %7.3f,%7.3f,\n",
+  if ( rp.debug==14 ) Serial.printf("reset_free,select,duty,  ||(noa),  vs_int, 0_int, 1_int, vshunt, ishunt_cal, ||(amp), vs_int, 0_int, 1_int, vshunt, ishunt_cal,  ||,  Ishunt,T=,    %d,%d,%ld,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %7.3f,%7.3f,\n",
     reset_free, rp.curr_sel_noamp, rp.duty,
     Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt_int_0(), Sen->ShuntNoAmp->vshunt_int_1(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->ishunt_cal(),
     Sen->Vshunt_amp_int, vshunt_amp_int_0, vshunt_amp_int_1, Sen->Vshunt_amp, Sen->Ishunt_amp_cal,
