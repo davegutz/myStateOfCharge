@@ -66,10 +66,10 @@ Shunt::Shunt(const String name, const uint8_t port, double *rp_delta_q_inf, doub
 {
   setGain(GAIN_SIXTEEN, GAIN_SIXTEEN); // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
   if (!begin()) {
-    Serial.printf("FAILED to initialize ADS SHUNT MONITOR %s", name_.c_str());
+    Serial.printf("FAILED to initialize ADS SHUNT MONITOR %s\n", name_.c_str());
     bare_ = true;
   }
-  else Serial.printf("SHUNT MONITOR %s initialized", name_.c_str());
+  else Serial.printf("SHUNT MONITOR %s initialized\n", name_.c_str());
 }
 Shunt::~Shunt() {}
 // operators
@@ -193,43 +193,28 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins, Adafruit_ADS1015
   past = now;
 
   // Current bias.  Feeds into signal conversion, not to duty injection
-  cp.curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_noamp;
-  cp.curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_amp;
+  cp.curr_bias_noamp =  rp.curr_bias_noamp  + rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_noamp;
+  cp.curr_bias_amp =    rp.curr_bias_amp    + rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_amp;
 
   // Read Sensors
   // ADS1015 conversion
-  // Amp
-  int16_t vshunt_amp_int_0 = 0;
-  int16_t vshunt_amp_int_1 = 0;
-  if (!Sen->bare_ads_amp)
-  {
-    if ( rp.debug>102 ) Serial.printf("begin ads_amp->readADC_Differential_0_1 at %ld...", millis());
-    Sen->Vshunt_amp_int = ads_amp->readADC_Differential_0_1();
-    if ( rp.debug>102 ) Serial.printf("done at %ld\n", millis());
-    if ( rp.debug==-14 ){vshunt_amp_int_0 = ads_amp->readADC_SingleEnded(0); vshunt_amp_int_1 = ads_amp->readADC_SingleEnded(1);}
-  }
-  else
-    Sen->Vshunt_amp_int = 0;
-  Sen->Vshunt_amp = ads_amp->computeVolts(Sen->Vshunt_amp_int);
-  Sen->Ishunt_amp_cal = Sen->Vshunt_amp*shunt_amp_v2a_s + cp.curr_bias_amp;
-
-  // No Amp
+  Sen->ShuntAmp->load();
   Sen->ShuntNoAmp->load();
 
   // Print results
   if ( rp.debug==14 ) Serial.printf("reset_free,select,duty,  ||(noa),  vs_int, 0_int, 1_int, vshunt, ishunt_cal, ||(amp), vs_int, 0_int, 1_int, vshunt, ishunt_cal,  ||,  Ishunt,T=,    %d,%d,%ld,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %7.3f,%7.3f,\n",
     reset_free, rp.curr_sel_noamp, rp.duty,
     Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt_int_0(), Sen->ShuntNoAmp->vshunt_int_1(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->ishunt_cal(),
-    Sen->Vshunt_amp_int, vshunt_amp_int_0, vshunt_amp_int_1, Sen->Vshunt_amp, Sen->Ishunt_amp_cal,
+    Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt_int_0(), Sen->ShuntAmp->vshunt_int_1(), Sen->ShuntAmp->vshunt(), Sen->ShuntAmp->ishunt_cal(),
     Sen->Ishunt, T);
 
   // Current signal selection, based on if there or not.
   // Over-ride 'permanent' with Talk(rp.curr_sel_noamp) = Talk('s')
-  if ( !rp.curr_sel_noamp && !Sen->bare_ads_amp)
+  if ( !rp.curr_sel_noamp && ! Sen->ShuntAmp->bare())
   {
-    Sen->Vshunt = Sen->Vshunt_amp;
-    Sen->Ishunt = Sen->Ishunt_amp_cal;
-    Sen->shunt_v2a_s = shunt_amp_v2a_s;
+    Sen->Vshunt = Sen->ShuntAmp->vshunt();
+    Sen->Ishunt = Sen->ShuntAmp->ishunt_cal();
+    Sen->shunt_v2a_s = Sen->ShuntAmp->v2a_s();
   }
   else if ( !Sen->ShuntNoAmp->bare() )
   {
@@ -310,6 +295,12 @@ String tryExtractString(String str, const char* start, const char* end)
   return str.substring(idx + strlen(start), endIdx);
 }
 
+// Tweak
+void tweak(Sensors *Sen, boolean sat, unsigned long int now)
+{
+  if ( Sen->ShuntAmp->update(Sen->ShuntAmp->ishunt_cal(), Sen->T, sat, now) ) Sen->ShuntAmp->adjust();
+  if ( Sen->ShuntNoAmp->update(Sen->ShuntNoAmp->ishunt_cal(), Sen->T, sat, now) ) Sen->ShuntNoAmp->adjust();
+}
 
 // Convert time to decimal for easy lookup
 double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip)
@@ -356,7 +347,7 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner
 
-  boolean no_currents = Sen->bare_ads_amp && Sen->ShuntNoAmp->bare();
+  boolean no_currents = Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare();
   char dispString[21];
   if ( !pass && cp.model_cutback && rp.modeling )
     sprintf(dispString, "%3.0f %5.2f      ", cp.pubList.Tbatt, cp.pubList.voc);

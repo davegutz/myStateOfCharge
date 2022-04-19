@@ -108,12 +108,10 @@ struct Sensors
   double Vbatt_model;     // Sim coefficient model battery voltage based on filtered current, V
   double Tbatt;           // Sensed battery temp, C
   double Tbatt_filt;      // Filtered, sensed battery temp, C
-  int16_t Vshunt_amp_int; // Sensed shunt voltage, count
   double Vshunt_amp;      // Sensed shunt voltage, V
   double Vshunt;          // Sensed shunt voltage, V
   double Vshunt_filt;     // Filtered, sensed shunt voltage, V
   double shunt_v2a_s;     // Selected shunt conversion gain, A/V
-  double Ishunt_amp_cal;  // Sensed, calibrated amplified ADC, A
   double Ishunt;          // Selected calibrated, shunt current, A
   double Ishunt_filt;     // Filtered, calibrated sensed shunt current for observer, A
   double Wshunt;          // Sensed shunt power, W
@@ -122,30 +120,17 @@ struct Sensors
   double T;               // Update time, s
   double T_filt;          // Filter update time, s
   double T_temp;          // Temperature update time, s
-  boolean bare_ads_amp;   // If no ADS detected
   boolean saturated;      // Battery saturation status based on Temp and VOC
   Shunt *ShuntAmp;        // Shunt amplified
   Shunt *ShuntNoAmp;      // Shunt non-amplified
   Sensors(void) {}
-  Sensors(double Vbatt, double Tbatt, double Tbatt_filt,
-          int16_t Vshunt_amp_int, double Vshunt_amp, double Vshunt_amp_filt,
-          int I2C_status, double T, double T_temp, boolean bare_ads_amp)
+  Sensors(int I2C_status, double T, double T_temp)
   {
-    this->Vbatt = Vbatt;
-    this->Tbatt = Tbatt;
-    this->Tbatt_filt = Tbatt_filt;
-    this->Vshunt = Vshunt;
-    this->Vshunt_filt = Vshunt_filt;
-    this->Ishunt = Vshunt * shunt_noamp_v2a_s + rp.curr_bias_noamp;
-    this->Wshunt = Vshunt * Ishunt;
-    this->Wcharge = Vshunt * Ishunt;
-    this->Vshunt_amp_int = Vshunt_amp_int;
     this->I2C_status = I2C_status;
     this->T = T;
     this->T_filt = T;
     this->T_temp = T_temp;
-    this->bare_ads_amp = bare_ads_amp;
-    // this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_inf_amp, &rp.tweak_bias_amp, &cp.curr_bias_amp, shunt_amp_v2a_s);
+    this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_inf_amp, &rp.tweak_bias_amp, &cp.curr_bias_amp, shunt_amp_v2a_s);
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp, &cp.curr_bias_noamp, shunt_noamp_v2a_s);
   }
 };
@@ -166,5 +151,6 @@ uint32_t pwm_write(uint32_t duty, Pins *myPins);
 String time_long_2_str(const unsigned long current_time, char *tempStr);
 void create_print_string(char *buffer, Publish *pubList);
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);
+void tweak(Sensors *Sen, boolean sat, unsigned long int now);
 
 #endif

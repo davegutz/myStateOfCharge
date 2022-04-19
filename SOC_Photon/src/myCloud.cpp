@@ -137,11 +137,11 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Tbatt = Sen->Tbatt;
   pubList->Tbatt_filt = Sen->Tbatt_filt;
   pubList->Tbatt_filt_model = rp.t_last_model;
-  pubList->Vshunt_amp = Sen->Vshunt_amp;
+  pubList->Vshunt_amp = Sen->ShuntAmp->vshunt();
   pubList->Vshunt_noamp = Sen->ShuntNoAmp->vshunt();
   pubList->Vshunt = Sen->Vshunt;
   pubList->Vshunt_filt = Sen->Vshunt_filt;
-  pubList->Ishunt_amp_cal = Sen->Ishunt_amp_cal;
+  pubList->Ishunt_amp_cal = Sen->ShuntAmp->ishunt_cal();
   pubList->Ishunt_noamp_cal = Sen->ShuntNoAmp->ishunt_cal();
   pubList->Ishunt = Sen->Ishunt;
   pubList->Wshunt = Sen->Wshunt;

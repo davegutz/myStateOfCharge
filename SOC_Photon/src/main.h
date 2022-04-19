@@ -90,8 +90,6 @@ Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_ADS1015 *ads_amp;      // Use this for the 12-bit version; 1115 for 16-bit; amplified; different address
 Adafruit_ADS1015 *ads_noamp;    // Use this for the 12-bit version; 1115 for 16-bit; non-amplified
 Adafruit_SSD1306 *display;
-boolean bare_ads_noamp = false; // If ADS to be ignored
-boolean bare_ads_amp = false;   // If ADS to be ignored
 Wifi *myWifi;                   // Manage Wifi
 
 // Setup
@@ -124,24 +122,22 @@ void setup()
 
   // AD
   // Amped
-  Serial.println("Initializing SHUNT MONITORS");
-  ads_amp = new Adafruit_ADS1015;
-  ads_amp->setGain(GAIN_EIGHT, GAIN_TWO);    // First argument is differential, second is single-ended.
-  // 8 was used by Texas Instruments in their example implementation.   16 was used by another
-  // Particle user in their non-amplified implementation.
-  // TODO:  why 8 scaled by R/R gives same result as 16 for ads_noamp?
-  if (!ads_amp->begin((0x49))) {
-    Serial.println("FAILED to initialize ADS AMPLIFIED SHUNT MONITOR.");
-    bare_ads_amp = true;
-  }
-  // Non-amped
-  ads_noamp = new Adafruit_ADS1015;
-  ads_noamp->setGain(GAIN_SIXTEEN, GAIN_SIXTEEN); // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
-  if (!ads_noamp->begin()) {
-    Serial.println("FAILED to initialize ADS SHUNT MONITOR.");
-    bare_ads_noamp = true;
-  }
-  Serial.println("SHUNT MONITORS initialized");
+  // Serial.println("Initializing SHUNT MONITORS");
+  // ads_amp = new Adafruit_ADS1015;
+  // ads_amp->setGain(GAIN_EIGHT, GAIN_TWO);    // First argument is differential, second is single-ended.
+  // // 8 was used by Texas Instruments in their example implementation.   16 was used by another
+  // // Particle user in their non-amplified implementation.
+  // // TODO:  why 8 scaled by R/R gives same result as 16 for ads_noamp?
+  // if (!ads_amp->begin((0x49))) {
+  //   Serial.println("FAILED to initialize ADS AMPLIFIED SHUNT MONITOR.");
+  // }
+  // // Non-amped
+  // ads_noamp = new Adafruit_ADS1015;
+  // ads_noamp->setGain(GAIN_SIXTEEN, GAIN_SIXTEEN); // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+  // if (!ads_noamp->begin()) {
+  //   Serial.println("FAILED to initialize ADS SHUNT MONITOR.");
+  // }
+  // Serial.println("SHUNT MONITORS initialized");
   
   // Display
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
@@ -226,9 +222,7 @@ void loop()
   static DS18* SensorTbatt = new DS18(myPins->pin_1_wire, temp_parasitic, temp_delay);
 
   // Sensor conversions
-  static Sensors *Sen = new Sensors(NOMVBATT, NOMTBATT, NOMTBATT,
-        NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
-        0, 0, 0, bare_ads_amp); // Manage sensor data
+  static Sensors *Sen = new Sensors(0, 0, 0); // Manage sensor data
   static SlidingDeadband *SdTbatt = new SlidingDeadband(HDB_TBATT);
   static double t_bias_last;  // Memory for rate limiter in filter_temp call, deg C
 
@@ -275,13 +269,7 @@ void loop()
   boolean control;                         // Summarize, T/F
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
   static uint8_t last_publishS_debug = 0;    // Remember first time with new debug to print headers
-
-  // Tweak current sensing accuracy
-  static Tweak *Twk_amp = new Tweak("amp", TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS,
-    &rp.delta_q_inf_amp, &rp.tweak_bias_amp);
-  // static Tweak *Twk_noa = new Tweak("no amp", TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS,
-  //   &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp);
-  
+ 
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
   // Start Blynk, only if connected since it is blocking
@@ -329,7 +317,7 @@ void loop()
     
     // Arduino plots
     if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f, %7.3f,\n",
-        Mon->soc(), Sen->Ishunt_amp_cal, Sen->ShuntNoAmp->ishunt_cal(),
+        Mon->soc(), Sen->ShuntAmp->ishunt_cal(), Sen->ShuntNoAmp->ishunt_cal(),
         Sen->Vbatt, Sim->voc_stat(), Sim->voc());
 
     //
@@ -415,8 +403,7 @@ void loop()
     Mon->calculate_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ishunt,Mon->soc());
 
     // Adjust current
-    if ( Twk_amp->update(Sen->Ishunt_amp_cal, Sen->T, sat, now) ) Twk_amp->adjust();
-    if ( Sen->ShuntNoAmp->update(Sen->ShuntNoAmp->ishunt_cal(), Sen->T, sat, now) ) Sen->ShuntNoAmp->adjust();
+    tweak(Sen, sat, now);
     //////////////////////////////////////////////////////////////
 
     //
@@ -424,7 +411,7 @@ void loop()
     if ( rp.debug==-1 )
       Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
         Sim->SOC()-90,
-        Sen->Ishunt_amp_cal, Sen->ShuntNoAmp->ishunt_cal(),
+        Sen->ShuntAmp->ishunt_cal(), Sen->ShuntNoAmp->ishunt_cal(),
         Sen->Vbatt*10-110, Sim->voc()*10-110, Sim->vdyn()*10, Sim->vb()*10-110, Mon->vdyn()*10-110);
     if ( rp.debug==12 )
       Serial.printf("ib,ib_mod,   vb,vb_mod,  voc_dyn,voc_stat_mod,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
@@ -525,7 +512,7 @@ void loop()
   // then can enter commands by sending strings.   End the strings with a real carriage return
   // right in the "Send String" box then press "Send."
   // String definitions are below.
-  talk(Mon, Sim, Sen, Twk_amp);
+  talk(Mon, Sim, Sen);
 
   // Summary management
   boolean initial_summarize = summarizing_waiting && ( elapsed >= SUMMARIZE_WAIT );
@@ -535,7 +522,7 @@ void loop()
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
     mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,
-                          Mon->soc_ekf(), Mon->soc(), Mon->voc_dyn(), Mon->voc(), Twk_amp->delta_q_inf(), Twk_amp->tweak_bias());
+                          Mon->soc_ekf(), Mon->soc(), Mon->voc_dyn(), Mon->voc(), Sen->ShuntAmp->delta_q_inf(), Sen->ShuntAmp->tweak_bias());
     if ( rp.debug==0 ) Serial.printf("Summarized.....................\n");
   }
 
