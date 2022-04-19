@@ -53,6 +53,52 @@ void create_print_string(char *buffer, Publish *pubList)
     '\0');
 }
 
+// class Shunt
+// constructors
+Shunt::Shunt()
+: Tweak(), Adafruit_ADS1015(), name_("None"), port_(0x00), bare_(false){}
+Shunt::Shunt(const String name, const uint8_t port, double *rp_delta_q_inf, double *rp_tweak_bias, double *cp_curr_bias,
+  const double v2a_s)
+: Tweak(name, TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS, rp_delta_q_inf, rp_tweak_bias),
+  Adafruit_ADS1015(),
+  name_(name), port_(port), bare_(false), cp_curr_bias_(cp_curr_bias), v2a_s_(v2a_s),
+  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), vshunt_filt_(0), ishunt_cal_(0), ishunt_(0), ishunt_filt_(0)
+{
+  setGain(GAIN_SIXTEEN, GAIN_SIXTEEN); // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+  if (!begin()) {
+    Serial.printf("FAILED to initialize ADS SHUNT MONITOR %s", name_.c_str());
+    bare_ = true;
+  }
+  else Serial.printf("SHUNT MONITOR %s initialized", name_.c_str());
+}
+Shunt::~Shunt() {}
+// operators
+// functions
+
+// load
+void Shunt::load()
+{
+  if (!bare_)
+  {
+    if ( rp.debug>102 ) Serial.printf("begin %s->readADC_Differential_0_1 at %ld...", name_.c_str(), millis());
+
+    vshunt_int_ = readADC_Differential_0_1();
+    
+    if ( rp.debug>102 ) Serial.printf("done at %ld\n", millis());
+    if ( rp.debug==-14 ) { vshunt_int_0_ = readADC_SingleEnded(0);  vshunt_int_1_ = readADC_SingleEnded(1); }
+                    else { vshunt_int_0_ = 0;                       vshunt_int_1_ = 0; }
+  }
+  else
+  {
+    vshunt_int_ = 0;
+    vshunt_ = computeVolts(vshunt_int_);
+    ishunt_cal_ = vshunt_*v2a_s_ + *cp_curr_bias_;
+    vshunt_int_0_ = 0; vshunt_int_1_ = 0;
+  }
+}
+
+
+
 // Time synchro for web information
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip)
 {
@@ -141,8 +187,7 @@ void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt)
 }
 
 // Load all others
-void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
-    Adafruit_ADS1015 *ads_amp, Adafruit_ADS1015 *ads_noamp, const unsigned long now)
+void load(const boolean reset_free, Sensors *Sen, Pins *myPins, Adafruit_ADS1015 *ads_amp, const unsigned long now)
 {
   static unsigned long int past = now;
   double T = (now - past)/1e3;
@@ -168,25 +213,14 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
     Sen->Vshunt_amp_int = 0;
   Sen->Vshunt_amp = ads_amp->computeVolts(Sen->Vshunt_amp_int);
   Sen->Ishunt_amp_cal = Sen->Vshunt_amp*shunt_amp_v2a_s + cp.curr_bias_amp;
-  // No amp
-  int16_t vshunt_noamp_int_0 = 0;
-  int16_t vshunt_noamp_int_1 = 0;
-  if (!Sen->bare_ads_noamp)
-  {
-    if ( rp.debug>102 ) Serial.printf("begin ads_amp->readADC_Differential_0_1 at %ld...", millis());
-    Sen->Vshunt_noamp_int = ads_noamp->readADC_Differential_0_1();
-    if ( rp.debug>102 ) Serial.printf("done at %ld\n", millis());
-    if ( rp.debug==-14 ){vshunt_noamp_int_0 = ads_noamp->readADC_SingleEnded(0); vshunt_noamp_int_1 = ads_noamp->readADC_SingleEnded(1);}
-  }
-  else
-    Sen->Vshunt_noamp_int = 0;
-  Sen->Vshunt_noamp = ads_noamp->computeVolts(Sen->Vshunt_noamp_int);
-  Sen->Ishunt_noamp_cal = Sen->Vshunt_noamp*shunt_noamp_v2a_s + cp.curr_bias_noamp;
+
+  // No Amp
+  Sen->ShuntNoAmp->load();
 
   // Print results
-  if ( rp.debug==14 ) Serial.printf("reset_free,select,duty,  ||,  vs_na_int,0_na_int,1_na_int,vshunt_na,ishunt_na, ||, vshunt_a_int,0_a_int,1_a_int,vshunt_a,ishunt_a,  ||,  Ishunt,T=,    %d,%d,%ld,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %7.3f,%7.3f,\n",
+  if ( rp.debug==14 ) Serial.printf("reset_free,select,duty,  ||(noa),  vs_int, 0_int, 1_int, vshunt, ishunt, ||(amp), vs_int, 0_int, 1_int, vshunt, ishunt,  ||,  Ishunt,T=,    %d,%d,%ld,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %7.3f,%7.3f,\n",
     reset_free, rp.curr_sel_noamp, rp.duty,
-    Sen->Vshunt_noamp_int, vshunt_noamp_int_0, vshunt_noamp_int_1, Sen->Vshunt_noamp, Sen->Ishunt_noamp_cal,
+    Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt_int_0(), Sen->ShuntNoAmp->vshunt_int_1(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->ishunt_cal(),
     Sen->Vshunt_amp_int, vshunt_amp_int_0, vshunt_amp_int_1, Sen->Vshunt_amp, Sen->Ishunt_amp_cal,
     Sen->Ishunt, T);
 
@@ -198,17 +232,17 @@ void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
     Sen->Ishunt = Sen->Ishunt_amp_cal;
     Sen->shunt_v2a_s = shunt_amp_v2a_s;
   }
-  else if ( !Sen->bare_ads_noamp )
+  else if ( !Sen->ShuntNoAmp->bare() )
   {
-    Sen->Vshunt = Sen->Vshunt_noamp;
-    Sen->Ishunt = Sen->Ishunt_noamp_cal;
-    Sen->shunt_v2a_s = shunt_noamp_v2a_s;
+    Sen->Vshunt = Sen->ShuntNoAmp->vshunt();
+    Sen->Ishunt = Sen->ShuntNoAmp->ishunt_cal();
+    Sen->shunt_v2a_s = Sen->ShuntNoAmp->v2a_s();
   }
   else
   {
     Sen->Vshunt = 0.;
     Sen->Ishunt = 0.;
-    Sen->shunt_v2a_s = shunt_noamp_v2a_s; // noamp preferred, default to that
+    Sen->shunt_v2a_s = Sen->ShuntNoAmp->v2a_s(); // noamp preferred, default to that
   }
 
   // Vbatt
@@ -323,7 +357,7 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner
 
-  boolean no_currents = Sen->bare_ads_amp && Sen->bare_ads_noamp;
+  boolean no_currents = Sen->bare_ads_amp && Sen->ShuntNoAmp->bare();
   char dispString[21];
   if ( !pass && cp.model_cutback && rp.modeling )
     sprintf(dispString, "%3.0f %5.2f      ", cp.pubList.Tbatt, cp.pubList.voc);

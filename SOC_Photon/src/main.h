@@ -228,8 +228,7 @@ void loop()
   // Sensor conversions
   static Sensors *Sen = new Sensors(NOMVBATT, NOMTBATT, NOMTBATT,
         NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
-        NOMVSHUNTI, NOMVSHUNT, NOMVSHUNT,
-        0, 0, 0, bare_ads_noamp, bare_ads_amp); // Manage sensor data
+        0, 0, 0, bare_ads_amp); // Manage sensor data
   static SlidingDeadband *SdTbatt = new SlidingDeadband(HDB_TBATT);
   static double t_bias_last;  // Memory for rate limiter in filter_temp call, deg C
 
@@ -280,8 +279,8 @@ void loop()
   // Tweak current sensing accuracy
   static Tweak *Twk_amp = new Tweak("amp", TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS,
     &rp.delta_q_inf_amp, &rp.tweak_bias_amp);
-  static Tweak *Twk_noa = new Tweak("no amp", TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS,
-    &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp);
+  // static Tweak *Twk_noa = new Tweak("no amp", TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS,
+  //   &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp);
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
@@ -326,11 +325,11 @@ void loop()
     if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  \n", Sen->T, millis());
 
     // Load and filter
-    load(reset, Sen, myPins, ads_amp, ads_noamp, ReadSensors->now());
+    load(reset, Sen, myPins, ads_amp, ReadSensors->now());
     
     // Arduino plots
     if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f, %7.3f,\n",
-        Mon->soc(), Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
+        Mon->soc(), Sen->Ishunt_amp_cal, Sen->ShuntNoAmp->ishunt_cal(),
         Sen->Vbatt, Sim->voc_stat(), Sim->voc());
 
     //
@@ -417,7 +416,7 @@ void loop()
 
     // Adjust current
     if ( Twk_amp->update(Sen->Ishunt_amp_cal, Sen->T, sat, now) ) Twk_amp->adjust();
-    if ( Twk_noa->update(Sen->Ishunt_noamp_cal, Sen->T, sat, now) ) Twk_noa->adjust();
+    if ( Sen->ShuntNoAmp->update(Sen->ShuntNoAmp->ishunt_cal(), Sen->T, sat, now) ) Sen->ShuntNoAmp->adjust();
     //////////////////////////////////////////////////////////////
 
     //
@@ -425,7 +424,7 @@ void loop()
     if ( rp.debug==-1 )
       Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
         Sim->SOC()-90,
-        Sen->Ishunt_amp_cal, Sen->Ishunt_noamp_cal,
+        Sen->Ishunt_amp_cal, Sen->ShuntNoAmp->ishunt_cal(),
         Sen->Vbatt*10-110, Sim->voc()*10-110, Sim->vdyn()*10, Sim->vb()*10-110, Mon->vdyn()*10-110);
     if ( rp.debug==12 )
       Serial.printf("ib,ib_mod,   vb,vb_mod,  voc_dyn,voc_stat_mod,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
@@ -526,7 +525,7 @@ void loop()
   // then can enter commands by sending strings.   End the strings with a real carriage return
   // right in the "Send String" box then press "Send."
   // String definitions are below.
-  talk(Mon, Sim, Sen, Twk_amp, Twk_noa);
+  talk(Mon, Sim, Sen, Twk_amp);
 
   // Summary management
   boolean initial_summarize = summarizing_waiting && ( elapsed >= SUMMARIZE_WAIT );

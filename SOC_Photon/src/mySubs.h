@@ -31,6 +31,7 @@
 #include "myTalk.h"
 #include "retained.h"
 #include "command.h"
+#include "Tweak.h"
 
 // Temp sensor
 #include <hardware/OneWire.h>
@@ -44,6 +45,44 @@
 #include <Adafruit/Adafruit_SSD1306.h>
 
 extern RetainedPars rp; // Various parameters to be static at system level
+extern CommandPars cp;  // Various parameters to be static at system level
+
+
+// ADS1015-based shunt
+class Shunt: public Tweak, Adafruit_ADS1015
+{
+public:
+  Shunt();
+  Shunt(const String name, const uint8_t port, double *rp_delta_q_inf, double *rp_tweak_bias, double *cp_curr_bias, 
+    const double v2a_s);
+  ~Shunt();
+  // operators
+  // functions
+  boolean bare() { return ( bare_ ); };
+  double ishunt() { return ( ishunt_ ); };
+  double ishunt_cal() { return ( ishunt_cal_ ); };
+  void load();
+  double v2a_s() { return ( v2a_s_ ); };
+  double vshunt() { return ( vshunt_ ); };
+  int16_t vshunt_int() { return ( vshunt_int_ ); };
+  int16_t vshunt_int_0() { return ( vshunt_int_0_ ); };
+  int16_t vshunt_int_1() { return ( vshunt_int_1_ ); };
+protected:
+  String name_;         // For print statements, multiple instances
+  uint8_t port_;        // Octal I2C port used by Acafruit_ADS1015
+  boolean bare_;        // If ADS to be ignored
+  double *cp_curr_bias_;// Global bias, A
+  double v2a_s_;        // Selected shunt conversion gain, A/V
+  int16_t vshunt_int_;  // Sensed shunt voltage, count
+  int16_t vshunt_int_0_;// Interim conversion, count
+  int16_t vshunt_int_1_;// Interim conversion, count
+  double vshunt_;       // Sensed shunt voltage, V
+  double vshunt_filt_;  // Filtered, sensed shunt voltage, V
+  double ishunt_cal_;   // Sensed, calibrated ADC, A
+  double ishunt_;       // Selected calibrated, shunt current, A
+  double ishunt_filt_;  // Filtered, calibrated sensed shunt current for observer, A
+};
+
 
 // Pins
 struct Pins
@@ -70,14 +109,11 @@ struct Sensors
   double Tbatt;           // Sensed battery temp, C
   double Tbatt_filt;      // Filtered, sensed battery temp, C
   int16_t Vshunt_amp_int; // Sensed shunt voltage, count
-  int16_t Vshunt_noamp_int;// Sensed shunt voltage, count
   double Vshunt_amp;      // Sensed shunt voltage, V
-  double Vshunt_noamp;    // Sensed shunt voltage, V
   double Vshunt;          // Sensed shunt voltage, V
   double Vshunt_filt;     // Filtered, sensed shunt voltage, V
   double shunt_v2a_s;     // Selected shunt conversion gain, A/V
   double Ishunt_amp_cal;  // Sensed, calibrated amplified ADC, A
-  double Ishunt_noamp_cal;// Sensed, calibrated non-amplified ADC, A
   double Ishunt;          // Selected calibrated, shunt current, A
   double Ishunt_filt;     // Filtered, calibrated sensed shunt current for observer, A
   double Wshunt;          // Sensed shunt power, W
@@ -87,18 +123,17 @@ struct Sensors
   double T_filt;          // Filter update time, s
   double T_temp;          // Temperature update time, s
   boolean bare_ads_amp;   // If no ADS detected
-  boolean bare_ads_noamp; // If no ADS detected
   boolean saturated;      // Battery saturation status based on Temp and VOC
+  Shunt *ShuntAmp;        // Shunt amplified
+  Shunt *ShuntNoAmp;      // Shunt non-amplified
   Sensors(void) {}
   Sensors(double Vbatt, double Tbatt, double Tbatt_filt,
-          int16_t Vshunt_noamp_int, double Vshunt, double Vshunt_filt,
           int16_t Vshunt_amp_int, double Vshunt_amp, double Vshunt_amp_filt,
-          int I2C_status, double T, double T_temp, boolean bare_ads_noamp, boolean bare_ads_amp)
+          int I2C_status, double T, double T_temp, boolean bare_ads_amp)
   {
     this->Vbatt = Vbatt;
     this->Tbatt = Tbatt;
     this->Tbatt_filt = Tbatt_filt;
-    this->Vshunt_noamp_int = Vshunt_noamp_int;
     this->Vshunt = Vshunt;
     this->Vshunt_filt = Vshunt_filt;
     this->Ishunt = Vshunt * shunt_noamp_v2a_s + rp.curr_bias_noamp;
@@ -109,8 +144,9 @@ struct Sensors
     this->T = T;
     this->T_filt = T;
     this->T_temp = T_temp;
-    this->bare_ads_noamp = bare_ads_noamp;
     this->bare_ads_amp = bare_ads_amp;
+    // this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_inf_amp, &rp.tweak_bias_amp, &cp.curr_bias_amp, shunt_amp_v2a_s);
+    this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp, &cp.curr_bias_noamp, shunt_noamp_v2a_s);
   }
 };
 
@@ -118,8 +154,7 @@ struct Sensors
 // Headers
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);
-void load(const boolean reset_free, Sensors *Sen, Pins *myPins,
-    Adafruit_ADS1015 *ads_amp, Adafruit_ADS1015 *ads_noamp, const unsigned long now);
+void load(const boolean reset_free, Sensors *Sen, Pins *myPins, Adafruit_ADS1015 *ads_amp, const unsigned long now);
 void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt);
 void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFilt, General2_Pole* IshuntSenseFilt);
 void filter_temp(const int reset, const double t_rlim, Sensors *Sen, General2_Pole* TbattSenseFilt, const double t_bias, double *t_bias_last);
