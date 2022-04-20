@@ -186,7 +186,7 @@ void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt)
 }
 
 // Load all others
-void load(const boolean reset_free, Sensors *Sen, Pins *myPins, Adafruit_ADS1015 *ads_amp, const unsigned long now)
+void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins *myPins)
 {
   static unsigned long int past = now;
   double T = (now - past)/1e3;
@@ -296,10 +296,10 @@ String tryExtractString(String str, const char* start, const char* end)
 }
 
 // Tweak
-void tweak(Sensors *Sen, boolean sat, unsigned long int now)
+void tweak(Sensors *Sen, unsigned long int now)
 {
-  if ( Sen->ShuntAmp->update(Sen->ShuntAmp->ishunt_cal(), Sen->T, sat, now) ) Sen->ShuntAmp->adjust();
-  if ( Sen->ShuntNoAmp->update(Sen->ShuntNoAmp->ishunt_cal(), Sen->T, sat, now) ) Sen->ShuntNoAmp->adjust();
+  if ( Sen->ShuntAmp->update(Sen->ShuntAmp->ishunt_cal(), Sen->T, Sen->saturated, now) ) Sen->ShuntAmp->adjust();
+  if ( Sen->ShuntNoAmp->update(Sen->ShuntNoAmp->ishunt_cal(), Sen->T, Sen->saturated, now) ) Sen->ShuntNoAmp->adjust();
 }
 
 // Convert time to decimal for easy lookup

@@ -313,7 +313,7 @@ void loop()
     if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  \n", Sen->T, millis());
 
     // Load and filter
-    load(reset, Sen, myPins, ads_amp, ReadSensors->now());
+    load(reset, ReadSensors->now(), Sen, myPins);
     
     // Arduino plots
     if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f, %7.3f,\n",
@@ -403,7 +403,7 @@ void loop()
     Mon->calculate_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ishunt,Mon->soc());
 
     // Adjust current
-    tweak(Sen, sat, now);
+    tweak(Sen, now);
     //////////////////////////////////////////////////////////////
 
     //
