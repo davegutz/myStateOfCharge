@@ -215,7 +215,7 @@ void loop()
 
   // Sim, used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off. 
   static BatteryModel *Sim = new BatteryModel(batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
-    dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, 1.);
+    dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, 1., &rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model);
 
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay();   // Time persistence
@@ -321,7 +321,7 @@ void loop()
     // Sim initialize as needed from memory
     if ( reset )
     {
-      Sim->load(rp.delta_q_model, rp.t_last_model, rp.s_cap_model);
+      Sim->load();
       Sim->apply_delta_q_t(rp.delta_q_model, rp.t_last_model);
       Sim->init_battery();  // for cp.soft_reset
     }
@@ -342,7 +342,6 @@ void loop()
 
     // Charge calculation and memory store
     Sim->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, rp.t_last_model);
-    Sim->update(&rp.delta_q_model, &rp.t_last_model);
 
     // D2 signal injection to hardware current sensors (also has rp.inj_soft_bias path for rp.tweak_test)
     rp.duty = Sim->calc_inj_duty(elapsed, rp.type, rp.amp, rp.freq);

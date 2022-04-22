@@ -309,8 +309,10 @@ void BatteryMonitor::pretty_print(void)
 BatteryModel::BatteryModel() : Battery() {}
 BatteryModel::BatteryModel(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx) :
-    Battery(num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_direx), q_(q_cap_rated)
+    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx, 
+    double *rp_delta_q_model, double *rp_t_last_model, double *rp_s_cap_model) :
+    Battery(num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_direx), q_(q_cap_rated),
+    rp_delta_q_model_(rp_delta_q_model), rp_t_last_model_(rp_t_last_model), rp_s_cap_model_(rp_s_cap_model)
 {
     // Randles dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery
@@ -540,11 +542,11 @@ double BatteryModel::count_coulombs(const double dt, const boolean reset, const 
 }
 
 // Load states from retained memory
-void BatteryModel::load(const double delta_q, const double t_last, const double s_cap_model)
+void BatteryModel::load()
 {
-    delta_q_ = delta_q;
-    t_last_ = t_last;
-    apply_cap_scale(s_cap_model);
+    delta_q_ = *rp_delta_q_model_;
+    t_last_ = *rp_t_last_model_;
+    apply_cap_scale(*rp_s_cap_model_);
 }
 
 // Print
@@ -559,13 +561,6 @@ void BatteryModel::pretty_print(void)
     Serial.printf("  model_saturated_ =    %d;     // Modeled current being limited on saturation cutback, T = cutback limited\n", model_saturated_);
     Serial.printf("  ib_sat_ =           %7.3f; // Indicator of maximal cutback, T = cutback saturated\n", ib_sat_);
     Serial.printf("  s_cap_ =            %7.3f; // Rated capacity scalar\n", s_cap_);
-}
-
-// Update states to be saved in retained memory
-void BatteryModel::update(double *delta_q, double *t_last)
-{
-    *delta_q = delta_q_;
-    *t_last = t_last_;
 }
 
 

@@ -255,18 +255,16 @@ public:
   BatteryModel();
   BatteryModel(const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale);
+    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale, 
+    double *rp_delta_q_model, double *rp_t_last_model, double *rp_s_cap_model);
   ~BatteryModel();
   // operators
   // functions
-  // double calculate(const double temp_C, const double soc_frac, double curr_in, const double dt,
-  //   const double q_capacity, const double q_cap, const boolean dc_dc_on);
   double calculate(Sensors *Sen, const boolean dc_dc_on);
   uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);
   double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
     const double t_last);
-  void load(const double delta_q, const double t_last, const double s_cap_model);
-  void update(double *delta_q, double *t_last);
+  void load();
   void pretty_print(void);
   boolean cutback() { return model_cutback_; };
   boolean saturated() { return model_saturated_; };
@@ -286,6 +284,9 @@ protected:
   boolean model_saturated_; // Indicator of maximal cutback, T = cutback saturated
   double ib_sat_;       // Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
   double s_cap_;        // Rated capacity scalar
+  double *rp_delta_q_model_;
+  double *rp_t_last_model_;
+  double *rp_s_cap_model_;
 };
 
 
