@@ -112,25 +112,27 @@ struct Sensors
   double Ishunt;          // Selected calibrated, shunt current, A
   double Wshunt;          // Sensed shunt power, W
   double Wcharge;         // Charge power, W
-  int I2C_status;
   double T;               // Update time, s
   double T_filt;          // Filter update time, s
   double T_temp;          // Temperature update time, s
   boolean saturated;      // Battery saturation status based on Temp and VOC
-  Shunt *ShuntAmp;        // Shunt amplified
-  Shunt *ShuntNoAmp;      // Shunt non-amplified
-  General2_Pole* TbattSenseFilt;  // Filter for Tb. There are 1 Hz AAFs in hardware for Vb and Ib
+  Shunt *ShuntAmp;        // Ib sense amplified
+  Shunt *ShuntNoAmp;      // Ib sense non-amplified
+  DS18* SensorTbatt;      // Tb sense
+  General2_Pole* TbattSenseFilt;  // Linear filter for Tb. There are 1 Hz AAFs in hardware for Vb and Ib
+  SlidingDeadband *SdTbatt;       // Non-linear filter for Tb
 
   Sensors(void) {}
-  Sensors(int I2C_status, double T, double T_temp)
+  Sensors(double T, double T_temp, byte pin_1_wire)
   {
-    this->I2C_status = I2C_status;
     this->T = T;
     this->T_filt = T;
     this->T_temp = T_temp;
     this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_inf_amp, &rp.tweak_bias_amp, &cp.curr_bias_amp, shunt_amp_v2a_s);
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp, &cp.curr_bias_noamp, shunt_noamp_v2a_s);
+    this->SensorTbatt = new DS18(pin_1_wire, temp_parasitic, temp_delay);
     this->TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
+    SdTbatt = new SlidingDeadband(HDB_TBATT);
   }
 };
 
@@ -139,7 +141,7 @@ struct Sensors
 void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);
 void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins *myPins);
-void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt);
+void load_temp(Sensors *Sen);
 void filter_temp(const int reset, const double t_rlim, Sensors *Sen, const double t_bias, double *t_bias_last);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);

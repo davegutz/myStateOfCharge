@@ -162,7 +162,7 @@ void serial_print(unsigned long now, double T)
 }
 
 // Load temperature only
-void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt)
+void load_temp(Sensors *Sen)
 {
   // Read Sensor
   // MAXIM conversion 1-wire Tp plenum temperature
@@ -170,12 +170,12 @@ void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt)
   double temp = 0.;
   while ( ++count<MAX_TEMP_READS && temp==0)
   {
-    if ( SensorTbatt->read() ) temp = SensorTbatt->celsius() + (TBATT_TEMPCAL);
+    if ( Sen->SensorTbatt->read() ) temp = Sen->SensorTbatt->celsius() + (TBATT_TEMPCAL);
     delay(1);
   }
   if ( count<MAX_TEMP_READS )
   {
-    Sen->Tbatt = SdTbatt->update(temp);
+    Sen->Tbatt = Sen->SdTbatt->update(temp);
     if ( rp.debug==-103 ) Serial.printf("Temperature %7.3f read on count=%d\n", temp, count);
   }
   else

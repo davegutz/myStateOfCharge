@@ -197,7 +197,7 @@ void setup()
 
   // Header for rp.debug print
   if ( rp.debug>101 ) print_serial_header();
-  if ( rp.debug>103 ) { Serial.print(F("End setup rp.debug message=")); Serial.println(F(", ")); };
+  if ( rp.debug>103 ) { Serial.print(F("End setup")); Serial.println(F(", ")); };
 
 } // setup
 
@@ -205,12 +205,8 @@ void setup()
 // Loop
 void loop()
 {
-  // 1-wire temp sensor battery temp
-  static DS18* SensorTbatt = new DS18(myPins->pin_1_wire, temp_parasitic, temp_delay);
-
   // Sensor conversions
-  static Sensors *Sen = new Sensors(0, 0, 0); // Manage sensor data
-  static SlidingDeadband *SdTbatt = new SlidingDeadband(HDB_TBATT);
+  static Sensors *Sen = new Sensors(0, 0, myPins->pin_1_wire); // Manage sensor data
   static double t_bias_last;  // Memory for rate limiter in filter_temp call, deg C
 
    // Mon, used to count Coulombs and run EKF
@@ -289,7 +285,7 @@ void loop()
     Sen->T_temp =  ReadTemp->updateTime();
 
     // Load and filter temperature Tb only
-    load_temp(Sen, SensorTbatt, SdTbatt);
+    load_temp(Sen);
     filter_temp(reset_temp, t_rlim, Sen, rp.t_bias, &t_bias_last);
 
   }
