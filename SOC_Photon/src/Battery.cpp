@@ -39,10 +39,10 @@ extern CommandPars cp;
 Battery::Battery()
     :voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(4), dv_dsoc_(0), sr_(1), vsat_(13.7),
     dv_(0), dvoc_dt_(0){}
-Battery::Battery(const int num_cells,
+Battery::Battery(double *rp_delta_q, double *rp_t_last, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx)
-    : Coulombs(q_cap_rated, t_rated, t_rlim), voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0),
+    : Coulombs(rp_delta_q, rp_t_last, q_cap_rated, t_rated, t_rlim), voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0),
     sr_(1.), nom_vsat_(batt_vsat), dv_(0.01), dvoc_dt_(dvoc_dt),  // 0.01 to compensate for tables generated without considering hys
     r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
     tau_sd_(1.8e7), r_sd_(70.), ioc_(0)
@@ -156,10 +156,10 @@ BatteryMonitor::BatteryMonitor(): Battery()
     Q_ = 0.;
     R_ = 0.;
 }
-BatteryMonitor::BatteryMonitor(const int num_cells,
+BatteryMonitor::BatteryMonitor(double *rp_delta_q, double *rp_t_last, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx, const double hdb_vbatt) :
-    Battery(num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_direx), tcharge_(24), voc_filt_(batt_vsat)
+    Battery(rp_delta_q, rp_t_last, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_direx), tcharge_(24), voc_filt_(batt_vsat)
 {
 
     // EKF
@@ -307,12 +307,12 @@ void BatteryMonitor::pretty_print(void)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
 BatteryModel::BatteryModel() : Battery() {}
-BatteryModel::BatteryModel(const int num_cells,
+BatteryModel::BatteryModel(double *rp_delta_q, double *rp_t_last, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx, 
-    double *rp_delta_q_model, double *rp_t_last_model, double *rp_s_cap_model) :
-    Battery(num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_direx), q_(q_cap_rated),
-    rp_delta_q_model_(rp_delta_q_model), rp_t_last_model_(rp_t_last_model), rp_s_cap_model_(rp_s_cap_model)
+    double *rp_s_cap_model) :
+    Battery(rp_delta_q, rp_t_last, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_direx), q_(q_cap_rated),
+    rp_s_cap_model_(rp_s_cap_model)
 {
     // Randles dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery
@@ -509,19 +509,19 @@ double BatteryModel::count_coulombs(const double dt, const boolean reset, const 
     // Rate limit temperature
     double temp_lim = max(min(temp_c, t_last + t_rlim_*dt), t_last - t_rlim_*dt);
     if ( reset ) temp_lim = temp_c;
-    if ( reset ) t_last_ = temp_c;
+    if ( reset ) *rp_t_last_ = temp_c;
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
     if ( model_saturated_ )
     {
-        if ( reset ) delta_q_ = 0.;  // Sim is truth.   Saturate it then restart it to reset charge
+        if ( reset ) *rp_delta_q_ = 0.;  // Sim is truth.   Saturate it then restart it to reset charge
     }
     resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass
 
     // Integration
     q_capacity_ = calculate_capacity(temp_lim);
-    if ( !reset ) delta_q_ = max(min(delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-t_last_), 0. ), -q_capacity_);
-    q_ = q_capacity_ + delta_q_;
+    if ( !reset ) *rp_delta_q_ = max(min(*rp_delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-*rp_t_last_), 0. ), -q_capacity_);
+    q_ = q_capacity_ + *rp_delta_q_;
 
     // Normalize
     soc_ = q_ / q_capacity_;
@@ -531,21 +531,19 @@ double BatteryModel::count_coulombs(const double dt, const boolean reset, const 
 
     if ( rp.debug==97 )
         Serial.printf("BatteryModel::cc,  dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,%5.1f,\n",
-                    dt,cp.pubList.voc,  sat_voc(temp_c), temp_lim, model_saturated_, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
+                    dt,cp.pubList.voc,  sat_voc(temp_c), temp_lim, model_saturated_, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
     if ( rp.debug==-97 )
         Serial.printf("voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,%5.1f,\n",
-                    cp.pubList.voc,  sat_voc(temp_c), temp_lim, model_saturated_, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
+                    cp.pubList.voc,  sat_voc(temp_c), temp_lim, model_saturated_, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
 
     // Save and return
-    t_last_ = temp_lim;
+    *rp_t_last_ = temp_lim;
     return ( soc_ );
 }
 
 // Load states from retained memory
 void BatteryModel::load()
 {
-    delta_q_ = *rp_delta_q_model_;
-    t_last_ = *rp_t_last_model_;
     apply_cap_scale(*rp_s_cap_model_);
 }
 

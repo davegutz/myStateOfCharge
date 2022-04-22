@@ -141,7 +141,7 @@ class Battery : public Coulombs
 {
 public:
   Battery();
-  Battery(const int num_cells,
+  Battery(double *rp_delta_q, double *rp_t_last, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx);
   ~Battery();
@@ -210,7 +210,7 @@ class BatteryMonitor: public Battery, public EKF_1x1
 {
 public:
   BatteryMonitor();
-  BatteryMonitor(const int num_cells,
+  BatteryMonitor(double *rp_delta_q, double *rp_t_last, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale, const double hdb_vbatt);
   ~BatteryMonitor();
@@ -253,10 +253,10 @@ class BatteryModel: public Battery
 {
 public:
   BatteryModel();
-  BatteryModel(const int num_cells,
+  BatteryModel(double *rp_delta_q, double *rp_t_last, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale, 
-    double *rp_delta_q_model, double *rp_t_last_model, double *rp_s_cap_model);
+    double *rp_s_cap_model);
   ~BatteryModel();
   // operators
   // functions

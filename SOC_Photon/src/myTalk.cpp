@@ -234,8 +234,6 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
           Mon->apply_soc(SOCS_in, Sen->Tbatt_filt);
           Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
           if ( rp.modeling ) Mon->init_soc_ekf(Sim->soc());
-          Mon->update(&rp.delta_q, &rp.t_last);
-          Sim->update(&rp.delta_q_model, &rp.t_last_model);
 
           Serial.printf("SOC=%7.3f, soc=%7.3f, modeling = %d, delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
               Mon->SOC(), Mon->soc(), rp.modeling, rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model, Mon->soc_ekf());
@@ -348,7 +346,6 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         if ( SOCS_in<1.1 )   // Apply crude limit to prevent user error
         {
           Sim->apply_soc(SOCS_in, Sen->Tbatt_filt);
-          Sim->update(&rp.delta_q_model, &rp.t_last_model);
           if ( rp.modeling )
             Mon->init_soc_ekf(Mon->soc());
 
@@ -364,8 +361,6 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         Mon->apply_SOC(SOCS_in, Sen->Tbatt_filt);
         Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
         if ( rp.modeling ) Mon->init_soc_ekf(Sim->soc());
-        Mon->update(&rp.delta_q, &rp.t_last);
-        Sim->update(&rp.delta_q_model, &rp.t_last_model);
 
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
             Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model, Mon->soc_ekf());
@@ -547,7 +542,6 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
       case ( 'W' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
         Sim->apply_SOC(SOCS_in, Sen->Tbatt_filt);
-        Sim->update(&rp.delta_q_model, &rp.t_last_model);
         if ( rp.modeling )
           Mon->init_soc_ekf(Mon->soc());
 

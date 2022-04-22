@@ -35,8 +35,8 @@ extern CommandPars cp;
 // class Coulombs
 Coulombs::Coulombs()
   : q_cap_rated_(0), q_cap_rated_scaled_(0), t_rated_(25), t_rlim_(0.017) {}
-Coulombs::Coulombs(const double q_cap_rated, const double t_rated, const double t_rlim)
-  : q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017),
+Coulombs::Coulombs(double *rp_delta_q, double *rp_t_last, const double q_cap_rated, const double t_rated, const double t_rlim)
+  : rp_delta_q_(rp_delta_q), rp_t_last_(rp_t_last), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017),
   soc_min_(0)
   {
     soc_min_T_ = new TableInterp1D(n_n, x_soc_min, t_soc_min);
@@ -53,12 +53,12 @@ void Coulombs::pretty_print(void)
   Serial.printf("  q_capacity_ = %9.1f;     // Saturation charge at temperature, C\n", q_capacity_);
   Serial.printf("  q_ =          %9.1f;     // Present charge available to use, except q_min_, C\n", q_);
   Serial.printf("  q_min_ =      %9.1f;     // Charge at low voltage shutdown, C\n", q_min_);
-  Serial.printf("  delta_q_      %9.1f;     // Charge since saturated, C\n", delta_q_);
+  Serial.printf("  delta_q       %9.1f;     // Charge since saturated, C\n", *rp_delta_q_);
   Serial.printf("  soc_ =        %7.3f;       // Fraction of saturation charge (q_capacity_) available (0-1)  soc_);\n", soc_);
   Serial.printf("  SOC_ =        %5.1f;         // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries\n", SOC_);
   Serial.printf("  sat_ =          %d;          // Indication calculated by caller that battery is saturated, T=saturated\n", sat_);
   Serial.printf("  t_rated_ =    %5.1f;         // Rated temperature, deg C\n", t_rated_);
-  Serial.printf("  t_last_ =     %5.1f;         // Last battery temperature for rate limit memory, deg C\n", t_last_);
+  Serial.printf("  t_last =      %5.1f;         // Last battery temperature for rate limit memory, deg C\n", *rp_t_last_);
   Serial.printf("  t_rlim_ =     %7.3f;       // Tbatt rate limit, deg C / s\n", t_rlim_);
   Serial.printf("  resetting_ =     %d;          // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter\n", resetting_);
   Serial.printf("  soc_min_ =    %7.3f;       // Lowest soc for power delivery.   Arises with temp < 20 C\n", soc_min_);
@@ -74,8 +74,8 @@ void Coulombs::pretty_print(void)
 void Coulombs::apply_cap_scale(const double scale)
 {
   q_cap_rated_scaled_ = scale * q_cap_rated_;
-  q_capacity_ = calculate_capacity(t_last_);
-  q_ = delta_q_ + q_capacity_; // preserve delta_q, deficit since last saturation (like real life)
+  q_capacity_ = calculate_capacity(*rp_t_last_);
+  q_ = *rp_delta_q_ + q_capacity_; // preserve delta_q, deficit since last saturation (like real life)
   soc_ = q_ / q_capacity_;
   SOC_ = q_ / q_cap_rated_scaled_ * 100.;
   resetting_ = true;     // momentarily turn off saturation check
@@ -84,8 +84,8 @@ void Coulombs::apply_cap_scale(const double scale)
 // Memory set, adjust book-keeping as needed.  delta_q, capacity, temp preserved
 void Coulombs::apply_delta_q(const double delta_q)
 {
-  delta_q_ = delta_q;
-  q_ = delta_q_ + q_capacity_;
+  *rp_delta_q_ = delta_q;
+  q_ = *rp_delta_q_ + q_capacity_;
   soc_ = q_ / q_capacity_;
   SOC_ = q_ / q_cap_rated_scaled_ * 100.;
   resetting_ = true;     // momentarily turn off saturation check
@@ -94,9 +94,9 @@ void Coulombs::apply_delta_q(const double delta_q)
 // Memory set, adjust book-keeping as needed.  q_cap_ etc presesrved
 void Coulombs::apply_delta_q_t(const double delta_q, const double temp_c)
 {
-  delta_q_ = delta_q;
+  *rp_delta_q_ = delta_q;
   q_capacity_ = calculate_capacity(temp_c);
-  q_ = q_capacity_ + delta_q;
+  q_ = q_capacity_ + *rp_delta_q_;
   soc_ = q_ / q_capacity_;
   SOC_ = q_ / q_cap_rated_scaled_ * 100.;
   resetting_ = true;
@@ -108,7 +108,7 @@ void Coulombs::apply_soc(const double soc, const double temp_c)
   soc_ = soc;
   q_capacity_ = calculate_capacity(temp_c);
   q_ = soc*q_capacity_;
-  delta_q_ = q_ - q_capacity_;
+  *rp_delta_q_ = q_ - q_capacity_;
   SOC_ = q_ / q_cap_rated_scaled_ * 100.;
   resetting_ = true;     // momentarily turn off saturation check
 }
@@ -119,7 +119,7 @@ void Coulombs::apply_SOC(const double SOC, const double temp_c)
   SOC_ = SOC;
   q_ = SOC / 100. * q_cap_rated_scaled_;
   q_capacity_ = calculate_capacity(temp_c);
-  delta_q_ = q_ - q_capacity_;
+  *rp_delta_q_ = q_ - q_capacity_;
   soc_ = q_ / q_capacity_;
   resetting_ = true;     // momentarily turn off saturation check
 }
@@ -148,7 +148,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
     // Rate limit temperature
     double temp_lim = max(min( temp_c, t_last + t_rlim_*dt), t_last - t_rlim_*dt);
     if ( reset ) temp_lim = temp_c;
-    if ( reset ) t_last_ = temp_c;
+    if ( reset ) *rp_t_last_ = temp_c;
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
     if ( sat )
@@ -156,17 +156,17 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
         if ( d_delta_q > 0 )
         {
             d_delta_q = 0.;
-            if ( !resetting_ ) delta_q_ = 0.;
+            if ( !resetting_ ) *rp_delta_q_ = 0.;
         }
         else if ( reset )
-          delta_q_ = 0.;
+          *rp_delta_q_ = 0.;
     }
     resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass
 
     // Integration
     q_capacity_ = calculate_capacity(temp_lim);
-    if ( !reset ) delta_q_ = max(min(delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-t_last_), 0.0), -q_capacity_);
-    q_ = q_capacity_ + delta_q_;
+    if ( !reset ) *rp_delta_q_ = max(min(*rp_delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-*rp_t_last_), 0.0), -q_capacity_);
+    q_ = q_capacity_ + *rp_delta_q_;
 
     // Normalize
     soc_ = q_ / q_capacity_;
@@ -176,26 +176,12 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
 
     if ( rp.debug==96 )
         Serial.printf("Coulombs::cc,             reset,dt,voc, voc_filt, v_sat, temp_c, temp_lim, sat, charge_curr, d_d_q, d_q, d_q_i, q, q_capacity,soc,SOC,      %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,%7.3f,\n",
-                    reset, dt, cp.pubList.voc, cp.pubList.voc_filt,  sat_voc(temp_c), temp_c, temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
+                    reset, dt, cp.pubList.voc, cp.pubList.voc_filt,  sat_voc(temp_c), temp_c, temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
     if ( rp.debug==-96 )
         Serial.printf("voc, voc_filt, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, d_q_i, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,%7.3f,\n",
-                    cp.pubList.voc, cp.pubList.voc_filt, sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, delta_q_, q_, q_capacity_, soc_, SOC_);
+                    cp.pubList.voc, cp.pubList.voc_filt, sat_voc(temp_c), temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
 
     // Save and return
-    t_last_ = temp_lim;
+    *rp_t_last_ = temp_lim;
     return ( soc_ );
-}
-
-// Load states from retained memory
-void Coulombs::load(const double delta_q, const double t_last, const double delta_q_inf)
-{
-    delta_q_ = delta_q;
-    t_last_ = t_last;
-}
-
-// Update states to be saved in retained memory
-void Coulombs::update(double *delta_q, double *t_last)
-{
-    *delta_q = delta_q_;
-    *t_last = t_last_;
 }

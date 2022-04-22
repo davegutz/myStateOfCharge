@@ -210,12 +210,12 @@ void loop()
   static double t_bias_last;  // Memory for rate limiter in filter_temp call, deg C
 
    // Mon, used to count Coulombs and run EKF
-  static BatteryMonitor *Mon = new BatteryMonitor(batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
+  static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last, batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
     dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, -1., HDB_VBATT);
 
   // Sim, used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off. 
-  static BatteryModel *Sim = new BatteryModel(batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
-    dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, 1., &rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model);
+  static BatteryModel *Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
+    dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, 1., &rp.s_cap_model);
 
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay();   // Time persistence
@@ -321,7 +321,6 @@ void loop()
     // Sim initialize as needed from memory
     if ( reset )
     {
-      Sim->load();
       Sim->apply_delta_q_t(rp.delta_q_model, rp.t_last_model);
       Sim->init_battery();  // for cp.soft_reset
     }
@@ -358,7 +357,6 @@ void loop()
     // Initialize Cc structure if needed.   Needed here in this location to have a value for Sen->Tbatt_filt
     if ( reset_temp )
     {
-      Mon->load(rp.delta_q, rp.t_last, rp.delta_q_inf_amp); // From memory
       Mon->apply_delta_q_t(rp.delta_q, rp.t_last);          // From memory
       Mon->init_battery();  // for cp.soft_reset
       if ( rp.modeling )
@@ -378,8 +376,7 @@ void loop()
     Sen->saturated = Is_sat_delay->calculate(sat, t_sat, t_desat, min(Sen->T, t_sat/2.), reset);
 
     // Memory store
-    Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
-    Mon->update(&rp.delta_q, &rp.t_last);
+    Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last); // TODO:  delete rp.t_last
 
     // Charge time for display
     Mon->calculate_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ishunt,Mon->soc());
