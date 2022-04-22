@@ -32,6 +32,7 @@
 #include "myLibrary/injection.h"
 #include "myLibrary/myFilters.h"
 #include "constants.h"
+struct Sensors;
 
 // BattleBorn 100 Ah, 12v LiFePO4
 #define NOM_SYS_VOLT          12.       // Nominal system output, V, at which the reported amps are used (12)
@@ -258,8 +259,9 @@ public:
   ~BatteryModel();
   // operators
   // functions
-  double calculate(const double temp_C, const double soc_frac, double curr_in, const double dt,
-    const double q_capacity, const double q_cap, const boolean dc_dc_on);
+  // double calculate(const double temp_C, const double soc_frac, double curr_in, const double dt,
+  //   const double q_capacity, const double q_cap, const boolean dc_dc_on);
+  double calculate(Sensors *Sen, const boolean dc_dc_on);
   uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);
   double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
     const double t_last);

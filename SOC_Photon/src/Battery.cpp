@@ -28,8 +28,9 @@
 #include "retained.h"
 #include <math.h>
 #include "constants.h"
-extern RetainedPars rp; // Various parameters to be static at system level
 #include "command.h"
+#include "mySubs.h"
+extern RetainedPars rp; // Various parameters to be static at system level
 extern CommandPars cp;
 
 
@@ -348,25 +349,43 @@ BatteryModel::BatteryModel(const int num_cells,
     ib_sat_ = 0.5;              // deadzone for cutback actuation, A
 }
 
-// SOC-OCV curve fit method per Zhang, et al.   Makes a good reference model
-double BatteryModel::calculate(const double temp_C, const double soc, double curr_in, const double dt,
-  const double q_capacity, const double q_cap, const boolean dc_dc_on)
+// calculate:  SOC-OCV table with a Battery Management System (BMS) and hysteresis.
+// Makes a good reference model. Intervenes in sensor path to provide Mon with inputs.
+//
+//  Inputs:
+//    Sen->Tbatt_filt Simulated Tb filtered for noise, past value of temp_c_, deg C
+//    Sen->Ishunt     Proposed simulated Ib, A
+//    Sen->T          Update time, sec
+//
+//  States:
+//    soc_            State of Charge, fraction
+//
+//  Outputs:
+//    Tb              Simulated Tb, deg C
+//    Ib              Simulated Ib, A
+//    Vb (return)     Simulated Vb, V
+//    rp.duty         (0-255) for D2 hardware injection when rp.modeling and proper wire connections made
+double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
 {
+    const double temp_C = Sen->Tbatt_filt;
+    double curr_in = Sen->Ishunt;
+    const double dt = min(Sen->T, F_MAX_T);
+
     dt_ = dt;
     temp_c_ = temp_C;
 
-    double soc_lim = max(min(soc, 1.0), 0.0);
-    double SOC = soc * q_capacity / q_cap_rated_scaled_ * 100;
+    double soc_lim = max(min(soc_, 1.0), 0.0);
+    double SOC = soc_ * q_capacity_ / q_cap_rated_scaled_ * 100;
 
     // VOC-OCV model
-    voc_stat_ = calc_soc_voc(soc, temp_C, &dv_dsoc_);
-    voc_stat_ = min(voc_stat_ + (soc - soc_lim) * dv_dsoc_, max_voc);  // slightly beyond but don't windup
+    voc_stat_ = calc_soc_voc(soc_, temp_C, &dv_dsoc_);
+    voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, max_voc);  // slightly beyond but don't windup
     bms_off_ = ( temp_c_ <= low_t ) || ( voc_stat_ < low_voc );
     if ( bms_off_ ) curr_in = 0.;
 
     // Dynamic emf
     // Hysteresis model
-    hys_->calculate(curr_in, voc_stat_, soc);
+    hys_->calculate(curr_in, voc_stat_, soc_);
     voc_ = hys_->update(dt);
     ioc_ = hys_->ioc();
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
@@ -396,15 +415,15 @@ double BatteryModel::calculate(const double temp_C, const double soc, double cur
     model_saturated_ = (voc_stat_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
     Coulombs::sat_ = model_saturated_;
     if ( rp.debug==79 ) Serial.printf("temp_C, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f,\n",
-        temp_C, dvoc_dt_, vsat_, voc_, q_capacity, sat_ib_max_, ib_);
+        temp_C, dvoc_dt_, vsat_, voc_, q_capacity_, sat_ib_max_, ib_);
 
-    if ( rp.debug==78 ) Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc,voc,,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-     dt,temp_C, ib_, soc, voc_, vdyn_, vb_);
+    if ( rp.debug==78 ) Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc_,voc,,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+     dt,temp_C, ib_, soc_, voc_, vdyn_, vb_);
     if ( rp.debug==-78 ) Serial.printf("SOC/10,soc*10,voc,vsat,curr_in,sat_ib_max_,ib,sat,\n%7.3f, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
-      SOC/10, soc*10, voc_, vsat_, curr_in, sat_ib_max_, ib_, model_saturated_);
+      SOC/10, soc_*10, voc_, vsat_, curr_in, sat_ib_max_, ib_, model_saturated_);
     
     if ( rp.debug==76 ) Serial.printf("BatteryModel::calculate:,  soc=%7.3f, temp_c=%7.3f, ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
-        soc, temp_C, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);
+        soc_, temp_C, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);
 
     return ( vb_ );
 }

@@ -77,10 +77,8 @@ protected:
   int16_t vshunt_int_0_;// Interim conversion, count
   int16_t vshunt_int_1_;// Interim conversion, count
   double vshunt_;       // Sensed shunt voltage, V
-  double vshunt_filt_;  // Filtered, sensed shunt voltage, V
   double ishunt_cal_;   // Sensed, calibrated ADC, A
   double ishunt_;       // Selected calibrated, shunt current, A
-  double ishunt_filt_;  // Filtered, calibrated sensed shunt current for observer, A
 };
 
 
@@ -110,10 +108,8 @@ struct Sensors
   double Tbatt_filt;      // Filtered, sensed battery temp, C
   double Vshunt_amp;      // Sensed shunt voltage, V
   double Vshunt;          // Sensed shunt voltage, V
-  double Vshunt_filt;     // Filtered, sensed shunt voltage, V
   double shunt_v2a_s;     // Selected shunt conversion gain, A/V
   double Ishunt;          // Selected calibrated, shunt current, A
-  double Ishunt_filt;     // Filtered, calibrated sensed shunt current for observer, A
   double Wshunt;          // Sensed shunt power, W
   double Wcharge;         // Charge power, W
   int I2C_status;
@@ -123,6 +119,8 @@ struct Sensors
   boolean saturated;      // Battery saturation status based on Temp and VOC
   Shunt *ShuntAmp;        // Shunt amplified
   Shunt *ShuntNoAmp;      // Shunt non-amplified
+  General2_Pole* TbattSenseFilt;  // Filter for Tb. There are 1 Hz AAFs in hardware for Vb and Ib
+
   Sensors(void) {}
   Sensors(int I2C_status, double T, double T_temp)
   {
@@ -132,6 +130,7 @@ struct Sensors
     this->T_temp = T_temp;
     this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_inf_amp, &rp.tweak_bias_amp, &cp.curr_bias_amp, shunt_amp_v2a_s);
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp, &cp.curr_bias_noamp, shunt_noamp_v2a_s);
+    this->TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
   }
 };
 
@@ -141,8 +140,7 @@ void manage_wifi(unsigned long now, Wifi *wifi);
 void serial_print(unsigned long now, double T);
 void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins *myPins);
 void load_temp(Sensors *Sen, DS18 *SensorTbatt, SlidingDeadband *SdTbatt);
-void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFilt, General2_Pole* IshuntSenseFilt);
-void filter_temp(const int reset, const double t_rlim, Sensors *Sen, General2_Pole* TbattSenseFilt, const double t_bias, double *t_bias_last);
+void filter_temp(const int reset, const double t_rlim, Sensors *Sen, const double t_bias, double *t_bias_last);
 String tryExtractString(String str, const char* start, const char* end);
 double  decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
 void print_serial_header(void);

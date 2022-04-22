@@ -43,7 +43,6 @@ struct Publish
   double Ishunt_noamp_cal;
   boolean curr_sel_noamp; 
   double T;
-  int I2C_status;
   double voc_dyn;
   double voc;
   double voc_filt;
@@ -51,7 +50,6 @@ struct Publish
   boolean sat;
   double Tbatt_filt;
   double Tbatt_filt_model;
-  double Vshunt_filt;
   int num_timeouts;
   double tcharge;
   double amp_hrs_remaining;

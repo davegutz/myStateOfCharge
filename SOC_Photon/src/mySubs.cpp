@@ -62,7 +62,7 @@ Shunt::Shunt(const String name, const uint8_t port, double *rp_delta_q_inf, doub
 : Tweak(name, TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS, rp_delta_q_inf, rp_tweak_bias),
   Adafruit_ADS1015(),
   name_(name), port_(port), bare_(false), cp_curr_bias_(cp_curr_bias), v2a_s_(v2a_s),
-  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), vshunt_filt_(0), ishunt_cal_(0), ishunt_(0), ishunt_filt_(0)
+  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0), ishunt_(0)
 {
   setGain(GAIN_SIXTEEN, GAIN_SIXTEEN); // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
   if (!begin()) {
@@ -243,7 +243,7 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
 }
 
 // Filter temperature only
-void filter_temp(const int reset_loc, const double t_rlim, Sensors *Sen, General2_Pole* TbattSenseFilt, const double t_bias, double *t_bias_last)
+void filter_temp(const int reset_loc, const double t_rlim, Sensors *Sen, const double t_bias, double *t_bias_last)
 {
   // Rate limit the temperature bias
   if ( reset_loc ) *t_bias_last = t_bias;
@@ -254,25 +254,14 @@ void filter_temp(const int reset_loc, const double t_rlim, Sensors *Sen, General
   if ( reset_loc && Sen->Tbatt>40. )
   {
     Sen->Tbatt = RATED_TEMP + t_bias_loc; // Cold startup T=85.5 C
-    Sen->Tbatt_filt = TbattSenseFilt->calculate(RATED_TEMP, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
+    Sen->Tbatt_filt = Sen->TbattSenseFilt->calculate(RATED_TEMP, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
   }
   else
   {
-    Sen->Tbatt_filt = TbattSenseFilt->calculate(Sen->Tbatt, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
+    Sen->Tbatt_filt = Sen->TbattSenseFilt->calculate(Sen->Tbatt, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
     Sen->Tbatt += t_bias_loc;
   }
 }
-
-// Filter all other inputs
-void filter(int reset, Sensors *Sen, General2_Pole* VbattSenseFilt,  General2_Pole* IshuntSenseFilt)
-{
-  int reset_loc = reset;
-
-  // Shunt
-  Sen->Ishunt_filt = IshuntSenseFilt->calculate( Sen->Ishunt, reset_loc, min(Sen->T_filt, F_O_MAX_T));
-  
-}
-
 
 // Returns any text found between a start and end string inside 'str'
 // example: startfooend  -> returns foo

@@ -1,17 +1,27 @@
 /*
- * Project Vent_Photon
+ * Project SOC_Photon
   * Description:
-  * Combine digital pot output in parallel with manual pot
-  * to control an ECMF-150 TerraBloom brushless DC servomotor fan.
-  * 
-  * By:  Dave Gutz January 2021
-  * 07-Jan-2021   A tinker version
-  * 18-Feb-2021   Cleanup working version
+  * Monitor battery State of Charge (SOC) using Coulomb Counting (CC).  An experimental
+  * Extended Kalman Filter (EKF) method is developed alongside though not used to
+  * improve the CC yet.
+  * By:  Dave Gutz September 2021
+  * 09-Aug-2021   Initial Git committ.   Unamplified ASD1013 12-bit shunt voltage sensor
+  * ??-Sep-2021   Added 1 Hz anti-alias filters (AAF) in hardware to cleanup the 60 Hz
+  * inverter noise on Vb and Ib.
+  * 27-Oct-2021   Add amplified (OPA333) current sensor ASD1013 with Texas Instruments (TI)
+  * amplifier design in hardware
+  * 27-Aug-2021   First working prototype with iterative solver SOC-->Vb from polynomial
+  * that have coefficients in tables
+  * 22-Dec-2021   Mark last good working version before class code.  EKF functional
+  * 26-Dec-2021   Put in class code for Monitor and Model
+  * ??-Jan-2021   Vb model in tables.  Add battery heater in hardware
+  * 03-Mar-2022   Manually tune for current sensor errors.   Vb model in tables
+  * 21-Apr-2022   Add Tweak methods to dynamically determine current sensor erros
   * 
 //
 // MIT License
 //
-// Copyright (C) 2021 - Dave Gutz
+// Copyright (C) 2022 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -37,11 +47,10 @@
 // For Photon
 #if (PLATFORM_ID==6)
 #define PHOTON
-//#define BOOT_CLEAN        // Use this to clear 'lockup' problems introduced during testing using Talk
-#include "application.h" // Should not be needed if file ino or Arduino
-//SYSTEM_MODE(SEMI_AUTOMATIC);
-SYSTEM_THREAD(ENABLED); // Make sure code always run regardless of network status
-#include <Arduino.h>     // Used instead of Print.h - breaks Serial
+//#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
+#include "application.h"  // Should not be needed if file ino or Arduino
+SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
+#include <Arduino.h>      // Used instead of Print.h - breaks Serial
 #else
 #undef PHOTON
 using namespace std;
@@ -87,20 +96,19 @@ int num_timeouts = 0;           // Number of Particle.connect() needed to unfree
 String hm_string = "00:00";     // time, hh:mm
 double control_time = 0.0;      // Decimal time, seconds since 1/1/2021
 Pins *myPins;                   // Photon hardware pin mapping used
-Adafruit_ADS1015 *ads_amp;      // Use this for the 12-bit version; 1115 for 16-bit; amplified; different address
-Adafruit_ADS1015 *ads_noamp;    // Use this for the 12-bit version; 1115 for 16-bit; non-amplified
-Adafruit_SSD1306 *display;
+Adafruit_SSD1306 *display;      // Main OLED display
 Wifi *myWifi;                   // Manage Wifi
 
 // Setup
 void setup()
 {
   // Serial
-  Serial.begin(115200); // initialize serial communication at 115200 bits per second:
+  Serial.begin(115200);
   Serial.flush();
   delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
   Serial.println("Hello!");
-  // Serial1.begin(9600); // initialize serial communication at 115200 bits per second:
+  // Bluetooth (hardware didn't work)
+  // Serial1.begin(9600);
   // Serial1.flush();
   // delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
   // Serial1.println("Hello!");
@@ -121,24 +129,8 @@ void setup()
   Wire.begin();
 
   // AD
-  // Amped
-  // Serial.println("Initializing SHUNT MONITORS");
-  // ads_amp = new Adafruit_ADS1015;
-  // ads_amp->setGain(GAIN_EIGHT, GAIN_TWO);    // First argument is differential, second is single-ended.
-  // // 8 was used by Texas Instruments in their example implementation.   16 was used by another
-  // // Particle user in their non-amplified implementation.
-  // // TODO:  why 8 scaled by R/R gives same result as 16 for ads_noamp?
-  // if (!ads_amp->begin((0x49))) {
-  //   Serial.println("FAILED to initialize ADS AMPLIFIED SHUNT MONITOR.");
-  // }
-  // // Non-amped
-  // ads_noamp = new Adafruit_ADS1015;
-  // ads_noamp->setGain(GAIN_SIXTEEN, GAIN_SIXTEEN); // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
-  // if (!ads_noamp->begin()) {
-  //   Serial.println("FAILED to initialize ADS SHUNT MONITOR.");
-  // }
-  // Serial.println("SHUNT MONITORS initialized");
-  
+  // Shunts initialized in Sensors as static loop() instantiation
+
   // Display
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
@@ -213,11 +205,6 @@ void setup()
 // Loop
 void loop()
 {
-  // Sensor noise filters.   There are AAF in hardware for Vbatt and VshuntAmp and VshuntNoAmp
-  // static General2_Pole* VbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -50., 50.);
-  // static General2_Pole* IshuntSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W, F_Z, -500., 500.);
-  static General2_Pole* TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
-
   // 1-wire temp sensor battery temp
   static DS18* SensorTbatt = new DS18(myPins->pin_1_wire, temp_parasitic, temp_delay);
 
@@ -226,17 +213,15 @@ void loop()
   static SlidingDeadband *SdTbatt = new SlidingDeadband(HDB_TBATT);
   static double t_bias_last;  // Memory for rate limiter in filter_temp call, deg C
 
-  // Battery  models
-  // Free, driven by soc
-  // Instantiate the table
+   // Mon, used to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor(batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
     dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, -1., HDB_VBATT);
-  // Sim, driven by soc, used to get Vbatt.   Use Talk 'x' to toggle model on/off. 
+
+  // Sim, used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off. 
   static BatteryModel *Sim = new BatteryModel(batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
     dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, 1.);
 
   // Battery saturation debounce
-  // static Debounce *SatDebounce = new Debounce(true, 50);       // Updates persistence
   static TFDelay *Is_sat_delay = new TFDelay();   // Time persistence
 
   unsigned long current_time;               // Time result
@@ -276,13 +261,20 @@ void loop()
   if ( Particle.connected() && !myWifi->blynk_started )
   {
     if ( rp.debug>102 ) Serial.printf("Starting Blynk at %ld...  ", millis());
+
     Blynk.begin(blynkAuth.c_str());   // blocking if no connection
     myWifi->blynk_started = true;
+
     if ( rp.debug>102 ) Serial.printf("completed at %ld\n", millis());
   }
+
   if ( myWifi->blynk_started && myWifi->connected )
   {
-    Blynk.run(); blynk_timer_1.run(); blynk_timer_2.run(); blynk_timer_3.run(); blynk_timer_4.run(); 
+    Blynk.run();
+    blynk_timer_1.run();
+    blynk_timer_2.run();
+    blynk_timer_3.run();
+    blynk_timer_4.run(); 
   }
 
   // Keep time
@@ -295,12 +287,10 @@ void loop()
   if ( read_temp )
   {
     Sen->T_temp =  ReadTemp->updateTime();
-    if ( rp.debug>102 ) Serial.printf("Read temp update=%7.3f and performing load_temp() at %ld...  \n", Sen->T_temp, millis());
 
-    // Load and filter temperature only
+    // Load and filter temperature Tb only
     load_temp(Sen, SensorTbatt, SdTbatt);
-    if ( rp.debug>102 ) Serial.printf("Read temp update=%7.3f and done       load_temp() at %ld...  \n", Sen->T_temp, millis());
-    filter_temp(reset_temp, t_rlim, Sen, TbattSenseFilt, rp.t_bias, &t_bias_last);
+    filter_temp(reset_temp, t_rlim, Sen, rp.t_bias, &t_bias_last);
 
   }
 
@@ -312,7 +302,7 @@ void loop()
     Sen->T =  ReadSensors->updateTime();
     if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  \n", Sen->T, millis());
 
-    // Load and filter
+    // Load and filter Ib and Vb
     load(reset, ReadSensors->now(), Sen, myPins);
     
     // Arduino plots
@@ -320,21 +310,19 @@ void loop()
         Mon->soc(), Sen->ShuntAmp->ishunt_cal(), Sen->ShuntNoAmp->ishunt_cal(),
         Sen->Vbatt, Sim->voc_stat(), Sim->voc());
 
-    //
     // Sim used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
     // to have availabe a value for Sen->Tbatt_filt when called
     //  Inputs:
     //    Sen->Ishunt     A
     //    Sen->Vbatt      V
     //    Sen->Tbatt_filt deg C
-    //    Cc    Coulomb charge counter memory structure
     //  Outputs:
-    //    tb              deg C
-    //    ib              A
-    //    vb              V
-    //    rp.duty         (0-255) for D2 hardware injection when rp.modeling
+    //    Tb              deg C
+    //    Ib              A
+    //    Vb              V
+    //    rp.duty         (0-255) for D2 hardware injection when rp.modeling and proper wire connections made
 
-    // Initialize as needed
+    // Sim initialize as needed from memory
     if ( reset )
     {
       Sim->load(rp.delta_q_model, rp.t_last_model, rp.s_cap_model);
@@ -343,14 +331,13 @@ void loop()
     }
 
     // Sim calculation
-    Sen->Vbatt_model = Sim->calculate(Sen->Tbatt_filt, Sim->soc(), Sen->Ishunt, min(Sen->T, F_MAX_T),
-        Sim->q_capacity(), Sim->q_cap_rated(), cp.dc_dc_on);
+    Sen->Vbatt_model = Sim->calculate(Sen, cp.dc_dc_on);
     cp.model_cutback = Sim->cutback();
     cp.model_saturated = Sim->saturated();
 
     // Use model instead of sensors when running tests as user
-    // Over-ride Ishunt, Vbatt and Tbatt with model when running tests.  rp.modeling should never be set in use
-    if ( rp.modeling )
+    // Over-ride sensed Ib, Vb and Tb with model when running tests
+    if ( rp.modeling )    // Should never be set in real use
     {
       Sen->Ishunt = Sim->ib();
       Sen->Vbatt = Sen->Vbatt_model;
@@ -376,11 +363,11 @@ void loop()
     // Initialize Cc structure if needed.   Needed here in this location to have a value for Sen->Tbatt_filt
     if ( reset_temp )
     {
-      Mon->load(rp.delta_q, rp.t_last, rp.delta_q_inf_amp);
-      Mon->apply_delta_q_t(rp.delta_q, rp.t_last);
+      Mon->load(rp.delta_q, rp.t_last, rp.delta_q_inf_amp); // From memory
+      Mon->apply_delta_q_t(rp.delta_q, rp.t_last);          // From memory
       Mon->init_battery();  // for cp.soft_reset
       if ( rp.modeling )
-        Mon->init_soc_ekf(Sim->soc());  // When modeling, ekf wants to equal model
+        Mon->init_soc_ekf(Sim->soc());  // When modeling, ekf tracks model
       else
         Mon->init_soc_ekf(Mon->soc());
       Mon->init_hys(0.0);
@@ -428,8 +415,8 @@ void loop()
         Mon->K_ekf(), Mon->y_ekf(),
         Sim->soc()*100-90, Mon->soc_ekf()*100-90, Sim->soc()*100-90);
     if ( rp.debug==-3 )
-      Serial.printf("fast,et,reset,Wshunt,q_f,q,soc,T, %12.3f,%7.3f, %d, %7.3f,    %7.3f,     %7.3f,\n",
-      control_time, double(elapsed)/1000., reset, Sen->Wshunt, Sim->soc(), Sen->T_filt);
+      Serial.printf("fast,et,reset,Wshunt,q_f,q,soc,T, %12.3f,%7.3f, %d, %7.3f,    %7.3f,\n",
+      control_time, double(elapsed)/1000., reset, Sen->Wshunt, Sim->soc());
 
   }  // end read (high speed frame)
 
@@ -437,20 +424,14 @@ void loop()
   filt = FilterSync->update(millis(), reset);               //  now || reset
   if ( filt )
   {
-    Sen->T_filt =  FilterSync->updateTime();
-    if ( rp.debug>102 ) Serial.printf("Filter update=%7.3f and performing load() at %ld...  ", Sen->T_filt, millis());
-    if ( rp.modeling && reset && Sim->q()<=0. ) Sen->Ishunt = 0.;
 
-    // Filter
-    // filter(reset, Sen, VbattSenseFilt, IshuntSenseFilt);
+    // Empty battery
+    if ( rp.modeling && reset && Sim->q()<=0. ) Sen->Ishunt = 0.;
 
     // rp.debug print statements
     // Useful for vector testing and serial data capture
     if ( rp.debug==-35 ) Serial.printf("soc_mod,soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f\n",
         Sim->soc(), Mon->x_ekf(), Mon->z_ekf());
-
-    //if ( bare ) delay(41);  // Usual I2C time
-    if ( rp.debug>102 ) Serial.printf("completed load at %ld\n", millis());
 
   }
 
