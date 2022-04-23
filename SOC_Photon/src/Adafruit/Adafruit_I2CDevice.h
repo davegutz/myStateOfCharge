@@ -10,7 +10,7 @@ public:
   uint8_t address(void);
   bool begin(bool addr_detect = true);
   bool detected(void);
-
+  void pretty_print(const String name);
   bool read(uint8_t *buffer, size_t len, bool stop = true);
   bool write(const uint8_t *buffer, size_t len, bool stop = true,
              const uint8_t *prefix_buffer = NULL, size_t prefix_len = 0);

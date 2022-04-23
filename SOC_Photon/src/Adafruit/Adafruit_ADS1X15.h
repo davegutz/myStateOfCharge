@@ -157,6 +157,7 @@ public:
   adsGain_t getsGain();  // DAG 2021-10-28
   void setDataRate(uint16_t rate);
   uint16_t getDataRate();
+  void pretty_print(const String name);
 
 private:
   bool conversionComplete();

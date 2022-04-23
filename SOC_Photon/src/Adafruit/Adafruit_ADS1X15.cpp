@@ -33,6 +33,18 @@ Adafruit_ADS1015::Adafruit_ADS1015() {
   m_dataRate = RATE_ADS1015_1600SPS;
 }
 
+
+void Adafruit_ADS1X15::pretty_print(const String name)
+{
+  Serial.printf("Adafruit_ADS1x15 (%s):\n", name.c_str());
+  Serial.printf(" m_bitShift =   %d\n", m_bitShift);
+  Serial.printf(" m_gain =       %d\n", m_gain);
+  Serial.printf(" s_gain =       %d\n", s_gain);
+  Serial.printf(" m_dataRate =   %d\n", m_dataRate);
+  Serial.printf("Adafruit_ADS1x15::");
+  m_i2c_dev->pretty_print(name);
+}
+
 /**************************************************************************/
 /*!
     @brief  Instantiates a new ADS1115 class w/appropriate properties

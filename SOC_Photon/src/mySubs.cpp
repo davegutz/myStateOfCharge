@@ -89,6 +89,20 @@ Shunt::~Shunt() {}
 // operators
 // functions
 
+void Shunt::pretty_print()
+{
+  Serial.printf("Shunt(%s)::\n", name_.c_str());
+  Serial.printf("  port_          = %d     // Octal I2C port used by Acafruit_ADS1015\n", port_);
+  Serial.printf("  bare_          = %d     // If ADS to be ignored\n", bare_);
+  Serial.printf("  *cp_curr_bias_ = %7.3f  // Global bias, A\n", *cp_curr_bias_);
+  Serial.printf("  v2a_s_ =         %7.3f  // Selected shunt conversion gain, A/V\n", v2a_s_);
+  Serial.printf("  vshunt_int_ =    %d     // Sensed shunt voltage, count\n", vshunt_int_);
+  Serial.printf("  ishunt_cal_ =    %7.3f  // Sensed, calibrated ADC, A\n", ishunt_cal_);
+  Serial.printf("  ishunt_ =        %7.3f  // Selected calibrated, shunt current, A\n", ishunt_);
+  Serial.printf("Shunt(%s)::", name_.c_str()); Tweak::pretty_print();
+  Serial.printf("Shunt(%s)::", name_.c_str()); Adafruit_ADS1015::pretty_print(name_);
+}
+
 // load
 void Shunt::load()
 {

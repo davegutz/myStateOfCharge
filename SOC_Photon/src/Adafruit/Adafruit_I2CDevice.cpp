@@ -19,6 +19,13 @@ Adafruit_I2CDevice::Adafruit_I2CDevice(uint8_t addr, TwoWire *theWire) {
 #endif
 }
 
+void Adafruit_I2CDevice::pretty_print(const String name)
+{
+  Serial.printf("Adafruit_I2CDevice (%s):\n", name.c_str());
+  Serial.printf("  _addr = %d\n", _addr);
+  Serial.printf("  _begun = %d\n", _begun);
+  Serial.printf("  _maxBufferSize = %d\n", _maxBufferSize);
+}
 /*!
  *    @brief  Initializes and does basic address detection
  *    @param  addr_detect Whether we should attempt to detect the I2C address
