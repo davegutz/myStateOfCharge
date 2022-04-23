@@ -62,7 +62,7 @@ Shunt::Shunt(const String name, const uint8_t port, double *rp_delta_q_inf, doub
 : Tweak(name, TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS, rp_delta_q_inf, rp_tweak_bias),
   Adafruit_ADS1015(),
   name_(name), port_(port), bare_(false), cp_curr_bias_(cp_curr_bias), v2a_s_(v2a_s),
-  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0), ishunt_(0)
+  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0)
 {
   if ( name_=="No Amp")
   {
@@ -79,7 +79,7 @@ Shunt::Shunt(const String name, const uint8_t port, double *rp_delta_q_inf, doub
     setGain(GAIN_EIGHT, GAIN_TWO); // First argument is differential, second is single-ended.
     Serial.printf("Setting gain 8 - 2 for name='%s.'   Diff=%d, S.E.=%d'\n", name_.c_str(), getGain(), getsGain());
   }
-  if (!begin()) {
+  if (!begin(port_)) {
     Serial.printf("FAILED to initialize ADS SHUNT MONITOR %s\n", name_.c_str());
     bare_ = true;
   }
@@ -98,7 +98,7 @@ void Shunt::pretty_print()
   Serial.printf("  v2a_s_ =         %7.3f  // Selected shunt conversion gain, A/V\n", v2a_s_);
   Serial.printf("  vshunt_int_ =    %d     // Sensed shunt voltage, count\n", vshunt_int_);
   Serial.printf("  ishunt_cal_ =    %7.3f  // Sensed, calibrated ADC, A\n", ishunt_cal_);
-  Serial.printf("  ishunt_ =        %7.3f  // Selected calibrated, shunt current, A\n", ishunt_);
+  // Serial.printf("  ishunt_ =        %7.3f  // Selected calibrated, shunt current, A\n", ishunt_);
   Serial.printf("Shunt(%s)::", name_.c_str()); Tweak::pretty_print();
   Serial.printf("Shunt(%s)::", name_.c_str()); Adafruit_ADS1015::pretty_print(name_);
 }

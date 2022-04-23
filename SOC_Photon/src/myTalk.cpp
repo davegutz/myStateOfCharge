@@ -402,11 +402,11 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
             break;
 
           case ( 'M' ):
-             Serial.printf("Tweak::"); Sen->ShuntAmp->Tweak::pretty_print();
+             Serial.printf("Tweak::"); Sen->ShuntAmp->pretty_print();
             break;
 
           case ( 'N' ):
-             Serial.printf("Tweak::"); Sen->ShuntNoAmp->Tweak::pretty_print();
+             Serial.printf("Tweak::"); Sen->ShuntNoAmp->pretty_print();
             break;
 
           case ( 'r' ):

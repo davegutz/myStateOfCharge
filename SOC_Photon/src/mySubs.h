@@ -59,7 +59,7 @@ public:
   // operators
   // functions
   boolean bare() { return ( bare_ ); };
-  double ishunt() { return ( ishunt_ ); };
+  // double ishunt() { return ( ishunt_ ); };
   double ishunt_cal() { return ( ishunt_cal_ ); };
   void load();
   void pretty_print();
@@ -79,7 +79,7 @@ protected:
   int16_t vshunt_int_1_;// Interim conversion, count
   double vshunt_;       // Sensed shunt voltage, V
   double ishunt_cal_;   // Sensed, calibrated ADC, A
-  double ishunt_;       // Selected calibrated, shunt current, A
+  // double ishunt_;       // Selected calibrated, shunt current, A
 };
 
 
