@@ -521,11 +521,11 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
       case ( 's' ):
         if ( cp.input_string.substring(1).toInt()>0 )
         {
-          rp.curr_sel_noamp = false;
+          rp.curr_sel_noamp = true;
         }
         else
-          rp.curr_sel_noamp = true;
-        Serial.printf("Signal selection (1=noamp, 0=amp) set to %d\n", rp.curr_sel_noamp);
+          rp.curr_sel_noamp = false;
+        Serial.printf("Signal selection ( 0=amp, 1=noamp,) set to %d\n", rp.curr_sel_noamp);
         break;
 
       case ( 'T' ):   // This is a test feature only
@@ -767,35 +767,6 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 
   Serial.printf("A=  nominalize the rp structure for clean boots etc'\n");
 
-  Serial.printf("H<?>   Manage history\n");
-  Serial.printf("  Hd= "); Serial.printf("dump the summary log to screen\n");
-  Serial.printf("  HR= "); Serial.printf("reset the summary log\n");
-  Serial.printf("  Hs= "); Serial.printf("save a data point to summary log and print log and status to screen\n");
-
-  Serial.printf("m=  assign curve charge state in fraction to all versions including model- '(0-1.1)'\n"); 
-  Serial.printf("n=  assign curve charge state in fraction to model only (ekf if modeling)- '(0-1.1)'\n"); 
-  Serial.printf("O=  assign a CHARGE state in percent to all versions including model- '('truncated 0-100')'\n"); 
-  Serial.printf("s   curr signal select (0=amp preferred, 1=noamp) = "); Serial.println(rp.curr_sel_noamp);
-  Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
-  Serial.printf("    -<>:   Negative - Arduino plot compatible\n");
-  Serial.printf("     +2:   General purpose\n");
-  Serial.printf("   +/-5:   Charge time\n");
-  Serial.printf("     +6:   Vectoring\n");
-  Serial.printf("    -11:   Summary\n");
-  Serial.printf("  +/-12:   EKF summary\n");
-  Serial.printf("  +/-14:   vshunt and ishunt raw\n");
-  Serial.printf("    +15:   vb raw\n");
-  Serial.printf("    +33:   state-space\n");
-  Serial.printf("  +/-34:   EKF detailed\n");
-  Serial.printf("    +35:   Randles balance\n");
-  Serial.printf("  +/-37:   EKF short\n");
-  Serial.printf("    +76:   vb model\n");
-  Serial.printf("  +/-78:   Battery model saturation\n");
-  Serial.printf("    +79:   sat_ib model\n");
-  Serial.printf("  +/-96:   CC saturation\n");
-  Serial.printf("  +/-97:   CC model saturation\n");
-  Serial.printf("W=  assign a CHARGE state in percent to model only (ekf if modeling)-- '('truncated 0-100')'\n"); 
-  
   Serial.printf("D/S<?> Adjustments.   For example:\n");
   Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_bias_amp); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
   Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias_noamp); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
@@ -810,7 +781,14 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 
   Serial.printf("E=  set the BatteryModel delta_q to same value as Battery'\n"); 
 
+  Serial.printf("H<?>   Manage history\n");
+  Serial.printf("  Hd= "); Serial.printf("dump the summary log to screen\n");
+  Serial.printf("  HR= "); Serial.printf("reset the summary log\n");
+  Serial.printf("  Hs= "); Serial.printf("save a data point to summary log and print log and status to screen\n");
+
   Serial.printf("i=,<inp> set the BatteryMonitor delta_q_inf to <inp> (-360000 - 3600000'\n"); 
+
+  Serial.printf("m=  assign curve charge state in fraction to all versions including model- '(0-1.1)'\n"); 
 
   Serial.printf("M<?> Amp tweaks.   For example:\n");
   Serial.printf("  MC= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_change()); Serial.println("    : tweak amp max change allowed, A [0.05]"); 
@@ -824,6 +802,8 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("  Mz= "); Serial.printf("%7.3f", Sen->ShuntAmp->time_sat_past()); Serial.println("    : tweak amp time since last tweak, hr [varies]"); 
 
 
+  Serial.printf("n=  assign curve charge state in fraction to model only (ekf if modeling)- '(0-1.1)'\n"); 
+
   Serial.printf("N<?> No amp tweaks.   For example:\n");
   Serial.printf("  NC= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_change()); Serial.println("    : tweak no amp max change allowed, A [0.05]"); 
   Serial.printf("  Ng= "); Serial.printf("%7.6f", Sen->ShuntNoAmp->gain()); Serial.println("    : tweak no amp gain = correction to be made for charge, A/Coulomb [0.0001]"); 
@@ -835,6 +815,8 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("  Nx= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_tweak()); Serial.println("    : tweak no amp adder maximum, A [1]"); 
   Serial.printf("  Nz= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->time_sat_past()); Serial.println("    : tweak no amp time since last tweak, hr [varies]"); 
 
+  Serial.printf("O=  assign a CHARGE state in percent to all versions including model- '('truncated 0-100')'\n"); 
+  
   Serial.printf("P<?>   Print Battery values\n");
   Serial.printf("  Pa= "); Serial.printf("print all\n");
   Serial.printf("  Pc= "); Serial.printf("print all coulombs\n");
@@ -860,10 +842,33 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("  RR= "); Serial.printf("saturate, equalize, and nominalize all testing for DEPLOY\n");
   Serial.printf("  Rs= "); Serial.printf("small reset.  reset flags to reinitialize filters\n");
 
+  Serial.printf("s   curr signal select (0=amp preferred, 1=noamp) = "); Serial.println(rp.curr_sel_noamp);
+
   Serial.printf("T<new cmd>  Send in a new command.  Used to test calling Talk from itself.   For Example:\n");
   Serial.printf("  Tv=-78  sends v=-78 to talk\n");
 
+  Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
+  Serial.printf("    -<>:   Negative - Arduino plot compatible\n");
+  Serial.printf("     +2:   General purpose\n");
+  Serial.printf("   +/-5:   Charge time\n");
+  Serial.printf("     +6:   Vectoring\n");
+  Serial.printf("    -11:   Summary\n");
+  Serial.printf("  +/-12:   EKF summary\n");
+  Serial.printf("  +/-14:   vshunt and ishunt raw\n");
+  Serial.printf("    +15:   vb raw\n");
+  Serial.printf("    +33:   state-space\n");
+  Serial.printf("  +/-34:   EKF detailed\n");
+  Serial.printf("    +35:   Randles balance\n");
+  Serial.printf("  +/-37:   EKF short\n");
+  Serial.printf("    +76:   vb model\n");
+  Serial.printf("  +/-78:   Battery model saturation\n");
+  Serial.printf("    +79:   sat_ib model\n");
+  Serial.printf("  +/-96:   CC saturation\n");
+  Serial.printf("  +/-97:   CC model saturation\n");
+
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);
+
+  Serial.printf("W=  assign a CHARGE state in percent to model only (ekf if modeling)-- '('truncated 0-100')'\n"); 
 
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xd= "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);

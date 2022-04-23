@@ -216,10 +216,10 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   Sen->ShuntNoAmp->load();
 
   // Print results
-  if ( rp.debug==14 ) Serial.printf("reset_free,select,duty,  ||(noa),  vs_int, 0_int, 1_int, vshunt, ishunt_cal, ||(amp), vs_int, 0_int, 1_int, vshunt, ishunt_cal,  ||,  Ishunt,T=,    %d,%d,%ld,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %d,%d,%d,%7.3f,%7.3f,  ||,  %7.3f,%7.3f,\n",
+  if ( rp.debug==14 ) Serial.printf("reset_free,select,duty,vs_int_na,vshunt_na,ishunt_cal_na,vs_int_a,vshunt_a,ishunt_cal_a,Ishunt,T=,    %d,%d,%ld,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,\n",
     reset_free, rp.curr_sel_noamp, rp.duty,
-    Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt_int_0(), Sen->ShuntNoAmp->vshunt_int_1(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->ishunt_cal(),
-    Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt_int_0(), Sen->ShuntAmp->vshunt_int_1(), Sen->ShuntAmp->vshunt(), Sen->ShuntAmp->ishunt_cal(),
+    Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->ishunt_cal(),
+    Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), Sen->ShuntAmp->ishunt_cal(),
     Sen->Ishunt, T);
 
   // Current signal selection, based on if there or not.
