@@ -121,10 +121,10 @@ void Battery::pretty_print(void)
     Serial.printf("  temp, #cells, dvoc_dt = %7.1f, %d, %10.6f;\n", temp_c_, num_cells_, dvoc_dt_);
     Serial.printf("  r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f;\n",
         r0_, rct_, tau_ct_, r_dif_, tau_dif_, r_sd_, tau_sd_);
-    Serial.printf("  bms_off_       =      %d;     // BMS off, T = current prevented\n", bms_off_);
+    Serial.printf("  bms_off_       =      %d;     // Calculated indication that the BMS has turned off charge current, T=off\n", bms_off_);
     Serial.printf("  dv_dsoc = %10.6f;  // Derivative scaled, V/fraction\n", dv_dsoc_);
-    Serial.printf("  ib =      %7.3f;  // Current into battery, A\n", ib_);
-    Serial.printf("  vb =      %7.3f;  // Total model voltage, voltage at terminals, V\n", vb_);
+    Serial.printf("  ib =      %7.3f;  // Battery terminal current, A\n", ib_);
+    Serial.printf("  vb =      %7.3f;  // Battery terminal voltage, V\n", vb_);
     Serial.printf("  voc =     %7.3f;  // Static model open circuit voltage, V\n", voc_);
     Serial.printf("  vsat =    %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
     Serial.printf("  vdyn =    %7.3f;  // Sim current induced back emf, V\n", vdyn_);
@@ -172,29 +172,57 @@ BatteryMonitor::~BatteryMonitor() {}
 // operators
 // functions
 
-// SOC-OCV curve fit method per Zhang, et al modified by ekf
-double BatteryMonitor::calculate_ekf(const double temp_c, const double vb, const double ib, const double dt)
+
+
+/* BatteryModel::calculate_ekf:  SOC-OCV curve fit solved by ekf
+        Inputs:
+        Sen->Tbatt_filt Tb filtered for noise, past value of temp_c_, deg C
+        Sen->Vbatt      Battery terminal voltage, V
+        Sen->Ishunt     Shunt current Ib, A
+        Sen->T          Update time, sec
+        q_capacity_     Saturation charge at temperature, C
+        q_cap_rated_scaled_   Applied rated capacity at t_rated_, after scaling, C
+        RATED_BATT_CAP  Nominal battery bank capacity (assume actual not known), Ah
+    Outputs:
+        vsat_           Saturation threshold at temperature, V
+        voc_dyn_        VOC estimated from Vb and RC model, V
+        voc_            Static model open circuit voltage, V
+        vdyn_           Sim current induced back emf, V
+        voc_filt_       Filtered open circuit voltage for saturation detect, V
+        ioc_            Best estimate of IOC charge current after hysteresis, A
+        bms_off_        Calculated indication that the BMS has turned off charge current, T=off
+        voc_stat_       Static model open circuit voltage from table (reference), V\n
+        Tb              Tb, deg C
+        ib_             Battery terminal current, A
+        vb_             Battery terminal voltage, V
+        rp.duty         (0-255) for D2 hardware injection when rp.modeling and proper wire connections made
+        soc_ekf_        Solved state of charge, fraction
+        q_ekf_          Filtered charge calculated by ekf, C
+        SOC_ekf_ (return)     Solved state of charge, percent
+        tcharge_ekf_    Solved charging time to full from ekf, hr
+*/
+double BatteryMonitor::calculate_ekf(Sensors *Sen)
 {
-    temp_c_ = temp_c;
+    temp_c_ = Sen->Tbatt_filt;
     vsat_ = calc_vsat(temp_c_);
-    dt_ = dt;
+    dt_ =  min(Sen->T, F_MAX_T);
 
     // Dynamic emf
-    vb_ = vb;
-    ib_ = ib;
+    vb_ = Sen->Vbatt;
+    ib_ = Sen->Ishunt;
     double u[2] = {ib_, vb_};
     Randles_->calc_x_dot(u);
-    Randles_->update(dt);
+    Randles_->update(dt_);
     if ( rp.debug==35 )
     {
         Serial.printf("BatteryMonitor::calculate_ekf:"); Randles_->pretty_print();
     }
     voc_dyn_ = Randles_->y(0);
     vdyn_ = vb_ - voc_dyn_;
-    voc_stat_ = voc_soc(soc_, temp_c);
+    voc_stat_ = voc_soc(soc_, Sen->Tbatt_filt);
     // Hysteresis model
     hys_->calculate(ib_, voc_dyn_, soc_);
-    voc_ = hys_->update(dt);
+    voc_ = hys_->update(dt_);
     voc_filt_ = SdVbatt_->update(voc_);
     ioc_ = hys_->ioc();
     bms_off_ = temp_c_ <= low_t;    // KISS
@@ -208,18 +236,18 @@ double BatteryMonitor::calculate_ekf(const double temp_c, const double vb, const
     }
 
     // EKF 1x1
-    predict_ekf(ib_);      // u = ib
+    predict_ekf(ib_);           // u = ib
     update_ekf(voc_, 0., 1.);   // z = voc, voc_filtered = hx
-    soc_ekf_ = x_ekf();   // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
+    soc_ekf_ = x_ekf();         // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
     q_ekf_ = soc_ekf_ * q_capacity_;
     SOC_ekf_ = q_ekf_ / q_cap_rated_scaled_ * 100.;
 
     if ( rp.debug==34 )
         Serial.printf("dt,ib,voc_dyn,voc,voc_filt,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
-            dt, ib_, voc_dyn_, voc_, voc_filt_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
+            dt_, ib_, voc_dyn_, voc_, voc_filt_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
     if ( rp.debug==-34 )
         Serial.printf("dt,ib,voc_dyn,voc,voc_filt,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,  \n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
-            dt, ib_, voc_dyn_, voc_, voc_filt_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
+            dt_, ib_, voc_dyn_, voc_, voc_filt_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
     if ( rp.debug==37 )
         Serial.printf("ib,vb,voc_dyn,voc(z_),  K_,y_,SOC_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
             ib_, vb_, voc_dyn_, voc_,     K_, y_, soc_ekf_);
@@ -293,16 +321,15 @@ void BatteryMonitor::pretty_print(void)
     Serial.printf("BatteryMonitor::");
     this->Battery::pretty_print();
     Serial.printf("  voc_filt_ = %7.3f;  // Filtered open circuit voltage for saturation detect, V\n", voc_filt_);
-    Serial.printf("  voc_stat_ = %7.3f;  // Static model open circuit voltage from table, V\n", voc_stat_);
+    Serial.printf("  voc_stat_ = %7.3f;  // Static model open circuit voltage from table (reference), V\n", voc_stat_);
     Serial.printf("  q_ekf =%10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
-    Serial.printf("  tcharge =    %5.1f; // Charging time to full, hr\n", tcharge_);
-    Serial.printf("  tcharge_ekf =%5.1f; // Charging time to full from ekf, hr\n", tcharge_ekf_);
-    Serial.printf("  soc_ekf = %7.3f;  // Filtered state of charge from ekf (0-1)\n", soc_ekf_);
-    Serial.printf("  SOC_ekf_ =   %5.1f; // Filtered state of charge from ekf (0-100)\n", SOC_ekf_);
+    Serial.printf("  tcharge =    %5.1f; // Counted charging time to full, hr\n", tcharge_);
+    Serial.printf("  tcharge_ekf =%5.1f; // Solved charging time to full from ekf, hr\n", tcharge_ekf_);
+    Serial.printf("  soc_ekf = %7.3f;  // Solved state of charge, fraction\n", soc_ekf_);
+    Serial.printf("  SOC_ekf_ =   %5.1f; // Solved state of charge, percent\n", SOC_ekf_);
     Serial.printf("  amp_hrs_remaining =       %7.3f;  // Discharge amp*time left if drain to q=0, A-h\n", amp_hrs_remaining_);
     Serial.printf("  amp_hrs_remaining_ekf_ =  %7.3f;  // Discharge amp*time left if drain to q_ekf=0, A-h\n", amp_hrs_remaining_ekf_);
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
@@ -492,24 +519,30 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
   return ( duty_ );
 }
 
-// Count coulombs based on true=actual capacity
-double BatteryModel::count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
-    const double t_last)
+/* BatteryModel::count_coulombs: Count coulombs based on assumed model true=actual capacity
+Inputs:
+    Sen->T          Integration step, s
+    Sen->Tbatt      Battery temperature, deg C
+    Sen->Ishunt     Charge, A
+    t_last          Past value of battery temperature used for rate limit memory, deg C
+Outputs:
+    q_capacity_     Saturation charge at temperature, C
+    *rp_delta_q_    Charge change since saturated, C
+    *rp_t_last_     Updated value of battery temperature used for rate limit memory, deg C
+    resetting_      Sticky flag for initialization, T=reset
+    soc_            Fraction of saturation charge (q_capacity_) available (0-1) 
+    SOC_            Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries
+    soc_min_        Estimated soc where battery BMS will shutoff current, fraction
+    q_min_          Estimated charge at low voltage shutdown, C\
+*/
+double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const double t_last)
 {
-    /* Count coulombs based on true=actual capacity
-    Inputs:
-        dt              Integration step, s
-        temp_c          Battery temperature, deg C
-        charge_curr     Charge, A
-        sat             Indicator that battery is saturated (VOC>threshold(temp)), T/F
-        tlast           Past value of battery temperature used for rate limit memory, deg C
-    */
-    double d_delta_q = charge_curr * dt;
+    double d_delta_q = Sen->Ishunt * Sen->T;
 
     // Rate limit temperature
-    double temp_lim = max(min(temp_c, t_last + t_rlim_*dt), t_last - t_rlim_*dt);
-    if ( reset ) temp_lim = temp_c;
-    if ( reset ) *rp_t_last_ = temp_c;
+    double temp_lim = max(min(Sen->Tbatt, t_last + t_rlim_*Sen->T), t_last - t_rlim_*Sen->T);
+    if ( reset ) temp_lim = Sen->Tbatt;
+    if ( reset ) *rp_t_last_ = Sen->Tbatt;
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
     if ( model_saturated_ )
@@ -531,10 +564,10 @@ double BatteryModel::count_coulombs(const double dt, const boolean reset, const 
 
     if ( rp.debug==97 )
         Serial.printf("BatteryModel::cc,  dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,%5.1f,\n",
-                    dt,cp.pubList.voc,  sat_voc(temp_c), temp_lim, model_saturated_, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
+                    Sen->T,cp.pubList.voc,  sat_voc(Sen->Tbatt), temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
     if ( rp.debug==-97 )
         Serial.printf("voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,%5.1f,\n",
-                    cp.pubList.voc,  sat_voc(temp_c), temp_lim, model_saturated_, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
+                    cp.pubList.voc,  sat_voc(Sen->Tbatt), temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
 
     // Save and return
     *rp_t_last_ = temp_lim;

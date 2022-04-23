@@ -52,8 +52,8 @@ void Coulombs::pretty_print(void)
   Serial.printf("  q_cap_rated_scaled_ = %9.1f; // Applied rated capacity at t_rated_, after scaling, C\n", q_cap_rated_scaled_);
   Serial.printf("  q_capacity_ = %9.1f;     // Saturation charge at temperature, C\n", q_capacity_);
   Serial.printf("  q_ =          %9.1f;     // Present charge available to use, except q_min_, C\n", q_);
-  Serial.printf("  q_min_ =      %9.1f;     // Charge at low voltage shutdown, C\n", q_min_);
-  Serial.printf("  delta_q       %9.1f;     // Charge since saturated, C\n", *rp_delta_q_);
+  Serial.printf("  q_min_ =      %9.1f;     // Estimated charge at low voltage shutdown, C\n", q_min_);
+  Serial.printf("  delta_q       %9.1f;     // Charge change since saturated, C\n", *rp_delta_q_);
   Serial.printf("  soc_ =        %7.3f;       // Fraction of saturation charge (q_capacity_) available (0-1)  soc_);\n", soc_);
   Serial.printf("  SOC_ =        %5.1f;         // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries\n", SOC_);
   Serial.printf("  sat_ =          %d;          // Indication calculated by caller that battery is saturated, T=saturated\n", sat_);
@@ -61,7 +61,7 @@ void Coulombs::pretty_print(void)
   Serial.printf("  t_last =      %5.1f;         // Last battery temperature for rate limit memory, deg C\n", *rp_t_last_);
   Serial.printf("  t_rlim_ =     %7.3f;       // Tbatt rate limit, deg C / s\n", t_rlim_);
   Serial.printf("  resetting_ =     %d;          // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter\n", resetting_);
-  Serial.printf("  soc_min_ =    %7.3f;       // Lowest soc for power delivery.   Arises with temp < 20 C\n", soc_min_);
+  Serial.printf("  soc_min_ =    %7.3f;       // Estimated soc where battery BMS will shutoff current, fraction\n", soc_min_);
 }
 
 // functions
@@ -130,18 +130,26 @@ double Coulombs::calculate_capacity(const double temp_c)
   return( q_cap_rated_scaled_ * (1-DQDT*(temp_c - t_rated_)) );
 }
 
-// Count coulombs based on true=actual capacity
+/* Coulombs::count_coulombs:  Count coulombs based on true=actual capacity
+Inputs:
+  dt              Integration step, s
+  temp_c          Battery temperature, deg C
+  charge_curr     Charge, A
+  sat             Indicator that battery is saturated (VOC>threshold(temp)), T/F
+  tlast           Past value of battery temperature used for rate limit memory, deg C
+Outputs:
+  q_capacity_     Saturation charge at temperature, C
+  *rp_delta_q_    Charge change since saturated, C
+  *rp_t_last_     Updated value of battery temperature used for rate limit memory, deg C
+  resetting_      Sticky flag for initialization, T=reset
+  soc_            Fraction of saturation charge (q_capacity_) available (0-1) 
+  SOC_            Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries
+  soc_min_        Estimated soc where battery BMS will shutoff current, fraction
+  q_min_          Estimated charge at low voltage shutdown, C\
+*/
 double Coulombs::count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
   const boolean sat, const double t_last)
 {
-    /* Count coulombs based on true=actual capacity
-    Inputs:
-        dt              Integration step, s
-        temp_c          Battery temperature, deg C
-        charge_curr     Charge, A
-        sat             Indicator that battery is saturated (VOC>threshold(temp)), T/F
-        tlast           Past value of battery temperature used for rate limit memory, deg C
-    */
     double d_delta_q = charge_curr * dt;
     sat_ = sat;
 

@@ -64,7 +64,21 @@ Shunt::Shunt(const String name, const uint8_t port, double *rp_delta_q_inf, doub
   name_(name), port_(port), bare_(false), cp_curr_bias_(cp_curr_bias), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0), ishunt_(0)
 {
-  setGain(GAIN_SIXTEEN, GAIN_SIXTEEN); // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+  if ( name_=="No Amp")
+  {
+    setGain(GAIN_SIXTEEN, GAIN_SIXTEEN); // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+    Serial.printf("Setting gain 16 - 16 for 'No Amp.   Diff=%d, S.E.=%d'\n", getGain(), getsGain());
+  }
+  else if ( name_=="Amp")
+  {
+    setGain(GAIN_EIGHT, GAIN_TWO); // First argument is differential, second is single-ended.
+    Serial.printf("Setting gain 8 - 2 for 'Amp.'   Diff=%d, S.E.=%d'\n", getGain(), getsGain());
+  }
+  else
+  {
+    setGain(GAIN_EIGHT, GAIN_TWO); // First argument is differential, second is single-ended.
+    Serial.printf("Setting gain 8 - 2 for name='%s.'   Diff=%d, S.E.=%d'\n", name_.c_str(), getGain(), getsGain());
+  }
   if (!begin()) {
     Serial.printf("FAILED to initialize ADS SHUNT MONITOR %s\n", name_.c_str());
     bare_ = true;
@@ -287,8 +301,8 @@ String tryExtractString(String str, const char* start, const char* end)
 // Tweak
 void tweak(Sensors *Sen, unsigned long int now)
 {
-  if ( Sen->ShuntAmp->update(Sen->ShuntAmp->ishunt_cal(), Sen->T, Sen->saturated, now) ) Sen->ShuntAmp->adjust();
-  if ( Sen->ShuntNoAmp->update(Sen->ShuntNoAmp->ishunt_cal(), Sen->T, Sen->saturated, now) ) Sen->ShuntNoAmp->adjust();
+  if ( Sen->ShuntAmp->update(Sen->ShuntAmp->ishunt_cal(), Sen->T, Sen->saturated, now) ) Sen->ShuntAmp->adjust();  // TODO:  reduce arg list
+  if ( Sen->ShuntNoAmp->update(Sen->ShuntNoAmp->ishunt_cal(), Sen->T, Sen->saturated, now) ) Sen->ShuntNoAmp->adjust();  // TODO:  reduce arg list
 }
 
 // Convert time to decimal for easy lookup

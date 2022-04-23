@@ -60,7 +60,7 @@ protected:
   double q_cap_rated_;// Rated capacity at t_rated_, saved for future scaling, C
   double q_cap_rated_scaled_;// Applied rated capacity at t_rated_, after scaling, C
   double q_capacity_; // Saturation charge at temperature, C
-  double q_;          // Present charge available to use, C
+  double q_;          // Present charge available to use, except q_min_, C
   double soc_;        // Fraction of saturation charge (q_capacity_) available (0-1)
   double SOC_;        // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries.
   boolean sat_;       // Indication calculated by caller that battery is saturated, T=saturated

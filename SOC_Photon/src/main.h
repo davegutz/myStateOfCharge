@@ -230,26 +230,26 @@ void loop()
   static boolean reset_publish = true;      // Dynamic reset
   
   // Synchronization
-  boolean publishP;                            // Particle publish, T/F
+  boolean publishP;                           // Particle publish, T/F
   static Sync *PublishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
-  boolean publishB;                            // Particle publish, T/F
+  boolean publishB;                           // Particle publish, T/F
   static Sync *PublishBlynk = new Sync(PUBLISH_BLYNK_DELAY);
-  boolean read;                                // Read, T/F
+  boolean read;                               // Read, T/F
   static Sync *ReadSensors = new Sync(READ_DELAY);
-  boolean filt;                                // Filter, T/F
+  boolean filt;                               // Filter, T/F
   static Sync *FilterSync = new Sync(FILTER_DELAY);
-  boolean read_temp;                           // Read temp, T/F
+  boolean read_temp;                          // Read temp, T/F
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
-  boolean publishS;                            // Serial print, T/F
+  boolean publishS;                           // Serial print, T/F
   static Sync *PublishSerial = new Sync(PUBLISH_SERIAL_DELAY);
-  boolean display_to_user;                     // User display, T/F
+  boolean display_to_user;                    // User display, T/F
   static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
-  boolean summarizing;                         // Summarize, T/F
+  boolean summarizing;                        // Summarize, T/F
   static boolean summarizing_waiting = true;  // waiting for a while before summarizing
   static Sync *Summarize = new Sync(SUMMARIZE_DELAY);
-  boolean control;                         // Summarize, T/F
+  boolean control;                            // Summarize, T/F
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
-  static uint8_t last_publishS_debug = 0;    // Remember first time with new debug to print headers
+  static uint8_t last_publishS_debug = 0;     // Remember first time with new debug to print headers
  
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
@@ -258,12 +258,11 @@ void loop()
   {
     if ( rp.debug>102 ) Serial.printf("Starting Blynk at %ld...  ", millis());
 
-    Blynk.begin(blynkAuth.c_str());   // blocking if no connection
+    Blynk.begin(blynkAuth.c_str());   // warning:  blocks if no connection
     myWifi->blynk_started = true;
 
     if ( rp.debug>102 ) Serial.printf("completed at %ld\n", millis());
   }
-
   if ( myWifi->blynk_started && myWifi->connected )
   {
     Blynk.run();
@@ -278,16 +277,13 @@ void loop()
   time_now = Time.now();
   sync_time(now, &last_sync, &millis_flip);      // Refresh time synchronization
 
-  // Input temperature only
+  // Load temperature only
   read_temp = ReadTemp->update(millis(), reset);              //  now || reset
   if ( read_temp )
   {
     Sen->T_temp =  ReadTemp->updateTime();
-
-    // Load and filter temperature Tb only
     load_temp(Sen);
     filter_temp(reset_temp, t_rlim, Sen, rp.t_bias, &t_bias_last);
-
   }
 
   // Input all other sensors and do high rate calculations
@@ -298,7 +294,7 @@ void loop()
     Sen->T =  ReadSensors->updateTime();
     if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  \n", Sen->T, millis());
 
-    // Load and filter Ib and Vb
+    // Load Ib and Vb
     load(reset, ReadSensors->now(), Sen, myPins);
     
     // Arduino plots
@@ -306,18 +302,18 @@ void loop()
         Mon->soc(), Sen->ShuntAmp->ishunt_cal(), Sen->ShuntNoAmp->ishunt_cal(),
         Sen->Vbatt, Sim->voc_stat(), Sim->voc());
 
-    // Sim used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
-    // to have availabe a value for Sen->Tbatt_filt when called
-    //  Inputs:
-    //    Sen->Ishunt     A
-    //    Sen->Vbatt      V
-    //    Sen->Tbatt_filt deg C
-    //  Outputs:
-    //    Tb              deg C
-    //    Ib              A
-    //    Vb              V
-    //    rp.duty         (0-255) for D2 hardware injection when rp.modeling and proper wire connections made
-
+    /* Sim used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
+    to have availabe a value for Sen->Tbatt_filt when called
+    Inputs:
+      Ib              Battery terminal current, A
+      Vb              Battery terminal voltage, V
+      Tbatt_filt      Tb filtered for noise, past value, deg C
+    Outputs:
+      Tb              deg C
+      Ib              A
+      Vb              V
+      rp.duty         (0-255) for D2 hardware injection when rp.modeling and proper wire connections made
+    */
     // Sim initialize as needed from memory
     if ( reset )
     {
@@ -340,49 +336,52 @@ void loop()
     }
 
     // Charge calculation and memory store
-    Sim->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, rp.t_last_model);
+    Sim->count_coulombs(Sen, reset_temp, rp.t_last_model);
 
     // D2 signal injection to hardware current sensors (also has rp.inj_soft_bias path for rp.tweak_test)
     rp.duty = Sim->calc_inj_duty(elapsed, rp.type, rp.amp, rp.freq);
-    ////////////////////////////////////////////////////////////////////////////
 
-    //
-    // Main Battery
-    //  Inputs:
-    //    Sen->Ishunt     A
-    //    Sen->Vbatt      V
-    //    Sen->Tbatt_filt deg C
-    //    Cc    Coulomb charge counter memory structure
 
-    // Initialize Cc structure if needed.   Needed here in this location to have a value for Sen->Tbatt_filt
+    /* Main Battery Monitor
+      Inputs:
+        Ib              Battery terminal current, A
+        Vb              Battery terminal voltage, V
+        Tbatt_filt      Tb filtered for noise, past value, deg C
+      Outputs:
+    		tcharge    	    Counted charging time to full, hr
+        tcharge_ekf     Solved charging time to full from ekf, hr
+        voc             Static model open circuit voltage, V
+        voc_filt        Filtered open circuit voltage for saturation detect, V
+    */
+    // Initialize charge state if temperature initial condition changed
+    // Needed here in this location to have a value for Sen->Tbatt_filt
     if ( reset_temp )
     {
-      Mon->apply_delta_q_t(rp.delta_q, rp.t_last);          // From memory
-      Mon->init_battery();  // for cp.soft_reset
+      Mon->apply_delta_q_t(rp.delta_q, rp.t_last);  // From memory
+      Mon->init_battery();                          // for cp.soft_reset
       if ( rp.modeling )
-        Mon->init_soc_ekf(Sim->soc());  // When modeling, ekf tracks model
+        Mon->init_soc_ekf(Sim->soc());              // When modeling, ekf tracks model
       else
         Mon->init_soc_ekf(Mon->soc());
       Mon->init_hys(0.0);
     }
     
     // EKF - calculates temp_c_, voc_, voc_dyn_ as functions of sensed parameters vb & ib (not soc)
-    Mon->calculate_ekf(Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,  min(Sen->T, F_MAX_T));
+    Mon->calculate_ekf(Sen);
     
     // Debounce saturation calculation done in ekf using voc model
-    // boolean sat = is_sat(Sen->Tbatt_filt, Mon->voc(), Mon->soc());
     boolean sat = is_sat(Sen->Tbatt_filt, Mon->voc_filt(), Mon->soc());
-    // Sen->saturated = SatDebounce->calculate(sat, reset);
     Sen->saturated = Is_sat_delay->calculate(sat, t_sat, t_desat, min(Sen->T, t_sat/2.), reset);
 
     // Memory store
-    Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last); // TODO:  delete rp.t_last
+    Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
 
     // Charge time for display
     Mon->calculate_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ishunt,Mon->soc());
 
-    // Adjust current
+    // Adjust current sensors
     tweak(Sen, now);
+
     //////////////////////////////////////////////////////////////
 
     //

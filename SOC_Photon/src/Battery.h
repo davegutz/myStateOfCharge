@@ -172,8 +172,8 @@ public:
 protected:
   double voc_;      // Static model open circuit voltage, V
   double vdyn_;     // Sim current induced back emf, V
-  double vb_;        // Total model voltage, voltage at terminals, V
-  double ib_;  // Current into battery, A
+  double vb_;       // Battery terminal voltage, V
+  double ib_;       // Battery terminal current, A
   int num_cells_;   // Number of cells
   double dv_dsoc_;  // Derivative scaled, V/fraction
   double sr_;       // Resistance scalar
@@ -217,7 +217,7 @@ public:
   // operators
   // functions
   double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
-  double calculate_ekf(const double temp_c, const double vb, const double ib, const double dt);
+  double calculate_ekf(Sensors *Sen);
   void init_soc_ekf(const double soc);
   void pretty_print(void);
   double K_ekf() { return (K_); };
@@ -235,11 +235,11 @@ protected:
   double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
   double voc_stat_; // Sim voc from soc-voc table, V
-  double tcharge_ekf_;  // Charging time to 100% from ekf, hr
+  double tcharge_ekf_;  // Solved charging time to 100% from ekf, hr
   double voc_dyn_;  // Charging voltage, V
   double soc_ekf_;  // Filtered state of charge from ekf (0-1)
   double SOC_ekf_;  // Filtered state of charge from ekf (0-100)
-  double tcharge_;  // Charging time to 100%, hr
+  double tcharge_;  // Counted charging time to 100%, hr
   double q_ekf_;    // Filtered charge calculated by ekf, C
   void ekf_model_predict(double *Fx, double *Bu);
   void ekf_model_update(double *hx, double *H);
@@ -262,8 +262,7 @@ public:
   // functions
   double calculate(Sensors *Sen, const boolean dc_dc_on);
   uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);
-  double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
-    const double t_last);
+  double count_coulombs(Sensors *Sen, const boolean reset, const double t_last);
   void load();
   void pretty_print(void);
   boolean cutback() { return model_cutback_; };

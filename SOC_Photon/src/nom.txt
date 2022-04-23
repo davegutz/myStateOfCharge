@@ -1,0 +1,55 @@
+		amp_hrs_remaining	Discharge amp*time left if drain to q=0, A-h
+		amp_hrs_remaining_ekf_	Discharge amp*time left if drain to q_ekf=0, A-h
+        bms_off_        Calculated indication that the BMS has turned off charge current, T=off
+		cap_			Capacitance, Farads
+		cap_init_		Capacitance, Farads
+		dt_ 			Update time, s
+		dv_				Adjustment, V
+		dv_dsoc			Derivative scaled, V/fraction
+        ib_             Battery terminal current, A
+        ioc_            Best estimate of IOC charge current after hysteresis, A
+		ib_sat_			Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
+		model_cutback_	Indicate that modeled current being limited on saturation cutback, T = cutback limited
+		model_saturated_	Indicator of maximal cutback, T = cutback saturated
+		q_				Present charge available to use, except q_min_, C	
+		q_cap_rated_    Rated capacity at t_rated_, saved for future scaling, C
+        q_cap_rated_scaled_   Applied rated capacity at t_rated_, after scaling, C
+        q_capacity_     Saturation charge at temperature, C
+        q_ekf_          Filtered charge calculated by ekf, C
+        q_min_          Estimated charge at low voltage shutdown, C\
+		res_			Null resistance, Ohms
+		resetting_		Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
+        rp.duty         (0-255) for D2 hardware injection when rp.modeling and proper wire connections made
+        *rp_delta_q_    Charge change since saturated, C
+        *rp_t_last_     Updated value of battery temperature ure injection when rp.modeling and proper wire connections made
+		s_cap_			Rated capacity scalar
+		sat_			Indication calculated by caller that battery is saturated, T=saturated
+		sat_cutback_gain_	Gain to retard ib when voc exceeds vsat, dimensionless
+		sat_ib_max_		Current cutback to be applied to modeled ib output, A
+		sat_ib_null_	Current cutback value for voc=vsat, A
+        Sen->Ishunt     Shunt current Ib, A
+        Sen->T          Update time, sec
+        Sen->Tbatt_filt Tb filtered for noise, past value of temp_c_, deg C
+        Sen->Vbatt      Battery terminal voltage, V
+        soc_            Fraction of saturation charge (q_capacity_) available (0-1) 
+        soc_ekf_        Solved state of charge, fraction
+        soc_min_        Estimated soc where battery BMS will shutoff current, fraction
+        SOC_            Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries
+        SOC_ekf_ (return)     Solved state of charge, percent
+		sr				Resistance scalar
+		t_last			Last battery temperature for rate limit memory, deg C
+		t_rated_		Rated temperature, deg C
+		t_rlim_			Tbatt rate limit, deg C / s
+		tau_			Null time constant, sec
+		tcharge_    	Counted charging time to full, hr
+        tcharge_ekf_    Solved charging time to full from ekf, hr
+		tlast           Past value of battery temperature used for rate limit memory, deg C
+        RATED_BATT_CAP  Nominal battery bank capacity (assume actual not known), Ah
+        Tb              Tb, deg C
+        vb_             Battery terminal voltage, V
+        vdyn_           Sim current induced back emf, V
+        voc_            Static model open circuit voltage, V
+        voc_dyn_        VOC estimated from Vb and RC model, V
+        voc_filt_       Filtered open circuit voltage for saturation detect, V
+        voc_stat_       Static model open circuit voltage from table (reference), V\n
+		vsat_           Saturation threshold at temperature, Vsed for rate limit memory, deg C
