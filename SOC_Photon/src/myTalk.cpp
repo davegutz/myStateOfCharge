@@ -763,7 +763,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("    : delta I adder to all sensed shunt current, A [0]"); 
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.println("    : delta T adder to sensed Tbatt, deg C [0]"); 
-  Serial.printf("  Dv= "); Serial.print(Sim->Dv()); Serial.println("    : delta V adder to Vb measurement, V"); 
+  Serial.printf("  Dv= "); Serial.print(Sim->Dv()); Serial.println("    : Table hard-coded adjustment, compensates for data collection errors (hysteresis), V [0.01]"); 
   Serial.printf("  Sc= "); Serial.print(Sim->q_capacity()/Mon->q_capacity()); Serial.println("    : Scalar battery model size"); 
   Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.println("    : hysteresis scalar 1e-6 - 100");
   Serial.printf("  Sr= "); Serial.print(Sim->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
