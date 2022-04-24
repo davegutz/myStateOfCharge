@@ -71,13 +71,20 @@ struct CommandPars
     this->model_saturated = true;
     this->soft_reset = true;
   }
+
   void pretty_print(void)
   {
-    Serial.printf("enable_wifi = %d, model_cutback = %d, model_saturated = %d, soft_reset = %d, write_summary = %d, \
-curr_bias_amp = %7.3f, curr_bias_noamp = %7.3f, dc_dc_on = %d,\n",
-      this->enable_wifi, this->model_cutback, this->model_saturated, this->soft_reset, this->write_summary,
-      this->curr_bias_amp, this->curr_bias_noamp, this->dc_dc_on);
+    Serial.printf("command parameters(cp):\n");
+    Serial.printf("  enable_wifi =          %d;  // Enable wifi\n", this->enable_wifi);
+    Serial.printf("  model_cutback =        %d;  // On model cutback\n", this->model_cutback);
+    Serial.printf("  model_saturated =      %d;  // Sim on cutback and saturated\n", this->model_saturated);
+    Serial.printf("  soft_reset =           %d;  // Use talk to reset main\n", this->soft_reset);
+    Serial.printf("  write_summary =        %d;  // Use talk to issue a write command to summary\n", this->write_summary);
+    Serial.printf("  curr_bias_amp =  %7.3f;  // Signal injection bias for amplified current input, A\n", this->curr_bias_amp);
+    Serial.printf("  curr_bias_noamp =%7.3f;  // Signal injection bias for non-amplified current input, A\n", this->curr_bias_noamp);
+    Serial.printf("  dc_dc_on =             %d;  // DC-DC charger is on\n", this->dc_dc_on);
   }
 };            
+
 
 #endif

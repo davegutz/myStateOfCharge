@@ -170,10 +170,8 @@ void setup()
 
 #ifdef BOOT_CLEAN
   rp.nominal();
-  rp.print_part_1(cp.buffer);
   Serial.printf("Force nominal rp %s", cp.buffer);
-  rp.print_part_2(cp.buffer);
-  Serial.printf("%s", cp.buffer);
+  rp.pretty_print();
 #endif
 
   #ifdef PHOTON

@@ -71,16 +71,16 @@ void Tweak::adjust(void)
 void Tweak::pretty_print(void)
 {
     Serial.printf("Tweak(%s)::\n", name_.c_str());
-    Serial.printf("  gain_ =               %10.6f; // Current correction to be made for charge error see 'N/Mg', A/Coulomb\n", gain_);
+    Serial.printf("  gain_ =                %10.6f; // Current correction to be made for charge error see 'N/Mg', A/Coulomb\n", gain_);
     Serial.printf("  max_change_ =             %7.3f; // Maximum allowed change to calibration adjustment see 'N/MC', A\n", max_change_);
     Serial.printf("  max_tweak_ =              %7.3f; // Maximum allowed calibration adjustment see 'N/Mx', A\n", max_tweak_);
     Serial.printf("  rp_delta_q_inf_ =      %10.1f; // Charge infinity at past update see 'N/Mi', Coulombs\n", *rp_delta_q_inf_);
     Serial.printf("  delta_q_sat_present_ = %10.1f; // Charge infinity at saturation, present see 'N/MP', Coulombs\n", delta_q_sat_present_);
     Serial.printf("  delta_q_sat_past_ =    %10.1f; // Charge infinity at saturation, past see 'N/Mp', Coulombs\n", delta_q_sat_past_);
-    Serial.printf("  sat_ =                 %d;    // Saturation status, T=saturated\n", sat_);
-    Serial.printf("  now-time_sat_past_ =   %7.3f; // Time since last allowed saturation see 'N/Mz', hr\n", double(millis()-time_sat_past_)/3600000.);
-    Serial.printf("  time_to_wait =         %7.3f; // Time to wait before allowing saturation see 'N/Mw', hr\n", double(time_to_wait_)/3600000.);
-    Serial.printf("  tweak_bias =           %7.3f; // Bias on current see 'N/Mk', A\n", *rp_tweak_bias_);
+    Serial.printf("  sat_ =                          %d; // Saturation status, T=saturated\n", sat_);
+    Serial.printf("  now-time_sat_past_ =      %7.3f; // Time since last allowed saturation see 'N/Mz', hr\n", double(millis()-time_sat_past_)/3600000.);
+    Serial.printf("  time_to_wait =            %7.3f; // Time to wait before allowing saturation see 'N/Mw', hr\n", double(time_to_wait_)/3600000.);
+    Serial.printf("  tweak_bias =              %7.3f; // Bias on current see 'N/Mk', A\n", *rp_tweak_bias_);
 }
 
 // Reset on demand

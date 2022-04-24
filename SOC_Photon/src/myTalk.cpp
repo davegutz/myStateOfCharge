@@ -48,10 +48,8 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
     {
       case ( 'A' ):
         rp.nominal();
-        rp.print_part_1(cp.buffer);
+        rp.pretty_print();
         Serial.printf("Force nominal rp %s", cp.buffer);
-        rp.print_part_2(cp.buffer);
-        Serial.printf("%s", cp.buffer);
         Serial.printf("\n\n ************** now Reset to apply nominal rp ***********************\n");
         break;
 
@@ -371,78 +369,70 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         {
           case ( 'a' ):
             self_talk("Pm", Mon, Sim, Sen);
-            Serial.printf("\n");
-            Serial.printf("Sim:   rp.modeling = %d\n", rp.modeling);
+            Serial.printf("\nSim:   rp.modeling = %d\n", rp.modeling);
             self_talk("Ps", Mon, Sim, Sen);
-            Serial.printf("\n");
             self_talk("Pr", Mon, Sim, Sen);
-            Serial.printf("\n");
             self_talk("Pt", Mon, Sim, Sen);
-            Serial.printf("\n");
             self_talk("PM", Mon, Sim, Sen);
-            Serial.printf("\n");
             self_talk("PN", Mon, Sim, Sen);
-            Serial.printf("\n");
             break;
 
           case ( 'c' ):
-            Serial.printf("Mon::"); Mon->Coulombs::pretty_print();
-            Serial.printf("Sim::");   Sim->Coulombs::pretty_print();
+            Serial.printf("\nMon::"); Mon->Coulombs::pretty_print();
+            Serial.printf("\nSim::");   Sim->Coulombs::pretty_print();
             break;
 
           case ( 'e' ):
-             Serial.printf("Mon::"); Mon->EKF_1x1::pretty_print();
+             Serial.printf("\nMon::"); Mon->EKF_1x1::pretty_print();
             break;
 
           case ( 'm' ):
-            Serial.printf("Mon:");  Mon->pretty_print();
+            Serial.printf("\nMon:");  Mon->pretty_print();
             Serial.printf("Mon::"); Mon->Coulombs::pretty_print();
             Serial.printf("Mon::"); Mon->pretty_print_ss();
             Serial.printf("Mon::"); Mon->EKF_1x1::pretty_print();
             break;
 
           case ( 'M' ):
-             Serial.printf("Tweak::"); Sen->ShuntAmp->pretty_print();
+             Serial.printf("\nTweak::"); Sen->ShuntAmp->pretty_print();
             break;
 
           case ( 'N' ):
-             Serial.printf("Tweak::"); Sen->ShuntNoAmp->pretty_print();
+             Serial.printf("\nTweak::"); Sen->ShuntNoAmp->pretty_print();
             break;
 
           case ( 'r' ):
-            Serial.printf("retained::");
-            rp.print_part_1(cp.buffer); Serial.printf("%s", cp.buffer);
-            rp.print_part_2(cp.buffer); Serial.printf("%s", cp.buffer);
-            Serial.printf("command::");       cp.pretty_print();
+            Serial.printf("\n"); rp.pretty_print();
+            Serial.printf("\n"); cp.pretty_print();
             break;
 
           case ( 's' ):
-            Serial.printf("Sim:   rp.modeling = %d\n", rp.modeling);
+            Serial.printf("\nSim:   rp.modeling = %d\n", rp.modeling);
             Serial.printf("Sim:");    Sim->pretty_print();
             Serial.printf("Sim::");   Sim->Coulombs::pretty_print();
             Serial.printf("Sim::");   Sim->pretty_print_ss();
             break;
 
           case ( 't' ):
-            Serial.printf("Mon::"); Mon->pretty_print_ss();
-            Serial.printf("Sim::");   Sim->pretty_print_ss();
+            Serial.printf("\nMon::"); Mon->pretty_print_ss();
+            Serial.printf("\nSim::"); Sim->pretty_print_ss();
             break;
 
           case ( 'x' ):
-            Serial.printf("Amp:   ");      Serial.printf("Vshunt_int, Vshunt, cp.curr_bias, Ishunt_cal, sel_noamp, Ishunt=, %d, %7.3f, %7.3f, %7.3f,%d, %7.3f\n", 
-              Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), cp.curr_bias_amp, Sen->ShuntAmp->ishunt_cal(), rp.curr_sel_noamp, Sen->Ishunt);
-            Serial.printf("No Amp:");      Serial.printf("Vshunt_int, Vshunt, cp.curr_bias, Ishunt_cal, sel_noamp, Ishunt=, %d, %7.3f, %7.3f, %7.3f, %d, %7.3f\n", 
-              Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), cp.curr_bias_noamp, Sen->ShuntNoAmp->ishunt_cal(),
-              rp.curr_sel_noamp, Sen->Ishunt);
+            Serial.printf("\nAmp:   "); Serial.printf("Vshunt_int, Vshunt, cp.curr_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
+              Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), cp.curr_bias_amp, Sen->ShuntAmp->ishunt_cal());
+            Serial.printf("No Amp:"); Serial.printf("Vshunt_int, Vshunt, cp.curr_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
+              Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), cp.curr_bias_noamp, Sen->ShuntNoAmp->ishunt_cal());
+            Serial.printf("Selected:  NoAmp,Ishunt=,  %d, %7.3f\n", rp.curr_sel_noamp, Sen->Ishunt);
             break;
 
           case ( 'v' ):
-            Serial.printf("Volt:   ");      Serial.printf("rp.vbatt_bias, Vbatt_model, rp.modeling, Vbatt=, %7.3f, %7.3f, %d, %7.3f,\n", 
+            Serial.printf("\nVolt:   ");      Serial.printf("rp.vbatt_bias, Vbatt_model, rp.modeling, Vbatt=, %7.3f, %7.3f, %d, %7.3f,\n", 
               rp.vbatt_bias, Sen->Vbatt_model, rp.modeling, Sen->Vbatt);
             break;
 
           default:
-            Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
+            Serial.println("");Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
         }
         break;
 

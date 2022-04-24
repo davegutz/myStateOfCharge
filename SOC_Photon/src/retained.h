@@ -117,24 +117,39 @@ struct RetainedPars
     this->tweak_bias_amp = 0.;
     this->tweak_bias_noamp = 0.;
   }
-  void print_part_1(char *buffer)
+  
+  // Print
+  void pretty_print(void)
   {
-    sprintf(buffer, "debug = %d, delta_q = %7.3f, t_last = %7.3f, delta_q_model = %7.3f, t_last_model = %7.3f, \n\
-    curr_bias_amp = %7.3f, curr_bias_noamp = %7.3f, curr_bias_all = %7.3f, curr_sel_noamp = %d, tweak_test = %d,\n\
-    tweak_bias_amp = %7.3f, tweak_bias_noamp = %7.3f,\n",
-      this->debug, this->delta_q, this->t_last, this->delta_q_model, this->t_last_model,
-      this->curr_bias_amp, this->curr_bias_noamp, this->curr_bias_all, this->curr_sel_noamp, this->tweak_test,
-      this->tweak_bias_amp, this->tweak_bias_noamp);
+    Serial.printf("retained parameters (rp):\n");
+    Serial.printf("  debug =                     %d;  // Level of debug printing\n", this->debug);
+    Serial.printf("  delta_q =             %7.3f;  // Coulomb Counter state for ekf, (-1 - 1)\n", this->delta_q);
+    Serial.printf("  t_last =              %7.3f;  // Battery temperature past value for rate limit memory, deg C\n", this->t_last);
+    Serial.printf("  delta_q_model =    %10.1f;  // Coulomb Counter state for model, (-1 - 1)\n", this->delta_q_model);
+    Serial.printf("  t_last_model =        %7.3f;  // Battery temperature past value for rate limit memory, deg C\n", this->t_last_model);
+    Serial.printf("  curr_bias_amp =       %7.3f;  // Calibrate amp current sensor, A\n", this->curr_bias_amp);
+    Serial.printf("  curr_bias_noamp =     %7.3f;  // Calibrate non-amplified current sensor, A\n", this->curr_bias_noamp);
+    Serial.printf("  curr_bias_all =       %7.3f;  // Bias all current sensors, A \n", this->curr_bias_all);
+    Serial.printf("  curr_sel_noamp =            %d;  // Use non-amplified sensor\n", this->curr_sel_noamp);
+    Serial.printf("  vbatt_bias =          %7.3f;  // Calibrate Vbatt, V\n", this->vbatt_bias);
+    Serial.printf("  modeling =                  %d;  // Driving saturation calculation with model\n", this->modeling);
+    Serial.printf("  duty =                      %ld;  // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))\n", this->duty);
+    Serial.printf("  amp =                 %7.3f;  // Injected amplitude, A pk (0-18.3)\n", this->amp);
+    Serial.printf("  freq =                %7.3f;  // Injected frequency, Hz (0-2)\n", this->freq);
+    Serial.printf("  type =                      %d;  //  Injected waveform type.   0=sine, 1=square, 2=triangle\n", this->type);
+    Serial.printf("  inj_soft_bias =       %7.3f;  // Constant bias, A\n", this->inj_soft_bias);
+    Serial.printf("  t_bias =              %7.3f;  // Sensed temp bias, deg C\n", this->t_bias);
+    Serial.printf("  s_cap_model =         %7.3f;  // Scalar on battery model size\n", this->s_cap_model);
+    Serial.printf("  cutback_gain_scalar = %7.3f;  // Scalar on battery model saturation cutback function\n", this->cutback_gain_scalar);
+    Serial.printf("  isum =                      %d;  // Summary location.   Begins at -1 because first action is to increment isum\n", this->isum);
+    Serial.printf("  delta_q_inf_amp =  %10.1f;  // delta_q since last reset.  Simple integration of amplified current\n", this->delta_q_inf_amp);
+    Serial.printf("  delta_q_inf_noamp =%10.1f;  // delta_q since last reset.  Simple integration of amplified current\n", this->delta_q_inf_noamp);
+    Serial.printf("  hys_scale =           %7.3f;  //  Hysteresis scalar\n", this->hys_scale);
+    Serial.printf("  tweak_test =                %d;  // Driving signal injection completely using software inj_soft_bias \n", this->tweak_test);
+    Serial.printf("  tweak_bias_amp =      %7.3f;  // Tweak calibration for amplified current sensor\n", this->tweak_bias_amp);
+    Serial.printf("  tweak_bias_noamp =    %7.3f;  // Tweak calibration for non-amplified current sensor\n", this->tweak_bias_noamp);
   }
-  void print_part_2(char *buffer)
-  {
-    sprintf(buffer, "    vbatt_bias = %7.3f, modeling = %d, duty = %ld, amp = %7.3f, freq = %7.3f, type = %d, inj_soft_bias = %7.3f, \n\
-    t_bias = %7.3f, s_cap_model = %7.3f, cutback_gain_scalar = %7.3f, delta_q_inf_amp = %7.3f, delta_q_inf_noamp = %7.3f,\
-    hys_scale = %7.3f,\n",
-      this->vbatt_bias, this->modeling, this->duty, this->amp, this->freq, this->type, this->inj_soft_bias,
-      this->t_bias, this->s_cap_model, this->cutback_gain_scalar, this->delta_q_inf_amp,
-      this->delta_q_inf_noamp, this->hys_scale);
-  }
+
 };            
 
 #endif

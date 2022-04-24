@@ -121,23 +121,23 @@ void Battery::pretty_print(void)
     Serial.printf("  temp, #cells, dvoc_dt = %7.1f, %d, %10.6f;\n", temp_c_, num_cells_, dvoc_dt_);
     Serial.printf("  r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f;\n",
         r0_, rct_, tau_ct_, r_dif_, tau_dif_, r_sd_, tau_sd_);
-    Serial.printf("  bms_off_       =      %d;     // Calculated indication that the BMS has turned off charge current, T=off\n", bms_off_);
+    Serial.printf("  bms_off_ =         %d;  // Calculated indication that the BMS has turned off charge current, T=off\n", bms_off_);
     Serial.printf("  dv_dsoc = %10.6f;  // Derivative scaled, V/fraction\n", dv_dsoc_);
-    Serial.printf("  ib =      %7.3f;  // Battery terminal current, A\n", ib_);
-    Serial.printf("  vb =      %7.3f;  // Battery terminal voltage, V\n", vb_);
-    Serial.printf("  voc =     %7.3f;  // Static model open circuit voltage, V\n", voc_);
-    Serial.printf("  vsat =    %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
-    Serial.printf("  vdyn =    %7.3f;  // Sim current induced back emf, V\n", vdyn_);
-    Serial.printf("  sr =      %7.3f;  // Resistance scalar\n", sr_);
-    Serial.printf("  dv_ =      %7.3f; // Adjustment, V\n", dv_);
-    Serial.printf("  dt_ =      %7.3f; // Update time, s\n", dt_);
+    Serial.printf("  ib =         %7.3f;  // Battery terminal current, A\n", ib_);
+    Serial.printf("  vb =         %7.3f;  // Battery terminal voltage, V\n", vb_);
+    Serial.printf("  voc =        %7.3f;  // Static model open circuit voltage, V\n", voc_);
+    Serial.printf("  vsat =       %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
+    Serial.printf("  vdyn =       %7.3f;  // Sim current induced back emf, V\n", vdyn_);
+    Serial.printf("  sr =         %7.3f;  // Resistance scalar\n", sr_);
+    Serial.printf("  dv_ =        %7.3f;  // Adjustment, V\n", dv_);
+    Serial.printf("  dt_ =        %7.3f;  // Update time, s\n", dt_);
 }
 
 // Print State Space
 void Battery::pretty_print_ss(void)
 {
     Randles_->pretty_print();
-    hys_->pretty_print();
+    Serial.printf("  ::"); hys_->pretty_print();
 }
 
 // EKF model for update
@@ -320,13 +320,13 @@ void BatteryMonitor::pretty_print(void)
 {
     Serial.printf("BatteryMonitor::");
     this->Battery::pretty_print();
-    Serial.printf("  voc_filt_ = %7.3f;  // Filtered open circuit voltage for saturation detect, V\n", voc_filt_);
-    Serial.printf("  voc_stat_ = %7.3f;  // Static model open circuit voltage from table (reference), V\n", voc_stat_);
-    Serial.printf("  q_ekf =%10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
-    Serial.printf("  tcharge =    %5.1f; // Counted charging time to full, hr\n", tcharge_);
-    Serial.printf("  tcharge_ekf =%5.1f; // Solved charging time to full from ekf, hr\n", tcharge_ekf_);
-    Serial.printf("  soc_ekf = %7.3f;  // Solved state of charge, fraction\n", soc_ekf_);
-    Serial.printf("  SOC_ekf_ =   %5.1f; // Solved state of charge, percent\n", SOC_ekf_);
+    Serial.printf("  voc_filt_ =               %7.3f;  // Filtered open circuit voltage for saturation detect, V\n", voc_filt_);
+    Serial.printf("  voc_stat_ =               %7.3f;  // Static model open circuit voltage from table (reference), V\n", voc_stat_);
+    Serial.printf("  q_ekf =                %10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
+    Serial.printf("  tcharge =                   %5.1f;  // Counted charging time to full, hr\n", tcharge_);
+    Serial.printf("  tcharge_ekf =               %5.1f;  // Solved charging time to full from ekf, hr\n", tcharge_ekf_);
+    Serial.printf("  soc_ekf =                 %7.3f;  // Solved state of charge, fraction\n", soc_ekf_);
+    Serial.printf("  SOC_ekf_ =                  %5.1f;  // Solved state of charge, percent\n", SOC_ekf_);
     Serial.printf("  amp_hrs_remaining =       %7.3f;  // Discharge amp*time left if drain to q=0, A-h\n", amp_hrs_remaining_);
     Serial.printf("  amp_hrs_remaining_ekf_ =  %7.3f;  // Discharge amp*time left if drain to q_ekf=0, A-h\n", amp_hrs_remaining_ekf_);
 }
@@ -585,13 +585,13 @@ void BatteryModel::pretty_print(void)
 {
     Serial.printf("BatteryModel::");
     this->Battery::pretty_print();
-    Serial.printf("  sat_ib_max_ =       %7.3f; // Current cutback to be applied to modeled ib output, A\n", sat_ib_max_);
-    Serial.printf("  sat_ib_null_ =      %7.3f; // Current cutback value for voc=vsat, A\n", sat_ib_null_);
-    Serial.printf("  sat_cutback_gain_ = %7.3f; // Gain to retard ib when voc exceeds vsat, dimensionless\n", sat_cutback_gain_);
-    Serial.printf("  model_cutback_ =      %d;     // Gain to retard ib when voc exceeds vsat, dimensionless\n", model_cutback_);
-    Serial.printf("  model_saturated_ =    %d;     // Modeled current being limited on saturation cutback, T = cutback limited\n", model_saturated_);
-    Serial.printf("  ib_sat_ =           %7.3f; // Indicator of maximal cutback, T = cutback saturated\n", ib_sat_);
-    Serial.printf("  s_cap_ =            %7.3f; // Rated capacity scalar\n", s_cap_);
+    Serial.printf("  sat_ib_max_ =       %7.3f;  // Current cutback to be applied to modeled ib output, A\n", sat_ib_max_);
+    Serial.printf("  sat_ib_null_ =      %7.3f;  // Current cutback value for voc=vsat, A\n", sat_ib_null_);
+    Serial.printf("  sat_cutback_gain_ = %7.1f;  // Gain to retard ib when voc exceeds vsat, dimensionless\n", sat_cutback_gain_);
+    Serial.printf("  model_cutback_ =          %d;  // Gain to retard ib when voc exceeds vsat, dimensionless\n", model_cutback_);
+    Serial.printf("  model_saturated_ =        %d;  // Modeled current being limited on saturation cutback, T = cutback limited\n", model_saturated_);
+    Serial.printf("  ib_sat_ =           %7.3f;  // Indicator of maximal cutback, T = cutback saturated\n", ib_sat_);
+    Serial.printf("  s_cap_ =            %7.3f;  // Rated capacity scalar\n", s_cap_);
 }
 
 
@@ -670,22 +670,22 @@ double Hysteresis::look_hys(const double dv, const double soc)
 void Hysteresis::pretty_print()
 {
     Serial.printf("Hysteresis:\n");
-    Serial.printf("  res_ =       %6.4f; // Null resistance, Ohms\n", res_);
-    Serial.printf("  cap_init_ =%10.1f; // Capacitance, Farads\n", cap_init_);
-    Serial.printf("  cap_ =     %10.1f; // Capacitance, Farads\n", cap_);
+    Serial.printf("  res_ =         %6.4f;  // Null resistance, Ohms\n", res_);
+    Serial.printf("  cap_init_ =%10.1f;  // Capacitance, Farads\n", cap_init_);
+    Serial.printf("  cap_ =     %10.1f;  // Capacitance, Farads\n", cap_);
     double res = look_hys(0., 0.8);
-    Serial.printf("  tau_ =     %10.1f; // Null time constant, sec\n", res*cap_);
-    Serial.printf("  ib_ =        %7.3f;  // Current in, A\n", ib_);
-    Serial.printf("  ioc_ =       %7.3f;  // Current out, A\n", ioc_);
-    Serial.printf("  voc_in_ =    %7.3f;  // Voltage input, V\n", voc_in_);
-    Serial.printf("  voc_out_ =   %7.3f;  // Voltage output, V\n", voc_out_);
-    Serial.printf("  soc_ =       %7.3f;  // State of charge input, dimensionless\n", soc_);
-    Serial.printf("  res_ =       %7.3f;  // Variable resistance value, ohms\n", res_);
-    Serial.printf("  dv_dot_ =    %7.3f;  // Calculated voltage rate, V/s\n", dv_dot_);
-    Serial.printf("  dv_hys_ =    %7.3f;  // Delta voltage state, V\n", dv_hys_);
-    Serial.printf("  disabled_ =    %d;      // Hysteresis disabled by low scale input < 1e-5, T=disabled\n", disabled_);
-    Serial.printf("  direx_  =     %2.0f;      // If hysteresis hooked up backwards, -1.=reversed\n", direx_);
-    Serial.printf("  rp.hys_scale=%6.2f;   // Scalar on hysteresis, dimensionless\n", rp.hys_scale);
+    Serial.printf("  tau_ =     %10.1f;  // Null time constant, sec\n", res*cap_);
+    Serial.printf("  ib_ =         %7.3f;  // Current in, A\n", ib_);
+    Serial.printf("  ioc_ =        %7.3f;  // Current out, A\n", ioc_);
+    Serial.printf("  voc_in_ =     %7.3f;  // Voltage input, V\n", voc_in_);
+    Serial.printf("  voc_out_ =    %7.3f;  // Voltage output, V\n", voc_out_);
+    Serial.printf("  soc_ =        %7.3f;  // State of charge input, dimensionless\n", soc_);
+    Serial.printf("  res_ =        %7.3f;  // Variable resistance value, ohms\n", res_);
+    Serial.printf("  dv_dot_ =     %7.3f;  // Calculated voltage rate, V/s\n", dv_dot_);
+    Serial.printf("  dv_hys_ =     %7.3f;  // Delta voltage state, V\n", dv_hys_);
+    Serial.printf("  disabled_ =         %d;  // Hysteresis disabled by low scale input < 1e-5, T=disabled\n", disabled_);
+    Serial.printf("  direx_  =          %2.0f;  // If hysteresis hooked up backwards, -1.=reversed\n", direx_);
+    Serial.printf("  rp.hys_scale=  %6.2f;  // Scalar on hysteresis, dimensionless\n", rp.hys_scale);
 }
 
 // Scale

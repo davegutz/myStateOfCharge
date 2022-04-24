@@ -79,7 +79,6 @@ protected:
   int16_t vshunt_int_1_;// Interim conversion, count
   double vshunt_;       // Sensed shunt voltage, V
   double ishunt_cal_;   // Sensed, calibrated ADC, A
-  // double ishunt_;       // Selected calibrated, shunt current, A
 };
 
 
@@ -130,11 +129,17 @@ struct Sensors
     this->T_filt = T;
     this->T_temp = T_temp;
     this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_inf_amp, &rp.tweak_bias_amp, &cp.curr_bias_amp, shunt_amp_v2a_s);
-    Serial.printf("After new Shunt('Amp'):\n");
-    this->ShuntAmp->pretty_print();
+    if ( rp.debug>102 )
+    {
+      Serial.printf("After new Shunt('Amp'):\n");
+      this->ShuntAmp->pretty_print();
+    }
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp, &cp.curr_bias_noamp, shunt_noamp_v2a_s);
-    Serial.printf("After new Shunt('No Amp'):\n");
-    this->ShuntNoAmp->pretty_print();
+    if ( rp.debug>102 )
+    {
+      Serial.printf("After new Shunt('No Amp'):\n");
+      this->ShuntNoAmp->pretty_print();
+    }
     this->SensorTbatt = new DS18(pin_1_wire, temp_parasitic, temp_delay);
     this->TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
     SdTbatt = new SlidingDeadband(HDB_TBATT);
