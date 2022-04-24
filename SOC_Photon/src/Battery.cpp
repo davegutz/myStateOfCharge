@@ -136,7 +136,7 @@ void Battery::pretty_print(void)
     Serial.printf("  vsat_ =      %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
     Serial.printf("  vdyn_ =      %7.3f;  // Sim current induced back emf, V\n", vdyn_);
     Serial.printf("  sr_ =        %7.3f;  // Resistance scalar\n", sr_);
-    Serial.printf("  dv_ =        %7.3f;  // Adjustment, V\n", dv_);
+    Serial.printf("  dv_ =        %7.3f;  // Table hard-coded adjustment, compensates for data collection errors (hysteresis), V\n", dv_);
     Serial.printf("  dt_ =        %7.3f;  // Update time, s\n", dt_);
 }
 

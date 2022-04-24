@@ -179,7 +179,7 @@ protected:
   double sr_;       // Resistance scalar
   double nom_vsat_; // Nominal saturation threshold at 25C, V
   double vsat_;     // Saturation threshold at temperature, V
-  double dv_;       // Adjustment, V
+  double dv_;       // Table hard-coded adjustment, compensates for data collection errors (hysteresis), V
   double dvoc_dt_;  // Change of VOC with temperature, V/deg C
   double dt_;       // Update time, s
   double r0_;       // Randles R0, ohms
