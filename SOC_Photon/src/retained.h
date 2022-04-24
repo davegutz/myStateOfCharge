@@ -41,14 +41,14 @@ struct RetainedPars
   double curr_bias_noamp = CURR_BIAS_NOAMP; // Calibrate non-amplified current sensor, A 
   double curr_bias_all = CURR_BIAS_ALL; // Bias all current sensors, A 
   boolean curr_sel_noamp = false; // Use non-amplified sensor
-  double vbatt_bias = 0;    // Calibrate Vbatt, V
+  double vbatt_bias = VOLT_BIAS;    // Calibrate Vbatt, V
   boolean modeling = false; // Driving saturation calculation with model
   uint32_t duty = 0;        // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
   double amp = 0.;          // Injected amplitude, A pk (0-18.3)
   double freq = 0.;         // Injected frequency, Hz (0-2)
   uint8_t type = 0;         // Injected waveform type.   0=sine, 1=square, 2=triangle
   double inj_soft_bias = 0.;       // Constant bias, A
-  double t_bias = 0.;       // Sensed temp bias, deg C
+  double t_bias = TEMP_BIAS;       // Sensed temp bias, deg C
   double s_cap_model = 1.;  // Scalar on battery model size
   double cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
@@ -72,14 +72,14 @@ struct RetainedPars
     this->curr_bias_noamp = CURR_BIAS_NOAMP;
     this->curr_bias_all = CURR_BIAS_ALL;
     this->curr_sel_noamp = false;
-    this->vbatt_bias = 0;
+    this->vbatt_bias = VOLT_BIAS;
     this->modeling = false;
     this->duty = 0;
     this->amp = 0.;
     this->freq = 0.;
     this->type = 0;
     this->inj_soft_bias = 0.;
-    this->t_bias = 0.;
+    this->t_bias = TEMP_BIAS;
     this->s_cap_model = 1.0;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
@@ -99,14 +99,14 @@ struct RetainedPars
     this->curr_bias_noamp = CURR_BIAS_NOAMP;
     this->curr_bias_all = CURR_BIAS_ALL;
     this->curr_sel_noamp = false;   // non-amplified
-    this->vbatt_bias = 0;
+    this->vbatt_bias = VOLT_BIAS;
     this->modeling = false;
     this->duty = 0;
     this->amp = 0.;
     this->freq = 0.;
     this->type = 0;
     this->inj_soft_bias = 0.;
-    this->t_bias = 0.;
+    this->t_bias = TEMP_BIAS;
     this->s_cap_model = 1.0;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;

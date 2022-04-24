@@ -2,7 +2,7 @@
 #define local_config_h
 
 // version with Tweak on both current sensors
-const   String    unit = "soc0_20220420";
+const   String    unit = "soc0_20220424";
 
 //#define CURR_BIAS_AMP       -0.2  // 3/1/2022. Dapped to -0.8 on 2/28
 //#define CURR_BIAS_NOAMP     -0.5  // 3/1/2022. Dapped to -1.1 on 2/28
@@ -12,5 +12,7 @@ const   String    unit = "soc0_20220420";
 #define CURR_BIAS_AMP       -0.93
 #define CURR_BIAS_NOAMP     -1.23
 #define CURR_BIAS_ALL       0.0
+#define VOLT_BIAS            0.0
+#define TEMP_BIAS            0.0
 
 #endif
