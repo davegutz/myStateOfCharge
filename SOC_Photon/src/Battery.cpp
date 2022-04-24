@@ -118,17 +118,24 @@ void Battery::init_battery(void)
 void Battery::pretty_print(void)
 {
     Serial.printf("Battery:\n");
-    Serial.printf("  temp, #cells, dvoc_dt = %7.1f, %d, %10.6f;\n", temp_c_, num_cells_, dvoc_dt_);
-    Serial.printf("  r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f, %10.6f;\n",
-        r0_, rct_, tau_ct_, r_dif_, tau_dif_, r_sd_, tau_sd_);
+    Serial.printf("  temp_c_ =    %7.3f;  //  Battery temperature, deg C\n", temp_c_);
+    Serial.printf("  num_cells_ =       %d;  //  Battery number of cells\n", num_cells_);
+    Serial.printf("  dvoc_dt_ =%10.6f;  //  Change of VOC with temperature, V/deg C\n", dvoc_dt_);
+    Serial.printf("  r0_ =     %10.6f;  //  Randles R0, ohms\n", r0_);
+    Serial.printf("  rct_ =    %10.6f;  //  Randles charge transfer resistance, ohms\n", rct_);
+    Serial.printf("  tau_ct =  %10.6f;  //  Randles charge transfer time constant, s (=1/Rct/Cct)\n", tau_ct_);
+    Serial.printf("  r_dif_ =  %10.6f;  //  Randles diffusion resistance, ohms\n", r_dif_);
+    Serial.printf("  tau_dif_ =%10.6f;  //  Randles diffusion time constant, s (=1/Rdif/Cdif)\n", tau_dif_);
+    Serial.printf("  r_sd_ =   %10.6f;  //  Trickle discharge of ideal battery capacitor model, ohms\n", r_sd_);
+    Serial.printf("  tau_sd_ = %10.1f;  //  Time constant of ideal battery capacitor model, input current A, output volts=soc (0-1)\n", tau_sd_);
     Serial.printf("  bms_off_ =         %d;  // Calculated indication that the BMS has turned off charge current, T=off\n", bms_off_);
-    Serial.printf("  dv_dsoc = %10.6f;  // Derivative scaled, V/fraction\n", dv_dsoc_);
-    Serial.printf("  ib =         %7.3f;  // Battery terminal current, A\n", ib_);
-    Serial.printf("  vb =         %7.3f;  // Battery terminal voltage, V\n", vb_);
-    Serial.printf("  voc =        %7.3f;  // Static model open circuit voltage, V\n", voc_);
-    Serial.printf("  vsat =       %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
-    Serial.printf("  vdyn =       %7.3f;  // Sim current induced back emf, V\n", vdyn_);
-    Serial.printf("  sr =         %7.3f;  // Resistance scalar\n", sr_);
+    Serial.printf("  dv_dsoc_= %10.6f;  // Derivative scaled, V/fraction\n", dv_dsoc_);
+    Serial.printf("  ib_ =        %7.3f;  // Battery terminal current, A\n", ib_);
+    Serial.printf("  vb_ =        %7.3f;  // Battery terminal voltage, V\n", vb_);
+    Serial.printf("  voc_ =       %7.3f;  // Static model open circuit voltage, V\n", voc_);
+    Serial.printf("  vsat_ =      %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
+    Serial.printf("  vdyn_ =      %7.3f;  // Sim current induced back emf, V\n", vdyn_);
+    Serial.printf("  sr_ =        %7.3f;  // Resistance scalar\n", sr_);
     Serial.printf("  dv_ =        %7.3f;  // Adjustment, V\n", dv_);
     Serial.printf("  dt_ =        %7.3f;  // Update time, s\n", dt_);
 }
@@ -320,6 +327,7 @@ void BatteryMonitor::pretty_print(void)
 {
     Serial.printf("BatteryMonitor::");
     this->Battery::pretty_print();
+    Serial.printf(" BatteryMonitor::BatteryMonitor:\n");
     Serial.printf("  voc_filt_ =               %7.3f;  // Filtered open circuit voltage for saturation detect, V\n", voc_filt_);
     Serial.printf("  voc_stat_ =               %7.3f;  // Static model open circuit voltage from table (reference), V\n", voc_stat_);
     Serial.printf("  q_ekf =                %10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
@@ -585,6 +593,7 @@ void BatteryModel::pretty_print(void)
 {
     Serial.printf("BatteryModel::");
     this->Battery::pretty_print();
+    Serial.printf(" BatteryModel::BatteryModel:\n");
     Serial.printf("  sat_ib_max_ =       %7.3f;  // Current cutback to be applied to modeled ib output, A\n", sat_ib_max_);
     Serial.printf("  sat_ib_null_ =      %7.3f;  // Current cutback value for voc=vsat, A\n", sat_ib_null_);
     Serial.printf("  sat_cutback_gain_ = %7.1f;  // Gain to retard ib when voc exceeds vsat, dimensionless\n", sat_cutback_gain_);
