@@ -30,6 +30,7 @@
 #include "local_config.h"
 #include "mySummary.h"
 #include <math.h>
+#include "debug.h"
 
 extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
@@ -50,7 +51,8 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         rp.nominal();
         rp.pretty_print();
         Serial.printf("Force nominal rp %s", cp.buffer);
-        Serial.printf("\n\n ************** now Reset to apply nominal rp ***********************\n");
+        rp.debug = 0;
+        Serial.printf("\n\n ************** now press reset button for a clean boot ****************************\n");
         break;
 
       case ( 'D' ):
@@ -81,7 +83,8 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
             rp.t_bias = cp.input_string.substring(2).toFloat();
             Serial.printf("rp.t_bias changed to %7.3f\n", rp.t_bias);
             // TODO:  make soft reset properly reinit t filters
-            Serial.printf("****************You should perform a hard reset to initialize temp filters to new values\n");
+            rp.debug = 0;
+            Serial.printf("**************** now press reset button to initialize temp filters to new values********\n");
             break;
 
           case ( 'v' ):
@@ -635,7 +638,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 self_talk("Xp0", Mon, Sim, Sen);
                 self_talk("m0.5", Mon, Sim, Sen);
                 rp.modeling = false;
-                rp.debug = -12;   // myDisplay = 2
+                debug_inject();  // Arduino plot
                 break;
 
               case ( 0 ):
@@ -645,7 +648,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 rp.amp = 0.0;
                 if ( !rp.tweak_test ) rp.inj_soft_bias = 0.0;
                 rp.curr_bias_all = 0;
-                rp.debug = -12;   // myDisplay = 5
+                debug_inject();  // Arduino plot
                 break;
 
               case ( 1 ):
@@ -655,8 +658,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 rp.freq = 0.05;
                 rp.amp = 6.;
                 if ( !rp.tweak_test ) rp.inj_soft_bias = -rp.amp;
-                rp.debug = -12;
                 rp.freq *= (2. * PI);
+                debug_inject();  // Arduino plot
                 break;
 
               case ( 2 ):
@@ -666,8 +669,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 rp.freq = 0.10;
                 rp.amp = 6.;
                 if ( !rp.tweak_test ) rp.inj_soft_bias = -rp.amp;
-                rp.debug = -12;
                 rp.freq *= (2. * PI);
+                debug_inject();  // Arduino plot
                 break;
 
               case ( 3 ):
@@ -677,29 +680,29 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 rp.freq = 0.05;
                 rp.amp = 6.;
                 if ( !rp.tweak_test ) rp.inj_soft_bias = -rp.amp;
-                rp.debug = -12;
                 rp.freq *= (2. * PI);
+                debug_inject();  // Arduino plot
                 break;
 
               case ( 4 ):
                 self_talk("Xp0", Mon, Sim, Sen);
                 rp.type = 4;
                 rp.curr_bias_all = -RATED_BATT_CAP;  // Software effect only
-                rp.debug = -12;
+                debug_inject();  // Arduino plot
                 break;
 
               case ( 5 ):
                 self_talk("Xp0", Mon, Sim, Sen);
                 rp.type = 5;
                 rp.curr_bias_all = RATED_BATT_CAP; // Software effect only
-                rp.debug = -12;
+                debug_inject();  // Arduino plot
                 break;
 
               case ( 6 ):
                 self_talk("Xp0", Mon, Sim, Sen);
                 rp.type = 6;
                 rp.amp = RATED_BATT_CAP*0.2;
-                rp.debug = -12;
+                debug_inject();  // Arduino plot
                 break;
 
               case ( 7 ):
@@ -720,15 +723,13 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 rp.freq = 0.05;
                 rp.amp = 6.;
                 if ( !rp.tweak_test ) rp.inj_soft_bias = -rp.amp;
-                rp.debug = -12;
                 rp.freq *= (2. * PI);
+                debug_inject();  // Arduino plot
                 break;
 
               default:
                 Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
             }
-            Serial.printf("Setting injection program to:  rp.curr_sel_noamp = %d, rp.modeling = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.curr_bias_all = %7.3f\n",
-                                    rp.modeling, rp.curr_sel_noamp, rp.type, rp.freq, rp.amp, rp.debug, rp.curr_bias_all);
             break;
 
           default:
@@ -782,7 +783,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 
   Serial.printf("M<?> Amp tweaks.   For example:\n");
   Serial.printf("  MC= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_change()); Serial.println("    : tweak amp max change allowed, A [0.05]"); 
-  Serial.printf("  Mg= "); Serial.printf("%7.6f", Sen->ShuntAmp->gain()); Serial.println("    : tweak amp gain = correction to be made for charge, A/Coulomb [0.0001]"); 
+  Serial.printf("  Mg= "); Serial.printf("%7.6f", Sen->ShuntAmp->gain()); Serial.println("    : tweak amp gain = correction to be made for charge, A/Coulomb/day [0.0001]"); 
   Serial.printf("  Mi= "); Serial.printf("%7.3f", Sen->ShuntAmp->delta_q_inf()); Serial.println("    : tweak amp value for state of infinite counter, C [varies]"); 
   Serial.printf("  Mk= "); Serial.printf("%7.3f", Sen->ShuntAmp->tweak_bias()); Serial.println("    : tweak amp adder to all sensed shunt current, A [0]"); 
   Serial.printf("  Mp= "); Serial.printf("%10.1f", Sen->ShuntAmp->delta_q_sat_past()); Serial.println("    : tweak amp past charge infinity at sat, C [varies]"); 
@@ -839,15 +840,18 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("    -<>:   Negative - Arduino plot compatible\n");
+  Serial.printf("     -1:   General purpose Arduino plot\n");
   Serial.printf("     +2:   General purpose\n");
   Serial.printf("   +/-5:   Charge time\n");
   Serial.printf("     +6:   Vectoring\n");
-  Serial.printf("    -11:   Summary\n");
-  Serial.printf("  +/-12:   EKF summary\n");
+  Serial.printf("     -7:   Battery i/o Arduino plot\n");
+  Serial.printf("    -11:   Summary Arduino\n");
+  Serial.printf("  +/-12:   Inject\n");
   Serial.printf("  +/-14:   vshunt and ishunt raw\n");
   Serial.printf("    +15:   vb raw\n");
   Serial.printf("    +33:   state-space\n");
   Serial.printf("  +/-34:   EKF detailed\n");
+  Serial.printf("    -35:   EKF summary Arduino\n");
   Serial.printf("    +35:   Randles balance\n");
   Serial.printf("  +/-37:   EKF short\n");
   Serial.printf("    +76:   vb model\n");
@@ -882,7 +886,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("h   this menu\n");
 }
 
-// Recursion
+// Call talk from within, a crude macro feature
 void self_talk(const String cmd, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 {
   cp.input_string = cmd;

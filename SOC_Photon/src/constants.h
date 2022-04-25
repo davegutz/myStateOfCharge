@@ -36,7 +36,8 @@
 #include "local_config.h"       // this is not in GitHub repository.  Normally empty file
 
 // Constants always defined
-#define ONE_DAY_MILLIS        86400000  // Number of milliseconds in one day (24*60*60*1000)
+#define ONE_HOUR_MILLIS       3600000UL  // Number of milliseconds in one hour (60*60*1000)
+#define ONE_DAY_MILLIS        86400000UL  // Number of milliseconds in one day (24*60*60*1000)
 #define PUBLISH_BLYNK_DELAY   10000UL   // Blynk cloud updates, ms (10000UL = 10 sec)
 #define PUBLISH_PARTICLE_DELAY 2000UL   // Particle cloud updates (2000UL = 2 sec)
 #define READ_DELAY            100UL     // Sensor read wait, ms (100UL = 0.1 sec)
@@ -107,6 +108,9 @@ const uint16_t temp_delay = 1;          // Time to block temperature sensor read
 #define TWEAK_GAIN        43200.  // Estimate of A calibration change for accumulated charge error over ~24 hour period (86400 = 24*3600)/2, Coulomb/A
 #define TWEAK_MAX_CHANGE  0.05    // Maximum allowed tweak per charge cycle, A
 #define TWEAK_MAX         1.      // Maximum tweak allowed, +/- A
-#define EIGHTEEN_HRS      64800000UL // Battery state tracking and reporting, ms (64800000UL = 18 hrs)
+#define TWEAK_WAIT        6.      // Time to persist unsaturated before allowing peak, hrs
+#define EIGHTEEN_HRS      64800000UL // Battery state tracking and reporting, ms
+#define SIX_HRS           21600000UL // Battery state tracking and reporting, ms
+#define ONE_DAY           86400000UL // Battery state tracking and reporting, ms
 
 #endif // CONSTANTS_H_

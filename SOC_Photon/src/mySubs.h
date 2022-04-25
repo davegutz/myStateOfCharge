@@ -146,21 +146,20 @@ struct Sensors
   }
 };
 
-
 // Headers
-void manage_wifi(unsigned long now, Wifi *wifi);
-void serial_print(unsigned long now, double T);
+void create_print_string(char *buffer, Publish *pubList);
+double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
+void filter_temp(const int reset, const double t_rlim, Sensors *Sen, const double t_bias, double *t_bias_last);
 void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins *myPins);
 void load_temp(Sensors *Sen);
-void filter_temp(const int reset, const double t_rlim, Sensors *Sen, const double t_bias, double *t_bias_last);
-String tryExtractString(String str, const char* start, const char* end);
-double  decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
+void manage_wifi(unsigned long now, Wifi *wifi);
+void oled_display(Adafruit_SSD1306 *display, Sensors *Sen);
 void print_serial_header(void);
-void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen);
 uint32_t pwm_write(uint32_t duty, Pins *myPins);
-String time_long_2_str(const unsigned long current_time, char *tempStr);
-void create_print_string(char *buffer, Publish *pubList);
+void serial_print(unsigned long now, double T);
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);
-void tweak(Sensors *Sen, unsigned long int now);
+String time_long_2_str(const unsigned long current_time, char *tempStr);
+String tryExtractString(String str, const char* start, const char* end);
+void tweak_on_new_desat(Sensors *Sen, unsigned long int now);
 
 #endif

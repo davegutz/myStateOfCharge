@@ -77,6 +77,7 @@ Make it yourself.   It should look like this, with your personal authorizations:
 #include "mySummary.h"
 #include "myCloud.h"
 #include "Tweak.h"
+#include "debug.h"
 
 extern BlynkParticle Blynk;       // Blynk object
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4; // Time Blynk events
@@ -243,7 +244,7 @@ void loop()
   boolean display_to_user;                    // User display, T/F
   static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
   boolean summarizing;                        // Summarize, T/F
-  static boolean summarizing_waiting = true;  // waiting for a while before summarizing
+  static boolean boot_wait = true;  // waiting for a while before summarizing
   static Sync *Summarize = new Sync(SUMMARIZE_DELAY);
   boolean control;                            // Summarize, T/F
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
@@ -296,9 +297,7 @@ void loop()
     load(reset, ReadSensors->now(), Sen, myPins);
     
     // Arduino plots
-    if ( rp.debug==-7 ) Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f, %7.3f,\n",
-        Mon->soc(), Sen->ShuntAmp->ishunt_cal(), Sen->ShuntNoAmp->ishunt_cal(),
-        Sen->Vbatt, Sim->voc_stat(), Sim->voc());
+    if ( rp.debug==-7 ) debug_m7(Mon, Sim, Sen);
 
     /* Sim used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
     to have availabe a value for Sen->Tbatt_filt when called
@@ -378,34 +377,16 @@ void loop()
     Mon->calculate_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ishunt,Mon->soc());
 
     // Adjust current sensors
-    tweak(Sen, now);
+    tweak_on_new_desat(Sen, now);
 
     //////////////////////////////////////////////////////////////
 
     //
     // Useful for Arduino plotting
-    if ( rp.debug==-1 )
-      Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-        Sim->SOC()-90,
-        Sen->ShuntAmp->ishunt_cal(), Sen->ShuntNoAmp->ishunt_cal(),
-        Sen->Vbatt*10-110, Sim->voc()*10-110, Sim->vdyn()*10, Sim->vb()*10-110, Mon->vdyn()*10-110);
-    if ( rp.debug==12 )
-      Serial.printf("ib,ib_mod,   vb,vb_mod,  voc_dyn,voc_stat_mod,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
-        Mon->ib(), Sim->ib(),
-        Mon->vb(), Sim->vb(),
-        Mon->voc_dyn(), Sim->voc_stat(), Sim->voc(),
-        Mon->K_ekf(), Mon->y_ekf(),
-        Sim->soc(), Mon->soc_ekf(), Mon->soc());
-    if ( rp.debug==-12 )
-      Serial.printf("ib,ib_mod,   vb*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_stat_mod*10-110,voc_mod*10-110,   K, y,    SOC_mod-90, SOC_ekf-90, SOC-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
-        Mon->ib(), Sim->ib(),
-        Mon->vb()*10-110, Sim->vb()*10-110,
-        Mon->voc_dyn()*10-110, Sim->voc_stat()*10-110, Sim->voc()*10-110,
-        Mon->K_ekf(), Mon->y_ekf(),
-        Sim->soc()*100-90, Mon->soc_ekf()*100-90, Sim->soc()*100-90);
-    if ( rp.debug==-3 )
-      Serial.printf("fast,et,reset,Wshunt,q_f,q,soc,T, %12.3f,%7.3f, %d, %7.3f,    %7.3f,\n",
-      control_time, double(elapsed)/1000., reset, Sen->Wshunt, Sim->soc());
+    if ( rp.debug==-1 ) debug_m1(Mon, Sim, Sen); // General purpose Arduino
+    if ( rp.debug==12 ) debug_12(Mon, Sim, Sen);  // EKF
+    if ( rp.debug==-12 ) debug_m12(Mon, Sim, Sen);  // EKF Arduino
+    if ( rp.debug==-3 ) debug_m3(Mon, Sim, Sen, control_time, elapsed, reset);  // Power Arduino
 
   }  // end read (high speed frame)
 
@@ -417,10 +398,8 @@ void loop()
     // Empty battery
     if ( rp.modeling && reset && Sim->q()<=0. ) Sen->Ishunt = 0.;
 
-    // rp.debug print statements
-    // Useful for vector testing and serial data capture
-    if ( rp.debug==-35 ) Serial.printf("soc_mod,soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f\n",
-        Sim->soc(), Mon->x_ekf(), Mon->z_ekf());
+    // Arduino plot
+    if ( rp.debug==-35 ) debug_m35(Mon, Sim, Sen); // EKF Arduino
 
   }
 
@@ -432,11 +411,11 @@ void loop()
     if ( rp.debug>102 ) Serial.printf("completed control at %ld.  rp.duty=%ld\n", millis(), rp.duty);
   }
 
-  // Display driver
-  display_to_user = DisplayUserSync->update(millis(), reset);               //  now || reset
+  // OLED display driver
+  display_to_user = DisplayUserSync->update(millis(), reset);  //  now || reset
   if ( display_to_user )
   {
-    myDisplay(display, Sen);
+    oled_display(display, Sen);
   }
 
   // Publish to Particle cloud if desired (different than Blynk)
@@ -444,7 +423,7 @@ void loop()
   // to get a curl command to run
   publishP = PublishParticle->update(millis(), false);        //  now || false
   publishB = PublishBlynk->update(millis(), false);           //  now || false
-  publishS = PublishSerial->update(millis(), reset_publish);          //  now || reset
+  publishS = PublishSerial->update(millis(), reset_publish);  //  now || reset_publish
   if ( publishP || publishS)
   {
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
@@ -484,15 +463,18 @@ void loop()
   // String definitions are below.
   talk(Mon, Sim, Sen);
 
-  // Summary management
-  boolean initial_summarize = summarizing_waiting && ( elapsed >= SUMMARIZE_WAIT );
-  if ( elapsed >= SUMMARIZE_WAIT ) summarizing_waiting = false;
-  summarizing = Summarize->update(millis(), initial_summarize, !rp.modeling) || (rp.debug==-11 && publishB);               //  now || initial_summarize && !rp.modeling
-  if ( !summarizing_waiting && (summarizing || cp.write_summary) )
+  // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
+  // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
+  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT );
+  if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
+  summarizing = Summarize->update(millis(), boot_summ, !rp.modeling); // now || boot_summ && !rp.modeling
+  summarizing = summarizing || (rp.debug==-11 && publishB);
+  if ( !boot_wait && (summarizing || cp.write_summary) )
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
     mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,
-                          Mon->soc_ekf(), Mon->soc(), Mon->voc_dyn(), Mon->voc(), Sen->ShuntAmp->delta_q_inf(), Sen->ShuntAmp->tweak_bias());
+                          Mon->soc_ekf(), Mon->soc(), Mon->voc_dyn(), Mon->voc(),
+                          Sen->ShuntAmp->delta_q_inf(), Sen->ShuntAmp->tweak_bias());
     if ( rp.debug==0 ) Serial.printf("Summarized.....................\n");
   }
 

@@ -327,7 +327,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   28. To run tweak test using talk function, 50 sec period==>Ng/Mg /2 = -.01
       Xx2; Xts; Xf0.02; Xa-2000;
       then hard reset then
-      m1; Ri; Mw0; Nw0; Ng-.01; Mg-.01; NC0.5; MC0.5; Nx10; Mx10; v0;
+      m1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; v0;
       To record ongoing adjustments (also put in local_config.h)
       Da-2.96;Db-2.92;Mk0;Nk0;
       To end:

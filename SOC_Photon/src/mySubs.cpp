@@ -28,30 +28,11 @@
 #include "command.h"
 #include "local_config.h"
 #include <math.h>
+#include "debug.h"
 
 extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
 
-// Text header
-void print_serial_header(void)
-{
-  Serial.println(F("unit,          hm,                  cTime,        T,         Tb_f,   Tb_f_m,    Vb,  voc_dyn,   voc,    vsat,    sat,  sel, mod, Ib,       tcharge,   soc_m, soc_ekf, soc,   SOC_m, SOC_ekf, SOC,"));
-}
-
-// Print strings
-void create_print_string(char *buffer, Publish *pubList)
-{
-  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,  %d,    %d,   %d, %7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,  %c", \
-    pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
-    pubList->Tbatt, pubList->Tbatt_filt_model,
-    pubList->Vbatt, pubList->voc_dyn, pubList->voc, pubList->vsat,
-    pubList->sat, pubList->curr_sel_noamp, rp.modeling,
-    pubList->Ishunt,
-    pubList->tcharge,
-    pubList->soc_model, pubList->soc_ekf, pubList->soc, 
-    pubList->SOC_model, pubList->SOC_ekf, pubList->SOC, 
-    '\0');
-}
 
 // class Shunt
 // constructors
@@ -59,7 +40,7 @@ Shunt::Shunt()
 : Tweak(), Adafruit_ADS1015(), name_("None"), port_(0x00), bare_(false){}
 Shunt::Shunt(const String name, const uint8_t port, double *rp_delta_q_inf, double *rp_tweak_bias, double *cp_curr_bias,
   const double v2a_s)
-: Tweak(name, TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, EIGHTEEN_HRS, rp_delta_q_inf, rp_tweak_bias),
+: Tweak(name, TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, TWEAK_WAIT, rp_delta_q_inf, rp_tweak_bias),
   Adafruit_ADS1015(),
   name_(name), port_(port), bare_(false), cp_curr_bias_(cp_curr_bias), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0)
@@ -115,91 +96,75 @@ void Shunt::load()
 }
 
 
-
-// Time synchro for web information
-void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip)
+// Print strings
+void create_print_string(char *buffer, Publish *pubList)
 {
-  if (now - *last_sync > ONE_DAY_MILLIS) 
-  {
-    *last_sync = millis();
+  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,  %d,    %d,   %d, %7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,  %c", \
+    pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
+    pubList->Tbatt, pubList->Tbatt_filt_model,
+    pubList->Vbatt, pubList->voc_dyn, pubList->voc, pubList->vsat,
+    pubList->sat, pubList->curr_sel_noamp, rp.modeling,
+    pubList->Ishunt,
+    pubList->tcharge,
+    pubList->soc_model, pubList->soc_ekf, pubList->soc, 
+    pubList->SOC_model, pubList->SOC_ekf, pubList->SOC, 
+    '\0');
+}
 
-    // Request time synchronization from the Particle Cloud
-    if ( Particle.connected() ) Particle.syncTime();
+// Convert time to decimal for easy lookup
+double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip)
+{
+    *current_time = Time.now();
+    uint32_t year = Time.year(*current_time);
+    uint8_t month = Time.month(*current_time);
+    uint8_t day = Time.day(*current_time);
+    uint8_t hours = Time.hour(*current_time);
 
-    // Refresh millis() at turn of Time.now
-    long time_begin = Time.now();
-    while ( Time.now()==time_begin )
+    // Second Sunday Mar and First Sunday Nov; 2:00 am; crude DST handling
+    if ( USE_DST)
     {
-      delay(1);
-      *millis_flip = millis()%1000;
+      uint8_t dayOfWeek = Time.weekday(*current_time);     // 1-7
+      if (  month>2   && month<12 &&
+        !(month==3  && ((day-dayOfWeek)<7 ) && hours>1) &&  // <second Sunday Mar
+        !(month==11 && ((day-dayOfWeek)>=0) && hours>0) )  // >=first Sunday Nov
+        {
+          Time.zone(GMT+1);
+          *current_time = Time.now();
+          day = Time.day(*current_time);
+          hours = Time.hour(*current_time);
+        }
     }
-  }
+    uint8_t dayOfWeek = Time.weekday(*current_time)-1;  // 0-6
+    uint8_t minutes   = Time.minute(*current_time);
+    uint8_t seconds   = Time.second(*current_time);
+
+    // Convert the string
+    time_long_2_str(*current_time, tempStr);
+
+    // Convert the decimal
+    if ( rp.debug>105 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
+    return (((( (float(year-2021)*12 + float(month))*30.4375 + float(day))*24.0 + float(hours))*60.0 + float(minutes))*60.0 + \
+                        float(seconds) + float((now-millis_flip)%1000)/1000. );
 }
 
-void manage_wifi(unsigned long now, Wifi *wifi)
+// Filter temperature only
+void filter_temp(const int reset_loc, const double t_rlim, Sensors *Sen, const double t_bias, double *t_bias_last)
 {
-  if ( rp.debug >= 100 )
-  {
-    Serial.printf("P.connected=%i, disconnect check: %ld >=? %ld, turn on check: %ld >=? %ld, confirmation check: %ld >=? %ld, connected=%i, blynk_started=%i,\n",
-      Particle.connected(), now-wifi->last_disconnect, DISCONNECT_DELAY, now-wifi->lastAttempt,  CHECK_INTERVAL, now-wifi->lastAttempt, CONFIRMATION_DELAY, wifi->connected, wifi->blynk_started);
-  }
-  wifi->particle_connected_now = Particle.connected();
-  if ( wifi->particle_connected_last && !wifi->particle_connected_now )  // reset timer
-  {
-    wifi->last_disconnect = now;
-  }
-  if ( !wifi->particle_connected_now && now-wifi->last_disconnect>=DISCONNECT_DELAY )
-  {
-    wifi->last_disconnect = now;
-    WiFi.off();
-    wifi->connected = false;
-    if ( rp.debug >= 100 ) Serial.printf("wifi turned off\n");
-  }
-  if ( now-wifi->lastAttempt>=CHECK_INTERVAL && cp.enable_wifi )
-  {
-    wifi->last_disconnect = now;   // Give it a chance
-    wifi->lastAttempt = now;
-    WiFi.on();
-    Particle.connect();
-    if ( rp.debug >= 100 ) Serial.printf("wifi reattempted\n");
-  }
-  if ( now-wifi->lastAttempt>=CONFIRMATION_DELAY )
-  {
-    wifi->connected = Particle.connected();
-    if ( rp.debug >= 100 ) Serial.printf("wifi disconnect check\n");
-  }
-  wifi->particle_connected_last = wifi->particle_connected_now;
-}
+  // Rate limit the temperature bias
+  if ( reset_loc ) *t_bias_last = t_bias;
+  double t_bias_loc = max(min(t_bias, *t_bias_last + t_rlim*Sen->T_temp), *t_bias_last - t_rlim*Sen->T_temp);
+  *t_bias_last = t_bias_loc;
 
-// Inputs serial print
-void serial_print(unsigned long now, double T)
-{
-  create_print_string(cp.buffer, &cp.pubList);
-  if ( rp.debug >= 100 ) Serial.printf("serial_print:  ");
-  Serial.println(cp.buffer);  //Serial1.println(cp.buffer);
-}
-
-// Load temperature only
-void load_temp(Sensors *Sen)
-{
-  // Read Sensor
-  // MAXIM conversion 1-wire Tp plenum temperature
-  uint8_t count = 0;
-  double temp = 0.;
-  while ( ++count<MAX_TEMP_READS && temp==0)
+  // Filter and add rate limited bias
+  if ( reset_loc && Sen->Tbatt>40. )
   {
-    if ( Sen->SensorTbatt->read() ) temp = Sen->SensorTbatt->celsius() + (TBATT_TEMPCAL);
-    delay(1);
-  }
-  if ( count<MAX_TEMP_READS )
-  {
-    Sen->Tbatt = Sen->SdTbatt->update(temp);
-    if ( rp.debug==-103 ) Serial.printf("Temperature %7.3f read on count=%d\n", temp, count);
+    Sen->Tbatt = RATED_TEMP + t_bias_loc; // Cold startup T=85.5 C
+    Sen->Tbatt_filt = Sen->TbattSenseFilt->calculate(RATED_TEMP, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
   }
   else
   {
-    Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value\n");
-    // Using last-good-value:  no assignment
+    Sen->Tbatt_filt = Sen->TbattSenseFilt->calculate(Sen->Tbatt, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
+    Sen->Tbatt += t_bias_loc;
   }
 }
 
@@ -260,92 +225,68 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   Sen->Wcharge = Sen->Ishunt * NOM_SYS_VOLT;
 }
 
-// Filter temperature only
-void filter_temp(const int reset_loc, const double t_rlim, Sensors *Sen, const double t_bias, double *t_bias_last)
+// Load temperature only
+void load_temp(Sensors *Sen)
 {
-  // Rate limit the temperature bias
-  if ( reset_loc ) *t_bias_last = t_bias;
-  double t_bias_loc = max(min(t_bias, *t_bias_last + t_rlim*Sen->T_temp), *t_bias_last - t_rlim*Sen->T_temp);
-  *t_bias_last = t_bias_loc;
-
-  // Filter and add rate limited bias
-  if ( reset_loc && Sen->Tbatt>40. )
+  // Read Sensor
+  // MAXIM conversion 1-wire Tp plenum temperature
+  uint8_t count = 0;
+  double temp = 0.;
+  while ( ++count<MAX_TEMP_READS && temp==0)
   {
-    Sen->Tbatt = RATED_TEMP + t_bias_loc; // Cold startup T=85.5 C
-    Sen->Tbatt_filt = Sen->TbattSenseFilt->calculate(RATED_TEMP, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
+    if ( Sen->SensorTbatt->read() ) temp = Sen->SensorTbatt->celsius() + (TBATT_TEMPCAL);
+    delay(1);
+  }
+  if ( count<MAX_TEMP_READS )
+  {
+    Sen->Tbatt = Sen->SdTbatt->update(temp);
+    if ( rp.debug==-103 ) Serial.printf("Temperature %7.3f read on count=%d\n", temp, count);
   }
   else
   {
-    Sen->Tbatt_filt = Sen->TbattSenseFilt->calculate(Sen->Tbatt, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
-    Sen->Tbatt += t_bias_loc;
+    Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value\n");
+    // Using last-good-value:  no assignment
   }
 }
 
-// Returns any text found between a start and end string inside 'str'
-// example: startfooend  -> returns foo
-String tryExtractString(String str, const char* start, const char* end)
+// Manage wifi
+void manage_wifi(unsigned long now, Wifi *wifi)
 {
-  if (str=="")
+  if ( rp.debug >= 100 )
   {
-    return "";
+    Serial.printf("P.connected=%i, disconnect check: %ld >=? %ld, turn on check: %ld >=? %ld, confirmation check: %ld >=? %ld, connected=%i, blynk_started=%i,\n",
+      Particle.connected(), now-wifi->last_disconnect, DISCONNECT_DELAY, now-wifi->lastAttempt,  CHECK_INTERVAL, now-wifi->lastAttempt, CONFIRMATION_DELAY, wifi->connected, wifi->blynk_started);
   }
-  int idx = str.indexOf(start);
-  if (idx < 0)
+  wifi->particle_connected_now = Particle.connected();
+  if ( wifi->particle_connected_last && !wifi->particle_connected_now )  // reset timer
   {
-    return "";
+    wifi->last_disconnect = now;
   }
-  int endIdx = str.indexOf(end);
-  if (endIdx < 0)
+  if ( !wifi->particle_connected_now && now-wifi->last_disconnect>=DISCONNECT_DELAY )
   {
-    return "";
+    wifi->last_disconnect = now;
+    WiFi.off();
+    wifi->connected = false;
+    if ( rp.debug >= 100 ) Serial.printf("wifi turned off\n");
   }
-  return str.substring(idx + strlen(start), endIdx);
+  if ( now-wifi->lastAttempt>=CHECK_INTERVAL && cp.enable_wifi )
+  {
+    wifi->last_disconnect = now;   // Give it a chance
+    wifi->lastAttempt = now;
+    WiFi.on();
+    Particle.connect();
+    if ( rp.debug >= 100 ) Serial.printf("wifi reattempted\n");
+  }
+  if ( now-wifi->lastAttempt>=CONFIRMATION_DELAY )
+  {
+    wifi->connected = Particle.connected();
+    if ( rp.debug >= 100 ) Serial.printf("wifi disconnect check\n");
+  }
+  wifi->particle_connected_last = wifi->particle_connected_now;
 }
 
-// Tweak
-void tweak(Sensors *Sen, unsigned long int now)
-{
-  if ( Sen->ShuntAmp->update(Sen->ShuntAmp->ishunt_cal(), Sen->T, Sen->saturated, now) ) Sen->ShuntAmp->adjust();  // TODO:  reduce arg list
-  if ( Sen->ShuntNoAmp->update(Sen->ShuntNoAmp->ishunt_cal(), Sen->T, Sen->saturated, now) ) Sen->ShuntNoAmp->adjust();  // TODO:  reduce arg list
-}
-
-// Convert time to decimal for easy lookup
-double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip)
-{
-    *current_time = Time.now();
-    uint32_t year = Time.year(*current_time);
-    uint8_t month = Time.month(*current_time);
-    uint8_t day = Time.day(*current_time);
-    uint8_t hours = Time.hour(*current_time);
-
-    // Second Sunday Mar and First Sunday Nov; 2:00 am; crude DST handling
-    if ( USE_DST)
-    {
-      uint8_t dayOfWeek = Time.weekday(*current_time);     // 1-7
-      if (  month>2   && month<12 &&
-        !(month==3  && ((day-dayOfWeek)<7 ) && hours>1) &&  // <second Sunday Mar
-        !(month==11 && ((day-dayOfWeek)>=0) && hours>0) )  // >=first Sunday Nov
-        {
-          Time.zone(GMT+1);
-          *current_time = Time.now();
-          day = Time.day(*current_time);
-          hours = Time.hour(*current_time);
-        }
-    }
-    uint8_t dayOfWeek = Time.weekday(*current_time)-1;  // 0-6
-    uint8_t minutes   = Time.minute(*current_time);
-    uint8_t seconds   = Time.second(*current_time);
-
-    // Convert the string
-    time_long_2_str(*current_time, tempStr);
-
-    // Convert the decimal
-    if ( rp.debug>105 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
-    return (((( (float(year-2021)*12 + float(month))*30.4375 + float(day))*24.0 + float(hours))*60.0 + float(minutes))*60.0 + \
-                        float(seconds) + float((now-millis_flip)%1000)/1000. );
-}
-
-void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
+// OLED display drive
+void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 {
   static boolean pass = false;
   display->clearDisplay();
@@ -387,13 +328,15 @@ void myDisplay(Adafruit_SSD1306 *display, Sensors *Sen)
   display->display();
   pass = !pass;
 
-  if ( rp.debug==5 ) Serial.printf("myDisplay: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem, %3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
-      cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt, cp.pubList.amp_hrs_remaining_ekf, cp.pubList.tcharge, cp.pubList.amp_hrs_remaining);
-  if ( rp.debug==-5 ) Serial.printf("Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem,\n%3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
-      cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt, cp.pubList.amp_hrs_remaining_ekf, cp.pubList.tcharge, cp.pubList.amp_hrs_remaining);
-
+  if ( rp.debug==5 ) debug_5();
+  if ( rp.debug==-5 ) debug_m5();  // Arduino plot
 }
 
+// Text header
+void print_serial_header(void)
+{
+  Serial.println(F("unit,          hm,                  cTime,        T,         Tb_f,   Tb_f_m,    Vb,  voc_dyn,   voc,    vsat,    sat,  sel, mod, Ib,       tcharge,   soc_m, soc_ekf, soc,   SOC_m, SOC_ekf, SOC,"));
+}
 
 // Write to the D/A converter
 uint32_t pwm_write(uint32_t duty, Pins *myPins)
@@ -459,6 +402,34 @@ void serialEvent1()
 }
 */
 
+// Inputs serial print
+void serial_print(unsigned long now, double T)
+{
+  create_print_string(cp.buffer, &cp.pubList);
+  if ( rp.debug >= 100 ) Serial.printf("serial_print:  ");
+  Serial.println(cp.buffer);  //Serial1.println(cp.buffer);
+}
+
+// Time synchro for web information
+void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip)
+{
+  if (now - *last_sync > ONE_DAY_MILLIS) 
+  {
+    *last_sync = millis();
+
+    // Request time synchronization from the Particle Cloud
+    if ( Particle.connected() ) Particle.syncTime();
+
+    // Refresh millis() at turn of Time.now
+    long time_begin = Time.now();
+    while ( Time.now()==time_begin )
+    {
+      delay(1);
+      *millis_flip = millis()%1000;
+    }
+  }
+}
+
 // For summary prints
 String time_long_2_str(const unsigned long current_time, char *tempStr)
 {
@@ -487,3 +458,37 @@ String time_long_2_str(const unsigned long current_time, char *tempStr)
     sprintf(tempStr, "%4u-%02u-%02uT%02u:%02u:%02u", int(year), month, day, hours, minutes, seconds);
     return ( String(tempStr) );
 }
+
+// Returns any text found between a start and end string inside 'str'
+// example: startfooend  -> returns foo
+String tryExtractString(String str, const char* start, const char* end)
+{
+  if (str=="")
+  {
+    return "";
+  }
+  int idx = str.indexOf(start);
+  if (idx < 0)
+  {
+    return "";
+  }
+  int endIdx = str.indexOf(end);
+  if (endIdx < 0)
+  {
+    return "";
+  }
+  return str.substring(idx + strlen(start), endIdx);
+}
+
+// Tweak
+void tweak_on_new_desat(Sensors *Sen, unsigned long int now)
+{
+
+  if ( Sen->ShuntAmp->new_desat(Sen->ShuntAmp->ishunt_cal(), Sen->T, Sen->saturated, now) )
+    Sen->ShuntAmp->adjust(now);
+
+  if ( Sen->ShuntNoAmp->new_desat(Sen->ShuntNoAmp->ishunt_cal(), Sen->T, Sen->saturated, now) )
+    Sen->ShuntNoAmp->adjust(now);
+
+}
+
