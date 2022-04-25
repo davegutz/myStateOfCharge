@@ -50,11 +50,12 @@ void Tweak::adjust(unsigned long now)
   if ( delta_q_sat_past_==0.0 ) return;
   double new_Di;
   double error = delta_q_sat_present_ - delta_q_sat_past_;
-  new_Di = *rp_tweak_bias_ + max(min(error*gain_*24./delta_hrs_, max_change_), -max_change_);
+  double gain = gain_*24./delta_hrs_;
+  new_Di = *rp_tweak_bias_ + max(min(error*gain, max_change_), -max_change_);
   new_Di = max(min(new_Di, max_tweak_), -max_tweak_);
 
   Serial.printf("          Tweak(%s)::adjust:, past=%10.1f, pres=%10.1f, error=%10.1f, gain=%10.6f, delta_hrs=%10.6f, Di=%7.3f, new_Di=%7.3f,\n",
-    name_.c_str(), delta_q_sat_past_, delta_q_sat_present_, error, gain_, delta_hrs_, *rp_tweak_bias_, new_Di);
+    name_.c_str(), delta_q_sat_past_, delta_q_sat_present_, error, gain, delta_hrs_, *rp_tweak_bias_, new_Di);
 
   // Reset delta to keep from wandering away
   double shift = delta_q_sat_past_;
