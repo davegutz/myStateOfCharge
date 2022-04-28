@@ -357,7 +357,6 @@ void loop()
       Mon->apply_delta_q_t(rp.delta_q, rp.t_last);  // From memory
       Mon->init_battery();                          // for cp.soft_reset
       Mon->solve_ekf(Sen);
-      Mon->init_hys(0.0);
     }
     
     // EKF - calculates temp_c_, voc_, voc_dyn_ as functions of sensed parameters vb & ib (not soc)

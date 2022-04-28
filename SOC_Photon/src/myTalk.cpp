@@ -233,9 +233,7 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         if ( SOCS_in<1.1 )  // Apply crude limit to prevent user error
         {
           Mon->apply_soc(SOCS_in, Sen->Tbatt_filt);
-          Mon->init_battery();
           Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
-          Sim->init_battery();
           cp.cmd_reset();
 
           Serial.printf("SOC=%7.3f, soc=%7.3f, modeling = %d, delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
@@ -349,7 +347,6 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         if ( SOCS_in<1.1 )   // Apply crude limit to prevent user error
         {
           Sim->apply_soc(SOCS_in, Sen->Tbatt_filt);
-          Mon->init_battery();
           cp.cmd_reset();
 
           Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
@@ -363,7 +360,6 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         SOCS_in = cp.input_string.substring(1).toFloat();
         Mon->apply_SOC(SOCS_in, Sen->Tbatt_filt);
         Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
-        Mon->init_battery();
         cp.cmd_reset();
 
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
@@ -486,9 +482,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
           case ( 'r' ):
             Serial.printf("Small reset.   Just reset all to soc=1.0 and delta_q = 0\n");
             Sim->apply_soc(1.0, Sen->Tbatt_filt);
-            Sim->init_hys(0.0);
             Mon->apply_soc(1.0, Sen->Tbatt_filt);
-            Mon->init_battery();
             cp.cmd_reset();
             break;
 
@@ -535,8 +529,6 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
       case ( 'W' ):  // assign a CHARGE state in percent to model Sim only (and ekf if modeling)
         SOCS_in = cp.input_string.substring(1).toFloat();
         Sim->apply_SOC(SOCS_in, Sen->Tbatt_filt);
-        Sim->init_battery();
-        Mon->init_battery();
         cp.cmd_reset();
 
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
@@ -562,7 +554,6 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
           case ( 'x' ):
             if ( cp.input_string.substring(2).toInt()>0 ) rp.modeling = true;
             else rp.modeling = false;
-            Mon->init_battery();
             cp.cmd_reset();
             Serial.printf("Modeling set to %d\n", rp.modeling);
             if ( cp.input_string.substring(2).toInt()>1 )
