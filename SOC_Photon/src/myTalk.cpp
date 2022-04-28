@@ -349,11 +349,8 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         if ( SOCS_in<1.1 )   // Apply crude limit to prevent user error
         {
           Sim->apply_soc(SOCS_in, Sen->Tbatt_filt);
-          if ( rp.modeling )  // ekf too
-          {
-            Mon->init_battery();
-            cp.cmd_reset();
-          }
+          Mon->init_battery();
+          cp.cmd_reset();
 
           Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
               Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
@@ -366,11 +363,8 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         SOCS_in = cp.input_string.substring(1).toFloat();
         Mon->apply_SOC(SOCS_in, Sen->Tbatt_filt);
         Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
-        if ( rp.modeling )  // ekf too
-        {
-          Mon->init_battery();
-          cp.cmd_reset();
-        }
+        Mon->init_battery();
+        cp.cmd_reset();
 
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
             Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
@@ -494,11 +488,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             Sim->apply_soc(1.0, Sen->Tbatt_filt);
             Sim->init_hys(0.0);
             Mon->apply_soc(1.0, Sen->Tbatt_filt);
-            if ( rp.modeling )
-            {
-              Mon->init_battery();
-              cp.cmd_reset();
-            }
+            Mon->init_battery();
+            cp.cmd_reset();
             break;
 
           case ( 'R' ):
@@ -545,11 +536,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
         SOCS_in = cp.input_string.substring(1).toFloat();
         Sim->apply_SOC(SOCS_in, Sen->Tbatt_filt);
         Sim->init_battery();
-        if ( rp.modeling )  // ekf too
-        {
-          Mon->init_battery();
-          cp.cmd_reset();
-        }
+        Mon->init_battery();
+        cp.cmd_reset();
 
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
             Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
