@@ -560,13 +560,10 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             break;
 
           case ( 'x' ):
-            if ( cp.input_string.substring(2).toInt()>0 )
-            {
-              rp.modeling = true;
-              Mon->init_soc_ekf(Sim->soc());
-            }
-            else
-              rp.modeling = false;
+            if ( cp.input_string.substring(2).toInt()>0 ) rp.modeling = true;
+            else rp.modeling = false;
+            Mon->init_battery();
+            cp.cmd_reset();
             Serial.printf("Modeling set to %d\n", rp.modeling);
             if ( cp.input_string.substring(2).toInt()>1 )
               rp.tweak_test = true;
