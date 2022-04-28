@@ -434,7 +434,7 @@ BatteryModel::BatteryModel(double *rp_delta_q, double *rp_t_last, const int num_
 //
 //  Outputs:
 //    Tb              Simulated Tb, deg C
-//    Ib              Simulated Ib, A
+//    Ib              Simulated over-ridden by saturation Ib, A
 //    Vb (return)     Simulated Vb, V
 //    rp.duty         (0-255) for D2 hardware injection when rp.modeling and proper wire connections made
 double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)

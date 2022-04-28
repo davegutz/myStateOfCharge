@@ -532,14 +532,16 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
         rp.debug = cp.input_string.substring(1).toInt();
         break;
 
-      case ( 'W' ):
+      case ( 'W' ):  // assign a CHARGE state in percent to model Sim only (and ekf if modeling)
         SOCS_in = cp.input_string.substring(1).toFloat();
         Sim->apply_SOC(SOCS_in, Sen->Tbatt_filt);
         if ( rp.modeling )
         {
-          Sim->calculate(Sen, cp.dc_dc_on);
-          Sen->Vbatt = Sim->vb();
+          Sim->calculate(Sen, cp.dc_dc_on);   // Recalc vb
+          Sim->init_battery();
+          Sen->Vbatt = Sim->vb();             // Update it
           Mon->solve_ekf(Sen);
+          Mon->init_battery();
           Mon->init_hys(0.0);
         }
 
@@ -868,7 +870,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);
 
-  Serial.printf("W=  assign a CHARGE state in percent to model only (ekf if modeling)-- '('truncated 0-100')'\n"); 
+  Serial.printf("W=  assign a CHARGE state in percent to model only (and ekf if modeling)-- '('truncated 0-100')'\n"); 
 
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xd= "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
