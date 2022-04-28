@@ -536,7 +536,12 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
         SOCS_in = cp.input_string.substring(1).toFloat();
         Sim->apply_SOC(SOCS_in, Sen->Tbatt_filt);
         if ( rp.modeling )
-          Mon->init_soc_ekf(Mon->soc());
+        {
+          Sim->calculate(Sen, cp.dc_dc_on);
+          Sen->Vbatt = Sim->vb();
+          Mon->solve_ekf(Sen);
+          Mon->init_hys(0.0);
+        }
 
         Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
             Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model, Mon->soc_ekf());
@@ -843,7 +848,8 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("     -1:   General purpose Arduino plot\n");
   Serial.printf("     +2:   General purpose\n");
   Serial.printf("   +/-5:   Charge time\n");
-  Serial.printf("     +6:   Vectoring\n");
+  Serial.printf("     +6:   EKF solver iterations during initialization\n");
+  Serial.printf("     +7:   EKF solver summary during initialization\n");
   Serial.printf("     -7:   Battery i/o Arduino plot\n");
   Serial.printf("    -11:   Summary Arduino\n");
   Serial.printf("  +/-12:   Inject\n");
