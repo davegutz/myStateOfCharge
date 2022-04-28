@@ -57,6 +57,7 @@ const double batt_vsat = double(batt_num_cells)*double(BATT_V_SAT) - HDB_VBATT; 
 const double batt_vmax = (14.3/4)*double(batt_num_cells); // Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
 const double batt_r1 = double(BATT_R1);     // Randels static resistance per cell, Ohms
 const double batt_r2 = double(BATT_R2);     // Randels dynamic resistance per cell, Ohms
+const double batt_r_ss = batt_r1 + batt_r2; // Steady state equivalent battery resistance, for solver, Ohms
 const double batt_r2c2 = double(BATT_R2C2);// Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
                               // test so using with R2 and then multiplying by 4 for total result is valid,
                               // though probably not for an individual cell
@@ -220,6 +221,7 @@ public:
   double calculate_ekf(Sensors *Sen);
   void init_soc_ekf(const double soc);
   void pretty_print(void);
+  boolean solve_ekf(Sensors *Sen);
   double K_ekf() { return (K_); };
   double y_ekf() { return (y_); };
   double soc_ekf() { return (soc_ekf_); };

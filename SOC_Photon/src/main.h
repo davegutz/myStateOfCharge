@@ -357,9 +357,15 @@ void loop()
       Mon->apply_delta_q_t(rp.delta_q, rp.t_last);  // From memory
       Mon->init_battery();                          // for cp.soft_reset
       if ( rp.modeling )
-        Mon->init_soc_ekf(Sim->soc());              // When modeling, ekf tracks model
+      {
+        // Mon->init_soc_ekf(Sim->soc());              // When modeling, ekf tracks model
+        Mon->solve_ekf(Sen);
+      }
       else
-        Mon->init_soc_ekf(Mon->soc());
+      {
+        // Mon->init_soc_ekf(Mon->soc());
+        Mon->solve_ekf(Sen);
+      }
       Mon->init_hys(0.0);
     }
     

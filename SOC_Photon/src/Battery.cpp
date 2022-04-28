@@ -210,6 +210,7 @@ BatteryMonitor::~BatteryMonitor() {}
 */
 double BatteryMonitor::calculate_ekf(Sensors *Sen)
 {
+    // Inputs
     temp_c_ = Sen->Tbatt_filt;
     vsat_ = calc_vsat(temp_c_);
     dt_ =  min(Sen->T, F_MAX_T);
@@ -337,6 +338,34 @@ void BatteryMonitor::pretty_print(void)
     Serial.printf("  SOC_ekf_ =                  %5.1f;  // Solved state of charge, percent\n", SOC_ekf_);
     Serial.printf("  amp_hrs_remaining =       %7.3f;  // Discharge amp*time left if drain to q=0, A-h\n", amp_hrs_remaining_);
     Serial.printf("  amp_hrs_remaining_ekf_ =  %7.3f;  // Discharge amp*time left if drain to q_ekf=0, A-h\n", amp_hrs_remaining_ekf_);
+}
+
+// Steady state voc(soc) solver for initialization of ekf state.  Expects Sen->Tbatt_filt to be in reset mode
+boolean BatteryMonitor::solve_ekf(Sensors *Sen)
+{
+    // Solver, steady
+    #define SOLV_ERR 1e-6
+    #define SOLV_MAX_COUNTS 10
+    #define SOLV_MAX_STEP 0.2
+    const double meps = 1-1e-6;
+    double vb = Sen->Vbatt - Sen->Ishunt*batt_r_ss;
+    int8_t count = 0;
+    static double soc_solved = 1.0;
+    double dv_dsoc;
+    double vb_solved = calc_soc_voc(soc_solved, Sen->Tbatt_filt, &dv_dsoc);
+    double err = vb - vb_solved;
+    while( abs(err)>SOLV_ERR && count++<SOLV_MAX_COUNTS )
+    {
+        soc_solved = max(min(soc_solved + max(min( err/dv_dsoc, SOLV_MAX_STEP), -SOLV_MAX_STEP), meps), 1e-6);
+        vb_solved = calc_soc_voc(soc_solved, Sen->Tbatt_filt, &dv_dsoc);
+        err = vb - vb_solved;
+        if ( rp.debug==5 ) Serial.printf("solve_ekf:Tbatt_f,ib,count,soc_s,vb,vb_m_s,err, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+            Sen->Tbatt_filt, Sen->Ishunt, count, soc_solved, vb, vb_solved, err);
+    }
+    if ( rp.debug==6 ) Serial.printf("solve_ekf:Tbatt_f,ib,count,soc_s,vb,vb_m_s,err, %7.3f,%7.3f,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+    Sen->Tbatt_filt, Sen->Ishunt, count, soc_solved, vb, vb_solved, err);
+    init_soc_ekf(soc_solved);
+    return ( count<SOLV_MAX_COUNTS );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
