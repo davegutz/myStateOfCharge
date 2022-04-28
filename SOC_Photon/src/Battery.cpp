@@ -112,6 +112,7 @@ double Battery::calc_soc_voc_slope(const double soc, const double temp_c)
 void Battery::init_battery(void)
 {
     Randles_->init_state_space();
+    init_hys(0.0);
 }
 
 // Print

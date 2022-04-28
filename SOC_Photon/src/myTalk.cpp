@@ -227,17 +227,19 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         }
         break;
 
-      case ( 'm' ):
+      case ( 'm' ):  // assign curve charge state in fraction to all versions including model-
         SOCS_in = cp.input_string.substring(1).toFloat();
 
         if ( SOCS_in<1.1 )  // Apply crude limit to prevent user error
         {
           Mon->apply_soc(SOCS_in, Sen->Tbatt_filt);
+          Mon->init_battery();
           Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
-          if ( rp.modeling ) Mon->init_soc_ekf(Sim->soc());
+          Sim->init_battery();
+          cp.cmd_reset();
 
-          Serial.printf("SOC=%7.3f, soc=%7.3f, modeling = %d, delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
-              Mon->SOC(), Mon->soc(), rp.modeling, rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model, Mon->soc_ekf());
+          Serial.printf("SOC=%7.3f, soc=%7.3f, modeling = %d, delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
+              Mon->SOC(), Mon->soc(), rp.modeling, rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
         }
 
         else
@@ -342,29 +344,36 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         }
         break;
 
-      case ( 'n' ):
+      case ( 'n' ):  // assign curve charge state in fraction to model only (ekf if modeling)-
         SOCS_in = cp.input_string.substring(1).toFloat();
         if ( SOCS_in<1.1 )   // Apply crude limit to prevent user error
         {
           Sim->apply_soc(SOCS_in, Sen->Tbatt_filt);
-          if ( rp.modeling )
-            Mon->init_soc_ekf(Mon->soc());
+          if ( rp.modeling )  // ekf too
+          {
+            Mon->init_battery();
+            cp.cmd_reset();
+          }
 
-          Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
-              Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model, Mon->soc_ekf());
+          Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
+              Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
         }
         else
-          Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'M' instead of 'm'?\n", SOCS_in);
+          Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'W' instead of 'n'?\n", SOCS_in);
         break;
 
       case ( 'O' ):
         SOCS_in = cp.input_string.substring(1).toFloat();
         Mon->apply_SOC(SOCS_in, Sen->Tbatt_filt);
         Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
-        if ( rp.modeling ) Mon->init_soc_ekf(Sim->soc());
+        if ( rp.modeling )  // ekf too
+        {
+          Mon->init_battery();
+          cp.cmd_reset();
+        }
 
-        Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
-            Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model, Mon->soc_ekf());
+        Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
+            Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
         break;
 
       case ( 'P' ):
@@ -487,8 +496,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             Mon->apply_soc(1.0, Sen->Tbatt_filt);
             if ( rp.modeling )
             {
-              Mon->init_soc_ekf(Sim->soc());
-              Mon->init_hys(0.0);
+              Mon->init_battery();
+              cp.cmd_reset();
             }
             break;
 
@@ -535,18 +544,15 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
       case ( 'W' ):  // assign a CHARGE state in percent to model Sim only (and ekf if modeling)
         SOCS_in = cp.input_string.substring(1).toFloat();
         Sim->apply_SOC(SOCS_in, Sen->Tbatt_filt);
-        if ( rp.modeling )
+        Sim->init_battery();
+        if ( rp.modeling )  // ekf too
         {
-          Sim->calculate(Sen, cp.dc_dc_on);   // Recalc vb
-          Sim->init_battery();
-          Sen->Vbatt = Sim->vb();             // Update it
-          Mon->solve_ekf(Sen);
           Mon->init_battery();
-          Mon->init_hys(0.0);
+          cp.cmd_reset();
         }
 
-        Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f, soc_ekf=%7.3f,\n",
-            Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model, Mon->soc_ekf());
+        Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
+            Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
         break;
 
       case ( 'w' ): 
