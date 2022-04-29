@@ -98,6 +98,10 @@ const double t_r[m_h*n_h] = { 1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.00
                               1e-7, 1e-7,   0.0050, 0.0036, 0.0015, 0.0024, 0.0030,   1e-7, 1e-7,
                               1e-7, 1e-7,     1e-7, 0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7};
 
+#define EKF_CONV    1e-3      // EKF tracking error indicating convergence, V (1e-3)
+#define EKF_T_CONV  30.       // EKF set convergence test criterion, sec (30.)
+#define EKF_T_RESET (EKF_T_CONV/2.) // EKF reset test criterion, sec ('up 1, down 2')
+#define CC_RESET_THRESH 0.05  // Threshold to resest Coulomb Counter if different from ekf, fraction (0.05)
 
 // Hysteresis: reservoir model of battery electrical hysteresis
 // Use variable resistor and capacitor to create hysteresis from an RC circuit
@@ -217,22 +221,23 @@ public:
   ~BatteryMonitor();
   // operators
   // functions
-  double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
-  double calculate_ekf(Sensors *Sen);
-  void init_soc_ekf(const double soc);
-  void pretty_print(void);
-  boolean solve_ekf(Sensors *Sen);
-  double K_ekf() { return (K_); };
-  double y_ekf() { return (y_); };
-  double soc_ekf() { return (soc_ekf_); };
-  double SOC_ekf() { return (SOC_ekf_); };
-  double tcharge() { return (tcharge_); };
-  double voc() { return (voc_); };
-  double voc_filt() { return (voc_filt_); };
-  double voc_dyn() { return (voc_dyn_); };
-  double voc_stat() { return (voc_stat_); };
   double amp_hrs_remaining() { return (amp_hrs_remaining_); };
   double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
+  double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
+  double calculate_ekf(Sensors *Sen);
+  boolean converged_ekf() { return(EKF_converged->state()); };
+  void init_soc_ekf(const double soc);
+  double K_ekf() { return (K_); };
+  void pretty_print(void);
+  double soc_ekf() { return (soc_ekf_); };
+  double SOC_ekf() { return (SOC_ekf_); };
+  boolean solve_ekf(Sensors *Sen);
+  double tcharge() { return (tcharge_); };
+  double voc() { return (voc_); };
+  double voc_dyn() { return (voc_dyn_); };
+  double voc_filt() { return (voc_filt_); };
+  double voc_stat() { return (voc_stat_); };
+  double y_ekf() { return (y_); };
 protected:
   double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
@@ -247,6 +252,7 @@ protected:
   void ekf_model_update(double *hx, double *H);
   double voc_filt_; // Filtered, static model open circuit voltage, V
   SlidingDeadband *SdVbatt_;  // Sliding deadband filter for Vbatt
+  TFDelay *EKF_converged = new TFDelay();   // Time persistence
 };
 
 

@@ -84,7 +84,7 @@ bool DetectRise::calculate(const int in)
 // constructors
 TFDelay::TFDelay()
     : timer_(0), nt_(0), nf_(0), T_(1) {}
-TFDelay::TFDelay(const bool in, const double Tt, const double Tf, const double T)
+TFDelay::TFDelay(const boolean in, const double Tt, const double Tf, const double T)
     : timer_(0), nt_(int(fmax(round(Tt/T)+1,0))), nf_(int(fmax(round(Tf/T+1),0))), T_(T)
 {
   if ( Tt==0 ) nt_ = 0;
@@ -95,7 +95,7 @@ TFDelay::TFDelay(const bool in, const double Tt, const double Tf, const double T
 TFDelay::~TFDelay() {}
 // operators
 // functions
-double TFDelay::calculate(const bool in)
+boolean TFDelay::calculate(const boolean in)
 {
   if ( timer_ >= 0 )
   {
@@ -119,9 +119,9 @@ double TFDelay::calculate(const bool in)
   // Serial.print(", nf_="); Serial.print(nf_);Serial.print(", return=");Serial.println(timer_>=0);
   return ( timer_> 0 );
 }
-double TFDelay::calculate(const bool in, const int RESET)
+boolean TFDelay::calculate(const boolean in, const int RESET)
 {
-  bool out;
+  boolean out;
   if (RESET>0)
   {
       if ( in ) timer_ = nf_;
@@ -134,20 +134,20 @@ double TFDelay::calculate(const bool in, const int RESET)
   }
   return ( out );
 }
-double TFDelay::calculate(const bool in, const double Tt, const double Tf)
+boolean TFDelay::calculate(const boolean in, const double Tt, const double Tf)
 {
   nt_ = int(fmax(round(Tt/T_),0));
   nf_ = int(fmax(round(Tf/T_),0));
   return(TFDelay::calculate(in));
 }
-double TFDelay::calculate(const bool in, const double Tt, const double Tf, const double T)
+boolean TFDelay::calculate(const boolean in, const double Tt, const double Tf, const double T)
 {
   T_ = T;
   nt_ = int(fmax(round(Tt/T_),0));
   nf_ = int(fmax(round(Tf/T_),0));
   return(TFDelay::calculate(in));
 }
-double TFDelay::calculate(const bool in, const double Tt, const double Tf, const int RESET)
+boolean TFDelay::calculate(const boolean in, const double Tt, const double Tf, const int RESET)
 {
   if (RESET>0)
   {
@@ -156,7 +156,7 @@ double TFDelay::calculate(const bool in, const double Tt, const double Tf, const
   }
   return(TFDelay::calculate(in, Tt, Tf));
 }
-double TFDelay::calculate(const bool in, const double Tt, const double Tf, const double T, const int RESET)
+boolean TFDelay::calculate(const boolean in, const double Tt, const double Tf, const double T, const int RESET)
 {
   if (RESET>0)
   {

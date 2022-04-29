@@ -173,7 +173,8 @@ BatteryMonitor::BatteryMonitor(double *rp_delta_q, double *rp_t_last, const int 
     // EKF
     this->Q_ = 0.001*0.001;
     this->R_ = 0.1*0.1;
-    SdVbatt_ = new SlidingDeadband(hdb_vbatt);
+    SdVbatt_ = new SlidingDeadband(hdb_vbatt);  // Noise filter
+    EKF_converged = new TFDelay(false, EKF_T_CONV, EKF_T_RESET, 0.1); // Convergence test debounce.  Initializes false
 }
 BatteryMonitor::~BatteryMonitor() {}
 
@@ -251,18 +252,22 @@ double BatteryMonitor::calculate_ekf(Sensors *Sen)
     q_ekf_ = soc_ekf_ * q_capacity_;
     SOC_ekf_ = q_ekf_ / q_cap_rated_scaled_ * 100.;
 
+    // EKF convergence
+    boolean conv = abs(y_)<EKF_CONV && !cp.soft_reset;  // Initialize false
+    EKF_converged->calculate(conv, EKF_T_CONV, EKF_T_RESET, min(Sen->T, EKF_T_RESET), cp.soft_reset);
+
     if ( rp.debug==34 )
-        Serial.printf("dt,ib,voc_dyn,voc,voc_filt,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
-            dt_, ib_, voc_dyn_, voc_, voc_filt_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
+        Serial.printf("dt,ib,voc_dyn,voc,voc_filt,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,  %d,\n",
+            dt_, ib_, voc_dyn_, voc_, voc_filt_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, converged_ekf());
     if ( rp.debug==-34 )
-        Serial.printf("dt,ib,voc_dyn,voc,voc_filt,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf,  \n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,\n",
-            dt_, ib_, voc_dyn_, voc_, voc_filt_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_);
+        Serial.printf("dt,ib,voc_dyn,voc,voc_filt,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, conv,\n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,  %d\n",
+            dt_, ib_, voc_dyn_, voc_, voc_filt_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, converged_ekf());
     if ( rp.debug==37 )
-        Serial.printf("ib,vb,voc_dyn,voc(z_),  K_,y_,SOC_ekf,   %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
-            ib_, vb_, voc_dyn_, voc_,     K_, y_, soc_ekf_);
+        Serial.printf("ib,vb,voc_dyn,voc(z_),  K_,y_,soc_ekf, conv,  %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,  %d,\n",
+            ib_, vb_, voc_dyn_, voc_,     K_, y_, soc_ekf_, converged_ekf());
     if ( rp.debug==-37 )
-        Serial.printf("ib,vb*10-110,voc_dyn_,voc(z_)*10-110,  K_,y_,SOC_ekf-90,   \n%7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,\n",
-            ib_, vb_*10-110, voc_dyn_*10-110, voc_*10-110,     K_, y_, soc_ekf_*100-90);
+        Serial.printf("ib,vb*10-110,voc_dyn_,voc(z_)*10-110,  K_,y_,soc_ekf-90,   conv*100,\n%7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,  %7.3f,\n",
+            ib_, vb_*10-110, voc_dyn_*10-110, voc_*10-110,     K_, y_, soc_ekf_*100-90, double(converged_ekf())*100.);
 
     // Charge time if used ekf 
     if ( ib_ > 0.1 )  tcharge_ekf_ = min(RATED_BATT_CAP / ib_ * (1. - soc_ekf_), 24.);
@@ -330,15 +335,16 @@ void BatteryMonitor::pretty_print(void)
     Serial.printf("BatteryMonitor::");
     this->Battery::pretty_print();
     Serial.printf(" BatteryMonitor::BatteryMonitor:\n");
-    Serial.printf("  voc_filt_ =               %7.3f;  // Filtered open circuit voltage for saturation detect, V\n", voc_filt_);
-    Serial.printf("  voc_stat_ =               %7.3f;  // Static model open circuit voltage from table (reference), V\n", voc_stat_);
+    Serial.printf("  amp_hrs_remaining =       %7.3f;  // Discharge amp*time left if drain to q=0, A-h\n", amp_hrs_remaining_);
+    Serial.printf("  amp_hrs_remaining_ekf_ =  %7.3f;  // Discharge amp*time left if drain to q_ekf=0, A-h\n", amp_hrs_remaining_ekf_);
+    Serial.printf("  EKF_converged =                 %d;  // EKF is converged, T=converged\n", converged_ekf());
     Serial.printf("  q_ekf =                %10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
     Serial.printf("  tcharge =                   %5.1f;  // Counted charging time to full, hr\n", tcharge_);
     Serial.printf("  tcharge_ekf =               %5.1f;  // Solved charging time to full from ekf, hr\n", tcharge_ekf_);
     Serial.printf("  soc_ekf =                 %7.3f;  // Solved state of charge, fraction\n", soc_ekf_);
     Serial.printf("  SOC_ekf_ =                  %5.1f;  // Solved state of charge, percent\n", SOC_ekf_);
-    Serial.printf("  amp_hrs_remaining =       %7.3f;  // Discharge amp*time left if drain to q=0, A-h\n", amp_hrs_remaining_);
-    Serial.printf("  amp_hrs_remaining_ekf_ =  %7.3f;  // Discharge amp*time left if drain to q_ekf=0, A-h\n", amp_hrs_remaining_ekf_);
+    Serial.printf("  voc_filt_ =               %7.3f;  // Filtered open circuit voltage for saturation detect, V\n", voc_filt_);
+    Serial.printf("  voc_stat_ =               %7.3f;  // Static model open circuit voltage from table (reference), V\n", voc_stat_);
 }
 /*
 INPUTS:

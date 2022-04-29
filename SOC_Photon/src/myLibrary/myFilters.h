@@ -88,12 +88,13 @@ public:
   ~TFDelay();
   // operators
   // functions
-  double calculate(const bool in);
-  double calculate(const bool in, const int RESET);
-  double calculate(const bool in, const double Tt, const double Tf);
-  double calculate(const bool in, const double Tt, const double Tf, const double T);
-  double calculate(const bool in, const double Tt, const double Tf, const int RESET);
-  double calculate(const bool in, const double Tt, const double Tf, const double T, const int RESET);
+  boolean calculate(const boolean in);
+  boolean calculate(const boolean in, const int RESET);
+  boolean calculate(const boolean in, const double Tt, const double Tf);
+  boolean calculate(const boolean in, const double Tt, const double Tf, const double T);
+  boolean calculate(const boolean in, const double Tt, const double Tf, const int RESET);
+  boolean calculate(const boolean in, const double Tt, const double Tf, const double T, const int RESET);
+  boolean state() { return ( timer_> 0 ); };
 protected:
   int timer_;
   int nt_;
