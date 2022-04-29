@@ -167,7 +167,8 @@ BatteryMonitor::BatteryMonitor(): Battery()
 BatteryMonitor::BatteryMonitor(double *rp_delta_q, double *rp_t_last, const int num_cells,
     const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
     const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx, const double hdb_vbatt) :
-    Battery(rp_delta_q, rp_t_last, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_direx), tcharge_(24), voc_filt_(batt_vsat)
+    Battery(rp_delta_q, rp_t_last, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_direx),
+    tcharge_(24), voc_filt_(batt_vsat), soc_weight_(0), SOC_weight_(0), amp_hrs_remaining_wt_(0)
 {
 
     // EKF
@@ -204,7 +205,7 @@ BatteryMonitor::~BatteryMonitor() {}
         Tb              Tb, deg C
         ib_             Battery terminal current, A
         vb_             Battery terminal voltage, V
-        rp.duty         (0-255) for D2 hardware injection when rp.modeling and proper wire connections made
+        rp.duty         (0-255) for DF2 hardware injection when rp.modeling and proper wire connections made
         soc_ekf_        Solved state of charge, fraction
         q_ekf_          Filtered charge calculated by ekf, C
         SOC_ekf_ (return)     Solved state of charge, percent
@@ -289,9 +290,15 @@ double BatteryMonitor::calculate_charge_time(const double q, const double q_capa
 
     amp_hrs_remaining_ = max(q_capacity - q_min_ + delta_q, 0.) / 3600.;
     if ( soc > 0. )
+    {
         amp_hrs_remaining_ekf_ = amp_hrs_remaining_ * (soc_ekf_ - soc_min_) / max(soc - soc_min_, 1e-8);
+        amp_hrs_remaining_wt_ = amp_hrs_remaining_ * (soc_weight_ - soc_min_) / max(soc - soc_min_, 1e-8);
+    }
     else
+    {
         amp_hrs_remaining_ekf_ = 0.;
+        amp_hrs_remaining_wt_ = 0.;
+    }
 
     return( tcharge_ );
 }
@@ -337,15 +344,49 @@ void BatteryMonitor::pretty_print(void)
     Serial.printf(" BatteryMonitor::BatteryMonitor:\n");
     Serial.printf("  amp_hrs_remaining =       %7.3f;  // Discharge amp*time left if drain to q=0, A-h\n", amp_hrs_remaining_);
     Serial.printf("  amp_hrs_remaining_ekf_ =  %7.3f;  // Discharge amp*time left if drain to q_ekf=0, A-h\n", amp_hrs_remaining_ekf_);
+    Serial.printf("  amp_hrs_remaining_wt_  =  %7.3f;  // Discharge amp*time left if drain soc_weight_ to 0, A-h\n", amp_hrs_remaining_wt_);
     Serial.printf("  EKF_converged =                 %d;  // EKF is converged, T=converged\n", converged_ekf());
     Serial.printf("  q_ekf =                %10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
     Serial.printf("  tcharge =                   %5.1f;  // Counted charging time to full, hr\n", tcharge_);
     Serial.printf("  tcharge_ekf =               %5.1f;  // Solved charging time to full from ekf, hr\n", tcharge_ekf_);
     Serial.printf("  soc_ekf =                 %7.3f;  // Solved state of charge, fraction\n", soc_ekf_);
     Serial.printf("  SOC_ekf_ =                  %5.1f;  // Solved state of charge, percent\n", SOC_ekf_);
+    Serial.printf("  soc_weight_ =             %7.3f;  // Weighted selection of ekf state of charge and coulomb counter (0-1)\n", soc_weight_);
+    Serial.printf("  SOC_weight_ =               %5.1f;  // Weighted selection of ekf state of charge and coulomb counter, percent\n", SOC_weight_);
     Serial.printf("  voc_filt_ =               %7.3f;  // Filtered open circuit voltage for saturation detect, V\n", voc_filt_);
     Serial.printf("  voc_stat_ =               %7.3f;  // Static model open circuit voltage from table (reference), V\n", voc_stat_);
 }
+
+// Reset Coulomb Counter to EKF under restricted conditions especially new boot no history of saturation
+void BatteryMonitor::regauge(const double temp_c)
+{
+    if ( converged_ekf() && abs(soc_ekf_-soc_)>CC_RESET_THRESH )
+    {
+        Serial.printf("Resetting Coulomb Counter Monitor from %7.3f to EKF=%7.3f\n", soc_, soc_ekf_);
+        apply_soc(soc_ekf_, temp_c);
+    }
+}
+
+// Weight between EKF and Coulomb Counter
+void BatteryMonitor::select()
+{
+    #define DF1 0.02    // Lower transition drift, fraction
+    #define DF2 0.05    // Upper transition drift, fraction
+    double drift = soc_ekf_ - soc_;
+    double avg = (soc_ekf_ + soc_) / 2.;
+    if ( drift<=-DF2 || drift>=DF2 )
+        soc_weight_ = soc_ekf_;
+    if ( -DF2<drift && drift<-DF1 )
+        soc_weight_ = avg + (drift + DF1)/(DF2 - DF1) * (DF2/2.);
+    else if ( DF1<drift && drift<DF2 )
+        soc_weight_ = avg + (drift - DF1)/(DF2 - DF1) * (DF2/2.);
+    else
+        soc_weight_ = avg;
+    SOC_weight_ = soc_weight_*q_capacity_ / q_cap_rated_scaled_*100.;
+    #undef DF1
+    #undef DF2 
+}
+
 /*
 INPUTS:
     Sen->Vbatt      
@@ -443,7 +484,7 @@ BatteryModel::BatteryModel(double *rp_delta_q, double *rp_t_last, const int num_
 //    Tb              Simulated Tb, deg C
 //    Ib              Simulated over-ridden by saturation Ib, A
 //    Vb (return)     Simulated Vb, V
-//    rp.duty         (0-255) for D2 hardware injection when rp.modeling and proper wire connections made
+//    rp.duty         (0-255) for DF2 hardware injection when rp.modeling and proper wire connections made
 double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
 {
     const double temp_C = Sen->Tbatt_filt;

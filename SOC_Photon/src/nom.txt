@@ -34,6 +34,7 @@
         soc_            Fraction of saturation charge (q_capacity_) available (0-1) 
         soc_ekf_        Solved state of charge, fraction
         soc_min_        Estimated soc where battery BMS will shutoff current, fraction
+		soc_weight_		Weighted selection of ekf state of charge and coulomb counter (0-1)
         SOC_            Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries
         SOC_ekf_ (return)     Solved state of charge, percent
 		sr				Resistance scalar

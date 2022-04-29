@@ -223,14 +223,19 @@ public:
   // functions
   double amp_hrs_remaining() { return (amp_hrs_remaining_); };
   double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
+  double amp_hrs_remaining_wt() { return (amp_hrs_remaining_wt_); };
   double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   double calculate_ekf(Sensors *Sen);
   boolean converged_ekf() { return(EKF_converged->state()); };
   void init_soc_ekf(const double soc);
   double K_ekf() { return (K_); };
   void pretty_print(void);
+  void regauge(const double temp_c);
+  void select();
   double soc_ekf() { return (soc_ekf_); };
+  double soc_weight() { return soc_weight_; };
   double SOC_ekf() { return (SOC_ekf_); };
+  double SOC_weight() { return SOC_weight_; };
   boolean solve_ekf(Sensors *Sen);
   double tcharge() { return (tcharge_); };
   double voc() { return (voc_); };
@@ -253,6 +258,9 @@ protected:
   double voc_filt_; // Filtered, static model open circuit voltage, V
   SlidingDeadband *SdVbatt_;  // Sliding deadband filter for Vbatt
   TFDelay *EKF_converged = new TFDelay();   // Time persistence
+  double soc_weight_;   // Weighted selection of ekf state of charge and coulomb counter (0-1)
+  double SOC_weight_;   // Weighted selection of ekf state of charge and coulomb counter, percent
+  double amp_hrs_remaining_wt_; // Discharge amp*time left if drain soc_weight_ to 0, A-h
 };
 
 

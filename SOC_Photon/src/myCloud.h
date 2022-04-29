@@ -54,12 +54,15 @@ struct Publish
   double tcharge;
   double amp_hrs_remaining;
   double amp_hrs_remaining_ekf;
+  double amp_hrs_remaining_wt;
   double soc_model;
   double soc;
   double soc_ekf;
   double SOC_model;
   double SOC;
   double SOC_ekf;
+  double soc_weight;
+  double SOC_weight;
 };
 
 void publish1(void);

@@ -375,12 +375,11 @@ void loop()
     // Adjust current sensors
     tweak_on_new_desat(Sen, now);
 
-    // Reset Coulomb Counter to EKF under restricted conditions especially new boot no history of saturation
-    if ( Mon->converged_ekf() && abs(Mon->soc_ekf()-Mon->soc())>CC_RESET_THRESH )
-    {
-      Serial.printf("Resetting Coulomb Counter Monitor from %7.3f to EKF=%7.3f\n", Mon->soc(), Mon->soc_ekf());
-      Mon->apply_soc(Mon->soc_ekf(), Sen->Tbatt_filt);
-    }
+    // Select between Coulomb Counter and EKF
+    Mon->select();
+
+    // Re-init Coulomb Counter to EKF if it is different than EKF or if never saturated
+    Mon->regauge(Sen->Tbatt_filt);
 
     //////////////////////////////////////////////////////////////
 

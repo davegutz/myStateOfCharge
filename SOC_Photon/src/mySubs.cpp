@@ -99,15 +99,15 @@ void Shunt::load()
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,  %d,    %d,   %d, %7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,  %c", \
+  sprintf(buffer, "%s,%s, %12.3f,%6.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,  %d,    %d,   %d, %7.3f,   %7.3f,   %5.3f,%5.3f,%5.3f,%5.3f,    %5.1f,%5.1f,%5.1f,%5.1f,  %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
     pubList->Tbatt, pubList->Tbatt_filt_model,
     pubList->Vbatt, pubList->voc_dyn, pubList->voc, pubList->vsat,
     pubList->sat, pubList->curr_sel_noamp, rp.modeling,
     pubList->Ishunt,
     pubList->tcharge,
-    pubList->soc_model, pubList->soc_ekf, pubList->soc, 
-    pubList->SOC_model, pubList->SOC_ekf, pubList->SOC, 
+    pubList->soc_model, pubList->soc_ekf, pubList->soc, pubList->soc_weight,
+    pubList->SOC_model, pubList->SOC_ekf, pubList->SOC, pubList->SOC_weight,
     '\0');
 }
 
@@ -320,7 +320,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[4];
   if ( pass || !Sen->saturated )
-    sprintf(dispStringS, "%3.0f", min(cp.pubList.amp_hrs_remaining, 999.));
+    sprintf(dispStringS, "%3.0f", min(cp.pubList.amp_hrs_remaining_wt, 999.));
   else if (Sen->saturated)
     sprintf(dispStringS, "SAT");
   display->print(dispStringS);
@@ -335,7 +335,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,          hm,                  cTime,        T,         Tb_f,   Tb_f_m,    Vb,  voc_dyn,   voc,    vsat,    sat,  sel, mod, Ib,       tcharge,   soc_m, soc_ekf, soc,   SOC_m, SOC_ekf, SOC,"));
+  Serial.println(F("unit,          hm,                  cTime,        T,         Tb_f,   Tb_f_m,    Vb,  voc_dyn,   voc,    vsat,    sat,  sel, mod, Ib,       tcharge,   soc_m, soc_ekf, soc, soc_wt,   SOC_m, SOC_ekf, SOC, SOC_wt,"));
 }
 
 // Write to the D/A converter
