@@ -41,12 +41,12 @@ struct Sum_st
   int16_t soc_ekf;  // Battery state of charge, ekf, %
   int16_t voc_dyn;  // Battery modeled charge voltage at soc, V
   int16_t voc_ekf;  // Ekf estimated charge voltage, V
-  int16_t delta_q_inf_amp; // Simple integration of charge since large reset, C
-  int16_t tweak_bias_amp;  // Accumulated current bias, A
+  int16_t tweak_bias_amp;  // Accumulated amplified current bias, A
+  int16_t tweak_bias_noa;  // Accumulated non-amplified current bias, A
   Sum_st(void){}
   void assign(const time32_t now, const double Tbatt, const double Vbatt, const double Ishunt,
-    const double soc_ekf, const double soc, const double voc_dyn, const double voc_ekf, const double delta_q_inf,
-    const double tweak_bias_amp)
+    const double soc_ekf, const double soc, const double voc_dyn, const double voc_ekf,
+    const double tweak_bias_amp, const double tweak_bias_noa)
   {
     char buffer[32];
     this->t = now;
@@ -57,8 +57,8 @@ struct Sum_st
     this->soc_ekf = int16_t(soc_ekf*16000.);
     this->voc_dyn = int16_t(voc_dyn*1200.);
     this->voc_ekf = int16_t(voc_ekf*1200.);
-    this->delta_q_inf_amp = int16_t(delta_q_inf_amp/24.);
     this->tweak_bias_amp = int16_t(tweak_bias_amp*1200.);
+    this->tweak_bias_noa = int16_t(tweak_bias_noa*1200.);
     time_long_2_str(now, buffer);
   }
   void print(void)
@@ -68,10 +68,10 @@ struct Sum_st
     {
       time_long_2_str(this->t, buffer);
     }
-    Serial.printf("%s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %9.1f, %7.3f,",
+    Serial.printf("%s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %7.3f,",
           buffer, this->t, double(this->tb)/600., double(this->vb)/1200., double(this->ib)/600., double(this->soc)/16000., double(this->soc_ekf)/16000.,
-          double(this->voc_dyn)/1200., double(this->voc_ekf)/1200., double(this->delta_q_inf_amp)*24., 
-          double(this->tweak_bias_amp)/1200.);
+          double(this->voc_dyn)/1200., double(this->voc_ekf)/1200.,
+          double(this->tweak_bias_amp)/1200.,  double(this->tweak_bias_noa)/1200.);
   }
   void nominal()
   {
@@ -83,8 +83,8 @@ struct Sum_st
     this->soc_ekf = 0.;
     this->voc_dyn = 0.;
     this->voc_ekf = 0.;
-    this->delta_q_inf_amp = 0.;
     this->tweak_bias_amp = 0.;
+    this->tweak_bias_noa = 0.;
   }
 };
 

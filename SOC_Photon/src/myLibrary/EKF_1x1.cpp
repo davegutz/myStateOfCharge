@@ -52,7 +52,7 @@ void EKF_1x1::predict_ekf(double u)
     P   1x1 Kalman probability
   */
   u_ = u;
-  this->ekf_model_predict(&Fx_, &Bu_);
+  this->ekf_predict(&Fx_, &Bu_);
   x_ = Fx_*x_ + Bu_*u_;
   if ( isnan(P_) ) P_ = 0.;   // reset overflow
   P_ = Fx_*P_*Fx_ + Q_;
@@ -104,7 +104,7 @@ void EKF_1x1::update_ekf(const double z, double x_min, double x_max)
     S   1x1 system uncertainty
     SI  1x1 system uncertainty inverse
   */
-  this->ekf_model_update(&hx_, &H_);
+  this->ekf_update(&hx_, &H_);
   z_ = z;
   double pht = P_*H_;
   S_ = H_*pht + R_;

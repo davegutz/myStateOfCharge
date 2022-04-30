@@ -221,7 +221,6 @@ public:
   ~BatteryMonitor();
   // operators
   // functions
-  double amp_hrs_remaining() { return (amp_hrs_remaining_); };
   double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
   double amp_hrs_remaining_wt() { return (amp_hrs_remaining_wt_); };
   double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
@@ -233,9 +232,9 @@ public:
   void regauge(const double temp_c);
   void select();
   double soc_ekf() { return (soc_ekf_); };
-  double soc_weight() { return soc_weight_; };
+  double soc_wt() { return soc_wt_; };
   double SOC_ekf() { return (SOC_ekf_); };
-  double SOC_weight() { return SOC_weight_; };
+  double SOC_wt() { return SOC_wt_; };
   boolean solve_ekf(Sensors *Sen);
   double tcharge() { return (tcharge_); };
   double voc() { return (voc_); };
@@ -244,8 +243,6 @@ public:
   double voc_stat() { return (voc_stat_); };
   double y_ekf() { return (y_); };
 protected:
-  double amp_hrs_remaining_;  // Discharge amp*time left if drain to q=0, A-h
-  double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
   double voc_stat_; // Sim voc from soc-voc table, V
   double tcharge_ekf_;  // Solved charging time to 100% from ekf, hr
   double voc_dyn_;  // Charging voltage, V
@@ -253,14 +250,15 @@ protected:
   double SOC_ekf_;  // Filtered state of charge from ekf (0-100)
   double tcharge_;  // Counted charging time to 100%, hr
   double q_ekf_;    // Filtered charge calculated by ekf, C
-  void ekf_model_predict(double *Fx, double *Bu);
-  void ekf_model_update(double *hx, double *H);
+  void ekf_predict(double *Fx, double *Bu);
+  void ekf_update(double *hx, double *H);
   double voc_filt_; // Filtered, static model open circuit voltage, V
   SlidingDeadband *SdVbatt_;  // Sliding deadband filter for Vbatt
   TFDelay *EKF_converged = new TFDelay();   // Time persistence
-  double soc_weight_;   // Weighted selection of ekf state of charge and coulomb counter (0-1)
-  double SOC_weight_;   // Weighted selection of ekf state of charge and coulomb counter, percent
-  double amp_hrs_remaining_wt_; // Discharge amp*time left if drain soc_weight_ to 0, A-h
+  double soc_wt_;   // Weighted selection of ekf state of charge and coulomb counter (0-1)
+  double SOC_wt_;   // Weighted selection of ekf state of charge and coulomb counter, percent
+  double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
+  double amp_hrs_remaining_wt_; // Discharge amp*time left if drain soc_wt_ to 0, A-h
 };
 
 

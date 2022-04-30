@@ -155,15 +155,14 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->vsat = Mon->vsat();
   pubList->sat = Mon->sat();
   pubList->curr_sel_noamp = rp.curr_sel_noamp;
-  pubList->amp_hrs_remaining = Mon->amp_hrs_remaining();
-  pubList->amp_hrs_remaining_ekf = Mon->amp_hrs_remaining_ekf();
   pubList->soc_model = Sim->soc();
   pubList->soc_ekf = Mon->soc_ekf();
   pubList->soc = Mon->soc();
   pubList->SOC_model = Sim->SOC();
   pubList->SOC_ekf = Mon->SOC_ekf();
   pubList->SOC = Mon->SOC();
-  pubList->soc_weight = Mon->soc_weight();
-  pubList->SOC_weight = Mon->SOC_weight();
+  pubList->soc_wt = Mon->soc_wt();
+  pubList->SOC_wt = Mon->SOC_wt();
+  pubList->amp_hrs_remaining_ekf = Mon->amp_hrs_remaining_ekf();
   pubList->amp_hrs_remaining_wt = Mon->amp_hrs_remaining_wt();
 }

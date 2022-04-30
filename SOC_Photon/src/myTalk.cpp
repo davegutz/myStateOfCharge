@@ -55,6 +55,58 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         Serial.printf("\n\n ************** now press reset button for a clean boot ****************************\n");
         break;
 
+      case ( 'C' ):
+        switch ( cp.input_string.charAt(1) )
+        {
+          case ( 'a' ):  // assign charge state in fraction to all versions including model
+            SOCS_in = cp.input_string.substring(2).toFloat();
+            if ( SOCS_in<1.1 )  // Apply crude limit to prevent user error
+            {
+              Mon->apply_soc(SOCS_in, Sen->Tbatt_filt);
+              Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
+              cp.cmd_reset();
+              Serial.printf("SOC=%7.3f, soc=%7.3f, modeling = %d, delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
+                  Mon->SOC(), Mon->soc(), rp.modeling, rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
+            }
+            else
+              Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'M' instead of 'm'?\n", SOCS_in);
+            break;
+
+          case ( 'm' ):  // assign curve charge state in fraction to model only (ekf if modeling)
+            SOCS_in = cp.input_string.substring(2).toFloat();
+            if ( SOCS_in<1.1 )   // Apply crude limit to prevent user error
+            {
+              Sim->apply_soc(SOCS_in, Sen->Tbatt_filt);
+              cp.cmd_reset();
+              Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
+                  Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
+            }
+            else
+              Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'W' instead of 'n'?\n", SOCS_in);
+            break;
+
+          case ( 'A' ):  // assign charge state in percent to all versions including model
+            SOCS_in = cp.input_string.substring(2).toFloat();
+            Mon->apply_SOC(SOCS_in, Sen->Tbatt_filt);
+            Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
+            cp.cmd_reset();
+            Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
+                Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
+            break;
+
+          case ( 'M' ):  // assign a CHARGE state in percent to model Sim only (and ekf if modeling)
+            SOCS_in = cp.input_string.substring(2).toFloat();
+            Sim->apply_SOC(SOCS_in, Sen->Tbatt_filt);
+            cp.cmd_reset();
+            Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
+                Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
+            break;
+
+          default:
+            Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
+        }
+        break;
+
       case ( 'D' ):
         switch ( cp.input_string.charAt(1) )
         {
@@ -227,23 +279,6 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         }
         break;
 
-      case ( 'm' ):  // assign curve charge state in fraction to all versions including model-
-        SOCS_in = cp.input_string.substring(1).toFloat();
-
-        if ( SOCS_in<1.1 )  // Apply crude limit to prevent user error
-        {
-          Mon->apply_soc(SOCS_in, Sen->Tbatt_filt);
-          Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
-          cp.cmd_reset();
-
-          Serial.printf("SOC=%7.3f, soc=%7.3f, modeling = %d, delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
-              Mon->SOC(), Mon->soc(), rp.modeling, rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
-        }
-
-        else
-          Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'M' instead of 'm'?\n", SOCS_in);
-        break;
-
       case ( 'M' ):
         switch ( cp.input_string.charAt(1) )
         {
@@ -340,30 +375,6 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown.  Try typing 'h'");
         }
-        break;
-
-      case ( 'n' ):  // assign curve charge state in fraction to model only (ekf if modeling)-
-        SOCS_in = cp.input_string.substring(1).toFloat();
-        if ( SOCS_in<1.1 )   // Apply crude limit to prevent user error
-        {
-          Sim->apply_soc(SOCS_in, Sen->Tbatt_filt);
-          cp.cmd_reset();
-
-          Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
-              Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
-        }
-        else
-          Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'W' instead of 'n'?\n", SOCS_in);
-        break;
-
-      case ( 'O' ):
-        SOCS_in = cp.input_string.substring(1).toFloat();
-        Mon->apply_SOC(SOCS_in, Sen->Tbatt_filt);
-        Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
-        cp.cmd_reset();
-
-        Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
-            Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
         break;
 
       case ( 'P' ):
@@ -524,15 +535,6 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
 
       case ( 'v' ):
         rp.debug = cp.input_string.substring(1).toInt();
-        break;
-
-      case ( 'W' ):  // assign a CHARGE state in percent to model Sim only (and ekf if modeling)
-        SOCS_in = cp.input_string.substring(1).toFloat();
-        Sim->apply_SOC(SOCS_in, Sen->Tbatt_filt);
-        cp.cmd_reset();
-
-        Serial.printf("SOC=%7.3f, soc=%7.3f,   delta_q=%7.3f, SOC_model=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
-            Mon->SOC(), Mon->soc(), rp.delta_q, Sim->SOC(), Sim->soc(), rp.delta_q_model);
         break;
 
       case ( 'w' ): 
@@ -747,6 +749,12 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 
   Serial.printf("A=  nominalize the rp structure for clean boots etc'\n");
 
+  Serial.printf("C<?> Charge assignments.   For example:\n");
+  Serial.printf("  Ca=  assign curve charge state in fraction to all versions including model- '(0-1.1)'\n"); 
+  Serial.printf("  Cm=  assign curve charge state in fraction to model only (and ekf if modeling)- '(0-1.1)'\n"); 
+  Serial.printf("  CA=  assign a CHARGE state in percent to all versions including model- '('truncated 0-100')'\n"); 
+  Serial.printf("  CM=  assign a CHARGE state in percent to model only (and ekf if modeling)-- '('truncated 0-100')'\n"); 
+
   Serial.printf("D/S<?> Adjustments.   For example:\n");
   Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_bias_amp); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
   Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias_noamp); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
@@ -768,8 +776,6 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 
   Serial.printf("i=,<inp> set the BatteryMonitor delta_q_inf to <inp> (-360000 - 3600000'\n"); 
 
-  Serial.printf("m=  assign curve charge state in fraction to all versions including model- '(0-1.1)'\n"); 
-
   Serial.printf("M<?> Amp tweaks.   For example:\n");
   Serial.printf("  MC= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_change()); Serial.println("    : tweak amp max change allowed, A [0.05]"); 
   Serial.printf("  Mg= "); Serial.printf("%7.6f", Sen->ShuntAmp->gain()); Serial.println("    : tweak amp gain = correction to be made for charge, A/Coulomb/day [0.0001]"); 
@@ -780,9 +786,6 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("  Mw= "); Serial.printf("%7.3f", Sen->ShuntAmp->time_to_wait()); Serial.println("    : tweak amp time to wait for next tweak, hr [18]]"); 
   Serial.printf("  Mx= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_tweak()); Serial.println("    : tweak amp adder maximum, A [1]"); 
   Serial.printf("  Mz= "); Serial.printf("%7.3f", Sen->ShuntAmp->time_sat_past()); Serial.println("    : tweak amp time since last tweak, hr [varies]"); 
-
-
-  Serial.printf("n=  assign curve charge state in fraction to model only (ekf if modeling)- '(0-1.1)'\n"); 
 
   Serial.printf("N<?> No amp tweaks.   For example:\n");
   Serial.printf("  NC= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_change()); Serial.println("    : tweak no amp max change allowed, A [0.05]"); 
@@ -795,8 +798,6 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("  Nx= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_tweak()); Serial.println("    : tweak no amp adder maximum, A [1]"); 
   Serial.printf("  Nz= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->time_sat_past()); Serial.println("    : tweak no amp time since last tweak, hr [varies]"); 
 
-  Serial.printf("O=  assign a CHARGE state in percent to all versions including model- '('truncated 0-100')'\n"); 
-  
   Serial.printf("P<?>   Print Battery values\n");
   Serial.printf("  Pa= "); Serial.printf("print all\n");
   Serial.printf("  Pc= "); Serial.printf("print all coulombs\n");
@@ -851,8 +852,6 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("  +/-97:   CC model saturation\n");
 
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);
-
-  Serial.printf("W=  assign a CHARGE state in percent to model only (and ekf if modeling)-- '('truncated 0-100')'\n"); 
 
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xd= "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);

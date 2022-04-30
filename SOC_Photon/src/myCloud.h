@@ -52,7 +52,6 @@ struct Publish
   double Tbatt_filt_model;
   int num_timeouts;
   double tcharge;
-  double amp_hrs_remaining;
   double amp_hrs_remaining_ekf;
   double amp_hrs_remaining_wt;
   double soc_model;
@@ -61,8 +60,8 @@ struct Publish
   double SOC_model;
   double SOC;
   double SOC_ekf;
-  double soc_weight;
-  double SOC_weight;
+  double soc_wt;
+  double SOC_wt;
 };
 
 void publish1(void);
