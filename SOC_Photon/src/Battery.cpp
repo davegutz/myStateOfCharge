@@ -771,7 +771,7 @@ void Hysteresis::pretty_print()
     Serial.printf("  dv_dot_ =     %7.3f;  // Calculated voltage rate, V/s\n", dv_dot_);
     Serial.printf("  dv_hys_ =     %7.3f;  // Delta voltage state, V\n", dv_hys_);
     Serial.printf("  disabled_ =         %d;  // Hysteresis disabled by low scale input < 1e-5, T=disabled\n", disabled_);
-    Serial.printf("  direx_  =          %2.0f;  // If hysteresis hooked up backwards, -1.=reversed\n", direx_);
+    Serial.printf("  direx_  =          %2.0f;  // If hysteresis hooked up backwards, -1.=reversed for Mon\n", direx_);
     Serial.printf("  rp.hys_scale=  %6.2f;  // Scalar on hysteresis, dimensionless\n", rp.hys_scale);
 }
 
