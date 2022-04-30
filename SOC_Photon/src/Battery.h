@@ -103,6 +103,9 @@ const double t_r[m_h*n_h] = { 1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.00
 #define EKF_T_RESET (EKF_T_CONV/2.) // EKF reset test time, sec ('up 1, down 2')
 #define DF2 0.05              // Threshold to resest Coulomb Counter if different from ekf, fraction (0.05)
 #define DF1 0.02              // Weighted selection lower transition drift, fraction
+#define TAU_Y_FILT  5.        // EKF y-filter time constant, sec (5.)
+#define MIN_Y_FILT  -0.5      // EKF y-filter minimum, V (-0.5)
+#define MAX_Y_FILT  0.5       // EKF y-filter maximum, V (0.5)
 
 // Hysteresis: reservoir model of battery electrical hysteresis
 // Use variable resistor and capacitor to create hysteresis from an RC circuit
@@ -243,6 +246,7 @@ public:
   double voc_filt() { return (voc_filt_); };
   double voc_stat() { return (voc_stat_); };
   double y_ekf() { return (y_); };
+  double y_ekf_filt() { return (y_filt_); };
 protected:
   double voc_stat_; // Sim voc from soc-voc table, V
   double tcharge_ekf_;  // Solved charging time to 100% from ekf, hr
@@ -260,6 +264,8 @@ protected:
   double SOC_wt_;   // Weighted selection of ekf state of charge and coulomb counter, percent
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
   double amp_hrs_remaining_wt_; // Discharge amp*time left if drain soc_wt_ to 0, A-h
+  LagTustin *y_filt = new LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);
+  double y_filt_;   // Filtered EKF y value, V
 };
 
 
