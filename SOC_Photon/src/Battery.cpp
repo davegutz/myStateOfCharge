@@ -205,7 +205,7 @@ BatteryMonitor::~BatteryMonitor() {}
         Tb              Tb, deg C
         ib_             Battery terminal current, A
         vb_             Battery terminal voltage, V
-        rp.duty         (0-255) for DF2 hardware injection when rp.modeling and proper wire connections made
+        rp.duty         (0-255) for hardware injection when rp.modeling and proper wire connections made
         soc_ekf_        Solved state of charge, fraction
         q_ekf_          Filtered charge calculated by ekf, C
         SOC_ekf_ (return)     Solved state of charge, percent
@@ -359,7 +359,7 @@ void BatteryMonitor::pretty_print(void)
 // Reset Coulomb Counter to EKF under restricted conditions especially new boot no history of saturation
 void BatteryMonitor::regauge(const double temp_c)
 {
-    if ( converged_ekf() && abs(soc_ekf_-soc_)>CC_RESET_THRESH )
+    if ( converged_ekf() && abs(soc_ekf_-soc_)>DF2 )
     {
         Serial.printf("Resetting Coulomb Counter Monitor from %7.3f to EKF=%7.3f\n", soc_, soc_ekf_);
         apply_soc(soc_ekf_, temp_c);
@@ -369,8 +369,6 @@ void BatteryMonitor::regauge(const double temp_c)
 // Weight between EKF and Coulomb Counter
 void BatteryMonitor::select()
 {
-    #define DF1 0.02    // Lower transition drift, fraction
-    #define DF2 0.05    // Upper transition drift, fraction
     double drift = soc_ekf_ - soc_;
     double avg = (soc_ekf_ + soc_) / 2.;
     if ( drift<=-DF2 || drift>=DF2 )
@@ -382,8 +380,6 @@ void BatteryMonitor::select()
     else
         soc_wt_ = avg;
     SOC_wt_ = soc_wt_*q_capacity_ / q_cap_rated_scaled_*100.;
-    #undef DF1
-    #undef DF2 
 }
 
 /*

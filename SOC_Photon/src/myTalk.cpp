@@ -832,7 +832,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("    -<>:   Negative - Arduino plot compatible\n");
   Serial.printf("     -1:   General purpose Arduino plot\n");
   Serial.printf("     +2:   General purpose\n");
-  Serial.printf("   +/-5:   Charge time\n");
+  Serial.printf("   +/-5:   OLED display\n");
   Serial.printf("     +6:   EKF solver iterations during initialization\n");
   Serial.printf("     +7:   EKF solver summary during initialization\n");
   Serial.printf("     -7:   Battery i/o Arduino plot\n");

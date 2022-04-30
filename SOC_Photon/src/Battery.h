@@ -99,9 +99,10 @@ const double t_r[m_h*n_h] = { 1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.00
                               1e-7, 1e-7,     1e-7, 0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7};
 
 #define EKF_CONV    1e-3      // EKF tracking error indicating convergence, V (1e-3)
-#define EKF_T_CONV  30.       // EKF set convergence test criterion, sec (30.)
-#define EKF_T_RESET (EKF_T_CONV/2.) // EKF reset test criterion, sec ('up 1, down 2')
-#define CC_RESET_THRESH 0.05  // Threshold to resest Coulomb Counter if different from ekf, fraction (0.05)
+#define EKF_T_CONV  30.       // EKF set convergence test time, sec (30.)
+#define EKF_T_RESET (EKF_T_CONV/2.) // EKF reset test time, sec ('up 1, down 2')
+#define DF2 0.05              // Threshold to resest Coulomb Counter if different from ekf, fraction (0.05)
+#define DF1 0.02              // Weighted selection lower transition drift, fraction
 
 // Hysteresis: reservoir model of battery electrical hysteresis
 // Use variable resistor and capacitor to create hysteresis from an RC circuit

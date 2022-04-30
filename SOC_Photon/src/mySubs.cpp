@@ -335,7 +335,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 // Text header
 void print_serial_header(void)
 {
-  Serial.println(F("unit,          hm,                  cTime,        T,       Tb_f, Tb_f_m,    Vb, voc_dyn, voc, vsat,   sat, sel, mod, Ib,   tcharge,   soc_m,soc_ekf,soc,soc_wt,   SOC_m,SOC_ekf,SOC,SOC_wt,"));
+  Serial.println(F("unit,          hm,                  cTime,        T,       Tb_f, Tb_f_m,  Vb, voc_dyn, voc, vsat,   sat,sel,mod, Ib,    tcharge, soc_m,soc_ekf,soc,soc_wt,   SOC_m,SOC_ekf,SOC,SOC_wt,"));
 }
 
 // Write to the D/A converter
