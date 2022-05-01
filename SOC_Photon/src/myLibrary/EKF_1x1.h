@@ -64,7 +64,6 @@ protected:
     @param hx gets output of observation function h(x)
     @param H gets Jacobian of h(x)
   */
-  // virtual void ekf_model(double *Fx, double *Bu, double *hx, double *H) = 0;
   virtual void ekf_predict(double *Fx, double *Bu) = 0;
   virtual void ekf_update(double *hx, double *H) = 0;
 };

@@ -54,6 +54,7 @@ public:
   double SOC() { return(SOC_); };
   boolean sat() { return(sat_); };
   double t_last() { return(*rp_t_last_); };
+  virtual double vsat(void) = 0;
 protected:
   double *rp_delta_q_;// Charge since saturated, C
   double *rp_t_last_; // Last battery temperature for rate limit memory, deg C

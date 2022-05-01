@@ -286,6 +286,8 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   26. Coulomb counting shall simultaneously track temperature changes to keep aligned with capacity estimates.
   27. 'SOC' shall be current charge 'q' at the instant temperature divided by rated capacity at rated temperature.
   28. The monitor logic must detect and be benign that the DC-DC charger has come on setting Vb while the BMS in the battery has shutoff current.   This is to prevent falsely declaring saturation from DC-DC charger on.
+  29. Only Battleborn will be implemented at first but structure will support other suppliers.  For now, recompilation is needed to run another supplier and #define switches between them.
+  30. The nominal unit of configuration shall be a 12 v battery with a characteristic soc-voc and rated Ah capacity.  Use with multiple batteries shall include running an arbitrary number of batteries in parallel and then series (nPmS).  The configuration shall be in local_config.h and in retained.h and fully adjustable on the fly using Talk.  If somebody has Battleborn they will not need to ever recompile and reflash a Photon.
 
 ## Implementation Notes
 

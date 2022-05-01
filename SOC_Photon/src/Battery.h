@@ -156,28 +156,29 @@ public:
   ~Battery();
   // operators
   // functions
-  void Dv(const double dv) { dv_ = dv; };
-  void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -r0_*sr_); };
   double calc_soc_voc(const double soc, const double temp_c, double *dv_dsoc);
   double calc_soc_voc_slope(double soc, double temp_c);
+  void calc_vsat(void);
   virtual double calculate(const double temp_C, const double soc_frac, double curr_in, const double dt, const boolean dc_dc_on);
-  void init_battery(void);
-  virtual void pretty_print();
-  void pretty_print_ss();
-  double vsat() { return (vsat_); };
-  double vdyn() { return (vdyn_); };
-  double vb() { return (vb_); };
-  double ib() { return (ib_); };
-  double ioc() { return (ioc_); };
-  double temp_c() { return (temp_c_); };
+  void Dv(const double dv) { dv_ = dv; };
   double dv_dsoc() { return (dv_dsoc_); };
   double Dv() { return (dv_); };
-  double Sr() { return (sr_); };
-  double voc() { return (voc_); };
-  double voc_soc(const double soc, const double temp_c);
   double hys_scale() { return (hys_->scale()*hys_->direx()); };
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
+  void init_battery(void);
   void init_hys(const double hys) { hys_->init(hys); };
+  double ib() { return (ib_); };
+  double ioc() { return (ioc_); };
+  virtual void pretty_print();
+  void pretty_print_ss();
+  double voc() { return (voc_); };
+  double voc_soc(const double soc, const double temp_c);
+  void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -r0_*sr_); };
+  double Sr() { return (sr_); };
+  double temp_c() { return (temp_c_); };
+  double vb() { return (vb_); };
+  double vdyn() { return (vdyn_); };
+  double vsat() { return (vsat_); };
 protected:
   double voc_;      // Static model open circuit voltage, V
   double vdyn_;     // Sim current induced back emf, V
@@ -231,6 +232,7 @@ public:
   double calculate_ekf(Sensors *Sen);
   boolean converged_ekf() { return(EKF_converged->state()); };
   void init_soc_ekf(const double soc);
+  boolean is_sat(void);
   double K_ekf() { return (K_); };
   void pretty_print(void);
   void regauge(const double temp_c);
@@ -311,10 +313,5 @@ protected:
 
 
 // Methods
-void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols);
-void mulvec(double * a, double * x, double * y, int m, int n);
-double sat_voc(const double temp_c);
-double calc_vsat(const double temp_c);
-boolean is_sat(const double temp_c, const double voc, const double soc);
 
 #endif

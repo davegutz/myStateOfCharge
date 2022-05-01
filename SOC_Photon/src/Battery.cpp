@@ -108,6 +108,12 @@ double Battery::calc_soc_voc_slope(const double soc, const double temp_c)
     return (dv_dsoc);
 }
 
+// calc_vsat: Saturated voltage calculation
+void Battery::calc_vsat(void)
+{
+    vsat_ =  nom_vsat_ + (temp_c_-25.)*dvoc_dt_;
+}
+
 // Initialize
 void Battery::init_battery(void)
 {
@@ -216,7 +222,7 @@ double BatteryMonitor::calculate_ekf(Sensors *Sen)
 {
     // Inputs
     temp_c_ = Sen->Tbatt_filt;
-    vsat_ = calc_vsat(temp_c_);
+    calc_vsat();
     dt_ =  min(Sen->T, F_MAX_T);
 
     // Dynamic emf
@@ -336,6 +342,18 @@ void BatteryMonitor::init_soc_ekf(const double soc)
     {
         Serial.printf("init_soc_ekf:  soc, soc_ekf_, x_ekf_ = %7.3f,%7.3f, %7.3f,\n", soc, soc_ekf_, x_ekf());
     }
+}
+
+/* is_sat:  Calculate saturation status
+    Inputs:
+        temp_c  Battery temperature, deg C
+        voc     Battery open circuit voltage, V
+    Outputs:
+        is_saturated Battery saturation status, T/F
+*/
+boolean BatteryMonitor::is_sat(void)
+{
+    return ( temp_c_ > low_t && (voc_filt_ >= vsat_ || soc_ >= mxeps_bb) );
 }
 
 // Print
@@ -524,7 +542,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     }
 
     // Saturation logic, both full and empty
-    vsat_ = nom_vsat_ + (temp_C-25.)*dvoc_dt_;
+    calc_vsat();
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
     if ( rp.tweak_test ) sat_ib_max_ = curr_in; // Disable cutback when doing tweak_test test
     ib_ = min(curr_in, sat_ib_max_);
@@ -652,11 +670,11 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
     SOC_ = q_ / q_cap_rated_scaled_ * 100;
 
     if ( rp.debug==97 )
-        Serial.printf("BatteryModel::cc,  dt,voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,%5.1f,\n",
-                    Sen->T,cp.pubList.voc,  sat_voc(Sen->Tbatt), temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
+        Serial.printf("BatteryModel::cc,  dt,voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,%5.1f,\n",
+                    Sen->T,cp.pubList.voc,  vsat_, temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
     if ( rp.debug==-97 )
-        Serial.printf("voc, v_sat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,%5.1f,\n",
-                    cp.pubList.voc,  sat_voc(Sen->Tbatt), temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
+        Serial.printf("voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,%5.1f,\n",
+                    cp.pubList.voc,  vsat_, temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
 
     // Save and return
     *rp_t_last_ = temp_lim;
@@ -792,61 +810,3 @@ double Hysteresis::update(const double dt)
     return voc_out_;
 }
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* C <- A * B */
-void mulmat(double * a, double * b, double * c, int arows, int acols, int bcols)
-{
-    int i, j,l;
-
-    for(i=0; i<arows; ++i)
-        for(j=0; j<bcols; ++j)
-        {
-            c[i*bcols+j] = 0;
-            for(l=0; l<acols; ++l)
-                c[i*bcols+j] += a[i*acols+l] * b[l*bcols+j];
-        }
-}
-void mulvec(double * a, double * x, double * y, int m, int n)
-{
-    int i, j;
-
-    for(i=0; i<m; ++i)
-    {
-        y[i] = 0;
-        for(j=0; j<n; ++j)
-            y[i] += x[j] * a[i*n+j];
-    }
-}
-
-/* Calculate saturation voltage
-    Inputs:
-        temp_c  Battery temperature, deg C
-        batt_vsat   Battery nominal saturation voltage, constant from Battery.h, V
-        dvoc_dt Battery saturation sensitivity with temperature, V/deg C
-    Outputs:
-        sat_voc Battery saturation open circuit voltage, V
-*/
-double sat_voc(const double temp_c)
-{
-    return ( batt_vsat + (temp_c-25.)*dvoc_dt );
-}
-
-/* Calculate saturation status
-    Inputs:
-        temp_c  Battery temperature, deg C
-        voc     Battery open circuit voltage, V
-    Outputs:
-        is_saturated Battery saturation status, T/F
-*/
-boolean is_sat(const double temp_c, const double voc, const double soc)
-{
-    double vsat = sat_voc(temp_c);
-    return ( temp_c > low_t && (voc >= vsat || soc >= mxeps_bb) );
-}
-
-// Saturated voltage calculation
-double calc_vsat(const double temp_c)
-{
-    return ( sat_voc(temp_c) );
-}

@@ -363,7 +363,7 @@ void loop()
     Mon->calculate_ekf(Sen);
     
     // Debounce saturation calculation done in ekf using voc model
-    boolean sat = is_sat(Sen->Tbatt_filt, Mon->voc_filt(), Mon->soc());
+    boolean sat = Mon->is_sat();
     Sen->saturated = Is_sat_delay->calculate(sat, t_sat, t_desat, min(Sen->T, t_sat/2.), reset);
 
     // Memory store
