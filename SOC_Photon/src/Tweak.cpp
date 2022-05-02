@@ -37,7 +37,7 @@ Tweak::Tweak()
 Tweak::Tweak(const String name, const double gain, const double max_change, const double max_tweak,
   const double time_to_wait, double *rp_delta_q_inf, double *rp_tweak_bias)
   : name_(name), gain_(-1./gain), max_change_(max_change), max_tweak_(max_tweak), delta_q_sat_present_(0),
-    delta_q_sat_past_(0), sat_(false), delta_q_max_(-Q_CAP_RATED), time_sat_past_(millis()), time_to_wait_(time_to_wait),
+    delta_q_sat_past_(0), sat_(false), delta_q_max_(-(RATED_BATT_CAP*3600.)), time_sat_past_(millis()), time_to_wait_(time_to_wait),
     rp_delta_q_inf_(rp_delta_q_inf), rp_tweak_bias_(rp_tweak_bias), delta_hrs_(0) {}
 Tweak::~Tweak() {}
 // operators
@@ -91,7 +91,7 @@ void Tweak::reset(void)
   delta_q_sat_present_ = 0.;
   delta_q_sat_past_ = 0.;
   sat_ = false;
-  delta_q_max_ = -Q_CAP_RATED;
+  delta_q_max_ = -(RATED_BATT_CAP*3600.);
 }
 
 // Save new result
@@ -99,7 +99,7 @@ void Tweak::save_new_sat(unsigned long int now)
 {
   delta_q_sat_past_ = delta_q_sat_present_;
   delta_q_sat_present_ = delta_q_max_;
-  delta_q_max_ = -Q_CAP_RATED;                // Reset
+  delta_q_max_ = -(RATED_BATT_CAP*3600.);                // Reset
   sat_ = false;
   time_sat_past_ = now;
 }

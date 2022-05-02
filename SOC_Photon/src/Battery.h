@@ -35,13 +35,11 @@
 struct Sensors;
 
 // BattleBorn 100 Ah, 12v LiFePO4
-#define RATED_BATT_CAP        100.      // Nominal battery bank capacity, Ah (100)
 #define RATED_TEMP            25.       // Temperature at RATED_BATT_CAP, deg C
 // >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
 #define BATT_V_SAT            13.85     // Normal battery cell saturation for SOC=99.7, V (13.85)
 #define DQDT                  0.01      // Change of charge with temperature, fraction/deg C (0.01 from literature)
 #define TCHARGE_DISPLAY_DEADBAND 0.1    // Inside this +/- deadband, charge time is displayed '---', A
-#define Q_CAP_RATED           (RATED_BATT_CAP*3600)   // Rated capacity at t_rated_, saved for future scaling, C
 #define T_RLIM                0.017    // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s (0.017 allows 1 deg for 1 minute)
 const double sat_cutback_gain = 10; // Multiplier on saturation anti-windup
 const double vb_dc_dc = 13.5;   // DC-DC charger estimated voltage, V
@@ -142,7 +140,7 @@ class Battery : public Coulombs
 {
 public:
   Battery();
-  Battery(double *rp_delta_q, double *rp_t_last, const double hys_direx);
+  Battery(double *rp_delta_q, double *rp_t_last, const double hys_direx, double *rp_nP, double *rp_nS);
   ~Battery();
   // operators
   // functions
@@ -157,8 +155,12 @@ public:
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
   void init_battery(void);
   void init_hys(const double hys) { hys_->init(hys); };
-  double ib() { return (ib_); };
+  double Ib() { return (ib_*(*rp_nP_)); };
   double ioc() { return (ioc_); };
+  double nP() { return (*rp_nP_); };
+  void nP(const double np) { *rp_nP_ = np; };
+  double nS() { return (*rp_nS_); };
+  void nS(const double ns) { *rp_nS_ = ns; };
   virtual void pretty_print();
   void pretty_print_ss();
   double voc() { return (voc_); };
@@ -166,7 +168,7 @@ public:
   void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -r0_*sr_); };
   double Sr() { return (sr_); };
   double temp_c() { return (temp_c_); };
-  double vb() { return (vb_); };
+  double Vb() { return (vb_*(*rp_nS_)); };
   double vdyn() { return (vdyn_); };
   double vsat() { return (vsat_); };
 protected:
@@ -201,6 +203,8 @@ protected:
   Hysteresis *hys_;
   double ioc_;      // Current into charge portion of battery, A
   double voc_stat_; // Static, table lookup value of voc before applying hysteresis, V
+  double *rp_nP_;   // Number of parallel batteries in bank, e.g. '2P1S'
+  double *rp_nS_;   // Number of series batteries in bank, e.g. '2P1S'
 };
 
 
@@ -209,7 +213,7 @@ class BatteryMonitor: public Battery, public EKF_1x1
 {
 public:
   BatteryMonitor();
-  BatteryMonitor(double *rp_delta_q, double *rp_t_last);
+  BatteryMonitor(double *rp_delta_q, double *rp_t_last, double *rp_nP, double *rp_nS);
   ~BatteryMonitor();
   // operators
   // functions
@@ -263,7 +267,7 @@ class BatteryModel: public Battery
 {
 public:
   BatteryModel();
-  BatteryModel(double *rp_delta_q, double *rp_t_last, double *rp_s_cap_model);
+  BatteryModel(double *rp_delta_q, double *rp_t_last, double *rp_s_cap_model, double *rp_nP, double *rp_nS);
   ~BatteryModel();
   // operators
   // functions

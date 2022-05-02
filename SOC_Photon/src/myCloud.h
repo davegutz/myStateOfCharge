@@ -43,7 +43,6 @@ struct Publish
   double Ishunt_noamp_cal;
   boolean curr_sel_noamp; 
   double T;
-  double voc_dyn;
   double voc;
   double voc_filt;
   double vsat;

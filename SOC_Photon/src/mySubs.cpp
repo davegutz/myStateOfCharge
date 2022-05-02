@@ -96,13 +96,19 @@ void Shunt::load()
 }
 
 
+// Text header
+void print_serial_header(void)
+{
+  Serial.println(F("unit,          hm,                  cTime,        T,       Tb_f, Tb_f_m,  Vb, voc, vsat,   sat,sel,mod, Ib,    tcharge, soc_m,soc_ekf,soc,soc_wt,   SOC_m,SOC_ekf,SOC,SOC_wt,"));
+}
+
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s,%s, %12.3f,%6.3f,   %5.2f,%5.2f,   %5.2f,%5.2f,%5.2f,%5.2f,  %d,  %d,  %d, %7.3f,  %5.1f,  %5.3f,%5.3f,%5.3f,%5.3f,   %5.1f,%5.1f,%5.1f,%5.1f,  %c", \
+  sprintf(buffer, "%s,%s, %12.3f,%6.3f,   %5.2f,%5.2f,   %5.2f,%5.2f,%5.2f,  %d,  %d,  %d, %7.3f,  %5.1f,  %5.3f,%5.3f,%5.3f,%5.3f,   %5.1f,%5.1f,%5.1f,%5.1f,  %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
     pubList->Tbatt, pubList->Tbatt_filt_model,
-    pubList->Vbatt, pubList->voc_dyn, pubList->voc, pubList->vsat,
+    pubList->Vbatt, pubList->voc, pubList->vsat,
     pubList->sat, pubList->curr_sel_noamp, rp.modeling,
     pubList->Ishunt,
     pubList->tcharge,
@@ -329,12 +335,6 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 
   if ( rp.debug==5 ) debug_5();
   if ( rp.debug==-5 ) debug_m5();  // Arduino plot
-}
-
-// Text header
-void print_serial_header(void)
-{
-  Serial.println(F("unit,          hm,                  cTime,        T,       Tb_f, Tb_f_m,  Vb, voc_dyn, voc, vsat,   sat,sel,mod, Ib,    tcharge, soc_m,soc_ekf,soc,soc_wt,   SOC_m,SOC_ekf,SOC,SOC_wt,"));
 }
 
 // Write to the D/A converter

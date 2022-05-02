@@ -209,10 +209,10 @@ void loop()
   static double t_bias_last;  // Memory for rate limiter in filter_temp call, deg C
 
    // Mon, used to count Coulombs and run EKF
-  static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last);
+  static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last, &rp.nP, &rp.nS);
 
   // Sim, used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off. 
-  static BatteryModel *Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model);
+  static BatteryModel *Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS);
 
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay();   // Time persistence
@@ -325,7 +325,7 @@ void loop()
     // Over-ride sensed Ib, Vb and Tb with model when running tests
     if ( rp.modeling )    // Should never be set in real use
     {
-      Sen->Ishunt = Sim->ib();
+      Sen->Ishunt = Sim->Ib();
       Sen->Vbatt = Sen->Vbatt_model;
       Sen->Tbatt_filt = Sim->temp_c();
     }

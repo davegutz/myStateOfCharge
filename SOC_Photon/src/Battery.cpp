@@ -37,11 +37,11 @@ extern CommandPars cp;
 // class Battery
 // constructors
 Battery::Battery() {}
-Battery::Battery(double *rp_delta_q, double *rp_t_last, const double hys_direx)
-    : Coulombs(rp_delta_q, rp_t_last, Q_CAP_RATED, RATED_TEMP, T_RLIM),
+Battery::Battery(double *rp_delta_q, double *rp_t_last, const double hys_direx, double *rp_nP, double *rp_nS)
+    : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM),
     sr_(1), nom_vsat_(BATT_V_SAT-HDB_VBATT), dv_(BATT_DV), dvoc_dt_(BATT_DVOC_DT),
     r0_(BATT_R_0), tau_ct_(BATT_TAU_CT), rct_(BATT_R_CT), tau_dif_(BATT_TAU_DIFF), r_dif_(BATT_R_DIFF),
-    tau_sd_(BATT_TAU_SD), r_sd_(BATT_R_SD)
+    tau_sd_(BATT_TAU_SD), r_sd_(BATT_R_SD), rp_nP_(rp_nP), rp_nS_(rp_nS)
 {
     // Battery characteristic tables
     voc_T_ = new TableInterp2D(n_s, m_t, x_soc, y_t, t_voc);
@@ -141,25 +141,31 @@ void Battery::init_battery(void)
 void Battery::pretty_print(void)
 {
     Serial.printf("Battery:\n");
-    Serial.printf("  temp_c_ =    %7.3f;  //  Battery temperature, deg C\n", temp_c_);
-    Serial.printf("  dvoc_dt_ =%10.6f;  //  Change of VOC with temperature, V/deg C\n", dvoc_dt_);
-    Serial.printf("  r0_ =     %10.6f;  //  Randles R0, ohms\n", r0_);
-    Serial.printf("  rct_ =    %10.6f;  //  Randles charge transfer resistance, ohms\n", rct_);
-    Serial.printf("  tau_ct =  %10.6f;  //  Randles charge transfer time constant, s (=1/Rct/Cct)\n", tau_ct_);
-    Serial.printf("  r_dif_ =  %10.6f;  //  Randles diffusion resistance, ohms\n", r_dif_);
-    Serial.printf("  tau_dif_ =%10.6f;  //  Randles diffusion time constant, s (=1/Rdif/Cdif)\n", tau_dif_);
-    Serial.printf("  r_sd_ =   %10.6f;  //  Trickle discharge of ideal battery capacitor model, ohms\n", r_sd_);
-    Serial.printf("  tau_sd_ = %10.1f;  //  Time constant of ideal battery capacitor model, input current A, output volts=soc (0-1)\n", tau_sd_);
-    Serial.printf("  bms_off_ =         %d;  // Calculated indication that the BMS has turned off charge current, T=off\n", bms_off_);
-    Serial.printf("  dv_dsoc_= %10.6f;  // Derivative scaled, V/fraction\n", dv_dsoc_);
-    Serial.printf("  ib_ =        %7.3f;  // Battery terminal current, A\n", ib_);
-    Serial.printf("  vb_ =        %7.3f;  // Battery terminal voltage, V\n", vb_);
-    Serial.printf("  voc_ =       %7.3f;  // Static model open circuit voltage, V\n", voc_);
-    Serial.printf("  vsat_ =      %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
-    Serial.printf("  vdyn_ =      %7.3f;  // Sim current induced back emf, V\n", vdyn_);
-    Serial.printf("  sr_ =        %7.3f;  // Resistance scalar\n", sr_);
-    Serial.printf("  dv_ =        %7.3f;  // Table hard-coded adjustment, compensates for data collection errors (hysteresis), V\n", dv_);
-    Serial.printf("  dt_ =        %7.3f;  // Update time, s\n", dt_);
+    Serial.printf("  temp_c_ =         %7.3f;  //  Battery temperature, deg C\n", temp_c_);
+    Serial.printf("  *rp_delt_q_ =  %10.1f;  //  Charge change since saturated, C\n", *rp_delta_q_);
+    Serial.printf("  *rp_t_last_ =  %10.1f;  // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C\n", *rp_t_last_);
+    Serial.printf("  dvoc_dt_ =     %10.6f;  //  Change of VOC with temperature, V/deg C\n", dvoc_dt_);
+    Serial.printf("  r0_ =          %10.6f;  //  Randles R0, ohms\n", r0_);
+    Serial.printf("  rct_ =         %10.6f;  //  Randles charge transfer resistance, ohms\n", rct_);
+    Serial.printf("  tau_ct =       %10.6f;  //  Randles charge transfer time constant, s (=1/Rct/Cct)\n", tau_ct_);
+    Serial.printf("  r_dif_ =       %10.6f;  //  Randles diffusion resistance, ohms\n", r_dif_);
+    Serial.printf("  tau_dif_ =     %10.6f;  //  Randles diffusion time constant, s (=1/Rdif/Cdif)\n", tau_dif_);
+    Serial.printf("  r_sd_ =        %10.6f;  //  Trickle discharge of ideal battery capacitor model, ohms\n", r_sd_);
+    Serial.printf("  tau_sd_ =      %10.1f;  //  Time constant of ideal battery capacitor model, input current A, output volts=soc (0-1)\n", tau_sd_);
+    Serial.printf("  bms_off_ =              %d;  // Calculated indication that the BMS has turned off charge current, T=off\n", bms_off_);
+    Serial.printf("  dv_dsoc_=      %10.6f;  // Derivative scaled, V/fraction\n", dv_dsoc_);
+    Serial.printf("  ib_ =             %7.3f;  // Battery terminal current, A\n", ib_);
+    Serial.printf("  Ib =              %7.3f;  // Battery bank current, A\n", ib_*(*rp_nP_));
+    Serial.printf("  vb_ =             %7.3f;  // Battery terminal voltage, V\n", vb_);
+    Serial.printf("  Vb =              %7.3f;  // Battery bank voltage, V\n", vb_*(*rp_nS_));
+    Serial.printf("  voc_ =            %7.3f;  // Static model open circuit voltage, V\n", voc_);
+    Serial.printf("  vsat_ =           %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
+    Serial.printf("  vdyn_ =           %7.3f;  // Sim current induced back emf, V\n", vdyn_);
+    Serial.printf("  sr_ =             %7.3f;  // Resistance scalar\n", sr_);
+    Serial.printf("  dv_ =             %7.3f;  // Table hard-coded adjustment, compensates for data collection errors (hysteresis), V\n", dv_);
+    Serial.printf("  dt_ =             %7.3f;  // Update time, s\n", dt_);
+    Serial.printf(" *rp_nP_ =            %5.2f;  // Number of parallel batteries in bank, e.g. '2P1S'\n", *rp_nP_);
+    Serial.printf(" *rp_nS_ =            %5.2f;  // Number of series batteries in bank, e.g. '2P1S'\n", *rp_nS_);
 }
 
 // Print State Space
@@ -181,7 +187,8 @@ double Battery::voc_soc(const double soc, const double temp_c)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery monitor class
 BatteryMonitor::BatteryMonitor(): Battery() {}
-BatteryMonitor::BatteryMonitor(double *rp_delta_q, double *rp_t_last) : Battery(rp_delta_q, rp_t_last, -1.), voc_filt_(BATT_V_SAT-HDB_VBATT)
+BatteryMonitor::BatteryMonitor(double *rp_delta_q, double *rp_t_last, double *rp_nP, double *rp_nS):
+    Battery(rp_delta_q, rp_t_last, -1., rp_nP, rp_nS), voc_filt_(BATT_V_SAT-HDB_VBATT)
 {
     // EKF
     this->Q_ = EKF_Q_SD*EKF_Q_SD;
@@ -230,8 +237,8 @@ double BatteryMonitor::calculate(Sensors *Sen)
     dt_ =  min(Sen->T, F_MAX_T);
 
     // Dynamic emf
-    vb_ = Sen->Vbatt;
-    ib_ = Sen->Ishunt;
+    vb_ = Sen->Vbatt / (*rp_nS_);
+    ib_ = Sen->Ishunt / (*rp_nP_);
     double u[2] = {ib_, vb_};
     Randles_->calc_x_dot(u);
     Randles_->update(dt_);
@@ -323,7 +330,6 @@ void BatteryMonitor::ekf_predict(double *Fx, double *Bu)
     *Bu = (1. - *Fx) * r_sd_;
 }
 
-// EKF model for update
 // EKF model for update
 void BatteryMonitor::ekf_update(double *hx, double *H)
 {
@@ -419,7 +425,7 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
 {
     // Solver, steady
     const double meps = 1-1e-6;
-    double voc = Sen->Vbatt - Sen->Ishunt*batt_r_ss;
+    double voc = Sen->Vbatt/(*rp_nS_) - Sen->Ishunt/(*rp_nP_)*batt_r_ss;
     int8_t count = 0;
     static double soc_solved = 1.0;
     double dv_dsoc;
@@ -442,8 +448,8 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
 BatteryModel::BatteryModel() : Battery() {}
-BatteryModel::BatteryModel(double *rp_delta_q, double *rp_t_last, double *rp_s_cap_model) :
-    Battery(rp_delta_q, rp_t_last, 1.), q_(Q_CAP_RATED), rp_s_cap_model_(rp_s_cap_model)
+BatteryModel::BatteryModel(double *rp_delta_q, double *rp_t_last, double *rp_s_cap_model, double *rp_nP, double *rp_nS) :
+    Battery(rp_delta_q, rp_t_last, 1., rp_nP, rp_nS), q_(RATED_BATT_CAP*3600.), rp_s_cap_model_(rp_s_cap_model)
 {
     // Randles dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery
@@ -541,7 +547,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     // Saturation logic, both full and empty
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
     if ( rp.tweak_test ) sat_ib_max_ = curr_in; // Disable cutback when doing tweak_test test
-    ib_ = min(curr_in, sat_ib_max_);
+    ib_ = min(curr_in/(*rp_nP_), sat_ib_max_);
     if ( (q_ <= 0.) && (curr_in < 0.) ) ib_ = 0.;  //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_ == sat_ib_max_);
     model_saturated_ = (voc_stat_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
@@ -559,7 +565,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     if ( rp.debug==76 ) Serial.printf("BatteryModel::calculate:,  soc=%7.3f, temp_c=%7.3f, ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
         soc_, temp_C, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);
 
-    return ( vb_ );
+    return ( vb_*(*rp_nS_) );
 }
 
 // Injection model, calculate duty

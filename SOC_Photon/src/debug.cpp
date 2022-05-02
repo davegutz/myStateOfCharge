@@ -31,7 +31,7 @@ void debug_m1(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
     Sim->SOC()-90,
     Sen->ShuntAmp->ishunt_cal(), Sen->ShuntNoAmp->ishunt_cal(),
-    Sen->Vbatt*10-110, Sim->voc()*10-110, Sim->vdyn()*10, Sim->vb()*10-110, Mon->vdyn()*10-110);
+    Sen->Vbatt*10-110, Sim->voc()*10-110, Sim->vdyn()*10, Sim->Vb()*10-110, Mon->vdyn()*10-110);
 }
 
 // rp.debug==-3  // Power Arduino plot
@@ -45,8 +45,8 @@ void debug_m3(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, const double
 void debug_12(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 {
   Serial.printf("ib,ib_mod,   vb,vb_mod,  voc_dyn,voc_stat_mod,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
-  Mon->ib(), Sim->ib(),
-  Mon->vb(), Sim->vb(),
+  Mon->Ib(), Sim->Ib(),
+  Mon->Vb(), Sim->Vb(),
   Mon->voc_dyn(), Sim->voc_stat(), Sim->voc(),
   Mon->K_ekf(), Mon->y_ekf(),
   Sim->soc(), Mon->soc_ekf(), Mon->soc());
@@ -56,8 +56,8 @@ void debug_12(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 void debug_m12(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 {
   Serial.printf("ib,ib_mod,   vb*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_stat_mod*10-110,voc_mod*10-110,   K, y,    SOC_mod-90, SOC_ekf-90, SOC-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
-  Mon->ib(), Sim->ib(),
-  Mon->vb()*10-110, Sim->vb()*10-110,
+  Mon->Ib(), Sim->Ib(),
+  Mon->Vb()*10-110, Sim->Vb()*10-110,
   Mon->voc_dyn()*10-110, Sim->voc_stat()*10-110, Sim->voc()*10-110,
   Mon->K_ekf(), Mon->y_ekf(),
   Sim->soc()*100-90, Mon->soc_ekf()*100-90, Sim->soc()*100-90);

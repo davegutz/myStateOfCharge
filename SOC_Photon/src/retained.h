@@ -33,8 +33,8 @@
 struct RetainedPars
 {
   int8_t debug = 2;         // Level of debug printing
-  double delta_q = -0.5;    // Coulomb Counter state for ekf, (-1 - 1)
-  double t_last = 25.;      // Battery temperature past value for rate limit memory, deg C
+  double delta_q = -0.5;    // Charge change since saturated, C
+  double t_last = 25.;      //Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
   double delta_q_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
   double t_last_model = 25.;  // Battery temperature past value for rate limit memory, deg C
   double curr_bias_amp = CURR_BIAS_AMP; // Calibrate amp current sensor, A 
@@ -59,6 +59,8 @@ struct RetainedPars
   boolean tweak_test = false;   // Driving signal injection completely using software inj_soft_bias 
   double tweak_bias_amp = 0.;   // Tweak calibration for amplified current sensor
   double tweak_bias_noamp = 0.; // Tweak calibration for non-amplified current sensor
+  double nP = NP;               // Number parallel batteries in bank
+  double nS = NS;               // Number series batteries in bank
 
   // Nominalize
   void nominal()
@@ -89,6 +91,8 @@ struct RetainedPars
     this->tweak_test = false;
     this->tweak_bias_amp = 0.;
     this->tweak_bias_noamp = 0.;
+    this->nP = 1.;
+    this->nS = 1.;
   }
   void large_reset()
   {
@@ -116,6 +120,8 @@ struct RetainedPars
     this->tweak_test = false;
     this->tweak_bias_amp = 0.;
     this->tweak_bias_noamp = 0.;
+    this->nP = 1.;
+    this->nS = 1.;
   }
   
   // Print
@@ -148,6 +154,8 @@ struct RetainedPars
     Serial.printf("  tweak_test =                %d;  // Driving signal injection completely using software inj_soft_bias \n", this->tweak_test);
     Serial.printf("  tweak_bias_amp =      %7.3f;  // Tweak calibration for amplified current sensor\n", this->tweak_bias_amp);
     Serial.printf("  tweak_bias_noamp =    %7.3f;  // Tweak calibration for non-amplified current sensor\n", this->tweak_bias_noamp);
+    Serial.printf("  nP =                    %5.2f;  // Number of parallel batteries in bank, e.g. '2P1S'\n", this->tweak_bias_noamp);
+    Serial.printf("  nS =                    %5.2f;  // Number of series batteries in bank, e.g. '2P1S'\n", this->tweak_bias_noamp);
   }
 
 };            
