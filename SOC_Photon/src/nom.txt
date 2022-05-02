@@ -4,19 +4,30 @@
 		cap_			Capacitance, Farads
 		cap_init_		Capacitance, Farads
 		dt_ 			Update time, s
-		dv_				Adjustment, V
+		dv_				Adjustment for calibration error, V
 		dv_dsoc			Derivative scaled, V/fraction
+		DVOC_DT			Change of VOC with operating temperature in range 0 - 50 C V/deg C
+		HDB_TBATT		Half deadband to filter Tbatt, V
+		HDB_VBATT		Half deadband to filter Vbatt, V
         ib_             Battery terminal current, A
         ioc_            Best estimate of IOC charge current after hysteresis, A
 		ib_sat_			Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
 		model_cutback_	Indicate that modeled current being limited on saturation cutback, T = cutback limited
 		model_saturated_	Indicator of maximal cutback, T = cutback saturated
+		nom_vsat_		Nominal saturation threshold at 25C, V
 		q_				Present charge available to use, except q_min_, C	
 		q_cap_rated_    Rated capacity at t_rated_, saved for future scaling, C
         q_cap_rated_scaled_   Applied rated capacity at t_rated_, after scaling, C
         q_capacity_     Saturation charge at temperature, C
         q_ekf_          Filtered charge calculated by ekf, C
         q_min_          Estimated charge at low voltage shutdown, C\
+		r_0_			Randles R0, ohms
+		r_sd_			Equivalent model for EKF reference.  Parasitic equivalent, ohms
+		dv_		        Adjustment to compensate for tables generated without considering hys, V
+		r_ct_			Randles charge transfer resistance, ohms
+		r_diff_			Randles diffusion resistance, ohms
+		tau_ct_			Randles charge transfer time constant, s (=1/Rct/Cct)
+		tau_diff_		Randles diffusion time constant, s (=1/Rdif/Cdif)
 		res_			Null resistance, Ohms
 		resetting_		Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
         rp.duty         (0-255) for D2 hardware injection when rp.modeling and proper wire connections made
@@ -37,13 +48,18 @@
 		soc_weight_		Weighted selection of ekf state of charge and coulomb counter (0-1)
         SOC_            Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries
         SOC_ekf_ (return)     Solved state of charge, percent
+		SOLV_ERR       	EKF initialization solver error bound, V
+		SOLV_MAX_COUNTS	EKF initialization solver max iters
+		SOLV_MAX_STEP	EKF initialization solver max step size of soc, fraction
 		sr				Resistance scalar
 		t_last			Last battery temperature for rate limit memory, deg C
 		t_rated_		Rated temperature, deg C
-		t_rlim_			Tbatt rate limit, deg C / s
+		t_rlim_			Tbatt rate limit noise filter, deg C / s
 		tau_			Null time constant, sec
+		tau_sd			Equivalent model for EKF.  Creating an anchor.   So large it's just a pass through, s
 		tcharge_    	Counted charging time to full, hr
         tcharge_ekf_    Solved charging time to full from ekf, hr
+		temp_c_			Battery temperature, deg C\
 		tlast           Past value of battery temperature used for rate limit memory, deg C
         RATED_BATT_CAP  Nominal battery bank capacity (assume actual not known), Ah
         Tb              Tb, deg C
@@ -53,4 +69,4 @@
         voc_dyn_        VOC estimated from Vb and RC model, V
         voc_filt_       Filtered open circuit voltage for saturation detect, V
         voc_stat_       Static model open circuit voltage from table (reference), V\n
-		vsat_           Saturation threshold at temperature, Vsed for rate limit memory, deg C
+		vsat_           Saturation threshold at temperature, deg C

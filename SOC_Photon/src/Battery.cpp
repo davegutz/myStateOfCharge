@@ -36,23 +36,18 @@ extern CommandPars cp;
 
 // class Battery
 // constructors
-Battery::Battery()
-    :voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(4), dv_dsoc_(0), sr_(1), vsat_(13.7),
-    dv_(0), dvoc_dt_(0){}
-Battery::Battery(double *rp_delta_q, double *rp_t_last, const int num_cells,
-    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx)
-    : Coulombs(rp_delta_q, rp_t_last, q_cap_rated, t_rated, t_rlim), voc_(0), vdyn_(0), vb_(0), ib_(0), num_cells_(num_cells), dv_dsoc_(0),
-    sr_(1.), nom_vsat_(batt_vsat), dv_(0.01), dvoc_dt_(dvoc_dt),  // 0.01 to compensate for tables generated without considering hys
-    r0_(0.003), tau_ct_(0.2), rct_(0.0016), tau_dif_(83.), r_dif_(0.0077),
-    tau_sd_(1.8e7), r_sd_(70.), ioc_(0)
+Battery::Battery() {}
+Battery::Battery(double *rp_delta_q, double *rp_t_last, const double hys_direx)
+    : Coulombs(rp_delta_q, rp_t_last, Q_CAP_RATED, RATED_TEMP, T_RLIM),
+    sr_(1), nom_vsat_(BATT_V_SAT-HDB_VBATT), dv_(BATT_DV), dvoc_dt_(BATT_DVOC_DT),
+    r0_(BATT_R_0), tau_ct_(BATT_TAU_CT), rct_(BATT_R_CT), tau_dif_(BATT_TAU_DIFF), r_dif_(BATT_R_DIFF),
+    tau_sd_(BATT_TAU_SD), r_sd_(BATT_R_SD)
 {
     // Battery characteristic tables
     voc_T_ = new TableInterp2D(n_s, m_t, x_soc, y_t, t_voc);
 
     // Randles dynamic model for EKF, forward version based on sensor inputs {ib, vb} --> {voc}, ioc=ib
     // Resistance values add up to same resistance loss as matched to installed battery
-    //   i.e.  (r0_ + rct_ + rdif_) = (r1 + r2)*num_cells
     // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
     // the state-space stability requires at least 0.1.   Used 0.2.
     double c_ct = tau_ct_ / rct_;
@@ -83,12 +78,20 @@ Battery::~Battery() {}
 // operators
 // functions
 
-// SOC-OCV curve fit method per Zhang, et al.   May write this base version if needed using BatteryModel::calculate()
+// Placeholder; not used.  May write this base version if needed using BatteryModel::calculate()
 // as a starting point but use the base class Randles formulation and re-arrange the i/o for that model.
 double Battery::calculate(const double temp_C, const double q, const double curr_in, const double dt,
     const boolean dc_dc_on) { return 0.;}
 
-// VOC-OCV model
+/* calc_soc_voc:  VOC-OCV model
+    INPUTS:
+        soc         Fraction of saturation charge (q_capacity_) available (0-1) 
+        temp_c      Battery temperature, deg C
+        dv_         Adjustment to compensate for tables generated without considering hys, V
+    OUTPUTS:
+        dv_dsoc     Derivative scaled, V/fraction
+        voc         Static model open circuit voltage, V
+*/
 double Battery::calc_soc_voc(const double soc, const double temp_c, double *dv_dsoc)
 {
     double voc;  // return value
@@ -97,7 +100,13 @@ double Battery::calc_soc_voc(const double soc, const double temp_c, double *dv_d
     return (voc);
 }
 
-// Derivative model
+/* calc_soc_voc_slope:  Derivative model read from tables
+    INPUTS:
+        soc         Fraction of saturation charge (q_capacity_) available (0-1) 
+        temp_c      Battery temperature, deg C
+    OUTPUTS:
+        dv_dsoc     Derivative scaled, V/fraction
+*/
 double Battery::calc_soc_voc_slope(const double soc, const double temp_c)
 {
     double dv_dsoc;  // return value
@@ -108,10 +117,17 @@ double Battery::calc_soc_voc_slope(const double soc, const double temp_c)
     return (dv_dsoc);
 }
 
-// calc_vsat: Saturated voltage calculation
-void Battery::calc_vsat(void)
+/* calc_vsat: Saturated voltage calculation
+    INPUTS:
+        nom_vsat_   Nominal saturation threshold at 25C, V
+        temp_c_     Battery temperature, deg C
+        dvoc_dt_    Change of VOC with operating temperature in range 0 - 50 C V/deg C
+    OUTPUTS:
+        vsat        Saturation threshold at temperature, deg C
+*/  
+double_t Battery::calc_vsat(void)
 {
-    vsat_ =  nom_vsat_ + (temp_c_-25.)*dvoc_dt_;
+    return ( nom_vsat_ + (temp_c_-25.)*dvoc_dt_ );
 }
 
 // Initialize
@@ -126,7 +142,6 @@ void Battery::pretty_print(void)
 {
     Serial.printf("Battery:\n");
     Serial.printf("  temp_c_ =    %7.3f;  //  Battery temperature, deg C\n", temp_c_);
-    Serial.printf("  num_cells_ =       %d;  //  Battery number of cells\n", num_cells_);
     Serial.printf("  dvoc_dt_ =%10.6f;  //  Change of VOC with temperature, V/deg C\n", dvoc_dt_);
     Serial.printf("  r0_ =     %10.6f;  //  Randles R0, ohms\n", r0_);
     Serial.printf("  rct_ =    %10.6f;  //  Randles charge transfer resistance, ohms\n", rct_);
@@ -165,32 +180,21 @@ double Battery::voc_soc(const double soc, const double temp_c)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery monitor class
-BatteryMonitor::BatteryMonitor(): Battery()
+BatteryMonitor::BatteryMonitor(): Battery() {}
+BatteryMonitor::BatteryMonitor(double *rp_delta_q, double *rp_t_last) : Battery(rp_delta_q, rp_t_last, -1.), voc_filt_(BATT_V_SAT-HDB_VBATT)
 {
-    Q_ = 0.;
-    R_ = 0.;
-}
-BatteryMonitor::BatteryMonitor(double *rp_delta_q, double *rp_t_last, const int num_cells,
-    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx, const double hdb_vbatt) :
-    Battery(rp_delta_q, rp_t_last, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_direx),
-    tcharge_(24), voc_filt_(batt_vsat), soc_wt_(0), SOC_wt_(0), amp_hrs_remaining_wt_(0), y_filt_(0)
-{
-
     // EKF
-    this->Q_ = 0.001*0.001;
-    this->R_ = 0.1*0.1;
-    SdVbatt_ = new SlidingDeadband(hdb_vbatt);  // Noise filter
-    EKF_converged = new TFDelay(false, EKF_T_CONV, EKF_T_RESET, 0.1); // Convergence test debounce.  Initializes false
+    this->Q_ = EKF_Q_SD*EKF_Q_SD;
+    this->R_ = EKF_R_SD*EKF_R_SD;
+    SdVbatt_ = new SlidingDeadband(HDB_VBATT);  // Noise filter
+    EKF_converged = new TFDelay(false, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT); // Convergence test debounce.  Initializes false
 }
 BatteryMonitor::~BatteryMonitor() {}
 
 // operators
 // functions
 
-
-
-/* BatteryModel::calculate_ekf:  SOC-OCV curve fit solved by ekf
+/* BatteryModel::calculate:  SOC-OCV curve fit solved by ekf
         Inputs:
         Sen->Tbatt_filt Tb filtered for noise, past value of temp_c_, deg C
         Sen->Vbatt      Battery terminal voltage, V
@@ -218,11 +222,11 @@ BatteryMonitor::~BatteryMonitor() {}
         tcharge_ekf_    Solved charging time to full from ekf, hr
         y_filt_         Filtered EKF y residual value, V
 */
-double BatteryMonitor::calculate_ekf(Sensors *Sen)
+double BatteryMonitor::calculate(Sensors *Sen)
 {
     // Inputs
     temp_c_ = Sen->Tbatt_filt;
-    calc_vsat();
+    vsat_ = calc_vsat();
     dt_ =  min(Sen->T, F_MAX_T);
 
     // Dynamic emf
@@ -233,7 +237,7 @@ double BatteryMonitor::calculate_ekf(Sensors *Sen)
     Randles_->update(dt_);
     if ( rp.debug==35 )
     {
-        Serial.printf("BatteryMonitor::calculate_ekf:"); Randles_->pretty_print();
+        Serial.printf("BatteryMonitor::calculate:"); Randles_->pretty_print();
     }
     voc_dyn_ = Randles_->y(0);
     vdyn_ = vb_ - voc_dyn_;
@@ -288,7 +292,7 @@ double BatteryMonitor::calculate_ekf(Sensors *Sen)
 }
 
 // Charge time calculation
-double BatteryMonitor::calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc)
+double BatteryMonitor::calc_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc)
 {
     double delta_q = q - q_capacity;
     if ( charge_curr > TCHARGE_DISPLAY_DEADBAND )  tcharge_ = min( -delta_q / charge_curr / 3600., 24.);
@@ -414,9 +418,6 @@ OUTPUTS:
 boolean BatteryMonitor::solve_ekf(Sensors *Sen)
 {
     // Solver, steady
-    #define SOLV_ERR 1e-6
-    #define SOLV_MAX_COUNTS 10
-    #define SOLV_MAX_STEP 0.2
     const double meps = 1-1e-6;
     double voc = Sen->Vbatt - Sen->Ishunt*batt_r_ss;
     int8_t count = 0;
@@ -441,16 +442,11 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
 BatteryModel::BatteryModel() : Battery() {}
-BatteryModel::BatteryModel(double *rp_delta_q, double *rp_t_last, const int num_cells,
-    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx, 
-    double *rp_s_cap_model) :
-    Battery(rp_delta_q, rp_t_last, num_cells, r1, r2, r2c2, batt_vsat, dvoc_dt, q_cap_rated, t_rated, t_rlim, hys_direx), q_(q_cap_rated),
-    rp_s_cap_model_(rp_s_cap_model)
+BatteryModel::BatteryModel(double *rp_delta_q, double *rp_t_last, double *rp_s_cap_model) :
+    Battery(rp_delta_q, rp_t_last, 1.), q_(Q_CAP_RATED), rp_s_cap_model_(rp_s_cap_model)
 {
     // Randles dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery
-    //   i.e.  (r0_ + rct_ + rdif_) = (r1 + r2)*num_cells
     // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
     // the state-space stability requires at least 0.1.   Used 0.2.
     double c_ct = tau_ct_ / rct_;
@@ -509,13 +505,14 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
 
     dt_ = dt;
     temp_c_ = temp_C;
+    vsat_ = calc_vsat();
 
     double soc_lim = max(min(soc_, 1.0), 0.0);
     double SOC = soc_ * q_capacity_ / q_cap_rated_scaled_ * 100;
 
     // VOC-OCV model
     voc_stat_ = calc_soc_voc(soc_, temp_C, &dv_dsoc_);
-    voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, max_voc);  // slightly beyond but don't windup
+    voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, vsat_*1.2);  // slightly beyond but don't windup
     bms_off_ = ( temp_c_ <= low_t ) || ( voc_stat_ < low_voc );
     if ( bms_off_ ) curr_in = 0.;
 
@@ -542,7 +539,6 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     }
 
     // Saturation logic, both full and empty
-    calc_vsat();
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
     if ( rp.tweak_test ) sat_ib_max_ = curr_in; // Disable cutback when doing tweak_test test
     ib_ = min(curr_in, sat_ib_max_);
@@ -550,11 +546,13 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     model_cutback_ = (voc_stat_ > vsat_) && (ib_ == sat_ib_max_);
     model_saturated_ = (voc_stat_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
     Coulombs::sat_ = model_saturated_;
+
     if ( rp.debug==79 ) Serial.printf("temp_C, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f,\n",
         temp_C, dvoc_dt_, vsat_, voc_, q_capacity_, sat_ib_max_, ib_);
 
     if ( rp.debug==78 ) Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc_,voc,,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      dt,temp_C, ib_, soc_, voc_, vdyn_, vb_);
+    
     if ( rp.debug==-78 ) Serial.printf("SOC/10,soc*10,voc,vsat,curr_in,sat_ib_max_,ib,sat,\n%7.3f, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
       SOC/10, soc_*10, voc_, vsat_, curr_in, sat_ib_max_, ib_, model_saturated_);
     
@@ -647,7 +645,7 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
     double d_delta_q = Sen->Ishunt * Sen->T;
 
     // Rate limit temperature
-    double temp_lim = max(min(Sen->Tbatt, t_last + t_rlim_*Sen->T), t_last - t_rlim_*Sen->T);
+    double temp_lim = max(min(Sen->Tbatt, t_last + T_RLIM*Sen->T), t_last - T_RLIM*Sen->T);
     if ( reset ) temp_lim = Sen->Tbatt;
     if ( reset ) *rp_t_last_ = Sen->Tbatt;
 

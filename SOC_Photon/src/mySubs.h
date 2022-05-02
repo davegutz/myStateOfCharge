@@ -110,8 +110,7 @@ struct Sensors
   double Vshunt;          // Sensed shunt voltage, V
   double shunt_v2a_s;     // Selected shunt conversion gain, A/V
   double Ishunt;          // Selected calibrated, shunt current, A
-  double Wshunt;          // Sensed shunt power, W
-  double Wcharge;         // Charge power, W
+  double Wshunt;          // Sensed shunt power, use to compare to other shunts, W
   double T;               // Update time, s
   double T_filt;          // Filter update time, s
   double T_temp;          // Temperature update time, s

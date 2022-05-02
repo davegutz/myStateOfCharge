@@ -35,38 +35,14 @@
 struct Sensors;
 
 // BattleBorn 100 Ah, 12v LiFePO4
-#define NOM_SYS_VOLT          12.       // Nominal system output, V, at which the reported amps are used (12)
-#define RATED_BATT_CAP        100.      // Nominal battery bank capacity, Ah (100).   Accounts for internal losses.  This is 
-                                        // what gets delivered, e.g. Wshunt/NOM_SYS_VOLT.  Also varies 0.2-0.4C currents
-                                        // or 20-40 A for a 100 Ah battery
+#define RATED_BATT_CAP        100.      // Nominal battery bank capacity, Ah (100)
 #define RATED_TEMP            25.       // Temperature at RATED_BATT_CAP, deg C
-#define BATT_DVOC_DT          0.001     // Change of VOC with operating temperature in range 0 - 50 C (0.004 for Vb on 2022-02-18) V/deg C
 // >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
-#define BATT_V_SAT            3.4625    // Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
-#define BATT_R1               0.00126   // Battery Randels static resistance, Ohms (0.00126) for 3v cell matches transients
-#define BATT_R2               0.00168   // Battery Randels dynamic resistance, Ohms (0.00168) for 3v cell matches transients
-#define BATT_R2C2             100.      // Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
-                                        // test so using with R2 and then multiplying by 4 for total result is valid,
-                                        // though probably not for an individual cell
-#define DQDT                  0.01      // Change of charge with temperature, fraction/deg C
-                                        // DQDT from literature.   0.01 / deg C is commonly used.
+#define BATT_V_SAT            13.85     // Normal battery cell saturation for SOC=99.7, V (13.85)
+#define DQDT                  0.01      // Change of charge with temperature, fraction/deg C (0.01 from literature)
 #define TCHARGE_DISPLAY_DEADBAND 0.1    // Inside this +/- deadband, charge time is displayed '---', A
-const double max_voc = 1.2*NOM_SYS_VOLT;// Prevent windup of battery model, V
-const int batt_num_cells = NOM_SYS_VOLT/3;  // Number of standard 3 volt LiFePO4 cells
-const double batt_vsat = double(batt_num_cells)*double(BATT_V_SAT) - HDB_VBATT;  // Total bank saturation for 0.997=soc, V
-const double batt_vmax = (14.3/4)*double(batt_num_cells); // Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
-const double batt_r1 = double(BATT_R1);     // Randels static resistance per cell, Ohms
-const double batt_r2 = double(BATT_R2);     // Randels dynamic resistance per cell, Ohms
-const double batt_r_ss = batt_r1 + batt_r2; // Steady state equivalent battery resistance, for solver, Ohms
-const double batt_r2c2 = double(BATT_R2C2);// Battery Randels dynamic term, Ohms-Farads (100).   Value of 100 probably derived from a 4 cell
-                              // test so using with R2 and then multiplying by 4 for total result is valid,
-                              // though probably not for an individual cell
-const double batt_c2 = double(BATT_R2C2)/batt_r2;
-const double nom_q_cap = RATED_BATT_CAP * 3600;   // Nominal battery capacity, C
-const double q_cap_rated = RATED_BATT_CAP * 3600;   // Nominal battery capacity, C;
-const double t_rlim = 0.017;    // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s
-                                // t_rlim=0.017 allows 1 deg for 1 minute
-const double dvoc_dt = BATT_DVOC_DT * double(batt_num_cells);
+#define Q_CAP_RATED           (RATED_BATT_CAP*3600)   // Rated capacity at t_rated_, saved for future scaling, C
+#define T_RLIM                0.017    // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s (0.017 allows 1 deg for 1 minute)
 const double sat_cutback_gain = 10; // Multiplier on saturation anti-windup
 const double vb_dc_dc = 13.5;   // DC-DC charger estimated voltage, V
 
@@ -98,14 +74,30 @@ const double t_r[m_h*n_h] = { 1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.00
                               1e-7, 1e-7,   0.0050, 0.0036, 0.0015, 0.0024, 0.0030,   1e-7, 1e-7,
                               1e-7, 1e-7,     1e-7, 0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7};
 
-#define EKF_CONV    1e-3      // EKF tracking error indicating convergence, V (1e-3)
-#define EKF_T_CONV  30.       // EKF set convergence test time, sec (30.)
+#define EKF_CONV        1e-3      // EKF tracking error indicating convergence, V (1e-3)
+#define EKF_T_CONV      30.       // EKF set convergence test time, sec (30.)
 #define EKF_T_RESET (EKF_T_CONV/2.) // EKF reset test time, sec ('up 1, down 2')
-#define DF2 0.05              // Threshold to resest Coulomb Counter if different from ekf, fraction (0.05)
-#define DF1 0.02              // Weighted selection lower transition drift, fraction
-#define TAU_Y_FILT  5.        // EKF y-filter time constant, sec (5.)
-#define MIN_Y_FILT  -0.5      // EKF y-filter minimum, V (-0.5)
-#define MAX_Y_FILT  0.5       // EKF y-filter maximum, V (0.5)
+#define EKF_Q_SD        0.001     // Standard deviation of EKF process uncertainty, V
+#define EKF_R_SD        0.1       // Standard deviation of EKF state uncertainty, fraction (0-1)
+#define EKF_NOM_DT      0.1       // EKF nominal update time, s (initialization; actual value varies)
+#define DF2             0.05      // Threshold to resest Coulomb Counter if different from ekf, fraction (0.05)
+#define DF1             0.02      // Weighted selection lower transition drift, fraction
+#define TAU_Y_FILT      5.        // EKF y-filter time constant, sec (5.)
+#define MIN_Y_FILT      -0.5      // EKF y-filter minimum, V (-0.5)
+#define MAX_Y_FILT      0.5       // EKF y-filter maximum, V (0.5)
+#define BATT_DV         0.01      // Adjustment to compensate for tables generated without considering hys, V
+#define BATT_R_0        0.003     // Randles R0, ohms
+#define BATT_R_CT       0.0016    // Randles charge transfer resistance, ohms
+#define BATT_R_DIFF     0.0077    // Randles diffusion resistance, ohms
+#define BATT_TAU_CT     0.2       // Randles charge transfer time constant, s (=1/Rct/Cct)
+#define BATT_TAU_DIFF   83.       // Randles diffusion time constant, s (=1/Rdif/Cdif)
+#define BATT_TAU_SD     1.8e7     // Equivalent model for EKF.  Creating an anchor.   So large it's just a pass through, sec
+#define BATT_R_SD       70.       // Equivalent model for EKF reference.  Parasitic equivalent, ohms
+#define SOLV_ERR        1e-6      // EKF initialization solver error bound, V
+#define SOLV_MAX_COUNTS 10        // EKF initialization solver max iters
+#define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction
+#define BATT_DVOC_DT    0.004     // Change of VOC with operating temperature in range 0 - 50 C (0.004 for Vb on 2022-02-18) V/deg C
+const double batt_r_ss = BATT_R_0 + BATT_R_CT + BATT_R_DIFF; // Steady state equivalent battery resistance, for solver, Ohms
 
 // Hysteresis: reservoir model of battery electrical hysteresis
 // Use variable resistor and capacitor to create hysteresis from an RC circuit
@@ -150,15 +142,13 @@ class Battery : public Coulombs
 {
 public:
   Battery();
-  Battery(double *rp_delta_q, double *rp_t_last, const int num_cells,
-    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_direx);
+  Battery(double *rp_delta_q, double *rp_t_last, const double hys_direx);
   ~Battery();
   // operators
   // functions
   double calc_soc_voc(const double soc, const double temp_c, double *dv_dsoc);
   double calc_soc_voc_slope(double soc, double temp_c);
-  void calc_vsat(void);
+  double calc_vsat(void);
   virtual double calculate(const double temp_C, const double soc_frac, double curr_in, const double dt, const boolean dc_dc_on);
   void Dv(const double dv) { dv_ = dv; };
   double dv_dsoc() { return (dv_dsoc_); };
@@ -184,7 +174,6 @@ protected:
   double vdyn_;     // Sim current induced back emf, V
   double vb_;       // Battery terminal voltage, V
   double ib_;       // Battery terminal current, A
-  int num_cells_;   // Number of cells
   double dv_dsoc_;  // Derivative scaled, V/fraction
   double sr_;       // Resistance scalar
   double nom_vsat_; // Nominal saturation threshold at 25C, V
@@ -220,16 +209,14 @@ class BatteryMonitor: public Battery, public EKF_1x1
 {
 public:
   BatteryMonitor();
-  BatteryMonitor(double *rp_delta_q, double *rp_t_last, const int num_cells,
-    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale, const double hdb_vbatt);
+  BatteryMonitor(double *rp_delta_q, double *rp_t_last);
   ~BatteryMonitor();
   // operators
   // functions
   double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
   double amp_hrs_remaining_wt() { return (amp_hrs_remaining_wt_); };
-  double calculate_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
-  double calculate_ekf(Sensors *Sen);
+  double calc_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
+  double calculate(Sensors *Sen);
   boolean converged_ekf() { return(EKF_converged->state()); };
   void init_soc_ekf(const double soc);
   boolean is_sat(void);
@@ -266,7 +253,7 @@ protected:
   double SOC_wt_;   // Weighted selection of ekf state of charge and coulomb counter, percent
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
   double amp_hrs_remaining_wt_; // Discharge amp*time left if drain soc_wt_ to 0, A-h
-  LagTustin *y_filt = new LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);
+  LagTustin *y_filt = new LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
   double y_filt_;   // Filtered EKF y value, V
 };
 
@@ -276,10 +263,7 @@ class BatteryModel: public Battery
 {
 public:
   BatteryModel();
-  BatteryModel(double *rp_delta_q, double *rp_t_last, const int num_cells,
-    const double r1, const double r2, const double r2c2, const double batt_vsat, const double dvoc_dt,
-    const double q_cap_rated, const double t_rated, const double t_rlim, const double hys_scale, 
-    double *rp_s_cap_model);
+  BatteryModel(double *rp_delta_q, double *rp_t_last, double *rp_s_cap_model);
   ~BatteryModel();
   // operators
   // functions

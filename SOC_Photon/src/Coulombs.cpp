@@ -33,8 +33,7 @@ extern RetainedPars rp; // Various parameters to be static at system level
 extern CommandPars cp;
 
 // class Coulombs
-Coulombs::Coulombs()
-  : q_cap_rated_(0), q_cap_rated_scaled_(0), t_rated_(25), t_rlim_(0.017) {}
+Coulombs::Coulombs() {}
 Coulombs::Coulombs(double *rp_delta_q, double *rp_t_last, const double q_cap_rated, const double t_rated, const double t_rlim)
   : rp_delta_q_(rp_delta_q), rp_t_last_(rp_t_last), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017),
   soc_min_(0)

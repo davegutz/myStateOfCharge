@@ -209,12 +209,10 @@ void loop()
   static double t_bias_last;  // Memory for rate limiter in filter_temp call, deg C
 
    // Mon, used to count Coulombs and run EKF
-  static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last, batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
-    dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, -1., HDB_VBATT);
+  static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last);
 
   // Sim, used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off. 
-  static BatteryModel *Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, batt_num_cells, batt_r1, batt_r2, batt_r2c2, batt_vsat,
-    dvoc_dt, q_cap_rated, RATED_TEMP, t_rlim, 1., &rp.s_cap_model);
+  static BatteryModel *Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model);
 
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay();   // Time persistence
@@ -282,7 +280,7 @@ void loop()
   {
     Sen->T_temp =  ReadTemp->updateTime();
     load_temp(Sen);
-    filter_temp(reset_temp, t_rlim, Sen, rp.t_bias, &t_bias_last);
+    filter_temp(reset_temp, T_RLIM, Sen, rp.t_bias, &t_bias_last);
   }
 
   // Input all other sensors and do high rate calculations
@@ -360,7 +358,7 @@ void loop()
     }
     
     // EKF - calculates temp_c_, voc_, voc_dyn_ as functions of sensed parameters vb & ib (not soc)
-    Mon->calculate_ekf(Sen);
+    Mon->calculate(Sen);
     
     // Debounce saturation calculation done in ekf using voc model
     boolean sat = Mon->is_sat();
@@ -370,7 +368,7 @@ void loop()
     Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
 
     // Charge time for display
-    Mon->calculate_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ishunt,Mon->soc());
+    Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ishunt,Mon->soc());
 
     // Adjust current sensors
     tweak_on_new_desat(Sen, now);

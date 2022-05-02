@@ -222,7 +222,6 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
 
   // Power calculation
   Sen->Wshunt = Sen->Vbatt*Sen->Ishunt;
-  Sen->Wcharge = Sen->Ishunt * NOM_SYS_VOLT;
 }
 
 // Load temperature only
