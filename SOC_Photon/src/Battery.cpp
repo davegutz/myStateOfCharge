@@ -276,14 +276,14 @@ double BatteryMonitor::calculate(Sensors *Sen)
     boolean conv = abs(y_filt_)<EKF_CONV && !cp.soft_reset;  // Initialize false
     EKF_converged->calculate(conv, EKF_T_CONV, EKF_T_RESET, min(Sen->T, EKF_T_RESET), cp.soft_reset);
 
-    if ( rp.debug==34 )
-        Serial.printf("dt,ib,voc_dyn,voc,voc_filt,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,  %d,\n",
+    if ( rp.debug==34 || rp.debug==7 )
+        Serial.printf("BatteryMonitor:dt,ib,voc_dyn,voc,voc_filt,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,  %d,\n",
             dt_, ib_, voc_dyn_, voc_, voc_filt_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, converged_ekf());
     if ( rp.debug==-34 )
         Serial.printf("dt,ib,voc_dyn,voc,voc_filt,vdyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, conv,\n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,  %d\n",
             dt_, ib_, voc_dyn_, voc_, voc_filt_, vdyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, converged_ekf());
     if ( rp.debug==37 )
-        Serial.printf("ib,vb,voc_dyn,voc(z_),  K_,y_,soc_ekf, y_ekf_f, conv,  %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,%7.4f,  %d,\n",
+        Serial.printf("BatteryMonitor:ib,vb,voc_dyn,voc(z_),  K_,y_,soc_ekf, y_ekf_f, conv,  %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,%7.4f,  %d,\n",
             ib_, vb_, voc_dyn_, voc_,     K_, y_, soc_ekf_, y_filt_, converged_ekf());
     if ( rp.debug==-37 )
         Serial.printf("ib,vb*10-110,voc_dyn_,voc(z_)*10-110,  K_,y_,soc_ekf-90, y_ekf_f,   conv*100,\n%7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,%7.4f,  %7.3f,\n",
@@ -425,22 +425,24 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
 {
     // Solver, steady
     const double meps = 1-1e-6;
-    double voc = Sen->Vbatt/(*rp_nS_) - Sen->Ishunt/(*rp_nP_)*batt_r_ss;
+    double vb = Sen->Vbatt/(*rp_nS_);
+    double voc =  vb - Sen->Ishunt/(*rp_nP_)*batt_r_ss;
+    // double voc =  vb;  // BatteryModel and BatteryMonitor state spaces are initialized at 0 current
     int8_t count = 0;
     static double soc_solved = 1.0;
     double dv_dsoc;
-    double vb_solved = calc_soc_voc(soc_solved, Sen->Tbatt_filt, &dv_dsoc);
-    double err = voc - vb_solved;
+    double voc_solved = calc_soc_voc(soc_solved, Sen->Tbatt_filt, &dv_dsoc);
+    double err = voc - voc_solved;
     while( abs(err)>SOLV_ERR && count++<SOLV_MAX_COUNTS )
     {
         soc_solved = max(min(soc_solved + max(min( err/dv_dsoc, SOLV_MAX_STEP), -SOLV_MAX_STEP), meps), 1e-6);
-        vb_solved = calc_soc_voc(soc_solved, Sen->Tbatt_filt, &dv_dsoc);
-        err = voc - vb_solved;
-        if ( rp.debug==6 ) Serial.printf("solve_ekf:Tbatt_f,ib,count,soc_s,voc,voc_m_s,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-            Sen->Tbatt_filt, Sen->Ishunt, count, soc_solved, voc, vb_solved, err);
+        voc_solved = calc_soc_voc(soc_solved, Sen->Tbatt_filt, &dv_dsoc);
+        err = voc - voc_solved;
+        if ( rp.debug==6 ) Serial.printf("solve_ekf:Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
+            Sen->Tbatt_filt, Sen->Ishunt, count, soc_solved, vb, voc, voc_solved, err);
     }
-    if ( rp.debug==7 ) Serial.printf("solve_ekf:Tbatt_f,ib,count,soc_s,voc,voc_m_s,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-    Sen->Tbatt_filt, Sen->Ishunt, count, soc_solved, voc, vb_solved, err);
+    if ( rp.debug==7 ) Serial.printf("solve_ekf:Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
+    Sen->Tbatt_filt, Sen->Ishunt, count, soc_solved, vb, voc, voc_solved, err);
     init_soc_ekf(soc_solved);
     return ( count<SOLV_MAX_COUNTS );
 }
@@ -556,7 +558,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     if ( rp.debug==79 ) Serial.printf("temp_C, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f,\n",
         temp_C, dvoc_dt_, vsat_, voc_, q_capacity_, sat_ib_max_, ib_);
 
-    if ( rp.debug==78 ) Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc_,voc,,vdyn,v,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+    if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc_,voc,,vdyn,vb,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      dt,temp_C, ib_, soc_, voc_, vdyn_, vb_);
     
     if ( rp.debug==-78 ) Serial.printf("SOC/10,soc*10,voc,vsat,curr_in,sat_ib_max_,ib,sat,\n%7.3f, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
