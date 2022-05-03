@@ -40,8 +40,8 @@ struct CommandPars
   boolean model_saturated;  // Sim on cutback and saturated
   boolean soft_reset;       // Use talk to reset main
   boolean write_summary;    // Use talk to issue a write command to summary
-  double curr_bias_amp;     // Signal injection bias for amplified current input, A
-  double curr_bias_noamp;   // Signal injection bias for non-amplified current input, A
+  float curr_bias_amp;     // Signal injection bias for amplified current input, A
+  float curr_bias_noamp;   // Signal injection bias for non-amplified current input, A
   boolean dc_dc_on;         // DC-DC charger is on
   CommandPars(void)
   {

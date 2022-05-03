@@ -34,33 +34,33 @@ struct RetainedPars
 {
   int8_t debug = 2;         // Level of debug printing
   double delta_q = -0.5;    // Charge change since saturated, C
-  double t_last = 25.;      //Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
+  float t_last = 25.;      //Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
   double delta_q_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
-  double t_last_model = 25.;  // Battery temperature past value for rate limit memory, deg C
-  double curr_bias_amp = CURR_BIAS_AMP; // Calibrate amp current sensor, A 
-  double curr_bias_noamp = CURR_BIAS_NOAMP; // Calibrate non-amplified current sensor, A 
-  double curr_bias_all = CURR_BIAS_ALL; // Bias all current sensors, A 
+  float t_last_model = 25.;  // Battery temperature past value for rate limit memory, deg C
+  float curr_bias_amp = CURR_BIAS_AMP; // Calibrate amp current sensor, A 
+  float curr_bias_noamp = CURR_BIAS_NOAMP; // Calibrate non-amplified current sensor, A 
+  float curr_bias_all = CURR_BIAS_ALL; // Bias all current sensors, A 
   boolean curr_sel_noamp = false; // Use non-amplified sensor
-  double vbatt_bias = VOLT_BIAS;    // Calibrate Vbatt, V
+  float vbatt_bias = VOLT_BIAS;    // Calibrate Vbatt, V
   boolean modeling = false; // Driving saturation calculation with model
   uint32_t duty = 0;        // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
-  double amp = 0.;          // Injected amplitude, A pk (0-18.3)
-  double freq = 0.;         // Injected frequency, Hz (0-2)
+  float amp = 0.;          // Injected amplitude, A pk (0-18.3)
+  float freq = 0.;         // Injected frequency, Hz (0-2)
   uint8_t type = 0;         // Injected waveform type.   0=sine, 1=square, 2=triangle
-  double inj_soft_bias = 0.;       // Constant bias, A
-  double t_bias = TEMP_BIAS;       // Sensed temp bias, deg C
-  double s_cap_model = 1.;  // Scalar on battery model size
-  double cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function
+  float inj_soft_bias = 0.;       // Constant bias, A
+  float t_bias = TEMP_BIAS;       // Sensed temp bias, deg C
+  float s_cap_model = 1.;  // Scalar on battery model size
+  float cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
   int isum = -1;                // Summary location.   Begins at -1 because first action is to increment isum
-  double delta_q_inf_amp = 0.;  // delta_q since last reset.  Simple integration of amplified current
-  double delta_q_inf_noamp = 0.;// delta_q since last reset.  Simple integration of non-amplified current
-  double hys_scale = 1.;        // Hysteresis scalar
+  float delta_q_inf_amp = 0.;  // delta_q since last reset.  Simple integration of amplified current
+  float delta_q_inf_noamp = 0.;// delta_q since last reset.  Simple integration of non-amplified current
+  float hys_scale = 1.;        // Hysteresis scalar
   boolean tweak_test = false;   // Driving signal injection completely using software inj_soft_bias 
-  double tweak_bias_amp = 0.;   // Tweak calibration for amplified current sensor
-  double tweak_bias_noamp = 0.; // Tweak calibration for non-amplified current sensor
-  double nP = NP;               // Number parallel batteries in bank
-  double nS = NS;               // Number series batteries in bank
+  float tweak_bias_amp = 0.;   // Tweak calibration for amplified current sensor
+  float tweak_bias_noamp = 0.; // Tweak calibration for non-amplified current sensor
+  float nP = NP;               // Number parallel batteries in bank
+  float nS = NS;               // Number series batteries in bank
 
   // Nominalize
   void nominal()

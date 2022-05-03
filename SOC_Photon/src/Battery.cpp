@@ -37,7 +37,7 @@ extern CommandPars cp;
 // class Battery
 // constructors
 Battery::Battery() {}
-Battery::Battery(double *rp_delta_q, double *rp_t_last, const double hys_direx, double *rp_nP, double *rp_nS)
+Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS)
     : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM),
     sr_(1), nom_vsat_(BATT_V_SAT-HDB_VBATT), dv_(BATT_DV), dvoc_dt_(BATT_DVOC_DT),
     r0_(BATT_R_0), tau_ct_(BATT_TAU_CT), rct_(BATT_R_CT), tau_dif_(BATT_TAU_DIFF), r_dif_(BATT_R_DIFF),
@@ -135,12 +135,11 @@ void Battery::init_battery(Sensors *Sen)
 {
     vb_ = Sen->Vbatt / (*rp_nS_);
     ib_ = Sen->Ishunt / (*rp_nP_);
-    if ( isnan(vb_) ) vb_ = 13.;   // reset overflow
-    if ( isnan(ib_) ) ib_ = 0.;   // reset overflow
+    if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
+    if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
     double u[2] = {ib_, vb_};
     if ( rp.debug==8) Serial.printf("init_battery:  initializing Randles to %7.3f, %7.3f\n", ib_, vb_);
     Randles_->init_state_space(u);
-    Randles_->calc_x_dot(u); // Confirm
     if ( rp.debug==8 ) Randles_->pretty_print();
     init_hys(0.0);
 }
@@ -195,7 +194,7 @@ double Battery::voc_soc(const double soc, const double temp_c)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery monitor class
 BatteryMonitor::BatteryMonitor(): Battery() {}
-BatteryMonitor::BatteryMonitor(double *rp_delta_q, double *rp_t_last, double *rp_nP, double *rp_nS):
+BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS):
     Battery(rp_delta_q, rp_t_last, -1., rp_nP, rp_nS), voc_filt_(BATT_V_SAT-HDB_VBATT)
 {
     // EKF
@@ -458,7 +457,7 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
 BatteryModel::BatteryModel() : Battery() {}
-BatteryModel::BatteryModel(double *rp_delta_q, double *rp_t_last, double *rp_s_cap_model, double *rp_nP, double *rp_nS) :
+BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS) :
     Battery(rp_delta_q, rp_t_last, 1., rp_nP, rp_nS), q_(RATED_BATT_CAP*3600.), rp_s_cap_model_(rp_s_cap_model)
 {
     // Randles dynamic model for EKF

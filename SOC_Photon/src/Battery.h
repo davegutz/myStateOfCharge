@@ -140,7 +140,7 @@ class Battery : public Coulombs
 {
 public:
   Battery();
-  Battery(double *rp_delta_q, double *rp_t_last, const double hys_direx, double *rp_nP, double *rp_nS);
+  Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS);
   ~Battery();
   // operators
   // functions
@@ -203,8 +203,8 @@ protected:
   Hysteresis *hys_;
   double ioc_;      // Current into charge portion of battery, A
   double voc_stat_; // Static, table lookup value of voc before applying hysteresis, V
-  double *rp_nP_;   // Number of parallel batteries in bank, e.g. '2P1S'
-  double *rp_nS_;   // Number of series batteries in bank, e.g. '2P1S'
+  float *rp_nP_;    // Number of parallel batteries in bank, e.g. '2P1S'
+  float *rp_nS_;    // Number of series batteries in bank, e.g. '2P1S'
 };
 
 
@@ -213,7 +213,7 @@ class BatteryMonitor: public Battery, public EKF_1x1
 {
 public:
   BatteryMonitor();
-  BatteryMonitor(double *rp_delta_q, double *rp_t_last, double *rp_nP, double *rp_nS);
+  BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS);
   ~BatteryMonitor();
   // operators
   // functions
@@ -267,7 +267,7 @@ class BatteryModel: public Battery
 {
 public:
   BatteryModel();
-  BatteryModel(double *rp_delta_q, double *rp_t_last, double *rp_s_cap_model, double *rp_nP, double *rp_nS);
+  BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS);
   ~BatteryModel();
   // operators
   // functions
@@ -294,9 +294,9 @@ protected:
   boolean model_saturated_; // Indicator of maximal cutback, T = cutback saturated
   double ib_sat_;       // Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
   double s_cap_;        // Rated capacity scalar
-  double *rp_delta_q_model_;
-  double *rp_t_last_model_;
-  double *rp_s_cap_model_;
+  double *rp_delta_q_model_;// Charge change since saturated, C
+  float *rp_t_last_model_;  // Battery temperature past value for rate limit memory, deg C
+  float *rp_s_cap_model_;   // Rated capacity scalar
 };
 
 

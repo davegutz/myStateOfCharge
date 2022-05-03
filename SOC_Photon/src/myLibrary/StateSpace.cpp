@@ -82,6 +82,7 @@ void StateSpace::init_state_space(double *u)
   if ( n_==2 && p_==2 )
   {
     mulmat(AinvB_, u_, x_, n_, n_, 1);
+    calc_x_dot(u_);
   }
   else  // All zero
   {

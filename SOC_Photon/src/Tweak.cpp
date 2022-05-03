@@ -35,7 +35,7 @@ Tweak::Tweak()
   : name_("None"), gain_(0), max_change_(0), delta_q_sat_present_(0), delta_q_sat_past_(0), sat_(false),
   delta_q_max_(0), time_sat_past_(0UL), time_to_wait_(0), delta_hrs_(0) {}
 Tweak::Tweak(const String name, const double gain, const double max_change, const double max_tweak,
-  const double time_to_wait, double *rp_delta_q_inf, double *rp_tweak_bias)
+  const double time_to_wait, float *rp_delta_q_inf, float *rp_tweak_bias)
   : name_(name), gain_(-1./gain), max_change_(max_change), max_tweak_(max_tweak), delta_q_sat_present_(0),
     delta_q_sat_past_(0), sat_(false), delta_q_max_(-(RATED_BATT_CAP*3600.)), time_sat_past_(millis()), time_to_wait_(time_to_wait),
     rp_delta_q_inf_(rp_delta_q_inf), rp_tweak_bias_(rp_tweak_bias), delta_hrs_(0) {}

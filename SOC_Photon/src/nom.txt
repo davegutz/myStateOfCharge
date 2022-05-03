@@ -8,12 +8,15 @@
 		dv_				Adjustment for calibration error, V
 		dv_dsoc			Derivative scaled, V/fraction
 		DVOC_DT			Change of VOC with operating temperature in range 0 - 50 C V/deg C
+		gain_			Current correction to be made for charge error, A/Coulomb/day
 		HDB_TBATT		Half deadband to filter Tbatt, V
 		HDB_VBATT		Half deadband to filter Vbatt, V
         ib_             Battery terminal current, A
         Ib_             Battery bank current, A
         ioc_            Best estimate of IOC charge current after hysteresis, A
 		ib_sat_			Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
+		max_change_		Maximum allowed change to calibration adjustment, A
+		max_tweak_		Maximum allowed calibration adjustment, A\n
 		model_cutback_	Indicate that modeled current being limited on saturation cutback, T = cutback limited
 		model_saturated_	Indicator of maximal cutback, T = cutback saturated
 		nom_vsat_		Nominal saturation threshold at 25C, V

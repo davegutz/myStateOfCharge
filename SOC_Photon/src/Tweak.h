@@ -30,7 +30,7 @@ class Tweak
 public:
   Tweak();
   Tweak(const String name, const double gain, const double max_change, const double max_tweak, const double time_to_wait,
-    double *rp_delta_q_inf, double *rp_tweak_bias);
+    float *rp_delta_q_inf, float *rp_tweak_bias);
   ~Tweak();
   // operators
   // functions
@@ -59,17 +59,17 @@ public:
   void save_new_sat(unsigned long int now);
 protected:
   String name_;
-  double gain_;
-  double max_change_;
-  double max_tweak_;
-  double delta_q_sat_present_;
+  double gain_;                 // Current correction to be made for charge error, A/Coulomb/day
+  double max_change_;           // Maximum allowed change to calibration adjustment, A
+  double max_tweak_;            // Maximum allowed calibration adjustment, A\n
+  double delta_q_sat_present_;  // TODO:  finish these comments and populate nom.txt too
   double delta_q_sat_past_;
   boolean sat_;
   double delta_q_max_;          // Running tab since last de-saturation of potential new delta_q_sat
   unsigned long int time_sat_past_;
   double time_to_wait_;
-  double *rp_delta_q_inf_;
-  double *rp_tweak_bias_;
+  float *rp_delta_q_inf_;
+  float *rp_tweak_bias_;
   double delta_hrs_;
 };
 

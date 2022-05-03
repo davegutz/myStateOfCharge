@@ -31,7 +31,7 @@ class Coulombs
 {
 public:
   Coulombs();
-  Coulombs(double *rp_delta_q, double *rp_t_last, const double q_cap_rated, const double t_rated, const double t_rlim);
+  Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rated, const double t_rated, const double t_rlim);
   ~Coulombs();
   // operators
   // functions
@@ -57,7 +57,7 @@ public:
   virtual double vsat(void) = 0;
 protected:
   double *rp_delta_q_;// Charge since saturated, C
-  double *rp_t_last_; // Last battery temperature for rate limit memory, deg C
+  float *rp_t_last_;  // Last battery temperature for rate limit memory, deg C
   double q_cap_rated_;// Rated capacity at t_rated_, saved for future scaling, C
   double q_cap_rated_scaled_;// Applied rated capacity at t_rated_, after scaling, C
   double q_capacity_; // Saturation charge at temperature, C

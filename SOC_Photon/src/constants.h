@@ -36,8 +36,8 @@
 #include "local_config.h"       // this is not in GitHub repository.  Normally empty file
 
 // Constants always defined
-#define ONE_HOUR_MILLIS       3600000UL  // Number of milliseconds in one hour (60*60*1000)
-#define ONE_DAY_MILLIS        86400000UL  // Number of milliseconds in one day (24*60*60*1000)
+#define ONE_HOUR_MILLIS       3600000UL // Number of milliseconds in one hour (60*60*1000)
+#define ONE_DAY_MILLIS        86400000UL// Number of milliseconds in one day (24*60*60*1000)
 #define PUBLISH_BLYNK_DELAY   10000UL   // Blynk cloud updates, ms (10000UL = 10 sec)
 #define PUBLISH_PARTICLE_DELAY 2000UL   // Particle cloud updates (2000UL = 2 sec)
 #define READ_DELAY            100UL     // Sensor read wait, ms (100UL = 0.1 sec)
@@ -81,7 +81,7 @@
 #define F_Z             0.80        // General filter zeta (0.80)
 #define F_W_T           0.05        // Temperature filter wn, r/s (0.05)   
 #define F_Z_T           0.80        // Temperature filter zeta (0.80)
-#define NSUM            90          // Number of saved summaries.   If too large, will get compile error
+#define NSUM            102         // Number of saved summaries.   If too large, will get compile error
 #define HDB_TBATT       0.06        // Half deadband to filter Tbatt, F (0.06)
 #define HDB_VBATT       0.05        // Half deadband to filter Vbatt, V (0.05)
 const double t_sat = 5.;            // Saturation time, sec
