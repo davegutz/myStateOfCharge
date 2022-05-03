@@ -39,9 +39,20 @@ StateSpace::StateSpace(double *A, double *B, double *C, double *D, const int8_t 
     x_ = new double[n_];
     x_dot_ = new double[n_];
     x_past_ = new double[n_];
-    init_state_space();
     u_ = new double[p_];
     y_ = new double[q_];
+    if ( n_==2 && p_==2)
+    {
+      double Adet = A_[0]*A_[3] - A_[1]*A_[2];
+      double *mAinv_ = new double[n*n];
+      AinvB_ = new double[n*n];
+      mAinv_[0] = -A_[3] / Adet;
+      mAinv_[1] =  A_[1] / Adet;
+      mAinv_[2] =  A_[2] / Adet;
+      mAinv_[3] = -A_[0] / Adet;
+      mulmat(mAinv_, B_, AinvB_, n, n, p);
+    }
+
   }
 StateSpace::~StateSpace() {}
 
@@ -64,12 +75,21 @@ void StateSpace::calc_x_dot(double *u)
 }
 
 // Initialize
-void StateSpace::init_state_space(void)
+void StateSpace::init_state_space(double *u)
 {
-  for ( int i=0; i<n_; i++ )
+  // Explicit initialization 2x2
+  for (int i=0; i<p_; i++) u_[i] = u[i];
+  if ( n_==2 && p_==2 )
   {
-    x_[i] = 0.;
-    x_past_[i] = 0.;
+    mulmat(AinvB_, u_, x_, n_, n_, 1);
+  }
+  else  // All zero
+  {
+    for ( int i=0; i<n_; i++ )
+    {
+      x_[i] = 0.;
+      x_past_[i] = 0.;
+    }
   }
 }
 
@@ -115,6 +135,11 @@ void StateSpace::pretty_print(void)
   pretty_print_mat("C ", q_, n_, C_);
   pretty_print_mat("D ", q_, p_, D_);
   pretty_print_vec("x_dot ", n_, x_dot_);
+  if ( n_==2 && p_==2)
+  {
+    pretty_print_mat("AinvB", n_, n_, AinvB_);
+  }
+
 }
 
 // Scale elements as requested

@@ -131,9 +131,17 @@ double_t Battery::calc_vsat(void)
 }
 
 // Initialize
-void Battery::init_battery(void)
+void Battery::init_battery(Sensors *Sen)
 {
-    Randles_->init_state_space();
+    vb_ = Sen->Vbatt / (*rp_nS_);
+    ib_ = Sen->Ishunt / (*rp_nP_);
+    if ( isnan(vb_) ) vb_ = 13.;   // reset overflow
+    if ( isnan(ib_) ) ib_ = 0.;   // reset overflow
+    double u[2] = {ib_, vb_};
+    if ( rp.debug==8) Serial.printf("init_battery:  initializing Randles to %7.3f, %7.3f\n", ib_, vb_);
+    Randles_->init_state_space(u);
+    Randles_->calc_x_dot(u); // Confirm
+    if ( rp.debug==8 ) Randles_->pretty_print();
     init_hys(0.0);
 }
 

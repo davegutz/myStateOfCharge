@@ -313,7 +313,7 @@ void loop()
     if ( reset )
     {
       Sim->apply_delta_q_t(rp.delta_q_model, rp.t_last_model);
-      Sim->init_battery();  // for cp.soft_reset
+      Sim->init_battery(Sen);
     }
 
     // Sim calculation
@@ -353,7 +353,7 @@ void loop()
     if ( reset_temp )
     {
       Mon->apply_delta_q_t(rp.delta_q, rp.t_last);  // From memory
-      Mon->init_battery();                          // for cp.soft_reset
+      Mon->init_battery(Sen);
       Mon->solve_ekf(Sen);
     }
     

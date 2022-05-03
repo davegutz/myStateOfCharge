@@ -153,7 +153,7 @@ public:
   double Dv() { return (dv_); };
   double hys_scale() { return (hys_->scale()*hys_->direx()); };
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
-  void init_battery(void);
+  void init_battery(Sensors *Sen);
   void init_hys(const double hys) { hys_->init(hys); };
   double Ib() { return (ib_*(*rp_nP_)); };
   double ioc() { return (ioc_); };

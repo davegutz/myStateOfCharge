@@ -36,7 +36,7 @@ public:
   // operators
   // functions
   void calc_x_dot(double *u);
-  void init_state_space(void);
+  void init_state_space(double *u);
   void update(const double dt);
   virtual void pretty_print();
   void pretty_print_mat(const String name, const uint8_t n, const uint8_t m, double *A);
@@ -61,6 +61,7 @@ protected:
   int8_t n_; // Length of state vector
   int8_t p_; // Length of input vector
   int8_t q_; // Length of output vector
+  double *AinvB_;   // Inverse of A times B; valid for 2x2 only
 };
 
 // Methods

@@ -871,6 +871,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("     +6:   EKF solver iterations during initialization\n");
   Serial.printf("     +7:   EKF solver summary during initialization\n");
   Serial.printf("     -7:   Battery i/o Arduino plot\n");
+  Serial.printf("     +8:   Randles model state space initialization\n");
   Serial.printf("    -11:   Summary Arduino\n");
   Serial.printf("  +/-12:   Inject\n");
   Serial.printf("  +/-14:   vshunt and ishunt raw\n");
