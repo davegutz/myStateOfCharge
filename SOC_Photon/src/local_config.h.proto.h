@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const   String    unit = "proto_20220502";  // Gross configuration stamp, put on data points and matches GitHub tag
+const   String    unit = "pro_20220502";  // Gross configuration stamp, put on data points and matches GitHub tag
 #define CURR_BIAS_AMP         -0.24 // Calibration of amplified shunt sensor, A
 #define CURR_BIAS_NOAMP       -1.1  // Calibration of non-amplified shunt sensor, A
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors, A

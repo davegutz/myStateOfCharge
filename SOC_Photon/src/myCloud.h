@@ -31,7 +31,7 @@ struct Publish
   uint32_t now;
   String unit;
   String hm_string;
-  float control_time;
+  double control_time;
   float Vbatt;
   float Tbatt;
   float Vshunt;
