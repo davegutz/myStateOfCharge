@@ -51,33 +51,52 @@ Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, f
     // Resistance values add up to same resistance loss as matched to installed battery
     // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
     // the state-space stability requires at least 0.1.   Used 0.2.
-    double c_ct = tau_ct_ / rct_;
-    double c_dif = tau_dif_ / r_dif_;
     int rand_n = 2; // Rows A and B
     int rand_p = 2; // Col B    
     int rand_q = 1; // Row C and D
     rand_A_ = new double[rand_n*rand_n];
-    rand_A_[0] = -1./tau_ct_;
-    rand_A_[1] = 0.;
-    rand_A_[2] = 0.;
-    rand_A_[3] = -1/tau_dif_;
     rand_B_ = new double [rand_n*rand_p];
-    rand_B_[0] = 1./c_ct;
-    rand_B_[1] = 0.;
-    rand_B_[2] = 1./c_dif;
-    rand_B_[3] = 0.;
     rand_C_ = new double [rand_q*rand_n];
-    rand_C_[0] = -1.;
-    rand_C_[1] = -1.;
     rand_D_ = new double [rand_q*rand_p];
-    rand_D_[0] = -r0_;
-    rand_D_[1] = 1.;
+    assign_rand();
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
     hys_ = new Hysteresis(hys_cap, hys_direx);
 }
 Battery::~Battery() {}
 // operators
 // functions
+
+// Assign parameters of model
+void Battery::assign_mod(const uint8_t mod)
+{
+    switch (mod)
+    {
+        case ( '0' ):  // "Battleborn";
+            break;
+        case ( '1' ):  // "LION";
+            break;
+        default:       // "unknown"
+            Serial.printf("Battery::assign_mod:  unknown mod number = %d.  Type 'h' for help\n", mod);
+            break;
+    }
+}
+
+// Battery::assign_rand:    Assign constants from battery chemistry to arrays for state space model
+void Battery::assign_rand(void)
+{
+    rand_A_[0] = -1./tau_ct_;
+    rand_A_[1] = 0.;
+    rand_A_[2] = 0.;
+    rand_A_[3] = -1/tau_dif_;
+    rand_B_[0] = 1./(tau_ct_ / rct_);
+    rand_B_[1] = 0.;
+    rand_B_[2] = 1./(tau_dif_ / r_dif_);
+    rand_B_[3] = 0.;
+    rand_C_[0] = -1.;
+    rand_C_[1] = -1.;
+    rand_D_[0] = -r0_;
+    rand_D_[1] = 1.;
+}
 
 // Placeholder; not used.  May write this base version if needed using BatteryModel::calculate()
 // as a starting point but use the base class Randles formulation and re-arrange the i/o for that model.
@@ -134,21 +153,35 @@ double_t Battery::calc_vsat(void)
 // Battery type model translate to plain English for display
 String Battery::decode(const uint8_t mod)
 {
-    // TODO
-    return ( "TODO" );
+    String result;
+    switch (mod)
+    {
+        case ( '0' ):
+            result = "Battleborn";
+            break;
+        case ( '1' ):
+            result = "LION";
+            break;
+        default:
+            result = "unknown";
+            Serial.printf("Battery::decode:  unknown mod number = %d.  Type 'h' for help\n", mod);
+            break;
+    }
+    return ( result );
 }
 
 // Battery type model coding
 uint8_t Battery::encode(const String mod_str)
 {
-    // TODO
-    return ( 0 );
-}
-
-// Assign parameters of model
-void Battery::assign_mod(const uint8_t mod)
-{
-// TODO
+    uint8_t result;
+    if ( mod_str=="Battleborn" ) result = 0;
+    else if ( mod_str=="LION" ) result = 1;
+    else
+    {
+        result = 99;
+        Serial.printf("Battery::encode:  unknown mod = %s.  Type 'h' for help\n", mod_str.c_str());
+    }
+    return ( result );
 }
 
 // Initialize
@@ -464,7 +497,7 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
     // Solver, steady
     const double meps = 1-1e-6;
     double vb = Sen->Vbatt/(*rp_nS_);
-    double voc =  vb - Sen->Ishunt/(*rp_nP_)*batt_r_ss;
+    double voc =  vb - Sen->Ishunt/(*rp_nP_)*r_ss;
     // double voc =  vb;  // BatteryModel and BatteryMonitor state spaces are initialized at 0 current
     int8_t count = 0;
     static double soc_solved = 1.0;

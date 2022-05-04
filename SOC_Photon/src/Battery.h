@@ -34,21 +34,35 @@
 #include "constants.h"
 struct Sensors;
 
-// BattleBorn 100 Ah, 12v LiFePO4
-#define RATED_TEMP            25.       // Temperature at RATED_BATT_CAP, deg C
-// >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
-#define BATT_V_SAT            13.85     // Normal battery cell saturation for SOC=99.7, V (13.85)
-#define DQDT                  0.01      // Change of charge with temperature, fraction/deg C (0.01 from literature)
 #define TCHARGE_DISPLAY_DEADBAND 0.1    // Inside this +/- deadband, charge time is displayed '---', A
 #define T_RLIM                0.017    // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s (0.017 allows 1 deg for 1 minute)
 const double sat_cutback_gain = 10; // Multiplier on saturation anti-windup
 const double vb_dc_dc = 13.5;   // DC-DC charger estimated voltage, V
 
-// Latest table from data
+#define EKF_CONV        1e-3      // EKF tracking error indicating convergence, V (1e-3)
+#define EKF_T_CONV      30.       // EKF set convergence test time, sec (30.)
+#define EKF_T_RESET (EKF_T_CONV/2.) // EKF reset test time, sec ('up 1, down 2')
+#define EKF_Q_SD        0.001     // Standard deviation of EKF process uncertainty, V
+#define EKF_R_SD        0.1       // Standard deviation of EKF state uncertainty, fraction (0-1)
+#define EKF_NOM_DT      0.1       // EKF nominal update time, s (initialization; actual value varies)
+#define DF2             0.05      // Threshold to resest Coulomb Counter if different from ekf, fraction (0.05)
+#define DF1             0.02      // Weighted selection lower transition drift, fraction
+#define TAU_Y_FILT      5.        // EKF y-filter time constant, sec (5.)
+#define MIN_Y_FILT      -0.5      // EKF y-filter minimum, V (-0.5)
+#define MAX_Y_FILT      0.5       // EKF y-filter maximum, V (0.5)
+#define SOLV_ERR        1e-6      // EKF initialization solver error bound, V
+#define SOLV_MAX_COUNTS 10        // EKF initialization solver max iters
+#define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction
+
+// Battery chemistry
+
+// BattleBorn 100 Ah, 12v LiFePO4
 // See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
-const double low_voc = 10.; // Voltage threshold for BMS to turn off battery
-const double low_t = 0.;    // Minimum temperature for valid saturation check, because BMS shuts off battery low.
-                            // Heater should keep >4, too
+// >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
+#define DQDT          0.01  // Change of charge with temperature, fraction/deg C (0.01 from literature)
+const double low_voc = 10.;         // Voltage threshold for BMS to turn off battery
+const double low_t = 0.;            // Minimum temperature for valid saturation check, because BMS shuts off battery low.
+                                    // Heater should keep >4, too
 const unsigned int m_t = 4;
 const double y_t[m_t] =  { 5., 11.1, 20., 40. };
 const unsigned int n_s = 16;
@@ -72,17 +86,9 @@ const double t_r[m_h*n_h] = { 1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.00
                               1e-7, 1e-7,   0.0050, 0.0036, 0.0015, 0.0024, 0.0030,   1e-7, 1e-7,
                               1e-7, 1e-7,     1e-7, 0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7};
 
-#define EKF_CONV        1e-3      // EKF tracking error indicating convergence, V (1e-3)
-#define EKF_T_CONV      30.       // EKF set convergence test time, sec (30.)
-#define EKF_T_RESET (EKF_T_CONV/2.) // EKF reset test time, sec ('up 1, down 2')
-#define EKF_Q_SD        0.001     // Standard deviation of EKF process uncertainty, V
-#define EKF_R_SD        0.1       // Standard deviation of EKF state uncertainty, fraction (0-1)
-#define EKF_NOM_DT      0.1       // EKF nominal update time, s (initialization; actual value varies)
-#define DF2             0.05      // Threshold to resest Coulomb Counter if different from ekf, fraction (0.05)
-#define DF1             0.02      // Weighted selection lower transition drift, fraction
-#define TAU_Y_FILT      5.        // EKF y-filter time constant, sec (5.)
-#define MIN_Y_FILT      -0.5      // EKF y-filter minimum, V (-0.5)
-#define MAX_Y_FILT      0.5       // EKF y-filter maximum, V (0.5)
+// Battleborn
+#define BATT_V_SAT      13.85     // Normal battery cell saturation for SOC=99.7, V
+#define BATT_DVOC_DT    0.004     // Change of VOC with operating temperature in range 0 - 50 C (0.004 for Vb on 2022-02-18) V/deg C
 #define BATT_DV         0.01      // Adjustment to compensate for tables generated without considering hys, V
 #define BATT_R_0        0.003     // Randles R0, ohms
 #define BATT_R_CT       0.0016    // Randles charge transfer resistance, ohms
@@ -91,11 +97,8 @@ const double t_r[m_h*n_h] = { 1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.00
 #define BATT_TAU_DIFF   83.       // Randles diffusion time constant, s (=1/Rdif/Cdif)
 #define BATT_TAU_SD     1.8e7     // Equivalent model for EKF.  Creating an anchor.   So large it's just a pass through, sec
 #define BATT_R_SD       70.       // Equivalent model for EKF reference.  Parasitic equivalent, ohms
-#define SOLV_ERR        1e-6      // EKF initialization solver error bound, V
-#define SOLV_MAX_COUNTS 10        // EKF initialization solver max iters
-#define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction
-#define BATT_DVOC_DT    0.004     // Change of VOC with operating temperature in range 0 - 50 C (0.004 for Vb on 2022-02-18) V/deg C
-const double batt_r_ss = BATT_R_0 + BATT_R_CT + BATT_R_DIFF; // Steady state equivalent battery resistance, for solver, Ohms
+
+const float r_ss = BATT_R_0 + BATT_R_CT + BATT_R_DIFF; // Steady state equivalent battery resistance, for solver, Ohms
 
 // Hysteresis: reservoir model of battery electrical hysteresis
 // Use variable resistor and capacitor to create hysteresis from an RC circuit
@@ -145,6 +148,7 @@ public:
   // operators
   // functions
   void assign_mod(const uint8_t mod);
+  void assign_rand(void);
   double calc_soc_voc(const double soc, const double temp_c, double *dv_dsoc);
   double calc_soc_voc_slope(double soc, double temp_c);
   double calc_vsat(void);
