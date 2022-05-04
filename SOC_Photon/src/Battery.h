@@ -54,51 +54,12 @@ const double vb_dc_dc = 13.5;   // DC-DC charger estimated voltage, V
 #define SOLV_MAX_COUNTS 10        // EKF initialization solver max iters
 #define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction
 
-// Battery chemistry
+
 
 // BattleBorn 100 Ah, 12v LiFePO4
 // See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
 // >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
-#define DQDT          0.01  // Change of charge with temperature, fraction/deg C (0.01 from literature)
-const double low_voc = 10.;         // Voltage threshold for BMS to turn off battery
-const double low_t = 0.;            // Minimum temperature for valid saturation check, because BMS shuts off battery low.
-                                    // Heater should keep >4, too
-const unsigned int m_t = 4;
-const double y_t[m_t] =  { 5., 11.1, 20., 40. };
-const unsigned int n_s = 16;
-const double x_soc[n_s] =     { 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.98,  1.00};
-const double t_voc[m_t*n_s] = { 4.00,  4.00,  6.00,  9.50,  11.70, 12.30, 12.50, 12.65, 12.82, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 14.95,
-                                4.00,  4.00,  8.00,  11.60, 12.40, 12.60, 12.70, 12.80, 12.92, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 14.96,
-                                4.00,  8.00,  12.20, 12.68, 12.73, 12.79, 12.81, 12.89, 13.00, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 15.00,
-                                4.08,  8.08,  12.28, 12.76, 12.81, 12.87, 12.89, 12.97, 13.08, 13.12, 13.17, 13.22, 13.29, 13.33, 13.35, 15.08};
-const unsigned int n_n = 4;
-const double x_soc_min[n_n] = { 5.,   11.1,  20.,  40. };
-const double t_soc_min[n_n] = { 0.14, 0.12,  0.08, 0.07};
 const double mxeps_bb = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness)
-
-// Hysteresis constants
-const double hys_cap = 3.6e6;
-const unsigned int n_h = 9;
-const unsigned int m_h = 3;
-const double x_dv[n_h]    = { -0.09, -0.07, -0.05, -0.03, 0.00, 0.03, 0.05, 0.07, 0.09};
-const double y_soc[m_h]   = { 0.0,   0.5,    1.0};
-const double t_r[m_h*n_h] = { 1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.0030, 0.0046, 1e-7,
-                              1e-7, 1e-7,   0.0050, 0.0036, 0.0015, 0.0024, 0.0030,   1e-7, 1e-7,
-                              1e-7, 1e-7,     1e-7, 0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7};
-
-// Battleborn
-#define BATT_V_SAT      13.85     // Normal battery cell saturation for SOC=99.7, V
-#define BATT_DVOC_DT    0.004     // Change of VOC with operating temperature in range 0 - 50 C (0.004 for Vb on 2022-02-18) V/deg C
-#define BATT_DV         0.01      // Adjustment to compensate for tables generated without considering hys, V
-#define BATT_R_0        0.003     // Randles R0, ohms
-#define BATT_R_CT       0.0016    // Randles charge transfer resistance, ohms
-#define BATT_R_DIFF     0.0077    // Randles diffusion resistance, ohms
-#define BATT_TAU_CT     0.2       // Randles charge transfer time constant, s (=1/Rct/Cct)
-#define BATT_TAU_DIFF   83.       // Randles diffusion time constant, s (=1/Rdif/Cdif)
-#define BATT_TAU_SD     1.8e7     // Equivalent model for EKF.  Creating an anchor.   So large it's just a pass through, sec
-#define BATT_R_SD       70.       // Equivalent model for EKF reference.  Parasitic equivalent, ohms
-
-const float r_ss = BATT_R_0 + BATT_R_CT + BATT_R_DIFF; // Steady state equivalent battery resistance, for solver, Ohms
 
 // Hysteresis: reservoir model of battery electrical hysteresis
 // Use variable resistor and capacitor to create hysteresis from an RC circuit
@@ -106,7 +67,7 @@ class Hysteresis
 {
 public:
   Hysteresis();
-  Hysteresis(const double cap, const double direx);
+  Hysteresis(const double cap, const double direx, Chemistry chem);
   ~Hysteresis();
   // operators
   // functions
@@ -195,8 +156,8 @@ protected:
   double rct_;      // Randles charge transfer resistance, ohms
   double tau_dif_;  // Randles diffusion time constant, s (=1/Rdif/Cdif)
   double r_dif_;    // Randles diffusion resistance, ohms
-  double tau_sd_;   // Time constant of ideal battery capacitor model, input current A, output volts=soc (0-1)
-  double r_sd_;     // Trickle discharge of ideal battery capacitor model, ohms
+  double tau_sd_;   // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
+  double r_sd_;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
   // EKF declarations
   StateSpace *Randles_; // Randles model {ib, vb} --> {voc}, ioc=ib for Battery version
                         // Randles model {ib, voc} --> {vb}, ioc=ib for BatteryModel version

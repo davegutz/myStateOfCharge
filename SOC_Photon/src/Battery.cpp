@@ -34,18 +34,16 @@ extern RetainedPars rp; // Various parameters to be static at system level
 extern CommandPars cp;
 extern PublishPars pp;            // For publishing
 
-
 // class Battery
 // constructors
 Battery::Battery() {}
 Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS, uint8_t *rp_mod)
-    : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM),
-    sr_(1), nom_vsat_(BATT_V_SAT-HDB_VBATT), dv_(BATT_DV), dvoc_dt_(BATT_DVOC_DT),
-    r0_(BATT_R_0), tau_ct_(BATT_TAU_CT), rct_(BATT_R_CT), tau_dif_(BATT_TAU_DIFF), r_dif_(BATT_R_DIFF),
-    tau_sd_(BATT_TAU_SD), r_sd_(BATT_R_SD), rp_nP_(rp_nP), rp_nS_(rp_nS), rp_mod_(rp_mod)
+    : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, batt_mod),
+    sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS), rp_mod_(rp_mod)
 {
     // Battery characteristic tables
-    voc_T_ = new TableInterp2D(n_s, m_t, x_soc, y_t, t_voc);
+    voc_T_ = new TableInterp2D(chem_.n_s, chem_.m_t, chem_.x_soc, chem_.y_t, chem_.t_voc);
+    nom_vsat_   = chem_.v_sat - HDB_VBATT;   // TODO:  ??
 
     // Randles dynamic model for EKF, forward version based on sensor inputs {ib, vb} --> {voc}, ioc=ib
     // Resistance values add up to same resistance loss as matched to installed battery
@@ -60,26 +58,11 @@ Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, f
     rand_D_ = new double [rand_q*rand_p];
     assign_rand();
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
-    hys_ = new Hysteresis(hys_cap, hys_direx);
+    hys_ = new Hysteresis(hys_cap, hys_direx, chem_);
 }
 Battery::~Battery() {}
 // operators
 // functions
-
-// Assign parameters of model
-void Battery::assign_mod(const uint8_t mod)
-{
-    switch (mod)
-    {
-        case ( '0' ):  // "Battleborn";
-            break;
-        case ( '1' ):  // "LION";
-            break;
-        default:       // "unknown"
-            Serial.printf("Battery::assign_mod:  unknown mod number = %d.  Type 'h' for help\n", mod);
-            break;
-    }
-}
 
 // Battery::assign_rand:    Assign constants from battery chemistry to arrays for state space model
 void Battery::assign_rand(void)
@@ -150,40 +133,6 @@ double_t Battery::calc_vsat(void)
     return ( nom_vsat_ + (temp_c_-25.)*dvoc_dt_ );
 }
 
-// Battery type model translate to plain English for display
-String Battery::decode(const uint8_t mod)
-{
-    String result;
-    switch (mod)
-    {
-        case ( '0' ):
-            result = "Battleborn";
-            break;
-        case ( '1' ):
-            result = "LION";
-            break;
-        default:
-            result = "unknown";
-            Serial.printf("Battery::decode:  unknown mod number = %d.  Type 'h' for help\n", mod);
-            break;
-    }
-    return ( result );
-}
-
-// Battery type model coding
-uint8_t Battery::encode(const String mod_str)
-{
-    uint8_t result;
-    if ( mod_str=="Battleborn" ) result = 0;
-    else if ( mod_str=="LION" ) result = 1;
-    else
-    {
-        result = 99;
-        Serial.printf("Battery::encode:  unknown mod = %s.  Type 'h' for help\n", mod_str.c_str());
-    }
-    return ( result );
-}
-
 // Initialize
 void Battery::init_battery(Sensors *Sen)
 {
@@ -211,8 +160,8 @@ void Battery::pretty_print(void)
     Serial.printf("  tau_ct =       %10.6f;  //  Randles charge transfer time constant, s (=1/Rct/Cct)\n", tau_ct_);
     Serial.printf("  r_dif_ =       %10.6f;  //  Randles diffusion resistance, ohms\n", r_dif_);
     Serial.printf("  tau_dif_ =     %10.6f;  //  Randles diffusion time constant, s (=1/Rdif/Cdif)\n", tau_dif_);
-    Serial.printf("  r_sd_ =        %10.6f;  //  Trickle discharge of ideal battery capacitor model, ohms\n", r_sd_);
-    Serial.printf("  tau_sd_ =      %10.1f;  //  Time constant of ideal battery capacitor model, input current A, output volts=soc (0-1)\n", tau_sd_);
+    Serial.printf("  r_sd_ =        %10.6f;  //  Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n", r_sd_);
+    Serial.printf("  tau_sd_ =      %10.1f;  //  Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n", tau_sd_);
     Serial.printf("  bms_off_ =              %d;  // Calculated indication that the BMS has turned off charge current, T=off\n", bms_off_);
     Serial.printf("  dv_dsoc_=      %10.6f;  // Derivative scaled, V/fraction\n", dv_dsoc_);
     Serial.printf("  ib_ =             %7.3f;  // Battery terminal current, A\n", ib_);
@@ -228,7 +177,7 @@ void Battery::pretty_print(void)
     Serial.printf(" *rp_nP_ =            %5.2f;  // Number of parallel batteries in bank, e.g. '2P1S'\n", *rp_nP_);
     Serial.printf(" *rp_nS_ =            %5.2f;  // Number of series batteries in bank, e.g. '2P1S'\n", *rp_nS_);
     Serial.printf(" *rp_mod_ =                  %d;  // Model type of battery chemistry e.g. Battleborn or LION, integer code\n", *rp_mod_);
-    Serial.printf("  mod=               %s;  // Model type of battery chemistry e.g. Battleborn or LION, String\n", decode(*rp_mod_).c_str());
+    Serial.printf("  mod=               %s;  // Model type of battery chemistry e.g. Battleborn or LION, String\n", chem_.decode(*rp_mod_).c_str());
 }
 
 // Print State Space
@@ -497,7 +446,7 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
     // Solver, steady
     const double meps = 1-1e-6;
     double vb = Sen->Vbatt/(*rp_nS_);
-    double voc =  vb - Sen->Ishunt/(*rp_nP_)*r_ss;
+    double voc =  vb - Sen->Ishunt/(*rp_nP_)*chem_.r_ss;
     // double voc =  vb;  // BatteryModel and BatteryMonitor state spaces are initialized at 0 current
     int8_t count = 0;
     static double soc_solved = 1.0;
@@ -737,7 +686,7 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
 
     // Integration
     q_capacity_ = calculate_capacity(temp_lim);
-    if ( !reset ) *rp_delta_q_ = max(min(*rp_delta_q_ + d_delta_q - DQDT*q_capacity_*(temp_lim-*rp_t_last_), 0. ), -q_capacity_);
+    if ( !reset ) *rp_delta_q_ = max(min(*rp_delta_q_ + d_delta_q - chem_.dqdt*q_capacity_*(temp_lim-*rp_t_last_), 0. ), -q_capacity_);
     q_ = q_capacity_ + *rp_delta_q_;
 
     // Normalize
@@ -783,12 +732,12 @@ void BatteryModel::pretty_print(void)
 Hysteresis::Hysteresis()
 : disabled_(false), res_(0), soc_(0), ib_(0), ioc_(0), voc_in_(0), voc_out_(0), dv_hys_(0), dv_dot_(0), tau_(0),
    direx_(0), cap_init_(0){};
-Hysteresis::Hysteresis(const double cap, const double direx)
+Hysteresis::Hysteresis(const double cap, const double direx, Chemistry chem)
 : disabled_(false), res_(0), soc_(0), ib_(0), ioc_(0), voc_in_(0), voc_out_(0), dv_hys_(0), dv_dot_(0), tau_(0),
    direx_(direx), cap_init_(cap)
 {
     // Characteristic table
-    hys_T_ = new TableInterp2D(n_h, m_h, x_dv, y_soc, t_r);
+    hys_T_ = new TableInterp2D(chem.n_h, chem.m_h, chem.x_dv, chem.y_soc, chem.t_r);
 
     // Disabled logic
     disabled_ = rp.hys_scale < 1e-5;

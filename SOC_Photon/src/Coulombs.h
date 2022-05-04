@@ -25,13 +25,58 @@
 #ifndef COULOMBS_H_
 #define COULOMBS_H_
 
+// Battery chemistry
+struct Chemistry
+{
+  float dqdt;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
+  float low_voc;    // Voltage threshold for BMS to turn off battery, V
+  float low_t;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C 
+  uint8_t m_t;      // Number temperature breakpoints for voc table
+  float *y_t;       // Temperature breakpoints for voc table
+  uint8_t n_s;      // Number of soc breakpoints voc table
+  float *x_soc;     // soc breakpoints for voc table
+  float *t_voc;     // voc(soc,t)
+  uint8_t n_n;      // Number temperature breakpoints for soc_min table
+  float *x_soc_min; // Temperature breakpoints for soc_min table
+  float *t_soc_min; // soc_min table
+  float hys_cap;    // Capacitance of hysteresis, Farads
+  uint8_t n_h;      // Number of dv breakpoints in r(soc, dv) table t_r
+  uint8_t m_h;      // Number of soc breakpoints in r(soc, dv) table t_r
+  float *x_dv;      // dv breakpoints for r(soc, dv) table t_r
+  float *y_soc;     // soc breakpoints for r(soc, dv) table t_r
+  float *t_r;       // r(soc, dv) table
+  float v_sat;      // Saturation threshold at temperature, deg C
+  float dvoc_dt;    // Change of VOC with operating temperature in range 0 - 50 C V/deg C
+  float dv;         // Adjustment for calibration error, V
+  float r_0;        // Randles R0, ohms
+  float r_ct;       // Randles charge transfer resistance, ohms
+  float r_diff;     // Randles diffusion resistance, ohms
+  float tau_ct;     // Randles charge transfer time constant, s (=1/Rct/Cct)
+  float tau_diff;   // Randles diffusion time constant, s (=1/Rdif/Cdif)
+  float tau_sd;     // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
+  float r_sd;       // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
+  float r_ss;       // Equivalent model for state space model initialization, ohms
+  void assign_mod(const String mod_str);
+  String decode(const uint8_t mod);
+  uint8_t encode(const String mod_str);
+  Chemistry(const String mod_str)
+  {
+    assign_mod(mod_str);
+  }
+  Chemistry(const uint8_t mod)
+  {
+    String mod_str = decode(mod);
+    assign_mod(mod_str);
+  }
+};
 
 // Coulomb Counter Class
 class Coulombs
 {
 public:
   Coulombs();
-  Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rated, const double t_rated, const double t_rlim);
+  Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rated, const double t_rated, const double t_rlim,
+    const String batt_mod);
   ~Coulombs();
   // operators
   // functions
@@ -71,6 +116,7 @@ protected:
   double soc_min_;    // As battery cools, the voltage drops and there appears a minimum soc it can deliver
   double q_min_;      // Floor on charge available to use, C
   TableInterp1D *soc_min_T_;   // SOC-MIN 1-D table, V
+  Chemistry chem_; // Storage of chemistry information
 };
 
 #endif
