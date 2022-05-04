@@ -17,6 +17,7 @@
 		ib_sat_			Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
 		max_change_		Maximum allowed change to calibration adjustment, A
 		max_tweak_		Maximum allowed calibration adjustment, A\n
+		mod_			Model type of battery chemistry e.g. Battleborn or LION, integer code
 		model_cutback_	Indicate that modeled current being limited on saturation cutback, T = cutback limited
 		model_saturated_	Indicator of maximal cutback, T = cutback saturated
 		nom_vsat_		Nominal saturation threshold at 25C, V

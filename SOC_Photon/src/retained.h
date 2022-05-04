@@ -32,35 +32,37 @@
 // ********CAUTION:  any special includes or logic in here breaks retained function
 struct RetainedPars
 {
-  int8_t debug = 2;         // Level of debug printing
-  double delta_q = -0.5;    // Charge change since saturated, C
-  float t_last = 25.;      //Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
+  int8_t debug = 2;             // Level of debug printing
+  double delta_q = -0.5;        // Charge change since saturated, C
+  float t_last = 25.;           //Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
   double delta_q_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
-  float t_last_model = 25.;  // Battery temperature past value for rate limit memory, deg C
+  float t_last_model = 25.;     // Battery temperature past value for rate limit memory, deg C
   float curr_bias_amp = CURR_BIAS_AMP; // Calibrate amp current sensor, A 
   float curr_bias_noamp = CURR_BIAS_NOAMP; // Calibrate non-amplified current sensor, A 
   float curr_bias_all = CURR_BIAS_ALL; // Bias all current sensors, A 
   boolean curr_sel_noamp = false; // Use non-amplified sensor
-  float vbatt_bias = VOLT_BIAS;    // Calibrate Vbatt, V
-  boolean modeling = false; // Driving saturation calculation with model
-  uint32_t duty = 0;        // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
-  float amp = 0.;          // Injected amplitude, A pk (0-18.3)
-  float freq = 0.;         // Injected frequency, Hz (0-2)
-  uint8_t type = 0;         // Injected waveform type.   0=sine, 1=square, 2=triangle
-  float inj_soft_bias = 0.;       // Constant bias, A
-  float t_bias = TEMP_BIAS;       // Sensed temp bias, deg C
-  float s_cap_model = 1.;  // Scalar on battery model size
+  float vbatt_bias = VOLT_BIAS; // Calibrate Vbatt, V
+  boolean modeling = false;     // Driving saturation calculation with model
+  uint32_t duty = 0;            // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
+  float amp = 0.;               // Injected amplitude, A pk (0-18.3)
+  float freq = 0.;              // Injected frequency, Hz (0-2)
+  uint8_t type = 0;             // Injected waveform type.   0=sine, 1=square, 2=triangle
+  float inj_soft_bias = 0.;     // Constant bias, A
+  float t_bias = TEMP_BIAS;     // Sensed temp bias, deg C
+  float s_cap_model = 1.;       // Scalar on battery model size
   float cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
   int isum = -1;                // Summary location.   Begins at -1 because first action is to increment isum
-  float delta_q_inf_amp = 0.;  // delta_q since last reset.  Simple integration of amplified current
-  float delta_q_inf_noamp = 0.;// delta_q since last reset.  Simple integration of non-amplified current
-  float hys_scale = 1.;        // Hysteresis scalar
+  float delta_q_inf_amp = 0.;   // delta_q since last reset.  Simple integration of amplified current
+  float delta_q_inf_noamp = 0.; // delta_q since last reset.  Simple integration of non-amplified current
+  float hys_scale = 1.;         // Hysteresis scalar
   boolean tweak_test = false;   // Driving signal injection completely using software inj_soft_bias 
-  float tweak_bias_amp = 0.;   // Tweak calibration for amplified current sensor
-  float tweak_bias_noamp = 0.; // Tweak calibration for non-amplified current sensor
-  float nP = NP;               // Number parallel batteries in bank
-  float nS = NS;               // Number series batteries in bank
+  float tweak_bias_amp = 0.;    // Tweak calibration for amplified current sensor
+  float tweak_bias_noamp = 0.;  // Tweak calibration for non-amplified current sensor
+  float nP = NP;                // Number parallel batteries in bank
+  float nS = NS;                // Number series batteries in bank
+  uint8_t mon_mod = 0;          // Monitor model type, see key
+  uint8_t sim_mod = 0;          // Monitor model type, see key
 
   // Nominalize
   void nominal()
@@ -93,6 +95,8 @@ struct RetainedPars
     this->tweak_bias_noamp = 0.;
     this->nP = 1.;
     this->nS = 1.;
+    this->mon_mod = 0;
+    this->sim_mod = 0;
   }
   void large_reset()
   {
@@ -122,6 +126,8 @@ struct RetainedPars
     this->tweak_bias_noamp = 0.;
     this->nP = 1.;
     this->nS = 1.;
+    this->mon_mod = 0;
+    this->sim_mod = 0;
   }
   
   // Print
@@ -156,6 +162,8 @@ struct RetainedPars
     Serial.printf("  tweak_bias_noamp =    %7.3f;  // Tweak calibration for non-amplified current sensor\n", this->tweak_bias_noamp);
     Serial.printf("  nP =                    %5.2f;  // Number of parallel batteries in bank, e.g. '2P1S'\n", this->tweak_bias_noamp);
     Serial.printf("  nS =                    %5.2f;  // Number of series batteries in bank, e.g. '2P1S'\n", this->tweak_bias_noamp);
+    Serial.printf("  mon_mod =                   %d;  //  Monitor battery model for electrical chars.   0=Battleborn, 1=LION\n", this->mon_mod);
+    Serial.printf("  sim_mod =                   %d;  //  Simulation battery model for electrical chars.   0=Battleborn, 1=LION\n", this->sim_mod);
   }
 
 };            

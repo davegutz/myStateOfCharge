@@ -140,17 +140,20 @@ class Battery : public Coulombs
 {
 public:
   Battery();
-  Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS);
+  Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS, uint8_t *mod);
   ~Battery();
   // operators
   // functions
+  void assign_mod(const uint8_t mod);
   double calc_soc_voc(const double soc, const double temp_c, double *dv_dsoc);
   double calc_soc_voc_slope(double soc, double temp_c);
   double calc_vsat(void);
   virtual double calculate(const double temp_C, const double soc_frac, double curr_in, const double dt, const boolean dc_dc_on);
+  String decode(const uint8_t mod);
   void Dv(const double dv) { dv_ = dv; };
   double dv_dsoc() { return (dv_dsoc_); };
   double Dv() { return (dv_); };
+  uint8_t encode(const String mod_str);
   double hys_scale() { return (hys_->scale()*hys_->direx()); };
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
   void init_battery(Sensors *Sen);
@@ -205,6 +208,7 @@ protected:
   double voc_stat_; // Static, table lookup value of voc before applying hysteresis, V
   float *rp_nP_;    // Number of parallel batteries in bank, e.g. '2P1S'
   float *rp_nS_;    // Number of series batteries in bank, e.g. '2P1S'
+  uint8_t *rp_mod_; // Model type of battery chemistry e.g. Battleborn or LION, integer code
 };
 
 
@@ -213,7 +217,7 @@ class BatteryMonitor: public Battery, public EKF_1x1
 {
 public:
   BatteryMonitor();
-  BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS);
+  BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod);
   ~BatteryMonitor();
   // operators
   // functions
@@ -267,7 +271,7 @@ class BatteryModel: public Battery
 {
 public:
   BatteryModel();
-  BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS);
+  BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod);
   ~BatteryModel();
   // operators
   // functions

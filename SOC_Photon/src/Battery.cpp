@@ -38,11 +38,11 @@ extern PublishPars pp;            // For publishing
 // class Battery
 // constructors
 Battery::Battery() {}
-Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS)
+Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS, uint8_t *rp_mod)
     : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM),
     sr_(1), nom_vsat_(BATT_V_SAT-HDB_VBATT), dv_(BATT_DV), dvoc_dt_(BATT_DVOC_DT),
     r0_(BATT_R_0), tau_ct_(BATT_TAU_CT), rct_(BATT_R_CT), tau_dif_(BATT_TAU_DIFF), r_dif_(BATT_R_DIFF),
-    tau_sd_(BATT_TAU_SD), r_sd_(BATT_R_SD), rp_nP_(rp_nP), rp_nS_(rp_nS)
+    tau_sd_(BATT_TAU_SD), r_sd_(BATT_R_SD), rp_nP_(rp_nP), rp_nS_(rp_nS), rp_mod_(rp_mod)
 {
     // Battery characteristic tables
     voc_T_ = new TableInterp2D(n_s, m_t, x_soc, y_t, t_voc);
@@ -131,6 +131,26 @@ double_t Battery::calc_vsat(void)
     return ( nom_vsat_ + (temp_c_-25.)*dvoc_dt_ );
 }
 
+// Battery type model translate to plain English for display
+String Battery::decode(const uint8_t mod)
+{
+    // TODO
+    return ( "TODO" );
+}
+
+// Battery type model coding
+uint8_t Battery::encode(const String mod_str)
+{
+    // TODO
+    return ( 0 );
+}
+
+// Assign parameters of model
+void Battery::assign_mod(const uint8_t mod)
+{
+// TODO
+}
+
 // Initialize
 void Battery::init_battery(Sensors *Sen)
 {
@@ -174,6 +194,8 @@ void Battery::pretty_print(void)
     Serial.printf("  dt_ =             %7.3f;  // Update time, s\n", dt_);
     Serial.printf(" *rp_nP_ =            %5.2f;  // Number of parallel batteries in bank, e.g. '2P1S'\n", *rp_nP_);
     Serial.printf(" *rp_nS_ =            %5.2f;  // Number of series batteries in bank, e.g. '2P1S'\n", *rp_nS_);
+    Serial.printf(" *rp_mod_ =                  %d;  // Model type of battery chemistry e.g. Battleborn or LION, integer code\n", *rp_mod_);
+    Serial.printf("  mod=               %s;  // Model type of battery chemistry e.g. Battleborn or LION, String\n", decode(*rp_mod_).c_str());
 }
 
 // Print State Space
@@ -195,8 +217,8 @@ double Battery::voc_soc(const double soc, const double temp_c)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery monitor class
 BatteryMonitor::BatteryMonitor(): Battery() {}
-BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS):
-    Battery(rp_delta_q, rp_t_last, -1., rp_nP, rp_nS), voc_filt_(BATT_V_SAT-HDB_VBATT)
+BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod):
+    Battery(rp_delta_q, rp_t_last, -1., rp_nP, rp_nS, rp_mod), voc_filt_(BATT_V_SAT-HDB_VBATT)
 {
     // EKF
     this->Q_ = EKF_Q_SD*EKF_Q_SD;
@@ -298,10 +320,14 @@ double BatteryMonitor::calculate(Sensors *Sen)
             ib_, vb_*10-110, voc_dyn_*10-110, voc_*10-110,     K_, y_, soc_ekf_*100-90, y_filt_, double(converged_ekf())*100.);
 
     // Charge time if used ekf 
-    if ( ib_ > 0.1 )  tcharge_ekf_ = min(RATED_BATT_CAP / ib_ * (1. - soc_ekf_), 24.);
-    else if ( ib_ < -0.1 ) tcharge_ekf_ = max(RATED_BATT_CAP / ib_ * soc_ekf_, -24.);
-    else if ( ib_ >= 0. ) tcharge_ekf_ = 24.*(1. - soc_ekf_);
-    else tcharge_ekf_ = -24.*soc_ekf_;
+    if ( ib_ > 0.1 )
+        tcharge_ekf_ = min(RATED_BATT_CAP / ib_ * (1. - soc_ekf_), 24.);
+    else if ( ib_ < -0.1 )
+        tcharge_ekf_ = max(RATED_BATT_CAP / ib_ * soc_ekf_, -24.);
+    else if ( ib_ >= 0. )
+        tcharge_ekf_ = 24.*(1. - soc_ekf_);
+    else 
+        tcharge_ekf_ = -24.*soc_ekf_;
 
     return ( soc_ekf_ );
 }
@@ -310,10 +336,14 @@ double BatteryMonitor::calculate(Sensors *Sen)
 double BatteryMonitor::calc_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc)
 {
     double delta_q = q - q_capacity;
-    if ( charge_curr > TCHARGE_DISPLAY_DEADBAND )  tcharge_ = min( -delta_q / charge_curr / 3600., 24.);
-    else if ( charge_curr < -TCHARGE_DISPLAY_DEADBAND ) tcharge_ = max( max(q_capacity + delta_q - q_min_, 0.) / charge_curr / 3600., -24.);
-    else if ( charge_curr >= 0. ) tcharge_ = 24.;
-    else tcharge_ = -24.;
+    if ( charge_curr > TCHARGE_DISPLAY_DEADBAND )
+        tcharge_ = min( -delta_q / charge_curr / 3600., 24.);
+    else if ( charge_curr < -TCHARGE_DISPLAY_DEADBAND )
+        tcharge_ = max( max(q_capacity + delta_q - q_min_, 0.) / charge_curr / 3600., -24.);
+    else if ( charge_curr >= 0. )
+        tcharge_ = 24.;
+    else
+        tcharge_ = -24.;
 
     double amp_hrs_remaining = max(q_capacity - q_min_ + delta_q, 0.) / 3600.;
     if ( soc > 0. )
@@ -458,8 +488,8 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
 BatteryModel::BatteryModel() : Battery() {}
-BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS) :
-    Battery(rp_delta_q, rp_t_last, 1., rp_nP, rp_nS), q_(RATED_BATT_CAP*3600.), rp_s_cap_model_(rp_s_cap_model)
+BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod) :
+    Battery(rp_delta_q, rp_t_last, 1., rp_nP, rp_nS, rp_mod), q_(RATED_BATT_CAP*3600.), rp_s_cap_model_(rp_s_cap_model)
 {
     // Randles dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery
