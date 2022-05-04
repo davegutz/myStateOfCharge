@@ -81,14 +81,14 @@ void debug_m35(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 void debug_5(void)
 {
   Serial.printf("oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt, %3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
-    cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt, cp.pubList.amp_hrs_remaining_ekf, cp.pubList.tcharge, cp.pubList.amp_hrs_remaining_wt);
+    pp.pubList.Tbatt, pp.pubList.Vbatt, pp.pubList.Ishunt, pp.pubList.amp_hrs_remaining_ekf, pp.pubList.tcharge, pp.pubList.amp_hrs_remaining_wt);
 }
 
 // rp.debug==-5 Charge time Arduino plot
 void debug_m5(void)
 {
   if ( rp.debug==-5 ) Serial.printf("Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,\n%3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
-    cp.pubList.Tbatt, cp.pubList.Vbatt, cp.pubList.Ishunt, cp.pubList.amp_hrs_remaining_ekf, cp.pubList.tcharge, cp.pubList.amp_hrs_remaining_wt);
+    pp.pubList.Tbatt, pp.pubList.Vbatt, pp.pubList.Ishunt, pp.pubList.amp_hrs_remaining_ekf, pp.pubList.tcharge, pp.pubList.amp_hrs_remaining_wt);
 }
 
 // rp.debug==-7 Battery i/o Arduino plot

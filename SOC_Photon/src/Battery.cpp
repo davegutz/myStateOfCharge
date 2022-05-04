@@ -32,6 +32,7 @@
 #include "mySubs.h"
 extern RetainedPars rp; // Various parameters to be static at system level
 extern CommandPars cp;
+extern PublishPars pp;            // For publishing
 
 
 // class Battery
@@ -684,10 +685,10 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
 
     if ( rp.debug==97 )
         Serial.printf("BatteryModel::cc,  dt,voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,%5.1f,\n",
-                    Sen->T,cp.pubList.voc,  vsat_, temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
+                    Sen->T,pp.pubList.voc,  vsat_, temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
     if ( rp.debug==-97 )
         Serial.printf("voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,%5.1f,\n",
-                    cp.pubList.voc,  vsat_, temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
+                    pp.pubList.voc,  vsat_, temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
 
     // Save and return
     *rp_t_last_ = temp_lim;

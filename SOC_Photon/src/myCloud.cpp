@@ -33,6 +33,7 @@
 #include "Blynk/BlynkParticle.h"
 
 extern CommandPars cp;            // Various parameters to be common at system level (reset on PLC reset)
+extern PublishPars pp;            // For publishing
 extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;     // Time Blynk events
 extern BlynkParticle Blynk;
 
@@ -40,9 +41,9 @@ extern BlynkParticle Blynk;
 void publish1(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write1\n");
-  Blynk.virtualWrite(V2,  cp.pubList.Vbatt);
-  Blynk.virtualWrite(V3,  cp.pubList.voc);
-  Blynk.virtualWrite(V4,  cp.pubList.Vbatt);
+  Blynk.virtualWrite(V2,  pp.pubList.Vbatt);
+  Blynk.virtualWrite(V3,  pp.pubList.voc);
+  Blynk.virtualWrite(V4,  pp.pubList.Vbatt);
 }
 
 
@@ -50,9 +51,9 @@ void publish1(void)
 void publish2(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write2\n");
-  Blynk.virtualWrite(V6,  cp.pubList.soc);
-  Blynk.virtualWrite(V8,  cp.pubList.T);
-  Blynk.virtualWrite(V10, cp.pubList.Tbatt);
+  Blynk.virtualWrite(V6,  pp.pubList.soc);
+  Blynk.virtualWrite(V8,  pp.pubList.T);
+  Blynk.virtualWrite(V10, pp.pubList.Tbatt);
 }
 
 
@@ -60,8 +61,8 @@ void publish2(void)
 void publish3(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write3\n");
-  Blynk.virtualWrite(V15, cp.pubList.hm_string);
-  Blynk.virtualWrite(V16, cp.pubList.tcharge);
+  Blynk.virtualWrite(V15, pp.pubList.hm_string);
+  Blynk.virtualWrite(V16, pp.pubList.tcharge);
 }
 
 
@@ -69,9 +70,9 @@ void publish3(void)
 void publish4(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write4\n");
-  Blynk.virtualWrite(V18, cp.pubList.Ishunt);
-  Blynk.virtualWrite(V20, cp.pubList.Wshunt);
-  Blynk.virtualWrite(V21, cp.pubList.soc_ekf);
+  Blynk.virtualWrite(V18, pp.pubList.Ishunt);
+  Blynk.virtualWrite(V20, pp.pubList.Wshunt);
+  Blynk.virtualWrite(V21, pp.pubList.soc_ekf);
 }
 
 
@@ -104,7 +105,7 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
   if ( wifi->connected )
   {
     // Create print string
-    create_print_string(cp.buffer, &cp.pubList);
+    create_print_string(cp.buffer, &pp.pubList);
  
     unsigned nowSec = now/1000UL;
     unsigned sec = nowSec%60;
@@ -119,7 +120,7 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
   else
   {
     if ( rp.debug>102 ) Serial.printf("nothing to do\n");
-    cp.pubList.num_timeouts++;
+    pp.pubList.num_timeouts++;
   }
 }
 

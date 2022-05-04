@@ -85,11 +85,13 @@ BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;        //
 extern CommandPars cp;            // Various parameters to be common at system level
 extern RetainedPars rp;           // Various parameters to be static at system level
 extern Sum_st mySum[NSUM];        // Summaries for saving charge history
+extern PublishPars pp;            // For publishing
 
 // Global locals
 retained RetainedPars rp;             // Various control parameters static at system level
 retained CommandPars cp = CommandPars(); // Various control parameters commanding at system level
 retained Sum_st mySum[NSUM];          // Summaries
+PublishPars pp = PublishPars();       // Common for publishing
 unsigned long millis_flip = millis(); // Timekeeping
 unsigned long last_sync = millis();   // Timekeeping
 
@@ -429,7 +431,7 @@ void loop()
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
     control_time = decimalTime(&current_time, tempStr, now, millis_flip);
     hm_string = String(tempStr);
-    assign_publist(&cp.pubList, PublishParticle->now(), unit, hm_string, control_time, Sen, num_timeouts, Sim, Mon);
+    assign_publist(&pp.pubList, PublishParticle->now(), unit, hm_string, control_time, Sen, num_timeouts, Sim, Mon);
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )

@@ -31,6 +31,7 @@
 #include "debug.h"
 
 extern CommandPars cp;          // Various parameters shared at system level
+extern PublishPars pp;            // For publishing
 extern RetainedPars rp;         // Various parameters to be static at system level
 
 
@@ -303,13 +304,13 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   boolean no_currents = Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare();
   char dispString[21];
   if ( !pass && cp.model_cutback && rp.modeling )
-    sprintf(dispString, "%3.0f %5.2f      ", cp.pubList.Tbatt, cp.pubList.voc);
+    sprintf(dispString, "%3.0f %5.2f      ", pp.pubList.Tbatt, pp.pubList.voc);
   else
   {
     if (no_currents)
-      sprintf(dispString, "%3.0f %5.2f fail", cp.pubList.Tbatt, cp.pubList.voc);
+      sprintf(dispString, "%3.0f %5.2f fail", pp.pubList.Tbatt, pp.pubList.voc);
     else
-      sprintf(dispString, "%3.0f %5.2f %5.1f", cp.pubList.Tbatt, cp.pubList.voc, cp.pubList.Ishunt);
+      sprintf(dispString, "%3.0f %5.2f %5.1f", pp.pubList.Tbatt, pp.pubList.voc, pp.pubList.Ishunt);
   }
   display->println(dispString);
 
@@ -317,15 +318,15 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 
   display->setTextColor(SSD1306_WHITE);
   char dispStringT[9];
-  if ( abs(cp.pubList.tcharge) < 24. )
-    sprintf(dispStringT, "%3.0f%5.1f", cp.pubList.amp_hrs_remaining_ekf, cp.pubList.tcharge);
+  if ( abs(pp.pubList.tcharge) < 24. )
+    sprintf(dispStringT, "%3.0f%5.1f", pp.pubList.amp_hrs_remaining_ekf, pp.pubList.tcharge);
   else
-    sprintf(dispStringT, "%3.0f --- ", cp.pubList.amp_hrs_remaining_ekf);
+    sprintf(dispStringT, "%3.0f --- ", pp.pubList.amp_hrs_remaining_ekf);
   display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[4];
   if ( pass || !Sen->saturated )
-    sprintf(dispStringS, "%3.0f", min(cp.pubList.amp_hrs_remaining_wt, 999.));
+    sprintf(dispStringS, "%3.0f", min(pp.pubList.amp_hrs_remaining_wt, 999.));
   else if (Sen->saturated)
     sprintf(dispStringS, "SAT");
   display->print(dispStringS);
@@ -404,7 +405,7 @@ void serialEvent1()
 // Inputs serial print
 void serial_print(unsigned long now, double T)
 {
-  create_print_string(cp.buffer, &cp.pubList);
+  create_print_string(cp.buffer, &pp.pubList);
   if ( rp.debug >= 100 ) Serial.printf("serial_print:  ");
   Serial.println(cp.buffer);  //Serial1.println(cp.buffer);
 }

@@ -29,10 +29,19 @@
 // Definition of structure for external control coordination
 // Default values below are important:  they determine behavior
 // after a reset.   Also prevent junk behavior on initial build.
+struct PublishPars
+{
+  Publish pubList;          // Publish object
+  PublishPars(void)
+  {
+    this->pubList = Publish();
+  }
+};
+
+
 struct CommandPars
 {
   char buffer[256];         // Auxiliary print buffer
-  Publish pubList;          // Publish object
   String input_string;      // A string to hold incoming data
   boolean string_complete;  // whether the string is complete
   boolean enable_wifi;      // Enable wifi
@@ -47,7 +56,6 @@ struct CommandPars
   {
     this->string_complete = false;
     this->enable_wifi = false;
-    this->pubList = Publish();
     this->model_cutback = false;
     this->model_saturated = false;
     this->soft_reset = false;

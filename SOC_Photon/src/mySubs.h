@@ -45,6 +45,7 @@
 #include <Adafruit/Adafruit_SSD1306.h>
 
 extern RetainedPars rp; // Various parameters to be static at system level
+extern PublishPars pp;            // For publishing
 extern CommandPars cp;  // Various parameters to be static at system level
 
 
