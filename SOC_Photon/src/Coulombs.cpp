@@ -37,47 +37,37 @@ extern PublishPars pp;            // For publishing
 // Assign parameters of model
 void Chemistry::assign_mod(const String mod_str)
 {
-  switch (encode(mod_str))
+  int i;
+  uint8_t mod = encode(mod_str);
+  switch (mod)
   {
     case ( '0' ):  // "Battleborn";
-      dqdt    = 0.01;   // Change of charge with temperature, fraction/deg C (0.01 from literature)
-      low_voc = 10.;    // Voltage threshold for BMS to turn off battery;
-      low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
-      m_t     = 4;      // Number temperature breakpoints for voc table
-      n_s     = 16;     //Number of soc breakpoints voc table
-      delete y_t;
-      y_t = new double[m_t];
-      delete x_soc;
-      x_soc = new double[n_s];
-      delete t_voc;
-      t_voc = new double[m_t*n_s];
-      y_t   = { 5., 11.1, 20., 40. }; //Temperature breakpoints for voc table
-      x_soc = { 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.98,  1.00};
-      t_voc = { 4.00,  4.00,  6.00,  9.50,  11.70, 12.30, 12.50, 12.65, 12.82, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 14.95,
-                              4.00,  4.00,  8.00,  11.60, 12.40, 12.60, 12.70, 12.80, 12.92, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 14.96,
-                              4.00,  8.00,  12.20, 12.68, 12.73, 12.79, 12.81, 12.89, 13.00, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 15.00,
-                              4.08,  8.08,  12.28, 12.76, 12.81, 12.87, 12.89, 12.97, 13.08, 13.12, 13.17, 13.22, 13.29, 13.33, 13.35, 15.08};
-      n_n = 4;   // Number of temperature breakpoints for x_soc_min table
-      delete x_soc_min;
-      x_soc_min = new double[n_n];
-      delete t_soc_min;
-      t_soc_min = new double[n_n];
-      x_soc_min = { 5.,   11.1,  20.,  40.};
-      t_soc_min = { 0.14, 0.12,  0.08, 0.07};
-      hys_cap   = 3.6e6;    // Capacitance of hysteresis, Farads
-      n_h       = 9;        // Number of dv breakpoints in r(dv) table t_r
-      m_h       = 3;        // Number of soc breakpoints in r(soc, dv) table t_r
-      delete x_dv;
-      x_dv = new double[n_h];   // dv breakpoints for r(soc, dv) table t_r
-      delete y_soc;
-      y_soc = new double[m_h];  // soc breakpoints for r(soc, dv) table t_r
-      delete t_r;
-      t_r = new double[m_h*n_h];
-      x_dv =  { -0.09,-0.07, -0.05,   -0.03,  0.00,   0.03,   0.05,   0.07,   0.09};
-      y_soc = { 0.0,  0.5,    1.0};
-      t_r =   { 1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.0030, 0.0046, 1e-7,
-                1e-7, 1e-7,   0.0050, 0.0036, 0.0015, 0.0024, 0.0030,   1e-7, 1e-7,
-                1e-7, 1e-7,   1e-7,   0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7};
+      mod_code = mod;
+      dqdt    = 0.01;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
+      low_voc = 10.;      // Voltage threshold for BMS to turn off battery;
+      low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
+      m_t     = m_t_bb;   // Number temperature breakpoints for voc table
+      n_s     = n_s_bb;   //Number of soc breakpoints voc table
+      delete y_t;     y_t = new float[m_t];
+      delete x_soc;   x_soc = new float[n_s];
+      delete t_voc;   t_voc = new float[m_t*n_s];
+      for (i=0; i<m_t; i++) y_t[i] = y_t_bb[i];
+      for (i=0; i<n_s; i++) x_soc[i] = x_soc_bb[i];
+      for (i=0; i<m_t*n_s; i++) t_voc[i] = t_voc_bb[i];
+      n_n     = n_n_bb;   // Number of temperature breakpoints for x_soc_min table
+      delete x_soc_min;    x_soc_min = new float[n_n];
+      delete t_soc_min;    t_soc_min = new float[n_n];
+      for (i=0; i<n_n; i++) x_soc_min[i] = x_soc_min_bb[i];
+      for (i=0; i<n_n; i++) t_soc_min[i] = t_soc_min_bb[i];
+      hys_cap = 3.6e6;    // Capacitance of hysteresis, Farads
+      n_h     = n_h_bb;
+      m_h     = m_h_bb;
+      delete x_dv;    x_dv = new float[n_h];
+      delete y_soc;   y_soc = new float[m_h];
+      delete t_r;     t_r = new float[m_h*n_h];
+      for (i=0; i<n_h; i++) x_dv[i] = x_dv_bb[i];
+      for (i=0; i<m_h; i++) y_soc[i] = y_soc_bb[i];
+      for (i=0; i<m_h*n_h; i++) t_r[i] = t_r_bb[i];
       v_sat       = 13.85;  // Saturation threshold at temperature, deg C
       dvoc_dt     = 0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
       dv          = 0.01;   // Adjustment for calibration error, V
@@ -90,9 +80,45 @@ void Chemistry::assign_mod(const String mod_str)
       r_sd        = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
       break;
     case ( '1' ):  // "LION";
-        break;
+      mod_code = mod;
+      dqdt    = 0.02;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
+      low_voc = 9.;       // Voltage threshold for BMS to turn off battery;
+      low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
+      m_t     = m_t_li;   // Number temperature breakpoints for voc table
+      n_s     = n_s_li;   //Number of soc breakpoints voc table
+      delete y_t;     y_t = new float[m_t];
+      delete x_soc;   x_soc = new float[n_s];
+      delete t_voc;   t_voc = new float[m_t*n_s];
+      for (i=0; i<m_t; i++) y_t[i] = y_t_li[i];
+      for (i=0; i<n_s; i++) x_soc[i] = x_soc_li[i];
+      for (i=0; i<m_t*n_s; i++) t_voc[i] = t_voc_li[i];
+      n_n     = n_n_li;   // Number of temperature breakpoints for x_soc_min table
+      delete x_soc_min;    x_soc_min = new float[n_n];
+      delete t_soc_min;    t_soc_min = new float[n_n];
+      for (i=0; i<n_n; i++) x_soc_min[i] = x_soc_min_li[i];
+      for (i=0; i<n_n; i++) t_soc_min[i] = t_soc_min_li[i];
+      hys_cap = 7.2e6;    // Capacitance of hysteresis, Farads
+      n_h     = n_h_li;
+      m_h     = m_h_li;
+      delete x_dv;    x_dv = new float[n_h];
+      delete y_soc;   y_soc = new float[m_h];
+      delete t_r;     t_r = new float[m_h*n_h];
+      for (i=0; i<n_h; i++) x_dv[i] = x_dv_li[i];
+      for (i=0; i<m_h; i++) y_soc[i] = y_soc_li[i];
+      for (i=0; i<m_h*n_h; i++) t_r[i] = t_r_li[i];
+      v_sat       = 12.85;  // Saturation threshold at temperature, deg C
+      dvoc_dt     = 0.008;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
+      dv          = 0.01;   // Adjustment for calibration error, V
+      r_0         = 0.006;  // Randles R0, ohms   
+      r_ct        = 0.0032; // Randles charge transfer resistance, ohms
+      r_diff      = 0.0144; // Randles diffusion resistance, ohms
+      tau_ct      = 0.4;    // Randles charge transfer time constant, s (=1/Rct/Cct)
+      tau_diff    = 166.;    // Randles diffusion time constant, s (=1/Rdif/Cdif)
+      tau_sd      = 3.6e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
+      r_sd        = 140;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
+      break;
     default:       // "unknown"
-        Serial.printf("Battery::assign_mod:  unknown mod number = %d.  Type 'h' for help\n", mod);
+        Serial.printf("Battery::assign_mod:  unknown mod = %s.  Type 'h' for help\n", mod_str.c_str());
         break;
   }
   r_ss = r_0 + r_ct + r_diff;
@@ -140,7 +166,7 @@ Coulombs::Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rate
   : rp_delta_q_(rp_delta_q), rp_t_last_(rp_t_last), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017),
   soc_min_(0), chem_(Chemistry(batt_mod))
   {
-    soc_min_T_ = new TableInterp1D(n_n, x_soc_min, t_soc_min);
+    soc_min_T_ = new TableInterp1D(chem_.n_n, chem_.x_soc_min, chem_.t_soc_min);
   }
 Coulombs::~Coulombs() {}
 
@@ -228,7 +254,7 @@ void Coulombs::apply_SOC(const double SOC, const double temp_c)
 // Capacity
 double Coulombs::calculate_capacity(const double temp_c)
 {
-  return( q_cap_rated_scaled_ * (1-Battery::chem_.dqdt*(temp_c - t_rated_)) );
+  return( q_cap_rated_scaled_ * (1-chem_.dqdt*(temp_c - t_rated_)) );
 }
 
 /* Coulombs::count_coulombs:  Count coulombs based on true=actual capacity
@@ -274,7 +300,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
 
     // Integration
     q_capacity_ = calculate_capacity(temp_lim);
-    if ( !reset ) *rp_delta_q_ = max(min(*rp_delta_q_ + d_delta_q - chem_->dqdt*q_capacity_*(temp_lim-*rp_t_last_), 0.0), -q_capacity_);
+    if ( !reset ) *rp_delta_q_ = max(min(*rp_delta_q_ + d_delta_q - chem_.dqdt*q_capacity_*(temp_lim-*rp_t_last_), 0.0), -q_capacity_);
     q_ = q_capacity_ + *rp_delta_q_;
 
     // Normalize

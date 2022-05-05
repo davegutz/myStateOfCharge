@@ -1,71 +1,65 @@
+
 		amp_hrs_remaining	Discharge amp*time left if drain to q=0, A-h
 		amp_hrs_remaining_ekf_	Discharge amp*time left if drain to q_ekf=0, A-h
 		BATT_V_SAT		Normal battery cell saturation for SOC=99.7, V
 		bms_off_		Calculated indication that the BMS has turned off charge current, T=off
 		cap_			Capacitance, Farads
 		cap_init_		Initial capacitance specification, Farads
+		CURR_BIAS_ALL	Bias on all shunt sensors, A
 		CURR_BIAS_AMP	Calibration of amplified shunt sensor, A
 		CURR_BIAS_NOAMP	Calibration of non-amplified shunt sensor, A
-		CURR_BIAS_ALL	Bias on all shunt sensors, A
 		delta_q_		Charge change since saturated, C
 		direx_			Direction scalar
 		disabled_		// Hysteresis disabled by low scale input < 1e-5, T=disabled
 		dqdt			Change of charge with temperature, fraction/deg C (0.01 from literature)
 		dt_ 			Update time, s
 		dv				Delta voltage, V
-		dv_				Adjustment for calibration error, V
+		DVOC_DT			Change of VOC with operating temperature in range 0 - 50 C V/deg C
+		dv_				Adjustment to compensate for tables generated without considering hys, V
 		dv_dot_			Calculated voltage rate, V/s
 		dv_dsoc			Derivative scaled, V/fraction
 		dv_hys_			Delta voltage state, V
-		DVOC_DT			Change of VOC with operating temperature in range 0 - 50 C V/deg C
 		gain_			Current correction to be made for charge error, A/Coulomb/day
 		HDB_TBATT		Half deadband to filter Tbatt, V
 		HDB_VBATT		Half deadband to filter Vbatt, V
 		hys_cap			Capacitance of hysteresis, Farads
 		hys_T_;   		dv-soc 2-D table, V
-		ib_				Battery terminal current, A
 		Ib_				Battery bank current, A
-		ioc_			Best estimate of IOC charge current after hysteresis, A
+		ib_				Battery terminal current, A
 		ib_sat_			Threshold to declare saturation.	This regeneratively slows down charging so if too small takes too long, A
+		ioc_			Best estimate of IOC charge current after hysteresis, A
 		low_t			Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
 		low_voc			Voltage threshold for BMS to turn off battery, V
 		max_change_		Maximum allowed change to calibration adjustment, A
 		max_tweak_		Maximum allowed calibration adjustment, A\n
-		mod_			Model type of battery chemistry e.g. Battleborn or LION, integer code
 		model_cutback_	Indicate that modeled current being limited on saturation cutback, T = cutback limited
 		model_saturated_	Indicator of maximal cutback, T = cutback saturated
+		mod_			Model type of battery chemistry e.g. Battleborn or LION, integer code
 		m_h				Number of soc breakpoints in r(soc, dv) table t_r
 		m_t				Number temperature breakpoints for voc table
 		nom_vsat_		Nominal saturation threshold at 25C, V
+		nP				Number of parallel batteries in bank, e.g. '2P1S'
+		nS				Number of series batteries in bank, e.g. '2P1S'
+		ns				Number of soc breakpoints voc table
 		n_h				Number of dv breakpoints in r(dv) table t_r
 		n_n				Number of temperature breakpoints for soc_min table
-		nP				Number of parallel batteries in bank, e.g. '2P1S'
-		ns				Number of soc breakpoints voc table
-		nS				Number of series batteries in bank, e.g. '2P1S'
 		q_				Present charge available to use, except q_min_, C	
+		q_capacity_		Saturation charge at temperature, C
 		q_cap_rated_	Rated capacity at t_rated_, saved for future scaling, C
 		q_cap_rated_scaled_	Applied rated capacity at t_rated_, after scaling, C
-		q_capacity_		Saturation charge at temperature, C
 		q_ekf_			Filtered charge calculated by ekf, C
 		q_min_			Estimated charge at low voltage shutdown, C
 		RATED_BATT_CAP	Nominal battery bank capacity (assume actual not known), Ah
 		RATED_TEMP		Temperature at RATED_BATT_CAP, deg C
+		resetting_		Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
+		res_			Null resistance, Ohms
+		res_;          	Variable resistance value, ohms
+		rp.duty			(0-255) for D2 hardware injection when rp.modeling and proper wire connections made
 		r_0_			Randles R0, ohms
 		r_ct_			Randles charge transfer resistance, ohms
 		r_diff_			Randles diffusion resistance, ohms
 		r_sd_			Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
 		r_ss			Steady state equivalent battery resistance, for solver, Ohms
-		res_;          	Variable resistance value, ohms
-		res_			Null resistance, Ohms
-		dv_				Adjustment to compensate for tables generated without considering hys, V
-		t_last			Battery temperature past value for rate limit memory, deg C
-		tau_			Null time constant, sec
-		tau_ct_			Randles charge transfer time constant, s (=1/Rct/Cct)
-		tau_diff_		Randles diffusion time constant, s (=1/Rdif/Cdif)
-		tau_sd			Equivalent model for EKF reference.	Parasitic discharge time constant, sec
-		resetting_		Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
-		rp.duty			(0-255) for D2 hardware injection when rp.modeling and proper wire connections made
-		s_cap_			Rated capacity scalar
 		sat_			Indication calculated by caller that battery is saturated, T=saturated
 		sat_cutback_gain	Gain to retard ib when voc exceeds vsat, dimensionless
 		sat_ib_max_		Current cutback to be applied to modeled ib output, A
@@ -74,33 +68,37 @@
 		Sen->T			Update time, sec
 		Sen->Tbatt_filt	Tb filtered for noise, past value of temp_c_, deg C
 		Sen->Vbatt		Battery terminal voltage, V
+		SOC_			Fraction of rated capacity available (0 - ~1.2).	For comparison to other batteries
 		soc_			Fraction of saturation charge (q_capacity_) available (0-1) 
 		soc_ekf_		Solved state of charge, fraction
+		SOC_ekf_		Solved state of charge, percent
 		soc_min_		Estimated soc where battery BMS will shutoff current, fraction
 		soc_weight_		Weighted selection of ekf state of charge and coulomb counter (0-1)
-		SOC_			Fraction of rated capacity available (0 - ~1.2).	For comparison to other batteries
-		SOC_ekf_		Solved state of charge, percent
 		SOLV_ERR		EKF initialization solver error bound, V
 		SOLV_MAX_COUNTS	EKF initialization solver max iters
 		SOLV_MAX_STEP	EKF initialization solver max step size of soc, fraction
 		sr				Resistance scalar
-		t_last			Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
-		t_rated_		Rated temperature, deg C
-		t_rlim_			Tbatt rate limit noise filter, deg C / s
-		t_soc_min		soc_min(t)
-		t_voc			voc(soc, t)
+		s_cap_			Rated capacity scalar
 		tau_			Null time constant, sec
+		tau_			Null time constant, sec
+		tau_ct_			Randles charge transfer time constant, s (=1/Rct/Cct)
+		tau_diff_		Randles diffusion time constant, s (=1/Rdif/Cdif)
+		tau_sd			Equivalent model for EKF reference.	Parasitic discharge time constant, sec
 		tau_sd			Equivalent model for EKF.	Creating an anchor.	So large it's just a pass through, s
+		Tb				Tb, deg C
 		tcharge_		Counted charging time to full, hr
 		tcharge_ekf_	Solved charging time to full from ekf, hr
 		TEMP_BIAS		Bias on Tbatt sensor, deg C
 		temp_c_			Battery temperature, deg C
 		tlast			Past value of battery temperature used for rate limit memory, deg C
-		RATED_BATT_CAP	Nominal battery bank capacity (assume actual not known), Ah
+		t_last			Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
 		t_r				r(soc, dv) table
-		Tb				Tb, deg C
-		vb_				Battery terminal voltage, V
+		t_rated_		Rated temperature, deg C
+		t_rlim_			Tbatt rate limit noise filter, deg C / s
+		t_soc_min		soc_min(t)
+		t_voc			voc(soc, t)
 		Vb_				Battery bank voltage, V
+		vb_				Battery terminal voltage, V
 		vdyn_			Sim current induced back emf, V
 		voc_			Static model open circuit voltage, V
 		voc_dyn_		VOC estimated from Vb and RC model, V
@@ -108,9 +106,9 @@
 		voc_in_			Voltage input, V
 		voc_out_		Voltage output, V
 		voc_stat_		Static model open circuit voltage from table (reference), V\n
+		VOLT_BIAS		Bias on Vbatt sensor, V
 		vsat_			Saturation threshold at temperature, deg C
 		v_sat_			Saturation threshold at temperature, deg C
-		VOLT_BIAS		Bias on Vbatt sensor, V
 		x_dv			dv breakpoints for r(soc, dv) table t_r
 		x_soc			soc breakpoints for voc table
 		x_soc_min		Temperature breakpoints for soc_min table

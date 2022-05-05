@@ -28,6 +28,7 @@
 // Battery chemistry
 struct Chemistry
 {
+  uint8_t mod_code; // Chemistry code integer
   float dqdt;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
   float low_voc;    // Voltage threshold for BMS to turn off battery, V
   float low_t;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C 
@@ -59,6 +60,7 @@ struct Chemistry
   void assign_mod(const String mod_str);
   String decode(const uint8_t mod);
   uint8_t encode(const String mod_str);
+  Chemistry();
   Chemistry(const String mod_str)
   {
     assign_mod(mod_str);
@@ -86,11 +88,13 @@ public:
   void apply_soc(const double soc, const double temp_c);
   void apply_SOC(const double SOC, const double temp_c);
   void apply_delta_q_t(const double delta_q, const double temp_c);
+  void assign_mod(const String mod_str) { chem_.assign_mod(mod_str); };
   double calculate_capacity(const double temp_c);
   virtual double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
     const boolean sat, const double t_last);
   double delta_q() { return(*rp_delta_q_); };
   virtual void pretty_print();
+  uint8_t mon_code() { return (chem_.mod_code); };
   double q(){ return (q_); };
   double q_cap_rated(){ return (q_cap_rated_); };
   double q_cap_scaled(){ return (q_cap_rated_scaled_); };

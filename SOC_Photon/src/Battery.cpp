@@ -58,7 +58,7 @@ Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, f
     rand_D_ = new double [rand_q*rand_p];
     assign_rand();
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
-    hys_ = new Hysteresis(hys_cap, hys_direx, chem_);
+    hys_ = new Hysteresis(chem_.hys_cap, hys_direx, chem_);
 }
 Battery::~Battery() {}
 // operators
@@ -200,8 +200,9 @@ double Battery::voc_soc(const double soc, const double temp_c)
 // Battery monitor class
 BatteryMonitor::BatteryMonitor(): Battery() {}
 BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod):
-    Battery(rp_delta_q, rp_t_last, -1., rp_nP, rp_nS, rp_mod), voc_filt_(BATT_V_SAT-HDB_VBATT)
+    Battery(rp_delta_q, rp_t_last, -1., rp_nP, rp_nS, rp_mod)
 {
+    voc_filt_ = chem_.v_sat-HDB_VBATT;
     // EKF
     this->Q_ = EKF_Q_SD*EKF_Q_SD;
     this->R_ = EKF_R_SD*EKF_R_SD;
@@ -266,7 +267,7 @@ double BatteryMonitor::calculate(Sensors *Sen)
     voc_ = hys_->update(dt_);
     voc_filt_ = SdVbatt_->update(voc_);
     ioc_ = hys_->ioc();
-    bms_off_ = temp_c_ <= low_t;    // KISS
+    bms_off_ = temp_c_ <= chem_.low_t;    // KISS
     if ( bms_off_ )
     {
         ib_ = 0.;
@@ -383,7 +384,7 @@ void BatteryMonitor::init_soc_ekf(const double soc)
 */
 boolean BatteryMonitor::is_sat(void)
 {
-    return ( temp_c_ > low_t && (voc_filt_ >= vsat_ || soc_ >= mxeps_bb) );
+    return ( temp_c_ > chem_.low_t && (voc_filt_ >= vsat_ || soc_ >= mxeps) );
 }
 
 // Print
@@ -541,7 +542,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     // VOC-OCV model
     voc_stat_ = calc_soc_voc(soc_, temp_C, &dv_dsoc_);
     voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, vsat_*1.2);  // slightly beyond but don't windup
-    bms_off_ = ( temp_c_ <= low_t ) || ( voc_stat_ < low_voc );
+    bms_off_ = ( temp_c_ <= chem_.low_t ) || ( voc_stat_ < chem_.low_voc );
     if ( bms_off_ ) curr_in = 0.;
 
     // Dynamic emf

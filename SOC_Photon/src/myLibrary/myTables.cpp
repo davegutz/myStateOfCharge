@@ -177,6 +177,15 @@ TableInterp::TableInterp(const unsigned int n, const double x[])
     x_[i] = x[i];
   }
 }
+TableInterp::TableInterp(const unsigned int n, const float x[])
+    : n1_(n)
+{
+  x_ = new double[n1_];
+  for (unsigned int i = 0; i < n1_; i++)
+  {
+    x_[i] = x[i];
+  }
+}
 
 TableInterp::~TableInterp() {}
 // operators
@@ -190,6 +199,15 @@ double TableInterp::interp(void)
 // constructors
 TableInterp1D::TableInterp1D() : TableInterp() {}
 TableInterp1D::TableInterp1D(const unsigned int n, const double x[], const double v[])
+    : TableInterp(n, x)
+{
+  v_ = new double[n1_];
+  for (unsigned int i = 0; i < n1_; i++)
+  {
+    v_[i] = v[i];
+  }
+}
+TableInterp1D::TableInterp1D(const unsigned int n, const float x[], const float v[])
     : TableInterp(n, x)
 {
   v_ = new double[n1_];
@@ -240,6 +258,23 @@ v = {v11, v12, ...v1n, v21, v22, ...v2n, ...............  vm1, vm2, ...vmn}
 TableInterp2D::TableInterp2D() : TableInterp() {}
 TableInterp2D::TableInterp2D(const unsigned int n, const unsigned int m, const double x[],
                              const double y[], const double v[])
+    : TableInterp(n, x)
+{
+  n2_ = m;
+  y_ = new double[n2_];
+  for (unsigned int j = 0; j < n2_; j++)
+  {
+    y_[j] = y[j];
+  }
+  v_ = new double[n1_ * n2_];
+  for (unsigned int i = 0; i < n1_; i++)
+    for (unsigned int j = 0; j < n2_; j++)
+    {
+      v_[i + j * n1_] = v[i + j * n1_];
+    }
+}
+TableInterp2D::TableInterp2D(const unsigned int n, const unsigned int m, const float x[],
+                             const float y[], const float v[])
     : TableInterp(n, x)
 {
   n2_ = m;
