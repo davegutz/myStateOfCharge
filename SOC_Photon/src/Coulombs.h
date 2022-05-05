@@ -28,7 +28,7 @@
 // Battery chemistry
 struct Chemistry
 {
-  uint8_t mod_code; // Chemistry code integer
+  uint8_t *rp_mod_code;  // Chemistry code integer
   float dqdt;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
   float low_voc;    // Voltage threshold for BMS to turn off battery, V
   float low_t;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C 
@@ -63,11 +63,13 @@ struct Chemistry
   Chemistry();
   Chemistry(const String mod_str)
   {
+    rp_mod_code = new uint8_t(-1);
     assign_mod(mod_str);
   }
-  Chemistry(const uint8_t mod)
+  Chemistry(const uint8_t mod_code)
   {
-    String mod_str = decode(mod);
+    rp_mod_code = new uint8_t(mod_code);
+    String mod_str = decode(*rp_mod_code);
     assign_mod(mod_str);
   }
 };
@@ -78,7 +80,7 @@ class Coulombs
 public:
   Coulombs();
   Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rated, const double t_rated, const double t_rlim,
-    const String batt_mod);
+    const uint8_t *rp_mod_code);
   ~Coulombs();
   // operators
   // functions
@@ -93,8 +95,8 @@ public:
   virtual double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
     const boolean sat, const double t_last);
   double delta_q() { return(*rp_delta_q_); };
+  uint8_t mod_code() { return (*chem_.rp_mod_code); };
   virtual void pretty_print();
-  uint8_t mon_code() { return (chem_.mod_code); };
   double q(){ return (q_); };
   double q_cap_rated(){ return (q_cap_rated_); };
   double q_cap_scaled(){ return (q_cap_rated_scaled_); };

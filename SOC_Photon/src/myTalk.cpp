@@ -64,15 +64,15 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
             switch ( MOD_in )
             {
               case ( 0 ):
-                Serial.printf("Changing monitor chemistry from %d", Mon->mon_code());
+                Serial.printf("Changing monitor chemistry from %d", Mon->mod_code());
                 Mon->assign_mod("Battleborn");
-                Serial.printf(" to %d\n", Mon->mon_code());
+                Serial.printf(" to %d\n", Mon->mod_code());
                 break;
 
               case ( 1 ):
-                Serial.printf("Changing monitor chemistry from %d", Mon->mon_code());
+                Serial.printf("Changing monitor chemistry from %d", Mon->mod_code());
                 Mon->assign_mod("LION");
-                Serial.printf(" to %d\n", Mon->mon_code());
+                Serial.printf(" to %d\n", Mon->mod_code());
                 break;
 
               default:
@@ -85,15 +85,15 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
             switch ( MOD_in )
             {
               case ( 0 ):
-                Serial.printf("Changing simulation chemistry from %d", Sim->mon_code());
+                Serial.printf("Changing simulation chemistry from %d", Sim->mod_code());
                 Sim->assign_mod("Battleborn");
-                Serial.printf(" to %d ('Battleborn')\n", Sim->mon_code());
+                Serial.printf(" to %d ('Battleborn')\n", Sim->mod_code());
                 break;
 
               case ( 1 ):
-                Serial.printf("Changing simulation chemistry from %d", Sim->mon_code());
+                Serial.printf("Changing simulation chemistry from %d", Sim->mod_code());
                 Sim->assign_mod("LION");
-                Serial.printf(" to %d ('LION')\n", Sim->mon_code());
+                Serial.printf(" to %d ('LION')\n", Sim->mod_code());
                 break;
 
               default:

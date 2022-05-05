@@ -1,4 +1,3 @@
-
 		amp_hrs_remaining	Discharge amp*time left if drain to q=0, A-h
 		amp_hrs_remaining_ekf_	Discharge amp*time left if drain to q_ekf=0, A-h
 		BATT_V_SAT		Normal battery cell saturation for SOC=99.7, V
@@ -54,7 +53,7 @@
 		resetting_		Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
 		res_			Null resistance, Ohms
 		res_;          	Variable resistance value, ohms
-		rp.duty			(0-255) for D2 hardware injection when rp.modeling and proper wire connections made
+		duty			(0-255) for D2 hardware injection when rp.modeling and proper wire connections made
 		r_0_			Randles R0, ohms
 		r_ct_			Randles charge transfer resistance, ohms
 		r_diff_			Randles diffusion resistance, ohms

@@ -42,7 +42,6 @@ void Chemistry::assign_mod(const String mod_str)
   switch (mod)
   {
     case ( '0' ):  // "Battleborn";
-      mod_code = mod;
       dqdt    = 0.01;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
       low_voc = 10.;      // Voltage threshold for BMS to turn off battery;
       low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
@@ -80,7 +79,6 @@ void Chemistry::assign_mod(const String mod_str)
       r_sd        = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
       break;
     case ( '1' ):  // "LION";
-      mod_code = mod;
       dqdt    = 0.02;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
       low_voc = 9.;       // Voltage threshold for BMS to turn off battery;
       low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
@@ -162,9 +160,9 @@ uint8_t Chemistry::encode(const String mod_str)
 // class Coulombs
 Coulombs::Coulombs() {}
 Coulombs::Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rated, const double t_rated, 
-  const double t_rlim, const String batt_mod)
+  const double t_rlim, const uint8_t *rp_mod_code)
   : rp_delta_q_(rp_delta_q), rp_t_last_(rp_t_last), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017),
-  soc_min_(0), chem_(Chemistry(batt_mod))
+  soc_min_(0), chem_(*rp_mod_code)
   {
     soc_min_T_ = new TableInterp1D(chem_.n_n, chem_.x_soc_min, chem_.t_soc_min);
   }
@@ -189,6 +187,8 @@ void Coulombs::pretty_print(void)
   Serial.printf("  t_rlim_ =       %7.3f;  // Tbatt rate limit, deg C / s\n", t_rlim_);
   Serial.printf("  resetting_ =          %d;  // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter\n", resetting_);
   Serial.printf("  soc_min_ =      %7.3f;  // Estimated soc where battery BMS will shutoff current, fraction\n", soc_min_);
+  Serial.printf("  mod_ =        %s;  // Model type of battery chemistry e.g. Battleborn or LION\n", chem_.decode(mod_code()).c_str());
+  Serial.printf("  mod_code_ =           %d;  // Chemistry code integer\n", mod_code());
 }
 
 // functions

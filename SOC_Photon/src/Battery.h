@@ -156,7 +156,7 @@ class Battery : public Coulombs
 {
 public:
   Battery();
-  Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS, uint8_t *mod);
+  Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code);
   ~Battery();
   // operators
   // functions
@@ -224,7 +224,6 @@ protected:
   double voc_stat_; // Static, table lookup value of voc before applying hysteresis, V
   float *rp_nP_;    // Number of parallel batteries in bank, e.g. '2P1S'
   float *rp_nS_;    // Number of series batteries in bank, e.g. '2P1S'
-  uint8_t *rp_mod_; // Model type of battery chemistry e.g. Battleborn or LION, integer code
 };
 
 
@@ -233,7 +232,7 @@ class BatteryMonitor: public Battery, public EKF_1x1
 {
 public:
   BatteryMonitor();
-  BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod);
+  BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code);
   ~BatteryMonitor();
   // operators
   // functions
@@ -287,7 +286,7 @@ class BatteryModel: public Battery
 {
 public:
   BatteryModel();
-  BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod);
+  BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code);
   ~BatteryModel();
   // operators
   // functions

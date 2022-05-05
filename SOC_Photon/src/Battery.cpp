@@ -37,9 +37,9 @@ extern PublishPars pp;            // For publishing
 // class Battery
 // constructors
 Battery::Battery() {}
-Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS, uint8_t *rp_mod)
-    : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, batt_mod),
-    sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS), rp_mod_(rp_mod)
+Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code)
+    : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, rp_mod_code),
+    sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS)
 {
     // Battery characteristic tables
     voc_T_ = new TableInterp2D(chem_.n_s, chem_.m_t, chem_.x_soc, chem_.y_t, chem_.t_voc);
@@ -176,8 +176,6 @@ void Battery::pretty_print(void)
     Serial.printf("  dt_ =             %7.3f;  // Update time, s\n", dt_);
     Serial.printf(" *rp_nP_ =            %5.2f;  // Number of parallel batteries in bank, e.g. '2P1S'\n", *rp_nP_);
     Serial.printf(" *rp_nS_ =            %5.2f;  // Number of series batteries in bank, e.g. '2P1S'\n", *rp_nS_);
-    Serial.printf(" *rp_mod_ =                  %d;  // Model type of battery chemistry e.g. Battleborn or LION, integer code\n", *rp_mod_);
-    Serial.printf("  mod=               %s;  // Model type of battery chemistry e.g. Battleborn or LION, String\n", chem_.decode(*rp_mod_).c_str());
 }
 
 // Print State Space
@@ -199,8 +197,8 @@ double Battery::voc_soc(const double soc, const double temp_c)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery monitor class
 BatteryMonitor::BatteryMonitor(): Battery() {}
-BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod):
-    Battery(rp_delta_q, rp_t_last, -1., rp_nP, rp_nS, rp_mod)
+BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code):
+    Battery(rp_delta_q, rp_t_last, -1., rp_nP, rp_nS, rp_mod_code)
 {
     voc_filt_ = chem_.v_sat-HDB_VBATT;
     // EKF
@@ -471,8 +469,8 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
 BatteryModel::BatteryModel() : Battery() {}
-BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod) :
-    Battery(rp_delta_q, rp_t_last, 1., rp_nP, rp_nS, rp_mod), q_(RATED_BATT_CAP*3600.), rp_s_cap_model_(rp_s_cap_model)
+BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code) :
+    Battery(rp_delta_q, rp_t_last, 1., rp_nP, rp_nS, rp_mod_code), q_(RATED_BATT_CAP*3600.), rp_s_cap_model_(rp_s_cap_model)
 {
     // Randles dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery

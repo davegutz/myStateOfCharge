@@ -61,8 +61,8 @@ struct RetainedPars
   float tweak_bias_noamp = 0.;  // Tweak calibration for non-amplified current sensor
   float nP = NP;                // Number parallel batteries in bank
   float nS = NS;                // Number series batteries in bank
-  uint8_t mon_mod = 0;          // Monitor model type, see key
-  uint8_t sim_mod = 0;          // Monitor model type, see key
+  uint8_t mon_mod = 0;          // Monitor battery chemistry type
+  uint8_t sim_mod = 0;          // Simulation battery chemistry type
 
   // Nominalize
   void nominal()
