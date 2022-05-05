@@ -18,7 +18,7 @@ public:
   // operators
   // functions
   virtual double interp(void);
-
+  void pretty_print(void);
 protected:
   unsigned int n1_;
   double *x_;

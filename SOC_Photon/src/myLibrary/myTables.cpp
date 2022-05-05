@@ -194,6 +194,22 @@ double TableInterp::interp(void)
 {
   return (-999.);
 }
+void TableInterp::pretty_print(void)
+{
+  Serial.printf("TableInterp:\n");
+  Serial.printf(" x_ = {");
+  for (unsigned int i = 0; i < n1_; i++)
+  {
+     Serial.printf("%7.3f, ", x_[i]);
+  }
+  Serial.printf("};\n");
+  Serial.printf(" v_ = {");
+  for (unsigned int i = 0; i < n1_; i++)
+  {
+     Serial.printf("%7.3f, ", v_[i]);
+  }
+  Serial.printf("};\n");
+}
 
 // 1-D Interpolation Table Lookup
 // constructors

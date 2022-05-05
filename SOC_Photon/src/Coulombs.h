@@ -60,6 +60,7 @@ struct Chemistry
   void assign_mod(const String mod_str);
   String decode(const uint8_t mod);
   uint8_t encode(const String mod_str);
+  void pretty_print();
   Chemistry();
   Chemistry(const String mod_str)
   {

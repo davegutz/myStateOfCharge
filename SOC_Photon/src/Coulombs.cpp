@@ -156,6 +156,44 @@ uint8_t Chemistry::encode(const String mod_str)
     return ( result );
 }
 
+// Pretty print
+void Chemistry::pretty_print(void)
+{
+  Serial.printf("Chemistry:\n");
+  Serial.printf("  dqdt =        %7.3f;  // Change of charge with temperature, fraction/deg C (0.01 from literature)\n", dqdt);
+  Serial.printf("  low_voc =     %7.3f;  // Voltage threshold for BMS to turn off battery, V\n", low_voc);
+  Serial.printf("  hys_cap =     %7.3f;  // Capacitance of hysteresis, Farads\n", hys_cap);
+  Serial.printf("  v_sat =       %7.3f;  // Saturation threshold at temperature, deg C\n", v_sat);
+  Serial.printf("  dvoc_dt =     %7.3f;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n", dvoc_dt);
+  Serial.printf("  dv =          %7.3f;  // Adjustment for calibration error, V\n", dv);
+  Serial.printf("  r_0 =         %7.3f;  // Randles R0, ohms\n", r_0);
+  Serial.printf("  r_ct =        %7.3f;  // Randles charge transfer resistance, ohms\n", r_ct);
+  Serial.printf("  r_diff =      %7.3f;  // Randles diffusion resistance, ohms\n", r_diff);
+  Serial.printf("  tau_ct =      %7.3f;  // Randles charge transfer time constant, s (=1/Rct/Cct)\n", tau_ct);
+  Serial.printf("  tau_diff =    %7.3f;  // Randles diffusion time constant, s (=1/Rdif/Cdif)\n", tau_diff);
+  Serial.printf("  tau_sd =      %7.3f;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n", tau_sd);
+  Serial.printf("  r_sd =        %7.3f;  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n", r_sd);
+  Serial.printf("  r_ss =        %7.3f;  // Equivalent model for state space model initialization, ohms\n", r_ss);
+  Serial.printf("  y_t=voc(t, soc):\n");
+  Serial.printf("    y={"); for ( int i=0; i<m_t; i++ ) Serial.printf("%7.3f, ", y_t[i]); Serial.printf("};\n");
+  Serial.printf("    x={"); for ( int i=0; i<n_s; i++ ) Serial.printf("%7.3f, ", x_soc[i]); Serial.printf("};\n");
+  Serial.printf("    z=\n");
+  for ( int i=0; i<m_t; i++ )
+  {
+    Serial.printf("      {"); for ( int j=0; j<n_s; j++ ) Serial.printf("%7.3f, ", t_voc[i*n_s+j]);
+  }
+  Serial.printf("};\n");
+
+  // float *y_t;       // Temperature breakpoints for voc table
+  // float *x_soc;     // soc breakpoints for voc table
+  // float *t_voc;     // voc(soc,t)
+  // float *x_soc_min; // Temperature breakpoints for soc_min table
+  // float *t_soc_min; // soc_min table
+  // float *x_dv;      // dv breakpoints for r(soc, dv) table t_r
+  // float *y_soc;     // soc breakpoints for r(soc, dv) table t_r
+  // float *t_r;       // r(soc, dv) table
+}
+
 
 // class Coulombs
 Coulombs::Coulombs() {}
@@ -167,6 +205,7 @@ Coulombs::Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rate
     soc_min_T_ = new TableInterp1D(chem_.n_n, chem_.x_soc_min, chem_.t_soc_min);
   }
 Coulombs::~Coulombs() {}
+
 
 // operators
 // Pretty print
@@ -189,6 +228,8 @@ void Coulombs::pretty_print(void)
   Serial.printf("  soc_min_ =      %7.3f;  // Estimated soc where battery BMS will shutoff current, fraction\n", soc_min_);
   Serial.printf("  mod_ =        %s;  // Model type of battery chemistry e.g. Battleborn or LION\n", chem_.decode(mod_code()).c_str());
   Serial.printf("  mod_code_ =           %d;  // Chemistry code integer\n", mod_code());
+  Serial.printf("Coulombs::");
+  chem_.pretty_print();
 }
 
 // functions
