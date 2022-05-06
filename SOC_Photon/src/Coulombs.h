@@ -67,9 +67,9 @@ struct Chemistry
     rp_mod_code = new uint8_t(-1);
     assign_mod(mod_str);
   }
-  Chemistry(const uint8_t mod_code)
+  Chemistry(uint8_t *mod_code)
   {
-    rp_mod_code = new uint8_t(mod_code);
+    rp_mod_code = mod_code;
     String mod_str = decode(*rp_mod_code);
     assign_mod(mod_str);
   }
@@ -81,7 +81,7 @@ class Coulombs
 public:
   Coulombs();
   Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rated, const double t_rated, const double t_rlim,
-    const uint8_t *rp_mod_code);
+    uint8_t *rp_mod_code);
   ~Coulombs();
   // operators
   // functions

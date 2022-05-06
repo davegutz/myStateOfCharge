@@ -41,6 +41,7 @@ void Chemistry::assign_mod(const String mod_str)
   uint8_t mod = encode(mod_str);
   if ( mod==0 )  // "Battleborn";
   {
+    *rp_mod_code = mod;
     dqdt    = 0.01;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
     low_voc = 10.;      // Voltage threshold for BMS to turn off battery;
     low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
@@ -86,6 +87,7 @@ void Chemistry::assign_mod(const String mod_str)
   }
   else if ( mod==1 )  // "LION";
   {
+    *rp_mod_code = mod;
     dqdt    = 0.02;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
     low_voc = 9.;       // Voltage threshold for BMS to turn off battery;
     low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
@@ -210,9 +212,9 @@ void Chemistry::pretty_print(void)
 // class Coulombs
 Coulombs::Coulombs() {}
 Coulombs::Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rated, const double t_rated, 
-  const double t_rlim, const uint8_t *rp_mod_code)
+  const double t_rlim, uint8_t *rp_mod_code)
   : rp_delta_q_(rp_delta_q), rp_t_last_(rp_t_last), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017),
-  soc_min_(0), chem_(*rp_mod_code)
+  soc_min_(0), chem_(rp_mod_code)
   {
     soc_min_T_ = new TableInterp1D(chem_.n_n, chem_.x_soc_min, chem_.t_soc_min);
   }
