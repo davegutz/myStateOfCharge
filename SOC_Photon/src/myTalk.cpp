@@ -67,12 +67,14 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
                 Serial.printf("Changing monitor chemistry from %d", Mon->mod_code());
                 Mon->assign_mod("Battleborn");
                 Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_rand();
+                cp.cmd_reset();
                 break;
 
               case ( 1 ):
                 Serial.printf("Changing monitor chemistry from %d", Mon->mod_code());
                 Mon->assign_mod("LION");
                 Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_rand();
+                cp.cmd_reset();
                 break;
 
               default:
@@ -88,12 +90,14 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
                 Serial.printf("Changing simulation chemistry from %d", Sim->mod_code());
                 Sim->assign_mod("Battleborn"); Sim->assign_rand();
                 Serial.printf(" to %d ('Battleborn')\n", Sim->mod_code());
+                cp.cmd_reset();
                 break;
 
               case ( 1 ):
                 Serial.printf("Changing simulation chemistry from %d", Sim->mod_code());
                 Sim->assign_mod("LION"); Sim->assign_rand();
                 Serial.printf(" to %d ('LION')\n", Sim->mod_code());
+                cp.cmd_reset();
                 break;
 
               default:
@@ -259,9 +263,8 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         
           case ( 'h' ):
             scale = cp.input_string.substring(2).toFloat();
+            Serial.printf("\nBefore Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n", Mon->hys_scale(), Sim->hys_scale());
             rp.hys_scale = scale;
-            Serial.printf("\nBefore Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n",
-                Mon->hys_scale(), Sim->hys_scale());
             Serial.printf("\nChanging to Sh= %7.3f\n", scale);
             Mon->hys_scale(scale);
             Sim->hys_scale(scale);

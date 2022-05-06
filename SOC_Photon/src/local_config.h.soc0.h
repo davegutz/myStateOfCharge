@@ -2,7 +2,7 @@
 #define local_config_h
 
 // version with Tweak on both current sensors
-const   String    unit = "soc0_20220502";  // Gross configuration stamp, put on data points and matches GitHub tag
+const   String    unit = "soc0_20220506";  // Gross configuration stamp, put on data points and matches GitHub tag
 
 //#define CURR_BIAS_AMP       -0.2  // 3/1/2022. Dapped to -0.8 on 2/28
 //#define CURR_BIAS_NOAMP     -0.5  // 3/1/2022. Dapped to -1.1 on 2/28

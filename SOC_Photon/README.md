@@ -331,7 +331,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
       then hard reset then
       Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; v0;
       To record ongoing adjustments (also put in local_config.h)
-      Da-2.96;Db-2.92;Mk0;Nk0;
+      Da-5.;Db-2.92;Mk0;Nk0;
       To end:
       Xp0; v2;
       Transfer tweak_bias to CURR_BIAS_AMP and CURR_BIAS_NOAMP in local_config.h; otherwise max_tweak will begin to limit.
