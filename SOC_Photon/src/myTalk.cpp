@@ -66,13 +66,13 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
               case ( 0 ):
                 Serial.printf("Changing monitor chemistry from %d", Mon->mod_code());
                 Mon->assign_mod("Battleborn");
-                Serial.printf(" to %d\n", Mon->mod_code());
+                Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_rand();
                 break;
 
               case ( 1 ):
                 Serial.printf("Changing monitor chemistry from %d", Mon->mod_code());
                 Mon->assign_mod("LION");
-                Serial.printf(" to %d\n", Mon->mod_code());
+                Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_rand();
                 break;
 
               default:
@@ -86,13 +86,13 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
             {
               case ( 0 ):
                 Serial.printf("Changing simulation chemistry from %d", Sim->mod_code());
-                Sim->assign_mod("Battleborn");
+                Sim->assign_mod("Battleborn"); Sim->assign_rand();
                 Serial.printf(" to %d ('Battleborn')\n", Sim->mod_code());
                 break;
 
               case ( 1 ):
                 Serial.printf("Changing simulation chemistry from %d", Sim->mod_code());
-                Sim->assign_mod("LION");
+                Sim->assign_mod("LION"); Sim->assign_rand();
                 Serial.printf(" to %d ('LION')\n", Sim->mod_code());
                 break;
 
@@ -921,7 +921,6 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("  +/-12:   Inject\n");
   Serial.printf("  +/-14:   vshunt and ishunt raw\n");
   Serial.printf("    +15:   vb raw\n");
-  Serial.printf("    +33:   state-space\n");
   Serial.printf("  +/-34:   EKF detailed\n");
   Serial.printf("    -35:   EKF summary Arduino\n");
   Serial.printf("    +35:   Randles balance\n");

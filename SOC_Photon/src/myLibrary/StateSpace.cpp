@@ -69,9 +69,6 @@ void StateSpace::calc_x_dot(double *u)
   mulmat(A_, x_, AX, n_, n_, 1);
   mulmat(B_, u_, BU, n_, p_, 1);
   for (i=0; i<n_; i++) x_dot_[i] = AX[i] + BU[i];
-  if ( rp.debug==33 )
-  {
-  }
 }
 
 // Initialize

@@ -41,6 +41,9 @@ Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, f
     : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, rp_mod_code),
     sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS)
 {
+    // Initialize Randles state space
+    // assign_rand();
+
     // Battery characteristic tables
     voc_T_ = new TableInterp2D(chem_.n_s, chem_.m_t, chem_.x_soc, chem_.y_t, chem_.t_voc);
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // TODO:  ??
@@ -67,17 +70,17 @@ Battery::~Battery() {}
 // Battery::assign_rand:    Assign constants from battery chemistry to arrays for state space model
 void Battery::assign_rand(void)
 {
-    rand_A_[0] = -1./tau_ct_;
+    rand_A_[0] = -1./chem_.tau_ct;
     rand_A_[1] = 0.;
     rand_A_[2] = 0.;
-    rand_A_[3] = -1/tau_dif_;
-    rand_B_[0] = 1./(tau_ct_ / rct_);
+    rand_A_[3] = -1/chem_.tau_ct;
+    rand_B_[0] = 1./(chem_.tau_ct / chem_.r_ct);
     rand_B_[1] = 0.;
-    rand_B_[2] = 1./(tau_dif_ / r_dif_);
+    rand_B_[2] = 1./(chem_.tau_diff / chem_.r_diff);
     rand_B_[3] = 0.;
     rand_C_[0] = -1.;
     rand_C_[1] = -1.;
-    rand_D_[0] = -r0_;
+    rand_D_[0] = -chem_.r_0;
     rand_D_[1] = 1.;
 }
 
@@ -155,13 +158,13 @@ void Battery::pretty_print(void)
     Serial.printf("  *rp_delt_q_ =  %10.1f;  //  Charge change since saturated, C\n", *rp_delta_q_);
     Serial.printf("  *rp_t_last_ =  %10.1f;  // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C\n", *rp_t_last_);
     Serial.printf("  dvoc_dt_ =     %10.6f;  //  Change of VOC with temperature, V/deg C\n", dvoc_dt_);
-    Serial.printf("  r0_ =          %10.6f;  //  Randles R0, ohms\n", r0_);
-    Serial.printf("  rct_ =         %10.6f;  //  Randles charge transfer resistance, ohms\n", rct_);
-    Serial.printf("  tau_ct =       %10.6f;  //  Randles charge transfer time constant, s (=1/Rct/Cct)\n", tau_ct_);
-    Serial.printf("  r_dif_ =       %10.6f;  //  Randles diffusion resistance, ohms\n", r_dif_);
-    Serial.printf("  tau_dif_ =     %10.6f;  //  Randles diffusion time constant, s (=1/Rdif/Cdif)\n", tau_dif_);
-    Serial.printf("  r_sd_ =        %10.6f;  //  Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n", r_sd_);
-    Serial.printf("  tau_sd_ =      %10.1f;  //  Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n", tau_sd_);
+    Serial.printf("  r0_ =          %10.6f;  //  Randles R0, ohms\n", chem_.r_0);
+    Serial.printf("  rct_ =         %10.6f;  //  Randles charge transfer resistance, ohms\n", chem_.r_ct);
+    Serial.printf("  tau_ct =       %10.6f;  //  Randles charge transfer time constant, s (=1/Rct/Cct)\n", chem_.tau_ct);
+    Serial.printf("  r_dif_ =       %10.6f;  //  Randles diffusion resistance, ohms\n", chem_.r_diff);
+    Serial.printf("  tau_dif_ =     %10.6f;  //  Randles diffusion time constant, s (=1/Rdif/Cdif)\n", chem_.tau_diff);
+    Serial.printf("  r_sd_ =        %10.6f;  //  Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n", chem_.r_sd);
+    Serial.printf("  tau_sd_ =      %10.1f;  //  Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n", chem_.tau_sd);
     Serial.printf("  bms_off_ =              %d;  // Calculated indication that the BMS has turned off charge current, T=off\n", bms_off_);
     Serial.printf("  dv_dsoc_=      %10.6f;  // Derivative scaled, V/fraction\n", dv_dsoc_);
     Serial.printf("  ib_ =             %7.3f;  // Battery terminal current, A\n", ib_);
@@ -345,8 +348,8 @@ double BatteryMonitor::calc_charge_time(const double q, const double q_capacity,
 void BatteryMonitor::ekf_predict(double *Fx, double *Bu)
 {
     // Process model
-    *Fx = exp(-dt_ / tau_sd_);
-    *Bu = (1. - *Fx) * r_sd_;
+    *Fx = exp(-dt_ / chem_.tau_sd);
+    *Bu = (1. - *Fx) * chem_.r_sd;
 }
 
 // EKF model for update
@@ -476,16 +479,16 @@ BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap
     // Resistance values add up to same resistance loss as matched to installed battery
     // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
     // the state-space stability requires at least 0.1.   Used 0.2.
-    double c_ct = tau_ct_ / rct_;
-    double c_dif = tau_dif_ / r_dif_;
+    double c_ct = chem_.tau_ct / chem_.r_ct;
+    double c_dif = chem_.tau_diff / chem_.r_diff;
     int rand_n = 2; // Rows A and B
     int rand_p = 2; // Col B    
     int rand_q = 1; // Row C and D
     rand_A_ = new double[rand_n*rand_n];
-    rand_A_[0] = -1./tau_ct_;
+    rand_A_[0] = -1./chem_.tau_ct;
     rand_A_[1] = 0.;
     rand_A_[2] = 0.;
-    rand_A_[3] = -1/tau_dif_;
+    rand_A_[3] = -1/chem_.tau_diff;
     rand_B_ = new double [rand_n*rand_p];
     rand_B_[0] = 1./c_ct;
     rand_B_[1] = 0.;
@@ -495,7 +498,7 @@ BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap
     rand_C_[0] = 1.;
     rand_C_[1] = 1.;
     rand_D_ = new double [rand_q*rand_p];
-    rand_D_[0] = r0_;
+    rand_D_[0] = chem_.r_0;
     rand_D_[1] = 1.;
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
     Sin_inj_ = new SinInj();

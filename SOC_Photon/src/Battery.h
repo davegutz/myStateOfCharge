@@ -184,7 +184,7 @@ public:
   void pretty_print_ss();
   double voc() { return (voc_); };
   double voc_soc(const double soc, const double temp_c);
-  void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -r0_*sr_); };
+  void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -chem_.r_0*sr_); };
   double Sr() { return (sr_); };
   double temp_c() { return (temp_c_); };
   double Vb() { return (vb_*(*rp_nS_)); };
@@ -202,13 +202,6 @@ protected:
   double dv_;       // Table hard-coded adjustment, compensates for data collection errors (hysteresis), V
   double dvoc_dt_;  // Change of VOC with temperature, V/deg C
   double dt_;       // Update time, s
-  double r0_;       // Randles R0, ohms
-  double tau_ct_;   // Randles charge transfer time constant, s (=1/Rct/Cct)
-  double rct_;      // Randles charge transfer resistance, ohms
-  double tau_dif_;  // Randles diffusion time constant, s (=1/Rdif/Cdif)
-  double r_dif_;    // Randles diffusion resistance, ohms
-  double tau_sd_;   // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
-  double r_sd_;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
   // EKF declarations
   StateSpace *Randles_; // Randles model {ib, vb} --> {voc}, ioc=ib for Battery version
                         // Randles model {ib, voc} --> {vb}, ioc=ib for BatteryModel version
