@@ -265,10 +265,10 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
             scale = cp.input_string.substring(2).toFloat();
             Serial.printf("\nBefore Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n", Mon->hys_scale(), Sim->hys_scale());
             rp.hys_scale = scale;
-            Serial.printf("\nChanging to Sh= %7.3f\n", scale);
+            Serial.printf("Changing to Sh= %7.3f\n", scale);
             Mon->hys_scale(scale);
             Sim->hys_scale(scale);
-            Serial.printf("\nAfter Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n",
+            Serial.printf("After Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n",
                 Mon->hys_scale(), Sim->hys_scale());
             break;
         
