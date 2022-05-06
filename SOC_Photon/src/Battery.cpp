@@ -41,9 +41,6 @@ Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, f
     : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, rp_mod_code),
     sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS)
 {
-    // Initialize Randles state space
-    // assign_rand();
-
     // Battery characteristic tables
     voc_T_ = new TableInterp2D(chem_.n_s, chem_.m_t, chem_.x_soc, chem_.y_t, chem_.t_voc);
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // TODO:  ??
