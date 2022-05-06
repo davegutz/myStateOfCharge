@@ -200,7 +200,6 @@ protected:
   double nom_vsat_; // Nominal saturation threshold at 25C, V
   double vsat_;     // Saturation threshold at temperature, V
   double dv_;       // Table hard-coded adjustment, compensates for data collection errors (hysteresis), V
-  double dvoc_dt_;  // Change of VOC with temperature, V/deg C
   double dt_;       // Update time, s
   // EKF declarations
   StateSpace *Randles_; // Randles model {ib, vb} --> {voc}, ioc=ib for Battery version

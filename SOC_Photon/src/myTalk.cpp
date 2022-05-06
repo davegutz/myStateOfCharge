@@ -925,6 +925,7 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("    -35:   EKF summary Arduino\n");
   Serial.printf("    +35:   Randles balance\n");
   Serial.printf("  +/-37:   EKF short\n");
+  Serial.printf("    +75:   voc_low check model\n");
   Serial.printf("    +76:   vb model\n");
   Serial.printf("  +/-78:   Battery model saturation\n");
   Serial.printf("    +79:   sat_ib model\n");

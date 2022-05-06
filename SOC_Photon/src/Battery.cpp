@@ -124,13 +124,13 @@ double Battery::calc_soc_voc_slope(const double soc, const double temp_c)
     INPUTS:
         nom_vsat_   Nominal saturation threshold at 25C, V
         temp_c_     Battery temperature, deg C
-        dvoc_dt_    Change of VOC with operating temperature in range 0 - 50 C V/deg C
+        dvoc_dt     Change of VOC with operating temperature in range 0 - 50 C V/deg C
     OUTPUTS:
         vsat        Saturation threshold at temperature, deg C
 */  
 double_t Battery::calc_vsat(void)
 {
-    return ( nom_vsat_ + (temp_c_-25.)*dvoc_dt_ );
+    return ( nom_vsat_ + (temp_c_-25.)*chem_.dvoc_dt );
 }
 
 // Initialize
@@ -152,16 +152,16 @@ void Battery::pretty_print(void)
 {
     Serial.printf("Battery:\n");
     Serial.printf("  temp_c_ =         %7.3f;  //  Battery temperature, deg C\n", temp_c_);
-    Serial.printf("  *rp_delt_q_ =  %10.1f;  //  Charge change since saturated, C\n", *rp_delta_q_);
-    Serial.printf("  *rp_t_last_ =  %10.1f;  // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C\n", *rp_t_last_);
-    Serial.printf("  dvoc_dt_ =     %10.6f;  //  Change of VOC with temperature, V/deg C\n", dvoc_dt_);
-    Serial.printf("  r0_ =          %10.6f;  //  Randles R0, ohms\n", chem_.r_0);
-    Serial.printf("  rct_ =         %10.6f;  //  Randles charge transfer resistance, ohms\n", chem_.r_ct);
+    Serial.printf(" *rp_delt_q_ =   %10.1f;  //  Charge change since saturated, C\n", *rp_delta_q_);
+    Serial.printf(" *rp_t_last_ =   %10.1f;  // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C\n", *rp_t_last_);
+    Serial.printf("  dvoc_dt  =     %10.6f;  //  Change of VOC with temperature, V/deg C\n", chem_.dvoc_dt);
+    Serial.printf("  r_0 =          %10.6f;  //  Randles R0, ohms\n", chem_.r_0);
+    Serial.printf("  r_ct =         %10.6f;  //  Randles charge transfer resistance, ohms\n", chem_.r_ct);
     Serial.printf("  tau_ct =       %10.6f;  //  Randles charge transfer time constant, s (=1/Rct/Cct)\n", chem_.tau_ct);
-    Serial.printf("  r_dif_ =       %10.6f;  //  Randles diffusion resistance, ohms\n", chem_.r_diff);
-    Serial.printf("  tau_dif_ =     %10.6f;  //  Randles diffusion time constant, s (=1/Rdif/Cdif)\n", chem_.tau_diff);
-    Serial.printf("  r_sd_ =        %10.6f;  //  Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n", chem_.r_sd);
-    Serial.printf("  tau_sd_ =      %10.1f;  //  Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n", chem_.tau_sd);
+    Serial.printf("  r_diff =       %10.6f;  //  Randles diffusion resistance, ohms\n", chem_.r_diff);
+    Serial.printf("  tau_diff =     %10.6f;  //  Randles diffusion time constant, s (=1/Rdif/Cdif)\n", chem_.tau_diff);
+    Serial.printf("  r_sd =         %10.6f;  //  Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n", chem_.r_sd);
+    Serial.printf("  tau_sd =       %10.1f;  //  Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n", chem_.tau_sd);
     Serial.printf("  bms_off_ =              %d;  // Calculated indication that the BMS has turned off charge current, T=off\n", bms_off_);
     Serial.printf("  dv_dsoc_=      %10.6f;  // Derivative scaled, V/fraction\n", dv_dsoc_);
     Serial.printf("  ib_ =             %7.3f;  // Battery terminal current, A\n", ib_);
@@ -574,8 +574,11 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     model_saturated_ = (voc_stat_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
     Coulombs::sat_ = model_saturated_;
 
+    if ( rp.debug==75 ) Serial.printf("BatteryModel::calculate: voc_stat_, low_voc,=  %7.3f, %7.3f,\n",
+        voc_stat_, chem_.low_voc);
+
     if ( rp.debug==79 ) Serial.printf("temp_C, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f,\n",
-        temp_C, dvoc_dt_, vsat_, voc_, q_capacity_, sat_ib_max_, ib_);
+        temp_C, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_);
 
     if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc_,voc,,vdyn,vb,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      dt,temp_C, ib_, soc_, voc_, vdyn_, vb_);
