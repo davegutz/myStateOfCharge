@@ -32,17 +32,17 @@ struct Chemistry
   float dqdt;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
   float low_voc;    // Voltage threshold for BMS to turn off battery, V
   float low_t;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C 
-  uint8_t m_t;      // Number temperature breakpoints for voc table
+  uint8_t m_t = 0;  // Number temperature breakpoints for voc table
   float *y_t;       // Temperature breakpoints for voc table
-  uint8_t n_s;      // Number of soc breakpoints voc table
+  uint8_t n_s = 0;  // Number of soc breakpoints voc table
   float *x_soc;     // soc breakpoints for voc table
   float *t_voc;     // voc(soc,t)
-  uint8_t n_n;      // Number temperature breakpoints for soc_min table
+  uint8_t n_n = 0;  // Number temperature breakpoints for soc_min table
   float *x_soc_min; // Temperature breakpoints for soc_min table
   float *t_soc_min; // soc_min table
   float hys_cap;    // Capacitance of hysteresis, Farads
-  uint8_t n_h;      // Number of dv breakpoints in r(soc, dv) table t_r
-  uint8_t m_h;      // Number of soc breakpoints in r(soc, dv) table t_r
+  uint8_t n_h = 0;  // Number of dv breakpoints in r(soc, dv) table t_r
+  uint8_t m_h = 0;  // Number of soc breakpoints in r(soc, dv) table t_r
   float *x_dv;      // dv breakpoints for r(soc, dv) table t_r
   float *y_soc;     // soc breakpoints for r(soc, dv) table t_r
   float *t_r;       // r(soc, dv) table

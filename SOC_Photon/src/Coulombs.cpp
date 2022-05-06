@@ -39,86 +39,97 @@ void Chemistry::assign_mod(const String mod_str)
 {
   int i;
   uint8_t mod = encode(mod_str);
-  switch (mod)
+  if ( mod==0 )  // "Battleborn";
   {
-    case ( '0' ):  // "Battleborn";
-      dqdt    = 0.01;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
-      low_voc = 10.;      // Voltage threshold for BMS to turn off battery;
-      low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
-      m_t     = m_t_bb;   // Number temperature breakpoints for voc table
-      n_s     = n_s_bb;   //Number of soc breakpoints voc table
-      delete y_t;     y_t = new float[m_t];
-      delete x_soc;   x_soc = new float[n_s];
-      delete t_voc;   t_voc = new float[m_t*n_s];
-      for (i=0; i<m_t; i++) y_t[i] = y_t_bb[i];
-      for (i=0; i<n_s; i++) x_soc[i] = x_soc_bb[i];
-      for (i=0; i<m_t*n_s; i++) t_voc[i] = t_voc_bb[i];
-      n_n     = n_n_bb;   // Number of temperature breakpoints for x_soc_min table
-      delete x_soc_min;    x_soc_min = new float[n_n];
-      delete t_soc_min;    t_soc_min = new float[n_n];
-      for (i=0; i<n_n; i++) x_soc_min[i] = x_soc_min_bb[i];
-      for (i=0; i<n_n; i++) t_soc_min[i] = t_soc_min_bb[i];
-      hys_cap = 3.6e6;    // Capacitance of hysteresis, Farads
-      n_h     = n_h_bb;
-      m_h     = m_h_bb;
-      delete x_dv;    x_dv = new float[n_h];
-      delete y_soc;   y_soc = new float[m_h];
-      delete t_r;     t_r = new float[m_h*n_h];
-      for (i=0; i<n_h; i++) x_dv[i] = x_dv_bb[i];
-      for (i=0; i<m_h; i++) y_soc[i] = y_soc_bb[i];
-      for (i=0; i<m_h*n_h; i++) t_r[i] = t_r_bb[i];
-      v_sat       = 13.85;  // Saturation threshold at temperature, deg C
-      dvoc_dt     = 0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
-      dv          = 0.01;   // Adjustment for calibration error, V
-      r_0         = 0.003;  // Randles R0, ohms   
-      r_ct        = 0.0016; // Randles charge transfer resistance, ohms
-      r_diff      = 0.0077; // Randles diffusion resistance, ohms
-      tau_ct      = 0.2;    // Randles charge transfer time constant, s (=1/Rct/Cct)
-      tau_diff    = 83.;    // Randles diffusion time constant, s (=1/Rdif/Cdif)
-      tau_sd      = 1.8e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
-      r_sd        = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
-      break;
-    case ( '1' ):  // "LION";
-      dqdt    = 0.02;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
-      low_voc = 9.;       // Voltage threshold for BMS to turn off battery;
-      low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
-      m_t     = m_t_li;   // Number temperature breakpoints for voc table
-      n_s     = n_s_li;   //Number of soc breakpoints voc table
-      delete y_t;     y_t = new float[m_t];
-      delete x_soc;   x_soc = new float[n_s];
-      delete t_voc;   t_voc = new float[m_t*n_s];
-      for (i=0; i<m_t; i++) y_t[i] = y_t_li[i];
-      for (i=0; i<n_s; i++) x_soc[i] = x_soc_li[i];
-      for (i=0; i<m_t*n_s; i++) t_voc[i] = t_voc_li[i];
-      n_n     = n_n_li;   // Number of temperature breakpoints for x_soc_min table
-      delete x_soc_min;    x_soc_min = new float[n_n];
-      delete t_soc_min;    t_soc_min = new float[n_n];
-      for (i=0; i<n_n; i++) x_soc_min[i] = x_soc_min_li[i];
-      for (i=0; i<n_n; i++) t_soc_min[i] = t_soc_min_li[i];
-      hys_cap = 7.2e6;    // Capacitance of hysteresis, Farads
-      n_h     = n_h_li;
-      m_h     = m_h_li;
-      delete x_dv;    x_dv = new float[n_h];
-      delete y_soc;   y_soc = new float[m_h];
-      delete t_r;     t_r = new float[m_h*n_h];
-      for (i=0; i<n_h; i++) x_dv[i] = x_dv_li[i];
-      for (i=0; i<m_h; i++) y_soc[i] = y_soc_li[i];
-      for (i=0; i<m_h*n_h; i++) t_r[i] = t_r_li[i];
-      v_sat       = 12.85;  // Saturation threshold at temperature, deg C
-      dvoc_dt     = 0.008;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
-      dv          = 0.01;   // Adjustment for calibration error, V
-      r_0         = 0.006;  // Randles R0, ohms   
-      r_ct        = 0.0032; // Randles charge transfer resistance, ohms
-      r_diff      = 0.0144; // Randles diffusion resistance, ohms
-      tau_ct      = 0.4;    // Randles charge transfer time constant, s (=1/Rct/Cct)
-      tau_diff    = 166.;    // Randles diffusion time constant, s (=1/Rdif/Cdif)
-      tau_sd      = 3.6e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
-      r_sd        = 140;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
-      break;
-    default:       // "unknown"
-        Serial.printf("Battery::assign_mod:  unknown mod = %s.  Type 'h' for help\n", mod_str.c_str());
-        break;
+    dqdt    = 0.01;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
+    low_voc = 10.;      // Voltage threshold for BMS to turn off battery;
+    low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
+    if ( n_s )  delete x_soc;
+    if ( m_t )  delete y_t;
+    if ( m_t && n_s )  delete t_voc;
+    n_s     = n_s_bb;   //Number of soc breakpoints voc table
+    m_t     = m_t_bb;   // Number temperature breakpoints for voc table
+    x_soc = new float[n_s];
+    y_t = new float[m_t];
+    t_voc = new float[m_t*n_s];
+    for (i=0; i<n_s; i++) x_soc[i] = x_soc_bb[i];
+    for (i=0; i<m_t; i++) y_t[i] = y_t_bb[i];
+    for (i=0; i<m_t*n_s; i++) t_voc[i] = t_voc_bb[i];
+    if ( n_n ) { delete x_soc_min; delete t_soc_min;}
+    n_n     = n_n_bb;   // Number of temperature breakpoints for x_soc_min table
+    x_soc_min = new float[n_n];
+    t_soc_min = new float[n_n];
+    for (i=0; i<n_n; i++) x_soc_min[i] = x_soc_min_bb[i];
+    for (i=0; i<n_n; i++) t_soc_min[i] = t_soc_min_bb[i];
+    hys_cap = 3.6e6;    // Capacitance of hysteresis, Farads
+    if ( n_h )  delete x_dv;
+    if ( m_h )  delete y_soc;
+    if ( m_h && n_h )  delete t_r;
+    n_h     = n_h_bb;   // Number of dv breakpoints in r(dv) table t_r
+    m_h     = m_h_bb;   // Number of soc breakpoints in r(soc, dv) table t_r
+    x_dv = new float[n_h];
+    y_soc = new float[m_h];
+    t_r = new float[m_h*n_h];
+    for (i=0; i<n_h; i++) x_dv[i] = x_dv_bb[i];
+    for (i=0; i<m_h; i++) y_soc[i] = y_soc_bb[i];
+    for (i=0; i<m_h*n_h; i++) t_r[i] = t_r_bb[i];
+    v_sat       = 13.85;  // Saturation threshold at temperature, deg C
+    dvoc_dt     = 0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
+    dv          = 0.01;   // Adjustment for calibration error, V
+    r_0         = 0.003;  // Randles R0, ohms   
+    r_ct        = 0.0016; // Randles charge transfer resistance, ohms
+    r_diff      = 0.0077; // Randles diffusion resistance, ohms
+    tau_ct      = 0.2;    // Randles charge transfer time constant, s (=1/Rct/Cct)
+    tau_diff    = 83.;    // Randles diffusion time constant, s (=1/Rdif/Cdif)
+    tau_sd      = 1.8e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
+    r_sd        = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
   }
+  else if ( mod==1 )  // "LION";
+  {
+    dqdt    = 0.02;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
+    low_voc = 9.;       // Voltage threshold for BMS to turn off battery;
+    low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
+    if ( n_s )  delete x_soc;
+    if ( m_t )  delete y_t;
+    if ( m_t && n_s )  delete t_voc;
+    n_s     = n_s_li;   //Number of soc breakpoints voc table
+    m_t     = m_t_li;   // Number temperature breakpoints for voc table
+    x_soc = new float[n_s];
+    y_t = new float[m_t];
+    t_voc = new float[m_t*n_s];
+    for (i=0; i<n_s; i++) x_soc[i] = x_soc_li[i];
+    for (i=0; i<m_t; i++) y_t[i] = y_t_li[i];
+    for (i=0; i<m_t*n_s; i++) t_voc[i] = t_voc_li[i];
+    if ( n_n ) { delete x_soc_min; delete t_soc_min;}
+    n_n     = n_n_li;   // Number of temperature breakpoints for x_soc_min table
+    x_soc_min = new float[n_n];
+    t_soc_min = new float[n_n];
+    for (i=0; i<n_n; i++) x_soc_min[i] = x_soc_min_li[i];
+    for (i=0; i<n_n; i++) t_soc_min[i] = t_soc_min_li[i];
+    hys_cap = 3.6e6;    // Capacitance of hysteresis, Farads
+    if ( n_h )  delete x_dv;
+    if ( m_h )  delete y_soc;
+    if ( m_h && n_h )  delete t_r;
+    n_h     = n_h_li;   // Number of dv breakpoints in r(dv) table t_r
+    m_h     = m_h_li;   // Number of soc breakpoints in r(soc, dv) table t_r
+    x_dv = new float[n_h];
+    y_soc = new float[m_h];
+    t_r = new float[m_h*n_h];
+    for (i=0; i<n_h; i++) x_dv[i] = x_dv_li[i];
+    for (i=0; i<m_h; i++) y_soc[i] = y_soc_li[i];
+    for (i=0; i<m_h*n_h; i++) t_r[i] = t_r_li[i];
+    v_sat       = 12.85;  // Saturation threshold at temperature, deg C
+    dvoc_dt     = 0.008;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
+    dv          = 0.01;   // Adjustment for calibration error, V
+    r_0         = 0.006;  // Randles R0, ohms   
+    r_ct        = 0.0032; // Randles charge transfer resistance, ohms
+    r_diff      = 0.0144; // Randles diffusion resistance, ohms
+    tau_ct      = 0.4;    // Randles charge transfer time constant, s (=1/Rct/Cct)
+    tau_diff    = 166.;    // Randles diffusion time constant, s (=1/Rdif/Cdif)
+    tau_sd      = 3.6e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
+    r_sd        = 140;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
+  }
+  else Serial.printf("Battery::assign_mod:  unknown mod = %d.  Type 'h' for help\n", mod);
   r_ss = r_0 + r_ct + r_diff;
 }
 
@@ -126,18 +137,12 @@ void Chemistry::assign_mod(const String mod_str)
 String Chemistry::decode(const uint8_t mod)
 {
     String result;
-    switch (mod)
+    if ( mod==0 ) result = "Battleborn";
+    else if ( mod==1 ) result = "LION";
+    else
     {
-        case ( '0' ):
-            result = "Battleborn";
-            break;
-        case ( '1' ):
-            result = "LION";
-            break;
-        default:
-            result = "unknown";
-            Serial.printf("Chemistry::decode:  unknown mod number = %d.  Type 'h' for help\n", mod);
-            break;
+      result = "unknown";
+      Serial.printf("Chemistry::decode:  unknown mod number = %d.  Type 'h' for help\n", mod);
     }
     return ( result );
 }
@@ -174,24 +179,31 @@ void Chemistry::pretty_print(void)
   Serial.printf("  tau_sd =      %7.3f;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n", tau_sd);
   Serial.printf("  r_sd =        %7.3f;  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n", r_sd);
   Serial.printf("  r_ss =        %7.3f;  // Equivalent model for state space model initialization, ohms\n", r_ss);
-  Serial.printf("  y_t=voc(t, soc):\n");
-  Serial.printf("    y={"); for ( int i=0; i<m_t; i++ ) Serial.printf("%7.3f, ", y_t[i]); Serial.printf("};\n");
-  Serial.printf("    x={"); for ( int i=0; i<n_s; i++ ) Serial.printf("%7.3f, ", x_soc[i]); Serial.printf("};\n");
-  Serial.printf("    z=\n");
+  Serial.printf("  voc(t, soc):\n");
+  Serial.printf("    t=  {"); for ( int i=0; i<m_t; i++ ) Serial.printf("%7.3f, ", y_t[i]); Serial.printf("};\n");
+  Serial.printf("    soc={"); for ( int i=0; i<n_s; i++ ) Serial.printf("%7.3f, ", x_soc[i]); Serial.printf("};\n");
+  Serial.printf("    voc={\n");
   for ( int i=0; i<m_t; i++ )
   {
-    Serial.printf("      {"); for ( int j=0; j<n_s; j++ ) Serial.printf("%7.3f, ", t_voc[i*n_s+j]);
+    Serial.printf("      {");
+    for ( int j=0; j<n_s; j++ ) Serial.printf("%7.3f, ", t_voc[i*n_s+j]);
+    Serial.printf("},\n");
   }
-  Serial.printf("};\n");
-
-  // float *y_t;       // Temperature breakpoints for voc table
-  // float *x_soc;     // soc breakpoints for voc table
-  // float *t_voc;     // voc(soc,t)
-  // float *x_soc_min; // Temperature breakpoints for soc_min table
-  // float *t_soc_min; // soc_min table
-  // float *x_dv;      // dv breakpoints for r(soc, dv) table t_r
-  // float *y_soc;     // soc breakpoints for r(soc, dv) table t_r
-  // float *t_r;       // r(soc, dv) table
+  Serial.printf("         };\n");
+  Serial.printf("  soc_min(temp_c):\n");
+  Serial.printf("    temp_c =  {"); for ( int i=0; i<n_n; i++ ) Serial.printf("%7.3f, ", x_soc_min[i]); Serial.printf("};\n");
+  Serial.printf("    soc_min=  {"); for ( int i=0; i<n_n; i++ ) Serial.printf("%7.3f, ", t_soc_min[i]); Serial.printf("};\n");
+  Serial.printf("  r(soc, dv):\n");
+  Serial.printf("    soc={"); for ( int i=0; i<m_h; i++ ) Serial.printf("%8.6f, ", y_soc[i]); Serial.printf("};\n");
+  Serial.printf("    dv ={"); for ( int i=0; i<n_h; i++ ) Serial.printf("%7.3f, ", x_dv[i]); Serial.printf("};\n");
+  Serial.printf("    r  ={\n");
+  for ( int i=0; i<m_h; i++ )
+  {
+    Serial.printf("      {");
+    for ( int j=0; j<n_h; j++ ) Serial.printf("%9.6f, ", t_r[i*n_h+j]);
+    Serial.printf("},\n");
+  }
+  Serial.printf("         };\n");
 }
 
 

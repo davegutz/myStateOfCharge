@@ -73,8 +73,8 @@ const float t_voc_bb[m_t_bb*n_s_bb] = // r(soc, dv) table
 const uint8_t n_n_bb = 4;   // Number of temperature breakpoints for x_soc_min table
 const float x_soc_min_bb[n_n_bb] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
 const float t_soc_min_bb[n_n_bb] =  { 0.14, 0.12,  0.08, 0.07}; // soc_min(t)
-const uint8_t n_h_bb  = 9;          // Number of dv breakpoints in r(dv) table t_r
 const uint8_t m_h_bb  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
+const uint8_t n_h_bb  = 9;          // Number of dv breakpoints in r(dv) table t_r
 const float x_dv_bb[n_h_bb] =       // dv breakpoints for r(soc, dv) table t_r
         { -0.09,-0.07, -0.05,   -0.03,  0.00,   0.03,   0.05,   0.07,   0.09};
 const float y_soc_bb[m_h_bb] =      // soc breakpoints for r(soc, dv) table t_r
@@ -100,8 +100,8 @@ const float t_voc_li[m_t_li*n_s_li] = // r(soc, dv) table
 const uint8_t n_n_li = 4;   // Number of temperature breakpoints for x_soc_min table
 const float x_soc_min_li[n_n_li] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
 const float t_soc_min_li[n_n_li] =  { 0.28, 0.24,  0.16, 0.14}; // soc_min(t)
-const uint8_t n_h_li  = 9;          // Number of dv breakpoints in r(dv) table t_r
 const uint8_t m_h_li  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
+const uint8_t n_h_li  = 9;          // Number of dv breakpoints in r(dv) table t_r
 const float x_dv_li[n_h_li] =       // dv breakpoints for r(soc, dv) table t_r
         { -0.09,-0.07, -0.05,   -0.03,  0.00,   0.03,   0.05,   0.07,   0.09};
 const float y_soc_li[m_h_li] =      // soc breakpoints for r(soc, dv) table t_r
