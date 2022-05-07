@@ -81,7 +81,7 @@
 #define F_Z             0.80        // General filter zeta (0.80)
 #define F_W_T           0.05        // Temperature filter wn, r/s (0.05)   
 #define F_Z_T           0.80        // Temperature filter zeta (0.80)
-#define NSUM            109         // Number of saved summaries.   If too large, will get compile error
+#define NSUM            50         // Number of saved summaries.   If too large, will get compile error
 #define HDB_TBATT       0.06        // Half deadband to filter Tbatt, F (0.06)
 #define HDB_VBATT       0.05        // Half deadband to filter Vbatt, V (0.05)
 const double t_sat = 5.;            // Saturation time, sec

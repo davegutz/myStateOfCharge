@@ -18,12 +18,12 @@ extern char buffer[256];
 *                      16-Aug-93   Pointers.
 *   Inputs:
 *       Name        Type        Length      Definition
-*       x           float      1           Input to vector.
+*       x           t_float      1           Input to vector.
 *       n           int         1           Size of vector.
-*       v           float      n           Vector.
+*       v           t_float      n           Vector.
 *   Outputs:
 *       Name        Type        Length      Definition
-*       *dx         float      1           Fraction of range for x.
+*       *dx         t_float      1           Fraction of range for x.
 *       *low        int         1           Current low end of range.
 *       *high       int         1           Current high end of range.
 *   Hardware dependencies:  ANSI C.
@@ -31,7 +31,7 @@ extern char buffer[256];
 *   Global variables used:  None.
 *   Functions called:   None.
 */
-void binsearch(float x, float *v, int n, int *high, int *low, float *dx)
+void binsearch(t_float x, t_float *v, int n, int *high, int *low, t_float *dx)
 {
   int mid;
 
@@ -77,23 +77,23 @@ void binsearch(float x, float *v, int n, int *high, int *low, float *dx)
 *   Inputs:
 *       Name        Type        Length      Definition
 *       n           int         1           Number of points.
-*       x           float      1           Independent variable.
-*       v           float      n           Breakpoint table.
-*       y           float      n           Table data.
+*       x           t_float      1           Independent variable.
+*       v           t_float      n           Breakpoint table.
+*       y           t_float      n           Table data.
 *   Outputs:
 *       Name        Type        Length      Definition
-*       tab1        float      1           Result of table lookup.
+*       tab1        t_float      1           Result of table lookup.
 *   Hardware dependencies:  ANSI C.
 *   Header needed in scope of caller:   None.
 *   Global variables used:  None.
 *   Functions called:   binsearch.
 */
-float tab1(float x, float *v, float *y, int n)
+t_float tab1(t_float x, t_float *v, t_float *y, int n)
 {
-  float dx;
+  t_float dx;
   int high, low;
-  void binsearch(float x, float *v, int n, int *high,
-                 int *low, float *dx);
+  void binsearch(t_float x, t_float *v, int n, int *high,
+                 int *low, t_float *dx);
   if (n < 1)
     return y[0];
   binsearch(x, v, n, &high, &low, &dx);
@@ -111,12 +111,12 @@ float tab1(float x, float *v, float *y, int n)
 *   Outputs:
 *       tab1        Result of table lookup
 */
-float tab1clip(float x, float *v, float *y, int n)
+t_float tab1clip(t_float x, t_float *v, t_float *y, int n)
 {
-  float dx;
+  t_float dx;
   int high, low;
-  void binsearch(float x, float *v, int n, int *high,
-                 int *low, float *dx);
+  void binsearch(t_float x, t_float *v, int n, int *high,
+                 int *low, t_float *dx);
   if (n < 1)
     return y[0];
   binsearch(x, v, n, &high, &low, &dx);
@@ -133,26 +133,26 @@ float tab1clip(float x, float *v, float *y, int n)
 *       Name        Type        Length      Definition
 *       n1          int         1           Number of ind var #1 brkpts.
 *       n2          int         1           Number of ind var #2 brkpts.
-*       x1          float      1           Independent variable #1.
-*       x2          float      1           Independent variable #2.
-*       v1          float      n1          Breakpoints for var #1.
-*       v2          float      n2          Breakpoints for var #2.
-*       y           float      n1*n2       Table data.
+*       x1          t_float      1           Independent variable #1.
+*       x2          t_float      1           Independent variable #2.
+*       v1          t_float      n1          Breakpoints for var #1.
+*       v2          t_float      n2          Breakpoints for var #2.
+*       y           t_float      n1*n2       Table data.
 *   Outputs:
 *       Name        Type        Length      Definition
-*       tab2        float      1           Result of table lookup.
+*       tab2        t_float      1           Result of table lookup.
 *   Hardware dependencies:  ANSI C.
 *   Header needed in scope of caller:   None.
 *   Global variables used:  None.
 *   Functions called:   binsearch.
 */
-float tab2(float x1, float x2, float *v1, float *v2, float *y, int n1,
+t_float tab2(t_float x1, t_float x2, t_float *v1, t_float *v2, t_float *y, int n1,
             int n2)
 {
-  float dx1, dx2, r0, r1;
+  t_float dx1, dx2, r0, r1;
   int high1, high2, low1, low2, temp1, temp2;
-  void binsearch(float x, float *v, int n, int *high,
-                 int *low, float *dx);
+  void binsearch(t_float x, t_float *v, int n, int *high,
+                 int *low, t_float *dx);
   if (n1 < 1 || n2 < 1)
     return y[0];
   binsearch(x1, v1, n1, &high1, &low1, &dx1);
@@ -168,10 +168,10 @@ float tab2(float x1, float x2, float *v1, float *v2, float *y, int n1,
 // constructors
 TableInterp::TableInterp()
     : n1_(0) {}
-TableInterp::TableInterp(const unsigned int n, const float x[])
+TableInterp::TableInterp(const unsigned int n, const t_float x[])
     : n1_(n)
 {
-  x_ = new float[n1_];
+  x_ = new t_float[n1_];
   for (unsigned int i = 0; i < n1_; i++)
   {
     x_[i] = x[i];
@@ -181,7 +181,7 @@ TableInterp::TableInterp(const unsigned int n, const float x[])
 TableInterp::~TableInterp() {}
 // operators
 // functions
-float TableInterp::interp(void)
+t_float TableInterp::interp(void)
 {
   return (-999.);
 }
@@ -205,10 +205,10 @@ void TableInterp::pretty_print(void)
 // 1-D Interpolation Table Lookup
 // constructors
 TableInterp1D::TableInterp1D() : TableInterp() {}
-TableInterp1D::TableInterp1D(const unsigned int n, const float x[], const float v[])
+TableInterp1D::TableInterp1D(const unsigned int n, const t_float x[], const t_float v[])
     : TableInterp(n, x)
 {
-  v_ = new float[n1_];
+  v_ = new t_float[n1_];
   for (unsigned int i = 0; i < n1_; i++)
   {
     v_[i] = v[i];
@@ -217,7 +217,7 @@ TableInterp1D::TableInterp1D(const unsigned int n, const float x[], const float 
 TableInterp1D::~TableInterp1D() {}
 // operators
 // functions
-float TableInterp1D::interp(const float x)
+t_float TableInterp1D::interp(const t_float x)
 {
   return (tab1(x, x_, v_, n1_));
 }
@@ -225,10 +225,10 @@ float TableInterp1D::interp(const float x)
 // 1-D Interpolation Table Lookup
 // constructors
 TableInterp1Dclip::TableInterp1Dclip() : TableInterp() {}
-TableInterp1Dclip::TableInterp1Dclip(const unsigned int n, const float x[], const float v[])
+TableInterp1Dclip::TableInterp1Dclip(const unsigned int n, const t_float x[], const t_float v[])
     : TableInterp(n, x)
 {
-  v_ = new float[n1_];
+  v_ = new t_float[n1_];
   for (unsigned int i = 0; i < n1_; i++)
   {
     v_[i] = v[i];
@@ -237,7 +237,7 @@ TableInterp1Dclip::TableInterp1Dclip(const unsigned int n, const float x[], cons
 TableInterp1Dclip::~TableInterp1Dclip() {}
 // operators
 // functions
-float TableInterp1Dclip::interp(const float x)
+t_float TableInterp1Dclip::interp(const t_float x)
 {
   return (tab1(x, x_, v_, n1_));
 }
@@ -254,17 +254,17 @@ v = {v11, v12, ...v1n, v21, v22, ...v2n, ...............  vm1, vm2, ...vmn}
 */
 // constructors
 TableInterp2D::TableInterp2D() : TableInterp() {}
-TableInterp2D::TableInterp2D(const unsigned int n, const unsigned int m, const float x[],
-                             const float y[], const float v[])
+TableInterp2D::TableInterp2D(const unsigned int n, const unsigned int m, const t_float x[],
+                             const t_float y[], const t_float v[])
     : TableInterp(n, x)
 {
   n2_ = m;
-  y_ = new float[n2_];
+  y_ = new t_float[n2_];
   for (unsigned int j = 0; j < n2_; j++)
   {
     y_[j] = y[j];
   }
-  v_ = new float[n1_ * n2_];
+  v_ = new t_float[n1_ * n2_];
   for (unsigned int i = 0; i < n1_; i++)
     for (unsigned int j = 0; j < n2_; j++)
     {
@@ -274,17 +274,17 @@ TableInterp2D::TableInterp2D(const unsigned int n, const unsigned int m, const f
 TableInterp2D::~TableInterp2D() {}
 // operators
 // functions
-float TableInterp2D::interp(float x, float y)
+t_float TableInterp2D::interp(t_float x, t_float y)
 {
   return (tab2(x, y, x_, y_, v_, n1_, n2_));
 }
-//tab2(float x1, float x2, float *v1, float *v2, float *y, int n1, int n2);
+//tab2(t_float x1, t_float x2, t_float *v1, t_float *v2, t_float *y, int n1, int n2);
 /*
-static float  xTbl[6]  =
+static t_float  xTbl[6]  =
   {-4.7, -1.88, -1.41, -.94, -.47, 4.7};
-static float   yTbl[4]   =
+static t_float   yTbl[4]   =
   {0., 10000., 20000., 30000.};
-static float  vTbl[24]  =
+static t_float  vTbl[24]  =
   {5.5, 3.5, 3.0, 2.5,
    5.5, 3.5, 3.0, 2.5,
    5.5, 3.5, 3.0, 5.5,
@@ -292,7 +292,7 @@ static float  vTbl[24]  =
    5.5, 5.5, 5.5, 5.5,
    5.5, 5.5, 5.5, 5.5};
     val = tab2(xDR_ven, fxven, xTbl, yTbl, vTbl,
-    sizeof(xTbl)/sizeof(float),
-    sizeof(yTbl)/sizeof(float)) * 100. / 4.7;
+    sizeof(xTbl)/sizeof(t_float),
+    sizeof(yTbl)/sizeof(t_float)) * 100. / 4.7;
 */
 

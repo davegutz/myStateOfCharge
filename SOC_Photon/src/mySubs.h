@@ -54,7 +54,7 @@ class Shunt: public Tweak, Adafruit_ADS1015
 {
 public:
   Shunt();
-  Shunt(const String name, const uint8_t port, float *rp_delta_q_inf, float *rp_tweak_bias, float *cp_curr_bias, 
+  Shunt(const String name, const uint8_t port, t_float *rp_delta_q_inf, t_float *rp_tweak_bias, t_float *cp_curr_bias, 
     const double v2a_s);
   ~Shunt();
   // operators
@@ -72,7 +72,7 @@ protected:
   String name_;         // For print statements, multiple instances
   uint8_t port_;        // Octal I2C port used by Acafruit_ADS1015
   boolean bare_;        // If ADS to be ignored
-  float *cp_curr_bias_; // Global bias, A
+  t_float *cp_curr_bias_; // Global bias, A
   double v2a_s_;        // Selected shunt conversion gain, A/V
   int16_t vshunt_int_;  // Sensed shunt voltage, count
   int16_t vshunt_int_0_;// Interim conversion, count

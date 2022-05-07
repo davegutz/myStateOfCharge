@@ -33,6 +33,7 @@
 #include "myLibrary/myFilters.h"
 #include "constants.h"
 struct Sensors;
+#define t_float double
 
 #define TCHARGE_DISPLAY_DEADBAND 0.1    // Inside this +/- deadband, charge time is displayed '---', A
 #define T_RLIM                0.017    // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s (0.017 allows 1 deg for 1 minute)
@@ -61,25 +62,25 @@ const double vb_dc_dc = 13.5;   // DC-DC charger estimated voltage, V
 // >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
 const uint8_t m_t_bb  = 4;    // Number temperature breakpoints for voc table
 const uint8_t n_s_bb  = 16;   // Number soc breakpoints for voc table
-const float y_t_bb[m_t_bb] =  //Temperature breakpoints for voc table
+const t_float y_t_bb[m_t_bb] =  //Temperature breakpoints for voc table
         { 5., 11.1, 20., 40. }; 
-const float x_soc_bb[n_s_bb] =      //soc breakpoints for voc table
+const t_float x_soc_bb[n_s_bb] =      //soc breakpoints for voc table
         { 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.98,  1.00};
-const float t_voc_bb[m_t_bb*n_s_bb] = // r(soc, dv) table
+const t_float t_voc_bb[m_t_bb*n_s_bb] = // r(soc, dv) table
         { 4.00,  4.00,  6.00,  9.50,  11.70, 12.30, 12.50, 12.65, 12.82, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 14.95,
           4.00,  4.00,  8.00,  11.60, 12.40, 12.60, 12.70, 12.80, 12.92, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 14.96,
           4.00,  8.00,  12.20, 12.68, 12.73, 12.79, 12.81, 12.89, 13.00, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 15.00,
           4.08,  8.08,  12.28, 12.76, 12.81, 12.87, 12.89, 12.97, 13.08, 13.12, 13.17, 13.22, 13.29, 13.33, 13.35, 15.08};
 const uint8_t n_n_bb = 4;   // Number of temperature breakpoints for x_soc_min table
-const float x_soc_min_bb[n_n_bb] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
-const float t_soc_min_bb[n_n_bb] =  { 0.14, 0.12,  0.08, 0.07}; // soc_min(t)
+const t_float x_soc_min_bb[n_n_bb] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
+const t_float t_soc_min_bb[n_n_bb] =  { 0.14, 0.12,  0.08, 0.07}; // soc_min(t)
 const uint8_t m_h_bb  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
 const uint8_t n_h_bb  = 9;          // Number of dv breakpoints in r(dv) table t_r
-const float x_dv_bb[n_h_bb] =       // dv breakpoints for r(soc, dv) table t_r
+const t_float x_dv_bb[n_h_bb] =       // dv breakpoints for r(soc, dv) table t_r
         { -0.09,-0.07, -0.05,   -0.03,  0.00,   0.03,   0.05,   0.07,   0.09};
-const float y_soc_bb[m_h_bb] =      // soc breakpoints for r(soc, dv) table t_r
+const t_float y_soc_bb[m_h_bb] =      // soc breakpoints for r(soc, dv) table t_r
         { 0.0,  0.5,    1.0};
-const float t_r_bb[m_h_bb*n_h_bb] = // r(soc, dv) table
+const t_float t_r_bb[m_h_bb*n_h_bb] = // r(soc, dv) table
         { 1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.0030, 0.0046, 1e-7,
           1e-7, 1e-7,   0.0050, 0.0036, 0.0015, 0.0024, 0.0030,   1e-7, 1e-7,
           1e-7, 1e-7,   1e-7,   0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7};
@@ -88,25 +89,25 @@ const float t_r_bb[m_h_bb*n_h_bb] = // r(soc, dv) table
 // shifted Battleborn because don't have real data yet; test structure of program
 const uint8_t m_t_li  = 4;    // Number temperature breakpoints for voc table
 const uint8_t n_s_li  = 16;   // Number soc breakpoints for voc table
-const float y_t_li[m_t_li] =  //Temperature breakpoints for voc table
+const t_float y_t_li[m_t_li] =  //Temperature breakpoints for voc table
         { 5., 11.1, 20., 40. }; 
-const float x_soc_li[n_s_li] =      //soc breakpoints for voc table
+const t_float x_soc_li[n_s_li] =      //soc breakpoints for voc table
         { 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.98,  1.00};
-const float t_voc_li[m_t_li*n_s_li] = // r(soc, dv) table
+const t_float t_voc_li[m_t_li*n_s_li] = // r(soc, dv) table
         { 3.00,  3.00,  5.00,  8.50,  10.70, 11.30, 11.50, 11.65, 11.82, 11.91, 11.98, 12.05, 12.11, 12.17, 12.22, 13.95,
           3.00,  3.00,  7.00,  10.60, 11.40, 11.60, 11.70, 11.80, 11.92, 12.01, 12.06, 12.11, 12.17, 12.20, 12.23, 13.96,
           3.00,  7.00,  11.20, 11.68, 11.73, 11.79, 11.81, 11.89, 12.00, 12.04, 12.09, 12.14, 12.21, 12.25, 12.27, 14.00,
           3.08,  7.08,  11.28, 11.76, 11.81, 11.87, 11.89, 11.97, 12.08, 12.12, 12.17, 12.22, 12.29, 12.33, 12.35, 14.08};
 const uint8_t n_n_li = 4;   // Number of temperature breakpoints for x_soc_min table
-const float x_soc_min_li[n_n_li] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
-const float t_soc_min_li[n_n_li] =  { 0.28, 0.24,  0.16, 0.14}; // soc_min(t)
+const t_float x_soc_min_li[n_n_li] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
+const t_float t_soc_min_li[n_n_li] =  { 0.28, 0.24,  0.16, 0.14}; // soc_min(t)
 const uint8_t m_h_li  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
 const uint8_t n_h_li  = 9;          // Number of dv breakpoints in r(dv) table t_r
-const float x_dv_li[n_h_li] =       // dv breakpoints for r(soc, dv) table t_r
+const t_float x_dv_li[n_h_li] =       // dv breakpoints for r(soc, dv) table t_r
         { -0.09,-0.07, -0.05,   -0.03,  0.00,   0.03,   0.05,   0.07,   0.09};
-const float y_soc_li[m_h_li] =      // soc breakpoints for r(soc, dv) table t_r
+const t_float y_soc_li[m_h_li] =      // soc breakpoints for r(soc, dv) table t_r
         { 0.0,  0.5,    1.0};
-const float t_r_li[m_h_li*n_h_li] = // r(soc, dv) table
+const t_float t_r_li[m_h_li*n_h_li] = // r(soc, dv) table
         { 1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.0030, 0.0046, 1e-7,
           1e-7, 1e-7,   0.0050, 0.0036, 0.0015, 0.0024, 0.0030,   1e-7, 1e-7,
           1e-7, 1e-7,   1e-7,   0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7};
@@ -156,7 +157,7 @@ class Battery : public Coulombs
 {
 public:
   Battery();
-  Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code);
+  Battery(double *rp_delta_q, t_float *rp_t_last, const double hys_direx, t_float *rp_nP, t_float *rp_nS, uint8_t *rp_mod_code);
   ~Battery();
   // operators
   // functions
@@ -214,8 +215,8 @@ protected:
   Hysteresis *hys_;
   double ioc_;      // Current into charge portion of battery, A
   double voc_stat_; // Static, table lookup value of voc before applying hysteresis, V
-  float *rp_nP_;    // Number of parallel batteries in bank, e.g. '2P1S'
-  float *rp_nS_;    // Number of series batteries in bank, e.g. '2P1S'
+  t_float *rp_nP_;    // Number of parallel batteries in bank, e.g. '2P1S'
+  t_float *rp_nS_;    // Number of series batteries in bank, e.g. '2P1S'
 };
 
 
@@ -224,7 +225,7 @@ class BatteryMonitor: public Battery, public EKF_1x1
 {
 public:
   BatteryMonitor();
-  BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code);
+  BatteryMonitor(double *rp_delta_q, t_float *rp_t_last, t_float *rp_nP, t_float *rp_nS, uint8_t *rp_mod_code);
   ~BatteryMonitor();
   // operators
   // functions
@@ -278,7 +279,7 @@ class BatteryModel: public Battery
 {
 public:
   BatteryModel();
-  BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code);
+  BatteryModel(double *rp_delta_q, t_float *rp_t_last, t_float *rp_s_cap_model, t_float *rp_nP, t_float *rp_nS, uint8_t *rp_mod_code);
   ~BatteryModel();
   // operators
   // functions
@@ -306,8 +307,8 @@ protected:
   double ib_sat_;       // Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
   double s_cap_;        // Rated capacity scalar
   double *rp_delta_q_model_;// Charge change since saturated, C
-  float *rp_t_last_model_;  // Battery temperature past value for rate limit memory, deg C
-  float *rp_s_cap_model_;   // Rated capacity scalar
+  t_float *rp_t_last_model_;  // Battery temperature past value for rate limit memory, deg C
+  t_float *rp_s_cap_model_;   // Rated capacity scalar
 };
 
 

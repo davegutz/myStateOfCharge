@@ -23,6 +23,7 @@
 
 #ifndef _MY_TWEAK_H
 #define _MY_TWEAK_H
+#define t_float double
 
 // Use known saturation instances to adjust current sensor for zero net energy.
 class Tweak
@@ -30,7 +31,7 @@ class Tweak
 public:
   Tweak();
   Tweak(const String name, const double gain, const double max_change, const double max_tweak, const double time_to_wait,
-    float *rp_delta_q_inf, float *rp_tweak_bias);
+    t_float *rp_delta_q_inf, t_float *rp_tweak_bias);
   ~Tweak();
   // operators
   // functions
@@ -68,8 +69,8 @@ protected:
   double delta_q_max_;          // Running tab since last de-saturation of potential new delta_q_sat
   unsigned long int time_sat_past_;
   double time_to_wait_;
-  float *rp_delta_q_inf_;
-  float *rp_tweak_bias_;
+  t_float *rp_delta_q_inf_;
+  t_float *rp_tweak_bias_;
   double delta_hrs_;
 };
 

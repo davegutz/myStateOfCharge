@@ -37,7 +37,7 @@ extern PublishPars pp;            // For publishing
 // class Battery
 // constructors
 Battery::Battery() {}
-Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code)
+Battery::Battery(double *rp_delta_q, t_float *rp_t_last, const double hys_direx, t_float *rp_nP, t_float *rp_nS, uint8_t *rp_mod_code)
     : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, rp_mod_code),
     sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS)
 {
@@ -197,7 +197,7 @@ double Battery::voc_soc(const double soc, const double temp_c)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery monitor class
 BatteryMonitor::BatteryMonitor(): Battery() {}
-BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code):
+BatteryMonitor::BatteryMonitor(double *rp_delta_q, t_float *rp_t_last, t_float *rp_nP, t_float *rp_nS, uint8_t *rp_mod_code):
     Battery(rp_delta_q, rp_t_last, -1., rp_nP, rp_nS, rp_mod_code)
 {
     voc_filt_ = chem_.v_sat-HDB_VBATT;
@@ -469,7 +469,7 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
 BatteryModel::BatteryModel() : Battery() {}
-BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code) :
+BatteryModel::BatteryModel(double *rp_delta_q, t_float *rp_t_last, t_float *rp_s_cap_model, t_float *rp_nP, t_float *rp_nS, uint8_t *rp_mod_code) :
     Battery(rp_delta_q, rp_t_last, 1., rp_nP, rp_nS, rp_mod_code), q_(RATED_BATT_CAP*3600.), rp_s_cap_model_(rp_s_cap_model)
 {
     // Randles dynamic model for EKF
