@@ -40,7 +40,6 @@ extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 {
   double SOCS_in = -99.;
-  int MOD_in = -1;
   double scale = 1.;
   double Q_in = 0.;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
@@ -59,52 +58,6 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
       case ( 'B' ):
         switch ( cp.input_string.charAt(1) )
         {
-          case ( 'm' ):  // Monitor chemistry change
-            MOD_in = cp.input_string.substring(2).toInt();
-            switch ( MOD_in )
-            {
-              case ( 0 ):
-                Serial.printf("Changing monitor chemistry from %d", Mon->mod_code());
-                Mon->assign_mod("Battleborn");
-                Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_rand();
-                cp.cmd_reset();
-                break;
-
-              case ( 1 ):
-                Serial.printf("Changing monitor chemistry from %d", Mon->mod_code());
-                Mon->assign_mod("LION");
-                Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_rand();
-                cp.cmd_reset();
-                break;
-
-              default:
-                Serial.printf("%d unknown.  Try typing 'h'", MOD_in);
-            }
-            break;
-
-          case ( 's' ):  // Simulation chemistry change
-            MOD_in = cp.input_string.substring(2).toInt();
-            switch ( MOD_in )
-            {
-              case ( 0 ):
-                Serial.printf("Changing simulation chemistry from %d", Sim->mod_code());
-                Sim->assign_mod("Battleborn"); Sim->assign_rand();
-                Serial.printf(" to %d ('Battleborn')\n", Sim->mod_code());
-                cp.cmd_reset();
-                break;
-
-              case ( 1 ):
-                Serial.printf("Changing simulation chemistry from %d", Sim->mod_code());
-                Sim->assign_mod("LION"); Sim->assign_rand();
-                Serial.printf(" to %d ('LION')\n", Sim->mod_code());
-                cp.cmd_reset();
-                break;
-
-              default:
-                Serial.printf("%d unknown.  Try typing 'h'", MOD_in);
-            }
-            break;
-
           case ( 'P' ):  // Number of parallel batteries in bank, e.g. '2P1S'
             SOCS_in = cp.input_string.substring(2).toFloat();
             if ( SOCS_in>0 )  // Apply crude limit to prevent user error
@@ -263,12 +216,13 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         
           case ( 'h' ):
             scale = cp.input_string.substring(2).toFloat();
-            Serial.printf("\nBefore Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n", Mon->hys_scale(), Sim->hys_scale());
             rp.hys_scale = scale;
-            Serial.printf("Changing to Sh= %7.3f\n", scale);
+            Serial.printf("\nBefore Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n",
+                Mon->hys_scale(), Sim->hys_scale());
+            Serial.printf("\nChanging to Sh= %7.3f\n", scale);
             Mon->hys_scale(scale);
             Sim->hys_scale(scale);
-            Serial.printf("After Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n",
+            Serial.printf("\nAfter Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n",
                 Mon->hys_scale(), Sim->hys_scale());
             break;
         
@@ -827,8 +781,6 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("A=  nominalize the rp structure for clean boots etc'\n");
 
   Serial.printf("B<?> Battery assignments.   For example:\n");
-  Serial.printf("  Bm=  %d.  Monitor battery chemistry 0='Battleborn', 1='LION''\n", rp.mon_mod); 
-  Serial.printf("  Bs=  %d.  Simulation battery chemistry 0='Battleborn', 1='LION''\n", rp.sim_mod); 
   Serial.printf("  BP=  %5.2f.  Assign number of parallel batteries in bank '\n", rp.nP); 
   Serial.printf("  BS=  %5.2f.  Assign number of parallel batteries in bank '\n", rp.nS); 
 
