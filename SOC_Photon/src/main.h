@@ -445,13 +445,18 @@ void loop()
     if ( reset_publish ) digitalWrite(myPins->status_led, HIGH);
     else  digitalWrite(myPins->status_led, LOW);
 
-    // Mon for rp.debug
+// Mon for rp.debug
     if ( publishS )
     {
-      if ( rp.debug==2 )
+      if ( rp.debug==2 || rp.debug==4 )
       {
         if ( reset_publish || (last_publishS_debug != rp.debug) ) print_serial_header();
         serial_print(PublishSerial->now(), Sen->T);
+      }
+
+      if ( rp.debug==-4 )
+      {
+        debug_m4(Mon, Sim, Sen);
       }
       last_publishS_debug = rp.debug;
     }

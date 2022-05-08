@@ -165,4 +165,7 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->SOC_wt = Mon->SOC_wt();
   pubList->amp_hrs_remaining_ekf = Mon->amp_hrs_remaining_ekf()*Mon->nP()*Mon->nS();
   pubList->amp_hrs_remaining_wt = Mon->amp_hrs_remaining_wt()*Mon->nP()*Mon->nS();
+  pubList->vdyn = Mon->vdyn();
+  pubList->voc_ekf = Mon->z_ekf();
+  pubList->y_ekf = Mon->y_ekf();
 }

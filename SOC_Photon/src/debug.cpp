@@ -37,8 +37,19 @@ void debug_m1(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 // rp.debug==-3  // Power Arduino plot
 void debug_m3(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen, const double control_time, const unsigned long elapsed, const boolean reset)
 {
-  Serial.printf("fast,et,reset,Wshunt,q_f,q,soc,T, %12.3f,%7.3f, %d, %7.3f,    %7.3f,\n",
+  Serial.printf("fast,et,reset,Wshunt,q_f,q,soc,T,\n %12.3f,%7.3f, %d, %7.3f,    %7.3f,\n",
   control_time, double(elapsed)/1000., reset, Sen->Wshunt, Sim->soc());
+}
+
+// rp.debug==-4  // General Arduino plot
+void debug_m4(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
+{
+  Serial.printf("Tb,Vb*10-110,Ib, voc_dyn*10-110,vdyn*100,voc_ekf*10-110,voc*10-110,vsat*10-110,  y_ekf*1000,  soc_sim*100,soc_ekf*100,soc*100,soc_wt*100,\n,\
+    %7.3f,%7.3f,%7.3f,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,  %10.6f,  %7.3f,%7.4f,%7.4f,%7.4f,\n",
+    Sen->Tbatt, Sen->Vbatt*10.-110., Sen->Ishunt,
+    Mon->voc_dyn()*10.-110., Mon->vdyn()*100., Mon->z_ekf()*10.-110., Mon->voc()*10.-110., Mon->vsat()*10.-110.,
+    Mon->y_ekf()*1000.,
+    Sim->soc()*100., Mon->x_ekf()*100., Mon->soc()*100.,  Mon->soc_wt()*100.);
 }
 
 // rp.debug==12 EKF

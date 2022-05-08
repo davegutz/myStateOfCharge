@@ -97,16 +97,20 @@ void Shunt::load()
 }
 
 
-// Text header
+// Text headers
 void print_serial_header(void)
 {
-  Serial.println(F("unit,         hm,                  cTime,        T,       Tb_f, Tb_f_m,  Vb, voc, vsat,    sat,sel,mod, Ib,    tcharge, soc_m,soc_ekf,soc,soc_wt,   SOC_m,SOC_ekf,SOC,SOC_wt,"));
+  if ( rp.debug==2 )
+    Serial.println(F("unit,         hm,                  cTime,        T,       Tb_f, Tb_f_m,  Vb, voc, vsat,    sat,sel,mod, Ib,    tcharge, soc_m,soc_ekf,soc,soc_wt,   SOC_m,SOC_ekf,SOC,SOC_wt,"));
+  else if ( rp.debug==4 )
+    Serial.printf("unit,               hm,                  cTime,        T,       sat,sel,mod,  Tb,  Vb,  Ib,        vsat,vdyn,voc,voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %4.1f,%4.1f,   %5.2f,%5.2f,%5.2f,  %d,  %d,  %d, %7.3f,  %5.1f,  %5.3f,%5.3f,%5.3f,%5.3f,   %5.1f,%5.1f,%5.1f,%5.1f,  %c", \
+  if ( rp.debug==2 )
+  sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %4.1f,%4.1f,   %5.2f,%5.2f,%5.2f,  %d,  %d,  %d,     %7.3f,  %5.1f,  %5.3f,%5.3f,%5.3f,%5.3f,   %5.1f,%5.1f,%5.1f,%5.1f,  %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
     pubList->Tbatt, pubList->Tbatt_filt_model,
     pubList->Vbatt, pubList->voc, pubList->vsat,
@@ -115,6 +119,15 @@ void create_print_string(char *buffer, Publish *pubList)
     pubList->tcharge,
     pubList->soc_model, pubList->soc_ekf, pubList->soc, pubList->soc_wt,
     pubList->SOC_model, pubList->SOC_ekf, pubList->SOC, pubList->SOC_wt,
+    '\0');
+  else if ( rp.debug==4 )
+  sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%7.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
+    pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
+    pubList->sat, pubList->curr_sel_noamp, rp.modeling,
+    pubList->Tbatt, pubList->Vbatt, pubList->Ishunt,
+    pubList->vsat, pubList->vdyn, pubList->voc, pubList->voc_ekf,
+    pubList->y_ekf,
+    pubList->soc_model, pubList->soc_ekf, pubList->soc, pubList->soc_wt,
     '\0');
 }
 
@@ -407,7 +420,7 @@ void serial_print(unsigned long now, double T)
 {
   create_print_string(cp.buffer, &pp.pubList);
   if ( rp.debug >= 100 ) Serial.printf("serial_print:  ");
-  Serial.println(cp.buffer);  //Serial1.println(cp.buffer);
+  Serial.println(cp.buffer);
 }
 
 // Time synchro for web information
