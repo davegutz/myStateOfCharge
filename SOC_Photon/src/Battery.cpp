@@ -70,7 +70,7 @@ void Battery::assign_rand(void)
     rand_A_[0] = -1./chem_.tau_ct;
     rand_A_[1] = 0.;
     rand_A_[2] = 0.;
-    rand_A_[3] = -1/chem_.tau_ct;
+    rand_A_[3] = -1/chem_.tau_diff;
     rand_B_[0] = 1./(chem_.tau_ct / chem_.r_ct);
     rand_B_[1] = 0.;
     rand_B_[2] = 1./(chem_.tau_diff / chem_.r_diff);
@@ -141,9 +141,9 @@ void Battery::init_battery(Sensors *Sen)
     if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
     double u[2] = {ib_, vb_};
-    if ( rp.debug==8) Serial.printf("init_battery:  initializing Randles to %7.3f, %7.3f\n", ib_, vb_);
+    if ( rp.debug==8 || rp.debug==6 || rp.debug==7 ) Serial.printf("init_battery:  initializing Randles to %7.3f, %7.3f\n", ib_, vb_);
     Randles_->init_state_space(u);
-    if ( rp.debug==8 ) Randles_->pretty_print();
+    if ( rp.debug==8 || rp.debug==6 || rp.debug==7 ) Randles_->pretty_print();
     init_hys(0.0);
 }
 
@@ -263,6 +263,7 @@ double BatteryMonitor::calculate(Sensors *Sen)
     // Hysteresis model
     hys_->calculate(ib_, voc_dyn_, soc_);
     voc_ = hys_->update(dt_);
+    double vhys = voc_dyn_ - voc_;
     voc_filt_ = SdVbatt_->update(voc_);
     ioc_ = hys_->ioc();
     bms_off_ = temp_c_ <= chem_.low_t;    // KISS
@@ -282,6 +283,9 @@ double BatteryMonitor::calculate(Sensors *Sen)
     q_ekf_ = soc_ekf_ * q_capacity_;
     SOC_ekf_ = q_ekf_ / q_cap_rated_scaled_ * 100.;
     y_filt_ = y_filt->calculate(y_, min(Sen->T, EKF_T_RESET));
+    if ( rp.debug==6 || rp.debug==7 )
+        Serial.printf("calculate:Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,vdyn,vhys,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
+            Sen->Tbatt_filt, Sen->Ishunt, 0, soc_ekf_, vb_, voc_, hx_, vdyn_, vhys, y_);
 
     // EKF convergence
     boolean conv = abs(y_filt_)<EKF_CONV && !cp.soft_reset;  // Initialize false
@@ -445,7 +449,9 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
     // Solver, steady
     const double meps = 1-1e-6;
     double vb = Sen->Vbatt/(*rp_nS_);
-    double voc =  vb - Sen->Ishunt/(*rp_nP_)*chem_.r_ss;
+    double vdyn = Sen->Ishunt/(*rp_nP_)*chem_.r_ss;
+    double voc =  vb - vdyn;
+    double vhys = 0.;
     // double voc =  vb;  // BatteryModel and BatteryMonitor state spaces are initialized at 0 current
     int8_t count = 0;
     static double soc_solved = 1.0;
@@ -457,12 +463,14 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
         soc_solved = max(min(soc_solved + max(min( err/dv_dsoc, SOLV_MAX_STEP), -SOLV_MAX_STEP), meps), 1e-6);
         voc_solved = calc_soc_voc(soc_solved, Sen->Tbatt_filt, &dv_dsoc);
         err = voc - voc_solved;
-        if ( rp.debug==6 ) Serial.printf("solve_ekf:Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-            Sen->Tbatt_filt, Sen->Ishunt, count, soc_solved, vb, voc, voc_solved, err);
+        if ( rp.debug==6 )
+            Serial.printf("solve    :Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,vdyn,vhys,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
+            Sen->Tbatt_filt, Sen->Ishunt, count, soc_solved, vb, voc, voc_solved, vdyn, vhys, err);
     }
-    if ( rp.debug==7 ) Serial.printf("solve_ekf:Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-    Sen->Tbatt_filt, Sen->Ishunt, count, soc_solved, vb, voc, voc_solved, err);
     init_soc_ekf(soc_solved);
+    if ( rp.debug==7 )
+            Serial.printf("solve    :Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,vdyn,vhys,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
+            Sen->Tbatt_filt, Sen->Ishunt, count, soc_solved, vb, voc, voc_solved, vdyn, vhys, err);
     return ( count<SOLV_MAX_COUNTS );
 }
 

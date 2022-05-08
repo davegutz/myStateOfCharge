@@ -133,6 +133,7 @@ void StateSpace::pretty_print(void)
   pretty_print_mat("C ", q_, n_, C_);
   pretty_print_mat("D ", q_, p_, D_);
   pretty_print_vec("x_dot ", n_, x_dot_);
+  pretty_print_vec("y ", q_, y_);
   if ( n_==2 && p_==2)
   {
     pretty_print_mat("AinvB", n_, n_, AinvB_);
