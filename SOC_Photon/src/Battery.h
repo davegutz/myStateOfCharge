@@ -234,6 +234,7 @@ public:
   double calc_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   double calculate(Sensors *Sen);
   boolean converged_ekf() { return(EKF_converged->state()); };
+  double hx() { return (hx_); };
   void init_soc_ekf(const double soc);
   boolean is_sat(void);
   double K_ekf() { return (K_); };
