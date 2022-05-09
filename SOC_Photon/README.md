@@ -327,14 +327,16 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   26. Had a failed attempt to heat the battery before settling on what Battleborn does here:  <https://battlebornbatteries.com/faq-how-to-use-a-heat-pad-with-battle-born-batteries/>.  I thought the pads I bought here:  <https://smile.amazon.com/gp/product/B0794V5J5H/ref=ppx_yo_dt_b_asin_title_o05_s00?ie=UTF8&psc=1> would gently heat the batter.  I had the right wattage (36 W vs 30 W that Battleborn uses) but I put them all on the bottom.  And the temp sensor is on top.   And the controller is on/off.   That set up a situation where the heat would be on full blast and the entire battery had to heat up before the wave of heat would hit the sensor to shut it off.   The wave continued to create about 5 degree C overshoot of temp then 5 degree C undershoot on recovery.   I measured up to 180 F at the bottom of the battery using an oven thermometer.  There was some localized melting of the case.  A model accurately predicted it.   See GitHub\myStateOfCharge\SOC_Photon\Battery State\EKF\sandbox\GP_battery_warm_2022a.py.  I made a jacket, covered whole thing with R1 camping pad (because BB suggests putting temp sensors inside 'blanket') and put the temp sensor for the SOC monitor and the heater together at one corner about 2 inches down from the top.   I set the on/off to run between 40 and 50F (4.4 - 7.2C) compared to BB 35 - 45 F.  I wanted tighter control for better data.   Maybe after I get more data I'll loosen it back up to 35 - 45 F.
   27. Calibrated the t_soc voc tables at a 1-4 A discharge rate.    Then they charged 5 - 30 A.   The hysteresis would have been used some at the 1-4 A rate.   May have to adjust tables +0.01 V or so after adding the hysteresis.  Measure it:  0.007 V.
   28. To run tweak test using talk function, 50 sec period==>Ng/Mg /2 = -.01
-      Xx2; Xts; Xf0.02; Xa-2000;
-      then hard reset then
-      Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; v4;
-      To record ongoing adjustments (also put in local_config.h)
-      Da-5.;Db-2.92;Mk0;Nk0;
-      To end:
-      Xp0; v2;
-      Transfer tweak_bias to CURR_BIAS_AMP and CURR_BIAS_NOAMP in local_config.h; otherwise max_tweak will begin to limit.
+    after re-build:  RR; Xx1;
+    set Da so ib=0 with Ca0.5 after cycling through sequence below as tria
+  Xx2; Xts; Xf0.02; Xa-2000;
+    then hard reset then
+  Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; v4;
+    To record ongoing adjustments (also put in local_config.h)
+  Da-5.;Db-2.92;Mk0;Nk0;
+    To end:
+  Xp0; v4;
+    Transfer tweak_bias to CURR_BIAS_AMP and CURR_BIAS_NOAMP in local_config.h; otherwise max_tweak will begin to limit.
   29. An issue that only show up when using the 'talk' function is an overload of resources that causes a busy waiting of current input reading.  I added to readADC_Differential_0_1 count_max logic to prevent forever waiting.   There is an optimum because if wait too long it creates cascade wait race in rest of application.  50: inf events.  100:0-4 events.  200:  5 events.   800:  25 events.  You can reproduce the problem by sending "Hd" wile running the tweak test of previous item.  Apparently exercising the Serial port while reading can cause the read to crash. The actual read statement does not forever wait, but the writer of readADC_Differential_0_1 put a 'while forever' loop around it.   I modified the Adafruit code to time out the loop.
   30. Running the tweak test will cause voc to wander low and after about 5 cycles will no longer saturate.   The hysteresis model causes this and is an artifact of running a huge, fast cosine input to the monitor.  Will not happen in real world.
   31. A clean way to initialize the EKF is an iterative solver called whenever initialization is needed.  The times this is needed are hard bootup and adjustment of SOC state using Talk function.   The latter is initiated using cp.soft_reset.  The convergence test persistence is initialized false as desired by TFDelay(false,...) instantiation.   Want it to begin false because of the potentially severe consequences of using the EKF to re-initialize the Coulomb Counter.
@@ -342,11 +344,12 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   33. To hedge on errors, the displayed amp hours remaining is a weighted average of the EKF and the Coulomb Counter.  Weighted to EKF as error increases from DF1 to DF2 error.   Set to EKF when error > DF2.  Set to average when error < DF1.
   34. Some Randles dynamics approximation was added to the models, both simulated and EKF embedded to better match reality.   I did this in response to poor behavior of the electrical circuits in presence of 60 Hz pulse noise introduced by my system's pure-sine A/C inverter.   Eventually I added 1 Hz time constant RC circuits to the A/D analog inputs to smooth things out.   I'm not sure the electrical circuit models add any value now.   This is because the objective of this device is to measure long term energy drain, time averaged by integration over periods of hours.   So much fitering inherent in integration would swamp most of the dynamics captured by the Randles models.   It averages out.   Detailed study is needed to justify either leaving it in or removing it.  An easy study would be to run the simulated version, turning off the Randles model in the Monitor object only.  Run the accelerated age test - 'Tweak test' - and observe changes in the Monitor's tweak behavior upon turning off its Randles model.   Then and only then it may be sensible to embark on improving the Randles models.
   35. Given the existing Randles models, note that current is constrained to be the same through series arranagements of battery units.   The constraint comes from external loads that have much higher impedance than battery cells.   Those cells are nearly pure capacitance.   With identical current and mostly linear dynamics, series batteries would have the same current and divide the voltage perfectly.   Parallel batteries would have the same voltage and divide the current perfectly.   Even the non-linear hysteresis is driven by that same identical current forcing a perfect division of that voltage drop too.   So multiple battery banks may be managed by scalars nP and nS on the output of single battery models.
-  36. Regression test:
-  set Da so ib=0 with Ca0.5 after cycling through sequence below as tria
-   start recording
+  36. Regression test slow tweak test 10 min:
+    after re-build:  RR; Xx1;
+    set Da so ib=0 with Ca0.5 after cycling through sequence below as tria
+    start recording
   Bm0; Bs0; Xx2; Xts; Xf0.002; Xa-60;
-   reset
+    reset
   Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; v4;
-   To end:
-  Xp0; Xx1; v2;
+    To end:
+  Xp0; v4;
