@@ -329,7 +329,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   28. To run tweak test using talk function, 50 sec period==>Ng/Mg /2 = -.01
     after re-build:  RR; Xx1;
     set Da so ib=0 with Ca0.5 after cycling through sequence below as tria
-  Xx2; Xts; Xf0.02; Xa-2000;
+  v0; Xx2; Xts; Xf0.02; Xa-2000;
     then hard reset then
   Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; v4;
     To record ongoing adjustments (also put in local_config.h)
@@ -344,7 +344,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   33. To hedge on errors, the displayed amp hours remaining is a weighted average of the EKF and the Coulomb Counter.  Weighted to EKF as error increases from DF1 to DF2 error.   Set to EKF when error > DF2.  Set to average when error < DF1.
   34. Some Randles dynamics approximation was added to the models, both simulated and EKF embedded to better match reality.   I did this in response to poor behavior of the electrical circuits in presence of 60 Hz pulse noise introduced by my system's pure-sine A/C inverter.   Eventually I added 1 Hz time constant RC circuits to the A/D analog inputs to smooth things out.   I'm not sure the electrical circuit models add any value now.   This is because the objective of this device is to measure long term energy drain, time averaged by integration over periods of hours.   So much fitering inherent in integration would swamp most of the dynamics captured by the Randles models.   It averages out.   Detailed study is needed to justify either leaving it in or removing it.  An easy study would be to run the simulated version, turning off the Randles model in the Monitor object only.  Run the accelerated age test - 'Tweak test' - and observe changes in the Monitor's tweak behavior upon turning off its Randles model.   Then and only then it may be sensible to embark on improving the Randles models.
   35. Given the existing Randles models, note that current is constrained to be the same through series arranagements of battery units.   The constraint comes from external loads that have much higher impedance than battery cells.   Those cells are nearly pure capacitance.   With identical current and mostly linear dynamics, series batteries would have the same current and divide the voltage perfectly.   Parallel batteries would have the same voltage and divide the current perfectly.   Even the non-linear hysteresis is driven by that same identical current forcing a perfect division of that voltage drop too.   So multiple battery banks may be managed by scalars nP and nS on the output of single battery models.
-  36. Regression test slow tweak test 10 min:
+  36. Regression test slow tweak test 8 min:
     after re-build:  RR; Xx1;
     set Da so ib=0 with Ca0.5 after cycling through sequence below as tria
     start recording
