@@ -163,8 +163,10 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
 
     // Convert the decimal
     if ( rp.debug>105 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
-    return (((( (float(year-2021)*12 + float(month))*30.4375 + float(day))*24.0 + float(hours))*60.0 + float(minutes))*60.0 + \
-                        float(seconds) + float((now-millis_flip)%1000)/1000. );
+    static double cTimeInit = ((( (double(year-2021)*12 + double(month))*30.4375 + double(day))*24.0 + double(hours))*60.0 + double(minutes))*60.0 + \
+                        double(seconds) + double(now-millis_flip)/1000.;
+    double cTime = cTimeInit + double(now-millis_flip)/1000.;
+    return ( cTime );
 }
 
 // Filter temperature only
