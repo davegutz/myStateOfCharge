@@ -41,14 +41,12 @@ struct Publish
   float Ishunt_amp_cal;
   float Vshunt_noamp;
   float Ishunt_noamp_cal;
-  boolean curr_sel_noamp; 
   float T;
   float voc;
   float voc_filt;
   float vsat;
   boolean sat;
   float Tbatt_filt;
-  float Tbatt_filt_model;
   int num_timeouts;
   float tcharge;
   float amp_hrs_remaining_ekf;

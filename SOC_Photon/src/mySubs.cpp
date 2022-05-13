@@ -93,7 +93,7 @@ void Shunt::load()
     vshunt_int_0_ = 0; vshunt_int_1_ = 0; vshunt_int_ = 0;
   }
   vshunt_ = computeVolts(vshunt_int_);
-  ishunt_cal_ = vshunt_*v2a_s_ + *cp_curr_bias_;
+  ishunt_cal_ = vshunt_*v2a_s_*float(!rp.modeling) + *cp_curr_bias_;
 }
 
 
@@ -110,11 +110,11 @@ void print_serial_header(void)
 void create_print_string(char *buffer, Publish *pubList)
 {
   if ( rp.debug==2 )
-  sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %4.1f,%4.1f,   %5.2f,%5.2f,%5.2f,  %d,  %d,  %d,     %7.3f,  %5.1f,  %5.3f,%5.3f,%5.3f,%5.3f,   %5.1f,%5.1f,%5.1f,%5.1f,  %c", \
+  sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %4.1f,%4.1f,   %5.2f,%5.2f,%5.2f,  %d,  %d,  %d,   %7.3f,  %5.1f,  %5.3f,%5.3f,%5.3f,%5.3f,   %5.1f,%5.1f,%5.1f,%5.1f,  %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
-    pubList->Tbatt, pubList->Tbatt_filt_model,
+    pubList->Tbatt, rp.t_last_model,
     pubList->Vbatt, pubList->voc, pubList->vsat,
-    pubList->sat, pubList->curr_sel_noamp, rp.modeling,
+    pubList->sat, rp.curr_sel_noamp, rp.modeling,
     pubList->Ishunt,
     pubList->tcharge,
     pubList->soc_model, pubList->soc_ekf, pubList->soc, pubList->soc_wt,
@@ -123,7 +123,7 @@ void create_print_string(char *buffer, Publish *pubList)
   else if ( rp.debug==4 )
   sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%7.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
-    pubList->sat, pubList->curr_sel_noamp, rp.modeling,
+    pubList->sat, rp.curr_sel_noamp, rp.modeling,
     pubList->Tbatt, pubList->Vbatt, pubList->Ishunt,
     pubList->vsat, pubList->vdyn, pubList->voc, pubList->voc_ekf,
     pubList->y_ekf,
@@ -253,20 +253,32 @@ void load_temp(Sensors *Sen)
   // MAXIM conversion 1-wire Tp plenum temperature
   uint8_t count = 0;
   double temp = 0.;
-  while ( ++count<MAX_TEMP_READS && temp==0)
+  if ( !rp.modeling )
   {
-    if ( Sen->SensorTbatt->read() ) temp = Sen->SensorTbatt->celsius() + (TBATT_TEMPCAL);
-    delay(1);
+    // Read hardware and check
+    while ( ++count<MAX_TEMP_READS && temp==0)
+    {
+      if ( Sen->SensorTbatt->read() ) temp = Sen->SensorTbatt->celsius() + (TBATT_TEMPCAL);
+      delay(1);
+    }
+
+    // Check success
+    if ( count<MAX_TEMP_READS )
+    {
+      Sen->Tbatt = Sen->SdTbatt->update(temp);
+      if ( rp.debug==-103 ) Serial.printf("Temperature %7.3f read on count=%d\n", temp, count);
+    }
+    else
+    {
+      Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value.   Sometimes a hard reset will stop these\n");
+      // Using last-good-value:  no assignment
+    }
   }
-  if ( count<MAX_TEMP_READS )
-  {
-    Sen->Tbatt = Sen->SdTbatt->update(temp);
-    if ( rp.debug==-103 ) Serial.printf("Temperature %7.3f read on count=%d\n", temp, count);
-  }
+
+  // Use model instead
   else
   {
-    Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value\n");
-    // Using last-good-value:  no assignment
+    Sen->Tbatt = RATED_TEMP;
   }
 }
 

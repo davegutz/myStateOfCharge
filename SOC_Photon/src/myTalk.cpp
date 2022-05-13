@@ -622,7 +622,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
       case ( 'X' ):
         switch ( cp.input_string.charAt(1) )
         {
-          case ( 'd' ):
+          case ( 'd' ):   // dc-dc charger manual setting
             if ( cp.input_string.substring(2).toInt()>0 )
               cp.dc_dc_on = true;
             else
@@ -630,32 +630,56 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             Serial.printf("dc_dc_on set to %d\n", cp.dc_dc_on);
             break;
 
-          case ( 'x' ):
-            if ( cp.input_string.substring(2).toInt()>0 ) rp.modeling = true;
-            else rp.modeling = false;
-            cp.cmd_reset();
-            Serial.printf("Modeling set to %d\n", rp.modeling);
-            if ( cp.input_string.substring(2).toInt()>1 )
-              rp.tweak_test = true;
-            else
-              rp.tweak_test = false;
-            Serial.printf("tweak_test set to %d\n", rp.tweak_test);
+          case ( 'x' ):   // Signal sourcing
+            MOD_in =  cp.input_string.substring(2).toInt();
+            switch ( MOD_in )
+            {
+              case ( 0 ):
+                rp.modeling = false;
+                rp.tweak_test = false;
+                cp.cmd_reset();
+                break;
+
+              case ( 1 ):
+                rp.modeling = true;
+                rp.tweak_test = false;
+                cp.cmd_reset();
+                break;
+
+              case ( 10 ):
+                rp.modeling = false;
+                rp.tweak_test = true;
+                cp.cmd_reset();
+                break;
+
+              case ( 11 ):
+                rp.modeling = true;
+                rp.tweak_test = true;
+                cp.cmd_reset();
+                break;
+
+              default:
+                Serial.print(MOD_in); Serial.println(" unknown.  Try typing 'h'");
+                break;
+            }
+            Serial.printf("Modeling is %d\n", rp.modeling);
+            Serial.printf("tweak_test is%d\n", rp.tweak_test);
             break;
 
-          case ( 'a' ):
+          case ( 'a' ): // injection amplitude
             // rp.amp = max(min(cp.input_string.substring(2).toFloat(), 18.3), 0.0);
             rp.amp = cp.input_string.substring(2).toFloat();
             Serial.printf("Modeling injected amp set to %7.3f and inj_soft_bias set to %7.3f\n", rp.amp, rp.inj_soft_bias);
             break;
 
-          case ( 'f' ):
+          case ( 'f' ): // injection frequency
             rp.freq = max(min(cp.input_string.substring(2).toFloat(), 2.0), 0.0);
             Serial.printf("Modeling injected freq set to %7.3f Hz =", rp.freq);
             rp.freq = rp.freq * 2.0 * PI;
             Serial.printf(" %7.3f r/s\n", rp.freq);
             break;
 
-          case ( 't' ):
+          case ( 't' ): // injection type
             switch ( cp.input_string.charAt(2) )
             {
               case ( 'o' ):
@@ -693,12 +717,12 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             }
             break;
 
-          case ( 'o' ):
+          case ( 'o' ): // injection dc offset
             rp.inj_soft_bias = max(min(cp.input_string.substring(2).toFloat(), 18.3), -18.3);
             Serial.printf("Modeling injected inj_soft_bias set to %7.3f\n", rp.inj_soft_bias);
             break;
 
-          case ( 'p' ):
+          case ( 'p' ): // injection program
             switch ( cp.input_string.substring(2).toInt() )
             {
 
@@ -940,7 +964,11 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xd= "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
-  Serial.printf("  Xx= "); Serial.printf("%d,   use model for Vbatt(1) and tweak_test(2) [0]\n", rp.modeling + rp.tweak_test);
+  Serial.printf("  Xx= %d signal sourcing option...\n", rp.modeling + rp.tweak_test*10 );
+  Serial.printf("       0  normal operation\n");
+  Serial.printf("       1  use models <<TODO>>\n");
+  Serial.printf("      10  tweak test hardware <<TODO>>\n");
+  Serial.printf("      11  tweak test use models\n");
   Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Injection amplitude A pk (0-18.3) [0]");
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println("  : Injection frequency Hz (0-2) [0]");
   Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Injection type.  'c', 's', 'q', 't' (cosine, sine, square, triangle)");

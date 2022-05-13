@@ -17,7 +17,7 @@ const   String    unit = "soc0_20220506";  // Gross configuration stamp, put on 
 #define VOLT_BIAS             0.0   // Bias on Vbatt sensor, V
 #define TEMP_BIAS             0.0   // Bias on Tbatt sensor, deg C
 
-// const String chemistry = "Battleborn"; // Used various configuration parameters
+// Battery
 #define MOD_CODE              0     // Chemistry code integer, 0=Battleborn, 1=LION
 #define RATED_BATT_CAP        100.  // Nominal battery unit capacity, Ah
 #define RATED_TEMP            25.   // Temperature at RATED_BATT_CAP, deg C

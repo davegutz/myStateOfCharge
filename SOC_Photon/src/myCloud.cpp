@@ -137,7 +137,6 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Vbatt = Sen->Vbatt;
   pubList->Tbatt = Sen->Tbatt;
   pubList->Tbatt_filt = Sen->Tbatt_filt;
-  pubList->Tbatt_filt_model = rp.t_last_model;
   pubList->Vshunt_amp = Sen->ShuntAmp->vshunt();
   pubList->Vshunt_noamp = Sen->ShuntNoAmp->vshunt();
   pubList->Vshunt = Sen->Vshunt;
@@ -154,7 +153,6 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->voc_filt = Mon->voc_filt()*Mon->nS();
   pubList->vsat = Mon->vsat()*Mon->nS();
   pubList->sat = Mon->sat();
-  pubList->curr_sel_noamp = rp.curr_sel_noamp;
   pubList->soc_model = Sim->soc();
   pubList->soc_ekf = Mon->soc_ekf();
   pubList->soc = Mon->soc();

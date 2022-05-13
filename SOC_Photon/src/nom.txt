@@ -9,7 +9,8 @@
 		CURR_BIAS_NOAMP	Calibration of non-amplified shunt sensor, A
 		delta_q_		Charge change since saturated, C
 		direx_			Direction scalar
-		disabled_		// Hysteresis disabled by low scale input < 1e-5, T=disabled
+		disab_hard;		Disable hardware in signal selection and use model or input, T=disab
+		disabled_		Hysteresis disabled by low scale input < 1e-5, T=disabled
 		dqdt			Change of charge with temperature, fraction/deg C (0.01 from literature)
 		dt_ 			Update time, s
 		dv				Delta voltage, V
