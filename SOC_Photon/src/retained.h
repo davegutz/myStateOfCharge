@@ -33,7 +33,7 @@
 // ********CAUTION:  any special includes or logic in here breaks retained function
 struct RetainedPars
 {
-  int8_t debug = 2;             // Level of debug printing
+  int8_t debug = 0;             // Level of debug printing
   double delta_q = -0.5;        // Charge change since saturated, C
   t_float t_last = 25.;           //Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
   double delta_q_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
@@ -68,7 +68,7 @@ struct RetainedPars
   // Nominalize
   void nominal()
   {
-    this->debug = 2;
+    this->debug = 0;
     this->delta_q = -0.5;
     this->t_last = 25.;
     this->delta_q_model = -0.5;
@@ -101,7 +101,7 @@ struct RetainedPars
   }
   void large_reset()
   {
-    this->debug = 2;
+    this->debug = 0;
     this->delta_q = 0.;           // saturate
     this->delta_q_model = 0.;     // saturate
     this->curr_bias_amp = CURR_BIAS_AMP;

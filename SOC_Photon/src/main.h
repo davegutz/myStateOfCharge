@@ -171,11 +171,20 @@ void setup()
   }
   Serial.printf("done CLOUD\n");
 
+  // Clean boot logic
 #ifdef BOOT_CLEAN
   rp.nominal();
-  Serial.printf("Force nominal rp %s", cp.buffer);
+  Serial.printf("Force nominal rp %s\n", cp.buffer);
   rp.pretty_print();
 #endif
+  if ( rp.nP==0 || rp.nS==0 || rp.mon_mod>10 || isnan(rp.amp) || rp.freq>2. ) 
+  {
+    rp.pretty_print();
+    Serial.printf("\n************************WARNING(setup):  Forcing nominal SRAM ****************************** %s\n", cp.buffer);
+    rp.nominal();
+    Serial.printf("\n************************WARNING(setup):  Forced nominal SRAM ****************************** %s\n", cp.buffer);
+    rp.pretty_print();
+  }
 
   #ifdef PHOTON
     if ( rp.debug>101 ) { sprintf(cp.buffer, "Particle Photon\n"); Serial.print(cp.buffer); } //Serial1.print(buffer); }

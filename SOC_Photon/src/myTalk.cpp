@@ -51,7 +51,7 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
       case ( 'A' ):
         rp.nominal();
         rp.pretty_print();
-        Serial.printf("Force nominal rp %s", cp.buffer);
+        Serial.printf("Force nominal rp %s\n", cp.buffer);
         rp.debug = 0;
         Serial.printf("\n\n ************** now press reset button for a clean boot ****************************\n");
         break;
@@ -575,6 +575,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             break;
 
           case ( 'R' ):
+            Serial.printf("Large reset\n");
             self_talk("Rr", Mon, Sim, Sen);
             Serial.printf("also large and soft reset.   Initialize all variables to clean run without model at saturation.   Ready to use\n");
             rp.large_reset();

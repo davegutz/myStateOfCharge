@@ -138,6 +138,7 @@ void Battery::init_battery(Sensors *Sen)
 {
     vb_ = Sen->Vbatt / (*rp_nS_);
     ib_ = Sen->Ishunt / (*rp_nP_);
+    ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
     if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
     double u[2] = {ib_, vb_};
@@ -250,6 +251,7 @@ double BatteryMonitor::calculate(Sensors *Sen)
     // Dynamic emf
     vb_ = Sen->Vbatt / (*rp_nS_);
     ib_ = Sen->Ishunt / (*rp_nP_);
+    ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
     double u[2] = {ib_, vb_};
     Randles_->calc_x_dot(u);
     Randles_->update(dt_);
@@ -557,6 +559,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     voc_ = hys_->update(dt);
     ioc_ = hys_->ioc();
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
+    ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
     double u[2] = {ib_, voc_};  // past value ib_
     Randles_->calc_x_dot(u);
     Randles_->update(dt);
