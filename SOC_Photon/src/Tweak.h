@@ -23,7 +23,7 @@
 
 #ifndef _MY_TWEAK_H
 #define _MY_TWEAK_H
-#define t_float double
+#define t_float float
 
 // Use known saturation instances to adjust current sensor for zero net energy.
 class Tweak

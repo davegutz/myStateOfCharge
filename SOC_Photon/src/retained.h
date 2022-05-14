@@ -23,7 +23,7 @@
 
 #ifndef _RETAINED_H
 #define _RETAINED_H
-#define t_float double
+#define t_float float
 
 #include "local_config.h"
 

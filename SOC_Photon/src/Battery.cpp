@@ -582,8 +582,8 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     model_saturated_ = (voc_stat_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
     Coulombs::sat_ = model_saturated_;
 
-    if ( rp.debug==75 ) Serial.printf("BatteryModel::calculate: voc_stat_, low_voc,=  %7.3f, %7.3f,\n",
-        voc_stat_, chem_.low_voc);
+    if ( rp.debug==75 ) Serial.printf("BatteryModel::calculate: temp_C, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
+        temp_C, soc_, voc_stat_, chem_.low_voc);
 
     if ( rp.debug==79 ) Serial.printf("temp_C, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f,\n",
         temp_C, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_);

@@ -33,7 +33,7 @@
 #include "myLibrary/myFilters.h"
 #include "constants.h"
 struct Sensors;
-#define t_float double
+#define t_float float
 
 #define TCHARGE_DISPLAY_DEADBAND 0.1    // Inside this +/- deadband, charge time is displayed '---', A
 #define T_RLIM                0.017    // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s (0.017 allows 1 deg for 1 minute)

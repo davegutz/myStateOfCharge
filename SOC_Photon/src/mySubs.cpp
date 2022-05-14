@@ -208,7 +208,7 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
 
   // Current signal selection, based on if there or not.
   // Over-ride 'permanent' with Talk(rp.curr_sel_noamp) = Talk('s')
-  if ( !rp.curr_sel_noamp && ! Sen->ShuntAmp->bare())
+  if ( !rp.curr_sel_noamp && !Sen->ShuntAmp->bare())
   {
     Sen->Vshunt = Sen->ShuntAmp->vshunt();
     Sen->Ishunt = Sen->ShuntAmp->ishunt_cal();
