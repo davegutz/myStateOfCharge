@@ -177,7 +177,7 @@ void setup()
   Serial.printf("Force nominal rp %s\n", cp.buffer);
   rp.pretty_print();
 #endif
-  if ( rp.nP==0 || rp.nS==0 || rp.mon_mod>10 || isnan(rp.amp) || rp.freq>2. ) 
+  if ( rp.is_corrupt() ) 
   {
     rp.pretty_print();
     Serial.printf("\n************************WARNING(setup):  Forcing nominal SRAM ****************************** %s\n", cp.buffer);

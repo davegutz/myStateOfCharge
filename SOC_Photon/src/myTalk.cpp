@@ -48,14 +48,6 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   {
     switch ( cp.input_string.charAt(0) )
     {
-      case ( 'A' ):
-        rp.nominal();
-        rp.pretty_print();
-        Serial.printf("Force nominal rp %s\n", cp.buffer);
-        rp.debug = 0;
-        Serial.printf("\n\n ************** now press reset button for a clean boot ****************************\n");
-        break;
-
       case ( 'B' ):
         switch ( cp.input_string.charAt(1) )
         {
@@ -604,13 +596,6 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
         Serial.printf("Signal selection ( 0=amp, 1=noamp,) set to %d\n", rp.curr_sel_noamp);
         break;
 
-      case ( 'T' ):   // This is a test feature only
-        cp.input_string = cp.input_string.substring(1);
-        Serial.printf("new string = '%s'\n", cp.input_string.c_str());
-        cp.string_complete = true;
-        talk(Mon, Sim, Sen);
-        break;
-
       case ( 'v' ):
         rp.debug = cp.input_string.substring(1).toInt();
         break;
@@ -849,8 +834,6 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 {
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
 
-  Serial.printf("A=  nominalize the rp structure for clean boots etc'\n");
-
   Serial.printf("B<?> Battery assignments.   For example:\n");
   Serial.printf("  Bm=  %d.  Monitor battery chemistry 0='Battleborn', 1='LION''\n", rp.mon_mod); 
   Serial.printf("  Bs=  %d.  Simulation battery chemistry 0='Battleborn', 1='LION''\n", rp.sim_mod); 
@@ -932,9 +915,6 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("  Rs= "); Serial.printf("small reset.  reset flags to reinitialize filters\n");
 
   Serial.printf("s   curr signal select (0=amp preferred, 1=noamp) = "); Serial.println(rp.curr_sel_noamp);
-
-  Serial.printf("T<new cmd>  Send in a new command.  Used to test calling Talk from itself.   For Example:\n");
-  Serial.printf("  Tv=-78  sends v=-78 to talk\n");
 
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("    -<>:   Negative - Arduino plot compatible\n");

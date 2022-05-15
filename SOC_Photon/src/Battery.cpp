@@ -417,8 +417,9 @@ void BatteryMonitor::regauge(const double temp_c)
 {
     if ( converged_ekf() && abs(soc_ekf_-soc_)>DF2 )
     {
-        Serial.printf("Resetting Coulomb Counter Monitor from %7.3f to EKF=%7.3f\n", soc_, soc_ekf_);
+        Serial.printf("Resetting Coulomb Counter Monitor from %7.3f to EKF=%7.3f...", soc_, soc_ekf_);
         apply_soc(soc_ekf_, temp_c);
+        Serial.printf("confirmed %7.3f\n", soc_);
     }
 }
 

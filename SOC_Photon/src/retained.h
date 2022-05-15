@@ -26,6 +26,7 @@
 #define t_float float
 
 #include "local_config.h"
+#include "math.h"
 
 // Definition of structure to be saved in SRAM
 // Default values below are important:  they prevent junk
@@ -64,6 +65,14 @@ struct RetainedPars
   t_float nS = NS;                // Number series batteries in bank
   uint8_t mon_mod = MOD_CODE;   // Monitor battery chemistry type
   uint8_t sim_mod = MOD_CODE;   // Simulation battery chemistry type
+
+  // Corruption test
+  boolean is_corrupt()
+  {
+    return ( this->nP==0 || this->nS==0 || this->mon_mod>10 || isnan(this->amp) || this->freq>2. ||
+     abs(this->curr_bias_amp)>500. ||
+     this->duty>1000 || abs(this->cutback_gain_scalar)>1000. || abs(this->curr_bias_noamp)>500. );
+  }
 
   // Nominalize
   void nominal()
