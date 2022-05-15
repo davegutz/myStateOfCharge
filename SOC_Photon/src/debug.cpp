@@ -29,7 +29,7 @@
 void debug_m1(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 {
   Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-    Sim->SOC()-90,
+    Sim->soc()*100.-90,
     Sen->ShuntAmp->ishunt_cal(), Sen->ShuntNoAmp->ishunt_cal(),
     Sen->Vbatt*10-110, Sim->voc()*10-110, Sim->vdyn()*10, Sim->Vb()*10-110, Mon->vdyn()*10-110);
 }

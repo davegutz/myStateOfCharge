@@ -250,23 +250,23 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
     a.  Nominally the battery may have more than 100 Ah capacity.   This should be confirmed.
     b.  Displayed SOC may exceed 100 but should not go below 0.
   2. Displayed values when sitting either charging slightly or discharging DC ciruits (no inverter) should appear constant after filter rise.
-    a.  Estimate and display hours to 100 SOC. (charge is positive).   This is the main use of this device:  to assure sleeper that CPAP, once turned on, will last longer than expected sleep time.
+    a.  Estimate and display hours to 1 soc. (charge is positive).   This is the main use of this device:  to assure sleeper that CPAP, once turned on, will last longer than expected sleep time.
     b.  Measure and display shunt current (charge is positive), A.
     c.  Measure and display battery voltage, V.
     d.  Measure and display battery temperature, F.
   3. Implement an adjustment 'talk' function.  Along with general debugging it must be capable of
-    a.  Setting SOC state
+    a.  Setting soc state
     b.  Separately setting the model state
     c.  Resetting pretty much anything
     d.  Injecting test signals
-  4. CPU hard and soft resets must not change the state of operation, either SOC, display, or serial bus.
+  4. CPU hard and soft resets must not change the state of operation, either soc, display, or serial bus.
   5. Serial streams shall have an absolute Julien-type time for easy plotting and comparison.
   6. Built-in test function, engaged using 'talk' function.
   7. Load software using USB.  Wifi to truck will not be reliable.
   8. Likewise, monitor USB using laptop or phone.  'Talk' function should change serial monitor and inject signals for debugging.
   9. Device shall have no effect on system operation.   Monitor function only.
   10. Bluetooth serial interface required.  ***This did not work due to age of Android phone (6 yrs) not compatible with the latest bluetooth devices.
-  11. Keep as much summary as possible of SOC every half hour:  Tbatt, Vbatt, SOC.   Save as SRAM battery backup memory. Print out to serial automatically on boot and as requested by 'Talk.'  This will tell users charging history.
+  11. Keep as much summary as possible of soc every half hour:  Tbatt, Vbatt, soc.   Save as SRAM battery backup memory. Print out to serial automatically on boot and as requested by 'Talk.'  This will tell users charging history.
   12. Adjustments to model using talk function should preserve delta_q between models to preserve change from
   saturated situation.  The one 'constant' in this device is that it may be reset to reality whenever fully
   charged.   Test it the same way.  The will be separate adjustment to bias the model away from this ('n' and 'W')
@@ -300,7 +300,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   4. Shunt monitor seems to have 0 V bias at 0 A current so this is assumed when scaling inputs.
   5. Current calibrated using clamping ammeter turning large loads off and on.
   6. Battleborn nominal capacity determined by load tests.
-  7. An iterative solver for SOC-VOC model works extremely well given calculatable derivative for the equations from reference.  PI observer removed in favor of solver.  The solver could be used to initialize SOC for the Coulomb Counter but probaly not worth the trouble.   Leave this device in more future possible usage.  An EKF
+  7. An iterative solver for SOC-VOC model works extremely well given calculatable derivative for the equations from reference.  PI observer removed in favor of solver.  The solver could be used to initialize soc for the Coulomb Counter but probaly not worth the trouble.   Leave this device in more future possible usage.  An EKF
   then replaced the solver because it essentially does the same thing and was much quieter.
   8. Note that there is no effect of the device on system operation so debugging via serial can be more extensive than usual.
   9. Two-pole filters and update time framing, determined experimentally and by experience to provide best possible Coulommb Counter and display behavior.

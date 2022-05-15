@@ -233,7 +233,6 @@ void Coulombs::pretty_print(void)
   Serial.printf("  q_min_ =      %9.1f;  // Estimated charge at low voltage shutdown, C\n", q_min_);
   Serial.printf("  delta_q       %9.1f;  // Charge change since saturated, C\n", *rp_delta_q_);
   Serial.printf("  soc_ =          %7.3f;  // Fraction of saturation charge (q_capacity_) available (0-1);\n", soc_);
-  Serial.printf("  SOC_ =            %5.1f;  // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries\n", SOC_);
   Serial.printf("  sat_ =                %d;  // Indication calculated by caller that battery is saturated, T=saturated\n", sat_);
   Serial.printf("  t_rated_ =        %5.1f;  // Rated temperature, deg C\n", t_rated_);
   Serial.printf("  t_last =          %5.1f;  // Last battery temperature for rate limit memory, deg C\n", *rp_t_last_);
@@ -259,7 +258,6 @@ void Coulombs::apply_cap_scale(const double scale)
   q_capacity_ = calculate_capacity(*rp_t_last_);
   q_ = *rp_delta_q_ + q_capacity_; // preserve delta_q, deficit since last saturation (like real life)
   soc_ = q_ / q_capacity_;
-  SOC_ = q_ / q_cap_rated_scaled_ * 100.;
   resetting_ = true;     // momentarily turn off saturation check
 }
 
@@ -269,7 +267,6 @@ void Coulombs::apply_delta_q(const double delta_q)
   *rp_delta_q_ = delta_q;
   q_ = *rp_delta_q_ + q_capacity_;
   soc_ = q_ / q_capacity_;
-  SOC_ = q_ / q_cap_rated_scaled_ * 100.;
   resetting_ = true;     // momentarily turn off saturation check
 }
 
@@ -280,7 +277,6 @@ void Coulombs::apply_delta_q_t(const double delta_q, const double temp_c)
   q_capacity_ = calculate_capacity(temp_c);
   q_ = q_capacity_ + *rp_delta_q_;
   soc_ = q_ / q_capacity_;
-  SOC_ = q_ / q_cap_rated_scaled_ * 100.;
   resetting_ = true;
 }
 
@@ -291,18 +287,6 @@ void Coulombs::apply_soc(const double soc, const double temp_c)
   q_capacity_ = calculate_capacity(temp_c);
   q_ = soc*q_capacity_;
   *rp_delta_q_ = q_ - q_capacity_;
-  SOC_ = q_ / q_cap_rated_scaled_ * 100.;
-  resetting_ = true;     // momentarily turn off saturation check
-}
-
-// Memory set, adjust book-keeping as needed.  delta_q preserved
-void Coulombs::apply_SOC(const double SOC, const double temp_c)
-{
-  SOC_ = SOC;
-  q_ = SOC / 100. * q_cap_rated_scaled_;
-  q_capacity_ = calculate_capacity(temp_c);
-  *rp_delta_q_ = q_ - q_capacity_;
-  soc_ = q_ / q_capacity_;
   resetting_ = true;     // momentarily turn off saturation check
 }
 
@@ -325,7 +309,6 @@ Outputs:
   *rp_t_last_     Updated value of battery temperature used for rate limit memory, deg C
   resetting_      Sticky flag for initialization, T=reset
   soc_            Fraction of saturation charge (q_capacity_) available (0-1) 
-  SOC_            Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries
   soc_min_        Estimated soc where battery BMS will shutoff current, fraction
   q_min_          Estimated charge at low voltage shutdown, C\
 */
@@ -362,14 +345,13 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
     soc_ = q_ / q_capacity_;
     soc_min_ = soc_min_T_->interp(temp_lim);
     q_min_ = soc_min_ * q_capacity_;
-    SOC_ = q_ / q_cap_rated_scaled_ * 100;
 
     if ( rp.debug==96 )
-        Serial.printf("Coulombs::cc,             reset,dt,voc, voc_filt, v_sat, temp_c, temp_lim, sat, charge_curr, d_d_q, d_q, d_q_i, q, q_capacity,soc,SOC,      %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,%7.3f,\n",
-                    reset, dt, pp.pubList.voc, pp.pubList.voc_filt,  this->vsat(), temp_c, temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
+        Serial.printf("Coulombs::cc,             reset,dt,voc, voc_filt, v_sat, temp_c, temp_lim, sat, charge_curr, d_d_q, d_q, d_q_i, q, q_capacity,soc,SOC,      %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
+                    reset, dt, pp.pubList.voc, pp.pubList.voc_filt,  this->vsat(), temp_c, temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
     if ( rp.debug==-96 )
-        Serial.printf("voc, voc_filt, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, d_q_i, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,%7.3f,\n",
-                    pp.pubList.voc, pp.pubList.voc_filt, this->vsat(), temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, SOC_);
+        Serial.printf("voc, voc_filt, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, d_q_i, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
+                    pp.pubList.voc, pp.pubList.voc_filt, this->vsat(), temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 
     // Save and return
     *rp_t_last_ = temp_lim;

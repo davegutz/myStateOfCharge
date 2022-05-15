@@ -89,7 +89,6 @@ public:
   void apply_delta_q(const double delta_q);
   void apply_resetting(const boolean resetting){ resetting_ = resetting; };
   void apply_soc(const double soc, const double temp_c);
-  void apply_SOC(const double SOC, const double temp_c);
   void apply_delta_q_t(const double delta_q, const double temp_c);
   void assign_mod(const String mod_str) { chem_.assign_mod(mod_str); };
   double calculate_capacity(const double temp_c);
@@ -103,7 +102,6 @@ public:
   double q_cap_scaled(){ return (q_cap_rated_scaled_); };
   double q_capacity(){ return (q_capacity_); };
   double soc() { return(soc_); };
-  double SOC() { return(SOC_); };
   boolean sat() { return(sat_); };
   double t_last() { return(*rp_t_last_); };
   virtual double vsat(void) = 0;
@@ -115,7 +113,6 @@ protected:
   double q_capacity_; // Saturation charge at temperature, C
   double q_;          // Present charge available to use, except q_min_, C
   double soc_;        // Fraction of saturation charge (q_capacity_) available (0-1)
-  double SOC_;        // Fraction of rated capacity available (0 - ~1.2).   For comparison to other batteries.
   boolean sat_;       // Indication calculated by caller that battery is saturated, T=saturated
   double t_rated_;    // Rated temperature, deg C
   double t_rlim_;     // Tbatt rate limit, deg C / s

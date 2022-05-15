@@ -156,11 +156,7 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->soc_model = Sim->soc();
   pubList->soc_ekf = Mon->soc_ekf();
   pubList->soc = Mon->soc();
-  pubList->SOC_model = Sim->SOC();
-  pubList->SOC_ekf = Mon->SOC_ekf();
-  pubList->SOC = Mon->SOC();
   pubList->soc_wt = Mon->soc_wt();
-  pubList->SOC_wt = Mon->SOC_wt();
   pubList->amp_hrs_remaining_ekf = Mon->amp_hrs_remaining_ekf()*Mon->nP()*Mon->nS();
   pubList->amp_hrs_remaining_wt = Mon->amp_hrs_remaining_wt()*Mon->nP()*Mon->nS();
   pubList->vdyn = Mon->vdyn();

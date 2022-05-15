@@ -101,7 +101,7 @@ void Shunt::load()
 void print_serial_header(void)
 {
   if ( rp.debug==2 )
-    Serial.println(F("unit,         hm,                  cTime,        T,       Tb_f, Tb_f_m,  Vb, voc, vsat,    sat,sel,mod, Ib,    tcharge, soc_m,soc_ekf,soc,soc_wt,   SOC_m,SOC_ekf,SOC,SOC_wt,"));
+    Serial.println(F("unit,         hm,                  cTime,        T,       Tb_f, Tb_f_m,  Vb, voc, vsat,    sat,sel,mod, Ib,    tcharge, soc_m,soc_ekf,soc,soc_wt,"));
   else if ( rp.debug==4 )
     Serial.printf("unit,               hm,                  cTime,        T,       sat,sel,mod,  Tb,  Vb,  Ib,        vsat,vdyn,voc,voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
 }
@@ -110,7 +110,7 @@ void print_serial_header(void)
 void create_print_string(char *buffer, Publish *pubList)
 {
   if ( rp.debug==2 )
-  sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %4.1f,%4.1f,   %5.2f,%5.2f,%5.2f,  %d,  %d,  %d,   %7.3f,  %5.1f,  %5.3f,%5.3f,%5.3f,%5.3f,   %5.1f,%5.1f,%5.1f,%5.1f,  %c", \
+  sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %4.1f,%4.1f,   %5.2f,%5.2f,%5.2f,  %d,  %d,  %d,   %7.3f,  %5.1f,  %5.3f,%5.3f,%5.3f,%5.3f,  %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
     pubList->Tbatt, rp.t_last_model,
     pubList->Vbatt, pubList->voc, pubList->vsat,
@@ -118,7 +118,6 @@ void create_print_string(char *buffer, Publish *pubList)
     pubList->Ishunt,
     pubList->tcharge,
     pubList->soc_model, pubList->soc_ekf, pubList->soc, pubList->soc_wt,
-    pubList->SOC_model, pubList->SOC_ekf, pubList->SOC, pubList->SOC_wt,
     '\0');
   else if ( rp.debug==4 )
   sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%7.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \

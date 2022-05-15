@@ -171,7 +171,8 @@ void setup()
   }
   Serial.printf("done CLOUD\n");
 
-  // Clean boot logic
+  // Clean boot logic.  This occurs only when doing a structural rebuild clean make on initial flash, because
+  // the SRAM is not explicitly initialized.   This is by design, as SRAM must be remembered between boots.
 #ifdef BOOT_CLEAN
   rp.nominal();
   Serial.printf("Force nominal rp %s\n", cp.buffer);
@@ -179,11 +180,8 @@ void setup()
 #endif
   if ( rp.is_corrupt() ) 
   {
-    rp.pretty_print();
-    Serial.printf("\n************************WARNING(setup):  Forcing nominal SRAM ****************************** %s\n", cp.buffer);
     rp.nominal();
     Serial.printf("\n************************WARNING(setup):  Forced nominal SRAM ****************************** %s\n", cp.buffer);
-    rp.pretty_print();
   }
 
   #ifdef PHOTON

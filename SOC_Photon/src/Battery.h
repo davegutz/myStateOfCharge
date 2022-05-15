@@ -40,7 +40,7 @@ struct Sensors;
 const double sat_cutback_gain = 10; // Multiplier on saturation anti-windup
 const double vb_dc_dc = 13.5;   // DC-DC charger estimated voltage, V
 
-#define EKF_CONV        1e-3      // EKF tracking error indicating convergence, V (1e-3)
+#define EKF_CONV        2e-3      // EKF tracking error indicating convergence, V (1e-3)
 #define EKF_T_CONV      30.       // EKF set convergence test time, sec (30.)
 #define EKF_T_RESET (EKF_T_CONV/2.) // EKF reset test time, sec ('up 1, down 2')
 #define EKF_Q_SD        0.001     // Standard deviation of EKF process uncertainty, V
@@ -243,8 +243,6 @@ public:
   void select();
   double soc_ekf() { return (soc_ekf_); };
   double soc_wt() { return soc_wt_; };
-  double SOC_ekf() { return (SOC_ekf_); };
-  double SOC_wt() { return SOC_wt_; };
   boolean solve_ekf(Sensors *Sen);
   double tcharge() { return (tcharge_); };
   double voc() { return (voc_); };
@@ -258,7 +256,6 @@ protected:
   double tcharge_ekf_;  // Solved charging time to 100% from ekf, hr
   double voc_dyn_;  // Charging voltage, V
   double soc_ekf_;  // Filtered state of charge from ekf (0-1)
-  double SOC_ekf_;  // Filtered state of charge from ekf (0-100)
   double tcharge_;  // Counted charging time to 100%, hr
   double q_ekf_;    // Filtered charge calculated by ekf, C
   void ekf_predict(double *Fx, double *Bu);
@@ -267,7 +264,6 @@ protected:
   SlidingDeadband *SdVbatt_;  // Sliding deadband filter for Vbatt
   TFDelay *EKF_converged = new TFDelay();   // Time persistence
   double soc_wt_;   // Weighted selection of ekf state of charge and coulomb counter (0-1)
-  double SOC_wt_;   // Weighted selection of ekf state of charge and coulomb counter, percent
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
   double amp_hrs_remaining_wt_; // Discharge amp*time left if drain soc_wt_ to 0, A-h
   LagTustin *y_filt = new LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time

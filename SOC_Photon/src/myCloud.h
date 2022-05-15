@@ -54,11 +54,7 @@ struct Publish
   float soc_model;
   float soc;
   float soc_ekf;
-  float SOC_model;
-  float SOC;
-  float SOC_ekf;
   float soc_wt;
-  float SOC_wt;
   float vdyn;
   float voc_ekf;
   float y_ekf;
