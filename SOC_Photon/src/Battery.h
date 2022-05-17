@@ -35,11 +35,9 @@
 struct Sensors;
 #define t_float float
 
-#define TCHARGE_DISPLAY_DEADBAND 0.1    // Inside this +/- deadband, charge time is displayed '---', A
-#define T_RLIM                0.017    // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s (0.017 allows 1 deg for 1 minute)
-const double sat_cutback_gain = 10; // Multiplier on saturation anti-windup
-const double vb_dc_dc = 13.5;   // DC-DC charger estimated voltage, V
-
+#define TCHARGE_DISPLAY_DEADBAND  0.1   // Inside this +/- deadband, charge time is displayed '---', A
+#define T_RLIM          0.017     // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s (0.017 allows 1 deg for 1 minute)
+const double vb_dc_dc = 13.5;     // DC-DC charger estimated voltage, V
 #define EKF_CONV        2e-3      // EKF tracking error indicating convergence, V (1e-3)
 #define EKF_T_CONV      30.       // EKF set convergence test time, sec (30.)
 #define EKF_T_RESET (EKF_T_CONV/2.) // EKF reset test time, sec ('up 1, down 2')
@@ -54,7 +52,7 @@ const double vb_dc_dc = 13.5;   // DC-DC charger estimated voltage, V
 #define SOLV_ERR        1e-6      // EKF initialization solver error bound, V
 #define SOLV_MAX_COUNTS 10        // EKF initialization solver max iters
 #define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction
-
+const double mxeps = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness)
 
 
 // BattleBorn 100 Ah, 12v LiFePO4
@@ -85,6 +83,7 @@ const t_float t_r_bb[m_h_bb*n_h_bb] = // r(soc, dv) table
           1e-7, 1e-7,   0.0050, 0.0036, 0.0015, 0.0024, 0.0030,   1e-7, 1e-7,
           1e-7, 1e-7,   1e-7,   0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7};
 
+
 // LION 100 Ah, 12v LiFePO4
 // shifted Battleborn because don't have real data yet; test structure of program
 const uint8_t m_t_li  = 4;    // Number temperature breakpoints for voc table
@@ -111,8 +110,6 @@ const t_float t_r_li[m_h_li*n_h_li] = // r(soc, dv) table
         { 1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.0030, 0.0046, 1e-7,
           1e-7, 1e-7,   0.0050, 0.0036, 0.0015, 0.0024, 0.0030,   1e-7, 1e-7,
           1e-7, 1e-7,   1e-7,   0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7};
-
-const double mxeps = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness)
 
 // Hysteresis: reservoir model of battery electrical hysteresis
 // Use variable resistor and capacitor to create hysteresis from an RC circuit

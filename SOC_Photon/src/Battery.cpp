@@ -514,22 +514,25 @@ BatteryModel::BatteryModel(double *rp_delta_q, t_float *rp_t_last, t_float *rp_s
     ib_sat_ = 0.5;              // deadzone for cutback actuation, A
 }
 
-// calculate:  SOC-OCV table with a Battery Management System (BMS) and hysteresis.
-// Makes a good reference model. Intervenes in sensor path to provide Mon with inputs.
+// BatteryModel::calculate:  Sim SOC-OCV table with a Battery Management System (BMS) and hysteresis.
+// Makes a good reference model. Intervenes in sensor path to provide Mon with inputs
+// when running simulations.  Never used for anything during normal operation.  Models
+// for monitoring in normal operation are in the BatteryMonitor object.
 //
 //  Inputs:
-//    Sen->Tbatt_filt Simulated Tb filtered for noise, past value of temp_c_, deg C
-//    Sen->Ishunt     Proposed simulated Ib, A
-//    Sen->T          Update time, sec
+//    Sen->Tbatt_filt   Simulated Tb filtered for noise, past value of temp_c_, deg C
+//    Sen->Ishunt       Proposed simulated Ib, A
+//    Sen->T            Update time, sec
 //
 //  States:
-//    soc_            State of Charge, fraction
+//    soc_              State of Charge, fraction
 //
 //  Outputs:
-//    Tb              Simulated Tb, deg C
-//    Ib              Simulated over-ridden by saturation Ib, A
-//    Vb (return)     Simulated Vb, V
-//    rp.duty         (0-255) for DF2 hardware injection when rp.modeling and proper wire connections made
+//    temp_c_           Simulated Tb, deg C
+//    ib_               Simulated over-ridden by saturation, A
+//    vb_               Simulated Vb, V
+//    rp.duty           (0-255) for DF2 hardware injection when rp.modeling and proper wire connections made
+//
 double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
 {
     const double temp_C = Sen->Tbatt_filt;
@@ -555,8 +558,8 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     voc_ = hys_->update(dt);
     ioc_ = hys_->ioc();
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
-    ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
-    double u[2] = {ib_, voc_};  // past value ib_
+    ib_ = max(min(ib_, 10000.), -10000.);  //  Past value ib_.  Overflow protection when ib_ past value used
+    double u[2] = {ib_, voc_};
     Randles_->calc_x_dot(u);
     Randles_->update(dt);
     vb_ = Randles_->y(0);
@@ -569,7 +572,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     }
     if ( bms_off_ && dc_dc_on )
     {
-        vb_ = vb_dc_dc;
+        vb_ = vb_dc_dc*rp.nS;
     }
 
     // Saturation logic, both full and empty
@@ -667,12 +670,13 @@ Inputs:
     Sen->Tbatt      Battery temperature, deg C
     Sen->Ishunt     Charge, A
     t_last          Past value of battery temperature used for rate limit memory, deg C
-Outputs:
-    q_capacity_     Saturation charge at temperature, C
+States:
     *rp_delta_q_    Charge change since saturated, C
     *rp_t_last_     Updated value of battery temperature used for rate limit memory, deg C
-    resetting_      Sticky flag for initialization, T=reset
     soc_            Fraction of saturation charge (q_capacity_) available (0-1) 
+Outputs:
+    q_capacity_     Saturation charge at temperature, C
+    resetting_      Sticky flag for initialization, T=reset
     soc_min_        Estimated soc where battery BMS will shutoff current, fraction
     q_min_          Estimated charge at low voltage shutdown, C\
 */

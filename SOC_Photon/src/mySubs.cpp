@@ -317,6 +317,57 @@ void manage_wifi(unsigned long now, Wifi *wifi)
   wifi->particle_connected_last = wifi->particle_connected_now;
 }
 
+// Calculate Ah remaining
+// Inputs:  rp.mon_mod, Sen->Ishunt, Sen->Vbatt, Sen->Tbatt_filt
+// States:  Mon.soc
+// Outputs: tcharge_wt, tcharge_ekf
+void  monitor(const int reset, const boolean reset_temp, const unsigned long now,
+  TFDelay *Is_sat_delay, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
+{
+  /* Main Battery Monitor
+      Inputs:
+        rp.mon_mod      Monitor battery chemistry type
+        Sen->Ishunt     Battery terminal current, A
+        Sen->Vbatt      Battery terminal voltage, V
+        Sen->Tbatt_filt Tb filtered for noise, past value, deg C
+        Mon.soc         State of charge
+      Outputs:
+        voc             Static model open circuit voltage, V
+        voc_filt        Filtered open circuit voltage for saturation detect, V
+        Mon.soc         State of charge
+        Mon.soc_ekf     EKF state of charge
+        Mon.soc_wt      Weighted selection of soc
+        tcharge    	    Counted charging time to full, hr
+        tcharge_ekf     Solved charging time to full from ekf, hr
+        tcharge_wf  	    Counted charging time to full, hr
+  */
+
+  // Initialize charge state if temperature initial condition changed
+  // Needed here in this location to have a value for Sen->Tbatt_filt
+  if ( reset_temp )
+  {
+    Mon->apply_delta_q_t(rp.delta_q, rp.t_last);  // From memory
+    Mon->init_battery(Sen);
+    Mon->solve_ekf(Sen);
+  }
+
+  // EKF - calculates temp_c_, voc_, voc_dyn_ as functions of sensed parameters vb & ib (not soc)
+  Mon->calculate(Sen);
+
+  // Debounce saturation calculation done in ekf using voc model
+  boolean sat = Mon->is_sat();
+  Sen->saturated = Is_sat_delay->calculate(sat, t_sat, t_desat, min(Sen->T, t_sat/2.), reset);
+
+  // Memory store
+  Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
+
+  // Charge time for display
+  Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ishunt, Mon->soc());
+
+  // Select between Coulomb Counter and EKF
+  Mon->select();
+}
+
 // OLED display drive
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 {
@@ -370,6 +421,70 @@ uint32_t pwm_write(uint32_t duty, Pins *myPins)
     analogWrite(myPins->pwm_pin, duty, pwm_frequency);
     return duty;
 }
+
+// Read sensors, model signals, select between them
+// Inputs:  rp.config, rp.sim_mod
+// Outputs: Sen->Ishunt, Sen->Vbatt, Sen->Tbatt_filt, rp.duty
+void sense_synth_select(const int reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
+  Pins *myPins, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
+{
+  // Load Ib and Vb
+  // Outputs: Sen->Ishunt, Sen->Vbatt 
+  load(reset, now, Sen, myPins);
+
+  // Arduino plots
+  if ( rp.debug==-7 ) debug_m7(Mon, Sim, Sen);
+
+  /* Sim used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
+  to have available a value for Sen->Tbatt_filt when called.   Recalculates Sen->Ishunt accounting for
+  saturation.  Sen->Ishunt is a feedback.
+      Inputs:
+        rp.sim_mod        Simulation battery chemistry type
+        Sim.soc           Model state of charge, Coulombs
+        Sen->Ishunt       Battery terminal current, A
+        Sen->Tbatt        Battery temperature, deg C
+        Sen->Tbatt_filt   Tb filtered for noise, past value, deg C
+      Outputs:
+        Sim.soc           Model state of charge, Coulombs
+        Sim.temp_c_       Simulated Tb, deg C
+        Sen->Tbatt_filt   = Sim.temp_c override
+        Sim.ib_           Simulated over-ridden by saturation, A
+        Sen->Ishunt       = Sim.ib_ override
+        Sen->Vbatt_model  = Sim.vb_.  Battery terminal voltage, V
+        Sen->Vbatt        = Sen->Vbatt_model override
+        rp.duty           (0-255) for DF2 hardware injection when rp.modeling and proper wire connections made
+  */
+
+  // Sim initialize as needed from memory
+  if ( reset )
+  {
+    Sim->apply_delta_q_t(rp.delta_q_model, rp.t_last_model);
+    Sim->init_battery(Sen);
+  }
+
+  // Sim calculation
+  Sen->Vbatt_model = Sim->calculate(Sen, cp.dc_dc_on);
+  cp.model_cutback = Sim->cutback();
+  cp.model_saturated = Sim->saturated();
+
+  // Use model instead of sensors when running tests as user
+  // Over-ride sensed Ib, Vb and Tb with model when running tests
+  if ( rp.modeling )    // Should never be set in real use
+  {
+    Sen->Ishunt = Sim->Ib();
+    Sen->Vbatt = Sen->Vbatt_model;
+    Sen->Tbatt_filt = Sim->temp_c();
+  }
+
+  // Charge calculation and memory store
+  // Inputs: Sen->Tbatt, Sen->Ishunt, and Sim.soc
+  // Outputs: Sim.soc
+  Sim->count_coulombs(Sen, reset_temp, rp.t_last_model);
+
+  // D2 signal injection to hardware current sensors (also has rp.inj_soft_bias path for rp.tweak_test)
+  rp.duty = Sim->calc_inj_duty(elapsed, rp.type, rp.amp, rp.freq);
+}
+
 
 /*
   Special handler that uses built-in callback.

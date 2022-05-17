@@ -55,11 +55,7 @@
 #define GMT                   -5        // Enter time different to zulu (does not respect DST) (-5)
 #define USE_DST               1         // Whether to apply DST or not, 0 or 1 (1)
 #define TBATT_TEMPCAL         0.56      // Maxim 1-wire plenum temp sense calibrate (0.56), C
-#define NOMVBATT              13.1      // Nominal battery voltage, V (13.1)
-#define NOMTBATT              20        // Nominal battery temp, C (68)
 #define MAX_TEMP_READS        10        // Number of consequetive temp queries allowed (10)
-#define NOMVSHUNTI            0         // Nominal shunt reading, integer (0)
-#define NOMVSHUNT             0         // Nominal shunt reading, V (0)
 #define VBATT_SENSE_R_LO      4700      // Vbatt low sense resistor, ohm (4700)
 #define VBATT_SENSE_R_HI      20000     // Vbatt high sense resistor, ohm (20000)
 #define VBATT_S               1.017     // Vbatt sense scalar (1.017)
@@ -74,14 +70,11 @@
 #define OLED_RESET            4         // Reset pin # (or -1 if sharing Arduino reset pin) (4)
 #define SCREEN_ADDRESS        0x3C      // See datasheet for Address; 0x3D for 128x64, (0x3C for 128x32)
 
-#define F_O_MAX_T       3.0         // Maximum call update time filters (3.0)
 #define F_MAX_T         0.5         // Maximum call update time sensors and coulomb counter (o.5)
 #define F_MAX_T_TEMP    18.0        // Maximum call update time filters (18.0)
-#define F_W             0.50        // General filter wn, r/s (0.5)   
-#define F_Z             0.80        // General filter zeta (0.80)
 #define F_W_T           0.05        // Temperature filter wn, r/s (0.05)   
 #define F_Z_T           0.80        // Temperature filter zeta (0.80)
-#define NSUM            50         // Number of saved summaries.   If too large, will get compile error
+#define NSUM            110         // Number of saved summaries.   If too large, will get compile error BACKUPSRAM
 #define HDB_TBATT       0.06        // Half deadband to filter Tbatt, F (0.06)
 #define HDB_VBATT       0.05        // Half deadband to filter Vbatt, V (0.05)
 const double t_sat = 5.;            // Saturation time, sec
@@ -100,8 +93,8 @@ const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI
                               double(VBATT_SENSE_R_LO) / double(PHOTON_ADC_COUNT) * double(VBATT_S);
 
 // Read temp initialization constants
-const boolean temp_parasitic = true;    // DS18 sensor power. true means leave it on all the time (true)
-const uint16_t temp_delay = 1;          // Time to block temperature sensor read in DS18 routine, ms (1)
+#define TEMP_PARASITIC    true    // DS18 sensor power. true means leave it on all the time (true)
+#define TEMP_DELAY        1       // Time to block temperature sensor read in DS18 routine, ms (1)
 #define TEMP_INIT_DELAY   10000         // It takes 10 seconds first read of DS18
 
 // Tweaker
@@ -109,8 +102,5 @@ const uint16_t temp_delay = 1;          // Time to block temperature sensor read
 #define TWEAK_MAX_CHANGE  0.05    // Maximum allowed tweak per charge cycle, A
 #define TWEAK_MAX         1.      // Maximum tweak allowed, +/- A
 #define TWEAK_WAIT        6.      // Time to persist unsaturated before allowing peak, hrs
-#define EIGHTEEN_HRS      64800000UL // Battery state tracking and reporting, ms
-#define SIX_HRS           21600000UL // Battery state tracking and reporting, ms
-#define ONE_DAY           86400000UL // Battery state tracking and reporting, ms
 
 #endif // CONSTANTS_H_

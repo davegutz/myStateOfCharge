@@ -139,7 +139,7 @@ struct Sensors
       Serial.printf("After new Shunt('No Amp'):\n");
       this->ShuntNoAmp->pretty_print();
     }
-    this->SensorTbatt = new DS18(pin_1_wire, temp_parasitic, temp_delay);
+    this->SensorTbatt = new DS18(pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
     this->TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
     SdTbatt = new SlidingDeadband(HDB_TBATT);
   }
@@ -152,9 +152,13 @@ void filter_temp(const int reset, const double t_rlim, Sensors *Sen, const doubl
 void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins *myPins);
 void load_temp(Sensors *Sen);
 void manage_wifi(unsigned long now, Wifi *wifi);
+void  monitor(const int reset, const boolean reset_temp, const unsigned long now,
+  TFDelay *Is_sat_delay, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen);
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen);
 void print_serial_header(void);
 uint32_t pwm_write(uint32_t duty, Pins *myPins);
+void sense_synth_select(const int reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
+  Pins *myPins, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen);
 void serial_print(unsigned long now, double T);
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);
 String time_long_2_str(const unsigned long current_time, char *tempStr);

@@ -284,6 +284,7 @@ void loop()
   sync_time(now, &last_sync, &millis_flip);      // Refresh time synchronization
 
   // Load temperature only
+  // Outputs:   Sen->Tbatt,  Sen->Tbatt_filt
   read_temp = ReadTemp->update(millis(), reset);              //  now || reset
   if ( read_temp )
   {
@@ -300,90 +301,19 @@ void loop()
     Sen->T =  ReadSensors->updateTime();
     if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  \n", Sen->T, millis());
 
-    // Load Ib and Vb
-    load(reset, ReadSensors->now(), Sen, myPins);
-    
-    // Arduino plots
-    if ( rp.debug==-7 ) debug_m7(Mon, Sim, Sen);
+    // Read sensors, model signals, select between them
+    // Inputs:  rp.config, rp.sim_mod
+    // Outputs: Sen->Ishunt, Sen->Vbatt, Sen->Tbatt_filt, rp.duty
+    sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sim, Sen);
 
-    /* Sim used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
-    to have availabe a value for Sen->Tbatt_filt when called
-    Inputs:
-      Ib              Battery terminal current, A
-      Vb              Battery terminal voltage, V
-      Tbatt_filt      Tb filtered for noise, past value, deg C
-    Outputs:
-      Tb              deg C
-      Ib              A
-      Vb              V
-      rp.duty         (0-255) for D2 hardware injection when rp.modeling and proper wire connections made
-    */
-    // Sim initialize as needed from memory
-    if ( reset )
-    {
-      Sim->apply_delta_q_t(rp.delta_q_model, rp.t_last_model);
-      Sim->init_battery(Sen);
-    }
-
-    // Sim calculation
-    Sen->Vbatt_model = Sim->calculate(Sen, cp.dc_dc_on);
-    cp.model_cutback = Sim->cutback();
-    cp.model_saturated = Sim->saturated();
-
-    // Use model instead of sensors when running tests as user
-    // Over-ride sensed Ib, Vb and Tb with model when running tests
-    if ( rp.modeling )    // Should never be set in real use
-    {
-      Sen->Ishunt = Sim->Ib();
-      Sen->Vbatt = Sen->Vbatt_model;
-      Sen->Tbatt_filt = Sim->temp_c();
-    }
-
-    // Charge calculation and memory store
-    Sim->count_coulombs(Sen, reset_temp, rp.t_last_model);
-
-    // D2 signal injection to hardware current sensors (also has rp.inj_soft_bias path for rp.tweak_test)
-    rp.duty = Sim->calc_inj_duty(elapsed, rp.type, rp.amp, rp.freq);
-
-
-    /* Main Battery Monitor
-      Inputs:
-        Ib              Battery terminal current, A
-        Vb              Battery terminal voltage, V
-        Tbatt_filt      Tb filtered for noise, past value, deg C
-      Outputs:
-    		tcharge    	    Counted charging time to full, hr
-        tcharge_ekf     Solved charging time to full from ekf, hr
-        voc             Static model open circuit voltage, V
-        voc_filt        Filtered open circuit voltage for saturation detect, V
-    */
-    // Initialize charge state if temperature initial condition changed
-    // Needed here in this location to have a value for Sen->Tbatt_filt
-    if ( reset_temp )
-    {
-      Mon->apply_delta_q_t(rp.delta_q, rp.t_last);  // From memory
-      Mon->init_battery(Sen);
-      Mon->solve_ekf(Sen);
-    }
-    
-    // EKF - calculates temp_c_, voc_, voc_dyn_ as functions of sensed parameters vb & ib (not soc)
-    Mon->calculate(Sen);
-    
-    // Debounce saturation calculation done in ekf using voc model
-    boolean sat = Mon->is_sat();
-    Sen->saturated = Is_sat_delay->calculate(sat, t_sat, t_desat, min(Sen->T, t_sat/2.), reset);
-
-    // Memory store
-    Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
-
-    // Charge time for display
-    Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ishunt,Mon->soc());
+    // Calculate Ah remaining
+    // Inputs:  rp.mon_mod, Sen->Ishunt, Sen->Vbatt, Sen->Tbatt_filt
+    // States:  Mon.soc
+    // Outputs: tcharge_wt, tcharge_ekf
+    monitor(reset, reset_temp, now, Is_sat_delay, Mon, Sim, Sen);
 
     // Adjust current sensors
     tweak_on_new_desat(Sen, now);
-
-    // Select between Coulomb Counter and EKF
-    Mon->select();
 
     // Re-init Coulomb Counter to EKF if it is different than EKF or if never saturated
     Mon->regauge(Sen->Tbatt_filt);
@@ -443,14 +373,12 @@ void loop()
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
     {
-      // static boolean led_on = false;
-      // led_on = !led_on;
-      // if ( led_on ) digitalWrite(myPins->status_led, HIGH);
-      // else  digitalWrite(myPins->status_led, LOW);
       publish_particle(PublishParticle->now(), myWifi, cp.enable_wifi);
     }
-    if ( reset_publish ) digitalWrite(myPins->status_led, HIGH);
-    else  digitalWrite(myPins->status_led, LOW);
+    if ( reset_publish )
+      digitalWrite(myPins->status_led, HIGH);
+    else
+      digitalWrite(myPins->status_led, LOW);
 
 // Mon for rp.debug
     if ( publishS )

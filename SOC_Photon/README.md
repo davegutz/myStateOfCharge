@@ -287,7 +287,8 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   27. 'SOC' shall be current charge 'q' at the instant temperature divided by rated capacity at rated temperature.
   28. The monitor logic must detect and be benign that the DC-DC charger has come on setting Vb while the BMS in the battery has shutoff current.   This is to prevent falsely declaring saturation from DC-DC charger on.
   29. Only Battleborn will be implemented at first but structure will support other suppliers.  For now, recompilation is needed to run another supplier and #define switches between them.
-  30. The nominal unit of configuration shall be a 12 v battery with a characteristic soc-voc and rated Ah capacity.  Use with multiple batteries shall include running an arbitrary number of batteries in parallel and then series (nPmS).  The configuration shall be in local_config.h and in retained.h and fully adjustable on the fly using Talk.  If somebody has Battleborn they will not need to ever recompile and reflash a Photon.
+  30. The nominal unit of configuration shall be a 12 v battery with a characteristic soc-voc and rated Ah capacity.  Use with multiple batteries shall include running an arbitrary number of batteries in parallel and then series (nPmS).  The configuration shall be in local_config.h and in retained.h.   This is called the 'chemistry' of the configuration.
+  31. The configuration shall be fully adjustable on the fly using Talk.  If somebody has Battleborn or a LION they will not need to ever recompile and reflash a Photon.
 
 ## Implementation Notes
 
@@ -337,7 +338,15 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   ........................................................................................
   35. Regression tests:
 
-  Rapid tweak test 1 min using models Xx11 'tweakMod'
+Rapid tweak test 1 min using models Xx11 'tweakMod' to test tweak only (no data collection)
+    after re-build:  RR; Xx1;
+  v0; Bm0; Bs0; Xx11; Xts; Da0; Db0; Mk0; Nk0; Xf0.02;  Xa-2000;
+    then hard reset then
+  Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mp-8.5; Np-8.5; v0;
+    To end:
+  Xp0; v4;
+
+Rapid tweak test 1 min using models Xx11 'tweakMod'
     after re-build:  RR; Xx1;
   //  set Da so ib=0 with Ca0.5 after cycling through sequence below as tria
   v0; Bm0; Bs0; Xx11; Xts; Da0; Db0; Mk0; Nk0; Xf0.02;  Xa-2000;
@@ -349,20 +358,11 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   Xp0; v4;
   // Transfer tweak_bias to CURR_BIAS_AMP and CURR_BIAS_NOAMP in local_config.h; otherwise max_tweak will begin to limit.
 
-Rapid tweak test 1 min using models Xx11 'tweakMod' to test tweak only (no data collection)
-    after re-build:  RR; Xx1;
-  v0; Bm0; Bs0; Xx11; Xts; Da0; Db0; Mk0; Nk0; Xf0.02;  Xa-2000;
-    then hard reset then
-  Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mp-8.5; Np-8.5; v0;
-    To end:
-  Xp0; v4;
- 
-
   Slow cycle test 8 min using models Xx1 'cycleMod'
     after re-build:  RR; Xx1;
     //set Da so ib=0 with Ca0.5 after cycling through sequence below as trial
     start recording
-  v0; Bm0; Bs0; Xx11; Xts; Da0; Db0; Mk0; Nk0; Xf0.002; Xa-60; 
+  v0; Bm0; Bs0; Xx11; Xts; Da0; Db0; Mk0; Nk0; Xf0.002; Xa-60;
     reset
   Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; v4;
     To end:
