@@ -42,7 +42,6 @@
 #define PUBLISH_PARTICLE_DELAY 2000UL   // Particle cloud updates (2000UL = 2 sec)
 #define READ_DELAY            100UL     // Sensor read wait, ms (100UL = 0.1 sec)
 #define READ_TEMP_DELAY       6000UL    // Sensor read wait, ms (6000UL = 6 sec)
-#define FILTER_DELAY          1000UL    // Filter read wait, ms (1000UL = 1 sec)
 #define SUMMARIZE_DELAY       1800000UL // Battery state tracking and reporting, ms (1800000UL = 30 min)
 #define SUMMARIZE_WAIT        60000UL   // Summarize alive time before first save, ms (60000UL = 1 min)
 #define PUBLISH_SERIAL_DELAY  400UL     // Serial print interval (400UL = 0.4 sec)
@@ -77,8 +76,8 @@
 #define NSUM            110         // Number of saved summaries.   If too large, will get compile error BACKUPSRAM
 #define HDB_TBATT       0.06        // Half deadband to filter Tbatt, F (0.06)
 #define HDB_VBATT       0.05        // Half deadband to filter Vbatt, V (0.05)
-const double t_sat = 5.;            // Saturation time, sec
-const double t_desat = t_sat * 2.;  // De-saturation time, sec ('up 2 down 1')
+#define T_SAT           5           // Saturation time, sec
+#define T_DESAT         (T_SAT*2)   // De-saturation time, sec
 
 // Conversion gains
 const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  

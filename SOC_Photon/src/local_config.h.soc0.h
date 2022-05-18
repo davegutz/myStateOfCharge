@@ -4,24 +4,22 @@
 // version with Tweak on both current sensors
 const   String    unit = "soc0_20220506";  // Gross configuration stamp, put on data points and matches GitHub tag
 
-//#define CURR_BIAS_AMP       -0.2  // 3/1/2022. Dapped to -0.8 on 2/28
-//#define CURR_BIAS_NOAMP     -0.5  // 3/1/2022. Dapped to -1.1 on 2/28
-//#define CURR_BIAS_ALL       -0.6  // 3/5/2022. Dapped to 0 on 2/28
-//#define CURR_BIAS_AMP       -0.8  // 3/5/2022. Dapped to -0.93 on 3/1
-//#define CURR_BIAS_NOAMP     -1.1  // 3/5/2022. Dapped to -1.23 on 3/1
-//#define CURR_BIAS_AMP       -0.93 // 4/30/2022. Change to -1.03 from tweak
-//#define CURR_BIAS_NOAMP     -1.23 // 4/30/2022. Change to -1.37 from tweak
-#define CURR_BIAS_AMP         -1.03 // Calibration of amplified shunt sensor, A
-#define CURR_BIAS_NOAMP       -1.37  // Calibration of non-amplified shunt sensor, A
-#define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors, A
-#define VOLT_BIAS             0.0   // Bias on Vbatt sensor, V
-#define TEMP_BIAS             0.0   // Bias on Tbatt sensor, deg C
+// Sensor biases
+#define CURR_BIAS_AMP         -1.03 // Calibration of amplified shunt sensor ('Da=#.#;'), A
+#define CURR_BIAS_NOAMP       -1.37  // Calibration of non-amplified shunt sensor ('Db=#.#;'), A
+#define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors ('Di=#.#;'), A
+#define VOLT_BIAS             0.0   // Bias on Vbatt sensor ('Dc=#.#;'), V
+#define TEMP_BIAS             0.0   // Bias on Tbatt sensor ('Dt=#.#;'  +reset), deg C
 
-// Battery
-#define MOD_CODE              0     // Chemistry code integer, 0=Battleborn, 1=LION
-#define RATED_BATT_CAP        100.  // Nominal battery unit capacity, Ah
-#define RATED_TEMP            25.   // Temperature at RATED_BATT_CAP, deg C
-#define NS                    1.0   // Number of series batteries in bank
-#define NP                    1.0   // Number of parallel batteries in bank
+// Battery.  One 12 V 100 Ah battery bank would have RATED_BATT_CAP 100, NS 1, and NP 1
+// Two 12 V 100 Ah series battery bank would have RATED_BATT_CAP 100, NS 2, and NP 1
+// Four 12 V 200 Ah with two in parallel joined with two more in series
+//   would have  RATED_BATT_CAP 200, NS 2, and NP 2
+#define MOD_CODE              0     // Chemistry code integer ('Bm=#; Bs=#'), 0=Battleborn, 1=LION
+#define RATED_BATT_CAP        100.  // Nominal battery unit capacity (Scale with 'Sc=#.#;'), Ah
+#define RATED_TEMP            25.   // Temperature at RATED_BATT_CAP (TODO:  talk input), deg C
+#define NS                    1.0   // Number of series batteries in bank ('BS=#')
+#define NP                    1.0   // Number of parallel batteries in bank ('BP=#;')
+
 
 #endif

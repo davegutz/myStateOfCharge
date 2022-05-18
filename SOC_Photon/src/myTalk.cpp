@@ -818,21 +818,21 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
 
   Serial.printf("B<?> Battery assignments.   For example:\n");
-  Serial.printf("  Bm=  %d.  Monitor battery chemistry 0='Battleborn', 1='LION''\n", rp.mon_mod); 
-  Serial.printf("  Bs=  %d.  Simulation battery chemistry 0='Battleborn', 1='LION''\n", rp.sim_mod); 
-  Serial.printf("  BP=  %5.2f.  Assign number of parallel batteries in bank '\n", rp.nP); 
-  Serial.printf("  BS=  %5.2f.  Assign number of parallel batteries in bank '\n", rp.nS); 
+  Serial.printf("  Bm=  %d.  Monitor battery chemistry 0='Battleborn', 1='LION' [%d]\n", rp.mon_mod, MOD_CODE); 
+  Serial.printf("  Bs=  %d.  Simulation battery chemistry 0='Battleborn', 1='LION' [%d]\n", rp.sim_mod, MOD_CODE); 
+  Serial.printf("  BP=  %5.2f.  Assign number of parallel batteries in bank [%5.2f]'\n", rp.nP, NP); 
+  Serial.printf("  BS=  %5.2f.  Assign number of parallel batteries in bank [%5.2f]'\n", rp.nS, NS); 
 
   Serial.printf("C<?> Charge assignments.   For example:\n");
   Serial.printf("  Ca=  assign curve charge state in fraction to all versions including model- '(0-1.1)'\n"); 
   Serial.printf("  Cm=  assign curve charge state in fraction to model only (and ekf if modeling)- '(0-1.1)'\n"); 
 
   Serial.printf("D/S<?> Adjustments.   For example:\n");
-  Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_bias_amp); Serial.println("    : delta I adder to sensed amplified shunt current, A [0]"); 
-  Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias_noamp); Serial.println("    : delta I adder to sensed shunt current, A [0]"); 
-  Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("    : delta I adder to all sensed shunt current, A [0]"); 
-  Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.println("    : delta V adder to sensed battery voltage, V [0]"); 
-  Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.println("    : delta T adder to sensed Tbatt, deg C [0]"); 
+  Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_bias_amp); Serial.printf("    : delta I adder to sensed amplified shunt current, A [%7.3f]\n", CURR_BIAS_AMP); 
+  Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias_noamp); Serial.printf("    : delta I adder to sensed shunt current, A [%7.3f]\n", CURR_BIAS_NOAMP); 
+  Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.printf("    : delta I adder to all sensed shunt current, A [%7.3f]\n", CURR_BIAS_ALL); 
+  Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.printf("    : delta V adder to sensed battery voltage, V [%7.3f]\n", VOLT_BIAS); 
+  Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.printf("    : delta T adder to sensed Tbatt, deg C [%7.3f]\n", TEMP_BIAS); 
   Serial.printf("  Dv= "); Serial.print(Sim->Dv()); Serial.println("    : Table hard-coded adjustment, compensates for data collection errors (hysteresis), V [0.01]"); 
   Serial.printf("  Sc= "); Serial.print(Sim->q_capacity()/Mon->q_capacity()); Serial.println("    : Scalar battery model size"); 
   Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.println("    : hysteresis scalar 1e-6 - 100");

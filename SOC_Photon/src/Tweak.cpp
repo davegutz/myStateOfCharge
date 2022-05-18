@@ -35,7 +35,7 @@ Tweak::Tweak()
   : name_("None"), gain_(0), max_change_(0), delta_q_sat_present_(0), delta_q_sat_past_(0), sat_(false),
   delta_q_max_(0), time_sat_past_(0UL), time_to_wait_(0), delta_hrs_(0) {}
 Tweak::Tweak(const String name, const double gain, const double max_change, const double max_tweak,
-  const double time_to_wait, t_float *rp_delta_q_inf, t_float *rp_tweak_bias)
+  const double time_to_wait, float *rp_delta_q_inf, float *rp_tweak_bias)
   : name_(name), gain_(-1./gain), max_change_(max_change), max_tweak_(max_tweak), delta_q_sat_present_(0),
     delta_q_sat_past_(0), sat_(false), delta_q_max_(-(RATED_BATT_CAP*3600.)), time_sat_past_(millis()), time_to_wait_(time_to_wait),
     rp_delta_q_inf_(rp_delta_q_inf), rp_tweak_bias_(rp_tweak_bias), delta_hrs_(0) {}
@@ -44,7 +44,7 @@ Tweak::~Tweak() {}
 // functions
 // Process new information and return indicator of new peak found
 
-// Do the tweak
+// Do the tweak and display change
 void Tweak::adjust(unsigned long now)
 {
   if ( delta_q_sat_past_==0.0 ) return;
@@ -53,18 +53,17 @@ void Tweak::adjust(unsigned long now)
   double gain = gain_*24./delta_hrs_;
   new_Di = *rp_tweak_bias_ + max(min(error*gain, max_change_), -max_change_);
   new_Di = max(min(new_Di, max_tweak_), -max_tweak_);
-
   Serial.printf("          Tweak(%s)::adjust:, past=%10.1f, pres=%10.1f, error=%10.1f, gain=%10.6f, delta_hrs=%10.6f, Di=%7.3f, new_Di=%7.3f,\n",
     name_.c_str(), delta_q_sat_past_, delta_q_sat_present_, error, gain, delta_hrs_, *rp_tweak_bias_, new_Di);
+  *rp_tweak_bias_ = new_Di;
 
-  // Reset delta to keep from wandering away
+  // Reset deltas to prevent windup
   double shift = delta_q_sat_past_;
   delta_q_sat_past_ = 1e-5;   // Avoid 0.0 so don't reset the counters
   *rp_delta_q_inf_ -= shift;
   delta_q_sat_present_ -= shift;
   delta_q_max_ -= shift;
   
-  *rp_tweak_bias_ = new_Di;
   return;
 }
 

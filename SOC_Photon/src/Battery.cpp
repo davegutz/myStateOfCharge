@@ -37,7 +37,7 @@ extern PublishPars pp;            // For publishing
 // class Battery
 // constructors
 Battery::Battery() {}
-Battery::Battery(double *rp_delta_q, t_float *rp_t_last, const double hys_direx, t_float *rp_nP, t_float *rp_nS, uint8_t *rp_mod_code)
+Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code)
     : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, rp_mod_code),
     sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS)
 {
@@ -134,6 +134,7 @@ double_t Battery::calc_vsat(void)
 }
 
 // Initialize
+// Works in 12 V batteryunits.   Scales up/down to number of series/parallel batteries on output/input.
 void Battery::init_battery(Sensors *Sen)
 {
     vb_ = Sen->Vbatt / (*rp_nS_);
@@ -198,7 +199,7 @@ double Battery::voc_soc(const double soc, const double temp_c)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery monitor class
 BatteryMonitor::BatteryMonitor(): Battery() {}
-BatteryMonitor::BatteryMonitor(double *rp_delta_q, t_float *rp_t_last, t_float *rp_nP, t_float *rp_nS, uint8_t *rp_mod_code):
+BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code):
     Battery(rp_delta_q, rp_t_last, -1., rp_nP, rp_nS, rp_mod_code)
 {
     voc_filt_ = chem_.v_sat-HDB_VBATT;
@@ -213,7 +214,8 @@ BatteryMonitor::~BatteryMonitor() {}
 // operators
 // functions
 
-/* BatteryModel::calculate:  SOC-OCV curve fit solved by ekf
+/* BatteryMonitor::calculate:  SOC-OCV curve fit solved by ekf.   Works in 12 V
+   battery units.  Scales up/down to number of series/parallel batteries on output/input.
         Inputs:
         Sen->Tbatt_filt Tb filtered for noise, past value of temp_c_, deg C
         Sen->Vbatt      Battery terminal voltage, V
@@ -434,14 +436,13 @@ void BatteryMonitor::select()
         soc_wt_ = avg;
 }
 
-/*
-INPUTS:
-    Sen->Vbatt      
-    Sen->Ishunt
-OUTPUTS:
-    Mon->soc_ekf
+/* Steady state voc(soc) solver for initialization of ekf state.  Expects Sen->Tbatt_filt to be in reset mode
+    INPUTS:
+        Sen->Vbatt      
+        Sen->Ishunt
+    OUTPUTS:
+        Mon->soc_ekf
 */
-// Steady state voc(soc) solver for initialization of ekf state.  Expects Sen->Tbatt_filt to be in reset mode
 boolean BatteryMonitor::solve_ekf(Sensors *Sen)
 {
     // Solver, steady
@@ -475,7 +476,7 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
 BatteryModel::BatteryModel() : Battery() {}
-BatteryModel::BatteryModel(double *rp_delta_q, t_float *rp_t_last, t_float *rp_s_cap_model, t_float *rp_nP, t_float *rp_nS, uint8_t *rp_mod_code) :
+BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code) :
     Battery(rp_delta_q, rp_t_last, 1., rp_nP, rp_nS, rp_mod_code), q_(RATED_BATT_CAP*3600.), rp_s_cap_model_(rp_s_cap_model)
 {
     // Randles dynamic model for EKF
@@ -517,7 +518,8 @@ BatteryModel::BatteryModel(double *rp_delta_q, t_float *rp_t_last, t_float *rp_s
 // BatteryModel::calculate:  Sim SOC-OCV table with a Battery Management System (BMS) and hysteresis.
 // Makes a good reference model. Intervenes in sensor path to provide Mon with inputs
 // when running simulations.  Never used for anything during normal operation.  Models
-// for monitoring in normal operation are in the BatteryMonitor object.
+// for monitoring in normal operation are in the BatteryMonitor object.   Works in 12 V battery
+// units.   Scales up/down to number of series/parallel batteries on output/input.
 //
 //  Inputs:
 //    Sen->Tbatt_filt   Simulated Tb filtered for noise, past value of temp_c_, deg C
@@ -572,7 +574,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     }
     if ( bms_off_ && dc_dc_on )
     {
-        vb_ = vb_dc_dc*rp.nS;
+        vb_ = vb_dc_dc;
     }
 
     // Saturation logic, both full and empty

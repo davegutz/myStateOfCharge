@@ -17,6 +17,7 @@
   * ??-Jan-2021   Vb model in tables.  Add battery heater in hardware
   * 03-Mar-2022   Manually tune for current sensor errors.   Vb model in tables
   * 21-Apr-2022   Add Tweak methods to dynamically determine current sensor erros
+  * 18-May-2022   Bunch of cleanup and reorganization
   * 
 //
 // MIT License
@@ -242,8 +243,6 @@ void loop()
   static Sync *PublishBlynk = new Sync(PUBLISH_BLYNK_DELAY);
   boolean read;                               // Read, T/F
   static Sync *ReadSensors = new Sync(READ_DELAY);
-  boolean filt;                               // Filter, T/F
-  static Sync *FilterSync = new Sync(FILTER_DELAY);
   boolean read_temp;                          // Read temp, T/F
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
   boolean publishS;                           // Serial print, T/F
@@ -282,10 +281,21 @@ void loop()
   now = millis();
   time_now = Time.now();
   sync_time(now, &last_sync, &millis_flip);      // Refresh time synchronization
-
-  // Load temperature only
-  // Outputs:   Sen->Tbatt,  Sen->Tbatt_filt
   read_temp = ReadTemp->update(millis(), reset);              //  now || reset
+  read = ReadSensors->update(millis(), reset);               //  now || reset
+  elapsed = ReadSensors->now() - start;
+  control = ControlSync->update(millis(), reset);               //  now || reset
+  display_to_user = DisplayUserSync->update(millis(), reset);  //  now || reset
+  publishP = PublishParticle->update(millis(), false);        //  now || false
+  publishB = PublishBlynk->update(millis(), false);           //  now || false
+  publishS = PublishSerial->update(millis(), reset_publish);  //  now || reset_publish
+  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT );
+  if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
+  summarizing = Summarize->update(millis(), boot_summ, !rp.modeling); // now || boot_summ && !rp.modeling
+  summarizing = summarizing || (rp.debug==-11 && publishB);
+
+  // Load temperature
+  // Outputs:   Sen->Tbatt,  Sen->Tbatt_filt
   if ( read_temp )
   {
     Sen->T_temp =  ReadTemp->updateTime();
@@ -294,14 +304,12 @@ void loop()
   }
 
   // Input all other sensors and do high rate calculations
-  read = ReadSensors->update(millis(), reset);               //  now || reset
-  elapsed = ReadSensors->now() - start;
   if ( read )
   {
     Sen->T =  ReadSensors->updateTime();
     if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  \n", Sen->T, millis());
 
-    // Read sensors, model signals, select between them
+    // Read sensors, model signals, select between them, synthesize a pwm shunt voltage (rp.duty) for certain wiring setup
     // Inputs:  rp.config, rp.sim_mod
     // Outputs: Sen->Ishunt, Sen->Vbatt, Sen->Tbatt_filt, rp.duty
     sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sim, Sen);
@@ -318,32 +326,19 @@ void loop()
     // Re-init Coulomb Counter to EKF if it is different than EKF or if never saturated
     Mon->regauge(Sen->Tbatt_filt);
 
-    //////////////////////////////////////////////////////////////
+    // Empty battery
+    if ( rp.modeling && reset && Sim->q()<=0. ) Sen->Ishunt = 0.;
 
-    //
-    // Useful for Arduino plotting
+    // Debug for read
     if ( rp.debug==-1 ) debug_m1(Mon, Sim, Sen); // General purpose Arduino
     if ( rp.debug==12 ) debug_12(Mon, Sim, Sen);  // EKF
     if ( rp.debug==-12 ) debug_m12(Mon, Sim, Sen);  // EKF Arduino
     if ( rp.debug==-3 ) debug_m3(Mon, Sim, Sen, control_time, elapsed, reset);  // Power Arduino
+    if ( rp.debug==-35 ) debug_m35(Mon, Sim, Sen); // EKF Arduino
 
   }  // end read (high speed frame)
 
-  // Run filters on other signals
-  filt = FilterSync->update(millis(), reset);               //  now || reset
-  if ( filt )
-  {
-
-    // Empty battery
-    if ( rp.modeling && reset && Sim->q()<=0. ) Sen->Ishunt = 0.;
-
-    // Arduino plot
-    if ( rp.debug==-35 ) debug_m35(Mon, Sim, Sen); // EKF Arduino
-
-  }
-
   // Control
-  control = ControlSync->update(millis(), reset);               //  now || reset
   if ( control )
   {
     pwm_write(rp.duty, myPins);
@@ -351,7 +346,6 @@ void loop()
   }
 
   // OLED display driver
-  display_to_user = DisplayUserSync->update(millis(), reset);  //  now || reset
   if ( display_to_user )
   {
     oled_display(display, Sen);
@@ -360,9 +354,6 @@ void loop()
   // Publish to Particle cloud if desired (different than Blynk)
   // Visit https://console.particle.io/events.   Click on "view events on a terminal"
   // to get a curl command to run
-  publishP = PublishParticle->update(millis(), false);        //  now || false
-  publishB = PublishBlynk->update(millis(), false);           //  now || false
-  publishS = PublishSerial->update(millis(), reset_publish);  //  now || reset_publish
   if ( publishP || publishS)
   {
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
@@ -380,10 +371,10 @@ void loop()
     else
       digitalWrite(myPins->status_led, LOW);
 
-// Mon for rp.debug
+    // Mon for rp.debug
     if ( publishS )
     {
-      if ( rp.debug==2 || rp.debug==4 )
+      if ( rp.debug==2 || rp.debug==4 )  // TODO:  delete rp.debug==2
       {
         if ( reset_publish || (last_publishS_debug != rp.debug) ) print_serial_header();
         serial_print(PublishSerial->now(), Sen->T);
@@ -407,10 +398,6 @@ void loop()
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
-  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT );
-  if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
-  summarizing = Summarize->update(millis(), boot_summ, !rp.modeling); // now || boot_summ && !rp.modeling
-  summarizing = summarizing || (rp.debug==-11 && publishB);
   if ( !boot_wait && (summarizing || cp.write_summary) )
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;

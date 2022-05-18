@@ -50,16 +50,16 @@ void Chemistry::assign_mod(const String mod_str)
     if ( m_t && n_s )  delete t_voc;
     n_s     = n_s_bb;   //Number of soc breakpoints voc table
     m_t     = m_t_bb;   // Number temperature breakpoints for voc table
-    x_soc = new t_float[n_s];
-    y_t = new t_float[m_t];
-    t_voc = new t_float[m_t*n_s];
+    x_soc = new float[n_s];
+    y_t = new float[m_t];
+    t_voc = new float[m_t*n_s];
     for (i=0; i<n_s; i++) x_soc[i] = x_soc_bb[i];
     for (i=0; i<m_t; i++) y_t[i] = y_t_bb[i];
     for (i=0; i<m_t*n_s; i++) t_voc[i] = t_voc_bb[i];
     if ( n_n ) { delete x_soc_min; delete t_soc_min;}
     n_n     = n_n_bb;   // Number of temperature breakpoints for x_soc_min table
-    x_soc_min = new t_float[n_n];
-    t_soc_min = new t_float[n_n];
+    x_soc_min = new float[n_n];
+    t_soc_min = new float[n_n];
     for (i=0; i<n_n; i++) x_soc_min[i] = x_soc_min_bb[i];
     for (i=0; i<n_n; i++) t_soc_min[i] = t_soc_min_bb[i];
     hys_cap = 3.6e6;    // Capacitance of hysteresis, Farads
@@ -68,9 +68,9 @@ void Chemistry::assign_mod(const String mod_str)
     if ( m_h && n_h )  delete t_r;
     n_h     = n_h_bb;   // Number of dv breakpoints in r(dv) table t_r
     m_h     = m_h_bb;   // Number of soc breakpoints in r(soc, dv) table t_r
-    x_dv = new t_float[n_h];
-    y_soc = new t_float[m_h];
-    t_r = new t_float[m_h*n_h];
+    x_dv = new float[n_h];
+    y_soc = new float[m_h];
+    t_r = new float[m_h*n_h];
     for (i=0; i<n_h; i++) x_dv[i] = x_dv_bb[i];
     for (i=0; i<m_h; i++) y_soc[i] = y_soc_bb[i];
     for (i=0; i<m_h*n_h; i++) t_r[i] = t_r_bb[i];
@@ -96,16 +96,16 @@ void Chemistry::assign_mod(const String mod_str)
     if ( m_t && n_s )  delete t_voc;
     n_s     = n_s_li;   //Number of soc breakpoints voc table
     m_t     = m_t_li;   // Number temperature breakpoints for voc table
-    x_soc = new t_float[n_s];
-    y_t = new t_float[m_t];
-    t_voc = new t_float[m_t*n_s];
+    x_soc = new float[n_s];
+    y_t = new float[m_t];
+    t_voc = new float[m_t*n_s];
     for (i=0; i<n_s; i++) x_soc[i] = x_soc_li[i];
     for (i=0; i<m_t; i++) y_t[i] = y_t_li[i];
     for (i=0; i<m_t*n_s; i++) t_voc[i] = t_voc_li[i];
     if ( n_n ) { delete x_soc_min; delete t_soc_min;}
     n_n     = n_n_li;   // Number of temperature breakpoints for x_soc_min table
-    x_soc_min = new t_float[n_n];
-    t_soc_min = new t_float[n_n];
+    x_soc_min = new float[n_n];
+    t_soc_min = new float[n_n];
     for (i=0; i<n_n; i++) x_soc_min[i] = x_soc_min_li[i];
     for (i=0; i<n_n; i++) t_soc_min[i] = t_soc_min_li[i];
     hys_cap = 3.6e6;    // Capacitance of hysteresis, Farads
@@ -114,9 +114,9 @@ void Chemistry::assign_mod(const String mod_str)
     if ( m_h && n_h )  delete t_r;
     n_h     = n_h_li;   // Number of dv breakpoints in r(dv) table t_r
     m_h     = m_h_li;   // Number of soc breakpoints in r(soc, dv) table t_r
-    x_dv = new t_float[n_h];
-    y_soc = new t_float[m_h];
-    t_r = new t_float[m_h*n_h];
+    x_dv = new float[n_h];
+    y_soc = new float[m_h];
+    t_r = new float[m_h*n_h];
     for (i=0; i<n_h; i++) x_dv[i] = x_dv_li[i];
     for (i=0; i<m_h; i++) y_soc[i] = y_soc_li[i];
     for (i=0; i<m_h*n_h; i++) t_r[i] = t_r_li[i];
@@ -127,9 +127,9 @@ void Chemistry::assign_mod(const String mod_str)
     r_ct        = 0.0032; // Randles charge transfer resistance, ohms
     r_diff      = 0.0144; // Randles diffusion resistance, ohms
     tau_ct      = 0.4;    // Randles charge transfer time constant, s (=1/Rct/Cct)
-    tau_diff    = 166.;    // Randles diffusion time constant, s (=1/Rdif/Cdif)
+    tau_diff    = 166.;   // Randles diffusion time constant, s (=1/Rdif/Cdif)
     tau_sd      = 3.6e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
-    r_sd        = 140;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
+    r_sd        = 140;    // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
   }
   else Serial.printf("Battery::assign_mod:  unknown mod = %d.  Type 'h' for help\n", mod);
   r_ss = r_0 + r_ct + r_diff;
@@ -211,7 +211,7 @@ void Chemistry::pretty_print(void)
 
 // class Coulombs
 Coulombs::Coulombs() {}
-Coulombs::Coulombs(double *rp_delta_q, t_float *rp_t_last, const double q_cap_rated, const double t_rated, 
+Coulombs::Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rated, const double t_rated, 
   const double t_rlim, uint8_t *rp_mod_code)
   : rp_delta_q_(rp_delta_q), rp_t_last_(rp_t_last), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017),
   soc_min_(0), chem_(rp_mod_code)

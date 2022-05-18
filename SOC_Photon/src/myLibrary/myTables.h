@@ -4,25 +4,25 @@
 
 // Interpolating, clipping, 1 and 2-D arbitrarily spaced table look-up
 
-void binsearch(t_float x, t_float *v, int n, int *high, int *low, t_float *dx);
-t_float tab1(t_float x, t_float *v, t_float *y, int n);
-t_float tab1clip(t_float x, t_float *v, t_float *y, int n);
-t_float tab2(t_float x1, t_float x2, t_float *v1, t_float *v2, t_float *y, int n1, int n2);
+void binsearch(float x, float *v, int n, int *high, int *low, float *dx);
+float tab1(float x, float *v, float *y, int n);
+float tab1clip(float x, float *v, float *y, int n);
+float tab2(float x1, float x2, float *v1, float *v2, float *y, int n1, int n2);
 
 class TableInterp
 {
 public:
   TableInterp();
-  TableInterp(const unsigned int n, const t_float x[]);   // TODO:  template for tables
+  TableInterp(const unsigned int n, const float x[]);   // TODO:  template for tables
   virtual ~TableInterp();
   // operators
   // functions
-  virtual t_float interp(void);
+  virtual float interp(void);
   void pretty_print(void);
 protected:
   unsigned int n1_;
-  t_float *x_;
-  t_float *v_;
+  float *x_;
+  float *v_;
 };
 
 // 1-D Interpolation Table Lookup
@@ -30,11 +30,11 @@ class TableInterp1D : public TableInterp
 {
 public:
   TableInterp1D();
-  TableInterp1D(const unsigned int n, const t_float x[], const t_float v[]);  // TODO:  template
+  TableInterp1D(const unsigned int n, const float x[], const float v[]);  // TODO:  template
   ~TableInterp1D();
   //operators
   //functions
-  virtual t_float interp(const t_float x);
+  virtual float interp(const float x);
 
 protected:
 };
@@ -44,11 +44,11 @@ class TableInterp1Dclip : public TableInterp
 {
 public:
   TableInterp1Dclip();
-  TableInterp1Dclip(const unsigned int n, const t_float x[], const t_float v[]);
+  TableInterp1Dclip(const unsigned int n, const float x[], const float v[]);
   ~TableInterp1Dclip();
   //operators
   //functions
-  virtual t_float interp(const t_float x);
+  virtual float interp(const float x);
 
 protected:
 };
@@ -58,16 +58,16 @@ class TableInterp2D : public TableInterp
 {
 public:
   TableInterp2D();
-  TableInterp2D(const unsigned int n, const unsigned int m, const t_float x[],
-                const t_float y[], const t_float v[]);
+  TableInterp2D(const unsigned int n, const unsigned int m, const float x[],
+                const float y[], const float v[]);
   ~TableInterp2D();
   //operators
   //functions
-  virtual t_float interp(const t_float x, const t_float y);
+  virtual float interp(const float x, const float y);
 
 protected:
   unsigned int n2_;
-  t_float *y_;
+  float *y_;
 };
 
 #endif
