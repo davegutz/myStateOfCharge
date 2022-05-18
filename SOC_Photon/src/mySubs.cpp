@@ -322,7 +322,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // States:  Mon.soc
 // Outputs: tcharge_wt, tcharge_ekf
 void  monitor(const int reset, const boolean reset_temp, const unsigned long now,
-  TFDelay *Is_sat_delay, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
+  TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen)
 {
   /* Main Battery Monitor
       Inputs:
@@ -426,14 +426,14 @@ uint32_t pwm_write(uint32_t duty, Pins *myPins)
 // Inputs:  rp.config, rp.sim_mod
 // Outputs: Sen->Ishunt, Sen->Vbatt, Sen->Tbatt_filt, rp.duty
 void sense_synth_select(const int reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
-  Pins *myPins, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
+  Pins *myPins, BatteryMonitor *Mon, Sensors *Sen)
 {
   // Load Ib and Vb
   // Outputs: Sen->Ishunt, Sen->Vbatt 
   load(reset, now, Sen, myPins);
 
   // Arduino plots
-  if ( rp.debug==-7 ) debug_m7(Mon, Sim, Sen);
+  if ( rp.debug==-7 ) debug_m7(Mon, Sen);
 
   /* Sim used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
   to have available a value for Sen->Tbatt_filt when called.   Recalculates Sen->Ishunt accounting for
@@ -458,31 +458,31 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   // Sim initialize as needed from memory
   if ( reset )
   {
-    Sim->apply_delta_q_t(rp.delta_q_model, rp.t_last_model);
-    Sim->init_battery(Sen);
+    Sen->Sim->apply_delta_q_t(rp.delta_q_model, rp.t_last_model);
+    Sen->Sim->init_battery(Sen);
   }
 
   // Sim calculation
-  Sen->Vbatt_model = Sim->calculate(Sen, cp.dc_dc_on);
-  cp.model_cutback = Sim->cutback();
-  cp.model_saturated = Sim->saturated();
+  Sen->Vbatt_model = Sen->Sim->calculate(Sen, cp.dc_dc_on);
+  cp.model_cutback = Sen->Sim->cutback();
+  cp.model_saturated = Sen->Sim->saturated();
 
   // Use model instead of sensors when running tests as user
   // Over-ride sensed Ib, Vb and Tb with model when running tests
   if ( rp.modeling )    // Should never be set in real use
   {
-    Sen->Ishunt = Sim->Ib();
+    Sen->Ishunt = Sen->Sim->Ib();
     Sen->Vbatt = Sen->Vbatt_model;
-    Sen->Tbatt_filt = Sim->temp_c();
+    Sen->Tbatt_filt = Sen->Sim->temp_c();
   }
 
   // Charge calculation and memory store
   // Inputs: Sen->Tbatt, Sen->Ishunt, and Sim.soc
   // Outputs: Sim.soc
-  Sim->count_coulombs(Sen, reset_temp, rp.t_last_model);
+  Sen->Sim->count_coulombs(Sen, reset_temp, rp.t_last_model);
 
   // D2 signal injection to hardware current sensors (also has rp.inj_soft_bias path for rp.tweak_test)
-  rp.duty = Sim->calc_inj_duty(elapsed, rp.type, rp.amp, rp.freq);
+  rp.duty = Sen->Sim->calc_inj_duty(elapsed, rp.type, rp.amp, rp.freq);
 }
 
 

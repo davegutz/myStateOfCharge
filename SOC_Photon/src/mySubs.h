@@ -120,7 +120,7 @@ struct Sensors
   DS18* SensorTbatt;      // Tb sense
   General2_Pole* TbattSenseFilt;  // Linear filter for Tb. There are 1 Hz AAFs in hardware for Vb and Ib
   SlidingDeadband *SdTbatt;       // Non-linear filter for Tb
-
+  BatteryModel *Sim;      //  used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off. 
   Sensors(void) {}
   Sensors(double T, double T_temp, byte pin_1_wire)
   {
@@ -141,7 +141,8 @@ struct Sensors
     }
     this->SensorTbatt = new DS18(pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
     this->TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
-    SdTbatt = new SlidingDeadband(HDB_TBATT);
+    this->SdTbatt = new SlidingDeadband(HDB_TBATT);
+    this->Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS, &rp.sim_mod);
   }
 };
 
@@ -153,12 +154,12 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
 void load_temp(Sensors *Sen);
 void manage_wifi(unsigned long now, Wifi *wifi);
 void  monitor(const int reset, const boolean reset_temp, const unsigned long now,
-  TFDelay *Is_sat_delay, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen);
+  TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen);
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen);
 void print_serial_header(void);
 uint32_t pwm_write(uint32_t duty, Pins *myPins);
 void sense_synth_select(const int reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
-  Pins *myPins, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen);
+  Pins *myPins, BatteryMonitor *Mon, Sensors *Sen);
 void serial_print(unsigned long now, double T);
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);
 String time_long_2_str(const unsigned long current_time, char *tempStr);

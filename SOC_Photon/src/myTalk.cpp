@@ -37,7 +37,7 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 
 // Talk Executive
-void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
+void talk(BatteryMonitor *Mon, Sensors *Sen)
 {
   double SOCS_in = -99.;
   int MOD_in = -1;
@@ -79,16 +79,16 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
             switch ( MOD_in )
             {
               case ( 0 ):
-                Serial.printf("Changing simulation chemistry from %d", Sim->mod_code());
-                Sim->assign_mod("Battleborn"); Sim->assign_rand();
-                Serial.printf(" to %d ('Battleborn')\n", Sim->mod_code());
+                Serial.printf("Changing simulation chemistry from %d", Sen->Sim->mod_code());
+                Sen->Sim->assign_mod("Battleborn"); Sen->Sim->assign_rand();
+                Serial.printf(" to %d ('Battleborn')\n", Sen->Sim->mod_code());
                 cp.cmd_reset();
                 break;
 
               case ( 1 ):
-                Serial.printf("Changing simulation chemistry from %d", Sim->mod_code());
-                Sim->assign_mod("LION"); Sim->assign_rand();
-                Serial.printf(" to %d ('LION')\n", Sim->mod_code());
+                Serial.printf("Changing simulation chemistry from %d", Sen->Sim->mod_code());
+                Sen->Sim->assign_mod("LION"); Sen->Sim->assign_rand();
+                Serial.printf(" to %d ('LION')\n", Sen->Sim->mod_code());
                 cp.cmd_reset();
                 break;
 
@@ -101,9 +101,9 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
             SOCS_in = cp.input_string.substring(2).toFloat();
             if ( SOCS_in>0 )  // Apply crude limit to prevent user error
             {
-              Serial.printf("Changing Mon/Sim->nP from %5.2f / %5.2f ", Mon->nP(), Sim->nP());
+              Serial.printf("Changing Mon/Sim->nP from %5.2f / %5.2f ", Mon->nP(), Sen->Sim->nP());
               rp.nP = SOCS_in;
-              Serial.printf("to %5.2f / %5.2f\n", Mon->nP(), Sim->nP());
+              Serial.printf("to %5.2f / %5.2f\n", Mon->nP(), Sen->Sim->nP());
             }
             else
               Serial.printf("nP out of range.  You entered %5.2f; must be >0.\n", SOCS_in);
@@ -113,9 +113,9 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
             SOCS_in = cp.input_string.substring(2).toFloat();
             if ( SOCS_in>0 )  // Apply crude limit to prevent user error
             {
-              Serial.printf("Changing Mon/Sim->nS from %5.2f / %5.2f ", Mon->nS(), Sim->nS());
+              Serial.printf("Changing Mon/Sim->nS from %5.2f / %5.2f ", Mon->nS(), Sen->Sim->nS());
               rp.nS = SOCS_in;
-              Serial.printf("to %5.2f / %5.2f\n", Mon->nS(), Sim->nS());
+              Serial.printf("to %5.2f / %5.2f\n", Mon->nS(), Sen->Sim->nS());
             }
             else
               Serial.printf("nP out of range.  You entered %5.2f; must be >0.\n", SOCS_in);
@@ -134,9 +134,9 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
             if ( SOCS_in<1.1 )  // Apply crude limit to prevent user error
             {
               Mon->apply_soc(SOCS_in, Sen->Tbatt_filt);
-              Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
+              Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
               Serial.printf("soc=%7.3f, modeling = %d, delta_q=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
-                  Mon->soc(), rp.modeling, rp.delta_q, Sim->soc(), rp.delta_q_model);
+                  Mon->soc(), rp.modeling, rp.delta_q, Sen->Sim->soc(), rp.delta_q_model);
               cp.cmd_reset();
             }
             else
@@ -147,9 +147,9 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
             SOCS_in = cp.input_string.substring(2).toFloat();
             if ( SOCS_in<1.1 )   // Apply crude limit to prevent user error
             {
-              Sim->apply_soc(SOCS_in, Sen->Tbatt_filt);
+              Sen->Sim->apply_soc(SOCS_in, Sen->Tbatt_filt);
               Serial.printf("soc=%7.3f,   delta_q=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
-                  Mon->soc(), rp.delta_q, Sim->soc(), rp.delta_q_model);
+                  Mon->soc(), rp.delta_q, Sen->Sim->soc(), rp.delta_q_model);
               cp.cmd_reset();
             }
             else
@@ -195,8 +195,8 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
           case ( 'v' ):
             Mon->Dv(cp.input_string.substring(2).toFloat());
             Serial.printf("Mon.Dv changed to %7.3f\n", Mon->Dv());
-            Sim->Dv(cp.input_string.substring(2).toFloat());
-            Serial.printf("Sim.Dv changed to %7.3f\n", Sim->Dv());
+            Sen->Sim->Dv(cp.input_string.substring(2).toFloat());
+            Serial.printf("Sim.Dv changed to %7.3f\n", Sen->Sim->Dv());
             break;
 
           default:
@@ -208,16 +208,16 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         Serial.printf("Equalizing BatteryModel, and ekf if needed, to Battery\n");
 
         Serial.printf("\nMyBattModel:  soc=%7.3f, q=%7.3f, delta_q = %7.3f, q_scaled_rated = %7.3f,\
-        q_rated = %7.3f, q_capacity = %7.3f,\n\n", Sim->soc(), Sim->q(), Sim->delta_q(),
-        Sim->q_cap_scaled(), Sim->q_cap_rated(), Sim->q_capacity());
+        q_rated = %7.3f, q_capacity = %7.3f,\n\n", Sen->Sim->soc(), Sen->Sim->q(), Sen->Sim->delta_q(),
+        Sen->Sim->q_cap_scaled(), Sen->Sim->q_cap_rated(), Sen->Sim->q_capacity());
         
-        Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
-        if ( rp.modeling ) Mon->init_soc_ekf(Sim->soc());
+        Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
+        if ( rp.modeling ) Mon->init_soc_ekf(Sen->Sim->soc());
         Mon->init_hys(0.0);
         
         Serial.printf("\nMyBattModel:  soc=%7.3f, q=%7.3f, delta_q = %7.3f, q_scaled_rated = %7.3f,\
-        q_rated = %7.3f, q_capacity = %7.3f,\n\n", Sim->soc(), Sim->q(), Sim->delta_q(),
-        Sim->q_cap_scaled(), Sim->q_cap_rated(), Sim->q_capacity());
+        q_rated = %7.3f, q_capacity = %7.3f,\n\n", Sen->Sim->soc(), Sen->Sim->q(), Sen->Sim->delta_q(),
+        Sen->Sim->q_cap_scaled(), Sen->Sim->q_cap_rated(), Sen->Sim->q_capacity());
         break;
       
       case ( 'S' ):
@@ -227,33 +227,33 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
             scale = cp.input_string.substring(2).toFloat();
             rp.s_cap_model = scale;
         
-            Serial.printf("Sim.q_cap_rated scaled by %7.3f from %7.3f to ", scale, Sim->q_cap_scaled());
+            Serial.printf("Sim.q_cap_rated scaled by %7.3f from %7.3f to ", scale, Sen->Sim->q_cap_scaled());
         
-            Sim->apply_cap_scale(rp.s_cap_model);
-            if ( rp.modeling ) Mon->init_soc_ekf(Sim->soc());
+            Sen->Sim->apply_cap_scale(rp.s_cap_model);
+            if ( rp.modeling ) Mon->init_soc_ekf(Sen->Sim->soc());
         
-            Serial.printf("%7.3f\n", Sim->q_cap_scaled());
-            Serial.printf("Sim:  "); Sim->pretty_print(); Sim->Coulombs::pretty_print();
+            Serial.printf("%7.3f\n", Sen->Sim->q_cap_scaled());
+            Serial.printf("Sim:  "); Sen->Sim->pretty_print(); Sen->Sim->Coulombs::pretty_print();
             break;
         
           case ( 'h' ):
             scale = cp.input_string.substring(2).toFloat();
-            Serial.printf("\nBefore Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n", Mon->hys_scale(), Sim->hys_scale());
+            Serial.printf("\nBefore Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n", Mon->hys_scale(), Sen->Sim->hys_scale());
             rp.hys_scale = scale;
             Serial.printf("Changing to Sh= %7.3f\n", scale);
             Mon->hys_scale(scale);
-            Sim->hys_scale(scale);
+            Sen->Sim->hys_scale(scale);
             Serial.printf("After Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n",
-                Mon->hys_scale(), Sim->hys_scale());
+                Mon->hys_scale(), Sen->Sim->hys_scale());
             break;
         
           case ( 'r' ):
             scale = cp.input_string.substring(2).toFloat();
         
-            Serial.printf("\nBefore Sim::StateSpace:\n"); Sim->pretty_print_ss();
+            Serial.printf("\nBefore Sim::StateSpace:\n"); Sen->Sim->pretty_print_ss();
             Serial.printf("\nScaling D[0, 0] = -r0 by Sr= %7.3f\n", scale);
         
-            Sim->Sr(scale);
+            Sen->Sim->Sr(scale);
         
             Serial.printf("\nAfter Sim::StateSpace:\n"); Mon->pretty_print_ss();
             Serial.printf("\nBefore Mon::StateSpace:\n"); Mon->pretty_print_ss();
@@ -286,20 +286,20 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
             break;
 
           case ( 's' ):
-            self_talk("h", Mon, Sim, Sen);
+            self_talk("h", Mon, Sen);
             cp.cmd_summarize();
-            self_talk("Pm", Mon, Sim, Sen);
+            self_talk("Pm", Mon, Sen);
             Serial.printf("\n");
             if ( rp.modeling )
             {
               Serial.printf("Sim:   rp.modeling = %d\n", rp.modeling);
-              self_talk("Ps", Mon, Sim, Sen);
+              self_talk("Ps", Mon, Sen);
               Serial.printf("\n");
             }
-            self_talk("Pr", Mon, Sim, Sen);
+            self_talk("Pr", Mon, Sen);
             Serial.printf("\n");
             print_all_summary(mySum, rp.isum, NSUM);
-            self_talk("Q", Mon, Sim, Sen);
+            self_talk("Q", Mon, Sen);
             break;
 
           default:
@@ -312,11 +312,11 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         Serial.printf("Amp infinite coulomb counter reset from %9.1f ", Sen->ShuntAmp->delta_q_inf());
         Sen->ShuntAmp->delta_q_inf(Q_in);
         Serial.printf("to %9.1f\n", Sen->ShuntAmp->delta_q_inf());
-        self_talk("Mp0.0", Mon, Sim, Sen);
+        self_talk("Mp0.0", Mon, Sen);
         Serial.printf("No amp infinite coulomb counter reset from %9.1f ", Sen->ShuntNoAmp->delta_q_inf());
         Sen->ShuntNoAmp->delta_q_inf(Q_in);
         Serial.printf("to %9.1f\n", Sen->ShuntNoAmp->delta_q_inf());
-        self_talk("Np0.0", Mon, Sim, Sen);
+        self_talk("Np0.0", Mon, Sen);
         break;
 
       case ( 'l' ):
@@ -433,18 +433,18 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
         switch ( cp.input_string.charAt(1) )
         {
           case ( 'a' ):
-            self_talk("Pm", Mon, Sim, Sen);
+            self_talk("Pm", Mon, Sen);
             Serial.printf("\nSim:   rp.modeling = %d\n", rp.modeling);
-            self_talk("Ps", Mon, Sim, Sen);
-            self_talk("Pr", Mon, Sim, Sen);
-            self_talk("Pt", Mon, Sim, Sen);
-            self_talk("PM", Mon, Sim, Sen);
-            self_talk("PN", Mon, Sim, Sen);
+            self_talk("Ps", Mon, Sen);
+            self_talk("Pr", Mon, Sen);
+            self_talk("Pt", Mon, Sen);
+            self_talk("PM", Mon, Sen);
+            self_talk("PN", Mon, Sen);
             break;
 
           case ( 'c' ):
             Serial.printf("\nMon::"); Mon->Coulombs::pretty_print();
-            Serial.printf("\nSim::");   Sim->Coulombs::pretty_print();
+            Serial.printf("\nSim::");   Sen->Sim->Coulombs::pretty_print();
             break;
 
           case ( 'e' ):
@@ -473,14 +473,14 @@ void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 
           case ( 's' ):
             Serial.printf("\nSim:   rp.modeling = %d\n", rp.modeling);
-            Serial.printf("Sim:");    Sim->pretty_print();
-            Serial.printf("Sim::");   Sim->Coulombs::pretty_print();
-            Serial.printf("Sim::");   Sim->pretty_print_ss();
+            Serial.printf("Sim:");    Sen->Sim->pretty_print();
+            Serial.printf("Sim::");   Sen->Sim->Coulombs::pretty_print();
+            Serial.printf("Sim::");   Sen->Sim->pretty_print_ss();
             break;
 
           case ( 't' ):
             Serial.printf("\nMon::"); Mon->pretty_print_ss();
-            Serial.printf("\nSim::"); Sim->pretty_print_ss();
+            Serial.printf("\nSim::"); Sen->Sim->pretty_print_ss();
             break;
 
           case ( 'x' ):
@@ -514,49 +514,49 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
         {
           case ( 'e' ):
             Serial.printf("Equalizing reset.   Just set delta_q in BattModel = delta_q in Batt\n");
-            Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
+            Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
             break;
 
           case ( 'h' ):
             Serial.printf("Resetting monitor hysteresis\n");
             Mon->init_hys(0.0);
             Serial.printf("Resetting model hysteresis\n");
-            Sim->init_hys(0.0);
+            Sen->Sim->init_hys(0.0);
             break;
 
           case ( 'i' ):
-            self_talk("i0", Mon, Sim, Sen);
+            self_talk("i0", Mon, Sen);
             break;
 
           case ( 'M' ):
             Serial.printf("Resetting amp tweaker\n");
             Sen->ShuntAmp->reset();
             Sen->ShuntAmp->tweak_bias(0.);
-            self_talk("PM", Mon, Sim, Sen);
+            self_talk("PM", Mon, Sen);
             break;
 
           case ( 'N' ):
             Serial.printf("Resetting no amp tweaker\n");
             Sen->ShuntNoAmp->reset();
             Sen->ShuntNoAmp->tweak_bias(0.);
-            self_talk("PN", Mon, Sim, Sen);
+            self_talk("PN", Mon, Sen);
             break;
 
           case ( 'r' ):
             Serial.printf("Small reset.   Just reset all to soc=1.0 and delta_q = 0\n");
-            Sim->apply_soc(1.0, Sen->Tbatt_filt);
+            Sen->Sim->apply_soc(1.0, Sen->Tbatt_filt);
             Mon->apply_soc(1.0, Sen->Tbatt_filt);
             cp.cmd_reset();
             break;
 
           case ( 'R' ):
             Serial.printf("Large reset\n");
-            self_talk("Rr", Mon, Sim, Sen);
+            self_talk("Rr", Mon, Sen);
             Serial.printf("also large and soft reset.   Initialize all variables to clean run without model at saturation.   Ready to use\n");
             rp.large_reset();
             cp.large_reset();
             cp.cmd_reset();
-            self_talk("Hs", Mon, Sim, Sen);
+            self_talk("Hs", Mon, Sen);
             break;
 
           case ( 's' ):
@@ -696,8 +696,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             {
 
               case ( -1 ):
-                self_talk("Xp0", Mon, Sim, Sen);
-                self_talk("m0.5", Mon, Sim, Sen);
+                self_talk("Xp0", Mon, Sen);
+                self_talk("m0.5", Mon, Sen);
                 rp.modeling = false;
                 debug_inject();  // Arduino plot
                 break;
@@ -713,8 +713,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 break;
 
               case ( 1 ):
-                self_talk("Xp0", Mon, Sim, Sen);
-                self_talk("m0.5", Mon, Sim, Sen);
+                self_talk("Xp0", Mon, Sen);
+                self_talk("m0.5", Mon, Sen);
                 rp.type = 1;
                 rp.freq = 0.05;
                 rp.amp = 6.;
@@ -724,8 +724,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 break;
 
               case ( 2 ):
-                self_talk("Xp0", Mon, Sim, Sen);
-                self_talk("m0.5", Mon, Sim, Sen);
+                self_talk("Xp0", Mon, Sen);
+                self_talk("m0.5", Mon, Sen);
                 rp.type = 2;
                 rp.freq = 0.10;
                 rp.amp = 6.;
@@ -735,8 +735,8 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 break;
 
               case ( 3 ):
-                self_talk("Xp0", Mon, Sim, Sen);
-                self_talk("m0.5", Mon, Sim, Sen);
+                self_talk("Xp0", Mon, Sen);
+                self_talk("m0.5", Mon, Sen);
                 rp.type = 3;
                 rp.freq = 0.05;
                 rp.amp = 6.;
@@ -746,40 +746,40 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 break;
 
               case ( 4 ):
-                self_talk("Xp0", Mon, Sim, Sen);
+                self_talk("Xp0", Mon, Sen);
                 rp.type = 4;
                 rp.curr_bias_all = -RATED_BATT_CAP;  // Software effect only
                 debug_inject();  // Arduino plot
                 break;
 
               case ( 5 ):
-                self_talk("Xp0", Mon, Sim, Sen);
+                self_talk("Xp0", Mon, Sen);
                 rp.type = 5;
                 rp.curr_bias_all = RATED_BATT_CAP; // Software effect only
                 debug_inject();  // Arduino plot
                 break;
 
               case ( 6 ):
-                self_talk("Xp0", Mon, Sim, Sen);
+                self_talk("Xp0", Mon, Sen);
                 rp.type = 6;
                 rp.amp = RATED_BATT_CAP*0.2;
                 debug_inject();  // Arduino plot
                 break;
 
               case ( 7 ):
-                self_talk("Xp0", Mon, Sim, Sen);
+                self_talk("Xp0", Mon, Sen);
                 rp.type = 7;
-                self_talk("Xx1", Mon, Sim, Sen);    // Run to model
-                self_talk("m0.5", Mon, Sim, Sen);   // Set all soc=0.5
-                self_talk("n0.987", Mon, Sim, Sen); // Set model only to near saturation
-                self_talk("v2", Mon, Sim, Sen);     // Watch sat, soc, and voc vs v_sat
+                self_talk("Xx1", Mon, Sen);    // Run to model
+                self_talk("m0.5", Mon, Sen);   // Set all soc=0.5
+                self_talk("n0.987", Mon, Sen); // Set model only to near saturation
+                self_talk("v2", Mon, Sen);     // Watch sat, soc, and voc vs v_sat
                 rp.amp = RATED_BATT_CAP*0.2;              // Hard current charge
                 Serial.printf("Run 'n<val> as needed to init south of sat.  Reset this whole thing by running 'Xp-1'\n");
                 break;
 
               case ( 8 ):
-                self_talk("Xp0", Mon, Sim, Sen);
-                self_talk("m0.5", Mon, Sim, Sen);
+                self_talk("Xp0", Mon, Sen);
+                self_talk("m0.5", Mon, Sen);
                 rp.type = 8;
                 rp.freq = 0.05;
                 rp.amp = 6.;
@@ -799,7 +799,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
         break;
 
       case ( 'h' ): 
-        talkH(Mon, Sim, Sen);
+        talkH(Mon, Sen);
         break;
 
       default:
@@ -813,7 +813,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
 }
 
 // Talk Help
-void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
+void talkH(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
 
@@ -833,10 +833,10 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.printf("    : delta I adder to all sensed shunt current, A [%7.3f]\n", CURR_BIAS_ALL); 
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.printf("    : delta V adder to sensed battery voltage, V [%7.3f]\n", VOLT_BIAS); 
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.printf("    : delta T adder to sensed Tbatt, deg C [%7.3f]\n", TEMP_BIAS); 
-  Serial.printf("  Dv= "); Serial.print(Sim->Dv()); Serial.println("    : Table hard-coded adjustment, compensates for data collection errors (hysteresis), V [0.01]"); 
-  Serial.printf("  Sc= "); Serial.print(Sim->q_capacity()/Mon->q_capacity()); Serial.println("    : Scalar battery model size"); 
+  Serial.printf("  Dv= "); Serial.print(Sen->Sim->Dv()); Serial.println("    : Table hard-coded adjustment, compensates for data collection errors (hysteresis), V [0.01]"); 
+  Serial.printf("  Sc= "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println("    : Scalar battery model size"); 
   Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.println("    : hysteresis scalar 1e-6 - 100");
-  Serial.printf("  Sr= "); Serial.print(Sim->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
+  Serial.printf("  Sr= "); Serial.print(Sen->Sim->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
   Serial.printf("  Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println("    : Saturation of model cutback gain scalar"); 
 
   Serial.printf("E=  set the BatteryModel delta_q to same value as Battery'\n"); 
@@ -951,10 +951,10 @@ void talkH(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
 }
 
 // Call talk from within, a crude macro feature
-void self_talk(const String cmd, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen)
+void self_talk(const String cmd, BatteryMonitor *Mon, Sensors *Sen)
 {
   cp.input_string = cmd;
   Serial.printf("self_talk:  new string = '%s'\n", cp.input_string.c_str());
   cp.string_complete = true;
-  talk(Mon, Sim, Sen);
+  talk(Mon, Sen);
 }

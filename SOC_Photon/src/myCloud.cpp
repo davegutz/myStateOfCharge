@@ -127,8 +127,7 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
 
 // Assignments
 void assign_publist(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
-  const double control_time, struct Sensors* Sen, const int num_timeouts,
-  BatteryModel* Sim, BatteryMonitor* Mon)
+  const double control_time, struct Sensors* Sen, const int num_timeouts, BatteryMonitor* Mon)
 {
   pubList->now = now;
   pubList->unit = unit;
@@ -153,7 +152,7 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->voc_filt = Mon->voc_filt()*Mon->nS();
   pubList->vsat = Mon->vsat()*Mon->nS();
   pubList->sat = Mon->sat();
-  pubList->soc_model = Sim->soc();
+  pubList->soc_model = Sen->Sim->soc();
   pubList->soc_ekf = Mon->soc_ekf();
   pubList->soc = Mon->soc();
   pubList->soc_wt = Mon->soc_wt();

@@ -221,9 +221,6 @@ void loop()
    // Mon, used to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last, &rp.nP, &rp.nS, &rp.mon_mod);
 
-  // Sim, used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off. 
-  static BatteryModel *Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS, &rp.sim_mod);
-
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay();   // Time persistence
 
@@ -312,13 +309,13 @@ void loop()
     // Read sensors, model signals, select between them, synthesize a pwm shunt voltage (rp.duty) for certain wiring setup
     // Inputs:  rp.config, rp.sim_mod
     // Outputs: Sen->Ishunt, Sen->Vbatt, Sen->Tbatt_filt, rp.duty
-    sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sim, Sen);
+    sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen);
 
     // Calculate Ah remaining
     // Inputs:  rp.mon_mod, Sen->Ishunt, Sen->Vbatt, Sen->Tbatt_filt
     // States:  Mon.soc
     // Outputs: tcharge_wt, tcharge_ekf
-    monitor(reset, reset_temp, now, Is_sat_delay, Mon, Sim, Sen);
+    monitor(reset, reset_temp, now, Is_sat_delay, Mon, Sen);
 
     // Adjust current sensors
     tweak_on_new_desat(Sen, now);
@@ -327,14 +324,14 @@ void loop()
     Mon->regauge(Sen->Tbatt_filt);
 
     // Empty battery
-    if ( rp.modeling && reset && Sim->q()<=0. ) Sen->Ishunt = 0.;
+    if ( rp.modeling && reset && Sen->Sim->q()<=0. ) Sen->Ishunt = 0.;
 
     // Debug for read
-    if ( rp.debug==-1 ) debug_m1(Mon, Sim, Sen); // General purpose Arduino
-    if ( rp.debug==12 ) debug_12(Mon, Sim, Sen);  // EKF
-    if ( rp.debug==-12 ) debug_m12(Mon, Sim, Sen);  // EKF Arduino
-    if ( rp.debug==-3 ) debug_m3(Mon, Sim, Sen, control_time, elapsed, reset);  // Power Arduino
-    if ( rp.debug==-35 ) debug_m35(Mon, Sim, Sen); // EKF Arduino
+    if ( rp.debug==-1 ) debug_m1(Mon, Sen); // General purpose Arduino
+    if ( rp.debug==12 ) debug_12(Mon, Sen);  // EKF
+    if ( rp.debug==-12 ) debug_m12(Mon, Sen);  // EKF Arduino
+    if ( rp.debug==-3 ) debug_m3(Mon, Sen, control_time, elapsed, reset);  // Power Arduino
+    if ( rp.debug==-35 ) debug_m35(Mon, Sen); // EKF Arduino
 
   }  // end read (high speed frame)
 
@@ -359,7 +356,7 @@ void loop()
     char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
     control_time = decimalTime(&current_time, tempStr, now, millis_flip);
     hm_string = String(tempStr);
-    assign_publist(&pp.pubList, PublishParticle->now(), unit, hm_string, control_time, Sen, num_timeouts, Sim, Mon);
+    assign_publist(&pp.pubList, PublishParticle->now(), unit, hm_string, control_time, Sen, num_timeouts, Mon);
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
@@ -382,7 +379,7 @@ void loop()
 
       if ( rp.debug==-4 )
       {
-        debug_m4(Mon, Sim, Sen);
+        debug_m4(Mon, Sen);
       }
       last_publishS_debug = rp.debug;
     }
@@ -394,7 +391,7 @@ void loop()
   // then can enter commands by sending strings.   End the strings with a real carriage return
   // right in the "Send String" box then press "Send."
   // String definitions are below.
-  talk(Mon, Sim, Sen);
+  talk(Mon, Sen);
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)

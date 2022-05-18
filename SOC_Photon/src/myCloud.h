@@ -66,7 +66,6 @@ void publish3(void);
 void publish4(void);
 void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi);
 void assign_publist(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
-  const double control_time, struct Sensors* Sen, const int num_timeouts,
-  BatteryModel* Sim, BatteryMonitor* Mon);
+  const double control_time, struct Sensors* Sen, const int num_timeouts, BatteryMonitor* Mon);
 
 #endif

@@ -26,8 +26,8 @@
 #include "Battery.h"
 #include "Tweak.h"
 
-void talk(BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen);
-void talkH(BatteryMonitor *batt, BatteryModel *batt_model, Sensors *Sen); // Help
-void self_talk(const String cmd, BatteryMonitor *Mon, BatteryModel *Sim, Sensors *Sen);
+void talk(BatteryMonitor *Mon, Sensors *Sen);
+void talkH(BatteryMonitor *batt, Sensors *Sen); // Help
+void self_talk(const String cmd, BatteryMonitor *Mon, Sensors *Sen);
 
 #endif
