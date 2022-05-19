@@ -101,9 +101,9 @@ void Shunt::load()
 void print_serial_header(void)
 {
   if ( rp.debug==2 )
-    Serial.println(F("unit,         hm,                  cTime,        T,       Tb_f, Tb_f_m,  Vb, voc, vsat,    sat,sel,mod, Ib,    tcharge, soc_m,soc_ekf,soc,soc_wt,"));
+    Serial.println(F("unit,         hm,                  cTime,        T,       Tb_f, Tb_f_m,  Vb, Voc, Vsat,    sat,sel,mod, Ib,    tcharge, soc_m,soc_ekf,soc,soc_wt,"));
   else if ( rp.debug==4 )
-    Serial.printf("unit,               hm,                  cTime,        T,       sat,sel,mod,  Tb,  Vb,  Ib,        vsat,vdyn,voc,voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
+    Serial.printf("unit,               hm,                  cTime,        T,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
 }
 
 // Print strings
@@ -113,7 +113,7 @@ void create_print_string(char *buffer, Publish *pubList)
   sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %4.1f,%4.1f,   %5.2f,%5.2f,%5.2f,  %d,  %d,  %d,   %7.3f,  %5.1f,  %5.3f,%5.3f,%5.3f,%5.3f,  %c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
     pubList->Tbatt, rp.t_last_model,
-    pubList->Vbatt, pubList->voc, pubList->vsat,
+    pubList->Vbatt, pubList->Voc, pubList->Vsat,
     pubList->sat, rp.curr_sel_noamp, rp.modeling,
     pubList->Ishunt,
     pubList->tcharge,
@@ -124,7 +124,7 @@ void create_print_string(char *buffer, Publish *pubList)
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
     pubList->sat, rp.curr_sel_noamp, rp.modeling,
     pubList->Tbatt, pubList->Vbatt, pubList->Ishunt,
-    pubList->vsat, pubList->vdyn, pubList->voc, pubList->voc_ekf,
+    pubList->Vsat, pubList->Vdyn, pubList->Voc, pubList->Voc_ekf,
     pubList->y_ekf,
     pubList->soc_model, pubList->soc_ekf, pubList->soc, pubList->soc_wt,
     '\0');
@@ -332,8 +332,8 @@ void  monitor(const int reset, const boolean reset_temp, const unsigned long now
         Sen->Tbatt_filt Tb filtered for noise, past value, deg C
         Mon.soc         State of charge
       Outputs:
-        voc             Static model open circuit voltage, V
-        voc_filt        Filtered open circuit voltage for saturation detect, V
+        Voc             Static model open circuit voltage, V
+        Voc_filt        Filtered open circuit voltage for saturation detect, V
         Mon.soc         State of charge
         Mon.soc_ekf     EKF state of charge
         Mon.soc_wt      Weighted selection of soc
@@ -381,13 +381,13 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   boolean no_currents = Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare();
   char dispString[21];
   if ( !pass && cp.model_cutback && rp.modeling )
-    sprintf(dispString, "%3.0f %5.2f      ", pp.pubList.Tbatt, pp.pubList.voc);
+    sprintf(dispString, "%3.0f %5.2f      ", pp.pubList.Tbatt, pp.pubList.Voc);
   else
   {
     if (no_currents)
-      sprintf(dispString, "%3.0f %5.2f fail", pp.pubList.Tbatt, pp.pubList.voc);
+      sprintf(dispString, "%3.0f %5.2f fail", pp.pubList.Tbatt, pp.pubList.Voc);
     else
-      sprintf(dispString, "%3.0f %5.2f %5.1f", pp.pubList.Tbatt, pp.pubList.voc, pp.pubList.Ishunt);
+      sprintf(dispString, "%3.0f %5.2f %5.1f", pp.pubList.Tbatt, pp.pubList.Voc, pp.pubList.Ishunt);
   }
   display->println(dispString);
 
@@ -396,14 +396,14 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   display->setTextColor(SSD1306_WHITE);
   char dispStringT[9];
   if ( abs(pp.pubList.tcharge) < 24. )
-    sprintf(dispStringT, "%3.0f%5.1f", pp.pubList.amp_hrs_remaining_ekf, pp.pubList.tcharge);
+    sprintf(dispStringT, "%3.0f%5.1f", pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge);
   else
-    sprintf(dispStringT, "%3.0f --- ", pp.pubList.amp_hrs_remaining_ekf);
+    sprintf(dispStringT, "%3.0f --- ", pp.pubList.Amp_hrs_remaining_ekf);
   display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
   char dispStringS[4];
   if ( pass || !Sen->saturated )
-    sprintf(dispStringS, "%3.0f", min(pp.pubList.amp_hrs_remaining_wt, 999.));
+    sprintf(dispStringS, "%3.0f", min(pp.pubList.Amp_hrs_remaining_wt, 999.));
   else if (Sen->saturated)
     sprintf(dispStringS, "SAT");
   display->print(dispStringS);
@@ -437,7 +437,7 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
 
   /* Sim used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
   to have available a value for Sen->Tbatt_filt when called.   Recalculates Sen->Ishunt accounting for
-  saturation.  Sen->Ishunt is a feedback.
+  saturation.  Sen->Ishunt is a feedback (used-before-calculated).
       Inputs:
         rp.sim_mod        Simulation battery chemistry type
         Sim.soc           Model state of charge, Coulombs
@@ -463,7 +463,11 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   }
 
   // Sim calculation
+  //  Inputs:  Sen->Tbatt_filt, Sen->Ishunt
+  //  States: Sim->soc
+  //  Outputs:  Sim->temp_c_, Sim->ib, Sim->vb, rp.duty
   Sen->Vbatt_model = Sen->Sim->calculate(Sen, cp.dc_dc_on);
+  // Sim indicators
   cp.model_cutback = Sen->Sim->cutback();
   cp.model_saturated = Sen->Sim->saturated();
 

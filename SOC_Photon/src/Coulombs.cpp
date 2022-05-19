@@ -334,7 +334,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
         else if ( reset )
           *rp_delta_q_ = 0.;
     }
-    resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass
+    resetting_ = false;     // one pass flag
 
     // Integration
     q_capacity_ = calculate_capacity(temp_lim);
@@ -347,11 +347,11 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
     q_min_ = soc_min_ * q_capacity_;
 
     if ( rp.debug==96 )
-        Serial.printf("Coulombs::cc,             reset,dt,voc, voc_filt, v_sat, temp_c, temp_lim, sat, charge_curr, d_d_q, d_q, d_q_i, q, q_capacity,soc,SOC,      %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
-                    reset, dt, pp.pubList.voc, pp.pubList.voc_filt,  this->vsat(), temp_c, temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
+        Serial.printf("Coulombs::cc,             reset,dt,voc, Voc_filt, V_sat, temp_c, temp_lim, sat, charge_curr, d_d_q, d_q, d_q_i, q, q_capacity,soc,SOC,      %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
+                    reset, dt, pp.pubList.Voc, pp.pubList.Voc_filt,  this->Vsat(), temp_c, temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
     if ( rp.debug==-96 )
-        Serial.printf("voc, voc_filt, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, d_q_i, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
-                    pp.pubList.voc, pp.pubList.voc_filt, this->vsat(), temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
+        Serial.printf("voc, Voc_filt, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, d_q_i, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
+                    pp.pubList.Voc, pp.pubList.Voc_filt, this->Vsat(), temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 
     // Save and return
     *rp_t_last_ = temp_lim;

@@ -504,7 +504,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
       case ( 'Q' ):
         Serial.printf("tb  = %7.3f,\nvb  = %7.3f,\nvoc_dyn = %7.3f,\nvoc_filt  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc = %7.3f,\n\
 soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.3f,\nno amp delta_q_inf = %10.1f,\nno amp tweak_bias = %7.3f,\n",
-          Mon->temp_c(), Mon->Vb(), Mon->voc_dyn(), Mon->voc_filt(), Mon->vsat(),
+          Mon->temp_c(), Mon->Vb(), Mon->voc_dyn(), Mon->Voc_filt(), Mon->Vsat(),
           Mon->Ib(), Mon->soc(), Mon->soc_ekf(), rp.modeling, Sen->ShuntAmp->delta_q_inf(), Sen->ShuntAmp->tweak_bias(),
           Sen->ShuntNoAmp->delta_q_inf(), Sen->ShuntNoAmp->tweak_bias());
         break;
@@ -772,7 +772,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 self_talk("Xx1", Mon, Sen);    // Run to model
                 self_talk("m0.5", Mon, Sen);   // Set all soc=0.5
                 self_talk("n0.987", Mon, Sen); // Set model only to near saturation
-                self_talk("v2", Mon, Sen);     // Watch sat, soc, and voc vs v_sat
+                self_talk("v2", Mon, Sen);     // Watch sat, soc, and Voc vs v_sat
                 rp.amp = RATED_BATT_CAP*0.2;              // Hard current charge
                 Serial.printf("Run 'n<val> as needed to init south of sat.  Reset this whole thing by running 'Xp-1'\n");
                 break;
@@ -821,7 +821,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Bm=  %d.  Monitor battery chemistry 0='Battleborn', 1='LION' [%d]\n", rp.mon_mod, MOD_CODE); 
   Serial.printf("  Bs=  %d.  Simulation battery chemistry 0='Battleborn', 1='LION' [%d]\n", rp.sim_mod, MOD_CODE); 
   Serial.printf("  BP=  %5.2f.  Assign number of parallel batteries in bank [%5.2f]'\n", rp.nP, NP); 
-  Serial.printf("  BS=  %5.2f.  Assign number of parallel batteries in bank [%5.2f]'\n", rp.nS, NS); 
+  Serial.printf("  BS=  %5.2f.  Assign number of series batteries in bank [%5.2f]'\n", rp.nS, NS); 
 
   Serial.printf("C<?> Charge assignments.   For example:\n");
   Serial.printf("  Ca=  assign curve charge state in fraction to all versions including model- '(0-1.1)'\n"); 

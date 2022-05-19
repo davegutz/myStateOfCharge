@@ -105,6 +105,7 @@ public:
   boolean sat() { return(sat_); };
   double t_last() { return(*rp_t_last_); };
   virtual double vsat(void) = 0;
+  virtual double Vsat(void) = 0;
 protected:
   double *rp_delta_q_;// Charge since saturated, C
   float *rp_t_last_;  // Last battery temperature for rate limit memory, deg C
@@ -116,7 +117,7 @@ protected:
   boolean sat_;       // Indication calculated by caller that battery is saturated, T=saturated
   double t_rated_;    // Rated temperature, deg C
   double t_rlim_;     // Tbatt rate limit, deg C / s
-  boolean resetting_ = false;  // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
+  boolean resetting_ = false;  // Sticky flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
   double soc_min_;    // As battery cools, the voltage drops and there appears a minimum soc it can deliver
   double q_min_;      // Floor on charge available to use, C
   TableInterp1D *soc_min_T_;   // SOC-MIN 1-D table, V

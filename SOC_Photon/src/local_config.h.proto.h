@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "float_pro_20220517";  // new float types, battery types
+const String unit = "float_pro_20220519";  // new float types, battery types, nomenclature
 
 // Sensor biases
 #define CURR_BIAS_AMP         -0.24 // Calibration of amplified shunt sensor ('Da=#.#;'), A

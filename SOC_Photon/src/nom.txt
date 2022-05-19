@@ -1,6 +1,6 @@
 		amp_hrs_remaining	Discharge amp*time left if drain to q=0, A-h
 		amp_hrs_remaining_ekf_	Discharge amp*time left if drain to q_ekf=0, A-h
-		BATT_V_SAT		Normal battery cell saturation for SOC=99.7, V
+		BATT_V_SAT		Normal battery saturation for SOC=99.7, V
 		bms_off_		Calculated indication that the BMS has turned off charge current, T=off
 		cap_			Capacitance, Farads
 		cap_init_		Initial capacitance specification, Farads
@@ -24,8 +24,8 @@
 		HDB_VBATT		Half deadband to filter Vbatt, V
 		hys_cap			Capacitance of hysteresis, Farads
 		hys_T_;   		dv-soc 2-D table, V
-		Ib_				Battery bank current, A
-		ib_				Battery terminal current, A
+		Ib				Battery bank current, A
+		ib				Battery terminal current, A
 		ib_sat_			Threshold to declare saturation.	This regeneratively slows down charging so if too small takes too long, A
 		ioc_			Best estimate of IOC charge current after hysteresis, A
 		low_t			Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
@@ -51,7 +51,7 @@
 		q_min_			Estimated charge at low voltage shutdown, C
 		RATED_BATT_CAP	Nominal battery bank capacity (assume actual not known), Ah
 		RATED_TEMP		Temperature at RATED_BATT_CAP, deg C
-		resetting_		Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
+		resetting_		Sticky flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
 		res_			Null resistance, Ohms
 		res_;          	Variable resistance value, ohms
 		duty			(0-255) for D2 hardware injection when rp.modeling and proper wire connections made
@@ -85,7 +85,7 @@
 		tau_diff_		Randles diffusion time constant, s (=1/Rdif/Cdif)
 		tau_sd			Equivalent model for EKF reference.	Parasitic discharge time constant, sec
 		tau_sd			Equivalent model for EKF.	Creating an anchor.	So large it's just a pass through, s
-		Tb				Tb, deg C
+		Tb				Battery bank temperature, deg C
 		tcharge_		Counted charging time to full, hr
 		tcharge_ekf_	Solved charging time to full from ekf, hr
 		TEMP_BIAS		Bias on Tbatt sensor, deg C
@@ -100,14 +100,17 @@
 		Vb_				Battery bank voltage, V
 		vb_				Battery terminal voltage, V
 		vdyn_			Sim current induced back emf, V
+		Vdyn 			Bank current induced back emf, V
 		voc_			Static model open circuit voltage, V
 		voc_dyn_		VOC estimated from Vb and RC model, V
+		Voc_dyn			Bank VOC estimated from Vb and RC model, V
 		voc_filt_		Filtered open circuit voltage for saturation detect, V
 		voc_in_			Voltage input, V
 		voc_out_		Voltage output, V
 		voc_stat_		Static model open circuit voltage from table (reference), V\n
 		VOLT_BIAS		Bias on Vbatt sensor, V
 		vsat_			Saturation threshold at temperature, deg C
+		Vsat			Bank saturation threshold at temperature, deg C
 		v_sat_			Saturation threshold at temperature, deg C
 		x_dv			dv breakpoints for r(soc, dv) table t_r
 		x_soc			soc breakpoints for voc table

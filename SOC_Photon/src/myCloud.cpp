@@ -42,7 +42,7 @@ void publish1(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write1\n");
   Blynk.virtualWrite(V2,  pp.pubList.Vbatt);
-  Blynk.virtualWrite(V3,  pp.pubList.voc);
+  Blynk.virtualWrite(V3,  pp.pubList.Voc);
   Blynk.virtualWrite(V4,  pp.pubList.Vbatt);
 }
 
@@ -148,17 +148,17 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->T = Sen->T;
   if ( rp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
   pubList->tcharge = Mon->tcharge();
-  pubList->voc = Mon->voc()*Mon->nS();
-  pubList->voc_filt = Mon->voc_filt()*Mon->nS();
-  pubList->vsat = Mon->vsat()*Mon->nS();
+  pubList->Voc = Mon->Voc();
+  pubList->Voc_filt = Mon->Voc_filt();
+  pubList->Vsat = Mon->Vsat();
   pubList->sat = Mon->sat();
   pubList->soc_model = Sen->Sim->soc();
   pubList->soc_ekf = Mon->soc_ekf();
   pubList->soc = Mon->soc();
   pubList->soc_wt = Mon->soc_wt();
-  pubList->amp_hrs_remaining_ekf = Mon->amp_hrs_remaining_ekf()*Mon->nP()*Mon->nS();
-  pubList->amp_hrs_remaining_wt = Mon->amp_hrs_remaining_wt()*Mon->nP()*Mon->nS();
-  pubList->vdyn = Mon->vdyn();
-  pubList->voc_ekf = Mon->hx();
+  pubList->Amp_hrs_remaining_ekf = Mon->Amp_hrs_remaining_ekf();
+  pubList->Amp_hrs_remaining_wt = Mon->Amp_hrs_remaining_wt();
+  pubList->Vdyn = Mon->Vdyn();
+  pubList->Voc_ekf = Mon->Hx();
   pubList->y_ekf = Mon->y_ekf();
 }

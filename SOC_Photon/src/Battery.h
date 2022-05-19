@@ -172,7 +172,8 @@ public:
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
   void init_battery(Sensors *Sen);
   void init_hys(const double hys) { hys_->init(hys); };
-  double Ib() { return (ib_*(*rp_nP_)); };
+  double ib() { return (ib_); };            // Battery terminal current, A
+  double Ib() { return (ib_*(*rp_nP_)); };  // Battery bank current, A
   double ioc() { return (ioc_); };
   double nP() { return (*rp_nP_); };
   void nP(const double np) { *rp_nP_ = np; };
@@ -181,13 +182,18 @@ public:
   virtual void pretty_print();
   void pretty_print_ss();
   double voc() { return (voc_); };
+  double Voc() { return (voc_*(*rp_nS_)); };
   double voc_soc(const double soc, const double temp_c);
   void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -chem_.r_0*sr_); };
   double Sr() { return (sr_); };
-  double temp_c() { return (temp_c_); };
-  double Vb() { return (vb_*(*rp_nS_)); };
+  double temp_c() { return (temp_c_); };    // Battery temperature, deg C
+  double Tb() { return (temp_c_); };        // Battery bank temperature, deg C
+  double vb() { return (vb_); };            // Battery terminal voltage, V
+  double Vb() { return (vb_*(*rp_nS_)); };  // Battery bank voltage, V
   double vdyn() { return (vdyn_); };
+  double Vdyn() { return (vdyn_*(*rp_nS_)); };
   double vsat() { return (vsat_); };
+  double Vsat() { return (vsat_*(*rp_nS_)); };
 protected:
   double voc_;      // Static model open circuit voltage, V
   double vdyn_;     // Sim current induced back emf, V
@@ -228,10 +234,13 @@ public:
   // functions
   double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
   double amp_hrs_remaining_wt() { return (amp_hrs_remaining_wt_); };
+  double Amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_*(*rp_nP_)*(*rp_nS_)); };
+  double Amp_hrs_remaining_wt() { return (amp_hrs_remaining_wt_*(*rp_nP_)*(*rp_nS_)); };
   double calc_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   double calculate(Sensors *Sen);
   boolean converged_ekf() { return(EKF_converged->state()); };
   double hx() { return (hx_); };
+  double Hx() { return (hx_*(*rp_nS_)); };
   void init_soc_ekf(const double soc);
   boolean is_sat(void);
   double K_ekf() { return (K_); };
@@ -244,27 +253,30 @@ public:
   double tcharge() { return (tcharge_); };
   double voc() { return (voc_); };
   double voc_dyn() { return (voc_dyn_); };
+  double Voc_dyn() { return (voc_dyn_*(*rp_nS_)); };
   double voc_filt() { return (voc_filt_); };
+  double Voc_filt() { return (voc_filt_*(*rp_nS_)); };
   double voc_stat() { return (voc_stat_); };
+  double Voc_stat() { return (voc_stat_*(*rp_nS_)); };
   double y_ekf() { return (y_); };
   double y_ekf_filt() { return (y_filt_); };
 protected:
-  double voc_stat_; // Sim voc from soc-voc table, V
+  double voc_stat_;     // Sim voc from soc-voc table, V
   double tcharge_ekf_;  // Solved charging time to 100% from ekf, hr
-  double voc_dyn_;  // Charging voltage, V
-  double soc_ekf_;  // Filtered state of charge from ekf (0-1)
-  double tcharge_;  // Counted charging time to 100%, hr
-  double q_ekf_;    // Filtered charge calculated by ekf, C
-  void ekf_predict(double *Fx, double *Bu);
-  void ekf_update(double *hx, double *H);
-  double voc_filt_; // Filtered, static model open circuit voltage, V
+  double voc_dyn_;      // Charging voltage, V
+  double soc_ekf_;      // Filtered state of charge from ekf (0-1)
+  double tcharge_;      // Counted charging time to 100%, hr
+  double q_ekf_;        // Filtered charge calculated by ekf, C
+  double voc_filt_;     // Filtered, static model open circuit voltage, V
+  double soc_wt_;       // Weighted selection of ekf state of charge and coulomb counter (0-1)
+  double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
+  double amp_hrs_remaining_wt_;   // Discharge amp*time left if drain soc_wt_ to 0, A-h
+  double y_filt_;       // Filtered EKF y value, V
+  LagTustin *y_filt = new LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
   SlidingDeadband *SdVbatt_;  // Sliding deadband filter for Vbatt
   TFDelay *EKF_converged = new TFDelay();   // Time persistence
-  double soc_wt_;   // Weighted selection of ekf state of charge and coulomb counter (0-1)
-  double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
-  double amp_hrs_remaining_wt_; // Discharge amp*time left if drain soc_wt_ to 0, A-h
-  LagTustin *y_filt = new LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
-  double y_filt_;   // Filtered EKF y value, V
+  void ekf_predict(double *Fx, double *Bu);
+  void ekf_update(double *hx, double *H);
 };
 
 
@@ -287,19 +299,19 @@ public:
   double voc() { return (voc_); };
   double voc_stat() { return (voc_stat_); };
 protected:
-  double q_;        // Charge, C
-  SinInj *Sin_inj_;     // Class to create sine waves
-  SqInj *Sq_inj_;       // Class to create square waves
-  TriInj *Tri_inj_;     // Class to create triangle waves
-  CosInj *Cos_inj_;     // Class to create sosine waves
-  uint32_t duty_;       // Calculated duty cycle for D2 driver to ADC cards (0-255).  Bias on rp.inj_soft_bias
-  double sat_ib_max_;   // Current cutback to be applied to modeled ib output, A
-  double sat_ib_null_;  // Current cutback value for voc=vsat, A
+  double q_;                // Charge, C
+  SinInj *Sin_inj_;         // Class to create sine waves
+  SqInj *Sq_inj_;           // Class to create square waves
+  TriInj *Tri_inj_;         // Class to create triangle waves
+  CosInj *Cos_inj_;         // Class to create sosine waves
+  uint32_t duty_;           // Calculated duty cycle for D2 driver to ADC cards (0-255).  Bias on rp.inj_soft_bias
+  double sat_ib_max_;       // Current cutback to be applied to modeled ib output, A
+  double sat_ib_null_;      // Current cutback value for voc=vsat, A
   double sat_cutback_gain_; // Gain to retard ib when voc exceeds vsat, dimensionless
   boolean model_cutback_;   // Indicate that modeled current being limited on saturation cutback, T = cutback limited
   boolean model_saturated_; // Indicator of maximal cutback, T = cutback saturated
-  double ib_sat_;       // Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
-  double s_cap_;        // Rated capacity scalar
+  double ib_sat_;           // Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
+  double s_cap_;            // Rated capacity scalar
   double *rp_delta_q_model_;// Charge change since saturated, C
   float *rp_t_last_model_;  // Battery temperature past value for rate limit memory, deg C
   float *rp_s_cap_model_;   // Rated capacity scalar

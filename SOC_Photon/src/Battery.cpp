@@ -666,7 +666,8 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
   return ( duty_ );
 }
 
-/* BatteryModel::count_coulombs: Count coulombs based on assumed model true=actual capacity
+/* BatteryModel::count_coulombs: Count coulombs based on assumed model true=actual capacity.
+    Uses Tbatt instead of Tbatt_filt to be most like hardware and provide independence from application.
 Inputs:
     Sen->T          Integration step, s
     Sen->Tbatt      Battery temperature, deg C
@@ -694,9 +695,9 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
     if ( model_saturated_ )
     {
-        if ( reset ) *rp_delta_q_ = 0.;  // Sim is truth.   Saturate it then restart it to reset charge
+        if ( reset ) *rp_delta_q_ = 0.;
     }
-    resetting_ = false;     // one pass flag.  Saturation debounce should reset next pass
+    resetting_ = false;     // one pass flag
 
     // Integration
     q_capacity_ = calculate_capacity(temp_lim);
@@ -710,10 +711,10 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
 
     if ( rp.debug==97 )
         Serial.printf("BatteryModel::cc,  dt,voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
-                    Sen->T,pp.pubList.voc,  vsat_, temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
+                    Sen->T,pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
     if ( rp.debug==-97 )
         Serial.printf("voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
-                    pp.pubList.voc,  vsat_, temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
+                    pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 
     // Save and return
     *rp_t_last_ = temp_lim;

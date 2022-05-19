@@ -68,16 +68,22 @@
 #define SCREEN_HEIGHT         32        // OLED display height, in pixels (4)
 #define OLED_RESET            4         // Reset pin # (or -1 if sharing Arduino reset pin) (4)
 #define SCREEN_ADDRESS        0x3C      // See datasheet for Address; 0x3D for 128x64, (0x3C for 128x32)
-
-#define F_MAX_T         0.5         // Maximum call update time sensors and coulomb counter (o.5)
-#define F_MAX_T_TEMP    18.0        // Maximum call update time filters (18.0)
-#define F_W_T           0.05        // Temperature filter wn, r/s (0.05)   
-#define F_Z_T           0.80        // Temperature filter zeta (0.80)
-#define NSUM            110         // Number of saved summaries.   If too large, will get compile error BACKUPSRAM
-#define HDB_TBATT       0.06        // Half deadband to filter Tbatt, F (0.06)
-#define HDB_VBATT       0.05        // Half deadband to filter Vbatt, V (0.05)
-#define T_SAT           5           // Saturation time, sec
-#define T_DESAT         (T_SAT*2)   // De-saturation time, sec
+#define F_MAX_T               0.5       // Maximum call update time sensors and coulomb counter (o.5)
+#define F_MAX_T_TEMP          18.0      // Maximum call update time filters (18.0)
+#define F_W_T                 0.05      // Temperature filter wn, r/s (0.05)   
+#define F_Z_T                 0.80      // Temperature filter zeta (0.80)
+#define NSUM                  110       // Number of saved summaries.   If too large, will get compile error BACKUPSRAM
+#define HDB_TBATT             0.06      // Half deadband to filter Tbatt, F (0.06)
+#define HDB_VBATT             0.05      // Half deadband to filter Vbatt, V (0.05)
+#define T_SAT                 5         // Saturation time, sec
+#define T_DESAT               (T_SAT*2) // De-saturation time, sec
+#define TEMP_PARASITIC        true      // DS18 sensor power. true means leave it on all the time (true)
+#define TEMP_DELAY            1         // Time to block temperature sensor read in DS18 routine, ms (1)
+#define TEMP_INIT_DELAY       10000     // It takes 10 seconds first read of DS18
+#define TWEAK_GAIN            43200.    // Estimate of A calibration change for accumulated charge error over ~24 hour period (86400 = 24*3600)/2, Coulomb/A
+#define TWEAK_MAX_CHANGE      0.05      // Maximum allowed tweak per charge cycle, A
+#define TWEAK_MAX             1.        // Maximum tweak allowed, +/- A
+#define TWEAK_WAIT            6.        // Time to persist unsaturated before allowing peak, hrs
 
 // Conversion gains
 const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  
@@ -90,16 +96,5 @@ const double bias_gain = 0.366 * 100. / 255.;   // Amps to duty cycle of pwm ine
 // Battery voltage measurement gain
 const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
                               double(VBATT_SENSE_R_LO) / double(PHOTON_ADC_COUNT) * double(VBATT_S);
-
-// Read temp initialization constants
-#define TEMP_PARASITIC    true    // DS18 sensor power. true means leave it on all the time (true)
-#define TEMP_DELAY        1       // Time to block temperature sensor read in DS18 routine, ms (1)
-#define TEMP_INIT_DELAY   10000         // It takes 10 seconds first read of DS18
-
-// Tweaker
-#define TWEAK_GAIN        43200.  // Estimate of A calibration change for accumulated charge error over ~24 hour period (86400 = 24*3600)/2, Coulomb/A
-#define TWEAK_MAX_CHANGE  0.05    // Maximum allowed tweak per charge cycle, A
-#define TWEAK_MAX         1.      // Maximum tweak allowed, +/- A
-#define TWEAK_WAIT        6.      // Time to persist unsaturated before allowing peak, hrs
 
 #endif // CONSTANTS_H_

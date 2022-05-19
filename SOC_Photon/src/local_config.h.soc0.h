@@ -2,7 +2,7 @@
 #define local_config_h
 
 // version with Tweak on both current sensors
-const   String    unit = "soc0_20220506";  // Gross configuration stamp, put on data points and matches GitHub tag
+const String unit = "soc0_pro_20220519";  // new float types, battery types, nomenclature
 
 // Sensor biases
 #define CURR_BIAS_AMP         -1.03 // Calibration of amplified shunt sensor ('Da=#.#;'), A
