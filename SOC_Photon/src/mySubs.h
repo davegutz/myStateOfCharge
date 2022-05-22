@@ -55,16 +55,16 @@ class Shunt: public Tweak, Adafruit_ADS1015
 public:
   Shunt();
   Shunt(const String name, const uint8_t port, float *rp_delta_q_inf, float *rp_tweak_bias, float *cp_curr_bias, 
-    const double v2a_s);
+    const float v2a_s);
   ~Shunt();
   // operators
   // functions
   boolean bare() { return ( bare_ ); };
-  double ishunt_cal() { return ( ishunt_cal_ ); };
+  float ishunt_cal() { return ( ishunt_cal_ ); };
   void load();
   void pretty_print();
-  double v2a_s() { return ( v2a_s_ ); };
-  double vshunt() { return ( vshunt_ ); };
+  float v2a_s() { return ( v2a_s_ ); };
+  float vshunt() { return ( vshunt_ ); };
   int16_t vshunt_int() { return ( vshunt_int_ ); };
   int16_t vshunt_int_0() { return ( vshunt_int_0_ ); };
   int16_t vshunt_int_1() { return ( vshunt_int_1_ ); };
@@ -73,12 +73,12 @@ protected:
   uint8_t port_;        // Octal I2C port used by Acafruit_ADS1015
   boolean bare_;        // If ADS to be ignored
   float *cp_curr_bias_; // Global bias, A
-  double v2a_s_;        // Selected shunt conversion gain, A/V
+  float v2a_s_;        // Selected shunt conversion gain, A/V
   int16_t vshunt_int_;  // Sensed shunt voltage, count
   int16_t vshunt_int_0_;// Interim conversion, count
   int16_t vshunt_int_1_;// Interim conversion, count
-  double vshunt_;       // Sensed shunt voltage, V
-  double ishunt_cal_;   // Sensed, calibrated ADC, A
+  float vshunt_;       // Sensed shunt voltage, V
+  float ishunt_cal_;   // Sensed, calibrated ADC, A
 };
 
 
@@ -102,15 +102,16 @@ struct Pins
 // Sensors
 struct Sensors
 {
-  double Vbatt;           // Sensed battery voltage, V
-  double Vbatt_model;     // Sim coefficient model battery voltage based on filtered current, V
-  double Tbatt;           // Sensed battery temp, C
-  double Tbatt_filt;      // Filtered, sensed battery temp, C
-  double Vshunt_amp;      // Sensed shunt voltage, V
-  double Vshunt;          // Sensed shunt voltage, V
-  double shunt_v2a_s;     // Selected shunt conversion gain, A/V
-  double Ishunt;          // Selected calibrated, shunt current, A
-  double Wshunt;          // Sensed shunt power, use to compare to other shunts, W
+  float Vbatt;            // Sensed battery voltage, V
+  float Vbatt_model;      // Sim coefficient model battery voltage based on filtered current, V
+  float Tbatt;            // Sensed battery temp, C
+  float Tbatt_filt;       // Filtered, sensed battery temp, C
+  float Vshunt;           // Sensed shunt voltage, V
+  float Ishunt;         // Selected calibrated, shunt current, A
+  float Ibatt_hdwe;       // Selected, sensed shunt current, A
+  float Ibatt_model;      // Battery bank current cutback output of model, A
+  float Ibatt_model_in;   // Battery bank current input to model, A
+  float Wshunt;           // Sensed shunt power, use to compare to other shunts, W
   double T;               // Update time, s
   double T_filt;          // Filter update time, s
   double T_temp;          // Temperature update time, s
@@ -149,7 +150,7 @@ struct Sensors
 // Headers
 void create_print_string(char *buffer, Publish *pubList);
 double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
-void filter_temp(const int reset, const double t_rlim, Sensors *Sen, const double t_bias, double *t_bias_last);
+void filter_temp(const int reset, const float t_rlim, Sensors *Sen, const float t_bias, float *t_bias_last);
 void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins *myPins);
 void load_temp(Sensors *Sen);
 void manage_wifi(unsigned long now, Wifi *wifi);

@@ -72,7 +72,7 @@
 #define F_MAX_T_TEMP          18.0      // Maximum call update time filters (18.0)
 #define F_W_T                 0.05      // Temperature filter wn, r/s (0.05)   
 #define F_Z_T                 0.80      // Temperature filter zeta (0.80)
-#define NSUM                  110       // Number of saved summaries.   If too large, will get compile error BACKUPSRAM
+#define NSUM                  109       // Number of saved summaries.   If too large, will get compile error BACKUPSRAM
 #define HDB_TBATT             0.06      // Half deadband to filter Tbatt, F (0.06)
 #define HDB_VBATT             0.05      // Half deadband to filter Vbatt, V (0.05)
 #define T_SAT                 5         // Saturation time, sec

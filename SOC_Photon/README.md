@@ -339,31 +339,24 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   35. Regression tests:
 
 Rapid tweak test 1 min using models Xx11 'tweakMod' to test tweak only (no data collection)
-    after re-build:  RR; Xx1;
   v0; Bm0; Bs0; Xx11; Xts; Da0; Db0; Mk0; Nk0; Xf0.02;  Xa-2000;
     then hard reset then
-  Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mp-8.5; Np-8.5; v0;
+  Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mp0; Np0; v0;
     To end:
   Xp0; v4;
 
 Rapid tweak test 1 min using models Xx11 'tweakMod'
-    after re-build:  RR; Xx1;
-  //  set Da so ib=0 with Ca0.5 after cycling through sequence below as tria
+    start recording
   v0; Bm0; Bs0; Xx11; Xts; Da0; Db0; Mk0; Nk0; Xf0.02;  Xa-2000;
     then hard reset then
-  Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mp-8.5; Np-8.5; v4;
-  //  To record ongoing adjustments (also put in local_config.h)
-  //Da-5.;Db-2.92; Mk0; Nk0;
+  Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mp0; Np0; v4;
     To end:
   Xp0; v4;
-  // Transfer tweak_bias to CURR_BIAS_AMP and CURR_BIAS_NOAMP in local_config.h; otherwise max_tweak will begin to limit.
 
   Slow cycle test 8 min using models Xx1 'cycleMod'
-    after re-build:  RR; Xx1;
-    //set Da so ib=0 with Ca0.5 after cycling through sequence below as trial
     start recording
   v0; Bm0; Bs0; Xx11; Xts; Da0; Db0; Mk0; Nk0; Xf0.002; Xa-60;
-    reset
+    then hard reset then
   Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; v4;
     To end:
   Xp0; v4;

@@ -37,10 +37,6 @@ struct Publish
   float Vshunt;
   float Ishunt;
   float Wshunt;
-  float Vshunt_amp;
-  float Ishunt_amp_cal;
-  float Vshunt_noamp;
-  float Ishunt_noamp_cal;
   float T;
   float Voc;
   float Voc_filt;

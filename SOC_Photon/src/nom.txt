@@ -7,6 +7,7 @@
 		CURR_BIAS_ALL	Bias on all shunt sensors, A
 		CURR_BIAS_AMP	Calibration of amplified shunt sensor, A
 		CURR_BIAS_NOAMP	Calibration of non-amplified shunt sensor, A
+		curr_bias_model	Signal injection bias for model, A
 		delta_q_		Charge change since saturated, C
 		direx_			Direction scalar
 		disab_hard;		Disable hardware in signal selection and use model or input, T=disab
@@ -27,6 +28,10 @@
 		Ib				Battery bank current, A
 		ib				Battery terminal current, A
 		ib_sat_			Threshold to declare saturation.	This regeneratively slows down charging so if too small takes too long, A
+		Ibatt			Selected battery bank current, A
+		Ibatt_hdwe		Selected, sensed shunt current, A
+		Ibatt_model		Battery bank current cutback output of model, A
+		Ibatt_model_in	Battery bank current input to model, A
 		ioc_			Best estimate of IOC charge current after hysteresis, A
 		low_t			Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
 		low_voc			Voltage threshold for BMS to turn off battery, V
@@ -68,10 +73,8 @@
 		Sen->T			Update time, sec
 		Sen->Tbatt_filt	Tb filtered for noise, past value of temp_c_, deg C
 		Sen->Vbatt		Battery terminal voltage, V
-		SOC_			Fraction of rated capacity available (0 - ~1.2).	For comparison to other batteries
 		soc_			Fraction of saturation charge (q_capacity_) available (0-1) 
 		soc_ekf_		Solved state of charge, fraction
-		SOC_ekf_		Solved state of charge, percent
 		soc_min_		Estimated soc where battery BMS will shutoff current, fraction
 		soc_weight_		Weighted selection of ekf state of charge and coulomb counter (0-1)
 		SOLV_ERR		EKF initialization solver error bound, V
@@ -85,6 +88,11 @@
 		tau_diff_		Randles diffusion time constant, s (=1/Rdif/Cdif)
 		tau_sd			Equivalent model for EKF reference.	Parasitic discharge time constant, sec
 		tau_sd			Equivalent model for EKF.	Creating an anchor.	So large it's just a pass through, s
+		Tbatt			Sensed battery bank temp, C
+		Tbatt_filt		Filtered, sensed battery bank temp, C
+		Tbatt_filt_hdwe	Sensed, filtered battery bank temp, C
+		Tbatt_model		Temperature used for battery bank temp in model, C
+		Tbatt_hdwe		Sensed battery bank temp, C
 		Tb				Battery bank temperature, deg C
 		tcharge_		Counted charging time to full, hr
 		tcharge_ekf_	Solved charging time to full from ekf, hr
@@ -97,8 +105,12 @@
 		t_rlim_			Tbatt rate limit noise filter, deg C / s
 		t_soc_min		soc_min(t)
 		t_voc			voc(soc, t)
+		Vbatt			Selected battery bank voltage, V
+		Vbatt_hdwe		Sensed battery voltage, V
+		Vbatt_model		Sim coefficient model battery voltage based on filtered current, V
 		Vb_				Battery bank voltage, V
 		vb_				Battery terminal voltage, V
+		vb_dc_dc		DC-DC charger estimated voltage, V
 		vdyn_			Sim current induced back emf, V
 		Vdyn 			Bank current induced back emf, V
 		voc_			Static model open circuit voltage, V

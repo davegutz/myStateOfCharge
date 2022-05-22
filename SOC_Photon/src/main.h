@@ -216,7 +216,7 @@ void loop()
 {
   // Sensor conversions
   static Sensors *Sen = new Sensors(0, 0, myPins->pin_1_wire); // Manage sensor data
-  static double t_bias_last;  // Memory for rate limiter in filter_temp call, deg C
+  static float t_bias_last;  // Memory for rate limiter in filter_temp call, deg C
 
    // Mon, used to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last, &rp.nP, &rp.nS, &rp.mon_mod);

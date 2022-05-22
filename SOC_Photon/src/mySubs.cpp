@@ -40,7 +40,7 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 Shunt::Shunt()
 : Tweak(), Adafruit_ADS1015(), name_("None"), port_(0x00), bare_(false){}
 Shunt::Shunt(const String name, const uint8_t port, float *rp_delta_q_inf, float *rp_tweak_bias, float *cp_curr_bias,
-  const double v2a_s)
+  const float v2a_s)
 : Tweak(name, TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, TWEAK_WAIT, rp_delta_q_inf, rp_tweak_bias),
   Adafruit_ADS1015(),
   name_(name), port_(port), bare_(false), cp_curr_bias_(cp_curr_bias), v2a_s_(v2a_s),
@@ -169,11 +169,11 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
 }
 
 // Filter temperature only
-void filter_temp(const int reset_loc, const double t_rlim, Sensors *Sen, const double t_bias, double *t_bias_last)
+void filter_temp(const int reset_loc, const float t_rlim, Sensors *Sen, const float t_bias, float *t_bias_last)
 {
   // Rate limit the temperature bias
   if ( reset_loc ) *t_bias_last = t_bias;
-  double t_bias_loc = max(min(t_bias, *t_bias_last + t_rlim*Sen->T_temp), *t_bias_last - t_rlim*Sen->T_temp);
+  float t_bias_loc = max(min(t_bias, *t_bias_last + t_rlim*Sen->T_temp), *t_bias_last - t_rlim*Sen->T_temp);
   *t_bias_last = t_bias_loc;
 
   // Filter and add rate limited bias
@@ -197,8 +197,8 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   past = now;
 
   // Current bias.  Feeds into signal conversion, not to duty injection
-  cp.curr_bias_noamp =  rp.curr_bias_noamp  + rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_noamp;
-  cp.curr_bias_amp =    rp.curr_bias_amp    + rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_amp;
+  cp.curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_noamp;
+  cp.curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_amp;
 
   // Read Sensors
   // ADS1015 conversion
@@ -211,33 +211,39 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   {
     Sen->Vshunt = Sen->ShuntAmp->vshunt();
     Sen->Ishunt = Sen->ShuntAmp->ishunt_cal();
-    Sen->shunt_v2a_s = Sen->ShuntAmp->v2a_s();
+    Sen->Ibatt_hdwe = Sen->ShuntAmp->ishunt_cal();
+    cp.curr_bias_model = cp.curr_bias_amp;  // For testing tweak bias logic
   }
   else if ( !Sen->ShuntNoAmp->bare() )
   {
     Sen->Vshunt = Sen->ShuntNoAmp->vshunt();
     Sen->Ishunt = Sen->ShuntNoAmp->ishunt_cal();
-    Sen->shunt_v2a_s = Sen->ShuntNoAmp->v2a_s();
+    Sen->Ibatt_hdwe = Sen->ShuntNoAmp->ishunt_cal();
+    cp.curr_bias_model = cp.curr_bias_noamp;  // For testing tweak bias logic
   }
   else
   {
     Sen->Vshunt = 0.;
     Sen->Ishunt = 0.;
-    Sen->shunt_v2a_s = Sen->ShuntNoAmp->v2a_s(); // noamp preferred, default to that
+    cp.curr_bias_model = rp.curr_bias_all + rp.inj_soft_bias;   // For testing tweak bias logic
   }
+  if ( rp.modeling )
+    Sen->Ibatt_model_in = cp.curr_bias_model;
+  else
+    Sen->Ibatt_model_in = Sen->Ibatt_hdwe;
 
   // Print results
-  if ( rp.debug==14 ) Serial.printf("reset_free,select,duty,vs_int_a,vshunt_a,ishunt_cal_a,vs_int_na,vshunt_na,ishunt_cal_na,Ishunt,T=,    %d,%d,%ld,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,\n",
+  if ( rp.debug==14 ) Serial.printf("reset_free,select,duty,vs_int_a,Vshunt_a,Ibatt_hdwe_a,vs_int_na,Vshunt_na,Ibatt_hdwe_na,Ibatt_hdwe,T=,    %d,%d,%ld,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,\n",
     reset_free, rp.curr_sel_noamp, rp.duty,
     Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), Sen->ShuntAmp->ishunt_cal(),
     Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->ishunt_cal(),
-    Sen->Ishunt, T);
+    Sen->Ibatt_hdwe, T);
 
   // Vbatt
   if ( rp.debug>102 ) Serial.printf("begin analogRead at %ld...", millis());
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
   if ( rp.debug>102 ) Serial.printf("done at %ld\n", millis());
-  double vbatt_free =  double(raw_Vbatt)*vbatt_conv_gain + double(VBATT_A) + rp.vbatt_bias;
+  float vbatt_free =  float(raw_Vbatt)*vbatt_conv_gain + float(VBATT_A) + rp.vbatt_bias;
   if ( rp.modeling ) Sen->Vbatt = Sen->Vbatt_model;
   else Sen->Vbatt = vbatt_free;
 
@@ -251,7 +257,7 @@ void load_temp(Sensors *Sen)
   // Read Sensor
   // MAXIM conversion 1-wire Tp plenum temperature
   uint8_t count = 0;
-  double temp = 0.;
+  float temp = 0.;
   if ( !rp.modeling )
   {
     // Read hardware and check

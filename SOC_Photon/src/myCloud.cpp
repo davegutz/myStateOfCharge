@@ -136,14 +136,9 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Vbatt = Sen->Vbatt;
   pubList->Tbatt = Sen->Tbatt;
   pubList->Tbatt_filt = Sen->Tbatt_filt;
-  pubList->Vshunt_amp = Sen->ShuntAmp->vshunt();
-  pubList->Vshunt_noamp = Sen->ShuntNoAmp->vshunt();
   pubList->Vshunt = Sen->Vshunt;
-  pubList->Ishunt_amp_cal = Sen->ShuntAmp->ishunt_cal();
-  pubList->Ishunt_noamp_cal = Sen->ShuntNoAmp->ishunt_cal();
   pubList->Ishunt = Sen->Ishunt;
   pubList->Wshunt = Sen->Wshunt;
-  pubList->Vshunt_amp = Sen->Vshunt_amp;
   pubList->num_timeouts = num_timeouts;
   pubList->T = Sen->T;
   if ( rp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
