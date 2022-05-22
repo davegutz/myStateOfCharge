@@ -30,7 +30,7 @@
 		ib_sat_			Threshold to declare saturation.	This regeneratively slows down charging so if too small takes too long, A
 		Ibatt			Selected battery bank current, A
 		Ibatt_hdwe		Selected, sensed shunt current, A
-		Ibatt_model		Battery bank current cutback output of model, A
+		Ibatt_model		Modeled battery bank current, A
 		Ibatt_model_in	Battery bank current input to model, A
 		ioc_			Best estimate of IOC charge current after hysteresis, A
 		low_t			Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
@@ -88,16 +88,17 @@
 		tau_diff_		Randles diffusion time constant, s (=1/Rdif/Cdif)
 		tau_sd			Equivalent model for EKF reference.	Parasitic discharge time constant, sec
 		tau_sd			Equivalent model for EKF.	Creating an anchor.	So large it's just a pass through, s
-		Tbatt			Sensed battery bank temp, C
-		Tbatt_filt		Filtered, sensed battery bank temp, C
-		Tbatt_filt_hdwe	Sensed, filtered battery bank temp, C
-		Tbatt_model		Temperature used for battery bank temp in model, C
+		Tbatt			Battery bank temp, C
+		Tbatt_filt		Filtered battery bank temp, C
 		Tbatt_hdwe		Sensed battery bank temp, C
+		Tbatt_hdwe_filt	Filtered, sensed battery bank temp, C
+		Tbatt_model		Temperature used for battery bank temp in model, C
+		Tbatt_model_filt	Filtered, modeled battery bank temp, C
 		Tb				Battery bank temperature, deg C
 		tcharge_		Counted charging time to full, hr
 		tcharge_ekf_	Solved charging time to full from ekf, hr
 		TEMP_BIAS		Bias on Tbatt sensor, deg C
-		temp_c_			Battery temperature, deg C
+		temp_c_			Filtered battery temperature, deg C
 		tlast			Past value of battery temperature used for rate limit memory, deg C
 		t_last			Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
 		t_r				r(soc, dv) table
@@ -106,8 +107,8 @@
 		t_soc_min		soc_min(t)
 		t_voc			voc(soc, t)
 		Vbatt			Selected battery bank voltage, V
-		Vbatt_hdwe		Sensed battery voltage, V
-		Vbatt_model		Sim coefficient model battery voltage based on filtered current, V
+		Vbatt_hdwe		Sensed battery bank voltage, V
+		Vbatt_model		Modeled battery bank voltage, V
 		Vb_				Battery bank voltage, V
 		vb_				Battery terminal voltage, V
 		vb_dc_dc		DC-DC charger estimated voltage, V
