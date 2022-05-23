@@ -308,11 +308,11 @@ void loop()
 
     // Read sensors, model signals, select between them, synthesize a pwm shunt voltage (rp.duty) for certain wiring setup
     // Inputs:  rp.config, rp.sim_mod
-    // Outputs: Sen->Ishunt, Sen->Vbatt, Sen->Tbatt_filt, rp.duty
+    // Outputs: Sen->Ibatt, Sen->Vbatt, Sen->Tbatt_filt, rp.duty
     sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen);
 
     // Calculate Ah remaining
-    // Inputs:  rp.mon_mod, Sen->Ishunt, Sen->Vbatt, Sen->Tbatt_filt
+    // Inputs:  rp.mon_mod, Sen->Ibatt, Sen->Vbatt, Sen->Tbatt_filt
     // States:  Mon.soc
     // Outputs: tcharge_wt, tcharge_ekf
     monitor(reset, reset_temp, now, Is_sat_delay, Mon, Sen);
@@ -324,7 +324,7 @@ void loop()
     Mon->regauge(Sen->Tbatt_filt);
 
     // Empty battery
-    if ( rp.modeling && reset && Sen->Sim->q()<=0. ) Sen->Ishunt = 0.;
+    if ( rp.modeling && reset && Sen->Sim->q()<=0. ) Sen->Ibatt = 0.;
 
     // Debug for read
     if ( rp.debug==-1 ) debug_m1(Mon, Sen); // General purpose Arduino
@@ -398,7 +398,7 @@ void loop()
   if ( !boot_wait && (summarizing || cp.write_summary) )
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
-    mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ishunt,
+    mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ibatt,
                           Mon->soc_ekf(), Mon->soc(), Mon->Voc_dyn(), Mon->Voc(),
                           Sen->ShuntAmp->tweak_bias(), Sen->ShuntNoAmp->tweak_bias());
     if ( rp.debug==0 ) Serial.printf("Summarized.....................\n");

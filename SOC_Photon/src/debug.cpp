@@ -37,8 +37,8 @@ void debug_m1(BatteryMonitor *Mon, Sensors *Sen)
 // rp.debug==-3  // Power Arduino plot
 void debug_m3(BatteryMonitor *Mon, Sensors *Sen, const double control_time, const unsigned long elapsed, const boolean reset)
 {
-  Serial.printf("fast,et,reset,Wshunt,q_f,q,soc,T,\n %12.3f,%7.3f, %d, %7.3f,    %7.3f,\n",
-  control_time, double(elapsed)/1000., reset, Sen->Wshunt, Sen->Sim->soc());
+  Serial.printf("fast,et,reset,Wbatt,q_f,q,soc,T,\n %12.3f,%7.3f, %d, %7.3f,    %7.3f,\n",
+  control_time, double(elapsed)/1000., reset, Sen->Wbatt, Sen->Sim->soc());
 }
 
 // rp.debug==-4  // General Arduino plot
@@ -46,7 +46,7 @@ void debug_m4(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("Tb,Vb*10-110,Ib, voc_dyn*10-110,vdyn*100,voc_ekf*10-110,voc*10-110,vsat*10-110,  y_ekf*1000,  soc_sim*100,soc_ekf*100,soc*100,soc_wt*100,\n\
     %7.3f,%7.3f,%7.3f,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,  %10.6f,  %7.3f,%7.4f,%7.4f,%7.4f,\n",
-    Sen->Tbatt, Sen->Vbatt*10.-110., Sen->Ishunt,
+    Sen->Tbatt, Sen->Vbatt*10.-110., Sen->Ibatt,
     Mon->voc_dyn()*10.-110., Mon->vdyn()*100., Mon->z_ekf()*10.-110., Mon->voc()*10.-110., Mon->vsat()*10.-110.,
     Mon->y_ekf()*1000.,
     Sen->Sim->soc()*100., Mon->x_ekf()*100., Mon->soc()*100.,  Mon->soc_wt()*100.);
@@ -92,14 +92,14 @@ void debug_m35(BatteryMonitor *Mon, Sensors *Sen)
 void debug_5(void)
 {
   Serial.printf("oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt, %3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
-    pp.pubList.Tbatt, pp.pubList.Vbatt, pp.pubList.Ishunt, pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge, pp.pubList.Amp_hrs_remaining_wt);
+    pp.pubList.Tbatt, pp.pubList.Vbatt, pp.pubList.Ibatt, pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge, pp.pubList.Amp_hrs_remaining_wt);
 }
 
 // rp.debug==-5 Charge time Arduino plot
 void debug_m5(void)
 {
   if ( rp.debug==-5 ) Serial.printf("Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,\n%3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
-    pp.pubList.Tbatt, pp.pubList.Vbatt, pp.pubList.Ishunt, pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge, pp.pubList.Amp_hrs_remaining_wt);
+    pp.pubList.Tbatt, pp.pubList.Vbatt, pp.pubList.Ibatt, pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge, pp.pubList.Amp_hrs_remaining_wt);
 }
 
 // rp.debug==-7 Battery i/o Arduino plot

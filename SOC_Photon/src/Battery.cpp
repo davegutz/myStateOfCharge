@@ -138,7 +138,7 @@ double_t Battery::calc_vsat(void)
 void Battery::init_battery(Sensors *Sen)
 {
     vb_ = Sen->Vbatt / (*rp_nS_);
-    ib_ = Sen->Ishunt / (*rp_nP_);
+    ib_ = Sen->Ibatt / (*rp_nP_);
     ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
     if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
@@ -219,7 +219,7 @@ BatteryMonitor::~BatteryMonitor() {}
         Inputs:
         Sen->Tbatt_filt Tb filtered for noise, past value of temp_c_, deg C
         Sen->Vbatt      Battery terminal voltage, V
-        Sen->Ishunt     Shunt current Ib, A
+        Sen->Ibatt     Shunt current Ib, A
         Sen->T          Update time, sec
         q_capacity_     Saturation charge at temperature, C
         q_cap_rated_scaled_   Applied rated capacity at t_rated_, after scaling, C
@@ -252,7 +252,7 @@ double BatteryMonitor::calculate(Sensors *Sen)
 
     // Dynamic emf
     vb_ = Sen->Vbatt / (*rp_nS_);
-    ib_ = Sen->Ishunt / (*rp_nP_);
+    ib_ = Sen->Ibatt / (*rp_nP_);
     ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
     double u[2] = {ib_, vb_};
     Randles_->calc_x_dot(u);
@@ -288,7 +288,7 @@ double BatteryMonitor::calculate(Sensors *Sen)
     y_filt_ = y_filt->calculate(y_, min(Sen->T, EKF_T_RESET));
     if ( rp.debug==6 || rp.debug==7 )
         Serial.printf("calculate:Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,vdyn,vhys,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-            Sen->Tbatt_filt, Sen->Ishunt, 0, soc_ekf_, vb_, voc_, hx_, vdyn_, vhys, y_);
+            Sen->Tbatt_filt, Sen->Ibatt, 0, soc_ekf_, vb_, voc_, hx_, vdyn_, vhys, y_);
 
     // EKF convergence
     boolean conv = abs(y_filt_)<EKF_CONV && !cp.soft_reset;  // Initialize false
@@ -439,7 +439,7 @@ void BatteryMonitor::select()
 /* Steady state voc(soc) solver for initialization of ekf state.  Expects Sen->Tbatt_filt to be in reset mode
     INPUTS:
         Sen->Vbatt      
-        Sen->Ishunt
+        Sen->Ibatt
     OUTPUTS:
         Mon->soc_ekf
 */
@@ -448,7 +448,7 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
     // Solver, steady
     const double meps = 1-1e-6;
     double vb = Sen->Vbatt/(*rp_nS_);
-    double vdyn = Sen->Ishunt/(*rp_nP_)*chem_.r_ss;
+    double vdyn = Sen->Ibatt/(*rp_nP_)*chem_.r_ss;
     double voc =  vb - vdyn;
     double vhys = 0.;
     // double voc =  vb;  // BatteryModel and BatteryMonitor state spaces are initialized at 0 current
@@ -464,12 +464,12 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
         err = voc - voc_solved;
         if ( rp.debug==6 )
             Serial.printf("solve    :Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,vdyn,vhys,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-            Sen->Tbatt_filt, Sen->Ishunt, count, soc_solved, vb, voc, voc_solved, vdyn, vhys, err);
+            Sen->Tbatt_filt, Sen->Ibatt, count, soc_solved, vb, voc, voc_solved, vdyn, vhys, err);
     }
     init_soc_ekf(soc_solved);
     if ( rp.debug==7 )
             Serial.printf("solve    :Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,vdyn,vhys,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-            Sen->Tbatt_filt, Sen->Ishunt, count, soc_solved, vb, voc, voc_solved, vdyn, vhys, err);
+            Sen->Tbatt_filt, Sen->Ibatt, count, soc_solved, vb, voc, voc_solved, vdyn, vhys, err);
     return ( count<SOLV_MAX_COUNTS );
 }
 
@@ -522,8 +522,8 @@ BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap
 // units.   Scales up/down to number of series/parallel batteries on output/input.
 //
 //  Inputs:
-//    Sen->Tbatt_filt   Simulated Tb filtered for noise, past value of temp_c_, deg C
-//    Sen->Ishunt       Proposed simulated Ib, A
+//    Sen->Tbatt_filt   Filtered battery bank temp, C
+//    Sen->Ibatt_model_in  Battery bank current input to model, A
 //    Sen->T            Update time, sec
 //
 //  States:
@@ -538,7 +538,7 @@ BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap
 double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
 {
     const double temp_C = Sen->Tbatt_filt;
-    double curr_in = Sen->Ishunt;
+    double curr_in = Sen->Ibatt_model_in;
     const double dt = min(Sen->T, F_MAX_T);
 
     dt_ = dt;
@@ -671,7 +671,7 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
 Inputs:
     Sen->T          Integration step, s
     Sen->Tbatt      Battery temperature, deg C
-    Sen->Ishunt     Charge, A
+    Sen->Ibatt     Charge, A
     t_last          Past value of battery temperature used for rate limit memory, deg C
 States:
     *rp_delta_q_    Charge change since saturated, C
@@ -685,7 +685,7 @@ Outputs:
 */
 double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const double t_last)
 {
-    double d_delta_q = Sen->Ishunt * Sen->T;
+    double d_delta_q = Sen->Ibatt * Sen->T;
 
     // Rate limit temperature
     double temp_lim = max(min(Sen->Tbatt, t_last + T_RLIM*Sen->T), t_last - T_RLIM*Sen->T);
@@ -711,10 +711,10 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
 
     if ( rp.debug==97 )
         Serial.printf("BatteryModel::cc,  dt,voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
-                    Sen->T,pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
+                    Sen->T,pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, Sen->Ibatt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
     if ( rp.debug==-97 )
         Serial.printf("voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
-                    pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, Sen->Ishunt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
+                    pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, Sen->Ibatt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 
     // Save and return
     *rp_t_last_ = temp_lim;

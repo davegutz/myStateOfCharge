@@ -102,16 +102,21 @@ struct Pins
 // Sensors
 struct Sensors
 {
-  float Vbatt;            // Sensed battery voltage, V
-  float Vbatt_model;      // Sim coefficient model battery voltage based on filtered current, V
-  float Tbatt;            // Sensed battery temp, C
-  float Tbatt_filt;       // Filtered, sensed battery temp, C
+  float Vbatt;            // Selected battery bank voltage, V
+  float Vbatt_hdwe;       // Sensed battery bank voltage, V
+  float Vbatt_model;      // Modeled battery bank voltage, V
+  float Tbatt;            // Selected battery bank temp, C
+  float Tbatt_filt;       // Selected filtered battery bank temp, C
+  float Tbatt_hdwe;       // Sensed battery temp, C
+  float Tbatt_hdwe_filt;  // Filtered, sensed battery temp, C
+  float Tbatt_model;      // Temperature used for battery bank temp in model, C
+  float Tbatt_model_filt; // Filtered, modeled battery bank temp, C
   float Vshunt;           // Sensed shunt voltage, V
-  float Ishunt;         // Selected calibrated, shunt current, A
-  float Ibatt_hdwe;       // Selected, sensed shunt current, A
-  float Ibatt_model;      // Battery bank current cutback output of model, A
-  float Ibatt_model_in;   // Battery bank current input to model, A
-  float Wshunt;           // Sensed shunt power, use to compare to other shunts, W
+  float Ibatt;            // Selected battery bank current, A
+  float Ibatt_hdwe;       // Sensed battery bank current, A
+  float Ibatt_model;      // Modeled battery bank current, A
+  float Ibatt_model_in;   // Battery bank current input to model (modified by cutback), A
+  float Wbatt;            // Sensed battery bank power, use to compare to other shunts, W
   double T;               // Update time, s
   double T_filt;          // Filter update time, s
   double T_temp;          // Temperature update time, s

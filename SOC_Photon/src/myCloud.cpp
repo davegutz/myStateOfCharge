@@ -70,8 +70,8 @@ void publish3(void)
 void publish4(void)
 {
   if (rp.debug>104) Serial.printf("Blynk write4\n");
-  Blynk.virtualWrite(V18, pp.pubList.Ishunt);
-  Blynk.virtualWrite(V20, pp.pubList.Wshunt);
+  Blynk.virtualWrite(V18, pp.pubList.Ibatt);
+  Blynk.virtualWrite(V20, pp.pubList.Wbatt);
   Blynk.virtualWrite(V21, pp.pubList.soc_ekf);
 }
 
@@ -137,8 +137,8 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Tbatt = Sen->Tbatt;
   pubList->Tbatt_filt = Sen->Tbatt_filt;
   pubList->Vshunt = Sen->Vshunt;
-  pubList->Ishunt = Sen->Ishunt;
-  pubList->Wshunt = Sen->Wshunt;
+  pubList->Ibatt = Sen->Ibatt;
+  pubList->Wbatt = Sen->Wbatt;
   pubList->num_timeouts = num_timeouts;
   pubList->T = Sen->T;
   if ( rp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);

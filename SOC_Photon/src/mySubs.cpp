@@ -115,7 +115,7 @@ void create_print_string(char *buffer, Publish *pubList)
     pubList->Tbatt, rp.t_last_model,
     pubList->Vbatt, pubList->Voc, pubList->Vsat,
     pubList->sat, rp.curr_sel_noamp, rp.modeling,
-    pubList->Ishunt,
+    pubList->Ibatt,
     pubList->tcharge,
     pubList->soc_model, pubList->soc_ekf, pubList->soc, pubList->soc_wt,
     '\0');
@@ -123,7 +123,7 @@ void create_print_string(char *buffer, Publish *pubList)
   sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%7.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
     pubList->sat, rp.curr_sel_noamp, rp.modeling,
-    pubList->Tbatt, pubList->Vbatt, pubList->Ishunt,
+    pubList->Tbatt, pubList->Vbatt, pubList->Ibatt,
     pubList->Vsat, pubList->Vdyn, pubList->Voc, pubList->Voc_ekf,
     pubList->y_ekf,
     pubList->soc_model, pubList->soc_ekf, pubList->soc, pubList->soc_wt,
@@ -210,25 +210,25 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   if ( !rp.curr_sel_noamp && !Sen->ShuntAmp->bare())
   {
     Sen->Vshunt = Sen->ShuntAmp->vshunt();
-    Sen->Ishunt = Sen->ShuntAmp->ishunt_cal();
+    Sen->Ibatt = Sen->ShuntAmp->ishunt_cal();
     Sen->Ibatt_hdwe = Sen->ShuntAmp->ishunt_cal();
     cp.curr_bias_model = cp.curr_bias_amp;  // For testing tweak bias logic
   }
   else if ( !Sen->ShuntNoAmp->bare() )
   {
     Sen->Vshunt = Sen->ShuntNoAmp->vshunt();
-    Sen->Ishunt = Sen->ShuntNoAmp->ishunt_cal();
+    Sen->Ibatt = Sen->ShuntNoAmp->ishunt_cal();
     Sen->Ibatt_hdwe = Sen->ShuntNoAmp->ishunt_cal();
     cp.curr_bias_model = cp.curr_bias_noamp;  // For testing tweak bias logic
   }
   else
   {
     Sen->Vshunt = 0.;
-    Sen->Ishunt = 0.;
+    Sen->Ibatt = 0.;
     cp.curr_bias_model = rp.curr_bias_all + rp.inj_soft_bias;   // For testing tweak bias logic
   }
   if ( rp.modeling )
-    Sen->Ibatt_model_in = cp.curr_bias_model;
+    Sen->Ibatt_model_in = Sen->Ibatt;
   else
     Sen->Ibatt_model_in = Sen->Ibatt_hdwe;
 
@@ -248,7 +248,7 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   else Sen->Vbatt = vbatt_free;
 
   // Power calculation
-  Sen->Wshunt = Sen->Vbatt*Sen->Ishunt;
+  Sen->Wbatt = Sen->Vbatt*Sen->Ibatt;
 }
 
 // Load temperature only
@@ -324,7 +324,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 }
 
 // Calculate Ah remaining
-// Inputs:  rp.mon_mod, Sen->Ishunt, Sen->Vbatt, Sen->Tbatt_filt
+// Inputs:  rp.mon_mod, Sen->Ibatt, Sen->Vbatt, Sen->Tbatt_filt
 // States:  Mon.soc
 // Outputs: tcharge_wt, tcharge_ekf
 void  monitor(const int reset, const boolean reset_temp, const unsigned long now,
@@ -333,7 +333,7 @@ void  monitor(const int reset, const boolean reset_temp, const unsigned long now
   /* Main Battery Monitor
       Inputs:
         rp.mon_mod      Monitor battery chemistry type
-        Sen->Ishunt     Battery terminal current, A
+        Sen->Ibatt     Battery terminal current, A
         Sen->Vbatt      Battery terminal voltage, V
         Sen->Tbatt_filt Tb filtered for noise, past value, deg C
         Mon.soc         State of charge
@@ -365,10 +365,10 @@ void  monitor(const int reset, const boolean reset_temp, const unsigned long now
   Sen->saturated = Is_sat_delay->calculate(sat, T_SAT, T_DESAT, min(Sen->T, T_SAT/2.), reset);
 
   // Memory store
-  Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ishunt, Sen->saturated, rp.t_last);
+  Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ibatt, Sen->saturated, rp.t_last);
 
   // Charge time for display
-  Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ishunt, Mon->soc());
+  Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ibatt, Mon->soc());
 
   // Select between Coulomb Counter and EKF
   Mon->select();
@@ -393,7 +393,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
     if (no_currents)
       sprintf(dispString, "%3.0f %5.2f fail", pp.pubList.Tbatt, pp.pubList.Voc);
     else
-      sprintf(dispString, "%3.0f %5.2f %5.1f", pp.pubList.Tbatt, pp.pubList.Voc, pp.pubList.Ishunt);
+      sprintf(dispString, "%3.0f %5.2f %5.1f", pp.pubList.Tbatt, pp.pubList.Voc, pp.pubList.Ibatt);
   }
   display->println(dispString);
 
@@ -430,33 +430,32 @@ uint32_t pwm_write(uint32_t duty, Pins *myPins)
 
 // Read sensors, model signals, select between them
 // Inputs:  rp.config, rp.sim_mod
-// Outputs: Sen->Ishunt, Sen->Vbatt, Sen->Tbatt_filt, rp.duty
+// Outputs: Sen->Ibatt, Sen->Vbatt, Sen->Tbatt_filt, rp.duty
 void sense_synth_select(const int reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen)
 {
   // Load Ib and Vb
-  // Outputs: Sen->Ishunt, Sen->Vbatt 
+  // Outputs: Sen->Ibatt, Sen->Vbatt 
   load(reset, now, Sen, myPins);
 
   // Arduino plots
   if ( rp.debug==-7 ) debug_m7(Mon, Sen);
 
   /* Sim used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
-  to have available a value for Sen->Tbatt_filt when called.   Recalculates Sen->Ishunt accounting for
-  saturation.  Sen->Ishunt is a feedback (used-before-calculated).
+  to have available a value for Sen->Tbatt_filt when called.   Recalculates Sen->Ibatt accounting for
+  saturation.  Sen->Ibatt is a feedback (used-before-calculated).
       Inputs:
         rp.sim_mod        Simulation battery chemistry type
         Sim.soc           Model state of charge, Coulombs
-        Sen->Ishunt       Battery terminal current, A
+        Sen->Ibatt_model_in   Battery bank current input to model, A
         Sen->Tbatt        Battery temperature, deg C
-        Sen->Tbatt_filt   Tb filtered for noise, past value, deg C
+        Sen->Tbatt_filt   Filtered battery bank temp, C
       Outputs:
         Sim.soc           Model state of charge, Coulombs
         Sim.temp_c_       Simulated Tb, deg C
-        Sen->Tbatt_filt   = Sim.temp_c override
-        Sim.ib_           Simulated over-ridden by saturation, A
-        Sen->Ishunt       = Sim.ib_ override
-        Sen->Vbatt_model  = Sim.vb_.  Battery terminal voltage, V
+        Sen->Tbatt_filt   Filtered model battery bank temp, C
+        Sen->Ibatt_model  Modeled battery bank current, A
+        Sen->Vbatt_model  Modeled battery bank voltage, V
         Sen->Vbatt        = Sen->Vbatt_model override
         rp.duty           (0-255) for DF2 hardware injection when rp.modeling and proper wire connections made
   */
@@ -469,7 +468,7 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   }
 
   // Sim calculation
-  //  Inputs:  Sen->Tbatt_filt, Sen->Ishunt
+  //  Inputs:  Sen->Tbatt_filt, Sen->Ibatt
   //  States: Sim->soc
   //  Outputs:  Sim->temp_c_, Sim->ib, Sim->vb, rp.duty
   Sen->Vbatt_model = Sen->Sim->calculate(Sen, cp.dc_dc_on);
@@ -481,13 +480,13 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   // Over-ride sensed Ib, Vb and Tb with model when running tests
   if ( rp.modeling )    // Should never be set in real use
   {
-    Sen->Ishunt = Sen->Sim->Ib();
+    Sen->Ibatt = Sen->Sim->Ib();
     Sen->Vbatt = Sen->Vbatt_model;
     Sen->Tbatt_filt = Sen->Sim->temp_c();
   }
 
   // Charge calculation and memory store
-  // Inputs: Sen->Tbatt, Sen->Ishunt, and Sim.soc
+  // Inputs: Sen->Tbatt, Sen->Ibatt, and Sim.soc
   // Outputs: Sim.soc
   Sen->Sim->count_coulombs(Sen, reset_temp, rp.t_last_model);
 

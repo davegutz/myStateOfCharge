@@ -35,8 +35,8 @@ struct Publish
   float Vbatt;
   float Tbatt;
   float Vshunt;
-  float Ishunt;
-  float Wshunt;
+  float Ibatt;
+  float Wbatt;
   float T;
   float Voc;
   float Voc_filt;

@@ -488,7 +488,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), cp.curr_bias_amp, Sen->ShuntAmp->ishunt_cal());
             Serial.printf("No Amp:"); Serial.printf("Vshunt_int, Vshunt, cp.curr_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
               Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), cp.curr_bias_noamp, Sen->ShuntNoAmp->ishunt_cal());
-            Serial.printf("Selected:  NoAmp,Ishunt=,  %d, %7.3f\n", rp.curr_sel_noamp, Sen->Ishunt);
+            Serial.printf("Selected:  NoAmp,Ibatt=,  %d, %7.3f\n", rp.curr_sel_noamp, Sen->Ibatt);
             break;
 
           case ( 'v' ):
@@ -908,7 +908,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("     +8:   Randles model state space initialization\n");
   Serial.printf("    -11:   Summary Arduino\n");
   Serial.printf("  +/-12:   EKF\n");
-  Serial.printf("  +/-14:   vshunt and ishunt raw\n");
+  Serial.printf("  +/-14:   vshunt and Ibatt raw\n");
   Serial.printf("    +15:   vb raw\n");
   Serial.printf("  +/-34:   EKF detailed\n");
   Serial.printf("    -35:   EKF summary Arduino\n");

@@ -44,7 +44,7 @@ struct Sum_st
   int16_t tweak_bias_amp;  // Accumulated amplified current bias, A
   int16_t tweak_bias_noa;  // Accumulated non-amplified current bias, A
   Sum_st(void){}
-  void assign(const time32_t now, const double Tbatt, const double Vbatt, const double Ishunt,
+  void assign(const time32_t now, const double Tbatt, const double Vbatt, const double Ibatt,
     const double soc_ekf, const double soc, const double Voc_dyn, const double Voc_ekf,
     const double tweak_bias_amp, const double tweak_bias_noa)
   {
@@ -52,7 +52,7 @@ struct Sum_st
     this->t = now;
     this->Tb = int16_t(Tbatt*600.);
     this->Vb = int16_t(Vbatt*1200.);
-    this->Ib = int16_t(Ishunt*600.);
+    this->Ib = int16_t(Ibatt*600.);
     this->soc = int16_t(soc*16000.);
     this->soc_ekf = int16_t(soc_ekf*16000.);
     this->Voc_dyn = int16_t(Voc_dyn*1200.);
