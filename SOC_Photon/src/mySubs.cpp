@@ -197,8 +197,16 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   past = now;
 
   // Current bias.  Feeds into signal conversion, not to duty injection
-  cp.curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_noamp;
-  cp.curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_amp;
+  if ( rp.modeling )
+  {
+    cp.curr_bias_noamp = rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_noamp;
+    cp.curr_bias_amp = rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_amp;
+  }
+  else
+  {
+    cp.curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_noamp;
+    cp.curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_amp;
+  }
 
   // Read Sensors
   // ADS1015 conversion
@@ -213,7 +221,6 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
     Sen->Vshunt = Sen->ShuntAmp->vshunt();
     Sen->Ibatt = Sen->ShuntAmp->ishunt_cal();
     Sen->Ibatt_hdwe = Sen->ShuntAmp->ishunt_cal();
-    cp.curr_bias_model = cp.curr_bias_amp;  // For testing tweak bias logic
     model_curr_bias = Sen->ShuntAmp->cp_curr_bias();
   }
   else if ( !Sen->ShuntNoAmp->bare() )
@@ -221,14 +228,12 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
     Sen->Vshunt = Sen->ShuntNoAmp->vshunt();
     Sen->Ibatt = Sen->ShuntNoAmp->ishunt_cal();
     Sen->Ibatt_hdwe = Sen->ShuntNoAmp->ishunt_cal();
-    cp.curr_bias_model = cp.curr_bias_noamp;  // For testing tweak bias logic
     model_curr_bias = Sen->ShuntNoAmp->cp_curr_bias();
   }
   else
   {
     Sen->Vshunt = 0.;
     Sen->Ibatt = 0.;
-    cp.curr_bias_model = rp.curr_bias_all + rp.inj_soft_bias;   // For testing tweak bias logic
     model_curr_bias = 0.;
   }
   if ( rp.modeling )

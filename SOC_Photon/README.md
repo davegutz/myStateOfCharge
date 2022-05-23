@@ -339,7 +339,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   35. Regression tests:
 
 Rapid tweak test 1 min using models Xx11 'tweakMod' to test tweak only (no data collection)
-  v0; Bm0; Bs0; Xx11; Xts; Da0; Db0; Mk0; Nk0; Xf0.02;  Xa-2000;
+  v0; Bm0; Bs0; Xx11; Xts; Mk0; Nk0; Xf0.02;  Xa-2000;
     then hard reset then
   Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mp0; Np0; v0;
     To end:
@@ -347,7 +347,7 @@ Rapid tweak test 1 min using models Xx11 'tweakMod' to test tweak only (no data 
 
 Rapid tweak test 1 min using models Xx11 'tweakMod'
     start recording
-  v0; Bm0; Bs0; Xx11; Xts; Da0; Db0; Mk0; Nk0; Xf0.02;  Xa-2000;
+  v0; Bm0; Bs0; Xx11; Xts; Mk0; Nk0; Xf0.02;  Xa-2000;
     then hard reset then
   Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mp0; Np0; v4;
     To end:
@@ -355,7 +355,7 @@ Rapid tweak test 1 min using models Xx11 'tweakMod'
 
   Slow cycle test 8 min using models Xx1 'cycleMod'
     start recording
-  v0; Bm0; Bs0; Xx11; Xts; Da0; Db0; Mk0; Nk0; Xf0.002; Xa-60;
+  v0; Bm0; Bs0; Xx11; Xts; Mk0; Nk0; Xf0.002; Xa-60;
     then hard reset then
   Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; v4;
     To end:
