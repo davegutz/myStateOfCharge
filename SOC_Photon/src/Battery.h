@@ -196,7 +196,7 @@ public:
   double Vsat() { return (vsat_*(*rp_nS_)); };
 protected:
   double voc_;      // Static model open circuit voltage, V
-  double vdyn_;     // Sim current induced back emf, V
+  double vdyn_;     // Current-induced back emf, V
   double vb_;       // Battery terminal voltage, V
   double ib_;       // Battery terminal current, A
   double dv_dsoc_;  // Derivative scaled, V/fraction
@@ -304,7 +304,7 @@ protected:
   SqInj *Sq_inj_;           // Class to create square waves
   TriInj *Tri_inj_;         // Class to create triangle waves
   CosInj *Cos_inj_;         // Class to create sosine waves
-  uint32_t duty_;           // Calculated duty cycle for D2 driver to ADC cards (0-255).  Bias on rp.inj_soft_bias
+  uint32_t duty_;           // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
   double sat_ib_max_;       // Current cutback to be applied to modeled ib output, A
   double sat_ib_null_;      // Current cutback value for voc=vsat, A
   double sat_cutback_gain_; // Gain to retard ib when voc exceeds vsat, dimensionless

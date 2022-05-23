@@ -36,21 +36,21 @@ struct RetainedPars
 {
   int8_t debug = 0;             // Level of debug printing
   double delta_q = -0.5;        // Charge change since saturated, C
-  float t_last = 25.;           //Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
+  float t_last = 25.;           // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
   double delta_q_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
   float t_last_model = 25.;     // Battery temperature past value for rate limit memory, deg C
-  float curr_bias_amp = CURR_BIAS_AMP; // Calibrate amp current sensor, A 
-  float curr_bias_noamp = CURR_BIAS_NOAMP; // Calibrate non-amplified current sensor, A 
-  float curr_bias_all = CURR_BIAS_ALL; // Bias all current sensors, A 
+  float curr_bias_amp = CURR_BIAS_AMP; // Calibration of amplified shunt sensor, A
+  float curr_bias_noamp = CURR_BIAS_NOAMP; // Calibration of non-amplified shunt sensor, A
+  float curr_bias_all = CURR_BIAS_ALL; // Bias on all shunt sensors, A
   boolean curr_sel_noamp = false; // Use non-amplified sensor
   float vbatt_bias = VOLT_BIAS; // Calibrate Vbatt, V
-  boolean modeling = false;     // Driving saturation calculation with model
+  uint8_t modeling = 0;         // Driving saturation calculation with model.  Bits specify which signals use model.
   uint32_t duty = 0;            // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
   float freq = 0.;              // Injected frequency, Hz (0-2)
   uint8_t type = 0;             // Injected waveform type.   0=sine, 1=square, 2=triangle
   float inj_soft_bias = 0.;     // Constant bias, A
-  float t_bias = TEMP_BIAS;     // Sensed temp bias, deg C
+  float t_bias = TEMP_BIAS;     // Bias on Tbatt sensor, deg C
   float s_cap_model = 1.;       // Scalar on battery model size
   float cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
@@ -61,8 +61,8 @@ struct RetainedPars
   boolean tweak_test = false;   // Driving signal injection completely using software inj_soft_bias 
   float tweak_bias_amp = 0.;    // Tweak calibration for amplified current sensor
   float tweak_bias_noamp = 0.;  // Tweak calibration for non-amplified current sensor
-  float nP = NP;                // Number parallel batteries in bank
-  float nS = NS;                // Number series batteries in bank
+  float nP = NP;                // Number of parallel batteries in bank, e.g. '2P1S'
+  float nS = NS;                // Number of series batteries in bank, e.g. '2P1S'
   uint8_t mon_mod = MOD_CODE;   // Monitor battery chemistry type
   uint8_t sim_mod = MOD_CODE;   // Simulation battery chemistry type
 

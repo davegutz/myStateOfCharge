@@ -172,7 +172,7 @@ void Battery::pretty_print(void)
     Serial.printf("  Vb =              %7.3f;  // Battery bank voltage, V\n", vb_*(*rp_nS_));
     Serial.printf("  voc_ =            %7.3f;  // Static model open circuit voltage, V\n", voc_);
     Serial.printf("  vsat_ =           %7.3f;  // Saturation threshold at temperature, V\n", vsat_);
-    Serial.printf("  vdyn_ =           %7.3f;  // Sim current induced back emf, V\n", vdyn_);
+    Serial.printf("  vdyn_ =           %7.3f;  // Current-induced back emf, V\n", vdyn_);
     Serial.printf("  sr_ =             %7.3f;  // Resistance scalar\n", sr_);
     Serial.printf("  dv_ =             %7.3f;  // Table hard-coded adjustment, compensates for data collection errors (hysteresis), V\n", dv_);
     Serial.printf("  dt_ =             %7.3f;  // Update time, s\n", dt_);
@@ -228,7 +228,7 @@ BatteryMonitor::~BatteryMonitor() {}
         vsat_           Saturation threshold at temperature, V
         voc_dyn_        VOC estimated from Vb and RC model, V
         voc_            Static model open circuit voltage, V
-        vdyn_           Sim current induced back emf, V
+        vdyn_           Current-induced back emf, V
         voc_filt_       Filtered open circuit voltage for saturation detect, V
         ioc_            Best estimate of IOC charge current after hysteresis, A
         bms_off_        Calculated indication that the BMS has turned off charge current, T=off
@@ -236,7 +236,7 @@ BatteryMonitor::~BatteryMonitor() {}
         Tb              Tb, deg C
         ib_             Battery terminal current, A
         vb_             Battery terminal voltage, V
-        rp.duty         (0-255) for hardware injection when rp.modeling and proper wire connections made
+        rp.duty         Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
         soc_ekf_        Solved state of charge, fraction
         q_ekf_          Filtered charge calculated by ekf, C
         soc_ekf_ (return)     Solved state of charge, fraction
@@ -533,7 +533,7 @@ BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap
 //    temp_c_           Simulated Tb, deg C
 //    ib_               Simulated over-ridden by saturation, A
 //    vb_               Simulated Vb, V
-//    rp.duty           (0-255) for DF2 hardware injection when rp.modeling and proper wire connections made
+//    rp.duty           Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
 //
 double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
 {

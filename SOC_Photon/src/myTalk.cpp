@@ -604,25 +604,25 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             switch ( MOD_in )
             {
               case ( 0 ):
-                rp.modeling = false;
+                rp.modeling = 0;
                 rp.tweak_test = false;
                 cp.cmd_reset();
                 break;
 
               case ( 1 ):
-                rp.modeling = true;
+                rp.modeling = 7;
                 rp.tweak_test = false;
                 cp.cmd_reset();
                 break;
 
               case ( 10 ):
-                rp.modeling = false;
+                rp.modeling = 0;
                 rp.tweak_test = true;
                 cp.cmd_reset();
                 break;
 
               case ( 11 ):
-                rp.modeling = true;
+                rp.modeling = 7;
                 rp.tweak_test = true;
                 cp.cmd_reset();
                 break;
@@ -698,12 +698,12 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
               case ( -1 ):
                 self_talk("Xp0", Mon, Sen);
                 self_talk("m0.5", Mon, Sen);
-                rp.modeling = false;
+                rp.modeling = 0;
                 debug_inject();  // Arduino plot
                 break;
 
               case ( 0 ):
-                rp.modeling = true;
+                rp.modeling = 7;
                 rp.type = 0;
                 rp.freq = 0.0;
                 rp.amp = 0.0;

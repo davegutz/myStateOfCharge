@@ -440,7 +440,7 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   // Arduino plots
   if ( rp.debug==-7 ) debug_m7(Mon, Sen);
 
-  /* Sim used for built-in testing (rp.modeling = true and jumper wire).   Needed here in this location
+  /* Sim used for built-in testing (rp.modeling = 7 and jumper wire).   Needed here in this location
   to have available a value for Sen->Tbatt_filt when called.   Recalculates Sen->Ibatt accounting for
   saturation.  Sen->Ibatt is a feedback (used-before-calculated).
       Inputs:
@@ -456,7 +456,7 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
         Sen->Ibatt_model  Modeled battery bank current, A
         Sen->Vbatt_model  Modeled battery bank voltage, V
         Sen->Vbatt        = Sen->Vbatt_model override
-        rp.duty           (0-255) for DF2 hardware injection when rp.modeling and proper wire connections made
+        rp.duty           Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
   */
 
   // Sim initialize as needed from memory
