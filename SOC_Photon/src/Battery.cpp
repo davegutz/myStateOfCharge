@@ -670,8 +670,8 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
     Uses Tbatt instead of Tbatt_filt to be most like hardware and provide independence from application.
 Inputs:
     Sen->T          Integration step, s
-    Sen->Tbatt      Battery temperature, deg C
-    Sen->Ibatt     Charge, A
+    Sen->Tbatt      Battery bank temperature, deg C
+    Sen->Ibatt      Selected battery bank current, A
     t_last          Past value of battery temperature used for rate limit memory, deg C
 States:
     *rp_delta_q_    Charge change since saturated, C

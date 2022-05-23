@@ -60,6 +60,7 @@ public:
   // operators
   // functions
   boolean bare() { return ( bare_ ); };
+  float cp_curr_bias() { return ( *cp_curr_bias_ ); };
   float ishunt_cal() { return ( ishunt_cal_ ); };
   void load();
   void pretty_print();

@@ -115,6 +115,7 @@
 		vdyn_			Sim current induced back emf, V
 		Vdyn 			Bank current induced back emf, V
 		voc_			Static model open circuit voltage, V
+		Voc 			Static bank open circuit voltage, V
 		voc_dyn_		VOC estimated from Vb and RC model, V
 		Voc_dyn			Bank VOC estimated from Vb and RC model, V
 		voc_filt_		Filtered open circuit voltage for saturation detect, V
@@ -125,6 +126,7 @@
 		vsat_			Saturation threshold at temperature, deg C
 		Vsat			Bank saturation threshold at temperature, deg C
 		v_sat_			Saturation threshold at temperature, deg C
+		Wbatt			Battery bank charge power, use to compare to other shunts, W
 		x_dv			dv breakpoints for r(soc, dv) table t_r
 		x_soc			soc breakpoints for voc table
 		x_soc_min		Temperature breakpoints for soc_min table

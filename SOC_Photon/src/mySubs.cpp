@@ -179,7 +179,7 @@ void filter_temp(const int reset_loc, const float t_rlim, Sensors *Sen, const fl
   // Filter and add rate limited bias
   if ( reset_loc && Sen->Tbatt>40. )
   {
-    Sen->Tbatt = RATED_TEMP + t_bias_loc; // Cold startup T=85.5 C
+    Sen->Tbatt = RATED_TEMP + t_bias_loc;
     Sen->Tbatt_filt = Sen->TbattSenseFilt->calculate(RATED_TEMP, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
   }
   else
@@ -207,12 +207,14 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
 
   // Current signal selection, based on if there or not.
   // Over-ride 'permanent' with Talk(rp.curr_sel_noamp) = Talk('s')
+  float model_curr_bias = 0.;
   if ( !rp.curr_sel_noamp && !Sen->ShuntAmp->bare())
   {
     Sen->Vshunt = Sen->ShuntAmp->vshunt();
     Sen->Ibatt = Sen->ShuntAmp->ishunt_cal();
     Sen->Ibatt_hdwe = Sen->ShuntAmp->ishunt_cal();
     cp.curr_bias_model = cp.curr_bias_amp;  // For testing tweak bias logic
+    model_curr_bias = Sen->ShuntAmp->cp_curr_bias();
   }
   else if ( !Sen->ShuntNoAmp->bare() )
   {
@@ -220,15 +222,17 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
     Sen->Ibatt = Sen->ShuntNoAmp->ishunt_cal();
     Sen->Ibatt_hdwe = Sen->ShuntNoAmp->ishunt_cal();
     cp.curr_bias_model = cp.curr_bias_noamp;  // For testing tweak bias logic
+    model_curr_bias = Sen->ShuntNoAmp->cp_curr_bias();
   }
   else
   {
     Sen->Vshunt = 0.;
     Sen->Ibatt = 0.;
     cp.curr_bias_model = rp.curr_bias_all + rp.inj_soft_bias;   // For testing tweak bias logic
+    model_curr_bias = 0.;
   }
   if ( rp.modeling )
-    Sen->Ibatt_model_in = Sen->Ibatt;
+    Sen->Ibatt_model_in = model_curr_bias;
   else
     Sen->Ibatt_model_in = Sen->Ibatt_hdwe;
 
@@ -333,13 +337,13 @@ void  monitor(const int reset, const boolean reset_temp, const unsigned long now
   /* Main Battery Monitor
       Inputs:
         rp.mon_mod      Monitor battery chemistry type
-        Sen->Ibatt     Battery terminal current, A
-        Sen->Vbatt      Battery terminal voltage, V
-        Sen->Tbatt_filt Tb filtered for noise, past value, deg C
+        Sen->Ibatt      Selected battery bank current, A
+        Sen->Vbatt      Selected battery bank voltage, V
+        Sen->Tbatt_filt Filtered battery bank temp, C
         Mon.soc         State of charge
       Outputs:
-        Voc             Static model open circuit voltage, V
-        Voc_filt        Filtered open circuit voltage for saturation detect, V
+        Voc             Static bank open circuit voltage, V
+        Voc_filt        Filtered bank open circuit voltage for saturation detect, V
         Mon.soc         State of charge
         Mon.soc_ekf     EKF state of charge
         Mon.soc_wt      Weighted selection of soc
