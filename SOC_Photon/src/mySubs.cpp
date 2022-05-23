@@ -177,15 +177,15 @@ void filter_temp(const int reset_loc, const float t_rlim, Sensors *Sen, const fl
   *t_bias_last = t_bias_loc;
 
   // Filter and add rate limited bias
-  if ( reset_loc && Sen->Tbatt>40. )
+  if ( reset_loc && Sen->Tbatt>40. )  // Bootup T=85.5 C
   {
-    Sen->Tbatt = RATED_TEMP + t_bias_loc;
-    Sen->Tbatt_filt = Sen->TbattSenseFilt->calculate(RATED_TEMP, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
+    Sen->Tbatt_hdwe = RATED_TEMP + t_bias_loc;
+    Sen->Tbatt_hdwe_filt = Sen->TbattSenseFilt->calculate(RATED_TEMP, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
   }
   else
   {
-    Sen->Tbatt_filt = Sen->TbattSenseFilt->calculate(Sen->Tbatt, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
-    Sen->Tbatt += t_bias_loc;
+    Sen->Tbatt_hdwe_filt = Sen->TbattSenseFilt->calculate(Sen->Tbatt_hdwe, reset_loc,  min(Sen->T_temp, F_MAX_T_TEMP)) + t_bias_loc;
+    Sen->Tbatt_hdwe += t_bias_loc;
   }
 }
 
@@ -219,21 +219,22 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   if ( !rp.curr_sel_noamp && !Sen->ShuntAmp->bare())
   {
     Sen->Vshunt = Sen->ShuntAmp->vshunt();
-    Sen->Ibatt = Sen->ShuntAmp->ishunt_cal();
+    // Sen->Ibatt = Sen->ShuntAmp->ishunt_cal();  TODO:  delete
     Sen->Ibatt_hdwe = Sen->ShuntAmp->ishunt_cal();
     model_curr_bias = Sen->ShuntAmp->cp_curr_bias();
   }
   else if ( !Sen->ShuntNoAmp->bare() )
   {
     Sen->Vshunt = Sen->ShuntNoAmp->vshunt();
-    Sen->Ibatt = Sen->ShuntNoAmp->ishunt_cal();
+    // Sen->Ibatt = Sen->ShuntNoAmp->ishunt_cal();  TODO:  delete
     Sen->Ibatt_hdwe = Sen->ShuntNoAmp->ishunt_cal();
     model_curr_bias = Sen->ShuntNoAmp->cp_curr_bias();
   }
   else
   {
     Sen->Vshunt = 0.;
-    Sen->Ibatt = 0.;
+    // Sen->Ibatt = 0.;   TODO: delete
+    Sen->Ibatt_hdwe = 0.;
     model_curr_bias = 0.;
   }
   if ( rp.modeling )
@@ -252,9 +253,7 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   if ( rp.debug>102 ) Serial.printf("begin analogRead at %ld...", millis());
   int raw_Vbatt = analogRead(myPins->Vbatt_pin);
   if ( rp.debug>102 ) Serial.printf("done at %ld\n", millis());
-  float vbatt_free =  float(raw_Vbatt)*vbatt_conv_gain + float(VBATT_A) + rp.vbatt_bias;
-  if ( rp.modeling ) Sen->Vbatt = Sen->Vbatt_model;
-  else Sen->Vbatt = vbatt_free;
+  Sen->Vbatt_hdwe =  float(raw_Vbatt)*vbatt_conv_gain + float(VBATT_A) + rp.vbatt_bias;
 
   // Power calculation
   Sen->Wbatt = Sen->Vbatt*Sen->Ibatt;
@@ -267,32 +266,23 @@ void load_temp(Sensors *Sen)
   // MAXIM conversion 1-wire Tp plenum temperature
   uint8_t count = 0;
   float temp = 0.;
-  if ( !rp.modeling )
+  // Read hardware and check
+  while ( ++count<MAX_TEMP_READS && temp==0)
   {
-    // Read hardware and check
-    while ( ++count<MAX_TEMP_READS && temp==0)
-    {
-      if ( Sen->SensorTbatt->read() ) temp = Sen->SensorTbatt->celsius() + (TBATT_TEMPCAL);
-      delay(1);
-    }
-
-    // Check success
-    if ( count<MAX_TEMP_READS )
-    {
-      Sen->Tbatt = Sen->SdTbatt->update(temp);
-      if ( rp.debug==-103 ) Serial.printf("Temperature %7.3f read on count=%d\n", temp, count);
-    }
-    else
-    {
-      Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value.   Sometimes a hard reset will stop these\n");
-      // Using last-good-value:  no assignment
-    }
+    if ( Sen->SensorTbatt->read() ) temp = Sen->SensorTbatt->celsius() + (TBATT_TEMPCAL);
+    delay(1);
   }
 
-  // Use model instead
+  // Check success
+  if ( count<MAX_TEMP_READS )
+  {
+    Sen->Tbatt_hdwe = Sen->SdTbatt->update(temp);
+    if ( rp.debug==-103 ) Serial.printf("Temperature %7.3f read on count=%d\n", temp, count);
+  }
   else
   {
-    Sen->Tbatt = RATED_TEMP;
+    Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value.   Sometimes a hard reset will stop these\n");
+    // Using last-good-value:  no assignment
   }
 }
 
@@ -477,11 +467,12 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   }
 
   // Sim calculation
-  //  Inputs:  Sen->Tbatt_filt, Sen->Ibatt
-  //  States: Sim->soc
-  //  Outputs:  Sim->temp_c_, Sim->ib, Sim->vb, rp.duty
+  //  Inputs:  Sen->Tbatt_filt(past), Sen->Ibatt_model_in
+  //  States: Sim->soc(past)
+  //  Outputs:  Sim->temp_c(), Sim->Ib(), Sim->Vb(), rp.duty
   Sen->Vbatt_model = Sen->Sim->calculate(Sen, cp.dc_dc_on);
-  // Sim indicators
+  Sen->Ibatt_model = Sen->Sim->Ib();
+  Sen->Tbatt_model = Sen->Tbatt_model_filt = Sen->Sim->temp_c();
   cp.model_cutback = Sen->Sim->cutback();
   cp.model_saturated = Sen->Sim->saturated();
 
@@ -489,9 +480,17 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   // Over-ride sensed Ib, Vb and Tb with model when running tests
   if ( rp.modeling )    // Should never be set in real use
   {
-    Sen->Ibatt = Sen->Sim->Ib();
+    Sen->Ibatt = Sen->Ibatt_model;
     Sen->Vbatt = Sen->Vbatt_model;
-    Sen->Tbatt_filt = Sen->Sim->temp_c();
+    Sen->Tbatt = RATED_TEMP;
+    Sen->Tbatt_filt = Sen->Tbatt;
+  }
+  else
+  {
+    Sen->Ibatt = Sen->Ibatt_hdwe;
+    Sen->Vbatt = Sen->Vbatt_hdwe;
+    Sen->Tbatt = Sen->Tbatt_hdwe;
+    Sen->Tbatt_filt = Sen->Tbatt_hdwe_filt;
   }
 
   // Charge calculation and memory store
