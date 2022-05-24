@@ -609,13 +609,19 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             MOD_in =  cp.input_string.substring(2).toInt();
             if ( MOD_in>=0 && MOD_in<8 )
             {
+              boolean reset = rp.modeling != MOD_in;
               Serial.printf("modeling from %d to ", rp.modeling);
               rp.modeling = MOD_in;
               Serial.printf("%d\n", rp.modeling);
+              if ( reset )
+              {
+                Serial.printf("Changed...soft reset\n");
+                cp.cmd_reset();
+              }
             }
             else
             {
-              Serial.printf("invalid input.   rp.modeling is 0-7.  Try 'h'\n");
+              Serial.printf("invalid %d, rp.modeling is 0-7.  Try 'h'\n", MOD_in);
             }
             break;
 
