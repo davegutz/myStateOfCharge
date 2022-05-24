@@ -853,11 +853,11 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.printf("    : delta I adder to all sensed shunt current, A [%7.3f]\n", CURR_BIAS_ALL); 
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.printf("    : delta V adder to sensed battery voltage, V [%7.3f]\n", VOLT_BIAS); 
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.printf("    : delta T adder to sensed Tbatt, deg C [%7.3f]\n", TEMP_BIAS); 
-  Serial.printf("  Dv= "); Serial.print(Sen->Sim->Dv()); Serial.println("    : Table hard-coded adjustment, compensates for data collection errors (hysteresis), V [0.01]"); 
-  Serial.printf("  Sc= "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println("    : Scalar battery model size"); 
+  Serial.printf("  Dv= "); Serial.print(Sen->Sim->Dv()); Serial.println("       : Table hard-coded adjustment, compensates for data collection errors (hysteresis), V [0.01]"); 
+  Serial.printf("  Sc= "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println("       : Scalar battery model size"); 
   Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.println("    : hysteresis scalar 1e-6 - 100");
-  Serial.printf("  Sr= "); Serial.print(Sen->Sim->Sr()); Serial.println("    : Scalar resistor for battery dynamic calculation, V"); 
-  Serial.printf("  Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println("    : Saturation of model cutback gain scalar"); 
+  Serial.printf("  Sr= "); Serial.print(Sen->Sim->Sr()); Serial.println("       : Scalar resistor for battery dynamic calculation, V"); 
+  Serial.printf("  Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println("       : Saturation of model cutback gain scalar"); 
 
   Serial.printf("H<?>   Manage history\n");
   Serial.printf("  Hd= "); Serial.printf("dump the summary log to screen\n");
@@ -868,22 +868,22 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("M<?> Amp tweaks.   For example:\n");
   Serial.printf("  MC= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_change()); Serial.println("    : tweak amp max change allowed, A [0.05]"); 
-  Serial.printf("  Mg= "); Serial.printf("%7.6f", Sen->ShuntAmp->gain()); Serial.println("    : tweak amp gain = correction to be made for charge, A/Coulomb/day [0.0001]"); 
-  Serial.printf("  Mi= "); Serial.printf("%7.3f", Sen->ShuntAmp->delta_q_inf()); Serial.println("    : tweak amp value for state of infinite counter, C [varies]"); 
+  Serial.printf("  Mg= "); Serial.printf("%7.6f", Sen->ShuntAmp->gain()); Serial.println("  : tweak amp gain = correction to be made for charge, A/Coulomb/day [0.0001]"); 
+  Serial.printf("  Mi= "); Serial.printf("%7.3f", Sen->ShuntAmp->delta_q_inf()); Serial.println("   : tweak amp value for state of infinite counter, C [varies]"); 
   Serial.printf("  Mk= "); Serial.printf("%7.3f", Sen->ShuntAmp->tweak_bias()); Serial.println("    : tweak amp adder to all sensed shunt current, A [0]"); 
-  Serial.printf("  Mp= "); Serial.printf("%10.1f", Sen->ShuntAmp->delta_q_sat_past()); Serial.println("    : tweak amp past charge infinity at sat, C [varies]"); 
-  Serial.printf("  MP= "); Serial.printf("%10.1f", Sen->ShuntAmp->delta_q_sat_present()); Serial.println("    : tweak amp present charge infinity at sat, C [varies]"); 
+  Serial.printf("  Mp= "); Serial.printf("%10.1f", Sen->ShuntAmp->delta_q_sat_past()); Serial.println(" : tweak amp past charge infinity at sat, C [varies]"); 
+  Serial.printf("  MP= "); Serial.printf("%10.1f", Sen->ShuntAmp->delta_q_sat_present()); Serial.println(" : tweak amp present charge infinity at sat, C [varies]"); 
   Serial.printf("  Mw= "); Serial.printf("%7.3f", Sen->ShuntAmp->time_to_wait()); Serial.println("    : tweak amp time to wait for next tweak, hr [18]]"); 
   Serial.printf("  Mx= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_tweak()); Serial.println("    : tweak amp adder maximum, A [1]"); 
   Serial.printf("  Mz= "); Serial.printf("%7.3f", Sen->ShuntAmp->time_sat_past()); Serial.println("    : tweak amp time since last tweak, hr [varies]"); 
 
   Serial.printf("N<?> No amp tweaks.   For example:\n");
   Serial.printf("  NC= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_change()); Serial.println("    : tweak no amp max change allowed, A [0.05]"); 
-  Serial.printf("  Ng= "); Serial.printf("%7.6f", Sen->ShuntNoAmp->gain()); Serial.println("    : tweak no amp gain = correction to be made for charge, A/Coulomb [0.0001]"); 
-  Serial.printf("  Ni= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->delta_q_inf()); Serial.println("    : tweak no amp value for state of infinite counter, C [varies]"); 
+  Serial.printf("  Ng= "); Serial.printf("%7.6f", Sen->ShuntNoAmp->gain()); Serial.println("  : tweak no amp gain = correction to be made for charge, A/Coulomb [0.0001]"); 
+  Serial.printf("  Ni= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->delta_q_inf()); Serial.println("   : tweak no amp value for state of infinite counter, C [varies]"); 
   Serial.printf("  Nk= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->tweak_bias()); Serial.println("    : tweak no amp adder to all sensed shunt current, A [0]"); 
-  Serial.printf("  Np= "); Serial.printf("%10.1f", Sen->ShuntNoAmp->delta_q_sat_past()); Serial.println("    : tweak no amp past charge infinity at sat, C [varies]"); 
-  Serial.printf("  NP= "); Serial.printf("%10.1f", Sen->ShuntNoAmp->delta_q_sat_present()); Serial.println("    : tweak no amp present charge infinity at sat, C [varies]"); 
+  Serial.printf("  Np= "); Serial.printf("%10.1f", Sen->ShuntNoAmp->delta_q_sat_past()); Serial.println(" : tweak no amp past charge infinity at sat, C [varies]"); 
+  Serial.printf("  NP= "); Serial.printf("%10.1f", Sen->ShuntNoAmp->delta_q_sat_present()); Serial.println(" : tweak no amp present charge infinity at sat, C [varies]"); 
   Serial.printf("  Nw= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->time_to_wait()); Serial.println("    : tweak no amp time to wait for next tweak, hr [18]]"); 
   Serial.printf("  Nx= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_tweak()); Serial.println("    : tweak no amp adder maximum, A [1]"); 
   Serial.printf("  Nz= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->time_sat_past()); Serial.println("    : tweak no amp time since last tweak, hr [varies]"); 
