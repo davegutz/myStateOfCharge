@@ -236,6 +236,14 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
 
   You may temporarily fix this by running software reset talk ('Rs').   Permanently - work on the EKF to make it more robust.
 
+### Problem:  The application overflows APP_FLASH on compilation
+
+  Too much text being stored by Serial.printf statements.
+
+### Problem:  The application overflows BACKUPSRAM on compilation
+
+  Smaller NSUM in constants.h or rp in retained.h or cp in command.h
+
 ## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
 
 ## To get debug data

@@ -139,6 +139,9 @@ struct RetainedPars
     this->mon_mod = 0;
     this->sim_mod = 0;
   }
+  boolean mod_ib() { return ( 0x4 & modeling ); }
+  boolean mod_vb() { return ( 0x2 & modeling ); }
+  boolean mod_tb() { return ( 0x1 & modeling ); }
   
   // Print
   void pretty_print(void)
@@ -154,7 +157,7 @@ struct RetainedPars
     Serial.printf("  curr_bias_all =       %7.3f;  // Bias all current sensors, A \n", this->curr_bias_all);
     Serial.printf("  curr_sel_noamp =            %d;  // Use non-amplified sensor\n", this->curr_sel_noamp);
     Serial.printf("  vbatt_bias =          %7.3f;  // Calibrate Vbatt, V\n", this->vbatt_bias);
-    Serial.printf("  modeling =                  %d;  // Driving saturation calculation with model\n", this->modeling);
+    Serial.printf("  modeling =                  %d;  // Bit mapped modeling specification\n", this->modeling);
     Serial.printf("  duty =                      %ld;  // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))\n", this->duty);
     Serial.printf("  amp =                 %7.3f;  // Injected amplitude, A pk (0-18.3)\n", this->amp);
     Serial.printf("  freq =                %7.3f;  // Injected frequency, Hz (0-2)\n", this->freq);
