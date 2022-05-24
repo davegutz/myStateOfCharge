@@ -5,16 +5,23 @@
 		bms_off_		Calculated indication that the BMS has turned off charge current, T=off
 		cap_			Capacitance, Farads
 		cap_init_		Initial capacitance specification, Farads
+		COULOMBIC_EFF	Coulombic efficiency - the fraction of charging input that gets turned into useable Coulombs
 		CURR_BIAS_ALL	Bias on all shunt sensors, A
 		CURR_BIAS_AMP	Calibration of amplified shunt sensor, A
 		curr_bias_model	Signal injection bias for model, A
 		CURR_BIAS_NOAMP	Calibration of non-amplified shunt sensor, A
+		curr_in   		Current into process, A
 		curr_sel_noamp	Use non-amplified sensor
 		cutback_gain_scalar	Scalar on battery model saturation cutback function. Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
+		delta_hrs		Time since last allowed saturation see 'N/Mz', hr
 		delta_q_		Charge change since saturated, C
+		delta_q_inf_	Charge infinity at past update see 'N/Mi', Coulombs
 		delta_q_inf_amp	delta_q since last reset.  Simple integration of amplified current
 		delta_q_inf_noamp	delta_q since last reset.  Simple integration of non-amplified current
+		delta_q_max		Running tab since last de-saturation of potential new delta_q_sat
 		delta_q_model	Coulomb Counter state for model, (-1 - 1)
+		delta_q_sat_present_	Charge infinity at saturation, present see 'N/MP', Coulombs
+		delta_q_sat_past_		Charge infinity at saturation, past see 'N/Mp', Coulombs
 		direx_			Direction scalar
 		disabled_		Hysteresis disabled by low scale input < 1e-5, T=disabled
 		disab_hard;		Disable hardware in signal selection and use model or input, T=disab
@@ -43,6 +50,7 @@
 		ib_sat_			Threshold to declare saturation.	This regeneratively slows down charging so if too small takes too long, A
 		int isum		Summary location.   Begins at -1 because first action is to increment isum
 		ioc_			Best estimate of IOC charge current after hysteresis, A
+		is_sat    		Is the battery in saturation, T=saturated
 		low_t			Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
 		low_voc			Voltage threshold for BMS to turn off battery, V
 		max_change_		Maximum allowed change to calibration adjustment, A
@@ -55,6 +63,7 @@
 		m_h				Number of soc breakpoints in r(soc, dv) table t_r
 		m_t				Number temperature breakpoints for voc table
 		nom_vsat_		Nominal saturation threshold at 25C, V
+		now       		Time since boot, ms
 		nP				Number of parallel batteries in bank, e.g. '2P1S'
 		nS				Number of series batteries in bank, e.g. '2P1S'
 		ns				Number of soc breakpoints voc table
@@ -76,7 +85,7 @@
 		r_diff_			Randles diffusion resistance, ohms
 		r_sd_			Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
 		r_ss			Steady state equivalent battery resistance, for solver, Ohms
-		sat_			Indication calculated by caller that battery is saturated, T=saturated
+		sat_			Indication that battery is saturated, T=saturated
 		sat_cutback_gain	Gain to retard ib when voc exceeds vsat, dimensionless
 		sat_ib_max_		Current cutback to be applied to modeled ib output, A
 		sat_ib_null_	Current cutback value for voc=vsat, A
@@ -95,6 +104,7 @@
 		sr				Resistance scalar
 		s_cap_			Rated capacity scalar
 		s_cap_model		Scalar on battery model size
+		T         		Time since last call, sec
 		tau_			Null time constant, sec
 		tau_			Null time constant, sec
 		tau_ct_			Randles charge transfer time constant, s (=1/Rct/Cct)
@@ -112,7 +122,10 @@
 		tcharge_ekf_	Solved charging time to full from ekf, hr
 		TEMP_BIAS		Bias on Tbatt sensor, deg C
 		temp_c_			Filtered battery temperature, deg C
+		time_sat_past_	Time at last declared saturation, ms
+		time_to_wait	Time to wait before allowing saturation see 'N/Mw', hr
 		tlast			Past value of battery temperature used for rate limit memory, deg C
+		tweak_bias		Bias on current see 'N/Mk', A
 		tweak_bias_amp	Tweak calibration for amplified current sensor
 		tweak_bias_noamp		Tweak calibration for non-amplified current sensor
 		tweak_test		Driving signal injection completely using software inj_soft_bias 

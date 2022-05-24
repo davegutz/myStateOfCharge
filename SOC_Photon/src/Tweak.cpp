@@ -44,7 +44,21 @@ Tweak::~Tweak() {}
 // functions
 // Process new information and return indicator of new peak found
 
-// Do the tweak and display change
+/* Do the tweak and display change
+  Inputs:
+    now                   Time since boot, ms
+    delta_hrs_            Time since last allowed saturation see 'N/Mz', hr
+    gain_                 Current correction to be made for charge error, A/Coulomb/day
+    max_change_           Maximum allowed change to calibration adjustment, A
+    max_tweak_            Maximum allowed calibration adjustment, A\n
+  States:
+    delta_q_max_          Running tab since last de-saturation of potential new delta_q_sat
+    delta_q_sat_past_     Charge infinity at saturation, past see 'N/Mp', Coulombs
+    delta_q_sat_present_  Charge infinity at saturation, present see 'N/MP', Coulombs
+   *rp_delta_q_inf_       Charge infinity at past update see 'N/Mi', Coulombs
+  Outputs:
+    tweak_bias_           Bias on current see 'N/Mk', A
+*/
 void Tweak::adjust(unsigned long now)
 {
   if ( delta_q_sat_past_==0.0 ) return;
@@ -77,13 +91,13 @@ void Tweak::pretty_print(void)
     Serial.printf("  rp_delta_q_inf_ =      %10.1f; // Charge infinity at past update see 'N/Mi', Coulombs\n", *rp_delta_q_inf_);
     Serial.printf("  delta_q_sat_present_ = %10.1f; // Charge infinity at saturation, present see 'N/MP', Coulombs\n", delta_q_sat_present_);
     Serial.printf("  delta_q_sat_past_ =    %10.1f; // Charge infinity at saturation, past see 'N/Mp', Coulombs\n", delta_q_sat_past_);
-    Serial.printf("  sat_ =                          %d; // Saturation status, T=saturated\n", sat_);
+    Serial.printf("  sat_ =                          %d; // Indication that battery is saturated, T=saturated\n", sat_);
     Serial.printf("  delta_hrs_ =           %10.6f; // Time since last allowed saturation see 'N/Mz', hr\n", double(millis()-time_sat_past_)/3600000.);
     Serial.printf("  time_to_wait =         %10.6f; // Time to wait before allowing saturation see 'N/Mw', hr\n", time_to_wait_);
     Serial.printf("  tweak_bias =              %7.3f; // Bias on current see 'N/Mk', A\n", *rp_tweak_bias_);
 }
 
-// Reset on demand
+// reset:  Reset on call.   Reset all indicators and states to boot status.
 void Tweak::reset(void)
 {
   *rp_delta_q_inf_ = 0.;
@@ -93,7 +107,17 @@ void Tweak::reset(void)
   delta_q_max_ = -(RATED_BATT_CAP*3600.);
 }
 
-// Save new result
+/* save_new_sat:  Save new result
+  Inputs:
+    now                   Time since boot, ms
+    delta_q_sat_present_  Charge infinity at saturation, present see 'N/MP', Coulombs
+  Outputs:
+    delta_q_max_          Running tab since last de-saturation of potential new delta_q_sat
+    delta_q_sat_past_     Charge infinity at saturation, past see 'N/Mp', Coulombs
+    delta_q_sat_present_  Charge infinity at saturation, present see 'N/MP', Coulombs
+    sat_                  Indication that battery is saturated, T=saturated
+    time_sat_past_        Time at last declared saturation, ms
+*/
 void Tweak::save_new_sat(unsigned long int now)
 {
   delta_q_sat_past_ = delta_q_sat_present_;
@@ -103,10 +127,22 @@ void Tweak::save_new_sat(unsigned long int now)
   time_sat_past_ = now;
 }
 
-// Monitor the process and return status
+/* Monitor the process and return status
+  INPUTS:
+    curr_in   Current into process, A
+    T         Time since last call, sec
+    is_sat    Is the battery in saturation, T=saturated
+    now       Time since boot, ms
+  OUTPUTS:
+    delta_hrs_    Time since last allowed saturation see 'N/Mz', hr
+    delta_q_max_  Running tab since last de-saturation of potential new delta_q_sat
+    sat_          Indication that battery is saturated, T=saturated
+*/
 boolean Tweak::new_desat(const double curr_in, const double T, const boolean is_sat, unsigned long int now)
 {
-  *rp_delta_q_inf_ += curr_in * T;
+  double delta_q_inf = curr_in * T;
+  if ( curr_in>0. ) delta_q_inf *= COULOMBIC_EFF;
+  *rp_delta_q_inf_ += delta_q_inf;
   delta_hrs_ = double(now - time_sat_past_)/double(ONE_HOUR_MILLIS);
   boolean have_new = false;
   if ( sat_ )

@@ -14,11 +14,12 @@ const String unit = "float_pro_20220523";  // new float types, battery types, no
 // Two 12 V 100 Ah series battery bank would have RATED_BATT_CAP 100, NS 2, and NP 1
 // Four 12 V 200 Ah with two in parallel joined with two more in series
 //   would have  RATED_BATT_CAP 200, NS 2, and NP 2
-#define MOD_CODE              0     // Chemistry code integer ('Bm=#; Bs=#'), 0=Battleborn, 1=LION
-#define RATED_BATT_CAP        100.  // Nominal battery unit capacity (Scale with 'Sc=#.#;'), Ah
-#define RATED_TEMP            25.   // Temperature at RATED_BATT_CAP (TODO:  talk input), deg C
-#define NS                    1.0   // Number of series batteries in bank ('BS=#')
-#define NP                    1.0   // Number of parallel batteries in bank ('BP=#;')
+#define COULOMBIC_EFF         0.9985  // Coulombic efficiency of battery, fraction of charge that gets used
+#define MOD_CODE              0       // Chemistry code integer ('Bm=#; Bs=#'), 0=Battleborn, 1=LION 
+#define RATED_BATT_CAP        100.    // Nominal battery unit capacity (Scale with 'Sc=#.#;'), Ah
+#define RATED_TEMP            25.     // Temperature at RATED_BATT_CAP (TODO:  talk input), deg C
+#define NS                    1.0     // Number of series batteries in bank ('BS=#')
+#define NP                    1.0     // Number of parallel batteries in bank ('BP=#;')
 
 
 #endif

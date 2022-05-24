@@ -233,7 +233,7 @@ void Coulombs::pretty_print(void)
   Serial.printf("  q_min_ =      %9.1f;  // Estimated charge at low voltage shutdown, C\n", q_min_);
   Serial.printf("  delta_q       %9.1f;  // Charge change since saturated, C\n", *rp_delta_q_);
   Serial.printf("  soc_ =          %7.3f;  // Fraction of saturation charge (q_capacity_) available (0-1);\n", soc_);
-  Serial.printf("  sat_ =                %d;  // Indication calculated by caller that battery is saturated, T=saturated\n", sat_);
+  Serial.printf("  sat_ =                %d;  // Indication that battery is saturated, T=saturated\n", sat_);
   Serial.printf("  t_rated_ =        %5.1f;  // Rated temperature, deg C\n", t_rated_);
   Serial.printf("  t_last =          %5.1f;  // Last battery temperature for rate limit memory, deg C\n", *rp_t_last_);
   Serial.printf("  t_rlim_ =       %7.3f;  // Tbatt rate limit, deg C / s\n", t_rlim_);
@@ -301,8 +301,9 @@ Inputs:
   dt              Integration step, s
   temp_c          Battery temperature, deg C
   charge_curr     Charge, A
-  sat             Indicator that battery is saturated (VOC>threshold(temp)), T/F
+  sat             Indication that battery is saturated, T=saturated
   tlast           Past value of battery temperature used for rate limit memory, deg C
+  COULOMBIC_EFF   Fraction of charging input that gets turned into useable Coulombs
 Outputs:
   q_capacity_     Saturation charge at temperature, C
   *rp_delta_q_    Charge change since saturated, C
@@ -316,6 +317,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
   const boolean sat, const double t_last)
 {
     double d_delta_q = charge_curr * dt;
+    if ( charge_curr>0. ) d_delta_q *= COULOMBIC_EFF;
     sat_ = sat;
 
     // Rate limit temperature

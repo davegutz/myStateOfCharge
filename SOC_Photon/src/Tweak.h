@@ -63,15 +63,15 @@ protected:
   double gain_;                 // Current correction to be made for charge error, A/Coulomb/day
   double max_change_;           // Maximum allowed change to calibration adjustment, A
   double max_tweak_;            // Maximum allowed calibration adjustment, A\n
-  double delta_q_sat_present_;  // TODO:  finish these comments and populate nom.txt too
-  double delta_q_sat_past_;
-  boolean sat_;
+  double delta_q_sat_present_;  // Present charge cycle declared delta_q_max, C
+  double delta_q_sat_past_;     // Past charge cycle declared delta_q_max, C
+  boolean sat_;                 // Indication that battery is saturated, T=saturated
   double delta_q_max_;          // Running tab since last de-saturation of potential new delta_q_sat
-  unsigned long int time_sat_past_;
-  double time_to_wait_;
-  float *rp_delta_q_inf_;
-  float *rp_tweak_bias_;
-  double delta_hrs_;
+  unsigned long int time_sat_past_; // Time at last declared saturation, ms
+  double time_to_wait_;         // Time specified to wait before engaging delta_q_max declaration, ms
+  float *rp_delta_q_inf_;       // Charge infinity at past update see 'N/Mi', Coulombs
+  float *rp_tweak_bias_;        // Bias on current see 'N/Mk', A
+  double delta_hrs_;            // Time since last allowed saturation see 'N/Mz', hr
 };
 
 #endif

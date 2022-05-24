@@ -686,6 +686,7 @@ Outputs:
 double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const double t_last)
 {
     double d_delta_q = Sen->Ibatt * Sen->T;
+    if ( Sen->Ibatt>0. ) d_delta_q *= COULOMBIC_EFF;
 
     // Rate limit temperature
     double temp_lim = max(min(Sen->Tbatt, t_last + T_RLIM*Sen->T), t_last - T_RLIM*Sen->T);
