@@ -604,7 +604,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     return ( vb_*(*rp_nS_) );
 }
 
-// Injection model, calculate duty
+// Injection model, calculate duty based on time since boot (TODO:  create an 'elapsed_inj' time so can restart inj on the fly)
 uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq)
 {
   double t;

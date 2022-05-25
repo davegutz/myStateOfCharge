@@ -346,33 +346,41 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   ........................................................................................
   35. Regression tests:
 
-Rapid tweak test 1 min using models Xx11 'tweakMod' to test tweak only (no data collection)
+Rapid tweak test 1 min using models Xx11 'tweakMod' to test tweak only (no data collection, v0)
   v0; Bm0; Bs0; Xx11; Xts; Xf0.02;  Xa-2000;
     then hard reset  (to restart sinusoids  [TODO])then
-  Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; Mp0; Np0; v0;
+  Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; Mp0; Np0; Dn1; v0;
     To end:
-  Xp0; v4;
+  Xp0; v4; Dn0.9985;
+    expected result:
+      Tweak(Amp)::adjust:, past=       0.0, pres=       0.0, error=       0.0, gain= -0.040001, delta_hrs=  0.013889, Di=  0.000, new_Di= -0.000,
+      Tweak(No Amp)::adjust:, past=       0.0, pres=       0.0, error=       0.0, gain= -0.040001, delta_hrs=  0.013889, Di=  0.000, new_Di= -0.000,
 
 Rapid tweak test 1 min using models Xx11 'tweakMod'
-    start recording
-  v0; Bm0; Bs0; Xx11; Xts; Xf0.02;  Xa-2000;
+    start recording (will need v4)
+  v0; Bm0; Bs0; Xx11; Xts; Xf0.02; Xa-2000;
     then hard reset (to restart sinusoids  [TODO]) then
-  Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; Mp0; Np0; v4;
+  Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; Mp0; Np0; Dn1; v4;
     To end:
-  Xp0; v4;
+  Xp0; v4; Dn0.9985;
+    expected result:  see 'dataReduction/newFloatTweakMod_overplots.xlsx'
 
   Slow cycle test 8 min using models Xx1 'cycleMod'
-    start recording
+    start recording (will need v4)
   v0; Bm0; Bs0; Xx11; Xts; Xf0.002; Xa-60;
     then hard reset  (to restart sinusoids  [TODO])then
-  Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; v4;
+  Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; Dn1; v4;
     To end:
-  Xp0; v4;
+  Xp0; v4; Dn0.9985;
+    expected result:  see 'dataReduction/newFloatCycleMod_overplots.xlsx'
 
-What these mean:
+What the adjustments mean:
   v0;         turn off debug temporarily so not snowed by data dumps
+  v4;         for recordings
   Bm0; Bs0;   make sure running base Battleborn configuration
-  Xx11;       modeling, for totally digital test of logic
+  Xx11;       modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim
+  Dn1;        disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
+  Dn0.9985    nominal Coulombic efficiency in local_config.h
   Xts;        start up a sine wave.   presently initializes only on bootup (TODO)
   Xf0.02;     frequency 0.02 Hz
   Xa-2000     amplitude -2000 A
@@ -381,7 +389,8 @@ What these mean:
   Ri;         reset the delta_q's to 0
   Mw0; Nw0;   allow tweak bias to work immediately instead of waiting several hours
   MC0.5; Mx10; NC0.5; Nx10;   give tweak bias logic a large adjustment range to quickly converge
-  Mk0; Nk0;   reset the tweak biases to 0
+  Mk0; Nk0;   reset the tweak biases to 0 for new count
+  Mp0; Np0;   reset memory to fresh state for new count
   v4;         monitor the standard debug
   Xp0;        reset the signal injection back to 0 without affecting model settings
 
