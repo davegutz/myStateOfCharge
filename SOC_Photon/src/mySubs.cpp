@@ -41,7 +41,7 @@ Shunt::Shunt()
 : Tweak(), Adafruit_ADS1015(), name_("None"), port_(0x00), bare_(false){}
 Shunt::Shunt(const String name, const uint8_t port, float *rp_delta_q_inf, float *rp_tweak_bias, float *cp_curr_bias,
   const float v2a_s)
-: Tweak(name, TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, TWEAK_WAIT, rp_delta_q_inf, rp_tweak_bias),
+: Tweak(name, TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, TWEAK_WAIT, rp_delta_q_inf, rp_tweak_bias, COULOMBIC_EFF),
   Adafruit_ADS1015(),
   name_(name), port_(port), bare_(false), cp_curr_bias_(cp_curr_bias), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0)
@@ -219,21 +219,18 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   if ( !rp.curr_sel_noamp && !Sen->ShuntAmp->bare())
   {
     Sen->Vshunt = Sen->ShuntAmp->vshunt();
-    // Sen->Ibatt = Sen->ShuntAmp->ishunt_cal();  TODO:  delete
     Sen->Ibatt_hdwe = Sen->ShuntAmp->ishunt_cal();
     model_curr_bias = Sen->ShuntAmp->cp_curr_bias();
   }
   else if ( !Sen->ShuntNoAmp->bare() )
   {
     Sen->Vshunt = Sen->ShuntNoAmp->vshunt();
-    // Sen->Ibatt = Sen->ShuntNoAmp->ishunt_cal();  TODO:  delete
     Sen->Ibatt_hdwe = Sen->ShuntNoAmp->ishunt_cal();
     model_curr_bias = Sen->ShuntNoAmp->cp_curr_bias();
   }
   else
   {
     Sen->Vshunt = 0.;
-    // Sen->Ibatt = 0.;   TODO: delete
     Sen->Ibatt_hdwe = 0.;
     model_curr_bias = 0.;
   }

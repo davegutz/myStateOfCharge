@@ -35,10 +35,10 @@ Tweak::Tweak()
   : name_("None"), gain_(0), max_change_(0), delta_q_sat_present_(0), delta_q_sat_past_(0), sat_(false),
   delta_q_max_(0), time_sat_past_(0UL), time_to_wait_(0), delta_hrs_(0) {}
 Tweak::Tweak(const String name, const double gain, const double max_change, const double max_tweak,
-  const double time_to_wait, float *rp_delta_q_inf, float *rp_tweak_bias)
+  const double time_to_wait, float *rp_delta_q_inf, float *rp_tweak_bias, const double coul_eff)
   : name_(name), gain_(-1./gain), max_change_(max_change), max_tweak_(max_tweak), delta_q_sat_present_(0),
     delta_q_sat_past_(0), sat_(false), delta_q_max_(-(RATED_BATT_CAP*3600.)), time_sat_past_(millis()), time_to_wait_(time_to_wait),
-    rp_delta_q_inf_(rp_delta_q_inf), rp_tweak_bias_(rp_tweak_bias), delta_hrs_(0) {}
+    rp_delta_q_inf_(rp_delta_q_inf), rp_tweak_bias_(rp_tweak_bias), delta_hrs_(0), coul_eff_(coul_eff) {}
 Tweak::~Tweak() {}
 // operators
 // functions
@@ -129,20 +129,20 @@ void Tweak::save_new_sat(unsigned long int now)
 
 /* Monitor the process and return status
   INPUTS:
-    curr_in   Current into process, A
-    T         Time since last call, sec
-    is_sat    Is the battery in saturation, T=saturated
-    now       Time since boot, ms
-  OUTPUTS:
+    curr_in       Current into process, A
+    T             Time since last call, sec
+    is_sat        Is the battery in saturation, T=saturated
+    now           Time since boot, ms
+    coul_eff_     Coulombic efficiency - the fraction of charging input that gets turned into useable Coulombs
     delta_hrs_    Time since last allowed saturation see 'N/Mz', hr
     delta_q_max_  Running tab since last de-saturation of potential new delta_q_sat
     sat_          Indication that battery is saturated, T=saturated
 */
 boolean Tweak::new_desat(const double curr_in, const double T, const boolean is_sat, unsigned long int now)
 {
-  double delta_q_inf = curr_in * T;
-  if ( curr_in>0. ) delta_q_inf *= COULOMBIC_EFF;
-  *rp_delta_q_inf_ += delta_q_inf;
+  double d_delta_q_inf = curr_in * T;
+  if ( curr_in>0. ) d_delta_q_inf *= coul_eff_;
+  *rp_delta_q_inf_ += d_delta_q_inf;
   delta_hrs_ = double(now - time_sat_past_)/double(ONE_HOUR_MILLIS);
   boolean have_new = false;
   if ( sat_ )
@@ -167,6 +167,7 @@ boolean Tweak::new_desat(const double curr_in, const double T, const boolean is_
   }
   if ( rp.debug==88 ) Serial.printf("Tweak(%s)::update:,  delta_q_inf=%10.1f, is_sat=%d, now=%ld, sat=%d, delta_q_sat_past=%10.1f, delta_q_sat_present=%10.1f, time_sat_past=%ld,\n",
     name_.c_str(), *rp_delta_q_inf_, is_sat, now, sat_, delta_q_sat_past_, delta_q_sat_present_, time_sat_past_);
+  if ( rp.debug==99 )  Serial.printf("Tweak:,%7.3f,%7.3f,", curr_in, d_delta_q_inf);
 
   return ( have_new );
 }

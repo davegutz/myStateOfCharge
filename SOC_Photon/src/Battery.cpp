@@ -38,7 +38,7 @@ extern PublishPars pp;            // For publishing
 // constructors
 Battery::Battery() {}
 Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code)
-    : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, rp_mod_code),
+    : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, rp_mod_code, COULOMBIC_EFF),
     sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS)
 {
     // Battery characteristic tables
@@ -673,6 +673,7 @@ Inputs:
     Sen->Tbatt      Battery bank temperature, deg C
     Sen->Ibatt      Selected battery bank current, A
     t_last          Past value of battery temperature used for rate limit memory, deg C
+    coul_eff_       Coulombic efficiency - the fraction of charging input that gets turned into useable Coulombs
 States:
     *rp_delta_q_    Charge change since saturated, C
     *rp_t_last_     Updated value of battery temperature used for rate limit memory, deg C
@@ -686,7 +687,7 @@ Outputs:
 double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const double t_last)
 {
     double d_delta_q = Sen->Ibatt * Sen->T;
-    if ( Sen->Ibatt>0. ) d_delta_q *= COULOMBIC_EFF;
+    if ( Sen->Ibatt>0. ) d_delta_q *= coul_eff_;
 
     // Rate limit temperature
     double temp_lim = max(min(Sen->Tbatt, t_last + T_RLIM*Sen->T), t_last - T_RLIM*Sen->T);
@@ -716,6 +717,7 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
     if ( rp.debug==-97 )
         Serial.printf("voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
                     pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, Sen->Ibatt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
+    if ( rp.debug==99 )  Serial.printf("Battery:,%7.3f,%7.3f,", Sen->Ibatt, d_delta_q);
 
     // Save and return
     *rp_t_last_ = temp_lim;

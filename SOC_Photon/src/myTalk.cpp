@@ -39,8 +39,8 @@ extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 // Talk Executive
 void talk(BatteryMonitor *Mon, Sensors *Sen)
 {
-  double SOCS_in = -99.;
-  int MOD_in = -1;
+  double FP_in = -99.;
+  int INT_in = -1;
   double scale = 1.;
   double Q_in = 0.;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
@@ -52,8 +52,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         switch ( cp.input_string.charAt(1) )
         {
           case ( 'm' ):  // Monitor chemistry change
-            MOD_in = cp.input_string.substring(2).toInt();
-            switch ( MOD_in )
+            INT_in = cp.input_string.substring(2).toInt();
+            switch ( INT_in )
             {
               case ( 0 ):
                 Serial.printf("Changing monitor chemistry from %d", Mon->mod_code());
@@ -70,13 +70,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               default:
-                Serial.printf("%d unknown.  Try typing 'h'", MOD_in);
+                Serial.printf("%d unknown.  Try typing 'h'", INT_in);
             }
             break;
 
           case ( 's' ):  // Simulation chemistry change
-            MOD_in = cp.input_string.substring(2).toInt();
-            switch ( MOD_in )
+            INT_in = cp.input_string.substring(2).toInt();
+            switch ( INT_in )
             {
               case ( 0 ):
                 Serial.printf("Changing simulation chemistry from %d", Sen->Sim->mod_code());
@@ -93,32 +93,32 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               default:
-                Serial.printf("%d unknown.  Try typing 'h'", MOD_in);
+                Serial.printf("%d unknown.  Try typing 'h'", INT_in);
             }
             break;
 
           case ( 'P' ):  // Number of parallel batteries in bank, e.g. '2P1S'
-            SOCS_in = cp.input_string.substring(2).toFloat();
-            if ( SOCS_in>0 )  // Apply crude limit to prevent user error
+            FP_in = cp.input_string.substring(2).toFloat();
+            if ( FP_in>0 )  // Apply crude limit to prevent user error
             {
               Serial.printf("Changing Mon/Sim->nP from %5.2f / %5.2f ", Mon->nP(), Sen->Sim->nP());
-              rp.nP = SOCS_in;
+              rp.nP = FP_in;
               Serial.printf("to %5.2f / %5.2f\n", Mon->nP(), Sen->Sim->nP());
             }
             else
-              Serial.printf("nP out of range.  You entered %5.2f; must be >0.\n", SOCS_in);
+              Serial.printf("nP out of range.  You entered %5.2f; must be >0.\n", FP_in);
             break;
 
           case ( 'S' ):  // Number of series batteries in bank, e.g. '2P1S'
-            SOCS_in = cp.input_string.substring(2).toFloat();
-            if ( SOCS_in>0 )  // Apply crude limit to prevent user error
+            FP_in = cp.input_string.substring(2).toFloat();
+            if ( FP_in>0 )  // Apply crude limit to prevent user error
             {
               Serial.printf("Changing Mon/Sim->nS from %5.2f / %5.2f ", Mon->nS(), Sen->Sim->nS());
-              rp.nS = SOCS_in;
+              rp.nS = FP_in;
               Serial.printf("to %5.2f / %5.2f\n", Mon->nS(), Sen->Sim->nS());
             }
             else
-              Serial.printf("nP out of range.  You entered %5.2f; must be >0.\n", SOCS_in);
+              Serial.printf("nP out of range.  You entered %5.2f; must be >0.\n", FP_in);
             break;
 
           default:
@@ -130,30 +130,30 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         switch ( cp.input_string.charAt(1) )
         {
           case ( 'a' ):  // assign charge state in fraction to all versions including model
-            SOCS_in = cp.input_string.substring(2).toFloat();
-            if ( SOCS_in<1.1 )  // Apply crude limit to prevent user error
+            FP_in = cp.input_string.substring(2).toFloat();
+            if ( FP_in<1.1 )  // Apply crude limit to prevent user error
             {
-              Mon->apply_soc(SOCS_in, Sen->Tbatt_filt);
+              Mon->apply_soc(FP_in, Sen->Tbatt_filt);
               Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
               Serial.printf("soc=%7.3f, modeling = %d, delta_q=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
                   Mon->soc(), rp.modeling, rp.delta_q, Sen->Sim->soc(), rp.delta_q_model);
               cp.cmd_reset();
             }
             else
-              Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'A' instead of 'a'?\n", SOCS_in);
+              Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'A' instead of 'a'?\n", FP_in);
             break;
 
           case ( 'm' ):  // assign curve charge state in fraction to model only (ekf if modeling)
-            SOCS_in = cp.input_string.substring(2).toFloat();
-            if ( SOCS_in<1.1 )   // Apply crude limit to prevent user error
+            FP_in = cp.input_string.substring(2).toFloat();
+            if ( FP_in<1.1 )   // Apply crude limit to prevent user error
             {
-              Sen->Sim->apply_soc(SOCS_in, Sen->Tbatt_filt);
+              Sen->Sim->apply_soc(FP_in, Sen->Tbatt_filt);
               Serial.printf("soc=%7.3f,   delta_q=%7.3f, soc_model=%7.3f,   delta_q_model=%7.3f,\n",
                   Mon->soc(), rp.delta_q, Sen->Sim->soc(), rp.delta_q_model);
               cp.cmd_reset();
             }
             else
-              Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'M' instead of 'm'?\n", SOCS_in);
+              Serial.printf("soc out of range.  You entered %7.3f; must be 0-1.1.  Did you mean to use 'M' instead of 'm'?\n", FP_in);
             break;
 
           default:
@@ -186,6 +186,16 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf("rp.curr_bias_all from %7.3f to ", rp.curr_bias_all);
             rp.curr_bias_all = cp.input_string.substring(2).toFloat();
             Serial.printf("%7.3f\n", rp.curr_bias_all);
+            break;
+
+          case ( 'n' ):
+            FP_in = cp.input_string.substring(2).toFloat();
+            Serial.printf("coulombic efficiency from %7.4f,%7.4f,%7.4f,%7.4f, to ", Sen->Sim->coul_eff(), Mon->coul_eff(), Sen->ShuntAmp->coul_eff(), Sen->ShuntNoAmp->coul_eff());
+            Sen->Sim->coul_eff(FP_in);
+            Mon->coul_eff(FP_in);
+            Sen->ShuntAmp->coul_eff(FP_in);
+            Sen->ShuntNoAmp->coul_eff(FP_in);
+            Serial.printf("%7.4f,%7.4f,%7.4f,%7.4f\n", Sen->Sim->coul_eff(), Mon->coul_eff(), Sen->ShuntAmp->coul_eff(), Sen->ShuntNoAmp->coul_eff());
             break;
 
           case ( 't' ):
@@ -606,12 +616,12 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             break;
 
           case ( 'm' ):   // modeling code
-            MOD_in =  cp.input_string.substring(2).toInt();
-            if ( MOD_in>=0 && MOD_in<8 )
+            INT_in =  cp.input_string.substring(2).toInt();
+            if ( INT_in>=0 && INT_in<8 )
             {
-              boolean reset = rp.modeling != MOD_in;
+              boolean reset = rp.modeling != INT_in;
               Serial.printf("modeling from %d to ", rp.modeling);
-              rp.modeling = MOD_in;
+              rp.modeling = INT_in;
               Serial.printf("%d\n", rp.modeling);
               if ( reset )
               {
@@ -621,13 +631,13 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             }
             else
             {
-              Serial.printf("invalid %d, rp.modeling is 0-7.  Try 'h'\n", MOD_in);
+              Serial.printf("invalid %d, rp.modeling is 0-7.  Try 'h'\n", INT_in);
             }
             break;
 
           case ( 'x' ):   // Signal sourcing
-            MOD_in =  cp.input_string.substring(2).toInt();
-            switch ( MOD_in )
+            INT_in =  cp.input_string.substring(2).toInt();
+            switch ( INT_in )
             {
               case ( 0 ):
                 rp.modeling = 0;
@@ -654,7 +664,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 break;
 
               default:
-                Serial.print(MOD_in); Serial.println(" unknown.  Try typing 'h'");
+                Serial.print(INT_in); Serial.println(" unknown.  Try typing 'h'");
                 break;
             }
             Serial.printf("Modeling is %d\n", rp.modeling);
@@ -844,25 +854,26 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("\n\n******** TALK *********\nHelp for serial talk.   Entries and current values.  All entries follwed by CR\n");
 
   Serial.printf("B<?> Battery assignments.   For example:\n");
-  Serial.printf("  Bm=  %d.  Monitor battery chemistry 0='Battleborn', 1='LION' [%d]\n", rp.mon_mod, MOD_CODE); 
-  Serial.printf("  Bs=  %d.  Simulation battery chemistry 0='Battleborn', 1='LION' [%d]\n", rp.sim_mod, MOD_CODE); 
-  Serial.printf("  BP=  %5.2f.  Assign number of parallel batteries in bank [%5.2f]'\n", rp.nP, NP); 
-  Serial.printf("  BS=  %5.2f.  Assign number of series batteries in bank [%5.2f]'\n", rp.nS, NS); 
+  Serial.printf("  Bm=  %d.  Mon chem 0='BB', 1='LI' [%d]\n", rp.mon_mod, MOD_CODE); 
+  Serial.printf("  Bs=  %d.  Sim chem 0='BB', 1='LI' [%d]\n", rp.sim_mod, MOD_CODE); 
+  Serial.printf("  BP=  %5.2f.  # parallel in bank [%5.2f]'\n", rp.nP, NP); 
+  Serial.printf("  BS=  %5.2f.  # series in bank [%5.2f]'\n", rp.nS, NS); 
 
   Serial.printf("C<?> Charge assignments.   For example:\n");
-  Serial.printf("  Ca=  assign curve charge state in fraction to all versions including model- '(0-1.1)'\n"); 
-  Serial.printf("  Cm=  assign curve charge state in fraction to model only (and ekf if modeling)- '(0-1.1)'\n"); 
+  Serial.printf("  Ca=  set soc in all - '(0-1.1)'\n"); 
+  Serial.printf("  Cm=  set soc model only (and ekf if modeling)- '(0-1.1)'\n"); 
 
   Serial.printf("D/S<?> Adjustments.   For example:\n");
-  Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_bias_amp); Serial.printf("    : delta I adder to sensed amplified shunt current, A [%7.3f]\n", CURR_BIAS_AMP); 
-  Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias_noamp); Serial.printf("    : delta I adder to sensed shunt current, A [%7.3f]\n", CURR_BIAS_NOAMP); 
-  Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.printf("    : delta I adder to all sensed shunt current, A [%7.3f]\n", CURR_BIAS_ALL); 
-  Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.printf("    : delta V adder to sensed battery voltage, V [%7.3f]\n", VOLT_BIAS); 
-  Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.printf("    : delta T adder to sensed Tbatt, deg C [%7.3f]\n", TEMP_BIAS); 
-  Serial.printf("  Dv= "); Serial.print(Sen->Sim->Dv()); Serial.println("       : Table hard-coded adjustment, compensates for data collection errors (hysteresis), V [0.01]"); 
+  Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_bias_amp); Serial.printf("    : delta amp sense, A [%7.3f]\n", CURR_BIAS_AMP); 
+  Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias_noamp); Serial.printf("    : delta noa sense, A [%7.3f]\n", CURR_BIAS_NOAMP); 
+  Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.printf("    : delta all sense, A [%7.3f]\n", CURR_BIAS_ALL); 
+  Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.printf("    : delta volt sense, V [%7.3f]\n", VOLT_BIAS); 
+  Serial.printf("  Dn= "); Serial.print(Sen->Sim->coul_eff()); Serial.println("       : coulombic efficiency"); 
+  Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.printf("    : delta T sense, deg C [%7.3f]\n", TEMP_BIAS); 
+  Serial.printf("  Dv= "); Serial.print(Sen->Sim->Dv()); Serial.println("       : Table adjust [0.01]"); 
   Serial.printf("  Sc= "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println("       : Scalar battery model size"); 
   Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.println("    : hysteresis scalar 1e-6 - 100");
-  Serial.printf("  Sr= "); Serial.print(Sen->Sim->Sr()); Serial.println("       : Scalar resistor for battery dynamic calculation, V"); 
+  Serial.printf("  Sr= "); Serial.print(Sen->Sim->Sr()); Serial.println("       : Scalar resistor sim"); 
   Serial.printf("  Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println("       : Saturation of model cutback gain scalar"); 
 
   Serial.printf("H<?>   Manage history\n");

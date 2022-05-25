@@ -212,9 +212,9 @@ void Chemistry::pretty_print(void)
 // class Coulombs
 Coulombs::Coulombs() {}
 Coulombs::Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rated, const double t_rated, 
-  const double t_rlim, uint8_t *rp_mod_code)
+  const double t_rlim, uint8_t *rp_mod_code, const double coul_eff)
   : rp_delta_q_(rp_delta_q), rp_t_last_(rp_t_last), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017),
-  soc_min_(0), chem_(rp_mod_code)
+  soc_min_(0), chem_(rp_mod_code), coul_eff_(coul_eff)
   {
     soc_min_T_ = new TableInterp1D(chem_.n_n, chem_.x_soc_min, chem_.t_soc_min);
   }
@@ -303,7 +303,7 @@ Inputs:
   charge_curr     Charge, A
   sat             Indication that battery is saturated, T=saturated
   tlast           Past value of battery temperature used for rate limit memory, deg C
-  COULOMBIC_EFF   Fraction of charging input that gets turned into useable Coulombs
+  coul_eff_       Coulombic efficiency - the fraction of charging input that gets turned into useable Coulombs
 Outputs:
   q_capacity_     Saturation charge at temperature, C
   *rp_delta_q_    Charge change since saturated, C
@@ -317,7 +317,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
   const boolean sat, const double t_last)
 {
     double d_delta_q = charge_curr * dt;
-    if ( charge_curr>0. ) d_delta_q *= COULOMBIC_EFF;
+    if ( charge_curr>0. ) d_delta_q *= coul_eff_;
     sat_ = sat;
 
     // Rate limit temperature
@@ -354,6 +354,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
     if ( rp.debug==-96 )
         Serial.printf("voc, Voc_filt, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, d_q_i, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
                     pp.pubList.Voc, pp.pubList.Voc_filt, this->Vsat(), temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
+    if ( rp.debug==99 )  Serial.printf("Coulombs:,%7.3f,%7.3f,\n", charge_curr, d_delta_q);
 
     // Save and return
     *rp_t_last_ = temp_lim;

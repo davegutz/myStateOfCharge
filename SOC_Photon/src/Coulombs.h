@@ -81,7 +81,7 @@ class Coulombs
 public:
   Coulombs();
   Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rated, const double t_rated, const double t_rlim,
-    uint8_t *rp_mod_code);
+    uint8_t *rp_mod_code, const double coul_eff);
   ~Coulombs();
   // operators
   // functions
@@ -92,6 +92,8 @@ public:
   void apply_delta_q_t(const double delta_q, const double temp_c);
   void assign_mod(const String mod_str) { chem_.assign_mod(mod_str); };
   double calculate_capacity(const double temp_c);
+  double coul_eff() { return ( coul_eff_ ); };
+  void coul_eff(const double coul_eff) { coul_eff_ = coul_eff; };
   virtual double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
     const boolean sat, const double t_last);
   double delta_q() { return(*rp_delta_q_); };
@@ -114,7 +116,7 @@ protected:
   double q_capacity_; // Saturation charge at temperature, C
   double q_;          // Present charge available to use, except q_min_, C
   double soc_;        // Fraction of saturation charge (q_capacity_) available (0-1)
-  boolean sat_;       // Indication calculated by caller that battery is saturated, T=saturated
+  boolean sat_;       // Indication that battery is saturated, T=saturated
   double t_rated_;    // Rated temperature, deg C
   double t_rlim_;     // Tbatt rate limit, deg C / s
   boolean resetting_ = false;  // Sticky flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
@@ -122,6 +124,7 @@ protected:
   double q_min_;      // Floor on charge available to use, C
   TableInterp1D *soc_min_T_;   // SOC-MIN 1-D table, V
   Chemistry chem_; // Storage of chemistry information
+  double coul_eff_;   // Coulombic efficiency - the fraction of charging input that gets turned into useable Coulombs
 };
 
 #endif

@@ -369,6 +369,21 @@ Rapid tweak test 1 min using models Xx11 'tweakMod'
     To end:
   Xp0; v4;
 
+What these mean:
+  v0;         turn off debug temporarily so not snowed by data dumps
+  Bm0; Bs0;   make sure running base Battleborn configuration
+  Xx11;       modeling, for totally digital test of logic
+  Xts;        start up a sine wave.   presently initializes only on bootup (TODO)
+  Xf0.02;     frequency 0.02 Hz
+  Xa-2000     amplitude -2000 A
+  reset       sine wave initializes only on bootup (TODO)
+  Ca1;        after restarting with sine running, soc will not be at 1.  Reset them all to 1
+  Ri;         reset the delta_q's to 0
+  Mw0; Nw0;   allow tweak bias to work immediately instead of waiting several hours
+  MC0.5; Mx10; NC0.5; Nx10;   give tweak bias logic a large adjustment range to quickly converge
+  Mk0; Nk0;   reset the tweak biases to 0
+  v4;         monitor the standard debug
+  Xp0;        reset the signal injection back to 0 without affecting model settings
 
   ...........................................................
 36. Placeholder

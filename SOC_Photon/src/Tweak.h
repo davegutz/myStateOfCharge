@@ -31,11 +31,13 @@ class Tweak
 public:
   Tweak();
   Tweak(const String name, const double gain, const double max_change, const double max_tweak, const double time_to_wait,
-    float *rp_delta_q_inf, float *rp_tweak_bias);
+    float *rp_delta_q_inf, float *rp_tweak_bias, double coul_eff);
   ~Tweak();
   // operators
   // functions
   void adjust(unsigned long now);
+  double coul_eff() { return ( coul_eff_ ); };
+  void coul_eff(const double coul_eff) { coul_eff_ = coul_eff; };
   void delta_q_inf(const double delta_q_inf) { *rp_delta_q_inf_ = delta_q_inf; };
   double delta_q_inf() { return ( *rp_delta_q_inf_ ); };
   void delta_q_sat_past(const double new_delta_q_sat_past) { delta_q_sat_past_ = new_delta_q_sat_past; };
@@ -72,6 +74,7 @@ protected:
   float *rp_delta_q_inf_;       // Charge infinity at past update see 'N/Mi', Coulombs
   float *rp_tweak_bias_;        // Bias on current see 'N/Mk', A
   double delta_hrs_;            // Time since last allowed saturation see 'N/Mz', hr
+  double coul_eff_;             // Coulombic efficiency - the fraction of charging input that gets turned into useable Coulombs
 };
 
 #endif
