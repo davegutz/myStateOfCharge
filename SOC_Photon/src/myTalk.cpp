@@ -645,7 +645,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 cp.cmd_reset();
                 break;
 
-              case ( 1 ):
+              case ( 7 ):
                 rp.modeling = 7;
                 rp.tweak_test = false;
                 cp.cmd_reset();
@@ -657,7 +657,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 cp.cmd_reset();
                 break;
 
-              case ( 11 ):
+              case ( 17 ):
                 rp.modeling = 7;
                 rp.tweak_test = true;
                 cp.cmd_reset();
@@ -668,7 +668,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 break;
             }
             Serial.printf("Modeling is %d\n", rp.modeling);
-            Serial.printf("tweak_test is%d\n", rp.tweak_test);
+            Serial.printf("tweak_test is %d\n", rp.tweak_test);
             break;
 
           case ( 'a' ): // injection amplitude
@@ -967,9 +967,9 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("       0x1 temperature = %d\n", rp.mod_tb());
   Serial.printf("  Xx= %d signal sourcing option...\n", rp.modeling + rp.tweak_test*10 );
   Serial.printf("       0  normal operation\n");
-  Serial.printf("       1  use models <<TODO>>\n");
+  Serial.printf("       7  use models <<TODO>>\n");
   Serial.printf("      10  tweak test hardware <<TODO>>\n");
-  Serial.printf("      11  tweak test use models\n");
+  Serial.printf("      17  tweak test use models\n");
   Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Inj amplitude A pk (0-18.3) [0]");
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println("  : Inj frequency Hz (0-2) [0]");
   Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Inj type.  'c', 's', 'q', 't' (cosine, sine, square, triangle)");

@@ -325,7 +325,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   17. Regression test:   For installed with real signal, could disconnect solar panels and inject using Talk('Di<>') or Talk('Xp5') and Talk('Xp6').  Uninstalled, should run through them all:  Talk('Xp<>,) 0-6.  Uninstalled should also run onto and off of limits (7 & 8 TODO).
   18. In modeling mode the Battery Model passes all sensed signals on to the Battery Monitor.   The Model does things like cutting back current near saturation, and injecting test signals both hard and soft.  The Signal Sense logic needs to perform some injection especially soft so Model not needed for some regression.
   19. All logic uses a counting scheme that debits Coulombs since last known saturation.   The prime requirement of using saturation to periodically reset logic is reflected in use of change since saturation.
-  20. The easiest way to confirm that the EKF is working correctly is to set 'modeling' using Talk('Xx1') and verify that soc_ekf equals soc_mod.
+  20. The easiest way to confirm that the EKF is working correctly is to set 'modeling' using Talk('Xx7') and verify that soc_ekf equals soc_mod.
   21. Lessons-learned from installation in truck.  Worked fine driving both A/D with D2 from main board.    But when installed in truck all hell broke loose.   The root cause was grounding the Vlow fuse side of shunt legs of the A/D converters.   In theory the fuse side is the same as ground of power supply.   But the wires are gage 20-22 and I detected a 75 mA current in the Vh and Vl legs which is enough to put about 50% error on detection.   Very sensitive.   But if float both legs and avoid ground looping it works fine.   And as long as ground loops avoided, there is no need to beef up the sense wire gage because there will be no current to speak of.  I revised the schematics.   There are now two pin-outs:  one for installed in truck and another when driving with the D2 pin and PWM into the RC circuits.
   22. Regression testing:  
     a. Saturation test.  Run Talk('Xp7').   This will initialize monitor at 0.5 and model near saturation then drive toward saturation.   Watch voc vs v_sat and sat in the v2 debug display that gets started.  Reset with 'Xp-1'.  If starting up Xp7 it initializes saturated just enter 'm<<val>>' with lower 'val' than what 'Xp7' started it with until it initializes without saturation.  Should saturate soon and reset soc of monitor to 1.0.  Then setting 'Di-1000' you should see it reset after a very little time. Again, reset the whole mess with 'Xp-1'.
@@ -346,8 +346,8 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   ........................................................................................
   35. Regression tests:
 
-Rapid tweak test 1 min using models Xx11 'tweakMod' to test tweak only (no data collection, v0)
-  v0; Bm0; Bs0; Xx11; Xts; Xf0.02;  Xa-2000;
+Rapid tweak test 1 min using models Xx17 'tweakMod' to test tweak only (no data collection, v0)
+  v0; Bm0; Bs0; Xx17; Xts; Xf0.02;  Xa-2000;
     then hard reset  (to restart sinusoids  [TODO])then
   Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; Mp0; Np0; Dn1; v0;
     To end:
@@ -356,18 +356,18 @@ Rapid tweak test 1 min using models Xx11 'tweakMod' to test tweak only (no data 
       Tweak(Amp)::adjust:, past=       0.0, pres=       0.0, error=       0.0, gain= -0.040001, delta_hrs=  0.013889, Di=  0.000, new_Di= -0.000,
       Tweak(No Amp)::adjust:, past=       0.0, pres=       0.0, error=       0.0, gain= -0.040001, delta_hrs=  0.013889, Di=  0.000, new_Di= -0.000,
 
-Rapid tweak test 02:30 min using models Xx11 'tweakMod'
+Rapid tweak test 02:30 min using models 'tweakMod'
     start recording (will need v4 later)
-  v0; Bm0; Bs0; Xx11; Xts; Xf0.02; Xa-2000;
+  v0; Bm0; Bs0; Xx17; Xts; Xf0.02; Xa-2000;
     then hard reset (to restart sinusoids  [TODO]) then
   Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; Mp0; Np0; Dn1; v4;
     To end:
   Xp0; v4; Dn0.9985;
     expected result:  see 'dataReduction/newFloatTweakMod_overplots.xlsx'
 
-  Slow cycle test 10:00 min using models Xx1 'cycleMod'
+  Slow cycle test 10:00 min using models 'cycleMod'
     start recording (will need v4 later)
-  v0; Bm0; Bs0; Xx11; Xts; Xf0.002; Xa-60;
+  v0; Bm0; Bs0; Xx17; Xts; Xf0.002; Xa-60;
     then hard reset  (to restart sinusoids  [TODO])then
   Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; Dn1; v4;
     To end:
@@ -378,7 +378,7 @@ What the adjustments mean:
   v0;         turn off debug temporarily so not snowed by data dumps
   v4;         for recordings
   Bm0; Bs0;   make sure running base Battleborn configuration
-  Xx11;       modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
+  Xx17;       modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
   Dn1;        disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
   Dn0.9985    nominal Coulombic efficiency in local_config.h
   Xts;        start up a sine wave.   presently initializes only on bootup (TODO)
