@@ -5,8 +5,8 @@
 const String unit = "soc0_20220525";  // new float types, battery types, nomenclature, coulombic efficiency
 
 // Sensor biases
-#define CURR_BIAS_AMP         -1.03 // Calibration of amplified shunt sensor ('Da=#.#;'), A
-#define CURR_BIAS_NOAMP       -1.37 // Calibration of non-amplified shunt sensor ('Db=#.#;'), A
+#define CURR_BIAS_AMP         -0.23 // Calibration of amplified shunt sensor ('Da=#.#;'), A
+#define CURR_BIAS_NOAMP       -0.57 // Calibration of non-amplified shunt sensor ('Db=#.#;'), A
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors ('Di=#.#;'), A
 #define VOLT_BIAS             0.0   // Bias on Vbatt sensor ('Dc=#.#;'), V
 #define TEMP_BIAS             0.0   // Bias on Tbatt sensor ('Dt=#.#;'  +reset), deg C
