@@ -479,7 +479,7 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   else Sen->Ibatt = Sen->Ibatt_hdwe;
   if ( rp.mod_vb() )  Sen->Vbatt = Sen->Vbatt_model;
   else Sen->Vbatt = Sen->Vbatt_hdwe;
-  if ( rp.mod_vb() )
+  if ( rp.mod_tb() )
   {
     Sen->Tbatt = RATED_TEMP;
     Sen->Tbatt_filt = Sen->Tbatt;
