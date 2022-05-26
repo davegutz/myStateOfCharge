@@ -39,10 +39,10 @@ struct RetainedPars
   float t_last = 25.;           // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
   double delta_q_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
   float t_last_model = 25.;     // Battery temperature past value for rate limit memory, deg C
-  float curr_bias_amp = CURR_BIAS_AMP; // Calibration of amplified shunt sensor, A
-  float curr_bias_noamp = CURR_BIAS_NOAMP; // Calibration of non-amplified shunt sensor, A
-  float curr_bias_all = CURR_BIAS_ALL; // Bias on all shunt sensors, A
-  boolean curr_sel_noamp = false; // Use non-amplified sensor
+  float ibatt_bias_amp = CURR_BIAS_AMP;     // Calibration of amplified shunt sensor, A
+  float ibatt_bias_noamp = CURR_BIAS_NOAMP; // Calibration of non-amplified shunt sensor, A
+  float ibatt_bias_all = CURR_BIAS_ALL;     // Bias on all shunt sensors, A
+  boolean ibatt_sel_noamp = false;          // Use non-amplified sensor
   float vbatt_bias = VOLT_BIAS; // Calibrate Vbatt, V
   uint8_t modeling = 0;         // Driving saturation calculation with model.  Bits specify which signals use model.
   uint32_t duty = 0;            // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
@@ -50,7 +50,7 @@ struct RetainedPars
   float freq = 0.;              // Injected frequency, Hz (0-2)
   uint8_t type = 0;             // Injected waveform type.   0=sine, 1=square, 2=triangle
   float inj_soft_bias = 0.;     // Constant bias, A
-  float t_bias = TEMP_BIAS;     // Bias on Tbatt sensor, deg C
+  float tbatt_bias = TEMP_BIAS; // Bias on Tbatt sensor, deg C
   float s_cap_model = 1.;       // Scalar on battery model size
   float cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
@@ -69,8 +69,8 @@ struct RetainedPars
   boolean is_corrupt()
   {
     return ( this->nP==0 || this->nS==0 || this->mon_mod>10 || isnan(this->amp) || this->freq>2. ||
-     abs(this->curr_bias_amp)>500. ||
-     this->duty>1000 || abs(this->cutback_gain_scalar)>1000. || abs(this->curr_bias_noamp)>500. );
+     abs(this->ibatt_bias_amp)>500. ||
+     this->duty>1000 || abs(this->cutback_gain_scalar)>1000. || abs(this->ibatt_bias_noamp)>500. );
   }
 
   // Nominalize
@@ -81,10 +81,10 @@ struct RetainedPars
     this->t_last = 25.;
     this->delta_q_model = -0.5;
     this->t_last_model = 25.;
-    this->curr_bias_amp = CURR_BIAS_AMP;
-    this->curr_bias_noamp = CURR_BIAS_NOAMP;
-    this->curr_bias_all = CURR_BIAS_ALL;
-    this->curr_sel_noamp = false;
+    this->ibatt_bias_amp = CURR_BIAS_AMP;
+    this->ibatt_bias_noamp = CURR_BIAS_NOAMP;
+    this->ibatt_bias_all = CURR_BIAS_ALL;
+    this->ibatt_sel_noamp = false;
     this->vbatt_bias = VOLT_BIAS;
     this->modeling = false;
     this->duty = 0;
@@ -92,7 +92,7 @@ struct RetainedPars
     this->freq = 0.;
     this->type = 0;
     this->inj_soft_bias = 0.;
-    this->t_bias = TEMP_BIAS;
+    this->tbatt_bias = TEMP_BIAS;
     this->s_cap_model = 1.0;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
@@ -111,10 +111,10 @@ struct RetainedPars
     this->debug = 0;
     this->delta_q = 0.;           // saturate
     this->delta_q_model = 0.;     // saturate
-    this->curr_bias_amp = CURR_BIAS_AMP;
-    this->curr_bias_noamp = CURR_BIAS_NOAMP;
-    this->curr_bias_all = CURR_BIAS_ALL;
-    this->curr_sel_noamp = false;   // T=amplified
+    this->ibatt_bias_amp = CURR_BIAS_AMP;
+    this->ibatt_bias_noamp = CURR_BIAS_NOAMP;
+    this->ibatt_bias_all = CURR_BIAS_ALL;
+    this->ibatt_sel_noamp = false;   // T=amplified
     this->vbatt_bias = VOLT_BIAS;
     this->modeling = false;
     this->duty = 0;
@@ -122,7 +122,7 @@ struct RetainedPars
     this->freq = 0.;
     this->type = 0;
     this->inj_soft_bias = 0.;
-    this->t_bias = TEMP_BIAS;
+    this->tbatt_bias = TEMP_BIAS;
     this->s_cap_model = 1.0;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
@@ -151,10 +151,10 @@ struct RetainedPars
     Serial.printf("  t_last =              %7.3f;  // Battery temperature past value for rate limit memory, deg C\n", this->t_last);
     Serial.printf("  delta_q_model =    %10.1f;  // Coulomb Counter state for model, (-1 - 1)\n", this->delta_q_model);
     Serial.printf("  t_last_model =        %7.3f;  // Battery temperature past value for rate limit memory, deg C\n", this->t_last_model);
-    Serial.printf("  curr_bias_amp =       %7.3f;  // Calibrate amp current sensor, A\n", this->curr_bias_amp);
-    Serial.printf("  curr_bias_noamp =     %7.3f;  // Calibrate non-amplified current sensor, A\n", this->curr_bias_noamp);
-    Serial.printf("  curr_bias_all =       %7.3f;  // Bias all current sensors, A \n", this->curr_bias_all);
-    Serial.printf("  curr_sel_noamp =            %d;  // Use non-amplified sensor\n", this->curr_sel_noamp);
+    Serial.printf("  ibatt_bias_amp =      %7.3f;  // Calibrate amp current sensor, A\n", this->ibatt_bias_amp);
+    Serial.printf("  ibatt_bias_noamp =    %7.3f;  // Calibrate non-amplified current sensor, A\n", this->ibatt_bias_noamp);
+    Serial.printf("  ibatt_bias_all =      %7.3f;  // Bias all current sensors, A \n", this->ibatt_bias_all);
+    Serial.printf("  ibatt_sel_noamp =           %d;  // Use non-amplified sensor\n", this->ibatt_sel_noamp);
     Serial.printf("  vbatt_bias =          %7.3f;  // Calibrate Vbatt, V\n", this->vbatt_bias);
     Serial.printf("  modeling =                  %d;  // Bit mapped modeling specification\n", this->modeling);
     Serial.printf("  duty =                      %ld;  // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))\n", this->duty);
@@ -162,7 +162,7 @@ struct RetainedPars
     Serial.printf("  freq =                %7.3f;  // Injected frequency, Hz (0-2)\n", this->freq);
     Serial.printf("  type =                      %d;  //  Injected waveform type.   0=sine, 1=square, 2=triangle\n", this->type);
     Serial.printf("  inj_soft_bias =       %7.3f;  // Constant bias, A\n", this->inj_soft_bias);
-    Serial.printf("  t_bias =              %7.3f;  // Sensed temp bias, deg C\n", this->t_bias);
+    Serial.printf("  tbatt_bias =          %7.3f;  // Sensed temp bias, deg C\n", this->tbatt_bias);
     Serial.printf("  s_cap_model =         %7.3f;  // Scalar on battery model size\n", this->s_cap_model);
     Serial.printf("  cutback_gain_scalar = %7.3f;  // Scalar on battery model saturation cutback function\n", this->cutback_gain_scalar);
     Serial.printf("  isum =                      %d;  // Summary location.   Begins at -1 because first action is to increment isum\n", this->isum);

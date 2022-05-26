@@ -54,13 +54,13 @@ class Shunt: public Tweak, Adafruit_ADS1015
 {
 public:
   Shunt();
-  Shunt(const String name, const uint8_t port, float *rp_delta_q_inf, float *rp_tweak_bias, float *cp_curr_bias, 
+  Shunt(const String name, const uint8_t port, float *rp_delta_q_inf, float *rp_tweak_bias, float *cp_ibatt_bias, 
     const float v2a_s);
   ~Shunt();
   // operators
   // functions
   boolean bare() { return ( bare_ ); };
-  float cp_curr_bias() { return ( *cp_curr_bias_ ); };
+  float cp_ibatt_bias() { return ( *cp_ibatt_bias_ ); };
   float ishunt_cal() { return ( ishunt_cal_ ); };
   void load();
   void pretty_print();
@@ -73,7 +73,7 @@ protected:
   String name_;         // For print statements, multiple instances
   uint8_t port_;        // Octal I2C port used by Acafruit_ADS1015
   boolean bare_;        // If ADS to be ignored
-  float *cp_curr_bias_; // Global bias, A
+  float *cp_ibatt_bias_; // Global bias, A
   float v2a_s_;        // Selected shunt conversion gain, A/V
   int16_t vshunt_int_;  // Sensed shunt voltage, count
   int16_t vshunt_int_0_;// Interim conversion, count
@@ -134,13 +134,13 @@ struct Sensors
     this->T = T;
     this->T_filt = T;
     this->T_temp = T_temp;
-    this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_inf_amp, &rp.tweak_bias_amp, &cp.curr_bias_amp, shunt_amp_v2a_s);
+    this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_inf_amp, &rp.tweak_bias_amp, &cp.ibatt_bias_amp, shunt_amp_v2a_s);
     if ( rp.debug>102 )
     {
       Serial.printf("After new Shunt('Amp'):\n");
       this->ShuntAmp->pretty_print();
     }
-    this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp, &cp.curr_bias_noamp, shunt_noamp_v2a_s);
+    this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp, &cp.ibatt_bias_noamp, shunt_noamp_v2a_s);
     if ( rp.debug>102 )
     {
       Serial.printf("After new Shunt('No Amp'):\n");
@@ -156,7 +156,7 @@ struct Sensors
 // Headers
 void create_print_string(char *buffer, Publish *pubList);
 double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
-void filter_temp(const int reset, const float t_rlim, Sensors *Sen, const float t_bias, float *t_bias_last);
+void filter_temp(const int reset, const float t_rlim, Sensors *Sen, const float tbatt_bias, float *tbatt_bias_last);
 void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins *myPins);
 void load_temp(Sensors *Sen);
 void manage_wifi(unsigned long now, Wifi *wifi);

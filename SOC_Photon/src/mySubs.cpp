@@ -39,11 +39,11 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // constructors
 Shunt::Shunt()
 : Tweak(), Adafruit_ADS1015(), name_("None"), port_(0x00), bare_(false){}
-Shunt::Shunt(const String name, const uint8_t port, float *rp_delta_q_inf, float *rp_tweak_bias, float *cp_curr_bias,
+Shunt::Shunt(const String name, const uint8_t port, float *rp_delta_q_inf, float *rp_tweak_bias, float *cp_ibatt_bias,
   const float v2a_s)
 : Tweak(name, TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, TWEAK_WAIT, rp_delta_q_inf, rp_tweak_bias, COULOMBIC_EFF),
   Adafruit_ADS1015(),
-  name_(name), port_(port), bare_(false), cp_curr_bias_(cp_curr_bias), v2a_s_(v2a_s),
+  name_(name), port_(port), bare_(false), cp_ibatt_bias_(cp_ibatt_bias), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0)
 {
   if ( name_=="No Amp")
@@ -67,7 +67,7 @@ void Shunt::pretty_print()
   Serial.printf("Shunt(%s)::\n", name_.c_str());
   Serial.printf("  port_ =                0x%X; // I2C port used by Acafruit_ADS1015\n", port_);
   Serial.printf("  bare_ =                   %d; // If ADS to be ignored\n", bare_);
-  Serial.printf("  *cp_curr_bias_ =    %7.3f; // Global bias, A\n", *cp_curr_bias_);
+  Serial.printf("  *cp_ibatt_bias_ =   %7.3f; // Global bias, A\n", *cp_ibatt_bias_);
   Serial.printf("  v2a_s_ =            %7.2f; // Selected shunt conversion gain, A/V\n", v2a_s_);
   Serial.printf("  vshunt_int_ =           %d; // Sensed shunt voltage, count\n", vshunt_int_);
   Serial.printf("  ishunt_cal_ =       %7.3f; // Sensed, calibrated ADC, A\n", ishunt_cal_);
@@ -93,7 +93,7 @@ void Shunt::load()
     vshunt_int_0_ = 0; vshunt_int_1_ = 0; vshunt_int_ = 0;
   }
   vshunt_ = computeVolts(vshunt_int_);
-  ishunt_cal_ = vshunt_*v2a_s_*float(!rp.modeling) + *cp_curr_bias_;
+  ishunt_cal_ = vshunt_*v2a_s_*float(!rp.modeling) + *cp_ibatt_bias_;
 }
 
 
@@ -110,7 +110,7 @@ void create_print_string(char *buffer, Publish *pubList)
   if ( rp.debug==4 )
   sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%7.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
-    pubList->sat, rp.curr_sel_noamp, rp.modeling,
+    pubList->sat, rp.ibatt_sel_noamp, rp.modeling,
     pubList->Tbatt, pubList->Vbatt, pubList->Ibatt,
     pubList->Vsat, pubList->Vdyn, pubList->Voc, pubList->Voc_ekf,
     pubList->y_ekf,
@@ -157,12 +157,12 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
 }
 
 // Filter temperature only
-void filter_temp(const int reset_loc, const float t_rlim, Sensors *Sen, const float t_bias, float *t_bias_last)
+void filter_temp(const int reset_loc, const float t_rlim, Sensors *Sen, const float tbatt_bias, float *tbatt_bias_last)
 {
   // Rate limit the temperature bias
-  if ( reset_loc ) *t_bias_last = t_bias;
-  float t_bias_loc = max(min(t_bias, *t_bias_last + t_rlim*Sen->T_temp), *t_bias_last - t_rlim*Sen->T_temp);
-  *t_bias_last = t_bias_loc;
+  if ( reset_loc ) *tbatt_bias_last = tbatt_bias;
+  float t_bias_loc = max(min(tbatt_bias, *tbatt_bias_last + t_rlim*Sen->T_temp), *tbatt_bias_last - t_rlim*Sen->T_temp);
+  *tbatt_bias_last = t_bias_loc;
 
   // Filter and add rate limited bias
   if ( reset_loc && Sen->Tbatt>40. )  // Bootup T=85.5 C
@@ -187,13 +187,13 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   // Current bias.  Feeds into signal conversion, not to duty injection
   if ( rp.mod_ib() )
   {
-    cp.curr_bias_noamp = rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_noamp;
-    cp.curr_bias_amp = rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_amp;
+    cp.ibatt_bias_noamp = rp.ibatt_bias_all + rp.inj_soft_bias + rp.tweak_bias_noamp;
+    cp.ibatt_bias_amp = rp.ibatt_bias_all + rp.inj_soft_bias + rp.tweak_bias_amp;
   }
   else
   {
-    cp.curr_bias_noamp = rp.curr_bias_noamp + rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_noamp;
-    cp.curr_bias_amp = rp.curr_bias_amp + rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_amp;
+    cp.ibatt_bias_noamp = rp.ibatt_bias_noamp + rp.ibatt_bias_all + rp.inj_soft_bias + rp.tweak_bias_noamp;
+    cp.ibatt_bias_amp = rp.ibatt_bias_amp + rp.ibatt_bias_all + rp.inj_soft_bias + rp.tweak_bias_amp;
   }
 
   // Read Sensors
@@ -202,34 +202,34 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   Sen->ShuntNoAmp->load();
 
   // Current signal selection, based on if there or not.
-  // Over-ride 'permanent' with Talk(rp.curr_sel_noamp) = Talk('s')
-  float model_curr_bias = 0.;
-  if ( !rp.curr_sel_noamp && !Sen->ShuntAmp->bare())
+  // Over-ride 'permanent' with Talk(rp.ibatt_sel_noamp) = Talk('s')
+  float model_ibatt_bias = 0.;
+  if ( !rp.ibatt_sel_noamp && !Sen->ShuntAmp->bare())
   {
     Sen->Vshunt = Sen->ShuntAmp->vshunt();
     Sen->Ibatt_hdwe = Sen->ShuntAmp->ishunt_cal();
-    model_curr_bias = Sen->ShuntAmp->cp_curr_bias();
+    model_ibatt_bias = Sen->ShuntAmp->cp_ibatt_bias();
   }
   else if ( !Sen->ShuntNoAmp->bare() )
   {
     Sen->Vshunt = Sen->ShuntNoAmp->vshunt();
     Sen->Ibatt_hdwe = Sen->ShuntNoAmp->ishunt_cal();
-    model_curr_bias = Sen->ShuntNoAmp->cp_curr_bias();
+    model_ibatt_bias = Sen->ShuntNoAmp->cp_ibatt_bias();
   }
   else
   {
     Sen->Vshunt = 0.;
     Sen->Ibatt_hdwe = 0.;
-    model_curr_bias = 0.;
+    model_ibatt_bias = 0.;
   }
   if ( rp.modeling )
-    Sen->Ibatt_model_in = model_curr_bias;
+    Sen->Ibatt_model_in = model_ibatt_bias;
   else
     Sen->Ibatt_model_in = Sen->Ibatt_hdwe;
 
   // Print results
   if ( rp.debug==14 ) Serial.printf("reset_free,select,duty,vs_int_a,Vshunt_a,Ibatt_hdwe_a,vs_int_na,Vshunt_na,Ibatt_hdwe_na,Ibatt_hdwe,T=,    %d,%d,%ld,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,\n",
-    reset_free, rp.curr_sel_noamp, rp.duty,
+    reset_free, rp.ibatt_sel_noamp, rp.duty,
     Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), Sen->ShuntAmp->ishunt_cal(),
     Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->ishunt_cal(),
     Sen->Ibatt_hdwe, T);

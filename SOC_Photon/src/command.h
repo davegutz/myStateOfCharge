@@ -49,8 +49,8 @@ struct CommandPars
   boolean model_saturated;  // Sim on cutback and saturated
   boolean soft_reset;       // Use talk to reset main
   boolean write_summary;    // Use talk to issue a write command to summary
-  float curr_bias_amp;      // Calibration of amplified shunt sensor, A
-  float curr_bias_noamp;    // Calibration of non-amplified shunt sensor, A
+  float ibatt_bias_amp;     // Calibration of amplified shunt sensor, A
+  float ibatt_bias_noamp;   // Calibration of non-amplified shunt sensor, A
   boolean dc_dc_on;         // DC-DC charger is on
   CommandPars(void)
   {
@@ -60,8 +60,8 @@ struct CommandPars
     this->model_saturated = false;
     this->soft_reset = false;
     this->write_summary = false;
-    curr_bias_amp = 0.;
-    curr_bias_noamp = 0.;
+    ibatt_bias_amp = 0.;
+    ibatt_bias_noamp = 0.;
     dc_dc_on = false;
   }
   void cmd_reset(void)
@@ -83,14 +83,14 @@ struct CommandPars
   void pretty_print(void)
   {
     Serial.printf("command parameters(cp):\n");
-    Serial.printf("  enable_wifi =          %d;  // Enable wifi\n", this->enable_wifi);
-    Serial.printf("  model_cutback =        %d;  // On model cutback\n", this->model_cutback);
-    Serial.printf("  model_saturated =      %d;  // Sim on cutback and saturated\n", this->model_saturated);
-    Serial.printf("  soft_reset =           %d;  // Use talk to reset main\n", this->soft_reset);
-    Serial.printf("  write_summary =        %d;  // Use talk to issue a write command to summary\n", this->write_summary);
-    Serial.printf("  curr_bias_amp =  %7.3f;  // Signal injection bias for amplified current input, A\n", this->curr_bias_amp);
-    Serial.printf("  curr_bias_noamp =%7.3f;  // Signal injection bias for non-amplified current input, A\n", this->curr_bias_noamp);
-    Serial.printf("  dc_dc_on =             %d;  // DC-DC charger is on\n", this->dc_dc_on);
+    Serial.printf("  enable_wifi =            %d;  // Enable wifi\n", this->enable_wifi);
+    Serial.printf("  model_cutback =          %d;  // On model cutback\n", this->model_cutback);
+    Serial.printf("  model_saturated =        %d;  // Sim on cutback and saturated\n", this->model_saturated);
+    Serial.printf("  soft_reset =             %d;  // Use talk to reset main\n", this->soft_reset);
+    Serial.printf("  write_summary =          %d;  // Use talk to issue a write command to summary\n", this->write_summary);
+    Serial.printf("  ibatt_bias_amp =   %7.3f;  // Signal injection bias for amplified current input, A\n", this->ibatt_bias_amp);
+    Serial.printf("  ibatt_bias_noamp = %7.3f;  // Signal injection bias for non-amplified current input, A\n", this->ibatt_bias_noamp);
+    Serial.printf("  dc_dc_on =               %d;  // DC-DC charger is on\n", this->dc_dc_on);
   }
 };            
 

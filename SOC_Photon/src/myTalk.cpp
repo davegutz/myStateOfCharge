@@ -165,15 +165,15 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         switch ( cp.input_string.charAt(1) )
         {
           case ( 'a' ):
-            Serial.printf("rp.curr_bias_amp from %7.3f to ", rp.curr_bias_amp);
-            rp.curr_bias_amp = cp.input_string.substring(2).toFloat();
-            Serial.printf("%7.3f\n", rp.curr_bias_amp);
+            Serial.printf("rp.ibatt_bias_amp from %7.3f to ", rp.ibatt_bias_amp);
+            rp.ibatt_bias_amp = cp.input_string.substring(2).toFloat();
+            Serial.printf("%7.3f\n", rp.ibatt_bias_amp);
             break;
 
           case ( 'b' ):
-            Serial.printf("rp.curr_bias_noamp from %7.3f to ", rp.curr_bias_noamp);
-            rp.curr_bias_noamp = cp.input_string.substring(2).toFloat();
-            Serial.printf("%7.3f\n", rp.curr_bias_noamp);
+            Serial.printf("rp.ibatt_bias_noamp from %7.3f to ", rp.ibatt_bias_noamp);
+            rp.ibatt_bias_noamp = cp.input_string.substring(2).toFloat();
+            Serial.printf("%7.3f\n", rp.ibatt_bias_noamp);
             break;
 
           case ( 'c' ):
@@ -183,9 +183,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'i' ):
-            Serial.printf("rp.curr_bias_all from %7.3f to ", rp.curr_bias_all);
-            rp.curr_bias_all = cp.input_string.substring(2).toFloat();
-            Serial.printf("%7.3f\n", rp.curr_bias_all);
+            Serial.printf("rp.ibatt_bias_all from %7.3f to ", rp.ibatt_bias_all);
+            rp.ibatt_bias_all = cp.input_string.substring(2).toFloat();
+            Serial.printf("%7.3f\n", rp.ibatt_bias_all);
             break;
 
           case ( 'n' ):
@@ -199,9 +199,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 't' ):
-            Serial.printf("rp.t_bias from %7.3f to ", rp.t_bias);
-            rp.t_bias = cp.input_string.substring(2).toFloat();
-            Serial.printf("%7.3f\n", rp.t_bias);
+            Serial.printf("rp.tbatt_bias from %7.3f to ", rp.tbatt_bias);
+            rp.tbatt_bias = cp.input_string.substring(2).toFloat();
+            Serial.printf("%7.3f\n", rp.tbatt_bias);
             rp.debug = 0;
             Serial.printf("**************** reset ****\n");
             break;
@@ -500,11 +500,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'x' ):
-            Serial.printf("\nAmp:   "); Serial.printf("Vshunt_int, Vshunt, cp.curr_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
-              Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), cp.curr_bias_amp, Sen->ShuntAmp->ishunt_cal());
-            Serial.printf("No Amp:"); Serial.printf("Vshunt_int, Vshunt, cp.curr_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
-              Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), cp.curr_bias_noamp, Sen->ShuntNoAmp->ishunt_cal());
-            Serial.printf("Selected:  NoAmp,Ibatt=,  %d, %7.3f\n", rp.curr_sel_noamp, Sen->Ibatt);
+            Serial.printf("\nAmp:   "); Serial.printf("Vshunt_int, Vshunt, cp.ibatt_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
+              Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), cp.ibatt_bias_amp, Sen->ShuntAmp->ishunt_cal());
+            Serial.printf("No Amp:"); Serial.printf("Vshunt_int, Vshunt, cp.ibatt_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
+              Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), cp.ibatt_bias_noamp, Sen->ShuntNoAmp->ishunt_cal());
+            Serial.printf("Selected:  NoAmp,Ibatt=,  %d, %7.3f\n", rp.ibatt_sel_noamp, Sen->Ibatt);
             break;
 
           case ( 'v' ):
@@ -588,11 +588,11 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
       case ( 's' ):
         if ( cp.input_string.substring(1).toInt()>0 )
         {
-          rp.curr_sel_noamp = true;
+          rp.ibatt_sel_noamp = true;
         }
         else
-          rp.curr_sel_noamp = false;
-        Serial.printf("Signal selection ( 0=amp, 1=noamp,) set to %d\n", rp.curr_sel_noamp);
+          rp.ibatt_sel_noamp = false;
+        Serial.printf("Signal selection ( 0=amp, 1=noamp,) set to %d\n", rp.ibatt_sel_noamp);
         break;
 
       case ( 'v' ):
@@ -715,7 +715,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 if ( !rp.tweak_test() ) rp.inj_soft_bias = 0.0;
                 self_talk("Mk0", Mon, Sen);
                 self_talk("Nk0", Mon, Sen);
-                rp.curr_bias_all = 0;
+                rp.ibatt_bias_all = 0;
                 debug_inject();  // Arduino plot
                 break;
 
@@ -755,14 +755,14 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
               case ( 4 ):
                 self_talk("Xp0", Mon, Sen);
                 rp.type = 4;
-                rp.curr_bias_all = -RATED_BATT_CAP;  // Software effect only
+                rp.ibatt_bias_all = -RATED_BATT_CAP;  // Software effect only
                 debug_inject();  // Arduino plot
                 break;
 
               case ( 5 ):
                 self_talk("Xp0", Mon, Sen);
                 rp.type = 5;
-                rp.curr_bias_all = RATED_BATT_CAP; // Software effect only
+                rp.ibatt_bias_all = RATED_BATT_CAP; // Software effect only
                 debug_inject();  // Arduino plot
                 break;
 
@@ -835,12 +835,12 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Cm=  set soc model only (and ekf if modeling)- '(0-1.1)'\n"); 
 
   Serial.printf("D/S<?> Adjustments.   For example:\n");
-  Serial.printf("  Da= "); Serial.printf("%7.3f", rp.curr_bias_amp); Serial.printf("    : delta amp sense, A [%7.3f]\n", CURR_BIAS_AMP); 
-  Serial.printf("  Db= "); Serial.printf("%7.3f", rp.curr_bias_noamp); Serial.printf("    : delta noa sense, A [%7.3f]\n", CURR_BIAS_NOAMP); 
-  Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.printf("    : delta all sense, A [%7.3f]\n", CURR_BIAS_ALL); 
+  Serial.printf("  Da= "); Serial.printf("%7.3f", rp.ibatt_bias_amp); Serial.printf("    : delta amp sense, A [%7.3f]\n", CURR_BIAS_AMP); 
+  Serial.printf("  Db= "); Serial.printf("%7.3f", rp.ibatt_bias_noamp); Serial.printf("    : delta noa sense, A [%7.3f]\n", CURR_BIAS_NOAMP); 
+  Serial.printf("  Di= "); Serial.printf("%7.3f", rp.ibatt_bias_all); Serial.printf("    : delta all sense, A [%7.3f]\n", CURR_BIAS_ALL); 
   Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.printf("    : delta volt sense, V [%7.3f]\n", VOLT_BIAS); 
   Serial.printf("  Dn= "); Serial.print(Sen->Sim->coul_eff()); Serial.println("       : coulombic efficiency"); 
-  Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.t_bias); Serial.printf("    : delta T sense, deg C [%7.3f]\n", TEMP_BIAS); 
+  Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.tbatt_bias); Serial.printf("    : delta T sense, deg C [%7.3f]\n", TEMP_BIAS); 
   Serial.printf("  Dv= "); Serial.print(Sen->Sim->Dv()); Serial.println("       : Table adjust [0.01]"); 
   Serial.printf("  Sc= "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println("       : Scalar battery model size"); 
   Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.println("    : hysteresis scalar 1e-6 - 100");
@@ -901,7 +901,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  RR= "); Serial.printf("saturate, equalize, and nominalize all testing for DEPLOY\n");
   Serial.printf("  Rs= "); Serial.printf("small reset.  reset flags to reinitialize filters\n");
 
-  Serial.printf("s   curr signal select (0=amp preferred, 1=noamp) = "); Serial.println(rp.curr_sel_noamp);
+  Serial.printf("s   curr signal select (0=amp preferred, 1=noamp) = "); Serial.println(rp.ibatt_sel_noamp);
 
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("    -<>:   Negative - Arduino plot compatible\n");
@@ -941,7 +941,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println("  : Inj frequency Hz (0-2) [0]");
   Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Inj type.  'c', 's', 'q', 't' (cosine, sine, square, triangle)");
   Serial.printf("  Xo= "); Serial.printf("%7.3f", rp.inj_soft_bias); Serial.println("  : Inj inj_soft_bias A (-18.3-18.3) [0]");
-  Serial.printf("  Di= "); Serial.printf("%7.3f", rp.curr_bias_all); Serial.println("  : Inj  A (unlimited) [0]");
+  Serial.printf("  Di= "); Serial.printf("%7.3f", rp.ibatt_bias_all); Serial.println("  : Inj  A (unlimited) [0]");
   Serial.printf("  Xp= <?>, programmed injection settings...\n"); 
   Serial.printf("      -1:  Off, modeling false\n");
   Serial.printf("       0:  steady-state modeling\n");
