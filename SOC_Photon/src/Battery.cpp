@@ -579,7 +579,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
 
     // Saturation logic, both full and empty
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
-    if ( rp.tweak_test ) sat_ib_max_ = curr_in; // Disable cutback when doing tweak_test test
+    if ( rp.tweak_test() ) sat_ib_max_ = curr_in; // Disable cutback when doing tweak_test test
     ib_ = min(curr_in/(*rp_nP_), sat_ib_max_);
     if ( (q_ <= 0.) && (curr_in < 0.) ) ib_ = 0.;  //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_ == sat_ib_max_);
@@ -608,7 +608,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
 uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq)
 {
   double t;
-  if ( rp.tweak_test )
+  if ( rp.tweak_test() )
   {
       if ( now<2*TEMP_INIT_DELAY )
       {
@@ -652,7 +652,7 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
       break;
   }
   inj_bias = sin_bias + square_bias + tri_bias + bias + cos_bias;
-  if ( rp.tweak_test )   // Use inj_soft_bias path, bypassing PWM that has limited hardware range
+  if ( rp.tweak_test() )   // Use inj_soft_bias path, bypassing PWM that has limited hardware range
   {
     duty_ = 0UL;
     rp.inj_soft_bias = inj_bias - rp.amp;
@@ -717,7 +717,6 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
     if ( rp.debug==-97 )
         Serial.printf("voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
                     pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, Sen->Ibatt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
-    if ( rp.debug==99 )  Serial.printf("Battery:,%7.3f,%7.3f,", Sen->Ibatt, d_delta_q);
 
     // Save and return
     *rp_t_last_ = temp_lim;

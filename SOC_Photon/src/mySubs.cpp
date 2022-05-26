@@ -197,7 +197,7 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   past = now;
 
   // Current bias.  Feeds into signal conversion, not to duty injection
-  if ( rp.modeling )
+  if ( rp.mod_ib() )
   {
     cp.curr_bias_noamp = rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_noamp;
     cp.curr_bias_amp = rp.curr_bias_all + rp.inj_soft_bias + rp.tweak_bias_amp;
@@ -475,17 +475,17 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
 
   // Use model instead of sensors when running tests as user
   // Over-ride sensed Ib, Vb and Tb with model when running tests
-  if ( rp.modeling )    // Should never be set in real use
+  if ( rp.mod_ib() )  Sen->Ibatt = Sen->Ibatt_model;
+  else Sen->Ibatt = Sen->Ibatt_hdwe;
+  if ( rp.mod_vb() )  Sen->Vbatt = Sen->Vbatt_model;
+  else Sen->Vbatt = Sen->Vbatt_hdwe;
+  if ( rp.mod_vb() )
   {
-    Sen->Ibatt = Sen->Ibatt_model;
-    Sen->Vbatt = Sen->Vbatt_model;
     Sen->Tbatt = RATED_TEMP;
     Sen->Tbatt_filt = Sen->Tbatt;
   }
   else
   {
-    Sen->Ibatt = Sen->Ibatt_hdwe;
-    Sen->Vbatt = Sen->Vbatt_hdwe;
     Sen->Tbatt = Sen->Tbatt_hdwe;
     Sen->Tbatt_filt = Sen->Tbatt_hdwe_filt;
   }

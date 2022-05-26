@@ -167,7 +167,6 @@ boolean Tweak::new_desat(const double curr_in, const double T, const boolean is_
   }
   if ( rp.debug==88 ) Serial.printf("Tweak(%s)::update:,  delta_q_inf=%10.1f, is_sat=%d, now=%ld, sat=%d, delta_q_sat_past=%10.1f, delta_q_sat_present=%10.1f, time_sat_past=%ld,\n",
     name_.c_str(), *rp_delta_q_inf_, is_sat, now, sat_, delta_q_sat_past_, delta_q_sat_present_, time_sat_past_);
-  if ( rp.debug==99 )  Serial.printf("Tweak:,%7.3f,%7.3f,", curr_in, d_delta_q_inf);
 
   return ( have_new );
 }

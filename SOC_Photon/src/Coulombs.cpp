@@ -354,7 +354,6 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
     if ( rp.debug==-96 )
         Serial.printf("voc, Voc_filt, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, d_q_i, q, q_capacity,soc, SOC,          \n%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
                     pp.pubList.Voc, pp.pubList.Voc_filt, this->Vsat(), temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
-    if ( rp.debug==99 )  Serial.printf("Coulombs:,%7.3f,%7.3f,\n", charge_curr, d_delta_q);
 
     // Save and return
     *rp_t_last_ = temp_lim;

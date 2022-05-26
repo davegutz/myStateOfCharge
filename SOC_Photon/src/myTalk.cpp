@@ -617,7 +617,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
 
           case ( 'm' ):   // modeling code
             INT_in =  cp.input_string.substring(2).toInt();
-            if ( INT_in>=0 && INT_in<8 )
+            if ( INT_in>=0 && INT_in<16 )
             {
               boolean reset = rp.modeling != INT_in;
               Serial.printf("modeling from %d to ", rp.modeling);
@@ -633,42 +633,11 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             {
               Serial.printf("invalid %d, rp.modeling is 0-7.  Try 'h'\n", INT_in);
             }
-            break;
-
-          case ( 'x' ):   // Signal sourcing
-            INT_in =  cp.input_string.substring(2).toInt();
-            switch ( INT_in )
-            {
-              case ( 0 ):
-                rp.modeling = 0;
-                rp.tweak_test = false;
-                cp.cmd_reset();
-                break;
-
-              case ( 7 ):
-                rp.modeling = 7;
-                rp.tweak_test = false;
-                cp.cmd_reset();
-                break;
-
-              case ( 10 ):
-                rp.modeling = 0;
-                rp.tweak_test = true;
-                cp.cmd_reset();
-                break;
-
-              case ( 17 ):
-                rp.modeling = 7;
-                rp.tweak_test = true;
-                cp.cmd_reset();
-                break;
-
-              default:
-                Serial.print(INT_in); Serial.println(" unknown.  Try typing 'h'");
-                break;
-            }
             Serial.printf("Modeling is %d\n", rp.modeling);
-            Serial.printf("tweak_test is %d\n", rp.tweak_test);
+            Serial.printf("tweak_test is %d\n", rp.tweak_test());
+            Serial.printf("mod_ib is %d\n", rp.mod_ib());
+            Serial.printf("mod_vb is %d\n", rp.mod_vb());
+            Serial.printf("mod_tb is %d\n", rp.mod_tb());
             break;
 
           case ( 'a' ): // injection amplitude
@@ -743,7 +712,9 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 rp.type = 0;
                 rp.freq = 0.0;
                 rp.amp = 0.0;
-                if ( !rp.tweak_test ) rp.inj_soft_bias = 0.0;
+                if ( !rp.tweak_test() ) rp.inj_soft_bias = 0.0;
+                self_talk("Mk0", Mon, Sen);
+                self_talk("Nk0", Mon, Sen);
                 rp.curr_bias_all = 0;
                 debug_inject();  // Arduino plot
                 break;
@@ -754,7 +725,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 rp.type = 1;
                 rp.freq = 0.05;
                 rp.amp = 6.;
-                if ( !rp.tweak_test ) rp.inj_soft_bias = -rp.amp;
+                if ( !rp.tweak_test() ) rp.inj_soft_bias = -rp.amp;
                 rp.freq *= (2. * PI);
                 debug_inject();  // Arduino plot
                 break;
@@ -765,7 +736,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 rp.type = 2;
                 rp.freq = 0.10;
                 rp.amp = 6.;
-                if ( !rp.tweak_test ) rp.inj_soft_bias = -rp.amp;
+                if ( !rp.tweak_test() ) rp.inj_soft_bias = -rp.amp;
                 rp.freq *= (2. * PI);
                 debug_inject();  // Arduino plot
                 break;
@@ -776,7 +747,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 rp.type = 3;
                 rp.freq = 0.05;
                 rp.amp = 6.;
-                if ( !rp.tweak_test ) rp.inj_soft_bias = -rp.amp;
+                if ( !rp.tweak_test() ) rp.inj_soft_bias = -rp.amp;
                 rp.freq *= (2. * PI);
                 debug_inject();  // Arduino plot
                 break;
@@ -819,7 +790,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 rp.type = 8;
                 rp.freq = 0.05;
                 rp.amp = 6.;
-                if ( !rp.tweak_test ) rp.inj_soft_bias = -rp.amp;
+                if ( !rp.tweak_test() ) rp.inj_soft_bias = -rp.amp;
                 rp.freq *= (2. * PI);
                 debug_inject();  // Arduino plot
                 break;
@@ -962,14 +933,10 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xd= "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
   Serial.printf("  Xm= "); Serial.printf("%d,   modeling bitmap [000]\n", rp.modeling);
+  Serial.printf("       0x8 tweak_test = %d\n", rp.tweak_test());
   Serial.printf("       0x4 current = %d\n", rp.mod_ib());
   Serial.printf("       0x2 voltage = %d\n", rp.mod_vb());
   Serial.printf("       0x1 temperature = %d\n", rp.mod_tb());
-  Serial.printf("  Xx= %d signal sourcing option...\n", rp.modeling + rp.tweak_test*10 );
-  Serial.printf("       0  normal operation\n");
-  Serial.printf("       7  use models <<TODO>>\n");
-  Serial.printf("      10  tweak test hardware <<TODO>>\n");
-  Serial.printf("      17  tweak test use models\n");
   Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Inj amplitude A pk (0-18.3) [0]");
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println("  : Inj frequency Hz (0-2) [0]");
   Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Inj type.  'c', 's', 'q', 't' (cosine, sine, square, triangle)");
