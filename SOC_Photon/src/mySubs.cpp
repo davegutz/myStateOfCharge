@@ -100,26 +100,14 @@ void Shunt::load()
 // Text headers
 void print_serial_header(void)
 {
-  if ( rp.debug==2 )
-    Serial.println(F("unit,         hm,                  cTime,        T,       Tb_f, Tb_f_m,  Vb, Voc, Vsat,    sat,sel,mod, Ib,    tcharge, soc_m,soc_ekf,soc,soc_wt,"));
-  else if ( rp.debug==4 )
+  if ( rp.debug==4 )
     Serial.printf("unit,               hm,                  cTime,        T,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
 }
 
 // Print strings
 void create_print_string(char *buffer, Publish *pubList)
 {
-  if ( rp.debug==2 )
-  sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %4.1f,%4.1f,   %5.2f,%5.2f,%5.2f,  %d,  %d,  %d,   %7.3f,  %5.1f,  %5.3f,%5.3f,%5.3f,%5.3f,  %c", \
-    pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
-    pubList->Tbatt, rp.t_last_model,
-    pubList->Vbatt, pubList->Voc, pubList->Vsat,
-    pubList->sat, rp.curr_sel_noamp, rp.modeling,
-    pubList->Ibatt,
-    pubList->tcharge,
-    pubList->soc_model, pubList->soc_ekf, pubList->soc, pubList->soc_wt,
-    '\0');
-  else if ( rp.debug==4 )
+  if ( rp.debug==4 )
   sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%7.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
     pubList->sat, rp.curr_sel_noamp, rp.modeling,

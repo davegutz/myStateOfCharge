@@ -779,7 +779,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 self_talk("Xx1", Mon, Sen);    // Run to model
                 self_talk("m0.5", Mon, Sen);   // Set all soc=0.5
                 self_talk("n0.987", Mon, Sen); // Set model only to near saturation
-                self_talk("v2", Mon, Sen);     // Watch sat, soc, and Voc vs v_sat
+                self_talk("v4", Mon, Sen);     // Watch sat, soc, and Voc vs v_sat
                 rp.amp = RATED_BATT_CAP*0.2;              // Hard current charge
                 Serial.printf("Run 'n<val> as needed to init south of sat.  Reset this whole thing by running 'Xp-1'\n");
                 break;
@@ -906,7 +906,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("    -<>:   Negative - Arduino plot compatible\n");
   Serial.printf("     -1:   General purpose Arduino plot\n");
-  Serial.printf("     +2:   General purpose\n");
+  Serial.printf("     +4:   General purpose\n");
   Serial.printf("   +/-5:   OLED display\n");
   Serial.printf("     +6:   EKF solver iter during init\n");
   Serial.printf("     +7:   EKF solver summary during init\n");

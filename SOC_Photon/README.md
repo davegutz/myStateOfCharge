@@ -328,7 +328,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   20. The easiest way to confirm that the EKF is working correctly is to set 'modeling' using Talk('Xm7') and verify that soc_ekf equals soc_mod.
   21. Lessons-learned from installation in truck.  Worked fine driving both A/D with D2 from main board.    But when installed in truck all hell broke loose.   The root cause was grounding the Vlow fuse side of shunt legs of the A/D converters.   In theory the fuse side is the same as ground of power supply.   But the wires are gage 20-22 and I detected a 75 mA current in the Vh and Vl legs which is enough to put about 50% error on detection.   Very sensitive.   But if float both legs and avoid ground looping it works fine.   And as long as ground loops avoided, there is no need to beef up the sense wire gage because there will be no current to speak of.  I revised the schematics.   There are now two pin-outs:  one for installed in truck and another when driving with the D2 pin and PWM into the RC circuits.
   22. Regression testing:  
-    a. Saturation test.  Run Talk('Xp7').   This will initialize monitor at 0.5 and model near saturation then drive toward saturation.   Watch voc vs v_sat and sat in the v2 debug display that gets started.  Reset with 'Xp-1'.  If starting up Xp7 it initializes saturated just enter 'm<<val>>' with lower 'val' than what 'Xp7' started it with until it initializes without saturation.  Should saturate soon and reset soc of monitor to 1.0.  Then setting 'Di-1000' you should see it reset after a very little time. Again, reset the whole mess with 'Xp-1'.
+    a. Saturation test.  Run Talk('Xp7').   This will initialize monitor at 0.5 and model near saturation then drive toward saturation.   Watch voc vs v_sat and sat in the v4 debug display that gets started.  Reset with 'Xp-1'.  If starting up Xp7 it initializes saturated just enter 'm<<val>>' with lower 'val' than what 'Xp7' started it with until it initializes without saturation.  Should saturate soon and reset soc of monitor to 1.0.  Then setting 'Di-1000' you should see it reset after a very little time. Again, reset the whole mess with 'Xp-1'.
     b.  
   23. 'Talk' refers to using CoolTerm to transmit commands through the myTalk.cpp functions. Talk is not threaded so can only send off a barage of commands open loop and hope for the best.
   24. I had to add persistence to the 'log on boot' function.   When in a cold shutoff, the BMS of the battery periodically 'looks' at the state of the battery by turning it on for a few seconds. The summary filled up quickly with these useless logs.  I used a 60 second persistence.
@@ -352,7 +352,7 @@ Rapid tweak test 1 min using models Xm15 'tweakMod' to test tweak only (no data 
   Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; Mp0; Np0; Dn1; v0;
     To end:
   Xp0; v4; Dn0.9985;
-    expected result:
+    expected result (may have small values of abs(Di)<0.01 ):
       Tweak(Amp)::adjust:, past=       0.0, pres=       0.0, error=       0.0, gain= -0.040001, delta_hrs=  0.013889, Di=  0.000, new_Di= -0.000,
       Tweak(No Amp)::adjust:, past=       0.0, pres=       0.0, error=       0.0, gain= -0.040001, delta_hrs=  0.013889, Di=  0.000, new_Di= -0.000,
 

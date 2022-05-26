@@ -201,7 +201,7 @@ void setup()
 
   // Summary
   System.enableFeature(FEATURE_RETAINED_MEMORY);
-  if ( rp.debug==2 )
+  if ( rp.debug==4 )
     print_all_summary(mySum, rp.isum, NSUM);
 
   // Header for rp.debug print
@@ -371,7 +371,7 @@ void loop()
     // Mon for rp.debug
     if ( publishS )
     {
-      if ( rp.debug==2 || rp.debug==4 )  // TODO:  delete rp.debug==2
+      if ( rp.debug==4 )
       {
         if ( reset_publish || (last_publishS_debug != rp.debug) ) print_serial_header();
         serial_print(PublishSerial->now(), Sen->T);
