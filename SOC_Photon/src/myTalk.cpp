@@ -801,16 +801,16 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             break;
 
           case ( 'C' ): // injection number of cycles
-            Sen->cycles_inj = max(min(cp.input_string.substring(2).toInt(), 32000), 0);
-            Serial.printf("Number of injection cycles set to %d\n", Sen->cycles_inj);
+            Sen->cycles_inj = max(min(cp.input_string.substring(2).toFloat(), 10000.), 0);
+            Serial.printf("Number of injection cycles set to %7.3f\n", Sen->cycles_inj);
             break;
 
           case ( 'R' ): // Start injection now
             if ( Sen->now>TEMP_INIT_DELAY )
             {
               Sen->start_inj = Sen->wait_inj + Sen->now;
-              Sen->stop_inj = Sen->wait_inj + (Sen->now + min((unsigned long int)(float(Sen->cycles_inj) / max(rp.freq/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
-              Serial.printf("RUN: at %ld, %d cycles from %ld to %ld with %ld wait\n", Sen->now, Sen->cycles_inj, Sen->start_inj, Sen->stop_inj, Sen->wait_inj);
+              Sen->stop_inj = Sen->wait_inj + (Sen->now + min((unsigned long int)(Sen->cycles_inj / max(rp.freq/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
+              Serial.printf("RUN: at %ld, %7.3f cycles from %ld to %ld with %ld wait\n", Sen->now, Sen->cycles_inj, Sen->start_inj, Sen->stop_inj, Sen->wait_inj);
             }
             else Serial.printf("Wait %5.1f s for init\n", float(TEMP_INIT_DELAY-Sen->now)/1000.);
             break;
@@ -981,7 +981,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("       5:  +1C soft charge until reset by Xp0 or Di0.  Software only\n");
   Serial.printf("       6:  +0.2C hard charge until reset by Xp0 or Di0\n");
   Serial.printf("       8:  1 Hz cosine centered at 0\n");
-  Serial.printf("  XC= "); Serial.printf("%d cycles inj\n", Sen->cycles_inj);
+  Serial.printf("  XC= "); Serial.printf("%7.3f cycles inj\n", Sen->cycles_inj);
   Serial.printf("  XR  "); Serial.printf("RUN inj\n");
   Serial.printf("  XS  "); Serial.printf("STOP inj\n");
   Serial.printf("  XW= "); Serial.printf("%6.2f s wait start inj\n", float(Sen->wait_inj)/1000.);

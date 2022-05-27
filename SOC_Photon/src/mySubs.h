@@ -132,7 +132,7 @@ struct Sensors
   unsigned long int start_inj;  // Start of calculated injection, ms
   unsigned long int stop_inj;   // Stop of calculated injection, ms
   unsigned long int wait_inj;   // Wait before start injection, ms
-  int cycles_inj;               // Number of injection cycles
+  float cycles_inj;             // Number of injection cycles
     Sensors(void) {}
   Sensors(double T, double T_temp, byte pin_1_wire)
   {
@@ -157,7 +157,7 @@ struct Sensors
     this->Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS, &rp.sim_mod);
     this->start_inj = 0UL;
     this->stop_inj = 0UL;
-    this->cycles_inj = 0;
+    this->cycles_inj = 0.;
   }
 };
 
