@@ -118,6 +118,7 @@ struct Sensors
   float Ibatt_model;      // Modeled battery bank current, A
   float Ibatt_model_in;   // Battery bank current input to model (modified by cutback), A
   float Wbatt;            // Sensed battery bank power, use to compare to other shunts, W
+  unsigned long int now;  // Time at sample, ms
   double T;               // Update time, s
   double T_filt;          // Filter update time, s
   double T_temp;          // Temperature update time, s
@@ -128,7 +129,11 @@ struct Sensors
   General2_Pole* TbattSenseFilt;  // Linear filter for Tb. There are 1 Hz AAFs in hardware for Vb and Ib
   SlidingDeadband *SdTbatt;       // Non-linear filter for Tb
   BatteryModel *Sim;      //  used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off. 
-  Sensors(void) {}
+  unsigned long int start_inj;  // Start of calculated injection, ms
+  unsigned long int stop_inj;   // Stop of calculated injection, ms
+  unsigned long int wait_inj;   // Wait before start injection, ms
+  int cycles_inj;               // Number of injection cycles
+    Sensors(void) {}
   Sensors(double T, double T_temp, byte pin_1_wire)
   {
     this->T = T;
@@ -150,6 +155,9 @@ struct Sensors
     this->TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
     this->SdTbatt = new SlidingDeadband(HDB_TBATT);
     this->Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS, &rp.sim_mod);
+    this->start_inj = 0UL;
+    this->stop_inj = 0UL;
+    this->cycles_inj = 0;
   }
 };
 

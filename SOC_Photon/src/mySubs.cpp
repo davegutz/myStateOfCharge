@@ -183,6 +183,7 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   static unsigned long int past = now;
   double T = (now - past)/1e3;
   past = now;
+  Sen->now = now;
 
   // Current bias.  Feeds into signal conversion, not to duty injection
   if ( rp.mod_ib() )
@@ -484,7 +485,12 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   Sen->Sim->count_coulombs(Sen, reset_temp, rp.t_last_model);
 
   // D2 signal injection to hardware current sensors (also has rp.inj_soft_bias path for rp.tweak_test)
-  rp.duty = Sen->Sim->calc_inj_duty(elapsed, rp.type, rp.amp, rp.freq);
+  unsigned long int elapsed_inj;
+  if ( (Sen->start_inj <= Sen->now) && (Sen->now <= Sen->stop_inj) )
+    elapsed_inj = Sen->now - Sen->start_inj + 1UL; // Shift by 1 so can use ==0 to turn off
+  else
+    elapsed_inj = 0;
+  rp.duty = Sen->Sim->calc_inj_duty(elapsed_inj, rp.type, rp.amp, rp.freq);
 }
 
 

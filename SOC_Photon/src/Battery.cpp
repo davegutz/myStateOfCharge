@@ -607,63 +607,60 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
 // Injection model, calculate duty based on time since boot (TODO:  create an 'elapsed_inj' time so can restart inj on the fly)
 uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq)
 {
-  double t;
-  if ( rp.tweak_test() )
-  {
-      if ( now<2*TEMP_INIT_DELAY )
-      {
-          duty_ = 0UL;
-          rp.inj_soft_bias = 0.;
-          return(duty_);
-      }
-      else
-          t = (now - 2*TEMP_INIT_DELAY)/1e3;
-  }
-  else t = now/1e3;
-  double sin_bias = 0.;
-  double square_bias = 0.;
-  double tri_bias = 0.;
-  double inj_bias = 0.;
-  double bias = 0.;
-  double cos_bias = 0.;
-  // Calculate injection amounts from user inputs (talk).
-  // One-sided because PWM voltage >0.  rp.inj_soft_bias applied elsewhere
-  switch ( type )
-  {
-    case ( 0 ):   // Nothing
-      break;
-    case ( 1 ):   // Sine wave
-      sin_bias = Sin_inj_->signal(amp, freq, t, 0.0);
-      break;
-    case ( 2 ):   // Square wave
-      square_bias = Sq_inj_->signal(amp, freq, t, 0.0);
-      break;
-    case ( 3 ):   // Triangle wave
-      tri_bias = Tri_inj_->signal(amp, freq, t, 0.0);
-    case ( 4 ): case ( 5 ): // Software biases only
-      break;
-    case ( 6 ):   // Positve bias
-      bias = amp;
-      break;
-    case ( 8 ):   // Cosine wave
-      cos_bias = Cos_inj_->signal(amp, freq, t, 0.0);
-      break;
-    default:
-      break;
-  }
-  inj_bias = sin_bias + square_bias + tri_bias + bias + cos_bias;
-  if ( rp.tweak_test() )   // Use inj_soft_bias path, bypassing PWM that has limited hardware range
-  {
-    duty_ = 0UL;
-    rp.inj_soft_bias = inj_bias - rp.amp;
-  }
-  else
-    duty_ = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
+    // Return if time 0
+    if ( now== 0UL )
+    {
+        duty_ = 0UL;
+        rp.inj_soft_bias = 0.;
+        return(duty_);
+    }
 
-  if ( rp.debug==-41 ) Serial.printf("type,amp,freq,sin,square,tri,bias,inj,duty,tnow,off=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %ld,  %7.3f, %7.3f,\n",
-            type, amp, freq, sin_bias, square_bias, tri_bias, bias, inj_bias, duty_, t, rp.inj_soft_bias);
+    // Injection.  time shifted by 1UL
+    double t = (now-1UL)/1e3;
+    double sin_bias = 0.;
+    double square_bias = 0.;
+    double tri_bias = 0.;
+    double inj_bias = 0.;
+    double bias = 0.;
+    double cos_bias = 0.;
+    // Calculate injection amounts from user inputs (talk).
+    // One-sided because PWM voltage >0.  rp.inj_soft_bias applied elsewhere
+    switch ( type )
+    {
+        case ( 0 ):   // Nothing
+        break;
+        case ( 1 ):   // Sine wave
+        sin_bias = Sin_inj_->signal(amp, freq, t, 0.0);
+        break;
+        case ( 2 ):   // Square wave
+        square_bias = Sq_inj_->signal(amp, freq, t, 0.0);
+        break;
+        case ( 3 ):   // Triangle wave
+        tri_bias = Tri_inj_->signal(amp, freq, t, 0.0);
+        case ( 4 ): case ( 5 ): // Software biases only
+        break;
+        case ( 6 ):   // Positve bias
+        bias = amp;
+        break;
+        case ( 8 ):   // Cosine wave
+        cos_bias = Cos_inj_->signal(amp, freq, t, 0.0);
+        break;
+        default:
+        break;
+    }
+    inj_bias = sin_bias + square_bias + tri_bias + bias + cos_bias;
+    if ( rp.tweak_test() )   // Use inj_soft_bias path, bypassing PWM that has limited hardware range
+    {
+        duty_ = 0UL;
+        rp.inj_soft_bias = inj_bias - rp.amp;
+    }
+    else
+        duty_ = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
 
-  return ( duty_ );
+    if ( rp.debug==-41 ) Serial.printf("type,amp,freq,sin,square,tri,bias,inj,duty,tnow,off=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %ld,  %7.3f, %7.3f,\n",
+                type, amp, freq, sin_bias, square_bias, tri_bias, bias, inj_bias, duty_, t, rp.inj_soft_bias);
+
+    return ( duty_ );
 }
 
 /* BatteryModel::count_coulombs: Count coulombs based on assumed model true=actual capacity.
