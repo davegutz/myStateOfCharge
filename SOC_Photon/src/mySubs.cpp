@@ -485,9 +485,16 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   Sen->Sim->count_coulombs(Sen, reset_temp, rp.t_last_model);
 
   // D2 signal injection to hardware current sensors (also has rp.inj_soft_bias path for rp.tweak_test)
-  unsigned long int elapsed_inj;
+  static unsigned long int elapsed_inj = 0;
   if ( (Sen->start_inj <= Sen->now) && (Sen->now <= Sen->stop_inj) )
+  {
+    if ( elapsed_inj==0 ) // Shift for asynchronous and improve repeatibility of tweak testing
+    {
+      Sen->stop_inj += Sen->now - Sen->start_inj;
+      Sen->start_inj = Sen->now;
+    }
     elapsed_inj = Sen->now - Sen->start_inj + 1UL; // Shift by 1 so can use ==0 to turn off
+  }
   else
     elapsed_inj = 0;
   rp.duty = Sen->Sim->calc_inj_duty(elapsed_inj, rp.type, rp.amp, rp.freq);

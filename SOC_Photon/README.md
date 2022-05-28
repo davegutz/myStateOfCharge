@@ -356,8 +356,8 @@ Rapid tweak test 1 min using models Xm15 'tweakMod' to test tweak only (no data 
   XS; Dn0.9985; Ca1; Mk0; Nk0;
     expected result:  see 'dataReduction/newFloatTweakMod_overplots.xlsx'
     expected result (may have small values of abs(Di)<0.01 ):
-      Tweak(Amp)::adjust:, past=       0.0, pres=       0.0, error=       0.0, gain= -0.040001, delta_hrs=  0.013889, Di=  0.000, new_Di= -0.000,
-      Tweak(No Amp)::adjust:, past=       0.0, pres=       0.0, error=       0.0, gain= -0.040001, delta_hrs=  0.013889, Di=  0.000, new_Di= -0.000,
+       Tweak(Amp)::adjust:, past=       1.1, pres=       1.1, error=      -0.0, gain= -0.039993, delta_hrs=  0.013891, Di=  0.000, new_Di=  0.000,
+       Tweak(No Amp)::adjust:, past=       1.1, pres=       1.1, error=      -0.0, gain= -0.039993, delta_hrs=  0.013891, Di=  0.000, new_Di=  0.000,
 
 Rapid tweak test 02:30 min using models 'tweakMod'
     start recording (will need v4 later)
