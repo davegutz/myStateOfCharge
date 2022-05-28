@@ -44,42 +44,11 @@ Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, f
     // Battery characteristic tables
     voc_T_ = new TableInterp2D(chem_.n_s, chem_.m_t, chem_.x_soc, chem_.y_t, chem_.t_voc);
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // TODO:  ??
-
-    // Randles dynamic model for EKF, forward version based on sensor inputs {ib, vb} --> {voc}, ioc=ib
-    // Resistance values add up to same resistance loss as matched to installed battery
-    // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
-    // the state-space stability requires at least 0.1.   Used 0.2.
-    int rand_n = 2; // Rows A and B
-    int rand_p = 2; // Col B    
-    int rand_q = 1; // Row C and D
-    rand_A_ = new double[rand_n*rand_n];
-    rand_B_ = new double [rand_n*rand_p];
-    rand_C_ = new double [rand_q*rand_n];
-    rand_D_ = new double [rand_q*rand_p];
-    assign_rand();
-    Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
     hys_ = new Hysteresis(chem_.hys_cap, hys_direx, chem_);
 }
 Battery::~Battery() {}
 // operators
 // functions
-
-// Battery::assign_rand:    Assign constants from battery chemistry to arrays for state space model
-void Battery::assign_rand(void)
-{
-    rand_A_[0] = -1./chem_.tau_ct;
-    rand_A_[1] = 0.;
-    rand_A_[2] = 0.;
-    rand_A_[3] = -1/chem_.tau_diff;
-    rand_B_[0] = 1./(chem_.tau_ct / chem_.r_ct);
-    rand_B_[1] = 0.;
-    rand_B_[2] = 1./(chem_.tau_diff / chem_.r_diff);
-    rand_B_[3] = 0.;
-    rand_C_[0] = -1.;
-    rand_C_[1] = -1.;
-    rand_D_[0] = -chem_.r_0;
-    rand_D_[1] = 1.;
-}
 
 // Placeholder; not used.  May write this base version if needed using BatteryModel::calculate()
 // as a starting point but use the base class Randles formulation and re-arrange the i/o for that model.
@@ -206,6 +175,19 @@ BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_n
     // EKF
     this->Q_ = EKF_Q_SD*EKF_Q_SD;
     this->R_ = EKF_R_SD*EKF_R_SD;
+    // Randles dynamic model for EKF, forward version based on sensor inputs {ib, vb} --> {voc}, ioc=ib
+    // Resistance values add up to same resistance loss as matched to installed battery
+    // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
+    // the state-space stability requires at least 0.1.   Used 0.2.
+    int rand_n = 2; // Rows A and B
+    int rand_p = 2; // Col B    
+    int rand_q = 1; // Row C and D
+    rand_A_ = new double [rand_n*rand_n];
+    rand_B_ = new double [rand_n*rand_p];
+    rand_C_ = new double [rand_q*rand_n];
+    rand_D_ = new double [rand_q*rand_p];
+    assign_rand();
+    Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
     SdVbatt_ = new SlidingDeadband(HDB_VBATT);  // Noise filter
     EKF_converged = new TFDelay(false, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT); // Convergence test debounce.  Initializes false
 }
@@ -213,6 +195,23 @@ BatteryMonitor::~BatteryMonitor() {}
 
 // operators
 // functions
+
+// BatteryMonitor::assign_rand:    Assign constants from battery chemistry to arrays for state space model
+void BatteryMonitor::assign_rand(void)
+{
+    rand_A_[0] = -1./chem_.tau_ct;
+    rand_A_[1] = 0.;
+    rand_A_[2] = 0.;
+    rand_A_[3] = -1/chem_.tau_diff;
+    rand_B_[0] = 1./(chem_.tau_ct / chem_.r_ct);
+    rand_B_[1] = 0.;
+    rand_B_[2] = 1./(chem_.tau_diff / chem_.r_diff);
+    rand_B_[3] = 0.;
+    rand_C_[0] = -1.;
+    rand_C_[1] = -1.;
+    rand_D_[0] = -chem_.r_0;
+    rand_D_[1] = 1.;
+}
 
 /* BatteryMonitor::calculate:  SOC-OCV curve fit solved by ekf.   Works in 12 V
    battery units.  Scales up/down to number of series/parallel batteries on output/input.
@@ -483,28 +482,6 @@ BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap
     // Resistance values add up to same resistance loss as matched to installed battery
     // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
     // the state-space stability requires at least 0.1.   Used 0.2.
-    double c_ct = chem_.tau_ct / chem_.r_ct;
-    double c_dif = chem_.tau_diff / chem_.r_diff;
-    int rand_n = 2; // Rows A and B
-    int rand_p = 2; // Col B    
-    int rand_q = 1; // Row C and D
-    rand_A_ = new double[rand_n*rand_n];
-    rand_A_[0] = -1./chem_.tau_ct;
-    rand_A_[1] = 0.;
-    rand_A_[2] = 0.;
-    rand_A_[3] = -1/chem_.tau_diff;
-    rand_B_ = new double [rand_n*rand_p];
-    rand_B_[0] = 1./c_ct;
-    rand_B_[1] = 0.;
-    rand_B_[2] = 1./c_dif;
-    rand_B_[3] = 0.;
-    rand_C_ = new double [rand_q*rand_n];
-    rand_C_[0] = 1.;
-    rand_C_[1] = 1.;
-    rand_D_ = new double [rand_q*rand_p];
-    rand_D_[0] = chem_.r_0;
-    rand_D_[1] = 1.;
-    Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
     Sin_inj_ = new SinInj();
     Sq_inj_ = new SqInj();
     Tri_inj_ = new TriInj();
@@ -513,6 +490,36 @@ BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap
     sat_cutback_gain_ = 1000.;  // Gain to retard ib when soc approaches 1, dimensionless
     model_saturated_ = false;
     ib_sat_ = 0.5;              // deadzone for cutback actuation, A
+    // Randles dynamic model for EKF, backward version based on model {ib, voc} --> {vb}, ioc=ib
+    // Resistance values add up to same resistance loss as matched to installed battery
+    // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
+    // the state-space stability requires at least 0.1.   Used 0.2.
+    int rand_n = 2; // Rows A and B
+    int rand_p = 2; // Col B    
+    int rand_q = 1; // Row C and D
+    rand_A_ = new double [rand_n*rand_n];
+    rand_B_ = new double [rand_n*rand_p];
+    rand_C_ = new double [rand_q*rand_n];
+    rand_D_ = new double [rand_q*rand_p];
+    assign_rand();
+    Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
+}
+
+// BatteryModel::assign_rand:    Assign constants from battery chemistry to arrays for state space model
+void BatteryModel::assign_rand(void)
+{
+    rand_A_[0] = -1./chem_.tau_ct;
+    rand_A_[1] = 0.;
+    rand_A_[2] = 0.;
+    rand_A_[3] = -1/chem_.tau_diff;
+    rand_B_[0] = 1./(chem_.tau_ct / chem_.r_ct);
+    rand_B_[1] = 0.;
+    rand_B_[2] = 1./(chem_.tau_diff / chem_.r_diff);
+    rand_B_[3] = 0.;
+    rand_C_[0] = 1.;
+    rand_C_[1] = 1.;
+    rand_D_[0] = chem_.r_0;
+    rand_D_[1] = 1.;
 }
 
 // BatteryModel::calculate:  Sim SOC-OCV table with a Battery Management System (BMS) and hysteresis.

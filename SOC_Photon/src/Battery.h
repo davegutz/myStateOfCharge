@@ -158,7 +158,7 @@ public:
   ~Battery();
   // operators
   // functions
-  void assign_rand(void);
+  virtual void assign_rand(void) { Serial.printf("ERROR:  Battery::assign_rand called\n"); };
   double calc_soc_voc(const double soc, const double temp_c, double *dv_dsoc);
   double calc_soc_voc_slope(double soc, double temp_c);
   double calc_vsat(void);
@@ -236,6 +236,7 @@ public:
   double amp_hrs_remaining_wt() { return (amp_hrs_remaining_wt_); };
   double Amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_*(*rp_nP_)*(*rp_nS_)); };
   double Amp_hrs_remaining_wt() { return (amp_hrs_remaining_wt_*(*rp_nP_)*(*rp_nS_)); };
+  virtual void assign_rand(void);
   double calc_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   double calculate(Sensors *Sen);
   boolean converged_ekf() { return(EKF_converged->state()); };
@@ -289,6 +290,7 @@ public:
   ~BatteryModel();
   // operators
   // functions
+  virtual void assign_rand(void);
   double calculate(Sensors *Sen, const boolean dc_dc_on);
   uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);
   double count_coulombs(Sensors *Sen, const boolean reset, const double t_last);
