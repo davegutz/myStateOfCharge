@@ -214,25 +214,6 @@ void setup()
 // Loop
 void loop()
 {
-  // Sensor conversions
-  static Sensors *Sen = new Sensors(0, 0, myPins->pin_1_wire); // Manage sensor data
-  static float tbatt_bias_last;  // Memory for rate limiter in filter_temp call, deg C
-
-   // Mon, used to count Coulombs and run EKF
-  static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last, &rp.nP, &rp.nS, &rp.mon_mod);
-
-  // Battery saturation debounce
-  static TFDelay *Is_sat_delay = new TFDelay();   // Time persistence
-
-  unsigned long current_time;               // Time result
-  static unsigned long now = millis();      // Keep track of time
-  time32_t time_now;                        // Keep track of time
-  static unsigned long start = millis();    // Keep track of time
-  unsigned long elapsed = 0;                // Keep track of time
-  static boolean reset = true;              // Dynamic reset
-  static boolean reset_temp = true;         // Dynamic reset
-  static boolean reset_publish = true;      // Dynamic reset
-  
   // Synchronization
   boolean publishP;                           // Particle publish, T/F
   static Sync *PublishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
@@ -253,6 +234,25 @@ void loop()
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
   static uint8_t last_publishS_debug = 0;     // Remember first time with new debug to print headers
  
+  // Sensor conversions
+  static Sensors *Sen = new Sensors(0, 0, myPins->pin_1_wire, PublishSerial); // Manage sensor data
+  static float tbatt_bias_last;  // Memory for rate limiter in filter_temp call, deg C
+
+   // Mon, used to count Coulombs and run EKF
+  static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last, &rp.nP, &rp.nS, &rp.mon_mod);
+
+  // Battery saturation debounce
+  static TFDelay *Is_sat_delay = new TFDelay();   // Time persistence
+
+  unsigned long current_time;               // Time result
+  static unsigned long now = millis();      // Keep track of time
+  time32_t time_now;                        // Keep track of time
+  static unsigned long start = millis();    // Keep track of time
+  unsigned long elapsed = 0;                // Keep track of time
+  static boolean reset = true;              // Dynamic reset
+  static boolean reset_temp = true;         // Dynamic reset
+  static boolean reset_publish = true;      // Dynamic reset
+  
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
   // Start Blynk, only if connected since it is blocking

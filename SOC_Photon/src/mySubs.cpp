@@ -494,9 +494,13 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
       Sen->start_inj = Sen->now;
     }
     elapsed_inj = Sen->now - Sen->start_inj + 1UL; // Shift by 1 so can use ==0 to turn off
+    Sen->PublishSerial->delay(READ_DELAY);
   }
   else
+  {
     elapsed_inj = 0;
+    Sen->PublishSerial->delay(PUBLISH_SERIAL_DELAY);
+  }
   rp.duty = Sen->Sim->calc_inj_duty(elapsed_inj, rp.type, rp.amp, rp.freq);
 }
 

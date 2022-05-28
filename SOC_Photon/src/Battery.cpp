@@ -43,6 +43,7 @@ Battery::Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, f
 {
     // Battery characteristic tables
     voc_T_ = new TableInterp2D(chem_.n_s, chem_.m_t, chem_.x_soc, chem_.y_t, chem_.t_voc);
+    dv_ = chem_.dv;
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // TODO:  ??
     hys_ = new Hysteresis(chem_.hys_cap, hys_direx, chem_);
 }

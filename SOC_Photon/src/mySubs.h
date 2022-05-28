@@ -32,6 +32,7 @@
 #include "retained.h"
 #include "command.h"
 #include "Tweak.h"
+#include "mySync.h"
 
 // Temp sensor
 #include <hardware/OneWire.h>
@@ -133,8 +134,9 @@ struct Sensors
   unsigned long int stop_inj;   // Stop of calculated injection, ms
   unsigned long int wait_inj;   // Wait before start injection, ms
   float cycles_inj;             // Number of injection cycles
-    Sensors(void) {}
-  Sensors(double T, double T_temp, byte pin_1_wire)
+  Sync *PublishSerial;          // Handle to debug print time
+  Sensors(void) {}
+  Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial)
   {
     this->T = T;
     this->T_filt = T;
@@ -158,6 +160,7 @@ struct Sensors
     this->start_inj = 0UL;
     this->stop_inj = 0UL;
     this->cycles_inj = 0.;
+    this->PublishSerial = PublishSerial;
   }
 };
 
