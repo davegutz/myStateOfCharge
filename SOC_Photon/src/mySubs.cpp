@@ -108,52 +108,52 @@ void print_serial_header(void)
 void create_print_string(char *buffer, Publish *pubList)
 {
   if ( rp.debug==4 )
-  sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%7.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
-    pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
-    pubList->sat, rp.ibatt_sel_noamp, rp.modeling,
-    pubList->Tbatt, pubList->Vbatt, pubList->Ibatt,
-    pubList->Vsat, pubList->Vdyn, pubList->Voc, pubList->Voc_ekf,
-    pubList->y_ekf,
-    pubList->soc_model, pubList->soc_ekf, pubList->soc, pubList->soc_wt,
-    '\0');
+    sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%7.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
+      pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
+      pubList->sat, rp.ibatt_sel_noamp, rp.modeling,
+      pubList->Tbatt, pubList->Vbatt, pubList->Ibatt,
+      pubList->Vsat, pubList->Vdyn, pubList->Voc, pubList->Voc_ekf,
+      pubList->y_ekf,
+      pubList->soc_model, pubList->soc_ekf, pubList->soc, pubList->soc_wt,
+      '\0');
 }
 
 // Convert time to decimal for easy lookup
 double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip)
 {
-    *current_time = Time.now();
-    uint32_t year = Time.year(*current_time);
-    uint8_t month = Time.month(*current_time);
-    uint8_t day = Time.day(*current_time);
-    uint8_t hours = Time.hour(*current_time);
+  *current_time = Time.now();
+  uint32_t year = Time.year(*current_time);
+  uint8_t month = Time.month(*current_time);
+  uint8_t day = Time.day(*current_time);
+  uint8_t hours = Time.hour(*current_time);
 
-    // Second Sunday Mar and First Sunday Nov; 2:00 am; crude DST handling
-    if ( USE_DST)
-    {
-      uint8_t dayOfWeek = Time.weekday(*current_time);     // 1-7
-      if (  month>2   && month<12 &&
-        !(month==3  && ((day-dayOfWeek)<7 ) && hours>1) &&  // <second Sunday Mar
-        !(month==11 && ((day-dayOfWeek)>=0) && hours>0) )  // >=first Sunday Nov
-        {
-          Time.zone(GMT+1);
-          *current_time = Time.now();
-          day = Time.day(*current_time);
-          hours = Time.hour(*current_time);
-        }
-    }
-    uint8_t dayOfWeek = Time.weekday(*current_time)-1;  // 0-6
-    uint8_t minutes   = Time.minute(*current_time);
-    uint8_t seconds   = Time.second(*current_time);
+  // Second Sunday Mar and First Sunday Nov; 2:00 am; crude DST handling
+  if ( USE_DST)
+  {
+    uint8_t dayOfWeek = Time.weekday(*current_time);     // 1-7
+    if (  month>2   && month<12 &&
+      !(month==3  && ((day-dayOfWeek)<7 ) && hours>1) &&  // <second Sunday Mar
+      !(month==11 && ((day-dayOfWeek)>=0) && hours>0) )  // >=first Sunday Nov
+      {
+        Time.zone(GMT+1);
+        *current_time = Time.now();
+        day = Time.day(*current_time);
+        hours = Time.hour(*current_time);
+      }
+  }
+  uint8_t dayOfWeek = Time.weekday(*current_time)-1;  // 0-6
+  uint8_t minutes   = Time.minute(*current_time);
+  uint8_t seconds   = Time.second(*current_time);
 
-    // Convert the string
-    time_long_2_str(*current_time, tempStr);
+  // Convert the string
+  time_long_2_str(*current_time, tempStr);
 
-    // Convert the decimal
-    if ( rp.debug>105 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
-    static double cTimeInit = ((( (double(year-2021)*12 + double(month))*30.4375 + double(day))*24.0 + double(hours))*60.0 + double(minutes))*60.0 + \
-                        double(seconds) + double(now-millis_flip)/1000.;
-    double cTime = cTimeInit + double(now-millis_flip)/1000.;
-    return ( cTime );
+  // Convert the decimal
+  if ( rp.debug>105 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
+  static double cTimeInit = ((( (double(year-2021)*12 + double(month))*30.4375 + double(day))*24.0 + double(hours))*60.0 + double(minutes))*60.0 + \
+                      double(seconds) + double(now-millis_flip)/1000.;
+  double cTime = cTimeInit + double(now-millis_flip)/1000.;
+  return ( cTime );
 }
 
 // Filter temperature only
