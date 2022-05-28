@@ -347,11 +347,13 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   35. Regression tests:
 
 Rapid tweak test 1 min using models Xm15 'tweakMod' to test tweak only (no data collection, v0)
-  v0; Bm0; Bs0; Xm15; Xts; Xf0.02;  Xa-2000; Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; Mp0; Np0; Dn1; XC20; XW5; v0; XR;
-    to end prematurely
-  XS; Dn0.9985; Ca1;
+  v0; Bm0; Bs0; Xm15; Xts; Xf0.02;  Xa-2000; Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; MP0; NP0; Mp0; Np0; Dn1; XC20; XW5; v0; XR;
+    to pause
+  XS;
     to continue
   XR;
+    to end and reset completely
+  XS; Dn0.9985; Ca1; Mk0; Nk0;
     expected result:  see 'dataReduction/newFloatTweakMod_overplots.xlsx'
     expected result (may have small values of abs(Di)<0.01 ):
       Tweak(Amp)::adjust:, past=       0.0, pres=       0.0, error=       0.0, gain= -0.040001, delta_hrs=  0.013889, Di=  0.000, new_Di= -0.000,
@@ -359,16 +361,16 @@ Rapid tweak test 1 min using models Xm15 'tweakMod' to test tweak only (no data 
 
 Rapid tweak test 02:30 min using models 'tweakMod'
     start recording (will need v4 later)
-  v0; Bm0; Bs0; Xm15; Xts; Xf0.02;  Xa-2000; Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; Mp0; Np0; Dn1; XC3; XW5; v4; XR;
+  v0; Bm0; Bs0; Xm15; Xts; Xf0.02;  Xa-2000; Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; MP0; NP0; Mp0; Np0; Dn1; XC3; XW5; v4; XR;
     to end
-  XS; Dn0.9985; Ca1;
+  XS; Dn0.9985; Ca1; Mk0; Nk0;
     expected result:  see 'dataReduction/newFloatTweakMod_overplots.xlsx'
 
   Slow cycle test 10:00 min using models 'cycleMod'
     start recording (will need v4 later)
-  v0; Bm0; Bs0; Xm15; Xts; Xf0.002;  Xa-60; Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; Mp0; Np0; Dn1; XC1; XW5; v4; XR;
+  v0; Bm0; Bs0; Xm15; Xts; Xf0.002;  Xa-60; Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; MP0; NP0; Mp0; Np0; Dn1; XC1; XW5; v4; XR;
     to end
-  XS; Dn0.9985; Ca1;
+  XS; Dn0.9985; Ca1; Mk0; Nk0;
     expected result:  see 'dataReduction/newFloatCycleMod_overplots.xlsx'
 
 What the adjustments mean:
@@ -386,7 +388,7 @@ What the adjustments mean:
   Mw0; Nw0;   allow tweak bias to work immediately instead of waiting several hours
   MC0.5; Mx10; NC0.5; Nx10;   give tweak bias logic a large adjustment range to quickly converge
   Mk0; Nk0;   reset the tweak biases to 0 for new count
-  Mp0; Np0;   reset memory to fresh state for new count
+  MP0; NP0; Mp0; Np0;   reset memory to fresh state for new count
   v4;         monitor the standard debug
   Xp0;        reset the signal injection back to 0 without affecting model settings
   XC1;        Number of injection cycles
