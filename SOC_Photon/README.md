@@ -347,54 +347,26 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   35. Regression tests:
 
 Rapid tweak test 1 min using models Xm15 'tweakMod' to test tweak only (no data collection, v0)
-  v0; Bm0; Bs0; Xm15; Xts; Xf0.02;  Xa-2000; Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; MP0; NP0; Mp0; Np0; Dn1; XC20; XW5; v0; XR;
-    to pause
-  XS;
-    to continue
-  XR;
-    to end and reset completely
+  Xp9;
+    to end prematurely
   XS; Dn0.9985; Ca1; Mk0; Nk0;
-    expected result:  see 'dataReduction/newFloatTweakMod_overplots.xlsx'
     expected result (may have small values of abs(Di)<0.01 ):
        Tweak(Amp)::adjust:, past=       1.1, pres=       1.1, error=      -0.0, gain= -0.039993, delta_hrs=  0.013891, Di=  0.000, new_Di=  0.000,
        Tweak(No Amp)::adjust:, past=       1.1, pres=       1.1, error=      -0.0, gain= -0.039993, delta_hrs=  0.013891, Di=  0.000, new_Di=  0.000,
 
 Rapid tweak test 02:30 min using models 'tweakMod'
     start recording (will need v4 later)
-  v0; Bm0; Bs0; Xm15; Xts; Xf0.02;  Xa-2000; Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; MP0; NP0; Mp0; Np0; Dn1; XC3; XW5; v4; XR;
-    to end
+  Xp10;
+    to end prematurely
   XS; Dn0.9985; Ca1; Mk0; Nk0;
     expected result:  see 'dataReduction/newFloatTweakMod_overplots.xlsx'
 
   Slow cycle test 10:00 min using models 'cycleMod'
     start recording (will need v4 later)
-  v0; Bm0; Bs0; Xm15; Xts; Xf0.002;  Xa-60; Ca1; Ri; Mw0; Nw0; NC0.5; MC0.5; Nx10; Mx10; Mk0; Nk0; MP0; NP0; Mp0; Np0; Dn1; XC1; XW5; v4; XR;
-    to end
+  Xp11;
+    to end prematurely
   XS; Dn0.9985; Ca1; Mk0; Nk0;
     expected result:  see 'dataReduction/newFloatCycleMod_overplots.xlsx'
-
-What the adjustments mean:
-  v0;         turn off debug temporarily so not snowed by data dumps
-  v4;         for recordings
-  Bm0; Bs0;   make sure running base Battleborn configuration
-  Xm15;       modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
-  Dn1;        disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
-  Dn0.9985    nominal Coulombic efficiency in local_config.h
-  Xts;        start up a sine wave
-  Xf0.02;     frequency 0.02 Hz
-  Xa-2000     amplitude -2000 A
-  Ca1;        after restarting with sine running, soc will not be at 1.  Reset them all to 1
-  Ri;         reset the delta_q's to 0
-  Mw0; Nw0;   allow tweak bias to work immediately instead of waiting several hours
-  MC0.5; Mx10; NC0.5; Nx10;   give tweak bias logic a large adjustment range to quickly converge
-  Mk0; Nk0;   reset the tweak biases to 0 for new count
-  MP0; NP0; Mp0; Np0;   reset memory to fresh state for new count
-  v4;         monitor the standard debug
-  Xp0;        reset the signal injection back to 0 without affecting model settings
-  XC1;        Number of injection cycles
-  XW5;        Wait time before starting to cycle
-  XR;         Run cycle
-  XS;         Stop cycle prematurely
 
   ...........................................................
 36. Placeholder

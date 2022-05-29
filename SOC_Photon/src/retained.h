@@ -159,7 +159,7 @@ struct RetainedPars
     Serial.printf("  modeling =                  %d;  // Bit mapped modeling specification\n", this->modeling);
     Serial.printf("  duty =                      %ld;  // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))\n", this->duty);
     Serial.printf("  amp =                 %7.3f;  // Injected amplitude, A pk (0-18.3)\n", this->amp);
-    Serial.printf("  freq =                %7.3f;  // Injected frequency, Hz (0-2)\n", this->freq);
+    Serial.printf("  freq =                %7.3f;  // Injected frequency, r/s (0-2*pi)\n", this->freq);
     Serial.printf("  type =                      %d;  //  Injected waveform type.   0=sine, 1=square, 2=triangle\n", this->type);
     Serial.printf("  inj_soft_bias =       %7.3f;  // Constant bias, A\n", this->inj_soft_bias);
     Serial.printf("  tbatt_bias =          %7.3f;  // Sensed temp bias, deg C\n", this->tbatt_bias);
