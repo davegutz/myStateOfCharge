@@ -40,8 +40,8 @@ rp = Retained()
 
 # Battery constants
 RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
-BATT_DVOC_DT = 0.0069  # 1/23/2022
-""" Change of VOC with operating temperature in range 0 - 50 C (0.0075) V/deg C
+BATT_DVOC_DT = 0.004  # 5/30/2022
+""" Change of VOC with operating temperature in range 0 - 50 C (0.004) V/deg C
                             >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C"""
 BATT_V_SAT = 3.4625  # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
 NOM_SYS_VOLT = 12.  # Nominal system output, V, at which the reported amps are used (12)

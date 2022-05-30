@@ -15,7 +15,7 @@
 
 __author__ = 'Dave Gutz <davegutz@alum.mit.edu>'
 __version__ = '$Revision: 1.1 $'
-__date__ = '$Date: 2022/01/08 13:15:02 $'
+__date__ = '$Date: 2022/05/30 13:15:02 $'
 
 import numpy as np
 from pyDAGx.lookup_table import LookupTable
