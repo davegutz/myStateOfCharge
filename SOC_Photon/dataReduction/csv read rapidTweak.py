@@ -122,9 +122,10 @@ if __name__ == '__main__':
     def main():
         # Load data
         # make csv file by hand from .ods by opening in openOffice and save as csv
-        # data_file = '../../../dataReduction/data_proto.csv'
-        data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220529_old.csv'
-        data_file_new = '../../../dataReduction/rapidTweakRegressionTest20220529_new.csv'
+        # data_file_old = './rapidTweakRegressionTest20220529_old.csv'
+        # data_file_new = './rapidTweakRegressionTest20220529_new.csv'
+        data_file_old = './slowCycleRegressionTest20220529_old.csv'
+        data_file_new = './slowCycleRegressionTest20220529_new.csv'
         cols = (
         'unit', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf', 'y_ekf', 'soc_m',
         'soc_ekf', 'soc', 'soc_wt')
