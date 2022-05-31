@@ -65,7 +65,7 @@ def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None)
     return n_fig, fig_files
 
 
-class Saved:
+class SavedData:
     def __init__(self, data=None):
         if data is None:
             self.time = []
@@ -132,8 +132,8 @@ if __name__ == '__main__':
             np.recarray)
         data_new = np.genfromtxt(data_file_new, delimiter=',', names=True, usecols=cols, dtype=None, encoding=None).view(
             np.recarray)
-        saved_old = Saved(data_old)
-        saved_new = Saved(data_new)
+        saved_old = SavedData(data_old)
+        saved_new = SavedData(data_new)
 
         # Plots
         n_fig = 0

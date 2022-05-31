@@ -2,11 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e1530aae-7896-47d6-af72-5df938f1555d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/csv read rapidTweak.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/unite_pictures.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Battery State/EKF/sandbox/GP_battery_EKF_2022d.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Battery State/EKF/sandbox/csv read rapidTweak.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Battery State/EKF/sandbox/csv read rapidTweak.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,6 +23,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunManager">
