@@ -59,6 +59,7 @@
 		model_cutback_	Indicate that modeled current being limited on saturation cutback, T = cutback limited
 		model_saturated_	Indicator of maximal cutback, T = cutback saturated
 		mod_			Model type of battery chemistry e.g. Battleborn or LION, integer code
+		mod 			Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
 		mon_mod			Monitor battery chemistry type
 		m_h				Number of soc breakpoints in r(soc, dv) table t_r
 		m_t				Number temperature breakpoints for voc table
@@ -89,15 +90,17 @@
 		sat_cutback_gain	Gain to retard ib when voc exceeds vsat, dimensionless
 		sat_ib_max_		Current cutback to be applied to modeled ib output, A
 		sat_ib_null_	Current cutback value for voc=vsat, A
+		sel				Current source selection, 0=amp, 1=no amp
 		Sen->Ishunt		Shunt current Ib, A
 		Sen->T			Update time, sec
 		Sen->Tbatt_filt	Tb filtered for noise, past value of temp_c_, deg C
 		Sen->Vbatt		Battery terminal voltage, V
 		sim_mod			Simulation battery chemistry type
-		soc_			Fraction of saturation charge (q_capacity_) available (0-1) 
+		soc_			Coulomb Counter fraction of saturation charge (q_capacity_) available (0-1) 
 		soc_ekf_		Solved state of charge, fraction
+		soc_m 			Simulated state of charge, fraction
 		soc_min_		Estimated soc where battery BMS will shutoff current, fraction
-		soc_weight_		Weighted selection of ekf state of charge and coulomb counter (0-1)
+		soc_weight_		Weighted selection of ekf state of charge and Coulomb Counter (0-1)
 		SOLV_ERR		EKF initialization solver error bound, V
 		SOLV_MAX_COUNTS	EKF initialization solver max iters
 		SOLV_MAX_STEP	EKF initialization solver max step size of soc, fraction
@@ -146,6 +149,7 @@
 		Vdyn 			Bank current induced back emf, V
 		vdyn_			Current-induced back emf, V
 		Voc 			Static bank open circuit voltage, V
+		Voc_ekf			Monitor bank solved static open circuit voltage, V
 		voc_			Static model open circuit voltage, V
 		Voc_dyn			Bank VOC estimated from Vb and RC model, V
 		voc_dyn_		VOC estimated from Vb and RC model, V
@@ -162,5 +166,6 @@
 		x_dv			dv breakpoints for r(soc, dv) table t_r
 		x_soc			soc breakpoints for voc table
 		x_soc_min		Temperature breakpoints for soc_min table
+		y_ekf			Monitor single battery solver error, V
 		y_soc			soc breakpoints for r(soc, dv) table t_r
 		y_t				Temperature breakpoints for voc table

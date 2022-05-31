@@ -10,14 +10,28 @@ def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None)
         fig_files = []
     plt.figure()
     n_fig += 1
-    plt.subplot(211)
+    plt.subplot(221)
     plt.title(plot_title)
     plt.plot(old_s.time, old_s.Ib, color='green', label='Ib')
     plt.plot(new_s.time, new_s.Ib, color='orange', linestyle='--', label='Ib_new')
     plt.legend(loc=1)
-    plt.subplot(212)
+    plt.subplot(222)
+    plt.plot(old_s.time, old_s.sat, color='black', label='sat')
+    plt.plot(new_s.time, new_s.sat, color='yellow', linestyle='--', label='sat_new')
+    plt.plot(old_s.time, old_s.sel, color='red', label='sel')
+    plt.plot(new_s.time, new_s.sel, color='blue', linestyle='--', label='sel_new')
+    plt.plot(old_s.time, old_s.mod, color='blue', label='mod')
+    plt.plot(new_s.time, new_s.mod, color='red', linestyle='--', label='sel_mod')
+    plt.legend(loc=1)
+    plt.subplot(223)
     plt.plot(old_s.time, old_s.Vb, color='green', label='Vb')
     plt.plot(new_s.time, new_s.Vb, color='orange', linestyle='--', label='Vb_new')
+    plt.legend(loc=1)
+    plt.subplot(224)
+    plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
+    plt.plot(new_s.time, new_s.Voc, color='orange', linestyle='--', label='Voc_new')
+    plt.plot(old_s.time, old_s.Vsat, color='blue', label='Vsat')
+    plt.plot(new_s.time, new_s.Vsat, color='red', linestyle='--', label='Vsat_new')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -25,14 +39,24 @@ def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None)
 
     plt.figure()
     n_fig += 1
-    plt.subplot(211)
+    plt.subplot(221)
     plt.title(plot_title)
-    plt.plot(old_s.time, old_s.Ib, color='green', label='Ib')
-    plt.plot(new_s.time, new_s.Ib, color='orange', linestyle='--', label='Ib_new')
+    plt.plot(old_s.time, old_s.Vdyn, color='green', label='Vdyn')
+    plt.plot(new_s.time, new_s.Vdyn, color='orange', linestyle='--', label='Vdyn_new')
     plt.legend(loc=1)
-    plt.subplot(212)
-    plt.plot(old_s.time, old_s.Vb, color='green', label='Vb')
-    plt.plot(new_s.time, new_s.Vb, color='orange', linestyle='--', label='Vb_new')
+    plt.subplot(222)
+    plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
+    plt.plot(new_s.time, new_s.Voc, color='orange', linestyle='--', label='Voc_new')
+    plt.legend(loc=1)
+    plt.subplot(223)
+    plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
+    plt.plot(new_s.time, new_s.Voc, color='orange', linestyle='--', label='Voc_new')
+    plt.plot(old_s.time, old_s.Voc_ekf, color='blue', label='Voc_ekf')
+    plt.plot(new_s.time, new_s.Voc_ekf, color='red', linestyle='--', label='Voc_ekf_new')
+    plt.legend(loc=1)
+    plt.subplot(224)
+    plt.plot(old_s.time, old_s.y_ekf, color='green', label='y_ekf')
+    plt.plot(new_s.time, new_s.y_ekf, color='orange', linestyle='--', label='y_ekf_new')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -42,10 +66,45 @@ def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None)
 
 
 class Saved:
-    def __init__(self):
-        self.time = []
-        self.Ib = []
-        self.Vb = []
+    def __init__(self, data=None):
+        if data is None:
+            self.time = []
+            self.Ib = []  # Bank current, A
+            self.Vb = []  # Bank voltage, V
+            self.sat = []  # Indication that battery is saturated, T=saturated
+            self.sel = []  # Current source selection, 0=amp, 1=no amp
+            self.mod = []  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
+            self.Tb = []  # Battery bank temperature, deg C
+            self.Vsat = []  # Monitor Bank saturation threshold at temperature, deg C
+            self.Vdyn = []  # Monitor Bank current induced back emf, V
+            self.Voc = []  # Monitor Static bank open circuit voltage, V
+            self.Voc_ekf = []  # Monitor bank solved static open circuit voltage, V
+            self.y_ekf = []  # Monitor single battery solver error, V
+            self.soc_m = []  # Simulated state of charge, fraction
+            self.soc_ekf = []  # Solved state of charge, fraction
+            self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) availabel (0-1)
+            self.soc_wt = []  # Weighted selection of ekf state of charge and Coulomb Counter (0-1)
+        else:
+            self.time = data.cTime
+            self.Ib = data.Ib
+            self.Vb = data.Vb
+            self.sat = data.sat
+            self.sel = data.sel
+            self.mod = data.mod
+            self.Tb = data.Tb
+            self.Vsat = data.Vsat
+            self.Vdyn = data.Vdyn
+            self.Voc = data.Voc
+            self.Voc_ekf = data.Voc_ekf
+            self.y_ekf = data.y_ekf
+            self.soc_m = data.soc_m
+            self.soc_ekf = data.soc_ekf
+            self.soc = data.soc
+            self.soc_wt = data.soc_wt
+            # Find first non-zero Ib and use to adjust time
+            item_index = np.where(self.Ib == 0.0)[0][-1]
+            time_ref = self.time[item_index]
+            self.time -= time_ref;
 
 
 if __name__ == '__main__':
@@ -61,26 +120,14 @@ if __name__ == '__main__':
         data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220529_old.csv'
         data_file_new = '../../../dataReduction/rapidTweakRegressionTest20220529_new.csv'
         cols = (
-        'unit', 'cTime', 'T', 'sat', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf', 'y_ekf', 'soc_m',
+        'unit', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf', 'y_ekf', 'soc_m',
         'soc_ekf', 'soc', 'soc_wt')
         data_old = np.genfromtxt(data_file_old, delimiter=',', names=True, usecols=cols, dtype=None, encoding=None).view(
             np.recarray)
         data_new = np.genfromtxt(data_file_new, delimiter=',', names=True, usecols=cols, dtype=None, encoding=None).view(
             np.recarray)
-
-        saved_old = Saved()
-        saved_old.time = data_old.cTime
-        saved_old.Ib = data_old.Ib
-        saved_old.Vb = data_old.Vb
-        # TODO:  find first non-zero Ib and use to adjust time
-        time_ref = saved_old.time[0]
-        saved_old.time -= time_ref;
-        saved_new = Saved()
-        saved_new.time = data_new.cTime
-        saved_new.Ib = data_new.Ib
-        saved_new.Vb = data_new.Vb
-        time_ref = saved_new.time[0]
-        saved_new.time -= time_ref;
+        saved_old = Saved(data_old)
+        saved_new = Saved(data_new)
 
         # Plots
         n_fig = 0
