@@ -136,8 +136,6 @@ if __name__ == '__main__':
         rp.modeling = saved_old.mod()
 
         # Setup
-        dt = 0.1
-        dt_ekf = 0.1
         lut_i = myTables.TableInterp1D(np.array(t_x_i), np.array(t_i))
         lut_dc = myTables.TableInterp1D(np.array(t_x_d), np.array(t_d))
         scale = model_bat_cap / Battery.RATED_BATT_CAP
@@ -146,9 +144,15 @@ if __name__ == '__main__':
                       r_dif=r_dif, temp_c=temp_c, hys_scale=hys_scale_monitor)
 
         # time loop
+        dt = 0.1  # initialize
+        dt_ekf = 0.1  # initialize
         t = saved_old.time;
         for i in range(len(t)):
             current_in = saved_old.Ib[i]
+            if i>0:
+                dt = t[i]-t[i-1]
+                dt_ekf = dt
+
             # dc_dc_on = bool(lut_dc.interp(t[i]))
             dc_dc_on = False
             init = (t[i] <= 1)
