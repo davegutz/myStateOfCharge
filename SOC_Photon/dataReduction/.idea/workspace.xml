@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e1530aae-7896-47d6-af72-5df938f1555d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../Battery State/EKF/sandbox/GP_battery_EKF_2022d.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Battery State/EKF/sandbox/csv read rapidTweak.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Battery State/EKF/sandbox/csv read rapidTweak.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="e1530aae-7896-47d6-af72-5df938f1555d" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

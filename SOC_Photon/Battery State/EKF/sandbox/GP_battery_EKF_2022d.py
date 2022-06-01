@@ -61,7 +61,7 @@ if __name__ == '__main__':
                 self.Vb = data.Vb
                 self.sat = data.sat
                 self.sel = data.sel
-                self.mod = data.mod
+                self.mod_data = data.mod
                 self.Tb = data.Tb
                 self.Vsat = data.Vsat
                 self.Vdyn = data.Vdyn
@@ -75,12 +75,16 @@ if __name__ == '__main__':
                 # Find first non-zero Ib and use to adjust time
                 # Ignore initial run of non-zero Ib because resetting from previous run
                 zero_start = np.where(self.Ib == 0.0)[0][0]
-                zero_end = zero_start
-                while self.Ib[zero_end] == 0.0:  # stop at first non-zero
-                    zero_end += 1
-                time_ref = self.time[zero_end]
+                self.zero_end = zero_start
+                while self.Ib[self.zero_end] == 0.0:  # stop at first non-zero
+                    self.zero_end += 1
+                time_ref = self.time[self.zero_end]
                 print("time_ref=", time_ref)
                 self.time -= time_ref;
+
+        def mod(self):
+             return self.mod_data[self.zero_end]
+
 
     def main():
         # Trade study inputs
@@ -129,6 +133,7 @@ if __name__ == '__main__':
         data_old = np.genfromtxt(data_file_old, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old)
+        rp.modeling = saved_old.mod()
 
         # Setup
         dt = 0.1
