@@ -677,10 +677,6 @@ def calculate_capacity(temp_c, t_sat, q_sat):
     return q_sat * (1-DQDT*(temp_c - t_sat))
 
 
-def calculate_saturation_charge(t_sat, q_cap):
-    return q_cap * ((t_sat - 25.)*DQDT + 1.)
-
-
 def calc_vsat(temp_c):
     return sat_voc(temp_c)
 
