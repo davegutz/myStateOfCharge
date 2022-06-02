@@ -225,6 +225,9 @@ class Battery(Coulombs):
     def i_r_dif(self):
         return self.vcd() / self.r_dif
 
+    def return_soc(self):
+        return self.soc
+
     def vd(self):
         return self.voc + self.ib * self.r0
 
@@ -264,6 +267,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.Q = 0.001*0.001  # EKF process uncertainty
         self.R = 0.1*0.1  # EKF state uncertainty
         self.hys = Hysteresis(scale=hys_scale)  # Battery hysteresis model - drift of voc
+        self.soc_m = 0.  # Model information
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -286,6 +290,9 @@ class BatteryMonitor(Battery, EKF_1x1):
         s += "\n  "
         s += EKF_1x1.__str__(self, prefix + 'BatteryMonitor:')
         return s
+
+    def assign_soc_m(self, soc_m):
+        self.soc_m = soc_m
 
     def calculate_ekf(self, temp_c, vb, ib, dt):
         self.temp_c = temp_c
@@ -461,6 +468,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.saved.sel.append(self.sel)
         self.saved.mod_data.append(self.mod)
         self.saved.soc_wt.append(self.soc_wt)
+        self.saved.soc_m.append(self.soc_m)
 
     def select(self):
         drift = self.soc_ekf - self.soc

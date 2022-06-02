@@ -159,6 +159,10 @@ if __name__ == '__main__':
             plt.plot(old_s.time, old_s.soc, color='blue', label='soc')
             plt.plot(new_s.time, new_s.soc, color='red', linestyle='--', label='soc_new')
             plt.legend(loc=1)
+            plt.subplot(224)
+            plt.plot(old_s.time, old_s.soc_m, color='green', label='soc_m')
+            plt.plot(new_s.time, new_s.soc_m, color='orange', linestyle='--', label='soc_m_new')
+            plt.legend(loc=1)
             fig_file_name = filename + '_' + str(n_fig) + ".png"
             fig_files.append(fig_file_name)
             plt.savefig(fig_file_name, format="png")
@@ -268,10 +272,11 @@ if __name__ == '__main__':
                                sat=is_sat(temp_c, mon.voc, mon.soc), t_last=mon.t_last)
             mon.calc_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
             mon.select()
+            mon.assign_soc_m(sim.return_soc())
             rp.delta_q, rp.t_last = mon.update()
 
             # Plot stuff
-            mon.save(t[i], sim.soc, sim.voc)
+            mon.save(t[i], mon.soc, sim.voc)
             sim.save(t[i], sim.soc, sim.voc)
 
         # Data
