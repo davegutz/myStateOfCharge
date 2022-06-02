@@ -272,7 +272,7 @@ if __name__ == '__main__':
                                sat=is_sat(temp_c, mon.voc, mon.soc), t_last=mon.t_last)
             mon.calc_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
             mon.select()
-            mon.assign_soc_m(sim.return_soc())
+            mon.assign_soc_m(sim.soc)
             rp.delta_q, rp.t_last = mon.update()
 
             # Plot stuff

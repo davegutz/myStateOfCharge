@@ -225,9 +225,6 @@ class Battery(Coulombs):
     def i_r_dif(self):
         return self.vcd() / self.r_dif
 
-    def return_soc(self):
-        return self.soc
-
     def vd(self):
         return self.voc + self.ib * self.r0
 
