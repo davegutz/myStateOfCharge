@@ -18,7 +18,7 @@ import numpy as np
 # > NOM_BATT_CAP so equations error when soc<=0 to match data.
 NOM_BATT_CAP = 100   # Nominal battery bank capacity, Ah (100).   Accounts for internal losses.  This is                     # what gets delivered, e.g. Wshunt/NOM_SYS_VOLT.  Also varies 0.2-0.4C currents
                      # or 20-40 A for a 100 Ah battery
-BATT_DVOC_DT = 0.001875 # Change of VOC with operating temperature in range 0 - 50 C (0.0075) V / deg C
+BATT_DVOC_DT = 0.001 # Change of VOC with operating temperature in range 0 - 50 C (0.004) V / deg C
 BATT_V_SAT = 3.4625 # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
 NOM_SYS_VOLT = 12   # Nominal system output, V, at which the reported amps are used (12)
 BATT_R1 = 0.00126

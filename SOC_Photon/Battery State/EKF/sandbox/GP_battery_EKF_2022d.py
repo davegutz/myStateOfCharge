@@ -207,8 +207,6 @@ if __name__ == '__main__':
         # time_end = 700
         time_end = 3500
         # time_end = 800
-        temp_c = 25.
-        # temp_c = 0.
 
         # Load data
         data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220529_old.csv'
@@ -218,6 +216,7 @@ if __name__ == '__main__':
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old)
         rp.modeling = saved_old.mod()
+        temp_c = data_old.Tb[0]
 
         # Setup
         lut_i = myTables.TableInterp1D(np.array(t_x_i), np.array(t_i))
