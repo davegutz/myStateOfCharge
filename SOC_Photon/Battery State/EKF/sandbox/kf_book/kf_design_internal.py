@@ -35,7 +35,7 @@ def set_radar_pos(pos):
     global hx
     hx.radar_pos = pos
 
-def sensor_fusion_kf():
+def sensor_fusion_ekf():
     global hx, fx
     # create unscented Kalman filter with large initial uncertainty
     points = JulierSigmaPoints(2, kappa=2)

@@ -33,13 +33,13 @@ class EKF_1x1:
         self.S = 0.  # System uncertainty
         self.K = 0.  # Kalman gain
         self.hx = 0.  # Output of observation function h(x)
-        self.u_kf = 0.  # Control input
-        self.x_kf = 0.  # Kalman state variable
-        self.y_kf = 0.  # Residual z-hx
+        self.u_ekf = 0.  # Control input
+        self.x_ekf = 0.  # Kalman state variable
+        self.y_ekf = 0.  # Residual z-hx
         self.z_ekf = 0.  # Observation of state x
-        self.x_prior = self.x_kf
+        self.x_prior = self.x_ekf
         self.P_prior = self.P
-        self.x_post = self.x_kf
+        self.x_post = self.x_ekf
         self.P_post = self.P
 
     def __str__(self, prefix=''):
@@ -51,9 +51,9 @@ class EKF_1x1:
         s += "  Q = {:10.6f}\n".format(self.Q)
         s += "  H = {:7.3f}\n".format(self.H)
         s += "  Outputs:\n"
-        s += "  x  = {:7.3f}\n".format(self.x_kf)
+        s += "  x  = {:7.3f}\n".format(self.x_ekf)
         s += "  hx = {:7.3f}\n".format(self.hx)
-        s += "  y  = {:7.3f}\n".format(self.y_kf)
+        s += "  y  = {:7.3f}\n".format(self.y_ekf)
         s += "  P  = {:10.6f}\n".format(self.P)
         s += "  K  = {:10.6f}\n".format(self.K)
         s += "  S  = {:10.6f}\n".format(self.S)
@@ -67,7 +67,7 @@ class EKF_1x1:
 
     def init_ekf(self, soc, p_init):
         """Initialize on demand"""
-        self.x_kf = soc
+        self.x_ekf = soc
         self.P = p_init
 
     def predict_ekf(self, u):
@@ -80,11 +80,11 @@ class EKF_1x1:
             x   1x1 Kalman state variable = Vsoc (0-1 fraction)
             P   1x1 Kalman probability
         """
-        self.u_kf = u
+        self.u_ekf = u
         self.Fx, self.Bu = self.ekf_model_predict()
-        self.x_kf = self.Fx*self.x_kf + self.Bu*self.u_kf
+        self.x_ekf = self.Fx*self.x_ekf + self.Bu*self.u_ekf
         self.P = self.Fx * self.P * self.Fx + self.Q
-        self.x_prior = self.x_kf
+        self.x_prior = self.x_ekf
         self.P_prior = self.P
 
     def update_ekf(self, z, x_min, x_max):
@@ -108,14 +108,14 @@ class EKF_1x1:
         self.S = self.H*pht + self.R
         if abs(self.S) > 1e-12:
             self.K = pht/self.S  # using last-good-value if S=0
-        self.y_kf = self.z_ekf - self.hx
-        self.x_kf = max(min(self.x_kf + self.K*self.y_kf, x_max), x_min)
+        self.y_ekf = self.z_ekf - self.hx
+        self.x_ekf = max(min(self.x_ekf + self.K*self.y_ekf, x_max), x_min)
         i_kh = 1 - self.K*self.H
         self.P = i_kh*self.P
-        self.x_post = self.x_kf
+        self.x_post = self.x_ekf
         self.P_post = self.P
 
-    def h_jacobian(self, x_kf):
+    def h_jacobian(self, x_ekf):
         # implemented by child
         raise NotImplementedError
 

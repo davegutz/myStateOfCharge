@@ -85,6 +85,86 @@ if __name__ == '__main__':
         def mod(self):
              return self.mod_data[self.zero_end]
 
+        def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None):
+            if fig_files is None:
+                fig_files = []
+            plt.figure()
+            n_fig += 1
+            plt.subplot(221)
+            plt.title(plot_title)
+            plt.plot(old_s.time, old_s.Ib, color='green', label='Ib')
+            plt.plot(new_s.time, new_s.Ib, color='orange', linestyle='--', label='Ib_new')
+            plt.legend(loc=1)
+            plt.subplot(222)
+            plt.plot(old_s.time, old_s.sat, color='black', label='sat')
+            plt.plot(new_s.time, new_s.sat, color='orange', linestyle='--', label='sat_new')
+            plt.plot(old_s.time, old_s.sel, color='red', label='sel')
+            plt.plot(new_s.time, new_s.sel, color='blue', linestyle='--', label='sel_new')
+            plt.plot(old_s.time, old_s.mod_data, color='blue', label='mod')
+            plt.plot(new_s.time, new_s.mod_data, color='red', linestyle='--', label='mod_new')
+            plt.legend(loc=1)
+            plt.subplot(223)
+            plt.plot(old_s.time, old_s.Vb, color='green', label='Vb')
+            plt.plot(new_s.time, new_s.Vb, color='orange', linestyle='--', label='Vb_new')
+            plt.legend(loc=1)
+            plt.subplot(224)
+            plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
+            plt.plot(new_s.time, new_s.Voc, color='orange', linestyle='--', label='Voc_new')
+            plt.plot(old_s.time, old_s.Vsat, color='blue', label='Vsat')
+            plt.plot(new_s.time, new_s.Vsat, color='red', linestyle='--', label='Vsat_new')
+            plt.legend(loc=1)
+            fig_file_name = filename + '_' + str(n_fig) + ".png"
+            fig_files.append(fig_file_name)
+            plt.savefig(fig_file_name, format="png")
+
+            plt.figure()
+            n_fig += 1
+            plt.subplot(221)
+            plt.title(plot_title)
+            plt.plot(old_s.time, old_s.Vdyn, color='green', label='Vdyn')
+            plt.plot(new_s.time, new_s.Vdyn, color='orange', linestyle='--', label='Vdyn_new')
+            plt.legend(loc=1)
+            plt.subplot(222)
+            plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
+            plt.plot(new_s.time, new_s.Voc, color='orange', linestyle='--', label='Voc_new')
+            plt.legend(loc=1)
+            plt.subplot(223)
+            plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
+            plt.plot(new_s.time, new_s.Voc, color='orange', linestyle='--', label='Voc_new')
+            plt.plot(old_s.time, old_s.Voc_ekf, color='blue', label='Voc_ekf')
+            plt.plot(new_s.time, new_s.Voc_ekf, color='red', linestyle='--', label='Voc_ekf_new')
+            plt.legend(loc=1)
+            plt.subplot(224)
+            plt.plot(old_s.time, old_s.y_ekf, color='green', label='y_ekf')
+            plt.plot(new_s.time, new_s.y_ekf, color='orange', linestyle='--', label='y_ekf_new')
+            plt.legend(loc=1)
+            fig_file_name = filename + '_' + str(n_fig) + ".png"
+            fig_files.append(fig_file_name)
+            plt.savefig(fig_file_name, format="png")
+
+            plt.figure()
+            n_fig += 1
+            plt.subplot(221)
+            plt.title(plot_title)
+            plt.plot(old_s.time, old_s.soc, color='blue', label='soc')
+            plt.plot(new_s.time, new_s.soc, color='red', linestyle='--', label='soc_new')
+            plt.legend(loc=1)
+            plt.subplot(222)
+            plt.plot(old_s.time, old_s.soc_ekf, color='green', label='soc_ekf')
+            plt.plot(new_s.time, new_s.soc_ekf, color='orange', linestyle='--', label='soc_ekf_new')
+            plt.legend(loc=1)
+            plt.subplot(223)
+            plt.plot(old_s.time, old_s.soc_wt, color='green', label='soc_wt')
+            plt.plot(new_s.time, new_s.soc_wt, color='orange', linestyle='--', label='soc_wt_new')
+            plt.plot(old_s.time, old_s.soc, color='blue', label='soc')
+            plt.plot(new_s.time, new_s.soc, color='red', linestyle='--', label='soc_new')
+            plt.legend(loc=1)
+            fig_file_name = filename + '_' + str(n_fig) + ".png"
+            fig_files.append(fig_file_name)
+            plt.savefig(fig_file_name, format="png")
+
+            return n_fig, fig_files
+
 
     def main():
         # Trade study inputs
@@ -186,7 +266,8 @@ if __name__ == '__main__':
             mon.calculate_ekf(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
             mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=temp_c, charge_curr=sim.ib,
                                sat=is_sat(temp_c, mon.voc, mon.soc), t_last=mon.t_last)
-            mon.calculate_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
+            mon.calc_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
+            mon.select()
             rp.delta_q, rp.t_last = mon.update()
 
             # Plot stuff
@@ -197,6 +278,7 @@ if __name__ == '__main__':
         print('mon:  ', str(mon))
         print('sim:  ', str(sim))
 
+
         # Plots
         n_fig = 0
         fig_files = []
@@ -206,6 +288,8 @@ if __name__ == '__main__':
 
         n_fig, fig_files = overall(mon.saved, sim.saved, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig)
+        n_fig, fig_files = SavedData.overall(saved_old, mon.saved, filename, fig_files,
+                                             plot_title=plot_title, n_fig=n_fig)
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
 

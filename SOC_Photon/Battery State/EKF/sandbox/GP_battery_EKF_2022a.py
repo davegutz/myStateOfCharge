@@ -122,7 +122,7 @@ if __name__ == '__main__':
             mon.calculate_ekf(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
             mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=temp_c, charge_curr=sim.ib,
                                sat=is_sat(temp_c, mon.voc, mon.soc), t_last=mon.t_last)
-            mon.calculate_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
+            mon.calc_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
             rp.delta_q, rp.t_last = mon.update()
 
             # Plot stuff

@@ -33,6 +33,8 @@ class Retained:
         self.delta_q_model = 0.
         self.t_last_model = 25.
         self.modeling = int(7)  # assumed for this 'model'
+        self.nS = 1  # assumed for this 'model'
+        self.nP = 1  # assumed for this 'model'
 
     def tweak_test(self):
         return ( 0x8 & self.modeling )
@@ -60,6 +62,8 @@ max_voc = 1.2*NOM_SYS_VOLT  # Prevent windup of battery model, V
 batt_num_cells = int(NOM_SYS_VOLT/3)  # Number of standard 3 volt LiFePO4 cells
 batt_vsat = float(batt_num_cells)*BATT_V_SAT  # Total bank saturation for 0.997=soc, V
 batt_vmax = (14.3/4)*float(batt_num_cells)  # Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
+DF1 = 0.02  # Weighted selection lower transition drift, fraction
+DF2 = 0.05  # Threshold to resest Coulomb Counter if different from ekf, fraction (0.05)
 
 
 class Battery(Coulombs):
@@ -135,6 +139,8 @@ class Battery(Coulombs):
         self.saved = Saved()  # for plots and prints
         self.dv_hys = 0.  # Placeholder so BatteryModel can be plotted
         self.bms_off = False
+        self.mod = 7
+        self.sel = 0
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -312,7 +318,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         # EKF 1x1
         self.predict_ekf(u=self.ib)
         self.update_ekf(z=self.voc, x_min=0., x_max=1.)
-        self.soc_ekf = self.x_kf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
+        self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity
         self.SOC_ekf = self.q_ekf / self.q_cap_rated_scaled * 100.
 
@@ -326,9 +332,20 @@ class BatteryMonitor(Battery, EKF_1x1):
         else:
             self.tcharge_ekf = -24.*self.soc_ekf
 
+        self.Ib = self.ib * rp.nP
+        self.Vb = self.vb * rp.nS
+        self.Voc = self.voc * rp.nS
+        self.Vsat = self.vsat * rp.nS
+        self.Vdyn = self.vdyn * rp.nS
+        self.Voc_ekf = self.hx * rp.nS
+        if rp.tweak_test():
+            self.mod = 15
+        else:
+            self.mod = 7
+
         return self.soc_ekf
 
-    def calculate_charge_time(self, q, q_capacity, charge_curr, soc):
+    def calc_charge_time(self, q, q_capacity, charge_curr, soc):
         delta_q = q - q_capacity
         if charge_curr > TCHARGE_DISPLAY_DEADBAND:
             self.tcharge = min(-delta_q / charge_curr / 3600., 24.)
@@ -380,7 +397,7 @@ class BatteryMonitor(Battery, EKF_1x1):
 
     def ekf_model_update(self):
         # Measurement function hx(x), x = soc ideal capacitor
-        self.hx, self.dv_dsoc = self.calc_soc_voc(max(min(self.x_kf, 1.), 0.), temp_c=self.temp_c)
+        self.hx, self.dv_dsoc = self.calc_soc_voc(max(min(self.x_ekf, 1.), 0.), temp_c=self.temp_c)
         # Jacobian of measurement function
         self.H = self.dv_dsoc
         return self.hx, self.H
@@ -422,9 +439,9 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.saved.S.append(self.S)
         self.saved.K.append(self.K)
         self.saved.hx.append(self.hx)
-        self.saved.u_kf.append(self.u_kf)
-        self.saved.x_kf.append(self.x_kf)
-        self.saved.y_kf.append(self.y_kf)
+        self.saved.u_ekf.append(self.u_ekf)
+        self.saved.x_ekf.append(self.x_ekf)
+        self.saved.y_ekf.append(self.y_ekf)
         self.saved.z_ekf.append(self.z_ekf)
         self.saved.x_prior.append(self.x_prior)
         self.saved.P_prior.append(self.P_prior)
@@ -434,7 +451,28 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.e_voc_ekf = (self.voc_dyn - voc_ref) / voc_ref
         self.saved.e_soc_ekf.append(self.e_soc_ekf)
         self.saved.e_voc_ekf.append(self.e_voc_ekf)
+        self.saved.Ib.append(self.Ib)
+        self.saved.Vb.append(self.Vb)
+        self.saved.Voc.append(self.Voc)
+        self.saved.Vsat.append(self.Vsat)
+        self.saved.Vdyn.append(self.Vdyn)
+        self.saved.Voc_ekf.append(self.Voc_ekf)
+        self.saved.sat.append(self.sat)
+        self.saved.sel.append(self.sel)
+        self.saved.mod_data.append(self.mod)
+        self.saved.soc_wt.append(self.soc_wt)
 
+    def select(self):
+        drift = self.soc_ekf - self.soc
+        avg = (self.soc_ekf + self.soc) / 2.
+        if drift<=-DF2 or drift>=DF2:
+            self.soc_wt = self.soc_ekf
+        if -DF2<drift and drift<-DF1:
+            self.soc_wt = avg + (drift + DF1)/(DF2 - DF1) * (DF2/2.)
+        elif DF1<drift and drift<DF2:
+            self.soc_wt = avg + (drift - DF1)/(DF2 - DF1) * (DF2/2.)
+        else:
+            self.soc_wt = avg
 
 class BatteryModel(Battery):
     """Extend basic class to run a model"""
@@ -523,6 +561,9 @@ class BatteryModel(Battery):
         self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
         if rp.tweak_test():
             self.sat_ib_max = curr_in
+            self.mod = 15
+        else:
+            self.mod = 7
         self.ib = min(curr_in, self.sat_ib_max)
         if ((self.q <= 0.) & (curr_in < 0.)):
             self.ib = 0.  # empty
@@ -677,9 +718,9 @@ class Saved:
         self.S = []
         self.K = []
         self.hx = []
-        self.u_kf = []
-        self.x_kf = []
-        self.y_kf = []
+        self.u_ekf = []
+        self.x_ekf = []
+        self.y_ekf = []
         self.z_ekf = []
         self.x_prior = []
         self.P_prior = []
@@ -687,6 +728,21 @@ class Saved:
         self.P_post = []
         self.e_soc_ekf = []
         self.e_voc_ekf = []
+        self.Ib = []  # Bank current, A
+        self.Vb = []  # Bank voltage, V
+        self.sat = []  # Indication that battery is saturated, T=saturated
+        self.sel = []  # Current source selection, 0=amp, 1=no amp
+        self.mod_data = []  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
+        self.Tb = []  # Battery bank temperature, deg C
+        self.Vsat = []  # Monitor Bank saturation threshold at temperature, deg C
+        self.Vdyn = []  # Monitor Bank current induced back emf, V
+        self.Voc = []  # Monitor Static bank open circuit voltage, V
+        self.Voc_ekf = []  # Monitor bank solved static open circuit voltage, V
+        self.y_ekf = []  # Monitor single battery solver error, V
+        self.soc_m = []  # Simulated state of charge, fraction
+        self.soc_ekf = []  # Solved state of charge, fraction
+        # self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) availabel (0-1)
+        self.soc_wt = []  # Weighted selection of ekf state of charge and Coulomb Counter (0-1)
 
 
 def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None):
@@ -767,14 +823,14 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None):
     n_fig += 1
     plt.subplot(331)
     plt.title(plot_title+' **EKF')
-    plt.plot(ms.time, ms.x_kf, color='red', linestyle='dotted', label='x ekf')
+    plt.plot(ms.time, ms.x_ekf, color='red', linestyle='dotted', label='x ekf')
     plt.legend(loc=4)
     plt.subplot(332)
     plt.plot(ms.time, ms.hx, color='cyan', linestyle='dotted', label='hx ekf')
     plt.plot(ms.time, ms.z_ekf, color='black', linestyle='dotted', label='z ekf')
     plt.legend(loc=4)
     plt.subplot(333)
-    plt.plot(ms.time, ms.y_kf, color='green', linestyle='dotted', label='y ekf')
+    plt.plot(ms.time, ms.y_ekf, color='green', linestyle='dotted', label='y ekf')
     plt.legend(loc=4)
     plt.subplot(334)
     plt.plot(ms.time, ms.H, color='magenta', linestyle='dotted', label='H ekf')

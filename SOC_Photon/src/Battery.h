@@ -43,9 +43,9 @@ const double vb_dc_dc = 13.5;     // DC-DC charger estimated voltage, V
 #define EKF_T_RESET (EKF_T_CONV/2.) // EKF reset test time, sec ('up 1, down 2')
 #define EKF_Q_SD        0.001     // Standard deviation of EKF process uncertainty, V
 #define EKF_R_SD        0.1       // Standard deviation of EKF state uncertainty, fraction (0-1)
-#define EKF_NOM_DT      0.1       // EKF nominal update time, s (initialization; actual value varies)
+#define EKF_NOM_DT      0.1       // EKF nominal update time, s (initialization; actual value varies) 
 #define DF2             0.05      // Threshold to resest Coulomb Counter if different from ekf, fraction (0.05)
-#define DF1             0.02      // Weighted selection lower transition drift, fraction
+#define DF1             0.02      // Weighted selection lower transition drift, fraction (0.02)
 #define TAU_Y_FILT      5.        // EKF y-filter time constant, sec (5.)
 #define MIN_Y_FILT      -0.5      // EKF y-filter minimum, V (-0.5)
 #define MAX_Y_FILT      0.5       // EKF y-filter maximum, V (0.5)
