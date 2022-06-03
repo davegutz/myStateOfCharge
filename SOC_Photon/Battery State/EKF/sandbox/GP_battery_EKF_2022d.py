@@ -24,6 +24,7 @@ from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, rp, overall
 from unite_pictures import unite_pictures_into_pdf
 import os
 from datetime import datetime
+from TFDelay import TFDelay
 
 if __name__ == '__main__':
     import sys
@@ -194,6 +195,8 @@ if __name__ == '__main__':
         soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
         hys_scale = 1.  # (1e-6<--1.-->10.) 1e-6 disables hysteresis
         hys_scale_monitor = -1.  # (-1e-6<-- -1.-->-10.) -1e-6 disables hysteresis.   Negative reverses hys
+        T_SAT = 5.  # Saturation time, sec
+        T_DESAT = T_SAT * 2.  # De-saturation time, sec
 
         # Transient  inputs
         # Current time inputs representing the load.
@@ -212,6 +215,7 @@ if __name__ == '__main__':
         data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220529_old.csv'
         cols = ('unit', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
+        # noinspection PyTypeChecker
         data_old = np.genfromtxt(data_file_old, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old)
@@ -225,6 +229,7 @@ if __name__ == '__main__':
         sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale)
         mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
                       r_dif=r_dif, temp_c=temp_c, hys_scale=hys_scale_monitor)
+        Is_sat_delay = TFDelay(in_=data_old.soc[0]>0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
         # time loop
         dt = 0.1  # initialize
@@ -267,8 +272,10 @@ if __name__ == '__main__':
 
             # Monitor calculations including ekf
             mon.calculate_ekf(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
+            sat = is_sat(temp_c, mon.voc, mon.soc)
+            saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(dt, T_SAT/2.), init)
             mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=temp_c, charge_curr=sim.ib,
-                               sat=is_sat(temp_c, mon.voc, mon.soc), t_last=mon.t_last)
+                               sat=saturated, t_last=mon.t_last)
             mon.calc_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
             mon.select()
             mon.assign_soc_m(sim.soc)

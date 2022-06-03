@@ -63,8 +63,7 @@ batt_num_cells = int(NOM_SYS_VOLT/3)  # Number of standard 3 volt LiFePO4 cells
 batt_vsat = float(batt_num_cells)*BATT_V_SAT  # Total bank saturation for 0.997=soc, V
 batt_vmax = (14.3/4)*float(batt_num_cells)  # Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
 DF1 = 0.02  # Weighted selection lower transition drift, fraction
-DF2 = 0.05  # Threshold to resest Coulomb Counter if different from ekf, fraction (0.05)
-
+DF2 = 0.05  # Threshold to reset Coulomb Counter if different from ekf, fraction (0.05)
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.

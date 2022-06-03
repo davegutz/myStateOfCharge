@@ -139,6 +139,8 @@
 		t_r				r(soc, dv) table
 		t_rated_		Rated temperature, deg C
 		t_rlim_			Tbatt rate limit noise filter, deg C / s
+		T_SAT			Saturation time, sec
+		T_DESAT			De-saturation time, sec
 		t_soc_min		soc_min(t)
 		t_voc			voc(soc, t)
 		Vbatt			Selected battery bank voltage, V
