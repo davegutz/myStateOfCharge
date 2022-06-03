@@ -150,15 +150,15 @@ class Battery(Coulombs):
             format(self.r0, self.r_ct, self.tau_ct, self.r_dif, self.tau_dif, self.r_sd, self.tau_sd)
         s += "  bms_off  = {:d}      // BMS off\n".format(self.bms_off)
         s += "  dv_dsoc = {:7.3f}  // Derivative scaled, V/fraction\n".format(self.dv_dsoc)
-        s += "  ib =      {:7.3f}  // Current into battery post, A\n".format(self.ib)
-        s += "  vb =      {:7.3f}  // Total model voltage, voltage at terminals, V\n".format(self.vb)
-        s += "  voc      ={:7.3f}  // Dynamic model open circuit voltage including hysteresis, V\n".format(self.voc)
-        s += "  voc_stat ={:7.3f}  // Static model open circuit voltage, V\n".format(self.voc_stat)
+        s += "  ib =      {:7.3f}  // Battery terminal current, A\n".format(self.ib)
+        s += "  vb =      {:7.3f}  // Battery terminal voltage, V\n".format(self.vb)
+        s += "  voc      ={:7.3f}  // Static model open circuit voltage, V\n".format(self.voc)
+        s += "  voc_stat ={:7.3f}  // Static model open circuit voltage from table (reference), V\n".format(self.voc_stat)
         s += "  vsat =    {:7.3f}  // Saturation threshold at temperature, V\n".format(self.vsat)
-        s += "  vdyn =    {:7.3f}  // Model current induced back emf, V\n".format(self.vdyn)
-        s += "  q =       {:7.3f}  // Present charge, C\n".format(self.q)
+        s += "  vdyn =    {:7.3f}  // Current-induced back emf, V\n".format(self.vdyn)
+        s += "  q =       {:7.3f}  // Present charge available to use, except q_min_, C\n".format(self.q)
         s += "  sr =      {:7.3f}  // Resistance scalar\n".format(self.sr)
-        s += "  dv_ =     {:7.3f}  / Adjustment, V\n".format(self.dv)
+        s += "  dv_ =     {:7.3f}  // Delta voltage, V\n".format(self.dv)
         s += "  dt_ =     {:7.3f}  // Update time, s\n".format(self.dt)
         s += "  dv_hys  = {:7.3f}  // Hysteresis delta v, V\n".format(self.dv_hys)
         s += "\n  "
@@ -187,7 +187,7 @@ class Battery(Coulombs):
     def calc_soc_voc(self, soc, temp_c):
         """SOC-OCV curve fit method per Zhang, et al """
         dv_dsoc = self.calc_h_jacobian(soc, temp_c)
-        voc = self.lut_voc.interp(soc, temp_c) + self.dv
+        voc = self.lut_voc.interp(soc, temp_c)
         return voc, dv_dsoc
 
     def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):
