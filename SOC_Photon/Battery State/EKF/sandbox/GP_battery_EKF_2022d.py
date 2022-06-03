@@ -285,9 +285,14 @@ if __name__ == '__main__':
             mon.save(t[i], mon.soc, sim.voc)
             sim.save(t[i], sim.soc, sim.voc)
 
+            # Print end of init
+            if i<300 and t[i+1]==0. and t[i]<0.:
+                print('mon:  ', str(mon))
+                print('sim:  ', str(sim))
+
         # Data
-        print('mon:  ', str(mon))
-        print('sim:  ', str(sim))
+        # print('mon:  ', str(mon))
+        # print('sim:  ', str(sim))
 
 
         # Plots

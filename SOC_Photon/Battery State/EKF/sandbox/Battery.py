@@ -118,7 +118,7 @@ class Battery(Coulombs):
         self.sr = 1  # Resistance scalar
         self.nom_vsat = bat_v_sat * self.num_cells  # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
         self.vsat = NOM_SYS_VOLT + 1.7  # Saturation voltage, V
-        self.dv = 0  # Adjustment for voltage level, V (0)
+        self.dv = 0.01  # Adjustment for voltage level, V (0.01)
         self.dvoc_dt = BATT_DVOC_DT * self.num_cells  # Change of VOC with operating temperature in
         # range 0 - 50 C, V/deg C
         self.dt = 0  # Update time, s
@@ -187,7 +187,7 @@ class Battery(Coulombs):
     def calc_soc_voc(self, soc, temp_c):
         """SOC-OCV curve fit method per Zhang, et al """
         dv_dsoc = self.calc_h_jacobian(soc, temp_c)
-        voc = self.lut_voc.interp(soc, temp_c)
+        voc = self.lut_voc.interp(soc, temp_c) + self.dv
         return voc, dv_dsoc
 
     def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):
