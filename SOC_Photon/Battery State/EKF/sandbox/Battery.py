@@ -109,7 +109,6 @@ class Battery(Coulombs):
         self.vb = NOM_SYS_VOLT  # Battery voltage at post, V
         self.ib = 0  # Current into battery post, A
         self.ioc = 0  # Current into battery process accounting for hysteresis, A
-        self.pow_oc = 0.  # Charge power, W
         self.dv_dsoc = 0.  # Slope of soc-voc curve, V/%
         self.tcharge = 0.  # Charging time to 100%, hr
         self.sr = 1  # Resistance scalar
@@ -187,8 +186,9 @@ class Battery(Coulombs):
 
     def calc_soc_voc(self, soc, temp_c):
         """SOC-OCV curve fit method per Zhang, et al """
-        dv_dsoc = self.calc_h_jacobian(soc, temp_c)
-        voc = self.lut_voc.interp(soc, temp_c)
+        soc_lim = max(min(soc, 1.), 0.)
+        dv_dsoc = self.calc_h_jacobian(soc_lim, temp_c)
+        voc = self.lut_voc.interp(soc_lim, temp_c)
         return voc, dv_dsoc
 
     def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):
@@ -271,14 +271,12 @@ class BatteryMonitor(Battery, EKF_1x1):
             format(self.voc_stat)
         s += "  \n  "
         s += Battery.__str__(self, prefix + 'BatteryMonitor:')
+        s += "  amp_hrs_remaining =       {:7.3f}  // Discharge amp*time left if drain to q=0, A-h\n".format(self.amp_hrs_remaining,)
+        s += "  amp_hrs_remaining_ekf_ =  {:7.3f}  // Discharge amp*time left if drain to q_ekf=0, A-h\n".format(self.amp_hrs_remaining_ekf)
         s += "  q_ekf     {:7.3f}  // Filtered charge calculated by ekf, C\n".format(self.q_ekf)
+        s += "  soc_ekf = {:7.3f}  // Solved state of charge, fraction\n".format(self.soc_ekf)
         s += "  tcharge = {:7.3f}  // Charging time to full, hr\n".format(self.tcharge)
         s += "  tcharge_ekf = {:7.3f}   // Charging time to full from ekf, hr\n".format(self.tcharge_ekf)
-        s += "  soc_ekf = {:7.3f}  // Filtered state of charge from ekf (0-1)\n".format(self.soc_ekf)
-        s += "  amp_hrs_remaining =       {:7.3f}  // Discharge amp*time left if drain to q=0, A-h\n".\
-            format(self.amp_hrs_remaining,)
-        s += "  amp_hrs_remaining_ekf_ =  {:7.3f}  // Discharge amp*time left if drain to q_ekf=0, A-h\n".\
-            format(self.amp_hrs_remaining_ekf)
         s += "  \n  "
         s += self.hys.__str__(prefix + 'BatteryMonitor:')
         s += "\n  "
@@ -291,25 +289,25 @@ class BatteryMonitor(Battery, EKF_1x1):
     def calculate_ekf(self, temp_c, vb, ib, dt):
         self.temp_c = temp_c
         self.vsat = calc_vsat(self.temp_c)
+        self.dt = dt
 
         # Dynamics
         self.vb = vb
-        self.ib = ib
+        self.ib = max(min(ib, 10000.), -10000.)  # Overflow protection since ib past value used
         u = np.array([ib, vb]).T
         self.Randles.calc_x_dot(u)
-        self.Randles.update(dt)
+        self.Randles.update(self.dt)
         self.voc_dyn = self.Randles.y
         self.vdyn = self.vb - self.voc_dyn
-        self.voc_stat = self.voc_dyn
+        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
         # Hysteresis model
-        self.hys.calculate_hys(self.ib, self.voc_stat, self.soc)
-        self.voc = self.hys.update(dt)
+        self.hys.calculate_hys(self.ib, self.voc_dyn, self.soc)
+        self.voc = self.hys.update(self.dt)
         self.ioc = self.hys.ioc
         self.dv_hys = self.hys.dv_hys
-        self.pow_oc = self.voc * self.ioc
         self.bms_off = self.temp_c <= low_t;  # KISS
         if self.bms_off:
-            self.voc_stat, self.dv_dsoc = self.calc_soc_voc(max(min(self.soc, 1.), 0.), temp_c)
+            self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
             self.voc_stat += self.dv  # Experimentally varied
             self.ib = 0.
             self.voc = self.voc_stat
@@ -426,7 +424,6 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.saved.vcd_dot.append(self.vcd_dot())
         self.saved.vbc_dot.append(self.vbc_dot())
         self.saved.soc.append(self.soc)
-        self.saved.pow_oc.append(self.pow_oc)
         self.saved.soc_ekf.append(self.soc_ekf)
         self.saved.voc_dyn.append(self.voc_dyn)
         self.saved.Fx.append(self.Fx)
@@ -568,7 +565,6 @@ class BatteryModel(Battery):
         self.model_saturated = self.temp_c > low_t and \
                                ((self.voc_stat > self.vsat) & (self.ib < self.ib_sat) & (self.ib == self.sat_ib_max))
         Coulombs.sat = self.model_saturated
-        self.pow_oc = self.vb * self.ib
 
         return self.vb
 
@@ -655,7 +651,6 @@ class BatteryModel(Battery):
         self.saved.vcd_dot.append(self.vcd_dot())
         self.saved.vbc_dot.append(self.vbc_dot())
         self.saved.soc.append(self.soc)
-        self.saved.pow_oc.append(self.pow_oc)
 
 
 # Other functions
@@ -697,7 +692,6 @@ class Saved:
         self.vcd_dot = []
         self.vbc_dot = []
         self.soc = []
-        self.pow_oc = []
         self.soc_ekf = []
         self.voc_dyn = []
         self.Fx = []
@@ -762,9 +756,6 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.subplot(322)
     plt.plot(ms.time, ms.soc, color='red', label='soc')
     plt.legend(loc=1)
-    plt.subplot(324)
-    plt.plot(ms.time, ms.pow_oc, color='orange', label='Pow_charge')
-    plt.legend(loc=1)
     plt.subplot(326)
     plt.plot(ss.soc, ss.voc, color='black', linestyle='dotted', label='SIM voc vs soc')
     plt.plot(ms.soc, ms.voc, color='green', linestyle='dotted', label='MON voc vs soc')
@@ -797,9 +788,6 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.legend(loc=1)
     plt.subplot(322)
     plt.plot(ss.time, ss.soc, color='red', label='soc')
-    plt.legend(loc=1)
-    plt.subplot(324)
-    plt.plot(ss.time, ss.pow_oc, color='orange', label='Pow_charge')
     plt.legend(loc=1)
     plt.subplot(326)
     plt.plot(ss.soc, ss.voc, color='black', label='voc vs soc')
