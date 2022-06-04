@@ -1,6 +1,7 @@
 		amp				Injected amplitude, A pk (0-18.3)
 		amp_hrs_remaining	Discharge amp*time left if drain to q=0, A-h
 		amp_hrs_remaining_ekf_	Discharge amp*time left if drain to q_ekf=0, A-h
+		amp_hrs_remaining_wt_	Discharge amp*time left if drain soc_wt_ to 0, A-h
 		BATT_V_SAT		Normal battery saturation for SOC=99.7, V
 		bms_off_		Calculated indication that the BMS has turned off charge current, T=off
 		cap_			Capacitance, Farads

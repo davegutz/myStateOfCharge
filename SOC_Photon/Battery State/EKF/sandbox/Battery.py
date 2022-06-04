@@ -187,7 +187,7 @@ class Battery(Coulombs):
     def calc_soc_voc(self, soc, temp_c):
         """SOC-OCV curve fit method per Zhang, et al """
         dv_dsoc = self.calc_h_jacobian(soc, temp_c)
-        voc = self.lut_voc.interp(soc, temp_c)
+        voc = self.lut_voc.interp(soc, temp_c) + self.dv
         return voc, dv_dsoc
 
     def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):  # Battery
@@ -253,9 +253,10 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.tcharge_ekf = 0.  # Charging time to 100% from ekf, hr
         self.voc_dyn = 0.  # Charging voltage, V
         self.soc_ekf = 0.  # Filtered state of charge from ekf (0-1)
+        self.soc_wt = 0.  # Weighted selection of ekf state of charge and coulomb counter (0-1)
         self.q_ekf = 0  # Filtered charge calculated by ekf, C
-        self.amp_hrs_remaining = 0  # Discharge amp*time left if drain to q=0, A-h
         self.amp_hrs_remaining_ekf = 0  # Discharge amp*time left if drain to q_ekf=0, A-h
+        self.amp_hrs_remaining_wt = 0  # Discharge amp*time left if drain soc_wt_ to 0, A-h
         self.e_soc_ekf = 0.  # analysis parameter
         self.e_voc_ekf = 0.  # analysis parameter
         self.Q = 0.001*0.001  # EKF process uncertainty
@@ -265,13 +266,10 @@ class BatteryMonitor(Battery, EKF_1x1):
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
-        s = prefix + "BatteryMonitor:\n"
-        s += "  voc_stat=        {:7.3f}  // Static, table lookup value of voc before applying hysteresis, V\n".\
-            format(self.voc_stat)
-        s += "  \n  "
+        s = prefix
         s += Battery.__str__(self, prefix + 'BatteryMonitor:')
-        s += "  amp_hrs_remaining =       {:7.3f}  // Discharge amp*time left if drain to q=0, A-h\n".format(self.amp_hrs_remaining,)
         s += "  amp_hrs_remaining_ekf_ =  {:7.3f}  // Discharge amp*time left if drain to q_ekf=0, A-h\n".format(self.amp_hrs_remaining_ekf)
+        s += "  amp_hrs_remaining_wt_  =  {:7.3f}  // Discharge amp*time left if drain soc_wt_ to 0, A-h\n".format(self.amp_hrs_remaining_wt)
         s += "  q_ekf     {:7.3f}  // Filtered charge calculated by ekf, C\n".format(self.q_ekf)
         s += "  soc_ekf = {:7.3f}  // Solved state of charge, fraction\n".format(self.soc_ekf)
         s += "  tcharge = {:7.3f}  // Charging time to full, hr\n".format(self.tcharge)
@@ -307,15 +305,14 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.bms_off = self.temp_c <= low_t;  # KISS
         if self.bms_off:
             self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
-            self.voc_stat += self.dv  # Experimentally varied
             self.ib = 0.
             self.voc = self.voc_stat
             self.vdyn = self.voc_stat
             self.voc_dyn = 0.
 
         # EKF 1x1
-        self.predict_ekf(u=self.ib)
-        self.update_ekf(z=self.voc, x_min=0., x_max=1.)
+        self.predict_ekf(u=self.ib)  # u = ib
+        self.update_ekf(z=self.voc, x_min=0., x_max=1.)  # z = voc, voc_filtered = hx
         self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity
 
@@ -352,12 +349,15 @@ class BatteryMonitor(Battery, EKF_1x1):
             self.tcharge = 24.
         else:
             self.tcharge = -24.
-        self.amp_hrs_remaining = max(q_capacity - self.q_min + delta_q, 0.) / 3600.
+        amp_hrs_remaining = max(q_capacity - self.q_min + delta_q, 0.) / 3600.
         if soc > 0.:
-            self.amp_hrs_remaining_ekf = self.amp_hrs_remaining * (self.soc_ekf - self.soc_min) /\
+            self.amp_hrs_remaining_ekf = amp_hrs_remaining * (self.soc_ekf - self.soc_min) /\
+                                         max(soc - self.soc_min, 1e-8)
+            self.amp_hrs_remaining_wt = amp_hrs_remaining * (self.soc_wt - self.soc_min) / \
                                          max(soc - self.soc_min, 1e-8)
         else:
             self.amp_hrs_remaining_ekf = 0.
+        self.amp_hrs_remaining_wt = 0.
         return self.tcharge
 
     # def count_coulombs(self, dt=0., reset=False, temp_c=25., charge_curr=0., sat=True, t_last=0.):
@@ -529,7 +529,6 @@ class BatteryModel(Battery):
         # VOC - OCV model
         self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc, temp_c)
         self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)  # slightly beyond but don't windup
-        self.voc_stat += self.dv  # Experimentally varied
 
         self.bms_off = (self.temp_c < low_t) or (self.voc < low_voc)
         if self.bms_off:

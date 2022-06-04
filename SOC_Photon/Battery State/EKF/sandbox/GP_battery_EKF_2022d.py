@@ -292,8 +292,8 @@ if __name__ == '__main__':
                 print('sim:  ', str(sim))
 
         # Data
-        # print('mon:  ', str(mon))
-        # print('sim:  ', str(sim))
+        print('mon:  ', str(mon))
+        print('sim:  ', str(sim))
 
 
         # Plots
