@@ -40,8 +40,8 @@ class Coulombs:
         self.t_last = 0.
         self.sat = True
         from pyDAGx import myTables
-        t_x_soc_min = [0., 10.,  15.,  20.,  40.]
-        t_soc_min = [0.75, 0.75, 0.70, 0.05, 0.05]
+        t_x_soc_min = [5.,   11.1,  20.,  40.]
+        t_soc_min = [ 0.14, 0.12,  0.08, 0.07]
         self.lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
 
     def __str__(self, prefix=''):

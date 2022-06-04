@@ -101,6 +101,7 @@
 		sim_mod			Simulation battery chemistry type
 		soc_			Coulomb Counter fraction of saturation charge (q_capacity_) available (0-1) 
 		soc_ekf_		Solved state of charge, fraction
+		soc_wt_			Weighted selection of ekf state of charge and coulomb counter (0-1)
 		soc_m 			Simulated state of charge, fraction
 		soc_min_		Estimated soc where battery BMS will shutoff current, fraction
 		soc_weight_		Weighted selection of ekf state of charge and Coulomb Counter (0-1)

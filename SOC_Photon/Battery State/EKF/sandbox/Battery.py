@@ -272,6 +272,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         s += "  amp_hrs_remaining_wt_  =  {:7.3f}  // Discharge amp*time left if drain soc_wt_ to 0, A-h\n".format(self.amp_hrs_remaining_wt)
         s += "  q_ekf     {:7.3f}  // Filtered charge calculated by ekf, C\n".format(self.q_ekf)
         s += "  soc_ekf = {:7.3f}  // Solved state of charge, fraction\n".format(self.soc_ekf)
+        s += "  soc_wt  = {:7.3f}  // Weighted selection of ekf state of charge and coulomb counter (0-1)\n".format(self.soc_wt)
         s += "  tcharge = {:7.3f}  // Charging time to full, hr\n".format(self.tcharge)
         s += "  tcharge_ekf = {:7.3f}   // Charging time to full from ekf, hr\n".format(self.tcharge_ekf)
         s += "  \n  "
@@ -349,6 +350,7 @@ class BatteryMonitor(Battery, EKF_1x1):
             self.tcharge = 24.
         else:
             self.tcharge = -24.
+
         amp_hrs_remaining = max(q_capacity - self.q_min + delta_q, 0.) / 3600.
         if soc > 0.:
             self.amp_hrs_remaining_ekf = amp_hrs_remaining * (self.soc_ekf - self.soc_min) /\
@@ -357,7 +359,7 @@ class BatteryMonitor(Battery, EKF_1x1):
                                          max(soc - self.soc_min, 1e-8)
         else:
             self.amp_hrs_remaining_ekf = 0.
-        self.amp_hrs_remaining_wt = 0.
+            self.amp_hrs_remaining_wt = 0.
         return self.tcharge
 
     # def count_coulombs(self, dt=0., reset=False, temp_c=25., charge_curr=0., sat=True, t_last=0.):
