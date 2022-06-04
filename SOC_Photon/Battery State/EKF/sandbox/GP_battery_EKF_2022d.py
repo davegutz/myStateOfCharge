@@ -189,9 +189,9 @@ if __name__ == '__main__':
         r_dif = 0.0077  # (0.0077-->0.015)   ++++++++++  dyn only provided reset soc periodically
         rsd = 70.  # (70.-->700)  ------- dyn only
         tau_ct = 0.2  # (0.2-->5.)  -------
-        tau_sd = 1.87e7  # (1.87e7-->1.87e6) ++++++ dyn only
-        v_std = 0.01  # (0.01-->0) ------ noise
-        i_std = 0.1  # (0.1-->0) ------ noise
+        tau_sd = 1.8e7  # (1.8e7-->1.8e6) ++++++ dyn only
+        v_std = 0.  # (0.01-->0) ------ noise
+        i_std = 0.  # (0.1-->0) ------ noise
         soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
         hys_scale = 1.  # (1e-6<--1.-->10.) 1e-6 disables hysteresis
         hys_scale_monitor = -1.  # (-1e-6<-- -1.-->-10.) -1e-6 disables hysteresis.   Negative reverses hys
@@ -286,7 +286,8 @@ if __name__ == '__main__':
             sim.save(t[i], sim.soc, sim.voc)
 
             # Print end of init
-            if i<300 and t[i+1]==0. and t[i]<0.:
+            # if i<300 and t[i+1]==0. and t[i]<0.:
+            if i==0:
                 print('mon:  ', str(mon))
                 print('sim:  ', str(sim))
 

@@ -35,7 +35,6 @@ class Coulombs:
         self.q_capacity = 0.
         self.soc_min = 0.
         self.soc = 1.
-        self.SOC = 100.
         self.resetting = True
         self.q_min = 0.
         self.t_last = 0.
@@ -54,7 +53,6 @@ class Coulombs:
         s += "  q =          {:9.1f}     // Present charge available to use, C\n".format(self. q)
         s += "  delta_q      {:9.1f}     // Charge since saturated, C\n".format(self. delta_q)
         s += "  soc =        {:7.3f}       // Fraction of saturation charge (q_capacity_) available (0-1)  soc)\n".format(self.soc)
-        s += "  SOC =        {:5.1f}         // Fraction of rated capacity available (0 - ~1.2)   For comparison to other batteries\n".format(self.SOC)
         s += "  sat =          {:d}          // Indication calculated by caller that battery is saturated, T=saturated\n".format(self.sat)
         s += "  t_rated =    {:5.1f}         // Rated temperature, deg C\n".format(self. t_rated)
         s += "  t_last =     {:5.1f}         // Last battery temperature for rate limit memory, deg C\n".format(self.t_last)
@@ -73,7 +71,6 @@ class Coulombs:
         self.q_capacity = self.calculate_capacity(self.t_last)
         self.q = self.delta_q + self.q_capacity  # preserve self.delta_q, deficit since last saturation(like real life)
         self.soc = self.q / self.q_capacity
-        self.SOC = self.q / self.q_cap_rated_scaled * 100.
         self.resetting = True  # momentarily turn off saturation check
 
     def apply_delta_q(self, delta_q, temp_c):
@@ -82,7 +79,6 @@ class Coulombs:
         self.q_capacity = self.calculate_capacity(temp_c)
         self.q = self.delta_q + self.q_capacity
         self.soc = self.q / self.q_capacity
-        self.SOC = self.q / self.q_cap_rated_scaled * 100.
         self.resetting = True  # momentarily turn off saturation check
 
     def apply_delta_q_t(self, delta_q, temp_c):
@@ -90,7 +86,6 @@ class Coulombs:
         self.q_capacity = self.calculate_capacity(temp_c)
         self.q = self.q_capacity + self.delta_q
         self.soc = self.q / self.q_capacity
-        self.SOC = self.q / self.q_cap_rated_scaled * 100.
         self.resetting = True
 
     def apply_soc(self, soc, temp_c):
@@ -99,16 +94,6 @@ class Coulombs:
         self.q_capacity = self.calculate_capacity(temp_c)
         self.q = soc*self.q_capacity
         self.delta_q = self.q - self.q_capacity
-        self.SOC = self.q / self.q_cap_rated_scaled * 100.
-        self.resetting = True  # momentarily turn off saturation check
-
-    def apply_SOC(self, soc, temp_c):
-        """Memory set, adjust book-keeping as needed.  delta_q preserved"""
-        self.SOC = soc
-        self.q_capacity = self.calculate_capacity(temp_c)
-        self.q = self.SOC / 100. * self.q_cap_rated_scaled
-        self.delta_q = self.q - self.q_capacity
-        self.soc = self.q / self.q_capacity
         self.resetting = True  # momentarily turn off saturation check
 
     def calculate_capacity(self, temp_c):
@@ -152,7 +137,6 @@ class Coulombs:
         self.soc = self.q / self.q_capacity
         self.soc_min = self.lut_soc_min.interp(temp_lim)
         self.q_min = self.soc_min * self.q_capacity
-        self.SOC = self.q / self.q_cap_rated_scaled * 100.
 
         # Save and return
         self.t_last = temp_lim

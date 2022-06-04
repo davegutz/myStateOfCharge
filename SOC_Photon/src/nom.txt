@@ -116,7 +116,7 @@
 		tau_diff_		Randles diffusion time constant, s (=1/Rdif/Cdif)
 		tau_sd			Equivalent model for EKF reference.	Parasitic discharge time constant, sec
 		tau_sd			Equivalent model for EKF.	Creating an anchor.	So large it's just a pass through, s
-		Tb				Battery bank temperature, deg C
+		Tb				Battery temperature, deg C
 		Tbatt			Battery bank temp, C
 		Tbatt_filt		Filtered battery bank temp, C
 		Tbatt_hdwe		Sensed battery bank temp, C
@@ -161,7 +161,7 @@
 		voc_filt_		Filtered open circuit voltage for saturation detect, V
 		voc_in_			Voltage input, V
 		voc_out_		Voltage output, V
-		voc_stat_		Static model open circuit voltage from table (reference), V\n
+		voc_stat_		Static model open circuit voltage from table (reference), V
 		VOLT_BIAS		Bias on Vbatt sensor, V
 		Vsat			Bank saturation threshold at temperature, deg C
 		vsat_			Saturation threshold at temperature, deg C

@@ -48,7 +48,7 @@ RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
 BATT_DVOC_DT = 0.004  # 5/30/2022
 """ Change of VOC with operating temperature in range 0 - 50 C (0.004) V/deg C
                             >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C"""
-BATT_V_SAT = 3.4625  # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
+BATT_V_SAT = 13.8  # Normal battery cell saturation for SOC=99.7, V (13.8)
 NOM_SYS_VOLT = 12.  # Nominal system output, V, at which the reported amps are used (12)
 low_voc = 10  # Minimum voltage for battery below which BMS shutsoff current
 low_t = 8  # Minimum temperature for valid saturation check, because BMS shuts off battery low.
@@ -60,7 +60,7 @@ CAP_DROOP_C = 20.  # Temperature below which a floor on q arises, C (20)
 TCHARGE_DISPLAY_DEADBAND = 0.1  # Inside this +/- deadband, charge time is displayed '---', A
 max_voc = 1.2*NOM_SYS_VOLT  # Prevent windup of battery model, V
 batt_num_cells = int(NOM_SYS_VOLT/3)  # Number of standard 3 volt LiFePO4 cells
-batt_vsat = float(batt_num_cells)*BATT_V_SAT  # Total bank saturation for 0.997=soc, V
+batt_vsat = BATT_V_SAT  # Total bank saturation for 0.997=soc, V
 batt_vmax = (14.3/4)*float(batt_num_cells)  # Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
 DF1 = 0.02  # Weighted selection lower transition drift, fraction
 DF2 = 0.05  # Threshold to reset Coulomb Counter if different from ekf, fraction (0.05)
@@ -78,7 +78,7 @@ class Battery(Coulombs):
                             or 20 - 40 A for a 100 Ah battery"""
 
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
-                 num_cells=4, bat_v_sat=3.4625, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
+                 num_cells=4, bat_v_sat=13.8, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
@@ -116,10 +116,10 @@ class Battery(Coulombs):
         self.dv_dsoc = 0.  # Slope of soc-voc curve, V/%
         self.tcharge = 0.  # Charging time to 100%, hr
         self.sr = 1  # Resistance scalar
-        self.nom_vsat = bat_v_sat * self.num_cells  # Normal battery cell saturation for SOC=99.7, V (3.4625 = 13.85v)
-        self.vsat = NOM_SYS_VOLT + 1.7  # Saturation voltage, V
+        self.nom_vsat = bat_v_sat  # Normal battery cell saturation for SOC=99.7, V
+        self.vsat = bat_v_sat  # Saturation voltage, V
         self.dv = 0.01  # Adjustment for voltage level, V (0.01)
-        self.dvoc_dt = BATT_DVOC_DT * self.num_cells  # Change of VOC with operating temperature in
+        self.dvoc_dt = BATT_DVOC_DT  # Change of VOC with operating temperature in
         # range 0 - 50 C, V/deg C
         self.dt = 0  # Update time, s
         self.r_sd = r_sd
@@ -142,14 +142,18 @@ class Battery(Coulombs):
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
-        s = prefix + "Battery:\n  "
-        s += 'temp, #cells, dvoc_dt = {:5.1f}, {}, {:7.3f},\n'.\
-            format(self.temp_c, self.num_cells, self.dvoc_dt)
-        s += '  r0, r_ct, tau_ct, r_dif, tau_dif, r_sd, tau_sd = {:7.3f}, {:7.3f}, {:7.3f},' \
-             ' {:7.3f}, {:7.3f}, {:7.3f}, {:7.3f},\n'.\
-            format(self.r0, self.r_ct, self.tau_ct, self.r_dif, self.tau_dif, self.r_sd, self.tau_sd)
+        s = prefix + "Battery:\n"
+        s += "  temp_c  = {:7.3f}  // Battery temperature, deg C\n".format(self.temp_c)
+        s += "  dvoc_dt = {:9.6f}  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n".format(self.dvoc_dt)
+        s += "  r_0     = {:9.6f}  // Randles R0, ohms\n".format(self.r0)
+        s += "  r_ct    = {:9.6f}  // Randles charge transfer resistance, ohms\n".format(self.r_ct)
+        s += "  tau_ct  = {:9.6f}  // Randles charge transfer time constant, s (=1/Rct/Cct)\n".format(self.tau_ct)
+        s += "  r_dif   = {:9.6f}  // Randles diffusion resistance, ohms\n".format(self.r_dif)
+        s += "  tau_dif = {:9.6f}  // Randles diffusion time constant, s (=1/Rdif/Cdif)\n".format(self.tau_dif)
+        s += "  r_sd    = {:9.6f}  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n".format(self.r_sd)
+        s += "  tau_sd  = {:9.1f}  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n".format(self.tau_sd)
         s += "  bms_off  = {:d}      // BMS off\n".format(self.bms_off)
-        s += "  dv_dsoc = {:7.3f}  // Derivative scaled, V/fraction\n".format(self.dv_dsoc)
+        s += "  dv_dsoc = {:9.6f}  // Derivative scaled, V/fraction\n".format(self.dv_dsoc)
         s += "  ib =      {:7.3f}  // Battery terminal current, A\n".format(self.ib)
         s += "  vb =      {:7.3f}  // Battery terminal voltage, V\n".format(self.vb)
         s += "  voc      ={:7.3f}  // Static model open circuit voltage, V\n".format(self.voc)
@@ -234,7 +238,7 @@ class BatteryMonitor(Battery, EKF_1x1):
     """Extend basic class to monitor"""
 
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
-                 num_cells=4, bat_v_sat=3.4625, q_cap_rated=Battery.RATED_BATT_CAP*3600,
+                 num_cells=4, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1.):
@@ -253,7 +257,6 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.tcharge_ekf = 0.  # Charging time to 100% from ekf, hr
         self.voc_dyn = 0.  # Charging voltage, V
         self.soc_ekf = 0.  # Filtered state of charge from ekf (0-1)
-        self.SOC_ekf = 0.  # Filtered state of charge from ekf (0-100)
         self.q_ekf = 0  # Filtered charge calculated by ekf, C
         self.amp_hrs_remaining = 0  # Discharge amp*time left if drain to q=0, A-h
         self.amp_hrs_remaining_ekf = 0  # Discharge amp*time left if drain to q_ekf=0, A-h
@@ -275,7 +278,6 @@ class BatteryMonitor(Battery, EKF_1x1):
         s += "  tcharge = {:7.3f}  // Charging time to full, hr\n".format(self.tcharge)
         s += "  tcharge_ekf = {:7.3f}   // Charging time to full from ekf, hr\n".format(self.tcharge_ekf)
         s += "  soc_ekf = {:7.3f}  // Filtered state of charge from ekf (0-1)\n".format(self.soc_ekf)
-        s += "  SOC_ekf  ={:7.3f}  // Filtered state of charge from ekf (0-100)\n".format(self.SOC_ekf)
         s += "  amp_hrs_remaining =       {:7.3f}  // Discharge amp*time left if drain to q=0, A-h\n".\
             format(self.amp_hrs_remaining,)
         s += "  amp_hrs_remaining_ekf_ =  {:7.3f}  // Discharge amp*time left if drain to q_ekf=0, A-h\n".\
@@ -322,7 +324,6 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.update_ekf(z=self.voc, x_min=0., x_max=1.)
         self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity
-        self.SOC_ekf = self.q_ekf / self.q_cap_rated_scaled * 100.
 
         # Charge time
         if self.ib > 0.1:
@@ -408,7 +409,6 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.soc_ekf = soc
         self.init_ekf(soc, 0.0)
         self.q_ekf = self.soc_ekf * self.q_capacity
-        self.SOC_ekf = self.q_ekf / self.q_cap_rated_scaled * 100.
 
     def save(self, time, soc_ref, voc_ref):
         self.saved.time.append(time)
@@ -429,10 +429,8 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.saved.vcd_dot.append(self.vcd_dot())
         self.saved.vbc_dot.append(self.vbc_dot())
         self.saved.soc.append(self.soc)
-        self.saved.SOC.append(self.SOC)
         self.saved.pow_oc.append(self.pow_oc)
         self.saved.soc_ekf.append(self.soc_ekf)
-        self.saved.SOC_ekf.append(self.SOC_ekf)
         self.saved.voc_dyn.append(self.voc_dyn)
         self.saved.Fx.append(self.Fx)
         self.saved.Bu.append(self.Bu)
@@ -481,7 +479,7 @@ class BatteryModel(Battery):
     """Extend basic class to run a model"""
 
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
-                 num_cells=4, bat_v_sat=3.4625, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
+                 num_cells=4, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1.):
@@ -536,7 +534,6 @@ class BatteryModel(Battery):
             curr_in = 0.
 
         # soc_lim = max(min(soc, mxeps_bb), mneps_bb)
-        # SOC = soc * q_capacity / self.q_cap_rated_scaled * 100.
 
         # VOC - OCV model
         self.voc_stat, self.dv_dsoc = self.calc_soc_voc(max(min(soc, 1.), 0.), temp_c)
@@ -637,7 +634,6 @@ class BatteryModel(Battery):
         self.soc = self.q / self.q_capacity
         self.soc_min = self.lut_soc_min.interp(temp_lim)
         self.q_min = self.soc_min * self.q_capacity
-        self.SOC = self.q / self.q_cap_rated_scaled * 100.
 
         # Save and return
         self.t_last = temp_lim
@@ -662,7 +658,6 @@ class BatteryModel(Battery):
         self.saved.vcd_dot.append(self.vcd_dot())
         self.saved.vbc_dot.append(self.vbc_dot())
         self.saved.soc.append(self.soc)
-        self.saved.SOC.append(self.SOC)
         self.saved.pow_oc.append(self.pow_oc)
 
 
@@ -705,10 +700,8 @@ class Saved:
         self.vcd_dot = []
         self.vbc_dot = []
         self.soc = []
-        self.SOC = []
         self.pow_oc = []
         self.soc_ekf = []
-        self.SOC_ekf = []
         self.voc_dyn = []
         self.Fx = []
         self.Bu = []

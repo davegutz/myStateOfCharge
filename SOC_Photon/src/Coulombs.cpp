@@ -173,9 +173,9 @@ void Chemistry::pretty_print(void)
   Serial.printf("  v_sat =       %7.3f;  // Saturation threshold at temperature, deg C\n", v_sat);
   Serial.printf("  dvoc_dt =     %7.3f;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n", dvoc_dt);
   Serial.printf("  dv =          %7.3f;  // Adjustment for calibration error, V\n", dv);
-  Serial.printf("  r_0 =         %7.3f;  // Randles R0, ohms\n", r_0);
-  Serial.printf("  r_ct =        %7.3f;  // Randles charge transfer resistance, ohms\n", r_ct);
-  Serial.printf("  r_diff =      %7.3f;  // Randles diffusion resistance, ohms\n", r_diff);
+  Serial.printf("  r_0 =         %9.6f;  // Randles R0, ohms\n", r_0);
+  Serial.printf("  r_ct =        %9.6f;  // Randles charge transfer resistance, ohms\n", r_ct);
+  Serial.printf("  r_diff =      %9.6f;  // Randles diffusion resistance, ohms\n", r_diff);
   Serial.printf("  tau_ct =      %7.3f;  // Randles charge transfer time constant, s (=1/Rct/Cct)\n", tau_ct);
   Serial.printf("  tau_diff =    %7.3f;  // Randles diffusion time constant, s (=1/Rdif/Cdif)\n", tau_diff);
   Serial.printf("  tau_sd =      %7.3f;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n", tau_sd);
