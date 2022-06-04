@@ -561,8 +561,8 @@ class BatteryModel(Battery):
             self.mod = 15
         else:
             self.mod = 7
-        self.ib = min(curr_in, self.sat_ib_max)
-        if ((self.q <= 0.) & (curr_in < 0.)):
+        self.ib = min(curr_in, self.sat_ib_max)  # the feedback of self.ib
+        if ((self.q <= 0.) & (curr_in < 0.)):  # empty
             self.ib = 0.  # empty
         self.model_cutback = (self.voc_stat > self.vsat) & (self.ib == self.sat_ib_max)
         self.model_saturated = self.temp_c > low_t and \

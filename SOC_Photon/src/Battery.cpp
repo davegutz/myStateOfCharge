@@ -586,9 +586,9 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
 
     // Saturation logic, both full and empty
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
-    if ( rp.tweak_test() ) sat_ib_max_ = curr_in; // Disable cutback when doing tweak_test test
-    ib_ = min(curr_in/(*rp_nP_), sat_ib_max_);
-    if ( (q_ <= 0.) && (curr_in < 0.) ) ib_ = 0.;  //  empty
+    if ( rp.tweak_test() ) sat_ib_max_ = curr_in;   // Disable cutback when doing tweak_test test
+    ib_ = min(curr_in/(*rp_nP_), sat_ib_max_);      // the feedback of ib_
+    if ( (q_ <= 0.) && (curr_in < 0.) ) ib_ = 0.;   //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_ == sat_ib_max_);
     model_saturated_ = (voc_stat_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
     Coulombs::sat_ = model_saturated_;

@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
 
     class SavedData:
-        def __init__(self, data=None):
+        def __init__(self, data=None, time_end=None):
             if data is None:
                 self.time = []
                 self.Ib = []  # Bank current, A
@@ -59,29 +59,37 @@ if __name__ == '__main__':
             else:
                 self.time = data.cTime
                 self.Ib = data.Ib
-                self.Vb = data.Vb
-                self.sat = data.sat
-                self.sel = data.sel
-                self.mod_data = data.mod
-                self.Tb = data.Tb
-                self.Vsat = data.Vsat
-                self.Vdyn = data.Vdyn
-                self.Voc = data.Voc
-                self.Voc_ekf = data.Voc_ekf
-                self.y_ekf = data.y_ekf
-                self.soc_m = data.soc_m
-                self.soc_ekf = data.soc_ekf
-                self.soc = data.soc
-                self.soc_wt = data.soc_wt
+                # manage data shape
                 # Find first non-zero Ib and use to adjust time
                 # Ignore initial run of non-zero Ib because resetting from previous run
-                zero_start = np.where(self.Ib == 0.0)[0][0]
+                zero_start = np.where(data.Ib == 0.0)[0][0]
                 self.zero_end = zero_start
-                while self.Ib[self.zero_end] == 0.0:  # stop at first non-zero
+                while data.Ib[self.zero_end] == 0.0:  # stop at first non-zero
                     self.zero_end += 1
                 time_ref = self.time[self.zero_end]
                 print("time_ref=", time_ref)
-                self.time -= time_ref;
+                self.time -= time_ref
+                # Truncate
+                if time_end is None:
+                    i_end = len(self.time)
+                else:
+                    i_end = np.where(self.time <= time_end)[0][-1]+1
+                self.time = data.cTime[:i_end]
+                self.Ib = data.Ib[:i_end]
+                self.Vb = data.Vb[:i_end]
+                self.sat = data.sat[:i_end]
+                self.sel = data.sel[:i_end]
+                self.mod_data = data.mod[:i_end]
+                self.Tb = data.Tb[:i_end]
+                self.Vsat = data.Vsat[:i_end]
+                self.Vdyn = data.Vdyn[:i_end]
+                self.Voc = data.Voc[:i_end]
+                self.Voc_ekf = data.Voc_ekf[:i_end]
+                self.y_ekf = data.y_ekf[:i_end]
+                self.soc_m = data.soc_m[:i_end]
+                self.soc_ekf = data.soc_ekf[:i_end]
+                self.soc = data.soc[:i_end]
+                self.soc_wt = data.soc_wt[:i_end]
 
         def mod(self):
              return self.mod_data[self.zero_end]
@@ -205,11 +213,8 @@ if __name__ == '__main__':
         # DC-DC charger status.   0=off, 1=on
         t_x_d = [0.0, 199., 200.0,  299.9, 300.0]
         t_d = [0,     0,    1,      1,     0]
-        # time_end = 2
-        # time_end = 13.3
-        # time_end = 700
-        time_end = 3500
-        # time_end = 800
+        time_end = None
+        # time_end = 1.
 
         # Load data
         data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220529_old.csv'
@@ -218,7 +223,9 @@ if __name__ == '__main__':
         # noinspection PyTypeChecker
         data_old = np.genfromtxt(data_file_old, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
-        saved_old = SavedData(data_old)
+        saved_old = SavedData(data_old, time_end)
+        t = saved_old.time
+        t_len = len(t)
         rp.modeling = saved_old.mod()
         temp_c = data_old.Tb[0]
 
@@ -232,13 +239,12 @@ if __name__ == '__main__':
         Is_sat_delay = TFDelay(in_=data_old.soc[0]>0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
         # time loop
-        dt = 0.1  # initialize
-        dt_ekf = 0.1  # initialize
-        t = saved_old.time;
-        for i in range(len(t)):
+        dt = t[1] - t[0]
+        dt_ekf = t[1] - t[0]
+        for i in range(t_len):
             current_in = saved_old.Ib[i]
             if i>0:
-                dt = t[i]-t[i-1]
+                dt = t[i] - t[i-1]
                 dt_ekf = dt
 
             # dc_dc_on = bool(lut_dc.interp(t[i]))
@@ -288,10 +294,13 @@ if __name__ == '__main__':
             # Print end of init
             # if i<300 and t[i+1]==0. and t[i]<0.:
             if i==0:
+                print('time=', t[i])
                 print('mon:  ', str(mon))
+                print('time=', t[i])
                 print('sim:  ', str(sim))
 
         # Data
+        print('time=', t[i])
         print('mon:  ', str(mon))
         print('sim:  ', str(sim))
 
@@ -303,10 +312,8 @@ if __name__ == '__main__':
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
 
-        n_fig, fig_files = overall(mon.saved, sim.saved, filename, fig_files,
-                                   plot_title=plot_title, n_fig=n_fig)
-        n_fig, fig_files = SavedData.overall(saved_old, mon.saved, filename, fig_files,
-                                             plot_title=plot_title, n_fig=n_fig)
+        n_fig, fig_files = overall(mon.saved, sim.saved, filename, fig_files,plot_title=plot_title, n_fig=n_fig)
+        n_fig, fig_files = SavedData.overall(saved_old, mon.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
 
