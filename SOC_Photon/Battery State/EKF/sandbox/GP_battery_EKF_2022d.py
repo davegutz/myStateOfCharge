@@ -271,7 +271,7 @@ if __name__ == '__main__':
                 mon.init_soc_ekf(soc_init)  # when modeling (assumed in python) ekf wants to equal model
 
             # Monitor calculations including ekf
-            mon.calculate_ekf(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
+            mon.calculate(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
             sat = is_sat(temp_c, mon.voc, mon.soc)
             saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(dt, T_SAT/2.), init)
             mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=temp_c, charge_curr=sim.ib,

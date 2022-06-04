@@ -186,12 +186,11 @@ class Battery(Coulombs):
 
     def calc_soc_voc(self, soc, temp_c):
         """SOC-OCV curve fit method per Zhang, et al """
-        soc_lim = max(min(soc, 1.), 0.)
-        dv_dsoc = self.calc_h_jacobian(soc_lim, temp_c)
-        voc = self.lut_voc.interp(soc_lim, temp_c)
+        dv_dsoc = self.calc_h_jacobian(soc, temp_c)
+        voc = self.lut_voc.interp(soc, temp_c)
         return voc, dv_dsoc
 
-    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):
+    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):  # Battery
         raise NotImplementedError
 
     def init_battery(self):
@@ -286,7 +285,7 @@ class BatteryMonitor(Battery, EKF_1x1):
     def assign_soc_m(self, soc_m):
         self.soc_m = soc_m
 
-    def calculate_ekf(self, temp_c, vb, ib, dt):
+    def calculate(self, temp_c, vb, ib, dt, q_capacity=None, dc_dc_on=None):  # BatteryMonitor
         self.temp_c = temp_c
         self.vsat = calc_vsat(self.temp_c)
         self.dt = dt
@@ -387,15 +386,16 @@ class BatteryMonitor(Battery, EKF_1x1):
         d = np.array([-self.r0, 1])
         return a, b, c, d
 
-    def ekf_model_predict(self):
+    def ekf_predict(self):
         """Process model"""
         self.Fx = math.exp(-self.dt / self.tau_sd)
         self.Bu = (1. - self.Fx)*self.r_sd
         return self.Fx, self.Bu
 
-    def ekf_model_update(self):
+    def ekf_update(self):
         # Measurement function hx(x), x = soc ideal capacitor
-        self.hx, self.dv_dsoc = self.calc_soc_voc(max(min(self.x_ekf, 1.), 0.), temp_c=self.temp_c)
+        x_lim = max(min(self.x_ekf, 1.), 0.)
+        self.hx, self.dv_dsoc = self.calc_soc_voc(x_lim, temp_c=self.temp_c)
         # Jacobian of measurement function
         self.H = self.dv_dsoc
         return self.hx, self.H
@@ -520,18 +520,20 @@ class BatteryModel(Battery):
         s += Battery.__str__(self, prefix + 'BatteryModel:')
         return s
 
-    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):
+    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):  # BatteryModel
         self.dt = dt
         self.temp_c = temp_c
+
+        soc_lim = max(min(soc, 1.), 0.)
+
+        # VOC - OCV model
+        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc, temp_c)
+        self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)  # slightly beyond but don't windup
+        self.voc_stat += self.dv  # Experimentally varied
+
         self.bms_off = (self.temp_c < low_t) or (self.voc < low_voc)
         if self.bms_off:
             curr_in = 0.
-
-        # soc_lim = max(min(soc, mxeps_bb), mneps_bb)
-
-        # VOC - OCV model
-        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(max(min(soc, 1.), 0.), temp_c)
-        self.voc_stat += self.dv  # Experimentally varied
 
         # Dynamic emf
         # Hysteresis model

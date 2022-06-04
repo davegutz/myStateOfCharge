@@ -401,10 +401,10 @@ void BatteryMonitor::pretty_print(void)
     Serial.printf("  amp_hrs_remaining_wt_  =  %7.3f;  // Discharge amp*time left if drain soc_wt_ to 0, A-h\n", amp_hrs_remaining_wt_);
     Serial.printf("  EKF_converged =                 %d;  // EKF is converged, T=converged\n", converged_ekf());
     Serial.printf("  q_ekf =                %10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
-    Serial.printf("  tcharge =                   %5.1f;  // Counted charging time to full, hr\n", tcharge_);
-    Serial.printf("  tcharge_ekf =               %5.1f;  // Solved charging time to full from ekf, hr\n", tcharge_ekf_);
     Serial.printf("  soc_ekf =                 %7.3f;  // Solved state of charge, fraction\n", soc_ekf_);
     Serial.printf("  soc_wt_ =                 %7.3f;  // Weighted selection of ekf state of charge and coulomb counter (0-1)\n", soc_wt_);
+    Serial.printf("  tcharge =                   %5.1f;  // Counted charging time to full, hr\n", tcharge_);
+    Serial.printf("  tcharge_ekf =               %5.1f;  // Solved charging time to full from ekf, hr\n", tcharge_ekf_);
     Serial.printf("  voc_filt_ =               %7.3f;  // Filtered open circuit voltage for saturation detect, V\n", voc_filt_);
     Serial.printf("  voc_stat_ =               %7.3f;  // Static model open circuit voltage from table (reference), V\n", voc_stat_);
     Serial.printf("  y_filt_ =                 %7.3f;  // Filtered y_ residual from EKF, V\n", y_filt_);
@@ -554,7 +554,6 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     vsat_ = calc_vsat();
 
     double soc_lim = max(min(soc_, 1.0), 0.0);
-    double SOC = soc_ * q_capacity_ / q_cap_rated_scaled_ * 100;
 
     // VOC-OCV model
     voc_stat_ = calc_soc_voc(soc_, temp_C, &dv_dsoc_);
@@ -603,8 +602,8 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc_,voc,,vdyn,vb,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
      dt,temp_C, ib_, soc_, voc_, vdyn_, vb_);
     
-    if ( rp.debug==-78 ) Serial.printf("SOC/10,soc*10,voc,vsat,curr_in,sat_ib_max_,ib,sat,\n%7.3f, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
-      SOC/10, soc_*10, voc_, vsat_, curr_in, sat_ib_max_, ib_, model_saturated_);
+    if ( rp.debug==-78 ) Serial.printf("soc*10,voc,vsat,curr_in,sat_ib_max_,ib,sat,\n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
+      soc_*10, voc_, vsat_, curr_in, sat_ib_max_, ib_, model_saturated_);
     
     if ( rp.debug==76 ) Serial.printf("BatteryModel::calculate:,  soc=%7.3f, temp_c=%7.3f, ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
         soc_, temp_C, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);
@@ -717,10 +716,10 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
     q_min_ = soc_min_ * q_capacity_;
 
     if ( rp.debug==97 )
-        Serial.printf("BatteryModel::cc,  dt,voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,SOC,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
+        Serial.printf("BatteryModel::cc,  dt,voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
                     Sen->T,pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, Sen->Ibatt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
     if ( rp.debug==-97 )
-        Serial.printf("voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc, SOC,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
+        Serial.printf("voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
                     pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, Sen->Ibatt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 
     // Save and return

@@ -13,13 +13,13 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-"""1x1 General Purpose Extended Kalman Filter.   Inherit from this class and include ekf_model_predict and
-ekf_model_update methods in the parent."""
+"""1x1 General Purpose Extended Kalman Filter.   Inherit from this class and include ekf_predict and
+ekf_update methods in the parent."""
 
 
 class EKF_1x1:
-    """1x1 General Purpose Extended Kalman Filter.   Inherit from this class and include ekf_model_predict and
-    ekf_model_update methods in the parent."""
+    """1x1 General Purpose Extended Kalman Filter.   Inherit from this class and include ekf_predict and
+    ekf_update methods in the parent."""
 
     def __init__(self):
         """
@@ -59,10 +59,10 @@ class EKF_1x1:
         s += "  S  = {:10.6f}\n".format(self.S)
         return s
 
-    def ekf_model_predict(self):
+    def ekf_predict(self):
         raise NotImplementedError
 
-    def ekf_model_update(self):
+    def ekf_update(self):
         raise NotImplementedError
 
     def init_ekf(self, soc, p_init):
@@ -81,7 +81,7 @@ class EKF_1x1:
             P   1x1 Kalman probability
         """
         self.u_ekf = u
-        self.Fx, self.Bu = self.ekf_model_predict()
+        self.Fx, self.Bu = self.ekf_predict()
         self.x_ekf = self.Fx*self.x_ekf + self.Bu*self.u_ekf
         self.P = self.Fx * self.P * self.Fx + self.Q
         self.x_prior = self.x_ekf
@@ -102,7 +102,7 @@ class EKF_1x1:
                 S   1x1 system uncertainty
                 SI  1x1 system uncertainty inverse
         """
-        self.hx, self.H = self.ekf_model_update()
+        self.hx, self.H = self.ekf_update()
         self.z_ekf = z
         pht = self.P*self.H
         self.S = self.H*pht + self.R
