@@ -59,9 +59,8 @@ DQDT = 0.01  # Change of charge with temperature, fraction/deg C.  From literatu
 CAP_DROOP_C = 20.  # Temperature below which a floor on q arises, C (20)
 TCHARGE_DISPLAY_DEADBAND = 0.1  # Inside this +/- deadband, charge time is displayed '---', A
 max_voc = 1.2*NOM_SYS_VOLT  # Prevent windup of battery model, V
-batt_num_cells = int(NOM_SYS_VOLT/3)  # Number of standard 3 volt LiFePO4 cells
 batt_vsat = BATT_V_SAT  # Total bank saturation for 0.997=soc, V
-batt_vmax = (14.3/4)*float(batt_num_cells)  # Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
+batt_vmax = 14.3  # Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
 DF1 = 0.02  # Weighted selection lower transition drift, fraction
 DF2 = 0.05  # Threshold to reset Coulomb Counter if different from ekf, fraction (0.05)
 
@@ -78,7 +77,7 @@ class Battery(Coulombs):
                             or 20 - 40 A for a 100 Ah battery"""
 
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
-                 num_cells=4, bat_v_sat=13.8, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
+                 bat_v_sat=13.8, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
@@ -102,7 +101,6 @@ class Battery(Coulombs):
         y = np.array(t_y_t)
         data_interp = np.array(t_voc)
         self.lut_voc = myTables.TableInterp2D(x, y, data_interp)
-        self.num_cells = num_cells
         self.nz = None
         self.q = 0  # Charge, C
         self.voc = NOM_SYS_VOLT  # Model open circuit voltage, V
@@ -112,7 +110,6 @@ class Battery(Coulombs):
         self.ib = 0  # Current into battery post, A
         self.ioc = 0  # Current into battery process accounting for hysteresis, A
         self.pow_oc = 0.  # Charge power, W
-        self.num_cells = num_cells
         self.dv_dsoc = 0.  # Slope of soc-voc curve, V/%
         self.tcharge = 0.  # Charging time to 100%, hr
         self.sr = 1  # Resistance scalar
@@ -238,11 +235,11 @@ class BatteryMonitor(Battery, EKF_1x1):
     """Extend basic class to monitor"""
 
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
-                 num_cells=4, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
+                 bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1.):
-        Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated, t_rated,
+        Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
 
@@ -479,11 +476,11 @@ class BatteryModel(Battery):
     """Extend basic class to run a model"""
 
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
-                 num_cells=4, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
+                 bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1.):
-        Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, num_cells, bat_v_sat, q_cap_rated, t_rated,
+        Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A
