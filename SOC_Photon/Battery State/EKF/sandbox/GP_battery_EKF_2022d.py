@@ -213,8 +213,8 @@ if __name__ == '__main__':
         # DC-DC charger status.   0=off, 1=on
         t_x_d = [0.0, 199., 200.0,  299.9, 300.0]
         t_d = [0,     0,    1,      1,     0]
-        time_end = None
-        # time_end = 1.
+        # time_end = None
+        time_end = 0.
 
         # Load data
         data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220529_old.csv'
