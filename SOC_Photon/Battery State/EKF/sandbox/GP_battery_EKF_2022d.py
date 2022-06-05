@@ -65,7 +65,6 @@ if __name__ == '__main__':
                 self.i = 0
                 self.cTime = np.array(data.cTime)
                 print(self.cTime[0])
-                print(type(self.cTime[0]))
                 self.time = np.array(data.cTime)
                 self.Ib = np.array(data.Ib)
                 # manage data shape
@@ -122,25 +121,28 @@ if __name__ == '__main__':
             return s
 
         def compare(old_s, new_s):
-            print("time=", old_s.time)
-            print("old_s.Ib=", old_s.Ib)
-            print("new_s.Ib=", new_s.Ib)
-            s = ""
+            s = " time,      Ib,                    Vb,                Vdyn,              Voc,            Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
             for i in range(len(new_s.time)):
-                s += "{:13.3f},".format(old_s.time[i])
-                s += "{:8.3f},".format(old_s.Ib[i])
-                # s += "{:8.3f},".format(new_s.Ib[i])
-                s += "{:7.2f},".format(old_s.Vsat[i])
-                # s += "{:7.2f},".format(new_s.Vsat[i])
+                s += "{:7.3f},".format(old_s.time[i])
+                s += "{:11.3f},".format(old_s.Ib[i])
+                s += "{:9.3f},".format(new_s.Ib[i])
+                s += "{:9.2f},".format(old_s.Vb[i])
+                s += "{:5.2f},".format(new_s.Vb[i])
+                s += "{:9.2f},".format(old_s.Vdyn[i])
+                s += "{:5.2f},".format(new_s.Vdyn[i])
+                s += "{:9.2f},".format(old_s.Voc[i])
+                s += "{:5.2f},".format(new_s.Voc[i])
+                s += "{:9.2f},".format(old_s.Voc_ekf[i])
+                s += "{:5.2f},".format(new_s.Voc_ekf[i])
+                s += "{:13.6f},".format(old_s.y_ekf[i])
+                s += "{:9.6f},".format(new_s.y_ekf[i])
+                s += "{:7.3f},".format(old_s.soc_ekf[i])
+                s += "{:5.3f},".format(new_s.soc_ekf[i])
+                s += "{:7.3f},".format(old_s.soc[i])
+                s += "{:5.3f},".format(new_s.soc[i])
+                s += "{:7.3f},".format(old_s.soc_wt[i])
+                s += "{:5.3f},".format(new_s.soc_wt[i])
                 s += "\n"
-                # s += "{:5.2f},".format(self.Vdyn[self.i])
-                # s += "{:5.2f},".format(self.Voc[self.i])
-                # s += "{:5.2f},".format(self.Voc_ekf[self.i])
-                # s += "{:10.6f},".format(self.y_ekf[self.i])
-                # s += "{:7.3f},".format(self.soc_m[self.i])
-                # s += "{:5.3f},".format(self.soc_ekf[self.i])
-                # s += "{:5.3f},".format(self.soc[self.i])
-                # s += "{:5.3f},".format(self.soc_wt[self.i])
             return s
 
         def hdr(self):
@@ -350,21 +352,16 @@ if __name__ == '__main__':
 
             # Print init
             if i==0:
-                # print('time=', t[i])
-                # print('mon:  ', str(mon))
-                # print('time=', t[i])
-                # print('sim:  ', str(sim))
-                print(saved_old.hdr())
-
-            print(saved_old)
+                print('time=', t[i])
+                print('mon:  ', str(mon))
+                print('time=', t[i])
+                print('sim:  ', str(sim))
 
         # Data
-        # print('time=', t[i])
-        # print('mon:  ', str(mon))
-        # print('sim:  ', str(sim))
-        print("montime", mon.saved.time)
-        print("simtime", sim.saved.time)
-        print(SavedData.compare(mon.saved, sim.saved))
+        print('time=', t[i])
+        print('mon:  ', str(mon))
+        print('sim:  ', str(sim))
+        print(SavedData.compare(saved_old, mon.saved))
 
 
         # Plots
