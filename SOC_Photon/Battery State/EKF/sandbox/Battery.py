@@ -237,7 +237,7 @@ class BatteryMonitor(Battery, EKF_1x1):
                  bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, hys_scale=1.):
+                 temp_c=RATED_TEMP, hys_scale=-1.):
         Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()

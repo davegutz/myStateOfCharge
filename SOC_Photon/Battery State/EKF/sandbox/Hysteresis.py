@@ -114,9 +114,9 @@ class Hysteresis():
     def update(self, dt):
         self.dv_hys += self.dv_dot * dt
         if self.reverse:
-            self.voc = self.voc_stat + self.dv_hys
-        else:
             self.voc = self.voc_stat - self.dv_hys
+        else:
+            self.voc = self.voc_stat + self.dv_hys
         return self.voc
 
 

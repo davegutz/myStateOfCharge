@@ -271,8 +271,8 @@ if __name__ == '__main__':
         # DC-DC charger status.   0=off, 1=on
         t_x_d = [0.0, 199., 200.0,  299.9, 300.0]
         t_d = [0,     0,    1,      1,     0]
-        # time_end = None
-        time_end = 1.5
+        time_end = None
+        # time_end = 1.5
 
         # Load data
         data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220605_newShort.csv'
@@ -283,6 +283,7 @@ if __name__ == '__main__':
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
         t = saved_old.time
+        Vb = saved_old.Vb
         t_len = len(t)
         rp.modeling = saved_old.mod()
         temp_c = data_old.Tb[0]
@@ -337,6 +338,7 @@ if __name__ == '__main__':
 
             # Monitor calculations including ekf
             mon.calculate(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
+            # mon.calculate(temp_c, Vb[i]+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
             sat = is_sat(temp_c, mon.voc, mon.soc)
             saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(dt, T_SAT/2.), init)
             mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=temp_c, charge_curr=sim.ib,
