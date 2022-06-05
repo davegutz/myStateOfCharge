@@ -121,6 +121,28 @@ if __name__ == '__main__':
             s += "{:5.3f},".format(self.soc_wt[self.i])
             return s
 
+        def compare(old_s, new_s):
+            print("time=", old_s.time)
+            print("old_s.Ib=", old_s.Ib)
+            print("new_s.Ib=", new_s.Ib)
+            s = ""
+            for i in range(len(new_s.time)):
+                s += "{:13.3f},".format(old_s.time[i])
+                s += "{:8.3f},".format(old_s.Ib[i])
+                # s += "{:8.3f},".format(new_s.Ib[i])
+                s += "{:7.2f},".format(old_s.Vsat[i])
+                # s += "{:7.2f},".format(new_s.Vsat[i])
+                s += "\n"
+                # s += "{:5.2f},".format(self.Vdyn[self.i])
+                # s += "{:5.2f},".format(self.Voc[self.i])
+                # s += "{:5.2f},".format(self.Voc_ekf[self.i])
+                # s += "{:10.6f},".format(self.y_ekf[self.i])
+                # s += "{:7.3f},".format(self.soc_m[self.i])
+                # s += "{:5.3f},".format(self.soc_ekf[self.i])
+                # s += "{:5.3f},".format(self.soc[self.i])
+                # s += "{:5.3f},".format(self.soc_wt[self.i])
+            return s
+
         def hdr(self):
             s = "unit, hm, cTime, sat, sel, mod, Tb, Vb, Ib, Vsat, Vdyn, Voc, Voc_ekf, y_ekf, soc_m, soc_ekf, soc, soc_wt,"
             return s
@@ -247,8 +269,8 @@ if __name__ == '__main__':
         # DC-DC charger status.   0=off, 1=on
         t_x_d = [0.0, 199., 200.0,  299.9, 300.0]
         t_d = [0,     0,    1,      1,     0]
-        time_end = None
-        # time_end = 0.5
+        # time_end = None
+        time_end = 1.5
 
         # Load data
         data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220605_newShort.csv'
@@ -340,6 +362,9 @@ if __name__ == '__main__':
         # print('time=', t[i])
         # print('mon:  ', str(mon))
         # print('sim:  ', str(sim))
+        print("montime", mon.saved.time)
+        print("simtime", sim.saved.time)
+        print(SavedData.compare(mon.saved, sim.saved))
 
 
         # Plots
