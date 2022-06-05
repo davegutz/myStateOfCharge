@@ -14,7 +14,7 @@ SOC_Photon/target/3.0.0-beta.1/photon/obj/src/newlib_stubs.o
 SOC_Photon/target/3.0.0-beta.1/photon/obj/src/user_export.o
 SOC_Photon/target/3.0.0-beta.1/photon/obj/src/user_module.o
 SOC_Photon/dataReduction/debug.csv
-*.csv
+.csv
 *.o
 *.o
 *.d
@@ -57,3 +57,4 @@ SOC_Photon/Battery State/EKF/sandbox/Hysteresis.py_1.png
 SOC_Photon/dataReduction/~$20220118_111309.xlsx
 *.odp#
 *.png
+SOC_Photon/dataReduction/data_proto.csv
