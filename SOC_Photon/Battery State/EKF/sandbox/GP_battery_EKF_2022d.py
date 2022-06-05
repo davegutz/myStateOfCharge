@@ -64,12 +64,13 @@ if __name__ == '__main__':
             else:
                 self.i = 0
                 self.cTime = np.array(data.cTime)
+                print(self.cTime[0])
+                print(type(self.cTime[0]))
                 self.time = np.array(data.cTime)
                 self.Ib = np.array(data.Ib)
                 # manage data shape
                 # Find first non-zero Ib and use to adjust time
                 # Ignore initial run of non-zero Ib because resetting from previous run
-                print(self.Ib)
                 zero_start = np.where(self.Ib == 0.0)[0][0]
                 self.zero_end = zero_start
                 while self.Ib[self.zero_end] == 0.0:  # stop at first non-zero
@@ -250,7 +251,7 @@ if __name__ == '__main__':
         # time_end = 0.5
 
         # Load data
-        data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220605_new.csv'
+        data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220605_newShort.csv'
         cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         # noinspection PyTypeChecker
