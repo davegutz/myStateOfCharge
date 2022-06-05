@@ -40,7 +40,12 @@ if __name__ == '__main__':
     class SavedData:
         def __init__(self, data=None, time_end=None):
             if data is None:
+                self.i = 0
                 self.time = []
+                self.T = []  # Update time, s
+                self.unit = []  # text title
+                self.hm = []  # hours, minutes
+                self.cTime = []  # Control time, s
                 self.Ib = []  # Bank current, A
                 self.Vb = []  # Bank voltage, V
                 self.sat = []  # Indication that battery is saturated, T=saturated
@@ -57,8 +62,10 @@ if __name__ == '__main__':
                 self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) availabel (0-1)
                 self.soc_wt = []  # Weighted selection of ekf state of charge and Coulomb Counter (0-1)
             else:
-                self.time = data.cTime
-                self.Ib = data.Ib
+                self.i = 0
+                self.cTime = np.array(data.cTime)
+                self.time = np.array(data.cTime)
+                self.Ib = np.array(data.Ib)
                 # manage data shape
                 # Find first non-zero Ib and use to adjust time
                 # Ignore initial run of non-zero Ib because resetting from previous run
@@ -67,29 +74,54 @@ if __name__ == '__main__':
                 while data.Ib[self.zero_end] == 0.0:  # stop at first non-zero
                     self.zero_end += 1
                 time_ref = self.time[self.zero_end]
-                print("time_ref=", time_ref)
+                # print("time_ref=", time_ref)
                 self.time -= time_ref
                 # Truncate
                 if time_end is None:
                     i_end = len(self.time)
                 else:
                     i_end = np.where(self.time <= time_end)[0][-1]+1
-                self.time = data.cTime[:i_end]
-                self.Ib = data.Ib[:i_end]
-                self.Vb = data.Vb[:i_end]
-                self.sat = data.sat[:i_end]
-                self.sel = data.sel[:i_end]
-                self.mod_data = data.mod[:i_end]
-                self.Tb = data.Tb[:i_end]
-                self.Vsat = data.Vsat[:i_end]
-                self.Vdyn = data.Vdyn[:i_end]
-                self.Voc = data.Voc[:i_end]
-                self.Voc_ekf = data.Voc_ekf[:i_end]
-                self.y_ekf = data.y_ekf[:i_end]
-                self.soc_m = data.soc_m[:i_end]
-                self.soc_ekf = data.soc_ekf[:i_end]
-                self.soc = data.soc[:i_end]
-                self.soc_wt = data.soc_wt[:i_end]
+                self.unit = data.unit[:i_end]
+                self.hm = data.hm[:i_end]
+                self.cTime = self.cTime[:i_end]
+                self.T = np.array(data.T[:i_end])
+                self.time = np.array(self.time[:i_end])
+                self.Ib = np.array(data.Ib[:i_end])
+                self.Vb = np.array(data.Vb[:i_end])
+                self.sat = np.array(data.sat[:i_end])
+                self.sel = np.array(data.sel[:i_end])
+                self.mod_data = np.array(data.mod[:i_end])
+                self.Tb = np.array(data.Tb[:i_end])
+                self.Vsat = np.array(data.Vsat[:i_end])
+                self.Vdyn = np.array(data.Vdyn[:i_end])
+                self.Voc = np.array(data.Voc[:i_end])
+                self.Voc_ekf = np.array(data.Voc_ekf[:i_end])
+                self.y_ekf = np.array(data.y_ekf[:i_end])
+                self.soc_m = np.array(data.soc_m[:i_end])
+                self.soc_ekf = np.array(data.soc_ekf[:i_end])
+                self.soc = np.array(data.soc[:i_end])
+                self.soc_wt = np.array(data.soc_wt[:i_end])
+
+        def __str__(self):
+            s = "{},".format(self.unit[self.i])
+            s += "{},".format(self.hm[self.i])
+            s += "{},".format(self.cTime[self.i])
+            # s += "{},".format(self.T[self.i])
+            s += "{},".format(self.Ib[self.i])
+            s += "{},".format(self.Vsat[self.i])
+            s += "{},".format(self.Vdyn[self.i])
+            s += "{},".format(self.Voc[self.i])
+            s += "{},".format(self.Voc_ekf[self.i])
+            s += "{},".format(self.y_ekf[self.i])
+            s += "{},".format(self.soc_m[self.i])
+            s += "{},".format(self.soc_ekf[self.i])
+            s += "{},".format(self.soc[self.i])
+            s += "{},".format(self.soc_wt[self.i])
+            return s
+
+        def hdr(self):
+            s = "unit, hm, cTime, sat, sel, mod, Tb, Vb, Ib, Vsat, Vdyn, Voc, Voc_ekf, y_ekf, soc_m, soc_ekf, soc, soc_wt,"
+            return s
 
         def mod(self):
              return self.mod_data[self.zero_end]
@@ -213,12 +245,12 @@ if __name__ == '__main__':
         # DC-DC charger status.   0=off, 1=on
         t_x_d = [0.0, 199., 200.0,  299.9, 300.0]
         t_d = [0,     0,    1,      1,     0]
-        # time_end = None
-        time_end = 0.
+        time_end = None
+        # time_end = 0.5
 
         # Load data
-        data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220529_old.csv'
-        cols = ('unit', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
+        data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220529_newShort.csv'
+        cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         # noinspection PyTypeChecker
         data_old = np.genfromtxt(data_file_old, delimiter=',', names=True, usecols=cols, dtype=None,
@@ -242,6 +274,7 @@ if __name__ == '__main__':
         dt = t[1] - t[0]
         dt_ekf = t[1] - t[0]
         for i in range(t_len):
+            saved_old.i = i
             current_in = saved_old.Ib[i]
             if i>0:
                 dt = t[i] - t[i-1]
@@ -291,18 +324,20 @@ if __name__ == '__main__':
             mon.save(t[i], mon.soc, sim.voc)
             sim.save(t[i], sim.soc, sim.voc)
 
-            # Print end of init
-            # if i<300 and t[i+1]==0. and t[i]<0.:
+            # Print init
             if i==0:
-                print('time=', t[i])
-                print('mon:  ', str(mon))
-                print('time=', t[i])
-                print('sim:  ', str(sim))
+                # print('time=', t[i])
+                # print('mon:  ', str(mon))
+                # print('time=', t[i])
+                # print('sim:  ', str(sim))
+                print(saved_old.hdr())
+
+            print(saved_old)
 
         # Data
-        print('time=', t[i])
-        print('mon:  ', str(mon))
-        print('sim:  ', str(sim))
+        # print('time=', t[i])
+        # print('mon:  ', str(mon))
+        # print('sim:  ', str(sim))
 
 
         # Plots
