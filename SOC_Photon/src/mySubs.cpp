@@ -108,7 +108,7 @@ void print_serial_header(void)
 void create_print_string(char *buffer, Publish *pubList)
 {
   if ( rp.debug==4 )
-    sprintf(buffer, "%s, %s, %12.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%7.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
+    sprintf(buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%7.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
       pubList->sat, rp.ibatt_sel_noamp, rp.modeling,
       pubList->Tbatt, pubList->Vbatt, pubList->Ibatt,

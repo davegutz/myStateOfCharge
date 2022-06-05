@@ -69,9 +69,10 @@ if __name__ == '__main__':
                 # manage data shape
                 # Find first non-zero Ib and use to adjust time
                 # Ignore initial run of non-zero Ib because resetting from previous run
-                zero_start = np.where(data.Ib == 0.0)[0][0]
+                print(self.Ib)
+                zero_start = np.where(self.Ib == 0.0)[0][0]
                 self.zero_end = zero_start
-                while data.Ib[self.zero_end] == 0.0:  # stop at first non-zero
+                while self.Ib[self.zero_end] == 0.0:  # stop at first non-zero
                     self.zero_end += 1
                 time_ref = self.time[self.zero_end]
                 # print("time_ref=", time_ref)
@@ -105,18 +106,18 @@ if __name__ == '__main__':
         def __str__(self):
             s = "{},".format(self.unit[self.i])
             s += "{},".format(self.hm[self.i])
-            s += "{},".format(self.cTime[self.i])
+            s += "{:13.3f},".format(self.cTime[self.i])
             # s += "{},".format(self.T[self.i])
-            s += "{},".format(self.Ib[self.i])
-            s += "{},".format(self.Vsat[self.i])
-            s += "{},".format(self.Vdyn[self.i])
-            s += "{},".format(self.Voc[self.i])
-            s += "{},".format(self.Voc_ekf[self.i])
-            s += "{},".format(self.y_ekf[self.i])
-            s += "{},".format(self.soc_m[self.i])
-            s += "{},".format(self.soc_ekf[self.i])
-            s += "{},".format(self.soc[self.i])
-            s += "{},".format(self.soc_wt[self.i])
+            s += "{:8.3f},".format(self.Ib[self.i])
+            s += "{:7.2f},".format(self.Vsat[self.i])
+            s += "{:5.2f},".format(self.Vdyn[self.i])
+            s += "{:5.2f},".format(self.Voc[self.i])
+            s += "{:5.2f},".format(self.Voc_ekf[self.i])
+            s += "{:10.6f},".format(self.y_ekf[self.i])
+            s += "{:7.3f},".format(self.soc_m[self.i])
+            s += "{:5.3f},".format(self.soc_ekf[self.i])
+            s += "{:5.3f},".format(self.soc[self.i])
+            s += "{:5.3f},".format(self.soc_wt[self.i])
             return s
 
         def hdr(self):
@@ -249,7 +250,7 @@ if __name__ == '__main__':
         # time_end = 0.5
 
         # Load data
-        data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220529_newShort.csv'
+        data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220605_new.csv'
         cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         # noinspection PyTypeChecker
