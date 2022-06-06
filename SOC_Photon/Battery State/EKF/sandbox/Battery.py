@@ -458,6 +458,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.saved.mod_data.append(self.mod)
         self.saved.soc_wt.append(self.soc_wt)
         self.saved.soc_m.append(self.soc_m)
+        self.Randles.save(time)
 
     def select(self):
         drift = self.soc_ekf - self.soc
@@ -731,7 +732,7 @@ class Saved:
         self.soc_wt = []  # Weighted selection of ekf state of charge and Coulomb Counter (0-1)
 
 
-def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None):
+def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     if fig_files is None:
         fig_files = []
     plt.figure()
@@ -901,5 +902,16 @@ def overall(ms, ss, filename, fig_files=None, plot_title=None, n_fig=None):
     fig_file_name = filename + "_" + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
+
+    plt.figure()
+    n_fig += 1
+    plt.subplot(111)
+    plt.title(plot_title)
+    plt.plot(mrs.time, mrs.y, color='blue', label='Mon Randles y')
+    plt.legend(loc=2)
+    fig_file_name = filename + "_" + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
 
     return n_fig, fig_files

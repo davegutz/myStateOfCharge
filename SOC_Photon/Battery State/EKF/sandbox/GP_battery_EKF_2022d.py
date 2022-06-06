@@ -120,7 +120,7 @@ if __name__ == '__main__':
             s += "{:5.3f},".format(self.soc_wt[self.i])
             return s
 
-        def compare(old_s, new_s):
+        def compare_print(old_s, new_s):
             s = " time,      Ib,                    Vb,                Vdyn,              Voc,            Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
             for i in range(len(new_s.time)):
                 s += "{:7.3f},".format(old_s.time[i])
@@ -143,10 +143,6 @@ if __name__ == '__main__':
                 s += "{:7.3f},".format(old_s.soc_wt[i])
                 s += "{:5.3f},".format(new_s.soc_wt[i])
                 s += "\n"
-            return s
-
-        def hdr(self):
-            s = "unit, hm, cTime, sat, sel, mod, Tb, Vb, Ib, Vsat, Vdyn, Voc, Voc_ekf, y_ekf, soc_m, soc_ekf, soc, soc_wt,"
             return s
 
         def mod(self):
@@ -265,12 +261,6 @@ if __name__ == '__main__':
         T_DESAT = T_SAT * 2.  # De-saturation time, sec
 
         # Transient  inputs
-        # Current time inputs representing the load.
-        t_x_i = [0.0, 49.9, 50.0,  449.9, 450., 999.9, 1000., 2999.9, 3000.]  # seconds
-        t_i = [0.0,   0.0,  -40.0, -40.0, 0.0,  0.0,   40.0,  40.0,   0.0]  # Amperes
-        # DC-DC charger status.   0=off, 1=on
-        t_x_d = [0.0, 199., 200.0,  299.9, 300.0]
-        t_d = [0,     0,    1,      1,     0]
         time_end = None
         # time_end = 1.5
 
@@ -289,8 +279,6 @@ if __name__ == '__main__':
         temp_c = data_old.Tb[0]
 
         # Setup
-        lut_i = myTables.TableInterp1D(np.array(t_x_i), np.array(t_i))
-        lut_dc = myTables.TableInterp1D(np.array(t_x_d), np.array(t_d))
         scale = model_bat_cap / Battery.RATED_BATT_CAP
         sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale)
         mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
@@ -363,7 +351,7 @@ if __name__ == '__main__':
         print('time=', t[i])
         print('mon:  ', str(mon))
         print('sim:  ', str(sim))
-        print(SavedData.compare(saved_old, mon.saved))
+        print(SavedData.compare_print(saved_old, mon.saved))
 
 
         # Plots
@@ -373,7 +361,7 @@ if __name__ == '__main__':
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
 
-        n_fig, fig_files = overall(mon.saved, sim.saved, filename, fig_files,plot_title=plot_title, n_fig=n_fig)
+        n_fig, fig_files = overall(mon.saved, sim.saved, mon.Randles.saved, filename, fig_files,plot_title=plot_title, n_fig=n_fig)
         n_fig, fig_files = SavedData.overall(saved_old, mon.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')

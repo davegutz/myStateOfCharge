@@ -33,6 +33,7 @@ class StateSpace:
         self.x_dot = self.x
         self.x_past = self.x
         self.dt = 0.
+        self.saved = Saved(n, p, q)
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -57,6 +58,14 @@ class StateSpace:
         self.x_past = self.x
         self.x_dot = self.x * 0.
 
+    def save(self, time):
+        self.saved.time = np.append(self.saved.time, time)
+        self.saved.u = np.append(self.saved.u, self.u)
+        self.saved.y = np.append(self.saved.y, self.y)
+        self.saved.x = np.append(self.saved.x, self.x)
+        self.saved.x_dot = np.append(self.saved.x_dot, self.x_dot)
+        self.saved.x_past = np.append(self.saved.x_past, self.x_past)
+
     def update(self, dt):
         if dt is not None:
             self.dt = dt
@@ -64,6 +73,20 @@ class StateSpace:
         self.x += self.x_dot * self.dt
         self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
         return self.y
+
+
+class Saved:
+    # For plot savings.   A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
+    def __init__(self, n=0, p=0, q=0):
+        self.time = np.zeros(shape=1)
+        self.n = n
+        self.p = p
+        self.q = q
+        self.u = np.zeros(shape=p)
+        self.y = np.zeros(shape=q)
+        self.x = np.zeros(shape=n)
+        self.x_dot = self.x
+        self.x_past = self.x
 
 
 if __name__ == '__main__':
