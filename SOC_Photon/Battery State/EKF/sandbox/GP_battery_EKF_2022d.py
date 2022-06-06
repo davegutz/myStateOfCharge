@@ -261,8 +261,8 @@ if __name__ == '__main__':
         T_DESAT = T_SAT * 2.  # De-saturation time, sec
 
         # Transient  inputs
-        time_end = None
-        # time_end = 1.5
+        # time_end = None
+        time_end = 1.5
 
         # Load data
         data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220605_newShort.csv'

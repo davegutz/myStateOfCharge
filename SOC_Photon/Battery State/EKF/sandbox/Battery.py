@@ -905,9 +905,21 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
 
     plt.figure()
     n_fig += 1
-    plt.subplot(111)
+    plt.subplot(221)
     plt.title(plot_title)
     plt.plot(mrs.time, mrs.y, color='blue', label='Mon Randles y')
+    plt.legend(loc=2)
+    plt.subplot(222)
+    plt.plot(mrs.time, mrs.x[:,0], color='blue', label='Mon Randles x[1]')
+    plt.plot(mrs.time, mrs.x[:,1], color='red', label='Mon Randles x[2]')
+    plt.legend(loc=2)
+    plt.subplot(223)
+    plt.plot(mrs.time, mrs.x_dot[:,0], color='blue', label='Mon Randles x_dot[1]')
+    plt.plot(mrs.time, mrs.x_dot[:,1], color='red', label='Mon Randles x_dot[2]')
+    plt.legend(loc=2)
+    plt.subplot(224)
+    plt.plot(mrs.time, mrs.u[:,0], color='blue', label='Mon Randles u[1]')
+    plt.plot(mrs.time, mrs.u[:,1], color='red', label='Mon Randles u[2]')
     plt.legend(loc=2)
     fig_file_name = filename + "_" + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
