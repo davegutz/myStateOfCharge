@@ -59,16 +59,9 @@ class StateSpace:
         self.x_dot = self.x * 0.
 
     def save(self, time):
-        print("saved.time=", self.saved.time)
         self.saved.time = np.append(self.saved.time, time)
-        print("saved.time=", self.saved.time)
         self.saved.u = np.append(self.saved.u, self.u.reshape(1,2), axis=0)
-        print("saved.y=", self.saved.y)
         self.saved.y = np.append(self.saved.y, self.y)
-        print("saved.y=", self.saved.y)
-        # print("self.x.reshape(2,1)=", self.x.reshape(2,1), "shape=", np.shape(self.x.reshape(2,1)))
-        # print("self.x.transpose=", self.x.T, "shape=", np.shape(self.x.T))
-        # print("saved.x=", self.saved.x, "shape=", np.shape(self.saved.x))
         self.saved.x = np.append(self.saved.x, self.x.reshape(1,2), axis=0)
         self.saved.x_dot = np.append(self.saved.x_dot, self.x_dot.reshape(1,2), axis=0)
         self.saved.x_past = np.append(self.saved.x_past, self.x_past.reshape(1,2), axis=0)

@@ -55,6 +55,7 @@ if __name__ == '__main__':
                 self.Vsat = []  # Monitor Bank saturation threshold at temperature, deg C
                 self.Vdyn = []  # Monitor Bank current induced back emf, V
                 self.Voc = []  # Monitor Static bank open circuit voltage, V
+                self.Voc_dyn = []  # Bank VOC estimated from Vb and RC model, V
                 self.Voc_ekf = []  # Monitor bank solved static open circuit voltage, V
                 self.y_ekf = []  # Monitor single battery solver error, V
                 self.soc_m = []  # Simulated state of charge, fraction
@@ -96,6 +97,7 @@ if __name__ == '__main__':
                 self.Vsat = np.array(data.Vsat[:i_end])
                 self.Vdyn = np.array(data.Vdyn[:i_end])
                 self.Voc = np.array(data.Voc[:i_end])
+                self.Voc_dyn = self.Vb - self.Vdyn
                 self.Voc_ekf = np.array(data.Voc_ekf[:i_end])
                 self.y_ekf = np.array(data.y_ekf[:i_end])
                 self.soc_m = np.array(data.soc_m[:i_end])
@@ -121,7 +123,7 @@ if __name__ == '__main__':
             return s
 
         def compare_print(old_s, new_s):
-            s = " time,      Ib,                    Vb,                Vdyn,              Voc,            Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
+            s = " time,      Ib,                   Vb,              Vdyn,          Voc,            Voc_dyn,        Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
             for i in range(len(new_s.time)):
                 s += "{:7.3f},".format(old_s.time[i])
                 s += "{:11.3f},".format(old_s.Ib[i])
@@ -132,6 +134,8 @@ if __name__ == '__main__':
                 s += "{:5.2f},".format(new_s.Vdyn[i])
                 s += "{:9.2f},".format(old_s.Voc[i])
                 s += "{:5.2f},".format(new_s.Voc[i])
+                s += "{:9.2f},".format(old_s.Voc_dyn[i])
+                s += "{:5.2f},".format(new_s.voc_dyn[i])
                 s += "{:9.2f},".format(old_s.Voc_ekf[i])
                 s += "{:5.2f},".format(new_s.Voc_ekf[i])
                 s += "{:13.6f},".format(old_s.y_ekf[i])
@@ -190,6 +194,8 @@ if __name__ == '__main__':
             plt.subplot(222)
             plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
             plt.plot(new_s.time, new_s.Voc, color='orange', linestyle='--', label='Voc_new')
+            plt.plot(old_s.time, old_s.Voc_dyn, color='blue', label='Voc_dyn')
+            plt.plot(new_s.time, new_s.voc_dyn, color='red', linestyle='--', label='Voc_dyn_new')
             plt.legend(loc=1)
             plt.subplot(223)
             plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
@@ -261,8 +267,8 @@ if __name__ == '__main__':
         T_DESAT = T_SAT * 2.  # De-saturation time, sec
 
         # Transient  inputs
-        # time_end = None
-        time_end = 1.5
+        time_end = None
+        # time_end = 1.5
 
         # Load data
         data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220605_newShort.csv'
