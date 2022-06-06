@@ -105,7 +105,7 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
   if ( wifi->connected )
   {
     // Create print string
-    create_print_string(cp.buffer, &pp.pubList);
+    create_print_string(&pp.pubList);
  
     unsigned nowSec = now/1000UL;
     unsigned sec = nowSec%60;

@@ -130,11 +130,12 @@ struct Sensors
   General2_Pole* TbattSenseFilt;  // Linear filter for Tb. There are 1 Hz AAFs in hardware for Vb and Ib
   SlidingDeadband *SdTbatt;       // Non-linear filter for Tb
   BatteryModel *Sim;      //  used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off. 
-  unsigned long int start_inj;  // Start of calculated injection, ms
-  unsigned long int stop_inj;   // Stop of calculated injection, ms
-  unsigned long int wait_inj;   // Wait before start injection, ms
-  float cycles_inj;             // Number of injection cycles
-  Sync *PublishSerial;          // Handle to debug print time
+  unsigned long int elapsed_inj;  // Injection elapsed time, ms
+  unsigned long int start_inj;    // Start of calculated injection, ms
+  unsigned long int stop_inj;     // Stop of calculated injection, ms
+  unsigned long int wait_inj;     // Wait before start injection, ms
+  float cycles_inj;               // Number of injection cycles
+  Sync *PublishSerial;            // Handle to debug print time
   Sensors(void) {}
   Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial)
   {
@@ -144,19 +145,20 @@ struct Sensors
     this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_inf_amp, &rp.tweak_bias_amp, &cp.ibatt_bias_amp, shunt_amp_v2a_s);
     if ( rp.debug>102 )
     {
-      Serial.printf("After new Shunt('Amp'):\n");
+      Serial.printf("New Shunt('Amp'):\n");
       this->ShuntAmp->pretty_print();
     }
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp, &cp.ibatt_bias_noamp, shunt_noamp_v2a_s);
     if ( rp.debug>102 )
     {
-      Serial.printf("After new Shunt('No Amp'):\n");
+      Serial.printf("New Shunt('No Amp'):\n");
       this->ShuntNoAmp->pretty_print();
     }
     this->SensorTbatt = new DS18(pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
     this->TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
     this->SdTbatt = new SlidingDeadband(HDB_TBATT);
     this->Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS, &rp.sim_mod);
+    this->elapsed_inj = 0UL;
     this->start_inj = 0UL;
     this->stop_inj = 0UL;
     this->cycles_inj = 0.;
@@ -165,13 +167,14 @@ struct Sensors
 };
 
 // Headers
-void create_print_string(char *buffer, Publish *pubList);
+void create_print_string(Publish *pubList);
+void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
 double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
 void filter_temp(const int reset, const float t_rlim, Sensors *Sen, const float tbatt_bias, float *tbatt_bias_last);
 void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins *myPins);
 void load_temp(Sensors *Sen);
 void manage_wifi(unsigned long now, Wifi *wifi);
-void  monitor(const int reset, const boolean reset_temp, const unsigned long now,
+void monitor(const int reset, const boolean reset_temp, const unsigned long now,
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen);
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen);
 void print_serial_header(void);
@@ -183,5 +186,6 @@ void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *milli
 String time_long_2_str(const unsigned long current_time, char *tempStr);
 String tryExtractString(String str, const char* start, const char* end);
 void tweak_on_new_desat(Sensors *Sen, unsigned long int now);
+void tweak_print(Sensors *Sen, BatteryMonitor *Mon);
 
 #endif

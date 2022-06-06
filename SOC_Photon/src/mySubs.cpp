@@ -105,10 +105,10 @@ void print_serial_header(void)
 }
 
 // Print strings
-void create_print_string(char *buffer, Publish *pubList)
+void create_print_string(Publish *pubList)
 {
   if ( rp.debug==4 )
-    sprintf(buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%7.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
+    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%7.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
       pubList->sat, rp.ibatt_sel_noamp, rp.modeling,
       pubList->Tbatt, pubList->Vbatt, pubList->Ibatt,
@@ -116,6 +116,20 @@ void create_print_string(char *buffer, Publish *pubList)
       pubList->y_ekf,
       pubList->soc_model, pubList->soc_ekf, pubList->soc, pubList->soc_wt,
       '\0');
+}
+void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
+{
+  if ( rp.debug==4 )
+  {
+    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%10.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
+      pubList->unit.c_str(), pubList->hm_string.c_str(), double(Sen->now)/1000., Sen->T,
+      pubList->sat, rp.ibatt_sel_noamp, rp.modeling,
+      Mon->Tb(), Mon->Vb(), Mon->Ib(),
+      Mon->Vsat(), Mon->Vdyn(), Mon->Voc(), Mon->Hx(),
+      Mon->y_ekf(),
+      Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(), Mon->soc_wt(),
+      '\0');
+  }
 }
 
 // Convert time to decimal for easy lookup
@@ -263,11 +277,11 @@ void load_temp(Sensors *Sen)
   if ( count<MAX_TEMP_READS )
   {
     Sen->Tbatt_hdwe = Sen->SdTbatt->update(temp);
-    if ( rp.debug==-103 ) Serial.printf("Temperature %7.3f read on count=%d\n", temp, count);
+    if ( rp.debug==-103 ) Serial.printf("Temp %7.3f on count=%d\n", temp, count);
   }
   else
   {
-    Serial.printf("Did not read DS18 1-wire temperature sensor, using last-good-value.   Sometimes a hard reset will stop these\n");
+    Serial.printf("Didn't read DS18, using last-good-value. Try hard reset\n");
     // Using last-good-value:  no assignment
   }
 }
@@ -277,7 +291,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 {
   if ( rp.debug >= 100 )
   {
-    Serial.printf("P.connected=%i, disconnect check: %ld >=? %ld, turn on check: %ld >=? %ld, confirmation check: %ld >=? %ld, connected=%i, blynk_started=%i,\n",
+    Serial.printf("P.conn=%i, dscn check: %ld >=? %ld, on check: %ld >=? %ld, conf check: %ld >=? %ld, conn=%i, blynk_start=%i,\n",
       Particle.connected(), now-wifi->last_disconnect, DISCONNECT_DELAY, now-wifi->lastAttempt,  CHECK_INTERVAL, now-wifi->lastAttempt, CONFIRMATION_DELAY, wifi->connected, wifi->blynk_started);
   }
   wifi->particle_connected_now = Particle.connected();
@@ -290,7 +304,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
     wifi->last_disconnect = now;
     WiFi.off();
     wifi->connected = false;
-    if ( rp.debug >= 100 ) Serial.printf("wifi turned off\n");
+    if ( rp.debug >= 100 ) Serial.printf("wifi off\n");
   }
   if ( now-wifi->lastAttempt>=CHECK_INTERVAL && cp.enable_wifi )
   {
@@ -298,12 +312,12 @@ void manage_wifi(unsigned long now, Wifi *wifi)
     wifi->lastAttempt = now;
     WiFi.on();
     Particle.connect();
-    if ( rp.debug >= 100 ) Serial.printf("wifi reattempted\n");
+    if ( rp.debug >= 100 ) Serial.printf("wifi retry\n");
   }
   if ( now-wifi->lastAttempt>=CONFIRMATION_DELAY )
   {
     wifi->connected = Particle.connected();
-    if ( rp.debug >= 100 ) Serial.printf("wifi disconnect check\n");
+    if ( rp.debug >= 100 ) Serial.printf("wifi dsc chk\n");
   }
   wifi->particle_connected_last = wifi->particle_connected_now;
 }
@@ -485,24 +499,22 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   Sen->Sim->count_coulombs(Sen, reset_temp, rp.t_last_model);
 
   // D2 signal injection to hardware current sensors (also has rp.inj_soft_bias path for rp.tweak_test)
-  static unsigned long int elapsed_inj = 0;
   if ( (Sen->start_inj <= Sen->now) && (Sen->now <= Sen->stop_inj) )
   {
-    if ( elapsed_inj==0 ) // Shift for asynchronous and improve repeatibility of tweak testing
+    if ( Sen->elapsed_inj==0 ) // Shift for asynchronous and improve repeatibility of tweak testing
     {
       Sen->stop_inj += Sen->now - Sen->start_inj;
       Sen->start_inj = Sen->now;
     }
-    elapsed_inj = Sen->now - Sen->start_inj + 1UL; // Shift by 1 so can use ==0 to turn off
-    Sen->PublishSerial->delay(READ_DELAY);
+    Sen->elapsed_inj = Sen->now - Sen->start_inj + 1UL; // Shift by 1 so can use ==0 to turn off
   }
-  else if ( elapsed_inj )
+  else if ( Sen->elapsed_inj )
   {
-    elapsed_inj = 0;
-    Sen->PublishSerial->delay(PUBLISH_SERIAL_DELAY);
+    Sen->elapsed_inj = 0;
     self_talk("Pa", Mon, Sen);  // Print all for record
+    self_talk("Xm7", Mon, Sen); // Turn off tweak_test
   }
-  rp.duty = Sen->Sim->calc_inj_duty(elapsed_inj, rp.type, rp.amp, rp.freq);
+  rp.duty = Sen->Sim->calc_inj_duty(Sen->elapsed_inj, rp.type, rp.amp, rp.freq);
 }
 
 
@@ -566,8 +578,14 @@ void serialEvent1()
 // Inputs serial print
 void serial_print(unsigned long now, double T)
 {
-  create_print_string(cp.buffer, &pp.pubList);
-  if ( rp.debug >= 100 ) Serial.printf("serial_print:  ");
+  create_print_string(&pp.pubList);
+  if ( rp.debug >= 100 ) Serial.printf("serial_print:");
+  Serial.println(cp.buffer);
+}
+void tweak_print(Sensors *Sen, BatteryMonitor *Mon)
+{
+  create_tweak_string(&pp.pubList, Sen, Mon);
+  if ( rp.debug >= 100 ) Serial.printf("tweak_print:");
   Serial.println(cp.buffer);
 }
 

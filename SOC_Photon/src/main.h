@@ -232,6 +232,7 @@ void loop()
   static Sync *Summarize = new Sync(SUMMARIZE_DELAY);
   boolean control;                            // Summarize, T/F
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
+  static uint8_t last_read_debug = 0;         // Remember first time with new debug to print headers
   static uint8_t last_publishS_debug = 0;     // Remember first time with new debug to print headers
  
   // Sensor conversions
@@ -258,12 +259,12 @@ void loop()
   // Start Blynk, only if connected since it is blocking
   if ( Particle.connected() && !myWifi->blynk_started )
   {
-    if ( rp.debug>102 ) Serial.printf("Starting Blynk at %ld...  ", millis());
+    if ( rp.debug>102 ) Serial.printf("Start Blynk %ld...  ", millis());
 
     Blynk.begin(blynkAuth.c_str());   // warning:  blocks if no connection
     myWifi->blynk_started = true;
 
-    if ( rp.debug>102 ) Serial.printf("completed at %ld\n", millis());
+    if ( rp.debug>102 ) Serial.printf("cpt at %ld\n", millis());
   }
   if ( myWifi->blynk_started && myWifi->connected )
   {
@@ -304,7 +305,7 @@ void loop()
   if ( read )
   {
     Sen->T =  ReadSensors->updateTime();
-    if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read update=%7.3f and performing load() at %ld...  \n", Sen->T, millis());
+    if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read dt=%7.3f; load at %ld...  \n", Sen->T, millis());
 
     // Read sensors, model signals, select between them, synthesize a pwm shunt voltage (rp.duty) for certain wiring setup
     // Inputs:  rp.config, rp.sim_mod
@@ -332,6 +333,21 @@ void loop()
     if ( rp.debug==-12 ) debug_m12(Mon, Sen);  // EKF Arduino
     if ( rp.debug==-3 ) debug_m3(Mon, Sen, control_time, elapsed, reset);  // Power Arduino
     if ( rp.debug==-35 ) debug_m35(Mon, Sen); // EKF Arduino
+    if ( rp.tweak_test() )
+    {
+      if ( rp.debug==4 )
+      {
+        if ( reset || (last_read_debug != rp.debug) ) print_serial_header();
+        tweak_print(Sen, Mon);
+      }
+
+      if ( rp.debug==-4 )
+      {
+        debug_m4(Mon, Sen);
+      }
+      last_read_debug = rp.debug;
+    }
+
 
   }  // end read (high speed frame)
 
@@ -339,7 +355,7 @@ void loop()
   if ( control )
   {
     pwm_write(rp.duty, myPins);
-    if ( rp.debug>102 ) Serial.printf("completed control at %ld.  rp.duty=%ld\n", millis(), rp.duty);
+    if ( rp.debug>102 ) Serial.printf("cpt control %ld.  rp.duty=%ld\n", millis(), rp.duty);
   }
 
   // OLED display driver
@@ -369,7 +385,7 @@ void loop()
       digitalWrite(myPins->status_led, LOW);
 
     // Mon for rp.debug
-    if ( publishS )
+    if ( publishS && !rp.tweak_test() )
     {
       if ( rp.debug==4 )
       {
@@ -401,7 +417,7 @@ void loop()
     mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ibatt,
                           Mon->soc_ekf(), Mon->soc(), Mon->Voc_dyn(), Mon->Voc(),
                           Sen->ShuntAmp->tweak_bias(), Sen->ShuntNoAmp->tweak_bias());
-    if ( rp.debug==0 ) Serial.printf("Summarized.....................\n");
+    if ( rp.debug==0 ) Serial.printf("Summ...\n");
   }
 
   // Initialize complete once sensors and models started and summary written
@@ -415,7 +431,7 @@ void loop()
     reset = true;
     reset_temp = true;
     reset_publish = true;
-    Serial.printf("soft reset initiated...\n");
+    Serial.printf("soft reset...\n");
   }
   cp.soft_reset = false;
   cp.write_summary = false;
