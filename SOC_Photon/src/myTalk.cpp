@@ -199,6 +199,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf("%7.4f,%7.4f,%7.4f,%7.4f\n", Sen->Sim->coul_eff(), Mon->coul_eff(), Sen->ShuntAmp->coul_eff(), Sen->ShuntNoAmp->coul_eff());
             break;
 
+          case ( 'p' ):
+            Serial.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
+            Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
+            Serial.printf("%ld\n", Sen->PublishSerial->delay());
+            break;
+
           case ( 'r' ):
             Serial.printf("ReadSensors from %ld to ", Sen->ReadSensors->delay());
             Sen->ReadSensors->delay(cp.input_string.substring(2).toInt());
@@ -912,15 +918,16 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Da= "); Serial.printf("%7.3f", rp.ibatt_bias_amp); Serial.printf("    : delta amp sense, A [%7.3f]\n", CURR_BIAS_AMP); 
   Serial.printf("  Db= "); Serial.printf("%7.3f", rp.ibatt_bias_noamp); Serial.printf("    : delta noa sense, A [%7.3f]\n", CURR_BIAS_NOAMP); 
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.ibatt_bias_all); Serial.printf("    : delta all sense, A [%7.3f]\n", CURR_BIAS_ALL); 
-  Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.printf("    : delta volt sense, V [%7.3f]\n", VOLT_BIAS); 
-  Serial.printf("  Dn= "); Serial.print(Sen->Sim->coul_eff()); Serial.println("       : coulombic efficiency"); 
-  Serial.printf("  Dr= "); Serial.print(Sen->ReadSensors->delay()); Serial.println("       : minor frame, ms [1000]"); 
-  Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.tbatt_bias); Serial.printf("    : delta T sense, deg C [%7.3f]\n", TEMP_BIAS); 
-  Serial.printf("  Dv= "); Serial.print(Sen->Sim->Dv()); Serial.println("       : Table adjust [0.01]"); 
-  Serial.printf("  Sc= "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println("       : Scalar battery model size"); 
+  Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.printf("    : delta sense, V [%7.3f]\n", VOLT_BIAS); 
+  Serial.printf("  Dn= "); Serial.print(Sen->Sim->coul_eff()); Serial.println("       : coul eff"); 
+  Serial.printf("  Dp= "); Serial.print(Sen->PublishSerial->delay()); Serial.println("       : publish frame, ms [400]"); 
+  Serial.printf("  Dr= "); Serial.print(Sen->ReadSensors->delay()); Serial.println("       : minor frame, ms [100]"); 
+  Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.tbatt_bias); Serial.printf("    : delta sense, deg C [%7.3f]\n", TEMP_BIAS); 
+  Serial.printf("  Dv= "); Serial.print(Sen->Sim->Dv()); Serial.println("       : Table adjust, V [0.01]"); 
+  Serial.printf("  Sc= "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println("       : Scalar model size"); 
   Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.println("    : hysteresis scalar 1e-6 - 100");
-  Serial.printf("  Sr= "); Serial.print(Sen->Sim->Sr()); Serial.println("       : Scalar resistor sim"); 
-  Serial.printf("  Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println("       : Saturation of model cutback gain scalar"); 
+  Serial.printf("  Sr= "); Serial.print(Sen->Sim->Sr()); Serial.println("       : Scalar res sim"); 
+  Serial.printf("  Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println("       : Sat model cutback scalar"); 
 
   Serial.printf("H<?>   Manage history\n");
   Serial.printf("  Hd= "); Serial.printf("dump summary log\n");
