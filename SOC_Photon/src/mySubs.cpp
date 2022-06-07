@@ -108,7 +108,7 @@ void print_serial_header(void)
 void create_print_string(Publish *pubList)
 {
   if ( rp.debug==4 )
-    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%7.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
+    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%7.3f,    %6.3f,%6.3f,%6.3f,%6.3f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
       pubList->sat, rp.ibatt_sel_noamp, rp.modeling,
       pubList->Tbatt, pubList->Vbatt, pubList->Ibatt,
@@ -121,7 +121,7 @@ void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
   if ( rp.debug==4 )
   {
-    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%5.2f,%10.3f,    %5.2f,%5.2f,%5.2f,%5.2f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
+    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,    %6.3f,%6.3f,%6.3f,%6.3f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), double(Sen->now)/1000., Sen->T,
       pubList->sat, rp.ibatt_sel_noamp, rp.modeling,
       Mon->Tb(), Mon->Vb(), Mon->Ib(),
@@ -498,23 +498,32 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   // Outputs: Sim.soc
   Sen->Sim->count_coulombs(Sen, reset_temp, rp.t_last_model);
 
-  // D2 signal injection to hardware current sensors (also has rp.inj_soft_bias path for rp.tweak_test)
-  if ( (Sen->start_inj <= Sen->now) && (Sen->now <= Sen->stop_inj) )
+  // Injection tweak test
+  if ( (Sen->start_inj <= Sen->now) && (Sen->now <= Sen->end_inj) ) // in range, test in progress
   {
-    if ( Sen->elapsed_inj==0 ) // Shift for asynchronous and improve repeatibility of tweak testing
+    // Shift times because sampling is asynchronous: improve repeatibility
+    if ( Sen->elapsed_inj==0 )
     {
+      Sen->end_inj += Sen->now - Sen->start_inj;
       Sen->stop_inj += Sen->now - Sen->start_inj;
       Sen->start_inj = Sen->now;
     }
-    Sen->elapsed_inj = Sen->now - Sen->start_inj + 1UL; // Shift by 1 so can use ==0 to turn off
+
+    Sen->elapsed_inj = Sen->now - Sen->start_inj + 1UL; // Shift by 1 because using ==0 to turn off
+
+    // Turn off amplitude of injection and wait for end_inj
+    if (Sen->now > Sen->stop_inj) rp.amp = 0;
   }
-  else if ( Sen->elapsed_inj )
+  else if ( Sen->elapsed_inj )  // Done.  Turn things off by setting 0
   {
     Sen->elapsed_inj = 0;
     self_talk("Pa", Mon, Sen);  // Print all for record
     self_talk("Xm7", Mon, Sen); // Turn off tweak_test
+    self_talk("v0", Mon, Sen);  // Turn off echo
   }
+  // Perform the calculation of injection signals 
   rp.duty = Sen->Sim->calc_inj_duty(Sen->elapsed_inj, rp.type, rp.amp, rp.freq);
+
 }
 
 

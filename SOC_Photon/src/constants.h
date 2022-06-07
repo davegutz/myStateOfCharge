@@ -84,7 +84,8 @@
 #define TWEAK_MAX_CHANGE      0.05      // Maximum allowed tweak per charge cycle, A
 #define TWEAK_MAX             1.        // Maximum tweak allowed, +/- A
 #define TWEAK_WAIT            6.        // Time to persist unsaturated before allowing peak, hrs
-#define MAX_WAIT              10.       // Maximum delay input by Talk('W<?>') function
+#define TT_WAIT               10.       // Before and after tweak test print interval, s
+
 // Conversion gains
 const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  
 const double shunt_amp_v2a_s = shunt_noamp_v2a_s * SHUNT_AMP_R1/SHUNT_AMP_R2; // Shunt amp V2A scalar

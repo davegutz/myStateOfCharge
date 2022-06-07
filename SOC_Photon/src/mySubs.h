@@ -134,6 +134,7 @@ struct Sensors
   unsigned long int start_inj;    // Start of calculated injection, ms
   unsigned long int stop_inj;     // Stop of calculated injection, ms
   unsigned long int wait_inj;     // Wait before start injection, ms
+  unsigned long int end_inj;      // End of print injection, ms
   float cycles_inj;               // Number of injection cycles
   Sync *PublishSerial;            // Handle to debug print time
   Sensors(void) {}
@@ -161,6 +162,7 @@ struct Sensors
     this->elapsed_inj = 0UL;
     this->start_inj = 0UL;
     this->stop_inj = 0UL;
+    this->end_inj = 0UL;
     this->cycles_inj = 0.;
     this->PublishSerial = PublishSerial;
   }

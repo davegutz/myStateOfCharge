@@ -337,31 +337,31 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         {
 
           case ( 'C' ):
-            Serial.printf("Sen->ShuntAmp->max_change_ from %10.6f to ", Sen->ShuntAmp->max_change());
+            Serial.printf("Sen->ShuntAmp->max_change_ %10.6f to ", Sen->ShuntAmp->max_change());
             Sen->ShuntAmp->max_change(cp.input_string.substring(2).toFloat());
             Serial.printf("%10.6f\n", Sen->ShuntAmp->max_change());
             break;
 
           case ( 'g' ):
-            Serial.printf("Sen->ShuntAmp->gain_ from %10.6f to ", Sen->ShuntAmp->gain());
+            Serial.printf("Sen->ShuntAmp->gain_ %10.6f to ", Sen->ShuntAmp->gain());
             Sen->ShuntAmp->gain(cp.input_string.substring(2).toFloat());
             Serial.printf("%10.6f\n", Sen->ShuntAmp->gain());
             break;
 
           case ( 'k' ):
-            Serial.printf("rp.tweak_bias from %7.3f to ", Sen->ShuntAmp->tweak_bias());
+            Serial.printf("rp.tweak_bias %7.3f to ", Sen->ShuntAmp->tweak_bias());
             Sen->ShuntAmp->tweak_bias(cp.input_string.substring(2).toFloat());
             Serial.printf("%7.3f\n", Sen->ShuntAmp->tweak_bias());
             break;
 
           case ( 'P' ):
-            Serial.printf("Sen->ShuntAmp->q_sat_present_ from %10.1f to ", Sen->ShuntAmp->delta_q_sat_present());
+            Serial.printf("Sen->ShuntAmp->q_sat_present_ %10.1f to ", Sen->ShuntAmp->delta_q_sat_present());
             Sen->ShuntAmp->delta_q_sat_present(cp.input_string.substring(2).toFloat());
             Serial.printf("%10.1f\n", Sen->ShuntAmp->delta_q_sat_present());
             break;
 
           case ( 'p' ):
-            Serial.printf("Sen->ShuntAmp->q_sat_past_ from %10.1f to ", Sen->ShuntAmp->delta_q_sat_past());
+            Serial.printf("Sen->ShuntAmp->q_sat_past_ %10.1f to ", Sen->ShuntAmp->delta_q_sat_past());
             Sen->ShuntAmp->delta_q_sat_past(cp.input_string.substring(2).toFloat());
             Serial.printf("%10.1f\n", Sen->ShuntAmp->delta_q_sat_past());
             break;
@@ -394,13 +394,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         {
 
           case ( 'C' ):
-            Serial.printf("Sen->ShuntNoAmp->max_change_ from %10.6f to ", Sen->ShuntNoAmp->max_change());
+            Serial.printf("Sen->ShuntNoAmp->max_change_ %10.6f to ", Sen->ShuntNoAmp->max_change());
             Sen->ShuntNoAmp->max_change(cp.input_string.substring(2).toFloat());
             Serial.printf("%10.6f\n", Sen->ShuntNoAmp->max_change());
             break;
 
           case ( 'g' ):
-            Serial.printf("Sen->ShuntNoAmp->gain_ from %10.6f to ", Sen->ShuntNoAmp->gain());
+            Serial.printf("Sen->ShuntNoAmp->gain_ %10.6f to ", Sen->ShuntNoAmp->gain());
             Sen->ShuntNoAmp->gain(cp.input_string.substring(2).toFloat());
             Serial.printf("%10.6f\n", Sen->ShuntNoAmp->gain());
             break;
@@ -412,31 +412,31 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'P' ):
-            Serial.printf("Sen->ShuntNoAmp->q_sat_present_ from %10.1f to ", Sen->ShuntNoAmp->delta_q_sat_present());
+            Serial.printf("Sen->ShuntNoAmp->q_sat_present_ %10.1f to ", Sen->ShuntNoAmp->delta_q_sat_present());
             Sen->ShuntNoAmp->delta_q_sat_present(cp.input_string.substring(2).toFloat());
             Serial.printf("%10.1f\n", Sen->ShuntNoAmp->delta_q_sat_present());
             break;
 
           case ( 'p' ):
-            Serial.printf("Sen->ShuntNoAmp->q_sat_past_ from %10.1f to ", Sen->ShuntNoAmp->delta_q_sat_past());
+            Serial.printf("Sen->ShuntNoAmp->q_sat_past_ %10.1f to ", Sen->ShuntNoAmp->delta_q_sat_past());
             Sen->ShuntNoAmp->delta_q_sat_past(cp.input_string.substring(2).toFloat());
             Serial.printf("%10.1f\n", Sen->ShuntNoAmp->delta_q_sat_past());
             break;
 
           case ( 'w' ):
-            Serial.printf("Sen->ShuntNoAmp->time_to_wait from %7.3f to ", Sen->ShuntNoAmp->time_to_wait());
+            Serial.printf("Sen->ShuntNoAmp->time_to_wait %7.3f to ", Sen->ShuntNoAmp->time_to_wait());
             Sen->ShuntNoAmp->time_to_wait(cp.input_string.substring(2).toFloat());
             Serial.printf("%7.3f\n", Sen->ShuntNoAmp->time_to_wait());
             break;
 
           case ( 'x' ):
-            Serial.printf("Sen->ShuntNoAmp->max_tweak from %7.3f to ", Sen->ShuntNoAmp->max_tweak());
+            Serial.printf("Sen->ShuntNoAmp->max_tweak %7.3f to ", Sen->ShuntNoAmp->max_tweak());
             Sen->ShuntNoAmp->max_tweak(cp.input_string.substring(2).toFloat());
             Serial.printf("%7.3f\n", Sen->ShuntNoAmp->max_tweak());
             break;
 
           case ( 'z' ):
-            Serial.printf("Sen->ShuntNoAmp->time_sat_past from %7.3f to ", Sen->ShuntNoAmp->time_sat_past());
+            Serial.printf("Sen->ShuntNoAmp->time_sat_past %7.3f to ", Sen->ShuntNoAmp->time_sat_past());
             Sen->ShuntNoAmp->time_sat_past(cp.input_string.substring(2).toFloat());
             Serial.printf("%7.3f\n", Sen->ShuntNoAmp->time_sat_past());
             break;
@@ -530,7 +530,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
         switch ( cp.input_string.charAt(1) )
         {
           case ( 'e' ):
-            Serial.printf("Equalizing delta_q in BattModel = delta_q in Batt\n");
+            Serial.printf("Equalizing counters\n");
             Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
             break;
 
@@ -546,7 +546,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             break;
 
           case ( 'r' ):
-            Serial.printf("Small reset all soc=1.0 and delta_q = 0\n");
+            Serial.printf("Small reset all counters\n");
             Sen->Sim->apply_soc(1.0, Sen->Tbatt_filt);
             Mon->apply_soc(1.0, Sen->Tbatt_filt);
             cp.cmd_reset();
@@ -555,7 +555,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
           case ( 'R' ):
             Serial.printf("Large reset\n");
             self_talk("Rr", Mon, Sen);
-            Serial.printf("Clean run all hardware. Ready to use\n");
+            Serial.printf("Clean. Ready to deploy\n");
             rp.large_reset();
             cp.large_reset();
             cp.cmd_reset();
@@ -563,12 +563,12 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             break;
 
           case ( 's' ):
-            Serial.printf("Small reset. Just reset flags so filters are reinit\n");
+            Serial.printf("Small reset. Filters reinit\n");
             cp.cmd_reset();
             break;
 
           default:
-            Serial.print(cp.input_string.charAt(1)); Serial.println(" unknown. Try typing 'h'");
+            Serial.print(cp.input_string.charAt(1)); Serial.println(" unk. Try typing 'h'");
         }
         break;
 
@@ -579,7 +579,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
         }
         else
           rp.ibatt_sel_noamp = false;
-        Serial.printf("Sig select ( 0=amp, 1=noamp,) set to %d\n", rp.ibatt_sel_noamp);
+        Serial.printf("Sig ( 0=amp, 1=noamp,) set %d\n", rp.ibatt_sel_noamp);
         break;
 
       case ( 'v' ):
@@ -588,7 +588,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
 
       case ( 'w' ): 
         cp.enable_wifi = !cp.enable_wifi; // not remembered in rp. Photon reset turns this false.
-        Serial.printf("Wifi togg to %d\n", cp.enable_wifi);
+        Serial.printf("Wifi togg %d\n", cp.enable_wifi);
         break;
 
       case ( 'X' ):
@@ -618,7 +618,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             }
             else
             {
-              Serial.printf("invalid %d, rp.modeling is 0-7.  Try 'h'\n", INT_in);
+              Serial.printf("invalid %d, modeling is 0-7.  Try 'h'\n", INT_in);
             }
             Serial.printf("Modeling is %d\n", rp.modeling);
             Serial.printf("tweak_test is %d\n", rp.tweak_test());
@@ -630,12 +630,12 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
           case ( 'a' ): // injection amplitude
             // rp.amp = max(min(cp.input_string.substring(2).toFloat(), 18.3), 0.0);
             rp.amp = cp.input_string.substring(2).toFloat();
-            Serial.printf("Modeling injected amp set to %7.3f and inj_soft_bias set to %7.3f\n", rp.amp, rp.inj_soft_bias);
+            Serial.printf("Inj amp set %7.3f & inj_soft_bias set %7.3f\n", rp.amp, rp.inj_soft_bias);
             break;
 
           case ( 'f' ): // injection frequency
             rp.freq = max(min(cp.input_string.substring(2).toFloat(), 2.0), 0.0);
-            Serial.printf("Modeling injected freq set to %7.3f Hz =", rp.freq);
+            Serial.printf("Injected freq set %7.3f Hz =", rp.freq);
             rp.freq = rp.freq * 2.0 * PI;
             Serial.printf(" %7.3f r/s\n", rp.freq);
             break;
@@ -645,12 +645,12 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             {
               case ( 'o' ):
                 rp.type = 8;
-                Serial.printf("Set cosine.  rp.type = %d\n", rp.type);
+                Serial.printf("Set cos.  rp.type = %d\n", rp.type);
                 break;
 
               case ( 's' ):
                 rp.type = 1;
-                Serial.printf("Set sine.  rp.type = %d\n", rp.type);
+                Serial.printf("Set sin.  rp.type = %d\n", rp.type);
                 break;
 
               case ( 'q' ):
@@ -660,7 +660,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
 
               case ( 't' ):
                 rp.type = 3;
-                Serial.printf("Set tri inject.  rp.type = %d\n", rp.type);
+                Serial.printf("Set tri.  rp.type = %d\n", rp.type);
                 break;
 
               case ( 'c' ):
@@ -680,7 +680,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
 
           case ( 'o' ): // injection dc offset
             rp.inj_soft_bias = max(min(cp.input_string.substring(2).toFloat(), 18.3), -18.3);
-            Serial.printf("inj_soft_bias set to %7.3f\n", rp.inj_soft_bias);
+            Serial.printf("inj_soft_bias set %7.3f\n", rp.inj_soft_bias);
             break;
 
           case ( 'p' ): // injection program
@@ -848,6 +848,7 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
             {
               Sen->start_inj = Sen->wait_inj + Sen->now;
               Sen->stop_inj = Sen->wait_inj + (Sen->now + min((unsigned long int)(Sen->cycles_inj / max(rp.freq/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
+              Sen->end_inj = Sen->stop_inj + Sen->wait_inj;
               Serial.printf("RUN: at %ld, %7.3f cycles from %ld to %ld with %ld wait\n", Sen->now, Sen->cycles_inj, Sen->start_inj, Sen->stop_inj, Sen->wait_inj);
             }
             else Serial.printf("Wait %5.1f s for init\n", float(TEMP_INIT_DELAY-Sen->now)/1000.);
@@ -856,12 +857,13 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
           case ( 'S' ): // Stop injection now
             Sen->start_inj = 0UL;
             Sen->stop_inj = 0UL;
+            Sen->end_inj = 0UL;
             Serial.printf("STOPPED\n");
             break;
 
           case ( 'W' ):
             FP_in = cp.input_string.substring(2).toFloat();
-            Sen->wait_inj = (unsigned long int)(max(min(FP_in, MAX_WAIT), 0.))*1000;
+            Sen->wait_inj = (unsigned long int)(max(min(FP_in, TT_WAIT), 0.))*1000;
             Serial.printf("Waiting %7.1f s to start inj\n", FP_in);
             break;
 
