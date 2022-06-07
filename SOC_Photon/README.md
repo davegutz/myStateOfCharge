@@ -368,5 +368,11 @@ Rapid tweak test 02:30 min using models 'tweakMod'
   XS; Dn0.9985; Ca1; Mk0; Nk0;
     expected result:  see 'dataReduction/newFloatCycleMod_overplots.xlsx'
 
+Throughput test
+  v4;Dr1;
+    look at T print, estimate X-2s value (0.049s, ~50% margin)
+  Dr100;
+    confirm T restored to 0.100s
+
   ...........................................................
 36. Placeholder

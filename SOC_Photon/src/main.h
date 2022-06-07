@@ -236,7 +236,7 @@ void loop()
   static uint8_t last_publishS_debug = 0;     // Remember first time with new debug to print headers
  
   // Sensor conversions
-  static Sensors *Sen = new Sensors(0, 0, myPins->pin_1_wire, PublishSerial); // Manage sensor data
+  static Sensors *Sen = new Sensors(0, 0, myPins->pin_1_wire, PublishSerial, ReadSensors); // Manage sensor data
   static float tbatt_bias_last;  // Memory for rate limiter in filter_temp call, deg C
 
    // Mon, used to count Coulombs and run EKF
