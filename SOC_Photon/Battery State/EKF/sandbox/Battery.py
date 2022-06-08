@@ -79,7 +79,7 @@ class Battery(Coulombs):
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
                  bat_v_sat=13.8, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP):
+                 temp_c=RATED_TEMP, tweak_test=False):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -87,7 +87,7 @@ class Battery(Coulombs):
         so equations error when soc<=0 to match data.    See Battery.h
         """
         # Parents
-        Coulombs.__init__(self, q_cap_rated,  q_cap_rated, t_rated, t_rlim)
+        Coulombs.__init__(self, q_cap_rated,  q_cap_rated, t_rated, t_rlim, tweak_test)
 
         # Defaults
         from pyDAGx import myTables
@@ -135,6 +135,7 @@ class Battery(Coulombs):
         self.bms_off = False
         self.mod = 7
         self.sel = 0
+        self.tweak_test = tweak_test
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -237,9 +238,9 @@ class BatteryMonitor(Battery, EKF_1x1):
                  bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, hys_scale=-1.):
+                 temp_c=RATED_TEMP, hys_scale=-1., tweak_test=False):
         Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, bat_v_sat, q_cap_rated, t_rated,
-                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
+                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
 
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
@@ -479,9 +480,9 @@ class BatteryModel(Battery):
                  bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, hys_scale=1.):
+                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False):
         Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, bat_v_sat, q_cap_rated, t_rated,
-                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c)
+                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A
         self.sat_ib_null = 0.  # Current cutback value for soc=1, A
@@ -497,6 +498,8 @@ class BatteryModel(Battery):
         if scale is not None:
             self.apply_cap_scale(scale)
         self.hys = Hysteresis(scale=hys_scale)  # Battery hysteresis model - drift of voc
+        self.tweak_test = tweak_test
+        self.voc_dyn = 0.  # Charging voltage, V
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -543,6 +546,7 @@ class BatteryModel(Battery):
         self.voc = self.hys.update(self.dt)
         self.ioc = self.hys.ioc
         self.dv_hys = self.hys.dv_hys
+        self.voc_dyn = self.voc
         # Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
         u = np.array([self.ib, self.voc]).T  # past value self.ib
         self.Randles.calc_x_dot(u)
@@ -557,7 +561,7 @@ class BatteryModel(Battery):
         # Saturation logic, both full and empty
         self.vsat = self.nom_vsat + (temp_c - 25.) * self.dvoc_dt
         self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
-        if rp.tweak_test():
+        if self.tweak_test:
             self.sat_ib_max = curr_in
             self.mod = 15
         else:
@@ -604,10 +608,13 @@ class BatteryModel(Battery):
             charge_curr     Charge, A
             sat             Indicator that battery is saturated (VOC>threshold(temp)), T/F
             t_last          Past value of battery temperature used for rate limit memory, deg C
+            coul_eff_       Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
         Outputs:
             soc     State of charge, fraction (0-1.5)
         """
         d_delta_q = charge_curr * dt
+        if charge_curr > 0. and not self.tweak_test:
+            d_delta_q *= self.coul_eff
 
         # Rate limit temperature
         temp_lim = max(min(temp_c, t_last + self.t_rlim*dt), t_last - self.t_rlim*dt)
@@ -645,6 +652,7 @@ class BatteryModel(Battery):
         self.saved.vd.append(self.vd())
         self.saved.dv_hys.append(self.dv_hys)
         self.saved.voc.append(self.voc)
+        self.saved.voc_dyn.append(self.voc_dyn)
         self.saved.voc_stat.append(self.voc_stat)
         self.saved.vbc.append(self.vbc())
         self.saved.vcd.append(self.vcd())
@@ -735,6 +743,7 @@ class Saved:
 def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     if fig_files is None:
         fig_files = []
+
     plt.figure()
     n_fig += 1
     plt.subplot(321)
@@ -749,9 +758,15 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.legend(loc=1)
     plt.subplot(323)
     plt.plot(ms.time, ms.vb, color='green', label='Vb')
+    plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='Vb_sim')
     plt.plot(ms.time, ms.vc, color='blue', label='Vc')
+    plt.plot(ss.time, ss.vc, color='blue', linestyle='--', label='Vc_sim')
     plt.plot(ms.time, ms.vd, color='red', label='Vd')
+    plt.plot(ss.time, ss.vd, color='red', linestyle='--', label='Vd_sim')
     plt.plot(ms.time, ms.voc_dyn, color='orange', label='Voc_dyn')
+    plt.plot(ss.time, ss.voc_dyn, color='cyan', linestyle='--', label='Voc_dyn_sim')
+    plt.plot(ms.time, ms.voc, color='green', label='Voc')
+    plt.plot(ss.time, ss.voc, color='black', linestyle='dotted', label='Voc_sim')
     plt.legend(loc=1)
     plt.subplot(325)
     plt.plot(ms.time, ms.vbc_dot, color='green', label='Vbc_dot')
@@ -759,6 +774,7 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.legend(loc=1)
     plt.subplot(322)
     plt.plot(ms.time, ms.soc, color='red', label='soc')
+    plt.plot(ss.time, ss.soc, color='black', linestyle='dotted', label='soc_sim')
     plt.legend(loc=1)
     plt.subplot(326)
     plt.plot(ss.soc, ss.voc, color='black', linestyle='dotted', label='SIM voc vs soc')
@@ -795,6 +811,36 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.legend(loc=1)
     plt.subplot(326)
     plt.plot(ss.soc, ss.voc, color='black', label='voc vs soc')
+    plt.legend(loc=1)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
+    plt.figure()
+    n_fig += 1
+    plt.subplot(321)
+    plt.title(plot_title+' MON vs SIM')
+    plt.plot(ms.time, ms.ib, color='green', label='ib')
+    plt.plot(ss.time, ss.ib, color='black', linestyle='--', label='ib_sim')
+    plt.legend(loc=1)
+    plt.subplot(322)
+    plt.plot(ms.time, ms.voc, color='green', label='Voc')
+    plt.plot(ss.time, ss.voc, color='red', linestyle='--', label='Voc_sim')
+    plt.legend(loc=1)
+    plt.subplot(323)
+    plt.plot(ms.time, ms.voc_dyn, color='green', label='Voc_dyn')
+    plt.plot(ss.time, ss.voc_dyn, color='red', linestyle='--', label='Voc_dyn_sim')
+    plt.legend(loc=1)
+    plt.subplot(324)
+    plt.plot(ss.time, ss.soc, color='green', label='soc')
+    plt.plot(ms.time, ms.soc, color='red', linestyle='--', label='soc_sim')
+    plt.legend(loc=1)
+    plt.subplot(325)
+    plt.plot(ms.time, ms.dv_hys, color='green', label='dv_hys')
+    plt.plot(ss.time, ss.dv_hys, color='black', linestyle='--', label='dv_hys_sim')
+    plt.legend(loc=1)
+    plt.subplot(326)
+    plt.plot(ss.time, ss.dv_hys, color='black', linestyle='--', label='dv_hys_sim')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)

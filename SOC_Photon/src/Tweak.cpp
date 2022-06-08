@@ -133,7 +133,7 @@ void Tweak::save_new_sat(unsigned long int now)
     T             Time since last call, sec
     is_sat        Is the battery in saturation, T=saturated
     now           Time since boot, ms
-    coul_eff_     Coulombic efficiency - the fraction of charging input that gets turned into useable Coulombs
+    coul_eff_     Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
     delta_hrs_    Time since last allowed saturation see 'N/Mz', hr
     delta_q_max_  Running tab since last de-saturation of potential new delta_q_sat
     sat_          Indication that battery is saturated, T=saturated

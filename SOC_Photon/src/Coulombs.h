@@ -124,7 +124,7 @@ protected:
   double q_min_;      // Floor on charge available to use, C
   TableInterp1D *soc_min_T_;   // SOC-MIN 1-D table, V
   Chemistry chem_; // Storage of chemistry information
-  double coul_eff_;   // Coulombic efficiency - the fraction of charging input that gets turned into useable Coulombs
+  double coul_eff_;   // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
 };
 
 #endif

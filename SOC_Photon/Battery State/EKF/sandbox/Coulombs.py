@@ -19,13 +19,13 @@ of the totals and standardize the calculations."""
 # Constants
 import numpy as np
 
-dqdt = 0.01
+dqdt = 0.01  # defacto standard from literature, many sources
 
 
 class Coulombs:
     """Coulomb Counting"""
 
-    def __init__(self, q_cap_rated, q_cap_rated_scaled, t_rated, t_rlim=0.017):
+    def __init__(self, q_cap_rated, q_cap_rated_scaled, t_rated, t_rlim=0.017, coul_eff=0.9985):
         self.q_cap_rated = q_cap_rated
         self.q_cap_rated_scaled = q_cap_rated_scaled
         self.t_rated = t_rated
@@ -41,11 +41,12 @@ class Coulombs:
         self.sat = True
         from pyDAGx import myTables
         t_x_soc_min = [5.,   11.1,  20.,  40.]
-        t_soc_min = [ 0.14, 0.12,  0.08, 0.07]
+        t_soc_min = [0.14, 0.12,  0.08, 0.07]
         self.lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
+        self.coul_eff = coul_eff
 
     def __str__(self, prefix=''):
-        '''Returns representation of the object'''
+        """Returns representation of the object"""
         s = prefix + "Coulombs:\n"
         s += "  q_cap_rated = {:9.1f}    // Rated capacity at t_rated_, saved for future scaling, C\n".format(self.q_cap_rated)
         s += "  q_cap_rated_scaled = {:9.1f} // Applied rated capacity at t_rated_, after scaling, C\n".format(self.q_cap_rated_scaled)
@@ -59,6 +60,7 @@ class Coulombs:
         s += "  t_rlim =     {:7.3f}       // Tbatt rate limit, deg C / s\n".format(self. t_rlim)
         s += "  resetting =     {:d}          // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter\n".format(self.resetting)
         s += "  soc_min =    {:7.3f}       // Lowest soc for power delivery.   Arises with temp < 20 C\n".format(self.soc_min)
+        s += "  coul_eff =   {:7.3f}       // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs\n".format(self.coul_eff)
         return s
 
     def apply_cap_scale(self, scale):
@@ -108,8 +110,11 @@ class Coulombs:
             charge_curr     Charge, A
             sat             Indicator that battery is saturated (VOC>threshold(temp)), T/F
             t_last          Past value of battery temperature used for rate limit memory, deg C
+            coul_eff        Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
         """
         d_delta_q = charge_curr * dt
+        if charge_curr > 0. and not self.tweak_test:
+            d_delta_q *= self.coul_eff
         self.sat = sat
 
         # Rate limit temperature

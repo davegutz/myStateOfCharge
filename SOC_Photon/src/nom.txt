@@ -6,7 +6,7 @@
 		bms_off_		Calculated indication that the BMS has turned off charge current, T=off
 		cap_			Capacitance, Farads
 		cap_init_		Initial capacitance specification, Farads
-		COULOMBIC_EFF	Coulombic efficiency - the fraction of charging input that gets turned into useable Coulombs
+		COULOMBIC_EFF	Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
 		CURR_BIAS_ALL	Bias on all shunt sensors, A
 		CURR_BIAS_AMP	Calibration of amplified shunt sensor, A
 		curr_bias_model	Signal injection bias for model, A

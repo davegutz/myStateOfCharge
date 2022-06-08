@@ -54,6 +54,7 @@ if __name__ == '__main__':
                 self.Tb = []  # Battery bank temperature, deg C
                 self.Vsat = []  # Monitor Bank saturation threshold at temperature, deg C
                 self.Vdyn = []  # Monitor Bank current induced back emf, V
+                self.dv_hys = []  # Drop across hysteresis, V
                 self.Voc = []  # Monitor Static bank open circuit voltage, V
                 self.Voc_dyn = []  # Bank VOC estimated from Vb and RC model, V
                 self.Voc_ekf = []  # Monitor bank solved static open circuit voltage, V
@@ -98,6 +99,7 @@ if __name__ == '__main__':
                 self.Vdyn = np.array(data.Vdyn[:i_end])
                 self.Voc = np.array(data.Voc[:i_end])
                 self.Voc_dyn = self.Vb - self.Vdyn
+                self.dv_hys = self.Voc_dyn - self.Voc
                 self.Voc_ekf = np.array(data.Voc_ekf[:i_end])
                 self.y_ekf = np.array(data.y_ekf[:i_end])
                 self.soc_m = np.array(data.soc_m[:i_end])
@@ -155,6 +157,7 @@ if __name__ == '__main__':
         def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None):
             if fig_files is None:
                 fig_files = []
+
             plt.figure()
             n_fig += 1
             plt.subplot(221)
@@ -186,26 +189,30 @@ if __name__ == '__main__':
 
             plt.figure()
             n_fig += 1
-            plt.subplot(221)
+            plt.subplot(321)
             plt.title(plot_title)
             plt.plot(old_s.time, old_s.Vdyn, color='green', label='Vdyn')
             plt.plot(new_s.time, new_s.Vdyn, color='orange', linestyle='--', label='Vdyn_new')
             plt.legend(loc=1)
-            plt.subplot(222)
+            plt.subplot(322)
             plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
             plt.plot(new_s.time, new_s.Voc, color='orange', linestyle='--', label='Voc_new')
             plt.plot(old_s.time, old_s.Voc_dyn, color='blue', label='Voc_dyn')
             plt.plot(new_s.time, new_s.voc_dyn, color='red', linestyle='--', label='Voc_dyn_new')
             plt.legend(loc=1)
-            plt.subplot(223)
+            plt.subplot(323)
             plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
             plt.plot(new_s.time, new_s.Voc, color='orange', linestyle='--', label='Voc_new')
             plt.plot(old_s.time, old_s.Voc_ekf, color='blue', label='Voc_ekf')
             plt.plot(new_s.time, new_s.Voc_ekf, color='red', linestyle='--', label='Voc_ekf_new')
             plt.legend(loc=1)
-            plt.subplot(224)
+            plt.subplot(324)
             plt.plot(old_s.time, old_s.y_ekf, color='green', label='y_ekf')
             plt.plot(new_s.time, new_s.y_ekf, color='orange', linestyle='--', label='y_ekf_new')
+            plt.legend(loc=1)
+            plt.subplot(325)
+            plt.plot(old_s.time, old_s.dv_hys, color='green', label='dv_hys')
+            plt.plot(new_s.time, new_s.dv_hys, color='orange', linestyle='--', label='dv_hys_new')
             plt.legend(loc=1)
             fig_file_name = filename + '_' + str(n_fig) + ".png"
             fig_files.append(fig_file_name)
@@ -282,13 +289,14 @@ if __name__ == '__main__':
         Vb = saved_old.Vb
         t_len = len(t)
         rp.modeling = saved_old.mod()
+        tweak_test = rp.tweak_test()
         temp_c = data_old.Tb[0]
 
         # Setup
         scale = model_bat_cap / Battery.RATED_BATT_CAP
-        sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale)
+        sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test)
         mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
-                      r_dif=r_dif, temp_c=temp_c, hys_scale=hys_scale_monitor)
+                      r_dif=r_dif, temp_c=temp_c, hys_scale=hys_scale_monitor, tweak_test=tweak_test)
         Is_sat_delay = TFDelay(in_=data_old.soc[0]>0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
         # time loop

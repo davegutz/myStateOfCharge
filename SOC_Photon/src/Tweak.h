@@ -74,7 +74,7 @@ protected:
   float *rp_delta_q_inf_;       // Charge infinity at past update see 'N/Mi', Coulombs
   float *rp_tweak_bias_;        // Bias on current see 'N/Mk', A
   double delta_hrs_;            // Time since last allowed saturation see 'N/Mz', hr
-  double coul_eff_;             // Coulombic efficiency - the fraction of charging input that gets turned into useable Coulombs
+  double coul_eff_;             // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
 };
 
 #endif

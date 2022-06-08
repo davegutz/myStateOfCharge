@@ -677,7 +677,7 @@ Inputs:
     Sen->Tbatt      Battery bank temperature, deg C
     Sen->Ibatt      Selected battery bank current, A
     t_last          Past value of battery temperature used for rate limit memory, deg C
-    coul_eff_       Coulombic efficiency - the fraction of charging input that gets turned into useable Coulombs
+    coul_eff_       Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
 States:
     *rp_delta_q_    Charge change since saturated, C
     *rp_t_last_     Updated value of battery temperature used for rate limit memory, deg C

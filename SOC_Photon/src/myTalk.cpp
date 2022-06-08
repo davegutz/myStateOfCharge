@@ -39,7 +39,7 @@ extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 // Talk Executive
 void talk(BatteryMonitor *Mon, Sensors *Sen)
 {
-  const String reset_ce = "Dn" + String(COULOMBIC_EFF);
+  const String set_nom_coul_eff = "Dn" + String(COULOMBIC_EFF);
   double FP_in = -99.;
   int INT_in = -1;
   double scale = 1.;
@@ -714,10 +714,10 @@ soc_ekf= %7.3f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                 rp.freq = 0.0;
                 rp.amp = 0.0;
                 if ( !rp.tweak_test() ) rp.inj_soft_bias = 0.0;
-                self_talk("XS", Mon, Sen);  // Stop any cycling
+                self_talk("XS", Mon, Sen);  // Stop any injection
                 self_talk("Mk0", Mon, Sen);
                 self_talk("Nk0", Mon, Sen);
-                self_talk(reset_ce, Mon, Sen); // Nominal COULOMBIC_EFF
+                self_talk(set_nom_coul_eff, Mon, Sen);
                 rp.ibatt_bias_all = 0;
                 debug_inject();  // Arduino plot
                 break;
