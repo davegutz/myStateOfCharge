@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "pro_20220609";  // new float types, battery types, nomenclature, coulombic efficiency
+const String unit = "pro_20220609";  // DF2=0.70 disable ekf as truth
 
 // Sensor biases
 #define CURR_BIAS_AMP         -0.24 // Calibration of amplified shunt sensor ('Da=#.#;'), A
