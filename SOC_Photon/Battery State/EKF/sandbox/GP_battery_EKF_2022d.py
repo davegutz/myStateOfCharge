@@ -72,10 +72,13 @@ if __name__ == '__main__':
                 # manage data shape
                 # Find first non-zero Ib and use to adjust time
                 # Ignore initial run of non-zero Ib because resetting from previous run
-                zero_start = np.where(self.Ib == 0.0)[0][0]
-                self.zero_end = zero_start
-                while self.Ib[self.zero_end] == 0.0:  # stop at first non-zero
-                    self.zero_end += 1
+                try:
+                    zero_start = np.where(self.Ib == 0.0)[0][0]
+                    self.zero_end = zero_start
+                    while self.Ib[self.zero_end] == 0.0:  # stop at first non-zero
+                        self.zero_end += 1
+                except:
+                    self.zero_end = 0
                 time_ref = self.time[self.zero_end]
                 # print("time_ref=", time_ref)
                 self.time -= time_ref
@@ -275,10 +278,11 @@ if __name__ == '__main__':
 
         # Transient  inputs
         time_end = None
-        # time_end = 1.5
+        # time_end = 10000.
 
         # Load data
-        data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220607_newShort.csv'
+        # data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220607_newShort.csv'
+        data_file_old = '../../../dataReduction/RealWorld 2022-06-07.csv'
         cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         # noinspection PyTypeChecker
@@ -287,8 +291,11 @@ if __name__ == '__main__':
         saved_old = SavedData(data_old, time_end)
         t = saved_old.time
         Vb = saved_old.Vb
+        Ib = saved_old.Ib
+        Tb = saved_old.Tb
         t_len = len(t)
         rp.modeling = saved_old.mod()
+        print("rp.modeling is ", rp.modeling)
         tweak_test = rp.tweak_test()
         temp_c = data_old.Tb[0]
 
@@ -339,7 +346,10 @@ if __name__ == '__main__':
                 mon.init_soc_ekf(soc_init)  # when modeling (assumed in python) ekf wants to equal model
 
             # Monitor calculations including ekf
-            mon.calculate(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
+            if rp.modeling == 0:
+                mon.calculate(Tb[i], Vb[i], Ib[i], dt_ekf)
+            else:
+                mon.calculate(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
             # mon.calculate(temp_c, Vb[i]+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
             sat = is_sat(temp_c, mon.voc, mon.soc)
             saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(dt, T_SAT/2.), init)
@@ -365,6 +375,7 @@ if __name__ == '__main__':
         print('time=', t[i])
         print('mon:  ', str(mon))
         print('sim:  ', str(sim))
+        print("Showing data from file then BatteryMonitor calculated from data")
         print(SavedData.compare_print(saved_old, mon.saved))
 
 

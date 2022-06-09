@@ -1,0 +1,9 @@
+Results:
+
+- Because ran first real world run with update time of 2 seconds, the model dynamic model (Randles) was aliased and unstable.   Had to force Vdyn in model to the Vdyn value from the data. (if dt>0.5, Voc_dyn = Vb)
+
+- The Coulomb counter in real data is being reset every so often because the EKF disagrees.
+
+Conclusions:
+
+- I don't understand all the accuracy issues yes.   Should change logic to reset Coulomb counter much less often than present.

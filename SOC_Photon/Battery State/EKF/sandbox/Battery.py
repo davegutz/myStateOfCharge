@@ -295,8 +295,11 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.ib = max(min(ib, 10000.), -10000.)  # Overflow protection since ib past value used
         u = np.array([ib, vb]).T
         self.Randles.calc_x_dot(u)
-        self.Randles.update(self.dt)
-        self.voc_dyn = self.Randles.y
+        if dt<0.5:
+            self.Randles.update(self.dt)
+            self.voc_dyn = self.Randles.y
+        else:  # aliased, unstable if update Randles
+            self.voc_dyn = vb
         self.vdyn = self.vb - self.voc_dyn
         self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
         # Hysteresis model
@@ -550,8 +553,11 @@ class BatteryModel(Battery):
         # Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
         u = np.array([self.ib, self.voc]).T  # past value self.ib
         self.Randles.calc_x_dot(u)
-        self.Randles.update(dt)
-        self.vb = self.Randles.y
+        if dt<0.5:
+            self.Randles.update(dt)
+            self.vb = self.Randles.y
+        else:  # aliased, unstable if update Randles
+            self.vb = self.voc
         self.vdyn = self.vb - self.voc
         if self.bms_off and dc_dc_on:
             self.vb = 13.5
