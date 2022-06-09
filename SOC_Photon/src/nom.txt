@@ -79,6 +79,7 @@
 		q_cap_rated_scaled_	Applied rated capacity at t_rated_, after scaling, C
 		q_ekf_			Filtered charge calculated by ekf, C
 		q_min_			Estimated charge at low voltage shutdown, C
+		RANDLES_T_MAX   Maximum update time of Randles state space model to avoid aliasing and instability
 		RATED_BATT_CAP	Nominal battery bank capacity (assume actual not known), Ah
 		RATED_TEMP		Temperature at RATED_BATT_CAP, deg C
 		resetting_		Sticky flag to coordinate user testing of coulomb counters, T=performing an external reset of counter

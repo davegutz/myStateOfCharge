@@ -256,12 +256,17 @@ double BatteryMonitor::calculate(Sensors *Sen)
     ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
     double u[2] = {ib_, vb_};
     Randles_->calc_x_dot(u);
-    Randles_->update(dt_);
+    if ( dt_<RANDLES_T_MAX )
+    {
+        Randles_->update(dt_);
+        voc_dyn_ = Randles_->y(0);
+    }
+    else    // aliased, unstable if T<0.5  TODO:  consider deleting Randles model (hardware filters)
+        voc_dyn_ = vb_ - chem_.r_ss * ib_;
     if ( rp.debug==35 )
     {
         Serial.printf("BatteryMonitor::calculate:"); Randles_->pretty_print();
     }
-    voc_dyn_ = Randles_->y(0);
     vdyn_ = vb_ - voc_dyn_;
     voc_stat_ = voc_soc(soc_, Sen->Tbatt_filt);
     // Hysteresis model
@@ -570,8 +575,13 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     ib_ = max(min(ib_, 10000.), -10000.);  //  Past value ib_.  Overflow protection when ib_ past value used
     double u[2] = {ib_, voc_};
     Randles_->calc_x_dot(u);
-    Randles_->update(dt);
-    vb_ = Randles_->y(0);
+    if ( dt_<RANDLES_T_MAX )
+    {
+        Randles_->update(dt);
+        vb_ = Randles_->y(0);
+    }
+    else    // aliased, unstable if T<0.5.  TODO:  consider deleting Randles model (hardware filters)
+        vb_ = voc_ + chem_.r_ss * ib_;
     vdyn_ = vb_ - voc_;
     // Special cases override
     if ( bms_off_ )

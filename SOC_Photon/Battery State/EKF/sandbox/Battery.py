@@ -40,9 +40,6 @@ class Retained:
         return ( 0x8 & self.modeling )
 
 
-rp = Retained()
-
-
 # Battery constants
 RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
 BATT_DVOC_DT = 0.004  # 5/30/2022
@@ -62,7 +59,7 @@ max_voc = 1.2*NOM_SYS_VOLT  # Prevent windup of battery model, V
 batt_vsat = BATT_V_SAT  # Total bank saturation for 0.997=soc, V
 batt_vmax = 14.3  # Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
 DF1 = 0.02  # Weighted selection lower transition drift, fraction
-DF2 = 0.05  # Threshold to reset Coulomb Counter if different from ekf, fraction (0.05)
+DF2 = 0.70  # Threshold to reset Coulomb Counter if different from ekf, fraction (0.05)
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -79,7 +76,7 @@ class Battery(Coulombs):
     def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
                  bat_v_sat=13.8, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, tweak_test=False):
+                 temp_c=RATED_TEMP, tweak_test=False, t_max=0.5):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -127,6 +124,7 @@ class Battery(Coulombs):
         self.tau_dif = tau_dif
         self.r_dif = r_dif
         self.c_dif = self.tau_dif / self.r_dif
+        self.t_max = t_max
         self.Randles = StateSpace(2, 2, 1)
         # self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
         self.temp_c = temp_c
@@ -136,6 +134,7 @@ class Battery(Coulombs):
         self.mod = 7
         self.sel = 0
         self.tweak_test = tweak_test
+        self.r_ss = r0 + r_ct + r_dif
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -147,6 +146,7 @@ class Battery(Coulombs):
         s += "  tau_ct  = {:9.6f}  // Randles charge transfer time constant, s (=1/Rct/Cct)\n".format(self.tau_ct)
         s += "  r_dif   = {:9.6f}  // Randles diffusion resistance, ohms\n".format(self.r_dif)
         s += "  tau_dif = {:9.6f}  // Randles diffusion time constant, s (=1/Rdif/Cdif)\n".format(self.tau_dif)
+        s += "  r_ss    = {:9.6f}  // Steady state equivalent battery resistance, for solver, Ohms\n".format(self.r_ss)
         s += "  r_sd    = {:9.6f}  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n".format(self.r_sd)
         s += "  tau_sd  = {:9.1f}  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n".format(self.tau_sd)
         s += "  bms_off  = {:d}      // BMS off\n".format(self.bms_off)
@@ -162,6 +162,7 @@ class Battery(Coulombs):
         s += "  dv_ =     {:7.3f}  // Delta voltage, V\n".format(self.dv)
         s += "  dt_ =     {:7.3f}  // Update time, s\n".format(self.dt)
         s += "  dv_hys  = {:7.3f}  // Hysteresis delta v, V\n".format(self.dv_hys)
+        s += "  tweak_test={:d}     // Driving signal injection completely using software inj_soft_bias\n".format(self.tweak_test)
         s += "\n  "
         s += Coulombs.__str__(self, prefix + 'Battery:')
         s += "\n  "
@@ -191,7 +192,7 @@ class Battery(Coulombs):
         voc = self.lut_voc.interp(soc, temp_c) + self.dv
         return voc, dv_dsoc
 
-    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):  # Battery
+    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, rp=None):  # Battery
         raise NotImplementedError
 
     def init_battery(self):
@@ -285,21 +286,22 @@ class BatteryMonitor(Battery, EKF_1x1):
     def assign_soc_m(self, soc_m):
         self.soc_m = soc_m
 
-    def calculate(self, temp_c, vb, ib, dt, q_capacity=None, dc_dc_on=None):  # BatteryMonitor
+    def calculate(self, temp_c, vb, ib, dt, q_capacity=None, dc_dc_on=None, rp=None):  # BatteryMonitor
         self.temp_c = temp_c
         self.vsat = calc_vsat(self.temp_c)
         self.dt = dt
+        self.mod = rp.modeling
 
         # Dynamics
         self.vb = vb
         self.ib = max(min(ib, 10000.), -10000.)  # Overflow protection since ib past value used
         u = np.array([ib, vb]).T
         self.Randles.calc_x_dot(u)
-        if dt<0.5:
+        if dt<self.t_max:
             self.Randles.update(self.dt)
             self.voc_dyn = self.Randles.y
         else:  # aliased, unstable if update Randles
-            self.voc_dyn = vb
+            self.voc_dyn = vb - self.r_ss * ib
         self.vdyn = self.vb - self.voc_dyn
         self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
         # Hysteresis model
@@ -337,10 +339,6 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.Vsat = self.vsat * rp.nS
         self.Vdyn = self.vdyn * rp.nS
         self.Voc_ekf = self.hx * rp.nS
-        if rp.tweak_test():
-            self.mod = 15
-        else:
-            self.mod = 7
 
         return self.soc_ekf
 
@@ -529,9 +527,10 @@ class BatteryModel(Battery):
         s += Battery.__str__(self, prefix + 'BatteryModel:')
         return s
 
-    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on):  # BatteryModel
+    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, rp=None):  # BatteryModel
         self.dt = dt
         self.temp_c = temp_c
+        self.mod = rp.modeling
 
         soc_lim = max(min(soc, 1.), 0.)
 
@@ -553,11 +552,12 @@ class BatteryModel(Battery):
         # Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
         u = np.array([self.ib, self.voc]).T  # past value self.ib
         self.Randles.calc_x_dot(u)
-        if dt<0.5:
+        if dt<self.t_max:
             self.Randles.update(dt)
             self.vb = self.Randles.y
         else:  # aliased, unstable if update Randles
-            self.vb = self.voc
+            self.vb = self.voc + self.r_ss * self.ib
+
         self.vdyn = self.vb - self.voc
         if self.bms_off and dc_dc_on:
             self.vb = 13.5
@@ -569,9 +569,6 @@ class BatteryModel(Battery):
         self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
         if self.tweak_test:
             self.sat_ib_max = curr_in
-            self.mod = 15
-        else:
-            self.mod = 7
         self.ib = min(curr_in, self.sat_ib_max)  # the feedback of self.ib
         if ((self.q <= 0.) & (curr_in < 0.)):  # empty
             self.ib = 0.  # empty

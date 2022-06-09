@@ -35,7 +35,7 @@
 struct Sensors;
 #define t_float float
 
-#define TCHARGE_DISPLAY_DEADBAND  0.1   // Inside this +/- deadband, charge time is displayed '---', A
+#define TCHARGE_DISPLAY_DEADBAND  0.1 // Inside this +/- deadband, charge time is displayed '---', A
 #define T_RLIM          0.017     // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s (0.017 allows 1 deg for 1 minute)
 const double vb_dc_dc = 13.5;     // DC-DC charger estimated voltage, V
 #define EKF_CONV        2e-3      // EKF tracking error indicating convergence, V (1e-3)
@@ -44,7 +44,7 @@ const double vb_dc_dc = 13.5;     // DC-DC charger estimated voltage, V
 #define EKF_Q_SD        0.001     // Standard deviation of EKF process uncertainty, V
 #define EKF_R_SD        0.1       // Standard deviation of EKF state uncertainty, fraction (0-1)
 #define EKF_NOM_DT      0.1       // EKF nominal update time, s (initialization; actual value varies) 
-#define DF2             0.05      // Threshold to resest Coulomb Counter if different from ekf, fraction (0.05)
+#define DF2             0.70      // Threshold to resest Coulomb Counter if different from ekf, fraction (0.20)
 #define DF1             0.02      // Weighted selection lower transition drift, fraction (0.02)
 #define TAU_Y_FILT      5.        // EKF y-filter time constant, sec (5.)
 #define MIN_Y_FILT      -0.5      // EKF y-filter minimum, V (-0.5)
@@ -52,6 +52,7 @@ const double vb_dc_dc = 13.5;     // DC-DC charger estimated voltage, V
 #define SOLV_ERR        1e-6      // EKF initialization solver error bound, V
 #define SOLV_MAX_COUNTS 10        // EKF initialization solver max iters
 #define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction
+#define RANDLES_T_MAX   0.5       // Maximum update time of Randles state space model to avoid aliasing and instability
 const double mxeps = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness)
 
 

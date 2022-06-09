@@ -20,7 +20,7 @@ Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Batt
 import numpy as np
 from numpy.random import randn
 import Battery
-from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, rp, overall
+from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, overall, Retained
 from unite_pictures import unite_pictures_into_pdf
 import os
 from datetime import datetime
@@ -278,7 +278,7 @@ if __name__ == '__main__':
 
         # Transient  inputs
         time_end = None
-        # time_end = 10000.
+        # time_end = 73250.
 
         # Load data
         # data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220607_newShort.csv'
@@ -294,6 +294,7 @@ if __name__ == '__main__':
         Ib = saved_old.Ib
         Tb = saved_old.Tb
         t_len = len(t)
+        rp = Retained()
         rp.modeling = saved_old.mod()
         print("rp.modeling is ", rp.modeling)
         tweak_test = rp.tweak_test()
@@ -330,7 +331,7 @@ if __name__ == '__main__':
 
             # Models
             sim.calculate(temp_c=temp_c, soc=sim.soc, curr_in=current_in, dt=dt, q_capacity=sim.q_capacity,
-                          dc_dc_on=dc_dc_on)
+                          dc_dc_on=dc_dc_on, rp=rp)
             sim.count_coulombs(dt=dt, reset=init, temp_c=temp_c, charge_curr=sim.ib, t_last=rp.t_last_model,
                                sat=False)
             rp.delta_q_model, rp.t_last_model = sim.update()
@@ -347,9 +348,9 @@ if __name__ == '__main__':
 
             # Monitor calculations including ekf
             if rp.modeling == 0:
-                mon.calculate(Tb[i], Vb[i], Ib[i], dt_ekf)
+                mon.calculate(Tb[i], Vb[i], Ib[i], dt_ekf, rp=rp)
             else:
-                mon.calculate(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
+                mon.calculate(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf, rp=rp)
             # mon.calculate(temp_c, Vb[i]+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
             sat = is_sat(temp_c, mon.voc, mon.soc)
             saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(dt, T_SAT/2.), init)
@@ -375,8 +376,8 @@ if __name__ == '__main__':
         print('time=', t[i])
         print('mon:  ', str(mon))
         print('sim:  ', str(sim))
-        print("Showing data from file then BatteryMonitor calculated from data")
-        print(SavedData.compare_print(saved_old, mon.saved))
+        # print("Showing data from file then BatteryMonitor calculated from data")
+        # print(SavedData.compare_print(saved_old, mon.saved))
 
 
         # Plots

@@ -110,7 +110,7 @@ void setup()
   Serial.begin(115200);
   Serial.flush();
   delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
-  Serial.println("Hello!");
+  Serial.println("Hi!");
   // Bluetooth (hardware didn't work)
   // Serial1.begin(9600);
   // Serial1.flush();
@@ -138,13 +138,13 @@ void setup()
   // Display
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-  Serial.println("Initializing DISPLAY");
+  Serial.println("Init DISPLAY");
   if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // Seems to return true even if depowered
   {
-    Serial.println(F("SSD1306 DISPLAY allocation FAILED"));
+    Serial.println(F("SSD1306 DISP alloc FAIL"));
     for(;;); // Don't proceed, loop forever
   }
-  Serial.println("DISPLAY allocated");
+  Serial.println("DISP allocated");
   display->display();   // Adafruit splash
   delay(2000); // Pause for 2 seconds
   display->clearDisplay();
@@ -153,13 +153,13 @@ void setup()
   Time.zone(GMT);
   unsigned long now = millis();
   myWifi = new Wifi(now-CHECK_INTERVAL+CONNECT_WAIT, now, false, false, Particle.connected());  // lastAttempt, last_disconnect, connected, blynk_started, Particle.connected
-  Serial.printf("Initializing CLOUD...");
+  Serial.printf("Init CLOUD...");
   Particle.disconnect();
   myWifi->last_disconnect = now;
   WiFi.off();
   myWifi->connected = false;
-  if ( rp.debug >= 100 ) Serial.printf("wifi disconnect...");
-  Serial.printf("Setting up blynk...");
+  if ( rp.debug >= 100 ) Serial.printf("wifi dscn...");
+  Serial.printf("Set up blynk...");
   blynk_timer_1.setInterval(PUBLISH_BLYNK_DELAY, publish1);
   blynk_timer_2.setTimeout(1*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_2.setInterval(PUBLISH_BLYNK_DELAY, publish2);});
   blynk_timer_3.setTimeout(2*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_3.setInterval(PUBLISH_BLYNK_DELAY, publish3);});
@@ -182,13 +182,13 @@ void setup()
   if ( rp.is_corrupt() ) 
   {
     rp.nominal();
-    Serial.printf("\n************************WARNING(setup):  Forced nominal SRAM ****************************** %s\n", cp.buffer);
+    Serial.printf("\n****MSG(setup): Forced nom SRAM *** %s\n", cp.buffer);
   }
 
   #ifdef PHOTON
-    if ( rp.debug>101 ) { sprintf(cp.buffer, "Particle Photon\n"); Serial.print(cp.buffer); } //Serial1.print(buffer); }
+    if ( rp.debug>101 ) { sprintf(cp.buffer, "Photon\n"); Serial.print(cp.buffer); } //Serial1.print(buffer); }
   #else
-    if ( rp.debug>101 ) { sprintf(cp.buffer, "Arduino Mega2560\n"); Serial.print(cp.buffer); } //Serial1.print(buffer); }
+    if ( rp.debug>101 ) { sprintf(cp.buffer, "Mega2560\n"); Serial.print(cp.buffer); } //Serial1.print(buffer); }
   #endif
 
   // Determine millis() at turn of Time.now
