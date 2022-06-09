@@ -2,7 +2,7 @@
 #define local_config_h
 
 // version with Tweak on both current sensors
-const String unit = "soc0_20220528";  // new float types, battery types, nomenclature, coulombic efficiency
+const String unit = "soc0_20220609";  // new float types, battery types, nomenclature, coulombic efficiency
 
 // Sensor biases
 #define CURR_BIAS_AMP         -0.23 // Calibration of amplified shunt sensor ('Da=#.#;'), A
