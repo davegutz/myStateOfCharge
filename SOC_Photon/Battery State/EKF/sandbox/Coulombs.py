@@ -25,7 +25,7 @@ dqdt = 0.01  # defacto standard from literature, many sources
 class Coulombs:
     """Coulomb Counting"""
 
-    def __init__(self, q_cap_rated, q_cap_rated_scaled, t_rated, t_rlim=0.017, coul_eff=0.9985):
+    def __init__(self, q_cap_rated, q_cap_rated_scaled, t_rated, t_rlim=0.017, tweak_test=False, coul_eff=0.9985):
         self.q_cap_rated = q_cap_rated
         self.q_cap_rated_scaled = q_cap_rated_scaled
         self.t_rated = t_rated
@@ -44,6 +44,7 @@ class Coulombs:
         t_soc_min = [0.14, 0.12,  0.08, 0.07]
         self.lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
         self.coul_eff = coul_eff
+        self.tweak_test = tweak_test
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -60,6 +61,7 @@ class Coulombs:
         s += "  t_rlim =     {:7.3f}       // Tbatt rate limit, deg C / s\n".format(self. t_rlim)
         s += "  resetting =     {:d}          // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter\n".format(self.resetting)
         s += "  soc_min =    {:7.3f}       // Lowest soc for power delivery.   Arises with temp < 20 C\n".format(self.soc_min)
+        s += "  tweak_test =    {:d}          // Driving signal injection completely using software inj_soft_bias\n".format(self.tweak_test)
         s += "  coul_eff =   {:7.3f}       // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs\n".format(self.coul_eff)
         return s
 

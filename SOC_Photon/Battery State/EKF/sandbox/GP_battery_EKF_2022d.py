@@ -387,7 +387,7 @@ if __name__ == '__main__':
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
 
-        n_fig, fig_files = overall(mon.saved, sim.saved, mon.Randles.saved, filename, fig_files,plot_title=plot_title, n_fig=n_fig)
+        # n_fig, fig_files = overall(mon.saved, sim.saved, mon.Randles.saved, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
         n_fig, fig_files = SavedData.overall(saved_old, mon.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
