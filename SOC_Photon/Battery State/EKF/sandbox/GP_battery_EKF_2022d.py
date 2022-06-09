@@ -282,7 +282,8 @@ if __name__ == '__main__':
 
         # Load data
         # data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220607_newShort.csv'
-        data_file_old = '../../../dataReduction/RealWorld 2022-06-07.csv'
+        # data_file_old = '../../../dataReduction/RealWorld 2022-06-07.csv'
+        data_file_old = '../../../dataReduction/rapidTweakTest_20220609.csv'
         cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         # noinspection PyTypeChecker
