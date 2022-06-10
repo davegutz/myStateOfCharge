@@ -212,6 +212,8 @@ if __name__ == '__main__':
             plt.subplot(324)
             plt.plot(old_s.time, old_s.y_ekf, color='green', label='y_ekf')
             plt.plot(new_s.time, new_s.y_ekf, color='orange', linestyle='--', label='y_ekf_new')
+            plt.plot(new_s.time, new_s.y_filt, color='black', linestyle='--', label='y_filt_new')
+            plt.plot(new_s.time, new_s.y_filt2, color='cyan', linestyle='--', label='y_filt2_new')
             plt.legend(loc=1)
             plt.subplot(325)
             plt.plot(old_s.time, old_s.dv_hys, color='green', label='dv_hys')

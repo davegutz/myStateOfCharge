@@ -174,5 +174,6 @@
 		x_soc			soc breakpoints for voc table
 		x_soc_min		Temperature breakpoints for soc_min table
 		y_ekf			Monitor single battery solver error, V
+		y_filt			Filtered EKF y residual value, V
 		y_soc			soc breakpoints for r(soc, dv) table t_r
 		y_t				Temperature breakpoints for voc table

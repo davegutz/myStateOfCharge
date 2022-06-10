@@ -23,7 +23,7 @@ from StateSpace import StateSpace
 from Hysteresis import Hysteresis
 import matplotlib.pyplot as plt
 from TFDelay import TFDelay
-from myFilters import LagTustin
+from myFilters import LagTustin, General2Pole
 
 
 class Retained:
@@ -278,6 +278,8 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.EKF_converged = TFDelay(False, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT)
         self.y_filt_lag = LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
         self.y_filt = 0.
+        self.y_filt_2Ord = General2Pole(0.1, 1., 0.85, MIN_Y_FILT, MAX_Y_FILT)
+        self.y_filt2 = 0.
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -335,7 +337,8 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.update_ekf(z=self.voc, x_min=0., x_max=1.)  # z = voc, voc_filtered = hx
         self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity
-        # self.y_filt = self.y_filt_lag.calculate(self.y_ekf, min(dt, EKF_T_RESET))
+        self.y_filt = self.y_filt_lag.calculate(in_=self.y_ekf, dt=min(dt, EKF_T_RESET), reset=False)
+        self.y_filt2 = self.y_filt_2Ord.calculate(in_=self.y_ekf, dt=min(dt, EKF_T_RESET), reset=False)
 
         # EKF convergence
         conv = abs(self.y_filt)<EKF_CONV
@@ -467,6 +470,8 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.saved.u_ekf.append(self.u_ekf)
         self.saved.x_ekf.append(self.x_ekf)
         self.saved.y_ekf.append(self.y_ekf)
+        self.saved.y_filt.append(self.y_filt)
+        self.saved.y_filt2.append(self.y_filt2)
         self.saved.z_ekf.append(self.z_ekf)
         self.saved.x_prior.append(self.x_prior)
         self.saved.P_prior.append(self.P_prior)
@@ -746,6 +751,8 @@ class Saved:
         self.u_ekf = []
         self.x_ekf = []
         self.y_ekf = []
+        self.y_filt = []
+        self.y_filt2 = []
         self.z_ekf = []
         self.x_prior = []
         self.P_prior = []
@@ -764,6 +771,8 @@ class Saved:
         self.Voc = []  # Monitor Static bank open circuit voltage, V
         self.Voc_ekf = []  # Monitor bank solved static open circuit voltage, V
         self.y_ekf = []  # Monitor single battery solver error, V
+        self.y_filt = []  # Filtered EKF y residual value, V
+        self.y_filt2 = []  # Filtered EKF y residual value, V
         self.soc_m = []  # Simulated state of charge, fraction
         self.soc_ekf = []  # Solved state of charge, fraction
         # self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) availabel (0-1)
@@ -888,6 +897,8 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.legend(loc=4)
     plt.subplot(333)
     plt.plot(ms.time, ms.y_ekf, color='green', linestyle='dotted', label='y ekf')
+    plt.plot(ms.time, ms.y_filt, color='black', linestyle='dotted', label='y filt')
+    plt.plot(ms.time, ms.y_filt2, color='cyan', linestyle='dotted', label='y filt2')
     plt.legend(loc=4)
     plt.subplot(334)
     plt.plot(ms.time, ms.H, color='magenta', linestyle='dotted', label='H ekf')

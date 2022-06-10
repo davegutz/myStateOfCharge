@@ -21,7 +21,7 @@ import numpy as np
 from pyDAGx.lookup_table import LookupTable
 
 
-class Hysteresis():
+class Hysteresis:
     # Use variable resistor to create hysteresis from an RC circuit
 
     def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e6, scale=1.):
