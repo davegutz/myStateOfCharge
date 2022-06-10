@@ -282,8 +282,8 @@ if __name__ == '__main__':
 
         # Load data
         # data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220607_newShort.csv'
-        # data_file_old = '../../../dataReduction/RealWorld 2022-06-07.csv'
-        data_file_old = '../../../dataReduction/rapidTweakTest_20220609.csv'
+        data_file_old = '../../../dataReduction/RealWorld 2022-06-07.csv'
+        # data_file_old = '../../../dataReduction/rapidTweakTest_20220609.csv'
         cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         # noinspection PyTypeChecker
@@ -359,6 +359,7 @@ if __name__ == '__main__':
                                sat=saturated, t_last=mon.t_last)
             mon.calc_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
             mon.select()
+            # mon.regauge(temp_c)
             mon.assign_soc_m(sim.soc)
             rp.delta_q, rp.t_last = mon.update()
 

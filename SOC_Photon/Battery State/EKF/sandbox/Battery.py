@@ -22,6 +22,8 @@ from Coulombs import Coulombs
 from StateSpace import StateSpace
 from Hysteresis import Hysteresis
 import matplotlib.pyplot as plt
+from TFDelay import TFDelay
+from myFilters import LagTustin
 
 
 class Retained:
@@ -60,6 +62,14 @@ batt_vsat = BATT_V_SAT  # Total bank saturation for 0.997=soc, V
 batt_vmax = 14.3  # Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
 DF1 = 0.02  # Weighted selection lower transition drift, fraction
 DF2 = 0.70  # Threshold to reset Coulomb Counter if different from ekf, fraction (0.05)
+EKF_CONV = 2e-3  # EKF tracking error indicating convergence, V (1e-3)
+EKF_T_CONV = 30. # EKF set convergence test time, sec (30.)
+EKF_T_RESET = (EKF_T_CONV/2.)  # EKF reset test time, sec ('up 1, down 2')
+EKF_NOM_DT = 0.1  # EKF nominal update time, s (initialization; actual value varies)
+TAU_Y_FILT = 5.  # EKF y-filter time constant, sec (5.)
+MIN_Y_FILT = -0.5  # EKF y-filter minimum, V (-0.5)
+MAX_Y_FILT = 0.5  # EKF y-filter maximum, V (0.5)
+
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -265,6 +275,9 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.R = 0.1*0.1  # EKF state uncertainty
         self.hys = Hysteresis(scale=hys_scale)  # Battery hysteresis model - drift of voc
         self.soc_m = 0.  # Model information
+        self.EKF_converged = TFDelay(False, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT)
+        self.y_filt_lag = LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
+        self.y_filt = 0.
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -301,7 +314,7 @@ class BatteryMonitor(Battery, EKF_1x1):
             self.Randles.update(self.dt)
             self.voc_dyn = self.Randles.y
         else:  # aliased, unstable if update Randles
-            self.voc_dyn = vb - self.r_ss * ib
+            self.voc_dyn = vb - self.r_ss * self.ib
         self.vdyn = self.vb - self.voc_dyn
         self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
         # Hysteresis model
@@ -322,6 +335,11 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.update_ekf(z=self.voc, x_min=0., x_max=1.)  # z = voc, voc_filtered = hx
         self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity
+        # self.y_filt = self.y_filt_lag.calculate(self.y_ekf, min(dt, EKF_T_RESET))
+
+        # EKF convergence
+        conv = abs(self.y_filt)<EKF_CONV
+        self.EKF_converged.calculate(conv, EKF_T_CONV, EKF_T_RESET, min(dt, EKF_T_RESET), False)
 
         # Charge time
         if self.ib > 0.1:
@@ -390,6 +408,9 @@ class BatteryMonitor(Battery, EKF_1x1):
         d = np.array([-self.r0, 1])
         return a, b, c, d
 
+    def converged_ekf(self):
+        return EKF_converged.state()
+
     def ekf_predict(self):
         """Process model"""
         self.Fx = math.exp(-self.dt / self.tau_sd)
@@ -408,6 +429,12 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.soc_ekf = soc
         self.init_ekf(soc, 0.0)
         self.q_ekf = self.soc_ekf * self.q_capacity
+
+    def regauge(self, temp_c):
+        if converged_ekf() and abs(self.soc_ekf - self.soc) > DF2:
+            print("Resetting Coulomb Counter Monitor from ", self.soc, " to EKF=", self.soc_ekf, "...")
+            self.apply_soc(self.soc_ekf, temp_c)
+            print("confirmed ", self.soc)
 
     def save(self, time, soc_ref, voc_ref):
         self.saved.time.append(time)

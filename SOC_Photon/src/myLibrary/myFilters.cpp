@@ -528,7 +528,7 @@ void RateLagExp::assignCoeff(double tau)
 double RateLagExp::state(void) { return (lstate_); };
 
 
-// Tustin lag calculator, non-pre-warped, no limits, fixed update rate
+// Tustin lag calculator, non-pre-warped
 // constructors
 LagTustin::LagTustin() : DiscreteFilter() {}
 LagTustin::LagTustin(const double T, const double tau, const double min, const double max)
