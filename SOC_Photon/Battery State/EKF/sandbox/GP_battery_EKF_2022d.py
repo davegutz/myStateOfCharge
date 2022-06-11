@@ -293,11 +293,13 @@ if __name__ == '__main__':
         # data_file_old = '../../../dataReduction/RealWorld 2022-06-07.csv'
         # data_file_old = '../../../dataReduction/rapidTweakTest_20220609.csv'
         data_file_old = '../../../dataReduction/real world status-reflash-test 20220609.csv'
+        title_str = "unit,"     # Find one instance of title
+        unit_str = 'soc0_2022'  # Used to filter out actual data
+
+        # Clean .txt file and load
         cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
-        title_str = "unit,"
         have_title_str = None
-        unit_str = 'soc0_2022'
         with open(data_file_old, "r") as input:
             with open(data_file_clean, "w") as output:
                 for line in input:
@@ -307,8 +309,6 @@ if __name__ == '__main__':
                             output.write(line)
                     if line.__contains__(unit_str):
                         output.write(line)
-
-        # noinspection PyTypeChecker
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
