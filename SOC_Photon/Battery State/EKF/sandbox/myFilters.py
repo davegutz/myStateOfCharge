@@ -412,16 +412,16 @@ if __name__ == '__main__':
 
     def main():
         # Setup to run the transients
-        dt = 0.1
+        dt = 2
         pull = Pulsar()
         time_end = pull.time_end()
         # time_end = 50.
 
         filter_1 = LagTustin(dt, 5., -10., 10.)
-        print(filter_1)
+        # print(filter_1)
         # filter_2 = General2Pole(dt, 1., .707, -10., 10.)
-        filter_2 = General2Pole(dt, 0.5, 0.85, -10., 10.)
-        print(filter_2)
+        filter_2 = General2Pole(dt, 0.1, 0.9, -10., 10.)
+        # print(filter_2)
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)

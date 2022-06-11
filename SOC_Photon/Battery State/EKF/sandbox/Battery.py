@@ -69,7 +69,8 @@ EKF_NOM_DT = 0.1  # EKF nominal update time, s (initialization; actual value var
 TAU_Y_FILT = 5.  # EKF y-filter time constant, sec (5.)
 MIN_Y_FILT = -0.5  # EKF y-filter minimum, V (-0.5)
 MAX_Y_FILT = 0.5  # EKF y-filter maximum, V (0.5)
-
+WN_Y_FILT = 0.1  # EKF y-filter-2 natural frequency, r/s (0.3)
+ZETA_Y_FILT = 0.9  # EKF y-fiter-2 damping factor (0.9)
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -278,7 +279,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.EKF_converged = TFDelay(False, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT)
         self.y_filt_lag = LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
         self.y_filt = 0.
-        self.y_filt_2Ord = General2Pole(0.1, 1., 0.85, MIN_Y_FILT, MAX_Y_FILT)
+        self.y_filt_2Ord = General2Pole(0.1, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
         self.y_filt2 = 0.
 
     def __str__(self, prefix=''):
