@@ -69,7 +69,7 @@ EKF_NOM_DT = 0.1  # EKF nominal update time, s (initialization; actual value var
 TAU_Y_FILT = 5.  # EKF y-filter time constant, sec (5.)
 MIN_Y_FILT = -0.5  # EKF y-filter minimum, V (-0.5)
 MAX_Y_FILT = 0.5  # EKF y-filter maximum, V (0.5)
-WN_Y_FILT = 0.1  # EKF y-filter-2 natural frequency, r/s (0.3)
+WN_Y_FILT = 0.1  # EKF y-filter-2 natural frequency, r/s (0.1)
 ZETA_Y_FILT = 0.9  # EKF y-fiter-2 damping factor (0.9)
 
 class Battery(Coulombs):
