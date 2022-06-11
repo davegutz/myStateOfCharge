@@ -287,16 +287,16 @@ if __name__ == '__main__':
         time_end = None
         # time_end = 73250.
 
-        # Load data
-        data_file_clean = '../../../dataReduction/clean.csv'
+        # Load data (must end in .txt)
         # data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220607_newShort.csv'
         # data_file_old = '../../../dataReduction/RealWorld 2022-06-07.csv'
         # data_file_old = '../../../dataReduction/rapidTweakTest_20220609.csv'
-        data_file_old = '../../../dataReduction/real world status-reflash-test 20220609.csv'
+        data_file_old = '../../../dataReduction/real world status-reflash-test 20220609.txt'
         title_str = "unit,"     # Find one instance of title
         unit_str = 'soc0_2022'  # Used to filter out actual data
 
         # Clean .txt file and load
+        data_file_clean = data_file_old.replace('.txt', '.csv', 1)
         cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         have_title_str = None
