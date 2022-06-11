@@ -305,7 +305,7 @@ if __name__ == '__main__':
                 for line in input:
                     if line.__contains__(title_str):
                         if have_title_str is None:
-                            have_title_str = True
+                            have_title_str = True  # write one title only
                             output.write(line)
                     if line.__contains__(unit_str):
                         output.write(line)
