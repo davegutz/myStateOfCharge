@@ -71,6 +71,7 @@ MIN_Y_FILT = -0.5  # EKF y-filter minimum, V (-0.5)
 MAX_Y_FILT = 0.5  # EKF y-filter maximum, V (0.5)
 WN_Y_FILT = 0.1  # EKF y-filter-2 natural frequency, r/s (0.1)
 ZETA_Y_FILT = 0.9  # EKF y-fiter-2 damping factor (0.9)
+TMAX_FILT = 3.  # Maximum y-filter-2 sample time, s (3.)
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -339,7 +340,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity
         self.y_filt = self.y_filt_lag.calculate(in_=self.y_ekf, dt=min(dt, EKF_T_RESET), reset=False)
-        self.y_filt2 = self.y_filt_2Ord.calculate(in_=self.y_ekf, dt=min(dt, EKF_T_RESET), reset=False)
+        self.y_filt2 = self.y_filt_2Ord.calculate(in_=self.y_ekf, dt=min(dt, TMAX_FILT), reset=False)
 
         # EKF convergence
         conv = abs(self.y_filt)<EKF_CONV
