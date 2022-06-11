@@ -23,11 +23,20 @@ class DiscreteFilter:
     # Base class for 1-pole filters
 
     def __init__(self, dt, tau, min_, max_):
-        self.max = max_
-        self.min = min_
-        self.rate = 0.
         self.dt = dt
         self.tau = tau
+        self.min = min_
+        self.max = max_
+        self.rate = 0.
+
+    def __str__(self, prefix=''):
+        s = prefix + "DiscreteFilter:\n"
+        s += "  dt       =    {:7.3f}  // Update time, s\n".format(self.dt)
+        s += "  tau      =    {:7.3f}  // Natural frequency, r/s\n".format(self.tau)
+        s += "  min      =    {:7.3f}  // Min output\n".format(self.min)
+        s += "  max      =    {:7.3f}  // Max output\n".format(self.max)
+        s += "  rate     =    {:7.3f}  // Calculated rate\n".format(self.rate)
+        return s
 
     def calculate_(self, in_, reset):
         if reset:
@@ -55,12 +64,22 @@ class DiscreteFilter2:
     # Base class for 2-pole filters
 
     def __init__(self, dt, omega_n, zeta, min_, max_):
-        self.max = max_
-        self.min = min_
-        self.omega_n = omega_n
         self.dt = dt
+        self.omega_n = omega_n
         self.zeta = zeta
+        self.min = min_
+        self.max = max_
         self.rate = 0.
+
+    def __str__(self, prefix=''):
+        s = prefix + "DiscreteFilter2:\n"
+        s += "  dt       =    {:7.3f}  // Update time, s\n".format(self.dt)
+        s += "  omega_n  =    {:7.3f}  // Natural frequency, r/s\n".format(self.omega_n)
+        s += "  zeta     =    {:7.3f}  // Damping factor\n".format(self.zeta)
+        s += "  min      =    {:7.3f}  // Min output\n".format(self.min)
+        s += "  max      =    {:7.3f}  // Max output\n".format(self.max)
+        s += "  rate     =    {:7.3f}  // Calculated rate\n".format(self.rate)
+        return s
 
     def calculate_(self, in_, reset):
         if reset:
@@ -87,6 +106,7 @@ class DiscreteIntegrator:
     """Generic integrator"""
 
     def __init__(self, dt, min_, max_, a, b, c):
+        self.dt = dt
         self.a = a
         self.b = b
         self.c = c
@@ -95,7 +115,18 @@ class DiscreteIntegrator:
         self.min = min_
         self.state = 0.
         self.rate_state = 0.
-        self.dt = dt
+
+    def __str__(self, prefix=''):
+        s = prefix + "DiscreteIntegrator:\n"
+        s += "  dt       =    {:7.3f}  // Update time, s\n".format(self.dt)
+        s += "  a        =    {:7.3f}  // Coefficient\n".format(self.a)
+        s += "  b        =    {:7.3f}  // Coefficient\n".format(self.b)
+        s += "  c        =    {:7.3f}  // Coefficient\n".format(self.c)
+        s += "  min      =    {:7.3f}  // Min output\n".format(self.min)
+        s += "  max      =    {:7.3f}  // Max output\n".format(self.max)
+        s += "  state    =    {:7.3f}  // State\n".format(self.state)
+        s += "  rate_state=   {:7.3f}  // Rate state\n".format(self.rate_state)
+        return s
 
     def new_state(self, new_state):
         self.state = max(min(new_state, self.max), self.min)
@@ -147,12 +178,24 @@ class AB2Integrator(DiscreteIntegrator):
     def __init__(self, dt, min_, max_):
         DiscreteIntegrator.__init__(self, dt, min_, max_, 3., -1., 2.)
 
+    def __str__(self, prefix=''):
+        s = prefix + "AB2Integrator:\n"
+        s += "\n  "
+        s += DiscreteIntegrator.__str__(self, prefix + 'AB2Integrator:')
+        return s
+
 
 class TustinIntegrator(DiscreteIntegrator):
     """AB2 Integrator"""
 
     def __init__(self, dt, min_, max_):
         DiscreteIntegrator.__init__(self, dt, min_, max_, 1., 1., 2.)
+
+    def __str__(self, prefix=''):
+        s = prefix + "TustinIntegrator:\n"
+        s += "\n  "
+        s += DiscreteIntegrator.__str__(self, prefix + 'TustinIntegrator:')
+        return s
 
 
 class General2Pole(DiscreteFilter2):
@@ -165,13 +208,24 @@ class General2Pole(DiscreteFilter2):
         self.assign_coeff(dt)
         self.AB2 = AB2Integrator(dt, min_, max_)
         self.Tustin = TustinIntegrator(dt, min_, max_)
-        self.AB2_state = 0.
-        self.AB2_rate_state = 0.
-        self.Tustin_state = 0.
-        self.Tustin_rate_state = 0.
         self.in_ = 0.
         self.out_ = 0.
+        self.accel = 0.
         self.saved = Saved2()
+
+    def __str__(self, prefix=''):
+        s = prefix + "General2Pole:\n"
+        s += DiscreteFilter2.__str__(self, prefix + 'General2Pole:')
+        s += "\n  "
+        s += self.AB2.__str__(prefix + 'General2Pole:')
+        s += "\n  "
+        s += self.Tustin.__str__(prefix + 'General2Pole:')
+        s += "  a        =    {:7.3f}  // Discrete coefficient\n".format(self.a)
+        s += "  b        =    {:7.3f}  // Discrete coefficient\n".format(self.b)
+        s += "  accel    =    {:7.3f}  // Input\n".format(self.accel)
+        s += "  in_      =    {:7.3f}  // Input\n".format(self.in_)
+        s += "  out_     =    {:7.3f}  // Output\n".format(self.out_)
+        return s
 
     def assign_coeff(self, dt):
         self.dt = dt
@@ -189,10 +243,10 @@ class General2Pole(DiscreteFilter2):
 
     def rate_state(self, in_, reset):
         if reset:
-            accel = 0.
+            self.accel = 0.
         else:
-            accel = self.b*(in_ - self.Tustin.state) - self.a*self.AB2.state
-        self.Tustin.calculate(self.AB2.calculate(accel, self.dt, reset, 0), self.dt, reset, in_)
+            self.accel = self.b * (in_ - self.Tustin.state) - self.a * self.AB2.state
+        self.Tustin.calculate(self.AB2.calculate(self.accel, self.dt, reset, 0), self.dt, reset, in_)
         if self.Tustin.lim:
             self.AB2.new_state(0)
 
@@ -204,10 +258,7 @@ class General2Pole(DiscreteFilter2):
         self.saved.time.append(time)
         self.saved.in_.append(self.in_)
         self.saved.out_.append(self.out_)
-        self.saved.AB2_state.append(self.AB2_state)
-        self.saved.AB2_rate_state.append(self.AB2_rate_state)
-        self.saved.Tustin_state.append(self.Tustin_state)
-        self.saved.Tustin_rate_state.append(self.Tustin_rate_state)
+        self.saved.accel.append(self.accel)
 
 
 class LagTustin(DiscreteFilter):
@@ -223,6 +274,16 @@ class LagTustin(DiscreteFilter):
         self.saved = Saved1()
         self.in_ = 0.
         self.out_ = 0.
+
+    def __str__(self, prefix=''):
+        s = prefix + "LagTustin:"
+        s += "\n  "
+        s += DiscreteFilter.__str__(self, prefix + 'LagTustin:')
+        s += "  a        =    {:7.3f}  // Discrete coefficient\n".format(self.a)
+        s += "  b        =    {:7.3f}  // Discrete coefficient\n".format(self.b)
+        s += "  in_      =    {:7.3f}  // Input\n".format(self.in_)
+        s += "  out_     =    {:7.3f}  // Output\n".format(self.out_)
+        return s
 
     def assign_coeff(self, tau):
         self.tau = tau
@@ -272,6 +333,7 @@ class Saved2:
         self.time = []
         self.in_ = []
         self.out_ = []
+        self.accel = []
         self.AB2_state = []
         self.AB2_rate_state = []
         self.Tustin_state = []
@@ -288,22 +350,20 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
 
-    def overall(filt1=Saved1(), filt2=Saved2(), filename='', fig_files=None, plot_title=None, n_fig=None, ref=None):
+    def overall(filter_1=Saved1(), filter_2=Saved2(), filename='', fig_files=None, plot_title=None, n_fig=None):
         if fig_files is None:
             fig_files = []
-        if ref is None:
-            ref = []
 
         plt.figure()
         n_fig += 1
         plt.subplot(211)
         plt.title(plot_title)
-        plt.plot(filt1.time, filt1.in_, color='blue', label='in 1')
-        plt.plot(filt1.time, filt1.out_, color='green', label='out 1')
+        plt.plot(filter_1.time, filter_1.in_, color='blue', label='in 1')
+        plt.plot(filter_1.time, filter_1.out_, color='green', label='out 1')
         plt.legend(loc=3)
         plt.subplot(212)
-        plt.plot(filt2.time, filt2.in_, color='blue', label='in 2')
-        plt.plot(filt2.time, filt2.out_, color='green', label='out 2')
+        plt.plot(filter_2.time, filter_2.in_, color='blue', label='in 2')
+        plt.plot(filter_2.time, filter_2.out_, color='green', label='out 2')
         plt.legend(loc=3)
         fig_file_name = filename + "_" + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -319,12 +379,9 @@ if __name__ == '__main__':
             self.holding = False
             self.resting = True
             self.index = -1
-            self.amp = [100., 0., -100., -100., -100., -100., -100., -100., -100., -100., -100., -100.,
-                        100., 100., 100., 100., 100., 100., 100., 100., 100., 100.]
-            self.dur = [16000., 0., 600., 600., 600., 600., 600., 600., 600., 600., 600., 600.,
-                        600., 600., 600., 600., 600., 600., 600., 600., 600., 600.]
-            self.rst = [600., 7200., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 7200.,
-                        3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 3600., 46800.]
+            self.amp = [1.,     0.,     -1.,    1.]
+            self.dur = [20.,    0.,     40.,    40.]
+            self.rst = [20.,    20.,    40.,    40.]
             self.pulse_value = self.amp[0]
             self.end_time = self.time_end()
 
@@ -355,54 +412,37 @@ if __name__ == '__main__':
 
     def main():
         # Setup to run the transients
-        dt = 10
-        # time_end = 2
-        # time_end = 500000
+        dt = 0.1
         pull = Pulsar()
         time_end = pull.time_end()
+        # time_end = 50.
 
-        filt1 = LagTustin(dt, 5., -10., 10.)
-        filt2 = General2Pole(dt, 1., .707, -10., 10.)
+        filter_1 = LagTustin(dt, 5., -10., 10.)
+        print(filter_1)
+        # filter_2 = General2Pole(dt, 1., .707, -10., 10.)
+        filter_2 = General2Pole(dt, 0.5, 0.85, -10., 10.)
+        print(filter_2)
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)
-        soc = 0.2
-        current_in_s = []
 
         # time loop
         for i in range(len(t)):
-            if t[i] < 10000:
-                current_in = 0
-            elif t[i] < 20000:
-                current_in = 1
-            elif t[i] < 30000:
-                current_in = -1
-            elif t[i] < 80000:
-                current_in = 2
-            elif t[i] < 130000:
-                current_in = -2
-            elif t[i] < 330000:
-                current_in = 4
-            elif t[i] < 440000:
-                current_in = -4
-            else:
-                current_in = 0
-
-            current_in = pull.calculate(t[i])
-
+            in_ = pull.calculate(t[i])
             reset = (t[i] <= 1)
 
             # Models
-            filt1.calculate(current_in, reset, dt)
-            filt1.calculate(current_in, reset, dt)
+            filter_1.calculate(in_, reset, dt)
+            filter_2.calculate(in_, reset, dt)
+            # print("t,in,accel,rate_state,state,out=", t[i],filter_2.in_, filter_2.accel, filter_2.AB2.state, filter_2.Tustin.state, filter_2.out_)
 
             # Plot stuff
-            current_in_s.append(current_in)
-            filt1.save(t[i])
-            filt2.save(t[i])
+            filter_1.save(t[i])
+            filter_2.save(t[i])
 
         # Data
-        # print('hys:  ', str(hys))
+        # print(filter_1)
+        # print(filter_2)
 
         # Plots
         n_fig = 0
@@ -411,8 +451,7 @@ if __name__ == '__main__':
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
 
-        n_fig, fig_files = overall(filt1.saved, filt2.saved, filename, fig_files, plot_title=plot_title,
-                                   n_fig=n_fig, ref=current_in_s)
+        n_fig, fig_files = overall(filter_1.saved, filter_2.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
         plt.show()
 
     main()
