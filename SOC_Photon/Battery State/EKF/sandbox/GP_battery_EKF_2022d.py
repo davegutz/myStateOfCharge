@@ -219,6 +219,10 @@ if __name__ == '__main__':
             plt.plot(old_s.time, old_s.dv_hys, color='green', label='dv_hys')
             plt.plot(new_s.time, new_s.dv_hys, color='orange', linestyle='--', label='dv_hys_new')
             plt.legend(loc=1)
+            plt.subplot(326)
+            plt.plot(old_s.time, old_s.Tb, color='green', label='temp_c')
+            plt.plot(new_s.time, new_s.Tb, color='orange', linestyle='--', label='temp_c_new')
+            plt.legend(loc=1)
             fig_file_name = filename + '_' + str(n_fig) + ".png"
             fig_files.append(fig_file_name)
             plt.savefig(fig_file_name, format="png")
@@ -287,7 +291,6 @@ if __name__ == '__main__':
         # data_file_old = '../../../dataReduction/RealWorld 2022-06-07.csv'
         # data_file_old = '../../../dataReduction/rapidTweakTest_20220609.csv'
         data_file_old = '../../../dataReduction/real world status-reflash-test 20220609.csv'
-        amp_tweak_bias = -0.619  # amp tweak bias.  Ib should reflect this
         cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         # noinspection PyTypeChecker
