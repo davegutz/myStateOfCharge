@@ -222,6 +222,7 @@ if __name__ == '__main__':
             plt.subplot(326)
             plt.plot(old_s.time, old_s.Tb, color='green', label='temp_c')
             plt.plot(new_s.time, new_s.Tb, color='orange', linestyle='--', label='temp_c_new')
+            plt.ylim(0., 50.)
             plt.legend(loc=1)
             fig_file_name = filename + '_' + str(n_fig) + ".png"
             fig_files.append(fig_file_name)
@@ -362,7 +363,11 @@ if __name__ == '__main__':
             # mon.calculate(temp_c, Vb[i]+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
             sat = is_sat(temp_c, mon.voc, mon.soc)
             saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(dt, T_SAT/2.), init)
-            mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=temp_c, charge_curr=sim.ib,
+            if rp.modeling == 0:
+                mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=Tb[i], charge_curr=Ib[i],
+                                   sat=saturated, t_last=mon.t_last)
+            else:
+                mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=temp_c, charge_curr=sim.ib,
                                sat=saturated, t_last=mon.t_last)
             mon.calc_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
             mon.select()
