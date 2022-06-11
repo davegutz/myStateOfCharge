@@ -20,7 +20,7 @@ Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Batt
 import numpy as np
 from numpy.random import randn
 import Battery
-from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, overall, Retained
+from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, Retained
 from unite_pictures import unite_pictures_into_pdf
 import os
 from datetime import datetime
@@ -33,7 +33,6 @@ if __name__ == '__main__':
     doctest.testmod(sys.modules['__main__'])
     import matplotlib.pyplot as plt
     import book_format
-    from pyDAGx import myTables
     book_format.set_style()
 
 
@@ -127,7 +126,7 @@ if __name__ == '__main__':
             s += "{:5.3f},".format(self.soc_wt[self.i])
             return s
 
-        def compare_print(old_s, new_s):
+        def compare_print(self, old_s, new_s):
             s = " time,      Ib,                   Vb,              Vdyn,          Voc,            Voc_dyn,        Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
             for i in range(len(new_s.time)):
                 s += "{:7.3f},".format(old_s.time[i])
@@ -300,9 +299,9 @@ if __name__ == '__main__':
         cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         have_title_str = None
-        with open(data_file_old, "r") as input:
+        with open(data_file_old, "r") as input_file:
             with open(data_file_clean, "w") as output:
-                for line in input:
+                for line in input_file:
                     if line.__contains__(title_str):
                         if have_title_str is None:
                             have_title_str = True  # write one title only
@@ -328,7 +327,7 @@ if __name__ == '__main__':
         sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test)
         mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
                       r_dif=r_dif, temp_c=temp_c, hys_scale=hys_scale_monitor, tweak_test=tweak_test)
-        Is_sat_delay = TFDelay(in_=data_old.soc[0]>0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
+        Is_sat_delay = TFDelay(in_=data_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
         # time loop
         dt = t[1] - t[0]
@@ -336,7 +335,7 @@ if __name__ == '__main__':
         for i in range(t_len):
             saved_old.i = i
             current_in = saved_old.Ib[i]
-            if i>0:
+            if i > 0:
                 dt = t[i] - t[i-1]
                 dt_ekf = dt
 
@@ -378,11 +377,11 @@ if __name__ == '__main__':
             sat = is_sat(temp_c, mon.voc, mon.soc)
             saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(dt, T_SAT/2.), init)
             if rp.modeling == 0:
-                mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=Tb[i], charge_curr=Ib[i],
-                                   sat=saturated, t_last=mon.t_last)
+                mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=Tb[i], charge_curr=Ib[i], sat=saturated,
+                                   t_last=mon.t_last)
             else:
-                mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=temp_c, charge_curr=sim.ib,
-                               sat=saturated, t_last=mon.t_last)
+                mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=temp_c, charge_curr=sim.ib, sat=saturated,
+                                   t_last=mon.t_last)
             mon.calc_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
             mon.select()
             # mon.regauge(temp_c)
@@ -394,7 +393,7 @@ if __name__ == '__main__':
             sim.save(t[i], sim.soc, sim.voc)
 
             # Print init
-            if i==0:
+            if i == 0:
                 print('time=', t[i])
                 print('mon:  ', str(mon))
                 print('time=', t[i])
@@ -406,7 +405,6 @@ if __name__ == '__main__':
         print('sim:  ', str(sim))
         # print("Showing data from file then BatteryMonitor calculated from data")
         # print(SavedData.compare_print(saved_old, mon.saved))
-
 
         # Plots
         n_fig = 0
