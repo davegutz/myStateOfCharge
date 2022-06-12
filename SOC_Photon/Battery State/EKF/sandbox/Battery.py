@@ -34,7 +34,7 @@ class Retained:
         self.t_last = 25.
         self.delta_q_model = 0.
         self.t_last_model = 25.
-        self.modeling = int(7)  # assumed for this 'model'
+        self.modeling = int(7)  # assumed for this 'model'; over-ridden later
         self.nS = 1  # assumed for this 'model'
         self.nP = 1  # assumed for this 'model'
 
@@ -602,14 +602,14 @@ class BatteryModel(Battery):
         # Saturation logic, both full and empty
         self.vsat = self.nom_vsat + (temp_c - 25.) * self.dvoc_dt
         self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
-        if self.tweak_test:
-            self.sat_ib_max = curr_in
+        if self.tweak_test or (not rp.modeling):
+        # if self.tweak_test:
+                self.sat_ib_max = curr_in
         self.ib = min(curr_in, self.sat_ib_max)  # the feedback of self.ib
         if ((self.q <= 0.) & (curr_in < 0.)):  # empty
             self.ib = 0.  # empty
         self.model_cutback = (self.voc_stat > self.vsat) & (self.ib == self.sat_ib_max)
-        self.model_saturated = self.temp_c > low_t and \
-                               ((self.voc_stat > self.vsat) & (self.ib < self.ib_sat) & (self.ib == self.sat_ib_max))
+        self.model_saturated = (self.temp_c > low_t) and (self.model_cutback & (self.ib < self.ib_sat))
         Coulombs.sat = self.model_saturated
 
         return self.vb
@@ -668,8 +668,8 @@ class BatteryModel(Battery):
 
         # Integration
         self.q_capacity = self.calculate_capacity(temp_lim)
-        self.delta_q = max(min(self.delta_q + d_delta_q - DQDT*self.q_capacity*(temp_lim-self.t_last), 0.),
-                           -self.q_capacity)
+        self.delta_q += d_delta_q - DQDT*self.q_capacity*(temp_lim-self.t_last)
+        self.delta_q = max(min(self.delta_q, 0.), -self.q_capacity)
         self.q = self.q_capacity + self.delta_q
 
         # Normalize

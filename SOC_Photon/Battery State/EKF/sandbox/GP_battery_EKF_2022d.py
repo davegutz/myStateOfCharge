@@ -20,7 +20,7 @@ Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Batt
 import numpy as np
 from numpy.random import randn
 import Battery
-from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, Retained
+from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, Retained, overall
 from unite_pictures import unite_pictures_into_pdf
 import os
 from datetime import datetime
@@ -282,7 +282,7 @@ if __name__ == '__main__':
 
         # Transient  inputs
         time_end = None
-        # time_end = 73250.
+        # time_end = 2500.
 
         # Load data (must end in .txt)
         # data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220607_newShort.csv'

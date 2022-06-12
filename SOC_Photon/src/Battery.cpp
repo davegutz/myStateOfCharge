@@ -252,7 +252,7 @@ double BatteryMonitor::calculate(Sensors *Sen)
 
     // Dynamic emf
     vb_ = Sen->Vbatt / (*rp_nS_);
-    ib_ = Sen->Ibatt / (*rp_nP_);
+    ib_ = Sen->Ibatt / (*rp_nP_);  // TODO:   same logic should be in BatteryModel::count_coulombs ??
     ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
     double u[2] = {ib_, vb_};
     Randles_->calc_x_dot(u);
@@ -596,11 +596,11 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
 
     // Saturation logic, both full and empty
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
-    if ( rp.tweak_test() ) sat_ib_max_ = curr_in;   // Disable cutback when doing tweak_test test
+    if ( rp.tweak_test() || !rp.modeling ) sat_ib_max_ = curr_in;   // Disable cutback when real world or when doing tweak_test test
     ib_ = min(curr_in/(*rp_nP_), sat_ib_max_);      // the feedback of ib_
     if ( (q_ <= 0.) && (curr_in < 0.) ) ib_ = 0.;   //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_ == sat_ib_max_);
-    model_saturated_ = (voc_stat_ > vsat_) && (ib_ < ib_sat_) && (ib_ == sat_ib_max_);
+    model_saturated_ = model_cutback_ && (ib_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
 
     if ( rp.debug==75 ) Serial.printf("BatteryModel::calculate: temp_C, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
@@ -683,6 +683,7 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
 /* BatteryModel::count_coulombs: Count coulombs based on assumed model true=actual capacity.
     Uses Tbatt instead of Tbatt_filt to be most like hardware and provide independence from application.
 Inputs:
+    model_saturated_    Indicator of maximal cutback, T = cutback saturated
     Sen->T          Integration step, s
     Sen->Tbatt      Battery bank temperature, deg C
     Sen->Ibatt      Selected battery bank current, A
@@ -717,7 +718,11 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
 
     // Integration
     q_capacity_ = calculate_capacity(temp_lim);
-    if ( !reset ) *rp_delta_q_ = max(min(*rp_delta_q_ + d_delta_q - chem_.dqdt*q_capacity_*(temp_lim-*rp_t_last_), 0. ), -q_capacity_);
+    if ( !reset )
+    {
+        *rp_delta_q_ += d_delta_q - chem_.dqdt*q_capacity_*(temp_lim-*rp_t_last_);
+        *rp_delta_q_ = max(min(*rp_delta_q_, 0.), -q_capacity_);
+    }
     q_ = q_capacity_ + *rp_delta_q_;
 
     // Normalize

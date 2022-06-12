@@ -469,7 +469,7 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   // Sim calculation
   //  Inputs:  Sen->Tbatt_filt(past), Sen->Ibatt_model_in
   //  States: Sim->soc(past)
-  //  Outputs:  Sim->temp_c(), Sim->Ib(), Sim->Vb(), rp.duty
+  //  Outputs:  Sim->temp_c(), Sim->Ib(), Sim->Vb(), rp.duty, Sim.model_saturated
   Sen->Vbatt_model = Sen->Sim->calculate(Sen, cp.dc_dc_on);
   Sen->Ibatt_model = Sen->Sim->Ib();
   Sen->Tbatt_model = Sen->Tbatt_model_filt = Sen->Sim->temp_c();
@@ -478,6 +478,9 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
 
   // Use model instead of sensors when running tests as user
   // Over-ride sensed Ib, Vb and Tb with model when running tests
+  // Inputs:  rp.modeling, Sen->Ibatt_model, Sen->Ibatt_hdwe, Sen->Vbatt_model, Sen->Vbatt_hdwe,
+  //          Sen->Tbatt_hdwe, Sen->Tbatt_hdwe_filt
+  // Outputs: Sen->Ibatt, Sen->Vbatt, Sen->Tbatt, Sen->Tbatt_filt
   if ( rp.mod_ib() )  Sen->Ibatt = Sen->Ibatt_model;
   else Sen->Ibatt = Sen->Ibatt_hdwe;
   if ( rp.mod_vb() )  Sen->Vbatt = Sen->Vbatt_model;
@@ -494,7 +497,7 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   }
 
   // Charge calculation and memory store
-  // Inputs: Sen->Tbatt, Sen->Ibatt, and Sim.soc
+  // Inputs: Sim.model_saturated, Sen->Tbatt, Sen->Ibatt, and Sim.soc
   // Outputs: Sim.soc
   Sen->Sim->count_coulombs(Sen, reset_temp, rp.t_last_model);
 
