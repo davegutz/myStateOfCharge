@@ -32,8 +32,6 @@ if __name__ == '__main__':
 
     doctest.testmod(sys.modules['__main__'])
     import matplotlib.pyplot as plt
-    import book_format
-    book_format.set_style()
 
 
     class SavedData:
