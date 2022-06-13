@@ -57,7 +57,7 @@ struct RetainedPars
   int isum = -1;                // Summary location.   Begins at -1 because first action is to increment isum
   float delta_q_inf_amp = 0.;   // delta_q since last reset.  Simple integration of amplified current
   float delta_q_inf_noamp = 0.; // delta_q since last reset.  Simple integration of non-amplified current
-  float hys_scale = 1.;         // Hysteresis scalar
+  float hys_scale = 10.;        // Hysteresis scalar.  DAG 6/13/2022 tune 1->10 to match data
   float tweak_bias_amp = 0.;    // Tweak calibration for amplified current sensor
   float tweak_bias_noamp = 0.;  // Tweak calibration for non-amplified current sensor
   float nP = NP;                // Number of parallel batteries in bank, e.g. '2P1S'
@@ -98,7 +98,7 @@ struct RetainedPars
     this->isum = -1;
     this->delta_q_inf_amp = 0.;
     this->delta_q_inf_noamp = 0.;
-    this->hys_scale = 1.;
+    this->hys_scale = 10.;    //  DAG 6/13/2022 tune 1->10 to match data
     this->tweak_bias_amp = 0.;
     this->tweak_bias_noamp = 0.;
     this->nP = NP;
@@ -128,7 +128,7 @@ struct RetainedPars
     this->isum = -1;
     this->delta_q_inf_amp = 0.;
     this->delta_q_inf_noamp = 0.;
-    this->hys_scale = 1.;
+    this->hys_scale = 10.;  // DAG 6/13/2022 tune 1->10 to match data
     this->tweak_bias_amp = 0.;
     this->tweak_bias_noamp = 0.;
     this->nP = NP;
@@ -165,12 +165,12 @@ struct RetainedPars
     Serial.printf("  tbatt_bias =          %7.3f;  // Sensed temp bias, deg C\n", this->tbatt_bias);
     Serial.printf("  s_cap_model =         %7.3f;  // Scalar on battery model size\n", this->s_cap_model);
     Serial.printf("  cutback_gain_scalar = %7.3f;  // Scalar on battery model saturation cutback function\n", this->cutback_gain_scalar);
-    Serial.printf("  isum =                      %d;  // Summary location.   Begins at -1 because first action is to increment isum\n", this->isum);
-    Serial.printf("  delta_q_inf_amp =  %10.1f;  // delta_q since last reset.  Simple integration of amplified current\n", this->delta_q_inf_amp);
-    Serial.printf("  delta_q_inf_noamp =%10.1f;  // delta_q since last reset.  Simple integration of amplified current\n", this->delta_q_inf_noamp);
+    Serial.printf("  isum =                      %d;  // Summary location ptr.   Begins at -1\n", this->isum);
+    Serial.printf("  delta_q_inf_amp =  %10.1f;  // delta_q since last reset\n", this->delta_q_inf_amp);
+    Serial.printf("  delta_q_inf_noamp =%10.1f;  // delta_q since last reset\n", this->delta_q_inf_noamp);
     Serial.printf("  hys_scale =           %7.3f;  //  Hysteresis scalar\n", this->hys_scale);
-    Serial.printf("  tweak_bias_amp =      %7.3f;  // Tweak calibration for amplified current sensor\n", this->tweak_bias_amp);
-    Serial.printf("  tweak_bias_noamp =    %7.3f;  // Tweak calibration for non-amplified current sensor\n", this->tweak_bias_noamp);
+    Serial.printf("  tweak_bias_amp =      %7.3f;  // Tweak calibration for amplified current\n", this->tweak_bias_amp);
+    Serial.printf("  tweak_bias_noamp =    %7.3f;  // Tweak calibration for non-amplified current\n", this->tweak_bias_noamp);
     Serial.printf("  nP =                    %5.2f;  // Number of parallel batteries in bank, e.g. '2P1S'\n", this->nP);
     Serial.printf("  nS =                    %5.2f;  // Number of series batteries in bank, e.g. '2P1S'\n", this->nS);
     Serial.printf("  mon_mod =                   %d;  //  Monitor battery model for electrical chars.   0=Battleborn, 1=LION\n", this->mon_mod);

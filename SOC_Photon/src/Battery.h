@@ -38,7 +38,7 @@ struct Sensors;
 #define TCHARGE_DISPLAY_DEADBAND  0.1 // Inside this +/- deadband, charge time is displayed '---', A
 #define T_RLIM          0.017     // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s (0.017 allows 1 deg for 1 minute)
 const double vb_dc_dc = 13.5;     // DC-DC charger estimated voltage, V
-#define EKF_CONV        2e-3      // EKF tracking error indicating convergence, V (1e-3)
+#define EKF_CONV        1.5e-3    // EKF tracking error indicating convergence, V (1.5e-3)
 #define EKF_T_CONV      30.       // EKF set convergence test time, sec (30.)
 #define EKF_T_RESET (EKF_T_CONV/2.) // EKF reset test time, sec ('up 1, down 2')
 #define EKF_Q_SD        0.001     // Standard deviation of EKF process uncertainty, V
@@ -49,6 +49,9 @@ const double vb_dc_dc = 13.5;     // DC-DC charger estimated voltage, V
 #define TAU_Y_FILT      5.        // EKF y-filter time constant, sec (5.)
 #define MIN_Y_FILT      -0.5      // EKF y-filter minimum, V (-0.5)
 #define MAX_Y_FILT      0.5       // EKF y-filter maximum, V (0.5)
+#define WN_Y_FILT       0.1       // EKF y-filter-2 natural frequency, r/s (0.1)
+#define ZETA_Y_FILT     0.9       // EKF y-fiter-2 damping factor (0.9)
+#define TMAX_FILT       3.        // Maximum y-filter-2 sample time, s (3.)
 #define SOLV_ERR        1e-6      // EKF initialization solver error bound, V
 #define SOLV_MAX_COUNTS 10        // EKF initialization solver max iters
 #define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction
@@ -276,7 +279,8 @@ protected:
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
   double amp_hrs_remaining_wt_;   // Discharge amp*time left if drain soc_wt_ to 0, A-h
   double y_filt_;       // Filtered EKF y value, V
-  LagTustin *y_filt = new LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
+  // LagTustin *y_filt = new LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
+  General2_Pole *y_filt = new General2_Pole(0.1, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
   SlidingDeadband *SdVbatt_;  // Sliding deadband filter for Vbatt
   TFDelay *EKF_converged = new TFDelay();   // Time persistence
   void ekf_predict(double *Fx, double *Bu);

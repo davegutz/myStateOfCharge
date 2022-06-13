@@ -295,7 +295,8 @@ double BatteryMonitor::calculate(Sensors *Sen)
         Serial.printf("calculate:Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,vdyn,vhys,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
             Sen->Tbatt_filt, Sen->Ibatt, 0, soc_ekf_, vb_, voc_, hx_, vdyn_, vhys, y_);
 
-    // EKF convergence
+    // EKF convergence.  Audio industry found that detection of quietness requires no more than
+    // second order filter of the signal.   Anything more is 'gilding the lily'
     boolean conv = abs(y_filt_)<EKF_CONV && !cp.soft_reset;  // Initialize false
     EKF_converged->calculate(conv, EKF_T_CONV, EKF_T_RESET, min(Sen->T, EKF_T_RESET), cp.soft_reset);
 
