@@ -276,6 +276,29 @@ if __name__ == '__main__':
             s += "\n"
         return s
 
+    def write_clean_file(txt_file, title_str, unit_str):
+        csv_file = txt_file.replace('.txt', '.csv', 1)
+        default_header_str = "unit,               hm,                  cTime,        T,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
+        # Header
+        have_header_str = None
+        with open(txt_file, "r") as input_file:
+            with open(csv_file, "w") as output:
+                for line in input_file:
+                    if line.__contains__(title_str):
+                        if have_header_str is None:
+                            have_header_str = True  # write one title only
+                            output.write(line)
+        if have_header_str is None:
+            output.write(default_header_str)
+            print("I:  using default data header")
+        # Date
+        with open(txt_file, "r") as input_file:
+            with open(csv_file, "a") as output:
+                for line in input_file:
+                    if line.__contains__(unit_str):
+                        output.write(line)
+        print("csv_file=", csv_file)
+        return csv_file
 
     def main():
         # Trade study inputs
@@ -309,27 +332,21 @@ if __name__ == '__main__':
         # time_end = 2500.
 
         # Load data (must end in .txt)
-        # data_file_old = '../../../dataReduction/real world status-reflash-test 20220609.txt'
-        # data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220613.txt'
-        data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220613_new.txt'
+        # data_file_old_txt = '../../../dataReduction/real world status-reflash-test 20220609.txt'
+        # data_file_old_txt = '../../../dataReduction/rapidTweakRegressionTest20220613.txt'
+        data_file_old_txt = '../../../dataReduction/rapidTweakRegressionTest20220613_new.txt'
         title_str = "unit,"     # Find one instance of title
         unit_str = 'pro_2022'  # Used to filter out actual data
         # unit_str = 'soc0_2022'  # Used to filter out actual data
+        title_str = "unit,"  # Find one instance of title
+        unit_str = 'pro_2022'  # Used to filter out actual data
 
-        # Clean .txt file and load
-        data_file_clean = data_file_old.replace('.txt', '.csv', 1)
+        # Clean .txt file
+        data_file_clean = write_clean_file(data_file_old_txt, title_str, unit_str)
+
+        # Load
         cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
-        have_title_str = None
-        with open(data_file_old, "r") as input_file:
-            with open(data_file_clean, "w") as output:
-                for line in input_file:
-                    if line.__contains__(title_str):
-                        if have_title_str is None:
-                            have_title_str = True  # write one title only
-                            output.write(line)
-                    if line.__contains__(unit_str):
-                        output.write(line)
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
@@ -438,7 +455,7 @@ if __name__ == '__main__':
         # n_fig, fig_files = overall(mon.saved, sim.saved, mon.Randles.saved, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
         n_fig, fig_files = SavedData.overall(saved_old, mon.saved, sim.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
 
-        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
+        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../../../dataReduction/figures')
         cleanup_fig_files(fig_files)
 
         plt.show()
