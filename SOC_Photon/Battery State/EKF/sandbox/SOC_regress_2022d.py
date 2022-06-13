@@ -165,15 +165,16 @@ if __name__ == '__main__':
         cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         have_title_str = None
-        with open(data_file_old, "r") as input_file:
-            with open(data_file_new_clean, "w") as output:
-                for line in input_file:
-                    if line.__contains__(title_str):
-                        if have_title_str is None:
-                            have_title_str = True  # write one title only
+        if True:  # set false to re-use clean csv
+            with open(data_file_old, "r") as input_file:
+                with open(data_file_new_clean, "w") as output:
+                    for line in input_file:
+                        if line.__contains__(title_str):
+                            if have_title_str is None:
+                                have_title_str = True  # write one title only
+                                output.write(line)
+                        if line.__contains__(unit_str):
                             output.write(line)
-                    if line.__contains__(unit_str):
-                        output.write(line)
 
         cols = (
         'unit', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf', 'y_ekf', 'soc_m',

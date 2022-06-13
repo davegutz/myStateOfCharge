@@ -761,7 +761,7 @@ void BatteryModel::pretty_print(void)
     Serial.printf("  model_cutback_ =          %d;  // Gain to retard ib when voc exceeds vsat, dimensionless\n", model_cutback_);
     Serial.printf("  model_saturated_ =        %d;  // Modeled current being limited on saturation cutback, T = cutback limited\n", model_saturated_);
     Serial.printf("  ib_sat_ =           %7.3f;  // Indicator of maximal cutback, T = cutback saturated\n", ib_sat_);
-    Serial.printf("  s_cap_ =            %7.3f;  // Rated capacity scalar\n", s_cap_);
+    Serial.printf(" *rp_s_cap_model_ =   %7.3f;  // Rated capacity scalar\n", *rp_s_cap_model_);
 }
 
 

@@ -320,7 +320,6 @@ protected:
   boolean model_cutback_;   // Indicate that modeled current being limited on saturation cutback, T = cutback limited
   boolean model_saturated_; // Indicator of maximal cutback, T = cutback saturated
   double ib_sat_;           // Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
-  double s_cap_;            // Rated capacity scalar
   double *rp_delta_q_model_;// Charge change since saturated, C
   float *rp_t_last_model_;  // Battery temperature past value for rate limit memory, deg C
   float *rp_s_cap_model_;   // Rated capacity scalar

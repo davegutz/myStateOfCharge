@@ -310,7 +310,8 @@ if __name__ == '__main__':
 
         # Load data (must end in .txt)
         # data_file_old = '../../../dataReduction/real world status-reflash-test 20220609.txt'
-        data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220613.txt'
+        # data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220613.txt'
+        data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220613_new.txt'
         title_str = "unit,"     # Find one instance of title
         unit_str = 'pro_2022'  # Used to filter out actual data
         # unit_str = 'soc0_2022'  # Used to filter out actual data

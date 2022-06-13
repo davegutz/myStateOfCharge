@@ -55,6 +55,7 @@
 #define USE_DST               1         // Whether to apply DST or not, 0 or 1 (1)
 #define TBATT_TEMPCAL         0.56      // Maxim 1-wire plenum temp sense calibrate (0.56), C
 #define MAX_TEMP_READS        10        // Number of consequetive temp queries allowed (10)
+#define TEMP_RANGE_CHECK      -5.       // Minimum expected temp reading, C (-5.)
 #define VBATT_SENSE_R_LO      4700      // Vbatt low sense resistor, ohm (4700)
 #define VBATT_SENSE_R_HI      20000     // Vbatt high sense resistor, ohm (20000)
 #define VBATT_S               1.017     // Vbatt sense scalar (1.017)

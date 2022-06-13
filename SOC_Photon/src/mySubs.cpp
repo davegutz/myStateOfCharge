@@ -108,7 +108,7 @@ void print_serial_header(void)
 void create_print_string(Publish *pubList)
 {
   if ( rp.debug==4 )
-    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%7.3f,    %6.3f,%6.3f,%6.3f,%6.3f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
+    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%7.3f,    %6.3f,%6.3f,%6.3f,%6.3f,  %9.6f, %6.4f,%6.4f,%6.4f,%6.4f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
       pubList->sat, rp.ibatt_sel_noamp, rp.modeling,
       pubList->Tbatt, pubList->Vbatt, pubList->Ibatt,
@@ -121,7 +121,7 @@ void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
   if ( rp.debug==4 )
   {
-    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,    %6.3f,%6.3f,%6.3f,%6.3f,  %9.6f, %5.3f,%5.3f,%5.3f,%5.3f,%c", \
+    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,    %6.3f,%6.3f,%6.3f,%6.3f,  %9.6f, %6.4f,%6.4f,%6.4f,%6.4f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), double(Sen->now)/1000., Sen->T,
       pubList->sat, rp.ibatt_sel_noamp, rp.modeling,
       Mon->Tb(), Mon->Vb(), Mon->Ib(),
@@ -274,14 +274,14 @@ void load_temp(Sensors *Sen)
   }
 
   // Check success
-  if ( count<MAX_TEMP_READS )
+  if ( count<MAX_TEMP_READS && TEMP_RANGE_CHECK<temp )
   {
     Sen->Tbatt_hdwe = Sen->SdTbatt->update(temp);
-    if ( rp.debug==-103 ) Serial.printf("Temp %7.3f on count=%d\n", temp, count);
+    if ( rp.debug==-103 ) Serial.printf("I:  t=%7.3f ct=%d\n", temp, count);
   }
   else
   {
-    Serial.printf("Didn't read DS18, using last-good-value. Try hard reset\n");
+    Serial.printf("E: DS18, t=%8.1f, ct=%d, using lgv\n", temp, count);
     // Using last-good-value:  no assignment
   }
 }
@@ -291,7 +291,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 {
   if ( rp.debug >= 100 )
   {
-    Serial.printf("P.conn=%i, dscn check: %ld >=? %ld, on check: %ld >=? %ld, conf check: %ld >=? %ld, conn=%i, blynk_start=%i,\n",
+    Serial.printf("P.cn=%i, dscn chk: %ld >=? %ld, on chk: %ld >=? %ld, conf chk: %ld >=? %ld, cn=%i, bly_strt=%i,\n",
       Particle.connected(), now-wifi->last_disconnect, DISCONNECT_DELAY, now-wifi->lastAttempt,  CHECK_INTERVAL, now-wifi->lastAttempt, CONFIRMATION_DELAY, wifi->connected, wifi->blynk_started);
   }
   wifi->particle_connected_now = Particle.connected();
