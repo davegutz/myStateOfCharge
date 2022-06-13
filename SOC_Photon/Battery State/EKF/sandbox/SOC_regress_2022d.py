@@ -62,6 +62,25 @@ def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None)
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
+    plt.figure()
+    n_fig += 1
+    plt.subplot(131)
+    plt.title(plot_title)
+    plt.plot(old_s.time, old_s.soc, color='orange', label='soc')
+    plt.plot(new_s.time, new_s.soc, color='green', linestyle='--', label='soc_new')
+    plt.legend(loc=1)
+    plt.subplot(132)
+    plt.plot(old_s.time, old_s.Vb, color='orange', label='Vb')
+    plt.plot(new_s.time, new_s.Vb, color='green', linestyle='--', label='Vb_new')
+    plt.legend(loc=1)
+    plt.subplot(133)
+    plt.plot(old_s.soc, old_s.Vb, color='orange', label='Vb')
+    plt.plot(new_s.soc, new_s.Vb, color='green', linestyle='--', label='Vb_new')
+    plt.legend(loc=1)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
     return n_fig, fig_files
 
 
@@ -121,16 +140,47 @@ if __name__ == '__main__':
 
     def main():
         # Load data
-        # make csv file by hand from .ods by opening in openOffice and save as csv
+        # make txt file streaming from CoolTerm and v4 in logic, run Xp10 or 11
         # data_file = '../../../dataReduction/data_proto.csv'
-        data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220529_old.csv'
-        data_file_new = '../../../dataReduction/rapidTweakRegressionTest20220529_new.csv'
+        data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220613.txt'
+        data_file_new = '../../../dataReduction/rapidTweakRegressionTest20220613_new.txt'
+        title_str = "unit,"     # Find one instance of title
+        unit_str = 'pro_2022'  # Used to filter out actual data
+
+        # Clean .txt file and load
+        data_file_old_clean = data_file_old.replace('.txt', '.csv', 1)
+        cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
+                'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
+        have_title_str = None
+        with open(data_file_old, "r") as input_file:
+            with open(data_file_old_clean, "w") as output:
+                for line in input_file:
+                    if line.__contains__(title_str):
+                        if have_title_str is None:
+                            have_title_str = True  # write one title only
+                            output.write(line)
+                    if line.__contains__(unit_str):
+                        output.write(line)
+        data_file_new_clean = data_file_old.replace('.txt', '.csv', 1)
+        cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
+                'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
+        have_title_str = None
+        with open(data_file_old, "r") as input_file:
+            with open(data_file_new_clean, "w") as output:
+                for line in input_file:
+                    if line.__contains__(title_str):
+                        if have_title_str is None:
+                            have_title_str = True  # write one title only
+                            output.write(line)
+                    if line.__contains__(unit_str):
+                        output.write(line)
+
         cols = (
         'unit', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf', 'y_ekf', 'soc_m',
         'soc_ekf', 'soc', 'soc_wt')
-        data_old = np.genfromtxt(data_file_old, delimiter=',', names=True, usecols=cols, dtype=None, encoding=None).view(
+        data_old = np.genfromtxt(data_file_old_clean, delimiter=',', names=True, usecols=cols, dtype=None, encoding=None).view(
             np.recarray)
-        data_new = np.genfromtxt(data_file_new, delimiter=',', names=True, usecols=cols, dtype=None, encoding=None).view(
+        data_new = np.genfromtxt(data_file_new_clean, delimiter=',', names=True, usecols=cols, dtype=None, encoding=None).view(
             np.recarray)
         saved_old = SavedData(data_old)
         saved_new = SavedData(data_new)
