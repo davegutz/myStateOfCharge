@@ -63,33 +63,33 @@ const double mxeps = 1-1e-6;      // Level of soc that indicates mathematically 
 // See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
 // >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
 const uint8_t m_t_bb  = 4;    // Number temperature breakpoints for voc table
-const uint8_t n_s_bb  = 16;   // Number soc breakpoints for voc table
+const uint8_t n_s_bb  = 17;   // Number soc breakpoints for voc table
 const float y_t_bb[m_t_bb] =  //Temperature breakpoints for voc table
         { 5., 11.1, 20., 40. }; 
 const float x_soc_bb[n_s_bb] =      //soc breakpoints for voc table
-        { 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.98,  1.00};
+        { 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99, 0.995, 1.00};
 const float t_voc_bb[m_t_bb*n_s_bb] = // r(soc, dv) table
-        { 4.00,  4.00,  6.00,  9.50,  11.70, 12.30, 12.50, 12.65, 12.82, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 14.95,
-          4.00,  4.00,  8.00,  11.60, 12.40, 12.60, 12.70, 12.80, 12.92, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 14.96,
-          4.00,  8.00,  12.20, 12.68, 12.73, 12.79, 12.81, 12.89, 13.00, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 15.00,
-          4.08,  8.08,  12.28, 12.76, 12.81, 12.87, 12.89, 12.97, 13.08, 13.12, 13.17, 13.22, 13.29, 13.33, 13.35, 15.08};
+        { 4.00,  4.00,  6.00,  9.50,  11.70, 12.30, 12.50, 12.65, 12.82, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.75, 14.45,
+          4.00,  4.00,  8.00,  11.60, 12.40, 12.60, 12.70, 12.80, 12.92, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.76, 14.46,
+          4.00,  8.00,  12.20, 12.68, 12.73, 12.79, 12.81, 12.89, 13.00, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.80, 14.50,
+          4.08,  8.08,  12.28, 12.76, 12.81, 12.87, 12.89, 12.97, 13.08, 13.12, 13.17, 13.22, 13.29, 13.33, 13.35, 13.88, 14.58};
 const uint8_t n_n_bb = 4;   // Number of temperature breakpoints for x_soc_min table
 const float x_soc_min_bb[n_n_bb] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
 const float t_soc_min_bb[n_n_bb] =  { 0.14, 0.12,  0.08, 0.07}; // soc_min(t)
 // Hysteresis
 const uint8_t m_h_bb  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
 const uint8_t n_h_bb  = 9;          // Number of dv breakpoints in r(dv) table t_r
-const float x_dv_bb[n_h_bb] =       // dv breakpoints for r(soc, dv) table t_r
-        { -0.09,-0.07, -0.05,   -0.03,  0.00,   0.03,   0.05,   0.07,   0.09};
+const float x_dv_bb[n_h_bb] =       // dv breakpoints for r(soc, dv) table t_r. // DAG 6/13/2022 tune x10 to match data
+        { -0.9, -0.7,   -0.5,  -0.3,    0.0,    0.3,    0.5,    0.7,    0.9 };
 const float y_soc_bb[m_h_bb] =      // soc breakpoints for r(soc, dv) table t_r
         { 0.0,  0.5,    1.0};
-const float t_r_bb[m_h_bb*n_h_bb] = // r(soc, dv) table
-        { 1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.0030, 0.0046, 1e-7,
-          1e-7, 1e-7,   0.0050, 0.0036, 0.0015, 0.0024, 0.0030,   1e-7, 1e-7,
-          1e-7, 1e-7,   1e-7,   0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7};
+const float t_r_bb[m_h_bb*n_h_bb] = // r(soc, dv) table.    // DAG 6/13/2022 tune x10 to match data
+        { 1e-6, 0.064,  0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
+          1e-6, 1e-6,   0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
+          1e-6, 1e-6,     1e-6, 0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6};
 
 
-// LION 100 Ah, 12v LiFePO4
+// LION 100 Ah, 12v LiFePO4.  "LION" placeholder.  Data fabricated
 // shifted Battleborn because don't have real data yet; test structure of program
 const uint8_t m_t_li  = 4;    // Number temperature breakpoints for voc table
 const uint8_t n_s_li  = 16;   // Number soc breakpoints for voc table
@@ -109,13 +109,13 @@ const float t_soc_min_li[n_n_li] =  { 0.28, 0.24,  0.16, 0.14}; // soc_min(t)
 const uint8_t m_h_li  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
 const uint8_t n_h_li  = 9;          // Number of dv breakpoints in r(dv) table t_r
 const float x_dv_li[n_h_li] =       // dv breakpoints for r(soc, dv) table t_r
-        { -0.09,-0.07, -0.05,   -0.03,  0.00,   0.03,   0.05,   0.07,   0.09};
+        { -0.9, -0.7,   -0.5,  -0.3,    0.0,    0.3,    0.5,    0.7,    0.0};
 const float y_soc_li[m_h_li] =      // soc breakpoints for r(soc, dv) table t_r
         { 0.0,  0.5,    1.0};
 const float t_r_li[m_h_li*n_h_li] = // r(soc, dv) table
-        { 1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.0030, 0.0046, 1e-7,
-          1e-7, 1e-7,   0.0050, 0.0036, 0.0015, 0.0024, 0.0030,   1e-7, 1e-7,
-          1e-7, 1e-7,   1e-7,   0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7};
+        { 1e-6, 0.064,  0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
+          1e-6, 1e-6,   0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
+          1e-6, 1e-6,     1e-6, 0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6};
 
 // Hysteresis: reservoir model of battery electrical hysteresis
 // Use variable resistor and capacitor to create hysteresis from an RC circuit

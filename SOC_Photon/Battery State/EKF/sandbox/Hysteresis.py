@@ -24,19 +24,19 @@ from unite_pictures import cleanup_fig_files
 class Hysteresis:
     # Use variable resistor to create hysteresis from an RC circuit
 
-    def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e6, scale=1.):
+    def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e5, scale=1.):
         # Defaults
         self.reverse = scale<0.0
         if self.reverse:
             scale = -scale
         if t_dv is None:
-            t_dv = [-0.09, -0.07,-0.05, -0.03, 0.000, 0.03, 0.05, 0.07, 0.09]
+            t_dv = [-0.9, -0.7,     -0.5,   -0.3,   0.0,    0.3,    0.5,    0.7,    0.9]
         if t_soc is None:
             t_soc = [0, .5, 1]
         if t_r is None:
-            t_r = [1e-7, 0.0064, 0.0050, 0.0036, 0.0015, 0.0024, 0.0030, 0.0046, 1e-7,
-                   1e-7, 1e-7,   0.0050, 0.0036, 0.0015, 0.0024, 0.0030,   1e-7, 1e-7,
-                   1e-7, 1e-7,     1e-7, 0.0036, 0.0015, 0.0024, 1e-7,     1e-7, 1e-7]
+            t_r = [ 1e-6, 0.064,    0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
+                    1e-6, 1e-6,     0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
+                    1e-6, 1e-6,     1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6]
         for i in range(len(t_dv)):
             t_dv[i] *= scale
             t_r[i] *= scale
@@ -69,7 +69,7 @@ class Hysteresis:
         s += "  ioc      =    {:7.3f}  // Current out, A\n".format(self.ioc)
         s += "  voc_stat =    {:7.3f}  // Battery model voltage input, V\n".format(self.voc_stat)
         s += "  voc      =    {:7.3f}  // Discharge voltage output, V\n".format(self.voc)
-        s += "  soc      =    {:7.3f}  // State of charge input, dimensionless\n".format(self.soc)
+        s += "  soc      =   {:8.4f}  // State of charge input, dimensionless\n".format(self.soc)
         s += "  res      =    {:7.3f}  // Variable resistance value, ohms\n".format(self.res)
         s += "  dv_dot   =    {:7.3f}  // Calculated voltage rate, V/s\n".format(self.dv_dot)
         s += "  dv_hys   =    {:7.3f}  // Delta voltage state, V\n".format(self.dv_hys)

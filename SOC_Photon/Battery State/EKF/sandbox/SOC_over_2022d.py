@@ -299,8 +299,8 @@ if __name__ == '__main__':
         v_std = 0.  # (0.01-->0) ------ noise
         i_std = 0.  # (0.1-->0) ------ noise
         soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
-        hys_scale = 10.  # (1e-6<--1.-->10.) 1e-6 disables hysteresis
-        hys_scale_monitor = -10.  # (-1e-6<-- -1.-->-10.) -1e-6 disables hysteresis.   Negative reverses hys
+        hys_scale = 1.  # (1e-6<--1.-->10.) 1e-6 disables hysteresis
+        hys_scale_monitor = -1.  # (-1e-6<-- -1.-->-10.) -1e-6 disables hysteresis.   Negative reverses hys
         T_SAT = 5.  # Saturation time, sec
         T_DESAT = T_SAT * 2.  # De-saturation time, sec
 
@@ -309,13 +309,11 @@ if __name__ == '__main__':
         # time_end = 2500.
 
         # Load data (must end in .txt)
-        # data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220607_newShort.csv'
-        # data_file_old = '../../../dataReduction/RealWorld 2022-06-07.csv'
-        # data_file_old = '../../../dataReduction/rapidTweakTest_20220609.csv'
         # data_file_old = '../../../dataReduction/real world status-reflash-test 20220609.txt'
         data_file_old = '../../../dataReduction/rapidTweakRegressionTest20220613.txt'
         title_str = "unit,"     # Find one instance of title
         unit_str = 'pro_2022'  # Used to filter out actual data
+        # unit_str = 'soc0_2022'  # Used to filter out actual data
 
         # Clean .txt file and load
         data_file_clean = data_file_old.replace('.txt', '.csv', 1)

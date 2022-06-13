@@ -146,8 +146,8 @@ void Battery::pretty_print(void)
     Serial.printf("  sr_ =             %7.3f;  // Resistance scalar\n", sr_);
     Serial.printf("  dv_ =             %7.3f;  // Table hard-coded adjustment, V\n", dv_);
     Serial.printf("  dt_ =             %7.3f;  // Update time, s\n", dt_);
-    Serial.printf(" *rp_nP_ =            %5.2f;  // Number of parallel batteries in bank, e.g. '2P1S'\n", *rp_nP_);
-    Serial.printf(" *rp_nS_ =            %5.2f;  // Number of series batteries in bank, e.g. '2P1S'\n", *rp_nS_);
+    Serial.printf(" *rp_nP_ =            %5.2f;  // P parallel batteries in bank, e.g. '2P1S'\n", *rp_nP_);
+    Serial.printf(" *rp_nS_ =            %5.2f;  // S series batteries in bank, e.g. '2P1S'\n", *rp_nS_);
 }
 
 // Print State Space
@@ -292,7 +292,7 @@ double BatteryMonitor::calculate(Sensors *Sen)
     q_ekf_ = soc_ekf_ * q_capacity_;
     y_filt_ = y_filt->calculate(y_, min(Sen->T, EKF_T_RESET));
     if ( rp.debug==6 || rp.debug==7 )
-        Serial.printf("calculate:Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,vdyn,vhys,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
+        Serial.printf("calculate:Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,vdyn,vhys,err, %7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
             Sen->Tbatt_filt, Sen->Ibatt, 0, soc_ekf_, vb_, voc_, hx_, vdyn_, vhys, y_);
 
     // EKF convergence.  Audio industry found that detection of quietness requires no more than
@@ -381,7 +381,7 @@ void BatteryMonitor::init_soc_ekf(const double soc)
     q_ekf_ = soc_ekf_ * q_capacity_;
     if ( rp.debug==-34 )
     {
-        Serial.printf("init_soc_ekf:  soc, soc_ekf_, x_ekf_ = %7.3f,%7.3f, %7.3f,\n", soc, soc_ekf_, x_ekf());
+        Serial.printf("init_soc_ekf:  soc, soc_ekf_, x_ekf_ = %8.4f,%8.4f, %8.4f,\n", soc, soc_ekf_, x_ekf());
     }
 }
 
@@ -407,8 +407,8 @@ void BatteryMonitor::pretty_print(void)
     Serial.printf("  amp_hrs_remaining_wt_  =  %7.3f;  // Discharge amp*time left if drain soc_wt_ to 0, A-h\n", amp_hrs_remaining_wt_);
     Serial.printf("  EKF_converged =                 %d;  // EKF is converged, T=converged\n", converged_ekf());
     Serial.printf("  q_ekf =                %10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
-    Serial.printf("  soc_ekf =                 %7.3f;  // Solved state of charge, fraction\n", soc_ekf_);
-    Serial.printf("  soc_wt_ =                 %7.3f;  // Weighted selection of ekf state of charge and coulomb counter (0-1)\n", soc_wt_);
+    Serial.printf("  soc_ekf =                %8.4f;  // Solved state of charge, fraction\n", soc_ekf_);
+    Serial.printf("  soc_wt_ =                %8.4f;  // Weighted selection of ekf state of charge and coulomb counter (0-1)\n", soc_wt_);
     Serial.printf("  tcharge =                   %5.1f;  // Counted charging time to full, hr\n", tcharge_);
     Serial.printf("  tcharge_ekf =               %5.1f;  // Solved charging time to full from ekf, hr\n", tcharge_ekf_);
     Serial.printf("  voc_filt_ =               %7.3f;  // Filtered open circuit voltage for saturation detect, V\n", voc_filt_);
@@ -469,12 +469,12 @@ boolean BatteryMonitor::solve_ekf(Sensors *Sen)
         voc_solved = calc_soc_voc(soc_solved, Sen->Tbatt_filt, &dv_dsoc);
         err = voc - voc_solved;
         if ( rp.debug==6 )
-            Serial.printf("solve    :Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,vdyn,vhys,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
+            Serial.printf("solve    :Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,vdyn,vhys,err, %7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
             Sen->Tbatt_filt, Sen->Ibatt, count, soc_solved, vb, voc, voc_solved, vdyn, vhys, err);
     }
     init_soc_ekf(soc_solved);
     if ( rp.debug==7 )
-            Serial.printf("solve    :Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,vdyn,vhys,err, %7.3f,%7.3f,  %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
+            Serial.printf("solve    :Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,vdyn,vhys,err, %7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
             Sen->Tbatt_filt, Sen->Ibatt, count, soc_solved, vb, voc, voc_solved, vdyn, vhys, err);
     return ( count<SOLV_MAX_COUNTS );
 }
@@ -610,13 +610,13 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     if ( rp.debug==79 ) Serial.printf("temp_C, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f,\n",
         temp_C, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_);
 
-    if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc_,voc,,vdyn,vb,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+    if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc_,voc,,vdyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
      dt,temp_C, ib_, soc_, voc_, vdyn_, vb_);
     
     if ( rp.debug==-78 ) Serial.printf("soc*10,voc,vsat,curr_in,sat_ib_max_,ib,sat,\n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
       soc_*10, voc_, vsat_, curr_in, sat_ib_max_, ib_, model_saturated_);
     
-    if ( rp.debug==76 ) Serial.printf("BatteryModel::calculate:,  soc=%7.3f, temp_c=%7.3f, ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
+    if ( rp.debug==76 ) Serial.printf("BatteryModel::calculate:,  soc=%8.4f, temp_c=%7.3f, ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
         soc_, temp_C, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);
 
     return ( vb_*(*rp_nS_) );
@@ -849,7 +849,7 @@ void Hysteresis::pretty_print()
     Serial.printf("  ioc_ =        %7.3f;  // Current out, A\n", ioc_);
     Serial.printf("  voc_in_ =     %7.3f;  // Voltage input, V\n", voc_in_);
     Serial.printf("  voc_out_ =    %7.3f;  // Voltage output, V\n", voc_out_);
-    Serial.printf("  soc_ =        %7.3f;  // State of charge input, dimensionless\n", soc_);
+    Serial.printf("  soc_ =       %8.4f;  // State of charge input, dimensionless\n", soc_);
     Serial.printf("  res_ =        %7.3f;  // Variable resistance value, ohms\n", res_);
     Serial.printf("  dv_dot_ =     %7.3f;  // Calculated voltage rate, V/s\n", dv_dot_);
     Serial.printf("  dv_hys_ =     %7.3f;  // Delta voltage state, V\n", dv_hys_);

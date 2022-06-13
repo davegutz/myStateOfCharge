@@ -57,7 +57,7 @@ struct RetainedPars
   int isum = -1;                // Summary location.   Begins at -1 because first action is to increment isum
   float delta_q_inf_amp = 0.;   // delta_q since last reset.  Simple integration of amplified current
   float delta_q_inf_noamp = 0.; // delta_q since last reset.  Simple integration of non-amplified current
-  float hys_scale = 10.;        // Hysteresis scalar.  DAG 6/13/2022 tune 1->10 to match data
+  float hys_scale = 1.;         // Hysteresis scalar
   float tweak_bias_amp = 0.;    // Tweak calibration for amplified current sensor
   float tweak_bias_noamp = 0.;  // Tweak calibration for non-amplified current sensor
   float nP = NP;                // Number of parallel batteries in bank, e.g. '2P1S'
@@ -98,7 +98,7 @@ struct RetainedPars
     this->isum = -1;
     this->delta_q_inf_amp = 0.;
     this->delta_q_inf_noamp = 0.;
-    this->hys_scale = 10.;    //  DAG 6/13/2022 tune 1->10 to match data
+    this->hys_scale = 1.;
     this->tweak_bias_amp = 0.;
     this->tweak_bias_noamp = 0.;
     this->nP = NP;
@@ -128,7 +128,7 @@ struct RetainedPars
     this->isum = -1;
     this->delta_q_inf_amp = 0.;
     this->delta_q_inf_noamp = 0.;
-    this->hys_scale = 10.;  // DAG 6/13/2022 tune 1->10 to match data
+    this->hys_scale = 1.;
     this->tweak_bias_amp = 0.;
     this->tweak_bias_noamp = 0.;
     this->nP = NP;

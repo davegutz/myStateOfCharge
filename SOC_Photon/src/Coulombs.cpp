@@ -62,7 +62,7 @@ void Chemistry::assign_mod(const String mod_str)
     t_soc_min = new float[n_n];
     for (i=0; i<n_n; i++) x_soc_min[i] = x_soc_min_bb[i];
     for (i=0; i<n_n; i++) t_soc_min[i] = t_soc_min_bb[i];
-    hys_cap = 3.6e6;    // Capacitance of hysteresis, Farads
+    hys_cap = 3.6e5;    // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data
     if ( n_h )  delete x_dv;
     if ( m_h )  delete y_soc;
     if ( m_h && n_h )  delete t_r;
@@ -85,7 +85,7 @@ void Chemistry::assign_mod(const String mod_str)
     tau_sd      = 1.8e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
     r_sd        = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
   }
-  else if ( mod==1 )  // "LION";
+  else if ( mod==1 )  // "LION" placeholder.  Data fabricated
   {
     *rp_mod_code = mod;
     dqdt    = 0.02;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
@@ -108,7 +108,7 @@ void Chemistry::assign_mod(const String mod_str)
     t_soc_min = new float[n_n];
     for (i=0; i<n_n; i++) x_soc_min[i] = x_soc_min_li[i];
     for (i=0; i<n_n; i++) t_soc_min[i] = t_soc_min_li[i];
-    hys_cap = 3.6e6;    // Capacitance of hysteresis, Farads
+    hys_cap = 3.6e5;    // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data
     if ( n_h )  delete x_dv;
     if ( m_h )  delete y_soc;
     if ( m_h && n_h )  delete t_r;
@@ -232,13 +232,13 @@ void Coulombs::pretty_print(void)
   Serial.printf("  q_ =          %9.1f;  // Present charge available to use, except q_min_, C\n", q_);
   Serial.printf("  q_min_ =      %9.1f;  // Estimated charge at low voltage shutdown, C\n", q_min_);
   Serial.printf("  delta_q       %9.1f;  // Charge change since saturated, C\n", *rp_delta_q_);
-  Serial.printf("  soc_ =          %7.3f;  // Fraction of saturation charge (q_capacity_) available (0-1);\n", soc_);
+  Serial.printf("  soc_ =         %8.4f;  // Fraction of saturation charge (q_capacity_) available (0-1);\n", soc_);
   Serial.printf("  sat_ =                %d;  // Indication that battery is saturated, T=saturated\n", sat_);
   Serial.printf("  t_rated_ =        %5.1f;  // Rated temperature, deg C\n", t_rated_);
   Serial.printf("  t_last =          %5.1f;  // Last battery temperature for rate limit memory, deg C\n", *rp_t_last_);
   Serial.printf("  t_rlim_ =       %7.3f;  // Tbatt rate limit, deg C / s\n", t_rlim_);
   Serial.printf("  resetting_ =          %d;  // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter\n", resetting_);
-  Serial.printf("  soc_min_ =      %7.3f;  // Estimated soc where battery BMS will shutoff current, fraction\n", soc_min_);
+  Serial.printf("  soc_min_ =     %8.4f;  // Estimated soc where battery BMS will shutoff current, fraction\n", soc_min_);
   Serial.printf("  mod_ =        %s;  // Model type of battery chemistry e.g. Battleborn or LION\n", chem_.decode(mod_code()).c_str());
   Serial.printf("  mod_code_ =           %d;  // Chemistry code integer\n", mod_code());
   Serial.printf("Coulombs::");

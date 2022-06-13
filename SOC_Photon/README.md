@@ -355,18 +355,18 @@ Rapid tweak test 1 min using models Xm15 'tweakMod' to test tweak only (no data 
        Tweak(No Amp)::adjust:, past=       1.1, pres=       1.1, error=      -0.0, gain= -0.039993, delta_hrs=  0.013891, Di=  0.000, new_Di=  0.000,
 
 Rapid tweak test 02:30 min using models 'tweakMod'
-    start recording
+    start recording, save to ../dataReduction/<name>.txt
   Xp10;
     to end prematurely
   XS; Dn0.9985; Ca1; Mk0; Nk0;
-    expected result:  see 'dataReduction/newFloatTweakMod_overplots.xlsx'
+    run py script SOC_over_2022d.py , adding <name>.txt to   data_file_old
 
   Slow cycle test 10:00 min using models 'cycleMod'
-    start recording
+    start recording, save to ../dataReduction/<name>.txt
   Xp11;
     to end prematurely
   XS; Dn0.9985; Ca1; Mk0; Nk0;
-    expected result:  see 'dataReduction/newFloatCycleMod_overplots.xlsx'
+    run py script SOC_over_2022d.py , adding <name>.txt to   data_file_old
 
 Throughput test
   v4;Dr1;
