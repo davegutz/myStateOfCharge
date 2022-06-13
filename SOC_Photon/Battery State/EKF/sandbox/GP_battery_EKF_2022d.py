@@ -21,7 +21,7 @@ import numpy as np
 from numpy.random import randn
 import Battery
 from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, Retained, overall
-from unite_pictures import unite_pictures_into_pdf
+from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 import os
 from datetime import datetime
 from TFDelay import TFDelay
@@ -32,6 +32,7 @@ if __name__ == '__main__':
 
     doctest.testmod(sys.modules['__main__'])
     import matplotlib.pyplot as plt
+    plt.rcParams['axes.grid'] = True
 
 
     class SavedData:
@@ -124,37 +125,10 @@ if __name__ == '__main__':
             s += "{:5.3f},".format(self.soc_wt[self.i])
             return s
 
-        def compare_print(self, old_s, new_s):
-            s = " time,      Ib,                   Vb,              Vdyn,          Voc,            Voc_dyn,        Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
-            for i in range(len(new_s.time)):
-                s += "{:7.3f},".format(old_s.time[i])
-                s += "{:11.3f},".format(old_s.Ib[i])
-                s += "{:9.3f},".format(new_s.Ib[i])
-                s += "{:9.2f},".format(old_s.Vb[i])
-                s += "{:5.2f},".format(new_s.Vb[i])
-                s += "{:9.2f},".format(old_s.Vdyn[i])
-                s += "{:5.2f},".format(new_s.Vdyn[i])
-                s += "{:9.2f},".format(old_s.Voc[i])
-                s += "{:5.2f},".format(new_s.Voc[i])
-                s += "{:9.2f},".format(old_s.Voc_dyn[i])
-                s += "{:5.2f},".format(new_s.voc_dyn[i])
-                s += "{:9.2f},".format(old_s.Voc_ekf[i])
-                s += "{:5.2f},".format(new_s.Voc_ekf[i])
-                s += "{:13.6f},".format(old_s.y_ekf[i])
-                s += "{:9.6f},".format(new_s.y_ekf[i])
-                s += "{:7.3f},".format(old_s.soc_ekf[i])
-                s += "{:5.3f},".format(new_s.soc_ekf[i])
-                s += "{:7.3f},".format(old_s.soc[i])
-                s += "{:5.3f},".format(new_s.soc[i])
-                s += "{:7.3f},".format(old_s.soc_wt[i])
-                s += "{:5.3f},".format(new_s.soc_wt[i])
-                s += "\n"
-            return s
-
         def mod(self):
              return self.mod_data[self.zero_end]
 
-        def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None):
+        def overall(old_s, new_s, new_s_s, filename, fig_files=None, plot_title=None, n_fig=None):
             if fig_files is None:
                 fig_files = []
 
@@ -250,7 +224,57 @@ if __name__ == '__main__':
             fig_files.append(fig_file_name)
             plt.savefig(fig_file_name, format="png")
 
+            plt.figure()
+            n_fig += 1
+            plt.subplot(131)
+            plt.title(plot_title)
+            plt.plot(old_s.time, old_s.soc, color='orange', label='soc')
+            plt.plot(new_s.time, new_s.soc, color='green', linestyle='--', label='soc_new')
+            plt.plot(new_s_s.time, new_s_s.soc, color='black', linestyle='--', label='soc_m_new')
+            plt.legend(loc=1)
+            plt.subplot(132)
+            plt.plot(old_s.time, old_s.Vb, color='orange', label='Vb')
+            plt.plot(new_s.time, new_s.Vb, color='green', linestyle='--', label='Vb_new')
+            plt.plot(new_s_s.time, new_s_s.vb, color='black', linestyle='--', label='Vb_m_new')
+            plt.legend(loc=1)
+            plt.subplot(133)
+            plt.plot(old_s.soc, old_s.Vb, color='orange', label='Vb')
+            plt.plot(new_s.soc, new_s.Vb, color='green', linestyle='--', label='Vb_new')
+            plt.plot(new_s_s.soc, new_s_s.vb, color='black', linestyle='--', label='Vb_m_new')
+            plt.legend(loc=1)
+            fig_file_name = filename + '_' + str(n_fig) + ".png"
+            fig_files.append(fig_file_name)
+            plt.savefig(fig_file_name, format="png")
+
             return n_fig, fig_files
+
+
+    def compare_print(old_s, new_s):
+        s = " time,      Ib,                   Vb,              Vdyn,          Voc,            Voc_dyn,        Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
+        for i in range(len(new_s.time)):
+            s += "{:7.3f},".format(old_s.time[i])
+            s += "{:11.3f},".format(old_s.Ib[i])
+            s += "{:9.3f},".format(new_s.Ib[i])
+            s += "{:9.2f},".format(old_s.Vb[i])
+            s += "{:5.2f},".format(new_s.Vb[i])
+            s += "{:9.2f},".format(old_s.Vdyn[i])
+            s += "{:5.2f},".format(new_s.Vdyn[i])
+            s += "{:9.2f},".format(old_s.Voc[i])
+            s += "{:5.2f},".format(new_s.Voc[i])
+            s += "{:9.2f},".format(old_s.Voc_dyn[i])
+            s += "{:5.2f},".format(new_s.voc_dyn[i])
+            s += "{:9.2f},".format(old_s.Voc_ekf[i])
+            s += "{:5.2f},".format(new_s.Voc_ekf[i])
+            s += "{:13.6f},".format(old_s.y_ekf[i])
+            s += "{:9.6f},".format(new_s.y_ekf[i])
+            s += "{:7.3f},".format(old_s.soc_ekf[i])
+            s += "{:5.3f},".format(new_s.soc_ekf[i])
+            s += "{:7.3f},".format(old_s.soc[i])
+            s += "{:5.3f},".format(new_s.soc[i])
+            s += "{:7.3f},".format(old_s.soc_wt[i])
+            s += "{:5.3f},".format(new_s.soc_wt[i])
+            s += "\n"
+        return s
 
 
     def main():
@@ -275,8 +299,8 @@ if __name__ == '__main__':
         v_std = 0.  # (0.01-->0) ------ noise
         i_std = 0.  # (0.1-->0) ------ noise
         soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
-        hys_scale = 1.  # (1e-6<--1.-->10.) 1e-6 disables hysteresis
-        hys_scale_monitor = -1.  # (-1e-6<-- -1.-->-10.) -1e-6 disables hysteresis.   Negative reverses hys
+        hys_scale = 10.  # (1e-6<--1.-->10.) 1e-6 disables hysteresis
+        hys_scale_monitor = -10.  # (-1e-6<-- -1.-->-10.) -1e-6 disables hysteresis.   Negative reverses hys
         T_SAT = 5.  # Saturation time, sec
         T_DESAT = T_SAT * 2.  # De-saturation time, sec
 
@@ -402,7 +426,7 @@ if __name__ == '__main__':
         print('mon:  ', str(mon))
         print('sim:  ', str(sim))
         # print("Showing data from file then BatteryMonitor calculated from data")
-        # print(SavedData.compare_print(saved_old, mon.saved))
+        # print(compare_print(saved_old, mon.saved))
 
         # Plots
         n_fig = 0
@@ -412,17 +436,11 @@ if __name__ == '__main__':
         plot_title = filename + '   ' + date_time
 
         # n_fig, fig_files = overall(mon.saved, sim.saved, mon.Randles.saved, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
-        n_fig, fig_files = SavedData.overall(saved_old, mon.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
+        n_fig, fig_files = SavedData.overall(saved_old, mon.saved, sim.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
+        cleanup_fig_files(fig_files)
 
-        # Clean up after itself.   Other fig files already in root will get plotted by unite_pictures_into_pdf
-        # Cleanup other figures in root folder by hand
-        for fig_file in fig_files:
-            try:
-                os.remove(fig_file)
-            except OSError:
-                pass
         plt.show()
 
     main()

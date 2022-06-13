@@ -19,7 +19,7 @@ __date__ = '$Date: 2022/05/30 13:15:02 $'
 
 import numpy as np
 from pyDAGx.lookup_table import LookupTable
-
+from unite_pictures import cleanup_fig_files
 
 class Hysteresis:
     # Use variable resistor to create hysteresis from an RC circuit
@@ -286,6 +286,9 @@ if __name__ == '__main__':
         plot_title = filename + '   ' + date_time
 
         n_fig, fig_files = overall(hys.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig, ref=current_in_s)
+
+        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
+        cleanup_fig_files(fig_files)
         plt.show()
 
     main()

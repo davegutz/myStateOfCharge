@@ -62,7 +62,7 @@ class Coulombs:
         s += "  resetting =     {:d}          // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter\n".format(self.resetting)
         s += "  soc_min =    {:7.3f}       // Lowest soc for power delivery.   Arises with temp < 20 C\n".format(self.soc_min)
         s += "  tweak_test =    {:d}          // Driving signal injection completely using software inj_soft_bias\n".format(self.tweak_test)
-        s += "  coul_eff =   {:7.3f}       // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs\n".format(self.coul_eff)
+        s += "  coul_eff =   {:8.4f}      // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs\n".format(self.coul_eff)
         return s
 
     def apply_cap_scale(self, scale):

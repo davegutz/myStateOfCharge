@@ -18,6 +18,16 @@ def sorted_nicely(l):
     return sorted(l, key=alphanum_key)
 
 
+def cleanup_fig_files(fig_files):
+    # Clean up after itself.   Other fig files already in root will get plotted by unite_pictures_into_pdf
+    # Cleanup other figures in root folder by hand
+    for fig_file in fig_files:
+        try:
+            os.remove(fig_file)
+        except OSError:
+            pass
+
+
 # ----------------------------------------------------------------------
 def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', pathToSavePdfTo='.', pathToPictures='.', splitType="picture",
                             numberOfEntitiesInOnePdf=9, listWithImagesExtensions=["png", "jpg"],

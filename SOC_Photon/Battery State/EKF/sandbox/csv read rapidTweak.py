@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime
-from unite_pictures import unite_pictures_into_pdf
+from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 import os
 
 def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None):
@@ -145,14 +145,8 @@ if __name__ == '__main__':
 
         # Copies
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
+        cleanup_fig_files(fig_files)
 
-        # Clean up after itself.   Other fig files already in root will get plotted by unite_pictures_into_pdf
-        # Cleanup other figures in root folder by hand
-        for fig_file in fig_files:
-            try:
-                os.remove(fig_file)
-            except OSError:
-                pass
         plt.show()
 
 
