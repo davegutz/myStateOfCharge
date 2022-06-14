@@ -24,7 +24,7 @@ import Battery
 from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, Retained
 from Battery import overall as overalls
 from TFDelay import TFDelay
-from MonSimNomConfig import *
+from MonSimNomConfig import *  # Global config parameters.   Overwrite in your own calls for studies
 
 def replicate(saved_old):
     t = saved_old.time
