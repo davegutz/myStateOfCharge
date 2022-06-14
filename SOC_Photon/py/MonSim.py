@@ -68,6 +68,7 @@ def replicate(saved_old):
     Vb = saved_old.Vb
     Ib = saved_old.Ib
     Tb = saved_old.Tb
+    soc_m_init = saved_old.soc_m[0]
     t_len = len(t)
     rp = Retained()
     rp.modeling = saved_old.mod()
@@ -106,7 +107,7 @@ def replicate(saved_old):
         sim.calculate(temp_c=temp_c, soc=sim.soc, curr_in=current_in, dt=T, q_capacity=sim.q_capacity,
                       dc_dc_on=dc_dc_on, rp=rp)
         sim.count_coulombs(dt=T, reset=init, temp_c=temp_c, charge_curr=sim.ib, t_last=rp.t_last_model,
-                           sat=False)
+                           sat=False, soc_m_init=soc_m_init)
         rp.delta_q_model, rp.t_last_model = sim.update()
 
         # EKF

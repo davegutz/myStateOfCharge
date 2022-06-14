@@ -104,7 +104,7 @@ class Coulombs:
         """Capacity"""
         return self.q_cap_rated_scaled * (1. - dqdt * (temp_c - self.t_rated))
 
-    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, t_last):
+    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, t_last, soc_init=None):
         """Count coulombs based on true=actual capacity
         Inputs:
             dt              Integration step, s

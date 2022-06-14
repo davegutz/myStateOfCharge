@@ -638,7 +638,7 @@ class BatteryModel(Battery):
         d = np.array([self.r0, 1])
         return a, b, c, d
 
-    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, t_last):
+    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, t_last, soc_m_init=None):
         """Coulomb counter based on true=actual capacity
         Internal resistance of battery is a loss
         Inputs:
@@ -659,6 +659,8 @@ class BatteryModel(Battery):
         temp_lim = max(min(temp_c, t_last + self.t_rlim*dt), t_last - self.t_rlim*dt)
         if reset:
             temp_lim = temp_c
+            if soc_m_init and not self.mod:
+                self.delta_q = self.calculate_capacity(temp_c) * (soc_m_init - 1.)
 
         # Saturation.   Goal is to set q_capacity and hold it so remember last saturation status
         # detection
