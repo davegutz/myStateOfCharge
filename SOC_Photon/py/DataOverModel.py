@@ -33,7 +33,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from TFDelay import TFDelay
 from MonSimNomConfig import *
-from MonSim import replicate
+from MonSim import replicate, save_clean_file
 
 def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None, new_s_s=None):
     if fig_files is None:
@@ -346,6 +346,9 @@ if __name__ == '__main__':
 
         # Run model
         mons, sims, monrs = replicate(saved_old)
+        mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
+        date_ = datetime.now().strftime("%y%m%d")
+        save_clean_file(mons, mon_file_save, 'rep' + date_)
 
         # Plots
         n_fig = 0
@@ -353,7 +356,7 @@ if __name__ == '__main__':
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
+        # n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
         n_fig, fig_files = overall(saved_old, mons, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
                                    new_s_s=sims)
 
