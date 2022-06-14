@@ -21,7 +21,8 @@ Coulomb Counter built in."""
 import numpy as np
 from numpy.random import randn
 import Battery
-from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, Retained, overall
+from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, Retained
+from Battery import overall as overalls
 from TFDelay import TFDelay
 from MonSimNomConfig import *
 
@@ -125,7 +126,7 @@ def replicate(saved_old):
 if __name__ == '__main__':
     from datetime import datetime
     import sys
-    from DataOverModel import SavedData, write_clean_file
+    from DataOverModel import SavedData, write_clean_file, overall
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
     import matplotlib.pyplot as plt
 
@@ -154,11 +155,12 @@ if __name__ == '__main__':
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        n_fig, fig_files = overall(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
+        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)
+        n_fig, fig_files = overall(saved_old, mons, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
+                                   new_s_s=sims)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
         cleanup_fig_files(fig_files)
 
         plt.show()
 
-
-main()
+    main()

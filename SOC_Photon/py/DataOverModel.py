@@ -31,6 +31,8 @@ import os
 import matplotlib.pyplot as plt
 from datetime import datetime
 from TFDelay import TFDelay
+from MonSimNomConfig import *
+from MonSim import replicate
 
 def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None, new_s_s=None):
     if fig_files is None:
@@ -323,24 +325,9 @@ if __name__ == '__main__':
         # tau_sd creating an anchor.   So large it's just a pass through.  TODO:  Why x correct??
         # TODO:  filter soc for saturation calculation in model
         # TODO:  temp sensitivities and mitigation
-        dv_sense = 0.  # (0.-->0.1) ++++++++ flat curve
-        di_sense = 0.  # (0.-->0.5) ++++++++  i does not go to zero steady state
-        dt_model = 0.  # (0.-->25.) +++++++  TODO:   ?????????
-        model_bat_cap = 100.  # (100.-->80) ++++++++++ dyn only provided reset soc periodically  TODO:  ???????
-        r0 = 0.003  # (0.003-->0.006)  +++ dyn only provided reset soc periodically
-        rct = 0.0016  # (0.0016-->0.0032) ++++++++++ dyn only provided reset soc periodically
-        tau_dif = 83  # (83-->100)  +++++++++++ dyn only provided reset soc periodically
-        r_dif = 0.0077  # (0.0077-->0.015)   ++++++++++  dyn only provided reset soc periodically
-        rsd = 70.  # (70.-->700)  ------- dyn only
-        tau_ct = 0.2  # (0.2-->5.)  -------
-        tau_sd = 1.8e7  # (1.8e7-->1.8e6) ++++++ dyn only
-        v_std = 0.  # (0.01-->0) ------ noise
-        i_std = 0.  # (0.1-->0) ------ noise
-        soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
-        hys_scale = 1.  # (1e-6<--1.-->10.) 1e-6 disables hysteresis
-        hys_scale_monitor = -1.  # (-1e-6<-- -1.-->-10.) -1e-6 disables hysteresis.   Negative reverses hys
-        T_SAT = 5.  # Saturation time, sec
-        T_DESAT = T_SAT * 2.  # De-saturation time, sec
+
+        # Config inputs
+        # from MonSimNomConfig import *
 
         # Transient  inputs
         time_end = None
@@ -356,100 +343,9 @@ if __name__ == '__main__':
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
-        t = saved_old.time
-        Vb = saved_old.Vb
-        Ib = saved_old.Ib
-        Tb = saved_old.Tb
-        t_len = len(t)
-        rp = Retained()
-        rp.modeling = saved_old.mod()
-        print("rp.modeling is ", rp.modeling)
-        tweak_test = rp.tweak_test()
-        temp_c = saved_old.Tb[0]
 
-        # Setup
-        scale = model_bat_cap / Battery.RATED_BATT_CAP
-        sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test)
-        mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
-                      r_dif=r_dif, temp_c=temp_c, hys_scale=hys_scale_monitor, tweak_test=tweak_test)
-        Is_sat_delay = TFDelay(in_=saved_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
-
-        # time loop
-        dt = t[1] - t[0]
-        dt_ekf = t[1] - t[0]
-        for i in range(t_len):
-            saved_old.i = i
-            current_in = saved_old.Ib[i]
-            if i > 0:
-                dt = t[i] - t[i-1]
-                dt_ekf = dt
-
-            # dc_dc_on = bool(lut_dc.interp(t[i]))
-            dc_dc_on = False
-            init = (t[i] <= 1)
-
-            if init:
-                sim.apply_soc(soc_init, temp_c)
-                rp.delta_q_model = sim.delta_q
-                rp.t_last_model = temp_c+dt_model
-                sim.load(rp.delta_q_model, rp.t_last_model)
-                sim.init_battery()
-                sim.apply_delta_q_t(rp.delta_q_model, rp.t_last_model)
-
-            # Models
-            sim.calculate(temp_c=temp_c, soc=sim.soc, curr_in=current_in, dt=dt, q_capacity=sim.q_capacity,
-                          dc_dc_on=dc_dc_on, rp=rp)
-            sim.count_coulombs(dt=dt, reset=init, temp_c=temp_c, charge_curr=sim.ib, t_last=rp.t_last_model,
-                               sat=False)
-            rp.delta_q_model, rp.t_last_model = sim.update()
-
-            # EKF
-            if init:
-                mon.apply_soc(soc_init, temp_c)
-                rp.delta_q = mon.delta_q
-                rp.t_last = temp_c
-                mon.load(rp.delta_q, rp.t_last)
-                mon.assign_temp_c(temp_c)
-                mon.init_battery()
-                mon.init_soc_ekf(soc_init)  # when modeling (assumed in python) ekf wants to equal model
-
-            # Monitor calculations including ekf
-            if rp.modeling == 0:
-                mon.calculate(Tb[i], Vb[i], Ib[i], dt_ekf, rp=rp)
-            else:
-                mon.calculate(temp_c, sim.vb+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf, rp=rp)
-            # mon.calculate(temp_c, Vb[i]+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt_ekf)
-            sat = is_sat(temp_c, mon.voc, mon.soc)
-            saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(dt, T_SAT/2.), init)
-            if rp.modeling == 0:
-                mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=Tb[i], charge_curr=Ib[i], sat=saturated,
-                                   t_last=mon.t_last)
-            else:
-                mon.count_coulombs(dt=dt_ekf, reset=init, temp_c=temp_c, charge_curr=sim.ib, sat=saturated,
-                                   t_last=mon.t_last)
-            mon.calc_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
-            mon.select()
-            # mon.regauge(temp_c)
-            mon.assign_soc_m(sim.soc)
-            rp.delta_q, rp.t_last = mon.update()
-
-            # Plot stuff
-            mon.save(t[i], mon.soc, sim.voc)
-            sim.save(t[i], sim.soc, sim.voc)
-
-            # Print init
-            if i == 0:
-                print('time=', t[i])
-                print('mon:  ', str(mon))
-                print('time=', t[i])
-                print('sim:  ', str(sim))
-
-        # Data
-        print('time=', t[i])
-        print('mon:  ', str(mon))
-        print('sim:  ', str(sim))
-        # print("Showing data from file then BatteryMonitor calculated from data")
-        # print(compare_print(saved_old, mon.saved))
+        # Run model
+        mons, sims, monrs = replicate(saved_old)
 
         # Plots
         n_fig = 0
@@ -458,8 +354,8 @@ if __name__ == '__main__':
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         # n_fig, fig_files = overall(mon.saved, sim.saved, mon.Randles.saved, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
-        n_fig, fig_files = overall(saved_old, mon.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
-                                   new_s_s=sim.saved)
+        n_fig, fig_files = overall(saved_old, mons, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
+                                   new_s_s=sims)
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
         cleanup_fig_files(fig_files)
