@@ -83,9 +83,12 @@ def replicate(saved_old):
     Is_sat_delay = TFDelay(in_=saved_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
     # time loop
+    T = t[1] - t[0]
     for i in range(t_len):
         saved_old.i = i
         current_in = saved_old.Ib[i]
+        if i > 0:
+            T = t[i] - t[i - 1]
 
         # dc_dc_on = bool(lut_dc.interp(t[i]))
         dc_dc_on = False
@@ -100,9 +103,9 @@ def replicate(saved_old):
             sim.apply_delta_q_t(rp.delta_q_model, rp.t_last_model)
 
         # Models
-        sim.calculate(temp_c=temp_c, soc=sim.soc, curr_in=current_in, dt=dt[i], q_capacity=sim.q_capacity,
+        sim.calculate(temp_c=temp_c, soc=sim.soc, curr_in=current_in, dt=T, q_capacity=sim.q_capacity,
                       dc_dc_on=dc_dc_on, rp=rp)
-        sim.count_coulombs(dt=dt[i], reset=init, temp_c=temp_c, charge_curr=sim.ib, t_last=rp.t_last_model,
+        sim.count_coulombs(dt=T, reset=init, temp_c=temp_c, charge_curr=sim.ib, t_last=rp.t_last_model,
                            sat=False)
         rp.delta_q_model, rp.t_last_model = sim.update()
 
@@ -118,17 +121,17 @@ def replicate(saved_old):
 
         # Monitor calculations including ekf
         if rp.modeling == 0:
-            mon.calculate(Tb[i], Vb[i], Ib[i], dt[i], rp=rp)
+            mon.calculate(Tb[i], Vb[i], Ib[i], T, rp=rp)
         else:
-            mon.calculate(temp_c, sim.vb + randn() * v_std + dv_sense, sim.ib + randn() * i_std + di_sense, dt[i], rp=rp)
-        # mon.calculate(temp_c, Vb[i]+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, dt[i])
+            mon.calculate(temp_c, sim.vb + randn() * v_std + dv_sense, sim.ib + randn() * i_std + di_sense, T, rp=rp)
+        # mon.calculate(temp_c, Vb[i]+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, T)
         sat = is_sat(temp_c, mon.voc, mon.soc)
-        saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(dt[i], T_SAT / 2.), init)
+        saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), init)
         if rp.modeling == 0:
-            mon.count_coulombs(dt=dt[i], reset=init, temp_c=Tb[i], charge_curr=Ib[i], sat=saturated,
+            mon.count_coulombs(dt=T, reset=init, temp_c=Tb[i], charge_curr=Ib[i], sat=saturated,
                                t_last=mon.t_last)
         else:
-            mon.count_coulombs(dt=dt[i], reset=init, temp_c=temp_c, charge_curr=sim.ib, sat=saturated,
+            mon.count_coulombs(dt=T, reset=init, temp_c=temp_c, charge_curr=sim.ib, sat=saturated,
                                t_last=mon.t_last)
         mon.calc_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
         mon.select()
@@ -137,8 +140,8 @@ def replicate(saved_old):
         rp.delta_q, rp.t_last = mon.update()
 
         # Plot stuff
-        mon.save(t[i], dt[i], mon.soc, sim.voc)
-        sim.save(t[i], dt[i], sim.soc, sim.voc)
+        mon.save(t[i], T, mon.soc, sim.voc)
+        sim.save(t[i], T, sim.soc, sim.voc)
 
         # Print init
         if i == 0:

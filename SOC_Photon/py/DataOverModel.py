@@ -25,7 +25,8 @@ Dependencies:
 import numpy as np
 from numpy.random import randn
 import Battery
-from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, Retained, overall
+from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, Retained
+from Battery import overall as overalls
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 import os
 import matplotlib.pyplot as plt
@@ -352,7 +353,7 @@ if __name__ == '__main__':
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        # n_fig, fig_files = overall(mon.saved, sim.saved, mon.Randles.saved, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
+        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
         n_fig, fig_files = overall(saved_old, mons, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
                                    new_s_s=sims)
 
@@ -367,6 +368,7 @@ if __name__ == '__main__':
 
     # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613_new.txt'; unit_key = 'pro_2022'  # Used to filter out actual data
     #python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220613_new.txt", "pro_2022")
+    #python DataOverModel.py("../dataReduction/2-pole y_filt, tune hys 220613.txt", "soc0_2022")
 
     if __name__ == "__main__":
         import sys
