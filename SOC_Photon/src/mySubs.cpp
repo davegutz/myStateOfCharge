@@ -101,7 +101,7 @@ void Shunt::load()
 void print_serial_header(void)
 {
   if ( rp.debug==4 )
-    Serial.printf("unit,               hm,                  cTime,        T,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
+    Serial.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
 }
 
 // Print strings

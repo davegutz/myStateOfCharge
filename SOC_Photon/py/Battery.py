@@ -441,8 +441,9 @@ class BatteryMonitor(Battery, EKF_1x1):
             self.apply_soc(self.soc_ekf, temp_c)
             print("confirmed ", self.soc)
 
-    def save(self, time, soc_ref, voc_ref):
+    def save(self, time, dt, soc_ref, voc_ref):
         self.saved.time.append(time)
+        self.saved.dt.append(dt)
         self.saved.ib.append(self.ib)
         self.saved.ioc.append(self.ioc)
         self.saved.vb.append(self.vb)
@@ -681,8 +682,9 @@ class BatteryModel(Battery):
         self.t_last = temp_lim
         return self.soc
 
-    def save(self, time, soc_ref, voc_ref):
+    def save(self, time, dt, soc_ref, voc_ref):
         self.saved.time.append(time)
+        self.saved.dt.append(dt)
         self.saved.ib.append(self.ib)
         self.saved.ioc.append(self.ioc)
         self.saved.vb.append(self.vb)
@@ -725,6 +727,7 @@ class Saved:
     # For plot savings.   A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
     def __init__(self):
         self.time = []
+        self.dt = []
         self.ib = []
         self.ioc = []
         self.vb = []

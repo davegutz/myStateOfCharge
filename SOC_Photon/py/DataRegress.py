@@ -79,10 +79,12 @@ if __name__ == '__main__':
         data_file_new_csv = write_clean_file(data_file_new_txt, title_key, unit_key)
 
         cols = (
-        'unit', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf', 'y_ekf', 'soc_m',
+        'unit', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf', 'y_ekf', 'soc_m',
         'soc_ekf', 'soc', 'soc_wt')
-        data_old = np.genfromtxt(data_file_old_csv, delimiter=',', names=True, usecols=cols, dtype=None, encoding=None).view(np.recarray)
-        data_new = np.genfromtxt(data_file_new_csv, delimiter=',', names=True, usecols=cols, dtype=None, encoding=None).view(np.recarray)
+        data_old = np.genfromtxt(data_file_old_csv, delimiter=',', names=True, usecols=cols, dtype=None,
+                                 encoding=None).view(np.recarray)
+        data_new = np.genfromtxt(data_file_new_csv, delimiter=',', names=True, usecols=cols, dtype=None,
+                                 encoding=None).view(np.recarray)
         saved_old = SavedData(data_old)
         saved_new = SavedData(data_new)
 

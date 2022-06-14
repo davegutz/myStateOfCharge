@@ -165,7 +165,7 @@ def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None,
 
 def write_clean_file(txt_file, title_key, unit_key):
     csv_file = txt_file.replace('.txt', '.csv', 1)
-    default_header_str = "unit,               hm,                  cTime,        T,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
+    default_header_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
     # Header
     have_header_str = None
     with open(txt_file, "r") as input_file:
@@ -193,7 +193,7 @@ class SavedData:
         if data is None:
             self.i = 0
             self.time = []
-            self.T = []  # Update time, s
+            self.dt = []  # Update time, s
             self.unit = []  # text title
             self.hm = []  # hours, minutes
             self.cTime = []  # Control time, s
@@ -217,7 +217,6 @@ class SavedData:
         else:
             self.i = 0
             self.cTime = np.array(data.cTime)
-            print(self.cTime[0])
             self.time = np.array(data.cTime)
             self.Ib = np.array(data.Ib)
             # manage data shape
@@ -241,7 +240,7 @@ class SavedData:
             self.unit = data.unit[:i_end]
             self.hm = data.hm[:i_end]
             self.cTime = self.cTime[:i_end]
-            self.T = np.array(data.T[:i_end])
+            self.dt = np.array(data.dt[:i_end])
             self.time = np.array(self.time[:i_end])
             self.Ib = np.array(data.Ib[:i_end])
             self.Vb = np.array(data.Vb[:i_end])
@@ -338,7 +337,7 @@ if __name__ == '__main__':
         data_file_clean = write_clean_file(data_file_old_txt, title_key, unit_key)
 
         # Load
-        cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
+        cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
