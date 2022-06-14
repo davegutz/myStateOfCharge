@@ -161,7 +161,7 @@ def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None,
 
     return n_fig, fig_files
 
-def write_clean_file(txt_file, title_str, unit_str):
+def write_clean_file(txt_file, title_key, unit_key):
     csv_file = txt_file.replace('.txt', '.csv', 1)
     default_header_str = "unit,               hm,                  cTime,        T,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
     # Header
@@ -169,7 +169,7 @@ def write_clean_file(txt_file, title_str, unit_str):
     with open(txt_file, "r") as input_file:
         with open(csv_file, "w") as output:
             for line in input_file:
-                if line.__contains__(title_str):
+                if line.__contains__(title_key):
                     if have_header_str is None:
                         have_header_str = True  # write one title only
                         output.write(line)
@@ -180,10 +180,105 @@ def write_clean_file(txt_file, title_str, unit_str):
     with open(txt_file, "r") as input_file:
         with open(csv_file, "a") as output:
             for line in input_file:
-                if line.__contains__(unit_str):
+                if line.__contains__(unit_key):
                     output.write(line)
     print("csv_file=", csv_file)
     return csv_file
+
+
+class SavedData:
+    def __init__(self, data=None, time_end=None):
+        if data is None:
+            self.i = 0
+            self.time = []
+            self.T = []  # Update time, s
+            self.unit = []  # text title
+            self.hm = []  # hours, minutes
+            self.cTime = []  # Control time, s
+            self.Ib = []  # Bank current, A
+            self.Vb = []  # Bank voltage, V
+            self.sat = []  # Indication that battery is saturated, T=saturated
+            self.sel = []  # Current source selection, 0=amp, 1=no amp
+            self.mod = []  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
+            self.Tb = []  # Battery bank temperature, deg C
+            self.Vsat = []  # Monitor Bank saturation threshold at temperature, deg C
+            self.Vdyn = []  # Monitor Bank current induced back emf, V
+            self.dv_hys = []  # Drop across hysteresis, V
+            self.Voc = []  # Monitor Static bank open circuit voltage, V
+            self.Voc_dyn = []  # Bank VOC estimated from Vb and RC model, V
+            self.Voc_ekf = []  # Monitor bank solved static open circuit voltage, V
+            self.y_ekf = []  # Monitor single battery solver error, V
+            self.soc_m = []  # Simulated state of charge, fraction
+            self.soc_ekf = []  # Solved state of charge, fraction
+            self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) availabel (0-1)
+            self.soc_wt = []  # Weighted selection of ekf state of charge and Coulomb Counter (0-1)
+        else:
+            self.i = 0
+            self.cTime = np.array(data.cTime)
+            print(self.cTime[0])
+            self.time = np.array(data.cTime)
+            self.Ib = np.array(data.Ib)
+            # manage data shape
+            # Find first non-zero Ib and use to adjust time
+            # Ignore initial run of non-zero Ib because resetting from previous run
+            try:
+                zero_start = np.where(self.Ib == 0.0)[0][0]
+                self.zero_end = zero_start
+                while self.Ib[self.zero_end] == 0.0:  # stop at first non-zero
+                    self.zero_end += 1
+            except:
+                self.zero_end = 0
+            time_ref = self.time[self.zero_end]
+            # print("time_ref=", time_ref)
+            self.time -= time_ref
+            # Truncate
+            if time_end is None:
+                i_end = len(self.time)
+            else:
+                i_end = np.where(self.time <= time_end)[0][-1] + 1
+            self.unit = data.unit[:i_end]
+            self.hm = data.hm[:i_end]
+            self.cTime = self.cTime[:i_end]
+            self.T = np.array(data.T[:i_end])
+            self.time = np.array(self.time[:i_end])
+            self.Ib = np.array(data.Ib[:i_end])
+            self.Vb = np.array(data.Vb[:i_end])
+            self.sat = np.array(data.sat[:i_end])
+            self.sel = np.array(data.sel[:i_end])
+            self.mod_data = np.array(data.mod[:i_end])
+            self.Tb = np.array(data.Tb[:i_end])
+            self.Vsat = np.array(data.Vsat[:i_end])
+            self.Vdyn = np.array(data.Vdyn[:i_end])
+            self.Voc = np.array(data.Voc[:i_end])
+            self.Voc_dyn = self.Vb - self.Vdyn
+            self.dv_hys = self.Voc_dyn - self.Voc
+            self.Voc_ekf = np.array(data.Voc_ekf[:i_end])
+            self.y_ekf = np.array(data.y_ekf[:i_end])
+            self.soc_m = np.array(data.soc_m[:i_end])
+            self.soc_ekf = np.array(data.soc_ekf[:i_end])
+            self.soc = np.array(data.soc[:i_end])
+            self.soc_wt = np.array(data.soc_wt[:i_end])
+
+    def __str__(self):
+        s = "{},".format(self.unit[self.i])
+        s += "{},".format(self.hm[self.i])
+        s += "{:13.3f},".format(self.cTime[self.i])
+        # s += "{},".format(self.T[self.i])
+        s += "{:8.3f},".format(self.Ib[self.i])
+        s += "{:7.2f},".format(self.Vsat[self.i])
+        s += "{:5.2f},".format(self.Vdyn[self.i])
+        s += "{:5.2f},".format(self.Voc[self.i])
+        s += "{:5.2f},".format(self.Voc_ekf[self.i])
+        s += "{:10.6f},".format(self.y_ekf[self.i])
+        s += "{:7.3f},".format(self.soc_m[self.i])
+        s += "{:5.3f},".format(self.soc_ekf[self.i])
+        s += "{:5.3f},".format(self.soc[self.i])
+        s += "{:5.3f},".format(self.soc_wt[self.i])
+        return s
+
+    def mod(self):
+        return self.mod_data[self.zero_end]
+
 
 if __name__ == '__main__':
     import sys
@@ -191,101 +286,6 @@ if __name__ == '__main__':
 
     doctest.testmod(sys.modules['__main__'])
     plt.rcParams['axes.grid'] = True
-
-
-    class SavedData:
-        def __init__(self, data=None, time_end=None):
-            if data is None:
-                self.i = 0
-                self.time = []
-                self.T = []  # Update time, s
-                self.unit = []  # text title
-                self.hm = []  # hours, minutes
-                self.cTime = []  # Control time, s
-                self.Ib = []  # Bank current, A
-                self.Vb = []  # Bank voltage, V
-                self.sat = []  # Indication that battery is saturated, T=saturated
-                self.sel = []  # Current source selection, 0=amp, 1=no amp
-                self.mod = []  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
-                self.Tb = []  # Battery bank temperature, deg C
-                self.Vsat = []  # Monitor Bank saturation threshold at temperature, deg C
-                self.Vdyn = []  # Monitor Bank current induced back emf, V
-                self.dv_hys = []  # Drop across hysteresis, V
-                self.Voc = []  # Monitor Static bank open circuit voltage, V
-                self.Voc_dyn = []  # Bank VOC estimated from Vb and RC model, V
-                self.Voc_ekf = []  # Monitor bank solved static open circuit voltage, V
-                self.y_ekf = []  # Monitor single battery solver error, V
-                self.soc_m = []  # Simulated state of charge, fraction
-                self.soc_ekf = []  # Solved state of charge, fraction
-                self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) availabel (0-1)
-                self.soc_wt = []  # Weighted selection of ekf state of charge and Coulomb Counter (0-1)
-            else:
-                self.i = 0
-                self.cTime = np.array(data.cTime)
-                print(self.cTime[0])
-                self.time = np.array(data.cTime)
-                self.Ib = np.array(data.Ib)
-                # manage data shape
-                # Find first non-zero Ib and use to adjust time
-                # Ignore initial run of non-zero Ib because resetting from previous run
-                try:
-                    zero_start = np.where(self.Ib == 0.0)[0][0]
-                    self.zero_end = zero_start
-                    while self.Ib[self.zero_end] == 0.0:  # stop at first non-zero
-                        self.zero_end += 1
-                except:
-                    self.zero_end = 0
-                time_ref = self.time[self.zero_end]
-                # print("time_ref=", time_ref)
-                self.time -= time_ref
-                # Truncate
-                if time_end is None:
-                    i_end = len(self.time)
-                else:
-                    i_end = np.where(self.time <= time_end)[0][-1]+1
-                self.unit = data.unit[:i_end]
-                self.hm = data.hm[:i_end]
-                self.cTime = self.cTime[:i_end]
-                self.T = np.array(data.T[:i_end])
-                self.time = np.array(self.time[:i_end])
-                self.Ib = np.array(data.Ib[:i_end])
-                self.Vb = np.array(data.Vb[:i_end])
-                self.sat = np.array(data.sat[:i_end])
-                self.sel = np.array(data.sel[:i_end])
-                self.mod_data = np.array(data.mod[:i_end])
-                self.Tb = np.array(data.Tb[:i_end])
-                self.Vsat = np.array(data.Vsat[:i_end])
-                self.Vdyn = np.array(data.Vdyn[:i_end])
-                self.Voc = np.array(data.Voc[:i_end])
-                self.Voc_dyn = self.Vb - self.Vdyn
-                self.dv_hys = self.Voc_dyn - self.Voc
-                self.Voc_ekf = np.array(data.Voc_ekf[:i_end])
-                self.y_ekf = np.array(data.y_ekf[:i_end])
-                self.soc_m = np.array(data.soc_m[:i_end])
-                self.soc_ekf = np.array(data.soc_ekf[:i_end])
-                self.soc = np.array(data.soc[:i_end])
-                self.soc_wt = np.array(data.soc_wt[:i_end])
-
-        def __str__(self):
-            s = "{},".format(self.unit[self.i])
-            s += "{},".format(self.hm[self.i])
-            s += "{:13.3f},".format(self.cTime[self.i])
-            # s += "{},".format(self.T[self.i])
-            s += "{:8.3f},".format(self.Ib[self.i])
-            s += "{:7.2f},".format(self.Vsat[self.i])
-            s += "{:5.2f},".format(self.Vdyn[self.i])
-            s += "{:5.2f},".format(self.Voc[self.i])
-            s += "{:5.2f},".format(self.Voc_ekf[self.i])
-            s += "{:10.6f},".format(self.y_ekf[self.i])
-            s += "{:7.3f},".format(self.soc_m[self.i])
-            s += "{:5.3f},".format(self.soc_ekf[self.i])
-            s += "{:5.3f},".format(self.soc[self.i])
-            s += "{:5.3f},".format(self.soc_wt[self.i])
-            return s
-
-        def mod(self):
-             return self.mod_data[self.zero_end]
-
 
     def compare_print(old_s, new_s):
         s = " time,      Ib,                   Vb,              Vdyn,          Voc,            Voc_dyn,        Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
@@ -315,7 +315,7 @@ if __name__ == '__main__':
         return s
 
 
-    def main():
+    def main(data_file_old_txt, unit_key):
         # Trade study inputs
         # i-->0 provides continuous anchor to reset filter (why?)  i shifts important --> 2 current sensors, hyst in ekf
         # saturation provides periodic anchor to reset filter
@@ -347,17 +347,8 @@ if __name__ == '__main__':
         # time_end = 2500.
 
         # Load data (must end in .txt)
-        # data_file_old_txt = '../dataReduction/real world status-reflash-test 20220609.txt'
-        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613.txt'
-        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613_new.txt'
-        title_str = "unit,"     # Find one instance of title
-        unit_str = 'pro_2022'  # Used to filter out actual data
-        # unit_str = 'soc0_2022'  # Used to filter out actual data
-        title_str = "unit,"  # Find one instance of title
-        unit_str = 'pro_2022'  # Used to filter out actual data
-
-        # Clean .txt file
-        data_file_clean = write_clean_file(data_file_old_txt, title_str, unit_str)
+        title_key = "unit,"  # Find one instance of title
+        data_file_clean = write_clean_file(data_file_old_txt, title_key, unit_key)
 
         # Load
         cols = ('unit', 'hm', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
@@ -374,14 +365,14 @@ if __name__ == '__main__':
         rp.modeling = saved_old.mod()
         print("rp.modeling is ", rp.modeling)
         tweak_test = rp.tweak_test()
-        temp_c = data_old.Tb[0]
+        temp_c = saved_old.Tb[0]
 
         # Setup
         scale = model_bat_cap / Battery.RATED_BATT_CAP
         sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test)
         mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
                       r_dif=r_dif, temp_c=temp_c, hys_scale=hys_scale_monitor, tweak_test=tweak_test)
-        Is_sat_delay = TFDelay(in_=data_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
+        Is_sat_delay = TFDelay(in_=saved_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
         # time loop
         dt = t[1] - t[0]
@@ -466,6 +457,7 @@ if __name__ == '__main__':
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
+        # n_fig, fig_files = overall(mon.saved, sim.saved, mon.Randles.saved, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
         n_fig, fig_files = overall(saved_old, mon.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
                                    new_s_s=sim.saved)
 
@@ -474,4 +466,14 @@ if __name__ == '__main__':
 
         plt.show()
 
-    main()
+
+    # data_file_old_txt = '../dataReduction/real world status-reflash-test 20220609.txt'; unit_key = 'soc0_2022'  # Used to filter out actual data
+    # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613.txt'; unit_key = 'pro_2022'  # Used to filter out actual data
+
+    # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613_new.txt'; unit_key = 'pro_2022'  # Used to filter out actual data
+    #python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220613_new.txt", "pro_2022")
+
+    if __name__ == "__main__":
+        import sys
+        print(sys.argv[1:])
+        main(sys.argv[1], sys.argv[2])

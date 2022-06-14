@@ -72,11 +72,11 @@ if __name__ == '__main__':
         # data_file = '../../../dataReduction/data_proto.csv'
         data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613.txt'
         data_file_new_txt = '../dataReduction/rapidTweakRegressionTest20220613_new.txt'
-        title_str = "unit,"     # Find one instance of title
-        unit_str = 'pro_2022'  # Used to filter out actual data
+        title_key = "unit,"     # Find one instance of title
+        unit_key = 'pro_2022'  # Used to filter out actual data
         # Clean .txt file and load
-        data_file_old_csv = write_clean_file(data_file_old_txt, title_str, unit_str)
-        data_file_new_csv = write_clean_file(data_file_new_txt, title_str, unit_str)
+        data_file_old_csv = write_clean_file(data_file_old_txt, title_key, unit_key)
+        data_file_new_csv = write_clean_file(data_file_new_txt, title_key, unit_key)
 
         cols = (
         'unit', 'cTime', 'T', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf', 'y_ekf', 'soc_m',
