@@ -15,7 +15,12 @@
 
 """Define a general purpose battery model including Randle's model and SoC-VOV model as well as Kalman filtering
 support for simplified Mathworks' tracker. See Huria, Ceraolo, Gazzarri, & Jackey, 2013 Simplified Extended Kalman
-Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Battery Cells """
+Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Battery Cells.
+Dependencies:
+    - numpy      (everything)
+    - matplotlib (plots)
+    - reportlab  (figures, pdf)
+"""
 
 import numpy as np
 from numpy.random import randn
@@ -276,7 +281,7 @@ if __name__ == '__main__':
             s += "\n"
         return s
 
-    from SOC_regress_2022d import write_clean_file
+    from DataRegress import write_clean_file
 
     def main():
         # Trade study inputs
@@ -310,9 +315,9 @@ if __name__ == '__main__':
         # time_end = 2500.
 
         # Load data (must end in .txt)
-        # data_file_old_txt = '../../../dataReduction/real world status-reflash-test 20220609.txt'
-        # data_file_old_txt = '../../../dataReduction/rapidTweakRegressionTest20220613.txt'
-        data_file_old_txt = '../../../dataReduction/rapidTweakRegressionTest20220613_new.txt'
+        # data_file_old_txt = '../dataReduction/real world status-reflash-test 20220609.txt'
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613.txt'
+        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613_new.txt'
         title_str = "unit,"     # Find one instance of title
         unit_str = 'pro_2022'  # Used to filter out actual data
         # unit_str = 'soc0_2022'  # Used to filter out actual data
@@ -433,7 +438,7 @@ if __name__ == '__main__':
         # n_fig, fig_files = overall(mon.saved, sim.saved, mon.Randles.saved, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
         n_fig, fig_files = SavedData.overall(saved_old, mon.saved, sim.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
 
-        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../../../dataReduction/figures')
+        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
         cleanup_fig_files(fig_files)
 
         plt.show()

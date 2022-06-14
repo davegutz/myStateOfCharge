@@ -112,10 +112,10 @@ void setup()
   delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
   Serial.println("Hi!");
   // Bluetooth (hardware didn't work)
-  // Serial1.begin(9600);
-  // Serial1.flush();
+  Serial1.begin(9600);
+  Serial1.flush();
   // delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
-  // Serial1.println("Hello!");
+  Serial1.println("Hello!");
 
   // Peripherals
   myPins = new Pins(D6, D7, A1, D2);
@@ -186,7 +186,7 @@ void setup()
   }
 
   #ifdef PHOTON
-    if ( rp.debug>101 ) { sprintf(cp.buffer, "Photon\n"); Serial.print(cp.buffer); } //Serial1.print(buffer); }
+    if ( rp.debug>101 ) { sprintf(cp.buffer, "Photon\n"); Serial.print(cp.buffer); } // Serial1.print(buffer); }
   #else
     if ( rp.debug>101 ) { sprintf(cp.buffer, "Mega2560\n"); Serial.print(cp.buffer); } //Serial1.print(buffer); }
   #endif
@@ -274,6 +274,8 @@ void loop()
   static boolean reset_publish = true;      // Dynamic reset
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
+  // Serial test
+  if ( Serial1.available() ) Serial1.write(Serial1.read());
 
   // Start Blynk, only if connected since it is blocking
   if ( Particle.connected() && !myWifi->blynk_started )
