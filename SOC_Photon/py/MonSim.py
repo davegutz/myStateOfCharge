@@ -29,8 +29,6 @@ from datetime import datetime, timedelta
 
 
 def save_clean_file(mons, csv_file, unit_key):
-    cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
-            'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
     default_header_str = "unit,               hm,                  cTime,        dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
     n = len(mons.time)
     date_time_start = datetime.now()
@@ -60,7 +58,32 @@ def save_clean_file(mons, csv_file, unit_key):
             s += "{:7.3f},".format(mons.soc_wt[i])
             s += "\n"
             output.write(s)
-        print("Wrote ", csv_file)
+        print("Wrote(save_clean_file):", csv_file)
+
+def save_clean_file_sim(sims, csv_file, unit_key):
+    default_header_str = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_m,vdyn_m,vb_m,ib_m,sat_m,ddq_m,dq_m,q_m,qcap_m,soc_m,"
+    n = len(sims.time)
+    date_time_start = datetime.now()
+    with open(csv_file, "w") as output:
+        output.write(default_header_str + "\n")
+        for i in range(n):
+            s = unit_key + ','
+            s += "{:13.3f},".format(sims.time[i])
+            s += "{:5.2f},".format(sims.Tb_m[i])
+            s += "{:5.2f},".format(sims.Tbl_m[i])
+            s += "{:8.3f},".format(sims.vsat_m[i])
+            s += "{:5.2f},".format(sims.voc_m[i])
+            s += "{:5.2f},".format(sims.vdyn_m[i])
+            s += "{:5.2f},".format(sims.vb_m[i])
+            s += "{:8.3f},".format(sims.ib_m[i])
+            s += "{:7.3f},".format(sims.sat_m[i])
+            s += "{:5.3f},".format(sims.ddq_m[i])
+            s += "{:5.3f},".format(sims.dq_m[i])
+            s += "{:5.3f},".format(sims.qcap_m[i])
+            s += "{:7.3f},".format(sims.soc_m[i])
+            s += "\n"
+            output.write(s)
+        print("Wrote(save_clean_file_sim):", csv_file)
 
 def replicate(saved_old):
     t = saved_old.time
@@ -142,7 +165,8 @@ def replicate(saved_old):
 
         # Plot stuff
         mon.save(t[i], T, mon.soc, sim.voc)
-        sim.save(t[i], T, sim.soc, sim.voc)
+        sim.save(t[i], T)
+        sim.save_m(t[i], T)
 
         # Print init
         if i == 0:
@@ -155,14 +179,15 @@ def replicate(saved_old):
     print('time=', t[i])
     print('mon:  ', str(mon))
     print('sim:  ', str(sim))
+
     # print("Showing data from file then BatteryMonitor calculated from data")
     # print(compare_print(saved_old, mon.saved))
 
-    return mon.saved, sim.saved, mon.Randles.saved
+    return mon.saved, sim.saved, mon.Randles.saved, sim.saved_m
 
 if __name__ == '__main__':
     import sys
-    from DataOverModel import SavedData, write_clean_file, overall
+    from DataOverModel import SavedData, SavedDataSim, write_clean_file, overall
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
     import matplotlib.pyplot as plt
 
@@ -177,7 +202,9 @@ if __name__ == '__main__':
         # Load data (must end in .txt)
         data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613_new.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
-        data_file_clean = write_clean_file(data_file_old_txt, title_key, unit_key)
+        title_key_sim = "unit_sim,"  # Find one instance of title
+        data_file_clean = write_clean_file(data_file_old_txt, '_mon', title_key, unit_key)
+        data_file_sim_clean = write_clean_file(data_file_old_txt, '_sim', title_key_sim, title_key_sim)
 
         # Load
         cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
@@ -185,18 +212,26 @@ if __name__ == '__main__':
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
+        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_m', 'vdyn_m', 'ib_m', 'sat_m', 'ddq_m',
+                    'dq_m', 'q_m', 'qcap_m', 'soc_m')
+        if data_file_sim_clean:
+            data_old_sim = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
+                                 encoding=None).view(np.recarray)
+            saved_old_sim = SavedDataSim(data_old_sim, time_end)
+        else:
+            saved_old_sim = None
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
-        mons, sims, monrs = replicate(saved_old)
-        save_clean_file(mons, mon_file_save, 'rep' + date_)
+        mons, sims, monrs, sims_m = replicate(saved_old)
+        save_clean_file(mons, mon_file_save, 'mon_rep' + date_)
 
         # Plots
         n_fig = 0
         fig_files = []
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)
-        n_fig, fig_files = overall(saved_old, mons, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
-                                   new_s_s=sims)
+        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files, plot_title=plot_title, n_fig=n_fig)  # sim over mon
+        n_fig, fig_files = overall(saved_old, mons, saved_old_sim, sims_m, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
+                                   new_s_s=sims)  # mon over data
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
         cleanup_fig_files(fig_files)
 

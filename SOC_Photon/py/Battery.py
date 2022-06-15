@@ -34,12 +34,12 @@ class Retained:
         self.t_last = 25.
         self.delta_q_model = 0.
         self.t_last_model = 25.
-        self.modeling = int(7)  # assumed for this 'model'; over-ridden later
+        self.modeling = 7  # assumed for this 'model'; over-ridden later
         self.nS = 1  # assumed for this 'model'
         self.nP = 1  # assumed for this 'model'
 
     def tweak_test(self):
-        return ( 0x8 & self.modeling )
+        return 0x8 & self.modeling
 
 
 # Battery constants
@@ -63,7 +63,7 @@ batt_vmax = 14.3  # Observed max voltage of 14.3 V at 25C for 12V prototype bank
 DF1 = 0.02  # Weighted selection lower transition drift, fraction
 DF2 = 0.70  # Threshold to reset Coulomb Counter if different from ekf, fraction (0.05)
 EKF_CONV = 2e-3  # EKF tracking error indicating convergence, V (1e-3)
-EKF_T_CONV = 30. # EKF set convergence test time, sec (30.)
+EKF_T_CONV = 30.  # EKF set convergence test time, sec (30.)
 EKF_T_RESET = (EKF_T_CONV/2.)  # EKF reset test time, sec ('up 1, down 2')
 EKF_NOM_DT = 0.1  # EKF nominal update time, s (initialization; actual value varies)
 TAU_Y_FILT = 5.  # EKF y-filter time constant, sec (5.)
@@ -72,6 +72,7 @@ MAX_Y_FILT = 0.5  # EKF y-filter maximum, V (0.5)
 WN_Y_FILT = 0.1  # EKF y-filter-2 natural frequency, r/s (0.1)
 ZETA_Y_FILT = 0.9  # EKF y-fiter-2 damping factor (0.9)
 TMAX_FILT = 3.  # Maximum y-filter-2 sample time, s (3.)
+
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -85,8 +86,7 @@ class Battery(Coulombs):
                             what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
                             or 20 - 40 A for a 100 Ah battery"""
 
-    def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
-                 bat_v_sat=13.8, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
+    def __init__(self, bat_v_sat=13.8, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, tweak_test=False, t_max=0.5):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
@@ -211,7 +211,7 @@ class Battery(Coulombs):
         self.Randles.init_state_space([0., 0.])
 
     def look_hys(self, dv, soc):
-        return NotImplementedError
+        raise NotImplementedError
 
     def vbc(self):
         return self.Randles.x[0]
@@ -247,12 +247,11 @@ class Battery(Coulombs):
 class BatteryMonitor(Battery, EKF_1x1):
     """Extend basic class to monitor"""
 
-    def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
-                 bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
+    def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=-1., tweak_test=False):
-        Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, bat_v_sat, q_cap_rated, t_rated,
+        Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
 
@@ -282,6 +281,12 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.y_filt = 0.
         self.y_filt_2Ord = General2Pole(0.1, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
         self.y_filt2 = 0.
+        self.Ib = 0.
+        self.Vb = 0.
+        self.Voc = 0.
+        self.Vsat = 0.
+        self.Vdyn = 0.
+        self.Voc_ekf = 0.
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -314,7 +319,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.ib = max(min(ib, 10000.), -10000.)  # Overflow protection since ib past value used
         u = np.array([ib, vb]).T
         self.Randles.calc_x_dot(u)
-        if dt<self.t_max:
+        if dt < self.t_max:
             self.Randles.update(self.dt)
             self.voc_dyn = self.Randles.y
         else:  # aliased, unstable if update Randles
@@ -326,7 +331,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.voc = self.hys.update(self.dt)
         self.ioc = self.hys.ioc
         self.dv_hys = self.hys.dv_hys
-        self.bms_off = self.temp_c <= low_t;  # KISS
+        self.bms_off = self.temp_c <= low_t  # KISS
         if self.bms_off:
             self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
             self.ib = 0.
@@ -343,7 +348,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.y_filt2 = self.y_filt_2Ord.calculate(in_=self.y_ekf, dt=min(dt, TMAX_FILT), reset=False)
 
         # EKF convergence
-        conv = abs(self.y_filt)<EKF_CONV
+        conv = abs(self.y_filt) < EKF_CONV
         self.EKF_converged.calculate(conv, EKF_T_CONV, EKF_T_RESET, min(dt, EKF_T_RESET), False)
 
         # Charge time
@@ -378,10 +383,8 @@ class BatteryMonitor(Battery, EKF_1x1):
 
         amp_hrs_remaining = max(q_capacity - self.q_min + delta_q, 0.) / 3600.
         if soc > 0.:
-            self.amp_hrs_remaining_ekf = amp_hrs_remaining * (self.soc_ekf - self.soc_min) /\
-                                         max(soc - self.soc_min, 1e-8)
-            self.amp_hrs_remaining_wt = amp_hrs_remaining * (self.soc_wt - self.soc_min) / \
-                                         max(soc - self.soc_min, 1e-8)
+            self.amp_hrs_remaining_ekf = amp_hrs_remaining * (self.soc_ekf - self.soc_min) / max(soc - self.soc_min, 1e-8)
+            self.amp_hrs_remaining_wt = amp_hrs_remaining * (self.soc_wt - self.soc_min) / max(soc - self.soc_min, 1e-8)
         else:
             self.amp_hrs_remaining_ekf = 0.
             self.amp_hrs_remaining_wt = 0.
@@ -414,7 +417,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         return a, b, c, d
 
     def converged_ekf(self):
-        return EKF_converged.state()
+        return self.EKF_converged.state()
 
     def ekf_predict(self):
         """Process model"""
@@ -436,7 +439,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.q_ekf = self.soc_ekf * self.q_capacity
 
     def regauge(self, temp_c):
-        if converged_ekf() and abs(self.soc_ekf - self.soc) > DF2:
+        if self.converged_ekf() and abs(self.soc_ekf - self.soc) > DF2:
             print("Resetting Coulomb Counter Monitor from ", self.soc, " to EKF=", self.soc_ekf, "...")
             self.apply_soc(self.soc_ekf, temp_c)
             print("confirmed ", self.soc)
@@ -501,24 +504,24 @@ class BatteryMonitor(Battery, EKF_1x1):
     def select(self):
         drift = self.soc_ekf - self.soc
         avg = (self.soc_ekf + self.soc) / 2.
-        if drift<=-DF2 or drift>=DF2:
+        if drift <= -DF2 or drift >= DF2:
             self.soc_wt = self.soc_ekf
-        if -DF2<drift and drift<-DF1:
+        if -DF2 < drift < -DF1:
             self.soc_wt = avg + (drift + DF1)/(DF2 - DF1) * (DF2/2.)
-        elif DF1<drift and drift<DF2:
+        elif DF1 < drift < DF2:
             self.soc_wt = avg + (drift - DF1)/(DF2 - DF1) * (DF2/2.)
         else:
             self.soc_wt = avg
 
+
 class BatteryModel(Battery):
     """Extend basic class to run a model"""
 
-    def __init__(self, t_t=None, t_b=None, t_a=None, t_c=None, m=0.478, n=0.4, d=0.707,
-                 bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
+    def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1., tweak_test=False):
-        Battery.__init__(self, t_t, t_b, t_a, t_c, m, n, d, bat_v_sat, q_cap_rated, t_rated,
+        Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A
@@ -537,6 +540,10 @@ class BatteryModel(Battery):
         self.hys = Hysteresis(scale=hys_scale)  # Battery hysteresis model - drift of voc
         self.tweak_test = tweak_test
         self.voc_dyn = 0.  # Charging voltage, V
+        self.d_delta_q = 0.  # Charging rate, Coulombs/sec
+        self.charge_curr = 0.  # Charge current, A
+        self.t_last = 0.  # Past value of battery temperature used for rate limit memory, deg C
+        self.saved_m = Saved_m()  # for plots and prints
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -588,7 +595,7 @@ class BatteryModel(Battery):
         # Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
         u = np.array([self.ib, self.voc]).T  # past value self.ib
         self.Randles.calc_x_dot(u)
-        if dt<self.t_max:
+        if dt < self.t_max:
             self.Randles.update(dt)
             self.vb = self.Randles.y
         else:  # aliased, unstable if update Randles
@@ -603,11 +610,11 @@ class BatteryModel(Battery):
         # Saturation logic, both full and empty
         self.vsat = self.nom_vsat + (temp_c - 25.) * self.dvoc_dt
         self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
-        if self.tweak_test or (not rp.modeling):
         # if self.tweak_test:
-                self.sat_ib_max = curr_in
+        if self.tweak_test or (not rp.modeling):
+            self.sat_ib_max = curr_in
         self.ib = min(curr_in, self.sat_ib_max)  # the feedback of self.ib
-        if ((self.q <= 0.) & (curr_in < 0.)):  # empty
+        if (self.q <= 0.) & (curr_in < 0.):  # empty
             self.ib = 0.  # empty
         self.model_cutback = (self.voc_stat > self.vsat) & (self.ib == self.sat_ib_max)
         self.model_saturated = (self.temp_c > low_t) and (self.model_cutback & (self.ib < self.ib_sat))
@@ -651,9 +658,11 @@ class BatteryModel(Battery):
         Outputs:
             soc     State of charge, fraction (0-1.5)
         """
-        d_delta_q = charge_curr * dt
-        if charge_curr > 0. and not self.tweak_test:
-            d_delta_q *= self.coul_eff
+        self.charge_curr = charge_curr
+        self.t_last = t_last
+        self.d_delta_q = self.charge_curr * dt
+        if self.charge_curr > 0. and not self.tweak_test:
+            self.d_delta_q *= self.coul_eff
 
         # Rate limit temperature
         temp_lim = max(min(temp_c, t_last + self.t_rlim*dt), t_last - self.t_rlim*dt)
@@ -671,7 +680,7 @@ class BatteryModel(Battery):
 
         # Integration
         self.q_capacity = self.calculate_capacity(temp_lim)
-        self.delta_q += d_delta_q - DQDT*self.q_capacity*(temp_lim-self.t_last)
+        self.delta_q += self.d_delta_q - DQDT*self.q_capacity*(temp_lim-self.t_last)
         self.delta_q = max(min(self.delta_q, 0.), -self.q_capacity)
         self.q = self.q_capacity + self.delta_q
 
@@ -684,7 +693,7 @@ class BatteryModel(Battery):
         self.t_last = temp_lim
         return self.soc
 
-    def save(self, time, dt, soc_ref, voc_ref):
+    def save(self, time, dt):
         self.saved.time.append(time)
         self.saved.dt.append(dt)
         self.saved.ib.append(self.ib)
@@ -705,6 +714,32 @@ class BatteryModel(Battery):
         self.saved.vcd_dot.append(self.vcd_dot())
         self.saved.vbc_dot.append(self.vbc_dot())
         self.saved.soc.append(self.soc)
+        self.saved.d_delta_q.append(self.d_delta_q)
+        self.saved.Tb.append(self.temp_c)
+        self.saved.t_last.append(self.t_last)
+        self.saved.Vsat.append(self.vsat)
+        self.saved.Vdyn.append(self.vdyn)
+        self.saved.charge_curr.append(self.charge_curr)
+        self.saved.sat.append(self.model_saturated)
+        self.saved.delta_q.append(self.delta_q)
+        self.saved.q.append(self.q)
+        self.saved.q_capacity.append(self.q_capacity)
+
+    def save_m(self, time, dt):
+        self.saved_m.time.append(time)
+        self.saved_m.Tb_m.append(self.temp_c)
+        self.saved_m.Tbl_m.append(self.t_last)
+        self.saved_m.vsat_m.append(self.vsat)
+        self.saved_m.voc_m.append(self.voc)
+        self.saved_m.vdyn_m.append(self.vdyn)
+        self.saved_m.vb_m.append(self.vb)
+        self.saved_m.ib_m.append(self.ib)
+        self.saved_m.sat_m.append(self.sat)
+        self.saved_m.ddq_m.append(self.d_delta_q)
+        self.saved_m.dq_m.append(self.delta_q)
+        self.saved_m.q_m.append(self.q)
+        self.saved_m.qcap_m.append(self.q_capacity)
+        self.saved_m.soc_m.append(self.soc)
 
 
 # Other functions
@@ -783,9 +818,14 @@ class Saved:
         self.y_filt2 = []  # Filtered EKF y residual value, V
         self.soc_m = []  # Simulated state of charge, fraction
         self.soc_ekf = []  # Solved state of charge, fraction
-        # self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) availabel (0-1)
+        # self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) available (0-1)
         self.soc_wt = []  # Weighted selection of ekf state of charge and Coulomb Counter (0-1)
-
+        self.d_delta_q = []  # Charging rate, Coulombs/sec
+        self.charge_curr = []  # Charging current, A
+        self.q = []  # Present charge available to use, except q_min_, C
+        self.delta_q = []  # Charge change since saturated, C
+        self.q_capacity = []  # Saturation charge at temperature, C
+        self.t_last = []  # Past value of battery temperature used for rate limit memory, deg C
 
 def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     if fig_files is None:
@@ -1002,23 +1042,63 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     n_fig += 1
     plt.subplot(221)
     plt.title(plot_title)
-    plt.plot(mrs.time[1:], mrs.u[1:,1], color='red', label='Mon Randles u[2]=Vb')
+    plt.plot(mrs.time[1:], mrs.u[1:, 1], color='red', label='Mon Randles u[2]=Vb')
     plt.plot(mrs.time[1:], mrs.y[1:], color='blue', label='Mon Randles y=Voc_dyn')
     plt.legend(loc=2)
     plt.subplot(222)
-    plt.plot(mrs.time[1:], mrs.x[1:,0], color='blue', label='Mon Randles x[1]')
-    plt.plot(mrs.time[1:], mrs.x[1:,1], color='red', label='Mon Randles x[2]')
+    plt.plot(mrs.time[1:], mrs.x[1:, 0], color='blue', label='Mon Randles x[1]')
+    plt.plot(mrs.time[1:], mrs.x[1:, 1], color='red', label='Mon Randles x[2]')
     plt.legend(loc=2)
     plt.subplot(223)
-    plt.plot(mrs.time[1:], mrs.x_dot[1:,0], color='blue', label='Mon Randles x_dot[1]')
-    plt.plot(mrs.time[1:], mrs.x_dot[1:,1], color='red', label='Mon Randles x_dot[2]')
+    plt.plot(mrs.time[1:], mrs.x_dot[1:, 0], color='blue', label='Mon Randles x_dot[1]')
+    plt.plot(mrs.time[1:], mrs.x_dot[1:, 1], color='red', label='Mon Randles x_dot[2]')
     plt.legend(loc=2)
     plt.subplot(224)
-    plt.plot(mrs.time[1:], mrs.u[1:,0], color='blue', label='Mon Randles u[1]=Ib')
+    plt.plot(mrs.time[1:], mrs.u[1:, 0], color='blue', label='Mon Randles u[1]=Ib')
     plt.legend(loc=2)
     fig_file_name = filename + "_" + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-
     return n_fig, fig_files
+
+
+class Saved_m:
+    # For plot savings.   A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
+    def __init__(self):
+        self.time = []
+        self.unit = []  # text title
+        self.c_time = []  # Control time, s
+        self.Tb_m = []
+        self.Tbl_m = []
+        self.vsat_m = []
+        self.voc_m = []
+        self.vdyn_m = []
+        self.vb_m = []
+        self.ib_m = []
+        self.sat_m = []
+        self.ddq_m = []
+        self.dq_m = []
+        self.q_m = []
+        self.qcap_m = []
+        self.soc_m = []
+
+    def __str__(self):
+        s = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_m,vdyn_m,vb_m,ib_m,sat_m,ddq_m,dq_m,q_m,qcap_m,soc_m,\n"
+        for i in range(len(self.time)):
+            s += 'sim,'
+            s += "{:13.3f},".format(self.time[i])
+            s += "{:5.2f},".format(self.Tb_m[i])
+            s += "{:5.2f},".format(self.Tbl_m[i])
+            s += "{:8.3f},".format(self.vsat_m[i])
+            s += "{:5.2f},".format(self.voc_m[i])
+            s += "{:5.2f},".format(self.vdyn_m[i])
+            s += "{:5.2f},".format(self.vb_m[i])
+            s += "{:8.3f},".format(self.ib_m[i])
+            s += "{:7.3f},".format(self.sat_m[i])
+            s += "{:5.3f},".format(self.ddq_m[i])
+            s += "{:5.3f},".format(self.dq_m[i])
+            s += "{:5.3f},".format(self.qcap_m[i])
+            s += "{:7.3f},".format(self.soc_m[i])
+            s += "\n"
+        return s

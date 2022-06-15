@@ -14,6 +14,7 @@
 		curr_in   		Current into process, A
 		curr_sel_noamp	Use non-amplified sensor
 		cutback_gain_scalar	Scalar on battery model saturation cutback function. Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
+		d_delta_q		Charging rate, Coulombs/sec
 		delta_hrs		Time since last allowed saturation see 'N/Mz', hr
 		delta_q_		Charge change since saturated, C
 		delta_q_inf_	Charge infinity at past update see 'N/Mi', Coulombs

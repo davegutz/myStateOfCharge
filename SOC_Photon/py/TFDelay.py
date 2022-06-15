@@ -90,3 +90,6 @@ class TFDelay:
             else:
                 self.timer = -self.nt
         return self.calculate4t(in_, t_true, t_false, dt)
+
+    def state(self):
+        return self.timer > 0.

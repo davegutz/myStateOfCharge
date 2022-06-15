@@ -33,9 +33,9 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from TFDelay import TFDelay
 from MonSimNomConfig import *
-from MonSim import replicate, save_clean_file
+from MonSim import replicate, save_clean_file, save_clean_file_sim
 
-def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None, new_s_s=None):
+def overall(old_s, new_s, old_s_sim, new_s_sim, filename, fig_files=None, plot_title=None, n_fig=None, new_s_s=None):
     if fig_files is None:
         fig_files = []
 
@@ -164,9 +164,9 @@ def overall(old_s, new_s, filename, fig_files=None, plot_title=None, n_fig=None,
 
     return n_fig, fig_files
 
-def write_clean_file(txt_file, title_key, unit_key):
-    csv_file = txt_file.replace('.txt', '.csv', 1)
-    default_header_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
+def write_clean_file(txt_file, type, title_key, unit_key):
+    csv_file = txt_file.replace('.txt', type + '.csv', 1)
+    # default_header_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
     # Header
     have_header_str = None
     with open(txt_file, "r") as input_file:
@@ -176,16 +176,23 @@ def write_clean_file(txt_file, title_key, unit_key):
                     if have_header_str is None:
                         have_header_str = True  # write one title only
                         output.write(line)
-    if have_header_str is None:
-        output.write(default_header_str)
-        print("I:  using default data header")
-    # Date
+    # if have_header_str is None:
+    #     with open(csv_file, "w") as output:
+    #         output.write(default_header_str)
+    #         print("I:  using default data header")
+    # Data
+    num_lines = 0
     with open(txt_file, "r") as input_file:
         with open(csv_file, "a") as output:
             for line in input_file:
                 if line.__contains__(unit_key):
                     output.write(line)
-    print("csv_file=", csv_file)
+                    num_lines += 1
+    if not num_lines:
+        csv_file = None
+        print("I(write_clean_file): no data to write")
+    else:
+        print("Wrote(write_clean_file):", csv_file)
     return csv_file
 
 
@@ -215,6 +222,7 @@ class SavedData:
             self.soc_ekf = []  # Solved state of charge, fraction
             self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) availabel (0-1)
             self.soc_wt = []  # Weighted selection of ekf state of charge and Coulomb Counter (0-1)
+            self.time_ref = 0.  # Adjust time for start of Ib input
         else:
             self.i = 0
             self.cTime = np.array(data.cTime)
@@ -230,9 +238,9 @@ class SavedData:
                     self.zero_end += 1
             except:
                 self.zero_end = 0
-            time_ref = self.time[self.zero_end]
-            # print("time_ref=", time_ref)
-            self.time -= time_ref
+            self.time_ref = self.time[self.zero_end]
+            # print("time_ref=", self.time_ref)
+            self.time -= self.time_ref
             # Truncate
             if time_end is None:
                 i_end = len(self.time)
@@ -276,6 +284,73 @@ class SavedData:
         s += "{:5.3f},".format(self.soc_ekf[self.i])
         s += "{:5.3f},".format(self.soc[self.i])
         s += "{:5.3f},".format(self.soc_wt[self.i])
+        return s
+
+    def mod(self):
+        return self.mod_data[self.zero_end]
+
+
+class SavedDataSim:
+    def __init__(self, time_ref, data=None, time_end=None):
+        if data is None:
+            self.i = 0
+            self.time = []
+            self.unit = []  # text title
+            self.c_time = []  # Control time, s
+            self.Tb_m = []
+            self.Tbl_m = []
+            self.vsat_m = []
+            self.voc_m = []
+            self.vdyn_m = []
+            self.vb_m = []
+            self.ib_m = []
+            self.sat_m = []
+            self.ddq_m = []
+            self.dq_m = []
+            self.q_m = []
+            self.qcap_m = []
+            self.soc_m = []
+        else:
+            self.i = 0
+            self.c_time = np.array(data.c_time)
+            self.time = np.array(data.c_time) - time_ref
+            # Truncate
+            if time_end is None:
+                i_end = len(self.time)
+            else:
+                i_end = np.where(self.time <= time_end)[0][-1] + 1
+            self.unit_m = data.unit_m[:i_end]
+            self.c_time = self.c_time[:i_end]
+            self.time = self.time[:i_end]
+            self.Tb_m = data.Tb_m[:i_end]
+            self.Tbl_m = data.Tbl_m[:i_end]
+            self.vsat_m = data.vsat_m[:i_end]
+            self.voc_m = data.voc_m[:i_end]
+            self.vdyn_m = data.vdyn_m[:i_end]
+            # self.vb_m = data.vb_m[:i_end]
+            self.ib_m = data.ib_m[:i_end]
+            self.sat_m = data.sat_m[:i_end]
+            self.ddq_m = data.ddq_m[:i_end]
+            self.dq_m = data.dq_m[:i_end]
+            self.q_m = data.q_m[:i_end]
+            self.qcap_m = data.qcap_m[:i_end]
+            self.soc_m = data.soc_m[:i_end]
+
+    def __str__(self):
+        s = "{},".format(self.unit[self.i])
+        s += "{:13.3f},".format(self.c_time[self.i])
+        s += "{:5.2f},".format(self.Tb_m[self.i])
+        s += "{:5.2f},".format(self.Tbl_m[self.i])
+        s += "{:8.3f},".format(self.vsat_m[self.i])
+        s += "{:5.2f},".format(self.voc_m[self.i])
+        s += "{:5.2f},".format(self.vdyn_m[self.i])
+        s += "{:5.2f},".format(self.vb_m[self.i])
+        s += "{:8.3f},".format(self.ib_m[self.i])
+        s += "{:7.3f},".format(self.sat_m[self.i])
+        s += "{:5.3f},".format(self.ddq_m[self.i])
+        s += "{:5.3f},".format(self.dq_m[self.i])
+        s += "{:5.3f},".format(self.qcap_m[self.i])
+        s += "{:7.3f},".format(self.soc_m[self.i])
         return s
 
     def mod(self):
@@ -334,8 +409,8 @@ if __name__ == '__main__':
         # time_end = 2500.
 
         # Load data (must end in .txt)
-        title_key = "unit,"  # Find one instance of title
-        data_file_clean = write_clean_file(data_file_old_txt, title_key, unit_key)
+        data_file_clean = write_clean_file(data_file_old_txt, '_mon', 'unit', unit_key)
+        data_file_sim_clean = write_clean_file(data_file_old_txt, '_sim', 'unit_m', 'sim,')
 
         # Load
         cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
@@ -343,12 +418,20 @@ if __name__ == '__main__':
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
+        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_m', 'vdyn_m', 'ib_m', 'sat_m', 'ddq_m',
+                    'dq_m', 'q_m', 'qcap_m', 'soc_m')
+        data_old_sim = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
+                                 encoding=None).view(np.recarray)
+        saved_old_sim = SavedDataSim(saved_old.time_ref, data_old_sim, time_end)
 
         # Run model
-        mons, sims, monrs = replicate(saved_old)
+        mons, sims, monrs, sims_m = replicate(saved_old)
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
+        sim_file_save = data_file_sim_clean.replace(".csv", "_rep.csv")
         date_ = datetime.now().strftime("%y%m%d")
-        save_clean_file(mons, mon_file_save, 'rep' + date_)
+        save_clean_file(mons, mon_file_save, '_mon_rep' + date_)
+        if sims_m:
+            save_clean_file_sim(sims_m, sim_file_save, '_sim_rep' + date_)
 
         # Plots
         n_fig = 0
@@ -357,8 +440,8 @@ if __name__ == '__main__':
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         # n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
-        n_fig, fig_files = overall(saved_old, mons, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
-                                   new_s_s=sims)
+        n_fig, fig_files = overall(saved_old, mons, saved_old_sim, sims, filename, fig_files, plot_title=plot_title,
+                                   n_fig=n_fig, new_s_s=sims)
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
         cleanup_fig_files(fig_files)
