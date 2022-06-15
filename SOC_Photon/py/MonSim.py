@@ -61,11 +61,11 @@ def save_clean_file(mons, csv_file, unit_key):
         print("Wrote(save_clean_file):", csv_file)
 
 def save_clean_file_sim(sims, csv_file, unit_key):
-    default_header_str = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_m,vdyn_m,vb_m,ib_m,sat_m,ddq_m,dq_m,q_m,qcap_m,soc_m,"
+    header_str = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_m,vdyn_m,vb_m,ib_m,sat_m,ddq_m,dq_m,q_m,qcap_m,soc_m,"
     n = len(sims.time)
     date_time_start = datetime.now()
     with open(csv_file, "w") as output:
-        output.write(default_header_str + "\n")
+        output.write(header_str + "\n")
         for i in range(n):
             s = unit_key + ','
             s += "{:13.3f},".format(sims.time[i])

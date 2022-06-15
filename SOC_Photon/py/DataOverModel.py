@@ -327,7 +327,7 @@ class SavedDataSim:
             self.vsat_m = data.vsat_m[:i_end]
             self.voc_m = data.voc_m[:i_end]
             self.vdyn_m = data.vdyn_m[:i_end]
-            # self.vb_m = data.vb_m[:i_end]
+            self.vb_m = data.voc_m[:i_end]*0.
             self.ib_m = data.ib_m[:i_end]
             self.sat_m = data.sat_m[:i_end]
             self.ddq_m = data.ddq_m[:i_end]
