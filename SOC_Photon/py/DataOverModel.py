@@ -372,6 +372,8 @@ if __name__ == '__main__':
     # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613_new.txt'; unit_key = 'pro_2022'  # Used to filter out actual data
     #python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220613_new.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/2-pole y_filt, tune hys 220613.txt", "soc0_2022")
+    #python DataOverModel.py("../dataReduction/Xp10_sim.txt", "pro_2022")
+    #python DataOverModel.py("../dataReduction/watchXm0.txt", "pro_2022")
 
     if __name__ == "__main__":
         import sys

@@ -144,10 +144,10 @@ void Battery::pretty_print(void)
     Serial.printf("  vsat_ =           %7.3f;  // V\n", vsat_);
     Serial.printf("  vdyn_ =           %7.3f;  // V\n", vdyn_);
     Serial.printf("  sr_ =             %7.3f;  // Resistance scalar\n", sr_);
-    Serial.printf("  dv_ =             %7.3f;  // Table hard-coded adjustment, V\n", dv_);
+    Serial.printf("  dv_ =             %7.3f;  // Table hard adj, V\n", dv_);
     Serial.printf("  dt_ =             %7.3f;  // Update time, s\n", dt_);
-    Serial.printf(" *rp_nP_ =            %5.2f;  // P parallel batteries in bank, e.g. '2P1S'\n", *rp_nP_);
-    Serial.printf(" *rp_nS_ =            %5.2f;  // S series batteries in bank, e.g. '2P1S'\n", *rp_nS_);
+    Serial.printf(" *rp_nP_ =            %5.2f;  // P parallel in bank, e.g. '2P1S'\n", *rp_nP_);
+    Serial.printf(" *rp_nS_ =            %5.2f;  // S series in bank, e.g. '2P1S'\n", *rp_nS_);
 }
 
 // Print State Space
@@ -702,8 +702,9 @@ Outputs:
 */
 double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const double t_last)
 {
-    double d_delta_q = Sen->Ibatt * Sen->T;
-    if ( Sen->Ibatt>0. ) d_delta_q *= coul_eff_;
+    float charge_curr = Sen->Ibatt;
+    double d_delta_q = charge_curr * Sen->T;
+    if ( charge_curr>0. ) d_delta_q *= coul_eff_;
 
     // Rate limit temperature
     double temp_lim = max(min(Sen->Tbatt, t_last + T_RLIM*Sen->T), t_last - T_RLIM*Sen->T);
@@ -736,10 +737,20 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
 
     if ( rp.debug==97 )
         Serial.printf("BatteryModel::cc,  dt,voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
-                    Sen->T,pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, Sen->Ibatt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
+                    Sen->T, pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
     if ( rp.debug==-97 )
         Serial.printf("voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
-                    pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, Sen->Ibatt, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
+                    pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
+
+    if ( rp.debug==24 )
+    {
+        double cTime;
+        if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;
+        else cTime = Sen->control_time;
+        sprintf(cp.buffer, "unit_sim, %13.3f, %4.1f,%4.1f, %6.3f,%6.3f,%6.3f, %7.3f, %d,  %10.6f,%9.1f,%9.1f,%9.1f,  %8.4f, %c",
+            cTime, Sen->Tbatt, temp_lim, vsat_, voc_, vdyn_, charge_curr, model_saturated_, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, '\0');
+        Serial.println(cp.buffer);
+    }
 
     // Save and return
     *rp_t_last_ = temp_lim;

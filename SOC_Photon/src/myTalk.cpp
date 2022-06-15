@@ -338,7 +338,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
           case ( -1 ):
             Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt_amp  ,Ishunt_noamp  ,Vbat_fo*10-110  ,voc_s*10-110  ,vdyn_s*10  ,v_s*10-110  , voc_dyn*10-110,,,,,,,,,,,\n");
             break;
-
+          case ( 14 ):
+            print_serial_sim_header();
+          case ( 4 ):
+            print_serial_header();
+            break;
           default:
             print_serial_header();
         }
@@ -833,14 +837,14 @@ soc_ekf= %8.4f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.
                   self_talk("Xf0.02", Mon, Sen);  // Frequency 0.02 Hz
                   self_talk("Xa-2000", Mon, Sen); // Amplitude -2000 A
                   self_talk("XC3", Mon, Sen);     // Number of injection cycles
-                  self_talk("v4", Mon, Sen);      // Data collection
+                  self_talk("v24", Mon, Sen);     // Data collection
                 }
                 else if ( INT_in == 11 )
                 {
-                  self_talk("Xf0.002", Mon, Sen); // Frequency 0.02 Hz
-                  self_talk("Xa-60", Mon, Sen);   // Amplitude -2000 A
+                  self_talk("Xf0.002", Mon, Sen); // Frequency 0.002 Hz
+                  self_talk("Xa-60", Mon, Sen);   // Amplitude -60 A
                   self_talk("XC1", Mon, Sen);     // Number of injection cycles
-                  self_talk("v4", Mon, Sen);      // Data collection
+                  self_talk("v24", Mon, Sen);     // Data collection
                 }
                 self_talk("Pa", Mon, Sen);    // Print all for record
                 self_talk("XR", Mon, Sen);    // Run cycle

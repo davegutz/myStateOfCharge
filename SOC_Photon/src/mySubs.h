@@ -101,6 +101,7 @@ struct Pins
   }
 };
 
+
 // Sensors
 struct Sensors
 {
@@ -138,6 +139,7 @@ struct Sensors
   float cycles_inj;               // Number of injection cycles
   Sync *PublishSerial;            // Handle to debug print time
   Sync *ReadSensors;              // Handle to debug read time
+  double control_time;            // Decimal time, seconds since 1/1/2021
   Sensors(void) {}
   Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, Sync *ReadSensors)
   {
@@ -182,6 +184,7 @@ void monitor(const int reset, const boolean reset_temp, const unsigned long now,
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen);
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen);
 void print_serial_header(void);
+void print_serial_sim_header(void);
 uint32_t pwm_write(uint32_t duty, Pins *myPins);
 void sense_synth_select(const int reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen);

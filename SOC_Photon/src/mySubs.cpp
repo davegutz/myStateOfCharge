@@ -100,14 +100,19 @@ void Shunt::load()
 // Text headers
 void print_serial_header(void)
 {
-  if ( rp.debug==4 )
+  if ( rp.debug==4 || rp.debug==24 )
     Serial.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
+}
+void print_serial_sim_header(void)
+{
+  if ( rp.debug==24 )
+    Serial.printf("unit_sim,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_m, vdyn_m, ib_m, sat_m, ddq_m, dq_m, q_m, qcap_m, soc_m,\n");
 }
 
 // Print strings
 void create_print_string(Publish *pubList)
 {
-  if ( rp.debug==4 )
+  if ( rp.debug==4 || rp.debug==24 )
     sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%7.3f,    %6.3f,%6.3f,%6.3f,%6.3f,  %9.6f, %6.4f,%6.4f,%6.4f,%6.4f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
       pubList->sat, rp.ibatt_sel_noamp, rp.modeling,
@@ -119,7 +124,7 @@ void create_print_string(Publish *pubList)
 }
 void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
-  if ( rp.debug==4 )
+  if ( rp.debug==4 || rp.debug==24 )
   {
     sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,    %6.3f,%6.3f,%6.3f,%6.3f,  %9.6f, %6.4f,%6.4f,%6.4f,%6.4f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), double(Sen->now)/1000., Sen->T,

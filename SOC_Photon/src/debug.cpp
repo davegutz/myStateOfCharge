@@ -35,10 +35,10 @@ void debug_m1(BatteryMonitor *Mon, Sensors *Sen)
 }
 
 // rp.debug==-3  // Power Arduino plot
-void debug_m3(BatteryMonitor *Mon, Sensors *Sen, const double control_time, const unsigned long elapsed, const boolean reset)
+void debug_m3(BatteryMonitor *Mon, Sensors *Sen, const unsigned long elapsed, const boolean reset)
 {
   Serial.printf("fast,et,reset,Wbatt,q_f,q,soc,T,\n %12.3f,%7.3f, %d, %7.3f,    %7.3f,\n",
-  control_time, double(elapsed)/1000., reset, Sen->Wbatt, Sen->Sim->soc());
+  Sen->control_time, double(elapsed)/1000., reset, Sen->Wbatt, Sen->Sim->soc());
 }
 
 // rp.debug==-4  // General Arduino plot

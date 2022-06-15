@@ -98,7 +98,6 @@ unsigned long last_sync = millis();   // Timekeeping
 
 int num_timeouts = 0;           // Number of Particle.connect() needed to unfreeze
 String hm_string = "00:00";     // time, hh:mm
-double control_time = 0.0;      // Decimal time, seconds since 1/1/2021
 Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_SSD1306 *display;      // Main OLED display
 Wifi *myWifi;                   // Manage Wifi
@@ -201,7 +200,7 @@ void setup()
 
   // Summary
   System.enableFeature(FEATURE_RETAINED_MEMORY);
-  if ( rp.debug==4 )
+  if ( rp.debug==4 || rp.debug==24 )
     print_all_summary(mySum, rp.isum, NSUM);
 
   // Header for rp.debug print
@@ -300,6 +299,9 @@ void loop()
   now = millis();
   time_now = Time.now();
   sync_time(now, &last_sync, &millis_flip);      // Refresh time synchronization
+  char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
+  Sen->control_time = decimalTime(&current_time, tempStr, now, millis_flip);
+  hm_string = String(tempStr);
   read_temp = ReadTemp->update(millis(), reset);              //  now || reset
   read = ReadSensors->update(millis(), reset);               //  now || reset
   elapsed = ReadSensors->now() - start;
@@ -352,13 +354,17 @@ void loop()
     if ( rp.debug==-1 ) debug_m1(Mon, Sen); // General purpose Arduino
     if ( rp.debug==12 ) debug_12(Mon, Sen);  // EKF
     if ( rp.debug==-12 ) debug_m12(Mon, Sen);  // EKF Arduino
-    if ( rp.debug==-3 ) debug_m3(Mon, Sen, control_time, elapsed, reset);  // Power Arduino
+    if ( rp.debug==-3 ) debug_m3(Mon, Sen, elapsed, reset);  // Power Arduino
     if ( rp.debug==-35 ) debug_m35(Mon, Sen); // EKF Arduino
     if ( rp.tweak_test() )
     {
-      if ( rp.debug==4 )
+      if ( rp.debug==4 || rp.debug==24 )
       {
-        if ( reset || (last_read_debug != rp.debug) ) print_serial_header();
+        if ( reset || (last_read_debug != rp.debug) )
+        {
+          print_serial_header();
+          if ( rp.debug==24 ) print_serial_sim_header();
+        }
         tweak_print(Sen, Mon);
       }
 
@@ -390,10 +396,7 @@ void loop()
   // to get a curl command to run
   if ( publishP || publishS)
   {
-    char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
-    control_time = decimalTime(&current_time, tempStr, now, millis_flip);
-    hm_string = String(tempStr);
-    assign_publist(&pp.pubList, PublishParticle->now(), unit, hm_string, control_time, Sen, num_timeouts, Mon);
+    assign_publist(&pp.pubList, PublishParticle->now(), unit, hm_string, Sen, num_timeouts, Mon);
  
     // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
     if ( publishP )
@@ -408,9 +411,13 @@ void loop()
     // Mon for rp.debug
     if ( publishS && !rp.tweak_test() )
     {
-      if ( rp.debug==4 )
+      if ( rp.debug==4 || rp.debug==24 )
       {
-        if ( reset_publish || (last_publishS_debug != rp.debug) ) print_serial_header();
+        if ( reset_publish || (last_publishS_debug != rp.debug) )
+        {
+          print_serial_header();
+          if ( rp.debug==24 ) print_serial_sim_header();
+        }
         serial_print(PublishSerial->now(), Sen->T);
       }
 
