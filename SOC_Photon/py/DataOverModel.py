@@ -35,7 +35,7 @@ from TFDelay import TFDelay
 from MonSimNomConfig import *
 from MonSim import replicate, save_clean_file, save_clean_file_sim
 
-def overall(old_s, new_s, old_s_sim, new_s_sim, filename, fig_files=None, plot_title=None, n_fig=None, new_s_s=None):
+def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files=None, plot_title=None, n_fig=None, new_s_s=None):
     if fig_files is None:
         fig_files = []
 
@@ -161,6 +161,50 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, filename, fig_files=None, plot_t
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
+
+    if old_s_sim and new_s_sim_m:
+        plt.figure()  # sim_m  1
+        n_fig += 1
+        plt.subplot(331)
+        plt.title(plot_title)
+        plt.plot(old_s_sim.time, old_s_sim.ib_m, color='orange', label='ib_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.ib_m, color='green', linestyle='--', label='ib_m_new')
+        plt.plot(old_s.time, old_s.Ib, color='blue', label='ib')
+        plt.plot(new_s.time, new_s.Ib, color='red', linestyle='--', label='ib_new')
+        plt.legend(loc=1)
+        plt.subplot(332)
+        plt.plot(old_s_sim.time, old_s_sim.soc_m, color='orange', label='soc_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.soc_m, color='green', linestyle='--', label='soc_m_new')
+        plt.legend(loc=1)
+        plt.subplot(333)
+        plt.plot(old_s_sim.time, old_s_sim.voc_m, color='orange', label='voc_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.voc_m, color='green', linestyle='--', label='voc_m_new')
+        plt.plot(old_s_sim.time, old_s_sim.vsat_m, color='blue', label='vsat_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.vsat_m, color='red', linestyle='--', label='vsat_m_new')
+        plt.plot(old_s_sim.time, old_s_sim.vb_m, color='cyan', label='vb_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.vb_m, color='black', linestyle='--', label='vb_m_new')
+        plt.legend(loc=1)
+        plt.subplot(334)
+        plt.plot(old_s_sim.time, old_s_sim.Tb_m, color='orange', label='Tb_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.Tb_m, color='green', linestyle='--', label='Tb_m_new')
+        plt.plot(old_s_sim.time, old_s_sim.Tbl_m, color='blue', label='Tbl_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.Tbl_m, color='red', linestyle='--', label='Tbl_m_new')
+        plt.legend(loc=1)
+        plt.subplot(335)
+        plt.plot(old_s_sim.time, old_s_sim.vdyn_m, color='orange', label='vdyn_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.vdyn_m, color='green', linestyle='--', label='vdyn_m_new')
+        plt.legend(loc=1)
+        plt.subplot(336)
+        plt.plot(old_s_sim.time, old_s_sim.ddq_m, color='orange', label='ddq_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.ddq_m, color='green', linestyle='--', label='ddq_m_new')
+        plt.legend(loc=1)
+        plt.subplot(337)
+        plt.plot(old_s_sim.time, old_s_sim.dq_m, color='orange', label='dq_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.dq_m, color='green', linestyle='--', label='dq_m_new')
+        plt.legend(loc=1)
+        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
 
     return n_fig, fig_files
 
@@ -440,7 +484,7 @@ if __name__ == '__main__':
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         # n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
-        n_fig, fig_files = overall(saved_old, mons, saved_old_sim, sims, filename, fig_files, plot_title=plot_title,
+        n_fig, fig_files = overall(saved_old, mons, saved_old_sim, sims, sims_m, filename, fig_files, plot_title=plot_title,
                                    n_fig=n_fig, new_s_s=sims)
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')

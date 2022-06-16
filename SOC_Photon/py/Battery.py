@@ -390,7 +390,7 @@ class BatteryMonitor(Battery, EKF_1x1):
             self.amp_hrs_remaining_wt = 0.
         return self.tcharge
 
-    # def count_coulombs(self, dt=0., reset=False, temp_c=25., charge_curr=0., sat=True, t_last=0.):
+    # def count_coulombs(self, dt=0., reset=False, temp_c=25., charge_curr=0., sat=True):
     #     raise NotImplementedError
 
     def construct_state_space_monitor(self):
@@ -542,7 +542,6 @@ class BatteryModel(Battery):
         self.voc_dyn = 0.  # Charging voltage, V
         self.d_delta_q = 0.  # Charging rate, Coulombs/sec
         self.charge_curr = 0.  # Charge current, A
-        self.t_last = 0.  # Past value of battery temperature used for rate limit memory, deg C
         self.saved_m = Saved_m()  # for plots and prints
 
     def __str__(self, prefix=''):
@@ -645,7 +644,7 @@ class BatteryModel(Battery):
         d = np.array([self.r0, 1])
         return a, b, c, d
 
-    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, t_last, soc_m_init=None):
+    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, soc_m_init=None):  # BatteryModel
         """Coulomb counter based on true=actual capacity
         Internal resistance of battery is a loss
         Inputs:
@@ -659,15 +658,16 @@ class BatteryModel(Battery):
             soc     State of charge, fraction (0-1.5)
         """
         self.charge_curr = charge_curr
-        self.t_last = t_last
         self.d_delta_q = self.charge_curr * dt
         if self.charge_curr > 0. and not self.tweak_test:
             self.d_delta_q *= self.coul_eff
 
         # Rate limit temperature
-        temp_lim = max(min(temp_c, t_last + self.t_rlim*dt), t_last - self.t_rlim*dt)
+        self.temp_lim = max(min(temp_c, self.t_last + self.t_rlim*dt), self.t_last - self.t_rlim*dt)
+        print("BatteryModel:  temp_c, t_last, t_rim, dt, temp_lim=", temp_c, self.t_last, self.t_rlim, dt, self.temp_lim)
         if reset:
-            temp_lim = temp_c
+            self.temp_lim = temp_c
+            self.t_last = temp_c
             if soc_m_init and not self.mod:
                 self.delta_q = self.calculate_capacity(temp_c) * (soc_m_init - 1.)
 
@@ -679,18 +679,18 @@ class BatteryModel(Battery):
         self.resetting = False  # one pass flag.  Saturation debounce should reset next pass
 
         # Integration
-        self.q_capacity = self.calculate_capacity(temp_lim)
-        self.delta_q += self.d_delta_q - DQDT*self.q_capacity*(temp_lim-self.t_last)
+        self.q_capacity = self.calculate_capacity(self.temp_lim)
+        self.delta_q += self.d_delta_q - DQDT*self.q_capacity*(self.temp_lim-self.t_last)
         self.delta_q = max(min(self.delta_q, 0.), -self.q_capacity)
         self.q = self.q_capacity + self.delta_q
 
         # Normalize
         self.soc = self.q / self.q_capacity
-        self.soc_min = self.lut_soc_min.interp(temp_lim)
+        self.soc_min = self.lut_soc_min.interp(self.temp_lim)
         self.q_min = self.soc_min * self.q_capacity
 
         # Save and return
-        self.t_last = temp_lim
+        self.t_last = self.temp_lim
         return self.soc
 
     def save(self, time, dt):
@@ -728,7 +728,7 @@ class BatteryModel(Battery):
     def save_m(self, time, dt):
         self.saved_m.time.append(time)
         self.saved_m.Tb_m.append(self.temp_c)
-        self.saved_m.Tbl_m.append(self.t_last)
+        self.saved_m.Tbl_m.append(self.temp_lim)
         self.saved_m.vsat_m.append(self.vsat)
         self.saved_m.voc_m.append(self.voc)
         self.saved_m.vdyn_m.append(self.vdyn)
@@ -740,7 +740,6 @@ class BatteryModel(Battery):
         self.saved_m.q_m.append(self.q)
         self.saved_m.qcap_m.append(self.q_capacity)
         self.saved_m.soc_m.append(self.soc)
-
 
 # Other functions
 def is_sat(temp_c, voc, soc):

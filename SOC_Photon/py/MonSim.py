@@ -119,27 +119,25 @@ def replicate(saved_old):
         init = (t[i] <= 1)
 
         if init:
-            sim.apply_soc(soc_init, temp_c)
+            sim.apply_soc(soc_init, Tb[i])
             rp.delta_q_model = sim.delta_q
-            rp.t_last_model = temp_c + dt_model
+            rp.t_last_model = Tb[i] + dt_model
             sim.load(rp.delta_q_model, rp.t_last_model)
             sim.init_battery()
             sim.apply_delta_q_t(rp.delta_q_model, rp.t_last_model)
 
         # Models
-        sim.calculate(temp_c=temp_c, soc=sim.soc, curr_in=current_in, dt=T, q_capacity=sim.q_capacity,
+        sim.calculate(temp_c=Tb[i], soc=sim.soc, curr_in=current_in, dt=T, q_capacity=sim.q_capacity,
                       dc_dc_on=dc_dc_on, rp=rp)
-        sim.count_coulombs(dt=T, reset=init, temp_c=temp_c, charge_curr=sim.ib, t_last=rp.t_last_model,
-                           sat=False, soc_m_init=soc_m_init)
-        rp.delta_q_model, rp.t_last_model = sim.update()
+        sim.count_coulombs(dt=T, reset=init, temp_c=Tb[i], charge_curr=sim.ib, sat=False, soc_m_init=soc_m_init)
 
         # EKF
         if init:
-            mon.apply_soc(soc_init, temp_c)
+            mon.apply_soc(soc_init, Tb[i])
             rp.delta_q = mon.delta_q
-            rp.t_last = temp_c
+            rp.t_last = Tb[i]
             mon.load(rp.delta_q, rp.t_last)
-            mon.assign_temp_c(temp_c)
+            mon.assign_temp_c(Tb[i])
             mon.init_battery()
             mon.init_soc_ekf(soc_init)  # when modeling (assumed in python) ekf wants to equal model
 
@@ -147,21 +145,18 @@ def replicate(saved_old):
         if rp.modeling == 0:
             mon.calculate(Tb[i], Vb[i], Ib[i], T, rp=rp)
         else:
-            mon.calculate(temp_c, sim.vb + randn() * v_std + dv_sense, sim.ib + randn() * i_std + di_sense, T, rp=rp)
-        # mon.calculate(temp_c, Vb[i]+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, T)
-        sat = is_sat(temp_c, mon.voc, mon.soc)
+            mon.calculate(Tb[i], sim.vb + randn() * v_std + dv_sense, sim.ib + randn() * i_std + di_sense, T, rp=rp)
+        # mon.calculate(Tb[i], Vb[i]+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, T)
+        sat = is_sat(Tb[i], mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), init)
         if rp.modeling == 0:
-            mon.count_coulombs(dt=T, reset=init, temp_c=Tb[i], charge_curr=Ib[i], sat=saturated,
-                               t_last=mon.t_last)
+            mon.count_coulombs(dt=T, reset=init, temp_c=Tb[i], charge_curr=Ib[i], sat=saturated)
         else:
-            mon.count_coulombs(dt=T, reset=init, temp_c=temp_c, charge_curr=sim.ib, sat=saturated,
-                               t_last=mon.t_last)
+            mon.count_coulombs(dt=T, reset=init, temp_c=temp_c, charge_curr=sim.ib, sat=saturated)
         mon.calc_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
         mon.select()
-        # mon.regauge(temp_c)
+        # mon.regauge(Tb[i])
         mon.assign_soc_m(sim.soc)
-        rp.delta_q, rp.t_last = mon.update()
 
         # Plot stuff
         mon.save(t[i], T, mon.soc, sim.voc)
@@ -174,6 +169,8 @@ def replicate(saved_old):
             print('mon:  ', str(mon))
             print('time=', t[i])
             print('sim:  ', str(sim))
+
+        print("Tb[i], t_last, t_last_model", Tb[i], mon.t_last, sim.t_last)
 
     # Data
     print('time=', t[i])
@@ -230,7 +227,7 @@ if __name__ == '__main__':
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files, plot_title=plot_title, n_fig=n_fig)  # sim over mon
-        n_fig, fig_files = overall(saved_old, mons, saved_old_sim, sims_m, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
+        n_fig, fig_files = overall(saved_old, mons, saved_old_sim, sims, sims_m, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
                                    new_s_s=sims)  # mon over data
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
         cleanup_fig_files(fig_files)

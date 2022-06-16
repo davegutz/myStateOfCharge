@@ -131,6 +131,7 @@
 		tcharge_ekf_	Solved charging time to full from ekf, hr
 		TEMP_BIAS		Bias on Tbatt sensor, deg C
 		temp_c_			Filtered battery temperature, deg C
+		temp_lim		Rate limited temperature, deg C
 		time_sat_past_	Time at last declared saturation, ms
 		time_to_wait	Time to wait before allowing saturation see 'N/Mw', hr
 		tlast			Past value of battery temperature used for rate limit memory, deg C

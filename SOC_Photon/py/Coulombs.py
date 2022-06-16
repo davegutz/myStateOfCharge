@@ -37,6 +37,7 @@ class Coulombs:
         self.soc = 1.
         self.resetting = True
         self.q_min = 0.
+        self.temp_lim = 0.
         self.t_last = 0.
         self.sat = True
         from pyDAGx import myTables
@@ -104,7 +105,7 @@ class Coulombs:
         """Capacity"""
         return self.q_cap_rated_scaled * (1. - dqdt * (temp_c - self.t_rated))
 
-    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, t_last, soc_init=None):
+    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, soc_init=None):
         """Count coulombs based on true=actual capacity
         Inputs:
             dt              Integration step, s
@@ -120,9 +121,11 @@ class Coulombs:
         self.sat = sat
 
         # Rate limit temperature
-        temp_lim = max(min(temp_c, t_last + self.t_rlim*dt), t_last - self.t_rlim*dt)
+        self.temp_lim = max(min(temp_c, self.t_last + self.t_rlim*dt), self.t_last - self.t_rlim*dt)
+        print("Coulombs:      temp_c, t_last, t_rim, dt, temp_lim=", temp_c, self.t_last, self.t_rlim, dt, self.temp_lim)
         if reset:
-            temp_lim = temp_c
+            self.temp_lim = temp_c
+            self.t_last = temp_c
 
         # Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
         if sat:
@@ -135,25 +138,21 @@ class Coulombs:
         self.resetting = False  # one pass flag.  Saturation debounce should reset next pass
 
         # Integration
-        self.q_capacity = self.calculate_capacity(temp_lim)
-        self.delta_q = max(min(self.delta_q + d_delta_q - dqdt*self.q_capacity*(temp_lim-self.t_last),
+        self.q_capacity = self.calculate_capacity(self.temp_lim)
+        self.delta_q = max(min(self.delta_q + d_delta_q - dqdt*self.q_capacity*(self.temp_lim-self.t_last),
                                0.0), -self.q_capacity)
         self.q = self.q_capacity + self.delta_q
 
         # Normalize
         self.soc = self.q / self.q_capacity
-        self.soc_min = self.lut_soc_min.interp(temp_lim)
+        self.soc_min = self.lut_soc_min.interp(self.temp_lim)
         self.q_min = self.soc_min * self.q_capacity
 
         # Save and return
-        self.t_last = temp_lim
+        self.t_last = self.temp_lim
         return self.soc
 
     def load(self, delta_q, t_last):
         """Load states from retained memory"""
         self.delta_q = delta_q
         self.t_last = t_last
-
-    def update(self):
-        """Update states to be saved in retained memory"""
-        return self.delta_q, self.t_last
