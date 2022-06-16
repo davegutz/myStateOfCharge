@@ -178,9 +178,10 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
 // Filter temperature only
 void filter_temp(const int reset_loc, const float t_rlim, Sensors *Sen, const float tbatt_bias, float *tbatt_bias_last)
 {
-  // Rate limit the temperature bias
+  // Rate limit the temperature bias, 2x so not to interact with rate limits in logic that also use t_rlim
   if ( reset_loc ) *tbatt_bias_last = tbatt_bias;
-  float t_bias_loc = max(min(tbatt_bias, *tbatt_bias_last + t_rlim*Sen->T_temp), *tbatt_bias_last - t_rlim*Sen->T_temp);
+  float t_bias_loc = max(min(tbatt_bias,  *tbatt_bias_last + t_rlim*2.*Sen->T_temp),
+                                          *tbatt_bias_last - t_rlim*2.*Sen->T_temp);
   *tbatt_bias_last = t_bias_loc;
 
   // Filter and add rate limited bias
@@ -420,6 +421,9 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 
   display->display();
   pass = !pass;
+
+  // Bluetooth
+  Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s    %s EKF,Ah  chg,hrs  CC, Ah\n\n\n", dispString, dispStringT, dispStringS);
 
   if ( rp.debug==5 ) debug_5();
   if ( rp.debug==-5 ) debug_m5();  // Arduino plot

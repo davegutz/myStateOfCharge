@@ -168,9 +168,9 @@ void Chemistry::pretty_print(void)
 {
   Serial.printf("Chemistry:\n");
   Serial.printf("  dqdt =        %7.3f;  // Change of charge with temperature, fraction/deg C (0.01 from literature)\n", dqdt);
-  Serial.printf("  low_voc =     %7.3f;  // Voltage threshold for BMS to turn off battery, V\n", low_voc);
-  Serial.printf("  hys_cap =     %7.3f;  // Capacitance of hysteresis, Farads\n", hys_cap);
-  Serial.printf("  v_sat =       %7.3f;  // Saturation threshold at temperature, deg C\n", v_sat);
+  Serial.printf("  low_voc =     %7.3f;  // Volt threshold for BMS to turn off battery, V\n", low_voc);
+  Serial.printf("  hys_cap =     %7.3f;  // Cap of hysteresis, Farads\n", hys_cap);
+  Serial.printf("  v_sat =       %7.3f;  // Sat thresh at temp, V\n", v_sat);
   Serial.printf("  dvoc_dt =     %7.3f;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n", dvoc_dt);
   Serial.printf("  dv =          %7.3f;  // Adjustment for calibration error, V\n", dv);
   Serial.printf("  r_0 =         %9.6f;  // Randles R0, ohms\n", r_0);

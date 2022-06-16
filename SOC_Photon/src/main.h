@@ -110,7 +110,7 @@ void setup()
   Serial.flush();
   delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
   Serial.println("Hi!");
-  // Bluetooth (hardware didn't work)
+  // Bluetooth
   Serial1.begin(9600);
   Serial1.flush();
   // delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
@@ -385,7 +385,7 @@ void loop()
     if ( rp.debug>102 ) Serial.printf("cpt control %ld.  rp.duty=%ld\n", millis(), rp.duty);
   }
 
-  // OLED display driver
+  // OLED and Bluetooth display drivers
   if ( display_to_user )
   {
     oled_display(display, Sen);

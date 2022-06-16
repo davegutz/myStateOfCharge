@@ -42,7 +42,7 @@
 		gain_			Current correction to be made for charge error, A/Coulomb/day
 		HDB_TBATT		Half deadband to filter Tbatt, V
 		HDB_VBATT		Half deadband to filter Vbatt, V
-		hys_cap			Capacitance of hysteresis, Farads
+		hys_cap			Cap of hysteresis, Farads
 		hys_scale		Hysteresis scalar
 		hys_T_;   		dv-soc 2-D table, V
 		Ib				Battery bank current, A
@@ -56,7 +56,7 @@
 		ioc_			Best estimate of IOC charge current after hysteresis, A
 		is_sat    		Is the battery in saturation, T=saturated
 		low_t			Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
-		low_voc			Voltage threshold for BMS to turn off battery, V
+		low_voc			Volt threshold for BMS to turn off battery, V
 		max_change_		Maximum allowed change to calibration adjustment, A
 		max_tweak_		Maximum allowed calibration adjustment, A\n
 		modeling		Driving saturation calculation with model.  Bits specify which signals use model.
@@ -169,8 +169,8 @@
 		voc_stat_		Static model open circuit voltage from table (reference), V
 		VOLT_BIAS		Bias on Vbatt sensor, V
 		Vsat			Bank saturation threshold at temperature, deg C
-		vsat_			Saturation threshold at temperature, deg C
-		v_sat_			Saturation threshold at temperature, deg C
+		vsat_			Sat thresh at temp, V
+		v_sat_			Sat thresh at temp, V
 		Wbatt			Battery bank charge power, use to compare to other shunts, W
 		x_dv			dv breakpoints for r(soc, dv) table t_r
 		x_soc			soc breakpoints for voc table
