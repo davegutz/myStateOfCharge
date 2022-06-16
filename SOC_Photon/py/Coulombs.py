@@ -46,6 +46,7 @@ class Coulombs:
         self.lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
         self.coul_eff = coul_eff
         self.tweak_test = tweak_test
+        self.reset = False
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -115,6 +116,7 @@ class Coulombs:
             t_last          Past value of battery temperature used for rate limit memory, deg C
             coul_eff        Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
         """
+        self.reset = reset
         d_delta_q = charge_curr * dt
         if charge_curr > 0. and not self.tweak_test:
             d_delta_q *= self.coul_eff
@@ -122,7 +124,7 @@ class Coulombs:
 
         # Rate limit temperature
         self.temp_lim = max(min(temp_c, self.t_last + self.t_rlim*dt), self.t_last - self.t_rlim*dt)
-        print("Coulombs:      temp_c, t_last, t_rim, dt, temp_lim=", temp_c, self.t_last, self.t_rlim, dt, self.temp_lim)
+        # print("Coulombs:      temp_c, t_last, t_rim, dt, temp_lim=", temp_c, self.t_last, self.t_rlim, dt, self.temp_lim)
         if reset:
             self.temp_lim = temp_c
             self.t_last = temp_c

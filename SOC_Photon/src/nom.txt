@@ -76,8 +76,8 @@
 		n_n				Number of temperature breakpoints for soc_min table
 		q_				Present charge available to use, except q_min_, C	
 		q_capacity_		Saturation charge at temperature, C
-		q_cap_rated_	Rated capacity at t_rated_, saved for future scaling, C
-		q_cap_rated_scaled_	Applied rated capacity at t_rated_, after scaling, C
+		q_cap_rated_	Rated capacity at t_rated_, C
+		q_cap_rated_scaled_	Applied rated capacity at t_rated_, C
 		q_ekf_			Filtered charge calculated by ekf, C
 		q_min_			Estimated charge at low voltage shutdown, C
 		RANDLES_T_MAX   Maximum update time of Randles state space model to avoid aliasing and instability

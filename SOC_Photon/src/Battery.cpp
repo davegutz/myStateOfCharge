@@ -440,6 +440,7 @@ void BatteryMonitor::select()
         soc_wt_ = avg + (drift - DF1)/(DF2 - DF1) * (DF2/2.);
     else
         soc_wt_ = avg;
+    soc_wt_ = soc_;  // Disable for now
 }
 
 /* Steady state voc(soc) solver for initialization of ekf state.  Expects Sen->Tbatt_filt to be in reset mode

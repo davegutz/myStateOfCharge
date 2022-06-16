@@ -194,13 +194,12 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         plt.plot(old_s_sim.time, old_s_sim.vdyn_m, color='orange', label='vdyn_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.vdyn_m, color='green', linestyle='--', label='vdyn_m_new')
         plt.legend(loc=1)
-        plt.subplot(336)
-        plt.plot(old_s_sim.time, old_s_sim.ddq_m, color='orange', label='ddq_m')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.ddq_m, color='green', linestyle='--', label='ddq_m_new')
-        plt.legend(loc=1)
         plt.subplot(337)
         plt.plot(old_s_sim.time, old_s_sim.dq_m, color='orange', label='dq_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.dq_m, color='green', linestyle='--', label='dq_m_new')
+        plt.legend(loc=1)
+        plt.subplot(338)
+        plt.plot(new_s_sim_m.time, new_s_sim_m.reset_m, color='red', linestyle='--', label='reset_m_new')
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -371,7 +370,7 @@ class SavedDataSim:
             self.vsat_m = data.vsat_m[:i_end]
             self.voc_m = data.voc_m[:i_end]
             self.vdyn_m = data.vdyn_m[:i_end]
-            self.vb_m = data.voc_m[:i_end]*0.
+            self.vb_m = data.vb_m[:i_end]
             self.ib_m = data.ib_m[:i_end]
             self.sat_m = data.sat_m[:i_end]
             self.ddq_m = data.ddq_m[:i_end]
@@ -462,7 +461,7 @@ if __name__ == '__main__':
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
-        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_m', 'vdyn_m', 'ib_m', 'sat_m', 'ddq_m',
+        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_m', 'vdyn_m', 'vb_m', 'ib_m', 'sat_m', 'ddq_m',
                     'dq_m', 'q_m', 'qcap_m', 'soc_m')
         data_old_sim = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
                                  encoding=None).view(np.recarray)
@@ -501,6 +500,7 @@ if __name__ == '__main__':
     #python DataOverModel.py("../dataReduction/2-pole y_filt, tune hys 220613.txt", "soc0_2022")
     #python DataOverModel.py("../dataReduction/Xp10_sim.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/watchXm0.txt", "pro_2022")
+    #python DataOverModel.py("../dataReduction/watchXm1.txt", "pro_2022")
 
     if __name__ == "__main__":
         import sys

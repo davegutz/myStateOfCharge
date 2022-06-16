@@ -61,7 +61,7 @@ def save_clean_file(mons, csv_file, unit_key):
         print("Wrote(save_clean_file):", csv_file)
 
 def save_clean_file_sim(sims, csv_file, unit_key):
-    header_str = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_m,vdyn_m,vb_m,ib_m,sat_m,ddq_m,dq_m,q_m,qcap_m,soc_m,"
+    header_str = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_m,vdyn_m,vb_m,ib_m,sat_m,ddq_m,dq_m,q_m,qcap_m,soc_m,reset_m,"
     n = len(sims.time)
     date_time_start = datetime.now()
     with open(csv_file, "w") as output:
@@ -79,8 +79,10 @@ def save_clean_file_sim(sims, csv_file, unit_key):
             s += "{:7.3f},".format(sims.sat_m[i])
             s += "{:5.3f},".format(sims.ddq_m[i])
             s += "{:5.3f},".format(sims.dq_m[i])
+            s += "{:5.3f},".format(sims.q_m[i])
             s += "{:5.3f},".format(sims.qcap_m[i])
             s += "{:7.3f},".format(sims.soc_m[i])
+            s += "{:7.3f},".format(sims.reset_m[i])
             s += "\n"
             output.write(s)
         print("Wrote(save_clean_file_sim):", csv_file)
@@ -170,7 +172,7 @@ def replicate(saved_old):
             print('time=', t[i])
             print('sim:  ', str(sim))
 
-        print("Tb[i], t_last, t_last_model", Tb[i], mon.t_last, sim.t_last)
+        # print("Tb[i], t_last, t_last_model", Tb[i], mon.t_last, sim.t_last)
 
     # Data
     print('time=', t[i])

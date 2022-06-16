@@ -657,6 +657,7 @@ class BatteryModel(Battery):
         Outputs:
             soc     State of charge, fraction (0-1.5)
         """
+        self.reset = reset
         self.charge_curr = charge_curr
         self.d_delta_q = self.charge_curr * dt
         if self.charge_curr > 0. and not self.tweak_test:
@@ -664,7 +665,7 @@ class BatteryModel(Battery):
 
         # Rate limit temperature
         self.temp_lim = max(min(temp_c, self.t_last + self.t_rlim*dt), self.t_last - self.t_rlim*dt)
-        print("BatteryModel:  temp_c, t_last, t_rim, dt, temp_lim=", temp_c, self.t_last, self.t_rlim, dt, self.temp_lim)
+        # print("BatteryModel:  temp_c, t_last, t_rim, dt, temp_lim=", temp_c, self.t_last, self.t_rlim, dt, self.temp_lim)
         if reset:
             self.temp_lim = temp_c
             self.t_last = temp_c
@@ -740,6 +741,7 @@ class BatteryModel(Battery):
         self.saved_m.q_m.append(self.q)
         self.saved_m.qcap_m.append(self.q_capacity)
         self.saved_m.soc_m.append(self.soc)
+        self.saved_m.reset_m.append(self.reset)
 
 # Other functions
 def is_sat(temp_c, voc, soc):
@@ -1081,6 +1083,7 @@ class Saved_m:
         self.q_m = []
         self.qcap_m = []
         self.soc_m = []
+        self.reset_m = []
 
     def __str__(self):
         s = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_m,vdyn_m,vb_m,ib_m,sat_m,ddq_m,dq_m,q_m,qcap_m,soc_m,\n"
@@ -1099,5 +1102,6 @@ class Saved_m:
             s += "{:5.3f},".format(self.dq_m[i])
             s += "{:5.3f},".format(self.qcap_m[i])
             s += "{:7.3f},".format(self.soc_m[i])
+            s += "{:d},".format(self.reset_m[i])
             s += "\n"
         return s

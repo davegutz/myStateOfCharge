@@ -226,8 +226,8 @@ Coulombs::~Coulombs() {}
 void Coulombs::pretty_print(void)
 {
   Serial.printf("Coulombs:\n");
-  Serial.printf("  q_cap_rated_ =%9.1f;  // Rated capacity at t_rated_, saved for future scaling, C\n", q_cap_rated_);
-  Serial.printf("  q_cap_rated_scaled_ = %9.1f;  // Applied rated capacity at t_rated_, after scaling, C\n", q_cap_rated_scaled_);
+  Serial.printf("  q_cap_rated_ =%9.1f;  // Rated capacity at t_rated, C\n", q_cap_rated_);
+  Serial.printf("  q_cap_rated_scaled_ = %9.1f;  // Applied rated capacity at t_rated_, C\n", q_cap_rated_scaled_);
   Serial.printf("  q_capacity_ = %9.1f;  // Saturation charge at temperature, C\n", q_capacity_);
   Serial.printf("  q_ =          %9.1f;  // Present charge available to use, except q_min_, C\n", q_);
   Serial.printf("  q_min_ =      %9.1f;  // Estimated charge at low voltage shutdown, C\n", q_min_);

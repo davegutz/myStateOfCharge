@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "pro_20220613";  // 2-pole y_filt, tune hys
+const String unit = "pro_20220615";  // 2-pole y_filt, tune hys
 
 // Sensor biases
 #define CURR_BIAS_AMP         -0.24 // Calibration of amplified shunt sensor ('Da=#.#;'), A
