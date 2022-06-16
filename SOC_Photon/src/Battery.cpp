@@ -743,12 +743,12 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
         Serial.printf("voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
                     pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 
-    if ( rp.debug==24 )
+    if ( rp.debug==24 ) 
     {
         double cTime;
         if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;
         else cTime = Sen->control_time;
-        sprintf(cp.buffer, "unit_sim, %13.3f, %4.1f,%4.1f, %6.3f,%6.3f,%6.3f,%6.3f, %7.3f, %d,  %10.6f,%9.1f,%9.1f,%9.1f,  %8.4f, %d, %c",
+        sprintf(cp.buffer, "unit_sim, %13.3f, %6.3f,%6.3f, %6.3f,%6.3f,%6.3f,%6.3f, %7.3f, %d,  %10.6f,%9.1f,%9.1f,%9.1f,  %8.4f, %d, %c",
             cTime, Sen->Tbatt, temp_lim, vsat_, voc_, vdyn_, vb_, charge_curr, model_saturated_, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, reset,'\0');
         Serial.println(cp.buffer);
     }

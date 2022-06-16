@@ -93,6 +93,7 @@ def replicate(saved_old):
     Vb = saved_old.Vb
     Ib = saved_old.Ib
     Tb = saved_old.Tb
+    soc_init = saved_old.soc[0]
     soc_m_init = saved_old.soc_m[0]
     t_len = len(t)
     rp = Retained()
@@ -121,7 +122,7 @@ def replicate(saved_old):
         init = (t[i] <= 1)
 
         if init:
-            sim.apply_soc(soc_init, Tb[i])
+            sim.apply_soc(soc_m_init, Tb[i])
             rp.delta_q_model = sim.delta_q
             rp.t_last_model = Tb[i] + dt_model
             sim.load(rp.delta_q_model, rp.t_last_model)
@@ -202,8 +203,8 @@ if __name__ == '__main__':
         data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613_new.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_sim,"  # Find one instance of title
-        data_file_clean = write_clean_file(data_file_old_txt, '_mon', title_key, unit_key)
-        data_file_sim_clean = write_clean_file(data_file_old_txt, '_sim', title_key_sim, title_key_sim)
+        data_file_clean = write_clean_file(data_file_old_txt, type='_mon', title_key=title_key, unit_key=unit_key)
+        data_file_sim_clean = write_clean_file(data_file_old_txt, type='_sim', title_key=title_key_sim, unit_key=title_key_sim)
 
         # Load
         cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
@@ -212,7 +213,7 @@ if __name__ == '__main__':
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
         cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_m', 'vdyn_m', 'ib_m', 'sat_m', 'ddq_m',
-                    'dq_m', 'q_m', 'qcap_m', 'soc_m')
+                    'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
         if data_file_sim_clean:
             data_old_sim = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
                                  encoding=None).view(np.recarray)

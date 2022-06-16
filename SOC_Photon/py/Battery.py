@@ -512,6 +512,7 @@ class BatteryMonitor(Battery, EKF_1x1):
             self.soc_wt = avg + (drift - DF1)/(DF2 - DF1) * (DF2/2.)
         else:
             self.soc_wt = avg
+        self.soc_wt = self.soc  # override logic
 
 
 class BatteryModel(Battery):

@@ -394,6 +394,7 @@ class SavedDataSim:
         s += "{:5.3f},".format(self.dq_m[self.i])
         s += "{:5.3f},".format(self.qcap_m[self.i])
         s += "{:7.3f},".format(self.soc_m[self.i])
+        s += "{:d},".format(self.reset_m[self.i])
         return s
 
     def mod(self):
@@ -451,9 +452,9 @@ if __name__ == '__main__':
         time_end = None
         # time_end = 2500.
 
-        # Load data (must end in .txt)
-        data_file_clean = write_clean_file(data_file_old_txt, '_mon', 'unit', unit_key)
-        data_file_sim_clean = write_clean_file(data_file_old_txt, '_sim', 'unit_m', 'sim,')
+        # Load data (must end in .txt) txt_file, type, title_key, unit_key
+        data_file_clean = write_clean_file(data_file_old_txt, type='_mon', title_key='unit,', unit_key=unit_key)
+        data_file_sim_clean = write_clean_file(data_file_old_txt, type='_sim', title_key='unit_m', unit_key='unit_sim,')
 
         # Load
         cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
@@ -462,7 +463,7 @@ if __name__ == '__main__':
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
         cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_m', 'vdyn_m', 'vb_m', 'ib_m', 'sat_m', 'ddq_m',
-                    'dq_m', 'q_m', 'qcap_m', 'soc_m')
+                    'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
         data_old_sim = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old_sim = SavedDataSim(saved_old.time_ref, data_old_sim, time_end)
@@ -501,6 +502,7 @@ if __name__ == '__main__':
     #python DataOverModel.py("../dataReduction/Xp10_sim.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/watchXm0.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/watchXm1.txt", "pro_2022")
+    #python DataOverModel.py("../dataReduction/watchXm2.txt", "pro_2022")
 
     if __name__ == "__main__":
         import sys
