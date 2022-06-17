@@ -58,3 +58,23 @@ SOC_Photon/dataReduction/~$20220118_111309.xlsx
 *.odp#
 *.png
 SOC_Photon/dataReduction/data_proto.csv
+SOC_Photon/dataReduction/2-pole y_filt, tune hys 220613.csv
+SOC_Photon/dataReduction/2-pole y_filt, tune hys 220613_mon.csv
+SOC_Photon/dataReduction/2-pole y_filt, tune hys 220613_mon_rep.csv
+SOC_Photon/dataReduction/2-pole y_filt, tune hys 220613_rep.csv
+SOC_Photon/dataReduction/2-pole y_filt, tune hys 220613_sim.csv
+SOC_Photon/dataReduction/rapidTweakRegressionTest20220607_new.csv
+SOC_Photon/dataReduction/rapidTweakRegressionTest20220607_newShort.csv
+SOC_Photon/dataReduction/rapidTweakRegressionTest20220613.csv
+SOC_Photon/dataReduction/rapidTweakRegressionTest20220613_new.csv
+SOC_Photon/dataReduction/rapidTweakRegressionTest20220613_new_mon.csv
+SOC_Photon/dataReduction/rapidTweakRegressionTest20220613_new_mon_rep.csv
+SOC_Photon/dataReduction/rapidTweakRegressionTest20220613_new_rep.csv
+SOC_Photon/dataReduction/rapidTweakRegressionTest20220613_new_sim.csv
+SOC_Photon/dataReduction/rapidTweakTest_20220609.csv
+SOC_Photon/dataReduction/real world status-reflash-test 20220609.csv
+SOC_Photon/dataReduction/RealWorld 2022-06-07.csv
+SOC_Photon/dataReduction/watchXm2_mon.csv
+SOC_Photon/dataReduction/watchXm2_mon_rep.csv
+SOC_Photon/dataReduction/watchXm2_sim.csv
+SOC_Photon/dataReduction/watchXm2_sim_rep.csv
