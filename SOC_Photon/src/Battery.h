@@ -55,7 +55,7 @@ const double vb_dc_dc = 13.5;     // DC-DC charger estimated voltage, V
 #define SOLV_ERR        1e-6      // EKF initialization solver error bound, V
 #define SOLV_MAX_COUNTS 10        // EKF initialization solver max iters
 #define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction
-#define RANDLES_T_MAX   0.5       // Maximum update time of Randles state space model to avoid aliasing and instability
+#define RANDLES_T_MAX   0.3       // Maximum update time of Randles state space model to avoid aliasing and instability
 const double mxeps = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness)
 
 

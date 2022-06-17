@@ -227,7 +227,8 @@ if __name__ == '__main__':
         # Plots
         n_fig = 0
         fig_files = []
-        filename = sys.argv[0].split('/')[-1]
+        data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
+        filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files, plot_title=plot_title, n_fig=n_fig)  # sim over mon
         n_fig, fig_files = overall(saved_old, mons, saved_old_sim, sims, sims_m, filename, fig_files, plot_title=plot_title, n_fig=n_fig,

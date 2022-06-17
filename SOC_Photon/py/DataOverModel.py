@@ -481,7 +481,8 @@ if __name__ == '__main__':
         n_fig = 0
         fig_files = []
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-        filename = sys.argv[0].split('/')[-1]
+        data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
+        filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         # n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
         n_fig, fig_files = overall(saved_old, mons, saved_old_sim, sims, sims_m, filename, fig_files, plot_title=plot_title,
@@ -493,15 +494,8 @@ if __name__ == '__main__':
         plt.show()
 
 
-    # data_file_old_txt = '../dataReduction/real world status-reflash-test 20220609.txt'; unit_key = 'soc0_2022'  # Used to filter out actual data
-    # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613.txt'; unit_key = 'pro_2022'  # Used to filter out actual data
-
-    # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613_new.txt'; unit_key = 'pro_2022'  # Used to filter out actual data
     #python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220613_new.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/2-pole y_filt, tune hys 220613.txt", "soc0_2022")
-    #python DataOverModel.py("../dataReduction/Xp10_sim.txt", "pro_2022")
-    #python DataOverModel.py("../dataReduction/watchXm0.txt", "pro_2022")
-    #python DataOverModel.py("../dataReduction/watchXm1.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/watchXm2.txt", "pro_2022")
 
     if __name__ == "__main__":
