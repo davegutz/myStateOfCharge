@@ -143,7 +143,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   Code from Adafruit ADS1X15 library.   Differential = A0-A1
   Ti OPA333 Used.   $11.00 for 5 Amazon OPA333AIDBVR SOT23-5 mounted on SOT23-6
   No special code for OPA.  Hardware only.   Pre-amp for ADC 5:1.
-  1-V 3v3 (+ TODO:  0.1uF to ground for transient power draws of the ADC)
+  1-V 3v3 (+ [TODO]:  0.1uF to ground for transient power draws of the ADC)
   2-G = Gnd
   3-SCL = Photon D1
   4-SDA  = Photon D0
@@ -305,7 +305,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   3. Blynk phone monitor implemented, as well as Particle Cloud, but found to be impractical because
     a.  Seldom near wifi when camping.
     b.  OLED display works well.
-    c.  'Talk' interface works well.   Can use with phone while on the go.  Need to buy dongle for the phone (Android only): Micro USB 2.0 OTG Cable ($6 on Amazon). 
+    c.  'Talk' interface works well.   Can use with phone while on the go.  Need to buy dongle for the phone (Android only): Micro USB 2.0 OTG Cable ($6 on Amazon).
   4. Shunt monitor seems to have 0 V bias at 0 A current so this is assumed when scaling inputs.
   5. Current calibrated using clamping ammeter turning large loads off and on.
   6. Battleborn nominal capacity determined by load tests.
@@ -322,13 +322,13 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   the rp structure.   You have to reset to force them to take effect.
   15. The minor frame time (READ_DELAY) could be run as fast as 5.   The application runs in 0.005 seconds.  The anti-alias filters in hardware need to run at 1 Hz -3dB bandwidth (tau = 0.159 s) to filter out the PWM-like activity of the inverter that is trying to regulate 60 Hz power.   With that kind of hardware filtering, there is no value added to running the logic any faster than 10 Hz (READ_DELAY = 100).   There's lots of throughput margin available for adding more EKF logic, etc.
   16. The hardware AAF filters effectively smooth out the PWM test input to look analog.   This is desired behavior:  the system must filter 60 Hz inverter activity.   The testing is done with PWM signal to give us an opportunity to test the hardware A/D behavior.  The user must remember to move the internal jumper wire from 3-5 (testing) to 4-5 (installed).
-  17. Regression test:   For installed with real signal, could disconnect solar panels and inject using Talk('Di<>') or Talk('Xp5') and Talk('Xp6').  Uninstalled, should run through them all:  Talk('Xp<>,) 0-6.  Uninstalled should also run onto and off of limits (7 & 8 TODO).
+  17. Regression test:   For installed with real signal, could disconnect solar panels and inject using Talk('Di<>') or Talk('Xp5') and Talk('Xp6').  Uninstalled, should run through them all:  Talk('Xp<>,) 0-6.  Uninstalled should also run onto and off of limits (7 & 8 [TODO]).
   18. In modeling mode the Battery Model passes all sensed signals on to the Battery Monitor.   The Model does things like cutting back current near saturation, and injecting test signals both hard and soft.  The Signal Sense logic needs to perform some injection especially soft so Model not needed for some regression.
   19. All logic uses a counting scheme that debits Coulombs since last known saturation.   The prime requirement of using saturation to periodically reset logic is reflected in use of change since saturation.
   20. The easiest way to confirm that the EKF is working correctly is to set 'modeling' using Talk('Xm7') and verify that soc_ekf equals soc_mod.
   21. Lessons-learned from installation in truck.  Worked fine driving both A/D with D2 from main board.    But when installed in truck all hell broke loose.   The root cause was grounding the Vlow fuse side of shunt legs of the A/D converters.   In theory the fuse side is the same as ground of power supply.   But the wires are gage 20-22 and I detected a 75 mA current in the Vh and Vl legs which is enough to put about 50% error on detection.   Very sensitive.   But if float both legs and avoid ground looping it works fine.   And as long as ground loops avoided, there is no need to beef up the sense wire gage because there will be no current to speak of.  I revised the schematics.   There are now two pin-outs:  one for installed in truck and another when driving with the D2 pin and PWM into the RC circuits.
   22. Regression testing:  
-    a. Saturation test.  Run Talk('Xp7').   This will initialize monitor at 0.5 and model near saturation then drive toward saturation.   Watch voc vs v_sat and sat in the v4 debug display that gets started.  Reset with 'Xp-1'.  If starting up Xp7 it initializes saturated just enter 'm<<val>>' with lower 'val' than what 'Xp7' started it with until it initializes without saturation.  Should saturate soon and reset soc of monitor to 1.0.  Then setting 'Di-1000' you should see it reset after a very little time. Again, reset the whole mess with 'Xp-1'.
+    a. Saturation test.  Run Talk('Xp7').   This will initialize monitor at 0.5 and model near saturation then drive toward saturation.   Watch voc vs v_sat and sat in the v4 debug display that gets started.  Reset with 'Xp-1'.  If starting up Xp7 it initializes saturated just enter 'm< val >' with lower 'val' than what 'Xp7' started it with until it initializes without saturation.  Should saturate soon and reset soc of monitor to 1.0.  Then setting 'Di-1000' you should see it reset after a very little time. Again, reset the whole mess with 'Xp-1'.
     b.  
   23. 'Talk' refers to using CoolTerm to transmit commands through the myTalk.cpp functions. Talk is not threaded so can only send off a barage of commands open loop and hope for the best.
   24. I had to add persistence to the 'log on boot' function.   When in a cold shutoff, the BMS of the battery periodically 'looks' at the state of the battery by turning it on for a few seconds. The summary filled up quickly with these useless logs.  I used a 60 second persistence.
@@ -355,18 +355,18 @@ Rapid tweak test 1 min using models Xm15 'tweakMod' to test tweak only (no data 
        Tweak(No Amp)::adjust:, past=       1.1, pres=       1.1, error=      -0.0, gain= -0.039993, delta_hrs=  0.013891, Di=  0.000, new_Di=  0.000,
 
 Rapid tweak test 02:30 min using models 'tweakMod'
-    start recording, save to ../dataReduction/<name>.txt
+    start recording, save to ../dataReduction/< name >.txt
   Xp10;
     to end prematurely
   XS; Dn0.9985; Ca1; Mk0; Nk0;
-    run py script SOC_over_2022d.py , adding <name>.txt to   data_file_old
+    run py script SOC_over_2022d.py , adding < name >.txt to   data_file_old
 
   Slow cycle test 10:00 min using models 'cycleMod'
-    start recording, save to ../dataReduction/<name>.txt
+    start recording, save to ../dataReduction/< name >.txt
   Xp11;
     to end prematurely
   XS; Dn0.9985; Ca1; Mk0; Nk0;
-    run py script SOC_over_2022d.py , adding <name>.txt to   data_file_old
+    run py script SOC_over_2022d.py , adding < name >.txt to   data_file_old
 
 Throughput test
   v4;Dr1;
@@ -375,4 +375,27 @@ Throughput test
     confirm T restored to 0.100s
 
   ...........................................................
-36. Placeholder
+37. Placeholder
+
+## Accuracy
+
+1. Current Sensor
+  a. Gain - component calibration at install
+  b. Bias - component calibration at install
+  c. Drift - Tweak test.   Could be confounded by lack of knowledge of Coulombic Efficiency (CE).   Presently the logic adjusts the bias for perceived charge cycle drifting.  [TODO]:  consider tweaking CE gain effect instead of drift and as side benefit have display = 0 quiescent.
+  d. Amplifier.  [TODO]:  need to run tests with
+2. Voltage Sensor
+3. Temperature Sensor
+4. Hysteresis Model
+5. Coulombic Efficiency and Tweaking and Drift
+6. Coulomb Counter
+  a.  Temperature derivative on counting is a new concept.  I believe I am pioneering this idea of technology.   That the temperature effects are large enough to fundamentally increase the order of Coulomb Counting.
+  b. My notion seems to be backed up by high sensitiviy
+7. Dynamic Model
+  a. Not sure this is even needed to due to low bandwidth of daily charge cycle.   Average out.
+  b. Leave this in design for now for study.   Able to disable
+8. EKF
+  a. Failures.  [TODO]:  need to run failures of sensors to see what EKF covers
+9. Redundancy
+  a. [TODO]:  need results of tests above
+10. Selection between EKF and Coulomb Counter.  Disabled.   [TODO]: next consider replacing large lag in EKF with the Coulomb Counter.
