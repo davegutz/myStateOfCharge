@@ -199,6 +199,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         plt.plot(new_s_sim_m.time, new_s_sim_m.dq_m, color='green', linestyle='--', label='dq_m_new')
         plt.legend(loc=1)
         plt.subplot(338)
+        plt.plot(old_s_sim.time, old_s_sim.reset_m, color='orange', label='reset_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.reset_m, color='red', linestyle='--', label='reset_m_new')
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -353,6 +354,7 @@ class SavedDataSim:
             self.q_m = []
             self.qcap_m = []
             self.soc_m = []
+            self.reset_m = []
         else:
             self.i = 0
             self.c_time = np.array(data.c_time)
@@ -378,6 +380,7 @@ class SavedDataSim:
             self.q_m = data.q_m[:i_end]
             self.qcap_m = data.qcap_m[:i_end]
             self.soc_m = data.soc_m[:i_end]
+            self.reset_m = data.reset_m[:i_end]
 
     def __str__(self):
         s = "{},".format(self.unit[self.i])
@@ -464,17 +467,21 @@ if __name__ == '__main__':
         saved_old = SavedData(data_old, time_end)
         cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_m', 'vdyn_m', 'vb_m', 'ib_m', 'sat_m', 'ddq_m',
                     'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
-        data_old_sim = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
+        try:
+            data_old_sim = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
                                  encoding=None).view(np.recarray)
-        saved_old_sim = SavedDataSim(saved_old.time_ref, data_old_sim, time_end)
+            saved_old_sim = SavedDataSim(saved_old.time_ref, data_old_sim, time_end)
+        except:
+            data_old_sim = None
+            saved_old_sim = None
 
         # Run model
         mons, sims, monrs, sims_m = replicate(saved_old)
-        mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
-        sim_file_save = data_file_sim_clean.replace(".csv", "_rep.csv")
         date_ = datetime.now().strftime("%y%m%d")
+        mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         save_clean_file(mons, mon_file_save, '_mon_rep' + date_)
-        if sims_m:
+        if data_file_sim_clean:
+            sim_file_save = data_file_sim_clean.replace(".csv", "_rep.csv")
             save_clean_file_sim(sims_m, sim_file_save, '_sim_rep' + date_)
 
         # Plots
