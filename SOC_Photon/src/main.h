@@ -59,7 +59,7 @@
   #undef min
 #endif
 
-#define USE_BT             // Change this to #define to use Bluetooth
+#undef USE_BT             // Change this to #define to use Bluetooth
 
 #include "constants.h"
 
@@ -74,6 +74,7 @@
   #define BLYNK_PRINT Serial
   #include "Blynk/BlynkSimpleSerialBLE.h"
   char auth[] = BLYNK_AUTH_TOKEN;
+  #define BLYNK_DEBUG
 #endif
 
 #include "mySummary.h"
@@ -117,8 +118,6 @@ void setup()
   // Bluetooth Serial1
   Serial1.begin(9600);
   #ifdef USE_BT
-    // Serial1.flush();
-    // delay(100);
     Blynk.begin(Serial1, auth);
   #endif
 
@@ -465,7 +464,7 @@ void loop()
   // Publish1 Blynk
   void publish1(void)
   {
-    if (rp.debug>104) Serial.printf("Blynk write1\n");
+    if (rp.debug==25) Serial.printf("Blynk write1\n");
     Blynk.virtualWrite(V2,  pp.pubList.Vbatt);
     Blynk.virtualWrite(V3,  pp.pubList.Voc);
     Blynk.virtualWrite(V4,  pp.pubList.Vbatt);
@@ -475,7 +474,7 @@ void loop()
   // Publish2 Blynk
   void publish2(void)
   {
-    if (rp.debug>104) Serial.printf("Blynk write2\n");
+    if (rp.debug==25) Serial.printf("Blynk write2\n");
     Blynk.virtualWrite(V6,  pp.pubList.soc);
     Blynk.virtualWrite(V8,  pp.pubList.T);
     Blynk.virtualWrite(V10, pp.pubList.Tbatt);
@@ -485,7 +484,7 @@ void loop()
   // Publish3 Blynk
   void publish3(void)
   {
-    if (rp.debug>104) Serial.printf("Blynk write3\n");
+    if (rp.debug==25) Serial.printf("Blynk write3\n");
     Blynk.virtualWrite(V15, pp.pubList.hm_string);
     Blynk.virtualWrite(V16, pp.pubList.tcharge);
   }
@@ -494,7 +493,7 @@ void loop()
   // Publish4 Blynk
   void publish4(void)
   {
-    if (rp.debug>104) Serial.printf("Blynk write4\n");
+    if (rp.debug==25) Serial.printf("Blynk write4\n");
     Blynk.virtualWrite(V18, pp.pubList.Ibatt);
     Blynk.virtualWrite(V20, pp.pubList.Wbatt);
     Blynk.virtualWrite(V21, pp.pubList.soc_ekf);
