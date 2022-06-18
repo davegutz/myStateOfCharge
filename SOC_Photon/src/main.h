@@ -59,7 +59,7 @@
   #undef min
 #endif
 
-#undef USE_BT             // Change this to #define to use Bluetooth
+#define USE_BT             // Change this to #define to use Bluetooth
 
 #include "constants.h"
 
@@ -68,10 +68,10 @@
 #include "mySubs.h"
 
 #ifdef USE_BT
-  #define BLYNK_AUTH_TOKEN            "DU9igmWDh6RuwYh6QAI_fWsi-KPkb7Aa"
+  // #define BLYNK_AUTH_TOKEN            "DU9igmWDh6RuwYh6QAI_fWsi-KPkb7Aa"
+  #define BLYNK_AUTH_TOKEN  "DU9igmWDh6RuwYh6QAI_fWsi-KPkb7Aa"
   #define BLYNK_USE_DIRECT_CONNECT
   #define BLYNK_PRINT Serial
-  #define SerialBLE Serial1
   #include "Blynk/BlynkSimpleSerialBLE.h"
   char auth[] = BLYNK_AUTH_TOKEN;
 #endif
@@ -115,11 +115,11 @@ void setup()
   Serial.println("Hi!");
 
   // Bluetooth Serial1
+  Serial1.begin(9600);
   #ifdef USE_BT
-    SerialBLE.begin(9600);
-    Blynk.begin(SerialBLE, auth);
-  #else
-    Serial1.begin(9600);
+    // Serial1.flush();
+    // delay(100);
+    Blynk.begin(Serial1, auth);
   #endif
 
   // Peripherals
@@ -164,7 +164,7 @@ void setup()
   WiFi.off();
   myWifi->connected = false;
   if ( rp.debug >= 100 ) Serial.printf("wifi dscn...");
-  #ifdef USE_BG
+  #ifdef USE_BT
     Serial.printf("Set up blynk...");
     blynk_timer_1.setInterval(PUBLISH_BLYNK_DELAY, publish1);
     blynk_timer_2.setTimeout(1*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_2.setInterval(PUBLISH_BLYNK_DELAY, publish2);});
@@ -187,9 +187,9 @@ void setup()
   }
 
   #ifdef PHOTON
-    if ( rp.debug>101 ) { sprintf(cp.buffer, "Photon\n"); Serial.print(cp.buffer); } // Serial1.print(buffer); }
+    if ( rp.debug>101 ) { sprintf(cp.buffer, "Photon\n"); Serial.print(cp.buffer); }
   #else
-    if ( rp.debug>101 ) { sprintf(cp.buffer, "Mega2560\n"); Serial.print(cp.buffer); } //Serial1.print(buffer); }
+    if ( rp.debug>101 ) { sprintf(cp.buffer, "Mega2560\n"); Serial.print(cp.buffer); }
   #endif
 
   // Determine millis() at turn of Time.now
@@ -276,7 +276,9 @@ void loop()
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
   // Serial test
-  if ( Serial1.available() ) Serial1.write(Serial1.read());
+  #ifndef USE_BT
+    if ( Serial1.available() ) Serial1.write(Serial1.read());
+  #endif
 
   // Start Blynk
   #ifdef USE_BT

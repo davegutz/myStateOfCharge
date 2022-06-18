@@ -423,8 +423,10 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   pass = !pass;
 
   // Bluetooth
-  Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s    %s EKF,Ah  chg,hrs  CC, Ah\n\n\n", dispString, dispStringT, dispStringS);
-
+  #ifndef USE_BT
+    Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s    %s EKF,Ah  chg,hrs  CC, Ah\n\n\n", dispString, dispStringT, dispStringS);
+  #endif
+  
   if ( rp.debug==5 ) debug_5();
   if ( rp.debug==-5 ) debug_m5();  // Arduino plot
 }
@@ -570,31 +572,6 @@ void serialEvent()
     }
   }
 }
-
-// Copy for bluetooth connected to TX/RX
-/*
-void serialEvent1()
-{
-  while (Serial1.available())
-  {
-    // get the new byte:
-    char inChar = (char)Serial1.read();
-    // add it to the cp.input_string:
-    cp.input_string += inChar;
-    // if the incoming character is a newline, set a flag
-    // so the main loop can do something about it:
-    if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',')
-    {
-      cp.string_complete = true;
-     // Remove whitespace
-      cp.input_string.trim();
-      cp.input_string.replace(" ","");
-      cp.input_string.replace("=","");
-      Serial1.println(cp.input_string);
-    }
-  }
-}
-*/
 
 // Inputs serial print
 void serial_print(unsigned long now, double T)
