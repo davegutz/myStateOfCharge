@@ -701,7 +701,7 @@ Outputs:
     soc_min_        Estimated soc where battery BMS will shutoff current, fraction
     q_min_          Estimated charge at low voltage shutdown, C\
 */
-double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const double t_last)
+double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const double t_last, BatteryMonitor *Mon) 
 {
     float charge_curr = Sen->Ibatt;
     double d_delta_q = charge_curr * Sen->T;
@@ -715,7 +715,9 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
         *rp_t_last_ = Sen->Tbatt;
     }
     
-    // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
+    // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status
+    // But if not modeling, set to Monitor when saturated
+    if ( !(rp.mod_vb() || rp.mod_ib())  && Mon->sat() ) *rp_delta_q_ = rp.delta_q;
     if ( model_saturated_ )
     {
         if ( reset ) *rp_delta_q_ = 0.;

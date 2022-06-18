@@ -508,7 +508,7 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   // Charge calculation and memory store
   // Inputs: Sim.model_saturated, Sen->Tbatt, Sen->Ibatt, and Sim.soc
   // Outputs: Sim.soc
-  Sen->Sim->count_coulombs(Sen, reset_temp, rp.t_last_model);
+  Sen->Sim->count_coulombs(Sen, reset_temp, rp.t_last_model, Mon);
 
   // Injection tweak test
   if ( (Sen->start_inj <= Sen->now) && (Sen->now <= Sen->end_inj) ) // in range, test in progress

@@ -86,7 +86,7 @@ struct RetainedPars
     this->ibatt_bias_all = CURR_BIAS_ALL;
     this->ibatt_sel_noamp = false;
     this->vbatt_bias = VOLT_BIAS;
-    this->modeling = false;
+    this->modeling = 0;
     this->duty = 0;
     this->amp = 0.;
     this->freq = 0.;
@@ -116,7 +116,7 @@ struct RetainedPars
     this->ibatt_bias_all = CURR_BIAS_ALL;
     this->ibatt_sel_noamp = false;   // T=amplified
     this->vbatt_bias = VOLT_BIAS;
-    this->modeling = false;
+    this->modeling = 0;
     this->duty = 0;
     this->amp = 0.;
     this->freq = 0.;
