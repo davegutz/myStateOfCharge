@@ -11,7 +11,7 @@
 #ifndef WidgetTable_h
 #define WidgetTable_h
 
-#include <Blynk/BlynkWidgetBase.h>
+#include "./Blynk/BlynkWidgetBase.h"
 
 class WidgetTable
     : public BlynkWidgetBase
@@ -56,6 +56,14 @@ public:
 
     void pickRow(int index) {
         Blynk.virtualWrite(mPin, "pick", index);
+    }
+
+    void selectRow(int index) {
+        Blynk.virtualWrite(mPin, "select", index);
+    }
+
+    void deselectRow(int index) {
+        Blynk.virtualWrite(mPin, "deselect", index);
     }
 
 private:

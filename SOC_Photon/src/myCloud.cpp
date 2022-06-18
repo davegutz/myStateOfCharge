@@ -28,14 +28,16 @@
 #include "myCloud.h"
 #include "constants.h"
 #include <math.h>
-#include "Blynk/BlynkHandlers.h"
-#include "Blynk/BlynkTimer.h"
-#include "Blynk/BlynkParticle.h"
+
+// #include "Blynk/BlynkSimpleSerialBLE.h"
+// #define BLYNK_PRINT Serial
 
 extern CommandPars cp;            // Various parameters to be common at system level (reset on PLC reset)
 extern PublishPars pp;            // For publishing
-extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;     // Time Blynk events
-extern BlynkParticle Blynk;
+
+/* dag 6/18/2022
+// extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;     // Time Blynk events
+// extern BlynkStream Blynk;       // Blynk object
 
 // Publish1 Blynk
 void publish1(void)
@@ -92,7 +94,7 @@ BLYNK_WRITE(V4) {
 BLYNK_WRITE(V6) {
 //    pubList.webHold = param.asInt();
 }
-
+*/
 
 // Check connection and publish Particle
 void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)

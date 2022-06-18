@@ -11,9 +11,9 @@
 #ifndef WidgetTimeInput_h
 #define WidgetTimeInput_h
 
-#include <Blynk/BlynkApi.h>
-#include <Blynk/BlynkDateTime.h>
-#include <Blynk/BlynkUtility.h>
+#include "./Blynk/BlynkApi.h"
+#include "./Blynk/BlynkDateTime.h"
+#include "./Blynk/BlynkUtility.h"
 
 class TimeInputParam
 {

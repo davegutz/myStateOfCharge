@@ -7,15 +7,15 @@
  * @brief
  */
 
-#include "Blynk/WidgetLED.h"
-#include "Blynk/WidgetLCD.h"
-#include "Blynk/WidgetTerminal.h"
-#include "Blynk/WidgetBridge.h"
-#include "Blynk/WidgetTimeInput.h"
-#include "Blynk/WidgetTable.h"
-#include "Blynk/WidgetGPS.h"
-#include "Blynk/WidgetMap.h"
+#include "./WidgetLED.h"
+#include "./WidgetLCD.h"
+#include "./WidgetTerminal.h"
+#include "./WidgetBridge.h"
+#include "./WidgetTimeInput.h"
+#include "./WidgetTable.h"
+#include "./WidgetGPS.h"
+#include "./WidgetMap.h"
 
 // Cannot auto-include as these have library dependencies
-//#include "Blynk/WidgetRTC.h"
-//#include "Blynk/WidgetSD.h"
+//#include <WidgetRTC.h>
+//#include <WidgetSD.h>

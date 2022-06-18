@@ -11,7 +11,7 @@
 #ifndef WidgetBridge_h
 #define WidgetBridge_h
 
-#include <Blynk/BlynkWidgetBase.h>
+#include "./Blynk/BlynkWidgetBase.h"
 
 class WidgetBridge
     : private BlynkWidgetBase

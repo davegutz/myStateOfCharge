@@ -47,42 +47,45 @@
 
 // For Photon
 #if (PLATFORM_ID==6)
-#define PHOTON
-//#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
-#include "application.h"  // Should not be needed if file ino or Arduino
-SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
-#include <Arduino.h>      // Used instead of Print.h - breaks Serial
+  #define PHOTON
+  //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
+  #include "application.h"  // Should not be needed if file ino or Arduino
+  SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
+  #include <Arduino.h>      // Used instead of Print.h - breaks Serial
 #else
-#undef PHOTON
-using namespace std;
-#undef max
-#undef min
+  #undef PHOTON
+  using namespace std;
+  #undef max
+  #undef min
 #endif
 
+#undef USE_BT             // Change this to #define to use Bluetooth
+
 #include "constants.h"
-#include "myAuth.h"
-/* This file myAuth.h is not in Git repository because it contains personal information.
-Make it yourself.   It should look like this, with your personal authorizations:
-(Note:  you don't need a valid number for one of the blynkAuth if not using it.)
-#ifndef BARE_PHOTON
-  const   String      blynkAuth     = "4f1de4949e4c4020882efd3e61XXX6cd"; // Photon thermostat
-#else
-  const   String      blynkAuth     = "d2140898f7b94373a78XXX158a3403a1"; // Bare photon
-#endif
-*/
 
 // Dependent includes.   Easier to rp.debug code if remove unused include files
 #include "mySync.h"
 #include "mySubs.h"
-#include "Blynk/blynk.h"              // Only place this can appear is top level main.h
+
+#ifdef USE_BT
+  #define BLYNK_AUTH_TOKEN            "DU9igmWDh6RuwYh6QAI_fWsi-KPkb7Aa"
+  #define BLYNK_USE_DIRECT_CONNECT
+  #define BLYNK_PRINT Serial
+  #define SerialBLE Serial1
+  #include "Blynk/BlynkSimpleSerialBLE.h"
+  char auth[] = BLYNK_AUTH_TOKEN;
+#endif
+
 #include "mySummary.h"
 #include "myCloud.h"
 #include "Tweak.h"
 #include "debug.h"
 
-extern BlynkParticle Blynk;       // Blynk object
-extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4; // Time Blynk events
-BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;        // Time Blynk events
+#ifdef USE_BT
+  extern BlynkStream Blynk;       // Blynk object
+  extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4; // Time Blynk events
+  BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;        // Time Blynk events
+#endif
 extern CommandPars cp;            // Various parameters to be common at system level
 extern RetainedPars rp;           // Various parameters to be static at system level
 extern Sum_st mySum[NSUM];        // Summaries for saving charge history
@@ -110,11 +113,14 @@ void setup()
   Serial.flush();
   delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
   Serial.println("Hi!");
-  // Bluetooth
-  Serial1.begin(9600);
-  Serial1.flush();
-  // delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
-  Serial1.println("Hello!");
+
+  // Bluetooth Serial1
+  #ifdef USE_BT
+    SerialBLE.begin(9600);
+    Blynk.begin(SerialBLE, auth);
+  #else
+    Serial1.begin(9600);
+  #endif
 
   // Peripherals
   myPins = new Pins(D6, D7, A1, D2);
@@ -158,17 +164,13 @@ void setup()
   WiFi.off();
   myWifi->connected = false;
   if ( rp.debug >= 100 ) Serial.printf("wifi dscn...");
-  Serial.printf("Set up blynk...");
-  blynk_timer_1.setInterval(PUBLISH_BLYNK_DELAY, publish1);
-  blynk_timer_2.setTimeout(1*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_2.setInterval(PUBLISH_BLYNK_DELAY, publish2);});
-  blynk_timer_3.setTimeout(2*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_3.setInterval(PUBLISH_BLYNK_DELAY, publish3);});
-  blynk_timer_4.setTimeout(3*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_4.setInterval(PUBLISH_BLYNK_DELAY, publish4);});
-  if ( myWifi->connected )
-  {
-    Serial.printf("Begin blynk...");
-    Blynk.begin(blynkAuth.c_str());
-    myWifi->blynk_started = true;
-  }
+  #ifdef USE_BG
+    Serial.printf("Set up blynk...");
+    blynk_timer_1.setInterval(PUBLISH_BLYNK_DELAY, publish1);
+    blynk_timer_2.setTimeout(1*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_2.setInterval(PUBLISH_BLYNK_DELAY, publish2);});
+    blynk_timer_3.setTimeout(2*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_3.setInterval(PUBLISH_BLYNK_DELAY, publish3);});
+    blynk_timer_4.setTimeout(3*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_4.setInterval(PUBLISH_BLYNK_DELAY, publish4);});
+  #endif
   Serial.printf("done CLOUD\n");
 
   // Clean boot logic.  This occurs only when doing a structural rebuild clean make on initial flash, because
@@ -276,24 +278,14 @@ void loop()
   // Serial test
   if ( Serial1.available() ) Serial1.write(Serial1.read());
 
-  // Start Blynk, only if connected since it is blocking
-  if ( Particle.connected() && !myWifi->blynk_started )
-  {
-    if ( rp.debug>102 ) Serial.printf("Start Blynk %ld...  ", millis());
-
-    Blynk.begin(blynkAuth.c_str());   // warning:  blocks if no connection
-    myWifi->blynk_started = true;
-
-    if ( rp.debug>102 ) Serial.printf("cpt at %ld\n", millis());
-  }
-  if ( myWifi->blynk_started && myWifi->connected )
-  {
+  // Start Blynk
+  #ifdef USE_BT
     Blynk.run();
     blynk_timer_1.run();
     blynk_timer_2.run();
     blynk_timer_3.run();
     blynk_timer_4.run(); 
-  }
+  #endif
 
   // Keep time
   now = millis();
@@ -465,3 +457,44 @@ void loop()
   cp.write_summary = false;
 
 } // loop
+
+
+#ifdef USE_BT
+  // Publish1 Blynk
+  void publish1(void)
+  {
+    if (rp.debug>104) Serial.printf("Blynk write1\n");
+    Blynk.virtualWrite(V2,  pp.pubList.Vbatt);
+    Blynk.virtualWrite(V3,  pp.pubList.Voc);
+    Blynk.virtualWrite(V4,  pp.pubList.Vbatt);
+  }
+
+
+  // Publish2 Blynk
+  void publish2(void)
+  {
+    if (rp.debug>104) Serial.printf("Blynk write2\n");
+    Blynk.virtualWrite(V6,  pp.pubList.soc);
+    Blynk.virtualWrite(V8,  pp.pubList.T);
+    Blynk.virtualWrite(V10, pp.pubList.Tbatt);
+  }
+
+
+  // Publish3 Blynk
+  void publish3(void)
+  {
+    if (rp.debug>104) Serial.printf("Blynk write3\n");
+    Blynk.virtualWrite(V15, pp.pubList.hm_string);
+    Blynk.virtualWrite(V16, pp.pubList.tcharge);
+  }
+
+
+  // Publish4 Blynk
+  void publish4(void)
+  {
+    if (rp.debug>104) Serial.printf("Blynk write4\n");
+    Blynk.virtualWrite(V18, pp.pubList.Ibatt);
+    Blynk.virtualWrite(V20, pp.pubList.Wbatt);
+    Blynk.virtualWrite(V21, pp.pubList.soc_ekf);
+  }
+#endif
