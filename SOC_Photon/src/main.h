@@ -59,7 +59,7 @@
   #undef min
 #endif
 
-#undef USE_BT             // Change this to #define to use Bluetooth
+#undef USE_BLYNK             // Change this to #define to use Bluetooth
 
 #include "constants.h"
 
@@ -67,8 +67,7 @@
 #include "mySync.h"
 #include "mySubs.h"
 
-#ifdef USE_BT
-  // #define BLYNK_AUTH_TOKEN            "DU9igmWDh6RuwYh6QAI_fWsi-KPkb7Aa"
+#ifdef USE_BLYNK
   #define BLYNK_AUTH_TOKEN  "DU9igmWDh6RuwYh6QAI_fWsi-KPkb7Aa"
   #define BLYNK_USE_DIRECT_CONNECT
   #define BLYNK_PRINT Serial
@@ -81,7 +80,7 @@
 #include "Tweak.h"
 #include "debug.h"
 
-#ifdef USE_BT
+#ifdef USE_BLYNK
   extern BlynkStream Blynk;       // Blynk object
   extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4; // Time Blynk events
   BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;        // Time Blynk events
@@ -116,9 +115,7 @@ void setup()
 
   // Bluetooth Serial1
   Serial1.begin(9600);
-  #ifdef USE_BT
-    // Serial1.flush();
-    // delay(100);
+  #ifdef USE_BLYNK
     Blynk.begin(Serial1, auth);
   #endif
 
@@ -164,7 +161,7 @@ void setup()
   WiFi.off();
   myWifi->connected = false;
   if ( rp.debug >= 100 ) Serial.printf("wifi dscn...");
-  #ifdef USE_BT
+  #ifdef USE_BLYNK
     Serial.printf("Set up blynk...");
     blynk_timer_1.setInterval(PUBLISH_BLYNK_DELAY, publish1);
     blynk_timer_2.setTimeout(1*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_2.setInterval(PUBLISH_BLYNK_DELAY, publish2);});
@@ -276,12 +273,12 @@ void loop()
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
   // Serial test
-  #ifndef USE_BT
+  #ifndef USE_BLYNK
     if ( Serial1.available() ) Serial1.write(Serial1.read());
   #endif
 
   // Start Blynk
-  #ifdef USE_BT
+  #ifdef USE_BLYNK
     Blynk.run();
     blynk_timer_1.run();
     blynk_timer_2.run();
@@ -380,10 +377,17 @@ void loop()
   }
 
   // OLED and Bluetooth display drivers
-  if ( display_to_user )
-  {
-    oled_display(display, Sen);
-  }
+  #ifdef USE_BLYNK
+    if ( display_to_user && Sen->display )
+    {
+      oled_display(display, Sen);
+    }
+  #else
+    if ( display_to_user )
+    {
+      oled_display(display, Sen);
+    }
+  #endif
 
   // Publish to Particle cloud if desired (different than Blynk)
   // Visit https://console.particle.io/events.   Click on "view events on a terminal"
@@ -461,7 +465,7 @@ void loop()
 } // loop
 
 
-#ifdef USE_BT
+#ifdef USE_BLYNK
   // Publish1 Blynk
   void publish1(void)
   {

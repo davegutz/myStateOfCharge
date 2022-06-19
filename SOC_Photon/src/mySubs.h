@@ -140,6 +140,7 @@ struct Sensors
   Sync *PublishSerial;            // Handle to debug print time
   Sync *ReadSensors;              // Handle to debug read time
   double control_time;            // Decimal time, seconds since 1/1/2021
+  boolean display;                // Use display
   Sensors(void) {}
   Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, Sync *ReadSensors)
   {
@@ -169,6 +170,7 @@ struct Sensors
     this->cycles_inj = 0.;
     this->PublishSerial = PublishSerial;
     this->ReadSensors = ReadSensors;
+    this->display = true;
   }
 };
 

@@ -604,8 +604,17 @@ soc_ekf= %8.4f,\nsoc = %8.4f,\nsoc_wt = %8.4f,\nmodeling = %d,\namp delta_q_inf 
         break;
 
       case ( 'w' ): 
-        cp.enable_wifi = !cp.enable_wifi; // not remembered in rp. Photon reset turns this false.
+        cp.enable_wifi = !cp.enable_wifi; // not remembered in rp. Photon reset turns this false
         Serial.printf("Wifi togg %d\n", cp.enable_wifi);
+        break;
+
+      case ( 'z' ):
+        #ifdef USE_BLYNK
+          Sen->display = !Sen->display; // not remembered in rp. Photon reset turns this to default
+          Serial.printf("display on (BT off) = %d\n", Sen->display);
+        #else
+          Serial.printf("ignored when not compiled with USE_BLYNK\n");
+        #endif
         break;
 
       case ( 'X' ):
@@ -1045,6 +1054,11 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  XR  "); Serial.printf("RUN inj\n");
   Serial.printf("  XS  "); Serial.printf("STOP inj\n");
   Serial.printf("  XW= "); Serial.printf("%6.2f s wait start inj\n", float(Sen->wait_inj)/1000.);
+
+  #ifdef USE_BLYNK
+    Serial.printf("z   toggle display = %d\n", Sen->display);
+  #endif
+
   Serial.printf("h   this menu\n");
 }
 

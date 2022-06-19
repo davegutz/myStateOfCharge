@@ -78,7 +78,7 @@ void Shunt::pretty_print()
 // load
 void Shunt::load()
 {
-  if (!bare_)
+  if ( !bare_ && !rp.mod_ib() )
   {
     if ( rp.debug>102 ) Serial.printf("begin %s->readADC_Differential_0_1 at %ld...", name_.c_str(), millis());
 
@@ -225,7 +225,7 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   // Current signal selection, based on if there or not.
   // Over-ride 'permanent' with Talk(rp.ibatt_sel_noamp) = Talk('s')
   float model_ibatt_bias = 0.;
-  if ( !rp.ibatt_sel_noamp && !Sen->ShuntAmp->bare())
+  if ( !rp.ibatt_sel_noamp && !Sen->ShuntAmp->bare() && !rp.mod_vb() )
   {
     Sen->Vshunt = Sen->ShuntAmp->vshunt();
     Sen->Ibatt_hdwe = Sen->ShuntAmp->ishunt_cal();
@@ -257,7 +257,8 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
 
   // Vbatt
   if ( rp.debug>102 ) Serial.printf("begin analogRead at %ld...", millis());
-  int raw_Vbatt = analogRead(myPins->Vbatt_pin);
+  int raw_Vbatt = 0;
+  if ( !rp.mod_vb() ) raw_Vbatt = analogRead(myPins->Vbatt_pin);
   if ( rp.debug>102 ) Serial.printf("done at %ld\n", millis());
   Sen->Vbatt_hdwe =  float(raw_Vbatt)*vbatt_conv_gain + float(VBATT_A) + rp.vbatt_bias;
 
@@ -273,7 +274,7 @@ void load_temp(Sensors *Sen)
   uint8_t count = 0;
   float temp = 0.;
   // Read hardware and check
-  while ( ++count<MAX_TEMP_READS && temp==0)
+  while ( ++count<MAX_TEMP_READS && temp==0 && !rp.mod_tb() )
   {
     if ( Sen->SensorTbatt->read() ) temp = Sen->SensorTbatt->celsius() + (TBATT_TEMPCAL);
     delay(1);
@@ -422,11 +423,11 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   display->display();
   pass = !pass;
 
-  // Bluetooth
-  #ifndef USE_BT
+  // Text basic Bluetooth (uses serial bluetooth app)
+  #ifndef USE_BLYNK
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s    %s EKF,Ah  chg,hrs  CC, Ah\n\n\n", dispString, dispStringT, dispStringS);
   #endif
-  
+
   if ( rp.debug==5 ) debug_5();
   if ( rp.debug==-5 ) debug_m5();  // Arduino plot
 }
