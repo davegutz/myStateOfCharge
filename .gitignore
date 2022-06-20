@@ -78,3 +78,4 @@ SOC_Photon/dataReduction/watchXm2_mon.csv
 SOC_Photon/dataReduction/watchXm2_mon_rep.csv
 SOC_Photon/dataReduction/watchXm2_sim.csv
 SOC_Photon/dataReduction/watchXm2_sim_rep.csv
+*.crc_block
