@@ -2,6 +2,8 @@ import socket
 
 #adapter_addr = '00:14:03:05:59:78'  # for the HC-06
 # adapter_addr = '54:27:1e:f4:74:73'  # Broadcom 20702 Bluetooth 4.0 Adapter Properties
+import time
+
 MAC = '00:14:03:05:59:90'
 port = 3
 buf_size = 1024
@@ -12,9 +14,12 @@ count = 0
 try:
     while True and count<30:
         count += 1
-        data = s.recv(buf_size)
+        buf = s.recv(buf_size).decode("utf-8")
+        time.sleep(0.8)
+        # data = buf.readline()
+        data = buf
         if data:
-            print(count, type(data), "    ", data, "    ", len(data))
+            print(count, len(data), data)
 except Exception as err:
     print("Something went wrong: ", err)
     s.close()
