@@ -10,16 +10,15 @@ buf_size = 1024
 
 s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
 s.connect((MAC, 1))
+r = s.makefile("r")
 count = 0
 try:
     while True and count<30:
         count += 1
-        buf = s.recv(buf_size).decode("utf-8")
         time.sleep(0.8)
-        # data = buf.readline()
-        data = buf
-        if data:
-            print(count, len(data), data)
+        data_r = r.readline().rstrip()
+        if data_r:
+            print(count, data_r)
 except Exception as err:
     print("Something went wrong: ", err)
     s.close()
