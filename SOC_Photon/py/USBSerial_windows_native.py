@@ -28,14 +28,19 @@ import os
 #     s.close()
 
 s = serial.Serial(port='COM4', baudrate=115200,  bytesize=8, parity='N', stopbits=1, timeout=None, xonxoff=0, rtscts=0)
+var_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
+vars = var_str.replace(" ", "").split(',')
+
 count = 0
 try:
-    while count<30:
+    while count<5:
         count += 1
         time.sleep(0.8)
         data_r = s.readline().decode().rstrip()
-        if data_r:
-            print(count, data_r)
+        if data_r.__contains__("pro_"):
+            list_r = data_r.split(',')
+            Ib = float(list_r[9])
+            print(count, Ib)
 except:
     print('exit')
     exit(1)
