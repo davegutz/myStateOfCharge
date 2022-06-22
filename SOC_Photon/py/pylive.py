@@ -76,23 +76,80 @@ def live_plotter(x_vec, y_vec, line1, line2, identifier='', pause_time=0.1):
     # return line so we can update it again in the next iteration
     return line1, line2
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     #from pylive import live_plotter
-    import numpy as np
+    # import numpy as np
+    #
+    # def main():
+    #     size = 100
+    #     x_vec = np.linspace(0, 1, size + 1)[0:-1]
+    #     y_vec = np.random.randn(len(x_vec), 2)
+    #     line1 = []
+    #     line2 = []
+    #     count = 0
+    #     t = x_vec[-1]
+    #     while True and count<30:
+    #         count += 1
+    #         y_vec[-1][0] = np.random.randn(1)
+    #         y_vec[-1][1] = np.random.randn(1)
+    #         line1,line2 = live_plotter(x_vec, y_vec, line1, line2)
+    #         y_vec = np.append(y_vec[1:][:], np.zeros((1,2)), axis=0)
+    #
+    # main()
+import numpy as np
 
-    def main():
-        size = 100
-        x_vec = np.linspace(0, 1, size + 1)[0:-1]
-        y_vec = np.random.randn(len(x_vec), 2)
-        line1 = []
-        line2 = []
-        count = 0
-        t = x_vec[-1]
-        while True and count<30:
-            count += 1
-            y_vec[-1][0] = np.random.randn(1)
-            y_vec[-1][1] = np.random.randn(1)
-            line1,line2 = live_plotter(x_vec, y_vec, line1, line2)
-            y_vec = np.append(y_vec[1:][:], np.zeros((1,2)), axis=0)
+size = 100
+x_vec = np.linspace(0, 1, size + 1)[0:-1]
+y_vec1 = np.random.randn(len(x_vec), 2)
+y_vec2 = np.random.randn(len(x_vec), 2)*10.
+linen1 = None
+linen2 = None
+count = 0
+pause_time = 0.1
+identifier=''
+t = x_vec[-1]
+count += 1
+y_vec1[-1][0] = np.random.randn(1)
+y_vec1[-1][1] = np.random.randn(1)
+y_vec2[-1][0] = np.random.randn(1)*10.
+y_vec2[-1][1] = np.random.randn(1)*10.
+if linen1 is None:
+    # this is the call to matplotlib that allows dynamic plotting
+    plt.ion()
+    fig = plt.figure(figsize=(13, 6))
+    ax1 = fig.add_subplot(211)
 
-    main()
+    # create a variable for the line so we can later update it
+    linen1 = ax1.plot(x_vec, y_vec1, '-o', alpha=0.8)
+
+    # update plot label/title
+    plt.ylabel('Y Label1')
+    plt.title('Title: {}'.format(identifier))
+
+    ax2 = fig.add_subplot(212)
+
+    # create a variable for the line so we can later update it
+    linen2 = ax2.plot(x_vec, y_vec2, '-o', alpha=0.8)
+
+    # update plot label/title
+    plt.ylabel('Y Label 2')
+    plt.show()
+
+# after the figure, axis, and line are created, we only need to update the y-data
+linen1[0].set_ydata(y_vec1[:,0])
+linen1[1].set_ydata(y_vec1[:,1])
+linen2[0].set_ydata(y_vec2[:,0])
+linen2[1].set_ydata(y_vec2[:,1])
+# line1.set_data(x_vec, y1_data)
+
+# adjust limits if new data goes beyond bounds
+if np.min(y_vec1[:][0:1]) <= linen1[0].axes.get_ylim()[0] or np.max(y_vec1[:][0:1]) >= linen1[0].axes.get_ylim()[1]:
+    ax1.set_ylim([ np.min(y_vec1[:][0:1]) - np.std(y_vec1[:][0:1]),   np.max(y_vec1[:][0:1]) + np.std(y_vec1[:][0:1]) ])
+
+if np.min(y_vec2[:][2:3]) <= linen1[0].axes.get_ylim()[0] or np.max(y_vec2[:][2:3]) >= linen1[0].axes.get_ylim()[1]:
+    ax2.set_ylim([ np.min(y_vec2[:][2:3]) - np.std(y_vec2[:][2:3]),   np.max(y_vec2[:][2:3]) + np.std(y_vec2[:][2:3]) ])
+
+# this pauses the data so the figure/axis can catch up - the amount of pause can be altered above
+plt.pause(pause_time)
+y_vec1 = np.append(y_vec1[1:][:], np.zeros((1,2)), axis=0)
+y_vec2 = np.append(y_vec2[1:][:], np.zeros((1,2)), axis=0)

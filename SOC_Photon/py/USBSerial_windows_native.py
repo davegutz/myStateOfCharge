@@ -7,6 +7,7 @@ import serial
 import io
 import time
 import os
+from pylive import live_plotter
 
 # MAC = '00:14:03:05:59:90'
 # port = 3
