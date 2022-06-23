@@ -72,8 +72,9 @@ def liven_plotter(x, y, linen, fig, subplot=111, ax=None, y_label='', title='', 
         plt.show()
 
     # after the figure, axis, and line are created, we only need to update the y-data
-    linen[0].set_ydata(y[:, 0])
-    linen[1].set_ydata(y[:, 1])
+    m = np.shape(y)[1]
+    for i in range(m):
+        linen[i].set_ydata(y[:, i])
 
     # adjust limits if new data goes beyond bounds
     ax = scale_n(y, linen, ax)
@@ -91,7 +92,7 @@ if __name__ == '__main__':
         size = 100
         x_vec = np.linspace(0, 1, size + 1)[0:-1]
         y_vec1 = np.random.randn(len(x_vec), 2)
-        y_vec2 = np.random.randn(len(x_vec), 2) * 10.
+        y_vec2 = np.random.randn(len(x_vec), 1) * 10.
         linen_x1 = None
         linen_x2 = None
         axx1 = None
@@ -107,7 +108,7 @@ if __name__ == '__main__':
             y_vec1[-1][0] = np.random.randn(1)
             y_vec1[-1][1] = np.random.randn(1)
             y_vec2[-1][0] = np.random.randn(1) * 10.
-            y_vec2[-1][1] = np.random.randn(1) * 10.
+            # y_vec2[-1][1] = np.random.randn(1) * 10.
             if linen_x1 is None:
                 fign = plt.figure(figsize=(12, 5))
             linen_x1, axx1 = liven_plotter(x_vec, y_vec1, linen_x1, fign, subplot=211, ax=axx1, y_label='Y Label1',
@@ -115,6 +116,6 @@ if __name__ == '__main__':
             linen_x2, axx2 = liven_plotter(x_vec, y_vec2, linen_x2, fign, subplot=212, ax=axx2, y_label='Y Label2',
                                           pause_time=0.1)
             y_vec1 = np.append(y_vec1[1:][:], np.zeros((1, 2)), axis=0)
-            y_vec2 = np.append(y_vec2[1:][:], np.zeros((1, 2)), axis=0)
+            y_vec2 = np.append(y_vec2[1:][:], np.zeros((1, 1)), axis=0)
 
     main()
