@@ -272,10 +272,6 @@ void loop()
   static boolean reset_publish = true;      // Dynamic reset
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
-  // Serial test
-  #ifndef USE_BLYNK
-    if ( Serial1.available() ) Serial1.write(Serial1.read());
-  #endif
 
   // Start Blynk
   #ifdef USE_BLYNK

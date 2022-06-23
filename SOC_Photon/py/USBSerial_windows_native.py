@@ -1,39 +1,42 @@
-import socket
-
-import time
 import serial
-import io
 import time
-import os
 import numpy as np
 from pylive import liven_plotter
 import matplotlib.pyplot as plt
 
-s = serial.Serial(port='COM4', baudrate=115200,  bytesize=8, parity='N', stopbits=1, timeout=None, xonxoff=0, rtscts=0)
+com_port = 'COM4'
+key = 'pro_'
+
+s = serial.Serial(port=com_port, baudrate=115200,  bytesize=8, parity='N', stopbits=1, timeout=None, xonxoff=0, rtscts=0)
+
+# key = 'soc0_'
+
 var_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
 vars = var_str.replace(" ", "").split(',')
-
 count = 0
 i = 0
 cTime_last = None
 y_v = None
 t_v = None
-time_span = 300.  # second plot window setting
+time_span = 3600.*4.  # second plot window setting
+y_vec0 = None
 y_vec1 = None
 y_vec2 = None
+linen_x0 = None
 linen_x1 = None
 linen_x2 = None
+axx0 = None
 axx1 = None
 axx2 = None
 fig = None
 identifier = ''
 print(var_str)
 try:
-    while count<50:
+    while True:
         count += 1
-        time.sleep(0.8)
+        time.sleep(0.01)
         data_r = s.readline().decode().rstrip()
-        if data_r.__contains__("pro_"):
+        if data_r.__contains__(key):
             list_r = data_r.split(',')
             unit = list_r[0]
             hm = list_r[1]
@@ -63,6 +66,10 @@ try:
                     T_maybe = cTime - cTime_last
                     n_v = int(time_span / T_maybe)
                     t_v = np.arange(-n_v*T_maybe, 0, T_maybe)
+                    y_vec0 = np.zeros((len(t_v), 3))
+                    y_vec0[:, 0] = soc_m
+                    y_vec0[:, 1] = soc_ekf
+                    y_vec0[:, 2] = soc
                     y_vec1 = np.zeros((len(t_v), 1))
                     y_vec1[:, 0] = Ib
                     y_vec2 = np.zeros((len(t_v), 4))
@@ -74,6 +81,9 @@ try:
                     # print('t_v=', t_v)
                     # print('y_vec1=', y_vec1, 'y_vec2=', y_vec2)
                 # Ready for plots
+                y_vec0[-1][0] = soc_m
+                y_vec0[-1][1] = soc_ekf
+                y_vec0[-1][2] = soc
                 y_vec1[-1][0] = Ib
                 y_vec2[-1][0] = Vb
                 y_vec2[-1][1] = Voc
@@ -81,16 +91,20 @@ try:
                 y_vec2[-1][3] = Vsat
                 if linen_x1 is None:
                     fig = plt.figure(figsize=(12, 5))
-                linen_x1, axx1 = liven_plotter(t_v, y_vec1, linen_x1, fig, subplot=211, ax=axx1, y_label='Amps',
-                                               title='Title: {}'.format(identifier), pause_time=0.1,
-                                               labels=['Ib'])
-                linen_x2, axx2 = liven_plotter(t_v, y_vec2, linen_x2, fig, subplot=212, ax=axx2, y_label='Volts',
-                                               pause_time=0.1, labels=['Vb', 'Voc', 'Voc_ekf', 'Vsat'])
+                linen_x0, axx0 = liven_plotter(t_v, y_vec0, linen_x0, fig, subplot=311, ax=axx0, y_label='Amps',
+                                               title='Title: {}'.format(identifier), pause_time=0.01,
+                                               labels=['soc_m', 'soc_ekf', 'soc'])
+                linen_x1, axx1 = liven_plotter(t_v, y_vec1, linen_x1, fig, subplot=312, ax=axx1, y_label='Amps',
+                                               pause_time=0.01,
+                                               labels='Ib')
+                linen_x2, axx2 = liven_plotter(t_v, y_vec2, linen_x2, fig, subplot=313, ax=axx2, y_label='Volts',
+                                               pause_time=0.01, labels=['Vb', 'Voc', 'Voc_ekf', 'Vsat'])
+                y_vec0 = np.append(y_vec0[1:][:], np.zeros((1, 3)), axis=0)
                 y_vec1 = np.append(y_vec1[1:][:], np.zeros((1, 1)), axis=0)
                 y_vec2 = np.append(y_vec2[1:][:], np.zeros((1, 4)), axis=0)
             # Past values
             cTime_last = cTime
-
-except:
-    print('exit')
+except Exception as err:
+    print("Something went wrong: ", err)
+    s.close()
     exit(1)

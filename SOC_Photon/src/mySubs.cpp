@@ -101,7 +101,10 @@ void Shunt::load()
 void print_serial_header(void)
 {
   if ( rp.debug==4 || rp.debug==24 )
+  {
     Serial.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
+    Serial1.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
+  }
 }
 void print_serial_sim_header(void)
 {
@@ -425,7 +428,8 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 
   // Text basic Bluetooth (uses serial bluetooth app)
   #ifndef USE_BLYNK
-    Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s    %s EKF,Ah  chg,hrs  CC, Ah\n\n\n", dispString, dispStringT, dispStringS);
+    if ( rp.debug!=4 )
+      Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s    %s EKF,Ah  chg,hrs  CC, Ah\n\n\n", dispString, dispStringT, dispStringS);
   #endif
 
   if ( rp.debug==5 ) debug_5();
@@ -580,6 +584,7 @@ void serial_print(unsigned long now, double T)
   create_print_string(&pp.pubList);
   if ( rp.debug >= 100 ) Serial.printf("serial_print:");
   Serial.println(cp.buffer);
+  Serial1.println(cp.buffer);
 }
 void tweak_print(Sensors *Sen, BatteryMonitor *Mon)
 {
