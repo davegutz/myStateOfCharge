@@ -57,15 +57,18 @@ def scale_n(y, lines, ax):
         ax.set_ylim([min_y-std_y, max_y+std_y])
     return ax
 
-def liven_plotter(x, y, linen, fig, subplot=111, ax=None, y_label='', title='', identifier='', pause_time=0.1):
+def liven_plotter(x, y, linen, fig, label=None, subplot=111, ax=None, y_label='', title='', identifier='', pause_time=0.1):
     if linen is None:
         # this is the call to matplotlib that allows dynamic plotting
         plt.ion()
         ax = fig.add_subplot(subplot)
 
         # create a variable for the line so we can later update it
-        linen = ax.plot(x, y, '-o', alpha=0.8)
-
+        if label is None:
+            linen = ax.plot(x, y, '-o', alpha=0.8)
+        else:
+            linen = ax.plot(x, y, '-o', alpha=0.8, label=label)
+            plt.legend(loc=2)
         # update plot label/title
         plt.ylabel(y_label)
         plt.title(title)
@@ -112,9 +115,9 @@ if __name__ == '__main__':
             if linen_x1 is None:
                 fign = plt.figure(figsize=(12, 5))
             linen_x1, axx1 = liven_plotter(x_vec, y_vec1, linen_x1, fign, subplot=211, ax=axx1, y_label='Y Label1',
-                                          title='Title: {}'.format(identifier), pause_time=0.1)
+                                          title='Title: {}'.format(identifier), pause_time=0.1, label=['v11', 'v12'])
             linen_x2, axx2 = liven_plotter(x_vec, y_vec2, linen_x2, fign, subplot=212, ax=axx2, y_label='Y Label2',
-                                          pause_time=0.1)
+                                          pause_time=0.1, label=['v21'])
             y_vec1 = np.append(y_vec1[1:][:], np.zeros((1, 2)), axis=0)
             y_vec2 = np.append(y_vec2[1:][:], np.zeros((1, 1)), axis=0)
 
