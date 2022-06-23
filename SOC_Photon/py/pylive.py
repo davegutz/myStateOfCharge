@@ -46,71 +46,21 @@ import matplotlib.pyplot as plt
 # use ggplot style for more sophisticated visuals
 plt.style.use('ggplot')
 
-def live_plotter(x_vec, y_vec, line1, line2, identifier='', pause_time=0.1):
-    if line1 == []:
-        # this is the call to matplotlib that allows dynamic plotting
-        plt.ion()
-        fig = plt.figure(figsize=(13, 6))
-        ax = fig.add_subplot(111)
-
-        # create a variable for the line so we can later update it
-        line1,line2 = ax.plot(x_vec, y_vec, '-o', alpha=0.8)
-
-        # update plot label/title
-        plt.ylabel('Y Label')
-        plt.title('Title: {}'.format(identifier))
-        plt.show()
-
-    # after the figure, axis, and line are created, we only need to update the y-data
-    line1.set_ydata(y_vec[:,0])
-    line2.set_ydata(y_vec[:,1])
-    # line1.set_data(x_vec, y1_data)
-
-    # adjust limits if new data goes beyond bounds
-    if np.min(y_vec) <= line1.axes.get_ylim()[0] or np.max(y_vec) >= line1.axes.get_ylim()[1]:
-        plt.ylim([np.min(y_vec) - np.std(y_vec), np.max(y_vec) + np.std(y_vec)])
-
-    # this pauses the data so the figure/axis can catch up - the amount of pause can be altered above
-    plt.pause(pause_time)
-
-    # return line so we can update it again in the next iteration
-    return line1, line2
-
 def scale_n(y, lines, ax):
     # In multiple lined plot, all lines have same scale. Use lines[0]
     min_y = np.min(y)
     max_y = np.max(y)
     std_y = np.std(y)
-    if min_y <= lines[0].axes.get_ylim()[0] or max_y >= lines[0].axes.get_ylim()[1]:
-        ax.set_ylim([min_y-std_y, max(+std_y)])
+    ylim_0 = lines[0].axes.get_ylim()[0]
+    ylim_1 = lines[0].axes.get_ylim()[1]
+    if min_y <= ylim_0 or max_y >= ylim_1:
+        try:
+            ax.set_ylim([min_y-std_y, max(+std_y)])
+        except:
+            print("except:", max_y, min_y, std_y, ylim_0, ylim_1)
     return ax
 
-# if np.min(y_vec1[:][0:1]) <= linen1[0].axes.get_ylim()[0] or np.max(y_vec1[:][0:1]) >= linen1[0].axes.get_ylim()[1]:
-#     ax1.set_ylim([ np.min(y_vec1[:][0:1]) - np.std(y_vec1[:][0:1]),   np.max(y_vec1[:][0:1]) + np.std(y_vec1[:][0:1]) ])
-
-
-# if __name__ == '__main__':
-    #from pylive import live_plotter
-    # import numpy as np
-    #
-    # def main():
-    #     size = 100
-    #     x_vec = np.linspace(0, 1, size + 1)[0:-1]
-    #     y_vec = np.random.randn(len(x_vec), 2)
-    #     line1 = []
-    #     line2 = []
-    #     count = 0
-    #     t = x_vec[-1]
-    #     while True and count<30:
-    #         count += 1
-    #         y_vec[-1][0] = np.random.randn(1)
-    #         y_vec[-1][1] = np.random.randn(1)
-    #         line1,line2 = live_plotter(x_vec, y_vec, line1, line2)
-    #         y_vec = np.append(y_vec[1:][:], np.zeros((1,2)), axis=0)
-    #
-    # main()
-    
-def liven_plotter(x, y, linen, fig, ax, subplot, ylabel, title, identifier='', pause_time=0.1):
+def liven_plotter(x, y, linen, fig, subplot=111, ax=None, y_label='', title='', identifier='', pause_time=0.1):
     if linen is None:
         # this is the call to matplotlib that allows dynamic plotting
         plt.ion()
@@ -120,9 +70,8 @@ def liven_plotter(x, y, linen, fig, ax, subplot, ylabel, title, identifier='', p
         linen = ax.plot(x, y, '-o', alpha=0.8)
 
         # update plot label/title
-        plt.ylabel(ylabel)
+        plt.ylabel(y_label)
         plt.title(title)
-        ax = fig.add_subplot(subplot)
         plt.show()
 
     # after the figure, axis, and line are created, we only need to update the y-data
@@ -137,58 +86,37 @@ def liven_plotter(x, y, linen, fig, ax, subplot, ylabel, title, identifier='', p
 
     return linen, ax
 
+if __name__ == '__main__':
+    from pylive import liven_plotter
+    import numpy as np
 
-import numpy as np
+    def main():
+        size = 100
+        x_vec = np.linspace(0, 1, size + 1)[0:-1]
+        y_vec1 = np.random.randn(len(x_vec), 2)
+        y_vec2 = np.random.randn(len(x_vec), 2) * 10.
+        linen_x1 = None
+        linen_x2 = None
+        axx1 = None
+        axx2 = None
+        count = 0
+        pause_time = 0.1
+        identifier = ''
+        t = x_vec[-1]
+        while True and count<30:
+            count += 1
+            print(count)
+            y_vec1[-1][0] = np.random.randn(1)
+            y_vec1[-1][1] = np.random.randn(1)
+            y_vec2[-1][0] = np.random.randn(1) * 10.
+            y_vec2[-1][1] = np.random.randn(1) * 10.
+            if linen_x1 is None:
+                fign = plt.figure(figsize=(12, 5))
+            linen_x1, axx1 = liven_plotter(x_vec, y_vec1, linen_x1, fign, subplot=211, ax=axx1, y_label='Y Label1',
+                                          title='Title: {}'.format(identifier), pause_time=0.1)
+            linen_x2, axx2 = liven_plotter(x_vec, y_vec2, linen_x2, fign, subplot=212, ax=axx2, y_label='Y Label2',
+                                          pause_time=0.1)
+            y_vec1 = np.append(y_vec1[1:][:], np.zeros((1, 2)), axis=0)
+            y_vec2 = np.append(y_vec2[1:][:], np.zeros((1, 2)), axis=0)
 
-size = 100
-x_vec = np.linspace(0, 1, size + 1)[0:-1]
-y_vec1 = np.random.randn(len(x_vec), 2)
-y_vec2 = np.random.randn(len(x_vec), 2)*10.
-linen1 = None
-linen2 = None
-count = 0
-pause_time = 0.1
-identifier=''
-t = x_vec[-1]
-count += 1
-y_vec1[-1][0] = np.random.randn(1)
-y_vec1[-1][1] = np.random.randn(1)
-y_vec2[-1][0] = np.random.randn(1)*10.
-y_vec2[-1][1] = np.random.randn(1)*10.
-if linen1 is None:
-    # this is the call to matplotlib that allows dynamic plotting
-    plt.ion()
-    fig = plt.figure(figsize=(13, 6))
-    ax1 = fig.add_subplot(211)
-
-    # create a variable for the line so we can later update it
-    linen1 = ax1.plot(x_vec, y_vec1, '-o', alpha=0.8)
-
-    # update plot label/title
-    plt.ylabel('Y Label1')
-    plt.title('Title: {}'.format(identifier))
-
-    ax2 = fig.add_subplot(212)
-
-    # create a variable for the line so we can later update it
-    linen2 = ax2.plot(x_vec, y_vec2, '-o', alpha=0.8)
-
-    # update plot label/title
-    plt.ylabel('Y Label 2')
-    plt.show()
-
-# after the figure, axis, and line are created, we only need to update the y-data
-linen1[0].set_ydata(y_vec1[:,0])
-linen1[1].set_ydata(y_vec1[:,1])
-linen2[0].set_ydata(y_vec2[:,0])
-linen2[1].set_ydata(y_vec2[:,1])
-# line1.set_data(x_vec, y1_data)
-
-# adjust limits if new data goes beyond bounds
-ax1 = scale_n(y_vec1, linen1, ax1)
-ax2 = scale_n(y_vec2, linen2, ax2)
-
-# this pauses the data so the figure/axis can catch up - the amount of pause can be altered above
-plt.pause(pause_time)
-y_vec1 = np.append(y_vec1[1:][:], np.zeros((1,2)), axis=0)
-y_vec2 = np.append(y_vec2[1:][:], np.zeros((1,2)), axis=0)
+    main()
