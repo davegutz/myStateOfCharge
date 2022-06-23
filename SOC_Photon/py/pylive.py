@@ -101,6 +101,7 @@ if __name__ == '__main__':
         linen_x2 = None
         axx1 = None
         axx2 = None
+        fign = None
         count = 0
         pause_time = 0.1
         identifier = ''
