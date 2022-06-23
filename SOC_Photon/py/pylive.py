@@ -44,7 +44,7 @@ from numpy.random import randn
 import matplotlib.pyplot as plt
 
 # use ggplot style for more sophisticated visuals
-plt.style.use('ggplot')
+# plt.style.use('ggplot')
 
 def scale_n(y, lines, ax):
     # In multiple lined plot, all lines have same scale. Use lines[0]
@@ -58,7 +58,7 @@ def scale_n(y, lines, ax):
     return ax
 
 def liven_plotter(x, y, linen, fig, labels=None, subplot=111, ax=None, y_label='', title='', identifier='',
-                  pause_time=0.1):
+                  pause_time=0.1, symbol=''):
     if linen is None:
         # this is the call to matplotlib that allows dynamic plotting
         plt.ion()
@@ -66,9 +66,9 @@ def liven_plotter(x, y, linen, fig, labels=None, subplot=111, ax=None, y_label='
 
         # create a variable for the line so we can later update it
         if labels is None:
-            linen = ax.plot(x, y, '-o', alpha=0.8)
+            linen = ax.plot(x, y, symbol, alpha=0.8)
         else:
-            linen = ax.plot(x, y, '-o', alpha=0.8, label=labels)
+            linen = ax.plot(x, y, symbol, alpha=0.8, label=labels)
             plt.legend(loc=2)
         # update plot label/title
         plt.ylabel(y_label)

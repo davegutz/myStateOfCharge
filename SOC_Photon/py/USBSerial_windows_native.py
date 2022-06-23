@@ -29,7 +29,7 @@ fig = None
 identifier = ''
 print(var_str)
 try:
-    while count<5:
+    while count<50:
         count += 1
         time.sleep(0.8)
         data_r = s.readline().decode().rstrip()
@@ -74,6 +74,11 @@ try:
                     # print('t_v=', t_v)
                     # print('y_vec1=', y_vec1, 'y_vec2=', y_vec2)
                 # Ready for plots
+                y_vec1[-1][0] = Ib
+                y_vec2[-1][0] = Vb
+                y_vec2[-1][1] = Voc
+                y_vec2[-1][2] = Voc_ekf
+                y_vec2[-1][3] = Vsat
                 if linen_x1 is None:
                     fig = plt.figure(figsize=(12, 5))
                 linen_x1, axx1 = liven_plotter(t_v, y_vec1, linen_x1, fig, subplot=211, ax=axx1, y_label='Amps',
@@ -81,8 +86,8 @@ try:
                                                labels=['Ib'])
                 linen_x2, axx2 = liven_plotter(t_v, y_vec2, linen_x2, fig, subplot=212, ax=axx2, y_label='Volts',
                                                pause_time=0.1, labels=['Vb', 'Voc', 'Voc_ekf', 'Vsat'])
-                y_vec1 = np.append(y_vec1[1:][:], np.zeros((1, 2)), axis=0)
-                y_vec2 = np.append(y_vec2[1:][:], np.zeros((1, 1)), axis=0)
+                y_vec1 = np.append(y_vec1[1:][:], np.zeros((1, 1)), axis=0)
+                y_vec2 = np.append(y_vec2[1:][:], np.zeros((1, 4)), axis=0)
             # Past values
             cTime_last = cTime
 
