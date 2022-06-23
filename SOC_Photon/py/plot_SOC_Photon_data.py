@@ -42,7 +42,10 @@ def plot_SOC_Photon_data(r, key):
         while True:
             count += 1
             time.sleep(0.01)
-            data_r = r.readline().rstrip()
+            try:
+                data_r = r.readline().decode().rstrip()  # USB
+            except:
+                data_r = r.readline().rstrip()  # BLE
             if data_r.__contains__(key):
                 list_r = data_r.split(',')
                 unit = list_r[0]
