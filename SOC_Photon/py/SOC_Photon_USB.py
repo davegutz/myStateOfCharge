@@ -17,7 +17,7 @@ import time
 import numpy as np
 from pylive import liven_plotter
 import matplotlib.pyplot as plt
-from SOC_Photon_BLESerial import plot_SOC_Photon_data
+from SOC_Photon_BLE import plot_SOC_Photon_data
 
 com_port = 'COM4'
 key = 'pro_'
