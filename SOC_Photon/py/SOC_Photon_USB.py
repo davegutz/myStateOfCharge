@@ -13,12 +13,7 @@
 #
 
 import serial
-import time
-import numpy as np
-from pylive import liven_plotter
-import matplotlib.pyplot as plt
-from SOC_Photon_BLE import plot_SOC_Photon_data
-
+from plot_SOC_Photon_data import *
 
 com_port = 'COM4'
 key = 'pro_'
