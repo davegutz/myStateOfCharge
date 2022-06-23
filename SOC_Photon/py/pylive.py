@@ -54,10 +54,7 @@ def scale_n(y, lines, ax):
     ylim_0 = lines[0].axes.get_ylim()[0]
     ylim_1 = lines[0].axes.get_ylim()[1]
     if min_y <= ylim_0 or max_y >= ylim_1:
-        try:
-            ax.set_ylim([min_y-std_y, max(+std_y)])
-        except:
-            print("except:", max_y, min_y, std_y, ylim_0, ylim_1)
+        ax.set_ylim([min_y-std_y, max_y+std_y])
     return ax
 
 def liven_plotter(x, y, linen, fig, subplot=111, ax=None, y_label='', title='', identifier='', pause_time=0.1):
@@ -103,9 +100,10 @@ if __name__ == '__main__':
         pause_time = 0.1
         identifier = ''
         t = x_vec[-1]
-        while True and count<30:
+        count_max = 100
+        while True and count<count_max:
             count += 1
-            print(count)
+            print(count, "of", count_max)
             y_vec1[-1][0] = np.random.randn(1)
             y_vec1[-1][1] = np.random.randn(1)
             y_vec2[-1][0] = np.random.randn(1) * 10.
