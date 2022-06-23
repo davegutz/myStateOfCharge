@@ -76,6 +76,19 @@ def live_plotter(x_vec, y_vec, line1, line2, identifier='', pause_time=0.1):
     # return line so we can update it again in the next iteration
     return line1, line2
 
+def scale_n(y, lines, ax):
+    # In multiple lined plot, all lines have same scale. Use lines[0]
+    min_y = np.min(y)
+    max_y = np.max(y)
+    std_y = np.std(y)
+    if min_y <= lines[0].axes.get_ylim()[0] or max_y >= lines[0].axes.get_ylim()[1]:
+        ax.set_ylim([min_y-std_y, max(+std_y)])
+    return ax
+
+# if np.min(y_vec1[:][0:1]) <= linen1[0].axes.get_ylim()[0] or np.max(y_vec1[:][0:1]) >= linen1[0].axes.get_ylim()[1]:
+#     ax1.set_ylim([ np.min(y_vec1[:][0:1]) - np.std(y_vec1[:][0:1]),   np.max(y_vec1[:][0:1]) + np.std(y_vec1[:][0:1]) ])
+
+
 # if __name__ == '__main__':
     #from pylive import live_plotter
     # import numpy as np
@@ -96,6 +109,35 @@ def live_plotter(x_vec, y_vec, line1, line2, identifier='', pause_time=0.1):
     #         y_vec = np.append(y_vec[1:][:], np.zeros((1,2)), axis=0)
     #
     # main()
+    
+def liven_plotter(x, y, linen, fig, ax, subplot, ylabel, title, identifier='', pause_time=0.1):
+    if linen is None:
+        # this is the call to matplotlib that allows dynamic plotting
+        plt.ion()
+        ax = fig.add_subplot(subplot)
+
+        # create a variable for the line so we can later update it
+        linen = ax.plot(x, y, '-o', alpha=0.8)
+
+        # update plot label/title
+        plt.ylabel(ylabel)
+        plt.title(title)
+        ax = fig.add_subplot(subplot)
+        plt.show()
+
+    # after the figure, axis, and line are created, we only need to update the y-data
+    linen[0].set_ydata(y[:, 0])
+    linen[1].set_ydata(y[:, 1])
+
+    # adjust limits if new data goes beyond bounds
+    ax = scale_n(y, linen, ax)
+
+    # this pauses the data so the figure/axis can catch up - the amount of pause can be altered above
+    plt.pause(pause_time)
+
+    return linen, ax
+
+
 import numpy as np
 
 size = 100
@@ -143,11 +185,8 @@ linen2[1].set_ydata(y_vec2[:,1])
 # line1.set_data(x_vec, y1_data)
 
 # adjust limits if new data goes beyond bounds
-if np.min(y_vec1[:][0:1]) <= linen1[0].axes.get_ylim()[0] or np.max(y_vec1[:][0:1]) >= linen1[0].axes.get_ylim()[1]:
-    ax1.set_ylim([ np.min(y_vec1[:][0:1]) - np.std(y_vec1[:][0:1]),   np.max(y_vec1[:][0:1]) + np.std(y_vec1[:][0:1]) ])
-
-if np.min(y_vec2[:][2:3]) <= linen1[0].axes.get_ylim()[0] or np.max(y_vec2[:][2:3]) >= linen1[0].axes.get_ylim()[1]:
-    ax2.set_ylim([ np.min(y_vec2[:][2:3]) - np.std(y_vec2[:][2:3]),   np.max(y_vec2[:][2:3]) + np.std(y_vec2[:][2:3]) ])
+ax1 = scale_n(y_vec1, linen1, ax1)
+ax2 = scale_n(y_vec2, linen2, ax2)
 
 # this pauses the data so the figure/axis can catch up - the amount of pause can be altered above
 plt.pause(pause_time)
