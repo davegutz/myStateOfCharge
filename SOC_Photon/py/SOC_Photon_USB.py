@@ -13,19 +13,23 @@
 #
 
 from platform import system
-if system() == 'android':
-    # from usb4a import usb
+if system() == 'Linux':
+    from usb4a import usb
     from usbserial4a import serial4a
 else:
     from serial import Serial
 from plot_SOC_Photon_data import *
 
-com_port = 'COM4'
-key = 'pro_'
-
-if system() == 'android':
-    s = serial4a.get_serial_port(port=com_port, baudrate=115200,  bytesize=8, parity='N', stopbits=1, timeout=None, xonxoff=0, rtscts=0)
+if system() == 'Linux':
+    device_name = '/dev/bus/usb/001/002'
+    device = usb.get_usb_device(device_name)
+    if not usb.has_usb_permission(device):
+        usb.request_usb_permission(device)
+    s = serial4a.get_serial_port(device_name, 115200,  8, 'N', 1, timeout=1)
 else:
+    com_port = 'COM4'
     s = Serial(port=com_port, baudrate=115200,  bytesize=8, parity='N', stopbits=1, timeout=None, xonxoff=0, rtscts=0)
+
+key = 'pro_'
 
 plot_SOC_Photon_data(s, key)
