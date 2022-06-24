@@ -12,15 +12,19 @@
 # Lesser General Public License for more details.
 #
 
-from platform import system
-if system() == 'Linux':
+# from platform import system
+# if system() == 'Linux':
+from kivy.utils import platform
+if platform == 'android':
+    import kivy
     from usb4a import usb
     from usbserial4a import serial4a
 else:
     from serial import Serial
 from plot_SOC_Photon_data import *
 
-if system() == 'Linux':
+# if system() == 'Linux':
+if platform == 'android':
     device_name = '/dev/bus/usb/001/002'
     device = usb.get_usb_device(device_name)
     if not usb.has_usb_permission(device):

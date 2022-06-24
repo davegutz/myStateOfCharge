@@ -52,6 +52,7 @@ struct CommandPars
   float ibatt_bias_amp;     // Calibration of amplified shunt sensor, A
   float ibatt_bias_noamp;   // Calibration of non-amplified shunt sensor, A
   boolean dc_dc_on;         // DC-DC charger is on
+  boolean serial1;          // Using Serial1 instead of Serial
   CommandPars(void)
   {
     this->string_complete = false;
@@ -63,6 +64,7 @@ struct CommandPars
     ibatt_bias_amp = 0.;
     ibatt_bias_noamp = 0.;
     dc_dc_on = false;
+    serial1 = false;
   }
   void cmd_reset(void)
   {
@@ -83,14 +85,15 @@ struct CommandPars
   void pretty_print(void)
   {
     Serial.printf("command parameters(cp):\n");
-    Serial.printf("  enable_wifi =            %d;  // Enable wifi\n", this->enable_wifi);
-    Serial.printf("  model_cutback =          %d;  // On model cutback\n", this->model_cutback);
-    Serial.printf("  model_saturated =        %d;  // Sim on cutback and saturated\n", this->model_saturated);
-    Serial.printf("  soft_reset =             %d;  // Use talk to reset main\n", this->soft_reset);
-    Serial.printf("  write_summary =          %d;  // Use talk to issue a write command to summary\n", this->write_summary);
-    Serial.printf("  ibatt_bias_amp =   %7.3f;  // Signal injection bias for amplified current input, A\n", this->ibatt_bias_amp);
-    Serial.printf("  ibatt_bias_noamp = %7.3f;  // Signal injection bias for non-amplified current input, A\n", this->ibatt_bias_noamp);
-    Serial.printf("  dc_dc_on =               %d;  // DC-DC charger is on\n", this->dc_dc_on);
+    Serial.printf("  enable_wifi =            %d;\n", this->enable_wifi);
+    Serial.printf("  model_cutback =          %d;\n", this->model_cutback);
+    Serial.printf("  model_saturated =        %d;\n", this->model_saturated);
+    Serial.printf("  soft_reset =             %d;\n", this->soft_reset);
+    Serial.printf("  write_summary =          %d;\n", this->write_summary);
+    Serial.printf("  ibatt_bias_amp =   %7.3f;\n", this->ibatt_bias_amp);
+    Serial.printf("  ibatt_bias_noamp = %7.3f;\n", this->ibatt_bias_noamp);
+    Serial.printf("  dc_dc_on =               %d;\n", this->dc_dc_on);
+    Serial.printf("  serial1 =                %d;\n", this->serial1);
   }
 };            
 

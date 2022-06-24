@@ -47,6 +47,14 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
   // Serial event  (terminate Send String data with 0A using CoolTerm)
   if (cp.string_complete)
   {
+    // Limited echoing of Serial1 commands available
+    if ( cp.serial1 )
+    {
+      Serial1.printf("echo and return:  %s\n", cp.input_string.c_str());
+      cp.input_string = "";
+      cp.string_complete = false;
+      return;
+    }
     switch ( cp.input_string.charAt(0) )
     {
       case ( 'B' ):

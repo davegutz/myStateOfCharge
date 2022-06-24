@@ -565,7 +565,39 @@ void serialEvent()
     // so the main loop can do something about it:
     if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',')
     {
+      // Remove whitespace
+      cp.input_string.trim();
+      cp.input_string.replace("\0","");
+      cp.input_string.replace(";","");
+      cp.input_string.replace(",","");
+      cp.input_string.replace(" ","");
+      cp.input_string.replace("=","");
+      cp.serial1 = false; 
       cp.string_complete = true;
+     break;  // enable reading multiple inputs
+    }
+  }
+}
+
+/*
+  Special handler that uses built-in callback.
+  SerialEvent occurs whenever a new data comes in the
+  hardware serial RX.  This routine is run between each
+  time loop() runs, so using delay inside loop can delay
+  response.  Multiple bytes of data may be available.
+ */
+void serialEvent1()
+{
+  while (Serial1.available())
+  {
+    // get the new byte:
+    char inChar = (char)Serial1.read();
+    // add it to the cp.input_string:
+    cp.input_string += inChar;
+    // if the incoming character is a newline, set a flag
+    // so the main loop can do something about it:
+    if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',')
+    {
      // Remove whitespace
       cp.input_string.trim();
       cp.input_string.replace("\0","");
@@ -573,6 +605,8 @@ void serialEvent()
       cp.input_string.replace(",","");
       cp.input_string.replace(" ","");
       cp.input_string.replace("=","");
+      cp.serial1 = true; 
+      cp.string_complete = true;
       break;  // enable reading multiple inputs
     }
   }
