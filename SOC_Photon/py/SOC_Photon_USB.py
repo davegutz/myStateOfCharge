@@ -35,7 +35,7 @@ else:
     try:
         s = Serial(port=com_port, baudrate=115200,  bytesize=8, parity='N', stopbits=1, timeout=None, xonxoff=0, rtscts=0)
     except IOError:
-        print('\n\n*************       Have you turned plugged in USB?      **********************\n\n')
+        print('\n\n*************       Have you plugged in USB?      **********************\n\n')
         exit(1)
 key = 'pro_'
 
