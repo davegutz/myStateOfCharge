@@ -15,7 +15,7 @@
 # from platform import system
 # if system() == 'Linux':
 from kivy.utils import platform
-if platform == 'android':
+if platform == 'linux':
     import kivy
     from usb4a import usb
     from usbserial4a import serial4a
@@ -24,7 +24,7 @@ else:
 from plot_SOC_Photon_data import *
 
 # if system() == 'Linux':
-if platform == 'android':
+if platform == 'linux':
     device_name = '/dev/bus/usb/001/002'
     device = usb.get_usb_device(device_name)
     if not usb.has_usb_permission(device):

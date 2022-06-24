@@ -25,6 +25,8 @@ def plot_SOC_Photon_data(r, key):
     cTime_last = None
     y_v = None
     t_v = None
+    T_actual = 0.
+    T_actual_past = 0.
     time_span = 3600. * 4.  # second plot window setting
     y_vec0 = None
     y_vec1 = None
@@ -75,6 +77,8 @@ def plot_SOC_Photon_data(r, key):
                     # Setup
                     if i == 2:
                         T_maybe = cTime - cTime_last
+                        T_actual = T_maybe
+                        T_actual_past = T_maybe
                         n_v = int(time_span / T_maybe)
                         t_v = np.arange(-n_v * T_maybe, 0, T_maybe)
                         y_vec0 = np.zeros((len(t_v), 3))
@@ -92,6 +96,8 @@ def plot_SOC_Photon_data(r, key):
                         # print('t_v=', t_v)
                         # print('y_vec1=', y_vec1, 'y_vec2=', y_vec2)
                     # Ready for plots
+                    T_actual = cTime - cTime_last
+                    t_v[:] = t_v[:] + T_actual_past - T_actual
                     y_vec0[-1][0] = soc_m
                     y_vec0[-1][1] = soc_ekf
                     y_vec0[-1][2] = soc
@@ -115,6 +121,7 @@ def plot_SOC_Photon_data(r, key):
                     y_vec2 = np.append(y_vec2[1:][:], np.zeros((1, 4)), axis=0)
                 # Past values
                 cTime_last = cTime
+                T_actual_past = T_actual
     except Exception as err:
         print("Something went wrong: ", err)
         r.close()
