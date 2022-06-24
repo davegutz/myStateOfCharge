@@ -359,14 +359,14 @@ Rapid tweak test 02:30 min using models 'tweakMod'
   Xp10;
     to end prematurely
   XS; Dn0.9985; Ca1; Mk0; Nk0;
-    run py script SOC_over_2022d.py , adding < name >.txt to   data_file_old
+    run py script DataOverModel.py, using suggestions at bottom of file to recognize the new data
 
   Slow cycle test 10:00 min using models 'cycleMod'
     start recording, save to ../dataReduction/< name >.txt
   Xp11;
     to end prematurely
   XS; Dn0.9985; Ca1; Mk0; Nk0;
-    run py script SOC_over_2022d.py , adding < name >.txt to   data_file_old
+    run py script DataOverModel.py, using suggestions at bottom of file to recognize the new data
 
 Throughput test
   v4;Dr1;
@@ -375,7 +375,7 @@ Throughput test
     confirm T restored to 0.100s
 
   ...........................................................
-37. Placeholder
+37. Android running of data collection.   The very best I could accompish is to run BLESerial App and save to file. You can use BLE transmit to change anything, echoed still on USB so flying a little blind.   Best for changing 'v0' to 'v4' and vice-versa.  The script 'DataOverModel.py' WILL RUN ON ANDROID but live plots I couldn't get to work.  Easiest to collect data using BLESerial and move to PC for analysis.
 
 ## Accuracy
 
