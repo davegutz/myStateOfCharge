@@ -50,10 +50,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
     // Limited echoing of Serial1 commands available
     if ( cp.serial1 )
     {
-      Serial1.printf("echo and return:  %s\n", cp.input_string.c_str());
-      cp.input_string = "";
-      cp.string_complete = false;
-      return;
+      Serial1.printf("echo:  %s\n", cp.input_string.c_str());
     }
     switch ( cp.input_string.charAt(0) )
     {
@@ -208,9 +205,18 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'p' ):
-            Serial.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
-            Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
-            Serial.printf("%ld\n", Sen->PublishSerial->delay());
+            if ( cp.serial1 )
+            {
+              Serial1.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
+              Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
+              Serial1.printf("%ld\n", Sen->PublishSerial->delay());
+            }
+            else
+            {
+              Serial.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
+              Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
+              Serial.printf("%ld\n", Sen->PublishSerial->delay());
+            }
             break;
 
           case ( 'r' ):
