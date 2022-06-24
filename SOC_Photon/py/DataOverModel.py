@@ -23,17 +23,10 @@ Dependencies:
 """
 
 import numpy as np
-from numpy.random import randn
-import Battery
-from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, Retained
-from Battery import overall as overalls
-from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
-import os
 import matplotlib.pyplot as plt
 from datetime import datetime
-from TFDelay import TFDelay
-from MonSimNomConfig import *
 from MonSim import replicate, save_clean_file, save_clean_file_sim
+from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 
 def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files=None, plot_title=None, n_fig=None, new_s_s=None):
     if fig_files is None:
@@ -489,7 +482,7 @@ if __name__ == '__main__':
         fig_files = []
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
-        filename = data_root + sys.argv[0].split('/')[-1]
+        filename = "./Figures/" + data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         # n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
         n_fig, fig_files = overall(saved_old, mons, saved_old_sim, sims, sims_m, filename, fig_files, plot_title=plot_title,

@@ -79,3 +79,5 @@ SOC_Photon/dataReduction/watchXm2_mon_rep.csv
 SOC_Photon/dataReduction/watchXm2_sim.csv
 SOC_Photon/dataReduction/watchXm2_sim_rep.csv
 *.crc_block
+SOC_Photon/dataReduction/serial_20220624_095543_mon_rep.csv
+SOC_Photon/dataReduction/serial_20220624_095543_mon_rep.csv
