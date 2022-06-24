@@ -32,8 +32,11 @@ if platform == 'linux':
     s = serial4a.get_serial_port(device_name, 115200,  8, 'N', 1, timeout=1)
 else:
     com_port = 'COM4'
-    s = Serial(port=com_port, baudrate=115200,  bytesize=8, parity='N', stopbits=1, timeout=None, xonxoff=0, rtscts=0)
-
+    try:
+        s = Serial(port=com_port, baudrate=115200,  bytesize=8, parity='N', stopbits=1, timeout=None, xonxoff=0, rtscts=0)
+    except IOError:
+        print('\n\n*************       Have you turned plugged in USB?      **********************\n\n')
+        exit(1)
 key = 'pro_'
 
 plot_SOC_Photon_data(s, key)

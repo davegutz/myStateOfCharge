@@ -19,6 +19,10 @@ MAC = '00:14:03:05:59:90'; key = 'pro_';
 # MAC = '00:14:03:05:59:78'; key = 'soc0_'; # HC-06 on soc0
 
 s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-s.connect((MAC, 1))
+try:
+    s.connect((MAC, 1))
+except OSError:
+    print('\n\n*************       Have you turned on Bluetooth?      **********************\n\n')
+    exit(1)
 r = s.makefile("r")
 plot_SOC_Photon_data(r, key)
