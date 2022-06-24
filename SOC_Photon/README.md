@@ -360,6 +360,7 @@ Rapid tweak test 02:30 min using models 'tweakMod'
     to end prematurely
   XS; Dn0.9985; Ca1; Mk0; Nk0;
     run py script DataOverModel.py, using suggestions at bottom of file to recognize the new data
+    [TODO]: still need to square any differences between Mon and Sim (even though overplots look good - those are sim-sim and mon-mon).  Make sure dv_hys is same - both driven by same current.   Delete the direx feature of Hysteresis and use dv_hys explicitly.
 
   Slow cycle test 10:00 min using models 'cycleMod'
     start recording, save to ../dataReduction/< name >.txt
@@ -373,9 +374,8 @@ Throughput test
     look at T print, estimate X-2s value (0.049s, ~50% margin)
   Dr100;
     confirm T restored to 0.100s
-
-  ...........................................................
-37. Android running of data collection.   The very best I could accompish is to run BLESerial App and save to file. You can use BLE transmit to change anything, echoed still on USB so flying a little blind.   Best for changing 'v0' to 'v4' and vice-versa.  The script 'DataOverModel.py' WILL RUN ON ANDROID but live plots I couldn't get to work.  Easiest to collect data using BLESerial and move to PC for analysis.
+    .
+37. Android running of data collection.   The very best I could accompish is to run BLESerial App and save to file. You can use BLE transmit to change anything, echoed still on USB so flying a little blind.   Best for changing 'v0' to 'v4' and vice-versa.  The script 'DataOverModel.py' WILL RUN ON ANDROID using PyDroid and a bunch of stupid setup work.  But live plots I couldn't get to work because USB support is buggy.  The author of best tools usbserial4 said using Python 2 was best - forget that!  Easiest to collect data using BLESerial and move to PC for analysis.
 
 ## Accuracy
 
