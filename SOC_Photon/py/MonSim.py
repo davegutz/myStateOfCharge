@@ -200,11 +200,14 @@ if __name__ == '__main__':
         # time_end = 2500.
 
         # Load data (must end in .txt)
-        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613_new.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613_new.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220624.txt';
+        unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
-        title_key_sim = "unit_sim,"  # Find one instance of title
+        title_key_sim = "unit_m,"  # Find one instance of title
+        unit_key_sim = "unit_sim"
         data_file_clean = write_clean_file(data_file_old_txt, type='_mon', title_key=title_key, unit_key=unit_key)
-        data_file_sim_clean = write_clean_file(data_file_old_txt, type='_sim', title_key=title_key_sim, unit_key=title_key_sim)
+        data_file_sim_clean = write_clean_file(data_file_old_txt, type='_sim', title_key=title_key_sim, unit_key=unit_key_sim)
 
         # Load
         cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
