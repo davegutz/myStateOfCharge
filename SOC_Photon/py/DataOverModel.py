@@ -26,7 +26,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
 from MonSim import replicate, save_clean_file, save_clean_file_sim
-from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
+from kivy.utils import platform
+if platform != 'linux':
+    from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 
 def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files=None, plot_title=None, n_fig=None, new_s_s=None):
     if fig_files is None:
@@ -482,14 +484,17 @@ if __name__ == '__main__':
         fig_files = []
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
-        filename = "./Figures/" + data_root + sys.argv[0].split('/')[-1]
+        if platform == 'linux':
+            filename = "Python/Figures/" + data_root + sys.argv[0].split('/')[-1]
+        else:
+            filename = "./Figures/" + data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         # n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
         n_fig, fig_files = overall(saved_old, mons, saved_old_sim, sims, sims_m, filename, fig_files, plot_title=plot_title,
                                    n_fig=n_fig, new_s_s=sims)
-
-        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
-        cleanup_fig_files(fig_files)
+        if platform != 'linux':
+            unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
+            cleanup_fig_files(fig_files)
 
         plt.show()
 
@@ -499,9 +504,17 @@ if __name__ == '__main__':
     #python DataOverModel.py("../dataReduction/watchXm2.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/serial_20220624_095543.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220624.txt", "pro_2022")
-    """ Sample Run Configuration Parameters:
+    #
+    """
+    PyCharm Sample Run Configuration Parameters:
     "../dataReduction/serial_20220624_095543.txt"
     pro_2022
+    
+    PyCharm Terminal:
+    python DataOverModel.py "../dataReduction/serial_20220624_095543.txt" "pro_2022"
+
+    android:
+    python Python/DataOverModel.py "USBTerminal/serial_20220624_095543.txt" "pro_2022"
     """
 
     if __name__ == "__main__":
