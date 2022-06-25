@@ -185,6 +185,7 @@ public:
   void pretty_print_ss();
   double voc() { return (voc_); };
   double Voc() { return (voc_*(*rp_nS_)); };
+  double Voc_stat() { return (voc_stat_*(*rp_nS_)); };
   double voc_soc(const double soc, const double temp_c);
   void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -chem_.r_0*sr_); };
   double Sr() { return (sr_); };
@@ -255,19 +256,14 @@ public:
   double soc_wt() { return soc_wt_; };
   boolean solve_ekf(Sensors *Sen);
   double tcharge() { return (tcharge_); };
-  double voc() { return (voc_); };
   double dv_dyn() { return (dv_dyn_); };
   double dV_dyn() { return (dv_dyn_*(*rp_nS_)); };
   double voc_filt() { return (voc_filt_); };
   double Voc_filt() { return (voc_filt_*(*rp_nS_)); };
-  double voc_stat() { return (voc_stat_); };
-  double Voc_stat() { return (voc_stat_*(*rp_nS_)); };
   double y_ekf() { return (y_); };
   double y_ekf_filt() { return (y_filt_); };
 protected:
-  double voc_stat_;     // Sim voc from soc-voc table, V
   double tcharge_ekf_;  // Solved charging time to 100% from ekf, hr
-  double voc_;          // Charging voltage, V
   double soc_ekf_;      // Filtered state of charge from ekf (0-1)
   double tcharge_;      // Counted charging time to 100%, hr
   double q_ekf_;        // Filtered charge calculated by ekf, C

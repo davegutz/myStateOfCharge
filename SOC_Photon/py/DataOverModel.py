@@ -54,8 +54,8 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(new_s.time, new_s.Vb, color='orange', linestyle='--', label='Vb_new')
     plt.legend(loc=1)
     plt.subplot(224)
-    plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
-    plt.plot(new_s.time, new_s.Voc, color='orange', linestyle='--', label='Voc_new')
+    plt.plot(old_s.time, old_s.Voc_stat, color='green', label='Voc_stat')
+    plt.plot(new_s.time, new_s.Voc_stat, color='orange', linestyle='--', label='Voc_stat_new')
     plt.plot(old_s.time, old_s.Vsat, color='blue', label='Vsat')
     plt.plot(new_s.time, new_s.Vsat, color='red', linestyle='--', label='Vsat_new')
     plt.legend(loc=1)
@@ -71,8 +71,8 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(new_s.time, new_s.dv_dyn, color='orange', linestyle='--', label='dv_dyn_new')
     plt.legend(loc=1)
     plt.subplot(322)
-    plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
-    plt.plot(new_s.time, new_s.Voc, color='orange', linestyle='--', label='Voc_new')
+    plt.plot(old_s.time, old_s.Voc_stat, color='green', label='Voc_stat')
+    plt.plot(new_s.time, new_s.Voc_stat, color='orange', linestyle='--', label='Voc_stat_new')
     plt.legend(loc=1)
     plt.subplot(323)
     plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
@@ -167,8 +167,8 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         plt.plot(new_s_sim_m.time, new_s_sim_m.soc_m, color='green', linestyle='--', label='soc_m_new')
         plt.legend(loc=1)
         plt.subplot(333)
-        plt.plot(old_s_sim.time, old_s_sim.voc_m, color='orange', label='voc_m')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.voc_m, color='green', linestyle='--', label='voc_m_new')
+        plt.plot(old_s_sim.time, old_s_sim.voc_stat_m, color='orange', label='voc_stat_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.voc_stat_m, color='green', linestyle='--', label='voc_stat_m_new')
         plt.plot(old_s_sim.time, old_s_sim.vsat_m, color='blue', label='vsat_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.vsat_m, color='red', linestyle='--', label='vsat_m_new')
         plt.plot(old_s_sim.time, old_s_sim.vb_m, color='cyan', label='vb_m')
@@ -181,7 +181,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         plt.plot(new_s_sim_m.time, new_s_sim_m.Tbl_m, color='red', linestyle='--', label='Tbl_m_new')
         plt.legend(loc=1)
         plt.subplot(335)
-        plt.plot(old_s_sim.time, old_s_sim.vdyn_m, color='orange', label='vdyn_m')
+        plt.plot(old_s_sim.time, old_s_sim.dv_dyn_m, color='orange', label='dv_dyn_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.dv_dyn_m, color='green', linestyle='--', label='dv_dyn_m_new')
         plt.legend(loc=1)
         plt.subplot(337)
@@ -200,7 +200,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
 
 def write_clean_file(txt_file, type, title_key, unit_key):
     csv_file = txt_file.replace('.txt', type + '.csv', 1)
-    # default_header_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
+    # default_header_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
     # Header
     have_header_str = None
     with open(txt_file, "r") as input_file:
@@ -310,8 +310,8 @@ class SavedData:
         # s += "{},".format(self.T[self.i])
         s += "{:8.3f},".format(self.Ib[self.i])
         s += "{:7.2f},".format(self.Vsat[self.i])
-        s += "{:5.2f},".format(self.Vdyn[self.i])
-        s += "{:5.2f},".format(self.Voc[self.i])
+        s += "{:5.2f},".format(self.dV_dyn[self.i])
+        s += "{:5.2f},".format(self.Voc_stat[self.i])
         s += "{:5.2f},".format(self.Voc_ekf[self.i])
         s += "{:10.6f},".format(self.y_ekf[self.i])
         s += "{:7.3f},".format(self.soc_m[self.i])
@@ -334,8 +334,8 @@ class SavedDataSim:
             self.Tb_m = []
             self.Tbl_m = []
             self.vsat_m = []
-            self.voc_m = []
-            self.vdyn_m = []
+            self.voc_stat_m = []
+            self.dv_dyn_m = []
             self.vb_m = []
             self.ib_m = []
             self.sat_m = []
@@ -360,8 +360,8 @@ class SavedDataSim:
             self.Tb_m = data.Tb_m[:i_end]
             self.Tbl_m = data.Tbl_m[:i_end]
             self.vsat_m = data.vsat_m[:i_end]
-            self.voc_m = data.voc_m[:i_end]
-            self.vdyn_m = data.vdyn_m[:i_end]
+            self.voc_stat_m = data.voc_stat_m[:i_end]
+            self.dv_dyn_m = data.dv_dyn_m[:i_end]
             self.vb_m = data.vb_m[:i_end]
             self.ib_m = data.ib_m[:i_end]
             self.sat_m = data.sat_m[:i_end]
@@ -378,8 +378,8 @@ class SavedDataSim:
         s += "{:5.2f},".format(self.Tb_m[self.i])
         s += "{:5.2f},".format(self.Tbl_m[self.i])
         s += "{:8.3f},".format(self.vsat_m[self.i])
-        s += "{:5.2f},".format(self.voc_m[self.i])
-        s += "{:5.2f},".format(self.vdyn_m[self.i])
+        s += "{:5.2f},".format(self.voc_stat_m[self.i])
+        s += "{:5.2f},".format(self.dv_dyn_m[self.i])
         s += "{:5.2f},".format(self.vb_m[self.i])
         s += "{:8.3f},".format(self.ib_m[self.i])
         s += "{:7.3f},".format(self.sat_m[self.i])
@@ -402,15 +402,15 @@ if __name__ == '__main__':
     plt.rcParams['axes.grid'] = True
 
     def compare_print(old_s, new_s):
-        s = " time,      Ib,                   Vb,              Vdyn,          Voc_stat,            Voc,        Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
+        s = " time,      Ib,                   Vb,              dV_dyn,          Voc_stat,            Voc,        Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
         for i in range(len(new_s.time)):
             s += "{:7.3f},".format(old_s.time[i])
             s += "{:11.3f},".format(old_s.Ib[i])
             s += "{:9.3f},".format(new_s.Ib[i])
             s += "{:9.2f},".format(old_s.Vb[i])
             s += "{:5.2f},".format(new_s.Vb[i])
-            s += "{:9.2f},".format(old_s.Vdyn[i])
-            s += "{:5.2f},".format(new_s.Vdyn[i])
+            s += "{:9.2f},".format(old_s.dV_dyn[i])
+            s += "{:5.2f},".format(new_s.dV_dyn[i])
             s += "{:9.2f},".format(old_s.Voc_stat[i])
             s += "{:5.2f},".format(new_s.Voc_stat[i])
             s += "{:9.2f},".format(old_s.Voc[i])
@@ -450,12 +450,12 @@ if __name__ == '__main__':
         data_file_sim_clean = write_clean_file(data_file_old_txt, type='_sim', title_key='unit_m', unit_key='unit_sim,')
 
         # Load
-        cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
+        cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn', 'Voc_stat', 'Voc_ekf',
                 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
-        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_m', 'vdyn_m', 'vb_m', 'ib_m', 'sat_m', 'ddq_m',
+        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'sat_m', 'ddq_m',
                     'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
         try:
             data_old_sim = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,

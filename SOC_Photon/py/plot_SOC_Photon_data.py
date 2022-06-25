@@ -18,7 +18,7 @@ from pylive import liven_plotter
 import matplotlib.pyplot as plt
 
 def plot_SOC_Photon_data(r, key):
-    var_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
+    var_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
     vars = var_str.replace(" ", "").split(',')
     count = 0
     i = 0
@@ -61,15 +61,15 @@ def plot_SOC_Photon_data(r, key):
                 Vb = float(list_r[8])
                 Ib = float(list_r[9])
                 Vsat = float(list_r[10])
-                Vdyn = float(list_r[11])
-                Voc = float(list_r[12])
+                dV_dyn = float(list_r[11])
+                Voc_stat = float(list_r[12])
                 Voc_ekf = float(list_r[13])
                 y_ekf = float(list_r[14])
                 soc_m = float(list_r[15])
                 soc_ekf = float(list_r[16])
                 soc = float(list_r[17])
                 soc_wt = float(list_r[18])
-                print(count, unit, hm, cTime, dt, sat, sel, mod, Tb, Vb, Ib, Vsat, Vdyn, Voc, Voc_ekf, y_ekf, soc_m,
+                print(count, unit, hm, cTime, dt, sat, sel, mod, Tb, Vb, Ib, Vsat, dV_dyn, Voc_stat, Voc_ekf, y_ekf, soc_m,
                       soc_ekf, soc, soc_wt)
                 i += 1
                 # Plot when have at least 2 points available

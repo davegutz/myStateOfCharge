@@ -284,9 +284,9 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.y_filt2 = 0.
         self.Ib = 0.
         self.Vb = 0.
-        self.Voc = 0.
+        self.Voc_stat = 0.
         self.Vsat = 0.
-        self.Vdyn = 0.
+        self.dV_dyn = 0.
         self.Voc_ekf = 0.
 
     def __str__(self, prefix=''):
@@ -365,8 +365,9 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.Ib = self.ib * rp.nP
         self.Vb = self.vb * rp.nS
         self.Voc = self.voc * rp.nS
+        self.Voc_stat = self.voc_stat * rp.nS
         self.Vsat = self.vsat * rp.nS
-        self.Vdyn = self.dv_dyn * rp.nS
+        self.dV_dyn = self.dv_dyn * rp.nS
         self.Voc_ekf = self.hx * rp.nS
 
         return self.soc_ekf
@@ -492,8 +493,9 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.saved.Vb.append(self.Vb)
         self.saved.Tb.append(self.temp_c)
         self.saved.Voc.append(self.Voc)
+        self.saved.Voc_stat.append(self.Voc_stat)
         self.saved.Vsat.append(self.Vsat)
-        self.saved.Vdyn.append(self.Vdyn)
+        self.saved.dV_dyn.append(self.dV_dyn)
         self.saved.Voc_ekf.append(self.Voc_ekf)
         self.saved.sat.append(self.sat)
         self.saved.sel.append(self.sel)
@@ -721,7 +723,6 @@ class BatteryModel(Battery):
         self.saved.Tb.append(self.temp_c)
         self.saved.t_last.append(self.t_last)
         self.saved.Vsat.append(self.vsat)
-        self.saved.Vdyn.append(self.dv_dyn)
         self.saved.charge_curr.append(self.charge_curr)
         self.saved.sat.append(self.model_saturated)
         self.saved.delta_q.append(self.delta_q)
@@ -734,6 +735,7 @@ class BatteryModel(Battery):
         self.saved_m.Tbl_m.append(self.temp_lim)
         self.saved_m.vsat_m.append(self.vsat)
         self.saved_m.voc_m.append(self.voc)
+        self.saved_m.voc_stat_m.append(self.voc_stat)
         self.saved_m.dv_dyn_m.append(self.dv_dyn)
         self.saved_m.vb_m.append(self.vb)
         self.saved_m.ib_m.append(self.ib)
@@ -814,7 +816,8 @@ class Saved:
         self.mod_data = []  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
         self.Tb = []  # Battery bank temperature, deg C
         self.Vsat = []  # Monitor Bank saturation threshold at temperature, deg C
-        self.Vdyn = []  # Monitor Bank current induced back emf, V
+        self.dV_dyn = []  # Monitor Bank current induced back emf, V
+        self.Voc_stat = []  # Monitor Static bank open circuit voltage, V
         self.Voc = []  # Monitor Static bank open circuit voltage, V
         self.Voc_ekf = []  # Monitor bank solved static open circuit voltage, V
         self.y_ekf = []  # Monitor single battery solver error, V
@@ -1078,6 +1081,7 @@ class Saved_m:
         self.Tbl_m = []
         self.vsat_m = []
         self.voc_m = []
+        self.voc_stat_m = []
         self.dv_dyn_m = []
         self.vb_m = []
         self.ib_m = []
@@ -1090,14 +1094,14 @@ class Saved_m:
         self.reset_m = []
 
     def __str__(self):
-        s = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_m,dv_dyn_m,vb_m,ib_m,sat_m,ddq_m,dq_m,q_m,qcap_m,soc_m,reset_m,\n"
+        s = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_stat_m,dv_dyn_m,vb_m,ib_m,sat_m,ddq_m,dq_m,q_m,qcap_m,soc_m,reset_m,\n"
         for i in range(len(self.time)):
             s += 'sim,'
             s += "{:13.3f},".format(self.time[i])
             s += "{:5.2f},".format(self.Tb_m[i])
             s += "{:5.2f},".format(self.Tbl_m[i])
             s += "{:8.3f},".format(self.vsat_m[i])
-            s += "{:5.2f},".format(self.voc_m[i])
+            s += "{:5.2f},".format(self.voc_stat_m[i])
             s += "{:5.2f},".format(self.dv_dyn_m[i])
             s += "{:5.2f},".format(self.vb_m[i])
             s += "{:8.3f},".format(self.ib_m[i])

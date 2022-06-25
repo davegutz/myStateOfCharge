@@ -133,7 +133,7 @@ void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
       pubList->unit.c_str(), pubList->hm_string.c_str(), double(Sen->now)/1000., Sen->T,
       pubList->sat, rp.ibatt_sel_noamp, rp.modeling,
       Mon->Tb(), Mon->Vb(), Mon->Ib(),
-      Mon->Vsat(), Mon->dV_dyn(), Mon->Voc(), Mon->Hx(),
+      Mon->Vsat(), Mon->dV_dyn(), Mon->Voc_stat(), Mon->Hx(),
       Mon->y_ekf(),
       Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(), Mon->soc_wt(),
       '\0');

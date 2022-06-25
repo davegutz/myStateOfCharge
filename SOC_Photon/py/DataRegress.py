@@ -37,7 +37,6 @@ class SavedData:
             self.mod = data.mod
             self.Tb = data.Tb
             self.Vsat = data.Vsat
-            self.Vdyn = data.Vdyn
             self.Voc = data.Voc
             self.dV_dyn = self.Vb - self.Voc
             self.dv_hys = self.Voc - self.Voc_stat
@@ -79,7 +78,7 @@ if __name__ == '__main__':
         data_file_new_csv = write_clean_file(data_file_new_txt, '', title_key, unit_key)
 
         cols = (
-        'unit', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf', 'y_ekf', 'soc_m',
+        'unit', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn', 'Voc_stat', 'Voc_ekf', 'y_ekf', 'soc_m',
         'soc_ekf', 'soc', 'soc_wt')
         data_old = np.genfromtxt(data_file_old_csv, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
