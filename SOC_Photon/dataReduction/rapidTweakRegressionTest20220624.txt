@@ -487,8 +487,8 @@ self_talk:  new string = 'XR'
 RUN: at 48501,   3.000 cycles from 53501 to 203501 with 5000 wait
 soft reset...
 unit_sim,        48.675, 25.000,25.000, 13.800,14.530, 0.000,14.530,   0.000, 1,    0.000000,      0.0, 360000.0, 360000.0,    1.0000, 1, 
-unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,
-unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_m, vdyn_m, vb_m, ib_m, sat_m, ddq_m, dq_m, q_m, qcap_m, soc_m, reset_m,
+unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,
+unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_stat_m, dv_dyn_m, vb_m, ib_m, sat_m, ddq_m, dq_m, q_m, qcap_m, soc_m, reset_m,
 pro_20220623, 2022-06-24T12:31:47,        48.675, 0.174,   0,  0,  15,  25.0,14.530,     0.000,    13.800, 0.000,14.530,14.530,   0.000143, 1.0000,1.0000,1.0000,1.0000,
 unit_sim,        48.862, 25.000,25.000, 13.800,14.530, 0.000,14.530,   0.000, 1,    0.000000,      0.0, 360000.0, 360000.0,    1.0000, 0, 
 pro_20220623, 2022-06-24T12:31:47,        48.862, 0.187,   1,  0,  15,  25.0,14.530,     0.000,    13.800, 0.000,14.530,14.530,   0.000042, 1.0000,1.0000,1.0000,1.0000,

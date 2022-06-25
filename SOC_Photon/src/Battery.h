@@ -123,12 +123,12 @@ class Hysteresis
 {
 public:
   Hysteresis();
-  Hysteresis(const double cap, const double direx, Chemistry chem);
+  Hysteresis(const double cap, Chemistry chem);
   ~Hysteresis();
   // operators
   // functions
   void apply_scale(const double scale);
-  double calculate(const double ib, const double voc_stat, const double soc);
+  double calculate(const double ib, const double soc);
   void init(const double dv_init);
   double look_hys(const double dv, const double soc);
   void pretty_print();
@@ -136,7 +136,6 @@ public:
   double ioc() { return (ioc_); };
   double dv_hys() { return (dv_hys_); };
   double scale();
-  double direx() { return (direx_); };
 protected:
   boolean disabled_;    // Hysteresis disabled by low scale input < 1e-5, T=disabled
   double cap_;          // Capacitance, Farads
@@ -144,12 +143,9 @@ protected:
   double soc_;          // State of charge input, dimensionless
   double ib_;           // Current in, A
   double ioc_;          // Current out, A
-  double voc_in_;       // Voltage input, V
-  double voc_out_;      // Voltage output, V
-  double dv_hys_;       // Delta voltage state, V
+  double dv_hys_;       // State, voc_-voc_stat_, V
   double dv_dot_;       // Calculated voltage rate, V/s
   double tau_;          // Null time constant, sec
-  double direx_;        // Direction scalar
   TableInterp2D *hys_T_;   // dv-soc 2-D table, V
   double cap_init_;     // Initial capacitance specification, Farads
 };
@@ -160,7 +156,7 @@ class Battery : public Coulombs
 {
 public:
   Battery();
-  Battery(double *rp_delta_q, float *rp_t_last, const double hys_direx, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code);
+  Battery(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code);
   ~Battery();
   // operators
   // functions
@@ -174,7 +170,7 @@ public:
   double dv_dsoc() { return (dv_dsoc_); };
   double Dv() { return (dv_); };
   uint8_t encode(const String mod_str);
-  double hys_scale() { return (hys_->scale()*hys_->direx()); };
+  double hys_scale() { return (hys_->scale()); };
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
   void init_battery(Sensors *Sen);
   void init_hys(const double hys) { hys_->init(hys); };
@@ -196,13 +192,14 @@ public:
   double Tb() { return (temp_c_); };        // Battery bank temperature, deg C
   double vb() { return (vb_); };            // Battery terminal voltage, V
   double Vb() { return (vb_*(*rp_nS_)); };  // Battery bank voltage, V
-  double vdyn() { return (vdyn_); };
-  double Vdyn() { return (vdyn_*(*rp_nS_)); };
+  double dv_dyn() { return (dv_dyn_); };
+  double dV_dyn() { return (dv_dyn_*(*rp_nS_)); };
   double vsat() { return (vsat_); };
   double Vsat() { return (vsat_*(*rp_nS_)); };
 protected:
   double voc_;      // Static model open circuit voltage, V
-  double vdyn_;     // Current-induced back emf, V
+  double dv_dyn_;   // ib-induced back emf, V
+  double dv_hys_;   // Hysteresis state, voc-voc_out, V
   double vb_;       // Battery terminal voltage, V
   double ib_;       // Battery terminal current, A
   double dv_dsoc_;  // Derivative scaled, V/fraction
@@ -259,8 +256,8 @@ public:
   boolean solve_ekf(Sensors *Sen);
   double tcharge() { return (tcharge_); };
   double voc() { return (voc_); };
-  double voc_dyn() { return (voc_dyn_); };
-  double Voc_dyn() { return (voc_dyn_*(*rp_nS_)); };
+  double dv_dyn() { return (dv_dyn_); };
+  double dV_dyn() { return (dv_dyn_*(*rp_nS_)); };
   double voc_filt() { return (voc_filt_); };
   double Voc_filt() { return (voc_filt_*(*rp_nS_)); };
   double voc_stat() { return (voc_stat_); };
@@ -270,7 +267,7 @@ public:
 protected:
   double voc_stat_;     // Sim voc from soc-voc table, V
   double tcharge_ekf_;  // Solved charging time to 100% from ekf, hr
-  double voc_dyn_;      // Charging voltage, V
+  double voc_;          // Charging voltage, V
   double soc_ekf_;      // Filtered state of charge from ekf (0-1)
   double tcharge_;      // Counted charging time to 100%, hr
   double q_ekf_;        // Filtered charge calculated by ekf, C

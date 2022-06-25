@@ -200,8 +200,8 @@ if __name__ == '__main__':
         # time_end = 2500.
 
         # Load data (must end in .txt)
-        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220613_new.txt'; unit_key = 'pro_2022'
         data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220624.txt';
+        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220624.txt';
         unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
@@ -210,12 +210,12 @@ if __name__ == '__main__':
         data_file_sim_clean = write_clean_file(data_file_old_txt, type='_sim', title_key=title_key_sim, unit_key=unit_key_sim)
 
         # Load
-        cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'Vdyn', 'Voc', 'Voc_ekf',
-                'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
+        cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn', 'Voc_stat',
+                'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
-        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_m', 'vdyn_m', 'ib_m', 'sat_m', 'ddq_m',
+        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'ib_m', 'sat_m', 'ddq_m',
                     'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
         if data_file_sim_clean:
             data_old_sim = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,

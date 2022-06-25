@@ -26,18 +26,19 @@
 		delta_q_sat_past_		Charge infinity at saturation, past see 'N/Mp', Coulombs
 		DF1				Weighted selection lower transition drift, fraction
 		DF2				Threshold to resest Coulomb Counter if different from ekf, fraction
-		direx_			Direction scalar
 		disabled_		Hysteresis disabled by low scale input < 1e-5, T=disabled
 		disab_hard;		Disable hardware in signal selection and use model or input, T=disab
 		dqdt			Change of charge with temperature, fraction/deg C (0.01 from literature)
 		dt_ 			Update time, s
 		duty			Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
 		dv				Delta voltage, V
+		dV_dyn 			Ib-induced Bank back emf, V
+		dv_dyn_			ib-induced back emf, V
 		DVOC_DT			Change of VOC with operating temperature in range 0 - 50 C V/deg C
 		dv_				Adjustment to compensate for tables generated without considering hys, V
 		dv_dot_			Calculated voltage rate, V/s
 		dv_dsoc			Derivative scaled, V/fraction
-		dv_hys_			Delta voltage state, V
+		dv_hys_			State, voc-voc_out, V
 		freq			Injected frequency, Hz (0-2)
 		gain_			Current correction to be made for charge error, A/Coulomb/day
 		HDB_TBATT		Half deadband to filter Tbatt, V
@@ -155,17 +156,12 @@
 		Vb_				Battery bank voltage, V
 		vb_				Battery terminal voltage, V
 		vb_dc_dc		DC-DC charger estimated voltage, V
-		Vdyn 			Bank current induced back emf, V
-		vdyn_			Current-induced back emf, V
 		Voc 			Static bank open circuit voltage, V
 		Voc_ekf			Monitor bank solved static open circuit voltage, V
-		voc_			Static model open circuit voltage, V
-		Voc_dyn			Bank VOC estimated from Vb and RC model, V
-		voc_dyn_		VOC estimated from Vb and RC model, V
-		Voc_filt_		Filtered bank open circuit voltage for saturation detect, V
-		voc_filt_		Filtered open circuit voltage for saturation detect, V
-		voc_in_			Voltage input, V
-		voc_out_		Voltage output, V
+		voc_			Charging voltage, V
+		Voc_			Bank VOC estimated from Vb and RC model, V
+		Voc_filt_		Filtered bank charging voltage for saturation detect, V
+		voc_filt_		Filtered charging voltage for saturation detect, V
 		voc_stat_		Static model open circuit voltage from table (reference), V
 		VOLT_BIAS		Bias on Vbatt sensor, V
 		Vsat			Bank saturation threshold at temperature, deg C

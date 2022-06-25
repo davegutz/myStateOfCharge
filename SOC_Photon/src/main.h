@@ -437,7 +437,7 @@ void loop()
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
     mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ibatt,
-                          Mon->soc_ekf(), Mon->soc(), Mon->Voc_dyn(), Mon->Voc(),
+                          Mon->soc_ekf(), Mon->soc(), Mon->Voc(), Mon->Voc(),
                           Sen->ShuntAmp->tweak_bias(), Sen->ShuntNoAmp->tweak_bias());
     if ( rp.debug==0 ) Serial.printf("Summ...\n");
   }

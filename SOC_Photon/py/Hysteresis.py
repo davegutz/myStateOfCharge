@@ -53,8 +53,6 @@ class Hysteresis:
         self.soc = 0.
         self.ib = 0.
         self.ioc = 0.
-        self.voc_stat = 0.
-        self.voc = 0.
         self.dv_hys = 0.
         self.dv_dot = 0.
         self.saved = Saved()
@@ -67,8 +65,6 @@ class Hysteresis:
         s += "  tau      = {:10.1f}  // Null time constant, sec\n".format(res*self.cap)
         s += "  ib       =    {:7.3f}  // Current in, A\n".format(self.ib)
         s += "  ioc      =    {:7.3f}  // Current out, A\n".format(self.ioc)
-        s += "  voc_stat =    {:7.3f}  // Battery model voltage input, V\n".format(self.voc_stat)
-        s += "  voc      =    {:7.3f}  // Discharge voltage output, V\n".format(self.voc)
         s += "  soc      =   {:8.4f}  // State of charge input, dimensionless\n".format(self.soc)
         s += "  res      =    {:7.3f}  // Variable resistance value, ohms\n".format(self.res)
         s += "  dv_dot   =    {:7.3f}  // Calculated voltage rate, V/s\n".format(self.dv_dot)
@@ -77,9 +73,8 @@ class Hysteresis:
         s += "  reverse  =     {:2.0f}      // If hysteresis hooked up backwards, T=reversed\n".format(self.reverse)
         return s
 
-    def calculate_hys(self, ib, voc_stat, soc):
+    def calculate_hys(self, ib, soc):
         self.ib = ib
-        self.voc_stat = voc_stat
         self.soc = soc
         if self.disabled:
             self.res = 0.
@@ -108,16 +103,10 @@ class Hysteresis:
         self.saved.dv_dot.append(self.dv_dot)
         self.saved.ib.append(self.ib)
         self.saved.ioc.append(self.ioc)
-        self.saved.voc_stat.append(self.voc_stat)
-        self.saved.voc.append(self.voc)
 
     def update(self, dt):
         self.dv_hys += self.dv_dot * dt
-        if self.reverse:
-            self.voc = self.voc_stat - self.dv_hys
-        else:
-            self.voc = self.voc_stat + self.dv_hys
-        return self.voc
+        return self.dv_hys
 
 
 class Saved:
@@ -130,8 +119,6 @@ class Saved:
         self.soc = []
         self.ib = []
         self.ioc = []
-        self.voc = []
-        self.voc_stat = []
 
 
 if __name__ == '__main__':
@@ -175,7 +162,7 @@ if __name__ == '__main__':
         n_fig += 1
         plt.subplot(111)
         plt.title(plot_title)
-        plt.plot(hys.soc, hys.voc, color='red', label='voc vs soc')
+        plt.plot(hys.soc, hys.dv_hys, color='red', label='dv_hys vs soc')
         plt.legend(loc=2)
         fig_file_name = filename + "_" + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -267,8 +254,7 @@ if __name__ == '__main__':
 
             # Models
             soc = min(max(soc + current_in / 100. * dt / 20000., 0.), 1.)
-            voc_stat = 13. + (soc - 0.5)
-            hys.calculate_hys(ib=current_in, voc_stat=voc_stat, soc=soc)
+            hys.calculate_hys(ib=current_in, soc=soc)
             hys.update(dt=dt)
 
             # Plot stuff

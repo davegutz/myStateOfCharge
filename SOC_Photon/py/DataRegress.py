@@ -18,10 +18,10 @@ class SavedData:
             self.mod = []  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
             self.Tb = []  # Battery bank temperature, deg C
             self.Vsat = []  # Monitor Bank saturation threshold at temperature, deg C
-            self.Vdyn = []  # Monitor Bank current induced back emf, V
-            self.Voc = []  # Monitor Static bank open circuit voltage, V
-            self.Voc_dyn = []  # Bank VOC estimated from Vb and RC model, V
-            self.Voc_ekf = []  # Monitor bank solved static open circuit voltage, V
+            self.dV_dyn = []  # Monitor Bank current induced back emf, V
+            self.Voc = []  # Monitor charging voltage, V
+            self.Voc_stat = []  # Bank static charging voltage, V
+            self.Voc_ekf = []  # Monitor bank solved static charging voltage, V
             self.y_ekf = []  # Monitor single battery solver error, V
             self.soc_m = []  # Simulated state of charge, fraction
             self.soc_ekf = []  # Solved state of charge, fraction
@@ -39,8 +39,8 @@ class SavedData:
             self.Vsat = data.Vsat
             self.Vdyn = data.Vdyn
             self.Voc = data.Voc
-            self.Voc_dyn = self.Vb - self.Vdyn
-            self.dv_hys = self.Voc_dyn - self.Voc
+            self.dV_dyn = self.Vb - self.Voc
+            self.dv_hys = self.Voc - self.Voc_stat
             self.Voc_ekf = data.Voc_ekf
             self.y_ekf = data.y_ekf
             self.soc_m = data.soc_m

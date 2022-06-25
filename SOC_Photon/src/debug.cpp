@@ -31,7 +31,7 @@ void debug_m1(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
     Sen->Sim->soc()*100.-90,
     Sen->ShuntAmp->ishunt_cal(), Sen->ShuntNoAmp->ishunt_cal(),
-    Sen->Vbatt*10-110, Sen->Sim->voc()*10-110, Sen->Sim->vdyn()*10, Sen->Sim->Vb()*10-110, Mon->vdyn()*10-110);
+    Sen->Vbatt*10-110, Sen->Sim->voc()*10-110, Sen->Sim->dv_dyn()*10, Sen->Sim->Vb()*10-110, Mon->dv_dyn()*10-110);
 }
 
 // rp.debug==-3  // Power Arduino plot
@@ -44,10 +44,10 @@ void debug_m3(BatteryMonitor *Mon, Sensors *Sen, const unsigned long elapsed, co
 // rp.debug==-4  // General Arduino plot
 void debug_m4(BatteryMonitor *Mon, Sensors *Sen)
 {
-  Serial.printf("Tb,Vb*10-110,Ib, voc_dyn*10-110,vdyn*100,voc_ekf*10-110,voc*10-110,vsat*10-110,  y_ekf*1000,  soc_sim*100,soc_ekf*100,soc*100,soc_wt*100,\n\
+  Serial.printf("Tb,Vb*10-110,Ib, voc*10-110,dv_dyn*100,voc_ekf*10-110,voc*10-110,vsat*10-110,  y_ekf*1000,  soc_sim*100,soc_ekf*100,soc*100,soc_wt*100,\n\
     %7.3f,%7.3f,%7.3f,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,  %10.6f,  %7.3f,%7.4f,%7.4f,%7.4f,\n",
     Sen->Tbatt, Sen->Vbatt*10.-110., Sen->Ibatt,
-    Mon->voc_dyn()*10.-110., Mon->vdyn()*100., Mon->z_ekf()*10.-110., Mon->voc()*10.-110., Mon->vsat()*10.-110.,
+    Mon->voc()*10.-110., Mon->dv_dyn()*100., Mon->z_ekf()*10.-110., Mon->voc()*10.-110., Mon->vsat()*10.-110.,
     Mon->y_ekf()*1000.,
     Sen->Sim->soc()*100., Mon->x_ekf()*100., Mon->soc()*100.,  Mon->soc_wt()*100.);
 }
@@ -55,10 +55,10 @@ void debug_m4(BatteryMonitor *Mon, Sensors *Sen)
 // rp.debug==12 EKF
 void debug_12(BatteryMonitor *Mon, Sensors *Sen)
 {
-  Serial.printf("ib,ib_mod,   vb,vb_mod,  voc_dyn,voc_stat_mod,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
+  Serial.printf("ib,ib_mod,   vb,vb_mod,  voc,voc_stat_mod,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
   Mon->Ib(), Sen->Sim->Ib(),
   Mon->Vb(), Sen->Sim->Vb(),
-  Mon->voc_dyn(), Sen->Sim->voc_stat(), Sen->Sim->voc(),
+  Mon->voc(), Sen->Sim->voc_stat(), Sen->Sim->voc(),
   Mon->K_ekf(), Mon->y_ekf(),
   Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc());
 }
@@ -66,10 +66,10 @@ void debug_12(BatteryMonitor *Mon, Sensors *Sen)
 // rp.debug==-12 EKF Arduino plot
 void debug_m12(BatteryMonitor *Mon, Sensors *Sen)
 {
-  Serial.printf("ib,ib_mod,   vb*10-110,vb_mod*10-110,  voc_dyn*10-110,voc_stat_mod*10-110,voc_mod*10-110,   K, y,    SOC_mod-90, SOC_ekf-90, SOC-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
+  Serial.printf("ib,ib_mod,   vb*10-110,vb_mod*10-110,  voc*10-110,voc_stat_mod*10-110,voc_mod*10-110,   K, y,    SOC_mod-90, SOC_ekf-90, SOC-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
   Mon->Ib(), Sen->Sim->Ib(),
   Mon->Vb()*10-110, Sen->Sim->Vb()*10-110,
-  Mon->voc_dyn()*10-110, Sen->Sim->voc_stat()*10-110, Sen->Sim->voc()*10-110,
+  Mon->voc()*10-110, Sen->Sim->voc_stat()*10-110, Sen->Sim->voc()*10-110,
   Mon->K_ekf(), Mon->y_ekf(),
   Sen->Sim->soc()*100-90, Mon->soc_ekf()*100-90, Sen->Sim->soc()*100-90);
 }

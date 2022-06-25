@@ -67,17 +67,12 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     n_fig += 1
     plt.subplot(321)
     plt.title(plot_title)
-    plt.plot(old_s.time, old_s.Vdyn, color='green', label='Vdyn')
-    plt.plot(new_s.time, new_s.Vdyn, color='orange', linestyle='--', label='Vdyn_new')
+    plt.plot(old_s.time, old_s.dV_dyn, color='green', label='dV_dyn')
+    plt.plot(new_s.time, new_s.dv_dyn, color='orange', linestyle='--', label='dv_dyn_new')
     plt.legend(loc=1)
     plt.subplot(322)
     plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
     plt.plot(new_s.time, new_s.Voc, color='orange', linestyle='--', label='Voc_new')
-    plt.plot(old_s.time, old_s.Voc_dyn, color='blue', label='Voc_dyn')
-    try:
-        plt.plot(new_s.time, new_s.Voc_dyn, color='red', linestyle='--', label='Voc_dyn_new')
-    except:
-        plt.plot(new_s.time, new_s.voc_dyn, color='red', linestyle='--', label='Voc_dyn_new')
     plt.legend(loc=1)
     plt.subplot(323)
     plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
@@ -95,7 +90,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         print("y_filt not available pure data regression")
     plt.legend(loc=1)
     plt.subplot(325)
-    plt.plot(old_s.time, old_s.dv_hys, color='green', label='dv_hys')
+    plt.plot(old_s.time, old_s.dV_hys, color='green', label='dV_hys')
     plt.plot(new_s.time, new_s.dv_hys, color='orange', linestyle='--', label='dv_hys_new')
     plt.legend(loc=1)
     plt.subplot(326)
@@ -187,7 +182,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         plt.legend(loc=1)
         plt.subplot(335)
         plt.plot(old_s_sim.time, old_s_sim.vdyn_m, color='orange', label='vdyn_m')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.vdyn_m, color='green', linestyle='--', label='vdyn_m_new')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.dv_dyn_m, color='green', linestyle='--', label='dv_dyn_m_new')
         plt.legend(loc=1)
         plt.subplot(337)
         plt.plot(old_s_sim.time, old_s_sim.dq_m, color='orange', label='dq_m')
@@ -251,10 +246,10 @@ class SavedData:
             self.mod = []  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
             self.Tb = []  # Battery bank temperature, deg C
             self.Vsat = []  # Monitor Bank saturation threshold at temperature, deg C
-            self.Vdyn = []  # Monitor Bank current induced back emf, V
+            self.dV_dyn = []  # Monitor Bank current induced back emf, V
             self.dv_hys = []  # Drop across hysteresis, V
-            self.Voc = []  # Monitor Static bank open circuit voltage, V
-            self.Voc_dyn = []  # Bank VOC estimated from Vb and RC model, V
+            self.Voc_stat = []  # Monitor Static bank open circuit voltage, V
+            self.Voc = []  # Bank VOC estimated from Vb and RC model, V
             self.Voc_ekf = []  # Monitor bank solved static open circuit voltage, V
             self.y_ekf = []  # Monitor single battery solver error, V
             self.soc_m = []  # Simulated state of charge, fraction
@@ -297,10 +292,10 @@ class SavedData:
             self.mod_data = np.array(data.mod[:i_end])
             self.Tb = np.array(data.Tb[:i_end])
             self.Vsat = np.array(data.Vsat[:i_end])
-            self.Vdyn = np.array(data.Vdyn[:i_end])
-            self.Voc = np.array(data.Voc[:i_end])
-            self.Voc_dyn = self.Vb - self.Vdyn
-            self.dv_hys = self.Voc_dyn - self.Voc
+            self.dV_dyn = np.array(data.dV_dyn[:i_end])
+            self.Voc_stat = np.array(data.Voc_stat[:i_end])
+            self.Voc = self.Vb - self.dV_dyn
+            self.dV_hys = self.Voc - self.Voc_stat
             self.Voc_ekf = np.array(data.Voc_ekf[:i_end])
             self.y_ekf = np.array(data.y_ekf[:i_end])
             self.soc_m = np.array(data.soc_m[:i_end])
@@ -407,7 +402,7 @@ if __name__ == '__main__':
     plt.rcParams['axes.grid'] = True
 
     def compare_print(old_s, new_s):
-        s = " time,      Ib,                   Vb,              Vdyn,          Voc,            Voc_dyn,        Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
+        s = " time,      Ib,                   Vb,              Vdyn,          Voc_stat,            Voc,        Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
         for i in range(len(new_s.time)):
             s += "{:7.3f},".format(old_s.time[i])
             s += "{:11.3f},".format(old_s.Ib[i])
@@ -416,10 +411,10 @@ if __name__ == '__main__':
             s += "{:5.2f},".format(new_s.Vb[i])
             s += "{:9.2f},".format(old_s.Vdyn[i])
             s += "{:5.2f},".format(new_s.Vdyn[i])
+            s += "{:9.2f},".format(old_s.Voc_stat[i])
+            s += "{:5.2f},".format(new_s.Voc_stat[i])
             s += "{:9.2f},".format(old_s.Voc[i])
-            s += "{:5.2f},".format(new_s.Voc[i])
-            s += "{:9.2f},".format(old_s.Voc_dyn[i])
-            s += "{:5.2f},".format(new_s.voc_dyn[i])
+            s += "{:5.2f},".format(new_s.voc[i])
             s += "{:9.2f},".format(old_s.Voc_ekf[i])
             s += "{:5.2f},".format(new_s.Voc_ekf[i])
             s += "{:13.6f},".format(old_s.y_ekf[i])

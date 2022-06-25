@@ -1,6 +1,6 @@
 rp.ibatt_bias_all from -35.000 to -26.000
-unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,
-unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_m, vdyn_m, vb_m, ib_m, sat_m, ddq_m, dq_m, q_m, qcap_m, soc_m, reset_m,
+unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,
+unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_stat_m, dv_dyn_m, vb_m, ib_m, sat_m, ddq_m, dq_m, q_m, qcap_m, soc_m, reset_m,
 pro_20220615, 2022-06-17T04:25:46,  48821152.847, 0.100,   0,  0,  0,  21.0,11.712, -0.674,    13.784,-0.056,11.755,11.756,  -0.000754, 0.7002,0.0945,0.6921,0.6921,
 unit_sim,  48821152.850, 21.000,21.000, 13.784,13.169,-0.056,13.112,  -0.674, 0,   -0.068037,-112253.3, 262146.7, 374400.0,    0.7002, 0, 
 pro_20220615, 2022-06-17T04:25:46,  48821152.946, 0.101,   0,  0,  0,  21.0,11.712, -0.674,    13.784,-0.056,11.755,11.755,  -0.000291, 0.7002,0.0945,0.6921,0.6921,

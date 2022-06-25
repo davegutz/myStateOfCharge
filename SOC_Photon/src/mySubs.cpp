@@ -102,25 +102,25 @@ void print_serial_header(void)
 {
   if ( rp.debug==4 || rp.debug==24 )
   {
-    Serial.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
-    Serial1.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,Vdyn,Voc,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
+    Serial.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
+    Serial1.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
   }
 }
 void print_serial_sim_header(void)
 {
   if ( rp.debug==24 )
-    Serial.printf("unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_m, vdyn_m, vb_m, ib_m, sat_m, ddq_m, dq_m, q_m, qcap_m, soc_m, reset_m,\n");
+    Serial.printf("unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_stat_m, dv_dyn_m, vb_m, ib_m, sat_m, ddq_m, dq_m, q_m, qcap_m, soc_m, reset_m,\n");
 }
 
 // Print strings
 void create_print_string(Publish *pubList)
 {
   if ( rp.debug==4 || rp.debug==24 )
-    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%7.3f,    %6.3f,%6.3f,%6.3f,%6.3f,  %9.6f, %6.4f,%6.4f,%6.4f,%6.4f,%c", \
+    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %5.2f,%7.4f,%7.4f,    %7.4f,%7.4f,%7.4f,%7.4f,  %9.6f, %6.4f,%6.4f,%6.4f,%6.4f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
       pubList->sat, rp.ibatt_sel_noamp, rp.modeling,
       pubList->Tbatt, pubList->Vbatt, pubList->Ibatt,
-      pubList->Vsat, pubList->Vdyn, pubList->Voc, pubList->Voc_ekf,
+      pubList->Vsat, pubList->dV_dyn, pubList->Voc_stat, pubList->Voc_ekf,
       pubList->y_ekf,
       pubList->soc_model, pubList->soc_ekf, pubList->soc, pubList->soc_wt,
       '\0');
@@ -129,11 +129,11 @@ void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
   if ( rp.debug==4 || rp.debug==24 )
   {
-    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,    %6.3f,%6.3f,%6.3f,%6.3f,  %9.6f, %6.4f,%6.4f,%6.4f,%6.4f,%c", \
+    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,    %7.4f,%7.4f,%7.4f,%7.4f,  %9.6f, %6.4f,%6.4f,%6.4f,%6.4f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), double(Sen->now)/1000., Sen->T,
       pubList->sat, rp.ibatt_sel_noamp, rp.modeling,
       Mon->Tb(), Mon->Vb(), Mon->Ib(),
-      Mon->Vsat(), Mon->Vdyn(), Mon->Voc(), Mon->Hx(),
+      Mon->Vsat(), Mon->dV_dyn(), Mon->Voc(), Mon->Hx(),
       Mon->y_ekf(),
       Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(), Mon->soc_wt(),
       '\0');
@@ -366,7 +366,7 @@ void  monitor(const int reset, const boolean reset_temp, const unsigned long now
     Mon->solve_ekf(Sen);
   }
 
-  // EKF - calculates temp_c_, voc_, voc_dyn_ as functions of sensed parameters vb & ib (not soc)
+  // EKF - calculates temp_c_, voc_stat_, voc_ as functions of sensed parameters vb & ib (not soc)
   Mon->calculate(Sen);
 
   // Debounce saturation calculation done in ekf using voc model

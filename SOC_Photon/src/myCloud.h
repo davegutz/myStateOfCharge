@@ -38,6 +38,7 @@ struct Publish
   float Ibatt;
   float Wbatt;
   float T;
+  float Voc_stat;
   float Voc;
   float Voc_filt;
   float Vsat;
@@ -51,7 +52,7 @@ struct Publish
   float soc;
   float soc_ekf;
   float soc_wt;
-  float Vdyn;
+  float dV_dyn;
   float Voc_ekf;
   float y_ekf;
 };

@@ -145,6 +145,7 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->T = Sen->T;
   if ( rp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
   pubList->tcharge = Mon->tcharge();
+  pubList->Voc_stat = Mon->Voc_stat();
   pubList->Voc = Mon->Voc();
   pubList->Voc_filt = Mon->Voc_filt();
   pubList->Vsat = Mon->Vsat();
@@ -155,7 +156,7 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->soc_wt = Mon->soc_wt();
   pubList->Amp_hrs_remaining_ekf = Mon->Amp_hrs_remaining_ekf();
   pubList->Amp_hrs_remaining_wt = Mon->Amp_hrs_remaining_wt();
-  pubList->Vdyn = Mon->Vdyn();
+  pubList->dV_dyn = Mon->dV_dyn();
   pubList->Voc_ekf = Mon->Hx();
   pubList->y_ekf = Mon->y_ekf();
 }
