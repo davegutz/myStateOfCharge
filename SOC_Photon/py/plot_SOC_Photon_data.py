@@ -97,7 +97,8 @@ def plot_SOC_Photon_data(r, key):
                         # print('y_vec1=', y_vec1, 'y_vec2=', y_vec2)
                     # Ready for plots
                     T_actual = cTime - cTime_last
-                    t_v[:] = t_v[:] + T_actual_past - T_actual
+                    dt = T_actual_past - T_actual
+                    t_v[:] = t_v[:] + dt
                     y_vec0[-1][0] = soc_m
                     y_vec0[-1][1] = soc_ekf
                     y_vec0[-1][2] = soc
