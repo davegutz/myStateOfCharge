@@ -375,7 +375,7 @@ Throughput test
   Dr100;
     confirm T restored to 0.100s
     .
-37. Android running of data collection.   The very best I could accompish is to run BLESerial App and save to file. You can use BLE transmit to change anything, echoed still on USB so flying a little blind.   Best for changing 'v0' to 'v4' and vice-versa.  The script 'DataOverModel.py' WILL RUN ON ANDROID using PyDroid and a bunch of stupid setup work.  But live plots I couldn't get to work because USB support is buggy.  The author of best tools usbserial4 said using Python 2 was best - forget that!  Easiest to collect data using BLESerial and move to PC for analysis.
+37. Android running of data collection.   The very best I could accompish is to run BLESerial App and save to file. You can use BLE transmit to change anything, echoed still on USB so flying a little blind.   Best for changing 'v0' to 'v4' and vice-versa.  The script 'DataOverModel.py' WILL RUN ON ANDROID using PyDroid and a bunch of stupid setup work.  But live plots I couldn't get to work because USB support is buggy.  The author of best tools usbserial4 said using Python 2 was best - forget that!  Easiest to collect data using BLESerial and move to PC for analysis.  Could use laptop PC to collect either BLE or USB and that should work really well.   Plug laptop into truck cab inverter.
 
 ## Accuracy
 
