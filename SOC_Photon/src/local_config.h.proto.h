@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "pro_20220625";  // BT debug==4, rejigger voc, voc_stat, Hys
+const String unit = "pro_20220626";  // BT debug==4, rejigger voc, voc_stat struct, Hys
 
 // Sensor biases
 #define CURR_BIAS_AMP         -0.24 // Calibration of amplified shunt sensor ('Da=#.#;'), A

@@ -200,8 +200,8 @@ if __name__ == '__main__':
         # time_end = 2500.
 
         # Setup and user inputs (data_file_old_txt must end in .txt)
-        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220625.txt';
-        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220625.txt';
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220626.txt';
+        data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220626.txt';
         unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
