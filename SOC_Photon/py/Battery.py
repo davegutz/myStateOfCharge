@@ -251,7 +251,7 @@ class BatteryMonitor(Battery, EKF_1x1):
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, hys_scale=-1., tweak_test=False):
+                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
@@ -326,23 +326,23 @@ class BatteryMonitor(Battery, EKF_1x1):
         else:  # aliased, unstable if update Randles
             self.voc = vb - self.r_ss * self.ib
         self.dv_dyn = self.vb - self.voc
-        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
+        # self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
         # Hysteresis model
         self.hys.calculate_hys(self.ib, self.soc)
         self.dv_hys = self.hys.update(self.dt)
-        self.voc = self.voc_stat + self.dv_hys
+        # self.voc = self.voc_stat + self.dv_hys
+        self.voc_stat = self.voc - self.dv_hys
         self.ioc = self.hys.ioc
         self.bms_off = self.temp_c <= low_t  # KISS
         if self.bms_off:
             self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
             self.ib = 0.
             self.voc = self.voc_stat
-            self.dv_dyn = self.voc_stat
-            self.dv_hys = 0.
+            self.dv_dyn = 0.
 
         # EKF 1x1
         self.predict_ekf(u=self.ib)  # u = ib
-        self.update_ekf(z=self.voc, x_min=0., x_max=1.)  # z = voc, voc_filtered = hx
+        self.update_ekf(z=self.voc_stat, x_min=0., x_max=1.)  # z = voc, voc_filtered = hx
         self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity
         self.y_filt = self.y_filt_lag.calculate(in_=self.y_ekf, dt=min(dt, EKF_T_RESET), reset=False)

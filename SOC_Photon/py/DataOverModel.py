@@ -91,6 +91,9 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.legend(loc=1)
     plt.subplot(325)
     plt.plot(old_s.time, old_s.dV_hys, color='green', label='dV_hys')
+    if old_s_sim and new_s_sim_m:
+        plt.plot(old_s_sim.time, old_s_sim.dv_hys_m, color='black', label='dv_hys_m')
+        plt.plot(new_s_sim.time, new_s_sim.dv_hys, color='red', linestyle='--', label='dv_hys_m_new')
     plt.plot(new_s.time, new_s.dv_hys, color='orange', linestyle='--', label='dv_hys_new')
     plt.legend(loc=1)
     plt.subplot(326)
@@ -334,8 +337,10 @@ class SavedDataSim:
             self.Tb_m = []
             self.Tbl_m = []
             self.vsat_m = []
+            self.voc_m = []
             self.voc_stat_m = []
             self.dv_dyn_m = []
+            self.dv_hys_m = []
             self.vb_m = []
             self.ib_m = []
             self.sat_m = []
@@ -359,10 +364,12 @@ class SavedDataSim:
             self.time = self.time[:i_end]
             self.Tb_m = data.Tb_m[:i_end]
             self.Tbl_m = data.Tbl_m[:i_end]
+            self.vb_m = data.vb_m[:i_end]
             self.vsat_m = data.vsat_m[:i_end]
             self.voc_stat_m = data.voc_stat_m[:i_end]
             self.dv_dyn_m = data.dv_dyn_m[:i_end]
-            self.vb_m = data.vb_m[:i_end]
+            self.voc_m = self.vb_m - self.dv_dyn_m
+            self.dv_hys_m = self.voc_m - self.voc_stat_m
             self.ib_m = data.ib_m[:i_end]
             self.sat_m = data.sat_m[:i_end]
             self.ddq_m = data.ddq_m[:i_end]

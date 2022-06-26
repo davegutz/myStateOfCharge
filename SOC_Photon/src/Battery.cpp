@@ -268,11 +268,12 @@ double BatteryMonitor::calculate(Sensors *Sen)
         Serial.printf("BatteryMonitor::calculate:"); Randles_->pretty_print();
     }
     dv_dyn_ = vb_ - voc_;
-    voc_stat_ = voc_soc(soc_, Sen->Tbatt_filt);
+    // voc_stat_ = voc_soc(soc_, Sen->Tbatt_filt);
     // Hysteresis model
     hys_->calculate(ib_, soc_);
     dv_hys_ = hys_->update(dt_);
-    voc_ = voc_stat_ + dv_hys_;
+    // voc_ = voc_stat_ + dv_hys_;
+    voc_stat_ = voc_ - dv_hys_;
     voc_filt_ = SdVbatt_->update(voc_);
     ioc_ = hys_->ioc();
     bms_off_ = temp_c_ <= chem_.low_t;    // KISS
@@ -286,7 +287,7 @@ double BatteryMonitor::calculate(Sensors *Sen)
 
     // EKF 1x1
     predict_ekf(ib_);           // u = ib
-    update_ekf(voc_, 0., 1.);   // z = voc, voc_filtered = hx
+    update_ekf(voc_stat_, 0., 1.);   // z = voc_stat, voc_filtered = hx
     soc_ekf_ = x_ekf();         // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
     q_ekf_ = soc_ekf_ * q_capacity_;
     y_filt_ = y_filt->calculate(y_, min(Sen->T, EKF_T_RESET));

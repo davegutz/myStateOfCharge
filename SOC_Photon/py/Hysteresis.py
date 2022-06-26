@@ -26,9 +26,6 @@ class Hysteresis:
 
     def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e5, scale=1.):
         # Defaults
-        self.reverse = scale<0.0
-        if self.reverse:
-            scale = -scale
         if t_dv is None:
             t_dv = [-0.9, -0.7,     -0.5,   -0.3,   0.0,    0.3,    0.5,    0.7,    0.9]
         if t_soc is None:
@@ -37,10 +34,11 @@ class Hysteresis:
             t_r = [ 1e-6, 0.064,    0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
                     1e-6, 1e-6,     0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
                     1e-6, 1e-6,     1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6]
+        self.scale = scale
         for i in range(len(t_dv)):
-            t_dv[i] *= scale
-            t_r[i] *= scale
-        self.disabled = scale<1e-5
+            t_dv[i] *= self.scale
+            t_r[i] *= self.scale
+        self.disabled = self.scale<1e-5
         self.lut = LookupTable()
         self.lut.addAxis('x', t_dv)
         self.lut.addAxis('y', t_soc)
@@ -48,7 +46,7 @@ class Hysteresis:
         if self.disabled:
             self.cap = cap
         else:
-            self.cap = cap / scale  # maintain time constant = R*C
+            self.cap = cap / self.scale  # maintain time constant = R*C
         self.res = 0.
         self.soc = 0.
         self.ib = 0.
@@ -70,7 +68,7 @@ class Hysteresis:
         s += "  dv_dot   =    {:7.3f}  // Calculated voltage rate, V/s\n".format(self.dv_dot)
         s += "  dv_hys   =    {:7.3f}  // Delta voltage state, V\n".format(self.dv_hys)
         s += "  disabled =     {:2.0f}      // Hysteresis disabled by low scale input < 1e-5, T=disabled\n".format(self.disabled)
-        s += "  reverse  =     {:2.0f}      // If hysteresis hooked up backwards, T=reversed\n".format(self.reverse)
+        s += "  hys_scale=    {:7.3f}  // Scalar on hys\n".format(self.scale)
         return s
 
     def calculate_hys(self, ib, soc):
@@ -84,6 +82,7 @@ class Hysteresis:
             self.res = self.look_hys(self.dv_hys, self.soc)
             self.ioc = self.dv_hys / self.res
             self.dv_dot = (self.ib - self.dv_hys/self.res) / self.cap
+        return self.dv_dot
 
     def init(self, dv_init):
         self.dv_hys = dv_init
@@ -92,7 +91,7 @@ class Hysteresis:
         if self.disabled:
             self.res = 0.
         else:
-            self.res = self.lut.lookup(x=dv, y=soc)
+            self.res = self.lut.lookup(x=dv/self.scale, y=soc)*self.scale
         return self.res
 
     def save(self, time):

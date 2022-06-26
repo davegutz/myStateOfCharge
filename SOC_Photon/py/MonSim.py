@@ -119,7 +119,7 @@ def replicate(saved_old):
 
         # dc_dc_on = bool(lut_dc.interp(t[i]))
         dc_dc_on = False
-        init = (t[i] <= 1)
+        init = (t[i] < -4)
 
         if init:
             sim.apply_soc(soc_m_init, Tb[i])
@@ -199,30 +199,34 @@ if __name__ == '__main__':
         time_end = None
         # time_end = 2500.
 
-        # Load data (must end in .txt)
+        # Setup and user inputs (data_file_old_txt must end in .txt)
         data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220625.txt';
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220625.txt';
         unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
-        data_file_clean = write_clean_file(data_file_old_txt, type='_mon', title_key=title_key, unit_key=unit_key)
-        data_file_sim_clean = write_clean_file(data_file_old_txt, type='_sim', title_key=title_key_sim, unit_key=unit_key_sim)
 
-        # Load
+        # Load mon v4 (old)
+        data_file_clean = write_clean_file(data_file_old_txt, type='_mon', title_key=title_key, unit_key=unit_key)
         cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn', 'Voc_stat',
                 'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
-        saved_old = SavedData(data_old, time_end)
+        saved_old = SavedData(data=data_old, time_end=time_end)
+
+        # Load _m v24 portion of real-time run (old)
+        data_file_sim_clean = write_clean_file(data_file_old_txt, type='_sim', title_key=title_key_sim, unit_key=unit_key_sim)
         cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'sat_m',
                     'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
         if data_file_sim_clean:
             data_old_sim = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
                                  encoding=None).view(np.recarray)
-            saved_old_sim = SavedDataSim(data_old_sim, time_end)
+            saved_old_sim = SavedDataSim(time_ref=saved_old.time_ref, data=data_old_sim, time_end=time_end)
         else:
             saved_old_sim = None
+
+        # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         mons, sims, monrs, sims_m = replicate(saved_old)
         save_clean_file(mons, mon_file_save, 'mon_rep' + date_)
