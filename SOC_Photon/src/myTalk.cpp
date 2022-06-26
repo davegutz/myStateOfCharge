@@ -873,6 +873,19 @@ soc_ekf= %8.4f,\nsoc = %8.4f,\nsoc_wt = %8.4f,\nmodeling = %d,\namp delta_q_inf 
                 self_talk("XR", Mon, Sen);    // Run cycle
                 break;
 
+              case( 20 ): case ( 21 ):  // 20=tweak-like data, 21= 2 sec data cycle
+                self_talk("v0", Mon, Sen);    // Turn off debug temporarily so not snowed by data dumps
+                self_talk("Pa", Mon, Sen);    // Print all for record
+                if ( INT_in == 20 )
+                {
+                  self_talk("v24", Mon, Sen);     // Tweak-like data collection
+                }
+                else if ( INT_in == 21 )
+                {
+                  self_talk("v4", Mon, Sen);      // Slow data collection
+                }
+                break;
+
               default:
                 Serial.print(cp.input_string.charAt(1)); Serial.println(" unk.  See 'h'");
             }
@@ -1064,6 +1077,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("       9:  silent tweak reg test\n");
   Serial.printf("      10:  tweak reg test\n");
   Serial.printf("      11:  slow cycle reg test\n");
+  Serial.printf("      20:  tweak-like data collection\n");
+  Serial.printf("      21:  slow data collection\n");
   Serial.printf("  XC= "); Serial.printf("%7.3f cycles inj\n", Sen->cycles_inj);
   Serial.printf("  XR  "); Serial.printf("RUN inj\n");
   Serial.printf("  XS  "); Serial.printf("STOP inj\n");

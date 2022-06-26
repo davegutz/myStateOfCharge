@@ -123,8 +123,12 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(new_s.time, new_s.soc, color='red', linestyle='--', label='soc_new')
     plt.legend(loc=1)
     plt.subplot(224)
+    plt.plot(old_s.time, old_s.soc, color='blue', label='soc')
+    plt.plot(new_s.time, new_s.soc, color='red', linestyle='--', label='soc_new')
     plt.plot(old_s.time, old_s.soc_m, color='green', label='soc_m')
     plt.plot(new_s.time, new_s.soc_m, color='orange', linestyle='--', label='soc_m_new')
+    plt.plot(old_s.time, old_s.soc_ekf, color='cyan', label='soc_ekf')
+    plt.plot(new_s.time, new_s.soc_ekf, color='black', linestyle='--', label='soc_ekf_new')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -138,6 +142,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(new_s.time, new_s.soc, color='green', linestyle='--', label='soc_new')
     if new_s_s:
         plt.plot(new_s_s.time, new_s_s.soc, color='black', linestyle='--', label='soc_m_new')
+    plt.plot(new_s.time, new_s.soc_ekf, color='cyan', linestyle='--', label='soc_ekf_new')
     plt.legend(loc=1)
     plt.subplot(132)
     plt.plot(old_s.time, old_s.Vb, color='orange', label='Vb')

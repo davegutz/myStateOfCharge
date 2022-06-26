@@ -103,3 +103,6 @@ SOC_Photon/dataReduction/rapidTweakRegressionTest20220626_mon.csv
 SOC_Photon/dataReduction/tryXp20_20220626_mon.csv
 SOC_Photon/dataReduction/tryXp20_20220626_mon_rep.csv
 SOC_Photon/dataReduction/tryXp20_20220626_sim.csv
+SOC_Photon/dataReduction/real world Xp20 20220626_sim.csv
+SOC_Photon/dataReduction/real world Xp20 20220626_mon_rep.csv
+SOC_Photon/dataReduction/real world Xp20 20220626_mon.csv

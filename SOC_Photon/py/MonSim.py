@@ -87,7 +87,7 @@ def save_clean_file_sim(sims, csv_file, unit_key):
             output.write(s)
         print("Wrote(save_clean_file_sim):", csv_file)
 
-def replicate(saved_old):
+def replicate(saved_old, init_time=-4.):
     t = saved_old.time
     dt = saved_old.dt
     Vb = saved_old.Vb
@@ -119,7 +119,7 @@ def replicate(saved_old):
 
         # dc_dc_on = bool(lut_dc.interp(t[i]))
         dc_dc_on = False
-        init = (t[i] < -4)
+        init = (t[i] < init_time)
 
         if init:
             sim.apply_soc(soc_m_init, Tb[i])
@@ -200,10 +200,10 @@ if __name__ == '__main__':
         # time_end = 2500.
 
         # Setup and user inputs (data_file_old_txt must end in .txt)
-        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220626.txt';
-        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220626.txt';
-        data_file_old_txt = '../dataReduction/tryXp20_20220626.txt';
-        unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220626.txt';unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220626.txt';unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/tryXp20_20220626.txt';unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/real world Xp20 20220626.txt';unit_key = 'soc0_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
@@ -227,9 +227,15 @@ if __name__ == '__main__':
         else:
             saved_old_sim = None
 
+        # How to initialize
+        if saved_old.time[0] == 0.: # no initialization flat detected at beginning of recording
+            init_time = 1.
+        else:
+            init_time = -4.
+
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
-        mons, sims, monrs, sims_m = replicate(saved_old)
+        mons, sims, monrs, sims_m = replicate(saved_old, init_time=init_time)
         save_clean_file(mons, mon_file_save, 'mon_rep' + date_)
 
         # Plots
