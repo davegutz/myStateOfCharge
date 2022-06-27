@@ -190,6 +190,7 @@ if __name__ == '__main__':
     from DataOverModel import SavedData, SavedDataSim, write_clean_file, overall
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
     import matplotlib.pyplot as plt
+    plt.rcParams['axes.grid'] = True
 
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
