@@ -25,7 +25,7 @@ class Hysteresis:
     # Use variable resistor to create hysteresis from an RC circuit
 
     # def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e5, scale=1., dv_hys=0.0):  # old nominal before 6/26
-    def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e7, scale=1., dv_hys=-0.05):
+    def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e5, scale=1., dv_hys=-0.05):
         # Defaults
         if t_dv is None:
             t_dv = [-0.9, -0.7,     -0.5,   -0.3,   0.0,    0.3,    0.5,    0.7,    0.9]
@@ -85,7 +85,7 @@ class Hysteresis:
         else:
             self.res = self.look_hys(self.dv_hys, self.soc)
             self.ioc = self.dv_hys / self.res
-            self.dv_dot = (self.ib - self.dv_hys/self.res) / self.cap
+            self.dv_dot = (self.ib - self.ioc) / self.cap
         return self.dv_dot
 
     def init(self, dv_init):
@@ -179,6 +179,18 @@ if __name__ == '__main__':
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
+        plt.figure()
+        n_fig += 1
+        plt.subplot(111)
+        plt.title(plot_title)
+        plt.plot(hys.time, hys.voc, color='red', label='voc')
+        plt.plot(hys.time, hys.voc_stat_est, color='blue', label='voc_stat_est')
+        plt.plot(hys.time, hys.voc_stat_target, color='green', linestyle='--', label='voc_stat_target')
+        plt.legend(loc=2)
+        fig_file_name = filename + "_" + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
+
         return n_fig, fig_files
 
     def main():
@@ -191,16 +203,15 @@ if __name__ == '__main__':
         cols_sim = ('unit_m', 'c_time', 'Tb_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'soc_m', 'reset_m')
         saved_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
                                  encoding=None).view(np.recarray)
-        dv_hys_init = -0.05
         t_v = saved_old.c_time - saved_old.c_time[0]
-        vb_t = saved_old.vb_m
+        vb_t = saved_old.vb_m   # not useful except to back out voc
         ib_t = saved_old.ib_m
         Tb_t = saved_old.Tb_m
         voc_stat_target_t = saved_old.voc_stat_m
         soc_t = saved_old.soc_m
         dv_dyn_t = saved_old.dv_dyn_m
         voc_t = vb_t - dv_dyn_t
-        hys = Hysteresis(dv_hys=dv_hys_init)
+        hys = Hysteresis(dv_hys=-0.0, cap=3.6e5)
         init_time = 1.
         dt = t_v[1] - t_v[0]
 

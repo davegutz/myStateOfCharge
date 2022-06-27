@@ -24,8 +24,7 @@ from unite_pictures import cleanup_fig_files
 class Hysteresis:
     # Use variable resistor to create hysteresis from an RC circuit
 
-    # def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e5, scale=1., dv_hys=0.0):  # old nominal before 6/26
-    def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e7, scale=1., dv_hys=-0.05):
+    def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e5, scale=1., dv_hys=0.0):
         # Defaults
         if t_dv is None:
             t_dv = [-0.9, -0.7,     -0.5,   -0.3,   0.0,    0.3,    0.5,    0.7,    0.9]
