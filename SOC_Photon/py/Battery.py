@@ -105,8 +105,7 @@ class Battery(Coulombs):
         t_voc = [4.00, 4.00, 6.00,  9.50,  11.70, 12.30, 12.50, 12.65, 12.82, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.75, 14.45,
                  4.00, 4.00, 8.00,  11.60, 12.40, 12.60, 12.70, 12.80, 12.92, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.76, 14.46,
                  4.00, 8.00, 12.20, 12.68, 12.73, 12.79, 12.81, 12.89, 13.00, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.80, 14.50,
-                 4.00, 8.00, 12.20, 12.68, 12.73, 12.79, 12.81, 12.89, 13.00, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.80, 14.50] # dag 6/27/2022
-                 # 4.08, 8.08, 12.28, 12.76, 12.81, 12.87, 12.89, 12.97, 13.08, 13.12, 13.17, 13.22, 13.29, 13.33, 13.35, 13.88, 14.58]
+                 4.08, 8.08, 12.28, 12.76, 12.81, 12.87, 12.89, 12.97, 13.08, 13.12, 13.17, 13.22, 13.29, 13.33, 13.35, 13.88, 14.58]
         x = np.array(t_x_soc)
         y = np.array(t_y_t)
         data_interp = np.array(t_voc)
@@ -252,7 +251,7 @@ class BatteryMonitor(Battery, EKF_1x1):
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False):
+                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0.):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
@@ -276,7 +275,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.e_voc_ekf = 0.  # analysis parameter
         self.Q = 0.001*0.001  # EKF process uncertainty
         self.R = 0.1*0.1  # EKF state uncertainty
-        self.hys = Hysteresis(scale=hys_scale)  # Battery hysteresis model - drift of voc
+        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
         self.soc_m = 0.  # Model information
         self.EKF_converged = TFDelay(False, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT)
         self.y_filt_lag = LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
@@ -525,7 +524,7 @@ class BatteryModel(Battery):
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False):
+                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0.):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
@@ -542,7 +541,7 @@ class BatteryModel(Battery):
         self.s_cap = scale  # Rated capacity scalar
         if scale is not None:
             self.apply_cap_scale(scale)
-        self.hys = Hysteresis(scale=hys_scale)  # Battery hysteresis model - drift of voc
+        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
         self.tweak_test = tweak_test
         self.voc = 0.  # Charging voltage, V
         self.d_delta_q = 0.  # Charging rate, Coulombs/sec

@@ -92,8 +92,21 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.subplot(325)
     plt.plot(old_s.time, old_s.dV_hys, color='green', label='dV_hys')
     if old_s_sim and new_s_sim_m:
+        tt = np.array(old_s.time)
+        Vbt = np.array(old_s.Vb)
+        from pyDAGx import myTables
+        lut_vb = myTables.TableInterp1D(tt, Vbt)
+        n = len(old_s_sim.time)
+        voc_req = np.zeros((n,1))
+        dv_hys_req = np.zeros((n,1))
+        voc_stat_req = np.zeros((n,1))
+        for i in range(n):
+            voc_req[i] = lut_vb.interp(old_s_sim.time[i]) - old_s_sim.dv_dyn_m[i]
+            voc_stat_req[i] = old_s_sim.voc_stat_m[i]
+            dv_hys_req[i] = voc_req[i] - old_s_sim.voc_stat_m[i]
         plt.plot(old_s_sim.time, old_s_sim.dv_hys_m, color='black', label='dv_hys_m')
         plt.plot(new_s_sim.time, new_s_sim.dv_hys, color='red', linestyle='--', label='dv_hys_m_new')
+        plt.plot(old_s_sim.time, dv_hys_req, color='black', linestyle='--', label='dv_hys_req')
     plt.plot(new_s.time, new_s.dv_hys, color='orange', linestyle='--', label='dv_hys_new')
     plt.legend(loc=1)
     plt.subplot(326)

@@ -87,7 +87,7 @@ def save_clean_file_sim(sims, csv_file, unit_key):
             output.write(s)
         print("Wrote(save_clean_file_sim):", csv_file)
 
-def replicate(saved_old, init_time=-4.):
+def replicate(saved_old, init_time=-4., dv_hys=0.):
     t = saved_old.time
     dt = saved_old.dt
     Vb = saved_old.Vb
@@ -104,9 +104,10 @@ def replicate(saved_old, init_time=-4.):
 
     # Setup
     scale = model_bat_cap / Battery.RATED_BATT_CAP
-    sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test)
+    sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
+                       dv_hys=dv_hys)
     mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
-                         r_dif=r_dif, temp_c=temp_c, hys_scale=hys_scale_monitor, tweak_test=tweak_test)
+                         r_dif=r_dif, temp_c=temp_c, hys_scale=hys_scale_monitor, tweak_test=tweak_test, dv_hys=dv_hys)
     Is_sat_delay = TFDelay(in_=saved_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
     # time loop
@@ -236,7 +237,7 @@ if __name__ == '__main__':
 
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
-        mons, sims, monrs, sims_m = replicate(saved_old, init_time=init_time)
+        mons, sims, monrs, sims_m = replicate(saved_old, init_time=init_time, dv_hys=-0.1)
         save_clean_file(mons, mon_file_save, 'mon_rep' + date_)
 
         # Plots
