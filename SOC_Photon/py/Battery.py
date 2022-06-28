@@ -88,7 +88,7 @@ class Battery(Coulombs):
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, tweak_test=False, t_max=0.3):
+                 temp_c=RATED_TEMP, tweak_test=False, t_max=0.3, sres=1.):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -129,12 +129,12 @@ class Battery(Coulombs):
         self.dt = 0  # Update time, s
         self.r_sd = r_sd
         self.tau_sd = tau_sd
-        self.r0 = r0
+        self.r0 = r0*sres
         self.tau_ct = tau_ct
-        self.r_ct = float(r_ct)
+        self.r_ct = float(r_ct)*sres
         self.c_ct = self.tau_ct / self.r_ct
         self.tau_dif = tau_dif
-        self.r_dif = r_dif
+        self.r_dif = r_dif*sres
         self.c_dif = self.tau_dif / self.r_dif
         self.t_max = t_max
         self.Randles = StateSpace(2, 2, 1)
@@ -251,9 +251,9 @@ class BatteryMonitor(Battery, EKF_1x1):
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0.):
+                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1.):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
-                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test)
+                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
 
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
@@ -300,6 +300,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         s += "  soc_wt  = {:7.3f}  // Weighted selection of ekf state of charge and coulomb counter (0-1)\n".format(self.soc_wt)
         s += "  tcharge = {:7.3f}  // Charging time to full, hr\n".format(self.tcharge)
         s += "  tcharge_ekf = {:7.3f}   // Charging time to full from ekf, hr\n".format(self.tcharge_ekf)
+        s += "  mod     =               {:d}  // Modeling\n".format(self.mod)
         s += "  \n  "
         s += self.hys.__str__(prefix + 'BatteryMonitor:')
         s += "\n  "
@@ -524,9 +525,9 @@ class BatteryModel(Battery):
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0.):
+                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1.):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
-                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test)
+                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A
         self.sat_ib_null = 0.  # Current cutback value for soc=1, A
@@ -567,6 +568,7 @@ class BatteryModel(Battery):
         s += "  voc     =        {:7.3f}  // Open circuit voltage, V\n".format(self.voc)
         s += "  voc_stat=        {:7.3f}  // Static, table lookup value of voc before applying hysteresis, V\n".\
             format(self.voc_stat)
+        s += "  mod     =               {:d}  // Modeling\n".format(self.mod)
         s += "  \n  "
         s += self.hys.__str__(prefix + 'BatteryModel:')
         s += "  \n  "
@@ -622,6 +624,8 @@ class BatteryModel(Battery):
         self.model_cutback = (self.voc_stat > self.vsat) & (self.ib == self.sat_ib_max)
         self.model_saturated = (self.temp_c > low_t) and (self.model_cutback & (self.ib < self.ib_sat))
         Coulombs.sat = self.model_saturated
+        # print("model:  soc, curr_in, ib, model_cutback, model_saturated",
+        #       self.soc, curr_in, self.ib, self.model_cutback, self.model_saturated)
 
         return self.vb
 
@@ -648,7 +652,7 @@ class BatteryModel(Battery):
         d = np.array([self.r0, 1])
         return a, b, c, d
 
-    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, soc_m_init=None):  # BatteryModel
+    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, soc_m_init=None, mon_delta_q=None, mon_sat=None):  # BatteryModel
         """Coulomb counter based on true=actual capacity
         Internal resistance of battery is a loss
         Inputs:
@@ -678,6 +682,8 @@ class BatteryModel(Battery):
 
         # Saturation.   Goal is to set q_capacity and hold it so remember last saturation status
         # detection
+        if not self.mod and mon_sat:
+            self.delta_q = mon_delta_q
         if self.model_saturated:
             if reset:
                 self.delta_q = 0.  # Model is truth.   Saturate it then restart it to reset charge
@@ -693,6 +699,10 @@ class BatteryModel(Battery):
         self.soc = self.q / self.q_capacity
         self.soc_min = self.lut_soc_min.interp(self.temp_lim)
         self.q_min = self.soc_min * self.q_capacity
+
+        # print("BatteryModel.cc: dt, reset, temp_c, temp_lim, charge_curr, ddq, dq, q, soc=",
+        #       dt, reset, temp_c, self.temp_lim, charge_curr,
+        #       self.d_delta_q, self.delta_q, self.q, self.soc)
 
         # Save and return
         self.t_last = self.temp_lim
@@ -854,15 +864,15 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.subplot(323)
     # plt.subplot_mosaic("C")
     plt.plot(ms.time, ms.vb, color='green', label='vb')
-    plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='vb_sim')
+    plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='vb_m')
     plt.plot(ms.time, ms.vc, color='blue', label='vc')
-    plt.plot(ss.time, ss.vc, color='blue', linestyle='--', label='vc_sim')
+    plt.plot(ss.time, ss.vc, color='blue', linestyle='--', label='vc_m')
     plt.plot(ms.time, ms.vd, color='red', label='vd')
-    plt.plot(ss.time, ss.vd, color='orange', linestyle='--', label='vd_sim')
+    plt.plot(ss.time, ss.vd, color='orange', linestyle='--', label='vd_m')
     plt.plot(ms.time, ms.voc_stat, color='orange', label='voc_stat')
     plt.plot(ss.time, ss.voc_stat, color='cyan', linestyle='--', label='voc_stat')
     plt.plot(ms.time, ms.voc, color='magenta', label='voc')
-    plt.plot(ss.time, ss.voc, color='black', linestyle='--', label='voc_sim')
+    plt.plot(ss.time, ss.voc, color='black', linestyle='--', label='voc_m')
     plt.legend(loc=1)
     plt.subplot(324)
     # plt.subplot_mosaic("D")
@@ -872,7 +882,7 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.subplot(322)
     # plt.subplot_mosaic("B")
     plt.plot(ms.time, ms.soc, color='red', label='soc')
-    plt.plot(ss.time, ss.soc, color='black', linestyle='dotted', label='soc_sim')
+    plt.plot(ss.time, ss.soc, color='black', linestyle='dotted', label='soc_m')
     plt.legend(loc=1)
     plt.subplot(326)
     # plt.subplot_mosaic("E")
@@ -888,15 +898,15 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.subplot(111)
     plt.title(plot_title)
     plt.plot(ms.time, ms.vb, color='green', label='vb')
-    plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='vb_sim')
+    plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='vb_m')
     plt.plot(ms.time, ms.vc, color='blue', label='vc')
-    plt.plot(ss.time, ss.vc, color='blue', linestyle='--', label='vc_sim')
+    plt.plot(ss.time, ss.vc, color='blue', linestyle='--', label='vc_m')
     plt.plot(ms.time, ms.vd, color='red', label='vd')
-    plt.plot(ss.time, ss.vd, color='orange', linestyle='--', label='vd_sim')
+    plt.plot(ss.time, ss.vd, color='orange', linestyle='--', label='vd_m')
     plt.plot(ms.time, ms.voc_stat, color='orange', label='voc_stat')
     plt.plot(ss.time, ss.voc_stat, color='cyan', linestyle='--', label='voc_stat')
     plt.plot(ms.time, ms.voc, color='magenta', label='voc')
-    plt.plot(ss.time, ss.voc, color='black', linestyle='--', label='voc_sim')
+    plt.plot(ss.time, ss.voc, color='black', linestyle='--', label='voc_m')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -939,33 +949,33 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.subplot(321)
     plt.title(plot_title+' MON vs SIM')
     plt.plot(ms.time, ms.ib, color='green', label='ib')
-    plt.plot(ss.time, ss.ib, color='black', linestyle='--', label='ib_sim')
+    plt.plot(ss.time, ss.ib, color='black', linestyle='--', label='ib_m')
     plt.legend(loc=1)
     plt.subplot(322)
     plt.plot(ms.time, ms.vb, color='green', label='vb')
-    plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='vb_sim')
+    plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='vb_m')
     plt.plot(ms.time, ms.voc, color='cyan', label='voc')
-    plt.plot(ss.time, ss.voc, color='red', linestyle='--', label='voc_sim')
+    plt.plot(ss.time, ss.voc, color='red', linestyle='--', label='voc_m')
     plt.legend(loc=1)
     plt.subplot(323)
     plt.plot(ms.time, ms.vb, color='green', label='vb')
-    plt.plot(ss.time, ss.vb, color='orange', linestyle='--', label='vb_sim')
+    plt.plot(ss.time, ss.vb, color='orange', linestyle='--', label='vb_m')
     plt.plot(ms.time, ms.voc, color='cyan', label='voc')
-    plt.plot(ss.time, ss.voc, color='red', linestyle='--', label='voc_sim')
+    plt.plot(ss.time, ss.voc, color='red', linestyle='--', label='voc_m')
     plt.plot(ms.time, ms.voc_stat, color='magenta', label='voc_stat')
-    plt.plot(ss.time, ss.voc_stat, color='black', linestyle='--', label='voc_stat_sim')
+    plt.plot(ss.time, ss.voc_stat, color='black', linestyle='--', label='voc_stat_m')
     plt.legend(loc=1)
     plt.subplot(324)
     plt.plot(ss.time, ss.dv_dyn, color='green', label='dv_dyn')
-    plt.plot(ms.time, ms.dv_dyn, color='red', linestyle='--', label='dv_dyn_sim')
+    plt.plot(ms.time, ms.dv_dyn, color='red', linestyle='--', label='dv_dyn_m')
     plt.legend(loc=1)
     plt.subplot(325)
     plt.plot(ms.time, ms.dv_hys, color='green', label='dv_hys')
-    plt.plot(ss.time, ss.dv_hys, color='black', linestyle='--', label='dv_hys_sim')
+    plt.plot(ss.time, ss.dv_hys, color='black', linestyle='--', label='dv_hys_m')
     plt.legend(loc=1)
     plt.subplot(326)
     plt.plot(ms.time, ms.vb, color='green', label='vb')
-    plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='vb_sim')
+    plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='vb_m')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1021,8 +1031,8 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     n_fig += 1
     plt.title(plot_title)
     plt.plot(ms.time, ms.voc, color='red', label='voc')
-    plt.plot(ms.time, ms.voc, color='blue', linestyle='dotted', label='voc ekf')
-    plt.plot(ss.time, ss.voc, color='green', label='voc model')
+    plt.plot(ms.time, ms.Voc_ekf, color='blue', linestyle='dotted', label='Voc_ekf')
+    plt.plot(ss.time, ss.voc, color='green', label='voc_m')
     plt.legend(loc=4)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1031,9 +1041,9 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.figure()
     n_fig += 1
     plt.title(plot_title)
-    plt.plot(ms.time, ms.soc_ekf, color='blue', linestyle='dotted', label='soc ekf')
-    plt.plot(ss.time, ss.soc, color='green', label='soc model')
-    plt.plot(ms.time, ms.soc, color='red', linestyle='dotted', label='soc counted')
+    plt.plot(ms.time, ms.soc_ekf, color='blue', linestyle='dotted', label='soc_ekf')
+    plt.plot(ss.time, ss.soc, color='green', label='soc_m')
+    plt.plot(ms.time, ms.soc, color='red', linestyle='dotted', label='soc')
     plt.legend(loc=4)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)

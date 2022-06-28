@@ -87,7 +87,7 @@ def save_clean_file_sim(sims, csv_file, unit_key):
             output.write(s)
         print("Wrote(save_clean_file_sim):", csv_file)
 
-def replicate(saved_old, init_time=-4., dv_hys=0.):
+def replicate(saved_old, init_time=-4., dv_hys=0., sres=1.):
     t = saved_old.time
     dt = saved_old.dt
     Vb = saved_old.Vb
@@ -105,9 +105,9 @@ def replicate(saved_old, init_time=-4., dv_hys=0.):
     # Setup
     scale = model_bat_cap / Battery.RATED_BATT_CAP
     sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
-                       dv_hys=dv_hys)
-    mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif,
-                         r_dif=r_dif, temp_c=temp_c, hys_scale=hys_scale_monitor, tweak_test=tweak_test, dv_hys=dv_hys)
+                       dv_hys=dv_hys, sres=sres)
+    mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
+                         temp_c=temp_c, hys_scale=hys_scale_monitor, tweak_test=tweak_test, dv_hys=dv_hys, sres=sres)
     Is_sat_delay = TFDelay(in_=saved_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
     # time loop
@@ -133,7 +133,8 @@ def replicate(saved_old, init_time=-4., dv_hys=0.):
         # Models
         sim.calculate(temp_c=Tb[i], soc=sim.soc, curr_in=current_in, dt=T, q_capacity=sim.q_capacity,
                       dc_dc_on=dc_dc_on, rp=rp)
-        sim.count_coulombs(dt=T, reset=init, temp_c=Tb[i], charge_curr=sim.ib, sat=False, soc_m_init=soc_m_init)
+        sim.count_coulombs(dt=T, reset=init, temp_c=Tb[i], charge_curr=sim.ib, sat=False, soc_m_init=soc_m_init,
+                           mon_sat=mon.sat, mon_delta_q=mon.delta_q)
 
         # EKF
         if init:
@@ -199,13 +200,14 @@ if __name__ == '__main__':
 
         # Transient  inputs
         time_end = None
-        # time_end = 2500.
+        # time_end = 2000.
 
         # Setup and user inputs (data_file_old_txt must end in .txt)
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220626.txt';unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220626.txt';unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/tryXp20_20220626.txt';unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/real world Xp20 20220626.txt';unit_key = 'soc0_2022'
+        # data_file_old_txt = '../dataReduction/tryXp20_20220626.txt';unit_key = 'pro_2022';
+        # data_file_old_txt = '../dataReduction/real world Xp20 20220626.txt';unit_key = 'soc0_2022';
+        data_file_old_txt = '../dataReduction/real world Xp21 20220626.txt';unit_key = 'soc0_2022';
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
@@ -234,10 +236,12 @@ if __name__ == '__main__':
             init_time = 1.
         else:
             init_time = -4.
+        # Get dv_hys from data
+        dv_hys = saved_old.dV_hys[0]
 
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
-        mons, sims, monrs, sims_m = replicate(saved_old, init_time=init_time, dv_hys=-0.1)
+        mons, sims, monrs, sims_m = replicate(saved_old, init_time=init_time, dv_hys=dv_hys, sres=1.0)
         save_clean_file(mons, mon_file_save, 'mon_rep' + date_)
 
         # Plots
