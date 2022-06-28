@@ -284,7 +284,7 @@ void load_temp(Sensors *Sen)
   }
 
   // Check success
-  if ( count<MAX_TEMP_READS && TEMP_RANGE_CHECK<temp )
+  if ( count<MAX_TEMP_READS && TEMP_RANGE_CHECK<temp && temp<TEMP_RANGE_CHECK_MAX )
   {
     Sen->Tbatt_hdwe = Sen->SdTbatt->update(temp);
     if ( rp.debug==-103 ) Serial.printf("I:  t=%7.3f ct=%d\n", temp, count);
