@@ -18,12 +18,12 @@
 import numpy as np
 import math
 from EKF_1x1 import EKF_1x1
-from Coulombs import Coulombs
+from Coulombs import Coulombs, dqdt
 from StateSpace import StateSpace
 from Hysteresis import Hysteresis
 import matplotlib.pyplot as plt
 from TFDelay import TFDelay
-from myFilters import LagTustin, General2Pole
+from myFilters import LagTustin, General2Pole, RateLimit
 
 
 class Retained:
@@ -54,7 +54,7 @@ low_t = 8  # Minimum temperature for valid saturation check, because BMS shuts o
 # Heater should keep >8, too
 mxeps_bb = 1-1e-6  # Numerical maximum of coefficient model with scaled soc
 mneps_bb = 1e-6  # Numerical minimum of coefficient model without scaled soc
-DQDT = 0.01  # Change of charge with temperature, fraction/deg C.  From literature.  0.01 is commonly used
+#DQDT = 0.01  # Change of charge with temperature, fraction/deg C.  From literature.  0.01 is commonly used
 CAP_DROOP_C = 20.  # Temperature below which a floor on q arises, C (20)
 TCHARGE_DISPLAY_DEADBAND = 0.1  # Inside this +/- deadband, charge time is displayed '---', A
 max_voc = 1.2*NOM_SYS_VOLT  # Prevent windup of battery model, V
@@ -288,6 +288,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.Vsat = 0.
         self.dV_dyn = 0.
         self.Voc_ekf = 0.
+        self.T_Rlim = RateLimit()
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -310,11 +311,13 @@ class BatteryMonitor(Battery, EKF_1x1):
     def assign_soc_m(self, soc_m):
         self.soc_m = soc_m
 
-    def calculate(self, temp_c, vb, ib, dt, q_capacity=None, dc_dc_on=None, rp=None):  # BatteryMonitor
+    def calculate(self, temp_c, vb, ib, dt, init, q_capacity=None, dc_dc_on=None, rp=None):  # BatteryMonitor
         self.temp_c = temp_c
         self.vsat = calc_vsat(self.temp_c)
         self.dt = dt
         self.mod = rp.modeling
+        self.T_Rlim.update(x=self.temp_c, reset=init, dt=dt, max_=0.017, min_=-.017)
+        T_rate = self.T_Rlim.rate
 
         # Dynamics
         self.vb = vb
@@ -342,7 +345,7 @@ class BatteryMonitor(Battery, EKF_1x1):
             self.dv_dyn = 0.
 
         # EKF 1x1
-        self.predict_ekf(u=self.ib)  # u = ib
+        self.predict_ekf(u=self.ib - dqdt*self.q_capacity*T_rate)  # u = ib
         self.update_ekf(z=self.voc_stat, x_min=0., x_max=1.)  # z = voc, voc_filtered = hx
         self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity
@@ -691,7 +694,7 @@ class BatteryModel(Battery):
 
         # Integration
         self.q_capacity = self.calculate_capacity(self.temp_lim)
-        self.delta_q += self.d_delta_q - DQDT*self.q_capacity*(self.temp_lim-self.t_last)
+        self.delta_q += self.d_delta_q - dqdt*self.q_capacity*(self.temp_lim-self.t_last)
         self.delta_q = max(min(self.delta_q, 0.), -self.q_capacity)
         self.q = self.q_capacity + self.delta_q
 
@@ -764,7 +767,7 @@ def is_sat(temp_c, voc, soc):
 
 
 def calculate_capacity(temp_c, t_sat, q_sat):
-    return q_sat * (1-DQDT*(temp_c - t_sat))
+    return q_sat * (1-dqdt*(temp_c - t_sat))
 
 
 def calc_vsat(temp_c):

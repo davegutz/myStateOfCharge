@@ -104,10 +104,41 @@ def replicate(saved_old, init_time=-4., dv_hys=0., sres=1.):
 
     # Setup
     scale = model_bat_cap / Battery.RATED_BATT_CAP
+    # q = 0.001; r = 0.1  # base 0.72 / 0.85 / +-0.05 base
+    # q = 0.01; r = 0.01  # base 0.72 / 0.9 / +-0.07  noisy
+    # q = 0.1; r = 0.001  # base 0.72 / 0.9 / +-0.07  noisier
+    # q = 0.002; r = 0.1  # base 0.73 / 0.86 / +-0.055 noisy
+    # q = 0.005; r = 0.1  # base 0.73 / 0.86 / +-0.055 noisy
+    # q = 0.01; r = 0.1  # base 0.73 / 0.86 / +-0.055 noisy
+    # q = 0.1; r = 0.1  # base 0.73 / 0.86 / +-0.055 noisier
+    # q = 0.005; r = 0.05  # base 0.73 / 0.86 / +-0.055 noisy
+    # q = 0.05; r = 0.05  # base 0.73 / 0.86 / +-0.055 noisier
+    # q = 0.001; r = 0.05  # base 0.73 / 0.86 / +-0.055 like base
+    # q = 0.001; r = 0.01  # base 0.73 / 0.86 / +-0.055 noisier
+    # q = 0.001; r = 0.001  # base 0.73 / 0.86 / +-0.055 noisier
+    # q = 0.0001; r = 0.05  # base 0.75 / 0.83 / +-0.04 good
+    # q = 0.0001; r = 0.1  # base 0.74 / 0.8 / +-0.03 better
+    # q = 0.00002; r = 0.2  # base 0.4 / n/a / +-0.0 falls apart
+    # q = 0.0001; r = 0.2  # base 0.74 / 0.8 / +-0.03 best (temperature bias apparent. EKF doesn't account for it)
+    # q = 0.0001; r = 0.5  # base 0.74 / 0.8 / +-0.03 even better than best
+    # q = 0.0001; r = 1.0  # base 0.74 / 0.8 / +-0.03 even better than best
+    # q = 0.00005; r = 2.0  # base 0.74 / 0.8 / +-0.03 even better than best
+    # q = 0.00001; r = 1.0  # base 0.74 / 0.8 / +-0.03 even better than best
+    # q = 0.00005; r = 1.0  # base 0.74 / 0.8 / +-0.03 even better than best
+    # q = 0.00005; r = 1.0; sres = 2.  # base 0.74 / 0.8 / +-0.03 even better than best
+    # q = 0.00005; r = 1.0; sres = 1.; tau_dif = 83./2.  # base 0.74 / 0.8 / +-0.03 even better than best
+    # q = 0.00005; r = 1.0; sres = 2.; tau_dif = 83./2.  # base 0.74 / 0.8 / +-0.03 even better than best
+    # q = 0.00005; r = 1.0; sres = 1.; tau_dif = 83.*4.  # base 0.74 / 0.8 / +-0.03 even better than best
+    # q = 0.00005; r = 1.0; sres = 1.; tau_dif = 83.; tau_sd = 1.8e7*1.4   # base 0.74 / 0.8 / +-0.03 even better than best
+    # q = 0.00005; r = 1.0; tau_sd = 2.53e7   # base 0.74 / 0.8 / +-0.03 even better than best
+    q = 0.00005; r = 1.0; tau_sd = 2.5e7;   # base 0.74 / 0.8 / +-0.03 even better than best
     sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
                        dv_hys=dv_hys, sres=sres)
     mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
                          temp_c=temp_c, hys_scale=hys_scale_monitor, tweak_test=tweak_test, dv_hys=dv_hys, sres=sres)
+    # need Tb input.   perhaps need higher order to enforce basic type 1 response
+    mon.Q = q * q
+    mon.R = r * r
     Is_sat_delay = TFDelay(in_=saved_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
     # time loop
@@ -148,9 +179,10 @@ def replicate(saved_old, init_time=-4., dv_hys=0., sres=1.):
 
         # Monitor calculations including ekf
         if rp.modeling == 0:
-            mon.calculate(Tb[i], Vb[i], Ib[i], T, rp=rp)
+            mon.calculate(Tb[i], Vb[i], Ib[i], T, rp=rp, init=init)
         else:
-            mon.calculate(Tb[i], sim.vb + randn() * v_std + dv_sense, sim.ib + randn() * i_std + di_sense, T, rp=rp)
+            mon.calculate(Tb[i], sim.vb + randn() * v_std + dv_sense, sim.ib + randn() * i_std + di_sense, T, rp=rp,
+                          init=init)
         # mon.calculate(Tb[i], Vb[i]+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, T)
         sat = is_sat(Tb[i], mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), init)

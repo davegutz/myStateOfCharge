@@ -18,6 +18,29 @@ __version__ = '$Revision: 1.1 $'
 __date__ = '$Date: 2022/06/10 13:15:02 $'
 
 
+class RateLimit:
+    def __init__(self):
+        self.rate_min = 0.
+        self.rate_max = 0.
+        self.y = 0.
+        self.y_past = 0.
+        self.rate = 0.
+        self.dt = 0.
+
+    def update(self, x, reset, dt, min_, max_):
+        self.rate_min = min_
+        self.rate_max = max_
+        self.dt = dt
+        if reset:
+            self.y = x
+            self.y_past = x
+        else:
+            self.y = max(min(x, self.y_past + self.rate_max*self.dt), self.y_past + self.rate_min*self.dt)
+        self.rate = (self.y - self.y_past) / self.dt
+        self.y_past = self.y
+        return self.y
+
+
 # 1-pole filters
 class DiscreteFilter:
     # Base class for 1-pole filters

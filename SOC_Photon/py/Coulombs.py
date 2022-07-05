@@ -19,7 +19,7 @@ of the totals and standardize the calculations."""
 # Constants
 import numpy as np
 
-dqdt = 0.01  # defacto standard from literature, many sources
+dqdt = 0.01  # Change of charge with temperature, fraction/deg C.  From literature.  0.01 is commonly used
 
 
 class Coulombs:
