@@ -87,7 +87,7 @@ def save_clean_file_sim(sims, csv_file, unit_key):
             output.write(s)
         print("Wrote(save_clean_file_sim):", csv_file)
 
-def replicate(saved_old, init_time=-4., dv_hys=0., sres=1.):
+def replicate(saved_old, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2, t_Ib_fail=None, Ib_fail=0.):
     t = saved_old.time
     dt = saved_old.dt
     Vb = saved_old.Vb
@@ -145,7 +145,6 @@ def replicate(saved_old, init_time=-4., dv_hys=0., sres=1.):
     T = t[1] - t[0]
     for i in range(t_len):
         saved_old.i = i
-        current_in = saved_old.Ib[i]
         if i > 0:
             T = t[i] - t[i - 1]
 
@@ -162,9 +161,15 @@ def replicate(saved_old, init_time=-4., dv_hys=0., sres=1.):
             sim.apply_delta_q_t(rp.delta_q_model, rp.t_last_model)
 
         # Models
+        if t_Ib_fail and t[i] > t_Ib_fail:
+            current_in = Ib_fail
+            charge_curr = Ib_fail
+        else:
+            current_in = saved_old.Ib[i]
+            charge_curr = sim.ib
         sim.calculate(temp_c=Tb[i], soc=sim.soc, curr_in=current_in, dt=T, q_capacity=sim.q_capacity,
                       dc_dc_on=dc_dc_on, rp=rp)
-        sim.count_coulombs(dt=T, reset=init, temp_c=Tb[i], charge_curr=sim.ib, sat=False, soc_m_init=soc_m_init,
+        sim.count_coulombs(dt=T, reset=init, temp_c=Tb[i], charge_curr=charge_curr, sat=False, soc_m_init=soc_m_init,
                            mon_sat=mon.sat, mon_delta_q=mon.delta_q)
 
         # EKF
@@ -178,19 +183,25 @@ def replicate(saved_old, init_time=-4., dv_hys=0., sres=1.):
             mon.init_soc_ekf(soc_init)  # when modeling (assumed in python) ekf wants to equal model
 
         # Monitor calculations including ekf
-        if rp.modeling == 0:
-            mon.calculate(Tb[i], Vb[i], Ib[i], T, rp=rp, init=init)
+        if t_Vb_fail and t[i] >= t_Vb_fail:
+            Vb_ = Vb_fail
+            vb = Vb_fail
         else:
-            mon.calculate(Tb[i], sim.vb + randn() * v_std + dv_sense, sim.ib + randn() * i_std + di_sense, T, rp=rp,
+            Vb_ = Vb[i]
+            vb = sim.vb
+        if rp.modeling == 0:
+            mon.calculate(Tb[i], Vb_, current_in, T, rp=rp, init=init)
+        else:
+            mon.calculate(Tb[i], vb + randn() * v_std + dv_sense, charge_curr + randn() * i_std + di_sense, T, rp=rp,
                           init=init)
         # mon.calculate(Tb[i], Vb[i]+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, T)
         sat = is_sat(Tb[i], mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), init)
         if rp.modeling == 0:
-            mon.count_coulombs(dt=T, reset=init, temp_c=Tb[i], charge_curr=Ib[i], sat=saturated)
+            mon.count_coulombs(dt=T, reset=init, temp_c=Tb[i], charge_curr=current_in, sat=saturated)
         else:
-            mon.count_coulombs(dt=T, reset=init, temp_c=temp_c, charge_curr=sim.ib, sat=saturated)
-        mon.calc_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
+            mon.count_coulombs(dt=T, reset=init, temp_c=temp_c, charge_curr=charge_curr, sat=saturated)
+        mon.calc_charge_time(mon.q, mon.q_capacity, charge_curr, mon.soc)
         mon.select()
         # mon.regauge(Tb[i])
         mon.assign_soc_m(sim.soc)
