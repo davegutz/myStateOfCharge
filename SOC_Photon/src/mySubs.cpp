@@ -367,7 +367,7 @@ void  monitor(const int reset, const boolean reset_temp, const unsigned long now
   }
 
   // EKF - calculates temp_c_, voc_stat_, voc_ as functions of sensed parameters vb & ib (not soc)
-  Mon->calculate(Sen);
+  Mon->calculate(Sen, reset_temp);
 
   // Debounce saturation calculation done in ekf using voc model
   boolean sat = Mon->is_sat();

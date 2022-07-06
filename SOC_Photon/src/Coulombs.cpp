@@ -82,7 +82,7 @@ void Chemistry::assign_mod(const String mod_str)
     r_diff      = 0.0077; // Randles diffusion resistance, ohms
     tau_ct      = 0.2;    // Randles charge transfer time constant, s (=1/Rct/Cct)
     tau_diff    = 83.;    // Randles diffusion time constant, s (=1/Rdif/Cdif)
-    tau_sd      = 1.8e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
+    tau_sd      = 2.5e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
     r_sd        = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
   }
   else if ( mod==1 )  // "LION" placeholder.  Data fabricated

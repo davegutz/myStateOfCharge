@@ -243,12 +243,13 @@ void BatteryMonitor::assign_rand(void)
         tcharge_ekf_    Solved charging time to full from ekf, hr
         y_filt_         Filtered EKF y residual value, V
 */
-double BatteryMonitor::calculate(Sensors *Sen)
+double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
 {
     // Inputs
     temp_c_ = Sen->Tbatt_filt;
     vsat_ = calc_vsat();
     dt_ =  min(Sen->T, F_MAX_T);
+    double T_rate = T_RLim->calculate(temp_c_, T_RLIM, T_RLIM, reset, Sen->T);
 
     // Dynamic emf
     vb_ = Sen->Vbatt / (*rp_nS_);
@@ -286,9 +287,12 @@ double BatteryMonitor::calculate(Sensors *Sen)
     }
 
     // EKF 1x1
-    predict_ekf(ib_);           // u = ib
-    update_ekf(voc_stat_, 0., 1.);   // z = voc_stat, voc_filtered = hx
-    soc_ekf_ = x_ekf();         // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
+    double charge_curr = ib_;
+    if ( charge_curr>0. && !rp.tweak_test() ) charge_curr *= coul_eff_;
+    charge_curr -= chem_.dqdt * q_capacity_ * T_rate;
+    predict_ekf(charge_curr);       // u = ib
+    update_ekf(voc_stat_, 0., 1.);  // z = voc_stat, voc_filtered = hx
+    soc_ekf_ = x_ekf();             // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
     q_ekf_ = soc_ekf_ * q_capacity_;
     y_filt_ = y_filt->calculate(y_, min(Sen->T, EKF_T_RESET));
     if ( rp.debug==6 || rp.debug==7 )
