@@ -250,7 +250,7 @@ class BatteryMonitor(Battery, EKF_1x1):
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017,
-                 r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
+                 r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1.):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres)
@@ -273,8 +273,12 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.amp_hrs_remaining_wt = 0  # Discharge amp*time left if drain soc_wt_ to 0, A-h
         self.e_soc_ekf = 0.  # analysis parameter
         self.e_voc_ekf = 0.  # analysis parameter
-        self.Q = 0.001*0.001  # EKF process uncertainty
-        self.R = 0.1*0.1  # EKF state uncertainty
+        q = 0.00005
+        r = 1.0
+        # self.Q = 0.001*0.001  # EKF process uncertainty
+        # self.R = 0.1*0.1  # EKF state uncertainty
+        self.Q = q * q  # EKF process uncertainty
+        self.R = r * r  # EKF state uncertainty
         self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
         self.soc_m = 0.  # Model information
         self.EKF_converged = TFDelay(False, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT)
@@ -345,7 +349,11 @@ class BatteryMonitor(Battery, EKF_1x1):
             self.dv_dyn = 0.
 
         # EKF 1x1
-        self.predict_ekf(u=self.ib - dqdt*self.q_capacity*T_rate)  # u = ib
+        charge_curr = self.ib
+        if charge_curr > 0. and not self.tweak_test:
+            charge_curr *= self.coul_eff
+        charge_curr -= dqdt*self.q_capacity*T_rate
+        self.predict_ekf(u=charge_curr)  # u = ib
         self.update_ekf(z=self.voc_stat, x_min=0., x_max=1.)  # z = voc, voc_filtered = hx
         self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity

@@ -20,7 +20,7 @@ of the totals and standardize the calculations."""
 import numpy as np
 
 dqdt = 0.01  # Change of charge with temperature, fraction/deg C.  From literature.  0.01 is commonly used
-
+coul_eff = 0.9985  # Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
 
 class Coulombs:
     """Coulomb Counting"""
