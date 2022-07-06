@@ -83,8 +83,8 @@
 #define TEMP_DELAY            1         // Time to block temperature sensor read in DS18 routine, ms (1)
 #define TEMP_INIT_DELAY       10000     // It takes 10 seconds first read of DS18
 #define TWEAK_GAIN            43200.    // Estimate of A calibration change for accumulated charge error over ~24 hour period (86400 = 24*3600)/2, Coulomb/A
-#define TWEAK_MAX_CHANGE      0.05      // Maximum allowed tweak per charge cycle, A
-#define TWEAK_MAX             1.        // Maximum tweak allowed, +/- A
+#define TWEAK_MAX_CHANGE      0.        // Maximum allowed tweak per charge cycle, A
+#define TWEAK_MAX             0.        // Maximum tweak allowed, +/- A
 #define TWEAK_WAIT            6.        // Time to persist unsaturated before allowing peak, hrs
 #define TT_WAIT               10.       // Before and after tweak test print interval, s
 

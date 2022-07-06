@@ -336,13 +336,19 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
       case ( 'i' ):
         Q_in = cp.input_string.substring(1).toFloat();
-        Serial.printf("Amp inf CC reset from %9.1f ", Sen->ShuntAmp->delta_q_inf());
-        Sen->ShuntAmp->delta_q_inf(Q_in);
-        Serial.printf("to %9.1f\n", Sen->ShuntAmp->delta_q_inf());
+        Serial.printf("Amp cinf CC reset from %9.1f ", Sen->ShuntAmp->delta_q_cinf());
+        Sen->ShuntAmp->delta_q_cinf(Q_in);
+        Serial.printf("to %9.1f\n", Sen->ShuntAmp->delta_q_cinf());
+        Serial.printf("Amp dinf CC reset from %9.1f ", Sen->ShuntAmp->delta_q_dinf());
+        Sen->ShuntAmp->delta_q_dinf(Q_in);
+        Serial.printf("to %9.1f\n", Sen->ShuntAmp->delta_q_dinf());
         self_talk("Mp0.0", Mon, Sen);
-        Serial.printf("No amp inf CC reset from %9.1f ", Sen->ShuntNoAmp->delta_q_inf());
-        Sen->ShuntNoAmp->delta_q_inf(Q_in);
-        Serial.printf("to %9.1f\n", Sen->ShuntNoAmp->delta_q_inf());
+        Serial.printf("No amp cinf CC reset from %9.1f ", Sen->ShuntNoAmp->delta_q_cinf());
+        Sen->ShuntNoAmp->delta_q_cinf(Q_in);
+        Serial.printf("to %9.1f\n", Sen->ShuntNoAmp->delta_q_cinf());
+        Serial.printf("No amp dinf CC reset from %9.1f ", Sen->ShuntNoAmp->delta_q_dinf());
+        Sen->ShuntNoAmp->delta_q_dinf(Q_in);
+        Serial.printf("to %9.1f\n", Sen->ShuntNoAmp->delta_q_dinf());
         self_talk("Np0.0", Mon, Sen);
         break;
 
@@ -550,10 +556,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
       case ( 'Q' ):
         Serial.printf("Tb  = %7.3f,\nVb  = %7.3f,\nVoc = %7.3f,\nvoc_filt  = %7.3f,\nVsat = %7.3f,\nIb  = %7.3f,\nsoc_m = %8.4f,\n\
-soc_ekf= %8.4f,\nsoc = %8.4f,\nsoc_wt = %8.4f,\nmodeling = %d,\namp delta_q_inf = %10.1f,\namp tweak_bias = %7.3f,\nno amp delta_q_inf = %10.1f,\nno amp tweak_bias = %7.3f,\n",
-          Mon->temp_c(), Mon->Vb(), Mon->Voc(), Mon->Voc_filt(), Mon->Vsat(),
-          Mon->Ib(), Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(), Mon->soc_wt(), rp.modeling, Sen->ShuntAmp->delta_q_inf(), Sen->ShuntAmp->tweak_bias(),
-          Sen->ShuntNoAmp->delta_q_inf(), Sen->ShuntNoAmp->tweak_bias());
+soc_ekf= %8.4f,\nsoc = %8.4f,\nsoc_wt = %8.4f,\nmodeling = %d,\namp delta_q_cinf = %10.1f,\namp delta_q_dinf = %10.1f,\namp tweak_bias = %7.3f,\n\
+no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_bias = %7.3f,\n",
+          Mon->temp_c(), Mon->Vb(), Mon->Voc(), Mon->Voc_filt(), Mon->Vsat(), Mon->Ib(), Sen->Sim->soc(), Mon->soc_ekf(),
+          Mon->soc(), Mon->soc_wt(), rp.modeling, Sen->ShuntAmp->delta_q_cinf(), Sen->ShuntAmp->delta_q_dinf(),
+          Sen->ShuntAmp->tweak_bias(), Sen->ShuntNoAmp->delta_q_cinf(), Sen->ShuntNoAmp->delta_q_dinf(),
+          Sen->ShuntNoAmp->tweak_bias());
         break;
 
       case ( 'R' ):
@@ -974,12 +982,9 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  HR= "); Serial.printf("reset summary log\n");
   Serial.printf("  Hs= "); Serial.printf("save and print log\n");
 
-  Serial.printf("i=,<inp> set BatteryMonitor delta_q_inf (-360000 - 3600000'\n"); 
-
   Serial.printf("M<?> Amp tweaks\n");
   Serial.printf("  MC= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_change()); Serial.println("    : amp max change allowed, A [0.05]"); 
   Serial.printf("  Mg= "); Serial.printf("%7.6f", Sen->ShuntAmp->gain()); Serial.println("  : amp gain = correction to be made for charge, A/Coulomb/day [0.0001]"); 
-  Serial.printf("  Mi= "); Serial.printf("%7.3f", Sen->ShuntAmp->delta_q_inf()); Serial.println("   : amp value for state of infinite counter, C [varies]"); 
   Serial.printf("  Mk= "); Serial.printf("%7.3f", Sen->ShuntAmp->tweak_bias()); Serial.println("    : amp adder to all sensed shunt current, A [0]"); 
   Serial.printf("  Mp= "); Serial.printf("%10.1f", Sen->ShuntAmp->delta_q_sat_past()); Serial.println(" : amp past charge infinity at sat, C [varies]"); 
   Serial.printf("  MP= "); Serial.printf("%10.1f", Sen->ShuntAmp->delta_q_sat_present()); Serial.println(" : amp present charge infinity at sat, C [varies]"); 
@@ -990,7 +995,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("N<?> No amp tweaks\n");
   Serial.printf("  NC= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_change()); Serial.println("    : no amp max change allowed, A [0.05]"); 
   Serial.printf("  Ng= "); Serial.printf("%7.6f", Sen->ShuntNoAmp->gain()); Serial.println("  : no amp gain = correction to be made for charge, A/Coulomb [0.0001]"); 
-  Serial.printf("  Ni= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->delta_q_inf()); Serial.println("   : no amp value for state of infinite counter, C [varies]"); 
   Serial.printf("  Nk= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->tweak_bias()); Serial.println("    : no amp adder to all sensed shunt current, A [0]"); 
   Serial.printf("  Np= "); Serial.printf("%10.1f", Sen->ShuntNoAmp->delta_q_sat_past()); Serial.println(" : no amp past charge infinity at sat, C [varies]"); 
   Serial.printf("  NP= "); Serial.printf("%10.1f", Sen->ShuntNoAmp->delta_q_sat_present()); Serial.println(" : no amp present charge infinity at sat, C [varies]"); 
@@ -1016,7 +1020,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("R<?>   Reset\n");
   Serial.printf("  Re= "); Serial.printf("equalize delta_q in Sim to Mon\n");
   Serial.printf("  Rh= "); Serial.printf("reset all hys\n");
-  Serial.printf("  Ri= "); Serial.printf("reset delta_q_inf to 0.0\n");
+  Serial.printf("  Ri= "); Serial.printf("reset all delta_q_inf to 0.0\n");
   Serial.printf("  Rr= "); Serial.printf("saturate battery monitor and equalize Sim & Mon\n");
   Serial.printf("  RR= "); Serial.printf("saturate, equalize, & nominalize all testing for DEPLOY\n");
   Serial.printf("  Rs= "); Serial.printf("small reset.  Reset flags to reinitialize filters\n");

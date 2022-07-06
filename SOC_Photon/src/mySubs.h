@@ -55,8 +55,8 @@ class Shunt: public Tweak, Adafruit_ADS1015
 {
 public:
   Shunt();
-  Shunt(const String name, const uint8_t port, float *rp_delta_q_inf, float *rp_tweak_bias, float *cp_ibatt_bias, 
-    const float v2a_s);
+  Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_bias,
+    float *cp_ibatt_bias, const float v2a_s);
   ~Shunt();
   // operators
   // functions
@@ -147,13 +147,15 @@ struct Sensors
     this->T = T;
     this->T_filt = T;
     this->T_temp = T_temp;
-    this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_inf_amp, &rp.tweak_bias_amp, &cp.ibatt_bias_amp, shunt_amp_v2a_s);
+    this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_cinf_amp, &rp.delta_q_dinf_amp, &rp.tweak_bias_amp, &cp.ibatt_bias_amp,
+      shunt_amp_v2a_s);
     if ( rp.debug>102 )
     {
       Serial.printf("New Shunt('Amp'):\n");
       this->ShuntAmp->pretty_print();
     }
-    this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp, &cp.ibatt_bias_noamp, shunt_noamp_v2a_s);
+    this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_cinf_noamp, &rp.delta_q_dinf_noamp, &rp.tweak_bias_noamp,
+      &cp.ibatt_bias_noamp, shunt_noamp_v2a_s);
     if ( rp.debug>102 )
     {
       Serial.printf("New Shunt('No Amp'):\n");

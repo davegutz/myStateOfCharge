@@ -39,9 +39,10 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // constructors
 Shunt::Shunt()
 : Tweak(), Adafruit_ADS1015(), name_("None"), port_(0x00), bare_(false){}
-Shunt::Shunt(const String name, const uint8_t port, float *rp_delta_q_inf, float *rp_tweak_bias, float *cp_ibatt_bias,
-  const float v2a_s)
-: Tweak(name, TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, TWEAK_WAIT, rp_delta_q_inf, rp_tweak_bias, COULOMBIC_EFF),
+Shunt::Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_bias,
+  float *cp_ibatt_bias, const float v2a_s)
+: Tweak(name, TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, TWEAK_WAIT, rp_delta_q_cinf, rp_delta_q_dinf, rp_tweak_bias,
+  COULOMBIC_EFF),
   Adafruit_ADS1015(),
   name_(name), port_(port), bare_(false), cp_ibatt_bias_(cp_ibatt_bias), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0)

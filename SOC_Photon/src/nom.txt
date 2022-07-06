@@ -17,9 +17,12 @@
 		d_delta_q		Charging rate, Coulombs/sec
 		delta_hrs		Time since last allowed saturation see 'N/Mz', hr
 		delta_q_		Charge change since saturated, C
-		delta_q_inf_	Charge infinity at past update see 'N/Mi', Coulombs
-		delta_q_inf_amp	delta_q since last reset
-		delta_q_inf_noamp	delta_q since last reset
+		delta_q_cinf_	Charge infinity at past update see 'N/Mi', Coulombs
+		delta_q_cinf_amp	Charge delta_q since last reset
+		delta_q_cinf_noamp	Charge delta_q since last reset
+		delta_q_dinf_	Discharge infinity at past update see 'N/Mi', Coulombs
+		delta_q_dinf_amp	Discharge delta_q since last reset
+		delta_q_dinf_noamp	Discharge delta_q since last reset
 		delta_q_max		Running tab since last de-saturation of potential new delta_q_sat
 		delta_q_model	Coulomb Counter state for model, (-1 - 1)
 		delta_q_sat_present_	Charge infinity at saturation, present see 'N/MP', Coulombs

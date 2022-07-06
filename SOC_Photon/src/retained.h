@@ -55,8 +55,10 @@ struct RetainedPars
   float cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
   int isum = -1;                // Summary location.   Begins at -1 because first action is to increment isum
-  float delta_q_inf_amp = 0.;   // delta_q since last reset.  Simple integration of amplified current
-  float delta_q_inf_noamp = 0.; // delta_q since last reset.  Simple integration of non-amplified current
+  float delta_q_cinf_amp = 0.;  // Charge delta_q since last reset.  Simple integration of amplified current
+  float delta_q_cinf_noamp = 0.;// Charge delta_q since last reset.  Simple integration of non-amplified current
+  float delta_q_dinf_amp = 0.;  // Discharge delta_q since last reset.  Simple integration of amplified current
+  float delta_q_dinf_noamp = 0.;// Discharge delta_q since last reset.  Simple integration of non-amplified current
   float hys_scale = 1.;         // Hysteresis scalar
   float tweak_bias_amp = 0.;    // Tweak calibration for amplified current sensor
   float tweak_bias_noamp = 0.;  // Tweak calibration for non-amplified current sensor
@@ -96,8 +98,10 @@ struct RetainedPars
     this->s_cap_model = 1.0;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
-    this->delta_q_inf_amp = 0.;
-    this->delta_q_inf_noamp = 0.;
+    this->delta_q_cinf_amp = 0.;
+    this->delta_q_cinf_noamp = 0.;
+    this->delta_q_dinf_amp = 0.;
+    this->delta_q_dinf_noamp = 0.;
     this->hys_scale = 1.;
     this->tweak_bias_amp = 0.;
     this->tweak_bias_noamp = 0.;
@@ -126,8 +130,10 @@ struct RetainedPars
     this->s_cap_model = 1.0;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
-    this->delta_q_inf_amp = 0.;
-    this->delta_q_inf_noamp = 0.;
+    this->delta_q_cinf_amp = 0.;
+    this->delta_q_cinf_noamp = 0.;
+    this->delta_q_dinf_amp = 0.;
+    this->delta_q_dinf_noamp = 0.;
     this->hys_scale = 1.;
     this->tweak_bias_amp = 0.;
     this->tweak_bias_noamp = 0.;
@@ -166,8 +172,10 @@ struct RetainedPars
     Serial.printf("  s_cap_model =         %7.3f;  // Scalar on battery model size\n", this->s_cap_model);
     Serial.printf("  cutback_gain_scalar = %7.3f;  // Scalar on battery model saturation cutback function\n", this->cutback_gain_scalar);
     Serial.printf("  isum =                      %d;  // Summary location ptr.   Begins at -1\n", this->isum);
-    Serial.printf("  delta_q_inf_amp =  %10.1f;  // delta_q since last reset\n", this->delta_q_inf_amp);
-    Serial.printf("  delta_q_inf_noamp =%10.1f;  // delta_q since last reset\n", this->delta_q_inf_noamp);
+    Serial.printf("  delta_q_cinf_amp =  %10.1f;  // Coul\n", this->delta_q_cinf_amp);
+    Serial.printf("  delta_q_dinf_amp =  %10.1f;  // Coul\n", this->delta_q_dinf_amp);
+    Serial.printf("  delta_q_cinf_noamp =%10.1f;  // Coul\n", this->delta_q_cinf_noamp);
+    Serial.printf("  delta_q_dinf_noamp =%10.1f;  // Coul\n", this->delta_q_dinf_noamp);
     Serial.printf("  hys_scale =           %7.3f;  //  Hysteresis scalar\n", this->hys_scale);
     Serial.printf("  tweak_bias_amp =      %7.3f;  // Tweak calibration for amplified current\n", this->tweak_bias_amp);
     Serial.printf("  tweak_bias_noamp =    %7.3f;  // Tweak calibration for non-amplified current\n", this->tweak_bias_noamp);
