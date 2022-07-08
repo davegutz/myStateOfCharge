@@ -37,7 +37,12 @@ Tweak::Tweak(const String name, const double max_change, const double max_tweak,
   float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_sclr, const double coul_eff)
   : name_(name), max_change_(max_change), max_tweak_(max_tweak), sat_(false), time_sat_past_(millis()),
     time_to_wait_(time_to_wait), rp_delta_q_cinf_(rp_delta_q_cinf), rp_delta_q_dinf_(rp_delta_q_dinf),
-    rp_tweak_sclr_(rp_tweak_sclr), delta_hrs_(0), coul_eff_(coul_eff) {}
+    rp_tweak_sclr_(rp_tweak_sclr), delta_hrs_(0), coul_eff_(coul_eff)
+    {
+      // Always reinit these on boot because they get saved on previous run
+      *rp_delta_q_cinf_ = -RATED_BATT_CAP*3600.;
+      *rp_delta_q_dinf_ = RATED_BATT_CAP*3600.;
+    }
 Tweak::~Tweak() {}
 // operators
 // functions
