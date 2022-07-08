@@ -628,7 +628,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
 }
 
 // Injection model, calculate inj bias based on time since boot
-uint32_t BatteryModel::calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq)
+float BatteryModel::calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq)
 {
     // Return if time 0
     if ( now== 0UL )
@@ -647,7 +647,6 @@ uint32_t BatteryModel::calc_inj(const unsigned long now, const uint8_t type, con
     double bias = 0.;
     double cos_bias = 0.;
     // Calculate injection amounts from user inputs (talk).
-    // One-sided because PWM voltage >0.  rp.inj_bias applied elsewhere
     switch ( type )
     {
         case ( 0 ):   // Nothing
@@ -794,8 +793,8 @@ Hysteresis::Hysteresis(const double cap, Chemistry chem)
     disabled_ = rp.hys_scale < 1e-5;
 
     // Capacitance logic
-    if ( disabled_ ) cap_ = cap;
-    else cap_ = cap / rp.hys_scale;    // maintain time constant = R*C
+    if ( disabled_ ) cap_ = cap_init_;
+    else cap_ = cap_init_ / rp.hys_scale;    // maintain time constant = R*C
 }
 
 // Apply scale
@@ -817,15 +816,20 @@ double Hysteresis::calculate(const double ib, const double soc)
     ib_ = ib;
     soc_ = soc;
 
+    // Disabled logic
+    disabled_ = rp.hys_scale < 1e-5;
+
     // Calculate
     if ( disabled_ )
     {
+        cap_ = cap_init_;
         res_ = 0.;
         ioc_ = ib;
         dv_dot_ = 0.;
     }
     else
     {
+        cap_ = cap_init_ / rp.hys_scale;    // maintain time constant = R*C
         res_ = look_hys(dv_hys_, soc_);
         ioc_ = dv_hys_ / res_;
         dv_dot_ = (ib_ - dv_hys_/res_) / cap_;  // Capacitor ode

@@ -211,13 +211,13 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   // Current bias.  Feeds into signal conversion
   if ( rp.mod_ib() )
   {
-    cp.ibatt_bias_noamp = rp.ibatt_bias_all + rp.inj_bias + rp.tweak_bias_noamp;
-    cp.ibatt_bias_amp = rp.ibatt_bias_all + rp.inj_bias + rp.tweak_bias_amp;
+    cp.ibatt_bias_noamp = rp.ibatt_bias_all + rp.inj_bias + rp.tweak_sclr_noamp;
+    cp.ibatt_bias_amp = rp.ibatt_bias_all + rp.inj_bias + rp.tweak_sclr_amp;
   }
   else
   {
-    cp.ibatt_bias_noamp = rp.ibatt_bias_noamp + rp.ibatt_bias_all + rp.inj_bias + rp.tweak_bias_noamp;
-    cp.ibatt_bias_amp = rp.ibatt_bias_amp + rp.ibatt_bias_all + rp.inj_bias + rp.tweak_bias_amp;
+    cp.ibatt_bias_noamp = rp.ibatt_bias_noamp + rp.ibatt_bias_all + rp.inj_bias + rp.tweak_sclr_noamp;
+    cp.ibatt_bias_amp = rp.ibatt_bias_amp + rp.ibatt_bias_all + rp.inj_bias + rp.tweak_sclr_amp;
   }
 
   // Read Sensors
@@ -252,7 +252,7 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
     Sen->Ibatt_model_in = Sen->Ibatt_hdwe;
 
   // Print results
-  if ( rp.debug==14 ) Serial.printf("reset_free,select,inj_bias,vs_int_a,Vshunt_a,Ibatt_hdwe_a,vs_int_na,Vshunt_na,Ibatt_hdwe_na,Ibatt_hdwe,T=,    %d,%d,%ld,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,\n",
+  if ( rp.debug==14 ) Serial.printf("reset_free,select,inj_bias,vs_int_a,Vshunt_a,Ibatt_hdwe_a,vs_int_na,Vshunt_na,Ibatt_hdwe_na,Ibatt_hdwe,T=,    %d,%d,%7.3f,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,\n",
     reset_free, rp.ibatt_sel_noamp, rp.inj_bias,
     Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), Sen->ShuntAmp->ishunt_cal(),
     Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->ishunt_cal(),

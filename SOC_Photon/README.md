@@ -377,6 +377,8 @@ Throughput test
     .
 37. Android running of data collection.   The very best I could accompish is to run BLESerial App and save to file. You can use BLE transmit to change anything, echoed still on USB so flying a little blind.   Best for changing 'v0' to 'v4' and vice-versa.  The script 'DataOverModel.py' WILL RUN ON ANDROID using PyDroid and a bunch of stupid setup work.  But live plots I couldn't get to work because USB support is buggy.  The author of best tools usbserial4 said using Python 2 was best - forget that!  Easiest to collect data using BLESerial and move to PC for analysis.  Could use laptop PC to collect either BLE or USB and that should work really well.   Plug laptop into truck cab inverter.
 38. Capitalized parameters, violation of coding standards, are "Bank" values, e.g. for '2P3S' parallelSerial banks of batteries while lower case are per 12V battery unit.
+39. Signal injection examples:
+ Ca0.5;Xts;Xa100;Xf0.1;XW5;XC5;XR;v4;
 
 ## Accuracy
 

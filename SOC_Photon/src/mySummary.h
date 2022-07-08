@@ -41,12 +41,12 @@ struct Sum_st
   int16_t soc_ekf;  // Battery state of charge, ekf, %
   int16_t Voc_dyn;  // Battery modeled charge voltage at soc, V
   int16_t Voc_ekf;  // Ekf estimated charge voltage, V
-  int16_t tweak_bias_amp;  // Accumulated amplified current bias, A
-  int16_t tweak_bias_noa;  // Accumulated non-amplified current bias, A
+  int16_t tweak_sclr_amp;  // Accumulated amplified current bias, A
+  int16_t tweak_sclr_noa;  // Accumulated non-amplified current bias, A
   Sum_st(void){}
   void assign(const time32_t now, const double Tbatt, const double Vbatt, const double Ibatt,
     const double soc_ekf, const double soc, const double Voc_dyn, const double Voc_ekf,
-    const double tweak_bias_amp, const double tweak_bias_noa)
+    const double tweak_sclr_amp, const double tweak_sclr_noa)
   {
     char buffer[32];
     this->t = now;
@@ -57,8 +57,8 @@ struct Sum_st
     this->soc_ekf = int16_t(soc_ekf*16000.);
     this->Voc_dyn = int16_t(Voc_dyn*1200.);
     this->Voc_ekf = int16_t(Voc_ekf*1200.);
-    this->tweak_bias_amp = int16_t(tweak_bias_amp*1200.);
-    this->tweak_bias_noa = int16_t(tweak_bias_noa*1200.);
+    this->tweak_sclr_amp = int16_t(tweak_sclr_amp*1200.);
+    this->tweak_sclr_noa = int16_t(tweak_sclr_noa*1200.);
     time_long_2_str(now, buffer);
   }
   void print(void)
@@ -71,7 +71,7 @@ struct Sum_st
     Serial.printf("%s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %7.3f,",
           buffer, this->t, double(this->Tb)/600., double(this->Tb)/1200., double(this->Ib)/600., double(this->soc)/16000., double(this->soc_ekf)/16000.,
           double(this->Voc_dyn)/1200., double(this->Voc_ekf)/1200.,
-          double(this->tweak_bias_amp)/1200.,  double(this->tweak_bias_noa)/1200.);
+          double(this->tweak_sclr_amp)/1200.,  double(this->tweak_sclr_noa)/1200.);
   }
   void nominal()
   {
@@ -83,8 +83,8 @@ struct Sum_st
     this->soc_ekf = 0.;
     this->Voc_dyn = 0.;
     this->Voc_ekf = 0.;
-    this->tweak_bias_amp = 0.;
-    this->tweak_bias_noa = 0.;
+    this->tweak_sclr_amp = 0.;
+    this->tweak_sclr_noa = 0.;
   }
 };
 

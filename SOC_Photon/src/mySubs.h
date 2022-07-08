@@ -147,14 +147,14 @@ struct Sensors
     this->T = T;
     this->T_filt = T;
     this->T_temp = T_temp;
-    this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_cinf_amp, &rp.delta_q_dinf_amp, &rp.tweak_bias_amp, &cp.ibatt_bias_amp,
+    this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_cinf_amp, &rp.delta_q_dinf_amp, &rp.tweak_sclr_amp, &cp.ibatt_bias_amp,
       shunt_amp_v2a_s);
     if ( rp.debug>102 )
     {
       Serial.printf("New Shunt('Amp'):\n");
       this->ShuntAmp->pretty_print();
     }
-    this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_cinf_noamp, &rp.delta_q_dinf_noamp, &rp.tweak_bias_noamp,
+    this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_cinf_noamp, &rp.delta_q_dinf_noamp, &rp.tweak_sclr_noamp,
       &cp.ibatt_bias_noamp, shunt_noamp_v2a_s);
     if ( rp.debug>102 )
     {

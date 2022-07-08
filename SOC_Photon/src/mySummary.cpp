@@ -40,8 +40,8 @@ void print_all_summary(struct Sum_st *sum, const int isum, const int nsum)
     Serial.printf("\n");
     Serial1.printf("\n");
   }
-  Serial.printf("i,  date,                time,    Tbatt, Vbatt, Ibatt, soc, soc_ekf, Voc_dyn, Voc, tweak_bias_amp, tweak_bias_noa,\n");
-  Serial1.printf("i,  date,                time,    Tbatt, Vbatt, Ibatt, soc, soc_ekf, Voc_dyn, Voc, tweak_bias_amp, tweak_bias_noa,\n");
+  Serial.printf("i,  date,                time,    Tbatt, Vbatt, Ibatt, soc, soc_ekf, Voc_dyn, Voc, tweak_sclr_amp, tweak_sclr_noa,\n");
+  Serial1.printf("i,  date,                time,    Tbatt, Vbatt, Ibatt, soc, soc_ekf, Voc_dyn, Voc, tweak_sclr_amp, tweak_sclr_noa,\n");
 }
 
 // reset helper

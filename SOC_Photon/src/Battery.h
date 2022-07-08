@@ -293,7 +293,7 @@ public:
   // functions
   virtual void assign_rand(void);
   double calculate(Sensors *Sen, const boolean dc_dc_on);
-  uint32_t calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq);
+  float calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq);
   double count_coulombs(Sensors *Sen, const boolean reset, const double t_last, BatteryMonitor *Mon);
   void load();
   void pretty_print(void);

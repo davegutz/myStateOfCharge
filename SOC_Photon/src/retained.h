@@ -59,8 +59,8 @@ struct RetainedPars
   float delta_q_dinf_amp = RATED_BATT_CAP*3600.;    // Discharge delta_q since last reset.  Simple integration of amplified current
   float delta_q_dinf_noamp = RATED_BATT_CAP*3600.;  // Discharge delta_q since last reset.  Simple integration of non-amplified current
   float hys_scale = 1.;         // Hysteresis scalar
-  float tweak_bias_amp = 1.;    // Tweak calibration for amplified current sensor
-  float tweak_bias_noamp = 1.;  // Tweak calibration for non-amplified current sensor
+  float tweak_sclr_amp = 1.;    // Tweak calibration for amplified current sensor
+  float tweak_sclr_noamp = 1.;  // Tweak calibration for non-amplified current sensor
   float nP = NP;                // Number of parallel batteries in bank, e.g. '2P1S'
   float nS = NS;                // Number of series batteries in bank, e.g. '2P1S'
   uint8_t mon_mod = MOD_CODE;   // Monitor battery chemistry type
@@ -100,8 +100,8 @@ struct RetainedPars
     this->delta_q_dinf_amp = RATED_BATT_CAP*3600.;
     this->delta_q_dinf_noamp = RATED_BATT_CAP*3600.;
     this->hys_scale = 1.;
-    this->tweak_bias_amp = 1.;
-    this->tweak_bias_noamp = 1.;
+    this->tweak_sclr_amp = 1.;
+    this->tweak_sclr_noamp = 1.;
     this->nP = NP;
     this->nS = NS;
     this->mon_mod = 0;
@@ -131,8 +131,8 @@ struct RetainedPars
     this->delta_q_dinf_amp = RATED_BATT_CAP*3600.;
     this->delta_q_dinf_noamp = RATED_BATT_CAP*3600.;
     this->hys_scale = 1.;
-    this->tweak_bias_amp = 1.;
-    this->tweak_bias_noamp = 1.;
+    this->tweak_sclr_amp = 1.;
+    this->tweak_sclr_noamp = 1.;
     this->nP = NP;
     this->nS = NS;
     this->mon_mod = 0;
@@ -162,18 +162,18 @@ struct RetainedPars
     Serial.printf("  amp =                 %7.3f;  // Injected amplitude, A pk (0-18.3)\n", this->amp);
     Serial.printf("  freq =                %7.3f;  // Injected frequency, r/s (0-2*pi)\n", this->freq);
     Serial.printf("  type =                      %d;  //  Injected waveform type.   0=sine, 1=square, 2=triangle\n", this->type);
-    Serial.printf("  inj_bias =       %7.3f;  // Injected bias, A\n", this->inj_bias);
+    Serial.printf("  inj_bias =            %7.3f;  // Injected bias, A\n", this->inj_bias);
     Serial.printf("  tbatt_bias =          %7.3f;  // Sensed temp bias, deg C\n", this->tbatt_bias);
     Serial.printf("  s_cap_model =         %7.3f;  // Scalar on battery model size\n", this->s_cap_model);
     Serial.printf("  cutback_gain_scalar = %7.3f;  // Scalar on battery model saturation cutback function\n", this->cutback_gain_scalar);
     Serial.printf("  isum =                      %d;  // Summary location ptr.   Begins at -1\n", this->isum);
-    Serial.printf("  delta_q_cinf_amp =  %10.1f;  // Coul\n", this->delta_q_cinf_amp);
-    Serial.printf("  delta_q_dinf_amp =  %10.1f;  // Coul\n", this->delta_q_dinf_amp);
-    Serial.printf("  delta_q_cinf_noamp =%10.1f;  // Coul\n", this->delta_q_cinf_noamp);
-    Serial.printf("  delta_q_dinf_noamp =%10.1f;  // Coul\n", this->delta_q_dinf_noamp);
+    Serial.printf("  delta_q_cinf_amp = %10.1f;  // Coul\n", this->delta_q_cinf_amp);
+    Serial.printf("  delta_q_dinf_amp = %10.1f;  // Coul\n", this->delta_q_dinf_amp);
+    Serial.printf("  delta_q_cinf_noamp=%10.1f;  // Coul\n", this->delta_q_cinf_noamp);
+    Serial.printf("  delta_q_dinf_noamp=%10.1f;  // Coul\n", this->delta_q_dinf_noamp);
     Serial.printf("  hys_scale =           %7.3f;  //  Hysteresis scalar\n", this->hys_scale);
-    Serial.printf("  tweak_bias_amp =      %7.3f;  // Tweak calibration for amplified current\n", this->tweak_bias_amp);
-    Serial.printf("  tweak_bias_noamp =    %7.3f;  // Tweak calibration for non-amplified current\n", this->tweak_bias_noamp);
+    Serial.printf("  tweak_sclr_amp =      %7.3f;  // Tweak calibration for amplified current\n", this->tweak_sclr_amp);
+    Serial.printf("  tweak_sclr_noamp =    %7.3f;  // Tweak calibration for non-amplified current\n", this->tweak_sclr_noamp);
     Serial.printf("  nP =                    %5.2f;  // Number of parallel batteries in bank, e.g. '2P1S'\n", this->nP);
     Serial.printf("  nS =                    %5.2f;  // Number of series batteries in bank, e.g. '2P1S'\n", this->nS);
     Serial.printf("  mon_mod =                   %d;  //  Monitor battery model for electrical chars.  0=Battleborn, 1=LION\n", this->mon_mod);
