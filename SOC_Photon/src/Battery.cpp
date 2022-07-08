@@ -288,7 +288,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
 
     // EKF 1x1
     double charge_curr = ib_;
-    if ( charge_curr>0. && !rp.tweak_test() ) charge_curr *= coul_eff_;
+    if ( charge_curr>0. && !rp.tweak_test() ) charge_curr *= coul_eff_ * Sen->sclr_coul_eff;
     charge_curr -= chem_.dqdt * q_capacity_ * T_rate;
     predict_ekf(charge_curr);       // u = ib
     update_ekf(voc_stat_, 0., 1.);  // z = voc_stat, voc_filtered = hx
@@ -702,7 +702,7 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
 {
     float charge_curr = Sen->Ibatt;
     double d_delta_q = charge_curr * Sen->T;
-    if ( charge_curr>0. ) d_delta_q *= coul_eff_;
+    if ( charge_curr>0. ) d_delta_q *= coul_eff_ * Sen->sclr_coul_eff;
 
     // Rate limit temperature
     double temp_lim = max(min(Sen->Tbatt, t_last + T_RLIM*Sen->T), t_last - T_RLIM*Sen->T);

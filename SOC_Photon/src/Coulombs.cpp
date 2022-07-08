@@ -241,6 +241,7 @@ void Coulombs::pretty_print(void)
   Serial.printf("  soc_min_ =     %8.4f;  // Estimated soc where battery BMS will shutoff current, fraction\n", soc_min_);
   Serial.printf("  mod_ =        %s;  // Model type of battery chemistry e.g. Battleborn or LION\n", chem_.decode(mod_code()).c_str());
   Serial.printf("  mod_code_ =           %d;  // Chemistry code integer\n", mod_code());
+  Serial.printf("  coul_eff_ =    %9.5f;  // Coulombic Efficiency\n", coul_eff_);
   Serial.printf("Coulombs::");
   chem_.pretty_print();
 }
@@ -304,6 +305,7 @@ Inputs:
   sat             Indication that battery is saturated, T=saturated
   tlast           Past value of battery temperature used for rate limit memory, deg C
   coul_eff_       Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
+  sclr_coul_eff   Scalar on coul_eff determined by tweak test
 Outputs:
   q_capacity_     Saturation charge at temperature, C
   *rp_delta_q_    Charge change since saturated, C
@@ -314,10 +316,10 @@ Outputs:
   q_min_          Estimated charge at low voltage shutdown, C\
 */
 double Coulombs::count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
-  const boolean sat, const double t_last)
+  const boolean sat, const double t_last, const double sclr_coul_eff)
 {
     double d_delta_q = charge_curr * dt;
-    if ( charge_curr>0. ) d_delta_q *= coul_eff_;
+    if ( charge_curr>0. ) d_delta_q *= coul_eff_ * sclr_coul_eff;
     sat_ = sat;
 
     // Rate limit temperature

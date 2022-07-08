@@ -31,7 +31,7 @@ class Tweak
 public:
   Tweak();
   Tweak(const String name, const double max_change, const double max_tweak, const double time_to_wait,
-    float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_bias, double coul_eff);
+    float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_sclr, double coul_eff);
   ~Tweak();
   // operators
   // functions
@@ -53,8 +53,6 @@ public:
   void time_sat_past(const double new_time) { time_sat_past_ = millis()-(unsigned long int)(new_time*3600000.); };
   double time_to_wait() { return( time_to_wait_); };
   void time_to_wait(const double new_time) { time_to_wait_ = new_time; };
-  double tweak_sclr() { return( *rp_tweak_sclr_ ); };
-  void tweak_sclr(const double sclr) { *rp_tweak_sclr_ = sclr; };
   void save_new_sat(unsigned long int now);
 protected:
   String name_;

@@ -41,8 +41,8 @@ struct Sum_st
   int16_t soc_ekf;  // Battery state of charge, ekf, %
   int16_t Voc_dyn;  // Battery modeled charge voltage at soc, V
   int16_t Voc_ekf;  // Ekf estimated charge voltage, V
-  int16_t tweak_sclr_amp;  // Accumulated amplified current bias, A
-  int16_t tweak_sclr_noa;  // Accumulated non-amplified current bias, A
+  int16_t tweak_sclr_amp;  // Amplified Coulombic Efficiency scalar
+  int16_t tweak_sclr_noa;  // Non-Amplified Coulombic Efficiency scalar
   Sum_st(void){}
   void assign(const time32_t now, const double Tbatt, const double Vbatt, const double Ibatt,
     const double soc_ekf, const double soc, const double Voc_dyn, const double Voc_ekf,
@@ -83,8 +83,8 @@ struct Sum_st
     this->soc_ekf = 0.;
     this->Voc_dyn = 0.;
     this->Voc_ekf = 0.;
-    this->tweak_sclr_amp = 0.;
-    this->tweak_sclr_noa = 0.;
+    this->tweak_sclr_amp = 1.;
+    this->tweak_sclr_noa = 1.;
   }
 };
 

@@ -34,10 +34,10 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 Tweak::Tweak()
   : name_("None"), max_change_(0), sat_(false),time_sat_past_(0UL), time_to_wait_(0), delta_hrs_(0) {}
 Tweak::Tweak(const String name, const double max_change, const double max_tweak, const double time_to_wait,
-  float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_bias, const double coul_eff)
+  float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_sclr, const double coul_eff)
   : name_(name), max_change_(max_change), max_tweak_(max_tweak), sat_(false), time_sat_past_(millis()),
     time_to_wait_(time_to_wait), rp_delta_q_cinf_(rp_delta_q_cinf), rp_delta_q_dinf_(rp_delta_q_dinf),
-    rp_tweak_sclr_(rp_tweak_bias), delta_hrs_(0), coul_eff_(coul_eff) {}
+    rp_tweak_sclr_(rp_tweak_sclr), delta_hrs_(0), coul_eff_(coul_eff) {}
 Tweak::~Tweak() {}
 // operators
 // functions
@@ -88,7 +88,7 @@ void Tweak::pretty_print(void)
     Serial.printf("  delta_hrs_ =           %10.6f; // Time since last allowed saturation see 'N/Mz', hr\n", double(millis()-time_sat_past_)/3600000.);
     Serial.printf("  time_to_wait =         %10.6f; // Time to wait before allowing saturation see 'N/Mw', hr\n", time_to_wait_);
     Serial.printf("  tweak_sclr =              %7.3f; // Scalar on Coulombic Efficiency 'N/Mk'\n", *rp_tweak_sclr_);
-
+    Serial.printf("  coul_eff_ =    %9.5f;  // Coulombic Efficiency\n", coul_eff_);
 }
 
 // reset:  Reset on call.   Reset all indicators and states to boot status.
@@ -127,7 +127,7 @@ boolean Tweak::new_desat(const double curr_in, const double T, const boolean is_
   double d_delta_q_inf = curr_in * T;
   if ( curr_in>0. )
   {
-    d_delta_q_inf *= coul_eff_;
+    d_delta_q_inf *= coul_eff_ * (*rp_tweak_sclr_);
     *rp_delta_q_cinf_ += d_delta_q_inf;
   }
   else

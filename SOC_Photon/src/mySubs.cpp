@@ -39,9 +39,9 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // constructors
 Shunt::Shunt()
 : Tweak(), Adafruit_ADS1015(), name_("None"), port_(0x00), bare_(false){}
-Shunt::Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_bias,
+Shunt::Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_sclr,
   float *cp_ibatt_bias, const float v2a_s)
-: Tweak(name, TWEAK_MAX_CHANGE, TWEAK_MAX, TWEAK_WAIT, rp_delta_q_cinf, rp_delta_q_dinf, rp_tweak_bias, COULOMBIC_EFF),
+: Tweak(name, TWEAK_MAX_CHANGE, TWEAK_MAX, TWEAK_WAIT, rp_delta_q_cinf, rp_delta_q_dinf, rp_tweak_sclr, COULOMBIC_EFF),
   Adafruit_ADS1015(),
   name_(name), port_(port), bare_(false), cp_ibatt_bias_(cp_ibatt_bias), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0)
@@ -71,6 +71,7 @@ void Shunt::pretty_print()
   Serial.printf("  v2a_s_ =            %7.2f; // Selected shunt conversion gain, A/V\n", v2a_s_);
   Serial.printf("  vshunt_int_ =           %d; // Sensed shunt voltage, count\n", vshunt_int_);
   Serial.printf("  ishunt_cal_ =       %7.3f; // Sensed, calibrated ADC, A\n", ishunt_cal_);
+  Serial.printf("  sclr_coul_eff =     %7.3f; // Sensed, calibrated ADC, A\n", sclr_coul_eff_);
   Serial.printf("Shunt(%s)::", name_.c_str()); Tweak::pretty_print();
   Serial.printf("Shunt(%s)::", name_.c_str()); Adafruit_ADS1015::pretty_print(name_);
 }
@@ -211,13 +212,13 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   // Current bias.  Feeds into signal conversion
   if ( rp.mod_ib() )
   {
-    cp.ibatt_bias_noamp = rp.ibatt_bias_all + rp.inj_bias + rp.tweak_sclr_noamp;
-    cp.ibatt_bias_amp = rp.ibatt_bias_all + rp.inj_bias + rp.tweak_sclr_amp;
+    cp.ibatt_bias_noamp = rp.ibatt_bias_all + rp.inj_bias;
+    cp.ibatt_bias_amp = rp.ibatt_bias_all + rp.inj_bias;
   }
   else
   {
-    cp.ibatt_bias_noamp = rp.ibatt_bias_noamp + rp.ibatt_bias_all + rp.inj_bias + rp.tweak_sclr_noamp;
-    cp.ibatt_bias_amp = rp.ibatt_bias_amp + rp.ibatt_bias_all + rp.inj_bias + rp.tweak_sclr_amp;
+    cp.ibatt_bias_noamp = rp.ibatt_bias_noamp + rp.ibatt_bias_all + rp.inj_bias;
+    cp.ibatt_bias_amp = rp.ibatt_bias_amp + rp.ibatt_bias_all + rp.inj_bias;
   }
 
   // Read Sensors
@@ -233,18 +234,21 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
     Sen->Vshunt = Sen->ShuntAmp->vshunt();
     Sen->Ibatt_hdwe = Sen->ShuntAmp->ishunt_cal();
     model_ibatt_bias = Sen->ShuntAmp->cp_ibatt_bias();
+    Sen->sclr_coul_eff = rp.tweak_sclr_amp;
   }
   else if ( !Sen->ShuntNoAmp->bare() )
   {
     Sen->Vshunt = Sen->ShuntNoAmp->vshunt();
     Sen->Ibatt_hdwe = Sen->ShuntNoAmp->ishunt_cal();
     model_ibatt_bias = Sen->ShuntNoAmp->cp_ibatt_bias();
+    Sen->sclr_coul_eff = rp.tweak_sclr_noamp;
   }
   else
   {
     Sen->Vshunt = 0.;
     Sen->Ibatt_hdwe = 0.;
     model_ibatt_bias = 0.;
+    Sen->sclr_coul_eff = 1.;
   }
   if ( rp.modeling )
     Sen->Ibatt_model_in = model_ibatt_bias;
@@ -252,11 +256,11 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
     Sen->Ibatt_model_in = Sen->Ibatt_hdwe;
 
   // Print results
-  if ( rp.debug==14 ) Serial.printf("reset_free,select,inj_bias,vs_int_a,Vshunt_a,Ibatt_hdwe_a,vs_int_na,Vshunt_na,Ibatt_hdwe_na,Ibatt_hdwe,T=,    %d,%d,%7.3f,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,\n",
+  if ( rp.debug==14 ) Serial.printf("reset_free,select,inj_bias,vs_int_a,Vshunt_a,Ibatt_hdwe_a,vs_int_na,Vshunt_na,Ibatt_hdwe_na,Ibatt_hdwe,T,sclr_coul_eff=,    %d,%d,%7.3f,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,  %7.3f,\n",
     reset_free, rp.ibatt_sel_noamp, rp.inj_bias,
     Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), Sen->ShuntAmp->ishunt_cal(),
     Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->ishunt_cal(),
-    Sen->Ibatt_hdwe, T);
+    Sen->Ibatt_hdwe, T, Sen->sclr_coul_eff);
 
   // Vbatt
   if ( rp.debug>102 ) Serial.printf("begin analogRead at %ld...", millis());
@@ -373,8 +377,9 @@ void  monitor(const int reset, const boolean reset_temp, const unsigned long now
   boolean sat = Mon->is_sat();
   Sen->saturated = Is_sat_delay->calculate(sat, T_SAT, T_DESAT, min(Sen->T, T_SAT/2.), reset);
 
-  // Memory store
-  Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ibatt, Sen->saturated, rp.t_last);
+  // Memory store // TODO:  simplify arg list here.  Unpack Sen inside count_coulombs
+  Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ibatt, Sen->saturated, rp.t_last,
+    Sen->sclr_coul_eff);
 
   // Charge time for display
   Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ibatt, Mon->soc());

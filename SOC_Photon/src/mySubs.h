@@ -55,7 +55,7 @@ class Shunt: public Tweak, Adafruit_ADS1015
 {
 public:
   Shunt();
-  Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_bias,
+  Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_sclr,
     float *cp_ibatt_bias, const float v2a_s);
   ~Shunt();
   // operators
@@ -65,6 +65,8 @@ public:
   float ishunt_cal() { return ( ishunt_cal_ ); };
   void load();
   void pretty_print();
+  double tweak_sclr() { return ( *rp_tweak_sclr_ ); };
+  void tweak_sclr(const double sclr) { *rp_tweak_sclr_ = sclr; };
   float v2a_s() { return ( v2a_s_ ); };
   float vshunt() { return ( vshunt_ ); };
   int16_t vshunt_int() { return ( vshunt_int_ ); };
@@ -74,13 +76,14 @@ protected:
   String name_;         // For print statements, multiple instances
   uint8_t port_;        // Octal I2C port used by Acafruit_ADS1015
   boolean bare_;        // If ADS to be ignored
-  float *cp_ibatt_bias_; // Global bias, A
-  float v2a_s_;        // Selected shunt conversion gain, A/V
+  float *cp_ibatt_bias_;// Global bias, A
+  float v2a_s_;         // Selected shunt conversion gain, A/V
   int16_t vshunt_int_;  // Sensed shunt voltage, count
   int16_t vshunt_int_0_;// Interim conversion, count
   int16_t vshunt_int_1_;// Interim conversion, count
-  float vshunt_;       // Sensed shunt voltage, V
-  float ishunt_cal_;   // Sensed, calibrated ADC, A
+  float vshunt_;        // Sensed shunt voltage, V
+  float ishunt_cal_;    // Sensed, calibrated ADC, A
+  double sclr_coul_eff_;// Scalar on Coulombic Efficiency
 };
 
 
@@ -141,6 +144,7 @@ struct Sensors
   Sync *ReadSensors;              // Handle to debug read time
   double control_time;            // Decimal time, seconds since 1/1/2021
   boolean display;                // Use display
+  double sclr_coul_eff;           // Scalar on Coulombic Efficiency
   Sensors(void) {}
   Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, Sync *ReadSensors)
   {
@@ -173,6 +177,7 @@ struct Sensors
     this->PublishSerial = PublishSerial;
     this->ReadSensors = ReadSensors;
     this->display = true;
+    this->sclr_coul_eff = 1.;
   }
 };
 
