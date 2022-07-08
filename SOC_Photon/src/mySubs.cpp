@@ -41,8 +41,7 @@ Shunt::Shunt()
 : Tweak(), Adafruit_ADS1015(), name_("None"), port_(0x00), bare_(false){}
 Shunt::Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_bias,
   float *cp_ibatt_bias, const float v2a_s)
-: Tweak(name, TWEAK_GAIN, TWEAK_MAX_CHANGE, TWEAK_MAX, TWEAK_WAIT, rp_delta_q_cinf, rp_delta_q_dinf, rp_tweak_bias,
-  COULOMBIC_EFF),
+: Tweak(name, TWEAK_MAX_CHANGE, TWEAK_MAX, TWEAK_WAIT, rp_delta_q_cinf, rp_delta_q_dinf, rp_tweak_bias, COULOMBIC_EFF),
   Adafruit_ADS1015(),
   name_(name), port_(port), bare_(false), cp_ibatt_bias_(cp_ibatt_bias), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0)
@@ -209,16 +208,16 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   past = now;
   Sen->now = now;
 
-  // Current bias.  Feeds into signal conversion, not to duty injection
+  // Current bias.  Feeds into signal conversion
   if ( rp.mod_ib() )
   {
-    cp.ibatt_bias_noamp = rp.ibatt_bias_all + rp.inj_soft_bias + rp.tweak_bias_noamp;
-    cp.ibatt_bias_amp = rp.ibatt_bias_all + rp.inj_soft_bias + rp.tweak_bias_amp;
+    cp.ibatt_bias_noamp = rp.ibatt_bias_all + rp.inj_bias + rp.tweak_bias_noamp;
+    cp.ibatt_bias_amp = rp.ibatt_bias_all + rp.inj_bias + rp.tweak_bias_amp;
   }
   else
   {
-    cp.ibatt_bias_noamp = rp.ibatt_bias_noamp + rp.ibatt_bias_all + rp.inj_soft_bias + rp.tweak_bias_noamp;
-    cp.ibatt_bias_amp = rp.ibatt_bias_amp + rp.ibatt_bias_all + rp.inj_soft_bias + rp.tweak_bias_amp;
+    cp.ibatt_bias_noamp = rp.ibatt_bias_noamp + rp.ibatt_bias_all + rp.inj_bias + rp.tweak_bias_noamp;
+    cp.ibatt_bias_amp = rp.ibatt_bias_amp + rp.ibatt_bias_all + rp.inj_bias + rp.tweak_bias_amp;
   }
 
   // Read Sensors
@@ -253,8 +252,8 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
     Sen->Ibatt_model_in = Sen->Ibatt_hdwe;
 
   // Print results
-  if ( rp.debug==14 ) Serial.printf("reset_free,select,duty,vs_int_a,Vshunt_a,Ibatt_hdwe_a,vs_int_na,Vshunt_na,Ibatt_hdwe_na,Ibatt_hdwe,T=,    %d,%d,%ld,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,\n",
-    reset_free, rp.ibatt_sel_noamp, rp.duty,
+  if ( rp.debug==14 ) Serial.printf("reset_free,select,inj_bias,vs_int_a,Vshunt_a,Ibatt_hdwe_a,vs_int_na,Vshunt_na,Ibatt_hdwe_na,Ibatt_hdwe,T=,    %d,%d,%ld,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,\n",
+    reset_free, rp.ibatt_sel_noamp, rp.inj_bias,
     Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), Sen->ShuntAmp->ishunt_cal(),
     Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->ishunt_cal(),
     Sen->Ibatt_hdwe, T);
@@ -437,16 +436,9 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   if ( rp.debug==-5 ) debug_m5();  // Arduino plot
 }
 
-// Write to the D/A converter
-uint32_t pwm_write(uint32_t duty, Pins *myPins)
-{
-    analogWrite(myPins->pwm_pin, duty, pwm_frequency);
-    return duty;
-}
-
 // Read sensors, model signals, select between them
 // Inputs:  rp.config, rp.sim_mod
-// Outputs: Sen->Ibatt, Sen->Vbatt, Sen->Tbatt_filt, rp.duty
+// Outputs: Sen->Ibatt, Sen->Vbatt, Sen->Tbatt_filt, rp.inj_bias
 void sense_synth_select(const int reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen)
 {
@@ -473,7 +465,7 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
         Sen->Ibatt_model  Modeled battery bank current, A
         Sen->Vbatt_model  Modeled battery bank voltage, V
         Sen->Vbatt        = Sen->Vbatt_model override
-        rp.duty           Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
+        rp.inj_bias       Used to inject fake shunt current, A
   */
 
   // Sim initialize as needed from memory
@@ -486,7 +478,7 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   // Sim calculation
   //  Inputs:  Sen->Tbatt_filt(past), Sen->Ibatt_model_in
   //  States: Sim->soc(past)
-  //  Outputs:  Sim->temp_c(), Sim->Ib(), Sim->Vb(), rp.duty, Sim.model_saturated
+  //  Outputs:  Sim->temp_c(), Sim->Ib(), Sim->Vb(), rp.inj_bias, Sim.model_saturated
   Sen->Vbatt_model = Sen->Sim->calculate(Sen, cp.dc_dc_on);
   Sen->Ibatt_model = Sen->Sim->Ib();
   Sen->Tbatt_model = Sen->Tbatt_model_filt = Sen->Sim->temp_c();
@@ -542,7 +534,7 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
     self_talk("v0", Mon, Sen);  // Turn off echo
   }
   // Perform the calculation of injection signals 
-  rp.duty = Sen->Sim->calc_inj_duty(Sen->elapsed_inj, rp.type, rp.amp, rp.freq);
+  rp.inj_bias = Sen->Sim->calc_inj(Sen->elapsed_inj, rp.type, rp.amp, rp.freq);
 
 }
 

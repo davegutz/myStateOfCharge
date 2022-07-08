@@ -44,24 +44,23 @@ struct RetainedPars
   float ibatt_bias_all = CURR_BIAS_ALL;     // Bias on all shunt sensors, A
   boolean ibatt_sel_noamp = false;          // Use non-amplified sensor
   float vbatt_bias = VOLT_BIAS; // Calibrate Vbatt, V
-  uint8_t modeling = 0;         // Driving saturation calculation with model.  Bits specify which signals use model.
-  uint32_t duty = 0;            // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
+  uint8_t modeling = 0;         // Driving saturation calculation with model.  Bits specify which signals use model
   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
   float freq = 0.;              // Injected frequency, Hz (0-2)
   uint8_t type = 0;             // Injected waveform type.   0=sine, 1=square, 2=triangle
-  float inj_soft_bias = 0.;     // Constant bias, A
+  float inj_bias = 0.;     // Constant bias, A
   float tbatt_bias = TEMP_BIAS; // Bias on Tbatt sensor, deg C
   float s_cap_model = 1.;       // Scalar on battery model size
   float cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
   int isum = -1;                // Summary location.   Begins at -1 because first action is to increment isum
-  float delta_q_cinf_amp = 0.;  // Charge delta_q since last reset.  Simple integration of amplified current
-  float delta_q_cinf_noamp = 0.;// Charge delta_q since last reset.  Simple integration of non-amplified current
-  float delta_q_dinf_amp = 0.;  // Discharge delta_q since last reset.  Simple integration of amplified current
-  float delta_q_dinf_noamp = 0.;// Discharge delta_q since last reset.  Simple integration of non-amplified current
+  float delta_q_cinf_amp = -RATED_BATT_CAP*3600.;   // Charge delta_q since last reset.  Simple integration of amplified current
+  float delta_q_cinf_noamp = -RATED_BATT_CAP*3600.; // Charge delta_q since last reset.  Simple integration of non-amplified current
+  float delta_q_dinf_amp = RATED_BATT_CAP*3600.;    // Discharge delta_q since last reset.  Simple integration of amplified current
+  float delta_q_dinf_noamp = RATED_BATT_CAP*3600.;  // Discharge delta_q since last reset.  Simple integration of non-amplified current
   float hys_scale = 1.;         // Hysteresis scalar
-  float tweak_bias_amp = 0.;    // Tweak calibration for amplified current sensor
-  float tweak_bias_noamp = 0.;  // Tweak calibration for non-amplified current sensor
+  float tweak_bias_amp = 1.;    // Tweak calibration for amplified current sensor
+  float tweak_bias_noamp = 1.;  // Tweak calibration for non-amplified current sensor
   float nP = NP;                // Number of parallel batteries in bank, e.g. '2P1S'
   float nS = NS;                // Number of series batteries in bank, e.g. '2P1S'
   uint8_t mon_mod = MOD_CODE;   // Monitor battery chemistry type
@@ -71,8 +70,7 @@ struct RetainedPars
   boolean is_corrupt()
   {
     return ( this->nP==0 || this->nS==0 || this->mon_mod>10 || isnan(this->amp) || this->freq>2. ||
-     abs(this->ibatt_bias_amp)>500. ||
-     this->duty>1000 || abs(this->cutback_gain_scalar)>1000. || abs(this->ibatt_bias_noamp)>500. );
+     abs(this->ibatt_bias_amp)>500. || abs(this->cutback_gain_scalar)>1000. || abs(this->ibatt_bias_noamp)>500. );
   }
 
   // Nominalize
@@ -89,22 +87,21 @@ struct RetainedPars
     this->ibatt_sel_noamp = false;
     this->vbatt_bias = VOLT_BIAS;
     this->modeling = 0;
-    this->duty = 0;
     this->amp = 0.;
     this->freq = 0.;
     this->type = 0;
-    this->inj_soft_bias = 0.;
+    this->inj_bias = 0.;
     this->tbatt_bias = TEMP_BIAS;
     this->s_cap_model = 1.0;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
-    this->delta_q_cinf_amp = 0.;
-    this->delta_q_cinf_noamp = 0.;
-    this->delta_q_dinf_amp = 0.;
-    this->delta_q_dinf_noamp = 0.;
+    this->delta_q_cinf_amp = -RATED_BATT_CAP*3600.;
+    this->delta_q_cinf_noamp = -RATED_BATT_CAP*3600.;
+    this->delta_q_dinf_amp = RATED_BATT_CAP*3600.;
+    this->delta_q_dinf_noamp = RATED_BATT_CAP*3600.;
     this->hys_scale = 1.;
-    this->tweak_bias_amp = 0.;
-    this->tweak_bias_noamp = 0.;
+    this->tweak_bias_amp = 1.;
+    this->tweak_bias_noamp = 1.;
     this->nP = NP;
     this->nS = NS;
     this->mon_mod = 0;
@@ -121,29 +118,28 @@ struct RetainedPars
     this->ibatt_sel_noamp = false;   // T=amplified
     this->vbatt_bias = VOLT_BIAS;
     this->modeling = 0;
-    this->duty = 0;
     this->amp = 0.;
     this->freq = 0.;
     this->type = 0;
-    this->inj_soft_bias = 0.;
+    this->inj_bias = 0.;
     this->tbatt_bias = TEMP_BIAS;
     this->s_cap_model = 1.0;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
-    this->delta_q_cinf_amp = 0.;
-    this->delta_q_cinf_noamp = 0.;
-    this->delta_q_dinf_amp = 0.;
-    this->delta_q_dinf_noamp = 0.;
+    this->delta_q_cinf_amp = -RATED_BATT_CAP*3600.;
+    this->delta_q_cinf_noamp = -RATED_BATT_CAP*3600.;
+    this->delta_q_dinf_amp = RATED_BATT_CAP*3600.;
+    this->delta_q_dinf_noamp = RATED_BATT_CAP*3600.;
     this->hys_scale = 1.;
-    this->tweak_bias_amp = 0.;
-    this->tweak_bias_noamp = 0.;
+    this->tweak_bias_amp = 1.;
+    this->tweak_bias_noamp = 1.;
     this->nP = NP;
     this->nS = NS;
     this->mon_mod = 0;
     this->sim_mod = 0;
   }
   // Configuration functions
-  boolean tweak_test() { return ( 0x8 & modeling ); } // Driving signal injection completely using software inj_soft_bias 
+  boolean tweak_test() { return ( 0x8 & modeling ); } // Driving signal injection completely using software inj_bias 
   boolean mod_ib() { return ( 0x4 & modeling ); }     // Using Sim as source of ib
   boolean mod_vb() { return ( 0x2 & modeling ); }     // Using Sim as source of vb
   boolean mod_tb() { return ( 0x1 & modeling ); }     // Using Sim as source of tb
@@ -163,11 +159,10 @@ struct RetainedPars
     Serial.printf("  ibatt_sel_noamp =           %d;  // Use non-amplified sensor\n", this->ibatt_sel_noamp);
     Serial.printf("  vbatt_bias =          %7.3f;  // Calibrate Vbatt, V\n", this->vbatt_bias);
     Serial.printf("  modeling =                  %d;  // Bit mapped modeling specification\n", this->modeling);
-    Serial.printf("  duty =                      %ld;  // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))\n", this->duty);
     Serial.printf("  amp =                 %7.3f;  // Injected amplitude, A pk (0-18.3)\n", this->amp);
     Serial.printf("  freq =                %7.3f;  // Injected frequency, r/s (0-2*pi)\n", this->freq);
     Serial.printf("  type =                      %d;  //  Injected waveform type.   0=sine, 1=square, 2=triangle\n", this->type);
-    Serial.printf("  inj_soft_bias =       %7.3f;  // Constant bias, A\n", this->inj_soft_bias);
+    Serial.printf("  inj_bias =       %7.3f;  // Injected bias, A\n", this->inj_bias);
     Serial.printf("  tbatt_bias =          %7.3f;  // Sensed temp bias, deg C\n", this->tbatt_bias);
     Serial.printf("  s_cap_model =         %7.3f;  // Scalar on battery model size\n", this->s_cap_model);
     Serial.printf("  cutback_gain_scalar = %7.3f;  // Scalar on battery model saturation cutback function\n", this->cutback_gain_scalar);
@@ -181,8 +176,8 @@ struct RetainedPars
     Serial.printf("  tweak_bias_noamp =    %7.3f;  // Tweak calibration for non-amplified current\n", this->tweak_bias_noamp);
     Serial.printf("  nP =                    %5.2f;  // Number of parallel batteries in bank, e.g. '2P1S'\n", this->nP);
     Serial.printf("  nS =                    %5.2f;  // Number of series batteries in bank, e.g. '2P1S'\n", this->nS);
-    Serial.printf("  mon_mod =                   %d;  //  Monitor battery model for electrical chars.   0=Battleborn, 1=LION\n", this->mon_mod);
-    Serial.printf("  sim_mod =                   %d;  //  Simulation battery model for electrical chars.   0=Battleborn, 1=LION\n", this->sim_mod);
+    Serial.printf("  mon_mod =                   %d;  //  Monitor battery model for electrical chars.  0=Battleborn, 1=LION\n", this->mon_mod);
+    Serial.printf("  sim_mod =                   %d;  //  Simulation battery model for electrical chars.  0=Battleborn, 1=LION\n", this->sim_mod);
   }
 
 };            

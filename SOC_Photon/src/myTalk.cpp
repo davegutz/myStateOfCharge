@@ -378,28 +378,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf("%10.6f\n", Sen->ShuntAmp->max_change());
             break;
 
-          case ( 'g' ):
-            Serial.printf("Amp->gain_ %10.6f to ", Sen->ShuntAmp->gain());
-            Sen->ShuntAmp->gain(cp.input_string.substring(2).toFloat());
-            Serial.printf("%10.6f\n", Sen->ShuntAmp->gain());
-            break;
-
           case ( 'k' ):
-            Serial.printf("rp.tweak_bias %7.3f to ", Sen->ShuntAmp->tweak_bias());
-            Sen->ShuntAmp->tweak_bias(cp.input_string.substring(2).toFloat());
-            Serial.printf("%7.3f\n", Sen->ShuntAmp->tweak_bias());
-            break;
-
-          case ( 'P' ):
-            Serial.printf("Amp->q_sat_present_ %10.1f to ", Sen->ShuntAmp->delta_q_sat_present());
-            Sen->ShuntAmp->delta_q_sat_present(cp.input_string.substring(2).toFloat());
-            Serial.printf("%10.1f\n", Sen->ShuntAmp->delta_q_sat_present());
-            break;
-
-          case ( 'p' ):
-            Serial.printf("Amp->q_sat_past_ %10.1f to ", Sen->ShuntAmp->delta_q_sat_past());
-            Sen->ShuntAmp->delta_q_sat_past(cp.input_string.substring(2).toFloat());
-            Serial.printf("%10.1f\n", Sen->ShuntAmp->delta_q_sat_past());
+            Serial.printf("rp.tweak_sclr %7.3f to ", Sen->ShuntAmp->tweak_sclr());
+            Sen->ShuntAmp->tweak_sclr(cp.input_string.substring(2).toFloat());
+            Serial.printf("%7.3f\n", Sen->ShuntAmp->tweak_sclr());
             break;
 
           case ( 'w' ):
@@ -435,28 +417,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf("%10.6f\n", Sen->ShuntNoAmp->max_change());
             break;
 
-          case ( 'g' ):
-            Serial.printf("NoAmp->gain_ %10.6f to ", Sen->ShuntNoAmp->gain());
-            Sen->ShuntNoAmp->gain(cp.input_string.substring(2).toFloat());
-            Serial.printf("%10.6f\n", Sen->ShuntNoAmp->gain());
-            break;
-
           case ( 'k' ):
-            Serial.printf("rp.tweak_bias from %7.3f to ", Sen->ShuntNoAmp->tweak_bias());
-            Sen->ShuntNoAmp->tweak_bias(cp.input_string.substring(2).toFloat());
-            Serial.printf("%7.3f\n", Sen->ShuntNoAmp->tweak_bias());
-            break;
-
-          case ( 'P' ):
-            Serial.printf("NoAmp->q_sat_present_ %10.1f to ", Sen->ShuntNoAmp->delta_q_sat_present());
-            Sen->ShuntNoAmp->delta_q_sat_present(cp.input_string.substring(2).toFloat());
-            Serial.printf("%10.1f\n", Sen->ShuntNoAmp->delta_q_sat_present());
-            break;
-
-          case ( 'p' ):
-            Serial.printf("NoAmp->q_sat_past_ %10.1f to ", Sen->ShuntNoAmp->delta_q_sat_past());
-            Sen->ShuntNoAmp->delta_q_sat_past(cp.input_string.substring(2).toFloat());
-            Serial.printf("%10.1f\n", Sen->ShuntNoAmp->delta_q_sat_past());
+            Serial.printf("rp.tweak_sclr from %7.3f to ", Sen->ShuntNoAmp->tweak_sclr());
+            Sen->ShuntNoAmp->tweak_sclr(cp.input_string.substring(2).toFloat());
+            Serial.printf("%7.3f\n", Sen->ShuntNoAmp->tweak_sclr());
             break;
 
           case ( 'w' ):
@@ -556,12 +520,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
       case ( 'Q' ):
         Serial.printf("Tb  = %7.3f,\nVb  = %7.3f,\nVoc = %7.3f,\nvoc_filt  = %7.3f,\nVsat = %7.3f,\nIb  = %7.3f,\nsoc_m = %8.4f,\n\
-soc_ekf= %8.4f,\nsoc = %8.4f,\nsoc_wt = %8.4f,\nmodeling = %d,\namp delta_q_cinf = %10.1f,\namp delta_q_dinf = %10.1f,\namp tweak_bias = %7.3f,\n\
-no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_bias = %7.3f,\n",
+soc_ekf= %8.4f,\nsoc = %8.4f,\nsoc_wt = %8.4f,\nmodeling = %d,\namp delta_q_cinf = %10.1f,\namp delta_q_dinf = %10.1f,\namp tweak_sclr = %7.3f,\n\
+no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr = %7.3f,\n",
           Mon->temp_c(), Mon->Vb(), Mon->Voc(), Mon->Voc_filt(), Mon->Vsat(), Mon->Ib(), Sen->Sim->soc(), Mon->soc_ekf(),
           Mon->soc(), Mon->soc_wt(), rp.modeling, Sen->ShuntAmp->delta_q_cinf(), Sen->ShuntAmp->delta_q_dinf(),
-          Sen->ShuntAmp->tweak_bias(), Sen->ShuntNoAmp->delta_q_cinf(), Sen->ShuntNoAmp->delta_q_dinf(),
-          Sen->ShuntNoAmp->tweak_bias());
+          Sen->ShuntAmp->tweak_sclr(), Sen->ShuntNoAmp->delta_q_cinf(), Sen->ShuntNoAmp->delta_q_dinf(),
+          Sen->ShuntNoAmp->tweak_sclr());
         break;
 
       case ( 'R' ):
@@ -678,7 +642,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_bias 
           case ( 'a' ): // injection amplitude
             // rp.amp = max(min(cp.input_string.substring(2).toFloat(), 18.3), 0.0);
             rp.amp = cp.input_string.substring(2).toFloat();
-            Serial.printf("Inj amp set %7.3f & inj_soft_bias set %7.3f\n", rp.amp, rp.inj_soft_bias);
+            Serial.printf("Inj amp set %7.3f & inj_bias set %7.3f\n", rp.amp, rp.inj_bias);
             break;
 
           case ( 'f' ): // injection frequency
@@ -727,8 +691,8 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_bias 
             break;
 
           case ( 'o' ): // injection dc offset
-            rp.inj_soft_bias = max(min(cp.input_string.substring(2).toFloat(), 18.3), -18.3);
-            Serial.printf("inj_soft_bias set %7.3f\n", rp.inj_soft_bias);
+            rp.inj_bias = max(min(cp.input_string.substring(2).toFloat(), 18.3), -18.3);
+            Serial.printf("inj_bias set %7.3f\n", rp.inj_bias);
             break;
 
           case ( 'p' ): // injection program
@@ -748,7 +712,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_bias 
                 rp.type = 0;
                 rp.freq = 0.0;
                 rp.amp = 0.0;
-                if ( !rp.tweak_test() ) rp.inj_soft_bias = 0.0;
+                if ( !rp.tweak_test() ) rp.inj_bias = 0.0;
                 self_talk("XS", Mon, Sen);  // Stop any injection
                 self_talk("Mk0", Mon, Sen);
                 self_talk("Nk0", Mon, Sen);
@@ -763,7 +727,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_bias 
                 rp.type = 1;
                 rp.freq = 0.05;
                 rp.amp = 6.;
-                if ( !rp.tweak_test() ) rp.inj_soft_bias = -rp.amp;
+                if ( !rp.tweak_test() ) rp.inj_bias = -rp.amp;
                 rp.freq *= (2. * PI);
                 debug_inject();  // Arduino plot
                 break;
@@ -774,7 +738,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_bias 
                 rp.type = 2;
                 rp.freq = 0.10;
                 rp.amp = 6.;
-                if ( !rp.tweak_test() ) rp.inj_soft_bias = -rp.amp;
+                if ( !rp.tweak_test() ) rp.inj_bias = -rp.amp;
                 rp.freq *= (2. * PI);
                 debug_inject();  // Arduino plot
                 break;
@@ -785,7 +749,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_bias 
                 rp.type = 3;
                 rp.freq = 0.05;
                 rp.amp = 6.;
-                if ( !rp.tweak_test() ) rp.inj_soft_bias = -rp.amp;
+                if ( !rp.tweak_test() ) rp.inj_bias = -rp.amp;
                 rp.freq *= (2. * PI);
                 debug_inject();  // Arduino plot
                 break;
@@ -828,7 +792,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_bias 
                 rp.type = 8;
                 rp.freq = 0.05;
                 rp.amp = 6.;
-                if ( !rp.tweak_test() ) rp.inj_soft_bias = -rp.amp;
+                if ( !rp.tweak_test() ) rp.inj_bias = -rp.amp;
                 rp.freq *= (2. * PI);
                 debug_inject();  // Arduino plot
                 break;
@@ -983,24 +947,18 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Hs= "); Serial.printf("save and print log\n");
 
   Serial.printf("M<?> Amp tweaks\n");
-  Serial.printf("  MC= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_change()); Serial.println("    : amp max change allowed, A [0.05]"); 
-  Serial.printf("  Mg= "); Serial.printf("%7.6f", Sen->ShuntAmp->gain()); Serial.println("  : amp gain = correction to be made for charge, A/Coulomb/day [0.0001]"); 
-  Serial.printf("  Mk= "); Serial.printf("%7.3f", Sen->ShuntAmp->tweak_bias()); Serial.println("    : amp adder to all sensed shunt current, A [0]"); 
-  Serial.printf("  Mp= "); Serial.printf("%10.1f", Sen->ShuntAmp->delta_q_sat_past()); Serial.println(" : amp past charge infinity at sat, C [varies]"); 
-  Serial.printf("  MP= "); Serial.printf("%10.1f", Sen->ShuntAmp->delta_q_sat_present()); Serial.println(" : amp present charge infinity at sat, C [varies]"); 
-  Serial.printf("  Mw= "); Serial.printf("%7.3f", Sen->ShuntAmp->time_to_wait()); Serial.println("    : amp time to wait for next tweak, hr [18]]"); 
-  Serial.printf("  Mx= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_tweak()); Serial.println("    : amp adder maximum, A [1]"); 
-  Serial.printf("  Mz= "); Serial.printf("%7.3f", Sen->ShuntAmp->time_sat_past()); Serial.println("    : amp time since last tweak, hr [varies]"); 
+  Serial.printf("  MC= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_change()); Serial.println("    : Amp Coul eff max change allowed scakar [0.001]"); 
+  Serial.printf("  Mk= "); Serial.printf("%7.3f", Sen->ShuntAmp->tweak_sclr()); Serial.println("    : Amp Coul eff scalar [1]"); 
+  Serial.printf("  Mw= "); Serial.printf("%7.3f", Sen->ShuntAmp->time_to_wait()); Serial.println("    : Amp time to wait for next tweak, hr [18]]"); 
+  Serial.printf("  Mx= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_tweak()); Serial.println("    : Amp Coul eff max allowed scalar [0.01]"); 
+  Serial.printf("  Mz= "); Serial.printf("%7.3f", Sen->ShuntAmp->time_sat_past()); Serial.println("    : Amp time since last tweak, hr [varies]"); 
 
   Serial.printf("N<?> No amp tweaks\n");
-  Serial.printf("  NC= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_change()); Serial.println("    : no amp max change allowed, A [0.05]"); 
-  Serial.printf("  Ng= "); Serial.printf("%7.6f", Sen->ShuntNoAmp->gain()); Serial.println("  : no amp gain = correction to be made for charge, A/Coulomb [0.0001]"); 
-  Serial.printf("  Nk= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->tweak_bias()); Serial.println("    : no amp adder to all sensed shunt current, A [0]"); 
-  Serial.printf("  Np= "); Serial.printf("%10.1f", Sen->ShuntNoAmp->delta_q_sat_past()); Serial.println(" : no amp past charge infinity at sat, C [varies]"); 
-  Serial.printf("  NP= "); Serial.printf("%10.1f", Sen->ShuntNoAmp->delta_q_sat_present()); Serial.println(" : no amp present charge infinity at sat, C [varies]"); 
-  Serial.printf("  Nw= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->time_to_wait()); Serial.println("    : no amp time to wait for next tweak, hr [18]]"); 
-  Serial.printf("  Nx= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_tweak()); Serial.println("    : no amp adder maximum, A [1]"); 
-  Serial.printf("  Nz= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->time_sat_past()); Serial.println("    : no amp time since last tweak, hr [varies]"); 
+  Serial.printf("  NC= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_change()); Serial.println("    : No Amp Coul eff max change allowed scakar [0.001]"); 
+  Serial.printf("  Nk= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->tweak_sclr()); Serial.println("    : No Amp Coul eff scalar [1]"); 
+  Serial.printf("  Nw= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->time_to_wait()); Serial.println("    : No Amp time to wait for next tweak, hr [18]]"); 
+  Serial.printf("  Nx= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_tweak()); Serial.println("    : Amp Coul eff max allowed scalar [0.01]"); 
+  Serial.printf("  Nz= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->time_sat_past()); Serial.println("    : No Amp time since last tweak, hr [varies]"); 
 
   Serial.printf("P<?>   Print Battery values\n");
   Serial.printf("  Pa= "); Serial.printf("all\n");
@@ -1066,7 +1024,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Inj amp A pk (0-18.3) [0]");
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println("  : Inj freq Hz (0-2) [0]");
   Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Inj type.  'c', 's', 'q', 't' (cos, sine, square, tri)");
-  Serial.printf("  Xo= "); Serial.printf("%7.3f", rp.inj_soft_bias); Serial.println("  : Inj inj_soft_bias A (-18.3-18.3) [0]");
+  Serial.printf("  Xo= "); Serial.printf("%7.3f", rp.inj_bias); Serial.println("  : Inj inj_bias A (-18.3-18.3) [0]");
   Serial.printf("  Di= "); Serial.printf("%7.3f", rp.ibatt_bias_all); Serial.println("  : Inj  A (unlimited) [0]");
   Serial.printf("  Xp= <?>, programmed inj settings...\n"); 
   Serial.printf("      -1:  Off, modeling false\n");

@@ -189,7 +189,6 @@ void monitor(const int reset, const boolean reset_temp, const unsigned long now,
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen);
 void print_serial_header(void);
 void print_serial_sim_header(void);
-uint32_t pwm_write(uint32_t duty, Pins *myPins);
 void sense_synth_select(const int reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen);
 void serial_print(unsigned long now, double T);

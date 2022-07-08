@@ -236,7 +236,7 @@ void BatteryMonitor::assign_rand(void)
         Tb              Tb, deg C
         ib_             Battery terminal current, A
         vb_             Battery terminal voltage, V
-        rp.duty         Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
+        rp.inj_bias  Used to inject fake shunt current
         soc_ekf_        Solved state of charge, fraction
         q_ekf_          Filtered charge calculated by ekf, C
         soc_ekf_ (return)     Solved state of charge, fraction
@@ -551,7 +551,7 @@ void BatteryModel::assign_rand(void)
 //    temp_c_           Simulated Tb, deg C
 //    ib_               Simulated over-ridden by saturation, A
 //    vb_               Simulated Vb, V
-//    rp.duty           Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
+//    rp.inj_bias  Used to inject fake shunt current, A
 //
 double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
 {
@@ -627,14 +627,14 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     return ( vb_*(*rp_nS_) );
 }
 
-// Injection model, calculate duty based on time since boot (TODO:  create an 'elapsed_inj' time so can restart inj on the fly)
-uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq)
+// Injection model, calculate inj bias based on time since boot
+uint32_t BatteryModel::calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq)
 {
     // Return if time 0
     if ( now== 0UL )
     {
         duty_ = 0UL;
-        rp.inj_soft_bias = 0.;
+        rp.inj_bias = 0.;
         return(duty_);
     }
 
@@ -647,7 +647,7 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
     double bias = 0.;
     double cos_bias = 0.;
     // Calculate injection amounts from user inputs (talk).
-    // One-sided because PWM voltage >0.  rp.inj_soft_bias applied elsewhere
+    // One-sided because PWM voltage >0.  rp.inj_bias applied elsewhere
     switch ( type )
     {
         case ( 0 ):   // Nothing
@@ -672,18 +672,12 @@ uint32_t BatteryModel::calc_inj_duty(const unsigned long now, const uint8_t type
         break;
     }
     inj_bias = sin_bias + square_bias + tri_bias + bias + cos_bias;
-    if ( rp.tweak_test() )   // Use inj_soft_bias path, bypassing PWM that has limited hardware range
-    {
-        duty_ = 0UL;
-        rp.inj_soft_bias = inj_bias - rp.amp;
-    }
-    else
-        duty_ = min(uint32_t(inj_bias / bias_gain), uint32_t(255.));
+    rp.inj_bias = inj_bias - rp.amp;
 
-    if ( rp.debug==-41 ) Serial.printf("type,amp,freq,sin,square,tri,bias,inj,duty,tnow,off=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %ld,  %7.3f, %7.3f,\n",
-                type, amp, freq, sin_bias, square_bias, tri_bias, bias, inj_bias, duty_, t, rp.inj_soft_bias);
+    if ( rp.debug==-41 ) Serial.printf("type,amp,freq,sin,square,tri,bias,inj,tnow,bias=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n",
+                type, amp, freq, sin_bias, square_bias, tri_bias, bias, inj_bias, t, rp.inj_bias);
 
-    return ( duty_ );
+    return ( rp.inj_bias );
 }
 
 /* BatteryModel::count_coulombs: Count coulombs based on assumed model true=actual capacity.
