@@ -526,7 +526,7 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
     // Turn off amplitude of injection and wait for end_inj
     if (Sen->now > Sen->stop_inj) rp.amp = 0;
   }
-  else if ( Sen->elapsed_inj )  // Done.  Turn things off by setting 0
+  else if ( Sen->elapsed_inj && rp.tweak_test() )  // Done.  Turn things off by setting 0
   {
     Sen->elapsed_inj = 0;
     self_talk("Pa", Mon, Sen);  // Print all for record
