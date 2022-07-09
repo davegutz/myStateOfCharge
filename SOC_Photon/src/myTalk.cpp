@@ -513,8 +513,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
       case ( 'Q' ):  // Q:  quick critical
         Serial.printf("Tb  = %7.3f,\nVb  = %7.3f,\nVoc = %7.3f,\nvoc_filt  = %7.3f,\nVsat = %7.3f,\nIb  = %7.3f,\nsoc_m = %8.4f,\n\
-soc_ekf= %8.4f,\nsoc = %8.4f,\nsoc_wt = %8.4f,\nmodeling = %d,\namp delta_q_cinf = %10.1f,\namp delta_q_dinf = %10.1f,\namp tweak_sclr = %7.3f,\n\
-no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr = %7.3f,\n",
+soc_ekf= %8.4f,\nsoc = %8.4f,\nsoc_wt = %8.4f,\nmodeling = %d,\namp delta_q_cinf = %10.1f,\namp delta_q_dinf = %10.1f,\namp tweak_sclr = %10.6f,\n\
+no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr = %10.6f,\n",
           Mon->temp_c(), Mon->Vb(), Mon->Voc(), Mon->Voc_filt(), Mon->Vsat(), Mon->Ib(), Sen->Sim->soc(), Mon->soc_ekf(),
           Mon->soc(), Mon->soc_wt(), rp.modeling, Sen->ShuntAmp->delta_q_cinf(), Sen->ShuntAmp->delta_q_dinf(),
           Sen->ShuntAmp->tweak_sclr(), Sen->ShuntNoAmp->delta_q_cinf(), Sen->ShuntNoAmp->delta_q_dinf(),
@@ -816,8 +816,8 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 self_talk("Nw0", Mon, Sen);   // Allow tweak bias to work immediately instead of waiting several hours
                 self_talk("MC0.004", Mon, Sen); // Give tweak bias logic a large adjustment range to quickly converge
                 self_talk("Mx0.04", Mon, Sen);  // Give tweak bias logic a large adjustment range to quickly converge
-                self_talk("NC0.5", Mon, Sen); // Give tweak bias logic a large adjustment range to quickly converge
-                self_talk("Nx10", Mon, Sen);  // Give tweak bias logic a large adjustment range to quickly converge
+                self_talk("NC0.004", Mon, Sen); // Give tweak bias logic a large adjustment range to quickly converge
+                self_talk("Nx0.04", Mon, Sen);  // Give tweak bias logic a large adjustment range to quickly converge
                 self_talk("Mk1", Mon, Sen);   // Reset the tweak biases to 1 for new count
                 self_talk("Nk1", Mon, Sen);   // Reset the tweak biases to 1 for new count
                 self_talk("MP0", Mon, Sen);   // Reset memory to fresh state for new count
