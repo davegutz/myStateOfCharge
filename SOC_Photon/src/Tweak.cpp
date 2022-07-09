@@ -77,12 +77,12 @@ void Tweak::adjust(unsigned long now)
   {
     *rp_tweak_sclr_ *= new_Si;
     Serial.printf("          Tweak(%s)::adjust:, cinf=%10.1f, dinf=%10.1f, coul_eff=%9.6f, scaler=%9.6f, effective coul_eff=%9.6f\n",
-      name_.c_str(), *rp_delta_q_cinf_, *rp_delta_q_dinf_, coul_eff_, *rp_tweak_sclr_, coul_eff_ / *rp_tweak_sclr_);
+      name_.c_str(), *rp_delta_q_cinf_, *rp_delta_q_dinf_, coul_eff_, *rp_tweak_sclr_, coul_eff_*(*rp_tweak_sclr_));
   }
   else
   {
     Serial.printf("          Tweak(%s)::ignore:, cinf=%10.1f, dinf=%10.1f, coul_eff=%9.6f, scaler=%9.6f, effective coul_eff=%9.6f\n",
-      name_.c_str(), *rp_delta_q_cinf_, *rp_delta_q_dinf_, coul_eff_, *rp_tweak_sclr_, coul_eff_ / *rp_tweak_sclr_);
+      name_.c_str(), *rp_delta_q_cinf_, *rp_delta_q_dinf_, coul_eff_, *rp_tweak_sclr_, coul_eff_*(*rp_tweak_sclr_));
   }
 
 
