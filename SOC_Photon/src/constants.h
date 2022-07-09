@@ -85,6 +85,7 @@
 #define TWEAK_MAX_CHANGE      0.001     // Maximum allowed tweak per charge cycle, scalar +/- (0.001)
 #define TWEAK_MAX             0.01      // Maximum tweak allowed, scalar +/- (0.01)
 #define TWEAK_WAIT            6.        // Time to persist unsaturated before allowing peak, hrs (6)
+#define TWEAK_GAIN            0.66      // Tweak change limit gain to make soft landing (0.66)
 #define TT_WAIT               10.       // Before and after tweak test print interval, s (10)
 
 // Conversion gains
