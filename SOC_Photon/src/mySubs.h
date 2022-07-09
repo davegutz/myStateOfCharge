@@ -65,8 +65,6 @@ public:
   float ishunt_cal() { return ( ishunt_cal_ ); };
   void load();
   void pretty_print();
-  double tweak_sclr() { return ( *rp_tweak_sclr_ ); };
-  void tweak_sclr(const double sclr) { *rp_tweak_sclr_ = sclr; };
   float v2a_s() { return ( v2a_s_ ); };
   float vshunt() { return ( vshunt_ ); };
   int16_t vshunt_int() { return ( vshunt_int_ ); };

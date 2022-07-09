@@ -54,6 +54,8 @@ public:
   double time_to_wait() { return( time_to_wait_); };
   void time_to_wait(const double new_time) { time_to_wait_ = new_time; };
   void save_new_sat(unsigned long int now);
+  double tweak_sclr() { return ( *rp_tweak_sclr_ ); };
+  void tweak_sclr(const double sclr) { *rp_tweak_sclr_ = sclr; };
 protected:
   String name_;
   double max_change_;           // Maximum allowed change to calibration scalar see 'N/MC'

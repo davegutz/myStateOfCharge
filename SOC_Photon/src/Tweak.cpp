@@ -64,15 +64,15 @@ void Tweak::adjust(unsigned long now)
 {
   double new_Si = -(*rp_delta_q_cinf_ / *rp_delta_q_dinf_);
   new_Si = max(min(new_Si, *rp_tweak_sclr_+max_change_), *rp_tweak_sclr_-max_change_);
-  new_Si = max(min(new_Si, 1.+max_tweak_), 1-max_tweak_);
-  double new_coul_eff = coul_eff_ / new_Si;
+  new_Si = max(min(new_Si, 1.+max_tweak_), 1.-max_tweak_);
   if ( *rp_delta_q_cinf_>=0. && *rp_delta_q_dinf_<=0. )  // Check for first cycle
   {
     *rp_tweak_sclr_ = new_Si;
   }
+  double new_coul_eff = coul_eff_ / *rp_tweak_sclr_;
 
-  Serial.printf("          Tweak(%s)::adjust:, cinf=%10.1f, dinf=%10.1f, coul_eff=%9.6f, scaler=%9.6f, new coul_eff=%9.6f\n",
-    name_.c_str(), *rp_delta_q_cinf_, *rp_delta_q_dinf_, coul_eff_, new_Si, new_coul_eff);
+  Serial.printf("          Tweak(%s)::adjust:, cinf=%10.1f, dinf=%10.1f, coul_eff=%9.6f, scaler=%9.6f, effective coul_eff=%9.6f\n",
+    name_.c_str(), *rp_delta_q_cinf_, *rp_delta_q_dinf_, coul_eff_, *rp_tweak_sclr_, new_coul_eff);
 
   // Reset for next charge cycle
   *rp_delta_q_cinf_ = 0.;
