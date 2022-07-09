@@ -335,14 +335,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         Serial.printf("Amp dinf CC reset from %9.1f ", Sen->ShuntAmp->delta_q_dinf());
         Sen->ShuntAmp->delta_q_dinf(RATED_BATT_CAP*3600.);
         Serial.printf("to %9.1f\n", Sen->ShuntAmp->delta_q_dinf());
-        self_talk("Mp0.0", Mon, Sen);
         Serial.printf("No amp cinf CC reset from %9.1f ", Sen->ShuntNoAmp->delta_q_cinf());
         Sen->ShuntNoAmp->delta_q_cinf(-RATED_BATT_CAP*3600.);
         Serial.printf("to %9.1f\n", Sen->ShuntNoAmp->delta_q_cinf());
         Serial.printf("No amp dinf CC reset from %9.1f ", Sen->ShuntNoAmp->delta_q_dinf());
         Sen->ShuntNoAmp->delta_q_dinf(RATED_BATT_CAP*3600.);
         Serial.printf("to %9.1f\n", Sen->ShuntNoAmp->delta_q_dinf());
-        self_talk("Np0.0", Mon, Sen);
         break;
 
       case ( 'l' ):
@@ -543,14 +541,12 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
             Serial.printf("Amp dinf CC reset from %9.1f ", Sen->ShuntAmp->delta_q_dinf());
             Sen->ShuntAmp->delta_q_dinf(RATED_BATT_CAP*3600.);
             Serial.printf("to %9.1f\n", Sen->ShuntAmp->delta_q_dinf());
-            self_talk("Mp0.0", Mon, Sen);
             Serial.printf("No amp cinf CC reset from %9.1f ", Sen->ShuntNoAmp->delta_q_cinf());
             Sen->ShuntNoAmp->delta_q_cinf(-RATED_BATT_CAP*3600.);
             Serial.printf("to %9.1f\n", Sen->ShuntNoAmp->delta_q_cinf());
             Serial.printf("No amp dinf CC reset from %9.1f ", Sen->ShuntNoAmp->delta_q_dinf());
             Sen->ShuntNoAmp->delta_q_dinf(RATED_BATT_CAP*3600.);
             Serial.printf("to %9.1f\n", Sen->ShuntNoAmp->delta_q_dinf());
-            self_talk("Np0.0", Mon, Sen);
             break;
 
           case ( 'r' ):  // Rr:  small reset counters
@@ -820,10 +816,6 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 self_talk("Nx0.04", Mon, Sen);  // Give tweak bias logic a large adjustment range to quickly converge
                 self_talk("Mk1", Mon, Sen);   // Reset the tweak biases to 1 for new count
                 self_talk("Nk1", Mon, Sen);   // Reset the tweak biases to 1 for new count
-                self_talk("MP0", Mon, Sen);   // Reset memory to fresh state for new count
-                self_talk("NP0", Mon, Sen);   // Reset memory to fresh state for new count
-                self_talk("Mp0", Mon, Sen);   // Reset memory to fresh state for new count
-                self_talk("Np0", Mon, Sen);   // Reset memory to fresh state for new count
                 self_talk("Dn1", Mon, Sen);   // Disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
                 self_talk("XW5", Mon, Sen);   // Wait time before starting to cycle
                 if ( INT_in == 9 )

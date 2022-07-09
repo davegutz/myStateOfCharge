@@ -69,13 +69,14 @@ void Tweak::adjust(unsigned long now)
   new_Si = TWEAK_GAIN*(new_Si-1.) + 1.;
 
   // Apply limits
-  new_Si = max(min(new_Si, *rp_tweak_sclr_+max_change_), *rp_tweak_sclr_-max_change_);
-  new_Si = max(min(new_Si, 1.+max_tweak_), 1.-max_tweak_);
+  double new_tweak_sclr = *rp_tweak_sclr_ * new_Si;
+  new_tweak_sclr = max(min(new_tweak_sclr, *rp_tweak_sclr_+max_change_), *rp_tweak_sclr_-max_change_);
+  new_tweak_sclr = max(min(new_tweak_sclr, 1.+max_tweak_), 1.-max_tweak_);
 
   // Result
   if ( *rp_delta_q_cinf_>=0. && *rp_delta_q_dinf_<=0. )  // Exclude first cycle after boot:  uncertain history
   {
-    *rp_tweak_sclr_ *= new_Si;
+    *rp_tweak_sclr_ = new_tweak_sclr;
     Serial.printf("          Tweak(%s)::adjust:, cinf=%10.1f, dinf=%10.1f, coul_eff=%9.6f, scaler=%9.6f, effective coul_eff=%9.6f\n",
       name_.c_str(), *rp_delta_q_cinf_, *rp_delta_q_dinf_, coul_eff_, *rp_tweak_sclr_, coul_eff_*(*rp_tweak_sclr_));
   }

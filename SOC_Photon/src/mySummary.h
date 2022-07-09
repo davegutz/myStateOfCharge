@@ -57,8 +57,8 @@ struct Sum_st
     this->soc_ekf = int16_t(soc_ekf*16000.);
     this->Voc_dyn = int16_t(Voc_dyn*1200.);
     this->Voc_ekf = int16_t(Voc_ekf*1200.);
-    this->tweak_sclr_amp = int16_t(tweak_sclr_amp*1200.);
-    this->tweak_sclr_noa = int16_t(tweak_sclr_noa*1200.);
+    this->tweak_sclr_amp = int16_t(tweak_sclr_amp*16000.);
+    this->tweak_sclr_noa = int16_t(tweak_sclr_noa*16000.);
     time_long_2_str(now, buffer);
   }
   void print(void)
@@ -68,10 +68,17 @@ struct Sum_st
     {
       time_long_2_str(this->t, buffer);
     }
-    Serial.printf("%s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %7.3f,",
-          buffer, this->t, double(this->Tb)/600., double(this->Tb)/1200., double(this->Ib)/600., double(this->soc)/16000., double(this->soc_ekf)/16000.,
-          double(this->Voc_dyn)/1200., double(this->Voc_ekf)/1200.,
-          double(this->tweak_sclr_amp)/1200.,  double(this->tweak_sclr_noa)/1200.);
+    Serial.printf("%s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %10.6f, %10.6f,",
+          buffer, this->t,
+          double(this->Tb)/600.,
+          double(this->Tb)/1200.,
+          double(this->Ib)/600.,
+          double(this->soc)/16000.,
+          double(this->soc_ekf)/16000.,
+          double(this->Voc_dyn)/1200.,
+          double(this->Voc_ekf)/1200.,
+          double(this->tweak_sclr_amp)/16000.,
+          double(this->tweak_sclr_noa)/16000.);
   }
   void nominal()
   {
