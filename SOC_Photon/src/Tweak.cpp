@@ -62,7 +62,8 @@ Tweak::~Tweak() {}
 */
 void Tweak::adjust(unsigned long now)
 {
-  double new_Si = -(*rp_delta_q_cinf_ / *rp_delta_q_dinf_);
+  // Candidate change scalar
+  double new_Si = -(*rp_delta_q_dinf_ / *rp_delta_q_cinf_);
 
   // Soft landing / stability
   new_Si = TWEAK_GAIN*(new_Si-1.) + 1.;
