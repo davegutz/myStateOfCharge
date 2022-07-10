@@ -315,7 +315,7 @@ class BatteryMonitor(Battery, EKF_1x1):
     def assign_soc_m(self, soc_m):
         self.soc_m = soc_m
 
-    def calculate(self, temp_c, vb, ib, dt, init, q_capacity=None, dc_dc_on=None, rp=None):  # BatteryMonitor
+    def calculate(self, temp_c, vb, ib, dt, init, q_capacity=None, dc_dc_on=None, rp=None, d_voc=None):  # BatteryMonitor
         self.temp_c = temp_c
         self.vsat = calc_vsat(self.temp_c)
         self.dt = dt
@@ -333,6 +333,8 @@ class BatteryMonitor(Battery, EKF_1x1):
             self.voc = self.Randles.y
         else:  # aliased, unstable if update Randles
             self.voc = vb - self.r_ss * self.ib
+        if d_voc:
+            self.voc = d_voc
         self.dv_dyn = self.vb - self.voc
         # self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
         # Hysteresis model

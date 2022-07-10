@@ -93,6 +93,8 @@ def replicate(saved_old, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_f
     Vb = saved_old.Vb
     Ib = saved_old.Ib
     Tb = saved_old.Tb
+    Voc = saved_old.Voc
+    Voc_stat = saved_old.Voc_stat
     soc_init = saved_old.soc[0]
     soc_m_init = saved_old.soc_m[0]
     t_len = len(t)
@@ -193,7 +195,9 @@ def replicate(saved_old, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_f
             mon.calculate(Tb[i], Vb_, current_in, T, rp=rp, init=init)
         else:
             mon.calculate(Tb[i], vb + randn() * v_std + dv_sense, charge_curr + randn() * i_std + di_sense, T, rp=rp,
-                          init=init)
+                          init=init, d_voc=None)
+            # mon.calculate(Tb[i], vb + randn() * v_std + dv_sense, charge_curr + randn() * i_std + di_sense, T, rp=rp,
+            #           init=init, d_voc=Voc[i])
         # mon.calculate(Tb[i], Vb[i]+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, T)
         sat = is_sat(Tb[i], mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), init)
@@ -251,7 +255,7 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/tryXp20_20220626.txt';unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/real world Xp20 20220626.txt';unit_key = 'soc0_2022';
         # data_file_old_txt = '../dataReduction/real world Xp21 20220626.txt';unit_key = 'soc0_2022';
-        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220709.txt';unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220710.txt';unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"

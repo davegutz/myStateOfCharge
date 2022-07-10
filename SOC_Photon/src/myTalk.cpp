@@ -830,6 +830,8 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                   self_talk("XC1", Mon, Sen);     // Number of injection cycles
                   self_talk("v24", Mon, Sen);     // Data collection
                 }
+                Sen->Sim->init_battery(Sen);  // Reset model battery state
+                Mon->init_battery(Sen);       // Reset model battery state
                 self_talk("Pa", Mon, Sen);    // Print all for record
                 self_talk("XR", Mon, Sen);    // Run cycle
                 break;
@@ -845,6 +847,8 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 {
                   self_talk("v4", Mon, Sen);      // Slow data collection
                 }
+                Sen->Sim->init_battery(Sen);  // Reset model battery state
+                Mon->init_battery(Sen);       // Reset model battery state
                 break;
 
               default:
