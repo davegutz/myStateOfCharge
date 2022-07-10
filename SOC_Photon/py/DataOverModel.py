@@ -337,6 +337,7 @@ class SavedData:
             self.hm = []  # hours, minutes
             self.cTime = []  # Control time, s
             self.Ib = []  # Bank current, A
+            self.Ib_past = []  # Past bank current, A
             self.Vb = []  # Bank voltage, V
             self.sat = []  # Indication that battery is saturated, T=saturated
             self.sel = []  # Current source selection, 0=amp, 1=no amp
@@ -383,6 +384,7 @@ class SavedData:
             self.dt = np.array(data.dt[:i_end])
             self.time = np.array(self.time[:i_end])
             self.Ib = np.array(data.Ib[:i_end])
+            self.Ib_past = np.append(np.zeros((1,1)), np.array(data.Ib[:(i_end-1)]))
             self.Vb = np.array(data.Vb[:i_end])
             self.sat = np.array(data.sat[:i_end])
             self.sel = np.array(data.sel[:i_end])
@@ -437,6 +439,7 @@ class SavedDataSim:
             self.dv_hys_m = []
             self.vb_m = []
             self.ib_m = []
+            self.ib_fwd_m = []
             self.sat_m = []
             self.ddq_m = []
             self.dq_m = []
@@ -464,7 +467,8 @@ class SavedDataSim:
             self.dv_dyn_m = data.dv_dyn_m[:i_end]
             self.voc_m = self.vb_m - self.dv_dyn_m
             self.dv_hys_m = self.voc_m - self.voc_stat_m
-            self.ib_m = data.ib_m[:i_end]
+            self.ib_fwd_m = data.ib_m[:i_end]
+            self.ib_m = np.append(np.zeros((1,1)), np.array(data.ib_m[:(i_end-1)]))
             self.sat_m = data.sat_m[:i_end]
             self.ddq_m = data.ddq_m[:i_end]
             self.dq_m = data.dq_m[:i_end]

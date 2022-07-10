@@ -92,6 +92,7 @@ def replicate(saved_old, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_f
     dt = saved_old.dt
     Vb = saved_old.Vb
     Ib = saved_old.Ib
+    Ib_past = saved_old.Ib_past
     Tb = saved_old.Tb
     Voc = saved_old.Voc
     Voc_stat = saved_old.Voc_stat
@@ -164,13 +165,17 @@ def replicate(saved_old, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_f
 
         # Models
         if t_Ib_fail and t[i] > t_Ib_fail:
+            current_in_past = Ib_fail
             current_in = Ib_fail
+        else:
+            current_in_past = Ib_past[i]
+            current_in = saved_old.Ib[i]
+        sim.calculate(temp_c=Tb[i], soc=sim.soc, curr_in=current_in_past, dt=T, q_capacity=sim.q_capacity,
+                      dc_dc_on=dc_dc_on, rp=rp)
+        if t_Ib_fail and t[i] > t_Ib_fail:
             charge_curr = Ib_fail
         else:
-            current_in = saved_old.Ib[i]
             charge_curr = sim.ib
-        sim.calculate(temp_c=Tb[i], soc=sim.soc, curr_in=current_in, dt=T, q_capacity=sim.q_capacity,
-                      dc_dc_on=dc_dc_on, rp=rp)
         sim.count_coulombs(dt=T, reset=init, temp_c=Tb[i], charge_curr=charge_curr, sat=False, soc_m_init=soc_m_init,
                            mon_sat=mon.sat, mon_delta_q=mon.delta_q)
 
@@ -246,7 +251,8 @@ if __name__ == '__main__':
         date_ = datetime.now().strftime("%y%m%d")
 
         # Transient  inputs
-        time_end = None
+        # time_end = None
+        time_end = 1.
         # time_end = 2000.
 
         # Setup and user inputs (data_file_old_txt must end in .txt)
