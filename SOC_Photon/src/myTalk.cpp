@@ -706,7 +706,6 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 self_talk("Xp0", Mon, Sen);
                 self_talk("Ca0.5", Mon, Sen);
                 rp.modeling = 0;
-                debug_inject();  // Arduino plot
                 break;
 
               case ( 0 ):  // Xp0:  reset stop
@@ -720,7 +719,6 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 self_talk("Nk1", Mon, Sen);
                 self_talk(set_nom_coul_eff, Mon, Sen);
                 rp.ibatt_bias_all = 0;
-                debug_inject();  // Arduino plot
                 break;
 
               case ( 1 ):  // Xp1:  sine
@@ -731,7 +729,6 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 rp.amp = 6.;
                 if ( !rp.tweak_test() ) rp.inj_bias = -rp.amp;
                 rp.freq *= (2. * PI);
-                debug_inject();  // Arduino plot
                 break;
 
               case ( 2 ):  // Xp2:  
@@ -742,7 +739,6 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 rp.amp = 6.;
                 if ( !rp.tweak_test() ) rp.inj_bias = -rp.amp;
                 rp.freq *= (2. * PI);
-                debug_inject();  // Arduino plot
                 break;
 
               case ( 3 ):
@@ -753,28 +749,24 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 rp.amp = 6.;
                 if ( !rp.tweak_test() ) rp.inj_bias = -rp.amp;
                 rp.freq *= (2. * PI);
-                debug_inject();  // Arduino plot
                 break;
 
               case ( 4 ):
                 self_talk("Xp0", Mon, Sen);
                 rp.type = 4;
                 rp.ibatt_bias_all = -RATED_BATT_CAP;  // Software effect only
-                debug_inject();  // Arduino plot
                 break;
 
               case ( 5 ):
                 self_talk("Xp0", Mon, Sen);
                 rp.type = 5;
                 rp.ibatt_bias_all = RATED_BATT_CAP; // Software effect only
-                debug_inject();  // Arduino plot
                 break;
 
               case ( 6 ):
                 self_talk("Xp0", Mon, Sen);
                 rp.type = 6;
                 rp.amp = RATED_BATT_CAP*0.2;
-                debug_inject();  // Arduino plot
                 break;
 
               case ( 7 ):
@@ -796,7 +788,6 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 rp.amp = 6.;
                 if ( !rp.tweak_test() ) rp.inj_bias = -rp.amp;
                 rp.freq *= (2. * PI);
-                debug_inject();  // Arduino plot
                 break;
 
               case ( 9 ): case( 10 ): case ( 11 ):  // Regression tests 9=tweak, 10=tweak w data, 11=cycle

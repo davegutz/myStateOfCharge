@@ -39,7 +39,7 @@ class Retained:
         self.nP = 1  # assumed for this 'model'
 
     def tweak_test(self):
-        return 0x8 & self.modeling
+        return 0b001 & self.modeling
 
 
 # Battery constants
@@ -87,7 +87,7 @@ class Battery(Coulombs):
                             or 20 - 40 A for a 100 Ah battery"""
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
-                 r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
+                 r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, tweak_test=False, t_max=0.3, sres=1.):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
@@ -535,7 +535,7 @@ class BatteryModel(Battery):
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
-                 r_sd=70., tau_sd=1.8e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
+                 r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1.):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres)

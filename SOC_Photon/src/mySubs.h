@@ -81,7 +81,6 @@ protected:
   int16_t vshunt_int_1_;// Interim conversion, count
   float vshunt_;        // Sensed shunt voltage, V
   float ishunt_cal_;    // Sensed, calibrated ADC, A
-  double sclr_coul_eff_;// Scalar on Coulombic Efficiency
 };
 
 

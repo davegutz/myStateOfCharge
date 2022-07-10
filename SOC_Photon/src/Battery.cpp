@@ -280,10 +280,11 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     bms_off_ = temp_c_ <= chem_.low_t;    // KISS
     if ( bms_off_ )
     {
+        voc_stat_ = voc_soc(soc_, Sen->Tbatt_filt);
         ib_ = 0.;
         voc_ = voc_stat_;
-        voc_filt_ = voc_stat_;
         dv_dyn_ = 0.;
+        voc_filt_ = voc_stat_;
     }
 
     // EKF 1x1
