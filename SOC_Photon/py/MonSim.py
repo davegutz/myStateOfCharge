@@ -165,16 +165,16 @@ def replicate(saved_old, saved_sim_old=None, init_time=-.5, dv_hys=0., sres=1., 
 
         # Models
         if t_Ib_fail and t[i] > t_Ib_fail:
-            ib_m_in = Ib_fail
+            ib_in_m = Ib_fail
             current_in = Ib_fail
         else:
             if saved_sim_old:
-                ib_m_in = saved_sim_old.ib_m_in[i]
+                ib_in_m = saved_sim_old.ib_in_m[i]
             else:
-                ib_m_in = Ib_past[i]
+                ib_in_m = Ib_past[i]
             current_in = saved_old.Ib[i]
-        sim.calculate(temp_c=Tb[i], soc=sim.soc, curr_in=ib_m_in, dt=T, q_capacity=sim.q_capacity,
-                      dc_dc_on=dc_dc_on, rp=rp)
+        sim.calculate(temp_c=Tb[i], soc=sim.soc, curr_in=ib_in_m, dt=T, q_capacity=sim.q_capacity,
+                      dc_dc_on=dc_dc_on, reset=reset, rp=rp)
         if t_Ib_fail and t[i] > t_Ib_fail:
             charge_curr = Ib_fail
         else:
@@ -259,12 +259,11 @@ if __name__ == '__main__':
         # time_end = 2000.
 
         # Setup and user inputs (data_file_old_txt must end in .txt)
-        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220626.txt';unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220626.txt';unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tryXp20_20220626.txt';unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/real world Xp20 20220626.txt';unit_key = 'soc0_2022';
         # data_file_old_txt = '../dataReduction/real world Xp21 20220626.txt';unit_key = 'soc0_2022';
-        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220710.txt';unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220710.txt';unit_key = 'pro_2022' TODO: delete
+        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220711.txt';unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
@@ -279,8 +278,8 @@ if __name__ == '__main__':
 
         # Load _m v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type='_sim', title_key=title_key_sim, unit_key=unit_key_sim)
-        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'sat_m',
-                    'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
+        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'ib_in_m',
+                    'sat_m', 'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
         if data_file_sim_clean:
             data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
                                  encoding=None).view(np.recarray)

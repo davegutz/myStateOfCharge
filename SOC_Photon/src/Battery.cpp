@@ -543,6 +543,7 @@ void BatteryModel::assign_rand(void)
 //  Inputs:
 //    Sen->Tbatt_filt   Filtered battery bank temp, C
 //    Sen->Ibatt_model_in  Battery bank current input to model, A
+//    ib_fut_(past)     Past future value of limited current, A
 //    Sen->T            Update time, sec
 //
 //  States:
@@ -550,15 +551,18 @@ void BatteryModel::assign_rand(void)
 //
 //  Outputs:
 //    temp_c_           Simulated Tb, deg C
-//    ib_               Simulated over-ridden by saturation, A
+//    ib_fut_           Simulated over-ridden by saturation, A
 //    vb_               Simulated Vb, V
 //    rp.inj_bias  Used to inject fake shunt current, A
 //
-double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
+double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset)
 {
     const double temp_C = Sen->Tbatt_filt;
     double curr_in = Sen->Ibatt_model_in;
     const double dt = min(Sen->T, F_MAX_T);
+    ib_in_ = curr_in;
+    if ( reset ) ib_fut_ = ib_in_;
+    ib_ = max(min(ib_fut_, 10000.), -10000.);  //  Past value ib_.  Overflow protection when ib_ past value used
 
     dt_ = dt;
     temp_c_ = temp_C;
@@ -570,16 +574,15 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
     voc_stat_ = calc_soc_voc(soc_, temp_C, &dv_dsoc_);
     voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, vsat_*1.2);  // slightly beyond but don't windup
     bms_off_ = ( temp_c_ <= chem_.low_t ) || ( voc_stat_ < chem_.low_voc );
-    if ( bms_off_ ) curr_in = 0.;
+    if ( bms_off_ ) ib_in_ = 0.;
 
     // Dynamic emf
     // Hysteresis model
-    hys_->calculate(curr_in, soc_);
+    hys_->calculate(ib_in_, soc_);
     dv_hys_ = hys_->update(dt);
     voc_ = voc_stat_ + dv_hys_;
     ioc_ = hys_->ioc();
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
-    ib_ = max(min(ib_, 10000.), -10000.);  //  Past value ib_.  Overflow protection when ib_ past value used
     double u[2] = {ib_, voc_};
     Randles_->calc_x_dot(u);
     if ( dt_<RANDLES_T_MAX )
@@ -603,24 +606,24 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on)
 
     // Saturation logic, both full and empty
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
-    if ( rp.tweak_test() || !rp.modeling ) sat_ib_max_ = curr_in;   // Disable cutback when real world or when doing tweak_test test
-    ib_ = min(curr_in/(*rp_nP_), sat_ib_max_);      // the feedback of ib_
-    if ( (q_ <= 0.) && (curr_in < 0.) ) ib_ = 0.;   //  empty
-    model_cutback_ = (voc_stat_ > vsat_) && (ib_ == sat_ib_max_);
-    model_saturated_ = model_cutback_ && (ib_ < ib_sat_);
+    if ( rp.tweak_test() || !rp.modeling ) sat_ib_max_ = ib_in_;   // Disable cutback when real world or when doing tweak_test test
+    ib_fut_ = min(ib_in_/(*rp_nP_), sat_ib_max_);      // the feedback of ib_
+    if ( (q_ <= 0.) && (ib_in_ < 0.) ) ib_fut_ = 0.;   //  empty
+    model_cutback_ = (voc_stat_ > vsat_) && (ib_fut_ == sat_ib_max_);
+    model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
 
     if ( rp.debug==75 ) Serial.printf("BatteryModel::calculate: temp_C, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
         temp_C, soc_, voc_stat_, chem_.low_voc);
 
-    if ( rp.debug==79 ) Serial.printf("temp_C, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f,\n",
-        temp_C, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_);
+    if ( rp.debug==79 ) Serial.printf("temp_C, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib_fut, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f, %7.3f,\n",
+        temp_C, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
 
     if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
      dt,temp_C, ib_, soc_, voc_, dv_dyn_, vb_);
     
-    if ( rp.debug==-78 ) Serial.printf("soc*10,voc,vsat,curr_in,sat_ib_max_,ib,sat,\n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
-      soc_*10, voc_, vsat_, curr_in, sat_ib_max_, ib_, model_saturated_);
+    if ( rp.debug==-78 ) Serial.printf("soc*10,voc,vsat,ib_in_,sat_ib_max_,ib,sat,\n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
+      soc_*10, voc_, vsat_, ib_in_, sat_ib_max_, ib_, model_saturated_);
     
     if ( rp.debug==76 ) Serial.printf("BatteryModel::calculate:,  soc=%8.4f, temp_c=%7.3f, ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
         soc_, temp_C, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);
@@ -743,13 +746,13 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
         Serial.printf("voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
                     pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 
-    if ( rp.debug==24 ) 
+    if ( rp.debug==24 ) // print_serial_sim
     {
         double cTime;
         if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;
         else cTime = Sen->control_time;
-        sprintf(cp.buffer, "unit_sim, %13.3f, %7.4f,%7.4f, %7.4f,%7.4f,%7.4f,%7.4f, %7.3f, %d,  %10.6f,%9.1f,%9.1f,%9.1f,  %8.5f, %d, %c",
-            cTime, Sen->Tbatt, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, charge_curr, model_saturated_, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, reset,'\0');
+        sprintf(cp.buffer, "unit_sim, %13.3f, %7.4f,%7.4f, %7.4f,%7.4f,%7.4f,%7.4f, %7.3f,%7.3f,  %d,  %10.6f,%9.1f,%9.1f,%9.1f,  %8.5f, %d, %c",
+            cTime, Sen->Tbatt, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, model_saturated_, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, reset,'\0');
         Serial.println(cp.buffer);
     }
 
@@ -775,6 +778,9 @@ void BatteryModel::pretty_print(void)
     Serial.printf("  sat_cutback_gain_ = %7.1f;  // Gain to retard ib when voc exceeds vsat, dimensionless\n", sat_cutback_gain_);
     Serial.printf("  model_cutback_ =          %d;  // Gain to retard ib when voc exceeds vsat, dimensionless\n", model_cutback_);
     Serial.printf("  model_saturated_ =        %d;  // Modeled current being limited on saturation cutback, T = cutback limited\n", model_saturated_);
+    Serial.printf("  ib_ =               %7.3f;  // Battery terminal current, A\n", ib_);
+    Serial.printf("  ib_in_ =            %7.3f;  // Saved value of current input, A\n", ib_in_);
+    Serial.printf("  ib_fut_ =           %7.3f;  // Future value of limited current, A\n", ib_fut_);
     Serial.printf("  ib_sat_ =           %7.3f;  // Indicator of maximal cutback, T = cutback saturated\n", ib_sat_);
     Serial.printf(" *rp_s_cap_model_ =   %7.3f;  // Rated capacity scalar\n", *rp_s_cap_model_);
 }

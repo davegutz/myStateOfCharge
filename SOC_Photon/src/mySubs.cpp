@@ -108,8 +108,8 @@ void print_serial_header(void)
 }
 void print_serial_sim_header(void)
 {
-  if ( rp.debug==24 )
-    Serial.printf("unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_stat_m, dv_dyn_m, vb_m, ib_m, sat_m, ddq_m, dq_m, q_m, qcap_m, soc_m, reset_m,\n");
+  if ( rp.debug==24 ) // print_serial_sim_header
+    Serial.printf("unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_stat_m, dv_dyn_m, vb_m, ib_m, ib_in_m, sat_m, ddq_m, dq_m, q_m, qcap_m, soc_m, reset_m,\n");
 }
 
 // Print strings
@@ -483,7 +483,7 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   //  Inputs:  Sen->Tbatt_filt(past), Sen->Ibatt_model_in
   //  States: Sim->soc(past)
   //  Outputs:  Sim->temp_c(), Sim->Ib(), Sim->Vb(), rp.inj_bias, Sim.model_saturated
-  Sen->Vbatt_model = Sen->Sim->calculate(Sen, cp.dc_dc_on);
+  Sen->Vbatt_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, reset);
   Sen->Ibatt_model = Sen->Sim->Ib();
   Sen->Tbatt_model = Sen->Tbatt_model_filt = Sen->Sim->temp_c();
   cp.model_cutback = Sen->Sim->cutback();

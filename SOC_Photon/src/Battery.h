@@ -292,7 +292,7 @@ public:
   // operators
   // functions
   virtual void assign_rand(void);
-  double calculate(Sensors *Sen, const boolean dc_dc_on);
+  double calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset);
   float calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq);
   double count_coulombs(Sensors *Sen, const boolean reset, const double t_last, BatteryMonitor *Mon);
   void load();
@@ -317,6 +317,8 @@ protected:
   double *rp_delta_q_model_;// Charge change since saturated, C
   float *rp_t_last_model_;  // Battery temperature past value for rate limit memory, deg C
   float *rp_s_cap_model_;   // Rated capacity scalar
+  double ib_fut_;           // Future value of limited current, A
+  double ib_in_;            // Saved value of current input, A
 };
 
 

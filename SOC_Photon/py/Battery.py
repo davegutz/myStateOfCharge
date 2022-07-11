@@ -561,6 +561,8 @@ class BatteryModel(Battery):
         self.d_delta_q = 0.  # Charging rate, Coulombs/sec
         self.charge_curr = 0.  # Charge current, A
         self.saved_m = Saved_m()  # for plots and prints
+        self.ib_in = 0.  # Saved value of current input, A
+        self.ib_fut = 0.  # Future value of limited current, A
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -577,9 +579,11 @@ class BatteryModel(Battery):
             format(self.model_saturated)
         s += "  ib_sat =          {:7.3f}  // Threshold to declare saturation.  This regeneratively slows" \
              " down charging so if too\n".format(self.ib_sat)
-        s += "  ib     =        {:7.3f}  // Open circuit current into posts, A\n".format(self.ib)
-        s += "  voc     =        {:7.3f}  // Open circuit voltage, V\n".format(self.voc)
-        s += "  voc_stat=        {:7.3f}  // Static, table lookup value of voc before applying hysteresis, V\n".\
+        s += "  ib_in  =          {:7.3f}  // Saved value of current input, A\n".format(self.ib_in)
+        s += "  ib     =          {:7.3f}  // Open circuit current into posts, A\n".format(self.ib)
+        s += "  ib_fut =          {:7.3f}  // Future value of limited current, A\n".format(self.ib_fut)
+        s += "  voc     =         {:7.3f}  // Open circuit voltage, V\n".format(self.voc)
+        s += "  voc_stat=         {:7.3f}  // Static, table lookup value of voc before applying hysteresis, V\n".\
             format(self.voc_stat)
         s += "  mod     =               {:d}  // Modeling\n".format(self.mod)
         s += "  \n  "
@@ -588,10 +592,14 @@ class BatteryModel(Battery):
         s += Battery.__str__(self, prefix + 'BatteryModel:')
         return s
 
-    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, rp=None):  # BatteryModel
+    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None):  # BatteryModel
         self.dt = dt
         self.temp_c = temp_c
         self.mod = rp.modeling
+        self.ib_in = curr_in
+        if reset:
+            self.ib_fut = self.ib_in
+        self.ib = self.ib_fut
 
         soc_lim = max(min(soc, 1.), 0.)
 
@@ -630,15 +638,15 @@ class BatteryModel(Battery):
         self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
         # if self.tweak_test:
         if self.tweak_test or (not rp.modeling):
-            self.sat_ib_max = curr_in
-        self.ib = min(curr_in, self.sat_ib_max)  # the feedback of self.ib
-        if (self.q <= 0.) & (curr_in < 0.):  # empty
-            self.ib = 0.  # empty
-        self.model_cutback = (self.voc_stat > self.vsat) & (self.ib == self.sat_ib_max)
-        self.model_saturated = (self.temp_c > low_t) and (self.model_cutback & (self.ib < self.ib_sat))
+            self.sat_ib_max = self.ib_in
+        self.ib_fut = min(self.ib_in, self.sat_ib_max)  # the feedback of self.ib
+        if (self.q <= 0.) & (self.ib_in < 0.):  # empty
+            self.ib_fut = 0.  # empty
+        self.model_cutback = (self.voc_stat > self.vsat) & (self.ib_fut == self.sat_ib_max)
+        self.model_saturated = (self.temp_c > low_t) and (self.model_cutback & (self.ib_fut < self.ib_sat))
         Coulombs.sat = self.model_saturated
-        # print("model:  soc, curr_in, ib, model_cutback, model_saturated",
-        #       self.soc, curr_in, self.ib, self.model_cutback, self.model_saturated)
+        # print("model:  soc, ib_in, ib, model_cutback, model_saturated",
+        #       self.soc, self.ib_in, self.ib, self.model_cutback, self.model_saturated)
 
         return self.vb
 
@@ -762,6 +770,8 @@ class BatteryModel(Battery):
         self.saved_m.dv_dyn_m.append(self.dv_dyn)
         self.saved_m.vb_m.append(self.vb)
         self.saved_m.ib_m.append(self.ib)
+        self.saved_m.ib_in_m.append(self.ib_in)
+        self.saved_m.ib_fut_m.append(self.ib_fut)
         self.saved_m.sat_m.append(self.sat)
         self.saved_m.ddq_m.append(self.d_delta_q)
         self.saved_m.dq_m.append(self.delta_q)
@@ -1138,6 +1148,8 @@ class Saved_m:
         self.dv_dyn_m = []
         self.vb_m = []
         self.ib_m = []
+        self.ib_in_m = []
+        self.ib_fut_m = []
         self.sat_m = []
         self.ddq_m = []
         self.dq_m = []
@@ -1158,6 +1170,8 @@ class Saved_m:
             s += "{:5.2f},".format(self.dv_dyn_m[i])
             s += "{:5.2f},".format(self.vb_m[i])
             s += "{:8.3f},".format(self.ib_m[i])
+            s += "{:8.3f},".format(self.ib_in_m[i])
+            s += "{:8.3f},".format(self.ib_fut_m[i])
             s += "{:7.3f},".format(self.sat_m[i])
             s += "{:5.3f},".format(self.ddq_m[i])
             s += "{:5.3f},".format(self.dq_m[i])

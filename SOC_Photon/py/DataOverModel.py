@@ -438,7 +438,7 @@ class SavedDataSim:
             self.dv_dyn_m = []
             self.dv_hys_m = []
             self.vb_m = []
-            self.ib_m_in= []
+            self.ib_in_m= []
             self.ib_m = []
             self.sat_m = []
             self.ddq_m = []
@@ -468,7 +468,7 @@ class SavedDataSim:
             self.voc_m = self.vb_m - self.dv_dyn_m
             self.dv_hys_m = self.voc_m - self.voc_stat_m
             self.ib_m = data.ib_m[:i_end]
-            self.ib_m_in = np.append(np.zeros((1,1)), np.array(data.ib_m[:(i_end-1)]))
+            self.ib_in_m = data.ib_in_m[:i_end]
             self.sat_m = data.sat_m[:i_end]
             self.ddq_m = data.ddq_m[:i_end]
             self.dq_m = data.dq_m[:i_end]
@@ -560,8 +560,8 @@ if __name__ == '__main__':
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
-        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'sat_m', 'ddq_m',
-                    'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
+        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'ib_in_m',
+                    'sat_m', 'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
         try:
             data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
                                  encoding=None).view(np.recarray)

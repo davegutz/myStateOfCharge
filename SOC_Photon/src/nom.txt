@@ -51,6 +51,8 @@
 		hys_T_;   		dv-soc 2-D table, V
 		Ib				Battery bank current, A
 		ib				Battery terminal current, A
+		ib_fut_			Future value of limited current, A
+		ib_in_			Saved value of current input, A
 		Ibatt			Selected battery bank current, A
 		Ibatt_hdwe		Selected, sensed shunt current, A
 		Ibatt_model		Modeled battery bank current, A
