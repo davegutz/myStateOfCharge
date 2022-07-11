@@ -599,12 +599,11 @@ if __name__ == '__main__':
         plt.show()
 
 
-    #python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220613_new.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/2-pole y_filt, tune hys 220613.txt", "soc0_2022")
     #python DataOverModel.py("../dataReduction/watchXm2.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/serial_20220624_095543.txt", "pro_2022")
-    #python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220706.txt", "pro_2022")
-    #python DataOverModel.py("../dataReduction/slowTweakRegressionTest20220706.txt", "pro_2022")
+    #python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220711.txt", "pro_2022")
+    #python DataOverModel.py("../dataReduction/slowTweakRegressionTest20220711.txt", "pro_2022")
     #
     """
     PyCharm Sample Run Configuration Parameters:
