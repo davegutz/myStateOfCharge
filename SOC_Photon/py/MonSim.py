@@ -254,8 +254,8 @@ if __name__ == '__main__':
         date_ = datetime.now().strftime("%y%m%d")
 
         # Transient  inputs
-        # time_end = None
-        time_end = 5.
+        time_end = None
+        # time_end = 5.
         # time_end = 2000.
 
         # Setup and user inputs (data_file_old_txt must end in .txt)
