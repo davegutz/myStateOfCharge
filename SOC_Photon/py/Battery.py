@@ -315,12 +315,12 @@ class BatteryMonitor(Battery, EKF_1x1):
     def assign_soc_m(self, soc_m):
         self.soc_m = soc_m
 
-    def calculate(self, temp_c, vb, ib, dt, init, q_capacity=None, dc_dc_on=None, rp=None, d_voc=None):  # BatteryMonitor
+    def calculate(self, temp_c, vb, ib, dt, reset, q_capacity=None, dc_dc_on=None, rp=None, d_voc=None):  # BatteryMonitor
         self.temp_c = temp_c
         self.vsat = calc_vsat(self.temp_c)
         self.dt = dt
         self.mod = rp.modeling
-        self.T_Rlim.update(x=self.temp_c, reset=init, dt=dt, max_=0.017, min_=-.017)
+        self.T_Rlim.update(x=self.temp_c, reset=reset, dt=dt, max_=0.017, min_=-.017)
         T_rate = self.T_Rlim.rate
 
         # Dynamics
@@ -687,7 +687,7 @@ class BatteryModel(Battery):
         # Rate limit temperature
         self.temp_lim = max(min(temp_c, self.t_last + self.t_rlim*dt), self.t_last - self.t_rlim*dt)
         # print("BatteryModel:  temp_c, t_last, t_rim, dt, temp_lim=", temp_c, self.t_last, self.t_rlim, dt, self.temp_lim)
-        if reset:
+        if self.reset:
             self.temp_lim = temp_c
             self.t_last = temp_c
             if soc_m_init and not self.mod:

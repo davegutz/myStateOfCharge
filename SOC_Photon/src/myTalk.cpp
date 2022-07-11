@@ -741,7 +741,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 rp.freq *= (2. * PI);
                 break;
 
-              case ( 3 ):
+              case ( 3 ):  // Xp3:  
                 self_talk("Xp0", Mon, Sen);
                 self_talk("Ca0.5", Mon, Sen);
                 rp.type = 3;
@@ -751,25 +751,25 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 rp.freq *= (2. * PI);
                 break;
 
-              case ( 4 ):
+              case ( 4 ):  // Xp4:  
                 self_talk("Xp0", Mon, Sen);
                 rp.type = 4;
                 rp.ibatt_bias_all = -RATED_BATT_CAP;  // Software effect only
                 break;
 
-              case ( 5 ):
+              case ( 5 ):  // Xp5:  
                 self_talk("Xp0", Mon, Sen);
                 rp.type = 5;
                 rp.ibatt_bias_all = RATED_BATT_CAP; // Software effect only
                 break;
 
-              case ( 6 ):
+              case ( 6 ):  // Xp6:  
                 self_talk("Xp0", Mon, Sen);
                 rp.type = 6;
                 rp.amp = RATED_BATT_CAP*0.2;
                 break;
 
-              case ( 7 ):
+              case ( 7 ):  // Xp7:  
                 self_talk("Xp0", Mon, Sen);
                 rp.type = 7;
                 self_talk("Xm7", Mon, Sen);    // Run to model
@@ -780,7 +780,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 Serial.printf("Run 'n<val> to init south of sat.  Reset whole thing by running 'Xp-1'\n");
                 break;
 
-              case ( 8 ):
+              case ( 8 ):  // Xp8:  
                 self_talk("Xp0", Mon, Sen);
                 self_talk("Ca0.5", Mon, Sen);
                 rp.type = 8;
@@ -790,7 +790,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 rp.freq *= (2. * PI);
                 break;
 
-              case ( 9 ): case( 10 ): case ( 11 ):  // Regression tests 9=tweak, 10=tweak w data, 11=cycle
+              case ( 9 ): case( 10 ): case ( 11 ):  // Xp9: Xp10: Xp11: Regression tests 9=tweak, 10=tweak w data, 11=cycle
                 self_talk("Xp0", Mon, Sen);   // Reset nominal
                 self_talk("v0", Mon, Sen);    // Turn off debug temporarily so not snowed by data dumps
                 self_talk("Bm0", Mon, Sen);   // Set Battleborn configuration
@@ -808,7 +808,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 self_talk("Mk1", Mon, Sen);   // Reset the tweak biases to 1 for new count
                 self_talk("Nk1", Mon, Sen);   // Reset the tweak biases to 1 for new count
                 self_talk("Dn1", Mon, Sen);   // Disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
-                self_talk("XW5", Mon, Sen);   // Wait time before starting to cycle
+                self_talk("XW1", Mon, Sen);   // Wait time before starting to cycle
                 if ( INT_in == 9 )
                 {
                   self_talk("Xf0.02", Mon, Sen);  // Frequency 0.02 Hz
@@ -836,7 +836,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 self_talk("XR", Mon, Sen);    // Run cycle
                 break;
 
-              case( 20 ): case ( 21 ):  // 20=tweak-like data, 21= 2 sec data cycle
+              case( 20 ): case ( 21 ):  // Xp20:  Xp21:  20=tweak-like data, 21= 2 sec data cycle
                 self_talk("v0", Mon, Sen);    // Turn off debug temporarily so not snowed by data dumps
                 self_talk("Pa", Mon, Sen);    // Print all for record
                 if ( INT_in == 20 )
@@ -856,12 +856,12 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
             }
             break;
 
-          case ( 'C' ): // injection number of cycles
+          case ( 'C' ): // XC:  injection number of cycles
             Sen->cycles_inj = max(min(cp.input_string.substring(2).toFloat(), 10000.), 0);
             Serial.printf("Num of inj cycles set to %7.3f\n", Sen->cycles_inj);
             break;
 
-          case ( 'R' ): // Start injection now
+          case ( 'R' ): // XR:  Start injection now
             if ( Sen->now>TEMP_INIT_DELAY )
             {
               Sen->start_inj = Sen->wait_inj + Sen->now;
@@ -872,14 +872,14 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
             else Serial.printf("Wait %5.1f s for init\n", float(TEMP_INIT_DELAY-Sen->now)/1000.);
             break;
 
-          case ( 'S' ): // Stop injection now
+          case ( 'S' ): // XS:  Stop injection now
             Sen->start_inj = 0UL;
             Sen->stop_inj = 0UL;
             Sen->end_inj = 0UL;
             Serial.printf("STOPPED\n");
             break;
 
-          case ( 'W' ):
+          case ( 'W' ):  // XW<>:  Wait
             FP_in = cp.input_string.substring(2).toFloat();
             Sen->wait_inj = (unsigned long int)(max(min(FP_in, TT_WAIT), 0.))*1000;
             Serial.printf("Waiting %7.1f s to start inj\n", FP_in);
@@ -890,7 +890,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
         }
         break;
 
-      case ( 'h' ): 
+      case ( 'h' ):  // h: help
         talkH(Mon, Sen);
         break;
 

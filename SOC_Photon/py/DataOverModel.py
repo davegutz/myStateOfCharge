@@ -193,42 +193,42 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         n_fig += 1
         plt.subplot(331)
         plt.title(plot_title)
-        plt.plot(old_s_sim.time, old_s_sim.ib_m, color='orange', label='ib_m')
+        plt.plot(old_s_sim.time, old_s_sim.ib_m, color='magenta', label='ib_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.ib_m, color='green', linestyle='--', label='ib_m_new')
-        plt.plot(old_s.time, old_s.Ib, color='blue', label='ib')
-        plt.plot(new_s.time, new_s.Ib, color='red', linestyle='--', label='ib_new')
+        plt.plot(old_s.time, old_s.Ib, color='blue',  linestyle=':', label='ib')
+        plt.plot(new_s.time, new_s.Ib, color='cyan', linestyle='-.', label='ib_new')
         plt.legend(loc=1)
         plt.subplot(332)
-        plt.plot(old_s_sim.time, old_s_sim.soc_m, color='orange', label='soc_m')
+        plt.plot(old_s_sim.time, old_s_sim.soc_m, color='magenta', label='soc_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.soc_m, color='green', linestyle='--', label='soc_m_new')
         plt.legend(loc=1)
         plt.subplot(333)
-        plt.plot(old_s_sim.time, old_s_sim.voc_stat_m, color='orange', label='voc_stat_m')
+        plt.plot(old_s_sim.time, old_s_sim.voc_stat_m, color='magenta', label='voc_stat_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.voc_stat_m, color='green', linestyle='--', label='voc_stat_m_new')
-        plt.plot(old_s_sim.time, old_s_sim.vsat_m, color='blue', label='vsat_m')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.vsat_m, color='red', linestyle='--', label='vsat_m_new')
-        plt.plot(old_s_sim.time, old_s_sim.vb_m, color='cyan', label='vb_m')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.vb_m, color='black', linestyle='--', label='vb_m_new')
+        plt.plot(old_s_sim.time, old_s_sim.vsat_m, color='blue',  linestyle=':', label='vsat_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.vsat_m, color='cyan', linestyle='-.', label='vsat_m_new')
+        plt.plot(old_s_sim.time, old_s_sim.vb_m, color='orange', linestyle=':', label='vb_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.vb_m, color='black', linestyle='-.', label='vb_m_new')
         plt.legend(loc=1)
         plt.subplot(334)
-        plt.plot(old_s_sim.time, old_s_sim.Tb_m, color='orange', label='Tb_m')
+        plt.plot(old_s_sim.time, old_s_sim.Tb_m, color='magenta', label='Tb_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.Tb_m, color='green', linestyle='--', label='Tb_m_new')
-        plt.plot(old_s_sim.time, old_s_sim.Tbl_m, color='blue', label='Tbl_m')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.Tbl_m, color='red', linestyle='--', label='Tbl_m_new')
+        plt.plot(old_s_sim.time, old_s_sim.Tbl_m, color='blue', linestyle=':', label='Tbl_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.Tbl_m, color='cyan', linestyle='-.', label='Tbl_m_new')
         plt.legend(loc=1)
         plt.subplot(335)
-        plt.plot(old_s_sim.time, old_s_sim.dv_dyn_m, color='orange', label='dv_dyn_m')
+        plt.plot(old_s_sim.time, old_s_sim.dv_dyn_m, color='magenta', label='dv_dyn_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.dv_dyn_m, color='green', linestyle='--', label='dv_dyn_m_new')
-        plt.plot(old_s.time, old_s.dV_dyn, color='blue', label='dv_dyn')
-        plt.plot(new_s.time, new_s.dV_dyn, color='red', linestyle='--', label='dv_dyn_new')
+        plt.plot(old_s.time, old_s.dV_dyn, color='blue', linestyle=':', label='dv_dyn')
+        plt.plot(new_s.time, new_s.dV_dyn, color='cyan', linestyle='-.', label='dv_dyn_new')
         plt.legend(loc=1)
         plt.subplot(337)
-        plt.plot(old_s_sim.time, old_s_sim.dq_m, color='orange', label='dq_m')
+        plt.plot(old_s_sim.time, old_s_sim.dq_m, color='magenta', label='dq_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.dq_m, color='green', linestyle='--', label='dq_m_new')
         plt.legend(loc=1)
         plt.subplot(338)
-        plt.plot(old_s_sim.time, old_s_sim.reset_m, color='orange', label='reset_m')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.reset_m, color='red', linestyle='--', label='reset_m_new')
+        plt.plot(old_s_sim.time, old_s_sim.reset_m, color='magenta', label='reset_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.reset_m, color='green', linestyle='--', label='reset_m_new')
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -438,8 +438,8 @@ class SavedDataSim:
             self.dv_dyn_m = []
             self.dv_hys_m = []
             self.vb_m = []
+            self.ib_m_in= []
             self.ib_m = []
-            self.ib_fwd_m = []
             self.sat_m = []
             self.ddq_m = []
             self.dq_m = []
@@ -467,8 +467,8 @@ class SavedDataSim:
             self.dv_dyn_m = data.dv_dyn_m[:i_end]
             self.voc_m = self.vb_m - self.dv_dyn_m
             self.dv_hys_m = self.voc_m - self.voc_stat_m
-            self.ib_fwd_m = data.ib_m[:i_end]
-            self.ib_m = np.append(np.zeros((1,1)), np.array(data.ib_m[:(i_end-1)]))
+            self.ib_m = data.ib_m[:i_end]
+            self.ib_m_in = np.append(np.zeros((1,1)), np.array(data.ib_m[:(i_end-1)]))
             self.sat_m = data.sat_m[:i_end]
             self.ddq_m = data.ddq_m[:i_end]
             self.dq_m = data.dq_m[:i_end]
@@ -563,12 +563,12 @@ if __name__ == '__main__':
         cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'sat_m', 'ddq_m',
                     'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
         try:
-            data_old_sim = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
+            data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
                                  encoding=None).view(np.recarray)
-            saved_old_sim = SavedDataSim(saved_old.time_ref, data_old_sim, time_end)
+            saved_sim_old = SavedDataSim(saved_old.time_ref, data_sim_old, time_end)
         except:
-            data_old_sim = None
-            saved_old_sim = None
+            data_sim_old = None
+            saved_sim_old = None
 
         # Run model
         mons, sims, monrs, sims_m = replicate(saved_old)
@@ -590,7 +590,7 @@ if __name__ == '__main__':
             filename = "./Figures/" + data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         # n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
-        n_fig, fig_files = overall(saved_old, mons, saved_old_sim, sims, sims_m, filename, fig_files, plot_title=plot_title,
+        n_fig, fig_files = overall(saved_old, mons, saved_sim_old, sims, sims_m, filename, fig_files, plot_title=plot_title,
                                    n_fig=n_fig, new_s_s=sims)
         if platform != 'linux':
             unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
