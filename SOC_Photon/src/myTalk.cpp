@@ -808,7 +808,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 self_talk("Mk1", Mon, Sen);   // Reset the tweak biases to 1 for new count
                 self_talk("Nk1", Mon, Sen);   // Reset the tweak biases to 1 for new count
                 self_talk("Dn1", Mon, Sen);   // Disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
-                self_talk("XW1", Mon, Sen);   // Wait time before starting to cycle
+                self_talk("XW5", Mon, Sen);   // Wait time before starting to cycle
                 if ( INT_in == 9 )
                 {
                   self_talk("Xf0.02", Mon, Sen);  // Frequency 0.02 Hz

@@ -87,7 +87,7 @@ def save_clean_file_sim(sims, csv_file, unit_key):
             output.write(s)
         print("Wrote(save_clean_file_sim):", csv_file)
 
-def replicate(saved_old, saved_sim_old=None, init_time=-.5, dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2, t_Ib_fail=None, Ib_fail=0.):
+def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2, t_Ib_fail=None, Ib_fail=0.):
     t = saved_old.time
     dt = saved_old.dt
     Vb = saved_old.Vb
@@ -255,7 +255,7 @@ if __name__ == '__main__':
 
         # Transient  inputs
         # time_end = None
-        time_end = 1.
+        time_end = 5.
         # time_end = 2000.
 
         # Setup and user inputs (data_file_old_txt must end in .txt)
@@ -291,7 +291,7 @@ if __name__ == '__main__':
         if saved_old.time[0] == 0.: # no initialization flat detected at beginning of recording
             init_time = 1.
         else:
-            init_time = -0.5
+            init_time = -4.
         # Get dv_hys from data
         dv_hys = saved_old.dV_hys[0]
 
