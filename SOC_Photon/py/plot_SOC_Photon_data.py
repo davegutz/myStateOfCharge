@@ -89,7 +89,7 @@ def plot_SOC_Photon_data(r, key):
                         y_vec1[:, 0] = Ib
                         y_vec2 = np.zeros((len(t_v), 4))
                         y_vec2[:, 0] = Vb
-                        y_vec2[:, 1] = Voc
+                        y_vec2[:, 1] = Voc_stat
                         y_vec2[:, 2] = Voc_ekf
                         y_vec2[:, 3] = Vsat
                         print('Point#', i, 'at cTime=', cTime, 'T may be=', T_maybe, 'N=', n_v)
@@ -104,7 +104,7 @@ def plot_SOC_Photon_data(r, key):
                     y_vec0[-1][2] = soc
                     y_vec1[-1][0] = Ib
                     y_vec2[-1][0] = Vb
-                    y_vec2[-1][1] = Voc
+                    y_vec2[-1][1] = Voc_stat
                     y_vec2[-1][2] = Voc_ekf
                     y_vec2[-1][3] = Vsat
                     if linen_x1 is None:
@@ -116,7 +116,7 @@ def plot_SOC_Photon_data(r, key):
                                                    pause_time=0.01,
                                                    labels='Ib')
                     linen_x2, axx2 = liven_plotter(t_v, y_vec2, linen_x2, fig, subplot=313, ax=axx2, y_label='Volts',
-                                                   pause_time=0.01, labels=['Vb', 'Voc', 'Voc_ekf', 'Vsat'])
+                                                   pause_time=0.01, labels=['Vb', 'Voc_stat', 'Voc_ekf', 'Vsat'])
                     y_vec0 = np.append(y_vec0[1:][:], np.zeros((1, 3)), axis=0)
                     y_vec1 = np.append(y_vec1[1:][:], np.zeros((1, 1)), axis=0)
                     y_vec2 = np.append(y_vec2[1:][:], np.zeros((1, 4)), axis=0)
