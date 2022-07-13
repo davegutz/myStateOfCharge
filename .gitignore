@@ -136,3 +136,7 @@ SOC_Photon/dataReduction/slowTweakRegressionTest20220711_mon.csv
 SOC_Photon/dataReduction/slowTweakRegressionTest20220711_mon_rep.csv
 SOC_Photon/dataReduction/slowTweakRegressionTest20220711_sim.csv
 SOC_Photon/dataReduction/slowTweakRegressionTest20220711_sim_rep.csv
+SOC_Photon/dataReduction/real world rapid 20220713_sim_rep.csv
+SOC_Photon/dataReduction/real world rapid 20220713_sim.csv
+SOC_Photon/dataReduction/real world rapid 20220713_mon_rep.csv
+SOC_Photon/dataReduction/real world rapid 20220713_mon.csv

@@ -603,12 +603,13 @@ if __name__ == '__main__':
     #python DataOverModel.py("../dataReduction/watchXm2.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/serial_20220624_095543.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220711.txt", "pro_2022")
-    #python DataOverModel.py("../dataReduction/slowTweakRegressionTest20220711.txt", "pro_2022")
+    #python DataOverModel.py()
     #
     """
-    PyCharm Sample Run Configuration Parameters:
-    "../dataReduction/serial_20220624_095543.txt"
-    pro_2022
+    PyCharm Sample Run Configuration Parameters (right click in pyCharm - Modify Run Configuration:
+        "../dataReduction/slowTweakRegressionTest20220711.txt" "pro_2022"
+        "../dataReduction/serial_20220624_095543.txt"    "pro_2022"
+        "../dataReduction/real world rapid 20220713.txt" "soc0_2022"
     
     PyCharm Terminal:
     python DataOverModel.py "../dataReduction/serial_20220624_095543.txt" "pro_2022"

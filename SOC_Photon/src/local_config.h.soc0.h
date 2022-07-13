@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "soc0_20220710";  // Tweak Coulombic efficiency, delete duty
+const String unit = "soc0_20220712";  // Tweak Coulombic efficiency, delete duty, model past value
 
 // Sensor biases
 #define CURR_BIAS_AMP         -0.23 // Calibration of amplified shunt sensor ('Da=#.#;'), A

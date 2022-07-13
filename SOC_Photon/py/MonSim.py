@@ -87,7 +87,8 @@ def save_clean_file_sim(sims, csv_file, unit_key):
             output.write(s)
         print("Wrote(save_clean_file_sim):", csv_file)
 
-def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2, t_Ib_fail=None, Ib_fail=0.):
+def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
+              t_Ib_fail=None, Ib_fail=0.):
     t = saved_old.time
     dt = saved_old.dt
     Vb = saved_old.Vb
@@ -264,6 +265,7 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/real world Xp21 20220626.txt';unit_key = 'soc0_2022';
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220710.txt';unit_key = 'pro_2022' TODO: delete
         data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220711.txt';unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220711.txt';unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
