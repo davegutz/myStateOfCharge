@@ -548,7 +548,7 @@ if __name__ == '__main__':
 
         # Transient  inputs
         time_end = None
-        # time_end = 2500.
+        # time_end = 20.
 
         # Load data (must end in .txt) txt_file, type, title_key, unit_key
         data_file_clean = write_clean_file(data_file_old_txt, type='_mon', title_key='unit,', unit_key=unit_key)
@@ -571,7 +571,7 @@ if __name__ == '__main__':
             saved_sim_old = None
 
         # Run model
-        mons, sims, monrs, sims_m = replicate(saved_old)
+        mons, sims, monrs, sims_m = replicate(saved_old, init_time=1.)
         date_ = datetime.now().strftime("%y%m%d")
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         save_clean_file(mons, mon_file_save, '_mon_rep' + date_)

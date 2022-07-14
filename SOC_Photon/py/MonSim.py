@@ -98,7 +98,13 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
     Voc = saved_old.Voc
     Voc_stat = saved_old.Voc_stat
     soc_init = saved_old.soc[0]
+    soc_ekf_init = saved_old.soc_ekf[0]
     soc_m_init = saved_old.soc_m[0]
+    sat_init = saved_old.sat[0]
+    if saved_sim_old:
+        sat_m_init = saved_sim_old.sat_m[0]
+    else:
+        sat_m_init = saved_old.Voc_stat[0] > saved_old.Vsat[0]
     t_len = len(t)
     rp = Retained()
     rp.modeling = saved_old.mod()
@@ -163,6 +169,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
             sim.load(rp.delta_q_model, rp.t_last_model)
             sim.init_battery()
             sim.apply_delta_q_t(rp.delta_q_model, rp.t_last_model)
+            mon.sat = sat_init
 
         # Models
         if t_Ib_fail and t[i] > t_Ib_fail:
@@ -175,7 +182,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
                 ib_in_m = Ib_past[i]
             current_in = saved_old.Ib[i]
         sim.calculate(temp_c=Tb[i], soc=sim.soc, curr_in=ib_in_m, dt=T, q_capacity=sim.q_capacity,
-                      dc_dc_on=dc_dc_on, reset=reset, rp=rp)
+                      dc_dc_on=dc_dc_on, reset=reset, rp=rp, sat_init=sat_m_init)
         if t_Ib_fail and t[i] > t_Ib_fail:
             charge_curr = Ib_fail
         else:
@@ -191,7 +198,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
             mon.load(rp.delta_q, rp.t_last)
             mon.assign_temp_c(Tb[i])
             mon.init_battery()
-            mon.init_soc_ekf(soc_init)  # when modeling (assumed in python) ekf wants to equal model
+            mon.init_soc_ekf(soc_ekf_init)  # when modeling (assumed in python) ekf wants to equal model
 
         # Monitor calculations including ekf
         if t_Vb_fail and t[i] >= t_Vb_fail:
@@ -264,8 +271,9 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/real world Xp20 20220626.txt';unit_key = 'soc0_2022';
         # data_file_old_txt = '../dataReduction/real world Xp21 20220626.txt';unit_key = 'soc0_2022';
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220710.txt';unit_key = 'pro_2022' TODO: delete
-        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220711.txt';unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220711.txt';unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220711.txt';unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220711.txt';unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/real world rapid 20220713.txt'; unit_key = "soc0_2022"
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
