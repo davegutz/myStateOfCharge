@@ -26,6 +26,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
 from MonSim import replicate, save_clean_file, save_clean_file_sim
+from Battery import overall as overalls
 from kivy.utils import platform
 if platform != 'linux':
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
@@ -385,6 +386,7 @@ class SavedData:
             self.time = np.array(self.time[:i_end])
             self.Ib = np.array(data.Ib[:i_end])
             self.Ib_past = np.append(np.zeros((1,1)), np.array(data.Ib[:(i_end-1)]))
+            self.Ib_past[0] = self.Ib_past[1]
             self.Vb = np.array(data.Vb[:i_end])
             self.sat = np.array(data.sat[:i_end])
             self.sel = np.array(data.sel[:i_end])
@@ -589,7 +591,7 @@ if __name__ == '__main__':
         else:
             filename = "./Figures/" + data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        # n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
+        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
         n_fig, fig_files = overall(saved_old, mons, saved_sim_old, sims, sims_m, filename, fig_files, plot_title=plot_title,
                                    n_fig=n_fig, new_s_s=sims)
         if platform != 'linux':

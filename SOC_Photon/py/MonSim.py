@@ -152,15 +152,16 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
     Is_sat_delay = TFDelay(in_=saved_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
     # time loop
-    T = t[1] - t[0]
     for i in range(t_len):
+        reset = (t[i] <= init_time)
         saved_old.i = i
         if i > 0:
             T = t[i] - t[i - 1]
+        else:
+            T = t[1] - t[0]
 
         # dc_dc_on = bool(lut_dc.interp(t[i]))
         dc_dc_on = False
-        reset = (t[i] <= init_time)
 
         if reset:
             sim.apply_soc(soc_m_init, Tb[i])
