@@ -126,10 +126,6 @@ void setup()
   pinMode(myPins->status_led, OUTPUT);
   digitalWrite(myPins->status_led, LOW);
 
-  // Initialize output (Used in Test mode only)
-  pinMode(myPins->pwm_pin, OUTPUT);
-  pwm_write(0, myPins);
-
   // I2C
   Wire.setSpeed(CLOCK_SPEED_100KHZ);
   Wire.begin();
@@ -317,9 +313,9 @@ void loop()
     Sen->T =  ReadSensors->updateTime();
     if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read dt=%7.3f; load at %ld...  \n", Sen->T, millis());
 
-    // Read sensors, model signals, select between them, synthesize a pwm shunt voltage (rp.duty) for certain wiring setup
+    // Read sensors, model signals, select between them, synthesize injection signals on current
     // Inputs:  rp.config, rp.sim_mod
-    // Outputs: Sen->Ibatt, Sen->Vbatt, Sen->Tbatt_filt, rp.duty
+    // Outputs: Sen->Ibatt, Sen->Vbatt, Sen->Tbatt_filt, rp.inj_bias
     sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen);
 
     // Calculate Ah remaining
@@ -368,8 +364,7 @@ void loop()
   // Control
   if ( control )
   {
-    pwm_write(rp.duty, myPins);
-    if ( rp.debug>102 ) Serial.printf("cpt control %ld.  rp.duty=%ld\n", millis(), rp.duty);
+    // continue;
   }
 
   // OLED and Bluetooth display drivers
@@ -438,7 +433,7 @@ void loop()
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
     mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ibatt,
                           Mon->soc_ekf(), Mon->soc(), Mon->Voc(), Mon->Voc(),
-                          Sen->ShuntAmp->tweak_bias(), Sen->ShuntNoAmp->tweak_bias());
+                          Sen->ShuntAmp->tweak_sclr(), Sen->ShuntNoAmp->tweak_sclr());
     if ( rp.debug==0 ) Serial.printf("Summ...\n");
   }
 

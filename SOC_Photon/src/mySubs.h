@@ -55,8 +55,8 @@ class Shunt: public Tweak, Adafruit_ADS1015
 {
 public:
   Shunt();
-  Shunt(const String name, const uint8_t port, float *rp_delta_q_inf, float *rp_tweak_bias, float *cp_ibatt_bias, 
-    const float v2a_s);
+  Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_sclr,
+    float *cp_ibatt_bias, const float v2a_s);
   ~Shunt();
   // operators
   // functions
@@ -74,13 +74,13 @@ protected:
   String name_;         // For print statements, multiple instances
   uint8_t port_;        // Octal I2C port used by Acafruit_ADS1015
   boolean bare_;        // If ADS to be ignored
-  float *cp_ibatt_bias_; // Global bias, A
-  float v2a_s_;        // Selected shunt conversion gain, A/V
+  float *cp_ibatt_bias_;// Global bias, A
+  float v2a_s_;         // Selected shunt conversion gain, A/V
   int16_t vshunt_int_;  // Sensed shunt voltage, count
   int16_t vshunt_int_0_;// Interim conversion, count
   int16_t vshunt_int_1_;// Interim conversion, count
-  float vshunt_;       // Sensed shunt voltage, V
-  float ishunt_cal_;   // Sensed, calibrated ADC, A
+  float vshunt_;        // Sensed shunt voltage, V
+  float ishunt_cal_;    // Sensed, calibrated ADC, A
 };
 
 
@@ -141,19 +141,22 @@ struct Sensors
   Sync *ReadSensors;              // Handle to debug read time
   double control_time;            // Decimal time, seconds since 1/1/2021
   boolean display;                // Use display
+  double sclr_coul_eff;           // Scalar on Coulombic Efficiency
   Sensors(void) {}
   Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, Sync *ReadSensors)
   {
     this->T = T;
     this->T_filt = T;
     this->T_temp = T_temp;
-    this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_inf_amp, &rp.tweak_bias_amp, &cp.ibatt_bias_amp, shunt_amp_v2a_s);
+    this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_cinf_amp, &rp.delta_q_dinf_amp, &rp.tweak_sclr_amp, &cp.ibatt_bias_amp,
+      shunt_amp_v2a_s);
     if ( rp.debug>102 )
     {
       Serial.printf("New Shunt('Amp'):\n");
       this->ShuntAmp->pretty_print();
     }
-    this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_inf_noamp, &rp.tweak_bias_noamp, &cp.ibatt_bias_noamp, shunt_noamp_v2a_s);
+    this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_cinf_noamp, &rp.delta_q_dinf_noamp, &rp.tweak_sclr_noamp,
+      &cp.ibatt_bias_noamp, shunt_noamp_v2a_s);
     if ( rp.debug>102 )
     {
       Serial.printf("New Shunt('No Amp'):\n");
@@ -171,6 +174,7 @@ struct Sensors
     this->PublishSerial = PublishSerial;
     this->ReadSensors = ReadSensors;
     this->display = true;
+    this->sclr_coul_eff = 1.;
   }
 };
 
@@ -187,7 +191,6 @@ void monitor(const int reset, const boolean reset_temp, const unsigned long now,
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen);
 void print_serial_header(void);
 void print_serial_sim_header(void);
-uint32_t pwm_write(uint32_t duty, Pins *myPins);
 void sense_synth_select(const int reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen);
 void serial_print(unsigned long now, double T);

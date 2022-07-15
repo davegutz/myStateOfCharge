@@ -17,9 +17,12 @@
 		d_delta_q		Charging rate, Coulombs/sec
 		delta_hrs		Time since last allowed saturation see 'N/Mz', hr
 		delta_q_		Charge change since saturated, C
-		delta_q_inf_	Charge infinity at past update see 'N/Mi', Coulombs
-		delta_q_inf_amp	delta_q since last reset
-		delta_q_inf_noamp	delta_q since last reset
+		delta_q_cinf_	Charge infinity at past update see 'N/Mi', Coulombs
+		delta_q_cinf_amp	Charge delta_q since last reset
+		delta_q_cinf_noamp	Charge delta_q since last reset
+		delta_q_dinf_	Discharge infinity at past update see 'N/Mi', Coulombs
+		delta_q_dinf_amp	Discharge delta_q since last reset
+		delta_q_dinf_noamp	Discharge delta_q since last reset
 		delta_q_max		Running tab since last de-saturation of potential new delta_q_sat
 		delta_q_model	Coulomb Counter state for model, (-1 - 1)
 		delta_q_sat_present_	Charge infinity at saturation, present see 'N/MP', Coulombs
@@ -48,18 +51,21 @@
 		hys_T_;   		dv-soc 2-D table, V
 		Ib				Battery bank current, A
 		ib				Battery terminal current, A
+		ib_fut_			Future value of limited current, A
+		ib_in_			Saved value of current input, A
 		Ibatt			Selected battery bank current, A
 		Ibatt_hdwe		Selected, sensed shunt current, A
 		Ibatt_model		Modeled battery bank current, A
 		Ibatt_model_in	Battery bank current input to model, A
+		inj_soft_bias	Injected bias, A
 		ib_sat_			Threshold to declare saturation.	This regeneratively slows down charging so if too small takes too long, A
 		int isum		Summary location.   Begins at -1 because first action is to increment isum
 		ioc_			Best estimate of IOC charge current after hysteresis, A
 		is_sat    		Is the battery in saturation, T=saturated
 		low_t			Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
 		low_voc			Volt threshold for BMS to turn off battery, V
-		max_change_		Maximum allowed change to calibration adjustment, A
-		max_tweak_		Maximum allowed calibration adjustment, A\n
+		max_change_		Maximum allowed change to calibration scalar see 'N/MC'
+		max_tweak_		Maximum allowed calibration scalar see 'N/Mx'
 		modeling		Driving saturation calculation with model.  Bits specify which signals use model.
 		model_cutback_	Indicate that modeled current being limited on saturation cutback, T = cutback limited
 		model_saturated_	Indicator of maximal cutback, T = cutback saturated
@@ -136,9 +142,7 @@
 		time_sat_past_	Time at last declared saturation, ms
 		time_to_wait	Time to wait before allowing saturation see 'N/Mw', hr
 		tlast			Past value of battery temperature used for rate limit memory, deg C
-		tweak_bias		Bias on current see 'N/Mk', A
-		tweak_bias_amp	Tweak calibration for amplified current
-		tweak_bias_noamp		Tweak calibration for non-amplified current
+		tweak_sclr		Scalar on Coulombic Efficiency 'N/Mk'
 		tweak_test		Driving signal injection completely using software inj_soft_bias 
 		t_bias			Bias on Tbatt sensor, deg C
 		t_last			Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
@@ -149,6 +153,7 @@
 		T_DESAT			De-saturation time, sec
 		t_soc_min		soc_min(t)
 		t_voc			voc(soc, t)
+		uncertain_reset_	Indicator that probably on first charge cycle, T=uncertain
 		Vbatt			Selected battery bank voltage, V
 		vbatt_bias		Calibrate Vbatt, V
 		Vbatt_hdwe		Sensed battery bank voltage, V

@@ -37,6 +37,5 @@ void debug_m7(BatteryMonitor *Mon, Sensors *Sen);
 void debug_12(BatteryMonitor *Mon, Sensors *Sen);
 void debug_m12(BatteryMonitor *Mon, Sensors *Sen);
 void debug_m35(BatteryMonitor *Mon, Sensors *Sen);
-void debug_inject(void);
 
 #endif

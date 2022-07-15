@@ -74,14 +74,6 @@ void debug_m12(BatteryMonitor *Mon, Sensors *Sen)
   Sen->Sim->soc()*100-90, Mon->soc_ekf()*100-90, Sen->Sim->soc()*100-90);
 }
 
-// rp.debug==-12 Injection Arduino plot
-void debug_inject(void)
-{
-  rp.debug = -12;
-  Serial.printf("Setting injection program to:  rp.modeling = %d, rp.ibatt_sel_noamp = %d, r0.tweak_test = %d, rp.type = %d, rp.freq = %7.3f, rp.amp = %7.3f, rp.debug = %d, rp.ibatt_bias_all = %7.3f\n",
-    rp.modeling, rp.ibatt_sel_noamp, rp.tweak_test(), rp.type, rp.freq, rp.amp, rp.debug, rp.ibatt_bias_all);
-}
-
 // rp.debug==-35 EKF summary Arduino plot
 void debug_m35(BatteryMonitor *Mon, Sensors *Sen)
 {

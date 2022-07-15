@@ -41,8 +41,8 @@ const double vb_dc_dc = 13.5;     // DC-DC charger estimated voltage, V
 #define EKF_CONV        1.5e-3    // EKF tracking error indicating convergence, V (1.5e-3)
 #define EKF_T_CONV      30.       // EKF set convergence test time, sec (30.)
 #define EKF_T_RESET (EKF_T_CONV/2.) // EKF reset test time, sec ('up 1, down 2')
-#define EKF_Q_SD        0.001     // Standard deviation of EKF process uncertainty, V
-#define EKF_R_SD        0.1       // Standard deviation of EKF state uncertainty, fraction (0-1)
+#define EKF_Q_SD        0.00005   // Standard deviation of EKF process uncertainty, V (0.001)
+#define EKF_R_SD        1.0       // Standard deviation of EKF state uncertainty, fraction (0-1) (0.1)
 #define EKF_NOM_DT      0.1       // EKF nominal update time, s (initialization; actual value varies) 
 #define DF2             1.2       // Threshold to resest Coulomb Counter if different from ekf, fraction (0.20)
 #define DF1             0.02      // Weighted selection lower transition drift, fraction (0.02)
@@ -242,7 +242,7 @@ public:
   double Amp_hrs_remaining_wt() { return (amp_hrs_remaining_wt_*(*rp_nP_)*(*rp_nS_)); };
   virtual void assign_rand(void);
   double calc_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
-  double calculate(Sensors *Sen);
+  double calculate(Sensors *Sen, const boolean reset);
   boolean converged_ekf() { return(EKF_converged->state()); };
   double hx() { return (hx_); };
   double Hx() { return (hx_*(*rp_nS_)); };
@@ -278,6 +278,7 @@ protected:
   TFDelay *EKF_converged = new TFDelay();   // Time persistence
   void ekf_predict(double *Fx, double *Bu);
   void ekf_update(double *hx, double *H);
+  RateLimit *T_RLim = new RateLimit();
 };
 
 
@@ -291,8 +292,8 @@ public:
   // operators
   // functions
   virtual void assign_rand(void);
-  double calculate(Sensors *Sen, const boolean dc_dc_on);
-  uint32_t calc_inj_duty(const unsigned long now, const uint8_t type, const double amp, const double freq);
+  double calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset);
+  float calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq);
   double count_coulombs(Sensors *Sen, const boolean reset, const double t_last, BatteryMonitor *Mon);
   void load();
   void pretty_print(void);
@@ -316,6 +317,8 @@ protected:
   double *rp_delta_q_model_;// Charge change since saturated, C
   float *rp_t_last_model_;  // Battery temperature past value for rate limit memory, deg C
   float *rp_s_cap_model_;   // Rated capacity scalar
+  double ib_fut_;           // Future value of limited current, A
+  double ib_in_;            // Saved value of current input, A
 };
 
 

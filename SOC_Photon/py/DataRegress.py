@@ -31,6 +31,7 @@ class SavedData:
         else:
             self.time = data.cTime
             self.Ib = data.Ib
+            self.Ib_past = np.append(np.zeros((1,1)), self.Ib[0:-1])
             self.Vb = data.Vb
             self.sat = data.sat
             self.sel = data.sel

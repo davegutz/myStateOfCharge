@@ -26,6 +26,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
 from MonSim import replicate, save_clean_file, save_clean_file_sim
+from Battery import overall as overalls
 from kivy.utils import platform
 if platform != 'linux':
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
@@ -44,8 +45,8 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.subplot(222)
     plt.plot(old_s.time, old_s.sat, color='black', label='sat')
     plt.plot(new_s.time, new_s.sat, color='orange', linestyle='--', label='sat_new')
-    plt.plot(old_s.time, old_s.sel, color='red', label='sel')
-    plt.plot(new_s.time, new_s.sel, color='blue', linestyle='--', label='sel_new')
+    plt.plot(old_s.time, old_s.sel, color='red', linestyle='-.', label='sel')
+    plt.plot(new_s.time, new_s.sel, color='blue', linestyle=':', label='sel_new')
     plt.plot(old_s.time, old_s.mod_data, color='blue', label='mod')
     plt.plot(new_s.time, new_s.mod_data, color='red', linestyle='--', label='mod_new')
     plt.legend(loc=1)
@@ -77,15 +78,15 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.subplot(323)
     plt.plot(old_s.time, old_s.Voc, color='green', label='Voc')
     plt.plot(new_s.time, new_s.Voc, color='orange', linestyle='--', label='Voc_new')
-    plt.plot(old_s.time, old_s.Voc_ekf, color='blue', label='Voc_ekf')
-    plt.plot(new_s.time, new_s.Voc_ekf, color='red', linestyle='--', label='Voc_ekf_new')
+    plt.plot(old_s.time, old_s.Voc_ekf, color='blue', linestyle='-.', label='Voc_ekf')
+    plt.plot(new_s.time, new_s.Voc_ekf, color='red', linestyle=':', label='Voc_ekf_new')
     plt.legend(loc=1)
     plt.subplot(324)
     plt.plot(old_s.time, old_s.y_ekf, color='green', label='y_ekf')
     plt.plot(new_s.time, new_s.y_ekf, color='orange', linestyle='--', label='y_ekf_new')
     try:
-        plt.plot(new_s.time, new_s.y_filt, color='black', linestyle='--', label='y_filt_new')
-        plt.plot(new_s.time, new_s.y_filt2, color='cyan', linestyle='--', label='y_filt2_new')
+        plt.plot(new_s.time, new_s.y_filt, color='black', linestyle='-.', label='y_filt_new')
+        plt.plot(new_s.time, new_s.y_filt2, color='cyan', linestyle=':', label='y_filt2_new')
     except:
         print("y_filt not available pure data regression")
     plt.legend(loc=1)
@@ -105,7 +106,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
             voc_stat_req[i] = new_s_sim.voc_stat[i]
             dv_hys_req[i] = voc_req[i] - new_s_sim.voc_stat[i]
         plt.plot(new_s_sim.time, new_s_sim.dv_hys, color='red', linestyle='--', label='dv_hys_m_new')
-        plt.plot(new_s_sim.time, dv_hys_req, color='black', linestyle='--', label='dv_hys_req_m_new')
+        plt.plot(new_s_sim.time, dv_hys_req, color='black', linestyle='-.', label='dv_hys_req_m_new')
 
     if old_s_sim:
         tt = np.array(old_s.time)
@@ -120,9 +121,9 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
             voc_req[i] = lut_vb.interp(old_s_sim.time[i]) - old_s_sim.dv_dyn_m[i]
             voc_stat_req[i] = old_s_sim.voc_stat_m[i]
             dv_hys_req[i] = voc_req[i] - old_s_sim.voc_stat_m[i]
-        plt.plot(old_s_sim.time, old_s_sim.dv_hys_m, color='black', label='dv_hys_m')
+        plt.plot(old_s_sim.time, old_s_sim.dv_hys_m, color='magenta',  linestyle=':', label='dv_hys_m')
         plt.plot(old_s_sim.time, dv_hys_req, color='orange', linestyle='--', label='dv_hys_req_m')
-    plt.plot(new_s.time, new_s.dv_hys, color='orange', linestyle='--', label='dv_hys_new')
+    plt.plot(new_s.time, new_s.dv_hys, color='cyan', linestyle=':', label='dv_hys_new')
     plt.legend(loc=1)
     plt.subplot(326)
     plt.plot(old_s.time, old_s.Tb, color='green', label='temp_c')
@@ -147,14 +148,14 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.subplot(223)
     plt.plot(old_s.time, old_s.soc_wt, color='green', label='soc_wt')
     plt.plot(new_s.time, new_s.soc_wt, color='orange', linestyle='--', label='soc_wt_new')
-    plt.plot(old_s.time, old_s.soc, color='blue', label='soc')
-    plt.plot(new_s.time, new_s.soc, color='red', linestyle='--', label='soc_new')
+    plt.plot(old_s.time, old_s.soc, color='blue', linestyle='-.', label='soc')
+    plt.plot(new_s.time, new_s.soc, color='red', linestyle=':', label='soc_new')
     plt.legend(loc=1)
     plt.subplot(224)
     plt.plot(old_s.time, old_s.soc, color='blue', label='soc')
     plt.plot(new_s.time, new_s.soc, color='red', linestyle='--', label='soc_new')
-    plt.plot(old_s.time, old_s.soc_m, color='green', label='soc_m')
-    plt.plot(new_s.time, new_s.soc_m, color='orange', linestyle='--', label='soc_m_new')
+    plt.plot(old_s.time, old_s.soc_m, color='green', linestyle='-.', label='soc_m')
+    plt.plot(new_s.time, new_s.soc_m, color='orange', linestyle=':', label='soc_m_new')
     plt.plot(old_s.time, old_s.soc_ekf, color='cyan', label='soc_ekf')
     plt.plot(new_s.time, new_s.soc_ekf, color='black', linestyle='--', label='soc_ekf_new')
     plt.legend(loc=1)
@@ -169,20 +170,20 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(old_s.time, old_s.soc, color='orange', label='soc')
     plt.plot(new_s.time, new_s.soc, color='green', linestyle='--', label='soc_new')
     if new_s_s:
-        plt.plot(new_s_s.time, new_s_s.soc, color='black', linestyle='--', label='soc_m_new')
-    plt.plot(new_s.time, new_s.soc_ekf, color='cyan', linestyle='--', label='soc_ekf_new')
+        plt.plot(new_s_s.time, new_s_s.soc, color='black', linestyle=':', label='soc_m_new')
+    plt.plot(new_s.time, new_s.soc_ekf, color='cyan', linestyle='-.', label='soc_ekf_new')
     plt.legend(loc=1)
     plt.subplot(132)
     plt.plot(old_s.time, old_s.Vb, color='orange', label='Vb')
     plt.plot(new_s.time, new_s.Vb, color='green', linestyle='--', label='Vb_new')
     if new_s_s:
-        plt.plot(new_s_s.time, new_s_s.vb, color='black', linestyle='--', label='Vb_m_new')
+        plt.plot(new_s_s.time, new_s_s.vb, color='black', linestyle='-.', label='Vb_m_new')
     plt.legend(loc=1)
     plt.subplot(133)
     plt.plot(old_s.soc, old_s.Vb, color='orange', label='Vb')
     plt.plot(new_s.soc, new_s.Vb, color='green', linestyle='--', label='Vb_new')
     if new_s_s:
-        plt.plot(new_s_s.soc, new_s_s.vb, color='black', linestyle='--', label='Vb_m_new')
+        plt.plot(new_s_s.soc, new_s_s.vb, color='black', linestyle='-.', label='Vb_m_new')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -193,40 +194,42 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         n_fig += 1
         plt.subplot(331)
         plt.title(plot_title)
-        plt.plot(old_s_sim.time, old_s_sim.ib_m, color='orange', label='ib_m')
+        plt.plot(old_s_sim.time, old_s_sim.ib_m, color='magenta', label='ib_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.ib_m, color='green', linestyle='--', label='ib_m_new')
-        plt.plot(old_s.time, old_s.Ib, color='blue', label='ib')
-        plt.plot(new_s.time, new_s.Ib, color='red', linestyle='--', label='ib_new')
+        plt.plot(old_s.time, old_s.Ib, color='blue',  linestyle=':', label='ib')
+        plt.plot(new_s.time, new_s.Ib, color='cyan', linestyle='-.', label='ib_new')
         plt.legend(loc=1)
         plt.subplot(332)
-        plt.plot(old_s_sim.time, old_s_sim.soc_m, color='orange', label='soc_m')
+        plt.plot(old_s_sim.time, old_s_sim.soc_m, color='magenta', label='soc_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.soc_m, color='green', linestyle='--', label='soc_m_new')
         plt.legend(loc=1)
         plt.subplot(333)
-        plt.plot(old_s_sim.time, old_s_sim.voc_stat_m, color='orange', label='voc_stat_m')
+        plt.plot(old_s_sim.time, old_s_sim.voc_stat_m, color='magenta', label='voc_stat_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.voc_stat_m, color='green', linestyle='--', label='voc_stat_m_new')
-        plt.plot(old_s_sim.time, old_s_sim.vsat_m, color='blue', label='vsat_m')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.vsat_m, color='red', linestyle='--', label='vsat_m_new')
-        plt.plot(old_s_sim.time, old_s_sim.vb_m, color='cyan', label='vb_m')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.vb_m, color='black', linestyle='--', label='vb_m_new')
+        plt.plot(old_s_sim.time, old_s_sim.vsat_m, color='blue',  linestyle='-.', label='vsat_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.vsat_m, color='cyan', linestyle=':', label='vsat_m_new')
+        plt.plot(old_s_sim.time, old_s_sim.vb_m, color='orange', linestyle='-.', label='vb_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.vb_m, color='black', linestyle=':', label='vb_m_new')
         plt.legend(loc=1)
         plt.subplot(334)
-        plt.plot(old_s_sim.time, old_s_sim.Tb_m, color='orange', label='Tb_m')
+        plt.plot(old_s_sim.time, old_s_sim.Tb_m, color='magenta', label='Tb_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.Tb_m, color='green', linestyle='--', label='Tb_m_new')
-        plt.plot(old_s_sim.time, old_s_sim.Tbl_m, color='blue', label='Tbl_m')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.Tbl_m, color='red', linestyle='--', label='Tbl_m_new')
+        plt.plot(old_s_sim.time, old_s_sim.Tbl_m, color='blue', linestyle=':', label='Tbl_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.Tbl_m, color='cyan', linestyle='-.', label='Tbl_m_new')
         plt.legend(loc=1)
         plt.subplot(335)
-        plt.plot(old_s_sim.time, old_s_sim.dv_dyn_m, color='orange', label='dv_dyn_m')
+        plt.plot(old_s_sim.time, old_s_sim.dv_dyn_m, color='magenta', label='dv_dyn_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.dv_dyn_m, color='green', linestyle='--', label='dv_dyn_m_new')
+        plt.plot(old_s.time, old_s.dV_dyn, color='blue', linestyle=':', label='dv_dyn')
+        plt.plot(new_s.time, new_s.dV_dyn, color='cyan', linestyle='-.', label='dv_dyn_new')
         plt.legend(loc=1)
         plt.subplot(337)
-        plt.plot(old_s_sim.time, old_s_sim.dq_m, color='orange', label='dq_m')
+        plt.plot(old_s_sim.time, old_s_sim.dq_m, color='magenta', label='dq_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.dq_m, color='green', linestyle='--', label='dq_m_new')
         plt.legend(loc=1)
         plt.subplot(338)
-        plt.plot(old_s_sim.time, old_s_sim.reset_m, color='orange', label='reset_m')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.reset_m, color='red', linestyle='--', label='reset_m_new')
+        plt.plot(old_s_sim.time, old_s_sim.reset_m, color='magenta', label='reset_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.reset_m, color='green', linestyle='--', label='reset_m_new')
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -237,29 +240,29 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         plt.subplot(331)
         plt.title(plot_title)
         plt.plot(old_s.time, old_s.Vb, color='red', label='Vb')
-        plt.plot(old_s.time, old_s.Voc, color='blue', label='Voc')
-        plt.plot(old_s.time, old_s.Voc_stat, color='green', label='Voc_stat')
+        plt.plot(old_s.time, old_s.Voc, color='blue',  linestyle='--', label='Voc')
+        plt.plot(old_s.time, old_s.Voc_stat, color='green', linestyle=':', label='Voc_stat')
         plt.legend(loc=1)
         plt.subplot(332)
         plt.plot(old_s_sim.time, old_s_sim.vb_m, color='red', label='vb_m')
-        plt.plot(old_s_sim.time, old_s_sim.voc_m, color='blue', label='voc_m')
-        plt.plot(old_s_sim.time, old_s_sim.voc_stat_m, color='green', label='voc_stat_m')
+        plt.plot(old_s_sim.time, old_s_sim.voc_m, color='blue',  linestyle='--', label='voc_m')
+        plt.plot(old_s_sim.time, old_s_sim.voc_stat_m, color='green', linestyle=':', label='voc_stat_m')
         plt.legend(loc=1)
         plt.subplot(334)
         plt.plot(new_s.time, new_s.vb, color='red', label='vb_new')
-        plt.plot(new_s.time, new_s.voc, color='blue', label='voc_new')
-        plt.plot(new_s.time, new_s.voc_stat, color='green', label='voc_stat_new')
+        plt.plot(new_s.time, new_s.voc, color='blue', linestyle='--', label='voc_new')
+        plt.plot(new_s.time, new_s.voc_stat, color='green', linestyle=':', label='voc_stat_new')
         plt.legend(loc=1)
         plt.subplot(335)
         plt.plot(new_s_sim_m.time, new_s_sim_m.vb_m, color='red', label='vb_m_new')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.voc_m, color='blue', label='voc_m_new')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.voc_stat_m, color='green', label='voc_stat_m_new')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.voc_m, color='blue', linestyle='--', label='voc_m_new')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.voc_stat_m, color='green', linestyle=':', label='voc_stat_m_new')
         plt.legend(loc=1)
         plt.subplot(337)
         plt.plot(old_s.time, old_s.soc, color='orange', label='soc')
-        plt.plot(old_s.time, old_s.soc_ekf, color='blue', label='soc_ekf')
-        plt.plot(new_s.time, new_s.soc, color='cyan', linestyle='--', label='soc_new')
-        plt.plot(new_s.time, new_s.soc_ekf, color='red', linestyle='--', label='soc_ekf_new')
+        plt.plot(old_s.time, old_s.soc_ekf, color='blue',  linestyle='--', label='soc_ekf')
+        plt.plot(new_s.time, new_s.soc, color='cyan', linestyle=':', label='soc_new')
+        plt.plot(new_s.time, new_s.soc_ekf, color='red', linestyle='-.', label='soc_ekf_new')
         plt.legend(loc=1)
         plt.subplot(338)
         plt.plot(old_s_sim.time, old_s_sim.soc_m, color='orange', label='soc_m')
@@ -268,23 +271,23 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         plt.subplot(333)
         plt.title(plot_title)
         plt.plot(old_s.time, old_s.Vb, color='red', label='Vb')
-        plt.plot(old_s_sim.time, old_s_sim.vb_m, color='blue', label='vb_m')
-        plt.plot(new_s.time, new_s.vb, color='magenta', label='vb_new')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.vb_m, color='green', label='vb_m_new')
+        plt.plot(old_s_sim.time, old_s_sim.vb_m, color='blue', linestyle='--',  label='vb_m')
+        plt.plot(new_s.time, new_s.vb, color='black', linestyle=':', label='vb_new')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.vb_m, color='green', linestyle='-.', label='vb_m_new')
         plt.legend(loc=1)
         plt.subplot(336)
         plt.title(plot_title)
         plt.plot(old_s.time, old_s.Voc, color='red', label='Voc')
-        plt.plot(new_s.time, new_s.voc, color='magenta', label='voc_new')
-        plt.plot(old_s_sim.time, old_s_sim.voc_m, color='blue', label='voc_m')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.voc_m, color='green', label='voc_m_new')
+        plt.plot(new_s.time, new_s.voc, color='black', linestyle='--', label='voc_new')
+        plt.plot(old_s_sim.time, old_s_sim.voc_m, color='blue', linestyle=':', label='voc_m')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.voc_m, color='green', linestyle='-.', label='voc_m_new')
         plt.legend(loc=1)
         plt.subplot(339)
         plt.title(plot_title)
         plt.plot(old_s.time, old_s.Voc_stat, color='red', label='Voc_stat')
-        plt.plot(old_s_sim.time, old_s_sim.voc_stat_m, color='blue', label='voc_stat_m')
-        plt.plot(new_s.time, new_s.voc_stat, color='magenta', label='voc_stat_new')
-        plt.plot(new_s_sim_m.time, new_s_sim_m.voc_stat_m, color='green', label='voc_stat_m_new')
+        plt.plot(old_s_sim.time, old_s_sim.voc_stat_m, color='blue',  linestyle='--', label='voc_stat_m')
+        plt.plot(new_s.time, new_s.voc_stat, color='black', linestyle=':', label='voc_stat_new')
+        plt.plot(new_s_sim_m.time, new_s_sim_m.voc_stat_m, color='green', linestyle='-.', label='voc_stat_m_new')
         plt.legend(loc=1)
 
         fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -335,6 +338,7 @@ class SavedData:
             self.hm = []  # hours, minutes
             self.cTime = []  # Control time, s
             self.Ib = []  # Bank current, A
+            self.Ib_past = []  # Past bank current, A
             self.Vb = []  # Bank voltage, V
             self.sat = []  # Indication that battery is saturated, T=saturated
             self.sel = []  # Current source selection, 0=amp, 1=no amp
@@ -381,6 +385,8 @@ class SavedData:
             self.dt = np.array(data.dt[:i_end])
             self.time = np.array(self.time[:i_end])
             self.Ib = np.array(data.Ib[:i_end])
+            self.Ib_past = np.append(np.zeros((1,1)), np.array(data.Ib[:(i_end-1)]))
+            self.Ib_past[0] = self.Ib_past[1]
             self.Vb = np.array(data.Vb[:i_end])
             self.sat = np.array(data.sat[:i_end])
             self.sel = np.array(data.sel[:i_end])
@@ -434,6 +440,7 @@ class SavedDataSim:
             self.dv_dyn_m = []
             self.dv_hys_m = []
             self.vb_m = []
+            self.ib_in_m= []
             self.ib_m = []
             self.sat_m = []
             self.ddq_m = []
@@ -463,6 +470,7 @@ class SavedDataSim:
             self.voc_m = self.vb_m - self.dv_dyn_m
             self.dv_hys_m = self.voc_m - self.voc_stat_m
             self.ib_m = data.ib_m[:i_end]
+            self.ib_in_m = data.ib_in_m[:i_end]
             self.sat_m = data.sat_m[:i_end]
             self.ddq_m = data.ddq_m[:i_end]
             self.dq_m = data.dq_m[:i_end]
@@ -542,7 +550,7 @@ if __name__ == '__main__':
 
         # Transient  inputs
         time_end = None
-        # time_end = 2500.
+        # time_end = 20.
 
         # Load data (must end in .txt) txt_file, type, title_key, unit_key
         data_file_clean = write_clean_file(data_file_old_txt, type='_mon', title_key='unit,', unit_key=unit_key)
@@ -554,18 +562,18 @@ if __name__ == '__main__':
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
-        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'sat_m', 'ddq_m',
-                    'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
+        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'ib_in_m',
+                    'sat_m', 'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
         try:
-            data_old_sim = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
+            data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
                                  encoding=None).view(np.recarray)
-            saved_old_sim = SavedDataSim(saved_old.time_ref, data_old_sim, time_end)
+            saved_sim_old = SavedDataSim(saved_old.time_ref, data_sim_old, time_end)
         except:
-            data_old_sim = None
-            saved_old_sim = None
+            data_sim_old = None
+            saved_sim_old = None
 
         # Run model
-        mons, sims, monrs, sims_m = replicate(saved_old)
+        mons, sims, monrs, sims_m = replicate(saved_old, init_time=1.)
         date_ = datetime.now().strftime("%y%m%d")
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         save_clean_file(mons, mon_file_save, '_mon_rep' + date_)
@@ -583,8 +591,8 @@ if __name__ == '__main__':
         else:
             filename = "./Figures/" + data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        # n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
-        n_fig, fig_files = overall(saved_old, mons, saved_old_sim, sims, sims_m, filename, fig_files, plot_title=plot_title,
+        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
+        n_fig, fig_files = overall(saved_old, mons, saved_sim_old, sims, sims_m, filename, fig_files, plot_title=plot_title,
                                    n_fig=n_fig, new_s_s=sims)
         if platform != 'linux':
             unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
@@ -593,17 +601,17 @@ if __name__ == '__main__':
         plt.show()
 
 
-    #python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220613_new.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/2-pole y_filt, tune hys 220613.txt", "soc0_2022")
     #python DataOverModel.py("../dataReduction/watchXm2.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/serial_20220624_095543.txt", "pro_2022")
-    #python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220624.txt", "pro_2022")
-    #python DataOverModel.py("../dataReduction/slowTweakRegressionTest20220624.txt", "pro_2022")
+    #python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220711.txt", "pro_2022")
+    #python DataOverModel.py()
     #
     """
-    PyCharm Sample Run Configuration Parameters:
-    "../dataReduction/serial_20220624_095543.txt"
-    pro_2022
+    PyCharm Sample Run Configuration Parameters (right click in pyCharm - Modify Run Configuration:
+        "../dataReduction/slowTweakRegressionTest20220711.txt" "pro_2022"
+        "../dataReduction/serial_20220624_095543.txt"    "pro_2022"
+        "../dataReduction/real world rapid 20220713.txt" "soc0_2022"
     
     PyCharm Terminal:
     python DataOverModel.py "../dataReduction/serial_20220624_095543.txt" "pro_2022"

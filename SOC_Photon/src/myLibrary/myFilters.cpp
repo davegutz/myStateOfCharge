@@ -231,9 +231,8 @@ RateLimit::~RateLimit() {}
 // functions
 double RateLimit::calculate(const double in)
 {
-  double out = fmax( fmin( in, past_+jmax_), past_+jmin_);
-  past_ = in;
-  return (out);
+  past_ = fmax( fmin( in, past_+jmax_), past_+jmin_);
+  return ( past_ );
 }
 double RateLimit::calculate(const double in, const int RESET)
 {
@@ -241,15 +240,13 @@ double RateLimit::calculate(const double in, const int RESET)
   {
     past_ = in;
   }
-  double out = RateLimit::calculate(in);
-  return(out);
+  return ( RateLimit::calculate(in) );
 }
 double RateLimit::calculate(const double in, const double Rmax, const double Rmin)
 {
   jmax_ = fabs(Rmax*T_);
   jmin_ = -fabs(Rmin*T_);
-  double out = RateLimit::calculate(in);
-  return(out);
+  return ( RateLimit::calculate(in) );
 }
 double RateLimit::calculate(const double in, const double Rmax, const double Rmin, const int RESET)
 {
@@ -257,8 +254,17 @@ double RateLimit::calculate(const double in, const double Rmax, const double Rmi
   {
     past_ = in;
   }
-  double out = RateLimit::calculate(in, Rmax, Rmin);
-  return(out);
+  return ( RateLimit::calculate(in, Rmax, Rmin) );
+}
+double RateLimit::calculate(const double in, const double Rmax, const double Rmin, const int RESET, const double T)
+{
+  T_ = T;
+  if (RESET>0)
+  {
+    past_ = in;
+  }
+  double past = past_;
+  return ( ( RateLimit::calculate(in, Rmax, Rmin) - past) / T_ );
 }
 
 

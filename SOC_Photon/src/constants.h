@@ -77,24 +77,20 @@
 #define NSUM                  110       // Number of saved summaries.   If too large, will get compile error BACKUPSRAM
 #define HDB_TBATT             0.06      // Half deadband to filter Tbatt, F (0.06)
 #define HDB_VBATT             0.05      // Half deadband to filter Vbatt, V (0.05)
-#define T_SAT                 5         // Saturation time, sec
+#define T_SAT                 5         // Saturation time, sec (5)
 #define T_DESAT               (T_SAT*2) // De-saturation time, sec
 #define TEMP_PARASITIC        true      // DS18 sensor power. true means leave it on all the time (true)
 #define TEMP_DELAY            1         // Time to block temperature sensor read in DS18 routine, ms (1)
-#define TEMP_INIT_DELAY       10000     // It takes 10 seconds first read of DS18
-#define TWEAK_GAIN            43200.    // Estimate of A calibration change for accumulated charge error over ~24 hour period (86400 = 24*3600)/2, Coulomb/A
-#define TWEAK_MAX_CHANGE      0.05      // Maximum allowed tweak per charge cycle, A
-#define TWEAK_MAX             1.        // Maximum tweak allowed, +/- A
-#define TWEAK_WAIT            6.        // Time to persist unsaturated before allowing peak, hrs
-#define TT_WAIT               10.       // Before and after tweak test print interval, s
+#define TEMP_INIT_DELAY       10000     // It takes 10 seconds first read of DS18 (10000)
+#define TWEAK_MAX_CHANGE      0.001     // Maximum allowed tweak per charge cycle, scalar +/- (0.001)
+#define TWEAK_MAX             0.01      // Maximum tweak allowed, scalar +/- (0.01)
+#define TWEAK_WAIT            6.        // Time to persist unsaturated before allowing peak, hrs (6)
+#define TWEAK_GAIN            0.66      // Tweak change limit gain to make soft landing (0.66)
+#define TT_WAIT               10.       // Before and after tweak test print interval, s (10)
 
 // Conversion gains
 const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  
 const double shunt_amp_v2a_s = shunt_noamp_v2a_s * SHUNT_AMP_R1/SHUNT_AMP_R2; // Shunt amp V2A scalar
-
-const uint32_t pwm_frequency = 60;  // Photon pwm driver frequency, Hz. (60 Hz is the real stuff that an inverter sends our way)
-// I confirmed using o-scope that this 60 Hz works as a pwm value on the Photon.
-const double bias_gain = 0.366 * 100. / 255.;   // Amps to duty cycle of pwm inection into fake signal of board,  A/duty
 
 // Battery voltage measurement gain
 const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /

@@ -116,6 +116,7 @@ public:
   double calculate(const double in, const int RESET);
   double calculate(const double in, const double Rmax, const double Rmin);
   double calculate(const double in, const double Rmax, const double Rmin, const int RESET);
+  double calculate(const double in, const double Rmax, const double Rmin, const int RESET, const double T);
 protected:
   double past_;
   double jmax_;   // Max rate limit, units of in/update

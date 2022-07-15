@@ -87,14 +87,24 @@ def save_clean_file_sim(sims, csv_file, unit_key):
             output.write(s)
         print("Wrote(save_clean_file_sim):", csv_file)
 
-def replicate(saved_old, init_time=-4., dv_hys=0., sres=1.):
+def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
+              t_Ib_fail=None, Ib_fail=0.):
     t = saved_old.time
     dt = saved_old.dt
     Vb = saved_old.Vb
     Ib = saved_old.Ib
+    Ib_past = saved_old.Ib_past
     Tb = saved_old.Tb
+    Voc = saved_old.Voc
+    Voc_stat = saved_old.Voc_stat
     soc_init = saved_old.soc[0]
+    soc_ekf_init = saved_old.soc_ekf[0]
     soc_m_init = saved_old.soc_m[0]
+    sat_init = saved_old.sat[0]
+    if saved_sim_old:
+        sat_m_init = saved_sim_old.sat_m[0]
+    else:
+        sat_m_init = saved_old.Voc_stat[0] > saved_old.Vsat[0]
     t_len = len(t)
     rp = Retained()
     rp.modeling = saved_old.mod()
@@ -142,55 +152,77 @@ def replicate(saved_old, init_time=-4., dv_hys=0., sres=1.):
     Is_sat_delay = TFDelay(in_=saved_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
     # time loop
-    T = t[1] - t[0]
     for i in range(t_len):
+        reset = (t[i] <= init_time)
         saved_old.i = i
-        current_in = saved_old.Ib[i]
         if i > 0:
             T = t[i] - t[i - 1]
+        else:
+            T = t[1] - t[0]
 
         # dc_dc_on = bool(lut_dc.interp(t[i]))
         dc_dc_on = False
-        init = (t[i] < init_time)
 
-        if init:
+        if reset:
             sim.apply_soc(soc_m_init, Tb[i])
             rp.delta_q_model = sim.delta_q
             rp.t_last_model = Tb[i] + dt_model
             sim.load(rp.delta_q_model, rp.t_last_model)
             sim.init_battery()
             sim.apply_delta_q_t(rp.delta_q_model, rp.t_last_model)
+            mon.sat = sat_init
 
         # Models
-        sim.calculate(temp_c=Tb[i], soc=sim.soc, curr_in=current_in, dt=T, q_capacity=sim.q_capacity,
-                      dc_dc_on=dc_dc_on, rp=rp)
-        sim.count_coulombs(dt=T, reset=init, temp_c=Tb[i], charge_curr=sim.ib, sat=False, soc_m_init=soc_m_init,
+        if t_Ib_fail and t[i] > t_Ib_fail:
+            ib_in_m = Ib_fail
+            current_in = Ib_fail
+        else:
+            if saved_sim_old:
+                ib_in_m = saved_sim_old.ib_in_m[i]
+            else:
+                ib_in_m = Ib_past[i]
+            current_in = saved_old.Ib[i]
+        sim.calculate(temp_c=Tb[i], soc=sim.soc, curr_in=ib_in_m, dt=T, q_capacity=sim.q_capacity,
+                      dc_dc_on=dc_dc_on, reset=reset, rp=rp, sat_init=sat_m_init)
+        if t_Ib_fail and t[i] > t_Ib_fail:
+            charge_curr = Ib_fail
+        else:
+            charge_curr = sim.ib
+        sim.count_coulombs(dt=T, reset=reset, temp_c=Tb[i], charge_curr=charge_curr, sat=False, soc_m_init=soc_m_init,
                            mon_sat=mon.sat, mon_delta_q=mon.delta_q)
 
         # EKF
-        if init:
+        if reset:
             mon.apply_soc(soc_init, Tb[i])
             rp.delta_q = mon.delta_q
             rp.t_last = Tb[i]
             mon.load(rp.delta_q, rp.t_last)
             mon.assign_temp_c(Tb[i])
             mon.init_battery()
-            mon.init_soc_ekf(soc_init)  # when modeling (assumed in python) ekf wants to equal model
+            mon.init_soc_ekf(soc_ekf_init)  # when modeling (assumed in python) ekf wants to equal model
 
         # Monitor calculations including ekf
-        if rp.modeling == 0:
-            mon.calculate(Tb[i], Vb[i], Ib[i], T, rp=rp, init=init)
+        if t_Vb_fail and t[i] >= t_Vb_fail:
+            Vb_ = Vb_fail
+            vb = Vb_fail
         else:
-            mon.calculate(Tb[i], sim.vb + randn() * v_std + dv_sense, sim.ib + randn() * i_std + di_sense, T, rp=rp,
-                          init=init)
+            Vb_ = Vb[i]
+            vb = sim.vb
+        if rp.modeling == 0:
+            mon.calculate(Tb[i], Vb_, current_in, T, rp=rp, reset=reset)
+        else:
+            mon.calculate(Tb[i], vb + randn() * v_std + dv_sense, charge_curr + randn() * i_std + di_sense, T, rp=rp,
+                          reset=reset, d_voc=None)
+            # mon.calculate(Tb[i], vb + randn() * v_std + dv_sense, charge_curr + randn() * i_std + di_sense, T, rp=rp,
+            #           reset=reset, d_voc=Voc[i])
         # mon.calculate(Tb[i], Vb[i]+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, T)
         sat = is_sat(Tb[i], mon.voc, mon.soc)
-        saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), init)
+        saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
         if rp.modeling == 0:
-            mon.count_coulombs(dt=T, reset=init, temp_c=Tb[i], charge_curr=Ib[i], sat=saturated)
+            mon.count_coulombs(dt=T, reset=reset, temp_c=Tb[i], charge_curr=current_in, sat=saturated)
         else:
-            mon.count_coulombs(dt=T, reset=init, temp_c=temp_c, charge_curr=sim.ib, sat=saturated)
-        mon.calc_charge_time(mon.q, mon.q_capacity, mon.ib, mon.soc)
+            mon.count_coulombs(dt=T, reset=reset, temp_c=temp_c, charge_curr=charge_curr, sat=saturated)
+        mon.calc_charge_time(mon.q, mon.q_capacity, charge_curr, mon.soc)
         mon.select()
         # mon.regauge(Tb[i])
         mon.assign_soc_m(sim.soc)
@@ -200,7 +232,7 @@ def replicate(saved_old, init_time=-4., dv_hys=0., sres=1.):
         sim.save(t[i], T)
         sim.save_m(t[i], T)
 
-        # Print init
+        # Print initial
         if i == 0:
             print('time=', t[i])
             print('mon:  ', str(mon))
@@ -232,14 +264,17 @@ if __name__ == '__main__':
 
         # Transient  inputs
         time_end = None
+        # time_end = 5.
         # time_end = 2000.
 
         # Setup and user inputs (data_file_old_txt must end in .txt)
-        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220626.txt';unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220626.txt';unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tryXp20_20220626.txt';unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/real world Xp20 20220626.txt';unit_key = 'soc0_2022';
-        data_file_old_txt = '../dataReduction/real world Xp21 20220626.txt';unit_key = 'soc0_2022';
+        # data_file_old_txt = '../dataReduction/real world Xp21 20220626.txt';unit_key = 'soc0_2022';
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220710.txt';unit_key = 'pro_2022' TODO: delete
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220711.txt';unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220711.txt';unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/real world rapid 20220713.txt'; unit_key = "soc0_2022"
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
@@ -254,14 +289,14 @@ if __name__ == '__main__':
 
         # Load _m v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type='_sim', title_key=title_key_sim, unit_key=unit_key_sim)
-        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'sat_m',
-                    'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
+        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'ib_in_m',
+                    'sat_m', 'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
         if data_file_sim_clean:
-            data_old_sim = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
+            data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
                                  encoding=None).view(np.recarray)
-            saved_old_sim = SavedDataSim(time_ref=saved_old.time_ref, data=data_old_sim, time_end=time_end)
+            saved_sim_old = SavedDataSim(time_ref=saved_old.time_ref, data=data_sim_old, time_end=time_end)
         else:
-            saved_old_sim = None
+            saved_sim_old = None
 
         # How to initialize
         if saved_old.time[0] == 0.: # no initialization flat detected at beginning of recording
@@ -273,7 +308,7 @@ if __name__ == '__main__':
 
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
-        mons, sims, monrs, sims_m = replicate(saved_old, init_time=init_time, dv_hys=dv_hys, sres=1.0)
+        mons, sims, monrs, sims_m = replicate(saved_old, saved_sim_old=saved_sim_old, init_time=init_time, dv_hys=dv_hys, sres=1.0)
         save_clean_file(mons, mon_file_save, 'mon_rep' + date_)
 
         # Plots
@@ -283,7 +318,7 @@ if __name__ == '__main__':
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files, plot_title=plot_title, n_fig=n_fig)  # sim over mon
-        n_fig, fig_files = overall(saved_old, mons, saved_old_sim, sims, sims_m, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
+        n_fig, fig_files = overall(saved_old, mons, saved_sim_old, sims, sims_m, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
                                    new_s_s=sims)  # mon over data
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
         cleanup_fig_files(fig_files)
