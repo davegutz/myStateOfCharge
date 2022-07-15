@@ -295,6 +295,11 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     update_ekf(voc_stat_, 0., 1.);  // z = voc_stat, voc_filtered = hx
     soc_ekf_ = x_ekf();             // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
     q_ekf_ = soc_ekf_ * q_capacity_;
+    delta_q_ekf_ = q_ekf_ - q_capacity_;
+
+    // Normalize
+    soc_ = q_ / q_capacity_;
+
     y_filt_ = y_filt->calculate(y_, min(Sen->T, EKF_T_RESET));
     if ( rp.debug==6 || rp.debug==7 )
         Serial.printf("calculate:Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,dv_dyn,dv_hys,err, %7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
@@ -717,9 +722,13 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
     }
     
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status
-    // But if not modeling, set to Monitor when saturated
-    if ( !(rp.mod_vb() || rp.mod_ib())  && Mon->sat() ) *rp_delta_q_ = rp.delta_q;
-    if ( model_saturated_ )
+    // But if not modeling in real world, set to Monitor when Monitor saturated and reset to EKF otherwise
+    if ( !(rp.mod_vb() || rp.mod_ib()) )  // Real world
+    {
+        if ( Mon->sat() ) *rp_delta_q_ = Mon->delta_q();
+        else if ( reset ) *rp_delta_q_ = Mon->delta_q_ekf();  // Solution to boot up unsaturated
+    }
+    else if ( model_saturated_ )  // Modeling
     {
         if ( reset ) *rp_delta_q_ = 0.;
     }

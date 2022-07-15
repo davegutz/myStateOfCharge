@@ -316,7 +316,7 @@ Outputs:
   q_min_          Estimated charge at low voltage shutdown, C\
 */
 double Coulombs::count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
-  const boolean sat, const double t_last, const double sclr_coul_eff)
+  const boolean sat, const double t_last, const double sclr_coul_eff, const double delta_q_ekf)
 {
     double d_delta_q = charge_curr * dt;
     if ( charge_curr>0. ) d_delta_q *= coul_eff_ * sclr_coul_eff;
@@ -324,8 +324,11 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
 
     // Rate limit temperature
     double temp_lim = max(min( temp_c, t_last + t_rlim_*dt), t_last - t_rlim_*dt);
-    if ( reset ) temp_lim = temp_c;
-    if ( reset ) *rp_t_last_ = temp_c;
+    if ( reset )
+    {
+      temp_lim = temp_c;
+      *rp_t_last_ = temp_c;
+    }
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
     if ( sat )
@@ -338,6 +341,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
         else if ( reset )
           *rp_delta_q_ = 0.;
     }
+    else if ( reset ) *rp_delta_q_ = delta_q_ekf;  // Solution to booting up unsaturated
     resetting_ = false;     // one pass flag
 
     // Integration

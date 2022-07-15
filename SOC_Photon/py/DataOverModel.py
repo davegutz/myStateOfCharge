@@ -612,6 +612,7 @@ if __name__ == '__main__':
         "../dataReduction/slowTweakRegressionTest20220711.txt" "pro_2022"
         "../dataReduction/serial_20220624_095543.txt"    "pro_2022"
         "../dataReduction/real world rapid 20220713.txt" "soc0_2022"
+        "../dataReduction/real world Xp20 20220715.txt" "soc0_2022"
     
     PyCharm Terminal:
     python DataOverModel.py "../dataReduction/serial_20220624_095543.txt" "pro_2022"

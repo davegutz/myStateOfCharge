@@ -379,6 +379,8 @@ Throughput test
 38. Capitalized parameters, violation of coding standards, are "Bank" values, e.g. for '2P3S' parallelSerial banks of batteries while lower case are per 12V battery unit.
 39. Signal injection examples:
  Ca0.5;Xts;Xa100;Xf0.1;XW5;XC5;v4;XR;
+40.  Expected anomolies:
+  a.  real world collection sometimes run sample times longer than RANDLES_T_MAX.   When that happens the modeled simulation of Randles system will oscillate so it is bypassed.   Real data will appear to have first order response and simulation in python will appear to be step.
 
 ## Accuracy
 

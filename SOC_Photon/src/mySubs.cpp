@@ -377,8 +377,9 @@ void  monitor(const int reset, const boolean reset_temp, const unsigned long now
   Sen->saturated = Is_sat_delay->calculate(sat, T_SAT, T_DESAT, min(Sen->T, T_SAT/2.), reset);
 
   // Memory store // TODO:  simplify arg list here.  Unpack Sen inside count_coulombs
+  // Initialize to ekf when not saturated
   Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ibatt, Sen->saturated, rp.t_last,
-    Sen->sclr_coul_eff);
+    Sen->sclr_coul_eff, Mon->delta_q_ekf());
 
   // Charge time for display
   Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ibatt, Mon->soc());

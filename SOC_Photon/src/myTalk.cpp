@@ -809,6 +809,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 self_talk("Nk1", Mon, Sen);   // Reset the tweak biases to 1 for new count
                 self_talk("Dn1", Mon, Sen);   // Disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
                 self_talk("XW5", Mon, Sen);   // Wait time before starting to cycle
+                self_talk("Dp100", Mon, Sen); // Fast data collection
                 if ( INT_in == 9 )
                 {
                   self_talk("Xf0.02", Mon, Sen);  // Frequency 0.02 Hz
@@ -841,10 +842,12 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 self_talk("Pa", Mon, Sen);    // Print all for record
                 if ( INT_in == 20 )
                 {
-                  self_talk("v24", Mon, Sen);     // Tweak-like data collection
+                  self_talk("Dp100", Mon, Sen);  // Tweak-like data collection
+                  self_talk("v24", Mon, Sen);    // Tweak-like data collection
                 }
                 else if ( INT_in == 21 )
                 {
+                  self_talk("Dp2000", Mon, Sen); // Fast data collection
                   self_talk("v4", Mon, Sen);      // Slow data collection
                 }
                 Sen->Sim->init_battery(Sen);  // Reset model battery state
