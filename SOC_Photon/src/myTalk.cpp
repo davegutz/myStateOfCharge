@@ -204,18 +204,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'p' ):  // Dp<>:
+            Serial1.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
             if ( cp.serial1 )
             {
-              Serial1.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
               Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
-              Serial1.printf("%ld\n", Sen->PublishSerial->delay());
             }
-            else
-            {
-              Serial.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
-              Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
-              Serial.printf("%ld\n", Sen->PublishSerial->delay());
-            }
+            Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
+            Serial.printf("%ld\n", Sen->PublishSerial->delay());
             break;
 
           case ( 'r' ):  // Dr<>:
@@ -990,6 +985,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("    -<>:   Negative - Arduino plot compatible\n");
   Serial.printf("    v-1:   GP Arduino plot\n");
+  Serial.printf("  +/-v3:   Powert\n");
   Serial.printf("     v4:   GP\n");
   Serial.printf("  +/-v5:   OLED display\n");
   Serial.printf("     v6:   EKF solver iter during init\n");
@@ -1000,6 +996,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" +/-v12:   EKF\n");
   Serial.printf(" +/-v14:   vshunt and Ibatt raw\n");
   Serial.printf("    v15:   vb raw\n");
+  Serial.printf("    v24:   sim\n");
+  Serial.printf("    v25:   Blynk write\n");
   Serial.printf(" +/-v34:   EKF detailed\n");
   Serial.printf("   v-35:   EKF summary Arduino\n");
   Serial.printf("    v35:   Randles balance\n");

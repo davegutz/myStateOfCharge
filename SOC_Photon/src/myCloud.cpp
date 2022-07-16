@@ -143,7 +143,6 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Wbatt = Sen->Wbatt;
   pubList->num_timeouts = num_timeouts;
   pubList->T = Sen->T;
-  if ( rp.debug==-13 ) Serial.printf("Sen->T=%6.3f\n", Sen->T);
   pubList->tcharge = Mon->tcharge();
   pubList->Voc_stat = Mon->Voc_stat();
   pubList->Voc = Mon->Voc();

@@ -59,7 +59,8 @@
   #undef min
 #endif
 
-#undef USE_BLYNK             // Change this to #define to use Bluetooth
+#define USE_BLE               // Change this to #define to use Bluetooth
+#undef USE_BLYNK              // Change this to #define to use BLYNK
 
 #include "constants.h"
 
@@ -114,10 +115,14 @@ void setup()
   Serial.println("Hi!");
 
   // Bluetooth Serial1
-  Serial1.begin(9600);
-  #ifdef USE_BLYNK
-    Blynk.begin(Serial1, auth);
-  #endif
+  if ( cp.serial1 )
+  {
+    Serial1.begin(9600);
+    // Serial1.begin(115200);
+    #ifdef USE_BLYNK
+      Blynk.begin(Serial1, auth);
+    #endif
+  }
 
   // Peripherals
   myPins = new Pins(D6, D7, A1, D2);
