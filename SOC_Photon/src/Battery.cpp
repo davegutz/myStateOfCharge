@@ -723,17 +723,17 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const dou
     
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status
     // But if not modeling in real world, set to Monitor when Monitor saturated and reset to EKF otherwise
+    static boolean reset_past = reset;   // needed because model called first in reset path; need to pick up latest
     if ( !rp.mod_vb() )  // Real world
     {
         if ( Mon->sat() ) apply_delta_q(Mon->delta_q());
-        else if ( reset ) apply_delta_q(Mon->delta_q_ekf());  // Solution to boot up unsaturated
-        if ( reset ) Serial.printf("rp.mod_vb, Mon->sat, reset, Mon->soc_ekf(), soc_m=,%d,%d,%d,%7.3f,%7.3f,\n",
-            rp.mod_vb(), Mon->sat(), reset, Mon->soc_ekf(), soc_);
+        else if ( reset_past ) apply_delta_q(Mon->delta_q_ekf());  // Solution to boot up unsaturated
     }
     else if ( model_saturated_ )  // Modeling
     {
         if ( reset ) *rp_delta_q_ = 0.;
     }
+    reset_past = reset;
     resetting_ = false;     // one pass flag
 
     // Integration
