@@ -601,9 +601,12 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
         #ifdef USE_BLYNK
           Sen->display = !Sen->display; // not remembered in rp. Photon reset turns this to default
           Serial.printf("display on (BT off) = %d\n", Sen->display);
-        #else
-          Serial.printf("ignored when not compiled with USE_BLYNK\n");
         #endif
+        Serial.printf("toggling cp.serial1 from %d to ", cp.serial1);
+        cp.serial1 = !cp.serial1;
+        if ( cp.serial1 ) Serial1.begin(115200);
+        else Serial1.end();
+        Serial.printf("%d\n", cp.serial1);
         break;
 
       case ( 'X' ):  // X
@@ -1045,10 +1048,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  XR  "); Serial.printf("RUN inj\n");
   Serial.printf("  XS  "); Serial.printf("STOP inj\n");
   Serial.printf("  XW= "); Serial.printf("%6.2f s wait start inj\n", float(Sen->wait_inj)/1000.);
-
-  #ifdef USE_BLYNK
-    Serial.printf("z   toggle display = %d\n", Sen->display);
-  #endif
+  Serial.printf("z   toggle bluetooth = %d\n", cp.serial1 );
 
   Serial.printf("h   this menu\n");
 }

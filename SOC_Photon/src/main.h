@@ -114,10 +114,11 @@ void setup()
   delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
   Serial.println("Hi!");
 
-  // Bluetooth Serial1
+  // Bluetooth Serial1.  Use BT-AT project in this GitHub repository to change.  Directions
+  // for HC-06 inside main.h of ../../BT-AT/src.   AT+BAUD8; to set 115200.
   if ( cp.serial1 )
   {
-    Serial1.begin(9600);
+    Serial1.begin(115200);
     // Serial1.begin(115200);
     #ifdef USE_BLYNK
       Blynk.begin(Serial1, auth);
