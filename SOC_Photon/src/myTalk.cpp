@@ -140,8 +140,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
               Mon->apply_soc(FP_in, Sen->Tbatt_filt);
               Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
-              Serial.printf("soc=%7.3f, modeling = %d, delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f,\n",
-                  Mon->soc(), rp.modeling, rp.delta_q, Sen->Sim->soc(), rp.delta_q_model);
+              Serial.printf("soc=%7.3f, modeling = %d, delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f, soc_ekf=%8.4f, delta_q_ekf=%7.3f,\n",
+                  Mon->soc(), rp.modeling, rp.delta_q, Sen->Sim->soc(), rp.delta_q_model, Mon->soc_ekf(), Mon->delta_q_ekf());
               cp.cmd_reset();
             }
             else
@@ -185,6 +185,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf("rp.vbatt_bias from %7.3f to ", rp.vbatt_bias);
             rp.vbatt_bias = cp.input_string.substring(2).toFloat();
             Serial.printf("%7.3f\n", rp.vbatt_bias);
+            break;
+
+          case ( 'i' ):  // Di<>:
+            Serial.printf("rp.ibatt_bias_all from %7.3f to ", rp.ibatt_bias_all);
+            rp.ibatt_bias_all = cp.input_string.substring(2).toFloat();
+            Serial.printf("%7.3f\n", rp.ibatt_bias_all);
             break;
 
           case ( 'n' ):  // Dn<>:

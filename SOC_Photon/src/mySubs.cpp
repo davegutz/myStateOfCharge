@@ -267,6 +267,8 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   if ( !rp.mod_vb() ) raw_Vbatt = analogRead(myPins->Vbatt_pin);
   if ( rp.debug>102 ) Serial.printf("done at %ld\n", millis());
   Sen->Vbatt_hdwe =  float(raw_Vbatt)*vbatt_conv_gain + float(VBATT_A) + rp.vbatt_bias;
+  if ( rp.debug==15 ) Serial.printf("raw_Vbatt, rp.vbatt_bias, Vbatt_hdwe=, %d, %7.3f,  %7.3f,\n",
+    raw_Vbatt, rp.vbatt_bias, Sen->Vbatt_hdwe);
 
   // Power calculation
   Sen->Wbatt = Sen->Vbatt*Sen->Ibatt;
