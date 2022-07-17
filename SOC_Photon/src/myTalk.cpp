@@ -204,18 +204,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'p' ):  // Dp<>:
+            Serial1.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
             if ( cp.serial1 )
             {
-              Serial1.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
               Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
-              Serial1.printf("%ld\n", Sen->PublishSerial->delay());
             }
-            else
-            {
-              Serial.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
-              Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
-              Serial.printf("%ld\n", Sen->PublishSerial->delay());
-            }
+            Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
+            Serial.printf("%ld\n", Sen->PublishSerial->delay());
             break;
 
           case ( 'r' ):  // Dr<>:
@@ -606,9 +601,12 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
         #ifdef USE_BLYNK
           Sen->display = !Sen->display; // not remembered in rp. Photon reset turns this to default
           Serial.printf("display on (BT off) = %d\n", Sen->display);
-        #else
-          Serial.printf("ignored when not compiled with USE_BLYNK\n");
         #endif
+        Serial.printf("toggling cp.serial1 from %d to ", cp.serial1);
+        cp.serial1 = !cp.serial1;
+        if ( cp.serial1 ) Serial1.begin(115200);
+        else Serial1.end();
+        Serial.printf("%d\n", cp.serial1);
         break;
 
       case ( 'X' ):  // X
@@ -990,6 +988,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("    -<>:   Negative - Arduino plot compatible\n");
   Serial.printf("    v-1:   GP Arduino plot\n");
+  Serial.printf("  +/-v3:   Powert\n");
   Serial.printf("     v4:   GP\n");
   Serial.printf("  +/-v5:   OLED display\n");
   Serial.printf("     v6:   EKF solver iter during init\n");
@@ -1000,6 +999,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" +/-v12:   EKF\n");
   Serial.printf(" +/-v14:   vshunt and Ibatt raw\n");
   Serial.printf("    v15:   vb raw\n");
+  Serial.printf("    v24:   sim\n");
+  Serial.printf("    v25:   Blynk write\n");
   Serial.printf(" +/-v34:   EKF detailed\n");
   Serial.printf("   v-35:   EKF summary Arduino\n");
   Serial.printf("    v35:   Randles balance\n");
@@ -1047,10 +1048,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  XR  "); Serial.printf("RUN inj\n");
   Serial.printf("  XS  "); Serial.printf("STOP inj\n");
   Serial.printf("  XW= "); Serial.printf("%6.2f s wait start inj\n", float(Sen->wait_inj)/1000.);
-
-  #ifdef USE_BLYNK
-    Serial.printf("z   toggle display = %d\n", Sen->display);
-  #endif
+  Serial.printf("z   toggle bluetooth = %d\n", cp.serial1 );
 
   Serial.printf("h   this menu\n");
 }

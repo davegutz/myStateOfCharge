@@ -52,7 +52,7 @@ struct CommandPars
   float ibatt_bias_amp;     // Calibration of amplified shunt sensor, A
   float ibatt_bias_noamp;   // Calibration of non-amplified shunt sensor, A
   boolean dc_dc_on;         // DC-DC charger is on
-  boolean serial1;          // Using Serial1 instead of Serial
+  boolean serial1;          // Using Serial1
   CommandPars(void)
   {
     this->string_complete = false;
@@ -64,7 +64,11 @@ struct CommandPars
     ibatt_bias_amp = 0.;
     ibatt_bias_noamp = 0.;
     dc_dc_on = false;
-    serial1 = false;
+    #ifdef USE_BLE
+      serial1 = true;
+    #else
+      serial1 = false;
+    #endif
   }
   void cmd_reset(void)
   {
