@@ -172,7 +172,7 @@ public:
   uint8_t encode(const String mod_str);
   double hys_scale() { return (hys_->scale()); };
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
-  void init_battery(Sensors *Sen);
+  void init_battery(const boolean reset, Sensors *Sen);
   void init_hys(const double hys) { hys_->init(hys); };
   double ib() { return (ib_); };            // Battery terminal current, A
   double Ib() { return (ib_*(*rp_nP_)); };  // Battery bank current, A
@@ -255,7 +255,7 @@ public:
   void select();
   double soc_ekf() { return (soc_ekf_); };
   double soc_wt() { return soc_wt_; };
-  boolean solve_ekf(Sensors *Sen);
+  boolean solve_ekf(const boolean reset, Sensors *Sen);
   double tcharge() { return (tcharge_); };
   double dv_dyn() { return (dv_dyn_); };
   double dV_dyn() { return (dv_dyn_*(*rp_nS_)); };

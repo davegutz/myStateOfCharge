@@ -272,8 +272,9 @@ void Coulombs::apply_delta_q(const double delta_q)
 }
 
 // Memory set, adjust book-keeping as needed.  q_cap_ etc presesrved
-void Coulombs::apply_delta_q_t(const double delta_q, const double temp_c)
+void Coulombs::apply_delta_q_t(const boolean reset, const double delta_q, const double temp_c)
 {
+  if ( !reset ) return;
   *rp_delta_q_ = delta_q;
   q_capacity_ = calculate_capacity(temp_c);
   q_ = q_capacity_ + *rp_delta_q_;

@@ -139,7 +139,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             if ( FP_in<1.1 )  // Apply crude limit to prevent user error
             {
               Mon->apply_soc(FP_in, Sen->Tbatt_filt);
-              Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
+              Sen->Sim->apply_delta_q_t(true, Mon->delta_q(), Sen->Tbatt_filt);
               Serial.printf("soc=%7.3f, modeling = %d, delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f, soc_ekf=%8.4f, delta_q_ekf=%7.3f,\n",
                   Mon->soc(), rp.modeling, rp.delta_q, Sen->Sim->soc(), rp.delta_q_model, Mon->soc_ekf(), Mon->delta_q_ekf());
               cp.cmd_reset();
@@ -525,7 +525,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
         {
           case ( 'e' ):  // Re:  equalize
             Serial.printf("Equalizing counters\n");
-            Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
+            Sen->Sim->apply_delta_q_t(true, Mon->delta_q(), Sen->Tbatt_filt);
             break;
 
           case ( 'h' ):  // Rh:  hys
@@ -835,8 +835,8 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                   self_talk("XC1", Mon, Sen);     // Number of injection cycles
                   self_talk("v24", Mon, Sen);     // Data collection
                 }
-                Sen->Sim->init_battery(Sen);  // Reset model battery state
-                Mon->init_battery(Sen);       // Reset model battery state
+                Sen->Sim->init_battery(true, Sen);  // Reset model battery state
+                Mon->init_battery(true, Sen);       // Reset model battery state
                 self_talk("Pa", Mon, Sen);    // Print all for record
                 self_talk("XR", Mon, Sen);    // Run cycle
                 break;
@@ -854,8 +854,8 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                   self_talk("Dp2000", Mon, Sen); // Fast data collection
                   self_talk("v4", Mon, Sen);      // Slow data collection
                 }
-                Sen->Sim->init_battery(Sen);  // Reset model battery state
-                Mon->init_battery(Sen);       // Reset model battery state
+                Sen->Sim->init_battery(true, Sen);  // Reset model battery state
+                Mon->init_battery(true, Sen);       // Reset model battery state
                 break;
 
               default:

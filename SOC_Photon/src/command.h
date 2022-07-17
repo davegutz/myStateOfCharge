@@ -64,11 +64,7 @@ struct CommandPars
     ibatt_bias_amp = 0.;
     ibatt_bias_noamp = 0.;
     dc_dc_on = false;
-    #ifdef USE_BLE
-      serial1 = true;
-    #else
-      serial1 = false;
-    #endif
+    serial1 = true;
   }
   void cmd_reset(void)
   {

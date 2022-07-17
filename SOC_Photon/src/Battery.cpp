@@ -105,8 +105,9 @@ double_t Battery::calc_vsat(void)
 
 // Initialize
 // Works in 12 V batteryunits.   Scales up/down to number of series/parallel batteries on output/input.
-void Battery::init_battery(Sensors *Sen)
+void Battery::init_battery(const boolean reset, Sensors *Sen)
 {
+    if ( !reset ) return;
     vb_ = Sen->Vbatt / (*rp_nS_);
     ib_ = Sen->Ibatt / (*rp_nP_);
     ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
@@ -292,7 +293,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     if ( charge_curr>0. && !rp.tweak_test() ) charge_curr *= coul_eff_ * Sen->sclr_coul_eff;
     charge_curr -= chem_.dqdt * q_capacity_ * T_rate;
     predict_ekf(charge_curr);       // u = ib
-    update_ekf(voc_stat_, 0., 1.);  // z = voc_stat, voc_filtered = hx
+    update_ekf(voc_stat_, 0., 1.);  // z = voc_stat, estimated = voc_filtered = hx, predicted = est past
     soc_ekf_ = x_ekf();             // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
     q_ekf_ = soc_ekf_ * q_capacity_;
     delta_q_ekf_ = q_ekf_ - q_capacity_;
@@ -302,7 +303,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
 
     y_filt_ = y_filt->calculate(y_, min(Sen->T, EKF_T_RESET));
     if ( rp.debug==6 || rp.debug==7 )
-        Serial.printf("calculate:Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,dv_dyn,dv_hys,err, %7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
+        Serial.printf("calculate:Tbatt_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err, %7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
             Sen->Tbatt_filt, Sen->Ibatt, 0, soc_ekf_, vb_, voc_, hx_, dv_dyn_, dv_hys_, y_);
 
     // EKF convergence.  Audio industry found that detection of quietness requires no more than
@@ -460,32 +461,53 @@ void BatteryMonitor::select()
     OUTPUTS:
         Mon->soc_ekf
 */
-boolean BatteryMonitor::solve_ekf(Sensors *Sen)
+boolean BatteryMonitor::solve_ekf(const boolean reset, Sensors *Sen)
 {
+    // Average dynamic inputs through the initialization period before apply EKF
+    static float Tb_avg = Sen->Tbatt_filt;
+    static float Vb_avg = Sen->Vbatt;
+    static float Ib_avg = Sen->Ibatt;
+    static uint16_t n_avg = 0;
+    if ( !reset )
+    {
+        Tb_avg = Sen->Tbatt_filt;
+        Vb_avg = Sen->Vbatt;
+        Ib_avg = Sen->Ibatt;
+        n_avg = 0;
+        return ( true );
+    }
+    else
+    {
+        n_avg++;
+        Tb_avg = (Tb_avg*float(n_avg-1) + Sen->Tbatt_filt) / float(n_avg);
+        Vb_avg = (Vb_avg*float(n_avg-1) + Sen->Vbatt) / float(n_avg);
+        Ib_avg = (Ib_avg*float(n_avg-1) + Sen->Ibatt) / float(n_avg);
+    }
+
     // Solver, steady
     const double meps = 1-1e-6;
-    double vb = Sen->Vbatt/(*rp_nS_);
-    double dv_dyn = Sen->Ibatt/(*rp_nP_)*chem_.r_ss;
+    double vb = Vb_avg/(*rp_nS_);
+    double dv_dyn = Ib_avg/(*rp_nP_)*chem_.r_ss;
     double voc =  vb - dv_dyn;
     double dv_hys_ = 0.;
     int8_t count = 0;
     static double soc_solved = 1.0;
     double dv_dsoc;
-    double voc_solved = calc_soc_voc(soc_solved, Sen->Tbatt_filt, &dv_dsoc);
+    double voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
     double err = voc - voc_solved;
     while( abs(err)>SOLV_ERR && count++<SOLV_MAX_COUNTS )
     {
         soc_solved = max(min(soc_solved + max(min( err/dv_dsoc, SOLV_MAX_STEP), -SOLV_MAX_STEP), meps), 1e-6);
-        voc_solved = calc_soc_voc(soc_solved, Sen->Tbatt_filt, &dv_dsoc);
+        voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
         err = voc - voc_solved;
         if ( rp.debug==6 )
-            Serial.printf("solve    :Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,dv_dyn,dv_hys,err, %7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-            Sen->Tbatt_filt, Sen->Ibatt, count, soc_solved, vb, voc, voc_solved, dv_dyn, dv_hys_, err);
+            Serial.printf("solve    :Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
+            Tb_avg, Vb_avg, Ib_avg, count, soc_solved,  voc, voc_solved, dv_dyn, dv_hys_, err);
     }
     init_soc_ekf(soc_solved);
     if ( rp.debug==7 )
-            Serial.printf("solve    :Tbatt_f,ib,count,soc_s,vb,voc,voc_m_s,dv_dyn,dv_hys,err, %7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-            Sen->Tbatt_filt, Sen->Ibatt, count, soc_solved, vb, voc, voc_solved, dv_dyn, dv_hys_, err);
+            Serial.printf("solve    :n_avg, Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %d, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
+            n_avg, Tb_avg, Vb_avg, Ib_avg, count, soc_solved, voc, voc_solved, dv_dyn, dv_hys_, err);
     return ( count<SOLV_MAX_COUNTS );
 }
 

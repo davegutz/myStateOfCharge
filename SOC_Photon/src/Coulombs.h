@@ -91,6 +91,7 @@ public:
   void apply_delta_q(const double delta_q);
   void apply_resetting(const boolean resetting){ resetting_ = resetting; };
   void apply_soc(const double soc, const double temp_c);
+  void apply_delta_q_t(const boolean reset, const double delta_q, const double temp_c);
   void apply_delta_q_t(const double delta_q, const double temp_c);
   void assign_mod(const String mod_str) { chem_.assign_mod(mod_str); };
   double calculate_capacity(const double temp_c);

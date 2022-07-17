@@ -59,7 +59,6 @@
   #undef min
 #endif
 
-#define USE_BLE               // Change this to #define to use Bluetooth
 #undef USE_BLYNK              // Change this to #define to use BLYNK
 
 #include "constants.h"
@@ -445,6 +444,7 @@ void loop()
 
   // Initialize complete once sensors and models started and summary written
   if ( read ) reset = false;
+
   if ( read_temp && elapsed>TEMP_INIT_DELAY ) reset_temp = false;
   if ( publishP || publishS ) reset_publish = false;
 
