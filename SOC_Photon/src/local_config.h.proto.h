@@ -1,13 +1,13 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "pro_20220710";  // Tweak Coulombic efficiency, delete duty
+const String unit = "pro_20220718";  // Init ekf
 
 // Sensor biases
 #define CURR_BIAS_AMP         -0.24 // Calibration of amplified shunt sensor ('Da=#.#;'), A
 #define CURR_BIAS_NOAMP       -1.1  // Calibration of non-amplified shunt sensor ('Db=#.#;'), A
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors ('Di=#.#;'), A
-#define VOLT_BIAS             0.0   // Bias on Vbatt sensor ('Dc=#.#;'), V
+#define VOLT_BIAS             1.8   // Bias on Vbatt sensor ('Dc=#.#;'), V
 #define TEMP_BIAS             0.0   // Bias on Tbatt sensor ('Dt=#.#;'  +reset), deg C
 
 // Battery.  One 12 V 100 Ah battery bank would have RATED_BATT_CAP 100, NS 1, and NP 1

@@ -103,7 +103,8 @@ void print_serial_header(void)
   if ( rp.debug==4 || rp.debug==24 )
   {
     Serial.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
-    Serial1.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
+    if ( cp.serial1 )
+      Serial1.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
   }
 }
 void print_serial_sim_header(void)
@@ -267,6 +268,8 @@ void load(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins 
   if ( !rp.mod_vb() ) raw_Vbatt = analogRead(myPins->Vbatt_pin);
   if ( rp.debug>102 ) Serial.printf("done at %ld\n", millis());
   Sen->Vbatt_hdwe =  float(raw_Vbatt)*vbatt_conv_gain + float(VBATT_A) + rp.vbatt_bias;
+  if ( rp.debug==15 ) Serial.printf("raw_Vbatt, rp.vbatt_bias, Vbatt_hdwe=, %d, %7.3f,  %7.3f,\n",
+    raw_Vbatt, rp.vbatt_bias, Sen->Vbatt_hdwe);
 
   // Power calculation
   Sen->Wbatt = Sen->Vbatt*Sen->Ibatt;
@@ -337,37 +340,17 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 
 // Calculate Ah remaining
 // Inputs:  rp.mon_mod, Sen->Ibatt, Sen->Vbatt, Sen->Tbatt_filt
-// States:  Mon.soc
-// Outputs: tcharge_wt, tcharge_ekf
+// States:  Mon.soc, Mon.soc_ekf
+// Outputs: tcharge_wt, tcharge_ekf, Voc, Voc_filt
 void  monitor(const int reset, const boolean reset_temp, const unsigned long now,
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen)
 {
-  /* Main Battery Monitor
-      Inputs:
-        rp.mon_mod      Monitor battery chemistry type
-        Sen->Ibatt      Selected battery bank current, A
-        Sen->Vbatt      Selected battery bank voltage, V
-        Sen->Tbatt_filt Filtered battery bank temp, C
-        Mon.soc         State of charge
-      Outputs:
-        Voc             Static bank open circuit voltage, V
-        Voc_filt        Filtered bank open circuit voltage for saturation detect, V
-        Mon.soc         State of charge
-        Mon.soc_ekf     EKF state of charge
-        Mon.soc_wt      Weighted selection of soc
-        tcharge    	    Counted charging time to full, hr
-        tcharge_ekf     Solved charging time to full from ekf, hr
-        tcharge_wf  	    Counted charging time to full, hr
-  */
 
   // Initialize charge state if temperature initial condition changed
   // Needed here in this location to have a value for Sen->Tbatt_filt
-  if ( reset_temp )
-  {
-    Mon->apply_delta_q_t(rp.delta_q, rp.t_last);  // From memory
-    Mon->init_battery(Sen);
-    Mon->solve_ekf(Sen);
-  }
+  Mon->apply_delta_q_t(reset_temp, rp.delta_q, rp.t_last);  // From memory
+  Mon->init_battery(reset_temp, Sen);
+  Mon->solve_ekf(reset_temp, Sen);
 
   // EKF - calculates temp_c_, voc_stat_, voc_ as functions of sensed parameters vb & ib (not soc)
   Mon->calculate(Sen, reset_temp);
@@ -377,8 +360,9 @@ void  monitor(const int reset, const boolean reset_temp, const unsigned long now
   Sen->saturated = Is_sat_delay->calculate(sat, T_SAT, T_DESAT, min(Sen->T, T_SAT/2.), reset);
 
   // Memory store // TODO:  simplify arg list here.  Unpack Sen inside count_coulombs
+  // Initialize to ekf when not saturated
   Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ibatt, Sen->saturated, rp.t_last,
-    Sen->sclr_coul_eff);
+    Sen->sclr_coul_eff, Mon->delta_q_ekf());
 
   // Charge time for display
   Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ibatt, Mon->soc());
@@ -431,18 +415,22 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   pass = !pass;
 
   // Text basic Bluetooth (uses serial bluetooth app)
-  #ifndef USE_BLYNK
-    if ( rp.debug!=4 )
-      Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s    %s EKF,Ah  chg,hrs  CC, Ah\n\n\n", dispString, dispStringT, dispStringS);
-  #endif
+  if ( rp.debug!=4 && cp.serial1 )
+    Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s    %s EKF,Ah  chg,hrs  CC, Ah\n\n\n", dispString, dispStringT, dispStringS);
 
   if ( rp.debug==5 ) debug_5();
   if ( rp.debug==-5 ) debug_m5();  // Arduino plot
 }
 
-// Read sensors, model signals, select between them
-// Inputs:  rp.config, rp.sim_mod
-// Outputs: Sen->Ibatt, Sen->Vbatt, Sen->Tbatt_filt, rp.inj_bias
+// Read sensors, model signals, select between them.
+// Sim used for built-in testing (rp.modeling = 7 and jumper wire).
+//    Needed here in this location to have available a value for
+//    Sen->Tbatt_filt when called.   Recalculates Sen->Ibatt accounting for
+//    saturation.  Sen->Ibatt is a feedback (used-before-calculated).
+// Inputs:  rp.config, rp.sim_mod, Sen->Tbatt, Sen->Ibatt_model_in
+// States:  Sim.soc
+// Outputs: Sim.temp_c_, Sen->Tbatt_filt, Sen->Ibatt, Sen->Ibatt_model,
+//   Sen->Vbatt_model, Sen->Tbatt_filt, rp.inj_bias
 void sense_synth_select(const int reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen)
 {
@@ -453,31 +441,9 @@ void sense_synth_select(const int reset, const boolean reset_temp, const unsigne
   // Arduino plots
   if ( rp.debug==-7 ) debug_m7(Mon, Sen);
 
-  /* Sim used for built-in testing (rp.modeling = 7 and jumper wire).   Needed here in this location
-  to have available a value for Sen->Tbatt_filt when called.   Recalculates Sen->Ibatt accounting for
-  saturation.  Sen->Ibatt is a feedback (used-before-calculated).
-      Inputs:
-        rp.sim_mod        Simulation battery chemistry type
-        Sim.soc           Model state of charge, Coulombs
-        Sen->Ibatt_model_in   Battery bank current input to model, A
-        Sen->Tbatt        Battery temperature, deg C
-        Sen->Tbatt_filt   Filtered battery bank temp, C
-      Outputs:
-        Sim.soc           Model state of charge, Coulombs
-        Sim.temp_c_       Simulated Tb, deg C
-        Sen->Tbatt_filt   Filtered model battery bank temp, C
-        Sen->Ibatt_model  Modeled battery bank current, A
-        Sen->Vbatt_model  Modeled battery bank voltage, V
-        Sen->Vbatt        = Sen->Vbatt_model override
-        rp.inj_bias       Used to inject fake shunt current, A
-  */
-
   // Sim initialize as needed from memory
-  if ( reset )
-  {
-    Sen->Sim->apply_delta_q_t(rp.delta_q_model, rp.t_last_model);
-    Sen->Sim->init_battery(Sen);
-  }
+  Sen->Sim->apply_delta_q_t(reset, rp.delta_q_model, rp.t_last_model);
+  Sen->Sim->init_battery(reset, Sen);
 
   // Sim calculation
   //  Inputs:  Sen->Tbatt_filt(past), Sen->Ibatt_model_in
@@ -569,7 +535,6 @@ void serialEvent()
       cp.input_string.replace(",","");
       cp.input_string.replace(" ","");
       cp.input_string.replace("=","");
-      cp.serial1 = false; 
       cp.string_complete = true;
      break;  // enable reading multiple inputs
     }
@@ -615,7 +580,8 @@ void serial_print(unsigned long now, double T)
   create_print_string(&pp.pubList);
   if ( rp.debug >= 100 ) Serial.printf("serial_print:");
   Serial.println(cp.buffer);
-  Serial1.println(cp.buffer);
+  if ( cp.serial1 )
+    Serial1.println(cp.buffer);
 }
 void tweak_print(Sensors *Sen, BatteryMonitor *Mon)
 {

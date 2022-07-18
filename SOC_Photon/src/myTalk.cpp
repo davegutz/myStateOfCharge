@@ -139,9 +139,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             if ( FP_in<1.1 )  // Apply crude limit to prevent user error
             {
               Mon->apply_soc(FP_in, Sen->Tbatt_filt);
-              Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
-              Serial.printf("soc=%7.3f, modeling = %d, delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f,\n",
-                  Mon->soc(), rp.modeling, rp.delta_q, Sen->Sim->soc(), rp.delta_q_model);
+              Sen->Sim->apply_delta_q_t(true, Mon->delta_q(), Sen->Tbatt_filt);
+              Serial.printf("soc=%7.3f, modeling = %d, delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f, soc_ekf=%8.4f, delta_q_ekf=%7.3f,\n",
+                  Mon->soc(), rp.modeling, rp.delta_q, Sen->Sim->soc(), rp.delta_q_model, Mon->soc_ekf(), Mon->delta_q_ekf());
               cp.cmd_reset();
             }
             else
@@ -187,6 +187,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf("%7.3f\n", rp.vbatt_bias);
             break;
 
+          case ( 'i' ):  // Di<>:
+            Serial.printf("rp.ibatt_bias_all from %7.3f to ", rp.ibatt_bias_all);
+            rp.ibatt_bias_all = cp.input_string.substring(2).toFloat();
+            Serial.printf("%7.3f\n", rp.ibatt_bias_all);
+            break;
+
           case ( 'n' ):  // Dn<>:
             FP_in = cp.input_string.substring(2).toFloat();
             Serial.printf("coulombic eff from %7.4f,%7.4f,%7.4f,%7.4f, to ", Sen->Sim->coul_eff(), Mon->coul_eff(), Sen->ShuntAmp->coul_eff(), Sen->ShuntNoAmp->coul_eff());
@@ -198,18 +204,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'p' ):  // Dp<>:
+            Serial1.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
             if ( cp.serial1 )
             {
-              Serial1.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
               Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
-              Serial1.printf("%ld\n", Sen->PublishSerial->delay());
             }
-            else
-            {
-              Serial.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
-              Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
-              Serial.printf("%ld\n", Sen->PublishSerial->delay());
-            }
+            Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
+            Serial.printf("%ld\n", Sen->PublishSerial->delay());
             break;
 
           case ( 'r' ):  // Dr<>:
@@ -524,7 +525,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
         {
           case ( 'e' ):  // Re:  equalize
             Serial.printf("Equalizing counters\n");
-            Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
+            Sen->Sim->apply_delta_q_t(true, Mon->delta_q(), Sen->Tbatt_filt);
             break;
 
           case ( 'h' ):  // Rh:  hys
@@ -600,9 +601,12 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
         #ifdef USE_BLYNK
           Sen->display = !Sen->display; // not remembered in rp. Photon reset turns this to default
           Serial.printf("display on (BT off) = %d\n", Sen->display);
-        #else
-          Serial.printf("ignored when not compiled with USE_BLYNK\n");
         #endif
+        Serial.printf("toggling cp.serial1 from %d to ", cp.serial1);
+        cp.serial1 = !cp.serial1;
+        if ( cp.serial1 ) Serial1.begin(115200);
+        else Serial1.end();
+        Serial.printf("%d\n", cp.serial1);
         break;
 
       case ( 'X' ):  // X
@@ -809,6 +813,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 self_talk("Nk1", Mon, Sen);   // Reset the tweak biases to 1 for new count
                 self_talk("Dn1", Mon, Sen);   // Disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
                 self_talk("XW5", Mon, Sen);   // Wait time before starting to cycle
+                self_talk("Dp100", Mon, Sen); // Fast data collection
                 if ( INT_in == 9 )
                 {
                   self_talk("Xf0.02", Mon, Sen);  // Frequency 0.02 Hz
@@ -830,8 +835,8 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                   self_talk("XC1", Mon, Sen);     // Number of injection cycles
                   self_talk("v24", Mon, Sen);     // Data collection
                 }
-                Sen->Sim->init_battery(Sen);  // Reset model battery state
-                Mon->init_battery(Sen);       // Reset model battery state
+                Sen->Sim->init_battery(true, Sen);  // Reset model battery state
+                Mon->init_battery(true, Sen);       // Reset model battery state
                 self_talk("Pa", Mon, Sen);    // Print all for record
                 self_talk("XR", Mon, Sen);    // Run cycle
                 break;
@@ -841,14 +846,16 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 self_talk("Pa", Mon, Sen);    // Print all for record
                 if ( INT_in == 20 )
                 {
-                  self_talk("v24", Mon, Sen);     // Tweak-like data collection
+                  self_talk("Dp100", Mon, Sen);  // Tweak-like data collection
+                  self_talk("v24", Mon, Sen);    // Tweak-like data collection
                 }
                 else if ( INT_in == 21 )
                 {
+                  self_talk("Dp2000", Mon, Sen); // Fast data collection
                   self_talk("v4", Mon, Sen);      // Slow data collection
                 }
-                Sen->Sim->init_battery(Sen);  // Reset model battery state
-                Mon->init_battery(Sen);       // Reset model battery state
+                Sen->Sim->init_battery(true, Sen);  // Reset model battery state
+                Mon->init_battery(true, Sen);       // Reset model battery state
                 break;
 
               default:
@@ -981,6 +988,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("    -<>:   Negative - Arduino plot compatible\n");
   Serial.printf("    v-1:   GP Arduino plot\n");
+  Serial.printf("  +/-v3:   Powert\n");
   Serial.printf("     v4:   GP\n");
   Serial.printf("  +/-v5:   OLED display\n");
   Serial.printf("     v6:   EKF solver iter during init\n");
@@ -991,6 +999,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" +/-v12:   EKF\n");
   Serial.printf(" +/-v14:   vshunt and Ibatt raw\n");
   Serial.printf("    v15:   vb raw\n");
+  Serial.printf("    v24:   sim\n");
+  Serial.printf("    v25:   Blynk write\n");
   Serial.printf(" +/-v34:   EKF detailed\n");
   Serial.printf("   v-35:   EKF summary Arduino\n");
   Serial.printf("    v35:   Randles balance\n");
@@ -1038,10 +1048,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  XR  "); Serial.printf("RUN inj\n");
   Serial.printf("  XS  "); Serial.printf("STOP inj\n");
   Serial.printf("  XW= "); Serial.printf("%6.2f s wait start inj\n", float(Sen->wait_inj)/1000.);
-
-  #ifdef USE_BLYNK
-    Serial.printf("z   toggle display = %d\n", Sen->display);
-  #endif
+  Serial.printf("z   toggle bluetooth = %d\n", cp.serial1 );
 
   Serial.printf("h   this menu\n");
 }

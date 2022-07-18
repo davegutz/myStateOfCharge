@@ -143,6 +143,8 @@ struct RetainedPars
   boolean mod_ib() { return ( 0x4 & modeling ); }     // Using Sim as source of ib
   boolean mod_vb() { return ( 0x2 & modeling ); }     // Using Sim as source of vb
   boolean mod_tb() { return ( 0x1 & modeling ); }     // Using Sim as source of tb
+  boolean mod_none() { return ( 0==modeling ); }      // Using nothing
+  boolean mod_any() { return ( 0<modeling ); }        // Using any
   
   // Print
   void pretty_print(void)

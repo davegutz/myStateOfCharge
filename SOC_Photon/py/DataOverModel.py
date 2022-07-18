@@ -26,6 +26,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
 from MonSim import replicate, save_clean_file, save_clean_file_sim
+from Battery import overall as overalls
 from kivy.utils import platform
 if platform != 'linux':
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
@@ -385,6 +386,7 @@ class SavedData:
             self.time = np.array(self.time[:i_end])
             self.Ib = np.array(data.Ib[:i_end])
             self.Ib_past = np.append(np.zeros((1,1)), np.array(data.Ib[:(i_end-1)]))
+            self.Ib_past[0] = self.Ib_past[1]
             self.Vb = np.array(data.Vb[:i_end])
             self.sat = np.array(data.sat[:i_end])
             self.sel = np.array(data.sel[:i_end])
@@ -548,7 +550,7 @@ if __name__ == '__main__':
 
         # Transient  inputs
         time_end = None
-        # time_end = 2500.
+        # time_end = 20.
 
         # Load data (must end in .txt) txt_file, type, title_key, unit_key
         data_file_clean = write_clean_file(data_file_old_txt, type='_mon', title_key='unit,', unit_key=unit_key)
@@ -571,7 +573,7 @@ if __name__ == '__main__':
             saved_sim_old = None
 
         # Run model
-        mons, sims, monrs, sims_m = replicate(saved_old)
+        mons, sims, monrs, sims_m = replicate(saved_old, init_time=1.)
         date_ = datetime.now().strftime("%y%m%d")
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         save_clean_file(mons, mon_file_save, '_mon_rep' + date_)
@@ -587,9 +589,9 @@ if __name__ == '__main__':
         if platform == 'linux':
             filename = "Python/Figures/" + data_root + sys.argv[0].split('/')[-1]
         else:
-            filename = "./Figures/" + data_root + sys.argv[0].split('/')[-1]
+            filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        # n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
+        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
         n_fig, fig_files = overall(saved_old, mons, saved_sim_old, sims, sims_m, filename, fig_files, plot_title=plot_title,
                                    n_fig=n_fig, new_s_s=sims)
         if platform != 'linux':
@@ -603,12 +605,14 @@ if __name__ == '__main__':
     #python DataOverModel.py("../dataReduction/watchXm2.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/serial_20220624_095543.txt", "pro_2022")
     #python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220711.txt", "pro_2022")
-    #python DataOverModel.py("../dataReduction/slowTweakRegressionTest20220711.txt", "pro_2022")
+    #python DataOverModel.py()
     #
     """
-    PyCharm Sample Run Configuration Parameters:
-    "../dataReduction/serial_20220624_095543.txt"
-    pro_2022
+    PyCharm Sample Run Configuration Parameters (right click in pyCharm - Modify Run Configuration:
+        "../dataReduction/slowTweakRegressionTest20220711.txt" "pro_2022"
+        "../dataReduction/serial_20220624_095543.txt"    "pro_2022"
+        "../dataReduction/real world rapid 20220713.txt" "soc0_2022"
+        "../dataReduction/real world Xp20 20220715.txt" "soc0_2022"
     
     PyCharm Terminal:
     python DataOverModel.py "../dataReduction/serial_20220624_095543.txt" "pro_2022"

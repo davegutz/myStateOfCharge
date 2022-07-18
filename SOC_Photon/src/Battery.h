@@ -172,7 +172,7 @@ public:
   uint8_t encode(const String mod_str);
   double hys_scale() { return (hys_->scale()); };
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
-  void init_battery(Sensors *Sen);
+  void init_battery(const boolean reset, Sensors *Sen);
   void init_hys(const double hys) { hys_->init(hys); };
   double ib() { return (ib_); };            // Battery terminal current, A
   double Ib() { return (ib_*(*rp_nP_)); };  // Battery bank current, A
@@ -243,6 +243,7 @@ public:
   virtual void assign_rand(void);
   double calc_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   double calculate(Sensors *Sen, const boolean reset);
+  double delta_q_ekf() { return (delta_q_ekf_); };
   boolean converged_ekf() { return(EKF_converged->state()); };
   double hx() { return (hx_); };
   double Hx() { return (hx_*(*rp_nS_)); };
@@ -254,7 +255,7 @@ public:
   void select();
   double soc_ekf() { return (soc_ekf_); };
   double soc_wt() { return soc_wt_; };
-  boolean solve_ekf(Sensors *Sen);
+  boolean solve_ekf(const boolean reset, Sensors *Sen);
   double tcharge() { return (tcharge_); };
   double dv_dyn() { return (dv_dyn_); };
   double dV_dyn() { return (dv_dyn_*(*rp_nS_)); };
@@ -262,6 +263,7 @@ public:
   double Voc_filt() { return (voc_filt_*(*rp_nS_)); };
   double y_ekf() { return (y_); };
   double y_ekf_filt() { return (y_filt_); };
+  double delta_q_ekf_;         // Charge deficit represented by charge calculated by ekf, C
 protected:
   double tcharge_ekf_;  // Solved charging time to 100% from ekf, hr
   double soc_ekf_;      // Filtered state of charge from ekf (0-1)

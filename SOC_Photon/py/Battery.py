@@ -592,7 +592,7 @@ class BatteryModel(Battery):
         s += Battery.__str__(self, prefix + 'BatteryModel:')
         return s
 
-    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None):  # BatteryModel
+    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None, sat_init=None):  # BatteryModel
         self.dt = dt
         self.temp_c = temp_c
         self.mod = rp.modeling
@@ -644,6 +644,9 @@ class BatteryModel(Battery):
             self.ib_fut = 0.  # empty
         self.model_cutback = (self.voc_stat > self.vsat) & (self.ib_fut == self.sat_ib_max)
         self.model_saturated = (self.temp_c > low_t) and (self.model_cutback & (self.ib_fut < self.ib_sat))
+        if reset and sat_init is not None:
+            self.model_saturated = sat_init
+            self.sat = sat_init
         Coulombs.sat = self.model_saturated
         # print("model:  soc, ib_in, ib, model_cutback, model_saturated",
         #       self.soc, self.ib_in, self.ib, self.model_cutback, self.model_saturated)

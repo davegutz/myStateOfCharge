@@ -379,6 +379,10 @@ Throughput test
 38. Capitalized parameters, violation of coding standards, are "Bank" values, e.g. for '2P3S' parallelSerial banks of batteries while lower case are per 12V battery unit.
 39. Signal injection examples:
  Ca0.5;Xts;Xa100;Xf0.1;XW5;XC5;v4;XR;
+40.  Expected anomolies:
+  a.  real world collection sometimes run sample times longer than RANDLES_T_MAX.   When that happens the modeled simulation of Randles system will oscillate so it is bypassed.   Real data will appear to have first order response and simulation in python will appear to be step.
+41.  Manual tests to check initialzation of real world.   Set 'Xm=4;' to over-ride current sensor.  Set 'Dc<>' to place Vb where you want it.   Press hard reset button to force reinitialization to the EKF.  If get stuck saturated or not, remember to add a little bit of current 'Di<>' positive to engage saturation and negative to disengage saturation.
+42.  Bluetooth (BLE).  In the logic it is visible as Serial1.   All the Serial1 api are non-blocking, so if BLE not connected or has failed then nothing seems to happen.  Another likely reason is baud rate mismatch between the HC-06 device (I couldn't get HC-05 to work) and Serial.begin(baud).   There is a project above this SOC_Photon project called BT-AT that runs the AT on HC-06.  You need to set baud rate using that.   You should use 115200 or higher.   Lower rates caused the Serial api to be the slowest routines in the chain of call.   At 9600 the fastest READ time 'Dr<>' was 100 - 200 ms depending on the print interval 'Dp<>'.
 
 ## Accuracy
 
@@ -402,3 +406,4 @@ Throughput test
 9. Redundancy
   a. [TODO]:  need results of tests above
 10. Selection between EKF and Coulomb Counter.  Disabled.   [TODO]: next consider replacing large lag in EKF with the Coulomb Counter.
+11.  
