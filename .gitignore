@@ -13,21 +13,10 @@ SOC_Photon/target/3.0.0-beta.1/photon/obj/src/module_info.o
 SOC_Photon/target/3.0.0-beta.1/photon/obj/src/newlib_stubs.o
 SOC_Photon/target/3.0.0-beta.1/photon/obj/src/user_export.o
 SOC_Photon/target/3.0.0-beta.1/photon/obj/src/user_module.o
-SOC_Photon/dataReduction/debug.csv
-.csv
 *.o
-*.o
-*.d
-*.d
 *.d
 SOC_Photon/target/3.0.0-beta.1/photon/obj/src/user_export.o.d
 SOC_Photon/target/3.0.0-beta.1/photon/SOC_Photon.bin.crc_block
-SOC_Photon/dataReduction/debugproto - Copy (3).xlsx
-SOC_Photon/dataReduction/debugproto - Copy (4).xlsx
-SOC_Photon/dataReduction/debugproto - Copy.xls
-SOC_Photon/dataReduction/~$debugproto - Copy (3).xlsx
-SOC_Photon/dataReduction/~$debugproto - Copy (4).xlsx
-SOC_Photon/dataReduction/debugproto - Copy.xls
 SOC_Photon/datasheets/~$BattleBorn.xlsx
 SOC_Photon/Battery State/~$BattleBorn.xlsx
 SOC_Photon/dataReduction/CoolTerm Capture 2021-08-14 04-02-05.txt
@@ -40,121 +29,8 @@ SOC_Photon/.vscode/settings.json
 *.pyc
 SOC_Photon/datasheets/GP_battery.net
 *.net
-SOC_Photon/Battery State/EKF/sandbox/Test_plot.py1.png
-SOC_Photon/Battery State/EKF/sandbox/Test_plot.py2.png
-SOC_Photon/Battery State/EKF/sandbox/Test_plot.py1.png
-*.pdf
-SOC_Photon/Battery State/EKF/sandbox/pyDAGx/Hysteresis.py_1.png
-SOC_Photon/Battery State/EKF/sandbox/figures/figure_a.png
-SOC_Photon/Battery State/EKF/sandbox/figures/figure_b.png
-SOC_Photon/Battery State/EKF/sandbox/figures/figure_c.png
-SOC_Photon/Battery State/EKF/sandbox/figures/table_c.png
-SOC_Photon/Battery State/EKF/sandbox/figures/table_b.png
-SOC_Photon/Battery State/EKF/sandbox/figures/table_a.png
-SOC_Photon/Battery State/EKF/sandbox/pyDAGx/Hysteresis.py_2.png
-SOC_Photon/Battery State/EKF/sandbox/Hysteresis.py_2.png
-SOC_Photon/Battery State/EKF/sandbox/Hysteresis.py_1.png
-SOC_Photon/dataReduction/~$20220118_111309.xlsx
+SOC_Photon/Battery State/EKF/sandbox/*.png
+~*.xlsx
 *.odp#
-*.png
-SOC_Photon/dataReduction/data_proto.csv
-SOC_Photon/dataReduction/2-pole y_filt, tune hys 220613.csv
-SOC_Photon/dataReduction/2-pole y_filt, tune hys 220613_mon.csv
-SOC_Photon/dataReduction/2-pole y_filt, tune hys 220613_mon_rep.csv
-SOC_Photon/dataReduction/2-pole y_filt, tune hys 220613_rep.csv
-SOC_Photon/dataReduction/2-pole y_filt, tune hys 220613_sim.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220607_new.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220607_newShort.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220613.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220613_new.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220613_new_mon.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220613_new_mon_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220613_new_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220613_new_sim.csv
-SOC_Photon/dataReduction/rapidTweakTest_20220609.csv
-SOC_Photon/dataReduction/real world status-reflash-test 20220609.csv
-SOC_Photon/dataReduction/RealWorld 2022-06-07.csv
-SOC_Photon/dataReduction/watchXm2_mon.csv
-SOC_Photon/dataReduction/watchXm2_mon_rep.csv
-SOC_Photon/dataReduction/watchXm2_sim.csv
-SOC_Photon/dataReduction/watchXm2_sim_rep.csv
+SOC_Photon/dataReduction/*.csv
 *.crc_block
-SOC_Photon/dataReduction/serial_20220624_095543_mon_rep.csv
-SOC_Photon/dataReduction/serial_20220624_095543_mon_rep.csv
-SOC_Photon/dataReduction/serial_20220624_095543_mon_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220624_mon.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220624_mon_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220624_sim.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220624_sim_rep.csv
-SOC_Photon/dataReduction/serial_20220624_095543_mon_rep.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220624_mon.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220624_mon_rep.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220624_sim.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220624_sim_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220625_mon.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220625_mon_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220625_sim.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220626_sim.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220626_mon_rep.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220626_mon.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220626_sim.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220626_mon_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220626_mon.csv
-SOC_Photon/dataReduction/tryXp20_20220626_mon.csv
-SOC_Photon/dataReduction/tryXp20_20220626_mon_rep.csv
-SOC_Photon/dataReduction/tryXp20_20220626_sim.csv
-SOC_Photon/dataReduction/real world Xp20 20220626_sim.csv
-SOC_Photon/dataReduction/real world Xp20 20220626_mon_rep.csv
-SOC_Photon/dataReduction/real world Xp20 20220626_mon.csv
-SOC_Photon/dataReduction/real world Xp21 20220626_mon_rep.csv
-SOC_Photon/dataReduction/real world Xp21 20220626_mon.csv
-SOC_Photon/dataReduction/real world Xp21 20220626_sim.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220626_sim_rep.csv
-SOC_Photon/dataReduction/serial_20220624_095543_mon_rep.csv
-SOC_Photon/dataReduction/serial_20220624_095543_mon_rep.csv
-SOC_Photon/dataReduction/serial_20220624_095543_mon_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220706_mon.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220706_mon_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220706_sim.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220706_sim_rep.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220706_mon.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220706_mon_rep.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220706_sim.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220706_sim_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220709_mon.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220709_mon_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220709_sim.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220709.txt
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220710_mon.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220710_mon_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220710_sim.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220710.txt
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220711_sim.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220711_mon_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220711_mon.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220711_mon.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220711_mon_rep.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220711_sim.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220711_sim_rep.csv
-SOC_Photon/dataReduction/real world rapid 20220713_sim_rep.csv
-SOC_Photon/dataReduction/real world rapid 20220713_sim.csv
-SOC_Photon/dataReduction/real world rapid 20220713_mon_rep.csv
-SOC_Photon/dataReduction/real world rapid 20220713_mon.csv
-SOC_Photon/dataReduction/real world Xp20 20220715_mon.csv
-SOC_Photon/dataReduction/real world Xp20 20220715_mon_rep.csv
-SOC_Photon/dataReduction/real world Xp20 20220715_sim.csv
-SOC_Photon/dataReduction/real world Xp20 20220715_sim_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220716_mon.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220716_mon_rep.csv
-SOC_Photon/dataReduction/rapidTweakRegressionTest20220716_sim.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220716_mon.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220716_mon_rep.csv
-SOC_Photon/dataReduction/slowTweakRegressionTest20220716_sim.csv
-SOC_Photon/dataReduction/real world Xp20 20220716_mon.csv
-SOC_Photon/dataReduction/real world Xp20 20220716_mon_rep.csv
-SOC_Photon/dataReduction/real world Xp20 20220716_sim.csv
-SOC_Photon/dataReduction/real world Xp20 20220716_sim_rep.csv
-SOC_Photon/dataReduction/real world Xp20 20220717_mon.csv
-SOC_Photon/dataReduction/real world Xp20 20220717_mon_rep.csv
-SOC_Photon/dataReduction/real world Xp20 20220717_sim.csv
-SOC_Photon/dataReduction/real world Xp20 20220717_sim_rep.csv
