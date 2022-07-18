@@ -243,7 +243,30 @@ void BatteryMonitor::assign_rand(void)
         soc_ekf_ (return)     Solved state of charge, fraction
         tcharge_ekf_    Solved charging time to full from ekf, hr
         y_filt_         Filtered EKF y residual value, V
-*/
+
+                <---ib        ______________         <---ib
+                 voc          |             |
+       -----------+-----------|   RANDLES   |----------+-----------+ vb
+       |                      |_____________|
+       |
+    ___|___
+    |      |
+    | HYS  |   |              HYS stores charge ib-ioc
+    |______|   |
+       |       v  ioc ~= ib
+       +   voc_stat
+       |
+    ___|____
+    |  +    |
+    | Batt  |
+    |  -    |                 Batt stores charge ioc
+    |_______|
+        |
+        |                      Total charge storage ib-ioc + ioc = ib
+        _
+        -
+        gnd
+*/ 
 double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
 {
     // Inputs
@@ -289,10 +312,10 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     }
 
     // EKF 1x1
-    double charge_curr = ib_;
-    if ( charge_curr>0. && !rp.tweak_test() ) charge_curr *= coul_eff_ * Sen->sclr_coul_eff;
-    charge_curr -= chem_.dqdt * q_capacity_ * T_rate;
-    predict_ekf(charge_curr);       // u = ib
+    double ddq_dt = ib_;
+    if ( ddq_dt>0. && !rp.tweak_test() ) ddq_dt *= coul_eff_ * Sen->sclr_coul_eff;
+    ddq_dt -= chem_.dqdt * q_capacity_ * T_rate;
+    predict_ekf(ddq_dt);       // u = d(q)/dt
     update_ekf(voc_stat_, 0., 1.);  // z = voc_stat, estimated = voc_filtered = hx, predicted = est past
     soc_ekf_ = x_ekf();             // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
     q_ekf_ = soc_ekf_ * q_capacity_;
@@ -561,7 +584,7 @@ void BatteryModel::assign_rand(void)
     rand_D_[1] = 1.;
 }
 
-// BatteryModel::calculate:  Sim SOC-OCV table with a Battery Management System (BMS) and hysteresis.
+/* BatteryModel::calculate:  Sim SOC-OCV table with a Battery Management System (BMS) and hysteresis.
 // Makes a good reference model. Intervenes in sensor path to provide Mon with inputs
 // when running simulations.  Never used for anything during normal operation.  Models
 // for monitoring in normal operation are in the BatteryMonitor object.   Works in 12 V battery
@@ -581,7 +604,31 @@ void BatteryModel::assign_rand(void)
 //    ib_fut_           Simulated over-ridden by saturation, A
 //    vb_               Simulated Vb, V
 //    rp.inj_bias  Used to inject fake shunt current, A
-//
+
+                <---ib        ______________         <---ib
+                 voc          |             |
+       -----------+-----------|   RANDLES   |----------+-----------+ vb
+       |                      |_____________|
+       |
+    ___|___
+    |      |
+    | HYS  |   |              HYS stores charge ib-ioc
+    |______|   |
+       |       v  ioc ~= ib
+       +   voc_stat
+       |
+    ___|____
+    |  +    |
+    | Batt  |
+    |  -    |                 Batt stores charge ioc
+    |_______|
+        |
+        |                      Total charge storage ib-ioc + ioc = ib
+        _
+        -
+        gnd
+
+*/
 double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset)
 {
     const double temp_C = Sen->Tbatt_filt;

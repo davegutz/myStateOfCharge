@@ -89,7 +89,10 @@ def save_clean_file_sim(sims, csv_file, unit_key):
 
 def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
               t_Ib_fail=None, Ib_fail=0.):
-    t = saved_old.time
+    if saved_sim_old and len(saved_sim_old.time) < len(saved_old.time):
+        t = saved_sim_old.time
+    else:
+        t = saved_old.time
     dt = saved_old.dt
     Vb = saved_old.Vb
     Ib = saved_old.Ib
@@ -114,34 +117,26 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
 
     # Setup
     scale = model_bat_cap / Battery.RATED_BATT_CAP
-    # q = 0.001; r = 0.1  # base 0.72 / 0.85 / +-0.05 base
-    # q = 0.01; r = 0.01  # base 0.72 / 0.9 / +-0.07  noisy
-    # q = 0.1; r = 0.001  # base 0.72 / 0.9 / +-0.07  noisier
-    # q = 0.002; r = 0.1  # base 0.73 / 0.86 / +-0.055 noisy
-    # q = 0.005; r = 0.1  # base 0.73 / 0.86 / +-0.055 noisy
-    # q = 0.01; r = 0.1  # base 0.73 / 0.86 / +-0.055 noisy
-    # q = 0.1; r = 0.1  # base 0.73 / 0.86 / +-0.055 noisier
-    # q = 0.005; r = 0.05  # base 0.73 / 0.86 / +-0.055 noisy
-    # q = 0.05; r = 0.05  # base 0.73 / 0.86 / +-0.055 noisier
-    # q = 0.001; r = 0.05  # base 0.73 / 0.86 / +-0.055 like base
-    # q = 0.001; r = 0.01  # base 0.73 / 0.86 / +-0.055 noisier
-    # q = 0.001; r = 0.001  # base 0.73 / 0.86 / +-0.055 noisier
-    # q = 0.0001; r = 0.05  # base 0.75 / 0.83 / +-0.04 good
-    # q = 0.0001; r = 0.1  # base 0.74 / 0.8 / +-0.03 better
-    # q = 0.00002; r = 0.2  # base 0.4 / n/a / +-0.0 falls apart
-    # q = 0.0001; r = 0.2  # base 0.74 / 0.8 / +-0.03 best (temperature bias apparent. EKF doesn't account for it)
-    # q = 0.0001; r = 0.5  # base 0.74 / 0.8 / +-0.03 even better than best
-    # q = 0.0001; r = 1.0  # base 0.74 / 0.8 / +-0.03 even better than best
-    # q = 0.00005; r = 2.0  # base 0.74 / 0.8 / +-0.03 even better than best
-    # q = 0.00001; r = 1.0  # base 0.74 / 0.8 / +-0.03 even better than best
-    # q = 0.00005; r = 1.0  # base 0.74 / 0.8 / +-0.03 even better than best
-    # q = 0.00005; r = 1.0; sres = 2.  # base 0.74 / 0.8 / +-0.03 even better than best
-    # q = 0.00005; r = 1.0; sres = 1.; tau_dif = 83./2.  # base 0.74 / 0.8 / +-0.03 even better than best
-    # q = 0.00005; r = 1.0; sres = 2.; tau_dif = 83./2.  # base 0.74 / 0.8 / +-0.03 even better than best
-    # q = 0.00005; r = 1.0; sres = 1.; tau_dif = 83.*4.  # base 0.74 / 0.8 / +-0.03 even better than best
-    # q = 0.00005; r = 1.0; sres = 1.; tau_dif = 83.; tau_sd = 1.8e7*1.4   # base 0.74 / 0.8 / +-0.03 even better than best
-    # q = 0.00005; r = 1.0; tau_sd = 2.53e7   # base 0.74 / 0.8 / +-0.03 even better than best
-    q = 0.00005; r = 1.0; tau_sd = 2.5e7;   # base 0.74 / 0.8 / +-0.03 even better than best
+    # Trade using real world Xp20 20220717.txt Fig 18
+    # q = 0.00005; r = 1.0   # tau_sd = 2.5e7; # base soc_ekf_new .975 tfail@125 .982 @ 1000
+    # q = 0.001; r = 0.1  # tau_sd = 2.5e7; soc_ekf_new 0.72
+    # q = 0.01; r = 0.01  # tau_sd = 2.5e7; soc_ekf_new 0.72 noisy
+    # q = 0.1; r = 0.001  # tau_sd = 2.5e7; soc_ekf_new 0.72 noisier than prev
+    # q = 0.002; r = 0.1  # tau_sd = 2.5e7; soc_ekf_new 0.72 quiet than prev
+    # q = 0.005; r = 0.1  # ""
+    # q = 0.01; r = 0.1  # " " noisier
+    # q = 0.1; r = 0.1  #  ""
+    # q = 0.005; r = 0.05  # ""
+    # q = 0.05; r = 0.05  # ""
+    # q = 0.001; r = 0.05  # ""
+    # q = 0.001; r = 0.01  # ""
+    # q = 0.001; r = 0.001  # ""
+    # q = 0.0001; r = 0.05  # 0.84 quiet
+    # q = 0.0001; r = 0.1  # 0.875 quiet
+    # q = 0.00002; r = 0.2  # close  could try this with failures  tfail@125 .982 @ 750 better than 1000
+    # q = 0.0001; r = 0.2  # 0.94 need smaller q <.0001
+    q = 0.00005; r = 0.5  # closer could try this with failures  tfail@125 .982 @ 730 better than 1000
+    # q = 0.00005; r = 0.2  # wobbly
     sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
                        dv_hys=dv_hys, sres=sres)
     mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
@@ -276,7 +271,8 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220711.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/real world rapid 20220713.txt'; unit_key = "soc0_2022"
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022';
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"

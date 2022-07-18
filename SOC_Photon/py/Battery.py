@@ -274,7 +274,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.e_soc_ekf = 0.  # analysis parameter
         self.e_voc_ekf = 0.  # analysis parameter
         q = 0.00005
-        r = 1.0
+        r = 0.5
         # self.Q = 0.001*0.001  # EKF process uncertainty
         # self.R = 0.1*0.1  # EKF state uncertainty
         self.Q = q * q  # EKF process uncertainty
@@ -351,11 +351,11 @@ class BatteryMonitor(Battery, EKF_1x1):
             self.dv_dyn = 0.
 
         # EKF 1x1
-        charge_curr = self.ib
-        if charge_curr > 0. and not self.tweak_test:
-            charge_curr *= self.coul_eff
-        charge_curr -= dqdt*self.q_capacity*T_rate
-        self.predict_ekf(u=charge_curr)  # u = ib
+        ddq_dt = self.ib
+        if ddq_dt > 0. and not self.tweak_test:
+            ddq_dt *= self.coul_eff
+        ddq_dt -= dqdt*self.q_capacity*T_rate
+        self.predict_ekf(u=ddq_dt)  # u = d(q)/dt
         self.update_ekf(z=self.voc_stat, x_min=0., x_max=1.)  # z = voc, voc_filtered = hx
         self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity

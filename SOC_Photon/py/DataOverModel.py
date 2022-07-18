@@ -27,9 +27,9 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from MonSim import replicate, save_clean_file, save_clean_file_sim
 from Battery import overall as overalls
-from kivy.utils import platform
-if platform != 'linux':
-    from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
+# from kivy.utils import platform  # failed experiment to run BLE data plotting realtime on android
+# if platform != 'linux':  from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
+from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 
 def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files=None, plot_title=None, n_fig=None, new_s_s=None):
     if fig_files is None:
@@ -550,7 +550,7 @@ if __name__ == '__main__':
 
         # Transient  inputs
         time_end = None
-        # time_end = 20.
+        # time_end = 1500.
 
         # Load data (must end in .txt) txt_file, type, title_key, unit_key
         data_file_clean = write_clean_file(data_file_old_txt, type='_mon', title_key='unit,', unit_key=unit_key)

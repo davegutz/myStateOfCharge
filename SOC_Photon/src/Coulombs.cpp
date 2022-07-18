@@ -319,10 +319,6 @@ Outputs:
 double Coulombs::count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
   const boolean sat, const double t_last, const double sclr_coul_eff, const double delta_q_ekf)
 {
-    double d_delta_q = charge_curr * dt;
-    if ( charge_curr>0. ) d_delta_q *= coul_eff_ * sclr_coul_eff;
-    sat_ = sat;
-
     // Rate limit temperature
     double temp_lim = max(min( temp_c, t_last + t_rlim_*dt), t_last - t_rlim_*dt);
     if ( reset )
@@ -330,6 +326,12 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
       temp_lim = temp_c;
       *rp_t_last_ = temp_c;
     }
+
+    // State change
+    double d_delta_q = charge_curr * dt;
+    if ( charge_curr>0. ) d_delta_q *= coul_eff_ * sclr_coul_eff;
+    d_delta_q -= chem_.dqdt*q_capacity_*(temp_lim - *rp_t_last_);
+    sat_ = sat;
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
     if ( sat )
@@ -347,7 +349,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const doub
 
     // Integration
     q_capacity_ = calculate_capacity(temp_lim);
-    if ( !reset ) *rp_delta_q_ = max(min(*rp_delta_q_ + d_delta_q - chem_.dqdt*q_capacity_*(temp_lim-*rp_t_last_), 0.0), -q_capacity_);
+    if ( !reset ) *rp_delta_q_ = max(min(*rp_delta_q_ + d_delta_q, 0.0), -q_capacity_);
     q_ = q_capacity_ + *rp_delta_q_;
 
     // Normalize
