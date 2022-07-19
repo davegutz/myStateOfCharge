@@ -136,6 +136,7 @@ struct Sensors
   unsigned long int stop_inj;     // Stop of calculated injection, ms
   unsigned long int wait_inj;     // Wait before start injection, ms
   unsigned long int end_inj;      // End of print injection, ms
+  unsigned long int tail_inj;     // Tail after end injection, ms
   float cycles_inj;               // Number of injection cycles
   Sync *PublishSerial;            // Handle to debug print time
   Sync *ReadSensors;              // Handle to debug read time

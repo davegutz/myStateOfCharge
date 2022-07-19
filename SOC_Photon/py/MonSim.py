@@ -262,7 +262,7 @@ if __name__ == '__main__':
         # time_end = 5.
         # time_end = 2000.
 
-        # Setup and user inputs (data_file_old_txt must end in .txt)
+        t_Ib_fail = None
         # data_file_old_txt = '../dataReduction/tryXp20_20220626.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/real world Xp20 20220626.txt'; unit_key = 'soc0_2022';
         # data_file_old_txt = '../dataReduction/real world Xp21 20220626.txt'; unit_key = 'soc0_2022';
@@ -272,7 +272,8 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/real world rapid 20220713.txt'; unit_key = "soc0_2022"
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022';
+        # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022';
+        data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 300;
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
@@ -306,7 +307,8 @@ if __name__ == '__main__':
 
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
-        mons, sims, monrs, sims_m = replicate(saved_old, saved_sim_old=saved_sim_old, init_time=init_time, dv_hys=dv_hys, sres=1.0)
+        mons, sims, monrs, sims_m = replicate(saved_old, saved_sim_old=saved_sim_old, init_time=init_time,
+                                              dv_hys=dv_hys, sres=1.0, t_Ib_fail=t_Ib_fail)
         save_clean_file(mons, mon_file_save, 'mon_rep' + date_)
 
         # Plots

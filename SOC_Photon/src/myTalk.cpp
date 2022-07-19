@@ -812,11 +812,12 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 self_talk("Mk1", Mon, Sen);   // Reset the tweak biases to 1 for new count
                 self_talk("Nk1", Mon, Sen);   // Reset the tweak biases to 1 for new count
                 self_talk("Dn1", Mon, Sen);   // Disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
-                self_talk("XW5", Mon, Sen);   // Wait time before starting to cycle
                 self_talk("Dp100", Mon, Sen); // Fast data collection
                 if ( INT_in == 9 )
                 {
                   self_talk("Xf0.02", Mon, Sen);  // Frequency 0.02 Hz
+                  self_talk("XW5", Mon, Sen);     // Wait time before starting to cycle
+                  self_talk("XT5", Mon, Sen);     // Wait time after cycle to print
                   self_talk("Xa-2000", Mon, Sen); // Amplitude -2000 A
                   self_talk("XC20", Mon, Sen);    // Number of injection cycles
                   self_talk("v0", Mon, Sen);      // Silent
@@ -825,6 +826,8 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 {
                   self_talk("Xf0.02", Mon, Sen);  // Frequency 0.02 Hz
                   self_talk("Xa-2000", Mon, Sen); // Amplitude -2000 A
+                  self_talk("XW5", Mon, Sen);     // Wait time before starting to cycle
+                  self_talk("XT5", Mon, Sen);     // Wait time after cycle to print
                   self_talk("XC3", Mon, Sen);     // Number of injection cycles
                   self_talk("v24", Mon, Sen);     // Data collection
                 }
@@ -832,6 +835,8 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 {
                   self_talk("Xf0.002", Mon, Sen); // Frequency 0.002 Hz
                   self_talk("Xa-60", Mon, Sen);   // Amplitude -60 A
+                  self_talk("XW60", Mon, Sen);    // Wait time before starting to cycle
+                  self_talk("XT600", Mon, Sen);   // Wait time after cycle to print
                   self_talk("XC1", Mon, Sen);     // Number of injection cycles
                   self_talk("v24", Mon, Sen);     // Data collection
                 }
@@ -873,8 +878,9 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
             {
               Sen->start_inj = Sen->wait_inj + Sen->now;
               Sen->stop_inj = Sen->wait_inj + (Sen->now + min((unsigned long int)(Sen->cycles_inj / max(rp.freq/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
-              Sen->end_inj = Sen->stop_inj + Sen->wait_inj;
-              Serial.printf("RUN: at %ld, %7.3f cycles from %ld to %ld with %ld wait\n", Sen->now, Sen->cycles_inj, Sen->start_inj, Sen->stop_inj, Sen->wait_inj);
+              Sen->end_inj = Sen->stop_inj + Sen->tail_inj;
+              Serial.printf("RUN: at %ld, %7.3f cycles from %ld to %ld with %ld wait and %ld tail\n",
+                Sen->now, Sen->cycles_inj, Sen->start_inj, Sen->stop_inj, Sen->wait_inj, Sen->tail_inj);
             }
             else Serial.printf("Wait %5.1f s for init\n", float(TEMP_INIT_DELAY-Sen->now)/1000.);
             break;
@@ -890,6 +896,12 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
             FP_in = cp.input_string.substring(2).toFloat();
             Sen->wait_inj = (unsigned long int)(max(min(FP_in, TT_WAIT), 0.))*1000;
             Serial.printf("Waiting %7.1f s to start inj\n", FP_in);
+            break;
+
+          case ( 'T' ):  // XT<>:  Tail
+            FP_in = cp.input_string.substring(2).toFloat();
+            Sen->tail_inj = (unsigned long int)(max(min(FP_in, TT_TAIL), 0.))*1000;
+            Serial.printf("Waiting %7.1f s tail after inj\n", FP_in);
             break;
 
           default:
@@ -1048,6 +1060,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  XR  "); Serial.printf("RUN inj\n");
   Serial.printf("  XS  "); Serial.printf("STOP inj\n");
   Serial.printf("  XW= "); Serial.printf("%6.2f s wait start inj\n", float(Sen->wait_inj)/1000.);
+  Serial.printf("  XT= "); Serial.printf("%6.2f s tail end inj\n", float(Sen->tail_inj)/1000.);
   Serial.printf("z   toggle bluetooth = %d\n", cp.serial1 );
 
   Serial.printf("h   this menu\n");

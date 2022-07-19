@@ -86,7 +86,8 @@
 #define TWEAK_MAX             0.01      // Maximum tweak allowed, scalar +/- (0.01)
 #define TWEAK_WAIT            6.        // Time to persist unsaturated before allowing peak, hrs (6)
 #define TWEAK_GAIN            0.66      // Tweak change limit gain to make soft landing (0.66)
-#define TT_WAIT               10.       // Before and after tweak test print interval, s (10)
+#define TT_WAIT               10.       // Before tweak test print wait, s (10)
+#define TT_TAIL               60.       // After tweak test print wait, s (60)
 
 // Conversion gains
 const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  
