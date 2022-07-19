@@ -135,8 +135,12 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
     # q = 0.0001; r = 0.1  # 0.875 quiet
     # q = 0.00002; r = 0.2  # close  could try this with failures  tfail@125 .982 @ 750 better than 1000
     # q = 0.0001; r = 0.2  # 0.94 need smaller q <.0001
-    q = 0.00005; r = 0.5  # closer could try this with failures  tfail@125 .982 @ 730 better than 1000
     # q = 0.00005; r = 0.2  # wobbly
+    # q = 0.00005; r = 0.5  # closer could try this with failures  tfail@125 .982 @ 730 better than 1000
+    # q = 0.00005; r = 0.5  # t_fail_ib = 10  works by half
+    # q = 0.005; r = 0.5  # t_fail_ib = 10 messy
+    # q = 0.00005; r = 0.05  # t_fail_ib = 10 messy
+    q = 0.7; r = 0.3  # t_fail_ib = 1000
     sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
                        dv_hys=dv_hys, sres=sres)
     mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
@@ -168,21 +172,13 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
             mon.sat = sat_init
 
         # Models
-        if t_Ib_fail and t[i] > t_Ib_fail:
-            ib_in_m = Ib_fail
-            current_in = Ib_fail
+        if saved_sim_old:
+            ib_in_m = saved_sim_old.ib_in_m[i]
         else:
-            if saved_sim_old:
-                ib_in_m = saved_sim_old.ib_in_m[i]
-            else:
-                ib_in_m = Ib_past[i]
-            current_in = saved_old.Ib[i]
+            ib_in_m = Ib_past[i]
         sim.calculate(temp_c=Tb[i], soc=sim.soc, curr_in=ib_in_m, dt=T, q_capacity=sim.q_capacity,
                       dc_dc_on=dc_dc_on, reset=reset, rp=rp, sat_init=sat_m_init)
-        if t_Ib_fail and t[i] > t_Ib_fail:
-            charge_curr = Ib_fail
-        else:
-            charge_curr = sim.ib
+        charge_curr = sim.ib
         sim.count_coulombs(dt=T, reset=reset, temp_c=Tb[i], charge_curr=charge_curr, sat=False, soc_m_init=soc_m_init,
                            mon_sat=mon.sat, mon_delta_q=mon.delta_q)
 
@@ -197,6 +193,12 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
             mon.init_soc_ekf(soc_ekf_init)  # when modeling (assumed in python) ekf wants to equal model
 
         # Monitor calculations including ekf
+        if t_Ib_fail and t[i] > t_Ib_fail:
+            current_sense = Ib_fail
+            charge_curr = Ib_fail
+        else:
+            current_sense = saved_old.Ib[i]
+            charge_curr = charge_curr
         if t_Vb_fail and t[i] >= t_Vb_fail:
             Vb_ = Vb_fail
             vb = Vb_fail
@@ -204,7 +206,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
             Vb_ = Vb[i]
             vb = sim.vb
         if rp.modeling == 0:
-            mon.calculate(Tb[i], Vb_, current_in, T, rp=rp, reset=reset)
+            mon.calculate(Tb[i], Vb_, current_sense, T, rp=rp, reset=reset)
         else:
             mon.calculate(Tb[i], vb + randn() * v_std + dv_sense, charge_curr + randn() * i_std + di_sense, T, rp=rp,
                           reset=reset, d_voc=None)
@@ -214,7 +216,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
         sat = is_sat(Tb[i], mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
         if rp.modeling == 0:
-            mon.count_coulombs(dt=T, reset=reset, temp_c=Tb[i], charge_curr=current_in, sat=saturated)
+            mon.count_coulombs(dt=T, reset=reset, temp_c=Tb[i], charge_curr=current_sense, sat=saturated)
         else:
             mon.count_coulombs(dt=T, reset=reset, temp_c=temp_c, charge_curr=charge_curr, sat=saturated)
         mon.calc_charge_time(mon.q, mon.q_capacity, charge_curr, mon.soc)
@@ -270,10 +272,13 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220711.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220711.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/real world rapid 20220713.txt'; unit_key = "soc0_2022"
-        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022';
-        data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = None;
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220716.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10;
+        # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022
+        # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'; t_Ib_fail = 10;
+        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10;
+        data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 1000;
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"

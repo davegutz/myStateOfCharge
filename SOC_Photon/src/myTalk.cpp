@@ -794,7 +794,8 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 rp.freq *= (2. * PI);
                 break;
 
-              case ( 9 ): case( 10 ): case ( 11 ):  // Xp9: Xp10: Xp11: Regression tests 9=tweak, 10=tweak w data, 11=cycle
+              case ( 9 ): case( 10 ): case ( 11 ): case( 12 ):  // Xp9: Xp10: Xp11: Xp12: 
+                          // Regression tests 9=tweak, 10=tweak w data, 11=cycle, 12 1/2 cycle
                 self_talk("Xp0", Mon, Sen);   // Reset nominal
                 self_talk("v0", Mon, Sen);    // Turn off debug temporarily so not snowed by data dumps
                 self_talk("Bm0", Mon, Sen);   // Set Battleborn configuration
@@ -813,7 +814,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 self_talk("Nk1", Mon, Sen);   // Reset the tweak biases to 1 for new count
                 self_talk("Dn1", Mon, Sen);   // Disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
                 self_talk("Dp100", Mon, Sen); // Fast data collection
-                if ( INT_in == 9 )
+                if ( INT_in == 9 )// Xp9:  silent tweak test
                 {
                   self_talk("Xf0.02", Mon, Sen);  // Frequency 0.02 Hz
                   self_talk("XW5", Mon, Sen);     // Wait time before starting to cycle
@@ -822,7 +823,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                   self_talk("XC20", Mon, Sen);    // Number of injection cycles
                   self_talk("v0", Mon, Sen);      // Silent
                 }
-                else if ( INT_in == 10 )
+                else if ( INT_in == 10 )  // Xp10:  rapid tweak
                 {
                   self_talk("Xf0.02", Mon, Sen);  // Frequency 0.02 Hz
                   self_talk("Xa-2000", Mon, Sen); // Amplitude -2000 A
@@ -831,7 +832,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                   self_talk("XC3", Mon, Sen);     // Number of injection cycles
                   self_talk("v24", Mon, Sen);     // Data collection
                 }
-                else if ( INT_in == 11 )
+                else if ( INT_in == 11 )  // Xp11:  slow tweak
                 {
                   self_talk("Xf0.002", Mon, Sen); // Frequency 0.002 Hz
                   self_talk("Xa-60", Mon, Sen);   // Amplitude -60 A
@@ -839,6 +840,15 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                   self_talk("XT600", Mon, Sen);   // Wait time after cycle to print
                   self_talk("XC1", Mon, Sen);     // Number of injection cycles
                   self_talk("v24", Mon, Sen);     // Data collection
+                }
+                else if ( INT_in == 12 )  // Xp12:  slow half tweak
+                {
+                  self_talk("Xf0.0002", Mon, Sen); // Frequency 0.002 Hz
+                  self_talk("Xa-6", Mon, Sen);     // Amplitude -60 A
+                  self_talk("XW60", Mon, Sen);     // Wait time before starting to cycle
+                  self_talk("XT2400", Mon, Sen);   // Wait time after cycle to print
+                  self_talk("XC0.5", Mon, Sen);    // Number of injection cycles
+                  self_talk("v24", Mon, Sen);      // Data collection
                 }
                 Sen->Sim->init_battery(true, Sen);  // Reset model battery state
                 Mon->init_battery(true, Sen);       // Reset model battery state
@@ -864,7 +874,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
                 break;
 
               default:
-                Serial.print(cp.input_string.charAt(1)); Serial.println(" unk.  See 'h'");
+                Serial.printf("Xp=%d unk.  see 'h'\n", INT_in);
             }
             break;
 
@@ -1054,6 +1064,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("      Xp9:  silent tweak reg test\n");
   Serial.printf("      Xp10:  tweak reg test\n");
   Serial.printf("      Xp11:  slow cycle reg test\n");
+  Serial.printf("      Xp12:  slow cycle reg test - half cycle\n");
   Serial.printf("      Xp20:  tweak-like data collection\n");
   Serial.printf("      Xp21:  slow data collection\n");
   Serial.printf("  XC= "); Serial.printf("%7.3f cycles inj\n", Sen->cycles_inj);

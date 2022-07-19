@@ -208,7 +208,7 @@ void setup()
   if ( rp.debug>103 ) { Serial.print(F("End setup")); Serial.println(F(", ")); };
 
 /*
-  // prototype of PRBS-7
+  // prototype of PRBS-7 pseudo random binar sequence
   // uint8_t start = 0x02;
   uint8_t start = 0x03;  // seed
   uint8_t noise = start;
