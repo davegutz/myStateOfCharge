@@ -894,13 +894,13 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
 
           case ( 'W' ):  // XW<>:  Wait
             FP_in = cp.input_string.substring(2).toFloat();
-            Sen->wait_inj = (unsigned long int)(max(min(FP_in, TT_WAIT), 0.))*1000;
+            Sen->wait_inj = (unsigned long int)(max(FP_in, 0.))*1000;
             Serial.printf("Waiting %7.1f s to start inj\n", FP_in);
             break;
 
           case ( 'T' ):  // XT<>:  Tail
             FP_in = cp.input_string.substring(2).toFloat();
-            Sen->tail_inj = (unsigned long int)(max(min(FP_in, TT_TAIL), 0.))*1000;
+            Sen->tail_inj = (unsigned long int)(max(FP_in, 0.))*1000;
             Serial.printf("Waiting %7.1f s tail after inj\n", FP_in);
             break;
 
