@@ -103,7 +103,7 @@ void print_serial_header(void)
   if ( rp.debug==4 || rp.debug==24 )
   {
     Serial.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
-    if ( cp.serial1 )
+    if ( !cp.blynking )
       Serial1.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
   }
 }
@@ -415,7 +415,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   pass = !pass;
 
   // Text basic Bluetooth (uses serial bluetooth app)
-  if ( rp.debug!=4 && cp.serial1 )
+  if ( rp.debug!=4 && !cp.blynking )
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s    %s EKF,Ah  chg,hrs  CC, Ah\n\n\n", dispString, dispStringT, dispStringS);
 
   if ( rp.debug==5 ) debug_5();
@@ -550,6 +550,7 @@ void serialEvent()
  */
 void serialEvent1()
 {
+  if ( cp.blynking ) return;
   while (Serial1.available())
   {
     // get the new byte:
@@ -567,7 +568,6 @@ void serialEvent1()
       cp.input_string.replace(",","");
       cp.input_string.replace(" ","");
       cp.input_string.replace("=","");
-      cp.serial1 = true; 
       cp.string_complete = true;
       break;  // enable reading multiple inputs
     }
@@ -580,7 +580,7 @@ void serial_print(unsigned long now, double T)
   create_print_string(&pp.pubList);
   if ( rp.debug >= 100 ) Serial.printf("serial_print:");
   Serial.println(cp.buffer);
-  if ( cp.serial1 )
+  if ( !cp.blynking )
     Serial1.println(cp.buffer);
 }
 void tweak_print(Sensors *Sen, BatteryMonitor *Mon)

@@ -18,6 +18,8 @@
   * 03-Mar-2022   Manually tune for current sensor errors.   Vb model in tables
   * 21-Apr-2022   Add Tweak methods to dynamically determine current sensor erros
   * 18-May-2022   Bunch of cleanup and reorganization
+  * 20-Jul-2022   Add low-emission bluetooth (BLE).  Initialize to EKF when unsaturated.
+  *               Correct time skews to align Vb and Ib.
   * 
 //
 // MIT License
@@ -115,15 +117,15 @@ void setup()
 
   // Bluetooth Serial1.  Use BT-AT project in this GitHub repository to change.  Directions
   // for HC-06 inside main.h of ../../BT-AT/src.   AT+BAUD8; to set 115200.
-  if ( cp.serial1 )
-  {
-    Serial1.begin(115200);
-    // Serial1.begin(115200);
-    #ifdef USE_BLYNK
-      Blynk.begin(Serial1, auth);
-    #endif
-  }
-
+  Serial1.begin(115200);
+  #ifdef USE_BLYNK
+    if ( cp.blynking )
+    {
+      Serial.printf("Starting Blynk...");
+      Blynk.begin(Serial1, auth);     // Blocking
+      Serial.printf("done");
+    }
+  #endif
   // Peripherals
   myPins = new Pins(D6, D7, A1, D2);
 
@@ -205,7 +207,6 @@ void setup()
 
   // Header for rp.debug print
   if ( rp.debug>101 ) print_serial_header();
-  if ( rp.debug>103 ) { Serial.print(F("End setup")); Serial.println(F(", ")); };
 
 /*
   // prototype of PRBS-7 pseudo random binar sequence
@@ -226,6 +227,7 @@ void setup()
   }
 */
 
+  Serial.printf("End setup()\n");
 } // setup
 
 
@@ -274,13 +276,24 @@ void loop()
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
-  // Start Blynk
+  // Run Blynk
   #ifdef USE_BLYNK
-    Blynk.run();
-    blynk_timer_1.run();
-    blynk_timer_2.run();
-    blynk_timer_3.run();
-    blynk_timer_4.run(); 
+    static boolean blynk_began = cp.blynking;
+    if ( cp.blynking )
+    {
+      if ( !blynk_began )
+      {
+        Serial.printf("Starting Blynk...\n");
+        Blynk.begin(Serial1, auth);     // Blocking
+        Serial.printf("Starting Blynk done\n");
+        blynk_began = true;
+      }
+      Blynk.run();
+      blynk_timer_1.run();
+      blynk_timer_2.run();
+      blynk_timer_3.run();
+      blynk_timer_4.run(); 
+    }
   #endif
 
   // Keep time
@@ -373,17 +386,10 @@ void loop()
   }
 
   // OLED and Bluetooth display drivers
-  #ifdef USE_BLYNK
-    if ( display_to_user && Sen->display )
-    {
-      oled_display(display, Sen);
-    }
-  #else
-    if ( display_to_user )
-    {
-      oled_display(display, Sen);
-    }
-  #endif
+  if ( display_to_user )
+  {
+    oled_display(display, Sen);
+  }
 
   // Publish to Particle cloud if desired (different than Blynk)
   // Visit https://console.particle.io/events.   Click on "view events on a terminal"

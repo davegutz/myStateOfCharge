@@ -47,7 +47,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
   if (cp.string_complete)
   {
     // Limited echoing of Serial1 commands available
-    if ( cp.serial1 )
+    if ( !cp.blynking )
     {
       Serial1.printf("echo:  %s\n", cp.input_string.c_str());
     }
@@ -204,9 +204,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'p' ):  // Dp<>:
-            Serial1.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
-            if ( cp.serial1 )
+            if ( !cp.blynking )
             {
+              Serial1.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
               Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
             }
             Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
@@ -597,16 +597,14 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
         Serial.printf("Wifi togg %d\n", cp.enable_wifi);
         break;
 
-      case ( 'z' ):  // z:  toggle bluetooth
-        #ifdef USE_BLYNK
-          Sen->display = !Sen->display; // not remembered in rp. Photon reset turns this to default
-          Serial.printf("display on (BT off) = %d\n", Sen->display);
-        #endif
-        Serial.printf("toggling cp.serial1 from %d to ", cp.serial1);
-        cp.serial1 = !cp.serial1;
-        if ( cp.serial1 ) Serial1.begin(115200);
-        else Serial1.end();
-        Serial.printf("%d\n", cp.serial1);
+      case ( 'z' ):  // z:  toggle Blynk
+        // For this to do anything need #define USE_BLYNK in main.h
+        // I don't think Blynk works with 115200 baud.  Meanwhile 9600 isn't fast enough to prevent
+        // clogging IPC.   If try starting Blynk with 115200 as presently configured both in this application
+        // and on the HC-06 device, the Blynk.begin() blocks after entering 'z' and have to reset.
+        Serial.printf("toggling cp.blynking from %d to ", cp.blynking);
+        cp.blynking = !cp.blynking;
+        Serial.printf("%d\n", cp.blynking);
         break;
 
       case ( 'X' ):  // X
@@ -1072,7 +1070,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  XS  "); Serial.printf("STOP inj\n");
   Serial.printf("  XW= "); Serial.printf("%6.2f s wait start inj\n", float(Sen->wait_inj)/1000.);
   Serial.printf("  XT= "); Serial.printf("%6.2f s tail end inj\n", float(Sen->tail_inj)/1000.);
-  Serial.printf("z   toggle bluetooth = %d\n", cp.serial1 );
+  Serial.printf("z   toggle BLYNK = %d\n", cp.blynking );
 
   Serial.printf("h   this menu\n");
 }

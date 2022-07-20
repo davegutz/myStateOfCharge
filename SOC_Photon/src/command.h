@@ -52,7 +52,7 @@ struct CommandPars
   float ibatt_bias_amp;     // Calibration of amplified shunt sensor, A
   float ibatt_bias_noamp;   // Calibration of non-amplified shunt sensor, A
   boolean dc_dc_on;         // DC-DC charger is on
-  boolean serial1;          // Using Serial1
+  boolean blynking;         // Using Serial1 for Blynk.  Turn off normal Serial1 monitoring and echo
   CommandPars(void)
   {
     this->string_complete = false;
@@ -64,7 +64,7 @@ struct CommandPars
     ibatt_bias_amp = 0.;
     ibatt_bias_noamp = 0.;
     dc_dc_on = false;
-    serial1 = true;
+    blynking = false;
   }
   void cmd_reset(void)
   {
@@ -93,7 +93,7 @@ struct CommandPars
     Serial.printf("  ibatt_bias_amp =   %7.3f;\n", this->ibatt_bias_amp);
     Serial.printf("  ibatt_bias_noamp = %7.3f;\n", this->ibatt_bias_noamp);
     Serial.printf("  dc_dc_on =               %d;\n", this->dc_dc_on);
-    Serial.printf("  serial1 =                %d;\n", this->serial1);
+    Serial.printf("  blynking =               %d;\n", this->blynking);
   }
 };            
 
