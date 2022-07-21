@@ -60,11 +60,11 @@ class StateSpace:
 
     def save(self, time):
         self.saved.time = np.append(self.saved.time, time)
-        self.saved.u = np.append(self.saved.u, self.u.reshape(1,2), axis=0)
+        self.saved.u = np.append(self.saved.u, self.u.reshape(1, 2), axis=0)
         self.saved.y = np.append(self.saved.y, self.y)
-        self.saved.x = np.append(self.saved.x, self.x.reshape(1,2), axis=0)
-        self.saved.x_dot = np.append(self.saved.x_dot, self.x_dot.reshape(1,2), axis=0)
-        self.saved.x_past = np.append(self.saved.x_past, self.x_past.reshape(1,2), axis=0)
+        self.saved.x = np.append(self.saved.x, self.x.reshape(1, 2), axis=0)
+        self.saved.x_dot = np.append(self.saved.x_dot, self.x_dot.reshape(1, 2), axis=0)
+        self.saved.x_past = np.append(self.saved.x_past, self.x_past.reshape(1, 2), axis=0)
 
     def update(self, dt):
         if dt is not None:
@@ -82,9 +82,9 @@ class Saved:
         self.n = n
         self.p = p
         self.q = q
-        self.u = np.zeros(shape=(1,p))
+        self.u = np.zeros(shape=(1, p))
         self.y = np.zeros(shape=q)
-        self.x = np.zeros(shape=(1,n))
+        self.x = np.zeros(shape=(1, n))
         self.x_dot = self.x
         self.x_past = self.x
 

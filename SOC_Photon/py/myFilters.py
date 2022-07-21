@@ -61,7 +61,7 @@ class DiscreteFilter:
         s += "  rate     =    {:7.3f}  // Calculated rate\n".format(self.rate)
         return s
 
-    def calculate_(self, in_, reset):
+    def calculate_(self, reset):
         if reset:
             self.rate = 0.
         return self.rate
@@ -474,7 +474,7 @@ if __name__ == '__main__':
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
 
-        n_fig, fig_files = overall(filter_1.saved, filter_2.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
+        overall(filter_1.saved, filter_2.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
         plt.show()
 
     main()

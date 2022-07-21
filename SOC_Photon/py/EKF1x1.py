@@ -17,7 +17,7 @@
 ekf_update methods in the parent."""
 
 
-class EKF_1x1:
+class EKF1x1:
     """1x1 General Purpose Extended Kalman Filter.   Inherit from this class and include ekf_predict and
     ekf_update methods in the parent."""
 
@@ -44,7 +44,7 @@ class EKF_1x1:
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
-        s = prefix + "EKF_1x1:\n"
+        s = prefix + "EKF1x1:\n"
         s += "  Inputs:\n"
         s += "  z = {:7.3f}\n".format(self.z_ekf)
         s += "  R = {:10.6f}\n".format(self.R)

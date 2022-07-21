@@ -1,4 +1,4 @@
-# plot_SOC_Photon_data:  plot known data structure
+# plot_soc_photon_data:  plot known data structure
 # Copyright (C) 2022 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
@@ -17,13 +17,12 @@ import numpy as np
 from pylive import liven_plotter
 import matplotlib.pyplot as plt
 
-def plot_SOC_Photon_data(r, key):
+
+def plot_soc_photon_data(r, key):
     var_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
-    vars = var_str.replace(" ", "").split(',')
     count = 0
     i = 0
     cTime_last = None
-    y_v = None
     t_v = None
     T_actual = 0.
     T_actual_past = 0.
@@ -46,7 +45,7 @@ def plot_SOC_Photon_data(r, key):
             time.sleep(0.01)
             try:
                 data_r = r.readline().decode().rstrip()  # USB
-            except:
+            except IOError:
                 data_r = r.readline().rstrip()  # BLE
             if data_r.__contains__(key):
                 list_r = data_r.split(',')
@@ -77,7 +76,6 @@ def plot_SOC_Photon_data(r, key):
                     # Setup
                     if i == 2:
                         T_maybe = cTime - cTime_last
-                        T_actual = T_maybe
                         T_actual_past = T_maybe
                         n_v = int(time_span / T_maybe)
                         t_v = np.arange(-n_v * T_maybe, 0, T_maybe)

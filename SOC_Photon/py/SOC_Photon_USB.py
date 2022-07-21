@@ -21,7 +21,7 @@ if platform == 'linux':
     from usbserial4a import serial4a
 else:
     from serial import Serial
-from plot_SOC_Photon_data import *
+from plot_soc_photon_data import *
 
 # if system() == 'Linux':
 if platform == 'linux':
@@ -39,4 +39,4 @@ else:
         exit(1)
 key = 'pro_'
 
-plot_SOC_Photon_data(s, key)
+plot_soc_photon_data(s, key)

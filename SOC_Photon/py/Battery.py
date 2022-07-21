@@ -13,11 +13,11 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-"""Define a general purpose battery model including Randle's model and SoC-VOV model."""
+"""Define a general purpose battery model including Randles' model and SoC-VOV model."""
 
 import numpy as np
 import math
-from EKF_1x1 import EKF_1x1
+from EKF1x1 import EKF1x1
 from Coulombs import Coulombs, dqdt
 from StateSpace import StateSpace
 from Hysteresis import Hysteresis
@@ -54,7 +54,7 @@ low_t = 8  # Minimum temperature for valid saturation check, because BMS shuts o
 # Heater should keep >8, too
 mxeps_bb = 1-1e-6  # Numerical maximum of coefficient model with scaled soc
 mneps_bb = 1e-6  # Numerical minimum of coefficient model without scaled soc
-#DQDT = 0.01  # Change of charge with temperature, fraction/deg C.  From literature.  0.01 is commonly used
+# DQDT = 0.01  # Change of charge with temperature, fraction/deg C.  From literature.  0.01 is commonly used
 CAP_DROOP_C = 20.  # Temperature below which a floor on q arises, C (20)
 TCHARGE_DISPLAY_DEADBAND = 0.1  # Inside this +/- deadband, charge time is displayed '---', A
 max_voc = 1.2*NOM_SYS_VOLT  # Prevent windup of battery model, V
@@ -70,7 +70,7 @@ TAU_Y_FILT = 5.  # EKF y-filter time constant, sec (5.)
 MIN_Y_FILT = -0.5  # EKF y-filter minimum, V (-0.5)
 MAX_Y_FILT = 0.5  # EKF y-filter maximum, V (0.5)
 WN_Y_FILT = 0.1  # EKF y-filter-2 natural frequency, r/s (0.1)
-ZETA_Y_FILT = 0.9  # EKF y-fiter-2 damping factor (0.9)
+ZETA_Y_FILT = 0.9  # EKF y-filter-2 damping factor (0.9)
 TMAX_FILT = 3.  # Maximum y-filter-2 sample time, s (3.)
 
 
@@ -80,7 +80,7 @@ class Battery(Coulombs):
     #                         what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
     #                         or 20 - 40 A for a 100 Ah battery"""
 
-    # Battery model:  Randle's dynamics, SOC-VOC model
+    # Battery model:  Randles' dynamics, SOC-VOC model
 
     """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
                             what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
@@ -93,7 +93,7 @@ class Battery(Coulombs):
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
         constraint >=0.02 V/soc.  m and n using Zhang values.   Had to scale soc because  actual capacity > NOM_BAT_CAP
-        so equations error when soc<=0 to match data.    See Battery.h
+        so equation error when soc<=0 to match data.    See Battery.h
         """
         # Parents
         Coulombs.__init__(self, q_cap_rated,  q_cap_rated, t_rated, t_rlim, tweak_test)
@@ -200,12 +200,13 @@ class Battery(Coulombs):
         return dv_dsoc
 
     def calc_soc_voc(self, soc, temp_c):
-        """SOC-OCV curve fit method per Zhang, et al """
+        """SOC-OCV curve fit method per Zhang, etal """
         dv_dsoc = self.calc_h_jacobian(soc, temp_c)
         voc = self.lut_voc.interp(soc, temp_c) + self.dv
         return voc, dv_dsoc
 
-    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, rp=None):  # Battery
+    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None, sat_init=None):
+        # Battery
         raise NotImplementedError
 
     def init_battery(self):
@@ -245,7 +246,7 @@ class Battery(Coulombs):
         return self.vd() + self.vcd()
 
 
-class BatteryMonitor(Battery, EKF_1x1):
+class BatteryMonitor(Battery, EKF1x1):
     """Extend basic class to monitor"""
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
@@ -263,7 +264,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         so equations error when soc<=0 to match data.    See Battery.h
         """
         # Parents
-        EKF_1x1.__init__(self)
+        EKF1x1.__init__(self)
         self.tcharge_ekf = 0.  # Charging time to 100% from ekf, hr
         self.voc = 0.  # Charging voltage, V
         self.soc_ekf = 0.  # Filtered state of charge from ekf (0-1)
@@ -289,6 +290,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         self.Ib = 0.
         self.Vb = 0.
         self.Voc_stat = 0.
+        self.Voc = 0.
         self.Vsat = 0.
         self.dV_dyn = 0.
         self.Voc_ekf = 0.
@@ -309,7 +311,7 @@ class BatteryMonitor(Battery, EKF_1x1):
         s += "  \n  "
         s += self.hys.__str__(prefix + 'BatteryMonitor:')
         s += "\n  "
-        s += EKF_1x1.__str__(self, prefix + 'BatteryMonitor:')
+        s += EKF1x1.__str__(self, prefix + 'BatteryMonitor:')
         return s
 
     def assign_soc_m(self, soc_m):
@@ -399,8 +401,10 @@ class BatteryMonitor(Battery, EKF_1x1):
 
         amp_hrs_remaining = max(q_capacity - self.q_min + delta_q, 0.) / 3600.
         if soc > 0.:
-            self.amp_hrs_remaining_ekf = amp_hrs_remaining * (self.soc_ekf - self.soc_min) / max(soc - self.soc_min, 1e-8)
-            self.amp_hrs_remaining_wt = amp_hrs_remaining * (self.soc_wt - self.soc_min) / max(soc - self.soc_min, 1e-8)
+            self.amp_hrs_remaining_ekf = amp_hrs_remaining * (self.soc_ekf - self.soc_min) /\
+                max(soc - self.soc_min, 1e-8)
+            self.amp_hrs_remaining_wt = amp_hrs_remaining * (self.soc_wt - self.soc_min) /\
+                max(soc - self.soc_min, 1e-8)
         else:
             self.amp_hrs_remaining_ekf = 0.
             self.amp_hrs_remaining_wt = 0.
@@ -560,7 +564,7 @@ class BatteryModel(Battery):
         self.voc = 0.  # Charging voltage, V
         self.d_delta_q = 0.  # Charging rate, Coulombs/sec
         self.charge_curr = 0.  # Charge current, A
-        self.saved_m = Saved_m()  # for plots and prints
+        self.saved_m = SavedM()  # for plots and prints
         self.ib_in = 0.  # Saved value of current input, A
         self.ib_fut = 0.  # Future value of limited current, A
 
@@ -592,7 +596,8 @@ class BatteryModel(Battery):
         s += Battery.__str__(self, prefix + 'BatteryModel:')
         return s
 
-    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None, sat_init=None):  # BatteryModel
+    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None, sat_init=None):
+        # BatteryModel
         self.dt = dt
         self.temp_c = temp_c
         self.mod = rp.modeling
@@ -605,7 +610,8 @@ class BatteryModel(Battery):
 
         # VOC - OCV model
         self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc, temp_c)
-        self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)  # slightly beyond but don't windup
+        # slightly beyond but don't windup
+        self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)
 
         self.bms_off = (self.temp_c < low_t) or (self.voc < low_voc)
         if self.bms_off:
@@ -676,7 +682,8 @@ class BatteryModel(Battery):
         d = np.array([self.r0, 1])
         return a, b, c, d
 
-    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, soc_m_init=None, mon_delta_q=None, mon_sat=None):  # BatteryModel
+    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, soc_m_init=None, mon_delta_q=None, mon_sat=None):
+        # BatteryModel
         """Coulomb counter based on true=actual capacity
         Internal resistance of battery is a loss
         Inputs:
@@ -697,14 +704,13 @@ class BatteryModel(Battery):
 
         # Rate limit temperature
         self.temp_lim = max(min(temp_c, self.t_last + self.t_rlim*dt), self.t_last - self.t_rlim*dt)
-        # print("BatteryModel:  temp_c, t_last, t_rim, dt, temp_lim=", temp_c, self.t_last, self.t_rlim, dt, self.temp_lim)
         if self.reset:
             self.temp_lim = temp_c
             self.t_last = temp_c
             if soc_m_init and not self.mod:
                 self.delta_q = self.calculate_capacity(temp_c) * (soc_m_init - 1.)
 
-        # Saturation.   Goal is to set q_capacity and hold it so remember last saturation status
+        # Saturation.   Goal is to set q_capacity and hold it so remembers last saturation status
         # detection
         if not self.mod and mon_sat:
             self.delta_q = mon_delta_q
@@ -763,7 +769,7 @@ class BatteryModel(Battery):
         self.saved.q.append(self.q)
         self.saved.q_capacity.append(self.q_capacity)
 
-    def save_m(self, time, dt):
+    def save_m(self, time):
         self.saved_m.time.append(time)
         self.saved_m.Tb_m.append(self.temp_c)
         self.saved_m.Tbl_m.append(self.temp_lim)
@@ -782,6 +788,7 @@ class BatteryModel(Battery):
         self.saved_m.qcap_m.append(self.q_capacity)
         self.saved_m.soc_m.append(self.soc)
         self.saved_m.reset_m.append(self.reset)
+
 
 # Other functions
 def is_sat(temp_c, voc, soc):
@@ -869,6 +876,7 @@ class Saved:
         self.delta_q = []  # Charge change since saturated, C
         self.q_capacity = []  # Saturation charge at temperature, C
         self.t_last = []  # Past value of battery temperature used for rate limit memory, deg C
+
 
 def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     if fig_files is None:
@@ -1067,7 +1075,7 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.figure()
     n_fig += 1
     plt.title(plot_title)
-    plt.plot(ms.time, ms.soc_ekf, color='blue',label='soc_ekf')
+    plt.plot(ms.time, ms.soc_ekf, color='blue', label='soc_ekf')
     plt.plot(ss.time, ss.soc, color='green', linestyle='-.', label='soc_m')
     plt.plot(ms.time, ms.soc, color='red', linestyle=':', label='soc')
     plt.legend(loc=4)
@@ -1137,7 +1145,7 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None):
     return n_fig, fig_files
 
 
-class Saved_m:
+class SavedM:
     # For plot savings.   A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
     def __init__(self):
         self.time = []

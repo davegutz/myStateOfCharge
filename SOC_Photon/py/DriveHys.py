@@ -21,6 +21,7 @@ import numpy as np
 from pyDAGx.lookup_table import LookupTable
 from unite_pictures import cleanup_fig_files
 
+
 class Hysteresis:
     # Use variable resistor to create hysteresis from an RC circuit
 
@@ -32,14 +33,14 @@ class Hysteresis:
         if t_soc is None:
             t_soc = [0, .5, 1]
         if t_r is None:
-            t_r = [ 1e-6, 0.064,    0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
-                    1e-6, 1e-6,     0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
-                    1e-6, 1e-6,     1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6]
+            t_r = [1e-6, 0.064,    0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
+                   1e-6, 1e-6,     0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
+                   1e-6, 1e-6,     1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6]
         self.scale = scale
         for i in range(len(t_dv)):
             t_dv[i] *= self.scale
             t_r[i] *= self.scale
-        self.disabled = self.scale<1e-5
+        self.disabled = self.scale < 1e-5
         self.lut = LookupTable()
         self.lut.addAxis('x', t_dv)
         self.lut.addAxis('y', t_soc)
@@ -138,16 +139,13 @@ if __name__ == '__main__':
     import doctest
     from datetime import datetime
     from unite_pictures import unite_pictures_into_pdf
-    import os
 
     doctest.testmod(sys.modules['__main__'])
     import matplotlib.pyplot as plt
 
-    def overall(hys=Hysteresis().saved, filename='', fig_files=None, plot_title=None, n_fig=None, ref=None):
+    def overall(hys=Hysteresis().saved, filename='', fig_files=None, plot_title=None, n_fig=None):
         if fig_files is None:
             fig_files = []
-        if ref is None:
-            ref = []
 
         plt.figure()
         n_fig += 1
@@ -194,25 +192,19 @@ if __name__ == '__main__':
         return n_fig, fig_files
 
     def main():
-        date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-        date_ = datetime.now().strftime("%y%m%d")
-
         # Transient  inputs
-        time_end = None
-        data_file_clean = '../dataReduction/real world Xp20 20220626_sim.txt';
+        data_file_clean = '../dataReduction/real world Xp20 20220626_sim.txt'
         cols_sim = ('unit_m', 'c_time', 'Tb_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'soc_m', 'reset_m')
         saved_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
-                                 encoding=None).view(np.recarray)
+                                  encoding=None).view(np.recarray)
         t_v = saved_old.c_time - saved_old.c_time[0]
         vb_t = saved_old.vb_m   # not useful except to back out voc
         ib_t = saved_old.ib_m
-        Tb_t = saved_old.Tb_m
         voc_stat_target_t = saved_old.voc_stat_m
         soc_t = saved_old.soc_m
         dv_dyn_t = saved_old.dv_dyn_m
         voc_t = vb_t - dv_dyn_t
         hys = Hysteresis(dv_hys=-0.0, cap=3.6e5)
-        init_time = 1.
         dt = t_v[1] - t_v[0]
 
         # time loop
@@ -220,13 +212,10 @@ if __name__ == '__main__':
             t = t_v[i]
             if i > 0:
                 dt = t - t_v[i-1]
-            vb = vb_t[i]
             ib = ib_t[i]
-            Tb = Tb_t[i]
             voc_stat_target = voc_stat_target_t[i]
             soc = soc_t[i]
             voc = voc_t[i]
-            init = t < init_time
 
             # Models
             hys.calculate_hys(ib=ib, soc=soc)
@@ -245,7 +234,7 @@ if __name__ == '__main__':
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
 
-        n_fig, fig_files = overall(hys.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig, ref=voc_stat_target)
+        n_fig, fig_files = overall(hys.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
         cleanup_fig_files(fig_files)

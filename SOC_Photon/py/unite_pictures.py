@@ -39,7 +39,7 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', pathToSavePdfTo=
         print("listWithImagesExtensions is empty.")
         return
 
-    if picturesAreInRootFolder == False:
+    if not picturesAreInRootFolder:
         foldersInsideFolderWithPictures = sorted_nicely(glob.glob(pathToPictures + "\\*\\"))
         if len(foldersInsideFolderWithPictures) != 0:
             picturesPathsForEachFolder = []
@@ -49,7 +49,7 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', pathToSavePdfTo=
                     picturePathsInFolder.extend(glob.glob(iFolder + "*." + jExtension))
                 picturesPathsForEachFolder.append(sorted_nicely(picturePathsInFolder))
             if splitType == "folder":
-                numberOfFoldersAdded = 0;
+                numberOfFoldersAdded = 0
                 for iFolder in picturesPathsForEachFolder:
                     if (numberOfFoldersAdded % numberOfEntitiesInOnePdf) == 0:
                         endNumber = numberOfFoldersAdded + numberOfEntitiesInOnePdf
@@ -78,8 +78,8 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', pathToSavePdfTo=
                     c.save()
                     print("created", filename)
             elif splitType == "picture":
-                numberOfPicturesAdded = 0;
-                totalNumberOfPictures = 0;
+                numberOfPicturesAdded = 0
+                totalNumberOfPictures = 0
                 for iFolder in picturesPathsForEachFolder:
                     totalNumberOfPictures += len(iFolder)
                 for iFolder in picturesPathsForEachFolder:
@@ -127,7 +127,7 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', pathToSavePdfTo=
             print("No pictures found.")
         return
 
-    if picturesAreInRootFolder == True:
+    if picturesAreInRootFolder:
         picturesInsideFolderWithPictures = []
         for iExtension in listWithImagesExtensions:
             picturesInsideFolderWithPictures.extend(glob.glob(pathToPictures + "\\*." + iExtension))

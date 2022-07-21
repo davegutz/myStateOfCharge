@@ -1,4 +1,6 @@
 import win32com.client
+
+
 def get_usb_device():
     try:
         usb_list = []
@@ -14,11 +16,8 @@ def get_usb_device():
         print('error', error)
 
 
-
 if __name__ == '__main__':
-    from usb_device_discovery import get_usb_device
-
     def main():
-          get_usb_device()
+        get_usb_device()
 
     main()

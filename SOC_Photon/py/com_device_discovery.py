@@ -2,9 +2,9 @@ import sys
 import glob
 import serial
 
+
 def serial_ports():
     """ Lists serial port names
-
         :raises EnvironmentError:
             On unsupported or unknown platforms
         :returns:
@@ -30,10 +30,9 @@ def serial_ports():
             pass
     return result
 
-if __name__ == '__main__':
-    from com_device_discovery import serial_ports
 
+if __name__ == '__main__':
     def main():
-          print(serial_ports())
+        print(serial_ports())
 
     main()

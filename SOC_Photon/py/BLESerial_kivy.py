@@ -1,16 +1,16 @@
 # Same as before, with a kivy-based UI
 
-'''
+"""
 Bluetooth/Pyjnius example
 =========================
 
 This was used to send some bytes to an arduino via bluetooth.
-The app must have BLUETOOTH and BLUETOOTH_ADMIN permissions (well, i didn't
-tested without BLUETOOTH_ADMIN, maybe it works.)
+The app must have BLUETOOTH and BLUETOOTH_ADMIN permissions (well, I didn't
+test without BLUETOOTH_ADMIN, maybe it works.)
 
 Connect your device to your phone, via the bluetooth menu. After the
 pairing is done, you'll be able to use it in the app.
-'''
+"""
 
 from jnius import autoclass
 
@@ -18,6 +18,7 @@ BluetoothAdapter = autoclass('android.bluetooth.BluetoothAdapter')
 BluetoothDevice = autoclass('android.bluetooth.BluetoothDevice')
 BluetoothSocket = autoclass('android.bluetooth.BluetoothSocket')
 UUID = autoclass('java.util.UUID')
+
 
 def get_socket_stream(name):
     paired_devices = BluetoothAdapter.getDefaultAdapter().getBondedDevices().toArray()
@@ -31,6 +32,7 @@ def get_socket_stream(name):
             break
     socket.connect()
     return recv_stream, send_stream
+
 
 if __name__ == '__main__':
     kv = '''

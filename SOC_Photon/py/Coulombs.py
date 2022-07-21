@@ -22,10 +22,12 @@ import numpy as np
 dqdt = 0.01  # Change of charge with temperature, fraction/deg C.  From literature.  0.01 is commonly used
 coul_eff = 0.9985  # Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
 
+
 class Coulombs:
     """Coulomb Counting"""
 
-    def __init__(self, q_cap_rated, q_cap_rated_scaled, t_rated, t_rlim=0.017, tweak_test=False, coul_eff=0.9985):
+    def __init__(self, q_cap_rated, q_cap_rated_scaled, t_rated, t_rlim=0.017, tweak_test=False,
+                 coul_eff_=0.9985):
         self.q_cap_rated = q_cap_rated
         self.q_cap_rated_scaled = q_cap_rated_scaled
         self.t_rated = t_rated
@@ -44,27 +46,36 @@ class Coulombs:
         t_x_soc_min = [5.,   11.1,  20.,  40.]
         t_soc_min = [0.14, 0.12,  0.08, 0.07]
         self.lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
-        self.coul_eff = coul_eff
+        self.coul_eff = coul_eff_
         self.tweak_test = tweak_test
         self.reset = False
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
         s = prefix + "Coulombs:\n"
-        s += "  q_cap_rated = {:9.1f}    // Rated capacity at t_rated_, saved for future scaling, C\n".format(self.q_cap_rated)
-        s += "  q_cap_rated_scaled = {:9.1f} // Applied rated capacity at t_rated_, after scaling, C\n".format(self.q_cap_rated_scaled)
+        s += "  q_cap_rated = {:9.1f}    // Rated capacity at t_rated_, saved for future scaling, C\n"\
+            .format(self.q_cap_rated)
+        s += "  q_cap_rated_scaled = {:9.1f} // Applied rated capacity at t_rated_, after scaling, C\n"\
+            .format(self.q_cap_rated_scaled)
         s += "  q_capacity = {:9.1f}     // Saturation charge at temperature, C\n".format(self. q_capacity)
         s += "  q =          {:9.1f}     // Present charge available to use, C\n".format(self. q)
         s += "  delta_q      {:9.1f}     // Charge since saturated, C\n".format(self. delta_q)
-        s += "  soc =        {:7.3f}       // Fraction of saturation charge (q_capacity_) available (0-1)  soc)\n".format(self.soc)
-        s += "  sat =          {:d}          // Indication calculated by caller that battery is saturated, T=saturated\n".format(self.sat)
+        s += "  soc =        {:7.3f}       // Fraction of saturation charge (q_capacity_) available (0-1)  soc)\n"\
+            .format(self.soc)
+        s += "  sat =          {:d}          // Indication from caller that battery is saturated, T=saturated\n"\
+            .format(self.sat)
         s += "  t_rated =    {:5.1f}         // Rated temperature, deg C\n".format(self. t_rated)
-        s += "  t_last =     {:5.1f}         // Last battery temperature for rate limit memory, deg C\n".format(self.t_last)
+        s += "  t_last =     {:5.1f}         // Last battery temperature for rate limit memory, deg C\n"\
+            .format(self.t_last)
         s += "  t_rlim =     {:7.3f}       // Tbatt rate limit, deg C / s\n".format(self. t_rlim)
-        s += "  resetting =     {:d}          // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter\n".format(self.resetting)
-        s += "  soc_min =    {:7.3f}       // Lowest soc for power delivery.   Arises with temp < 20 C\n".format(self.soc_min)
-        s += "  tweak_test =    {:d}          // Driving signal injection completely using software inj_soft_bias\n".format(self.tweak_test)
-        s += "  coul_eff =   {:8.4f}      // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs\n".format(self.coul_eff)
+        s += "  resetting =     {:d}          // Flag to test coulomb counters, T = external reset of counter\n"\
+            .format(self.resetting)
+        s += "  soc_min =    {:7.3f}       // Lowest soc for power delivery.   Arises with temp < 20 C\n"\
+            .format(self.soc_min)
+        s += "  tweak_test =    {:d}          // Driving signal injection completely using software inj_soft_bias\n"\
+            .format(self.tweak_test)
+        s += "  coul_eff =   {:8.4f}      // Coulombic efficiency- fraction of charging turned into usable Coulombs\n".\
+            format(self.coul_eff)
         return s
 
     def apply_cap_scale(self, scale):
@@ -80,7 +91,7 @@ class Coulombs:
         self.resetting = True  # momentarily turn off saturation check
 
     def apply_delta_q(self, delta_q, temp_c):
-        """Memory set, adjust book-keeping as needed.  delta_q, capacity, temp preserved"""
+        """Memory set, adjust bookkeeping as needed.  delta_q, capacity, temp preserved"""
         self.delta_q = delta_q
         self.q_capacity = self.calculate_capacity(temp_c)
         self.q = self.delta_q + self.q_capacity
@@ -95,7 +106,7 @@ class Coulombs:
         self.resetting = True
 
     def apply_soc(self, soc, temp_c):
-        """Memory set, adjust book-keeping as needed.  delta_q preserved"""
+        """Memory set, adjust bookkeeping as needed.  delta_q preserved"""
         self.soc = soc
         self.q_capacity = self.calculate_capacity(temp_c)
         self.q = soc*self.q_capacity
@@ -124,12 +135,11 @@ class Coulombs:
 
         # Rate limit temperature
         self.temp_lim = max(min(temp_c, self.t_last + self.t_rlim*dt), self.t_last - self.t_rlim*dt)
-        # print("Coulombs:      temp_c, t_last, t_rim, dt, temp_lim=", temp_c, self.t_last, self.t_rlim, dt, self.temp_lim)
         if reset:
             self.temp_lim = temp_c
             self.t_last = temp_c
 
-        # Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
+        # Saturation.   Goal is to set q_capacity and hold it so remembers last saturation status.
         if sat:
             if d_delta_q > 0:
                 d_delta_q = 0.

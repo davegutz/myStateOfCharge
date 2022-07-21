@@ -21,6 +21,7 @@ import numpy as np
 from pyDAGx.lookup_table import LookupTable
 from unite_pictures import cleanup_fig_files
 
+
 class Hysteresis:
     # Use variable resistor to create hysteresis from an RC circuit
 
@@ -31,14 +32,14 @@ class Hysteresis:
         if t_soc is None:
             t_soc = [0, .5, 1]
         if t_r is None:
-            t_r = [ 1e-6, 0.064,    0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
-                    1e-6, 1e-6,     0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
-                    1e-6, 1e-6,     1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6]
+            t_r = [1e-6, 0.064,    0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
+                   1e-6, 1e-6,     0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
+                   1e-6, 1e-6,     1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6]
         self.scale = scale
         for i in range(len(t_dv)):
             t_dv[i] *= self.scale
             t_r[i] *= self.scale
-        self.disabled = self.scale<1e-5
+        self.disabled = self.scale < 1e-5
         self.lut = LookupTable()
         self.lut.addAxis('x', t_dv)
         self.lut.addAxis('y', t_soc)
@@ -125,17 +126,14 @@ if __name__ == '__main__':
     import doctest
     from datetime import datetime
     from unite_pictures import unite_pictures_into_pdf
-    import os
 
     doctest.testmod(sys.modules['__main__'])
     import matplotlib.pyplot as plt
 
 
-    def overall(hys=Hysteresis().saved, filename='', fig_files=None, plot_title=None, n_fig=None, ref=None):
+    def overall(hys=Hysteresis().saved, filename='', fig_files=None, plot_title=None, n_fig=None):
         if fig_files is None:
             fig_files = []
-        if ref is None:
-            ref = []
 
         plt.figure()
         n_fig += 1
@@ -228,23 +226,6 @@ if __name__ == '__main__':
 
         # time loop
         for i in range(len(t)):
-            if t[i] < 10000:
-                current_in = 0
-            elif t[i] < 20000:
-                current_in = 40
-            elif t[i] < 30000:
-                current_in = -40
-            elif t[i] < 80000:
-                current_in = 8
-            elif t[i] < 130000:
-                current_in = -8
-            elif t[i] < 330000:
-                current_in = 2
-            elif t[i] < 440000:
-                current_in = -2
-            else:
-                current_in = 0
-
             current_in = pull.calculate(t[i])
 
             init_ekf = (t[i] <= 1)
@@ -270,7 +251,7 @@ if __name__ == '__main__':
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
 
-        n_fig, fig_files = overall(hys.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig, ref=current_in_s)
+        n_fig, fig_files = overall(hys.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
 
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
         cleanup_fig_files(fig_files)

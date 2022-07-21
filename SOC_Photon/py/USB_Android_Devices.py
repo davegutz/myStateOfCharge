@@ -6,7 +6,7 @@ from pprint import pprint
 usb_device_list = usb.get_usb_device_list()
 usb_device_name_list = [device.getDeviceName() for device in usb_device_list]
 usb_device_dict = {
-    device.getDeviceName():[
+    device.getDeviceName(): [
         device.getVendorId(),
         device.getManufacturerName(),
         device.getProductId(),

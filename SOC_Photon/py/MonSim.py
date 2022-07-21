@@ -29,7 +29,8 @@ from datetime import datetime, timedelta
 
 
 def save_clean_file(mons, csv_file, unit_key):
-    default_header_str = "unit,               hm,                  cTime,        dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
+    default_header_str = "unit,               hm,                  cTime,        dt,       sat,sel,mod,\
+      Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
     n = len(mons.time)
     date_time_start = datetime.now()
     with open(csv_file, "w") as output:
@@ -60,10 +61,11 @@ def save_clean_file(mons, csv_file, unit_key):
             output.write(s)
         print("Wrote(save_clean_file):", csv_file)
 
+
 def save_clean_file_sim(sims, csv_file, unit_key):
-    header_str = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_stat_m,dv_dyn_m,vb_m,ib_m,sat_m,ddq_m,dq_m,q_m,qcap_m,soc_m,reset_m,"
+    header_str = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_stat_m,dv_dyn_m,vb_m,ib_m,sat_m,ddq_m,dq_m,q_m,\
+    qcap_m,soc_m,reset_m,"
     n = len(sims.time)
-    date_time_start = datetime.now()
     with open(csv_file, "w") as output:
         output.write(header_str + "\n")
         for i in range(n):
@@ -87,19 +89,16 @@ def save_clean_file_sim(sims, csv_file, unit_key):
             output.write(s)
         print("Wrote(save_clean_file_sim):", csv_file)
 
+
 def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
               t_Ib_fail=None, Ib_fail=0.):
     if saved_sim_old and len(saved_sim_old.time) < len(saved_old.time):
         t = saved_sim_old.time
     else:
         t = saved_old.time
-    dt = saved_old.dt
     Vb = saved_old.Vb
-    Ib = saved_old.Ib
     Ib_past = saved_old.Ib_past
     Tb = saved_old.Tb
-    Voc = saved_old.Voc
-    Voc_stat = saved_old.Voc_stat
     soc_init = saved_old.soc[0]
     soc_ekf_init = saved_old.soc_ekf[0]
     soc_m_init = saved_old.soc_m[0]
@@ -140,7 +139,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
     # q = 0.00005; r = 0.5  # t_fail_ib = 10  works by half
     # q = 0.005; r = 0.5  # t_fail_ib = 10 messy
     # q = 0.00005; r = 0.05  # t_fail_ib = 10 messy
-    q = 0.7; r = 0.3  # t_fail_ib = 1000
+    q = 0.7; r = 0.3  # t_fail_ib = 1000 ok but oscillates before failure
     sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
                        dv_hys=dv_hys, sres=sres)
     mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
@@ -151,7 +150,9 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
     Is_sat_delay = TFDelay(in_=saved_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
     # time loop
+    now = t[0]
     for i in range(t_len):
+        now = t[i]
         reset = (t[i] <= init_time)
         saved_old.i = i
         if i > 0:
@@ -227,7 +228,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
         # Plot stuff
         mon.save(t[i], T, mon.soc, sim.voc)
         sim.save(t[i], T)
-        sim.save_m(t[i], T)
+        sim.save_m(t[i])
 
         # Print initial
         if i == 0:
@@ -239,7 +240,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
         # print("Tb[i], t_last, t_last_model", Tb[i], mon.t_last, sim.t_last)
 
     # Data
-    print('time=', t[i])
+    print('time=', now)
     print('mon:  ', str(mon))
     print('sim:  ', str(sim))
 
@@ -247,6 +248,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
     # print(compare_print(saved_old, mon.saved))
 
     return mon.saved, sim.saved, mon.Randles.saved, sim.saved_m
+
 
 if __name__ == '__main__':
     import sys
@@ -265,26 +267,25 @@ if __name__ == '__main__':
         # time_end = 2000.
 
         t_Ib_fail = None
-        # data_file_old_txt = '../dataReduction/tryXp20_20220626.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220626.txt'; unit_key = 'soc0_2022';
-        # data_file_old_txt = '../dataReduction/real world Xp21 20220626.txt'; unit_key = 'soc0_2022';
-        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220710.txt'; unit_key = 'pro_2022' TODO: delete
+        # data_file_old_txt = '../dataReduction/tryXp20_20220626.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/real world Xp20 20220626.txt'; unit_key = 'soc0_2022'
+        # data_file_old_txt = '../dataReduction/real world Xp21 20220626.txt'; unit_key = 'soc0_2022'
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220711.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220711.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/real world rapid 20220713.txt'; unit_key = "soc0_2022"
-        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220716.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10;
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
         # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'; t_Ib_fail = 10;
-        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10;
-        data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 1000;
+        # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'; t_Ib_fail = 10
+        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
+        data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 1000
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
 
         # Load mon v4 (old)
-        data_file_clean = write_clean_file(data_file_old_txt, type='_mon', title_key=title_key, unit_key=unit_key)
+        data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key)
         cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn', 'Voc_stat',
                 'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
@@ -292,18 +293,19 @@ if __name__ == '__main__':
         saved_old = SavedData(data=data_old, time_end=time_end)
 
         # Load _m v24 portion of real-time run (old)
-        data_file_sim_clean = write_clean_file(data_file_old_txt, type='_sim', title_key=title_key_sim, unit_key=unit_key_sim)
-        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'ib_in_m',
-                    'sat_m', 'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
+        data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
+                                               unit_key=unit_key_sim)
+        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m',
+                    'ib_in_m', 'sat_m', 'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
         if data_file_sim_clean:
-            data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
-                                 encoding=None).view(np.recarray)
+            data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
+                                         dtype=None, encoding=None).view(np.recarray)
             saved_sim_old = SavedDataSim(time_ref=saved_old.time_ref, data=data_sim_old, time_end=time_end)
         else:
             saved_sim_old = None
 
         # How to initialize
-        if saved_old.time[0] == 0.: # no initialization flat detected at beginning of recording
+        if saved_old.time[0] == 0.:  # no initialization flat detected at beginning of recording
             init_time = 1.
         else:
             init_time = -4.
@@ -323,8 +325,8 @@ if __name__ == '__main__':
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files, plot_title=plot_title, n_fig=n_fig)  # sim over mon
-        n_fig, fig_files = overall(saved_old, mons, saved_sim_old, sims, sims_m, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
-                                   new_s_s=sims)  # mon over data
+        n_fig, fig_files = overall(saved_old, mons, saved_sim_old, sims, sims_m, filename, fig_files,
+                                   plot_title=plot_title, n_fig=n_fig, new_s_s=sims)  # mon over data
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
         cleanup_fig_files(fig_files)
 

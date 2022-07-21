@@ -39,12 +39,12 @@ line1.axes.set_xticklabels(date_vector)
 This will maintain the limits, the x-axis tick alignments, the bounds, but change the labels on the x-axis.
 """
 
-import numpy as np
 from numpy.random import randn
 import matplotlib.pyplot as plt
 
 # use ggplot style for more sophisticated visuals
 # plt.style.use('ggplot')
+
 
 def scale_n(y, lines, ax):
     # In multiple lined plot, all lines have same scale. Use lines[0]
@@ -57,14 +57,15 @@ def scale_n(y, lines, ax):
         ax.set_ylim([min_y-std_y, max_y+std_y])
     return ax
 
-def liven_plotter(x, y, linen, fig, labels=None, subplot=111, ax=None, y_label='', title='', identifier='',
-                  pause_time=0.1, symbol=''):
+
+def liven_plotter(x, y, linen, fig, labels=None, subplot=111, ax=None, y_label='', title='', pause_time=0.1,
+                  symbol=''):
     if linen is None:
         # this is the call to matplotlib that allows dynamic plotting
         plt.ion()
         ax = fig.add_subplot(subplot)
 
-        # create a variable for the line so we can later update it
+        # create a variable for the line, so we can later update it
         if labels is None:
             linen = ax.plot(x, y, symbol, alpha=0.8)
         else:
@@ -88,8 +89,8 @@ def liven_plotter(x, y, linen, fig, labels=None, subplot=111, ax=None, y_label='
 
     return linen, ax
 
+
 if __name__ == '__main__':
-    from pylive import liven_plotter
     import numpy as np
 
     def main():
@@ -103,11 +104,9 @@ if __name__ == '__main__':
         axx2 = None
         fign = None
         count = 0
-        pause_time = 0.1
         identifier = ''
-        t = x_vec[-1]
         count_max = 100
-        while True and count<count_max:
+        while True and count < count_max:
             count += 1
             print(count, "of", count_max)
             y_vec1[-1][0] = np.random.randn(1)
@@ -116,10 +115,11 @@ if __name__ == '__main__':
             # y_vec2[-1][1] = np.random.randn(1) * 10.
             if linen_x1 is None:
                 fign = plt.figure(figsize=(12, 5))
-            linen_x1, axx1 = liven_plotter(x_vec, y_vec1, linen_x1, fign, subplot=211, ax=axx1, y_label='Y Label1',
-                                          title='Title: {}'.format(identifier), pause_time=0.1, labels=['v11', 'v12'])
-            linen_x2, axx2 = liven_plotter(x_vec, y_vec2, linen_x2, fign, subplot=212, ax=axx2, y_label='Y Label2',
-                                          pause_time=0.1, labels=['v21'])
+            linen_x1, axx1 = liven_plotter(x_vec, y_vec1, linen_x1, fign, subplot=211, ax=axx1,
+                                           y_label='Y Label1', title='Title: {}'.format(identifier),
+                                           pause_time=0.1, labels=['v11', 'v12'])
+            linen_x2, axx2 = liven_plotter(x_vec, y_vec2, linen_x2, fign, subplot=212, ax=axx2,
+                                           y_label='Y Label2', pause_time=0.1, labels=['v21'])
             y_vec1 = np.append(y_vec1[1:][:], np.zeros((1, 2)), axis=0)
             y_vec2 = np.append(y_vec2[1:][:], np.zeros((1, 1)), axis=0)
 

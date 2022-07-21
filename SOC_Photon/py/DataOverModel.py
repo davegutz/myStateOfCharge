@@ -13,7 +13,7 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-"""Define a general purpose battery model including Randle's model and SoC-VOV model as well as Kalman filtering
+"""Define a general purpose battery model including Randles' model and SoC-VOV model as well as Kalman filtering
 support for simplified Mathworks' tracker. See Huria, Ceraolo, Gazzarri, & Jackey, 2013 Simplified Extended Kalman
 Filter Observer for SOC Estimation of Commercial Power-Oriented LFP Lithium Battery Cells.
 Dependencies:
@@ -27,11 +27,14 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from MonSim import replicate, save_clean_file, save_clean_file_sim
 from Battery import overall as overalls
-# from kivy.utils import platform  # failed experiment to run BLE data plotting realtime on android
-# if platform != 'linux':  from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
-from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
+from kivy.utils import platform  # failed experiment to run BLE data plotting realtime on android
+if platform != 'linux':
+    from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
+# from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 
-def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files=None, plot_title=None, n_fig=None, new_s_s=None):
+
+def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files=None, plot_title=None,
+            n_fig=None, new_s_s=None):
     if fig_files is None:
         fig_files = []
 
@@ -87,20 +90,18 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     try:
         plt.plot(new_s.time, new_s.y_filt, color='black', linestyle='-.', label='y_filt_new')
         plt.plot(new_s.time, new_s.y_filt2, color='cyan', linestyle=':', label='y_filt2_new')
-    except:
+    except ValueError:
         print("y_filt not available pure data regression")
     plt.legend(loc=1)
     plt.subplot(325)
     plt.plot(old_s.time, old_s.dV_hys, color='green', label='dV_hys')
     if new_s_sim:
-        tt = np.array(old_s.time)
-        Vbt = np.array(old_s.Vb)
         from pyDAGx import myTables
-        lut_vb = myTables.TableInterp1D(tt, Vbt)
+        lut_vb = myTables.TableInterp1D(np.array(old_s.time), np.array(old_s.Vb))
         n = len(new_s_sim.time)
-        voc_req = np.zeros((n,1))
-        dv_hys_req = np.zeros((n,1))
-        voc_stat_req = np.zeros((n,1))
+        voc_req = np.zeros((n, 1))
+        dv_hys_req = np.zeros((n, 1))
+        voc_stat_req = np.zeros((n, 1))
         for i in range(n):
             voc_req[i] = lut_vb.interp(new_s_sim.time[i]) - new_s_sim.dv_dyn[i]
             voc_stat_req[i] = new_s_sim.voc_stat[i]
@@ -109,14 +110,12 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         plt.plot(new_s_sim.time, dv_hys_req, color='black', linestyle='-.', label='dv_hys_req_m_new')
 
     if old_s_sim:
-        tt = np.array(old_s.time)
-        Vbt = np.array(old_s.Vb)
         from pyDAGx import myTables
-        lut_vb = myTables.TableInterp1D(tt, Vbt)
+        lut_vb = myTables.TableInterp1D(np.array(old_s.time), np.array(old_s.Vb))
         n = len(old_s_sim.time)
-        voc_req = np.zeros((n,1))
-        dv_hys_req = np.zeros((n,1))
-        voc_stat_req = np.zeros((n,1))
+        voc_req = np.zeros((n, 1))
+        dv_hys_req = np.zeros((n, 1))
+        voc_stat_req = np.zeros((n, 1))
         for i in range(n):
             voc_req[i] = lut_vb.interp(old_s_sim.time[i]) - old_s_sim.dv_dyn_m[i]
             voc_stat_req[i] = old_s_sim.voc_stat_m[i]
@@ -296,9 +295,9 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
 
     return n_fig, fig_files
 
-def write_clean_file(txt_file, type, title_key, unit_key):
-    csv_file = txt_file.replace('.txt', type + '.csv', 1)
-    # default_header_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
+
+def write_clean_file(txt_file, type_, title_key, unit_key):
+    csv_file = txt_file.replace('.txt', type_ + '.csv', 1)
     # Header
     have_header_str = None
     with open(txt_file, "r") as input_file:
@@ -308,10 +307,6 @@ def write_clean_file(txt_file, type, title_key, unit_key):
                     if have_header_str is None:
                         have_header_str = True  # write one title only
                         output.write(line)
-    # if have_header_str is None:
-    #     with open(csv_file, "w") as output:
-    #         output.write(default_header_str)
-    #         print("I:  using default data header")
     # Data
     num_lines = 0
     with open(txt_file, "r") as input_file:
@@ -353,7 +348,7 @@ class SavedData:
             self.y_ekf = []  # Monitor single battery solver error, V
             self.soc_m = []  # Simulated state of charge, fraction
             self.soc_ekf = []  # Solved state of charge, fraction
-            self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) availabel (0-1)
+            self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) available (0-1)
             self.soc_wt = []  # Weighted selection of ekf state of charge and Coulomb Counter (0-1)
             self.time_ref = 0.  # Adjust time for start of Ib input
         else:
@@ -369,7 +364,7 @@ class SavedData:
                 self.zero_end = zero_start
                 while self.Ib[self.zero_end] == 0.0:  # stop at first non-zero
                     self.zero_end += 1
-            except:
+            except IOError:
                 self.zero_end = 0
             self.time_ref = self.time[self.zero_end]
             # print("time_ref=", self.time_ref)
@@ -385,7 +380,7 @@ class SavedData:
             self.dt = np.array(data.dt[:i_end])
             self.time = np.array(self.time[:i_end])
             self.Ib = np.array(data.Ib[:i_end])
-            self.Ib_past = np.append(np.zeros((1,1)), np.array(data.Ib[:(i_end-1)]))
+            self.Ib_past = np.append(np.zeros((1, 1)), np.array(data.Ib[:(i_end-1)]))
             self.Ib_past[0] = self.Ib_past[1]
             self.Vb = np.array(data.Vb[:i_end])
             self.sat = np.array(data.sat[:i_end])
@@ -440,7 +435,7 @@ class SavedDataSim:
             self.dv_dyn_m = []
             self.dv_hys_m = []
             self.vb_m = []
-            self.ib_in_m= []
+            self.ib_in_m = []
             self.ib_m = []
             self.sat_m = []
             self.ddq_m = []
@@ -497,9 +492,6 @@ class SavedDataSim:
         s += "{:d},".format(self.reset_m[self.i])
         return s
 
-    def mod(self):
-        return self.mod_data[self.zero_end]
-
 
 if __name__ == '__main__':
     import sys
@@ -509,7 +501,8 @@ if __name__ == '__main__':
     plt.rcParams['axes.grid'] = True
 
     def compare_print(old_s, new_s):
-        s = " time,      Ib,                   Vb,              dV_dyn,          Voc_stat,            Voc,        Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
+        s = " time,      Ib,                   Vb,              dV_dyn,          Voc_stat,\
+                    Voc,        Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
         for i in range(len(new_s.time)):
             s += "{:7.3f},".format(old_s.time[i])
             s += "{:11.3f},".format(old_s.Ib[i])
@@ -538,7 +531,8 @@ if __name__ == '__main__':
 
     def main(data_file_old_txt, unit_key):
         # Trade study inputs
-        # i-->0 provides continuous anchor to reset filter (why?)  i shifts important --> 2 current sensors, hyst in ekf
+        # i-->0 provides continuous anchor to reset filter (why?)  i shifts important --> 2 current sensors,
+        #   hyst in ekf
         # saturation provides periodic anchor to reset filter
         # reset soc periodically anchor user display
         # tau_sd creating an anchor.   So large it's just a pass through.  TODO:  Why x correct??
@@ -553,23 +547,24 @@ if __name__ == '__main__':
         # time_end = 1500.
 
         # Load data (must end in .txt) txt_file, type, title_key, unit_key
-        data_file_clean = write_clean_file(data_file_old_txt, type='_mon', title_key='unit,', unit_key=unit_key)
-        data_file_sim_clean = write_clean_file(data_file_old_txt, type='_sim', title_key='unit_m', unit_key='unit_sim,')
+        data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key='unit,',
+                                           unit_key=unit_key)
+        data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key='unit_m',
+                                               unit_key='unit_sim,')
 
         # Load
-        cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn', 'Voc_stat', 'Voc_ekf',
-                'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
+        cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn',
+                'Voc_stat', 'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
-        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m', 'ib_in_m',
-                    'sat_m', 'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
+        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m',
+                    'ib_m', 'ib_in_m', 'sat_m', 'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
         try:
-            data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
-                                 encoding=None).view(np.recarray)
+            data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
+                                         dtype=None, encoding=None).view(np.recarray)
             saved_sim_old = SavedDataSim(saved_old.time_ref, data_sim_old, time_end)
-        except:
-            data_sim_old = None
+        except IOError:
             saved_sim_old = None
 
         # Run model
@@ -591,22 +586,20 @@ if __name__ == '__main__':
         else:
             filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files,plot_title=plot_title, n_fig=n_fig)  # Could be confusing because sim over mon
-        n_fig, fig_files = overall(saved_old, mons, saved_sim_old, sims, sims_m, filename, fig_files, plot_title=plot_title,
-                                   n_fig=n_fig, new_s_s=sims)
+        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files, plot_title=plot_title,
+                                    n_fig=n_fig)  # Could be confusing because sim over mon
+        n_fig, fig_files = overall(saved_old, mons, saved_sim_old, sims, sims_m, filename, fig_files,
+                                   plot_title=plot_title, n_fig=n_fig, new_s_s=sims)
         if platform != 'linux':
-            unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
+            unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf',
+                                    pathToSavePdfTo='../dataReduction/figures')
             cleanup_fig_files(fig_files)
 
         plt.show()
 
 
-    #python DataOverModel.py("../dataReduction/2-pole y_filt, tune hys 220613.txt", "soc0_2022")
-    #python DataOverModel.py("../dataReduction/watchXm2.txt", "pro_2022")
-    #python DataOverModel.py("../dataReduction/serial_20220624_095543.txt", "pro_2022")
-    #python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220711.txt", "pro_2022")
-    #python DataOverModel.py()
-    #
+    # python DataOverModel.py("../dataReduction/rapidTweakRegressionTest20220711.txt", "pro_2022")
+
     """
     PyCharm Sample Run Configuration Parameters (right click in pyCharm - Modify Run Configuration:
         "../dataReduction/slowTweakRegressionTest20220711.txt" "pro_2022"
