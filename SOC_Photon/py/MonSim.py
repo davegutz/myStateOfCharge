@@ -26,7 +26,7 @@ from Battery import overall as overalls
 from TFDelay import TFDelay
 from MonSimNomConfig import *  # Global config parameters.   Overwrite in your own calls for studies
 from datetime import datetime, timedelta
-
+from Scale import Scale
 
 def save_clean_file(mons, csv_file, unit_key):
     default_header_str = "unit,               hm,                  cTime,        dt,       sat,sel,mod,\
@@ -116,37 +116,13 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
 
     # Setup
     scale = model_bat_cap / Battery.RATED_BATT_CAP
-    # Trade using real world Xp20 20220717.txt Fig 18
-    # q = 0.00005; r = 1.0   # tau_sd = 2.5e7; # base soc_ekf_new .975 tfail@125 .982 @ 1000
-    # q = 0.001; r = 0.1  # tau_sd = 2.5e7; soc_ekf_new 0.72
-    # q = 0.01; r = 0.01  # tau_sd = 2.5e7; soc_ekf_new 0.72 noisy
-    # q = 0.1; r = 0.001  # tau_sd = 2.5e7; soc_ekf_new 0.72 noisier than prev
-    # q = 0.002; r = 0.1  # tau_sd = 2.5e7; soc_ekf_new 0.72 quiet than prev
-    # q = 0.005; r = 0.1  # ""
-    # q = 0.01; r = 0.1  # " " noisier
-    # q = 0.1; r = 0.1  #  ""
-    # q = 0.005; r = 0.05  # ""
-    # q = 0.05; r = 0.05  # ""
-    # q = 0.001; r = 0.05  # ""
-    # q = 0.001; r = 0.01  # ""
-    # q = 0.001; r = 0.001  # ""
-    # q = 0.0001; r = 0.05  # 0.84 quiet
-    # q = 0.0001; r = 0.1  # 0.875 quiet
-    # q = 0.00002; r = 0.2  # close  could try this with failures  tfail@125 .982 @ 750 better than 1000
-    # q = 0.0001; r = 0.2  # 0.94 need smaller q <.0001
-    # q = 0.00005; r = 0.2  # wobbly
-    # q = 0.00005; r = 0.5  # closer could try this with failures  tfail@125 .982 @ 730 better than 1000
-    # q = 0.00005; r = 0.5  # t_fail_ib = 10  works by half
-    # q = 0.005; r = 0.5  # t_fail_ib = 10 messy
-    # q = 0.00005; r = 0.05  # t_fail_ib = 10 messy
-    q = 0.7; r = 0.3  # t_fail_ib = 1000 ok but oscillates before failure
+    s_q = Scale(1., 3., 0.000005, 0.00005); s_r = Scale(1., 3., 0.001, 1.)   # t_Ib_fail = 1000 o
     sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
                        dv_hys=dv_hys, sres=sres)
     mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
-                         temp_c=temp_c, hys_scale=hys_scale_monitor, tweak_test=tweak_test, dv_hys=dv_hys, sres=sres)
+                         temp_c=temp_c, hys_scale=hys_scale_monitor, tweak_test=tweak_test, dv_hys=dv_hys, sres=sres,
+                         scaler_q=s_q, scaler_r=s_r)
     # need Tb input.   perhaps need higher order to enforce basic type 1 response
-    mon.Q = q * q
-    mon.R = r * r
     Is_sat_delay = TFDelay(in_=saved_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
     # time loop
@@ -211,9 +187,6 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
         else:
             mon.calculate(Tb[i], vb + randn() * v_std + dv_sense, charge_curr + randn() * i_std + di_sense, T, rp=rp,
                           reset=reset, d_voc=None)
-            # mon.calculate(Tb[i], vb + randn() * v_std + dv_sense, charge_curr + randn() * i_std + di_sense, T, rp=rp,
-            #           reset=reset, d_voc=Voc[i])
-        # mon.calculate(Tb[i], Vb[i]+randn()*v_std+dv_sense, sim.ib+randn()*i_std+di_sense, T)
         sat = is_sat(Tb[i], mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
         if rp.modeling == 0:
@@ -267,19 +240,13 @@ if __name__ == '__main__':
         # time_end = 2000.
 
         t_Ib_fail = None
-        # data_file_old_txt = '../dataReduction/tryXp20_20220626.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220626.txt'; unit_key = 'soc0_2022'
-        # data_file_old_txt = '../dataReduction/real world Xp21 20220626.txt'; unit_key = 'soc0_2022'
-        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220711.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220711.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/real world rapid 20220713.txt'; unit_key = "soc0_2022"
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'; t_Ib_fail = 10
+        # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'
+        data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'; t_Ib_fail = 10
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
-        data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 1000
+        # data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"

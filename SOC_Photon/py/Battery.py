@@ -24,6 +24,7 @@ from Hysteresis import Hysteresis
 import matplotlib.pyplot as plt
 from TFDelay import TFDelay
 from myFilters import LagTustin, General2Pole, RateLimit
+from Scale import Scale
 
 
 class Retained:
@@ -252,7 +253,8 @@ class BatteryMonitor(Battery, EKF1x1):
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1.):
+                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., scaler_q=None,
+                 scaler_r=None):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
@@ -278,6 +280,14 @@ class BatteryMonitor(Battery, EKF1x1):
         r = 0.5
         # self.Q = 0.001*0.001  # EKF process uncertainty
         # self.R = 0.1*0.1  # EKF state uncertainty
+        if scaler_q is None:
+            self.scaler_q = Scale(1, 4, 0.7, 0.00005)
+        else:
+            self.scaler_q = scaler_q
+        if scaler_r is None:
+            self.scaler_r = Scale(1, 4, 0.3, 0.5)
+        else:
+            self.scaler_r = scaler_r
         self.Q = q * q  # EKF process uncertainty
         self.R = r * r  # EKF state uncertainty
         self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
@@ -357,6 +367,8 @@ class BatteryMonitor(Battery, EKF1x1):
         if ddq_dt > 0. and not self.tweak_test:
             ddq_dt *= self.coul_eff
         ddq_dt -= dqdt*self.q_capacity*T_rate
+        self.Q = self.scaler_q.calculate(ddq_dt)
+        self.R = self.scaler_r.calculate(ddq_dt)
         self.predict_ekf(u=ddq_dt)  # u = d(q)/dt
         self.update_ekf(z=self.voc_stat, x_min=0., x_max=1.)  # z = voc, voc_filtered = hx
         self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc

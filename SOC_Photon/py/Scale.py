@@ -30,13 +30,14 @@ class Scale:
         self.di = i_x - i_n
         self.do = o_x - o_n
 
-    def calculate1(self, i):
+    def calculate(self, i):
         if i <= self.i_n:
-            return self.o_n
+            o = self.o_n
         elif i >= self.i_x:
-            return self.o_x
+            o = self.o_x
         else:
-            return (i - self.i_n) / self.di * self.do + self.o_n
+            o = (i - self.i_n) / self.di * self.do + self.o_n
+        return o * o
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""

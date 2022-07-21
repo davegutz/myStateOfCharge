@@ -27,6 +27,8 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from MonSim import replicate, save_clean_file, save_clean_file_sim
 from Battery import overall as overalls
+import os
+os.environ["KIVY_NO_CONSOLELOG"] = "1"
 from kivy.utils import platform  # failed experiment to run BLE data plotting realtime on android
 if platform != 'linux':
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
@@ -364,7 +366,7 @@ class SavedData:
                 self.zero_end = zero_start
                 while self.Ib[self.zero_end] == 0.0:  # stop at first non-zero
                     self.zero_end += 1
-            except IOError:
+            except:
                 self.zero_end = 0
             self.time_ref = self.time[self.zero_end]
             # print("time_ref=", self.time_ref)
