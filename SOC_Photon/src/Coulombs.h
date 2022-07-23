@@ -25,7 +25,7 @@
 #ifndef COULOMBS_H_
 #define COULOMBS_H_
 
-struct Sensors;
+class Sensors;
 
 // Battery chemistry
 struct Chemistry

@@ -32,7 +32,7 @@
 #include "myLibrary/injection.h"
 #include "myLibrary/myFilters.h"
 #include "constants.h"
-struct Sensors;
+class Sensors;
 #define t_float float
 
 #define TCHARGE_DISPLAY_DEADBAND  0.1 // Inside this +/- deadband, charge time is displayed '---', A

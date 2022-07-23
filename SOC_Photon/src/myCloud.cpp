@@ -129,7 +129,7 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
 
 // Assignments
 void assign_publist(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
-  struct Sensors* Sen, const int num_timeouts, BatteryMonitor* Mon)
+  Sensors* Sen, const int num_timeouts, BatteryMonitor* Mon)
 {
   pubList->now = now;
   pubList->unit = unit;
