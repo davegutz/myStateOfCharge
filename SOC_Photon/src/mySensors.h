@@ -120,6 +120,7 @@ public:
     float Wbatt;            // Sensed battery bank power, use to compare to other shunts, W
     unsigned long int now;  // Time at sample, ms
     double T;               // Update time, s
+    boolean reset;          // Reset flag, T = reset
     double T_filt;          // Filter update time, s
     double T_temp;          // Temperature update time, s
     boolean saturated;      // Battery saturation status based on Temp and VOC
@@ -128,7 +129,12 @@ public:
     TempSensor* SensorTbatt;        // Tb sense
     General2_Pole* TbattSenseFilt;  // Linear filter for Tb. There are 1 Hz AAFs in hardware for Vb and Ib
     SlidingDeadband *SdTbatt;       // Non-linear filter for Tb
-    BatteryModel *Sim;      //  used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off. 
+    BatteryModel *Sim;      // Used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off
+    LagTustin *IbattErrFilt;// Noise filter for signal selection
+    TFDelay *IbattErrFail;  // Persistence current error for signal selection 
+    TFDelay *IbattAmpHardFail;  // Persistence voltage range check for signall selection 
+    TFDelay *IbattNoAmpHardFail;  // Persistence voltage range check for signall selection 
+    TFDelay *VbattHardFail;  // Persistence voltage range check for signall selection 
     unsigned long int elapsed_inj;  // Injection elapsed time, ms
     unsigned long int start_inj;    // Start of calculated injection, ms
     unsigned long int stop_inj;     // Stop of calculated injection, ms
@@ -141,17 +147,27 @@ public:
     double control_time;            // Decimal time, seconds since 1/1/2021
     boolean display;                // Use display
     double sclr_coul_eff;           // Scalar on Coulombic Efficiency
-    double keep_time(const unsigned long now);
     void shunt_bias(void);          // Load biases into Shunt objects
+    void shunt_check(BatteryMonitor *Mon);  // Range check Ibatt signals
     void shunt_load(void);          // Load ADS015 protocol
-    void shunt_print(const boolean reset_free, const double T); // Print selection result
-    void shunt_select(void);        // Choose between shunts and pass along Vbatt fault detection
+    void shunt_print(); // Print selection result
+    void shunt_select(BatteryMonitor *Mon);   // Choose between shunts and pass along Vbatt fault detection
+    void vbatt_check(BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max);  // Range check Vbatt
     void vbatt_load(const byte vbatt_pin);  // Analog read of Vbatt
     void vbatt_print(void);         // Print Vbatt result
-    void temp_filter(const int reset_loc, const float t_rlim, const float tbatt_bias, float *tbatt_bias_last);
-    void temp_load_and_filter(Sensors *Sen, const int reset_loc, const float t_rlim, const float tbatt_bias,
+    void temp_filter(const boolean reset_loc, const float t_rlim, const float tbatt_bias, float *tbatt_bias_last);
+    void temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim, const float tbatt_bias,
         float *tbatt_bias_last);
+    boolean Ibatt_amp_fail() { return Ibatt_amp_fail_; };
+    boolean Ibatt_noamp_fail() { return Ibatt_noamp_fail_; };
+    boolean Vbatt_fail() { return Vbatt_fail_; };
 protected:
+    boolean Ibatt_amp_fail_;    // Amp sensor selection memory, T = amp failed
+    boolean Ibatt_amp_fault_;   // Momentary isolation of Ibatt failure, T=faulted 
+    boolean Ibatt_noamp_fail_;  // Noamp sensor selection memory, T = no amp failed
+    boolean Ibatt_noamp_fault_; // Momentary isolation of Ibatt failure, T=faulted 
+    boolean Vbatt_fail_;        // Peristed, latched isolation of Vbatt failure, T=failed
+    boolean Vbatt_fault_;       // Momentary isolation of Vbatt failure, T=faulted 
 };
 
 

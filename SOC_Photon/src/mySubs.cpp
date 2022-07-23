@@ -118,21 +118,20 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
 
 // Load all others
 // Outputs:   Sen->Ibatt_model_in, Sen->Ibatt_hdwe, 
-void load_ibatt_vbatt(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins *myPins)
+void load_ibatt_vbatt(const boolean reset, const unsigned long now, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon)
 {
-  // Bookkeep time
-  double T = Sen->keep_time(now);
-
   // Load shunts
   // Outputs:  Sen->Ibatt_model_in, Sen->Ibatt_hdwe, Sen->Vbatt, Sen->Wbatt
   Sen->shunt_bias();
   Sen->shunt_load();
-  Sen->shunt_select();
-  if ( rp.debug==14 ) Sen->shunt_print(reset_free, T);
+  Sen->shunt_check(Mon);
+  Sen->shunt_select(Mon);
+  if ( rp.debug==14 ) Sen->shunt_print();
 
   // Vbatt
   // Outputs:  Sen->Vbatt
   Sen->vbatt_load(myPins->Vbatt_pin);
+  Sen->vbatt_check(Mon, VBATT_MIN, VBATT_MAX);
   if ( rp.debug==15 ) Sen->vbatt_print();
 
   // Power calculation
@@ -179,7 +178,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 // Inputs:  rp.mon_mod, Sen->Ibatt, Sen->Vbatt, Sen->Tbatt_filt
 // States:  Mon.soc, Mon.soc_ekf
 // Outputs: tcharge_wt, tcharge_ekf, Voc, Voc_filt
-void  monitor(const int reset, const boolean reset_temp, const unsigned long now,
+void  monitor(const boolean reset, const boolean reset_temp, const unsigned long now,
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen)
 {
 
@@ -268,12 +267,12 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 // States:  Sim.soc
 // Outputs: Sim.temp_c_, Sen->Tbatt_filt, Sen->Ibatt, Sen->Ibatt_model,
 //   Sen->Vbatt_model, Sen->Tbatt_filt, rp.inj_bias
-void sense_synth_select(const int reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
+void sense_synth_select(const boolean reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen)
 {
   // Load Ib and Vb
   // Outputs: Sen->Ibatt_model_in, Sen->Ibatt, Sen->Vbatt 
-  load_ibatt_vbatt(reset, now, Sen, myPins);
+  load_ibatt_vbatt(reset, now, Sen, myPins, Mon);
 
   // Arduino plots
   if ( rp.debug==-7 ) debug_m7(Mon, Sen);

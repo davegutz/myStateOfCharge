@@ -328,6 +328,7 @@ void loop()
   if ( read )
   {
     Sen->T =  ReadSensors->updateTime();
+    Sen->reset = reset;
     if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read dt=%7.3f; load at %ld...  \n", Sen->T, millis());
 
     // Read sensors, model signals, select between them, synthesize injection signals on current

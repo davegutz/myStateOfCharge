@@ -297,6 +297,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   29. Only Battleborn will be implemented at first but structure will support other suppliers.  For now, recompilation is needed to run another supplier and #define switches between them.
   30. The nominal unit of configuration shall be a 12 v battery with a characteristic soc-voc and rated Ah capacity.  Use with multiple batteries shall include running an arbitrary number of batteries in parallel and then series (nPmS).  The configuration shall be in local_config.h and in retained.h.   This is called the 'chemistry' of the configuration.
   31. The configuration shall be fully adjustable on the fly using Talk.  If somebody has Battleborn or a LION they will not need to ever recompile and reflash a Photon.
+  32. Maximize system availability in presence of loss of sensor signals.  Soft or hard resets cause signal fault detection and selection to reset.   Flash display to communicate signal status:  every fourth update of screen indicates a minor fault.  Every other update is major fault where action needed.   Print signal faults in the 'Q' talk.   Add ability to mask faults to a retained parameter rp.
 
 ## Implementation Notes
 
@@ -383,14 +384,15 @@ Throughput test
   a.  real world collection sometimes run sample times longer than RANDLES_T_MAX.   When that happens the modeled simulation of Randles system will oscillate so it is bypassed.   Real data will appear to have first order response and simulation in python will appear to be step.
 41.  Manual tests to check initialzation of real world.   Set 'Xm=4;' to over-ride current sensor.  Set 'Dc<>' to place Vb where you want it.   Press hard reset button to force reinitialization to the EKF.  If get stuck saturated or not, remember to add a little bit of current 'Di<>' positive to engage saturation and negative to disengage saturation.
 42.  Bluetooth (BLE).  In the logic it is visible as Serial1.   All the Serial1 api are non-blocking, so if BLE not connected or has failed then nothing seems to happen.  Another likely reason is baud rate mismatch between the HC-06 device (I couldn't get HC-05 to work) and Serial.begin(baud).   There is a project above this SOC_Photon project called BT-AT that runs the AT on HC-06.  You need to set baud rate using that.   You should use 115200 or higher.   Lower rates caused the Serial api to be the slowest routines in the chain of call.   At 9600 the fastest READ time 'Dr<>' was 100 - 200 ms depending on the print interval 'Dp<>'.
+43.  Current is a critical signal for availability.   If lose current also lose knowledge of instantaneous voc_stat because do not know how to adjust for rapid changes in Vb without current.   So the EKF useful only for steady state use.  If add redundant current sensor then If current is available, it creates a triplex signal selection process where current sensors may be compared to each other and Coulomb counter may be compared to EKF to provide enough information to sort out the correct signals.  For example, if the currents disagree and CC and EKF agree then the standby current sensor has faulted.   For that same situation and the CC and EKF disagree then either the active current sensor has likely failed.  If the currents agree and CC and EKF disagree then the voltage sensor has likely failed.  The amplified current sensor is most accurate and is the first choice default.  The non amplified sensor is ok - observing long cycling 'Xp9' see that for a long history, counted coulombs are the same and sensor errors average out.   All this consistent with proper and same calibration of current sensors' gains and setting biases so indicated currents are zero when actual current is zero.
 
 ## Accuracy
 
 1. Current Sensor
   a. Gain - component calibration at install
   b. Bias - component calibration at install
-  c. Drift - Tweak test.   Could be confounded by lack of knowledge of Coulombic Efficiency (CE).   Presently the logic adjusts the bias for perceived charge cycle drifting.  [TODO]:  consider tweaking CE gain effect instead of drift and as side benefit have display = 0 quiescent.
-  d. Amplifier.  [TODO]:  need to run tests with
+  c. Drift - Tweak test
+  d. Amplifier vs non-amplifier.  Observations of tweak function show over long averaging time the non-amplified sensor provides equivalent results.  Could probably get by with two non-amplified sensors.
 2. Voltage Sensor
 3. Temperature Sensor
 4. Hysteresis Model
@@ -402,8 +404,8 @@ Throughput test
   a. Not sure this is even needed to due to low bandwidth of daily charge cycle.   Average out.
   b. Leave this in design for now for study.   Able to disable
 8. EKF
-  a. Failures.  [TODO]:  need to run failures of sensors to see what EKF covers
+  a. Failures.  [TODO]:  need to implement signal selection and screen flashing status
 9. Redundancy
   a. [TODO]:  need results of tests above
-10. Selection between EKF and Coulomb Counter.  Disabled.   [TODO]: next consider replacing large lag in EKF with the Coulomb Counter.
+10. Selection between EKF and Coulomb Counter.  Disabled.   [TODO]: need to replace amp hrs weighted with straight CC.
 11.  

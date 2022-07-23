@@ -68,14 +68,14 @@ struct Pins
 void create_print_string(Publish *pubList);
 void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
 double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
-void load_ibatt_vbatt(const boolean reset_free, const unsigned long now, Sensors *Sen, Pins *myPins);
+void load_ibatt_vbatt(const boolean reset, const unsigned long now, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon);
 void manage_wifi(unsigned long now, Wifi *wifi);
-void monitor(const int reset, const boolean reset_temp, const unsigned long now,
+void monitor(const boolean reset, const boolean reset_temp, const unsigned long now,
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen);
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen);
 void print_serial_header(void);
 void print_serial_sim_header(void);
-void sense_synth_select(const int reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
+void sense_synth_select(const boolean reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen);
 void serial_print(unsigned long now, double T);
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);

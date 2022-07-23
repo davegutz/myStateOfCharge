@@ -137,7 +137,8 @@ void Shunt::load()
 
 
 // Class Sensors
-Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, Sync *ReadSensors)
+Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, Sync *ReadSensors):
+    Ibatt_amp_fail_(false), Ibatt_noamp_fail_(false), Vbatt_fail_(false), Vbatt_fault_(false)
 {
     this->T = T;
     this->T_filt = T;
@@ -159,6 +160,11 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
     this->SensorTbatt = new TempSensor(pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
     this->TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
     this->Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS, &rp.sim_mod);
+    this->IbattErrFilt = new LagTustin(0.1, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
+    this->IbattErrFail = new TFDelay();
+    this->IbattAmpHardFail  = new TFDelay();
+    this->IbattNoAmpHardFail  = new TFDelay();
+    this->VbattHardFail  = new TFDelay();
     this->elapsed_inj = 0UL;
     this->start_inj = 0UL;
     this->stop_inj = 0UL;
@@ -168,15 +174,6 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
     this->ReadSensors = ReadSensors;
     this->display = true;
     this->sclr_coul_eff = 1.;
-}
-
-// Bookkeep time
-double Sensors::keep_time(const unsigned long now_)
-{
-    static unsigned long int past = now_;
-    past = now_;
-    now = now_;
-    return (now_ - past)/1e3;
 }
 
 // Current bias.  Feeds into signal conversion
@@ -194,99 +191,134 @@ void Sensors::shunt_bias(void)
   }
 }
 
+// Checks analog current.  Latches
+void Sensors::shunt_check(BatteryMonitor *Mon)
+{
+    if ( reset )
+    {
+        Ibatt_amp_fail_ = false;
+        Ibatt_noamp_fail_ = false;
+    }
+    float current_max = RATED_BATT_CAP * Mon->nP();
+    Ibatt_amp_fault_ = ShuntAmp->ishunt_cal()  <= -current_max || ShuntAmp->ishunt_cal() >= current_max;
+    Ibatt_noamp_fault_ = ShuntNoAmp->ishunt_cal()  <= -current_max || ShuntNoAmp->ishunt_cal() >= current_max;
+    Ibatt_amp_fail_ = Ibatt_amp_fail_ || IbattAmpHardFail->calculate(Ibatt_amp_fault_, IBATT_HARD_SET, IBATT_HARD_RESET, T, reset);
+    Ibatt_noamp_fail_ = Ibatt_noamp_fail_ || IbattNoAmpHardFail->calculate(Ibatt_noamp_fault_, IBATT_HARD_SET, IBATT_HARD_RESET, T, reset);
+}
+
 // Read and convert shunt Sensors
 void Sensors::shunt_load(void)
 {
-  ShuntAmp->load();
-  ShuntNoAmp->load();
+    ShuntAmp->load();
+    ShuntNoAmp->load();
 }
 
 // Print Shunt selection data
-void Sensors::shunt_print(const boolean reset_free, const double T)
+void Sensors::shunt_print()
 {
-    Serial.printf("reset_free,select,inj_bias,vs_int_a,Vshunt_a,Ibatt_hdwe_a,vs_int_na,Vshunt_na,Ibatt_hdwe_na,Ibatt_hdwe,T,sclr_coul_eff=,    %d,%d,%7.3f,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,  %7.3f,\n",
-        reset_free, rp.ibatt_sel_noamp, rp.inj_bias, ShuntAmp->vshunt_int(), ShuntAmp->vshunt(), ShuntAmp->ishunt_cal(),
+    Serial.printf("reset,T,select,inj_bias,vs_int_a,Vshunt_a,Ibatt_hdwe_a,vs_int_na,Vshunt_na,Ibatt_hdwe_na,Ibatt_hdwe,T,sclr_coul_eff,Ibatt_amp_fault,Ibatt_amp_fail,Ibatt_noamp_fault,Ibatt_noamp_fail,=,    %d,%7.3f,%d,%7.3f,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,  %7.3f, %d,%d,  %d,%d,\n",
+        reset, T, rp.ibatt_sel_noamp, rp.inj_bias, ShuntAmp->vshunt_int(), ShuntAmp->vshunt(), ShuntAmp->ishunt_cal(),
         ShuntNoAmp->vshunt_int(), ShuntNoAmp->vshunt(), ShuntNoAmp->ishunt_cal(),
-        Ibatt_hdwe, T, sclr_coul_eff);
+        Ibatt_hdwe, T, sclr_coul_eff,
+        Ibatt_amp_fault_, Ibatt_amp_fail_, Ibatt_noamp_fault_, Ibatt_noamp_fail_);
 }
 
-// Shunt selection
-void Sensors::shunt_select(void)
+// Shunt selection.  Use Coulomb counter and EKF to sort three signals:  amp current, non-amp current, voltage
+// Inputs: rp.ibatt_sel_noamp (user override), Mon (EKF status)
+// States:  Ibatt_fail_noamp_
+// Outputs:  Ibatt_hdwe, Ibatt_model_in, Vbatt_sel_status_
+void Sensors::shunt_select(BatteryMonitor *Mon)
 {
-  // Current signal selection, based on if there or not.
-  // Over-ride 'permanent' with Talk(rp.ibatt_sel_noamp) = Talk('s')
-  float model_ibatt_bias = 0.;
+    float ekf_error = Mon->soc_ekf() - Mon->soc();  // These are filtered in their construction (EKF is a dynamic filter and 
+                                                    // Coulomb counter is a big integrator)
+    boolean ekf_cc_disagree = abs(ekf_error) >= SOC_DISAGREE_THRESH;
+    float ibatt_error = ShuntAmp->ishunt_cal() - ShuntNoAmp->ishunt_cal();
+    float ibatt_err_filt = IbattErrFilt->calculate(ibatt_error, reset, min(T, MAX_ERR_T));
+    float ibatt_err_fault = abs(ibatt_err_filt) >= IBATT_DISAGREE_THRESH;
+    boolean ibatt_err_fail = IbattErrFail->calculate(ibatt_err_fault, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T, reset);
 
-  // Check for bare sensor
-  if ( !rp.ibatt_sel_noamp && !ShuntAmp->bare() )
-  {
-    Vshunt = ShuntAmp->vshunt();
-    Ibatt_hdwe = ShuntAmp->ishunt_cal();
-    model_ibatt_bias = ShuntAmp->bias();
-    sclr_coul_eff = rp.tweak_sclr_amp;
-  }
-  else if ( !ShuntNoAmp->bare() )
-  {
-    Vshunt = ShuntNoAmp->vshunt();
-    Ibatt_hdwe = ShuntNoAmp->ishunt_cal();
-    model_ibatt_bias = ShuntNoAmp->bias();
-    sclr_coul_eff = rp.tweak_sclr_noamp;
-  }
-  else
-  {
-    Vshunt = 0.;
-    Ibatt_hdwe = 0.;
-    model_ibatt_bias = 0.;
-    sclr_coul_eff = 1.;
-  }
+    // Current signal selection, based on if there or not.
+    // Over-ride 'permanent' with Talk(rp.ibatt_sel_noamp) = Talk('s')
+    float model_ibatt_bias = 0.;
 
-  // Check for modeling
-  if ( rp.modeling )
-    Ibatt_model_in = model_ibatt_bias;
-  else
-    Ibatt_model_in = Ibatt_hdwe;
+    // Check for bare sensor
+    if ( !rp.ibatt_sel_noamp && !ShuntAmp->bare() )
+    {
+        Vshunt = ShuntAmp->vshunt();
+        Ibatt_hdwe = ShuntAmp->ishunt_cal();
+        model_ibatt_bias = ShuntAmp->bias();
+        sclr_coul_eff = rp.tweak_sclr_amp;
+    }
+    else if ( !ShuntNoAmp->bare() )
+    {
+        Vshunt = ShuntNoAmp->vshunt();
+        Ibatt_hdwe = ShuntNoAmp->ishunt_cal();
+        model_ibatt_bias = ShuntNoAmp->bias();
+        sclr_coul_eff = rp.tweak_sclr_noamp;
+    }
+    else
+    {
+        Vshunt = 0.;
+        Ibatt_hdwe = 0.;
+        model_ibatt_bias = 0.;
+        sclr_coul_eff = 1.;
+    }
+
+    // Check for modeling
+    if ( rp.modeling )
+        Ibatt_model_in = model_ibatt_bias;
+    else
+        Ibatt_model_in = Ibatt_hdwe;
 }
 
 // Filter temp
-void Sensors::temp_filter(const int reset_loc, const float t_rlim, const float tbatt_bias, float *tbatt_bias_last)
+void Sensors::temp_filter(const boolean reset_loc, const float t_rlim, const float tbatt_bias, float *tbatt_bias_last)
 {
-  // Rate limit the temperature bias, 2x so not to interact with rate limits in logic that also use t_rlim
-  if ( reset_loc ) *tbatt_bias_last = tbatt_bias;
-  float t_bias_loc = max(min(tbatt_bias,  *tbatt_bias_last + t_rlim*2.*T_temp),
-                                          *tbatt_bias_last - t_rlim*2.*T_temp);
-  *tbatt_bias_last = t_bias_loc;
+    // Rate limit the temperature bias, 2x so not to interact with rate limits in logic that also use t_rlim
+    if ( reset_loc ) *tbatt_bias_last = tbatt_bias;
+    float t_bias_loc = max(min(tbatt_bias,  *tbatt_bias_last + t_rlim*2.*T_temp),
+                                            *tbatt_bias_last - t_rlim*2.*T_temp);
+    *tbatt_bias_last = t_bias_loc;
 
-  // Filter and add rate limited bias
-  if ( reset_loc && Tbatt>40. )  // Bootup T=85.5 C
-  {
-    Tbatt_hdwe = RATED_TEMP + t_bias_loc;
-    Tbatt_hdwe_filt = TbattSenseFilt->calculate(RATED_TEMP, reset_loc,  min(T_temp, F_MAX_T_TEMP)) + t_bias_loc;
-  }
-  else
-  {
-    Tbatt_hdwe_filt = TbattSenseFilt->calculate(Tbatt_hdwe, reset_loc,  min(T_temp, F_MAX_T_TEMP)) + t_bias_loc;
-    Tbatt_hdwe += t_bias_loc;
-  }
+    // Filter and add rate limited bias
+    if ( reset_loc && Tbatt>40. )  // Bootup T=85.5 C
+    {
+        Tbatt_hdwe = RATED_TEMP + t_bias_loc;
+        Tbatt_hdwe_filt = TbattSenseFilt->calculate(RATED_TEMP, reset_loc,  min(T_temp, F_MAX_T_TEMP)) + t_bias_loc;
+    }
+    else
+    {
+        Tbatt_hdwe_filt = TbattSenseFilt->calculate(Tbatt_hdwe, reset_loc,  min(T_temp, F_MAX_T_TEMP)) + t_bias_loc;
+        Tbatt_hdwe += t_bias_loc;
+    }
 }
 
 // Filter temp
-void Sensors::temp_load_and_filter(Sensors *Sen, const int reset_loc, const float t_rlim, const float tbatt_bias,
+void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim, const float tbatt_bias,
     float *tbatt_bias_last)
 {
     SensorTbatt->load(Sen);
     temp_filter(reset_loc, T_RLIM, rp.tbatt_bias, tbatt_bias_last);
 }
 
+// Check analog voltage.  Latches
+void Sensors::vbatt_check(BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max)
+{
+    if ( reset ) Vbatt_fail_ = false;
+    Vbatt_fault_ = Vbatt_hdwe <= _Vbatt_min*Mon->nS() || Vbatt_hdwe >= _Vbatt_max*Mon->nS();
+    Vbatt_fail_ = Vbatt_fail_ || VbattHardFail->calculate(Vbatt_fault_, VBATT_HARD_SET, VBATT_HARD_RESET, T, reset);
+}
+
 // Load analog voltage
 void Sensors::vbatt_load(const byte vbatt_pin)
 {
-    if ( !rp.mod_vb() ) Vbatt_raw = analogRead(vbatt_pin);
+    Vbatt_raw = analogRead(vbatt_pin);
     Vbatt_hdwe =  float(Vbatt_raw)*vbatt_conv_gain + float(VBATT_A) + rp.vbatt_bias;
 }
 
 // Print analog voltage
 void Sensors::vbatt_print()
 {
-  Serial.printf("Vbatt_raw, rp.vbatt_bias, Vbatt_hdwe=, %d, %7.3f,  %7.3f,\n",
-    Vbatt_raw, rp.vbatt_bias, Vbatt_hdwe);
+  Serial.printf("reset, T, Vbatt_raw, rp.vbatt_bias, Vbatt_hdwe, Vbatt_fault, Vbatt_fail=, %d, %7.3f, %d, %7.3f,  %7.3f, %d, %d,\n",
+    reset, T, Vbatt_raw, rp.vbatt_bias, Vbatt_hdwe, Vbatt_fault_, Vbatt_fail_);
 }

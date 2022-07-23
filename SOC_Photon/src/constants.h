@@ -88,6 +88,20 @@
 #define TWEAK_GAIN            0.66      // Tweak change limit gain to make soft landing (0.66)
 #define TT_WAIT               10.       // Before tweak test print wait, s (10)
 #define TT_TAIL               60.       // After tweak test print wait, s (60)
+#define SOC_DISAGREE_THRESH   0.1       // Signal selection threshold for Coulomb counter EKF disagree test (0.1)
+#define TAU_ERR_FILT          5.        // Current sensor difference filter time constant, s (5.)
+#define MAX_ERR_FILT          10.       // Current sensor difference Filter maximum windup, A (10.)
+#define MAX_ERR_T             10.       // Maximum update time allowed to avoid instability, s (10.)
+#define IBATT_DISAGREE_THRESH 5.        // Signal selection threshold for current disagree test, A (5.)
+#define IBATT_DISAGREE_SET    20.       // Signal selection current disagree fail persistence, s (20.)
+#define IBATT_DISAGREE_RESET  1.        // Signal selection current disagree reset persistence, s (1.)
+#define IBATT_HARD_SET        1.        // Signal selection volt range fail persistence, s (1.)
+#define IBATT_HARD_RESET      1.        // Signal selection volt range fail reset persistence, s (1.)
+#define VBATT_MAX             17.       // Signal selection hard fault threshold, V (17. < vbatt_conv_gain*4095)
+#define VBATT_MIN             9.        // Signal selection hard fault threshold, V (0.  < 9. < 10 bms shutoff)
+#define VBATT_HARD_SET        1.        // Signal selection volt range fail persistence, s (1.)
+#define VBATT_HARD_RESET      1.        // Signal selection volt range fail reset persistence, s (1.)
+
 
 // Conversion gains
 const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  
