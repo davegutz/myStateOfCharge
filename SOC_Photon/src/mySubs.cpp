@@ -292,24 +292,13 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   cp.model_saturated = Sen->Sim->saturated();
 
   // Use model instead of sensors when running tests as user
-  // Over-ride sensed Ib, Vb and Tb with model when running tests
-  // Inputs:  rp.modeling, Sen->Ibatt_model, Sen->Ibatt_hdwe, Sen->Vbatt_model, Sen->Vbatt_hdwe,
-  //          Sen->Tbatt_hdwe, Sen->Tbatt_hdwe_filt
-  // Outputs: Sen->Ibatt, Sen->Vbatt, Sen->Tbatt, Sen->Tbatt_filt
-  if ( rp.mod_ib() )  Sen->Ibatt = Sen->Ibatt_model;
-  else Sen->Ibatt = Sen->Ibatt_hdwe;
-  if ( rp.mod_vb() )  Sen->Vbatt = Sen->Vbatt_model;
-  else Sen->Vbatt = Sen->Vbatt_hdwe;
-  if ( rp.mod_tb() )
-  {
-    Sen->Tbatt = RATED_TEMP;
-    Sen->Tbatt_filt = Sen->Tbatt;
-  }
-  else
-  {
-    Sen->Tbatt = Sen->Tbatt_hdwe;
-    Sen->Tbatt_filt = Sen->Tbatt_hdwe_filt;
-  }
+  // Inputs:  Sen->Ibatt_model, Sen->Ibatt_hdwe,
+  //          Sen->Vbatt_model, Sen->Vbatt_hdwe,
+  //          ----------------, Sen->Tbatt_hdwe, Sen->Tbatt_hdwe_filt
+  // Outputs: Ibatt,
+  //          Vbatt,
+  //          Tbatt, Tbatt_filt
+  Sen->select_all();
 
   // Charge calculation and memory store
   // Inputs: Sim.model_saturated, Sen->Tbatt, Sen->Ibatt, and Sim.soc
@@ -341,9 +330,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   }
   // Perform the calculation of injection signals 
   rp.inj_bias = Sen->Sim->calc_inj(Sen->elapsed_inj, rp.type, rp.amp, rp.freq);
-
 }
-
 
 /*
   Special handler that uses built-in callback.

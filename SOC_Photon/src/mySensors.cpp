@@ -138,42 +138,69 @@ void Shunt::load()
 
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, Sync *ReadSensors):
-    Ibatt_amp_fail_(false), Ibatt_noamp_fail_(false), Vbatt_fail_(false), Vbatt_fault_(false)
+  Ibatt_amp_fail_(false), Ibatt_noamp_fail_(false), Vbatt_fail_(false), Vbatt_fault_(false)
 {
-    this->T = T;
-    this->T_filt = T;
-    this->T_temp = T_temp;
-    this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_cinf_amp, &rp.delta_q_dinf_amp, &rp.tweak_sclr_amp, &cp.ibatt_bias_amp,
-        shunt_amp_v2a_s);
-    if ( rp.debug>102 )
-    {
-        Serial.printf("New Shunt('Amp'):\n");
-        this->ShuntAmp->pretty_print();
-    }
-    this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_cinf_noamp, &rp.delta_q_dinf_noamp, &rp.tweak_sclr_noamp,
-        &cp.ibatt_bias_noamp, shunt_noamp_v2a_s);
-    if ( rp.debug>102 )
-    {
-        Serial.printf("New Shunt('No Amp'):\n");
-        this->ShuntNoAmp->pretty_print();
-    }
-    this->SensorTbatt = new TempSensor(pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
-    this->TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
-    this->Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS, &rp.sim_mod);
-    this->IbattErrFilt = new LagTustin(0.1, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
-    this->IbattErrFail = new TFDelay();
-    this->IbattAmpHardFail  = new TFDelay();
-    this->IbattNoAmpHardFail  = new TFDelay();
-    this->VbattHardFail  = new TFDelay();
-    this->elapsed_inj = 0UL;
-    this->start_inj = 0UL;
-    this->stop_inj = 0UL;
-    this->end_inj = 0UL;
-    this->cycles_inj = 0.;
-    this->PublishSerial = PublishSerial;
-    this->ReadSensors = ReadSensors;
-    this->display = true;
-    this->sclr_coul_eff = 1.;
+  this->T = T;
+  this->T_filt = T;
+  this->T_temp = T_temp;
+  this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_cinf_amp, &rp.delta_q_dinf_amp, &rp.tweak_sclr_amp, &cp.ibatt_bias_amp,
+      shunt_amp_v2a_s);
+  if ( rp.debug>102 )
+  {
+      Serial.printf("New Shunt('Amp'):\n");
+      this->ShuntAmp->pretty_print();
+  }
+  this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_cinf_noamp, &rp.delta_q_dinf_noamp, &rp.tweak_sclr_noamp,
+      &cp.ibatt_bias_noamp, shunt_noamp_v2a_s);
+  if ( rp.debug>102 )
+  {
+      Serial.printf("New Shunt('No Amp'):\n");
+      this->ShuntNoAmp->pretty_print();
+  }
+  this->SensorTbatt = new TempSensor(pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
+  this->TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
+  this->Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS, &rp.sim_mod);
+  this->IbattErrFilt = new LagTustin(0.1, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
+  this->IbattErrFail = new TFDelay();
+  this->IbattAmpHardFail  = new TFDelay();
+  this->IbattNoAmpHardFail  = new TFDelay();
+  this->VbattHardFail  = new TFDelay();
+  this->elapsed_inj = 0UL;
+  this->start_inj = 0UL;
+  this->stop_inj = 0UL;
+  this->end_inj = 0UL;
+  this->cycles_inj = 0.;
+  this->PublishSerial = PublishSerial;
+  this->ReadSensors = ReadSensors;
+  this->display = true;
+  this->sclr_coul_eff = 1.;
+}
+
+// Final choices
+// Use model instead of sensors when running tests as user
+// Over-ride sensed Ib, Vb and Tb with model when running tests
+// Inputs:  Sen->Ibatt_model, Sen->Ibatt_hdwe,
+//          Sen->Vbatt_model, Sen->Vbatt_hdwe,
+//          ----------------, Sen->Tbatt_hdwe, Sen->Tbatt_hdwe_filt
+// Outputs: Ibatt,
+//          Vbatt,
+//          Tbatt, Tbatt_filt
+void Sensors::select_all(void)
+{
+  if ( rp.mod_ib() )  Ibatt = Ibatt_model;
+  else Ibatt = Ibatt_hdwe;
+  if ( rp.mod_vb() )  Vbatt = Vbatt_model;
+  else Vbatt = Vbatt_hdwe;
+  if ( rp.mod_tb() )
+  {
+    Tbatt = RATED_TEMP;
+    Tbatt_filt = Tbatt;
+  }
+  else
+  {
+    Tbatt = Tbatt_hdwe;
+    Tbatt_filt = Tbatt_hdwe_filt;
+  }
 }
 
 // Current bias.  Feeds into signal conversion
