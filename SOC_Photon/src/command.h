@@ -27,8 +27,6 @@
 #include "myCloud.h"
 
 // Definition of structure for external control coordination
-// Default values below are important:  they determine behavior
-// after a reset.   Also prevent junk behavior on initial build.
 struct PublishPars
 {
   Publish pubList;          // Publish object

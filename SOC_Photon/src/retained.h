@@ -31,6 +31,8 @@
 // Definition of structure to be saved in SRAM
 // Default values below are important:  they prevent junk
 // behavior on initial build.
+// Don't put anything in here that you can't live with normal running
+// because could get set by testing and forgotten.  Not reset by hard reset
 // ********CAUTION:  any special includes or logic in here breaks retained function
 struct RetainedPars
 {
@@ -42,7 +44,7 @@ struct RetainedPars
   float ibatt_bias_amp = CURR_BIAS_AMP;     // Calibration of amplified shunt sensor, A
   float ibatt_bias_noamp = CURR_BIAS_NOAMP; // Calibration of non-amplified shunt sensor, A
   float ibatt_bias_all = CURR_BIAS_ALL;     // Bias on all shunt sensors, A
-  boolean ibatt_sel_noamp = false;          // Use non-amplified sensor
+  boolean ibatt_sel_noamp = false;          // Force non-amplified sensor (amplified sensor is default)
   float vbatt_bias = VOLT_BIAS; // Calibrate Vbatt, V
   uint8_t modeling = 0;         // Driving saturation calculation with model.  Bits specify which signals use model
   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
