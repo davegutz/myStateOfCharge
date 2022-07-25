@@ -139,9 +139,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             if ( FP_in<1.1 )  // Apply crude limit to prevent user error
             {
               Mon->apply_soc(FP_in, Sen->Tbatt_filt);
-              Sen->Sim->apply_delta_q_t(true, Mon->delta_q(), Sen->Tbatt_filt);
+              Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
               Serial.printf("soc=%7.3f, modeling = %d, delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f, soc_ekf=%8.4f, delta_q_ekf=%7.3f,\n",
-                  Mon->soc(), rp.modeling, rp.delta_q, Sen->Sim->soc(), rp.delta_q_model, Mon->soc_ekf(), Mon->delta_q_ekf());
+                  Mon->soc(), rp.modeling, Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf());
               cp.cmd_reset();
             }
             else
@@ -154,7 +154,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
               Sen->Sim->apply_soc(FP_in, Sen->Tbatt_filt);
               Serial.printf("soc=%8.4f,   delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f,\n",
-                  Mon->soc(), rp.delta_q, Sen->Sim->soc(), rp.delta_q_model);
+                  Mon->soc(), Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q());
               cp.cmd_reset();
             }
             else
@@ -493,10 +493,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'x' ):  // Px: shunt measure
-            Serial.printf("\nAmp:   "); Serial.printf("Vshunt_int, Vshunt, cp.ibatt_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
-              Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), cp.ibatt_bias_amp, Sen->ShuntAmp->ishunt_cal());
-            Serial.printf("No Amp:"); Serial.printf("Vshunt_int, Vshunt, cp.ibatt_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
-              Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), cp.ibatt_bias_noamp, Sen->ShuntNoAmp->ishunt_cal());
+            Serial.printf("\nAmp:   "); Serial.printf("Vshunt_int, Vshunt, cp.ibatt_tot_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
+              Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), cp.ibatt_tot_bias_amp, Sen->ShuntAmp->ishunt_cal());
+            Serial.printf("No Amp:"); Serial.printf("Vshunt_int, Vshunt, cp.ibatt_tot_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
+              Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), cp.ibatt_tot_bias_noamp, Sen->ShuntNoAmp->ishunt_cal());
             Serial.printf("Selected:  NoAmp,Ibatt=,  %d, %7.3f\n", rp.ibatt_sel_noamp, Sen->Ibatt);
             break;
 
@@ -527,7 +527,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
         {
           case ( 'e' ):  // Re:  equalize
             Serial.printf("Equalizing counters\n");
-            Sen->Sim->apply_delta_q_t(true, Mon->delta_q(), Sen->Tbatt_filt);
+            Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
             break;
 
           case ( 'h' ):  // Rh:  hys

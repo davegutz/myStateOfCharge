@@ -94,8 +94,8 @@ extern PublishPars pp;            // For publishing
 
 // Global locals
 retained RetainedPars rp;             // Various control parameters static at system level
-retained CommandPars cp = CommandPars(); // Various control parameters commanding at system level
 retained Sum_st mySum[NSUM];          // Summaries
+CommandPars cp = CommandPars();       // Various control parameters commanding at system level.   Forces reinit
 PublishPars pp = PublishPars();       // Common for publishing
 unsigned long millis_flip = millis(); // Timekeeping
 unsigned long last_sync = millis();   // Timekeeping
@@ -183,7 +183,7 @@ void setup()
   if ( rp.is_corrupt() ) 
   {
     rp.nominal();
-    Serial.printf("\n****MSG(setup): Forced nom SRAM *** %s\n", cp.buffer);
+    Serial.printf("\n****MSG(setup): Corrupt SRAM- force nom *** %s\n", cp.buffer);
   }
 
   #ifdef PHOTON
@@ -237,23 +237,40 @@ void loop()
   // Synchronization
   boolean publishP;                           // Particle publish, T/F
   static Sync *PublishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
+
   boolean publishB;                           // Particle publish, T/F
   static Sync *PublishBlynk = new Sync(PUBLISH_BLYNK_DELAY);
+
   boolean read;                               // Read, T/F
   static Sync *ReadSensors = new Sync(READ_DELAY);
+
   boolean read_temp;                          // Read temp, T/F
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
+
   boolean publishS;                           // Serial print, T/F
   static Sync *PublishSerial = new Sync(PUBLISH_SERIAL_DELAY);
+
   boolean display_to_user;                    // User display, T/F
   static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
+
   boolean summarizing;                        // Summarize, T/F
   static boolean boot_wait = true;  // waiting for a while before summarizing
   static Sync *Summarize = new Sync(SUMMARIZE_DELAY);
+
   boolean control;                            // Summarize, T/F
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
+
   static uint8_t last_read_debug = 0;         // Remember first time with new debug to print headers
   static uint8_t last_publishS_debug = 0;     // Remember first time with new debug to print headers
+
+  unsigned long current_time;                 // Time result
+  static unsigned long now = millis();        // Keep track of time
+  time32_t time_now;                          // Keep track of time
+  static unsigned long start = millis();      // Keep track of time
+  unsigned long elapsed = 0;                  // Keep track of time
+  static boolean reset = true;                // Dynamic reset
+  static boolean reset_temp = true;           // Dynamic reset
+  static boolean reset_publish = true;        // Dynamic reset
  
   // Sensor conversions
   static Sensors *Sen = new Sensors(0, 0, myPins->pin_1_wire, PublishSerial, ReadSensors); // Manage sensor data
@@ -265,14 +282,6 @@ void loop()
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay();   // Time persistence
 
-  unsigned long current_time;               // Time result
-  static unsigned long now = millis();      // Keep track of time
-  time32_t time_now;                        // Keep track of time
-  static unsigned long start = millis();    // Keep track of time
-  unsigned long elapsed = 0;                // Keep track of time
-  static boolean reset = true;              // Dynamic reset
-  static boolean reset_temp = true;         // Dynamic reset
-  static boolean reset_publish = true;      // Dynamic reset
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
@@ -296,7 +305,7 @@ void loop()
     }
   #endif
 
-  // Keep time
+  // Synchronize
   now = millis();
   time_now = Time.now();
   sync_time(now, &last_sync, &millis_flip);      // Refresh time synchronization
@@ -304,10 +313,10 @@ void loop()
   Sen->control_time = decimalTime(&current_time, tempStr, now, millis_flip);
   hm_string = String(tempStr);
   read_temp = ReadTemp->update(millis(), reset);              //  now || reset
-  read = ReadSensors->update(millis(), reset);               //  now || reset
+  read = ReadSensors->update(millis(), reset);                //  now || reset
   elapsed = ReadSensors->now() - start;
-  control = ControlSync->update(millis(), reset);               //  now || reset
-  display_to_user = DisplayUserSync->update(millis(), reset);  //  now || reset
+  control = ControlSync->update(millis(), reset);             //  now || reset
+  display_to_user = DisplayUserSync->update(millis(), reset); //  now || reset
   publishP = PublishParticle->update(millis(), false);        //  now || false
   publishB = PublishBlynk->update(millis(), false);           //  now || false
   publishS = PublishSerial->update(millis(), reset_publish);  //  now || reset_publish
@@ -321,6 +330,7 @@ void loop()
   if ( read_temp )
   {
     Sen->T_temp =  ReadTemp->updateTime();
+    // TODO:   rp.tbatt_bias and tbatt_bias_last into Sen class
     Sen->temp_load_and_filter(Sen, reset_temp, T_RLIM, rp.tbatt_bias, &tbatt_bias_last);
   }
 
@@ -352,6 +362,7 @@ void loop()
     if ( rp.modeling && reset && Sen->Sim->q()<=0. ) Sen->Ibatt = 0.;
 
     // Debug for read
+    // TODO:  debug_main() into debug.cpp.  Move create_print_string, tweak_print, print_serial_header and print_serial_sim_header to debug.cpp 
     if ( rp.debug==-1 ) debug_m1(Mon, Sen); // General purpose Arduino
     if ( rp.debug==12 ) debug_12(Mon, Sen);  // EKF
     if ( rp.debug==-12 ) debug_m12(Mon, Sen);  // EKF Arduino
@@ -394,6 +405,7 @@ void loop()
   // Publish to Particle cloud if desired (different than Blynk)
   // Visit https://console.particle.io/events.   Click on "view events on a terminal"
   // to get a curl command to run
+  // TODO:  publish_main(publishP, reset_publish, publishS) in myCloud
   if ( publishP || publishS)
   {
     assign_publist(&pp.pubList, PublishParticle->now(), unit, hm_string, Sen, num_timeouts, Mon);
@@ -468,6 +480,7 @@ void loop()
 } // loop
 
 
+// TODO:  move to myCloud.cpp
 #ifdef USE_BLYNK
   // Publish1 Blynk
   void publish1(void)

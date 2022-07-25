@@ -161,10 +161,10 @@ public:
   // operators
   // functions
   virtual void assign_rand(void) { Serial.printf("ERROR:  Battery::assign_rand called\n"); };
-  double calc_soc_voc(const double soc, const double temp_c, double *dv_dsoc);
-  double calc_soc_voc_slope(double soc, double temp_c);
+  double calc_soc_voc(const double soc, const float temp_c, double *dv_dsoc);
+  double calc_soc_voc_slope(double soc, float temp_c);
   double calc_vsat(void);
-  virtual double calculate(const double temp_C, const double soc_frac, double curr_in, const double dt, const boolean dc_dc_on);
+  virtual double calculate(const float temp_C, const double soc_frac, double curr_in, const double dt, const boolean dc_dc_on);
   String decode(const uint8_t mod);
   void Dv(const double dv) { dv_ = dv; };
   double dv_dsoc() { return (dv_dsoc_); };
@@ -186,10 +186,10 @@ public:
   double voc() { return (voc_); };
   double Voc() { return (voc_*(*rp_nS_)); };
   double Voc_stat() { return (voc_stat_*(*rp_nS_)); };
-  double voc_soc(const double soc, const double temp_c);
+  double voc_soc(const double soc, const float temp_c);
   void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -chem_.r_0*sr_); };
   double Sr() { return (sr_); };
-  double temp_c() { return (temp_c_); };    // Battery temperature, deg C
+  float temp_c() { return (temp_c_); };    // Battery temperature, deg C
   double Tb() { return (temp_c_); };        // Battery bank temperature, deg C
   double vb() { return (vb_); };            // Battery terminal voltage, V
   double Vb() { return (vb_*(*rp_nS_)); };  // Battery bank voltage, V
@@ -216,7 +216,7 @@ protected:
   double *rand_B_;  // Randles model B
   double *rand_C_;  // Randles model C
   double *rand_D_;  // Randles model D
-  double temp_c_;   // Battery temperature, deg C
+  float temp_c_;   // Battery temperature, deg C
   boolean bms_off_; // Indicator that battery management system is off, T = off preventing current flow
   TableInterp2D *voc_T_;   // SOC-VOC 2-D table, V
   Hysteresis *hys_;
@@ -251,7 +251,7 @@ public:
   boolean is_sat(void);
   double K_ekf() { return (K_); };
   void pretty_print(void);
-  void regauge(const double temp_c);
+  void regauge(const float temp_c);
   void select();
   double soc_ekf() { return (soc_ekf_); };
   double soc_wt() { return soc_wt_; };
@@ -296,7 +296,9 @@ public:
   virtual void assign_rand(void);
   double calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset);
   float calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq);
-  double count_coulombs(Sensors *Sen, const boolean reset, const double t_last, BatteryMonitor *Mon);
+  double count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon);
+  double delta_q() { return *rp_delta_q_; };
+  float t_last() { return *rp_t_last_; };
   void load();
   void pretty_print(void);
   boolean cutback() { return model_cutback_; };

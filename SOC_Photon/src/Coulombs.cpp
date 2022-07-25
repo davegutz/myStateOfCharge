@@ -272,18 +272,24 @@ void Coulombs::apply_delta_q(const double delta_q)
 }
 
 // Memory set, adjust book-keeping as needed.  q_cap_ etc presesrved
-void Coulombs::apply_delta_q_t(const boolean reset, const double delta_q, const double temp_c)
+void Coulombs::apply_delta_q_t(const boolean reset)
 {
   if ( !reset ) return;
-  *rp_delta_q_ = delta_q;
-  q_capacity_ = calculate_capacity(temp_c);
+  q_capacity_ = calculate_capacity(*rp_t_last_);
   q_ = q_capacity_ + *rp_delta_q_;
   soc_ = q_ / q_capacity_;
   resetting_ = true;
 }
+void Coulombs::apply_delta_q_t(const double delta_q, const float temp_c)
+{
+  *rp_delta_q_ = delta_q;
+  *rp_t_last_ = temp_c;
+  apply_delta_q_t(true);
+}
+
 
 // Memory set, adjust book-keeping as needed.  delta_q preserved
-void Coulombs::apply_soc(const double soc, const double temp_c)
+void Coulombs::apply_soc(const double soc, const float temp_c)
 {
   soc_ = soc;
   q_capacity_ = calculate_capacity(temp_c);
@@ -293,7 +299,7 @@ void Coulombs::apply_soc(const double soc, const double temp_c)
 }
 
 // Capacity
-double Coulombs::calculate_capacity(const double temp_c)
+double Coulombs::calculate_capacity(const float temp_c)
 {
   return( q_cap_rated_scaled_ * (1-chem_.dqdt*(temp_c - t_rated_)) );
 }
@@ -316,16 +322,12 @@ Outputs:
   soc_min_        Estimated soc where battery BMS will shutoff current, fraction
   q_min_          Estimated charge at low voltage shutdown, C\
 */
-double Coulombs::count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
-  const boolean sat, const double t_last, const double sclr_coul_eff, const double delta_q_ekf)
+double Coulombs::count_coulombs(const double dt, const boolean reset, const float temp_c, const double charge_curr,
+  const boolean sat, const double sclr_coul_eff, const double delta_q_ekf)
 {
     // Rate limit temperature
-    double temp_lim = max(min( temp_c, t_last + t_rlim_*dt), t_last - t_rlim_*dt);
-    if ( reset )
-    {
-      temp_lim = temp_c;
-      *rp_t_last_ = temp_c;
-    }
+    if ( reset ) *rp_t_last_ = temp_c;
+    double temp_lim = max(min( temp_c, *rp_t_last_ + t_rlim_*dt), *rp_t_last_ - t_rlim_*dt);
 
     // State change
     double d_delta_q = charge_curr * dt;

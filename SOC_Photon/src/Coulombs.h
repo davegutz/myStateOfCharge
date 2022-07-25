@@ -90,15 +90,15 @@ public:
   void apply_cap_scale(const double scale);
   void apply_delta_q(const double delta_q);
   void apply_resetting(const boolean resetting){ resetting_ = resetting; };
-  void apply_soc(const double soc, const double temp_c);
-  void apply_delta_q_t(const boolean reset, const double delta_q, const double temp_c);
-  void apply_delta_q_t(const double delta_q, const double temp_c);
+  void apply_soc(const double soc, const float temp_c);
+  void apply_delta_q_t(const boolean reset);
+  void apply_delta_q_t(const double delta_q, const float temp_c);
   void assign_mod(const String mod_str) { chem_.assign_mod(mod_str); };
-  double calculate_capacity(const double temp_c);
+  double calculate_capacity(const float temp_c);
   double coul_eff() { return ( coul_eff_ ); };
   void coul_eff(const double coul_eff) { coul_eff_ = coul_eff; };
-  virtual double count_coulombs(const double dt, const boolean reset, const double temp_c, const double charge_curr,
-    const boolean sat, const double t_last, const double sclr_coul_eff, const double delta_q_ekf);
+  virtual double count_coulombs(const double dt, const boolean reset, const float temp_c, const double charge_curr,
+    const boolean sat, const double sclr_coul_eff, const double delta_q_ekf);
   double delta_q() { return(*rp_delta_q_); };
   uint8_t mod_code() { return (*chem_.rp_mod_code); };
   virtual void pretty_print();

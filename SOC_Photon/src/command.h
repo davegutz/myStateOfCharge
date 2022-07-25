@@ -47,8 +47,8 @@ struct CommandPars
   boolean model_saturated;  // Sim on cutback and saturated
   boolean soft_reset;       // Use talk to reset main
   boolean write_summary;    // Use talk to issue a write command to summary
-  float ibatt_bias_amp;     // Calibration of amplified shunt sensor, A
-  float ibatt_bias_noamp;   // Calibration of non-amplified shunt sensor, A
+  float ibatt_tot_bias_amp; // Runtime bias of amplified shunt sensor, A
+  float ibatt_tot_bias_noamp; // Runtime bias of non-amplified shunt sensor, A
   boolean dc_dc_on;         // DC-DC charger is on
   boolean blynking;         // Using Serial1 for Blynk.  Turn off normal Serial1 monitoring and echo
   CommandPars(void)
@@ -59,8 +59,8 @@ struct CommandPars
     this->model_saturated = false;
     this->soft_reset = false;
     this->write_summary = false;
-    ibatt_bias_amp = 0.;
-    ibatt_bias_noamp = 0.;
+    ibatt_tot_bias_amp = 0.;
+    ibatt_tot_bias_noamp = 0.;
     dc_dc_on = false;
     blynking = false;
   }
@@ -83,15 +83,15 @@ struct CommandPars
   void pretty_print(void)
   {
     Serial.printf("command parameters(cp):\n");
-    Serial.printf("  enable_wifi =            %d;\n", this->enable_wifi);
-    Serial.printf("  model_cutback =          %d;\n", this->model_cutback);
-    Serial.printf("  model_saturated =        %d;\n", this->model_saturated);
-    Serial.printf("  soft_reset =             %d;\n", this->soft_reset);
-    Serial.printf("  write_summary =          %d;\n", this->write_summary);
-    Serial.printf("  ibatt_bias_amp =   %7.3f;\n", this->ibatt_bias_amp);
-    Serial.printf("  ibatt_bias_noamp = %7.3f;\n", this->ibatt_bias_noamp);
-    Serial.printf("  dc_dc_on =               %d;\n", this->dc_dc_on);
-    Serial.printf("  blynking =               %d;\n", this->blynking);
+    Serial.printf("  enable_wifi =                %d;\n", this->enable_wifi);
+    Serial.printf("  model_cutback =              %d;\n", this->model_cutback);
+    Serial.printf("  model_saturated =            %d;\n", this->model_saturated);
+    Serial.printf("  soft_reset =                 %d;\n", this->soft_reset);
+    Serial.printf("  write_summary =              %d;\n", this->write_summary);
+    Serial.printf("  ibatt_tot_bias_amp =   %7.3f;\n", this->ibatt_tot_bias_amp);
+    Serial.printf("  ibatt_tot_bias_noamp = %7.3f;\n", this->ibatt_tot_bias_noamp);
+    Serial.printf("  dc_dc_on =                   %d;\n", this->dc_dc_on);
+    Serial.printf("  blynking =                   %d;\n", this->blynking);
   }
 };            
 

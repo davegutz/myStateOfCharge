@@ -184,7 +184,7 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
 
   // Initialize charge state if temperature initial condition changed
   // Needed here in this location to have a value for Sen->Tbatt_filt
-  Mon->apply_delta_q_t(reset_temp, rp.delta_q, rp.t_last);  // From memory
+  Mon->apply_delta_q_t(reset_temp);  // From memory
   Mon->init_battery(reset_temp, Sen);
   Mon->solve_ekf(reset_temp, Sen);
 
@@ -197,8 +197,8 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
 
   // Memory store // TODO:  simplify arg list here.  Unpack Sen inside count_coulombs
   // Initialize to ekf when not saturated
-  Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ibatt, Sen->saturated, rp.t_last,
-    Sen->sclr_coul_eff, Mon->delta_q_ekf());
+  Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ibatt, Sen->saturated, Sen->sclr_coul_eff,
+    Mon->delta_q_ekf());
 
   // Charge time for display
   Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ibatt, Mon->soc());
@@ -278,7 +278,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   if ( rp.debug==-7 ) debug_m7(Mon, Sen);
 
   // Sim initialize as needed from memory
-  Sen->Sim->apply_delta_q_t(reset, rp.delta_q_model, rp.t_last_model);
+  Sen->Sim->apply_delta_q_t(reset);
   Sen->Sim->init_battery(reset, Sen);
 
   // Sim calculation
@@ -292,18 +292,17 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   cp.model_saturated = Sen->Sim->saturated();
 
   // Use model instead of sensors when running tests as user
-  // Inputs:  Sen->Ibatt_model, Sen->Ibatt_hdwe,
-  //          Sen->Vbatt_model, Sen->Vbatt_hdwe,
-  //          ----------------, Sen->Tbatt_hdwe, Sen->Tbatt_hdwe_filt
-  // Outputs: Ibatt,
-  //          Vbatt,
-  //          Tbatt, Tbatt_filt
+  //  Inputs:                                             --->   Outputs:
+  // TODO:  control parameter list here...
+  //  Ibatt_model, Ibatt_hdwe,                            --->   Ibatt
+  //  Vbatt_model, Vbatt_hdwe,                            --->   Vbatt
+  //  constant,         Tbatt_hdwe, Tbatt_hdwe_filt       --->   Tbatt, Tbatt_filt
   Sen->select_all();
 
   // Charge calculation and memory store
   // Inputs: Sim.model_saturated, Sen->Tbatt, Sen->Ibatt, and Sim.soc
   // Outputs: Sim.soc
-  Sen->Sim->count_coulombs(Sen, reset_temp, rp.t_last_model, Mon);
+  Sen->Sim->count_coulombs(Sen, reset_temp, Mon);
 
   // Injection tweak test
   if ( (Sen->start_inj <= Sen->now) && (Sen->now <= Sen->end_inj) ) // in range, test in progress

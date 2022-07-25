@@ -143,15 +143,15 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
   this->T = T;
   this->T_filt = T;
   this->T_temp = T_temp;
-  this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_cinf_amp, &rp.delta_q_dinf_amp, &rp.tweak_sclr_amp, &cp.ibatt_bias_amp,
-      shunt_amp_v2a_s);
+  this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_cinf_amp, &rp.delta_q_dinf_amp, &rp.tweak_sclr_amp,
+    &cp.ibatt_tot_bias_amp, shunt_amp_v2a_s);
   if ( rp.debug>102 )
   {
       Serial.printf("New Shunt('Amp'):\n");
       this->ShuntAmp->pretty_print();
   }
   this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_cinf_noamp, &rp.delta_q_dinf_noamp, &rp.tweak_sclr_noamp,
-      &cp.ibatt_bias_noamp, shunt_noamp_v2a_s);
+    &cp.ibatt_tot_bias_noamp, shunt_noamp_v2a_s);
   if ( rp.debug>102 )
   {
       Serial.printf("New Shunt('No Amp'):\n");
@@ -189,8 +189,10 @@ void Sensors::select_all(void)
 {
   if ( rp.mod_ib() )  Ibatt = Ibatt_model;
   else Ibatt = Ibatt_hdwe;
+
   if ( rp.mod_vb() )  Vbatt = Vbatt_model;
   else Vbatt = Vbatt_hdwe;
+  
   if ( rp.mod_tb() )
   {
     Tbatt = RATED_TEMP;

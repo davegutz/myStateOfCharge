@@ -44,7 +44,7 @@ Battery::Battery(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_n
     // Battery characteristic tables
     voc_T_ = new TableInterp2D(chem_.n_s, chem_.m_t, chem_.x_soc, chem_.y_t, chem_.t_voc);
     dv_ = chem_.dv;
-    nom_vsat_   = chem_.v_sat - HDB_VBATT;   // TODO:  ??
+    nom_vsat_   = chem_.v_sat - HDB_VBATT;   // Center in hysteresis
     hys_ = new Hysteresis(chem_.hys_cap, chem_);
 }
 Battery::~Battery() {}
@@ -53,7 +53,7 @@ Battery::~Battery() {}
 
 // Placeholder; not used.  May write this base version if needed using BatteryModel::calculate()
 // as a starting point but use the base class Randles formulation and re-arrange the i/o for that model.
-double Battery::calculate(const double temp_C, const double q, const double curr_in, const double dt,
+double Battery::calculate(const float temp_C, const double q, const double curr_in, const double dt,
     const boolean dc_dc_on) { return 0.;}
 
 /* calc_soc_voc:  VOC-OCV model
@@ -65,7 +65,7 @@ double Battery::calculate(const double temp_C, const double q, const double curr
         dv_dsoc     Derivative scaled, V/fraction
         voc_stat    Static model open circuit voltage from table (reference), V
 */
-double Battery::calc_soc_voc(const double soc, const double temp_c, double *dv_dsoc)
+double Battery::calc_soc_voc(const double soc, const float temp_c, double *dv_dsoc)
 {
     double voc_stat;  // return value
     *dv_dsoc = calc_soc_voc_slope(soc, temp_c);
@@ -80,7 +80,7 @@ double Battery::calc_soc_voc(const double soc, const double temp_c, double *dv_d
     OUTPUTS:
         dv_dsoc     Derivative scaled, V/fraction
 */
-double Battery::calc_soc_voc_slope(const double soc, const double temp_c)
+double Battery::calc_soc_voc_slope(const double soc, const float temp_c)
 {
     double dv_dsoc;  // return value
     if ( soc > 0.5 )
@@ -160,7 +160,7 @@ void Battery::pretty_print_ss(void)
 }
 
 // EKF model for update
-double Battery::voc_soc(const double soc, const double temp_c)
+double Battery::voc_soc(const double soc, const float temp_c)
 {
     double voc_stat;     // return value
     double dv_dsoc;
@@ -277,7 +277,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
 
     // Dynamic emf
     vb_ = Sen->Vbatt / (*rp_nS_);
-    ib_ = Sen->Ibatt / (*rp_nP_);  // TODO:   same logic should be in BatteryModel::count_coulombs ??
+    ib_ = Sen->Ibatt / (*rp_nP_);
     ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
     double u[2] = {ib_, vb_};
     Randles_->calc_x_dot(u);
@@ -451,7 +451,7 @@ void BatteryMonitor::pretty_print(void)
 }
 
 // Reset Coulomb Counter to EKF under restricted conditions especially new boot no history of saturation
-void BatteryMonitor::regauge(const double temp_c)
+void BatteryMonitor::regauge(const float temp_c)
 {
     if ( converged_ekf() && abs(soc_ekf_-soc_)>DF2 )
     {
@@ -631,7 +631,7 @@ void BatteryModel::assign_rand(void)
 */
 double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset)
 {
-    const double temp_C = Sen->Tbatt_filt;
+    temp_c_ = Sen->Tbatt_filt;
     double curr_in = Sen->Ibatt_model_in;
     const double dt = min(Sen->T, F_MAX_T);
     ib_in_ = curr_in;
@@ -639,13 +639,12 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boole
     ib_ = max(min(ib_fut_, 10000.), -10000.);  //  Past value ib_.  Overflow protection when ib_ past value used
 
     dt_ = dt;
-    temp_c_ = temp_C;
     vsat_ = calc_vsat();
 
     double soc_lim = max(min(soc_, 1.0), 0.0);
 
     // VOC-OCV model
-    voc_stat_ = calc_soc_voc(soc_, temp_C, &dv_dsoc_);
+    voc_stat_ = calc_soc_voc(soc_, temp_c_, &dv_dsoc_);
     voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, vsat_*1.2);  // slightly beyond but don't windup
     bms_off_ = ( temp_c_ <= chem_.low_t ) || ( voc_stat_ < chem_.low_voc );
     if ( bms_off_ ) ib_in_ = 0.;
@@ -687,20 +686,20 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boole
     model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
 
-    if ( rp.debug==75 ) Serial.printf("BatteryModel::calculate: temp_C, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
-        temp_C, soc_, voc_stat_, chem_.low_voc);
+    if ( rp.debug==75 ) Serial.printf("BatteryModel::calculate: temp_c_, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
+        temp_c_, soc_, voc_stat_, chem_.low_voc);
 
-    if ( rp.debug==79 ) Serial.printf("temp_C, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib_fut, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f, %7.3f,\n",
-        temp_C, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
+    if ( rp.debug==79 ) Serial.printf("temp_c_, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib_fut, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f, %7.3f,\n",
+        temp_c_, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
 
     if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
-     dt,temp_C, ib_, soc_, voc_, dv_dyn_, vb_);
+     dt,temp_c_, ib_, soc_, voc_, dv_dyn_, vb_);
     
     if ( rp.debug==-78 ) Serial.printf("soc*10,voc,vsat,ib_in_,sat_ib_max_,ib,sat,\n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
       soc_*10, voc_, vsat_, ib_in_, sat_ib_max_, ib_, model_saturated_);
     
-    if ( rp.debug==76 ) Serial.printf("BatteryModel::calculate:,  soc=%8.4f, temp_c=%7.3f, ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
-        soc_, temp_C, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);
+    if ( rp.debug==76 ) Serial.printf("BatteryModel::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
+        soc_, temp_c_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);
 
     return ( vb_*(*rp_nS_) );
 }
@@ -776,19 +775,15 @@ Outputs:
     soc_min_        Estimated soc where battery BMS will shutoff current, fraction
     q_min_          Estimated charge at low voltage shutdown, C\
 */
-double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, const double t_last, BatteryMonitor *Mon) 
+double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon) 
 {
-    float charge_curr = Sen->Ibatt;
+    float charge_curr = Sen->Ibatt / (*rp_nP_);
     double d_delta_q = charge_curr * Sen->T;
     if ( charge_curr>0. ) d_delta_q *= coul_eff_;
 
     // Rate limit temperature
-    double temp_lim = max(min(Sen->Tbatt, t_last + T_RLIM*Sen->T), t_last - T_RLIM*Sen->T);
-    if ( reset )
-    {
-        temp_lim = Sen->Tbatt;
-        *rp_t_last_ = Sen->Tbatt;
-    }
+    if ( reset ) *rp_t_last_ = Sen->Tbatt;
+    double temp_lim = max(min(Sen->Tbatt, *rp_t_last_ + T_RLIM*Sen->T), *rp_t_last_ - T_RLIM*Sen->T);
     
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status
     // But if not modeling in real world, set to Monitor when Monitor saturated and reset to EKF otherwise
