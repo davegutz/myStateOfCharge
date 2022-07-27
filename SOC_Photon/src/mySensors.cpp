@@ -175,6 +175,7 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
   this->ReadSensors = ReadSensors;
   this->display = true;
   this->sclr_coul_eff = 1.;
+  this->Ibatt_hdwe_model = 0.;
 }
 
 // Final choices
@@ -186,8 +187,54 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
 // Outputs: Ibatt,
 //          Vbatt,
 //          Tbatt, Tbatt_filt
-void Sensors::select_all(void)
+void Sensors::select_all(BatteryMonitor *Mon)
 {
+  float ekf_error = Mon->soc_ekf() - Mon->soc();  // These are filtered in their construction (EKF is a dynamic filter and 
+                                                  // Coulomb counter is a big integrator)
+  boolean ekf_cc_disagree = abs(ekf_error) >= SOC_DISAGREE_THRESH;
+  float ibatt_error;
+  if ( rp.mod_ib() ) ibatt_error = Ibatt_amp_model - Ibatt_noamp_model;
+  else ibatt_error = Ibatt_amp_hdwe - Ibatt_noamp_hdwe;
+  float ibatt_err_filt = IbattErrFilt->calculate(ibatt_error, reset, min(T, MAX_ERR_T));
+  float ibatt_err_fault = abs(ibatt_err_filt) >= IBATT_DISAGREE_THRESH;
+  boolean ibatt_err_fail = IbattErrFail->calculate(ibatt_err_fault, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T, reset);
+
+  // Truth table
+  if ( !rp.ibatt_sel_noamp && !ShuntNoAmp->bare() )  // Latches on this, if auto or manually set.   Can write it to false to reset
+  {
+    if ( ShuntAmp->bare() && !ShuntNoAmp->bare() ) rp.ibatt_sel_noamp = true;
+    else if ( ShuntAmp->bare() || (ibatt_err_fail && ekf_cc_disagree) )
+    {
+      rp.ibatt_sel_noamp = true;
+      Serial.printf("Select change:  ShuntAmp->bare=%d, ShuntNoAmp->bare=%d, ibatt_err_fail=%d, ekf_cc_disagree=%d, rp.ibatt_sel_noamp=%d\n",
+        ShuntAmp->bare(), ShuntNoAmp->bare(), ibatt_err_fail, ekf_cc_disagree, rp.ibatt_sel_noamp);
+    }
+  }
+
+  // Reselect since may be changed
+  if ( !rp.ibatt_sel_noamp && !ShuntAmp->bare() )
+  {
+      Vshunt = ShuntAmp->vshunt();
+      Ibatt_hdwe = Ibatt_amp_hdwe;
+      Ibatt_hdwe_model = Ibatt_amp_model;
+      sclr_coul_eff = rp.tweak_sclr_amp;
+  }
+  else if ( !ShuntNoAmp->bare() )
+  {
+      Vshunt = ShuntNoAmp->vshunt();
+      Ibatt_hdwe = Ibatt_noamp_hdwe;
+      Ibatt_hdwe_model = Ibatt_noamp_model;
+      sclr_coul_eff = rp.tweak_sclr_noamp;
+  }
+  else
+  {
+      Vshunt = 0.;
+      Ibatt_hdwe = 0.;
+      Ibatt_hdwe_model = 0.;
+      sclr_coul_eff = 1.;
+  }
+
+  // Final assignments
   if ( rp.mod_ib() )  Ibatt = Ibatt_model;
   else Ibatt = Ibatt_hdwe;
 
@@ -257,19 +304,10 @@ void Sensors::shunt_print()
 // Inputs: rp.ibatt_sel_noamp (user override), Mon (EKF status)
 // States:  Ibatt_fail_noamp_
 // Outputs:  Ibatt_hdwe, Ibatt_model_in, Vbatt_sel_status_
-void Sensors::shunt_select(BatteryMonitor *Mon)
+void Sensors::shunt_select()
 {
-    float ekf_error = Mon->soc_ekf() - Mon->soc();  // These are filtered in their construction (EKF is a dynamic filter and 
-                                                    // Coulomb counter is a big integrator)
-    boolean ekf_cc_disagree = abs(ekf_error) >= SOC_DISAGREE_THRESH;
-    float ibatt_error = ShuntAmp->ishunt_cal() - ShuntNoAmp->ishunt_cal();
-    float ibatt_err_filt = IbattErrFilt->calculate(ibatt_error, reset, min(T, MAX_ERR_T));
-    float ibatt_err_fault = abs(ibatt_err_filt) >= IBATT_DISAGREE_THRESH;
-    boolean ibatt_err_fail = IbattErrFail->calculate(ibatt_err_fault, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T, reset);
-
     // Current signal selection, based on if there or not.
     // Over-ride 'permanent' with Talk(rp.ibatt_sel_noamp) = Talk('s')
-    float Ibatt_hdwe_model = 0.;
 
     // Retrieve values.   Return values include scalar/adder for fault
     Ibatt_amp_hdwe = ShuntAmp->ishunt_cal();

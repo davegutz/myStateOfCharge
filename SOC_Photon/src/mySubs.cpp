@@ -125,7 +125,7 @@ void load_ibatt_vbatt(const boolean reset, const unsigned long now, Sensors *Sen
   Sen->shunt_bias();
   Sen->shunt_load();
   Sen->shunt_check(Mon);
-  Sen->shunt_select(Mon);
+  Sen->shunt_select();
   if ( rp.debug==14 ) Sen->shunt_print();
 
   // Vbatt
@@ -297,7 +297,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   //  Ibatt_model, Ibatt_hdwe,                            --->   Ibatt
   //  Vbatt_model, Vbatt_hdwe,                            --->   Vbatt
   //  constant,         Tbatt_hdwe, Tbatt_hdwe_filt       --->   Tbatt, Tbatt_filt
-  Sen->select_all();
+  Sen->select_all(Mon);
 
   // Charge calculation and memory store
   // Inputs: Sim.model_saturated, Sen->Tbatt, Sen->Ibatt, and Sim.soc

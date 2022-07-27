@@ -125,6 +125,7 @@ public:
     float Ibatt_noamp_hdwe;         // Sensed noamp battery bank current, A
     float Ibatt_noamp_model;        // Modeled noamp battery bank current, A
     float Ibatt_hdwe;               // Sensed battery bank current, A
+    float Ibatt_hdwe_model;         // Selected model hardware signal, A
     float Ibatt_model;              // Modeled battery bank current, A
     float Ibatt_model_in;           // Battery bank current input to model (modified by cutback), A
     float Wbatt;                    // Sensed battery bank power, use to compare to other shunts, W
@@ -157,12 +158,12 @@ public:
     double control_time;            // Decimal time, seconds since 1/1/2021
     boolean display;                // Use display
     double sclr_coul_eff;           // Scalar on Coulombic Efficiency
-    void select_all(void);          // Final choices
+    void select_all(BatteryMonitor *Mon);  // Final choices
     void shunt_bias(void);          // Load biases into Shunt objects
     void shunt_check(BatteryMonitor *Mon);  // Range check Ibatt signals
     void shunt_load(void);          // Load ADS015 protocol
     void shunt_print(); // Print selection result
-    void shunt_select(BatteryMonitor *Mon);   // Choose between shunts and pass along Vbatt fault detection
+    void shunt_select();   // Choose between shunts for model
     void temp_filter(const boolean reset_loc, const float t_rlim);
     void temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim);
     void vbatt_check(BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max);  // Range check Vbatt
