@@ -30,7 +30,7 @@ class TableInterp1D : public TableInterp
 {
 public:
   TableInterp1D();
-  TableInterp1D(const unsigned int n, const float x[], const float v[]);  // TODO:  template
+  TableInterp1D(const unsigned int n, const float x[], const float v[]);  // TODO:  template, double or float
   ~TableInterp1D();
   //operators
   //functions

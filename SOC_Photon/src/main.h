@@ -274,7 +274,6 @@ void loop()
  
   // Sensor conversions
   static Sensors *Sen = new Sensors(0, 0, myPins->pin_1_wire, PublishSerial, ReadSensors); // Manage sensor data
-  static float tbatt_bias_last;  // Memory for rate limiter in temp_filter call, deg C
 
    // Mon, used to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last, &rp.nP, &rp.nS, &rp.mon_mod);
@@ -330,8 +329,7 @@ void loop()
   if ( read_temp )
   {
     Sen->T_temp =  ReadTemp->updateTime();
-    // TODO:   rp.tbatt_bias and tbatt_bias_last into Sen class
-    Sen->temp_load_and_filter(Sen, reset_temp, T_RLIM, rp.tbatt_bias, &tbatt_bias_last);
+    Sen->temp_load_and_filter(Sen, reset_temp, T_RLIM);
   }
 
   // Input all other sensors and do high rate calculations

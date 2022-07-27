@@ -293,7 +293,6 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
         Serial.printf("BatteryMonitor::calculate:"); Randles_->pretty_print();
     }
     dv_dyn_ = vb_ - voc_;
-    // voc_stat_ = voc_soc(soc_, Sen->Tbatt_filt);
     // Hysteresis model
     hys_->calculate(ib_, soc_);
     dv_hys_ = hys_->update(dt_);
@@ -848,15 +847,15 @@ void BatteryModel::pretty_print(void)
     Serial.printf("BatteryModel::");
     this->Battery::pretty_print();
     Serial.printf(" BatteryModel::BatteryModel:\n");
-    Serial.printf("  sat_ib_max_ =       %7.3f;  // Current cutback to be applied to modeled ib output, A\n", sat_ib_max_);
-    Serial.printf("  sat_ib_null_ =      %7.3f;  // Current cutback value for voc=vsat, A\n", sat_ib_null_);
-    Serial.printf("  sat_cutback_gain_ = %7.1f;  // Gain to retard ib when voc exceeds vsat, dimensionless\n", sat_cutback_gain_);
-    Serial.printf("  model_cutback_ =          %d;  // Gain to retard ib when voc exceeds vsat, dimensionless\n", model_cutback_);
-    Serial.printf("  model_saturated_ =        %d;  // Modeled current being limited on saturation cutback, T = cutback limited\n", model_saturated_);
-    Serial.printf("  ib_ =               %7.3f;  // Battery terminal current, A\n", ib_);
-    Serial.printf("  ib_in_ =            %7.3f;  // Saved value of current input, A\n", ib_in_);
-    Serial.printf("  ib_fut_ =           %7.3f;  // Future value of limited current, A\n", ib_fut_);
-    Serial.printf("  ib_sat_ =           %7.3f;  // Indicator of maximal cutback, T = cutback saturated\n", ib_sat_);
+    Serial.printf("  sat_ib_max_ =       %7.3f;  // Cutback, A\n", sat_ib_max_);
+    Serial.printf("  sat_ib_null_ =      %7.3f;  // Cutback value for voc=vsat, A\n", sat_ib_null_);
+    Serial.printf("  sat_cutback_gain_ = %7.1f;  // Gain to retard ib when voc exceeds vsat\n", sat_cutback_gain_);
+    Serial.printf("  model_cutback_ =          %d;  // Cutting\n", model_cutback_);
+    Serial.printf("  model_saturated_ =        %d;  // Limited on saturation cutback\n", model_saturated_);
+    Serial.printf("  ib_ =               %7.3f;  // Battery terminal curr, A\n", ib_);
+    Serial.printf("  ib_in_ =            %7.3f;  // Saved value of curr in, A\n", ib_in_);
+    Serial.printf("  ib_fut_ =           %7.3f;  // Future value of limited curr, A\n", ib_fut_);
+    Serial.printf("  ib_sat_ =           %7.3f;  // T = cutback saturated\n", ib_sat_);
     Serial.printf(" *rp_s_cap_model_ =   %7.3f;  // Rated capacity scalar\n", *rp_s_cap_model_);
 }
 

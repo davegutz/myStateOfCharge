@@ -167,20 +167,20 @@ uint8_t Chemistry::encode(const String mod_str)
 void Chemistry::pretty_print(void)
 {
   Serial.printf("Chemistry:\n");
-  Serial.printf("  dqdt =        %7.3f;  // Change of charge with temperature, fraction/deg C (0.01 from literature)\n", dqdt);
-  Serial.printf("  low_voc =     %7.3f;  // Volt threshold for BMS to turn off battery, V\n", low_voc);
-  Serial.printf("  hys_cap =     %7.3f;  // Cap of hysteresis, Farads\n", hys_cap);
-  Serial.printf("  v_sat =       %7.3f;  // Sat thresh at temp, V\n", v_sat);
-  Serial.printf("  dvoc_dt =     %7.3f;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n", dvoc_dt);
-  Serial.printf("  dv =          %7.3f;  // Adjustment for calibration error, V\n", dv);
-  Serial.printf("  r_0 =         %9.6f;  // Randles R0, ohms\n", r_0);
-  Serial.printf("  r_ct =        %9.6f;  // Randles charge transfer resistance, ohms\n", r_ct);
-  Serial.printf("  r_diff =      %9.6f;  // Randles diffusion resistance, ohms\n", r_diff);
-  Serial.printf("  tau_ct =      %7.3f;  // Randles charge transfer time constant, s (=1/Rct/Cct)\n", tau_ct);
-  Serial.printf("  tau_diff =    %7.3f;  // Randles diffusion time constant, s (=1/Rdif/Cdif)\n", tau_diff);
-  Serial.printf("  tau_sd =      %7.3f;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n", tau_sd);
-  Serial.printf("  r_sd =        %7.3f;  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n", r_sd);
-  Serial.printf("  r_ss =        %7.3f;  // Equivalent model for state space model initialization, ohms\n", r_ss);
+  Serial.printf("  dqdt =    %7.3f;  // Change charge with temperature, fraction/deg C (0.01 from lit)\n", dqdt);
+  Serial.printf("  low_voc = %7.3f;  // Threshold for BMS to turn off battery, V\n", low_voc);
+  Serial.printf("  hys_cap = %7.3f;  // Cap of hysteresis, Farads\n", hys_cap);
+  Serial.printf("  v_sat =   %7.3f;  // Sat thresh at temp, V\n", v_sat);
+  Serial.printf("  dvoc_dt = %7.3f;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n", dvoc_dt);
+  Serial.printf("  dv =      %7.3f;  // Adj for cal error, V\n", dv);
+  Serial.printf("  r_0 =   %9.6f;  // Randles R0, ohms\n", r_0);
+  Serial.printf("  r_ct =  %9.6f;  // Charge transfer resistance, ohms\n", r_ct);
+  Serial.printf("  r_diff =%9.6f;  // Diffusion resistance, ohms\n", r_diff);
+  Serial.printf("  tau_ct =  %7.3f;  // Charge transfer time constant, s (=1/Rct/Cct)\n", tau_ct);
+  Serial.printf("  tau_diff =%7.3f;  // Diffusion time constant, s (=1/Rdif/Cdif)\n", tau_diff);
+  Serial.printf("  tau_sd =  %7.3f;  // EKF ref.	Parasitic discharge time constant, sec\n", tau_sd);
+  Serial.printf("  r_sd =    %7.3f;  // EKF ref.	Parasitic discharge, ohms\n", r_sd);
+  Serial.printf("  r_ss =    %7.3f;  // For state space model init, ohms\n", r_ss);
   Serial.printf("  voc(t, soc):\n");
   Serial.printf("    t=  {"); for ( int i=0; i<m_t; i++ ) Serial.printf("%7.3f, ", y_t[i]); Serial.printf("};\n");
   Serial.printf("    soc={"); for ( int i=0; i<n_s; i++ ) Serial.printf("%7.3f, ", x_soc[i]); Serial.printf("};\n");
@@ -226,22 +226,22 @@ Coulombs::~Coulombs() {}
 void Coulombs::pretty_print(void)
 {
   Serial.printf("Coulombs:\n");
-  Serial.printf("  q_cap_rated_ =%9.1f;  // Rated capacity at t_rated, C\n", q_cap_rated_);
-  Serial.printf("  q_cap_rated_scaled_ = %9.1f;  // Applied rated capacity at t_rated_, C\n", q_cap_rated_scaled_);
-  Serial.printf("  q_capacity_ = %9.1f;  // Saturation charge at temperature, C\n", q_capacity_);
-  Serial.printf("  q_ =          %9.1f;  // Present charge available to use, except q_min_, C\n", q_);
-  Serial.printf("  q_min_ =      %9.1f;  // Estimated charge at low voltage shutdown, C\n", q_min_);
-  Serial.printf("  delta_q       %9.1f;  // Charge change since saturated, C\n", *rp_delta_q_);
-  Serial.printf("  soc_ =         %8.4f;  // Fraction of saturation charge (q_capacity_) available (0-1);\n", soc_);
-  Serial.printf("  sat_ =                %d;  // Indication that battery is saturated, T=saturated\n", sat_);
-  Serial.printf("  t_rated_ =        %5.1f;  // Rated temperature, deg C\n", t_rated_);
-  Serial.printf("  t_last =          %5.1f;  // Last battery temperature for rate limit memory, deg C\n", *rp_t_last_);
-  Serial.printf("  t_rlim_ =       %7.3f;  // Tbatt rate limit, deg C / s\n", t_rlim_);
-  Serial.printf("  resetting_ =          %d;  // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter\n", resetting_);
-  Serial.printf("  soc_min_ =     %8.4f;  // Estimated soc where battery BMS will shutoff current, fraction\n", soc_min_);
-  Serial.printf("  mod_ =        %s;  // Model type of battery chemistry e.g. Battleborn or LION\n", chem_.decode(mod_code()).c_str());
-  Serial.printf("  mod_code_ =           %d;  // Chemistry code integer\n", mod_code());
-  Serial.printf("  coul_eff_ =    %9.5f;  // Coulombic Efficiency\n", coul_eff_);
+  Serial.printf("  q_cap_rated_=%9.1f;  // Rated capacity at t_rated, C\n", q_cap_rated_);
+  Serial.printf("  q_cap_rated_scaled_= %9.1f;  // Applied rated capacity at t_rated_, C\n", q_cap_rated_scaled_);
+  Serial.printf("  q_capacity_ =%9.1f;  // Saturation charge at temperature, C\n", q_capacity_);
+  Serial.printf("  q_ =         %9.1f;  // Present charge available to use, except q_min_, C\n", q_);
+  Serial.printf("  q_min_ =     %9.1f;  // Est charge at low voltage shutdown, C\n", q_min_);
+  Serial.printf("  delta_q      %9.1f;  // Charge change since saturated, C\n", *rp_delta_q_);
+  Serial.printf("  soc_ =        %8.4f;  // Fraction of q_capacity_available (0-1);\n", soc_);
+  Serial.printf("  sat_ =               %d;  // Indication that battery is saturated, T=saturated\n", sat_);
+  Serial.printf("  t_rated_ =       %5.1f;  // Rated temperature, deg C\n", t_rated_);
+  Serial.printf("  t_last =         %5.1f;  // Last battery temperature for rate limit memory, deg C\n", *rp_t_last_);
+  Serial.printf("  t_rlim_ =      %7.3f;  // Tbatt rate limit, deg C / s\n", t_rlim_);
+  Serial.printf("  resetting_ =         %d;  // Flag to coord user testing of CC, T=perf external reset of counter\n", resetting_);
+  Serial.printf("  soc_min_ =    %8.4f;  // Est soc where battery BMS shuts off current\n", soc_min_);
+  Serial.printf("  mod_ =       %s;  // Model type of battery chemistry e.g. Battleborn or LION\n", chem_.decode(mod_code()).c_str());
+  Serial.printf("  mod_code_ =          %d;  // Chemistry code integer\n", mod_code());
+  Serial.printf("  coul_eff_ =  %9.5f;  // Coulombic Efficiency\n", coul_eff_);
   Serial.printf("Coulombs::");
   chem_.pretty_print();
 }

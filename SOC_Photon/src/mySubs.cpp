@@ -212,7 +212,6 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 {
   static boolean pass = false;
   display->clearDisplay();
-
   display->setTextSize(1);              // Normal 1:1 pixel scale
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner
@@ -231,8 +230,8 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   display->println(dispString);
 
   display->println(F(""));
-
   display->setTextColor(SSD1306_WHITE);
+
   char dispStringT[9];
   if ( abs(pp.pubList.tcharge) < 24. )
     sprintf(dispStringT, "%3.0f%5.1f", pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge);
@@ -240,6 +239,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
     sprintf(dispStringT, "%3.0f --- ", pp.pubList.Amp_hrs_remaining_ekf);
   display->print(dispStringT);
   display->setTextSize(2);             // Draw 2X-scale text
+
   char dispStringS[4];
   if ( pass || !Sen->saturated )
     sprintf(dispStringS, "%3.0f", min(pp.pubList.Amp_hrs_remaining_wt, 999.));
@@ -293,7 +293,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 
   // Use model instead of sensors when running tests as user
   //  Inputs:                                             --->   Outputs:
-  // TODO:  control parameter list here...
+  // TODO:  control parameter list here...Vbatt_fail, soc, soc_ekf,
   //  Ibatt_model, Ibatt_hdwe,                            --->   Ibatt
   //  Vbatt_model, Vbatt_hdwe,                            --->   Vbatt
   //  constant,         Tbatt_hdwe, Tbatt_hdwe_filt       --->   Tbatt, Tbatt_filt

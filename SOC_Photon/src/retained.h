@@ -37,10 +37,10 @@
 struct RetainedPars
 {
   int8_t debug = 0;             // Level of debug printing
-  double delta_q = -0.5;        // Charge change since saturated, C
-  float t_last = 25.;           // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
-  double delta_q_model = -0.5;  // Coulomb Counter state for model, (-1 - 1)
-  float t_last_model = 25.;     // Battery temperature past value for rate limit memory, deg C
+  double delta_q = 0.;          // Charge change since saturated, C
+  float t_last = RATED_TEMP;    // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
+  double delta_q_model = 0.;    // Coulomb Counter state for model, C
+  float t_last_model = RATED_TEMP;  // Battery temperature past value for rate limit memory, deg C
   float ibatt_bias_amp = CURR_BIAS_AMP;     // Calibration of amplified shunt sensor, A
   float ibatt_bias_noamp = CURR_BIAS_NOAMP; // Calibration of non-amplified shunt sensor, A
   float ibatt_bias_all = CURR_BIAS_ALL;     // Bias on all shunt sensors, A
@@ -50,7 +50,7 @@ struct RetainedPars
   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
   float freq = 0.;              // Injected frequency, Hz (0-2)
   uint8_t type = 0;             // Injected waveform type.   0=sine, 1=square, 2=triangle
-  float inj_bias = 0.;     // Constant bias, A
+  float inj_bias = 0.;          // Constant bias, A
   float tbatt_bias = TEMP_BIAS; // Bias on Tbatt sensor, deg C
   float s_cap_model = 1.;       // Scalar on battery model size
   float cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function
@@ -68,7 +68,8 @@ struct RetainedPars
   uint8_t mon_mod = MOD_CODE;   // Monitor battery chemistry type
   uint8_t sim_mod = MOD_CODE;   // Simulation battery chemistry type
 
-  // Corruption test
+  // Corruption test on bootup.  Needed because retained parameter memory is not managed by the compiler as it relies on
+  // battery.  Small compilation changes can change where in this memory the program points, too.
   boolean is_corrupt()
   {
     return ( this->nP==0 || this->nS==0 || this->mon_mod>10 || isnan(this->amp) || this->freq>2. ||
@@ -80,10 +81,10 @@ struct RetainedPars
   void nominal()
   {
     this->debug = 0;
-    this->delta_q = -0.5;
-    this->t_last = 25.;
-    this->delta_q_model = -0.5;
-    this->t_last_model = 25.;
+    this->delta_q = 0.;
+    this->t_last = RATED_TEMP;
+    this->delta_q_model = 0.;
+    this->t_last_model = RATED_TEMP;
     this->ibatt_bias_amp = CURR_BIAS_AMP;
     this->ibatt_bias_noamp = CURR_BIAS_NOAMP;
     this->ibatt_bias_all = CURR_BIAS_ALL;
@@ -114,6 +115,7 @@ struct RetainedPars
   {
     nominal();
   }
+
   // Configuration functions
   boolean tweak_test() { return ( 0x8 & modeling ); } // Driving signal injection completely using software inj_bias 
   boolean mod_ib() { return ( 0x4 & modeling ); }     // Using Sim as source of ib
@@ -126,36 +128,36 @@ struct RetainedPars
   void pretty_print(void)
   {
     Serial.printf("retained parameters (rp):\n");
-    Serial.printf("  debug =                     %d;  // Level of debug printing\n", this->debug);
-    Serial.printf("  delta_q =             %7.3f;  // CC state Monf, (-1 - 1)\n", this->delta_q);
-    Serial.printf("  t_last =              %7.3f;  // Battery temp past rate limit mem, deg C\n", this->t_last);
-    Serial.printf("  delta_q_model =    %10.1f;  // CC state model, (-1 - 1)\n", this->delta_q_model);
-    Serial.printf("  t_last_model =        %7.3f;  // Battery temp past rate limit mem, deg C\n", this->t_last_model);
-    Serial.printf("  ibatt_bias_amp =      %7.3f;  // Calibrate amp sensor, A\n", this->ibatt_bias_amp);
-    Serial.printf("  ibatt_bias_noamp =    %7.3f;  // Calibrate non-amp sensor, A\n", this->ibatt_bias_noamp);
-    Serial.printf("  ibatt_bias_all =      %7.3f;  // Bias all sensors, A \n", this->ibatt_bias_all);
-    Serial.printf("  ibatt_sel_noamp =           %d;  // Use non-amp\n", this->ibatt_sel_noamp);
-    Serial.printf("  vbatt_bias =          %7.3f;  // Calibrate Vbatt, V\n", this->vbatt_bias);
-    Serial.printf("  modeling =                  %d;  // Bit mapped mod spec\n", this->modeling);
-    Serial.printf("  amp =                 %7.3f;  // Injected amp, A pk (0-18.3)\n", this->amp);
-    Serial.printf("  freq =                %7.3f;  // Injected freq, r/s (0-2*pi)\n", this->freq);
-    Serial.printf("  type =                      %d;  //  Injected wave.  0=sin, 1=sq, 2=tri\n", this->type);
-    Serial.printf("  inj_bias =            %7.3f;  // Injected bias, A\n", this->inj_bias);
-    Serial.printf("  tbatt_bias =          %7.3f;  // Sense bias, deg C\n", this->tbatt_bias);
-    Serial.printf("  s_cap_model =         %7.3f;  // Scalar on battery mod size\n", this->s_cap_model);
-    Serial.printf("  cutback_gain_scalar = %7.3f;  // Scalar on battery mod saturation cutback function\n", this->cutback_gain_scalar);
-    Serial.printf("  isum =                      %d;  // Summary location ptr.   Begins at -1\n", this->isum);
+    Serial.printf("  debug =                 %d;  // Level of debug printing\n", this->debug);
+    Serial.printf("  delta_q =         %7.3f;  // CC state Monf, (-1 - 1)\n", this->delta_q);
+    Serial.printf("  t_last =          %7.3f;  // Battery temp past rate limit mem, deg C\n", this->t_last);
+    Serial.printf("  delta_q_model =%10.1f;  // CC state model, (-1 - 1)\n", this->delta_q_model);
+    Serial.printf("  t_last_model =    %7.3f;  // Battery temp past rate limit mem, deg C\n", this->t_last_model);
+    Serial.printf("  ibatt_bias_amp =  %7.3f;  // Calibrate amp sensor, A\n", this->ibatt_bias_amp);
+    Serial.printf("  ibatt_bias_noamp =%7.3f;  // Calibrate non-amp sensor, A\n", this->ibatt_bias_noamp);
+    Serial.printf("  ibatt_bias_all =  %7.3f;  // Bias all sensors, A \n", this->ibatt_bias_all);
+    Serial.printf("  ibatt_sel_noamp =       %d;  // Use non-amp\n", this->ibatt_sel_noamp);
+    Serial.printf("  vbatt_bias =      %7.3f;  // Calibrate Vbatt, V\n", this->vbatt_bias);
+    Serial.printf("  modeling =              %d;  // Bit mapped mod spec\n", this->modeling);
+    Serial.printf("  amp =             %7.3f;  // Injected amp, A pk (0-18.3)\n", this->amp);
+    Serial.printf("  freq =            %7.3f;  // Injected freq, r/s (0-2*pi)\n", this->freq);
+    Serial.printf("  type =                  %d;  //  Injected wave.  0=sin, 1=sq, 2=tri\n", this->type);
+    Serial.printf("  inj_bias =        %7.3f;  // Injected bias, A\n", this->inj_bias);
+    Serial.printf("  tbatt_bias =      %7.3f;  // Sense bias, deg C\n", this->tbatt_bias);
+    Serial.printf("  s_cap_model =     %7.3f;  // Scalar on battery mod size\n", this->s_cap_model);
+    Serial.printf("  cutback_gain_scalar=%7.3f;  // Scalar on battery mod saturation cutback function\n", this->cutback_gain_scalar);
+    Serial.printf("  isum =                  %d;  // Summary location ptr.   Begins at -1\n", this->isum);
     Serial.printf("  delta_q_cinf_amp = %10.1f;  // Coul\n", this->delta_q_cinf_amp);
     Serial.printf("  delta_q_dinf_amp = %10.1f;  // Coul\n", this->delta_q_dinf_amp);
     Serial.printf("  delta_q_cinf_noamp=%10.1f;  // Coul\n", this->delta_q_cinf_noamp);
     Serial.printf("  delta_q_dinf_noamp=%10.1f;  // Coul\n", this->delta_q_dinf_noamp);
-    Serial.printf("  hys_scale =           %7.3f;  //  Hysteresis scalar\n", this->hys_scale);
-    Serial.printf("  tweak_sclr_amp =      %7.3f;  // Tweak calibration for amp current\n", this->tweak_sclr_amp);
-    Serial.printf("  tweak_sclr_noamp =    %7.3f;  // Tweak calibration for non-amp current\n", this->tweak_sclr_noamp);
-    Serial.printf("  nP =                    %5.2f;  // Num parallel batteries in bank, e.g. '2P1S'\n", this->nP);
-    Serial.printf("  nS =                    %5.2f;  // Num series batteries in bank, e.g. '2P1S'\n", this->nS);
-    Serial.printf("  mon_mod =                   %d;  //  Mon battery model chars.  0=Battleborn, 1=LION\n", this->mon_mod);
-    Serial.printf("  sim_mod =                   %d;  //  Sim battery model chars.  0=Battleborn, 1=LION\n", this->sim_mod);
+    Serial.printf("  hys_scale =       %7.3f;  //  Hysteresis scalar\n", this->hys_scale);
+    Serial.printf("  tweak_sclr_amp =  %7.3f;  // Tweak calibration for amp current\n", this->tweak_sclr_amp);
+    Serial.printf("  tweak_sclr_noamp =%7.3f;  // Tweak calibration for non-amp current\n", this->tweak_sclr_noamp);
+    Serial.printf("  nP =                %5.2f;  // Num parallel batteries in bank, e.g. '2P1S'\n", this->nP);
+    Serial.printf("  nS =                %5.2f;  // Num series batteries in bank, e.g. '2P1S'\n", this->nS);
+    Serial.printf("  mon_mod =               %d;  //  Mon battery model chars.  0=Battleborn, 1=LION\n", this->mon_mod);
+    Serial.printf("  sim_mod =               %d;  //  Sim battery model chars.  0=Battleborn, 1=LION\n", this->sim_mod);
   }
 
 };            

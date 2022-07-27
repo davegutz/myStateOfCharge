@@ -70,12 +70,16 @@ public:
   ~Shunt();
   // operators
   // functions
+  float add() { return ( add_ ); };
+  void add(const float add) { add_ = add; };
   boolean bare() { return ( bare_ ); };
   void bias(float bias) { *cp_ibatt_bias_ = bias; };
-  float bias() { return ( *cp_ibatt_bias_ ); };
-  float ishunt_cal() { return ( ishunt_cal_ ); };
+  float bias() { return ( *cp_ibatt_bias_*slr_ + add_ ); };
+  float ishunt_cal() { return ( ishunt_cal_*slr_ + add_ ); };
   void load();
   void pretty_print();
+  float slr() { return ( slr_ ); };
+  void slr(const float slr) { slr_ = slr; };
   float v2a_s() { return ( v2a_s_ ); };
   float vshunt() { return ( vshunt_ ); };
   int16_t vshunt_int() { return ( vshunt_int_ ); };
@@ -92,6 +96,8 @@ protected:
   int16_t vshunt_int_1_;// Interim conversion, count
   float vshunt_;        // Sensed shunt voltage, V
   float ishunt_cal_;    // Sensed, calibrated ADC, A
+  float slr_;           // Scalar for fault test
+  float add_;           // Adder for fault test, A
 };
 
 
@@ -114,6 +120,10 @@ public:
     float Tbatt_model_filt;         // Filtered, modeled battery bank temp, C
     float Vshunt;                   // Sensed shunt voltage, V
     float Ibatt;                    // Selected battery bank current, A
+    float Ibatt_amp_hdwe;           // Sensed amp battery bank current, A
+    float Ibatt_amp_model;          // Modeled amp battery bank current, A
+    float Ibatt_noamp_hdwe;         // Sensed noamp battery bank current, A
+    float Ibatt_noamp_model;        // Modeled noamp battery bank current, A
     float Ibatt_hdwe;               // Sensed battery bank current, A
     float Ibatt_model;              // Modeled battery bank current, A
     float Ibatt_model_in;           // Battery bank current input to model (modified by cutback), A
@@ -153,9 +163,8 @@ public:
     void shunt_load(void);          // Load ADS015 protocol
     void shunt_print(); // Print selection result
     void shunt_select(BatteryMonitor *Mon);   // Choose between shunts and pass along Vbatt fault detection
-    void temp_filter(const boolean reset_loc, const float t_rlim, const float tbatt_bias, float *tbatt_bias_last);
-    void temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim, const float tbatt_bias,
-        float *tbatt_bias_last);
+    void temp_filter(const boolean reset_loc, const float t_rlim);
+    void temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim);
     void vbatt_check(BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max);  // Range check Vbatt
     void vbatt_load(const byte vbatt_pin);  // Analog read of Vbatt
     void vbatt_print(void);         // Print Vbatt result
@@ -169,6 +178,8 @@ protected:
     boolean Ibatt_noamp_fault_;   // Momentary isolation of Ibatt failure, T=faulted 
     boolean Vbatt_fail_;          // Peristed, latched isolation of Vbatt failure, T=failed
     boolean Vbatt_fault_;         // Momentary isolation of Vbatt failure, T=faulted 
+    float *rp_tbatt_bias_;        // Location of retained bias, deg C
+    float tbatt_bias_last_;       // Last value of bias for rate limit, deg C
 };
 
 

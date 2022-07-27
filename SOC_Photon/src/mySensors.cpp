@@ -63,7 +63,7 @@ float TempSensor::load(Sensors *Sen)
   if ( count<MAX_TEMP_READS && TEMP_RANGE_CHECK<temp && temp<TEMP_RANGE_CHECK_MAX )
   {
     Tbatt_hdwe = SdTbatt->update(temp);
-    if ( rp.debug==-103 ) Serial.printf("I:  t=%7.3f ct=%d\n", temp, count);
+    if ( rp.debug==16 ) Serial.printf("I:  t=%7.3f ct=%d, Tbatt_hdwe=%7.3f,\n", temp, count, Tbatt_hdwe);
   }
   else
   {
@@ -83,7 +83,7 @@ Shunt::Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, floa
 : Tweak(name, TWEAK_MAX_CHANGE, TWEAK_MAX, TWEAK_WAIT, rp_delta_q_cinf, rp_delta_q_dinf, rp_tweak_sclr, COULOMBIC_EFF),
   Adafruit_ADS1015(),
   name_(name), port_(port), bare_(false), cp_ibatt_bias_(cp_ibatt_bias), v2a_s_(v2a_s),
-  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0)
+  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0), slr_(1.), add_(0.)
 {
   if ( name_=="No Amp")
     setGain(GAIN_SIXTEEN, GAIN_SIXTEEN); // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
@@ -138,7 +138,8 @@ void Shunt::load()
 
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, Sync *ReadSensors):
-  Ibatt_amp_fail_(false), Ibatt_noamp_fail_(false), Vbatt_fail_(false), Vbatt_fault_(false)
+  Ibatt_amp_fail_(false), Ibatt_noamp_fail_(false), Vbatt_fail_(false), Vbatt_fault_(false),
+  rp_tbatt_bias_(&rp.tbatt_bias), tbatt_bias_last_(0.)
 {
   this->T = T;
   this->T_filt = T;
@@ -268,46 +269,52 @@ void Sensors::shunt_select(BatteryMonitor *Mon)
 
     // Current signal selection, based on if there or not.
     // Over-ride 'permanent' with Talk(rp.ibatt_sel_noamp) = Talk('s')
-    float model_ibatt_bias = 0.;
+    float Ibatt_hdwe_model = 0.;
+
+    // Retrieve values.   Return values include scalar/adder for fault
+    Ibatt_amp_hdwe = ShuntAmp->ishunt_cal();
+    Ibatt_amp_model = ShuntAmp->bias();
+    Ibatt_noamp_hdwe = ShuntNoAmp->ishunt_cal();
+    Ibatt_noamp_model = ShuntNoAmp->bias();
 
     // Check for bare sensor
     if ( !rp.ibatt_sel_noamp && !ShuntAmp->bare() )
     {
         Vshunt = ShuntAmp->vshunt();
-        Ibatt_hdwe = ShuntAmp->ishunt_cal();
-        model_ibatt_bias = ShuntAmp->bias();
+        Ibatt_hdwe = Ibatt_amp_hdwe;
+        Ibatt_hdwe_model = Ibatt_amp_model;
         sclr_coul_eff = rp.tweak_sclr_amp;
     }
     else if ( !ShuntNoAmp->bare() )
     {
         Vshunt = ShuntNoAmp->vshunt();
-        Ibatt_hdwe = ShuntNoAmp->ishunt_cal();
-        model_ibatt_bias = ShuntNoAmp->bias();
+        Ibatt_hdwe = Ibatt_noamp_hdwe;
+        Ibatt_hdwe_model = Ibatt_noamp_model;
         sclr_coul_eff = rp.tweak_sclr_noamp;
     }
     else
     {
         Vshunt = 0.;
         Ibatt_hdwe = 0.;
-        model_ibatt_bias = 0.;
+        Ibatt_hdwe_model = 0.;
         sclr_coul_eff = 1.;
     }
 
     // Check for modeling
     if ( rp.modeling )
-        Ibatt_model_in = model_ibatt_bias;
+        Ibatt_model_in = Ibatt_hdwe_model;
     else
         Ibatt_model_in = Ibatt_hdwe;
 }
 
 // Filter temp
-void Sensors::temp_filter(const boolean reset_loc, const float t_rlim, const float tbatt_bias, float *tbatt_bias_last)
+void Sensors::temp_filter(const boolean reset_loc, const float t_rlim)
 {
     // Rate limit the temperature bias, 2x so not to interact with rate limits in logic that also use t_rlim
-    if ( reset_loc ) *tbatt_bias_last = tbatt_bias;
-    float t_bias_loc = max(min(tbatt_bias,  *tbatt_bias_last + t_rlim*2.*T_temp),
-                                            *tbatt_bias_last - t_rlim*2.*T_temp);
-    *tbatt_bias_last = t_bias_loc;
+    if ( reset_loc ) tbatt_bias_last_ = *rp_tbatt_bias_;
+    float t_bias_loc = max(min(*rp_tbatt_bias_,  tbatt_bias_last_ + t_rlim*2.*T_temp),
+                                            tbatt_bias_last_ - t_rlim*2.*T_temp);
+    tbatt_bias_last_ = t_bias_loc;
 
     // Filter and add rate limited bias
     if ( reset_loc && Tbatt>40. )  // Bootup T=85.5 C
@@ -320,14 +327,15 @@ void Sensors::temp_filter(const boolean reset_loc, const float t_rlim, const flo
         Tbatt_hdwe_filt = TbattSenseFilt->calculate(Tbatt_hdwe, reset_loc,  min(T_temp, F_MAX_T_TEMP)) + t_bias_loc;
         Tbatt_hdwe += t_bias_loc;
     }
+    if ( rp.debug==16 ) Serial.printf("reset_loc,t_bias_loc, RATED_TEMP, Tbatt_hdwe, Tbatt_hdwe_filt, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",
+      reset_loc,t_bias_loc, RATED_TEMP, Tbatt_hdwe, Tbatt_hdwe_filt );
 }
 
 // Filter temp
-void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim, const float tbatt_bias,
-    float *tbatt_bias_last)
+void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim)
 {
-    SensorTbatt->load(Sen);
-    temp_filter(reset_loc, T_RLIM, rp.tbatt_bias, tbatt_bias_last);
+    Tbatt_hdwe = SensorTbatt->load(Sen);
+    temp_filter(reset_loc, T_RLIM);
 }
 
 // Check analog voltage.  Latches
