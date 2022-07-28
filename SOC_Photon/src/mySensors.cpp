@@ -176,6 +176,7 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
   this->display = true;
   this->sclr_coul_eff = 1.;
   this->Ibatt_hdwe_model = 0.;
+  this->ibatt_sel_status_ = 0;
 }
 
 // Deliberate choice based on results and inputs
@@ -287,8 +288,9 @@ void Sensors::select_all(BatteryMonitor *Mon)
       double cTime;
       if ( rp.tweak_test() ) cTime = double(now)/1000.;
       else cTime = control_time;
-      sprintf(cp.buffer, "unit_sel,%13.3f,%d,%d,      %9.6f,%d,  %7.5f,%d,%d,    %d,%7.5f,%7.5f,%7.5f,      %7.5f,%7.5f,%7.5f,     %5.2f,%5.2f,%5.2f, %c,",
+      sprintf(cp.buffer, "unit_sel,%13.3f,%d,%d,      %d,%d,            %9.6f,%d,      %7.5f,%d,%d,                %d,%7.5f,%7.5f,%7.5f,    %7.5f,%7.5f,%7.5f,   %5.2f,%5.2f,%5.2f, %c,",
           cTime, reset, rp.ibatt_select,
+          ShuntAmp->bare(), ShuntNoAmp->bare(),
           ekf_error_, ekf_cc_disagree_,
           ibatt_error_, ibatt_err_fault_, ibatt_err_fail_,
           ibatt_sel_status_, Ibatt_hdwe, Ibatt_model, Ibatt,

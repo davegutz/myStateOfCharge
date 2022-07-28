@@ -52,7 +52,7 @@ void print_serial_sim_header(void)
 void print_signal_sel_header(void)
 {
   if ( rp.debug==26 ) // print_signal_sel_header
-    Serial.printf("unit_sel,c_time,rese,user_sel,   ekf_err,ekf_dis,  ib_err,ib_err_flt,ib_err_f,  ib_sel_st,Ib_hd,Ib_s,Ib,  Vb_hd,Vb_s,Vb,        Tb_hd,Tb,Tb_f,\n");
+    Serial.printf("unit_sel,c_time,rese,user_sel,   m_bare,n_bare,  ekf_err,ekf_dis,  ib_err,ib_err_flt,ib_err_f,  ib_sel_st,Ib_hd,Ib_s,Ib,     Vb_hd,Vb_s,Vb,                  Tb_hd,Tb,Tb_f,\n");
 }
 
 // Print strings
