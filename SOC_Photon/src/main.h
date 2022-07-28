@@ -202,7 +202,7 @@ void setup()
 
   // Summary
   System.enableFeature(FEATURE_RETAINED_MEMORY);
-  if ( rp.debug==4 || rp.debug==24 )
+  if ( rp.debug==4 || rp.debug==24 || rp.debug==26 )
     print_all_summary(mySum, rp.isum, NSUM);
 
   // Header for rp.debug print
@@ -368,12 +368,13 @@ void loop()
     if ( rp.debug==-35 ) debug_m35(Mon, Sen); // EKF Arduino
     if ( rp.tweak_test() )
     {
-      if ( rp.debug==4 || rp.debug==24 )
+      if ( rp.debug==4 || rp.debug==24 || rp.debug==26 )
       {
         if ( reset || (last_read_debug != rp.debug) )
         {
           print_serial_header();
           if ( rp.debug==24 ) print_serial_sim_header();
+          if ( rp.debug==26 ) print_signal_sel_header();
         }
         tweak_print(Sen, Mon);
       }
@@ -421,12 +422,13 @@ void loop()
     // Mon for rp.debug
     if ( publishS && !rp.tweak_test() )
     {
-      if ( rp.debug==4 || rp.debug==24 )
+      if ( rp.debug==4 || rp.debug==24 || rp.debug==26 )
       {
         if ( reset_publish || (last_publishS_debug != rp.debug) )
         {
           print_serial_header();
           if ( rp.debug==24 ) print_serial_sim_header();
+          if ( rp.debug==26 ) print_signal_sel_header();
         }
         serial_print(PublishSerial->now(), Sen->T);
       }

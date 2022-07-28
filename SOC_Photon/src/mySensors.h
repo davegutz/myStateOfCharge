@@ -144,7 +144,7 @@ public:
     SlidingDeadband *SdTbatt;       // Non-linear filter for Tb
     BatteryModel *Sim;              // Used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off
     LagTustin *IbattErrFilt;        // Noise filter for signal selection
-    TFDelay *IbattErrFail;          // Persistence current error for signal selection 
+    TFDelay *IbattErrPersist;          // Persistence current error for signal selection 
     TFDelay *IbattAmpHardFail;      // Persistence voltage range check for signall selection 
     TFDelay *IbattNoAmpHardFail;    // Persistence voltage range check for signall selection 
     TFDelay *VbattHardFail;         // Persistence voltage range check for signall selection 
@@ -163,7 +163,7 @@ public:
     void shunt_check(BatteryMonitor *Mon);  // Range check Ibatt signals
     void shunt_load(void);          // Load ADS015 protocol
     void shunt_print(); // Print selection result
-    void shunt_select();   // Choose between shunts for model
+    void shunt_select_initial();   // Choose between shunts for model
     void temp_filter(const boolean reset_loc, const float t_rlim);
     void temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim);
     void vbatt_check(BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max);  // Range check Vbatt
@@ -172,15 +172,24 @@ public:
     boolean Ibatt_amp_fail() { return Ibatt_amp_fail_; };
     boolean Ibatt_noamp_fail() { return Ibatt_noamp_fail_; };
     boolean Vbatt_fail() { return Vbatt_fail_; };
+    int8_t ibatt_sel_status() { return ibatt_sel_status_; };
 protected:
+    boolean ekf_cc_disagree_;     // EKF tested disagree, T = error
+    float ekf_error_;             // EKF tracking error, C
     boolean Ibatt_amp_fail_;      // Amp sensor selection memory, T = amp failed
     boolean Ibatt_amp_fault_;     // Momentary isolation of Ibatt failure, T=faulted 
+    float ibatt_error_;           // Current sensor difference error, A
+    float ibatt_err_filt_;        // Filtered sensor difference error, A
+    boolean ibatt_err_fail_;      // Persisted sensor difference error, T = fail
+    boolean ibatt_err_fault_;     // Faulted sensor difference error, T = fault
     boolean Ibatt_noamp_fail_;    // Noamp sensor selection memory, T = no amp failed
     boolean Ibatt_noamp_fault_;   // Momentary isolation of Ibatt failure, T=faulted 
     boolean Vbatt_fail_;          // Peristed, latched isolation of Vbatt failure, T=failed
-    boolean Vbatt_fault_;         // Momentary isolation of Vbatt failure, T=faulted 
+    boolean Vbatt_fault_;         // Momentary isolation of Vbatt failure, T=faulted
+    int8_t ibatt_sel_status_;     // Memory of Ibatt signal selection, -1=noamp, 0=none, 1=amp
     float *rp_tbatt_bias_;        // Location of retained bias, deg C
     float tbatt_bias_last_;       // Last value of bias for rate limit, deg C
+    void choose_(void);           // Deliberate choice based on inputs and results
 };
 
 

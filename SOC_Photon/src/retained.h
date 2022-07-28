@@ -44,7 +44,7 @@ struct RetainedPars
   float ibatt_bias_amp = CURR_BIAS_AMP;     // Calibration of amplified shunt sensor, A
   float ibatt_bias_noamp = CURR_BIAS_NOAMP; // Calibration of non-amplified shunt sensor, A
   float ibatt_bias_all = CURR_BIAS_ALL;     // Bias on all shunt sensors, A
-  boolean ibatt_sel_noamp = false;          // Force non-amplified sensor (amplified sensor is default)
+  int8_t ibatt_select = 0;      // Force current sensor (-1=non-amp, 0=auto, 1=amp)
   float vbatt_bias = VOLT_BIAS; // Calibrate Vbatt, V
   uint8_t modeling = 0;         // Driving saturation calculation with model.  Bits specify which signals use model
   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
@@ -88,7 +88,7 @@ struct RetainedPars
     this->ibatt_bias_amp = CURR_BIAS_AMP;
     this->ibatt_bias_noamp = CURR_BIAS_NOAMP;
     this->ibatt_bias_all = CURR_BIAS_ALL;
-    this->ibatt_sel_noamp = false;
+    this->ibatt_select = false;
     this->vbatt_bias = VOLT_BIAS;
     this->modeling = 0;
     this->amp = 0.;
@@ -136,7 +136,7 @@ struct RetainedPars
     Serial.printf("  ibatt_bias_amp =  %7.3f;  // Calibrate amp sensor, A\n", this->ibatt_bias_amp);
     Serial.printf("  ibatt_bias_noamp =%7.3f;  // Calibrate non-amp sensor, A\n", this->ibatt_bias_noamp);
     Serial.printf("  ibatt_bias_all =  %7.3f;  // Bias all sensors, A \n", this->ibatt_bias_all);
-    Serial.printf("  ibatt_sel_noamp =       %d;  // Use non-amp\n", this->ibatt_sel_noamp);
+    Serial.printf("  ibatt_select =          %d;  // -1=noamp, 0=auto, 1=amp\n", this->ibatt_select);
     Serial.printf("  vbatt_bias =      %7.3f;  // Calibrate Vbatt, V\n", this->vbatt_bias);
     Serial.printf("  modeling =              %d;  // Bit mapped mod spec\n", this->modeling);
     Serial.printf("  amp =             %7.3f;  // Injected amp, A pk (0-18.3)\n", this->amp);

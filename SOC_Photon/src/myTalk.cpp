@@ -521,7 +521,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), cp.ibatt_tot_bias_amp, Sen->ShuntAmp->ishunt_cal());
             Serial.printf("No Amp:"); Serial.printf("Vshunt_int, Vshunt, cp.ibatt_tot_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
               Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), cp.ibatt_tot_bias_noamp, Sen->ShuntNoAmp->ishunt_cal());
-            Serial.printf("Selected:  NoAmp,Ibatt=,  %d, %7.3f\n", rp.ibatt_sel_noamp, Sen->Ibatt);
+            Serial.printf("Selected:  NoAmp,Ibatt=,  %d, %7.3f\n", rp.ibatt_select, Sen->Ibatt);
             break;
 
           case ( 'v' ):  // Pv:  Vbatt measure
@@ -616,11 +616,13 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
       case ( 's' ):  // s<>:  select amp or noamp
         if ( cp.input_string.substring(1).toInt()>0 )
         {
-          rp.ibatt_sel_noamp = true;
+          rp.ibatt_select = 1;
         }
+        else if ( cp.input_string.substring(1).toInt()<0 )
+          rp.ibatt_select = -1;
         else
-          rp.ibatt_sel_noamp = false;
-        Serial.printf("Sig ( 0=amp, 1=noamp,) set %d\n", rp.ibatt_sel_noamp);
+          rp.ibatt_select = 0;
+        Serial.printf("Sig ( -1=noamp, 0=auto, 1=amp,) set %d\n", rp.ibatt_select);
         break;
 
       case ( 'v' ):  // v<>:  verbose level
@@ -1042,7 +1044,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  RR= "); Serial.printf("saturate, equalize, & nominalize all testing for DEPLOY\n");
   Serial.printf("  Rs= "); Serial.printf("small reset.  Reset flags to reinitialize filters\n");
 
-  Serial.printf("s   curr signal select (0=amp preferred, 1=noamp) = "); Serial.println(rp.ibatt_sel_noamp);
+  Serial.printf("s   curr signal select (-1=noamp, 0=auto, 1=amp) = "); Serial.println(rp.ibatt_select);
 
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("    : verbosity, -128 - +128. [2]");
   Serial.printf("    -<>:   Negative - Arduino plot compatible\n");
@@ -1059,8 +1061,9 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" +/-v14:   vshunt and Ibatt raw\n");
   Serial.printf("    v15:   vb raw\n");
   Serial.printf("    v16:   Tbatt\n");
-  Serial.printf("    v24:   sim\n");
+  Serial.printf("    v24:   Sim\n");
   Serial.printf("    v25:   Blynk write\n");
+  Serial.printf("    v26:   Signal selection\n");
   Serial.printf(" +/-v34:   EKF detailed\n");
   Serial.printf("   v-35:   EKF summary Arduino\n");
   Serial.printf("    v35:   Randles balance\n");
