@@ -52,7 +52,15 @@ void print_serial_sim_header(void)
 void print_signal_sel_header(void)
 {
   if ( rp.debug==26 ) // print_signal_sel_header
-    Serial.printf("unit_sel,c_time,rese,user_sel,   m_bare,n_bare,  ekf_err,ekf_dis,  ib_err,ib_err_flt,ib_err_f,  ib_sel_st,Ib_hd,Ib_s,Ib,     Vb_hd,Vb_s,Vb,                  Tb_hd,Tb,Tb_f,\n");
+    Serial.printf("unit_sel,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,cc_flt,  ibmh,ibnh,ibmm,ibnm,ibm,                     ib_dif,ib_dif_flt,ib_dif_fa,  ib_sel,Ib_h,Ib_m,mib,Ib,            Vb_h,Vb_m,mvb,Vb,                  Tb_h,Tb,mtb,Tb_f,\n");
+          // -----, cTime, reset, rp.ibatt_select,
+          //                                    ShuntAmp->bare(), ShuntNoAmp->bare(),
+          //                                                        cc_diff_, cc_flt_,
+          //                                                                       Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model, Ibatt_model,
+          //                                                                                                                   ib_diff_, ib_diff_flt_, ib_diff_fa_,
+          //                                                                                                                                                   ib_sel_stat_, Ibatt_hdwe, Ibatt_hdwe_model, mod_ib(), Ibatt,
+          //                                                                                                                                                                                      Vbatt_hdwe, Vbatt_model,mod_vb(), Vbatt,
+          //                                                                                                                                                                                                                        Tbatt_hdwe, Tbatt, mod_tb(), Tbatt_filt,
 }
 
 // Print strings

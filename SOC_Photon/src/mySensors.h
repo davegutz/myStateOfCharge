@@ -169,27 +169,27 @@ public:
     void vbatt_check(BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max);  // Range check Vbatt
     void vbatt_load(const byte vbatt_pin);  // Analog read of Vbatt
     void vbatt_print(void);         // Print Vbatt result
-    boolean Ibatt_amp_fail() { return Ibatt_amp_fail_; };
-    boolean Ibatt_noamp_fail() { return Ibatt_noamp_fail_; };
-    boolean Vbatt_fail() { return Vbatt_fail_; };
-    int8_t ibatt_sel_status() { return ibatt_sel_status_; };
+    boolean Ibatt_amp_fail() { return Ibatt_amp_fa_; };
+    boolean Ibatt_noamp_fail() { return Ibatt_noamp_fa_; };
+    boolean Vbatt_fail() { return Vbatt_fa_; };
+    int8_t ibatt_sel_status() { return ib_sel_stat_; };
 protected:
-    boolean ekf_cc_disagree_;     // EKF tested disagree, T = error
-    float ekf_error_;             // EKF tracking error, C
-    boolean Ibatt_amp_fail_;      // Amp sensor selection memory, T = amp failed
-    boolean Ibatt_amp_fault_;     // Momentary isolation of Ibatt failure, T=faulted 
-    float ibatt_error_;           // Current sensor difference error, A
-    float ibatt_err_filt_;        // Filtered sensor difference error, A
-    boolean ibatt_err_fail_;      // Persisted sensor difference error, T = fail
-    boolean ibatt_err_fault_;     // Faulted sensor difference error, T = fault
-    boolean Ibatt_noamp_fail_;    // Noamp sensor selection memory, T = no amp failed
-    boolean Ibatt_noamp_fault_;   // Momentary isolation of Ibatt failure, T=faulted 
-    boolean Vbatt_fail_;          // Peristed, latched isolation of Vbatt failure, T=failed
-    boolean Vbatt_fault_;         // Momentary isolation of Vbatt failure, T=faulted
-    int8_t ibatt_sel_status_;     // Memory of Ibatt signal selection, -1=noamp, 0=none, 1=amp
-    float *rp_tbatt_bias_;        // Location of retained bias, deg C
-    float tbatt_bias_last_;       // Last value of bias for rate limit, deg C
-    void choose_(void);           // Deliberate choice based on inputs and results
+    boolean cc_flt_;          // EKF tested disagree, T = error
+    float cc_diff_;           // EKF tracking error, C
+    boolean Ibatt_amp_fa_;    // Amp sensor selection memory, T = amp failed
+    boolean Ibatt_amp_flt_;   // Momentary isolation of Ibatt failure, T=faulted 
+    float ib_diff_;           // Current sensor difference error, A
+    float ib_diff_f_;         // Filtered sensor difference error, A
+    boolean ib_diff_fa_;      // Persisted sensor difference error, T = fail
+    boolean ib_diff_flt_;     // Faulted sensor difference error, T = fault
+    boolean Ibatt_noamp_fa_;  // Noamp sensor selection memory, T = no amp failed
+    boolean Ibatt_noamp_flt_; // Momentary isolation of Ibatt failure, T=faulted 
+    boolean Vbatt_fa_;        // Peristed, latched isolation of Vbatt failure, T=failed
+    boolean Vbatt_flt_;       // Momentary isolation of Vbatt failure, T=faulted
+    int8_t ib_sel_stat_;      // Memory of Ibatt signal selection, -1=noamp, 0=none, 1=amp
+    float *rp_tbatt_bias_;    // Location of retained bias, deg C
+    float tbatt_bias_last_;   // Last value of bias for rate limit, deg C
+    void choose_(void);       // Deliberate choice based on inputs and results
 };
 
 

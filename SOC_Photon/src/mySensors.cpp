@@ -138,7 +138,7 @@ void Shunt::load()
 
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, Sync *ReadSensors):
-  Ibatt_amp_fail_(false), Ibatt_noamp_fail_(false), Vbatt_fail_(false), Vbatt_fault_(false),
+  Ibatt_amp_fa_(false), Ibatt_noamp_fa_(false), Vbatt_fa_(false), Vbatt_flt_(false),
   rp_tbatt_bias_(&rp.tbatt_bias), tbatt_bias_last_(0.)
 {
   this->T = T;
@@ -176,22 +176,22 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
   this->display = true;
   this->sclr_coul_eff = 1.;
   this->Ibatt_hdwe_model = 0.;
-  this->ibatt_sel_status_ = 0;
+  this->ib_sel_stat_ = 1;     // Default is amp
 }
 
 // Deliberate choice based on results and inputs
-// Inputs:  ibatt_sel_status_, Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model
+// Inputs:  ib_sel_stat_, Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model
 // Outputs:  Ibatt_hdwe_model, Ibatt_hdwe, sclr_coul_eff, Vshunt
 void Sensors::choose_()
 {
-  if ( ibatt_sel_status_>0 )
+  if ( ib_sel_stat_>0 )
   {
       Vshunt = ShuntAmp->vshunt();
       Ibatt_hdwe = Ibatt_amp_hdwe;
       Ibatt_hdwe_model = Ibatt_amp_model;
       sclr_coul_eff = rp.tweak_sclr_amp;
   }
-  else if ( ibatt_sel_status_<0 )
+  else if ( ib_sel_stat_<0 )
   {
       Vshunt = ShuntNoAmp->vshunt();
       Ibatt_hdwe = Ibatt_noamp_hdwe;
@@ -211,6 +211,7 @@ void Sensors::choose_()
 // Use model instead of sensors when running tests as user
 // Equivalent to using voc(soc) as voter between two hardware currrents
 // Over-ride sensed Ib, Vb and Tb with model when running tests
+// TODO:  fix this nomenclature
 // Inputs:  Sen->Ibatt_model, Sen->Ibatt_hdwe,
 //          Sen->Vbatt_model, Sen->Vbatt_hdwe,
 //          ----------------, Sen->Tbatt_hdwe, Sen->Tbatt_hdwe_filt
@@ -220,54 +221,58 @@ void Sensors::choose_()
 void Sensors::select_all(BatteryMonitor *Mon)
 {
   // EKF error test - failure conditions track poorly
-  ekf_error_ = Mon->soc_ekf() - Mon->soc();  // These are filtered in their construction (EKF is a dynamic filter and 
+  cc_diff_ = Mon->soc_ekf() - Mon->soc();  // These are filtered in their construction (EKF is a dynamic filter and 
                                                   // Coulomb counter is a big integrator)
-  ekf_cc_disagree_ = abs(ekf_error_) >= SOC_DISAGREE_THRESH;
+  cc_flt_ = abs(cc_diff_) >= SOC_DISAGREE_THRESH;
 
   // Compare current sensors - failure conditions large difference
   // Difference error, filter, check, persist
-  if ( rp.mod_ib() ) ibatt_error_ = Ibatt_amp_model - Ibatt_noamp_model;
-  else ibatt_error_ = Ibatt_amp_hdwe - Ibatt_noamp_hdwe;
-  ibatt_err_filt_ = IbattErrFilt->calculate(ibatt_error_, reset, min(T, MAX_ERR_T));
-  ibatt_err_fault_ = abs(ibatt_err_filt_) >= IBATT_DISAGREE_THRESH;
-  ibatt_err_fail_ = IbattErrPersist->calculate(ibatt_err_fault_, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T, reset);
+  if ( rp.mod_ib() ) ib_diff_ = Ibatt_amp_model - Ibatt_noamp_model;
+  else ib_diff_ = Ibatt_amp_hdwe - Ibatt_noamp_hdwe;
+  ib_diff_f_ = IbattErrFilt->calculate(ib_diff_, reset, min(T, MAX_ERR_T));
+  ib_diff_flt_ = abs(ib_diff_f_) >= IBATT_DISAGREE_THRESH;
+  ib_diff_fa_ = IbattErrPersist->calculate(ib_diff_flt_, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T, reset);
 
   // Truth table
-  static int8_t ibatt_sel_status_last = ibatt_sel_status_;
+  static int8_t ib_sel_stat_last = ib_sel_stat_;
   if ( ShuntAmp->bare() && ShuntNoAmp->bare() )
   {
-    ibatt_sel_status_ = 0;
+    ib_sel_stat_ = 0;
   }
   else if ( rp.ibatt_select>0 && !ShuntAmp->bare() )
   {
-    ibatt_sel_status_ = 1;
+    ib_sel_stat_ = 1;
   }
   else if ( rp.ibatt_select<0 && !ShuntNoAmp->bare() )
   {
-    ibatt_sel_status_ = -1;
+    ib_sel_stat_ = -1;
   }
   else if ( rp.ibatt_select==0 )
   {
     if ( ShuntAmp->bare() && !ShuntNoAmp->bare() )
     {
-      ibatt_sel_status_ = -1;
+      ib_sel_stat_ = -1;
     }
-    else if ( ShuntAmp->bare() || (ibatt_err_fail_ && ekf_cc_disagree_) )
+    else if ( ShuntAmp->bare() || (ib_diff_fa_ && cc_flt_) )
     {
-      ibatt_sel_status_ = -1;
+      ib_sel_stat_ = -1;
+    }
+    else
+    {
+      ib_sel_stat_ = 1;
     }
   }
-  if ( ibatt_sel_status_ != ibatt_sel_status_last )
-      Serial.printf("Select change:  ShuntAmp->bare=%d, ShuntNoAmp->bare=%d, ibatt_err_fail=%d, ekf_cc_disagree_=%d, rp.ibatt_select=%d, ibatt_sel_status=%d,\n",
-        ShuntAmp->bare(), ShuntNoAmp->bare(), ibatt_err_fail_, ekf_cc_disagree_, rp.ibatt_select, ibatt_sel_status_);
+  if ( ib_sel_stat_ != ib_sel_stat_last )
+      Serial.printf("Select change:  ShuntAmp->bare=%d, ShuntNoAmp->bare=%d, ibatt_err_fail=%d, cc_flt_=%d, rp.ibatt_select=%d, ibatt_sel_status=%d,\n",
+        ShuntAmp->bare(), ShuntNoAmp->bare(), ib_diff_fa_, cc_flt_, rp.ibatt_select, ib_sel_stat_);
 
   // Reselect since may be changed
-  // Inputs:  ibatt_sel_status_, Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model
+  // Inputs:  ib_sel_stat_, Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model
   // Outputs:  Ibatt_hdwe_model, Ibatt_hdwe, sclr_coul_eff, Vshunt
   choose_();
 
   // Final assignments
-  if ( rp.mod_ib() )  Ibatt = Ibatt_model;
+  if ( rp.mod_ib() )  Ibatt = Ibatt_hdwe_model;
   else Ibatt = Ibatt_hdwe;
 
   if ( rp.mod_vb() )  Vbatt = Vbatt_model;
@@ -288,17 +293,19 @@ void Sensors::select_all(BatteryMonitor *Mon)
       double cTime;
       if ( rp.tweak_test() ) cTime = double(now)/1000.;
       else cTime = control_time;
-      sprintf(cp.buffer, "unit_sel,%13.3f,%d,%d,      %d,%d,            %9.6f,%d,      %7.5f,%d,%d,                %d,%7.5f,%7.5f,%7.5f,    %7.5f,%7.5f,%7.5f,   %5.2f,%5.2f,%5.2f, %c,",
+      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,    %d, %d,          %9.6f, %d,   %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,   %7.5f, %d, %d,                %d, %7.5f,%7.5f, %d, %7.5f,    %7.5f,%7.5f, %d, %7.5f,   %5.2f,%5.2f, %d, %5.2f, %c,",
           cTime, reset, rp.ibatt_select,
           ShuntAmp->bare(), ShuntNoAmp->bare(),
-          ekf_error_, ekf_cc_disagree_,
-          ibatt_error_, ibatt_err_fault_, ibatt_err_fail_,
-          ibatt_sel_status_, Ibatt_hdwe, Ibatt_model, Ibatt,
-          Vbatt_hdwe, Vbatt_model, Vbatt,
-          Tbatt_hdwe, Tbatt, Tbatt_filt,
+          cc_diff_, cc_flt_,
+          Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model, Ibatt_model, 
+          ib_diff_, ib_diff_flt_, ib_diff_fa_,
+          ib_sel_stat_, Ibatt_hdwe, Ibatt_hdwe_model, rp.mod_ib(), Ibatt,
+          Vbatt_hdwe, Vbatt_model, rp.mod_vb(), Vbatt,
+          Tbatt_hdwe, Tbatt, rp.mod_tb(), Tbatt_filt,
           '\0');
       Serial.println(cp.buffer);
   }
+  ib_sel_stat_last = ib_sel_stat_;
 }
 
 // Current bias.  Feeds into signal conversion
@@ -321,14 +328,14 @@ void Sensors::shunt_check(BatteryMonitor *Mon)
 {
     if ( reset )
     {
-        Ibatt_amp_fail_ = false;
-        Ibatt_noamp_fail_ = false;
+        Ibatt_amp_fa_ = false;
+        Ibatt_noamp_fa_ = false;
     }
     float current_max = RATED_BATT_CAP * Mon->nP();
-    Ibatt_amp_fault_ = ShuntAmp->ishunt_cal()  <= -current_max || ShuntAmp->ishunt_cal() >= current_max;
-    Ibatt_noamp_fault_ = ShuntNoAmp->ishunt_cal()  <= -current_max || ShuntNoAmp->ishunt_cal() >= current_max;
-    Ibatt_amp_fail_ = Ibatt_amp_fail_ || IbattAmpHardFail->calculate(Ibatt_amp_fault_, IBATT_HARD_SET, IBATT_HARD_RESET, T, reset);
-    Ibatt_noamp_fail_ = Ibatt_noamp_fail_ || IbattNoAmpHardFail->calculate(Ibatt_noamp_fault_, IBATT_HARD_SET, IBATT_HARD_RESET, T, reset);
+    Ibatt_amp_flt_ = ShuntAmp->ishunt_cal()  <= -current_max || ShuntAmp->ishunt_cal() >= current_max;
+    Ibatt_noamp_flt_ = ShuntNoAmp->ishunt_cal()  <= -current_max || ShuntNoAmp->ishunt_cal() >= current_max;
+    Ibatt_amp_fa_ = Ibatt_amp_fa_ || IbattAmpHardFail->calculate(Ibatt_amp_flt_, IBATT_HARD_SET, IBATT_HARD_RESET, T, reset);
+    Ibatt_noamp_fa_ = Ibatt_noamp_fa_ || IbattNoAmpHardFail->calculate(Ibatt_noamp_flt_, IBATT_HARD_SET, IBATT_HARD_RESET, T, reset);
 }
 
 // Read and convert shunt Sensors
@@ -345,7 +352,7 @@ void Sensors::shunt_print()
         reset, T, rp.ibatt_select, rp.inj_bias, ShuntAmp->vshunt_int(), ShuntAmp->vshunt(), ShuntAmp->ishunt_cal(),
         ShuntNoAmp->vshunt_int(), ShuntNoAmp->vshunt(), ShuntNoAmp->ishunt_cal(),
         Ibatt_hdwe, T, sclr_coul_eff,
-        Ibatt_amp_fault_, Ibatt_amp_fail_, Ibatt_noamp_fault_, Ibatt_noamp_fail_);
+        Ibatt_amp_flt_, Ibatt_amp_fa_, Ibatt_noamp_flt_, Ibatt_noamp_fa_);
 }
 
 // Shunt selection.  Use Coulomb counter and EKF to sort three signals:  amp current, non-amp current, voltage
@@ -365,7 +372,7 @@ void Sensors::shunt_select_initial()
     Ibatt_noamp_model = ShuntNoAmp->bias();
 
     // Initial choice
-    // Inputs:  ibatt_sel_status_, Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model
+    // Inputs:  ib_sel_stat_, Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model
     // Outputs:  Ibatt_hdwe_model, Ibatt_hdwe, sclr_coul_eff, Vshunt
     choose_();
 
@@ -410,9 +417,9 @@ void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const 
 // Check analog voltage.  Latches
 void Sensors::vbatt_check(BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max)
 {
-    if ( reset ) Vbatt_fail_ = false;
-    Vbatt_fault_ = Vbatt_hdwe <= _Vbatt_min*Mon->nS() || Vbatt_hdwe >= _Vbatt_max*Mon->nS();
-    Vbatt_fail_ = Vbatt_fail_ || VbattHardFail->calculate(Vbatt_fault_, VBATT_HARD_SET, VBATT_HARD_RESET, T, reset);
+    if ( reset ) Vbatt_fa_ = false;
+    Vbatt_flt_ = Vbatt_hdwe <= _Vbatt_min*Mon->nS() || Vbatt_hdwe >= _Vbatt_max*Mon->nS();
+    Vbatt_fa_ = Vbatt_fa_ || VbattHardFail->calculate(Vbatt_flt_, VBATT_HARD_SET, VBATT_HARD_RESET, T, reset);
 }
 
 // Load analog voltage
@@ -426,5 +433,5 @@ void Sensors::vbatt_load(const byte vbatt_pin)
 void Sensors::vbatt_print()
 {
   Serial.printf("reset, T, Vbatt_raw, rp.vbatt_bias, Vbatt_hdwe, Vbatt_fault, Vbatt_fail=, %d, %7.3f, %d, %7.3f,  %7.3f, %d, %d,\n",
-    reset, T, Vbatt_raw, rp.vbatt_bias, Vbatt_hdwe, Vbatt_fault_, Vbatt_fail_);
+    reset, T, Vbatt_raw, rp.vbatt_bias, Vbatt_hdwe, Vbatt_flt_, Vbatt_fa_);
 }
