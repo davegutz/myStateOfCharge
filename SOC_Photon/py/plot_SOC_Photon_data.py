@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 
 def plot_soc_photon_data(r, key):
-    var_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
+    var_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,"
     count = 0
     i = 0
     cTime_last = None
@@ -67,9 +67,8 @@ def plot_soc_photon_data(r, key):
                 soc_m = float(list_r[15])
                 soc_ekf = float(list_r[16])
                 soc = float(list_r[17])
-                soc_wt = float(list_r[18])
                 print(count, unit, hm, cTime, dt, sat, sel, mod, Tb, Vb, Ib, Vsat, dV_dyn, Voc_stat, Voc_ekf, y_ekf, soc_m,
-                      soc_ekf, soc, soc_wt)
+                      soc_ekf, soc)
                 i += 1
                 # Plot when have at least 2 points available
                 if i > 1:

@@ -147,8 +147,6 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(new_s.time, new_s.soc_ekf, color='orange', linestyle='--', label='soc_ekf_new')
     plt.legend(loc=1)
     plt.subplot(223)
-    plt.plot(old_s.time, old_s.soc_wt, color='green', label='soc_wt')
-    plt.plot(new_s.time, new_s.soc_wt, color='orange', linestyle='--', label='soc_wt_new')
     plt.plot(old_s.time, old_s.soc, color='blue', linestyle='-.', label='soc')
     plt.plot(new_s.time, new_s.soc, color='red', linestyle=':', label='soc_new')
     plt.legend(loc=1)
@@ -351,7 +349,6 @@ class SavedData:
             self.soc_m = []  # Simulated state of charge, fraction
             self.soc_ekf = []  # Solved state of charge, fraction
             self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) available (0-1)
-            self.soc_wt = []  # Weighted selection of ekf state of charge and Coulomb Counter (0-1)
             self.time_ref = 0.  # Adjust time for start of Ib input
         else:
             self.i = 0
@@ -399,7 +396,6 @@ class SavedData:
             self.soc_m = np.array(data.soc_m[:i_end])
             self.soc_ekf = np.array(data.soc_ekf[:i_end])
             self.soc = np.array(data.soc[:i_end])
-            self.soc_wt = np.array(data.soc_wt[:i_end])
 
     def __str__(self):
         s = "{},".format(self.unit[self.i])
@@ -415,7 +411,6 @@ class SavedData:
         s += "{:7.3f},".format(self.soc_m[self.i])
         s += "{:5.3f},".format(self.soc_ekf[self.i])
         s += "{:5.3f},".format(self.soc[self.i])
-        s += "{:5.3f},".format(self.soc_wt[self.i])
         return s
 
     def mod(self):
@@ -504,7 +499,7 @@ if __name__ == '__main__':
 
     def compare_print(old_s, new_s):
         s = " time,      Ib,                   Vb,              dV_dyn,          Voc_stat,\
-                    Voc,        Voc_ekf,         y_ekf,               soc_ekf,      soc,         soc_wt,\n"
+                    Voc,        Voc_ekf,         y_ekf,               soc_ekf,      soc,\n"
         for i in range(len(new_s.time)):
             s += "{:7.3f},".format(old_s.time[i])
             s += "{:11.3f},".format(old_s.Ib[i])
@@ -525,8 +520,6 @@ if __name__ == '__main__':
             s += "{:5.3f},".format(new_s.soc_ekf[i])
             s += "{:7.3f},".format(old_s.soc[i])
             s += "{:5.3f},".format(new_s.soc[i])
-            s += "{:7.3f},".format(old_s.soc_wt[i])
-            s += "{:5.3f},".format(new_s.soc_wt[i])
             s += "\n"
         return s
 
@@ -556,7 +549,7 @@ if __name__ == '__main__':
 
         # Load
         cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn',
-                'Voc_stat', 'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
+                'Voc_stat', 'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc')
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)

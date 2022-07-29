@@ -270,7 +270,6 @@ class BatteryMonitor(Battery, EKF1x1):
         self.tcharge_ekf = 0.  # Charging time to 100% from ekf, hr
         self.voc = 0.  # Charging voltage, V
         self.soc_ekf = 0.  # Filtered state of charge from ekf (0-1)
-        self.soc_wt = 0.  # Weighted selection of ekf state of charge and coulomb counter (0-1)
         self.q_ekf = 0  # Filtered charge calculated by ekf, C
         self.amp_hrs_remaining_ekf = 0  # Discharge amp*time left if drain to q_ekf=0, A-h
         self.amp_hrs_remaining_wt = 0  # Discharge amp*time left if drain soc_wt_ to 0, A-h
@@ -314,7 +313,6 @@ class BatteryMonitor(Battery, EKF1x1):
         s += "  amp_hrs_remaining_wt_  =  {:7.3f}  // Discharge amp*time left if drain soc_wt_ to 0, A-h\n".format(self.amp_hrs_remaining_wt)
         s += "  q_ekf     {:7.3f}  // Filtered charge calculated by ekf, C\n".format(self.q_ekf)
         s += "  soc_ekf = {:7.3f}  // Solved state of charge, fraction\n".format(self.soc_ekf)
-        s += "  soc_wt  = {:7.3f}  // Weighted selection of ekf state of charge and coulomb counter (0-1)\n".format(self.soc_wt)
         s += "  tcharge = {:7.3f}  // Charging time to full, hr\n".format(self.tcharge)
         s += "  tcharge_ekf = {:7.3f}   // Charging time to full from ekf, hr\n".format(self.tcharge_ekf)
         s += "  mod     =               {:d}  // Modeling\n".format(self.mod)
@@ -415,7 +413,7 @@ class BatteryMonitor(Battery, EKF1x1):
         if soc > 0.:
             self.amp_hrs_remaining_ekf = amp_hrs_remaining * (self.soc_ekf - self.soc_min) /\
                 max(soc - self.soc_min, 1e-8)
-            self.amp_hrs_remaining_wt = amp_hrs_remaining * (self.soc_wt - self.soc_min) /\
+            self.amp_hrs_remaining_wt = amp_hrs_remaining * (self.soc - self.soc_min) /\
                 max(soc - self.soc_min, 1e-8)
         else:
             self.amp_hrs_remaining_ekf = 0.
@@ -530,22 +528,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.sat.append(self.sat)
         self.saved.sel.append(self.sel)
         self.saved.mod_data.append(self.mod)
-        self.saved.soc_wt.append(self.soc_wt)
         self.saved.soc_m.append(self.soc_m)
         self.Randles.save(time)
-
-    def select(self):
-        drift = self.soc_ekf - self.soc
-        avg = (self.soc_ekf + self.soc) / 2.
-        if drift <= -DF2 or drift >= DF2:
-            self.soc_wt = self.soc_ekf
-        if -DF2 < drift < -DF1:
-            self.soc_wt = avg + (drift + DF1)/(DF2 - DF1) * (DF2/2.)
-        elif DF1 < drift < DF2:
-            self.soc_wt = avg + (drift - DF1)/(DF2 - DF1) * (DF2/2.)
-        else:
-            self.soc_wt = avg
-        self.soc_wt = self.soc  # override logic
 
 
 class BatteryModel(Battery):
@@ -881,7 +865,6 @@ class Saved:
         self.soc_m = []  # Simulated state of charge, fraction
         self.soc_ekf = []  # Solved state of charge, fraction
         # self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) available (0-1)
-        self.soc_wt = []  # Weighted selection of ekf state of charge and Coulomb Counter (0-1)
         self.d_delta_q = []  # Charging rate, Coulombs/sec
         self.charge_curr = []  # Charging current, A
         self.q = []  # Present charge available to use, except q_min_, C

@@ -30,7 +30,7 @@ from Scale import Scale
 
 def save_clean_file(mons, csv_file, unit_key):
     default_header_str = "unit,               hm,                  cTime,        dt,       sat,sel,mod,\
-      Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,"
+      Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,"
     n = len(mons.time)
     date_time_start = datetime.now()
     with open(csv_file, "w") as output:
@@ -56,7 +56,6 @@ def save_clean_file(mons, csv_file, unit_key):
             s += "{:7.3f},".format(mons.soc_m[i])
             s += "{:7.3f},".format(mons.soc_ekf[i])
             s += "{:7.3f},".format(mons.soc[i])
-            s += "{:7.3f},".format(mons.soc_wt[i])
             s += "\n"
             output.write(s)
         print("Wrote(save_clean_file):", csv_file)
@@ -194,7 +193,6 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
         else:
             mon.count_coulombs(dt=T, reset=reset, temp_c=temp_c, charge_curr=charge_curr, sat=saturated)
         mon.calc_charge_time(mon.q, mon.q_capacity, charge_curr, mon.soc)
-        mon.select()
         # mon.regauge(Tb[i])
         mon.assign_soc_m(sim.soc)
 
@@ -240,13 +238,14 @@ if __name__ == '__main__':
         # time_end = 2000.
 
         t_Ib_fail = None
-        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220723.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220723.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
         # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'
         # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'; t_Vb_fail = 10
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
         # data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
+        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220729.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
@@ -254,7 +253,7 @@ if __name__ == '__main__':
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key)
         cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn', 'Voc_stat',
-                'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc', 'soc_wt')
+                'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc')
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data=data_old, time_end=time_end)
