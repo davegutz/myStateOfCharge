@@ -1,0 +1,969 @@
+self_talk:  new string = 'Xp0'
+self_talk:  new string = 'XS'
+STOPPED
+self_talk:  new string = 'Mk1'
+rp.tweak_sclr   1.000 to   1.000
+self_talk:  new string = 'Nk1'
+rp.tweak_sclr from   1.000 to   1.000
+self_talk:  new string = 'Dn0.998500'
+ShuntNoAmp.add from   0.000 to   0.998
+self_talk:  new string = 'v0'
+self_talk:  new string = 'Bm0'
+Changing monitor chemistry from 0 to 0
+self_talk:  new string = 'Bs0'
+Changing simulation chemistry from 0 to 0 ('Battleborn')
+self_talk:  new string = 'Xm15'
+modeling from 7 to 15
+Changed...soft reset
+Modeling is 15
+tweak_test is 1
+mod_ib is 1
+mod_vb is 1
+mod_tb is 1
+self_talk:  new string = 'Xts'
+Set sin.  rp.type = 1
+self_talk:  new string = 'Ca1'
+soc=  1.000, modeling = 15, delta_q=  0.000, soc_model=  1.0000,   delta_q_model=  0.000, soc_ekf=  0.0000, delta_q_ekf=-360000.000,
+self_talk:  new string = 'Ri'
+Amp cinf CC reset from -360000.0 to -360000.0
+Amp dinf CC reset from  360000.0 to  360000.0
+No amp cinf CC reset from -360000.0 to -360000.0
+No amp dinf CC reset from  360000.0 to  360000.0
+self_talk:  new string = 'Mw0'
+Amp->time_to_wait from   6.000 to   0.000
+self_talk:  new string = 'Nw0'
+NoAmp->time_to_wait   6.000 to   0.000
+self_talk:  new string = 'MC0.004'
+Amp->max_change_   0.001000 to   0.004000
+self_talk:  new string = 'Mx0.04'
+Amp->max_tweak from   0.010 to   0.040
+self_talk:  new string = 'NC0.004'
+NoAmp->max_change_   0.001000 to   0.004000
+self_talk:  new string = 'Nx0.04'
+NoAmp->max_tweak   0.010 to   0.040
+self_talk:  new string = 'Mk1'
+rp.tweak_sclr   1.000 to   1.000
+self_talk:  new string = 'Nk1'
+rp.tweak_sclr from   1.000 to   1.000
+self_talk:  new string = 'Dn1'
+ShuntNoAmp.add from   0.998 to   1.000
+self_talk:  new string = 'Dp100'
+100
+self_talk:  new string = 'Xf0.02'
+Injected freq set   0.020 Hz =   0.126 r/s
+self_talk:  new string = 'Xa-2000'
+Inj amp set -2000.000 & inj_bias set   0.000
+self_talk:  new string = 'XW5'
+Waiting     5.0 s to start inj
+self_talk:  new string = 'XT5'
+Waiting     5.0 s tail after inj
+self_talk:  new string = 'XC3'
+Num of inj cycles set to   3.000
+self_talk:  new string = 'v24'
+self_talk:  new string = 'Pa'
+self_talk:  new string = 'Pm'
+
+Mon:BatteryMonitor::Battery:
+  temp_c_ =          25.000;  //  deg C
+ *rp_delt_q_ =          0.0;  //  Coulombs
+ *rp_t_last_ =         25.0;  // deg C
+  dvoc_dt  =       0.004000;  //  V/deg C
+  r_0 =            0.003000;  //  ohms
+  r_ct =           0.001600;  //  ohms
+  tau_ct =         0.200000;  //  s (=1/Rct/Cct)
+  r_diff =         0.007700;  //  ohms
+  tau_diff =      83.000000;  //  s (=1/Rdif/Cdif)
+  r_sd =          70.000000;  //  ohms
+  tau_sd =       25000000.0;  //  sec
+  bms_off_ =              0;  // T=off
+  dv_dsoc_=       80.000019;  // V/fraction
+  ib_ =               0.000;  // A
+  Ib =                0.000;  // Bank, A
+  vb_ =             -30.773;  // V
+  Vb =              -30.773;  // Bank, V
+  voc_ =            -30.773;  // V
+  voc_stat_ =       -30.773;  // V
+  vsat_ =            13.800;  // V
+  dv_dyn_ =           0.000;  // V
+  sr_ =               1.000;  // Resistance scalar
+  dv_ =               0.010;  // Table hard adj, V
+  dt_ =               0.100;  // Update time, s
+ *rp_nP_ =             1.00;  // P parallel in bank, e.g. '2P1S'
+ *rp_nS_ =             1.00;  // S series in bank, e.g. '2P1S'
+ BatteryMonitor::BatteryMonitor:
+  amp_hrs_remaining_ekf_ =   -7.750;  // Discharge amp*time left if drain to q_ekf=0, A-h
+  amp_hrs_remaining_soc_ =   92.250;  // Discharge amp*time left if drain soc_ to 0, A-h
+  EKF_converged =                 0;  // EKF is converged, T=converged
+  q_ekf =                       0.0;  // Filtered charge calculated by ekf, C
+  soc_ekf =                  0.0000;  // Solved state of charge, fraction
+  tcharge =                    24.0;  // Counted charging time to full, hr
+  tcharge_ekf =                24.0;  // Solved charging time to full from ekf, hr
+  voc_filt_ =               -30.823;  // Filtered charging voltage for saturation detect, V
+  voc_stat_ =               -30.773;  // Static model open circuit voltage from table (reference), V
+  y_filt_ =                  -0.500;  // Filtered y_ residual from EKF, V
+Mon::Coulombs:
+  q_cap_rated_= 360000.0;  // Rated capacity at t_rated, C
+  q_cap_rated_scaled_=  360000.0;  // Applied rated capacity at t_rated_, C
+  q_capacity_ = 360000.0;  // Saturation charge at temperature, C
+  q_ =          360000.0;  // Present charge available to use, except q_min_, C
+  q_min_ =       27900.0;  // Est charge at low voltage shutdown, C
+  delta_q            0.0;  // Charge change since saturated, C
+  soc_ =          1.0000;  // Fraction of q_capacity_available (0-1);
+  sat_ =               1;  // Indication that battery is saturated, T=saturated
+  t_rated_ =        25.0;  // Rated temperature, deg C
+  t_last =          25.0;  // Last battery temperature for rate limit memory, deg C
+  t_rlim_ =        0.017;  // Tbatt rate limit, deg C / s
+  resetting_ =         1;  // Flag to coord user testing of CC, T=perf external reset of counter
+  soc_min_ =      0.0775;  // Est soc where battery BMS shuts off current
+  mod_ =       Battleborn;  // Model type of battery chemistry e.g. Battleborn or LION
+  mod_code_ =          0;  // Chemistry code integer
+  coul_eff_ =    0.99850;  // Coulombic Efficiency
+Coulombs::Chemistry:
+  dqdt =      0.010;  // Change charge with temperature, fraction/deg C (0.01 from lit)
+  low_voc =  10.000;  // Threshold for BMS to turn off battery, V
+  hys_cap = 360000.000;  // Cap of hysteresis, Farads
+  v_sat =    13.850;  // Sat thresh at temp, V
+  dvoc_dt =   0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
+  dv =        0.010;  // Adj for cal error, V
+  r_0 =    0.003000;  // Randles R0, ohms
+  r_ct =   0.001600;  // Charge transfer resistance, ohms
+  r_diff = 0.007700;  // Diffusion resistance, ohms
+  tau_ct =    0.200;  // Charge transfer time constant, s (=1/Rct/Cct)
+  tau_diff = 83.000;  // Diffusion time constant, s (=1/Rdif/Cdif)
+  tau_sd =  25000000.000;  // EKF ref.	Parasitic discharge time constant, sec
+  r_sd =     70.000;  // EKF ref.	Parasitic discharge, ohms
+  r_ss =      0.012;  // For state space model init, ohms
+  voc(t, soc):
+    t=  {  5.000,  11.100,  20.000,  40.000, };
+    soc={  0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.990,   0.995,   1.000, };
+    voc={
+      {  4.000,   4.000,   6.000,   9.500,  11.700,  12.300,  12.500,  12.650,  12.820,  12.910,  12.980,  13.050,  13.110,  13.170,  13.220,  13.750,  14.450, },
+      {  4.000,   4.000,   8.000,  11.600,  12.400,  12.600,  12.700,  12.800,  12.920,  13.010,  13.060,  13.110,  13.170,  13.200,  13.230,  13.760,  14.460, },
+      {  4.000,   8.000,  12.200,  12.680,  12.730,  12.790,  12.810,  12.890,  13.000,  13.040,  13.090,  13.140,  13.210,  13.250,  13.270,  13.800,  14.500, },
+      {  4.080,   8.080,  12.280,  12.760,  12.810,  12.870,  12.890,  12.970,  13.080,  13.120,  13.170,  13.220,  13.290,  13.330,  13.350,  13.880,  14.580, },
+         };
+  soc_min(temp_c):
+    temp_c =  {  5.000,  11.100,  20.000,  40.000, };
+    soc_min=  {  0.140,   0.120,   0.080,   0.070, };
+  r(soc, dv):
+    soc={0.000000, 0.500000, 1.000000, };
+    dv ={ -0.900,  -0.700,  -0.500,  -0.300,   0.000,   0.300,   0.500,   0.700,   0.900, };
+    r  ={
+      { 0.000001,  0.064000,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.046000,  0.000001, },
+      { 0.000001,  0.000001,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.000001,  0.000001, },
+      { 0.000001,  0.000001,  0.000001,  0.036000,  0.015000,  0.024000,  0.000001,  0.000001,  0.000001, },
+         };
+Mon::StateSpace:
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.000000,  0.000000];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.000000,-30.772644];
+   C  =  [ -1.000000, -1.000000];
+   D  =  [ -0.003000,  1.000000];
+   x_dot  =  [  0.000000,  0.000000];
+   y  =  [-30.772644];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res_ =         0.0150;  // Null, Ohms
+  cap_init_ =  360000.0;  // Farads
+  cap_ =       360000.0;  // Farads
+  tau_ =         5400.0;  // Null time const, sec
+  ib_ =           0.000;  // In, A
+  ioc_ =          0.000;  // Out, A
+  soc_ =         1.0000;  // Input
+  res_ =          0.015;  // Variable value, ohms
+  dv_dot_ =       0.000;  // Calculated rate, V/s
+  dv_hys_ =       0.000;  // Delta state, V
+  disabled_ =         0;  // Disabled by input < 1e-5, T=disab
+  rp.hys_scale=    1.00;  // Scalar on hys
+Mon::EKF_1x1:
+Inputs:
+  z  =   -30.7726;  // 1x1 input, =voc, dynamic predicted by other model, V
+  R  =   0.250000;  // 1x1 Kalman state uncertainty
+  Q  =   0.000000;  // 1x1 Kalman process uncertainty
+  H  =     80.000;  // 1x1 Jacobian sensitivity dV/dSOC
+Outputs:
+  x  =     0.0000;  // 1x1 Kalman state variable = Vsoc (0-1 fraction)
+  hx =     4.0300;  // Output of observation function h(x)
+  y  =   -34.8026;  // 1x1 Residual z-hx, V
+  P  =   0.000000;  // 1x1 Kalman uncertainty covariance
+  K  =   0.000098;  // 1x1 Kalman gain
+  S  =   0.251985;  // 1x1 system uncertainty
+
+Sim:   rp.modeling = 15
+self_talk:  new string = 'Ps'
+
+Sim:   rp.modeling = 15
+Sim:BatteryModel::Battery:
+  temp_c_ =          25.000;  //  deg C
+ *rp_delt_q_ =          0.0;  //  Coulombs
+ *rp_t_last_ =         25.0;  // deg C
+  dvoc_dt  =       0.004000;  //  V/deg C
+  r_0 =            0.003000;  //  ohms
+  r_ct =           0.001600;  //  ohms
+  tau_ct =         0.200000;  //  s (=1/Rct/Cct)
+  r_diff =         0.007700;  //  ohms
+  tau_diff =      83.000000;  //  s (=1/Rdif/Cdif)
+  r_sd =          70.000000;  //  ohms
+  tau_sd =       25000000.0;  //  sec
+  bms_off_ =              0;  // T=off
+  dv_dsoc_=      122.999954;  // V/fraction
+  ib_ =               0.000;  // A
+  Ib =                0.000;  // Bank, A
+  vb_ =             -30.773;  // V
+  Vb =              -30.773;  // Bank, V
+  voc_ =             14.530;  // V
+  voc_stat_ =        14.530;  // V
+  vsat_ =            13.800;  // V
+  dv_dyn_ =         -45.303;  // V
+  sr_ =               1.000;  // Resistance scalar
+  dv_ =               0.010;  // Table hard adj, V
+  dt_ =               0.100;  // Update time, s
+ *rp_nP_ =             1.00;  // P parallel in bank, e.g. '2P1S'
+ *rp_nS_ =             1.00;  // S series in bank, e.g. '2P1S'
+ BatteryModel::BatteryModel:
+  sat_ib_max_ =         0.000;  // Cutback, A
+  sat_ib_null_ =        0.000;  // Cutback value for voc=vsat, A
+  sat_cutback_gain_ =  1000.0;  // Gain to retard ib when voc exceeds vsat
+  model_cutback_ =          1;  // Cutting
+  model_saturated_ =        1;  // Limited on saturation cutback
+  ib_ =                 0.000;  // Battery terminal curr, A
+  ib_in_ =              0.000;  // Saved value of curr in, A
+  ib_fut_ =             0.000;  // Future value of limited curr, A
+  ib_sat_ =             0.500;  // T = cutback saturated
+ *rp_s_cap_model_ =     1.000;  // Rated capacity scalar
+Sim::Coulombs:
+  q_cap_rated_= 360000.0;  // Rated capacity at t_rated, C
+  q_cap_rated_scaled_=  360000.0;  // Applied rated capacity at t_rated_, C
+  q_capacity_ = 360000.0;  // Saturation charge at temperature, C
+  q_ =          360000.0;  // Present charge available to use, except q_min_, C
+  q_min_ =       27900.0;  // Est charge at low voltage shutdown, C
+  delta_q            0.0;  // Charge change since saturated, C
+  soc_ =          1.0000;  // Fraction of q_capacity_available (0-1);
+  sat_ =               1;  // Indication that battery is saturated, T=saturated
+  t_rated_ =        25.0;  // Rated temperature, deg C
+  t_last =          25.0;  // Last battery temperature for rate limit memory, deg C
+  t_rlim_ =        0.017;  // Tbatt rate limit, deg C / s
+  resetting_ =         1;  // Flag to coord user testing of CC, T=perf external reset of counter
+  soc_min_ =      0.0775;  // Est soc where battery BMS shuts off current
+  mod_ =       Battleborn;  // Model type of battery chemistry e.g. Battleborn or LION
+  mod_code_ =          0;  // Chemistry code integer
+  coul_eff_ =    0.99850;  // Coulombic Efficiency
+Coulombs::Chemistry:
+  dqdt =      0.010;  // Change charge with temperature, fraction/deg C (0.01 from lit)
+  low_voc =  10.000;  // Threshold for BMS to turn off battery, V
+  hys_cap = 360000.000;  // Cap of hysteresis, Farads
+  v_sat =    13.850;  // Sat thresh at temp, V
+  dvoc_dt =   0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
+  dv =        0.010;  // Adj for cal error, V
+  r_0 =    0.003000;  // Randles R0, ohms
+  r_ct =   0.001600;  // Charge transfer resistance, ohms
+  r_diff = 0.007700;  // Diffusion resistance, ohms
+  tau_ct =    0.200;  // Charge transfer time constant, s (=1/Rct/Cct)
+  tau_diff = 83.000;  // Diffusion time constant, s (=1/Rdif/Cdif)
+  tau_sd =  25000000.000;  // EKF ref.	Parasitic discharge time constant, sec
+  r_sd =     70.000;  // EKF ref.	Parasitic discharge, ohms
+  r_ss =      0.012;  // For state space model init, ohms
+  voc(t, soc):
+    t=  {  5.000,  11.100,  20.000,  40.000, };
+    soc={  0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.990,   0.995,   1.000, };
+    voc={
+      {  4.000,   4.000,   6.000,   9.500,  11.700,  12.300,  12.500,  12.650,  12.820,  12.910,  12.980,  13.050,  13.110,  13.170,  13.220,  13.750,  14.450, },
+      {  4.000,   4.000,   8.000,  11.600,  12.400,  12.600,  12.700,  12.800,  12.920,  13.010,  13.060,  13.110,  13.170,  13.200,  13.230,  13.760,  14.460, },
+      {  4.000,   8.000,  12.200,  12.680,  12.730,  12.790,  12.810,  12.890,  13.000,  13.040,  13.090,  13.140,  13.210,  13.250,  13.270,  13.800,  14.500, },
+      {  4.080,   8.080,  12.280,  12.760,  12.810,  12.870,  12.890,  12.970,  13.080,  13.120,  13.170,  13.220,  13.290,  13.330,  13.350,  13.880,  14.580, },
+         };
+  soc_min(temp_c):
+    temp_c =  {  5.000,  11.100,  20.000,  40.000, };
+    soc_min=  {  0.140,   0.120,   0.080,   0.070, };
+  r(soc, dv):
+    soc={0.000000, 0.500000, 1.000000, };
+    dv ={ -0.900,  -0.700,  -0.500,  -0.300,   0.000,   0.300,   0.500,   0.700,   0.900, };
+    r  ={
+      { 0.000001,  0.064000,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.046000,  0.000001, },
+      { 0.000001,  0.000001,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.000001,  0.000001, },
+      { 0.000001,  0.000001,  0.000001,  0.036000,  0.015000,  0.024000,  0.000001,  0.000001,  0.000001, },
+         };
+Sim::StateSpace:
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.000000,  0.000000];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.000000,-30.772644];
+   C  =  [  1.000000,  1.000000];
+   D  =  [  0.003000,  1.000000];
+   x_dot  =  [  0.000000,  0.000000];
+   y  =  [-30.772644];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res_ =         0.0150;  // Null, Ohms
+  cap_init_ =  360000.0;  // Farads
+  cap_ =       360000.0;  // Farads
+  tau_ =         5400.0;  // Null time const, sec
+  ib_ =           0.000;  // In, A
+  ioc_ =          0.000;  // Out, A
+  soc_ =         1.0000;  // Input
+  res_ =          0.015;  // Variable value, ohms
+  dv_dot_ =       0.000;  // Calculated rate, V/s
+  dv_hys_ =       0.000;  // Delta state, V
+  disabled_ =         0;  // Disabled by input < 1e-5, T=disab
+  rp.hys_scale=    1.00;  // Scalar on hys
+self_talk:  new string = 'Pr'
+
+retained parameters (rp):
+  debug =                 24;  // Level of debug printing
+  delta_q =           0.000;  // CC state Monf, (-1 - 1)
+  t_last =           25.000;  // Battery temp past rate limit mem, deg C
+  delta_q_model =       0.0;  // CC state model, (-1 - 1)
+  t_last_model =     25.000;  // Battery temp past rate limit mem, deg C
+  ibatt_bias_amp =   -0.240;  // Calibrate amp sensor, A
+  ibatt_bias_noamp = -1.100;  // Calibrate non-amp sensor, A
+  ibatt_bias_all =    0.000;  // Bias all sensors, A 
+  ibatt_select =          0;  // -1=noamp, 0=auto, 1=amp
+  vbatt_bias =        1.800;  // Calibrate Vbatt, V
+  modeling =              15;  // Bit mapped mod spec
+  amp =             -2000.000;  // Injected amp, A pk (0-18.3)
+  freq =              0.126;  // Injected freq, r/s (0-2*pi)
+  type =                  1;  //  Injected wave.  0=sin, 1=sq, 2=tri
+  inj_bias =          0.000;  // Injected bias, A
+  tbatt_bias =        0.000;  // Sense bias, deg C
+  s_cap_model =       1.000;  // Scalar on battery mod size
+  cutback_gain_scalar=  1.000;  // Scalar on battery mod saturation cutback function
+  isum =                  4;  // Summary location ptr.   Begins at -1
+  delta_q_cinf_amp =  -360000.0;  // Coul
+  delta_q_dinf_amp =   360000.0;  // Coul
+  delta_q_cinf_noamp= -360000.0;  // Coul
+  delta_q_dinf_noamp=  360000.0;  // Coul
+  hys_scale =         1.000;  //  Hysteresis scalar
+  tweak_sclr_amp =    1.000;  // Tweak calibration for amp current
+  tweak_sclr_noamp =  1.000;  // Tweak calibration for non-amp current
+  nP =                 1.00;  // Num parallel batteries in bank, e.g. '2P1S'
+  nS =                 1.00;  // Num series batteries in bank, e.g. '2P1S'
+  mon_mod =               0;  //  Mon battery model chars.  0=Battleborn, 1=LION
+  sim_mod =               0;  //  Sim battery model chars.  0=Battleborn, 1=LION
+
+command parameters(cp):
+  enable_wifi =                0;
+  model_cutback =              1;
+  model_saturated =            1;
+  soft_reset =                 1;
+  write_summary =              0;
+  ibatt_tot_bias_amp =     0.000;
+  ibatt_tot_bias_noamp =   0.000;
+  dc_dc_on =                   0;
+  blynking =                   0;
+self_talk:  new string = 'Pt'
+
+Mon::StateSpace:
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.000000,  0.000000];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.000000,-30.772644];
+   C  =  [ -1.000000, -1.000000];
+   D  =  [ -0.003000,  1.000000];
+   x_dot  =  [  0.000000,  0.000000];
+   y  =  [-30.772644];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res_ =         0.0150;  // Null, Ohms
+  cap_init_ =  360000.0;  // Farads
+  cap_ =       360000.0;  // Farads
+  tau_ =         5400.0;  // Null time const, sec
+  ib_ =           0.000;  // In, A
+  ioc_ =          0.000;  // Out, A
+  soc_ =         1.0000;  // Input
+  res_ =          0.015;  // Variable value, ohms
+  dv_dot_ =       0.000;  // Calculated rate, V/s
+  dv_hys_ =       0.000;  // Delta state, V
+  disabled_ =         0;  // Disabled by input < 1e-5, T=disab
+  rp.hys_scale=    1.00;  // Scalar on hys
+
+Sim::StateSpace:
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.000000,  0.000000];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.000000,-30.772644];
+   C  =  [  1.000000,  1.000000];
+   D  =  [  0.003000,  1.000000];
+   x_dot  =  [  0.000000,  0.000000];
+   y  =  [-30.772644];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res_ =         0.0150;  // Null, Ohms
+  cap_init_ =  360000.0;  // Farads
+  cap_ =       360000.0;  // Farads
+  tau_ =         5400.0;  // Null time const, sec
+  ib_ =           0.000;  // In, A
+  ioc_ =          0.000;  // Out, A
+  soc_ =         1.0000;  // Input
+  res_ =          0.015;  // Variable value, ohms
+  dv_dot_ =       0.000;  // Calculated rate, V/s
+  dv_hys_ =       0.000;  // Delta state, V
+  disabled_ =         0;  // Disabled by input < 1e-5, T=disab
+  rp.hys_scale=    1.00;  // Scalar on hys
+self_talk:  new string = 'PM'
+
+Tweak::Shunt(Amp)::
+  port_ =                0x49; // I2C port used by Acafruit_ADS1015
+  bare_ =                   0; // If ADS to be ignored
+  *cp_ibatt_bias_ =     0.000; // Global bias, A
+  v2a_s_ =            -246.67; // Selected shunt conversion gain, A/V
+  vshunt_int_ =           0; // Sensed shunt voltage, count
+  ishunt_cal_ =         0.000; // Sensed, calibrated ADC, A
+Shunt(Amp)::Tweak(Amp)::
+  max_change_ =               0.004; // Maximum allowed change to calibration scalar see 'N/MC'
+  max_tweak_ =                0.040; // Maximum allowed calibration scalar see 'N/Mx'
+  rp_delta_q_cinf_ =      -360000.0; // Charge infinity at past update see 'N/Mi', Coulombs
+  rp_delta_q_dinf_ =       360000.0; // Discharge infinity at past update see 'N/Mi', Coulombs
+  sat_ =                          1; // Indication that battery is saturated, T=saturated
+  delta_hrs_ =             0.012315; // Time since last allowed saturation see 'N/Mz', hr
+  time_to_wait =           0.000000; // Time to wait before allowing saturation see 'N/Mw', hr
+  tweak_sclr =                1.000; // Scalar on Coulombic Efficiency 'N/Mk'
+  coul_eff_ =      0.99850;  // Coulombic Efficiency
+Shunt(Amp)::Adafruit_ADS1x15 (Amp):
+ m_bitShift =      4;
+ m_gain =       2048;
+ s_gain =       1024;
+ m_dataRate =    128;
+Adafruit_ADS1x15::Adafruit_I2CDevice (Amp):
+  _addr =        0x49;
+  _begun =          1;
+  _maxBufferSize = 32;
+self_talk:  new string = 'PN'
+
+Tweak::Shunt(No Amp)::
+  port_ =                0x48; // I2C port used by Acafruit_ADS1015
+  bare_ =                   0; // If ADS to be ignored
+  *cp_ibatt_bias_ =     0.000; // Global bias, A
+  v2a_s_ =            -1189.30; // Selected shunt conversion gain, A/V
+  vshunt_int_ =           0; // Sensed shunt voltage, count
+  ishunt_cal_ =         0.000; // Sensed, calibrated ADC, A
+Shunt(No Amp)::Tweak(No Amp)::
+  max_change_ =               0.004; // Maximum allowed change to calibration scalar see 'N/MC'
+  max_tweak_ =                0.040; // Maximum allowed calibration scalar see 'N/Mx'
+  rp_delta_q_cinf_ =      -360000.0; // Charge infinity at past update see 'N/Mi', Coulombs
+  rp_delta_q_dinf_ =       360000.0; // Discharge infinity at past update see 'N/Mi', Coulombs
+  sat_ =                          1; // Indication that battery is saturated, T=saturated
+  delta_hrs_ =             0.012318; // Time since last allowed saturation see 'N/Mz', hr
+  time_to_wait =           0.000000; // Time to wait before allowing saturation see 'N/Mw', hr
+  tweak_sclr =                1.000; // Scalar on Coulombic Efficiency 'N/Mk'
+  coul_eff_ =      0.99850;  // Coulombic Efficiency
+Shunt(No Amp)::Adafruit_ADS1x15 (No Amp):
+ m_bitShift =      4;
+ m_gain =       2560;
+ s_gain =       2560;
+ m_dataRate =    128;
+Adafruit_ADS1x15::Adafruit_I2CDevice (No Amp):
+  _addr =        0x48;
+  _begun =          1;
+  _maxBufferSize = 32;
+self_talk:  new string = 'XR'
+RUN: at 47631,   3.000 cycles from 52631 to 202631 with 5000 wait and 5000 tail
+soft reset...
+unit_sim,        47.876, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 1, 
+unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,,
+unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_stat_m, dv_dyn_m, vb_m, ib_m, ib_in_m, sat_m, ddq_m, dq_m, q_m, qcap_m, soc_m, reset_m,
+pro_20220723, 2022-07-29T17:40:33,        47.876, 0.245,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        47.976, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:33,        47.976, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        48.076, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:33,        48.076, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        48.176, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:33,        48.176, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        48.276, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:33,        48.276, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        48.376, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:33,        48.376, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        48.476, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:33,        48.476, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        48.576, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:34,        48.576, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        48.676, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:34,        48.676, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        48.776, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:34,        48.776, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        48.876, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:34,        48.876, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        48.976, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:34,        48.976, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        49.129, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:34,        49.129, 0.153,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        49.229, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:34,        49.229, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        49.329, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:34,        49.329, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        49.429, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:34,        49.429, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        49.529, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:35,        49.529, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        49.629, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:35,        49.629, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        49.729, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:35,        49.729, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        49.829, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:35,        49.829, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        49.929, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:35,        49.929, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        50.029, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:35,        50.029, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        50.129, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:35,        50.129, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        50.229, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:35,        50.229, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        50.329, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:35,        50.329, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        50.429, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:35,        50.429, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        50.529, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:36,        50.529, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        50.629, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:36,        50.629, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        50.729, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:36,        50.729, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        50.829, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:36,        50.829, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        50.929, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:36,        50.929, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        51.029, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:36,        51.029, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        51.129, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:36,        51.129, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        51.229, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:36,        51.229, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52985,   0.000151, 1.00000,1.00000,1.00000,
+unit_sim,        51.329, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:36,        51.329, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        51.429, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:36,        51.429, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        51.529, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:37,        51.529, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        51.629, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:37,        51.629, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        51.729, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:37,        51.729, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        51.829, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:37,        51.829, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        51.929, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:37,        51.929, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        52.029, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:37,        52.029, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        52.129, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:37,        52.129, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        52.229, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:37,        52.229, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        52.329, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:37,        52.329, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        52.429, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:37,        52.429, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        52.529, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:38,        52.529, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        52.629, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:38,        52.629, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        52.729, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:38,        52.729, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        52.829, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
+pro_20220723, 2022-07-29T17:40:38,        52.829, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,
+unit_sim,        52.929, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.52999,   0.000,-25.132,  1,   -2.513208,     -2.5, 359997.5, 360000.0,   0.99999, 0, 
+pro_20220723, 2022-07-29T17:40:38,        52.929, 0.100,   1,  0,  15,  25.0,14.530,     0.000,    13.80000,0.00000,14.52999,14.52986,   0.000136, 0.99999,1.00000,1.00000,
+unit_sim,        53.029, 25.00000,25.00000, 13.80000,14.52902,-0.07540,14.45361, -25.132,-50.260,  1,   -5.026019,     -7.5, 359992.5, 360000.0,   0.99998, 0, 
+pro_20220723, 2022-07-29T17:40:38,        53.029, 0.100,   1,  0,  15,  25.0,14.454,   -25.132,    13.80000,-0.07540,14.52901,14.52887,   0.000137, 0.99998,0.99999,0.99999,
+unit_sim,        53.129, 25.00000,25.00000, 13.80000,14.52707,-0.17112,14.35591, -50.260,-75.380,  1,   -7.538036,    -15.1, 359984.9, 360000.0,   0.99996, 0, 
+pro_20220723, 2022-07-29T17:40:38,        53.129, 0.100,   1,  0,  15,  25.0,14.356,   -50.260,    13.80000,-0.17112,14.52705,14.52690,   0.000145, 0.99996,0.99998,0.99998,
+unit_sim,        53.229, 25.00000,25.00000, 13.80000,14.52413,-0.27710,14.24696, -75.380,-100.489,  1,  -10.048863,    -25.1, 359974.9, 360000.0,   0.99993, 0, 
+pro_20220723, 2022-07-29T17:40:38,        53.229, 0.100,   1,  0,  15,  25.0,14.247,   -75.380,    13.80000,-0.27710,14.52411,14.52395,   0.000155, 0.99993,0.99996,0.99996,
+unit_sim,        53.329, 25.00000,25.00000, 13.80000,14.52023,-0.38830,14.13183, -100.489,-125.581,  1,  -12.558103,    -37.7, 359962.3, 360000.0,   0.99990, 0, 
+pro_20220723, 2022-07-29T17:40:38,        53.329, 0.100,   1,  0,  15,  25.0,14.132,  -100.489,    13.80000,-0.38830,14.52019,14.52001,   0.000183, 0.99990,0.99993,0.99993,
+unit_sim,        53.429, 25.00000,25.00000, 13.80000,14.51535,-0.50218,14.01302, -125.581,-150.654,  1,  -15.065359,    -52.7, 359947.3, 360000.0,   0.99985, 0, 
+pro_20220723, 2022-07-29T17:40:38,        53.429, 0.100,   1,  0,  15,  25.0,14.013,  -125.581,    13.80000,-0.50218,14.51530,14.51509,   0.000216, 0.99985,0.99989,0.99990,
+unit_sim,        53.529, 25.00000,25.00000, 13.80000,14.50949,-0.61747,13.89182, -150.654,-175.702,  1,  -17.570238,    -70.3, 359929.7, 360000.0,   0.99980, 0, 
+pro_20220723, 2022-07-29T17:40:39,        53.529, 0.100,   1,  0,  15,  25.0,13.892,  -150.654,    13.80000,-0.61747,14.50944,14.50919,   0.000251, 0.99980,0.99985,0.99985,
+unit_sim,        53.629, 25.00000,25.00000, 13.80000,14.50265,-0.73352,13.76888, -175.702,-200.723,  1,  -20.072342,    -90.4, 359909.6, 360000.0,   0.99975, 0, 
+pro_20220723, 2022-07-29T17:40:39,        53.629, 0.100,   1,  0,  15,  25.0,13.769,  -175.702,    13.80000,-0.73352,14.50260,14.50230,   0.000296, 0.99975,0.99980,0.99980,
+unit_sim,        53.729, 25.00000,25.00000, 13.80000,14.49484,-0.85001,13.64452, -200.723,-225.713,  1,  -22.571275,   -113.0, 359887.0, 360000.0,   0.99969, 0, 
+pro_20220723, 2022-07-29T17:40:39,        53.729, 0.100,   1,  0,  15,  25.0,13.645,  -200.723,    13.80000,-0.85001,14.49478,14.49443,   0.000348, 0.99969,0.99975,0.99975,
+unit_sim,        53.829, 25.00000,25.00000, 13.80000,14.48607,-0.96674,13.51895, -225.713,-250.666,  1,  -25.066644,   -138.0, 359862.0, 360000.0,   0.99962, 0, 
+pro_20220723, 2022-07-29T17:40:39,        53.829, 0.100,   1,  0,  15,  25.0,13.519,  -225.713,    13.80000,-0.96674,14.48600,14.48559,   0.000415, 0.99962,0.99968,0.99969,
+unit_sim,        53.929, 25.00000,25.00000, 13.80000,14.47632,-1.08364,13.39222, -250.666,-275.581,  1,  -27.558057,   -165.6, 359834.4, 360000.0,   0.99954, 0, 
+pro_20220723, 2022-07-29T17:40:39,        53.929, 0.100,   1,  0,  15,  25.0,13.392,  -250.666,    13.80000,-1.08364,14.47624,14.47577,   0.000473, 0.99954,0.99961,0.99962,
+unit_sim,        54.029, 25.00000,25.00000, 13.80000,14.46560,-1.20063,13.26443, -275.581,-300.451,  1,  -30.045117,   -195.6, 359804.4, 360000.0,   0.99946, 0, 
+pro_20220723, 2022-07-29T17:40:39,        54.029, 0.100,   1,  0,  15,  25.0,13.264,  -275.581,    13.80000,-1.20063,14.46552,14.46497,   0.000552, 0.99946,0.99954,0.99954,
+unit_sim,        54.129, 25.00000,25.00000, 13.80000,14.45392,-1.31768,13.13561, -300.451,-325.274,  1,  -32.527432,   -228.2, 359771.8, 360000.0,   0.99937, 0, 
+pro_20220723, 2022-07-29T17:40:39,        54.129, 0.100,   1,  0,  15,  25.0,13.136,  -300.451,    13.80000,-1.31768,14.45383,14.45320,   0.000637, 0.99937,0.99945,0.99946,
+unit_sim,        54.229, 25.00000,25.00000, 13.80000,14.44127,-1.43477,13.00577, -325.274,-350.046,  1,  -35.004608,   -263.2, 359736.8, 360000.0,   0.99927, 0, 
+pro_20220723, 2022-07-29T17:40:39,        54.229, 0.100,   1,  0,  15,  25.0,13.006,  -325.274,    13.80000,-1.43477,14.44117,14.44044,   0.000729, 0.99927,0.99936,0.99937,
+unit_sim,        54.329, 25.00000,25.00000, 13.80000,14.42766,-1.55186,12.87497, -350.046,-374.763,  1,  -37.476260,   -300.6, 359699.4, 360000.0,   0.99916, 0, 
+pro_20220723, 2022-07-29T17:40:39,        54.329, 0.100,   1,  0,  15,  25.0,12.875,  -350.046,    13.80000,-1.55186,14.42756,14.42673,   0.000823, 0.99916,0.99926,0.99927,
+unit_sim,        54.429, 25.00000,25.00000, 13.80000,14.41308,-1.66894,12.74320, -374.763,-399.420,  1,  -39.941992,   -340.6, 359659.4, 360000.0,   0.99905, 0, 
+pro_20220723, 2022-07-29T17:40:39,        54.429, 0.100,   1,  0,  15,  25.0,12.743,  -374.763,    13.80000,-1.66894,14.41297,14.41205,   0.000925, 0.99905,0.99916,0.99916,
+unit_sim,        54.529, 25.00000,25.00000, 13.80000,14.39755,-1.78599,12.61050, -399.420,-424.014,  1,  -42.401419,   -383.0, 359617.0, 360000.0,   0.99894, 0, 
+pro_20220723, 2022-07-29T17:40:40,        54.529, 0.100,   1,  0,  15,  25.0,12.611,  -399.420,    13.80000,-1.78599,14.39744,14.39639,   0.001042, 0.99894,0.99905,0.99905,
+unit_sim,        54.629, 25.00000,25.00000, 13.80000,14.38107,-1.90298,12.47690, -424.014,-448.542,  1,  -44.854150,   -427.8, 359572.2, 360000.0,   0.99881, 0, 
+pro_20220723, 2022-07-29T17:40:40,        54.629, 0.100,   1,  0,  15,  25.0,12.477,  -424.014,    13.80000,-1.90298,14.38094,14.37979,   0.001153, 0.99881,0.99893,0.99894,
+unit_sim,        54.729, 25.00000,25.00000, 13.80000,14.36362,-2.01990,12.34239, -448.542,-472.998,  1,  -47.299796,   -475.1, 359524.9, 360000.0,   0.99868, 0, 
+pro_20220723, 2022-07-29T17:40:40,        54.729, 0.100,   1,  0,  15,  25.0,12.342,  -448.542,    13.80000,-2.01990,14.36349,14.36221,   0.001271, 0.99868,0.99880,0.99881,
+unit_sim,        54.829, 25.00000,25.00000, 13.80000,14.34522,-2.13674,12.20703, -472.998,-497.380,  1,  -49.737973,   -524.9, 359475.1, 360000.0,   0.99854, 0, 
+pro_20220723, 2022-07-29T17:40:40,        54.829, 0.100,   1,  0,  15,  25.0,12.207,  -472.998,    13.80000,-2.13674,14.34509,14.34368,   0.001405, 0.99854,0.99867,0.99868,
+unit_sim,        54.929, 25.00000,25.00000, 13.80000,14.32588,-2.25346,12.07082, -497.380,-521.683,  1,  -52.168298,   -577.0, 359423.0, 360000.0,   0.99840, 0, 
+pro_20220723, 2022-07-29T17:40:40,        54.929, 0.100,   1,  0,  15,  25.0,12.071,  -497.380,    13.80000,-2.25346,14.32574,14.32420,   0.001541, 0.99840,0.99853,0.99854,
+unit_sim,        55.029, 25.00000,25.00000, 13.80000,14.30560,-2.37006,11.93379, -521.683,-545.904,  1,  -54.590381,   -631.6, 359368.4, 360000.0,   0.99825, 0, 
+pro_20220723, 2022-07-29T17:40:40,        55.029, 0.100,   1,  0,  15,  25.0,11.934,  -521.683,    13.80000,-2.37006,14.30544,14.30375,   0.001693, 0.99825,0.99838,0.99840,
+unit_sim,        55.129, 25.00000,25.00000, 13.80000,14.28437,-2.48650,11.79595, -545.904,-570.039,  1,  -57.003851,   -688.6, 359311.4, 360000.0,   0.99809, 0, 
+pro_20220723, 2022-07-29T17:40:40,        55.129, 0.100,   1,  0,  15,  25.0,11.796,  -545.904,    13.80000,-2.48650,14.28421,14.28237,   0.001835, 0.99809,0.99823,0.99825,
+unit_sim,        55.229, 25.00000,25.00000, 13.80000,14.26220,-2.60279,11.65733, -570.039,-594.083,  1,  -59.408313,   -748.0, 359252.0, 360000.0,   0.99792, 0, 
+pro_20220723, 2022-07-29T17:40:40,        55.229, 0.100,   1,  0,  15,  25.0,11.657,  -570.039,    13.80000,-2.60279,14.26203,14.26003,   0.001996, 0.99792,0.99807,0.99809,
+unit_sim,        55.329, 25.00000,25.00000, 13.80000,14.23909,-2.71889,11.51795, -594.083,-618.034,  1,  -61.803394,   -809.9, 359190.1, 360000.0,   0.99775, 0, 
+pro_20220723, 2022-07-29T17:40:40,        55.329, 0.100,   1,  0,  15,  25.0,11.518,  -594.083,    13.80000,-2.71889,14.23892,14.23677,   0.002148, 0.99775,0.99791,0.99792,
+unit_sim,        55.429, 25.00000,25.00000, 13.80000,14.21506,-2.83478,11.37784, -618.034,-641.887,  1,  -64.188721,   -874.0, 359126.0, 360000.0,   0.99757, 0, 
+pro_20220723, 2022-07-29T17:40:40,        55.429, 0.100,   1,  0,  15,  25.0,11.378,  -618.034,    13.80000,-2.83478,14.21488,14.21255,   0.002324, 0.99757,0.99773,0.99775,
+unit_sim,        55.529, 25.00000,25.00000, 13.80000,14.19010,-2.95046,11.23703, -641.887,-665.639,  1,  -66.563904,   -940.6, 359059.4, 360000.0,   0.99739, 0, 
+pro_20220723, 2022-07-29T17:40:41,        55.529, 0.100,   1,  0,  15,  25.0,11.237,  -641.887,    13.80000,-2.95046,14.18991,14.18741,   0.002502, 0.99739,0.99755,0.99757,
+unit_sim,        55.629, 25.00000,25.00000, 13.80000,14.16421,-3.06590,11.09551, -665.639,-689.286,  1,  -68.928583,  -1009.5, 358990.5, 360000.0,   0.99720, 0, 
+pro_20220723, 2022-07-29T17:40:41,        55.629, 0.100,   1,  0,  15,  25.0,11.096,  -665.639,    13.80000,-3.06590,14.16402,14.16133,   0.002687, 0.99720,0.99737,0.99739,
+unit_sim,        55.729, 25.00000,25.00000, 13.80000,14.13740,-3.18107,10.95333, -689.286,-712.824,  1,  -71.282373,  -1080.8, 358919.2, 360000.0,   0.99700, 0, 
+pro_20220723, 2022-07-29T17:40:41,        55.729, 0.100,   1,  0,  15,  25.0,10.953,  -689.286,    13.80000,-3.18107,14.13720,14.13434,   0.002865, 0.99700,0.99717,0.99720,
+unit_sim,        55.829, 25.00000,25.00000, 13.80000,14.10968,-3.29597,10.81050, -712.824,-736.249,  1,  -73.624908,  -1154.4, 358845.6, 360000.0,   0.99679, 0, 
+pro_20220723, 2022-07-29T17:40:41,        55.829, 0.100,   1,  0,  15,  25.0,10.810,  -712.824,    13.80000,-3.29597,14.10948,14.10642,   0.003059, 0.99679,0.99697,0.99700,
+unit_sim,        55.929, 25.00000,25.00000, 13.80000,14.08105,-3.41058,10.66705, -736.249,-759.558,  1,  -75.955817,  -1230.4, 358769.6, 360000.0,   0.99658, 0, 
+pro_20220723, 2022-07-29T17:40:41,        55.929, 0.100,   1,  0,  15,  25.0,10.667,  -736.249,    13.80000,-3.41058,14.08084,14.07758,   0.003260, 0.99658,0.99677,0.99679,
+unit_sim,        56.029, 25.00000,25.00000, 13.80000,14.05151,-3.52487,10.52300, -759.558,-782.747,  1,  -78.274731,  -1308.7, 358691.3, 360000.0,   0.99636, 0, 
+pro_20220723, 2022-07-29T17:40:41,        56.029, 0.100,   1,  0,  15,  25.0,10.523,  -759.558,    13.80000,-3.52487,14.05129,14.04782,   0.003472, 0.99636,0.99656,0.99658,
+unit_sim,        56.129, 25.00000,25.00000, 13.80000,14.02108,-3.63883,10.37838, -782.747,-805.813,  1,  -80.581281,  -1389.3, 358610.7, 360000.0,   0.99614, 0, 
+pro_20220723, 2022-07-29T17:40:41,        56.129, 0.100,   1,  0,  15,  25.0,10.378,  -782.747,    13.80000,-3.63883,14.02085,14.01716,   0.003690, 0.99614,0.99634,0.99636,
+unit_sim,        56.229, 25.00000,25.00000, 13.80000,13.98973,-3.75245,10.23320, -805.813,-828.751,  1,  -82.875110,  -1472.1, 358527.9, 360000.0,   0.99591, 0, 
+pro_20220723, 2022-07-29T17:40:41,        56.229, 0.100,   1,  0,  15,  25.0,10.233,  -805.813,    13.80000,-3.75245,13.98950,13.98560,   0.003908, 0.99591,0.99611,0.99614,
+unit_sim,        56.329, 25.00000,25.00000, 13.80000,13.95751,-3.86569,10.08749, -828.751,-851.559,  1,  -85.155853,  -1557.3, 358442.7, 360000.0,   0.99567, 0, 
+pro_20220723, 2022-07-29T17:40:41,        56.329, 0.100,   1,  0,  15,  25.0,10.087,  -828.751,    13.80000,-3.86569,13.95727,13.95313,   0.004135, 0.99567,0.99588,0.99591,
+unit_sim,        56.429, 25.00000,25.00000, 13.80000,13.92439,-3.97854,9.94127, -851.559,-874.232,  1,  -87.423151,  -1644.7, 358355.3, 360000.0,   0.99543, 0, 
+pro_20220723, 2022-07-29T17:40:41,        56.429, 0.100,   1,  0,  15,  25.0, 9.941,  -851.559,    13.80000,-3.97854,13.92414,13.91978,   0.004364, 0.99543,0.99564,0.99567,
+unit_sim,        56.529, 25.00000,25.00000, 13.80000,13.89039,-4.09100,9.79458, -874.232,-896.766,  1,  -89.676636,  -1734.4, 358265.6, 360000.0,   0.99518, 0, 
+pro_20220723, 2022-07-29T17:40:42,        56.529, 0.100,   1,  0,  15,  25.0, 9.795,  -874.232,    13.80000,-4.09100,13.89014,13.88553,   0.004607, 0.99518,0.99540,0.99543,
+unit_sim,        56.629, 25.00000,25.00000, 13.80000,13.85552,-4.20303,9.64742, -896.766,-919.160,  1,  -91.915967,  -1826.3, 358173.7, 360000.0,   0.99493, 0, 
+pro_20220723, 2022-07-29T17:40:42,        56.629, 0.100,   1,  0,  15,  25.0, 9.647,  -896.766,    13.80000,-4.20303,13.85526,13.85041,   0.004850, 0.99493,0.99515,0.99518,
+unit_sim,        56.729, 25.00000,25.00000, 13.80000,13.82225,-4.31462,9.50231, -919.160,-941.408,  1,  -94.140778,  -1920.4, 358079.6, 360000.0,   0.99467, 0, 
+pro_20220723, 2022-07-29T17:40:42,        56.729, 0.100,   1,  0,  15,  25.0, 9.502,  -919.160,    13.80000,-4.31462,13.82199,13.81819,   0.003802, 0.99467,0.99489,0.99493,
+unit_sim,        56.829, 25.00000,25.00000, 13.80000,13.79454,-4.42575,9.36319, -941.408,-963.507,  0,  -96.350726,  -2016.8, 357983.2, 360000.0,   0.99440, 0, 
+pro_20220723, 2022-07-29T17:40:42,        56.829, 0.100,   1,  0,  15,  25.0, 9.363,  -941.408,    13.80000,-4.42575,13.79427,13.79027,   0.004003, 0.99440,0.99463,0.99467,
+unit_sim,        56.929, 25.00000,25.00000, 13.80000,13.76617,-4.53640,9.22389, -963.507,-985.455,  0,  -98.545465,  -2115.3, 357884.7, 360000.0,   0.99412, 0, 
+pro_20220723, 2022-07-29T17:40:42,        56.929, 0.100,   1,  0,  15,  25.0, 9.224,  -963.507,    13.80000,-4.53640,13.76589,13.76168,   0.004213, 0.99412,0.99436,0.99440,
+unit_sim,        57.029, 25.00000,25.00000, 13.80000,13.73715,-4.64656,9.08444, -985.455,-1007.246,  0,  -100.724634,  -2216.1, 357783.9, 360000.0,   0.99384, 0, 
+pro_20220723, 2022-07-29T17:40:42,        57.029, 0.100,   1,  0,  15,  25.0, 9.084,  -985.455,    13.80000,-4.64656,13.73687,13.73245,   0.004422, 0.99384,0.99408,0.99412,
+unit_sim,        57.129, 25.00000,25.00000, 13.80000,13.70749,-4.75621,8.94484, -1007.246,-1028.879,  0,  -102.887903,  -2318.9, 357681.1, 360000.0,   0.99356, 0, 
+pro_20220723, 2022-07-29T17:40:42,        57.129, 0.100,   1,  0,  15,  25.0, 8.945, -1007.246,    13.80000,-4.75621,13.70721,13.70257,   0.004637, 0.99356,0.99380,0.99384,
+unit_sim,        57.229, 25.00000,25.00000, 13.80000,13.67720,-4.86533,8.80514, -1028.879,-1050.349,  0,  -105.034924,  -2424.0, 357576.0, 360000.0,   0.99327, 0, 
+pro_20220723, 2022-07-29T17:40:42,        57.229, 0.100,   1,  0,  15,  25.0, 8.805, -1028.879,    13.80000,-4.86533,13.67691,13.67205,   0.004857, 0.99327,0.99351,0.99356,
+unit_sim,        57.329, 25.00000,25.00000, 13.80000,13.64627,-4.97390,8.66534, -1050.349,-1071.654,  0,  -107.165356,  -2531.1, 357468.9, 360000.0,   0.99297, 0, 
+pro_20220723, 2022-07-29T17:40:42,        57.329, 0.100,   1,  0,  15,  25.0, 8.665, -1050.349,    13.80000,-4.97390,13.64597,13.64089,   0.005087, 0.99297,0.99322,0.99327,
+unit_sim,        57.429, 25.00000,25.00000, 13.80000,13.61472,-5.08191,8.52547, -1071.654,-1092.789,  0,  -109.278857,  -2640.4, 357359.6, 360000.0,   0.99267, 0, 
+pro_20220723, 2022-07-29T17:40:42,        57.429, 0.100,   1,  0,  15,  25.0, 8.525, -1071.654,    13.80000,-5.08191,13.61441,13.60909,   0.005319, 0.99267,0.99292,0.99297,
+unit_sim,        57.530, 25.00000,25.00000, 13.80000,13.58254,-5.18934,8.38556, -1092.789,-1113.751,  0,  -112.488873,  -2752.9, 357247.1, 360000.0,   0.99235, 0, 
+pro_20220723, 2022-07-29T17:40:43,        57.530, 0.101,   1,  0,  15,  25.0, 8.386, -1092.789,    13.80000,-5.18934,13.58223,13.57635,   0.005884, 0.99235,0.99261,0.99266,
+unit_sim,        57.630, 25.00000,25.00000, 13.80000,13.54942,-5.29661,8.24485, -1113.751,-1134.745,  0,  -113.474475,  -2866.4, 357133.6, 360000.0,   0.99204, 0, 
+pro_20220723, 2022-07-29T17:40:43,        57.630, 0.100,   1,  0,  15,  25.0, 8.245, -1113.751,    13.80000,-5.29661,13.54910,13.54330,   0.005800, 0.99204,0.99230,0.99235,
+unit_sim,        57.730, 25.00000,25.00000, 13.80000,13.51601,-5.40327,8.10446, -1134.745,-1155.350,  0,  -115.535046,  -2981.9, 357018.1, 360000.0,   0.99172, 0, 
+pro_20220723, 2022-07-29T17:40:43,        57.730, 0.100,   1,  0,  15,  25.0, 8.104, -1134.745,    13.80000,-5.40327,13.51569,13.50964,   0.006054, 0.99172,0.99198,0.99204,
+unit_sim,        57.830, 25.00000,25.00000, 13.80000,13.48199,-5.50893,7.96445, -1155.350,-1175.774,  0,  -117.577380,  -3099.5, 356900.5, 360000.0,   0.99139, 0, 
+pro_20220723, 2022-07-29T17:40:43,        57.830, 0.100,   1,  0,  15,  25.0, 7.964, -1155.350,    13.80000,-5.50893,13.48166,13.47535,   0.006307, 0.99139,0.99165,0.99172,
+unit_sim,        57.930, 25.00000,25.00000, 13.80000,13.44737,-5.61389,7.82454, -1175.774,-1196.011,  0,  -119.601135,  -3219.1, 356780.9, 360000.0,   0.99106, 0, 
+pro_20220723, 2022-07-29T17:40:43,        57.930, 0.100,   1,  0,  15,  25.0, 7.825, -1175.774,    13.80000,-5.61389,13.44704,13.44047,   0.006567, 0.99106,0.99133,0.99139,
+unit_sim,        58.030, 25.00000,25.00000, 13.80000,13.41215,-5.71817,7.68470, -1196.011,-1216.060,  0,  -121.606006,  -3340.7, 356659.3, 360000.0,   0.99072, 0, 
+pro_20220723, 2022-07-29T17:40:43,        58.030, 0.100,   1,  0,  15,  25.0, 7.685, -1196.011,    13.80000,-5.71817,13.41182,13.40498,   0.006840, 0.99072,0.99099,0.99106,
+unit_sim,        58.130, 25.00000,25.00000, 13.80000,13.37635,-5.82176,7.54497, -1216.060,-1235.917,  0,  -123.591675,  -3464.3, 356535.7, 360000.0,   0.99038, 0, 
+pro_20220723, 2022-07-29T17:40:43,        58.130, 0.100,   1,  0,  15,  25.0, 7.545, -1216.060,    13.80000,-5.82176,13.37600,13.36889,   0.007113, 0.99038,0.99065,0.99072,
+unit_sim,        58.230, 25.00000,25.00000, 13.80000,13.33996,-5.92464,7.40535, -1235.917,-1255.578,  0,  -125.557825,  -3589.9, 356410.1, 360000.0,   0.99003, 0, 
+pro_20220723, 2022-07-29T17:40:43,        58.230, 0.100,   1,  0,  15,  25.0, 7.405, -1235.917,    13.80000,-5.92464,13.33961,13.33222,   0.007391, 0.99003,0.99030,0.99038,
+unit_sim,        58.330, 25.00000,25.00000, 13.80000,13.30298,-6.02680,7.26586, -1255.578,-1275.042,  0,  -127.504150,  -3717.4, 356282.6, 360000.0,   0.98967, 0, 
+pro_20220723, 2022-07-29T17:40:43,        58.330, 0.100,   1,  0,  15,  25.0, 7.266, -1255.578,    13.80000,-6.02680,13.30263,13.29999,   0.002639, 0.98967,0.98995,0.99003,
+unit_sim,        58.430, 25.00000,25.00000, 13.80000,13.29993,-6.12822,7.16102, -1275.042,-1294.303,  0,  -129.430347,  -3846.8, 356153.2, 360000.0,   0.98931, 0, 
+pro_20220723, 2022-07-29T17:40:43,        58.430, 0.100,   1,  0,  15,  25.0, 7.161, -1275.042,    13.80000,-6.12822,13.29957,13.29991,  -0.000342, 0.98931,0.98960,0.98967,
+unit_sim,        58.530, 25.00000,25.00000, 13.80000,13.29985,-6.22890,7.05990, -1294.303,-1313.361,  0,  -131.336096,  -3978.1, 356021.9, 360000.0,   0.98895, 0, 
+pro_20220723, 2022-07-29T17:40:44,        58.530, 0.100,   1,  0,  15,  25.0, 7.060, -1294.303,    13.80000,-6.22890,13.29948,13.29983,  -0.000346, 0.98895,0.98923,0.98931,
+unit_sim,        58.630, 25.00000,25.00000, 13.80000,13.29977,-6.32881,6.95954, -1313.361,-1332.211,  0,  -133.221118,  -4111.4, 355888.6, 360000.0,   0.98858, 0, 
+pro_20220723, 2022-07-29T17:40:44,        58.630, 0.100,   1,  0,  15,  25.0, 6.960, -1313.361,    13.80000,-6.32881,13.29940,13.29975,  -0.000353, 0.98858,0.98887,0.98895,
+unit_sim,        58.730, 25.00000,25.00000, 13.80000,13.29968,-6.42794,6.85996, -1332.211,-1350.851,  0,  -135.085083,  -4246.4, 355753.6, 360000.0,   0.98820, 0, 
+pro_20220723, 2022-07-29T17:40:44,        58.730, 0.100,   1,  0,  15,  25.0, 6.860, -1332.211,    13.80000,-6.42794,13.29931,13.29967,  -0.000356, 0.98820,0.98849,0.98858,
+unit_sim,        58.830, 25.00000,25.00000, 13.80000,13.29960,-6.52627,6.76116, -1350.851,-1369.277,  0,  -136.927734,  -4383.4, 355616.6, 360000.0,   0.98782, 0, 
+pro_20220723, 2022-07-29T17:40:44,        58.830, 0.100,   1,  0,  15,  25.0, 6.761, -1350.851,    13.80000,-6.52627,13.29922,13.29958,  -0.000359, 0.98782,0.98811,0.98820,
+unit_sim,        58.930, 25.00000,25.00000, 13.80000,13.29952,-6.62379,6.66317, -1369.277,-1387.488,  0,  -138.748755,  -4522.1, 355477.9, 360000.0,   0.98744, 0, 
+pro_20220723, 2022-07-29T17:40:44,        58.930, 0.100,   1,  0,  15,  25.0, 6.663, -1369.277,    13.80000,-6.62379,13.29913,13.29950,  -0.000364, 0.98744,0.98773,0.98782,
+unit_sim,        59.030, 25.00000,25.00000, 13.80000,13.29943,-6.72047,6.56601, -1387.488,-1405.479,  0,  -140.547864,  -4662.7, 355337.3, 360000.0,   0.98705, 0, 
+pro_20220723, 2022-07-29T17:40:44,        59.030, 0.100,   1,  0,  15,  25.0, 6.566, -1387.488,    13.80000,-6.72047,13.29904,13.29941,  -0.000369, 0.98705,0.98734,0.98744,
+unit_sim,        59.130, 25.00000,25.00000, 13.80000,13.29934,-6.81632,6.46968, -1405.479,-1423.248,  0,  -142.324792,  -4805.0, 355195.0, 360000.0,   0.98665, 0, 
+pro_20220723, 2022-07-29T17:40:44,        59.130, 0.100,   1,  0,  15,  25.0, 6.470, -1405.479,    13.80000,-6.81632,13.29895,13.29932,  -0.000372, 0.98665,0.98695,0.98705,
+unit_sim,        59.230, 25.00000,25.00000, 13.80000,13.29926,-6.91130,6.37421, -1423.248,-1440.792,  0,  -144.079236,  -4949.1, 355050.9, 360000.0,   0.98625, 0, 
+pro_20220723, 2022-07-29T17:40:44,        59.230, 0.100,   1,  0,  15,  25.0, 6.374, -1423.248,    13.80000,-6.91130,13.29886,13.29923,  -0.000377, 0.98625,0.98655,0.98665,
+unit_sim,        59.330, 25.00000,25.00000, 13.80000,13.29917,-7.00541,6.27961, -1440.792,-1458.109,  0,  -145.810925,  -5094.9, 354905.1, 360000.0,   0.98585, 0, 
+pro_20220723, 2022-07-29T17:40:44,        59.330, 0.100,   1,  0,  15,  25.0, 6.280, -1440.792,    13.80000,-7.00541,13.29876,13.29914,  -0.000382, 0.98585,0.98615,0.98625,
+unit_sim,        59.430, 25.00000,25.00000, 13.80000,13.29908,-7.09863,6.18589, -1458.109,-1475.196,  0,  -147.519592,  -5242.4, 354757.6, 360000.0,   0.98544, 0, 
+pro_20220723, 2022-07-29T17:40:44,        59.430, 0.100,   1,  0,  15,  25.0, 6.186, -1458.109,    13.80000,-7.09863,13.29867,13.29905,  -0.000385, 0.98544,0.98574,0.98585,
+unit_sim,        59.530, 25.00000,25.00000, 13.80000,13.29899,-7.19095,6.09307, -1475.196,-1492.050,  0,  -149.204956,  -5391.6, 354608.4, 360000.0,   0.98502, 0, 
+pro_20220723, 2022-07-29T17:40:45,        59.530, 0.100,   1,  0,  15,  25.0, 6.093, -1475.196,    13.80000,-7.19095,13.29857,13.29896,  -0.000390, 0.98502,0.98533,0.98544,
+unit_sim,        59.630, 25.00000,25.00000, 13.80000,13.29889,-7.28234,6.00116, -1492.050,-1508.668,  0,  -150.866772,  -5542.5, 354457.5, 360000.0,   0.98460, 0, 
+pro_20220723, 2022-07-29T17:40:45,        59.630, 0.100,   1,  0,  15,  25.0, 6.001, -1492.050,    13.80000,-7.28234,13.29848,13.29887,  -0.000392, 0.98460,0.98491,0.98502,
+unit_sim,        59.730, 25.00000,25.00000, 13.80000,13.29880,-7.37280,5.91019, -1508.668,-1525.048,  0,  -152.504761,  -5695.0, 354305.0, 360000.0,   0.98418, 0, 
+pro_20220723, 2022-07-29T17:40:45,        59.730, 0.100,   1,  0,  15,  25.0, 5.910, -1508.668,    13.80000,-7.37280,13.29838,13.29877,  -0.000397, 0.98418,0.98449,0.98460,
+unit_sim,        59.830, 25.00000,25.00000, 13.80000,13.29871,-7.46231,5.82015, -1525.048,-1541.187,  0,  -154.118665,  -5849.1, 354150.9, 360000.0,   0.98375, 0, 
+pro_20220723, 2022-07-29T17:40:45,        59.830, 0.100,   1,  0,  15,  25.0, 5.820, -1525.048,    13.80000,-7.46231,13.29828,13.29868,  -0.000399, 0.98375,0.98406,0.98418,
+unit_sim,        59.930, 25.00000,25.00000, 13.80000,13.29861,-7.55086,5.73108, -1541.187,-1557.082,  0,  -155.708228,  -6004.8, 353995.2, 360000.0,   0.98332, 0, 
+pro_20220723, 2022-07-29T17:40:45,        59.930, 0.100,   1,  0,  15,  25.0, 5.731, -1541.187,    13.80000,-7.55086,13.29818,13.29858,  -0.000404, 0.98332,0.98363,0.98375,
+unit_sim,        60.030, 25.00000,25.00000, 13.80000,13.29852,-7.63843,5.64298, -1557.082,-1572.732,  0,  -157.273206,  -6162.1, 353837.9, 360000.0,   0.98288, 0, 
+pro_20220723, 2022-07-29T17:40:45,        60.030, 0.100,   1,  0,  15,  25.0, 5.643, -1557.082,    13.80000,-7.63843,13.29808,13.29849,  -0.000408, 0.98288,0.98319,0.98332,
+unit_sim,        60.130, 25.00000,25.00000, 13.80000,13.29842,-7.72501,5.55586, -1572.732,-1588.134,  0,  -158.813354,  -6320.9, 353679.1, 360000.0,   0.98244, 0, 
+pro_20220723, 2022-07-29T17:40:45,        60.130, 0.100,   1,  0,  15,  25.0, 5.556, -1572.732,    13.80000,-7.72501,13.29798,13.29839,  -0.000410, 0.98244,0.98275,0.98288,
+unit_sim,        60.230, 25.00000,25.00000, 13.80000,13.29832,-7.81058,5.46975, -1588.134,-1603.284,  0,  -160.328418,  -6481.2, 353518.8, 360000.0,   0.98200, 0, 
+pro_20220723, 2022-07-29T17:40:45,        60.230, 0.100,   1,  0,  15,  25.0, 5.470, -1588.134,    13.80000,-7.81058,13.29788,13.29829,  -0.000414, 0.98200,0.98231,0.98244,
+unit_sim,        60.330, 25.00000,25.00000, 13.80000,13.29822,-7.89513,5.38465, -1603.284,-1618.182,  0,  -161.818164,  -6643.0, 353357.0, 360000.0,   0.98155, 0, 
+pro_20220723, 2022-07-29T17:40:45,        60.330, 0.100,   1,  0,  15,  25.0, 5.385, -1603.284,    13.80000,-7.89513,13.29777,13.29819,  -0.000419, 0.98155,0.98186,0.98200,
+unit_sim,        60.430, 25.00000,25.00000, 13.80000,13.29812,-7.97865,5.30058, -1618.182,-1632.824,  0,  -163.282361,  -6806.3, 353193.7, 360000.0,   0.98109, 0, 
+pro_20220723, 2022-07-29T17:40:45,        60.430, 0.100,   1,  0,  15,  25.0, 5.301, -1618.182,    13.80000,-7.97865,13.29767,13.29809,  -0.000421, 0.98109,0.98140,0.98155,
+unit_sim,        60.530, 25.00000,25.00000, 13.80000,13.29802,-8.06112,5.21754, -1632.824,-1647.208,  0,  -164.720764,  -6971.0, 353029.0, 360000.0,   0.98064, 0, 
+pro_20220723, 2022-07-29T17:40:46,        60.530, 0.100,   1,  0,  15,  25.0, 5.218, -1632.824,    13.80000,-8.06112,13.29756,13.29799,  -0.000425, 0.98064,0.98095,0.98109,
+unit_sim,        60.630, 25.00000,25.00000, 13.80000,13.29792,-8.14253,5.13557, -1647.208,-1661.332,  0,  -166.133167,  -7137.2, 352862.8, 360000.0,   0.98017, 0, 
+pro_20220723, 2022-07-29T17:40:46,        60.630, 0.100,   1,  0,  15,  25.0, 5.136, -1647.208,    13.80000,-8.14253,13.29746,13.29789,  -0.000427, 0.98017,0.98048,0.98064,
+unit_sim,        60.730, 25.00000,25.00000, 13.80000,13.29782,-8.22287,5.05466, -1661.332,-1675.193,  0,  -167.519336,  -7304.7, 352695.3, 360000.0,   0.97971, 0, 
+pro_20220723, 2022-07-29T17:40:46,        60.730, 0.100,   1,  0,  15,  25.0, 5.055, -1661.332,    13.80000,-8.22287,13.29735,13.29778,  -0.000430, 0.97971,0.98002,0.98017,
+unit_sim,        60.830, 25.00000,25.00000, 13.80000,13.29771,-8.30213,4.97484, -1675.193,-1688.790,  0,  -168.879041,  -7473.6, 352526.4, 360000.0,   0.97924, 0, 
+pro_20220723, 2022-07-29T17:40:46,        60.830, 0.100,   1,  0,  15,  25.0, 4.975, -1675.193,    13.80000,-8.30213,13.29725,13.29768,  -0.000432, 0.97924,0.97955,0.97971,
+unit_sim,        60.930, 25.00000,25.00000, 13.80000,13.29761,-8.38028,4.89611, -1688.790,-1702.121,  0,  -170.212085,  -7643.8, 352356.2, 360000.0,   0.97877, 0, 
+pro_20220723, 2022-07-29T17:40:46,        60.930, 0.100,   1,  0,  15,  25.0, 4.896, -1688.790,    13.80000,-8.38028,13.29714,13.29757,  -0.000436, 0.97877,0.97908,0.97924,
+unit_sim,        61.030, 25.00000,25.00000, 13.80000,13.29750,-8.45732,4.81848, -1702.121,-1715.182,  0,  -171.518250,  -7815.3, 352184.7, 360000.0,   0.97829, 0, 
+pro_20220723, 2022-07-29T17:40:46,        61.030, 0.100,   1,  0,  15,  25.0, 4.818, -1702.121,    13.80000,-8.45732,13.29703,13.29747,  -0.000440, 0.97829,0.97860,0.97877,
+unit_sim,        61.130, 25.00000,25.00000, 13.80000,13.29740,-8.53324,4.74198, -1715.182,-1727.973,  0,  -172.797327,  -7988.1, 352011.9, 360000.0,   0.97781, 0, 
+pro_20220723, 2022-07-29T17:40:46,        61.130, 0.100,   1,  0,  15,  25.0, 4.742, -1715.182,    13.80000,-8.53324,13.29692,13.29736,  -0.000442, 0.97781,0.97812,0.97829,
+unit_sim,        61.230, 25.00000,25.00000, 13.80000,13.29729,-8.60802,4.66661, -1727.973,-1740.491,  0,  -174.049121,  -8162.1, 351837.9, 360000.0,   0.97733, 0, 
+pro_20220723, 2022-07-29T17:40:46,        61.230, 0.100,   1,  0,  15,  25.0, 4.667, -1727.973,    13.80000,-8.60802,13.29681,13.29725,  -0.000443, 0.97733,0.97764,0.97781,
+unit_sim,        61.330, 25.00000,25.00000, 13.80000,13.29718,-8.68166,4.59238, -1740.491,-1752.734,  0,  -175.273438,  -8337.4, 351662.6, 360000.0,   0.97684, 0, 
+pro_20220723, 2022-07-29T17:40:46,        61.330, 0.100,   1,  0,  15,  25.0, 4.592, -1740.491,    13.80000,-8.68166,13.29670,13.29715,  -0.000448, 0.97684,0.97715,0.97733,
+unit_sim,        61.430, 25.00000,25.00000, 13.80000,13.29708,-8.75413,4.51930, -1752.734,-1764.701,  0,  -176.470068,  -8513.9, 351486.1, 360000.0,   0.97635, 0, 
+pro_20220723, 2022-07-29T17:40:46,        61.430, 0.100,   1,  0,  15,  25.0, 4.519, -1752.734,    13.80000,-8.75413,13.29659,13.29703,  -0.000448, 0.97635,0.97666,0.97684,
+unit_sim,        61.530, 25.00000,25.00000, 13.80000,13.29697,-8.82544,4.44740, -1764.701,-1776.388,  0,  -177.638831,  -8691.5, 351308.5, 360000.0,   0.97586, 0, 
+pro_20220723, 2022-07-29T17:40:47,        61.530, 0.100,   1,  0,  15,  25.0, 4.447, -1764.701,    13.80000,-8.82544,13.29647,13.29693,  -0.000453, 0.97586,0.97616,0.97635,
+unit_sim,        61.630, 25.00000,25.00000, 13.80000,13.29686,-8.89556,4.37667, -1776.388,-1787.795,  0,  -178.779541,  -8870.3, 351129.7, 360000.0,   0.97536, 0, 
+pro_20220723, 2022-07-29T17:40:47,        61.630, 0.100,   1,  0,  15,  25.0, 4.377, -1776.388,    13.80000,-8.89556,13.29636,13.29682,  -0.000455, 0.97536,0.97567,0.97586,
+unit_sim,        61.730, 25.00000,25.00000, 13.80000,13.29675,-8.96448,4.30714, -1787.795,-1798.920,  0,  -179.892029,  -9050.2, 350949.8, 360000.0,   0.97486, 0, 
+pro_20220723, 2022-07-29T17:40:47,        61.730, 0.100,   1,  0,  15,  25.0, 4.307, -1787.795,    13.80000,-8.96448,13.29625,13.29671,  -0.000458, 0.97486,0.97517,0.97536,
+unit_sim,        61.830, 25.00000,25.00000, 13.80000,13.29664,-9.03220,4.23880, -1798.920,-1809.761,  0,  -180.976099,  -9231.2, 350768.8, 360000.0,   0.97436, 0, 
+pro_20220723, 2022-07-29T17:40:47,        61.830, 0.100,   1,  0,  15,  25.0, 4.239, -1798.920,    13.80000,-9.03220,13.29613,13.29659,  -0.000458, 0.97436,0.97466,0.97486,
+unit_sim,        61.930, 25.00000,25.00000, 13.80000,13.29652,-9.09871,4.17168, -1809.761,-1820.316,  0,  -182.031604,  -9413.2, 350586.8, 360000.0,   0.97385, 0, 
+pro_20220723, 2022-07-29T17:40:47,        61.930, 0.100,   1,  0,  15,  25.0, 4.172, -1809.761,    13.80000,-9.09871,13.29602,13.29648,  -0.000461, 0.97385,0.97416,0.97436,
+unit_sim,        62.030, 25.00000,25.00000, 13.80000,13.29641,-9.16398,4.10579, -1820.316,-1830.583,  0,  -183.058350,  -9596.3, 350403.7, 360000.0,   0.97334, 0, 
+pro_20220723, 2022-07-29T17:40:47,        62.030, 0.100,   1,  0,  15,  25.0, 4.106, -1820.316,    13.80000,-9.16398,13.29590,13.29637,  -0.000462, 0.97334,0.97365,0.97385,
+unit_sim,        62.130, 25.00000,25.00000, 13.80000,13.29630,-9.22802,4.04113, -1830.583,-1840.562,  0,  -184.056201,  -9780.3, 350219.7, 360000.0,   0.97283, 0, 
+pro_20220723, 2022-07-29T17:40:47,        62.130, 0.100,   1,  0,  15,  25.0, 4.041, -1830.583,    13.80000,-9.22802,13.29579,13.29625,  -0.000465, 0.97283,0.97313,0.97334,
+unit_sim,        62.230, 25.00000,25.00000, 13.80000,13.29619,-9.29081,3.97771, -1840.562,-1850.250,  0,  -185.024976,  -9965.3, 350034.7, 360000.0,   0.97232, 0, 
+pro_20220723, 2022-07-29T17:40:47,        62.230, 0.100,   1,  0,  15,  25.0, 3.978, -1840.562,    13.80000,-9.29081,13.29567,13.29614,  -0.000466, 0.97232,0.97262,0.97283,
+unit_sim,        62.330, 25.00000,25.00000, 13.80000,13.29607,-9.35234,3.91555, -1850.250,-1859.645,  0,  -185.964539, -10151.3, 349848.7, 360000.0,   0.97180, 0, 
+pro_20220723, 2022-07-29T17:40:47,        62.330, 0.100,   1,  0,  15,  25.0, 3.916, -1850.250,    13.80000,-9.35234,13.29556,13.29602,  -0.000467, 0.97180,0.97210,0.97232,
+unit_sim,        62.430, 25.00000,25.00000, 13.80000,13.29596,-9.41260,3.85465, -1859.645,-1868.747,  0,  -186.874744, -10338.2, 349661.8, 360000.0,   0.97128, 0, 
+pro_20220723, 2022-07-29T17:40:47,        62.430, 0.100,   1,  0,  15,  25.0, 3.855, -1859.645,    13.80000,-9.41260,13.29544,13.29591,  -0.000471, 0.97128,0.97158,0.97180,
+unit_sim,        62.530, 25.00000,25.00000, 13.80000,13.29584,-9.47159,3.79503, -1868.747,-1877.554,  0,  -187.755432, -10525.9, 349474.1, 360000.0,   0.97076, 0, 
+pro_20220723, 2022-07-29T17:40:48,        62.530, 0.100,   1,  0,  15,  25.0, 3.795, -1868.747,    13.80000,-9.47159,13.29532,13.29579,  -0.000472, 0.97076,0.97106,0.97128,
+unit_sim,        62.630, 25.00000,25.00000, 13.80000,13.29572,-9.52929,3.73669, -1877.554,-1886.065,  0,  -188.606470, -10714.5, 349285.5, 360000.0,   0.97024, 0, 
+pro_20220723, 2022-07-29T17:40:48,        62.630, 0.100,   1,  0,  15,  25.0, 3.737, -1877.554,    13.80000,-9.52929,13.29520,13.29567,  -0.000472, 0.97024,0.97053,0.97076,
+unit_sim,        62.730, 25.00000,25.00000, 13.80000,13.29561,-9.58569,3.67965, -1886.065,-1894.277,  0,  -189.427722, -10904.0, 349096.0, 360000.0,   0.96971, 0, 
+pro_20220723, 2022-07-29T17:40:48,        62.730, 0.100,   1,  0,  15,  25.0, 3.680, -1886.065,    13.80000,-9.58569,13.29508,13.29556,  -0.000474, 0.96971,0.97000,0.97024,
+unit_sim,        62.830, 25.00000,25.00000, 13.80000,13.29549,-9.64078,3.62391, -1894.277,-1902.191,  0,  -190.219067, -11094.2, 348905.8, 360000.0,   0.96918, 0, 
+pro_20220723, 2022-07-29T17:40:48,        62.830, 0.100,   1,  0,  15,  25.0, 3.624, -1894.277,    13.80000,-9.64078,13.29496,13.29544,  -0.000475, 0.96918,0.96947,0.96971,
+unit_sim,        62.930, 25.00000,25.00000, 13.80000,13.29537,-9.69456,3.56949, -1902.191,-1909.804,  0,  -190.980371, -11285.2, 348714.8, 360000.0,   0.96865, 0, 
+pro_20220723, 2022-07-29T17:40:48,        62.930, 0.100,   1,  0,  15,  25.0, 3.569, -1902.191,    13.80000,-9.69456,13.29484,13.29532,  -0.000477, 0.96865,0.96894,0.96918,
+unit_sim,        63.030, 25.00000,25.00000, 13.80000,13.29526,-9.74701,3.51638, -1909.804,-1917.115,  0,  -191.711511, -11476.9, 348523.1, 360000.0,   0.96812, 0, 
+pro_20220723, 2022-07-29T17:40:48,        63.030, 0.100,   1,  0,  15,  25.0, 3.516, -1909.804,    13.80000,-9.74701,13.29473,13.29520,  -0.000477, 0.96812,0.96841,0.96865,
+unit_sim,        63.130, 25.00000,25.00000, 13.80000,13.29514,-9.79813,3.46461, -1917.115,-1924.124,  0,  -192.412390, -11669.3, 348330.7, 360000.0,   0.96759, 0, 
+pro_20220723, 2022-07-29T17:40:48,        63.130, 0.100,   1,  0,  15,  25.0, 3.465, -1917.115,    13.80000,-9.79813,13.29460,13.29508,  -0.000479, 0.96759,0.96787,0.96812,
+unit_sim,        63.230, 25.00000,25.00000, 13.80000,13.29502,-9.84791,3.41417, -1924.124,-1930.829,  0,  -193.082874, -11862.4, 348137.6, 360000.0,   0.96705, 0, 
+pro_20220723, 2022-07-29T17:40:48,        63.230, 0.100,   1,  0,  15,  25.0, 3.414, -1924.124,    13.80000,-9.84791,13.29448,13.29496,  -0.000479, 0.96705,0.96733,0.96759,
+unit_sim,        63.330, 25.00000,25.00000, 13.80000,13.29490,-9.89635,3.36509, -1930.829,-1937.229,  0,  -193.722876, -12056.1, 347943.9, 360000.0,   0.96651, 0, 
+pro_20220723, 2022-07-29T17:40:48,        63.330, 0.100,   1,  0,  15,  25.0, 3.365, -1930.829,    13.80000,-9.89635,13.29436,13.29484,  -0.000478, 0.96651,0.96679,0.96705,
+unit_sim,        63.430, 25.00000,25.00000, 13.80000,13.29478,-9.94342,3.31735, -1937.229,-1943.323,  0,  -194.332288, -12250.4, 347749.6, 360000.0,   0.96597, 0, 
+pro_20220723, 2022-07-29T17:40:48,        63.430, 0.100,   1,  0,  15,  25.0, 3.317, -1937.229,    13.80000,-9.94342,13.29424,13.29472,  -0.000480, 0.96597,0.96625,0.96651,
+unit_sim,        63.530, 25.00000,25.00000, 13.80000,13.29466,-9.98913,3.27098, -1943.323,-1949.110,  0,  -194.911011, -12445.3, 347554.7, 360000.0,   0.96543, 0, 
+pro_20220723, 2022-07-29T17:40:49,        63.530, 0.100,   1,  0,  15,  25.0, 3.271, -1943.323,    13.80000,-9.98913,13.29412,13.29460,  -0.000482, 0.96543,0.96570,0.96597,
+unit_sim,        63.630, 25.00000,25.00000, 13.80000,13.29454,-10.03347,3.22598, -1949.110,-1954.589,  0,  -195.458948, -12640.8, 347359.2, 360000.0,   0.96489, 0, 
+pro_20220723, 2022-07-29T17:40:49,        63.630, 0.100,   1,  0,  15,  25.0, 3.226, -1949.110,    13.80000,-10.03347,13.29400,13.29448,  -0.000481, 0.96489,0.96516,0.96543,
+unit_sim,        63.730, 25.00000,25.00000, 13.80000,13.29442,-10.07643,3.18235, -1954.589,-1959.760,  0,  -195.976025, -12836.8, 347163.2, 360000.0,   0.96434, 0, 
+pro_20220723, 2022-07-29T17:40:49,        63.730, 0.100,   1,  0,  15,  25.0, 3.182, -1954.589,    13.80000,-10.07643,13.29388,13.29436,  -0.000481, 0.96434,0.96461,0.96489,
+unit_sim,        63.830, 25.00000,25.00000, 13.80000,13.29430,-10.11800,3.14011, -1959.760,-1964.622,  0,  -196.462158, -13033.2, 346966.8, 360000.0,   0.96380, 0, 
+pro_20220723, 2022-07-29T17:40:49,        63.830, 0.100,   1,  0,  15,  25.0, 3.140, -1959.760,    13.80000,-10.11800,13.29375,13.29424,  -0.000484, 0.96380,0.96406,0.96434,
+unit_sim,        63.930, 25.00000,25.00000, 13.80000,13.29418,-10.15818,3.09927, -1964.622,-1969.173,  0,  -196.917261, -13230.2, 346769.8, 360000.0,   0.96325, 0, 
+pro_20220723, 2022-07-29T17:40:49,        63.930, 0.100,   1,  0,  15,  25.0, 3.099, -1964.622,    13.80000,-10.15818,13.29363,13.29411,  -0.000482, 0.96325,0.96351,0.96380,
+unit_sim,        64.030, 25.00000,25.00000, 13.80000,13.29406,-10.19697,3.05982, -1969.173,-1973.413,  0,  -197.341272, -13427.5, 346572.5, 360000.0,   0.96270, 0, 
+pro_20220723, 2022-07-29T17:40:49,        64.030, 0.100,   1,  0,  15,  25.0, 3.060, -1969.173,    13.80000,-10.19697,13.29351,13.29399,  -0.000483, 0.96270,0.96296,0.96325,
+unit_sim,        64.130, 25.00000,25.00000, 13.80000,13.29393,-10.23434,3.02177, -1973.413,-1977.341,  0,  -197.734119, -13625.2, 346374.8, 360000.0,   0.96215, 0, 
+pro_20220723, 2022-07-29T17:40:49,        64.130, 0.100,   1,  0,  15,  25.0, 3.022, -1973.413,    13.80000,-10.23434,13.29339,13.29387,  -0.000484, 0.96215,0.96241,0.96270,
+unit_sim,        64.230, 25.00000,25.00000, 13.80000,13.29381,-10.27030,2.98514, -1977.341,-1980.957,  0,  -198.095740, -13823.3, 346176.7, 360000.0,   0.96160, 0, 
+pro_20220723, 2022-07-29T17:40:49,        64.230, 0.100,   1,  0,  15,  25.0, 2.985, -1977.341,    13.80000,-10.27030,13.29326,13.29374,  -0.000483, 0.96160,0.96185,0.96215,
+unit_sim,        64.330, 25.00000,25.00000, 13.80000,13.29369,-10.30485,2.94992, -1980.957,-1984.261,  0,  -198.426086, -14021.8, 345978.2, 360000.0,   0.96105, 0, 
+pro_20220723, 2022-07-29T17:40:49,        64.330, 0.100,   1,  0,  15,  25.0, 2.950, -1980.957,    13.80000,-10.30485,13.29314,13.29362,  -0.000484, 0.96105,0.96130,0.96160,
+unit_sim,        64.430, 25.00000,25.00000, 13.80000,13.29357,-10.33797,2.91613, -1984.261,-1987.251,  0,  -198.725098, -14220.5, 345779.5, 360000.0,   0.96050, 0, 
+pro_20220723, 2022-07-29T17:40:49,        64.430, 0.100,   1,  0,  15,  25.0, 2.916, -1984.261,    13.80000,-10.33797,13.29302,13.29350,  -0.000483, 0.96050,0.96074,0.96105,
+unit_sim,        64.530, 25.00000,25.00000, 13.80000,13.29345,-10.36966,2.88376, -1987.251,-1989.927,  0,  -198.992725, -14419.5, 345580.5, 360000.0,   0.95995, 0, 
+pro_20220723, 2022-07-29T17:40:50,        64.530, 0.100,   1,  0,  15,  25.0, 2.884, -1987.251,    13.80000,-10.36966,13.29289,13.29337,  -0.000482, 0.95995,0.96019,0.96050,
+unit_sim,        64.630, 25.00000,25.00000, 13.80000,13.29332,-10.39992,2.85283, -1989.927,-1992.289,  0,  -199.228931, -14618.7, 345381.3, 360000.0,   0.95939, 0, 
+pro_20220723, 2022-07-29T17:40:50,        64.630, 0.100,   1,  0,  15,  25.0, 2.853, -1989.927,    13.80000,-10.39992,13.29277,13.29325,  -0.000482, 0.95939,0.95963,0.95995,
+unit_sim,        64.730, 25.00000,25.00000, 13.80000,13.29320,-10.42873,2.82333, -1992.289,-1994.337,  0,  -199.433667, -14818.1, 345181.9, 360000.0,   0.95884, 0, 
+pro_20220723, 2022-07-29T17:40:50,        64.730, 0.100,   1,  0,  15,  25.0, 2.823, -1992.289,    13.80000,-10.42873,13.29265,13.29313,  -0.000481, 0.95884,0.95907,0.95939,
+unit_sim,        64.830, 25.00000,25.00000, 13.80000,13.29308,-10.45610,2.79528, -1994.337,-1996.069,  0,  -199.606921, -15017.7, 344982.3, 360000.0,   0.95828, 0, 
+pro_20220723, 2022-07-29T17:40:50,        64.830, 0.100,   1,  0,  15,  25.0, 2.795, -1994.337,    13.80000,-10.45610,13.29252,13.29300,  -0.000481, 0.95828,0.95851,0.95884,
+unit_sim,        64.930, 25.00000,25.00000, 13.80000,13.29295,-10.48203,2.76868, -1996.069,-1997.487,  0,  -199.748657, -15217.5, 344782.5, 360000.0,   0.95773, 0, 
+pro_20220723, 2022-07-29T17:40:50,        64.930, 0.100,   1,  0,  15,  25.0, 2.769, -1996.069,    13.80000,-10.48203,13.29240,13.29288,  -0.000482, 0.95773,0.95795,0.95828,
+unit_sim,        65.030, 25.00000,25.00000, 13.80000,13.29283,-10.50650,2.74353, -1997.487,-1998.588,  0,  -199.858838, -15417.4, 344582.6, 360000.0,   0.95717, 0, 
+pro_20220723, 2022-07-29T17:40:50,        65.030, 0.100,   1,  0,  15,  25.0, 2.744, -1997.487,    13.80000,-10.50650,13.29227,13.29275,  -0.000480, 0.95717,0.95739,0.95773,
+unit_sim,        65.130, 25.00000,25.00000, 13.80000,13.29271,-10.52951,2.71984, -1998.588,-1999.375,  0,  -199.937463, -15617.3, 344382.7, 360000.0,   0.95662, 0, 
+pro_20220723, 2022-07-29T17:40:50,        65.130, 0.100,   1,  0,  15,  25.0, 2.720, -1998.588,    13.80000,-10.52951,13.29215,13.29263,  -0.000480, 0.95662,0.95684,0.95717,
+unit_sim,        65.230, 25.00000,25.00000, 13.80000,13.29258,-10.55106,2.69761, -1999.375,-1999.845,  0,  -199.984521, -15817.3, 344182.7, 360000.0,   0.95606, 0, 
+pro_20220723, 2022-07-29T17:40:50,        65.230, 0.100,   1,  0,  15,  25.0, 2.698, -1999.375,    13.80000,-10.55106,13.29203,13.29251,  -0.000479, 0.95606,0.95628,0.95662,
+unit_sim,        65.330, 25.00000,25.00000, 13.80000,13.29246,-10.57115,2.67685, -1999.845,-2000.000,  0,  -200.000000, -16017.3, 343982.7, 360000.0,   0.95551, 0, 
+pro_20220723, 2022-07-29T17:40:50,        65.330, 0.100,   1,  0,  15,  25.0, 2.677, -1999.845,    13.80000,-10.57115,13.29190,13.29238,  -0.000477, 0.95551,0.95572,0.95606,
+unit_sim,        65.430, 25.00000,25.00000, 13.80000,13.29234,-10.58977,2.65755, -2000.000,-1999.839,  0,  -199.983887, -16217.3, 343782.7, 360000.0,   0.95495, 0, 
+pro_20220723, 2022-07-29T17:40:50,        65.430, 0.100,   1,  0,  15,  25.0, 2.658, -2000.000,    13.80000,-10.58977,13.29178,13.29226,  -0.000477, 0.95495,0.95516,0.95551,
+unit_sim,        65.530, 25.00000,25.00000, 13.80000,13.29221,-10.60692,2.63972, -1999.839,-1999.362,  0,  -199.936206, -16417.2, 343582.8, 360000.0,   0.95440, 0, 
+pro_20220723, 2022-07-29T17:40:51,        65.530, 0.100,   1,  0,  15,  25.0, 2.640, -1999.839,    13.80000,-10.60692,13.29166,13.29213,  -0.000477, 0.95440,0.95460,0.95495,
+unit_sim,        65.630, 25.00000,25.00000, 13.80000,13.29209,-10.62259,2.62337, -1999.362,-1998.569,  0,  -199.856946, -16617.1, 343382.9, 360000.0,   0.95384, 0, 
+pro_20220723, 2022-07-29T17:40:51,        65.630, 0.100,   1,  0,  15,  25.0, 2.623, -1999.362,    13.80000,-10.62259,13.29153,13.29201,  -0.000472, 0.95384,0.95404,0.95440,
+unit_sim,        65.730, 25.00000,25.00000, 13.80000,13.29197,-10.63679,2.60850, -1998.569,-1997.461,  0,  -199.746130, -16816.8, 343183.2, 360000.0,   0.95329, 0, 
+pro_20220723, 2022-07-29T17:40:51,        65.730, 0.100,   1,  0,  15,  25.0, 2.609, -1998.569,    13.80000,-10.63679,13.29141,13.29188,  -0.000472, 0.95329,0.95348,0.95384,
+unit_sim,        65.830, 25.00000,25.00000, 13.80000,13.29184,-10.64950,2.59511, -1997.461,-1996.038,  0,  -199.603772, -17016.4, 342983.6, 360000.0,   0.95273, 0, 
+pro_20220723, 2022-07-29T17:40:51,        65.830, 0.100,   1,  0,  15,  25.0, 2.595, -1997.461,    13.80000,-10.64950,13.29129,13.29176,  -0.000472, 0.95273,0.95292,0.95329,
+unit_sim,        65.930, 25.00000,25.00000, 13.80000,13.29172,-10.66074,2.58320, -1996.038,-1994.299,  0,  -199.429883, -17215.8, 342784.2, 360000.0,   0.95218, 0, 
+pro_20220723, 2022-07-29T17:40:51,        65.930, 0.100,   1,  0,  15,  25.0, 2.583, -1996.038,    13.80000,-10.66074,13.29117,13.29164,  -0.000469, 0.95218,0.95236,0.95273,
+unit_sim,        66.030, 25.00000,25.00000, 13.80000,13.29160,-10.67049,2.57277, -1994.299,-1992.245,  0,  -199.224512, -17415.1, 342584.9, 360000.0,   0.95162, 0, 
+pro_20220723, 2022-07-29T17:40:51,        66.030, 0.100,   1,  0,  15,  25.0, 2.573, -1994.299,    13.80000,-10.67049,13.29104,13.29151,  -0.000469, 0.95162,0.95180,0.95218,
+unit_sim,        66.130, 25.00000,25.00000, 13.80000,13.29147,-10.67875,2.56383, -1992.245,-1989.877,  0,  -198.987683, -17614.0, 342386.0, 360000.0,   0.95107, 0, 
+pro_20220723, 2022-07-29T17:40:51,        66.130, 0.100,   1,  0,  15,  25.0, 2.564, -1992.245,    13.80000,-10.67875,13.29092,13.29139,  -0.000466, 0.95107,0.95124,0.95162,
+unit_sim,        66.230, 25.00000,25.00000, 13.80000,13.29135,-10.68553,2.55638, -1989.877,-1987.194,  0,  -198.719421, -17812.8, 342187.2, 360000.0,   0.95052, 0, 
+pro_20220723, 2022-07-29T17:40:51,        66.230, 0.100,   1,  0,  15,  25.0, 2.556, -1989.877,    13.80000,-10.68553,13.29080,13.29126,  -0.000465, 0.95052,0.95068,0.95107,
+unit_sim,        66.330, 25.00000,25.00000, 13.80000,13.29123,-10.69082,2.55042, -1987.194,-1984.198,  0,  -198.419788, -18011.2, 341988.8, 360000.0,   0.94997, 0, 
+pro_20220723, 2022-07-29T17:40:51,        66.330, 0.100,   1,  0,  15,  25.0, 2.550, -1987.194,    13.80000,-10.69082,13.29068,13.29114,  -0.000463, 0.94997,0.95013,0.95052,
+unit_sim,        66.430, 25.00000,25.00000, 13.80000,13.29111,-10.69462,2.54594, -1984.198,-1980.888,  0,  -198.088818, -18209.3, 341790.7, 360000.0,   0.94942, 0, 
+pro_20220723, 2022-07-29T17:40:51,        66.430, 0.100,   1,  0,  15,  25.0, 2.546, -1984.198,    13.80000,-10.69462,13.29056,13.29102,  -0.000460, 0.94942,0.94957,0.94997,
+unit_sim,        66.530, 25.00000,25.00000, 13.80000,13.29098,-10.69693,2.54297, -1980.888,-1977.266,  0,  -197.726575, -18407.0, 341593.0, 360000.0,   0.94887, 0, 
+pro_20220723, 2022-07-29T17:40:52,        66.530, 0.100,   1,  0,  15,  25.0, 2.543, -1980.888,    13.80000,-10.69693,13.29043,13.29089,  -0.000459, 0.94887,0.94902,0.94942,
+unit_sim,        66.630, 25.00000,25.00000, 13.80000,13.29086,-10.69775,2.54148, -1977.266,-1973.331,  0,  -197.333105, -18604.3, 341395.7, 360000.0,   0.94832, 0, 
+pro_20220723, 2022-07-29T17:40:52,        66.630, 0.100,   1,  0,  15,  25.0, 2.541, -1977.266,    13.80000,-10.69775,13.29031,13.29077,  -0.000456, 0.94832,0.94846,0.94887,
+unit_sim,        66.730, 25.00000,25.00000, 13.80000,13.29074,-10.69707,2.54148, -1973.331,-1969.085,  0,  -196.908472, -18801.2, 341198.8, 360000.0,   0.94777, 0, 
+pro_20220723, 2022-07-29T17:40:52,        66.730, 0.100,   1,  0,  15,  25.0, 2.541, -1973.331,    13.80000,-10.69707,13.29019,13.29065,  -0.000455, 0.94777,0.94791,0.94832,
+unit_sim,        66.830, 25.00000,25.00000, 13.80000,13.29062,-10.69491,2.54298, -1969.085,-1964.527,  0,  -196.452747, -18997.7, 341002.3, 360000.0,   0.94723, 0, 
+pro_20220723, 2022-07-29T17:40:52,        66.830, 0.100,   1,  0,  15,  25.0, 2.543, -1969.085,    13.80000,-10.69491,13.29007,13.29053,  -0.000453, 0.94723,0.94736,0.94777,
+unit_sim,        66.930, 25.00000,25.00000, 13.80000,13.29049,-10.69125,2.54597, -1964.527,-1959.660,  0,  -195.965991, -19193.7, 340806.3, 360000.0,   0.94668, 0, 
+          Tweak(Amp)::ignore:, cinf= -360000.0, dinf=  360000.0, coul_eff= 0.998500, scaler= 1.000000, effective coul_eff= 0.998500
+          Tweak(No Amp)::ignore:, cinf= -359981.9, dinf=  360000.0, coul_eff= 0.998500, scaler= 1.000000, effective coul_eff= 0.998500
+pro_20220723, 2022-07-29T17:40:52,        66.930, 0.100,   1,  0,  15,  25.0, 2.546, -1964.527,    13.80000,-10.69125,13.28995,13.29040,  -0.000452, 0.94668,0.94681,0.94723,
+unit_sim,        67.030, 25.00000,25.00000, 13.80000,13.29037,-10.68611,2.55046, -1959.660,-1954.483,  0,  -195.448303, -19389.1, 340610.9, 360000.0,   0.94614, 0, 
+pro_20220723, 2022-07-29T17:40:52,        67.030, 0.100,   0,  0,  15,  25.0, 2.550, -1959.660,    13.80000,-10.68611,13.28983,13.29028,  -0.000449, 0.94614,0.94626,0.94668,
+unit_sim,        67.130, 25.00000,25.00000, 13.80000,13.29025,-10.67947,2.55643, -1954.483,-1948.997,  0,  -194.899744, -19584.0, 340416.0, 360000.0,   0.94560, 0, 
+pro_20220723, 2022-07-29T17:40:52,        67.130, 0.100,   0,  0,  15,  25.0, 2.556, -1954.483,    13.80000,-10.67947,13.28971,13.29016,  -0.000445, 0.94560,0.94571,0.94614,
+unit_sim,        67.230, 25.00000,25.00000, 13.80000,13.29013,-10.67134,2.56390, -1948.997,-1943.204,  0,  -194.320410, -19778.3, 340221.7, 360000.0,   0.94506, 0, 
+pro_20220723, 2022-07-29T17:40:52,        67.230, 0.100,   0,  0,  15,  25.0, 2.564, -1948.997,    13.80000,-10.67134,13.28960,13.29004,  -0.000442, 0.94506,0.94517,0.94560,
+unit_sim,        67.330, 25.00000,25.00000, 13.80000,13.29001,-10.66172,2.57286, -1943.204,-1937.104,  0,  -193.710388, -19972.0, 340028.0, 360000.0,   0.94452, 0, 
+pro_20220723, 2022-07-29T17:40:52,        67.330, 0.100,   0,  0,  15,  25.0, 2.573, -1943.204,    13.80000,-10.66172,13.28948,13.28992,  -0.000440, 0.94452,0.94462,0.94506,
+unit_sim,        67.430, 25.00000,25.00000, 13.80000,13.28989,-10.65062,2.58331, -1937.104,-1930.698,  0,  -193.069775, -20165.1, 339834.9, 360000.0,   0.94399, 0, 
+pro_20220723, 2022-07-29T17:40:52,        67.430, 0.100,   0,  0,  15,  25.0, 2.583, -1937.104,    13.80000,-10.65062,13.28936,13.28980,  -0.000438, 0.94399,0.94408,0.94452,
+unit_sim,        67.530, 25.00000,25.00000, 13.80000,13.28978,-10.63803,2.59525, -1930.698,-1923.987,  0,  -192.398682, -20357.5, 339642.5, 360000.0,   0.94345, 0, 
+pro_20220723, 2022-07-29T17:40:53,        67.530, 0.100,   0,  0,  15,  25.0, 2.595, -1930.698,    13.80000,-10.63803,13.28924,13.28968,  -0.000435, 0.94345,0.94354,0.94399,
+unit_sim,        67.630, 25.00000,25.00000, 13.80000,13.28966,-10.62396,2.60867, -1923.987,-1916.972,  0,  -191.697205, -20549.2, 339450.8, 360000.0,   0.94292, 0, 
+pro_20220723, 2022-07-29T17:40:53,        67.630, 0.100,   0,  0,  15,  25.0, 2.609, -1923.987,    13.80000,-10.62396,13.28912,13.28956,  -0.000433, 0.94292,0.94300,0.94345,
+unit_sim,        67.730, 25.00000,25.00000, 13.80000,13.28954,-10.60840,2.62358, -1916.972,-1909.655,  0,  -190.965454, -20740.2, 339259.8, 360000.0,   0.94239, 0, 
+pro_20220723, 2022-07-29T17:40:53,        67.730, 0.100,   0,  0,  15,  25.0, 2.624, -1916.972,    13.80000,-10.60840,13.28901,13.28944,  -0.000429, 0.94239,0.94247,0.94292,
+unit_sim,        67.830, 25.00000,25.00000, 13.80000,13.28942,-10.59137,2.63997, -1909.655,-1902.035,  0,  -190.203540, -20930.4, 339069.6, 360000.0,   0.94186, 0, 
+pro_20220723, 2022-07-29T17:40:53,        67.830, 0.100,   0,  0,  15,  25.0, 2.640, -1909.655,    13.80000,-10.59137,13.28889,13.28932,  -0.000426, 0.94186,0.94193,0.94239,
+unit_sim,        67.930, 25.00000,25.00000, 13.80000,13.28930,-10.57285,2.65784, -1902.035,-1894.116,  0,  -189.411597, -21119.8, 338880.2, 360000.0,   0.94133, 0, 
+pro_20220723, 2022-07-29T17:40:53,        67.930, 0.100,   0,  0,  15,  25.0, 2.658, -1902.035,    13.80000,-10.57285,13.28878,13.28920,  -0.000422, 0.94133,0.94140,0.94186,
+unit_sim,        68.030, 25.00000,25.00000, 13.80000,13.28919,-10.55286,2.67719, -1894.116,-1885.897,  0,  -188.589746, -21308.4, 338691.6, 360000.0,   0.94081, 0, 
+pro_20220723, 2022-07-29T17:40:53,        68.030, 0.100,   0,  0,  15,  25.0, 2.677, -1894.116,    13.80000,-10.55286,13.28866,13.28908,  -0.000418, 0.94081,0.94087,0.94133,
+unit_sim,        68.130, 25.00000,25.00000, 13.80000,13.28907,-10.53140,2.69801, -1885.897,-1877.381,  0,  -187.738123, -21496.1, 338503.9, 360000.0,   0.94029, 0, 
+pro_20220723, 2022-07-29T17:40:53,        68.130, 0.100,   0,  0,  15,  25.0, 2.698, -1885.897,    13.80000,-10.53140,13.28855,13.28896,  -0.000416, 0.94029,0.94034,0.94081,
+unit_sim,        68.230, 25.00000,25.00000, 13.80000,13.28895,-10.50848,2.72030, -1877.381,-1868.568,  0,  -186.856836, -21683.0, 338317.0, 360000.0,   0.93977, 0, 
+pro_20220723, 2022-07-29T17:40:53,        68.230, 0.100,   0,  0,  15,  25.0, 2.720, -1877.381,    13.80000,-10.50848,13.28844,13.28885,  -0.000413, 0.93977,0.93981,0.94029,
+unit_sim,        68.330, 25.00000,25.00000, 13.80000,13.28884,-10.48408,2.74406, -1868.568,-1859.461,  0,  -185.946057, -21868.9, 338131.1, 360000.0,   0.93925, 0, 
+pro_20220723, 2022-07-29T17:40:53,        68.330, 0.100,   0,  0,  15,  25.0, 2.744, -1868.568,    13.80000,-10.48408,13.28832,13.28873,  -0.000411, 0.93925,0.93929,0.93977,
+unit_sim,        68.430, 25.00000,25.00000, 13.80000,13.28872,-10.45823,2.76929, -1859.461,-1850.059,  0,  -185.005908, -22053.9, 337946.1, 360000.0,   0.93874, 0, 
+pro_20220723, 2022-07-29T17:40:53,        68.430, 0.100,   0,  0,  15,  25.0, 2.769, -1859.461,    13.80000,-10.45823,13.28821,13.28862,  -0.000406, 0.93874,0.93877,0.93925,
+unit_sim,        68.530, 25.00000,25.00000, 13.80000,13.28861,-10.43091,2.79598, -1850.059,-1840.365,  0,  -184.036548, -22238.0, 337762.0, 360000.0,   0.93823, 0, 
+pro_20220723, 2022-07-29T17:40:54,        68.530, 0.100,   0,  0,  15,  25.0, 2.796, -1850.059,    13.80000,-10.43091,13.28810,13.28850,  -0.000404, 0.93823,0.93825,0.93874,
+unit_sim,        68.630, 25.00000,25.00000, 13.80000,13.28850,-10.40215,2.82413, -1840.365,-1830.381,  0,  -183.038123, -22421.0, 337579.0, 360000.0,   0.93772, 0, 
+pro_20220723, 2022-07-29T17:40:54,        68.630, 0.100,   0,  0,  15,  25.0, 2.824, -1840.365,    13.80000,-10.40215,13.28799,13.28839,  -0.000399, 0.93772,0.93774,0.93823,
+unit_sim,        68.730, 25.00000,25.00000, 13.80000,13.28838,-10.37193,2.85372, -1830.381,-1820.108,  0,  -182.010791, -22603.0, 337397.0, 360000.0,   0.93721, 0, 
+pro_20220723, 2022-07-29T17:40:54,        68.730, 0.100,   0,  0,  15,  25.0, 2.854, -1830.381,    13.80000,-10.37193,13.28788,13.28827,  -0.000396, 0.93721,0.93722,0.93772,
+unit_sim,        68.830, 25.00000,25.00000, 13.80000,13.28827,-10.34027,2.88477, -1820.108,-1809.547,  0,  -180.954724, -22784.0, 337216.0, 360000.0,   0.93671, 0, 
+pro_20220723, 2022-07-29T17:40:54,        68.830, 0.100,   0,  0,  15,  25.0, 2.885, -1820.108,    13.80000,-10.34027,13.28777,13.28816,  -0.000389, 0.93671,0.93672,0.93721,
+unit_sim,        68.930, 25.00000,25.00000, 13.80000,13.28816,-10.30717,2.91726, -1809.547,-1798.701,  0,  -179.870081, -22963.8, 337036.2, 360000.0,   0.93621, 0, 
+pro_20220723, 2022-07-29T17:40:54,        68.930, 0.100,   0,  0,  15,  25.0, 2.917, -1809.547,    13.80000,-10.30717,13.28766,13.28805,  -0.000386, 0.93621,0.93621,0.93671,
+unit_sim,        69.030, 25.00000,25.00000, 13.80000,13.28805,-10.27263,2.95119, -1798.701,-1787.570,  0,  -178.757031, -23142.6, 336857.4, 360000.0,   0.93572, 0, 
+pro_20220723, 2022-07-29T17:40:54,        69.030, 0.100,   0,  0,  15,  25.0, 2.951, -1798.701,    13.80000,-10.27263,13.28755,13.28794,  -0.000383, 0.93572,0.93570,0.93621,
+unit_sim,        69.130, 25.00000,25.00000, 13.80000,13.28794,-10.23667,2.98656, -1787.570,-1776.157,  0,  -177.615747, -23320.2, 336679.8, 360000.0,   0.93522, 0, 
+pro_20220723, 2022-07-29T17:40:54,        69.130, 0.100,   0,  0,  15,  25.0, 2.987, -1787.570,    13.80000,-10.23667,13.28744,13.28782,  -0.000378, 0.93522,0.93520,0.93572,
+unit_sim,        69.230, 25.00000,25.00000, 13.80000,13.28783,-10.19927,3.02335, -1776.157,-1764.464,  0,  -176.446423, -23496.6, 336503.4, 360000.0,   0.93473, 0, 
+pro_20220723, 2022-07-29T17:40:54,        69.230, 0.100,   0,  0,  15,  25.0, 3.023, -1776.157,    13.80000,-10.19927,13.28734,13.28771,  -0.000377, 0.93473,0.93471,0.93522,
+unit_sim,        69.330, 25.00000,25.00000, 13.80000,13.28772,-10.16046,3.06156, -1764.464,-1752.492,  0,  -175.249243, -23671.9, 336328.1, 360000.0,   0.93424, 0, 
+pro_20220723, 2022-07-29T17:40:54,        69.330, 0.100,   0,  0,  15,  25.0, 3.062, -1764.464,    13.80000,-10.16046,13.28723,13.28760,  -0.000372, 0.93424,0.93421,0.93473,
+unit_sim,        69.430, 25.00000,25.00000, 13.80000,13.28761,-10.12024,3.10120, -1752.492,-1740.244,  0,  -174.024377, -23845.9, 336154.1, 360000.0,   0.93376, 0, 
+pro_20220723, 2022-07-29T17:40:54,        69.430, 0.100,   0,  0,  15,  25.0, 3.101, -1752.492,    13.80000,-10.12024,13.28713,13.28749,  -0.000366, 0.93376,0.93372,0.93424,
+unit_sim,        69.530, 25.00000,25.00000, 13.80000,13.28750,-10.07861,3.14224, -1740.244,-1727.720,  0,  -172.772034, -24018.7, 335981.3, 360000.0,   0.93328, 0, 
+pro_20220723, 2022-07-29T17:40:55,        69.530, 0.100,   0,  0,  15,  25.0, 3.142, -1740.244,    13.80000,-10.07861,13.28702,13.28739,  -0.000363, 0.93328,0.93323,0.93376,
+unit_sim,        69.630, 25.00000,25.00000, 13.80000,13.28740,-10.03558,3.18469, -1727.720,-1714.924,  0,  -171.492419, -24190.2, 335809.8, 360000.0,   0.93281, 0, 
+pro_20220723, 2022-07-29T17:40:55,        69.630, 0.100,   0,  0,  15,  25.0, 3.185, -1727.720,    13.80000,-10.03558,13.28692,13.28728,  -0.000359, 0.93281,0.93275,0.93328,
+unit_sim,        69.730, 25.00000,25.00000, 13.80000,13.28729,-9.99116,3.22853, -1714.924,-1701.857,  0,  -170.185706, -24360.4, 335639.6, 360000.0,   0.93233, 0, 
+pro_20220723, 2022-07-29T17:40:55,        69.730, 0.100,   0,  0,  15,  25.0, 3.229, -1714.924,    13.80000,-9.99116,13.28682,13.28717,  -0.000354, 0.93233,0.93227,0.93281,
+unit_sim,        69.830, 25.00000,25.00000, 13.80000,13.28719,-9.94535,3.27377, -1701.857,-1688.521,  0,  -168.852136, -24529.2, 335470.8, 360000.0,   0.93186, 0, 
+pro_20220723, 2022-07-29T17:40:55,        69.830, 0.100,   0,  0,  15,  25.0, 3.274, -1701.857,    13.80000,-9.94535,13.28672,13.28707,  -0.000348, 0.93186,0.93179,0.93233,
+unit_sim,        69.930, 25.00000,25.00000, 13.80000,13.28708,-9.89816,3.32039, -1688.521,-1674.919,  0,  -167.491895, -24696.7, 335303.3, 360000.0,   0.93140, 0, 
+pro_20220723, 2022-07-29T17:40:55,        69.930, 0.100,   0,  0,  15,  25.0, 3.320, -1688.521,    13.80000,-9.89816,13.28662,13.28696,  -0.000344, 0.93140,0.93132,0.93186,
+unit_sim,        70.030, 25.00000,25.00000, 13.80000,13.28698,-9.84959,3.36839, -1674.919,-1661.052,  0,  -166.105200, -24862.8, 335137.2, 360000.0,   0.93094, 0, 
+pro_20220723, 2022-07-29T17:40:55,        70.030, 0.100,   0,  0,  15,  25.0, 3.368, -1674.919,    13.80000,-9.84959,13.28652,13.28686,  -0.000338, 0.93094,0.93085,0.93140,
+unit_sim,        70.130, 25.00000,25.00000, 13.80000,13.28687,-9.79966,3.41776, -1661.052,-1646.923,  0,  -164.692273, -25027.5, 334972.5, 360000.0,   0.93048, 0, 
+pro_20220723, 2022-07-29T17:40:55,        70.130, 0.100,   0,  0,  15,  25.0, 3.418, -1661.052,    13.80000,-9.79966,13.28642,13.28675,  -0.000335, 0.93048,0.93039,0.93094,
+unit_sim,        70.230, 25.00000,25.00000, 13.80000,13.28677,-9.74838,3.46850, -1646.923,-1632.533,  0,  -163.253345, -25190.8, 334809.2, 360000.0,   0.93003, 0, 
+pro_20220723, 2022-07-29T17:40:55,        70.230, 0.100,   0,  0,  15,  25.0, 3.468, -1646.923,    13.80000,-9.74838,13.28632,13.28665,  -0.000331, 0.93003,0.92993,0.93048,
+unit_sim,        70.330, 25.00000,25.00000, 13.80000,13.28667,-9.69574,3.52058, -1632.533,-1617.886,  0,  -161.788647, -25352.6, 334647.4, 360000.0,   0.92958, 0, 
+pro_20220723, 2022-07-29T17:40:55,        70.330, 0.100,   0,  0,  15,  25.0, 3.521, -1632.533,    13.80000,-9.69574,13.28622,13.28655,  -0.000325, 0.92958,0.92947,0.93003,
+unit_sim,        70.430, 25.00000,25.00000, 13.80000,13.28657,-9.64176,3.57402, -1617.886,-1602.984,  0,  -160.298389, -25512.9, 334487.1, 360000.0,   0.92913, 0, 
+pro_20220723, 2022-07-29T17:40:55,        70.430, 0.100,   0,  0,  15,  25.0, 3.574, -1617.886,    13.80000,-9.64176,13.28613,13.28645,  -0.000318, 0.92913,0.92902,0.92958,
+unit_sim,        70.530, 25.00000,25.00000, 13.80000,13.28647,-9.58645,3.62879, -1602.984,-1587.828,  0,  -158.782813, -25671.6, 334328.4, 360000.0,   0.92869, 0, 
+pro_20220723, 2022-07-29T17:40:56,        70.530, 0.100,   0,  0,  15,  25.0, 3.629, -1602.984,    13.80000,-9.58645,13.28603,13.28635,  -0.000314, 0.92869,0.92857,0.92913,
+unit_sim,        70.630, 25.00000,25.00000, 13.80000,13.28637,-9.52981,3.68489, -1587.828,-1572.422,  0,  -157.242175, -25828.9, 334171.1, 360000.0,   0.92825, 0, 
+pro_20220723, 2022-07-29T17:40:56,        70.630, 0.100,   0,  0,  15,  25.0, 3.685, -1587.828,    13.80000,-9.52981,13.28594,13.28625,  -0.000310, 0.92825,0.92812,0.92869,
+unit_sim,        70.730, 25.00000,25.00000, 13.80000,13.28628,-9.47186,3.74232, -1572.422,-1556.767,  0,  -155.676697, -25984.6, 334015.4, 360000.0,   0.92782, 0, 
+pro_20220723, 2022-07-29T17:40:56,        70.730, 0.100,   0,  0,  15,  25.0, 3.742, -1572.422,    13.80000,-9.47186,13.28585,13.28615,  -0.000304, 0.92782,0.92768,0.92825,
+unit_sim,        70.830, 25.00000,25.00000, 13.80000,13.28618,-9.41260,3.80106, -1556.767,-1540.866,  0,  -154.086646, -26138.6, 333861.4, 360000.0,   0.92739, 0, 
+pro_20220723, 2022-07-29T17:40:56,        70.830, 0.100,   0,  0,  15,  25.0, 3.801, -1556.767,    13.80000,-9.41260,13.28576,13.28605,  -0.000299, 0.92739,0.92725,0.92782,
+unit_sim,        70.930, 25.00000,25.00000, 13.80000,13.28609,-9.35204,3.86110, -1540.866,-1524.723,  0,  -152.472253, -26291.1, 333708.9, 360000.0,   0.92697, 0, 
+pro_20220723, 2022-07-29T17:40:56,        70.930, 0.100,   0,  0,  15,  25.0, 3.861, -1540.866,    13.80000,-9.35204,13.28566,13.28596,  -0.000295, 0.92697,0.92682,0.92739,
+unit_sim,        71.030, 25.00000,25.00000, 13.80000,13.28599,-9.29019,3.92243, -1524.723,-1508.338,  0,  -150.833789, -26441.9, 333558.1, 360000.0,   0.92655, 0, 
+pro_20220723, 2022-07-29T17:40:56,        71.030, 0.100,   0,  0,  15,  25.0, 3.922, -1524.723,    13.80000,-9.29019,13.28558,13.28586,  -0.000288, 0.92655,0.92639,0.92697,
+unit_sim,        71.130, 25.00000,25.00000, 13.80000,13.28590,-9.22706,3.98506, -1508.338,-1491.715,  0,  -149.171509, -26591.1, 333408.9, 360000.0,   0.92614, 0, 
+pro_20220723, 2022-07-29T17:40:56,        71.130, 0.100,   0,  0,  15,  25.0, 3.985, -1508.338,    13.80000,-9.22706,13.28549,13.28577,  -0.000284, 0.92614,0.92597,0.92655,
+unit_sim,        71.230, 25.00000,25.00000, 13.80000,13.28581,-9.16267,4.04895, -1491.715,-1474.857,  0,  -147.485669, -26738.6, 333261.4, 360000.0,   0.92573, 0, 
+pro_20220723, 2022-07-29T17:40:56,        71.230, 0.100,   0,  0,  15,  25.0, 4.049, -1491.715,    13.80000,-9.16267,13.28540,13.28568,  -0.000277, 0.92573,0.92555,0.92614,
+unit_sim,        71.330, 25.00000,25.00000, 13.80000,13.28572,-9.09701,4.11411, -1474.857,-1457.765,  0,  -145.776538, -26884.4, 333115.6, 360000.0,   0.92532, 0, 
+pro_20220723, 2022-07-29T17:40:56,        71.330, 0.100,   0,  0,  15,  25.0, 4.114, -1474.857,    13.80000,-9.09701,13.28531,13.28559,  -0.000272, 0.92532,0.92514,0.92573,
+unit_sim,        71.430, 25.00000,25.00000, 13.80000,13.28563,-9.03010,4.18053, -1457.765,-1440.444,  0,  -144.044397, -27028.4, 332971.6, 360000.0,   0.92492, 0, 
+pro_20220723, 2022-07-29T17:40:56,        71.430, 0.100,   0,  0,  15,  25.0, 4.181, -1457.765,    13.80000,-9.03010,13.28523,13.28550,  -0.000268, 0.92492,0.92473,0.92532,
+unit_sim,        71.530, 25.00000,25.00000, 13.80000,13.28554,-8.96196,4.24819, -1440.444,-1422.895,  0,  -142.289502, -27170.7, 332829.3, 360000.0,   0.92453, 0, 
+pro_20220723, 2022-07-29T17:40:57,        71.530, 0.100,   0,  0,  15,  25.0, 4.248, -1440.444,    13.80000,-8.96196,13.28514,13.28541,  -0.000263, 0.92453,0.92432,0.92492,
+unit_sim,        71.630, 25.00000,25.00000, 13.80000,13.28545,-8.89258,4.31709, -1422.895,-1405.121,  0,  -140.512134, -27311.2, 332688.8, 360000.0,   0.92414, 0, 
+pro_20220723, 2022-07-29T17:40:57,        71.630, 0.100,   0,  0,  15,  25.0, 4.317, -1422.895,    13.80000,-8.89258,13.28506,13.28532,  -0.000256, 0.92414,0.92393,0.92453,
+unit_sim,        71.730, 25.00000,25.00000, 13.80000,13.28536,-8.82199,4.38721, -1405.121,-1387.126,  0,  -138.712585, -27449.9, 332550.1, 360000.0,   0.92375, 0, 
+pro_20220723, 2022-07-29T17:40:57,        71.730, 0.100,   0,  0,  15,  25.0, 4.387, -1405.121,    13.80000,-8.82199,13.28498,13.28523,  -0.000249, 0.92375,0.92353,0.92414,
+unit_sim,        71.830, 25.00000,25.00000, 13.80000,13.28528,-8.75019,4.45854, -1387.126,-1368.911,  0,  -136.891125, -27586.8, 332413.2, 360000.0,   0.92337, 0, 
+pro_20220723, 2022-07-29T17:40:57,        71.830, 0.100,   0,  0,  15,  25.0, 4.459, -1387.126,    13.80000,-8.75019,13.28490,13.28514,  -0.000244, 0.92337,0.92314,0.92375,
+unit_sim,        71.930, 25.00000,25.00000, 13.80000,13.28519,-8.67720,4.53108, -1368.911,-1350.480,  0,  -135.048047, -27721.9, 332278.1, 360000.0,   0.92299, 0, 
+pro_20220723, 2022-07-29T17:40:57,        71.930, 0.100,   0,  0,  15,  25.0, 4.531, -1368.911,    13.80000,-8.67720,13.28482,13.28506,  -0.000239, 0.92299,0.92276,0.92337,
+unit_sim,        72.030, 25.00000,25.00000, 13.80000,13.28511,-8.60302,4.60481, -1350.480,-1331.837,  0,  -133.183655, -27855.1, 332144.9, 360000.0,   0.92262, 0, 
+pro_20220723, 2022-07-29T17:40:57,        72.030, 0.100,   0,  0,  15,  25.0, 4.605, -1350.480,    13.80000,-8.60302,13.28474,13.28497,  -0.000234, 0.92262,0.92238,0.92299,
+unit_sim,        72.130, 25.00000,25.00000, 13.80000,13.28503,-8.52767,4.67971, -1331.837,-1312.982,  0,  -131.298218, -27986.4, 332013.6, 360000.0,   0.92226, 0, 
+pro_20220723, 2022-07-29T17:40:57,        72.130, 0.100,   0,  0,  15,  25.0, 4.680, -1331.837,    13.80000,-8.52767,13.28466,13.28489,  -0.000226, 0.92226,0.92201,0.92262,
+unit_sim,        72.230, 25.00000,25.00000, 13.80000,13.28495,-8.45115,4.75579, -1312.982,-1293.921,  0,  -129.392053, -28115.8, 331884.2, 360000.0,   0.92190, 0, 
+pro_20220723, 2022-07-29T17:40:57,        72.230, 0.100,   0,  0,  15,  25.0, 4.756, -1312.982,    13.80000,-8.45115,13.28459,13.28481,  -0.000221, 0.92190,0.92164,0.92226,
+unit_sim,        72.330, 25.00000,25.00000, 13.80000,13.28487,-8.37349,4.83302, -1293.921,-1274.655,  0,  -127.465454, -28243.2, 331756.8, 360000.0,   0.92155, 0, 
+pro_20220723, 2022-07-29T17:40:57,        72.330, 0.100,   0,  0,  15,  25.0, 4.833, -1293.921,    13.80000,-8.37349,13.28451,13.28473,  -0.000216, 0.92155,0.92128,0.92190,
+unit_sim,        72.430, 25.00000,25.00000, 13.80000,13.28479,-8.29469,4.91139, -1274.655,-1255.187,  0,  -125.518738, -28368.7, 331631.3, 360000.0,   0.92120, 0, 
+pro_20220723, 2022-07-29T17:40:57,        72.430, 0.100,   0,  0,  15,  25.0, 4.911, -1274.655,    13.80000,-8.29469,13.28444,13.28465,  -0.000208, 0.92120,0.92092,0.92155,

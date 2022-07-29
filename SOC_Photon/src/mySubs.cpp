@@ -135,6 +135,7 @@ void load_ibatt_vbatt(const boolean reset, const unsigned long now, Sensors *Sen
 {
   // Load shunts
   // Outputs:  Sen->Ibatt_model_in, Sen->Ibatt_hdwe, Sen->Vbatt, Sen->Wbatt
+  Sen->now = now;
   Sen->shunt_bias();
   Sen->shunt_load();
   Sen->shunt_check(Mon);
