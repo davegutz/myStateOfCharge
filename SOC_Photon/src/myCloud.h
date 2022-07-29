@@ -47,11 +47,10 @@ struct Publish
   int num_timeouts;
   float tcharge;
   float Amp_hrs_remaining_ekf;
-  float Amp_hrs_remaining_wt;
+  float Amp_hrs_remaining_soc;
   float soc_model;
   float soc;
   float soc_ekf;
-  float soc_wt;
   float dV_dyn;
   float Voc_ekf;
   float y_ekf;

@@ -301,7 +301,7 @@ void Sensors::select_all(BatteryMonitor *Mon)
       double cTime;
       if ( rp.tweak_test() ) cTime = double(now)/1000.;
       else cTime = control_time;
-      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,    %d, %d,          %9.6f, %d,   %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,   %7.5f, %d, %d,                %d, %7.5f,%7.5f, %d, %7.5f,    %7.5f,%7.5f, %d, %7.5f,   %5.2f,%5.2f, %d, %5.2f, %c,",
+      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,    %d, %d,      %9.6f, %d,   %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,   %7.5f, %d, %d,     %d, %7.5f,%7.5f, %d, %7.5f,    %7.5f,%7.5f, %d, %7.5f,   %5.2f,%5.2f, %d, %5.2f, %c,",
           cTime, reset, rp.ibatt_select,
           ShuntAmp->bare(), ShuntNoAmp->bare(),
           cc_diff_, cc_flt_,
@@ -380,8 +380,8 @@ void Sensors::shunt_select_initial()
     choose_();
 
     // Check for modeling
-    if ( rp.modeling )
-        Ibatt_model_in = Ibatt_hdwe_model;
+    if ( rp.mod_ib() )
+        Ibatt_model_in = rp.inj_bias + rp.ibatt_bias_all;
     else
         Ibatt_model_in = Ibatt_hdwe;
 }

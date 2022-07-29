@@ -39,9 +39,9 @@ void print_serial_header(void)
 {
   if ( rp.debug==4 || rp.debug==24 || rp.debug==26 )
   {
-    Serial.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
+    Serial.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,,\n");
     if ( !cp.blynking )
-      Serial1.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,soc_wt,\n");
+      Serial1.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,\n");
   }
 }
 void print_serial_sim_header(void)
@@ -67,26 +67,26 @@ void print_signal_sel_header(void)
 void create_print_string(Publish *pubList)
 {
   if ( rp.debug==4 || rp.debug==24 || rp.debug==26 )
-    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %5.2f,%7.5f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%7.5f,%c", \
+    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %5.2f,%7.5f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
       pubList->sat, rp.ibatt_select, rp.modeling,
       pubList->Tbatt, pubList->Vbatt, pubList->Ibatt,
       pubList->Vsat, pubList->dV_dyn, pubList->Voc_stat, pubList->Voc_ekf,
       pubList->y_ekf,
-      pubList->soc_model, pubList->soc_ekf, pubList->soc, pubList->soc_wt,
+      pubList->soc_model, pubList->soc_ekf, pubList->soc,
       '\0');
 }
 void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
   if ( rp.debug==4 || rp.debug || rp.debug==26 )
   {
-    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%7.5f,%c", \
+    sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), double(Sen->now)/1000., Sen->T,
       pubList->sat, rp.ibatt_select, rp.modeling,
       Mon->Tb(), Mon->Vb(), Mon->Ib(),
       Mon->Vsat(), Mon->dV_dyn(), Mon->Voc_stat(), Mon->Hx(),
       Mon->y_ekf(),
-      Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(), Mon->soc_wt(),
+      Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(),
       '\0');
   }
 }
@@ -215,9 +215,6 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
 
   // Charge time for display
   Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ibatt, Mon->soc());
-
-  // Select between Coulomb Counter and EKF
-  Mon->select();
 }
 
 // OLED display drive
@@ -255,7 +252,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 
   char dispStringS[4];
   if ( pass || !Sen->saturated )
-    sprintf(dispStringS, "%3.0f", min(pp.pubList.Amp_hrs_remaining_wt, 999.));
+    sprintf(dispStringS, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
   else if (Sen->saturated)
     sprintf(dispStringS, "SAT");
   display->print(dispStringS);

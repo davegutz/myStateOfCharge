@@ -45,7 +45,6 @@ const double vb_dc_dc = 13.5;     // DC-DC charger estimated voltage, V (13.5 < 
 #define EKF_R_SD        0.5       // Standard deviation of EKF state uncertainty, fraction (0-1) (0.5)
 #define EKF_NOM_DT      0.1       // EKF nominal update time, s (initialization; actual value varies) 
 #define DF2             1.2       // Threshold to resest Coulomb Counter if different from ekf, fraction (0.20)
-#define DF1             0.02      // Weighted selection lower transition drift, fraction (0.02)
 #define TAU_Y_FILT      5.        // EKF y-filter time constant, sec (5.)
 #define MIN_Y_FILT      -0.5      // EKF y-filter minimum, V (-0.5)
 #define MAX_Y_FILT      0.5       // EKF y-filter maximum, V (0.5)
@@ -237,9 +236,9 @@ public:
   // operators
   // functions
   double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
-  double amp_hrs_remaining_wt() { return (amp_hrs_remaining_wt_); };
+  double amp_hrs_remaining_soc() { return (amp_hrs_remaining_soc_); };
   double Amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_*(*rp_nP_)*(*rp_nS_)); };
-  double Amp_hrs_remaining_wt() { return (amp_hrs_remaining_wt_*(*rp_nP_)*(*rp_nS_)); };
+  double Amp_hrs_remaining_soc() { return (amp_hrs_remaining_soc_*(*rp_nP_)*(*rp_nS_)); };
   virtual void assign_rand(void);
   double calc_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   double calculate(Sensors *Sen, const boolean reset);
@@ -252,9 +251,7 @@ public:
   double K_ekf() { return (K_); };
   void pretty_print(void);
   void regauge(const float temp_c);
-  void select();
   double soc_ekf() { return (soc_ekf_); };
-  double soc_wt() { return soc_wt_; };
   boolean solve_ekf(const boolean reset, Sensors *Sen);
   double tcharge() { return (tcharge_); };
   double dv_dyn() { return (dv_dyn_); };
@@ -270,9 +267,9 @@ protected:
   double tcharge_;      // Counted charging time to 100%, hr
   double q_ekf_;        // Filtered charge calculated by ekf, C
   double voc_filt_;     // Filtered, static model open circuit voltage, V
-  double soc_wt_;       // Weighted selection of ekf state of charge and coulomb counter (0-1)
+  double soc_;       // Weighted selection of ekf state of charge and coulomb counter (0-1)
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
-  double amp_hrs_remaining_wt_;   // Discharge amp*time left if drain soc_wt_ to 0, A-h
+  double amp_hrs_remaining_soc_;  // Discharge amp*time left if drain soc_ to 0, A-h
   double y_filt_;       // Filtered EKF y value, V
   // LagTustin *y_filt = new LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
   General2_Pole *y_filt = new General2_Pole(0.1, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time

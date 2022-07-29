@@ -376,12 +376,12 @@ double BatteryMonitor::calc_charge_time(const double q, const double q_capacity,
     if ( soc > 0. )
     {
         amp_hrs_remaining_ekf_ = amp_hrs_remaining * (soc_ekf_ - soc_min_) / max(soc - soc_min_, 1e-8);
-        amp_hrs_remaining_wt_ = amp_hrs_remaining * (soc_wt_ - soc_min_) / max(soc - soc_min_, 1e-8);
+        amp_hrs_remaining_soc_ = amp_hrs_remaining * (soc_ - soc_min_) / max(soc - soc_min_, 1e-8);
     }
     else
     {
         amp_hrs_remaining_ekf_ = 0.;
-        amp_hrs_remaining_wt_ = 0.;
+        amp_hrs_remaining_soc_ = 0.;
     }
 
     return( tcharge_ );
@@ -437,11 +437,10 @@ void BatteryMonitor::pretty_print(void)
     this->Battery::pretty_print();
     Serial.printf(" BatteryMonitor::BatteryMonitor:\n");
     Serial.printf("  amp_hrs_remaining_ekf_ =  %7.3f;  // Discharge amp*time left if drain to q_ekf=0, A-h\n", amp_hrs_remaining_ekf_);
-    Serial.printf("  amp_hrs_remaining_wt_  =  %7.3f;  // Discharge amp*time left if drain soc_wt_ to 0, A-h\n", amp_hrs_remaining_wt_);
+    Serial.printf("  amp_hrs_remaining_soc_ =  %7.3f;  // Discharge amp*time left if drain soc_ to 0, A-h\n", amp_hrs_remaining_soc_);
     Serial.printf("  EKF_converged =                 %d;  // EKF is converged, T=converged\n", converged_ekf());
     Serial.printf("  q_ekf =                %10.1f;  // Filtered charge calculated by ekf, C\n", q_ekf_);
     Serial.printf("  soc_ekf =                %8.4f;  // Solved state of charge, fraction\n", soc_ekf_);
-    Serial.printf("  soc_wt_ =                %8.4f;  // Weighted selection of ekf state of charge and coulomb counter (0-1)\n", soc_wt_);
     Serial.printf("  tcharge =                   %5.1f;  // Counted charging time to full, hr\n", tcharge_);
     Serial.printf("  tcharge_ekf =               %5.1f;  // Solved charging time to full from ekf, hr\n", tcharge_ekf_);
     Serial.printf("  voc_filt_ =               %7.3f;  // Filtered charging voltage for saturation detect, V\n", voc_filt_);
@@ -458,22 +457,6 @@ void BatteryMonitor::regauge(const float temp_c)
         apply_soc(soc_ekf_, temp_c);
         Serial.printf("confirmed %7.3f\n", soc_);
     }
-}
-
-// Weight between EKF and Coulomb Counter
-void BatteryMonitor::select()
-{
-    double drift = soc_ekf_ - soc_;
-    double avg = (soc_ekf_ + soc_) / 2.;
-    if ( drift<=-DF2 || drift>=DF2 )
-        soc_wt_ = soc_ekf_;
-    if ( -DF2<drift && drift<-DF1 )
-        soc_wt_ = avg + (drift + DF1)/(DF2 - DF1) * (DF2/2.);
-    else if ( DF1<drift && drift<DF2 )
-        soc_wt_ = avg + (drift - DF1)/(DF2 - DF1) * (DF2/2.);
-    else
-        soc_wt_ = avg;
-    soc_wt_ = soc_;  // Disable for now
 }
 
 /* Steady state voc(soc) solver for initialization of ekf state.  Expects Sen->Tbatt_filt to be in reset mode
