@@ -759,7 +759,8 @@ Outputs:
 */
 double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon) 
 {
-    float charge_curr = Sen->Ibatt / (*rp_nP_);
+    // float charge_curr = Sen->Ibatt / (*rp_nP_);
+    float charge_curr = ib_in_;
     double d_delta_q = charge_curr * Sen->T;
     if ( charge_curr>0. ) d_delta_q *= coul_eff_;
 
