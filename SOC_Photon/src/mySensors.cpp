@@ -179,6 +179,14 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
   this->ib_sel_stat_ = 1;     // Default is amp
 }
 
+// Bias model outputs for sensor fault injection
+void Sensors::bias_all_model()
+{
+  Ibatt_amp_model = ShuntAmp->bias_any( Ibatt_model );
+  Ibatt_noamp_model = ShuntNoAmp->bias_any( Ibatt_model );
+}
+
+
 // Deliberate choice based on results and inputs
 // Inputs:  ib_sel_stat_, Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model
 // Outputs:  Ibatt_hdwe_model, Ibatt_hdwe, sclr_coul_eff, Vshunt
@@ -311,12 +319,7 @@ void Sensors::select_all(BatteryMonitor *Mon)
 // Current bias.  Feeds into signal conversion
 void Sensors::shunt_bias(void)
 {
-  if ( rp.mod_ib() )
-  {
-    ShuntAmp->bias( rp.ibatt_bias_all + rp.inj_bias );
-    ShuntNoAmp->bias( rp.ibatt_bias_all + rp.inj_bias );
-  }
-  else
+  if ( !rp.mod_ib() )
   {
     ShuntAmp->bias( rp.ibatt_bias_amp + rp.ibatt_bias_all + rp.inj_bias );
     ShuntNoAmp->bias( rp.ibatt_bias_noamp + rp.ibatt_bias_all + rp.inj_bias );
@@ -366,13 +369,13 @@ void Sensors::shunt_select_initial()
     // Over-ride 'permanent' with Talk(rp.ibatt_select) = Talk('s')
 
     // Retrieve values.   Return values include scalar/adder for fault
+    Ibatt_amp_model = ShuntAmp->bias_any( Ibatt_model );      // uses past Ib
+    Ibatt_noamp_model = ShuntNoAmp->bias_any( Ibatt_model );  // uses pst Ib
     Ibatt_amp_hdwe = ShuntAmp->ishunt_cal();
-    Ibatt_amp_model = ShuntAmp->bias();
     Ibatt_noamp_hdwe = ShuntNoAmp->ishunt_cal();
-    Ibatt_noamp_model = ShuntNoAmp->bias();
 
     // Initial choice
-    // Inputs:  ib_sel_stat_, Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model
+    // Inputs:  ib_sel_stat_, Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model(past), Ibatt_noamp_model(past)
     // Outputs:  Ibatt_hdwe_model, Ibatt_hdwe, sclr_coul_eff, Vshunt
     choose_();
 

@@ -73,8 +73,9 @@ public:
   float add() { return ( add_ ); };
   void add(const float add) { add_ = add; };
   boolean bare() { return ( bare_ ); };
-  void bias(float bias) { *cp_ibatt_bias_ = bias; };
+  void bias(const float bias) { *cp_ibatt_bias_ = bias; };
   float bias() { return ( *cp_ibatt_bias_*slr_ + add_ ); };
+  float bias_any(const float Ib) { return ( Ib*slr_ + add_ ); };
   float ishunt_cal() { return ( ishunt_cal_*slr_ + add_ ); };
   void load();
   void pretty_print();
@@ -158,6 +159,7 @@ public:
     double control_time;            // Decimal time, seconds since 1/1/2021
     boolean display;                // Use display
     double sclr_coul_eff;           // Scalar on Coulombic Efficiency
+    void bias_all_model();          // Bias model outputs for sensor fault injection
     void select_all(BatteryMonitor *Mon);  // Final choices
     void shunt_bias(void);          // Load biases into Shunt objects
     void shunt_check(BatteryMonitor *Mon);  // Range check Ibatt signals

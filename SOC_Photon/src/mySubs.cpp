@@ -304,6 +304,9 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   cp.model_cutback = Sen->Sim->cutback();
   cp.model_saturated = Sen->Sim->saturated();
 
+  // Inputs:  Sim->Ib
+  Sen->bias_all_model();   // Bias model outputs for sensor fault injection
+
   // Use model instead of sensors when running tests as user
   //  Inputs:                                             --->   Outputs:
   // TODO:  control parameter list here...Vbatt_fail, soc, soc_ekf,
