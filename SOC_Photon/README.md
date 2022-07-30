@@ -387,8 +387,9 @@ Throughput test
 43.  Current is a critical signal for availability.   If lose current also lose knowledge of instantaneous voc_stat because do not know how to adjust for rapid changes in Vb without current.   So the EKF useful only for steady state use.  If add redundant current sensor then If current is available, it creates a triplex signal selection process where current sensors may be compared to each other and Coulomb counter may be compared to EKF to provide enough information to sort out the correct signals.  For example, if the currents disagree and CC and EKF agree then the standby current sensor has faulted.   For that same situation and the CC and EKF disagree then either the active current sensor has likely failed.  If the currents agree and CC and EKF disagree then the voltage sensor has likely failed.  The amplified current sensor is most accurate and is the first choice default.  The non amplified sensor is ok - observing long cycling 'Xp9' see that for a long history, counted coulombs are the same and sensor errors average out.   All this consistent with proper and same calibration of current sensors' gains and setting biases so indicated currents are zero when actual current is zero.
 44. Fault injection testing
 
-Ca1;Dr1000;Dp10000;Xm7;v26;Dm-500;Dn0;Rs;
+Ca1;Dr1000;Dp10000;Xm7;Rs;v26;Dm-500;Dn0.0001;
 
+Ca1;Dr100;Dp100;Xm7;Rs;v26;Dm-500;Dn0.0001;
 
 ## Accuracy
 

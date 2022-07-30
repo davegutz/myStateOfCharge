@@ -311,7 +311,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   //  Ibatt_model, Ibatt_hdwe,                            --->   Ibatt
   //  Vbatt_model, Vbatt_hdwe,                            --->   Vbatt
   //  constant,         Tbatt_hdwe, Tbatt_hdwe_filt       --->   Tbatt, Tbatt_filt
-  Sen->select_all(Mon);
+  Sen->select_all(Mon, reset);
 
   // Charge calculation and memory store
   // Inputs: Sim.model_saturated, Sen->Tbatt, Sen->Ibatt, and Sim.soc

@@ -226,7 +226,7 @@ void Sensors::choose_()
 // Outputs: Ibatt,
 //          Vbatt,
 //          Tbatt, Tbatt_filt
-void Sensors::select_all(BatteryMonitor *Mon)
+void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
 {
   // EKF error test - failure conditions track poorly
   cc_diff_ = Mon->soc_ekf() - Mon->soc();  // These are filtered in their construction (EKF is a dynamic filter and 
@@ -243,6 +243,7 @@ void Sensors::select_all(BatteryMonitor *Mon)
 
   // Truth table
   static int8_t ib_sel_stat_last = ib_sel_stat_;
+  if ( reset ) ib_sel_stat_last = 1;
   if ( ShuntAmp->bare() && ShuntNoAmp->bare() )
   {
     ib_sel_stat_ = 0;
@@ -265,7 +266,7 @@ void Sensors::select_all(BatteryMonitor *Mon)
     {
       ib_sel_stat_ = -1;
     }
-    else
+    else if ( ib_sel_stat_last >= 0 )  // Must reset to move out of no amp selection
     {
       ib_sel_stat_ = 1;
     }

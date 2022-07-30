@@ -245,7 +245,8 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
         # data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
-        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220729.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220729.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/ampLoFail20220730.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"

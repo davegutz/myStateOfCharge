@@ -160,7 +160,7 @@ public:
     boolean display;                // Use display
     double sclr_coul_eff;           // Scalar on Coulombic Efficiency
     void bias_all_model();          // Bias model outputs for sensor fault injection
-    void select_all(BatteryMonitor *Mon);  // Final choices
+    void select_all(BatteryMonitor *Mon, const boolean reset);  // Final choices
     void shunt_bias(void);          // Load biases into Shunt objects
     void shunt_check(BatteryMonitor *Mon);  // Range check Ibatt signals
     void shunt_load(void);          // Load ADS015 protocol
