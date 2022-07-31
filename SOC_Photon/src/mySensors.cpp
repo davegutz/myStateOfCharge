@@ -243,7 +243,7 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
 
   // Truth table
   static int8_t ib_sel_stat_last = ib_sel_stat_;
-  if ( reset ) ib_sel_stat_last = 1;
+  // if ( reset ) ib_sel_stat_last = 1;  // must do hard reset
   if ( ShuntAmp->bare() && ShuntNoAmp->bare() )
   {
     ib_sel_stat_ = 0;
@@ -252,11 +252,15 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
   {
     ib_sel_stat_ = 1;
   }
+  else if ( ib_sel_stat_last==-1 && !ShuntNoAmp->bare() )  // latch - use hard reset
+  {
+    ib_sel_stat_ = -1;
+  }
   else if ( rp.ibatt_select<0 && !ShuntNoAmp->bare() )
   {
     ib_sel_stat_ = -1;
   }
-  else if ( rp.ibatt_select==0 )
+  else if ( rp.ibatt_select==0 )  // auto
   {
     if ( ShuntAmp->bare() && !ShuntNoAmp->bare() )
     {
@@ -272,9 +276,13 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
     }
   }
   if ( ib_sel_stat_ != ib_sel_stat_last )
-      Serial.printf("Select change:  ShuntAmp->bare=%d, ShuntNoAmp->bare=%d, ibatt_err_fail=%d, cc_flt_=%d, rp.ibatt_select=%d, ibatt_sel_status=%d,\n",
+  {
+    Serial.printf("Select change:  ShuntAmp->bare=%d, ShuntNoAmp->bare=%d, ibatt_err_fail=%d, cc_flt_=%d, rp.ibatt_select=%d, ibatt_sel_status=%d,\n",
         ShuntAmp->bare(), ShuntNoAmp->bare(), ib_diff_fa_, cc_flt_, rp.ibatt_select, ib_sel_stat_);
-
+    Serial.printf("Small reset. Filters reinit and selection unchanged.   Hard reset to re-init selection\n");
+    cp.cmd_reset();   
+  }
+ 
   // Reselect since may be changed
   // Inputs:  ib_sel_stat_, Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model
   // Outputs:  Ibatt_hdwe_model, Ibatt_hdwe, sclr_coul_eff, Vshunt

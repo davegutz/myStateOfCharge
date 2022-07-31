@@ -427,7 +427,7 @@ void loop()
         if ( reset_publish || (last_publishS_debug != rp.debug) )
         {
           print_serial_header();
-          if ( rp.debug==24 ) print_serial_sim_header();
+          if ( rp.debug==24 || rp.debug==26) print_serial_sim_header();
           if ( rp.debug==26 ) print_signal_sel_header();
         }
         serial_print(PublishSerial->now(), Sen->T);

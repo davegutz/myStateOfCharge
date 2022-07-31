@@ -46,7 +46,7 @@ void print_serial_header(void)
 }
 void print_serial_sim_header(void)
 {
-  if ( rp.debug==24 ) // print_serial_sim_header
+  if ( rp.debug==24 || rp.debug==26) // print_serial_sim_header
     Serial.printf("unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_stat_m, dv_dyn_m, vb_m, ib_m, ib_in_m, sat_m, ddq_m, dq_m, q_m, qcap_m, soc_m, reset_m,\n");
 }
 void print_signal_sel_header(void)
