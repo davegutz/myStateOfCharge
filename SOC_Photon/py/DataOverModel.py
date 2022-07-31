@@ -582,7 +582,7 @@ if __name__ == '__main__':
             filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files, plot_title=plot_title,
-                                    n_fig=n_fig)  # Could be confusing because sim over mon
+                                    n_fig=n_fig, suffix='_new')  # Could be confusing because sim over mon
         n_fig, fig_files = overall(saved_old, mons, saved_sim_old, sims, sims_m, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig, new_s_s=sims)
         if platform != 'linux':

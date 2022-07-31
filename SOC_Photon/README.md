@@ -391,6 +391,8 @@ Ca1;Dr1000;Dp10000;Xm7;Rs;v26;Dm-500;Dn0.0001;
 
 Ca1;Dr100;Dp100;Xm7;Rs;v26;Dm-500;Dn0.0001;
 
+Dm0;Dn0;v0;Xm7;Ca0.5;Dr100;Dp100;v26;Dm500;Dn0.0001;
+
 ## Accuracy
 
 1. Current Sensor

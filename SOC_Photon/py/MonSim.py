@@ -246,7 +246,8 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
         # data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220729.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/ampLoFail20220730.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampLoFail20220730.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/ampHiFail20220730.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
@@ -291,7 +292,7 @@ if __name__ == '__main__':
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files, plot_title=plot_title, n_fig=n_fig)  # sim over mon
+        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files, plot_title=plot_title, n_fig=n_fig, suffix='_new')  # sim over mon
         n_fig, fig_files = overall(saved_old, mons, saved_sim_old, sims, sims_m, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig, new_s_s=sims)  # mon over data
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')

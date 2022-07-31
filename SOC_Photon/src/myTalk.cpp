@@ -256,7 +256,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
       case ( 'S' ):
         switch ( cp.input_string.charAt(1) )
         {
-          case ( 'c' ):  // Sc<>:
+          case ( 'c' ):  // Sc<>: scale capacity
             scale = cp.input_string.substring(2).toFloat();
             rp.s_cap_model = scale;
         
@@ -269,7 +269,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf("Sim:  "); Sen->Sim->pretty_print(); Sen->Sim->Coulombs::pretty_print();
             break;
         
-          case ( 'h' ):  // Sh<>:
+          case ( 'h' ):  // Sh<>: scale hysteresis
             scale = cp.input_string.substring(2).toFloat();
 
             Serial.printf("\nBefore Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n", Mon->hys_scale(), Sen->Sim->hys_scale());
