@@ -73,6 +73,13 @@ MAX_Y_FILT = 0.5  # EKF y-filter maximum, V (0.5)
 WN_Y_FILT = 0.1  # EKF y-filter-2 natural frequency, r/s (0.1)
 ZETA_Y_FILT = 0.9  # EKF y-filter-2 damping factor (0.9)
 TMAX_FILT = 3.  # Maximum y-filter-2 sample time, s (3.)
+EKF_Q_SD_NORM = 0.00005
+EKF_R_SD_NORM = 0.5
+# disable because not in particle logic
+# EKF_Q_SD_REV = 0.7
+# EKF_R_SD_REV = 0.3
+EKF_Q_SD_REV = EKF_Q_SD_NORM
+EKF_R_SD_REV = EKF_R_SD_NORM
 
 
 class Battery(Coulombs):
@@ -275,20 +282,18 @@ class BatteryMonitor(Battery, EKF1x1):
         self.amp_hrs_remaining_wt = 0  # Discharge amp*time left if drain soc_wt_ to 0, A-h
         self.e_soc_ekf = 0.  # analysis parameter
         self.e_voc_ekf = 0.  # analysis parameter
-        q = 0.00005
-        r = 0.5
         # self.Q = 0.001*0.001  # EKF process uncertainty
         # self.R = 0.1*0.1  # EKF state uncertainty
         if scaler_q is None:
-            self.scaler_q = Scale(1, 4, 0.7, 0.00005)
+            self.scaler_q = Scale(1, 4, EKF_Q_SD_REV, EKF_Q_SD_NORM)
         else:
             self.scaler_q = scaler_q
         if scaler_r is None:
-            self.scaler_r = Scale(1, 4, 0.3, 0.5)
+            self.scaler_r = Scale(1, 4, EKF_R_SD_REV, EKF_R_SD_NORM)
         else:
             self.scaler_r = scaler_r
-        self.Q = q * q  # EKF process uncertainty
-        self.R = r * r  # EKF state uncertainty
+        self.Q = EKF_Q_SD_NORM * EKF_Q_SD_NORM  # EKF process uncertainty
+        self.R = EKF_R_SD_NORM * EKF_R_SD_NORM  # EKF state uncertainty
         self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
         self.soc_m = 0.  # Model information
         self.EKF_converged = TFDelay(False, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT)
@@ -894,12 +899,12 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     # plt.subplot_mosaic("C")
     plt.plot(ms.time, ms.vb, color='green', label='vb'+suffix)
     plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='vb_m'+suffix)
-    plt.plot(ms.time, ms.vc, color='blue', label='vc'+suffix)
-    plt.plot(ss.time, ss.vc, color='green', linestyle='--', label='vc_m'+suffix)
+    plt.plot(ms.time, ms.vc, color='blue', linestyle='-.', label='vc'+suffix)
+    plt.plot(ss.time, ss.vc, color='green', linestyle=':', label='vc_m'+suffix)
     plt.plot(ms.time, ms.vd, color='red', label='vd'+suffix)
     plt.plot(ss.time, ss.vd, color='orange', linestyle='--', label='vd_m'+suffix)
-    plt.plot(ms.time, ms.voc_stat, color='orange', label='voc_stat'+suffix)
-    plt.plot(ss.time, ss.voc_stat, color='cyan', linestyle='--', label='voc_stat_,'+suffix)
+    plt.plot(ms.time, ms.voc_stat, color='orange', linestyle='-.', label='voc_stat'+suffix)
+    plt.plot(ss.time, ss.voc_stat, color='cyan', linestyle=':', label='voc_stat_,'+suffix)
     plt.plot(ms.time, ms.voc, color='magenta', label='voc'+suffix)
     plt.plot(ss.time, ss.voc, color='black', linestyle='--', label='voc_m'+suffix)
     plt.legend(loc=1)
@@ -928,12 +933,12 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     plt.title(plot_title)
     plt.plot(ms.time, ms.vb, color='green', label='vb'+suffix)
     plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='vb_m'+suffix)
-    plt.plot(ms.time, ms.vc, color='blue', label='vc'+suffix)
-    plt.plot(ss.time, ss.vc, color='green', linestyle='--', label='vc_m'+suffix)
+    plt.plot(ms.time, ms.vc, color='blue', linestyle='-.', label='vc'+suffix)
+    plt.plot(ss.time, ss.vc, color='green', linestyle=':', label='vc_m'+suffix)
     plt.plot(ms.time, ms.vd, color='red', label='vd'+suffix)
     plt.plot(ss.time, ss.vd, color='orange', linestyle='--', label='vd_m'+suffix)
-    plt.plot(ms.time, ms.voc_stat, color='orange', label='voc_stat'+suffix)
-    plt.plot(ss.time, ss.voc_stat, color='cyan', linestyle='--', label='voc_stat'+suffix)
+    plt.plot(ms.time, ms.voc_stat, color='orange', linestyle='-.', label='voc_stat'+suffix)
+    plt.plot(ss.time, ss.voc_stat, color='cyan', linestyle=':', label='voc_stat'+suffix)
     plt.plot(ms.time, ms.voc, color='magenta', label='voc'+suffix)
     plt.plot(ss.time, ss.voc, color='black', linestyle='--', label='voc_m'+suffix)
     plt.legend(loc=1)
@@ -989,9 +994,9 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     plt.subplot(323)
     plt.plot(ms.time, ms.vb, color='green', label='vb'+suffix)
     plt.plot(ss.time, ss.vb, color='orange', linestyle='--', label='vb_m'+suffix)
-    plt.plot(ms.time, ms.voc, color='cyan', label='voc'+suffix)
-    plt.plot(ss.time, ss.voc, color='red', linestyle='--', label='voc_m'+suffix)
-    plt.plot(ms.time, ms.voc_stat, color='magenta', label='voc_stat'+suffix)
+    plt.plot(ms.time, ms.voc, color='cyan', linestyle='-.', label='voc'+suffix)
+    plt.plot(ss.time, ss.voc, color='red', linestyle=':', label='voc_m'+suffix)
+    plt.plot(ms.time, ms.voc_stat, color='magenta', linestyle=':', label='voc_stat'+suffix)
     plt.plot(ss.time, ss.voc_stat, color='black', linestyle='--', label='voc_stat_m'+suffix)
     plt.legend(loc=1)
     plt.subplot(324)

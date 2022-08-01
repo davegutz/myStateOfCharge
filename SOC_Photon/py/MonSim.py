@@ -95,6 +95,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
         t = saved_sim_old.time
     else:
         t = saved_old.time
+    reset_sel = saved_old.res
     Vb = saved_old.Vb
     Ib_past = saved_old.Ib_past
     Tb = saved_old.Tb
@@ -128,7 +129,9 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
     now = t[0]
     for i in range(t_len):
         now = t[i]
-        reset = (t[i] <= init_time)
+        if not reset_sel is None:
+            sel_reset = reset_sel[i]
+        reset = (t[i] <= init_time) or sel_reset
         saved_old.i = i
         if i > 0:
             T = t[i] - t[i - 1]
@@ -169,29 +172,26 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
             mon.init_soc_ekf(soc_ekf_init)  # when modeling (assumed in python) ekf wants to equal model
 
         # Monitor calculations including ekf
+        Tb_ = Tb[i]
         if t_Ib_fail and t[i] > t_Ib_fail:
-            current_sense = Ib_fail
-            charge_curr = Ib_fail
+            Ib_ = Ib_fail
         else:
-            current_sense = saved_old.Ib[i]
-            charge_curr = charge_curr
+            Ib_ = saved_old.Ib[i]
         if t_Vb_fail and t[i] >= t_Vb_fail:
             Vb_ = Vb_fail
-            vb = Vb_fail
         else:
             Vb_ = Vb[i]
-            vb = sim.vb
         if rp.modeling == 0:
-            mon.calculate(Tb[i], Vb_, current_sense, T, rp=rp, reset=reset)
+            mon.calculate(Tb_, Vb_, Ib_, T, rp=rp, reset=reset)
         else:
-            mon.calculate(Tb[i], vb + randn() * v_std + dv_sense, charge_curr + randn() * i_std + di_sense, T, rp=rp,
+            mon.calculate(Tb_, Vb_ + randn() * v_std + dv_sense, Ib_ + randn() * i_std + di_sense, T, rp=rp,
                           reset=reset, d_voc=None)
         sat = is_sat(Tb[i], mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
         if rp.modeling == 0:
-            mon.count_coulombs(dt=T, reset=reset, temp_c=Tb[i], charge_curr=current_sense, sat=saturated)
+            mon.count_coulombs(dt=T, reset=reset, temp_c=Tb[i], charge_curr=Ib_, sat=saturated)
         else:
-            mon.count_coulombs(dt=T, reset=reset, temp_c=temp_c, charge_curr=charge_curr, sat=saturated)
+            mon.count_coulombs(dt=T, reset=reset, temp_c=temp_c, charge_curr=Ib_, sat=saturated)
         mon.calc_charge_time(mon.q, mon.q_capacity, charge_curr, mon.soc)
         # mon.regauge(Tb[i])
         mon.assign_soc_m(sim.soc)
@@ -284,9 +284,6 @@ if __name__ == '__main__':
             saved_sim_old = SavedDataSim(time_ref=saved_old.time_ref, data=data_sim_old, time_end=time_end)
         else:
             saved_sim_old = None
-
-        if sel_old is not None and saved_sim_old is not None:
-            saved_old.Ib_finj = saved_old.Ib - saved_sim_old.ib_m
 
         # How to initialize
         if saved_old.time[0] == 0.:  # no initialization flat detected at beginning of recording

@@ -176,8 +176,8 @@ BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_n
 {
     voc_filt_ = chem_.v_sat-HDB_VBATT;
     // EKF
-    this->Q_ = EKF_Q_SD*EKF_Q_SD;
-    this->R_ = EKF_R_SD*EKF_R_SD;
+    this->Q_ = EKF_Q_SD_NORM*EKF_Q_SD_NORM;
+    this->R_ = EKF_R_SD_NORM*EKF_R_SD_NORM;
     // Randles dynamic model for EKF, forward version based on sensor inputs {ib, vb} --> {voc}, ioc=ib
     // Resistance values add up to same resistance loss as matched to installed battery
     // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
