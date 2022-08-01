@@ -115,7 +115,12 @@ class Coulombs:
 
     def calculate_capacity(self, temp_c):
         """Capacity"""
-        return self.q_cap_rated_scaled * (1. - dqdt * (temp_c - self.t_rated))
+        try:
+            res = self.q_cap_rated_scaled * (1. - dqdt * (temp_c - self.t_rated))
+        except:
+            res = 1
+        return res
+        # return self.q_cap_rated_scaled * (1. - dqdt * (temp_c - self.t_rated))
 
     def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, soc_init=None):
         """Count coulombs based on true=actual capacity

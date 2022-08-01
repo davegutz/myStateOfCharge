@@ -249,6 +249,8 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/ampLoFail20220730.txt'; unit_key = 'pro_2022'
         data_file_old_txt = '../dataReduction/ampHiFail20220731.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
+        title_key_sel = "unit_s,"  # Find one instance of title
+        unit_key_sel = "unit_sel"
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
 
@@ -258,7 +260,18 @@ if __name__ == '__main__':
                 'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc')
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
-        saved_old = SavedData(data=data_old, time_end=time_end)
+
+        # Load sel (old)
+        sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
+                                          unit_key=unit_key_sel)
+        cols_sel = ('c_time', 'res', 'user_sel', 'm_bare', 'n_bare', 'cc_dif', 'cc_flt',  'ibmh',
+                    'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_dif', 'ib_dif_flt', 'ib_dif_fa', 'ib_sel', 'Ib_h', 'Ib_m',
+                    'mib', 'Ib_s', 'Vb_h', 'Vb_m', 'mvb', 'Vb_s', 'Tb_h', 'Tb_s', 'mtb', 'Tb_f')
+        sel_old = None
+        if sel_file_clean:
+            sel_old = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,
+                                    encoding=None).view(np.recarray)
+        saved_old = SavedData(data=data_old, sel=sel_old, time_end=time_end)
 
         # Load _m v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
@@ -271,6 +284,9 @@ if __name__ == '__main__':
             saved_sim_old = SavedDataSim(time_ref=saved_old.time_ref, data=data_sim_old, time_end=time_end)
         else:
             saved_sim_old = None
+
+        if sel_old is not None and saved_sim_old is not None:
+            saved_old.Ib_finj = saved_old.Ib - saved_sim_old.ib_m
 
         # How to initialize
         if saved_old.time[0] == 0.:  # no initialization flat detected at beginning of recording

@@ -27,12 +27,13 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from MonSim import replicate, save_clean_file, save_clean_file_sim
 from Battery import overall as overalls
-import os
-os.environ["KIVY_NO_CONSOLELOG"] = "1"
-from kivy.utils import platform  # failed experiment to run BLE data plotting realtime on android
-if platform != 'linux':
-    from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
-# from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
+# below suppresses runtime error display******************
+# import os
+# os.environ["KIVY_NO_CONSOLELOG"] = "1"
+# from kivy.utils import platform  # failed experiment to run BLE data plotting realtime on android
+# if platform != 'linux':
+#     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
+from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 
 
 def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files=None, plot_title=None,
@@ -324,7 +325,7 @@ def write_clean_file(txt_file, type_, title_key, unit_key):
 
 
 class SavedData:
-    def __init__(self, data=None, time_end=None):
+    def __init__(self, data=None, sel=None, time_end=None):
         if data is None:
             self.i = 0
             self.time = []
@@ -371,8 +372,13 @@ class SavedData:
             # Truncate
             if time_end is None:
                 i_end = len(self.time)
+                if sel is not None:
+                    self.c_time_s = np.array(sel.c_time)
+                    i_end = min(i_end, len(self.c_time_s))
             else:
                 i_end = np.where(self.time <= time_end)[0][-1] + 1
+                if sel is not None:
+                    i_end = min(i_end, np.where(self.sel_time <= time_end)[0][-1] + 1)
             self.unit = data.unit[:i_end]
             self.hm = data.hm[:i_end]
             self.cTime = self.cTime[:i_end]
@@ -396,6 +402,67 @@ class SavedData:
             self.soc_m = np.array(data.soc_m[:i_end])
             self.soc_ekf = np.array(data.soc_ekf[:i_end])
             self.soc = np.array(data.soc[:i_end])
+        if sel is None:
+            self.c_time_s = []
+            self.res = []
+            self.user_sel = []
+            self.m_bare = []
+            self.n_bare = []
+            self.cc_dif = []
+            self.cc_flt = []
+            self.ibmh = []
+            self.ibnh = []
+            self.ibmm = []
+            self.ibnm = []
+            self.ibm = []
+            self.ib_dif = []
+            self.ib_dif_flt = []
+            self.ib_dif_fa = []
+            self.ib_sel = []
+            self.Ib_h = []
+            self.Ib_m = []
+            self.mib = []
+            self.Ib_s = []
+            self.Vb_h = []
+            self.Vb_m = []
+            self.mvb = []
+            self.Vb_s = []
+            self.Tb_h = []
+            self.Tb_s = []
+            self.mtb = []
+            self.Tb_f = []
+            self.Ib_finj = None
+            self.Tb_finj = None
+            self.Vb_finj = None
+        else:
+            self.c_time_s = np.array(sel.c_time[:i_end])
+            self.res = np.array(sel.res[:i_end])
+            self.user_sel = np.array(sel.user_sel[:i_end])
+            self.m_bare = np.array(sel.m_bare[:i_end])
+            self.n_bare = np.array(sel.n_bare[:i_end])
+            self.cc_dif = np.array(sel.cc_dif[:i_end])
+            self.cc_flt = np.array(sel.cc_flt[:i_end])
+            self.ibmh = np.array(sel.ibmh[:i_end])
+            self.ibnh = np.array(sel.ibnh[:i_end])
+            self.ibmm = np.array(sel.ibmm[:i_end])
+            self.ibnm = np.array(sel.ibnm[:i_end])
+            self.ibm = np.array(sel.ibm[:i_end])
+            self.ib_dif = np.array(sel.ib_dif[:i_end])
+            self.ib_dif_flt = np.array(sel.ib_dif_flt[:i_end])
+            self.ib_dif_fa = np.array(sel.ib_dif_fa[:i_end])
+            self.ib_sel = np.array(sel.ib_sel[:i_end])
+            self.Ib_h = np.array(sel.Ib_h[:i_end])
+            self.Ib_m = np.array(sel.Ib_m[:i_end])
+            self.mib = np.array(sel.mib[:i_end])
+            self.Ib_s = np.array(sel.Ib_s[:i_end])
+            self.Vb_h = np.array(sel.Vb_h[:i_end])
+            self.Vb_m = np.array(sel.Vb_m[:i_end])
+            self.mvb = np.array(sel.mvb[:i_end])
+            self.Vb_s = np.array(sel.Vb_s[:i_end])
+            self.Tb_h = np.array(sel.Tb_h[:i_end])
+            self.Tb_s = np.array(sel.Tb_s[:i_end])
+            self.mtb = np.array(sel.mtb[:i_end])
+            self.Tb_f = np.array(sel.Tb_f[:i_end])
 
     def __str__(self):
         s = "{},".format(self.unit[self.i])
@@ -604,6 +671,8 @@ if __name__ == '__main__':
     
     PyCharm Terminal:
     python DataOverModel.py "../dataReduction/serial_20220624_095543.txt" "pro_2022"
+    python DataOverModel.py "../dataReduction/ampHiFail20220731.txt" "pro_2022"
+    
 
     android:
     python Python/DataOverModel.py "USBTerminal/serial_20220624_095543.txt" "pro_2022"

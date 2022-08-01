@@ -52,7 +52,7 @@ void print_serial_sim_header(void)
 void print_signal_sel_header(void)
 {
   if ( rp.debug==26 ) // print_signal_sel_header
-    Serial.printf("unit_sel,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,cc_flt,  ibmh,ibnh,ibmm,ibnm,ibm,                     ib_dif,ib_dif_flt,ib_dif_fa,  ib_sel,Ib_h,Ib_m,mib,Ib,            Vb_h,Vb_m,mvb,Vb,                  Tb_h,Tb,mtb,Tb_f,\n");
+    Serial.printf("unit_s,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,cc_flt,  ibmh,ibnh,ibmm,ibnm,ibm,                     ib_dif,ib_dif_flt,ib_dif_fa,  ib_sel,Ib_h,Ib_m,mib,Ib_s,          Vb_h,Vb_m,mvb,Vb_s,                Tb_h,Tb_s,mtb,Tb_f,\n");
           // -----, cTime, reset, rp.ibatt_select,
           //                                    ShuntAmp->bare(), ShuntNoAmp->bare(),
           //                                                        cc_diff_, cc_flt_,
