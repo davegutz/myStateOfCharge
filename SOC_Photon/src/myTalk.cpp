@@ -60,7 +60,7 @@ void chat()
       cp.input_string.replace(" ","");
       cp.input_string.replace("=","");
       cp.string_complete = true;  // Temporarily inhibits while loop until talk() call resets string_complete
-      Serial.printf("chat:  talk(''%s;'')\n", cp.input_string.c_str());
+      Serial.printf("chat:  talk('%s;')\n", cp.input_string.c_str());
       break;  // enable reading multiple inputs
     }
   }
