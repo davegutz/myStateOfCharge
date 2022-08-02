@@ -130,7 +130,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
     for i in range(t_len):
         now = t[i]
         reset = (t[i] <= init_time)
-        if not reset_sel is None:
+        if reset_sel is not None:
             reset = reset or reset_sel[i]
         saved_old.i = i
         if i > 0:
@@ -237,8 +237,8 @@ if __name__ == '__main__':
         date_ = datetime.now().strftime("%y%m%d")
 
         # Transient  inputs
-        # time_end = None
-        time_end = 1.
+        time_end = None
+        # time_end = 1.
         # time_end = 2000.
 
         t_Ib_fail = None
@@ -252,7 +252,8 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220729.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampLoFail20220730.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFail20220731.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220801.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220801.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/pulse20220802.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"
@@ -294,7 +295,10 @@ if __name__ == '__main__':
         if saved_old.time[0] == 0.:  # no initialization flat detected at beginning of recording
             init_time = 1.
         else:
-            init_time = -4.
+            if init_time_in:
+                init_time = init_time_in
+            else:
+                init_time = -4.
         # Get dv_hys from data
         dv_hys = saved_old.dV_hys[0]
 

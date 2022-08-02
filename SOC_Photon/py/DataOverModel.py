@@ -378,7 +378,9 @@ class SavedData:
             else:
                 i_end = np.where(self.time <= time_end)[0][-1] + 1
                 if sel is not None:
-                    i_end = min(i_end, np.where(self.sel_time <= time_end)[0][-1] + 1)
+                    self.c_time_s = np.array(sel.c_time)
+                    i_end_sel = np.where(self.c_time_s <= time_end)[0][-1] + 1
+                    i_end = min(i_end, i_end_sel)
             self.unit = data.unit[:i_end]
             self.hm = data.hm[:i_end]
             self.cTime = self.cTime[:i_end]
