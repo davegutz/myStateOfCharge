@@ -443,9 +443,8 @@ void loop()
   // Control
   if ( control )
   {
-    Serial.printf("talk...\n");
-    chat();
-    talk(Mon, Sen);
+    chat();         // Work on internal chit-chat
+    talk(Mon, Sen); // Work on user inputs
   }
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer

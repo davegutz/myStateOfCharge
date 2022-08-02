@@ -30,6 +30,5 @@ void chat(void);
 void chit(const String cmd, BatteryMonitor *Mon, Sensors *Sen);
 void talk(BatteryMonitor *Mon, Sensors *Sen);
 void talkH(BatteryMonitor *batt, Sensors *Sen); // Help
-void self_talk(const String cmd, BatteryMonitor *Mon, Sensors *Sen);
 
 #endif
