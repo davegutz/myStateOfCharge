@@ -36,6 +36,43 @@ extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
 extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 
+// Process chat strings and feed to talk using input_string and string_complete
+// Collisions with Serial.read unlikely because Serial.read kicks off commands to chit and chat.
+void chat()
+{
+  if ( cp.chat_str.length() ) Serial.printf("chat:  extracting new command from '%s'\n", cp.chat_str.c_str());
+  while ( !cp.string_complete && cp.chat_str.length() )
+  {
+    // get the new byte:
+    char inChar = cp.chat_str.charAt(0);
+    cp.chat_str.remove(0, 1);
+    // add it to the cp.chat_str:
+    cp.input_string += inChar;
+    // if the incoming character is a newline, set a flag
+    // so the main loop can do something about it:
+    if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
+    {
+      // Remove whitespace
+      cp.input_string.trim();
+      cp.input_string.replace("\0","");
+      cp.input_string.replace(";","");
+      cp.input_string.replace(",","");
+      cp.input_string.replace(" ","");
+      cp.input_string.replace("=","");
+      cp.string_complete = true;  // Temporarily inhibits while loop until talk() call resets string_complete
+      Serial.printf("chat:  sending new command '%s'\n", cp.input_string.c_str());
+      break;  // enable reading multiple inputs
+    }
+  }
+}
+
+// Call talk from within, a crude macro feature
+void chit(const String cmd, BatteryMonitor *Mon, Sensors *Sen)
+{
+  cp.chat_str = cmd;
+  Serial.printf("chit:  new input = '%s'\n", cp.chat_str.c_str());
+}
+
 // Talk Executive
 void talk(BatteryMonitor *Mon, Sensors *Sen)
 {
@@ -632,6 +669,11 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
       case ( 'w' ):   // w:  toggle wifi
         cp.enable_wifi = !cp.enable_wifi; // not remembered in rp. Photon reset turns this false
         Serial.printf("Wifi togg %d\n", cp.enable_wifi);
+        break;
+
+      case ( 'W' ):   // W:  wait.  Skip
+        Serial.printf(".....Wait...\n");
+        chit("Dm0;Dn0;", Mon, Sen);
         break;
 
       case ( 'z' ):  // z:  toggle Blynk

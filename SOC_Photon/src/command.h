@@ -40,8 +40,8 @@ struct PublishPars
 struct CommandPars
 {
   char buffer[256];         // Auxiliary print buffer
-  String input_string;      // A string to hold incoming data
-  boolean string_complete;  // whether the string is complete
+  String input_string;      // Hold incoming data
+  boolean string_complete;  // Whether input_string is complete
   boolean enable_wifi;      // Enable wifi
   boolean model_cutback;    // On model cutback
   boolean model_saturated;  // Sim on cutback and saturated
@@ -51,6 +51,7 @@ struct CommandPars
   float ibatt_tot_bias_noamp; // Runtime bias of non-amplified shunt sensor, A
   boolean dc_dc_on;         // DC-DC charger is on
   boolean blynking;         // Using Serial1 for Blynk.  Turn off normal Serial1 monitoring and echo
+  String chat_str;          // Hold chit_chat data
   CommandPars(void)
   {
     this->string_complete = false;

@@ -87,16 +87,17 @@
   extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4; // Time Blynk events
   BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;        // Time Blynk events
 #endif
+
+// Globals
 extern CommandPars cp;            // Various parameters to be common at system level
 extern RetainedPars rp;           // Various parameters to be static at system level
 extern Sum_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
 
-// Global locals
 retained RetainedPars rp;             // Various control parameters static at system level
 retained Sum_st mySum[NSUM];          // Summaries
-CommandPars cp = CommandPars();       // Various control parameters commanding at system level.   Forces reinit
-PublishPars pp = PublishPars();       // Common for publishing
+CommandPars cp = CommandPars();       // Various control parameters commanding at system level
+PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
 unsigned long millis_flip = millis(); // Timekeeping
 unsigned long last_sync = millis();   // Timekeeping
 
@@ -385,15 +386,7 @@ void loop()
       }
       last_read_debug = rp.debug;
     }
-
-
   }  // end read (high speed frame)
-
-  // Control
-  if ( control )
-  {
-    // continue;
-  }
 
   // OLED and Bluetooth display drivers
   if ( display_to_user )
@@ -447,7 +440,13 @@ void loop()
   // then can enter commands by sending strings.   End the strings with a real carriage return
   // right in the "Send String" box then press "Send."
   // String definitions are below.
-  talk(Mon, Sen);
+  // Control
+  if ( control )
+  {
+    Serial.printf("talk...\n");
+    chat();
+    talk(Mon, Sen);
+  }
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
