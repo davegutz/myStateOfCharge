@@ -51,7 +51,9 @@ struct CommandPars
   float ibatt_tot_bias_noamp; // Runtime bias of non-amplified shunt sensor, A
   boolean dc_dc_on;         // DC-DC charger is on
   boolean blynking;         // Using Serial1 for Blynk.  Turn off normal Serial1 monitoring and echo
-  String chat_str;          // Hold chit_chat data
+  String queue_str;         // Hold chit_chat queue data - queue with Control pass, 1 per Control pass
+  String soon_str;          // Hold chit_chat soon data - priority with next Control pass, 1 per Control pass
+  String asap_str;          // Hold chit_chat asap data - no waiting, ASAP all of now_str processed before Control pass
   CommandPars(void)
   {
     this->string_complete = false;

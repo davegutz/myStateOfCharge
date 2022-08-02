@@ -26,8 +26,11 @@
 #include "Battery.h"
 #include "Tweak.h"
 
+enum urgency {ASAP, SOON, QUEUE};
+typedef enum urgency urgency;
+
 void chat(void);
-void chit(const String cmd, BatteryMonitor *Mon, Sensors *Sen);
+void chit(const String cmd, BatteryMonitor *Mon, Sensors *Sen, const enum urgency when = QUEUE);
 void talk(BatteryMonitor *Mon, Sensors *Sen);
 void talkH(BatteryMonitor *batt, Sensors *Sen); // Help
 

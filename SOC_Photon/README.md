@@ -392,7 +392,7 @@ Ca1;Dr1000;Dp10000;Xm7;Rs;v26;Dm-500;Dn0.0001;
 Ca1;Dr100;Dp100;Xm7;Rs;v26;Dm-500;Dn0.0001;
 
 pulse:
-XS;Dm0;Dn0;v0;Xm7;Ca0.5;W;W;W;Pm;Dr100;Dp100;v26;Dn0.00001;Dm500;Pm;Pm;Dm-500;Pm;Pm;Dm0;Pm;Pm;W;W;W;W;Pm;v0;
+XS;Dm0;Dn0;v0;Xm7;Ca0.5;Pm;Dr100;Dp100;v26;Dn0.00001;Dm500;Pm;Pm;Dm-500;Pm;Pm;Dm0;Pm;Pm;W;W;W;W;Pm;v0;
 
 
 ## Accuracy

@@ -36,17 +36,17 @@ extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
 extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 
-// Process chat strings and feed to talk using input_string and string_complete
 // Collisions with Serial.read unlikely because Serial.read kicks off commands to chit and chat.
-void chat()
+// Prioritize urgency SOON over QUEUE.   The chit() call specifies urgency.  QUEUE is default
+void asap()
 {
-  // if ( cp.chat_str.length() ) Serial.printf("chat:  extracting new command from '%s'\n", cp.chat_str.c_str());
-  while ( !cp.string_complete && cp.chat_str.length() )
+  if ( cp.asap_str.length() ) Serial.printf("chat:  extracting ASAP command from '%s'\n", cp.asap_str.c_str());
+  while ( !cp.string_complete && cp.asap_str.length() )
   {
     // get the new byte:
-    char inChar = cp.chat_str.charAt(0);
-    cp.chat_str.remove(0, 1);
-    // add it to the cp.chat_str:
+    char inChar = cp.asap_str.charAt(0);
+    cp.asap_str.remove(0, 1);
+    // add it to the cp.input_string:
     cp.input_string += inChar;
     // if the incoming character is a newline, set a flag
     // so the main loop can do something about it:
@@ -59,17 +59,87 @@ void chat()
       cp.input_string.replace(",","");
       cp.input_string.replace(" ","");
       cp.input_string.replace("=","");
-      cp.string_complete = true;  // Temporarily inhibits while loop until talk() call resets string_complete
-      Serial.printf("chat:  talk('%s;')\n", cp.input_string.c_str());
+      cp.string_complete = true;  // token:  temporarily inhibits while loop until talk() call resets string_complete
+      Serial.printf("chat (ASAP):  talk('%s;')\n", cp.input_string.c_str());
       break;  // enable reading multiple inputs
     }
   }
 }
 
-// Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for talk()
-void chit(const String cmd, BatteryMonitor *Mon, Sensors *Sen)
+
+
+// Process chat strings and feed to talk using input_string and string_complete
+// Collisions with Serial.read unlikely because Serial.read kicks off commands to chit and chat.
+// Prioritize urgency SOON over QUEUE.   The chit() call specifies urgency.  QUEUE is default
+void chat()
 {
-  cp.chat_str += cmd;
+  if ( cp.soon_str.length() )  // Do SOON first
+  {
+    if ( cp.soon_str.length() ) Serial.printf("chat:  extracting SOON command from '%s'\n", cp.soon_str.c_str());
+    while ( !cp.string_complete && cp.soon_str.length() )
+    {
+      // get the new byte:
+      char inChar = cp.soon_str.charAt(0);
+      cp.soon_str.remove(0, 1);
+      // add it to the cp.input_string:
+      cp.input_string += inChar;
+      // if the incoming character is a newline, set a flag
+      // so the main loop can do something about it:
+      if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
+      {
+        // Remove whitespace
+        cp.input_string.trim();
+        cp.input_string.replace("\0","");
+        cp.input_string.replace(";","");
+        cp.input_string.replace(",","");
+        cp.input_string.replace(" ","");
+        cp.input_string.replace("=","");
+        cp.string_complete = true;  // token:  temporarily inhibits while loop until talk() call resets string_complete
+        Serial.printf("chat (SOON):  talk('%s;')\n", cp.input_string.c_str());
+        break;  // enable reading multiple inputs
+      }
+    }
+    return;
+  }   // end soon
+  else  // Do QUEUE only after SOON empty
+  {
+    if ( cp.queue_str.length() ) Serial.printf("chat:  extracting QUEUE command from '%s'\n", cp.queue_str.c_str());
+    while ( !cp.string_complete && cp.queue_str.length() )
+    {
+      // get the new byte:
+      char inChar = cp.queue_str.charAt(0);
+      cp.queue_str.remove(0, 1);
+      // add it to the cp.input_string:
+      cp.input_string += inChar;
+      // if the incoming character is a newline, set a flag
+      // so the main loop can do something about it:
+      if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
+      {
+        // Remove whitespace
+        cp.input_string.trim();
+        cp.input_string.replace("\0","");
+        cp.input_string.replace(";","");
+        cp.input_string.replace(",","");
+        cp.input_string.replace(" ","");
+        cp.input_string.replace("=","");
+        cp.string_complete = true;  // token:  temporarily inhibits while loop until talk() call resets string_complete
+        Serial.printf("chat (QUEUE):  talk('%s;')\n", cp.input_string.c_str());
+        break;  // enable reading multiple inputs
+      }
+    }
+  } // end queue
+}
+
+// Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for talk()
+// TODO:   delete Mon and Sen arguments from chit
+void chit(const String cmd, BatteryMonitor *Mon, Sensors *Sen, const urgency when = QUEUE)
+{
+  if ( when == QUEUE )
+    cp.queue_str += cmd;
+  else if ( when == SOON )
+    cp.soon_str += cmd;
+  else
+    cp.now_str += cmd;
 }
 
 // Talk Executive
@@ -179,6 +249,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               Serial.printf("soc=%7.3f, modeling = %d, delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f, soc_ekf=%8.4f, delta_q_ekf=%7.3f,\n",
                   Mon->soc(), rp.modeling, Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf());
               cp.cmd_reset();
+              chit("W;W;W;", Mon, Sen, SOON);  // Wait 3 passes of Control
             }
             else
               Serial.printf("soc = %8.4f; must be 0-1.1\n", FP_in);
@@ -503,7 +574,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         {
           case ( 'a' ):  // Pa:  all
             chit("Pm;", Mon, Sen);
-            Serial.printf("\nSim:   rp.modeling = %d\n", rp.modeling);
             chit("Ps;", Mon, Sen);
             chit("Pr;", Mon, Sen);
             chit("Pt;", Mon, Sen);
@@ -525,6 +595,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf("Mon::"); Mon->Coulombs::pretty_print();
             Serial.printf("Mon::"); Mon->pretty_print_ss();
             Serial.printf("Mon::"); Mon->EKF_1x1::pretty_print();
+            Serial.printf("\nSim:   rp.modeling = %d\n", rp.modeling);
             break;
 
           case ( 'M' ):  // PM:  shunt Amp
@@ -630,13 +701,16 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
 
           case ( 'R' ):  // RR:  large reset
             Serial.printf("Large reset\n");
-            chit("Rr;", Mon, Sen);
+            Sen->Sim->apply_soc(1.0, Sen->Tbatt_filt);
+            Mon->apply_soc(1.0, Sen->Tbatt_filt);
+            cp.cmd_reset();
             Sen->ReadSensors->delay(READ_DELAY);
             Serial.printf("Clean. Ready to deploy\n");
             rp.large_reset();
             cp.large_reset();
             cp.cmd_reset();
-            chit("Hs;", Mon, Sen);
+            chit("W;W;W;", Mon, Sen, SOON);
+            chit("Hs;", Mon, Sen, SOON);
             break;
 
           case ( 's' ):  // Rs:  small reset filters
@@ -672,7 +746,6 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
 
       case ( 'W' ):   // W:  wait.  Skip
         Serial.printf(".....Wait...\n");
-        // chit("Dm0;Dn0;;", Mon, Sen);
         break;
 
       case ( 'z' ):  // z:  toggle Blynk
@@ -722,7 +795,6 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
             break;
 
           case ( 'a' ): // Xa<>:  injection amplitude
-            // rp.amp = max(min(cp.input_string.substring(2).toFloat(), 18.3), 0.0);
             rp.amp = cp.input_string.substring(2).toFloat();
             Serial.printf("Inj amp set %7.3f & inj_bias set %7.3f\n", rp.amp, rp.inj_bias);
             break;
@@ -730,8 +802,13 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
           case ( 'f' ): // Xf<>:  injection frequency
             rp.freq = max(min(cp.input_string.substring(2).toFloat(), 2.0), 0.0);
             Serial.printf("Injected freq set %7.3f Hz =", rp.freq);
-            rp.freq = rp.freq * 2.0 * PI;
+            rp.freq *= (2. * PI);
             Serial.printf(" %7.3f r/s\n", rp.freq);
+            break;
+
+          case ( 'b' ): // Xb<>:  injection bias
+            rp.inj_bias = cp.input_string.substring(2).toFloat();
+            Serial.printf("Inj_bias set %7.3f\n", rp.inj_bias);
             break;
 
           case ( 't' ): // Xt<>:  injection type
@@ -783,91 +860,75 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
             {
 
               case ( -1 ):  // Xp-1:  full reset
-                chit("Xp0;", Mon, Sen);
-                chit("Ca0.5;", Mon, Sen);
-                rp.modeling = 0;
+                chit("Xp0;", Mon, Sen, ASAP);
+                chit("Ca0.5;", Mon, Sen, SOON);
+                chit("Xm0;", Mon, Sen, SOON);
                 break;
 
               case ( 0 ):  // Xp0:  reset stop
-                rp.modeling = 7;
-                rp.type = 0;
-                rp.freq = 0.0;
-                rp.amp = 0.0;
-                if ( !rp.tweak_test() ) rp.inj_bias = 0.0;
-                chit("XS;", Mon, Sen);  // Stop any injection
-                chit("Mk1;", Mon, Sen);
-                chit("Nk1;", Mon, Sen);
-                chit(set_nom_coul_eff, Mon, Sen);
+                chit("Xm7;", Mon, Sen, ASAP);
+                chit("Xt0; Xf0.; Xa0.", Mon, Sen, ASAP);
+                if ( !rp.tweak_test() ) chit("Xb0.", Mon, Sen, ASAP);
+                chit("XS; Mk1; Nk1;", Mon, Sen, ASAP);  // Stop any injection
+                chit(set_nom_coul_eff, Mon, Sen, ASAP);
                 rp.ibatt_bias_all = 0;
                 break;
 
               case ( 1 ):  // Xp1:  sine
                 chit("Xp0;", Mon, Sen);
                 chit("Ca0.5;", Mon, Sen);
-                rp.type = 1;
-                rp.freq = 0.05;
-                rp.amp = 6.;
-                if ( !rp.tweak_test() ) rp.inj_bias = -rp.amp;
-                rp.freq *= (2. * PI);
+                chit("Xt1; Xf0.05; Xa6.;", Mon, Sen);
+                if ( !rp.tweak_test() ) chit("Xb-6.", Mon, Sen);
                 break;
 
               case ( 2 ):  // Xp2:  
                 chit("Xp0;", Mon, Sen);
                 chit("Ca0.5;", Mon, Sen);
-                rp.type = 2;
-                rp.freq = 0.10;
-                rp.amp = 6.;
-                if ( !rp.tweak_test() ) rp.inj_bias = -rp.amp;
-                rp.freq *= (2. * PI);
+                chit("Xt2; Xf0.10; Xa6.;", Mon, Sen);
+                if ( !rp.tweak_test() ) chit("Xb-6.", Mon, Sen);
                 break;
 
               case ( 3 ):  // Xp3:  
                 chit("Xp0;", Mon, Sen);
                 chit("Ca0.5;", Mon, Sen);
-                rp.type = 3;
-                rp.freq = 0.05;
-                rp.amp = 6.;
-                if ( !rp.tweak_test() ) rp.inj_bias = -rp.amp;
-                rp.freq *= (2. * PI);
+                chit("Xt3; Xf0.05; Xa6.;", Mon, Sen);
+                if ( !rp.tweak_test() ) chit("Xb-6.", Mon, Sen);
                 break;
 
               case ( 4 ):  // Xp4:  
                 chit("Xp0;", Mon, Sen);
-                rp.type = 4;
+                chit("Xt4;", Mon, Sen);
                 rp.ibatt_bias_all = -RATED_BATT_CAP;  // Software effect only
                 break;
 
               case ( 5 ):  // Xp5:  
                 chit("Xp0;", Mon, Sen);
-                rp.type = 5;
+                chit("Xt5;", Mon, Sen);
                 rp.ibatt_bias_all = RATED_BATT_CAP; // Software effect only
                 break;
 
               case ( 6 ):  // Xp6:  
                 chit("Xp0;", Mon, Sen);
-                rp.type = 6;
+                chit("Xt6;", Mon, Sen);
                 rp.amp = RATED_BATT_CAP*0.2;
                 break;
 
               case ( 7 ):  // Xp7:  
                 chit("Xp0;", Mon, Sen);
-                rp.type = 7;
+                chit("Xt7;", Mon, Sen);
                 chit("Xm7;", Mon, Sen);    // Run to model
                 chit("Ca0.5;", Mon, Sen);   // Set all soc=0.5
                 chit("n0.987;", Mon, Sen); // Set model only to near saturation
                 chit("v4;", Mon, Sen);     // Watch sat, soc, and Voc vs v_sat
-                rp.amp = RATED_BATT_CAP*0.2;              // Hard current charge
+                chit("Xa20;", Mon, Sen);
                 Serial.printf("Run 'n<val> to init south of sat.  Reset whole thing by running 'Xp-1'\n");
                 break;
 
               case ( 8 ):  // Xp8:  
                 chit("Xp0;", Mon, Sen);
                 chit("Ca0.5;", Mon, Sen);
-                rp.type = 8;
-                rp.freq = 0.05;
-                rp.amp = 6.;
-                if ( !rp.tweak_test() ) rp.inj_bias = -rp.amp;
-                rp.freq *= (2. * PI);
+                chit("Xt8; Xf0.05; Xa6.;", Mon, Sen);
+                if ( !rp.tweak_test() ) chit("Xb-6.", Mon, Sen);
                 break;
 
               case ( 9 ): case( 10 ): case ( 11 ): case( 12 ):  // Xp9: Xp10: Xp11: Xp12: 
@@ -1126,6 +1187,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("       0x2 voltage = %d\n", rp.mod_vb());
   Serial.printf("       0x1 temp = %d\n", rp.mod_tb());
   Serial.printf("  Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println("  : Inj amp A pk (0-18.3) [0]");
+  Serial.printf("  Xb= "); Serial.printf("%7.3f", rp.inj_bias); Serial.println("  : Inj bias A [0]");
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println("  : Inj freq Hz (0-2) [0]");
   Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Inj type.  'c', 's', 'q', 't' (cos, sine, square, tri)");
   Serial.printf("  Xo= "); Serial.printf("%7.3f", rp.inj_bias); Serial.println("  : Inj inj_bias A (-18.3-18.3) [0]");
