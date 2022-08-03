@@ -337,9 +337,9 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   else if ( Sen->elapsed_inj && rp.tweak_test() )  // Done.  Turn things off by setting 0
   {
     Sen->elapsed_inj = 0;
-    chit("Pa;", Mon, Sen);  // Print all for record
-    chit("Xm7;", Mon, Sen); // Turn off tweak_test
-    chit("v0;", Mon, Sen);  // Turn off echo
+    chit("Pa;", QUEUE);  // Print all for record
+    chit("Xm7;", QUEUE); // Turn off tweak_test
+    chit("v0;", QUEUE);  // Turn off echo
   }
   // Perform the calculation of injection signals 
   rp.inj_bias = Sen->Sim->calc_inj(Sen->elapsed_inj, rp.type, rp.amp, rp.freq);

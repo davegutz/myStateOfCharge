@@ -131,15 +131,14 @@ void chat()
 }
 
 // Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for talk()
-// TODO:   delete Mon and Sen arguments from chit
-void chit(const String cmd, BatteryMonitor *Mon, Sensors *Sen, const urgency when = QUEUE)
+void chit(const String cmd, const urgency when)
 {
   if ( when == QUEUE )
     cp.queue_str += cmd;
   else if ( when == SOON )
     cp.soon_str += cmd;
   else
-    cp.now_str += cmd;
+    cp.asap_str += cmd;
 }
 
 // Talk Executive
@@ -249,7 +248,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               Serial.printf("soc=%7.3f, modeling = %d, delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f, soc_ekf=%8.4f, delta_q_ekf=%7.3f,\n",
                   Mon->soc(), rp.modeling, Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf());
               cp.cmd_reset();
-              chit("W;W;W;", Mon, Sen, SOON);  // Wait 3 passes of Control
+              chit("W;W;W;", SOON);  // Wait 3 passes of Control
             }
             else
               Serial.printf("soc = %8.4f; must be 0-1.1\n", FP_in);
@@ -439,20 +438,20 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 's' ):  // Hs:
-            chit("h;", Mon, Sen);
+            chit("h;", QUEUE);
             cp.cmd_summarize();
-            chit("Pm;", Mon, Sen);
+            chit("Pm;", QUEUE);
             Serial.printf("\n");
             if ( rp.modeling )
             {
               Serial.printf("Sim:   rp.modeling = %d\n", rp.modeling);
-              chit("Ps;", Mon, Sen);
+              chit("Ps;", QUEUE);
               Serial.printf("\n");
             }
-            chit("Pr;", Mon, Sen);
+            chit("Pr;", QUEUE);
             Serial.printf("\n");
             print_all_summary(mySum, rp.isum, NSUM);
-            chit("Q;", Mon, Sen);
+            chit("Q;", QUEUE);
             break;
 
           default:
@@ -572,25 +571,25 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
       case ( 'P' ):
         switch ( cp.input_string.charAt(1) )
         {
-          case ( 'a' ):  // Pa:  all
-            chit("Pm;", Mon, Sen);
-            chit("Ps;", Mon, Sen);
-            chit("Pr;", Mon, Sen);
-            chit("Pt;", Mon, Sen);
-            chit("PM;", Mon, Sen);
-            chit("PN;", Mon, Sen);
+          case ( 'a' ):  // Pa:  Print all
+            chit("Pm;", QUEUE);
+            chit("Ps;", QUEUE);
+            chit("Pr;", QUEUE);
+            chit("Pt;", QUEUE);
+            chit("PM;", QUEUE);
+            chit("PN;", QUEUE);
             break;
 
-          case ( 'c' ):  // Pc:  coulombs
+          case ( 'c' ):  // Pc:  Print coulombs
             Serial.printf("\nMon::"); Mon->Coulombs::pretty_print();
             Serial.printf("\nSim::"); Sen->Sim->Coulombs::pretty_print();
             break;
 
-          case ( 'e' ):  // Pe:  EKF
+          case ( 'e' ):  // Pe:  Print EKF
              Serial.printf("\nMon::"); Mon->EKF_1x1::pretty_print();
             break;
 
-          case ( 'm' ):  // Pm:  mon
+          case ( 'm' ):  // Pm:  Print mon
             Serial.printf("\nMon:"); Mon->pretty_print();
             Serial.printf("Mon::"); Mon->Coulombs::pretty_print();
             Serial.printf("Mon::"); Mon->pretty_print_ss();
@@ -598,32 +597,32 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf("\nSim:   rp.modeling = %d\n", rp.modeling);
             break;
 
-          case ( 'M' ):  // PM:  shunt Amp
+          case ( 'M' ):  // PM:  Print shunt Amp
              Serial.printf("\nTweak::"); Sen->ShuntAmp->pretty_print();
             break;
 
-          case ( 'N' ):  // PN:  shunt no amp
+          case ( 'N' ):  // PN:  Print shunt no amp
              Serial.printf("\nTweak::"); Sen->ShuntNoAmp->pretty_print();
             break;
 
-          case ( 'r' ):  // Pr:  retained
+          case ( 'r' ):  // Pr:  Print retained
             Serial.printf("\n"); rp.pretty_print();
             Serial.printf("\n"); cp.pretty_print();
             break;
 
-          case ( 's' ):  // Ps:  sim
+          case ( 's' ):  // Ps:  Print sim
             Serial.printf("\nSim:   rp.modeling = %d\n", rp.modeling);
             Serial.printf("Sim:");  Sen->Sim->pretty_print();
             Serial.printf("Sim::"); Sen->Sim->Coulombs::pretty_print();
             Serial.printf("Sim::"); Sen->Sim->pretty_print_ss();
             break;
 
-          case ( 't' ):  // Pt:  mon and sim
+          case ( 't' ):  // Pt:  Print mon and sim
             Serial.printf("\nMon::"); Mon->pretty_print_ss();
             Serial.printf("\nSim::"); Sen->Sim->pretty_print_ss();
             break;
 
-          case ( 'x' ):  // Px: shunt measure
+          case ( 'x' ):  // Px:  Print shunt measure
             Serial.printf("\nAmp:   "); Serial.printf("Vshunt_int, Vshunt, cp.ibatt_tot_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
               Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), cp.ibatt_tot_bias_amp, Sen->ShuntAmp->ishunt_cal());
             Serial.printf("No Amp:"); Serial.printf("Vshunt_int, Vshunt, cp.ibatt_tot_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
@@ -631,7 +630,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf("Selected:  NoAmp,Ibatt=,  %d, %7.3f\n", rp.ibatt_select, Sen->Ibatt);
             break;
 
-          case ( 'v' ):  // Pv:  Vbatt measure
+          case ( 'v' ):  // Pv:  Print Vbatt measure
             Serial.printf("\nVolt:   ");   Serial.printf("rp.vbatt_bias, Vbatt_model, rp.modeling, Vbatt=, %7.3f, %7.3f, %d, %7.3f,\n", 
               rp.vbatt_bias, Sen->Vbatt_model, rp.modeling, Sen->Vbatt);
             break;
@@ -642,29 +641,17 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         break;
 
       case ( 'Q' ):  // Q:  quick critical
-        Serial.printf("Ib_amp_fail = %d,\nIb_noamp_fail = %d,\nVb_fail = %d,\n\
-Tb  = %7.3f,\nVb  = %7.3f,\nVoc = %7.3f,\nvoc_filt  = %7.3f,\nVsat = %7.3f,\nIb  = %7.3f,\nsoc_m = %8.4f,\n\
-soc_ekf= %8.4f,\nsoc = %8.4f,\nmodeling = %d,\namp delta_q_cinf = %10.1f,\namp delta_q_dinf = %10.1f,\namp tweak_sclr = %10.6f,\n\
-no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr = %10.6f,\n",
-          Sen->Ibatt_amp_fail(), Sen->Ibatt_noamp_fail(), Sen->Vbatt_fail(),
-          Mon->temp_c(), Mon->Vb(), Mon->Voc(), Mon->Voc_filt(), Mon->Vsat(), Mon->Ib(), Sen->Sim->soc(), Mon->soc_ekf(),
-          Mon->soc(), rp.modeling, Sen->ShuntAmp->delta_q_cinf(), Sen->ShuntAmp->delta_q_dinf(),
-          Sen->ShuntAmp->tweak_sclr(), Sen->ShuntNoAmp->delta_q_cinf(), Sen->ShuntNoAmp->delta_q_dinf(),
-          Sen->ShuntNoAmp->tweak_sclr());
-        Serial1.printf("Ib_amp_fail = %d,\nIb_noamp_fail = %d,\nVb_fail = %d,\n\
-Tb  = %7.3f,\nVb  = %7.3f,\nVoc = %7.3f,\nvoc_filt  = %7.3f,\nVsat = %7.3f,\nIb  = %7.3f,\nsoc_m = %8.4f,\n\
-soc_ekf= %8.4f,\nsoc = %8.4f,\nmodeling = %d,\namp delta_q_cinf = %10.1f,\namp delta_q_dinf = %10.1f,\namp tweak_sclr = %10.6f,\n\
-no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr = %10.6f,\n",
-          Sen->Ibatt_amp_fail(), Sen->Ibatt_noamp_fail(), Sen->Vbatt_fail(),
-          Mon->temp_c(), Mon->Vb(), Mon->Voc(), Mon->Voc_filt(), Mon->Vsat(), Mon->Ib(), Sen->Sim->soc(), Mon->soc_ekf(),
-          Mon->soc(), rp.modeling, Sen->ShuntAmp->delta_q_cinf(), Sen->ShuntAmp->delta_q_dinf(),
-          Sen->ShuntAmp->tweak_sclr(), Sen->ShuntNoAmp->delta_q_cinf(), Sen->ShuntNoAmp->delta_q_dinf(),
-          Sen->ShuntNoAmp->tweak_sclr());
+        debug_q(Mon, Sen);
         break;
 
       case ( 'R' ):
         switch ( cp.input_string.charAt(1) )
         {
+          case ( 'b' ):  // Rb:  Reset battery states
+            Sen->Sim->init_battery(true, Sen);  // Reset sim battery state
+            Mon->init_battery(true, Sen);       // Reset mon battery state
+            break;
+
           case ( 'e' ):  // Re:  equalize
             Serial.printf("Equalizing counters\n");
             Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
@@ -709,8 +696,8 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
             rp.large_reset();
             cp.large_reset();
             cp.cmd_reset();
-            chit("W;W;W;", Mon, Sen, SOON);
-            chit("Hs;", Mon, Sen, SOON);
+            chit("W;W;W;", SOON);
+            chit("Hs;", SOON);
             break;
 
           case ( 's' ):  // Rs:  small reset filters
@@ -860,151 +847,131 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
             {
 
               case ( -1 ):  // Xp-1:  full reset
-                chit("Xp0;", Mon, Sen, ASAP);
-                chit("Ca0.5;", Mon, Sen, SOON);
-                chit("Xm0;", Mon, Sen, SOON);
+                chit("Xp0;", ASAP);
+                chit("Ca0.5;", SOON);
+                chit("Xm0;", SOON);
                 break;
 
               case ( 0 ):  // Xp0:  reset stop
-                chit("Xm7;", Mon, Sen, ASAP);
-                chit("Xt0; Xf0.; Xa0.", Mon, Sen, ASAP);
-                if ( !rp.tweak_test() ) chit("Xb0.", Mon, Sen, ASAP);
-                chit("XS; Mk1; Nk1;", Mon, Sen, ASAP);  // Stop any injection
-                chit(set_nom_coul_eff, Mon, Sen, ASAP);
-                rp.ibatt_bias_all = 0;
+                chit("Xm7;", ASAP);
+                chit("Xf0.; Xa0.", ASAP);
+                if ( !rp.tweak_test() ) chit("Xb0.", ASAP);
+                chit("XS; Mk1; Nk1;", ASAP);  // Stop any injection
+                chit(set_nom_coul_eff, ASAP);
+                chit("Di0;", ASAP);
                 break;
 
               case ( 1 ):  // Xp1:  sine
-                chit("Xp0;", Mon, Sen);
-                chit("Ca0.5;", Mon, Sen);
-                chit("Xt1; Xf0.05; Xa6.;", Mon, Sen);
-                if ( !rp.tweak_test() ) chit("Xb-6.", Mon, Sen);
+                chit("Xp0;", QUEUE);
+                chit("Ca0.5;", QUEUE);
+                chit("Xts; Xf0.05; Xa6.;", QUEUE);
+                if ( !rp.tweak_test() ) chit("Xb-6.", QUEUE);
                 break;
 
               case ( 2 ):  // Xp2:  
-                chit("Xp0;", Mon, Sen);
-                chit("Ca0.5;", Mon, Sen);
-                chit("Xt2; Xf0.10; Xa6.;", Mon, Sen);
-                if ( !rp.tweak_test() ) chit("Xb-6.", Mon, Sen);
+                chit("Xp0;", QUEUE);
+                chit("Ca0.5;", QUEUE);
+                chit("Xtq; Xf0.10; Xa6.;", QUEUE);
+                if ( !rp.tweak_test() ) chit("Xb-6.", QUEUE);
                 break;
 
               case ( 3 ):  // Xp3:  
-                chit("Xp0;", Mon, Sen);
-                chit("Ca0.5;", Mon, Sen);
-                chit("Xt3; Xf0.05; Xa6.;", Mon, Sen);
-                if ( !rp.tweak_test() ) chit("Xb-6.", Mon, Sen);
+                chit("Xp0;", QUEUE);
+                chit("Ca0.5;", QUEUE);
+                chit("Xtt; Xf0.05; Xa6.;", QUEUE);
+                if ( !rp.tweak_test() ) chit("Xb-6.", QUEUE);
                 break;
 
               case ( 4 ):  // Xp4:  
-                chit("Xp0;", Mon, Sen);
-                chit("Xt4;", Mon, Sen);
-                rp.ibatt_bias_all = -RATED_BATT_CAP;  // Software effect only
+                chit("Xp0;", QUEUE);
+                chit("Xtc;", QUEUE);
+                chit("Di-100;", QUEUE);
                 break;
 
               case ( 5 ):  // Xp5:  
-                chit("Xp0;", Mon, Sen);
-                chit("Xt5;", Mon, Sen);
-                rp.ibatt_bias_all = RATED_BATT_CAP; // Software effect only
+                chit("Xp0;", QUEUE);
+                chit("Xtc;", QUEUE);
+                chit("Di100;", QUEUE);
                 break;
 
-              case ( 6 ):  // Xp6:  
-                chit("Xp0;", Mon, Sen);
-                chit("Xt6;", Mon, Sen);
-                rp.amp = RATED_BATT_CAP*0.2;
+              case ( 6 ):  // Xp6:  Program a pulse
+                chit("XS;Dm0;Dn0;v0;Xm7;Ca0.5;Pm;Dr100;Dp100;v26;", QUEUE);  // setup
+                chit("Dn0.00001;Dm500;Pt;Pt;Dm-500;Pt;Pt;Dm0;Pt;Pt;", QUEUE);  // run
+                chit("W;W;W;W;Pm;v0;", QUEUE);  // finish
                 break;
 
-              case ( 7 ):  // Xp7:  
-                chit("Xp0;", Mon, Sen);
-                chit("Xt7;", Mon, Sen);
-                chit("Xm7;", Mon, Sen);    // Run to model
-                chit("Ca0.5;", Mon, Sen);   // Set all soc=0.5
-                chit("n0.987;", Mon, Sen); // Set model only to near saturation
-                chit("v4;", Mon, Sen);     // Watch sat, soc, and Voc vs v_sat
-                chit("Xa20;", Mon, Sen);
-                Serial.printf("Run 'n<val> to init south of sat.  Reset whole thing by running 'Xp-1'\n");
-                break;
-
-              case ( 8 ):  // Xp8:  
-                chit("Xp0;", Mon, Sen);
-                chit("Ca0.5;", Mon, Sen);
-                chit("Xt8; Xf0.05; Xa6.;", Mon, Sen);
-                if ( !rp.tweak_test() ) chit("Xb-6.", Mon, Sen);
-                break;
-
-              case ( 9 ): case( 10 ): case ( 11 ): case( 12 ):  // Xp9: Xp10: Xp11: Xp12: 
+              case ( 9 ): case( 10 ): case ( 11 ): case( 12 ):  // Xp9: Xp10: Xp11: Xp12:  Program regression
                           // Regression tests 9=tweak, 10=tweak w data, 11=cycle, 12 1/2 cycle
-                chit("Xp0;", Mon, Sen);     // Reset nominal
-                chit("v0;", Mon, Sen);      // Turn off debug temporarily so not snowed by data dumps
-                chit("Bm0;Bs0;", Mon, Sen); // Set Battleborn configuration
-                chit("Xm15;", Mon, Sen);    // Modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
-                chit("Xts;", Mon, Sen);     // Start up a sine wave
-                chit("Ca1;", Mon, Sen);     // After restarting with sine running, soc will not be at 1.  Reset them all to 1
-                chit("Ri;", Mon, Sen);      // Reset the delta_q's
-                chit("Mw0;Nw0;", Mon, Sen); // Allow tweak bias to work immediately instead of waiting several hours
-                chit("MC0.004;", Mon, Sen); // Give tweak bias logic a large adjustment range to quickly converge
-                chit("Mx0.04;", Mon, Sen);  // Give tweak bias logic a large adjustment range to quickly converge
-                chit("NC0.004;", Mon, Sen); // Give tweak bias logic a large adjustment range to quickly converge
-                chit("Nx0.04;", Mon, Sen);  // Give tweak bias logic a large adjustment range to quickly converge
-                chit("Mk1;Nk1;", Mon, Sen); // Reset the tweak biases to 1 for new count
-                chit("Dn1;", Mon, Sen);   // Disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
-                chit("Dp100;", Mon, Sen); // Fast data collection
+                chit("Xp0;", QUEUE);     // Reset nominal
+                chit("v0;", QUEUE);      // Turn off debug temporarily so not snowed by data dumps
+                chit("Bm0;Bs0;", QUEUE); // Set Battleborn configuration
+                chit("Xm15;", QUEUE);    // Modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
+                chit("Xts;", QUEUE);     // Start up a sine wave
+                chit("Ca1;", QUEUE);     // After restarting with sine running, soc will not be at 1.  Reset them all to 1
+                chit("Ri;", QUEUE);      // Reset the delta_q's
+                chit("Mw0;Nw0;", QUEUE); // Allow tweak bias to work immediately instead of waiting several hours
+                chit("MC0.004;", QUEUE); // Give tweak bias logic a large adjustment range to quickly converge
+                chit("Mx0.04;", QUEUE);  // Give tweak bias logic a large adjustment range to quickly converge
+                chit("NC0.004;", QUEUE); // Give tweak bias logic a large adjustment range to quickly converge
+                chit("Nx0.04;", QUEUE);  // Give tweak bias logic a large adjustment range to quickly converge
+                chit("Mk1;Nk1;", QUEUE); // Reset the tweak biases to 1 for new count
+                chit("Dn1;", QUEUE);   // Disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
+                chit("Dp100;", QUEUE); // Fast data collection
                 if ( INT_in == 9 )// Xp9:  silent tweak test
                 {
-                  chit("Xf0.02;", Mon, Sen);  // Frequency 0.02 Hz
-                  chit("XW5;", Mon, Sen);     // Wait time before starting to cycle
-                  chit("XT5;", Mon, Sen);     // Wait time after cycle to print
-                  chit("Xa-2000;", Mon, Sen); // Amplitude -2000 A
-                  chit("XC20;", Mon, Sen);    // Number of injection cycles
-                  chit("v0;", Mon, Sen);      // Silent
+                  chit("Xf0.02;", QUEUE);  // Frequency 0.02 Hz
+                  chit("XW5;", QUEUE);     // Wait time before starting to cycle
+                  chit("XT5;", QUEUE);     // Wait time after cycle to print
+                  chit("Xa-2000;", QUEUE); // Amplitude -2000 A
+                  chit("XC20;", QUEUE);    // Number of injection cycles
+                  chit("v0;", QUEUE);      // Silent
                 }
                 else if ( INT_in == 10 )  // Xp10:  rapid tweak
                 {
-                  chit("Xf0.02;", Mon, Sen);  // Frequency 0.02 Hz
-                  chit("Xa-2000;", Mon, Sen); // Amplitude -2000 A
-                  chit("XW5;", Mon, Sen);     // Wait time before starting to cycle
-                  chit("XT5;", Mon, Sen);     // Wait time after cycle to print
-                  chit("XC3;", Mon, Sen);     // Number of injection cycles
-                  chit("v24;", Mon, Sen);     // Data collection
+                  chit("Xf0.02;", QUEUE);  // Frequency 0.02 Hz
+                  chit("Xa-2000;", QUEUE); // Amplitude -2000 A
+                  chit("XW5;", QUEUE);     // Wait time before starting to cycle
+                  chit("XT5;", QUEUE);     // Wait time after cycle to print
+                  chit("XC3;", QUEUE);     // Number of injection cycles
+                  chit("v24;", QUEUE);     // Data collection
                 }
                 else if ( INT_in == 11 )  // Xp11:  slow tweak
                 {
-                  chit("Xf0.002;", Mon, Sen); // Frequency 0.002 Hz
-                  chit("Xa-60;", Mon, Sen);   // Amplitude -60 A
-                  chit("XW60;", Mon, Sen);    // Wait time before starting to cycle
-                  chit("XT600;", Mon, Sen);   // Wait time after cycle to print
-                  chit("XC1;", Mon, Sen);     // Number of injection cycles
-                  chit("v24;", Mon, Sen);     // Data collection
+                  chit("Xf0.002;", QUEUE); // Frequency 0.002 Hz
+                  chit("Xa-60;", QUEUE);   // Amplitude -60 A
+                  chit("XW60;", QUEUE);    // Wait time before starting to cycle
+                  chit("XT600;", QUEUE);   // Wait time after cycle to print
+                  chit("XC1;", QUEUE);     // Number of injection cycles
+                  chit("v24;", QUEUE);     // Data collection
                 }
                 else if ( INT_in == 12 )  // Xp12:  slow half tweak
                 {
-                  chit("Xf0.0002;", Mon, Sen); // Frequency 0.002 Hz
-                  chit("Xa-6;", Mon, Sen);     // Amplitude -60 A
-                  chit("XW60;", Mon, Sen);     // Wait time before starting to cycle
-                  chit("XT2400;", Mon, Sen);   // Wait time after cycle to print
-                  chit("XC0.5;", Mon, Sen);    // Number of injection cycles
-                  chit("v24;", Mon, Sen);      // Data collection
+                  chit("Xf0.0002;", QUEUE); // Frequency 0.002 Hz
+                  chit("Xa-6;", QUEUE);     // Amplitude -60 A
+                  chit("XW60;", QUEUE);     // Wait time before starting to cycle
+                  chit("XT2400;", QUEUE);   // Wait time after cycle to print
+                  chit("XC0.5;", QUEUE);    // Number of injection cycles
+                  chit("v24;", QUEUE);      // Data collection
                 }
-                Sen->Sim->init_battery(true, Sen);  // Reset model battery state
-                Mon->init_battery(true, Sen);       // Reset model battery state
-                chit("Pa;", Mon, Sen);    // Print all for record
-                chit("XR;", Mon, Sen);    // Run cycle
+                chit("Rb;", QUEUE);    // Reset battery states
+                chit("Pa;", QUEUE);    // Print all for record
+                chit("XR;", QUEUE);    // Run cycle
                 break;
 
               case( 20 ): case ( 21 ):  // Xp20:  Xp21:  20=tweak-like data, 21= 2 sec data cycle
-                chit("v0;", Mon, Sen);    // Turn off debug temporarily so not snowed by data dumps
-                chit("Pa;", Mon, Sen);    // Print all for record
+                chit("v0;", QUEUE);    // Turn off debug temporarily so not snowed by data dumps
+                chit("Pa;", QUEUE);    // Print all for record
                 if ( INT_in == 20 )
                 {
-                  chit("Dp100;", Mon, Sen);  // Tweak-like data collection
-                  chit("v24;", Mon, Sen);    // Tweak-like data collection
+                  chit("Dp100;", QUEUE);  // Tweak-like data collection
+                  chit("v24;", QUEUE);    // Tweak-like data collection
                 }
                 else if ( INT_in == 21 )
                 {
-                  chit("Dp2000;", Mon, Sen); // Fast data collection
-                  chit("v4;", Mon, Sen);      // Slow data collection
+                  chit("Dp2000;", QUEUE); // Fast data collection
+                  chit("v4;", QUEUE);      // Slow data collection
                 }
-                Sen->Sim->init_battery(true, Sen);  // Reset model battery state
-                Mon->init_battery(true, Sen);       // Reset model battery state
+                chit("Rb;", QUEUE);    // Reset battery states
                 break;
 
               default:
@@ -1136,6 +1103,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("Q      vital stats\n");
 
   Serial.printf("R<?>   Reset\n");
+  Serial.printf("  Rb= "); Serial.printf("reset batteries to current inputs\n");
   Serial.printf("  Re= "); Serial.printf("equalize delta_q in Sim to Mon\n");
   Serial.printf("  Rh= "); Serial.printf("reset all hys\n");
   Serial.printf("  Ri= "); Serial.printf("reset all delta_q_inf\n");
@@ -1200,8 +1168,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("      Xp3:  1 Hz triangle about 0\n");
   Serial.printf("      Xp4:  -1C soft discharge, reset xp0 or Di0\n");
   Serial.printf("      Xp5:  +1C soft charge\n");
-  Serial.printf("      Xp6:  +0.2C hard charge\n");
-  Serial.printf("      Xp8:  1 Hz cosine about 0\n");
+  Serial.printf("      Xp6:  +/-500 A pulse\n");
   Serial.printf("      Xp9:  silent tweak reg test\n");
   Serial.printf("      Xp10:  tweak reg test\n");
   Serial.printf("      Xp11:  slow cycle reg test\n");

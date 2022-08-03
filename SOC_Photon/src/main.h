@@ -441,6 +441,7 @@ void loop()
   // right in the "Send String" box then press "Send."
   // String definitions are below.
   // Control
+  asap();
   if ( control )
   {
     chat();         // Work on internal chit-chat

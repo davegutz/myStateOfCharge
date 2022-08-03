@@ -29,8 +29,9 @@
 enum urgency {ASAP, SOON, QUEUE};
 typedef enum urgency urgency;
 
+void asap(void);
 void chat(void);
-void chit(const String cmd, BatteryMonitor *Mon, Sensors *Sen, const enum urgency when = QUEUE);
+void chit(const String cmd, const enum urgency when);
 void talk(BatteryMonitor *Mon, Sensors *Sen);
 void talkH(BatteryMonitor *batt, Sensors *Sen); // Help
 

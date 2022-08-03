@@ -168,6 +168,8 @@ public:
   void Dv(const double dv) { dv_ = dv; };
   double dv_dsoc() { return (dv_dsoc_); };
   double Dv() { return (dv_); };
+  double dv_dyn() { return (dv_dyn_); };
+  double dV_dyn() { return (dv_dyn_*(*rp_nS_)); };
   uint8_t encode(const String mod_str);
   double hys_scale() { return (hys_->scale()); };
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
@@ -182,18 +184,16 @@ public:
   void nS(const double ns) { *rp_nS_ = ns; };
   virtual void pretty_print();
   void pretty_print_ss();
-  double voc() { return (voc_); };
-  double Voc() { return (voc_*(*rp_nS_)); };
-  double Voc_stat() { return (voc_stat_*(*rp_nS_)); };
-  double voc_soc(const double soc, const float temp_c);
   void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -chem_.r_0*sr_); };
   double Sr() { return (sr_); };
   float temp_c() { return (temp_c_); };    // Battery temperature, deg C
   double Tb() { return (temp_c_); };        // Battery bank temperature, deg C
   double vb() { return (vb_); };            // Battery terminal voltage, V
   double Vb() { return (vb_*(*rp_nS_)); };  // Battery bank voltage, V
-  double dv_dyn() { return (dv_dyn_); };
-  double dV_dyn() { return (dv_dyn_*(*rp_nS_)); };
+  double voc() { return (voc_); };
+  double Voc() { return (voc_*(*rp_nS_)); };
+  double Voc_stat() { return (voc_stat_*(*rp_nS_)); };
+  double voc_soc(const double soc, const float temp_c);
   double vsat() { return (vsat_); };
   double Vsat() { return (vsat_*(*rp_nS_)); };
 protected:
