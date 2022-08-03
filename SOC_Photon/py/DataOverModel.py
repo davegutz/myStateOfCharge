@@ -364,6 +364,7 @@ class SavedData:
                 self.zero_end = zero_start
                 while self.Ib[self.zero_end] == 0.0:  # stop at first non-zero
                     self.zero_end += 1
+                self.zero_end -= 1  # adjust for going past one
             except:
                 self.zero_end = 0
             self.time_ref = self.time[self.zero_end]
