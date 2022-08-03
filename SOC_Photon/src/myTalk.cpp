@@ -40,7 +40,7 @@ extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 // Prioritize urgency SOON over QUEUE.   The chit() call specifies urgency.  QUEUE is default
 void asap()
 {
-  if ( cp.asap_str.length() ) Serial.printf("chat:  extracting ASAP command from '%s'\n", cp.asap_str.c_str());
+  // if ( cp.asap_str.length() ) Serial.printf("chat:  extracting ASAP command from '%s'\n", cp.asap_str.c_str());
   while ( !cp.string_complete && cp.asap_str.length() )
   {
     // get the new byte:
@@ -75,7 +75,7 @@ void chat()
 {
   if ( cp.soon_str.length() )  // Do SOON first
   {
-    if ( cp.soon_str.length() ) Serial.printf("chat:  extracting SOON command from '%s'\n", cp.soon_str.c_str());
+    // if ( cp.soon_str.length() ) Serial.printf("chat:  extracting SOON command from '%s'\n", cp.soon_str.c_str());
     while ( !cp.string_complete && cp.soon_str.length() )
     {
       // get the new byte:
@@ -103,7 +103,7 @@ void chat()
   }   // end soon
   else  // Do QUEUE only after SOON empty
   {
-    if ( cp.queue_str.length() ) Serial.printf("chat:  extracting QUEUE command from '%s'\n", cp.queue_str.c_str());
+    // if ( cp.queue_str.length() ) Serial.printf("chat:  extracting QUEUE command from '%s'\n", cp.queue_str.c_str());
     while ( !cp.string_complete && cp.queue_str.length() )
     {
       // get the new byte:
@@ -314,7 +314,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
           case ( 'p' ):  // Dp<>:  PRINT interval input
             if ( !cp.blynking )
             {
-              Serial1.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
+              Serial.printf("PublishSerial from %ld to ", Sen->PublishSerial->delay());
               Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
             }
             Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
@@ -896,8 +896,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 6 ):  // Xp6:  Program a pulse
                 chit("XS;Dm0;Dn0;v0;Xm7;Ca0.5;Pm;Dr100;Dp100;v26;", QUEUE);  // setup
-                chit("Dn0.00001;Dm500;Pt;Pt;Dm-500;Pt;Pt;Dm0;Pt;Pt;", QUEUE);  // run
-                chit("W;W;W;W;Pm;v0;", QUEUE);  // finish
+                chit("Dn0.00001;Dm500;Pt;Pt;Pt;Pt;Pt;Pt;Pt;Dm-500;Pt;Pt;Pt;Pt;Pt;Pt;Pt;Dm0;Pt;Pt;Pt;Pt;Pt;Pt;Pt;", QUEUE);  // run
+                chit("W;W;W;W;W;W;W;W;W;W;W;W;Pm;v0;", QUEUE);  // finish
                 break;
 
               case ( 9 ): case( 10 ): case ( 11 ): case( 12 ):  // Xp9: Xp10: Xp11: Xp12:  Program regression

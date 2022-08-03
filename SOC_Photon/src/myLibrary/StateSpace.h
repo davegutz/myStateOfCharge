@@ -49,6 +49,7 @@ public:
   void insert_D(const uint8_t i, const uint8_t j, const double value);
   double y(int i) { return ( y_[i] ); };
 protected:
+  double dt_; // Saved update time
   double *A_; // n x n state matrix
   double *B_; // n x p input matrix
   double *C_; // q x n state output matrix

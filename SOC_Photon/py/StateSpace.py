@@ -45,6 +45,7 @@ class StateSpace:
         s += "  C = \n {}\n".format(self.C)
         s += "  D = \n {}\n".format(self.D)
         s += "  x_dot = {}\n".format(self.x_dot)
+        s += "  y = {}\n".format(self.y)
         return s
 
     def calc_x_dot(self, u):
@@ -69,7 +70,7 @@ class StateSpace:
     def update(self, dt):
         if dt is not None:
             self.dt = dt
-        self.x_past = self.x  # Backwards Euler has extra delay
+        self.x_past = self.x.copy()  # Backwards Euler has extra delay
         self.x += self.x_dot * self.dt
         self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
         return self.y

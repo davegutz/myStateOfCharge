@@ -655,8 +655,6 @@ class BatteryModel(Battery):
             self.model_saturated = sat_init
             self.sat = sat_init
         Coulombs.sat = self.model_saturated
-        # print("model:  soc, ib_in, ib, model_cutback, model_saturated",
-        #       self.soc, self.ib_in, self.ib, self.model_cutback, self.model_saturated)
 
         return self.vb
 
@@ -730,10 +728,6 @@ class BatteryModel(Battery):
         self.soc = self.q / self.q_capacity
         self.soc_min = self.lut_soc_min.interp(self.temp_lim)
         self.q_min = self.soc_min * self.q_capacity
-
-        # print("BatteryModel.cc: dt, reset, temp_c, temp_lim, charge_curr, ddq, dq, q, soc=",
-        #       dt, reset, temp_c, self.temp_lim, charge_curr,
-        #       self.d_delta_q, self.delta_q, self.q, self.soc)
 
         # Save and return
         self.t_last = self.temp_lim

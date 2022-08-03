@@ -186,10 +186,6 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
         else:
             mon.calculate(Tb_, Vb_ + randn() * v_std + dv_sense, Ib_ + randn() * i_std + di_sense, T, rp=rp,
                           reset=reset, d_voc=None)
-
-        print("time=", now, "soc_m=", sim.soc, "voc_stat_m=", sim.voc_stat, "vb_m=", sim.vb, "ib_m=", sim.ib, "ib_in_m=", sim.ib_in, "dv_dyn_m=", sim.dv_dyn, "current_sense=", saved_old.Ib[i],
-              "charge_curr=", sim.ib, "soc=", mon.soc, "voc_stat=", mon.voc_stat, "Vb_=", Vb_, "Ib_=", Ib_, "dv_dyn=", mon.dv_dyn, "voc=", mon.voc, "dv_dyn=", mon.dv_dyn)
-
         sat = is_sat(Tb[i], mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
         if rp.modeling == 0:
@@ -212,15 +208,10 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
             print('time=', t[i])
             print('sim:  ', str(sim))
 
-        # print("Tb[i], t_last, t_last_model", Tb[i], mon.t_last, sim.t_last)
-
     # Data
     print('time=', now)
     print('mon:  ', str(mon))
     print('sim:  ', str(sim))
-
-    # print("Showing data from file then BatteryMonitor calculated from data")
-    # print(compare_print(saved_old, mon.saved))
 
     return mon.saved, sim.saved, mon.Randles.saved, sim.saved_m
 
@@ -239,9 +230,9 @@ if __name__ == '__main__':
         # Transient  inputs
         time_end = None
         # time_end = 1.
-        # time_end = 2000.
 
         t_Ib_fail = None
+        init_time_in = None
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220723.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220716.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
         # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'
@@ -252,8 +243,8 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220729.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampLoFail20220730.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFail20220731.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220801.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/pulse20220803.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
+        # data_file_old_txt = '../dataReduction/pulse20220803.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
+        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220803.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"

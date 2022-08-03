@@ -34,7 +34,7 @@ extern RetainedPars rp;
 // constructors
 StateSpace::StateSpace(){}
 StateSpace::StateSpace(double *A, double *B, double *C, double *D, const int8_t n, const int8_t p,
-  const int8_t q) : A_(A), B_(B), C_(C), D_(D), n_(n), p_(p), q_(q)
+  const int8_t q) : dt_(0), A_(A), B_(B), C_(C), D_(D), n_(n), p_(p), q_(q)
   {
     x_ = new double[n_];
     x_dot_ = new double[n_];
@@ -126,6 +126,7 @@ void StateSpace::pretty_print_vec(const String name, const uint8_t n, double *x)
 void StateSpace::pretty_print(void)
 {
   Serial.printf("StateSpace:\n");
+  Serial.printf("  dt = %9.6f\n", dt_);
   pretty_print_mat("A ", n_, n_, A_);
   pretty_print_vec("x ", n_, x_);
   pretty_print_mat("B ", n_, p_, B_);
@@ -164,12 +165,13 @@ void StateSpace::insert_D(const uint8_t i, const uint8_t j, const double value)
 void StateSpace::update(const double dt)
 {
   int i;
+  dt_ = dt;
   double CX[q_];
   double DU[q_];
   for (i=0; i<n_; i++)
   {
     x_past_[i] = x_[i];
-    x_[i] += x_dot_[i] * dt;
+    x_[i] += x_dot_[i] * dt_;
   }
   mulmat(C_, x_past_, CX, q_, n_, 1);  // Back Euler uses past
   mulmat(D_, u_, DU, q_, p_, 1);

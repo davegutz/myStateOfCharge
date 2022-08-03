@@ -367,7 +367,6 @@ class SavedData:
             except:
                 self.zero_end = 0
             self.time_ref = self.time[self.zero_end]
-            # print("time_ref=", self.time_ref)
             self.time -= self.time_ref
             # Truncate
             if time_end is None:
