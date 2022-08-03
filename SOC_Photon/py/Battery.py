@@ -75,7 +75,7 @@ ZETA_Y_FILT = 0.9  # EKF y-filter-2 damping factor (0.9)
 TMAX_FILT = 3.  # Maximum y-filter-2 sample time, s (3.)
 EKF_Q_SD_NORM = 0.00005
 EKF_R_SD_NORM = 0.5
-# disable because not in particle logic
+# disable because not in particle photon logic
 # EKF_Q_SD_REV = 0.7
 # EKF_R_SD_REV = 0.3
 EKF_Q_SD_REV = EKF_Q_SD_NORM

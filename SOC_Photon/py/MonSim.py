@@ -133,10 +133,10 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
         if reset_sel is not None:
             reset = reset or reset_sel[i]
         saved_old.i = i
-        if i > 0:
-            T = t[i] - t[i - 1]
-        else:
+        if i == 0:
             T = t[1] - t[0]
+        else:
+            T = t[i] - t[i - 1]
 
         # dc_dc_on = bool(lut_dc.interp(t[i]))
         dc_dc_on = False

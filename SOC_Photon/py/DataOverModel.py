@@ -362,9 +362,9 @@ class SavedData:
             try:
                 zero_start = np.where(self.Ib == 0.0)[0][0]
                 self.zero_end = zero_start
-                while self.Ib[self.zero_end] == 0.0:  # stop at first non-zero
+                while self.Ib[self.zero_end] == 0.0:  # stop after first non-zero
                     self.zero_end += 1
-                self.zero_end -= 1  # adjust for going past one
+                self.zero_end -= 1  # backup one
             except:
                 self.zero_end = 0
             self.time_ref = self.time[self.zero_end]
