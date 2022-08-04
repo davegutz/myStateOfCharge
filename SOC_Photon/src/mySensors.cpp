@@ -223,7 +223,7 @@ float Sensors::Tbatt_noise()
 {
   if ( Tbatt_noise_amp_==0. ) return ( 0. );
   uint8_t raw = Prbn_Tbatt_->calculate();
-  float noise = (float(raw)/255. - 0.5) * Tbatt_noise_amp_;
+  float noise = (float(raw)/127. - 0.5) * Tbatt_noise_amp_;
   return ( noise );
 }
 
@@ -232,7 +232,7 @@ float Sensors::Vbatt_noise()
 {
   if ( Vbatt_noise_amp_==0. ) return ( 0. );
   uint8_t raw = Prbn_Vbatt_->calculate();
-  float noise = (float(raw)/255. - 0.5) * Vbatt_noise_amp_;
+  float noise = (float(raw)/127. - 0.5) * Vbatt_noise_amp_;
   return ( noise );
 }
 
@@ -241,7 +241,7 @@ float Sensors::Ibatt_noise()
 {
   if ( Ibatt_noise_amp_==0. ) return ( 0. );
   uint8_t raw = Prbn_Ibatt_->calculate();
-  float noise = (float(raw)/255. - 0.5) * Ibatt_noise_amp_;
+  float noise = (float(raw)/125. - 0.5) * Ibatt_noise_amp_;
   return ( noise );
 }
 
@@ -327,8 +327,8 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
   
   if ( rp.mod_tb() )
   {
-    Tbatt = RATED_TEMP;
-    Tbatt_filt = Tbatt;
+    Tbatt = RATED_TEMP + Tbatt_noise();
+    Tbatt_filt = TbattSenseFilt->calculate(Tbatt, reset, min(T_temp, F_MAX_T_TEMP));
   }
   else
   {
