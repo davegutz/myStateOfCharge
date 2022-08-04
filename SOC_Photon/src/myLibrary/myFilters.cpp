@@ -83,9 +83,9 @@ bool DetectRise::calculate(const int in)
 // class TFDelay
 // constructors
 TFDelay::TFDelay()
-    : timer_(0), nt_(0), nf_(0), T_(1) {}
+    : timer_(0), nt_(0), nf_(0), T_(1), T_init_(1) {}
 TFDelay::TFDelay(const boolean in, const double Tt, const double Tf, const double T)
-    : timer_(0), nt_(int(fmax(round(Tt/T)+1,0))), nf_(int(fmax(round(Tf/T+1),0))), T_(T)
+    : timer_(0), nt_(int(fmax(round(Tt/T)+1,0))), nf_(int(fmax(round(Tf/T+1),0))), T_(T), T_init_(T)
 {
   if ( Tt==0 ) nt_ = 0;
   if ( Tf==0 ) nf_ = 0;
@@ -143,8 +143,8 @@ boolean TFDelay::calculate(const boolean in, const double Tt, const double Tf)
 boolean TFDelay::calculate(const boolean in, const double Tt, const double Tf, const double T)
 {
   T_ = T;
-  nt_ = int(fmax(round(Tt/T_),0));
-  nf_ = int(fmax(round(Tf/T_),0));
+  nt_ = int(fmax(round(Tt/T_), 0));
+  nf_ = int(fmax(round(Tf/T_), 0));
   return(TFDelay::calculate(in));
 }
 boolean TFDelay::calculate(const boolean in, const double Tt, const double Tf, const int RESET)
@@ -158,12 +158,15 @@ boolean TFDelay::calculate(const boolean in, const double Tt, const double Tf, c
 }
 boolean TFDelay::calculate(const boolean in, const double Tt, const double Tf, const double T, const int RESET)
 {
+  double T_loc = T;
   if (RESET>0)
   {
     if ( in ) timer_ = nf_;
     else timer_ = -nt_;
+    T_loc = T_init_;
   }
-  return(TFDelay::calculate(in, Tt, Tf, T));
+  boolean res = TFDelay::calculate(in, Tt, Tf, T_loc);
+  return(res);
 }
 
 

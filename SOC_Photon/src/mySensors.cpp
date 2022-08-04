@@ -162,10 +162,10 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
   this->TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
   this->Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS, &rp.sim_mod);
   this->IbattErrFilt = new LagTustin(0.1, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
-  this->IbattErrPersist = new TFDelay();
-  this->IbattAmpHardFail  = new TFDelay();
-  this->IbattNoAmpHardFail  = new TFDelay();
-  this->VbattHardFail  = new TFDelay();
+  this->IbattErrPersist = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
+  this->IbattAmpHardFail  = new TFDelay(false, IBATT_HARD_SET, IBATT_HARD_RESET, T);
+  this->IbattNoAmpHardFail  = new TFDelay(false, IBATT_HARD_SET, IBATT_HARD_RESET, T);
+  this->VbattHardFail  = new TFDelay(false, VBATT_HARD_SET, VBATT_HARD_RESET, T);
   this->elapsed_inj = 0UL;
   this->start_inj = 0UL;
   this->stop_inj = 0UL;
@@ -328,7 +328,7 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
   if ( rp.mod_tb() )
   {
     Tbatt = RATED_TEMP + Tbatt_noise();
-    Tbatt_filt = TbattSenseFilt->calculate(Tbatt, reset, min(T_temp, F_MAX_T_TEMP));
+    Tbatt_filt = RATED_TEMP;
   }
   else
   {

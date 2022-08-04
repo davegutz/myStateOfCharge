@@ -274,7 +274,7 @@ protected:
   // LagTustin *y_filt = new LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
   General2_Pole *y_filt = new General2_Pole(0.1, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
   SlidingDeadband *SdVbatt_;  // Sliding deadband filter for Vbatt
-  TFDelay *EKF_converged = new TFDelay();   // Time persistence
+  TFDelay *EKF_converged;     // Time persistence
   void ekf_predict(double *Fx, double *Bu);
   void ekf_update(double *hx, double *H);
   RateLimit *T_RLim = new RateLimit();

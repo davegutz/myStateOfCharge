@@ -118,6 +118,7 @@ protected:
   int nt_;
   int nf_;
   double T_;
+  double T_init_;
 };
 
 

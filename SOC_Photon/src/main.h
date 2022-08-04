@@ -255,13 +255,13 @@ void loop()
   static boolean reset_publish = true;        // Dynamic reset
  
   // Sensor conversions
-  static Sensors *Sen = new Sensors(0, 0, myPins->pin_1_wire, PublishSerial, ReadSensors); // Manage sensor data
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins->pin_1_wire, PublishSerial, ReadSensors); // Manage sensor data
 
    // Mon, used to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last, &rp.nP, &rp.nS, &rp.mon_mod);
 
   // Battery saturation debounce
-  static TFDelay *Is_sat_delay = new TFDelay();   // Time persistence
+  static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);   // Time persistence
 
   
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
