@@ -49,14 +49,15 @@ extern CommandPars cp;  // Various parameters to be static at system level
 class TempSensor: public DS18
 {
 public:
-    TempSensor();
-    TempSensor(const uint16_t pin, const bool parasitic, const uint16_t conversion_delay);
-    ~TempSensor();
-    // operators
-    // functions
-    float load(Sensors *Sen);
+  TempSensor();
+  TempSensor(const uint16_t pin, const bool parasitic, const uint16_t conversion_delay);
+  ~TempSensor();
+  // operators
+  // functions
+  float load(Sensors *Sen);
+  float noise();
 protected:
-    SlidingDeadband *SdTbatt;
+  SlidingDeadband *SdTbatt;
 };
 
 
@@ -170,6 +171,15 @@ public:
     void temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim);
     void vbatt_check(BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max);  // Range check Vbatt
     void vbatt_load(const byte vbatt_pin);  // Analog read of Vbatt
+    float Tbatt_noise();
+    float Tbatt_noise_amp() { return ( Tbatt_noise_amp_ ); };
+    void Tbatt_noise_amp(const float noise) { Tbatt_noise_amp_ = noise; };
+    float Vbatt_noise();
+    float Vbatt_noise_amp() { return ( Vbatt_noise_amp_ ); };
+    void Vbatt_noise_amp(const float noise) { Vbatt_noise_amp_ = noise; };
+    float Ibatt_noise();
+    float Ibatt_noise_amp() { return ( Ibatt_noise_amp_ ); };
+    void Ibatt_noise_amp(const float noise) { Ibatt_noise_amp_ = noise; };
     void vbatt_print(void);         // Print Vbatt result
     boolean Ibatt_amp_fail() { return Ibatt_amp_fa_; };
     boolean Ibatt_noamp_fail() { return Ibatt_noamp_fa_; };
@@ -192,6 +202,12 @@ protected:
     float *rp_tbatt_bias_;    // Location of retained bias, deg C
     float tbatt_bias_last_;   // Last value of bias for rate limit, deg C
     void choose_(void);       // Deliberate choice based on inputs and results
+    PRBS_7 *Prbn_Tbatt_;      // Tb noise generator model only
+    PRBS_7 *Prbn_Vbatt_;      // Vb noise generator model only
+    PRBS_7 *Prbn_Ibatt_;      // Ib noise generator model only
+    float Tbatt_noise_amp_;   // Tb noise amplitude model only, deg C pk-pk
+    float Vbatt_noise_amp_;   // Vb noise amplitude model only, V pk-pk
+    float Ibatt_noise_amp_;   // Ib noise amplitude model only, A pk-pk
 };
 
 

@@ -139,7 +139,7 @@ void Shunt::load()
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, Sync *ReadSensors):
   Ibatt_amp_fa_(false), Ibatt_noamp_fa_(false), Vbatt_fa_(false), Vbatt_flt_(false),
-  rp_tbatt_bias_(&rp.tbatt_bias), tbatt_bias_last_(0.)
+  rp_tbatt_bias_(&rp.tbatt_bias), tbatt_bias_last_(0.), Tbatt_noise_amp_(TB_NOISE), Vbatt_noise_amp_(VB_NOISE), Ibatt_noise_amp_(IB_NOISE)
 {
   this->T = T;
   this->T_filt = T;
@@ -177,6 +177,9 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
   this->sclr_coul_eff = 1.;
   this->Ibatt_hdwe_model = 0.;
   this->ib_sel_stat_ = 1;     // Default is amp
+  Prbn_Tbatt_ = new PRBS_7(TB_NOISE_SEED);
+  Prbn_Vbatt_ = new PRBS_7(VB_NOISE_SEED);
+  Prbn_Ibatt_ = new PRBS_7(IB_NOISE_SEED);
 }
 
 // Bias model outputs for sensor fault injection
@@ -213,6 +216,33 @@ void Sensors::choose_()
       Ibatt_hdwe_model = 0.;
       sclr_coul_eff = 1.;
   }
+}
+
+// Tb noise
+float Sensors::Tbatt_noise()
+{
+  if ( Tbatt_noise_amp_==0. ) return ( 0. );
+  uint8_t raw = Prbn_Tbatt_->calculate();
+  float noise = (float(raw)/255. - 0.5) * Tbatt_noise_amp_;
+  return ( noise );
+}
+
+// Vb noise
+float Sensors::Vbatt_noise()
+{
+  if ( Vbatt_noise_amp_==0. ) return ( 0. );
+  uint8_t raw = Prbn_Vbatt_->calculate();
+  float noise = (float(raw)/255. - 0.5) * Vbatt_noise_amp_;
+  return ( noise );
+}
+
+// Ib noise
+float Sensors::Ibatt_noise()
+{
+  if ( Ibatt_noise_amp_==0. ) return ( 0. );
+  uint8_t raw = Prbn_Ibatt_->calculate();
+  float noise = (float(raw)/255. - 0.5) * Ibatt_noise_amp_;
+  return ( noise );
 }
 
 // Calculate selection for choice
@@ -408,11 +438,11 @@ void Sensors::temp_filter(const boolean reset_loc, const float t_rlim)
     if ( reset_loc && Tbatt>40. )  // Bootup T=85.5 C
     {
         Tbatt_hdwe = RATED_TEMP + t_bias_loc;
-        Tbatt_hdwe_filt = TbattSenseFilt->calculate(RATED_TEMP, reset_loc,  min(T_temp, F_MAX_T_TEMP)) + t_bias_loc;
+        Tbatt_hdwe_filt = TbattSenseFilt->calculate(RATED_TEMP, reset_loc, min(T_temp, F_MAX_T_TEMP)) + t_bias_loc;
     }
     else
     {
-        Tbatt_hdwe_filt = TbattSenseFilt->calculate(Tbatt_hdwe, reset_loc,  min(T_temp, F_MAX_T_TEMP)) + t_bias_loc;
+        Tbatt_hdwe_filt = TbattSenseFilt->calculate(Tbatt_hdwe, reset_loc, min(T_temp, F_MAX_T_TEMP)) + t_bias_loc;
         Tbatt_hdwe += t_bias_loc;
     }
     if ( rp.debug==16 ) Serial.printf("reset_loc,t_bias_loc, RATED_TEMP, Tbatt_hdwe, Tbatt_hdwe_filt, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",

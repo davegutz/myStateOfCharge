@@ -101,6 +101,12 @@
 #define VBATT_MIN             9.        // Signal selection hard fault threshold, V (0.  < 9. < 10 bms shutoff)
 #define VBATT_HARD_SET        1.        // Signal selection volt range fail persistence, s (1.)
 #define VBATT_HARD_RESET      1.        // Signal selection volt range fail reset persistence, s (1.)
+#define TB_NOISE              0.        // Tb added noise amplitude, deg C pk-pk
+#define TB_NOISE_SEED         0xe2      // Tb added noise seed 0-255 = 0x00-0xFF (0x01) 
+#define VB_NOISE              0.        // Vb added noise amplitude, V pk-pk
+#define VB_NOISE_SEED         0xb2      // Vb added noise seed 0-255 = 0x00-0xFF (0x01) 
+#define IB_NOISE              0.        // Ib added noise amplitude, A pk-pk
+#define IB_NOISE_SEED         0x01      // Ib added noise seed 0-255 = 0x00-0xFF (0x01) 
 
 
 // Conversion gains

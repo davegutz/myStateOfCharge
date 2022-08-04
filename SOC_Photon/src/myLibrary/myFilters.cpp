@@ -794,3 +794,16 @@ void General2_Pole::rateStateCalc(double in, const double T, const int RESET)
   assignCoeff(T);
   rateState(in, RESET);
 }
+
+
+// class PRBS_7
+// Pseudo-Random Binary Sequence, 7 bits.  Seed in range [0-255] or [0x00-0xFF]
+// Useful noise device
+PRBS_7::PRBS_7(): noise_(0x02){};
+PRBS_7::PRBS_7(uint8_t seed): noise_(seed){};
+uint8_t PRBS_7::calculate()
+{
+  int newbit = (((noise_>>6) ^ (noise_>>5)) & 1);
+  noise_ = ((noise_<<1) | newbit) & 0x7f;
+  return ( noise_ );
+}

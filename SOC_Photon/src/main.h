@@ -209,25 +209,6 @@ void setup()
   // Header for rp.debug print
   if ( rp.debug>101 ) print_serial_header();
 
-/*
-  // prototype of PRBS-7 pseudo random binar sequence
-  // uint8_t start = 0x02;
-  uint8_t start = 0x03;  // seed
-  uint8_t noise = start;
-  int i;
-  for (i=1;; i++)
-  {
-    int newbit = (((noise>>6) ^ (noise>>5)) & 1);
-    noise = ((noise<<1) | newbit) & 0x7f;
-    Serial.printf("%7.3f,%7.3f,\n", float(i)*0.1, float(noise));
-    if ( noise==start )
-    {
-      Serial.printf("\nrep per is %d\n", i);
-      break;
-    }
-  }
-*/
-
   Serial.printf("End setup()\n");
 } // setup
 

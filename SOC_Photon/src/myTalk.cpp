@@ -354,6 +354,24 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf("%7.3f\n", Sen->Sim->Dv());
             break;
 
+          case ( 'T' ):  // DT<>:  Tbatt noise
+            Serial.printf("Sen.Tbatt_noise_amp_ from %7.3f to ", Sen->Tbatt_noise_amp());
+            Sen->Tbatt_noise_amp(cp.input_string.substring(2).toFloat());
+            Serial.printf("%7.3f\n", Sen->Tbatt_noise_amp());
+            break;
+
+          case ( 'V' ):  // DV<>:  Vbatt noise
+            Serial.printf("Sen.Vbatt_noise_amp_ from %7.3f to ", Sen->Vbatt_noise_amp());
+            Sen->Vbatt_noise_amp(cp.input_string.substring(2).toFloat());
+            Serial.printf("%7.3f\n", Sen->Vbatt_noise_amp());
+            break;
+
+          case ( 'I' ):  // DI<>:  Ibatt noise
+            Serial.printf("Sen.Ibatt_noise_amp_ from %7.3f to ", Sen->Ibatt_noise_amp());
+            Sen->Ibatt_noise_amp(cp.input_string.substring(2).toFloat());
+            Serial.printf("%7.3f\n", Sen->Ibatt_noise_amp());
+            break;
+
           default:
             Serial.print(cp.input_string.charAt(1)); Serial.println(" unk.  See 'h'");
         }
@@ -1061,6 +1079,9 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Dr= "); Serial.print(Sen->ReadSensors->delay()); Serial.println("       : minor frame, ms [100]"); 
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.tbatt_bias); Serial.printf("    : delta sense, deg C [%7.3f]\n", TEMP_BIAS); 
   Serial.printf("  Dv= "); Serial.print(Sen->Sim->Dv()); Serial.println("       : Table adjust, V [0.01]"); 
+  Serial.printf("  DT= "); Serial.printf("%7.3f", Sen->Tbatt_noise_amp()); Serial.printf("    : Tbatt noise for model, deg C pk-pk [%7.3f]\n", TEMP_BIAS); 
+  Serial.printf("  DV= "); Serial.printf("%7.3f", Sen->Vbatt_noise_amp()); Serial.printf("    : Vbatt noise for model, V pk-pk [%7.3f]\n", TEMP_BIAS); 
+  Serial.printf("  DI= "); Serial.printf("%7.3f", Sen->Ibatt_noise_amp()); Serial.printf("    : Ibatt noise for model, A pk-pk [%7.3f]\n", TEMP_BIAS); 
   Serial.printf("  Sc= "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println("       : Scalar model size"); 
   Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.println("    : hysteresis scalar 1e-6 - 100 [1]");
   Serial.printf("  Sm= "); Serial.printf("%7.3f", Sen->ShuntAmp->slr()); Serial.printf("    : scalar amp, [1]\n"); 

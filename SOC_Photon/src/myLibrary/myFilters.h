@@ -18,6 +18,24 @@
 #define DEAD(X, HDB)  ( max(X-HDB, 0) + min(X+HDB, 0) )
 
 
+/* Pseudo-Random Binary Sequence, 7 bits
+   Useful noise device
+   Pseudo-Random Binary Sequence, 7 bits.  Seed in range [0-255] or [0x00-0xFF]
+*/
+class PRBS_7
+{
+public:
+  PRBS_7();
+  PRBS_7(const uint8_t seed);
+  ~PRBS_7();
+  // operators
+  // functions
+  uint8_t calculate();
+protected:
+  uint8_t noise_;   // Static value of sequence, [0-255] or [0x00-0xFF]
+};
+
+
 class Debounce
 {
 public:
