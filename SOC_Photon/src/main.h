@@ -422,12 +422,14 @@ void loop()
   // right in the "Send String" box then press "Send."
   // String definitions are below.
   // Control
+  if ( control ){} // placeholder
+  // Chit-chat requires 'read' timing so 'Dp' and 'Dr' can manage sequencing
   asap();
-  if ( control )
+  if ( read )
   {
     chat();         // Work on internal chit-chat
-    talk(Mon, Sen); // Work on user inputs
   }
+  talk(Mon, Sen); // Work on user inputs
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)

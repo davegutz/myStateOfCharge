@@ -387,10 +387,71 @@ Throughput test
 43.  Current is a critical signal for availability.   If lose current also lose knowledge of instantaneous voc_stat because do not know how to adjust for rapid changes in Vb without current.   So the EKF useful only for steady state use.  If add redundant current sensor then If current is available, it creates a triplex signal selection process where current sensors may be compared to each other and Coulomb counter may be compared to EKF to provide enough information to sort out the correct signals.  For example, if the currents disagree and CC and EKF agree then the standby current sensor has faulted.   For that same situation and the CC and EKF disagree then either the active current sensor has likely failed.  If the currents agree and CC and EKF disagree then the voltage sensor has likely failed.  The amplified current sensor is most accurate and is the first choice default.  The non amplified sensor is ok - observing long cycling 'Xp9' see that for a long history, counted coulombs are the same and sensor errors average out.   All this consistent with proper and same calibration of current sensors' gains and setting biases so indicated currents are zero when actual current is zero.
 44. Fault injection testing
 
-current errors:
-  ampHiFail:      Xm7;Ca0.5;Dr100;Dp100;v26;W50;*Dm500;*Dn0.0001;
+test talk:   (-=ASAP, '',*=SOON , +=QUEUE)
+      -Dp1000;-Dr1000;W3;-Dm0;*Dm3;+Dm2;Dm1;-Dn0;+Dm0;+Dn0;+Dr100;+Dp400;
+      expected result:
+pro_20220723, 2022-08-05T12:52:57,  53074383.975, 1.000,   1,  0,  7,  25.00,14.47433,0.00000,    13.80000,0.00000,14.47433,14.47152,   0.002812, 0.99960,0.99958,1.00000,
+pro_20220723, 2022-08-05T12:52:58,  53074384.975, 1.000,   1,  0,  7,  25.00,14.47433,0.00000,    13.80000,0.00000,14.47433,14.47155,   0.002787, 0.99960,0.99958,1.00000,
+pro_20220723, 2022-08-05T12:52:59,  53074385.975, 1.000,   1,  0,  7,  25.00,14.47433,0.00000,    13.80000,0.00000,14.47433,14.47158,   0.002754, 0.99960,0.99958,1.00000,
+echo:  -Dp1000
+echo:  -Dr1000
+echo:  W3
+echo:  -Dm0
+echo:  *Dm3
+echo:  +Dm2
+echo:  Dm1
+echo:  -Dn0
+echo:  +Dm0
+echo:  +Dn0
+echo:  +Dr100
+echo:  +Dp400
+echo:  >Dp1000
+PublishSerial from 1000 to 1000
+echo:  >Dr1000
+ReadSensors from 1000 to 1000
+echo:  >Dm0
+ShuntAmp.add from   0.000 to   0.000
+echo:  >Dn0
+ShuntNoAmp.add from   0.000 to   0.000
+pro_20220723, 2022-08-05T12:53:00,  53074386.976, 1.000,   1,  0,  7,  25.00,14.47433,0.00000,    13.80000,0.00000,14.47433,14.47161,   0.002720, 0.99960,0.99958,1.00000,
+echo:  >W3
+pro_20220723, 2022-08-05T12:53:01,  53074387.975, 1.000,   1,  0,  7,  25.00,14.47433,0.00000,    13.80000,0.00000,14.47433,14.47164,   0.002695, 0.99960,0.99958,1.00000,
+echo:  >Dm3
+ShuntAmp.add from   0.000 to   3.000
+pro_20220723, 2022-08-05T12:53:02,  53074388.975, 1.000,   1,  0,  7,  25.00,14.47433,0.00000,    13.80000,0.00000,14.47433,14.47167,   0.002661, 0.99960,0.99958,1.00000,
+echo:  >Dm1
+ShuntAmp.add from   3.000 to   1.000
+pro_20220723, 2022-08-05T12:53:03,  53074389.976, 1.000,   1,  0,  7,  25.00,14.47433,3.00000,    13.80000,0.03690,14.43743,14.47206,  -0.034625, 0.99960,0.99958,1.00000,
+echo:  >W
+.....Wait...
+pro_20220723, 2022-08-05T12:53:04,  53074390.975, 1.000,   1,  0,  7,  25.00,14.47433,1.00000,    13.80000,0.01230,14.46203,14.47176,  -0.009734, 0.99960,0.99958,1.00000,
+echo:  >W
+.....Wait...
+pro_20220723, 2022-08-05T12:53:05,  53074391.975, 1.000,   1,  0,  7,  25.00,14.47433,1.00000,    13.80000,0.01230,14.46203,14.47177,  -0.009742, 0.99960,0.99958,1.00000,
+echo:  >W
+.....Wait...
+pro_20220723, 2022-08-05T12:53:06,  53074392.976, 1.000,   1,  0,  7,  25.00,14.47433,1.00000,    13.80000,0.01230,14.46203,14.47177,  -0.009743, 0.99960,0.99958,1.00000,
+echo:  >Dm2
+ShuntAmp.add from   1.000 to   2.000
+pro_20220723, 2022-08-05T12:53:07,  53074393.975, 1.000,   1,  0,  7,  25.00,14.47433,1.00000,    13.80000,0.01230,14.46203,14.47177,  -0.009744, 0.99960,0.99958,1.00000,
+echo:  >Dm0
+ShuntAmp.add from   2.000 to   0.000
+pro_20220723, 2022-08-05T12:53:08,  53074394.975, 1.000,   1,  0,  7,  25.00,14.47433,2.00000,    13.80000,0.02460,14.44973,14.47189,  -0.022162, 0.99960,0.99958,1.00000,
+echo:  >Dn0
+ShuntNoAmp.add from   0.000 to   0.000
+pro_20220723, 2022-08-05T12:53:09,  53074395.975, 1.000,   1,  0,  7,  25.00,14.47433,0.00000,    13.80000,0.00000,14.47433,14.47163,   0.002695, 0.99960,0.99958,1.00000,
+echo:  >Dr100
+ReadSensors from 1000 to 100
+echo:  >Dp400
+PublishSerial from 1000 to 400
+pro_20220723, 2022-08-05T12:53:10,  53074396.375, 0.100,   1,  0,  7,  25.00,14.47433,0.00000,    13.80000,0.00000,14.47433,14.47175,   0.002571, 0.99960,0.99958,1.00000,
+pro_20220723, 2022-08-05T12:53:10,  53074396.776, 0.100,   1,  0,  7,  25.00,14.47433,0.00000,    13.80000,0.00000,14.47433,14.47187,   0.002453, 0.99960,0.99959,1.00000,
+
+
+Inject current errors:
+  ampHiFail:      Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dm500;Dn0.0001;
                   Dm0;s1;W10;s0;W50;+v0;
-  ampLoFail:      Xm7;Ca0.5;Dr100;Dp100;v26;W50;*Dm-500;*Dn0.0001;
+  ampLoFail:      Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dm-500;Dn0.0001;
                   Dm0;s1;W10;s0;W50;+v0;
   ampHiFailNoise: Xm7;Ca0.5;Dr100;Dp100;v26;W10;DT.05;DV0.05;DI1;W50;Dm500;Dn0.0001;
                   DT0;DV0.0;DI0;Dm0;s1;W10;s0;W50;+v0;
