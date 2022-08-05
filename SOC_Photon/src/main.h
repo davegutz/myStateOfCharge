@@ -447,7 +447,7 @@ void loop()
   if ( publishP || publishS ) reset_publish = false;
 
   // Soft reset
-  if ( cp.soft_reset || cp.fault_reset )
+  if ( cp.soft_reset )
   {
     reset = true;
     reset_temp = true;
@@ -456,7 +456,6 @@ void loop()
   }
   cp.soft_reset = false;
   cp.write_summary = false;
-  cp.fault_reset = false;
 
 } // loop
 

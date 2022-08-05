@@ -677,8 +677,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
           case ( 'f' ):  // Rf:  Reset fault latches
             Serial.printf("Resetting fault latches\n");
-            cp.flt_reset();
-            chit("W3;", SOON);
+            chit("Dm0;s1;W10;s0;W50;", SOON);
             break;
 
           case ( 'h' ):  // Rh:  hys
@@ -996,6 +995,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 chit("XR;", QUEUE);    // Run cycle
                 break;
 
+              case ( 13 ):  // Xp13:  Program hi amp fail
+                chit("Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dm500;Dn0.0001;", QUEUE);  // begin
+                Serial.printf("Run 'Rf' to finish\n");
+                break;
+
               case( 20 ): case ( 21 ):  // Xp20:  Xp21:  20=tweak-like data, 21= 2 sec data cycle
                 chit("v0;", QUEUE);    // Turn off debug temporarily so not snowed by data dumps
                 chit("Pa;", QUEUE);    // Print all for record
@@ -1215,6 +1219,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("      Xp10:  tweak reg test\n");
   Serial.printf("      Xp11:  slow cycle reg test\n");
   Serial.printf("      Xp12:  slow cycle reg test - half cycle\n");
+  Serial.printf("      Xp13:  amp hi fail\n");
   Serial.printf("      Xp20:  tweak-like data collection\n");
   Serial.printf("      Xp21:  slow data collection\n");
   Serial.printf("  XC= "); Serial.printf("%7.3f cycles inj\n", Sen->cycles_inj);

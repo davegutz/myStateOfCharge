@@ -45,7 +45,6 @@ struct CommandPars
   boolean enable_wifi;      // Enable wifi
   boolean model_cutback;    // On model cutback
   boolean model_saturated;  // Sim on cutback and saturated
-  boolean fault_reset;      // Use talk to reset faults
   boolean soft_reset;       // Use talk to reset main
   boolean write_summary;    // Use talk to issue a write command to summary
   float ibatt_tot_bias_amp; // Runtime bias of amplified shunt sensor, A
@@ -61,7 +60,6 @@ struct CommandPars
     this->enable_wifi = false;
     this->model_cutback = false;
     this->model_saturated = false;
-    this->fault_reset = false;
     this->soft_reset = false;
     this->write_summary = false;
     ibatt_tot_bias_amp = 0.;
@@ -77,17 +75,11 @@ struct CommandPars
   {
     this->write_summary = true;
   }
-  void flt_reset(void)
-  {
-    this->fault_reset = true;
-  }
   void large_reset(void)
   {
     this->enable_wifi = false;
     this->model_cutback = true;
     this->model_saturated = true;
-    this->fault_reset = true;
-    this->fault_reset = true;
     this->soft_reset = true;
   }
 
@@ -97,7 +89,6 @@ struct CommandPars
     Serial.printf("  enable_wifi =                %d;\n", this->enable_wifi);
     Serial.printf("  model_cutback =              %d;\n", this->model_cutback);
     Serial.printf("  model_saturated =            %d;\n", this->model_saturated);
-    Serial.printf("  fault_reset =                %d;\n", this->fault_reset);
     Serial.printf("  soft_reset =                 %d;\n", this->soft_reset);
     Serial.printf("  write_summary =              %d;\n", this->write_summary);
     Serial.printf("  ibatt_tot_bias_amp =   %7.3f;\n", this->ibatt_tot_bias_amp);
