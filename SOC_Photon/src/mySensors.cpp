@@ -267,13 +267,19 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
   // Difference error, filter, check, persist
   if ( rp.mod_ib() ) ib_diff_ = Ibatt_amp_model - Ibatt_noamp_model;
   else ib_diff_ = Ibatt_amp_hdwe - Ibatt_noamp_hdwe;
-  ib_diff_f_ = IbattErrFilt->calculate(ib_diff_, reset, min(T, MAX_ERR_T));
+  ib_diff_f_ = IbattErrFilt->calculate(ib_diff_, reset || cp.fault_reset, min(T, MAX_ERR_T));
   ib_diff_flt_ = abs(ib_diff_f_) >= IBATT_DISAGREE_THRESH;
-  ib_diff_fa_ = IbattErrPersist->calculate(ib_diff_flt_, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T, reset);
+  ib_diff_fa_ = IbattErrPersist->calculate(ib_diff_flt_, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T,
+                                          reset || cp.fault_reset);
 
   // Truth table
   static int8_t ib_sel_stat_last = ib_sel_stat_;
-  // if ( reset ) ib_sel_stat_last = 1;  // must do hard reset
+  if ( cp.fault_reset )
+  {
+    ib_sel_stat_last = 1;
+    ib_sel_stat_ = 1;
+    Serial.printf("Resetting faults\n");
+  }
   if ( ShuntAmp->bare() && ShuntNoAmp->bare() )
   {
     ib_sel_stat_ = 0;
@@ -282,7 +288,7 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
   {
     ib_sel_stat_ = 1;
   }
-  else if ( ib_sel_stat_last==-1 && !ShuntNoAmp->bare() )  // latch - use hard reset
+  else if ( ib_sel_stat_last==-1 && !ShuntNoAmp->bare() )  // latch - use reset
   {
     ib_sel_stat_ = -1;
   }

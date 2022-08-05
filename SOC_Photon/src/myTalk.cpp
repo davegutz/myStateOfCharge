@@ -248,7 +248,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               Serial.printf("soc=%7.3f, modeling = %d, delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f, soc_ekf=%8.4f, delta_q_ekf=%7.3f,\n",
                   Mon->soc(), rp.modeling, Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf());
               cp.cmd_reset();
-              chit("W;W;W;", SOON);  // Wait 3 passes of Control
+              chit("W3;", SOON);  // Wait 3 passes of Control
             }
             else
               Serial.printf("soc = %8.4f; must be 0-1.1\n", FP_in);
@@ -675,6 +675,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
             break;
 
+          case ( 'f' ):  // Rf:  Reset fault latches
+            Serial.printf("Resetting fault latches\n");
+            cp.flt_reset();
+            chit("W3;", SOON);
+            break;
+
           case ( 'h' ):  // Rh:  hys
             Serial.printf("Resetting monitor hys\n");
             Mon->init_hys(0.0);
@@ -714,7 +720,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             rp.large_reset();
             cp.large_reset();
             cp.cmd_reset();
-            chit("W;W;W;", SOON);
+            chit("W3;", SOON);
             chit("Hs;", SOON);
             break;
 
@@ -749,8 +755,22 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         Serial.printf("Wifi togg %d\n", cp.enable_wifi);
         break;
 
-      case ( 'W' ):   // W:  wait.  Skip
-        Serial.printf(".....Wait...\n");
+      case ( 'W' ):   // W<>:  wait.  Skip
+        if ( cp.input_string.substring(1).length() )
+        {
+          INT_in = cp.input_string.substring(1).toInt();
+          if ( INT_in > 0 )
+          {
+            for ( int i=0; i<INT_in; i++ )
+            {
+              chit("W;", SOON);
+            }
+          }
+        }
+        else
+        {
+          Serial.printf(".....Wait...\n");
+        }
         break;
 
       case ( 'z' ):  // z:  toggle Blynk
@@ -915,7 +935,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 6 ):  // Xp6:  Program a pulse
                 chit("XS;Dm0;Dn0;v0;Xm7;Ca0.5;Pm;Dr100;Dp100;v26;", QUEUE);  // setup
                 chit("Dn0.00001;Dm500;Pt;Pt;Pt;Pt;Pt;Pt;Pt;Dm-500;Pt;Pt;Pt;Pt;Pt;Pt;Pt;Dm0;Pt;Pt;Pt;Pt;Pt;Pt;Pt;", QUEUE);  // run
-                chit("W;W;W;W;W;W;W;W;W;W;W;W;Pm;v0;", QUEUE);  // finish
+                chit("W10;Pm;v0;", QUEUE);  // finish
                 break;
 
               case ( 9 ): case( 10 ): case ( 11 ): case( 12 ):  // Xp9: Xp10: Xp11: Xp12:  Program regression
@@ -1021,7 +1041,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf("STOPPED\n");
             break;
 
-          case ( 'W' ):  // XW<>:  Wait
+          case ( 'W' ):  // XW<>:  Wait beginning of programmed transient
             FP_in = cp.input_string.substring(2).toFloat();
             Sen->wait_inj = (unsigned long int)(max(FP_in, 0.))*1000;
             Serial.printf("Waiting %7.1f s to start inj\n", FP_in);
@@ -1126,6 +1146,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("R<?>   Reset\n");
   Serial.printf("  Rb= "); Serial.printf("reset batteries to current inputs\n");
   Serial.printf("  Re= "); Serial.printf("equalize delta_q in Sim to Mon\n");
+  Serial.printf("  Rf= "); Serial.printf("reset fault logic latches\n");
   Serial.printf("  Rh= "); Serial.printf("reset all hys\n");
   Serial.printf("  Ri= "); Serial.printf("reset all delta_q_inf\n");
   Serial.printf("  Rr= "); Serial.printf("saturate battery monitor and equalize Sim & Mon\n");
@@ -1166,7 +1187,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);
 
-  Serial.printf("W<?>  - seconds to wait\n");
+  Serial.printf("W<?>  - iterations to wait\n");
 
   Serial.printf("X<?> - Test Mode.   For example:\n");
   Serial.printf("  Xd= "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
