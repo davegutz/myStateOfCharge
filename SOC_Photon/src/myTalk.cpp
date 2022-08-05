@@ -40,7 +40,7 @@ extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 // Prioritize urgency SOON over QUEUE.   The chit() call specifies urgency.  QUEUE is default
 void asap()
 {
-  // if ( cp.asap_str.length() ) Serial.printf("chat:  extracting ASAP command from '%s'\n", cp.asap_str.c_str());
+    if ( cp.queue_str.length() ) Serial.printf("cmd from '%s'\n", cp.queue_str.c_str());
   while ( !cp.string_complete && cp.asap_str.length() )
   {
     // get the new byte:
@@ -75,7 +75,7 @@ void chat()
 {
   if ( cp.soon_str.length() )  // Do SOON first
   {
-    // if ( cp.soon_str.length() ) Serial.printf("chat:  extracting SOON command from '%s'\n", cp.soon_str.c_str());
+    if ( cp.queue_str.length() ) Serial.printf("cmd from '%s'\n", cp.queue_str.c_str());
     while ( !cp.string_complete && cp.soon_str.length() )
     {
       // get the new byte:
@@ -103,7 +103,7 @@ void chat()
   }   // end soon
   else  // Do QUEUE only after SOON empty
   {
-    // if ( cp.queue_str.length() ) Serial.printf("chat:  extracting QUEUE command from '%s'\n", cp.queue_str.c_str());
+    if ( cp.queue_str.length() ) Serial.printf("cmd from '%s'\n", cp.queue_str.c_str());
     while ( !cp.string_complete && cp.queue_str.length() )
     {
       // get the new byte:
@@ -123,7 +123,7 @@ void chat()
         cp.input_string.replace(" ","");
         cp.input_string.replace("=","");
         cp.string_complete = true;  // token:  temporarily inhibits while loop until talk() call resets string_complete
-        Serial.printf("chat (QUEUE):  talk('%s;')\n", cp.input_string.c_str());
+        Serial.printf("QUEUE:  talk('%s;')\n", cp.input_string.c_str());
         break;  // enable reading multiple inputs
       }
     }
@@ -133,6 +133,7 @@ void chat()
 // Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for talk()
 void chit(const String cmd, const urgency when)
 {
+  Serial.printf("chit cmd=%s,\n", cmd.c_str());
   if ( when == QUEUE )
     cp.queue_str += cmd;
   else if ( when == SOON )
@@ -156,8 +157,24 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
     {
       Serial1.printf("echo:  %s\n", cp.input_string.c_str());
     }
+    Serial.printf("echo:%s,\n", cp.input_string.c_str());
     switch ( cp.input_string.charAt(0) )
     {
+      case ( '-' ):  // ASAP
+        Serial.printf("asap:%s,\n", cp.input_string.substring(1).c_str());
+        chit( cp.input_string.substring(1)+";", ASAP);
+        break;
+
+      case ( '*' ): // SOON
+        Serial.printf("soon:%s,\n", cp.input_string.substring(1).c_str());
+        chit( cp.input_string.substring(1)+";", SOON);
+        break;
+
+      case ( '+' ): // QUEUE
+        Serial.printf("queue:%s,\n", cp.input_string.substring(1).c_str());
+        chit( cp.input_string.substring(1)+";", QUEUE);
+        break;
+
       case ( 'B' ):
         switch ( cp.input_string.charAt(1) )
         {
@@ -166,14 +183,14 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( INT_in )
             {
               case ( 0 ):  // Bm0:
-                Serial.printf("Changing monitor chemistry from %d", Mon->mod_code());
+                Serial.printf("Mon chem from %d", Mon->mod_code());
                 Mon->assign_mod("Battleborn");
                 Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_rand();
                 cp.cmd_reset();
                 break;
 
               case ( 1 ):  // Bm1:
-                Serial.printf("Changing monitor chemistry from %d", Mon->mod_code());
+                Serial.printf("Mon chem from %d", Mon->mod_code());
                 Mon->assign_mod("LION");
                 Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_rand();
                 cp.cmd_reset();
@@ -189,14 +206,14 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( INT_in )
             {
               case ( 0 ):  // Bs0:
-                Serial.printf("Changing simulation chemistry from %d", Sen->Sim->mod_code());
+                Serial.printf("Sim chem from %d", Sen->Sim->mod_code());
                 Sen->Sim->assign_mod("Battleborn"); Sen->Sim->assign_rand();
                 Serial.printf(" to %d ('Battleborn')\n", Sen->Sim->mod_code());
                 cp.cmd_reset();
                 break;
 
               case ( 1 ):  // Bs1:
-                Serial.printf("Changing simulation chemistry from %d", Sen->Sim->mod_code());
+                Serial.printf("Sim chem from %d", Sen->Sim->mod_code());
                 Sen->Sim->assign_mod("LION"); Sen->Sim->assign_rand();
                 Serial.printf(" to %d ('LION')\n", Sen->Sim->mod_code());
                 cp.cmd_reset();
@@ -211,7 +228,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             FP_in = cp.input_string.substring(2).toFloat();
             if ( FP_in>0 )  // Apply crude limit to prevent user error
             {
-              Serial.printf("Changing Mon/Sim->nP from %5.2f / %5.2f ", Mon->nP(), Sen->Sim->nP());
+              Serial.printf("Mon/Sim->nP from %5.2f / %5.2f ", Mon->nP(), Sen->Sim->nP());
               rp.nP = FP_in;
               Serial.printf("to %5.2f / %5.2f\n", Mon->nP(), Sen->Sim->nP());
             }
@@ -223,7 +240,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             FP_in = cp.input_string.substring(2).toFloat();
             if ( FP_in>0 )  // Apply crude limit to prevent user error
             {
-              Serial.printf("Changing Mon/Sim->nS from %5.2f / %5.2f ", Mon->nS(), Sen->Sim->nS());
+              Serial.printf("Mon/Sim->nS from %5.2f / %5.2f ", Mon->nS(), Sen->Sim->nS());
               rp.nS = FP_in;
               Serial.printf("to %5.2f / %5.2f\n", Mon->nS(), Sen->Sim->nS());
             }
@@ -396,12 +413,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
           case ( 'h' ):  // Sh<>: scale hysteresis
             scale = cp.input_string.substring(2).toFloat();
 
-            Serial.printf("\nBefore Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n", Mon->hys_scale(), Sen->Sim->hys_scale());
+            Serial.printf("\nBefore Hys::scale = %7.3f & %7.3f\n", Mon->hys_scale(), Sen->Sim->hys_scale());
             rp.hys_scale = scale;
-            Serial.printf("Changing to Sh= %7.3f\n", scale);
+            Serial.printf("scale= %7.3f\n", scale);
             Mon->hys_scale(scale);
             Sen->Sim->hys_scale(scale);
-            Serial.printf("After Mon::Hys::scale = %7.3f, Sim::Hys::scale = %7.3f\n",
+            Serial.printf("After = %7.3f & %7.3f\n",
                 Mon->hys_scale(), Sen->Sim->hys_scale());
             break;
 

@@ -388,14 +388,14 @@ Throughput test
 44. Fault injection testing
 
 current errors:
-  ampHiFail:      Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dm500;Dn0.0001;
-                  Dm0;s1;W10;s0;W50;v0;
-  ampLoFail:      Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dm-500;Dn0.0001;
-                  Dm0;s1;W10;s0;W50;v0;
+  ampHiFail:      Xm7;Ca0.5;Dr100;Dp100;v26;W50;*Dm500;*Dn0.0001;
+                  Dm0;s1;W10;s0;W50;+v0;
+  ampLoFail:      Xm7;Ca0.5;Dr100;Dp100;v26;W50;*Dm-500;*Dn0.0001;
+                  Dm0;s1;W10;s0;W50;+v0;
   ampHiFailNoise: Xm7;Ca0.5;Dr100;Dp100;v26;W10;DT.05;DV0.05;DI1;W50;Dm500;Dn0.0001;
-                  DT0;DV0.0;DI0;Dm0;s1;W10;s0;W50;v0;
+                  DT0;DV0.0;DI0;Dm0;s1;W10;s0;W50;+v0;
   ampLoFailNoise: Xm7;Ca0.5;Dr100;Dp100;v26;W10;DT.05;DV0.05;DI1;W50;Dm-500;Dn0.0001;
-                  DT0;DV0.0;DI0;Dm0;s1;W10;s0;W50;v0;
+                  DT0;DV0.0;DI0;Dm0;s1;W10;s0;W50;+v0;
 pulse:  Xp6
 
 ## Accuracy
