@@ -353,13 +353,13 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   response.  Multiple bytes of data may be available.
 
   Particle documentation says not to use something like
-  the cp.string_complete in the while loop statement.
+  the cp.token in the while loop statement.
   They suggest handling all the data in one call.   But 
   this works, so far.
  */
 void serialEvent()
 {
-  while ( !cp.string_complete && Serial.available() )
+  while ( !cp.token && Serial.available() )
   {
     // get the new byte:
     char inChar = (char)Serial.read();
@@ -376,7 +376,7 @@ void serialEvent()
       cp.input_string.replace(",","");
       cp.input_string.replace(" ","");
       cp.input_string.replace("=","");
-      cp.string_complete = true;  // Temporarily inhibits while loop until talk() call resets string_complete
+      cp.token = true;  // Temporarily inhibits while loop until talk() call resets token
       break;  // enable reading multiple inputs
     }
   }
@@ -392,7 +392,7 @@ void serialEvent()
 void serialEvent1()
 {
   if ( cp.blynking ) return;
-  while (!cp.string_complete && Serial1.available())
+  while (!cp.token && Serial1.available())
   {
     // get the new byte:
     char inChar = (char)Serial1.read();
@@ -409,7 +409,7 @@ void serialEvent1()
       cp.input_string.replace(",","");
       cp.input_string.replace(" ","");
       cp.input_string.replace("=","");
-      cp.string_complete = true;
+      cp.token = true;
       break;  // enable reading multiple inputs
     }
   }

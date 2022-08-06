@@ -388,6 +388,7 @@ Throughput test
 44. Fault injection testing
 
 test talk:   (-=ASAP, '',*=SOON , +=QUEUE)
+      v4;
       -Dp1000;-Dr1000;W3;-Dm0;*Dm3;+Dm2;Dm1;-Dn0;+Dm0;+Dn0;+Dr100;+Dp400;
       expected result:
 pro_20220723, 2022-08-05T12:52:57,  53074383.975, 1.000,   1,  0,  7,  25.00,14.47433,0.00000,    13.80000,0.00000,14.47433,14.47152,   0.002812, 0.99960,0.99958,1.00000,

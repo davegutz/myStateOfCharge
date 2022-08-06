@@ -41,7 +41,7 @@ struct CommandPars
 {
   char buffer[256];         // Auxiliary print buffer
   String input_string;      // Hold incoming data
-  boolean string_complete;  // Whether input_string is complete
+  boolean token;  // Whether input_string is complete
   boolean enable_wifi;      // Enable wifi
   boolean model_cutback;    // On model cutback
   boolean model_saturated;  // Sim on cutback and saturated
@@ -56,7 +56,7 @@ struct CommandPars
   String asap_str;          // Hold chit_chat asap data - no waiting, ASAP all of now_str processed before Control pass
   CommandPars(void)
   {
-    this->string_complete = false;
+    this->token = false;
     this->enable_wifi = false;
     this->model_cutback = false;
     this->model_saturated = false;

@@ -36,99 +36,57 @@ extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
 extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 
-// Collisions with Serial.read unlikely because Serial.read kicks off commands to chit and chat.
-// Prioritize urgency SOON over QUEUE.   The chit() call specifies urgency.  QUEUE is default
-void asap()
+// Cleanup string for final processing by talk
+void finish_request()
 {
-  // if ( cp.queue_str.length() ) Serial.printf("cmd from '%s'\n", cp.queue_str.c_str());
-  while ( !cp.string_complete && cp.asap_str.length() )
+  // Remove whitespace
+  cp.input_string.trim();
+  cp.input_string.replace("\0","");
+  cp.input_string.replace(";","");
+  cp.input_string.replace(",","");
+  cp.input_string.replace(" ","");
+  cp.input_string.replace("=","");
+  cp.input_string = ">" + cp.input_string;
+  cp.token = true;  // token:  temporarily inhibits while loop until talk() call resets token
+}
+
+// If false token, get new string from source
+void get_string(String *source)
+{
+  while ( !cp.token && source->length() )
   {
-    // get the new byte:
-    char inChar = cp.asap_str.charAt(0);
-    cp.asap_str.remove(0, 1);
-    // add it to the cp.input_string:
+    // get the new byte, add to input and check for completion
+    char inChar = source->charAt(0);
+    source->remove(0, 1);
     cp.input_string += inChar;
-    // if the incoming character is a newline, set a flag
-    // so the main loop can do something about it:
     if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
     {
-      // Remove whitespace
-      cp.input_string.trim();
-      cp.input_string.replace("\0","");
-      cp.input_string.replace(";","");
-      cp.input_string.replace(",","");
-      cp.input_string.replace(" ","");
-      cp.input_string.replace("=","");
-      cp.input_string = ">" + cp.input_string;
-      cp.string_complete = true;  // token:  temporarily inhibits while loop until talk() call resets string_complete
-      // Serial.printf("chat (ASAP):  talk('%s;')\n", cp.input_string.c_str());
+      finish_request();
       break;  // enable reading multiple inputs
     }
   }
 }
 
-// Process chat strings and feed to talk using input_string and string_complete
-// Collisions with Serial.read unlikely because Serial.read kicks off commands to chit and chat.
-// Prioritize urgency SOON over QUEUE.   The chit() call specifies urgency.  QUEUE is default
+// Process asap commands
+void asap()
+{
+  get_string(&cp.asap_str);
+  // if ( cp.token ) Serial.printf("chat (ASAP):  talk('%s;')\n", cp.input_string.c_str());
+}
+
+// Process chat strings
 void chat()
 {
   if ( cp.soon_str.length() )  // Do SOON first
   {
-    // if ( cp.queue_str.length() ) Serial.printf("cmd from '%s'\n", cp.queue_str.c_str());
-    while ( !cp.string_complete && cp.soon_str.length() )
-    {
-      // get the new byte:
-      char inChar = cp.soon_str.charAt(0);
-      cp.soon_str.remove(0, 1);
-      // add it to the cp.input_string:
-      cp.input_string += inChar;
-      // if the incoming character is a newline, set a flag
-      // so the main loop can do something about it:
-      if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
-      {
-        // Remove whitespace
-        cp.input_string.trim();
-        cp.input_string.replace("\0","");
-        cp.input_string.replace(";","");
-        cp.input_string.replace(",","");
-        cp.input_string.replace(" ","");
-        cp.input_string.replace("=","");
-        cp.input_string = ">" + cp.input_string;
-        cp.string_complete = true;  // token:  temporarily inhibits while loop until talk() call resets string_complete
-        // Serial.printf("chat (SOON):  talk('%s;')\n", cp.input_string.c_str());
-        break;  // enable reading multiple inputs
-      }
-    }
-    return;
-  }   // end soon
+    get_string(&cp.soon_str);
+    // if ( cp.token ) Serial.printf("chat (SOON):  talk('%s;')\n", cp.input_string.c_str());
+  }
   else  // Do QUEUE only after SOON empty
   {
-    // if ( cp.queue_str.length() ) Serial.printf("cmd from '%s'\n", cp.queue_str.c_str());
-    while ( !cp.string_complete && cp.queue_str.length() )
-    {
-      // get the new byte:
-      char inChar = cp.queue_str.charAt(0);
-      cp.queue_str.remove(0, 1);
-      // add it to the cp.input_string:
-      cp.input_string += inChar;
-      // if the incoming character is a newline, set a flag
-      // so the main loop can do something about it:
-      if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
-      {
-        // Remove whitespace
-        cp.input_string.trim();
-        cp.input_string.replace("\0","");
-        cp.input_string.replace(";","");
-        cp.input_string.replace(",","");
-        cp.input_string.replace(" ","");
-        cp.input_string.replace("=","");
-        cp.input_string = ">" + cp.input_string;
-        cp.string_complete = true;  // token:  temporarily inhibits while loop until talk() call resets string_complete
-        // Serial.printf("QUEUE:  talk('%s;')\n", cp.input_string.c_str());
-        break;  // enable reading multiple inputs
-      }
-    }
-  } // end queue
+    get_string(&cp.queue_str);
+    // if ( cp.token ) Serial.printf("chat (QUEUE):  talk('%s;')\n", cp.input_string.c_str());
+  }
 }
 
 // Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for talk()
@@ -152,7 +110,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
   double scale = 1.;
   urgency request;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
-  if (cp.string_complete)
+  if (cp.token)
   {
     // Limited echoing of Serial1 commands available
     if ( !cp.blynking )
@@ -162,13 +120,14 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
     Serial.printf("echo:  %s\n", cp.input_string.c_str());
 
     // Categorize the requests
-    if ( cp.input_string.charAt(0) == '-' )
+    char key = cp.input_string.charAt(0);
+    if ( key == '-' )
       request = ASAP;
-    else if ( cp.input_string.charAt(0) == '+' )
+    else if ( key == '+' )
       request = QUEUE;
-    else if ( cp.input_string.charAt(0) == '*' )
+    else if ( key == '*' )
       request = SOON;
-    else if ( cp.input_string.charAt(0) == '>' )
+    else if ( key == '>' )
     {
       cp.input_string = cp.input_string.substring(1);  // Delete the leading '>'
       request = INCOMING;
@@ -179,9 +138,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
     // Deal with each request
     switch ( request )
     {
-      case ( NEW ):  // Defaults to SOON
+      case ( NEW ):  // Defaults to QUEUE
         // Serial.printf("new:%s,\n", cp.input_string.substring(0).c_str());
-        chit( cp.input_string.substring(0) + ";", SOON);
+        chit( cp.input_string.substring(0) + ";", QUEUE);
         break;
 
       case ( ASAP ):
@@ -1119,8 +1078,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
     }
 
     cp.input_string = "";
-    cp.string_complete = false;
-  }  // if ( cp.string_complete )
+    cp.token = false;
+  }  // if ( cp.token )
 }
 
 // Talk Help
@@ -1275,6 +1234,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  XW= "); Serial.printf("%6.2f s wait start inj\n", float(Sen->wait_inj)/1000.);
   Serial.printf("  XT= "); Serial.printf("%6.2f s tail end inj\n", float(Sen->tail_inj)/1000.);
   Serial.printf("z   toggle BLYNK = %d\n", cp.blynking );
-
+  Serial.printf(" urgency levels of commands:  -=ASAP, *=SOON , '',+=QUEUE\n"); 
   Serial.printf("h   this menu\n");
 }
