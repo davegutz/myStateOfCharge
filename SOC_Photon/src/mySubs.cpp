@@ -114,7 +114,7 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
         hours = Time.hour(*current_time);
       }
   }
-  uint8_t dayOfWeek = Time.weekday(*current_time)-1;  // 0-6
+  // uint8_t dayOfWeek = Time.weekday(*current_time)-1;  // 0-6
   uint8_t minutes   = Time.minute(*current_time);
   uint8_t seconds   = Time.second(*current_time);
 
@@ -122,7 +122,6 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
   time_long_2_str(*current_time, tempStr);
 
   // Convert the decimal
-  if ( rp.debug>105 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
   static double cTimeInit = ((( (double(year-2021)*12 + double(month))*30.4375 + double(day))*24.0 + double(hours))*60.0 + double(minutes))*60.0 + \
                       double(seconds) + double(now-millis_flip)/1000.;
   double cTime = cTimeInit + double(now-millis_flip)/1000.;
@@ -345,6 +344,37 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   rp.inj_bias = Sen->Sim->calc_inj(Sen->elapsed_inj, rp.type, rp.amp, rp.freq);
 }
 
+// If false token, get new string from source
+void get_string(String *source)
+{
+  while ( !cp.token && source->length() )
+  {
+    // get the new byte, add to input and check for completion
+    char inChar = source->charAt(0);
+    source->remove(0, 1);
+    cp.input_string += inChar;
+    if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
+    {
+      finish_request();
+      cp.input_string = ">" + cp.input_string;
+      break;  // enable reading multiple inputs
+    }
+  }
+}
+
+// Cleanup string for final processing by talk
+void finish_request(void)
+{
+  // Remove whitespace
+  cp.input_string.trim();
+  cp.input_string.replace("\0","");
+  cp.input_string.replace(";","");
+  cp.input_string.replace(",","");
+  cp.input_string.replace(" ","");
+  cp.input_string.replace("=","");
+  cp.token = true;  // token:  temporarily inhibits while loop until talk() call resets token
+}
+
 /*
   Special handler that uses built-in callback.
   SerialEvent occurs whenever a new data comes in the
@@ -363,23 +393,19 @@ void serialEvent()
   {
     // get the new byte:
     char inChar = (char)Serial.read();
+
     // add it to the cp.input_string:
     cp.input_string += inChar;
+
     // if the incoming character is a newline, set a flag
     // so the main loop can do something about it:
     if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
     {
-      // Remove whitespace
-      cp.input_string.trim();
-      cp.input_string.replace("\0","");
-      cp.input_string.replace(";","");
-      cp.input_string.replace(",","");
-      cp.input_string.replace(" ","");
-      cp.input_string.replace("=","");
-      cp.token = true;  // Temporarily inhibits while loop until talk() call resets token
+      finish_request();
       break;  // enable reading multiple inputs
     }
   }
+  // if ( cp.token ) Serial.printf("serialEvent:  %s\n", cp.input_string.c_str());
 }
 
 /*
@@ -402,14 +428,7 @@ void serialEvent1()
     // so the main loop can do something about it:
     if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',')
     {
-     // Remove whitespace
-      cp.input_string.trim();
-      cp.input_string.replace("\0","");
-      cp.input_string.replace(";","");
-      cp.input_string.replace(",","");
-      cp.input_string.replace(" ","");
-      cp.input_string.replace("=","");
-      cp.token = true;
+      finish_request();
       break;  // enable reading multiple inputs
     }
   }
@@ -419,7 +438,6 @@ void serialEvent1()
 void serial_print(unsigned long now, double T)
 {
   create_print_string(&pp.pubList);
-  if ( rp.debug >= 100 ) Serial.printf("serial_print:");
   Serial.println(cp.buffer);
   if ( !cp.blynking )
     Serial1.println(cp.buffer);
@@ -472,10 +490,9 @@ String time_long_2_str(const unsigned long current_time, char *tempStr)
           hours = Time.hour(current_time);
         }
     }
-        uint8_t dayOfWeek = Time.weekday(current_time)-1;  // 0-6
+        // uint8_t dayOfWeek = Time.weekday(current_time)-1;  // 0-6
         uint8_t minutes   = Time.minute(current_time);
         uint8_t seconds   = Time.second(current_time);
-        if ( rp.debug>105 ) Serial.printf("DAY %u HOURS %u\n", dayOfWeek, hours);
     sprintf(tempStr, "%4u-%02u-%02uT%02u:%02u:%02u", int(year), month, day, hours, minutes, seconds);
     return ( String(tempStr) );
 }

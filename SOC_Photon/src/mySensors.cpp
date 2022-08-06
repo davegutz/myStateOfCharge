@@ -119,11 +119,8 @@ void Shunt::load()
 {
   if ( !bare_ && !rp.mod_ib() )
   {
-    if ( rp.debug>102 ) Serial.printf("begin %s->readADC_Differential_0_1 at %ld...", name_.c_str(), millis());
-
     vshunt_int_ = readADC_Differential_0_1();
     
-    if ( rp.debug>102 ) Serial.printf("done at %ld\n", millis());
     if ( rp.debug==-14 ) { vshunt_int_0_ = readADC_SingleEnded(0);  vshunt_int_1_ = readADC_SingleEnded(1); }
                     else { vshunt_int_0_ = 0;                       vshunt_int_1_ = 0; }
   }
@@ -146,18 +143,8 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
   this->T_temp = T_temp;
   this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_cinf_amp, &rp.delta_q_dinf_amp, &rp.tweak_sclr_amp,
     &cp.ibatt_tot_bias_amp, shunt_amp_v2a_s);
-  if ( rp.debug>102 )
-  {
-      Serial.printf("New Shunt('Amp'):\n");
-      this->ShuntAmp->pretty_print();
-  }
   this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_cinf_noamp, &rp.delta_q_dinf_noamp, &rp.tweak_sclr_noamp,
     &cp.ibatt_tot_bias_noamp, shunt_noamp_v2a_s);
-  if ( rp.debug>102 )
-  {
-      Serial.printf("New Shunt('No Amp'):\n");
-      this->ShuntNoAmp->pretty_print();
-  }
   this->SensorTbatt = new TempSensor(pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
   this->TbattSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
   this->Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS, &rp.sim_mod);

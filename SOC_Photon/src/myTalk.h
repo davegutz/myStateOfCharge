@@ -26,7 +26,7 @@
 #include "Battery.h"
 #include "Tweak.h"
 
-enum urgency {NEW, ASAP, SOON, QUEUE, INCOMING};
+enum urgency {INCOMING, ASAP, SOON, QUEUE, NEW};
 typedef enum urgency urgency;
 
 void asap(void);

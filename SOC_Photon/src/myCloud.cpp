@@ -35,67 +35,6 @@
 extern CommandPars cp;            // Various parameters to be common at system level (reset on PLC reset)
 extern PublishPars pp;            // For publishing
 
-/* dag 6/18/2022
-// extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;     // Time Blynk events
-// extern BlynkStream Blynk;       // Blynk object
-
-// Publish1 Blynk
-void publish1(void)
-{
-  if (rp.debug>104) Serial.printf("Blynk write1\n");
-  Blynk.virtualWrite(V2,  pp.pubList.Vbatt);
-  Blynk.virtualWrite(V3,  pp.pubList.Voc);
-  Blynk.virtualWrite(V4,  pp.pubList.Vbatt);
-}
-
-
-// Publish2 Blynk
-void publish2(void)
-{
-  if (rp.debug>104) Serial.printf("Blynk write2\n");
-  Blynk.virtualWrite(V6,  pp.pubList.soc);
-  Blynk.virtualWrite(V8,  pp.pubList.T);
-  Blynk.virtualWrite(V10, pp.pubList.Tbatt);
-}
-
-
-// Publish3 Blynk
-void publish3(void)
-{
-  if (rp.debug>104) Serial.printf("Blynk write3\n");
-  Blynk.virtualWrite(V15, pp.pubList.hm_string);
-  Blynk.virtualWrite(V16, pp.pubList.tcharge);
-}
-
-
-// Publish4 Blynk
-void publish4(void)
-{
-  if (rp.debug>104) Serial.printf("Blynk write4\n");
-  Blynk.virtualWrite(V18, pp.pubList.Ibatt);
-  Blynk.virtualWrite(V20, pp.pubList.Wbatt);
-  Blynk.virtualWrite(V21, pp.pubList.soc_ekf);
-}
-
-
-// Attach a Slider widget to the Virtual pin 4 IN in your Blynk app
-// - and control the web desired temperature.
-// Note:  there are separate virtual IN and OUT in Blynk.
-BLYNK_WRITE(V4) {
-    if (param.asInt() > 0)
-    {
-        //pubList.webDmd = param.asDouble();
-    }
-}
-
-
-// Attach a switch widget to the Virtual pin 6 in your Blynk app - and demand continuous web control
-// Note:  there are separate virtual IN and OUT in Blynk.
-BLYNK_WRITE(V6) {
-//    pubList.webHold = param.asInt();
-}
-*/
-
 // Check connection and publish Particle
 void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
 {
@@ -103,7 +42,6 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
   manage_wifi(now, wifi);
 
   // Publish if valid
-  if ( rp.debug>102 ) Serial.printf("Particle write:  ");
   if ( wifi->connected )
   {
     // Create print string
@@ -117,11 +55,9 @@ void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
     sprintf(publishString,"%u:%u:%u",hours,min,sec);
     Particle.publish("Uptime",publishString);
     Particle.publish("stat", cp.buffer);
-    if ( rp.debug>102 ) Serial.println(cp.buffer);
   }
   else
   {
-    if ( rp.debug>102 ) Serial.printf("nothing to do\n");
     pp.pubList.num_timeouts++;
   }
 }

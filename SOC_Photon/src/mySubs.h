@@ -68,6 +68,8 @@ struct Pins
 void create_print_string(Publish *pubList);
 void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
 double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
+void finish_request(void);
+void get_string(String *source);
 void load_ibatt_vbatt(const boolean reset, const unsigned long now, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon);
 void manage_wifi(unsigned long now, Wifi *wifi);
 void monitor(const boolean reset, const boolean reset_temp, const unsigned long now,

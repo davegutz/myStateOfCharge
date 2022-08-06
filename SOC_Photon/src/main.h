@@ -187,12 +187,6 @@ void setup()
     Serial.printf("\n****MSG(setup): Corrupt SRAM- force nom *** %s\n", cp.buffer);
   }
 
-  #ifdef PHOTON
-    if ( rp.debug>101 ) { sprintf(cp.buffer, "Photon\n"); Serial.print(cp.buffer); }
-  #else
-    if ( rp.debug>101 ) { sprintf(cp.buffer, "Mega2560\n"); Serial.print(cp.buffer); }
-  #endif
-
   // Determine millis() at turn of Time.now
   long time_begin = Time.now();
   while ( Time.now()==time_begin )
@@ -205,9 +199,6 @@ void setup()
   System.enableFeature(FEATURE_RETAINED_MEMORY);
   if ( rp.debug==4 || rp.debug==24 || rp.debug==26 )
     print_all_summary(mySum, rp.isum, NSUM);
-
-  // Header for rp.debug print
-  if ( rp.debug>101 ) print_serial_header();
 
   Serial.printf("End setup()\n");
 } // setup
@@ -319,7 +310,7 @@ void loop()
   {
     Sen->T =  ReadSensors->updateTime();
     Sen->reset = reset;
-    if ( rp.debug>102 || rp.debug==-13 ) Serial.printf("Read dt=%7.3f; load at %ld...  \n", Sen->T, millis());
+    if ( rp.debug==-13 ) Serial.printf("Read dt=%7.3f; load at %ld...  \n", Sen->T, millis());
 
     // Read sensors, model signals, select between them, synthesize injection signals on current
     // Inputs:  rp.config, rp.sim_mod

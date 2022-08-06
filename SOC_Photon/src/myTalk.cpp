@@ -36,42 +36,11 @@ extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
 extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 
-// Cleanup string for final processing by talk
-void finish_request()
-{
-  // Remove whitespace
-  cp.input_string.trim();
-  cp.input_string.replace("\0","");
-  cp.input_string.replace(";","");
-  cp.input_string.replace(",","");
-  cp.input_string.replace(" ","");
-  cp.input_string.replace("=","");
-  cp.input_string = ">" + cp.input_string;
-  cp.token = true;  // token:  temporarily inhibits while loop until talk() call resets token
-}
-
-// If false token, get new string from source
-void get_string(String *source)
-{
-  while ( !cp.token && source->length() )
-  {
-    // get the new byte, add to input and check for completion
-    char inChar = source->charAt(0);
-    source->remove(0, 1);
-    cp.input_string += inChar;
-    if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
-    {
-      finish_request();
-      break;  // enable reading multiple inputs
-    }
-  }
-}
-
 // Process asap commands
 void asap()
 {
   get_string(&cp.asap_str);
-  // if ( cp.token ) Serial.printf("chat (ASAP):  talk('%s;')\n", cp.input_string.c_str());
+  // if ( cp.token ) Serial.printf("asap:  talk('%s;')\n", cp.input_string.c_str());
 }
 
 // Process chat strings
@@ -112,13 +81,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
   // Serial event  (terminate Send String data with 0A using CoolTerm)
   if (cp.token)
   {
-    // Limited echoing of Serial1 commands available
-    if ( !cp.blynking )
-    {
-      Serial1.printf("echo:  %s\n", cp.input_string.c_str());
-    }
-    Serial.printf("echo:  %s\n", cp.input_string.c_str());
-
     // Categorize the requests
     char key = cp.input_string.charAt(0);
     if ( key == '-' )
@@ -134,6 +96,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
     }
     else 
       request = NEW;
+
+    // Limited echoing of Serial1 commands available
+    if ( !cp.blynking )
+    {
+      Serial1.printf("echo:  %s, %d\n", cp.input_string.c_str(), request);
+    }
+    Serial.printf("echo:  %s, %d\n", cp.input_string.c_str(), request);
 
     // Deal with each request
     switch ( request )
