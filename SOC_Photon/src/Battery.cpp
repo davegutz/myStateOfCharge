@@ -425,9 +425,12 @@ void BatteryMonitor::init_soc_ekf(const double soc)
     Outputs:
         is_saturated    Battery saturation status, T/F
 */
-boolean BatteryMonitor::is_sat(void)
+boolean BatteryMonitor::is_sat(const boolean reset)
 {
-    return ( temp_c_ > chem_.low_t && (voc_filt_ >= vsat_ || soc_ >= mxeps) );
+    if ( reset)
+        return ( temp_c_ > chem_.low_t && voc_filt_ >= vsat_ );
+    else
+        return ( temp_c_ > chem_.low_t && (voc_filt_ >= vsat_ || soc_ >= mxeps) );
 }
 
 // Print

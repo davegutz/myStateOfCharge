@@ -460,7 +460,7 @@ Inject current errors:
                   Dm0;s1;W10;s0;W50;+v0;Dr100;Dp400;
 
   ampLoFail inv:  Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dm-500;Dn0.0001;W50;Pe;Dm0;s1;W10;s0;W50;+v0;Dr100;Dp400;
-  
+
 pulse:  Xp6
 
 ## Accuracy

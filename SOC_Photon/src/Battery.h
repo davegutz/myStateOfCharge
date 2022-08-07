@@ -247,7 +247,7 @@ public:
   double hx() { return (hx_); };
   double Hx() { return (hx_*(*rp_nS_)); };
   void init_soc_ekf(const double soc);
-  boolean is_sat(void);
+  boolean is_sat(const boolean reset);
   double K_ekf() { return (K_); };
   void pretty_print(void);
   void regauge(const float temp_c);

@@ -205,10 +205,11 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
   Mon->calculate(Sen, reset_temp);
 
   // Debounce saturation calculation done in ekf using voc model
-  boolean sat = Mon->is_sat();
+  boolean sat = Mon->is_sat(reset);
+
   Sen->saturated = Is_sat_delay->calculate(sat, T_SAT, T_DESAT, min(Sen->T, T_SAT/2.), reset);
-  Serial.printf("reset,reset_temp,sat,Sen->saturated,vsat,voc_filt,voc,ib=, %d, %d, %d, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",
-      reset, reset_temp, sat, Sen->saturated, Mon->vsat(), Mon->voc_filt(), Mon->voc(), Mon->ib());
+  Serial.printf("reset,reset_temp,sat,Sen->saturated,soc,temp_c,vsat,voc_filt,voc,ib=, %d, %d, %d, %d, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f,\n",
+      reset, reset_temp, sat, Sen->saturated, Mon->soc(), Mon->temp_c(), Mon->vsat(), Mon->voc_filt(), Mon->voc(), Mon->ib());
 
   // Memory store // TODO:  simplify arg list here.  Unpack Sen inside count_coulombs
   // Initialize to ekf when not saturated
