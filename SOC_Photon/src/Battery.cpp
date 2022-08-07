@@ -314,7 +314,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     double ddq_dt = ib_;
     if ( ddq_dt>0. && !rp.tweak_test() ) ddq_dt *= coul_eff_ * Sen->sclr_coul_eff;
     ddq_dt -= chem_.dqdt * q_capacity_ * T_rate;
-    predict_ekf(ddq_dt);       // u = d(q)/dt
+    predict_ekf(ddq_dt);       // u = d(dq)/dt
     update_ekf(voc_stat_, 0., 1.);  // z = voc_stat, estimated = voc_filtered = hx, predicted = est past
     soc_ekf_ = x_ekf();             // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
     q_ekf_ = soc_ekf_ * q_capacity_;

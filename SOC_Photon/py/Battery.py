@@ -73,8 +73,8 @@ MAX_Y_FILT = 0.5  # EKF y-filter maximum, V (0.5)
 WN_Y_FILT = 0.1  # EKF y-filter-2 natural frequency, r/s (0.1)
 ZETA_Y_FILT = 0.9  # EKF y-filter-2 damping factor (0.9)
 TMAX_FILT = 3.  # Maximum y-filter-2 sample time, s (3.)
-EKF_Q_SD_NORM = 0.00005
-EKF_R_SD_NORM = 0.5
+EKF_Q_SD_NORM = 0.00005  # Standard deviation of normal EKF process uncertainty, V (0.00005)
+EKF_R_SD_NORM = 0.5  # Standard deviation of normal EKF state uncertainty, fraction (0-1) (0.5)
 # disable because not in particle photon logic
 # EKF_Q_SD_REV = 0.7
 # EKF_R_SD_REV = 0.3
@@ -370,8 +370,10 @@ class BatteryMonitor(Battery, EKF1x1):
         if ddq_dt > 0. and not self.tweak_test:
             ddq_dt *= self.coul_eff
         ddq_dt -= dqdt*self.q_capacity*T_rate
-        self.Q = self.scaler_q.calculate(ddq_dt)
-        self.R = self.scaler_r.calculate(ddq_dt)
+        self.Q = self.scaler_q.calculate(ddq_dt)  # TODO this doesn't work right
+        self.R = self.scaler_r.calculate(ddq_dt)  # TODO this doesn't work right
+        self.Q = EKF_Q_SD_NORM**2  # override
+        self.R = EKF_R_SD_NORM**2  # override
         self.predict_ekf(u=ddq_dt)  # u = d(q)/dt
         self.update_ekf(z=self.voc_stat, x_min=0., x_max=1.)  # z = voc, voc_filtered = hx
         self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
