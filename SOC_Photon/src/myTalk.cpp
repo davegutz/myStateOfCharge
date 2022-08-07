@@ -864,7 +864,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                   case ( 0 ):  // Xp0:  reset stop
-                    if ( !rp.tweak_test() ) chit("Xm7;", ASAP);
+                    if ( !rp.tweak_test() ) chit("Xm7;", ASAP);  // Prevent upset of time in Xp9, Xp10, Xp11, etc
                     chit("Xf0.; Xa0.", ASAP);
                     if ( !rp.tweak_test() ) chit("Xb0.", ASAP);
                     chit("XS; Mk1; Nk1;", ASAP);  // Stop any injection
