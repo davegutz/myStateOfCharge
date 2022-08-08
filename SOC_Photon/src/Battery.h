@@ -40,7 +40,7 @@ class Sensors;
 const double vb_dc_dc = 13.5;     // DC-DC charger estimated voltage, V (13.5 < v_sat = 13.85)
 #define EKF_CONV        1.5e-3    // EKF tracking error indicating convergence, V (1.5e-3)
 #define EKF_T_CONV      30.       // EKF set convergence test time, sec (30.)
-#define EKF_T_RESET (EKF_T_CONV/2.) // EKF reset test time, sec ('up 1, down 2')
+#define EKF_T_RESET (EKF_T_CONV/2.) // EKF reset retest time, sec ('up 1, down 2')
 #define EKF_Q_SD_NORM   0.00005   // Standard deviation of normal EKF process uncertainty, V (0.00005)
 #define EKF_R_SD_NORM   0.5       // Standard deviation of normal EKF state uncertainty, fraction (0-1) (0.5)
 #define EKF_NOM_DT      0.1       // EKF nominal update time, s (initialization; actual value varies) 
@@ -56,7 +56,6 @@ const double vb_dc_dc = 13.5;     // DC-DC charger estimated voltage, V (13.5 < 
 #define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction
 #define RANDLES_T_MAX   0.3       // Maximum update time of Randles state space model to avoid aliasing and instability
 const double mxeps = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness)
-
 
 // BattleBorn 100 Ah, 12v LiFePO4
 // See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
@@ -242,8 +241,8 @@ public:
   virtual void assign_rand(void);
   double calc_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   double calculate(Sensors *Sen, const boolean reset);
-  double delta_q_ekf() { return (delta_q_ekf_); };
   boolean converged_ekf() { return(EKF_converged->state()); };
+  double delta_q_ekf() { return (delta_q_ekf_); };
   double hx() { return (hx_); };
   double Hx() { return (hx_*(*rp_nS_)); };
   void init_soc_ekf(const double soc);
@@ -251,6 +250,7 @@ public:
   double K_ekf() { return (K_); };
   void pretty_print(void);
   void regauge(const float temp_c);
+  float r_sd () { return ( chem_.r_sd ); };
   double soc_ekf() { return (soc_ekf_); };
   boolean solve_ekf(const boolean reset, Sensors *Sen);
   double tcharge() { return (tcharge_); };
@@ -258,6 +258,8 @@ public:
   double dV_dyn() { return (dv_dyn_*(*rp_nS_)); };
   double voc_filt() { return (voc_filt_); };
   double Voc_filt() { return (voc_filt_*(*rp_nS_)); };
+  double voc_tab() { return (voc_stat_tab_); };
+  double Voc_tab() { return (voc_stat_tab_*(*rp_nS_)); };
   double y_ekf() { return (y_); };
   double y_ekf_filt() { return (y_filt_); };
   double delta_q_ekf_;         // Charge deficit represented by charge calculated by ekf, C
@@ -267,17 +269,17 @@ protected:
   double tcharge_;      // Counted charging time to 100%, hr
   double q_ekf_;        // Filtered charge calculated by ekf, C
   double voc_filt_;     // Filtered, static model open circuit voltage, V
-  double soc_;       // Weighted selection of ekf state of charge and coulomb counter (0-1)
+  double soc_;          // Weighted selection of ekf state of charge and coulomb counter (0-1)
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
   double amp_hrs_remaining_soc_;  // Discharge amp*time left if drain soc_ to 0, A-h
   double y_filt_;       // Filtered EKF y value, V
-  // LagTustin *y_filt = new LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
   General2_Pole *y_filt = new General2_Pole(0.1, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
   SlidingDeadband *SdVbatt_;  // Sliding deadband filter for Vbatt
   TFDelay *EKF_converged;     // Time persistence
   void ekf_predict(double *Fx, double *Bu);
   void ekf_update(double *hx, double *H);
   RateLimit *T_RLim = new RateLimit();
+  float voc_stat_tab_;  // Raw table lookup of voc, V
 };
 
 

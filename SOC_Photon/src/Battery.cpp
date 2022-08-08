@@ -296,14 +296,14 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     // Hysteresis model
     hys_->calculate(ib_, soc_);
     dv_hys_ = hys_->update(dt_);
-    // voc_ = voc_stat_ + dv_hys_;
+    voc_stat_tab_ = voc_soc(soc_, Sen->Tbatt_filt);
     voc_stat_ = voc_ - dv_hys_;
     voc_filt_ = SdVbatt_->update(voc_);
     ioc_ = hys_->ioc();
     bms_off_ = temp_c_ <= chem_.low_t;    // KISS
     if ( bms_off_ )
     {
-        voc_stat_ = voc_soc(soc_, Sen->Tbatt_filt);
+        voc_stat_ = voc_stat_tab_;
         ib_ = 0.;
         voc_ = voc_stat_;
         dv_dyn_ = 0.;
@@ -334,11 +334,11 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     EKF_converged->calculate(conv, EKF_T_CONV, EKF_T_RESET, min(Sen->T, EKF_T_RESET), cp.soft_reset);
 
     if ( rp.debug==34 || rp.debug==7 )
-        Serial.printf("BatteryMonitor:dt,ib,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, soc, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,  %d,\n",
-            dt_, ib_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, soc_, converged_ekf());
+        Serial.printf("BatteryMonitor:dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, soc, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,  %d,\n",
+            dt_, ib_, voc_stat_tab_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, soc_, converged_ekf());
     if ( rp.debug==-34 )
-        Serial.printf("dt,ib,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, conv,\n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,  %d\n",
-            dt_, ib_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, converged_ekf());
+        Serial.printf("dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, conv,\n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,  %d\n",
+            dt_, ib_, voc_stat_tab_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, converged_ekf());
     if ( rp.debug==37 )
         Serial.printf("BatteryMonitor:ib,vb,voc_stat,voc(z_),  K_,y_,soc_ekf, y_ekf_f, conv,  %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,%7.4f,  %d,\n",
             ib_, vb_, voc_stat_, voc_,     K_, y_, soc_ekf_, y_filt_, converged_ekf());

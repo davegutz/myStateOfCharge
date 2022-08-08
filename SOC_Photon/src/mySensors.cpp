@@ -167,6 +167,9 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
   Prbn_Tbatt_ = new PRBS_7(TB_NOISE_SEED);
   Prbn_Vbatt_ = new PRBS_7(VB_NOISE_SEED);
   Prbn_Ibatt_ = new PRBS_7(IB_NOISE_SEED);
+  WrapErrFilt = new LagTustin(0.1, WRAP_ERR_FILT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT);  // actual update time provided run time
+  WrapHi = new TFDelay(false, WRAP_HI_S, WRAP_HI_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
+  WrapLo = new TFDelay(false, WRAP_LO_S, WRAP_LO_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
 }
 
 // Bias model outputs for sensor fault injection
@@ -203,6 +206,18 @@ void Sensors::choose_()
       Ibatt_hdwe_model = 0.;
       sclr_coul_eff = 1.;
   }
+}
+
+// Voltage wraparound logic for current selection
+// Avoid using hysteresis data for this test and accept more generous thresholds
+void Sensors::ib_wrap(const boolean reset, BatteryMonitor *Mon)
+{
+    e_wrap_ = Mon->voc() - Mon->voc_tab();
+    e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset, min(T, F_MAX_T_WRAP));
+    boolean wrap_hi = e_wrap_filt_ >= Mon->r_sd()*WRAP_HI_A;
+    boolean wrap_lo = e_wrap_filt_ <= Mon->r_sd()*WRAP_LO_A;
+    WrapHi->calculate(wrap_hi, WRAP_HI_S, WRAP_HI_R, T, reset);
+    WrapLo->calculate(wrap_lo, WRAP_LO_S, WRAP_LO_R, T, reset);
 }
 
 // Tb noise

@@ -107,7 +107,15 @@
 #define VB_NOISE_SEED         0xb2      // Vb added noise seed 0-255 = 0x00-0xFF (0x01) 
 #define IB_NOISE              0.        // Ib added noise amplitude, A pk-pk
 #define IB_NOISE_SEED         0x01      // Ib added noise seed 0-255 = 0x00-0xFF (0x01) 
-
+#define WRAP_ERR_FILT         2.        // Wrap error filter time constant, s (2)
+#define MAX_WRAP_ERR_FILT     2.        // Anti-windup wrap error filter, V
+#define WRAP_LO_S  (T_SAT-1.)           // Wrap low failure set time, sec (T_SAT-1) // must be quicker than SAT test
+#define WRAP_LO_R  (WRAP_LO_S/2.)       // Wrap low failure reset time, sec ('up 1, down 2')
+#define WRAP_HI_S  WRAP_LO_S            // Wrap high failure set time, sec (WRAP_LO_S)
+#define WRAP_HI_R  (WRAP_HI_S/2.)       // Wrap high failure reset time, sec ('up 1, down 2')
+#define WRAP_HI_A       16.             // Wrap high voltage threshold, A (16)
+#define WRAP_LO_A       -16.            // Wrap high voltage threshold, A (-16)
+#define F_MAX_T_WRAP    0.8             // Maximum update time of Wrap filter for stability, s (0.8)
 
 // Conversion gains
 const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  
