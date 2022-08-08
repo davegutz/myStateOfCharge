@@ -452,11 +452,11 @@ Inject current errors:
                   Dm0;s1;W10;s0;W50;+v0;Dr100;Dp400;
   ampLoFail:      Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dm-500;Dn0.0001;W50;Pe;
                   Dm0;s1;W10;s0;W50;+v0;Dr100;Dp400;
-  ampHiFailNoise: Xm7;Ca0.5;Dr100;Dp100;v26;W10;DT.05;DV0.05;DI1;W50;Dm500;Dn0.0001;
+  ampHiFailNoise: Xm7;Ca0.5;Dr100;Dp100;v26;W50;DT.05;DV0.05;DI1;W50;Dm500;Dn0.0001;
                   DT0;DV0.0;DI0;Dm0;s1;W10;s0;W50;+v0;Dr100;Dp400;
-  ampLoFailNoise: Xm7;Ca0.5;Dr100;Dp100;v26;W10;DT.05;DV0.05;DI1;W50;Dm-500;Dn0.0001;
+  ampLoFailNoise: Xm7;Ca0.5;Dr100;Dp100;v26;W50;DT.05;DV0.05;DI1;W50;Dm-500;Dn0.0001;
                   DT0;DV0.0;DI0;Dm0;s1;W10;s0;W50;+v0;Dr100;Dp400;
-  ampHiFailSlow:  Xm7;Ca0.5;Dr10000;Dp10000;v26;W2;Dm5;Dn0.0001;
+  ampHiFailSlow:  Xm7;Ca0.5;Dr10000;Dp10000;v26;W50;Dm5;Dn0.0001;
                   Dm0;s1;W10;s0;W50;+v0;Dr100;Dp400;
 
   ampLoFail inv:  Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dm-500;Dn0.0001;W50;Pe;Dm0;s1;W10;s0;W50;+v0;Dr100;Dp400;
