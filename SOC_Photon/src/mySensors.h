@@ -214,6 +214,10 @@ protected:
   float e_wrap_;            // Wrap error, V
   LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
   float e_wrap_filt_;       // Wrap error, V
+  boolean wrap_hi_fault_;   // Current faulted high
+  boolean wrap_lo_fault_;   // Current faulted low
+  boolean wrap_hi_fail_;    // Current failed high
+  boolean wrap_lo_fail_;    // Current failed low
   TFDelay *WrapHi;          // Time high wrap fail persistence
   TFDelay *WrapLo;          // Time low wrap fail persistence
 };

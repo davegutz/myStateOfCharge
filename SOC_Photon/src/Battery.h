@@ -251,6 +251,7 @@ public:
   void pretty_print(void);
   void regauge(const float temp_c);
   float r_sd () { return ( chem_.r_sd ); };
+  float r_ss () { return ( chem_.r_ss ); };
   double soc_ekf() { return (soc_ekf_); };
   boolean solve_ekf(const boolean reset, Sensors *Sen);
   double tcharge() { return (tcharge_); };

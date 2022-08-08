@@ -136,7 +136,8 @@ void Shunt::load()
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, Sync *ReadSensors):
   Ibatt_amp_fa_(false), Ibatt_noamp_fa_(false), Vbatt_fa_(false), Vbatt_flt_(false),
-  rp_tbatt_bias_(&rp.tbatt_bias), tbatt_bias_last_(0.), Tbatt_noise_amp_(TB_NOISE), Vbatt_noise_amp_(VB_NOISE), Ibatt_noise_amp_(IB_NOISE)
+  rp_tbatt_bias_(&rp.tbatt_bias), tbatt_bias_last_(0.), Tbatt_noise_amp_(TB_NOISE), Vbatt_noise_amp_(VB_NOISE), Ibatt_noise_amp_(IB_NOISE),
+  e_wrap_(0), e_wrap_filt_(0), wrap_hi_fault_(0), wrap_lo_fault_(0), wrap_hi_fail_(0), wrap_lo_fail_(0)
 {
   this->T = T;
   this->T_filt = T;
@@ -212,12 +213,12 @@ void Sensors::choose_()
 // Avoid using hysteresis data for this test and accept more generous thresholds
 void Sensors::ib_wrap(const boolean reset, BatteryMonitor *Mon)
 {
-    e_wrap_ = Mon->voc() - Mon->voc_tab();
+    e_wrap_ = Mon->voc_tab() - Mon->voc();
     e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset, min(T, F_MAX_T_WRAP));
-    boolean wrap_hi = e_wrap_filt_ >= Mon->r_sd()*WRAP_HI_A;
-    boolean wrap_lo = e_wrap_filt_ <= Mon->r_sd()*WRAP_LO_A;
-    WrapHi->calculate(wrap_hi, WRAP_HI_S, WRAP_HI_R, T, reset);
-    WrapLo->calculate(wrap_lo, WRAP_LO_S, WRAP_LO_R, T, reset);
+    wrap_hi_fault_ = e_wrap_filt_ >= Mon->r_ss()*WRAP_HI_A;
+    wrap_lo_fault_ = e_wrap_filt_ <= Mon->r_ss()*WRAP_LO_A;
+    wrap_hi_fail_ = WrapHi->calculate(wrap_hi_fault_, WRAP_HI_S, WRAP_HI_R, T, reset);
+    wrap_lo_fail_ = WrapLo->calculate(wrap_lo_fault_, WRAP_LO_S, WRAP_LO_R, T, reset);
 }
 
 // Tb noise
@@ -297,7 +298,7 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
     {
       ib_sel_stat_ = -1;
     }
-    else if ( ShuntAmp->bare() || (ib_diff_fa_ && cc_flt_) )
+    else if ( ShuntAmp->bare() || (ib_diff_fa_ && ( wrap_hi_fail_ || wrap_lo_fail_ || cc_flt_ )) )
     {
       ib_sel_stat_ = -1;
     }
@@ -308,8 +309,8 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
   }
   if ( ib_sel_stat_ != ib_sel_stat_last )
   {
-    Serial.printf("Select change:  ShuntAmp->bare=%d, ShuntNoAmp->bare=%d, ibatt_err_fail=%d, cc_flt_=%d, rp.ibatt_select=%d, ibatt_sel_status=%d,\n",
-        ShuntAmp->bare(), ShuntNoAmp->bare(), ib_diff_fa_, cc_flt_, rp.ibatt_select, ib_sel_stat_);
+    Serial.printf("Select change:  ShuntAmp->bare=%d, ShuntNoAmp->bare=%d, ibatt_err_fail=%d, wh_fa=%d, wl_fa=%d, cc_flt_=%d, rp.ibatt_select=%d, ibatt_sel_status=%d,\n",
+        ShuntAmp->bare(), ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fail_, wrap_lo_fail_, cc_flt_, rp.ibatt_select, ib_sel_stat_);
     Serial.printf("Small reset. Filters reinit and selection unchanged.   Hard reset to re-init selection\n");
     cp.cmd_reset();   
   }
@@ -341,12 +342,15 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
       double cTime;
       if ( rp.tweak_test() ) cTime = double(now)/1000.;
       else cTime = control_time;
-      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,    %d, %d,      %9.6f, %d,   %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,   %7.5f, %d, %d,     %d, %7.5f,%7.5f, %d, %7.5f,    %7.5f,%7.5f, %d, %7.5f,   %5.2f,%5.2f, %d, %5.2f, %c,",
+      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,    %d, %d,      %9.6f, %d,   %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,   %7.5f, %d, %d,",
           cTime, reset, rp.ibatt_select,
           ShuntAmp->bare(), ShuntNoAmp->bare(),
           cc_diff_, cc_flt_,
           Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model, Ibatt_model, 
-          ib_diff_, ib_diff_flt_, ib_diff_fa_,
+          ib_diff_, ib_diff_flt_, ib_diff_fa_);
+      Serial.print(cp.buffer);
+      sprintf(cp.buffer, "                %7.5f, %7.5f, %d, %d,%d, %d,    %d, %7.5f,%7.5f, %d, %7.5f,    %7.5f,%7.5f, %d, %7.5f,   %5.2f,%5.2f, %d, %5.2f, %c,",
+          e_wrap_, e_wrap_filt_, wrap_hi_fault_, wrap_lo_fault_, wrap_hi_fail_, wrap_lo_fail_,
           ib_sel_stat_, Ibatt_hdwe, Ibatt_hdwe_model, rp.mod_ib(), Ibatt,
           Vbatt_hdwe, Vbatt_model, rp.mod_vb(), Vbatt,
           Tbatt_hdwe, Tbatt, rp.mod_tb(), Tbatt_filt,
