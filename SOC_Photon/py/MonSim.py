@@ -248,7 +248,9 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/ampLoFail20220807.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFail20220807.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFailNoise20220807.txt'; unit_key = 'pro_2022';
-        data_file_old_txt = '../dataReduction/ampLoFailNoise20220808.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampLoFailNoise20220808.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampHiFail20220808.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/ampLoFail20220809.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"
@@ -265,8 +267,10 @@ if __name__ == '__main__':
         # Load sel (old)
         sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
                                           unit_key=unit_key_sel)
-        cols_sel = ('c_time', 'res', 'user_sel', 'm_bare', 'n_bare', 'cc_dif', 'cc_flt',  'ibmh',
-                    'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_dif', 'ib_dif_flt', 'ib_dif_fa', 'ib_sel', 'Ib_h', 'Ib_m',
+        cols_sel = ('c_time', 'res', 'user_sel', 'm_bare', 'n_bare', 'cc_dif', 'cc_flt',
+                    'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_dif', 'ib_dif_flt', 'ib_dif_fa',
+                    'e_w', 'e_w_f', 'wh_flt', 'wl_flt', 'wh_fa', 'wl_fa',
+                    'ib_sel', 'Ib_h', 'Ib_m',
                     'mib', 'Ib_s', 'Vb_h', 'Vb_m', 'mvb', 'Vb_s', 'Tb_h', 'Tb_s', 'mtb', 'Tb_f')
         sel_old = None
         if sel_file_clean:

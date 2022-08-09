@@ -43,28 +43,56 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
 
     plt.figure()  # 1
     n_fig += 1
-    plt.subplot(221)
+    plt.subplot(331)
     plt.title(plot_title)
     plt.plot(old_s.time, old_s.Ib, color='green', label='Ib')
     plt.plot(new_s.time, new_s.Ib, color='orange', linestyle='--', label='Ib_new')
     plt.legend(loc=1)
-    plt.subplot(222)
+    plt.subplot(332)
     plt.plot(old_s.time, old_s.sat, color='black', label='sat')
     plt.plot(new_s.time, new_s.sat, color='orange', linestyle='--', label='sat_new')
     plt.plot(old_s.time, old_s.sel, color='red', linestyle='-.', label='sel')
     plt.plot(new_s.time, new_s.sel, color='blue', linestyle=':', label='sel_new')
     plt.plot(old_s.time, old_s.mod_data, color='blue', label='mod')
     plt.plot(new_s.time, new_s.mod_data, color='red', linestyle='--', label='mod_new')
+    plt.plot(old_s.time, old_s.ib_sel, color='cyan', linestyle='-.', label='ib_sel')
     plt.legend(loc=1)
-    plt.subplot(223)
+    plt.subplot(333)
     plt.plot(old_s.time, old_s.Vb, color='green', label='Vb')
     plt.plot(new_s.time, new_s.Vb, color='orange', linestyle='--', label='Vb_new')
     plt.legend(loc=1)
-    plt.subplot(224)
+    plt.subplot(334)
     plt.plot(old_s.time, old_s.Voc_stat, color='green', label='Voc_stat')
     plt.plot(new_s.time, new_s.Voc_stat, color='orange', linestyle='--', label='Voc_stat_new')
     plt.plot(old_s.time, old_s.Vsat, color='blue', label='Vsat')
     plt.plot(new_s.time, new_s.Vsat, color='red', linestyle='--', label='Vsat_new')
+    plt.legend(loc=1)
+    plt.subplot(335)
+    plt.plot(old_s.time, old_s.e_w, color='magenta', label='e_wrap')
+    plt.plot(old_s.time, old_s.e_w_f, color='black', linestyle='--', label='e_wrap_filt')
+    plt.legend(loc=1)
+    plt.subplot(336)
+    plt.plot(old_s.time, old_s.wh_flt, color='black', label='wrap_hi_fault')
+    plt.plot(old_s.time, old_s.wl_flt, color='magenta', linestyle='--', label='wrap_lo_fault')
+    plt.plot(old_s.time, old_s.wh_fa, color='cyan', linestyle='-.', label='wrap_hi_fail')
+    plt.plot(old_s.time, old_s.wl_fa, color='orange', linestyle=':', label='wrap_lo_fail')
+    plt.plot(old_s.time, old_s.cc_flt-4, color='black', label='cc_flt')
+    plt.plot(old_s.time, old_s.ib_sel-4, color='magenta', linestyle='--', label='ib_sel')
+    plt.plot(old_s.time, old_s.ib_dif_flt-4, color='cyan', linestyle='-.', label='ib_dif_flt')
+    plt.plot(old_s.time, old_s.ib_dif_fa-4, color='orange', linestyle=':', label='ib_dif_fa')
+    plt.plot(old_s.time, old_s.sat+2, color='black', label='sat')
+    plt.legend(loc=1)
+    plt.subplot(337)
+    plt.plot(old_s.time, old_s.cc_dif, color='black', label='cc_dif')
+    plt.legend(loc=1)
+    plt.subplot(338)
+    plt.plot(old_s.time, old_s.cc_flt, color='black', label='cc_flt')
+    plt.plot(old_s.time, old_s.wl_flt, color='magenta', linestyle='--', label='wrap_lo_fault')
+    plt.plot(old_s.time, old_s.wh_fa, color='cyan', linestyle='-.', label='wrap_hi_fail')
+    plt.plot(old_s.time, old_s.wl_fa, color='orange', linestyle=':', label='wrap_lo_fail')
+    plt.legend(loc=1)
+    plt.subplot(339)
+    plt.plot(old_s.time, old_s.ib_dif, color='black', label='ib_dif')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -420,6 +448,12 @@ class SavedData:
             self.ib_dif = []
             self.ib_dif_flt = []
             self.ib_dif_fa = []
+            self.e_w = None
+            self.e_w_f = None
+            self.wh_flt = None
+            self.wl_flt = None
+            self.wh_fa = None
+            self.wl_fa = None
             self.ib_sel = []
             self.Ib_h = []
             self.Ib_m = []
@@ -452,6 +486,12 @@ class SavedData:
             self.ib_dif = np.array(sel.ib_dif[:i_end])
             self.ib_dif_flt = np.array(sel.ib_dif_flt[:i_end])
             self.ib_dif_fa = np.array(sel.ib_dif_fa[:i_end])
+            self.e_w = np.array(sel.e_w[:i_end])
+            self.e_w_f = np.array(sel.e_w_f[:i_end])
+            self.wh_flt = np.array(sel.wh_flt[:i_end])
+            self.wl_flt = np.array(sel.wl_flt[:i_end])
+            self.wh_fa = np.array(sel.wh_fa[:i_end])
+            self.wl_fa = np.array(sel.wl_fa[:i_end])
             self.ib_sel = np.array(sel.ib_sel[:i_end])
             self.Ib_h = np.array(sel.Ib_h[:i_end])
             self.Ib_m = np.array(sel.Ib_m[:i_end])
