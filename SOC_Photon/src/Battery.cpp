@@ -309,6 +309,11 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
         dv_dyn_ = 0.;
         voc_filt_ = voc_stat_;
     }
+    if ( Sen->Vbatt_fail() )
+    {
+        voc_ = voc_stat_ = voc_filt_ = voc_stat_tab_;
+        dv_dyn_ = dv_hys_ = 0;
+    }
 
     // EKF 1x1
     double ddq_dt = ib_;

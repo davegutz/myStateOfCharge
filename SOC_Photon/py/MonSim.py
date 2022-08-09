@@ -269,9 +269,9 @@ if __name__ == '__main__':
                                           unit_key=unit_key_sel)
         cols_sel = ('c_time', 'res', 'user_sel', 'm_bare', 'n_bare', 'cc_dif', 'cc_flt',
                     'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_dif', 'ib_dif_flt', 'ib_dif_fa',
-                    'e_w', 'e_w_f', 'wh_flt', 'wl_flt', 'wh_fa', 'wl_fa',
+                    'e_w', 'e_w_f', 'wh_flt', 'wl_flt', 'wh_fa', 'wl_fa', 'wv_fa',
                     'ib_sel', 'Ib_h', 'Ib_m',
-                    'mib', 'Ib_s', 'Vb_h', 'Vb_m', 'mvb', 'Vb_s', 'Tb_h', 'Tb_s', 'mtb', 'Tb_f')
+                    'mib', 'Ib_s', 'Vb_h', 'Vb_m', 'mvb', 'Vb_s', 'Tb_h', 'Tb_s', 'mtb', 'Tb_f', 'Vb_flt', 'Vb_fa')
         sel_old = None
         if sel_file_clean:
             sel_old = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,

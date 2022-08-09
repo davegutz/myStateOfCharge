@@ -217,8 +217,8 @@ void Sensors::ib_wrap(const boolean reset, BatteryMonitor *Mon)
     e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset, min(T, F_MAX_T_WRAP));
     wrap_hi_fault_ = e_wrap_filt_ >= Mon->r_ss()*WRAP_HI_A;
     wrap_lo_fault_ = e_wrap_filt_ <= Mon->r_ss()*WRAP_LO_A;
-    wrap_hi_fail_ = WrapHi->calculate(wrap_hi_fault_, WRAP_HI_S, WRAP_HI_R, T, reset);
-    wrap_lo_fail_ = WrapLo->calculate(wrap_lo_fault_, WRAP_LO_S, WRAP_LO_R, T, reset);
+    wrap_hi_fail_ = WrapHi->calculate(wrap_hi_fault_, WRAP_HI_S, WRAP_HI_R, T, reset) && !Vbatt_fa_;
+    wrap_lo_fail_ = WrapLo->calculate(wrap_lo_fault_, WRAP_LO_S, WRAP_LO_R, T, reset) && !Vbatt_fa_;
 }
 
 // Tb noise
@@ -274,7 +274,9 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
   ib_diff_flt_ = abs(ib_diff_f_) >= IBATT_DISAGREE_THRESH;
   ib_diff_fa_ = IbattErrPersist->calculate(ib_diff_flt_, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T, reset);
 
-  // Truth table
+  // Truth tables
+
+  // ib
   static int8_t ib_sel_stat_last = ib_sel_stat_;
   if ( ShuntAmp->bare() && ShuntNoAmp->bare() )
   {
@@ -307,10 +309,19 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
       ib_sel_stat_ = 1;
     }
   }
-  if ( ib_sel_stat_ != ib_sel_stat_last )
+
+  // vb failure from wrap result
+  static int8_t vbatt_fa_last = Vbatt_fa_;
+  if ( !ib_diff_fa_ && ( wrap_hi_fail_ || wrap_lo_fail_ ) )
   {
-    Serial.printf("Select change:  ShuntAmp->bare=%d, ShuntNoAmp->bare=%d, ibatt_err_fail=%d, wh_fa=%d, wl_fa=%d, cc_flt_=%d, rp.ibatt_select=%d, ibatt_sel_status=%d,\n",
-        ShuntAmp->bare(), ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fail_, wrap_lo_fail_, cc_flt_, rp.ibatt_select, ib_sel_stat_);
+    // Vbatt_fa_ = true;  // Will shut off wrap_hi_fail_ and wrap_lo_fail_  TODO:  this vb logic doesn't work
+  }
+
+  // Print
+  if ( ib_sel_stat_ != ib_sel_stat_last || Vbatt_fa_ != vbatt_fa_last )
+  {
+    Serial.printf("Select change:  ShuntAmp->bare=%d, ShuntNoAmp->bare=%d, ibatt_err_fail=%d, wh_fa=%d, wl_fa=%d, cc_flt_=%d, rp.ibatt_select=%d, ibatt_sel_status=%d, Vbatt_fail=%d,\n",
+        ShuntAmp->bare(), ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fail_, wrap_lo_fail_, cc_flt_, rp.ibatt_select, ib_sel_stat_, Vbatt_fa_);
     Serial.printf("Small reset. Filters reinit and selection unchanged.   Hard reset to re-init selection\n");
     cp.cmd_reset();   
   }
@@ -342,22 +353,24 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
       double cTime;
       if ( rp.tweak_test() ) cTime = double(now)/1000.;
       else cTime = control_time;
-      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,    %d, %d,      %9.6f, %d,   %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,   %7.5f, %d, %d,",
+      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,    %d, %d,     %10.7f, %d,   %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,   %7.5f, %d, %d,",
           cTime, reset, rp.ibatt_select,
           ShuntAmp->bare(), ShuntNoAmp->bare(),
           cc_diff_, cc_flt_,
           Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model, Ibatt_model, 
           ib_diff_, ib_diff_flt_, ib_diff_fa_);
       Serial.print(cp.buffer);
-      sprintf(cp.buffer, "                %7.5f, %7.5f, %d, %d,%d, %d,    %d, %7.5f,%7.5f, %d, %7.5f,    %7.5f,%7.5f, %d, %7.5f,   %5.2f,%5.2f, %d, %5.2f, %c,",
-          e_wrap_, e_wrap_filt_, wrap_hi_fault_, wrap_lo_fault_, wrap_hi_fail_, wrap_lo_fail_,
+      sprintf(cp.buffer, "                %7.5f, %7.5f, %d, %d,%d, %d, %d,   %d, %7.5f,%7.5f, %d, %7.5f,    %7.5f,%7.5f, %d, %7.5f,   %5.2f,%5.2f, %d, %5.2f,  %d, %d, %c,",
+          e_wrap_, e_wrap_filt_, wrap_hi_fault_, wrap_lo_fault_, wrap_hi_fail_, wrap_lo_fail_, wrap_vb_fail_,
           ib_sel_stat_, Ibatt_hdwe, Ibatt_hdwe_model, rp.mod_ib(), Ibatt,
           Vbatt_hdwe, Vbatt_model, rp.mod_vb(), Vbatt,
           Tbatt_hdwe, Tbatt, rp.mod_tb(), Tbatt_filt,
+          Vbatt_flt_, Vbatt_fa_,
           '\0');
       Serial.println(cp.buffer);
   }
   ib_sel_stat_last = ib_sel_stat_;
+  vbatt_fa_last = Vbatt_fa_;
 }
 
 // Current bias.  Feeds into signal conversion

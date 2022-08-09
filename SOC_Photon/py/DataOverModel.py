@@ -90,6 +90,9 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(old_s.time, old_s.wl_flt, color='magenta', linestyle='--', label='wrap_lo_fault')
     plt.plot(old_s.time, old_s.wh_fa, color='cyan', linestyle='-.', label='wrap_hi_fail')
     plt.plot(old_s.time, old_s.wl_fa, color='orange', linestyle=':', label='wrap_lo_fail')
+    plt.plot(old_s.time, old_s.wv_fa+2, color='black', label='wrap_vb_fail')
+    plt.plot(old_s.time, old_s.Vb_flt-2, color='black', label='Vbatt_flt')
+    plt.plot(old_s.time, old_s.Vb_fa-2, color='magenta', linestyle='--', label='Vbatt_fa')
     plt.legend(loc=1)
     plt.subplot(339)
     plt.plot(old_s.time, old_s.ib_dif, color='black', label='ib_dif')
@@ -454,6 +457,7 @@ class SavedData:
             self.wl_flt = None
             self.wh_fa = None
             self.wl_fa = None
+            self.wv_fa = None
             self.ib_sel = []
             self.Ib_h = []
             self.Ib_m = []
@@ -467,6 +471,8 @@ class SavedData:
             self.Tb_s = []
             self.mtb = []
             self.Tb_f = []
+            self.Vb_flt = None
+            self.Vb_fa = None
             self.Ib_finj = None
             self.Tb_finj = None
             self.Vb_finj = None
@@ -492,6 +498,7 @@ class SavedData:
             self.wl_flt = np.array(sel.wl_flt[:i_end])
             self.wh_fa = np.array(sel.wh_fa[:i_end])
             self.wl_fa = np.array(sel.wl_fa[:i_end])
+            self.wv_fa = np.array(sel.wv_fa[:i_end])
             self.ib_sel = np.array(sel.ib_sel[:i_end])
             self.Ib_h = np.array(sel.Ib_h[:i_end])
             self.Ib_m = np.array(sel.Ib_m[:i_end])
@@ -505,6 +512,8 @@ class SavedData:
             self.Tb_s = np.array(sel.Tb_s[:i_end])
             self.mtb = np.array(sel.mtb[:i_end])
             self.Tb_f = np.array(sel.Tb_f[:i_end])
+            self.Vb_flt = np.array(sel.Vb_flt[:i_end])
+            self.Vb_fa = np.array(sel.Vb_fa[:i_end])
 
     def __str__(self):
         s = "{},".format(self.unit[self.i])

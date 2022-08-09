@@ -218,6 +218,7 @@ protected:
   boolean wrap_lo_fault_;   // Current faulted low
   boolean wrap_hi_fail_;    // Current failed high
   boolean wrap_lo_fail_;    // Current failed low
+  boolean wrap_vb_fail_;    // Wrap isolates to Vb fail
   TFDelay *WrapHi;          // Time high wrap fail persistence
   TFDelay *WrapLo;          // Time low wrap fail persistence
 };
