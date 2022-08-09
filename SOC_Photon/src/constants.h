@@ -77,7 +77,7 @@
 #define NSUM                  122       // Number of saved summaries.   If too large, will get compile error BACKUPSRAM
 #define HDB_TBATT             0.06      // Half deadband to filter Tbatt, F (0.06)
 #define HDB_VBATT             0.05      // Half deadband to filter Vbatt, V (0.05)
-#define T_SAT                 5         // Saturation time, sec (5)
+#define T_SAT                 10        // Saturation time, sec (10 for no sat Ib lo fault of -100 A)
 #define T_DESAT               (T_SAT*2) // De-saturation time, sec
 #define TEMP_PARASITIC        true      // DS18 sensor power. true means leave it on all the time (true)
 #define TEMP_DELAY            1         // Time to block temperature sensor read in DS18 routine, ms (1)
