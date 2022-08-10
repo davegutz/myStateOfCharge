@@ -62,7 +62,7 @@ class Coulombs:
         s += "  delta_q      {:9.1f}     // Charge since saturated, C\n".format(self. delta_q)
         s += "  soc =        {:7.3f}       // Fraction of saturation charge (q_capacity_) available (0-1)  soc)\n"\
             .format(self.soc)
-        s += "  sat =          {:d}          // Indication from caller that battery is saturated, T=saturated\n"\
+        s += "  sat =          {:1.0f}          // Indication from caller that battery is saturated, T=saturated\n"\
             .format(self.sat)
         s += "  t_rated =    {:5.1f}         // Rated temperature, deg C\n".format(self. t_rated)
         s += "  t_last =     {:5.1f}         // Last battery temperature for rate limit memory, deg C\n"\

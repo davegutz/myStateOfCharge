@@ -42,9 +42,9 @@ def save_clean_file(mons, csv_file, unit_key):
             s += time_stamp.strftime("%Y-%m-%dT%H:%M:%S,")
             s += "{:7.3f},".format(mons.time[i])
             s += "{:7.3f},".format(mons.dt[i])
-            s += "{:d},".format(mons.sat[i])
-            s += "{:d},".format(mons.sel[i])
-            s += "{:d},".format(mons.mod_data[i])
+            s += "{:1.0f},".format(mons.sat[i])
+            s += "{:1.0f},".format(mons.sel[i])
+            s += "{:1.0f},".format(mons.mod_data[i])
             s += "{:7.3f},".format(mons.Tb[i])
             s += "{:7.3f},".format(mons.Vb[i])
             s += "{:7.3f},".format(mons.Ib[i])
@@ -261,7 +261,7 @@ if __name__ == '__main__':
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key)
         cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn', 'Voc_stat',
                 'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc')
-        data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
+        data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
                                  encoding=None).view(np.recarray)
 
         # Load sel (old)
@@ -286,7 +286,7 @@ if __name__ == '__main__':
                     'ib_in_m', 'sat_m', 'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
         if data_file_sim_clean:
             data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
-                                         dtype=None, encoding=None).view(np.recarray)
+                                         dtype=float, encoding=None).view(np.recarray)
             saved_sim_old = SavedDataSim(time_ref=saved_old.time_ref, data=data_sim_old, time_end=time_end)
         else:
             saved_sim_old = None

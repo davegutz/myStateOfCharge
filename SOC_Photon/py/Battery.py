@@ -40,7 +40,7 @@ class Retained:
         self.nP = 1  # assumed for this 'model'
 
     def tweak_test(self):
-        return 0b001 & self.modeling
+        return 0b001 & int(self.modeling)
 
 
 # Battery constants
@@ -320,7 +320,7 @@ class BatteryMonitor(Battery, EKF1x1):
         s += "  soc_ekf = {:7.3f}  // Solved state of charge, fraction\n".format(self.soc_ekf)
         s += "  tcharge = {:7.3f}  // Charging time to full, hr\n".format(self.tcharge)
         s += "  tcharge_ekf = {:7.3f}   // Charging time to full from ekf, hr\n".format(self.tcharge_ekf)
-        s += "  mod     =               {:d}  // Modeling\n".format(self.mod)
+        s += "  mod     =               {:f}  // Modeling\n".format(self.mod)
         s += "  \n  "
         s += self.hys.__str__(prefix + 'BatteryMonitor:')
         s += "\n  "
@@ -532,7 +532,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.Vsat.append(self.Vsat)
         self.saved.dV_dyn.append(self.dV_dyn)
         self.saved.Voc_ekf.append(self.Voc_ekf)
-        self.saved.sat.append(self.sat)
+        self.saved.sat.append(int(self.sat))
         self.saved.sel.append(self.sel)
         self.saved.mod_data.append(self.mod)
         self.saved.soc_m.append(self.soc_m)
@@ -582,7 +582,7 @@ class BatteryModel(Battery):
             format(self.sat_cutback_gain)
         s += "  model_cutback =         {:d}  // Indicate that modeled current being limited on" \
              " saturation cutback, T = cutback limited\n".format(self.model_cutback)
-        s += "  model_saturated =       {:d}  // Indicator of maximal cutback, T = cutback saturated\n".\
+        s += "  model_saturated =       {:f}  // Indicator of maximal cutback, T = cutback saturated\n".\
             format(self.model_saturated)
         s += "  ib_sat =          {:7.3f}  // Threshold to declare saturation.  This regeneratively slows" \
              " down charging so if too\n".format(self.ib_sat)
@@ -592,7 +592,7 @@ class BatteryModel(Battery):
         s += "  voc     =         {:7.3f}  // Open circuit voltage, V\n".format(self.voc)
         s += "  voc_stat=         {:7.3f}  // Static, table lookup value of voc before applying hysteresis, V\n".\
             format(self.voc_stat)
-        s += "  mod     =               {:d}  // Modeling\n".format(self.mod)
+        s += "  mod     =               {:f}  // Modeling\n".format(self.mod)
         s += "  \n  "
         s += self.hys.__str__(prefix + 'BatteryModel:')
         s += "  \n  "
@@ -761,7 +761,7 @@ class BatteryModel(Battery):
         self.saved.t_last.append(self.t_last)
         self.saved.Vsat.append(self.vsat)
         self.saved.charge_curr.append(self.charge_curr)
-        self.saved.sat.append(self.model_saturated)
+        self.saved.sat.append(int(self.model_saturated))
         self.saved.delta_q.append(self.delta_q)
         self.saved.q.append(self.q)
         self.saved.q_capacity.append(self.q_capacity)
@@ -778,7 +778,7 @@ class BatteryModel(Battery):
         self.saved_m.ib_m.append(self.ib)
         self.saved_m.ib_in_m.append(self.ib_in)
         self.saved_m.ib_fut_m.append(self.ib_fut)
-        self.saved_m.sat_m.append(self.sat)
+        self.saved_m.sat_m.append(int(self.sat))
         self.saved_m.ddq_m.append(self.d_delta_q)
         self.saved_m.dq_m.append(self.delta_q)
         self.saved_m.q_m.append(self.q)
@@ -1179,7 +1179,7 @@ class SavedM:
             s += "{:8.3f},".format(self.ib_m[i])
             s += "{:8.3f},".format(self.ib_in_m[i])
             s += "{:8.3f},".format(self.ib_fut_m[i])
-            s += "{:7.3f},".format(self.sat_m[i])
+            s += "{:1.0f},".format(self.sat_m[i])
             s += "{:5.3f},".format(self.ddq_m[i])
             s += "{:5.3f},".format(self.dq_m[i])
             s += "{:5.3f},".format(self.qcap_m[i])
