@@ -55,7 +55,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(new_s.time, new_s.sel, color='blue', linestyle=':', label='sel_new')
     plt.plot(old_s.time, old_s.mod_data, color='blue', label='mod')
     plt.plot(new_s.time, new_s.mod_data, color='red', linestyle='--', label='mod_new')
-    plt.plot(old_s.time, old_s.ib_sel, color='cyan', linestyle='-.', label='ib_sel')
+    plt.plot(old_s.time, old_s.ib_sel, color='cyan', linestyle='-.', label='ib_sel_stat')
     plt.legend(loc=1)
     plt.subplot(333)
     plt.plot(old_s.time, old_s.Vb, color='green', label='Vb')
@@ -76,11 +76,13 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(old_s.time, old_s.wl_flt, color='magenta', linestyle='--', label='wrap_lo_fault')
     plt.plot(old_s.time, old_s.wh_fa, color='cyan', linestyle='-.', label='wrap_hi_fail')
     plt.plot(old_s.time, old_s.wl_fa, color='orange', linestyle=':', label='wrap_lo_fail')
-    plt.plot(old_s.time, old_s.cc_flt-4, color='black', label='cc_flt')
-    plt.plot(old_s.time, old_s.ib_sel-4, color='magenta', linestyle='--', label='ib_sel')
-    plt.plot(old_s.time, old_s.ib_dif_flt-4, color='cyan', linestyle='-.', label='ib_dif_flt')
-    plt.plot(old_s.time, old_s.ib_dif_fa-4, color='orange', linestyle=':', label='ib_dif_fa')
-    plt.plot(old_s.time, old_s.sat+2, color='black', label='sat')
+    plt.plot(old_s.time, old_s.wv_fa+2, color='red', label='wrap_vb_fail')
+    plt.plot(old_s.time, old_s.vb_sel+2, color='blue', linestyle='--', label='vb_sel_stat')
+    plt.plot(old_s.time, old_s.cc_flt-4, color='green', label='cc_flt')
+    plt.plot(old_s.time, old_s.ib_sel-4, color='orange', linestyle='--', label='ib_sel_stat')
+    plt.plot(old_s.time, old_s.ib_dif_flt-4, color='magenta', linestyle='-.', label='ib_dif_flt')
+    plt.plot(old_s.time, old_s.ib_dif_fa-4, color='cyan', linestyle=':', label='ib_dif_fa')
+    plt.plot(old_s.time, old_s.sat+2, color='blue', label='sat')
     plt.legend(loc=1)
     plt.subplot(337)
     plt.plot(old_s.time, old_s.cc_dif, color='black', label='cc_dif')
@@ -90,9 +92,10 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(old_s.time, old_s.wl_flt, color='magenta', linestyle='--', label='wrap_lo_fault')
     plt.plot(old_s.time, old_s.wh_fa, color='cyan', linestyle='-.', label='wrap_hi_fail')
     plt.plot(old_s.time, old_s.wl_fa, color='orange', linestyle=':', label='wrap_lo_fail')
-    plt.plot(old_s.time, old_s.wv_fa+2, color='black', label='wrap_vb_fail')
-    plt.plot(old_s.time, old_s.Vb_flt-2, color='black', label='Vbatt_flt')
-    plt.plot(old_s.time, old_s.Vb_fa-2, color='magenta', linestyle='--', label='Vbatt_fa')
+    plt.plot(old_s.time, old_s.wv_fa+2, color='red', label='wrap_vb_fail')
+    plt.plot(old_s.time, old_s.Vb_flt-2, color='blue', label='Vbatt_flt')
+    plt.plot(old_s.time, old_s.Vb_fa-2, color='green', linestyle='--', label='Vbatt_fa')
+    plt.plot(old_s.time, old_s.vb_sel-2, color='black', linestyle=':', label='vb_sel_stat')
     plt.legend(loc=1)
     plt.subplot(339)
     plt.plot(old_s.time, old_s.ib_dif, color='black', label='ib_dif')
@@ -471,6 +474,7 @@ class SavedData:
             self.Tb_s = []
             self.mtb = []
             self.Tb_f = []
+            self.vb_sel = []
             self.Vb_flt = None
             self.Vb_fa = None
             self.Ib_finj = None
@@ -512,6 +516,7 @@ class SavedData:
             self.Tb_s = np.array(sel.Tb_s[:i_end])
             self.mtb = np.array(sel.mtb[:i_end])
             self.Tb_f = np.array(sel.Tb_f[:i_end])
+            self.vb_sel = np.array(sel.vb_sel[:i_end])
             self.Vb_flt = np.array(sel.Vb_flt[:i_end])
             self.Vb_fa = np.array(sel.Vb_fa[:i_end])
 

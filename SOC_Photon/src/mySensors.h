@@ -184,6 +184,8 @@ public:
   boolean Ibatt_amp_fail() { return Ibatt_amp_fa_; };
   boolean Ibatt_noamp_fail() { return Ibatt_noamp_fa_; };
   boolean Vbatt_fail() { return Vbatt_fa_; };
+  int8_t tbatt_sel_status() { return tb_sel_stat_; };
+  int8_t vbatt_sel_status() { return vb_sel_stat_; };
   int8_t ibatt_sel_status() { return ib_sel_stat_; };
   void ib_wrap(const boolean reset, BatteryMonitor *Mon);
   boolean wrap_fail_hi() { return(WrapHi->state()); };
@@ -201,7 +203,6 @@ protected:
   boolean Ibatt_noamp_flt_; // Momentary isolation of Ibatt failure, T=faulted 
   boolean Vbatt_fa_;        // Peristed, latched isolation of Vbatt failure, T=failed
   boolean Vbatt_flt_;       // Momentary isolation of Vbatt failure, T=faulted
-  int8_t ib_sel_stat_;      // Memory of Ibatt signal selection, -1=noamp, 0=none, 1=amp
   float *rp_tbatt_bias_;    // Location of retained bias, deg C
   float tbatt_bias_last_;   // Last value of bias for rate limit, deg C
   void choose_(void);       // Deliberate choice based on inputs and results
@@ -221,6 +222,9 @@ protected:
   boolean wrap_vb_fail_;    // Wrap isolates to Vb fail
   TFDelay *WrapHi;          // Time high wrap fail persistence
   TFDelay *WrapLo;          // Time low wrap fail persistence
+  int8_t tb_sel_stat_;      // Memory of Tbatt signal selection, 0=none, 1=sensor
+  int8_t vb_sel_stat_;      // Memory of Vbatt signal selection, 0=none, 1=sensor
+  int8_t ib_sel_stat_;      // Memory of Ibatt signal selection, -1=noamp, 0=none, 1=amp
 };
 
 

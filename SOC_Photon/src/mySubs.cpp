@@ -53,7 +53,7 @@ void print_signal_sel_header(void)
 {
   if ( rp.debug==26 ) // print_signal_sel_header
     Serial.printf("unit_s,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,cc_flt,  ibmh,ibnh,ibmm,ibnm,ibm,                   ib_dif,ib_dif_flt,ib_dif_fa,");
-    Serial.printf("    e_w,e_w_f,wh_flt,wl_flt,wh_fa,wl_fa,wv_fa,     ib_sel,Ib_h,Ib_m,mib,Ib_s,          Vb_h,Vb_m,mvb,Vb_s,                Tb_h,Tb_s,mtb,Tb_f,  Vb_flt,Vb_fa,\n");
+    Serial.printf("    e_w,e_w_f,wh_flt,wl_flt,wh_fa,wl_fa,wv_fa,     ib_sel,Ib_h,Ib_m,mib,Ib_s,          vb_sel,Vb_h,Vb_m,mvb,Vb_s,                Tb_h,Tb_s,mtb,Tb_f,  Vb_flt,Vb_fa,\n");
           // -----, cTime, reset, rp.ibatt_select,
           //                                    ShuntAmp->bare(), ShuntNoAmp->bare(),
           //                                                        cc_diff_, cc_flt_,
@@ -61,8 +61,8 @@ void print_signal_sel_header(void)
           //                                                                                                                   ib_diff_, ib_diff_flt_, ib_diff_fa_,
           //           e_wrap_, e_wrap_filt_, wrap_hi_fault_, wrap_lo_fault_, wrap_hi_fail_, wrap_lo_fail_, wrap_vb_fail,
           //                                                            ib_sel_stat_, Ibatt_hdwe, Ibatt_hdwe_model, mod_ib(), Ibatt,
-          //                                                                                                Vbatt_hdwe, Vbatt_model,mod_vb(), Vbatt,
-          //                                                                                                                                  Tbatt_hdwe, Tbatt, mod_tb(), Tbatt_filt,  Vb_flt, Vb_fa
+          //                                                                                                vb_sel_stat, Vbatt_hdwe, Vbatt_model,mod_vb(), Vbatt,
+          //                                                                                                                                        Tbatt_hdwe, Tbatt, mod_tb(), Tbatt_filt,  Vb_flt, Vb_fa
 }
 
 // Print strings
