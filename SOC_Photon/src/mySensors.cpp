@@ -312,8 +312,6 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
 
   // vb failure from wrap result.  Latches
   static int8_t vb_sel_stat_last = vb_sel_stat_;
-  Serial.printf("Before:  wrap_vb_fail_=%d, ib_diff_fa_=%d, wrap_hi_fail_=%d, wrap_lo_fail_=%d, vb_sel_stat_=%d, vb_sel_stat_last=%d, \n", 
-      wrap_vb_fail_, ib_diff_fa_, wrap_hi_fail_, wrap_lo_fail_,  vb_sel_stat_, vb_sel_stat_last);
   if ( reset )
   {
     vb_sel_stat_ = 1;
@@ -330,8 +328,6 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
   }
   else
     wrap_vb_fail_ = false;
-  Serial.printf("After:  wrap_vb_fail_=%d, vb_sel_stat_=%d, vb_sel_stat_last=%d,\n",
-    wrap_vb_fail_, vb_sel_stat_, vb_sel_stat_last);
 
   // Print
   if ( ib_sel_stat_ != ib_sel_stat_last || vb_sel_stat_ != vb_sel_stat_last )

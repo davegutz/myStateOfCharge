@@ -92,9 +92,6 @@
 #define TAU_ERR_FILT          5.        // Current sensor difference filter time constant, s (5.)
 #define MAX_ERR_FILT          10.       // Current sensor difference Filter maximum windup, A (10.)
 #define MAX_ERR_T             10.       // Maximum update time allowed to avoid instability, s (10.)
-#define IBATT_DISAGREE_THRESH 5.        // Signal selection threshold for current disagree test, A (5.)
-#define IBATT_DISAGREE_SET    20.       // Signal selection current disagree fail persistence, s (20.)
-#define IBATT_DISAGREE_RESET  1.        // Signal selection current disagree reset persistence, s (1.)
 #define IBATT_HARD_SET        1.        // Signal selection volt range fail persistence, s (1.)
 #define IBATT_HARD_RESET      1.        // Signal selection volt range fail reset persistence, s (1.)
 #define VBATT_MAX             17.       // Signal selection hard fault threshold, V (17. < vbatt_conv_gain*4095)
@@ -116,6 +113,9 @@
 #define WRAP_HI_A       16.             // Wrap high voltage threshold, A (16)
 #define WRAP_LO_A       -16.            // Wrap high voltage threshold, A (-16)
 #define F_MAX_T_WRAP    1.4             // Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (1.4)
+#define IBATT_DISAGREE_THRESH 5.        // Signal selection threshold for current disagree test, A (5.)
+#define IBATT_DISAGREE_SET  (WRAP_LO_S-1.)       // Signal selection current disagree fail persistence, s (WRAP_LO_S-1) // must be quicker than wrap lo
+#define IBATT_DISAGREE_RESET  1.        // Signal selection current disagree reset persistence, s (1.)
 
 // Conversion gains
 const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  
