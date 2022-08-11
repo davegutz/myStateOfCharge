@@ -314,6 +314,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
         voc_ = voc_stat_ = voc_filt_ = voc_stat_tab_;
         dv_dyn_ = dv_hys_ = 0;
     }
+    Serial.printf("Mon.calculate:  Vbatt_fail=%d, voc_stat=%7.3f\n", Sen->Vbatt_fail(), voc_stat_);
 
     // EKF 1x1
     double ddq_dt = ib_;

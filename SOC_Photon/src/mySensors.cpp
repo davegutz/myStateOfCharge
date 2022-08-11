@@ -312,11 +312,11 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
 
   // vb failure from wrap result.  Latches
   static int8_t vb_sel_stat_last = vb_sel_stat_;
-  if ( reset )
-  {
-    vb_sel_stat_ = 1;
-    vb_sel_stat_last = vb_sel_stat_;
-  }
+  // if ( reset )
+  // {
+  //   vb_sel_stat_ = 1;
+  //   vb_sel_stat_last = vb_sel_stat_;
+  // }
   if ( !vb_sel_stat_last )
   {
     vb_sel_stat_ = 0;   // Latch
@@ -335,6 +335,9 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
     Serial.printf("Select change:  ShuntAmp->bare=%d, ShuntNoAmp->bare=%d, ibatt_err_fail=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, cc_flt_=%d, rp.ibatt_select=%d, ibatt_sel_status=%d, vbatt_sel_status=%d, Vbatt_fail=%d,\n",
         ShuntAmp->bare(), ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fail_, wrap_lo_fail_, wrap_vb_fail_, cc_flt_, rp.ibatt_select, ib_sel_stat_, vb_sel_stat_, Vbatt_fa_);
     Serial.printf("Small reset. Filters reinit and selection unchanged.   Hard reset to re-init selection\n");
+  }
+  if ( ib_sel_stat_ != ib_sel_stat_last )
+  {
     cp.cmd_reset();   
   }
  
@@ -377,7 +380,7 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
           ib_sel_stat_, Ibatt_hdwe, Ibatt_hdwe_model, rp.mod_ib(), Ibatt,
           vb_sel_stat_, Vbatt_hdwe, Vbatt_model, rp.mod_vb(), Vbatt,
           Tbatt_hdwe, Tbatt, rp.mod_tb(), Tbatt_filt,
-          Vbatt_flt_, Vbatt_fa_,
+          Vbatt_flt_, Vbatt_fail(),
           '\0');
       Serial.println(cp.buffer);
   }

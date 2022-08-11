@@ -183,7 +183,7 @@ public:
   void vbatt_print(void);         // Print Vbatt result
   boolean Ibatt_amp_fail() { return Ibatt_amp_fa_; };
   boolean Ibatt_noamp_fail() { return Ibatt_noamp_fa_; };
-  boolean Vbatt_fail() { return Vbatt_fa_; };
+  boolean Vbatt_fail() { return ( Vbatt_fa_ || vb_sel_stat_==0 ); };
   int8_t tbatt_sel_status() { return tb_sel_stat_; }
   int8_t vbatt_sel_status() { return vb_sel_stat_; };
   int8_t ibatt_sel_status() { return ib_sel_stat_; };

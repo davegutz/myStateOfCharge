@@ -88,7 +88,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(old_s.time, old_s.ib_dif_flt, color='cyan', linestyle='-', label='ib_dif_flt')
     plt.plot(old_s.time, old_s.ib_dif_fa, color='magenta', linestyle='--', label='ib_dif_fa')
     plt.plot(old_s.time, old_s.Vb_flt, color='blue', linestyle='-.', label='Vbatt_flt')
-    plt.plot(old_s.time, old_s.Vb_fa, color='black', linestyle=':', label='Vbatt_fa')
+    plt.plot(old_s.time, old_s.Vb_fa, color='black', linestyle=':', label='Vbatt_fail')
     plt.plot(old_s.time, old_s.ib_sel-2, color='black', linestyle='-', label='ib_sel_stat')
     plt.plot(old_s.time, old_s.vb_sel-2, color='green', linestyle='--', label='vb_sel_stat')
     plt.legend(loc=1)
