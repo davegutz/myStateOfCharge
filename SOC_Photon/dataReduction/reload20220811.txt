@@ -1,0 +1,1701 @@
+self_talk:  new string = 'Pm'
+
+Mon:BatteryMonitor::Battery:
+  temp_c_ =          28.500;  //  deg C
+ *rp_delt_q_ =          0.0;  //  Coulombs
+ *rp_t_last_ =         28.5;  // deg C
+  dvoc_dt  =       0.004000;  //  V/deg C
+  r_0 =            0.003000;  //  ohms
+  r_ct =           0.001600;  //  ohms
+  tau_ct =         0.200000;  //  s (=1/Rct/Cct)
+  r_diff =         0.007700;  //  ohms
+  tau_diff =      83.000000;  //  s (=1/Rdif/Cdif)
+  r_sd =          70.000000;  //  ohms
+  tau_sd =       25000000.0;  //  sec
+  bms_off_ =              0;  // T=off
+  dv_dsoc_=      107.036972;  // V/fraction
+  ib_ =               0.232;  // A
+  Ib =                0.232;  // Bank, A
+  vb_ =              14.395;  // V
+  Vb =               14.395;  // Bank, V
+  voc_ =             14.392;  // V
+  voc_stat_ =        14.389;  // V
+  vsat_ =            13.814;  // V
+  dv_dyn_ =           0.003;  // V
+  sr_ =               1.000;  // Resistance scalar
+  dv_ =               0.010;  // Table hard adj, V
+  dt_ =               0.100;  // Update time, s
+ *rp_nP_ =             1.00;  // P parallel in bank, e.g. '2P1S'
+ *rp_nS_ =             1.00;  // S series in bank, e.g. '2P1S'
+ BatteryMonitor::BatteryMonitor:
+  amp_hrs_remaining_ekf_ =   89.080;  // Discharge amp*time left if drain to q_ekf=0, A-h
+  amp_hrs_remaining_wt_  =   89.190;  // Discharge amp*time left if drain soc_wt_ to 0, A-h
+  EKF_converged =                 1;  // EKF is converged, T=converged
+  q_ekf =                  347003.4;  // Filtered charge calculated by ekf, C
+  soc_ekf =                  0.9989;  // Solved state of charge, fraction
+  soc_wt_ =                  1.0000;  // Weighted selection of ekf state of charge and coulomb counter (0-1)
+  tcharge =                    -0.0;  // Counted charging time to full, hr
+  tcharge_ekf =                 0.5;  // Solved charging time to full from ekf, hr
+  voc_filt_ =                14.377;  // Filtered charging voltage for saturation detect, V
+  voc_stat_ =                14.389;  // Static model open circuit voltage from table (reference), V
+  y_filt_ =                  -0.001;  // Filtered y_ residual from EKF, V
+Mon::Coulombs:
+  q_cap_rated_ = 360000.0;  // Rated capacity at t_rated, C
+  q_cap_rated_scaled_ =  360000.0;  // Applied rated capacity at t_rated_, C
+  q_capacity_ =  347400.0;  // Saturation charge at temperature, C
+  q_ =           347400.0;  // Present charge available to use, except q_min_, C
+  q_min_ =        26315.6;  // Estimated charge at low voltage shutdown, C
+  delta_q             0.0;  // Charge change since saturated, C
+  soc_ =           1.0000;  // Fraction of saturation charge (q_capacity_) available (0-1);
+  sat_ =                1;  // Indication that battery is saturated, T=saturated
+  t_rated_ =         25.0;  // Rated temperature, deg C
+  t_last =           28.5;  // Last battery temperature for rate limit memory, deg C
+  t_rlim_ =         0.017;  // Tbatt rate limit, deg C / s
+  resetting_ =          0;  // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
+  soc_min_ =       0.0758;  // Estimated soc where battery BMS will shutoff current, fraction
+  mod_ =        Battleborn;  // Model type of battery chemistry e.g. Battleborn or LION
+  mod_code_ =           0;  // Chemistry code integer
+  coul_eff_ =      0.99850;  // Coulombic Efficiency
+Coulombs::Chemistry:
+  dqdt =          0.010;  // Change of charge with temperature, fraction/deg C (0.01 from literature)
+  low_voc =      10.000;  // Volt threshold for BMS to turn off battery, V
+  hys_cap =     360000.000;  // Cap of hysteresis, Farads
+  v_sat =        13.850;  // Sat thresh at temp, V
+  dvoc_dt =       0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
+  dv =            0.010;  // Adjustment for calibration error, V
+  r_0 =          0.003000;  // Randles R0, ohms
+  r_ct =         0.001600;  // Randles charge transfer resistance, ohms
+  r_diff =       0.007700;  // Randles diffusion resistance, ohms
+  tau_ct =        0.200;  // Randles charge transfer time constant, s (=1/Rct/Cct)
+  tau_diff =     83.000;  // Randles diffusion time constant, s (=1/Rdif/Cdif)
+  tau_sd =      25000000.000;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
+  r_sd =         70.000;  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
+  r_ss =          0.012;  // Equivalent model for state space model initialization, ohms
+  voc(t, soc):
+    t=  {  5.000,  11.100,  20.000,  40.000, };
+    soc={  0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.990,   0.995,   1.000, };
+    voc={
+      {  4.000,   4.000,   6.000,   9.500,  11.700,  12.300,  12.500,  12.650,  12.820,  12.910,  12.980,  13.050,  13.110,  13.170,  13.220,  13.750,  14.450, },
+      {  4.000,   4.000,   8.000,  11.600,  12.400,  12.600,  12.700,  12.800,  12.920,  13.010,  13.060,  13.110,  13.170,  13.200,  13.230,  13.760,  14.460, },
+      {  4.000,   8.000,  12.200,  12.680,  12.730,  12.790,  12.810,  12.890,  13.000,  13.040,  13.090,  13.140,  13.210,  13.250,  13.270,  13.800,  14.500, },
+      {  4.080,   8.080,  12.280,  12.760,  12.810,  12.870,  12.890,  12.970,  13.080,  13.120,  13.170,  13.220,  13.290,  13.330,  13.350,  13.880,  14.580, },
+         };
+  soc_min(temp_c):
+    temp_c =  {  5.000,  11.100,  20.000,  40.000, };
+    soc_min=  {  0.140,   0.120,   0.080,   0.070, };
+  r(soc, dv):
+    soc={0.000000, 0.500000, 1.000000, };
+    dv ={ -0.900,  -0.700,  -0.500,  -0.300,   0.000,   0.300,   0.500,   0.700,   0.900, };
+    r  ={
+      { 0.000001,  0.064000,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.046000,  0.000001, },
+      { 0.000001,  0.000001,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.000001,  0.000001, },
+      { 0.000001,  0.000001,  0.000001,  0.036000,  0.015000,  0.024000,  0.000001,  0.000001,  0.000001, },
+         };
+Mon::StateSpace:
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.000331,  0.001758];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.231681, 14.394958];
+   C  =  [ -1.000000, -1.000000];
+   D  =  [ -0.003000,  1.000000];
+   x_dot  =  [  0.000397,  0.000000];
+   y  =  [ 14.392214];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res_ =         0.0151;  // Null, Ohms
+  cap_init_ =  360000.0;  // Farads
+  cap_ =       360000.0;  // Farads
+  tau_ =         5400.0;  // Null time const, sec
+  ib_ =           0.232;  // In, A
+  ioc_ =          0.236;  // Out, A
+  soc_ =         1.0000;  // Input
+  res_ =          0.015;  // Variable value, ohms
+  dv_dot_ =      -0.000;  // Calculated rate, V/s
+  dv_hys_ =       0.004;  // Delta state, V
+  disabled_ =         0;  // Disabled by input < 1e-5, T=disab
+  rp.hys_scale=    1.00;  // Scalar on hys
+Mon::EKF_1x1:
+Inputs:
+  z  =    14.3886;  // 1x1 input, =voc, dynamic predicted by other model, V
+  R  =   0.250000;  // 1x1 Kalman state uncertainty
+  Q  =   0.000000;  // 1x1 Kalman process uncertainty
+  H  =    107.037;  // 1x1 Jacobian sensitivity dV/dSOC
+Outputs:
+  x  =     0.9989;  // 1x1 Kalman state variable = Vsoc (0-1 fraction)
+  hx =    14.3841;  // Output of observation function h(x)
+  y  =     0.0045;  // 1x1 Residual z-hx, V
+  P  =   0.000000;  // 1x1 Kalman uncertainty covariance
+  K  =   0.000099;  // 1x1 Kalman gain
+  S  =   0.252691;  // 1x1 system uncertainty
+
+Sim:   rp.modeling = 0
+self_talk:  new string = 'Ps'
+
+Sim:   rp.modeling = 0
+Sim:BatteryModel::Battery:
+  temp_c_ =          28.500;  //  deg C
+ *rp_delt_q_ =          0.0;  //  Coulombs
+ *rp_t_last_ =         28.5;  // deg C
+  dvoc_dt  =       0.004000;  //  V/deg C
+  r_0 =            0.003000;  //  ohms
+  r_ct =           0.001600;  //  ohms
+  tau_ct =         0.200000;  //  s (=1/Rct/Cct)
+  r_diff =         0.007700;  //  ohms
+  tau_diff =      83.000000;  //  s (=1/Rdif/Cdif)
+  r_sd =          70.000000;  //  ohms
+  tau_sd =       25000000.0;  //  sec
+  bms_off_ =              0;  // T=off
+  dv_dsoc_=      122.999954;  // V/fraction
+  ib_ =               0.170;  // A
+  Ib =                0.170;  // Bank, A
+  vb_ =              14.550;  // V
+  Vb =               14.550;  // Bank, V
+  voc_ =             14.548;  // V
+  voc_stat_ =        14.544;  // V
+  vsat_ =            13.814;  // V
+  dv_dyn_ =           0.003;  // V
+  sr_ =               1.000;  // Resistance scalar
+  dv_ =               0.010;  // Table hard adj, V
+  dt_ =               0.100;  // Update time, s
+ *rp_nP_ =             1.00;  // P parallel in bank, e.g. '2P1S'
+ *rp_nS_ =             1.00;  // S series in bank, e.g. '2P1S'
+ BatteryModel::BatteryModel:
+  sat_ib_max_ =         0.232;  // Current cutback to be applied to modeled ib output, A
+  sat_ib_null_ =        0.000;  // Current cutback value for voc=vsat, A
+  sat_cutback_gain_ =  1000.0;  // Gain to retard ib when voc exceeds vsat, dimensionless
+  model_cutback_ =          1;  // Gain to retard ib when voc exceeds vsat, dimensionless
+  model_saturated_ =        1;  // Modeled current being limited on saturation cutback, T = cutback limited
+  ib_ =                 0.170;  // Battery terminal current, A
+  ib_in_ =              0.232;  // Saved value of current input, A
+  ib_fut_ =             0.232;  // Future value of limited current, A
+  ib_sat_ =             0.500;  // Indicator of maximal cutback, T = cutback saturated
+ *rp_s_cap_model_ =     1.000;  // Rated capacity scalar
+Sim::Coulombs:
+  q_cap_rated_ = 360000.0;  // Rated capacity at t_rated, C
+  q_cap_rated_scaled_ =  360000.0;  // Applied rated capacity at t_rated_, C
+  q_capacity_ =  347400.0;  // Saturation charge at temperature, C
+  q_ =           347400.0;  // Present charge available to use, except q_min_, C
+  q_min_ =        26315.6;  // Estimated charge at low voltage shutdown, C
+  delta_q             0.0;  // Charge change since saturated, C
+  soc_ =           1.0000;  // Fraction of saturation charge (q_capacity_) available (0-1);
+  sat_ =                1;  // Indication that battery is saturated, T=saturated
+  t_rated_ =         25.0;  // Rated temperature, deg C
+  t_last =           28.5;  // Last battery temperature for rate limit memory, deg C
+  t_rlim_ =         0.017;  // Tbatt rate limit, deg C / s
+  resetting_ =          0;  // Flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
+  soc_min_ =       0.0758;  // Estimated soc where battery BMS will shutoff current, fraction
+  mod_ =        Battleborn;  // Model type of battery chemistry e.g. Battleborn or LION
+  mod_code_ =           0;  // Chemistry code integer
+  coul_eff_ =      0.99850;  // Coulombic Efficiency
+Coulombs::Chemistry:
+  dqdt =          0.010;  // Change of charge with temperature, fraction/deg C (0.01 from literature)
+  low_voc =      10.000;  // Volt threshold for BMS to turn off battery, V
+  hys_cap =     360000.000;  // Cap of hysteresis, Farads
+  v_sat =        13.850;  // Sat thresh at temp, V
+  dvoc_dt =       0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
+  dv =            0.010;  // Adjustment for calibration error, V
+  r_0 =          0.003000;  // Randles R0, ohms
+  r_ct =         0.001600;  // Randles charge transfer resistance, ohms
+  r_diff =       0.007700;  // Randles diffusion resistance, ohms
+  tau_ct =        0.200;  // Randles charge transfer time constant, s (=1/Rct/Cct)
+  tau_diff =     83.000;  // Randles diffusion time constant, s (=1/Rdif/Cdif)
+  tau_sd =      25000000.000;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
+  r_sd =         70.000;  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
+  r_ss =          0.012;  // Equivalent model for state space model initialization, ohms
+  voc(t, soc):
+    t=  {  5.000,  11.100,  20.000,  40.000, };
+    soc={  0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.990,   0.995,   1.000, };
+    voc={
+      {  4.000,   4.000,   6.000,   9.500,  11.700,  12.300,  12.500,  12.650,  12.820,  12.910,  12.980,  13.050,  13.110,  13.170,  13.220,  13.750,  14.450, },
+      {  4.000,   4.000,   8.000,  11.600,  12.400,  12.600,  12.700,  12.800,  12.920,  13.010,  13.060,  13.110,  13.170,  13.200,  13.230,  13.760,  14.460, },
+      {  4.000,   8.000,  12.200,  12.680,  12.730,  12.790,  12.810,  12.890,  13.000,  13.040,  13.090,  13.140,  13.210,  13.250,  13.270,  13.800,  14.500, },
+      {  4.080,   8.080,  12.280,  12.760,  12.810,  12.870,  12.890,  12.970,  13.080,  13.120,  13.170,  13.220,  13.290,  13.330,  13.350,  13.880,  14.580, },
+         };
+  soc_min(temp_c):
+    temp_c =  {  5.000,  11.100,  20.000,  40.000, };
+    soc_min=  {  0.140,   0.120,   0.080,   0.070, };
+  r(soc, dv):
+    soc={0.000000, 0.500000, 1.000000, };
+    dv ={ -0.900,  -0.700,  -0.500,  -0.300,   0.000,   0.300,   0.500,   0.700,   0.900, };
+    r  ={
+      { 0.000001,  0.064000,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.046000,  0.000001, },
+      { 0.000001,  0.000001,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.000001,  0.000001, },
+      { 0.000001,  0.000001,  0.000001,  0.036000,  0.015000,  0.024000,  0.000001,  0.000001,  0.000001, },
+         };
+Sim::StateSpace:
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.000291,  0.001758];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.170013, 14.547566];
+   C  =  [  1.000000,  1.000000];
+   D  =  [  0.003000,  1.000000];
+   x_dot  =  [ -0.000192, -0.000005];
+   y  =  [ 14.550145];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res_ =         0.0151;  // Null, Ohms
+  cap_init_ =  360000.0;  // Farads
+  cap_ =       360000.0;  // Farads
+  tau_ =         5400.0;  // Null time const, sec
+  ib_ =           0.232;  // In, A
+  ioc_ =          0.236;  // Out, A
+  soc_ =         1.0000;  // Input
+  res_ =          0.015;  // Variable value, ohms
+  dv_dot_ =      -0.000;  // Calculated rate, V/s
+  dv_hys_ =       0.004;  // Delta state, V
+  disabled_ =         0;  // Disabled by input < 1e-5, T=disab
+  rp.hys_scale=    1.00;  // Scalar on hys
+self_talk:  new string = 'Pr'
+
+retained parameters (rp):
+  debug =                     0;  // Level of debug printing
+  delta_q =               0.000;  // Coulomb Counter state for ekf, (-1 - 1)
+  t_last =               28.500;  // Battery temperature past value for rate limit memory, deg C
+  delta_q_model =           0.0;  // Coulomb Counter state for model, (-1 - 1)
+  t_last_model =         28.500;  // Battery temperature past value for rate limit memory, deg C
+  ibatt_bias_amp =       -0.940;  // Calibrate amp current sensor, A
+  ibatt_bias_noamp =     -0.170;  // Calibrate non-amplified current sensor, A
+  ibatt_bias_all =        0.000;  // Bias all current sensors, A 
+  ibatt_sel_noamp =           0;  // Use non-amplified sensor
+  vbatt_bias =            0.000;  // Calibrate Vbatt, V
+  modeling =                  0;  // Bit mapped modeling specification
+  amp =                   0.000;  // Injected amplitude, A pk (0-18.3)
+  freq =                  0.000;  // Injected frequency, r/s (0-2*pi)
+  type =                      0;  //  Injected waveform type.   0=sine, 1=square, 2=triangle
+  inj_bias =              0.000;  // Injected bias, A
+  tbatt_bias =            0.000;  // Sensed temp bias, deg C
+  s_cap_model =           1.000;  // Scalar on battery model size
+  cutback_gain_scalar =   1.000;  // Scalar on battery model saturation cutback function
+  isum =                      33;  // Summary location ptr.   Begins at -1
+  delta_q_cinf_amp =    13026.6;  // Coul
+  delta_q_dinf_amp =     -111.4;  // Coul
+  delta_q_cinf_noamp=   10816.1;  // Coul
+  delta_q_dinf_noamp=    -271.0;  // Coul
+  hys_scale =             1.000;  //  Hysteresis scalar
+  tweak_sclr_amp =        1.003;  // Tweak calibration for amplified current
+  tweak_sclr_noamp =      1.003;  // Tweak calibration for non-amplified current
+  nP =                     1.00;  // Number of parallel batteries in bank, e.g. '2P1S'
+  nS =                     1.00;  // Number of series batteries in bank, e.g. '2P1S'
+  mon_mod =                   0;  //  Monitor battery model for electrical chars.  0=Battleborn, 1=LION
+  sim_mod =                   0;  //  Simulation battery model for electrical chars.  0=Battleborn, 1=LION
+
+command parameters(cp):
+  enable_wifi =            0;
+  model_cutback =          1;
+  model_saturated =        1;
+  soft_reset =             0;
+  write_summary =          0;
+  ibatt_bias_amp =    -0.940;
+  ibatt_bias_noamp =  -0.170;
+  dc_dc_on =               0;
+  blynking =               0;
+self_talk:  new string = 'Pt'
+
+Mon::StateSpace:
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.000331,  0.001758];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.231681, 14.394958];
+   C  =  [ -1.000000, -1.000000];
+   D  =  [ -0.003000,  1.000000];
+   x_dot  =  [  0.000397,  0.000000];
+   y  =  [ 14.392214];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res_ =         0.0151;  // Null, Ohms
+  cap_init_ =  360000.0;  // Farads
+  cap_ =       360000.0;  // Farads
+  tau_ =         5400.0;  // Null time const, sec
+  ib_ =           0.232;  // In, A
+  ioc_ =          0.236;  // Out, A
+  soc_ =         1.0000;  // Input
+  res_ =          0.015;  // Variable value, ohms
+  dv_dot_ =      -0.000;  // Calculated rate, V/s
+  dv_hys_ =       0.004;  // Delta state, V
+  disabled_ =         0;  // Disabled by input < 1e-5, T=disab
+  rp.hys_scale=    1.00;  // Scalar on hys
+
+Sim::StateSpace:
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.000291,  0.001758];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.170013, 14.547566];
+   C  =  [  1.000000,  1.000000];
+   D  =  [  0.003000,  1.000000];
+   x_dot  =  [ -0.000192, -0.000005];
+   y  =  [ 14.550145];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res_ =         0.0151;  // Null, Ohms
+  cap_init_ =  360000.0;  // Farads
+  cap_ =       360000.0;  // Farads
+  tau_ =         5400.0;  // Null time const, sec
+  ib_ =           0.232;  // In, A
+  ioc_ =          0.236;  // Out, A
+  soc_ =         1.0000;  // Input
+  res_ =          0.015;  // Variable value, ohms
+  dv_dot_ =      -0.000;  // Calculated rate, V/s
+  dv_hys_ =       0.004;  // Delta state, V
+  disabled_ =         0;  // Disabled by input < 1e-5, T=disab
+  rp.hys_scale=    1.00;  // Scalar on hys
+self_talk:  new string = 'PM'
+
+Tweak::Shunt(Amp)::
+  port_ =                0x49; // I2C port used by Acafruit_ADS1015
+  bare_ =                   0; // If ADS to be ignored
+  *cp_ibatt_bias_ =    -0.940; // Global bias, A
+  v2a_s_ =            -246.67; // Selected shunt conversion gain, A/V
+  vshunt_int_ =           -19; // Sensed shunt voltage, count
+  ishunt_cal_ =         0.232; // Sensed, calibrated ADC, A
+Shunt(Amp)::Tweak(Amp)::
+  max_change_ =               0.001; // Maximum allowed change to calibration scalar see 'N/MC'
+  max_tweak_ =                0.010; // Maximum allowed calibration scalar see 'N/Mx'
+  rp_delta_q_cinf_ =        13026.6; // Charge infinity at past update see 'N/Mi', Coulombs
+  rp_delta_q_dinf_ =         -111.4; // Discharge infinity at past update see 'N/Mi', Coulombs
+  sat_ =                          1; // Indication that battery is saturated, T=saturated
+  delta_hrs_ =             8.827560; // Time since last allowed saturation see 'N/Mz', hr
+  time_to_wait =           6.000000; // Time to wait before allowing saturation see 'N/Mw', hr
+  tweak_sclr =                1.003; // Scalar on Coulombic Efficiency 'N/Mk'
+  coul_eff_ =      0.99850;  // Coulombic Efficiency
+Shunt(Amp)::Adafruit_ADS1x15 (Amp):
+ m_bitShift =      4;
+ m_gain =       2048;
+ s_gain =       1024;
+ m_dataRate =    128;
+Adafruit_ADS1x15::Adafruit_I2CDevice (Amp):
+  _addr =        0x49;
+  _begun =          1;
+  _maxBufferSize = 32;
+self_talk:  new string = 'PN'
+
+Tweak::Shunt(No Amp)::
+  port_ =                0x48; // I2C port used by Acafruit_ADS1015
+  bare_ =                   0; // If ADS to be ignored
+  *cp_ibatt_bias_ =    -0.170; // Global bias, A
+  v2a_s_ =            -1189.30; // Selected shunt conversion gain, A/V
+  vshunt_int_ =           -2; // Sensed shunt voltage, count
+  ishunt_cal_ =         0.127; // Sensed, calibrated ADC, A
+Shunt(No Amp)::Tweak(No Amp)::
+  max_change_ =               0.001; // Maximum allowed change to calibration scalar see 'N/MC'
+  max_tweak_ =                0.010; // Maximum allowed calibration scalar see 'N/Mx'
+  rp_delta_q_cinf_ =        10816.1; // Charge infinity at past update see 'N/Mi', Coulombs
+  rp_delta_q_dinf_ =         -271.0; // Discharge infinity at past update see 'N/Mi', Coulombs
+  sat_ =                          1; // Indication that battery is saturated, T=saturated
+  delta_hrs_ =             8.827562; // Time since last allowed saturation see 'N/Mz', hr
+  time_to_wait =           6.000000; // Time to wait before allowing saturation see 'N/Mw', hr
+  tweak_sclr =                1.003; // Scalar on Coulombic Efficiency 'N/Mk'
+  coul_eff_ =      0.99850;  // Coulombic Efficiency
+Shunt(No Amp)::Adafruit_ADS1x15 (No Amp):
+ m_bitShift =      4;
+ m_gain =       2560;
+ s_gain =       2560;
+ m_dataRate =    128;
+Adafruit_ADS1x15::Adafruit_I2CDevice (No Amp):
+  _addr =        0x48;
+  _begun =          1;
+  _maxBufferSize = 32;
+0,  2022-08-09T08:45:34, 1660049134,  29.187,  14.593,   2.205,  1.0000,  0.9955,  13.911,  13.911,   1.003000,   1.003000,
+1,  2022-08-09T09:15:34, 1660050934,  29.410,  14.705,   0.170,  1.0000,  0.9986,  14.396,  14.396,   1.003000,   1.003000,
+2,  2022-08-09T09:45:34, 1660052734,  30.125,  15.062,   0.293,  1.0000,  0.9987,  14.370,  14.370,   1.003000,   1.003000,
+3,  2022-08-09T10:15:34, 1660054534,  30.875,  15.438,   0.170,  1.0000,  0.9987,  14.387,  14.387,   1.003000,   1.003000,
+4,  2022-08-09T10:45:34, 1660056334,  31.750,  15.875,   0.232,  1.0000,  0.9986,  14.370,  14.370,   1.003000,   1.003000,
+5,  2022-08-09T11:15:34, 1660058134,  32.678,  16.339,   0.355,  1.0000,  0.9986,  14.357,  14.357,   1.003000,   1.003000,
+6,  2022-08-09T11:45:34, 1660059934,  33.512,  16.756,   0.170,  1.0000,  0.9985,  14.387,  14.387,   1.003000,   1.003000,
+7,  2022-08-09T12:15:34, 1660061734,  34.312,  17.156,   0.293,  1.0000,  0.9985,  14.361,  14.361,   1.003000,   1.003000,
+8,  2022-08-09T12:45:34, 1660063534,  35.113,  17.557,   0.293,  1.0000,  0.9984,  14.378,  14.378,   1.003000,   1.003000,
+9,  2022-08-09T13:15:34, 1660065334,  35.832,  17.916,   0.293,  1.0000,  0.9984,  14.348,  14.348,   1.003000,   1.003000,
+10,  2022-08-09T13:45:34, 1660067134,  36.437,  18.218,   0.293,  1.0000,  0.9984,  14.387,  14.387,   1.003000,   1.003000,
+11,  2022-08-09T14:15:35, 1660068935,  36.812,  18.406,   0.170,  1.0000,  0.9984,  14.362,  14.362,   1.003000,   1.003000,
+12,  2022-08-09T14:45:35, 1660070735,  37.000,  18.500,  -0.013,  0.9999,  0.9975,  14.244,  14.244,   1.003000,   1.003000,
+13,  2022-08-09T15:15:35, 1660072535,  36.317,  18.158,  -0.075,  0.9999,  0.9954,  13.935,  13.935,   1.003000,   1.003000,
+14,  2022-08-09T15:45:35, 1660074335,  35.223,  17.612,   0.293,  1.0000,  0.9987,  14.384,  14.384,   1.003000,   1.003000,
+15,  2022-08-09T16:15:35, 1660076135,  34.557,  17.278,   0.293,  1.0000,  0.9986,  14.378,  14.378,   1.003000,   1.003000,
+16,  2022-08-09T16:45:35, 1660077935,  34.562,  17.281,   0.232,  1.0000,  0.9986,  14.374,  14.374,   1.003000,   1.003000,
+17,  2022-08-09T17:15:35, 1660079735,  34.750,  17.375,   0.170,  1.0000,  0.9986,  14.383,  14.383,   1.003000,   1.003000,
+18,  2022-08-09T17:45:35, 1660081535,  34.937,  17.468,   0.355,  1.0000,  0.9986,  14.378,  14.378,   1.003000,   1.003000,
+19,  2022-08-09T18:15:35, 1660083335,  35.000,  17.500,   0.170,  1.0000,  0.9986,  14.379,  14.379,   1.003000,   1.003000,
+20,  2022-08-09T18:45:35, 1660085135,  34.932,  17.466,   0.047,  1.0000,  0.9972,  14.197,  14.197,   1.003000,   1.003000,
+21,  2022-08-09T19:15:35, 1660086935,  34.682,  17.341,   0.232,  1.0000,  0.9981,  14.293,  14.293,   1.003000,   1.003000,
+22,  2022-08-09T19:45:35, 1660088735,  33.932,  16.966,  -0.013,  0.9999,  0.9973,  14.201,  14.201,   1.003000,   1.003000,
+23,  2022-08-09T20:15:35, 1660090535,  32.870,  16.435,  -0.137,  0.9999,  0.9954,  13.914,  13.914,   1.003000,   1.003000,
+24,  2022-08-09T20:45:35, 1660092335,  31.748,  15.874,  -0.137,  0.9999,  0.9940,  13.750,  13.750,   1.002000,   1.002000,
+25,  2022-08-09T21:15:36, 1660094136,  30.743,  15.372,  -0.137,  0.9999,  0.9929,  13.621,  13.621,   1.002000,   1.002000,
+26,  2022-08-09T21:45:36, 1660095936,  29.857,  14.928,  -0.137,  0.9999,  0.9921,  13.539,  13.539,   1.002000,   1.002000,
+27,  2022-08-09T22:15:36, 1660097736,  28.993,  14.497,  -0.137,  0.9999,  0.9913,  13.453,  13.453,   1.002000,   1.002000,
+28,  2022-08-09T22:45:36, 1660099536,  28.243,  14.122,  -0.137,  0.9999,  0.9908,  13.419,  13.419,   1.002000,   1.002000,
+29,  2022-08-09T23:15:36, 1660101336,  27.568,  13.784,  -0.137,  0.9999,  0.9905,  13.358,  13.358,   1.002000,   1.002000,
+30,  2022-08-09T23:45:36, 1660103136,  26.995,  13.498,  -0.137,  0.9999,  0.9901,  13.320,  13.320,   1.002000,   1.002000,
+31,  2022-08-10T00:15:36, 1660104936,  26.432,  13.216,  -0.137,  0.9999,  0.9895,  13.285,  13.285,   1.002000,   1.002000,
+32,  2022-08-10T00:45:36, 1660106736,  25.932,  12.966,  -0.137,  0.9999,  0.9729,  13.268,  13.268,   1.002000,   1.002000,
+33,  2022-08-10T01:15:36, 1660108536,  25.493,  12.747,  -0.137,  0.9999,  0.9321,  13.242,  13.242,   1.002000,   1.002000,
+34,  2022-08-10T01:45:36, 1660110336,  25.120,  12.560,  -0.198,  0.9999,  0.8694,  13.255,  13.255,   1.002000,   1.002000,
+35,  2022-08-10T02:15:36, 1660112136,  24.743,  12.372,  -0.137,  0.9999,  0.8299,  13.225,  13.225,   1.002000,   1.002000,
+36,  2022-08-10T02:45:37, 1660113937,  24.432,  12.216,  -0.198,  0.9999,  0.8081,  13.238,  13.238,   1.002000,   1.002000,
+37,  2022-08-10T03:15:37, 1660115737,  24.120,  12.060,  -0.198,  0.9999,  0.7956,  13.225,  13.225,   1.002000,   1.002000,
+38,  2022-08-10T03:45:37, 1660117537,  23.808,  11.904,  -0.198,  0.9999,  0.7931,  13.238,  13.238,   1.002000,   1.002000,
+39,  2022-08-10T04:15:37, 1660119337,  23.557,  11.778,  -0.198,  0.9999,  0.7926,  13.217,  13.217,   1.002000,   1.002000,
+40,  2022-08-10T04:45:37, 1660121137,  23.307,  11.653,  -0.198,  0.9999,  0.7929,  13.242,  13.242,   1.002000,   1.002000,
+41,  2022-08-10T05:15:37, 1660122937,  23.057,  11.528,  -0.137,  0.9999,  0.7935,  13.217,  13.217,   1.002000,   1.002000,
+42,  2022-08-10T05:45:37, 1660124737,  22.808,  11.404,  -0.198,  0.9999,  0.7943,  13.222,  13.222,   1.002000,   1.002000,
+43,  2022-08-10T06:15:37, 1660126537,  22.618,  11.309,  -0.137,  0.9999,  0.7943,  13.213,  13.213,   1.002000,   1.002000,
+44,  2022-08-10T06:45:37, 1660128337,  22.432,  11.216,  -0.198,  0.9998,  0.7949,  13.238,  13.238,   1.002000,   1.002000,
+45,  2022-08-10T07:15:37, 1660130137,  22.245,  11.123,  -0.137,  0.9999,  0.7958,  13.213,  13.213,   1.002000,   1.002000,
+46,  2022-08-10T07:45:38, 1660131938,  22.118,  11.059,   0.047,  1.0000,  0.8007,  13.240,  13.240,   1.003000,   1.003000,
+47,  2022-08-10T08:15:38, 1660133738,  21.993,  10.997,   0.910,  1.0000,  0.8211,  13.252,  13.252,   1.003000,   1.003000,
+48,  2022-08-10T08:45:38, 1660135538,  21.932,  10.966,   0.787,  1.0000,  0.9004,  13.339,  13.339,   1.003000,   1.003000,
+49,  2022-08-10T09:15:38, 1660137338,  21.868,  10.934,   1.157,  1.0000,  0.9905,  13.348,  13.348,   1.003000,   1.003000,
+50,  2022-08-10T09:45:38, 1660139138,  21.937,  10.968,   1.095,  1.0000,  0.9988,  14.370,  14.370,   1.003000,   1.003000,
+51,  2022-08-10T10:15:38, 1660140938,  22.373,  11.187,   0.232,  1.0000,  0.9990,  14.392,  14.392,   1.003000,   1.003000,
+52,  2022-08-10T10:45:38, 1660142738,  23.123,  11.562,   0.047,  1.0000,  0.9990,  14.414,  14.414,   1.003000,   1.003000,
+53,  2022-08-10T11:15:38, 1660144538,  23.812,  11.906,   0.232,  1.0000,  0.9990,  14.375,  14.375,   1.003000,   1.003000,
+54,  2022-08-10T11:45:38, 1660146338,  24.372,  12.186,   0.170,  1.0000,  0.9989,  14.405,  14.405,   1.003000,   1.003000,
+55,  2022-08-10T12:15:38, 1660148138,  24.925,  12.463,   0.232,  1.0000,  0.9989,  14.383,  14.383,   1.003000,   1.003000,
+56,  2022-08-10T12:45:38, 1660149938,  25.323,  12.662,   0.293,  1.0000,  0.9989,  14.400,  14.400,   1.003000,   1.003000,
+57,  2022-08-10T13:15:39, 1660151739,  25.750,  12.875,   0.170,  1.0000,  0.9989,  14.387,  14.387,   1.003000,   1.003000,
+58,  2022-08-10T13:45:39, 1660153539,  26.187,  13.093,   0.232,  1.0000,  0.9989,  14.405,  14.405,   1.003000,   1.003000,
+59,  2022-08-10T14:15:39, 1660155339,  26.692,  13.346,   0.232,  1.0000,  0.9989,  14.387,  14.387,   1.003000,   1.003000,
+60,  2022-08-10T14:45:39, 1660157139,  27.250,  13.625,   0.170,  1.0000,  0.9988,  14.387,  14.387,   1.003000,   1.003000,
+61,  2022-08-10T15:15:39, 1660158939,  27.687,  13.843,   0.293,  1.0000,  0.9988,  14.374,  14.374,   1.003000,   1.003000,
+62,  2022-08-10T15:45:39, 1660160739,  27.998,  13.999,   0.170,  1.0000,  0.9988,  14.383,  14.383,   1.003000,   1.003000,
+63,  2022-08-10T16:15:39, 1660162539,  28.175,  14.088,   0.293,  1.0000,  0.9987,  14.362,  14.362,   1.003000,   1.003000,
+64,  2022-08-10T16:45:39, 1660164339,  28.187,  14.093,   0.232,  1.0000,  0.9988,  14.387,  14.387,   1.003000,   1.003000,
+65,  2022-08-10T17:15:39, 1660166139,  28.187,  14.093,   0.170,  1.0000,  0.9988,  14.362,  14.362,   1.003000,   1.003000,
+66,  2022-08-10T17:45:39, 1660167939,  28.187,  14.093,  -0.075,  0.9999,  0.9980,  14.275,  14.275,   1.003000,   1.003000,
+67,  2022-08-10T18:15:39, 1660169739,  27.995,  13.998,   0.293,  1.0000,  0.9969,  14.137,  14.137,   1.003000,   1.003000,
+68,  2022-08-10T18:45:39, 1660171539,  27.618,  13.809,   0.170,  1.0000,  0.9989,  14.397,  14.397,   1.003000,   1.003000,
+69,  2022-08-10T19:15:40, 1660173340,  27.618,  13.809,  -0.075,  0.9999,  0.9976,  14.210,  14.210,   1.003000,   1.003000,
+70,  2022-08-10T19:45:40, 1660175140,  27.182,  13.591,  -0.137,  0.9999,  0.9958,  13.953,  13.953,   1.003000,   1.003000,
+71,  2022-08-10T20:15:40, 1660176940,  26.560,  13.280,  -0.137,  0.9999,  0.9945,  13.768,  13.768,   1.003000,   1.003000,
+72,  2022-08-10T20:45:40, 1660178740,  26.057,  13.028,  -0.137,  0.9999,  0.9932,  13.652,  13.652,   1.002000,   1.002000,
+73,  2022-08-10T21:15:40, 1660180540,  25.743,  12.872,  -0.137,  0.9999,  0.9923,  13.543,  13.543,   1.002000,   1.002000,
+74,  2022-08-10T21:45:40, 1660182340,  25.432,  12.716,  -0.137,  0.9999,  0.9917,  13.492,  13.492,   1.002000,   1.002000,
+75,  2022-08-10T22:15:40, 1660184140,  25.057,  12.528,  -0.137,  0.9999,  0.9911,  13.410,  13.410,   1.002000,   1.002000,
+76,  2022-08-10T22:45:40, 1660185940,  24.682,  12.341,  -0.137,  0.9999,  0.9907,  13.372,  13.372,   1.002000,   1.002000,
+77,  2022-08-10T23:15:40, 1660187740,  24.368,  12.184,  -0.137,  0.9999,  0.9904,  13.328,  13.328,   1.002000,   1.002000,
+78,  2022-08-10T23:45:40, 1660189540,  24.057,  12.028,  -0.198,  0.9999,  0.9901,  13.320,  13.320,   1.002000,   1.002000,
+79,  2022-08-11T00:15:40, 1660191340,  23.807,  11.903,  -0.198,  0.9999,  0.9883,  13.260,  13.260,   1.002000,   1.002000,
+80,  2022-08-11T00:45:41, 1660193141,  23.618,  11.809,  -0.198,  0.9998,  0.9680,  13.260,  13.260,   1.002000,   1.002000,
+81,  2022-08-11T01:15:41, 1660194941,  23.368,  11.684,  -0.198,  0.9999,  0.9295,  13.242,  13.242,   1.002000,   1.002000,
+82,  2022-08-11T01:45:41, 1660196741,  23.182,  11.591,  -0.198,  0.9999,  0.8766,  13.242,  13.242,   1.002000,   1.002000,
+83,  2022-08-11T02:15:41, 1660198541,  22.995,  11.498,  -0.198,  0.9999,  0.8451,  13.238,  13.238,   1.002000,   1.002000,
+84,  2022-08-11T02:45:41, 1660200341,  22.807,  11.403,  -0.198,  0.9999,  0.8288,  13.234,  13.234,   1.002000,   1.002000,
+85,  2022-08-11T03:15:41, 1660202141,  22.682,  11.341,  -0.198,  0.9998,  0.8197,  13.238,  13.238,   1.002000,   1.002000,
+86,  2022-08-11T03:45:41, 1660203941,  22.557,  11.278,  -0.198,  0.9996,  0.8145,  13.226,  13.226,   1.002000,   1.002000,
+87,  2022-08-11T04:15:41, 1660205741,  22.432,  11.216,  -0.198,  0.9997,  0.8125,  13.226,  13.226,   1.002000,   1.002000,
+88,  2022-08-11T04:45:41, 1660207541,  22.307,  11.153,  -0.198,  0.9998,  0.8116,  13.226,  13.226,   1.002000,   1.002000,
+89,  2022-08-11T05:15:41, 1660209341,  22.182,  11.091,  -0.198,  0.9999,  0.8116,  13.234,  13.234,   1.002000,   1.002000,
+90,  2022-08-11T05:45:41, 1660211141,  22.118,  11.059,  -0.198,  0.9995,  0.8101,  13.230,  13.230,   1.002000,   1.002000,
+91,  2022-08-11T06:15:42, 1660212942,  21.995,  10.998,  -0.137,  0.9999,  0.8099,  13.221,  13.221,   1.002000,   1.002000,
+92,  2022-08-11T06:45:42, 1660214742,  21.932,  10.966,  -0.075,  0.9999,  0.8120,  13.228,  13.228,   1.003000,   1.003000,
+93,  2022-08-11T07:15:42, 1660216542,  21.868,  10.934,   0.787,  1.0000,  0.8234,  13.257,  13.257,   1.003000,   1.003000,
+94,  2022-08-11T07:45:42, 1660218342,  21.868,  10.934,   0.540,  1.0000,  0.9048,  13.316,  13.316,   1.003000,   1.003000,
+95,  2022-08-11T08:15:42, 1660220142,  21.868,  10.934,   1.650,  1.0000,  0.9888,  13.383,  13.383,   1.003000,   1.003000,
+96,  2022-08-11T08:45:42, 1660221942,  21.937,  10.968,   0.848,  1.0000,  0.9914,  13.440,  13.440,   1.003000,   1.003000,
+97,  2022-08-11T09:15:42, 1660223742,  22.062,  11.031,   0.355,  1.0000,  0.9990,  14.394,  14.394,   1.003000,   1.003000,
+98,  2022-08-11T09:45:42, 1660225542,  22.558,  11.279,   0.232,  1.0000,  0.9990,  14.392,  14.392,   1.003000,   1.003000,
+99,  2022-08-11T10:15:42, 1660227342,  23.442,  11.721,   0.170,  1.0000,  0.9990,  14.401,  14.401,   1.003000,   1.003000,
+100,  2022-08-11T10:45:42, 1660229142,  24.312,  12.156,   0.293,  1.0000,  0.9990,  14.392,  14.392,   1.003000,   1.003000,
+101,  2022-08-11T11:15:43, 1660230943,  25.035,  12.518,   0.170,  1.0000,  0.9989,  14.409,  14.409,   1.003000,   1.003000,
+102,  2022-08-11T11:45:43, 1660232743,  25.500,  12.750,   0.232,  1.0000,  0.9989,  14.379,  14.379,   1.003000,   1.003000,
+103,  2022-08-11T12:15:43, 1660234543,  25.873,  12.937,   0.232,  1.0000,  0.9989,  14.409,  14.409,   1.003000,   1.003000,
+104,  2022-08-11T12:45:43, 1660236343,  26.183,  13.092,   0.170,  1.0000,  0.9989,  14.387,  14.387,   1.003000,   1.003000,
+105,  2022-08-11T13:15:43, 1660238143,  26.495,  13.248,   0.293,  1.0000,  0.9989,  14.409,  14.409,   1.003000,   1.003000,
+106,  2022-08-11T13:45:43, 1660239943,  26.812,  13.406,   0.232,  1.0000,  0.9989,  14.396,  14.396,   1.003000,   1.003000,
+107,  2022-08-11T14:15:43, 1660241743,  27.312,  13.656,   0.293,  1.0000,  0.9989,  14.396,  14.396,   1.003000,   1.003000,
+108,  2022-08-11T14:45:43, 1660243543,  27.998,  13.999,   0.293,  1.0000,  0.9988,  14.383,  14.383,   1.003000,   1.003000,
+109,  2022-08-11T15:15:43, 1660245343,  28.422,  14.211,   0.108,  1.0000,  0.9988,  14.401,  14.401,   1.003000,   1.003000,
+i,  date,                time,    Tbatt, Vbatt, Ibatt, soc, soc_ekf, Voc_dyn, Voc, tweak_sclr_amp, tweak_sclr_noa,
+Tb  =  28.500,
+Vb  =  14.386,
+Voc =  14.384,
+voc_filt  =  14.377,
+Vsat =  13.814,
+Ib  =   0.170,
+soc_m =   1.0000,
+soc_ekf=   0.9989,
+soc =   1.0000,
+soc_wt =   1.0000,
+modeling = 0,
+amp delta_q_cinf =    13033.5,
+amp delta_q_dinf =     -111.4,
+amp tweak_sclr =   1.003000,
+no amp delta_q_cinf =    10821.3,
+no amp delta_q_dinf =     -271.0,
+no amp tweak_sclr =   1.003000,
+Hi!
+Init DISPLAY
+DISP allocated
+Init CLOUD...done CLOUD
+End setup()
+SHUNT MONITOR Amp initialized
+SHUNT MONITOR No Amp initialized
+echo:  Q, 4
+echo:  Q, 0
+Ib_amp_fail = 0,
+Ib_noamp_fail = 0,
+Vb_fail = 0,
+Tb  =  28.500,
+Vb  =  14.391,
+Voc =  14.380,
+voc_filt  =  14.351,
+Vsat =  13.814,
+Ib  =   0.880,
+soc_m =   1.0000,
+soc_ekf=   0.9988,
+soc =   1.0000,
+modeling = 0,
+amp delta_q_cinf =  -359984.7,
+amp delta_q_dinf =   360000.0,
+amp tweak_sclr =   1.000000,
+no amp delta_q_cinf =  -360000.0,
+no amp delta_q_dinf =   359997.0,
+no amp tweak_sclr =   1.000000,
+echo:  Pa, 4
+echo:  Pa, 0
+echo:  Pm, 0
+
+Mon:BatteryMonitor::Battery:
+  temp_c_ =  28.520;  //  deg C
+ *rp_delt_q_ =       0.0;  //  Coulombs
+ *rp_t_last_ =      28.5;  // deg C
+  dvoc_dt  =  0.004000;  //  V/deg C
+  r_0 =    0.003000;  //  ohms
+  r_ct =   0.001600;  //  ohms
+  tau_ct=  0.200000;  //  s (=1/Rct/Cct)
+  r_diff=  0.007700;  //  ohms
+  tau_diff = 83.000000;  //  s (=1/Rdif/Cdif)
+  r_sd =  70.000000;  //  ohms
+  tau_sd=25000000.0;  //  sec
+  bms_off_ =      0;  // T=off
+  dv_dsoc_=105.640602;  // V/fraction
+  ib_ =       0.880;  // A
+  Ib =        0.880;  // Bank, A
+  vb_ =      14.386;  // V
+  Vb =       14.386;  // Bank, V
+  voc_ =     14.375;  // V
+  voc_stat_= 14.375;  // V
+  vsat_ =    13.814;  // V
+  dv_dyn_ =   0.011;  // V
+  sr_ =       1.000;  // Resistance scalar
+  dv_ =       0.010;  // Table hard adj, V
+  dt_ =       0.100;  // Update time, s
+ *rp_nP_ =   1.00;  // P parallel in bank, e.g. '2P1S'
+ *rp_nS_ =     1.00;  // S series in bank, e.g. '2P1S'
+ BatteryMonitor::BatteryMonitor:
+  amp_hrs_remaining_ekf_= 89.053;  // if drain to q_ekf=0, A-h
+  amp_hrs_remaining_soc_= 89.173;  // if drain soc_ to 0, A-h
+  EKF_converged =        1;  // T=converged
+  q_ekf =         346896.8;  // charge calc by ekf, C
+  soc_ekf =          0.9988;  // Solved state of charge, fraction
+  tcharge =           -0.0;  // CC time to full, hr
+  tcharge_ekf =        0.1;  // Solved time to full, hr
+  voc_filt_ =       14.351;  // Filtered charging for sat detect, V
+  voc_stat_ =       14.375;  // Static model OC from table (ref), V
+  y_filt_ =          0.001;  // Residual from EKF, V
+Mon::Coulombs:
+  q_cap_rated_= 360000.0;  // Rated capacity at t_rated, C
+  q_cap_rated_scaled_=  360000.0;  // Applied rated capacity at t_rated_, C
+  q_capacity_ = 347328.0;  // Saturation charge at temperature, C
+  q_ =          347328.0;  // Present charge available to use, except q_min_, C
+  q_min_ =       26306.6;  // Est charge at low voltage shutdown, C
+  delta_q            0.0;  // Charge change since saturated, C
+  soc_ =          1.0000;  // Fraction of q_capacity_available (0-1);
+  sat_ =               1;  // Indication that battery is saturated, T=saturated
+  t_rated_ =        25.0;  // Rated temperature, deg C
+  t_last =          28.5;  // Last battery temperature for rate limit memory, deg C
+  t_rlim_ =        0.017;  // Tbatt rate limit, deg C / s
+  resetting_ =         0;  // Flag to coord user testing of CC, T=perf external reset of counter
+  soc_min_ =      0.0757;  // Est soc where battery BMS shuts off current
+  mod_ =       Battleborn;  // Model type of battery chemistry e.g. Battleborn or LION
+  mod_code_ =          0;  // Chemistry code integer
+  coul_eff_ =    0.99850;  // Coulombic Efficiency
+Coulombs::Chemistry:
+  dqdt =      0.010;  // Change charge with temperature, fraction/deg C (0.01 from lit)
+  low_voc =  10.000;  // Threshold for BMS to turn off battery, V
+  hys_cap = 360000.000;  // Cap of hysteresis, Farads
+  v_sat =    13.850;  // Sat thresh at temp, V
+  dvoc_dt =   0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
+  dv =        0.010;  // Adj for cal error, V
+  r_0 =    0.003000;  // Randles R0, ohms
+  r_ct =   0.001600;  // Charge transfer resistance, ohms
+  r_diff = 0.007700;  // Diffusion resistance, ohms
+  tau_ct =    0.200;  // Charge transfer time constant, s (=1/Rct/Cct)
+  tau_diff = 83.000;  // Diffusion time constant, s (=1/Rdif/Cdif)
+  tau_sd =  25000000.000;  // EKF ref.	Parasitic discharge time constant, sec
+  r_sd =     70.000;  // EKF ref.	Parasitic discharge, ohms
+  r_ss =      0.012;  // For state space model init, ohms
+  voc(t, soc):
+    t=  {  5.000,  11.100,  20.000,  40.000, };
+    soc={  0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.990,   0.995,   1.000, };
+    voc={
+      {  4.000,   4.000,   6.000,   9.500,  11.700,  12.300,  12.500,  12.650,  12.820,  12.910,  12.980,  13.050,  13.110,  13.170,  13.220,  13.750,  14.450, },
+      {  4.000,   4.000,   8.000,  11.600,  12.400,  12.600,  12.700,  12.800,  12.920,  13.010,  13.060,  13.110,  13.170,  13.200,  13.230,  13.760,  14.460, },
+      {  4.000,   8.000,  12.200,  12.680,  12.730,  12.790,  12.810,  12.890,  13.000,  13.040,  13.090,  13.140,  13.210,  13.250,  13.270,  13.800,  14.500, },
+      {  4.080,   8.080,  12.280,  12.760,  12.810,  12.870,  12.890,  12.970,  13.080,  13.120,  13.170,  13.220,  13.290,  13.330,  13.350,  13.880,  14.580, },
+         };
+  soc_min(temp_c):
+    temp_c =  {  5.000,  11.100,  20.000,  40.000, };
+    soc_min=  {  0.140,   0.120,   0.080,   0.070, };
+  r(soc, dv):
+    soc={0.000000, 0.500000, 1.000000, };
+    dv ={ -0.900,  -0.700,  -0.500,  -0.300,   0.000,   0.300,   0.500,   0.700,   0.900, };
+    r  ={
+      { 0.000001,  0.064000,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.046000,  0.000001, },
+      { 0.000001,  0.000001,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.000001,  0.000001, },
+      { 0.000001,  0.000001,  0.000001,  0.036000,  0.015000,  0.024000,  0.000001,  0.000001,  0.000001, },
+         };
+Mon::StateSpace:
+  dt =  0.100000
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.001407,  0.006922];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.880013, 14.386347];
+   C  =  [ -1.000000, -1.000000];
+   D  =  [ -0.003000,  1.000000];
+   x_dot  =  [  0.000007, -0.000002];
+   y  =  [ 14.375378];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res_ =         0.0150;  // Null, Ohms
+  cap_init_ =  360000.0;  // Farads
+  cap_ =       360000.0;  // Farads
+  tau_ =         5400.0;  // Null time const, sec
+  ib_ =           0.880;  // In, A
+  ioc_ =          0.006;  // Out, A
+  soc_ =         1.0000;  // Input
+  res_ =          0.015;  // Variable value, ohms
+  dv_dot_ =       0.000;  // Calculated rate, V/s
+  dv_hys_ =       0.000;  // Delta state, V
+  disabled_ =         0;  // Disabled by input < 1e-5, T=disab
+  rp.hys_scale=    1.00;  // Scalar on hys
+Mon::EKF_1x1:
+Inputs:
+  z  =    14.3753;  // 1x1 input, =voc, dynamic predicted by other model, V
+  R  =   0.250000;  // 1x1 Kalman state uncertainty
+  Q  =   0.000000;  // 1x1 Kalman process uncertainty
+  H  =    105.641;  // 1x1 Jacobian sensitivity dV/dSOC
+Outputs:
+  x  =     0.9988;  // 1x1 Kalman state variable = Vsoc (0-1 fraction)
+  hx =    14.3702;  // Output of observation function h(x)
+  y  =     0.0051;  // 1x1 Residual z-hx, V
+  P  =   0.000000;  // 1x1 Kalman uncertainty covariance
+  K  =   0.000099;  // 1x1 Kalman gain
+  S  =   0.252645;  // 1x1 system uncertainty
+
+Sim:   rp.modeling = 0
+echo:  Ps, 0
+
+Sim:   rp.modeling = 0
+Sim:BatteryModel::Battery:
+  temp_c_ =  28.520;  //  deg C
+ *rp_delt_q_ =       0.0;  //  Coulombs
+ *rp_t_last_ =      28.6;  // deg C
+  dvoc_dt  =  0.004000;  //  V/deg C
+  r_0 =    0.003000;  //  ohms
+  r_ct =   0.001600;  //  ohms
+  tau_ct=  0.200000;  //  s (=1/Rct/Cct)
+  r_diff=  0.007700;  //  ohms
+  tau_diff = 83.000000;  //  s (=1/Rdif/Cdif)
+  r_sd =  70.000000;  //  ohms
+  tau_sd=25000000.0;  //  sec
+  bms_off_ =      0;  // T=off
+  dv_dsoc_=122.999954;  // V/fraction
+  ib_ =       0.880;  // A
+  Ib =        0.880;  // Bank, A
+  vb_ =      14.551;  // V
+  Vb =       14.551;  // Bank, V
+  voc_ =     14.544;  // V
+  voc_stat_= 14.544;  // V
+  vsat_ =    13.814;  // V
+  dv_dyn_ =   0.007;  // V
+  sr_ =       1.000;  // Resistance scalar
+  dv_ =       0.010;  // Table hard adj, V
+  dt_ =       0.100;  // Update time, s
+ *rp_nP_ =   1.00;  // P parallel in bank, e.g. '2P1S'
+ *rp_nS_ =     1.00;  // S series in bank, e.g. '2P1S'
+ BatteryModel::BatteryModel:
+  sat_ib_max_ =         0.880;  // Cutback, A
+  sat_ib_null_ =        0.000;  // Cutback value for voc=vsat, A
+  sat_cutback_gain_ =  1000.0;  // Gain to retard ib when voc exceeds vsat
+  model_cutback_ =          1;  // Cutting
+  model_saturated_ =        0;  // Limited on saturation cutback
+  ib_ =                 0.880;  // Battery terminal curr, A
+  ib_in_ =              0.880;  // Saved value of curr in, A
+  ib_fut_ =             0.880;  // Future value of limited curr, A
+  ib_sat_ =             0.500;  // T = cutback saturated
+ *rp_s_cap_model_ =     1.000;  // Rated capacity scalar
+Sim::Coulombs:
+  q_cap_rated_= 360000.0;  // Rated capacity at t_rated, C
+  q_cap_rated_scaled_=  360000.0;  // Applied rated capacity at t_rated_, C
+  q_capacity_ = 347175.0;  // Saturation charge at temperature, C
+  q_ =          347175.0;  // Present charge available to use, except q_min_, C
+  q_min_ =       26287.7;  // Est charge at low voltage shutdown, C
+  delta_q            0.0;  // Charge change since saturated, C
+  soc_ =          1.0000;  // Fraction of q_capacity_available (0-1);
+  sat_ =               0;  // Indication that battery is saturated, T=saturated
+  t_rated_ =        25.0;  // Rated temperature, deg C
+  t_last =          28.6;  // Last battery temperature for rate limit memory, deg C
+  t_rlim_ =        0.017;  // Tbatt rate limit, deg C / s
+  resetting_ =         0;  // Flag to coord user testing of CC, T=perf external reset of counter
+  soc_min_ =      0.0757;  // Est soc where battery BMS shuts off current
+  mod_ =       Battleborn;  // Model type of battery chemistry e.g. Battleborn or LION
+  mod_code_ =          0;  // Chemistry code integer
+  coul_eff_ =    0.99850;  // Coulombic Efficiency
+Coulombs::Chemistry:
+  dqdt =      0.010;  // Change charge with temperature, fraction/deg C (0.01 from lit)
+  low_voc =  10.000;  // Threshold for BMS to turn off battery, V
+  hys_cap = 360000.000;  // Cap of hysteresis, Farads
+  v_sat =    13.850;  // Sat thresh at temp, V
+  dvoc_dt =   0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
+  dv =        0.010;  // Adj for cal error, V
+  r_0 =    0.003000;  // Randles R0, ohms
+  r_ct =   0.001600;  // Charge transfer resistance, ohms
+  r_diff = 0.007700;  // Diffusion resistance, ohms
+  tau_ct =    0.200;  // Charge transfer time constant, s (=1/Rct/Cct)
+  tau_diff = 83.000;  // Diffusion time constant, s (=1/Rdif/Cdif)
+  tau_sd =  25000000.000;  // EKF ref.	Parasitic discharge time constant, sec
+  r_sd =     70.000;  // EKF ref.	Parasitic discharge, ohms
+  r_ss =      0.012;  // For state space model init, ohms
+  voc(t, soc):
+    t=  {  5.000,  11.100,  20.000,  40.000, };
+    soc={  0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.990,   0.995,   1.000, };
+    voc={
+      {  4.000,   4.000,   6.000,   9.500,  11.700,  12.300,  12.500,  12.650,  12.820,  12.910,  12.980,  13.050,  13.110,  13.170,  13.220,  13.750,  14.450, },
+      {  4.000,   4.000,   8.000,  11.600,  12.400,  12.600,  12.700,  12.800,  12.920,  13.010,  13.060,  13.110,  13.170,  13.200,  13.230,  13.760,  14.460, },
+      {  4.000,   8.000,  12.200,  12.680,  12.730,  12.790,  12.810,  12.890,  13.000,  13.040,  13.090,  13.140,  13.210,  13.250,  13.270,  13.800,  14.500, },
+      {  4.080,   8.080,  12.280,  12.760,  12.810,  12.870,  12.890,  12.970,  13.080,  13.120,  13.170,  13.220,  13.290,  13.330,  13.350,  13.880,  14.580, },
+         };
+  soc_min(temp_c):
+    temp_c =  {  5.000,  11.100,  20.000,  40.000, };
+    soc_min=  {  0.140,   0.120,   0.080,   0.070, };
+  r(soc, dv):
+    soc={0.000000, 0.500000, 1.000000, };
+    dv ={ -0.900,  -0.700,  -0.500,  -0.300,   0.000,   0.300,   0.500,   0.700,   0.900, };
+    r  ={
+      { 0.000001,  0.064000,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.046000,  0.000001, },
+      { 0.000001,  0.000001,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.000001,  0.000001, },
+      { 0.000001,  0.000001,  0.000001,  0.036000,  0.015000,  0.024000,  0.000001,  0.000001,  0.000001, },
+         };
+Sim::StateSpace:
+  dt =  0.100000
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.001407,  0.003014];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.880013, 14.544197];
+   C  =  [  1.000000,  1.000000];
+   D  =  [  0.003000,  1.000000];
+   x_dot  =  [  0.000007,  0.000045];
+   y  =  [ 14.551253];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res_ =         0.0150;  // Null, Ohms
+  cap_init_ =  360000.0;  // Farads
+  cap_ =       360000.0;  // Farads
+  tau_ =         5400.0;  // Null time const, sec
+  ib_ =           0.880;  // In, A
+  ioc_ =          0.008;  // Out, A
+  soc_ =         1.0000;  // Input
+  res_ =          0.015;  // Variable value, ohms
+  dv_dot_ =       0.000;  // Calculated rate, V/s
+  dv_hys_ =       0.000;  // Delta state, V
+  disabled_ =         0;  // Disabled by input < 1e-5, T=disab
+  rp.hys_scale=    1.00;  // Scalar on hys
+echo:  Pr, 0
+
+retained parameters (rp):
+  debug =                 0;  // Level of debug printing
+  delta_q =           0.000;  // CC state Monf, (-1 - 1)
+  t_last =           28.520;  // Battery temp past rate limit mem, deg C
+  delta_q_model =       0.0;  // CC state model, (-1 - 1)
+  t_last_model =     28.562;  // Battery temp past rate limit mem, deg C
+  ibatt_bias_amp =   -0.230;  // Calibrate amp sensor, A
+  ibatt_bias_noamp = -0.570;  // Calibrate non-amp sensor, A
+  ibatt_bias_all =    0.000;  // Bias all sensors, A 
+  ibatt_select =          0;  // -1=noamp, 0=auto, 1=amp
+  vbatt_bias =        0.000;  // Calibrate Vbatt, V
+  modeling =              0;  // Bit mapped mod spec
+  amp =               0.000;  // Injected amp, A pk (0-18.3)
+  freq =              0.000;  // Injected freq, r/s (0-2*pi)
+  type =                  0;  //  Injected wave.  0=sin, 1=sq, 2=tri
+  inj_bias =          0.000;  // Injected bias, A
+  tbatt_bias =        0.000;  // Sense bias, deg C
+  s_cap_model =       1.000;  // Scalar on battery mod size
+  cutback_gain_scalar=  1.000;  // Scalar on battery mod saturation cutback function
+  isum =                  -1;  // Summary location ptr.   Begins at -1
+  delta_q_cinf_amp =  -359953.9;  // Coul
+  delta_q_dinf_amp =   360000.0;  // Coul
+  delta_q_cinf_noamp= -360000.0;  // Coul
+  delta_q_dinf_noamp=  359990.9;  // Coul
+  hys_scale =         1.000;  //  Hysteresis scalar
+  tweak_sclr_amp =    1.000;  // Tweak calibration for amp current
+  tweak_sclr_noamp =  1.000;  // Tweak calibration for non-amp current
+  nP =                 1.00;  // Num parallel batteries in bank, e.g. '2P1S'
+  nS =                 1.00;  // Num series batteries in bank, e.g. '2P1S'
+  mon_mod =               0;  //  Mon battery model chars.  0=Battleborn, 1=LION
+  sim_mod =               0;  //  Sim battery model chars.  0=Battleborn, 1=LION
+
+command parameters(cp):
+  enable_wifi =                0;
+  model_cutback =              1;
+  model_saturated =            0;
+  soft_reset =                 0;
+  write_summary =              0;
+  ibatt_tot_bias_amp =    -0.230;
+  ibatt_tot_bias_noamp =  -0.570;
+  dc_dc_on =                   0;
+  blynking =                   0;
+echo:  Pt, 0
+
+Mon::StateSpace:
+  dt =  0.100000
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.001433,  0.006922];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.880013, 14.394958];
+   C  =  [ -1.000000, -1.000000];
+   D  =  [ -0.003000,  1.000000];
+   x_dot  =  [ -0.000246, -0.000002];
+   y  =  [ 14.383939];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res_ =         0.0150;  // Null, Ohms
+  cap_init_ =  360000.0;  // Farads
+  cap_ =       360000.0;  // Farads
+  tau_ =         5400.0;  // Null time const, sec
+  ib_ =           0.880;  // In, A
+  ioc_ =          0.006;  // Out, A
+  soc_ =         1.0000;  // Input
+  res_ =          0.015;  // Variable value, ohms
+  dv_dot_ =       0.000;  // Calculated rate, V/s
+  dv_hys_ =       0.000;  // Delta state, V
+  disabled_ =         0;  // Disabled by input < 1e-5, T=disab
+  rp.hys_scale=    1.00;  // Scalar on hys
+
+Sim::StateSpace:
+  dt =  0.100000
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.001457,  0.003024];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.941681, 14.544197];
+   C  =  [  1.000000,  1.000000];
+   D  =  [  0.003000,  1.000000];
+   x_dot  =  [  0.000495,  0.000051];
+   y  =  [ 14.551449];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res_ =         0.0150;  // Null, Ohms
+  cap_init_ =  360000.0;  // Farads
+  cap_ =       360000.0;  // Farads
+  tau_ =         5400.0;  // Null time const, sec
+  ib_ =           0.880;  // In, A
+  ioc_ =          0.008;  // Out, A
+  soc_ =         1.0000;  // Input
+  res_ =          0.015;  // Variable value, ohms
+  dv_dot_ =       0.000;  // Calculated rate, V/s
+  dv_hys_ =       0.000;  // Delta state, V
+  disabled_ =         0;  // Disabled by input < 1e-5, T=disab
+  rp.hys_scale=    1.00;  // Scalar on hys
+echo:  PM, 0
+
+Tweak::Shunt(Amp)::
+  port_ =                0x49; // I2C port used by Acafruit_ADS1015
+  bare_ =                   0; // If ADS to be ignored
+  *cp_ibatt_bias_ =    -0.230; // Global bias, A
+  v2a_s_ =            -246.67; // Selected shunt conversion gain, A/V
+  vshunt_int_ =           -19; // Sensed shunt voltage, count
+  ishunt_cal_ =         0.942; // Sensed, calibrated ADC, A
+Shunt(Amp)::Tweak(Amp)::
+  max_change_ =               0.001; // Maximum allowed change to calibration scalar see 'N/MC'
+  max_tweak_ =                0.010; // Maximum allowed calibration scalar see 'N/Mx'
+  rp_delta_q_cinf_ =      -359953.8; // Charge infinity at past update see 'N/Mi', Coulombs
+  rp_delta_q_dinf_ =       360000.0; // Discharge infinity at past update see 'N/Mi', Coulombs
+  sat_ =                          1; // Indication that battery is saturated, T=saturated
+  delta_hrs_ =             0.012564; // Time since last allowed saturation see 'N/Mz', hr
+  time_to_wait =           6.000000; // Time to wait before allowing saturation see 'N/Mw', hr
+  tweak_sclr =                1.000; // Scalar on Coulombic Efficiency 'N/Mk'
+  coul_eff_ =      0.99850;  // Coulombic Efficiency
+Shunt(Amp)::Adafruit_ADS1x15 (Amp):
+ m_bitShift =      4;
+ m_gain =       2048;
+ s_gain =       1024;
+ m_dataRate =    128;
+Adafruit_ADS1x15::Adafruit_I2CDevice (Amp):
+  _addr =        0x49;
+  _begun =          1;
+  _maxBufferSize = 32;
+echo:  PN, 0
+
+Tweak::Shunt(No Amp)::
+  port_ =                0x48; // I2C port used by Acafruit_ADS1015
+  bare_ =                   0; // If ADS to be ignored
+  *cp_ibatt_bias_ =    -0.570; // Global bias, A
+  v2a_s_ =            -1189.30; // Selected shunt conversion gain, A/V
+  vshunt_int_ =           -2; // Sensed shunt voltage, count
+  ishunt_cal_ =        -0.273; // Sensed, calibrated ADC, A
+Shunt(No Amp)::Tweak(No Amp)::
+  max_change_ =               0.001; // Maximum allowed change to calibration scalar see 'N/MC'
+  max_tweak_ =                0.010; // Maximum allowed calibration scalar see 'N/Mx'
+  rp_delta_q_cinf_ =      -360000.0; // Charge infinity at past update see 'N/Mi', Coulombs
+  rp_delta_q_dinf_ =       359990.8; // Discharge infinity at past update see 'N/Mi', Coulombs
+  sat_ =                          1; // Indication that battery is saturated, T=saturated
+  delta_hrs_ =             0.012592; // Time since last allowed saturation see 'N/Mz', hr
+  time_to_wait =           6.000000; // Time to wait before allowing saturation see 'N/Mw', hr
+  tweak_sclr =                1.000; // Scalar on Coulombic Efficiency 'N/Mk'
+  coul_eff_ =      0.99850;  // Coulombic Efficiency
+Shunt(No Amp)::Adafruit_ADS1x15 (No Amp):
+ m_bitShift =      4;
+ m_gain =       2560;
+ s_gain =       2560;
+ m_dataRate =    128;
+Adafruit_ADS1x15::Adafruit_I2CDevice (No Amp):
+  _addr =        0x48;
+  _begun =          1;
+  _maxBufferSize = 32;
+echo:  v4, 4
+echo:  v4, 0
+unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,,
+soc0_20220811, 2022-08-11T15:30:15,  53602221.524, 0.100,   1,  0,  0,  28.56,14.37773,1.00335,    13.81411,0.01155,14.36608,14.37169,  -0.005618, 1.00000,0.99877,1.00000,
+soc0_20220811, 2022-08-11T15:30:15,  53602221.923, 0.100,   1,  0,  0,  28.56,14.40788,1.00335,    13.81411,0.01158,14.39619,14.37177,   0.024417, 1.00000,0.99877,1.00000,
+soc0_20220811, 2022-08-11T15:30:16,  53602222.323, 0.100,   1,  0,  0,  28.56,14.38204,1.00335,    13.81411,0.01159,14.37035,14.37248,  -0.002134, 1.00000,0.99877,1.00000,
+soc0_20220811, 2022-08-11T15:30:16,  53602222.723, 0.100,   1,  0,  0,  28.56,14.39926,0.94168,    13.81411,0.01137,14.38779,14.37329,   0.014497, 1.00000,0.99878,1.00000,
+soc0_20220811, 2022-08-11T15:30:17,  53602223.124, 0.100,   1,  0,  0,  28.56,14.39065,0.94168,    13.81414,0.01138,14.37917,14.37123,   0.007936, 1.00000,0.99877,0.99998,
+soc0_20220811, 2022-08-11T15:30:17,  53602223.523, 0.100,   1,  0,  0,  28.56,14.39065,1.00335,    13.81414,0.01150,14.37904,14.36484,   0.014202, 0.99993,0.99872,0.99993,
+soc0_20220811, 2022-08-11T15:30:17,  53602223.923, 0.100,   1,  0,  0,  28.56,14.39926,0.94168,    13.81414,0.01132,14.38783,14.36571,   0.022126, 1.00000,0.99873,1.00000,
+soc0_20220811, 2022-08-11T15:30:18,  53602224.323, 0.100,   1,  0,  0,  28.56,14.38204,0.94168,    13.81414,0.01131,14.37061,14.36652,   0.004096, 1.00000,0.99873,1.00000,
+soc0_20220811, 2022-08-11T15:30:18,  53602224.723, 0.100,   1,  0,  0,  28.56,14.39065,0.88001,    13.81414,0.01104,14.37950,14.36729,   0.012204, 1.00000,0.99874,1.00000,
+soc0_20220811, 2022-08-11T15:30:19,  53602225.123, 0.100,   1,  0,  0,  28.56,14.40357,0.88001,    13.81414,0.01104,14.39241,14.36804,   0.024377, 1.00000,0.99874,1.00000,
+soc0_20220811, 2022-08-11T15:30:19,  53602225.524, 0.100,   1,  0,  0,  28.56,14.38635,0.88001,    13.81414,0.01103,14.37520,14.36902,   0.006182, 1.00000,0.99875,1.00000,
+soc0_20220811, 2022-08-11T15:30:19,  53602225.923, 0.100,   1,  0,  0,  28.56,14.39065,0.94168,    13.81414,0.01123,14.37931,14.36979,   0.009523, 1.00000,0.99876,1.00000,
+soc0_20220811, 2022-08-11T15:30:20,  53602226.323, 0.100,   1,  0,  0,  28.56,14.39926,0.88001,    13.81414,0.01107,14.38807,14.37033,   0.017743, 1.00000,0.99876,1.00000,
+soc0_20220811, 2022-08-11T15:30:20,  53602226.723, 0.100,   1,  0,  0,  28.56,14.37773,0.94168,    13.81414,0.01124,14.36637,14.37161,  -0.005233, 1.00000,0.99877,1.00000,
+soc0_20220811, 2022-08-11T15:30:21,  53602227.123, 0.100,   1,  0,  0,  28.56,14.39926,0.88001,    13.81414,0.01104,14.38811,14.37206,   0.016051, 1.00000,0.99877,1.00000,
+soc0_20220811, 2022-08-11T15:30:21,  53602227.524, 0.100,   1,  0,  0,  28.56,14.39065,0.88001,    13.81414,0.01110,14.37943,14.37247,   0.006954, 1.00000,0.99877,1.00000,
+soc0_20220811, 2022-08-11T15:30:21,  53602227.924, 0.100,   1,  0,  0,  28.56,14.38635,0.88001,    13.81414,0.01103,14.37519,14.37305,   0.002142, 1.00000,0.99878,1.00000,
+soc0_20220811, 2022-08-11T15:30:22,  53602228.324, 0.100,   1,  0,  0,  28.56,14.39065,0.88001,    13.81414,0.01104,14.37949,14.37330,   0.006190, 1.00000,0.99878,1.00000,
+soc0_20220811, 2022-08-11T15:30:22,  53602228.724, 0.100,   1,  0,  0,  28.56,14.38204,0.88001,    13.81414,0.01103,14.37089,14.37389,  -0.002996, 1.00000,0.99878,1.00000,
+soc0_20220811, 2022-08-11T15:30:23,  53602229.123, 0.100,   1,  0,  0,  28.56,14.39496,0.88001,    13.81417,0.01098,14.38386,14.37199,   0.011867, 1.00000,0.99877,0.99998,
+soc0_20220811, 2022-08-11T15:30:23,  53602229.523, 0.100,   1,  0,  0,  28.56,14.37773,0.88001,    13.81417,0.01103,14.36657,14.36612,   0.000458, 0.99994,0.99873,1.00000,
+soc0_20220811, 2022-08-11T15:30:23,  53602229.923, 0.100,   1,  0,  0,  28.56,14.38204,0.88001,    13.81417,0.01102,14.37089,14.36728,   0.003613, 1.00000,0.99874,1.00000,
+soc0_20220811, 2022-08-11T15:30:24,  53602230.323, 0.100,   1,  0,  0,  28.56,14.40357,0.88001,    13.81417,0.01102,14.39242,14.36784,   0.024577, 1.00000,0.99874,1.00000,
+soc0_20220811, 2022-08-11T15:30:24,  53602230.724, 0.100,   1,  0,  0,  28.56,14.38204,0.88001,    13.81417,0.01102,14.37089,14.36860,   0.002286, 1.00000,0.99875,1.00000,
+soc0_20220811, 2022-08-11T15:30:25,  53602231.123, 0.100,   1,  0,  0,  28.56,14.38204,0.88001,    13.81417,0.01097,14.37094,14.36969,   0.001252, 1.00000,0.99875,1.00000,
+soc0_20220811, 2022-08-11T15:30:25,  53602231.523, 0.100,   1,  0,  0,  28.56,14.39496,0.94168,    13.81417,0.01124,14.38359,14.37013,   0.013458, 1.00000,0.99876,1.00000,
+soc0_20220811, 2022-08-11T15:30:25,  53602231.924, 0.100,   1,  0,  0,  28.56,14.37773,0.94168,    13.81417,0.01130,14.36630,14.37076,  -0.004463, 1.00000,0.99876,1.00000,
+soc0_20220811, 2022-08-11T15:30:26,  53602232.323, 0.100,   1,  0,  0,  28.56,14.39496,0.94168,    13.81417,0.01131,14.38352,14.37132,   0.012205, 1.00000,0.99877,1.00000,
+soc0_20220811, 2022-08-11T15:30:26,  53602232.723, 0.100,   1,  0,  0,  28.56,14.38635,0.94168,    13.81417,0.01123,14.37498,14.37171,   0.003273, 1.00000,0.99877,1.00000,
+soc0_20220811, 2022-08-11T15:30:27,  53602233.124, 0.100,   1,  0,  0,  28.56,14.38635,1.00335,    13.81417,0.01149,14.37472,14.37238,   0.002341, 1.00000,0.99877,1.00000,
+soc0_20220811, 2022-08-11T15:30:27,  53602233.523, 0.100,   1,  0,  0,  28.56,14.39496,0.94168,    13.81417,0.01137,14.38346,14.37272,   0.010740, 1.00000,0.99878,1.00000,
+soc0_20220811, 2022-08-11T15:30:27,  53602233.923, 0.100,   1,  0,  0,  28.56,14.39496,1.00335,    13.81417,0.01156,14.38326,14.37309,   0.010166, 1.00000,0.99878,1.00000,
+soc0_20220811, 2022-08-11T15:30:28,  53602234.324, 0.100,   1,  0,  0,  28.56,14.39065,1.00335,    13.81417,0.01151,14.37900,14.37409,   0.004911, 1.00000,0.99879,1.00000,
+soc0_20220811, 2022-08-11T15:30:28,  53602234.723, 0.100,   1,  0,  0,  28.56,14.40357,0.94168,    13.81417,0.01141,14.39202,14.37422,   0.017801, 1.00000,0.99879,1.00000,
+soc0_20220811, 2022-08-11T15:30:29,  53602235.124, 0.100,   1,  0,  0,  28.56,14.38635,0.94168,    13.81419,0.01133,14.37488,14.37275,   0.002135, 1.00000,0.99878,0.99998,
+soc0_20220811, 2022-08-11T15:30:29,  53602235.523, 0.100,   1,  0,  0,  28.56,14.39496,1.00335,    13.81419,0.01159,14.38322,14.36839,   0.014832, 0.99995,0.99875,1.00000,
+soc0_20220811, 2022-08-11T15:30:29,  53602235.923, 0.100,   1,  0,  0,  28.56,14.39496,1.00335,    13.81419,0.01157,14.38325,14.36900,   0.014246, 1.00000,0.99875,1.00000,
+soc0_20220811, 2022-08-11T15:30:30,  53602236.323, 0.100,   1,  0,  0,  28.56,14.37773,0.94168,    13.81419,0.01142,14.36617,14.37004,  -0.003877, 1.00000,0.99876,1.00000,
+soc0_20220811, 2022-08-11T15:30:30,  53602236.724, 0.100,   1,  0,  0,  28.56,14.39926,1.00335,    13.81419,0.01161,14.38751,14.37027,   0.017243, 1.00000,0.99876,1.00000,
+echo:  v0, 4
+echo:  v0, 0
+echo:  v26, 4
+echo:  v26, 0
+unit_sel, 53602244.064, 0, 0,    0, 0,     -0.0012175, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.16038, 0.16399, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.37343,14.55281, 0, 14.37343,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602244.064, 28.56250,28.56250, 13.81421,14.54421,0.00841,14.55281,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602244.164, 0, 0,    0, 0,     -0.0012184, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.18188, 0.16486, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.39496,14.55279, 0, 14.39496,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602244.164, 28.56250,28.56250, 13.81421,14.54421,0.00839,14.55279,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602244.264, 0, 0,    0, 0,     -0.0012172, 0,   0.81835,-0.42134,0.88001,0.88001,0.88001,   1.23968, 0, 0,                0.16034, 0.16464, 0, 0,0, 0, 0,   1, 0.81835,0.88001, 0, 0.81835,    1, 14.39065,14.55278, 0, 14.39065,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602244.264, 28.56250,28.56250, 13.81421,14.54421,0.00838,14.55278,   0.880,  0.818,  0,    0.081712,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,,
+unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_stat_m, dv_dyn_m, vb_m, ib_m, ib_in_m, sat_m, ddq_m, dq_m, q_m, qcap_m, soc_m, reset_m,
+unit_s,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,cc_flt,  ibmh,ibnh,ibmm,ibnm,ibm,                   ib_dif,ib_dif_flt,ib_dif_fa,    e_w,e_w_f,wh_flt,wl_flt,wh_fa,wl_fa,wv_fa,     ib_sel,Ib_h,Ib_m,mib,Ib_s,          vb_sel,Vb_h,Vb_m,mvb,Vb_s,                Tb_h,Tb_s,mtb,Tb_f,  Vb_flt,Vb_fa,
+soc0_20220811, 2022-08-11T15:30:38,  53602244.323, 0.100,   1,  0,  0,  28.56,14.39065,0.81835,    13.81421,0.01090,14.37959,14.37383,   0.005759, 1.00000,0.99878,1.00000,
+unit_sel, 53602244.365, 0, 0,    0, 0,     -0.0012164, 0,   0.81835,-0.42134,0.81835,0.81835,0.81835,   1.23968, 0, 0,                0.16445, 0.16463, 0, 0,0, 0, 0,   1, 0.81835,0.81835, 0, 0.81835,    1, 14.40357,14.55259, 0, 14.40357,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602244.365, 28.56250,28.56250, 13.81421,14.54421,0.00819,14.55259,   0.818,  0.818,  0,    0.081712,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602244.464, 0, 0,    0, 0,     -0.0012143, 0,   0.88001,-0.27267,0.81835,0.81835,0.81835,   1.15269, 0, 0,                0.15148, 0.16399, 0, 0,0, 0, 0,   1, 0.88001,0.81835, 0, 0.88001,    1, 14.38635,14.55254, 0, 14.38635,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602244.464, 28.56250,28.56250, 13.81421,14.54421,0.00814,14.55254,   0.818,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602244.564, 0, 0,    0, 0,     -0.0012140, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.16886, 0.16423, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.37343,14.55270, 0, 14.37343,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602244.564, 28.56250,28.56250, 13.81421,14.54421,0.00830,14.55270,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602244.665, 0, 0,    0, 0,     -0.0012149, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.18181, 0.16509, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.36912,14.55274, 0, 14.36912,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602244.665, 28.56250,28.56250, 13.81421,14.54421,0.00834,14.55274,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:38,  53602244.727, 0.100,   1,  0,  0,  28.56,14.36912,0.88001,    13.81421,0.01105,14.35790,14.37415,  -0.016248, 1.00000,0.99878,1.00000,
+unit_sel, 53602244.764, 0, 0,    0, 0,     -0.0012163, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.18614, 0.16611, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.39065,14.55276, 0, 14.39065,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602244.764, 28.56250,28.56250, 13.81421,14.54421,0.00836,14.55276,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602244.864, 0, 0,    0, 0,     -0.0012155, 0,   0.88001,-0.42134,0.88001,0.88001,0.88001,   1.30135, 0, 0,                0.16462, 0.16604, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.40357,14.55277, 0, 14.40357,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602244.864, 28.56250,28.56250, 13.81421,14.54421,0.00837,14.55277,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602244.964, 0, 0,    0, 0,     -0.0012135, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.15170, 0.16534, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.39926,14.55278, 0, 14.39926,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602244.964, 28.56250,28.56250, 13.81421,14.54421,0.00838,14.55278,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602245.064, 0, 0,    0, 0,     -0.0012119, 0,   0.81835,-0.27267,0.88001,0.88001,0.88001,   1.09102, 0, 0,                0.15601, 0.16489, 0, 0,0, 0, 0,   1, 0.81835,0.88001, 0, 0.81835,    1, 14.38635,14.55278, 0, 14.38635,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602245.064, 28.56250,28.56250, 13.81421,14.54421,0.00838,14.55278,   0.880,  0.818,  0,    0.081712,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:39,  53602245.127, 0.100,   1,  0,  0,  28.56,14.38635,0.81835,    13.81421,0.01089,14.37529,14.37458,   0.000720, 1.00000,0.99879,1.00000,
+unit_sel, 53602245.165, 0, 0,    0, 0,     -0.0012116, 0,   0.81835,-0.42134,0.81835,0.81835,0.81835,   1.23968, 0, 0,                0.16874, 0.16507, 0, 0,0, 0, 0,   1, 0.81835,0.81835, 0, 0.81835,    1, 14.37773,14.55260, 0, 14.37773,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602245.165, 28.56250,28.56250, 13.81421,14.54421,0.00820,14.55260,   0.818,  0.818,  0,    0.081712,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602245.264, 0, 0,    0, 0,     -0.0012121, 0,   0.88001,-0.27267,0.81835,0.81835,0.81835,   1.15269, 0, 0,                0.17731, 0.16567, 0, 0,0, 0, 0,   1, 0.88001,0.81835, 0, 0.88001,    1, 14.37343,14.55256, 0, 14.37343,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602245.264, 28.56250,28.56250, 13.81421,14.54421,0.00815,14.55256,   0.818,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602245.364, 0, 0,    0, 0,     -0.0012131, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.18177, 0.16646, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.38635,14.55272, 0, 14.38635,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602245.364, 28.56250,28.56250, 13.81421,14.54421,0.00832,14.55272,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602245.464, 0, 0,    0, 0,     -0.0012128, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.16889, 0.16658, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.38635,14.55276, 0, 14.38635,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602245.464, 28.56250,28.56250, 13.81421,14.54421,0.00836,14.55276,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:39,  53602245.526, 0.100,   1,  0,  0,  28.56,14.38635,0.88001,    13.81421,0.01105,14.37513,14.37445,   0.000678, 1.00000,0.99879,1.00000,
+unit_sel, 53602245.564, 0, 0,    0, 0,     -0.0012125, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.16891, 0.16669, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.39496,14.55278, 0, 14.39496,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602245.564, 28.56250,28.56250, 13.81421,14.54421,0.00838,14.55278,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602245.664, 0, 0,    0, 0,     -0.0012113, 0,   0.81835,-0.42134,0.88001,0.88001,0.88001,   1.23968, 0, 0,                0.16031, 0.16638, 0, 0,0, 0, 0,   1, 0.81835,0.88001, 0, 0.81835,    1, 14.40357,14.55280, 0, 14.40357,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602245.664, 28.56250,28.56250, 13.81421,14.54421,0.00839,14.55280,   0.880,  0.818,  0,    0.081712,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602245.764, 0, 0,    0, 0,     -0.0012093, 0,   0.88001,-0.42134,0.81835,0.81835,0.81835,   1.30135, 0, 0,                0.15151, 0.16565, 0, 0,0, 0, 0,   1, 0.88001,0.81835, 0, 0.88001,    1, 14.38204,14.55262, 0, 14.38204,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602245.764, 28.56250,28.56250, 13.81421,14.54421,0.00821,14.55262,   0.818,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602245.864, 0, 0,    0, 0,     -0.0012095, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.17318, 0.16602, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.37343,14.55276, 0, 14.37343,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602245.864, 28.56250,28.56250, 13.81421,14.54421,0.00835,14.55276,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:39,  53602245.927, 0.100,   1,  0,  0,  28.56,14.37343,0.88001,    13.81421,0.01104,14.36222,14.37491,  -0.012691, 1.00000,0.99879,1.00000,
+unit_sel, 53602245.964, 0, 0,    0, 0,     -0.0012105, 0,   0.88001,-0.12401,0.88001,0.88001,0.88001,   1.00403, 0, 0,                0.18182, 0.16679, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.37773,14.55279, 0, 14.37773,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602245.964, 28.56250,28.56250, 13.81421,14.54421,0.00838,14.55279,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602246.065, 0, 0,    0, 0,     -0.0012111, 0,   0.94168,-0.27267,0.88001,0.88001,0.88001,   1.21436, 0, 0,                0.17753, 0.16731, 0, 0,0, 0, 0,   1, 0.94168,0.88001, 0, 0.94168,    1, 14.39065,14.55280, 0, 14.39065,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602246.065, 28.56250,28.56250, 13.81421,14.54421,0.00840,14.55280,   0.880,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602246.164, 0, 0,    0, 0,     -0.0012104, 0,   0.88001,-0.27267,0.94168,0.94168,0.94168,   1.15269, 0, 0,                0.16480, 0.16719, 0, 0,0, 0, 0,   1, 0.88001,0.94168, 0, 0.88001,    1, 14.39496,14.55300, 0, 14.39496,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602246.164, 28.56250,28.56250, 13.81421,14.54421,0.00859,14.55300,   0.942,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602246.264, 0, 0,    0, 0,     -0.0012092, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.16036, 0.16686, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.40788,14.55287, 0, 14.40788,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602246.264, 28.56250,28.56250, 13.81421,14.54421,0.00846,14.55287,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:40,  53602246.326, 0.100,   1,  0,  0,  28.56,14.40788,0.88001,    13.81421,0.01109,14.39662,14.37494,   0.021674, 1.00000,0.99879,1.00000,
+unit_sel, 53602246.365, 0, 0,    0, 0,     -0.0012068, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.14742, 0.16591, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.38204,14.55285, 0, 14.38204,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602246.365, 28.56250,28.56250, 13.81421,14.54421,0.00844,14.55285,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602246.464, 0, 0,    0, 0,     -0.0012070, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.17324, 0.16627, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.39065,14.55284, 0, 14.39065,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602246.464, 28.56250,28.56250, 13.81421,14.54421,0.00844,14.55284,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602246.564, 0, 0,    0, 0,     -0.0012064, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.16462, 0.16619, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.37773,14.55284, 0, 14.37773,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602246.564, 28.56250,28.56250, 13.81421,14.54421,0.00843,14.55284,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602246.664, 0, 0,    0, 0,     -0.0012070, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.17754, 0.16674, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.37773,14.55284, 0, 14.37773,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602246.664, 28.56250,28.56250, 13.81421,14.54421,0.00843,14.55284,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:40,  53602246.726, 0.100,   1,  0,  0,  28.56,14.37773,0.88001,    13.81421,0.01107,14.36650,14.37525,  -0.008755, 1.00000,0.99879,1.00000,
+unit_sel, 53602246.764, 0, 0,    0, 0,     -0.0012077, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.17754, 0.16727, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.38635,14.55284, 0, 14.38635,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602246.764, 28.56250,28.56250, 13.81421,14.54421,0.00843,14.55284,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602246.864, 0, 0,    0, 0,     -0.0012074, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.16892, 0.16735, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.39496,14.55284, 0, 14.39496,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602246.864, 28.56250,28.56250, 13.81421,14.54421,0.00844,14.55284,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602246.965, 0, 0,    0, 0,     -0.0012063, 0,   0.88001,-0.42134,0.88001,0.88001,0.88001,   1.30135, 0, 0,                0.16031, 0.16701, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.39065,14.55285, 0, 14.39065,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602246.965, 28.56250,28.56250, 13.81421,14.54421,0.00844,14.55285,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602247.065, 0, 0,    0, 0,     -0.0012057, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.16462, 0.16689, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.37773,14.55285, 0, 14.37773,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602247.065, 28.56250,28.56250, 13.81421,14.54421,0.00844,14.55285,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:41,  53602247.127, 0.100,   1,  0,  0,  28.56,14.37773,0.88001,    13.81422,0.01106,14.36650,14.37315,  -0.006647, 1.00000,0.99878,0.99998,
+unit_sel, 53602247.164, 0, 0,    0, 0,     -0.0012059, 0,   0.94168,-0.27267,0.88001,0.88001,0.88001,   1.21436, 0, 0,                0.17755, 0.16741, 0, 0,0, 0, 0,   1, 0.94168,0.88001, 0, 0.94168,    1, 14.38204,14.55287, 0, 14.38204,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602247.164, 28.56250,28.56250, 13.81422,14.54422,0.00844,14.55287,   0.880,  0.942,  0,    0.094027,     -5.7, 347169.3, 347175.0,   0.99998, 0, 
+unit_sel, 53602247.264, 0, 0,    0, 0,     -0.0012054, 0,   0.94168,-0.27267,0.94168,0.94168,0.94168,   1.21436, 0, 0,                0.17343, 0.16770, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.37343,14.55075, 0, 14.37343,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602247.264, 28.56250,28.56250, 13.81422,14.54192,0.00863,14.55075,   0.942,  0.942,  0,    0.094027,    -11.5, 347163.5, 347175.0,   0.99997, 0, 
+unit_sel, 53602247.364, 0, 0,    0, 0,     -0.0012063, 0,   0.88001,-0.27267,0.94168,0.94168,0.94168,   1.15269, 0, 0,                0.17975, 0.16829, 0, 0,0, 0, 0,   1, 0.88001,0.94168, 0, 0.88001,    1, 14.39496,14.54846, 0, 14.39496,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602247.364, 28.56250,28.56250, 13.81422,14.53957,0.00868,14.54846,   0.942,  0.880,  0,    0.087869,    -11.8, 347163.2, 347175.0,   0.99997, 0, 
+unit_sel, 53602247.464, 0, 0,    0, 0,     -0.0012391, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.15571, 0.16768, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.39926,14.54818, 0, 14.39926,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602247.464, 28.56250,28.56250, 13.81422,14.53945,0.00853,14.54818,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:41,  53602247.526, 0.100,   1,  0,  0,  28.56,14.39926,0.88001,    13.81422,0.01110,14.38799,14.37078,   0.017215, 1.00000,0.99876,1.00000,
+unit_sel, 53602247.565, 0, 0,    0, 0,     -0.0012372, 0,   0.88001,-0.42134,0.88001,0.88001,0.88001,   1.30135, 0, 0,                0.15124, 0.16688, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.39496,14.55292, 0, 14.39496,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602247.565, 28.56250,28.56250, 13.81422,14.54422,0.00849,14.55292,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602247.664, 0, 0,    0, 0,     -0.0012357, 0,   0.88001,-0.42134,0.88001,0.88001,0.88001,   1.30135, 0, 0,                0.16034, 0.16656, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.39496,14.55290, 0, 14.39496,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602247.664, 28.56250,28.56250, 13.81422,14.54422,0.00848,14.55290,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602247.764, 0, 0,    0, 0,     -0.0012342, 0,   0.88001,-0.27267,0.88001,0.88001,0.88001,   1.15269, 0, 0,                0.16033, 0.16625, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.38204,14.55290, 0, 14.38204,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602247.764, 28.56250,28.56250, 13.81422,14.54422,0.00847,14.55290,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602247.864, 0, 0,    0, 0,     -0.0012340, 0,   0.88001,-0.12401,0.88001,0.88001,0.88001,   1.00403, 0, 0,                0.17325, 0.16659, 0, 0,0, 0, 0,   1, 0.88001,0.88001, 0, 0.88001,    1, 14.37343,14.55289, 0, 14.37343,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602247.864, 28.56250,28.56250, 13.81422,14.54422,0.00847,14.55289,   0.880,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:41,  53602247.926, 0.100,   1,  0,  0,  28.56,14.37343,0.88001,    13.81422,0.01107,14.36219,14.37149,  -0.009305, 1.00000,0.99877,1.00000,
+unit_sel, 53602247.965, 0, 0,    0, 0,     -0.0012347, 0,   0.94168,-0.27267,0.88001,0.88001,0.88001,   1.21436, 0, 0,                0.18186, 0.16734, 0, 0,0, 0, 0,   1, 0.94168,0.88001, 0, 0.94168,    1, 14.39065,14.55289, 0, 14.39065,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602247.965, 28.56250,28.56250, 13.81422,14.54422,0.00847,14.55289,   0.880,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602248.064, 0, 0,    0, 0,     -0.0012336, 0,   0.88001,-0.42134,0.94168,0.94168,0.94168,   1.30135, 0, 0,                0.16482, 0.16722, 0, 0,0, 0, 0,   1, 0.88001,0.94168, 0, 0.88001,    1, 14.39926,14.55308, 0, 14.39926,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602248.064, 28.56250,28.56250, 13.81422,14.54422,0.00866,14.55308,   0.942,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602248.164, 0, 0,    0, 0,     -0.0012318, 0,   0.94168,-0.27267,0.88001,0.88001,0.88001,   1.21436, 0, 0,                0.15607, 0.16667, 0, 0,0, 0, 0,   1, 0.94168,0.88001, 0, 0.94168,    1, 14.39065,14.55295, 0, 14.39065,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602248.164, 28.56250,28.56250, 13.81422,14.54422,0.00852,14.55295,   0.880,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602248.264, 0, 0,    0, 0,     -0.0012308, 0,   0.94168,-0.27267,0.94168,0.94168,0.94168,   1.21436, 0, 0,                0.16484, 0.16658, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.39926,14.55311, 0, 14.39926,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602248.264, 28.56250,28.56250, 13.81422,14.54422,0.00869,14.55311,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:42,  53602248.326, 0.100,   1,  0,  0,  28.56,14.39926,0.94168,    13.81422,0.01131,14.38778,14.37194,   0.015836, 1.00000,0.99877,1.00000,
+unit_sel, 53602248.364, 0, 0,    0, 0,     -0.0012289, 0,   0.94168,-0.27267,0.94168,0.94168,0.94168,   1.21436, 0, 0,                0.15627, 0.16608, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.38204,14.55315, 0, 14.38204,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602248.364, 28.56250,28.56250, 13.81422,14.54422,0.00873,14.55315,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602248.464, 0, 0,    0, 0,     -0.0012288, 0,   0.94168,-0.27267,0.94168,0.94168,0.94168,   1.21436, 0, 0,                0.17351, 0.16644, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.38635,14.55317, 0, 14.38635,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602248.464, 28.56250,28.56250, 13.81422,14.54422,0.00875,14.55317,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602248.565, 0, 0,    0, 0,     -0.0012283, 0,   0.88001,-0.27267,0.94168,0.94168,0.94168,   1.15269, 0, 0,                0.16921, 0.16658, 0, 0,0, 0, 0,   1, 0.88001,0.94168, 0, 0.88001,    1, 14.38204,14.55319, 0, 14.38204,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602248.565, 28.56250,28.56250, 13.81422,14.54422,0.00876,14.55319,   0.942,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602248.664, 0, 0,    0, 0,     -0.0012282, 0,   0.94168,-0.27267,0.88001,0.88001,0.88001,   1.21436, 0, 0,                0.17334, 0.16691, 0, 0,0, 0, 0,   1, 0.94168,0.88001, 0, 0.94168,    1, 14.39926,14.55301, 0, 14.39926,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602248.664, 28.56250,28.56250, 13.81422,14.54422,0.00858,14.55301,   0.880,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:42,  53602248.726, 0.100,   1,  0,  0,  28.56,14.39926,0.94168,    13.81422,0.01130,14.38779,14.37230,   0.015490, 1.00000,0.99877,1.00000,
+unit_sel, 53602248.765, 0, 0,    0, 0,     -0.0012264, 0,   0.88001,-0.27267,0.94168,0.94168,0.94168,   1.15269, 0, 0,                0.15625, 0.16639, 0, 0,0, 0, 0,   1, 0.88001,0.94168, 0, 0.88001,    1, 14.39065,14.55315, 0, 14.39065,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602248.765, 28.56250,28.56250, 13.81422,14.54422,0.00873,14.55315,   0.942,  0.880,  0,    0.087869,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602248.864, 0, 0,    0, 0,     -0.0012255, 0,   0.94168,-0.27267,0.88001,0.88001,0.88001,   1.21436, 0, 0,                0.16470, 0.16630, 0, 0,0, 0, 0,   1, 0.94168,0.88001, 0, 0.94168,    1, 14.40357,14.55300, 0, 14.40357,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602248.864, 28.56250,28.56250, 13.81422,14.54422,0.00857,14.55300,   0.880,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602248.965, 0, 0,    0, 0,     -0.0012233, 0,   0.94168,-0.27267,0.94168,0.94168,0.94168,   1.21436, 0, 0,                0.15193, 0.16560, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.38635,14.55315, 0, 14.38635,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602248.965, 28.56250,28.56250, 13.81422,14.54422,0.00872,14.55315,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602249.064, 0, 0,    0, 0,     -0.0012229, 0,   1.00335,-0.27267,0.94168,0.94168,0.94168,   1.27602, 0, 0,                0.16919, 0.16578, 0, 0,0, 0, 0,   1, 1.00335,0.94168, 0, 1.00335,    1, 14.39065,14.55318, 0, 14.39065,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602249.064, 28.56250,28.56250, 13.81422,14.54422,0.00876,14.55318,   0.942,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:43,  53602249.126, 0.100,   1,  0,  0,  28.56,14.39065,1.00335,    13.81422,0.01152,14.37896,14.37305,   0.005905, 1.00000,0.99878,1.00000,
+unit_sel, 53602249.165, 0, 0,    0, 0,     -0.0012220, 0,   0.94168,-0.27267,1.00335,1.00335,1.00335,   1.21436, 0, 0,                0.16508, 0.16574, 0, 0,0, 0, 0,   1, 0.94168,1.00335, 0, 0.94168,    1, 14.38204,14.55339, 0, 14.38204,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602249.165, 28.56250,28.56250, 13.81422,14.54422,0.00896,14.55339,   1.003,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602249.265, 0, 0,    0, 0,     -0.0012220, 0,   0.94168,-0.27267,0.94168,0.94168,0.94168,   1.21436, 0, 0,                0.17357, 0.16613, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.39065,14.55326, 0, 14.39065,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602249.265, 28.56250,28.56250, 13.81422,14.54422,0.00884,14.55326,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602249.364, 0, 0,    0, 0,     -0.0012212, 0,   1.00335,-0.27267,0.94168,0.94168,0.94168,   1.27602, 0, 0,                0.16494, 0.16607, 0, 0,0, 0, 0,   1, 1.00335,0.94168, 0, 1.00335,    1, 14.38635,14.55325, 0, 14.38635,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602249.364, 28.56250,28.56250, 13.81422,14.54422,0.00882,14.55325,   0.942,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602249.465, 0, 0,    0, 0,     -0.0012208, 0,   0.94168,-0.27267,1.00335,1.00335,1.00335,   1.21436, 0, 0,                0.16942, 0.16623, 0, 0,0, 0, 0,   1, 0.94168,1.00335, 0, 0.94168,    1, 14.40357,14.55342, 0, 14.40357,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602249.465, 28.56250,28.56250, 13.81422,14.54422,0.00900,14.55342,   1.003,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:43,  53602249.527, 0.100,   1,  0,  0,  28.56,14.40357,0.94168,    13.81422,0.01140,14.39199,14.37335,   0.018642, 1.00000,0.99878,1.00000,
+unit_sel, 53602249.565, 0, 0,    0, 0,     -0.0012187, 0,   0.94168,-0.27267,0.94168,0.94168,0.94168,   1.21436, 0, 0,                0.15205, 0.16554, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.39496,14.55329, 0, 14.39496,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602249.565, 28.56250,28.56250, 13.81422,14.54422,0.00886,14.55329,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602249.664, 0, 0,    0, 0,     -0.0012174, 0,   0.94168,-0.27267,0.94168,0.94168,0.94168,   1.21436, 0, 0,                0.16064, 0.16530, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.37343,14.55326, 0, 14.37343,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602249.664, 28.56250,28.56250, 13.81422,14.54422,0.00884,14.55326,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602249.764, 0, 0,    0, 0,     -0.0012184, 0,   0.94168,-0.12401,0.94168,0.94168,0.94168,   1.06569, 0, 0,                0.18216, 0.16612, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.37773,14.55325, 0, 14.37773,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602249.764, 28.56250,28.56250, 13.81422,14.54422,0.00882,14.55325,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602249.864, 0, 0,    0, 0,     -0.0012188, 0,   0.94168,-0.12401,0.94168,0.94168,0.94168,   1.06569, 0, 0,                0.17784, 0.16670, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.37773,14.55325, 0, 14.37773,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602249.864, 28.56250,28.56250, 13.81422,14.54422,0.00882,14.55325,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:43,  53602249.926, 0.100,   1,  0,  0,  28.56,14.37773,0.94168,    13.81422,0.01135,14.36620,14.37361,  -0.007412, 1.00000,0.99878,1.00000,
+unit_sel, 53602249.964, 0, 0,    0, 0,     -0.0012193, 0,   0.94168,-0.27267,0.94168,0.94168,0.94168,   1.21436, 0, 0,                0.17784, 0.16724, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.40357,14.55325, 0, 14.40357,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602249.964, 28.56250,28.56250, 13.81422,14.54422,0.00882,14.55325,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602250.064, 0, 0,    0, 0,     -0.0012172, 0,   0.94168,-0.27267,0.94168,0.94168,0.94168,   1.21436, 0, 0,                0.15200, 0.16650, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.40357,14.55325, 0, 14.40357,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602250.064, 28.56250,28.56250, 13.81422,14.54422,0.00882,14.55325,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602250.165, 0, 0,    0, 0,     -0.0012152, 0,   0.94168,-0.27267,0.94168,0.94168,0.94168,   1.21436, 0, 0,                0.15200, 0.16579, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.39496,14.55326, 0, 14.39496,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602250.165, 28.56250,28.56250, 13.81422,14.54422,0.00883,14.55326,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602250.265, 0, 0,    0, 0,     -0.0012140, 0,   1.00335,-0.27267,0.94168,0.94168,0.94168,   1.27602, 0, 0,                0.16061, 0.16554, 0, 0,0, 0, 0,   1, 1.00335,0.94168, 0, 1.00335,    1, 14.38204,14.55326, 0, 14.38204,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602250.265, 28.56250,28.56250, 13.81422,14.54422,0.00883,14.55326,   0.942,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:44,  53602250.327, 0.100,   1,  0,  0,  28.56,14.38204,1.00335,    13.81422,0.01154,14.37032,14.37431,  -0.003983, 1.00000,0.99879,1.00000,
+unit_sel, 53602250.364, 0, 0,    0, 0,     -0.0012141, 0,   1.00335,-0.12401,1.00335,1.00335,1.00335,   1.12736, 0, 0,                0.17372, 0.16594, 0, 0,0, 0, 0,   1, 1.00335,1.00335, 0, 1.00335,    1, 14.37773,14.55345, 0, 14.37773,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602250.364, 28.56250,28.56250, 13.81422,14.54422,0.00902,14.55345,   1.003,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602250.464, 0, 0,    0, 0,     -0.0012146, 0,   0.94168,-0.27267,1.00335,1.00335,1.00335,   1.21436, 0, 0,                0.17807, 0.16653, 0, 0,0, 0, 0,   1, 0.94168,1.00335, 0, 0.94168,    1, 14.38204,14.55350, 0, 14.38204,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602250.464, 28.56250,28.56250, 13.81422,14.54422,0.00907,14.55350,   1.003,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602250.564, 0, 0,    0, 0,     -0.0012148, 0,   0.94168,-0.27267,0.94168,0.94168,0.94168,   1.21436, 0, 0,                0.17361, 0.16687, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.39496,14.55334, 0, 14.39496,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602250.564, 28.56250,28.56250, 13.81422,14.54422,0.00891,14.55334,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602250.665, 0, 0,    0, 0,     -0.0012136, 0,   0.94168,-0.27267,0.94168,0.94168,0.94168,   1.21436, 0, 0,                0.16065, 0.16657, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.40788,14.55331, 0, 14.40788,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602250.665, 28.56250,28.56250, 13.81422,14.54422,0.00888,14.55331,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:44,  53602250.727, 0.100,   1,  0,  0,  28.56,14.40788,0.94168,    13.81422,0.01137,14.39632,14.37436,   0.021966, 1.00000,0.99879,1.00000,
+unit_sel, 53602250.764, 0, 0,    0, 0,     -0.0012111, 0,   0.94168,-0.12401,0.94168,0.94168,0.94168,   1.06569, 0, 0,                0.14772, 0.16565, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.39926,14.55330, 0, 14.39926,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602250.764, 28.56250,28.56250, 13.81422,14.54422,0.00886,14.55330,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602250.864, 0, 0,    0, 0,     -0.0012096, 0,   1.00335,-0.27267,0.94168,0.94168,0.94168,   1.27602, 0, 0,                0.15632, 0.16519, 0, 0,0, 0, 0,   1, 1.00335,0.94168, 0, 1.00335,    1, 14.39065,14.55329, 0, 14.39065,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602250.864, 28.56250,28.56250, 13.81422,14.54422,0.00886,14.55329,   0.942,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602250.964, 0, 0,    0, 0,     -0.0012089, 0,   0.94168,-0.27267,1.00335,1.00335,1.00335,   1.21436, 0, 0,                0.16511, 0.16519, 0, 0,0, 0, 0,   1, 0.94168,1.00335, 0, 0.94168,    1, 14.38635,14.55347, 0, 14.38635,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602250.964, 28.56250,28.56250, 13.81422,14.54422,0.00904,14.55347,   1.003,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602251.064, 0, 0,    0, 0,     -0.0012087, 0,   0.94168,-0.12401,0.94168,0.94168,0.94168,   1.06569, 0, 0,                0.16928, 0.16539, 0, 0,0, 0, 0,   1, 0.94168,0.94168, 0, 0.94168,    1, 14.38204,14.55334, 0, 14.38204,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602251.064, 28.56250,28.56250, 13.81422,14.54422,0.00891,14.55334,   0.942,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:45,  53602251.126, 0.100,   1,  0,  0,  28.56,14.38204,0.94168,    13.81422,0.01138,14.37048,14.37504,  -0.004564, 1.00000,0.99879,1.00000,
+unit_sel, 53602251.165, 0, 0,    0, 0,     -0.0012089, 0,   1.00335,-0.27267,0.94168,0.94168,0.94168,   1.27602, 0, 0,                0.17356, 0.16579, 0, 0,0, 0, 0,   1, 1.00335,0.94168, 0, 1.00335,    1, 14.38635,14.55332, 0, 14.38635,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602251.165, 28.56250,28.56250, 13.81422,14.54422,0.00889,14.55332,   0.942,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602251.264, 0, 0,    0, 0,     -0.0012086, 0,   0.94168,-0.12401,1.00335,1.00335,1.00335,   1.06569, 0, 0,                0.16943, 0.16597, 0, 0,0, 0, 0,   1, 0.94168,1.00335, 0, 0.94168,    1, 14.38635,14.55349, 0, 14.38635,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602251.264, 28.56250,28.56250, 13.81422,14.54422,0.00906,14.55349,   1.003,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602251.364, 0, 0,    0, 0,     -0.0012084, 0,   1.00335,-0.12401,0.94168,0.94168,0.94168,   1.12736, 0, 0,                0.16929, 0.16613, 0, 0,0, 0, 0,   1, 1.00335,0.94168, 0, 1.00335,    1, 14.39496,14.55336, 0, 14.39496,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602251.364, 28.56250,28.56250, 13.81422,14.54422,0.00892,14.55336,   0.942,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602251.465, 0, 0,    0, 0,     -0.0012073, 0,   1.00335,-0.12401,1.00335,1.00335,1.00335,   1.12736, 0, 0,                0.16083, 0.16587, 0, 0,0, 0, 0,   1, 1.00335,1.00335, 0, 1.00335,    1, 14.39496,14.55352, 0, 14.39496,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602251.465, 28.56250,28.56250, 13.81422,14.54422,0.00908,14.55352,   1.003,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:45,  53602251.527, 0.100,   1,  0,  0,  28.56,14.39496,1.00335,    13.81422,0.01161,14.38317,14.37523,   0.007936, 1.00000,0.99879,1.00000,
+unit_sel, 53602251.565, 0, 0,    0, 0,     -0.0012062, 0,   1.00335,-0.27267,1.00335,1.00335,1.00335,   1.27602, 0, 0,                0.16087, 0.16563, 0, 0,0, 0, 0,   1, 1.00335,1.00335, 0, 1.00335,    1, 14.37773,14.55356, 0, 14.37773,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602251.565, 28.56250,28.56250, 13.81422,14.54422,0.00912,14.55356,   1.003,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602251.665, 0, 0,    0, 0,     -0.0012069, 0,   1.00335,-0.12401,1.00335,1.00335,1.00335,   1.12736, 0, 0,                0.17811, 0.16623, 0, 0,0, 0, 0,   1, 1.00335,1.00335, 0, 1.00335,    1, 14.38204,14.55358, 0, 14.38204,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602251.665, 28.56250,28.56250, 13.81422,14.54422,0.00914,14.55358,   1.003,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602251.764, 0, 0,    0, 0,     -0.0012071, 0,   1.00335,-0.12401,1.00335,1.00335,1.00335,   1.12736, 0, 0,                0.17382, 0.16660, 0, 0,0, 0, 0,   1, 1.00335,1.00335, 0, 1.00335,    1, 14.37343,14.55359, 0, 14.37343,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602251.764, 28.56250,28.56250, 13.81422,14.54422,0.00916,14.55359,   1.003,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602251.865, 0, 0,    0, 0,     -0.0012082, 0,   1.00335,-0.27267,1.00335,1.00335,1.00335,   1.27602, 0, 0,                0.18243, 0.16738, 0, 0,0, 0, 0,   1, 1.00335,1.00335, 0, 1.00335,    1, 14.38635,14.55360, 0, 14.38635,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602251.865, 28.56250,28.56250, 13.81422,14.54422,0.00916,14.55360,   1.003,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:45,  53602251.926, 0.100,   1,  0,  0,  28.56,14.38635,1.00335,    13.81422,0.01164,14.37452,14.37511,  -0.000587, 1.00000,0.99879,1.00000,
+unit_sel, 53602251.964, 0, 0,    0, 0,     -0.0012080, 0,   1.00335,-0.12401,1.00335,1.00335,1.00335,   1.12736, 0, 0,                0.16952, 0.16748, 0, 0,0, 0, 0,   1, 1.00335,1.00335, 0, 1.00335,    1, 14.38635,14.55361, 0, 14.38635,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602251.964, 28.56250,28.56250, 13.81422,14.54422,0.00917,14.55361,   1.003,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602252.064, 0, 0,    0, 0,     -0.0012078, 0,   1.00335,-0.12401,1.00335,1.00335,1.00335,   1.12736, 0, 0,                0.16952, 0.16758, 0, 0,0, 0, 0,   1, 1.00335,1.00335, 0, 1.00335,    1, 14.39926,14.55361, 0, 14.39926,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602252.064, 28.56250,28.56250, 13.81422,14.54422,0.00918,14.55361,   1.003,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602252.165, 0, 0,    0, 0,     -0.0012063, 0,   1.00335,-0.27267,1.00335,1.00335,1.00335,   1.27602, 0, 0,                0.15660, 0.16705, 0, 0,0, 0, 0,   1, 1.00335,1.00335, 0, 1.00335,    1, 14.39065,14.55362, 0, 14.39065,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602252.165, 28.56250,28.56250, 13.81422,14.54422,0.00918,14.55362,   1.003,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602252.264, 0, 0,    0, 0,     -0.0012057, 0,   1.00335,-0.27267,1.00335,1.00335,1.00335,   1.27602, 0, 0,                0.16522, 0.16696, 0, 0,0, 0, 0,   1, 1.00335,1.00335, 0, 1.00335,    1, 14.37773,14.55362, 0, 14.37773,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602252.264, 28.56250,28.56250, 13.81422,14.54422,0.00918,14.55362,   1.003,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+soc0_20220811, 2022-08-11T15:30:46,  53602252.326, 0.100,   1,  0,  0,  28.56,14.37773,1.00335,    13.81422,0.01165,14.36590,14.37547,  -0.009566, 1.00000,0.99879,1.00000,
+unit_sel, 53602252.364, 0, 0,    0, 0,     -0.0012064, 0,   1.00335,-0.27267,1.00335,1.00335,1.00335,   1.27602, 0, 0,                0.17813, 0.16750, 0, 0,0, 0, 0,   1, 1.00335,1.00335, 0, 1.00335,    1, 14.37343,14.55362, 0, 14.37343,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602252.364, 28.56250,28.56250, 13.81422,14.54422,0.00919,14.55362,   1.003,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+unit_sel, 53602252.465, 0, 0,    0, 0,     -0.0012074, 0,   1.00335,-0.27267,1.00335,1.00335,1.00335,   1.27602, 0, 0,                0.18244, 0.16823, 0, 0,0, 0, 0,   1, 1.00335,1.00335, 0, 1.00335,    1, 14.39065,14.55363, 0, 14.39065,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602252.465, 28.56250,28.56250, 13.81422,14.54422,0.00919,14.55363,   1.003,  1.003,  0,    0.100184,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+echo:  v0, 4
+unit_sel, 53602252.565, 0, 0,    0, 0,     -0.0012068, 0,   0.94168,-0.27267,1.00335,1.00335,1.00335,   1.21436, 0, 0,                0.16522, 0.16808, 0, 0,0, 0, 0,   1, 0.94168,1.00335, 0, 0.94168,    1, 14.39065,14.55363, 0, 14.39065,   28.56,28.56, 0, 28.55,  0, 0, 
+unit_sim,  53602252.565, 28.56250,28.56250, 13.81422,14.54422,0.00920,14.55363,   1.003,  0.942,  0,    0.094027,      0.0, 347175.0, 347175.0,   1.00000, 0, 
+echo:  v0, 0
+echo:  h, 4
+echo:  h, 0
+
+
+**** TALK ****
+Help talk.   Entries and curr values.  Entries followed by CR or ';'
+B<?> Battery assignments.   For example:
+  Bm=  0.  Mon chem 0='BB', 1='LI' [0]
+  Bs=  0.  Sim chem 0='BB', 1='LI' [0]
+  BP=   1.00.  # parallel in bank [ 1.00]'
+  BS=   1.00.  # series in bank [ 1.00]'
+C<?> Charge assignments.   For example:
+  Ca=  set soc in all - '(0-1.1)'
+  Cm=  set soc model only (and ekf if modeling)- '(0-1.1)'
+D/S<?> Adjustments.   For example:
+  Da=  -0.230    : delta amp sense, A [ -0.230]
+  Db=  -0.570    : delta noa sense, A [ -0.570]
+  Di=   0.000    : delta all sense, A [  0.000]
+  Dc=   0.000    : delta sense, V [  0.000]
+  Du= 1.00       : coul eff
+  Dm=   0.000    : delta amp, A [0]
+  Dn=   0.000    : delta noamp, A [0]
+  Dp= 400       : publish frame, ms [400]
+  Dr= 100       : minor frame, ms [100]
+  Dt=   0.000    : delta sense, deg C [  0.000]
+  Dv= 0.00       : voltage fault inj, V [0]
+  Dw= 0.01       : Table adjust, V [0.01]
+  DT=   0.000    : Tbatt noise for model, deg C pk-pk [  0.000]
+  DV=   0.000    : Vbatt noise for model, V pk-pk [  0.000]
+  DI=   0.000    : Ibatt noise for model, A pk-pk [  0.000]
+  Sc= 1.00       : Scalar model size
+  Sh=   1.000    : hysteresis scalar 1e-6 - 100 [1]
+  Sm=   1.000    : scalar amp, [1]
+  Sn=   1.000    : scalar noamp [1]
+  Sr= 1.00       : Scalar res sim
+  Sk= 1.00       : Sat model cutback scalar
+H<?>   Manage history
+  Hd= dump summary log
+  HR= reset summary log
+  Hs= save and print log
+M<?> Amp tweaks
+  MC=   0.001    : Amp Coul eff max change allowed scakar [0.001]
+  Mk=   1.000    : Amp Coul eff scalar [1]
+  Mw=   6.000    : Amp time to wait for next tweak, hr [18]]
+  Mx=   0.010    : Amp Coul eff max allowed scalar [0.01]
+  Mz=   0.037    : Amp time since last tweak, hr [varies]
+N<?> No amp tweaks
+  NC=   0.001    : No Amp Coul eff max change allowed scakar [0.001]
+  Nk=   1.000    : No Amp Coul eff scalar [1]
+  Nw=   6.000    : No Amp time to wait for next tweak, hr [18]]
+  Nx=   0.010    : Amp Coul eff max allowed scalar [0.01]
+  Nz=   0.037    : No Amp time since last tweak, hr [varies]
+P<?>   Print Battery values
+  Pa= all
+  Pc= all coulombs
+  Pe= ekf
+  Pm= monitor
+  PM= amp tweak
+  PN= no amp tweak
+  Pr= retained and command
+  Ps= simulation
+  Pt= all state-space
+  Px= current signal selection
+  Pv= voltage signal details
+Q      vital stats
+R<?>   Reset
+  Rb= reset batteries to current inputs
+  Re= equalize delta_q in Sim to Mon
+  Rf= reset fault logic latches
+  Rh= reset all hys
+  Ri= reset all delta_q_inf
+  Rr= saturate battery monitor and equalize Sim & Mon
+  RR= saturate, equalize, & nominalize all testing for DEPLOY
+  Rs= small reset.  Reset flags to reinitialize filters
+s   curr signal select (-1=noamp, 0=auto, 1=amp) = 0
+v=  0    : verbosity, -128 - +128. [2]
+    -<>:   Negative - Arduino plot compatible
+    v-1:   GP Arduino plot
+  +/-v3:   Powert
+     v4:   GP
+  +/-v5:   OLED display
+     v6:   EKF solver iter during init
+     v7:   EKF solver summary during init
+    v-7:   Battery i/o Arduino plot
+     v8:   Randles state space init
+   v-11:   Summary Arduino
+ +/-v12:   EKF
+ +/-v14:   vshunt and Ibatt raw
+    v15:   vb raw
+    v16:   Tbatt
+    v24:   Sim
+    v25:   Blynk write
+    v26:   Signal selection
+ +/-v34:   EKF detailed
+   v-35:   EKF summary Arduino
+    v35:   Randles balance
+ +/-v37:   EKF short
+   v-41:   Inj
+    v75:   voc_low check model
+    v76:   vb model
+ +/-v78:   Batt model saturation
+    v79:   sat_ib model
+ +/-v96:   CC saturation
+ +/-v97:   CC model saturation
+w   turn on wifi = 0
+W<?>  - iterations to wait
+X<?> - Test Mode.   For example:
+  Xd= 0,   dc-dc charger on [0]
+  Xm= 0,   modeling bitmap [000]
+       0x8 tweak_test = 0
+       0x4 current = 0
+       0x2 voltage = 0
+       0x1 temp = 0
+  Xa=   0.000  : Inj amp A pk (0-18.3) [0]
+  Xb=   0.000  : Inj bias A [0]
+  Xf=   0.000  : Inj freq Hz (0-2) [0]
+  Xt= 0  : Inj type.  'c', 's', 'q', 't' (cos, sine, square, tri)
+  Xo=   0.000  : Inj inj_bias A (-18.3-18.3) [0]
+  Di=   0.000  : Inj  A (unlimited) [0]
+  Xp= <?>, programmed inj settings...
+      Xp-1:  Off, modeling false
+      Xp0:  steady-state modeling
+      Xp1:  1 Hz sine about 0
+      Xp2:  1 Hz square about 0
+      Xp3:  1 Hz triangle about 0
+      Xp4:  -1C soft discharge, reset xp0 or Di0
+      Xp5:  +1C soft charge
+      Xp6:  +/-500 A pulse
+      Xp9:  silent tweak reg test
+      Xp10:  tweak reg test
+      Xp11:  slow cycle reg test
+      Xp12:  slow cycle reg test - half cycle
+      Xp20:  tweak-like data collection
+      Xp21:  slow data collection
+  XC=   0.000 cycles inj
+  XR  RUN inj
+  XS  STOP inj
+  XW= 134856.72 s wait start inj
+  XT= 536995.78 s tail end inj
+z   toggle BLYNK = 0
+ urgency levels of commands:  -=ASAP, *=SOON , '',+=QUEUE
+h   this menu
+echo:  Pr, 4
+echo:  Pr, 0
+ unk.  See 'h'
+echo:  Pr, 4
+echo:  Pr, 0
+
+retained parameters (rp):
+  debug =                 0;  // Level of debug printing
+  delta_q =           0.000;  // CC state Monf, (-1 - 1)
+  t_last =           28.563;  // Battery temp past rate limit mem, deg C
+  delta_q_model =       0.0;  // CC state model, (-1 - 1)
+  t_last_model =     28.562;  // Battery temp past rate limit mem, deg C
+  ibatt_bias_amp =   -0.230;  // Calibrate amp sensor, A
+  ibatt_bias_noamp = -0.570;  // Calibrate non-amp sensor, A
+  ibatt_bias_all =    0.000;  // Bias all sensors, A 
+  ibatt_select =          0;  // -1=noamp, 0=auto, 1=amp
+  vbatt_bias =        0.000;  // Calibrate Vbatt, V
+  modeling =              0;  // Bit mapped mod spec
+  amp =               0.000;  // Injected amp, A pk (0-18.3)
+  freq =              0.000;  // Injected freq, r/s (0-2*pi)
+  type =                  0;  //  Injected wave.  0=sin, 1=sq, 2=tri
+  inj_bias =          0.000;  // Injected bias, A
+  tbatt_bias =        0.000;  // Sense bias, deg C
+  s_cap_model =       1.000;  // Scalar on battery mod size
+  cutback_gain_scalar=  1.000;  // Scalar on battery mod saturation cutback function
+  isum =                  0;  // Summary location ptr.   Begins at -1
+  delta_q_cinf_amp =  -359812.0;  // Coul
+  delta_q_dinf_amp =   360000.0;  // Coul
+  delta_q_cinf_noamp= -360000.0;  // Coul
+  delta_q_dinf_noamp=  359957.1;  // Coul
+  hys_scale =         1.000;  //  Hysteresis scalar
+  tweak_sclr_amp =    1.000;  // Tweak calibration for amp current
+  tweak_sclr_noamp =  1.000;  // Tweak calibration for non-amp current
+  nP =                 1.00;  // Num parallel batteries in bank, e.g. '2P1S'
+  nS =                 1.00;  // Num series batteries in bank, e.g. '2P1S'
+  mon_mod =               0;  //  Mon battery model chars.  0=Battleborn, 1=LION
+  sim_mod =               0;  //  Sim battery model chars.  0=Battleborn, 1=LION
+
+command parameters(cp):
+  enable_wifi =                0;
+  model_cutback =              1;
+  model_saturated =            0;
+  soft_reset =                 0;
+  write_summary =              0;
+  ibatt_tot_bias_amp =    -0.230;
+  ibatt_tot_bias_noamp =  -0.570;
+  dc_dc_on =                   0;
+  blynking =                   0;
+echo:  h, 4
+echo:  h, 0
+
+
+**** TALK ****
+Help talk.   Entries and curr values.  Entries followed by CR or ';'
+B<?> Battery assignments.   For example:
+  Bm=  0.  Mon chem 0='BB', 1='LI' [0]
+  Bs=  0.  Sim chem 0='BB', 1='LI' [0]
+  BP=   1.00.  # parallel in bank [ 1.00]'
+  BS=   1.00.  # series in bank [ 1.00]'
+C<?> Charge assignments.   For example:
+  Ca=  set soc in all - '(0-1.1)'
+  Cm=  set soc model only (and ekf if modeling)- '(0-1.1)'
+D/S<?> Adjustments.   For example:
+  Da=  -0.230    : delta amp sense, A [ -0.230]
+  Db=  -0.570    : delta noa sense, A [ -0.570]
+  Di=   0.000    : delta all sense, A [  0.000]
+  Dc=   0.000    : delta sense, V [  0.000]
+  Du= 1.00       : coul eff
+  Dm=   0.000    : delta amp, A [0]
+  Dn=   0.000    : delta noamp, A [0]
+  Dp= 400       : publish frame, ms [400]
+  Dr= 100       : minor frame, ms [100]
+  Dt=   0.000    : delta sense, deg C [  0.000]
+  Dv= 0.00       : voltage fault inj, V [0]
+  Dw= 0.01       : Table adjust, V [0.01]
+  DT=   0.000    : Tbatt noise for model, deg C pk-pk [  0.000]
+  DV=   0.000    : Vbatt noise for model, V pk-pk [  0.000]
+  DI=   0.000    : Ibatt noise for model, A pk-pk [  0.000]
+  Sc= 1.00       : Scalar model size
+  Sh=   1.000    : hysteresis scalar 1e-6 - 100 [1]
+  Sm=   1.000    : scalar amp, [1]
+  Sn=   1.000    : scalar noamp [1]
+  Sr= 1.00       : Scalar res sim
+  Sk= 1.00       : Sat model cutback scalar
+H<?>   Manage history
+  Hd= dump summary log
+  HR= reset summary log
+  Hs= save and print log
+M<?> Amp tweaks
+  MC=   0.001    : Amp Coul eff max change allowed scakar [0.001]
+  Mk=   1.000    : Amp Coul eff scalar [1]
+  Mw=   6.000    : Amp time to wait for next tweak, hr [18]]
+  Mx=   0.010    : Amp Coul eff max allowed scalar [0.01]
+  Mz=   0.080    : Amp time since last tweak, hr [varies]
+N<?> No amp tweaks
+  NC=   0.001    : No Amp Coul eff max change allowed scakar [0.001]
+  Nk=   1.000    : No Amp Coul eff scalar [1]
+  Nw=   6.000    : No Amp time to wait for next tweak, hr [18]]
+  Nx=   0.010    : Amp Coul eff max allowed scalar [0.01]
+  Nz=   0.080    : No Amp time since last tweak, hr [varies]
+P<?>   Print Battery values
+  Pa= all
+  Pc= all coulombs
+  Pe= ekf
+  Pm= monitor
+  PM= amp tweak
+  PN= no amp tweak
+  Pr= retained and command
+  Ps= simulation
+  Pt= all state-space
+  Px= current signal selection
+  Pv= voltage signal details
+Q      vital stats
+R<?>   Reset
+  Rb= reset batteries to current inputs
+  Re= equalize delta_q in Sim to Mon
+  Rf= reset fault logic latches
+  Rh= reset all hys
+  Ri= reset all delta_q_inf
+  Rr= saturate battery monitor and equalize Sim & Mon
+  RR= saturate, equalize, & nominalize all testing for DEPLOY
+  Rs= small reset.  Reset flags to reinitialize filters
+s   curr signal select (-1=noamp, 0=auto, 1=amp) = 0
+v=  0    : verbosity, -128 - +128. [2]
+    -<>:   Negative - Arduino plot compatible
+    v-1:   GP Arduino plot
+  +/-v3:   Powert
+     v4:   GP
+  +/-v5:   OLED display
+     v6:   EKF solver iter during init
+     v7:   EKF solver summary during init
+    v-7:   Battery i/o Arduino plot
+     v8:   Randles state space init
+   v-11:   Summary Arduino
+ +/-v12:   EKF
+ +/-v14:   vshunt and Ibatt raw
+    v15:   vb raw
+    v16:   Tbatt
+    v24:   Sim
+    v25:   Blynk write
+    v26:   Signal selection
+ +/-v34:   EKF detailed
+   v-35:   EKF summary Arduino
+    v35:   Randles balance
+ +/-v37:   EKF short
+   v-41:   Inj
+    v75:   voc_low check model
+    v76:   vb model
+ +/-v78:   Batt model saturation
+    v79:   sat_ib model
+ +/-v96:   CC saturation
+ +/-v97:   CC model saturation
+w   turn on wifi = 0
+W<?>  - iterations to wait
+X<?> - Test Mode.   For example:
+  Xd= 0,   dc-dc charger on [0]
+  Xm= 0,   modeling bitmap [000]
+       0x8 tweak_test = 0
+       0x4 current = 0
+       0x2 voltage = 0
+       0x1 temp = 0
+  Xa=   0.000  : Inj amp A pk (0-18.3) [0]
+  Xb=   0.000  : Inj bias A [0]
+  Xf=   0.000  : Inj freq Hz (0-2) [0]
+  Xt= 0  : Inj type.  'c', 's', 'q', 't' (cos, sine, square, tri)
+  Xo=   0.000  : Inj inj_bias A (-18.3-18.3) [0]
+  Di=   0.000  : Inj  A (unlimited) [0]
+  Xp= <?>, programmed inj settings...
+      Xp-1:  Off, modeling false
+      Xp0:  steady-state modeling
+      Xp1:  1 Hz sine about 0
+      Xp2:  1 Hz square about 0
+      Xp3:  1 Hz triangle about 0
+      Xp4:  -1C soft discharge, reset xp0 or Di0
+      Xp5:  +1C soft charge
+      Xp6:  +/-500 A pulse
+      Xp9:  silent tweak reg test
+      Xp10:  tweak reg test
+      Xp11:  slow cycle reg test
+      Xp12:  slow cycle reg test - half cycle
+      Xp20:  tweak-like data collection
+      Xp21:  slow data collection
+  XC=   0.000 cycles inj
+  XR  RUN inj
+  XS  STOP inj
+  XW= 134856.72 s wait start inj
+  XT= 536995.78 s tail end inj
+z   toggle BLYNK = 0
+ urgency levels of commands:  -=ASAP, *=SOON , '',+=QUEUE
+h   this menu
+echo:  Da-.94, 4
+echo:  Db-.17, 4
+echo:  h, 4
+echo:  Da-.94, 0
+rp.ibatt_bias_amp from  -0.230 to  -0.940
+echo:  Db-.17, 0
+rp.ibatt_bias_noamp from  -0.570 to  -0.170
+echo:  h, 0
+
+
+**** TALK ****
+Help talk.   Entries and curr values.  Entries followed by CR or ';'
+B<?> Battery assignments.   For example:
+  Bm=  0.  Mon chem 0='BB', 1='LI' [0]
+  Bs=  0.  Sim chem 0='BB', 1='LI' [0]
+  BP=   1.00.  # parallel in bank [ 1.00]'
+  BS=   1.00.  # series in bank [ 1.00]'
+C<?> Charge assignments.   For example:
+  Ca=  set soc in all - '(0-1.1)'
+  Cm=  set soc model only (and ekf if modeling)- '(0-1.1)'
+D/S<?> Adjustments.   For example:
+  Da=  -0.940    : delta amp sense, A [ -0.230]
+  Db=  -0.170    : delta noa sense, A [ -0.570]
+  Di=   0.000    : delta all sense, A [  0.000]
+  Dc=   0.000    : delta sense, V [  0.000]
+  Du= 1.00       : coul eff
+  Dm=   0.000    : delta amp, A [0]
+  Dn=   0.000    : delta noamp, A [0]
+  Dp= 400       : publish frame, ms [400]
+  Dr= 100       : minor frame, ms [100]
+  Dt=   0.000    : delta sense, deg C [  0.000]
+  Dv= 0.00       : voltage fault inj, V [0]
+  Dw= 0.01       : Table adjust, V [0.01]
+  DT=   0.000    : Tbatt noise for model, deg C pk-pk [  0.000]
+  DV=   0.000    : Vbatt noise for model, V pk-pk [  0.000]
+  DI=   0.000    : Ibatt noise for model, A pk-pk [  0.000]
+  Sc= 1.00       : Scalar model size
+  Sh=   1.000    : hysteresis scalar 1e-6 - 100 [1]
+  Sm=   1.000    : scalar amp, [1]
+  Sn=   1.000    : scalar noamp [1]
+  Sr= 1.00       : Scalar res sim
+  Sk= 1.00       : Sat model cutback scalar
+H<?>   Manage history
+  Hd= dump summary log
+  HR= reset summary log
+  Hs= save and print log
+M<?> Amp tweaks
+  MC=   0.001    : Amp Coul eff max change allowed scakar [0.001]
+  Mk=   1.000    : Amp Coul eff scalar [1]
+  Mw=   6.000    : Amp time to wait for next tweak, hr [18]]
+  Mx=   0.010    : Amp Coul eff max allowed scalar [0.01]
+  Mz=   0.088    : Amp time since last tweak, hr [varies]
+N<?> No amp tweaks
+  NC=   0.001    : No Amp Coul eff max change allowed scakar [0.001]
+  Nk=   1.000    : No Amp Coul eff scalar [1]
+  Nw=   6.000    : No Amp time to wait for next tweak, hr [18]]
+  Nx=   0.010    : Amp Coul eff max allowed scalar [0.01]
+  Nz=   0.088    : No Amp time since last tweak, hr [varies]
+P<?>   Print Battery values
+  Pa= all
+  Pc= all coulombs
+  Pe= ekf
+  Pm= monitor
+  PM= amp tweak
+  PN= no amp tweak
+  Pr= retained and command
+  Ps= simulation
+  Pt= all state-space
+  Px= current signal selection
+  Pv= voltage signal details
+Q      vital stats
+R<?>   Reset
+  Rb= reset batteries to current inputs
+  Re= equalize delta_q in Sim to Mon
+  Rf= reset fault logic latches
+  Rh= reset all hys
+  Ri= reset all delta_q_inf
+  Rr= saturate battery monitor and equalize Sim & Mon
+  RR= saturate, equalize, & nominalize all testing for DEPLOY
+  Rs= small reset.  Reset flags to reinitialize filters
+s   curr signal select (-1=noamp, 0=auto, 1=amp) = 0
+v=  0    : verbosity, -128 - +128. [2]
+    -<>:   Negative - Arduino plot compatible
+    v-1:   GP Arduino plot
+  +/-v3:   Powert
+     v4:   GP
+  +/-v5:   OLED display
+     v6:   EKF solver iter during init
+     v7:   EKF solver summary during init
+    v-7:   Battery i/o Arduino plot
+     v8:   Randles state space init
+   v-11:   Summary Arduino
+ +/-v12:   EKF
+ +/-v14:   vshunt and Ibatt raw
+    v15:   vb raw
+    v16:   Tbatt
+    v24:   Sim
+    v25:   Blynk write
+    v26:   Signal selection
+ +/-v34:   EKF detailed
+   v-35:   EKF summary Arduino
+    v35:   Randles balance
+ +/-v37:   EKF short
+   v-41:   Inj
+    v75:   voc_low check model
+    v76:   vb model
+ +/-v78:   Batt model saturation
+    v79:   sat_ib model
+ +/-v96:   CC saturation
+ +/-v97:   CC model saturation
+w   turn on wifi = 0
+W<?>  - iterations to wait
+X<?> - Test Mode.   For example:
+  Xd= 0,   dc-dc charger on [0]
+  Xm= 0,   modeling bitmap [000]
+       0x8 tweak_test = 0
+       0x4 current = 0
+       0x2 voltage = 0
+       0x1 temp = 0
+  Xa=   0.000  : Inj amp A pk (0-18.3) [0]
+  Xb=   0.000  : Inj bias A [0]
+  Xf=   0.000  : Inj freq Hz (0-2) [0]
+  Xt= 0  : Inj type.  'c', 's', 'q', 't' (cos, sine, square, tri)
+  Xo=   0.000  : Inj inj_bias A (-18.3-18.3) [0]
+  Di=   0.000  : Inj  A (unlimited) [0]
+  Xp= <?>, programmed inj settings...
+      Xp-1:  Off, modeling false
+      Xp0:  steady-state modeling
+      Xp1:  1 Hz sine about 0
+      Xp2:  1 Hz square about 0
+      Xp3:  1 Hz triangle about 0
+      Xp4:  -1C soft discharge, reset xp0 or Di0
+      Xp5:  +1C soft charge
+      Xp6:  +/-500 A pulse
+      Xp9:  silent tweak reg test
+      Xp10:  tweak reg test
+      Xp11:  slow cycle reg test
+      Xp12:  slow cycle reg test - half cycle
+      Xp20:  tweak-like data collection
+      Xp21:  slow data collection
+  XC=   0.000 cycles inj
+  XR  RUN inj
+  XS  STOP inj
+  XW= 134856.72 s wait start inj
+  XT= 536995.78 s tail end inj
+z   toggle BLYNK = 0
+ urgency levels of commands:  -=ASAP, *=SOON , '',+=QUEUE
+h   this menu
