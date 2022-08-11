@@ -263,7 +263,7 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
 {
   // EKF error test - failure conditions track poorly
   cc_diff_ = Mon->soc_ekf() - Mon->soc();  // These are filtered in their construction (EKF is a dynamic filter and 
-                                                  // Coulomb counter is a big integrator)
+                                                  // Coulomb counter is wrapa big integrator)
   cc_flt_ = abs(cc_diff_) >= SOC_DISAGREE_THRESH;
 
   // Compare current sensors - failure conditions large difference

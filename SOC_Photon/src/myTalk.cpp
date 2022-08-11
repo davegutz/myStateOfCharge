@@ -318,7 +318,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%7.4f,%7.4f,%7.4f,%7.4f\n", Sen->Sim->coul_eff(), Mon->coul_eff(), Sen->ShuntAmp->coul_eff(), Sen->ShuntNoAmp->coul_eff());
                 break;
 
-              case ( 'v' ):  // Dv<>:
+              case ( 'v' ):  // Dv<>:  voltage signal adder for faults
+                Serial.printf("Sen->vbatt_add from %7.3f to ", Sen->vbatt_add());
+                Sen->vbatt_add(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", Sen->vbatt_add());
+                break;
+
+              case ( 'w' ):  // Dw<>:
                 Serial.printf("Mon.Dv from %7.3f to ", Mon->Dv());
                 Mon->Dv(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Mon->Dv());
@@ -1077,7 +1083,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Dp= "); Serial.print(Sen->PublishSerial->delay()); Serial.println("       : publish frame, ms [400]"); 
   Serial.printf("  Dr= "); Serial.print(Sen->ReadSensors->delay()); Serial.println("       : minor frame, ms [100]"); 
   Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.tbatt_bias); Serial.printf("    : delta sense, deg C [%7.3f]\n", TEMP_BIAS); 
-  Serial.printf("  Dv= "); Serial.print(Sen->Sim->Dv()); Serial.println("       : Table adjust, V [0.01]"); 
+  Serial.printf("  Dv= "); Serial.print(Sen->vbatt_add()); Serial.println("       : voltage fault inj, V [0]"); 
+  Serial.printf("  Dw= "); Serial.print(Sen->Sim->Dv()); Serial.println("       : Table adjust, V [0.01]"); 
   Serial.printf("  DT= "); Serial.printf("%7.3f", Sen->Tbatt_noise_amp()); Serial.printf("    : Tbatt noise for model, deg C pk-pk [%7.3f]\n", TEMP_BIAS); 
   Serial.printf("  DV= "); Serial.printf("%7.3f", Sen->Vbatt_noise_amp()); Serial.printf("    : Vbatt noise for model, V pk-pk [%7.3f]\n", TEMP_BIAS); 
   Serial.printf("  DI= "); Serial.printf("%7.3f", Sen->Ibatt_noise_amp()); Serial.printf("    : Ibatt noise for model, A pk-pk [%7.3f]\n", TEMP_BIAS); 

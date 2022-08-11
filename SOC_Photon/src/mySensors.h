@@ -184,10 +184,13 @@ public:
   boolean Ibatt_amp_fail() { return Ibatt_amp_fa_; };
   boolean Ibatt_noamp_fail() { return Ibatt_noamp_fa_; };
   boolean Vbatt_fail() { return Vbatt_fa_; };
-  int8_t tbatt_sel_status() { return tb_sel_stat_; };
+  int8_t tbatt_sel_status() { return tb_sel_stat_; }
   int8_t vbatt_sel_status() { return vb_sel_stat_; };
   int8_t ibatt_sel_status() { return ib_sel_stat_; };
   void ib_wrap(const boolean reset, BatteryMonitor *Mon);
+  float vbatt_add() { return ( vbatt_add_ ); };
+  void vbatt_add(const float add) { vbatt_add_ = add; };
+  float Vbatt_add() { return ( vbatt_add_ * rp.nS ); };
   boolean wrap_fail_hi() { return(WrapHi->state()); };
   boolean wrap_fail_lo() { return(WrapLo->state()); };
 protected:
@@ -224,7 +227,8 @@ protected:
   TFDelay *WrapLo;          // Time low wrap fail persistence
   int8_t tb_sel_stat_;      // Memory of Tbatt signal selection, 0=none, 1=sensor
   int8_t vb_sel_stat_;      // Memory of Vbatt signal selection, 0=none, 1=sensor
-  int8_t ib_sel_stat_;      // Memory of Ibatt signal selection, -1=noamp, 0=none, 1=amp
+  int8_t ib_sel_stat_;      // Memory of Ibatt signal selection, -1=noamp, 0=none, 1=a
+  float vbatt_add_;         // Fault injection bias, V
 };
 
 
