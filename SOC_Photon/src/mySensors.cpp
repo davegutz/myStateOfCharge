@@ -138,7 +138,7 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
   Ibatt_amp_fa_(false), Ibatt_noamp_fa_(false), Vbatt_fa_(false), Vbatt_flt_(false),
   rp_tbatt_bias_(&rp.tbatt_bias), tbatt_bias_last_(0.), Tbatt_noise_amp_(TB_NOISE), Vbatt_noise_amp_(VB_NOISE), Ibatt_noise_amp_(IB_NOISE),
   e_wrap_(0), e_wrap_filt_(0), wrap_hi_fault_(false), wrap_lo_fault_(false), wrap_hi_fail_(false), wrap_lo_fail_(false),
-  wrap_vb_fail_(false), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1)
+  wrap_vb_fail_(false), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false)
 {
   this->T = T;
   this->T_filt = T;
@@ -261,6 +261,8 @@ float Sensors::Ibatt_noise()
 //          Tbatt, Tbatt_filt
 void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
 {
+  boolean reset_loc = reset || reset_all_faults_;
+
   // EKF error test - failure conditions track poorly
   cc_diff_ = Mon->soc_ekf() - Mon->soc();  // These are filtered in their construction (EKF is a dynamic filter and 
                                                   // Coulomb counter is wrapa big integrator)
@@ -270,15 +272,20 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
   // Difference error, filter, check, persist
   if ( rp.mod_ib() ) ib_diff_ = Ibatt_amp_model - Ibatt_noamp_model;
   else ib_diff_ = Ibatt_amp_hdwe - Ibatt_noamp_hdwe;
-  ib_diff_f_ = IbattErrFilt->calculate(ib_diff_, reset, min(T, MAX_ERR_T));
+  ib_diff_f_ = IbattErrFilt->calculate(ib_diff_, reset_loc, min(T, MAX_ERR_T));
   ib_diff_flt_ = abs(ib_diff_f_) >= IBATT_DISAGREE_THRESH;
-  ib_diff_fa_ = IbattErrPersist->calculate(ib_diff_flt_, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T, reset);
+  ib_diff_fa_ = IbattErrPersist->calculate(ib_diff_flt_, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T, reset_loc);
 
   // Truth tables
 
   // ib
   static int8_t ib_sel_stat_last = ib_sel_stat_;
-  if ( ShuntAmp->bare() && ShuntNoAmp->bare() )
+  if ( reset_all_faults_ )
+  {
+    ib_sel_stat_last = 1;
+    Serial.printf("Select reset ib faults\n");
+  }
+    if ( ShuntAmp->bare() && ShuntNoAmp->bare() )
   {
     ib_sel_stat_ = 0;
   }
@@ -312,11 +319,12 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
 
   // vb failure from wrap result.  Latches
   static int8_t vb_sel_stat_last = vb_sel_stat_;
-  // if ( reset )
-  // {
-  //   vb_sel_stat_ = 1;
-  //   vb_sel_stat_last = vb_sel_stat_;
-  // }
+  if ( reset_all_faults_ )
+  {
+    vb_sel_stat_last = 1;
+    vb_sel_stat_ = 1;
+    Serial.printf("Select reset vb faults\n");
+  }
   if ( !vb_sel_stat_last )
   {
     vb_sel_stat_ = 0;   // Latch
@@ -386,6 +394,7 @@ void Sensors::select_all(BatteryMonitor *Mon, const boolean reset)
   }
   ib_sel_stat_last = ib_sel_stat_;
   vb_sel_stat_last = vb_sel_stat_;
+  reset_all_faults_ = false;
 }
 
 // Current bias.  Feeds into signal conversion

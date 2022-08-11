@@ -449,17 +449,17 @@ pro_20220806, 2022-08-06T08:58:01,  53146687.898, 0.100,   1,  0,  7,  25.00,-44
 
 Inject current errors:
   ampHiFail:      Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dm100;Dn0.0001;
-                  Dm0;Dn0;s1;W10;s0;W50;+v0;Dr100;Dp400;
+                  Dm0;Dn0;Rf;W100;+v0;Dr100;Dp400;
   ampLoFail:      Xm7;Ca0.95;Dr100;Dp100;v26;W50;Dm-100;Dn0.0001;W50;Pe;
-                  Dm0;Dn0;s1;W10;s0;W50;+v0;Dr100;Dp400;
+                  Dm0;Dn0;Rf;W100;+v0;Dr100;Dp400;
   ampHiFailNoise: Xm7;Ca0.5;Dr100;Dp100;v26;W50;DT.05;DV0.05;DI1;W50;Dm100;Dn0.0001;
-                  DT0;DV0.0;DI0;Dm0;Dn0;s1;W10;s0;W50;+v0;Dr100;Dp400;
+                  DT0;DV0.0;DI0;Dm0;Dn0;Rf;W100;+v0;Dr100;Dp400;
   ampLoFailNoise: Xm7;Ca0.95;Dr100;Dp100;v26;W50;DT.05;DV0.05;DI1;W50;Dm-100;Dn0.0001;
-                  DT0;DV0.0;DI0;Dm0;Dn0;s1;W10;s0;W50;+v0;Dr100;Dp400;
+                  DT0;DV0.0;DI0;Dm0;Dn0;RfW100;+v0;Dr100;Dp400;
   ampHiFailSlow:  Xm7;Ca0.5;Dr10000;Dp10000;v26;W5;Dm6;Dn0.0001;
-                  Dm0;Dn0;s1;W2;s0;W5;+v0;Dr100;Dp400;
-  vHiFail:        Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dv1;
-                  Dv0;s1;W10;s0;W50;+v0;Dr100;Dp400;
+                  Dm0;Dn0;Rf;W4;+v0;Dr100;Dp400;
+  vHiFail:        Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dv0.25;
+                  Dv0;Rf;W100;+v0;Dr100;Dp400;
 
   ampLoFail inv:  Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dm-500;Dn0.0001;W50;Pe;Dm0;s1;W10;s0;W50;+v0;Dr100;Dp400;
 

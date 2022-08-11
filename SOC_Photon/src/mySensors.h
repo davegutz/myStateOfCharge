@@ -188,6 +188,7 @@ public:
   int8_t vbatt_sel_status() { return vb_sel_stat_; };
   int8_t ibatt_sel_status() { return ib_sel_stat_; };
   void ib_wrap(const boolean reset, BatteryMonitor *Mon);
+  void reset_all_faults() { reset_all_faults_ = true; };
   float vbatt_add() { return ( vbatt_add_ ); };
   void vbatt_add(const float add) { vbatt_add_ = add; };
   float Vbatt_add() { return ( vbatt_add_ * rp.nS ); };
@@ -229,6 +230,7 @@ protected:
   int8_t vb_sel_stat_;      // Memory of Vbatt signal selection, 0=none, 1=sensor
   int8_t ib_sel_stat_;      // Memory of Ibatt signal selection, -1=noamp, 0=none, 1=a
   float vbatt_add_;         // Fault injection bias, V
+  boolean reset_all_faults_; // Reset all fault logic
 };
 
 
