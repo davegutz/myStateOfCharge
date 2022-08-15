@@ -657,7 +657,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'f' ):  // Rf:  Reset fault Rf
                 Serial.printf("Resetting fault latches\n");
-                Sen->reset_all_faults();
+                Sen->Flt->reset_all_faults();
                 break;
 
               case ( 'h' ):  // Rh:  hys

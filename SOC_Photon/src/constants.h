@@ -78,7 +78,7 @@
 #define HDB_TBATT             0.06      // Half deadband to filter Tbatt, F (0.06)
 #define HDB_VBATT             0.05      // Half deadband to filter Vbatt, V (0.05)
 #define T_SAT                 10        // Saturation time, sec (10 for no sat Ib lo fault of -100 A)
-#define T_DESAT               (T_SAT*2) // De-saturation time, sec
+const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define TEMP_PARASITIC        true      // DS18 sensor power. true means leave it on all the time (true)
 #define TEMP_DELAY            1         // Time to block temperature sensor read in DS18 routine, ms (1)
 #define TEMP_INIT_DELAY       10000     // It takes 10 seconds first read of DS18 (10000)
@@ -106,23 +106,27 @@
 #define IB_NOISE_SEED         0x01      // Ib added noise seed 0-255 = 0x00-0xFF (0x01) 
 #define WRAP_ERR_FILT         2.        // Wrap error filter time constant, s (2)
 #define MAX_WRAP_ERR_FILT     10.       // Anti-windup wrap error filter, V (10)
-#define WRAP_LO_S  (T_SAT-1.)           // Wrap low failure set time, sec (T_SAT-1) // must be quicker than SAT test
-#define WRAP_LO_R  (WRAP_LO_S/2.)       // Wrap low failure reset time, sec ('up 1, down 2')
-#define WRAP_HI_S  WRAP_LO_S            // Wrap high failure set time, sec (WRAP_LO_S)
-#define WRAP_HI_R  (WRAP_HI_S/2.)       // Wrap high failure reset time, sec ('up 1, down 2')
+const float WRAP_LO_S = (T_SAT-1.);     // Wrap low failure set time, sec (T_SAT-1) // must be quicker than SAT test
+const float WRAP_LO_R = (WRAP_LO_S/2.); // Wrap low failure reset time, sec ('up 1, down 2')
+const float WRAP_HI_S = WRAP_LO_S;      // Wrap high failure set time, sec (WRAP_LO_S)
+const float WRAP_HI_R = (WRAP_HI_S/2.); // Wrap high failure reset time, sec ('up 1, down 2')
 #define WRAP_HI_A       16.             // Wrap high voltage threshold, A (16)
 #define WRAP_LO_A       -16.            // Wrap high voltage threshold, A (-16)
 #define F_MAX_T_WRAP    1.4             // Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (1.4)
 #define IBATT_DISAGREE_THRESH 5.        // Signal selection threshold for current disagree test, A (5.)
-#define IBATT_DISAGREE_SET  (WRAP_LO_S-1.)       // Signal selection current disagree fail persistence, s (WRAP_LO_S-1) // must be quicker than wrap lo
+const float IBATT_DISAGREE_SET = (WRAP_LO_S-1.); // Signal selection current disagree fail persistence, s (WRAP_LO_S-1) // must be quicker than wrap lo
 #define IBATT_DISAGREE_RESET  1.        // Signal selection current disagree reset persistence, s (1.)
+#define MIN_Q_FILT      -5.             // Quiet y-filter minimum, V (-0.5)
+#define MAX_Q_FILT      5.              // Quiet y-filter maximum, V (0.5)
+#define WN_Q_FILT       1.0             // Quiet y-filter-2 natural frequency, r/s (1.0)
+#define ZETA_Q_FILT     0.9             // Quiet y-fiter-2 damping factor (0.9)
 
 // Conversion gains
-const double shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  
-const double shunt_amp_v2a_s = shunt_noamp_v2a_s * SHUNT_AMP_R1/SHUNT_AMP_R2; // Shunt amp V2A scalar
+const float shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  
+const float shunt_amp_v2a_s = shunt_noamp_v2a_s * SHUNT_AMP_R1/SHUNT_AMP_R2; // Shunt amp V2A scalar
 
 // Battery voltage measurement gain
-const double vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
+const float vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
                               double(VBATT_SENSE_R_LO) / double(PHOTON_ADC_COUNT) * double(VBATT_S);
 
 #endif // CONSTANTS_H_

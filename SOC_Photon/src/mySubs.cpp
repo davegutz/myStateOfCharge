@@ -139,14 +139,14 @@ void load_ibatt_vbatt(const boolean reset, const unsigned long now, Sensors *Sen
   Sen->now = now;
   Sen->shunt_bias();
   Sen->shunt_load();
-  Sen->shunt_check(Mon);
+  Sen->Flt->shunt_check(Sen, Mon, reset);
   Sen->shunt_select_initial();
   if ( rp.debug==14 ) Sen->shunt_print();
 
   // Vbatt
   // Outputs:  Sen->Vbatt
   Sen->vbatt_load(myPins->Vbatt_pin);
-  Sen->vbatt_check(Mon, VBATT_MIN, VBATT_MAX);
+  Sen->Flt->vbatt_check(Sen, Mon, VBATT_MIN, VBATT_MAX);
   if ( rp.debug==15 ) Sen->vbatt_print();
 
   // Power calculation
@@ -285,7 +285,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   // Load Ib and Vb
   // Outputs: Sen->Ibatt_model_in, Sen->Ibatt, Sen->Vbatt 
   load_ibatt_vbatt(reset, now, Sen, myPins, Mon);
-  Sen->ib_wrap(reset, Mon);
+  Sen->Flt->ib_wrap(reset, Sen, Mon);
 
   // Arduino plots
   if ( rp.debug==-7 ) debug_m7(Mon, Sen);
@@ -313,7 +313,8 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   //  Ibatt_model, Ibatt_hdwe,                            --->   Ibatt
   //  Vbatt_model, Vbatt_hdwe,                            --->   Vbatt
   //  constant,         Tbatt_hdwe, Tbatt_hdwe_filt       --->   Tbatt, Tbatt_filt
-  Sen->select_all(Mon, reset);
+  Sen->Flt->select_all(Sen, Mon, reset);
+  Sen->final_assignments();
 
   // Charge calculation and memory store
   // Inputs: Sim.model_saturated, Sen->Tbatt, Sen->Ibatt, and Sim.soc

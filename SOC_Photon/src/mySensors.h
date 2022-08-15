@@ -103,6 +103,81 @@ protected:
 };
 
 
+// Detect faults and manage selection
+class Fault
+{
+public:
+  Fault();
+  Fault(const double T);
+  ~Fault();
+  LagTustin *IbattErrFilt;        // Noise filter for signal selection
+  TFDelay *IbattErrPersist;          // Persistence current error for signal selection 
+  TFDelay *IbattAmpHardFail;      // Persistence voltage range check for signall selection 
+  TFDelay *IbattNoAmpHardFail;    // Persistence voltage range check for signall selection 
+  TFDelay *VbattHardFail;         // Persistence voltage range check for signall selection 
+  boolean cc_diff() { return cc_diff_; };
+  boolean cc_flt() { return cc_flt_; };
+  float e_wrap() { return e_wrap_; };
+  float e_wrap_filt() { return e_wrap_filt_; };
+  boolean Ibatt_amp_flt() { return Ibatt_amp_flt_; };
+  boolean Ibatt_amp_fa() { return Ibatt_amp_fa_; };
+  boolean Ibatt_noamp_flt() { return Ibatt_noamp_flt_; };
+  boolean Ibatt_noamp_fa() { return Ibatt_noamp_fa_; };
+  boolean Vbatt_fail() { return ( Vbatt_fa_ || vb_sel_stat_==0 ); };
+  int8_t ib_sel_stat() { return ib_sel_stat_; };
+  float ib_diff() { return ( ib_diff_ ); };
+  boolean ib_diff_fa() { return ib_diff_fa_; };
+  boolean ib_diff_flt() { return ib_diff_flt_; };
+  void ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
+  void reset_all_faults() { reset_all_faults_ = true; };
+  void select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
+  void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ibatt signals
+  void shunt_select_initial();   // Choose between shunts for model
+  int8_t tbatt_sel_status() { return tb_sel_stat_; }
+  void vbatt_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max);  // Range check Vbatt
+  boolean Vbatt_fa() { return Vbatt_fa_; };
+  int8_t vb_sel_stat() { return vb_sel_stat_; };
+  boolean Vbatt_flt() { return Vbatt_flt_; };
+  boolean wrap_fail_hi() { return WrapHi->state(); };
+  boolean wrap_fail_lo() { return WrapLo->state(); };
+  boolean wrap_hi_fa() { return wrap_hi_fa_; };
+  boolean wrap_hi_flt() { return wrap_hi_flt_; };
+  boolean wrap_lo_fa() { return wrap_lo_fa_; };
+  boolean wrap_lo_flt() { return wrap_lo_flt_; };
+  boolean wrap_vb_fa() { return wrap_vb_fa_; };
+protected:
+  boolean cc_flt_;          // EKF tested disagree, T = error
+  float cc_diff_;           // EKF tracking error, C
+  boolean Ibatt_amp_fa_;    // Amp sensor selection memory, T = amp failed
+  boolean Ibatt_amp_flt_;   // Momentary isolation of Ibatt failure, T=faulted 
+  float ib_diff_;           // Current sensor difference error, A
+  float ib_diff_f_;         // Filtered sensor difference error, A
+  boolean ib_diff_fa_;      // Persisted sensor difference error, T = fail
+  boolean ib_diff_flt_;     // Faulted sensor difference error, T = fault
+  boolean Ibatt_noamp_fa_;  // Noamp sensor selection memory, T = no amp failed
+  boolean Ibatt_noamp_flt_; // Momentary isolation of Ibatt failure, T=faulted 
+  boolean Vbatt_fa_;        // Peristed, latched isolation of Vbatt failure, T=failed
+  boolean Vbatt_flt_;       // Momentary isolation of Vbatt failure, T=faulted
+  float e_wrap_;            // Wrap error, V
+  LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
+  General2_Pole *QuietFilt; // Linear filter to test for quiet (disconnected)
+  float e_wrap_filt_;       // Wrap error, V
+  boolean wrap_hi_flt_;     // Current faulted high
+  boolean wrap_lo_flt_;     // Current faulted low
+  boolean wrap_hi_fa_;      // Current failed high
+  boolean wrap_lo_fa_;      // Current failed low
+  boolean wrap_vb_fa_;      // Wrap isolates to Vb fail
+  TFDelay *WrapHi;          // Time high wrap fail persistence
+  TFDelay *WrapLo;          // Time low wrap fail persistence
+  int8_t tb_sel_stat_;      // Memory of Tbatt signal selection, 0=none, 1=sensor
+  int8_t vb_sel_stat_;      // Memory of Vbatt signal selection, 0=none, 1=sensor
+  int8_t ib_sel_stat_;      // Memory of Ibatt signal selection, -1=noamp, 0=none, 1=a
+  boolean reset_all_faults_; // Reset all fault logic
+  uint32_t fltw_;           // Bitmapped faults
+  uint32_t falw_;           // Bitmapped fails
+};
+
+
 // Sensors (like a big struct with public access)
 class Sensors
 {
@@ -145,11 +220,6 @@ public:
   General2_Pole* TbattSenseFilt;  // Linear filter for Tb. There are 1 Hz AAFs in hardware for Vb and Ib
   SlidingDeadband *SdTbatt;       // Non-linear filter for Tb
   BatteryModel *Sim;              // Used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off
-  LagTustin *IbattErrFilt;        // Noise filter for signal selection
-  TFDelay *IbattErrPersist;          // Persistence current error for signal selection 
-  TFDelay *IbattAmpHardFail;      // Persistence voltage range check for signall selection 
-  TFDelay *IbattNoAmpHardFail;    // Persistence voltage range check for signall selection 
-  TFDelay *VbattHardFail;         // Persistence voltage range check for signall selection 
   unsigned long int elapsed_inj;  // Injection elapsed time, ms
   unsigned long int start_inj;    // Start of calculated injection, ms
   unsigned long int stop_inj;     // Stop of calculated injection, ms
@@ -161,15 +231,13 @@ public:
   boolean display;                // Use display
   double sclr_coul_eff;           // Scalar on Coulombic Efficiency
   void bias_all_model();          // Bias model outputs for sensor fault injection
-  void select_all(BatteryMonitor *Mon, const boolean reset);  // Final choices
+  void final_assignments();       // Make final signal selection
   void shunt_bias(void);          // Load biases into Shunt objects
-  void shunt_check(BatteryMonitor *Mon);  // Range check Ibatt signals
   void shunt_load(void);          // Load ADS015 protocol
   void shunt_print(); // Print selection result
   void shunt_select_initial();   // Choose between shunts for model
   void temp_filter(const boolean reset_loc, const float t_rlim);
   void temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim);
-  void vbatt_check(BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max);  // Range check Vbatt
   void vbatt_load(const byte vbatt_pin);  // Analog read of Vbatt
   float Tbatt_noise();
   float Tbatt_noise_amp() { return ( Tbatt_noise_amp_ ); };
@@ -181,32 +249,11 @@ public:
   float Ibatt_noise_amp() { return ( Ibatt_noise_amp_ ); };
   void Ibatt_noise_amp(const float noise) { Ibatt_noise_amp_ = noise; };
   void vbatt_print(void);         // Print Vbatt result
-  boolean Ibatt_amp_fail() { return Ibatt_amp_fa_; };
-  boolean Ibatt_noamp_fail() { return Ibatt_noamp_fa_; };
-  boolean Vbatt_fail() { return ( Vbatt_fa_ || vb_sel_stat_==0 ); };
-  int8_t tbatt_sel_status() { return tb_sel_stat_; }
-  int8_t vbatt_sel_status() { return vb_sel_stat_; };
-  int8_t ibatt_sel_status() { return ib_sel_stat_; };
-  void ib_wrap(const boolean reset, BatteryMonitor *Mon);
-  void reset_all_faults() { reset_all_faults_ = true; };
   float vbatt_add() { return ( vbatt_add_ ); };
   void vbatt_add(const float add) { vbatt_add_ = add; };
   float Vbatt_add() { return ( vbatt_add_ * rp.nS ); };
-  boolean wrap_fail_hi() { return(WrapHi->state()); };
-  boolean wrap_fail_lo() { return(WrapLo->state()); };
+  Fault *Flt;
 protected:
-  boolean cc_flt_;          // EKF tested disagree, T = error
-  float cc_diff_;           // EKF tracking error, C
-  boolean Ibatt_amp_fa_;    // Amp sensor selection memory, T = amp failed
-  boolean Ibatt_amp_flt_;   // Momentary isolation of Ibatt failure, T=faulted 
-  float ib_diff_;           // Current sensor difference error, A
-  float ib_diff_f_;         // Filtered sensor difference error, A
-  boolean ib_diff_fa_;      // Persisted sensor difference error, T = fail
-  boolean ib_diff_flt_;     // Faulted sensor difference error, T = fault
-  boolean Ibatt_noamp_fa_;  // Noamp sensor selection memory, T = no amp failed
-  boolean Ibatt_noamp_flt_; // Momentary isolation of Ibatt failure, T=faulted 
-  boolean Vbatt_fa_;        // Peristed, latched isolation of Vbatt failure, T=failed
-  boolean Vbatt_flt_;       // Momentary isolation of Vbatt failure, T=faulted
   float *rp_tbatt_bias_;    // Location of retained bias, deg C
   float tbatt_bias_last_;   // Last value of bias for rate limit, deg C
   void choose_(void);       // Deliberate choice based on inputs and results
@@ -216,21 +263,7 @@ protected:
   float Tbatt_noise_amp_;   // Tb noise amplitude model only, deg C pk-pk
   float Vbatt_noise_amp_;   // Vb noise amplitude model only, V pk-pk
   float Ibatt_noise_amp_;   // Ib noise amplitude model only, A pk-pk
-  float e_wrap_;            // Wrap error, V
-  LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
-  float e_wrap_filt_;       // Wrap error, V
-  boolean wrap_hi_fault_;   // Current faulted high
-  boolean wrap_lo_fault_;   // Current faulted low
-  boolean wrap_hi_fail_;    // Current failed high
-  boolean wrap_lo_fail_;    // Current failed low
-  boolean wrap_vb_fail_;    // Wrap isolates to Vb fail
-  TFDelay *WrapHi;          // Time high wrap fail persistence
-  TFDelay *WrapLo;          // Time low wrap fail persistence
-  int8_t tb_sel_stat_;      // Memory of Tbatt signal selection, 0=none, 1=sensor
-  int8_t vb_sel_stat_;      // Memory of Vbatt signal selection, 0=none, 1=sensor
-  int8_t ib_sel_stat_;      // Memory of Ibatt signal selection, -1=noamp, 0=none, 1=a
   float vbatt_add_;         // Fault injection bias, V
-  boolean reset_all_faults_; // Reset all fault logic
 };
 
 

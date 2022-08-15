@@ -309,7 +309,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
         dv_dyn_ = 0.;
         voc_filt_ = voc_stat_;
     }
-    if ( Sen->Vbatt_fail() )
+    if ( Sen->Flt->Vbatt_fa() )
     {
         voc_ = voc_stat_ = voc_filt_ = voc_stat_tab_;
         dv_dyn_ = dv_hys_ = 0;
