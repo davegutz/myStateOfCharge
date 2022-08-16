@@ -135,8 +135,10 @@ void Shunt::load()
 
 // Class Fault
 Fault::Fault(const double T):
-  Ibatt_amp_fa_(false), Ibatt_noamp_fa_(false), Vbatt_fa_(false), Vbatt_flt_(false),
-  e_wrap_(0), e_wrap_filt_(0), wrap_hi_flt_(false), wrap_lo_flt_(false), wrap_hi_fa_(false), wrap_lo_fa_(false),
+  cc_flt_(false), cc_diff_(0.), e_wrap_(0), e_wrap_filt_(0), ib_diff_(0), ib_diff_f_(0),
+  Ibatt_amp_fa_(false), Ibatt_amp_flt_(false), ib_diff_fa_(false), ib_diff_flt_(false), Ibatt_noamp_fa_(false), Ibatt_noamp_flt_(false),
+  ib_quiet_fa_(false), ib_quiet_flt_(false), Vbatt_fa_(false), Vbatt_flt_(false),
+  wrap_hi_fa_(false), wrap_hi_flt_(false), wrap_lo_fa_(false), wrap_lo_flt_(false),
   wrap_vb_fa_(false), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
   vb_sel_stat_last_(1), ib_sel_stat_last_(1)
 {
@@ -145,10 +147,20 @@ Fault::Fault(const double T):
   IbattAmpHardFail  = new TFDelay(false, IBATT_HARD_SET, IBATT_HARD_RESET, T);
   IbattNoAmpHardFail  = new TFDelay(false, IBATT_HARD_SET, IBATT_HARD_RESET, T);
   VbattHardFail  = new TFDelay(false, VBATT_HARD_SET, VBATT_HARD_RESET, T);
+  QuietPer  = new TFDelay(false, QUIET_S, QUIET_R, T);
   WrapErrFilt = new LagTustin(T, WRAP_ERR_FILT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT);  // actual update time provided run time
   WrapHi = new TFDelay(false, WRAP_HI_S, WRAP_HI_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
   WrapLo = new TFDelay(false, WRAP_LO_S, WRAP_LO_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
   QuietFilt = new General2_Pole(T, WN_Q_FILT, ZETA_Q_FILT, MIN_Q_FILT, MAX_Q_FILT);  // actual update time provided run time
+}
+
+// Detect no signal present
+void Fault::ib_quiet(const boolean reset, Sensors *Sen)
+{
+  boolean reset_loc = reset | reset_all_faults_;
+  ib_quiet_ = QuietFilt->calculate(Sen->Ibatt_amp_hdwe+Sen->Ibatt_noamp_hdwe, reset_loc, min(Sen->T, MAX_T_Q_FILT));
+  ib_quiet_flt_ = abs(ib_quiet_) >= QUIET_A;
+  ib_quiet_fa_ = QuietPer->calculate(ib_quiet_flt_, QUIET_S, QUIET_R, Sen->T, reset_loc);
 }
 
 // Voltage wraparound logic for current selection

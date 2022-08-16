@@ -110,11 +110,6 @@ public:
   Fault();
   Fault(const double T);
   ~Fault();
-  LagTustin *IbattErrFilt;        // Noise filter for signal selection
-  TFDelay *IbattErrPersist;          // Persistence current error for signal selection 
-  TFDelay *IbattAmpHardFail;      // Persistence voltage range check for signall selection 
-  TFDelay *IbattNoAmpHardFail;    // Persistence voltage range check for signall selection 
-  TFDelay *VbattHardFail;         // Persistence voltage range check for signall selection 
   float cc_diff() { return cc_diff_; };
   boolean cc_flt() { return cc_flt_; };
   float e_wrap() { return e_wrap_; };
@@ -129,6 +124,7 @@ public:
   float ib_diff_f() { return ( ib_diff_f_ ); };
   boolean ib_diff_fa() { return ib_diff_fa_; };
   boolean ib_diff_flt() { return ib_diff_flt_; };
+  void ib_quiet(const boolean reset, Sensors *Sen);
   void ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
   void pretty_print(Sensors *Sen, BatteryMonitor *Mon);
   void reset_all_faults() { reset_all_faults_ = true; };
@@ -146,26 +142,35 @@ public:
   boolean wrap_lo_flt() { return wrap_lo_flt_; };
   boolean wrap_vb_fa() { return wrap_vb_fa_; };
 protected:
+  TFDelay *IbattErrPersist;
+  TFDelay *IbattAmpHardFail;
+  TFDelay *IbattNoAmpHardFail;
+  TFDelay *VbattHardFail;
+  TFDelay *QuietPer;
+  LagTustin *IbattErrFilt;  // Noise filter for signal selection
+  LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
+  General2_Pole *QuietFilt; // Linear filter to test for quiet (disconnected)
   boolean cc_flt_;          // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
-  boolean Ibatt_amp_fa_;    // Amp sensor selection memory, T = amp failed
-  boolean Ibatt_amp_flt_;   // Momentary isolation of Ibatt failure, T=faulted 
+  float e_wrap_;            // Wrap error, V
+  float e_wrap_filt_;       // Wrap error, V
   float ib_diff_;           // Current sensor difference error, A
   float ib_diff_f_;         // Filtered sensor difference error, A
+  boolean Ibatt_amp_fa_;    // Amp sensor selection memory, T = amp failed
+  boolean Ibatt_amp_flt_;   // Momentary isolation of Ibatt failure, T=faulted 
   boolean ib_diff_fa_;      // Persisted sensor difference error, T = fail
   boolean ib_diff_flt_;     // Faulted sensor difference error, T = fault
   boolean Ibatt_noamp_fa_;  // Noamp sensor selection memory, T = no amp failed
   boolean Ibatt_noamp_flt_; // Momentary isolation of Ibatt failure, T=faulted 
+  float ib_quiet_;          // ib hardware noise, A
+  boolean ib_quiet_fa_;     // Persisted quiet error, T = fail
+  boolean ib_quiet_flt_;    // Faulted quiet error, T = fault
   boolean Vbatt_fa_;        // Peristed, latched isolation of Vbatt failure, T=failed
   boolean Vbatt_flt_;       // Momentary isolation of Vbatt failure, T=faulted
-  float e_wrap_;            // Wrap error, V
-  LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
-  General2_Pole *QuietFilt; // Linear filter to test for quiet (disconnected)
-  float e_wrap_filt_;       // Wrap error, V
-  boolean wrap_hi_flt_;     // Current faulted high
-  boolean wrap_lo_flt_;     // Current faulted low
   boolean wrap_hi_fa_;      // Current failed high
+  boolean wrap_hi_flt_;     // Current faulted high
   boolean wrap_lo_fa_;      // Current failed low
+  boolean wrap_lo_flt_;     // Current faulted low
   boolean wrap_vb_fa_;      // Wrap isolates to Vb fail
   TFDelay *WrapHi;          // Time high wrap fail persistence
   TFDelay *WrapLo;          // Time low wrap fail persistence

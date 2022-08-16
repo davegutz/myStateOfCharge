@@ -116,10 +116,14 @@ const float WRAP_HI_R = (WRAP_HI_S/2.); // Wrap high failure reset time, sec ('u
 #define IBATT_DISAGREE_THRESH 5.        // Signal selection threshold for current disagree test, A (5.)
 const float IBATT_DISAGREE_SET = (WRAP_LO_S-1.); // Signal selection current disagree fail persistence, s (WRAP_LO_S-1) // must be quicker than wrap lo
 #define IBATT_DISAGREE_RESET  1.        // Signal selection current disagree reset persistence, s (1.)
-#define MIN_Q_FILT      -5.             // Quiet y-filter minimum, V (-0.5)
-#define MAX_Q_FILT      5.              // Quiet y-filter maximum, V (0.5)
-#define WN_Q_FILT       1.0             // Quiet y-filter-2 natural frequency, r/s (1.0)
-#define ZETA_Q_FILT     0.9             // Quiet y-fiter-2 damping factor (0.9)
+#define MIN_Q_FILT      -5.             // Quiet filter minimum, V (-0.5)
+#define MAX_Q_FILT      5.              // Quiet filter maximum, V (0.5)
+#define WN_Q_FILT       1.0             // Quiet filter-2 natural frequency, r/s (1.0)
+#define ZETA_Q_FILT     0.9             // Quiet fiter-2 damping factor (0.9)
+#define MAX_T_Q_FILT    RANDLES_T_MAX   // Quiet filter max update time (0.2)
+#define QUIET_A         0.1             // Quiet set threshold, sec (0.1)
+#define QUIET_S         20.             // Quiet set persistence, sec (20.)
+const float QUIET_R   (QUIET_S/5.);     // Quiet reset persistence, sec ('up 1 down 5')
 
 // Conversion gains
 const float shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  

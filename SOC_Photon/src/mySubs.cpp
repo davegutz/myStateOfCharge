@@ -286,6 +286,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   // Outputs: Sen->Ibatt_model_in, Sen->Ibatt, Sen->Vbatt 
   load_ibatt_vbatt(reset, now, Sen, myPins, Mon);
   Sen->Flt->ib_wrap(reset, Sen, Mon);
+  Sen->Flt->ib_quiet(reset, Sen);
 
   // Arduino plots
   if ( rp.debug==-7 ) debug_m7(Mon, Sen);
