@@ -587,6 +587,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("\nMon::"); Mon->EKF_1x1::pretty_print();
                 break;
 
+              case ( 'f' ):  // Pf:  Print faults
+                Serial.printf("\nSen::"); Sen->Flt->pretty_print(Sen, Mon);
+                break;
+
               case ( 'm' ):  // Pm:  Print mon
                 Serial.printf("\nMon:"); Mon->pretty_print();
                 Serial.printf("Mon::"); Mon->Coulombs::pretty_print();
@@ -1109,10 +1113,11 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Nx= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_tweak()); Serial.println("    : Amp Coul eff max allowed scalar [0.01]"); 
   Serial.printf("  Nz= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->time_sat_past()); Serial.println("    : No Amp time since last tweak, hr [varies]"); 
 
-  Serial.printf("P<?>   Print Battery values\n");
+  Serial.printf("P<?>   Print values\n");
   Serial.printf("  Pa= "); Serial.printf("all\n");
   Serial.printf("  Pc= "); Serial.printf("all coulombs\n");
   Serial.printf("  Pe= "); Serial.printf("ekf\n");
+  Serial.printf("  Pf= "); Serial.printf("faults\n");
   Serial.printf("  Pm= "); Serial.printf("monitor\n");
   Serial.printf("  PM= "); Serial.printf("amp tweak\n");
   Serial.printf("  PN= "); Serial.printf("no amp tweak\n");

@@ -130,7 +130,7 @@ public:
   boolean ib_diff_fa() { return ib_diff_fa_; };
   boolean ib_diff_flt() { return ib_diff_flt_; };
   void ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
-  void pretty_print();
+  void pretty_print(Sensors *Sen, BatteryMonitor *Mon);
   void reset_all_faults() { reset_all_faults_ = true; };
   void select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ibatt signals
@@ -140,8 +140,6 @@ public:
   boolean Vbatt_fa() { return Vbatt_fa_; };
   int8_t vb_sel_stat() { return vb_sel_stat_; };
   boolean Vbatt_flt() { return Vbatt_flt_; };
-  boolean wrap_fail_hi() { return WrapHi->state(); };
-  boolean wrap_fail_lo() { return WrapLo->state(); };
   boolean wrap_hi_fa() { return wrap_hi_fa_; };
   boolean wrap_hi_flt() { return wrap_hi_flt_; };
   boolean wrap_lo_fa() { return wrap_lo_fa_; };
@@ -177,8 +175,8 @@ protected:
   boolean reset_all_faults_; // Reset all fault logic
   uint32_t fltw_;           // Bitmapped faults
   uint32_t falw_;           // Bitmapped fails
-  uint8_t vb_sel_stat_last_;// past value
-  uint8_t ib_sel_stat_last_;// past value
+  int8_t vb_sel_stat_last_; // past value
+  int8_t ib_sel_stat_last_; // past value
 };
 
 

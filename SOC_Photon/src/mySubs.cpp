@@ -52,13 +52,13 @@ void print_serial_sim_header(void)
 void print_signal_sel_header(void)
 {
   if ( rp.debug==26 ) // print_signal_sel_header
-    Serial.printf("unit_s,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,cc_flt,  ibmh,ibnh,ibmm,ibnm,ibm,                   ib_dif,ib_dif_flt,ib_dif_fa,");
+    Serial.printf("unit_s,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,cc_flt,  ibmh,ibnh,ibmm,ibnm,ibm,                   ib_dif,ib_dif_f,ib_dif_flt,ib_dif_fa,");
     Serial.printf("    e_w,e_w_f,wh_flt,wl_flt,wh_fa,wl_fa,wv_fa,     ib_sel,Ib_h,Ib_m,mib,Ib_s,          vb_sel,Vb_h,Vb_m,mvb,Vb_s,                Tb_h,Tb_s,mtb,Tb_f,  Vb_flt,Vb_fa,\n");
           // -----, cTime, reset, rp.ibatt_select,
           //                                    ShuntAmp->bare(), ShuntNoAmp->bare(),
           //                                                        cc_diff_, cc_flt_,
           //                                                                       Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model, Ibatt_model,
-          //                                                                                                                   ib_diff_, ib_diff_flt_, ib_diff_fa_,
+          //                                                                                                                   ib_diff_, ib_diff_f, ib_diff_flt_, ib_diff_fa_,
           //           e_wrap_, e_wrap_filt_, wrap_hi_fault_, wrap_lo_fault_, wrap_hi_fail_, wrap_lo_fail_, wrap_vb_fail,
           //                                                            ib_sel_stat_, Ibatt_hdwe, Ibatt_hdwe_model, mod_ib(), Ibatt,
           //                                                                                                vb_sel_stat, Vbatt_hdwe, Vbatt_model,mod_vb(), Vbatt,
@@ -146,7 +146,7 @@ void load_ibatt_vbatt(const boolean reset, const unsigned long now, Sensors *Sen
   // Vbatt
   // Outputs:  Sen->Vbatt
   Sen->vbatt_load(myPins->Vbatt_pin);
-  Sen->Flt->vbatt_check(Sen, Mon, VBATT_MIN, VBATT_MAX);
+  Sen->Flt->vbatt_check(Sen, Mon, VBATT_MIN, VBATT_MAX, reset);
   if ( rp.debug==15 ) Sen->vbatt_print();
 
   // Power calculation

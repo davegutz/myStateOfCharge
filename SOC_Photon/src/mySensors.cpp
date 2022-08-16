@@ -92,10 +92,10 @@ Shunt::Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, floa
   else
     setGain(GAIN_EIGHT, GAIN_TWO); // First argument is differential, second is single-ended.
   if (!begin(port_)) {
-    Serial.printf("FAILED to initialize ADS SHUNT MONITOR %s\n", name_.c_str());
+    Serial.printf("FAILED init ADS SHUNT MON %s\n", name_.c_str());
     bare_ = true;
   }
-  else Serial.printf("SHUNT MONITOR %s initialized\n", name_.c_str());
+  else Serial.printf("SHUNT MON %s init\n", name_.c_str());
 }
 Shunt::~Shunt() {}
 // operators
@@ -104,12 +104,12 @@ Shunt::~Shunt() {}
 void Shunt::pretty_print()
 {
   Serial.printf("Shunt(%s)::\n", name_.c_str());
-  Serial.printf("  port_ =                0x%X; // I2C port used by Acafruit_ADS1015\n", port_);
-  Serial.printf("  bare_ =                   %d; // If ADS to be ignored\n", bare_);
-  Serial.printf("  *cp_ibatt_bias_ =   %7.3f; // Global bias, A\n", *cp_ibatt_bias_);
-  Serial.printf("  v2a_s_ =            %7.2f; // Selected shunt conversion gain, A/V\n", v2a_s_);
-  Serial.printf("  vshunt_int_ =           %d; // Sensed shunt voltage, count\n", vshunt_int_);
-  Serial.printf("  ishunt_cal_ =       %7.3f; // Sensed, calibrated ADC, A\n", ishunt_cal_);
+  Serial.printf("  port_ = 0x%X;\n", port_);
+  Serial.printf("  bare_ = %d;\n", bare_);
+  Serial.printf("  *cp_ibatt_bias_ = %7.3f; A\n", *cp_ibatt_bias_);
+  Serial.printf("  v2a_s_ = %7.2f; // A/V\n", v2a_s_);
+  Serial.printf("  vshunt_int_ = %d; // count\n", vshunt_int_);
+  Serial.printf("  ishunt_cal_ = %7.3f; // A\n", ishunt_cal_);
   Serial.printf("Shunt(%s)::", name_.c_str()); Tweak::pretty_print();
   Serial.printf("Shunt(%s)::", name_.c_str()); Adafruit_ADS1015::pretty_print(name_);
 }
@@ -155,25 +155,34 @@ Fault::Fault(const double T):
 // Avoid using hysteresis data for this test and accept more generous thresholds
 void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
-    e_wrap_ = Mon->voc_tab() - Mon->voc();
-    e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset, min(Sen->T, F_MAX_T_WRAP));
-    wrap_hi_flt_ = e_wrap_filt_ >= Mon->r_ss()*WRAP_HI_A;
-    wrap_lo_flt_ = e_wrap_filt_ <= Mon->r_ss()*WRAP_LO_A;
-    wrap_hi_fa_ = WrapHi->calculate(wrap_hi_flt_, WRAP_HI_S, WRAP_HI_R, Sen->T, reset) && !Vbatt_fa_;
-    wrap_lo_fa_ = WrapLo->calculate(wrap_lo_flt_, WRAP_LO_S, WRAP_LO_R, Sen->T, reset) && !Vbatt_fa_;
+  boolean reset_loc = reset | reset_all_faults_;
+  e_wrap_ = Mon->voc_tab() - Mon->voc();
+  e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
+  wrap_hi_flt_ = e_wrap_filt_ >= Mon->r_ss()*WRAP_HI_A;
+  wrap_lo_flt_ = e_wrap_filt_ <= Mon->r_ss()*WRAP_LO_A;
+  wrap_hi_fa_ = WrapHi->calculate(wrap_hi_flt_, WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !Vbatt_fa_;
+  wrap_lo_fa_ = WrapLo->calculate(wrap_lo_flt_, WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !Vbatt_fa_;
 }
 
-void Fault::pretty_print()
+void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
 {
   Serial.printf("Fault:\n");
+  Serial.printf("  amp_bare = %d;\n", Sen->ShuntAmp->bare());
+  Serial.printf("  noa_bare = %d;\n", Sen->ShuntNoAmp->bare());
   Serial.printf("  cc_diff_= %7.3f;\n", cc_diff_);
   Serial.printf("  cc_flt_ =     %d;\n", cc_flt_);
+  Serial.printf("  voc_tab = %7.3f;\n", Mon->voc_tab());
+  Serial.printf("  voc = %7.3f;\n", Mon->voc());
   Serial.printf("  e_wrap_ = %7.3f;\n", e_wrap_);
   Serial.printf("  e_w_f_ = %7.3f;\n", e_wrap_filt_);
   Serial.printf("  Ibatt_amp_flt_ = %d;\n", Ibatt_amp_flt_);
   Serial.printf("  Ibatt_amp_fa_ = %d;\n", Ibatt_amp_fa_);
   Serial.printf("  Ibatt_noamp_flt_ = %d;\n", Ibatt_noamp_flt_);
   Serial.printf("  Ibatt_noamp_fa_ = %d;\n", Ibatt_noamp_fa_);
+  Serial.printf("  amp_calh = %7.3f;\n", Sen->Ibatt_amp_hdwe);
+  Serial.printf("  noa_calh = %7.3f;\n", Sen->Ibatt_noamp_hdwe);
+  Serial.printf("  amp_calm = %7.3f;\n", Sen->Ibatt_amp_model);
+  Serial.printf("  noa_calm = %7.3f;\n", Sen->Ibatt_noamp_model);
   Serial.printf("  ib_diff_= %7.3f;\n", ib_diff_);
   Serial.printf("  ib_diff_f_= %7.3f;\n", ib_diff_f_);
   Serial.printf("  ib_diff_flt_ = %d;\n", ib_diff_flt_);
@@ -225,10 +234,12 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // Truth tables
 
   // ib
+  // Serial.printf("\nTopTruth: rpibs,rloc,raf,ibss,ibssl,vbss,vbssl,ampb,noab,ibdf,whf,wlf,ccf, %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,\n",
+  //  rp.ibatt_select, reset_loc, reset_all_faults_, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fa_, wrap_lo_fa_, cc_flt_);
   if ( reset_all_faults_ )
   {
     ib_sel_stat_last_ = 1;
-    Serial.printf("Select reset ib faults\n");
+    Serial.printf("reset ib flt\n");
   }
     if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() )
   {
@@ -267,7 +278,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   {
     vb_sel_stat_last_ = 1;
     vb_sel_stat_ = 1;
-    Serial.printf("Select reset vb faults\n");
+    Serial.printf("reset vb flts\n");
   }
   if ( !vb_sel_stat_last_ )
   {
@@ -281,15 +292,18 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   else
     wrap_vb_fa_ = false;
 
+  // Serial.printf("BotTruth: rpibs,rloc,raf,ibss,ibssl,vbss,vbssl,ampb,noab,ibdf,whf,wlf,ccf, %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,\n",
+  //  rp.ibatt_select, reset_loc, reset_all_faults_, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fa_, wrap_lo_fa_, cc_flt_);
+
   // Print
   if ( ib_sel_stat_ != ib_sel_stat_last_ || vb_sel_stat_ != vb_sel_stat_last_ )
   {
     Serial.printf("Select change:  ShuntAmp->bare=%d, ShuntNoAmp->bare=%d, ibatt_dif_fa=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, cc_flt_=%d, rp.ibatt_select=%d, ib_sel_stat=%d, vb_sel_stat=%d, Vbatt_fail=%d,\n",
         Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fa_, wrap_lo_fa_, wrap_vb_fa_, cc_flt_, rp.ibatt_select, ib_sel_stat_, vb_sel_stat_, Vbatt_fa_);
-    Serial.printf("Small reset. Filters reinit and selection unchanged.   Hard reset to re-init selection\n");
   }
   if ( ib_sel_stat_ != ib_sel_stat_last_ )
   {
+    Serial.printf("Small reset\n");
     cp.cmd_reset();   
   }
   ib_sel_stat_last_ = ib_sel_stat_;
@@ -300,7 +314,8 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
 // Checks analog current.  Latches
 void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
 {
-    if ( reset )
+    boolean reset_loc = reset | reset_all_faults_;
+    if ( reset_loc )
     {
         Ibatt_amp_fa_ = false;
         Ibatt_noamp_fa_ = false;
@@ -308,16 +323,17 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     float current_max = RATED_BATT_CAP * Mon->nP();
     Ibatt_amp_flt_ = Sen->ShuntAmp->ishunt_cal()  <= -current_max || Sen->ShuntAmp->ishunt_cal() >= current_max;
     Ibatt_noamp_flt_ = Sen->ShuntNoAmp->ishunt_cal()  <= -current_max || Sen->ShuntNoAmp->ishunt_cal() >= current_max;
-    Ibatt_amp_fa_ = Ibatt_amp_fa_ || IbattAmpHardFail->calculate(Ibatt_amp_flt_, IBATT_HARD_SET, IBATT_HARD_RESET, Sen->T, reset);
-    Ibatt_noamp_fa_ = Ibatt_noamp_fa_ || IbattNoAmpHardFail->calculate(Ibatt_noamp_flt_, IBATT_HARD_SET, IBATT_HARD_RESET, Sen->T, reset);
+    Ibatt_amp_fa_ = Ibatt_amp_fa_ || IbattAmpHardFail->calculate(Ibatt_amp_flt_, IBATT_HARD_SET, IBATT_HARD_RESET, Sen->T, reset_loc);
+    Ibatt_noamp_fa_ = Ibatt_noamp_fa_ || IbattNoAmpHardFail->calculate(Ibatt_noamp_flt_, IBATT_HARD_SET, IBATT_HARD_RESET, Sen->T, reset_loc);
 }
 
 // Check analog voltage.  Latches
 void Fault::vbatt_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max, const boolean reset)
 {
-    if ( reset ) Vbatt_fa_ = false;
-    Vbatt_flt_ = Sen->Vbatt_hdwe <= _Vbatt_min*Mon->nS() || Sen->Vbatt_hdwe >= _Vbatt_max*Mon->nS();
-    Vbatt_fa_ = Vbatt_fa_ || VbattHardFail->calculate(Vbatt_flt_, VBATT_HARD_SET, VBATT_HARD_RESET, Sen->T, reset);
+  boolean reset_loc = reset | reset_all_faults_;
+  if ( reset_loc ) Vbatt_fa_ = false;
+  Vbatt_flt_ = Sen->Vbatt_hdwe <= _Vbatt_min*Mon->nS() || Sen->Vbatt_hdwe >= _Vbatt_max*Mon->nS();
+  Vbatt_fa_ = Vbatt_fa_ || VbattHardFail->calculate(Vbatt_flt_, VBATT_HARD_SET, VBATT_HARD_RESET, Sen->T, reset_loc);
 }
 
 
