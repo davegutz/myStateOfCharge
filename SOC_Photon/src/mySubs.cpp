@@ -310,7 +310,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 
   // Use model instead of sensors when running tests as user
   //  Inputs:                                             --->   Outputs:
-  // TODO:  control parameter list here...Vbatt_fail, soc, soc_ekf,
+  // TODO:  control parameter list here...vb_fa, soc, soc_ekf,
   //  Ibatt_model, Ibatt_hdwe,                            --->   Ibatt
   //  Vbatt_model, Vbatt_hdwe,                            --->   Vbatt
   //  constant,         Tbatt_hdwe, Tbatt_hdwe_filt       --->   Tbatt, Tbatt_filt

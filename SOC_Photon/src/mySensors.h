@@ -102,6 +102,39 @@ protected:
   float add_;           // Adder for fault test, A
 };
 
+// Fault word bits
+#define TB_FLT        0   // Momentary isolation of Tb failure, T=faulted
+#define VB_FLT        1   // Momentary isolation of Vb failure, T=faulted
+#define IB_AMP_FLT    2   // Momentary isolation of Ib amp failure, T=faulted 
+#define IB_NOA_FLT    3   // Momentary isolation of Ib no amp failure, T=faulted 
+#define CCD_FLT       4
+#define WRAP_HI_FLT   5   // Wrap isolates to Ib high fault
+#define WRAP_LO_FLT   6   // Wrap isolates to Ib low fault
+#define IB_DIF_HI_FLT 8   // Faulted sensor difference error, T = fault
+#define IB_DIF_LO_FLT 9   // Faulted sensor difference error, T = fault
+#define DSCN_FLT      10  // Dual faulted quiet error, T = disconnected shunt
+#define IB_AMP_BARE   11  // Unconnected ib bus, T = bare bus
+#define IB_NOA_BARE   12  // Unconnected ib bus, T = bare bus
+
+// Fail word bits
+#define TB_FA         0   // Peristed, latched isolation of Tb failure, T=failed
+#define VB_FA         1   // Peristed, latched isolation of Vb failure, T=failed
+#define IB_AMP_FA     2   // Amp sensor selection memory, T = amp failed
+#define IB_NOA_FA     3   // Noamp sensor selection memory, T = no amp failed
+#define CCD_FA        4
+#define WRAP_HI_FA    5   // Wrap isolates to Ib high fail
+#define WRAP_LO_FA    6   // Wrap isolates to Ib low fail
+#define WRAP_VB_FA    7   // Wrap isolates to Vb fail
+#define IB_DIF_HI_FA  8   // Persisted sensor difference error, T = fail
+#define IB_DIF_LO_FA  9   // Persisted sensor difference error, T = fail
+#define DSCN_FA       10  // Dual persisted quiet error, T = disconnected shunt
+
+#define faultSet(bit) (bitSet(fltw_, bit) )
+#define failSet(bit) (bitSet(falw_, bit) )
+#define faultRead(bit) (bitRead(fltw_, bit) )
+#define failRead(bit) (bitRead(fltw_, bit) )
+#define faultAssign(bval, bit) if (bval) bitSet(fltw_, bit); else bitClear(fltw_, bit)
+#define failAssign(bval, bit) if (bval) bitSet(falw_, bit); else bitClear(falw_, bit)
 
 // Detect faults and manage selection
 class Fault
@@ -112,18 +145,22 @@ public:
   ~Fault();
   float cc_diff() { return cc_diff_; };
   boolean cc_flt() { return cc_flt_; };
+  boolean dscn_fa() { return failRead(DSCN_FA); };
+  boolean dscn_flt() { return faultRead(DSCN_FLT); };
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
-  boolean Ibatt_amp_flt() { return Ibatt_amp_flt_; };
-  boolean Ibatt_amp_fa() { return Ibatt_amp_fa_; };
-  boolean Ibatt_noamp_flt() { return Ibatt_noamp_flt_; };
-  boolean Ibatt_noamp_fa() { return Ibatt_noamp_fa_; };
-  boolean Vbatt_fail() { return ( Vbatt_fa_ || vb_sel_stat_==0 ); };
+  boolean ib_amp_fa() { return failRead(IB_AMP_FA); };
+  boolean ib_amp_flt() { return faultRead(IB_AMP_FLT);  };
+  boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
+  boolean ib_noa_flt() { return faultRead(IB_NOA_FLT); };
+  boolean Vbatt_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   float ib_diff() { return ( ib_diff_ ); };
   float ib_diff_f() { return ( ib_diff_f_ ); };
-  boolean ib_diff_fa() { return ib_diff_fa_; };
-  boolean ib_diff_flt() { return ib_diff_flt_; };
+  boolean ib_dif_hi_fa() { return failRead(IB_DIF_HI_FA); };
+  boolean ib_dif_hi_flt() { return faultRead(IB_DIF_HI_FLT); };
+  boolean ib_dif_lo_fa() { return failRead(IB_DIF_LO_FA); };
+  boolean ib_dif_lo_flt() { return faultRead(IB_DIF_LO_FLT); };
   void ib_quiet(const boolean reset, Sensors *Sen);
   void ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
   void pretty_print(Sensors *Sen, BatteryMonitor *Mon);
@@ -133,16 +170,17 @@ public:
   void shunt_select_initial();   // Choose between shunts for model
   int8_t tbatt_sel_status() { return tb_sel_stat_; }
   void vbatt_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max, const boolean reset);  // Range check Vbatt
-  boolean Vbatt_fa() { return Vbatt_fa_; };
   int8_t vb_sel_stat() { return vb_sel_stat_; };
-  boolean Vbatt_flt() { return Vbatt_flt_; };
-  boolean wrap_hi_fa() { return wrap_hi_fa_; };
-  boolean wrap_hi_flt() { return wrap_hi_flt_; };
-  boolean wrap_lo_fa() { return wrap_lo_fa_; };
-  boolean wrap_lo_flt() { return wrap_lo_flt_; };
-  boolean wrap_vb_fa() { return wrap_vb_fa_; };
+  boolean vb_fa() { return failRead(VB_FA); };
+  boolean vb_flt() { return faultRead(VB_FLT); };
+  boolean wrap_hi_fa() { return failRead(WRAP_HI_FA); };
+  boolean wrap_hi_flt() { return faultRead(WRAP_HI_FLT); };
+  boolean wrap_lo_fa() { return failRead(WRAP_LO_FA); };
+  boolean wrap_lo_flt() { return faultRead(WRAP_LO_FLT);  };
+  boolean wrap_vb_fa() { return failRead(WRAP_LO_FA); };
 protected:
-  TFDelay *IbattErrPersist;
+  TFDelay *IbdHiPersist;
+  TFDelay *IbdLoPersist;
   TFDelay *IbattAmpHardFail;
   TFDelay *IbattNoAmpHardFail;
   TFDelay *VbattHardFail;
@@ -156,32 +194,17 @@ protected:
   float e_wrap_filt_;       // Wrap error, V
   float ib_diff_;           // Current sensor difference error, A
   float ib_diff_f_;         // Filtered sensor difference error, A
-  boolean Ibatt_amp_fa_;    // Amp sensor selection memory, T = amp failed
-  boolean Ibatt_amp_flt_;   // Momentary isolation of Ibatt failure, T=faulted 
-  boolean ib_diff_fa_;      // Persisted sensor difference error, T = fail
-  boolean ib_diff_flt_;     // Faulted sensor difference error, T = fault
-  boolean Ibatt_noamp_fa_;  // Noamp sensor selection memory, T = no amp failed
-  boolean Ibatt_noamp_flt_; // Momentary isolation of Ibatt failure, T=faulted 
   float ib_quiet_;          // ib hardware noise, A
-  boolean ib_quiet_fa_;     // Persisted quiet error, T = fail
-  boolean ib_quiet_flt_;    // Faulted quiet error, T = fault
-  boolean Vbatt_fa_;        // Peristed, latched isolation of Vbatt failure, T=failed
-  boolean Vbatt_flt_;       // Momentary isolation of Vbatt failure, T=faulted
-  boolean wrap_hi_fa_;      // Current failed high
-  boolean wrap_hi_flt_;     // Current faulted high
-  boolean wrap_lo_fa_;      // Current failed low
-  boolean wrap_lo_flt_;     // Current faulted low
-  boolean wrap_vb_fa_;      // Wrap isolates to Vb fail
   TFDelay *WrapHi;          // Time high wrap fail persistence
   TFDelay *WrapLo;          // Time low wrap fail persistence
   int8_t tb_sel_stat_;      // Memory of Tbatt signal selection, 0=none, 1=sensor
   int8_t vb_sel_stat_;      // Memory of Vbatt signal selection, 0=none, 1=sensor
   int8_t ib_sel_stat_;      // Memory of Ibatt signal selection, -1=noamp, 0=none, 1=a
   boolean reset_all_faults_; // Reset all fault logic
-  uint32_t fltw_;           // Bitmapped faults
-  uint32_t falw_;           // Bitmapped fails
   int8_t vb_sel_stat_last_; // past value
   int8_t ib_sel_stat_last_; // past value
+  uint32_t fltw_;           // Bitmapped faults
+  uint32_t falw_;           // Bitmapped fails
 };
 
 

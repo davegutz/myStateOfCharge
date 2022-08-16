@@ -245,7 +245,7 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220803.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220807.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220807.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/ampHiFail20220815.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/ampHiFail20220816a.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampLoFail20220811.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFailNoise20220811.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/ampLoFailNoise20220811.txt'; unit_key = 'pro_2022'

@@ -109,7 +109,7 @@ void debug_q(BatteryMonitor *Mon, Sensors *Sen)
 Tb  = %7.3f,\nVb  = %7.3f,\nVoc = %7.3f,\nvoc_filt  = %7.3f,\nVsat = %7.3f,\nIb  = %7.3f,\nsoc_m = %8.4f,\n\
 soc_ekf= %8.4f,\nsoc = %8.4f,\nmodeling = %d,\namp delta_q_cinf = %10.1f,\namp delta_q_dinf = %10.1f,\namp tweak_sclr = %10.6f,\n\
 no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr = %10.6f,\n",
-    Sen->Flt->Ibatt_amp_fa(), Sen->Flt->Ibatt_noamp_fa(), Sen->Flt->Vbatt_fail(),
+    Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->Vbatt_fail(),
     Mon->temp_c(), Mon->Vb(), Mon->Voc(), Mon->Voc_filt(), Mon->Vsat(), Mon->Ib(), Sen->Sim->soc(), Mon->soc_ekf(),
     Mon->soc(), rp.modeling, Sen->ShuntAmp->delta_q_cinf(), Sen->ShuntAmp->delta_q_dinf(),
     Sen->ShuntAmp->tweak_sclr(), Sen->ShuntNoAmp->delta_q_cinf(), Sen->ShuntNoAmp->delta_q_dinf(),
@@ -118,7 +118,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
 Tb  = %7.3f,\nVb  = %7.3f,\nVoc = %7.3f,\nvoc_filt  = %7.3f,\nVsat = %7.3f,\nIb  = %7.3f,\nsoc_m = %8.4f,\n\
 soc_ekf= %8.4f,\nsoc = %8.4f,\nmodeling = %d,\namp delta_q_cinf = %10.1f,\namp delta_q_dinf = %10.1f,\namp tweak_sclr = %10.6f,\n\
 no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr = %10.6f,\n",
-    Sen->Flt->Ibatt_amp_fa(), Sen->Flt->Ibatt_noamp_fa(), Sen->Flt->Vbatt_fail(),
+    Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->Vbatt_fail(),
     Mon->temp_c(), Mon->Vb(), Mon->Voc(), Mon->Voc_filt(), Mon->Vsat(), Mon->Ib(), Sen->Sim->soc(), Mon->soc_ekf(),
     Mon->soc(), rp.modeling, Sen->ShuntAmp->delta_q_cinf(), Sen->ShuntAmp->delta_q_dinf(),
     Sen->ShuntAmp->tweak_sclr(), Sen->ShuntNoAmp->delta_q_cinf(), Sen->ShuntNoAmp->delta_q_dinf(),
