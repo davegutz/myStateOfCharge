@@ -132,7 +132,7 @@ protected:
 #define faultSet(bit) (bitSet(fltw_, bit) )
 #define failSet(bit) (bitSet(falw_, bit) )
 #define faultRead(bit) (bitRead(fltw_, bit) )
-#define failRead(bit) (bitRead(fltw_, bit) )
+#define failRead(bit) (bitRead(falw_, bit) )
 #define faultAssign(bval, bit) if (bval) bitSet(fltw_, bit); else bitClear(fltw_, bit)
 #define failAssign(bval, bit) if (bval) bitSet(falw_, bit); else bitClear(falw_, bit)
 
