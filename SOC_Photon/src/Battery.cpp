@@ -125,7 +125,7 @@ void Battery::pretty_print(void)
 {
     Serial.printf("Battery:\n");
     Serial.printf("  temp_c_ = %7.3f;  //  deg C\n", temp_c_);
-    Serial.printf(" *rp_delt_q_ =%10.1f;  //  Coulombs\n", *rp_delta_q_);
+    Serial.printf(" *rp_delt_q_ =%10.1f;  //  Coul\n", *rp_delta_q_);
     Serial.printf(" *rp_t_last_ =%10.1f;  // deg C\n", *rp_t_last_);
     Serial.printf("  dvoc_dt  =%10.6f;  //  V/deg C\n", chem_.dvoc_dt);
     Serial.printf("  r_0 =  %10.6f;  //  ohms\n", chem_.r_0);
@@ -136,20 +136,20 @@ void Battery::pretty_print(void)
     Serial.printf("  r_sd = %10.6f;  //  ohms\n", chem_.r_sd);
     Serial.printf("  tau_sd=%10.1f;  //  sec\n", chem_.tau_sd);
     Serial.printf("  bms_off_ =      %d;  // T=off\n", bms_off_);
-    Serial.printf("  dv_dsoc_=%10.6f;  // V/fraction\n", dv_dsoc_);
-    Serial.printf("  ib_ =     %7.3f;  // A\n", ib_);
-    Serial.printf("  Ib =      %7.3f;  // Bank, A\n", ib_*(*rp_nP_));
-    Serial.printf("  vb_ =     %7.3f;  // V\n", vb_);
-    Serial.printf("  Vb =      %7.3f;  // Bank, V\n", vb_*(*rp_nS_));
-    Serial.printf("  voc_ =    %7.3f;  // V\n", voc_);
+    Serial.printf("  dv_dsoc_=%10.6f;  // V/frac\n", dv_dsoc_);
+    Serial.printf("  ib_ =  %7.3f;  // A\n", ib_);
+    Serial.printf("  Ib =   %7.3f;  // Bank, A\n", ib_*(*rp_nP_));
+    Serial.printf("  vb_ =  %7.3f;  // V\n", vb_);
+    Serial.printf("  Vb =   %7.3f;  // Bank, V\n", vb_*(*rp_nS_));
+    Serial.printf("  voc_ = %7.3f;  // V\n", voc_);
     Serial.printf("  voc_stat_=%7.3f;  // V\n", voc_stat_);
-    Serial.printf("  vsat_ =   %7.3f;  // V\n", vsat_);
+    Serial.printf("  vsat_ =%7.3f;  // V\n", vsat_);
     Serial.printf("  dv_dyn_ = %7.3f;  // V\n", dv_dyn_);
-    Serial.printf("  sr_ =     %7.3f;  // Resistance scalar\n", sr_);
-    Serial.printf("  dv_ =     %7.3f;  // Table hard adj, V\n", dv_);
-    Serial.printf("  dt_ =     %7.3f;  // Update time, s\n", dt_);
-    Serial.printf(" *rp_nP_ =  %5.2f;  // P parallel in bank, e.g. '2P1S'\n", *rp_nP_);
-    Serial.printf(" *rp_nS_ =    %5.2f;  // S series in bank, e.g. '2P1S'\n", *rp_nS_);
+    Serial.printf("  sr_ =  %7.3f;  // scalar\n", sr_);
+    Serial.printf("  dv_ =  %7.3f;  // Table adj, V\n", dv_);
+    Serial.printf("  dt_ =  %7.3f;  // s\n", dt_);
+    Serial.printf(" *rp_nP_ =%5.2f;  // P in bank, e.g. '2P1S'\n", *rp_nP_);
+    Serial.printf(" *rp_nS_ =%5.2f;  // S in bank, e.g. '2P1S'\n", *rp_nS_);
 }
 
 // Print State Space
@@ -443,17 +443,17 @@ void BatteryMonitor::pretty_print(void)
 {
     Serial.printf("BatteryMonitor::");
     this->Battery::pretty_print();
-    Serial.printf(" BatteryMonitor::BatteryMonitor:\n");
-    Serial.printf("  amp_hrs_remaining_ekf_=%7.3f;  // if drain to q_ekf=0, A-h\n", amp_hrs_remaining_ekf_);
-    Serial.printf("  amp_hrs_remaining_soc_=%7.3f;  // if drain soc_ to 0, A-h\n", amp_hrs_remaining_soc_);
-    Serial.printf("  EKF_converged =        %d;  // T=converged\n", converged_ekf());
-    Serial.printf("  q_ekf =       %10.1f;  // charge calc by ekf, C\n", q_ekf_);
-    Serial.printf("  soc_ekf =        %8.4f;  // Solved state of charge, fraction\n", soc_ekf_);
-    Serial.printf("  tcharge =          %5.1f;  // CC time to full, hr\n", tcharge_);
-    Serial.printf("  tcharge_ekf =      %5.1f;  // Solved time to full, hr\n", tcharge_ekf_);
-    Serial.printf("  voc_filt_ =      %7.3f;  // Filtered charging for sat detect, V\n", voc_filt_);
-    Serial.printf("  voc_stat_ =      %7.3f;  // Static model OC from table (ref), V\n", voc_stat_);
-    Serial.printf("  y_filt_ =        %7.3f;  // Residual from EKF, V\n", y_filt_);
+    Serial.printf(" BM::BM:\n");
+    Serial.printf("  amp_hrs_remaining_ekf_=%7.3f;  // drain to q_ekf=0, A-h\n", amp_hrs_remaining_ekf_);
+    Serial.printf("  amp_hrs_remaining_soc_=%7.3f;  // drain to 0, A-h\n", amp_hrs_remaining_soc_);
+    Serial.printf("  EKF_converged =  %d;  // T=conv\n", converged_ekf());
+    Serial.printf("  q_ekf =   %10.1f;  // charge calc by ekf, C\n", q_ekf_);
+    Serial.printf("  soc_ekf =   %8.4f;  // Solved, frac\n", soc_ekf_);
+    Serial.printf("  tcharge =      %5.1f;  // CC time full, hr\n", tcharge_);
+    Serial.printf("  tcharge_ekf =  %5.1f;  // Solv time full, hr\n", tcharge_ekf_);
+    Serial.printf("  voc_filt_ =  %7.3f;  // V\n", voc_filt_);
+    Serial.printf("  voc_stat_ =  %7.3f;  // V\n", voc_stat_);
+    Serial.printf("  y_filt_ =    %7.3f;  // Res EKF, V\n", y_filt_);
 }
 
 // Reset Coulomb Counter to EKF under restricted conditions especially new boot no history of saturation
@@ -839,16 +839,16 @@ void BatteryModel::pretty_print(void)
     Serial.printf("BatteryModel::");
     this->Battery::pretty_print();
     Serial.printf(" BatteryModel::BatteryModel:\n");
-    Serial.printf("  sat_ib_max_ =       %7.3f;  // Cutback, A\n", sat_ib_max_);
-    Serial.printf("  sat_ib_null_ =      %7.3f;  // Cutback value for voc=vsat, A\n", sat_ib_null_);
-    Serial.printf("  sat_cutback_gain_ = %7.1f;  // Gain to retard ib when voc exceeds vsat\n", sat_cutback_gain_);
-    Serial.printf("  model_cutback_ =          %d;  // Cutting\n", model_cutback_);
-    Serial.printf("  model_saturated_ =        %d;  // Limited on saturation cutback\n", model_saturated_);
-    Serial.printf("  ib_ =               %7.3f;  // Battery terminal curr, A\n", ib_);
-    Serial.printf("  ib_in_ =            %7.3f;  // Saved value of curr in, A\n", ib_in_);
-    Serial.printf("  ib_fut_ =           %7.3f;  // Future value of limited curr, A\n", ib_fut_);
-    Serial.printf("  ib_sat_ =           %7.3f;  // T = cutback saturated\n", ib_sat_);
-    Serial.printf(" *rp_s_cap_model_ =   %7.3f;  // Rated capacity scalar\n", *rp_s_cap_model_);
+    Serial.printf("  sat_ib_max_ =  %7.3f;  // CB, A\n", sat_ib_max_);
+    Serial.printf("  sat_ib_null_ = %7.3f;  // CB for voc=vsat, A\n", sat_ib_null_);
+    Serial.printf("  sat_cutback_gain_ = %7.1f;  // Gn retard ib for voc>vsat\n", sat_cutback_gain_);
+    Serial.printf("  model_cutback_ =   %d;  // T=Cut\n", model_cutback_);
+    Serial.printf("  model_saturated_ = %d;  // On sat CB\n", model_saturated_);
+    Serial.printf("  ib_ =     %7.3f;  // Batt term, A\n", ib_);
+    Serial.printf("  ib_in_ =  %7.3f;  // Saved in, A\n", ib_in_);
+    Serial.printf("  ib_fut_ = %7.3f;  // Fut val, A\n", ib_fut_);
+    Serial.printf("  ib_sat_ = %7.3f;  // T = sat\n", ib_sat_);
+    Serial.printf(" *rp_s_cap_model_ = %7.3f;  // Scalar\n", *rp_s_cap_model_);
 }
 
 
@@ -931,19 +931,19 @@ double Hysteresis::look_hys(const double dv, const double soc)
 void Hysteresis::pretty_print()
 {
     Serial.printf("Hysteresis:\n");
-    Serial.printf("  res_ =         %6.4f;  // Null, Ohms\n", res_);
-    Serial.printf("  cap_init_ =%10.1f;  // Farads\n", cap_init_);
-    Serial.printf("  cap_ =     %10.1f;  // Farads\n", cap_);
+    Serial.printf("  res_ =  %6.4f;  // Null, Ohms\n", res_);
+    Serial.printf("  cap_init_ =%10.1f;  // F\n", cap_init_);
+    Serial.printf("  cap_ = %10.1f;  // F\n", cap_);
     double res = look_hys(0., 0.8);
-    Serial.printf("  tau_ =     %10.1f;  // Null time const, sec\n", res*cap_);
-    Serial.printf("  ib_ =         %7.3f;  // In, A\n", ib_);
-    Serial.printf("  ioc_ =        %7.3f;  // Out, A\n", ioc_);
-    Serial.printf("  soc_ =       %8.4f;  // Input\n", soc_);
-    Serial.printf("  res_ =        %7.3f;  // Variable value, ohms\n", res_);
-    Serial.printf("  dv_dot_ =     %7.3f;  // Calculated rate, V/s\n", dv_dot_);
-    Serial.printf("  dv_hys_ =     %7.3f;  // Delta state, V\n", dv_hys_);
-    Serial.printf("  disabled_ =         %d;  // Disabled by input < 1e-5, T=disab\n", disabled_);
-    Serial.printf("  rp.hys_scale=  %6.2f;  // Scalar on hys\n", rp.hys_scale);
+    Serial.printf("  tau_ = %10.1f;  // Null, sec\n", res*cap_);
+    Serial.printf("  ib_ =  %7.3f;  // In, A\n", ib_);
+    Serial.printf("  ioc_ = %7.3f;  // Out, A\n", ioc_);
+    Serial.printf("  soc_ = %8.4f;  // Input\n", soc_);
+    Serial.printf("  res_ = %7.3f;  // Var, ohms\n", res_);
+    Serial.printf("  dv_dot_ = %7.3f;  // V/s\n", dv_dot_);
+    Serial.printf("  dv_hys_ = %7.3f;  // Delta state, V\n", dv_hys_);
+    Serial.printf("  disabled_ = %d;  // input < 1e-5\n", disabled_);
+    Serial.printf("  rp.hys_scale= %6.2f;  // Scalar\n", rp.hys_scale);
 }
 
 // Scale

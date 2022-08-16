@@ -137,17 +137,18 @@ void Shunt::load()
 Fault::Fault(const double T):
   Ibatt_amp_fa_(false), Ibatt_noamp_fa_(false), Vbatt_fa_(false), Vbatt_flt_(false),
   e_wrap_(0), e_wrap_filt_(0), wrap_hi_flt_(false), wrap_lo_flt_(false), wrap_hi_fa_(false), wrap_lo_fa_(false),
-  wrap_vb_fa_(false), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false)
+  wrap_vb_fa_(false), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
+  vb_sel_stat_last_(1), ib_sel_stat_last_(1)
 {
-  this->IbattErrFilt = new LagTustin(0.1, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
-  this->IbattErrPersist = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
-  this->IbattAmpHardFail  = new TFDelay(false, IBATT_HARD_SET, IBATT_HARD_RESET, T);
-  this->IbattNoAmpHardFail  = new TFDelay(false, IBATT_HARD_SET, IBATT_HARD_RESET, T);
-  this->VbattHardFail  = new TFDelay(false, VBATT_HARD_SET, VBATT_HARD_RESET, T);
-  WrapErrFilt = new LagTustin(0.1, WRAP_ERR_FILT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT);  // actual update time provided run time
+  IbattErrFilt = new LagTustin(T, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
+  IbattErrPersist = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
+  IbattAmpHardFail  = new TFDelay(false, IBATT_HARD_SET, IBATT_HARD_RESET, T);
+  IbattNoAmpHardFail  = new TFDelay(false, IBATT_HARD_SET, IBATT_HARD_RESET, T);
+  VbattHardFail  = new TFDelay(false, VBATT_HARD_SET, VBATT_HARD_RESET, T);
+  WrapErrFilt = new LagTustin(T, WRAP_ERR_FILT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT);  // actual update time provided run time
   WrapHi = new TFDelay(false, WRAP_HI_S, WRAP_HI_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
   WrapLo = new TFDelay(false, WRAP_LO_S, WRAP_LO_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
-  General2_Pole *QuietFilt = new General2_Pole(0.1, WN_Q_FILT, ZETA_Q_FILT, MIN_Q_FILT, MAX_Q_FILT);  // actual update time provided run time
+  QuietFilt = new General2_Pole(T, WN_Q_FILT, ZETA_Q_FILT, MIN_Q_FILT, MAX_Q_FILT);  // actual update time provided run time
 }
 
 // Voltage wraparound logic for current selection
@@ -162,6 +163,37 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
     wrap_lo_fa_ = WrapLo->calculate(wrap_lo_flt_, WRAP_LO_S, WRAP_LO_R, Sen->T, reset) && !Vbatt_fa_;
 }
 
+void Fault::pretty_print()
+{
+  Serial.printf("Fault:\n");
+  Serial.printf("  cc_diff_= %7.3f;\n", cc_diff_);
+  Serial.printf("  cc_flt_ =     %d;\n", cc_flt_);
+  Serial.printf("  e_wrap_ = %7.3f;\n", e_wrap_);
+  Serial.printf("  e_w_f_ = %7.3f;\n", e_wrap_filt_);
+  Serial.printf("  Ibatt_amp_flt_ = %d;\n", Ibatt_amp_flt_);
+  Serial.printf("  Ibatt_amp_fa_ = %d;\n", Ibatt_amp_fa_);
+  Serial.printf("  Ibatt_noamp_flt_ = %d;\n", Ibatt_noamp_flt_);
+  Serial.printf("  Ibatt_noamp_fa_ = %d;\n", Ibatt_noamp_fa_);
+  Serial.printf("  ib_diff_= %7.3f;\n", ib_diff_);
+  Serial.printf("  ib_diff_f_= %7.3f;\n", ib_diff_f_);
+  Serial.printf("  ib_diff_flt_ = %d;\n", ib_diff_flt_);
+  Serial.printf("  ib_diff_fa_ = %d;\n", ib_diff_fa_);
+  Serial.printf("  Vbatt_flt_ = %d;\n", Vbatt_flt_);
+  Serial.printf("  Vbatt_fa_ = %d;\n", Vbatt_fa_);
+  Serial.printf("  wrap_hi_flt_ = %d;\n", wrap_hi_flt_);
+  Serial.printf("  wrap_hi_fa_ = %d;\n", wrap_hi_fa_);
+  Serial.printf("  wrap_lo_flt_ = %d;\n", wrap_lo_flt_);
+  Serial.printf("  wrap_lo_fa_ = %d;\n", wrap_lo_fa_);
+  Serial.printf("  wrap_vb_fa_ = %d;\n", wrap_vb_fa_);
+  Serial.printf("  tb_sel_stat_ = %d;\n", tb_sel_stat_);
+  Serial.printf("  vb_sel_stat_     = %d;\n", vb_sel_stat_);
+  Serial.printf("  vb_sel_stat_last_= %d;\n", vb_sel_stat_last_);
+  Serial.printf("  ib_sel_stat_     = %d;\n", ib_sel_stat_);
+  Serial.printf("  ib_sel_stat_last_= %d;\n", ib_sel_stat_last_);
+  Serial.printf("  reset_all_faults_ = %d;\n", reset_all_faults_);
+  Serial.printf("  fltw_ = %ld;\n", fltw_);
+  Serial.printf("  falw_ = %ld;\n", falw_);
+}
 // Calculate selection for choice
 // Use model instead of sensors when running tests as user
 // Equivalent to using voc(soc) as voter between two hardware currrents
@@ -193,10 +225,9 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // Truth tables
 
   // ib
-  static int8_t ib_sel_stat_last = ib_sel_stat_;
   if ( reset_all_faults_ )
   {
-    ib_sel_stat_last = 1;
+    ib_sel_stat_last_ = 1;
     Serial.printf("Select reset ib faults\n");
   }
     if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() )
@@ -207,7 +238,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   {
     ib_sel_stat_ = 1;
   }
-  else if ( ib_sel_stat_last==-1 && !Sen->ShuntNoAmp->bare() )  // latch - use reset
+  else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare() )  // latch - use reset
   {
     ib_sel_stat_ = -1;
   }
@@ -225,21 +256,20 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     {
       ib_sel_stat_ = -1;
     }
-    else if ( ib_sel_stat_last >= 0 )  // Must reset to move out of no amp selection
+    else if ( ib_sel_stat_last_ >= 0 )  // Must reset to move out of no amp selection
     {
       ib_sel_stat_ = 1;
     }
   }
 
   // vb failure from wrap result.  Latches
-  static int8_t vb_sel_stat_last = vb_sel_stat_;
   if ( reset_all_faults_ )
   {
-    vb_sel_stat_last = 1;
+    vb_sel_stat_last_ = 1;
     vb_sel_stat_ = 1;
     Serial.printf("Select reset vb faults\n");
   }
-  if ( !vb_sel_stat_last )
+  if ( !vb_sel_stat_last_ )
   {
     vb_sel_stat_ = 0;   // Latch
   }
@@ -252,18 +282,18 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     wrap_vb_fa_ = false;
 
   // Print
-  if ( ib_sel_stat_ != ib_sel_stat_last || vb_sel_stat_ != vb_sel_stat_last )
+  if ( ib_sel_stat_ != ib_sel_stat_last_ || vb_sel_stat_ != vb_sel_stat_last_ )
   {
-    Serial.printf("Select change:  ShuntAmp->bare=%d, ShuntNoAmp->bare=%d, ibatt_err_fail=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, cc_flt_=%d, rp.ibatt_select=%d, ib_sel_stat=%d, vb_sel_stat=%d, Vbatt_fail=%d,\n",
+    Serial.printf("Select change:  ShuntAmp->bare=%d, ShuntNoAmp->bare=%d, ibatt_dif_fa=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, cc_flt_=%d, rp.ibatt_select=%d, ib_sel_stat=%d, vb_sel_stat=%d, Vbatt_fail=%d,\n",
         Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fa_, wrap_lo_fa_, wrap_vb_fa_, cc_flt_, rp.ibatt_select, ib_sel_stat_, vb_sel_stat_, Vbatt_fa_);
     Serial.printf("Small reset. Filters reinit and selection unchanged.   Hard reset to re-init selection\n");
   }
-  if ( ib_sel_stat_ != ib_sel_stat_last )
+  if ( ib_sel_stat_ != ib_sel_stat_last_ )
   {
     cp.cmd_reset();   
   }
-  ib_sel_stat_last = ib_sel_stat_;
-  vb_sel_stat_last = vb_sel_stat_;
+  ib_sel_stat_last_ = ib_sel_stat_;
+  vb_sel_stat_last_ = vb_sel_stat_;
   reset_all_faults_ = false;
 }
 
@@ -283,7 +313,7 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
 }
 
 // Check analog voltage.  Latches
-void Fault::vbatt_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max)
+void Fault::vbatt_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max, const boolean reset)
 {
     if ( reset ) Vbatt_fa_ = false;
     Vbatt_flt_ = Sen->Vbatt_hdwe <= _Vbatt_min*Mon->nS() || Sen->Vbatt_hdwe >= _Vbatt_max*Mon->nS();
@@ -387,12 +417,12 @@ void Sensors::final_assignments()
       double cTime;
       if ( rp.tweak_test() ) cTime = double(now)/1000.;
       else cTime = control_time;
-      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,    %d, %d,     %10.7f, %d,   %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,   %7.5f, %d, %d,",
+      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,    %d, %d,     %10.7f, %d,   %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,   %7.5f,%7.5f, %d, %d,",
           cTime, reset, rp.ibatt_select,
           ShuntAmp->bare(), ShuntNoAmp->bare(),
           Flt->cc_diff(), Flt->cc_flt(),
           Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model, Ibatt_model, 
-          Flt->ib_diff(), Flt->ib_diff_flt(), Flt->ib_diff_fa());
+          Flt->ib_diff(), Flt->ib_diff_f(), Flt->ib_diff_flt(), Flt->ib_diff_fa());
       Serial.print(cp.buffer);
       sprintf(cp.buffer, "                %7.5f, %7.5f, %d, %d,%d, %d, %d,   %d, %7.5f,%7.5f, %d, %7.5f,    %d, %7.5f,%7.5f, %d, %7.5f,   %5.2f,%5.2f, %d, %5.2f,  %d, %d, %c,",
           Flt->e_wrap(), Flt->e_wrap_filt(), Flt->wrap_hi_flt(), Flt->wrap_lo_flt(), Flt->wrap_hi_fa(), Flt->wrap_lo_fa(), Flt->wrap_vb_fa(),

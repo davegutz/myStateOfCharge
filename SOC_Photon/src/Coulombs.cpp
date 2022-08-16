@@ -167,20 +167,20 @@ uint8_t Chemistry::encode(const String mod_str)
 void Chemistry::pretty_print(void)
 {
   Serial.printf("Chemistry:\n");
-  Serial.printf("  dqdt =    %7.3f;  // Change charge with temperature, fraction/deg C (0.01 from lit)\n", dqdt);
-  Serial.printf("  low_voc = %7.3f;  // Threshold for BMS to turn off battery, V\n", low_voc);
-  Serial.printf("  hys_cap = %7.3f;  // Cap of hysteresis, Farads\n", hys_cap);
-  Serial.printf("  v_sat =   %7.3f;  // Sat thresh at temp, V\n", v_sat);
-  Serial.printf("  dvoc_dt = %7.3f;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n", dvoc_dt);
-  Serial.printf("  dv =      %7.3f;  // Adj for cal error, V\n", dv);
-  Serial.printf("  r_0 =   %9.6f;  // Randles R0, ohms\n", r_0);
-  Serial.printf("  r_ct =  %9.6f;  // Charge transfer resistance, ohms\n", r_ct);
-  Serial.printf("  r_diff =%9.6f;  // Diffusion resistance, ohms\n", r_diff);
-  Serial.printf("  tau_ct =  %7.3f;  // Charge transfer time constant, s (=1/Rct/Cct)\n", tau_ct);
-  Serial.printf("  tau_diff =%7.3f;  // Diffusion time constant, s (=1/Rdif/Cdif)\n", tau_diff);
-  Serial.printf("  tau_sd =  %7.3f;  // EKF ref.	Parasitic discharge time constant, sec\n", tau_sd);
-  Serial.printf("  r_sd =    %7.3f;  // EKF ref.	Parasitic discharge, ohms\n", r_sd);
-  Serial.printf("  r_ss =    %7.3f;  // For state space model init, ohms\n", r_ss);
+  Serial.printf("  dqdt =   %7.3f;  // frac/deg C\n", dqdt);
+  Serial.printf("  low_voc =%7.3f;  // BMS turn off, V\n", low_voc);
+  Serial.printf("  hys_cap =%7.3f;  // F\n", hys_cap);
+  Serial.printf("  v_sat =  %7.3f;  // Sat at temp, V\n", v_sat);
+  Serial.printf("  dvoc_dt =%7.3f;  // V/deg C\n", dvoc_dt);
+  Serial.printf("  dv =     %7.3f;  // Cal error, V\n", dv);
+  Serial.printf("  r_0 =  %9.6f;  // Randles R0, ohms\n", r_0);
+  Serial.printf("  r_ct = %9.6f;  // Charge transfer, ohms\n", r_ct);
+  Serial.printf("  r_diff =%9.6f;  // Diffusion, ohms\n", r_diff);
+  Serial.printf("  tau_ct = %7.3f;  // Charge transfer, s (=1/Rct/Cct)\n", tau_ct);
+  Serial.printf("  tau_diff=%7.3f;  // Diffusion, s (=1/Rdif/Cdif)\n", tau_diff);
+  Serial.printf("  tau_sd = %7.3f;  // EKF. Parasitic disch, sec\n", tau_sd);
+  Serial.printf("  r_sd =   %7.3f;  // EKF. Parasitic disch, ohms\n", r_sd);
+  Serial.printf("  r_ss =   %7.3f;  // SS init, ohms\n", r_ss);
   Serial.printf("  voc(t, soc):\n");
   Serial.printf("    t=  {"); for ( int i=0; i<m_t; i++ ) Serial.printf("%7.3f, ", y_t[i]); Serial.printf("};\n");
   Serial.printf("    soc={"); for ( int i=0; i<n_s; i++ ) Serial.printf("%7.3f, ", x_soc[i]); Serial.printf("};\n");

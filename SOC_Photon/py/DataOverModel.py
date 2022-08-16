@@ -47,7 +47,8 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.title(plot_title)
     plt.plot(old_s.time, old_s.Ib, color='green', linestyle='-', label='Ib')
     plt.plot(new_s.time, new_s.Ib, color='orange', linestyle='--', label='Ib_new')
-    plt.plot(old_s.time, old_s.ib_dif, color='black', linestyle=':', label='ib_dif')
+    plt.plot(old_s.time, old_s.ib_dif, color='black', linestyle='-.', label='ib_dif')
+    plt.plot(old_s.time, old_s.ib_dif_f, color='magenta', linestyle=':', label='ib_dif_f')
     plt.legend(loc=1)
     plt.subplot(332)
     plt.plot(old_s.time, old_s.mod_data, color='blue', linestyle='-', label='mod')
@@ -444,6 +445,7 @@ class SavedData:
             self.ibnm = []
             self.ibm = []
             self.ib_dif = []
+            self.ib_dif_f = []
             self.ib_dif_flt = []
             self.ib_dif_fa = []
             self.e_w = None
@@ -486,6 +488,7 @@ class SavedData:
             self.ibnm = np.array(sel.ibnm[:i_end])
             self.ibm = np.array(sel.ibm[:i_end])
             self.ib_dif = np.array(sel.ib_dif[:i_end])
+            self.ib_dif_f = np.array(sel.ib_dif_f[:i_end])
             self.ib_dif_flt = np.array(sel.ib_dif_flt[:i_end])
             self.ib_dif_fa = np.array(sel.ib_dif_fa[:i_end])
             self.e_w = np.array(sel.e_w[:i_end])

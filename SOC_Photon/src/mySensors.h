@@ -115,7 +115,7 @@ public:
   TFDelay *IbattAmpHardFail;      // Persistence voltage range check for signall selection 
   TFDelay *IbattNoAmpHardFail;    // Persistence voltage range check for signall selection 
   TFDelay *VbattHardFail;         // Persistence voltage range check for signall selection 
-  boolean cc_diff() { return cc_diff_; };
+  float cc_diff() { return cc_diff_; };
   boolean cc_flt() { return cc_flt_; };
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
@@ -126,15 +126,17 @@ public:
   boolean Vbatt_fail() { return ( Vbatt_fa_ || vb_sel_stat_==0 ); };
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   float ib_diff() { return ( ib_diff_ ); };
+  float ib_diff_f() { return ( ib_diff_f_ ); };
   boolean ib_diff_fa() { return ib_diff_fa_; };
   boolean ib_diff_flt() { return ib_diff_flt_; };
   void ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
+  void pretty_print();
   void reset_all_faults() { reset_all_faults_ = true; };
   void select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ibatt signals
   void shunt_select_initial();   // Choose between shunts for model
   int8_t tbatt_sel_status() { return tb_sel_stat_; }
-  void vbatt_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max);  // Range check Vbatt
+  void vbatt_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max, const boolean reset);  // Range check Vbatt
   boolean Vbatt_fa() { return Vbatt_fa_; };
   int8_t vb_sel_stat() { return vb_sel_stat_; };
   boolean Vbatt_flt() { return Vbatt_flt_; };
@@ -175,6 +177,8 @@ protected:
   boolean reset_all_faults_; // Reset all fault logic
   uint32_t fltw_;           // Bitmapped faults
   uint32_t falw_;           // Bitmapped fails
+  uint8_t vb_sel_stat_last_;// past value
+  uint8_t ib_sel_stat_last_;// past value
 };
 
 
