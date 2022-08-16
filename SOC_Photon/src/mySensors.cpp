@@ -351,7 +351,7 @@ void Fault::vbatt_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vbatt_mi
     failAssign(false, VB_FA);
   }
   faultAssign( (Sen->Vbatt_hdwe<=_Vbatt_min*Mon->nS()) || (Sen->Vbatt_hdwe>=_Vbatt_max*Mon->nS()), VB_FLT);
-  failAssign( vb_fa() || VbattHardFail->calculate(vb_flt(), VBATT_HARD_SET, VBATT_HARD_RESET, Sen->T, reset_loc), VB_FA);
+  failAssign( vb_fa() || wrap_vb_fa() || VbattHardFail->calculate(vb_flt(), VBATT_HARD_SET, VBATT_HARD_RESET, Sen->T, reset_loc), VB_FA);
 }
 
 
