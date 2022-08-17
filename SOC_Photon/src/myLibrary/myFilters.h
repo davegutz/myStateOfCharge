@@ -183,7 +183,7 @@ protected:
 };
 
 
-// Tustin rate-lag rate calculator, non-pre-warped, no limits, fixed update rate
+// Tustin rate-lag rate calculator, non-pre-warped, no limits
 class LeadLagTustin : public DiscreteFilter
 {
 public:

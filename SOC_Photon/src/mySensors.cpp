@@ -135,7 +135,7 @@ void Shunt::load()
 
 // Class Fault
 Fault::Fault(const double T):
-  cc_flt_(false), cc_diff_(0.), e_wrap_(0), e_wrap_filt_(0), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), 
+  cc_diff_(0.), e_wrap_(0), e_wrap_filt_(0), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), 
   tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
   vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL)
 {
@@ -191,7 +191,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("  amp_bare=%d;\n", Sen->ShuntAmp->bare());
   Serial.printf("  noa_bare=%d;\n", Sen->ShuntNoAmp->bare());
   Serial.printf("  cc_diff=%7.3f;\n", cc_diff_);
-  Serial.printf("  cc_flt=%d;\n", cc_flt_);
+  Serial.printf("  cc_flt=%d;\n", cc_flt());
   Serial.printf("  voc_tab=%7.3f;\n", Mon->voc_tab());
   Serial.printf("  voc=%7.3f;\n", Mon->voc());
   Serial.printf("  e_wrap=%7.3f;\n", e_wrap_);
@@ -253,6 +253,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   cc_diff_ = Mon->soc_ekf() - Mon->soc();  // These are filtered in their construction (EKF is a dynamic filter and 
                                                   // Coulomb counter is wrapa big integrator)
   faultAssign( abs(cc_diff_) >= SOC_DISAGREE_THRESH, CCD_FLT );
+  failAssign( cc_flt(), CCD_FA );
 
   // Compare current sensors - failure conditions large difference
   // Difference error, filter, check, persist
@@ -297,7 +298,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       ib_sel_stat_ = -1;
     }
     else if ( Sen->ShuntAmp->bare() ||
-      ( (ib_dif_hi_fa()||ib_dif_lo_fa()) && ( ( vb_sel_stat_ && (wrap_hi_fa() || wrap_lo_fa())) || cc_flt_ )) )
+      ( (ib_dif_hi_fa()||ib_dif_lo_fa()) && ( ( vb_sel_stat_ && (wrap_hi_fa() || wrap_lo_fa())) || cc_flt() )) )
     {
       ib_sel_stat_ = -1;
     }

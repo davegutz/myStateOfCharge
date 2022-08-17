@@ -145,7 +145,7 @@ public:
   ~Fault();
   void bitMapPrint(char *buf, const int16_t fw);
   float cc_diff() { return cc_diff_; };
-  boolean cc_flt() { return cc_flt_; };
+  boolean cc_flt() { return faultRead(CCD_FLT); };
   boolean dscn_fa() { return failRead(IB_DSCN_FA); };
   boolean dscn_flt() { return faultRead(IB_DSCN_FLT); };
   float e_wrap() { return e_wrap_; };

@@ -226,34 +226,26 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   static uint8_t frame = 0;
   static boolean pass = false;
   String dispT, dispV, dispI;
-  // char dispString[21];
 
   display->clearDisplay();
   display->setTextSize(1);              // Normal 1:1 pixel scale
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner
 
-
+  // Top Line
   // Tb
+  sprintf(cp.buffer, "%3.0f", pp.pubList.Tbatt);
+  dispT = cp.buffer;
   if ( Sen->Flt->tb_fa() && (frame==0 || frame==1) )
     dispT = "***";
-  else
-  {
-    sprintf(cp.buffer, "%3.0f", pp.pubList.Tbatt);
-    dispT = cp.buffer;
-  }
-
   // Voc
+  sprintf(cp.buffer, "%5.2f", pp.pubList.Voc);
+  dispV = cp.buffer;
   if ( Sen->Flt->vb_fa() && (frame==1 || frame==2) )
     dispV = "**F**";
-  else
-  {
-    sprintf(cp.buffer, "%5.2f", pp.pubList.Voc);
-    dispV = cp.buffer;
-  }
-
-
   // Ib
+  sprintf(cp.buffer, "%6.1f", pp.pubList.Ibatt);
+  dispI = cp.buffer;
   if ( frame==2 )
   {
     if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() && !rp.mod_ib() )
@@ -262,11 +254,6 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
       dispI = "..C..";
     else if ( Sen->Flt->ib_red_loss() )
       dispI = "--R--";
-    else
-    {
-      sprintf(cp.buffer, "%6.1f", pp.pubList.Ibatt);
-      dispI = cp.buffer;
-    }
   }
   else if ( frame==3 )
   {
@@ -274,22 +261,11 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
       dispI = "**F**";
     else if ( Sen->Flt->dscn_fa() && !rp.mod_ib() )
       dispI = "..C..";
-    else
-    {
-      sprintf(cp.buffer, "%6.1f", pp.pubList.Ibatt);
-      dispI = cp.buffer;
-    }
-  }
-  else
-  {
-    sprintf(cp.buffer, "%5.1f", pp.pubList.Ibatt);
-    dispI = cp.buffer;
   }
   String dispTop = dispT.substring(0, 4) + " " + dispV.substring(0, 6) + " " + dispI.substring(0, 7);
   display->println(dispTop.c_str());
   display->println(F(""));
   display->setTextColor(SSD1306_WHITE);
-
 
   // Bottom line
   if ( abs(pp.pubList.tcharge) < 24. )
@@ -303,7 +279,6 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
     dispT = cp.buffer;
   }  
   display->print(dispT.c_str());
-
   // Hrs large
   display->setTextSize(2);             // Draw 2X-scale text
   if ( frame==1 || frame==3 || !Sen->saturated )
