@@ -143,6 +143,7 @@ public:
   Fault();
   Fault(const double T);
   ~Fault();
+  void bitMapPrint(char *buf, const int16_t fw);
   float cc_diff() { return cc_diff_; };
   boolean cc_flt() { return cc_flt_; };
   boolean dscn_fa() { return failRead(DSCN_FA); };

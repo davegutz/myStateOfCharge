@@ -152,6 +152,17 @@ Fault::Fault(const double T):
   QuietFilt = new General2_Pole(T, WN_Q_FILT, ZETA_Q_FILT, MIN_Q_FILT, MAX_Q_FILT);  // actual update time provided run time
 }
 
+// Print bitmap
+void Fault::bitMapPrint(char *buf, const int16_t fw)
+{
+  for ( int i=0; i<16; i++ )
+  {
+    if ( bitRead(fw, i) ) buf[15-i] = '1';
+    else  buf[15-i] = '0';
+  }
+  buf[16] = '\0';
+}
+
 // Detect no signal present
 void Fault::ib_quiet(const boolean reset, Sensors *Sen)
 {
@@ -179,41 +190,47 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("Fault:\n");
   Serial.printf("  amp_bare=%d;\n", Sen->ShuntAmp->bare());
   Serial.printf("  noa_bare=%d;\n", Sen->ShuntNoAmp->bare());
-  Serial.printf("  cc_diff_=%7.3f;\n", cc_diff_);
-  Serial.printf("  cc_flt_=%d;\n", cc_flt_);
+  Serial.printf("  cc_diff=%7.3f;\n", cc_diff_);
+  Serial.printf("  cc_flt=%d;\n", cc_flt_);
   Serial.printf("  voc_tab=%7.3f;\n", Mon->voc_tab());
   Serial.printf("  voc=%7.3f;\n", Mon->voc());
-  Serial.printf("  e_wrap_=%7.3f;\n", e_wrap_);
-  Serial.printf("  e_w_f_=%7.3f;\n", e_wrap_filt_);
-  Serial.printf("  ib_amp_flt()=%d;\n", ib_amp_flt());
-  Serial.printf("  ib_amp_fa()=%d;\n", ib_amp_fa());
-  Serial.printf("  ib_noamp_flt()=%d;\n", ib_noa_flt());
-  Serial.printf("  ib_noamp_fa()=%d;\n", ib_noa_fa());
+  Serial.printf("  e_wrap=%7.3f;\n", e_wrap_);
+  Serial.printf("  e_w_f=%7.3f;\n", e_wrap_filt_);
+  Serial.printf("  ib_amp_flt=%d;\n", ib_amp_flt());
+  Serial.printf("  ib_amp_fa=%d;\n", ib_amp_fa());
+  Serial.printf("  ib_noamp_flt=%d;\n", ib_noa_flt());
+  Serial.printf("  ib_noamp_fa=%d;\n", ib_noa_fa());
   Serial.printf("  amp_calh=%7.3f;\n", Sen->Ibatt_amp_hdwe);
   Serial.printf("  noa_calh=%7.3f;\n", Sen->Ibatt_noamp_hdwe);
   Serial.printf("  amp_calm=%7.3f;\n", Sen->Ibatt_amp_model);
   Serial.printf("  noa_calm=%7.3f;\n", Sen->Ibatt_noamp_model);
-  Serial.printf("  ib_diff_=%7.3f;\n", ib_diff_);
-  Serial.printf("  ib_diff_f_=%7.3f;\n", ib_diff_f_);
-  Serial.printf("  ib_dif_hi_flt_=%d;\n", ib_dif_hi_flt());
-  Serial.printf("  ib_dif_hi_fa_=%d;\n", ib_dif_hi_fa());
-  Serial.printf("  ib_dif_lo_flt_=%d;\n", ib_dif_lo_flt());
-  Serial.printf("  ib_dif_lo_fa_=%d;\n", ib_dif_lo_fa());
-  Serial.printf("  vb_flt_=%d;\n", vb_flt());
-  Serial.printf("  vb_fa_=%d;\n", vb_fa());
-  Serial.printf("  wrap_hi_flt()=%d;\n", wrap_hi_flt());
-  Serial.printf("  wrap_hi_fa()=%d;\n", wrap_hi_fa());
-  Serial.printf("  wrap_lo_flt()=%d;\n", wrap_lo_flt());
-  Serial.printf("  wrap_lo_fa()=%d;\n", wrap_lo_fa());
-  Serial.printf("  wrap_vb_fa()=%d;\n", wrap_vb_fa());
-  Serial.printf("  tb_sel_stat_=%d;\n", tb_sel_stat_);
-  Serial.printf("  vb_sel_stat_=%d;\n", vb_sel_stat_);
-  Serial.printf("  vb_sel_stat_last_=%d;\n", vb_sel_stat_last_);
-  Serial.printf("  ib_sel_stat_=%d;\n", ib_sel_stat_);
-  Serial.printf("  ib_sel_stat_last_=%d;\n", ib_sel_stat_last_);
-  Serial.printf("  reset_all_faults_= %d;\n", reset_all_faults_);
-  Serial.printf("  fltw_=%d;\n", fltw_);
-  Serial.printf("  falw_=%d;\n", falw_);
+  Serial.printf("  ib_diff=%7.3f;\n", ib_diff_);
+  Serial.printf("  ib_diff_f=%7.3f;\n", ib_diff_f_);
+  Serial.printf("  ib_dif_hi_flt=%d;\n", ib_dif_hi_flt());
+  Serial.printf("  ib_dif_hi_fa=%d;\n", ib_dif_hi_fa());
+  Serial.printf("  ib_dif_lo_flt=%d;\n", ib_dif_lo_flt());
+  Serial.printf("  ib_dif_lo_fa=%d;\n", ib_dif_lo_fa());
+  Serial.printf("  vb_flt=%d;\n", vb_flt());
+  Serial.printf("  vb_fa=%d;\n", vb_fa());
+  Serial.printf("  wrap_hi_flt=%d;\n", wrap_hi_flt());
+  Serial.printf("  wrap_hi_fa=%d;\n", wrap_hi_fa());
+  Serial.printf("  wrap_lo_flt=%d;\n", wrap_lo_flt());
+  Serial.printf("  wrap_lo_fa=%d;\n", wrap_lo_fa());
+  Serial.printf("  wrap_vb_fa=%d;\n", wrap_vb_fa());
+  Serial.printf("  tb_sel_stat=%d;\n", tb_sel_stat_);
+  Serial.printf("  vb_sel_stat=%d;\n", vb_sel_stat_);
+  Serial.printf("  vb_sel_stat_last=%d;\n", vb_sel_stat_last_);
+  Serial.printf("  ib_sel_stat=%d;\n", ib_sel_stat_);
+  Serial.printf("  ib_sel_stat_last=%d;\n", ib_sel_stat_last_);
+  Serial.printf("  reset_all_faults= %d;\n", reset_all_faults_);
+  Serial.printf("  fltw=%d;  ", fltw_);
+  bitMapPrint(cp.buffer, fltw_);
+  Serial.print(cp.buffer);
+  Serial.printf(";\n");
+  Serial.printf("  falw=%d;  ", falw_);
+  bitMapPrint(cp.buffer, falw_);
+  Serial.print(cp.buffer);
+  Serial.printf(";\n");
 }
 // Calculate selection for choice
 // Use model instead of sensors when running tests as user
@@ -451,32 +468,23 @@ void Sensors::final_assignments()
       double cTime;
       if ( rp.tweak_test() ) cTime = double(now)/1000.;
       else cTime = control_time;
-      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,    %d, %d,     %10.7f,   %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,   %7.5f,%7.5f, ",
+      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,  %d, %d,  %10.7f,  %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,  %7.5f,%7.5f, ",
           cTime, reset, rp.ibatt_select,
           ShuntAmp->bare(), ShuntNoAmp->bare(),
           Flt->cc_diff(),
           Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model, Ibatt_model, 
           Flt->ib_diff(), Flt->ib_diff_f());
       Serial.print(cp.buffer);
-      sprintf(cp.buffer, "                %7.5f, %7.5f,    %d, %7.5f,%7.5f, %d, %7.5f,    %d, %7.5f,%7.5f, %d, %7.5f,   %5.2f,%5.2f, %d, %5.2f, ",
+      sprintf(cp.buffer, "  %7.5f, %7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %5.2f,%5.2f, %d, %5.2f, ",
           Flt->e_wrap(), Flt->e_wrap_filt(),
           Flt->ib_sel_stat(), Ibatt_hdwe, Ibatt_hdwe_model, rp.mod_ib(), Ibatt,
           Flt->vb_sel_stat(), Vbatt_hdwe, Vbatt_model, rp.mod_vb(), Vbatt,
           Tbatt_hdwe, Tbatt, rp.mod_tb(), Tbatt_filt);
       Serial.print(cp.buffer);
-      sprintf(cp.buffer, "    %d, %d, ",
+      sprintf(cp.buffer, "%d, %d, ",
           Flt->fltw(), Flt->falw());
       Serial.print(cp.buffer);
-      for ( int i=0; i<16; i++ )
-      {
-        Serial.printf("%1d", bitRead(Flt->fltw(), i));
-      }
-      Serial.printf(", ");
-      for ( int i=0; i<16; i++ )
-      {
-        Serial.printf("%1d", bitRead(Flt->falw(), i));
-      }
-      Serial.printlnf(",%c,", '\0');
+      Serial.printlnf("%c,", '\0');
   }
 }
 

@@ -399,13 +399,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'r' ):  // Sr<>:
                 scale = cp.input_string.substring(2).toFloat();
             
-                Serial.printf("\nBefore Sim::StateSpace:\n"); Sen->Sim->pretty_print_ss();
+                Serial.printf("\nBefore Sim:::\n"); Sen->Sim->pretty_print_ss();
                 Serial.printf("\nScaling D[0, 0] = -r0 by Sr= %7.3f\n", scale);
             
                 Sen->Sim->Sr(scale);
             
-                Serial.printf("\nAfter Sim::StateSpace:\n"); Mon->pretty_print_ss();
-                Serial.printf("\nBefore Mon::StateSpace:\n"); Mon->pretty_print_ss();
+                Serial.printf("\nAfter Sim::\n"); Mon->pretty_print_ss();
+                Serial.printf("\nBefore Mon::\n"); Mon->pretty_print_ss();
                 Serial.printf("\nScaling D[0, 0] = -r0 by Sr= %7.3f\n", scale);
             
                 Mon->Sr(scale);
@@ -458,16 +458,16 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'i' ): // i<>:  
-            Serial.printf("Amp cinf CC reset from %9.1f ", Sen->ShuntAmp->delta_q_cinf());
+            Serial.printf("Amp CC reset from %9.1f ", Sen->ShuntAmp->delta_q_cinf());
             Sen->ShuntAmp->delta_q_cinf(-RATED_BATT_CAP*3600.);
             Serial.printf("to %9.1f\n", Sen->ShuntAmp->delta_q_cinf());
-            Serial.printf("Amp dinf CC reset from %9.1f ", Sen->ShuntAmp->delta_q_dinf());
+            Serial.printf("Amp CC reset from %9.1f ", Sen->ShuntAmp->delta_q_dinf());
             Sen->ShuntAmp->delta_q_dinf(RATED_BATT_CAP*3600.);
             Serial.printf("to %9.1f\n", Sen->ShuntAmp->delta_q_dinf());
-            Serial.printf("No amp cinf CC reset from %9.1f ", Sen->ShuntNoAmp->delta_q_cinf());
+            Serial.printf("No amp CC reset from %9.1f ", Sen->ShuntNoAmp->delta_q_cinf());
             Sen->ShuntNoAmp->delta_q_cinf(-RATED_BATT_CAP*3600.);
             Serial.printf("to %9.1f\n", Sen->ShuntNoAmp->delta_q_cinf());
-            Serial.printf("No amp dinf CC reset from %9.1f ", Sen->ShuntNoAmp->delta_q_dinf());
+            Serial.printf("No amp CC reset from %9.1f ", Sen->ShuntNoAmp->delta_q_dinf());
             Sen->ShuntNoAmp->delta_q_dinf(RATED_BATT_CAP*3600.);
             Serial.printf("to %9.1f\n", Sen->ShuntNoAmp->delta_q_dinf());
             break;
@@ -576,19 +576,24 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 chit("Pt;", QUEUE);
                 chit("PM;", QUEUE);
                 chit("PN;", QUEUE);
+                chit("Pf;", QUEUE);
                 break;
 
               case ( 'c' ):  // Pc:  Print coulombs
                 Serial.printf("\nMon::"); Mon->Coulombs::pretty_print();
                 Serial.printf("\nSim::"); Sen->Sim->Coulombs::pretty_print();
+                Serial1.printf("\nMon::"); Mon->Coulombs::pretty_print();
+                Serial1.printf("\nSim::"); Sen->Sim->Coulombs::pretty_print();
                 break;
 
               case ( 'e' ):  // Pe:  Print EKF
                 Serial.printf("\nMon::"); Mon->EKF_1x1::pretty_print();
+                Serial1.printf("\nMon::"); Mon->EKF_1x1::pretty_print();
                 break;
 
               case ( 'f' ):  // Pf:  Print faults
                 Serial.printf("\nSen::"); Sen->Flt->pretty_print(Sen, Mon);
+                Serial1.printf("\nSen::"); Sen->Flt->pretty_print(Sen, Mon);
                 break;
 
               case ( 'm' ):  // Pm:  Print mon
@@ -597,19 +602,28 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("Mon::"); Mon->pretty_print_ss();
                 Serial.printf("Mon::"); Mon->EKF_1x1::pretty_print();
                 Serial.printf("\nSim:   rp.modeling = %d\n", rp.modeling);
+                Serial1.printf("\nMon:"); Mon->pretty_print();
+                Serial1.printf("Mon::"); Mon->Coulombs::pretty_print();
+                Serial1.printf("Mon::"); Mon->pretty_print_ss();
+                Serial1.printf("Mon::"); Mon->EKF_1x1::pretty_print();
+                Serial1.printf("\nSim:   rp.modeling = %d\n", rp.modeling);
                 break;
 
               case ( 'M' ):  // PM:  Print shunt Amp
                 Serial.printf("\nTweak::"); Sen->ShuntAmp->pretty_print();
+                Serial1.printf("\nTweak::"); Sen->ShuntAmp->pretty_print();
                 break;
 
               case ( 'N' ):  // PN:  Print shunt no amp
                 Serial.printf("\nTweak::"); Sen->ShuntNoAmp->pretty_print();
+                Serial1.printf("\nTweak::"); Sen->ShuntNoAmp->pretty_print();
                 break;
 
               case ( 'r' ):  // Pr:  Print retained
                 Serial.printf("\n"); rp.pretty_print();
                 Serial.printf("\n"); cp.pretty_print();
+                Serial1.printf("\n"); rp.pretty_print();
+                Serial1.printf("\n"); cp.pretty_print();
                 break;
 
               case ( 's' ):  // Ps:  Print sim

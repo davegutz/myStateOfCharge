@@ -114,7 +114,7 @@ void Battery::init_battery(const boolean reset, Sensors *Sen)
     if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
     double u[2] = {ib_, vb_};
-    if ( rp.debug==8 || rp.debug==6 || rp.debug==7 ) Serial.printf("init_battery:  initializing Randles to %7.3f, %7.3f\n", ib_, vb_);
+    if ( rp.debug==8 || rp.debug==6 || rp.debug==7 ) Serial.printf("init_battery: Randles to %7.3f, %7.3f\n", ib_, vb_);
     Randles_->init_state_space(u);
     if ( rp.debug==8 || rp.debug==6 || rp.debug==7 ) Randles_->pretty_print();
     init_hys(0.0);
@@ -124,32 +124,32 @@ void Battery::init_battery(const boolean reset, Sensors *Sen)
 void Battery::pretty_print(void)
 {
     Serial.printf("Battery:\n");
-    Serial.printf("  temp_c_ = %7.3f;  //  deg C\n", temp_c_);
-    Serial.printf(" *rp_delt_q_ =%10.1f;  //  Coul\n", *rp_delta_q_);
-    Serial.printf(" *rp_t_last_ =%10.1f;  // deg C\n", *rp_t_last_);
-    Serial.printf("  dvoc_dt  =%10.6f;  //  V/deg C\n", chem_.dvoc_dt);
-    Serial.printf("  r_0 =  %10.6f;  //  ohms\n", chem_.r_0);
-    Serial.printf("  r_ct = %10.6f;  //  ohms\n", chem_.r_ct);
-    Serial.printf("  tau_ct=%10.6f;  //  s (=1/Rct/Cct)\n", chem_.tau_ct);
-    Serial.printf("  r_diff=%10.6f;  //  ohms\n", chem_.r_diff);
-    Serial.printf("  tau_diff =%10.6f;  //  s (=1/Rdif/Cdif)\n", chem_.tau_diff);
-    Serial.printf("  r_sd = %10.6f;  //  ohms\n", chem_.r_sd);
-    Serial.printf("  tau_sd=%10.1f;  //  sec\n", chem_.tau_sd);
-    Serial.printf("  bms_off_ =      %d;  // T=off\n", bms_off_);
-    Serial.printf("  dv_dsoc_=%10.6f;  // V/frac\n", dv_dsoc_);
-    Serial.printf("  ib_ =  %7.3f;  // A\n", ib_);
-    Serial.printf("  Ib =   %7.3f;  // Bank, A\n", ib_*(*rp_nP_));
-    Serial.printf("  vb_ =  %7.3f;  // V\n", vb_);
-    Serial.printf("  Vb =   %7.3f;  // Bank, V\n", vb_*(*rp_nS_));
-    Serial.printf("  voc_ = %7.3f;  // V\n", voc_);
-    Serial.printf("  voc_stat_=%7.3f;  // V\n", voc_stat_);
-    Serial.printf("  vsat_ =%7.3f;  // V\n", vsat_);
-    Serial.printf("  dv_dyn_ = %7.3f;  // V\n", dv_dyn_);
-    Serial.printf("  sr_ =  %7.3f;  // scalar\n", sr_);
-    Serial.printf("  dv_ =  %7.3f;  // Table adj, V\n", dv_);
-    Serial.printf("  dt_ =  %7.3f;  // s\n", dt_);
-    Serial.printf(" *rp_nP_ =%5.2f;  // P in bank, e.g. '2P1S'\n", *rp_nP_);
-    Serial.printf(" *rp_nS_ =%5.2f;  // S in bank, e.g. '2P1S'\n", *rp_nS_);
+    Serial.printf("  temp_c=%7.3f;  deg C\n", temp_c_);
+    Serial.printf(" *rp_delt_q=%10.1f;  Coul\n", *rp_delta_q_);
+    Serial.printf(" *rp_t_last=%10.1f; deg C\n", *rp_t_last_);
+    Serial.printf("  dvoc_dt=%10.6f;  V/deg C\n", chem_.dvoc_dt);
+    Serial.printf("  r_0=%10.6f;  ohms\n", chem_.r_0);
+    Serial.printf("  r_ct = %10.6f;  ohms\n", chem_.r_ct);
+    Serial.printf("  tau_ct=%10.6f;  s (=1/Rct/Cct)\n", chem_.tau_ct);
+    Serial.printf("  r_diff=%10.6f;  ohms\n", chem_.r_diff);
+    Serial.printf("  tau_diff =%10.6f;  s (=1/Rdif/Cdif)\n", chem_.tau_diff);
+    Serial.printf("  r_sd = %10.6f;  ohms\n", chem_.r_sd);
+    Serial.printf("  tau_sd=%10.1f;  sec\n", chem_.tau_sd);
+    Serial.printf("  bms_off=%d; T=off\n", bms_off_);
+    Serial.printf("  dv_dsoc=%10.6f; V/frac\n", dv_dsoc_);
+    Serial.printf("  ib=%7.3f; A\n", ib_);
+    Serial.printf("  Ib=%7.3f; Bank, A\n", ib_*(*rp_nP_));
+    Serial.printf("  vb=%7.3f; V\n", vb_);
+    Serial.printf("  Vb=%7.3f; Bank, V\n", vb_*(*rp_nS_));
+    Serial.printf("  voc=%7.3f; V\n", voc_);
+    Serial.printf("  voc_stat=%7.3f; V\n", voc_stat_);
+    Serial.printf("  vsat=%7.3f; V\n", vsat_);
+    Serial.printf("  dv_dyn= %7.3f; V\n", dv_dyn_);
+    Serial.printf("  sr=%7.3f; scalar\n", sr_);
+    Serial.printf("  dv=%7.3f; Table adj, V\n", dv_);
+    Serial.printf("  dt=%7.3f; s\n", dt_);
+    Serial.printf(" *rp_nP=%5.2f; P in bank, e.g. '2P1S'\n", *rp_nP_);
+    Serial.printf(" *rp_nS=%5.2f; S in bank, e.g. '2P1S'\n", *rp_nS_);
 }
 
 // Print State Space

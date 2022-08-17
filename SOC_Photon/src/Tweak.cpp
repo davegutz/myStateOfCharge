@@ -98,15 +98,15 @@ void Tweak::adjust(unsigned long now)
 void Tweak::pretty_print(void)
 {
     Serial.printf("Tweak(%s)::\n", name_.c_str());
-    Serial.printf("  max_change_ =             %7.3f; // Maximum allowed change to calibration scalar see 'N/MC'\n", max_change_);
-    Serial.printf("  max_tweak_ =              %7.3f; // Maximum allowed calibration scalar see 'N/Mx'\n", max_tweak_);
-    Serial.printf("  rp_delta_q_cinf_ =     %10.1f; // Charge infinity at past update see 'N/Mi', Coulombs\n", *rp_delta_q_cinf_);
-    Serial.printf("  rp_delta_q_dinf_ =     %10.1f; // Discharge infinity at past update see 'N/Mi', Coulombs\n", *rp_delta_q_dinf_);
-    Serial.printf("  sat_ =                          %d; // Indication that battery is saturated, T=saturated\n", sat_);
-    Serial.printf("  delta_hrs_ =           %10.6f; // Time since last allowed saturation see 'N/Mz', hr\n", double(millis()-time_sat_past_)/3600000.);
-    Serial.printf("  time_to_wait =         %10.6f; // Time to wait before allowing saturation see 'N/Mw', hr\n", time_to_wait_);
-    Serial.printf("  tweak_sclr =              %7.3f; // Scalar on Coulombic Efficiency 'N/Mk'\n", *rp_tweak_sclr_);
-    Serial.printf("  coul_eff_ =    %9.5f;  // Coulombic Efficiency\n", coul_eff_);
+    Serial.printf("  max_change=%7.3f; 'N/MC'\n", max_change_);
+    Serial.printf("  max_tweak=%7.3f;  'N/Mx'\n", max_tweak_);
+    Serial.printf("  rp_delta_q_cinf=%10.1f; 'N/Mi', Coulombs\n", *rp_delta_q_cinf_);
+    Serial.printf("  rp_delta_q_dinf=%10.1f; 'N/Mi', Coulombs\n", *rp_delta_q_dinf_);
+    Serial.printf("  sat=%d; T=sat\n", sat_);
+    Serial.printf("  delta_hrs=%10.6f; 'N/Mz', hr\n", double(millis()-time_sat_past_)/3600000.);
+    Serial.printf("  time_to_wait=%10.6f; 'N/Mw', hr\n", time_to_wait_);
+    Serial.printf("  tweak_sclr=%7.3f; 'N/Mk'\n", *rp_tweak_sclr_);
+    Serial.printf("  coul_eff=%9.5f;\n", coul_eff_);
 }
 
 // reset:  Reset on call.   Reset all indicators and states to boot status.
