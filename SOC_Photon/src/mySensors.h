@@ -112,7 +112,7 @@ protected:
 #define WRAP_LO_FLT   6   // Wrap isolates to Ib low fault
 #define IB_DIF_HI_FLT 8   // Faulted sensor difference error, T = fault
 #define IB_DIF_LO_FLT 9   // Faulted sensor difference error, T = fault
-#define DSCN_FLT      10  // Dual faulted quiet error, T = disconnected shunt
+#define IB_DSCN_FLT   10  // Dual faulted quiet error, T = disconnected shunt
 #define IB_AMP_BARE   11  // Unconnected ib bus, T = bare bus
 #define IB_NOA_BARE   12  // Unconnected ib bus, T = bare bus
 
@@ -127,7 +127,7 @@ protected:
 #define WRAP_VB_FA    7   // Wrap isolates to Vb fail
 #define IB_DIF_HI_FA  8   // Persisted sensor difference error, T = fail
 #define IB_DIF_LO_FA  9   // Persisted sensor difference error, T = fail
-#define DSCN_FA       10  // Dual persisted quiet error, T = disconnected shunt
+#define IB_DSCN_FA    10  // Dual persisted quiet error, T = disconnected shunt
 
 #define faultSet(bit) (bitSet(fltw_, bit) )
 #define failSet(bit) (bitSet(falw_, bit) )
@@ -146,8 +146,8 @@ public:
   void bitMapPrint(char *buf, const int16_t fw);
   float cc_diff() { return cc_diff_; };
   boolean cc_flt() { return cc_flt_; };
-  boolean dscn_fa() { return failRead(DSCN_FA); };
-  boolean dscn_flt() { return faultRead(DSCN_FLT); };
+  boolean dscn_fa() { return failRead(IB_DSCN_FA); };
+  boolean dscn_flt() { return faultRead(IB_DSCN_FLT); };
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
   uint16_t fltw() { return fltw_; };
@@ -156,6 +156,7 @@ public:
   boolean ib_amp_flt() { return faultRead(IB_AMP_FLT);  };
   boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
   boolean ib_noa_flt() { return faultRead(IB_NOA_FLT); };
+  boolean ib_red_loss() { return ib_sel_stat_<0; };
   boolean Vbatt_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   float ib_diff() { return ( ib_diff_ ); };
@@ -164,6 +165,8 @@ public:
   boolean ib_dif_hi_flt() { return faultRead(IB_DIF_HI_FLT); };
   boolean ib_dif_lo_fa() { return failRead(IB_DIF_LO_FA); };
   boolean ib_dif_lo_flt() { return faultRead(IB_DIF_LO_FLT); };
+  boolean ib_dscn_fa() { return failRead(IB_DSCN_FA); };
+  boolean ib_dscn_flt() { return faultRead(IB_DSCN_FLT); };
   void ib_quiet(const boolean reset, Sensors *Sen);
   void ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
   void pretty_print(Sensors *Sen, BatteryMonitor *Mon);
@@ -171,6 +174,8 @@ public:
   void select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ibatt signals
   void shunt_select_initial();   // Choose between shunts for model
+  boolean tb_fa() { return failRead(TB_FA); };
+  boolean tb_flt() { return faultRead(TB_FLT); };
   int8_t tbatt_sel_status() { return tb_sel_stat_; }
   void vbatt_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max, const boolean reset);  // Range check Vbatt
   int8_t vb_sel_stat() { return vb_sel_stat_; };

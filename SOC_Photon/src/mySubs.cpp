@@ -225,59 +225,108 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 {
   static uint8_t frame = 0;
   static boolean pass = false;
+  String dispT, dispV, dispI;
+  // char dispString[21];
+
   display->clearDisplay();
   display->setTextSize(1);              // Normal 1:1 pixel scale
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner
 
-  boolean no_currents = Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare();
-  boolean alt_current = Sen->Flt->ib_sel_stat() < 0;
-  boolean no_voltage = Sen->Flt->vb_fa();
-  boolean dscn_currents = Sen->Flt->dscn_fa();
 
-  char dispString[21];
-  if ( !pass && cp.model_cutback && rp.modeling )
-    sprintf(dispString, "%3.0f %5.2f      ", pp.pubList.Tbatt, pp.pubList.Voc);
+  // Tb
+  if ( Sen->Flt->tb_fa() && (frame==0 || frame==1) )
+    dispT = "***";
   else
   {
-    if ( no_currents && frame==0 )
-      sprintf(dispString, "%3.0f %5.2f *fa*", pp.pubList.Tbatt, pp.pubList.Voc);
-    else if ( no_voltage && frame==0 )
-      sprintf(dispString, "%3.0f *fa* %5.1f", pp.pubList.Tbatt, pp.pubList.Ibatt);
-    else if ( alt_current && frame==0 )
-      sprintf(dispString, "%3.0f %5.2f ----", pp.pubList.Tbatt, pp.pubList.Voc);
-    else
-      sprintf(dispString, "%3.0f %5.2f %5.1f", pp.pubList.Tbatt, pp.pubList.Voc, pp.pubList.Ibatt);
+    sprintf(cp.buffer, "%3.0f", pp.pubList.Tbatt);
+    dispT = cp.buffer;
   }
-  display->println(dispString);
 
+  // Voc
+  if ( Sen->Flt->vb_fa() && (frame==1 || frame==2) )
+    dispV = "**F**";
+  else
+  {
+    sprintf(cp.buffer, "%5.2f", pp.pubList.Voc);
+    dispV = cp.buffer;
+  }
+
+
+  // Ib
+  if ( frame==2 )
+  {
+    if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() && !rp.mod_ib() )
+      dispI = "**F**";
+    else if ( Sen->Flt->dscn_fa() && !rp.mod_ib() )
+      dispI = "..C..";
+    else if ( Sen->Flt->ib_red_loss() )
+      dispI = "--R--";
+    else
+    {
+      sprintf(cp.buffer, "%6.1f", pp.pubList.Ibatt);
+      dispI = cp.buffer;
+    }
+  }
+  else if ( frame==3 )
+  {
+    if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() && !rp.mod_ib() )
+      dispI = "**F**";
+    else if ( Sen->Flt->dscn_fa() && !rp.mod_ib() )
+      dispI = "..C..";
+    else
+    {
+      sprintf(cp.buffer, "%6.1f", pp.pubList.Ibatt);
+      dispI = cp.buffer;
+    }
+  }
+  else
+  {
+    sprintf(cp.buffer, "%5.1f", pp.pubList.Ibatt);
+    dispI = cp.buffer;
+  }
+  String dispTop = dispT.substring(0, 4) + " " + dispV.substring(0, 6) + " " + dispI.substring(0, 7);
+  display->println(dispTop.c_str());
   display->println(F(""));
   display->setTextColor(SSD1306_WHITE);
 
-  char dispStringT[9];
+
+  // Bottom line
   if ( abs(pp.pubList.tcharge) < 24. )
-    sprintf(dispStringT, "%3.0f%5.1f", pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge);
+  {
+    sprintf(cp.buffer, "%3.0f%5.1f", pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge);
+    dispT = cp.buffer;
+  }
   else
-    sprintf(dispStringT, "%3.0f --- ", pp.pubList.Amp_hrs_remaining_ekf);
-  display->print(dispStringT);
+  {
+    sprintf(cp.buffer, "%3.0f --- ", pp.pubList.Amp_hrs_remaining_ekf);
+    dispT = cp.buffer;
+  }  
+  display->print(dispT.c_str());
+
+  // Hrs large
   display->setTextSize(2);             // Draw 2X-scale text
-
-  char dispStringS[4];
-  if ( pass || !Sen->saturated )
-    sprintf(dispStringS, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
+  if ( frame==1 || frame==3 || !Sen->saturated )
+  {
+    sprintf(cp.buffer, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
+    dispV = cp.buffer;
+  }
   else if (Sen->saturated)
-    sprintf(dispStringS, "SAT");
-  display->print(dispStringS);
+    dispV = "SAT";
+  display->print(dispV.c_str());
+  String dispBot = dispT + " " + dispV;
 
+  // Display
   display->display();
   pass = !pass;
 
   // Text basic Bluetooth (uses serial bluetooth app)
   if ( rp.debug!=4 && !cp.blynking )
-    Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s    %s EKF,Ah  chg,hrs  CC, Ah\n\n\n", dispString, dispStringT, dispStringS);
+    Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\n\n\n", dispTop.c_str(), dispBot.c_str());
 
   if ( rp.debug==5 ) debug_5();
   if ( rp.debug==-5 ) debug_m5();  // Arduino plot
+
   frame += 1;
   if (frame>3) frame = 0;
 }

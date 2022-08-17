@@ -168,8 +168,8 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
 {
   boolean reset_loc = reset | reset_all_faults_;
   ib_quiet_ = QuietFilt->calculate(Sen->Ibatt_amp_hdwe+Sen->Ibatt_noamp_hdwe, reset_loc, min(Sen->T, MAX_T_Q_FILT));
-  faultAssign( abs(ib_quiet_)>=QUIET_A, DSCN_FLT);
-  failAssign( QuietPer->calculate(dscn_flt(), QUIET_S, QUIET_R, Sen->T, reset_loc), DSCN_FA);
+  faultAssign( !rp.mod_ib() && (ib_quiet_)>=QUIET_A, IB_DSCN_FLT);
+  failAssign( QuietPer->calculate(dscn_flt(), QUIET_S, QUIET_R, Sen->T, reset_loc), IB_DSCN_FA);
 }
 
 // Voltage wraparound logic for current selection
@@ -217,6 +217,8 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("  wrap_lo_flt=%d;\n", wrap_lo_flt());
   Serial.printf("  wrap_lo_fa=%d;\n", wrap_lo_fa());
   Serial.printf("  wrap_vb_fa=%d;\n", wrap_vb_fa());
+  Serial.printf("  ib_dscn_flt=%d;\n", ib_dscn_flt());
+  Serial.printf("  ib_dscn_fa=%d;\n", ib_dscn_fa());
   Serial.printf("  tb_sel_stat=%d;\n", tb_sel_stat_);
   Serial.printf("  vb_sel_stat=%d;\n", vb_sel_stat_);
   Serial.printf("  vb_sel_stat_last=%d;\n", vb_sel_stat_last_);
