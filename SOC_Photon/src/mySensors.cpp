@@ -104,12 +104,12 @@ Shunt::~Shunt() {}
 void Shunt::pretty_print()
 {
   Serial.printf("Shunt(%s)::\n", name_.c_str());
-  Serial.printf("  port_ = 0x%X;\n", port_);
-  Serial.printf("  bare_ = %d;\n", bare_);
-  Serial.printf("  *cp_ibatt_bias_ = %7.3f; A\n", *cp_ibatt_bias_);
-  Serial.printf("  v2a_s_ = %7.2f; // A/V\n", v2a_s_);
-  Serial.printf("  vshunt_int_ = %d; // count\n", vshunt_int_);
-  Serial.printf("  ishunt_cal_ = %7.3f; // A\n", ishunt_cal_);
+  Serial.printf("  port=0x%X;\n", port_);
+  Serial.printf("  bare=%d;\n", bare_);
+  Serial.printf("  *cp_ibatt_bias=%7.3f; A\n", *cp_ibatt_bias_);
+  Serial.printf("  v2a_s=%7.2f; A/V\n", v2a_s_);
+  Serial.printf("  vshunt_int=%d; count\n", vshunt_int_);
+  Serial.printf("  ishunt_cal=%7.3f; A\n", ishunt_cal_);
   Serial.printf("Shunt(%s)::", name_.c_str()); Tweak::pretty_print();
   Serial.printf("Shunt(%s)::", name_.c_str()); Adafruit_ADS1015::pretty_print(name_);
 }
@@ -464,10 +464,19 @@ void Sensors::final_assignments()
           Flt->vb_sel_stat(), Vbatt_hdwe, Vbatt_model, rp.mod_vb(), Vbatt,
           Tbatt_hdwe, Tbatt, rp.mod_tb(), Tbatt_filt);
       Serial.print(cp.buffer);
-      sprintf(cp.buffer, "    %d, %d, %c,",
-          Flt->fltw(), Flt->falw(),
-          '\0');
-      Serial.println(cp.buffer);
+      sprintf(cp.buffer, "    %d, %d, ",
+          Flt->fltw(), Flt->falw());
+      Serial.print(cp.buffer);
+      for ( int i=0; i<16; i++ )
+      {
+        Serial.printf("%1d", bitRead(Flt->fltw(), i));
+      }
+      Serial.printf(", ");
+      for ( int i=0; i<16; i++ )
+      {
+        Serial.printf("%1d", bitRead(Flt->falw(), i));
+      }
+      Serial.printlnf(",%c,", '\0');
   }
 }
 

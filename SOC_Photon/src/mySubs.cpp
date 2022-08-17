@@ -52,18 +52,18 @@ void print_serial_sim_header(void)
 void print_signal_sel_header(void)
 {
   if ( rp.debug==26 ) // print_signal_sel_header
-    Serial.printf("unit_s,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,                   ib_dif,ib_dif_f,");
-    Serial.printf("    e_w,e_w_f,     ib_sel,Ib_h,Ib_m,mib,Ib_s,          vb_sel,Vb_h,Vb_m,mvb,Vb_s,                Tb_h,Tb_s,mtb,Tb_f, ");
+    Serial.printf("unit_s,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_dif,ib_dif_f,");
+    Serial.printf("    e_w,e_w_f,  ib_sel,Ib_h,Ib_m,mib,Ib_s, vb_sel,Vb_h,Vb_m,mvb,Vb_s,  Tb_h,Tb_s,mtb,Tb_f, ");
     Serial.printf("  fltw, falw, fltmap, falmap,\n");
           // -----, cTime, reset, rp.ibatt_select,
           //                                    ShuntAmp->bare(), ShuntNoAmp->bare(),
-          //                                                        cc_diff_, cc_flt_,
-          //                                                                       Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model, Ibatt_model,
-          //                                                                                                                   ib_diff_, ib_diff_f, ib_diff_flt_, ib_diff_fa_,
-          //           e_wrap_, e_wrap_filt_, wrap_hi_fault_, wrap_lo_fault_, wrap_hi_fail_, wrap_lo_fail_, wrap_vb_fail,
-          //                                                            ib_sel_stat_, Ibatt_hdwe, Ibatt_hdwe_model, mod_ib(), Ibatt,
+          //                                                    cc_diff_,
+          //                                                              Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model, Ibatt_model,
+          //                                                                                          ib_diff_, ib_diff_f,
+          //         e_wrap_, e_wrap_filt_, ib_sel_stat_, Ibatt_hdwe, Ibatt_hdwe_model, mod_ib(), Ibatt,
           //                                                                                                vb_sel_stat, Vbatt_hdwe, Vbatt_model,mod_vb(), Vbatt,
-          //                                                                                                                                        Tbatt_hdwe, Tbatt, mod_tb(), Tbatt_filt,  Vb_flt, Vb_fa
+          //                                                                                                                                        Tbatt_hdwe, Tbatt, mod_tb(), Tbatt_filt,
+          //   fltw_, falw_, fltmap, falmap,
 }
 
 // Print strings
