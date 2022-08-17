@@ -212,8 +212,8 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("  ib_sel_stat_=%d;\n", ib_sel_stat_);
   Serial.printf("  ib_sel_stat_last_=%d;\n", ib_sel_stat_last_);
   Serial.printf("  reset_all_faults_= %d;\n", reset_all_faults_);
-  Serial.printf("  fltw_=%ld;\n", fltw_);
-  Serial.printf("  falw_=%ld;\n", falw_);
+  Serial.printf("  fltw_=%d;\n", fltw_);
+  Serial.printf("  falw_=%d;\n", falw_);
 }
 // Calculate selection for choice
 // Use model instead of sensors when running tests as user
@@ -451,19 +451,21 @@ void Sensors::final_assignments()
       double cTime;
       if ( rp.tweak_test() ) cTime = double(now)/1000.;
       else cTime = control_time;
-      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,    %d, %d,     %10.7f, %d,   %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,   %7.5f,%7.5f, %d, %d,",
+      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,    %d, %d,     %10.7f,   %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,   %7.5f,%7.5f, ",
           cTime, reset, rp.ibatt_select,
           ShuntAmp->bare(), ShuntNoAmp->bare(),
-          Flt->cc_diff(), Flt->cc_flt(),
+          Flt->cc_diff(),
           Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model, Ibatt_model, 
-          Flt->ib_diff(), Flt->ib_diff_f(), Flt->ib_dif_hi_flt()||Flt->ib_dif_lo_flt(), Flt->ib_dif_hi_fa()||Flt->ib_dif_lo_fa());
+          Flt->ib_diff(), Flt->ib_diff_f());
       Serial.print(cp.buffer);
-      sprintf(cp.buffer, "                %7.5f, %7.5f, %d, %d,%d, %d, %d,   %d, %7.5f,%7.5f, %d, %7.5f,    %d, %7.5f,%7.5f, %d, %7.5f,   %5.2f,%5.2f, %d, %5.2f,  %d, %d, %c,",
-          Flt->e_wrap(), Flt->e_wrap_filt(), Flt->wrap_hi_flt(), Flt->wrap_lo_flt(), Flt->wrap_hi_fa(), Flt->wrap_lo_fa(), Flt->wrap_vb_fa(),
+      sprintf(cp.buffer, "                %7.5f, %7.5f,    %d, %7.5f,%7.5f, %d, %7.5f,    %d, %7.5f,%7.5f, %d, %7.5f,   %5.2f,%5.2f, %d, %5.2f, ",
+          Flt->e_wrap(), Flt->e_wrap_filt(),
           Flt->ib_sel_stat(), Ibatt_hdwe, Ibatt_hdwe_model, rp.mod_ib(), Ibatt,
           Flt->vb_sel_stat(), Vbatt_hdwe, Vbatt_model, rp.mod_vb(), Vbatt,
-          Tbatt_hdwe, Tbatt, rp.mod_tb(), Tbatt_filt,
-          Flt->vb_flt(), Flt->vb_fa(),
+          Tbatt_hdwe, Tbatt, rp.mod_tb(), Tbatt_filt);
+      Serial.print(cp.buffer);
+      sprintf(cp.buffer, "    %d, %d, %c,",
+          Flt->fltw(), Flt->falw(),
           '\0');
       Serial.println(cp.buffer);
   }

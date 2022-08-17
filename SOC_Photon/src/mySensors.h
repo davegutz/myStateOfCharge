@@ -149,6 +149,8 @@ public:
   boolean dscn_flt() { return faultRead(DSCN_FLT); };
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
+  uint16_t fltw() { return fltw_; };
+  uint16_t falw() { return falw_; };
   boolean ib_amp_fa() { return failRead(IB_AMP_FA); };
   boolean ib_amp_flt() { return faultRead(IB_AMP_FLT);  };
   boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
@@ -203,8 +205,8 @@ protected:
   boolean reset_all_faults_; // Reset all fault logic
   int8_t vb_sel_stat_last_; // past value
   int8_t ib_sel_stat_last_; // past value
-  uint32_t fltw_;           // Bitmapped faults
-  uint32_t falw_;           // Bitmapped fails
+  uint16_t fltw_;           // Bitmapped faults
+  uint16_t falw_;           // Bitmapped fails
 };
 
 

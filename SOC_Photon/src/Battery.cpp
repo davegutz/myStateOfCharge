@@ -444,16 +444,16 @@ void BatteryMonitor::pretty_print(void)
     Serial.printf("BatteryMonitor::");
     this->Battery::pretty_print();
     Serial.printf(" BM::BM:\n");
-    Serial.printf("  amp_hrs_remaining_ekf_=%7.3f;  // drain to q_ekf=0, A-h\n", amp_hrs_remaining_ekf_);
-    Serial.printf("  amp_hrs_remaining_soc_=%7.3f;  // drain to 0, A-h\n", amp_hrs_remaining_soc_);
-    Serial.printf("  EKF_converged =  %d;  // T=conv\n", converged_ekf());
-    Serial.printf("  q_ekf =   %10.1f;  // charge calc by ekf, C\n", q_ekf_);
-    Serial.printf("  soc_ekf =   %8.4f;  // Solved, frac\n", soc_ekf_);
-    Serial.printf("  tcharge =      %5.1f;  // CC time full, hr\n", tcharge_);
-    Serial.printf("  tcharge_ekf =  %5.1f;  // Solv time full, hr\n", tcharge_ekf_);
-    Serial.printf("  voc_filt_ =  %7.3f;  // V\n", voc_filt_);
-    Serial.printf("  voc_stat_ =  %7.3f;  // V\n", voc_stat_);
-    Serial.printf("  y_filt_ =    %7.3f;  // Res EKF, V\n", y_filt_);
+    Serial.printf("  amp_hrs_remaining_ekf_=%7.3f; A-h\n", amp_hrs_remaining_ekf_);
+    Serial.printf("  amp_hrs_remaining_soc_=%7.3f; A-h\n", amp_hrs_remaining_soc_);
+    Serial.printf("  EKF_converged=%d; T=conv\n", converged_ekf());
+    Serial.printf("  q_ekf=%10.1f; C\n", q_ekf_);
+    Serial.printf("  soc_ekf=%8.4f; frac\n", soc_ekf_);
+    Serial.printf("  tcharge=%5.1f; hr\n", tcharge_);
+    Serial.printf("  tcharge_ekf=%5.1f; hr\n", tcharge_ekf_);
+    Serial.printf("  voc_filt=%7.3f; V\n", voc_filt_);
+    Serial.printf("  voc_stat=%7.3f; V\n", voc_stat_);
+    Serial.printf("  y_filt=%7.3f; Res EKF, V\n", y_filt_);
 }
 
 // Reset Coulomb Counter to EKF under restricted conditions especially new boot no history of saturation
@@ -839,16 +839,16 @@ void BatteryModel::pretty_print(void)
     Serial.printf("BatteryModel::");
     this->Battery::pretty_print();
     Serial.printf(" BatteryModel::BatteryModel:\n");
-    Serial.printf("  sat_ib_max_ =  %7.3f;  // CB, A\n", sat_ib_max_);
-    Serial.printf("  sat_ib_null_ = %7.3f;  // CB for voc=vsat, A\n", sat_ib_null_);
-    Serial.printf("  sat_cutback_gain_ = %7.1f;  // Gn retard ib for voc>vsat\n", sat_cutback_gain_);
-    Serial.printf("  model_cutback_ =   %d;  // T=Cut\n", model_cutback_);
-    Serial.printf("  model_saturated_ = %d;  // On sat CB\n", model_saturated_);
-    Serial.printf("  ib_ =     %7.3f;  // Batt term, A\n", ib_);
-    Serial.printf("  ib_in_ =  %7.3f;  // Saved in, A\n", ib_in_);
-    Serial.printf("  ib_fut_ = %7.3f;  // Fut val, A\n", ib_fut_);
-    Serial.printf("  ib_sat_ = %7.3f;  // T = sat\n", ib_sat_);
-    Serial.printf(" *rp_s_cap_model_ = %7.3f;  // Scalar\n", *rp_s_cap_model_);
+    Serial.printf("  sat_ib_max= %7.3f; A\n", sat_ib_max_);
+    Serial.printf("  sat_ib_null=%7.3f; A\n", sat_ib_null_);
+    Serial.printf("  sat_cutback_gain=%7.1f; for voc>vsat\n", sat_cutback_gain_);
+    Serial.printf("  model_cutback=%d; T=Cut\n", model_cutback_);
+    Serial.printf("  model_saturated=%d; On sat CB\n", model_saturated_);
+    Serial.printf("  ib=%7.3f; A\n", ib_);
+    Serial.printf("  ib_in=%7.3f; Saved, A\n", ib_in_);
+    Serial.printf("  ib_fut=%7.3f; A\n", ib_fut_);
+    Serial.printf("  ib_sat=%7.3f; T=sat\n", ib_sat_);
+    Serial.printf(" *rp_s_cap_model=%7.3f; Scalar\n", *rp_s_cap_model_);
 }
 
 

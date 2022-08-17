@@ -52,8 +52,9 @@ void print_serial_sim_header(void)
 void print_signal_sel_header(void)
 {
   if ( rp.debug==26 ) // print_signal_sel_header
-    Serial.printf("unit_s,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,cc_flt,  ibmh,ibnh,ibmm,ibnm,ibm,                   ib_dif,ib_dif_f,ib_dif_flt,ib_dif_fa,");
-    Serial.printf("    e_w,e_w_f,wh_flt,wl_flt,wh_fa,wl_fa,wv_fa,     ib_sel,Ib_h,Ib_m,mib,Ib_s,          vb_sel,Vb_h,Vb_m,mvb,Vb_s,                Tb_h,Tb_s,mtb,Tb_f,  Vb_flt,Vb_fa,\n");
+    Serial.printf("unit_s,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,                   ib_dif,ib_dif_f,");
+    Serial.printf("    e_w,e_w_f,     ib_sel,Ib_h,Ib_m,mib,Ib_s,          vb_sel,Vb_h,Vb_m,mvb,Vb_s,                Tb_h,Tb_s,mtb,Tb_f, ");
+    Serial.printf("  fltw, falw, fltmap, falmap,\n");
           // -----, cTime, reset, rp.ibatt_select,
           //                                    ShuntAmp->bare(), ShuntNoAmp->bare(),
           //                                                        cc_diff_, cc_flt_,
@@ -222,6 +223,7 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
 // OLED display drive
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 {
+  static uint8_t frame = 0;
   static boolean pass = false;
   display->clearDisplay();
   display->setTextSize(1);              // Normal 1:1 pixel scale
@@ -229,13 +231,21 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   display->setCursor(0,0);              // Start at top-left corner
 
   boolean no_currents = Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare();
+  boolean alt_current = Sen->Flt->ib_sel_stat() < 0;
+  boolean no_voltage = Sen->Flt->vb_fa();
+  boolean dscn_currents = Sen->Flt->dscn_fa();
+
   char dispString[21];
   if ( !pass && cp.model_cutback && rp.modeling )
     sprintf(dispString, "%3.0f %5.2f      ", pp.pubList.Tbatt, pp.pubList.Voc);
   else
   {
-    if (no_currents)
-      sprintf(dispString, "%3.0f %5.2f fail", pp.pubList.Tbatt, pp.pubList.Voc);
+    if ( no_currents && frame==0 )
+      sprintf(dispString, "%3.0f %5.2f *fa*", pp.pubList.Tbatt, pp.pubList.Voc);
+    else if ( no_voltage && frame==0 )
+      sprintf(dispString, "%3.0f *fa* %5.1f", pp.pubList.Tbatt, pp.pubList.Ibatt);
+    else if ( alt_current && frame==0 )
+      sprintf(dispString, "%3.0f %5.2f ----", pp.pubList.Tbatt, pp.pubList.Voc);
     else
       sprintf(dispString, "%3.0f %5.2f %5.1f", pp.pubList.Tbatt, pp.pubList.Voc, pp.pubList.Ibatt);
   }
@@ -268,6 +278,8 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 
   if ( rp.debug==5 ) debug_5();
   if ( rp.debug==-5 ) debug_m5();  // Arduino plot
+  frame += 1;
+  if (frame>3) frame = 0;
 }
 
 // Read sensors, model signals, select between them.
