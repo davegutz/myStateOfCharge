@@ -88,6 +88,8 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.subplot(338)
     plt.plot(old_s.time, old_s.ib_rate, color='orange', linestyle='-', label='ib_rate')
     plt.plot(old_s.time, old_s.ib_quiet, color='black', linestyle='--', label='ib_quiet')
+    plt.plot(old_s.time, old_s.dscn_flt, color='blue', linestyle='-.', label='dscn_flt')
+    plt.plot(old_s.time, old_s.dscn_fa, color='red', linestyle=':', label='dscn_fa')
     plt.legend(loc=1)
     plt.subplot(339)
     plt.plot(old_s.time, old_s.ib_dif_flt, color='cyan', linestyle='-', label='ib_dif_flt')
@@ -475,6 +477,8 @@ class SavedData:
             self.vb_sel = []
             self.ib_rate = None
             self.ib_quiet = None
+            self.dscn_flt = None
+            self.dscn_fa = None
             self.Vb_flt = None
             self.Vb_fa = None
             self.Ib_finj = None
@@ -522,6 +526,8 @@ class SavedData:
             self.vb_sel = np.array(sel.vb_sel[:i_end])
             self.ib_rate = np.array(sel.ib_rate[:i_end])
             self.ib_quiet = np.array(sel.ib_quiet[:i_end])
+            self.dscn_flt = np.bool8( np.array(fltw) & 2**10 )
+            self.dscn_fa = np.bool8( np.array(falw) & 2**10 )
             self.Vb_flt = np.bool8( np.array(fltw) & 2**1 )
             self.Vb_fa = np.bool8( np.array(falw) & 2**1 )
 
