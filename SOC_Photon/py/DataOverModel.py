@@ -94,8 +94,8 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.subplot(339)
     plt.plot(old_s.time, old_s.ib_dif_flt, color='cyan', linestyle='-', label='ib_dif_flt')
     plt.plot(old_s.time, old_s.ib_dif_fa, color='magenta', linestyle='--', label='ib_dif_fa')
-    plt.plot(old_s.time, old_s.Vb_flt, color='blue', linestyle='-.', label='Vbatt_flt')
-    plt.plot(old_s.time, old_s.Vb_fa, color='black', linestyle=':', label='Vbatt_fail')
+    plt.plot(old_s.time, old_s.vb_flt, color='blue', linestyle='-.', label='vb_flt')
+    plt.plot(old_s.time, old_s.vb_fa, color='black', linestyle=':', label='vb_fa')
     plt.plot(old_s.time, old_s.ib_sel-2, color='black', linestyle='-', label='ib_sel_stat')
     plt.plot(old_s.time, old_s.vb_sel-2, color='green', linestyle='--', label='vb_sel_stat')
     plt.legend(loc=1)
@@ -479,8 +479,8 @@ class SavedData:
             self.ib_quiet = None
             self.dscn_flt = None
             self.dscn_fa = None
-            self.Vb_flt = None
-            self.Vb_fa = None
+            self.vb_flt = None
+            self.vb_fa = None
             self.Ib_finj = None
             self.Tb_finj = None
             self.Vb_finj = None
@@ -528,8 +528,8 @@ class SavedData:
             self.ib_quiet = np.array(sel.ib_quiet[:i_end])
             self.dscn_flt = np.bool8( np.array(fltw) & 2**10 )
             self.dscn_fa = np.bool8( np.array(falw) & 2**10 )
-            self.Vb_flt = np.bool8( np.array(fltw) & 2**1 )
-            self.Vb_fa = np.bool8( np.array(falw) & 2**1 )
+            self.vb_flt = np.bool8( np.array(fltw) & 2**1 )
+            self.vb_fa = np.bool8( np.array(falw) & 2**1 )
 
     def __str__(self):
         s = "{},".format(self.unit[self.i])

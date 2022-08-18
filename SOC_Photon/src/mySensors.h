@@ -145,6 +145,8 @@ public:
   ~Fault();
   void bitMapPrint(char *buf, const int16_t fw);
   float cc_diff() { return cc_diff_; };
+  void ccd_sclr(const float sclr) { ccd_sclr_ = sclr; };
+  float ccd_sclr() { return ccd_sclr_; };
   boolean cc_flt() { return faultRead(CCD_FLT); };
   boolean dscn_fa() { return failRead(IB_DSCN_FA); };
   boolean dscn_flt() { return faultRead(IB_DSCN_FLT); };
@@ -207,6 +209,7 @@ protected:
   RateLagExp *QuietRate;    // Linear filter to calculate rate for quiet
   boolean cc_flt_;          // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
+  float ccd_sclr_;          // Scale cc_diff detection thresh, scalar
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
   float ibdt_sclr_;         // Scale ib_diff detection thresh, scalar

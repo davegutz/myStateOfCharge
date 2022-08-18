@@ -255,7 +255,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // EKF error test - failure conditions track poorly
   cc_diff_ = Mon->soc_ekf() - Mon->soc();  // These are filtered in their construction (EKF is a dynamic filter and 
                                                   // Coulomb counter is wrapa big integrator)
-  faultAssign( abs(cc_diff_) >= SOC_DISAGREE_THRESH, CCD_FLT );
+  faultAssign( abs(cc_diff_) >= SOC_DISAGREE_THRESH*ccd_sclr_, CCD_FLT );
   failAssign( cc_flt(), CCD_FA );
 
   // Compare current sensors - failure conditions large difference
@@ -328,7 +328,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   {
     vb_sel_stat_ = 0;   // Latch
   }
-  if (  !(ib_dif_hi_fa() || ib_dif_lo_fa()) && ( wrap_hi_fa() || wrap_lo_fa() ) )
+  if (  !ib_dif_fa() && wrap_fa() )
   {
     vb_sel_stat_ = 0;
     failAssign(true, WRAP_VB_FA);
@@ -342,7 +342,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // Print
   if ( ib_sel_stat_ != ib_sel_stat_last_ || vb_sel_stat_ != vb_sel_stat_last_ )
   {
-    Serial.printf("Select change:  ShuntAmp->bare=%d, ShuntNoAmp->bare=%d, ib_dif_fa=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, cc_flt_=%d, rp.ibatt_select=%d, ib_sel_stat=%d, vb_sel_stat=%d, Vbatt_fail=%d,\n",
+    Serial.printf("Sel chg:  Amp->bare=%d, NoAmp->bare=%d, ib_dif_fa=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, cc_flt_=%d, rp.ibatt_select=%d, ib_sel_stat=%d, vb_sel_stat=%d, Vbatt_fail=%d,\n",
         Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_dif_hi_fa()||ib_dif_lo_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_flt_, rp.ibatt_select, ib_sel_stat_, vb_sel_stat_, vb_fa());
   }
   if ( ib_sel_stat_ != ib_sel_stat_last_ )
