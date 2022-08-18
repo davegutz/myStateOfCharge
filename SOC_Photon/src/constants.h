@@ -116,6 +116,7 @@ const float WRAP_HI_R = (WRAP_HI_S/2.); // Wrap high failure reset time, sec ('u
 #define IBATT_DISAGREE_THRESH 5.        // Signal selection threshold for current disagree test, A (5.)
 const float IBATT_DISAGREE_SET = (WRAP_LO_S-1.); // Signal selection current disagree fail persistence, s (WRAP_LO_S-1) // must be quicker than wrap lo
 #define IBATT_DISAGREE_RESET  1.        // Signal selection current disagree reset persistence, s (1.)
+#define TAU_Q_FILT      0.5             // Quiet rate time constant, sec (0.5)
 #define MIN_Q_FILT      -5.             // Quiet filter minimum, V (-0.5)
 #define MAX_Q_FILT      5.              // Quiet filter maximum, V (0.5)
 #define WN_Q_FILT       1.0             // Quiet filter-2 natural frequency, r/s (1.0)

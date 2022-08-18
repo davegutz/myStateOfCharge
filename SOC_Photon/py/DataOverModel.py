@@ -85,6 +85,10 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.subplot(337)
     plt.plot(old_s.time, old_s.cc_dif, color='black', linestyle='-', label='cc_dif')
     plt.legend(loc=1)
+    plt.subplot(338)
+    plt.plot(old_s.time, old_s.ib_rate, color='orange', linestyle='-', label='ib_rate')
+    plt.plot(old_s.time, old_s.ib_quiet, color='black', linestyle='--', label='ib_quiet')
+    plt.legend(loc=1)
     plt.subplot(339)
     plt.plot(old_s.time, old_s.ib_dif_flt, color='cyan', linestyle='-', label='ib_dif_flt')
     plt.plot(old_s.time, old_s.ib_dif_fa, color='magenta', linestyle='--', label='ib_dif_fa')
@@ -469,6 +473,8 @@ class SavedData:
             self.mtb = []
             self.Tb_f = []
             self.vb_sel = []
+            self.ib_rate = None
+            self.ib_quiet = None
             self.Vb_flt = None
             self.Vb_fa = None
             self.Ib_finj = None
@@ -514,6 +520,8 @@ class SavedData:
             self.mtb = np.array(sel.mtb[:i_end])
             self.Tb_f = np.array(sel.Tb_f[:i_end])
             self.vb_sel = np.array(sel.vb_sel[:i_end])
+            self.ib_rate = np.array(sel.ib_rate[:i_end])
+            self.ib_quiet = np.array(sel.ib_quiet[:i_end])
             self.Vb_flt = np.bool8( np.array(fltw) & 2**1 )
             self.Vb_fa = np.bool8( np.array(falw) & 2**1 )
 

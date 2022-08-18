@@ -161,6 +161,8 @@ public:
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   float ib_diff() { return ( ib_diff_ ); };
   float ib_diff_f() { return ( ib_diff_f_ ); };
+  boolean ib_dif_fa() { return ( ib_dif_hi_fa() || ib_dif_lo_fa() ); };
+  boolean ib_dif_flt() { return ( ib_dif_hi_flt() || ib_dif_lo_flt() ); };
   boolean ib_dif_hi_fa() { return failRead(IB_DIF_HI_FA); };
   boolean ib_dif_hi_flt() { return faultRead(IB_DIF_HI_FLT); };
   boolean ib_dif_lo_fa() { return failRead(IB_DIF_LO_FA); };
@@ -168,6 +170,8 @@ public:
   boolean ib_dscn_fa() { return failRead(IB_DSCN_FA); };
   boolean ib_dscn_flt() { return faultRead(IB_DSCN_FLT); };
   void ib_quiet(const boolean reset, Sensors *Sen);
+  float ib_quiet() { return ib_quiet_; };
+  float ib_rate() { return ib_rate_; };
   void ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
   void pretty_print(Sensors *Sen, BatteryMonitor *Mon);
   void reset_all_faults() { reset_all_faults_ = true; };
@@ -181,28 +185,32 @@ public:
   int8_t vb_sel_stat() { return vb_sel_stat_; };
   boolean vb_fa() { return failRead(VB_FA); };
   boolean vb_flt() { return faultRead(VB_FLT); };
+  boolean wrap_fa() { return ( wrap_hi_fa() || wrap_lo_fa() ); };
+  boolean wrap_flt() { return ( wrap_hi_flt() || wrap_lo_flt() ); };
   boolean wrap_hi_fa() { return failRead(WRAP_HI_FA); };
   boolean wrap_hi_flt() { return faultRead(WRAP_HI_FLT); };
   boolean wrap_lo_fa() { return failRead(WRAP_LO_FA); };
   boolean wrap_lo_flt() { return faultRead(WRAP_LO_FLT);  };
   boolean wrap_vb_fa() { return failRead(WRAP_LO_FA); };
 protected:
-  TFDelay *IbdHiPersist;
-  TFDelay *IbdLoPersist;
+  TFDelay *IbdHiPer;
+  TFDelay *IbdLoPer;
   TFDelay *IbattAmpHardFail;
   TFDelay *IbattNoAmpHardFail;
   TFDelay *VbattHardFail;
   TFDelay *QuietPer;
   LagTustin *IbattErrFilt;  // Noise filter for signal selection
   LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
-  General2_Pole *QuietFilt; // Linear filter to test for quiet (disconnected)
+  General2_Pole *QuietFilt; // Linear filter to test for quiet
+  RateLagExp *QuietRate;    // Linear filter to calculate rate for quiet
   boolean cc_flt_;          // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
   float ib_diff_;           // Current sensor difference error, A
   float ib_diff_f_;         // Filtered sensor difference error, A
-  float ib_quiet_;          // ib hardware noise, A
+  float ib_quiet_;          // ib hardware noise, A/s
+  float ib_rate_;           // ib rate, A/s
   TFDelay *WrapHi;          // Time high wrap fail persistence
   TFDelay *WrapLo;          // Time low wrap fail persistence
   int8_t tb_sel_stat_;      // Memory of Tbatt signal selection, 0=none, 1=sensor

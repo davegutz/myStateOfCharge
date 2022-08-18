@@ -456,8 +456,8 @@ Inject current errors:
                   DT0;DV0.0;DI0;Dm0;Dn0;Rf;W100;+v0;Dr100;Dp400;
   ampLoFailNoise: Xm7;Ca0.95;Dr100;Dp100;v26;W50;DT.05;DV0.05;DI1;W50;Dm-50;Dn0.0001;
                   DT0;DV0.0;DI0;Dm0;Dn0;RfW100;+v0;Dr100;Dp400;
-  ampHiFailSlow:  Xm7;Ca0.5;Dr10000;Dp10000;v26;W5;Dm6;Dn0.0001;
-                  Dm0;Dn0;Rf;W4;+v0;Dr100;Dp400;
+  ampHiFailSlow:  Xm7;Ca0.5;Dr100;Dp10000;v26;W500;Dm6;Dn0.0001;
+                  Dm0;Dn0;Rf;W400;+v0;Dr100;Dp400;
   vHiFail:        Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dv0.25;
                   Dv0;Rf;W100;+v0;Dr100;Dp400;
 

@@ -135,13 +135,13 @@ void Shunt::load()
 
 // Class Fault
 Fault::Fault(const double T):
-  cc_diff_(0.), e_wrap_(0), e_wrap_filt_(0), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), 
+  cc_diff_(0.), e_wrap_(0), e_wrap_filt_(0), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0),
   tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
   vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL)
 {
   IbattErrFilt = new LagTustin(T, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
-  IbdHiPersist = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
-  IbdLoPersist = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
+  IbdHiPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
+  IbdLoPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
   IbattAmpHardFail  = new TFDelay(false, IBATT_HARD_SET, IBATT_HARD_RESET, T);
   IbattNoAmpHardFail  = new TFDelay(false, IBATT_HARD_SET, IBATT_HARD_RESET, T);
   VbattHardFail  = new TFDelay(false, VBATT_HARD_SET, VBATT_HARD_RESET, T);
@@ -150,6 +150,7 @@ Fault::Fault(const double T):
   WrapHi = new TFDelay(false, WRAP_HI_S, WRAP_HI_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
   WrapLo = new TFDelay(false, WRAP_LO_S, WRAP_LO_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
   QuietFilt = new General2_Pole(T, WN_Q_FILT, ZETA_Q_FILT, MIN_Q_FILT, MAX_Q_FILT);  // actual update time provided run time
+  QuietRate = new RateLagExp(T, TAU_Q_FILT, MIN_Q_FILT, MAX_Q_FILT);
 }
 
 // Print bitmap
@@ -167,8 +168,9 @@ void Fault::bitMapPrint(char *buf, const int16_t fw)
 void Fault::ib_quiet(const boolean reset, Sensors *Sen)
 {
   boolean reset_loc = reset | reset_all_faults_;
-  ib_quiet_ = QuietFilt->calculate(Sen->Ibatt_amp_hdwe+Sen->Ibatt_noamp_hdwe, reset_loc, min(Sen->T, MAX_T_Q_FILT));
-  faultAssign( !rp.mod_ib() && (ib_quiet_)>=QUIET_A, IB_DSCN_FLT);
+  ib_rate_ = QuietRate->calculate(Sen->Ibatt_amp_hdwe + Sen->Ibatt_noamp_hdwe, reset, min(Sen->T, MAX_T_Q_FILT));
+  ib_quiet_ = QuietFilt->calculate(ib_rate_, reset_loc, min(Sen->T, MAX_T_Q_FILT));
+  faultAssign( !rp.mod_ib() && abs(ib_quiet_)<=QUIET_A, IB_DSCN_FLT );
   failAssign( QuietPer->calculate(dscn_flt(), QUIET_S, QUIET_R, Sen->T, reset_loc), IB_DSCN_FA);
 }
 
@@ -234,6 +236,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.print(cp.buffer);
   Serial.printf(";\n");
 }
+
 // Calculate selection for choice
 // Use model instead of sensors when running tests as user
 // Equivalent to using voc(soc) as voter between two hardware currrents
@@ -262,8 +265,8 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   ib_diff_f_ = IbattErrFilt->calculate(ib_diff_, reset_loc, min(Sen->T, MAX_ERR_T));
   faultAssign( ib_diff_f_>=IBATT_DISAGREE_THRESH, IB_DIF_HI_FLT );
   faultAssign( ib_diff_f_<=-IBATT_DISAGREE_THRESH, IB_DIF_LO_FLT );
-  failAssign( IbdHiPersist->calculate(faultRead(IB_DIF_HI_FLT), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIF_HI_FA );
-  failAssign( IbdLoPersist->calculate(faultRead(IB_DIF_LO_FLT), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIF_LO_FA );
+  failAssign( IbdHiPer->calculate(ib_dif_hi_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIF_HI_FA );
+  failAssign( IbdLoPer->calculate(ib_dif_lo_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIF_LO_FA );
 
   // Truth tables
 
@@ -297,10 +300,16 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     {
       ib_sel_stat_ = -1;
     }
-    else if ( Sen->ShuntAmp->bare() ||
-      ( (ib_dif_hi_fa()||ib_dif_lo_fa()) && ( ( vb_sel_stat_ && (wrap_hi_fa() || wrap_lo_fa())) || cc_flt() )) )
+    else if ( ib_dif_fa() )
     {
-      ib_sel_stat_ = -1;
+      if ( vb_sel_stat_ && wrap_fa() )
+      {
+        ib_sel_stat_ = -1;
+      }
+      else if ( cc_flt() )
+      {
+        ib_sel_stat_ = -1;
+      }
     }
     else if ( ib_sel_stat_last_ >= 0 )  // Must reset to move out of no amp selection
     {
@@ -484,8 +493,8 @@ void Sensors::final_assignments()
           Flt->vb_sel_stat(), Vbatt_hdwe, Vbatt_model, rp.mod_vb(), Vbatt,
           Tbatt_hdwe, Tbatt, rp.mod_tb(), Tbatt_filt);
       Serial.print(cp.buffer);
-      sprintf(cp.buffer, "%d, %d, ",
-          Flt->fltw(), Flt->falw());
+      sprintf(cp.buffer, "%d, %d, %7.3f, %7.3f,",
+          Flt->fltw(), Flt->falw(), Flt->ib_rate(), Flt->ib_quiet());
       Serial.print(cp.buffer);
       Serial.printlnf("%c,", '\0');
   }
