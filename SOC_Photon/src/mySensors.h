@@ -152,6 +152,10 @@ public:
   float e_wrap_filt() { return e_wrap_filt_; };
   uint16_t fltw() { return fltw_; };
   uint16_t falw() { return falw_; };
+  void ibdt_sclr(const float sclr) { ibdt_sclr_ = sclr; };
+  float ibdt_sclr() { return ibdt_sclr_; };
+  void ibq_sclr(const float sclr) { ibq_sclr_ = sclr; };
+  float ibq_sclr() { return ibq_sclr_; };
   boolean ib_amp_fa() { return failRead(IB_AMP_FA); };
   boolean ib_amp_flt() { return faultRead(IB_AMP_FLT);  };
   boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
@@ -161,8 +165,7 @@ public:
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   float ib_diff() { return ( ib_diff_ ); };
   float ib_diff_f() { return ( ib_diff_f_ ); };
-  boolean ib_dif_fa() { return ( ib_dif_hi_fa() || ib_dif_lo_fa() ); };
-  boolean ib_dif_flt() { return ( ib_dif_hi_flt() || ib_dif_lo_flt() ); };
+  boolean ib_dif_fa() { return ( failRead(IB_DIF_HI_FA) || failRead(IB_DIF_LO_FA) ); };
   boolean ib_dif_hi_fa() { return failRead(IB_DIF_HI_FA); };
   boolean ib_dif_hi_flt() { return faultRead(IB_DIF_HI_FLT); };
   boolean ib_dif_lo_fa() { return failRead(IB_DIF_LO_FA); };
@@ -185,8 +188,7 @@ public:
   int8_t vb_sel_stat() { return vb_sel_stat_; };
   boolean vb_fa() { return failRead(VB_FA); };
   boolean vb_flt() { return faultRead(VB_FLT); };
-  boolean wrap_fa() { return ( wrap_hi_fa() || wrap_lo_fa() ); };
-  boolean wrap_flt() { return ( wrap_hi_flt() || wrap_lo_flt() ); };
+  boolean wrap_fa() { return ( failRead(WRAP_HI_FA) || failRead(WRAP_LO_FA) ); };
   boolean wrap_hi_fa() { return failRead(WRAP_HI_FA); };
   boolean wrap_hi_flt() { return faultRead(WRAP_HI_FLT); };
   boolean wrap_lo_fa() { return failRead(WRAP_LO_FA); };
@@ -207,6 +209,8 @@ protected:
   float cc_diff_;           // EKF tracking error, C
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
+  float ibdt_sclr_;         // Scale ib_diff detection thresh, scalar
+  float ibq_sclr_;          // Scale ib_quiet detection thresh, scalar
   float ib_diff_;           // Current sensor difference error, A
   float ib_diff_f_;         // Filtered sensor difference error, A
   float ib_quiet_;          // ib hardware noise, A/s

@@ -135,7 +135,7 @@ void Shunt::load()
 
 // Class Fault
 Fault::Fault(const double T):
-  cc_diff_(0.), e_wrap_(0), e_wrap_filt_(0), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0),
+  cc_diff_(0.), e_wrap_(0), e_wrap_filt_(0), ibdt_sclr_(1), ibq_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0),
   tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
   vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL)
 {
@@ -170,7 +170,7 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
   boolean reset_loc = reset | reset_all_faults_;
   ib_rate_ = QuietRate->calculate(Sen->Ibatt_amp_hdwe + Sen->Ibatt_noamp_hdwe, reset, min(Sen->T, MAX_T_Q_FILT));
   ib_quiet_ = QuietFilt->calculate(ib_rate_, reset_loc, min(Sen->T, MAX_T_Q_FILT));
-  faultAssign( !rp.mod_ib() && abs(ib_quiet_)<=QUIET_A, IB_DSCN_FLT );
+  faultAssign( !rp.mod_ib() && abs(ib_quiet_)<=QUIET_A*ibq_sclr_, IB_DSCN_FLT );
   failAssign( QuietPer->calculate(dscn_flt(), QUIET_S, QUIET_R, Sen->T, reset_loc), IB_DSCN_FA);
 }
 
@@ -263,8 +263,8 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   if ( rp.mod_ib() ) ib_diff_ = (Sen->Ibatt_amp_model - Sen->Ibatt_noamp_model) / Mon->nP();
   else ib_diff_ = (Sen->Ibatt_amp_hdwe - Sen->Ibatt_noamp_hdwe) / Mon->nP();
   ib_diff_f_ = IbattErrFilt->calculate(ib_diff_, reset_loc, min(Sen->T, MAX_ERR_T));
-  faultAssign( ib_diff_f_>=IBATT_DISAGREE_THRESH, IB_DIF_HI_FLT );
-  faultAssign( ib_diff_f_<=-IBATT_DISAGREE_THRESH, IB_DIF_LO_FLT );
+  faultAssign( ib_diff_f_>=IBATT_DISAGREE_THRESH*ibdt_sclr_, IB_DIF_HI_FLT );
+  faultAssign( ib_diff_f_<=-IBATT_DISAGREE_THRESH*ibdt_sclr_, IB_DIF_LO_FLT );
   failAssign( IbdHiPer->calculate(ib_dif_hi_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIF_HI_FA );
   failAssign( IbdLoPer->calculate(ib_dif_lo_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIF_LO_FA );
 
