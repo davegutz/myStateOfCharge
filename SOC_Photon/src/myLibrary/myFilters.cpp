@@ -117,7 +117,7 @@ boolean TFDelay::calculate(const boolean in)
   }
   // Serial.print("in=");Serial.print(in);Serial.print(", timer=");Serial.print(timer_);Serial.print(", nt_=");Serial.print(nt_);
   // Serial.print(", nf_="); Serial.print(nf_);Serial.print(", return=");Serial.println(timer_>=0);
-  return ( timer_>= 0 );  // dag 8/18/2022 was >0
+  return ( timer_> 0 );  // dag 8/18/2022 was >0
 }
 boolean TFDelay::calculate(const boolean in, const int RESET)
 {

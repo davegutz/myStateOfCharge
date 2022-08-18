@@ -135,8 +135,8 @@ void Shunt::load()
 
 // Class Fault
 Fault::Fault(const double T):
-  cc_diff_(0.), e_wrap_(0), e_wrap_filt_(0), ibdt_sclr_(1), ibq_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0),
-  tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
+  cc_diff_(0.), ccd_sclr_(1), e_wrap_(0), e_wrap_filt_(0), ibdt_sclr_(1), ibq_sclr_(1), ib_diff_(0), ib_diff_f_(0),
+  ib_quiet_(0), ib_rate_(0), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
   vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL)
 {
   IbattErrFilt = new LagTustin(T, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
