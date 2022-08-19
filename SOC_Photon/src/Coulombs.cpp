@@ -167,22 +167,22 @@ uint8_t Chemistry::encode(const String mod_str)
 void Chemistry::pretty_print(void)
 {
   Serial.printf("Chemistry:\n");
-  Serial.printf("  dqdt=%7.3f; frac/deg C\n", dqdt);
+  Serial.printf("  dqdt=%7.3f; frac/dg C\n", dqdt);
   Serial.printf("  low_voc=%7.3f; BMS turn off, V\n", low_voc);
   Serial.printf("  hys_cap=%7.3f; F\n", hys_cap);
-  Serial.printf("  v_sat=%7.3f; Sat at temp, V\n", v_sat);
-  Serial.printf("  dvoc_dt=%7.3f; V/deg C\n", dvoc_dt);
-  Serial.printf("  dv=%7.3f; Cal error, V\n", dv);
-  Serial.printf("  r_0=%9.6f; Randles R0, ohms\n", r_0);
-  Serial.printf("  r_ct=%9.6f; Charge transfer, ohms\n", r_ct);
-  Serial.printf("  r_diff=%9.6f; Diff, ohms\n", r_diff);
-  Serial.printf("  tau_ct=%7.3f; Charge transfer, s (=1/Rct/Cct)\n", tau_ct);
+  Serial.printf("  v_sat=%7.3f; V\n", v_sat);
+  Serial.printf("  dvoc_dt=%7.3f; V/dg C\n", dvoc_dt);
+  Serial.printf("  dv=%7.3f; Cal err, V\n", dv);
+  Serial.printf("  r_0=%9.6f; Randles R0, ohm\n", r_0);
+  Serial.printf("  r_ct=%9.6f; Charge trans, ohm\n", r_ct);
+  Serial.printf("  r_diff=%9.6f; Diff, ohm\n", r_diff);
+  Serial.printf("  tau_ct=%7.3f; Charge tran, s (=1/Rct/Cct)\n", tau_ct);
   Serial.printf("  tau_diff=%7.3f; Diff, s (=1/Rdif/Cdif)\n", tau_diff);
-  Serial.printf("  tau_sd=%7.3f; EKF. Parasitic disch, sec\n", tau_sd);
-  Serial.printf("  r_sd=%7.3f; EKF. Parasitic disch, ohms\n", r_sd);
-  Serial.printf("  r_ss=%7.3f; SS init, ohms\n", r_ss);
+  Serial.printf("  tau_sd=%7.3f; EKF. Parasitic disch, s\n", tau_sd);
+  Serial.printf("  r_sd=%7.3f; EKF. Parasitic disch, ohm\n", r_sd);
+  Serial.printf("  r_ss=%7.3f; SS init, ohm\n", r_ss);
   Serial.printf("  voc(t, soc):\n");
-  Serial.printf("    t=  {"); for ( int i=0; i<m_t; i++ ) Serial.printf("%7.3f, ", y_t[i]); Serial.printf("};\n");
+  Serial.printf("    t={"); for ( int i=0; i<m_t; i++ ) Serial.printf("%7.3f, ", y_t[i]); Serial.printf("};\n");
   Serial.printf("    soc={"); for ( int i=0; i<n_s; i++ ) Serial.printf("%7.3f, ", x_soc[i]); Serial.printf("};\n");
   Serial.printf("    voc={\n");
   for ( int i=0; i<m_t; i++ )
@@ -193,12 +193,12 @@ void Chemistry::pretty_print(void)
   }
   Serial.printf("         };\n");
   Serial.printf("  soc_min(temp_c):\n");
-  Serial.printf("    temp_c =  {"); for ( int i=0; i<n_n; i++ ) Serial.printf("%7.3f, ", x_soc_min[i]); Serial.printf("};\n");
-  Serial.printf("    soc_min=  {"); for ( int i=0; i<n_n; i++ ) Serial.printf("%7.3f, ", t_soc_min[i]); Serial.printf("};\n");
+  Serial.printf("    temp_c={"); for ( int i=0; i<n_n; i++ ) Serial.printf("%7.3f, ", x_soc_min[i]); Serial.printf("};\n");
+  Serial.printf("    soc_min={"); for ( int i=0; i<n_n; i++ ) Serial.printf("%7.3f, ", t_soc_min[i]); Serial.printf("};\n");
   Serial.printf("  r(soc, dv):\n");
   Serial.printf("    soc={"); for ( int i=0; i<m_h; i++ ) Serial.printf("%8.6f, ", y_soc[i]); Serial.printf("};\n");
-  Serial.printf("    dv ={"); for ( int i=0; i<n_h; i++ ) Serial.printf("%7.3f, ", x_dv[i]); Serial.printf("};\n");
-  Serial.printf("    r  ={\n");
+  Serial.printf("    dv={"); for ( int i=0; i<n_h; i++ ) Serial.printf("%7.3f, ", x_dv[i]); Serial.printf("};\n");
+  Serial.printf("    r={\n");
   for ( int i=0; i<m_h; i++ )
   {
     Serial.printf("      {");
@@ -226,22 +226,22 @@ Coulombs::~Coulombs() {}
 void Coulombs::pretty_print(void)
 {
   Serial.printf("Coulombs:\n");
-  Serial.printf("  q_cap_rated_=%9.1f;  // At t_rated, C\n", q_cap_rated_);
-  Serial.printf("  q_cap_rated_scaled_= %9.1f;  // App rated cap at t_rated_, C\n", q_cap_rated_scaled_);
-  Serial.printf("  q_capacity_ =%9.1f;  // Sat charge at temp, C\n", q_capacity_);
-  Serial.printf("  q_ =      %9.1f;  // Avail to use, except q_min_, C\n", q_);
-  Serial.printf("  q_min_ =  %9.1f;  // Low volt shutdown, C\n", q_min_);
-  Serial.printf("  delta_q   %9.1f;  // Charge change since sat, C\n", *rp_delta_q_);
-  Serial.printf("  soc_ =     %8.4f;  // Frac of q_capacity_available (0-1);\n", soc_);
-  Serial.printf("  sat_ =            %d;  // T=saturated\n", sat_);
-  Serial.printf("  t_rated_ =    %5.1f;  // Rated, deg C\n", t_rated_);
-  Serial.printf("  t_last =      %5.1f;  // past, deg C\n", *rp_t_last_);
-  Serial.printf("  t_rlim_ =   %7.3f;  // Tbatt RL, deg C / s\n", t_rlim_);
-  Serial.printf("  resetting_ =      %d;  // Coord user testing of CC, T=perf ext reset\n", resetting_);
-  Serial.printf("  soc_min_ = %8.4f;  // soc battery BMS shuts off current\n", soc_min_);
-  Serial.printf("  mod_ =    %s;  // Chemistry e.g. Battleborn or LION\n", chem_.decode(mod_code()).c_str());
-  Serial.printf("  mod_code_ =       %d;  // Chemistry code integer\n", mod_code());
-  Serial.printf("  coul_eff_=%9.5f;  // Coul Efficiency\n", coul_eff_);
+  Serial.printf("  q_cap_rated=%9.1f; At t_rated, C\n", q_cap_rated_);
+  Serial.printf("  q_cap_rated_scaled=%9.1f; Act at t_rated_, C\n", q_cap_rated_scaled_);
+  Serial.printf("  q_capacity=%9.1f; Sat charge at temp, C\n", q_capacity_);
+  Serial.printf("  q=%9.1f; Avail, except q_min_, C\n", q_);
+  Serial.printf("  q_min=%9.1f; Low volt shutdown, C\n", q_min_);
+  Serial.printf("  delta_q%9.1f; Charge change since sat, C\n", *rp_delta_q_);
+  Serial.printf("  soc=%8.4f; Frac of q_capacity_avail (0-1);\n", soc_);
+  Serial.printf("  sat=%d; T=saturated\n", sat_);
+  Serial.printf("  t_rated=%5.1f; Rated, dg C\n", t_rated_);
+  Serial.printf("  t_last=%5.1f; past, dg C\n", *rp_t_last_);
+  Serial.printf("  t_rlim=%7.3f; Tbatt RL, deg C / s\n", t_rlim_);
+  Serial.printf("  resetting=%d; Coord user testing of CC, T=ext reset\n", resetting_);
+  Serial.printf("  soc_min=%8.4f; soc BMS shuts off current\n", soc_min_);
+  Serial.printf("  mod=%s; Chem e.g. Battleborn or LION\n", chem_.decode(mod_code()).c_str());
+  Serial.printf("  mod_code=%d; Chem code\n", mod_code());
+  Serial.printf("  coul_eff=%9.5f; Coul Eff\n", coul_eff_);
   Serial.printf("Coulombs::");
   chem_.pretty_print();
 }

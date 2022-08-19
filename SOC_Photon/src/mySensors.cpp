@@ -154,14 +154,14 @@ Fault::Fault(const double T):
 }
 
 // Print bitmap
-void Fault::bitMapPrint(char *buf, const int16_t fw)
+void Fault::bitMapPrint(char *buf, const int16_t fw, const uint8_t num)
 {
-  for ( int i=0; i<16; i++ )
+  for ( int i=0; i<num; i++ )
   {
-    if ( bitRead(fw, i) ) buf[15-i] = '1';
-    else  buf[15-i] = '0';
+    if ( bitRead(fw, i) ) buf[num-i] = '1';
+    else  buf[num-i] = '0';
   }
-  buf[16] = '\0';
+  buf[num] = '\0';
 }
 
 // Detect no signal present
@@ -190,51 +190,83 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
 {
   Serial.printf("Fault:\n");
-  Serial.printf("  amp_bare=%d;\n", Sen->ShuntAmp->bare());
-  Serial.printf("  noa_bare=%d;\n", Sen->ShuntNoAmp->bare());
-  Serial.printf("  cc_diff=%7.3f;\n", cc_diff_);
-  Serial.printf("  ccd_fa=%d;\n", ccd_fa());
+  Serial.printf("  cc_dif=%7.3f;\n", cc_diff_);
   Serial.printf("  voc_tab=%7.3f;\n", Mon->voc_tab());
   Serial.printf("  voc=%7.3f;\n", Mon->voc());
-  Serial.printf("  e_wrap=%7.3f;\n", e_wrap_);
   Serial.printf("  e_w_f=%7.3f;\n", e_wrap_filt_);
-  Serial.printf("  ib_amp_flt=%d;\n", ib_amp_flt());
-  Serial.printf("  ib_amp_fa=%d;\n", ib_amp_fa());
-  Serial.printf("  ib_noamp_flt=%d;\n", ib_noa_flt());
-  Serial.printf("  ib_noamp_fa=%d;\n", ib_noa_fa());
-  Serial.printf("  amp_calh=%7.3f;\n", Sen->Ibatt_amp_hdwe);
-  Serial.printf("  noa_calh=%7.3f;\n", Sen->Ibatt_noamp_hdwe);
-  Serial.printf("  amp_calm=%7.3f;\n", Sen->Ibatt_amp_model);
-  Serial.printf("  noa_calm=%7.3f;\n", Sen->Ibatt_noamp_model);
-  Serial.printf("  ib_diff=%7.3f;\n", ib_diff_);
-  Serial.printf("  ib_diff_f=%7.3f;\n", ib_diff_f_);
-  Serial.printf("  ib_dif_hi_flt=%d;\n", ib_dif_hi_flt());
-  Serial.printf("  ib_dif_hi_fa=%d;\n", ib_dif_hi_fa());
-  Serial.printf("  ib_dif_lo_flt=%d;\n", ib_dif_lo_flt());
-  Serial.printf("  ib_dif_lo_fa=%d;\n", ib_dif_lo_fa());
-  Serial.printf("  vb_flt=%d;\n", vb_flt());
-  Serial.printf("  vb_fa=%d;\n", vb_fa());
-  Serial.printf("  wrap_hi_flt=%d;\n", wrap_hi_flt());
-  Serial.printf("  wrap_hi_fa=%d;\n", wrap_hi_fa());
-  Serial.printf("  wrap_lo_flt=%d;\n", wrap_lo_flt());
-  Serial.printf("  wrap_lo_fa=%d;\n", wrap_lo_fa());
-  Serial.printf("  wrap_vb_fa=%d;\n", wrap_vb_fa());
-  Serial.printf("  ib_dscn_flt=%d;\n", ib_dscn_flt());
-  Serial.printf("  ib_dscn_fa=%d;\n", ib_dscn_fa());
-  Serial.printf("  tb_sel_stat=%d;\n", tb_sel_stat_);
-  Serial.printf("  vb_sel_stat=%d;\n", vb_sel_stat_);
-  Serial.printf("  vb_sel_stat_last=%d;\n", vb_sel_stat_last_);
-  Serial.printf("  ib_sel_stat=%d;\n", ib_sel_stat_);
-  Serial.printf("  ib_sel_stat_last=%d;\n", ib_sel_stat_last_);
-  Serial.printf("  reset_all_faults= %d;\n", reset_all_faults_);
+  Serial.printf("  imh=%7.3f;\n", Sen->Ibatt_amp_hdwe);
+  Serial.printf("  inh=%7.3f;\n", Sen->Ibatt_noamp_hdwe);
+  Serial.printf("  imm=%7.3f;\n", Sen->Ibatt_amp_model);
+  Serial.printf("  inm=%7.3f;\n", Sen->Ibatt_noamp_model);
+  Serial.printf("  ibd_f=%7.3f;\n", ib_diff_f_);
+  Serial.printf("  tb_s_st=%d;\n", tb_sel_stat_);
+  Serial.printf("  vb_s_st=%d;\n", vb_sel_stat_);
+  Serial.printf("  ib_s_st=%d;\n", ib_sel_stat_);
+  Serial.printf("  ib_dscn_ft=%d;\n", ib_dscn_flt());
+  Serial.printf("  ibd_lo_ft=%d;\n", ib_dif_lo_flt());
+  Serial.printf("  ibd_hi_ft=%d;\n  X\n", ib_dif_hi_flt());
+  Serial.printf("  wl_ft=%d;\n", wrap_lo_flt());
+  Serial.printf("  wh_ft=%d;\n  X\n", wrap_hi_flt());
+  Serial.printf("  ibn_ft=%d;\n", ib_noa_flt());
+  Serial.printf("  ibm_ft=%d;\n", ib_amp_flt());
+  Serial.printf("  vb_ft=%d;\n", vb_flt());
+  Serial.printf("  tb_ft=%d;\n", tb_flt());
   Serial.printf("  fltw=%d;  ", fltw_);
-  bitMapPrint(cp.buffer, fltw_);
+  bitMapPrint(cp.buffer, fltw_, NUM_FLT);
   Serial.print(cp.buffer);
   Serial.printf(";\n");
+  Serial.printf("  nbar=%d;\n", Sen->ShuntNoAmp->bare());
+  Serial.printf("  mbar=%d;\n", Sen->ShuntAmp->bare());
+  Serial.printf("  ib_dscn_fa=%d;\n", ib_dscn_fa());
+  Serial.printf("  ibd_lo_fa=%d;\n", ib_dif_lo_fa());
+  Serial.printf("  ibd_hi_fa=%d;\n", ib_dif_hi_fa());
+  Serial.printf("  wv_fa=%d;\n", wrap_vb_fa());
+  Serial.printf("  wl_lo_fa=%d;\n", wrap_lo_fa());
+  Serial.printf("  wh_fa=%d;\n", wrap_hi_fa());
+  Serial.printf("  ccd_fa=%d;\n", ccd_fa());
+  Serial.printf("  ibn_fa=%d;\n", ib_noa_fa());
+  Serial.printf("  ibm_fa=%d;\n", ib_amp_fa());
+  Serial.printf("  vb_fa=%d;\n", vb_fa());
+  Serial.printf("  tb_fa=%d;\n", tb_fa());
   Serial.printf("  falw=%d;  ", falw_);
-  bitMapPrint(cp.buffer, falw_);
+  bitMapPrint(cp.buffer, falw_, NUM_FA);
   Serial.print(cp.buffer);
   Serial.printf(";\n");
+}
+void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
+{
+  Serial1.printf("Fault:\n");
+  Serial1.printf("  mbar=%d;\n", Sen->ShuntAmp->bare());
+  Serial1.printf("  nbar=%d;\n", Sen->ShuntNoAmp->bare());
+  Serial1.printf("  cc_dif=%7.3f;\n", cc_diff_);
+  Serial1.printf("  voc_tab=%7.3f;\n", Mon->voc_tab());
+  Serial1.printf("  voc=%7.3f;\n", Mon->voc());
+  Serial1.printf("  e_w_f=%7.3f;\n", e_wrap_filt_);
+  Serial1.printf("  imh=%7.3f;\n", Sen->Ibatt_amp_hdwe);
+  Serial1.printf("  inh=%7.3f;\n", Sen->Ibatt_noamp_hdwe);
+  Serial1.printf("  ibd_f=%7.3f;\n", ib_diff_f_);
+  Serial1.printf("  tb_s_st=%d;\n", tb_sel_stat_);
+  Serial1.printf("  vb_s_st=%d;\n", vb_sel_stat_);
+  Serial1.printf("  ib_s_st=%d;\n", ib_sel_stat_);
+  Serial1.printf("  fltw=%d;  ", fltw_);
+  Serial1.printf(";\n");
+  Serial1.printf("  ib_dscn_fa=%d;\n", ib_dscn_fa());
+  Serial1.printf("  nbar=%d;\n", Sen->ShuntNoAmp->bare());
+  Serial1.printf("  mbar=%d;\n", Sen->ShuntAmp->bare());
+  Serial1.printf("  ibd_lo_fa=%d;\n", ib_dif_lo_fa());
+  Serial1.printf("  ibd_hi_fa=%d;\n", ib_dif_hi_fa());
+  Serial1.printf("  wv_fa=%d;\n", wrap_vb_fa());
+  Serial1.printf("  wl_lo_fa=%d;\n", wrap_lo_fa());
+  Serial1.printf("  wh_fa=%d;\n", wrap_hi_fa());
+  Serial1.printf("  ccd_fa=%d;\n", ccd_fa());
+  Serial1.printf("  ibn_fa=%d;\n", ib_noa_fa());
+  Serial1.printf("  ibm_fa=%d;\n", ib_amp_fa());
+  Serial1.printf("  vb_fa=%d;\n", vb_fa());
+  Serial1.printf("  tb_fa=%d;\n", tb_fa());
+  Serial1.printf("  falw=%d;  ", falw_);
+  bitMapPrint(cp.buffer, falw_, NUM_FA);
+  Serial1.print(cp.buffer);
+  Serial1.printf(";\n");
 }
 
 // Calculate selection for choice
@@ -348,7 +380,22 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   }
   ib_sel_stat_last_ = ib_sel_stat_;
   vb_sel_stat_last_ = vb_sel_stat_;
-  reset_all_faults_ = false;
+
+  // Make sure asynk Rf command gets executed at least once all fault logic
+  static uint8_t count = 0;
+  if ( reset_all_faults_ )
+  {
+    if ( ( falw_==0 && fltw_==0 ) || count>1 )
+    {
+      reset_all_faults_ = false;
+      count = 0;
+    }
+    else
+    {
+      count++;
+      Serial.printf("Rf%d\n", count);
+    }
+  }
 }
 
 // Checks analog current.  Latches

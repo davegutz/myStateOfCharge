@@ -114,6 +114,7 @@ protected:
 #define IB_DSCN_FLT   10  // Dual faulted quiet error, T = disconnected shunt
 #define IB_AMP_BARE   11  // Unconnected ib bus, T = bare bus
 #define IB_NOA_BARE   12  // Unconnected ib bus, T = bare bus
+#define NUM_FLT       13
 
 // Fail word bits
 #define TB_FA         0   // Peristed, latched isolation of Tb failure, T=failed
@@ -127,6 +128,7 @@ protected:
 #define IB_DIF_HI_FA  8   // Persisted sensor difference error, T = fail
 #define IB_DIF_LO_FA  9   // Persisted sensor difference error, T = fail
 #define IB_DSCN_FA    10  // Dual persisted quiet error, T = disconnected shunt
+#define NUM_FA        11
 
 #define faultSet(bit) (bitSet(fltw_, bit) )
 #define failSet(bit) (bitSet(falw_, bit) )
@@ -142,7 +144,7 @@ public:
   Fault();
   Fault(const double T);
   ~Fault();
-  void bitMapPrint(char *buf, const int16_t fw);
+  void bitMapPrint(char *buf, const int16_t fw, const uint8_t num);
   float cc_diff() { return cc_diff_; };
   void ccd_sclr(const float sclr) { ccd_sclr_ = sclr; };
   float ccd_sclr() { return ccd_sclr_; };
@@ -178,6 +180,7 @@ public:
   float ib_rate() { return ib_rate_; };
   void ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
   void pretty_print(Sensors *Sen, BatteryMonitor *Mon);
+  void pretty_print1(Sensors *Sen, BatteryMonitor *Mon);
   void reset_all_faults() { reset_all_faults_ = true; };
   void select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ibatt signals

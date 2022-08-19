@@ -99,9 +99,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
     // Limited echoing of Serial1 commands available
     if ( !cp.blynking )
-    {
       Serial1.printf("echo:  %s, %d\n", cp.input_string.c_str(), request);
-    }
     Serial.printf("echo:  %s, %d\n", cp.input_string.c_str(), request);
 
     // Deal with each request
@@ -389,13 +387,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'h' ):  // Sh<>: scale hysteresis
                 scale = cp.input_string.substring(2).toFloat();
 
-                Serial.printf("\nBefore Hys::scale = %7.3f & %7.3f\n", Mon->hys_scale(), Sen->Sim->hys_scale());
+                Serial.printf("\nHys::scale %7.3f & %7.3f\n", Mon->hys_scale(), Sen->Sim->hys_scale());
                 rp.hys_scale = scale;
                 Serial.printf("scale= %7.3f\n", scale);
                 Mon->hys_scale(scale);
                 Sen->Sim->hys_scale(scale);
-                Serial.printf("After = %7.3f & %7.3f\n",
-                    Mon->hys_scale(), Sen->Sim->hys_scale());
+                Serial.printf("to  %7.3f & %7.3f\n", Mon->hys_scale(), Sen->Sim->hys_scale());
                 break;
 
               case ( 'm' ):  // Sm<>:  Amp signal scalar for faults
@@ -603,18 +600,27 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'c' ):  // Pc:  Print coulombs
                 Serial.printf("\nMon::"); Mon->Coulombs::pretty_print();
                 Serial.printf("\nSim::"); Sen->Sim->Coulombs::pretty_print();
-                Serial1.printf("\nMon::"); Mon->Coulombs::pretty_print();
-                Serial1.printf("\nSim::"); Sen->Sim->Coulombs::pretty_print();
+                if ( !cp.blynking )
+                {
+                  Serial1.printf("\nMon::"); Mon->Coulombs::pretty_print();
+                  Serial1.printf("\nSim::"); Sen->Sim->Coulombs::pretty_print();
+                }
                 break;
 
               case ( 'e' ):  // Pe:  Print EKF
                 Serial.printf("\nMon::"); Mon->EKF_1x1::pretty_print();
-                Serial1.printf("\nMon::"); Mon->EKF_1x1::pretty_print();
+                if ( !cp.blynking )
+                  Serial1.printf("\nMon::"); Mon->EKF_1x1::pretty_print();
                 break;
 
               case ( 'f' ):  // Pf:  Print faults
-                Serial.printf("\nSen::"); Sen->Flt->pretty_print(Sen, Mon);
-                Serial1.printf("\nSen::"); Sen->Flt->pretty_print(Sen, Mon);
+                Serial.printf("\nSen::");
+                Sen->Flt->pretty_print(Sen, Mon);
+                if ( !cp.blynking )
+                {
+                  Serial1.printf("\nSen::");
+                  Sen->Flt->pretty_print1(Sen, Mon);
+                }
                 break;
 
               case ( 'm' ):  // Pm:  Print mon
@@ -623,28 +629,36 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("Mon::"); Mon->pretty_print_ss();
                 Serial.printf("Mon::"); Mon->EKF_1x1::pretty_print();
                 Serial.printf("\nSim: rp.modeling = %d\n", rp.modeling);
-                Serial1.printf("\nMon:"); Mon->pretty_print();
-                Serial1.printf("Mon::"); Mon->Coulombs::pretty_print();
-                Serial1.printf("Mon::"); Mon->pretty_print_ss();
-                Serial1.printf("Mon::"); Mon->EKF_1x1::pretty_print();
-                Serial1.printf("\nSim: rp.modeling = %d\n", rp.modeling);
+                if ( !cp.blynking )
+                {
+                  Serial1.printf("\nMon:"); Mon->pretty_print();
+                  Serial1.printf("Mon::"); Mon->Coulombs::pretty_print();
+                  Serial1.printf("Mon::"); Mon->pretty_print_ss();
+                  Serial1.printf("Mon::"); Mon->EKF_1x1::pretty_print();
+                  Serial1.printf("\nSim: rp.modeling = %d\n", rp.modeling);
+                }
                 break;
 
               case ( 'M' ):  // PM:  Print shunt Amp
                 Serial.printf("\nTweak::"); Sen->ShuntAmp->pretty_print();
-                Serial1.printf("\nTweak::"); Sen->ShuntAmp->pretty_print();
+                if ( !cp.blynking )
+                  Serial1.printf("\nTweak::"); Sen->ShuntAmp->pretty_print();
                 break;
 
               case ( 'N' ):  // PN:  Print shunt no amp
                 Serial.printf("\nTweak::"); Sen->ShuntNoAmp->pretty_print();
-                Serial1.printf("\nTweak::"); Sen->ShuntNoAmp->pretty_print();
+                if ( !cp.blynking )
+                  Serial1.printf("\nTweak::"); Sen->ShuntNoAmp->pretty_print();
                 break;
 
               case ( 'r' ):  // Pr:  Print retained
                 Serial.printf("\n"); rp.pretty_print();
                 Serial.printf("\n"); cp.pretty_print();
-                Serial1.printf("\n"); rp.pretty_print();
-                Serial1.printf("\n"); cp.pretty_print();
+                if ( !cp.blynking )
+                {
+                  Serial1.printf("\n"); rp.pretty_print();
+                  Serial1.printf("\n"); cp.pretty_print();
+                }
                 break;
 
               case ( 's' ):  // Ps:  Print sim
@@ -734,12 +748,14 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Mon->apply_soc(1.0, Sen->Tbatt_filt);
                 cp.cmd_reset();
                 Sen->ReadSensors->delay(READ_DELAY);
-                Serial.printf("Clean. Ready to deploy\n");
                 rp.large_reset();
                 cp.large_reset();
                 cp.cmd_reset();
+                chit("Rf;", SOON);
                 chit("W3;", SOON);
                 chit("Hs;", SOON);
+                chit("Pf;", SOON);
+                Serial.printf("Clean. Deploy\n");
                 break;
 
               case ( 's' ):  // Rs:  small reset filters
