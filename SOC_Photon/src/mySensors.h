@@ -107,7 +107,6 @@ protected:
 #define VB_FLT        1   // Momentary isolation of Vb failure, T=faulted
 #define IB_AMP_FLT    2   // Momentary isolation of Ib amp failure, T=faulted 
 #define IB_NOA_FLT    3   // Momentary isolation of Ib no amp failure, T=faulted 
-#define CCD_FLT       4
 #define WRAP_HI_FLT   5   // Wrap isolates to Ib high fault
 #define WRAP_LO_FLT   6   // Wrap isolates to Ib low fault
 #define IB_DIF_HI_FLT 8   // Faulted sensor difference error, T = fault
@@ -147,7 +146,7 @@ public:
   float cc_diff() { return cc_diff_; };
   void ccd_sclr(const float sclr) { ccd_sclr_ = sclr; };
   float ccd_sclr() { return ccd_sclr_; };
-  boolean cc_flt() { return faultRead(CCD_FLT); };
+  boolean ccd_fa() { return failRead(CCD_FA); };
   boolean dscn_fa() { return failRead(IB_DSCN_FA); };
   boolean dscn_flt() { return faultRead(IB_DSCN_FLT); };
   float e_wrap() { return e_wrap_; };
@@ -207,7 +206,7 @@ protected:
   LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
   General2_Pole *QuietFilt; // Linear filter to test for quiet
   RateLagExp *QuietRate;    // Linear filter to calculate rate for quiet
-  boolean cc_flt_;          // EKF tested disagree, T = error
+  boolean ccd_fa_;          // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
   float ccd_sclr_;          // Scale cc_diff detection thresh, scalar
   float e_wrap_;            // Wrap error, V

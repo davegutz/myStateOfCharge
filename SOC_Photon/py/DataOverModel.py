@@ -75,12 +75,12 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(old_s.time, old_s.e_w_f, color='black', linestyle='--', label='e_wrap_filt')
     plt.legend(loc=1)
     plt.subplot(336)
-    plt.plot(old_s.time, old_s.wh_flt+4, color='black', linestyle='-', label='wrap_hi_fault')
-    plt.plot(old_s.time, old_s.wl_flt+4, color='magenta', linestyle='--', label='wrap_lo_fault')
-    plt.plot(old_s.time, old_s.wh_fa+2, color='cyan', linestyle='-', label='wrap_hi_fail')
-    plt.plot(old_s.time, old_s.wl_fa+2, color='red', linestyle='--', label='wrap_lo_fail')
-    plt.plot(old_s.time, old_s.wv_fa+2, color='orange', linestyle='-.', label='wrap_vb_fail')
-    plt.plot(old_s.time, old_s.cc_flt, color='green', linestyle='-', label='cc_flt')
+    plt.plot(old_s.time, old_s.wh_flt+4, color='black', linestyle='-', label='wrap_hi_flt')
+    plt.plot(old_s.time, old_s.wl_flt+4, color='magenta', linestyle='--', label='wrap_lo_flt')
+    plt.plot(old_s.time, old_s.wh_fa+2, color='cyan', linestyle='-', label='wrap_hi_fa')
+    plt.plot(old_s.time, old_s.wl_fa+2, color='red', linestyle='--', label='wrap_lo_fa')
+    plt.plot(old_s.time, old_s.wv_fa+2, color='orange', linestyle='-.', label='wrap_vb_fa')
+    plt.plot(old_s.time, old_s.ccd_fa, color='green', linestyle='-', label='ccd_fa')
     plt.legend(loc=1)
     plt.subplot(337)
     plt.plot(old_s.time, old_s.cc_dif, color='black', linestyle='-', label='cc_dif')
@@ -444,7 +444,7 @@ class SavedData:
             self.m_bare = []
             self.n_bare = []
             self.cc_dif = []
-            self.cc_flt = []
+            self.ccd_fa = []
             self.ibmh = []
             self.ibnh = []
             self.ibmm = []
@@ -493,7 +493,7 @@ class SavedData:
             self.m_bare = np.array(sel.m_bare[:i_end])
             self.n_bare = np.array(sel.n_bare[:i_end])
             self.cc_dif = np.array(sel.cc_dif[:i_end])
-            self.cc_flt = np.bool8( np.array(fltw) & 2**4 )
+            self.ccd_fa = np.bool8( np.array(falw) & 2**4 )
             self.ibmh = np.array(sel.ibmh[:i_end])
             self.ibnh = np.array(sel.ibnh[:i_end])
             self.ibmm = np.array(sel.ibmm[:i_end])

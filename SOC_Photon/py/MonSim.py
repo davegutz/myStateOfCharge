@@ -246,11 +246,11 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220807.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220807.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFail20220819.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/ampLoFail20220819.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampLoFail20220819.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFailNoise20220816.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/ampLoFailNoise20220816.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/ampHiFailSlow20220819.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/vHiFail20220816.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/ampHiFailSlow20220819.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = '../dataReduction/vHiFail20220819.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"

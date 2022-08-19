@@ -193,7 +193,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("  amp_bare=%d;\n", Sen->ShuntAmp->bare());
   Serial.printf("  noa_bare=%d;\n", Sen->ShuntNoAmp->bare());
   Serial.printf("  cc_diff=%7.3f;\n", cc_diff_);
-  Serial.printf("  cc_flt=%d;\n", cc_flt());
+  Serial.printf("  ccd_fa=%d;\n", ccd_fa());
   Serial.printf("  voc_tab=%7.3f;\n", Mon->voc_tab());
   Serial.printf("  voc=%7.3f;\n", Mon->voc());
   Serial.printf("  e_wrap=%7.3f;\n", e_wrap_);
@@ -255,8 +255,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // EKF error test - failure conditions track poorly
   cc_diff_ = Mon->soc_ekf() - Mon->soc();  // These are filtered in their construction (EKF is a dynamic filter and 
                                                   // Coulomb counter is wrapa big integrator)
-  faultAssign( abs(cc_diff_) >= SOC_DISAGREE_THRESH*ccd_sclr_, CCD_FLT );
-  failAssign( cc_flt(), CCD_FA );
+  failAssign( abs(cc_diff_) >= SOC_DISAGREE_THRESH*ccd_sclr_, CCD_FA );
 
   // Compare current sensors - failure conditions large difference
   // Difference error, filter, check, persist
@@ -271,8 +270,8 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // Truth tables
 
   // ib
-  // Serial.printf("\nTopTruth: rpibs,rloc,raf,ibss,ibssl,vbss,vbssl,ampb,noab,ibdf,whf,wlf,ccf, %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,\n",
-  //  rp.ibatt_select, reset_loc, reset_all_faults_, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fa(), wrap_lo_fa(), cc_flt_);
+  // Serial.printf("\nTopTruth: rpibs,rloc,raf,ibss,ibssl,vbss,vbssl,ampb,noab,ibdf,whf,wlf,ccdf, %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,\n",
+  //  rp.ibatt_select, reset_loc, reset_all_faults_, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fa(), wrap_lo_fa(), ccd_fa_);
   if ( reset_all_faults_ )
   {
     ib_sel_stat_last_ = 1;
@@ -306,7 +305,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       {
         ib_sel_stat_ = -1;
       }
-      else if ( cc_flt() )
+      else if ( ccd_fa() )
       {
         ib_sel_stat_ = -1;
       }
@@ -339,8 +338,8 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // Print
   if ( ib_sel_stat_ != ib_sel_stat_last_ || vb_sel_stat_ != vb_sel_stat_last_ )
   {
-    Serial.printf("Sel chg:  Amp->bare=%d, NoAmp->bare=%d, ib_dif_fa=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, cc_flt_=%d, rp.ibatt_select=%d, ib_sel_stat=%d, vb_sel_stat=%d, Vbatt_fail=%d,\n",
-        Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_dif_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_flt_, rp.ibatt_select, ib_sel_stat_, vb_sel_stat_, vb_fa());
+    Serial.printf("Sel chg:  Amp->bare=%d, NoAmp->bare=%d, ib_dif_fa=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, ccd_fa_=%d, rp.ibatt_select=%d, ib_sel_stat=%d, vb_sel_stat=%d, Vbatt_fail=%d,\n",
+        Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_dif_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), ccd_fa_, rp.ibatt_select, ib_sel_stat_, vb_sel_stat_, vb_fa());
   }
   if ( ib_sel_stat_ != ib_sel_stat_last_ )
   {
