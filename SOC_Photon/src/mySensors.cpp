@@ -270,6 +270,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf(";\n");
   Serial1.printf("  A9876543210\n");
   Serial1.printf("  falw=%d;\n", falw_);
+  Serial1.printf("v0; to return\n");
 }
 
 // Calculate selection for choice

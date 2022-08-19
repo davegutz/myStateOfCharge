@@ -296,8 +296,8 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   pass = !pass;
 
   // Text basic Bluetooth (uses serial bluetooth app)
-  if ( rp.debug!=4 && !cp.blynking )
-    Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\n\n\n", dispTop.c_str(), dispBot.c_str());
+  if ( rp.debug!=4 && rp.debug!=-2 && !cp.blynking )
+    Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\n\nv-2;Pf; for fails\n", dispTop.c_str(), dispBot.c_str());
 
   if ( rp.debug==5 ) debug_5();
   if ( rp.debug==-5 ) debug_m5();  // Arduino plot
