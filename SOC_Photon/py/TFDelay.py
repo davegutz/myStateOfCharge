@@ -25,15 +25,17 @@ class TFDelay:
 
     def __init__(self, in_=False, t_true=0., t_false=0., dt=0.1):
         # Defaults
-        self.timer = 0.
-        self.nt = int(max(round(t_true/dt)+1, 0))
-        self.nf = int(max(round(t_false/dt)+1, 0))
+        self.timer = 0
+        self.t_true = t_true
+        self.t_false = t_false
+        self.nt = int(max(round(self.t_true/dt)+1, 0))
+        self.nf = int(max(round(self.t_false/dt)+1, 0))
         self.dt = dt
         self.in_ = in_
         self.out = self.in_
-        if t_true == 0.0:
+        if self.t_true == 0.0:
             self.nt = 0
-        if t_false == 0.0:
+        if self.t_false == 0.0:
             self.nf = 0
         if in_:
             self.timer = self.nf
@@ -41,8 +43,20 @@ class TFDelay:
             self.time = -self.nt
         self.saved = Saved()
 
+    def __str__(self, prefix=''):
+        s = prefix + "TFDelay:\n"
+        s += "  dt  =  {:5.1f}  // s\n".format(self.dt)
+        s += "  t_t  = {:5.1f}  // s\n".format(self.t_true)
+        s += "  t_f  = {:5.1f}  // s\n".format(self.t_false)
+        s += "  nt   = {:2d}  // count\n".format(self.nt)
+        s += "  nf   = {:2d}  // count\n".format(self.nf)
+        s += "  timer= {:2d}  // count\n".format(self.timer)
+        s += "  in   = {:2d}  // count\n".format(self.in_)
+        s += "  out  = {:2d}  // count\n".format(self.out)
+        return s
+
     def calculate1(self, in_):
-        if self.timer >= 0.:
+        if self.timer >= 0:
             if in_:
                 self.timer = self.nf
             else:
@@ -54,10 +68,10 @@ class TFDelay:
                 self.timer = -self.nt
             else:
                 self.timer += 1
-                if self.timer >= 0.:
+                if self.timer >= 0:
                     self.timer = self.nf
-        out = self.timer > 0.
-        return out
+        self.out = self.timer > 0
+        return self.out
 
     def calculate2(self, in_, reset):
         if reset:
@@ -71,14 +85,16 @@ class TFDelay:
         return out
 
     def calculate3(self, in_, t_true, t_false):
-        self.nt = int(max(round(t_true / self.dt), 0))
-        self.nf = int(max(round(t_false / self.dt), 0))
+        self.nt = int(max(round(t_true / self.dt)+1, 0))
+        self.nf = int(max(round(t_false / self.dt)+1, 0))
         return self.calculate1(in_)
 
     def calculate4t(self, in_, t_true, t_false, dt):
         self.dt = dt
-        self.nt = int(max(round(t_true / self.dt), 0))
-        self.nf = int(max(round(t_false / self.dt), 0))
+        self.t_true = t_true
+        self.t_false = t_false
+        self.nt = int(max(round(self.t_true / self.dt)+1, 0))
+        self.nf = int(max(round(self.t_false / self.dt)+1, 0))
         return self.calculate1(in_)
 
     def calculate4r(self, in_, t_true, t_false, reset):
@@ -160,31 +176,38 @@ if __name__ == '__main__':
     def main():
         # Setup to run the transients
         dt = 10.
-        time_end = 100.
+        ttg = 800.
+        tfg = 100.
+        tt = 8.
+        tf = 1.
+        time_end = 1500.
 
-        tfd = TFDelay(in_=False, t_true=8., t_false=4., dt=dt)
+        tfd_long = TFDelay(in_=False, t_true=ttg, t_false=tfg, dt=dt)
+        tfd_short = TFDelay(in_=False, t_true=tt, t_false=tf, dt=dt)
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)
-        inp_s = []
 
         # time loop
         for i in range(len(t)):
-            init_tfd = (t[i] <= 10)
-            if t[i]>10. and t[i]<60.:
+            init_tfd = (t[i] < 100)
+            if 100. <= t[i] < 1000.:
                 inp = True
             else:
                 inp = False
 
             # Models
-            tfd.calculate(inp, 8., 4., dt, init_tfd)
+            tfd_long.calculate(inp, ttg, tfg, dt, init_tfd)
+            tfd_short.calculate(inp, tt, tf, dt, init_tfd)
 
             # Plot stuff
-            inp_s.append(inp)
-            tfd.save(t[i])
+            tfd_long.save(t[i])
+            tfd_short.save(t[i])
 
         # Data
-        print('tfd:  ', str(tfd))
+            if t[i] == 900.:
+                print('long:  ', str(tfd_long))
+                print('short:  ', str(tfd_short))
 
         # Plots
         n_fig = 0
@@ -193,7 +216,8 @@ if __name__ == '__main__':
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
 
-        n_fig, fig_files = overall(tfd.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
+        n_fig, fig_files = overall(tfd_long.saved, filename, fig_files, plot_title='long '+plot_title, n_fig=n_fig)
+        n_fig, fig_files = overall(tfd_short.saved, filename, fig_files, plot_title='short '+plot_title, n_fig=n_fig)
 
         # unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
         # cleanup_fig_files(fig_files)

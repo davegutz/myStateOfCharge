@@ -117,7 +117,7 @@ boolean TFDelay::calculate(const boolean in)
   }
   // Serial.print("in=");Serial.print(in);Serial.print(", timer=");Serial.print(timer_);Serial.print(", nt_=");Serial.print(nt_);
   // Serial.print(", nf_="); Serial.print(nf_);Serial.print(", return=");Serial.println(timer_>=0);
-  return ( timer_> 0 );  // dag 8/18/2022 was >0
+  return ( timer_ > 0 );
 }
 boolean TFDelay::calculate(const boolean in, const int RESET)
 {
@@ -136,15 +136,15 @@ boolean TFDelay::calculate(const boolean in, const int RESET)
 }
 boolean TFDelay::calculate(const boolean in, const double Tt, const double Tf)
 {
-  nt_ = int(fmax(round(Tt/T_),0));
-  nf_ = int(fmax(round(Tf/T_),0));
+  nt_ = int(fmax(round(Tt/T_)+1,0));  // dag 8/19/2022 was missing '+1'
+  nf_ = int(fmax(round(Tf/T_)+1,0));  // dag 8/19/2022 was missing '+1'
   return(TFDelay::calculate(in));
 }
 boolean TFDelay::calculate(const boolean in, const double Tt, const double Tf, const double T)
 {
   T_ = T;
-  nt_ = int(fmax(round(Tt/T_), 0));
-  nf_ = int(fmax(round(Tf/T_), 0));
+  nt_ = int(fmax(round(Tt/T_)+1, 0));  // dag 8/19/2022 was missing '+1'
+  nf_ = int(fmax(round(Tf/T_)+1, 0));  // dag 8/19/2022 was missing '+1'
   return(TFDelay::calculate(in));
 }
 boolean TFDelay::calculate(const boolean in, const double Tt, const double Tf, const int RESET)

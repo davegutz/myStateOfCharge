@@ -336,14 +336,11 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   else
     failAssign(false, WRAP_VB_FA);
 
-  // Serial.printf("BotTruth: rpibs,rloc,raf,ibss,ibssl,vbss,vbssl,ampb,noab,ibdf,whf,wlf,ccf, %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,\n",
-  //  rp.ibatt_select, reset_loc, reset_all_faults_, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fa(), wrap_lo_fa(), cc_flt_);
-
   // Print
   if ( ib_sel_stat_ != ib_sel_stat_last_ || vb_sel_stat_ != vb_sel_stat_last_ )
   {
     Serial.printf("Sel chg:  Amp->bare=%d, NoAmp->bare=%d, ib_dif_fa=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, cc_flt_=%d, rp.ibatt_select=%d, ib_sel_stat=%d, vb_sel_stat=%d, Vbatt_fail=%d,\n",
-        Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_dif_hi_fa()||ib_dif_lo_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_flt_, rp.ibatt_select, ib_sel_stat_, vb_sel_stat_, vb_fa());
+        Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_dif_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_flt_, rp.ibatt_select, ib_sel_stat_, vb_sel_stat_, vb_fa());
   }
   if ( ib_sel_stat_ != ib_sel_stat_last_ )
   {

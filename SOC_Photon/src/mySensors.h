@@ -195,7 +195,7 @@ public:
   boolean wrap_hi_flt() { return faultRead(WRAP_HI_FLT); };
   boolean wrap_lo_fa() { return failRead(WRAP_LO_FA); };
   boolean wrap_lo_flt() { return faultRead(WRAP_LO_FLT);  };
-  boolean wrap_vb_fa() { return failRead(WRAP_LO_FA); };
+  boolean wrap_vb_fa() { return failRead(WRAP_VB_FA); };
 protected:
   TFDelay *IbdHiPer;
   TFDelay *IbdLoPer;
