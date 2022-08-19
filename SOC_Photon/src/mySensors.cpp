@@ -202,11 +202,13 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("  tb_s_st=%d;\n", tb_sel_stat_);
   Serial.printf("  vb_s_st=%d;\n", vb_sel_stat_);
   Serial.printf("  ib_s_st=%d;\n", ib_sel_stat_);
+  Serial.printf("  nbar=%d;\n", Sen->ShuntNoAmp->bare());
+  Serial.printf("  mbar=%d;\n", Sen->ShuntAmp->bare());
   Serial.printf("  ib_dscn_ft=%d;\n", ib_dscn_flt());
   Serial.printf("  ibd_lo_ft=%d;\n", ib_dif_lo_flt());
-  Serial.printf("  ibd_hi_ft=%d;\n  X\n", ib_dif_hi_flt());
+  Serial.printf("  ibd_hi_ft=%d;\n    7\n", ib_dif_hi_flt());
   Serial.printf("  wl_ft=%d;\n", wrap_lo_flt());
-  Serial.printf("  wh_ft=%d;\n  X\n", wrap_hi_flt());
+  Serial.printf("  wh_ft=%d;\n    4\n", wrap_hi_flt());
   Serial.printf("  ibn_ft=%d;\n", ib_noa_flt());
   Serial.printf("  ibm_ft=%d;\n", ib_amp_flt());
   Serial.printf("  vb_ft=%d;\n", vb_flt());
@@ -215,8 +217,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   bitMapPrint(cp.buffer, fltw_, NUM_FLT);
   Serial.print(cp.buffer);
   Serial.printf(";\n");
-  Serial.printf("  nbar=%d;\n", Sen->ShuntNoAmp->bare());
-  Serial.printf("  mbar=%d;\n", Sen->ShuntAmp->bare());
+  Serial.printf("             CBA9876543210\n");
   Serial.printf("  ib_dscn_fa=%d;\n", ib_dscn_fa());
   Serial.printf("  ibd_lo_fa=%d;\n", ib_dif_lo_fa());
   Serial.printf("  ibd_hi_fa=%d;\n", ib_dif_hi_fa());
@@ -232,6 +233,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   bitMapPrint(cp.buffer, falw_, NUM_FA);
   Serial.print(cp.buffer);
   Serial.printf(";\n");
+  Serial.printf("             A9876543210\n");
 }
 void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 {
@@ -248,11 +250,11 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("  tb_s_st=%d;\n", tb_sel_stat_);
   Serial1.printf("  vb_s_st=%d;\n", vb_sel_stat_);
   Serial1.printf("  ib_s_st=%d;\n", ib_sel_stat_);
+  Serial1.printf("  nbar=%d;\n", Sen->ShuntNoAmp->bare());
+  Serial1.printf("  mbar=%d;\n", Sen->ShuntAmp->bare());
   Serial1.printf("  fltw=%d;  ", fltw_);
   Serial1.printf(";\n");
   Serial1.printf("  ib_dscn_fa=%d;\n", ib_dscn_fa());
-  Serial1.printf("  nbar=%d;\n", Sen->ShuntNoAmp->bare());
-  Serial1.printf("  mbar=%d;\n", Sen->ShuntAmp->bare());
   Serial1.printf("  ibd_lo_fa=%d;\n", ib_dif_lo_fa());
   Serial1.printf("  ibd_hi_fa=%d;\n", ib_dif_hi_fa());
   Serial1.printf("  wv_fa=%d;\n", wrap_vb_fa());
@@ -267,6 +269,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   bitMapPrint(cp.buffer, falw_, NUM_FA);
   Serial1.print(cp.buffer);
   Serial1.printf(";\n");
+  Serial.printf("             A9876543210\n");
 }
 
 // Calculate selection for choice
