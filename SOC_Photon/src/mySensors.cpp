@@ -158,8 +158,8 @@ void Fault::bitMapPrint(char *buf, const int16_t fw, const uint8_t num)
 {
   for ( int i=0; i<num; i++ )
   {
-    if ( bitRead(fw, i) ) buf[num-i] = '1';
-    else  buf[num-i] = '0';
+    if ( bitRead(fw, i) ) buf[num-i-1] = '1';
+    else  buf[num-i-1] = '0';
   }
   buf[num] = '\0';
 }
@@ -212,12 +212,12 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("  ibn_ft=%d;\n", ib_noa_flt());
   Serial.printf("  ibm_ft=%d;\n", ib_amp_flt());
   Serial.printf("  vb_ft=%d;\n", vb_flt());
-  Serial.printf("  tb_ft=%d;\n", tb_flt());
-  Serial.printf("  fltw=%d;  ", fltw_);
+  Serial.printf("  tb_ft=%d;\n  ", tb_flt());
   bitMapPrint(cp.buffer, fltw_, NUM_FLT);
   Serial.print(cp.buffer);
   Serial.printf(";\n");
-  Serial.printf("             CBA9876543210\n");
+  Serial.printf("  CBA98x65x3210\n");
+  Serial.printf("  fltw=%d;\n", fltw_);
   Serial.printf("  ib_dscn_fa=%d;\n", ib_dscn_fa());
   Serial.printf("  ibd_lo_fa=%d;\n", ib_dif_lo_fa());
   Serial.printf("  ibd_hi_fa=%d;\n", ib_dif_hi_fa());
@@ -228,12 +228,12 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("  ibn_fa=%d;\n", ib_noa_fa());
   Serial.printf("  ibm_fa=%d;\n", ib_amp_fa());
   Serial.printf("  vb_fa=%d;\n", vb_fa());
-  Serial.printf("  tb_fa=%d;\n", tb_fa());
-  Serial.printf("  falw=%d;  ", falw_);
+  Serial.printf("  tb_fa=%d;\n  ", tb_fa());
   bitMapPrint(cp.buffer, falw_, NUM_FA);
   Serial.print(cp.buffer);
   Serial.printf(";\n");
-  Serial.printf("             A9876543210\n");
+  Serial.printf("  A9876543210\n");
+  Serial.printf("  falw=%d\n;", falw_);
 }
 void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 {
@@ -264,12 +264,12 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("  ibn_fa=%d;\n", ib_noa_fa());
   Serial1.printf("  ibm_fa=%d;\n", ib_amp_fa());
   Serial1.printf("  vb_fa=%d;\n", vb_fa());
-  Serial1.printf("  tb_fa=%d;\n", tb_fa());
-  Serial1.printf("  falw=%d;  ", falw_);
+  Serial1.printf("  tb_fa=%d;\n  ", tb_fa());
   bitMapPrint(cp.buffer, falw_, NUM_FA);
   Serial1.print(cp.buffer);
   Serial1.printf(";\n");
-  Serial.printf("             A9876543210\n");
+  Serial1.printf("  A9876543210\n");
+  Serial1.printf("  falw=%d;\n", falw_);
 }
 
 // Calculate selection for choice
