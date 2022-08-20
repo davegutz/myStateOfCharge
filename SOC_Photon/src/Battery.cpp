@@ -341,9 +341,6 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     if ( rp.debug==34 || rp.debug==7 )
         Serial.printf("BatteryMonitor:dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, soc, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,  %d,\n",
             dt_, ib_, voc_stat_tab_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, soc_, converged_ekf());
-    if ( rp.debug==-34 )
-        Serial.printf("dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, conv,\n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,  %d\n",
-            dt_, ib_, voc_stat_tab_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, converged_ekf());
     if ( rp.debug==37 )
         Serial.printf("BatteryMonitor:ib,vb,voc_stat,voc(z_),  K_,y_,soc_ekf, y_ekf_f, conv,  %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,%7.4f,  %d,\n",
             ib_, vb_, voc_stat_, voc_,     K_, y_, soc_ekf_, y_filt_, converged_ekf());
@@ -417,10 +414,6 @@ void BatteryMonitor::init_soc_ekf(const double soc)
     soc_ekf_ = soc;
     init_ekf(soc_ekf_, 0.0);
     q_ekf_ = soc_ekf_ * q_capacity_;
-    if ( rp.debug==-34 )
-    {
-        Serial.printf("init_soc_ekf:  soc, soc_ekf_, x_ekf_ = %8.4f,%8.4f, %8.4f,\n", soc, soc_ekf_, x_ekf());
-    }
 }
 
 /* is_sat:  Calculate saturation status
@@ -685,9 +678,6 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boole
     if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
      dt,temp_c_, ib_, soc_, voc_, dv_dyn_, vb_);
     
-    if ( rp.debug==-78 ) Serial.printf("soc*10,voc,vsat,ib_in_,sat_ib_max_,ib,sat,\n%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,\n", 
-      soc_*10, voc_, vsat_, ib_in_, sat_ib_max_, ib_, model_saturated_);
-    
     if ( rp.debug==76 ) Serial.printf("BatteryModel::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
         soc_, temp_c_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);
 
@@ -808,9 +798,6 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, BatteryMo
     if ( rp.debug==97 )
         Serial.printf("BatteryModel::cc,  dt,voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
                     Sen->T, pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
-    if ( rp.debug==-97 )
-        Serial.printf("voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,        \n%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
-                    pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 
     if ( rp.debug==24 || rp.debug==26 ) // print_serial_sim
     {

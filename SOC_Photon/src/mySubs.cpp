@@ -300,7 +300,6 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\n\nv-2;Pf; for fails\n", dispTop.c_str(), dispBot.c_str());
 
   if ( rp.debug==5 ) debug_5();
-  if ( rp.debug==-5 ) debug_m5();  // Arduino plot
 
   frame += 1;
   if (frame>3) frame = 0;

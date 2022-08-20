@@ -591,20 +591,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 chit("Pm;", QUEUE);
                 chit("Ps;", QUEUE);
                 chit("Pr;", QUEUE);
-                chit("Pt;", QUEUE);
                 chit("PM;", QUEUE);
                 chit("PN;", QUEUE);
                 chit("Pf;", QUEUE);
-                break;
-
-              case ( 'c' ):  // Pc:  Print coulombs
-                Serial.printf("\nMon::"); Mon->Coulombs::pretty_print();
-                Serial.printf("\nSim::"); Sen->Sim->Coulombs::pretty_print();
-                if ( !cp.blynking )
-                {
-                  Serial1.printf("\nMon::"); Mon->Coulombs::pretty_print();
-                  Serial1.printf("\nSim::"); Sen->Sim->Coulombs::pretty_print();
-                }
                 break;
 
               case ( 'e' ):  // Pe:  Print EKF
@@ -668,11 +657,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("Sim::"); Sen->Sim->pretty_print_ss();
                 break;
 
-              case ( 't' ):  // Pt:  Print mon and sim
-                Serial.printf("\nMon::"); Mon->pretty_print_ss();
-                Serial.printf("\nSim::"); Sen->Sim->pretty_print_ss();
-                break;
-
               case ( 'x' ):  // Px:  Print shunt measure
                 Serial.printf("\nAmp: "); Serial.printf("Vshunt_int, Vshunt, cp.ibatt_tot_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
                   Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), cp.ibatt_tot_bias_amp, Sen->ShuntAmp->ishunt_cal());
@@ -698,26 +682,14 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
           case ( 'R' ):
             switch ( cp.input_string.charAt(1) )
             {
-              case ( 'b' ):  // Rb:  Reset battery states
+              case ( 'b' ):  // Rb:  Reset battery states (also hys)
                 Sen->Sim->init_battery(true, Sen);  // Reset sim battery state
                 Mon->init_battery(true, Sen);       // Reset mon battery state
                 break;
 
-              case ( 'e' ):  // Re:  equalize
-                Serial.printf("Equalizing counters\n");
-                Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
-                break;
-
               case ( 'f' ):  // Rf:  Reset fault Rf
-                Serial.printf("Resetting fault latches\n");
+                Serial.printf("Reset flt latches\n");
                 Sen->Flt->reset_all_faults();
-                break;
-
-              case ( 'h' ):  // Rh:  hys
-                Serial.printf("Resetting monitor hys\n");
-                Mon->init_hys(0.0);
-                Serial.printf("Resetting model hys\n");
-                Sen->Sim->init_hys(0.0);
                 break;
 
               case ( 'i' ):  // Ri:
@@ -968,7 +940,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
                   case ( 6 ):  // Xp6:  Program a pulse
                     chit("XS;Dm0;Dn0;v0;Xm7;Ca0.5;Pm;Dr100;Dp100;v26;", QUEUE);  // setup
-                    chit("Dn0.00001;Dm500;Pt;Pt;Pt;Pt;Pt;Pt;Pt;Dm-500;Pt;Pt;Pt;Pt;Pt;Pt;Pt;Dm0;Pt;Pt;Pt;Pt;Pt;Pt;Pt;", QUEUE);  // run
+                    chit("Dn0.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
                     chit("W10;Pm;v0;", QUEUE);  // finish
                     break;
 
@@ -1169,7 +1141,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("P<?>   Print values\n");
   Serial.printf("  Pa= "); Serial.printf("all\n");
-  Serial.printf("  Pc= "); Serial.printf("all coulombs\n");
   Serial.printf("  Pe= "); Serial.printf("ekf\n");
   Serial.printf("  Pf= "); Serial.printf("faults\n");
   Serial.printf("  Pm= "); Serial.printf("monitor\n");
@@ -1177,7 +1148,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  PN= "); Serial.printf("no amp tweak\n");
   Serial.printf("  Pr= "); Serial.printf("retained and command\n");
   Serial.printf("  Ps= "); Serial.printf("simulation\n");
-  Serial.printf("  Pt= "); Serial.printf("all state-space\n");
   Serial.printf("  Px= "); Serial.printf("current signal selection\n");
   Serial.printf("  Pv= "); Serial.printf("voltage signal details\n");
 
@@ -1185,9 +1155,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("R<?>   Reset\n");
   Serial.printf("  Rb= "); Serial.printf("reset batteries to current inputs\n");
-  Serial.printf("  Re= "); Serial.printf("equalize delta_q in Sim to Mon\n");
   Serial.printf("  Rf= "); Serial.printf("reset fault logic latches\n");
-  Serial.printf("  Rh= "); Serial.printf("reset all hys\n");
   Serial.printf("  Ri= "); Serial.printf("reset all delta_q_inf\n");
   Serial.printf("  Rr= "); Serial.printf("saturate battery monitor and equalize Sim & Mon\n");
   Serial.printf("  RR= "); Serial.printf("saturate, equalize, & nominalize all testing for DEPLOY\n");
@@ -1198,9 +1166,9 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("  : verbosity, -128 - +128. [2]");
   Serial.printf("    -<>: Negative - Arduino plot compatible\n");
   Serial.printf("    v-1: GP Arduino plot\n");
-  Serial.printf("  +/-v3: Powert\n");
+  Serial.printf("  +/-v3: Power\n");
   Serial.printf("     v4: GP\n");
-  Serial.printf("  +/-v5: OLED display\n");
+  Serial.printf("     v5: OLED display\n");
   Serial.printf("     v6: EKF solver iter during init\n");
   Serial.printf("     v7: EKF solver summary during init\n");
   Serial.printf("    v-7: Battery i/o Arduino plot\n");
@@ -1213,17 +1181,17 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("    v24: Sim\n");
   Serial.printf("    v25: Blynk write\n");
   Serial.printf("    v26: Signal selection\n");
-  Serial.printf(" +/-v34: EKF detailed\n");
+  Serial.printf("    v34: EKF detailed\n");
   Serial.printf("   v-35: EKF summary Arduino\n");
   Serial.printf("    v35: Randles balance\n");
   Serial.printf(" +/-v37: EKF short\n");
   Serial.printf("   v-41: Inj\n");
   Serial.printf("    v75: voc_low check model\n");
   Serial.printf("    v76: vb model\n");
-  Serial.printf(" +/-v78: Batt model saturation\n");
+  Serial.printf("    v78: Batt model saturation\n");
   Serial.printf("    v79: sat_ib model\n");
   Serial.printf(" +/-v96: CC saturation\n");
-  Serial.printf(" +/-v97: CC model saturation\n");
+  Serial.printf("    v97: CC model saturation\n");
 
   Serial.printf("w   turn on wifi = "); Serial.println(cp.enable_wifi);
 
@@ -1263,6 +1231,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  XW= "); Serial.printf("%6.2f s wait start inj\n", float(Sen->wait_inj)/1000.);
   Serial.printf("  XT= "); Serial.printf("%6.2f s tail end inj\n", float(Sen->tail_inj)/1000.);
   Serial.printf("z   toggle BLYNK = %d\n", cp.blynking );
-  Serial.printf(" urgency of commands:  -=ASAP, *=SOON , '',+=QUEUE\n"); 
+  Serial.printf(" urgency of cmds:  -=ASAP, *=SOON , '',+=QUEUE\n"); 
   Serial.printf("h   this\n");
 }
