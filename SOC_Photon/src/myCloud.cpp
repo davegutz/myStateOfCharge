@@ -71,12 +71,12 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->unit = unit;
   pubList->hm_string =hm_string;
   pubList->control_time = Sen->control_time;
-  pubList->Vbatt = Sen->Vbatt;
-  pubList->Tbatt = Sen->Tbatt;
-  pubList->Tbatt_filt = Sen->Tbatt_filt;
+  pubList->Vb = Sen->Vb;
+  pubList->Tb = Sen->Tb;
+  pubList->Tb_filt = Sen->Tb_filt;
   pubList->Vshunt = Sen->Vshunt;
-  pubList->Ibatt = Sen->Ibatt;
-  pubList->Wbatt = Sen->Wbatt;
+  pubList->Ib = Sen->Ib;
+  pubList->Wb = Sen->Wb;
   pubList->num_timeouts = num_timeouts;
   pubList->T = Sen->T;
   pubList->tcharge = Mon->tcharge();

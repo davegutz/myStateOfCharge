@@ -41,17 +41,17 @@ struct RetainedPars
   float t_last = RATED_TEMP;    // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
   double delta_q_model = 0.;    // Coulomb Counter state for model, C
   float t_last_model = RATED_TEMP;  // Battery temperature past value for rate limit memory, deg C
-  float ibatt_bias_amp = CURR_BIAS_AMP;     // Calibration of amplified shunt sensor, A
-  float ibatt_bias_noamp = CURR_BIAS_NOAMP; // Calibration of non-amplified shunt sensor, A
-  float ibatt_bias_all = CURR_BIAS_ALL;     // Bias on all shunt sensors, A
-  int8_t ibatt_select = 0;      // Force current sensor (-1=non-amp, 0=auto, 1=amp)
-  float vbatt_bias = VOLT_BIAS; // Calibrate Vbatt, V
+  float ib_bias_amp = CURR_BIAS_AMP;     // Calibration of amplified shunt sensor, A
+  float ib_bias_noamp = CURR_BIAS_NOAMP; // Calibration of non-amplified shunt sensor, A
+  float ib_bias_all = CURR_BIAS_ALL;     // Bias on all shunt sensors, A
+  int8_t ib_select = 0;      // Force current sensor (-1=non-amp, 0=auto, 1=amp)
+  float vb_bias = VOLT_BIAS; // Calibrate Vb, V
   uint8_t modeling = 0;         // Driving saturation calculation with model.  Bits specify which signals use model
   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
   float freq = 0.;              // Injected frequency, Hz (0-2)
   uint8_t type = 0;             // Injected waveform type.   0=sine, 1=square, 2=triangle
   float inj_bias = 0.;          // Constant bias, A
-  float tbatt_bias = TEMP_BIAS; // Bias on Tbatt sensor, deg C
+  float tb_bias = TEMP_BIAS; // Bias on Tb sensor, deg C
   float s_cap_model = 1.;       // Scalar on battery model size
   float cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
@@ -73,7 +73,7 @@ struct RetainedPars
   boolean is_corrupt()
   {
     return ( this->nP==0 || this->nS==0 || this->mon_mod>10 || isnan(this->amp) || this->freq>2. ||
-     abs(this->ibatt_bias_amp)>500. || abs(this->cutback_gain_scalar)>1000. || abs(this->ibatt_bias_noamp)>500. ||
+     abs(this->ib_bias_amp)>500. || abs(this->cutback_gain_scalar)>1000. || abs(this->ib_bias_noamp)>500. ||
      this->t_last_model<-10. || this->t_last_model>70. );
   }
 
@@ -85,17 +85,17 @@ struct RetainedPars
     this->t_last = RATED_TEMP;
     this->delta_q_model = 0.;
     this->t_last_model = RATED_TEMP;
-    this->ibatt_bias_amp = CURR_BIAS_AMP;
-    this->ibatt_bias_noamp = CURR_BIAS_NOAMP;
-    this->ibatt_bias_all = CURR_BIAS_ALL;
-    this->ibatt_select = false;
-    this->vbatt_bias = VOLT_BIAS;
+    this->ib_bias_amp = CURR_BIAS_AMP;
+    this->ib_bias_noamp = CURR_BIAS_NOAMP;
+    this->ib_bias_all = CURR_BIAS_ALL;
+    this->ib_select = false;
+    this->vb_bias = VOLT_BIAS;
     this->modeling = 0;
     this->amp = 0.;
     this->freq = 0.;
     this->type = 0;
     this->inj_bias = 0.;
-    this->tbatt_bias = TEMP_BIAS;
+    this->tb_bias = TEMP_BIAS;
     this->s_cap_model = 1.;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
@@ -133,17 +133,17 @@ struct RetainedPars
     Serial.printf("  t_last=%7.3f; deg C\n", this->t_last);
     Serial.printf("  delta_q_model=%10.1f;\n", this->delta_q_model);
     Serial.printf("  t_last_model=%7.3f; deg C\n", this->t_last_model);
-    Serial.printf("  ibatt_bias_amp= %7.3f; A\n", this->ibatt_bias_amp);
-    Serial.printf("  ibatt_bias_noamp=%7.3f; A\n", this->ibatt_bias_noamp);
-    Serial.printf("  ibatt_bias_all=%7.3f; A \n", this->ibatt_bias_all);
-    Serial.printf("  ibatt_select=%d; -1=noamp, 0=auto, 1=amp\n", this->ibatt_select);
-    Serial.printf("  vbatt_bias=%7.3f; V\n", this->vbatt_bias);
+    Serial.printf("  ib_bias_amp= %7.3f; A\n", this->ib_bias_amp);
+    Serial.printf("  ib_bias_noamp=%7.3f; A\n", this->ib_bias_noamp);
+    Serial.printf("  ib_bias_all=%7.3f; A \n", this->ib_bias_all);
+    Serial.printf("  ib_select=%d; -1=noamp, 0=auto, 1=amp\n", this->ib_select);
+    Serial.printf("  vb_bias=%7.3f; V\n", this->vb_bias);
     Serial.printf("  modeling=%d;\n", this->modeling);
     Serial.printf("  amp=%7.3f; A pk\n", this->amp);
     Serial.printf("  freq=%7.3f; r/s\n", this->freq);
     Serial.printf("  type=%d; 0=sin, 1=sq, 2=tri\n", this->type);
     Serial.printf("  inj_bias=%7.3f; A\n", this->inj_bias);
-    Serial.printf("  tbatt_bias=%7.3f; deg C\n", this->tbatt_bias);
+    Serial.printf("  tb_bias=%7.3f; deg C\n", this->tb_bias);
     Serial.printf("  s_cap_model=%7.3f;\n", this->s_cap_model);
     Serial.printf("  cutback_gain_scalar=%7.3f;\n", this->cutback_gain_scalar);
     Serial.printf("  isum=%d;\n", this->isum);

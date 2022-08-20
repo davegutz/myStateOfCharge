@@ -236,7 +236,7 @@ void Coulombs::pretty_print(void)
   Serial.printf("  sat=%d; T=saturated\n", sat_);
   Serial.printf("  t_rated=%5.1f; Rated, dg C\n", t_rated_);
   Serial.printf("  t_last=%5.1f; past, dg C\n", *rp_t_last_);
-  Serial.printf("  t_rlim=%7.3f; Tbatt RL, deg C / s\n", t_rlim_);
+  Serial.printf("  t_rlim=%7.3f; Tb RL, deg C / s\n", t_rlim_);
   Serial.printf("  resetting=%d; Coord user testing of CC, T=ext reset\n", resetting_);
   Serial.printf("  soc_min=%8.4f; soc BMS shuts off current\n", soc_min_);
   Serial.printf("  mod=%s; Chem e.g. Battleborn or LION\n", chem_.decode(mod_code()).c_str());
@@ -248,7 +248,7 @@ void Coulombs::pretty_print(void)
 
 // functions
 
-// Scale size of battery and adjust as needed to preserve delta_q.  Tbatt unchanged.
+// Scale size of battery and adjust as needed to preserve delta_q.  Tb unchanged.
 // Goal is to scale battery and see no change in delta_q on screen of 
 // test comparisons.   The rationale for this is that the battery is frequently saturated which
 // resets all the model parameters.   This happens daily.   Then both the model and the battery

@@ -121,7 +121,7 @@ protected:
   double soc_;        // Fraction of saturation charge (q_capacity_) available (0-1)
   boolean sat_;       // Indication that battery is saturated, T=saturated
   double t_rated_;    // Rated temperature, deg C
-  double t_rlim_;     // Tbatt rate limit, deg C / s
+  double t_rlim_;     // Tb rate limit, deg C / s
   boolean resetting_ = false;  // Sticky flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
   double soc_min_;    // As battery cools, the voltage drops and there appears a minimum soc it can deliver
   double q_min_;      // Floor on charge available to use, C

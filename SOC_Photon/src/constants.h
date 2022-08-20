@@ -57,10 +57,10 @@
 #define MAX_TEMP_READS        10        // Number of consequetive temp queries allowed (10)
 #define TEMP_RANGE_CHECK      -5.       // Minimum expected temp reading, C (-5.)
 #define TEMP_RANGE_CHECK_MAX  70.       // Maximum allowed temp reading, C (70.)
-#define VBATT_SENSE_R_LO      4700      // Vbatt low sense resistor, ohm (4700)
-#define VBATT_SENSE_R_HI      20000     // Vbatt high sense resistor, ohm (20000)
-#define VBATT_S               1.017     // Vbatt sense scalar (1.017)
-#define VBATT_A               0.0       // Vbatt sense adder, V (0)
+#define VBATT_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
+#define VBATT_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
+#define VBATT_S               1.017     // Vb sense scalar (1.017)
+#define VBATT_A               0.0       // Vb sense adder, V (0)
 #define PHOTON_ADC_COUNT      4096      // Photon ADC range, counts (4096)
 #define PHOTON_ADC_VOLT       3.3       // Photon ADC range, V (3.3)
 #define SHUNT_NOAMP_V2A_S     -1189.3   // Shunt V2A scalar, A/V (1333 is 100A/0.075V)  (-1189.3)
@@ -75,8 +75,8 @@
 #define F_W_T                 0.05      // Temperature filter wn, r/s (0.05)   
 #define F_Z_T                 0.80      // Temperature filter zeta (0.80)
 #define NSUM                  122       // Number of saved summaries.   If too large, will get compile error BACKUPSRAM
-#define HDB_TBATT             0.06      // Half deadband to filter Tbatt, F (0.06)
-#define HDB_VBATT             0.05      // Half deadband to filter Vbatt, V (0.05)
+#define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)
+#define HDB_VBATT             0.05      // Half deadband to filter Vb, V (0.05)
 #define T_SAT                 10        // Saturation time, sec (10 for no sat Ib lo fault of -100 A)
 const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define TEMP_PARASITIC        true      // DS18 sensor power. true means leave it on all the time (true)
@@ -94,7 +94,7 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define MAX_ERR_T             10.       // Maximum update time allowed to avoid instability, s (10.)
 #define IBATT_HARD_SET        1.        // Signal selection volt range fail persistence, s (1.)
 #define IBATT_HARD_RESET      1.        // Signal selection volt range fail reset persistence, s (1.)
-#define VBATT_MAX             17.       // Signal selection hard fault threshold, V (17. < vbatt_conv_gain*4095)
+#define VBATT_MAX             17.       // Signal selection hard fault threshold, V (17. < vb_conv_gain*4095)
 #define VBATT_MIN             9.        // Signal selection hard fault threshold, V (0.  < 9. < 10 bms shutoff)
 #define VBATT_HARD_SET        1.        // Signal selection volt range fail persistence, s (1.)
 #define VBATT_HARD_RESET      1.        // Signal selection volt range fail reset persistence, s (1.)
@@ -131,7 +131,7 @@ const float shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;
 const float shunt_amp_v2a_s = shunt_noamp_v2a_s * SHUNT_AMP_R1/SHUNT_AMP_R2; // Shunt amp V2A scalar
 
 // Battery voltage measurement gain
-const float vbatt_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
+const float vb_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
                               double(VBATT_SENSE_R_LO) / double(PHOTON_ADC_COUNT) * double(VBATT_S);
 
 #endif // CONSTANTS_H_

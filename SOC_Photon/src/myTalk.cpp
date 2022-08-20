@@ -214,8 +214,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 FP_in = cp.input_string.substring(2).toFloat();
                 if ( FP_in<1.1 )  // Apply crude limit to prevent user error
                 {
-                  Mon->apply_soc(FP_in, Sen->Tbatt_filt);
-                  Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tbatt_filt);
+                  Mon->apply_soc(FP_in, Sen->Tb_filt);
+                  Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tb_filt);
                   Serial.printf("soc=%7.3f, modeling = %d, delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f, soc_ekf=%8.4f, delta_q_ekf=%7.3f,\n",
                       Mon->soc(), rp.modeling, Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf());
                   cp.cmd_reset();
@@ -229,7 +229,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 FP_in = cp.input_string.substring(2).toFloat();
                 if ( FP_in<1.1 )   // Apply crude limit to prevent user error
                 {
-                  Sen->Sim->apply_soc(FP_in, Sen->Tbatt_filt);
+                  Sen->Sim->apply_soc(FP_in, Sen->Tb_filt);
                   Serial.printf("soc=%8.4f,   delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f,\n",
                       Mon->soc(), Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q());
                   cp.cmd_reset();
@@ -247,27 +247,27 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( cp.input_string.charAt(1) )
             {
               case ( 'a' ):  // Da<>:  Amp sensor bias
-                Serial.printf("rp.ibatt_bias_amp %7.3f to ", rp.ibatt_bias_amp);
-                rp.ibatt_bias_amp = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.ibatt_bias_amp);
+                Serial.printf("rp.ib_bias_amp %7.3f to ", rp.ib_bias_amp);
+                rp.ib_bias_amp = cp.input_string.substring(2).toFloat();
+                Serial.printf("%7.3f\n", rp.ib_bias_amp);
                 break;
 
               case ( 'b' ):  // Db<>:  No Amp sensor bias
-                Serial.printf("rp.ibatt_bias_noamp %7.3f to ", rp.ibatt_bias_noamp);
-                rp.ibatt_bias_noamp = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.ibatt_bias_noamp);
+                Serial.printf("rp.ib_bias_noamp %7.3f to ", rp.ib_bias_noamp);
+                rp.ib_bias_noamp = cp.input_string.substring(2).toFloat();
+                Serial.printf("%7.3f\n", rp.ib_bias_noamp);
                 break;
 
-              case ( 'c' ):  // Dc<>:  Vbatt bias
-                Serial.printf("rp.vbatt_bias %7.3f to ", rp.vbatt_bias);
-                rp.vbatt_bias = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.vbatt_bias);
+              case ( 'c' ):  // Dc<>:  Vb bias
+                Serial.printf("rp.vb_bias %7.3f to ", rp.vb_bias);
+                rp.vb_bias = cp.input_string.substring(2).toFloat();
+                Serial.printf("%7.3f\n", rp.vb_bias);
                 break;
 
               case ( 'i' ):  // Di<>:  Bias all current sensors (same way as Da and Db)
-                Serial.printf("rp.ibatt_bias_all %7.3f to ", rp.ibatt_bias_all);
-                rp.ibatt_bias_all = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.ibatt_bias_all);
+                Serial.printf("rp.ib_bias_all %7.3f to ", rp.ib_bias_all);
+                rp.ib_bias_all = cp.input_string.substring(2).toFloat();
+                Serial.printf("%7.3f\n", rp.ib_bias_all);
                 break;
 
               case ( 'm' ):  // Dm<>:  Amp signal adder for faults
@@ -299,9 +299,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 't' ):  // Dt<>:  Temp bias change
-                Serial.printf("rp.tbatt_bias %7.3f to ", rp.tbatt_bias);
-                rp.tbatt_bias = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.tbatt_bias);
+                Serial.printf("rp.tb_bias %7.3f to ", rp.tb_bias);
+                rp.tb_bias = cp.input_string.substring(2).toFloat();
+                Serial.printf("%7.3f\n", rp.tb_bias);
                 rp.debug = 0;
                 Serial.printf("*** reset **\n");
                 break;
@@ -317,9 +317,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'v' ):  // Dv<>:  voltage signal adder for faults
-                Serial.printf("Sen->vbatt_add %7.3f to ", Sen->vbatt_add());
-                Sen->vbatt_add(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->vbatt_add());
+                Serial.printf("Sen->vb_add %7.3f to ", Sen->vb_add());
+                Sen->vb_add(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", Sen->vb_add());
                 break;
 
               case ( 'w' ):  // Dw<>:
@@ -331,22 +331,22 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%7.3f\n", Sen->Sim->Dv());
                 break;
 
-              case ( 'T' ):  // DT<>:  Tbatt noise
-                Serial.printf("Sen.Tbatt_noise_amp_ %7.3f to ", Sen->Tbatt_noise_amp());
-                Sen->Tbatt_noise_amp(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->Tbatt_noise_amp());
+              case ( 'T' ):  // DT<>:  Tb noise
+                Serial.printf("Sen.Tb_noise_amp_ %7.3f to ", Sen->Tb_noise_amp());
+                Sen->Tb_noise_amp(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", Sen->Tb_noise_amp());
                 break;
 
-              case ( 'V' ):  // DV<>:  Vbatt noise
-                Serial.printf("Sen.Vbatt_noise_amp_ %7.3f to ", Sen->Vbatt_noise_amp());
-                Sen->Vbatt_noise_amp(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->Vbatt_noise_amp());
+              case ( 'V' ):  // DV<>:  Vb noise
+                Serial.printf("Sen.Vb_noise_amp_ %7.3f to ", Sen->Vb_noise_amp());
+                Sen->Vb_noise_amp(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", Sen->Vb_noise_amp());
                 break;
 
-              case ( 'I' ):  // DI<>:  Ibatt noise
-                Serial.printf("Sen.Ibatt_noise_amp_ %7.3f to ", Sen->Ibatt_noise_amp());
-                Sen->Ibatt_noise_amp(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->Ibatt_noise_amp());
+              case ( 'I' ):  // DI<>:  Ib noise
+                Serial.printf("Sen.Ib_noise_amp_ %7.3f to ", Sen->Ib_noise_amp());
+                Sen->Ib_noise_amp(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", Sen->Ib_noise_amp());
                 break;
 
               default:
@@ -442,7 +442,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             }
             break;
 
-          case ( 'H' ):
+          case ( 'H' ):  // History
             switch ( cp.input_string.charAt(1) )
             {
               case ( 'd' ):  // Hd:
@@ -658,16 +658,16 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'x' ):  // Px:  Print shunt measure
-                Serial.printf("\nAmp: "); Serial.printf("Vshunt_int, Vshunt, cp.ibatt_tot_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
-                  Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), cp.ibatt_tot_bias_amp, Sen->ShuntAmp->ishunt_cal());
-                Serial.printf("No Amp:"); Serial.printf("Vshunt_int, Vshunt, cp.ibatt_tot_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
-                  Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), cp.ibatt_tot_bias_noamp, Sen->ShuntNoAmp->ishunt_cal());
-                Serial.printf("Selected:  NoAmp,Ibatt=,  %d, %7.3f\n", rp.ibatt_select, Sen->Ibatt);
+                Serial.printf("\nAmp: "); Serial.printf("Vshunt_int, Vshunt, cp.ib_tot_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
+                  Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), cp.ib_tot_bias_amp, Sen->ShuntAmp->ishunt_cal());
+                Serial.printf("No Amp:"); Serial.printf("Vshunt_int, Vshunt, cp.ib_tot_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
+                  Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), cp.ib_tot_bias_noamp, Sen->ShuntNoAmp->ishunt_cal());
+                Serial.printf("Selected:  NoAmp,Ib=,  %d, %7.3f\n", rp.ib_select, Sen->Ib);
                 break;
 
-              case ( 'v' ):  // Pv:  Print Vbatt measure
-                Serial.printf("\nVolt: ");   Serial.printf("rp.vbatt_bias, Vbatt_model, rp.modeling, Vbatt=, %7.3f, %7.3f, %d, %7.3f,\n", 
-                  rp.vbatt_bias, Sen->Vbatt_model, rp.modeling, Sen->Vbatt);
+              case ( 'v' ):  // Pv:  Print Vb measure
+                Serial.printf("\nVolt: ");   Serial.printf("rp.vb_bias, Vb_model, rp.modeling, Vb=, %7.3f, %7.3f, %d, %7.3f,\n", 
+                  rp.vb_bias, Sen->Vb_model, rp.modeling, Sen->Vb);
                 break;
 
               default:
@@ -709,15 +709,15 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'r' ):  // Rr:  small reset counters
                 Serial.printf("Small reset all counters\n");
-                Sen->Sim->apply_soc(1.0, Sen->Tbatt_filt);
-                Mon->apply_soc(1.0, Sen->Tbatt_filt);
+                Sen->Sim->apply_soc(1.0, Sen->Tb_filt);
+                Mon->apply_soc(1.0, Sen->Tb_filt);
                 cp.cmd_reset();
                 break;
 
               case ( 'R' ):  // RR:  large reset
                 Serial.printf("Large reset\n");
-                Sen->Sim->apply_soc(1.0, Sen->Tbatt_filt);
-                Mon->apply_soc(1.0, Sen->Tbatt_filt);
+                Sen->Sim->apply_soc(1.0, Sen->Tb_filt);
+                Mon->apply_soc(1.0, Sen->Tb_filt);
                 cp.cmd_reset();
                 Sen->ReadSensors->delay(READ_DELAY);
                 rp.large_reset();
@@ -743,13 +743,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
           case ( 's' ):  // s<>:  select amp or noamp
             if ( cp.input_string.substring(1).toInt()>0 )
             {
-              rp.ibatt_select = 1;
+              rp.ib_select = 1;
             }
             else if ( cp.input_string.substring(1).toInt()<0 )
-              rp.ibatt_select = -1;
+              rp.ib_select = -1;
             else
-              rp.ibatt_select = 0;
-            Serial.printf("Sig ( -1=noamp, 0=auto, 1=amp,) set %d\n", rp.ibatt_select);
+              rp.ib_select = 0;
+            Serial.printf("Sig ( -1=noamp, 0=auto, 1=amp,) set %d\n", rp.ib_select);
             break;
 
           case ( 'v' ):  // v<>:  verbose level
@@ -946,76 +946,76 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
                   case ( 9 ): case( 10 ): case ( 11 ): case( 12 ):  // Xp9: Xp10: Xp11: Xp12:  Program regression
                               // Regression tests 9=tweak, 10=tweak w data, 11=cycle, 12 1/2 cycle
-                    chit("Xp0;", QUEUE);     // Reset nominal
-                    chit("v0;", QUEUE);      // Turn off debug temporarily so not snowed by data dumps
-                    chit("Bm0;Bs0;", QUEUE); // Set Battleborn configuration
-                    chit("Xm15;", QUEUE);    // Modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
-                    chit("Xts;", QUEUE);     // Start up a sine wave
-                    chit("Ca1;", QUEUE);     // After restarting with sine running, soc will not be at 1.  Reset them all to 1
-                    chit("Ri;", QUEUE);      // Reset the delta_q's
-                    chit("Mw0;Nw0;", QUEUE); // Allow tweak bias to work immediately instead of waiting several hours
-                    chit("MC0.004;", QUEUE); // Give tweak bias logic a large adjustment range to quickly converge
-                    chit("Mx0.04;", QUEUE);  // Give tweak bias logic a large adjustment range to quickly converge
-                    chit("NC0.004;", QUEUE); // Give tweak bias logic a large adjustment range to quickly converge
-                    chit("Nx0.04;", QUEUE);  // Give tweak bias logic a large adjustment range to quickly converge
-                    chit("Mk1;Nk1;", QUEUE); // Reset the tweak biases to 1 for new count
-                    chit("Dn1;", QUEUE);   // Disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
-                    chit("Dp100;", QUEUE); // Fast data collection
-                    if ( INT_in == 9 )// Xp9:  silent tweak test
+                    chit("Xp0;", QUEUE);      // Reset nominal
+                    chit("v0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
+                    chit("Bm0;Bs0;", QUEUE);  // Set Battleborn configuration
+                    chit("Xm15;", QUEUE);     // Modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
+                    chit("Xts;", QUEUE);      // Start up a sine wave
+                    chit("Ca1;", QUEUE);      // After restarting with sine running, soc will not be at 1.  Reset them all to 1
+                    chit("Ri;", QUEUE);       // Reset the delta_q's
+                    chit("Mw0;Nw0;", QUEUE);  // Allow tweak bias to work immediately instead of waiting several hours
+                    chit("MC0.004;", QUEUE);  // Give tweak bias logic a large adjustment range to quickly converge
+                    chit("Mx0.04;", QUEUE);   // Give tweak bias logic a large adjustment range to quickly converge
+                    chit("NC0.004;", QUEUE);  // Give tweak bias logic a large adjustment range to quickly converge
+                    chit("Nx0.04;", QUEUE);   // Give tweak bias logic a large adjustment range to quickly converge
+                    chit("Mk1;Nk1;", QUEUE);  // Reset the tweak biases to 1 for new count
+                    chit("Dn1;", QUEUE);      // Disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
+                    chit("Dp100;", QUEUE);    // Fast data collection
+                    if ( INT_in == 9 )  // Xp9:  silent tweak test
                     {
-                      chit("Xf0.02;", QUEUE);  // Frequency 0.02 Hz
-                      chit("XW5;", QUEUE);     // Wait time before starting to cycle
-                      chit("XT5;", QUEUE);     // Wait time after cycle to print
-                      chit("Xa-2000;", QUEUE); // Amplitude -2000 A
-                      chit("XC20;", QUEUE);    // Number of injection cycles
-                      chit("v0;", QUEUE);      // Silent
+                      chit("Xf0.02;", QUEUE); // Frequency 0.02 Hz
+                      chit("XW5;", QUEUE);    // Wait time before starting to cycle
+                      chit("XT5;", QUEUE);    // Wait time after cycle to print
+                      chit("Xa-2000;", QUEUE);// Amplitude -2000 A
+                      chit("XC20;", QUEUE);   // Number of injection cycles
+                      chit("v0;", QUEUE);     // Silent
                     }
                     else if ( INT_in == 10 )  // Xp10:  rapid tweak
                     {
-                      chit("Xf0.02;", QUEUE);  // Frequency 0.02 Hz
-                      chit("Xa-2000;", QUEUE); // Amplitude -2000 A
-                      chit("XW5;", QUEUE);     // Wait time before starting to cycle
-                      chit("XT5;", QUEUE);     // Wait time after cycle to print
-                      chit("XC3;", QUEUE);     // Number of injection cycles
-                      chit("v24;", QUEUE);     // Data collection
+                      chit("Xf0.02;", QUEUE); // Frequency 0.02 Hz
+                      chit("Xa-2000;", QUEUE);// Amplitude -2000 A
+                      chit("XW5;", QUEUE);    // Wait time before starting to cycle
+                      chit("XT5;", QUEUE);    // Wait time after cycle to print
+                      chit("XC3;", QUEUE);    // Number of injection cycles
+                      chit("v26;", QUEUE);    // Data collection
                     }
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
                     {
-                      chit("Xf0.002;", QUEUE); // Frequency 0.002 Hz
-                      chit("Xa-60;", QUEUE);   // Amplitude -60 A
-                      chit("XW60;", QUEUE);    // Wait time before starting to cycle
-                      chit("XT600;", QUEUE);   // Wait time after cycle to print
-                      chit("XC1;", QUEUE);     // Number of injection cycles
-                      chit("v24;", QUEUE);     // Data collection
+                      chit("Xf0.002;", QUEUE);// Frequency 0.002 Hz
+                      chit("Xa-60;", QUEUE);  // Amplitude -60 A
+                      chit("XW60;", QUEUE);   // Wait time before starting to cycle
+                      chit("XT600;", QUEUE);  // Wait time after cycle to print
+                      chit("XC1;", QUEUE);    // Number of injection cycles
+                      chit("v26;", QUEUE);    // Data collection
                     }
                     else if ( INT_in == 12 )  // Xp12:  slow half tweak
                     {
                       chit("Xf0.0002;", QUEUE); // Frequency 0.002 Hz
-                      chit("Xa-6;", QUEUE);     // Amplitude -60 A
-                      chit("XW60;", QUEUE);     // Wait time before starting to cycle
-                      chit("XT2400;", QUEUE);   // Wait time after cycle to print
-                      chit("XC0.5;", QUEUE);    // Number of injection cycles
-                      chit("v24;", QUEUE);      // Data collection
+                      chit("Xa-6;", QUEUE);   // Amplitude -60 A
+                      chit("XW60;", QUEUE);   // Wait time before starting to cycle
+                      chit("XT2400;", QUEUE); // Wait time after cycle to print
+                      chit("XC0.5;", QUEUE);  // Number of injection cycles
+                      chit("v26;", QUEUE);    // Data collection
                     }
-                    chit("Rb;", QUEUE);    // Reset battery states
-                    chit("Pa;", QUEUE);    // Print all for record
-                    chit("XR;", QUEUE);    // Run cycle
+                    chit("Rb;", QUEUE);     // Reset battery states
+                    chit("Pa;", QUEUE);     // Print all for record
+                    chit("XR;", QUEUE);     // Run cycle
                     break;
 
                   case( 20 ): case ( 21 ):  // Xp20:  Xp21:  20=tweak-like data, 21= 2 sec data cycle
-                    chit("v0;", QUEUE);    // Turn off debug temporarily so not snowed by data dumps
-                    chit("Pa;", QUEUE);    // Print all for record
+                    chit("v0;", QUEUE);     // Turn off debug temporarily so not snowed by data dumps
+                    chit("Pa;", QUEUE);     // Print all for record
                     if ( INT_in == 20 )
                     {
                       chit("Dp100;", QUEUE);  // Tweak-like data collection
-                      chit("v24;", QUEUE);    // Tweak-like data collection
+                      chit("v26;", QUEUE);    // Tweak-like data collection
                     }
                     else if ( INT_in == 21 )
                     {
                       chit("Dp2000;", QUEUE); // Fast data collection
-                      chit("v4;", QUEUE);      // Slow data collection
+                      chit("v6;", QUEUE);     // Slow data collection
                     }
-                    chit("Rb;", QUEUE);    // Reset battery states
+                    chit("Rb;", QUEUE);       // Reset battery states
                     break;
 
                   default:
@@ -1095,21 +1095,21 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Cm=  set soc model (& ekf if modeling)- '(0-1.1)'\n"); 
 
   Serial.printf("D/S<?> Adj e.g.:\n");
-  Serial.printf("  Da= "); Serial.printf("%7.3f", rp.ibatt_bias_amp); Serial.printf("  : delta amp sense, A [%7.3f]\n", CURR_BIAS_AMP); 
-  Serial.printf("  Db= "); Serial.printf("%7.3f", rp.ibatt_bias_noamp); Serial.printf("  : delta noa sense, A [%7.3f]\n", CURR_BIAS_NOAMP); 
-  Serial.printf("  Di= "); Serial.printf("%7.3f", rp.ibatt_bias_all); Serial.printf("  : delta all sense, A [%7.3f]\n", CURR_BIAS_ALL); 
-  Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vbatt_bias); Serial.printf("  : delta sense, V [%7.3f]\n", VOLT_BIAS); 
+  Serial.printf("  Da= "); Serial.printf("%7.3f", rp.ib_bias_amp); Serial.printf("  : delta amp sense, A [%7.3f]\n", CURR_BIAS_AMP); 
+  Serial.printf("  Db= "); Serial.printf("%7.3f", rp.ib_bias_noamp); Serial.printf("  : delta noa sense, A [%7.3f]\n", CURR_BIAS_NOAMP); 
+  Serial.printf("  Di= "); Serial.printf("%7.3f", rp.ib_bias_all); Serial.printf("  : delta all sense, A [%7.3f]\n", CURR_BIAS_ALL); 
+  Serial.printf("  Dc= "); Serial.printf("%7.3f", rp.vb_bias); Serial.printf("  : delta sense, V [%7.3f]\n", VOLT_BIAS); 
   Serial.printf("  Du= "); Serial.print(Sen->Sim->coul_eff()); Serial.println("  : coul eff"); 
   Serial.printf("  Dm= "); Serial.printf("%7.3f", Sen->ShuntAmp->add()); Serial.printf("  : delta amp, A [0]\n"); 
   Serial.printf("  Dn= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->add()); Serial.printf("  : delta noamp, A [0]\n"); 
   Serial.printf("  Dp= "); Serial.print(Sen->PublishSerial->delay()); Serial.println("  : publish frame, ms [400]"); 
   Serial.printf("  Dr= "); Serial.print(Sen->ReadSensors->delay()); Serial.println("  : minor frame, ms [100]"); 
-  Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.tbatt_bias); Serial.printf("  : delta sense, deg C [%7.3f]\n", TEMP_BIAS); 
-  Serial.printf("  Dv= "); Serial.print(Sen->vbatt_add()); Serial.println("  : voltage fault inj, V [0]"); 
+  Serial.printf("  Dt= "); Serial.printf("%7.3f", rp.tb_bias); Serial.printf("  : delta sense, deg C [%7.3f]\n", TEMP_BIAS); 
+  Serial.printf("  Dv= "); Serial.print(Sen->vb_add()); Serial.println("  : voltage fault inj, V [0]"); 
   Serial.printf("  Dw= "); Serial.print(Sen->Sim->Dv()); Serial.println("  : Table adjust, V [0.01]"); 
-  Serial.printf("  DT= "); Serial.printf("%7.3f", Sen->Tbatt_noise_amp()); Serial.printf("  : Tbatt noise for model, deg C pk-pk [%7.3f]\n", TEMP_BIAS); 
-  Serial.printf("  DV= "); Serial.printf("%7.3f", Sen->Vbatt_noise_amp()); Serial.printf("  : Vbatt noise for model, V pk-pk [%7.3f]\n", TEMP_BIAS); 
-  Serial.printf("  DI= "); Serial.printf("%7.3f", Sen->Ibatt_noise_amp()); Serial.printf(" : Ibatt noise for model, A pk-pk [%7.3f]\n", TEMP_BIAS); 
+  Serial.printf("  DT= "); Serial.printf("%7.3f", Sen->Tb_noise_amp()); Serial.printf("  : Tb noise for model, deg C pk-pk [%7.3f]\n", TEMP_BIAS); 
+  Serial.printf("  DV= "); Serial.printf("%7.3f", Sen->Vb_noise_amp()); Serial.printf("  : Vb noise for model, V pk-pk [%7.3f]\n", TEMP_BIAS); 
+  Serial.printf("  DI= "); Serial.printf("%7.3f", Sen->Ib_noise_amp()); Serial.printf(" : Ib noise for model, A pk-pk [%7.3f]\n", TEMP_BIAS); 
   Serial.printf("  Sc= "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println("  : Scalar model size"); 
   Serial.printf("  Sd= "); Serial.printf("%7.3f", Sen->Flt->ibdt_sclr()); Serial.printf(" : scalar ib_diff thresh [1]\n"); 
   Serial.printf("  Sf= "); Serial.printf("%7.3f", Sen->Flt->ccd_sclr()); Serial.printf(" : scalar cc_diff thresh [1]\n"); 
@@ -1161,7 +1161,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  RR= "); Serial.printf("saturate, equalize, & nominalize all testing for DEPLOY\n");
   Serial.printf("  Rs= "); Serial.printf("small reset.  Reset flags to reinitialize filters\n");
 
-  Serial.printf("s   curr signal select (-1=noamp, 0=auto, 1=amp) = "); Serial.println(rp.ibatt_select);
+  Serial.printf("s   curr signal select (-1=noamp, 0=auto, 1=amp) = "); Serial.println(rp.ib_select);
 
   Serial.printf("v=  "); Serial.print(rp.debug); Serial.println("  : verbosity, -128 - +128. [2]");
   Serial.printf("    -<>: Negative - Arduino plot compatible\n");
@@ -1175,12 +1175,11 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("     v8: Randles state space init\n");
   Serial.printf("   v-11: Summary Arduino\n");
   Serial.printf(" +/-v12: EKF\n");
-  Serial.printf(" +/-v14: vshunt and Ibatt raw\n");
+  Serial.printf(" +/-v14: vshunt and Ib raw\n");
   Serial.printf("    v15: vb raw\n");
-  Serial.printf("    v16: Tbatt\n");
-  Serial.printf("    v24: Sim\n");
+  Serial.printf("    v16: Tb\n");
   Serial.printf("    v25: Blynk write\n");
-  Serial.printf("    v26: Signal selection\n");
+  Serial.printf("    v26: Sim & Signal selection\n");
   Serial.printf("    v34: EKF detailed\n");
   Serial.printf("   v-35: EKF summary Arduino\n");
   Serial.printf("    v35: Randles balance\n");
@@ -1209,7 +1208,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println("  : Inj freq Hz (0-2) [0]");
   Serial.printf("  Xt= "); Serial.printf("%d", rp.type); Serial.println("  : Inj type.  'c', 's', 'q', 't' (cos, sine, square, tri)");
   Serial.printf("  Xo= "); Serial.printf("%7.3f", rp.inj_bias); Serial.println("  : Inj inj_bias A (-18.3-18.3) [0]");
-  Serial.printf("  Di= "); Serial.printf("%7.3f", rp.ibatt_bias_all); Serial.println("  : Inj  A (unlimited) [0]");
+  Serial.printf("  Di= "); Serial.printf("%7.3f", rp.ib_bias_all); Serial.println("  : Inj  A (unlimited) [0]");
   Serial.printf("  Xp= <?>, programmed inj settings...\n"); 
   Serial.printf("      Xp-1:  Off, modeling false\n");
   Serial.printf("      Xp0:  steady-state modeling\n");

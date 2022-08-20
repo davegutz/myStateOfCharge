@@ -298,7 +298,7 @@ void loop()
   summarizing = summarizing || (rp.debug==-11 && publishB);
 
   // Load temperature
-  // Outputs:   Sen->Tbatt,  Sen->Tbatt_filt
+  // Outputs:   Sen->Tb,  Sen->Tb_filt
   if ( read_temp )
   {
     Sen->T_temp =  ReadTemp->updateTime();
@@ -314,11 +314,11 @@ void loop()
 
     // Read sensors, model signals, select between them, synthesize injection signals on current
     // Inputs:  rp.config, rp.sim_mod
-    // Outputs: Sen->Ibatt, Sen->Vbatt, Sen->Tbatt_filt, rp.inj_bias
+    // Outputs: Sen->Ib, Sen->Vb, Sen->Tb_filt, rp.inj_bias
     sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen);
 
     // Calculate Ah remaining
-    // Inputs:  rp.mon_mod, Sen->Ibatt, Sen->Vbatt, Sen->Tbatt_filt
+    // Inputs:  rp.mon_mod, Sen->Ib, Sen->Vb, Sen->Tb_filt
     // States:  Mon.soc
     // Outputs: tcharge_wt, tcharge_ekf
     monitor(reset, reset_temp, now, Is_sat_delay, Mon, Sen);
@@ -327,10 +327,10 @@ void loop()
     tweak_on_new_desat(Sen, now);
 
     // Re-init Coulomb Counter to EKF if it is different than EKF or if never saturated
-    Mon->regauge(Sen->Tbatt_filt);
+    Mon->regauge(Sen->Tb_filt);
 
     // Empty battery
-    if ( rp.modeling && reset && Sen->Sim->q()<=0. ) Sen->Ibatt = 0.;
+    if ( rp.modeling && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
 
     // Debug for read
     // TODO:  debug_main() into debug.cpp.  Move create_print_string, tweak_print, print_serial_header and print_serial_sim_header to debug.cpp 
@@ -346,7 +346,7 @@ void loop()
         if ( reset || (last_read_debug != rp.debug) )
         {
           print_serial_header();
-          if ( rp.debug==24 ) print_serial_sim_header();
+          if ( rp.debug==24 || rp.debug==26 ) print_serial_sim_header();
           if ( rp.debug==26 ) print_signal_sel_header();
         }
         tweak_print(Sen, Mon);
@@ -427,7 +427,7 @@ void loop()
   if ( !boot_wait && (summarizing || cp.write_summary) )
   {
     if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
-    mySum[rp.isum].assign(time_now, Sen->Tbatt_filt, Sen->Vbatt, Sen->Ibatt,
+    mySum[rp.isum].assign(time_now, Sen->Tb_filt, Sen->Vb, Sen->Ib,
                           Mon->soc_ekf(), Mon->soc(), Mon->Voc(), Mon->Voc(),
                           Sen->ShuntAmp->tweak_sclr(), Sen->ShuntNoAmp->tweak_sclr());
     if ( rp.debug==0 ) Serial.printf("Summ...\n");
@@ -459,9 +459,9 @@ void loop()
   void publish1(void)
   {
     if (rp.debug==25) Serial.printf("Blynk write1\n");
-    Blynk.virtualWrite(V2,  pp.pubList.Vbatt);
+    Blynk.virtualWrite(V2,  pp.pubList.Vb);
     Blynk.virtualWrite(V3,  pp.pubList.Voc);
-    Blynk.virtualWrite(V4,  pp.pubList.Vbatt);
+    Blynk.virtualWrite(V4,  pp.pubList.Vb);
   }
 
 
@@ -471,7 +471,7 @@ void loop()
     if (rp.debug==25) Serial.printf("Blynk write2\n");
     Blynk.virtualWrite(V6,  pp.pubList.soc);
     Blynk.virtualWrite(V8,  pp.pubList.T);
-    Blynk.virtualWrite(V10, pp.pubList.Tbatt);
+    Blynk.virtualWrite(V10, pp.pubList.Tb);
   }
 
 
@@ -488,8 +488,8 @@ void loop()
   void publish4(void)
   {
     if (rp.debug==25) Serial.printf("Blynk write4\n");
-    Blynk.virtualWrite(V18, pp.pubList.Ibatt);
-    Blynk.virtualWrite(V20, pp.pubList.Wbatt);
+    Blynk.virtualWrite(V18, pp.pubList.Ib);
+    Blynk.virtualWrite(V20, pp.pubList.Wb);
     Blynk.virtualWrite(V21, pp.pubList.soc_ekf);
   }
 #endif

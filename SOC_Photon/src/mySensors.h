@@ -57,7 +57,7 @@ public:
   float load(Sensors *Sen);
   float noise();
 protected:
-  SlidingDeadband *SdTbatt;
+  SlidingDeadband *SdTb;
 };
 
 
@@ -67,15 +67,15 @@ class Shunt: public Tweak, Adafruit_ADS1015
 public:
   Shunt();
   Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_sclr,
-    float *cp_ibatt_bias, const float v2a_s);
+    float *cp_ib_bias, const float v2a_s);
   ~Shunt();
   // operators
   // functions
   float add() { return ( add_ ); };
   void add(const float add) { add_ = add; };
   boolean bare() { return ( bare_ ); };
-  void bias(const float bias) { *cp_ibatt_bias_ = bias; };
-  float bias() { return ( *cp_ibatt_bias_*slr_ + add_ ); };
+  void bias(const float bias) { *cp_ib_bias_ = bias; };
+  float bias() { return ( *cp_ib_bias_*slr_ + add_ ); };
   float bias_any(const float Ib) { return ( Ib*slr_ + add_ ); };
   float ishunt_cal() { return ( ishunt_cal_*slr_ + add_ ); };
   void load();
@@ -91,7 +91,7 @@ protected:
   String name_;         // For print statements, multiple instances
   uint8_t port_;        // Octal I2C port used by Acafruit_ADS1015
   boolean bare_;        // If ADS to be ignored
-  float *cp_ibatt_bias_;// Global bias, A
+  float *cp_ib_bias_;// Global bias, A
   float v2a_s_;         // Selected shunt conversion gain, A/V
   int16_t vshunt_int_;  // Sensed shunt voltage, count
   int16_t vshunt_int_0_;// Interim conversion, count
@@ -164,7 +164,7 @@ public:
   boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
   boolean ib_noa_flt() { return faultRead(IB_NOA_FLT); };
   boolean ib_red_loss() { return ib_sel_stat_<0; };
-  boolean Vbatt_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
+  boolean Vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   float ib_diff() { return ( ib_diff_ ); };
   float ib_diff_f() { return ( ib_diff_f_ ); };
@@ -183,12 +183,12 @@ public:
   void pretty_print1(Sensors *Sen, BatteryMonitor *Mon);
   void reset_all_faults() { reset_all_faults_ = true; };
   void select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
-  void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ibatt signals
+  void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ib signals
   void shunt_select_initial();   // Choose between shunts for model
   boolean tb_fa() { return failRead(TB_FA); };
   boolean tb_flt() { return faultRead(TB_FLT); };
-  int8_t tbatt_sel_status() { return tb_sel_stat_; }
-  void vbatt_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vbatt_min, const float _Vbatt_max, const boolean reset);  // Range check Vbatt
+  int8_t tb_sel_status() { return tb_sel_stat_; }
+  void vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vb_min, const float _Vb_max, const boolean reset);  // Range check Vb
   int8_t vb_sel_stat() { return vb_sel_stat_; };
   boolean vb_fa() { return failRead(VB_FA); };
   boolean vb_flt() { return faultRead(VB_FLT); };
@@ -199,13 +199,13 @@ public:
   boolean wrap_lo_flt() { return faultRead(WRAP_LO_FLT);  };
   boolean wrap_vb_fa() { return failRead(WRAP_VB_FA); };
 protected:
-  TFDelay *IbdHiPer;
-  TFDelay *IbdLoPer;
-  TFDelay *IbattAmpHardFail;
-  TFDelay *IbattNoAmpHardFail;
-  TFDelay *VbattHardFail;
-  TFDelay *QuietPer;
-  LagTustin *IbattErrFilt;  // Noise filter for signal selection
+  TFDelay *IbdHiPer;        // Persistence ib diff hi
+  TFDelay *IbdLoPer;        // Persistence ib diff lo
+  TFDelay *IbAmpHardFail;   // Persistence ib hard fail amp
+  TFDelay *IbNoAmpHardFail; // Persistence ib hard fail noamp
+  TFDelay *VbHardFail;      // Persistence vb hard fail amp
+  TFDelay *QuietPer;        // Persistence ib quiet disconnect detection
+  LagTustin *IbErrFilt;     // Noise filter for signal selection
   LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
   General2_Pole *QuietFilt; // Linear filter to test for quiet
   RateLagExp *QuietRate;    // Linear filter to calculate rate for quiet
@@ -222,10 +222,10 @@ protected:
   float ib_rate_;           // ib rate, A/s
   TFDelay *WrapHi;          // Time high wrap fail persistence
   TFDelay *WrapLo;          // Time low wrap fail persistence
-  int8_t tb_sel_stat_;      // Memory of Tbatt signal selection, 0=none, 1=sensor
-  int8_t vb_sel_stat_;      // Memory of Vbatt signal selection, 0=none, 1=sensor
-  int8_t ib_sel_stat_;      // Memory of Ibatt signal selection, -1=noamp, 0=none, 1=a
-  boolean reset_all_faults_; // Reset all fault logic
+  int8_t tb_sel_stat_;      // Memory of Tb signal selection, 0=none, 1=sensor
+  int8_t vb_sel_stat_;      // Memory of Vb signal selection, 0=none, 1=sensor
+  int8_t ib_sel_stat_;      // Memory of Ib signal selection, -1=noamp, 0=none, 1=a
+  boolean reset_all_faults_;// Reset all fault logic
   int8_t vb_sel_stat_last_; // past value
   int8_t ib_sel_stat_last_; // past value
   uint16_t fltw_;           // Bitmapped faults
@@ -240,85 +240,85 @@ public:
   Sensors();
   Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, Sync *ReadSensors);
   ~Sensors();
-  int Vbatt_raw;                  // Raw analog read, integer
-  float Vbatt;                    // Selected battery bank voltage, V
-  float Vbatt_hdwe;               // Sensed battery bank voltage, V
-  float Vbatt_model;              // Modeled battery bank voltage, V
-  float Tbatt;                    // Selected battery bank temp, C
-  float Tbatt_filt;               // Selected filtered battery bank temp, C
-  float Tbatt_hdwe;               // Sensed battery temp, C
-  float Tbatt_hdwe_filt;          // Filtered, sensed battery temp, C
-  float Tbatt_model;              // Temperature used for battery bank temp in model, C
-  float Tbatt_model_filt;         // Filtered, modeled battery bank temp, C
-  float Vshunt;                   // Sensed shunt voltage, V
-  float Ibatt;                    // Selected battery bank current, A
-  float Ibatt_amp_hdwe;           // Sensed amp battery bank current, A
-  float Ibatt_amp_model;          // Modeled amp battery bank current, A
-  float Ibatt_noamp_hdwe;         // Sensed noamp battery bank current, A
-  float Ibatt_noamp_model;        // Modeled noamp battery bank current, A
-  float Ibatt_hdwe;               // Sensed battery bank current, A
-  float Ibatt_hdwe_model;         // Selected model hardware signal, A
-  float Ibatt_model;              // Modeled battery bank current, A
-  float Ibatt_model_in;           // Battery bank current input to model (modified by cutback), A
-  float Wbatt;                    // Sensed battery bank power, use to compare to other shunts, W
-  unsigned long int now;          // Time at sample, ms
-  double T;                       // Update time, s
-  boolean reset;                  // Reset flag, T = reset
-  double T_filt;                  // Filter update time, s
-  double T_temp;                  // Temperature update time, s
-  Sync *PublishSerial;            // Handle to debug print time
-  Sync *ReadSensors;              // Handle to debug read time
-  boolean saturated;              // Battery saturation status based on Temp and VOC
-  Shunt *ShuntAmp;                // Ib sense amplified
-  Shunt *ShuntNoAmp;              // Ib sense non-amplified
-  TempSensor* SensorTbatt;        // Tb sense
-  General2_Pole* TbattSenseFilt;  // Linear filter for Tb. There are 1 Hz AAFs in hardware for Vb and Ib
-  SlidingDeadband *SdTbatt;       // Non-linear filter for Tb
-  BatteryModel *Sim;              // Used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off
+  int Vb_raw;                 // Raw analog read, integer
+  float Vb;                   // Selected battery bank voltage, V
+  float Vb_hdwe;              // Sensed battery bank voltage, V
+  float Vb_model;             // Modeled battery bank voltage, V
+  float Tb;                   // Selected battery bank temp, C
+  float Tb_filt;              // Selected filtered battery bank temp, C
+  float Tb_hdwe;              // Sensed battery temp, C
+  float Tb_hdwe_filt;         // Filtered, sensed battery temp, C
+  float Tb_model;             // Temperature used for battery bank temp in model, C
+  float Tb_model_filt;        // Filtered, modeled battery bank temp, C
+  float Vshunt;               // Sensed shunt voltage, V
+  float Ib;                   // Selected battery bank current, A
+  float Ib_amp_hdwe;          // Sensed amp battery bank current, A
+  float Ib_amp_model;         // Modeled amp battery bank current, A
+  float Ib_noamp_hdwe;        // Sensed noamp battery bank current, A
+  float Ib_noamp_model;       // Modeled noamp battery bank current, A
+  float Ib_hdwe;              // Sensed battery bank current, A
+  float Ib_hdwe_model;        // Selected model hardware signal, A
+  float Ib_model;             // Modeled battery bank current, A
+  float Ib_model_in;          // Battery bank current input to model (modified by cutback), A
+  float Wb;                   // Sensed battery bank power, use to compare to other shunts, W
+  unsigned long int now;      // Time at sample, ms
+  double T;                   // Update time, s
+  boolean reset;              // Reset flag, T = reset
+  double T_filt;              // Filter update time, s
+  double T_temp;              // Temperature update time, s
+  Sync *PublishSerial;        // Handle to debug print time
+  Sync *ReadSensors;          // Handle to debug read time
+  boolean saturated;          // Battery saturation status based on Temp and VOC
+  Shunt *ShuntAmp;            // Ib sense amplified
+  Shunt *ShuntNoAmp;          // Ib sense non-amplified
+  TempSensor* SensorTb;       // Tb sense
+  General2_Pole* TbSenseFilt; // Linear filter for Tb. There are 1 Hz AAFs in hardware for Vb and Ib
+  SlidingDeadband *SdTb;      // Non-linear filter for Tb
+  BatteryModel *Sim;          // Used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off
   unsigned long int elapsed_inj;  // Injection elapsed time, ms
-  unsigned long int start_inj;    // Start of calculated injection, ms
-  unsigned long int stop_inj;     // Stop of calculated injection, ms
-  unsigned long int wait_inj;     // Wait before start injection, ms
-  unsigned long int end_inj;      // End of print injection, ms
-  unsigned long int tail_inj;     // Tail after end injection, ms
-  float cycles_inj;               // Number of injection cycles
-  double control_time;            // Decimal time, seconds since 1/1/2021
-  boolean display;                // Use display
-  double sclr_coul_eff;           // Scalar on Coulombic Efficiency
-  void bias_all_model();          // Bias model outputs for sensor fault injection
-  void final_assignments();       // Make final signal selection
-  void shunt_bias(void);          // Load biases into Shunt objects
-  void shunt_load(void);          // Load ADS015 protocol
-  void shunt_print(); // Print selection result
+  unsigned long int start_inj;// Start of calculated injection, ms
+  unsigned long int stop_inj; // Stop of calculated injection, ms
+  unsigned long int wait_inj; // Wait before start injection, ms
+  unsigned long int end_inj;  // End of print injection, ms
+  unsigned long int tail_inj; // Tail after end injection, ms
+  float cycles_inj;           // Number of injection cycles
+  double control_time;        // Decimal time, seconds since 1/1/2021
+  boolean display;            // Use display
+  double sclr_coul_eff;       // Scalar on Coulombic Efficiency
+  void bias_all_model();      // Bias model outputs for sensor fault injection
+  void final_assignments();   // Make final signal selection
+  void shunt_bias(void);      // Load biases into Shunt objects
+  void shunt_load(void);      // Load ADS015 protocol
+  void shunt_print();         // Print selection result
   void shunt_select_initial();   // Choose between shunts for model
   void temp_filter(const boolean reset_loc, const float t_rlim);
   void temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim);
-  void vbatt_load(const byte vbatt_pin);  // Analog read of Vbatt
-  float Tbatt_noise();
-  float Tbatt_noise_amp() { return ( Tbatt_noise_amp_ ); };
-  void Tbatt_noise_amp(const float noise) { Tbatt_noise_amp_ = noise; };
-  float Vbatt_noise();
-  float Vbatt_noise_amp() { return ( Vbatt_noise_amp_ ); };
-  void Vbatt_noise_amp(const float noise) { Vbatt_noise_amp_ = noise; };
-  float Ibatt_noise();
-  float Ibatt_noise_amp() { return ( Ibatt_noise_amp_ ); };
-  void Ibatt_noise_amp(const float noise) { Ibatt_noise_amp_ = noise; };
-  void vbatt_print(void);         // Print Vbatt result
-  float vbatt_add() { return ( vbatt_add_ ); };
-  void vbatt_add(const float add) { vbatt_add_ = add; };
-  float Vbatt_add() { return ( vbatt_add_ * rp.nS ); };
+  void vb_load(const byte vb_pin);  // Analog read of Vb
+  float Tb_noise();
+  float Tb_noise_amp() { return ( Tb_noise_amp_ ); };
+  void Tb_noise_amp(const float noise) { Tb_noise_amp_ = noise; };
+  float Vb_noise();
+  float Vb_noise_amp() { return ( Vb_noise_amp_ ); };
+  void Vb_noise_amp(const float noise) { Vb_noise_amp_ = noise; };
+  float Ib_noise();
+  float Ib_noise_amp() { return ( Ib_noise_amp_ ); };
+  void Ib_noise_amp(const float noise) { Ib_noise_amp_ = noise; };
+  void vb_print(void);     // Print Vb result
+  float vb_add() { return ( vb_add_ ); };
+  void vb_add(const float add) { vb_add_ = add; };
+  float Vb_add() { return ( vb_add_ * rp.nS ); };
   Fault *Flt;
 protected:
-  float *rp_tbatt_bias_;    // Location of retained bias, deg C
-  float tbatt_bias_last_;   // Last value of bias for rate limit, deg C
-  void choose_(void);       // Deliberate choice based on inputs and results
-  PRBS_7 *Prbn_Tbatt_;      // Tb noise generator model only
-  PRBS_7 *Prbn_Vbatt_;      // Vb noise generator model only
-  PRBS_7 *Prbn_Ibatt_;      // Ib noise generator model only
-  float Tbatt_noise_amp_;   // Tb noise amplitude model only, deg C pk-pk
-  float Vbatt_noise_amp_;   // Vb noise amplitude model only, V pk-pk
-  float Ibatt_noise_amp_;   // Ib noise amplitude model only, A pk-pk
-  float vbatt_add_;         // Fault injection bias, V
+  float *rp_tb_bias_;    // Location of retained bias, deg C
+  float tb_bias_last_;   // Last value of bias for rate limit, deg C
+  void choose_(void);    // Deliberate choice based on inputs and results
+  PRBS_7 *Prbn_Tb_;      // Tb noise generator model only
+  PRBS_7 *Prbn_Vb_;      // Vb noise generator model only
+  PRBS_7 *Prbn_Ib_;      // Ib noise generator model only
+  float Tb_noise_amp_;   // Tb noise amplitude model only, deg C pk-pk
+  float Vb_noise_amp_;   // Vb noise amplitude model only, V pk-pk
+  float Ib_noise_amp_;   // Ib noise amplitude model only, A pk-pk
+  float vb_add_;         // Fault injection bias, V
 };
 
 

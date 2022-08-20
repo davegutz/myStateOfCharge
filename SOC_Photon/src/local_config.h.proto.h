@@ -7,8 +7,8 @@ const String unit = "pro_20220811";  // Signal select, vb
 #define CURR_BIAS_AMP         -0.24 // Calibration of amplified shunt sensor ('Da=#.#;'), A
 #define CURR_BIAS_NOAMP       -1.1  // Calibration of non-amplified shunt sensor ('Db=#.#;'), A
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors ('Di=#.#;'), A
-#define VOLT_BIAS             1.8   // Bias on Vbatt sensor ('Dc=#.#;'), V
-#define TEMP_BIAS             0.0   // Bias on Tbatt sensor ('Dt=#.#;'  +reset), deg C
+#define VOLT_BIAS             1.8   // Bias on Vb sensor ('Dc=#.#;'), V
+#define TEMP_BIAS             0.0   // Bias on Tb sensor ('Dt=#.#;'  +reset), deg C
 
 // Battery.  One 12 V 100 Ah battery bank would have RATED_BATT_CAP 100, NS 1, and NP 1
 // Two 12 V 100 Ah series battery bank would have RATED_BATT_CAP 100, NS 2, and NP 1

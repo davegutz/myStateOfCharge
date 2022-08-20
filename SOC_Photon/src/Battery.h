@@ -275,7 +275,7 @@ protected:
   double amp_hrs_remaining_soc_;  // Discharge amp*time left if drain soc_ to 0, A-h
   double y_filt_;       // Filtered EKF y value, V
   General2_Pole *y_filt = new General2_Pole(0.1, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
-  SlidingDeadband *SdVbatt_;  // Sliding deadband filter for Vbatt
+  SlidingDeadband *SdVb_;  // Sliding deadband filter for Vb
   TFDelay *EKF_converged;     // Time persistence
   void ekf_predict(double *Fx, double *Bu);
   void ekf_update(double *hx, double *H);

@@ -108,8 +108,8 @@ double_t Battery::calc_vsat(void)
 void Battery::init_battery(const boolean reset, Sensors *Sen)
 {
     if ( !reset ) return;
-    vb_ = Sen->Vbatt / (*rp_nS_);
-    ib_ = Sen->Ibatt / (*rp_nP_);
+    vb_ = Sen->Vb / (*rp_nS_);
+    ib_ = Sen->Ib / (*rp_nP_);
     ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
     if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
@@ -191,7 +191,7 @@ BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_n
     rand_D_ = new double [rand_q*rand_p];
     assign_rand();
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
-    SdVbatt_ = new SlidingDeadband(HDB_VBATT);  // Noise filter
+    SdVb_ = new SlidingDeadband(HDB_VBATT);  // Noise filter
     EKF_converged = new TFDelay(false, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT); // Convergence test debounce.  Initializes false
 }
 BatteryMonitor::~BatteryMonitor() {}
@@ -219,9 +219,9 @@ void BatteryMonitor::assign_rand(void)
 /* BatteryMonitor::calculate:  SOC-OCV curve fit solved by ekf.   Works in 12 V
    battery units.  Scales up/down to number of series/parallel batteries on output/input.
         Inputs:
-        Sen->Tbatt_filt Tb filtered for noise, past value of temp_c_, deg C
-        Sen->Vbatt      Battery terminal voltage, V
-        Sen->Ibatt     Shunt current Ib, A
+        Sen->Tb_filt Tb filtered for noise, past value of temp_c_, deg C
+        Sen->Vb      Battery terminal voltage, V
+        Sen->Ib     Shunt current Ib, A
         Sen->T          Update time, sec
         q_capacity_     Saturation charge at temperature, C
         q_cap_rated_scaled_   Applied rated capacity at t_rated_, after scaling, C
@@ -270,14 +270,14 @@ void BatteryMonitor::assign_rand(void)
 double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
 {
     // Inputs
-    temp_c_ = Sen->Tbatt_filt;
+    temp_c_ = Sen->Tb_filt;
     vsat_ = calc_vsat();
     dt_ =  min(Sen->T, F_MAX_T);
     double T_rate = T_RLim->calculate(temp_c_, T_RLIM, T_RLIM, reset, Sen->T);
 
     // Dynamic emf
-    vb_ = Sen->Vbatt / (*rp_nS_);
-    ib_ = Sen->Ibatt / (*rp_nP_);
+    vb_ = Sen->Vb / (*rp_nS_);
+    ib_ = Sen->Ib / (*rp_nP_);
     ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
     double u[2] = {ib_, vb_};
     Randles_->calc_x_dot(u);
@@ -296,9 +296,9 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     // Hysteresis model
     hys_->calculate(ib_, soc_);
     dv_hys_ = hys_->update(dt_);
-    voc_stat_tab_ = voc_soc(soc_, Sen->Tbatt_filt);
+    voc_stat_tab_ = voc_soc(soc_, Sen->Tb_filt);
     voc_stat_ = voc_ - dv_hys_;
-    voc_filt_ = SdVbatt_->update(voc_);
+    voc_filt_ = SdVb_->update(voc_);
     ioc_ = hys_->ioc();
     bms_off_ = temp_c_ <= chem_.low_t;    // KISS
     if ( bms_off_ )
@@ -330,8 +330,8 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
 
     y_filt_ = y_filt->calculate(y_, min(Sen->T, EKF_T_RESET));
     if ( rp.debug==6 || rp.debug==7 )
-        Serial.printf("calculate:Tbatt_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err, %7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-            Sen->Tbatt_filt, Sen->Ibatt, 0, soc_ekf_, vb_, voc_, hx_, dv_dyn_, dv_hys_, y_);
+        Serial.printf("calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err, %7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
+            Sen->Tb_filt, Sen->Ib, 0, soc_ekf_, vb_, voc_, hx_, dv_dyn_, dv_hys_, y_);
 
     // EKF convergence.  Audio industry found that detection of quietness requires no more than
     // second order filter of the signal.   Anything more is 'gilding the lily'
@@ -460,34 +460,34 @@ void BatteryMonitor::regauge(const float temp_c)
     }
 }
 
-/* Steady state voc(soc) solver for initialization of ekf state.  Expects Sen->Tbatt_filt to be in reset mode
+/* Steady state voc(soc) solver for initialization of ekf state.  Expects Sen->Tb_filt to be in reset mode
     INPUTS:
-        Sen->Vbatt      
-        Sen->Ibatt
+        Sen->Vb      
+        Sen->Ib
     OUTPUTS:
         Mon->soc_ekf
 */
 boolean BatteryMonitor::solve_ekf(const boolean reset, Sensors *Sen)
 {
     // Average dynamic inputs through the initialization period before apply EKF
-    static float Tb_avg = Sen->Tbatt_filt;
-    static float Vb_avg = Sen->Vbatt;
-    static float Ib_avg = Sen->Ibatt;
+    static float Tb_avg = Sen->Tb_filt;
+    static float Vb_avg = Sen->Vb;
+    static float Ib_avg = Sen->Ib;
     static uint16_t n_avg = 0;
     if ( !reset )
     {
-        Tb_avg = Sen->Tbatt_filt;
-        Vb_avg = Sen->Vbatt;
-        Ib_avg = Sen->Ibatt;
+        Tb_avg = Sen->Tb_filt;
+        Vb_avg = Sen->Vb;
+        Ib_avg = Sen->Ib;
         n_avg = 0;
         return ( true );
     }
     else
     {
         n_avg++;
-        Tb_avg = (Tb_avg*float(n_avg-1) + Sen->Tbatt_filt) / float(n_avg);
-        Vb_avg = (Vb_avg*float(n_avg-1) + Sen->Vbatt) / float(n_avg);
-        Ib_avg = (Ib_avg*float(n_avg-1) + Sen->Ibatt) / float(n_avg);
+        Tb_avg = (Tb_avg*float(n_avg-1) + Sen->Tb_filt) / float(n_avg);
+        Vb_avg = (Vb_avg*float(n_avg-1) + Sen->Vb) / float(n_avg);
+        Ib_avg = (Ib_avg*float(n_avg-1) + Sen->Ib) / float(n_avg);
     }
 
     // Solver, steady
@@ -574,8 +574,8 @@ void BatteryModel::assign_rand(void)
 // units.   Scales up/down to number of series/parallel batteries on output/input.
 //
 //  Inputs:
-//    Sen->Tbatt_filt   Filtered battery bank temp, C
-//    Sen->Ibatt_model_in  Battery bank current input to model, A
+//    Sen->Tb_filt   Filtered battery bank temp, C
+//    Sen->Ib_model_in  Battery bank current input to model, A
 //    ib_fut_(past)     Past future value of limited current, A
 //    Sen->T            Update time, sec
 //
@@ -614,8 +614,8 @@ void BatteryModel::assign_rand(void)
 */
 double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset)
 {
-    temp_c_ = Sen->Tbatt_filt;
-    double curr_in = Sen->Ibatt_model_in;
+    temp_c_ = Sen->Tb_filt;
+    double curr_in = Sen->Ib_model_in;
     const double dt = min(Sen->T, F_MAX_T);
     ib_in_ = curr_in;
     if ( reset ) ib_fut_ = ib_in_;
@@ -737,12 +737,12 @@ float BatteryModel::calc_inj(const unsigned long now, const uint8_t type, const 
 }
 
 /* BatteryModel::count_coulombs: Count coulombs based on assumed model true=actual capacity.
-    Uses Tbatt instead of Tbatt_filt to be most like hardware and provide independence from application.
+    Uses Tb instead of Tb_filt to be most like hardware and provide independence from application.
 Inputs:
     model_saturated_    Indicator of maximal cutback, T = cutback saturated
     Sen->T          Integration step, s
-    Sen->Tbatt      Battery bank temperature, deg C
-    Sen->Ibatt      Selected battery bank current, A
+    Sen->Tb      Battery bank temperature, deg C
+    Sen->Ib      Selected battery bank current, A
     t_last          Past value of battery temperature used for rate limit memory, deg C
     coul_eff_       Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
 States:
@@ -757,14 +757,14 @@ Outputs:
 */
 double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon) 
 {
-    // float charge_curr = Sen->Ibatt / (*rp_nP_); TODO:  re-run Xp10 with this change
+    // float charge_curr = Sen->Ib / (*rp_nP_); TODO:  re-run Xp10 with this change
     float charge_curr = ib_in_;
     double d_delta_q = charge_curr * Sen->T;
     if ( charge_curr>0. ) d_delta_q *= coul_eff_;
 
     // Rate limit temperature
-    if ( reset ) *rp_t_last_ = Sen->Tbatt;
-    double temp_lim = max(min(Sen->Tbatt, *rp_t_last_ + T_RLIM*Sen->T), *rp_t_last_ - T_RLIM*Sen->T);
+    if ( reset ) *rp_t_last_ = Sen->Tb;
+    double temp_lim = max(min(Sen->Tb, *rp_t_last_ + T_RLIM*Sen->T), *rp_t_last_ - T_RLIM*Sen->T);
     
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status
     // But if not modeling in real world, set to Monitor when Monitor saturated and reset to EKF otherwise
@@ -805,7 +805,7 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, BatteryMo
         if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;
         else cTime = Sen->control_time;
         sprintf(cp.buffer, "unit_sim, %13.3f, %7.5f,%7.5f, %7.5f,%7.5f,%7.5f,%7.5f, %7.3f,%7.3f,  %d,  %10.6f,%9.1f,%9.1f,%9.1f,  %8.5f, %d, %c",
-            cTime, Sen->Tbatt, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, model_saturated_, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, reset,'\0');
+            cTime, Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, model_saturated_, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_, reset,'\0');
         Serial.println(cp.buffer);
     }
 

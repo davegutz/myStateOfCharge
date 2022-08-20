@@ -55,14 +55,14 @@ void print_signal_sel_header(void)
     Serial.printf("unit_s,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_dif,ib_dif_f,");
     Serial.printf("    e_w,e_w_f,  ib_sel,Ib_h,Ib_m,mib,Ib_s, vb_sel,Vb_h,Vb_m,mvb,Vb_s,  Tb_h,Tb_s,mtb,Tb_f, ");
     Serial.printf("  fltw, falw, ib_rate, ib_quiet,\n");
-          // -----, cTime, reset, rp.ibatt_select,
+          // -----, cTime, reset, rp.ib_select,
           //                                    ShuntAmp->bare(), ShuntNoAmp->bare(),
           //                                                    cc_diff_,
-          //                                                              Ibatt_amp_hdwe, Ibatt_noamp_hdwe, Ibatt_amp_model, Ibatt_noamp_model, Ibatt_model,
+          //                                                              Ib_amp_hdwe, Ib_noamp_hdwe, Ib_amp_model, Ib_noamp_model, Ib_model,
           //                                                                                          ib_diff_, ib_diff_f,
-          //         e_wrap_, e_wrap_filt_, ib_sel_stat_, Ibatt_hdwe, Ibatt_hdwe_model, mod_ib(), Ibatt,
-          //                                                                                                vb_sel_stat, Vbatt_hdwe, Vbatt_model,mod_vb(), Vbatt,
-          //                                                                                                                                        Tbatt_hdwe, Tbatt, mod_tb(), Tbatt_filt,
+          //         e_wrap_, e_wrap_filt_, ib_sel_stat_, Ib_hdwe, Ib_hdwe_model, mod_ib(), Ib,
+          //                                                                                                vb_sel_stat, Vb_hdwe, Vb_model,mod_vb(), Vb,
+          //                                                                                                                                        Tb_hdwe, Tb, mod_tb(), Tb_filt,
           //   fltw_, falw_, ib_rate_, ib_quiet_
 }
 
@@ -72,8 +72,8 @@ void create_print_string(Publish *pubList)
   if ( rp.debug==4 || rp.debug==24 || rp.debug==26 )
     sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %5.2f,%7.5f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
-      pubList->sat, rp.ibatt_select, rp.modeling,
-      pubList->Tbatt, pubList->Vbatt, pubList->Ibatt,
+      pubList->sat, rp.ib_select, rp.modeling,
+      pubList->Tb, pubList->Vb, pubList->Ib,
       pubList->Vsat, pubList->dV_dyn, pubList->Voc_stat, pubList->Voc_ekf,
       pubList->y_ekf,
       pubList->soc_model, pubList->soc_ekf, pubList->soc,
@@ -85,7 +85,7 @@ void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
   {
     sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), double(Sen->now)/1000., Sen->T,
-      pubList->sat, rp.ibatt_select, rp.modeling,
+      pubList->sat, rp.ib_select, rp.modeling,
       Mon->Tb(), Mon->Vb(), Mon->Ib(),
       Mon->Vsat(), Mon->dV_dyn(), Mon->Voc_stat(), Mon->Hx(),
       Mon->y_ekf(),
@@ -132,11 +132,11 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
 }
 
 // Load all others
-// Outputs:   Sen->Ibatt_model_in, Sen->Ibatt_hdwe, 
-void load_ibatt_vbatt(const boolean reset, const unsigned long now, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon)
+// Outputs:   Sen->Ib_model_in, Sen->Ib_hdwe, 
+void load_ib_vb(const boolean reset, const unsigned long now, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon)
 {
   // Load shunts
-  // Outputs:  Sen->Ibatt_model_in, Sen->Ibatt_hdwe, Sen->Vbatt, Sen->Wbatt
+  // Outputs:  Sen->Ib_model_in, Sen->Ib_hdwe, Sen->Vb, Sen->Wb
   Sen->now = now;
   Sen->shunt_bias();
   Sen->shunt_load();
@@ -144,14 +144,14 @@ void load_ibatt_vbatt(const boolean reset, const unsigned long now, Sensors *Sen
   Sen->shunt_select_initial();
   if ( rp.debug==14 ) Sen->shunt_print();
 
-  // Vbatt
-  // Outputs:  Sen->Vbatt
-  Sen->vbatt_load(myPins->Vbatt_pin);
-  Sen->Flt->vbatt_check(Sen, Mon, VBATT_MIN, VBATT_MAX, reset);
-  if ( rp.debug==15 ) Sen->vbatt_print();
+  // Vb
+  // Outputs:  Sen->Vb
+  Sen->vb_load(myPins->Vb_pin);
+  Sen->Flt->vb_check(Sen, Mon, VBATT_MIN, VBATT_MAX, reset);
+  if ( rp.debug==15 ) Sen->vb_print();
 
   // Power calculation
-  Sen->Wbatt = Sen->Vbatt*Sen->Ibatt;
+  Sen->Wb = Sen->Vb*Sen->Ib;
 }
 
 // Manage wifi
@@ -191,7 +191,7 @@ void manage_wifi(unsigned long now, Wifi *wifi)
 }
 
 // Calculate Ah remaining
-// Inputs:  rp.mon_mod, Sen->Ibatt, Sen->Vbatt, Sen->Tbatt_filt
+// Inputs:  rp.mon_mod, Sen->Ib, Sen->Vb, Sen->Tb_filt
 // States:  Mon.soc, Mon.soc_ekf
 // Outputs: tcharge_wt, tcharge_ekf, Voc, Voc_filt
 void  monitor(const boolean reset, const boolean reset_temp, const unsigned long now,
@@ -199,7 +199,7 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
 {
 
   // Initialize charge state if temperature initial condition changed
-  // Needed here in this location to have a value for Sen->Tbatt_filt
+  // Needed here in this location to have a value for Sen->Tb_filt
   Mon->apply_delta_q_t(reset_temp);  // From memory
   Mon->init_battery(reset_temp, Sen);
   Mon->solve_ekf(reset_temp, Sen);
@@ -213,11 +213,11 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
 
   // Memory store // TODO:  simplify arg list here.  Unpack Sen inside count_coulombs
   // Initialize to ekf when not saturated
-  Mon->count_coulombs(Sen->T, reset_temp, Sen->Tbatt_filt, Sen->Ibatt, Sen->saturated, Sen->sclr_coul_eff,
+  Mon->count_coulombs(Sen->T, reset_temp, Sen->Tb_filt, Sen->Ib, Sen->saturated, Sen->sclr_coul_eff,
     Mon->delta_q_ekf());
 
   // Charge time for display
-  Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ibatt, Mon->soc());
+  Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ib, Mon->soc());
 }
 
 // OLED display drive
@@ -234,7 +234,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 
   // Top Line
   // Tb
-  sprintf(cp.buffer, "%3.0f", pp.pubList.Tbatt);
+  sprintf(cp.buffer, "%3.0f", pp.pubList.Tb);
   dispT = cp.buffer;
   if ( Sen->Flt->tb_fa() && (frame==0 || frame==1) )
     dispT = "***";
@@ -244,7 +244,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   if ( Sen->Flt->vb_fa() && (frame==1 || frame==2) )
     dispV = "**F**";
   // Ib
-  sprintf(cp.buffer, "%6.1f", pp.pubList.Ibatt);
+  sprintf(cp.buffer, "%6.1f", pp.pubList.Ib);
   dispI = cp.buffer;
   if ( frame==2 )
   {
@@ -308,18 +308,18 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 // Read sensors, model signals, select between them.
 // Sim used for built-in testing (rp.modeling = 7 and jumper wire).
 //    Needed here in this location to have available a value for
-//    Sen->Tbatt_filt when called.   Recalculates Sen->Ibatt accounting for
-//    saturation.  Sen->Ibatt is a feedback (used-before-calculated).
-// Inputs:  rp.config, rp.sim_mod, Sen->Tbatt, Sen->Ibatt_model_in
+//    Sen->Tb_filt when called.   Recalculates Sen->Ib accounting for
+//    saturation.  Sen->Ib is a feedback (used-before-calculated).
+// Inputs:  rp.config, rp.sim_mod, Sen->Tb, Sen->Ib_model_in
 // States:  Sim.soc
-// Outputs: Sim.temp_c_, Sen->Tbatt_filt, Sen->Ibatt, Sen->Ibatt_model,
-//   Sen->Vbatt_model, Sen->Tbatt_filt, rp.inj_bias
+// Outputs: Sim.temp_c_, Sen->Tb_filt, Sen->Ib, Sen->Ib_model,
+//   Sen->Vb_model, Sen->Tb_filt, rp.inj_bias
 void sense_synth_select(const boolean reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen)
 {
   // Load Ib and Vb
-  // Outputs: Sen->Ibatt_model_in, Sen->Ibatt, Sen->Vbatt 
-  load_ibatt_vbatt(reset, now, Sen, myPins, Mon);
+  // Outputs: Sen->Ib_model_in, Sen->Ib, Sen->Vb 
+  load_ib_vb(reset, now, Sen, myPins, Mon);
   Sen->Flt->ib_wrap(reset, Sen, Mon);
   Sen->Flt->ib_quiet(reset, Sen);
 
@@ -331,12 +331,12 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   Sen->Sim->init_battery(reset, Sen);
 
   // Sim calculation
-  //  Inputs:  Sen->Tbatt_filt(past), Sen->Ibatt_model_in
+  //  Inputs:  Sen->Tb_filt(past), Sen->Ib_model_in
   //  States: Sim->soc(past)
   //  Outputs:  Sim->temp_c(), Sim->Ib(), Sim->Vb(), rp.inj_bias, Sim.model_saturated
-  Sen->Tbatt_model = Sen->Tbatt_model_filt = Sen->Sim->temp_c() + Sen->Tbatt_noise();
-  Sen->Vbatt_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, reset) + Sen->Vbatt_noise() + Sen->Vbatt_add();
-  Sen->Ibatt_model = Sen->Sim->Ib() + Sen->Ibatt_noise();
+  Sen->Tb_model = Sen->Tb_model_filt = Sen->Sim->temp_c() + Sen->Tb_noise();
+  Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, reset) + Sen->Vb_noise() + Sen->Vb_add();
+  Sen->Ib_model = Sen->Sim->Ib() + Sen->Ib_noise();
   cp.model_cutback = Sen->Sim->cutback();
   cp.model_saturated = Sen->Sim->saturated();
 
@@ -346,14 +346,14 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   // Use model instead of sensors when running tests as user
   //  Inputs:                                             --->   Outputs:
   // TODO:  control parameter list here...vb_fa, soc, soc_ekf,
-  //  Ibatt_model, Ibatt_hdwe,                            --->   Ibatt
-  //  Vbatt_model, Vbatt_hdwe,                            --->   Vbatt
-  //  constant,         Tbatt_hdwe, Tbatt_hdwe_filt       --->   Tbatt, Tbatt_filt
+  //  Ib_model, Ib_hdwe,                            --->   Ib
+  //  Vb_model, Vb_hdwe,                            --->   Vb
+  //  constant,         Tb_hdwe, Tb_hdwe_filt       --->   Tb, Tb_filt
   Sen->Flt->select_all(Sen, Mon, reset);
   Sen->final_assignments();
 
   // Charge calculation and memory store
-  // Inputs: Sim.model_saturated, Sen->Tbatt, Sen->Ibatt, and Sim.soc
+  // Inputs: Sim.model_saturated, Sen->Tb, Sen->Ib, and Sim.soc
   // Outputs: Sim.soc
   Sen->Sim->count_coulombs(Sen, reset_temp, Mon);
 

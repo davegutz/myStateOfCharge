@@ -51,14 +51,14 @@ struct Pins
 {
   byte pin_1_wire;  // 1-wire Plenum temperature sensor
   byte status_led;  // On-board led
-  byte Vbatt_pin;   // Battery voltage
+  byte Vb_pin;   // Battery voltage
   pin_t pwm_pin;    // External signal injection
   Pins(void) {}
-  Pins(byte pin_1_wire, byte status_led, byte Vbatt_pin, pin_t pwm_pin)
+  Pins(byte pin_1_wire, byte status_led, byte Vb_pin, pin_t pwm_pin)
   {
     this->pin_1_wire = pin_1_wire;
     this->status_led = status_led;
-    this->Vbatt_pin = Vbatt_pin;
+    this->Vb_pin = Vb_pin;
     this->pwm_pin = pwm_pin;
   }
 };
@@ -70,7 +70,7 @@ void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
 double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
 void finish_request(void);
 void get_string(String *source);
-void load_ibatt_vbatt(const boolean reset, const unsigned long now, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon);
+void load_ib_vb(const boolean reset, const unsigned long now, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon);
 void manage_wifi(unsigned long now, Wifi *wifi);
 void monitor(const boolean reset, const boolean reset_temp, const unsigned long now,
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen);
