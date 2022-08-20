@@ -588,12 +588,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( cp.input_string.charAt(1) )
             {
               case ( 'a' ):  // Pa:  Print all
-                chit("Pm;", QUEUE);
-                chit("Ps;", QUEUE);
-                chit("Pr;", QUEUE);
-                chit("PM;", QUEUE);
-                chit("PN;", QUEUE);
-                chit("Pf;", QUEUE);
+                chit("Pm;", SOON);
+                chit("Ps;", SOON);
+                chit("Pr;", SOON);
+                chit("PM;", SOON);
+                chit("PN;", SOON);
+                chit("Pf;", SOON);
                 break;
 
               case ( 'e' ):  // Pe:  Print EKF
