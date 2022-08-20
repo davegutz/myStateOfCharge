@@ -42,7 +42,7 @@
 #include <Adafruit/Adafruit_SSD1306.h>
 
 extern RetainedPars rp; // Various parameters to be static at system level
-extern PublishPars pp;            // For publishing
+extern PublishPars pp;  // For publishing
 extern CommandPars cp;  // Various parameters to be static at system level
 
 
@@ -51,7 +51,7 @@ struct Pins
 {
   byte pin_1_wire;  // 1-wire Plenum temperature sensor
   byte status_led;  // On-board led
-  byte Vb_pin;   // Battery voltage
+  byte Vb_pin;      // Battery voltage
   pin_t pwm_pin;    // External signal injection
   Pins(void) {}
   Pins(byte pin_1_wire, byte status_led, byte Vb_pin, pin_t pwm_pin)

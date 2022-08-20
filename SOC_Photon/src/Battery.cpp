@@ -219,9 +219,9 @@ void BatteryMonitor::assign_rand(void)
 /* BatteryMonitor::calculate:  SOC-OCV curve fit solved by ekf.   Works in 12 V
    battery units.  Scales up/down to number of series/parallel batteries on output/input.
         Inputs:
-        Sen->Tb_filt Tb filtered for noise, past value of temp_c_, deg C
-        Sen->Vb      Battery terminal voltage, V
-        Sen->Ib     Shunt current Ib, A
+        Sen->Tb_filt    Tb filtered for noise, past value of temp_c_, deg C
+        Sen->Vb         Battery terminal voltage, V
+        Sen->Ib         Shunt current Ib, A
         Sen->T          Update time, sec
         q_capacity_     Saturation charge at temperature, C
         q_cap_rated_scaled_   Applied rated capacity at t_rated_, after scaling, C
@@ -574,7 +574,7 @@ void BatteryModel::assign_rand(void)
 // units.   Scales up/down to number of series/parallel batteries on output/input.
 //
 //  Inputs:
-//    Sen->Tb_filt   Filtered battery bank temp, C
+//    Sen->Tb_filt      Filtered battery bank temp, C
 //    Sen->Ib_model_in  Battery bank current input to model, A
 //    ib_fut_(past)     Past future value of limited current, A
 //    Sen->T            Update time, sec
@@ -586,7 +586,7 @@ void BatteryModel::assign_rand(void)
 //    temp_c_           Simulated Tb, deg C
 //    ib_fut_           Simulated over-ridden by saturation, A
 //    vb_               Simulated Vb, V
-//    rp.inj_bias  Used to inject fake shunt current, A
+//    rp.inj_bias       Used to inject fake shunt current, A
 
                 <---ib        ______________         <---ib
                  voc          |             |
@@ -739,10 +739,10 @@ float BatteryModel::calc_inj(const unsigned long now, const uint8_t type, const 
 /* BatteryModel::count_coulombs: Count coulombs based on assumed model true=actual capacity.
     Uses Tb instead of Tb_filt to be most like hardware and provide independence from application.
 Inputs:
-    model_saturated_    Indicator of maximal cutback, T = cutback saturated
+    model_saturated Indicator of maximal cutback, T = cutback saturated
     Sen->T          Integration step, s
-    Sen->Tb      Battery bank temperature, deg C
-    Sen->Ib      Selected battery bank current, A
+    Sen->Tb         Battery bank temperature, deg C
+    Sen->Ib         Selected battery bank current, A
     t_last          Past value of battery temperature used for rate limit memory, deg C
     coul_eff_       Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
 States:
@@ -799,7 +799,7 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, BatteryMo
         Serial.printf("BatteryModel::cc,  dt,voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
                     Sen->T, pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 
-    if ( rp.debug==24 || rp.debug==26 ) // print_serial_sim
+    if ( rp.debug==26 ) // print_serial_sim
     {
         double cTime;
         if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;

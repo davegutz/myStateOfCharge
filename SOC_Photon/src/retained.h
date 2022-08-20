@@ -40,20 +40,20 @@ struct RetainedPars
   double delta_q = 0.;          // Charge change since saturated, C
   float t_last = RATED_TEMP;    // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
   double delta_q_model = 0.;    // Coulomb Counter state for model, C
-  float t_last_model = RATED_TEMP;  // Battery temperature past value for rate limit memory, deg C
-  float ib_bias_amp = CURR_BIAS_AMP;     // Calibration of amplified shunt sensor, A
-  float ib_bias_noamp = CURR_BIAS_NOAMP; // Calibration of non-amplified shunt sensor, A
-  float ib_bias_all = CURR_BIAS_ALL;     // Bias on all shunt sensors, A
-  int8_t ib_select = 0;      // Force current sensor (-1=non-amp, 0=auto, 1=amp)
-  float vb_bias = VOLT_BIAS; // Calibrate Vb, V
+  float t_last_model = RATED_TEMP;        // Battery temperature past value for rate limit memory, deg C
+  float ib_bias_amp = CURR_BIAS_AMP;      // Calibration of amplified shunt sensor, A
+  float ib_bias_noamp = CURR_BIAS_NOAMP;  // Calibration of non-amplified shunt sensor, A
+  float ib_bias_all = CURR_BIAS_ALL;      // Bias on all shunt sensors, A
+  int8_t ib_select = 0;         // Force current sensor (-1=non-amp, 0=auto, 1=amp)
+  float vb_bias = VOLT_BIAS;    // Calibrate Vb, V
   uint8_t modeling = 0;         // Driving saturation calculation with model.  Bits specify which signals use model
   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
   float freq = 0.;              // Injected frequency, Hz (0-2)
   uint8_t type = 0;             // Injected waveform type.   0=sine, 1=square, 2=triangle
   float inj_bias = 0.;          // Constant bias, A
-  float tb_bias = TEMP_BIAS; // Bias on Tb sensor, deg C
+  float tb_bias = TEMP_BIAS;    // Bias on Tb sensor, deg C
   float s_cap_model = 1.;       // Scalar on battery model size
-  float cutback_gain_scalar = 1.;  // Scalar on battery model saturation cutback function
+  float cutback_gain_scalar = 1.;        // Scalar on battery model saturation cutback function
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
   int isum = -1;                // Summary location.   Begins at -1 because first action is to increment isum
   float delta_q_cinf_amp = -RATED_BATT_CAP*3600.;   // Charge delta_q since last reset.  Simple integration of amplified current

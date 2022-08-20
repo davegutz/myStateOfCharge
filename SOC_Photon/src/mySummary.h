@@ -33,7 +33,7 @@ extern CommandPars cp;
 // SRAM retention summary
 struct Sum_st
 {
-  unsigned long t;    // Timestamp
+  unsigned long t;  // Timestamp
   int16_t Tb;       // Battery temperature, filtered, C
   int16_t Vb;       // Battery measured potential, filtered, V
   int16_t Ib;       // Battery measured input current, filtered, A

@@ -214,7 +214,7 @@ protected:
   double *rand_B_;  // Randles model B
   double *rand_C_;  // Randles model C
   double *rand_D_;  // Randles model D
-  float temp_c_;   // Battery temperature, deg C
+  float temp_c_;    // Battery temperature, deg C
   boolean bms_off_; // Indicator that battery management system is off, T = off preventing current flow
   TableInterp2D *voc_T_;   // SOC-VOC 2-D table, V
   Hysteresis *hys_;

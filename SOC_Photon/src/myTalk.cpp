@@ -961,6 +961,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Mk1;Nk1;", QUEUE);  // Reset the tweak biases to 1 for new count
                     chit("Dn1;", QUEUE);      // Disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
                     chit("Dp100;", QUEUE);    // Fast data collection
+                    chit("Rb;", QUEUE);       // Reset battery states
+                    chit("Pa;", QUEUE);       // Print all for record
                     if ( INT_in == 9 )  // Xp9:  silent tweak test
                     {
                       chit("Xf0.02;", QUEUE); // Frequency 0.02 Hz
@@ -977,6 +979,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                       chit("XW5;", QUEUE);    // Wait time before starting to cycle
                       chit("XT5;", QUEUE);    // Wait time after cycle to print
                       chit("XC3;", QUEUE);    // Number of injection cycles
+                      chit("W2;", QUEUE);      // Wait
                       chit("v26;", QUEUE);    // Data collection
                     }
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
@@ -986,6 +989,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                       chit("XW60;", QUEUE);   // Wait time before starting to cycle
                       chit("XT600;", QUEUE);  // Wait time after cycle to print
                       chit("XC1;", QUEUE);    // Number of injection cycles
+                      chit("W2;", QUEUE);      // Wait
                       chit("v26;", QUEUE);    // Data collection
                     }
                     else if ( INT_in == 12 )  // Xp12:  slow half tweak
@@ -995,11 +999,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                       chit("XW60;", QUEUE);   // Wait time before starting to cycle
                       chit("XT2400;", QUEUE); // Wait time after cycle to print
                       chit("XC0.5;", QUEUE);  // Number of injection cycles
+                      chit("W2;", QUEUE);     // Wait
                       chit("v26;", QUEUE);    // Data collection
                     }
-                    chit("Rb;", QUEUE);     // Reset battery states
-                    chit("Pa;", QUEUE);     // Print all for record
-                    chit("XR;", QUEUE);     // Run cycle
+                    chit("W2;", QUEUE);       // Wait
+                    chit("XR;", QUEUE);       // Run cycle
                     break;
 
                   case( 20 ): case ( 21 ):  // Xp20:  Xp21:  20=tweak-like data, 21= 2 sec data cycle

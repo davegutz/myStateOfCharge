@@ -233,7 +233,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.print(cp.buffer);
   Serial.printf(";\n");
   Serial.printf("  A9876543210\n");
-  Serial.printf("  falw=%d\n;", falw_);
+  Serial.printf("  falw=%d;\n", falw_);
 }
 void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 {

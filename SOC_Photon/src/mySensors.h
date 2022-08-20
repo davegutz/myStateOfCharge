@@ -91,7 +91,7 @@ protected:
   String name_;         // For print statements, multiple instances
   uint8_t port_;        // Octal I2C port used by Acafruit_ADS1015
   boolean bare_;        // If ADS to be ignored
-  float *cp_ib_bias_;// Global bias, A
+  float *cp_ib_bias_;   // Global bias, A
   float v2a_s_;         // Selected shunt conversion gain, A/V
   int16_t vshunt_int_;  // Sensed shunt voltage, count
   int16_t vshunt_int_0_;// Interim conversion, count
