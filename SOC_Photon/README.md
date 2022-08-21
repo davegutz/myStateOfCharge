@@ -467,6 +467,14 @@ Full regression suite:
   slowTweakRegression:  Xp11
   vHiFail:        Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dv0.25;
                   Dv0;Rf;W100;+v0;Dr100;Dp400;
+  slowHalfTweakRegression:  Xp12
+  pulse:  Xp6
+  satSit: Xm7;Ca0.992;Rf;Dr100;Dp100;v26;W50;Di5;
+          Di-5;
+          Di0;Rf;W100;v0;Dp400;
+
+          Xm7;Ca0.992;Rf;Dr100;Dp100;Xtt;Xa5;Xf0.002;XW60;XT600;XC2;W2;v26;W50;Di5;XR;
+
 
   ampLoFail inv:  Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dm-500;Dn0.0001;W50;Pe;Dm0;s1;W10;s0;W50;+v0;Dr100;Dp400;
 

@@ -1239,7 +1239,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("      Xp9:  silent tweak reg test\n");
   Serial.printf("      Xp10:  tweak reg test\n");
   Serial.printf("      Xp11:  slow cycle reg test\n");
-  Serial.printf("      Xp12:  slow cycle reg test - half cycle\n");
+  Serial.printf("      Xp12:  slow half cycle reg test\n");
   Serial.printf("      Xp20:  tweak-like data collection\n");
   Serial.printf("      Xp21:  slow data collection\n");
   Serial.printf("  XC= "); Serial.printf("%7.3f cycles inj\n", Sen->cycles_inj);
