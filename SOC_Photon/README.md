@@ -384,10 +384,11 @@ Throughput test
   a.  real world collection sometimes run sample times longer than RANDLES_T_MAX.   When that happens the modeled simulation of Randles system will oscillate so it is bypassed.   Real data will appear to have first order response and simulation in python will appear to be step.
 41.  Manual tests to check initialzation of real world.   Set 'Xm=4;' to over-ride current sensor.  Set 'Dc<>' to place Vb where you want it.   Press hard reset button to force reinitialization to the EKF.  If get stuck saturated or not, remember to add a little bit of current 'Di<>' positive to engage saturation and negative to disengage saturation.
 42.  Bluetooth (BLE).  In the logic it is visible as Serial1.   All the Serial1 api are non-blocking, so if BLE not connected or has failed then nothing seems to happen.  Another likely reason is baud rate mismatch between the HC-06 device (I couldn't get HC-05 to work) and Serial.begin(baud).   There is a project above this SOC_Photon project called BT-AT that runs the AT on HC-06.  You need to set baud rate using that.   You should use 115200 or higher.   Lower rates caused the Serial api to be the slowest routines in the chain of call.   At 9600 the fastest READ time 'Dr<>' was 100 - 200 ms depending on the print interval 'Dp<>'.
-43.  Current is a critical signal for availability.   If lose current also lose knowledge of instantaneous voc_stat because do not know how to adjust for rapid changes in Vb without current.   So the EKF useful only for steady state use.  If add redundant current sensor then If current is available, it creates a triplex signal selection process where current sensors may be compared to each other and Coulomb counter may be compared to EKF to provide enough information to sort out the correct signals.  For example, if the currents disagree and CC and EKF agree then the standby current sensor has faulted.   For that same situation and the CC and EKF disagree then either the active current sensor has likely failed.  If the currents agree and CC and EKF disagree then the voltage sensor has likely failed.  The amplified current sensor is most accurate and is the first choice default.  The non amplified sensor is ok - observing long cycling 'Xp9' see that for a long history, counted coulombs are the same and sensor errors average out.   All this consistent with proper and same calibration of current sensors' gains and setting biases so indicated currents are zero when actual current is zero.
+43.  Current is a critical signal for availability.   If lose current also lose knowledge of instantaneous voc_stat because do not know how to adjust for rapid changes in Vb without current.   So the EKF useful only for steady state use.  If add redundant current sensor then If current is available, it creates a triplex signal selection process where current sensors may be compared to each other and Coulomb counter may be compared to EKF to provide enough information to sort out the correct signals.  For example, if the currents disagree and CC and EKF agree then the standby current sensor has faulted.   For that same situation and the CC and EKF disagree then either the active current sensor has likely failed.  If the currents agree and CC and EKF disagree then the voltage sensor has likely failed.  The amplified current sensor is most accurate and is the first choice default.  The non amplified sensor is ok - observing long cycling 'Xp9' see that for a long history, counted coulombs are the same and sensor errors average out.   All this consistent with proper and same calibration of current sensors' gains and setting biases so indicated currents are zero when actual current is zero.  Need to cover small long duration current differnces as well as large fast current difference failures.   These tend to compete in any logic.  So two mechanisms are created to deal with them separately (ccd_fa and wrap_fa).   The Coulomb Counter Difference logic (ccd) detects slow small failures as the precise Coulomb Counters drift apart between the two current sensors.   The Wrap logic detects rapid failures as the sensed current is used to predict vb and then trips when compared to actual vb.  Maximum currents are about 1C for a single rated capacity unit, e.g. 1P1S.   The trip points are sized to detect stuff no faster than that and as slow as C0.16.   The logic works better than this design range.
 44. Other fault notes:
   Every fail fault must change something on the display.  Goal is to make user run 'Pf' to see cause
-  Wrap logic 0.2 v=16 A. There is an inflection in voc(soc) that requires forgiveness during saturation.  0.25 v = 20 A for wrap hi.
+  Wrap logic 0.2 v=16 A. There is an inflection in voc(soc) that requires forgiveness during saturation.  0.25 v = 20 A for wrap hi.   Sized so wrap_lo_fa trips before false saturating with delta I=-100 with soc=.95
+  The tweak logic is small and limited and does not significantly interact with fault logic.
 45. Tweak shall be disabled for small <10% charge swings <TODO:  
 45. Fault injection testing
 
@@ -451,7 +452,7 @@ pro_20220806, 2022-08-06T08:58:01,  53146687.497, 0.100,   1,  0,  7,  25.00,-45
 pro_20220806, 2022-08-06T08:58:01,  53146687.898, 0.100,   1,  0,  7,  25.00,-44.97108,0.00000,    13.80000,0.00000,-44.97110,4.03000,  -49.001095, 0.99960,0.00000,1.00000,
 
 
-Inject current errors:
+Full regression suite:
   ampHiFail:      Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dm50;Dn0.0001;
                   Dm0;Dn0;Rf;W100;+v0;Dr100;Dp400;
   ampLoFail:      Xm7;Ca0.95;Dr100;Dp100;v26;W50;Dm-50;Dn0.0001;W50;Pe;
@@ -462,6 +463,8 @@ Inject current errors:
                   DT0;DV0.0;DI0;Dm0;Dn0;RfW100;+v0;Dr100;Dp400;
   ampHiFailSlow:  Xm7;Ca0.5;Dr10000;Dp10000;v26;W2;Dm6;Dn0.0001;Sf.05;
                   Dm0;Dn0;Rf;W2;+v0;Dr100;Dp400;Sf1;
+  rapidTweakRegression:  Xp10
+  slowTweakRegression:  Xp11
   vHiFail:        Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dv0.25;
                   Dv0;Rf;W100;+v0;Dr100;Dp400;
 

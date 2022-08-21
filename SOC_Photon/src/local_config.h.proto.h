@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "pro_20220811";  // Signal select, vb
+const String unit = "pro_20220821";  // Fault accomodation
 
 // Sensor biases
 #define CURR_BIAS_AMP         -0.24 // Calibration of amplified shunt sensor ('Da=#.#;'), A

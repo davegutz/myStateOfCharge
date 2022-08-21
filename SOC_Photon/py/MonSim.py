@@ -233,15 +233,15 @@ if __name__ == '__main__':
         init_time_in = None
         # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'
         # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'; t_Vb_fail = 10
+        # data_file_old_txt = '../dataReduction/ampHiFail20220821.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampHiFailNoise20220821.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = '../dataReduction/ampLoFail20220821.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampLoFailNoise20220821.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampHiFailSlow20220821.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220821.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220821.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220718.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
         # data_file_old_txt = '../dataReduction/pulse20220803.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
-        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220819.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220820.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/ampHiFail20220819.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/ampLoFail20220819.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/ampHiFailNoise20220819.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/ampLoFailNoise20220819.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/ampHiFailSlow20220819.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/vHiFail20220819.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
