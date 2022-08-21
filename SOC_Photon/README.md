@@ -469,8 +469,8 @@ Full regression suite:
                   Dv0;Rf;W100;+v0;Dr100;Dp400;
   slowHalfTweakRegression:  Xp12
   pulse:  Xp6
-  satSit: Xp0;Xm15;Di0;Dm0;Dn0;Dt0;Dv0;Ca0.9955;Rf;Dr100;Dp100;Xtt;Xa-5;Xf0.002;XW10;XT10;XC1;W2;v26;W5;XR;
-
+  satSit: Xp0;Xm15;Di0;Dm0;Dn0;Dt0;Dv0;Ca0.9951;Rb;Rf;Dr100;Dp100;Xts;Xa-10;Xf0.002;XW10;XT10;XC1;W2;v26;W5;XR;
+          XS;v0;Xp0;Di0;Dm0;Dn0;Dt0;Dv0;Ca.9951;W5;Rf;Pf;v0;
 
 ## Accuracy
 
