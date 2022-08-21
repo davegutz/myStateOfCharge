@@ -53,14 +53,14 @@ void print_signal_sel_header(void)
 {
   if ( rp.debug==26 ) // print_signal_sel_header
     Serial.printf("unit_s,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_dif,ib_dif_f,");
-    Serial.printf("    e_w,e_w_f,  ib_sel,Ib_h,Ib_m,mib,Ib_s, vb_sel,Vb_h,Vb_m,mvb,Vb_s,  Tb_h,Tb_s,mtb,Tb_f, ");
+    Serial.printf("    voc_tab,e_w,e_w_f,  ib_sel,Ib_h,Ib_m,mib,Ib_s, vb_sel,Vb_h,Vb_m,mvb,Vb_s,  Tb_h,Tb_s,mtb,Tb_f, ");
     Serial.printf("  fltw, falw, ib_rate, ib_quiet,\n");
           // -----, cTime, reset, rp.ib_select,
           //                                    ShuntAmp->bare(), ShuntNoAmp->bare(),
           //                                                    cc_diff_,
           //                                                              Ib_amp_hdwe, Ib_noamp_hdwe, Ib_amp_model, Ib_noamp_model, Ib_model,
           //                                                                                          ib_diff_, ib_diff_f,
-          //         e_wrap_, e_wrap_filt_, ib_sel_stat_, Ib_hdwe, Ib_hdwe_model, mod_ib(), Ib,
+          //         voc_tab, e_wrap_, e_wrap_filt_, ib_sel_stat_, Ib_hdwe, Ib_hdwe_model, mod_ib(), Ib,
           //                                                                                                vb_sel_stat, Vb_hdwe, Vb_model,mod_vb(), Vb,
           //                                                                                                                                        Tb_hdwe, Tb, mod_tb(), Tb_filt,
           //   fltw_, falw_, ib_rate_, ib_quiet_
@@ -350,7 +350,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   //  Vb_model, Vb_hdwe,                            --->   Vb
   //  constant,         Tb_hdwe, Tb_hdwe_filt       --->   Tb, Tb_filt
   Sen->Flt->select_all(Sen, Mon, reset);
-  Sen->final_assignments();
+  Sen->final_assignments(Mon);
 
   // Charge calculation and memory store
   // Inputs: Sim.model_saturated, Sen->Tb, Sen->Ib, and Sim.soc

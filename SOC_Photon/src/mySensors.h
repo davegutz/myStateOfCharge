@@ -151,6 +151,10 @@ public:
   boolean ccd_fa() { return failRead(CCD_FA); };
   boolean dscn_fa() { return failRead(IB_DSCN_FA); };
   boolean dscn_flt() { return faultRead(IB_DSCN_FLT); };
+  void ewhi_sclr(const float sclr) { ewhi_sclr_ = sclr; };
+  float ewhi_sclr() { return ewhi_sclr_; };
+  void ewlo_sclr(const float sclr) { ewlo_sclr_ = sclr; };
+  float ewlo_sclr() { return ewlo_sclr_; };
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
   uint16_t fltw() { return fltw_; };
@@ -212,6 +216,9 @@ protected:
   boolean ccd_fa_;          // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
   float ccd_sclr_;          // Scale cc_diff detection thresh, scalar
+  float ewhi_sclr_;         // Scale wrap hi detection thresh, scalar
+  float ewlo_sclr_;         // Scale wrap lo detection thresh, scalar
+  float ewsat_sclr_;        // Scale wrap detection thresh when voc(soc) saturated, scalar
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
   float ibdt_sclr_;         // Scale ib_diff detection thresh, scalar
@@ -286,7 +293,7 @@ public:
   boolean display;            // Use display
   double sclr_coul_eff;       // Scalar on Coulombic Efficiency
   void bias_all_model();      // Bias model outputs for sensor fault injection
-  void final_assignments();   // Make final signal selection
+  void final_assignments(BatteryMonitor *Mon);   // Make final signal selection
   void shunt_bias(void);      // Load biases into Shunt objects
   void shunt_load(void);      // Load ADS015 protocol
   void shunt_print();         // Print selection result

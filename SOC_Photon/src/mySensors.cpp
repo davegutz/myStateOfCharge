@@ -135,9 +135,10 @@ void Shunt::load()
 
 // Class Fault
 Fault::Fault(const double T):
-  cc_diff_(0.), ccd_sclr_(1), e_wrap_(0), e_wrap_filt_(0), ibdt_sclr_(1), ibq_sclr_(1), ib_diff_(0), ib_diff_f_(0),
-  ib_quiet_(0), ib_rate_(0), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
-  vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL)
+  cc_diff_(0.), ccd_sclr_(1), ewhi_sclr_(1), ewlo_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0),
+  ibdt_sclr_(1), ibq_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), tb_sel_stat_(1),
+  vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false), vb_sel_stat_last_(1), ib_sel_stat_last_(1),
+  fltw_(0UL), falw_(0UL)
 {
   IbErrFilt = new LagTustin(T, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
   IbdHiPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
@@ -180,9 +181,11 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   boolean reset_loc = reset | reset_all_faults_;
   e_wrap_ = Mon->voc_tab() - Mon->voc();
+  if ( Mon->voc_tab()>(Mon->vsat()-WRAP_HI_SAT_MARG) ) ewsat_sclr_ = WRAP_HI_SAT_SCLR;
+  else ewsat_sclr_ = 1.;
   e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
-  faultAssign( (e_wrap_filt_ >= Mon->r_ss()*WRAP_HI_A), WRAP_HI_FLT);
-  faultAssign( (e_wrap_filt_ <= Mon->r_ss()*WRAP_LO_A), WRAP_LO_FLT);
+  faultAssign( (e_wrap_filt_ >= Mon->r_ss()*WRAP_HI_A*ewhi_sclr_*ewsat_sclr_), WRAP_HI_FLT);
+  faultAssign( (e_wrap_filt_ <= Mon->r_ss()*WRAP_LO_A*ewlo_sclr_*ewsat_sclr_), WRAP_LO_FLT);
   failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );
   failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );
 }
@@ -498,7 +501,7 @@ void Sensors::choose_()
 }
 
 // Make final assignemnts
-void Sensors::final_assignments()
+void Sensors::final_assignments(BatteryMonitor *Mon)
 {
   // Reselect since may be changed
   // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noamp_hdwe, Ib_amp_model, Ib_noamp_model
@@ -534,8 +537,8 @@ void Sensors::final_assignments()
           Ib_amp_hdwe, Ib_noamp_hdwe, Ib_amp_model, Ib_noamp_model, Ib_model, 
           Flt->ib_diff(), Flt->ib_diff_f());
       Serial.print(cp.buffer);
-      sprintf(cp.buffer, "  %7.5f, %7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %5.2f,%5.2f, %d, %5.2f, ",
-          Flt->e_wrap(), Flt->e_wrap_filt(),
+      sprintf(cp.buffer, "  %7.5f,%7.5f,%7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %5.2f,%5.2f, %d, %5.2f, ",
+          Mon->voc_tab(), Flt->e_wrap(), Flt->e_wrap_filt(),
           Flt->ib_sel_stat(), Ib_hdwe, Ib_hdwe_model, rp.mod_ib(), Ib,
           Flt->vb_sel_stat(), Vb_hdwe, Vb_model, rp.mod_vb(), Vb,
           Tb_hdwe, Tb, rp.mod_tb(), Tb_filt);

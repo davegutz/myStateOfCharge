@@ -357,6 +357,20 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
           case ( 'S' ):
             switch ( cp.input_string.charAt(1) )
             {
+              case ( 'a' ):  // Sa<>: scale e_wrap_hi threshold
+                scale = cp.input_string.substring(2).toFloat();
+                Serial.printf("e_wrap_hi scl %7.3f to ", Sen->Flt->ewhi_sclr());
+                Sen->Flt->ewhi_sclr(scale);
+                Serial.printf("%7.3f\n", Sen->Flt->ewhi_sclr());
+                break;
+
+              case ( 'b' ):  // Sb<>: scale e_wrap_lo threshold
+                scale = cp.input_string.substring(2).toFloat();
+                Serial.printf("e_wrap_lo scl %7.3f to ", Sen->Flt->ewlo_sclr());
+                Sen->Flt->ewlo_sclr(scale);
+                Serial.printf("%7.3f\n", Sen->Flt->ewlo_sclr());
+                break;
+
               case ( 'c' ):  // Sc<>: scale capacity
                 scale = cp.input_string.substring(2).toFloat();
                 rp.s_cap_model = scale;
@@ -979,7 +993,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                       chit("XW5;", QUEUE);    // Wait time before starting to cycle
                       chit("XT5;", QUEUE);    // Wait time after cycle to print
                       chit("XC3;", QUEUE);    // Number of injection cycles
-                      chit("W2;", QUEUE);      // Wait
+                      chit("W2;", QUEUE);     // Wait
                       chit("v26;", QUEUE);    // Data collection
                     }
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
@@ -989,7 +1003,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                       chit("XW60;", QUEUE);   // Wait time before starting to cycle
                       chit("XT600;", QUEUE);  // Wait time after cycle to print
                       chit("XC1;", QUEUE);    // Number of injection cycles
-                      chit("W2;", QUEUE);      // Wait
+                      chit("W2;", QUEUE);     // Wait
                       chit("v26;", QUEUE);    // Data collection
                     }
                     else if ( INT_in == 12 )  // Xp12:  slow half tweak
@@ -1006,9 +1020,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("XR;", QUEUE);       // Run cycle
                     break;
 
-                  case( 20 ): case ( 21 ):  // Xp20:  Xp21:  20=tweak-like data, 21= 2 sec data cycle
-                    chit("v0;", QUEUE);     // Turn off debug temporarily so not snowed by data dumps
-                    chit("Pa;", QUEUE);     // Print all for record
+                  case( 20 ): case ( 21 ):    // Xp20:  Xp21:  20=tweak-like data, 21= 2 sec data cycle
+                    chit("v0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
+                    chit("Pa;", QUEUE);       // Print all for record
                     if ( INT_in == 20 )
                     {
                       chit("Dp100;", QUEUE);  // Tweak-like data collection

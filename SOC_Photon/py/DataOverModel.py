@@ -69,6 +69,8 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(new_s.time, new_s.Voc_stat, color='orange', linestyle='--', label='Voc_stat_new')
     plt.plot(old_s.time, old_s.Vsat, color='blue', linestyle='-', label='Vsat')
     plt.plot(new_s.time, new_s.Vsat, color='red', linestyle='--', label='Vsat_new')
+    plt.plot(old_s.time, old_s.voc_tab, color='black', linestyle='-', label='voc_tab')
+    plt.plot(old_s.time, old_s.voc, color='cyan', linestyle='--', label='voc')
     plt.legend(loc=1)
     plt.subplot(335)
     plt.plot(old_s.time, old_s.e_w, color='magenta', linestyle='-', label='e_wrap')
@@ -336,11 +338,14 @@ def write_clean_file(txt_file, type_, title_key, unit_key):
     have_header_str = None
     with open(txt_file, "r") as input_file:
         with open(csv_file, "w") as output:
-            for line in input_file:
-                if line.__contains__(title_key):
-                    if have_header_str is None:
-                        have_header_str = True  # write one title only
-                        output.write(line)
+            try:
+                for line in input_file:
+                    if line.__contains__(title_key):
+                        if have_header_str is None:
+                            have_header_str = True  # write one title only
+                            output.write(line)
+            except:
+                print(line)  # last line
     # Data
     num_lines = 0
     with open(txt_file, "r") as input_file:
@@ -454,6 +459,7 @@ class SavedData:
             self.ib_dif_f = []
             self.ib_dif_flt = []
             self.ib_dif_fa = []
+            self.voc_tab = None
             self.e_w = None
             self.e_w_f = None
             self.wh_flt = None
@@ -503,7 +509,9 @@ class SavedData:
             self.ib_dif_f = np.array(sel.ib_dif_f[:i_end])
             self.ib_dif_flt = np.bool8( (np.array(fltw) & 2**8) | (np.array(fltw) & 2**9) )
             self.ib_dif_fa = np.bool8( (np.array(falw) & 2**8) | (np.array(falw) & 2**9) )
+            self.voc_tab = np.array(sel.voc_tab[:i_end])
             self.e_w = np.array(sel.e_w[:i_end])
+            self.voc = self.voc_tab - self.e_w
             self.e_w_f = np.array(sel.e_w_f[:i_end])
             self.wh_flt = np.bool8( np.array(fltw) & 2**5 )
             self.wl_flt = np.bool8( np.array(fltw) & 2**6 )

@@ -77,7 +77,7 @@
 #define NSUM                  122       // Number of saved summaries.   If too large, will get compile error BACKUPSRAM
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)
 #define HDB_VBATT             0.05      // Half deadband to filter Vb, V (0.05)
-#define T_SAT                 10        // Saturation time, sec (10 for no sat Ib lo fault of -100 A)
+#define T_SAT                 10        // Saturation time, sec (10, >=10 for no sat Ib lo fault of -100 A)
 const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define TEMP_PARASITIC        true      // DS18 sensor power. true means leave it on all the time (true)
 #define TEMP_DELAY            1         // Time to block temperature sensor read in DS18 routine, ms (1)
@@ -110,8 +110,10 @@ const float WRAP_LO_S = (T_SAT-1.);     // Wrap low failure set time, sec (T_SAT
 const float WRAP_LO_R = (WRAP_LO_S/2.); // Wrap low failure reset time, sec ('up 1, down 2')
 const float WRAP_HI_S = WRAP_LO_S;      // Wrap high failure set time, sec (WRAP_LO_S)
 const float WRAP_HI_R = (WRAP_HI_S/2.); // Wrap high failure reset time, sec ('up 1, down 2')
-#define WRAP_HI_A       16.             // Wrap high voltage threshold, A (16)
-#define WRAP_LO_A       -16.            // Wrap high voltage threshold, A (-16)
+#define WRAP_HI_A       16.             // Wrap high voltage threshold, A (16=0.2v)
+#define WRAP_LO_A       -16.            // Wrap high voltage threshold, A (-16=-0.2v)
+#define WRAP_HI_SAT_MARG  0.2           // Wrap voltage margin to saturation, V (0.2)
+#define WRAP_HI_SAT_SCLR  2.0           // Wrap voltage margin scalar when saturated (2.0)
 #define F_MAX_T_WRAP    1.4             // Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (1.4)
 #define IBATT_DISAGREE_THRESH 5.        // Signal selection threshold for current disagree test, A (5.)
 const float IBATT_DISAGREE_SET = (WRAP_LO_S-1.); // Signal selection current disagree fail persistence, s (WRAP_LO_S-1) // must be quicker than wrap lo
