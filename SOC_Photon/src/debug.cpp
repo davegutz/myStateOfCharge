@@ -63,15 +63,15 @@ void debug_12(BatteryMonitor *Mon, Sensors *Sen)
   Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc());
 }
 
-// rp.debug==-12 EKF Arduino plot
-void debug_m12(BatteryMonitor *Mon, Sensors *Sen)
+// rp.debug==-13 ib_dscn
+void debug_m13(Sensors *Sen)
 {
-  Serial.printf("ib,ib_mod,   vb*10-110,vb_mod*10-110,  voc*10-110,voc_stat_mod*10-110,voc_mod*10-110,   K, y,    SOC_mod-90, SOC_ekf-90, SOC-90,\n%7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
-  Mon->Ib(), Sen->Sim->Ib(),
-  Mon->Vb()*10-110, Sen->Sim->Vb()*10-110,
-  Mon->voc()*10-110, Sen->Sim->voc_stat()*10-110, Sen->Sim->voc()*10-110,
-  Mon->K_ekf(), Mon->y_ekf(),
-  Sen->Sim->soc()*100-90, Mon->soc_ekf()*100-90, Sen->Sim->soc()*100-90);
+  Serial.printf("ib_sel_st, ib_amp, ib_noa, , ib_amph, ib_noah, ib_rate, ib_quiet,  dscn_flt, dscn_fa,\n%d, %7.3f,%7.3f,   %7.3f,%7.3f,  %7.3f,%7.3f,   %d,%d,\n",
+  Sen->Flt->ib_sel_stat(),
+  Sen->ShuntAmp->ishunt_cal(), Sen->ShuntNoAmp->ishunt_cal(),
+  Sen->Ib_amp_hdwe, Sen->Ib_noamp_hdwe, 
+  Sen->Flt->ib_rate(), Sen->Flt->ib_quiet(),
+  Sen->Flt->ib_dscn_fa(), Sen->Flt->ib_dscn_fa());
 }
 
 // rp.debug==-35 EKF summary Arduino plot

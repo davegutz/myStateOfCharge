@@ -730,8 +730,8 @@ float BatteryModel::calc_inj(const unsigned long now, const uint8_t type, const 
     inj_bias = sin_bias + square_bias + tri_bias + bias + cos_bias;
     rp.inj_bias = inj_bias - rp.amp;
 
-    if ( rp.debug==-41 ) Serial.printf("type,amp,freq,sin,square,tri,bias,inj,tnow,bias=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n",
-                type, amp, freq, sin_bias, square_bias, tri_bias, bias, inj_bias, t, rp.inj_bias);
+    if ( rp.debug==-41 ) Serial.printf("type,amp,freq,cos,sin,square,tri,bias,inj,tnow,bias=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n",
+                type, amp, freq, cos_bias, sin_bias, square_bias, tri_bias, bias, inj_bias, t, rp.inj_bias);
 
     return ( rp.inj_bias );
 }

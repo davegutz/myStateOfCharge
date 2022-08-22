@@ -129,7 +129,7 @@ void Shunt::load()
     vshunt_int_0_ = 0; vshunt_int_1_ = 0; vshunt_int_ = 0;
   }
   vshunt_ = computeVolts(vshunt_int_);
-  ishunt_cal_ = vshunt_*v2a_s_*float(!rp.modeling) + *cp_ib_bias_;
+  ishunt_cal_ = vshunt_*v2a_s_*float(!rp.mod_ib()) + *cp_ib_bias_;
 }
 
 
@@ -165,14 +165,23 @@ void Fault::bitMapPrint(char *buf, const int16_t fw, const uint8_t num)
   buf[num] = '\0';
 }
 
-// Detect no signal present
+// Detect no signal present based on detection of quiet signal.
+// Research by sound industry found that 2-pole filtering is the sweet spot between seeing noise
+// and actual motion without 'guilding the lily'
 void Fault::ib_quiet(const boolean reset, Sensors *Sen)
 {
   boolean reset_loc = reset | reset_all_faults_;
+
+  // Rate (has some filtering)
   ib_rate_ = QuietRate->calculate(Sen->Ib_amp_hdwe + Sen->Ib_noamp_hdwe, reset, min(Sen->T, MAX_T_Q_FILT));
+
+  // 2-pole filter
   ib_quiet_ = QuietFilt->calculate(ib_rate_, reset_loc, min(Sen->T, MAX_T_Q_FILT));
+
+  // Fault
   faultAssign( !rp.mod_ib() && abs(ib_quiet_)<=QUIET_A*ibq_sclr_, IB_DSCN_FLT );
   failAssign( QuietPer->calculate(dscn_flt(), QUIET_S, QUIET_R, Sen->T, reset_loc), IB_DSCN_FA);
+  if ( rp.debug==-13 ) debug_m13(Sen);
 }
 
 // Voltage wraparound logic for current selection

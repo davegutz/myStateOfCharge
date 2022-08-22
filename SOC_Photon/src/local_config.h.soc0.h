@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "soc0_20220821";  // Fault accomodation
+const String unit = "soc0_20220822";  // Fault accomodation
 
 // Sensor biases
 #define CURR_BIAS_AMP         -0.94 // Calibration of amplified shunt sensor ('Da=#.#;'), A
