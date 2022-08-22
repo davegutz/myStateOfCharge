@@ -124,7 +124,7 @@ const float IBATT_DISAGREE_SET = (WRAP_LO_S-1.); // Signal selection current dis
 #define WN_Q_FILT       1.0             // Quiet filter-2 natural frequency, r/s (1.0)
 #define ZETA_Q_FILT     0.9             // Quiet fiter-2 damping factor (0.9)
 #define MAX_T_Q_FILT    RANDLES_T_MAX   // Quiet filter max update time (0.2)
-#define QUIET_A         0.1             // Quiet set threshold, sec (0.1)
+#define QUIET_A         0.02            // Quiet set threshold, sec (0.02, 0.1 too large on protot)
 #define QUIET_S         20.             // Quiet set persistence, sec (20.)
 const float QUIET_R   (QUIET_S/5.);     // Quiet reset persistence, sec ('up 1 down 5')
 
