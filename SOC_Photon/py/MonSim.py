@@ -238,12 +238,15 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/ampLoFail20220821.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampLoFailNoise20220821.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFailSlow20220821.txt'; unit_key = 'pro_2022';
-        data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220821.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220821.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220821.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/vHiFail20220821.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220721.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
         # data_file_old_txt = '../dataReduction/pulse20220821.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
         # data_file_old_txt = '../dataReduction/satSit20220821.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = '../dataReduction/tbFailMod20220822.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/tbFailHdwe20220822.txt'; unit_key = 'pro_2022'
+
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"
@@ -265,7 +268,7 @@ if __name__ == '__main__':
                     'voc_tab', 'e_w', 'e_w_f',
                     'ib_sel', 'Ib_h', 'Ib_m',
                     'mib', 'Ib_s', 'Vb_h', 'Vb_m', 'mvb', 'Vb_s', 'Tb_h', 'Tb_s', 'mtb', 'Tb_f',
-                    'vb_sel', 'fltw', 'falw', 'ib_rate', 'ib_quiet')
+                    'vb_sel', 'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel')
         sel_old = None
         if sel_file_clean:
             sel_old = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,

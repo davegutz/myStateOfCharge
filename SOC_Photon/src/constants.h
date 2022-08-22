@@ -129,6 +129,7 @@ const float IBATT_DISAGREE_SET = (WRAP_LO_S-1.); // Signal selection current dis
 const float QUIET_R   (QUIET_S/5.);     // Quiet reset persistence, sec ('up 1 down 5')
 #define TB_STALE_SET    3600.           // Tb read from one-wire stale persistence for failure, s (3600, 1 hr)
 #define TB_STALE_RESET  0.              // Tb read from one-wire stale persistence for reset, s (0)
+#define NOMINAL_TB      15.             // Middle of the road Tb for decent reversionary operation, deg C (15.)
 
 // Conversion gains
 const float shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  

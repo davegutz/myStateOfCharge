@@ -98,8 +98,11 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(old_s.time, old_s.ib_dif_fa, color='magenta', linestyle='--', label='ib_dif_fa')
     plt.plot(old_s.time, old_s.vb_flt, color='blue', linestyle='-.', label='vb_flt')
     plt.plot(old_s.time, old_s.vb_fa, color='black', linestyle=':', label='vb_fa')
+    plt.plot(old_s.time, old_s.tb_flt, color='red', linestyle='-', label='tb_flt')
+    plt.plot(old_s.time, old_s.tb_fa, color='cyan', linestyle='--', label='tb_fa')
     plt.plot(old_s.time, old_s.ib_sel-2, color='black', linestyle='-', label='ib_sel_stat-2')
     plt.plot(old_s.time, old_s.vb_sel-2, color='green', linestyle='--', label='vb_sel_stat-2')
+    plt.plot(old_s.time, old_s.tb_sel-2, color='red', linestyle='-.', label='tb_sel_stat-2')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -490,6 +493,9 @@ class SavedData:
             self.Ib_finj = None
             self.Tb_finj = None
             self.Vb_finj = None
+            self.tb_sel = []
+            self.tb_flt = None
+            self.tb_fa = None
         else:
             falw = np.array(sel.falw[:i_end], dtype=np.uint16)
             fltw = np.array(sel.fltw[:i_end], dtype=np.uint16)
@@ -538,6 +544,9 @@ class SavedData:
             self.dscn_fa = np.bool8( np.array(falw) & 2**10 )
             self.vb_flt = np.bool8( np.array(fltw) & 2**1 )
             self.vb_fa = np.bool8( np.array(falw) & 2**1 )
+            self.tb_sel = np.array(sel.tb_sel[:i_end])
+            self.tb_flt = np.bool8( np.array(fltw) & 2**0 )
+            self.tb_fa = np.bool8( np.array(falw) & 2**0 )
 
     def __str__(self):
         s = "{},".format(self.unit[self.i])

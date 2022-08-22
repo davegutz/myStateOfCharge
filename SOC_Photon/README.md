@@ -389,6 +389,7 @@ Throughput test
   Every fail fault must change something on the display.  Goal is to make user run 'Pf' to see cause
   Wrap logic 0.2 v=16 A. There is an inflection in voc(soc) that requires forgiveness during saturation.  0.25 v = 20 A for wrap hi.   Sized so wrap_lo_fa trips before false saturating with delta I=-100 with soc=.95
   The tweak logic is small and limited and does not significantly interact with fault logic.
+  If Tb is never read on boot up it should fail to NOMINAL_TB.
 45. Tweak shall be disabled for small <10% charge swings <TODO:  
 45. Fault injection testing
 
@@ -471,8 +472,10 @@ Full regression suite:
   pulse:  Xp6
   satSit: Xp0;Xm15;Ca0.9951;Rb;Rf;Dr100;Dp100;Xts;Xa-10;Xf0.002;XW10;XT10;XC1;W2;v26;W5;XR;
           XS;v0;Xp0;Ca.9951;W5;Rf;Pf;v0;
-  tbStale:  Xv0.004;v26;Xu1;
-            Xu0;Xv1;v0;Pf;
+  tbFailHdwe:   Ca.5;Xp0;W4;Xm6;Dp100;Dr100;W2;v26;W100;Xu1;Xv.005;W900;Xu0;W100;v0;
+                Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;
+  tbFailMod:    Ca.5;Xp0;W4;Xm7;Dp100;Dr100;W2;v26;W100;Xu1;Xv.005;W900;Xu0;W100;v0;
+                Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;
 
 ## Accuracy
 

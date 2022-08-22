@@ -51,7 +51,7 @@ float TempSensor::load(Sensors *Sen)
   // MAXIM conversion 1-wire Tp plenum temperature
   uint8_t count = 0;
   float temp = 0.;
-  float Tb_hdwe = 0.;
+  static float Tb_hdwe = 0.;
   // Read hardware and check
   while ( ++count<MAX_TEMP_READS && temp==0 && !rp.mod_tb() )
   {
@@ -220,6 +220,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("  ib_s_st=%d;\n", ib_sel_stat_);
   Serial.printf("  nbar=%d;\n", Sen->ShuntNoAmp->bare());
   Serial.printf("  mbar=%d;\n", Sen->ShuntAmp->bare());
+  Serial.printf("  mod_tb=%d, mod_vb=%d, mod_ib=%d\n", rp.mod_tb(), rp.mod_vb(), rp.mod_ib());
   Serial.printf("  ib_dscn_ft=%d;\n", ib_dscn_flt());
   Serial.printf("  ibd_lo_ft=%d;\n", ib_dif_lo_flt());
   Serial.printf("  ibd_hi_ft=%d;\n    7\n", ib_dif_hi_flt());
@@ -263,6 +264,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("  imh=%7.3f;\n", Sen->Ib_amp_hdwe);
   Serial1.printf("  inh=%7.3f;\n", Sen->Ib_noamp_hdwe);
   Serial1.printf("  ibd_f=%7.3f;\n", ib_diff_f_);
+  Serial1.printf("  mod_tb=%d, mod_vb=%d, mod_ib=%d\n", rp.mod_tb(), rp.mod_vb(), rp.mod_ib());
   Serial1.printf("  tb_s_st=%d;\n", tb_sel_stat_);
   Serial1.printf("  vb_s_st=%d;\n", vb_sel_stat_);
   Serial1.printf("  ib_s_st=%d;\n", ib_sel_stat_);
@@ -392,11 +394,25 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   else
     failAssign(false, WRAP_VB_FA);
 
-  // Print
-  if ( ib_sel_stat_ != ib_sel_stat_last_ || vb_sel_stat_ != vb_sel_stat_last_ )
+  // tb failure from inactivity. Does not latch
+  if ( reset_all_faults_ )
   {
-    Serial.printf("Sel chg:  Amp->bare=%d, NoAmp->bare=%d, ib_dif_fa=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, ccd_fa_=%d, rp.ib_select=%d, ib_sel_stat=%d, vb_sel_stat=%d, Vb_fail=%d,\n",
-        Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_dif_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), ccd_fa_, rp.ib_select, ib_sel_stat_, vb_sel_stat_, vb_fa());
+    tb_sel_stat_last_ = 1;
+    tb_sel_stat_ = 1;
+    Serial.printf("reset tb flts\n");
+  }
+  if (  tb_fa() )
+  {
+    tb_sel_stat_ = 0;
+  }
+  else
+    tb_sel_stat_ = 1;
+
+  // Print
+  if ( ib_sel_stat_ != ib_sel_stat_last_ || vb_sel_stat_ != vb_sel_stat_last_ || tb_sel_stat_ != tb_sel_stat_last_ )
+  {
+    Serial.printf("Sel chg:  Amp->bare=%d, NoAmp->bare=%d, ib_dif_fa=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, ccd_fa_=%d,\n rp.ib_select=%d, ib_sel_stat=%d, vb_sel_stat=%d, tb_sel_stat=%d, Vb_fail=%d, Tb_fail=%d,\n",
+        Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_dif_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), ccd_fa_, rp.ib_select, ib_sel_stat_, vb_sel_stat_, tb_sel_stat_, vb_fa(), tb_fa());
   }
   if ( ib_sel_stat_ != ib_sel_stat_last_ )
   {
@@ -405,6 +421,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   }
   ib_sel_stat_last_ = ib_sel_stat_;
   vb_sel_stat_last_ = vb_sel_stat_;
+  tb_sel_stat_last_ = tb_sel_stat_;
 
   // Make sure asynk Rf command gets executed at least once all fault logic
   static uint8_t count = 0;
@@ -527,23 +544,64 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   choose_();
 
   // Final assignments
-  if ( rp.mod_ib() )  Ib = Ib_hdwe_model;
-  else Ib = Ib_hdwe;
-
-  if ( rp.mod_vb() )  Vb = Vb_model;
-  else Vb = Vb_hdwe;
-  
+  // tb
   if ( rp.mod_tb() )
   {
-    Tb = RATED_TEMP + Tb_noise();
-    Tb_filt = RATED_TEMP;
+    if ( Flt->tb_fa() )
+    {
+      Tb = NOMINAL_TB + Tb_noise();
+      Tb_filt = NOMINAL_TB;
+
+    }
+    else
+    {
+      Tb = RATED_TEMP;
+      Tb_filt = RATED_TEMP;
+    }
   }
   else
   {
-    Tb = Tb_hdwe;
-    Tb_filt = Tb_hdwe_filt;
+    if ( Flt->tb_fa() )
+    {
+      Tb = NOMINAL_TB;
+      Tb_filt = NOMINAL_TB;
+    }
+    else
+    {
+      Tb = Tb_hdwe;
+      Tb_filt = Tb_hdwe_filt;
+    }
   }
-  if ( rp.debug==26 ) // print_signal_select
+
+  // vb
+  if ( rp.mod_vb() )
+  {
+    Vb = Vb_model;
+  }
+  else
+  {
+    if ( Flt->wrap_vb_fa() || Flt->vb_fa() )
+    {
+      Vb = Vb_model;
+    }
+    else
+    {
+      Vb = Vb_hdwe;
+    }
+  }
+  
+  // ib
+  if ( rp.mod_ib() )
+  {
+    Ib = Ib_hdwe_model;
+  }
+  else
+  {
+    Ib = Ib_hdwe;
+  }
+
+  // print_signal_select
+  if ( rp.debug==26 )
   {
       double cTime;
       if ( rp.tweak_test() ) cTime = double(now)/1000.;
@@ -561,8 +619,8 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
           Flt->vb_sel_stat(), Vb_hdwe, Vb_model, rp.mod_vb(), Vb,
           Tb_hdwe, Tb, rp.mod_tb(), Tb_filt);
       Serial.print(cp.buffer);
-      sprintf(cp.buffer, "%d, %d, %7.3f, %7.3f,",
-          Flt->fltw(), Flt->falw(), Flt->ib_rate(), Flt->ib_quiet());
+      sprintf(cp.buffer, "%d, %d, %7.3f, %7.3f, %d,",
+          Flt->fltw(), Flt->falw(), Flt->ib_rate(), Flt->ib_quiet(), Flt->tb_sel_status());
       Serial.print(cp.buffer);
       Serial.printlnf("%c,", '\0');
   }
