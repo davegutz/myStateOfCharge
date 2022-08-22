@@ -454,23 +454,25 @@ pro_20220806, 2022-08-06T08:58:01,  53146687.898, 0.100,   1,  0,  7,  25.00,-44
 
 Full regression suite:
   ampHiFail:      Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dm50;Dn0.0001;
-                  Dm0;Dn0;Rf;W100;+v0;Dr100;Dp400;
+                  Xp0;Rf;W100;+v0;Dr100;Dp400;
   ampLoFail:      Xm7;Ca0.95;Dr100;Dp100;v26;W50;Dm-50;Dn0.0001;W50;Pe;
-                  Dm0;Dn0;Rf;W100;+v0;Dr100;Dp400;
+                  Xp0;Rf;W100;+v0;Dr100;Dp400;
   ampHiFailNoise: Xm7;Ca0.5;Dr100;Dp100;v26;W50;DT.05;DV0.05;DI1;W50;Dm50;Dn0.0001;
-                  DT0;DV0.0;DI0;Dm0;Dn0;Rf;W100;+v0;Dr100;Dp400;
+                  Xp0;Rf;W100;+v0;Dr100;Dp400;
   ampLoFailNoise: Xm7;Ca0.95;Dr100;Dp100;v26;W50;DT.05;DV0.05;DI1;W50;Dm-50;Dn0.0001;
-                  DT0;DV0.0;DI0;Dm0;Dn0;RfW100;+v0;Dr100;Dp400;
+                  Xp0;RfW100;+v0;Dr100;Dp400;
   ampHiFailSlow:  Xm7;Ca0.5;Dr10000;Dp10000;v26;W2;Dm6;Dn0.0001;Sf.05;
-                  Dm0;Dn0;Rf;W2;+v0;Dr100;Dp400;Sf1;
+                  Xp0;Rf;W2;+v0;Dr100;Dp400;Sf1;
   rapidTweakRegression:  Xp10
   slowTweakRegression:  Xp11
   vHiFail:        Xm7;Ca0.5;Dr100;Dp100;v26;W50;Dv0.25;
-                  Dv0;Rf;W100;+v0;Dr100;Dp400;
+                  Xp0;Rf;W100;+v0;Dr100;Dp400;
   slowHalfTweakRegression:  Xp12
   pulse:  Xp6
-  satSit: Xp0;Xm15;Di0;Dm0;Dn0;Dt0;Dv0;Ca0.9951;Rb;Rf;Dr100;Dp100;Xts;Xa-10;Xf0.002;XW10;XT10;XC1;W2;v26;W5;XR;
-          XS;v0;Xp0;Di0;Dm0;Dn0;Dt0;Dv0;Ca.9951;W5;Rf;Pf;v0;
+  satSit: Xp0;Xm15;Ca0.9951;Rb;Rf;Dr100;Dp100;Xts;Xa-10;Xf0.002;XW10;XT10;XC1;W2;v26;W5;XR;
+          XS;v0;Xp0;Ca.9951;W5;Rf;Pf;v0;
+  tbStale:  Xv0.004;v26;Xu1;
+            Xu0;Xv1;v0;Pf;
 
 ## Accuracy
 

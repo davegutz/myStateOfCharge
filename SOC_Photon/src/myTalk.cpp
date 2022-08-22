@@ -73,7 +73,6 @@ void chit(const String cmd, const urgency when)
 // Talk Executive
 void talk(BatteryMonitor *Mon, Sensors *Sen)
 {
-  const String set_nom_coul_eff = "Dn" + String(COULOMBIC_EFF);
   double FP_in = -99.;
   int INT_in = -1;
   double scale = 1.;
@@ -915,8 +914,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Xf0.; Xa0.", ASAP);
                     if ( !rp.tweak_test() ) chit("Xb0.", ASAP);
                     chit("XS; Mk1; Nk1;", ASAP);  // Stop any injection
-                    chit(set_nom_coul_eff, ASAP);
-                    chit("Di0;", ASAP);
+                    chit("Dn" + String(COULOMBIC_EFF), ASAP);
+                    chit("Di0;Dm0;Dn0;Dt0;Dv0;DT0;DV0.0;DI0;Xu0;Xv1.", ASAP);
                     break;
 
                   case ( 1 ):  // Xp1:  sine
@@ -1075,6 +1074,20 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 FP_in = cp.input_string.substring(2).toFloat();
                 Sen->tail_inj = (unsigned long int)(max(FP_in, 0.))*1000;
                 Serial.printf("Wait %7.1f s tail after\n", FP_in);
+                break;
+
+              case ( 'u' ):  // Xu<>:  Tb, fail it
+                INT_in = cp.input_string.substring(2).toInt();
+                Serial.printf("Fail tb %d to ", Sen->Flt->fail_tb());
+                Sen->Flt->fail_tb(INT_in);
+                Serial.printf("%d\n", Sen->Flt->fail_tb());
+                break;
+
+              case ( 'v' ):  // Xv<>:  Tb stale time scalar
+                FP_in = cp.input_string.substring(2).toFloat();
+                Serial.printf("Stale tb time sclr %9.4f to ", Sen->Flt->tb_stale_time_slr());
+                Sen->Flt->tb_stale_time_slr(FP_in);
+                Serial.printf("%9.4f\n", Sen->Flt->tb_stale_time_slr());
                 break;
 
               default:
@@ -1248,6 +1261,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  XS  "); Serial.printf("STOP inj\n");
   Serial.printf("  XW= "); Serial.printf("%6.2f s wait start inj\n", float(Sen->wait_inj)/1000.);
   Serial.printf("  XT= "); Serial.printf("%6.2f s tail end inj\n", float(Sen->tail_inj)/1000.);
+  Serial.printf("  Xu= "); Serial.printf("%d T=ignore Tb read\n", Sen->Flt->fail_tb());
+  Serial.printf("  Xv= "); Serial.printf("%6.2f scale Tb one-wire stale persistence\n", Sen->Flt->tb_stale_time_slr());
   Serial.printf("z   toggle BLYNK = %d\n", cp.blynking );
   Serial.printf(" urgency of cmds:  -=ASAP, *=SOON , '',+=QUEUE\n"); 
   Serial.printf("h   this\n");

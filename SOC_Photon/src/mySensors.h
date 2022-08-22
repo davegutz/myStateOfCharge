@@ -54,10 +54,12 @@ public:
   ~TempSensor();
   // operators
   // functions
+  boolean tb_stale_flt() { return tb_stale_flt_; };
   float load(Sensors *Sen);
   float noise();
 protected:
   SlidingDeadband *SdTb;
+  boolean tb_stale_flt_;   // One-wire did not update last pass
 };
 
 
@@ -157,6 +159,8 @@ public:
   float ewlo_sclr() { return ewlo_sclr_; };
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
+  void fail_tb(const boolean fail) { fail_tb_ = fail; };
+  boolean fail_tb() { return fail_tb_; };
   uint16_t fltw() { return fltw_; };
   uint16_t falw() { return falw_; };
   void ibdt_sclr(const float sclr) { ibdt_sclr_ = sclr; };
@@ -191,7 +195,9 @@ public:
   void shunt_select_initial();   // Choose between shunts for model
   boolean tb_fa() { return failRead(TB_FA); };
   boolean tb_flt() { return faultRead(TB_FLT); };
-  int8_t tb_sel_status() { return tb_sel_stat_; }
+  int8_t tb_sel_status() { return tb_sel_stat_; };
+  void tb_stale_time_slr(const float sclr) { tb_stale_time_slr_ = sclr; };
+  float tb_stale_time_slr() { return tb_stale_time_slr_; };
   void vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vb_min, const float _Vb_max, const boolean reset);  // Range check Vb
   int8_t vb_sel_stat() { return vb_sel_stat_; };
   boolean vb_fa() { return failRead(VB_FA); };
@@ -207,6 +213,7 @@ protected:
   TFDelay *IbdLoPer;        // Persistence ib diff lo
   TFDelay *IbAmpHardFail;   // Persistence ib hard fail amp
   TFDelay *IbNoAmpHardFail; // Persistence ib hard fail noamp
+  TFDelay *TbStaleFail;            // Persistence stale tb one-wire data
   TFDelay *VbHardFail;      // Persistence vb hard fail amp
   TFDelay *QuietPer;        // Persistence ib quiet disconnect detection
   LagTustin *IbErrFilt;     // Noise filter for signal selection
@@ -221,6 +228,7 @@ protected:
   float ewsat_sclr_;        // Scale wrap detection thresh when voc(soc) saturated, scalar
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
+  boolean fail_tb_;         // Make hardware bus read ignore Tb and fail it
   float ibdt_sclr_;         // Scale ib_diff detection thresh, scalar
   float ibq_sclr_;          // Scale ib_quiet detection thresh, scalar
   float ib_diff_;           // Current sensor difference error, A
@@ -230,9 +238,11 @@ protected:
   TFDelay *WrapHi;          // Time high wrap fail persistence
   TFDelay *WrapLo;          // Time low wrap fail persistence
   int8_t tb_sel_stat_;      // Memory of Tb signal selection, 0=none, 1=sensor
+  float tb_stale_time_slr_; // Scalar on persistences of Tb hardware stale chec, (1)
   int8_t vb_sel_stat_;      // Memory of Vb signal selection, 0=none, 1=sensor
   int8_t ib_sel_stat_;      // Memory of Ib signal selection, -1=noamp, 0=none, 1=a
   boolean reset_all_faults_;// Reset all fault logic
+  int8_t tb_sel_stat_last_; // past value
   int8_t vb_sel_stat_last_; // past value
   int8_t ib_sel_stat_last_; // past value
   uint16_t fltw_;           // Bitmapped faults

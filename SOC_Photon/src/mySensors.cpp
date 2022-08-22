@@ -38,7 +38,7 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // class TempSensor
 // constructors
 TempSensor::TempSensor(const uint16_t pin, const bool parasitic, const uint16_t conversion_delay)
-: DS18(pin, parasitic, conversion_delay)
+: DS18(pin, parasitic, conversion_delay), tb_stale_flt_(true)
 {
    SdTb = new SlidingDeadband(HDB_TBATT);
 }
@@ -60,14 +60,16 @@ float TempSensor::load(Sensors *Sen)
   }
 
   // Check success
-  if ( count<MAX_TEMP_READS && TEMP_RANGE_CHECK<temp && temp<TEMP_RANGE_CHECK_MAX )
+  if ( count<MAX_TEMP_READS && TEMP_RANGE_CHECK<temp && temp<TEMP_RANGE_CHECK_MAX && !Sen->Flt->fail_tb() )
   {
     Tb_hdwe = SdTb->update(temp);
+    tb_stale_flt_ = false;
     if ( rp.debug==16 ) Serial.printf("I:  t=%7.3f ct=%d, Tb_hdwe=%7.3f,\n", temp, count, Tb_hdwe);
   }
   else
   {
-    Serial.printf("E: DS18, t=%8.1f, ct=%d, using lgv\n", temp, count);
+    Serial.printf("E: DS18, t=%8.1f, ct=%d, using lgv=%8.1f\n", temp, count, Tb_hdwe);
+    tb_stale_flt_ = true;
     // Using last-good-value:  no assignment
   }
   return ( Tb_hdwe );
@@ -135,8 +137,8 @@ void Shunt::load()
 
 // Class Fault
 Fault::Fault(const double T):
-  cc_diff_(0.), ccd_sclr_(1), ewhi_sclr_(1), ewlo_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0),
-  ibdt_sclr_(1), ibq_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), tb_sel_stat_(1),
+  cc_diff_(0.), ccd_sclr_(1), ewhi_sclr_(1), ewlo_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0), fail_tb_(false),
+  ibdt_sclr_(1), ibq_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), tb_sel_stat_(1), tb_stale_time_slr_(1),
   vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false), vb_sel_stat_last_(1), ib_sel_stat_last_(1),
   fltw_(0UL), falw_(0UL)
 {
@@ -145,6 +147,7 @@ Fault::Fault(const double T):
   IbdLoPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
   IbAmpHardFail  = new TFDelay(false, IBATT_HARD_SET, IBATT_HARD_RESET, T);
   IbNoAmpHardFail  = new TFDelay(false, IBATT_HARD_SET, IBATT_HARD_RESET, T);
+  TbStaleFail  = new TFDelay(false, TB_STALE_SET, TB_STALE_RESET, T);
   VbHardFail  = new TFDelay(false, VBATT_HARD_SET, VBATT_HARD_RESET, T);
   QuietPer  = new TFDelay(false, QUIET_S, QUIET_R, T);
   WrapErrFilt = new LagTustin(T, WRAP_ERR_FILT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT);  // actual update time provided run time
@@ -300,6 +303,11 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
 {
   boolean reset_loc = reset || reset_all_faults_;
+
+  // Temperature persistence
+  faultAssign( Sen->SensorTb->tb_stale_flt(), TB_FLT );
+  failAssign( TbStaleFail->calculate(tb_flt(), TB_STALE_SET*tb_stale_time_slr_, TB_STALE_RESET*tb_stale_time_slr_,
+    Sen->T, reset_loc), TB_FA );
 
   // EKF error test - failure conditions track poorly
   cc_diff_ = Mon->soc_ekf() - Mon->soc();  // These are filtered in their construction (EKF is a dynamic filter and 
