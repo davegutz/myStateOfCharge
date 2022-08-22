@@ -63,14 +63,29 @@ void debug_12(BatteryMonitor *Mon, Sensors *Sen)
   Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc());
 }
 
-// rp.debug==-13 ib_dscn
+// rp.debug==-13 ib_dscn for Arduino.
+// Start Arduino serial plotter.  Toggle v like 'v0;v-13;' to produce legend
 void debug_m13(Sensors *Sen)
 {
-  Serial.printf("ib_sel_st, ib_amph, ib_noah, ib_rate, ib_quiet,  dscn_flt, dscn_fa,\n%d, %7.3f,%7.3f,  %7.3f,%7.3f,   %d,%d,\n",
+  static int8_t last_call = 0;
+
+  // Arduinio header
+  if ( rp.debug!=last_call && rp.debug==-13 )
+    Serial.printf("ib_sel_st:, ib_amph:, ib_noah:, ib_rate:, ib_quiet:,  dscn_flt:, dscn_fa:\n");
+
+  // Save
+  last_call = rp.debug;
+
+  // Plot
+  if ( rp.debug!=-13)
+    return;
+  else
+      Serial.printf("%d, %7.3f,%7.3f,  %7.3f,%7.3f,   %d,%d\n",
   Sen->Flt->ib_sel_stat(),
-  max(min(Sen->Ib_amp_hdwe,16),-16), max(min(Sen->Ib_noamp_hdwe,16),-16),
-  Sen->Flt->ib_rate(), Sen->Flt->ib_quiet(),
+  max(min(Sen->Ib_amp_hdwe, 2), -2), max(min(Sen->Ib_noamp_hdwe, 2), -2),
+  max(min(Sen->Flt->ib_rate(),2), -2), max(min(Sen->Flt->ib_quiet(), 2), -2),
   Sen->Flt->ib_dscn_fa(), Sen->Flt->ib_dscn_fa());
+
 }
 
 // rp.debug==-35 EKF summary Arduino plot
