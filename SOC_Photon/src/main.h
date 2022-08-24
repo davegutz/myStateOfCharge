@@ -197,7 +197,7 @@ void setup()
 
   // Summary
   System.enableFeature(FEATURE_RETAINED_MEMORY);
-  if ( ( rp.debug==4 || rp.debug==26 ) && cp.publishS )
+  if ( rp.debug==4 || rp.debug==26 )
     print_all_summary(mySum, rp.isum, NSUM);
 
   Serial.printf("End setup()\n");
@@ -368,7 +368,7 @@ void loop()
   // Visit https://console.particle.io/events.   Click on "view events on a terminal"
   // to get a curl command to run
   // TODO:  publish_main(publishP, reset_publish, publishS) in myCloud
-  if ( publishP || cp.publishS)
+  if ( publishP || cp.publishS )
   {
     assign_publist(&pp.pubList, PublishParticle->now(), unit, hm_string, Sen, num_timeouts, Mon);
  
@@ -385,13 +385,16 @@ void loop()
     // Mon for rp.debug
     if ( cp.publishS && !rp.tweak_test() )
     {
-      if ( ( rp.debug==4 || rp.debug==26 ) && cp.publishS )
+      if ( ( rp.debug==4 || rp.debug==26 ) )
       {
         if ( reset_publish || (last_publishS_debug != rp.debug) )
         {
           print_serial_header();
-          if ( rp.debug==26) print_serial_sim_header();
-          if ( rp.debug==26 ) print_signal_sel_header();
+          if ( rp.debug==26 )
+          {
+            print_serial_sim_header();
+            print_signal_sel_header();
+          }
         }
         serial_print(PublishSerial->now(), Sen->T);
       }

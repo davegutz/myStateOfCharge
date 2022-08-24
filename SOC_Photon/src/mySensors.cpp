@@ -193,7 +193,8 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   boolean reset_loc = reset | reset_all_faults_;
   e_wrap_ = Mon->voc_tab() - Mon->voc();
-  if ( Mon->voc_tab()>(Mon->vsat()-WRAP_HI_SAT_MARG) ) ewsat_sclr_ = WRAP_HI_SAT_SCLR;
+  if ( Mon->soc()>WRAP_HI_SOC_OFF ) ewsat_sclr_ = WRAP_HI_SOC_SCLR;
+  else if ( Mon->voc_tab()>(Mon->vsat()-WRAP_HI_SAT_MARG) ) ewsat_sclr_ = WRAP_HI_SAT_SCLR;
   else ewsat_sclr_ = 1.;
   e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
   // sat logic screens out voc jumps when ib>0 when saturated
@@ -601,7 +602,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   }
 
   // print_signal_select
-  if ( rp.debug==26 )
+  if ( rp.debug==26 && (true ||  cp.publishS ) )   // TODO:
   {
       double cTime;
       if ( rp.tweak_test() ) cTime = double(now)/1000.;

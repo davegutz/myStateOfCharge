@@ -130,6 +130,8 @@ const float QUIET_R   (QUIET_S/5.);     // Quiet reset persistence, sec ('up 1 d
 #define TB_STALE_SET    3600.           // Tb read from one-wire stale persistence for failure, s (3600, 1 hr)
 #define TB_STALE_RESET  0.              // Tb read from one-wire stale persistence for reset, s (0)
 #define NOMINAL_TB      15.             // Middle of the road Tb for decent reversionary operation, deg C (15.)
+#define WRAP_HI_SOC_OFF 0.97            // Disable e_wrap_hi when saturated
+#define WRAP_HI_SOC_SCLR 1000.          // Huge to disable e_wrap
 
 // Conversion gains
 const float shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  

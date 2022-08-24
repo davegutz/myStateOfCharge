@@ -678,8 +678,8 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boole
     if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
      dt,temp_c_, ib_, soc_, voc_, dv_dyn_, vb_);
     
-    if ( rp.debug==76 ) Serial.printf("BatteryModel::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
-        soc_, temp_c_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);
+    if ( rp.debug==76 ) Serial.printf("BatteryModel::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in=%7.3f,ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
+        soc_, temp_c_, ib_in_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);
 
     return ( vb_*(*rp_nS_) );
 }
@@ -799,7 +799,7 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, BatteryMo
         Serial.printf("BatteryModel::cc,  dt,voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
                     Sen->T, pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 
-    if ( rp.debug==26 ) // print_serial_sim
+    if ( rp.debug==26 && (true || cp.publishS) ) // print_serial_sim  TODO:
     {
         double cTime;
         if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;
