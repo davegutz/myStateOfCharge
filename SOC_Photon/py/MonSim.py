@@ -229,7 +229,7 @@ if __name__ == '__main__':
 
         # Transient  inputs
         # time_end = None
-        time_end = -800.
+        time_end = 950.
         t_Ib_fail = None
         init_time_in = None
         # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'
@@ -249,9 +249,10 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/triTweakRegressionTest20220823.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/cosTweakRegressionTest20220823.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tbFailHdwe20220822.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/realWorldXp20_20220823.txt'; unit_key = 'soc0_2022'
+        # data_file_old_txt = '../dataReduction/realWorldXp20_20220823.txt'; unit_key = 'soc0_2022'
         # data_file_old_txt = '../dataReduction/pulse50_20220824.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/pulse30_20220824.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/realWorldXp20_20220824.txt'; unit_key = 'soc0_2022'
 
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
