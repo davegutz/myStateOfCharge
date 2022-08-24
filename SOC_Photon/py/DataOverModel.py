@@ -282,6 +282,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         plt.plot(old_s.time, old_s.Voc, color='blue',  linestyle='--', label='Voc')
         plt.plot(old_s.time, old_s.Voc_stat, color='green', linestyle=':', label='Voc_stat')
         plt.plot(old_s.time, old_s.voc_tab, color='black', linestyle='-.', label='voc_tab')
+        plt.plot(old_s.time, old_s.Vb_h, color='cyan', linestyle=':', label='Vb_hdwe')
         plt.legend(loc=1)
         plt.subplot(332)
         plt.plot(old_s_sim.time, old_s_sim.vb_m, color='red', linestyle='-', label='vb_m')
