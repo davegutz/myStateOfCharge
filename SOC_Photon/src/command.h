@@ -54,6 +54,7 @@ struct CommandPars
   String queue_str;         // Hold chit_chat queue data - queue with Control pass, 1 per Control pass
   String soon_str;          // Hold chit_chat soon data - priority with next Control pass, 1 per Control pass
   String asap_str;          // Hold chit_chat asap data - no waiting, ASAP all of now_str processed before Control pass
+  boolean publishS;         // Print serial monitor data
   CommandPars(void)
   {
     this->token = false;
@@ -66,6 +67,7 @@ struct CommandPars
     ib_tot_bias_noamp = 0.;
     dc_dc_on = false;
     blynking = false;
+    publishS = false;
   }
   void cmd_reset(void)
   {
@@ -95,6 +97,7 @@ struct CommandPars
     Serial.printf("  ib_tot_bias_noamp=%7.3f;\n", this->ib_tot_bias_noamp);
     Serial.printf("  dc_dc_on=%d;\n", this->dc_dc_on);
     Serial.printf("  blynking=%d;\n", this->blynking);
+    Serial.printf("  publishS=%d;\n", this->publishS);
   }
 };            
 

@@ -197,7 +197,7 @@ void setup()
 
   // Summary
   System.enableFeature(FEATURE_RETAINED_MEMORY);
-  if ( rp.debug==4 || rp.debug==26 )
+  if ( ( rp.debug==4 || rp.debug==26 ) && cp.publishS )
     print_all_summary(mySum, rp.isum, NSUM);
 
   Serial.printf("End setup()\n");
@@ -220,7 +220,7 @@ void loop()
   boolean read_temp;                          // Read temp, T/F
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
 
-  boolean publishS;                           // Serial print, T/F
+  // boolean publishS;                           // Serial print, T/F see cp.publishS
   static Sync *PublishSerial = new Sync(PUBLISH_SERIAL_DELAY);
 
   boolean display_to_user;                    // User display, T/F
@@ -291,7 +291,7 @@ void loop()
   display_to_user = DisplayUserSync->update(millis(), reset); //  now || reset
   publishP = PublishParticle->update(millis(), false);        //  now || false
   publishB = PublishBlynk->update(millis(), false);           //  now || false
-  publishS = PublishSerial->update(millis(), reset_publish);  //  now || reset_publish
+  cp.publishS = PublishSerial->update(millis(), reset_publish);  //  now || reset_publish
   boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT );
   if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
   summarizing = Summarize->update(millis(), boot_summ, !rp.modeling); // now || boot_summ && !rp.modeling
@@ -339,7 +339,7 @@ void loop()
     if ( rp.debug==-35 ) debug_m35(Mon, Sen); // EKF Arduino
     if ( rp.tweak_test() )
     {
-      if ( rp.debug==4 || rp.debug==26 )
+      if ( ( rp.debug==4 || rp.debug==26 ) && cp.publishS )
       {
         if ( reset || (last_read_debug != rp.debug) )
         {
@@ -368,7 +368,7 @@ void loop()
   // Visit https://console.particle.io/events.   Click on "view events on a terminal"
   // to get a curl command to run
   // TODO:  publish_main(publishP, reset_publish, publishS) in myCloud
-  if ( publishP || publishS)
+  if ( publishP || cp.publishS)
   {
     assign_publist(&pp.pubList, PublishParticle->now(), unit, hm_string, Sen, num_timeouts, Mon);
  
@@ -383,9 +383,9 @@ void loop()
       digitalWrite(myPins->status_led, LOW);
 
     // Mon for rp.debug
-    if ( publishS && !rp.tweak_test() )
+    if ( cp.publishS && !rp.tweak_test() )
     {
-      if ( rp.debug==4 || rp.debug==26 )
+      if ( ( rp.debug==4 || rp.debug==26 ) && cp.publishS )
       {
         if ( reset_publish || (last_publishS_debug != rp.debug) )
         {
@@ -435,7 +435,7 @@ void loop()
   if ( read ) reset = false;
 
   if ( read_temp && elapsed>TEMP_INIT_DELAY ) reset_temp = false;
-  if ( publishP || publishS ) reset_publish = false;
+  if ( publishP || cp.publishS ) reset_publish = false;
 
   // Soft reset
   if ( cp.soft_reset )
