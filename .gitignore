@@ -34,3 +34,5 @@ SOC_Photon/Battery State/EKF/sandbox/*.png
 *.odp#
 SOC_Photon/dataReduction/*.csv
 *.crc_block
+SOC_Photon/py/.idea/misc.xml
+SOC_Photon/py/.idea/py.iml
