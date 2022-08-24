@@ -422,8 +422,7 @@ class SavedData:
                     self.c_time_s = np.array(sel.c_time) - self.time_ref
                     i_end_sel = np.where(self.c_time_s <= time_end)[0][-1] + 1
                     i_end = min(i_end, i_end_sel)
-            self.unit = data.unit[:i_end]
-            self.hm = data.hm[:i_end]
+                    self.zero_end = min(self.zero_end, i_end-1)
             self.cTime = self.cTime[:i_end]
             self.dt = np.array(data.dt[:i_end])
             self.time = np.array(self.time[:i_end])
@@ -601,7 +600,6 @@ class SavedDataSim:
                 i_end = len(self.time)
             else:
                 i_end = np.where(self.time <= time_end)[0][-1] + 1
-            self.unit_m = data.unit_m[:i_end]
             self.c_time = self.c_time[:i_end]
             self.time = self.time[:i_end]
             self.Tb_m = data.Tb_m[:i_end]

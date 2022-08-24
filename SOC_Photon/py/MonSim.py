@@ -228,7 +228,8 @@ if __name__ == '__main__':
         date_ = datetime.now().strftime("%y%m%d")
 
         # Transient  inputs
-        time_end = None
+        # time_end = None
+        time_end = -920.
         t_Ib_fail = None
         init_time_in = None
         # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'
@@ -245,7 +246,8 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/pulse20220821.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
         # data_file_old_txt = '../dataReduction/satSit20220821.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/tbFailMod20220822.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/tbFailHdwe20220822.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/tbFailHdwe20220822.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/realWorldXp20_20220823.txt'; unit_key = 'soc0_2022'
 
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
@@ -255,7 +257,7 @@ if __name__ == '__main__':
 
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key)
-        cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn', 'Voc_stat',
+        cols = ('cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn', 'Voc_stat',
                 'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc')
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
                                  encoding=None).view(np.recarray)
@@ -278,7 +280,7 @@ if __name__ == '__main__':
         # Load _m v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
                                                unit_key=unit_key_sim)
-        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m',
+        cols_sim = ('c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m',
                     'ib_in_m', 'sat_m', 'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
         if data_file_sim_clean:
             data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
