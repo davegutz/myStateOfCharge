@@ -37,7 +37,7 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // Text headers
 void print_serial_header(void)
 {
-  if ( rp.debug==4 || rp.debug==26 )
+  if ( ( rp.debug==4 || rp.debug==26 ) && cp.publishS )
   {
     Serial.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,,\n");
     if ( !cp.blynking )
@@ -69,7 +69,7 @@ void print_signal_sel_header(void)
 // Print strings
 void create_print_string(Publish *pubList)
 {
-  if ( rp.debug==4 || rp.debug==26 )
+  if ( ( rp.debug==4 || rp.debug==26 ) && cp.publishS )
     sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %5.2f,%7.5f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
       pubList->sat, rp.ib_select, rp.modeling,
@@ -81,7 +81,7 @@ void create_print_string(Publish *pubList)
 }
 void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
-  if ( rp.debug==4 || rp.debug || rp.debug==26 )
+  if ( ( rp.debug==4 || rp.debug || rp.debug==26 )  && cp.publishS )
   {
     sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
       pubList->unit.c_str(), pubList->hm_string.c_str(), double(Sen->now)/1000., Sen->T,
