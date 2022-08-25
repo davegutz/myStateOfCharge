@@ -252,7 +252,7 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/realWorldXp20_20220823.txt'; unit_key = 'soc0_2022'
         # data_file_old_txt = '../dataReduction/pulse50_20220824.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/pulse30_20220824.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/realWorldXp20_20220825.txt'; unit_key = 'soc0_2022'
+        data_file_old_txt = '../dataReduction/realWorldXp20_20220825a.txt'; unit_key = 'soc0_2022'
 
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title

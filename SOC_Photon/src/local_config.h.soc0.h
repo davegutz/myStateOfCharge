@@ -1,13 +1,13 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "soc0_20220825";  // Disable e_wrap saturated, history falw, cal noamp
+const String unit = "soc0_20220825b";  // Disable e_wrap saturated, history falw, cal noamp
 
 // Sensor biases
 #define CURR_BIAS_AMP         -0.94 // Calibration of amplified shunt sensor ('Da=#.#;'), A
 #define CURR_BIAS_NOAMP       -0.17 // Calibration of non-amplified shunt sensor ('Db=#.#;'), A
-#define SHUNT_SCALE_NOAMP     1.07  // Hardware to match data (1.07 for soc0)
-#define SHUNT_SCALE_AMP       0.83  // Hardware to match data (0.83 for soc0)
+#define SHUNT_SCALE_NOAMP     0.94  // Hardware to match data (0.94 for soc0)
+#define SHUNT_SCALE_AMP       0.892 // Hardware to match data (0.892 for soc0)
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors ('Di=#.#;'), A
 #define VOLT_BIAS             0.0   // Bias on Vb sensor ('Dc=#.#;'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor ('Dt=#.#;'  +reset), deg C

@@ -115,7 +115,7 @@ const float WRAP_HI_R = (WRAP_HI_S/2.); // Wrap high failure reset time, sec ('u
 #define WRAP_HI_SAT_MARG  0.2           // Wrap voltage margin to saturation, V (0.2)
 #define WRAP_HI_SAT_SCLR  2.0           // Wrap voltage margin scalar when saturated (2.0)
 #define F_MAX_T_WRAP    1.4             // Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (1.4)
-#define IBATT_DISAGREE_THRESH 5.        // Signal selection threshold for current disagree test, A (5.)
+#define IBATT_DISAGREE_THRESH 8.        // Signal selection threshold for current disagree test, A (8.)
 const float IBATT_DISAGREE_SET = (WRAP_LO_S-1.); // Signal selection current disagree fail persistence, s (WRAP_LO_S-1) // must be quicker than wrap lo
 #define IBATT_DISAGREE_RESET  1.        // Signal selection current disagree reset persistence, s (1.)
 #define TAU_Q_FILT      0.5             // Quiet rate time constant, sec (0.5)
@@ -135,7 +135,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 
 // Conversion gains
 const float shunt_noamp_v2a_s = SHUNT_NOM_V2A_S * SHUNT_SCALE_NOAMP;
-const float shunt_amp_v2a_s = shunt_noamp_v2a_s * SHUNT_AMP_R1 / SHUNT_AMP_R2 * SHUNT_SCALE_AMP; // Shunt amp V2A scalar
+const float shunt_amp_v2a_s = SHUNT_NOM_V2A_S * SHUNT_AMP_R1 / SHUNT_AMP_R2 * SHUNT_SCALE_AMP; // Shunt amp V2A scalar
 
 // Battery voltage measurement gain
 const float vb_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /

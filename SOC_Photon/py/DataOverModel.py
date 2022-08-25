@@ -41,6 +41,23 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     if fig_files is None:
         fig_files = []
 
+    plt.figure()  # 1a
+    n_fig += 1
+    plt.subplot(121)
+    plt.title(plot_title)
+    plt.plot(old_s.time, old_s.ibmh, color='black', linestyle='-', label='Ib_amp_hdse')
+    plt.plot(old_s.time, old_s.ibnh, color='green', linestyle='--', label='Ib_noa_hdwe')
+    plt.plot(old_s.time, old_s.Ib, color='red', linestyle='-.', label='Ib')
+    plt.legend(loc=1)
+    plt.subplot(122)
+    plt.title(plot_title)
+    plt.plot(old_s.time, old_s.ib_dif, color='black', linestyle='-.', label='ib_dif')
+    plt.plot(old_s.time, old_s.ib_dif_f, color='magenta', linestyle=':', label='ib_dif_f')
+    plt.legend(loc=1)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
     plt.figure()  # 1
     n_fig += 1
     plt.subplot(331)
