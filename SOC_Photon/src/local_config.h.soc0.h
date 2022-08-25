@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "soc0_20220824";  // Disable e_wrap saturated
+const String unit = "soc0_20220825";  // Disable e_wrap saturated, history falw
 
 // Sensor biases
 #define CURR_BIAS_AMP         -0.94 // Calibration of amplified shunt sensor ('Da=#.#;'), A
