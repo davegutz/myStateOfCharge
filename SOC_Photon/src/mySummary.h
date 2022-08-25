@@ -43,10 +43,11 @@ struct Sum_st
   int16_t Voc_ekf;  // Ekf estimated charge voltage, V
   int16_t tweak_sclr_amp;  // Amplified Coulombic Efficiency scalar
   int16_t tweak_sclr_noa;  // Non-Amplified Coulombic Efficiency scalar
+  uint16_t falw;    // Fail word
   Sum_st(void){}
   void assign(const time32_t now, const double Tb, const double Vb, const double Ib,
     const double soc_ekf, const double soc, const double Voc_dyn, const double Voc_ekf,
-    const double tweak_sclr_amp, const double tweak_sclr_noa)
+    const double tweak_sclr_amp, const double tweak_sclr_noa, const uint16_t falw)
   {
     char buffer[32];
     this->t = now;
@@ -59,6 +60,7 @@ struct Sum_st
     this->Voc_ekf = int16_t(Voc_ekf*1200.);
     this->tweak_sclr_amp = int16_t(tweak_sclr_amp*16000.);
     this->tweak_sclr_noa = int16_t(tweak_sclr_noa*16000.);
+    this->falw = falw;
     time_long_2_str(now, buffer);
   }
   void print(void)
@@ -68,7 +70,7 @@ struct Sum_st
     {
       time_long_2_str(this->t, buffer);
     }
-    Serial.printf("%s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %10.6f, %10.6f,",
+    Serial.printf("%s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %10.6f, %10.6f, %d,",
       buffer, this->t,
       double(this->Tb)/600.,
       double(this->Tb)/1200.,
@@ -78,7 +80,8 @@ struct Sum_st
       double(this->Voc_dyn)/1200.,
       double(this->Voc_ekf)/1200.,
       double(this->tweak_sclr_amp)/16000.,
-      double(this->tweak_sclr_noa)/16000.);
+      double(this->tweak_sclr_noa)/16000.,
+      this->falw);
   }
   void nominal()
   {
@@ -92,6 +95,7 @@ struct Sum_st
     this->Voc_ekf = 0.;
     this->tweak_sclr_amp = 1.;
     this->tweak_sclr_noa = 1.;
+    this->falw = 0;
   }
 };
 

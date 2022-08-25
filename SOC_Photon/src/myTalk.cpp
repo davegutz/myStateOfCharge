@@ -70,6 +70,14 @@ void chit(const String cmd, const urgency when)
     cp.asap_str += cmd;
 }
 
+// Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for talk()
+void clear_queues()
+{
+  cp.queue_str = "";
+  cp.soon_str = "";
+  cp.asap_str = "";
+}
+
 // Talk Executive
 void talk(BatteryMonitor *Mon, Sensors *Sen)
 {
@@ -93,8 +101,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
       cp.input_string = cp.input_string.substring(1);  // Delete the leading '>'
       request = INCOMING;
     }
-    else 
+    else
+    {
       request = NEW;
+      if ( key == 'c' ) clear_queues();
+    }
 
     // Limited echoing of Serial1 commands available
     if ( !cp.blynking )
@@ -204,6 +215,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               default:
                 Serial.print(cp.input_string.charAt(1)); Serial.println(" unk.  See 'h'");
             }
+            break;
+
+          case ( 'c' ):  // c:  clear queues
+            clear_queues();
             break;
 
           case ( 'C' ):  // C:
@@ -1120,6 +1135,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Bs=  %d.  Sim chem 0='BB', 1='LI' [%d]\n", rp.sim_mod, MOD_CODE); 
   Serial.printf("  BP=  %5.2f.  # parallel in bank [%5.2f]'\n", rp.nP, NP); 
   Serial.printf("  BS=  %5.2f.  # series in bank [%5.2f]'\n", rp.nS, NS); 
+
+  Serial.printf("c  clear talk queues, esp '-c;'\n");
 
   Serial.printf("C<?> Charge e.g.:\n");
   Serial.printf("  Ca=  set soc all - '(0-1.1)'\n"); 

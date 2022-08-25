@@ -109,8 +109,10 @@ protected:
 #define VB_FLT        1   // Momentary isolation of Vb failure, T=faulted
 #define IB_AMP_FLT    2   // Momentary isolation of Ib amp failure, T=faulted 
 #define IB_NOA_FLT    3   // Momentary isolation of Ib no amp failure, T=faulted 
+//                    4
 #define WRAP_HI_FLT   5   // Wrap isolates to Ib high fault
 #define WRAP_LO_FLT   6   // Wrap isolates to Ib low fault
+#define RED_LOSS      7   // Loss of current sensor redundancy, T = fault
 #define IB_DIF_HI_FLT 8   // Faulted sensor difference error, T = fault
 #define IB_DIF_LO_FLT 9   // Faulted sensor difference error, T = fault
 #define IB_DSCN_FLT   10  // Dual faulted quiet error, T = disconnected shunt
@@ -123,7 +125,7 @@ protected:
 #define VB_FA         1   // Peristed, latched isolation of Vb failure, T=failed
 #define IB_AMP_FA     2   // Amp sensor selection memory, T = amp failed
 #define IB_NOA_FA     3   // Noamp sensor selection memory, T = no amp failed
-#define CCD_FA        4
+#define CCD_FA        4   // Coulomb Counter difference accumulated, T = faulted=faile
 #define WRAP_HI_FA    5   // Wrap isolates to Ib high fail
 #define WRAP_LO_FA    6   // Wrap isolates to Ib low fail
 #define WRAP_VB_FA    7   // Wrap isolates to Vb fail
@@ -171,7 +173,7 @@ public:
   boolean ib_amp_flt() { return faultRead(IB_AMP_FLT);  };
   boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
   boolean ib_noa_flt() { return faultRead(IB_NOA_FLT); };
-  boolean ib_red_loss() { return ib_sel_stat_<0; };
+  boolean ib_red_loss() { return (ib_sel_stat_!=1 || rp.ib_select!=0 || ib_dif_fa()); };
   boolean Vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   float ib_diff() { return ( ib_diff_ ); };

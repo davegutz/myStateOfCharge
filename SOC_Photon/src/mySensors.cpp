@@ -182,7 +182,7 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
   ib_quiet_ = QuietFilt->calculate(ib_rate_, reset_loc, min(Sen->T, MAX_T_Q_FILT));
 
   // Fault
-  faultAssign( !rp.mod_ib() && abs(ib_quiet_)<=QUIET_A*ibq_sclr_, IB_DSCN_FLT );
+  faultAssign( !rp.mod_ib() && abs(ib_quiet_)<=QUIET_A*ibq_sclr_ && !reset_loc, IB_DSCN_FLT );   // initializes false
   failAssign( QuietPer->calculate(dscn_flt(), QUIET_S, QUIET_R, Sen->T, reset_loc), IB_DSCN_FA);
   debug_m13(Sen);
 }
@@ -224,7 +224,8 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("  mod_tb=%d, mod_vb=%d, mod_ib=%d\n", rp.mod_tb(), rp.mod_vb(), rp.mod_ib());
   Serial.printf("  ib_dscn_ft=%d;\n", ib_dscn_flt());
   Serial.printf("  ibd_lo_ft=%d;\n", ib_dif_lo_flt());
-  Serial.printf("  ibd_hi_ft=%d;\n    7\n", ib_dif_hi_flt());
+  Serial.printf("  ibd_hi_ft=%d;\n", ib_dif_hi_flt());
+  Serial.printf("  ib_red_loss=%d;\n", ib_red_loss());
   Serial.printf("  wl_ft=%d;\n", wrap_lo_flt());
   Serial.printf("  wh_ft=%d;\n    4\n", wrap_hi_flt());
   Serial.printf("  ibn_ft=%d;\n", ib_noa_flt());
@@ -234,7 +235,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   bitMapPrint(cp.buffer, fltw_, NUM_FLT);
   Serial.print(cp.buffer);
   Serial.printf(";\n");
-  Serial.printf("  CBA98x65x3210\n");
+  Serial.printf("  CBA98765x3210\n");
   Serial.printf("  fltw=%d;\n", fltw_);
   Serial.printf("  ib_dscn_fa=%d;\n", ib_dscn_fa());
   Serial.printf("  ibd_lo_fa=%d;\n", ib_dif_lo_fa());
@@ -262,6 +263,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("  voc_tab=%7.3f;\n", Mon->voc_tab());
   Serial1.printf("  voc=%7.3f;\n", Mon->voc());
   Serial1.printf("  e_w_f=%7.3f;\n", e_wrap_filt_);
+  Serial1.printf("  ib_red_loss=%d;\n", ib_red_loss());
   Serial1.printf("  imh=%7.3f;\n", Sen->Ib_amp_hdwe);
   Serial1.printf("  inh=%7.3f;\n", Sen->Ib_noamp_hdwe);
   Serial1.printf("  ibd_f=%7.3f;\n", ib_diff_f_);
@@ -375,6 +377,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       ib_sel_stat_ = 1;
     }
   }
+  faultAssign(ib_red_loss(), RED_LOSS); // ib_sel_stat<0
 
   // vb failure from wrap result.  Latches
   if ( reset_all_faults_ )

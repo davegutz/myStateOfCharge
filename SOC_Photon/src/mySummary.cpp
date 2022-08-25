@@ -42,9 +42,9 @@ void print_all_summary(struct Sum_st *sum, const int isum, const int nsum)
     if ( !cp.blynking )
       Serial1.printf("\n");
   }
-  Serial.printf("i,  date,                time,    Tb, Vb, Ib, soc, soc_ekf, Voc_dyn, Voc, tweak_sclr_amp, tweak_sclr_noa,\n");
+  Serial.printf("i,  date,                time,    Tb, Vb, Ib, soc, soc_ekf, Voc_dyn, Voc, tweak_sclr_amp, tweak_sclr_noa, falw,\n");
   if ( !cp.blynking )
-    Serial1.printf("i,  date,                time,    Tb, Vb, Ib, soc, soc_ekf, Voc_dyn, Voc, tweak_sclr_amp, tweak_sclr_noa,\n");
+    Serial1.printf("i,  date,                time,    Tb, Vb, Ib, soc, soc_ekf, Voc_dyn, Voc, tweak_sclr_amp, tweak_sclr_noa, falw,\n");
 }
 
 // reset helper
