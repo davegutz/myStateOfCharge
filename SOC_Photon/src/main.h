@@ -339,7 +339,7 @@ void loop()
     if ( rp.debug==-35 ) debug_m35(Mon, Sen); // EKF Arduino
     if ( rp.tweak_test() )
     {
-      if ( ( rp.debug==4 || rp.debug==26 ) && cp.publishS )
+      if ( ( rp.debug==4 || rp.debug==26 ) && (cp.publishS||true) ) // TODO:
       {
         if ( reset || (last_read_debug != rp.debug) )
         {

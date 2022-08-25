@@ -89,25 +89,48 @@ class SqInj
 class TriInj
 {
   public:
-    TriInj(): t_last_tri_(0) {};
+    TriInj(): t_last_(-1e6) {};
     ~TriInj();
     double signal(const double amp, const double freq_rps, const double t, const double inj_bias)
     {
-      double tri_bias = 0.;   // return value
-      double tri_dt = t;
+      double res = 0.;   // return value
+      double p = t;
       if ( freq_rps>1e-6 )
-        tri_dt = 1. / freq_rps * PI;
-      if ( t-t_last_tri_ >= tri_dt )
-        t_last_tri_ = t;
-      double dt = t-t_last_tri_;
-      if ( dt <= tri_dt/2. )
-        tri_bias = dt / (tri_dt/2.) * 2. * amp;
+        p = 2. / freq_rps * PI;
+
+      // refresh t_last base
+      if ( t - t_last_ >= p )
+        t_last_ = t;
+
+      // Wave calculation
+      /*     p/4
+             / \       
+            /   \      p  
+       0---/     \    /---
+           0      \  /
+                   \/ 
+                  3p/4
+      */
+      double s = 4. * amp / p;
+      double dt =  t - t_last_;
+
+      if ( dt <= p/4. )
+        res = dt * s;
+
+      else if ( dt <= 3.*p/4.)
+        res = (p/2. - dt) * s;
+
       else
-        tri_bias = (tri_dt-dt) / (tri_dt/2.) * 2. * amp;
-      return ( tri_bias + inj_bias );
+        res = (dt - p) * s;
+      
+      res += inj_bias;
+
+      // Serial.printf("trit,t_last_,dt,p,s,inj_bias,res,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", t, t_last_, dt, p, s, inj_bias, res);
+
+      return res;
     };
   protected:
-    double t_last_tri_;
+    double t_last_;
 };
 
 #endif
