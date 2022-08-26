@@ -115,7 +115,7 @@ const float WRAP_HI_R = (WRAP_HI_S/2.); // Wrap high failure reset time, sec ('u
 #define WRAP_HI_SAT_MARG  0.2           // Wrap voltage margin to saturation, V (0.2)
 #define WRAP_HI_SAT_SCLR  2.0           // Wrap voltage margin scalar when saturated (2.0)
 #define F_MAX_T_WRAP    1.4             // Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (1.4)
-#define IBATT_DISAGREE_THRESH 8.        // Signal selection threshold for current disagree test, A (8.)
+#define IBATT_DISAGREE_THRESH 5.        // Signal selection threshold for current disagree test, A (5.)
 const float IBATT_DISAGREE_SET = (WRAP_LO_S-1.); // Signal selection current disagree fail persistence, s (WRAP_LO_S-1) // must be quicker than wrap lo
 #define IBATT_DISAGREE_RESET  1.        // Signal selection current disagree reset persistence, s (1.)
 #define TAU_Q_FILT      0.5             // Quiet rate time constant, sec (0.5)
@@ -124,7 +124,7 @@ const float IBATT_DISAGREE_SET = (WRAP_LO_S-1.); // Signal selection current dis
 #define WN_Q_FILT       1.0             // Quiet filter-2 natural frequency, r/s (1.0)
 #define ZETA_Q_FILT     0.9             // Quiet fiter-2 damping factor (0.9)
 #define MAX_T_Q_FILT    RANDLES_T_MAX   // Quiet filter max update time (0.2)
-#define QUIET_A         0.01            // Quiet set threshold, sec (0.02, 0.1 too large on proto)
+#define QUIET_A         0.01            // Quiet set threshold, sec (0.01, 0.1 too large on proto)
 #define QUIET_S         40.             // Quiet set persistence, sec (40.)
 const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 down 10')
 #define TB_STALE_SET    3600.           // Tb read from one-wire stale persistence for failure, s (3600, 1 hr)
