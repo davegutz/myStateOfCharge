@@ -28,6 +28,7 @@ from MonSimNomConfig import *  # Global config parameters.   Overwrite in your o
 from datetime import datetime, timedelta
 from Scale import Scale
 
+
 def save_clean_file(mons, csv_file, unit_key):
     default_header_str = "unit,               hm,                  cTime,        dt,       sat,sel,mod,\
       Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,"
@@ -116,7 +117,8 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
 
     # Setup
     scale = model_bat_cap / Battery.RATED_BATT_CAP
-    s_q = Scale(1., 3., 0.000005, 0.00005); s_r = Scale(1., 3., 0.001, 1.)   # t_Ib_fail = 1000 o
+    s_q = Scale(1., 3., 0.000005, 0.00005)
+    s_r = Scale(1., 3., 0.001, 1.)   # t_Ib_fail = 1000 o
     sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
                        dv_hys=dv_hys, sres=sres)
     mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
@@ -317,7 +319,8 @@ if __name__ == '__main__':
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files, plot_title=plot_title, n_fig=n_fig, suffix='_new')  # sim over mon
+        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
+                                    suffix='_new')  # sim over mon
         n_fig, fig_files = overall(saved_old, mons, saved_sim_old, sims, sims_m, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig, new_s_s=sims)  # mon over data
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')

@@ -58,15 +58,15 @@ public:
   void tweak_sclr(const double sclr) { *rp_tweak_sclr_ = sclr; };
 protected:
   String name_;
-  double max_change_;           // Maximum allowed change to calibration scalar see 'N/MC'
-  double max_tweak_;            // Maximum allowed calibration scalar see 'N/Mx'
+  double max_change_;           // Maximum allowed change to calibration scalar # 'XN/MC'
+  double max_tweak_;            // Maximum allowed calibration scalar # 'XN/Mx'
   boolean sat_;                 // Indication that battery is saturated, T=saturated
   unsigned long int time_sat_past_; // Time at last declared saturation, ms
   double time_to_wait_;         // Time specified to wait before engaging delta_q_max declaration, ms
-  float *rp_delta_q_cinf_;      // Charge infinity at past update see 'N/Mi', Coulombs
-  float *rp_delta_q_dinf_;      // Discharge infinity at past update see 'N/Mi', Coulombs
+  float *rp_delta_q_cinf_;      // Charge infinity at past update # 'XN/Mi', Coulombs
+  float *rp_delta_q_dinf_;      // Discharge infinity at past update # 'XN/Mi', Coulombs
   float *rp_tweak_sclr_;        // Scalar on Coulombic efficiency 'N/Mk'
-  double delta_hrs_;            // Time since last allowed saturation see 'N/Mz', hr
+  double delta_hrs_;            // Time since last allowed saturation # 'XN/Mz', hr
   double coul_eff_;             // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
 };
 

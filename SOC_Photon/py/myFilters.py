@@ -457,7 +457,8 @@ if __name__ == '__main__':
             # Models
             filter_1.calculate(in_, reset, dt)
             filter_2.calculate(in_, reset, dt)
-            # print("t,in,accel,rate_state,state,out=", t[i],filter_2.in_, filter_2.accel, filter_2.AB2.state, filter_2.Tustin.state, filter_2.out_)
+            # print("t,in,accel,rate_state,state,out=", t[i],filter_2.in_,
+            #   filter_2.accel, filter_2.AB2.state, filter_2.Tustin.state, filter_2.out_)
 
             # Plot stuff
             filter_1.save(t[i])

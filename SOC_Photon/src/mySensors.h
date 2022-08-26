@@ -174,7 +174,7 @@ public:
   boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
   boolean ib_noa_flt() { return faultRead(IB_NOA_FLT); };
   boolean ib_red_loss() { return (ib_sel_stat_!=1 || rp.ib_select!=0 || ib_dif_fa()); };
-  boolean Vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
+  boolean vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   float ib_diff() { return ( ib_diff_ ); };
   float ib_diff_f() { return ( ib_diff_f_ ); };

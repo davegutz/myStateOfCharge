@@ -531,7 +531,7 @@ class SavedData:
             self.m_bare = np.array(sel.m_bare[:i_end])
             self.n_bare = np.array(sel.n_bare[:i_end])
             self.cc_dif = np.array(sel.cc_dif[:i_end])
-            self.ccd_fa = np.bool8( np.array(falw) & 2**4 )
+            self.ccd_fa = np.bool8(np.array(falw) & 2**4)
             self.ibmh = np.array(sel.ibmh[:i_end])
             self.ibnh = np.array(sel.ibnh[:i_end])
             self.ibmm = np.array(sel.ibmm[:i_end])
@@ -539,17 +539,17 @@ class SavedData:
             self.ibm = np.array(sel.ibm[:i_end])
             self.ib_dif = np.array(sel.ib_dif[:i_end])
             self.ib_dif_f = np.array(sel.ib_dif_f[:i_end])
-            self.ib_dif_flt = np.bool8( (np.array(fltw) & 2**8) | (np.array(fltw) & 2**9) )
-            self.ib_dif_fa = np.bool8( (np.array(falw) & 2**8) | (np.array(falw) & 2**9) )
+            self.ib_dif_flt = np.bool8((np.array(fltw) & 2**8) | (np.array(fltw) & 2**9))
+            self.ib_dif_fa = np.bool8((np.array(falw) & 2**8) | (np.array(falw) & 2**9))
             self.voc_tab = np.array(sel.voc_tab[:i_end])
             self.e_w = np.array(sel.e_w[:i_end])
             self.voc = self.voc_tab - self.e_w
             self.e_w_f = np.array(sel.e_w_f[:i_end])
-            self.wh_flt = np.bool8( np.array(fltw) & 2**5 )
-            self.wl_flt = np.bool8( np.array(fltw) & 2**6 )
-            self.wh_fa = np.bool8( np.array(falw) & 2**5 )
-            self.wl_fa = np.bool8( np.array(falw) & 2**6 )
-            self.wv_fa = np.bool8( np.array(falw) & 2**7 )
+            self.wh_flt = np.bool8(np.array(fltw) & 2**5)
+            self.wl_flt = np.bool8(np.array(fltw) & 2**6)
+            self.wh_fa = np.bool8(np.array(falw) & 2**5)
+            self.wl_fa = np.bool8(np.array(falw) & 2**6)
+            self.wv_fa = np.bool8(np.array(falw) & 2**7)
             self.ib_sel = np.array(sel.ib_sel[:i_end])
             self.Ib_h = np.array(sel.Ib_h[:i_end])
             self.Ib_m = np.array(sel.Ib_m[:i_end])
@@ -566,13 +566,13 @@ class SavedData:
             self.vb_sel = np.array(sel.vb_sel[:i_end])
             self.ib_rate = np.array(sel.ib_rate[:i_end])
             self.ib_quiet = np.array(sel.ib_quiet[:i_end])
-            self.dscn_flt = np.bool8( np.array(fltw) & 2**10 )
-            self.dscn_fa = np.bool8( np.array(falw) & 2**10 )
-            self.vb_flt = np.bool8( np.array(fltw) & 2**1 )
-            self.vb_fa = np.bool8( np.array(falw) & 2**1 )
+            self.dscn_flt = np.bool8(np.array(fltw) & 2**10)
+            self.dscn_fa = np.bool8(np.array(falw) & 2**10)
+            self.vb_flt = np.bool8(np.array(fltw) & 2**1)
+            self.vb_fa = np.bool8(np.array(falw) & 2**1)
             self.tb_sel = np.array(sel.tb_sel[:i_end])
-            self.tb_flt = np.bool8( np.array(fltw) & 2**0 )
-            self.tb_fa = np.bool8( np.array(falw) & 2**0 )
+            self.tb_flt = np.bool8(np.array(fltw) & 2**0)
+            self.tb_fa = np.bool8(np.array(falw) & 2**0)
 
     def __str__(self):
         s = "{},".format(self.unit[self.i])
@@ -752,19 +752,23 @@ if __name__ == '__main__':
         fig_files = []
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
-        if platform == 'linux':
-            filename = "Python/Figures/" + data_root + sys.argv[0].split('/')[-1]
-        else:
-            filename = data_root + sys.argv[0].split('/')[-1]
+        # if platform == 'linux':
+        #     filename = "Python/Figures/" + data_root + sys.argv[0].split('/')[-1]
+        # else:
+        #     filename = data_root + sys.argv[0].split('/')[-1]
+        filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files, plot_title=plot_title,
                                     n_fig=n_fig, suffix='_new')  # Could be confusing because sim over mon
         n_fig, fig_files = overall(saved_old, mons, saved_sim_old, sims, sims_m, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig, new_s_s=sims)
-        if platform != 'linux':
-            unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf',
-                                    pathToSavePdfTo='../dataReduction/figures')
-            cleanup_fig_files(fig_files)
+        # if platform != 'linux':
+        #     unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf',
+        #                             pathToSavePdfTo='../dataReduction/figures')
+        #     cleanup_fig_files(fig_files)
+        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf',
+                                pathToSavePdfTo='../dataReduction/figures')
+        cleanup_fig_files(fig_files)
 
         plt.show()
 
