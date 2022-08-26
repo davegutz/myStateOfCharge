@@ -1181,7 +1181,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Mz= "); Serial.printf("%7.3f", Sen->ShuntAmp->time_sat_past()); Serial.println("  : Amp time since last tweak, hr [varies]"); 
 
   Serial.printf("N<?> No amp tweaks\n");
-  Serial.printf("  NC= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_change()); Serial.println("  : Noa CE max change allowed scakar [0.001]"); 
+  Serial.printf("  NC= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_change()); Serial.println("  : Noa CE max change allowed scalar [0.001]"); 
   Serial.printf("  Nk= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->tweak_sclr()); Serial.println("  : No Amp Coul eff scalar [1]"); 
   Serial.printf("  Nw= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->time_to_wait()); Serial.println("  : No Amp time to wait for next tweak, hr [18]]"); 
   Serial.printf("  Nx= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_tweak()); Serial.println("  : Amp Coul eff max allowed scalar [0.01]"); 

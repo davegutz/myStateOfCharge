@@ -63,7 +63,7 @@
 #define VBATT_A               0.0       // Vb sense adder, V (0)
 #define PHOTON_ADC_COUNT      4096      // Photon ADC range, counts (4096)
 #define PHOTON_ADC_VOLT       3.3       // Photon ADC range, V (3.3)
-#define SHUNT_NOAMP_V2A_S     -1189.3   // Shunt V2A scalar, A/V (1333 is 100A/0.075V)  (-1189.3)
+#define SHUNT_NOM_V2A_S       -1333.    // Shunt V2A scalar, A/V (1333 is 100A/0.075V)
 #define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms
 #define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms
 #define SCREEN_WIDTH          128       // OLED display width, in pixels (128)
@@ -83,7 +83,7 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define TEMP_DELAY            1         // Time to block temperature sensor read in DS18 routine, ms (1)
 #define TEMP_INIT_DELAY       10000     // It takes 10 seconds first read of DS18 (10000)
 #define TWEAK_MAX_CHANGE      0.001     // Maximum allowed tweak per charge cycle, scalar +/- (0.001)
-#define TWEAK_MAX             0.01      // Maximum tweak allowed, scalar +/- (0.01)
+#define TWEAK_MAX             0.0       // Maximum tweak allowed, scalar +/- (0.01) dag 8/25/2021 turned this off for trials
 #define TWEAK_WAIT            6.        // Time to persist unsaturated before allowing peak, hrs (6)
 #define TWEAK_GAIN            0.66      // Tweak change limit gain to make soft landing (0.66)
 #define TT_WAIT               10.       // Before tweak test print wait, s (10)
@@ -115,7 +115,7 @@ const float WRAP_HI_R = (WRAP_HI_S/2.); // Wrap high failure reset time, sec ('u
 #define WRAP_HI_SAT_MARG  0.2           // Wrap voltage margin to saturation, V (0.2)
 #define WRAP_HI_SAT_SCLR  2.0           // Wrap voltage margin scalar when saturated (2.0)
 #define F_MAX_T_WRAP    1.4             // Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (1.4)
-#define IBATT_DISAGREE_THRESH 5.        // Signal selection threshold for current disagree test, A (5.)
+#define IBATT_DISAGREE_THRESH 8.        // Signal selection threshold for current disagree test, A (8.)
 const float IBATT_DISAGREE_SET = (WRAP_LO_S-1.); // Signal selection current disagree fail persistence, s (WRAP_LO_S-1) // must be quicker than wrap lo
 #define IBATT_DISAGREE_RESET  1.        // Signal selection current disagree reset persistence, s (1.)
 #define TAU_Q_FILT      0.5             // Quiet rate time constant, sec (0.5)
@@ -134,8 +134,8 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define WRAP_HI_SOC_SCLR 1000.          // Huge to disable e_wrap
 
 // Conversion gains
-const float shunt_noamp_v2a_s = SHUNT_NOAMP_V2A_S;  
-const float shunt_amp_v2a_s = shunt_noamp_v2a_s * SHUNT_AMP_R1/SHUNT_AMP_R2; // Shunt amp V2A scalar
+const float shunt_noamp_v2a_s = SHUNT_NOM_V2A_S * SHUNT_SCALE_NOAMP;
+const float shunt_amp_v2a_s = SHUNT_NOM_V2A_S * SHUNT_AMP_R1 / SHUNT_AMP_R2 * SHUNT_SCALE_AMP; // Shunt amp V2A scalar
 
 // Battery voltage measurement gain
 const float vb_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
