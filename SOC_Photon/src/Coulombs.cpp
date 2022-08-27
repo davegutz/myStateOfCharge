@@ -48,32 +48,32 @@ void Chemistry::assign_mod(const String mod_str)
     if ( n_s )  delete x_soc;
     if ( m_t )  delete y_t;
     if ( m_t && n_s )  delete t_voc;
-    n_s     = n_s_bb;   //Number of soc breakpoints voc table
-    m_t     = m_t_bb;   // Number temperature breakpoints for voc table
+    n_s     = N_S_BB;   //Number of soc breakpoints voc table
+    m_t     = M_T_BB;   // Number temperature breakpoints for voc table
     x_soc = new float[n_s];
     y_t = new float[m_t];
     t_voc = new float[m_t*n_s];
-    for (i=0; i<n_s; i++) x_soc[i] = x_soc_bb[i];
-    for (i=0; i<m_t; i++) y_t[i] = y_t_bb[i];
-    for (i=0; i<m_t*n_s; i++) t_voc[i] = t_voc_bb[i];
+    for (i=0; i<n_s; i++) x_soc[i] = X_SOC_BB[i];
+    for (i=0; i<m_t; i++) y_t[i] = Y_T_BB[i];
+    for (i=0; i<m_t*n_s; i++) t_voc[i] = T_VOC_BB[i];
     if ( n_n ) { delete x_soc_min; delete t_soc_min;}
-    n_n     = n_n_bb;   // Number of temperature breakpoints for x_soc_min table
+    n_n     = N_N_BB;   // Number of temperature breakpoints for x_soc_min table
     x_soc_min = new float[n_n];
     t_soc_min = new float[n_n];
-    for (i=0; i<n_n; i++) x_soc_min[i] = x_soc_min_bb[i];
-    for (i=0; i<n_n; i++) t_soc_min[i] = t_soc_min_bb[i];
+    for (i=0; i<n_n; i++) x_soc_min[i] = X_SOC_MIN_BB[i];
+    for (i=0; i<n_n; i++) t_soc_min[i] = T_SOC_MIN_BB[i];
     hys_cap = 3.6e5;    // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data
     if ( n_h )  delete x_dv;
     if ( m_h )  delete y_soc;
     if ( m_h && n_h )  delete t_r;
-    n_h     = n_h_bb;   // Number of dv breakpoints in r(dv) table t_r
-    m_h     = m_h_bb;   // Number of soc breakpoints in r(soc, dv) table t_r
+    n_h     = N_H_BB;   // Number of dv breakpoints in r(dv) table t_r
+    m_h     = M_H_BB;   // Number of soc breakpoints in r(soc, dv) table t_r
     x_dv = new float[n_h];
     y_soc = new float[m_h];
     t_r = new float[m_h*n_h];
-    for (i=0; i<n_h; i++) x_dv[i] = x_dv_bb[i];
-    for (i=0; i<m_h; i++) y_soc[i] = y_soc_bb[i];
-    for (i=0; i<m_h*n_h; i++) t_r[i] = t_r_bb[i];
+    for (i=0; i<n_h; i++) x_dv[i] = X_DV_BB[i];
+    for (i=0; i<m_h; i++) y_soc[i] = Y_SOC_BB[i];
+    for (i=0; i<m_h*n_h; i++) t_r[i] = T_R_BB[i];
     v_sat       = 13.85;  // Saturation threshold at temperature, deg C
     dvoc_dt     = 0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
     dv          = 0.01;   // Adjustment for calibration error, V
@@ -94,32 +94,32 @@ void Chemistry::assign_mod(const String mod_str)
     if ( n_s )  delete x_soc;
     if ( m_t )  delete y_t;
     if ( m_t && n_s )  delete t_voc;
-    n_s     = n_s_li;   //Number of soc breakpoints voc table
-    m_t     = m_t_li;   // Number temperature breakpoints for voc table
+    n_s     = N_S_LI;   //Number of soc breakpoints voc table
+    m_t     = M_T_LI;   // Number temperature breakpoints for voc table
     x_soc = new float[n_s];
     y_t = new float[m_t];
     t_voc = new float[m_t*n_s];
-    for (i=0; i<n_s; i++) x_soc[i] = x_soc_li[i];
-    for (i=0; i<m_t; i++) y_t[i] = y_t_li[i];
-    for (i=0; i<m_t*n_s; i++) t_voc[i] = t_voc_li[i];
+    for (i=0; i<n_s; i++) x_soc[i] = X_SOC_LI[i];
+    for (i=0; i<m_t; i++) y_t[i] = Y_T_LI[i];
+    for (i=0; i<m_t*n_s; i++) t_voc[i] = T_VOC_LI[i];
     if ( n_n ) { delete x_soc_min; delete t_soc_min;}
-    n_n     = n_n_li;   // Number of temperature breakpoints for x_soc_min table
+    n_n     = N_N_LI;   // Number of temperature breakpoints for x_soc_min table
     x_soc_min = new float[n_n];
     t_soc_min = new float[n_n];
-    for (i=0; i<n_n; i++) x_soc_min[i] = x_soc_min_li[i];
-    for (i=0; i<n_n; i++) t_soc_min[i] = t_soc_min_li[i];
+    for (i=0; i<n_n; i++) x_soc_min[i] = X_SOC_MIN_LI[i];
+    for (i=0; i<n_n; i++) t_soc_min[i] = T_SOC_MIN_LI[i];
     hys_cap = 3.6e5;    // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data
     if ( n_h )  delete x_dv;
     if ( m_h )  delete y_soc;
     if ( m_h && n_h )  delete t_r;
-    n_h     = n_h_li;   // Number of dv breakpoints in r(dv) table t_r
-    m_h     = m_h_li;   // Number of soc breakpoints in r(soc, dv) table t_r
+    n_h     = N_H_LI;   // Number of dv breakpoints in r(dv) table t_r
+    m_h     = M_H_LI;   // Number of soc breakpoints in r(soc, dv) table t_r
     x_dv = new float[n_h];
     y_soc = new float[m_h];
     t_r = new float[m_h*n_h];
-    for (i=0; i<n_h; i++) x_dv[i] = x_dv_li[i];
-    for (i=0; i<m_h; i++) y_soc[i] = y_soc_li[i];
-    for (i=0; i<m_h*n_h; i++) t_r[i] = t_r_li[i];
+    for (i=0; i<n_h; i++) x_dv[i] = X_DV_LI[i];
+    for (i=0; i<m_h; i++) y_soc[i] = Y_SOC_LI[i];
+    for (i=0; i<m_h*n_h; i++) t_r[i] = T_R_LI[i];
     v_sat       = 12.85;  // Saturation threshold at temperature, deg C
     dvoc_dt     = 0.008;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
     dv          = 0.01;   // Adjustment for calibration error, V
@@ -362,9 +362,6 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const floa
     if ( rp.debug==96 )
         Serial.printf("Coulombs::cc,             reset,dt,voc, Voc_filt, V_sat, temp_c, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,      %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
                     reset, dt, pp.pubList.Voc, pp.pubList.Voc_filt,  this->Vsat(), temp_c, temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
-    if ( rp.debug==-96 )
-        Serial.printf("voc, Voc_filt, v_sat, sat, temp_lim, charge_curr, d_d_q, d_q, q, q_capacity,soc,          \n%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
-                    pp.pubList.Voc, pp.pubList.Voc_filt, this->Vsat(), temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 
     // Save and return
     *rp_t_last_ = temp_lim;

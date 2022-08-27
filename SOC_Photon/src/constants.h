@@ -63,7 +63,6 @@
 #define VBATT_A               0.0       // Vb sense adder, V (0)
 #define PHOTON_ADC_COUNT      4096      // Photon ADC range, counts (4096)
 #define PHOTON_ADC_VOLT       3.3       // Photon ADC range, V (3.3)
-#define SHUNT_NOM_V2A_S       -1333.    // Shunt V2A scalar, A/V (1333 is 100A/0.075V)
 #define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms
 #define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms
 #define SCREEN_WIDTH          128       // OLED display width, in pixels (128)
@@ -74,7 +73,7 @@
 #define F_MAX_T_TEMP          18.0      // Maximum call update time filters (18.0)
 #define F_W_T                 0.05      // Temperature filter wn, r/s (0.05)   
 #define F_Z_T                 0.80      // Temperature filter zeta (0.80)
-#define NSUM                  122       // Number of saved summaries.   If too large, will get compile error BACKUPSRAM
+#define NSUM                  120       // Number of saved summaries.   If too large, will get compile error BACKUPSRAM
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)
 #define HDB_VBATT             0.05      // Half deadband to filter Vb, V (0.05)
 #define T_SAT                 10        // Saturation time, sec (10, >=10 for no sat ib lo fault of -100 A)
@@ -94,7 +93,7 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define MAX_ERR_T             10.       // Maximum update time allowed to avoid instability, s (10.)
 #define IBATT_HARD_SET        1.        // Signal selection volt range fail persistence, s (1.)
 #define IBATT_HARD_RESET      1.        // Signal selection volt range fail reset persistence, s (1.)
-#define VBATT_MAX             17.       // Signal selection hard fault threshold, V (17. < vb_conv_gain*4095)
+#define VBATT_MAX             17.       // Signal selection hard fault threshold, V (17. < VB_CONV_GAIN*4095)
 #define VBATT_MIN             9.        // Signal selection hard fault threshold, V (0.  < 9. < 10 bms shutoff)
 #define VBATT_HARD_SET        1.        // Signal selection volt range fail persistence, s (1.)
 #define VBATT_HARD_RESET      1.        // Signal selection volt range fail reset persistence, s (1.)
@@ -134,11 +133,11 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define WRAP_HI_SOC_SCLR 1000.          // Huge to disable e_wrap
 
 // Conversion gains
-const float shunt_noamp_v2a_s = SHUNT_NOM_V2A_S * SHUNT_SCALE_NOAMP;
-const float shunt_amp_v2a_s = SHUNT_NOM_V2A_S * SHUNT_AMP_R1 / SHUNT_AMP_R2 * SHUNT_SCALE_AMP; // Shunt amp V2A scalar
+const float SHUNT_NOA_GAIN = SHUNT_GAIN * CURR_SCALE_NOA;
+const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2 * CURR_SCALE_AMP;
 
 // Battery voltage measurement gain
-const float vb_conv_gain = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
+const float VB_CONV_GAIN = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
                               double(VBATT_SENSE_R_LO) / double(PHOTON_ADC_COUNT) * double(VBATT_S);
 
 #endif // CONSTANTS_H_

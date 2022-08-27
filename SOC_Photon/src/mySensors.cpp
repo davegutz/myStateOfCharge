@@ -81,11 +81,12 @@ float TempSensor::load(Sensors *Sen)
 Shunt::Shunt()
 : Tweak(), Adafruit_ADS1015(), name_("None"), port_(0x00), bare_(false){}
 Shunt::Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_sclr,
-  float *cp_ib_bias, const float v2a_s)
+  float *cp_ib_bias, float *cp_ib_scale, const float v2a_s, float *rp_shunt_gain_sclr)
 : Tweak(name, TWEAK_MAX_CHANGE, TWEAK_MAX, TWEAK_WAIT, rp_delta_q_cinf, rp_delta_q_dinf, rp_tweak_sclr, COULOMBIC_EFF),
   Adafruit_ADS1015(),
-  name_(name), port_(port), bare_(false), cp_ib_bias_(cp_ib_bias), v2a_s_(v2a_s),
-  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0), slr_(1.), add_(0.)
+  name_(name), port_(port), bare_(false), cp_ib_bias_(cp_ib_bias), cp_ib_scale_(cp_ib_scale), v2a_s_(v2a_s),
+  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0), slr_(1.), add_(0.),
+  rp_shunt_gain_sclr_(rp_shunt_gain_sclr)
 {
   if ( name_=="No Amp")
     setGain(GAIN_SIXTEEN, GAIN_SIXTEEN); // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
@@ -109,9 +110,11 @@ void Shunt::pretty_print()
   Serial.printf("  port=0x%X;\n", port_);
   Serial.printf("  bare=%d;\n", bare_);
   Serial.printf("  *cp_ib_bias=%7.3f; A\n", *cp_ib_bias_);
+  Serial.printf("  *cp_ib_scale=%7.3f; A\n", *cp_ib_scale_);
   Serial.printf("  v2a_s=%7.2f; A/V\n", v2a_s_);
   Serial.printf("  vshunt_int=%d; count\n", vshunt_int_);
   Serial.printf("  ishunt_cal=%7.3f; A\n", ishunt_cal_);
+  Serial.printf("  *rp_shunt_gain_sclr=%7.3f; A\n", *rp_shunt_gain_sclr_);
   Serial.printf("Shunt(%s)::", name_.c_str()); Tweak::pretty_print();
   Serial.printf("Shunt(%s)::", name_.c_str()); Adafruit_ADS1015::pretty_print(name_);
 }
@@ -131,7 +134,7 @@ void Shunt::load()
     vshunt_int_0_ = 0; vshunt_int_1_ = 0; vshunt_int_ = 0;
   }
   vshunt_ = computeVolts(vshunt_int_);
-  ishunt_cal_ = vshunt_*v2a_s_*float(!rp.mod_ib()) + *cp_ib_bias_;
+  ishunt_cal_ = vshunt_*v2a_s_*float(!rp.mod_ib())*(*cp_ib_scale_)*(*rp_shunt_gain_sclr_) + *cp_ib_bias_;
 }
 
 
@@ -176,7 +179,7 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
   boolean reset_loc = reset | reset_all_faults_;
 
   // Rate (has some filtering)
-  ib_rate_ = QuietRate->calculate(Sen->Ib_amp_hdwe + Sen->Ib_noamp_hdwe, reset, min(Sen->T, MAX_T_Q_FILT));
+  ib_rate_ = QuietRate->calculate(Sen->Ib_amp_hdwe + Sen->Ib_noa_hdwe, reset, min(Sen->T, MAX_T_Q_FILT));
 
   // 2-pole filter
   ib_quiet_ = QuietFilt->calculate(ib_rate_, reset_loc, min(Sen->T, MAX_T_Q_FILT));
@@ -212,9 +215,9 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("  voc=%7.3f;\n", Mon->voc());
   Serial.printf("  e_w_f=%7.3f;\n", e_wrap_filt_);
   Serial.printf("  imh=%7.3f;\n", Sen->Ib_amp_hdwe);
-  Serial.printf("  inh=%7.3f;\n", Sen->Ib_noamp_hdwe);
+  Serial.printf("  inh=%7.3f;\n", Sen->Ib_noa_hdwe);
   Serial.printf("  imm=%7.3f;\n", Sen->Ib_amp_model);
-  Serial.printf("  inm=%7.3f;\n", Sen->Ib_noamp_model);
+  Serial.printf("  inm=%7.3f;\n", Sen->Ib_noa_model);
   Serial.printf("  ibd_f=%7.3f;\n", ib_diff_f_);
   Serial.printf("  tb_s_st=%d;\n", tb_sel_stat_);
   Serial.printf("  vb_s_st=%d;\n", vb_sel_stat_);
@@ -265,7 +268,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("  e_w_f=%7.3f;\n", e_wrap_filt_);
   Serial1.printf("  ib_red_loss=%d;\n", ib_red_loss());
   Serial1.printf("  imh=%7.3f;\n", Sen->Ib_amp_hdwe);
-  Serial1.printf("  inh=%7.3f;\n", Sen->Ib_noamp_hdwe);
+  Serial1.printf("  inh=%7.3f;\n", Sen->Ib_noa_hdwe);
   Serial1.printf("  ibd_f=%7.3f;\n", ib_diff_f_);
   Serial1.printf("  mod_tb=%d, mod_vb=%d, mod_ib=%d\n", rp.mod_tb(), rp.mod_vb(), rp.mod_ib());
   Serial1.printf("  tb_s_st=%d;\n", tb_sel_stat_);
@@ -321,8 +324,8 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
 
   // Compare current sensors - failure conditions large difference
   // Difference error, filter, check, persist
-  if ( rp.mod_ib() ) ib_diff_ = (Sen->Ib_amp_model - Sen->Ib_noamp_model) / Mon->nP();
-  else ib_diff_ = (Sen->Ib_amp_hdwe - Sen->Ib_noamp_hdwe) / Mon->nP();
+  if ( rp.mod_ib() ) ib_diff_ = (Sen->Ib_amp_model - Sen->Ib_noa_model) / Mon->nP();
+  else ib_diff_ = (Sen->Ib_amp_hdwe - Sen->Ib_noa_hdwe) / Mon->nP();
   ib_diff_f_ = IbErrFilt->calculate(ib_diff_, reset_loc, min(Sen->T, MAX_ERR_T));
   faultAssign( ib_diff_f_>=IBATT_DISAGREE_THRESH*ibdt_sclr_, IB_DIF_HI_FLT );
   faultAssign( ib_diff_f_<=-IBATT_DISAGREE_THRESH*ibdt_sclr_, IB_DIF_LO_FLT );
@@ -481,9 +484,9 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
   this->T_filt = T;
   this->T_temp = T_temp;
   this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_cinf_amp, &rp.delta_q_dinf_amp, &rp.tweak_sclr_amp,
-    &cp.ib_tot_bias_amp, shunt_amp_v2a_s);
-  this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_cinf_noamp, &rp.delta_q_dinf_noamp, &rp.tweak_sclr_noamp,
-    &cp.ib_tot_bias_noamp, shunt_noamp_v2a_s);
+    &cp.ib_tot_bias_amp, &rp.ib_scale_amp, SHUNT_AMP_GAIN, &rp.shunt_gain_sclr);
+  this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_cinf_noa, &rp.delta_q_dinf_noa, &rp.tweak_sclr_noa,
+    &cp.ib_tot_bias_noa, &rp.ib_scale_noa, SHUNT_NOA_GAIN, &rp.shunt_gain_sclr);
   this->SensorTb = new TempSensor(pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
   this->TbSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
   this->Sim = new BatteryModel(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS, &rp.sim_mod);
@@ -507,12 +510,12 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
 void Sensors::bias_all_model()
 {
   Ib_amp_model = ShuntAmp->bias_any( Ib_model );
-  Ib_noamp_model = ShuntNoAmp->bias_any( Ib_model );
+  Ib_noa_model = ShuntNoAmp->bias_any( Ib_model );
 }
 
 
 // Deliberate choice based on results and inputs
-// Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noamp_hdwe, Ib_amp_model, Ib_noamp_model
+// Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model
 // Outputs:  Ib_hdwe_model, Ib_hdwe, sclr_coul_eff, Vshunt
 void Sensors::choose_()
 {
@@ -526,9 +529,9 @@ void Sensors::choose_()
   else if ( Flt->ib_sel_stat()<0 )
   {
       Vshunt = ShuntNoAmp->vshunt();
-      Ib_hdwe = Ib_noamp_hdwe;
-      Ib_hdwe_model = Ib_noamp_model;
-      sclr_coul_eff = rp.tweak_sclr_noamp;
+      Ib_hdwe = Ib_noa_hdwe;
+      Ib_hdwe_model = Ib_noa_model;
+      sclr_coul_eff = rp.tweak_sclr_noa;
   }
   else
   {
@@ -543,7 +546,7 @@ void Sensors::choose_()
 void Sensors::final_assignments(BatteryMonitor *Mon)
 {
   // Reselect since may be changed
-  // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noamp_hdwe, Ib_amp_model, Ib_noamp_model
+  // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model
   // Outputs:  Ib_hdwe_model, Ib_hdwe, sclr_coul_eff, Vshunt
   choose_();
 
@@ -614,7 +617,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
           cTime, reset, rp.ib_select,
           ShuntAmp->bare(), ShuntNoAmp->bare(),
           Flt->cc_diff(),
-          Ib_amp_hdwe, Ib_noamp_hdwe, Ib_amp_model, Ib_noamp_model, Ib_model, 
+          Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model, Ib_model, 
           Flt->ib_diff(), Flt->ib_diff_f());
       Serial.print(cp.buffer);
       sprintf(cp.buffer, "  %7.5f,%7.5f,%7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %5.2f,%5.2f, %d, %5.2f, ",
@@ -663,7 +666,7 @@ void Sensors::shunt_bias(void)
   if ( !rp.mod_ib() )
   {
     ShuntAmp->bias( rp.ib_bias_amp + rp.ib_bias_all + rp.inj_bias );
-    ShuntNoAmp->bias( rp.ib_bias_noamp + rp.ib_bias_all + rp.inj_bias );
+    ShuntNoAmp->bias( rp.ib_bias_noa + rp.ib_bias_all + rp.inj_bias );
   }
 }
 
@@ -677,17 +680,27 @@ void Sensors::shunt_load(void)
 // Print Shunt selection data
 void Sensors::shunt_print()
 {
-    Serial.printf("reset,T,select,inj_bias,vs_int_a,Vshunt_a,Ib_hdwe_a,vs_int_na,Vshunt_na,Ib_hdwe_na,Ib_hdwe,T,sclr_coul_eff,Ib_amp_fault,Ib_amp_fail,Ib_noamp_fault,Ib_noamp_fail,=,    %d,%7.3f,%d,%7.3f,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,  %7.3f, %d,%d,  %d,%d,\n",
+    Serial.printf("reset,T,select,inj_bias,vs_int_a,Vshunt_a,Ib_hdwe_a,vs_int_na,Vshunt_na,Ib_hdwe_na,Ib_hdwe,T,sclr_coul_eff,Ib_amp_fault,Ib_amp_fail,Ib_noa_fault,Ib_noa_fail,=,    %d,%7.3f,%d,%7.3f,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,  %7.3f, %d,%d,  %d,%d,\n",
         reset, T, rp.ib_select, rp.inj_bias, ShuntAmp->vshunt_int(), ShuntAmp->vshunt(), ShuntAmp->ishunt_cal(),
         ShuntNoAmp->vshunt_int(), ShuntNoAmp->vshunt(), ShuntNoAmp->ishunt_cal(),
         Ib_hdwe, T, sclr_coul_eff,
         Flt->ib_amp_flt(), Flt->ib_amp_fa(), Flt->ib_noa_flt(), Flt->ib_noa_fa());
 }
 
+// Current scale.  Feeds into signal conversion
+void Sensors::shunt_scale(void)
+{
+  if ( !rp.mod_ib() )
+  {
+    ShuntAmp->scale( rp.ib_scale_amp );
+    ShuntNoAmp->scale( rp.ib_scale_noa );
+  }
+}
+
 // Shunt selection.  Use Coulomb counter and EKF to sort three signals:  amp current, non-amp current, voltage
 // Initial selection to charge the Sim for modeling currents on BMS cutback
 // Inputs: rp.ib_select (user override), Mon (EKF status)
-// States:  Ib_fail_noamp_
+// States:  Ib_fail_noa_
 // Outputs:  Ib_hdwe, Ib_model_in, Vb_sel_status_
 void Sensors::shunt_select_initial()
 {
@@ -696,12 +709,12 @@ void Sensors::shunt_select_initial()
 
     // Retrieve values.   Return values include scalar/adder for fault
     Ib_amp_model = ShuntAmp->bias_any( Ib_model );      // uses past Ib
-    Ib_noamp_model = ShuntNoAmp->bias_any( Ib_model );  // uses pst Ib
+    Ib_noa_model = ShuntNoAmp->bias_any( Ib_model );  // uses pst Ib
     Ib_amp_hdwe = ShuntAmp->ishunt_cal();
-    Ib_noamp_hdwe = ShuntNoAmp->ishunt_cal();
+    Ib_noa_hdwe = ShuntNoAmp->ishunt_cal();
 
     // Initial choice
-    // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noamp_hdwe, Ib_amp_model(past), Ib_noamp_model(past)
+    // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model(past), Ib_noa_model(past)
     // Outputs:  Ib_hdwe_model, Ib_hdwe, sclr_coul_eff, Vshunt
     choose_();
 
@@ -747,7 +760,7 @@ void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const 
 void Sensors::vb_load(const byte vb_pin)
 {
     Vb_raw = analogRead(vb_pin);
-    Vb_hdwe =  float(Vb_raw)*vb_conv_gain + float(VBATT_A) + rp.vb_bias;
+    Vb_hdwe =  float(Vb_raw)*VB_CONV_GAIN + float(VBATT_A) + rp.vb_bias;
 }
 
 // Print analog voltage

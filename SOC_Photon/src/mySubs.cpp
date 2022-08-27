@@ -58,7 +58,7 @@ void print_signal_sel_header(void)
           // -----, cTime, reset, rp.ib_select,
           //                                    ShuntAmp->bare(), ShuntNoAmp->bare(),
           //                                                    cc_diff_,
-          //                                                              Ib_amp_hdwe, Ib_noamp_hdwe, Ib_amp_model, Ib_noamp_model, Ib_model,
+          //                                                              Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model, Ib_model,
           //                                                                                          ib_diff_, ib_diff_f,
           //         voc_tab, e_wrap_, e_wrap_filt_, ib_sel_stat_, Ib_hdwe, Ib_hdwe_model, mod_ib(), Ib,
           //                                                                                                vb_sel_stat, Vb_hdwe, Vb_model,mod_vb(), Vb,
@@ -134,6 +134,7 @@ void load_ib_vb(const boolean reset, const unsigned long now, Sensors *Sen, Pins
   // Load shunts
   // Outputs:  Sen->Ib_model_in, Sen->Ib_hdwe, Sen->Vb, Sen->Wb
   Sen->now = now;
+  Sen->shunt_scale();
   Sen->shunt_bias();
   Sen->shunt_load();
   Sen->Flt->shunt_check(Sen, Mon, reset);

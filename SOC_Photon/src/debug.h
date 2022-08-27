@@ -28,7 +28,6 @@
 #include "mySubs.h"
 
 void debug_m1(BatteryMonitor *Mon, Sensors *Sen);
-void debug_m3(BatteryMonitor *Mon, Sensors *Sen, const unsigned long elapsed, const boolean reset);
 void debug_m4(BatteryMonitor *Mon, Sensors *Sen);
 void debug_4(BatteryMonitor *Mon, Sensors *Sen);
 void debug_5(void);

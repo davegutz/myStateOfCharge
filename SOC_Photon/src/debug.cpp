@@ -34,13 +34,6 @@ void debug_m1(BatteryMonitor *Mon, Sensors *Sen)
     Sen->Vb*10-110, Sen->Sim->voc()*10-110, Sen->Sim->dv_dyn()*10, Sen->Sim->Vb()*10-110, Mon->dv_dyn()*10-110);
 }
 
-// rp.debug==-3  // Power Arduino plot
-void debug_m3(BatteryMonitor *Mon, Sensors *Sen, const unsigned long elapsed, const boolean reset)
-{
-  Serial.printf("fast,et,reset,Wb,q_f,q,soc,T,\n %12.3f,%7.3f, %d, %7.3f,    %7.3f,\n",
-  Sen->control_time, double(elapsed)/1000., reset, Sen->Wb, Sen->Sim->soc());
-}
-
 // rp.debug==-4  // General Arduino plot
 void debug_m4(BatteryMonitor *Mon, Sensors *Sen)
 {
@@ -82,7 +75,7 @@ void debug_m13(Sensors *Sen)
   else
       Serial.printf("%d, %7.3f,%7.3f,  %7.3f,%7.3f,   %d,%d\n",
   Sen->Flt->ib_sel_stat(),
-  max(min(Sen->Ib_amp_hdwe, 2), -2), max(min(Sen->Ib_noamp_hdwe, 2), -2),
+  max(min(Sen->Ib_amp_hdwe, 2), -2), max(min(Sen->Ib_noa_hdwe, 2), -2),
   max(min(Sen->Flt->ib_rate(),2), -2), max(min(Sen->Flt->ib_quiet(), 2), -2),
   Sen->Flt->ib_dscn_fa(), Sen->Flt->ib_dscn_fa());
 
@@ -112,7 +105,7 @@ void debug_m7(BatteryMonitor *Mon, Sensors *Sen)
 // Q quick print critical parameters
 void debug_q(BatteryMonitor *Mon, Sensors *Sen)
 {
-  Serial.printf("ib_amp_fail = %d,\nib_noamp_fail = %d,\nvb_fail = %d,\n\
+  Serial.printf("ib_amp_fail = %d,\nib_noa_fail = %d,\nvb_fail = %d,\n\
 Tb  = %7.3f,\nVb  = %7.3f,\nVoc = %7.3f,\nvoc_filt  = %7.3f,\nVsat = %7.3f,\nIb  = %7.3f,\nsoc_m = %8.4f,\n\
 soc_ekf= %8.4f,\nsoc = %8.4f,\nmodeling = %d,\namp delta_q_cinf = %10.1f,\namp delta_q_dinf = %10.1f,\namp tweak_sclr = %10.6f,\n\
 no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr = %10.6f,\n",
@@ -122,7 +115,7 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
     Sen->ShuntAmp->tweak_sclr(), Sen->ShuntNoAmp->delta_q_cinf(), Sen->ShuntNoAmp->delta_q_dinf(),
     Sen->ShuntNoAmp->tweak_sclr());
   if ( !cp.blynking )
-    Serial1.printf("ib_amp_fail = %d,\nib_noamp_fail = %d,\nvb_fail = %d,\n\
+    Serial1.printf("ib_amp_fail = %d,\nib_noa_fail = %d,\nvb_fail = %d,\n\
 Tb  = %7.3f,\nVb  = %7.3f,\nVoc = %7.3f,\nvoc_filt  = %7.3f,\nVsat = %7.3f,\nIb  = %7.3f,\nsoc_m = %8.4f,\n\
 soc_ekf= %8.4f,\nsoc = %8.4f,\nmodeling = %d,\namp delta_q_cinf = %10.1f,\namp delta_q_dinf = %10.1f,\namp tweak_sclr = %10.6f,\n\
 no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr = %10.6f,\n",

@@ -344,9 +344,6 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     if ( rp.debug==37 )
         Serial.printf("BatteryMonitor:ib,vb,voc_stat,voc(z_),  K_,y_,soc_ekf, y_ekf_f, conv,  %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,%7.4f,  %d,\n",
             ib_, vb_, voc_stat_, voc_,     K_, y_, soc_ekf_, y_filt_, converged_ekf());
-    if ( rp.debug==-37 )
-        Serial.printf("ib,vb*10-110,voc_stat_,voc(z_)*10-110,  K_,y_,soc_ekf-90, y_ekf_f,   conv*100,\n%7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,%7.4f,  %7.3f,\n",
-            ib_, vb_*10-110, voc_stat_*10-110, voc_*10-110,     K_, y_, soc_ekf_*100-90, y_filt_, double(converged_ekf())*100.);
 
     // Charge time if used ekf 
     if ( ib_ > 0.1 )
@@ -428,7 +425,7 @@ boolean BatteryMonitor::is_sat(const boolean reset)
     if ( reset)
         return ( temp_c_ > chem_.low_t && voc_filt_ >= vsat_ );
     else
-        return ( temp_c_ > chem_.low_t && (voc_filt_ >= vsat_ || soc_ >= mxeps) );
+        return ( temp_c_ > chem_.low_t && (voc_filt_ >= vsat_ || soc_ >= MXEPS) );
 }
 
 // Print

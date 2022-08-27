@@ -335,7 +335,6 @@ void loop()
     // TODO:  debug_main() into debug.cpp.  Move create_print_string, tweak_print, print_serial_header and print_serial_sim_header to debug.cpp 
     if ( rp.debug==-1 ) debug_m1(Mon, Sen); // General purpose Arduino
     if ( rp.debug==12 ) debug_12(Mon, Sen);  // EKF
-    if ( rp.debug==-3 ) debug_m3(Mon, Sen, elapsed, reset);  // Power Arduino
     if ( rp.debug==-35 ) debug_m35(Mon, Sen); // EKF Arduino
     if ( rp.tweak_test() )
     {

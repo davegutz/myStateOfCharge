@@ -69,7 +69,7 @@ class Shunt: public Tweak, Adafruit_ADS1015
 public:
   Shunt();
   Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_sclr,
-    float *cp_ib_bias, const float v2a_s);
+    float *cp_ib_bias, float *cp_ib_scale, const float v2a_s, float *rp_shunt_gain_sclr);
   ~Shunt();
   // operators
   // functions
@@ -82,18 +82,23 @@ public:
   float ishunt_cal() { return ( ishunt_cal_*slr_ + add_ ); };
   void load();
   void pretty_print();
+  void scale(const float sclr) { *cp_ib_scale_ = sclr; };
+  float scale() { return ( *cp_ib_scale_ ); };
+  void shunt_gain_sclr(const float sclr) { *rp_shunt_gain_sclr_ = sclr; };
+  float shunt_gain_sclr() { return *rp_shunt_gain_sclr_; };
   float slr() { return ( slr_ ); };
   void slr(const float slr) { slr_ = slr; };
-  float v2a_s() { return ( v2a_s_ ); };
-  float vshunt() { return ( vshunt_ ); };
-  int16_t vshunt_int() { return ( vshunt_int_ ); };
-  int16_t vshunt_int_0() { return ( vshunt_int_0_ ); };
-  int16_t vshunt_int_1() { return ( vshunt_int_1_ ); };
+  float v2a_s() { return v2a_s_ ; };
+  float vshunt() { return vshunt_; };
+  int16_t vshunt_int() { return vshunt_int_; };
+  int16_t vshunt_int_0() { return vshunt_int_0_; };
+  int16_t vshunt_int_1() { return vshunt_int_1_; };
 protected:
   String name_;         // For print statements, multiple instances
   uint8_t port_;        // Octal I2C port used by Acafruit_ADS1015
   boolean bare_;        // If ADS to be ignored
   float *cp_ib_bias_;   // Global bias, A
+  float *cp_ib_scale_;  // Global scale, A
   float v2a_s_;         // Selected shunt conversion gain, A/V
   int16_t vshunt_int_;  // Sensed shunt voltage, count
   int16_t vshunt_int_0_;// Interim conversion, count
@@ -102,6 +107,7 @@ protected:
   float ishunt_cal_;    // Sensed, calibrated ADC, A
   float slr_;           // Scalar for fault test
   float add_;           // Adder for fault test, A
+  float *rp_shunt_gain_sclr_; // Scalar on shunt gain
 };
 
 // Fault word bits
@@ -214,8 +220,8 @@ protected:
   TFDelay *IbdHiPer;        // Persistence ib diff hi
   TFDelay *IbdLoPer;        // Persistence ib diff lo
   TFDelay *IbAmpHardFail;   // Persistence ib hard fail amp
-  TFDelay *IbNoAmpHardFail; // Persistence ib hard fail noamp
-  TFDelay *TbStaleFail;            // Persistence stale tb one-wire data
+  TFDelay *IbNoAmpHardFail; // Persistence ib hard fail noa
+  TFDelay *TbStaleFail;     // Persistence stale tb one-wire data
   TFDelay *VbHardFail;      // Persistence vb hard fail amp
   TFDelay *QuietPer;        // Persistence ib quiet disconnect detection
   LagTustin *IbErrFilt;     // Noise filter for signal selection
@@ -242,7 +248,7 @@ protected:
   int8_t tb_sel_stat_;      // Memory of Tb signal selection, 0=none, 1=sensor
   float tb_stale_time_slr_; // Scalar on persistences of Tb hardware stale chec, (1)
   int8_t vb_sel_stat_;      // Memory of Vb signal selection, 0=none, 1=sensor
-  int8_t ib_sel_stat_;      // Memory of Ib signal selection, -1=noamp, 0=none, 1=a
+  int8_t ib_sel_stat_;      // Memory of Ib signal selection, -1=noa, 0=none, 1=a
   boolean reset_all_faults_;// Reset all fault logic
   int8_t tb_sel_stat_last_; // past value
   int8_t vb_sel_stat_last_; // past value
@@ -273,8 +279,8 @@ public:
   float Ib;                   // Selected battery bank current, A
   float Ib_amp_hdwe;          // Sensed amp battery bank current, A
   float Ib_amp_model;         // Modeled amp battery bank current, A
-  float Ib_noamp_hdwe;        // Sensed noamp battery bank current, A
-  float Ib_noamp_model;       // Modeled noamp battery bank current, A
+  float Ib_noa_hdwe;          // Sensed noa battery bank current, A
+  float Ib_noa_model;         // Modeled noa battery bank current, A
   float Ib_hdwe;              // Sensed battery bank current, A
   float Ib_hdwe_model;        // Selected model hardware signal, A
   float Ib_model;             // Modeled battery bank current, A
@@ -309,6 +315,7 @@ public:
   void shunt_bias(void);      // Load biases into Shunt objects
   void shunt_load(void);      // Load ADS015 protocol
   void shunt_print();         // Print selection result
+  void shunt_scale(void);     // Load scalars into Shunt objects
   void shunt_select_initial();   // Choose between shunts for model
   void temp_filter(const boolean reset_loc, const float t_rlim);
   void temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim);

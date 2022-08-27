@@ -26,12 +26,13 @@
 #define t_float float
 
 #include "local_config.h"
+#include "Battery.h"
 #include "math.h"
 
-// Definition of structure to be saved in SRAM
-// Default values below are important:  they prevent junk
-// behavior on initial build.
-// Don't put anything in here that you can't live with normal running
+// Definition of structure to be saved in SRAM.  Many are needed to calibrate.  Others are
+// needed to allow testing with resets.  Others allow application to remember dynamic
+// tweaks.  Default values below are important:  they prevent junk
+// behavior on initial build. Don't put anything in here that you can't live with normal running
 // because could get set by testing and forgotten.  Not reset by hard reset
 // ********CAUTION:  any special includes or logic in here breaks retained function
 struct RetainedPars
@@ -41,8 +42,11 @@ struct RetainedPars
   float t_last = RATED_TEMP;    // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
   double delta_q_model = 0.;    // Coulomb Counter state for model, C
   float t_last_model = RATED_TEMP;        // Battery temperature past value for rate limit memory, deg C
-  float ib_bias_amp = CURR_BIAS_AMP;      // Calibration of amplified shunt sensor, A
-  float ib_bias_noamp = CURR_BIAS_NOAMP;  // Calibration of non-amplified shunt sensor, A
+  float shunt_gain_sclr = 1.;             // Shunt gain scalar
+  float ib_scale_amp = CURR_SCALE_AMP;    // Calibration scalar of amplified shunt sensor, A
+  float ib_bias_amp = CURR_BIAS_AMP;      // Calibration adder of amplified shunt sensor, A
+  float ib_scale_noa = CURR_SCALE_NOA;    // Calibration scalar of non-amplified shunt sensor, A
+  float ib_bias_noa = CURR_BIAS_NOA;      // Calibration adder of non-amplified shunt sensor, A
   float ib_bias_all = CURR_BIAS_ALL;      // Bias on all shunt sensors, A
   int8_t ib_select = 0;         // Force current sensor (-1=non-amp, 0=auto, 1=amp)
   float vb_bias = VOLT_BIAS;    // Calibrate Vb, V
@@ -56,13 +60,13 @@ struct RetainedPars
   float cutback_gain_scalar = 1.;        // Scalar on battery model saturation cutback function
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
   int isum = -1;                // Summary location.   Begins at -1 because first action is to increment isum
-  float delta_q_cinf_amp = -RATED_BATT_CAP*3600.;   // Charge delta_q since last reset.  Simple integration of amplified current
-  float delta_q_cinf_noamp = -RATED_BATT_CAP*3600.; // Charge delta_q since last reset.  Simple integration of non-amplified current
-  float delta_q_dinf_amp = RATED_BATT_CAP*3600.;    // Discharge delta_q since last reset.  Simple integration of amplified current
-  float delta_q_dinf_noamp = RATED_BATT_CAP*3600.;  // Discharge delta_q since last reset.  Simple integration of non-amplified current
+  float delta_q_cinf_amp = -RATED_BATT_CAP*3600.;   // Dyn tweak.  Charge delta_q since last reset.  Simple integration of amplified current
+  float delta_q_cinf_noa = -RATED_BATT_CAP*3600.;   // Dyn tweak.  Charge delta_q since last reset.  Simple integration of non-amplified current
+  float delta_q_dinf_amp = RATED_BATT_CAP*3600.;    // Dyn tweak.  Discharge delta_q since last reset.  Simple integration of amplified current
+  float delta_q_dinf_noa = RATED_BATT_CAP*3600.;    // Dyn tweak.  Discharge delta_q since last reset.  Simple integration of non-amplified current
   float hys_scale = 1.;         // Hysteresis scalar
-  float tweak_sclr_amp = 1.;    // Tweak calibration for amplified current sensor
-  float tweak_sclr_noamp = 1.;  // Tweak calibration for non-amplified current sensor
+  float tweak_sclr_amp = 1.;    // Dyn tweak.  Tweak calibration for amplified current sensor
+  float tweak_sclr_noa = 1.;    // Dyn tweak.  Tweak calibration for non-amplified current sensor
   float nP = NP;                // Number of parallel batteries in bank, e.g. '2P1S'
   float nS = NS;                // Number of series batteries in bank, e.g. '2P1S'
   uint8_t mon_mod = MOD_CODE;   // Monitor battery chemistry type
@@ -73,7 +77,7 @@ struct RetainedPars
   boolean is_corrupt()
   {
     return ( this->nP==0 || this->nS==0 || this->mon_mod>10 || isnan(this->amp) || this->freq>2. ||
-     abs(this->ib_bias_amp)>500. || abs(this->cutback_gain_scalar)>1000. || abs(this->ib_bias_noamp)>500. ||
+     abs(this->ib_bias_amp)>500. || abs(this->cutback_gain_scalar)>1000. || abs(this->ib_bias_noa)>500. ||
      this->t_last_model<-10. || this->t_last_model>70. );
   }
 
@@ -85,8 +89,11 @@ struct RetainedPars
     this->t_last = RATED_TEMP;
     this->delta_q_model = 0.;
     this->t_last_model = RATED_TEMP;
+    this->shunt_gain_sclr = 1.;
+    this->ib_scale_amp = CURR_SCALE_AMP;
     this->ib_bias_amp = CURR_BIAS_AMP;
-    this->ib_bias_noamp = CURR_BIAS_NOAMP;
+    this->ib_scale_noa = CURR_SCALE_NOA;
+    this->ib_bias_noa = CURR_BIAS_NOA;
     this->ib_bias_all = CURR_BIAS_ALL;
     this->ib_select = false;
     this->vb_bias = VOLT_BIAS;
@@ -100,12 +107,12 @@ struct RetainedPars
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
     this->delta_q_cinf_amp = -RATED_BATT_CAP*3600.;
-    this->delta_q_cinf_noamp = -RATED_BATT_CAP*3600.;
+    this->delta_q_cinf_noa = -RATED_BATT_CAP*3600.;
     this->delta_q_dinf_amp = RATED_BATT_CAP*3600.;
-    this->delta_q_dinf_noamp = RATED_BATT_CAP*3600.;
+    this->delta_q_dinf_noa = RATED_BATT_CAP*3600.;
     this->hys_scale = 1.;
     this->tweak_sclr_amp = 1.;
-    this->tweak_sclr_noamp = 1.;
+    this->tweak_sclr_noa = 1.;
     this->nP = NP;
     this->nS = NS;
     this->mon_mod = MOD_CODE;
@@ -133,10 +140,13 @@ struct RetainedPars
     Serial.printf("  t_last=%7.3f; deg C\n", this->t_last);
     Serial.printf("  delta_q_model=%10.1f;\n", this->delta_q_model);
     Serial.printf("  t_last_model=%7.3f; deg C\n", this->t_last_model);
+    Serial.printf("  shunt_gain_sclr= %7.3f; A\n", this->shunt_gain_sclr);
+    Serial.printf("  ib_scale_amp= %7.3f; A\n", this->ib_scale_amp);
     Serial.printf("  ib_bias_amp= %7.3f; A\n", this->ib_bias_amp);
-    Serial.printf("  ib_bias_noamp=%7.3f; A\n", this->ib_bias_noamp);
+    Serial.printf("  ib_scale_noa= %7.3f; A\n", this->ib_scale_noa);
+    Serial.printf("  ib_bias_noa=%7.3f; A\n", this->ib_bias_noa);
     Serial.printf("  ib_bias_all=%7.3f; A \n", this->ib_bias_all);
-    Serial.printf("  ib_select=%d; -1=noamp, 0=auto, 1=amp\n", this->ib_select);
+    Serial.printf("  ib_select=%d; -1=noa, 0=auto, 1=amp\n", this->ib_select);
     Serial.printf("  vb_bias=%7.3f; V\n", this->vb_bias);
     Serial.printf("  modeling=%d;\n", this->modeling);
     Serial.printf("  amp=%7.3f; A pk\n", this->amp);
@@ -149,11 +159,11 @@ struct RetainedPars
     Serial.printf("  isum=%d;\n", this->isum);
     Serial.printf("  delta_q_cinf_amp= %10.1f; C\n", this->delta_q_cinf_amp);
     Serial.printf("  delta_q_dinf_amp= %10.1f; C\n", this->delta_q_dinf_amp);
-    Serial.printf("  delta_q_cinf_noamp=%10.1f; C\n", this->delta_q_cinf_noamp);
-    Serial.printf("  delta_q_dinf_noamp=%10.1f; C\n", this->delta_q_dinf_noamp);
+    Serial.printf("  delta_q_cinf_noa=%10.1f; C\n", this->delta_q_cinf_noa);
+    Serial.printf("  delta_q_dinf_noa=%10.1f; C\n", this->delta_q_dinf_noa);
     Serial.printf("  hys_scale=%7.3f;\n", this->hys_scale);
     Serial.printf("  tweak_sclr_amp=%7.3f;\n", this->tweak_sclr_amp);
-    Serial.printf("  tweak_sclr_noamp=%7.3f;\n", this->tweak_sclr_noamp);
+    Serial.printf("  tweak_sclr_noa=%7.3f;\n", this->tweak_sclr_noa);
     Serial.printf("  nP=%5.2f; e.g. '2P1S'\n", this->nP);
     Serial.printf("  nS=%5.2f; e.g. '2P1S'\n", this->nS);
     Serial.printf("  mon_mod=%d; 0=Battleborn, 1=LION\n", this->mon_mod);
