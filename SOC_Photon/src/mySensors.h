@@ -118,7 +118,7 @@ protected:
 //                    4
 #define WRAP_HI_FLT   5   // Wrap isolates to Ib high fault
 #define WRAP_LO_FLT   6   // Wrap isolates to Ib low fault
-#define RED_LOSS      7   // Loss of current sensor redundancy, T = fault
+#define IB_RED_LOSS      7   // Loss of current sensor redundancy, T = fault
 #define IB_DIF_HI_FLT 8   // Faulted sensor difference error, T = fault
 #define IB_DIF_LO_FLT 9   // Faulted sensor difference error, T = fault
 #define IB_DSCN_FLT   10  // Dual faulted quiet error, T = disconnected shunt
@@ -185,7 +185,8 @@ public:
   boolean ib_amp_flt() { return faultRead(IB_AMP_FLT);  };
   boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
   boolean ib_noa_flt() { return faultRead(IB_NOA_FLT); };
-  boolean ib_red_loss() { return (ib_sel_stat_!=1 || rp.ib_select!=0 || ib_dif_fa()); };
+  boolean ib_red_loss() { return faultRead(IB_RED_LOSS); };
+  boolean ib_red_loss_calc() { return (ib_sel_stat_!=1 || rp.ib_select!=0 || ib_dif_fa()); };
   boolean vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   float ib_diff() { return ( ib_diff_ ); };

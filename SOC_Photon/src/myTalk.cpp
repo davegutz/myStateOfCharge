@@ -502,19 +502,19 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'i' ):  // Fi:
                 INT_in = cp.input_string.substring(2).toInt();
                 Sen->Flt->disab_ib_fa(INT_in);
-                Serial.printf("Sen->Flt->disable_ib_fa to %d\n", Sen->Flt->disab_ib_fa());
+                Serial.printf("Sen->Flt->disab_ib_fa to %d\n", Sen->Flt->disab_ib_fa());
                 break;
 
               case ( 't' ):  // Ft:
                 INT_in = cp.input_string.substring(2).toInt();
                 Sen->Flt->disab_tb_fa(INT_in);
-                Serial.printf("Sen->Flt->disable_tb_fa to %d\n", Sen->Flt->disab_tb_fa());
+                Serial.printf("Sen->Flt->disab_tb_fa to %d\n", Sen->Flt->disab_tb_fa());
                 break;
 
               case ( 'v' ):  // Fv:
                 INT_in = cp.input_string.substring(2).toInt();
                 Sen->Flt->disab_vb_fa(INT_in);
-                Serial.printf("Sen->Flt->disable_vb_fa to %d\n", Sen->Flt->disab_vb_fa());
+                Serial.printf("Sen->Flt->disab_vb_fa to %d\n", Sen->Flt->disab_vb_fa());
                 break;
 
               default:

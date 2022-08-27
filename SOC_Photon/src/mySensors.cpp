@@ -392,7 +392,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       ib_sel_stat_ = 1;
     }
   }
-  faultAssign(ib_red_loss(), RED_LOSS); // ib_sel_stat<0
+  faultAssign(ib_red_loss_calc(), IB_RED_LOSS); // ib_sel_stat<0
 
   // vb failure from wrap result.  Latches
   if ( reset_all_faults_ )
@@ -471,8 +471,8 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       failAssign(false, IB_NOA_FA);
     }
     float current_max = RATED_BATT_CAP * Mon->nP();
-    faultAssign( abs(Sen->ShuntAmp->ishunt_cal()) >= current_max, IB_AMP_FLT );
-    faultAssign( abs(Sen->ShuntNoAmp->ishunt_cal()) >= current_max, IB_NOA_FLT );
+    faultAssign( abs(Sen->ShuntAmp->ishunt_cal()) >= current_max && !disab_ib_fa_, IB_AMP_FLT );
+    faultAssign( abs(Sen->ShuntNoAmp->ishunt_cal()) >= current_max && !disab_ib_fa_, IB_NOA_FLT );
     if ( disab_ib_fa_ )
     {
       failAssign( false, IB_AMP_FA );
