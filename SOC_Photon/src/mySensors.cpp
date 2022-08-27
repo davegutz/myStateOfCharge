@@ -85,7 +85,7 @@ Shunt::Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, floa
 : Tweak(name, TWEAK_MAX_CHANGE, TWEAK_MAX, TWEAK_WAIT, rp_delta_q_cinf, rp_delta_q_dinf, rp_tweak_sclr, COULOMBIC_EFF),
   Adafruit_ADS1015(),
   name_(name), port_(port), bare_(false), cp_ib_bias_(cp_ib_bias), cp_ib_scale_(cp_ib_scale), v2a_s_(v2a_s),
-  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0), slr_(1.), add_(0.),
+  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0), sclr_(1.), add_(0.),
   rp_shunt_gain_sclr_(rp_shunt_gain_sclr)
 {
   if ( name_=="No Amp")
@@ -140,8 +140,8 @@ void Shunt::load()
 
 // Class Fault
 Fault::Fault(const double T):
-  cc_diff_(0.), ccd_sclr_(1), ewhi_sclr_(1), ewlo_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0), fail_tb_(false),
-  ibdt_sclr_(1), ibq_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), tb_sel_stat_(1), tb_stale_time_slr_(1),
+  cc_diff_(0.), cc_diff_sclr_(1), ewhi_sclr_(1), ewlo_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0), fail_tb_(false),
+  ib_diff_sclr_(1), ib_quiet_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), tb_sel_stat_(1), tb_stale_time_sclr_(1),
   vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false), vb_sel_stat_last_(1), ib_sel_stat_last_(1),
   fltw_(0UL), falw_(0UL)
 {
@@ -185,7 +185,7 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
   ib_quiet_ = QuietFilt->calculate(ib_rate_, reset_loc, min(Sen->T, MAX_T_Q_FILT));
 
   // Fault
-  faultAssign( !rp.mod_ib() && abs(ib_quiet_)<=QUIET_A*ibq_sclr_ && !reset_loc, IB_DSCN_FLT );   // initializes false
+  faultAssign( !rp.mod_ib() && abs(ib_quiet_)<=QUIET_A*ib_quiet_sclr_ && !reset_loc, IB_DSCN_FLT );   // initializes false
   failAssign( QuietPer->calculate(dscn_flt(), QUIET_S, QUIET_R, Sen->T, reset_loc), IB_DSCN_FA);
   debug_m13(Sen);
 }
@@ -195,9 +195,9 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
 void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   boolean reset_loc = reset | reset_all_faults_;
-  e_wrap_ = Mon->voc_tab() - Mon->voc();
+  e_wrap_ = Mon->voc_soc() - Mon->voc();
   if ( Mon->soc()>WRAP_HI_SOC_OFF ) ewsat_sclr_ = WRAP_HI_SOC_SCLR;
-  else if ( Mon->voc_tab()>(Mon->vsat()-WRAP_HI_SAT_MARG) ) ewsat_sclr_ = WRAP_HI_SAT_SCLR;
+  else if ( Mon->voc_soc()>(Mon->vsat()-WRAP_HI_SAT_MARG) ) ewsat_sclr_ = WRAP_HI_SAT_SCLR;
   else ewsat_sclr_ = 1.;
   e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
   // sat logic screens out voc jumps when ib>0 when saturated
@@ -211,9 +211,12 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
 {
   Serial.printf("Fault:\n");
   Serial.printf("  cc_dif=%7.3f;\n", cc_diff_);
-  Serial.printf("  voc_tab=%7.3f;\n", Mon->voc_tab());
+  Serial.printf("  voc_soc=%7.3f;\n", Mon->voc_soc());
   Serial.printf("  voc=%7.3f;\n", Mon->voc());
   Serial.printf("  e_w_f=%7.3f;\n", e_wrap_filt_);
+  Serial.printf("  disab_ib_fa=%d;\n", disab_ib_fa_);
+  Serial.printf("  disab_tb_fa=%d;\n", disab_tb_fa_);
+  Serial.printf("  disab_vb_fa=%d;\n", disab_vb_fa_);
   Serial.printf("  imh=%7.3f;\n", Sen->Ib_amp_hdwe);
   Serial.printf("  inh=%7.3f;\n", Sen->Ib_noa_hdwe);
   Serial.printf("  imm=%7.3f;\n", Sen->Ib_amp_model);
@@ -246,7 +249,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("  wv_fa=%d; # 'Sd', 'Sb', 'Sa'\n", wrap_vb_fa());
   Serial.printf("  wl_fa=%d; # 'Sb'\n", wrap_lo_fa());
   Serial.printf("  wh_fa=%d; # 'Sa'\n", wrap_hi_fa());
-  Serial.printf("  ccd_fa=%d; # 'Sf'\n", ccd_fa());
+  Serial.printf("  cc_diff_fa=%d; # 'Sf'\n", cc_diff_fa());
   Serial.printf("  ibn_fa=%d;\n", ib_noa_fa());    // TODO: add __
   Serial.printf("  ibm_fa=%d;\n", ib_amp_fa());    // TODO: add __
   Serial.printf("  vb_fa=%d;\n", vb_fa());    // TODO: add __
@@ -263,7 +266,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("  mbar=%d;\n", Sen->ShuntAmp->bare());
   Serial1.printf("  nbar=%d;\n", Sen->ShuntNoAmp->bare());
   Serial1.printf("  cc_dif=%7.3f;\n", cc_diff_);
-  Serial1.printf("  voc_tab=%7.3f;\n", Mon->voc_tab());
+  Serial1.printf("  voc_soc=%7.3f;\n", Mon->voc_soc());
   Serial1.printf("  voc=%7.3f;\n", Mon->voc());
   Serial1.printf("  e_w_f=%7.3f;\n", e_wrap_filt_);
   Serial1.printf("  ib_red_loss=%d;\n", ib_red_loss());
@@ -284,7 +287,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("  wv_fa=%d; # 'Sd', 'Sb', 'Sa'\\n", wrap_vb_fa());
   Serial1.printf("  wl_fa=%d; # 'Sb'\n", wrap_lo_fa());
   Serial1.printf("  wh_fa=%d; # 'Sa'\n", wrap_hi_fa());
-  Serial1.printf("  ccd_fa=%d; # 'Sf'\n", ccd_fa());
+  Serial1.printf("  cc_diff_fa=%d; # 'Sf'\n", cc_diff_fa());
   Serial1.printf("  ibn_fa=%d;\n", ib_noa_fa());    // TODO: add __
   Serial1.printf("  ibm_fa=%d;\n", ib_amp_fa());    // TODO: add __
   Serial1.printf("  vb_fa=%d;\n", vb_fa());    // TODO: add __
@@ -313,22 +316,30 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   boolean reset_loc = reset || reset_all_faults_;
 
   // Temperature persistence
-  faultAssign( Sen->SensorTb->tb_stale_flt(), TB_FLT );
-  failAssign( TbStaleFail->calculate(tb_flt(), TB_STALE_SET*tb_stale_time_slr_, TB_STALE_RESET*tb_stale_time_slr_,
-    Sen->T, reset_loc), TB_FA );
+  if ( disab_tb_fa_ )
+  {
+    faultAssign( false, TB_FLT );
+    failAssign( false, TB_FA );
+  }
+  else
+  {
+    faultAssign( Sen->SensorTb->tb_stale_flt(), TB_FLT );
+    failAssign( TbStaleFail->calculate(tb_flt(), TB_STALE_SET*tb_stale_time_sclr_, TB_STALE_RESET*tb_stale_time_sclr_,
+      Sen->T, reset_loc), TB_FA );
+  }
 
   // EKF error test - failure conditions track poorly
   cc_diff_ = Mon->soc_ekf() - Mon->soc();  // These are filtered in their construction (EKF is a dynamic filter and 
                                                   // Coulomb counter is wrapa big integrator)
-  failAssign( abs(cc_diff_) >= SOC_DISAGREE_THRESH*ccd_sclr_, CCD_FA );
+  failAssign( abs(cc_diff_) >= SOC_DISAGREE_THRESH*cc_diff_sclr_, CCD_FA );
 
   // Compare current sensors - failure conditions large difference
   // Difference error, filter, check, persist
   if ( rp.mod_ib() ) ib_diff_ = (Sen->Ib_amp_model - Sen->Ib_noa_model) / Mon->nP();
   else ib_diff_ = (Sen->Ib_amp_hdwe - Sen->Ib_noa_hdwe) / Mon->nP();
   ib_diff_f_ = IbErrFilt->calculate(ib_diff_, reset_loc, min(Sen->T, MAX_ERR_T));
-  faultAssign( ib_diff_f_>=IBATT_DISAGREE_THRESH*ibdt_sclr_, IB_DIF_HI_FLT );
-  faultAssign( ib_diff_f_<=-IBATT_DISAGREE_THRESH*ibdt_sclr_, IB_DIF_LO_FLT );
+  faultAssign( ib_diff_f_>=IBATT_DISAGREE_THRESH*ib_diff_sclr_, IB_DIF_HI_FLT );
+  faultAssign( ib_diff_f_<=-IBATT_DISAGREE_THRESH*ib_diff_sclr_, IB_DIF_LO_FLT );
   failAssign( IbdHiPer->calculate(ib_dif_hi_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIF_HI_FA );
   failAssign( IbdLoPer->calculate(ib_dif_lo_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIF_LO_FA );
 
@@ -336,7 +347,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
 
   // ib
   // Serial.printf("\nTopTruth: rpibs,rloc,raf,ibss,ibssl,vbss,vbssl,ampb,noab,ibdf,whf,wlf,ccdf, %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,\n",
-  //  rp.ib_select, reset_loc, reset_all_faults_, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fa(), wrap_lo_fa(), ccd_fa_);
+  //  rp.ib_select, reset_loc, reset_all_faults_, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fa(), wrap_lo_fa(), cc_diff_fa_);
   if ( reset_all_faults_ )
   {
     ib_sel_stat_last_ = 1;
@@ -370,7 +381,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       {
         ib_sel_stat_ = -1;
       }
-      else if ( ccd_fa() )
+      else if ( cc_diff_fa() )
       {
         ib_sel_stat_ = -1;
       }
@@ -418,8 +429,8 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // Print
   if ( ib_sel_stat_ != ib_sel_stat_last_ || vb_sel_stat_ != vb_sel_stat_last_ || tb_sel_stat_ != tb_sel_stat_last_ )
   {
-    Serial.printf("Sel chg:  Amp->bare=%d, NoAmp->bare=%d, ib_dif_fa=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, ccd_fa_=%d,\n rp.ib_select=%d, ib_sel_stat=%d, vb_sel_stat=%d, tb_sel_stat=%d, vb_fail=%d, Tb_fail=%d,\n",
-        Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_dif_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), ccd_fa_, rp.ib_select, ib_sel_stat_, vb_sel_stat_, tb_sel_stat_, vb_fa(), tb_fa());
+    Serial.printf("Sel chg:  Amp->bare=%d, NoAmp->bare=%d, ib_dif_fa=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, cc_diff_fa_=%d,\n rp.ib_select=%d, ib_sel_stat=%d, vb_sel_stat=%d, tb_sel_stat=%d, vb_fail=%d, Tb_fail=%d,\n",
+        Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_dif_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_diff_fa_, rp.ib_select, ib_sel_stat_, vb_sel_stat_, tb_sel_stat_, vb_fa(), tb_fa());
   }
   if ( ib_sel_stat_ != ib_sel_stat_last_ )
   {
@@ -459,8 +470,16 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     float current_max = RATED_BATT_CAP * Mon->nP();
     faultAssign( abs(Sen->ShuntAmp->ishunt_cal()) >= current_max, IB_AMP_FLT );
     faultAssign( abs(Sen->ShuntNoAmp->ishunt_cal()) >= current_max, IB_NOA_FLT );
-    failAssign( ib_amp_fa() || IbAmpHardFail->calculate(ib_amp_flt(), IBATT_HARD_SET, IBATT_HARD_RESET, Sen->T, reset_loc), IB_AMP_FA );
-    failAssign( ib_noa_fa() || IbNoAmpHardFail->calculate(ib_noa_flt(), IBATT_HARD_SET, IBATT_HARD_RESET, Sen->T, reset_loc), IB_NOA_FA);
+    if ( disab_ib_fa_ )
+    {
+      failAssign( false, IB_AMP_FA );
+      failAssign( false, IB_NOA_FA);
+    }
+    else
+    {
+      failAssign( ib_amp_fa() || IbAmpHardFail->calculate(ib_amp_flt(), IBATT_HARD_SET, IBATT_HARD_RESET, Sen->T, reset_loc), IB_AMP_FA );
+      failAssign( ib_noa_fa() || IbNoAmpHardFail->calculate(ib_noa_flt(), IBATT_HARD_SET, IBATT_HARD_RESET, Sen->T, reset_loc), IB_NOA_FA);
+    }
 }
 
 // Check analog voltage.  Latches
@@ -471,8 +490,16 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vb_min, con
   {
     failAssign(false, VB_FA);
   }
-  faultAssign( (Sen->Vb_hdwe<=_Vb_min*Mon->nS()) || (Sen->Vb_hdwe>=_Vb_max*Mon->nS()), VB_FLT);
-  failAssign( vb_fa() || wrap_vb_fa() || VbHardFail->calculate(vb_flt(), VBATT_HARD_SET, VBATT_HARD_RESET, Sen->T, reset_loc), VB_FA);
+  if ( disab_vb_fa_ )
+  {
+    faultAssign(false, VB_FLT);
+    failAssign( false, VB_FA);
+  }
+  else
+  {
+    faultAssign( (Sen->Vb_hdwe<=_Vb_min*Mon->nS()) || (Sen->Vb_hdwe>=_Vb_max*Mon->nS()), VB_FLT);
+    failAssign( vb_fa() || VbHardFail->calculate(vb_flt(), VBATT_HARD_SET, VBATT_HARD_RESET, Sen->T, reset_loc), VB_FA);
+  }
 }
 
 
@@ -621,7 +648,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
           Flt->ib_diff(), Flt->ib_diff_f());
       Serial.print(cp.buffer);
       sprintf(cp.buffer, "  %7.5f,%7.5f,%7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %5.2f,%5.2f, %d, %5.2f, ",
-          Mon->voc_tab(), Flt->e_wrap(), Flt->e_wrap_filt(),
+          Mon->voc_soc(), Flt->e_wrap(), Flt->e_wrap_filt(),
           Flt->ib_sel_stat(), Ib_hdwe, Ib_hdwe_model, rp.mod_ib(), Ib,
           Flt->vb_sel_stat(), Vb_hdwe, Vb_model, rp.mod_vb(), Vb,
           Tb_hdwe, Tb, rp.mod_tb(), Tb_filt);
@@ -766,6 +793,6 @@ void Sensors::vb_load(const byte vb_pin)
 // Print analog voltage
 void Sensors::vb_print()
 {
-  Serial.printf("reset, T, Vb_raw, rp.vb_bias, Vb_hdwe, vb_flt(), vb_fa()=, %d, %7.3f, %d, %7.3f,  %7.3f, %d, %d,\n",
-    reset, T, Vb_raw, rp.vb_bias, Vb_hdwe, Flt->vb_flt(), Flt->vb_fa());
+  Serial.printf("reset, T, Vb_raw, rp.vb_bias, Vb_hdwe, vb_flt(), vb_fa(), wv_fa=, %d, %7.3f, %d, %7.3f,  %7.3f, %d, %d, %d,\n",
+    reset, T, Vb_raw, rp.vb_bias, Vb_hdwe, Flt->vb_flt(), Flt->vb_fa(), Flt->wrap_vb_fa());
 }

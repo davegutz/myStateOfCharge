@@ -77,17 +77,17 @@ public:
   void add(const float add) { add_ = add; };
   boolean bare() { return ( bare_ ); };
   void bias(const float bias) { *cp_ib_bias_ = bias; };
-  float bias() { return ( *cp_ib_bias_*slr_ + add_ ); };
-  float bias_any(const float Ib) { return ( Ib*slr_ + add_ ); };
-  float ishunt_cal() { return ( ishunt_cal_*slr_ + add_ ); };
+  float bias() { return ( *cp_ib_bias_*sclr_ + add_ ); };
+  float bias_any(const float Ib) { return ( Ib*sclr_ + add_ ); };
+  float ishunt_cal() { return ( ishunt_cal_*sclr_ + add_ ); };
   void load();
   void pretty_print();
   void scale(const float sclr) { *cp_ib_scale_ = sclr; };
   float scale() { return ( *cp_ib_scale_ ); };
   void shunt_gain_sclr(const float sclr) { *rp_shunt_gain_sclr_ = sclr; };
   float shunt_gain_sclr() { return *rp_shunt_gain_sclr_; };
-  float slr() { return ( slr_ ); };
-  void slr(const float slr) { slr_ = slr; };
+  float sclr() { return ( sclr_ ); };
+  void sclr(const float sclr) { sclr_ = sclr; };
   float v2a_s() { return v2a_s_ ; };
   float vshunt() { return vshunt_; };
   int16_t vshunt_int() { return vshunt_int_; };
@@ -105,7 +105,7 @@ protected:
   int16_t vshunt_int_1_;// Interim conversion, count
   float vshunt_;        // Sensed shunt voltage, V
   float ishunt_cal_;    // Sensed, calibrated ADC, A
-  float slr_;           // Scalar for fault test
+  float sclr_;           // Scalar for fault test
   float add_;           // Adder for fault test, A
   float *rp_shunt_gain_sclr_; // Scalar on shunt gain
 };
@@ -156,9 +156,15 @@ public:
   ~Fault();
   void bitMapPrint(char *buf, const int16_t fw, const uint8_t num);
   float cc_diff() { return cc_diff_; };
-  void ccd_sclr(const float sclr) { ccd_sclr_ = sclr; };
-  float ccd_sclr() { return ccd_sclr_; };
-  boolean ccd_fa() { return failRead(CCD_FA); };
+  void cc_diff_sclr(const float sclr) { cc_diff_sclr_ = sclr; };
+  float cc_diff_sclr() { return cc_diff_sclr_; };
+  boolean cc_diff_fa() { return failRead(CCD_FA); };
+  void disab_ib_fa(const boolean dis) { disab_ib_fa_ = dis; };
+  boolean disab_ib_fa() { return disab_ib_fa_; };
+  void disab_tb_fa(const boolean dis) { disab_tb_fa_ = dis; };
+  boolean disab_tb_fa() { return disab_tb_fa_; };
+  void disab_vb_fa(const boolean dis) { disab_vb_fa_ = dis; };
+  boolean disab_vb_fa() { return disab_vb_fa_; };
   boolean dscn_fa() { return failRead(IB_DSCN_FA); };
   boolean dscn_flt() { return faultRead(IB_DSCN_FLT); };
   void ewhi_sclr(const float sclr) { ewhi_sclr_ = sclr; };
@@ -171,10 +177,10 @@ public:
   boolean fail_tb() { return fail_tb_; };
   uint16_t fltw() { return fltw_; };
   uint16_t falw() { return falw_; };
-  void ibdt_sclr(const float sclr) { ibdt_sclr_ = sclr; };
-  float ibdt_sclr() { return ibdt_sclr_; };
-  void ibq_sclr(const float sclr) { ibq_sclr_ = sclr; };
-  float ibq_sclr() { return ibq_sclr_; };
+  void ib_diff_sclr(const float sclr) { ib_diff_sclr_ = sclr; };
+  float ib_diff_sclr() { return ib_diff_sclr_; };
+  void ib_quiet_sclr(const float sclr) { ib_quiet_sclr_ = sclr; };
+  float ib_quiet_sclr() { return ib_quiet_sclr_; };
   boolean ib_amp_fa() { return failRead(IB_AMP_FA); };
   boolean ib_amp_flt() { return faultRead(IB_AMP_FLT);  };
   boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
@@ -204,8 +210,8 @@ public:
   boolean tb_fa() { return failRead(TB_FA); };
   boolean tb_flt() { return faultRead(TB_FLT); };
   int8_t tb_sel_status() { return tb_sel_stat_; };
-  void tb_stale_time_slr(const float sclr) { tb_stale_time_slr_ = sclr; };
-  float tb_stale_time_slr() { return tb_stale_time_slr_; };
+  void tb_stale_time_sclr(const float sclr) { tb_stale_time_sclr_ = sclr; };
+  float tb_stale_time_sclr() { return tb_stale_time_sclr_; };
   void vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vb_min, const float _Vb_max, const boolean reset);  // Range check Vb
   int8_t vb_sel_stat() { return vb_sel_stat_; };
   boolean vb_fa() { return failRead(VB_FA); };
@@ -228,17 +234,20 @@ protected:
   LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
   General2_Pole *QuietFilt; // Linear filter to test for quiet
   RateLagExp *QuietRate;    // Linear filter to calculate rate for quiet
-  boolean ccd_fa_;          // EKF tested disagree, T = error
+  boolean cc_diff_fa_;      // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
-  float ccd_sclr_;          // Scale cc_diff detection thresh, scalar
+  float cc_diff_sclr_;      // Scale cc_diff detection thresh, scalar
+  boolean disab_ib_fa_;     // Disable hard fault range failures for ib
+  boolean disab_tb_fa_;     // Disable hard fault range failures for tb
+  boolean disab_vb_fa_;     // Disable hard fault range failures for vb
   float ewhi_sclr_;         // Scale wrap hi detection thresh, scalar
   float ewlo_sclr_;         // Scale wrap lo detection thresh, scalar
   float ewsat_sclr_;        // Scale wrap detection thresh when voc(soc) saturated, scalar
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
   boolean fail_tb_;         // Make hardware bus read ignore Tb and fail it
-  float ibdt_sclr_;         // Scale ib_diff detection thresh, scalar
-  float ibq_sclr_;          // Scale ib_quiet detection thresh, scalar
+  float ib_diff_sclr_;      // Scale ib_diff detection thresh, scalar
+  float ib_quiet_sclr_;     // Scale ib_quiet detection thresh, scalar
   float ib_diff_;           // Current sensor difference error, A
   float ib_diff_f_;         // Filtered sensor difference error, A
   float ib_quiet_;          // ib hardware noise, A/s
@@ -246,7 +255,7 @@ protected:
   TFDelay *WrapHi;          // Time high wrap fail persistence
   TFDelay *WrapLo;          // Time low wrap fail persistence
   int8_t tb_sel_stat_;      // Memory of Tb signal selection, 0=none, 1=sensor
-  float tb_stale_time_slr_; // Scalar on persistences of Tb hardware stale chec, (1)
+  float tb_stale_time_sclr_; // Scalar on persistences of Tb hardware stale chec, (1)
   int8_t vb_sel_stat_;      // Memory of Vb signal selection, 0=none, 1=sensor
   int8_t ib_sel_stat_;      // Memory of Ib signal selection, -1=noa, 0=none, 1=a
   boolean reset_all_faults_;// Reset all fault logic

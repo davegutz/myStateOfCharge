@@ -145,7 +145,7 @@ void Battery::pretty_print(void)
     Serial.printf("  voc_stat=%7.3f; V\n", voc_stat_);
     Serial.printf("  vsat=%7.3f; V\n", vsat_);
     Serial.printf("  dv_dyn= %7.3f; V\n", dv_dyn_);
-    Serial.printf("  sr=%7.3f; slr\n", sr_);
+    Serial.printf("  sr=%7.3f; sclr\n", sr_);
     Serial.printf("  dv=%7.3f; Tab adj, V\n", dv_);
     Serial.printf("  dt=%7.3f; s\n", dt_);
     Serial.printf(" *rp_nP=%5.2f; P bank, e.g. '2P1S'\n", *rp_nP_);
@@ -160,7 +160,7 @@ void Battery::pretty_print_ss(void)
 }
 
 // EKF model for update
-double Battery::voc_soc(const double soc, const float temp_c)
+double Battery::voc_soc_tab(const double soc, const float temp_c)
 {
     double voc_stat;     // return value
     double dv_dsoc;
@@ -296,14 +296,14 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     // Hysteresis model
     hys_->calculate(ib_, soc_);
     dv_hys_ = hys_->update(dt_);
-    voc_stat_tab_ = voc_soc(soc_, Sen->Tb_filt);
+    voc_soc_ = voc_soc_tab(soc_, Sen->Tb_filt);
     voc_stat_ = voc_ - dv_hys_;
     voc_filt_ = SdVb_->update(voc_);
     ioc_ = hys_->ioc();
     bms_off_ = temp_c_ <= chem_.low_t;    // KISS
     if ( bms_off_ )
     {
-        voc_stat_ = voc_stat_tab_;
+        voc_stat_ = voc_soc_;
         ib_ = 0.;
         voc_ = voc_stat_;
         dv_dyn_ = 0.;
@@ -311,7 +311,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     }
     if ( Sen->Flt->vb_fa() )
     {
-        voc_ = voc_stat_ = voc_filt_ = voc_stat_tab_;
+        voc_ = voc_stat_ = voc_filt_ = voc_soc_;
         dv_dyn_ = dv_hys_ = 0;
     }
 
@@ -340,7 +340,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
 
     if ( rp.debug==34 || rp.debug==7 )
         Serial.printf("BatteryMonitor:dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, soc, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,  %d,\n",
-            dt_, ib_, voc_stat_tab_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, soc_, converged_ekf());
+            dt_, ib_, voc_soc_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, soc_, converged_ekf());
     if ( rp.debug==37 )
         Serial.printf("BatteryMonitor:ib,vb,voc_stat,voc(z_),  K_,y_,soc_ekf, y_ekf_f, conv,  %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,%7.4f,  %d,\n",
             ib_, vb_, voc_stat_, voc_,     K_, y_, soc_ekf_, y_filt_, converged_ekf());
@@ -727,9 +727,6 @@ float BatteryModel::calc_inj(const unsigned long now, const uint8_t type, const 
     inj_bias = sin_bias + square_bias + tri_bias + bias + cos_bias;
     if ( type!=3 ) rp.inj_bias = inj_bias - rp.amp;
     else rp.inj_bias = inj_bias;
-
-    if ( rp.debug==-41 ) Serial.printf("type,amp,freq,cos,sin,square,tri,bias,inj,tnow,bias=%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f,\n",
-                type, amp, freq, cos_bias, sin_bias, square_bias, tri_bias, bias, inj_bias, t, rp.inj_bias);
 
     return ( rp.inj_bias );
 }

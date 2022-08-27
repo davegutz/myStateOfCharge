@@ -193,7 +193,7 @@ public:
   double voc() { return (voc_); };
   double Voc() { return (voc_*(*rp_nS_)); };
   double Voc_stat() { return (voc_stat_*(*rp_nS_)); };
-  double voc_soc(const double soc, const float temp_c);
+  double voc_soc_tab(const double soc, const float temp_c);
   double vsat() { return (vsat_); };
   double Vsat() { return (vsat_*(*rp_nS_)); };
 protected:
@@ -260,8 +260,8 @@ public:
   double dV_dyn() { return (dv_dyn_*(*rp_nS_)); };
   double voc_filt() { return (voc_filt_); };
   double Voc_filt() { return (voc_filt_*(*rp_nS_)); };
-  double voc_tab() { return (voc_stat_tab_); };
-  double Voc_tab() { return (voc_stat_tab_*(*rp_nS_)); };
+  double voc_soc() { return (voc_soc_); };
+  double Voc_tab() { return (voc_soc_*(*rp_nS_)); };
   double y_ekf() { return (y_); };
   double y_ekf_filt() { return (y_filt_); };
   double delta_q_ekf_;         // Charge deficit represented by charge calculated by ekf, C
@@ -281,7 +281,7 @@ protected:
   void ekf_predict(double *Fx, double *Bu);
   void ekf_update(double *hx, double *H);
   RateLimit *T_RLim = new RateLimit();
-  float voc_stat_tab_;  // Raw table lookup of voc, V
+  float voc_soc_;  // Raw table lookup of voc, V
 };
 
 

@@ -25,15 +25,6 @@
 
 #include "debug.h"
 
-// rp.debug==-1 General purpose Arduino plot
-void debug_m1(BatteryMonitor *Mon, Sensors *Sen)
-{
-  Serial.printf("%7.3f,     %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-    Sen->Sim->soc()*100.-90,
-    Sen->ShuntAmp->ishunt_cal(), Sen->ShuntNoAmp->ishunt_cal(),
-    Sen->Vb*10-110, Sen->Sim->voc()*10-110, Sen->Sim->dv_dyn()*10, Sen->Sim->Vb()*10-110, Mon->dv_dyn()*10-110);
-}
-
 // rp.debug==-4  // General Arduino plot
 void debug_m4(BatteryMonitor *Mon, Sensors *Sen)
 {
@@ -79,12 +70,6 @@ void debug_m13(Sensors *Sen)
   max(min(Sen->Flt->ib_rate(),2), -2), max(min(Sen->Flt->ib_quiet(), 2), -2),
   Sen->Flt->ib_dscn_fa(), Sen->Flt->ib_dscn_fa());
 
-}
-
-// rp.debug==-35 EKF summary Arduino plot
-void debug_m35(BatteryMonitor *Mon, Sensors *Sen)
-{
-  Serial.printf("soc_mod,soc_ekf,voc_ekf= %7.3f, %7.3f, %7.3f\n", Sen->Sim->soc(), Mon->x_ekf(), Mon->z_ekf());
 }
 
 // rp.debug==5 Charge time
