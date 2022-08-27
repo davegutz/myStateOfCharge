@@ -232,7 +232,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("  ib_dscn_ft=%d;  'Sq'\n", ib_dscn_flt());
   Serial.printf("  ibd_lo_ft=%d;   'Sd, *SA/*SB'\n", ib_dif_lo_flt());
   Serial.printf("  ibd_hi_ft=%d;   'Sd, *SA/*SB'\n", ib_dif_hi_flt());
-  Serial.printf("  ib_red_loss=%d;\n", ib_red_loss());
+  Serial.printf("  red_loss=%d;\n", ib_red_loss());
   Serial.printf("  wl_ft=%d;   'Sb'\n", wrap_lo_flt());
   Serial.printf("  wh_ft=%d;   'Sa'\n    4\n", wrap_hi_flt());
   Serial.printf("  ibn_ft=%d;  'Fi'\n", ib_noa_flt());   // TODO: add __
@@ -247,7 +247,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("  ib_dscn_fa=%d;   'Sq'\n", ib_dscn_fa());
   Serial.printf("  ibd_lo_fa=%d;   'Sd, *SA/*SB'\n", ib_dif_lo_fa());
   Serial.printf("  ibd_hi_fa=%d;   'Sd, *SA/*SB'\n", ib_dif_hi_fa());
-  Serial.printf("  wv_fa=%d;   'Sd', 'Sb', 'Sa'\n", wrap_vb_fa());
+  Serial.printf("  wv_fa=%d;   'Sd, Sa/Sb'\n", wrap_vb_fa());
   Serial.printf("  wl_fa=%d;   'Sb'\n", wrap_lo_fa());
   Serial.printf("  wh_fa=%d;   'Sa'\n", wrap_hi_fa());
   Serial.printf("  cc_diff_fa=%d;   'Sf'\n", cc_diff_fa());
@@ -270,7 +270,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("  voc_soc=%7.3f;\n", Mon->voc_soc());
   Serial1.printf("  voc=%7.3f;\n", Mon->voc());
   Serial1.printf("  e_w_f=%7.3f;\n", e_wrap_filt_);
-  Serial1.printf("  ib_red_loss=%d;\n", ib_red_loss());
+  Serial1.printf("  red_loss=%d;\n", ib_red_loss());
   Serial1.printf("  imh=%7.3f;\n", Sen->Ib_amp_hdwe);
   Serial1.printf("  inh=%7.3f;\n", Sen->Ib_noa_hdwe);
   Serial1.printf("  ibd_f=%7.3f;\n", ib_diff_f_);
@@ -285,7 +285,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("  ib_dscn_fa=%d;   'Sq'\n", ib_dscn_fa());
   Serial1.printf("  ibd_lo_fa=%d;   'Sd, *SA/*SB'\n", ib_dif_lo_fa());
   Serial1.printf("  ibd_hi_fa=%d;   'Sd, *SA/*SB'\n", ib_dif_hi_fa());
-  Serial1.printf("  wv_fa=%d;   'Sd', 'Sb', 'Sa'\\n", wrap_vb_fa());
+  Serial1.printf("  wv_fa=%d;   'Sd', Sa/Sb'\\n", wrap_vb_fa());
   Serial1.printf("  wl_fa=%d;   'Sb'\n", wrap_lo_fa());
   Serial1.printf("  wh_fa=%d;   'Sa'\n", wrap_hi_fa());
   Serial1.printf("  cc_diff_fa=%d;   'Sf'\n", cc_diff_fa());

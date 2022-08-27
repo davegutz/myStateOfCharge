@@ -1180,8 +1180,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("B<?> Battery e.g.:\n");
   Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='LI' [%d]\n", rp.mon_mod, MOD_CODE); 
   Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='LI' [%d]\n", rp.sim_mod, MOD_CODE); 
-  Serial.printf("  BP=  %5.2f.    parallel in bank [%5.2f]'\n", rp.nP, NP); 
-  Serial.printf("  BS=  %5.2f.    series in bank [%5.2f]'\n", rp.nS, NS); 
+  Serial.printf(" *BP=  %5.2f.    parallel in bank [%5.2f]'\n", rp.nP, NP); 
+  Serial.printf(" *BS=  %5.2f.    series in bank [%5.2f]'\n", rp.nS, NS); 
 
   Serial.printf("c  clear talk queues, esp '-c;'\n");
 
@@ -1208,11 +1208,11 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  DN= "); Serial.printf("%7.3f", Sen->Ib_noa_noise_amp()); Serial.printf(" : Ib noa noise model, A pk-pk [%7.3f]\n", IB_NOA_NOISE); 
   Serial.printf(" *SA= "); Serial.printf("%7.3f", rp.ib_scale_amp); Serial.printf(" : scale amp sense, A [%7.3f]\n", CURR_SCALE_AMP); 
   Serial.printf(" *SB= "); Serial.printf("%7.3f", rp.ib_scale_noa); Serial.printf(" : scale noa sense, A [%7.3f]\n", CURR_SCALE_NOA); 
-  Serial.printf(" *Sc= "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println(" : rp Scalar model size"); 
+  Serial.printf(" *Sc= "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println(" : rp. Scalar model size"); 
   Serial.printf("  Sd= "); Serial.printf("%7.3f", Sen->Flt->ib_diff_sclr()); Serial.printf(" : scalar ib_diff thresh [1]\n"); 
   Serial.printf("  Sf= "); Serial.printf("%7.3f", Sen->Flt->cc_diff_sclr()); Serial.printf(" : scalar cc_diff thresh [1]\n"); 
   Serial.printf(" *SG= "); Serial.printf("%7.3f/%7.3f", Sen->ShuntAmp->rp_shunt_gain_sclr(), Sen->ShuntAmp->rp_shunt_gain_sclr());
-  Serial.printf(" : scale both shunt gains [1]\n"); 
+  Serial.printf(" : rp. scale both shunt gains [1]\n"); 
   Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.println(" : hysteresis scalar 1e-6 - 100 [1]");
   Serial.printf("  Sm= "); Serial.printf("%7.3f", Sen->ShuntAmp->sclr()); Serial.printf(" : scalar amp, [1]\n"); 
   Serial.printf("  Sn= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->sclr()); Serial.printf(" : scalar noa [1]\n"); 
@@ -1232,14 +1232,14 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("M<?> Amp tweaks\n");
   Serial.printf("  MC= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_change()); Serial.println(" : Amp Coul eff max change allowed scalar [0.001]"); 
-  Serial.printf(" *Mk= "); Serial.printf("%7.3f", Sen->ShuntAmp->tweak_sclr()); Serial.println(" : Amp Coul eff scalar [1]"); 
+  Serial.printf(" *Mk= "); Serial.printf("%7.3f", Sen->ShuntAmp->tweak_sclr()); Serial.println(" : rp. Amp Coul eff scalar [1]"); 
   Serial.printf("  Mw= "); Serial.printf("%7.3f", Sen->ShuntAmp->time_to_wait()); Serial.println(" : Amp time wait next tweak, hr [18]]"); 
   Serial.printf("  Mx= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_tweak()); Serial.println(" : Amp Coul eff max allowed scalar [0.01]"); 
   Serial.printf("  Mz= "); Serial.printf("%7.3f", Sen->ShuntAmp->time_sat_past()); Serial.println(" : Amp time since last tweak, hr [varies]"); 
 
   Serial.printf("N<?> No amp tweaks\n");
   Serial.printf("  NC= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_change()); Serial.println(" : Noa CE max change allowed scalar [0.001]"); 
-  Serial.printf(" *Nk= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->tweak_sclr()); Serial.println(" : Noa Coul eff scalar [1]"); 
+  Serial.printf(" *Nk= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->tweak_sclr()); Serial.println(" : rp. Noa Coul eff scalar [1]"); 
   Serial.printf("  Nw= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->time_to_wait()); Serial.println(" : Noa time to wait for next tweak, hr [18]]"); 
   Serial.printf("  Nx= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_tweak()); Serial.println(" : Noa Coul eff max allowed scalar [0.01]"); 
   Serial.printf("  Nz= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->time_sat_past()); Serial.println(" : Noa time since last tweak, hr [varies]"); 
