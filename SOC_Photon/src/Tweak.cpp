@@ -51,14 +51,14 @@ Tweak::~Tweak() {}
 /* Do the tweak and display change
   Inputs:
     now                   Time since boot, ms
-    delta_hrs_            Time since last allowed saturation # 'XN/Mz', hr
-    max_change_           Maximum allowed change to calibration scalar # 'XN/Mc'
+    delta_hrs_            Time since last allowed saturation   'Mz/Nz', hr
+    max_change_           Maximum allowed change to calibration scalar   'Mc/Nc'
     max_tweak_            Maximum allowed calibration scaler
   States:
-   *rp_delta_q_cinf_      Charge infinity at past update # 'XN/Mi', Coulombs
-   *rp_delta_q_dinf_      Discharge infinity at past update # 'XN/Mi', Coulombs
+   *rp_delta_q_cinf_      Charge infinity at past update   'Mi/Ni', Coulombs
+   *rp_delta_q_dinf_      Discharge infinity at past update   'Mi/Ni', Coulombs
   Outputs:
-    tweak_sclr_           Scalar on Coulombic Efficiency # 'XN/Mk'
+    tweak_sclr_           Scalar on Coulombic Efficiency   '*Mk / *Nk'
 */
 void Tweak::adjust(unsigned long now)
 {
@@ -137,7 +137,7 @@ void Tweak::save_new_sat(unsigned long int now)
     is_sat        Is the battery in saturation, T=saturated
     now           Time since boot, ms
     coul_eff_     Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
-    delta_hrs_    Time since last allowed saturation # 'XN/Mz', hr
+    delta_hrs_    Time since last allowed saturation   'XN/Mz', hr
     sat_          Indication that battery is saturated, T=saturated
 */
 boolean Tweak::new_desat(const double curr_in, const double T, const boolean is_sat, unsigned long int now)

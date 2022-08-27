@@ -84,8 +84,8 @@ public:
   void pretty_print();
   void scale(const float sclr) { *cp_ib_scale_ = sclr; };
   float scale() { return ( *cp_ib_scale_ ); };
-  void shunt_gain_sclr(const float sclr) { *rp_shunt_gain_sclr_ = sclr; };
-  float shunt_gain_sclr() { return *rp_shunt_gain_sclr_; };
+  void rp_shunt_gain_sclr(const float sclr) { *rp_shunt_gain_sclr_ = sclr; };
+  float rp_shunt_gain_sclr() { return *rp_shunt_gain_sclr_; };
   float sclr() { return ( sclr_ ); };
   void sclr(const float sclr) { sclr_ = sclr; };
   float v2a_s() { return v2a_s_ ; };

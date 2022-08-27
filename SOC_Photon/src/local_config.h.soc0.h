@@ -4,7 +4,6 @@
 const String unit = "soc0_20220827";  // Disable e_wrap saturated; tweak, history falw, cal noa, 5 A ibdif
 
 // * = SRAM EEPROM adjustments, retained on power reset
-// # = RAM adjustments, disappear on power reset
 
 // Sensor biases
 #define SHUNT_GAIN            -1333.// Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)
@@ -22,7 +21,7 @@ const String unit = "soc0_20220827";  // Disable e_wrap saturated; tweak, histor
 //   would have  RATED_BATT_CAP 200, NS 2, and NP 2
 #define COULOMBIC_EFF         0.9985  // Coulombic efficiency of battery (Perm scale * 'Mk' for amp, * 'Nk' for noa), fraction of charge that gets used
 #define MOD_CODE              0       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=LION 
-#define RATED_BATT_CAP        100.    // Nominal battery unit capacity.  (# 'Sc' or perm set * 'BS'/'BP'), Ah
+#define RATED_BATT_CAP        100.    // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
 #define NS                    1.0     // Number of series batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BS')
 #define NP                    1.0     // Number of parallel batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BP')
 
