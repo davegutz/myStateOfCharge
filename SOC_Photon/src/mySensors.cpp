@@ -126,8 +126,8 @@ void Shunt::load()
   {
     vshunt_int_ = readADC_Differential_0_1();
     
-    if ( rp.debug==-14 ) { vshunt_int_0_ = readADC_SingleEnded(0);  vshunt_int_1_ = readADC_SingleEnded(1); }
-                    else { vshunt_int_0_ = 0;                       vshunt_int_1_ = 0; }
+    // if ( rp.debug==-14 ) { vshunt_int_0_ = readADC_SingleEnded(0);  vshunt_int_1_ = readADC_SingleEnded(1); }
+    //                 else { vshunt_int_0_ = 0;                       vshunt_int_1_ = 0; }
   }
   else
   {
@@ -140,7 +140,8 @@ void Shunt::load()
 
 // Class Fault
 Fault::Fault(const double T):
-  cc_diff_(0.), cc_diff_sclr_(1), ewhi_sclr_(1), ewlo_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0), fail_tb_(false),
+  cc_diff_(0.), cc_diff_sclr_(1), disab_ib_fa_(false), disab_tb_fa_(false), disab_vb_fa_(false), 
+  ewhi_sclr_(1), ewlo_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0), fail_tb_(false),
   ib_diff_sclr_(1), ib_quiet_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), tb_sel_stat_(1), tb_stale_time_sclr_(1),
   vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false), vb_sel_stat_last_(1), ib_sel_stat_last_(1),
   fltw_(0UL), falw_(0UL)
@@ -340,8 +341,8 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   ib_diff_f_ = IbErrFilt->calculate(ib_diff_, reset_loc, min(Sen->T, MAX_ERR_T));
   faultAssign( ib_diff_f_>=IBATT_DISAGREE_THRESH*ib_diff_sclr_, IB_DIF_HI_FLT );
   faultAssign( ib_diff_f_<=-IBATT_DISAGREE_THRESH*ib_diff_sclr_, IB_DIF_LO_FLT );
-  failAssign( IbdHiPer->calculate(ib_dif_hi_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIF_HI_FA );
-  failAssign( IbdLoPer->calculate(ib_dif_lo_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIF_LO_FA );
+  failAssign( IbdHiPer->calculate(ib_dif_hi_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIF_HI_FA ); // IB_DIF_FA
+  failAssign( IbdLoPer->calculate(ib_dif_lo_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIF_LO_FA ); // IB_DIF_FA
 
   // Truth tables
 
@@ -419,7 +420,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     tb_sel_stat_ = 1;
     Serial.printf("reset tb flts\n");
   }
-  if (  tb_fa() )
+  if ( tb_fa() )
   {
     tb_sel_stat_ = 0;
   }
@@ -505,7 +506,8 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vb_min, con
 
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, Sync *ReadSensors):
-  rp_tb_bias_(&rp.tb_bias), tb_bias_last_(0.), Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE), Ib_noise_amp_(IB_NOISE)
+  rp_tb_bias_(&rp.tb_bias), tb_bias_last_(0.), Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE),
+  Ib_amp_noise_amp_(IB_AMP_NOISE), Ib_noa_noise_amp_(IB_NOA_NOISE)
 {
   this->T = T;
   this->T_filt = T;
@@ -529,15 +531,16 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
   this->Ib_hdwe_model = 0.;
   Prbn_Tb_ = new PRBS_7(TB_NOISE_SEED);
   Prbn_Vb_ = new PRBS_7(VB_NOISE_SEED);
-  Prbn_Ib_ = new PRBS_7(IB_NOISE_SEED);
+  Prbn_Ib_amp_ = new PRBS_7(IB_AMP_NOISE_SEED);
+  Prbn_Ib_noa_ = new PRBS_7(IB_NOA_NOISE_SEED);
   Flt = new Fault(T);
 }
 
 // Bias model outputs for sensor fault injection
 void Sensors::bias_all_model()
 {
-  Ib_amp_model = ShuntAmp->bias_any( Ib_model );
-  Ib_noa_model = ShuntNoAmp->bias_any( Ib_model );
+  Ib_amp_model = ShuntAmp->bias_any( Ib_model ) + Ib_amp_noise();
+  Ib_noa_model = ShuntNoAmp->bias_any( Ib_model ) + Ib_noa_noise();
 }
 
 
@@ -583,13 +586,13 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   {
     if ( Flt->tb_fa() )
     {
-      Tb = NOMINAL_TB + Tb_noise();
+      Tb = NOMINAL_TB;
       Tb_filt = NOMINAL_TB;
 
     }
     else
     {
-      Tb = RATED_TEMP;
+      Tb = RATED_TEMP + Tb_noise();
       Tb_filt = RATED_TEMP;
     }
   }
@@ -610,7 +613,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   // vb
   if ( rp.mod_vb() )
   {
-    Vb = Vb_model;
+    Vb = Vb_model + Vb_noise();
   }
   else
   {
@@ -679,11 +682,18 @@ float Sensors::Vb_noise()
 }
 
 // Ib noise
-float Sensors::Ib_noise()
+float Sensors::Ib_amp_noise()
 {
-  if ( Ib_noise_amp_==0. ) return ( 0. );
-  uint8_t raw = Prbn_Ib_->calculate();
-  float noise = (float(raw)/125. - 0.5) * Ib_noise_amp_;
+  if ( Ib_amp_noise_amp_==0. ) return ( 0. );
+  uint8_t raw = Prbn_Ib_amp_->calculate();
+  float noise = (float(raw)/125. - 0.5) * Ib_amp_noise_amp_;
+  return ( noise );
+}
+float Sensors::Ib_noa_noise()
+{
+  if ( Ib_noa_noise_amp_==0. ) return ( 0. );
+  uint8_t raw = Prbn_Ib_noa_->calculate();
+  float noise = (float(raw)/125. - 0.5) * Ib_noa_noise_amp_;
   return ( noise );
 }
 

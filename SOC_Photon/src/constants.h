@@ -100,9 +100,11 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define TB_NOISE              0.        // Tb added noise amplitude, deg C pk-pk
 #define TB_NOISE_SEED         0xe2      // Tb added noise seed 0-255 = 0x00-0xFF (0x01) 
 #define VB_NOISE              0.        // Vb added noise amplitude, V pk-pk
-#define VB_NOISE_SEED         0xb2      // Vb added noise seed 0-255 = 0x00-0xFF (0x01) 
-#define IB_NOISE              0.        // Ib added noise amplitude, A pk-pk
-#define IB_NOISE_SEED         0x01      // Ib added noise seed 0-255 = 0x00-0xFF (0x01) 
+#define VB_NOISE_SEED         0xb2      // Vb added noise seed 0-255 = 0x00-0xFF (0x01)
+#define IB_AMP_NOISE          0.        // Ib amplified sensor added noise amplitude, A pk-pk
+#define IB_NOA_NOISE          0.        // Ib non-amplified sensor added noise amplitude, A pk-pk
+#define IB_AMP_NOISE_SEED     0x01      // Ib amplified sensor added noise seed 0-255 = 0x00-0xFF (0x01) 
+#define IB_NOA_NOISE_SEED     0x0a      // Ib non-amplified sensor added noise seed 0-255 = 0x00-0xFF (0x01) 
 #define WRAP_ERR_FILT         2.        // Wrap error filter time constant, s (2)
 #define MAX_WRAP_ERR_FILT     10.       // Anti-windup wrap error filter, V (10)
 const float WRAP_LO_S = (T_SAT-1.);     // Wrap low failure set time, sec (T_SAT-1) // must be quicker than SAT test

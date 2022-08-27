@@ -107,7 +107,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(old_s.time, old_s.wh_fa+2, color='cyan', linestyle='-', label='wrap_hi_fa+2')
     plt.plot(old_s.time, old_s.wl_fa+2, color='red', linestyle='--', label='wrap_lo_fa+2')
     plt.plot(old_s.time, old_s.wv_fa+2, color='orange', linestyle='-.', label='wrap_vb_fa+2')
-    plt.plot(old_s.time, old_s.ccd_fa, color='green', linestyle='-', label='ccd_fa')
+    plt.plot(old_s.time, old_s.ccd_fa, color='green', linestyle='-', label='cc_diff_fa')
     plt.legend(loc=1)
     plt.subplot(337)
     plt.plot(old_s.time, old_s.cc_dif, color='black', linestyle='-', label='cc_dif')

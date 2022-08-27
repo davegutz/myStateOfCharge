@@ -236,11 +236,11 @@ if __name__ == '__main__':
         init_time_in = None
         # data_file_old_txt = '../dataReduction/ampHiFail20220827.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampLoFail20220827.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/ampHiFailNoise20220827.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/ampLoFailNoise20220821.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/ampHiFailSlow20220821.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220821.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220821.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampHiFailNoise20220827.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = '../dataReduction/ampLoFailNoise20220827.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampHiFailSlow20220827.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220827.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/slowTweakRegressionTest20220827.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/vHiFail20220821.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220721.txt'; unit_key = 'pro_2022'; t_Ib_fail = 10
         # data_file_old_txt = '../dataReduction/pulse20220821.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;

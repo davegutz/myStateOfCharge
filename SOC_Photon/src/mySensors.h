@@ -336,8 +336,12 @@ public:
   float Vb_noise_amp() { return ( Vb_noise_amp_ ); };
   void Vb_noise_amp(const float noise) { Vb_noise_amp_ = noise; };
   float Ib_noise();
-  float Ib_noise_amp() { return ( Ib_noise_amp_ ); };
-  void Ib_noise_amp(const float noise) { Ib_noise_amp_ = noise; };
+  float Ib_amp_noise();
+  float Ib_amp_noise_amp() { return ( Ib_amp_noise_amp_ ); };
+  void Ib_amp_noise_amp(const float noise) { Ib_amp_noise_amp_ = noise; };
+  float Ib_noa_noise();
+  float Ib_noa_noise_amp() { return ( Ib_noa_noise_amp_ ); };
+  void Ib_noa_noise_amp(const float noise) { Ib_noa_noise_amp_ = noise; };
   void vb_print(void);     // Print Vb result
   float vb_add() { return ( vb_add_ ); };
   void vb_add(const float add) { vb_add_ = add; };
@@ -349,10 +353,12 @@ protected:
   void choose_(void);    // Deliberate choice based on inputs and results
   PRBS_7 *Prbn_Tb_;      // Tb noise generator model only
   PRBS_7 *Prbn_Vb_;      // Vb noise generator model only
-  PRBS_7 *Prbn_Ib_;      // Ib noise generator model only
+  PRBS_7 *Prbn_Ib_amp_;  // Ib amplified sensor noise generator model only
+  PRBS_7 *Prbn_Ib_noa_;  // Ib non-amplified sensor noise generator model only
   float Tb_noise_amp_;   // Tb noise amplitude model only, deg C pk-pk
   float Vb_noise_amp_;   // Vb noise amplitude model only, V pk-pk
-  float Ib_noise_amp_;   // Ib noise amplitude model only, A pk-pk
+  float Ib_amp_noise_amp_;  // Ib noise on amplified sensor, amplitude model only, A pk-pk
+  float Ib_noa_noise_amp_;  // Ib noise on non-amplified sensor, amplitude model only, A pk-pk
   float vb_add_;         // Fault injection bias, V
 };
 
