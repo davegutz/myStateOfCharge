@@ -51,8 +51,8 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.legend(loc=1)
     plt.subplot(222)
     plt.title(plot_title)
-    plt.plot(old_s.time, old_s.ib_dif, color='black', linestyle='-.', label='ib_dif')
-    plt.plot(old_s.time, old_s.ib_dif_f, color='magenta', linestyle=':', label='ib_dif_f')
+    plt.plot(old_s.time, old_s.ib_dif, color='black', linestyle='-.', label='ib_diff')
+    plt.plot(old_s.time, old_s.ib_dif_f, color='magenta', linestyle=':', label='ib_diff_f')
     plt.legend(loc=1)
     plt.subplot(223)
     # plt.plot(old_s.time, old_s.ib_rate, color='orange', linestyle='--', label='ib_rate')
@@ -71,8 +71,8 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.title(plot_title)
     plt.plot(old_s.time, old_s.Ib, color='green', linestyle='-', label='Ib')
     plt.plot(new_s.time, new_s.Ib, color='orange', linestyle='--', label='Ib_new')
-    plt.plot(old_s.time, old_s.ib_dif, color='black', linestyle='-.', label='ib_dif')
-    plt.plot(old_s.time, old_s.ib_dif_f, color='magenta', linestyle=':', label='ib_dif_f')
+    plt.plot(old_s.time, old_s.ib_dif, color='black', linestyle='-.', label='ib_diff')
+    plt.plot(old_s.time, old_s.ib_dif_f, color='magenta', linestyle=':', label='ib_diff_f')
     plt.legend(loc=1)
     plt.subplot(332)
     plt.plot(old_s.time, old_s.mod_data, color='blue', linestyle='-', label='mod')
@@ -93,7 +93,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(new_s.time, new_s.Voc_stat, color='orange', linestyle='--', label='Voc_stat_new')
     plt.plot(old_s.time, old_s.Vsat, color='blue', linestyle='-', label='Vsat')
     plt.plot(new_s.time, new_s.Vsat, color='red', linestyle='--', label='Vsat_new')
-    plt.plot(old_s.time, old_s.voc_tab+0.1, color='black', linestyle='-.', label='voc_tab+0.1')
+    plt.plot(old_s.time, old_s.voc_soc+0.1, color='black', linestyle='-.', label='voc_soc+0.1')
     plt.plot(old_s.time, old_s.voc+0.1, color='green', linestyle=':', label='voc+0.1')
     plt.plot(new_s.time, np.array(new_s.voc)+0.1, color='orange', linestyle=':', label='voc_new+0.1')
     plt.legend(loc=1)
@@ -305,7 +305,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         plt.plot(old_s.time, old_s.Vb, color='red', linestyle='-', label='Vb')
         plt.plot(old_s.time, old_s.Voc, color='blue',  linestyle='--', label='Voc')
         plt.plot(old_s.time, old_s.Voc_stat, color='green', linestyle=':', label='Voc_stat')
-        plt.plot(old_s.time, old_s.voc_tab, color='black', linestyle='-.', label='voc_tab')
+        plt.plot(old_s.time, old_s.voc_soc, color='black', linestyle='-.', label='voc_soc')
         plt.plot(old_s.time, old_s.Vb_h, color='cyan', linestyle=':', label='Vb_hdwe')
         plt.legend(loc=1)
         plt.subplot(332)
@@ -488,7 +488,7 @@ class SavedData:
             self.ib_dif_f = []
             self.ib_dif_flt = []
             self.ib_dif_fa = []
-            self.voc_tab = None
+            self.voc_soc = None
             self.e_w = None
             self.e_w_f = None
             self.wh_flt = None
@@ -541,9 +541,9 @@ class SavedData:
             self.ib_dif_f = np.array(sel.ib_dif_f[:i_end])
             self.ib_dif_flt = np.bool8((np.array(fltw) & 2**8) | (np.array(fltw) & 2**9))
             self.ib_dif_fa = np.bool8((np.array(falw) & 2**8) | (np.array(falw) & 2**9))
-            self.voc_tab = np.array(sel.voc_tab[:i_end])
+            self.voc_soc = np.array(sel.voc_soc[:i_end])
             self.e_w = np.array(sel.e_w[:i_end])
-            self.voc = self.voc_tab - self.e_w
+            self.voc = self.voc_soc - self.e_w
             self.e_w_f = np.array(sel.e_w_f[:i_end])
             self.wh_flt = np.bool8(np.array(fltw) & 2**5)
             self.wl_flt = np.bool8(np.array(fltw) & 2**6)

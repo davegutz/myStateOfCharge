@@ -234,11 +234,9 @@ if __name__ == '__main__':
         time_end = 950.
         t_Ib_fail = None
         init_time_in = None
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220717.txt'; unit_key = 'soc0_2022'; t_Vb_fail = 10
-        # data_file_old_txt = '../dataReduction/ampHiFail20220821.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/ampHiFailNoise20220821.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/ampLoFail20220821.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampHiFail20220827.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampLoFail20220827.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/ampHiFailNoise20220827.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/ampLoFailNoise20220821.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFailSlow20220821.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/rapidTweakRegressionTest20220821.txt'; unit_key = 'pro_2022'
@@ -254,7 +252,7 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/realWorldXp20_20220823.txt'; unit_key = 'soc0_2022'
         # data_file_old_txt = '../dataReduction/pulse50_20220824.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/pulse30_20220824.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/realWorldXp20_20220825b.txt'; unit_key = 'soc0_2022'
+        # data_file_old_txt = '../dataReduction/realWorldXp20_20220825b.txt'; unit_key = 'soc0_2022'
 
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
@@ -274,7 +272,7 @@ if __name__ == '__main__':
                                           unit_key=unit_key_sel)
         cols_sel = ('c_time', 'res', 'user_sel', 'm_bare', 'n_bare', 'cc_dif',
                     'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_dif', 'ib_dif_f',
-                    'voc_tab', 'e_w', 'e_w_f',
+                    'voc_soc', 'e_w', 'e_w_f',
                     'ib_sel', 'Ib_h', 'Ib_m',
                     'mib', 'Ib_s', 'Vb_h', 'Vb_m', 'mvb', 'Vb_s', 'Tb_h', 'Tb_s', 'mtb', 'Tb_f',
                     'vb_sel', 'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel')
