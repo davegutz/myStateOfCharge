@@ -723,11 +723,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'r' ):  // Pr:  Print retained
                 Serial.printf("\n"); rp.pretty_print();
                 Serial.printf("\n"); cp.pretty_print();
-                if ( !cp.blynking )
-                {
-                  Serial1.printf("\n"); rp.pretty_print();
-                  Serial1.printf("\n"); cp.pretty_print();
-                }
                 break;
 
               case ( 's' ):  // Ps:  Print sim
@@ -1279,9 +1274,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("     v3: Power\n");
   Serial.printf("     v4: GP\n");
   Serial.printf("     v5: OLED display\n");
-  Serial.printf("     v6: EKF solver iter during init\n");
-  Serial.printf("     v7: EKF solver summary during init\n");
-  Serial.printf("    v-7: Battery i/o plot\n");
+  Serial.printf("     v6: EKF solver iter init\n");
+  Serial.printf("     v7: EKF solver summ init\n");
   Serial.printf("     v8: Randles state space init\n");
   Serial.printf("   v-11: Summary\n");
   Serial.printf("    v12: EKF\n");

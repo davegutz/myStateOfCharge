@@ -79,14 +79,6 @@ void debug_5(void)
     pp.pubList.Tb, pp.pubList.Vb, pp.pubList.Ib, pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge, pp.pubList.Amp_hrs_remaining_soc);
 }
 
-// rp.debug==-7 Battery i/o Arduino plot
-void debug_m7(BatteryMonitor *Mon, Sensors *Sen)
-{
-  Serial.printf("%7.3f,%7.3f,%7.3f,   %7.3f, %7.3f, %7.3f,\n",
-        Mon->soc(), Sen->ShuntAmp->ishunt_cal(), Sen->ShuntNoAmp->ishunt_cal(),
-        Sen->Vb, Sen->Sim->voc_stat(), Sen->Sim->voc());
-}
-
 // Q quick print critical parameters
 void debug_q(BatteryMonitor *Mon, Sensors *Sen)
 {

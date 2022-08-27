@@ -320,9 +320,6 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   Sen->Flt->ib_wrap(reset, Sen, Mon);
   Sen->Flt->ib_quiet(reset, Sen);
 
-  // Arduino plots
-  if ( rp.debug==-7 ) debug_m7(Mon, Sen);
-
   // Sim initialize as needed from memory
   Sen->Sim->apply_delta_q_t(reset);
   Sen->Sim->init_battery(reset, Sen);
