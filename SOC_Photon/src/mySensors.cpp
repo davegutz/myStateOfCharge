@@ -206,6 +206,7 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   faultAssign( (e_wrap_filt_ <= Mon->r_ss()*WRAP_LO_A*ewlo_sclr_*ewsat_sclr_), WRAP_LO_FLT);
   failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );
   failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );
+  failAssign(wrap_vb_fa() || (!ib_dif_fa() && wrap_fa()), WRAP_VB_FA);
 }
 
 void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
@@ -213,6 +214,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("Fault:\n");
   Serial.printf("  cc_dif=%7.3f;\n", cc_diff_);
   Serial.printf("  voc_soc=%7.3f;\n", Mon->voc_soc());
+  Serial.printf("  soc=%7.3f;\n", Mon->soc());
   Serial.printf("  voc=%7.3f;\n", Mon->voc());
   Serial.printf("  e_w_f=%7.3f;\n", e_wrap_filt_);
   Serial.printf("  disab_ib_fa=%d;\n", disab_ib_fa_);
@@ -268,6 +270,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("  nbar=%d;\n", Sen->ShuntNoAmp->bare());
   Serial1.printf("  cc_dif=%7.3f;\n", cc_diff_);
   Serial1.printf("  voc_soc=%7.3f;\n", Mon->voc_soc());
+  Serial1.printf("  soc=%7.3f;\n", Mon->soc());
   Serial1.printf("  voc=%7.3f;\n", Mon->voc());
   Serial1.printf("  e_w_f=%7.3f;\n", e_wrap_filt_);
   Serial1.printf("  red_loss=%d;\n", ib_red_loss());
@@ -405,15 +408,12 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   {
     vb_sel_stat_ = 0;   // Latch
   }
-  if (  !ib_dif_fa() && wrap_fa() )
+  if (  wrap_vb_fa() )
   {
     vb_sel_stat_ = 0;
-    failAssign(true, WRAP_VB_FA);
   }
-  else
-    failAssign(false, WRAP_VB_FA);
 
-  // tb failure from inactivity. Does not latch
+  // tb failure from inactivity. Does not latch because can heal and failure not critical
   if ( reset_all_faults_ )
   {
     tb_sel_stat_last_ = 1;

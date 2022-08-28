@@ -238,7 +238,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   // Voc
   sprintf(cp.buffer, "%5.2f", pp.pubList.Voc);
   dispV = cp.buffer;
-  if ( Sen->Flt->vb_fa() && (frame==1 || frame==2) )
+  if ( Sen->Flt->vb_sel_stat()==0 && (frame==1 || frame==2) )
     dispV = "**F**";
   // Ib
   sprintf(cp.buffer, "%6.1f", pp.pubList.Ib);
