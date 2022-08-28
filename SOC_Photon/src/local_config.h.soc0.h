@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "soc0_20220828";  // Disable e_wrap saturated; tweak, history falw, cal noa, 5 A ibdif
+const String unit = "soc0_20220828a";  // Disable e_wrap saturated; tweak, history falw, cal noa, 5 A ibdif
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
@@ -9,8 +9,8 @@ const String unit = "soc0_20220828";  // Disable e_wrap saturated; tweak, histor
 #define SHUNT_GAIN            -1333.// Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)
 #define CURR_BIAS_AMP         -0.94 // Calibration of amplified shunt sensor (* 'DA'), A
 #define CURR_BIAS_NOA         -0.17 // Calibration of non-amplified shunt sensor (* 'DB'), A
-#define CURR_SCALE_NOA        0.94  // Hardware to match data (* 'SA')
-#define CURR_SCALE_AMP        0.892 // Hardware to match data (* 'SB')
+#define CURR_SCALE_NOA        1.00  // Hardware to match data (* 'SA')
+#define CURR_SCALE_AMP        0.955 // Hardware to match data (* 'SB')
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'Di'), A
 #define VOLT_BIAS             0.0   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
