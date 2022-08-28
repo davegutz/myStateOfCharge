@@ -380,10 +380,12 @@ def write_clean_file(txt_file, type_, title_key, unit_key):
     num_lines = 0
     with open(txt_file, "r") as input_file:
         with open(csv_file, "a") as output:
-            for line in input_file:
-                if line.__contains__(unit_key):
-                    output.write(line)
-                    num_lines += 1
+            try:
+                for line in input_file:
+                    if line.__contains__(unit_key):
+                        output.write(line)
+                        num_lines += 1
+            except:  "bad char"
     if not num_lines:
         csv_file = None
         print("I(write_clean_file): no data to write")
