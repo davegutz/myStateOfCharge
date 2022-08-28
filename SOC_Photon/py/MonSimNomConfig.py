@@ -33,5 +33,5 @@ i_std = 0.  # (0.1-->0) ------ noise
 # soc_init = 1.0  # (1.0-->0.8)  ------  initialization artifacts only
 hys_scale = 1.  # (1e-6<--   1.-->10.) 1e-6 disables hysteresis
 hys_scale_monitor = 1.  # (1e-6<--   1.-->10.) 1e-6 disables hysteresis
-T_SAT = 5.  # Saturation time, sec
+T_SAT = 10.  # Saturation time, sec 8/28/2022
 T_DESAT = T_SAT * 2.  # De-saturation time, sec

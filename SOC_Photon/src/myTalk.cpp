@@ -1249,8 +1249,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Pe= "); Serial.printf("ekf\n");
   Serial.printf("  Pf= "); Serial.printf("faults\n");
   Serial.printf("  Pm= "); Serial.printf("monitor\n");
-  Serial.printf("  PM= "); Serial.printf("amp tweak\n");
-  Serial.printf("  PN= "); Serial.printf("noa tweak\n");
+  Serial.printf("  PM= "); Serial.printf("amp shunt & tweak\n");
+  Serial.printf("  PN= "); Serial.printf("noa shunt & tweak\n");
   Serial.printf("  Pr= "); Serial.printf("retained and command\n");
   Serial.printf("  Ps= "); Serial.printf("simulation\n");
   Serial.printf("  Px= "); Serial.printf("current signal select\n");

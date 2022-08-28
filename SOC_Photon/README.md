@@ -477,7 +477,7 @@ Full regression suite:
   tbFailMod:    Ca.5;Xp0;W4;Xm7;Dp100;Dr100;W2;v26;W100;Xu1;Xv.005;W300;Xu0;W100;v0;
                 Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;
   triTweakRegression:   Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;Dn1;Dp100;Rb;Pa;Xf0.02;Xa-2000;XW5;XT5;XC3;W2;v26;W2;XR;
-                        v0;XS;Xp0;Ca1.;Pf;
+                        v0;XS;Dn0;Xp0;Ca1.;Pf;
   pulse30:      Xm7;Ca1;Dp100;v26;W50;Di-30;
                 Di30
                 Di0;Dp400;
