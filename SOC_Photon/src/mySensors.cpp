@@ -206,7 +206,7 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   faultAssign( (e_wrap_filt_ <= Mon->r_ss()*WRAP_LO_A*ewlo_sclr_*ewsat_sclr_), WRAP_LO_FLT);
   failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );
   failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );
-  failAssign(wrap_vb_fa() || (!ib_dif_fa() && wrap_fa()), WRAP_VB_FA);
+  failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_dif_fa() && wrap_fa()), WRAP_VB_FA);
 }
 
 void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
