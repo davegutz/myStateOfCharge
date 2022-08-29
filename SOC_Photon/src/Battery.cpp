@@ -114,9 +114,9 @@ void Battery::init_battery(const boolean reset, Sensors *Sen)
     if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
     double u[2] = {ib_, vb_};
-    if ( rp.debug==8 || rp.debug==6 || rp.debug==7 ) Serial.printf("init_battery: Randles to %7.3f, %7.3f\n", ib_, vb_);
+    if ( rp.debug==8 || rp.debug==7 ) Serial.printf("init_battery: Randles to %7.3f, %7.3f\n", ib_, vb_);
     Randles_->init_state_space(u);
-    if ( rp.debug==8 || rp.debug==6 || rp.debug==7 ) Randles_->pretty_print();
+    if ( rp.debug==8 || rp.debug==7 ) Randles_->pretty_print();
     init_hys(0.0);
 }
 
@@ -329,7 +329,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     soc_ = q_ / q_capacity_;
 
     y_filt_ = y_filt->calculate(y_, min(Sen->T, EKF_T_RESET));
-    if ( rp.debug==6 || rp.debug==7 )
+    if ( rp.debug==7 )
         Serial.printf("calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err, %7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
             Sen->Tb_filt, Sen->Ib, 0, soc_ekf_, vb_, voc_, hx_, dv_dyn_, dv_hys_, y_);
 
@@ -503,9 +503,6 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, Sensors *Sen)
         soc_solved = max(min(soc_solved + max(min( err/dv_dsoc, SOLV_MAX_STEP), -SOLV_MAX_STEP), meps), 1e-6);
         voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
         err = voc - voc_solved;
-        if ( rp.debug==6 )
-            Serial.printf("solve    :Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-            Tb_avg, Vb_avg, Ib_avg, count, soc_solved,  voc, voc_solved, dv_dyn, dv_hys_, err);
     }
     init_soc_ekf(soc_solved);
     if ( rp.debug==7 )

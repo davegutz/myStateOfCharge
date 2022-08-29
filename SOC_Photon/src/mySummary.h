@@ -82,6 +82,18 @@ struct Sum_st
       double(this->tweak_sclr_amp)/16000.,
       double(this->tweak_sclr_noa)/16000.,
       this->falw);
+    if ( !cp.blynking ) Serial1.printf("%s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %10.6f, %10.6f, %d,",
+      buffer, this->t,
+      double(this->Tb)/600.,
+      double(this->Tb)/1200.,
+      double(this->Ib)/600.,
+      double(this->soc)/16000.,
+      double(this->soc_ekf)/16000.,
+      double(this->Voc_dyn)/1200.,
+      double(this->Voc_ekf)/1200.,
+      double(this->tweak_sclr_amp)/16000.,
+      double(this->tweak_sclr_noa)/16000.,
+      this->falw);
   }
   void nominal()
   {

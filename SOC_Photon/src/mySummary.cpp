@@ -35,12 +35,12 @@ void print_all_summary(struct Sum_st *sum, const int isum, const int nsum)
   {
     if ( ++i>nsum-1 ) i = 0;  // Increment beyond last one written
     Serial.printf("%d,  ", n);
-    if ( !cp.blynking )
-      Serial1.printf("%d,  ", n);
+    if ( !cp.blynking ) Serial1.printf("%d,  ", n);
+
     sum[i].print();
+
     Serial.printf("\n");
-    if ( !cp.blynking )
-      Serial1.printf("\n");
+    if ( !cp.blynking ) Serial1.printf("\n");
   }
   Serial.printf("i,  date,                time,    Tb, Vb, Ib, soc, soc_ekf, Voc_dyn, Voc, tweak_sclr_amp, tweak_sclr_noa, falw,\n");
   if ( !cp.blynking )
