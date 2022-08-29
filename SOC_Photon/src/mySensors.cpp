@@ -642,7 +642,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   }
 
   // print_signal_select
-  if ( rp.debug==26 && print_now_ )   // TODO:
+  if ( rp.debug==26 && print_now_ )
   {
       double cTime;
       if ( rp.tweak_test() ) cTime = double(now)/1000.;

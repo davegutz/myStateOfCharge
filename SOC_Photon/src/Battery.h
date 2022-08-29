@@ -184,6 +184,7 @@ public:
   void nS(const double ns) { *rp_nS_ = ns; };
   virtual void pretty_print();
   void pretty_print_ss();
+  boolean print_now() { return print_now_; };
   void print_signal(const boolean print) { print_now_ = print; };
   void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -chem_.r_0*sr_); };
   double Sr() { return (sr_); };

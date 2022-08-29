@@ -37,7 +37,7 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 // Text headers
 void print_serial_header(void)
 {
-  if ( ( rp.debug==4 || rp.debug==26 ) && (true || cp.publishS ) )
+  if ( ( rp.debug==4 || rp.debug==26 ) )
   {
     Serial.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,,\n");
     if ( !cp.blynking )
@@ -329,8 +329,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   }
   Mon->print_signal(print_now);
   Sen->Sim->print_signal(print_now);
-  Sen->print_signal(print_now);  
-
+  Sen->print_signal(print_now);
 
   // Load Ib and Vb
   // Outputs: Sen->Ib_model_in, Sen->Ib, Sen->Vb 
@@ -496,9 +495,12 @@ void serial_print(unsigned long now, double T)
 }
 void tweak_print(Sensors *Sen, BatteryMonitor *Mon)
 {
-  create_tweak_string(&pp.pubList, Sen, Mon);
-  if ( rp.debug >= 100 ) Serial.printf("tweak_print:");
-  Serial.println(cp.buffer);
+  if ( Mon->print_now() )
+  {
+    create_tweak_string(&pp.pubList, Sen, Mon);
+    if ( rp.debug >= 100 ) Serial.printf("tweak_print:");
+    Serial.println(cp.buffer);
+  }
 }
 
 // Time synchro for web information

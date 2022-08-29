@@ -226,22 +226,22 @@ Coulombs::~Coulombs() {}
 void Coulombs::pretty_print(void)
 {
   Serial.printf("Coulombs:\n");
-  Serial.printf("  q_cap_rated=%9.1f; At t_rated, C\n", q_cap_rated_);
-  Serial.printf("  q_cap_rated_scaled=%9.1f; Act at t_rated_, C\n", q_cap_rated_scaled_);
-  Serial.printf("  q_capacity=%9.1f; Sat charge at temp, C\n", q_capacity_);
-  Serial.printf("  q=%9.1f; Avail, except q_min_, C\n", q_);
-  Serial.printf("  q_min=%9.1f; Low volt shutdown, C\n", q_min_);
-  Serial.printf("  delta_q%9.1f; Charge change since sat, C\n", *rp_delta_q_);
-  Serial.printf("  soc=%8.4f; Frac of q_capacity_avail (0-1);\n", soc_);
-  Serial.printf("  sat=%d; T=saturated\n", sat_);
-  Serial.printf("  t_rated=%5.1f; Rated, dg C\n", t_rated_);
-  Serial.printf("  t_last=%5.1f; past, dg C\n", *rp_t_last_);
-  Serial.printf("  t_rlim=%7.3f; Tb RL, deg C / s\n", t_rlim_);
-  Serial.printf("  resetting=%d; Coord user testing of CC, T=ext reset\n", resetting_);
-  Serial.printf("  soc_min=%8.4f; soc BMS shuts off current\n", soc_min_);
-  Serial.printf("  mod=%s; Chem e.g. Battleborn or LION\n", chem_.decode(mod_code()).c_str());
-  Serial.printf("  mod_code=%d; Chem code\n", mod_code());
-  Serial.printf("  coul_eff=%9.5f; Coul Eff\n", coul_eff_);
+  Serial.printf(" q_cap_rated=%9.1f; At t_rated, C\n", q_cap_rated_);
+  Serial.printf(" q_cap_rated_scaled=%9.1f; Act at t_rated_, C\n", q_cap_rated_scaled_);
+  Serial.printf(" q_capacity=%9.1f; Sat q at temp, C\n", q_capacity_);
+  Serial.printf(" q=%9.1f; Avail, except q_min_, C\n", q_);
+  Serial.printf(" q_min=%9.1f; Low volt shutdown, C\n", q_min_);
+  Serial.printf(" delta_q%9.1f; Change since sat, C\n", *rp_delta_q_);
+  Serial.printf(" soc=%8.4f; Frac of q_cap avail (0-1);\n", soc_);
+  Serial.printf(" sat=%d; T=saturated\n", sat_);
+  Serial.printf(" t_rated=%5.1f; Rated, dg C\n", t_rated_);
+  Serial.printf(" t_last=%5.1f; past, dg C\n", *rp_t_last_);
+  Serial.printf(" t_rlim=%7.3f; Tb RL, deg C / s\n", t_rlim_);
+  Serial.printf(" resetting=%d; Coord user testing of CC\n", resetting_);
+  Serial.printf(" soc_min=%8.4f; soc BMS shuts off\n", soc_min_);
+  Serial.printf(" mod=%s; Chem e.g. Battleborn or LION\n", chem_.decode(mod_code()).c_str());
+  Serial.printf(" mod_code=%d; Chem code\n", mod_code());
+  Serial.printf(" coul_eff=%9.5f; Coul Eff\n", coul_eff_);
   Serial.printf("Coulombs::");
   chem_.pretty_print();
 }
@@ -360,7 +360,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const floa
     q_min_ = soc_min_ * q_capacity_;
 
     if ( rp.debug==96 )
-        Serial.printf("Coulombs::cc,             reset,dt,voc, Voc_filt, V_sat, temp_c, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,      %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
+        Serial.printf("cc:,reset,dt,voc, Voc_filt, V_sat, temp_c, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_cap, soc, %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
                     reset, dt, pp.pubList.Voc, pp.pubList.Voc_filt,  this->Vsat(), temp_c, temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 
     // Save and return

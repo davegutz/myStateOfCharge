@@ -244,6 +244,10 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
 
   Smaller NSUM in constants.h or rp in retained.h or cp in command.h
 
+### Problem:  Garbage in print save .txt files
+
+  Too much data being streamed.   Set Dp/DP larger.   <TODO:  screen bad lines in python MonSim process using try-exception>
+
 ## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
 
 ## To get debug data
