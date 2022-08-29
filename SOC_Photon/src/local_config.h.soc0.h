@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "soc0_20220829";  // Disable e_wrap saturated; tweak, history falw, cal noa, 5 A ibdif
+const String unit = "soc0_20220829";  // Disable e_wrap saturated; tweak, history falw, cal noa, 5 A ibdif, print stuff
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

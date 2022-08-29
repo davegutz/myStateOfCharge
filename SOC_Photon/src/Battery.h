@@ -60,7 +60,7 @@ const double MXEPS = 1-1e-6;      // Level of soc that indicates mathematically 
 
 // BattleBorn 100 Ah, 12v LiFePO4
 // See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
-// >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
+// >13.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
 const uint8_t M_T_BB  = 4;    // Number temperature breakpoints for voc table
 const uint8_t N_S_BB  = 17;   // Number soc breakpoints for voc table
 const float Y_T_BB[M_T_BB] =  //Temperature breakpoints for voc table
@@ -184,6 +184,7 @@ public:
   void nS(const double ns) { *rp_nS_ = ns; };
   virtual void pretty_print();
   void pretty_print_ss();
+  void print_signal(const boolean print) { print_now_ = print; };
   void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -chem_.r_0*sr_); };
   double Sr() { return (sr_); };
   float temp_c() { return (temp_c_); };    // Battery temperature, deg C
@@ -223,6 +224,7 @@ protected:
   double voc_stat_; // Static, table lookup value of voc before applying hysteresis, V
   float *rp_nP_;    // Number of parallel batteries in bank, e.g. '2P1S'
   float *rp_nS_;    // Number of series batteries in bank, e.g. '2P1S'
+  boolean print_now_; // Print command
 };
 
 
