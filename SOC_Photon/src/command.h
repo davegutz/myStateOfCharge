@@ -55,6 +55,8 @@ struct CommandPars
   String soon_str;          // Hold chit_chat soon data - priority with next Control pass, 1 per Control pass
   String asap_str;          // Hold chit_chat asap data - no waiting, ASAP all of now_str processed before Control pass
   boolean publishS;         // Print serial monitor data
+  uint8_t print_mult;       // Print multiplier for objects
+
   CommandPars(void)
   {
     this->token = false;
@@ -68,15 +70,19 @@ struct CommandPars
     dc_dc_on = false;
     blynking = false;
     publishS = false;
+    print_mult = 4;
   }
+
   void cmd_reset(void)
   {
     this->soft_reset = true;
   }
+
   void cmd_summarize(void)
   {
     this->write_summary = true;
   }
+
   void large_reset(void)
   {
     this->enable_wifi = false;
@@ -99,6 +105,12 @@ struct CommandPars
     Serial.printf("  blynking=%d;\n", this->blynking);
     Serial.printf("  publishS=%d;\n", this->publishS);
   }
+
+  void assign_print_mult(const uint8_t count)
+  {
+    this->print_mult = count;
+  }
+
 };            
 
 

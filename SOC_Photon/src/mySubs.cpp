@@ -314,6 +314,24 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 void sense_synth_select(const boolean reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen)
 {
+
+  // Set print frame
+  static uint8_t print_count = 0;
+  boolean print_now = false;
+  if (print_count==cp.print_mult-1 || print_count==UINT8_MAX )
+  {
+    print_count = 0;
+    print_now = true;
+  }
+  else
+  {
+    print_count++;
+  }
+  Mon->print_signal(print_now);
+  Sen->Sim->print_signal(print_now);
+  Sen->print_signal(print_now);  
+
+
   // Load Ib and Vb
   // Outputs: Sen->Ib_model_in, Sen->Ib, Sen->Vb 
   load_ib_vb(reset, now, Sen, myPins, Mon);

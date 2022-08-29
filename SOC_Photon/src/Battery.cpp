@@ -39,7 +39,7 @@ extern PublishPars pp;            // For publishing
 Battery::Battery() {}
 Battery::Battery(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code)
     : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, rp_mod_code, COULOMBIC_EFF),
-    sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS)
+    sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS), print_now_(false)
 {
     // Battery characteristic tables
     voc_T_ = new TableInterp2D(chem_.n_s, chem_.m_t, chem_.x_soc, chem_.y_t, chem_.t_voc);
@@ -794,7 +794,7 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, BatteryMo
         Serial.printf("BatteryModel::cc,  dt,voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
                     Sen->T, pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 
-    if ( rp.debug==26 && (true || cp.publishS) ) // print_serial_sim  TODO:
+    if ( rp.debug==26 && print_now_ ) // print_serial_sim  TODO:
     {
         double cTime;
         if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;

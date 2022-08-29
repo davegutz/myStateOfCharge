@@ -343,6 +343,7 @@ public:
   float Ib_noa_noise();
   float Ib_noa_noise_amp() { return ( Ib_noa_noise_amp_ ); };
   void Ib_noa_noise_amp(const float noise) { Ib_noa_noise_amp_ = noise; };
+  void print_signal(const boolean print) { print_now_ = print; };
   void vb_print(void);     // Print Vb result
   float vb_add() { return ( vb_add_ ); };
   void vb_add(const float add) { vb_add_ = add; };
@@ -361,6 +362,7 @@ protected:
   float Ib_amp_noise_amp_;  // Ib noise on amplified sensor, amplitude model only, A pk-pk
   float Ib_noa_noise_amp_;  // Ib noise on non-amplified sensor, amplitude model only, A pk-pk
   float vb_add_;         // Fault injection bias, V
+  boolean print_now_;    // Print enable
 };
 
 
