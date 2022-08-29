@@ -296,16 +296,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%7.3f\n", Sen->ShuntNoAmp->add());
                 break;
 
-              case ( 'p' ):  //   Dp<>:  PRINT interval input
-                if ( !cp.blynking )
-                {
-                  Serial.printf("PublishSerial %ld to ", Sen->PublishSerial->delay());
-                  Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
-                }
-                Sen->PublishSerial->delay(cp.input_string.substring(2).toInt());
-                Serial.printf("%ld\n", Sen->PublishSerial->delay());
-                break;
-
               case ( 'P' ):  //   DP<>:  PRINT multiplier
                 Serial.printf("Print interval %d to ", cp.print_mult);
                 cp.assign_print_mult(max(min(cp.input_string.substring(2).toInt(), UINT8_MAX), 0));
@@ -982,7 +972,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     if ( !rp.tweak_test() ) chit("Xb0.", ASAP);
                     chit("XS; Mk1; Nk1;", ASAP);  // Stop any injection
                     chit("Dn" + String(COULOMBIC_EFF), ASAP);
-                    chit("Di0;Dm0;Dn0;Dt0;Dv0;DT0;DV0.0;DI0;Xu0;Xv1.;Dp400;DP4;", ASAP);
+                    chit("Di0;Dm0;Dn0;Dt0;Dv0;DT0;DV0.0;DI0;Xu0;Xv1.;DP4;", ASAP);
                     break;
 
                   case ( 1 ):  // Xp1:  sine
@@ -1019,7 +1009,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                   case ( 6 ):  // Xp6:  Program a pulse
-                    chit("XS;Dm0;Dn0;v0;Xm7;Ca0.5;Pm;Dr100;Dp100;DP1;v26;", QUEUE);  // setup
+                    chit("XS;Dm0;Dn0;v0;Xm7;Ca0.5;Pm;Dr100;DP1;v26;", QUEUE);  // setup
                     chit("Dn0.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
                     chit("W10;Pm;v0;", QUEUE);  // finish
                     break;
@@ -1040,7 +1030,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Nx0.04;", QUEUE);   // Give tweak bias logic a large adjustment range to quickly converge
                     chit("Mk1;Nk1;", QUEUE);  // Reset the tweak biases to 1 for new count
                     chit("Dn1;", QUEUE);      // Disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
-                    chit("Dp200;", QUEUE);    // Fast data collection
                     chit("DP2;", QUEUE);      // Fast data collection
                     chit("Rb;", QUEUE);       // Reset battery states
                     chit("Pa;", QUEUE);       // Print all for record
@@ -1092,13 +1081,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Pa;", QUEUE);       // Print all for record
                     if ( INT_in == 20 )
                     {
-                      chit("Dp400;", QUEUE);  // 4x data collection
                       chit("DP4;", QUEUE);    // 4x data collection
                       chit("v26;", QUEUE);    // 4x data collection
                     }
                     else if ( INT_in == 21 )
                     {
-                      chit("Dp2000;", QUEUE); // Slow data collection
                       chit("DP20;", QUEUE);    // 4x data collection
                       chit("v6;", QUEUE);     // Slow data collection
                     }
@@ -1205,7 +1192,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Du= "); Serial.print(Sen->Sim->coul_eff()); Serial.println(" : coul eff"); 
   Serial.printf("  Dm= "); Serial.printf("%7.3f", Sen->ShuntAmp->add()); Serial.printf(" : delta amp, A [0]\n"); 
   Serial.printf("  Dn= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->add()); Serial.printf(" : delta noa, A [0]\n"); 
-  Serial.printf("  Dp= "); Serial.print(Sen->PublishSerial->delay()); Serial.println(" : pub frame, ms [400]"); 
   Serial.printf("  DP= "); Serial.print(cp.print_mult); Serial.println(" : print mult of Dr [4]"); 
   Serial.printf("  Dr= "); Serial.print(Sen->ReadSensors->delay()); Serial.println(" : minor frame, ms [100]"); 
   Serial.printf(" *Dt= "); Serial.printf("%7.3f", rp.tb_bias); Serial.printf(" : delta sense, deg C [%7.3f]\n", TEMP_BIAS); 

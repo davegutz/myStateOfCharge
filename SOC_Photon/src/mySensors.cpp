@@ -509,7 +509,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vb_min, con
 
 
 // Class Sensors
-Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, Sync *ReadSensors):
+Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *ReadSensors):
   rp_tb_bias_(&rp.tb_bias), tb_bias_last_(0.), Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE),
   Ib_amp_noise_amp_(IB_AMP_NOISE), Ib_noa_noise_amp_(IB_NOA_NOISE)
 {
@@ -528,7 +528,6 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *PublishSerial, 
   this->stop_inj = 0UL;
   this->end_inj = 0UL;
   this->cycles_inj = 0.;
-  this->PublishSerial = PublishSerial;
   this->ReadSensors = ReadSensors;
   this->display = true;
   this->sclr_coul_eff = 1.;
@@ -642,7 +641,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   }
 
   // print_signal_select
-  if ( rp.debug==26 && print_now_ )
+  if ( rp.debug==26 && cp.publishS )
   {
       double cTime;
       if ( rp.tweak_test() ) cTime = double(now)/1000.;

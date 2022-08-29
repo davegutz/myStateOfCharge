@@ -221,7 +221,6 @@ void loop()
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
 
   // boolean publishS;                           // Serial print, T/F see cp.publishS
-  static Sync *PublishSerial = new Sync(PUBLISH_SERIAL_DELAY);
 
   boolean display_to_user;                    // User display, T/F
   static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
@@ -233,9 +232,6 @@ void loop()
   boolean control;                            // Summarize, T/F
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
 
-  static uint8_t last_read_debug = 0;         // Remember first time with new debug to print headers
-  static uint8_t last_publishS_debug = 0;     // Remember first time with new debug to print headers
-
   unsigned long current_time;                 // Time result
   static unsigned long now = millis();        // Keep track of time
   time32_t time_now;                          // Keep track of time
@@ -246,7 +242,7 @@ void loop()
   static boolean reset_publish = true;        // Dynamic reset
  
   // Sensor conversions
-  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins->pin_1_wire, PublishSerial, ReadSensors); // Manage sensor data
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins->pin_1_wire, ReadSensors); // Manage sensor data
 
    // Mon, used to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last, &rp.nP, &rp.nS, &rp.mon_mod);
@@ -291,7 +287,6 @@ void loop()
   display_to_user = DisplayUserSync->update(millis(), reset); //  now || reset
   publishP = PublishParticle->update(millis(), false);        //  now || false
   publishB = PublishBlynk->update(millis(), false);           //  now || false
-  cp.publishS = PublishSerial->update(millis(), reset_publish);  //  now || reset_publish
   boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT );
   if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
   summarizing = Summarize->update(millis(), boot_summ, !rp.modeling); // now || boot_summ && !rp.modeling
@@ -310,6 +305,19 @@ void loop()
   {
     Sen->T =  ReadSensors->updateTime();
     Sen->reset = reset;
+
+    // Set print frame
+    static uint8_t print_count = 0;
+    if (print_count>=cp.print_mult-1 || print_count==UINT8_MAX )  // > avoids lockup on change by user
+    {
+      print_count = 0;
+      cp.publishS = true;
+    }
+    else
+    {
+      print_count++;
+      cp.publishS = false;
+    }
 
     // Read sensors, model signals, select between them, synthesize injection signals on current
     // Inputs:  rp.config, rp.sim_mod
@@ -332,11 +340,14 @@ void loop()
     if ( rp.modeling && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
 
     // Debug for read
-    // TODO:  debug_main() into debug.cpp.  Move create_print_string, tweak_print, print_serial_header and print_serial_sim_header to debug.cpp 
     if ( rp.debug==12 ) debug_12(Mon, Sen);  // EKF
+    if ( rp.debug==-4 ) debug_m4(Mon, Sen);
+ 
+    // Print headers for tweak test  TODO: is this needed?   TODO: move to mySubs
+    static uint8_t last_read_debug = 0;         // Remember first time with new debug to print headers
     if ( rp.tweak_test() )
     {
-      if ( ( rp.debug==4 || rp.debug==26 ) && (cp.publishS||true) ) // TODO:
+      if ( ( rp.debug==4 || rp.debug==26 ) )
       {
         if ( reset || (last_read_debug != rp.debug) )
         {
@@ -344,15 +355,30 @@ void loop()
           if ( rp.debug==26 ) print_serial_sim_header();
           if ( rp.debug==26 ) print_signal_sel_header();
         }
-        tweak_print(Sen, Mon);
-      }
-
-      if ( rp.debug==-4 )
-      {
-        debug_m4(Mon, Sen);
       }
       last_read_debug = rp.debug;
     }
+
+    // Mon for rp.debug  TODO:  move to mySubs
+    static uint8_t last_publishS_debug = 0;     // Remember first time with new debug to print headers
+    if ( cp.publishS )
+    {
+      if ( ( rp.debug==4 || rp.debug==26 ) )
+      {
+        if ( reset_publish || (last_publishS_debug != rp.debug) )
+        {
+          print_serial_header();
+          if ( rp.debug==26 )
+          {
+            print_serial_sim_header();
+            print_signal_sel_header();
+          }
+        }
+        short_print(Sen, Mon);
+      }
+      last_publishS_debug = rp.debug;
+    }
+
   }  // end read (high speed frame)
 
   // OLED and Bluetooth display drivers
@@ -365,7 +391,7 @@ void loop()
   // Visit https://console.particle.io/events.   Click on "view events on a terminal"
   // to get a curl command to run
   // TODO:  publish_main(publishP, reset_publish, publishS) in myCloud
-  if ( publishP || cp.publishS )
+  if ( publishP )
   {
     assign_publist(&pp.pubList, PublishParticle->now(), unit, hm_string, Sen, num_timeouts, Mon);
  
@@ -379,30 +405,6 @@ void loop()
     else
       digitalWrite(myPins->status_led, LOW);
 
-    // Mon for rp.debug
-    if ( cp.publishS && !rp.tweak_test() )
-    {
-      if ( ( rp.debug==4 || rp.debug==26 ) )
-      {
-        if ( reset_publish || (last_publishS_debug != rp.debug) )
-        {
-          print_serial_header();
-          if ( rp.debug==26 )
-          {
-            print_serial_sim_header();
-            print_signal_sel_header();
-          }
-        }
-        serial_print(PublishSerial->now(), Sen->T);
-      }
-
-      if ( rp.debug==-4 )
-      {
-        debug_m4(Mon, Sen);
-      }
-      last_publishS_debug = rp.debug;
-    }
-
   }
 
   // Discuss things with the user
@@ -412,7 +414,7 @@ void loop()
   // String definitions are below.
   // Control
   if ( control ){} // placeholder
-  // Chit-chat requires 'read' timing so 'Dp' and 'Dr' can manage sequencing
+  // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
   asap();
   if ( read )
   {

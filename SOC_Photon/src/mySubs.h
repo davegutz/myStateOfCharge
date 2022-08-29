@@ -80,11 +80,10 @@ void print_serial_sim_header(void);
 void print_signal_sel_header(void);
 void sense_synth_select(const boolean reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen);
-void serial_print(unsigned long now, double T);
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);
 String time_long_2_str(const unsigned long current_time, char *tempStr);
 String tryExtractString(String str, const char* start, const char* end);
 void tweak_on_new_desat(Sensors *Sen, unsigned long int now);
-void tweak_print(Sensors *Sen, BatteryMonitor *Mon);
+void short_print(Sensors *Sen, BatteryMonitor *Mon);
 
 #endif

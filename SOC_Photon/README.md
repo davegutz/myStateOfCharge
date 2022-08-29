@@ -246,7 +246,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
 
 ### Problem:  Garbage in print save .txt files
 
-  Too much data being streamed.   Set Dp/DP larger.   <TODO:  screen bad lines in python MonSim process using try-exception>
+  Too much data being streamed.   Set DP larger.   <TODO:  screen bad lines in python MonSim process using try-exception>
 
 ## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
 
@@ -387,7 +387,7 @@ Throughput test
 40.  Expected anomolies:
   a.  real world collection sometimes run sample times longer than RANDLES_T_MAX.   When that happens the modeled simulation of Randles system will oscillate so it is bypassed.   Real data will appear to have first order response and simulation in python will appear to be step.
 41.  Manual tests to check initialzation of real world.   Set 'Xm=4;' to over-ride current sensor.  Set 'Dc<>' to place Vb where you want it.   Press hard reset button to force reinitialization to the EKF.  If get stuck saturated or not, remember to add a little bit of current 'Di<>' positive to engage saturation and negative to disengage saturation.
-42.  Bluetooth (BLE).  In the logic it is visible as Serial1.   All the Serial1 api are non-blocking, so if BLE not connected or has failed then nothing seems to happen.  Another likely reason is baud rate mismatch between the HC-06 device (I couldn't get HC-05 to work) and Serial.begin(baud).   There is a project above this SOC_Photon project called BT-AT that runs the AT on HC-06.  You need to set baud rate using that.   You should use 115200 or higher.   Lower rates caused the Serial api to be the slowest routines in the chain of call.   At 9600 the fastest READ time 'Dr<>' was 100 - 200 ms depending on the print interval 'Dp<>'.
+42.  Bluetooth (BLE).  In the logic it is visible as Serial1.   All the Serial1 api are non-blocking, so if BLE not connected or has failed then nothing seems to happen.  Another likely reason is baud rate mismatch between the HC-06 device (I couldn't get HC-05 to work) and Serial.begin(baud).   There is a project above this SOC_Photon project called BT-AT that runs the AT on HC-06.  You need to set baud rate using that.   You should use 115200 or higher.   Lower rates caused the Serial api to be the slowest routines in the chain of call.   At 9600 the fastest READ time 'Dr<>' was 100 - 200 ms depending on the print interval 'DP<>'.
 43.  Current is a critical signal for availability.   If lose current also lose knowledge of instantaneous voc_stat because do not know how to adjust for rapid changes in Vb without current.   So the EKF useful only for steady state use.  If add redundant current sensor then If current is available, it creates a triplex signal selection process where current sensors may be compared to each other and Coulomb counter may be compared to EKF to provide enough information to sort out the correct signals.  For example, if the currents disagree and CC and EKF agree then the standby current sensor has faulted.   For that same situation and the CC and EKF disagree then either the active current sensor has likely failed.  If the currents agree and CC and EKF disagree then the voltage sensor has likely failed.  The amplified current sensor is most accurate and is the first choice default.  The non amplified sensor is ok - observing long cycling 'Xp9' see that for a long history, counted coulombs are the same and sensor errors average out.   All this consistent with proper and same calibration of current sensors' gains and setting biases so indicated currents are zero when actual current is zero.  Need to cover small long duration current differnces as well as large fast current difference failures.   These tend to compete in any logic.  So two mechanisms are created to deal with them separately (ccd_fa and wrap_fa).   The Coulomb Counter Difference logic (ccd) detects slow small failures as the precise Coulomb Counters drift apart between the two current sensors.   The Wrap logic detects rapid failures as the sensed current is used to predict vb and then trips when compared to actual vb.  Maximum currents are about 1C for a single rated capacity unit, e.g. 1P1S.   The trip points are sized to detect stuff no faster than that and as slow as C0.16.   The logic works better than this design range.
 44. Other fault notes:
   Every fail fault must change something on the display.  Goal is to make user run 'Pf' to see cause
@@ -399,10 +399,10 @@ Throughput test
 
 test talk:   (-=ASAP, '',*=SOON , +=QUEUE)
       v4;
-      -Dp1000;-Dr1000;W3;-Dm0;*Dm3;+Dm2;Dm1;-Dn0;+Dm0;+Dn0;+Dr100;+Dp400;
+      -DP10;-Dr1000;W3;-Dm0;*Dm3;+Dm2;Dm1;-Dn0;+Dm0;+Dn0;+Dr100;+DP4;
       expected result:
 pro_20220806, 2022-08-06T08:57:50,  53146677.097, 0.100,   1,  0,  7,  25.00,-45.54717,0.00000,    13.80000,0.00000,-45.54717,4.03000,  -49.577168, 0.99960,0.00000,1.00000,
-echo:  -Dp1000, 1
+echo:  -DP10, 1
 echo:  -Dr1000, 1
 echo:  W3, 4
 echo:  -Dm0, 1
@@ -413,8 +413,8 @@ echo:  -Dn0, 1
 echo:  +Dm0, 3
 echo:  +Dn0, 3
 echo:  +Dr100, 3
-echo:  +Dp400, 3
-echo:  Dp1000, 0
+echo:  +DP4, 3
+echo:  DP10, 0
 PublishSerial from 400 to 1000
 echo:  Dr1000, 0
 ReadSensors from 100 to 1000
@@ -451,40 +451,40 @@ ShuntNoAmp.add from   0.000 to   0.000
 pro_20220806, 2022-08-06T08:58:00,  53146687.097, 1.000,   1,  0,  7,  25.00,14.47433,0.00000,    13.80000,0.00000,14.47432,4.45134,  10.022975, 0.99960,0.00593,1.00000,
 echo:  Dr100, 0
 ReadSensors from 1000 to 100
-echo:  Dp400, 0
+echo:  P4, 0
 PublishSerial from 1000 to 400
 pro_20220806, 2022-08-06T08:58:01,  53146687.497, 0.100,   1,  0,  7,  25.00,-45.25843,0.00000,    13.80000,0.00000,-45.25845,4.28979,  -49.548237, 0.99960,0.00000,1.00000,
 pro_20220806, 2022-08-06T08:58:01,  53146687.898, 0.100,   1,  0,  7,  25.00,-44.97108,0.00000,    13.80000,0.00000,-44.97110,4.03000,  -49.001095, 0.99960,0.00000,1.00000,
 
 
 Full regression suite:
-  ampHiFail:      Xm7;Ca0.5;Dr100;Dp100;DP1;v26;W50;Dm50;Dn0.0001;
+  ampHiFail:      Xm7;Ca0.5;Dr100;DP1;v26;W50;Dm50;Dn0.0001;
+                  Xp0;Rf;W100;+v0;Rf;Pf;
+  ampLoFail:      Xm7;Ca0.95;Dr100;DP1;v26;W50;Dm-50;Dn0.0001;W50;Pe;
                   Xp0;Rf;W100;+v0;Dr100;Rf;Pf;
-  ampLoFail:      Xm7;Ca0.95;Dr100;Dp100;DP1;v26;W50;Dm-50;Dn0.0001;W50;Pe;
-                  Xp0;Rf;W100;+v0;Dr100;Rf;Pf;
-  ampHiFailNoise: Xm7;Ca0.5;Dr100;Dp100;DP1;v26;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;
+  ampHiFailNoise: Xm7;Ca0.5;Dr100;DP1;v26;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;
                   DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Dr100;Rf;Pf;
-  ampLoFailNoise: Xm7;Ca0.95;Dr100;Dp100;DP1;v26;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm-50;Dn0.0001;
+  ampLoFailNoise: Xm7;Ca0.95;Dr100;DP1;v26;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm-50;Dn0.0001;
                   DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Dr100;Rf;Pf;
-  ampHiFailSlow:  Xm7;Ca0.5;Dr10000;Dp10000;DP100;v26;W2;Dm6;Dn0.0001;Sf.05;
+  ampHiFailSlow:  Xm7;Ca0.5;Dr10000;DP100;v26;W2;Dm6;Dn0.0001;Sf.05;
                   Xp0;Rf;W2;+v0;Dr100;Sf1;Rf;Pf;
   rapidTweakRegression:  Xp10
   slowTweakRegression:  Xp11
-  vHiFail:        Xm7;Ca0.5;Dr100;Dp100;DP1;v26;W50;Dv0.25;
+  vHiFail:        Xm7;Ca0.5;Dr100;DP1;v26;W50;Dv0.25;
                   Xp0;Rf;W100;+v0;Dr100;Rf;Pf;
   slowHalfTweakRegression:  Xp12
   pulse:  Xp6
-  satSit: Xp0;Xm15;Ca0.9951;Rb;Rf;Dr100;Dp100;DP1;Xts;Xa-10;Xf0.002;XW10;XT10;XC1;W2;v26;W5;XR;
+  satSit: Xp0;Xm15;Ca0.9951;Rb;Rf;Dr100;DP1;Xts;Xa-10;Xf0.002;XW10;XT10;XC1;W2;v26;W5;XR;
           XS;v0;Xp0;Ca.9951;W5;Rf;Pf;v0;
-  tbFailHdwe:   Ca.5;Xp0;W4;Xm6;Dp100;DP1;Dr100;W2;v26;W100;Xu1;Xv.005;W300;Xu0;W100;v0;
+  tbFailHdwe:   Ca.5;Xp0;W4;Xm6;DP1;Dr100;W2;v26;W100;Xu1;Xv.005;W300;Xu0;W100;v0;
                 Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;
-  tbFailMod:    Ca.5;Xp0;W4;Xm7;Dp100;DP1;Dr100;W2;v26;W100;Xu1;Xv.005;W300;Xu0;W100;v0;
+  tbFailMod:    Ca.5;Xp0;W4;Xm7;DP1;Dr100;W2;v26;W100;Xu1;Xv.005;W300;Xu0;W100;v0;
                 Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;
-  triTweakRegression:   Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;Dn1;Dp100;DP1;Rb;Pa;Xf0.02;Xa-2000;XW5;XT5;XC3;W2;v26;W2;XR;
+  triTweakRegression:   Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;Dn1;DP1;Rb;Pa;Xf0.02;Xa-2000;XW5;XT5;XC3;W2;v26;W2;XR;
                         v0;XS;Dn0;Xp0;Ca1.;Pf;
-  pulse30:      Xm7;Ca1;Dp100;DP1;v26;W50;Di-30;
+  pulse30:      Xm7;Ca1;DP1;v26;W50;Di-30;
                 Di30
-                Di0;Dp400;DP4;
+                Di0;DP4;
   Find bad segments in txt files:  ÿ
 
 ## Accuracy

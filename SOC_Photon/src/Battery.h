@@ -184,8 +184,6 @@ public:
   void nS(const double ns) { *rp_nS_ = ns; };
   virtual void pretty_print();
   void pretty_print_ss();
-  boolean print_now() { return print_now_; };
-  void print_signal(const boolean print) { print_now_ = print; };
   void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -chem_.r_0*sr_); };
   double Sr() { return (sr_); };
   float temp_c() { return (temp_c_); };    // Battery temperature, deg C
@@ -225,7 +223,6 @@ protected:
   double voc_stat_; // Static, table lookup value of voc before applying hysteresis, V
   float *rp_nP_;    // Number of parallel batteries in bank, e.g. '2P1S'
   float *rp_nS_;    // Number of series batteries in bank, e.g. '2P1S'
-  boolean print_now_; // Print command
 };
 
 

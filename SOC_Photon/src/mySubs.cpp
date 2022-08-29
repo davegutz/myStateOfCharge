@@ -39,7 +39,7 @@ void print_serial_header(void)
 {
   if ( ( rp.debug==4 || rp.debug==26 ) )
   {
-    Serial.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,,\n");
+    Serial.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,\n");
     if ( !cp.blynking )
       Serial1.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,\n");
   }
@@ -315,22 +315,6 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen)
 {
 
-  // Set print frame
-  static uint8_t print_count = 0;
-  boolean print_now = false;
-  if (print_count==cp.print_mult-1 || print_count==UINT8_MAX )
-  {
-    print_count = 0;
-    print_now = true;
-  }
-  else
-  {
-    print_count++;
-  }
-  Mon->print_signal(print_now);
-  Sen->Sim->print_signal(print_now);
-  Sen->print_signal(print_now);
-
   // Load Ib and Vb
   // Outputs: Sen->Ib_model_in, Sen->Ib, Sen->Vb 
   load_ib_vb(reset, now, Sen, myPins, Mon);
@@ -486,21 +470,10 @@ void serialEvent1()
 }
 
 // Inputs serial print
-void serial_print(unsigned long now, double T)
+void short_print(Sensors *Sen, BatteryMonitor *Mon)
 {
-  create_print_string(&pp.pubList);
+  create_tweak_string(&pp.pubList, Sen, Mon);
   Serial.println(cp.buffer);
-  if ( !cp.blynking )
-    Serial1.println(cp.buffer);
-}
-void tweak_print(Sensors *Sen, BatteryMonitor *Mon)
-{
-  if ( Mon->print_now() )
-  {
-    create_tweak_string(&pp.pubList, Sen, Mon);
-    if ( rp.debug >= 100 ) Serial.printf("tweak_print:");
-    Serial.println(cp.buffer);
-  }
 }
 
 // Time synchro for web information
