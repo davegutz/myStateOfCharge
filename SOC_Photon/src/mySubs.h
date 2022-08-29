@@ -66,7 +66,7 @@ struct Pins
 
 // Headers
 void create_print_string(Publish *pubList);
-void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
+void create_short_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
 double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
 void finish_request(void);
 void get_string(String *source);

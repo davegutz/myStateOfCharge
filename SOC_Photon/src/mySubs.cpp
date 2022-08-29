@@ -78,10 +78,14 @@ void create_print_string(Publish *pubList)
     pubList->soc_model, pubList->soc_ekf, pubList->soc,
     '\0');
 }
-void create_tweak_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
+void create_short_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
+  double cTime;
+  if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;
+  else cTime = Sen->control_time;
+
   sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
-    pubList->unit.c_str(), pubList->hm_string.c_str(), double(Sen->now)/1000., Sen->T,
+    pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
     pubList->sat, rp.ib_select, rp.modeling,
     Mon->Tb(), Mon->Vb(), Mon->Ib(),
     Mon->Vsat(), Mon->dV_dyn(), Mon->Voc_stat(), Mon->Hx(),
@@ -472,7 +476,7 @@ void serialEvent1()
 // Inputs serial print
 void short_print(Sensors *Sen, BatteryMonitor *Mon)
 {
-  create_tweak_string(&pp.pubList, Sen, Mon);
+  create_short_string(&pp.pubList, Sen, Mon);
   Serial.println(cp.buffer);
 }
 
