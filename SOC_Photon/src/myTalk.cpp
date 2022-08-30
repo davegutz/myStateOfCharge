@@ -1076,7 +1076,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("XR;", QUEUE);       // Run cycle
                     break;
 
-                  case( 20 ): case ( 21 ):    // Xp20:  Xp21:  20=tweak-like data, 21= 2 sec data cycle
+                  case( 20 ): case ( 21 ):    // Xp20:  Xp21:  20= 0.4 s data, 21= 2 s data, for nominal Dr100=0.1 s sample time
                     chit("v0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
                     chit("Pa;", QUEUE);       // Print all for record
                     if ( INT_in == 20 )
@@ -1086,8 +1086,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     }
                     else if ( INT_in == 21 )
                     {
-                      chit("DP20;", QUEUE);    // 4x data collection
-                      chit("v6;", QUEUE);     // Slow data collection
+                      chit("DP20;", QUEUE);    // 20x data collection
+                      chit("v26;", QUEUE);     // Slow data collection
                     }
                     chit("Rb;", QUEUE);       // Reset battery states
                     break;
