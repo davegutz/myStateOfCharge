@@ -281,7 +281,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
     double u[2] = {ib_, vb_};
     Randles_->calc_x_dot(u);
-    if ( dt_<RANDLES_T_MAX )
+    if ( dt_<=RANDLES_T_MAX )
     {
         Randles_->update(dt_);
         voc_ = Randles_->y(0);
@@ -635,7 +635,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boole
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
     double u[2] = {ib_, voc_};
     Randles_->calc_x_dot(u);
-    if ( dt_<RANDLES_T_MAX )
+    if ( dt_<=RANDLES_T_MAX )
     {
         Randles_->update(dt);
         vb_ = Randles_->y(0);
