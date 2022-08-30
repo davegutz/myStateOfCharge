@@ -234,16 +234,19 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   display->setCursor(0,0);              // Start at top-left corner
 
   // Top Line
+
   // Tb
   sprintf(cp.buffer, "%3.0f", pp.pubList.Tb);
   dispT = cp.buffer;
   if ( Sen->Flt->tb_fa() && (frame==0 || frame==1) )
     dispT = "***";
+
   // Voc
   sprintf(cp.buffer, "%5.2f", pp.pubList.Voc);
   dispV = cp.buffer;
   if ( Sen->Flt->vb_sel_stat()==0 && (frame==1 || frame==2) )
     dispV = "**F**";
+
   // Ib
   sprintf(cp.buffer, "%6.1f", pp.pubList.Ib);
   dispI = cp.buffer;
@@ -375,9 +378,9 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   else if ( Sen->elapsed_inj && rp.tweak_test() )  // Done.  Turn things off by setting 0
   {
     Sen->elapsed_inj = 0;
-    chit("v0;", ASAP);  // Turn off echo
-    chit("Pa;", QUEUE);  // Print all for record
-    chit("Xm7;", QUEUE); // Turn off tweak_test
+    chit("v0;", ASAP);    // Turn off echo
+    chit("Xm7;", QUEUE);  // Turn off tweak_test
+    chit("Pa;", QUEUE);   // Print all for record.  Last so Pf last and visible
   }
   // Perform the calculation of injection signals 
   rp.inj_bias = Sen->Sim->calc_inj(Sen->elapsed_inj, rp.type, rp.amp, rp.freq);

@@ -1029,7 +1029,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("NC0.004;", QUEUE);  // Give tweak bias logic a large adjustment range to quickly converge
                     chit("Nx0.04;", QUEUE);   // Give tweak bias logic a large adjustment range to quickly converge
                     chit("Mk1;Nk1;", QUEUE);  // Reset the tweak biases to 1 for new count
-                    chit("Dn1;", QUEUE);      // Disable Coulombic efficiency logic, otherwise tweak_test causes tweak logic to make bias ~1 A
+                    chit("Dm1;Dn1;", ASAP);   // Slight positive current so sat logic is functional.  ASAP so synchronized and ib_diff flat.
                     chit("DP2;", QUEUE);      // Fast data collection
                     chit("Rb;", QUEUE);       // Reset battery states
                     chit("Pa;", QUEUE);       // Print all for record

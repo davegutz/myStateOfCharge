@@ -148,8 +148,8 @@ class TriInj
       if ( freq_rps>1e-6 )
         p = 2. / freq_rps * PI;
 
-      // refresh t_last base
-      if ( t - t_last_ >= p )
+      // Refresh or reset t_last base
+      if ( t - t_last_ >= p || t < t_last_ )
         t_last_ = t;
 
       // Wave calculation
