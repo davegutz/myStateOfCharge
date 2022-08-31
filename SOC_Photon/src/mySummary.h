@@ -40,27 +40,25 @@ struct Sum_st
   int16_t soc;      // Battery state of charge, free Coulomb counting algorithm, %
   int16_t soc_ekf;  // Battery state of charge, ekf, %
   int16_t Voc_dyn;  // Battery modeled charge voltage at soc, V
-  int16_t Voc_ekf;  // Ekf estimated charge voltage, V
+  int16_t Voc_stat; // Ekf reference charge voltage, V
   int16_t tweak_sclr_amp;  // Amplified Coulombic Efficiency scalar
   int16_t tweak_sclr_noa;  // Non-Amplified Coulombic Efficiency scalar
   uint16_t falw;    // Fail word
   Sum_st(void){}
-  void assign(const time32_t now, const double Tb, const double Vb, const double Ib,
-    const double soc_ekf, const double soc, const double Voc_dyn, const double Voc_ekf,
-    const double tweak_sclr_amp, const double tweak_sclr_noa, const uint16_t falw)
+  void assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
   {
     char buffer[32];
     this->t = now;
-    this->Tb = int16_t(Tb*600.);
-    this->Vb = int16_t(Vb*1200.);
-    this->Ib = int16_t(Ib*600.);
-    this->soc = int16_t(soc*16000.);
-    this->soc_ekf = int16_t(soc_ekf*16000.);
-    this->Voc_dyn = int16_t(Voc_dyn*1200.);
-    this->Voc_ekf = int16_t(Voc_ekf*1200.);
-    this->tweak_sclr_amp = int16_t(tweak_sclr_amp*16000.);
-    this->tweak_sclr_noa = int16_t(tweak_sclr_noa*16000.);
-    this->falw = falw;
+    this->Tb = int16_t(Sen->Tb*600.);
+    this->Vb = int16_t(Sen->Vb*1200.);
+    this->Ib = int16_t(Sen->Ib*600.);
+    this->soc = int16_t(Mon->soc()*16000.);
+    this->soc_ekf = int16_t(Mon->soc_ekf()*16000.);
+    this->Voc_dyn = int16_t(Mon->Voc()*1200.);
+    this->Voc_stat = int16_t(Mon->Voc_stat()*1200.);
+    this->tweak_sclr_amp = int16_t(Sen->ShuntAmp->tweak_sclr()*16000.);
+    this->tweak_sclr_noa = int16_t(Sen->ShuntNoAmp->tweak_sclr()*16000.);
+    this->falw = Sen->Flt->falw();
     time_long_2_str(now, buffer);
   }
   void print(void)
@@ -78,7 +76,7 @@ struct Sum_st
       double(this->soc)/16000.,
       double(this->soc_ekf)/16000.,
       double(this->Voc_dyn)/1200.,
-      double(this->Voc_ekf)/1200.,
+      double(this->Voc_stat)/1200.,
       double(this->tweak_sclr_amp)/16000.,
       double(this->tweak_sclr_noa)/16000.,
       this->falw);
@@ -90,7 +88,7 @@ struct Sum_st
       double(this->soc)/16000.,
       double(this->soc_ekf)/16000.,
       double(this->Voc_dyn)/1200.,
-      double(this->Voc_ekf)/1200.,
+      double(this->Voc_stat)/1200.,
       double(this->tweak_sclr_amp)/16000.,
       double(this->tweak_sclr_noa)/16000.,
       this->falw);
@@ -104,7 +102,7 @@ struct Sum_st
     this->soc = 0.;
     this->soc_ekf = 0.;
     this->Voc_dyn = 0.;
-    this->Voc_ekf = 0.;
+    this->Voc_stat = 0.;
     this->tweak_sclr_amp = 1.;
     this->tweak_sclr_noa = 1.;
     this->falw = 0;

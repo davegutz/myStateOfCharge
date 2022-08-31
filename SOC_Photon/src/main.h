@@ -424,14 +424,15 @@ void loop()
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
-  if ( !boot_wait && (summarizing || cp.write_summary) )
+  if ( read )
   {
-    if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
-    mySum[rp.isum].assign(time_now, Sen->Tb_filt, Sen->Vb, Sen->Ib,
-                          Mon->soc_ekf(), Mon->soc(), Mon->Voc(), Mon->Voc(),
-                          Sen->ShuntAmp->tweak_sclr(), Sen->ShuntNoAmp->tweak_sclr(),
-                          Sen->Flt->falw());
-    if ( rp.debug==0 ) Serial.printf("Summ...\n");
+    if ( (!boot_wait && summarizing) || cp.write_summary )
+    {
+      if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
+      mySum[rp.isum].assign(time_now, Mon, Sen);
+      Serial.printf("Summ...\n");
+      cp.write_summary = false;
+    }
   }
 
   // Initialize complete once sensors and models started and summary written
@@ -449,7 +450,6 @@ void loop()
     Serial.printf("soft reset...\n");
   }
   cp.soft_reset = false;
-  cp.write_summary = false;
 
 } // loop
 
