@@ -343,41 +343,8 @@ void loop()
     if ( rp.debug==12 ) debug_12(Mon, Sen);  // EKF
     if ( rp.debug==-4 ) debug_m4(Mon, Sen);
  
-    // Print headers for tweak test  TODO: is this needed?   TODO: move to mySubs
-    static uint8_t last_read_debug = 0;         // Remember first time with new debug to print headers
-    if ( rp.tweak_test() )
-    {
-      if ( ( rp.debug==4 || rp.debug==26 ) )
-      {
-        if ( reset || (last_read_debug != rp.debug) )
-        {
-          print_serial_header();
-          if ( rp.debug==26 ) print_serial_sim_header();
-          if ( rp.debug==26 ) print_signal_sel_header();
-        }
-      }
-      last_read_debug = rp.debug;
-    }
-
-    // Mon for rp.debug  TODO:  move to mySubs
-    static uint8_t last_publishS_debug = 0;     // Remember first time with new debug to print headers
-    if ( cp.publishS )
-    {
-      if ( ( rp.debug==4 || rp.debug==26 ) )
-      {
-        if ( reset_publish || (last_publishS_debug != rp.debug) )
-        {
-          print_serial_header();
-          if ( rp.debug==26 )
-          {
-            print_serial_sim_header();
-            print_signal_sel_header();
-          }
-        }
-        short_print(Sen, Mon);
-      }
-      last_publishS_debug = rp.debug;
-    }
+    // Print
+    print_high_speed_data(reset, reset_publish, Sen, Mon);
 
   }  // end read (high speed frame)
 
