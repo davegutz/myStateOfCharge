@@ -369,7 +369,7 @@ def write_clean_file(txt_file, type_, title_key, unit_key):
     csv_file = txt_file.replace('.txt', type_ + '.csv', 1)
     # Header
     have_header_str = None
-    with open(txt_file, "r") as input_file:
+    with open(txt_file, "r", encoding='cp437') as input_file:
         with open(csv_file, "w") as output:
             try:
                 for line in input_file:
@@ -378,22 +378,25 @@ def write_clean_file(txt_file, type_, title_key, unit_key):
                             have_header_str = True  # write one title only
                             output.write(line)
             except:
-                print(line)  # last line
+                print("DataOverModel381:", line)  # last line
     # Data
     num_lines = 0
-    with open(txt_file, "r") as input_file:
+    length = 0
+    with open(txt_file, "r", encoding='cp437') as input_file:
         with open(csv_file, "a") as output:
-            try:
-                for line in input_file:
-                    if line.__contains__(unit_key):
+            for line in input_file:
+                if line.__contains__(unit_key):
+                    if num_lines == 0:
+                        length = line.count(",")
+                        print("length=", length)
+                    if line.count(",") == length:
                         output.write(line)
                         num_lines += 1
-            except:  "bad char"
     if not num_lines:
         csv_file = None
         print("I(write_clean_file): no data to write")
     else:
-        print("Wrote(write_clean_file):", csv_file)
+        print("Wrote(write_clean_file):", csv_file, num_lines, "lines")
     return csv_file
 
 
