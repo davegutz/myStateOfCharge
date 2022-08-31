@@ -382,13 +382,12 @@ def write_clean_file(txt_file, type_, title_key, unit_key):
     # Data
     num_lines = 0
     length = 0
-    with open(txt_file, "r", encoding='cp437') as input_file:
+    with open(txt_file, "r", encoding='cp437') as input_file:  # reads all characters even bad ones
         with open(csv_file, "a") as output:
             for line in input_file:
                 if line.__contains__(unit_key):
-                    if num_lines == 0:
+                    if num_lines == 0:  # use first data line to screen out short and long lines that have key
                         length = line.count(",")
-                        print("length=", length)
                     if line.count(",") == length:
                         output.write(line)
                         num_lines += 1
@@ -396,7 +395,7 @@ def write_clean_file(txt_file, type_, title_key, unit_key):
         csv_file = None
         print("I(write_clean_file): no data to write")
     else:
-        print("Wrote(write_clean_file):", csv_file, num_lines, "lines")
+        print("Wrote(write_clean_file):", csv_file, num_lines, "lines", length, "fields")
     return csv_file
 
 
