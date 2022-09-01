@@ -349,9 +349,9 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const floa
     else if ( reset ) *rp_delta_q_ = delta_q_ekf;  // Solution to booting up unsaturated
     resetting_ = false;     // one pass flag
 
-    // Integration
+    // Integration.   Can go to negative
     q_capacity_ = calculate_capacity(temp_lim);
-    if ( !reset ) *rp_delta_q_ = max(min(*rp_delta_q_ + d_delta_q, 0.0), -q_capacity_);
+    if ( !reset ) *rp_delta_q_ = max(min(*rp_delta_q_ + d_delta_q, 0.0), -q_capacity_*1.5);
     q_ = q_capacity_ + *rp_delta_q_;
 
     // Normalize

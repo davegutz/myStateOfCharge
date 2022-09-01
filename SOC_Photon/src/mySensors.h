@@ -238,6 +238,7 @@ protected:
   boolean cc_diff_fa_;      // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
   float cc_diff_sclr_;      // Scale cc_diff detection thresh, scalar
+  float cc_diff_empty_sclr_;  // Scale cc_diff when soc low, scalasr
   boolean disab_ib_fa_;     // Disable hard fault range failures for ib
   boolean disab_tb_fa_;     // Disable hard fault range failures for tb
   boolean disab_vb_fa_;     // Disable hard fault range failures for vb

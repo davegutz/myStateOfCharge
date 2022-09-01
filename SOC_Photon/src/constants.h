@@ -87,7 +87,8 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define TWEAK_GAIN            0.66      // Tweak change limit gain to make soft landing (0.66)
 #define TT_WAIT               10.       // Before tweak test print wait, s (10)
 #define TT_TAIL               60.       // After tweak test print wait, s (60)
-#define SOC_DISAGREE_THRESH   0.2       // Signal selection threshold for Coulomb counter EKF disagree test (0.2, 0.1 too small on truck)
+#define CC_DIFF_SOC_DIS_THRESH  0.2     // Signal selection threshold for Coulomb counter EKF disagree test (0.2, 0.1 too small on truck)
+#define CC_DIFF_LO_SOC_SCLR   4.        // Large to disable cc_diff
 #define TAU_ERR_FILT          5.        // Current sensor difference filter time constant, s (5.)
 #define MAX_ERR_FILT          10.       // Current sensor difference Filter maximum windup, A (10.)
 #define MAX_ERR_T             10.       // Maximum update time allowed to avoid instability, s (10.)
@@ -133,6 +134,9 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define NOMINAL_TB      15.             // Middle of the road Tb for decent reversionary operation, deg C (15.)
 #define WRAP_HI_SOC_OFF 0.97            // Disable e_wrap_hi when saturated
 #define WRAP_HI_SOC_SCLR 1000.          // Huge to disable e_wrap
+#define WRAP_LO_SOC_OFF     0.35        // Disable e_wrap_lo when near empty
+#define WRAP_LO_SOC_SCLR    4.          // Large to disable e_wrap
+#define IMAX_NUM        100000.         // Simulation limit to prevent NaN, A (1e5)
 
 // Conversion gains
 const float SHUNT_NOA_GAIN = SHUNT_GAIN * CURR_SCALE_NOA;

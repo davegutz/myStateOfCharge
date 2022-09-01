@@ -46,23 +46,23 @@ void print_all_header(void)
 }
 void print_high_speed_data(const boolean reset, const boolean reset_publish, Sensors *Sen, BatteryMonitor *Mon)
 {
-    static uint8_t last_read_debug = 0;         // Remember first time with new debug to print headers
-    static uint8_t last_publishS_debug = 0;     // Remember first time with new debug to print headers
-    if ( ( rp.debug==4 || rp.debug==26 ) )
+  static uint8_t last_read_debug = 0;         // Remember first time with new debug to print headers
+  static uint8_t last_publishS_debug = 0;     // Remember first time with new debug to print headers
+  if ( ( rp.debug==4 || rp.debug==26 ) )
+  {
+    if ( rp.tweak_test() )
     {
-      if ( rp.tweak_test() )
-      {
-        if ( reset || (last_read_debug != rp.debug) ) print_all_header();
-        // no print, done by sub-functions
-        last_read_debug = rp.debug;
-      }
-      if ( cp.publishS )
-      {
-        if ( reset_publish || (last_publishS_debug != rp.debug) ) print_all_header();
-        short_print(Sen, Mon);
-        last_publishS_debug = rp.debug;
-      }
+      if ( reset || (last_read_debug != rp.debug) ) print_all_header();
+      // no print, done by sub-functions
     }
+    if ( cp.publishS )
+    {
+      if ( reset_publish || (last_publishS_debug != rp.debug) ) print_all_header();
+      short_print(Sen, Mon);
+    }
+  }
+  last_read_debug = rp.debug;
+  last_publishS_debug = rp.debug;
 }
 void print_serial_header(void)
 {

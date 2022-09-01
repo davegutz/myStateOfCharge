@@ -74,7 +74,7 @@ const float T_VOC_BB[M_T_BB*N_S_BB] = // r(soc, dv) table
           9.08,  12.53, 12.73, 12.85, 12.93, 12.97, 13.03, 13.07, 13.11, 13.12, 13.17, 13.22, 13.29, 13.33, 13.35, 13.88, 14.58};
 const uint8_t N_N_BB = 4;   // Number of temperature breakpoints for x_soc_min table
 const float X_SOC_MIN_BB[N_N_BB] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
-const float T_SOC_MIN_BB[N_N_BB] =  { 0.14, 0.12,  0.08, 0.07}; // soc_min(t)
+const float T_SOC_MIN_BB[N_N_BB] =  { 0.10, 0.07,  0.02, 0.015}; // soc_min(t)
 // Hysteresis
 const uint8_t M_H_BB  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
 const uint8_t N_H_BB  = 9;          // Number of dv breakpoints in r(dv) table t_r

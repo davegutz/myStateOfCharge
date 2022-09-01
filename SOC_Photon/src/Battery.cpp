@@ -110,7 +110,7 @@ void Battery::init_battery(const boolean reset, Sensors *Sen)
     if ( !reset ) return;
     vb_ = Sen->Vb / (*rp_nS_);
     ib_ = Sen->Ib / (*rp_nP_);
-    ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
+    ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
     if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
     double u[2] = {ib_, vb_};
@@ -278,7 +278,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     // Dynamic emf
     vb_ = Sen->Vb / (*rp_nS_);
     ib_ = Sen->Ib / (*rp_nP_);
-    ib_ = max(min(ib_, 10000.), -10000.);  // Overflow protection when ib_ past value used
+    ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
     double u[2] = {ib_, vb_};
     Randles_->calc_x_dot(u);
     if ( dt_<=RANDLES_T_MAX )
@@ -365,22 +365,27 @@ double BatteryMonitor::calc_charge_time(const double q, const double q_capacity,
     if ( charge_curr > TCHARGE_DISPLAY_DEADBAND )
         tcharge_ = min( -delta_q / charge_curr / 3600., 24.);
     else if ( charge_curr < -TCHARGE_DISPLAY_DEADBAND )
-        tcharge_ = max( max(q_capacity + delta_q - q_min_, 0.) / charge_curr / 3600., -24.);
+        tcharge_ = max( (q_capacity + delta_q - q_min_) / charge_curr / 3600., -24.);
     else if ( charge_curr >= 0. )
         tcharge_ = 24.;
     else
         tcharge_ = -24.;
 
-    double amp_hrs_remaining = max(q_capacity - q_min_ + delta_q, 0.) / 3600.;
-    if ( soc > 0. )
+    double amp_hrs_remaining = (q_capacity - q_min_ + delta_q) / 3600.;
+    if ( soc > soc_min_)
     {
-        amp_hrs_remaining_ekf_ = amp_hrs_remaining * (soc_ekf_ - soc_min_) / max(soc - soc_min_, 1e-8);
-        amp_hrs_remaining_soc_ = amp_hrs_remaining * (soc_ - soc_min_) / max(soc - soc_min_, 1e-8);
+        amp_hrs_remaining_ekf_ = amp_hrs_remaining * (soc_ekf_ - soc_min_) / (soc - soc_min_);
+        amp_hrs_remaining_soc_ = amp_hrs_remaining * (soc_ - soc_min_) / (soc - soc_min_);
+    }
+    else if ( soc < soc_min_)
+    {
+        amp_hrs_remaining_ekf_ = amp_hrs_remaining * (soc_ekf_ - soc_min_) / (soc - soc_min_);
+        amp_hrs_remaining_soc_ = amp_hrs_remaining * (soc_ - soc_min_) / (soc - soc_min_);
     }
     else
     {
-        amp_hrs_remaining_ekf_ = 0.;
-        amp_hrs_remaining_soc_ = 0.;
+        amp_hrs_remaining_ekf_ = 0;
+        amp_hrs_remaining_soc_ = 0;
     }
 
     return( tcharge_ );
@@ -613,7 +618,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boole
     const double dt = min(Sen->T, F_MAX_T);
     ib_in_ = curr_in;
     if ( reset ) ib_fut_ = ib_in_;
-    ib_ = max(min(ib_fut_, 10000.), -10000.);  //  Past value ib_.  Overflow protection when ib_ past value used
+    ib_ = max(min(ib_fut_, IMAX_NUM), -IMAX_NUM);  //  Past value ib_.  Overflow protection when ib_ past value used
 
     dt_ = dt;
     vsat_ = calc_vsat();
@@ -623,7 +628,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boole
     // VOC-OCV model
     voc_stat_ = calc_soc_voc(soc_, temp_c_, &dv_dsoc_);
     voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, vsat_*1.2);  // slightly beyond but don't windup
-    bms_off_ = ( temp_c_ <= chem_.low_t ) || ( voc_stat_ < chem_.low_voc );
+    bms_off_ = (( temp_c_ <= chem_.low_t ) || ( voc_stat_ < chem_.low_voc )) && !rp.tweak_test();
     if ( bms_off_ ) ib_in_ = 0.;
 
     // Dynamic emf
@@ -658,7 +663,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boole
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
     if ( rp.tweak_test() || !rp.modeling ) sat_ib_max_ = ib_in_;   // Disable cutback when real world or when doing tweak_test test
     ib_fut_ = min(ib_in_/(*rp_nP_), sat_ib_max_);      // the feedback of ib_
-    if ( (q_ <= 0.) && (ib_in_ < 0.) ) ib_fut_ = 0.;   //  empty
+    if ( (q_ <= -0.2*q_cap_rated_scaled_) && (ib_in_ < 0.) ) ib_fut_ = 0.;   //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_fut_ == sat_ib_max_);
     model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
@@ -773,12 +778,12 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, BatteryMo
     reset_past = reset;
     resetting_ = false;     // one pass flag
 
-    // Integration
+    // Integration can go to -10%
     q_capacity_ = calculate_capacity(temp_lim);
     if ( !reset )
     {
         *rp_delta_q_ += d_delta_q - chem_.dqdt*q_capacity_*(temp_lim-*rp_t_last_);
-        *rp_delta_q_ = max(min(*rp_delta_q_, 0.), -q_capacity_);
+        *rp_delta_q_ = max(min(*rp_delta_q_, 0.), -q_capacity_*1.2);
     }
     q_ = q_capacity_ + *rp_delta_q_;
 

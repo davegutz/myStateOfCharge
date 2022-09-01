@@ -140,7 +140,7 @@ void Shunt::load()
 
 // Class Fault
 Fault::Fault(const double T):
-  cc_diff_(0.), cc_diff_sclr_(1), disab_ib_fa_(false), disab_tb_fa_(false), disab_vb_fa_(false), 
+  cc_diff_(0.), cc_diff_sclr_(1), cc_diff_empty_sclr_(1), disab_ib_fa_(false), disab_tb_fa_(false), disab_vb_fa_(false), 
   ewhi_sclr_(1), ewlo_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0), fail_tb_(false),
   ib_diff_sclr_(1), ib_quiet_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), tb_sel_stat_(1),
   tb_stale_time_sclr_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
@@ -197,7 +197,8 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   boolean reset_loc = reset | reset_all_faults_;
   e_wrap_ = Mon->voc_soc() - Mon->voc();
-  if ( Mon->soc()>WRAP_HI_SOC_OFF ) ewsat_sclr_ = WRAP_HI_SOC_SCLR;
+  if ( Mon->soc()>=WRAP_HI_SOC_OFF ) ewsat_sclr_ = WRAP_HI_SOC_SCLR;
+  else if ( Mon->soc()<=WRAP_LO_SOC_OFF ) ewsat_sclr_ = WRAP_LO_SOC_SCLR;
   else if ( Mon->voc_soc()>(Mon->vsat()-WRAP_HI_SAT_MARG) ) ewsat_sclr_ = WRAP_HI_SAT_SCLR;
   else ewsat_sclr_ = 1.;
   e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
@@ -337,7 +338,10 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // EKF error test - failure conditions track poorly
   cc_diff_ = Mon->soc_ekf() - Mon->soc();  // These are filtered in their construction (EKF is a dynamic filter and 
                                                   // Coulomb counter is wrapa big integrator)
-  failAssign( abs(cc_diff_) >= SOC_DISAGREE_THRESH*cc_diff_sclr_, CCD_FA );
+  if ( Mon->soc()<=WRAP_LO_SOC_OFF ) cc_diff_empty_sclr_ = CC_DIFF_LO_SOC_SCLR;
+  else ewsat_sclr_ = 1.;
+
+  failAssign( abs(cc_diff_) >= CC_DIFF_SOC_DIS_THRESH*cc_diff_sclr_, CCD_FA );
 
   // Compare current sensors - failure conditions large difference
   // Difference error, filter, check, persist

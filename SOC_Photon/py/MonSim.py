@@ -245,7 +245,9 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/tbFailMod20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tbFailHdwe20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/triTweakRegressionTest20220829.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/real world Xp20 20220901.txt'; unit_key = 'soc0_2022'
+        # data_file_old_txt = '../dataReduction/real world Xp20 20220901.txt'; unit_key = 'soc0_2022'
+        data_file_old_txt = '../dataReduction/triTweakDisch20220901.txt'; unit_key = 'pro_2022'
+
 
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
