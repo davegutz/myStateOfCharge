@@ -779,10 +779,7 @@ class BatteryModel(Battery):
         self.saved_m.ib_in_m.append(self.ib_in)
         self.saved_m.ib_fut_m.append(self.ib_fut)
         self.saved_m.sat_m.append(int(self.sat))
-        self.saved_m.ddq_m.append(self.d_delta_q)
         self.saved_m.dq_m.append(self.delta_q)
-        self.saved_m.q_m.append(self.q)
-        self.saved_m.qcap_m.append(self.q_capacity)
         self.saved_m.soc_m.append(self.soc)
         self.saved_m.reset_m.append(self.reset)
 

@@ -186,7 +186,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         dv_hys_req = np.zeros((n, 1))
         voc_stat_req = np.zeros((n, 1))
         for i in range(n):
-            voc_req[i] = lut_vb.interp(old_s_sim.time[i]) - old_s_sim.dv_dyn_m[i]
+            voc_req[i] = lut_vb.interp(old_s_sim.time[i]) - old_s_sim.dv_dy`n_m[i]
             voc_stat_req[i] = old_s_sim.voc_stat_m[i]
             dv_hys_req[i] = voc_req[i] - old_s_sim.voc_stat_m[i]
         plt.plot(old_s_sim.time, old_s_sim.dv_hys_m, color='magenta',  linestyle=':', label='dv_hys_m')
@@ -482,8 +482,6 @@ class SavedData:
             self.c_time_s = []
             self.res = None
             self.user_sel = []
-            self.m_bare = []
-            self.n_bare = []
             self.cc_dif = []
             self.ccd_fa = []
             self.ibmh = []
@@ -535,8 +533,6 @@ class SavedData:
             self.c_time_s = np.array(sel.c_time[:i_end])
             self.res = np.array(sel.res[:i_end])
             self.user_sel = np.array(sel.user_sel[:i_end])
-            self.m_bare = np.array(sel.m_bare[:i_end])
-            self.n_bare = np.array(sel.n_bare[:i_end])
             self.cc_dif = np.array(sel.cc_dif[:i_end])
             self.ccd_fa = np.bool8(np.array(falw) & 2**4)
             self.ibmh = np.array(sel.ibmh[:i_end])
@@ -737,7 +733,7 @@ if __name__ == '__main__':
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
         cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m',
-                    'ib_m', 'ib_in_m', 'sat_m', 'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
+                    'ib_m', 'ib_in_m', 'sat_m', 'dq_m', 'soc_m', 'reset_m')
         try:
             data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
                                          dtype=None, encoding=None).view(np.recarray)

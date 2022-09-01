@@ -646,9 +646,8 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
       double cTime;
       if ( rp.tweak_test() ) cTime = double(now)/1000.;
       else cTime = control_time;
-      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,  %d, %d,  %10.7f,  %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,  %7.5f,%7.5f, ",
+      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,  %10.7f,  %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,  %7.5f,%7.5f, ",
           cTime, reset, rp.ib_select,
-          ShuntAmp->bare(), ShuntNoAmp->bare(),
           Flt->cc_diff(),
           Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model, Ib_model, 
           Flt->ib_diff(), Flt->ib_diff_f());

@@ -76,23 +76,22 @@ void print_serial_header(void)
 void print_serial_sim_header(void)
 {
   if ( rp.debug==26 ) // print_serial_sim_header
-    Serial.printf("unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_stat_m, dv_dyn_m, vb_m, ib_m, ib_in_m, sat_m, ddq_m, dq_m, q_m, qcap_m, soc_m, reset_m,\n");
+    Serial.printf("unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_stat_m, dv_dyn_m, vb_m, ib_m, ib_in_m, sat_m, dq_m, soc_m, reset_m,\n");
 }
 void print_signal_sel_header(void)
 {
   if ( rp.debug==26 ) // print_signal_sel_header
-    Serial.printf("unit_s,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_dif,ib_dif_f,");
+    Serial.printf("unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_dif,ib_dif_f,");
     Serial.printf("    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_m,mib,Ib_s, vb_sel,Vb_h,Vb_m,mvb,Vb_s,  Tb_h,Tb_s,mtb,Tb_f, ");
     Serial.printf("  fltw, falw, ib_rate, ib_quiet, tb_sel,\n");
           // -----, cTime, reset, rp.ib_select,
-          //                                    ShuntAmp->bare(), ShuntNoAmp->bare(),
-          //                                                    cc_diff_,
-          //                                                              Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model, Ib_model,
-          //                                                                                          ib_diff_, ib_diff_f,
+          //                                     cc_diff_,
+          //                                              Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model, Ib_model,
+          //                                                                           ib_diff_, ib_diff_f,
           //         voc_soc, e_wrap_, e_wrap_filt_, ib_sel_stat_, Ib_hdwe, Ib_hdwe_model, mod_ib(), Ib,
-          //                                                                                                vb_sel_stat, Vb_hdwe, Vb_model,mod_vb(), Vb,
-          //                                                                                                                                        Tb_hdwe, Tb, mod_tb(), Tb_filt,
-          //   fltw_, falw_, ib_rate_, ib_quiet_, tb_sel_stat
+          //                                                          vb_sel_stat, Vb_hdwe, Vb_model,mod_vb(), Vb,
+          //                                                                                    Tb_hdwe, Tb, mod_tb(), Tb_filt,
+          //         fltw_, falw_, ib_rate_, ib_quiet_, tb_sel_stat
 }
 
 // Print strings

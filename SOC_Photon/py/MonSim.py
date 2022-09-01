@@ -63,8 +63,8 @@ def save_clean_file(mons, csv_file, unit_key):
 
 
 def save_clean_file_sim(sims, csv_file, unit_key):
-    header_str = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_stat_m,dv_dyn_m,vb_m,ib_m,sat_m,ddq_m,dq_m,q_m,\
-    qcap_m,soc_m,reset_m,"
+    header_str = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_stat_m,dv_dyn_m,vb_m,ib_m,sat_m,dq_m,\
+    soc_m,reset_m,"
     n = len(sims.time)
     with open(csv_file, "w") as output:
         output.write(header_str + "\n")
@@ -79,10 +79,7 @@ def save_clean_file_sim(sims, csv_file, unit_key):
             s += "{:5.2f},".format(sims.vb_m[i])
             s += "{:8.3f},".format(sims.ib_m[i])
             s += "{:7.3f},".format(sims.sat_m[i])
-            s += "{:5.3f},".format(sims.ddq_m[i])
             s += "{:5.3f},".format(sims.dq_m[i])
-            s += "{:5.3f},".format(sims.q_m[i])
-            s += "{:5.3f},".format(sims.qcap_m[i])
             s += "{:7.3f},".format(sims.soc_m[i])
             s += "{:7.3f},".format(sims.reset_m[i])
             s += "\n"
@@ -266,7 +263,7 @@ if __name__ == '__main__':
         # Load sel (old)
         sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
                                           unit_key=unit_key_sel)
-        cols_sel = ('c_time', 'res', 'user_sel', 'm_bare', 'n_bare', 'cc_dif',
+        cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
                     'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_dif', 'ib_dif_f',
                     'voc_soc', 'e_w', 'e_w_f',
                     'ib_sel', 'Ib_h', 'Ib_m',
@@ -282,7 +279,7 @@ if __name__ == '__main__':
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
                                                unit_key=unit_key_sim)
         cols_sim = ('c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m',
-                    'ib_in_m', 'sat_m', 'ddq_m', 'dq_m', 'q_m', 'qcap_m', 'soc_m', 'reset_m')
+                    'ib_in_m', 'sat_m', 'dq_m', 'soc_m', 'reset_m')
         if data_file_sim_clean:
             data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
                                          dtype=float, encoding=None).view(np.recarray)
