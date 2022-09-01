@@ -231,7 +231,7 @@ if __name__ == '__main__':
         # time_end = 950.
         t_Ib_fail = None
         init_time_in = None
-        # data_file_old_txt = '../dataReduction/ampHiFail20220831.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/ampHiFail20220901.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampLoFail20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFailNoise20220829.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/ampLoFailNoise20220829.txt'; unit_key = 'pro_2022'
@@ -245,7 +245,7 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/tbFailMod20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tbFailHdwe20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/triTweakRegressionTest20220829.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/real world Xp20 20220829.txt'; unit_key = 'soc0_2022'
+        # data_file_old_txt = '../dataReduction/real world Xp20 20220829.txt'; unit_key = 'soc0_2022'
 
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title

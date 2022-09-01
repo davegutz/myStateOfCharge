@@ -186,7 +186,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         dv_hys_req = np.zeros((n, 1))
         voc_stat_req = np.zeros((n, 1))
         for i in range(n):
-            voc_req[i] = lut_vb.interp(old_s_sim.time[i]) - old_s_sim.dv_dy`n_m[i]
+            voc_req[i] = lut_vb.interp(old_s_sim.time[i]) - old_s_sim.dv_dyn_m[i]
             voc_stat_req[i] = old_s_sim.voc_stat_m[i]
             dv_hys_req[i] = voc_req[i] - old_s_sim.voc_stat_m[i]
         plt.plot(old_s_sim.time, old_s_sim.dv_hys_m, color='magenta',  linestyle=':', label='dv_hys_m')
@@ -615,10 +615,7 @@ class SavedDataSim:
             self.ib_in_m = []
             self.ib_m = []
             self.sat_m = []
-            self.ddq_m = []
             self.dq_m = []
-            self.q_m = []
-            self.qcap_m = []
             self.soc_m = []
             self.reset_m = []
         else:
@@ -643,10 +640,7 @@ class SavedDataSim:
             self.ib_m = data.ib_m[:i_end]
             self.ib_in_m = data.ib_in_m[:i_end]
             self.sat_m = data.sat_m[:i_end]
-            self.ddq_m = data.ddq_m[:i_end]
             self.dq_m = data.dq_m[:i_end]
-            self.q_m = data.q_m[:i_end]
-            self.qcap_m = data.qcap_m[:i_end]
             self.soc_m = data.soc_m[:i_end]
             self.reset_m = data.reset_m[:i_end]
 
