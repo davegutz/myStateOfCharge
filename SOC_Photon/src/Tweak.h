@@ -35,7 +35,7 @@ public:
   ~Tweak();
   // operators
   // functions
-  void adjust(unsigned long now);
+  void adjust(unsigned long now, const double q_capacity);
   double coul_eff() { return ( coul_eff_ ); };
   void coul_eff(const double coul_eff) { coul_eff_ = coul_eff; };
   void delta_q_cinf(const double delta_q_cinf) { *rp_delta_q_cinf_ = delta_q_cinf; };

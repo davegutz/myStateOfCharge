@@ -331,7 +331,7 @@ void loop()
     monitor(reset, reset_temp, now, Is_sat_delay, Mon, Sen);
 
     // Adjust current sensors
-    tweak_on_new_desat(Sen, now);
+    tweak_on_new_desat(Mon, Sen, now);
 
     // Re-init Coulomb Counter to EKF if it is different than EKF or if never saturated
     Mon->regauge(Sen->Tb_filt);

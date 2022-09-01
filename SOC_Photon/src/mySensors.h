@@ -105,7 +105,7 @@ protected:
   int16_t vshunt_int_1_;// Interim conversion, count
   float vshunt_;        // Sensed shunt voltage, V
   float ishunt_cal_;    // Sensed, calibrated ADC, A
-  float sclr_;           // Scalar for fault test
+  float sclr_;          // Scalar for fault test
   float add_;           // Adder for fault test, A
   float *rp_shunt_gain_sclr_; // Scalar on shunt gain
 };
@@ -348,18 +348,18 @@ public:
   float Vb_add() { return ( vb_add_ * rp.nS ); };
   Fault *Flt;
 protected:
-  float *rp_tb_bias_;    // Location of retained bias, deg C
-  float tb_bias_last_;   // Last value of bias for rate limit, deg C
-  void choose_(void);    // Deliberate choice based on inputs and results
-  PRBS_7 *Prbn_Tb_;      // Tb noise generator model only
-  PRBS_7 *Prbn_Vb_;      // Vb noise generator model only
-  PRBS_7 *Prbn_Ib_amp_;  // Ib amplified sensor noise generator model only
-  PRBS_7 *Prbn_Ib_noa_;  // Ib non-amplified sensor noise generator model only
-  float Tb_noise_amp_;   // Tb noise amplitude model only, deg C pk-pk
-  float Vb_noise_amp_;   // Vb noise amplitude model only, V pk-pk
+  float *rp_tb_bias_;   // Location of retained bias, deg C
+  float tb_bias_last_;  // Last value of bias for rate limit, deg C
+  void choose_(void);   // Deliberate choice based on inputs and results
+  PRBS_7 *Prbn_Tb_;     // Tb noise generator model only
+  PRBS_7 *Prbn_Vb_;     // Vb noise generator model only
+  PRBS_7 *Prbn_Ib_amp_; // Ib amplified sensor noise generator model only
+  PRBS_7 *Prbn_Ib_noa_; // Ib non-amplified sensor noise generator model only
+  float Tb_noise_amp_;  // Tb noise amplitude model only, deg C pk-pk
+  float Vb_noise_amp_;  // Vb noise amplitude model only, V pk-pk
   float Ib_amp_noise_amp_;  // Ib noise on amplified sensor, amplitude model only, A pk-pk
   float Ib_noa_noise_amp_;  // Ib noise on non-amplified sensor, amplitude model only, A pk-pk
-  float vb_add_;         // Fault injection bias, V
+  float vb_add_;        // Fault injection bias, V
 };
 
 

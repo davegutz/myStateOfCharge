@@ -60,7 +60,7 @@ Tweak::~Tweak() {}
   Outputs:
     tweak_sclr_           Scalar on Coulombic Efficiency   '*Mk / *Nk'
 */
-void Tweak::adjust(unsigned long now)
+void Tweak::adjust(unsigned long now, const double q_capacity)
 {
   // Candidate change scalar
   double new_Si = -(*rp_delta_q_dinf_ / (*rp_delta_q_cinf_));
@@ -76,9 +76,10 @@ void Tweak::adjust(unsigned long now)
   // Result
   if ( *rp_delta_q_cinf_>=0. && *rp_delta_q_dinf_<=0. )  // Exclude first cycle after boot:  uncertain history
   {
-    *rp_tweak_sclr_ = new_tweak_sclr;
-    Serial.printf("          Tweak(%s)::adjust:, cinf=%10.1f, dinf=%10.1f, coul_eff=%9.6f, scaler=%9.6f, effective coul_eff=%9.6f\n",
-      name_.c_str(), *rp_delta_q_cinf_, *rp_delta_q_dinf_, coul_eff_, *rp_tweak_sclr_, coul_eff_*(*rp_tweak_sclr_));
+    double delta_soc = (*rp_delta_q_dinf_-*rp_delta_q_cinf_) / 2. / q_capacity;
+    if ( delta_soc > TWEAK_SOC_CHANGE ) *rp_tweak_sclr_ = new_tweak_sclr;
+    Serial.printf("          Tweak(%s)::adjust:, cinf=%10.1f, dinf=%10.1f, delta_soc=%7.3f, coul_eff=%9.6f, scaler=%9.6f, effective coul_eff=%9.6f\n",
+      name_.c_str(), *rp_delta_q_cinf_, *rp_delta_q_dinf_, delta_soc, coul_eff_, *rp_tweak_sclr_, coul_eff_*(*rp_tweak_sclr_));
   }
   else
   {

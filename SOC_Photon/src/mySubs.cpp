@@ -581,14 +581,14 @@ String tryExtractString(String str, const char* start, const char* end)
 }
 
 // Tweak
-void tweak_on_new_desat(Sensors *Sen, unsigned long int now)
+void tweak_on_new_desat(BatteryMonitor *Mon, Sensors *Sen, unsigned long int now)
 {
 
   if ( Sen->ShuntAmp->new_desat(Sen->ShuntAmp->ishunt_cal(), Sen->T, Sen->saturated, now) )
-    Sen->ShuntAmp->adjust(now);
+    Sen->ShuntAmp->adjust(now, Mon->q_capacity());
 
   if ( Sen->ShuntNoAmp->new_desat(Sen->ShuntNoAmp->ishunt_cal(), Sen->T, Sen->saturated, now) )
-    Sen->ShuntNoAmp->adjust(now);
+    Sen->ShuntNoAmp->adjust(now, Mon->q_capacity());
 
 }
 
