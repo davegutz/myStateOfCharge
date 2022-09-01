@@ -98,7 +98,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(new_s.time, new_s.Vsat, color='red', linestyle='--', label='Vsat_new')
     plt.plot(old_s.time, old_s.voc_soc+0.1, color='black', linestyle='-.', label='voc_soc+0.1')
     plt.plot(old_s.time, old_s.voc+0.1, color='green', linestyle=':', label='voc+0.1')
-    plt.plot(new_s.time, np.array(new_s.voc)+0.1, color='orange', linestyle=':', label='voc_new+0.1')
+    plt.plot(new_s.time, np.array(new_s.voc)+0.1, color='red', linestyle=':', label='voc_new+0.1')
     plt.legend(loc=1)
     plt.subplot(335)
     plt.plot(old_s.time, old_s.e_w, color='magenta', linestyle='-', label='e_wrap')
