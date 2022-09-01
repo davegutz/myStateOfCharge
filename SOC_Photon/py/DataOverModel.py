@@ -241,13 +241,15 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.legend(loc=1)
     plt.subplot(132)
     plt.plot(old_s.time, old_s.Vb, color='orange', linestyle='-', label='Vb')
-    plt.plot(new_s.time, new_s.Vb, color='green', linestyle='--', label='Vb_new')
+    plt.plot(old_s.time, old_s.Vb_h, color='cyan', linestyle='--', label='Vb_hdwe')
+    plt.plot(new_s.time, new_s.Vb, color='green', linestyle='-.', label='Vb_new')
     if new_s_s:
         plt.plot(new_s_s.time, new_s_s.vb, color='black', linestyle='-.', label='Vb_m_new')
     plt.legend(loc=1)
     plt.subplot(133)
     plt.plot(old_s.soc, old_s.Vb, color='orange', linestyle='-', label='Vb')
-    plt.plot(new_s.soc, new_s.Vb, color='green', linestyle='--', label='Vb_new')
+    plt.plot(old_s.soc, old_s.Vb_h, color='cyan', linestyle='--', label='Vb_hdwe')
+    plt.plot(new_s.soc, new_s.Vb, color='green', linestyle='-.', label='Vb_new')
     if new_s_s:
         plt.plot(new_s_s.soc, new_s_s.vb, color='black', linestyle='-.', label='Vb_m_new')
     plt.legend(loc=1)
@@ -381,6 +383,7 @@ def write_clean_file(txt_file, type_, title_key, unit_key):
                 print("DataOverModel381:", line)  # last line
     # Data
     num_lines = 0
+    num_skips = 0
     length = 0
     with open(txt_file, "r", encoding='cp437') as input_file:  # reads all characters even bad ones
         with open(csv_file, "a") as output:
@@ -391,11 +394,13 @@ def write_clean_file(txt_file, type_, title_key, unit_key):
                     if line.count(",") == length:
                         output.write(line)
                         num_lines += 1
+                    else:
+                        num_skips += 1
     if not num_lines:
         csv_file = None
         print("I(write_clean_file): no data to write")
     else:
-        print("Wrote(write_clean_file):", csv_file, num_lines, "lines", length, "fields")
+        print("Wrote(write_clean_file):", csv_file, num_lines, "lines", num_skips, "skips", length, "fields")
     return csv_file
 
 

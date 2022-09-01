@@ -520,6 +520,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.P_prior.append(self.P_prior)
         self.saved.x_post.append(self.x_post)
         self.saved.P_post.append(self.P_post)
+        if abs(soc_ref) < 1e-6:
+            soc_ref = 1e-6
         self.e_soc_ekf = (self.soc_ekf - soc_ref) / soc_ref
         self.e_voc_ekf = (self.voc - voc_ref) / voc_ref
         self.saved.e_soc_ekf.append(self.e_soc_ekf)
