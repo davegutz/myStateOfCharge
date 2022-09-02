@@ -277,10 +277,11 @@ class LookupTable:
 
     """
 
-    def __init__(self):
+    def __init__(self, clip_x=None):
 
         # axis_names - map name->index
-        self.axis_names = {}  
+        self.axis_names = {}
+        self.clip_x = clip_x
 
         # axes - define independent variable values known along each axis
         #    [[x0, x1, ..., xn], [y0, y1, ..., yn], ...]
@@ -441,11 +442,6 @@ class LookupTable:
         y1 = value_table[x1_i]
         y2 = value_table[x2_i]
 
-        print("x1_i", x1_i)
-        print("x2_i", x2_i)
-        print("y1", y1)
-        print("y2", y2)
-
         if hasattr(y1, '__len__'):
             # The value still depends on other axes.
             # Need to recurse, to interpolate on the subspace
@@ -459,12 +455,12 @@ class LookupTable:
 
         # Linearly interpolate x on the line from (x1, y1) to (x2, y2).
         # interp(x, (x1, y1), (x2, y2))
+        import numpy as np
         slope = (y2 - y1) / (x2 - x1)
-        val = slope * (x - x1) + y1
-
-        print("axis_values, nearest_indexes",  axis_values, nearest_indexes)
-        print("value_table", value_table)
-        print("val=", val)
+        if self.clip_x:
+            x = min(max(x, x1), x2)
+        # val = slope * (x - x1) + y1
+        val = ( y2*(x-x1) + y1*(x2-x) ) / (x2 - x1)
 
         return val
 

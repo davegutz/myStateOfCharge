@@ -50,16 +50,14 @@ def crosscheck3d():
     t_r = [1e-6, 0.064,    0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
            1e-6, 1e-6,     0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
            1e-6, 1e-6,     1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6]
-    lut = LookupTable()
+    lut = LookupTable(clip_x=True)
     lut.addAxis('x', t_dv)
     lut.addAxis('y', t_soc)
     lut.setValueTable(t_r)
-    res = lut.lookup(x=-.9, y=0)
-    ev = 1e-6
-    print("ev=", ev, "got", res)
-    res = lut.lookup(x=-.902, y=0.0957)
-    ev = 1e-6
-    print("ev=", ev, "got", res)
+    print("expected 1e-6 got", lut.lookup(x=-.902, y=0.0957))
+    print("expected 1e-6 got", lut.lookup(x=-.9, y=0))
+    print("expected 1e-6 got", lut.lookup(x=.902, y=0.0957))
+    print("expected 1e-6 got", lut.lookup(x=.9, y=0))
 
 
 def main():

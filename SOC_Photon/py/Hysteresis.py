@@ -40,7 +40,7 @@ class Hysteresis:
             t_dv[i] *= self.scale
             t_r[i] *= self.scale
         self.disabled = self.scale < 1e-5
-        self.lut = LookupTable()
+        self.lut = LookupTable(clip_x=True)
         self.lut.addAxis('x', t_dv)
         self.lut.addAxis('y', t_soc)
         self.lut.setValueTable(t_r)
@@ -92,8 +92,7 @@ class Hysteresis:
         if self.disabled:
             self.res = 0.
         else:
-            dv_lim = max(min(dv/self.scale, 0.9), -0.9)
-            self.res = self.lut.lookup(x=dv_lim, y=soc)*self.scale
+            self.res = self.lut.lookup(x=dv/self.scale, y=soc)*self.scale
         return self.res
 
     def save(self, time):
