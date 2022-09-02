@@ -478,7 +478,7 @@ Full regression suite:
                 Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;
   triTweakRegression:   Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;-DP1;Rb;Pa;Xf0.02;Xa-2000;XW5;XT5;XC3;W2;v26;W2;XR;
                 v0;XS;Dm0;Dn0;Xp0;Ca1.;Pf;
-  triTweakDisch: Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;-DP1;Rb;Pa;Xf0.02;Xa-28800;XW5;XT5;XC3;W2;v26;W2;Fa1000;Fb1000;Ff1000;Fd1000;Fv;Fi;Ft;XR;
+  triTweakDisch: Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-28800;XW5;XT5;XC3;W2;v26;W2;Fa1000;Fb1000;Ff1000;Fd1000;Fv;Fi;Ft;XR;
                 v0;XS;Dm0;Dn0;Xp0;Ca1.;Pf;
   pulse30:      Xm7;Ca1;DP1;v26;W50;Di-30;
                 Di30

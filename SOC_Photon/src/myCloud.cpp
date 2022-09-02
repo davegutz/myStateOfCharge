@@ -93,4 +93,5 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->dV_dyn = Mon->dV_dyn();
   pubList->Voc_ekf = Mon->Hx();
   pubList->y_ekf = Mon->y_ekf();
+  pubList->ioc = Mon->ioc();
 }

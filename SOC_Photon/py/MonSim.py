@@ -228,7 +228,7 @@ if __name__ == '__main__':
 
         # Transient  inputs
         time_end = None
-        # time_end = 950.
+        # time_end = 19.2
         t_Ib_fail = None
         init_time_in = None
         # data_file_old_txt = '../dataReduction/ampHiFail20220901.txt'; unit_key = 'pro_2022'
@@ -257,7 +257,7 @@ if __name__ == '__main__':
 
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key)
-        cols = ('cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn', 'Voc_stat',
+        cols = ('cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'ioc', 'Vsat', 'dV_dyn', 'Voc_stat',
                 'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc')
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
                                  encoding=None).view(np.recarray)
@@ -281,7 +281,7 @@ if __name__ == '__main__':
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
                                                unit_key=unit_key_sim)
         cols_sim = ('c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m',
-                    'ib_in_m', 'sat_m', 'dq_m', 'soc_m', 'reset_m')
+                    'ib_in_m', 'ioc_m', 'sat_m', 'dq_m', 'soc_m', 'reset_m')
         if data_file_sim_clean:
             data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
                                          dtype=float, encoding=None).view(np.recarray)

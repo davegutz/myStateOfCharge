@@ -54,6 +54,7 @@ struct Publish
   float dV_dyn;
   float Voc_ekf;
   float y_ekf;
+  float ioc;
 };
 
 void publish1(void);

@@ -352,11 +352,9 @@ class BatteryMonitor(Battery, EKF1x1):
         if d_voc:
             self.voc = d_voc
         self.dv_dyn = self.vb - self.voc
-        # self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
         # Hysteresis model
         self.hys.calculate_hys(self.ib, self.soc)
         self.dv_hys = self.hys.update(self.dt)
-        # self.voc = self.voc_stat + self.dv_hys
         self.voc_stat = self.voc - self.dv_hys
         self.ioc = self.hys.ioc
         self.bms_off = self.temp_c <= low_t  # KISS

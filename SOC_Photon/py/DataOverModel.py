@@ -291,6 +291,14 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
         plt.plot(old_s.time, old_s.dV_dyn, color='blue', linestyle='-.', label='dv_dyn')
         plt.plot(new_s.time, new_s.dV_dyn, color='cyan', linestyle=':', label='dv_dyn_new')
         plt.legend(loc=1)
+        plt.subplot(336)
+        plt.plot(old_s.time, old_s.Ib, color='blue', linestyle='-', label='Ib')
+        plt.plot(old_s_sim.time, old_s_sim.ib_m, color='red', linestyle='--', label='Ib_m')
+        plt.plot(old_s.time, old_s.ioc, color='cyan', linestyle='-', label='ioc')
+        plt.plot(new_s.time, new_s.ioc, color='magenta', linestyle='--', label='ioc_new')
+        plt.plot(old_s_sim.time, old_s_sim.ioc_m, color='green', linestyle='-.', label='ioc_m')
+        plt.plot(new_s_sim.time, new_s_sim.ioc, color='black', linestyle=':', label='ioc_m_new')
+        plt.legend(loc=1)
         plt.subplot(337)
         plt.plot(old_s_sim.time, old_s_sim.dq_m, color='magenta', linestyle='-', label='dq_m')
         plt.plot(new_s_sim_m.time, new_s_sim_m.dq_m, color='green', linestyle='--', label='dq_m_new')
@@ -414,6 +422,7 @@ class SavedData:
             self.hm = []  # hours, minutes
             self.cTime = []  # Control time, s
             self.Ib = []  # Bank current, A
+            self.ioc = []  # Hys indicator current, A
             self.Ib_past = []  # Past bank current, A
             self.Vb = []  # Bank voltage, V
             self.sat = []  # Indication that battery is saturated, T=saturated
@@ -466,6 +475,7 @@ class SavedData:
             self.dt = np.array(data.dt[:i_end])
             self.time = np.array(self.time[:i_end])
             self.Ib = np.array(data.Ib[:i_end])
+            self.ioc = np.array(data.ioc[:i_end])
             self.Ib_past = np.append(np.zeros((1, 1)), np.array(data.Ib[:(i_end-1)]))
             self.Ib_past[0] = self.Ib_past[1]
             self.Vb = np.array(data.Vb[:i_end])
@@ -618,6 +628,7 @@ class SavedDataSim:
             self.dv_hys_m = []
             self.vb_m = []
             self.ib_in_m = []
+            self.ioc_m = []
             self.ib_m = []
             self.sat_m = []
             self.dq_m = []
@@ -644,6 +655,7 @@ class SavedDataSim:
             self.dv_hys_m = self.voc_m - self.voc_stat_m
             self.ib_m = data.ib_m[:i_end]
             self.ib_in_m = data.ib_in_m[:i_end]
+            self.ioc_m = data.ioc_m[:i_end]
             self.sat_m = data.sat_m[:i_end]
             self.dq_m = data.dq_m[:i_end]
             self.soc_m = data.soc_m[:i_end]

@@ -64,43 +64,43 @@ class LookupTable:
 
     Normal situation:
     
-    >>> print(example_1var_func(2.5)
+    >>> print(example_1var_func(2.5))
     8.5
 
-    >>> print(lut.lookup(x=2.5)
+    >>> print(lut.lookup(x=2.5))
     8.5
 
     Lookup a value on the axis value:
-    >>> print(lut.lookup(x=3.)
+    >>> print(lut.lookup(x=3.))
     10.0
 
     Lookup a value on the bottom axis value:
-    >>> print(lut.lookup(x=1.)
+    >>> print(lut.lookup(x=1.))
     4.0
 
     Lookup a value on the top axis value:
-    >>> print(lut.lookup(x=5.)
+    >>> print(lut.lookup(x=5.))
     16.0
 
     Lookup a value below the bottom axis value:
-    >>> print(lut.lookup(x=0.5)
+    >>> print(lut.lookup(x=0.5))
     2.5
 
     Lookup a value above the top axis value:
-    >>> print(lut.lookup(x=6.)
+    >>> print(lut.lookup(x=6.))
     19.0
 
     Lookup a value without specifying an axis value:
-    >>> print(lut.lookup()
+    >>> print(lut.lookup())
     Traceback (most recent call last):
     Error: No axis value for 'x'
 
-    >>> print(lut.lookup(x=None)
+    >>> print(lut.lookup(x=None))
     Traceback (most recent call last):
     Error: No axis value for 'x'
 
     Try to include a non-existent axis value as well:
-    >>> print(lut.lookup(x=2.5, y=10)
+    >>> print(lut.lookup(x=2.5, y=10))
     8.5
 
     2-axis tests:
@@ -119,7 +119,7 @@ class LookupTable:
 
     Normal situation:
     
-    >>> print(example_2var_func(x=2.625, y=1.1)
+    >>> print(example_2var_func(x=2.625, y=1.1))
     18.08125
 
     Nearest neighbours:
@@ -134,28 +134,28 @@ class LookupTable:
     >>> x1y2 = example_2var_func(x=x1, y=y2)
     >>> x2y2 = example_2var_func(x=x2, y=y2)
 
-    >>> print(x1y1
+    >>> print(x1y1)
     12.0
 
-    >>> print(lut.lookup(x=x1, y=y1)
+    >>> print(lut.lookup(x=x1, y=y1))
     12.0
 
-    >>> print(x2y1
+    >>> print(x2y1)
     22.0
 
-    >>> print(lut.lookup(x=x2, y=y1) 
+    >>> print(lut.lookup(x=x2, y=y1) )
     22.0
 
-    >>> print(x1y2
+    >>> print(x1y2)
     15.0
 
-    >>> print(lut.lookup(x=x1, y=y2)
+    >>> print(lut.lookup(x=x1, y=y2))
     15.0
 
-    >>> print(x2y2
+    >>> print(x2y2)
     25.0
 
-    >>> print(lut.lookup(x=x2, y=y2)
+    >>> print(lut.lookup(x=x2, y=y2))
     25.0
 
     Now find the intermediate value points for each x value.
@@ -163,41 +163,41 @@ class LookupTable:
     >>> x = 2.625
     >>> y = 1.1
     >>> val_x1 = (x1y2-x1y1) * ((y-y1)/(y2-y1)) + x1y1
-    >>> print(val_x1
+    >>> print(val_x1)
     12.3
     
-    >>> print(lut.lookup(x=x1, y=y)
+    >>> print(lut.lookup(x=x1, y=y))
     12.3
 
     >>> val_x2 = (x2y2-x2y1) * ((y-y1)/(y2-y1)) + x2y1
-    >>> print(val_x2
+    >>> print(val_x2)
     22.3
     
-    >>> print(lut.lookup(x=x2, y=y)
+    >>> print(lut.lookup(x=x2, y=y))
     22.3
 
     Now interpolate the intermediate values to find the final value.
 
-    >>> print(((x-x1) * ((val_x2 - val_x1)/(x2-x1))) + val_x1
+    >>> print(((x-x1) * ((val_x2 - val_x1)/(x2-x1))) + val_x1)
     18.55
 
-    >>> print(lut.lookup(x=x, y=y)
+    >>> print(lut.lookup(x=x, y=y))
     18.55
 
     Lookup a value on the bottom axis value:
-    >>> print(lut.lookup(x=1., y=1.)
+    >>> print(lut.lookup(x=1., y=1.))
     6.0
 
     Lookup a value on the top axis value:
-    >>> print(lut.lookup(x=5., y=5.)
+    >>> print(lut.lookup(x=5., y=5.))
     66.0
 
     Lookup a value below the bottom axis value:
-    >>> print(lut.lookup(x=0.2, y=0.1)
+    >>> print(lut.lookup(x=0.2, y=0.1))
     -1.5
 
     Lookup a value above the top axis value:
-    >>> print(lut.lookup(x=6., y=5.5)
+    >>> print(lut.lookup(x=6., y=5.5))
     85.5
 
     Different sized axes:
@@ -225,30 +225,30 @@ class LookupTable:
     
     Normal situation:
     
-    >>> print(example_2var_func(x=2.4, y=1.1)
+    >>> print(example_2var_func(x=2.4, y=1.1))
     9.1
 
-    >>> print(lut.lookup(x=2.4, y=1.1)
+    >>> print(lut.lookup(x=2.4, y=1.1))
     9.1
 
     Lookup a value on the axis value:
-    >>> print(lut.lookup(x=8., y=1.9)
+    >>> print(lut.lookup(x=8., y=1.9))
     22.7
 
     Lookup a value on the bottom axis value:
-    >>> print(lut.lookup(x=2., y=1.)
+    >>> print(lut.lookup(x=2., y=1.))
     8.0
 
     Lookup a value on the top axis value:
-    >>> print(lut.lookup(x=32., y=7.)
+    >>> print(lut.lookup(x=32., y=7.))
     86.0
     
     Lookup a value below the bottom axis value:
-    >>> print(lut.lookup(x=0.2, y=0.1)
+    >>> print(lut.lookup(x=0.2, y=0.1))
     1.7
 
     Lookup a value above the top axis value:
-    >>> print(lut.lookup(x=40., y=10.)
+    >>> print(lut.lookup(x=40., y=10.))
     111.0
 
     3-axis tests:
@@ -269,10 +269,10 @@ class LookupTable:
 
     Normal situation:
     
-    >>> print(example_3var_func(x=2.4, y=1.1, z=3.3)
+    >>> print(example_3var_func(x=2.4, y=1.1, z=3.3))
     22.3
 
-    >>> print(lut.lookup(x=2.4, y=1.1, z=3.3)
+    >>> print(lut.lookup(x=2.4, y=1.1, z=3.3))
     22.3
 
     """
@@ -315,8 +315,8 @@ class LookupTable:
         if self.value_table is not None:
             raise Error("Cannot define axis once value table has been set.")
         axis_i = self.axis_names[axis_name]
-##         if len(axis_values) != len(self.axes[axis_i]):
-##             print('warning: number of axis values changed'
+        # if len(axis_values) != len(self.axes[axis_i]):
+        # print('warning: number of axis values changed'
         self.axes[axis_i] = axis_values
 
     def setValueTable(self, value_table):
@@ -349,7 +349,7 @@ class LookupTable:
         for axis in self.axes:
             adjacent_axis_values = zip(axis[:-1], axis[1:])
             delta_signs = [cmp(x, x_next)
-                          for x, x_next in adjacent_axis_values]
+                            for x, x_next in adjacent_axis_values]
             # todo: Generate error messages? Perhaps to supplied file object.
             if 0 in delta_signs:
                 valid = False
@@ -414,9 +414,9 @@ class LookupTable:
 
             nearest_indexes[axis_i] = interval_start_i
 
-##         print('axis_values', axis_values
-##         print('nearest_indexes', nearest_indexes
-##         print('value_table', self.value_table
+        #         print('axis_values', axis_values
+        #         print('nearest_indexes', nearest_indexes
+        #         print('value_table', self.value_table
         
         # Need to interpolate on this data.
         return self.interp_n(axis_values, nearest_indexes, self.value_table)
@@ -471,7 +471,7 @@ def nestedSequenceSize(nested_sequence):
     level_len = len(nested_sequence)
     sub_sequence_sizes = []
     for sub_sequence in nested_sequence:
-        if (hasattr(sub_sequence, '__len__') and not isinstance(sub_sequence, (str, unicode))):
+        if (hasattr(sub_sequence, '__len__') and not isinstance(sub_sequence, str, unicode)):
             sub_sequence_size = nestedSequenceSize(sub_sequence)
         else:
             sub_sequence_size = None
@@ -484,10 +484,27 @@ def nestedSequenceSize(nested_sequence):
             raise Error("Different sub-sequence sizes found at same level")
 
     if first_sub_sequence_size is None:
-        return (level_len,)
+        return level_len,
     else:
-        return first_sub_sequence_size + (level_len,)
+        return first_sub_sequence_size + level_len,
 
+def crosscheck3d():
+    """This is just here for testing/debug purposes."""
+    t_dv = [-0.9, -0.7,     -0.5,   -0.3,   0.0,    0.3,    0.5,    0.7,    0.9]
+    t_soc = [0, .5, 1]
+    t_r = [1e-6, 0.064,    0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
+           1e-6, 1e-6,     0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
+           1e-6, 1e-6,     1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6]
+    lut = LookupTable()
+    lut.addAxis('x', t_dv)
+    lut.addAxis('y', t_soc)
+    lut.setValueTable(t_r)
+    res = lut.lookup(x=-.9, y=0)
+    ev = 1e-6
+    print("ev=", ev, "got", res)
+    res = lut.lookup(x=-.902, y=0.0957)
+    ev = 1e-6
+    print("ev=", ev, "got", res)
 
 def crosscheck2d():
     """This is just here for testing/debug purposes.
@@ -500,6 +517,7 @@ def crosscheck2d():
     y_axis_values = [1., 2., 3., 4., 5.]
     lut.addAxis('x', x_axis_values)
     lut.addAxis('y', y_axis_values)
+
     def func(x, y):
         return (2 * x * x) + (3 * y) + 1
 
@@ -513,7 +531,6 @@ def crosscheck2d():
 
     x = 6.
     y = 5.5
-
 
     # Nearest neighbours
     x1y1 = func(x=x1, y=y1)
@@ -540,7 +557,12 @@ def crosscheck2d():
     print(lut.lookup(x=x, y=y))
 
 
+def main():
+    crosscheck2d()
+
+
 if __name__ == '__main__':
     import sys
     import doctest
     doctest.testmod(sys.modules['__main__'])
+    main()

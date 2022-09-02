@@ -108,7 +108,7 @@ const float T_SOC_MIN_LI[N_N_LI] =  { 0.28, 0.24,  0.16, 0.14}; // soc_min(t)
 const uint8_t M_H_LI  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
 const uint8_t N_H_LI  = 9;          // Number of dv breakpoints in r(dv) table t_r
 const float X_DV_LI[N_H_LI] =       // dv breakpoints for r(soc, dv) table t_r
-        { -0.9, -0.7,   -0.5,  -0.3,    0.0,    0.3,    0.5,    0.7,    0.0};
+        { -0.9, -0.7,   -0.5,  -0.3,    0.0,    0.3,    0.5,    0.7,    0.9};
 const float Y_SOC_LI[M_H_LI] =      // soc breakpoints for r(soc, dv) table t_r
         { 0.0,  0.5,    1.0};
 const float T_R_LI[M_H_LI*N_H_LI] = // r(soc, dv) table
