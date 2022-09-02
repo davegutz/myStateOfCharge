@@ -76,7 +76,7 @@ void monitor(const boolean reset, const boolean reset_temp, const unsigned long 
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen);
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen);
 void print_all_header(void);
-void print_high_speed_data(const boolean reset, const boolean reset_publish, Sensors *Sen, BatteryMonitor *Mon);
+void print_high_speed_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
 void print_serial_header(void);
 void print_serial_sim_header(void);
 void print_signal_sel_header(void);

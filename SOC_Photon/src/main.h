@@ -344,7 +344,7 @@ void loop()
     if ( rp.debug==-4 ) debug_m4(Mon, Sen);
  
     // Print
-    print_high_speed_data(reset, reset_publish, Sen, Mon);
+    print_high_speed_data(reset, Sen, Mon);
 
   }  // end read (high speed frame)
 
