@@ -456,9 +456,9 @@ class LookupTable:
         # Linearly interpolate x on the line from (x1, y1) to (x2, y2).
         # interp(x, (x1, y1), (x2, y2))
         import numpy as np
-        slope = (y2 - y1) / (x2 - x1)
         if self.clip_x:
             x = min(max(x, x1), x2)
+        # slope = (y2 - y1) / (x2 - x1)
         # val = slope * (x - x1) + y1
         val = ( y2*(x-x1) + y1*(x2-x) ) / (x2 - x1)
 
