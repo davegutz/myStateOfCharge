@@ -440,10 +440,15 @@ class LookupTable:
         # Represent the other axis variables as y.
         y1 = value_table[x1_i]
         y2 = value_table[x2_i]
-            
+
+        print("x1_i", x1_i)
+        print("x2_i", x2_i)
+        print("y1", y1)
+        print("y2", y2)
+
         if hasattr(y1, '__len__'):
             # The value still depends on other axes.
-            # Need to recurse, to interpolate on the subspace 
+            # Need to recurse, to interpolate on the subspace
             y1 = self.interp_n(axis_values[1:], nearest_indexes[1:], y1)
             y2 = self.interp_n(axis_values[1:], nearest_indexes[1:], y2)
             
@@ -456,6 +461,10 @@ class LookupTable:
         # interp(x, (x1, y1), (x2, y2))
         slope = (y2 - y1) / (x2 - x1)
         val = slope * (x - x1) + y1
+
+        print("axis_values, nearest_indexes",  axis_values, nearest_indexes)
+        print("value_table", value_table)
+        print("val=", val)
 
         return val
 
