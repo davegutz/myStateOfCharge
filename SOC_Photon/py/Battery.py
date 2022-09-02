@@ -80,7 +80,7 @@ EKF_R_SD_NORM = 0.5  # Standard deviation of normal EKF state uncertainty, fract
 # EKF_R_SD_REV = 0.3
 EKF_Q_SD_REV = EKF_Q_SD_NORM
 EKF_R_SD_REV = EKF_R_SD_NORM
-
+IMAX_NUM = 100000.
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -110,10 +110,11 @@ class Battery(Coulombs):
         from pyDAGx import myTables
         t_x_soc = [0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
         t_y_t = [5.,  11.1,  20.,   40.]
-        t_voc = [4.00, 4.00, 6.00,  9.50,  11.70, 12.30, 12.50, 12.65, 12.82, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.75, 14.45,
-                 4.00, 4.00, 8.00,  11.60, 12.40, 12.60, 12.70, 12.80, 12.92, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.76, 14.46,
-                 4.00, 8.00, 12.20, 12.68, 12.73, 12.79, 12.81, 12.89, 13.00, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.80, 14.50,
-                 4.08, 8.08, 12.28, 12.76, 12.81, 12.87, 12.89, 12.97, 13.08, 13.12, 13.17, 13.22, 13.29, 13.33, 13.35, 13.88, 14.58]
+        t_voc = [4.00, 4.00,  10.00, 11.80, 12.45, 12.55, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.75, 14.45,
+                 4.00, 8.00,  11.70, 12.50, 12.60, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.76, 14.46,
+                 9.00, 12.45, 12.65, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.80, 14.50,
+                 9.08, 12.53, 12.73, 12.85, 12.93, 12.97, 13.03, 13.07, 13.11, 13.12, 13.17, 13.22, 13.29, 13.33, 13.35, 13.88, 14.58]
+
         x = np.array(t_x_soc)
         y = np.array(t_y_t)
         data_interp = np.array(t_voc)
@@ -340,7 +341,7 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Dynamics
         self.vb = vb
-        self.ib = max(min(ib, 10000.), -10000.)  # Overflow protection since ib past value used
+        self.ib = max(min(ib, IMAX_NUM), -IMAX_NUM)  # Overflow protection since ib past value used
         u = np.array([ib, vb]).T
         self.Randles.calc_x_dot(u)
         if dt < self.t_max:
@@ -410,18 +411,23 @@ class BatteryMonitor(Battery, EKF1x1):
         if charge_curr > TCHARGE_DISPLAY_DEADBAND:
             self.tcharge = min(-delta_q / charge_curr / 3600., 24.)
         elif charge_curr < -TCHARGE_DISPLAY_DEADBAND:
-            self.tcharge = max(max(q_capacity + delta_q - self.q_min, 0.) / charge_curr / 3600., -24.)
+            self.tcharge = max((q_capacity + delta_q - self.q_min) / charge_curr / 3600., -24.)
         elif charge_curr >= 0.:
             self.tcharge = 24.
         else:
             self.tcharge = -24.
 
-        amp_hrs_remaining = max(q_capacity - self.q_min + delta_q, 0.) / 3600.
-        if soc > 0.:
+        amp_hrs_remaining = (q_capacity - self.q_min + delta_q) / 3600.
+        if soc > self.soc_min:
             self.amp_hrs_remaining_ekf = amp_hrs_remaining * (self.soc_ekf - self.soc_min) /\
-                max(soc - self.soc_min, 1e-8)
+                (soc - self.soc_min)
             self.amp_hrs_remaining_wt = amp_hrs_remaining * (self.soc - self.soc_min) /\
-                max(soc - self.soc_min, 1e-8)
+                (soc - self.soc_min)
+        elif soc < self.soc_min:
+            self.amp_hrs_remaining_ekf = amp_hrs_remaining * (self.soc_ekf - self.soc_min) / \
+                                         (soc - self.soc_min)
+            self.amp_hrs_remaining_wt = amp_hrs_remaining * (self.soc - self.soc_min) / \
+                                        (soc - self.soc_min)
         else:
             self.amp_hrs_remaining_ekf = 0.
             self.amp_hrs_remaining_wt = 0.
@@ -618,7 +624,7 @@ class BatteryModel(Battery):
         # slightly beyond but don't windup
         self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)
 
-        self.bms_off = (self.temp_c < low_t) or (self.voc < low_voc)
+        self.bms_off = ((self.temp_c < low_t) or (self.voc < low_voc)) and not self.tweak_test
         if self.bms_off:
             curr_in = 0.
 
@@ -651,7 +657,7 @@ class BatteryModel(Battery):
         if self.tweak_test or (not rp.modeling):
             self.sat_ib_max = self.ib_in
         self.ib_fut = min(self.ib_in, self.sat_ib_max)  # the feedback of self.ib
-        if (self.q <= 0.) & (self.ib_in < 0.):  # empty
+        if (self.q <= -0.2*self.q_cap_rated_scaled) & (self.ib_in < 0.):  # empty
             self.ib_fut = 0.  # empty
         self.model_cutback = (self.voc_stat > self.vsat) & (self.ib_fut == self.sat_ib_max)
         self.model_saturated = (self.temp_c > low_t) and (self.model_cutback & (self.ib_fut < self.ib_sat))
@@ -722,10 +728,10 @@ class BatteryModel(Battery):
                 self.delta_q = 0.  # Model is truth.   Saturate it then restart it to reset charge
         self.resetting = False  # one pass flag.  Saturation debounce should reset next pass
 
-        # Integration
+        # Integration can go to -20%
         self.q_capacity = self.calculate_capacity(self.temp_lim)
         self.delta_q += self.d_delta_q - dqdt*self.q_capacity*(self.temp_lim-self.t_last)
-        self.delta_q = max(min(self.delta_q, 0.), -self.q_capacity)
+        self.delta_q = max(min(self.delta_q, 0.), -self.q_capacity*1.2)
         self.q = self.q_capacity + self.delta_q
 
         # Normalize

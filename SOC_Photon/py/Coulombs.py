@@ -44,7 +44,7 @@ class Coulombs:
         self.sat = True
         from pyDAGx import myTables
         t_x_soc_min = [5.,   11.1,  20.,  40.]
-        t_soc_min = [0.14, 0.12,  0.08, 0.07]
+        t_soc_min = [0.10, 0.07,  0.02, 0.05]
         self.lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
         self.coul_eff = coul_eff_
         self.tweak_test = tweak_test
@@ -157,7 +157,7 @@ class Coulombs:
         # Integration
         self.q_capacity = self.calculate_capacity(self.temp_lim)
         self.delta_q = max(min(self.delta_q + d_delta_q - dqdt*self.q_capacity*(self.temp_lim-self.t_last),
-                               0.0), -self.q_capacity)
+                               0.0), -self.q_capacity*1.5)
         self.q = self.q_capacity + self.delta_q
 
         # Normalize
