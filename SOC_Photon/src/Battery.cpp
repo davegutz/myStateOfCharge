@@ -623,13 +623,13 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boole
     dt_ = dt;
     vsat_ = calc_vsat();
 
-    double soc_lim = max(min(soc_, 1.0), 0.0);
+    double soc_lim = max(min(soc_, 1.0), -0.2);  // slightly beyond
 
     // VOC-OCV model
     voc_stat_ = calc_soc_voc(soc_, temp_c_, &dv_dsoc_);
     voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, vsat_*1.2);  // slightly beyond but don't windup
     bms_off_ = (( temp_c_ <= chem_.low_t ) || ( voc_stat_ < chem_.low_voc )) && !rp.tweak_test();
-    if ( bms_off_ ) ib_in_ = 0.;
+    if ( bms_off_ && rp.mod_ib() ) ib_in_ = 0.;  // keep running when real world.  Input ib represents bms
 
     // Dynamic emf
     // Hysteresis model
@@ -663,7 +663,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boole
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
     if ( rp.tweak_test() || !rp.modeling ) sat_ib_max_ = ib_in_;   // Disable cutback when real world or when doing tweak_test test
     ib_fut_ = min(ib_in_/(*rp_nP_), sat_ib_max_);      // the feedback of ib_
-    if ( (q_ <= -0.2*q_cap_rated_scaled_) && (ib_in_ < 0.) ) ib_fut_ = 0.;   //  empty
+    if ( (q_ <= 0.01*q_cap_rated_scaled_) && (ib_in_ < 0.) ) ib_fut_ = 0.;   //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_fut_ == sat_ib_max_);
     model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;

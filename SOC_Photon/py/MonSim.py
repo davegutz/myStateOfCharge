@@ -88,7 +88,7 @@ def save_clean_file_sim(sims, csv_file, unit_key):
 
 
 def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
-              t_Ib_fail=None, Ib_fail=0.):
+              t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None):
     if saved_sim_old and len(saved_sim_old.time) < len(saved_old.time):
         t = saved_sim_old.time
     else:
@@ -114,6 +114,8 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
 
     # Setup
     scale = model_bat_cap / Battery.RATED_BATT_CAP
+    if scale_in:
+        scale *= scale_in
     s_q = Scale(1., 3., 0.000005, 0.00005)
     s_r = Scale(1., 3., 0.001, 1.)   # t_Ib_fail = 1000 o
     sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
@@ -150,7 +152,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
             mon.sat = sat_init
 
         # Models
-        if saved_sim_old:
+        if saved_sim_old and not use_ib_mon:
             ib_in_m = saved_sim_old.ib_in_m[i]
         else:
             ib_in_m = Ib_past[i]
@@ -209,8 +211,8 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
 
     # Data
     print('time=', now)
-    print('mon:  ', str(mon))
-    print('sim:  ', str(sim))
+    # print('mon:  ', str(mon))
+    # print('sim:  ', str(sim))
 
     return mon.saved, sim.saved, mon.Randles.saved, sim.saved_m
 
@@ -231,6 +233,8 @@ if __name__ == '__main__':
         # time_end = 19.2
         t_Ib_fail = None
         init_time_in = None
+        use_ib_mon_in = False
+        scale_in = None
         # data_file_old_txt = '../dataReduction/ampHiFail20220901.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampLoFail20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFailNoise20220829.txt'; unit_key = 'pro_2022';
@@ -245,9 +249,8 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/tbFailMod20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tbFailHdwe20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/triTweakRegressionTest20220829.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220901.txt'; unit_key = 'soc0_2022'
         # data_file_old_txt = '../dataReduction/triTweakDisch20220901.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/triTweakDisch20220901.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
@@ -303,7 +306,8 @@ if __name__ == '__main__':
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         mons, sims, monrs, sims_m = replicate(saved_old, saved_sim_old=saved_sim_old, init_time=init_time,
-                                              dv_hys=dv_hys, sres=1.0, t_Ib_fail=t_Ib_fail)
+                                              dv_hys=dv_hys, sres=1.0, t_Ib_fail=t_Ib_fail, use_ib_mon=use_ib_mon_in,
+                                              scale_in=scale_in)
         save_clean_file(mons, mon_file_save, 'mon_rep' + date_)
 
         # Plots

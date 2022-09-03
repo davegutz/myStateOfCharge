@@ -108,12 +108,14 @@ class Battery(Coulombs):
 
         # Defaults
         from pyDAGx import myTables
-        t_x_soc = [0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
+        t_x_soc = [-0.30, -0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
         t_y_t = [5.,  11.1,  20.,   40.]
-        t_voc = [4.00, 4.00,  10.00, 11.80, 12.45, 12.55, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.75, 14.45,
-                 4.00, 8.00,  11.70, 12.50, 12.60, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.76, 14.46,
-                 9.00, 12.45, 12.65, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.80, 14.50,
-                 9.08, 12.53, 12.73, 12.85, 12.93, 12.97, 13.03, 13.07, 13.11, 13.12, 13.17, 13.22, 13.29, 13.33, 13.35, 13.88, 14.58]
+        t_voc = [4.00, 4.00, 4.00,  4.00,  10.00, 11.80, 12.45, 12.55, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.75, 14.45,
+                 4.00, 4.00, 4.00,  8.00,  11.70, 12.50, 12.60, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.76, 14.46,
+                 4.00, 4.00, 9.00,  12.45, 12.65, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.80, 14.50,
+                 4.00, 9.00, 13.15, 13.45, 13.65, 13.77, 13.85, 13.89, 13.95, 13.99, 14.03, 14.04, 14.09, 14.14, 14.21, 14.25, 14.27, 14.37, 14.80]
+        # 4.00, 9.00, 10.00, 13.45, 13.65, 13.77, 13.85, 13.89, 13.95, 13.99, 14.03, 14.04, 14.09, 14.14, 14.21, 14.25, 14.27, 14.37, 14.80]
+        # 9.08, 12.53, 12.73, 12.85, 12.93, 12.97, 13.03, 13.07, 13.11, 13.12, 13.17, 13.22, 13.29, 13.33, 13.35, 13.88, 14.58]
 
         x = np.array(t_x_soc)
         y = np.array(t_y_t)
@@ -605,8 +607,7 @@ class BatteryModel(Battery):
         s += Battery.__str__(self, prefix + 'BatteryModel:')
         return s
 
-    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None, sat_init=None):
-        # BatteryModel
+    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None, sat_init=None):  # BatteryModel
         self.dt = dt
         self.temp_c = temp_c
         self.mod = rp.modeling
@@ -615,7 +616,7 @@ class BatteryModel(Battery):
             self.ib_fut = self.ib_in
         self.ib = self.ib_fut
 
-        soc_lim = max(min(soc, 1.), 0.)
+        soc_lim = max(min(soc, 1.), -0.2)  # dag 9/3/2022
 
         # VOC - OCV model
         self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc, temp_c)
@@ -648,14 +649,15 @@ class BatteryModel(Battery):
             self.dv_dyn = self.voc_stat
             self.voc = self.voc_stat
 
-        # Saturation logic, both full and empty
+        # Saturation logic, both full and empty   dag 9/3/2022 modify empty
         self.vsat = self.nom_vsat + (temp_c - 25.) * self.dvoc_dt
         self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
         # if self.tweak_test:
         if self.tweak_test or (not rp.modeling):
             self.sat_ib_max = self.ib_in
         self.ib_fut = min(self.ib_in, self.sat_ib_max)  # the feedback of self.ib
-        if (self.q <= -0.2*self.q_cap_rated_scaled) & (self.ib_in < 0.):  # empty
+        if (self.q <= -self.q_cap_rated_scaled*1.2) & (self.ib_in < 0.):
+            print("q", self.q, "empty", -self.q_cap_rated_scaled*1.2)
             self.ib_fut = 0.  # empty
         self.model_cutback = (self.voc_stat > self.vsat) & (self.ib_fut == self.sat_ib_max)
         self.model_saturated = (self.temp_c > low_t) and (self.model_cutback & (self.ib_fut < self.ib_sat))
@@ -726,10 +728,10 @@ class BatteryModel(Battery):
                 self.delta_q = 0.  # Model is truth.   Saturate it then restart it to reset charge
         self.resetting = False  # one pass flag.  Saturation debounce should reset next pass
 
-        # Integration can go to -20%
+        # Integration can go to -50%
         self.q_capacity = self.calculate_capacity(self.temp_lim)
         self.delta_q += self.d_delta_q - dqdt*self.q_capacity*(self.temp_lim-self.t_last)
-        self.delta_q = max(min(self.delta_q, 0.), -self.q_capacity*1.2)
+        self.delta_q = max(min(self.delta_q, 0.), -self.q_capacity*1.5)
         self.q = self.q_capacity + self.delta_q
 
         # Normalize
