@@ -131,7 +131,7 @@ protected:
 #define VB_FA         1   // Peristed, latched isolation of Vb failure, T=failed
 #define IB_AMP_FA     2   // Amp sensor selection memory, T = amp failed
 #define IB_NOA_FA     3   // Noamp sensor selection memory, T = no amp failed
-#define CCD_FA        4   // Coulomb Counter difference accumulated, T = faulted=faile
+#define CC_DIFF_FA    4   // Accumulated Coulomb Counter difference used to isolate IB differences, T = faulted=failed 
 #define WRAP_HI_FA    5   // Wrap isolates to Ib high fail
 #define WRAP_LO_FA    6   // Wrap isolates to Ib low fail
 #define WRAP_VB_FA    7   // Wrap isolates to Vb fail
@@ -158,7 +158,7 @@ public:
   float cc_diff() { return cc_diff_; };
   void cc_diff_sclr(const float sclr) { cc_diff_sclr_ = sclr; };
   float cc_diff_sclr() { return cc_diff_sclr_; };
-  boolean cc_diff_fa() { return failRead(CCD_FA); };
+  boolean cc_diff_fa() { return failRead(CC_DIFF_FA); };
   void disab_ib_fa(const boolean dis) { disab_ib_fa_ = dis; };
   boolean disab_ib_fa() { return disab_ib_fa_; };
   void disab_tb_fa(const boolean dis) { disab_tb_fa_ = dis; };
@@ -186,7 +186,7 @@ public:
   boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
   boolean ib_noa_flt() { return faultRead(IB_NOA_FLT); };
   boolean ib_red_loss() { return faultRead(IB_RED_LOSS); };
-  boolean ib_red_loss_calc() { return (ib_sel_stat_!=1 || rp.ib_select!=0 || ib_dif_fa()); };
+  boolean ib_red_loss_calc() { return (ib_sel_stat_!=1 || rp.ib_select!=0 || ib_dif_fa() || vb_fail()); };
   boolean vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   float ib_diff() { return ( ib_diff_ ); };

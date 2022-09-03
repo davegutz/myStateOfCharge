@@ -56,6 +56,7 @@ struct CommandPars
   String asap_str;          // Hold chit_chat asap data - no waiting, ASAP all of now_str processed before Control pass
   boolean publishS;         // Print serial monitor data
   uint8_t print_mult;       // Print multiplier for objects
+  unsigned long num_v_print;// Number of print echos made, for checking on BLE
 
   CommandPars(void)
   {
@@ -71,6 +72,7 @@ struct CommandPars
     blynking = false;
     publishS = false;
     print_mult = 4;
+    num_v_print = 0UL;
   }
 
   void cmd_reset(void)
@@ -89,6 +91,7 @@ struct CommandPars
     this->model_cutback = true;
     this->model_saturated = true;
     this->soft_reset = true;
+    this->num_v_print = 0UL;
   }
 
   void pretty_print(void)

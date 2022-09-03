@@ -49,14 +49,20 @@ void print_high_speed_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mo
   static uint8_t last_read_debug = rp.debug;     // Remember first time with new debug to print headers
   if ( ( rp.debug==4 || rp.debug==26 ) )
   {
-    if ( reset || (last_read_debug != rp.debug) ) print_all_header();
+    if ( reset || (last_read_debug != rp.debug) )
+    {
+      cp.num_v_print = 0UL;
+      print_all_header();
+    }
     if ( rp.tweak_test() )
     {
       // no print, done by sub-functions
+      cp.num_v_print++;
     }
     if ( cp.publishS )
     {
       short_print(Sen, Mon);
+      cp.num_v_print++;
     }
   }
   last_read_debug = rp.debug;
@@ -326,7 +332,8 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 
   // Text basic Bluetooth (uses serial bluetooth app)
   if ( rp.debug!=4 && rp.debug!=-2 && !cp.blynking )
-    Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\n\nv-2;Pf; for fails\n", dispTop.c_str(), dispBot.c_str());
+    Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\n\nv-2;Pf; for fails.  prints=%ld\n",
+      dispTop.c_str(), dispBot.c_str(), cp.num_v_print);
 
   if ( rp.debug==5 ) debug_5();
 
