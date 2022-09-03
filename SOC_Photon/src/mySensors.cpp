@@ -341,7 +341,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   if ( Mon->soc()<=WRAP_LO_SOC_OFF ) cc_diff_empty_sclr_ = CC_DIFF_LO_SOC_SCLR;
   else ewsat_sclr_ = 1.;
 
-  failAssign( abs(cc_diff_) >= CC_DIFF_SOC_DIS_THRESH*cc_diff_sclr_, CCD_FA );
+  failAssign( abs(cc_diff_) >= CC_DIFF_SOC_DIS_THRESH*cc_diff_sclr_, CC_DIFF_FA );
 
   // Compare current sensors - failure conditions large difference
   // Difference error, filter, check, persist
