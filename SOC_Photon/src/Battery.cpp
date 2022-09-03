@@ -663,7 +663,7 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boole
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
     if ( rp.tweak_test() || !rp.modeling ) sat_ib_max_ = ib_in_;   // Disable cutback when real world or when doing tweak_test test
     ib_fut_ = min(ib_in_/(*rp_nP_), sat_ib_max_);      // the feedback of ib_
-    if ( (q_ <= 0.01*q_cap_rated_scaled_) && (ib_in_ < 0.) ) ib_fut_ = 0.;   //  empty
+    if ( (q_ <= -0.5*q_cap_rated_scaled_) && (ib_in_ < 0.) ) ib_fut_ = 0.;   //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_fut_ == sat_ib_max_);
     model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
