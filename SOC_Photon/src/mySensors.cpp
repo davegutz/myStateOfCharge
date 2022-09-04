@@ -268,7 +268,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" ib_dsc_ft=%d;'Sq v'\n", ib_dscn_flt());
   Serial.printf(" ibd_lo_ft=%d;'Sd, *SA/*SB ^'\n", ib_diff_lo_flt());
   Serial.printf(" ibd_hi_ft=%d;'Sd, *SA/*SB ^'\n", ib_diff_hi_flt());
-  Serial.printf(" red_loss=%d;\n", ib_red_loss());
+  Serial.printf(" red_loss=%d;\n", red_loss());
   Serial.printf(" wl_ft=%d;    'Sb ^'\n", wrap_lo_flt());
   Serial.printf(" wh_ft=%d;    'Sa ^'\n    4\n", wrap_hi_flt());
   Serial.printf(" ibn_ft=%d;   'Fi 1'\n", ib_noa_flt());
@@ -309,7 +309,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf(" voc_soc=%7.3f;\n", Mon->voc_soc());
   Serial1.printf(" soc=%7.3f;\n", Mon->soc());
   Serial1.printf(" voc=%7.3f;\n", Mon->voc());
-  Serial1.printf(" red_loss=%d;\n", ib_red_loss());
+  Serial1.printf(" red_loss=%d;\n", red_loss());
   Serial1.printf(" imh=%7.3f;\n", Sen->Ib_amp_hdwe);
   Serial1.printf(" inh=%7.3f;\n", Sen->Ib_noa_hdwe);
   Serial1.printf(" ibd_f=%7.3f;\n", ib_diff_f_);
@@ -399,7 +399,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       ib_sel_stat_ = 1;
     }
   }
-  faultAssign(ib_red_loss_calc(), IB_RED_LOSS); // ib_sel_stat<0
+  faultAssign(red_loss_calc(), RED_LOSS); // ib_sel_stat<0
 
   // vb failure from wrap result.  Latches
   if ( reset_all_faults_ )

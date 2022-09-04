@@ -287,7 +287,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
       dispI = "**F**";
     else if ( Sen->Flt->dscn_fa() && !rp.mod_ib() )
       dispI = "..C..";
-    else if ( Sen->Flt->ib_red_loss() )
+    else if ( Sen->Flt->red_loss() )
       dispI = "-data-";
   }
   else if ( frame==3 )

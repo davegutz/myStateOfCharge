@@ -118,27 +118,27 @@ protected:
 //                    4
 #define WRAP_HI_FLT   5   // Wrap isolates to Ib high fault
 #define WRAP_LO_FLT   6   // Wrap isolates to Ib low fault
-#define IB_RED_LOSS   7   // Loss of current sensor redundancy, T = fault
+#define RED_LOSS      7   // Loss of current knowledge redundancy, T = fault
 #define IB_DIFF_HI_FLT 8   // Faulted sensor difference error, T = fault
 #define IB_DIFF_LO_FLT 9   // Faulted sensor difference error, T = fault
 #define IB_DSCN_FLT   10  // Dual faulted quiet error, T = disconnected shunt
 #define IB_AMP_BARE   11  // Unconnected ib bus, T = bare bus
 #define IB_NOA_BARE   12  // Unconnected ib bus, T = bare bus
-#define NUM_FLT       13
+#define NUM_FLT       13  // Number of these
 
 // Fail word bits
-#define TB_FA         0   // Peristed, latched isolation of Tb failure, T=failed
-#define VB_FA         1   // Peristed, latched isolation of Vb failure, T=failed
-#define IB_AMP_FA     2   // Amp sensor selection memory, T = amp failed
-#define IB_NOA_FA     3   // Noamp sensor selection memory, T = no amp failed
-#define CC_DIFF_FA    4   // Accumulated Coulomb Counter difference used to isolate IB differences, T = faulted=failed 
-#define WRAP_HI_FA    5   // Wrap isolates to Ib high fail
-#define WRAP_LO_FA    6   // Wrap isolates to Ib low fail
-#define WRAP_VB_FA    7   // Wrap isolates to Vb fail
-#define IB_DIFF_HI_FA 8   // Persisted sensor difference error, T = fail
-#define IB_DIFF_LO_FA 9   // Persisted sensor difference error, T = fail
-#define IB_DSCN_FA    10  // Dual persisted quiet error, T = disconnected shunt
-#define NUM_FA        11
+#define TB_FA         0   // Peristed, latched isolation of Tb failure, heals soft type, T=failed
+#define VB_FA         1   // Peristed, latched isolation of Vb failure, latches hard type, T=failed
+#define IB_AMP_FA     2   // Amp sensor selection memory, latches hard type, T = amp failed
+#define IB_NOA_FA     3   // Noamp sensor selection memory, latches hard type, T = no amp failed
+#define CC_DIFF_FA    4   // Accumulated Coulomb Counter difference used to isolate IB differences, heals functional type, T = faulted=failed 
+#define WRAP_HI_FA    5   // Wrap isolates to Ib high fail, heals dual sensor
+#define WRAP_LO_FA    6   // Wrap isolates to Ib low fail, heals dual sensor
+#define WRAP_VB_FA    7   // Wrap isolates to Vb fail, latches single sensor
+#define IB_DIFF_HI_FA 8   // Persisted sensor difference error, latches hard type, T = fail
+#define IB_DIFF_LO_FA 9   // Persisted sensor difference error, latches hard type, T = fail
+#define IB_DSCN_FA    10  // Dual persisted quiet error, heals functional type, T = disconnected shunt
+#define NUM_FA        11  // Number of these
 
 #define faultSet(bit) (bitSet(fltw_, bit) )
 #define failSet(bit) (bitSet(falw_, bit) )
@@ -199,9 +199,6 @@ public:
   float ib_quiet_sclr() { return ib_quiet_sclr_; };
   float ib_quiet_thr_;     // Threshold below which ib is quiet, A pk
   float ib_quiet_thr() { return ib_quiet_thr_; };
-  boolean ib_red_loss() { return faultRead(IB_RED_LOSS); };
-  boolean ib_red_loss_calc() { return (ib_sel_stat_!=1 || rp.ib_select!=0 || ib_diff_fa() || vb_fail()); };
-  boolean vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   float ib_diff() { return ( ib_diff_ ); };
   float ib_diff_f() { return ( ib_diff_f_ ); };
@@ -216,6 +213,8 @@ public:
   void ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
   void pretty_print(Sensors *Sen, BatteryMonitor *Mon);
   void pretty_print1(Sensors *Sen, BatteryMonitor *Mon);
+  boolean red_loss() { return faultRead(RED_LOSS); };
+  boolean red_loss_calc() { return (ib_sel_stat_!=1 || rp.ib_select!=0 || ib_diff_fa() || vb_fail()); };
   void reset_all_faults() { reset_all_faults_ = true; };
   void select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ib signals
@@ -227,6 +226,7 @@ public:
   void tb_stale_time_sclr(const float sclr) { tb_stale_time_sclr_ = sclr; };
   float tb_stale_time_sclr() { return tb_stale_time_sclr_; };
   void vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vb_min, const float _Vb_max, const boolean reset);  // Range check Vb
+  boolean vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
   int8_t vb_sel_stat() { return vb_sel_stat_; };
   boolean vb_fa() { return failRead(VB_FA); };
   boolean vb_flt() { return faultRead(VB_FLT); };
@@ -237,17 +237,17 @@ public:
   boolean wrap_lo_flt() { return faultRead(WRAP_LO_FLT);  };
   boolean wrap_vb_fa() { return failRead(WRAP_VB_FA); };
 protected:
+  TFDelay *IbAmpHardFail;   // Persistence ib hard fail amp
   TFDelay *IbdHiPer;        // Persistence ib diff hi
   TFDelay *IbdLoPer;        // Persistence ib diff lo
-  TFDelay *IbAmpHardFail;   // Persistence ib hard fail amp
+  LagTustin *IbErrFilt;     // Noise filter for signal selection
   TFDelay *IbNoAmpHardFail; // Persistence ib hard fail noa
+  General2_Pole *QuietFilt; // Linear filter to test for quiet
+  TFDelay *QuietPer;        // Persistence ib quiet disconnect detection
+  RateLagExp *QuietRate;    // Linear filter to calculate rate for quiet
   TFDelay *TbStaleFail;     // Persistence stale tb one-wire data
   TFDelay *VbHardFail;      // Persistence vb hard fail amp
-  TFDelay *QuietPer;        // Persistence ib quiet disconnect detection
-  LagTustin *IbErrFilt;     // Noise filter for signal selection
   LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
-  General2_Pole *QuietFilt; // Linear filter to test for quiet
-  RateLagExp *QuietRate;    // Linear filter to calculate rate for quiet
   boolean cc_diff_fa_;      // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
   float cc_diff_sclr_;      // Scale cc_diff detection thresh, scalar
@@ -267,8 +267,6 @@ protected:
   float ib_diff_f_;         // Filtered sensor difference error, A
   float ib_quiet_;          // ib hardware noise, A/s
   float ib_rate_;           // ib rate, A/s
-  TFDelay *WrapHi;          // Time high wrap fail persistence
-  TFDelay *WrapLo;          // Time low wrap fail persistence
   int8_t tb_sel_stat_;      // Memory of Tb signal selection, 0=none, 1=sensor
   float tb_stale_time_sclr_; // Scalar on persistences of Tb hardware stale chec, (1)
   int8_t vb_sel_stat_;      // Memory of Vb signal selection, 0=none, 1=sensor
@@ -279,6 +277,8 @@ protected:
   int8_t ib_sel_stat_last_; // past value
   uint16_t fltw_;           // Bitmapped faults
   uint16_t falw_;           // Bitmapped fails
+  TFDelay *WrapHi;          // Time high wrap fail persistence
+  TFDelay *WrapLo;          // Time low wrap fail persistence
 };
 
 

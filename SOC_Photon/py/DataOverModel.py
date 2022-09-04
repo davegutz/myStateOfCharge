@@ -121,6 +121,7 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(old_s.time, old_s.wl_fa+2, color='red', linestyle='--', label='wrap_lo_fa+2')
     plt.plot(old_s.time, old_s.wv_fa+2, color='orange', linestyle='-.', label='wrap_vb_fa+2')
     plt.plot(old_s.time, old_s.ccd_fa, color='green', linestyle='-', label='cc_diff_fa')
+    plt.plot(old_s.time, old_s.red_loss, color='blue', linestyle='--', label='red_loss')
     plt.legend(loc=1)
     plt.subplot(337)
     plt.plot(old_s.time, old_s.cc_dif, color='black', linestyle='-', label='cc_diff')
@@ -527,6 +528,7 @@ class SavedData:
             self.e_w_f = None
             self.wh_flt = None
             self.wl_flt = None
+            self.red_loss = None
             self.wh_fa = None
             self.wl_fa = None
             self.wv_fa = None
@@ -584,6 +586,7 @@ class SavedData:
             self.e_w_f = np.array(sel.e_w_f[:i_end])
             self.wh_flt = np.bool8(np.array(fltw) & 2**5)
             self.wl_flt = np.bool8(np.array(fltw) & 2**6)
+            self.red_loss = np.bool8(np.array(fltw) & 2**7)
             self.wh_fa = np.bool8(np.array(falw) & 2**5)
             self.wl_fa = np.bool8(np.array(falw) & 2**6)
             self.wv_fa = np.bool8(np.array(falw) & 2**7)
