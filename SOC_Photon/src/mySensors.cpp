@@ -265,12 +265,12 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" tb_s_st=%d, vb_s_st=%d, ib_s_st=%d\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_);
   Serial.printf(" nbar=%d;\n", Sen->ShuntNoAmp->bare());
   Serial.printf(" mbar=%d;\n", Sen->ShuntAmp->bare());
-  Serial.printf(" ib_dsc_ft=%d;'Sq v'\n", ib_dscn_flt());
-  Serial.printf(" ibd_lo_ft=%d;'Sd, *SA/*SB ^'\n", ib_diff_lo_flt());
-  Serial.printf(" ibd_hi_ft=%d;'Sd, *SA/*SB ^'\n", ib_diff_hi_flt());
+  Serial.printf(" ib_dsc_ft=%d;'Fq v'\n", ib_dscn_flt());
+  Serial.printf(" ibd_lo_ft=%d;'Fd, *SA/*SB ^'\n", ib_diff_lo_flt());
+  Serial.printf(" ibd_hi_ft=%d;'Fd, *SA/*SB ^'\n", ib_diff_hi_flt());
   Serial.printf(" red_loss=%d;\n", red_loss());
-  Serial.printf(" wl_ft=%d;    'Sb ^'\n", wrap_lo_flt());
-  Serial.printf(" wh_ft=%d;    'Sa ^'\n    4\n", wrap_hi_flt());
+  Serial.printf(" wl_ft=%d;    'Fb ^'\n", wrap_lo_flt());
+  Serial.printf(" wh_ft=%d;    'Fa ^'\n    4\n", wrap_hi_flt());
   Serial.printf(" ibn_ft=%d;   'Fi 1'\n", ib_noa_flt());
   Serial.printf(" ibm_ft=%d;   'Fi 1'\n", ib_amp_flt());
   Serial.printf(" vb_ft=%d;    'Fv 1'\n", vb_flt());
@@ -280,13 +280,13 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(";\n");
   Serial.printf("  CBA98765x3210\n");
   Serial.printf(" fltw=%d;\n", fltw_);
-  Serial.printf(" ib_dsc_fa=%d;'Sq v'\n", ib_dscn_fa());
-  Serial.printf(" ibd_lo_fa=%d;'Sd, *SA/*SB ^'\n", ib_diff_lo_fa());
-  Serial.printf(" ibd_hi_fa=%d;'Sd, *SA/*SB ^'\n", ib_diff_hi_fa());
-  Serial.printf(" wv_fa=%d;    'Sd, Sa/Sb ^'\n", wrap_vb_fa());
-  Serial.printf(" wl_fa=%d;    'Sb ^'\n", wrap_lo_fa());
-  Serial.printf(" wh_fa=%d;    'Sa ^'\n", wrap_hi_fa());
-  Serial.printf(" cc_dif_fa=%d;'Sf ^'\n", cc_diff_fa());
+  Serial.printf(" ib_dsc_fa=%d;'Fq v'\n", ib_dscn_fa());
+  Serial.printf(" ibd_lo_fa=%d;'Fd, *SA/*SB ^'\n", ib_diff_lo_fa());
+  Serial.printf(" ibd_hi_fa=%d;'Fd, *SA/*SB ^'\n", ib_diff_hi_fa());
+  Serial.printf(" wv_fa=%d;    'Fd, Fa/Fb ^'\n", wrap_vb_fa());
+  Serial.printf(" wl_fa=%d;    'Fb ^'\n", wrap_lo_fa());
+  Serial.printf(" wh_fa=%d;    'Fa ^'\n", wrap_hi_fa());
+  Serial.printf(" cc_dif_fa=%d;'Ff ^'\n", cc_diff_fa());
   Serial.printf(" ibn_fa=%d;   'Fi 1'\n", ib_noa_fa());
   Serial.printf(" ibm_fa=%d;   'Fi 1'\n", ib_amp_fa());
   Serial.printf(" vb_fa=%d;    'Fv 1'\n", vb_fa());
@@ -319,13 +319,13 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf(" mbar=%d;\n", Sen->ShuntAmp->bare());
   Serial1.printf(" fltw=%d;  ", fltw_);
   Serial1.printf(";\n");
-  Serial1.printf(" ib_dsc_fa=%d;'Sq v'\n", ib_dscn_fa());
-  Serial1.printf(" ibd_lo_fa=%d;'Sd, *SA/*SB ^'\n", ib_diff_lo_fa());
-  Serial1.printf(" ibd_hi_fa=%d;'Sd, *SA/*SB ^'\n", ib_diff_hi_fa());
-  Serial1.printf(" wv_fa=%d;    'Sd', Sa/Sb ^'\\n", wrap_vb_fa());
-  Serial1.printf(" wl_fa=%d;    'Sb ^'\n", wrap_lo_fa());
-  Serial1.printf(" wh_fa=%d;    'Sa ^'\n", wrap_hi_fa());
-  Serial1.printf(" cc_dif_fa=%d;'Sf ^'\n", cc_diff_fa());
+  Serial1.printf(" ib_dsc_fa=%d;'Fq v'\n", ib_dscn_fa());
+  Serial1.printf(" ibd_lo_fa=%d;'Fd, *SA/*SB ^'\n", ib_diff_lo_fa());
+  Serial1.printf(" ibd_hi_fa=%d;'Fd, *SA/*SB ^'\n", ib_diff_hi_fa());
+  Serial1.printf(" wv_fa=%d;    'Fd', Fa/Fb ^'\\n", wrap_vb_fa());
+  Serial1.printf(" wl_fa=%d;    'Fb ^'\n", wrap_lo_fa());
+  Serial1.printf(" wh_fa=%d;    'Fa ^'\n", wrap_hi_fa());
+  Serial1.printf(" cc_dif_fa=%d;'Ff ^'\n", cc_diff_fa());
   Serial1.printf(" ibn_fa=%d;   'Fi 1'\n", ib_noa_fa());    // TODO: add __
   Serial1.printf(" ibm_fa=%d;   'Fi 1'\n", ib_amp_fa());    // TODO: add __
   Serial1.printf(" vb_fa=%d;    'Fv 1'\n", vb_fa());    // TODO: add __

@@ -204,12 +204,27 @@ void setup()
   if ( ASK_DURING_BOOT )
   {
     rp.print_versus_local_config();
-    Serial.printf("Do you wish to reset to local? [Y/n]:  ");
+    display->clearDisplay();
+    display->setTextSize(1);              // Normal 1:1 pixel scale
+    display->setTextColor(SSD1306_WHITE); // Draw white text
+    display->setCursor(0,0);              // Start at top-left corner    rp.print_versus_local_config();
+    display->println("Waiting for user talk");
+    display->display();
+    Serial.printf("Do you wish to reset to local? [Y/n]:  "); Serial1.printf("Do you wish to reset to local? [Y/n]:  ");
     uint8_t count = 0;
-    while ( !Serial.available() && ++count<60 ) delay(1000);
-    byte answer=Serial.read();
-    if ( answer=='Y' ) rp.renominalize_to_local_config();
-    else Serial.printf("moving on....\n");
+    while ( !Serial.available() && !Serial1.available() && ++count<60 ) delay(1000);
+    byte answer = 'n';
+    if ( Serial.available() ) answer=Serial.read();
+    else if ( Serial1.available() ) answer=Serial1.read();
+    if ( answer=='Y' )
+    {
+      rp.renominalize_to_local_config();
+      rp.print_versus_local_config();
+    }
+    else
+    {
+      Serial.printf("moving on....\n"); Serial1.printf("moving on....\n");
+    }
   }
 
   Serial.printf("End setup()\n");

@@ -177,7 +177,7 @@ struct RetainedPars
     Serial.printf("bias amp %7.3f   %7.3f\n", CURR_BIAS_AMP, ib_bias_amp);
     Serial.printf("bias noa %7.3f   %7.3f\n", CURR_BIAS_NOA, ib_bias_noa);
     Serial.printf("sclr amp %7.3f   %7.3f\n", CURR_SCALE_AMP, ib_scale_amp);
-    Serial.printf("sclr noa %7.3f   %7.3f\n", CURR_BIAS_NOA, ib_scale_noa);
+    Serial.printf("sclr noa %7.3f   %7.3f\n", CURR_SCALE_NOA, ib_scale_noa);
   }
 
   // Renominalize as requested in setup()
@@ -186,7 +186,7 @@ struct RetainedPars
     ib_bias_amp = CURR_BIAS_AMP;
     ib_bias_noa = CURR_BIAS_NOA;
     ib_scale_amp = CURR_SCALE_AMP;
-    ib_scale_noa = CURR_BIAS_NOA;
+    ib_scale_noa = CURR_SCALE_NOA;
   }
 };            
 
