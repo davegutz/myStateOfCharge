@@ -200,6 +200,18 @@ void setup()
   if ( rp.debug==4 || rp.debug==26 )
     print_all_summary(mySum, rp.isum, NSUM);
 
+  // Ask to renominalize
+  if ( ASK_DURING_BOOT )
+  {
+    rp.print_versus_local_config();
+    Serial.printf("Do you wish to reset to local? [Y/n]:  ");
+    uint8_t count = 0;
+    while ( !Serial.available() && ++count<60 ) delay(1000);
+    byte answer=Serial.read();
+    if ( answer=='Y' ) rp.renominalize_to_local_config();
+    else Serial.printf("moving on....\n");
+  }
+
   Serial.printf("End setup()\n");
 } // setup
 

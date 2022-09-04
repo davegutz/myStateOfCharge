@@ -170,6 +170,24 @@ struct RetainedPars
     Serial.printf("  sim_mod=%d; 0=Battleborn, 1=LION\n", this->sim_mod);
   }
 
+  // Compare memory to local_config.h
+  void print_versus_local_config()
+  {
+    Serial.printf("          local    memory\n");
+    Serial.printf("bias amp %7.3f   %7.3f\n", CURR_BIAS_AMP, ib_bias_amp);
+    Serial.printf("bias noa %7.3f   %7.3f\n", CURR_BIAS_NOA, ib_bias_noa);
+    Serial.printf("sclr amp %7.3f   %7.3f\n", CURR_SCALE_AMP, ib_scale_amp);
+    Serial.printf("sclr noa %7.3f   %7.3f\n", CURR_BIAS_NOA, ib_scale_noa);
+  }
+
+  // Renominalize as requested in setup()
+  void renominalize_to_local_config()
+  {
+    ib_bias_amp = CURR_BIAS_AMP;
+    ib_bias_noa = CURR_BIAS_NOA;
+    ib_scale_amp = CURR_SCALE_AMP;
+    ib_scale_noa = CURR_BIAS_NOA;
+  }
 };            
 
 #endif

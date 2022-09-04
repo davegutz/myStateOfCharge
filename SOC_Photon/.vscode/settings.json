@@ -33,7 +33,8 @@
         "memory": "cpp",
         "xiosbase": "cpp",
         "xlocale": "cpp",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "xhash": "cpp"
     },
     "particle.firmwareVersion": "3.1.0",
     "particle.targetPlatform": "photon",
