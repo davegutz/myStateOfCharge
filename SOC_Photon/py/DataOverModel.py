@@ -51,17 +51,23 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.legend(loc=1)
     plt.subplot(222)
     plt.title(plot_title)
-    plt.plot(old_s.time, old_s.ib_dif, color='black', linestyle='-.', label='ib_diff')
-    plt.plot(old_s.time, old_s.ib_dif_f, color='magenta', linestyle=':', label='ib_diff_f')
+    plt.plot(old_s.time, old_s.ib_diff, color='black', linestyle='-', label='ib_diff')
+    plt.plot(old_s.time, old_s.ib_diff_f, color='magenta', linestyle='--', label='ib_diff_f')
+    plt.plot(old_s.time, old_s.ibd_thr, color='red', linestyle='-.', label='ib_diff_thr')
+    plt.plot(old_s.time, -old_s.ibd_thr, color='red', linestyle='-.')
     plt.legend(loc=1)
     plt.subplot(223)
     plt.plot(old_s.time, old_s.ib_quiet, color='green', linestyle='-', label='ib_quiet')
-    plt.plot(old_s.time, old_s.dscn_fa-.02, color='red', linestyle='-', label='dscn_fa-0.02')
+    plt.plot(old_s.time, old_s.ibq_thr, color='red', linestyle='--', label='ib_quiet_thr')
+    plt.plot(old_s.time, -old_s.ibq_thr, color='red', linestyle='--')
+    plt.plot(old_s.time, old_s.dscn_fa-.02, color='magenta', linestyle='-.', label='dscn_fa-0.02')
     plt.ylim(-.1, .1)
     plt.legend(loc=1)
     plt.subplot(224)
-    plt.plot(old_s.time, old_s.ib_rate, color='orange', linestyle='--', label='ib_rate')
-    plt.plot(old_s.time, old_s.ib_quiet, color='green', linestyle='-', label='ib_quiet')
+    plt.plot(old_s.time, old_s.ib_rate, color='orange', linestyle='-', label='ib_rate')
+    plt.plot(old_s.time, old_s.ib_quiet, color='green', linestyle='--', label='ib_quiet')
+    plt.plot(old_s.time, old_s.ibq_thr, color='red', linestyle='-.', label='ib_quiet_thr')
+    plt.plot(old_s.time, -old_s.ibq_thr, color='red', linestyle='-.')
     plt.ylim(-6, 6)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -74,8 +80,10 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.title(plot_title)
     plt.plot(old_s.time, old_s.Ib, color='green', linestyle='-', label='Ib')
     plt.plot(new_s.time, new_s.Ib, color='orange', linestyle='--', label='Ib_new')
-    plt.plot(old_s.time, old_s.ib_dif, color='black', linestyle='-.', label='ib_diff')
-    plt.plot(old_s.time, old_s.ib_dif_f, color='magenta', linestyle=':', label='ib_diff_f')
+    plt.plot(old_s.time, old_s.ib_diff, color='black', linestyle='-.', label='ib_diff')
+    plt.plot(old_s.time, old_s.ib_diff_f, color='magenta', linestyle=':', label='ib_diff_f')
+    plt.plot(old_s.time, old_s.ibd_thr, color='red', linestyle='-.', label='ib_diff_thr')
+    plt.plot(old_s.time, -old_s.ibd_thr, color='red', linestyle='-.')
     plt.legend(loc=1)
     plt.subplot(332)
     plt.plot(old_s.time, old_s.mod_data, color='blue', linestyle='-', label='mod')
@@ -103,6 +111,8 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.subplot(335)
     plt.plot(old_s.time, old_s.e_w, color='magenta', linestyle='-', label='e_wrap')
     plt.plot(old_s.time, old_s.e_w_f, color='black', linestyle='--', label='e_wrap_filt')
+    plt.plot(old_s.time, old_s.ewh_thr, color='red', linestyle='-.', label='ewh_thr')
+    plt.plot(old_s.time, old_s.ewl_thr, color='red', linestyle='-.', label='ewl_thr')
     plt.legend(loc=1)
     plt.subplot(336)
     plt.plot(old_s.time, old_s.wh_flt+4, color='black', linestyle='-', label='wrap_hi_flt+4')
@@ -113,17 +123,21 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.plot(old_s.time, old_s.ccd_fa, color='green', linestyle='-', label='cc_diff_fa')
     plt.legend(loc=1)
     plt.subplot(337)
-    plt.plot(old_s.time, old_s.cc_dif, color='black', linestyle='-', label='cc_dif')
+    plt.plot(old_s.time, old_s.cc_dif, color='black', linestyle='-', label='cc_diff')
+    plt.plot(old_s.time, old_s.ccd_thr, color='red', linestyle='--', label='cc_diff_thr')
+    plt.plot(old_s.time, -old_s.ccd_thr, color='red', linestyle='--')
     plt.legend(loc=1)
     plt.subplot(338)
     # plt.plot(old_s.time, old_s.ib_rate, color='orange', linestyle='--', label='ib_rate')
     plt.plot(old_s.time, old_s.ib_quiet, color='black', linestyle='-', label='ib_quiet')
+    plt.plot(old_s.time, old_s.ibq_thr, color='red', linestyle='--', label='ib_quiet_thr')
+    plt.plot(old_s.time, -old_s.ibq_thr, color='red', linestyle='--')
     plt.plot(old_s.time, old_s.dscn_flt-4, color='blue', linestyle='-.', label='dscn_flt-4')
     plt.plot(old_s.time, old_s.dscn_fa+4, color='red', linestyle='-', label='dscn_fa+4')
     plt.legend(loc=1)
     plt.subplot(339)
-    plt.plot(old_s.time, old_s.ib_dif_flt, color='cyan', linestyle='-', label='ib_dif_flt')
-    plt.plot(old_s.time, old_s.ib_dif_fa, color='magenta', linestyle='--', label='ib_dif_fa')
+    plt.plot(old_s.time, old_s.ib_diff_flt, color='cyan', linestyle='-', label='ib_diff_flt')
+    plt.plot(old_s.time, old_s.ib_diff_fa, color='magenta', linestyle='--', label='ib_diff_fa')
     plt.plot(old_s.time, old_s.vb_flt, color='blue', linestyle='-.', label='vb_flt')
     plt.plot(old_s.time, old_s.vb_fa, color='black', linestyle=':', label='vb_fa')
     plt.plot(old_s.time, old_s.tb_flt, color='red', linestyle='-', label='tb_flt')
@@ -504,10 +518,10 @@ class SavedData:
             self.ibmm = []
             self.ibnm = []
             self.ibm = []
-            self.ib_dif = []
-            self.ib_dif_f = []
-            self.ib_dif_flt = []
-            self.ib_dif_fa = []
+            self.ib_diff = []
+            self.ib_diff_f = []
+            self.ib_diff_flt = []
+            self.ib_diff_fa = []
             self.voc_soc = None
             self.e_w = None
             self.e_w_f = None
@@ -542,6 +556,11 @@ class SavedData:
             self.tb_sel = []
             self.tb_flt = None
             self.tb_fa = None
+            self.ccd_thr = None
+            self.ewh_thr = None
+            self.ewl_thr = None
+            self.ibd_thr = None
+            self.ibq_thr = None
         else:
             falw = np.array(sel.falw[:i_end], dtype=np.uint16)
             fltw = np.array(sel.fltw[:i_end], dtype=np.uint16)
@@ -555,10 +574,10 @@ class SavedData:
             self.ibmm = np.array(sel.ibmm[:i_end])
             self.ibnm = np.array(sel.ibnm[:i_end])
             self.ibm = np.array(sel.ibm[:i_end])
-            self.ib_dif = np.array(sel.ib_dif[:i_end])
-            self.ib_dif_f = np.array(sel.ib_dif_f[:i_end])
-            self.ib_dif_flt = np.bool8((np.array(fltw) & 2**8) | (np.array(fltw) & 2**9))
-            self.ib_dif_fa = np.bool8((np.array(falw) & 2**8) | (np.array(falw) & 2**9))
+            self.ib_diff = np.array(sel.ib_diff[:i_end])
+            self.ib_diff_f = np.array(sel.ib_diff_f[:i_end])
+            self.ib_diff_flt = np.bool8((np.array(fltw) & 2**8) | (np.array(fltw) & 2**9))
+            self.ib_diff_fa = np.bool8((np.array(falw) & 2**8) | (np.array(falw) & 2**9))
             self.voc_soc = np.array(sel.voc_soc[:i_end])
             self.e_w = np.array(sel.e_w[:i_end])
             self.voc = self.voc_soc - self.e_w
@@ -591,6 +610,11 @@ class SavedData:
             self.tb_sel = np.array(sel.tb_sel[:i_end])
             self.tb_flt = np.bool8(np.array(fltw) & 2**0)
             self.tb_fa = np.bool8(np.array(falw) & 2**0)
+            self.ccd_thr = np.array(sel.ccd_thr[:i_end])
+            self.ewh_thr = np.array(sel.ewh_thr[:i_end])
+            self.ewl_thr = np.array(sel.ewl_thr[:i_end])
+            self.ibd_thr = np.array(sel.ibd_thr[:i_end])
+            self.ibq_thr = np.array(sel.ibq_thr[:i_end])
 
     def __str__(self):
         s = "{},".format(self.unit[self.i])

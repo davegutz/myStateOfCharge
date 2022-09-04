@@ -235,7 +235,6 @@ if __name__ == '__main__':
         init_time_in = None
         use_ib_mon_in = False
         scale_in = None
-        # data_file_old_txt = '../dataReduction/ampHiFailNoise20220829.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/ampLoFailNoise20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFailSlow20220829.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/vHiFail20220829.txt'; unit_key = 'pro_2022'
@@ -252,6 +251,7 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/ampHiFail20220903.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampLoFail20220903.txt'; unit_key = 'pro_2022'
         data_file_old_txt = '../dataReduction/triTweakDisch20220903.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampHiFailNoise20220903.txt'; unit_key = 'pro_2022';
 
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
@@ -270,11 +270,12 @@ if __name__ == '__main__':
         sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
                                           unit_key=unit_key_sel)
         cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
-                    'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_dif', 'ib_dif_f',
+                    'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_diff', 'ib_diff_f',
                     'voc_soc', 'e_w', 'e_w_f',
                     'ib_sel', 'Ib_h', 'Ib_m',
                     'mib', 'Ib_s', 'Vb_h', 'Vb_m', 'mvb', 'Vb_s', 'Tb_h', 'Tb_s', 'mtb', 'Tb_f',
-                    'vb_sel', 'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel')
+                    'vb_sel', 'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel',
+                    'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr')
         sel_old = None
         if sel_file_clean:
             sel_old = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,

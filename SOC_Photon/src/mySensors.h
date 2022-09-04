@@ -118,9 +118,9 @@ protected:
 //                    4
 #define WRAP_HI_FLT   5   // Wrap isolates to Ib high fault
 #define WRAP_LO_FLT   6   // Wrap isolates to Ib low fault
-#define IB_RED_LOSS      7   // Loss of current sensor redundancy, T = fault
-#define IB_DIF_HI_FLT 8   // Faulted sensor difference error, T = fault
-#define IB_DIF_LO_FLT 9   // Faulted sensor difference error, T = fault
+#define IB_RED_LOSS   7   // Loss of current sensor redundancy, T = fault
+#define IB_DIFF_HI_FLT 8   // Faulted sensor difference error, T = fault
+#define IB_DIFF_LO_FLT 9   // Faulted sensor difference error, T = fault
 #define IB_DSCN_FLT   10  // Dual faulted quiet error, T = disconnected shunt
 #define IB_AMP_BARE   11  // Unconnected ib bus, T = bare bus
 #define IB_NOA_BARE   12  // Unconnected ib bus, T = bare bus
@@ -135,8 +135,8 @@ protected:
 #define WRAP_HI_FA    5   // Wrap isolates to Ib high fail
 #define WRAP_LO_FA    6   // Wrap isolates to Ib low fail
 #define WRAP_VB_FA    7   // Wrap isolates to Vb fail
-#define IB_DIF_HI_FA  8   // Persisted sensor difference error, T = fail
-#define IB_DIF_LO_FA  9   // Persisted sensor difference error, T = fail
+#define IB_DIFF_HI_FA 8   // Persisted sensor difference error, T = fail
+#define IB_DIFF_LO_FA 9   // Persisted sensor difference error, T = fail
 #define IB_DSCN_FA    10  // Dual persisted quiet error, T = disconnected shunt
 #define NUM_FA        11
 
@@ -156,9 +156,12 @@ public:
   ~Fault();
   void bitMapPrint(char *buf, const int16_t fw, const uint8_t num);
   float cc_diff() { return cc_diff_; };
+  void cc_diff(Sensors *Sen, BatteryMonitor *Mon);
   void cc_diff_sclr(const float sclr) { cc_diff_sclr_ = sclr; };
   float cc_diff_sclr() { return cc_diff_sclr_; };
   boolean cc_diff_fa() { return failRead(CC_DIFF_FA); };
+  float cc_diff_thr_;     // Threshold Coulomb Counters difference faults, soc fraction
+  float cc_diff_thr() { return cc_diff_thr_; };
   void disab_ib_fa(const boolean dis) { disab_ib_fa_ = dis; };
   boolean disab_ib_fa() { return disab_ib_fa_; };
   void disab_tb_fa(const boolean dis) { disab_tb_fa_ = dis; };
@@ -171,33 +174,42 @@ public:
   float ewhi_sclr() { return ewhi_sclr_; };
   void ewlo_sclr(const float sclr) { ewlo_sclr_ = sclr; };
   float ewlo_sclr() { return ewlo_sclr_; };
+  float ewhi_thr_;      // Threshold e_wrap failed high, V
+  float ewhi_thr() { return ewhi_thr_; };
+  float ewlo_thr_;      // Threshold e_wrap failed low, V
+  float ewlo_thr() { return ewlo_thr_; };
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
   void fail_tb(const boolean fail) { fail_tb_ = fail; };
   boolean fail_tb() { return fail_tb_; };
   uint16_t fltw() { return fltw_; };
   uint16_t falw() { return falw_; };
-  void ib_diff_sclr(const float sclr) { ib_diff_sclr_ = sclr; };
-  float ib_diff_sclr() { return ib_diff_sclr_; };
-  void ib_quiet_sclr(const float sclr) { ib_quiet_sclr_ = sclr; };
-  float ib_quiet_sclr() { return ib_quiet_sclr_; };
   boolean ib_amp_fa() { return failRead(IB_AMP_FA); };
   boolean ib_amp_flt() { return faultRead(IB_AMP_FLT);  };
+  void ib_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
+  void ib_diff_sclr(const float sclr) { ib_diff_sclr_ = sclr; };
+  float ib_diff_sclr() { return ib_diff_sclr_; };
+  float ib_diff_thr_;     // Threshold current difference faults, A
+  float ib_diff_thr() { return ib_diff_thr_; };
+  boolean ib_dscn_fa() { return failRead(IB_DSCN_FA); };
+  boolean ib_dscn_flt() { return faultRead(IB_DSCN_FLT); };
   boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
   boolean ib_noa_flt() { return faultRead(IB_NOA_FLT); };
+  void ib_quiet_sclr(const float sclr) { ib_quiet_sclr_ = sclr; };
+  float ib_quiet_sclr() { return ib_quiet_sclr_; };
+  float ib_quiet_thr_;     // Threshold below which ib is quiet, A pk
+  float ib_quiet_thr() { return ib_quiet_thr_; };
   boolean ib_red_loss() { return faultRead(IB_RED_LOSS); };
-  boolean ib_red_loss_calc() { return (ib_sel_stat_!=1 || rp.ib_select!=0 || ib_dif_fa() || vb_fail()); };
+  boolean ib_red_loss_calc() { return (ib_sel_stat_!=1 || rp.ib_select!=0 || ib_diff_fa() || vb_fail()); };
   boolean vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   float ib_diff() { return ( ib_diff_ ); };
   float ib_diff_f() { return ( ib_diff_f_ ); };
-  boolean ib_dif_fa() { return ( failRead(IB_DIF_HI_FA) || failRead(IB_DIF_LO_FA) ); };
-  boolean ib_dif_hi_fa() { return failRead(IB_DIF_HI_FA); };
-  boolean ib_dif_hi_flt() { return faultRead(IB_DIF_HI_FLT); };
-  boolean ib_dif_lo_fa() { return failRead(IB_DIF_LO_FA); };
-  boolean ib_dif_lo_flt() { return faultRead(IB_DIF_LO_FLT); };
-  boolean ib_dscn_fa() { return failRead(IB_DSCN_FA); };
-  boolean ib_dscn_flt() { return faultRead(IB_DSCN_FLT); };
+  boolean ib_diff_fa() { return ( failRead(IB_DIFF_HI_FA) || failRead(IB_DIFF_LO_FA) ); };
+  boolean ib_diff_hi_fa() { return failRead(IB_DIFF_HI_FA); };
+  boolean ib_diff_hi_flt() { return faultRead(IB_DIFF_HI_FLT); };
+  boolean ib_diff_lo_fa() { return failRead(IB_DIFF_LO_FA); };
+  boolean ib_diff_lo_flt() { return faultRead(IB_DIFF_LO_FLT); };
   void ib_quiet(const boolean reset, Sensors *Sen);
   float ib_quiet() { return ib_quiet_; };
   float ib_rate() { return ib_rate_; };
@@ -211,6 +223,7 @@ public:
   boolean tb_fa() { return failRead(TB_FA); };
   boolean tb_flt() { return faultRead(TB_FLT); };
   int8_t tb_sel_status() { return tb_sel_stat_; };
+  void tb_stale(const boolean reset, Sensors *Sen);
   void tb_stale_time_sclr(const float sclr) { tb_stale_time_sclr_ = sclr; };
   float tb_stale_time_sclr() { return tb_stale_time_sclr_; };
   void vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vb_min, const float _Vb_max, const boolean reset);  // Range check Vb

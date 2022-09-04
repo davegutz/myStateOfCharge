@@ -393,86 +393,26 @@ Throughput test
 45. Tweak shall be disabled for small <10% charge swings <TODO:  
 45. Fault injection testing
 
-test talk:   (-=ASAP, '',*=SOON , +=QUEUE)
-      v4;
-      -Dp1000;-Dr1000;W3;-Dm0;*Dm3;+Dm2;Dm1;-Dn0;+Dm0;+Dn0;+Dr100;+Dp400;
-      expected result:
-pro_20220806, 2022-08-06T08:57:50,  53146677.097, 0.100,   1,  0,  7,  25.00,-45.54717,0.00000,    13.80000,0.00000,-45.54717,4.03000,  -49.577168, 0.99960,0.00000,1.00000,
-echo:  -Dp1000, 1
-echo:  -Dr1000, 1
-echo:  W3, 4
-echo:  -Dm0, 1
-echo:  *Dm3, 2
-echo:  +Dm2, 3
-echo:  Dm1, 4
-echo:  -Dn0, 1
-echo:  +Dm0, 3
-echo:  +Dn0, 3
-echo:  +Dr100, 3
-echo:  +Dp400, 3
-echo:  Dp1000, 0
-PublishSerial from 400 to 1000
-echo:  Dr1000, 0
-ReadSensors from 100 to 1000
-echo:  Dm0, 0
-ShuntAmp.add from   0.000 to   0.000
-echo:  Dn0, 0
-ShuntNoAmp.add from   0.000 to   0.000
-pro_20220806, 2022-08-06T08:57:51,  53146678.097, 0.100,   1,  0,  7,  25.00,-45.40263,0.00000,    13.80000,0.00000,-45.40263,4.03000,  -49.432625, 0.99960,0.00000,1.00000,
-echo:  Dm3, 0
-ShuntAmp.add from   0.000 to   3.000
-pro_20220806, 2022-08-06T08:57:52,  53146679.098, 1.000,   1,  0,  7,  25.00,14.47433,0.00000,    13.80000,0.00000,14.47433,4.03000,  10.444333, 0.99960,0.00065,1.00000,
-echo:  W3, 0
-pro_20220806, 2022-08-06T08:57:53,  53146680.097, 1.000,   1,  0,  7,  25.00,14.47433,3.00000,    13.80000,0.03690,14.43743,4.08244,  10.354994, 0.99960,0.00131,1.00000,
-echo:  W, 0
-.....Wait...
-pro_20220806, 2022-08-06T08:57:54,  53146681.097, 1.000,   1,  0,  7,  25.00,14.47433,3.00000,    13.80000,0.03690,14.43743,4.13483,  10.302603, 0.99960,0.00196,1.00000,
-echo:  W, 0
-.....Wait...
-pro_20220806, 2022-08-06T08:57:55,  53146682.098, 1.000,   1,  0,  7,  25.00,14.47433,3.00000,    13.80000,0.03690,14.43743,4.18734,  10.250083, 0.99960,0.00262,1.00000,
-echo:  W, 0
-.....Wait...
-pro_20220806, 2022-08-06T08:57:56,  53146683.097, 1.000,   1,  0,  7,  25.00,14.47433,3.00000,    13.80000,0.03690,14.43742,4.23998,  10.197444, 0.99960,0.00328,1.00000,
-echo:  Dm2, 0
-ShuntAmp.add from   3.000 to   2.000
-pro_20220806, 2022-08-06T08:57:57,  53146684.098, 1.000,   1,  0,  7,  25.00,14.47433,3.00000,    13.80000,0.03690,14.43742,4.29273,  10.144693, 0.99960,0.00394,1.00000,
-echo:  Dm1, 0
-ShuntAmp.add from   2.000 to   1.000
-pro_20220806, 2022-08-06T08:57:58,  53146685.097, 1.000,   1,  0,  7,  25.00,14.47433,2.00000,    13.80000,0.02460,14.44972,4.34551,  10.104208, 0.99960,0.00460,1.00000,
-echo:  Dm0, 0
-ShuntAmp.add from   1.000 to   0.000
-pro_20220806, 2022-08-06T08:57:59,  53146686.098, 1.000,   1,  0,  7,  25.00,14.47433,1.00000,    13.80000,0.01230,14.46202,4.39838,  10.063634, 0.99960,0.00527,1.00000,
-echo:  Dn0, 0
-ShuntNoAmp.add from   0.000 to   0.000
-pro_20220806, 2022-08-06T08:58:00,  53146687.097, 1.000,   1,  0,  7,  25.00,14.47433,0.00000,    13.80000,0.00000,14.47432,4.45134,  10.022975, 0.99960,0.00593,1.00000,
-echo:  Dr100, 0
-ReadSensors from 1000 to 100
-echo:  Dp400, 0
-PublishSerial from 1000 to 400
-pro_20220806, 2022-08-06T08:58:01,  53146687.497, 0.100,   1,  0,  7,  25.00,-45.25843,0.00000,    13.80000,0.00000,-45.25845,4.28979,  -49.548237, 0.99960,0.00000,1.00000,
-pro_20220806, 2022-08-06T08:58:01,  53146687.898, 0.100,   1,  0,  7,  25.00,-44.97108,0.00000,    13.80000,0.00000,-44.97110,4.03000,  -49.001095, 0.99960,0.00000,1.00000,
-
-
 Full regression suite:
-  ampHiFail:      Xm7;Ca0.5;Dr100;Dp100;DP1;v26;W50;Dm50;Dn0.0001;
-                  Xp0;Pf;Rf;W100;+v0;Dr100;Rf;Pf;
-  ampLoFail:      Xm7;Ca0.95;Dr100;Dp100;DP1;v26;W50;Dm-50;Dn0.0001;W50;Pe;
-                  Xp0;Pf;Rf;W100;+v0;Dr100;Rf;Pf;
-  triTweakDisch: Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-29500;XW5;XT5;XC3;W2;v26;W2;Fa1000;Fb1000;Ff1000;Fd1000;Fv;Fi;Ft;XR;
-                v0;XS;Dm0;Dn0;Xp0;Ca1.;Pf;
-  ampHiFailNoise: Xm7;Ca0.5;Dr100;Dp100;DP1;v26;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;
-                  DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Dr100;Rf;Pf;
-  ampLoFailNoise: Xm7;Ca0.95;Dr100;Dp100;DP1;v26;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm-50;Dn0.0001;
-                  DT0;DV0;DM0;DN0;Xp0;Pf;Rf;W100;+v0;Dr100;Rf;Pf;
+  ampHiFail:      Xm7;Ca0.5;Dr100;DP1;v26;W50;Dm50;Dn0.0001;
+                  Xp0;Pf;Rf;W10;+v0;Dr100;Rf;Pf;
+  ampLoFail:      Xm7;Ca0.95;Dr100;DP1;v26;W50;Dm-50;Dn0.0001;W50;Pe;
+                  Xp0;Pf;Rf;W10;+v0;Dr100;Rf;Pf;
+  triTweakDisch:  Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-29500;XW5;XT5;XC3;W2;v26;W2;Fa1000;Fb1000;Ff1000;Fd1000;Fv;Fi;Ft;XR;
+                  v0;XS;Dm0;Dn0;Xp0;Ca1.;Pf;
+  ampHiFailNoise: Xm7;Ca0.5;Dr100;DP1;v26;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;
+                  DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
+  ampLoFailNoise: Xm7;Ca0.95;Dr100;DP1;v26;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm-50;Dn0.0001;
+                  DT0;DV0;DM0;DN0;Xp0;Pf;Rf;W10;+v0;Dr100;Rf;Pf;
   ampHiFailSlow:  Xm7;Ca0.5;v26;W2;Dr10000;DP1;Dm6;Dn0.0001;Sf.05;
                   Xp0;Pf;Rf;W2;+v0;Dr100;Sf1;Rf;Pf;
   rapidTweakRegression:  Xp10
   slowTweakRegression:  Xp11
   vHiFail:        Xm7;Ca0.5;Dr100;DP1;v26;W50;Dv0.25;
-                  Xp0;Rf;W100;+v0;Dr100;Rf;Pf;
+                  Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
   slowHalfTweakRegression:  Xp12
   pulse:  Xp6
-  satSit: Xp0;Xm15;Ca0.9951;Rb;Rf;Dr100;Dp100;DP1;Xts;Xa-10;Xf0.002;XW10;XT10;XC1;W2;v26;W5;XR;
+  satSit: Xp0;Xm15;Ca0.9951;Rb;Rf;Dr100;DP1;Xts;Xa-10;Xf0.002;XW10;XT10;XC1;W2;v26;W5;XR;
           XS;v0;Xp0;Ca.9951;W5;Rf;Pf;v0;
   tbFailMod:    Ca.5;Xp0;W4;Xm7;DP1;Dr100;W2;v26;W200;Xu1;Xv.005;W400;Xu0;Xv1;W100;v0;Pf;
                 Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;
@@ -483,7 +423,6 @@ Full regression suite:
   pulse30:      Xm7;Ca1;DP1;v26;W50;Di-30;
                 Di30
                 Di0;Dp400;DP4;
-  Find bad segments in txt files:  ÿ
 
 ## Accuracy
 

@@ -84,9 +84,9 @@ void print_serial_sim_header(void)
 void print_signal_sel_header(void)
 {
   if ( rp.debug==26 ) // print_signal_sel_header
-    Serial.printf("unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_dif,ib_dif_f,");
+    Serial.printf("unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,");
     Serial.printf("    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_m,mib,Ib_s, vb_sel,Vb_h,Vb_m,mvb,Vb_s,  Tb_h,Tb_s,mtb,Tb_f, ");
-    Serial.printf("  fltw, falw, ib_rate, ib_quiet, tb_sel,\n");
+    Serial.printf("  fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,\n");
           // -----, cTime, reset, rp.ib_select,
           //                                     cc_diff_,
           //                                              Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model, Ib_model,
@@ -94,7 +94,7 @@ void print_signal_sel_header(void)
           //         voc_soc, e_wrap_, e_wrap_filt_, ib_sel_stat_, Ib_hdwe, Ib_hdwe_model, mod_ib(), Ib,
           //                                                          vb_sel_stat, Vb_hdwe, Vb_model,mod_vb(), Vb,
           //                                                                                    Tb_hdwe, Tb, mod_tb(), Tb_filt,
-          //         fltw_, falw_, ib_rate_, ib_quiet_, tb_sel_stat
+          //         fltw_, falw_, ib_rate_, ib_quiet_, tb_sel_stat_, cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_,
 }
 
 // Print strings
@@ -330,9 +330,9 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   display->display();
   pass = !pass;
 
-  // Text basic Bluetooth (uses serial bluetooth app)
+  // Text basic Bluetooth (use serial bluetooth app)
   if ( rp.debug!=4 && rp.debug!=-2 && !cp.blynking )
-    Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\n\nv-2;Pf; for fails.  prints=%ld\n",
+    Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nv-2;Pf; for fails.  prints=%ld\n\n",
       dispTop.c_str(), dispBot.c_str(), cp.num_v_print);
 
   if ( rp.debug==5 ) debug_5();
@@ -359,6 +359,9 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   load_ib_vb(reset, now, Sen, myPins, Mon);
   Sen->Flt->ib_wrap(reset, Sen, Mon);
   Sen->Flt->ib_quiet(reset, Sen);
+  Sen->Flt->cc_diff(Sen, Mon);
+  Sen->Flt->ib_diff(reset, Sen, Mon);
+   
 
   // Sim initialize as needed from memory
   Sen->Sim->apply_delta_q_t(reset);
