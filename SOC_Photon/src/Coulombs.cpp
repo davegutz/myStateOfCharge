@@ -120,16 +120,62 @@ void Chemistry::assign_mod(const String mod_str)
     for (i=0; i<n_h; i++) x_dv[i] = X_DV_LI[i];
     for (i=0; i<m_h; i++) y_soc[i] = Y_SOC_LI[i];
     for (i=0; i<m_h*n_h; i++) t_r[i] = T_R_LI[i];
-    v_sat       = 12.85;  // Saturation threshold at temperature, deg C
-    dvoc_dt     = 0.008;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
+    v_sat       = 13.85;  // Saturation threshold at temperature, deg C
+    dvoc_dt     = 0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
     dv          = 0.01;   // Adjustment for calibration error, V
-    r_0         = 0.006;  // Randles R0, ohms   
-    r_ct        = 0.0032; // Randles charge transfer resistance, ohms
-    r_diff      = 0.0144; // Randles diffusion resistance, ohms
-    tau_ct      = 0.4;    // Randles charge transfer time constant, s (=1/Rct/Cct)
-    tau_diff    = 166.;   // Randles diffusion time constant, s (=1/Rdif/Cdif)
-    tau_sd      = 3.6e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
-    r_sd        = 140;    // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
+    r_0         = 0.003;  // Randles R0, ohms   
+    r_ct        = 0.0016; // Randles charge transfer resistance, ohms
+    r_diff      = 0.0077; // Randles diffusion resistance, ohms
+    tau_ct      = 0.2;    // Randles charge transfer time constant, s (=1/Rct/Cct)
+    tau_diff    = 83.;    // Randles diffusion time constant, s (=1/Rdif/Cdif)
+    tau_sd      = 2.5e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
+    r_sd        = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
+  }
+  else if ( mod==2 )  // "LION" EKF placeholder.  Data fabricated
+  {
+    *rp_mod_code = mod;
+    dqdt    = 0.02;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
+    low_voc = 9.;       // Voltage threshold for BMS to turn off battery;
+    low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
+    if ( n_s )  delete x_soc;
+    if ( m_t )  delete y_t;
+    if ( m_t && n_s )  delete t_voc;
+    n_s     = N_S_LIE;   //Number of soc breakpoints voc table
+    m_t     = M_T_LIE;   // Number temperature breakpoints for voc table
+    x_soc = new float[n_s];
+    y_t = new float[m_t];
+    t_voc = new float[m_t*n_s];
+    for (i=0; i<n_s; i++) x_soc[i] = X_SOC_LIE[i];
+    for (i=0; i<m_t; i++) y_t[i] = Y_T_LIE[i];
+    for (i=0; i<m_t*n_s; i++) t_voc[i] = T_VOC_LIE[i];
+    if ( n_n ) { delete x_soc_min; delete t_soc_min;}
+    n_n     = N_N_LIE;   // Number of temperature breakpoints for x_soc_min table
+    x_soc_min = new float[n_n];
+    t_soc_min = new float[n_n];
+    for (i=0; i<n_n; i++) x_soc_min[i] = X_SOC_MIN_LIE[i];
+    for (i=0; i<n_n; i++) t_soc_min[i] = T_SOC_MIN_LIE[i];
+    hys_cap = 3.6e5;    // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data
+    if ( n_h )  delete x_dv;
+    if ( m_h )  delete y_soc;
+    if ( m_h && n_h )  delete t_r;
+    n_h     = N_H_LI;   // Number of dv breakpoints in r(dv) table t_r
+    m_h     = M_H_LI;   // Number of soc breakpoints in r(soc, dv) table t_r
+    x_dv = new float[n_h];
+    y_soc = new float[m_h];
+    t_r = new float[m_h*n_h];
+    for (i=0; i<n_h; i++) x_dv[i] = X_DV_LI[i];
+    for (i=0; i<m_h; i++) y_soc[i] = Y_SOC_LI[i];
+    for (i=0; i<m_h*n_h; i++) t_r[i] = T_R_LI[i];
+    v_sat       = 13.85;  // Saturation threshold at temperature, deg C
+    dvoc_dt     = 0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
+    dv          = 0.01;   // Adjustment for calibration error, V
+    r_0         = 0.003;  // Randles R0, ohms   
+    r_ct        = 0.0016; // Randles charge transfer resistance, ohms
+    r_diff      = 0.0077; // Randles diffusion resistance, ohms
+    tau_ct      = 0.2;    // Randles charge transfer time constant, s (=1/Rct/Cct)
+    tau_diff    = 83.;    // Randles diffusion time constant, s (=1/Rdif/Cdif)
+    tau_sd      = 2.5e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
+    r_sd        = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
   }
   else Serial.printf("Battery::assign_mod:  unknown mod = %d.  Type 'h' for help\n", mod);
   r_ss = r_0 + r_ct + r_diff;
@@ -155,6 +201,7 @@ uint8_t Chemistry::encode(const String mod_str)
     uint8_t result;
     if ( mod_str=="Battleborn" ) result = 0;
     else if ( mod_str=="LION" ) result = 1;
+    else if ( mod_str=="LIE" ) result = 2;
     else
     {
         result = 99;

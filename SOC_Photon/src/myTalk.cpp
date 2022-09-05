@@ -146,16 +146,23 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 INT_in = cp.input_string.substring(2).toInt();
                 switch ( INT_in )
                 {
-                  case ( 0 ):  // Bm0:
+                  case ( 0 ):  // Bm0: Mon Battleborn
                     Serial.printf("Mon chem %d", Mon->mod_code());
                     Mon->assign_mod("Battleborn");
                     Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_rand();
                     cp.cmd_reset();
                     break;
 
-                  case ( 1 ):  // Bm1:
+                  case ( 1 ):  // Bm1: Mon LION
                     Serial.printf("Mon chem %d", Mon->mod_code());
                     Mon->assign_mod("LION");
+                    Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_rand();
+                    cp.cmd_reset();
+                    break;
+
+                  case ( 2 ):  // Bm2: Mon LION EKF
+                    Serial.printf("Mon chem %d", Mon->mod_code());
+                    Mon->assign_mod("LIE");
                     Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_rand();
                     cp.cmd_reset();
                     break;
@@ -169,17 +176,24 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 INT_in = cp.input_string.substring(2).toInt();
                 switch ( INT_in )
                 {
-                  case ( 0 ):  // Bs0:
+                  case ( 0 ):  // Bs0: Sim Battleborn
                     Serial.printf("chem %d", Sen->Sim->mod_code());
                     Sen->Sim->assign_mod("Battleborn"); Sen->Sim->assign_rand();
-                    Serial.printf(" to %d ('Battleborn')\n", Sen->Sim->mod_code());
+                    Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
 
-                  case ( 1 ):  // Bs1:
+                  case ( 1 ):  // Bs1: Sim LION
                     Serial.printf("chem %d", Sen->Sim->mod_code());
                     Sen->Sim->assign_mod("LION"); Sen->Sim->assign_rand();
-                    Serial.printf(" to %d ('LION')\n", Sen->Sim->mod_code());
+                    Serial.printf(" to %d\n", Sen->Sim->mod_code());
+                    cp.cmd_reset();
+                    break;
+
+                  case ( 2 ):  // Bs2: Sim LION EKF
+                    Serial.printf("chem %d", Sen->Sim->mod_code());
+                    Sen->Sim->assign_mod("LIE"); Sen->Sim->assign_rand();
+                    Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
 
@@ -1277,11 +1291,11 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  v16: Tb\n");
   Serial.printf("  v25: Blynk write\n");
   Serial.printf("  v26: GP, Sim & Sel\n");
-  Serial.printf("  v34: EKF detail\n");
-  Serial.printf("  v35: Randles balance\n");
+  // Serial.printf("  v34: EKF detail\n");
+  // Serial.printf("  v35: Randles balance\n");
   Serial.printf("  v37: EKF short\n");
   Serial.printf("  v41: Inj\n");
-  Serial.printf("  v75: voc_low check mod\n");
+  // Serial.printf("  v75: voc_low check mod\n");
   Serial.printf("  v76: vb model\n");
   Serial.printf("  v78: Batt model sat\n");
   Serial.printf("  v79: sat_ib model\n");

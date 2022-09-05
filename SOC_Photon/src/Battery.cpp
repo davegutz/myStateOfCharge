@@ -288,10 +288,10 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     }
     else    // aliased, unstable if T<0.5  TODO:  consider deleting Randles model (hardware filters)
         voc_ = vb_ - chem_.r_ss * ib_;
-    if ( rp.debug==35 )
-    {
-        Serial.printf("BatteryMonitor::calculate:"); Randles_->pretty_print();
-    }
+    // if ( rp.debug==35 )
+    // {
+    //     Serial.printf("BatteryMonitor::calculate:"); Randles_->pretty_print();
+    // }
     dv_dyn_ = vb_ - voc_;
     // Hysteresis model
     hys_->calculate(ib_, soc_);
@@ -338,9 +338,9 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     boolean conv = abs(y_filt_)<EKF_CONV && !cp.soft_reset;  // Initialize false
     EKF_converged->calculate(conv, EKF_T_CONV, EKF_T_RESET, min(Sen->T, EKF_T_RESET), cp.soft_reset);
 
-    if ( rp.debug==34 || rp.debug==7 )
-        Serial.printf("BatteryMonitor:dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, soc, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,  %d,\n",
-            dt_, ib_, voc_soc_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, soc_, converged_ekf());
+    // if ( rp.debug==34 || rp.debug==7 )
+    //     Serial.printf("BatteryMonitor:dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, soc, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,  %d,\n",
+    //         dt_, ib_, voc_soc_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, soc_, converged_ekf());
     if ( rp.debug==37 )
         Serial.printf("BatteryMonitor:ib,vb,voc_stat,voc(z_),  K_,y_,soc_ekf, y_ekf_f, conv,  %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,%7.4f,  %d,\n",
             ib_, vb_, voc_stat_, voc_,     K_, y_, soc_ekf_, y_filt_, converged_ekf());
@@ -668,8 +668,8 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boole
     model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
 
-    if ( rp.debug==75 ) Serial.printf("BatteryModel::calculate: temp_c_, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
-        temp_c_, soc_, voc_stat_, chem_.low_voc);
+    // if ( rp.debug==75 ) Serial.printf("BatteryModel::calculate: temp_c_, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
+    //     temp_c_, soc_, voc_stat_, chem_.low_voc);
 
     if ( rp.debug==79 ) Serial.printf("temp_c_, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib_fut, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f, %7.3f,\n",
         temp_c_, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
