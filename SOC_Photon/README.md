@@ -409,6 +409,7 @@ Full regression suite:
   rapidTweakRegression:  Xp10
   rapidTweakRegressionBucket:  Bm1;Bs1;D^15;Xp10
                               Bm0;Bs0;D^0;
+                              use Bsim=1 and Bmon=1 in MonSim
   slowTweakRegression:  Xp11
   vHiFail:        Xm7;Ca0.5;Dr100;DP1;v26;W50;Dv0.25;
                   Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
