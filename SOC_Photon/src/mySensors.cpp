@@ -530,7 +530,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vb_min, con
 
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *ReadSensors):
-  rp_tb_bias_(&rp.tb_bias), tb_bias_last_(0.), Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE),
+  rp_tb_bias_(&rp.tb_bias_hdwe), tb_bias_last_(0.), Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE),
   Ib_amp_noise_amp_(IB_AMP_NOISE), Ib_noa_noise_amp_(IB_NOA_NOISE)
 {
   this->T = T;
@@ -614,8 +614,8 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
     }
     else
     {
-      Tb = RATED_TEMP + Tb_noise();
-      Tb_filt = RATED_TEMP;
+      Tb = RATED_TEMP + Tb_noise() + cp.tb_bias_model;
+      Tb_filt = RATED_TEMP + cp.tb_bias_model;
     }
   }
   else

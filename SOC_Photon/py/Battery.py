@@ -96,7 +96,7 @@ class Battery(Coulombs):
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, tweak_test=False, t_max=0.31, sres=1.):
+                 temp_c=RATED_TEMP, tweak_test=False, t_max=0.31, sres=1., chem=None):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -108,17 +108,36 @@ class Battery(Coulombs):
 
         # Defaults
         from pyDAGx import myTables
-        t_x_soc = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
-        t_y_t = [5.,  11.1,  20.,   40.]
-        t_voc = [4.00, 4.00,  4.00,  10.00, 11.80, 12.45, 12.55, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.75, 14.45,
+        # Battleborn Bmon=0, Bsim=0
+        t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
+        t_y_t0 = [5.,  11.1,  20.,   40.]
+        t_voc0 = [4.00, 4.00,  4.00,  10.00, 11.80, 12.45, 12.55, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.75, 14.45,
                  4.00, 4.00,  8.00,  11.70, 12.50, 12.60, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.76, 14.46,
                  4.00, 9.00,  12.45, 12.65, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.80, 14.50,
                  9.00, 13.15, 13.45, 13.65, 13.77, 13.85, 13.89, 13.95, 13.99, 14.03, 14.06, 14.09, 14.14, 14.21, 14.25, 14.27, 14.37, 14.80]
 
-        x = np.array(t_x_soc)
-        y = np.array(t_y_t)
-        data_interp = np.array(t_voc)
-        self.lut_voc = myTables.TableInterp2D(x, y, data_interp)
+        x0 = np.array(t_x_soc0)
+        y0 = np.array(t_y_t0)
+        data_interp0 = np.array(t_voc0)
+        lut_voc0 = myTables.TableInterp2D(x0, y0, data_interp0)
+        # LION Bmon=1, Bsim=1
+        t_x_soc1 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
+        t_y_t1 = [5.,  20.,   40.]
+        t_voc1 = [4.00, 4.00,  4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
+                  4.00, 4.00,  10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
+                  4.00, 4.00,  11.00, 13.60, 13.77, 13.85, 13.89, 13.95, 13.99, 14.03, 14.04, 13.59, 13.54, 13.21, 13.25, 13.27, 14.72, 15.50]
+
+        x1 = np.array(t_x_soc1)
+        y1 = np.array(t_y_t1)
+        data_interp1 = np.array(t_voc1)
+        lut_voc1 = myTables.TableInterp2D(x1, y1, data_interp1)
+        if not chem or chem==0:
+            self.lut_voc = lut_voc0
+        elif chem==1:
+            self.lut_voc = lut_voc1
+        else:
+            print("unknown chem")
+            exit(1)
         self.nz = None
         self.q = 0  # Charge, C
         self.voc = NOM_SYS_VOLT  # Model open circuit voltage, V
@@ -262,9 +281,10 @@ class BatteryMonitor(Battery, EKF1x1):
                  t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., scaler_q=None,
-                 scaler_r=None):
+                 scaler_r=None, Bmon=0):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
-                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres)
+                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres,
+                         chem=Bmon)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
 
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
@@ -551,9 +571,10 @@ class BatteryModel(Battery):
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1.):
+                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., Bsim=0):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
-                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres)
+                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres,
+                         chem=Bsim)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A
         self.sat_ib_null = 0.  # Current cutback value for soc=1, A

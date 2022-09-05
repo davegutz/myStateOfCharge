@@ -88,7 +88,7 @@ def save_clean_file_sim(sims, csv_file, unit_key):
 
 
 def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
-              t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None):
+              t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=0, Bmon=0):
     if saved_sim_old and len(saved_sim_old.time) < len(saved_old.time):
         t = saved_sim_old.time
     else:
@@ -119,10 +119,10 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
     s_q = Scale(1., 3., 0.000005, 0.00005)
     s_r = Scale(1., 3., 0.001, 1.)   # t_Ib_fail = 1000 o
     sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
-                       dv_hys=dv_hys, sres=sres)
+                       dv_hys=dv_hys, sres=sres, Bsim=Bsim)
     mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
                          temp_c=temp_c, hys_scale=hys_scale_monitor, tweak_test=tweak_test, dv_hys=dv_hys, sres=sres,
-                         scaler_q=s_q, scaler_r=s_r)
+                         scaler_q=s_q, scaler_r=s_r, Bmon=Bmon)
     # need Tb input.   perhaps need higher order to enforce basic type 1 response
     Is_sat_delay = TFDelay(in_=saved_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
@@ -235,6 +235,8 @@ if __name__ == '__main__':
         init_time_in = None
         use_ib_mon_in = False
         scale_in = None
+        Bsim = None
+        Bmon = None
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
@@ -248,8 +250,9 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/satSit20220903.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/ampLoFailNoise20220903.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFailSlow20220903.txt'; unit_key = 'pro_2022';
-        data_file_old_txt = '../dataReduction/vHiFail20220903.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220829.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/vHiFail20220903.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220903.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/rapidTweakRegressionBucket20220903.txt'; unit_key = 'pro_2022';Bsim=1;Bmon=1
         # data_file_old_txt = '../dataReduction/pulse20220829.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
         # data_file_old_txt = '../dataReduction/tbFailMod20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tbFailHdwe20220829.txt'; unit_key = 'pro_2022'
@@ -312,7 +315,7 @@ if __name__ == '__main__':
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         mons, sims, monrs, sims_m = replicate(saved_old, saved_sim_old=saved_sim_old, init_time=init_time,
                                               dv_hys=dv_hys, sres=1.0, t_Ib_fail=t_Ib_fail, use_ib_mon=use_ib_mon_in,
-                                              scale_in=scale_in)
+                                              scale_in=scale_in, Bsim=Bsim, Bmon=Bmon)
         save_clean_file(mons, mon_file_save, 'mon_rep' + date_)
 
         # Plots

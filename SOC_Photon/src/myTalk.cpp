@@ -308,12 +308,18 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%ld\n", Sen->ReadSensors->delay());
                 break;
 
-              case ( 't' ):  // * Dt<>:  Temp bias change
-                Serial.printf("rp.tb_bias %7.3f to ", rp.tb_bias);
-                rp.tb_bias = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.tb_bias);
+              case ( 't' ):  // * Dt<>:  Temp bias change hardware
+                Serial.printf("rp.tb_bias_hdwe %7.3f to ", rp.tb_bias_hdwe);
+                rp.tb_bias_hdwe = cp.input_string.substring(2).toFloat();
+                Serial.printf("%7.3f\n", rp.tb_bias_hdwe);
                 rp.debug = 0;
                 Serial.printf("*** reset **\n");
+                break;
+
+              case ( '^' ):  // * D^<>:  Temp bias change model
+                Serial.printf("rp.tb_bias_hdwe %7.3f to ", cp.tb_bias_model);
+                cp.tb_bias_model = cp.input_string.substring(2).toFloat();
+                Serial.printf("%7.3f\n", cp.tb_bias_model);
                 break;
 
               case ( 'u' ):  //   Du<>:  Coulombic Efficiency change
@@ -1183,7 +1189,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Dn= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->add()); Serial.printf(": delta noa, A [0]\n"); 
   Serial.printf("  DP= "); Serial.print(cp.print_mult); Serial.println(": print mult of Dr [4]"); 
   Serial.printf("  Dr= "); Serial.print(Sen->ReadSensors->delay()); Serial.println(": minor frame, ms [100]"); 
-  Serial.printf(" *Dt= "); Serial.printf("%7.3f", rp.tb_bias); Serial.printf(": delta sense, deg C [%7.3f]\n", TEMP_BIAS); 
+  Serial.printf(" *Dt= "); Serial.printf("%7.3f", rp.tb_bias_hdwe); Serial.printf(": delta hdwe, deg C [%7.3f]\n", TEMP_BIAS); 
+  Serial.printf("  D^= "); Serial.printf("%7.3f", cp.tb_bias_model); Serial.printf(": delta model, deg C [%7.3f]\n", TEMP_BIAS); 
   Serial.printf("  Dv= "); Serial.print(Sen->vb_add()); Serial.println(": volt fault inj, V [0]"); 
   Serial.printf("  Dw= "); Serial.print(Sen->Sim->Dv()); Serial.println(": Tab adjust, V [0.01]"); 
   Serial.printf("  DT= "); Serial.printf("%7.3f", Sen->Tb_noise_amp()); Serial.printf(": Tb noise mod, deg C pk-pk [%7.3f]\n", TB_NOISE); 

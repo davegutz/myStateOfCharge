@@ -407,6 +407,8 @@ Full regression suite:
   ampHiFailSlow:  Xm7;Ca0.5;v26;W2;Dr10000;DP1;Dm6;Dn0.0001;Fc.05;Fd.5;
                   Xp0;Pf;Rf;W2;+v0;Dr100;Fc1;Fd1;Rf;Pf;
   rapidTweakRegression:  Xp10
+  rapidTweakRegressionBucket:  Bm1;Bs1;D^15;Xp10
+                              Bm0;Bs0;D^0;
   slowTweakRegression:  Xp11
   vHiFail:        Xm7;Ca0.5;Dr100;DP1;v26;W50;Dv0.25;
                   Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
