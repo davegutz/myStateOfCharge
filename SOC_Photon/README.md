@@ -398,14 +398,14 @@ Full regression suite:
                   Xp0;Pf;Rf;W10;+v0;Dr100;Rf;Pf;
   ampLoFail:      Xm7;Ca0.95;Dr100;DP1;v26;W50;Dm-50;Dn0.0001;W50;Pe;
                   Xp0;Pf;Rf;W10;+v0;Dr100;Rf;Pf;
-  triTweakDisch:  Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-29500;XW5;XT5;XC3;W2;v26;W2;Fa1000;Fb1000;Ff1000;Fd1000;Fv;Fi;Ft;XR;
-                  v0;XS;Dm0;Dn0;Xp0;Ca1.;Pf;
+  triTweakDisch:  Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-29500;XW5;XT5;XC3;W2;v26;W2;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;XR;
+                  v0;XS;Dm0;Dn0;FV0;FI0;FT0;Xp0;Ca1.;Pf;
   ampHiFailNoise: Xm7;Ca0.5;Dr100;DP1;v26;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;
                   DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
   ampLoFailNoise: Xm7;Ca0.95;Dr100;DP1;v26;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm-50;Dn0.0001;
                   DT0;DV0;DM0;DN0;Xp0;Pf;Rf;W10;+v0;Dr100;Rf;Pf;
-  ampHiFailSlow:  Xm7;Ca0.5;v26;W2;Dr10000;DP1;Dm6;Dn0.0001;Ff.05;
-                  Xp0;Pf;Rf;W2;+v0;Dr100;Ff1;Rf;Pf;
+  ampHiFailSlow:  Xm7;Ca0.5;v26;W2;Dr10000;DP1;Dm6;Dn0.0001;Fc.05;Fd.5;
+                  Xp0;Pf;Rf;W2;+v0;Dr100;Fc1;Fd1;Rf;Pf;
   rapidTweakRegression:  Xp10
   slowTweakRegression:  Xp11
   vHiFail:        Xm7;Ca0.5;Dr100;DP1;v26;W50;Dv0.25;

@@ -252,79 +252,93 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
   Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ib, Mon->soc());
 }
 
-// OLED display drive
+/* OLED display drive
+ e.g.:
+   35  13.71 -4.2    Tb,C  VOC,V  Ib,A 
+   45  -10.0  46     EKF,Ah  chg,hrs  CC, Ah
+*/
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 {
   static uint8_t frame = 0;
   static boolean pass = false;
-  String dispT, dispV, dispI;
+  String disp_0, disp_1, disp_2;
 
   display->clearDisplay();
   display->setTextSize(1);              // Normal 1:1 pixel scale
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner
 
-  // Top Line
-
+  // ---------- Top Line  ------------------------------------------------
   // Tb
   sprintf(cp.buffer, "%3.0f", pp.pubList.Tb);
-  dispT = cp.buffer;
+  disp_0 = cp.buffer;
   if ( Sen->Flt->tb_fa() && (frame==0 || frame==1) )
-    dispT = "***";
+    disp_0 = "***";
 
   // Voc
   sprintf(cp.buffer, "%5.2f", pp.pubList.Voc);
-  dispV = cp.buffer;
+  disp_1 = cp.buffer;
   if ( Sen->Flt->vb_sel_stat()==0 && (frame==1 || frame==2) )
-    dispV = "**F**";
+    disp_1 = "*fail";
 
   // Ib
   sprintf(cp.buffer, "%6.1f", pp.pubList.Ib);
-  dispI = cp.buffer;
+  disp_2 = cp.buffer;
   if ( frame==2 )
   {
     if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() && !rp.mod_ib() )
-      dispI = "**F**";
+      disp_2 = "*fail";
     else if ( Sen->Flt->dscn_fa() && !rp.mod_ib() )
-      dispI = "..C..";
+      disp_2 = " conn ";
     else if ( Sen->Flt->red_loss() )
-      dispI = "-data-";
+      disp_2 = " data ";
   }
   else if ( frame==3 )
   {
     if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() && !rp.mod_ib() )
-      dispI = "**F**";
+      disp_2 = "*fail";
     else if ( Sen->Flt->dscn_fa() && !rp.mod_ib() )
-      dispI = "..C..";
+      disp_2 = " conn ";
   }
-  String dispTop = dispT.substring(0, 4) + " " + dispV.substring(0, 6) + " " + dispI.substring(0, 7);
-  display->println(dispTop.c_str());
+  String disp_Tbop = disp_0.substring(0, 4) + " " + disp_1.substring(0, 6) + " " + disp_2.substring(0, 7);
+  display->println(disp_Tbop.c_str());
   display->println(F(""));
   display->setTextColor(SSD1306_WHITE);
 
-  // Bottom line
+  // --------------------- Bottom line  ---------------------------------
+  // Hrs EHK
+  sprintf(cp.buffer, "%3.0f", pp.pubList.Amp_hrs_remaining_ekf);
+  disp_0 = cp.buffer;
+  if ( frame==0 )
+  {
+    if ( Sen->Flt->cc_diff_fa() )
+      disp_0 = "---";
+  }
+  display->print(disp_0.c_str());
+
+  // t charge
   if ( abs(pp.pubList.tcharge) < 24. )
   {
-    sprintf(cp.buffer, "%3.0f%5.1f", pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge);
-    dispT = cp.buffer;
+    sprintf(cp.buffer, "%5.1f", pp.pubList.tcharge);
   }
   else
   {
-    sprintf(cp.buffer, "%3.0f --- ", pp.pubList.Amp_hrs_remaining_ekf);
-    dispT = cp.buffer;
+    sprintf(cp.buffer, " --- ");
   }  
-  display->print(dispT.c_str());
+  disp_1 = cp.buffer;
+  display->print(disp_1.c_str());
+
   // Hrs large
   display->setTextSize(2);             // Draw 2X-scale text
   if ( frame==1 || frame==3 || !Sen->saturated )
   {
     sprintf(cp.buffer, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
-    dispV = cp.buffer;
+    disp_2 = cp.buffer;
   }
   else if (Sen->saturated)
-    dispV = "SAT";
-  display->print(dispV.c_str());
-  String dispBot = dispT + " " + dispV;
+    disp_2 = "SAT";
+  display->print(disp_2.c_str());
+  String dispBot = disp_0 + disp_1 + " " + disp_2;
 
   // Display
   display->display();
@@ -333,7 +347,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   // Text basic Bluetooth (use serial bluetooth app)
   if ( rp.debug!=4 && rp.debug!=-2 && !cp.blynking )
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nv-2;Pf; for fails.  prints=%ld\n\n",
-      dispTop.c_str(), dispBot.c_str(), cp.num_v_print);
+      disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
 
   if ( rp.debug==5 ) debug_5();
 
