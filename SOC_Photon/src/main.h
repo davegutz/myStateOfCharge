@@ -314,10 +314,10 @@ void loop()
   display_to_user = DisplayUserSync->update(millis(), reset); //  now || reset
   publishP = PublishParticle->update(millis(), false);        //  now || false
   publishB = PublishBlynk->update(millis(), false);           //  now || false
-  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT );
+  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !rp.modeling;
   if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
-  summarizing = Summarize->update(millis(), boot_summ, !rp.modeling); // now || boot_summ && !rp.modeling
-  summarizing = summarizing || (rp.debug==-11 && publishB);
+  summarizing = Summarize->update(millis(), false); // now || boot_summ && !rp.modeling
+  summarizing = summarizing || (rp.debug==-11 && publishB) || boot_summ;
 
   // Load temperature
   // Outputs:   Sen->Tb,  Sen->Tb_filt
@@ -418,15 +418,12 @@ void loop()
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
-  if ( read )
+  if ( (!boot_wait && summarizing) || cp.write_summary )
   {
-    if ( (!boot_wait && summarizing) || cp.write_summary )
-    {
-      if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
-      mySum[rp.isum].assign(time_now, Mon, Sen);
-      Serial.printf("Summ...\n");
-      cp.write_summary = false;
-    }
+    if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
+    mySum[rp.isum].assign(time_now, Mon, Sen);
+    Serial.printf("Summ...\n");
+    cp.write_summary = false;
   }
 
   // Initialize complete once sensors and models started and summary written

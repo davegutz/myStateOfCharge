@@ -244,6 +244,10 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
 
   Smaller NSUM in constants.h or rp in retained.h or cp in command.h
 
+### Problem:  . ? h
+
+  CoolTerm - Options - Terminal:  Enter Key Emulation:  CR
+
 ## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
 
 ## To get debug data
