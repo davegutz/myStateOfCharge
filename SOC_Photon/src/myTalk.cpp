@@ -1181,8 +1181,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("\n\nHelp talk.   Entries followed by ';'\n");
 
   Serial.printf("B<?> Battery e.g.:\n");
-  Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='LI' [%d]\n", rp.mon_mod, MOD_CODE); 
-  Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='LI' [%d]\n", rp.sim_mod, MOD_CODE); 
+  Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='LI' [%d]\n", rp.mon_mod, MON_CHEM); 
+  Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='LI' [%d]\n", rp.sim_mod, SIM_CHEM); 
   Serial.printf(" *BP=  %5.2f.  parallel in bank [%5.2f]'\n", rp.nP, NP); 
   Serial.printf(" *BS=  %5.2f.  series in bank [%5.2f]'\n", rp.nS, NS); 
 

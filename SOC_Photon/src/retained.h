@@ -69,8 +69,8 @@ struct RetainedPars
   float tweak_sclr_noa = 1.;    // Dyn tweak.  Tweak calibration for non-amplified current sensor
   float nP = NP;                // Number of parallel batteries in bank, e.g. '2P1S'
   float nS = NS;                // Number of series batteries in bank, e.g. '2P1S'
-  uint8_t mon_mod = MOD_CODE;   // Monitor battery chemistry type
-  uint8_t sim_mod = MOD_CODE;   // Simulation battery chemistry type
+  uint8_t mon_mod = MON_CHEM;   // Monitor battery chemistry type
+  uint8_t sim_mod = SIM_CHEM;   // Simulation battery chemistry type
 
   // Corruption test on bootup.  Needed because retained parameter memory is not managed by the compiler as it relies on
   // battery.  Small compilation changes can change where in this memory the program points, too.
@@ -115,8 +115,8 @@ struct RetainedPars
     this->tweak_sclr_noa = 1.;
     this->nP = NP;
     this->nS = NS;
-    this->mon_mod = MOD_CODE;
-    this->sim_mod = MOD_CODE;
+    this->mon_mod = MON_CHEM;
+    this->sim_mod = SIM_CHEM;
   }
   void large_reset()
   {

@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "pro_20220903";  // Disable e_wrap saturated; tweak, history falw, cal noa, 5 A ibdif, print stuff, thresh tune, new curve
+const String unit = "pro_20220907";  // Disable e_wrap saturated; tweak, history falw, cal noa, 5 A ibdif, print stuff, thresh tune, new curve
 
 #define ASK_DURING_BOOT         1   // Flag to ask for application of this file to * retained adjustements
 // * = SRAM EEPROM adjustments, retained on power reset
@@ -21,7 +21,8 @@ const String unit = "pro_20220903";  // Disable e_wrap saturated; tweak, history
 // Four 12 V 200 Ah with two in parallel joined with two more in series
 //   would have  RATED_BATT_CAP 200, NS 2, and NP 2
 #define COULOMBIC_EFF         0.9985  // Coulombic efficiency of battery (Perm scale * 'Mk' for amp, * 'Nk' for noa), fraction of charge that gets used
-#define MOD_CODE              0       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=LION 
+#define MON_CHEM              2       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=LION 
+#define SIM_CHEM              1       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=LION 
 #define RATED_BATT_CAP        108.4   // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
 #define NS                    1.0     // Number of series batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BS')
 #define NP                    1.0     // Number of parallel batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BP')
