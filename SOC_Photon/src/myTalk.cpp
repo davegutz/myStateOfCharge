@@ -1125,6 +1125,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Sen->start_inj = 0UL;
                 Sen->stop_inj = 0UL;
                 Sen->end_inj = 0UL;
+                Sen->elapsed_inj = 0;
                 Serial.printf("STOP\n");
                 break;
 
