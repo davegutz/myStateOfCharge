@@ -211,6 +211,8 @@ def overall(old_s, new_s, old_s_sim, new_s_sim, new_s_sim_m, filename, fig_files
     plt.subplot(326)
     plt.plot(old_s.time, old_s.Tb, color='green', linestyle='-', label='temp_c')
     plt.plot(new_s.time, new_s.Tb, color='orange', linestyle='--', label='temp_c_new')
+    plt.plot(old_s.time, old_s.chm, color='black', linestyle='-', label='mon_mod')
+    plt.plot(old_s_sim.time, old_s_sim.chm_m, color='cyan', linestyle='--', label='sim_mod')
     plt.ylim(0., 50.)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -440,6 +442,7 @@ class SavedData:
             self.ioc = []  # Hys indicator current, A
             self.Ib_past = []  # Past bank current, A
             self.Vb = []  # Bank voltage, V
+            self.chm = []  # Battery chemistry code
             self.sat = []  # Indication that battery is saturated, T=saturated
             self.sel = []  # Current source selection, 0=amp, 1=no amp
             self.mod = []  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
@@ -494,6 +497,7 @@ class SavedData:
             self.Ib_past = np.append(np.zeros((1, 1)), np.array(data.Ib[:(i_end-1)]))
             self.Ib_past[0] = self.Ib_past[1]
             self.Vb = np.array(data.Vb[:i_end])
+            self.chm = np.array(data.chm[:i_end])
             self.sat = np.array(data.sat[:i_end])
             self.sel = np.array(data.sel[:i_end])
             self.mod_data = np.array(data.mod[:i_end])
@@ -646,6 +650,7 @@ class SavedDataSim:
             self.time = []
             self.unit = []  # text title
             self.c_time = []  # Control time, s
+            self.chm_m = []
             self.Tb_m = []
             self.Tbl_m = []
             self.vsat_m = []
@@ -672,6 +677,7 @@ class SavedDataSim:
                 i_end = np.where(self.time <= time_end)[0][-1] + 1
             self.c_time = self.c_time[:i_end]
             self.time = self.time[:i_end]
+            self.chm_m = data.chm_m[:i_end]
             self.Tb_m = data.Tb_m[:i_end]
             self.Tbl_m = data.Tbl_m[:i_end]
             self.vb_m = data.vb_m[:i_end]
@@ -765,12 +771,12 @@ if __name__ == '__main__':
                                                unit_key='unit_sim,')
 
         # Load
-        cols = ('unit', 'hm', 'cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn',
+        cols = ('unit', 'hm', 'cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn',
                 'Voc_stat', 'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc')
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                  encoding=None).view(np.recarray)
         saved_old = SavedData(data_old, time_end)
-        cols_sim = ('unit_m', 'c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m',
+        cols_sim = ('unit_m', 'c_time', 'chm_m', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m',
                     'ib_m', 'ib_in_m', 'sat_m', 'dq_m', 'soc_m', 'reset_m')
         try:
             data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,

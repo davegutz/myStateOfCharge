@@ -96,7 +96,7 @@ class Battery(Coulombs):
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, tweak_test=False, t_max=0.31, sres=1., chem=None):
+                 temp_c=RATED_TEMP, tweak_test=False, t_max=0.31, sres=1.):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -119,7 +119,7 @@ class Battery(Coulombs):
         x0 = np.array(t_x_soc0)
         y0 = np.array(t_y_t0)
         data_interp0 = np.array(t_voc0)
-        lut_voc0 = myTables.TableInterp2D(x0, y0, data_interp0)
+        self.lut_voc0 = myTables.TableInterp2D(x0, y0, data_interp0)
         # LION Bmon=1, Bsim=1
         t_x_soc1 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
         t_y_t1 = [5.,  20.,   40.]
@@ -130,14 +130,18 @@ class Battery(Coulombs):
         x1 = np.array(t_x_soc1)
         y1 = np.array(t_y_t1)
         data_interp1 = np.array(t_voc1)
-        lut_voc1 = myTables.TableInterp2D(x1, y1, data_interp1)
-        if not chem or chem==0:
-            self.lut_voc = lut_voc0
-        elif chem==1:
-            self.lut_voc = lut_voc1
-        else:
-            print("unknown chem")
-            exit(1)
+        self.lut_voc1 = myTables.TableInterp2D(x1, y1, data_interp1)
+        # LIE Bmon=2
+        t_x_soc2 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
+        t_y_t2 = [5.,  20.,   40.]
+        t_voc2 = [4.00, 4.00,  4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
+                  4.00, 4.00,  10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
+                  4.00, 4.00, 11.00, 13.60, 13.77, 13.81, 13.84, 13.86, 13.90, 13.94, 13.98, 14.02, 14.06, 14.10, 14.14, 14.18, 14.72, 15.50]
+
+        x2 = np.array(t_x_soc2)
+        y2 = np.array(t_y_t2)
+        data_interp2 = np.array(t_voc2)
+        self.lut_voc2 = myTables.TableInterp2D(x2, y2, data_interp2)
         self.nz = None
         self.q = 0  # Charge, C
         self.voc = NOM_SYS_VOLT  # Model open circuit voltage, V
@@ -283,8 +287,7 @@ class BatteryMonitor(Battery, EKF1x1):
                  temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., scaler_q=None,
                  scaler_r=None, Bmon=0):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
-                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres,
-                         chem=Bmon)
+                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
 
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
@@ -351,7 +354,17 @@ class BatteryMonitor(Battery, EKF1x1):
     def assign_soc_m(self, soc_m):
         self.soc_m = soc_m
 
-    def calculate(self, temp_c, vb, ib, dt, reset, q_capacity=None, dc_dc_on=None, rp=None, d_voc=None):  # BatteryMonitor
+    def calculate(self, chem, temp_c, vb, ib, dt, reset, q_capacity=None, dc_dc_on=None, rp=None, d_voc=None):  # BatteryMonitor
+        self.chm = chem
+        if self.chm==0:
+            self.lut_voc = self.lut_voc0
+        elif self.chm==1:
+            self.lut_voc = self.lut_voc1
+        elif self.chm==2:
+            self.lut_voc = self.lut_voc2
+        else:
+            print("BatteryMonitor.calculate:  bad chem value=", chem)
+            exit(1)
         self.temp_c = temp_c
         self.vsat = calc_vsat(self.temp_c)
         self.dt = dt
@@ -508,6 +521,7 @@ class BatteryMonitor(Battery, EKF1x1):
     def save(self, time, dt, soc_ref, voc_ref):
         self.saved.time.append(time)
         self.saved.dt.append(dt)
+        self.saved.chm.append(self.chm)
         self.saved.ib.append(self.ib)
         self.saved.ioc.append(self.ioc)
         self.saved.vb.append(self.vb)
@@ -573,8 +587,7 @@ class BatteryModel(Battery):
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., Bsim=0):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
-                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres,
-                         chem=Bsim)
+                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A
         self.sat_ib_null = 0.  # Current cutback value for soc=1, A
@@ -626,7 +639,17 @@ class BatteryModel(Battery):
         s += Battery.__str__(self, prefix + 'BatteryModel:')
         return s
 
-    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None, sat_init=None):  # BatteryModel
+    def calculate(self, chem, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None, sat_init=None):  # BatteryModel
+        self.chm = chem
+        if self.chm==0:
+            self.lut_voc = self.lut_voc0
+        elif self.chm==1:
+            self.lut_voc = self.lut_voc1
+        elif self.chm==2:
+            self.lut_voc = self.lut_voc2
+        else:
+            print("BatteryModel.calculate:  bad chem value=", chem)
+            exit(1)
         self.dt = dt
         self.temp_c = temp_c
         self.mod = rp.modeling
@@ -766,6 +789,7 @@ class BatteryModel(Battery):
         self.saved.time.append(time)
         self.saved.dt.append(dt)
         self.saved.ib.append(self.ib)
+        self.saved.chm.append(self.chm)
         self.saved.ioc.append(self.ioc)
         self.saved.vb.append(self.vb)
         self.saved.vc.append(self.vc())
@@ -795,6 +819,7 @@ class BatteryModel(Battery):
 
     def save_m(self, time):
         self.saved_m.time.append(time)
+        self.saved_m.chm_m.append(self.chm)
         self.saved_m.Tb_m.append(self.temp_c)
         self.saved_m.Tbl_m.append(self.temp_lim)
         self.saved_m.vsat_m.append(self.vsat)
@@ -834,6 +859,7 @@ class Saved:
     def __init__(self):
         self.time = []
         self.dt = []
+        self.chm = []
         self.ib = []
         self.ioc = []
         self.vb = []
@@ -938,10 +964,15 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     plt.plot(ms.time, ms.soc, color='red', label='soc'+suffix)
     plt.plot(ss.time, ss.soc, color='black', linestyle='dotted', label='soc_m'+suffix)
     plt.legend(loc=1)
+    plt.subplot(325)
+    # plt.subplot_mosaic("D")
+    plt.plot(ss.time, ss.chm, color='red', linestyle='-', label='chm_m'+suffix)
+    plt.plot(ms.time, ms.chm, color='black', linestyle='--', label='chm'+suffix)
+    plt.legend(loc=1)
     plt.subplot(326)
     # plt.subplot_mosaic("E")
-    plt.plot(ss.soc, ss.voc, color='black', linestyle='-.', label='SIM voc vs soc'+suffix)
-    plt.plot(ms.soc, ms.voc, color='green', linestyle=':', label='MON voc vs soc'+suffix)
+    plt.plot(ss.soc, ss.voc, color='red', linestyle='-', label='SIM voc vs soc'+suffix)
+    plt.plot(ms.soc, ms.voc, color='black', linestyle='--', label='MON voc vs soc'+suffix)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1171,6 +1202,7 @@ class SavedM:
         self.time = []
         self.unit = []  # text title
         self.c_time = []  # Control time, s
+        self.chm_m = []
         self.Tb_m = []
         self.Tbl_m = []
         self.vsat_m = []

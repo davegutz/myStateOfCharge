@@ -101,6 +101,8 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
     soc_ekf_init = saved_old.soc_ekf[0]
     soc_m_init = saved_old.soc_m[0]
     sat_init = saved_old.sat[0]
+    chm = saved_old.chm
+    chm_m = saved_sim_old.chm_m
     if saved_sim_old:
         sat_m_init = saved_sim_old.sat_m[0]
     else:
@@ -156,7 +158,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
             ib_in_m = saved_sim_old.ib_in_m[i]
         else:
             ib_in_m = Ib_past[i]
-        sim.calculate(temp_c=Tb[i], soc=sim.soc, curr_in=ib_in_m, dt=T, q_capacity=sim.q_capacity,
+        sim.calculate(chem=chm_m[i], temp_c=Tb[i], soc=sim.soc, curr_in=ib_in_m, dt=T, q_capacity=sim.q_capacity,
                       dc_dc_on=dc_dc_on, reset=reset, rp=rp, sat_init=sat_m_init)
         charge_curr = sim.ib
         sim.count_coulombs(dt=T, reset=reset, temp_c=Tb[i], charge_curr=charge_curr, sat=False, soc_m_init=soc_m_init,
@@ -174,6 +176,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
 
         # Monitor calculations including ekf
         Tb_ = Tb[i]
+        chm_ = chm[i]
         if t_Ib_fail and t[i] > t_Ib_fail:
             Ib_ = Ib_fail
         else:
@@ -183,9 +186,9 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
         else:
             Vb_ = Vb[i]
         if rp.modeling == 0:
-            mon.calculate(Tb_, Vb_, Ib_, T, rp=rp, reset=reset)
+            mon.calculate(chm_, Tb_, Vb_, Ib_, T, rp=rp, reset=reset)
         else:
-            mon.calculate(Tb_, Vb_ + randn() * v_std + dv_sense, Ib_ + randn() * i_std + di_sense, T, rp=rp,
+            mon.calculate(chm_, Tb_, Vb_ + randn() * v_std + dv_sense, Ib_ + randn() * i_std + di_sense, T, rp=rp,
                           reset=reset, d_voc=None)
         sat = is_sat(Tb[i], mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
@@ -252,8 +255,8 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/ampHiFailSlow20220903.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/vHiFail20220903.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220903.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/slowTweakRegressionBucket20220906.txt'; unit_key = 'pro_2022';Bsim=1;Bmon=2
-        # data_file_old_txt = '../dataReduction/triTweakDischBucket20220906.txt'; unit_key = 'pro_2022';Bsim=1;Bmon=2
+        # data_file_old_txt = '../dataReduction/slowTweakRegressionBucket20220906.txt'; unit_key = 'pro_2022';Bsim=1;Bmon=2
+        data_file_old_txt = '../dataReduction/triTweakDischBucket20220906.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/pulse20220829.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
         # data_file_old_txt = '../dataReduction/tbFailMod20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tbFailHdwe20220829.txt'; unit_key = 'pro_2022'
@@ -268,7 +271,7 @@ if __name__ == '__main__':
 
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key)
-        cols = ('cTime', 'dt', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'ioc', 'Vsat', 'dV_dyn', 'Voc_stat',
+        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'ioc', 'Vsat', 'dV_dyn', 'Voc_stat',
                 'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc')
         data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
                                  encoding=None).view(np.recarray)
@@ -292,7 +295,7 @@ if __name__ == '__main__':
         # Load _m v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
                                                unit_key=unit_key_sim)
-        cols_sim = ('c_time', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m',
+        cols_sim = ('c_time', 'chm_m', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m',
                     'ib_in_m', 'ioc_m', 'sat_m', 'dq_m', 'soc_m', 'reset_m')
         if data_file_sim_clean:
             data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
@@ -316,7 +319,7 @@ if __name__ == '__main__':
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         mons, sims, monrs, sims_m = replicate(saved_old, saved_sim_old=saved_sim_old, init_time=init_time,
                                               dv_hys=dv_hys, sres=1.0, t_Ib_fail=t_Ib_fail, use_ib_mon=use_ib_mon_in,
-                                              scale_in=scale_in, Bsim=Bsim, Bmon=Bmon)
+                                              scale_in=scale_in)
         save_clean_file(mons, mon_file_save, 'mon_rep' + date_)
 
         # Plots
