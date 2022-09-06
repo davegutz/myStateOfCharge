@@ -128,10 +128,10 @@ const float T_VOC_LIE[M_T_LIE*N_S_LIE] = // r(soc, dv) table
         { 4.00, 4.00,  4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
           4.00, 4.00,  4.00,  9.50,  12.00, 12.50, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.2,  13.23, 13.60, 14.46,
           4.00, 4.00,  10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
-          4.00, 4.00,  11.00, 13.60, 13.77, 13.81, 13.84, 13.86, 13.90, 13.94, 13.98, 14.02, 14.06, 14.10, 14.14, 14.18, 14.72, 15.50};
+          4.00, 4.00,  10.50, 13.10, 13.27, 13.31, 13.44, 13.46, 13.40, 13.44, 13.48, 13.52, 13.56, 13.60, 13.64, 13.68, 14.22, 15.00};
 const uint8_t N_N_LIE = 4;   // Number of temperature breakpoints for x_soc_min table
 const float X_SOC_MIN_LIE[N_N_LIE] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
-const float T_SOC_MIN_LIE[N_N_LIE] =  { 0.10, 0.07,  0.05, -0.05}; // soc_min(t)
+const float T_SOC_MIN_LIE[N_N_LIE] =  { 0.10, 0.07,  0.05, 0.0}; // soc_min(t)
 
 // Hysteresis: reservoir model of battery electrical hysteresis
 // Use variable resistor and capacitor to create hysteresis from an RC circuit
