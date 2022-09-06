@@ -177,21 +177,21 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 switch ( INT_in )
                 {
                   case ( 0 ):  // Bs0: Sim Battleborn
-                    Serial.printf("chem %d", Sen->Sim->mod_code());
+                    Serial.printf("Sim chem %d", Sen->Sim->mod_code());
                     Sen->Sim->assign_mod("Battleborn"); Sen->Sim->assign_rand();
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
 
                   case ( 1 ):  // Bs1: Sim LION
-                    Serial.printf("chem %d", Sen->Sim->mod_code());
+                    Serial.printf("Sim chem %d", Sen->Sim->mod_code());
                     Sen->Sim->assign_mod("LION"); Sen->Sim->assign_rand();
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
 
                   case ( 2 ):  // Bs2: Sim LION EKF
-                    Serial.printf("chem %d", Sen->Sim->mod_code());
+                    Serial.printf("Sim chem %d", Sen->Sim->mod_code());
                     Sen->Sim->assign_mod("LIE"); Sen->Sim->assign_rand();
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
@@ -698,17 +698,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'm' ):  // Pm:  Print mon
-                Serial.printf("\nMon:"); Mon->pretty_print();
-                Serial.printf("Mon::"); Mon->Coulombs::pretty_print();
-                Serial.printf("Mon::"); Mon->pretty_print_ss();
-                Serial.printf("Mon::"); Mon->EKF_1x1::pretty_print();
-                Serial.printf("\nrp.modeling = %d\n", rp.modeling);
                 if ( !cp.blynking )
                 {
-                  Serial1.printf("\nMon:"); Mon->pretty_print();
-                  Serial1.printf("Mon::"); Mon->Coulombs::pretty_print();
-                  Serial1.printf("Mon::"); Mon->pretty_print_ss();
-                  Serial1.printf("Mon::"); Mon->EKF_1x1::pretty_print();
+                  Serial1.printf("\nM:"); Mon->pretty_print();
+                  Serial1.printf("M::"); Mon->Coulombs::pretty_print();
+                  Serial1.printf("M::"); Mon->pretty_print_ss();
+                  Serial1.printf("M::"); Mon->EKF_1x1::pretty_print();
                   Serial1.printf("\nmodeling = %d\n", rp.modeling);
                 }
                 break;
@@ -731,10 +726,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 's' ):  // Ps:  Print sim
-                Serial.printf("\nmodeling=%d\n", rp.modeling);
-                Serial.printf("Sim:");  Sen->Sim->pretty_print();
-                Serial.printf("Sim::"); Sen->Sim->Coulombs::pretty_print();
-                Serial.printf("Sim::"); Sen->Sim->pretty_print_ss();
+                if ( !cp.blynking )
+                {
+                  Serial.printf("\nmodeling=%d\n", rp.modeling);
+                  Serial.printf("S:");  Sen->Sim->pretty_print();
+                  Serial.printf("S::"); Sen->Sim->Coulombs::pretty_print();
+                  Serial.printf("S::"); Sen->Sim->pretty_print_ss();
+                }
                 break;
 
               case ( 'x' ):  // Px:  Print shunt measure

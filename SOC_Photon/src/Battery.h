@@ -126,7 +126,7 @@ const float X_SOC_LIE[N_S_LIE] =      //soc breakpoints for voc table
 const float T_VOC_LIE[M_T_LIE*N_S_LIE] = // r(soc, dv) table
         { 4.00, 4.00,  4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
           4.00, 4.00,  10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
-          4.00, 4.00,  11.00, 13.60, 13.77, 13.85, 13.89, 13.83, 13.90, 13.94, 13.98, 14.02, 14.06, 14.10, 14.14, 14.18, 14.72, 15.50};
+          4.00, 4.00,  11.00, 13.60, 13.77, 13.81, 13.84, 13.86, 13.90, 13.94, 13.98, 14.02, 14.06, 14.10, 14.14, 14.18, 14.72, 15.50};
 const uint8_t N_N_LIE = 4;   // Number of temperature breakpoints for x_soc_min table
 const float X_SOC_MIN_LIE[N_N_LIE] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
 const float T_SOC_MIN_LIE[N_N_LIE] =  { 0.10, 0.07,  0.05, -0.05}; // soc_min(t)
@@ -226,7 +226,7 @@ protected:
   double dt_;       // Update time, s
   // EKF declarations
   StateSpace *Randles_; // Randles model {ib, vb} --> {voc}, ioc=ib for Battery version
-                        // Randles model {ib, voc} --> {vb}, ioc=ib for BatteryModel version
+                        // Randles model {ib, voc} --> {vb}, ioc=ib for BatterySim version
   double *rand_A_;  // Randles model A
   double *rand_B_;  // Randles model B
   double *rand_C_;  // Randles model C
@@ -302,13 +302,13 @@ protected:
 };
 
 
-// BatteryModel: extend Battery to use as model object
-class BatteryModel: public Battery
+// BatterySim: extend Battery to use as model object
+class BatterySim: public Battery
 {
 public:
-  BatteryModel();
-  BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code);
-  ~BatteryModel();
+  BatterySim();
+  BatterySim(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code);
+  ~BatterySim();
   // operators
   // functions
   virtual void assign_rand(void);

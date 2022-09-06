@@ -411,9 +411,6 @@ Full regression suite:
   ampHiFailSlow:  Xm7;Ca0.5;v26;W2;Dr10000;DP1;Dm6;Dn0.0001;Fc.05;Fd.5;
                   Xp0;Pf;Rf;W2;+v0;Dr100;Fc1;Fd1;Rf;Pf;
   rapidTweakRegression:  Xp10
-  rapidTweakRegressionBucket:  Bm1;Bs1;D^15;Xp10
-                              Bm0;Bs0;D^0;
-                              use Bsim=1 and Bmon=1 in MonSim
   slowTweakRegression:  Xp11
   vHiFail:        Xm7;Ca0.5;Dr100;DP1;v26;W50;Dv0.25;
                   Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
@@ -430,6 +427,15 @@ Full regression suite:
   pulse30:      Xm7;Ca1;DP1;v26;W50;Di-30;
                 Di30
                 Di0;Dp400;DP4;
+
+Bucket list:
+  Bucket:  Bm2;Bs1;D^15;
+           Bm0;Bs0;D^0;
+           use Bsim=1 and Bmon=2 in MonSim
+  triTweakDischBucket:  Xp0;v0;Bm2;Bs1;Xm15;D^15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-29500;XW5;XT5;XC3;W2;v26;W2;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;XR;
+                  v0;XS;Dm0;Dn0;FV0;FI0;FT0;Xp0;Ca1.;Pf;
+  slowTweakRegressionBucket: Bm2;Bs1;D^15;Xp11
+
 
 ## Accuracy
 

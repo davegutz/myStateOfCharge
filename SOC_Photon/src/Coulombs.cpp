@@ -88,7 +88,7 @@ void Chemistry::assign_mod(const String mod_str)
   else if ( mod==1 )  // "LION" placeholder.  Data fabricated
   {
     *rp_mod_code = mod;
-    dqdt    = 0.02;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
+    dqdt    = 0.01;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
     low_voc = 9.;       // Voltage threshold for BMS to turn off battery;
     low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
     if ( n_s )  delete x_soc;
@@ -134,7 +134,7 @@ void Chemistry::assign_mod(const String mod_str)
   else if ( mod==2 )  // "LION" EKF placeholder.  Data fabricated
   {
     *rp_mod_code = mod;
-    dqdt    = 0.02;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
+    dqdt    = 0.01;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
     low_voc = 9.;       // Voltage threshold for BMS to turn off battery;
     low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
     if ( n_s )  delete x_soc;
@@ -187,10 +187,11 @@ String Chemistry::decode(const uint8_t mod)
     String result;
     if ( mod==0 ) result = "Battleborn";
     else if ( mod==1 ) result = "LION";
+    else if ( mod==2 ) result = "LIE";
     else
     {
       result = "unknown";
-      Serial.printf("Chemistry::decode:  unknown mod number = %d.  Type 'h' for help\n", mod);
+      Serial.printf("C::decode:  unknown mod = %d. 'h'\n", mod);
     }
     return ( result );
 }
@@ -205,7 +206,7 @@ uint8_t Chemistry::encode(const String mod_str)
     else
     {
         result = 99;
-        Serial.printf("Chemistry::encode:  unknown mod = %s.  Type 'h' for help\n", mod_str.c_str());
+        Serial.printf("C::encode:  unknown mod = %s.  'h'\n", mod_str.c_str());
     }
     return ( result );
 }
@@ -348,7 +349,7 @@ void Coulombs::apply_soc(const double soc, const float temp_c)
 // Capacity
 double Coulombs::calculate_capacity(const float temp_c)
 {
-  return( q_cap_rated_scaled_ * (1-chem_.dqdt*(temp_c - t_rated_)) );
+  return( q_cap_rated_scaled_ * (1+chem_.dqdt*(temp_c - t_rated_)) );
 }
 
 /* Coulombs::count_coulombs:  Count coulombs based on true=actual capacity

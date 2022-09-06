@@ -322,7 +322,7 @@ public:
   TempSensor* SensorTb;       // Tb sense
   General2_Pole* TbSenseFilt; // Linear filter for Tb. There are 1 Hz AAFs in hardware for Vb and Ib
   SlidingDeadband *SdTb;      // Non-linear filter for Tb
-  BatteryModel *Sim;          // Used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off
+  BatterySim *Sim;            // Used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off
   unsigned long int elapsed_inj;  // Injection elapsed time, ms
   unsigned long int start_inj;// Start of calculated injection, ms
   unsigned long int stop_inj; // Stop of calculated injection, ms
