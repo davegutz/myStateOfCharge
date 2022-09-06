@@ -217,7 +217,7 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
   ib_quiet_thr_ = QUIET_A*ib_quiet_sclr_;
   faultAssign( !rp.mod_ib() && abs(ib_quiet_)<=ib_quiet_thr_ && !reset_loc, IB_DSCN_FLT );   // initializes false
   failAssign( QuietPer->calculate(dscn_flt(), QUIET_S, QUIET_R, Sen->T, reset_loc), IB_DSCN_FA);
-  debug_m13(Sen);
+  // debug_m13(Sen);
 }
 
 // Voltage wraparound logic for current selection

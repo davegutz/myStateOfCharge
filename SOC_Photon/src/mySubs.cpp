@@ -71,9 +71,9 @@ void print_serial_header(void)
 {
   if ( ( rp.debug==4 || rp.debug==26 ) )
   {
-    Serial.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,     Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,\n");
+    Serial.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,\n");
     if ( !cp.blynking )
-      Serial1.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,     Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,\n");
+      Serial1.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc, voc_soc,   Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,\n");
   }
 }
 void print_serial_sim_header(void)
@@ -100,10 +100,10 @@ void print_signal_sel_header(void)
 // Print strings
 void create_print_string(Publish *pubList)
 {
-  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %d,  %5.2f,%7.5f,%7.5f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
+  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %d,  %5.2f,%7.5f,%7.5f,%7.5f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
     rp.mon_mod, pubList->sat, rp.ib_select, rp.modeling,
-    pubList->Tb, pubList->Vb, pubList->Ib, pubList->ioc,
+    pubList->Tb, pubList->Vb, pubList->Ib, pubList->ioc, pubList->voc_soc,
     pubList->Vsat, pubList->dV_dyn, pubList->Voc_stat, pubList->Voc_ekf,
     pubList->y_ekf,
     pubList->soc_model, pubList->soc_ekf, pubList->soc,
@@ -115,10 +115,10 @@ void create_short_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
   if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;
   else cTime = Sen->control_time;
 
-  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,%10.3f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
+  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,%10.3f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
     rp.mon_mod, pubList->sat, rp.ib_select, rp.modeling,
-    Mon->Tb(), Mon->Vb(), Mon->Ib(), Mon->ioc(),
+    Mon->Tb(), Mon->Vb(), Mon->Ib(), Mon->ioc(), Mon->voc_soc(), 
     Mon->Vsat(), Mon->dV_dyn(), Mon->Voc_stat(), Mon->Hx(),
     Mon->y_ekf(),
     Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(),

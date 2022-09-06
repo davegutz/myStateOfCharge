@@ -90,19 +90,20 @@ const float T_R_BB[M_H_BB*N_H_BB] = // r(soc, dv) table.    // DAG 6/13/2022 tun
 
 // LION 100 Ah, 12v LiFePO4.  "LION" placeholder.  Data fabricated.   Useful to test weird shapes T=40 (Dt15)
 // shifted Battleborn because don't have real data yet; test structure of program
-const uint8_t M_T_LI  = 3;    // Number temperature breakpoints for voc table
+const uint8_t M_T_LI  = 4;    // Number temperature breakpoints for voc table
 const uint8_t N_S_LI  = 18;   // Number soc breakpoints for voc table
 const float Y_T_LI[M_T_LI] =  //Temperature breakpoints for voc table
-        { 5., 25., 40. }; 
+        { 5., 11.1, 25., 40. }; 
 const float X_SOC_LI[N_S_LI] =      //soc breakpoints for voc table
         { -0.15, 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99, 0.995, 1.00};
 const float T_VOC_LI[M_T_LI*N_S_LI] = // r(soc, dv) table
         { 4.00, 4.00,  4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
+          4.00, 4.00,  4.00,  9.50,  12.00, 12.50, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.2,  13.23, 13.60, 14.46,
           4.00, 4.00,  10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
-          4.00, 4.00,  11.00, 13.60, 13.77, 13.85, 13.89, 13.95, 13.99, 14.03, 14.04, 13.59, 13.54, 13.21, 13.25, 13.27, 14.72, 15.50};
-const uint8_t N_N_LI = 3;   // Number of temperature breakpoints for x_soc_min table
-const float X_SOC_MIN_LI[N_N_LI] =  { 5.,   20.,  40.};  // Temperature breakpoints for soc_min table
-const float T_SOC_MIN_LI[N_N_LI] =  { 0.10, 0.05, 0.03}; // soc_min(t)
+          4.00, 4.00,  11.00, 13.60, 13.77, 13.85, 13.89, 13.95, 13.99, 14.03, 14.04, 13.80, 13.54, 13.21, 13.25, 13.27, 14.72, 15.50};
+const uint8_t N_N_LI = 4;   // Number of temperature breakpoints for x_soc_min table
+const float X_SOC_MIN_LI[N_N_LI] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
+const float T_SOC_MIN_LI[N_N_LI] =  { 0.10, 0.07,  0.05, 0.03}; // soc_min(t)
 // Hysteresis
 const uint8_t M_H_LI  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
 const uint8_t N_H_LI  = 9;          // Number of dv breakpoints in r(dv) table t_r
@@ -117,14 +118,15 @@ const float T_R_LI[M_H_LI*N_H_LI] = // r(soc, dv) table
 
 
 // LION control EKF curve that is monotonic increasing
-const uint8_t M_T_LIE  = 3;    // Number temperature breakpoints for voc table
+const uint8_t M_T_LIE  = 4;    // Number temperature breakpoints for voc table
 const uint8_t N_S_LIE  = 18;   // Number soc breakpoints for voc table
 const float Y_T_LIE[M_T_LIE] =  //Temperature breakpoints for voc table
-        { 5., 25., 40. }; 
+        { 5., 11.1, 25., 40. }; 
 const float X_SOC_LIE[N_S_LIE] =      //soc breakpoints for voc table
         { -0.15, 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99, 0.995, 1.00};
 const float T_VOC_LIE[M_T_LIE*N_S_LIE] = // r(soc, dv) table
         { 4.00, 4.00,  4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
+          4.00, 4.00,  4.00,  9.50,  12.00, 12.50, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.2,  13.23, 13.60, 14.46,
           4.00, 4.00,  10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
           4.00, 4.00,  11.00, 13.60, 13.77, 13.81, 13.84, 13.86, 13.90, 13.94, 13.98, 14.02, 14.06, 14.10, 14.14, 14.18, 14.72, 15.50};
 const uint8_t N_N_LIE = 4;   // Number of temperature breakpoints for x_soc_min table

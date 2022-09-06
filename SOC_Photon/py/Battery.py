@@ -122,10 +122,11 @@ class Battery(Coulombs):
         self.lut_voc0 = myTables.TableInterp2D(x0, y0, data_interp0)
         # LION Bmon=1, Bsim=1
         t_x_soc1 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
-        t_y_t1 = [5.,  20.,   40.]
+        t_y_t1 = [5.,  11.1,   20.,   40.]
         t_voc1 = [4.00, 4.00,  4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
+                  4.00, 4.00,  8.00,  11.70, 12.50, 12.60, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.76, 14.46,
                   4.00, 4.00,  10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
-                  4.00, 4.00,  11.00, 13.60, 13.77, 13.85, 13.89, 13.95, 13.99, 14.03, 14.04, 13.59, 13.54, 13.21, 13.25, 13.27, 14.72, 15.50]
+                  4.00, 4.00,  11.00, 13.60, 13.77, 13.85, 13.89, 13.95, 13.99, 14.03, 14.04, 13.80, 13.54, 13.21, 13.25, 13.27, 14.72, 15.50]
 
         x1 = np.array(t_x_soc1)
         y1 = np.array(t_y_t1)
@@ -133,9 +134,10 @@ class Battery(Coulombs):
         self.lut_voc1 = myTables.TableInterp2D(x1, y1, data_interp1)
         # LIE Bmon=2
         t_x_soc2 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
-        t_y_t2 = [5.,  20.,   40.]
-        t_voc2 = [4.00, 4.00,  4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
-                  4.00, 4.00,  10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
+        t_y_t2 = [5.,  11.1,  20.,   40.]
+        t_voc2 = [4.00, 4.00, 4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
+                  4.00, 4.00, 8.00,  11.70, 12.50, 12.60, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.76, 14.46,
+                  4.00, 4.00, 10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
                   4.00, 4.00, 11.00, 13.60, 13.77, 13.81, 13.84, 13.86, 13.90, 13.94, 13.98, 14.02, 14.06, 14.10, 14.14, 14.18, 14.72, 15.50]
 
         x2 = np.array(t_x_soc2)
@@ -173,8 +175,8 @@ class Battery(Coulombs):
         # self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
         self.temp_c = temp_c
         self.saved = Saved()  # for plots and prints
-        self.dv_hys = 0.  # Placeholder so BatteryModel can be plotted
-        self.dv_dyn = 0.  # Placeholder so BatteryModel can be plotted
+        self.dv_hys = 0.  # Placeholder so BatterySim can be plotted
+        self.dv_dyn = 0.  # Placeholder so BatterySim can be plotted
         self.bms_off = False
         self.mod = 7
         self.sel = 0
@@ -328,6 +330,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.Ib = 0.
         self.Vb = 0.
         self.Voc_stat = 0.
+        self.voc_soc = 0.
         self.Voc = 0.
         self.Vsat = 0.
         self.dV_dyn = 0.
@@ -391,6 +394,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.voc_stat = self.voc - self.dv_hys
         self.ioc = self.hys.ioc
         self.bms_off = self.temp_c <= low_t  # KISS
+        self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
         if self.bms_off:
             self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
             self.ib = 0.
@@ -530,6 +534,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.dv_hys.append(self.dv_hys)
         self.saved.dv_dyn.append(self.dv_dyn)
         self.saved.voc.append(self.voc)
+        self.saved.voc_soc.append(self.voc_soc)
         self.saved.voc_stat.append(self.voc_stat)
         self.saved.vbc.append(self.vbc())
         self.saved.vcd.append(self.vcd())
@@ -579,7 +584,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.Randles.save(time)
 
 
-class BatteryModel(Battery):
+class BatterySim(Battery):
     """Extend basic class to run a model"""
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
@@ -613,7 +618,7 @@ class BatteryModel(Battery):
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
-        s = prefix + "BatteryModel:\n"
+        s = prefix + "BatterySim:\n"
         s += "  sat_ib_max =      {:7.3f}  // Current cutback to be applied to modeled ib output, A\n".\
             format(self.sat_ib_max)
         s += "  ib_null    =      {:7.3f}  // Current cutback value for voc=vsat, A\n".\
@@ -634,12 +639,12 @@ class BatteryModel(Battery):
             format(self.voc_stat)
         s += "  mod     =               {:f}  // Modeling\n".format(self.mod)
         s += "  \n  "
-        s += self.hys.__str__(prefix + 'BatteryModel:')
+        s += self.hys.__str__(prefix + 'BatterySim:')
         s += "  \n  "
-        s += Battery.__str__(self, prefix + 'BatteryModel:')
+        s += Battery.__str__(self, prefix + 'BatterySim:')
         return s
 
-    def calculate(self, chem, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None, sat_init=None):  # BatteryModel
+    def calculate(self, chem, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None, sat_init=None):  # BatterySim
         self.chm = chem
         if self.chm==0:
             self.lut_voc = self.lut_voc0
@@ -648,7 +653,7 @@ class BatteryModel(Battery):
         elif self.chm==2:
             self.lut_voc = self.lut_voc2
         else:
-            print("BatteryModel.calculate:  bad chem value=", chem)
+            print("BatterySim.calculate:  bad chem value=", chem)
             exit(1)
         self.dt = dt
         self.temp_c = temp_c
@@ -734,7 +739,7 @@ class BatteryModel(Battery):
         return a, b, c, d
 
     def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, soc_m_init=None, mon_delta_q=None, mon_sat=None):
-        # BatteryModel
+        # BatterySim
         """Coulomb counter based on true=actual capacity
         Internal resistance of battery is a loss
         Inputs:
@@ -785,7 +790,7 @@ class BatteryModel(Battery):
         self.t_last = self.temp_lim
         return self.soc
 
-    def save(self, time, dt):
+    def save(self, time, dt):  # BatterySim
         self.saved.time.append(time)
         self.saved.dt.append(dt)
         self.saved.ib.append(self.ib)
@@ -866,6 +871,7 @@ class Saved:
         self.vc = []
         self.vd = []
         self.voc = []
+        self.voc_soc = []
         self.voc_stat = []
         self.dv_hys = []
         self.dv_dyn = []
@@ -924,7 +930,7 @@ class Saved:
         self.t_last = []  # Past value of battery temperature used for rate limit memory, deg C
 
 
-def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, suffix=''):
+def overall_batt(mv, sv, rv, filename, fig_files=None, plot_title=None, n_fig=None, suffix=''):
     if fig_files is None:
         fig_files = []
 
@@ -934,45 +940,45 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     plt.subplot(321)
     # plt.subplot_mosaic("A")
     plt.title(plot_title)
-    plt.plot(ms.time, ms.ib, color='green', label='ib'+suffix)
-    plt.plot(ss.time, ss.ioc, color='magenta', linestyle='--', label='ioc'+suffix)
-    plt.plot(ms.time, ms.irc, color='red', linestyle='-.', label='i_r_ct'+suffix)
-    plt.plot(ms.time, ms.icd, color='cyan', linestyle=':', label='i_c_dif'+suffix)
-    plt.plot(ms.time, ms.ird, color='orange', linestyle=':', label='i_r_dif'+suffix)
-    # plt.plot(ms.time, ms.ib, color='black', linestyle='--', label='Ioc'+suffix)
+    plt.plot(mv.time, mv.ib, color='green', label='ib'+suffix)
+    plt.plot(sv.time, sv.ioc, color='magenta', linestyle='--', label='ioc'+suffix)
+    plt.plot(mv.time, mv.irc, color='red', linestyle='-.', label='i_r_ct'+suffix)
+    plt.plot(mv.time, mv.icd, color='cyan', linestyle=':', label='i_c_dif'+suffix)
+    plt.plot(mv.time, mv.ird, color='orange', linestyle=':', label='i_r_dif'+suffix)
+    # plt.plot(mv.time, mv.ib, color='black', linestyle='--', label='Ioc'+suffix)
     plt.legend(loc=1)
     plt.subplot(323)
     # plt.subplot_mosaic("C")
-    plt.plot(ms.time, ms.vb, color='green', label='vb'+suffix)
-    plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='vb_m'+suffix)
-    plt.plot(ms.time, ms.vc, color='blue', linestyle='-.', label='vc'+suffix)
-    plt.plot(ss.time, ss.vc, color='green', linestyle=':', label='vc_m'+suffix)
-    plt.plot(ms.time, ms.vd, color='red', label='vd'+suffix)
-    plt.plot(ss.time, ss.vd, color='orange', linestyle='--', label='vd_m'+suffix)
-    plt.plot(ms.time, ms.voc_stat, color='orange', linestyle='-.', label='voc_stat'+suffix)
-    plt.plot(ss.time, ss.voc_stat, color='cyan', linestyle=':', label='voc_stat_,'+suffix)
-    plt.plot(ms.time, ms.voc, color='magenta', label='voc'+suffix)
-    plt.plot(ss.time, ss.voc, color='black', linestyle='--', label='voc_m'+suffix)
+    plt.plot(mv.time, mv.vb, color='green', label='vb'+suffix)
+    plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_m'+suffix)
+    plt.plot(mv.time, mv.vc, color='blue', linestyle='-.', label='vc'+suffix)
+    plt.plot(sv.time, sv.vc, color='green', linestyle=':', label='vc_m'+suffix)
+    plt.plot(mv.time, mv.vd, color='red', label='vd'+suffix)
+    plt.plot(sv.time, sv.vd, color='orange', linestyle='--', label='vd_m'+suffix)
+    plt.plot(mv.time, mv.voc_stat, color='orange', linestyle='-.', label='voc_stat'+suffix)
+    plt.plot(sv.time, sv.voc_stat, color='cyan', linestyle=':', label='voc_stat_,'+suffix)
+    plt.plot(mv.time, mv.voc, color='magenta', label='voc'+suffix)
+    plt.plot(sv.time, sv.voc, color='black', linestyle='--', label='voc_m'+suffix)
     plt.legend(loc=1)
     plt.subplot(324)
     # plt.subplot_mosaic("D")
-    plt.plot(ms.time, ms.vbc_dot, color='green', label='vbc_dot'+suffix)
-    plt.plot(ms.time, ms.vcd_dot, color='blue', label='vcd_dot'+suffix)
+    plt.plot(mv.time, mv.vbc_dot, color='green', label='vbc_dot'+suffix)
+    plt.plot(mv.time, mv.vcd_dot, color='blue', label='vcd_dot'+suffix)
     plt.legend(loc=1)
     plt.subplot(322)
     # plt.subplot_mosaic("B")
-    plt.plot(ms.time, ms.soc, color='red', label='soc'+suffix)
-    plt.plot(ss.time, ss.soc, color='black', linestyle='dotted', label='soc_m'+suffix)
+    plt.plot(mv.time, mv.soc, color='red', label='soc'+suffix)
+    plt.plot(sv.time, sv.soc, color='black', linestyle='dotted', label='soc_m'+suffix)
     plt.legend(loc=1)
     plt.subplot(325)
     # plt.subplot_mosaic("D")
-    plt.plot(ss.time, ss.chm, color='red', linestyle='-', label='chm_m'+suffix)
-    plt.plot(ms.time, ms.chm, color='black', linestyle='--', label='chm'+suffix)
+    plt.plot(sv.time, sv.chm, color='red', linestyle='-', label='chm_m'+suffix)
+    plt.plot(mv.time, mv.chm, color='black', linestyle='--', label='chm'+suffix)
     plt.legend(loc=1)
     plt.subplot(326)
     # plt.subplot_mosaic("E")
-    plt.plot(ss.soc, ss.voc, color='red', linestyle='-', label='SIM voc vs soc'+suffix)
-    plt.plot(ms.soc, ms.voc, color='black', linestyle='--', label='MON voc vs soc'+suffix)
+    plt.plot(sv.soc, sv.voc, color='red', linestyle='-', label='SIM voc_stat vs soc'+suffix)
+    plt.plot(mv.soc, mv.voc_soc, color='black', linestyle='--', label='MON voc_soc'+suffix+' vs soc')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -982,16 +988,16 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     n_fig += 1
     plt.subplot(111)
     plt.title(plot_title)
-    plt.plot(ms.time, ms.vb, color='green', label='vb'+suffix)
-    plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='vb_m'+suffix)
-    plt.plot(ms.time, ms.vc, color='blue', linestyle='-.', label='vc'+suffix)
-    plt.plot(ss.time, ss.vc, color='green', linestyle=':', label='vc_m'+suffix)
-    plt.plot(ms.time, ms.vd, color='red', label='vd'+suffix)
-    plt.plot(ss.time, ss.vd, color='orange', linestyle='--', label='vd_m'+suffix)
-    plt.plot(ms.time, ms.voc_stat, color='orange', linestyle='-.', label='voc_stat'+suffix)
-    plt.plot(ss.time, ss.voc_stat, color='cyan', linestyle=':', label='voc_stat'+suffix)
-    plt.plot(ms.time, ms.voc, color='magenta', label='voc'+suffix)
-    plt.plot(ss.time, ss.voc, color='black', linestyle='--', label='voc_m'+suffix)
+    plt.plot(mv.time, mv.vb, color='green', label='vb'+suffix)
+    plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_m'+suffix)
+    plt.plot(mv.time, mv.vc, color='blue', linestyle='-.', label='vc'+suffix)
+    plt.plot(sv.time, sv.vc, color='green', linestyle=':', label='vc_m'+suffix)
+    plt.plot(mv.time, mv.vd, color='red', label='vd'+suffix)
+    plt.plot(sv.time, sv.vd, color='orange', linestyle='--', label='vd_m'+suffix)
+    plt.plot(mv.time, mv.voc_stat, color='orange', linestyle='-.', label='voc_stat'+suffix)
+    plt.plot(sv.time, sv.voc_stat, color='cyan', linestyle=':', label='voc_stat'+suffix)
+    plt.plot(mv.time, mv.voc, color='magenta', label='voc'+suffix)
+    plt.plot(sv.time, sv.voc, color='black', linestyle='--', label='voc_m'+suffix)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1001,29 +1007,29 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     n_fig += 1
     plt.subplot(321)
     plt.title(plot_title+' **SIM')
-    # plt.plot(ss.time, ref, color='black', label='curr dmd, A'+suffix)
-    plt.plot(ss.time, ss.ib, color='green', label='ib'+suffix)
-    plt.plot(ss.time, ss.irc, color='red',  linestyle='--', label='i_r_ct'+suffix)
-    plt.plot(ss.time, ss.icd, color='cyan',  linestyle='-.', label='i_c_dif'+suffix)
-    plt.plot(ss.time, ss.ird, color='orange', linestyle=':', label='i_r_dif'+suffix)
-    # plt.plot(ss.time, ss.ib, color='black', linestyle='--', label='Ioc'+suffix)
+    # plt.plot(sv.time, ref, color='black', label='curr dmd, A'+suffix)
+    plt.plot(sv.time, sv.ib, color='green', label='ib'+suffix)
+    plt.plot(sv.time, sv.irc, color='red',  linestyle='--', label='i_r_ct'+suffix)
+    plt.plot(sv.time, sv.icd, color='cyan',  linestyle='-.', label='i_c_dif'+suffix)
+    plt.plot(sv.time, sv.ird, color='orange', linestyle=':', label='i_r_dif'+suffix)
+    # plt.plot(sv.time, sv.ib, color='black', linestyle='--', label='Ioc'+suffix)
     plt.legend(loc=1)
     plt.subplot(323)
-    plt.plot(ss.time, ss.vb, color='green', label='vb'+suffix)
-    plt.plot(ss.time, ss.vc, color='blue', linestyle='--', label='vc'+suffix)
-    plt.plot(ss.time, ss.vd, color='red', linestyle='-.', label='vd'+suffix)
-    plt.plot(ss.time, ss.voc, color='orange', label='voc'+suffix)
-    plt.plot(ss.time, ss.voc_stat, color='magenta', linestyle=':', label='voc stat'+suffix)
+    plt.plot(sv.time, sv.vb, color='green', label='vb'+suffix)
+    plt.plot(sv.time, sv.vc, color='blue', linestyle='--', label='vc'+suffix)
+    plt.plot(sv.time, sv.vd, color='red', linestyle='-.', label='vd'+suffix)
+    plt.plot(sv.time, sv.voc, color='orange', label='voc'+suffix)
+    plt.plot(sv.time, sv.voc_stat, color='magenta', linestyle=':', label='voc stat'+suffix)
     plt.legend(loc=1)
     plt.subplot(325)
-    plt.plot(ss.time, ss.vbc_dot, color='green', label='vbc_dot'+suffix)
-    plt.plot(ss.time, ss.vcd_dot, color='blue', label='vcd_dot'+suffix)
+    plt.plot(sv.time, sv.vbc_dot, color='green', label='vbc_dot'+suffix)
+    plt.plot(sv.time, sv.vcd_dot, color='blue', label='vcd_dot'+suffix)
     plt.legend(loc=1)
     plt.subplot(322)
-    plt.plot(ss.time, ss.soc, color='red', label='soc'+suffix)
+    plt.plot(sv.time, sv.soc, color='red', label='soc'+suffix)
     plt.legend(loc=1)
     plt.subplot(326)
-    plt.plot(ss.soc, ss.voc, color='black', label='voc vs soc'+suffix)
+    plt.plot(sv.soc, sv.voc, color='black', label='voc vs soc'+suffix)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1033,34 +1039,34 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     n_fig += 1
     plt.subplot(321)
     plt.title(plot_title+' MON vs SIM')
-    plt.plot(ms.time, ms.ib, color='green', label='ib'+suffix)
-    plt.plot(ss.time, ss.ib, color='black', linestyle='--', label='ib_m'+suffix)
+    plt.plot(mv.time, mv.ib, color='green', label='ib'+suffix)
+    plt.plot(sv.time, sv.ib, color='black', linestyle='--', label='ib_m'+suffix)
     plt.legend(loc=1)
     plt.subplot(322)
-    plt.plot(ms.time, ms.vb, color='green', label='vb'+suffix)
-    plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='vb_m'+suffix)
-    plt.plot(ms.time, ms.voc, color='cyan', label='voc'+suffix)
-    plt.plot(ss.time, ss.voc, color='red', linestyle='--', label='voc_m'+suffix)
+    plt.plot(mv.time, mv.vb, color='green', label='vb'+suffix)
+    plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_m'+suffix)
+    plt.plot(mv.time, mv.voc, color='cyan', label='voc'+suffix)
+    plt.plot(sv.time, sv.voc, color='red', linestyle='--', label='voc_m'+suffix)
     plt.legend(loc=1)
     plt.subplot(323)
-    plt.plot(ms.time, ms.vb, color='green', label='vb'+suffix)
-    plt.plot(ss.time, ss.vb, color='orange', linestyle='--', label='vb_m'+suffix)
-    plt.plot(ms.time, ms.voc, color='cyan', linestyle='-.', label='voc'+suffix)
-    plt.plot(ss.time, ss.voc, color='red', linestyle=':', label='voc_m'+suffix)
-    plt.plot(ms.time, ms.voc_stat, color='magenta', linestyle=':', label='voc_stat'+suffix)
-    plt.plot(ss.time, ss.voc_stat, color='black', linestyle='--', label='voc_stat_m'+suffix)
+    plt.plot(mv.time, mv.vb, color='green', label='vb'+suffix)
+    plt.plot(sv.time, sv.vb, color='orange', linestyle='--', label='vb_m'+suffix)
+    plt.plot(mv.time, mv.voc, color='cyan', linestyle='-.', label='voc'+suffix)
+    plt.plot(sv.time, sv.voc, color='red', linestyle=':', label='voc_m'+suffix)
+    plt.plot(mv.time, mv.voc_stat, color='magenta', linestyle=':', label='voc_stat'+suffix)
+    plt.plot(sv.time, sv.voc_stat, color='black', linestyle='--', label='voc_stat_m'+suffix)
     plt.legend(loc=1)
     plt.subplot(324)
-    plt.plot(ss.time, ss.dv_dyn, color='green', label='dv_dyn'+suffix)
-    plt.plot(ms.time, ms.dv_dyn, color='red', linestyle='--', label='dv_dyn_m'+suffix)
+    plt.plot(sv.time, sv.dv_dyn, color='green', label='dv_dyn'+suffix)
+    plt.plot(mv.time, mv.dv_dyn, color='red', linestyle='--', label='dv_dyn_m'+suffix)
     plt.legend(loc=1)
     plt.subplot(325)
-    plt.plot(ms.time, ms.dv_hys, color='green', label='dv_hys'+suffix)
-    plt.plot(ss.time, ss.dv_hys, color='black', linestyle='--', label='dv_hys_m'+suffix)
+    plt.plot(mv.time, mv.dv_hys, color='green', label='dv_hys'+suffix)
+    plt.plot(sv.time, sv.dv_hys, color='black', linestyle='--', label='dv_hys_m'+suffix)
     plt.legend(loc=1)
     plt.subplot(326)
-    plt.plot(ms.time, ms.vb, color='green', label='vb'+suffix)
-    plt.plot(ss.time, ss.vb, color='black', linestyle='--', label='vb_m'+suffix)
+    plt.plot(mv.time, mv.vb, color='green', label='vb'+suffix)
+    plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_m'+suffix)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1070,32 +1076,32 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     n_fig += 1
     plt.subplot(331)
     plt.title(plot_title+' **EKF')
-    plt.plot(ms.time, ms.x_ekf, color='red', label='x ekf'+suffix)
+    plt.plot(mv.time, mv.x_ekf, color='red', label='x ekf'+suffix)
     plt.legend(loc=4)
     plt.subplot(332)
-    plt.plot(ms.time, ms.hx, color='cyan', label='hx ekf'+suffix)
-    plt.plot(ms.time, ms.z_ekf, color='black', linestyle='--', label='z ekf'+suffix)
+    plt.plot(mv.time, mv.hx, color='cyan', label='hx ekf'+suffix)
+    plt.plot(mv.time, mv.z_ekf, color='black', linestyle='--', label='z ekf'+suffix)
     plt.legend(loc=4)
     plt.subplot(333)
-    plt.plot(ms.time, ms.y_ekf, color='green', label='y ekf'+suffix)
-    plt.plot(ms.time, ms.y_filt, color='black', linestyle='--', label='y filt'+suffix)
-    plt.plot(ms.time, ms.y_filt2, color='cyan', linestyle='-.', label='y filt2'+suffix)
+    plt.plot(mv.time, mv.y_ekf, color='green', label='y ekf'+suffix)
+    plt.plot(mv.time, mv.y_filt, color='black', linestyle='--', label='y filt'+suffix)
+    plt.plot(mv.time, mv.y_filt2, color='cyan', linestyle='-.', label='y filt2'+suffix)
     plt.legend(loc=4)
     plt.subplot(334)
-    plt.plot(ms.time, ms.H, color='magenta', label='H ekf'+suffix)
+    plt.plot(mv.time, mv.H, color='magenta', label='H ekf'+suffix)
     plt.ylim(0, 150)
     plt.legend(loc=3)
     plt.subplot(335)
-    plt.plot(ms.time, ms.P, color='orange', label='P ekf'+suffix)
+    plt.plot(mv.time, mv.P, color='orange', label='P ekf'+suffix)
     plt.legend(loc=3)
     plt.subplot(336)
-    plt.plot(ms.time, ms.Fx, color='red', label='Fx ekf'+suffix)
+    plt.plot(mv.time, mv.Fx, color='red', label='Fx ekf'+suffix)
     plt.legend(loc=2)
     plt.subplot(337)
-    plt.plot(ms.time, ms.Bu, color='blue', label='Bu ekf'+suffix)
+    plt.plot(mv.time, mv.Bu, color='blue', label='Bu ekf'+suffix)
     plt.legend(loc=2)
     plt.subplot(338)
-    plt.plot(ms.time, ms.K, color='red', label='K ekf'+suffix)
+    plt.plot(mv.time, mv.K, color='red', label='K ekf'+suffix)
     plt.legend(loc=4)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1104,8 +1110,8 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     plt.figure()
     n_fig += 1
     plt.title(plot_title)
-    plt.plot(ms.time, ms.e_voc_ekf, color='blue', linestyle='-.', label='e_voc'+suffix)
-    plt.plot(ms.time, ms.e_soc_ekf, color='red', linestyle='dotted', label='e_soc_ekf'+suffix)
+    plt.plot(mv.time, mv.e_voc_ekf, color='blue', linestyle='-.', label='e_voc'+suffix)
+    plt.plot(mv.time, mv.e_soc_ekf, color='red', linestyle='dotted', label='e_soc_ekf'+suffix)
     plt.ylim(-0.01, 0.01)
     plt.legend(loc=2)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -1115,9 +1121,9 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     plt.figure()
     n_fig += 1
     plt.title(plot_title)
-    plt.plot(ms.time, ms.voc, color='red', label='voc'+suffix)
-    plt.plot(ms.time, ms.Voc_ekf, color='blue', linestyle='-.', label='Voc_ekf'+suffix)
-    plt.plot(ss.time, ss.voc, color='green', linestyle=':', label='voc_m'+suffix)
+    plt.plot(mv.time, mv.voc, color='red', label='voc'+suffix)
+    plt.plot(mv.time, mv.Voc_ekf, color='blue', linestyle='-.', label='Voc_ekf'+suffix)
+    plt.plot(sv.time, sv.voc, color='green', linestyle=':', label='voc_m'+suffix)
     plt.legend(loc=4)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1126,9 +1132,9 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     plt.figure()
     n_fig += 1
     plt.title(plot_title)
-    plt.plot(ms.time, ms.soc_ekf, color='blue', label='soc_ekf'+suffix)
-    plt.plot(ss.time, ss.soc, color='green', linestyle='-.', label='soc_m'+suffix)
-    plt.plot(ms.time, ms.soc, color='red', linestyle=':', label='soc'+suffix)
+    plt.plot(mv.time, mv.soc_ekf, color='blue', label='soc_ekf'+suffix)
+    plt.plot(sv.time, sv.soc, color='green', linestyle='-.', label='soc_m'+suffix)
+    plt.plot(mv.time, mv.soc, color='red', linestyle=':', label='soc'+suffix)
     plt.legend(loc=4)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1137,8 +1143,8 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     plt.figure()
     n_fig += 1
     plt.title(plot_title)
-    plt.plot(ms.time, ms.e_voc_ekf, color='blue', linestyle='-.', label='e_voc'+suffix)
-    plt.plot(ms.time, ms.e_soc_ekf, color='red', linestyle='dotted', label='e_soc_ekf'+suffix)
+    plt.plot(mv.time, mv.e_voc_ekf, color='blue', linestyle='-.', label='e_voc'+suffix)
+    plt.plot(mv.time, mv.e_soc_ekf, color='red', linestyle='dotted', label='e_soc_ekf'+suffix)
     plt.legend(loc=2)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1148,14 +1154,14 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     n_fig += 1
     plt.subplot(221)
     plt.title(plot_title)
-    plt.plot(ss.time, ss.soc, color='red', label='soc'+suffix)
+    plt.plot(sv.time, sv.soc, color='red', label='soc'+suffix)
     plt.legend(loc=1)
     plt.subplot(223)
-    plt.plot(ss.time, ss.ib, color='blue', label='ib, A'+suffix)
-    plt.plot(ss.time, ss.ioc, color='green', label='ioc hys indicator, A'+suffix)
+    plt.plot(sv.time, sv.ib, color='blue', label='ib, A'+suffix)
+    plt.plot(sv.time, sv.ioc, color='green', label='ioc hys indicator, A'+suffix)
     plt.legend(loc=1)
     plt.subplot(224)
-    plt.plot(ss.time, ss.dv_hys, color='red', label='dv_hys, V'+suffix)
+    plt.plot(sv.time, sv.dv_hys, color='red', label='dv_hys, V'+suffix)
     plt.legend(loc=2)
     fig_file_name = filename + "_" + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1165,7 +1171,7 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     n_fig += 1
     plt.subplot(111)
     plt.title(plot_title)
-    plt.plot(ss.soc, ss.voc, color='black', linestyle='dotted', label='SIM voc vs soc'+suffix)
+    plt.plot(sv.soc, sv.voc, color='black', linestyle='dotted', label='SIM voc vs soc'+suffix)
     plt.legend(loc=2)
     fig_file_name = filename + "_" + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1175,19 +1181,19 @@ def overall(ms, ss, mrs, filename, fig_files=None, plot_title=None, n_fig=None, 
     n_fig += 1
     plt.subplot(221)
     plt.title(plot_title)
-    plt.plot(mrs.time[1:], mrs.u[1:, 1], color='red', label='Mon Randles u[2]=vb'+suffix)
-    plt.plot(mrs.time[1:], mrs.y[1:], color='blue', label='Mon Randles y=voc'+suffix)
+    plt.plot(rv.time[1:], rv.u[1:, 1], color='red', label='Mon Randles u[2]=vb'+suffix)
+    plt.plot(rv.time[1:], rv.y[1:], color='blue', label='Mon Randles y=voc'+suffix)
     plt.legend(loc=2)
     plt.subplot(222)
-    plt.plot(mrs.time[1:], mrs.x[1:, 0], color='blue', label='Mon Randles x[1]'+suffix)
-    plt.plot(mrs.time[1:], mrs.x[1:, 1], color='red', label='Mon Randles x[2]'+suffix)
+    plt.plot(rv.time[1:], rv.x[1:, 0], color='blue', label='Mon Randles x[1]'+suffix)
+    plt.plot(rv.time[1:], rv.x[1:, 1], color='red', label='Mon Randles x[2]'+suffix)
     plt.legend(loc=2)
     plt.subplot(223)
-    plt.plot(mrs.time[1:], mrs.x_dot[1:, 0], color='blue', label='Mon Randles x_dot[1]'+suffix)
-    plt.plot(mrs.time[1:], mrs.x_dot[1:, 1], color='red', label='Mon Randles x_dot[2]'+suffix)
+    plt.plot(rv.time[1:], rv.x_dot[1:, 0], color='blue', label='Mon Randles x_dot[1]'+suffix)
+    plt.plot(rv.time[1:], rv.x_dot[1:, 1], color='red', label='Mon Randles x_dot[2]'+suffix)
     plt.legend(loc=2)
     plt.subplot(224)
-    plt.plot(mrs.time[1:], mrs.u[1:, 0], color='blue', label='Mon Randles u[1]=Ib'+suffix)
+    plt.plot(rv.time[1:], rv.u[1:, 0], color='blue', label='Mon Randles u[1]=Ib'+suffix)
     plt.legend(loc=2)
     fig_file_name = filename + "_" + str(n_fig) + ".png"
     fig_files.append(fig_file_name)

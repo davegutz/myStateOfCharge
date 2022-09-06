@@ -21,98 +21,98 @@ Coulomb Counter built in."""
 import numpy as np
 from numpy.random import randn
 import Battery
-from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, Retained
-from Battery import overall as overalls
+from Battery import Battery, BatteryMonitor, BatterySim, is_sat, Retained
+from Battery import overall_batt
 from TFDelay import TFDelay
 from MonSimNomConfig import *  # Global config parameters.   Overwrite in your own calls for studies
 from datetime import datetime, timedelta
 from Scale import Scale
 
 
-def save_clean_file(mons, csv_file, unit_key):
+def save_clean_file(mon_ver, csv_file, unit_key):
     default_header_str = "unit,               hm,                  cTime,        dt,       sat,sel,mod,\
       Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,"
-    n = len(mons.time)
+    n = len(mon_ver.time)
     date_time_start = datetime.now()
     with open(csv_file, "w") as output:
         output.write(default_header_str + "\n")
         for i in range(n):
             s = unit_key + ','
-            dt_dt = timedelta(seconds=mons.time[i]-mons.time[0])
+            dt_dt = timedelta(seconds=mon_ver.time[i]-mon_ver.time[0])
             time_stamp = date_time_start + dt_dt
             s += time_stamp.strftime("%Y-%m-%dT%H:%M:%S,")
-            s += "{:7.3f},".format(mons.time[i])
-            s += "{:7.3f},".format(mons.dt[i])
-            s += "{:1.0f},".format(mons.sat[i])
-            s += "{:1.0f},".format(mons.sel[i])
-            s += "{:1.0f},".format(mons.mod_data[i])
-            s += "{:7.3f},".format(mons.Tb[i])
-            s += "{:7.3f},".format(mons.Vb[i])
-            s += "{:7.3f},".format(mons.Ib[i])
-            s += "{:7.3f},".format(mons.Vsat[i])
-            s += "{:7.3f},".format(mons.dV_dyn[i])
-            s += "{:7.3f},".format(mons.Voc_stat[i])
-            s += "{:7.3f},".format(mons.Voc_ekf[i])
-            s += "{:7.3f},".format(mons.y_ekf[i])
-            s += "{:7.3f},".format(mons.soc_m[i])
-            s += "{:7.3f},".format(mons.soc_ekf[i])
-            s += "{:7.3f},".format(mons.soc[i])
+            s += "{:7.3f},".format(mon_ver.time[i])
+            s += "{:7.3f},".format(mon_ver.dt[i])
+            s += "{:1.0f},".format(mon_ver.sat[i])
+            s += "{:1.0f},".format(mon_ver.sel[i])
+            s += "{:1.0f},".format(mon_ver.mod_data[i])
+            s += "{:7.3f},".format(mon_ver.Tb[i])
+            s += "{:7.3f},".format(mon_ver.Vb[i])
+            s += "{:7.3f},".format(mon_ver.Ib[i])
+            s += "{:7.3f},".format(mon_ver.Vsat[i])
+            s += "{:7.3f},".format(mon_ver.dV_dyn[i])
+            s += "{:7.3f},".format(mon_ver.Voc_stat[i])
+            s += "{:7.3f},".format(mon_ver.Voc_ekf[i])
+            s += "{:7.3f},".format(mon_ver.y_ekf[i])
+            s += "{:7.3f},".format(mon_ver.soc_m[i])
+            s += "{:7.3f},".format(mon_ver.soc_ekf[i])
+            s += "{:7.3f},".format(mon_ver.soc[i])
             s += "\n"
             output.write(s)
         print("Wrote(save_clean_file):", csv_file)
 
 
-def save_clean_file_sim(sims, csv_file, unit_key):
+def save_clean_file_sim(sim_ver, csv_file, unit_key):
     header_str = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_stat_m,dv_dyn_m,vb_m,ib_m,sat_m,dq_m,\
     soc_m,reset_m,"
-    n = len(sims.time)
+    n = len(sim_ver.time)
     with open(csv_file, "w") as output:
         output.write(header_str + "\n")
         for i in range(n):
             s = unit_key + ','
-            s += "{:13.3f},".format(sims.time[i])
-            s += "{:5.2f},".format(sims.Tb_m[i])
-            s += "{:5.2f},".format(sims.Tbl_m[i])
-            s += "{:8.3f},".format(sims.vsat_m[i])
-            s += "{:5.2f},".format(sims.voc_stat_m[i])
-            s += "{:5.2f},".format(sims.dv_dyn_m[i])
-            s += "{:5.2f},".format(sims.vb_m[i])
-            s += "{:8.3f},".format(sims.ib_m[i])
-            s += "{:7.3f},".format(sims.sat_m[i])
-            s += "{:5.3f},".format(sims.dq_m[i])
-            s += "{:7.3f},".format(sims.soc_m[i])
-            s += "{:7.3f},".format(sims.reset_m[i])
+            s += "{:13.3f},".format(sim_ver.time[i])
+            s += "{:5.2f},".format(sim_ver.Tb_m[i])
+            s += "{:5.2f},".format(sim_ver.Tbl_m[i])
+            s += "{:8.3f},".format(sim_ver.vsat_m[i])
+            s += "{:5.2f},".format(sim_ver.voc_stat_m[i])
+            s += "{:5.2f},".format(sim_ver.dv_dyn_m[i])
+            s += "{:5.2f},".format(sim_ver.vb_m[i])
+            s += "{:8.3f},".format(sim_ver.ib_m[i])
+            s += "{:7.3f},".format(sim_ver.sat_m[i])
+            s += "{:5.3f},".format(sim_ver.dq_m[i])
+            s += "{:7.3f},".format(sim_ver.soc_m[i])
+            s += "{:7.3f},".format(sim_ver.reset_m[i])
             s += "\n"
             output.write(s)
         print("Wrote(save_clean_file_sim):", csv_file)
 
 
-def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
+def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
               t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=0, Bmon=0):
-    if saved_sim_old and len(saved_sim_old.time) < len(saved_old.time):
-        t = saved_sim_old.time
+    if sim_old and len(sim_old.time) < len(mon_old.time):
+        t = sim_old.time
     else:
-        t = saved_old.time
-    reset_sel = saved_old.res
-    Vb = saved_old.Vb
-    Ib_past = saved_old.Ib_past
-    Tb = saved_old.Tb
-    soc_init = saved_old.soc[0]
-    soc_ekf_init = saved_old.soc_ekf[0]
-    soc_m_init = saved_old.soc_m[0]
-    sat_init = saved_old.sat[0]
-    chm = saved_old.chm
-    chm_m = saved_sim_old.chm_m
-    if saved_sim_old:
-        sat_m_init = saved_sim_old.sat_m[0]
+        t = mon_old.time
+    reset_sel = mon_old.res
+    Vb = mon_old.Vb
+    Ib_past = mon_old.Ib_past
+    Tb = mon_old.Tb
+    soc_init = mon_old.soc[0]
+    soc_ekf_init = mon_old.soc_ekf[0]
+    soc_m_init = mon_old.soc_m[0]
+    sat_init = mon_old.sat[0]
+    chm = mon_old.chm
+    chm_m = sim_old.chm_m
+    if sim_old:
+        sat_m_init = sim_old.sat_m[0]
     else:
-        sat_m_init = saved_old.Voc_stat[0] > saved_old.Vsat[0]
+        sat_m_init = mon_old.Voc_stat[0] > mon_old.Vsat[0]
     t_len = len(t)
     rp = Retained()
-    rp.modeling = saved_old.mod()
+    rp.modeling = mon_old.mod()
     print("rp.modeling is ", rp.modeling)
     tweak_test = rp.tweak_test()
-    temp_c = saved_old.Tb[0]
+    temp_c = mon_old.Tb[0]
 
     # Setup
     scale = model_bat_cap / Battery.RATED_BATT_CAP
@@ -120,13 +120,13 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
         scale *= scale_in
     s_q = Scale(1., 3., 0.000005, 0.00005)
     s_r = Scale(1., 3., 0.001, 1.)   # t_Ib_fail = 1000 o
-    sim = BatteryModel(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
+    sim = BatterySim(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
                        dv_hys=dv_hys, sres=sres, Bsim=Bsim)
     mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
                          temp_c=temp_c, hys_scale=hys_scale_monitor, tweak_test=tweak_test, dv_hys=dv_hys, sres=sres,
                          scaler_q=s_q, scaler_r=s_r, Bmon=Bmon)
     # need Tb input.   perhaps need higher order to enforce basic type 1 response
-    Is_sat_delay = TFDelay(in_=saved_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
+    Is_sat_delay = TFDelay(in_=mon_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
     # time loop
     now = t[0]
@@ -135,7 +135,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
         reset = (t[i] <= init_time) or (t[i] < 0. and t[0] > init_time)
         if reset_sel is not None:
             reset = reset or reset_sel[i]
-        saved_old.i = i
+        mon_old.i = i
         if i == 0:
             T = t[1] - t[0]
         else:
@@ -154,8 +154,8 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
             mon.sat = sat_init
 
         # Models
-        if saved_sim_old and not use_ib_mon:
-            ib_in_m = saved_sim_old.ib_in_m[i]
+        if sim_old and not use_ib_mon:
+            ib_in_m = sim_old.ib_in_m[i]
         else:
             ib_in_m = Ib_past[i]
         sim.calculate(chem=chm_m[i], temp_c=Tb[i], soc=sim.soc, curr_in=ib_in_m, dt=T, q_capacity=sim.q_capacity,
@@ -180,7 +180,7 @@ def replicate(saved_old, saved_sim_old=None, init_time=-4., dv_hys=0., sres=1., 
         if t_Ib_fail and t[i] > t_Ib_fail:
             Ib_ = Ib_fail
         else:
-            Ib_ = saved_old.Ib[i]
+            Ib_ = mon_old.Ib[i]
         if t_Vb_fail and t[i] >= t_Vb_fail:
             Vb_ = Vb_fail
         else:
@@ -271,9 +271,9 @@ if __name__ == '__main__':
 
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key)
-        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'ioc', 'Vsat', 'dV_dyn', 'Voc_stat',
+        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'ioc', 'voc_soc', 'Vsat', 'dV_dyn', 'Voc_stat',
                 'Voc_ekf', 'y_ekf', 'soc_m', 'soc_ekf', 'soc')
-        data_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
+        mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
                                  encoding=None).view(np.recarray)
 
         # Load sel (old)
@@ -286,11 +286,11 @@ if __name__ == '__main__':
                     'mib', 'Ib_s', 'Vb_h', 'Vb_m', 'mvb', 'Vb_s', 'Tb_h', 'Tb_s', 'mtb', 'Tb_f',
                     'vb_sel', 'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel',
                     'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr')
-        sel_old = None
+        sel_old_raw = None
         if sel_file_clean:
-            sel_old = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,
+            sel_old_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,
                                     encoding=None).view(np.recarray)
-        saved_old = SavedData(data=data_old, sel=sel_old, time_end=time_end)
+        mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, time_end=time_end)
 
         # Load _m v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
@@ -298,14 +298,14 @@ if __name__ == '__main__':
         cols_sim = ('c_time', 'chm_m', 'Tb_m', 'Tbl_m', 'vsat_m', 'voc_stat_m', 'dv_dyn_m', 'vb_m', 'ib_m',
                     'ib_in_m', 'ioc_m', 'sat_m', 'dq_m', 'soc_m', 'reset_m')
         if data_file_sim_clean:
-            data_sim_old = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
+            sim_old_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
                                          dtype=float, encoding=None).view(np.recarray)
-            saved_sim_old = SavedDataSim(time_ref=saved_old.time_ref, data=data_sim_old, time_end=time_end)
+            sim_old = SavedDataSim(time_ref=mon_old.time_ref, data=sim_old_raw, time_end=time_end)
         else:
-            saved_sim_old = None
+            sim_old = None
 
         # How to initialize
-        if saved_old.time[0] == 0.:  # no initialization flat detected at beginning of recording
+        if mon_old.time[0] == 0.:  # no initialization flat detected at beginning of recording
             init_time = 1.
         else:
             if init_time_in:
@@ -313,14 +313,14 @@ if __name__ == '__main__':
             else:
                 init_time = -4.
         # Get dv_hys from data
-        dv_hys = saved_old.dV_hys[0]
+        dv_hys = mon_old.dV_hys[0]
 
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
-        mons, sims, monrs, sims_m = replicate(saved_old, saved_sim_old=saved_sim_old, init_time=init_time,
+        mon_ver, sim_ver, randles_ver, sim_m_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
                                               dv_hys=dv_hys, sres=1.0, t_Ib_fail=t_Ib_fail, use_ib_mon=use_ib_mon_in,
                                               scale_in=scale_in)
-        save_clean_file(mons, mon_file_save, 'mon_rep' + date_)
+        save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots
         n_fig = 0
@@ -328,10 +328,10 @@ if __name__ == '__main__':
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        n_fig, fig_files = overalls(mons, sims, monrs, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
-                                    suffix='_new')  # sim over mon
-        n_fig, fig_files = overall(saved_old, mons, saved_sim_old, sims, sims_m, filename, fig_files,
-                                   plot_title=plot_title, n_fig=n_fig, new_s_s=sims)  # mon over data
+        n_fig, fig_files = overall_batt(mon_ver, sim_ver, randles_ver, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
+                                    suffix='_ver')  # sim over mon
+        n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_m_ver, filename, fig_files,
+                                   plot_title=plot_title, n_fig=n_fig)  # mon over data
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
         cleanup_fig_files(fig_files)
 

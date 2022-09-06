@@ -3,8 +3,8 @@
 import numpy as np
 from numpy.random import randn
 import Battery
-from Battery import Battery, BatteryMonitor, BatteryModel, is_sat, Retained
-from Battery import overall as overalls
+from Battery import Battery, BatteryMonitor, BatterySim, is_sat, Retained
+from Battery import overall_batt
 from TFDelay import TFDelay
 from MonSimNomConfig import *  # Global config parameters.   Overwrite in your own calls for studies
 from datetime import datetime, timedelta
