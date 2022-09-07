@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 
 def plot_soc_photon_data(r, key):
-    var_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,"
+    var_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,"
     count = 0
     i = 0
     cTime_last = None
@@ -64,10 +64,10 @@ def plot_soc_photon_data(r, key):
                 Voc_stat = float(list_r[12])
                 Voc_ekf = float(list_r[13])
                 y_ekf = float(list_r[14])
-                soc_m = float(list_r[15])
+                soc_s = float(list_r[15])
                 soc_ekf = float(list_r[16])
                 soc = float(list_r[17])
-                print(count, unit, hm, cTime, dt, sat, sel, mod, Tb, Vb, Ib, Vsat, dV_dyn, Voc_stat, Voc_ekf, y_ekf, soc_m,
+                print(count, unit, hm, cTime, dt, sat, sel, mod, Tb, Vb, Ib, Vsat, dV_dyn, Voc_stat, Voc_ekf, y_ekf, soc_s,
                       soc_ekf, soc)
                 i += 1
                 # Plot when have at least 2 points available
@@ -79,7 +79,7 @@ def plot_soc_photon_data(r, key):
                         n_v = int(time_span / T_maybe)
                         t_v = np.arange(-n_v * T_maybe, 0, T_maybe)
                         y_vec0 = np.zeros((len(t_v), 3))
-                        y_vec0[:, 0] = soc_m
+                        y_vec0[:, 0] = soc_s
                         y_vec0[:, 1] = soc_ekf
                         y_vec0[:, 2] = soc
                         y_vec1 = np.zeros((len(t_v), 1))
@@ -96,7 +96,7 @@ def plot_soc_photon_data(r, key):
                     T_actual = cTime - cTime_last
                     dt = T_actual_past - T_actual
                     t_v[:] = t_v[:] + dt
-                    y_vec0[-1][0] = soc_m
+                    y_vec0[-1][0] = soc_s
                     y_vec0[-1][1] = soc_ekf
                     y_vec0[-1][2] = soc
                     y_vec1[-1][0] = Ib
@@ -108,7 +108,7 @@ def plot_soc_photon_data(r, key):
                         fig = plt.figure(figsize=(12, 5))
                     linen_x0, axx0 = liven_plotter(t_v, y_vec0, linen_x0, fig, subplot=311, ax=axx0, y_label='Amps',
                                                    title='Title: {}'.format(identifier), pause_time=0.01,
-                                                   labels=['soc_m', 'soc_ekf', 'soc'])
+                                                   labels=['soc_s', 'soc_ekf', 'soc'])
                     linen_x1, axx1 = liven_plotter(t_v, y_vec1, linen_x1, fig, subplot=312, ax=axx1, y_label='Amps',
                                                    pause_time=0.01,
                                                    labels='Ib')

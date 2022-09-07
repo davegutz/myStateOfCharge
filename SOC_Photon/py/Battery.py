@@ -284,11 +284,12 @@ class BatteryMonitor(Battery, EKF1x1):
     """Extend basic class to monitor"""
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
-                 t_rated=RATED_TEMP, t_rlim=0.017,
+                 t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., scaler_q=None,
                  scaler_r=None, Bmon=0):
-        Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
+        q_cap_rated_scaled = q_cap_rated * scale
+        Battery.__init__(self, bat_v_sat, q_cap_rated_scaled, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
 
@@ -321,7 +322,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.Q = EKF_Q_SD_NORM * EKF_Q_SD_NORM  # EKF process uncertainty
         self.R = EKF_R_SD_NORM * EKF_R_SD_NORM  # EKF state uncertainty
         self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
-        self.soc_m = 0.  # Model information
+        self.soc_s = 0.  # Model information
         self.EKF_converged = TFDelay(False, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT)
         self.y_filt_lag = LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
         self.y_filt = 0.
@@ -354,8 +355,8 @@ class BatteryMonitor(Battery, EKF1x1):
         s += EKF1x1.__str__(self, prefix + 'BatteryMonitor:')
         return s
 
-    def assign_soc_m(self, soc_m):
-        self.soc_m = soc_m
+    def assign_soc_s(self, soc_s):
+        self.soc_s = soc_s
 
     def calculate(self, chem, temp_c, vb, ib, dt, reset, q_capacity=None, dc_dc_on=None, rp=None, d_voc=None):  # BatteryMonitor
         self.chm = chem
@@ -580,7 +581,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.sat.append(int(self.sat))
         self.saved.sel.append(self.sel)
         self.saved.mod_data.append(self.mod)
-        self.saved.soc_m.append(self.soc_m)
+        self.saved.soc_s.append(self.soc_s)
         self.Randles.save(time)
 
 
@@ -612,7 +613,7 @@ class BatterySim(Battery):
         self.voc = 0.  # Charging voltage, V
         self.d_delta_q = 0.  # Charging rate, Coulombs/sec
         self.charge_curr = 0.  # Charge current, A
-        self.saved_m = SavedM()  # for plots and prints
+        self.saved_s = SavedS()  # for plots and prints
         self.ib_in = 0.  # Saved value of current input, A
         self.ib_fut = 0.  # Future value of limited current, A
 
@@ -738,7 +739,7 @@ class BatterySim(Battery):
         d = np.array([self.r0, 1])
         return a, b, c, d
 
-    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, soc_m_init=None, mon_delta_q=None, mon_sat=None):
+    def count_coulombs(self, chem, dt, reset, temp_c, charge_curr, sat, soc_s_init=None, mon_delta_q=None, mon_sat=None):
         # BatterySim
         """Coulomb counter based on true=actual capacity
         Internal resistance of battery is a loss
@@ -752,6 +753,16 @@ class BatterySim(Battery):
         Outputs:
             soc     State of charge, fraction (0-1.5)
         """
+        self.chm = chem
+        if self.chm==0:
+            self.lut_soc_min = self.lut_soc_min0
+        elif self.chm==1:
+            self.lut_soc_min = self.lut_soc_min1
+        elif self.chm==2:
+            self.lut_soc_min = self.lut_soc_min2
+        else:
+            print("BatteryMonitor.calculate:  bad chem value=", chem)
+            exit(1)
         self.reset = reset
         self.charge_curr = charge_curr
         self.d_delta_q = self.charge_curr * dt
@@ -763,8 +774,8 @@ class BatterySim(Battery):
         if self.reset:
             self.temp_lim = temp_c
             self.t_last = temp_c
-            if soc_m_init and not self.mod:
-                self.delta_q = self.calculate_capacity(temp_c) * (soc_m_init - 1.)
+            if soc_s_init and not self.mod:
+                self.delta_q = self.calculate_capacity(temp_c) * (soc_s_init - 1.)
 
         # Saturation.   Goal is to set q_capacity and hold it so remembers last saturation status
         # detection
@@ -822,23 +833,23 @@ class BatterySim(Battery):
         self.saved.q.append(self.q)
         self.saved.q_capacity.append(self.q_capacity)
 
-    def save_m(self, time):
-        self.saved_m.time.append(time)
-        self.saved_m.chm_m.append(self.chm)
-        self.saved_m.Tb_m.append(self.temp_c)
-        self.saved_m.Tbl_m.append(self.temp_lim)
-        self.saved_m.vsat_m.append(self.vsat)
-        self.saved_m.voc_m.append(self.voc)
-        self.saved_m.voc_stat_m.append(self.voc_stat)
-        self.saved_m.dv_dyn_m.append(self.dv_dyn)
-        self.saved_m.vb_m.append(self.vb)
-        self.saved_m.ib_m.append(self.ib)
-        self.saved_m.ib_in_m.append(self.ib_in)
-        self.saved_m.ib_fut_m.append(self.ib_fut)
-        self.saved_m.sat_m.append(int(self.sat))
-        self.saved_m.dq_m.append(self.delta_q)
-        self.saved_m.soc_m.append(self.soc)
-        self.saved_m.reset_m.append(self.reset)
+    def save_s(self, time):
+        self.saved_s.time.append(time)
+        self.saved_s.chm_s.append(self.chm)
+        self.saved_s.Tb_s.append(self.temp_c)
+        self.saved_s.Tbl_s.append(self.temp_lim)
+        self.saved_s.vsat_s.append(self.vsat)
+        self.saved_s.voc_s.append(self.voc)
+        self.saved_s.voc_stat_s.append(self.voc_stat)
+        self.saved_s.dv_dyn_s.append(self.dv_dyn)
+        self.saved_s.vb_s.append(self.vb)
+        self.saved_s.ib_s.append(self.ib)
+        self.saved_s.ib_in_s.append(self.ib_in)
+        self.saved_s.ib_fut_s.append(self.ib_fut)
+        self.saved_s.sat_s.append(int(self.sat))
+        self.saved_s.dq_s.append(self.delta_q)
+        self.saved_s.soc_s.append(self.soc)
+        self.saved_s.reset_s.append(self.reset)
 
 
 # Other functions
@@ -919,7 +930,7 @@ class Saved:
         self.y_ekf = []  # Monitor single battery solver error, V
         self.y_filt = []  # Filtered EKF y residual value, V
         self.y_filt2 = []  # Filtered EKF y residual value, V
-        self.soc_m = []  # Simulated state of charge, fraction
+        self.soc_s = []  # Simulated state of charge, fraction
         self.soc_ekf = []  # Solved state of charge, fraction
         # self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) available (0-1)
         self.d_delta_q = []  # Charging rate, Coulombs/sec
@@ -950,15 +961,15 @@ def overall_batt(mv, sv, rv, filename, fig_files=None, plot_title=None, n_fig=No
     plt.subplot(323)
     # plt.subplot_mosaic("C")
     plt.plot(mv.time, mv.vb, color='green', label='vb'+suffix)
-    plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_m'+suffix)
+    plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_s'+suffix)
     plt.plot(mv.time, mv.vc, color='blue', linestyle='-.', label='vc'+suffix)
-    plt.plot(sv.time, sv.vc, color='green', linestyle=':', label='vc_m'+suffix)
+    plt.plot(sv.time, sv.vc, color='green', linestyle=':', label='vc_s'+suffix)
     plt.plot(mv.time, mv.vd, color='red', label='vd'+suffix)
-    plt.plot(sv.time, sv.vd, color='orange', linestyle='--', label='vd_m'+suffix)
+    plt.plot(sv.time, sv.vd, color='orange', linestyle='--', label='vd_s'+suffix)
     plt.plot(mv.time, mv.voc_stat, color='orange', linestyle='-.', label='voc_stat'+suffix)
     plt.plot(sv.time, sv.voc_stat, color='cyan', linestyle=':', label='voc_stat_,'+suffix)
     plt.plot(mv.time, mv.voc, color='magenta', label='voc'+suffix)
-    plt.plot(sv.time, sv.voc, color='black', linestyle='--', label='voc_m'+suffix)
+    plt.plot(sv.time, sv.voc, color='black', linestyle='--', label='voc_s'+suffix)
     plt.legend(loc=1)
     plt.subplot(324)
     # plt.subplot_mosaic("D")
@@ -968,11 +979,11 @@ def overall_batt(mv, sv, rv, filename, fig_files=None, plot_title=None, n_fig=No
     plt.subplot(322)
     # plt.subplot_mosaic("B")
     plt.plot(mv.time, mv.soc, color='red', label='soc'+suffix)
-    plt.plot(sv.time, sv.soc, color='black', linestyle='dotted', label='soc_m'+suffix)
+    plt.plot(sv.time, sv.soc, color='black', linestyle='dotted', label='soc_s'+suffix)
     plt.legend(loc=1)
     plt.subplot(325)
     # plt.subplot_mosaic("D")
-    plt.plot(sv.time, sv.chm, color='red', linestyle='-', label='chm_m'+suffix)
+    plt.plot(sv.time, sv.chm, color='red', linestyle='-', label='chm_s'+suffix)
     plt.plot(mv.time, mv.chm, color='black', linestyle='--', label='chm'+suffix)
     plt.legend(loc=1)
     plt.subplot(326)
@@ -989,15 +1000,15 @@ def overall_batt(mv, sv, rv, filename, fig_files=None, plot_title=None, n_fig=No
     plt.subplot(111)
     plt.title(plot_title)
     plt.plot(mv.time, mv.vb, color='green', label='vb'+suffix)
-    plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_m'+suffix)
+    plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_s'+suffix)
     plt.plot(mv.time, mv.vc, color='blue', linestyle='-.', label='vc'+suffix)
-    plt.plot(sv.time, sv.vc, color='green', linestyle=':', label='vc_m'+suffix)
+    plt.plot(sv.time, sv.vc, color='green', linestyle=':', label='vc_s'+suffix)
     plt.plot(mv.time, mv.vd, color='red', label='vd'+suffix)
-    plt.plot(sv.time, sv.vd, color='orange', linestyle='--', label='vd_m'+suffix)
+    plt.plot(sv.time, sv.vd, color='orange', linestyle='--', label='vd_s'+suffix)
     plt.plot(mv.time, mv.voc_stat, color='orange', linestyle='-.', label='voc_stat'+suffix)
     plt.plot(sv.time, sv.voc_stat, color='cyan', linestyle=':', label='voc_stat'+suffix)
     plt.plot(mv.time, mv.voc, color='magenta', label='voc'+suffix)
-    plt.plot(sv.time, sv.voc, color='black', linestyle='--', label='voc_m'+suffix)
+    plt.plot(sv.time, sv.voc, color='black', linestyle='--', label='voc_s'+suffix)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1040,33 +1051,33 @@ def overall_batt(mv, sv, rv, filename, fig_files=None, plot_title=None, n_fig=No
     plt.subplot(321)
     plt.title(plot_title+' MON vs SIM')
     plt.plot(mv.time, mv.ib, color='green', label='ib'+suffix)
-    plt.plot(sv.time, sv.ib, color='black', linestyle='--', label='ib_m'+suffix)
+    plt.plot(sv.time, sv.ib, color='black', linestyle='--', label='ib_s'+suffix)
     plt.legend(loc=1)
     plt.subplot(322)
     plt.plot(mv.time, mv.vb, color='green', label='vb'+suffix)
-    plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_m'+suffix)
+    plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_s'+suffix)
     plt.plot(mv.time, mv.voc, color='cyan', label='voc'+suffix)
-    plt.plot(sv.time, sv.voc, color='red', linestyle='--', label='voc_m'+suffix)
+    plt.plot(sv.time, sv.voc, color='red', linestyle='--', label='voc_s'+suffix)
     plt.legend(loc=1)
     plt.subplot(323)
     plt.plot(mv.time, mv.vb, color='green', label='vb'+suffix)
-    plt.plot(sv.time, sv.vb, color='orange', linestyle='--', label='vb_m'+suffix)
+    plt.plot(sv.time, sv.vb, color='orange', linestyle='--', label='vb_s'+suffix)
     plt.plot(mv.time, mv.voc, color='cyan', linestyle='-.', label='voc'+suffix)
-    plt.plot(sv.time, sv.voc, color='red', linestyle=':', label='voc_m'+suffix)
+    plt.plot(sv.time, sv.voc, color='red', linestyle=':', label='voc_s'+suffix)
     plt.plot(mv.time, mv.voc_stat, color='magenta', linestyle=':', label='voc_stat'+suffix)
-    plt.plot(sv.time, sv.voc_stat, color='black', linestyle='--', label='voc_stat_m'+suffix)
+    plt.plot(sv.time, sv.voc_stat, color='black', linestyle='--', label='voc_stat_s'+suffix)
     plt.legend(loc=1)
     plt.subplot(324)
     plt.plot(sv.time, sv.dv_dyn, color='green', label='dv_dyn'+suffix)
-    plt.plot(mv.time, mv.dv_dyn, color='red', linestyle='--', label='dv_dyn_m'+suffix)
+    plt.plot(mv.time, mv.dv_dyn, color='red', linestyle='--', label='dv_dyn_s'+suffix)
     plt.legend(loc=1)
     plt.subplot(325)
     plt.plot(mv.time, mv.dv_hys, color='green', label='dv_hys'+suffix)
-    plt.plot(sv.time, sv.dv_hys, color='black', linestyle='--', label='dv_hys_m'+suffix)
+    plt.plot(sv.time, sv.dv_hys, color='black', linestyle='--', label='dv_hys_s'+suffix)
     plt.legend(loc=1)
     plt.subplot(326)
     plt.plot(mv.time, mv.vb, color='green', label='vb'+suffix)
-    plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_m'+suffix)
+    plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_s'+suffix)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1123,7 +1134,7 @@ def overall_batt(mv, sv, rv, filename, fig_files=None, plot_title=None, n_fig=No
     plt.title(plot_title)
     plt.plot(mv.time, mv.voc, color='red', label='voc'+suffix)
     plt.plot(mv.time, mv.Voc_ekf, color='blue', linestyle='-.', label='Voc_ekf'+suffix)
-    plt.plot(sv.time, sv.voc, color='green', linestyle=':', label='voc_m'+suffix)
+    plt.plot(sv.time, sv.voc, color='green', linestyle=':', label='voc_s'+suffix)
     plt.legend(loc=4)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1133,7 +1144,7 @@ def overall_batt(mv, sv, rv, filename, fig_files=None, plot_title=None, n_fig=No
     n_fig += 1
     plt.title(plot_title)
     plt.plot(mv.time, mv.soc_ekf, color='blue', label='soc_ekf'+suffix)
-    plt.plot(sv.time, sv.soc, color='green', linestyle='-.', label='soc_m'+suffix)
+    plt.plot(sv.time, sv.soc, color='green', linestyle='-.', label='soc_s'+suffix)
     plt.plot(mv.time, mv.soc, color='red', linestyle=':', label='soc'+suffix)
     plt.legend(loc=4)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -1171,7 +1182,7 @@ def overall_batt(mv, sv, rv, filename, fig_files=None, plot_title=None, n_fig=No
     n_fig += 1
     plt.subplot(111)
     plt.title(plot_title)
-    plt.plot(sv.soc, sv.voc, color='black', linestyle='dotted', label='SIM voc vs soc'+suffix)
+    plt.plot(sv.soc, sv.voc_stat, color='black', linestyle='dotted', label='SIM voc_stat vs soc'+suffix)
     plt.legend(loc=2)
     fig_file_name = filename + "_" + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1202,50 +1213,50 @@ def overall_batt(mv, sv, rv, filename, fig_files=None, plot_title=None, n_fig=No
     return n_fig, fig_files
 
 
-class SavedM:
+class SavedS:
     # For plot savings.   A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
     def __init__(self):
         self.time = []
         self.unit = []  # text title
         self.c_time = []  # Control time, s
-        self.chm_m = []
-        self.Tb_m = []
-        self.Tbl_m = []
-        self.vsat_m = []
-        self.voc_m = []
-        self.voc_stat_m = []
-        self.dv_dyn_m = []
-        self.vb_m = []
-        self.ib_m = []
-        self.ib_in_m = []
-        self.ib_fut_m = []
-        self.sat_m = []
-        self.ddq_m = []
-        self.dq_m = []
-        self.q_m = []
-        self.qcap_m = []
-        self.soc_m = []
-        self.reset_m = []
+        self.chm_s = []
+        self.Tb_s = []
+        self.Tbl_s = []
+        self.vsat_s = []
+        self.voc_s = []
+        self.voc_stat_s = []
+        self.dv_dyn_s = []
+        self.vb_s = []
+        self.ib_s = []
+        self.ib_in_s = []
+        self.ib_fut_s = []
+        self.sat_s = []
+        self.ddq_s = []
+        self.dq_s = []
+        self.q_s = []
+        self.qcap_s = []
+        self.soc_s = []
+        self.reset_s = []
 
     def __str__(self):
-        s = "unit_m,c_time,Tb_m,Tbl_m,vsat_m,voc_stat_m,dv_dyn_m,vb_m,ib_m,sat_m,ddq_m,dq_m,q_m,qcap_m,soc_m,reset_m,\n"
+        s = "unit_m,c_time,Tb_s,Tbl_s,vsat_s,voc_stat_s,dv_dyn_s,vb_s,ib_s,sat_s,ddq_s,dq_s,q_s,qcap_s,soc_s,reset_s,\n"
         for i in range(len(self.time)):
             s += 'sim,'
             s += "{:13.3f},".format(self.time[i])
-            s += "{:5.2f},".format(self.Tb_m[i])
-            s += "{:5.2f},".format(self.Tbl_m[i])
-            s += "{:8.3f},".format(self.vsat_m[i])
-            s += "{:5.2f},".format(self.voc_stat_m[i])
-            s += "{:5.2f},".format(self.dv_dyn_m[i])
-            s += "{:5.2f},".format(self.vb_m[i])
-            s += "{:8.3f},".format(self.ib_m[i])
-            s += "{:8.3f},".format(self.ib_in_m[i])
-            s += "{:8.3f},".format(self.ib_fut_m[i])
-            s += "{:1.0f},".format(self.sat_m[i])
-            s += "{:5.3f},".format(self.ddq_m[i])
-            s += "{:5.3f},".format(self.dq_m[i])
-            s += "{:5.3f},".format(self.qcap_m[i])
-            s += "{:7.3f},".format(self.soc_m[i])
-            s += "{:d},".format(self.reset_m[i])
+            s += "{:5.2f},".format(self.Tb_s[i])
+            s += "{:5.2f},".format(self.Tbl_s[i])
+            s += "{:8.3f},".format(self.vsat_s[i])
+            s += "{:5.2f},".format(self.voc_stat_s[i])
+            s += "{:5.2f},".format(self.dv_dyn_s[i])
+            s += "{:5.2f},".format(self.vb_s[i])
+            s += "{:8.3f},".format(self.ib_s[i])
+            s += "{:8.3f},".format(self.ib_in_s[i])
+            s += "{:8.3f},".format(self.ib_fut_s[i])
+            s += "{:1.0f},".format(self.sat_s[i])
+            s += "{:5.3f},".format(self.ddq_s[i])
+            s += "{:5.3f},".format(self.dq_s[i])
+            s += "{:5.3f},".format(self.qcap_s[i])
+            s += "{:7.3f},".format(self.soc_s[i])
+            s += "{:d},".format(self.reset_s[i])
             s += "\n"
         return s
