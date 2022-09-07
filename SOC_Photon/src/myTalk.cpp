@@ -244,10 +244,14 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 {
                   Mon->apply_soc(FP_in, Sen->Tb_filt);
                   Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tb_filt);
+                  if ( !rp.modeling ) Mon->init_soc_ekf(Mon->soc());
                   Serial.printf("soc=%7.3f, modeling = %d, delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f, soc_ekf=%8.4f, delta_q_ekf=%7.3f,\n",
                       Mon->soc(), rp.modeling, Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf());
-                  cp.cmd_reset();
-                  chit("W3;", SOON);  // Wait 3 passes of Control
+                  if ( rp.modeling )
+                  {
+                    cp.cmd_reset();
+                    chit("W3;", SOON);  // Wait 3 passes of Control
+                  }
                 }
                 else
                   Serial.printf("soc = %8.4f; err 0-1.1\n", FP_in);
@@ -260,7 +264,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   Sen->Sim->apply_soc(FP_in, Sen->Tb_filt);
                   Serial.printf("soc=%8.4f,   delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f,\n",
                       Mon->soc(), Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q());
-                  cp.cmd_reset();
+                  if ( rp.modeling ) cp.cmd_reset();
                 }
                 else
                   Serial.printf("soc = %8.4f; must be 0-1.1\n", FP_in);
