@@ -1,0 +1,790 @@
+echo:  Pf, 4
+echo:  Pf, 0
+
+Sen::Fault:
+ cc_dif=  0.002;
+ voc_soc= 13.276;
+ soc=  0.882;
+ voc= 13.280;
+ e_w_f= -0.004;
+ disab_ib_fa=0;
+ disab_tb_fa=0;
+ disab_vb_fa=0;
+ imh=  4.986;
+ inh=  5.329;
+ imm=  4.923;
+ inm=  4.923;
+ ibd_f= -0.313;
+ tb_s_st=1;
+ vb_s_st=0;
+ ib_s_st=1;
+ nbar=0;
+ mbar=0;
+ mod_tb=0, mod_vb=0, mod_ib=0
+ ib_dscn_ft=0;  'Sq'
+ ibd_lo_ft=0;   'Sd, *SA/*SB'
+ ibd_hi_ft=0;   'Sd, *SA/*SB'
+ red_loss=0;
+ wl_ft=0;   'Sb'
+ wh_ft=0;   'Sa'
+    4
+ ibn_ft=0;  'Fi'
+ ibm_ft=0;  'Fi'
+ vb_ft=0;   'Fv'
+ tb_ft=0;   'Ft'
+  0000000000000;
+ CBA98765x3210
+ fltw=0;
+ ib_dscn_fa=0;   'Sq'
+ ibd_lo_fa=0;   'Sd, *SA/*SB'
+ ibd_hi_fa=0;   'Sd, *SA/*SB'
+ wv_fa=1;   'Sd, Sa/Sb'
+ wl_fa=0;   'Sb'
+ wh_fa=0;   'Sa'
+ cc_diff_fa=0;   'Sf'
+ ibn_fa=0;  'Fi'
+ ibm_fa=0;  'Fi'
+ vb_fa=0;   'Fv'
+ tb_fa=0;   'Ft'
+  00010000000;
+ A9876543210
+ falw=128;
+echo:  v4, 4
+echo:  v4, 0
+soc0_20220902, 2022-09-04T11:41:01,  55613462.535, 0.100,   0,  0,  0,  25.8,13.261,    -3.020,     0.259,    13.80322,-0.01795,13.27536,13.27640,  -0.001038, 0.88031,0.88297,0.88110,
+soc0_20220902, 2022-09-04T11:41:01,  55613462.935, 0.100,   0,  0,  0,  25.8,13.261,    -3.020,     0.259,    13.80322,-0.01804,13.27536,13.27640,  -0.001040, 0.88031,0.88296,0.88110,
+soc0_20220902, 2022-09-04T11:41:01,  55613463.335, 0.100,   0,  0,  0,  25.8,13.261,    -3.020,     0.259,    13.80322,-0.01813,13.27536,13.27640,  -0.001039, 0.88030,0.88296,0.88110,
+soc0_20220902, 2022-09-04T11:41:03,  55613463.735, 0.100,   0,  0,  0,  25.8,13.261,    -3.020,     0.259,    13.80322,-0.01822,13.27536,13.27640,  -0.001039, 0.88030,0.88295,0.88109,
+soc0_20220902, 2022-09-04T11:41:03,  55613464.135, 0.100,   0,  0,  0,  25.8,13.261,    -3.020,     0.258,    13.80322,-0.01831,13.27536,13.27640,  -0.001039, 0.88030,0.88295,0.88109,
+soc0_20220902, 2022-09-04T11:41:03,  55613464.535, 0.100,   0,  0,  0,  25.8,13.261,    -3.020,     0.258,    13.80322,-0.01840,13.27536,13.27639,  -0.001039, 0.88029,0.88295,0.88109,
+soc0_20220902, 2022-09-04T11:41:03,  55613464.935, 0.100,   0,  0,  0,  25.8,13.261,    -3.020,     0.258,    13.80322,-0.01849,13.27535,13.27639,  -0.001039, 0.88029,0.88294,0.88108,
+soc0_20220902, 2022-09-04T11:41:03,  55613465.335, 0.100,   0,  0,  0,  25.8,13.261,    -3.020,     0.258,    13.80322,-0.01858,13.27535,13.27639,  -0.001038, 0.88029,0.88294,0.88108,
+echo:  v0, 4
+echo:  v0, 0
+echo:  Pa, 4
+echo:  Pa, 0
+echo:  Pm, 0
+
+Mon:BM::Battery:
+  temp_c= 25.863; dg C
+ *rp_delt_q=  -42585.7;  C
+ *rp_t_last=      25.9; dg C
+  dvoc_dt=  0.004000; V/dg C
+  r_0=  0.003000;  ohm
+  r_ct =   0.001600;  ohm
+  tau_ct=  0.200000;  s (=1/Rct/Cct)
+  r_diff=  0.007700;  ohm
+  tau_diff = 83.000000;  s (=1/Rdif/Cdif)
+  r_sd =  70.000000;  ohm
+  tau_sd=25000000.0;  s
+  bms_off=0;
+  dv_dsoc=  0.400066; V/frac
+  ib=  4.733; A
+  Ib=  4.733; Bank, A
+  vb= 13.305; V
+  Vb= 13.305; Bank, V
+  voc= 13.279; V
+  voc_stat= 13.275; V
+  vsat= 13.803; V
+  dv_dyn=   0.026; V
+  sr=  1.000; sclr
+  dv=  0.010; Tab adj, V
+  dt=  0.100; s
+ *rp_nP= 1.00; P bank, e.g. '2P1S'
+ *rp_nS= 1.00; S bank, e.g. '2P1S'
+ BM::BM:
+  ah_rem_ekf_= 85.658; A-h
+  ah_rem_soc_= 85.470; A-h
+  EKF_conv=1;
+  q_ekf=  314984.8; C
+  soc_ekf=  0.8826; frac
+  tcharge=  2.5; hr
+  tcharge_ekf=  2.5; hr
+  voc_filt= 13.301; V
+  voc_stat= 13.275; V
+  y_filt= -0.001; Res EKF, V
+Mon::Coulombs:
+ q_cap_rated= 360000.0; At t_rated, C
+ q_cap_rated_scaled= 360000.0; Act at t_rated_, C
+ q_capacity= 356893.8; Sat q at temp, C
+ q= 314308.1; Avail, except q_min_, C
+ q_min=   6614.8; Low volt shutdown, C
+ delta_q -42585.7; Change since sat, C
+ soc=  0.8807; Frac of q_cap avail (0-1);
+ sat=0; T=saturated
+ t_rated= 25.0; Rated, dg C
+ t_last= 25.9; past, dg C
+ t_rlim=  0.017; Tb RL, deg C / s
+ resetting=0; Coord user testing of CC
+ soc_min=  0.0185; soc BMS shuts off
+ mod=Battleborn; Chem e.g. Battleborn or LION
+ mod_code=0; Chem code
+ coul_eff=  0.99850; Coul Eff
+Coulombs::Chemistry:
+  dqdt=  0.010; frac/dg C
+  low_voc= 10.000; BMS turn off, V
+  hys_cap=360000.000; F
+  v_sat= 13.850; V
+  dvoc_dt=  0.004; V/dg C
+  dv=  0.010; Cal err, V
+  r_0= 0.003000; Randles R0, ohm
+  r_ct= 0.001600; Charge trans, ohm
+  r_diff= 0.007700; Diff, ohm
+  tau_ct=  0.200; Charge tran, s (=1/Rct/Cct)
+  tau_diff= 83.000; Diff, s (=1/Rdif/Cdif)
+  tau_sd=25000000.000; EKF. Parasitic disch, s
+  r_sd= 70.000; EKF. Parasitic disch, ohm
+  r_ss=  0.012; SS init, ohm
+  voc(t, soc):
+    t={  5.000,  11.100,  20.000,  40.000, };
+    soc={  0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.990,   0.995,   1.000, };
+    voc={
+      {  4.000,   4.000,  10.000,  11.800,  12.450,  12.550,  12.700,  12.770,  12.900,  12.910,  12.980,  13.050,  13.110,  13.170,  13.220,  13.750,  14.450, },
+      {  4.000,   8.000,  11.700,  12.500,  12.600,  12.700,  12.800,  12.900,  12.960,  13.010,  13.060,  13.110,  13.170,  13.200,  13.230,  13.760,  14.460, },
+      {  9.000,  12.450,  12.650,  12.770,  12.850,  12.890,  12.950,  12.990,  13.030,  13.040,  13.090,  13.140,  13.210,  13.250,  13.270,  13.800,  14.500, },
+      {  9.080,  12.530,  12.730,  12.850,  12.930,  12.970,  13.030,  13.070,  13.110,  13.120,  13.170,  13.220,  13.290,  13.330,  13.350,  13.880,  14.580, },
+         };
+  soc_min(temp_c):
+    temp_c={  5.000,  11.100,  20.000,  40.000, };
+    soc_min={  0.100,   0.070,   0.020,   0.015, };
+  r(soc, dv):
+    soc={0.000000, 0.500000, 1.000000, };
+    dv={ -0.900,  -0.700,  -0.500,  -0.300,   0.000,   0.300,   0.500,   0.700,   0.900, };
+    r={
+      { 0.000001,  0.064000,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.046000,  0.000001, },
+      { 0.000001,  0.000001,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.000001,  0.000001, },
+      { 0.000001,  0.000001,  0.000001,  0.036000,  0.015000,  0.024000,  0.000001,  0.000001,  0.000001, },
+         };
+Mon::StateSpace:
+  dt =  0.100000
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.007505,  0.003985];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  4.733404, 13.304844];
+   C  =  [ -1.000000, -1.000000];
+   D  =  [ -0.003000,  1.000000];
+   x_dot  =  [  0.000683,  0.000392];
+   y  =  [ 13.279261];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res=0.0151; Null, Ohm
+  cap_init=  360000.0; F
+  cap=  360000.0; F
+  tau=    5400.0; Null, s
+  ib=  4.733; In, A
+  ioc=  0.273; Out, A
+  soc=  0.8807; Input
+  res=  0.015; Var, ohm
+  dv_dot=  0.000; V/s
+  dv_hys=  0.004; Delta state, V
+  disabled=0; input < 1e-5
+  rp.hys_scale=  1.00; Slr
+Mon::EKF_1x1:
+Inputs:
+  z  =    13.2751;  // 1x1 input, =voc, dynamic predicted by other model, V
+  R  =   0.250000;  // 1x1 Kalman state uncertainty
+  Q  =   0.000000;  // 1x1 Kalman process uncertainty
+  H  =      0.400;  // 1x1 Jacobian sensitivity dV/dSOC
+Outputs:
+  x  =     0.8826;  // 1x1 Kalman state variable = Vsoc (0-1 fraction)
+  hx =    13.2765;  // Output of observation function h(x)
+  y  =    -0.0014;  // 1x1 Residual z-hx, V
+  P  =   0.000081;  // 1x1 Kalman uncertainty covariance
+  K  =   0.000130;  // 1x1 Kalman gain
+  S  =   0.250013;  // 1x1 system uncertainty
+
+rp.modeling = 0
+BM::Battery:
+  temp_c= 25.863; dg C
+ *rp_delt_q=  -42585.7;  C
+ *rp_t_last=      25.9; dg C
+  dvoc_dt=  0.004000; V/dg C
+  r_0=  0.003000;  ohm
+  r_ct =   0.001600;  ohm
+  tau_ct=  0.200000;  s (=1/Rct/Cct)
+  r_diff=  0.007700;  ohm
+  tau_diff = 83.000000;  s (=1/Rdif/Cdif)
+  r_sd =  70.000000;  ohm
+  tau_sd=25000000.0;  s
+  bms_off=0;
+  dv_dsoc=  0.400066; V/frac
+  ib=  4.733; A
+  Ib=  4.733; Bank, A
+  vb= 13.305; V
+  Vb= 13.305; Bank, V
+  voc= 13.279; V
+  voc_stat= 13.275; V
+  vsat= 13.803; V
+  dv_dyn=   0.026; V
+  sr=  1.000; sclr
+  dv=  0.010; Tab adj, V
+  dt=  0.100; s
+ *rp_nP= 1.00; P bank, e.g. '2P1S'
+ *rp_nS= 1.00; S bank, e.g. '2P1S'
+ BM::BM:
+  ah_rem_ekf_= 85.658; A-h
+  ah_rem_soc_= 85.470; A-h
+  EKF_conv=1;
+  q_ekf=  314984.8; C
+  soc_ekf=  0.8826; frac
+  tcharge=  2.5; hr
+  tcharge_ekf=  2.5; hr
+  voc_filt= 13.301; V
+  voc_stat= 13.275; V
+  y_filt= -0.001; Res EKF, V
+Coulombs:
+ q_cap_rated= 360000.0; At t_rated, C
+ q_cap_rated_scaled= 360000.0; Act at t_rated_, C
+ q_capacity= 356893.8; Sat q at temp, C
+ q= 314308.1; Avail, except q_min_, C
+ q_min=   6614.8; Low volt shutdown, C
+ delta_q -42585.7; Change since sat, C
+ soc=  0.8807; Frac of q_cap avail (0-1);
+ sat=0; T=saturated
+ t_rated= 25.0; Rated, dg C
+ t_last= 25.9; past, dg C
+ t_rlim=  0.017; Tb RL, deg C / s
+ resetting=0; Coord user testing of CC
+ soc_min=  0.0185; soc BMS shuts off
+ mod=Battleborn; Chem e.g. Battleborn or LION
+ mod_code=0; Chem code
+ coul_eff=  0.99850; Coul Eff
+Coulombs::Chemistry:
+  dqdt=  0.010; frac/dg C
+  low_voc= 10.000; BMS turn off, V
+  hys_cap=360000.000; F
+  v_sat= 13.850; V
+  dvoc_dt=  0.004; V/dg C
+  dv=  0.010; Cal err, V
+  r_0= 0.003000; Randles R0, ohm
+  r_ct= 0.001600; Charge trans, ohm
+  r_diff= 0.007700; Diff, ohm
+  tau_ct=  0.200; Charge tran, s (=1/Rct/Cct)
+  tau_diff= 83.000; Diff, s (=1/Rdif/Cdif)
+  tau_sd=25000000.000; EKF. Parasitic disch, s
+  r_sd= 70.000; EKF. Parasitic disch, ohm
+  r_ss=  0.012; SS init, ohm
+  voc(t, soc):
+    t={  5.000,  11.100,  20.000,  40.000, };
+    soc={  0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.990,   0.995,   1.000, };
+    voc={
+      {  4.000,   4.000,  10.000,  11.800,  12.450,  12.550,  12.700,  12.770,  12.900,  12.910,  12.980,  13.050,  13.110,  13.170,  13.220,  13.750,  14.450, },
+      {  4.000,   8.000,  11.700,  12.500,  12.600,  12.700,  12.800,  12.900,  12.960,  13.010,  13.060,  13.110,  13.170,  13.200,  13.230,  13.760,  14.460, },
+      {  9.000,  12.450,  12.650,  12.770,  12.850,  12.890,  12.950,  12.990,  13.030,  13.040,  13.090,  13.140,  13.210,  13.250,  13.270,  13.800,  14.500, },
+      {  9.080,  12.530,  12.730,  12.850,  12.930,  12.970,  13.030,  13.070,  13.110,  13.120,  13.170,  13.220,  13.290,  13.330,  13.350,  13.880,  14.580, },
+         };
+  soc_min(temp_c):
+    temp_c={  5.000,  11.100,  20.000,  40.000, };
+    soc_min={  0.100,   0.070,   0.020,   0.015, };
+  r(soc, dv):
+    soc={0.000000, 0.500000, 1.000000, };
+    dv={ -0.900,  -0.700,  -0.500,  -0.300,   0.000,   0.300,   0.500,   0.700,   0.900, };
+    r={
+      { 0.000001,  0.064000,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.046000,  0.000001, },
+      { 0.000001,  0.000001,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.000001,  0.000001, },
+      { 0.000001,  0.000001,  0.000001,  0.036000,  0.015000,  0.024000,  0.000001,  0.000001,  0.000001, },
+         };
+StateSpace:
+  dt =  0.100000
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.007505,  0.003985];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  4.733404, 13.304844];
+   C  =  [ -1.000000, -1.000000];
+   D  =  [ -0.003000,  1.000000];
+   x_dot  =  [  0.000683,  0.000392];
+   y  =  [ 13.279261];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res=0.0151; Null, Ohm
+  cap_init=  360000.0; F
+  cap=  360000.0; F
+  tau=    5400.0; Null, s
+  ib=  4.733; In, A
+  ioc=  0.273; Out, A
+  soc=  0.8807; Input
+  res=  0.015; Var, ohm
+  dv_dot=  0.000; V/s
+  dv_hys=  0.004; Delta state, V
+  disabled=0; input < 1e-5
+  rp.hys_scale=  1.00; Slr
+EKF_1x1:
+Inputs:
+  z  =    13.2751;  // 1x1 input, =voc, dynamic predicted by other model, V
+  R  =   0.250000;  // 1x1 Kalman state uncertainty
+  Q  =   0.000000;  // 1x1 Kalman process uncertainty
+  H  =      0.400;  // 1x1 Jacobian sensitivity dV/dSOC
+Outputs:
+  x  =     0.8826;  // 1x1 Kalman state variable = Vsoc (0-1 fraction)
+  hx =    13.2765;  // Output of observation function h(x)
+  y  =    -0.0014;  // 1x1 Residual z-hx, V
+  P  =   0.000081;  // 1x1 Kalman uncertainty covariance
+  K  =   0.000130;  // 1x1 Kalman gain
+  S  =   0.250013;  // 1x1 system uncertainty
+echo:  Ps, 0
+
+modeling=0
+Sim:BM::Battery:
+  temp_c= 25.863; dg C
+ *rp_delt_q=  -42850.0;  C
+ *rp_t_last=      25.9; dg C
+  dvoc_dt=  0.004000; V/dg C
+  r_0=  0.003000;  ohm
+  r_ct =   0.001600;  ohm
+  tau_ct=  0.200000;  s (=1/Rct/Cct)
+  r_diff=  0.007700;  ohm
+  tau_diff = 83.000000;  s (=1/Rdif/Cdif)
+  r_sd =  70.000000;  ohm
+  tau_sd=25000000.0;  s
+  bms_off=0;
+  dv_dsoc=  0.399971; V/frac
+  ib=  4.733; A
+  Ib=  4.733; Bank, A
+  vb= 13.305; V
+  Vb= 13.305; Bank, V
+  voc= 13.280; V
+  voc_stat= 13.275; V
+  vsat= 13.803; V
+  dv_dyn=   0.026; V
+  sr=  1.000; sclr
+  dv=  0.010; Tab adj, V
+  dt=  0.100; s
+ *rp_nP= 1.00; P bank, e.g. '2P1S'
+ *rp_nS= 1.00; S bank, e.g. '2P1S'
+ BM::BM:
+  sat_ib_max=  4.733; A
+  sat_ib_null=  0.000; A
+  sat_cutback_gain= 1000.0; voc>vsat
+  model_cutback=0;
+  model_saturated=0;
+  ib=  4.733; A
+  ib_in=  4.733; Saved, A
+  ib_fut=  4.733; A
+  ib_sat=  0.500;
+ *rp_s_cap_model=  1.000; Slr
+Sim::Coulombs:
+ q_cap_rated= 360000.0; At t_rated, C
+ q_cap_rated_scaled= 360000.0; Act at t_rated_, C
+ q_capacity= 356625.0; Sat q at temp, C
+ q=  26873.7; Avail, except q_min_, C
+ q_min=   6603.1; Low volt shutdown, C
+ delta_q -42850.0; Change since sat, C
+ soc=  0.8798; Frac of q_cap avail (0-1);
+ sat=0; T=saturated
+ t_rated= 25.0; Rated, dg C
+ t_last= 25.9; past, dg C
+ t_rlim=  0.017; Tb RL, deg C / s
+ resetting=0; Coord user testing of CC
+ soc_min=  0.0185; soc BMS shuts off
+ mod=Battleborn; Chem e.g. Battleborn or LION
+ mod_code=0; Chem code
+ coul_eff=  0.99850; Coul Eff
+Coulombs::Chemistry:
+  dqdt=  0.010; frac/dg C
+  low_voc= 10.000; BMS turn off, V
+  hys_cap=360000.000; F
+  v_sat= 13.850; V
+  dvoc_dt=  0.004; V/dg C
+  dv=  0.010; Cal err, V
+  r_0= 0.003000; Randles R0, ohm
+  r_ct= 0.001600; Charge trans, ohm
+  r_diff= 0.007700; Diff, ohm
+  tau_ct=  0.200; Charge tran, s (=1/Rct/Cct)
+  tau_diff= 83.000; Diff, s (=1/Rdif/Cdif)
+  tau_sd=25000000.000; EKF. Parasitic disch, s
+  r_sd= 70.000; EKF. Parasitic disch, ohm
+  r_ss=  0.012; SS init, ohm
+  voc(t, soc):
+    t={  5.000,  11.100,  20.000,  40.000, };
+    soc={  0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.990,   0.995,   1.000, };
+    voc={
+      {  4.000,   4.000,  10.000,  11.800,  12.450,  12.550,  12.700,  12.770,  12.900,  12.910,  12.980,  13.050,  13.110,  13.170,  13.220,  13.750,  14.450, },
+      {  4.000,   8.000,  11.700,  12.500,  12.600,  12.700,  12.800,  12.900,  12.960,  13.010,  13.060,  13.110,  13.170,  13.200,  13.230,  13.760,  14.460, },
+      {  9.000,  12.450,  12.650,  12.770,  12.850,  12.890,  12.950,  12.990,  13.030,  13.040,  13.090,  13.140,  13.210,  13.250,  13.270,  13.800,  14.500, },
+      {  9.080,  12.530,  12.730,  12.850,  12.930,  12.970,  13.030,  13.070,  13.110,  13.120,  13.170,  13.220,  13.290,  13.330,  13.350,  13.880,  14.580, },
+         };
+  soc_min(temp_c):
+    temp_c={  5.000,  11.100,  20.000,  40.000, };
+    soc_min={  0.100,   0.070,   0.020,   0.015, };
+  r(soc, dv):
+    soc={0.000000, 0.500000, 1.000000, };
+    dv={ -0.900,  -0.700,  -0.500,  -0.300,   0.000,   0.300,   0.500,   0.700,   0.900, };
+    r={
+      { 0.000001,  0.064000,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.046000,  0.000001, },
+      { 0.000001,  0.000001,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.000001,  0.000001, },
+      { 0.000001,  0.000001,  0.000001,  0.036000,  0.015000,  0.024000,  0.000001,  0.000001,  0.000001, },
+         };
+Sim::StateSpace:
+  dt =  0.100000
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.007505,  0.003985];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  4.733404, 13.279526];
+   C  =  [  1.000000,  1.000000];
+   D  =  [  0.003000,  1.000000];
+   x_dot  =  [  0.000683,  0.000392];
+   y  =  [ 13.305109];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res=0.0151; Null, Ohm
+  cap_init=  360000.0; F
+  cap=  360000.0; F
+  tau=    5400.0; Null, s
+  ib=  4.733; In, A
+  ioc=  0.273; Out, A
+  soc=  0.8798; Input
+  res=  0.015; Var, ohm
+  dv_dot=  0.000; V/s
+  dv_hys=  0.004; Delta state, V
+  disabled=0; input < 1e-5
+  rp.hys_scale=  1.00; Slr
+echo:  Pr, 0
+
+retained parameters (rp):
+  debug=0;
+  delta_q=-42584.767;
+  t_last= 25.863; deg C
+  delta_q_model=  -42849.5;
+  t_last_model= 25.938; deg C
+  shunt_gain_sclr=   1.000; A
+  ib_scale_amp=   0.955; A
+  ib_bias_amp=  -0.940; A
+  ib_scale_noa=   1.000; A
+  ib_bias_noa= -0.170; A
+  ib_bias_all=  0.000; A 
+  ib_select=0; -1=noa, 0=auto, 1=amp
+  vb_bias=  0.000; V
+  modeling=0;
+  amp=  0.000; A pk
+  freq=  0.000; r/s
+  type=0; 0=sin, 1=sq, 2=tri
+  inj_bias=  0.000; A
+  tb_bias=  0.000; deg C
+  s_cap_model=  1.000;
+  cutback_gain_scalar=  1.000;
+  isum=73;
+  delta_q_cinf_amp=    15090.1; C
+  delta_q_dinf_amp=   344350.3; C
+  delta_q_cinf_noa=   38306.8; C
+  delta_q_dinf_noa=  342754.5; C
+  hys_scale=  1.000;
+  tweak_sclr_amp=  1.000;
+  tweak_sclr_noa=  1.000;
+  nP= 1.00; e.g. '2P1S'
+  nS= 1.00; e.g. '2P1S'
+  mon_mod=0; 0=Battleborn, 1=LION
+  sim_mod=0; 0=Battleborn, 1=LION
+
+command parameters(cp):
+  enable_wifi=0;
+  model_cutback=0;
+  model_saturated=0;
+  soft_reset=0;
+  write_summary=0;
+  ib_tot_bias_amp= -0.940;
+  ib_tot_bias_noa= -0.170;
+  dc_dc_on=0;
+  blynking=0;
+  publishS=0;
+echo:  PM, 0
+
+Tweak::Shunt(Amp)::
+ port=0x49;
+ bare=0;
+ *cp_ib_bias= -0.940; A
+ *cp_ib_scale=  0.955; A
+ v2a_s=-264.03; A/V
+ vshunt_int=-92; count
+ ishunt_cal=  4.859; A
+ *rp_shunt_gain_sclr=  1.000; A
+Shunt(Amp)::Tweak(Amp)::
+  max_change=  0.001; 'N/MC'
+  max_tweak=  0.000;  'N/Mx'
+  rp_delta_q_cinf=   15090.6; 'N/Mi', Coulombs
+  rp_delta_q_dinf=  344350.3; 'N/Mi', Coulombs
+  sat=0; T=sat
+  delta_hrs= 27.955857; 'N/Mz', hr
+  time_to_wait=  6.000000; 'N/Mw', hr
+  tweak_sclr=  1.000; 'N/Mk'
+  coul_eff=  0.99850;
+Shunt(Amp)::Adafruit_ADS1x15 (Amp):
+ m_bitShift =      4;
+ m_gain =       2048;
+ s_gain =       1024;
+ m_dataRate =    128;
+Adafruit_ADS1x15::Adafruit_I2CDevice (Amp):
+  _addr =        0x49;
+  _begun =          1;
+  _maxBufferSize = 32;
+Shunt(Amp)::
+ port=0x49;
+ bare=0;
+ *cp_ib_bias= -0.940; A
+ *cp_ib_scale=  0.955; A
+ v2a_s=-264.03; A/V
+ vshunt_int=-92; count
+ ishunt_cal=  4.859; A
+ *rp_shunt_gain_sclr=  1.000; A
+Shunt(Amp)::Tweak(Amp)::
+  max_change=  0.001; 'N/MC'
+  max_tweak=  0.000;  'N/Mx'
+  rp_delta_q_cinf=   15090.6; 'N/Mi', Coulombs
+  rp_delta_q_dinf=  344350.3; 'N/Mi', Coulombs
+  sat=0; T=sat
+  delta_hrs= 27.955859; 'N/Mz', hr
+  time_to_wait=  6.000000; 'N/Mw', hr
+  tweak_sclr=  1.000; 'N/Mk'
+  coul_eff=  0.99850;
+Shunt(Amp)::Adafruit_ADS1x15 (Amp):
+ m_bitShift =      4;
+ m_gain =       2048;
+ s_gain =       1024;
+ m_dataRate =    128;
+Adafruit_ADS1x15::Adafruit_I2CDevice (Amp):
+  _addr =        0x49;
+  _begun =          1;
+  _maxBufferSize = 32;
+echo:  PN, 0
+
+Tweak::Shunt(No Amp)::
+ port=0x48;
+ bare=0;
+ *cp_ib_bias= -0.170; A
+ *cp_ib_scale=  1.000; A
+ v2a_s=-1333.00; A/V
+ vshunt_int=-32; count
+ ishunt_cal=  5.162; A
+ *rp_shunt_gain_sclr=  1.000; A
+Shunt(No Amp)::Tweak(No Amp)::
+  max_change=  0.001; 'N/MC'
+  max_tweak=  0.000;  'N/Mx'
+  rp_delta_q_cinf=   38307.8; 'N/Mi', Coulombs
+  rp_delta_q_dinf=  342754.5; 'N/Mi', Coulombs
+  sat=0; T=sat
+  delta_hrs= 27.955885; 'N/Mz', hr
+  time_to_wait=  6.000000; 'N/Mw', hr
+  tweak_sclr=  1.000; 'N/Mk'
+  coul_eff=  0.99850;
+Shunt(No Amp)::Adafruit_ADS1x15 (No Amp):
+ m_bitShift =      4;
+ m_gain =       2560;
+ s_gain =       2560;
+ m_dataRate =    128;
+Adafruit_ADS1x15::Adafruit_I2CDevice (No Amp):
+  _addr =        0x48;
+  _begun =          1;
+  _maxBufferSize = 32;
+Shunt(No Amp)::
+ port=0x48;
+ bare=0;
+ *cp_ib_bias= -0.170; A
+ *cp_ib_scale=  1.000; A
+ v2a_s=-1333.00; A/V
+ vshunt_int=-32; count
+ ishunt_cal=  5.162; A
+ *rp_shunt_gain_sclr=  1.000; A
+Shunt(No Amp)::Tweak(No Amp)::
+  max_change=  0.001; 'N/MC'
+  max_tweak=  0.000;  'N/Mx'
+  rp_delta_q_cinf=   38307.8; 'N/Mi', Coulombs
+  rp_delta_q_dinf=  342754.5; 'N/Mi', Coulombs
+  sat=0; T=sat
+  delta_hrs= 27.955886; 'N/Mz', hr
+  time_to_wait=  6.000000; 'N/Mw', hr
+  tweak_sclr=  1.000; 'N/Mk'
+  coul_eff=  0.99850;
+Shunt(No Amp)::Adafruit_ADS1x15 (No Amp):
+ m_bitShift =      4;
+ m_gain =       2560;
+ s_gain =       2560;
+ m_dataRate =    128;
+Adafruit_ADS1x15::Adafruit_I2CDevice (No Amp):
+  _addr =        0x48;
+  _begun =          1;
+  _maxBufferSize = 32;
+echo:  Pf, 0
+
+Sen::Fault:
+ cc_dif=  0.002;
+ voc_soc= 13.276;
+ soc=  0.881;
+ voc= 13.279;
+ e_w_f= -0.004;
+ disab_ib_fa=0;
+ disab_tb_fa=0;
+ disab_vb_fa=0;
+ imh=  4.923;
+ inh=  5.329;
+ imm=  4.923;
+ inm=  4.923;
+ ibd_f= -0.296;
+ tb_s_st=1;
+ vb_s_st=0;
+ ib_s_st=1;
+ nbar=0;
+ mbar=0;
+ mod_tb=0, mod_vb=0, mod_ib=0
+ ib_dscn_ft=0;  'Sq'
+ ibd_lo_ft=0;   'Sd, *SA/*SB'
+ ibd_hi_ft=0;   'Sd, *SA/*SB'
+ red_loss=0;
+ wl_ft=0;   'Sb'
+ wh_ft=0;   'Sa'
+    4
+ ibn_ft=0;  'Fi'
+ ibm_ft=0;  'Fi'
+ vb_ft=0;   'Fv'
+ tb_ft=0;   'Ft'
+  0000000000000;
+ CBA98765x3210
+ fltw=0;
+ ib_dscn_fa=0;   'Sq'
+ ibd_lo_fa=0;   'Sd, *SA/*SB'
+ ibd_hi_fa=0;   'Sd, *SA/*SB'
+ wv_fa=1;   'Sd, Sa/Sb'
+ wl_fa=0;   'Sb'
+ wh_fa=0;   'Sa'
+ cc_diff_fa=0;   'Sf'
+ ibn_fa=0;  'Fi'
+ ibm_fa=0;  'Fi'
+ vb_fa=0;   'Fv'
+ tb_fa=0;   'Ft'
+  00010000000;
+ A9876543210
+ falw=128;
+Hi!
+Init DISPLAY
+DISP allocated
+Init CLOUD...done CLOUD
+          local    memory
+bias amp  -0.940    -0.940
+bias noa  -0.170    -0.170
+sclr amp   0.984     0.955
+sclr noa  -0.170     1.000
+Do you wish to reset to local? [Y/n]:  End setup()
+SHUNT MON Amp init
+SHUNT MON No Amp init
+echo:  Pr, 4
+echo:  Pr, 0
+
+retained parameters (rp):
+  debug=0;
+  delta_q=  0.000;
+  t_last= 26.125; deg C
+  delta_q_model=       0.0;
+  t_last_model= 26.125; deg C
+  shunt_gain_sclr=   1.000; A
+  ib_scale_amp=   0.984; A
+  ib_bias_amp=  -0.940; A
+  ib_scale_noa=  -0.170; A
+  ib_bias_noa= -0.170; A
+  ib_bias_all=  0.000; A 
+  ib_select=0; -1=noa, 0=auto, 1=amp
+  vb_bias=  0.000; V
+  modeling=0;
+  amp=  0.000; A pk
+  freq=  0.000; r/s
+  type=0; 0=sin, 1=sq, 2=tri
+  inj_bias=  0.000; A
+  tb_bias=  0.000; deg C
+  s_cap_model=  1.000;
+  cutback_gain_scalar=  1.000;
+  isum=73;
+  delta_q_cinf_amp=  -390240.0; C
+  delta_q_dinf_amp=   390151.3; C
+  delta_q_cinf_noa= -390229.9; C
+  delta_q_dinf_noa=  390240.0; C
+  hys_scale=  1.000;
+  tweak_sclr_amp=  1.000;
+  tweak_sclr_noa=  1.000;
+  nP= 1.00; e.g. '2P1S'
+  nS= 1.00; e.g. '2P1S'
+  mon_mod=0; 0=Battleborn, 1=LION
+  sim_mod=0; 0=Battleborn, 1=LION
+
+command parameters(cp):
+  enable_wifi=0;
+  model_cutback=1;
+  model_saturated=1;
+  soft_reset=0;
+  write_summary=0;
+  ib_tot_bias_amp= -0.940;
+  ib_tot_bias_noa= -0.170;
+  dc_dc_on=0;
+  blynking=0;
+  publishS=0;
+echo:  SB1.033, 4
+echo:  SB1.033, 0
+rp.ib_scale_noa  -0.170 to   1.033
+echo:  Pr, 4
+echo:  Pr, 0
+
+retained parameters (rp):
+  debug=0;
+  delta_q=-142.521;
+  t_last= 26.172; deg C
+  delta_q_model=    -142.5;
+  t_last_model= 26.250; deg C
+  shunt_gain_sclr=   1.000; A
+  ib_scale_amp=   0.984; A
+  ib_bias_amp=  -0.940; A
+  ib_scale_noa=   1.033; A
+  ib_bias_noa= -0.170; A
+  ib_bias_all=  0.000; A 
+  ib_select=0; -1=noa, 0=auto, 1=amp
+  vb_bias=  0.000; V
+  modeling=0;
+  amp=  0.000; A pk
+  freq=  0.000; r/s
+  type=0; 0=sin, 1=sq, 2=tri
+  inj_bias=  0.000; A
+  tb_bias=  0.000; deg C
+  s_cap_model=  1.000;
+  cutback_gain_scalar=  1.000;
+  isum=73;
+  delta_q_cinf_amp=  -390108.9; C
+  delta_q_dinf_amp=   390062.0; C
+  delta_q_cinf_noa= -390222.0; C
+  delta_q_dinf_noa=  390200.4; C
+  hys_scale=  1.000;
+  tweak_sclr_amp=  1.000;
+  tweak_sclr_noa=  1.000;
+  nP= 1.00; e.g. '2P1S'
+  nS= 1.00; e.g. '2P1S'
+  mon_mod=0; 0=Battleborn, 1=LION
+  sim_mod=0; 0=Battleborn, 1=LION
+
+command parameters(cp):
+  enable_wifi=0;
+  model_cutback=1;
+  model_saturated=1;
+  soft_reset=0;
+  write_summary=0;
+  ib_tot_bias_amp= -0.940;
+  ib_tot_bias_noa= -0.170;
+  dc_dc_on=0;
+  blynking=0;
+  publishS=0;
+E: DS18, t=     0.0, ct=10, using lgv=    26.4
+Hi!
+Init DISPLAY
+DISP allocated
+Init CLOUD...done CLOUD
+          local    memory
+bias amp  -0.940    -0.940
+bias noa  -0.170    -0.170
+sclr amp   0.984     0.984
+sclr noa   1.033     1.033
+Do you wish to reset to local? [Y/n]:  moving on....
+End setup()
+SHUNT MON Amp init
+SHUNT MON No Amp init
