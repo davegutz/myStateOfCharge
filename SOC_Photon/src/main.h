@@ -204,12 +204,27 @@ void setup()
   if ( ASK_DURING_BOOT )
   {
     rp.print_versus_local_config();
-    Serial.printf("Do you wish to reset to local? [Y/n]:  ");
+    display->clearDisplay();
+    display->setTextSize(1);              // Normal 1:1 pixel scale
+    display->setTextColor(SSD1306_WHITE); // Draw white text
+    display->setCursor(0,0);              // Start at top-left corner    rp.print_versus_local_config();
+    display->println("Waiting for user talk");
+    display->display();
+    Serial.printf("Do you wish to reset to local? [Y/n]:  "); Serial1.printf("Do you wish to reset to local? [Y/n]:  ");
     uint8_t count = 0;
-    while ( !Serial.available() && ++count<60 ) delay(1000);
-    byte answer=Serial.read();
-    if ( answer=='Y' ) rp.renominalize_to_local_config();
-    else Serial.printf("moving on....\n");
+    while ( !Serial.available() && !Serial1.available() && ++count<60 ) delay(1000);
+    byte answer = 'n';
+    if ( Serial.available() ) answer=Serial.read();
+    else if ( Serial1.available() ) answer=Serial1.read();
+    if ( answer=='Y' )
+    {
+      rp.renominalize_to_local_config();
+      rp.print_versus_local_config();
+    }
+    else
+    {
+      Serial.printf("moving on....\n"); Serial1.printf("moving on....\n");
+    }
   }
 
   Serial.printf("End setup()\n");
@@ -299,10 +314,10 @@ void loop()
   display_to_user = DisplayUserSync->update(millis(), reset); //  now || reset
   publishP = PublishParticle->update(millis(), false);        //  now || false
   publishB = PublishBlynk->update(millis(), false);           //  now || false
-  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT );
+  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !rp.modeling;
   if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
-  summarizing = Summarize->update(millis(), boot_summ, !rp.modeling); // now || boot_summ && !rp.modeling
-  summarizing = summarizing || (rp.debug==-11 && publishB);
+  summarizing = Summarize->update(millis(), false); // now || boot_summ && !rp.modeling
+  summarizing = summarizing || (rp.debug==-11 && publishB) || boot_summ;
 
   // Load temperature
   // Outputs:   Sen->Tb,  Sen->Tb_filt
@@ -403,15 +418,12 @@ void loop()
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
-  if ( read )
+  if ( (!boot_wait && summarizing) || cp.write_summary )
   {
-    if ( (!boot_wait && summarizing) || cp.write_summary )
-    {
-      if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
-      mySum[rp.isum].assign(time_now, Mon, Sen);
-      Serial.printf("Summ...\n");
-      cp.write_summary = false;
-    }
+    if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
+    mySum[rp.isum].assign(time_now, Mon, Sen);
+    Serial.printf("Summ...\n");
+    cp.write_summary = false;
   }
 
   // Initialize complete once sensors and models started and summary written

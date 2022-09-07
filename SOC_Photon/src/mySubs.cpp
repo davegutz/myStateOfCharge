@@ -71,21 +71,21 @@ void print_serial_header(void)
 {
   if ( ( rp.debug==4 || rp.debug==26 ) )
   {
-    Serial.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,   ioc,     Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,\n");
+    Serial.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
     if ( !cp.blynking )
-      Serial1.printf("unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,   ioc,     Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,\n");
+      Serial1.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc, voc_soc,   Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
   }
 }
 void print_serial_sim_header(void)
 {
   if ( rp.debug==26 ) // print_serial_sim_header
-    Serial.printf("unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_stat_m, dv_dyn_m, vb_m, ib_m, ib_in_m, ioc_m, sat_m, dq_m, soc_m, reset_m,\n");
+    Serial.printf("unit_m,  c_time,       chm_s,  Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,\n");
 }
 void print_signal_sel_header(void)
 {
   if ( rp.debug==26 ) // print_signal_sel_header
     Serial.printf("unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,");
-    Serial.printf("    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_m,mib,Ib_s, vb_sel,Vb_h,Vb_m,mvb,Vb_s,  Tb_h,Tb_s,mtb,Tb_f, ");
+    Serial.printf("    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f, ");
     Serial.printf("  fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,\n");
           // -----, cTime, reset, rp.ib_select,
           //                                     cc_diff_,
@@ -100,10 +100,10 @@ void print_signal_sel_header(void)
 // Print strings
 void create_print_string(Publish *pubList)
 {
-  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %5.2f,%7.5f,%7.5f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
+  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %d,  %5.2f,%7.5f,%7.5f,%7.5f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
-    pubList->sat, rp.ib_select, rp.modeling,
-    pubList->Tb, pubList->Vb, pubList->Ib, pubList->ioc,
+    rp.mon_mod, pubList->sat, rp.ib_select, rp.modeling,
+    pubList->Tb, pubList->Vb, pubList->Ib, pubList->ioc, pubList->voc_soc,
     pubList->Vsat, pubList->dV_dyn, pubList->Voc_stat, pubList->Voc_ekf,
     pubList->y_ekf,
     pubList->soc_model, pubList->soc_ekf, pubList->soc,
@@ -115,10 +115,10 @@ void create_short_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
   if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;
   else cTime = Sen->control_time;
 
-  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,%10.3f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
+  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,%10.3f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
-    pubList->sat, rp.ib_select, rp.modeling,
-    Mon->Tb(), Mon->Vb(), Mon->Ib(), Mon->ioc(),
+    rp.mon_mod, pubList->sat, rp.ib_select, rp.modeling,
+    Mon->Tb(), Mon->Vb(), Mon->Ib(), Mon->ioc(), Mon->voc_soc(), 
     Mon->Vsat(), Mon->dV_dyn(), Mon->Voc_stat(), Mon->Hx(),
     Mon->y_ekf(),
     Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(),
@@ -252,79 +252,93 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
   Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ib, Mon->soc());
 }
 
-// OLED display drive
+/* OLED display drive
+ e.g.:
+   35  13.71 -4.2    Tb,C  VOC,V  Ib,A 
+   45  -10.0  46     EKF,Ah  chg,hrs  CC, Ah
+*/
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 {
   static uint8_t frame = 0;
   static boolean pass = false;
-  String dispT, dispV, dispI;
+  String disp_0, disp_1, disp_2;
 
   display->clearDisplay();
   display->setTextSize(1);              // Normal 1:1 pixel scale
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner
 
-  // Top Line
-
+  // ---------- Top Line  ------------------------------------------------
   // Tb
   sprintf(cp.buffer, "%3.0f", pp.pubList.Tb);
-  dispT = cp.buffer;
+  disp_0 = cp.buffer;
   if ( Sen->Flt->tb_fa() && (frame==0 || frame==1) )
-    dispT = "***";
+    disp_0 = "***";
 
   // Voc
   sprintf(cp.buffer, "%5.2f", pp.pubList.Voc);
-  dispV = cp.buffer;
+  disp_1 = cp.buffer;
   if ( Sen->Flt->vb_sel_stat()==0 && (frame==1 || frame==2) )
-    dispV = "**F**";
+    disp_1 = "*fail";
 
   // Ib
   sprintf(cp.buffer, "%6.1f", pp.pubList.Ib);
-  dispI = cp.buffer;
+  disp_2 = cp.buffer;
   if ( frame==2 )
   {
     if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() && !rp.mod_ib() )
-      dispI = "**F**";
+      disp_2 = "*fail";
     else if ( Sen->Flt->dscn_fa() && !rp.mod_ib() )
-      dispI = "..C..";
+      disp_2 = " conn ";
     else if ( Sen->Flt->red_loss() )
-      dispI = "-data-";
+      disp_2 = " data ";
   }
   else if ( frame==3 )
   {
     if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() && !rp.mod_ib() )
-      dispI = "**F**";
+      disp_2 = "*fail";
     else if ( Sen->Flt->dscn_fa() && !rp.mod_ib() )
-      dispI = "..C..";
+      disp_2 = " conn ";
   }
-  String dispTop = dispT.substring(0, 4) + " " + dispV.substring(0, 6) + " " + dispI.substring(0, 7);
-  display->println(dispTop.c_str());
+  String disp_Tbop = disp_0.substring(0, 4) + " " + disp_1.substring(0, 6) + " " + disp_2.substring(0, 7);
+  display->println(disp_Tbop.c_str());
   display->println(F(""));
   display->setTextColor(SSD1306_WHITE);
 
-  // Bottom line
+  // --------------------- Bottom line  ---------------------------------
+  // Hrs EHK
+  sprintf(cp.buffer, "%3.0f", pp.pubList.Amp_hrs_remaining_ekf);
+  disp_0 = cp.buffer;
+  if ( frame==0 )
+  {
+    if ( Sen->Flt->cc_diff_fa() )
+      disp_0 = "---";
+  }
+  display->print(disp_0.c_str());
+
+  // t charge
   if ( abs(pp.pubList.tcharge) < 24. )
   {
-    sprintf(cp.buffer, "%3.0f%5.1f", pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge);
-    dispT = cp.buffer;
+    sprintf(cp.buffer, "%5.1f", pp.pubList.tcharge);
   }
   else
   {
-    sprintf(cp.buffer, "%3.0f --- ", pp.pubList.Amp_hrs_remaining_ekf);
-    dispT = cp.buffer;
+    sprintf(cp.buffer, " --- ");
   }  
-  display->print(dispT.c_str());
+  disp_1 = cp.buffer;
+  display->print(disp_1.c_str());
+
   // Hrs large
   display->setTextSize(2);             // Draw 2X-scale text
   if ( frame==1 || frame==3 || !Sen->saturated )
   {
     sprintf(cp.buffer, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
-    dispV = cp.buffer;
+    disp_2 = cp.buffer;
   }
   else if (Sen->saturated)
-    dispV = "SAT";
-  display->print(dispV.c_str());
-  String dispBot = dispT + " " + dispV;
+    disp_2 = "SAT";
+  display->print(disp_2.c_str());
+  String dispBot = disp_0 + disp_1 + " " + disp_2;
 
   // Display
   display->display();
@@ -333,7 +347,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   // Text basic Bluetooth (use serial bluetooth app)
   if ( rp.debug!=4 && rp.debug!=-2 && !cp.blynking )
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nv-2;Pf; for fails.  prints=%ld\n\n",
-      dispTop.c_str(), dispBot.c_str(), cp.num_v_print);
+      disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
 
   if ( rp.debug==5 ) debug_5();
 

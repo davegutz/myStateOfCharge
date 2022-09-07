@@ -55,7 +55,7 @@ struct RetainedPars
   float freq = 0.;              // Injected frequency, Hz (0-2)
   uint8_t type = 0;             // Injected waveform type.   0=sine, 1=square, 2=triangle
   float inj_bias = 0.;          // Constant bias, A
-  float tb_bias = TEMP_BIAS;    // Bias on Tb sensor, deg C
+  float tb_bias_hdwe = TEMP_BIAS;    // Bias on Tb sensor, deg C
   float s_cap_model = 1.;       // Scalar on battery model size
   float cutback_gain_scalar = 1.;        // Scalar on battery model saturation cutback function
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
@@ -69,8 +69,8 @@ struct RetainedPars
   float tweak_sclr_noa = 1.;    // Dyn tweak.  Tweak calibration for non-amplified current sensor
   float nP = NP;                // Number of parallel batteries in bank, e.g. '2P1S'
   float nS = NS;                // Number of series batteries in bank, e.g. '2P1S'
-  uint8_t mon_mod = MOD_CODE;   // Monitor battery chemistry type
-  uint8_t sim_mod = MOD_CODE;   // Simulation battery chemistry type
+  uint8_t mon_mod = MON_CHEM;   // Monitor battery chemistry type
+  uint8_t sim_mod = SIM_CHEM;   // Simulation battery chemistry type
 
   // Corruption test on bootup.  Needed because retained parameter memory is not managed by the compiler as it relies on
   // battery.  Small compilation changes can change where in this memory the program points, too.
@@ -102,7 +102,7 @@ struct RetainedPars
     this->freq = 0.;
     this->type = 0;
     this->inj_bias = 0.;
-    this->tb_bias = TEMP_BIAS;
+    this->tb_bias_hdwe = TEMP_BIAS;
     this->s_cap_model = 1.;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
@@ -115,8 +115,8 @@ struct RetainedPars
     this->tweak_sclr_noa = 1.;
     this->nP = NP;
     this->nS = NS;
-    this->mon_mod = MOD_CODE;
-    this->sim_mod = MOD_CODE;
+    this->mon_mod = MON_CHEM;
+    this->sim_mod = SIM_CHEM;
   }
   void large_reset()
   {
@@ -153,7 +153,7 @@ struct RetainedPars
     Serial.printf("  freq=%7.3f; r/s\n", this->freq);
     Serial.printf("  type=%d; 0=sin, 1=sq, 2=tri\n", this->type);
     Serial.printf("  inj_bias=%7.3f; A\n", this->inj_bias);
-    Serial.printf("  tb_bias=%7.3f; deg C\n", this->tb_bias);
+    Serial.printf("  tb_bias_hdwe=%7.3f; deg C\n", this->tb_bias_hdwe);
     Serial.printf("  s_cap_model=%7.3f;\n", this->s_cap_model);
     Serial.printf("  cutback_gain_scalar=%7.3f;\n", this->cutback_gain_scalar);
     Serial.printf("  isum=%d;\n", this->isum);
@@ -177,7 +177,7 @@ struct RetainedPars
     Serial.printf("bias amp %7.3f   %7.3f\n", CURR_BIAS_AMP, ib_bias_amp);
     Serial.printf("bias noa %7.3f   %7.3f\n", CURR_BIAS_NOA, ib_bias_noa);
     Serial.printf("sclr amp %7.3f   %7.3f\n", CURR_SCALE_AMP, ib_scale_amp);
-    Serial.printf("sclr noa %7.3f   %7.3f\n", CURR_BIAS_NOA, ib_scale_noa);
+    Serial.printf("sclr noa %7.3f   %7.3f\n", CURR_SCALE_NOA, ib_scale_noa);
   }
 
   // Renominalize as requested in setup()
@@ -186,7 +186,7 @@ struct RetainedPars
     ib_bias_amp = CURR_BIAS_AMP;
     ib_bias_noa = CURR_BIAS_NOA;
     ib_scale_amp = CURR_SCALE_AMP;
-    ib_scale_noa = CURR_BIAS_NOA;
+    ib_scale_noa = CURR_SCALE_NOA;
   }
 };            
 

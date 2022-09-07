@@ -57,6 +57,7 @@ struct CommandPars
   boolean publishS;         // Print serial monitor data
   uint8_t print_mult;       // Print multiplier for objects
   unsigned long num_v_print;// Number of print echos made, for checking on BLE
+  float tb_bias_model;      // Bias on Tb for model, C
 
   CommandPars(void)
   {
@@ -73,6 +74,7 @@ struct CommandPars
     publishS = false;
     print_mult = 4;
     num_v_print = 0UL;
+    tb_bias_model = 0.;
   }
 
   void cmd_reset(void)
@@ -97,16 +99,17 @@ struct CommandPars
   void pretty_print(void)
   {
     Serial.printf("command parameters(cp):\n");
-    Serial.printf("  enable_wifi=%d;\n", this->enable_wifi);
-    Serial.printf("  model_cutback=%d;\n", this->model_cutback);
-    Serial.printf("  model_saturated=%d;\n", this->model_saturated);
-    Serial.printf("  soft_reset=%d;\n", this->soft_reset);
-    Serial.printf("  write_summary=%d;\n", this->write_summary);
-    Serial.printf("  ib_tot_bias_amp=%7.3f;\n", this->ib_tot_bias_amp);
-    Serial.printf("  ib_tot_bias_noa=%7.3f;\n", this->ib_tot_bias_noa);
-    Serial.printf("  dc_dc_on=%d;\n", this->dc_dc_on);
-    Serial.printf("  blynking=%d;\n", this->blynking);
-    Serial.printf("  publishS=%d;\n", this->publishS);
+    Serial.printf(" enable_wifi=%d;\n", this->enable_wifi);
+    Serial.printf(" model_cutback=%d;\n", this->model_cutback);
+    Serial.printf(" model_saturated=%d;\n", this->model_saturated);
+    Serial.printf(" soft_reset=%d;\n", this->soft_reset);
+    Serial.printf(" write_summary=%d;\n", this->write_summary);
+    Serial.printf(" ib_tot_bias_amp=%7.3f;\n", this->ib_tot_bias_amp);
+    Serial.printf(" ib_tot_bias_noa=%7.3f;\n", this->ib_tot_bias_noa);
+    Serial.printf(" dc_dc_on=%d;\n", this->dc_dc_on);
+    Serial.printf(" blynking=%d;\n", this->blynking);
+    Serial.printf(" publishS=%d;\n", this->publishS);
+    Serial.printf(" tb_bias_mode=%7.3f;\n", this->tb_bias_model);
   }
 
   void assign_print_mult(const uint8_t count)

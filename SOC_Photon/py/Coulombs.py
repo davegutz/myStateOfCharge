@@ -43,9 +43,18 @@ class Coulombs:
         self.t_last = 0.
         self.sat = True
         from pyDAGx import myTables
-        t_x_soc_min = [5.,   11.1,  20.,  40.]
-        t_soc_min = [0.10, 0.07,  0.02, 0.05]
-        self.lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
+        # Battleborn
+        t_x_soc_min0 = [5.,   11.1,  20.,  40.]
+        t_soc_min0 = [0.10, 0.07,  0.05, -0.05]
+        self.lut_soc_min0 = myTables.TableInterp1D(np.array(t_x_soc_min0), np.array(t_soc_min0))
+        # LION
+        t_x_soc_min1 = [5.,   11.1,  20.,  40.]
+        t_soc_min1 = [0.10, 0.07,  0.05, 0.03]
+        self.lut_soc_min1 = myTables.TableInterp1D(np.array(t_x_soc_min1), np.array(t_soc_min1))
+        # LION EKF
+        t_x_soc_min2 = [5.,   11.1,  20.,  40.]
+        t_soc_min2 = [0.10, 0.07,  0.05, 0.0]
+        self.lut_soc_min2 = myTables.TableInterp1D(np.array(t_x_soc_min2), np.array(t_soc_min2))
         self.coul_eff = coul_eff_
         self.tweak_test = tweak_test
         self.reset = False
@@ -116,13 +125,13 @@ class Coulombs:
     def calculate_capacity(self, temp_c):
         """Capacity"""
         try:
-            res = self.q_cap_rated_scaled * (1. - dqdt * (temp_c - self.t_rated))
+            res = self.q_cap_rated_scaled * (1. + dqdt * (temp_c - self.t_rated))
         except:
             res = 1
         return res
-        # return self.q_cap_rated_scaled * (1. - dqdt * (temp_c - self.t_rated))
+        # return self.q_cap_rated_scaled * (1. + dqdt * (temp_c - self.t_rated))
 
-    def count_coulombs(self, dt, reset, temp_c, charge_curr, sat, soc_init=None):
+    def count_coulombs(self, chem, dt, reset, temp_c, charge_curr, sat, soc_init=None):
         """Count coulombs based on true=actual capacity
         Inputs:
             dt              Integration step, s
@@ -132,6 +141,16 @@ class Coulombs:
             t_last          Past value of battery temperature used for rate limit memory, deg C
             coul_eff        Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
         """
+        self.chm = chem
+        if self.chm==0:
+            self.lut_soc_min = self.lut_soc_min0
+        elif self.chm==1:
+            self.lut_soc_min = self.lut_soc_min1
+        elif self.chm==2:
+            self.lut_soc_min = self.lut_soc_min2
+        else:
+            print("BatteryMonitor.calculate:  bad chem value=", chem)
+            exit(1)
         self.reset = reset
         d_delta_q = charge_curr * dt
         if charge_curr > 0. and not self.tweak_test:

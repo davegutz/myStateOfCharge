@@ -55,6 +55,7 @@ struct Publish
   float Voc_ekf;
   float y_ekf;
   float ioc;
+  float voc_soc;
 };
 
 void publish1(void);

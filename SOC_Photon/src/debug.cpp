@@ -49,15 +49,14 @@ void debug_12(BatteryMonitor *Mon, Sensors *Sen)
 
 // rp.debug==-13 ib_dscn for Arduino.
 // Start Arduino serial plotter.  Toggle v like 'v0;v-13;' to produce legend
+/*
 void debug_m13(Sensors *Sen)
 {
-  static int8_t last_call = 0;
 
   // Arduinio header
+  static int8_t last_call = 0;
   if ( rp.debug!=last_call && rp.debug==-13 )
     Serial.printf("ib_sel_st:, ib_amph:, ib_noah:, ib_rate:, ib_quiet:,  dscn_flt:, dscn_fa:\n");
-
-  // Save
   last_call = rp.debug;
 
   // Plot
@@ -69,8 +68,8 @@ void debug_m13(Sensors *Sen)
   max(min(Sen->Ib_amp_hdwe, 2), -2), max(min(Sen->Ib_noa_hdwe, 2), -2),
   max(min(Sen->Flt->ib_rate(),2), -2), max(min(Sen->Flt->ib_quiet(), 2), -2),
   Sen->Flt->ib_dscn_fa(), Sen->Flt->ib_dscn_fa());
-
 }
+*/
 
 // rp.debug==5 Charge time
 void debug_5(void)

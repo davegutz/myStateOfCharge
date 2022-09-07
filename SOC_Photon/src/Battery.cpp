@@ -51,7 +51,7 @@ Battery::~Battery() {}
 // operators
 // functions
 
-// Placeholder; not used.  May write this base version if needed using BatteryModel::calculate()
+// Placeholder; not used.  May write this base version if needed using BatterySim::calculate()
 // as a starting point but use the base class Randles formulation and re-arrange the i/o for that model.
 double Battery::calculate(const float temp_C, const double q, const double curr_in, const double dt,
     const boolean dc_dc_on) { return 0.;}
@@ -256,10 +256,10 @@ void BatteryMonitor::assign_rand(void)
        |       v  ioc ~= ib
        +   voc_stat
        |
-    ___|____
-    |  +    |
-    | Batt  |
-    |  -    |                 Batt stores charge ioc
+    ___|____  voc_soc
+    |  +    |   ^
+    | Batt  |   |
+    |  -    |   |             Batt stores charge ioc
     |_______|
         |
         |                      Total charge storage ib-ioc + ioc = ib
@@ -288,10 +288,10 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     }
     else    // aliased, unstable if T<0.5  TODO:  consider deleting Randles model (hardware filters)
         voc_ = vb_ - chem_.r_ss * ib_;
-    if ( rp.debug==35 )
-    {
-        Serial.printf("BatteryMonitor::calculate:"); Randles_->pretty_print();
-    }
+    // if ( rp.debug==35 )
+    // {
+    //     Serial.printf("BatteryMonitor::calculate:"); Randles_->pretty_print();
+    // }
     dv_dyn_ = vb_ - voc_;
     // Hysteresis model
     hys_->calculate(ib_, soc_);
@@ -338,9 +338,9 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     boolean conv = abs(y_filt_)<EKF_CONV && !cp.soft_reset;  // Initialize false
     EKF_converged->calculate(conv, EKF_T_CONV, EKF_T_RESET, min(Sen->T, EKF_T_RESET), cp.soft_reset);
 
-    if ( rp.debug==34 || rp.debug==7 )
-        Serial.printf("BatteryMonitor:dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, soc, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,  %d,\n",
-            dt_, ib_, voc_soc_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, soc_, converged_ekf());
+    // if ( rp.debug==34 || rp.debug==7 )
+    //     Serial.printf("BatteryMonitor:dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, soc, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,  %d,\n",
+    //         dt_, ib_, voc_soc_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, soc_, converged_ekf());
     if ( rp.debug==37 )
         Serial.printf("BatteryMonitor:ib,vb,voc_stat,voc(z_),  K_,y_,soc_ekf, y_ekf_f, conv,  %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,%7.4f,  %d,\n",
             ib_, vb_, voc_stat_, voc_,     K_, y_, soc_ekf_, y_filt_, converged_ekf());
@@ -518,8 +518,8 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, Sensors *Sen)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
-BatteryModel::BatteryModel() : Battery() {}
-BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code) :
+BatterySim::BatterySim() : Battery() {}
+BatterySim::BatterySim(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code) :
     Battery(rp_delta_q, rp_t_last, rp_nP, rp_nS, rp_mod_code), q_(RATED_BATT_CAP*3600.), rp_s_cap_model_(rp_s_cap_model)
 {
     // Randles dynamic model for EKF
@@ -549,8 +549,8 @@ BatteryModel::BatteryModel(double *rp_delta_q, float *rp_t_last, float *rp_s_cap
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
 }
 
-// BatteryModel::assign_rand:    Assign constants from battery chemistry to arrays for state space model
-void BatteryModel::assign_rand(void)
+// BatterySim::assign_rand:    Assign constants from battery chemistry to arrays for state space model
+void BatterySim::assign_rand(void)
 {
     rand_A_[0] = -1./chem_.tau_ct;
     rand_A_[1] = 0.;
@@ -566,7 +566,7 @@ void BatteryModel::assign_rand(void)
     rand_D_[1] = 1.;
 }
 
-/* BatteryModel::calculate:  Sim SOC-OCV table with a Battery Management System (BMS) and hysteresis.
+/* BatterySim::calculate:  Sim SOC-OCV table with a Battery Management System (BMS) and hysteresis.
 // Makes a good reference model. Intervenes in sensor path to provide Mon with inputs
 // when running simulations.  Never used for anything during normal operation.  Models
 // for monitoring in normal operation are in the BatteryMonitor object.   Works in 12 V battery
@@ -599,10 +599,10 @@ void BatteryModel::assign_rand(void)
        |       v  ioc ~= ib
        +   voc_stat
        |
-    ___|____
-    |  +    |
-    | Batt  |
-    |  -    |                 Batt stores charge ioc
+    ___|____ voc_soc
+    |  +    |   ^
+    | Batt  |   |
+    |  -    |   |              Batt stores charge ioc
     |_______|
         |
         |                      Total charge storage ib-ioc + ioc = ib
@@ -611,7 +611,7 @@ void BatteryModel::assign_rand(void)
         gnd
 
 */
-double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset)
+double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset)
 {
     temp_c_ = Sen->Tb_filt;
     double curr_in = Sen->Ib_model_in;
@@ -668,23 +668,23 @@ double BatteryModel::calculate(Sensors *Sen, const boolean dc_dc_on, const boole
     model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
 
-    if ( rp.debug==75 ) Serial.printf("BatteryModel::calculate: temp_c_, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
-        temp_c_, soc_, voc_stat_, chem_.low_voc);
+    // if ( rp.debug==75 ) Serial.printf("BatterySim::calculate: temp_c_, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
+    //     temp_c_, soc_, voc_stat_, chem_.low_voc);
 
     if ( rp.debug==79 ) Serial.printf("temp_c_, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib_fut, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f, %7.3f,\n",
         temp_c_, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
 
-    if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatteryModel::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
+    if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
      dt,temp_c_, ib_, soc_, voc_, dv_dyn_, vb_);
     
-    if ( rp.debug==76 ) Serial.printf("BatteryModel::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in=%7.3f,ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
+    if ( rp.debug==76 ) Serial.printf("BatterySim::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in=%7.3f,ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
         soc_, temp_c_, ib_in_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);
 
     return ( vb_*(*rp_nS_) );
 }
 
 // Injection model, calculate inj bias based on time since boot
-float BatteryModel::calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq)
+float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq)
 {
     // Return if time 0
     if ( now== 0UL )
@@ -733,7 +733,7 @@ float BatteryModel::calc_inj(const unsigned long now, const uint8_t type, const 
     return ( rp.inj_bias );
 }
 
-/* BatteryModel::count_coulombs: Count coulombs based on assumed model true=actual capacity.
+/* BatterySim::count_coulombs: Count coulombs based on assumed model true=actual capacity.
     Uses Tb instead of Tb_filt to be most like hardware and provide independence from application.
 Inputs:
     model_saturated Indicator of maximal cutback, T = cutback saturated
@@ -752,7 +752,7 @@ Outputs:
     soc_min_        Estimated soc where battery BMS will shutoff current, fraction
     q_min_          Estimated charge at low voltage shutdown, C\
 */
-double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon) 
+double BatterySim::count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon) 
 {
     // float charge_curr = Sen->Ib / (*rp_nP_); TODO:  re-run Xp10 with this change
     float charge_curr = ib_in_;
@@ -792,17 +792,13 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, BatteryMo
     soc_min_ = soc_min_T_->interp(temp_lim);
     q_min_ = soc_min_ * q_capacity_;
 
-    if ( rp.debug==97 )
-        Serial.printf("BatteryModel::cc,  dt,voc, vsat, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_capacity,soc,    %7.3f,%7.3f,%7.3f,%7.3f,  %d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%10.6f,\n",
-                    Sen->T, pp.pubList.Voc/(*rp_nS_),  vsat_, temp_lim, model_saturated_, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
-
     if ( rp.debug==26 && cp.publishS ) // print_serial_sim
     {
         double cTime;
         if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;
         else cTime = Sen->control_time;
-        sprintf(cp.buffer, "unit_sim, %13.3f, %7.5f,%7.5f, %7.5f,%7.5f,%7.5f,%7.5f, %7.3f,%7.3f,%7.3f,  %d,  %9.1f,  %8.5f, %d, %c",
-            cTime, Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, ioc_, model_saturated_, *rp_delta_q_, soc_, reset,'\0');
+        sprintf(cp.buffer, "unit_sim, %13.3f, %d, %7.5f,%7.5f, %7.5f,%7.5f,%7.5f,%7.5f, %7.3f,%7.3f,%7.3f,  %d,  %9.1f,  %8.5f, %d, %c",
+            cTime, rp.sim_mod,  Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, ioc_, model_saturated_, *rp_delta_q_, soc_, reset,'\0');
         Serial.println(cp.buffer);
     }
 
@@ -812,17 +808,17 @@ double BatteryModel::count_coulombs(Sensors *Sen, const boolean reset, BatteryMo
 }
 
 // Load states from retained memory
-void BatteryModel::load()
+void BatterySim::load()
 {
     apply_cap_scale(*rp_s_cap_model_);
 }
 
 // Print
-void BatteryModel::pretty_print(void)
+void BatterySim::pretty_print(void)
 {
-    Serial.printf("BM::");
+    Serial.printf("BS::");
     this->Battery::pretty_print();
-    Serial.printf(" BM::BM:\n");
+    Serial.printf(" BS::BS:\n");
     Serial.printf("  sat_ib_max=%7.3f; A\n", sat_ib_max_);
     Serial.printf("  sat_ib_null=%7.3f; A\n", sat_ib_null_);
     Serial.printf("  sat_cutback_gain=%7.1f; voc>vsat\n", sat_cutback_gain_);
