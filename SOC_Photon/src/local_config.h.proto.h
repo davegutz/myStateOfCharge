@@ -23,7 +23,7 @@ const String unit = "pro_20220907";  // Disable e_wrap saturated; tweak, history
 #define COULOMBIC_EFF         0.9985  // Coulombic efficiency of battery (Perm scale * 'Mk' for amp, * 'Nk' for noa), fraction of charge that gets used
 #define MON_CHEM              2       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=LION 
 #define SIM_CHEM              1       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=LION 
-#define RATED_BATT_CAP        108.4   // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
+#define RATED_BATT_CAP        100.    // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
 #define NS                    1.0     // Number of series batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BS')
 #define NP                    1.0     // Number of parallel batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BP')
 

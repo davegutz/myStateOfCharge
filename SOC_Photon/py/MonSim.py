@@ -256,7 +256,7 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/vHiFail20220903.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220903.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowTweakRegressionBucket20220906.txt'; unit_key = 'pro_2022';Bsim=1;Bmon=2
-        data_file_old_txt = '../dataReduction/triTweakDischBucket20220907.txt'; unit_key = 'pro_2022'; scale_in=1.084
+        data_file_old_txt = '../dataReduction/triTweakDischBucket20220907.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/pulse20220829.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
         # data_file_old_txt = '../dataReduction/tbFailMod20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tbFailHdwe20220829.txt'; unit_key = 'pro_2022'
