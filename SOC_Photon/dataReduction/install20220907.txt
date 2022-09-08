@@ -1,0 +1,1364 @@
+echo:  v4, 4
+echo:  v4, 0
+unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,   ioc,     Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,
+soc0_20220903, 2022-09-07T07:46:59,  55858626.362, 0.100,   0,  0,  0,  28.5,13.669,     0.599,    -0.984,    13.81396,0.00694,13.67813,13.67785,   0.000273, 0.88454,0.88340,0.88387,
+soc0_20220903, 2022-09-07T07:46:59,  55858626.662, 0.100,   0,  0,  0,  28.5,13.669,     0.599,    -0.984,    13.81393,0.00701,13.67830,13.67747,   0.000830, 0.88454,0.88342,0.88389,
+soc0_20220903, 2022-09-07T07:46:59,  55858626.962, 0.100,   0,  0,  0,  28.5,13.669,     0.599,    -0.984,    13.81393,0.00694,13.67774,13.67749,   0.000252, 0.88454,0.88348,0.88395,
+soc0_20220903, 2022-09-07T07:46:59,  55858627.262, 0.100,   0,  0,  0,  28.5,13.669,     0.532,    -0.984,    13.81393,0.00682,13.67811,13.67750,   0.000613, 0.88454,0.88349,0.88396,
+soc0_20220903, 2022-09-07T07:46:59,  55858627.562, 0.100,   0,  0,  0,  28.5,13.669,     0.532,    -0.984,    13.81393,0.00676,13.67796,13.67750,   0.000462, 0.88454,0.88349,0.88396,
+soc0_20220903, 2022-09-07T07:46:59,  55858627.862, 0.100,   0,  0,  0,  28.5,13.669,     0.599,    -0.984,    13.81393,0.00698,13.67787,13.67750,   0.000374, 0.88454,0.88349,0.88396,
+soc0_20220903, 2022-09-07T07:46:59,  55858628.162, 0.100,   0,  0,  0,  28.5,13.669,     0.532,    -0.983,    13.81393,0.00674,13.67794,13.67750,   0.000443, 0.88454,0.88349,0.88396,
+soc0_20220903, 2022-09-07T07:47:01,  55858628.462, 0.100,   0,  0,  0,  28.5,13.669,     0.532,    -0.983,    13.81393,0.00672,13.67792,13.67750,   0.000425, 0.88455,0.88349,0.88396,
+soc0_20220903, 2022-09-07T07:47:01,  55858628.762, 0.100,   0,  0,  0,  28.5,13.669,     0.532,    -0.983,    13.81393,0.00672,13.67792,13.67750,   0.000423, 0.88455,0.88349,0.88396,
+soc0_20220903, 2022-09-07T07:47:01,  55858629.062, 0.100,   0,  0,  0,  28.5,13.669,     0.532,    -0.983,    13.81393,0.00672,13.67792,13.67750,   0.000423, 0.88455,0.88349,0.88396,
+soc0_20220903, 2022-09-07T07:47:01,  55858629.362, 0.100,   0,  0,  0,  28.5,13.669,     0.532,    -0.983,    13.81393,0.00672,13.67792,13.67750,   0.000422, 0.88455,0.88349,0.88396,
+echo:  v0, 4
+soc0_20220903, 2022-09-07T07:47:01,  55858629.662, 0.100,   0,  0,  0,  28.5,13.669,     0.532,    -0.983,    13.81393,0.00672,13.67792,13.67750,   0.000422, 0.88455,0.88349,0.88396,
+echo:  v0, 0
+echo:  Pa, 4
+echo:  Pa, 0
+echo:  Pm, 0
+
+Mon:BM::Battery:
+  temp_c= 28.474; dg C
+ *rp_delt_q=  -43672.2;  C
+ *rp_t_last=      28.5; dg C
+  dvoc_dt=  0.004000; V/dg C
+  r_0=  0.003000;  ohm
+  r_ct =   0.001600;  ohm
+  tau_ct=  0.200000;  s (=1/Rct/Cct)
+  r_diff=  0.007700;  ohm
+  tau_diff = 83.000000;  s (=1/Rdif/Cdif)
+  r_sd =  70.000000;  ohm
+  tau_sd=25000000.0;  s
+  bms_off=0;
+  dv_dsoc=  0.399971; V/frac
+  ib=  0.532; A
+  Ib=  0.532; Bank, A
+  vb= 13.668; V
+  Vb= 13.668; Bank, V
+  voc= 13.662; V
+  voc_stat= 13.678; V
+  vsat= 13.814; V
+  dv_dyn=   0.007; V
+  sr=  1.000; sclr
+  dv=  0.010; Tab adj, V
+  dt=  0.100; s
+ *rp_nP= 1.00; P bank, e.g. '2P1S'
+ *rp_nS= 1.00; S bank, e.g. '2P1S'
+ BM::BM:
+  ah_rem_ekf_= 91.655; A-h
+  ah_rem_soc_= 91.704; A-h
+  EKF_conv=1;
+  q_ekf=  332831.8; C
+  soc_ekf=  0.8836; frac
+  tcharge= 22.8; hr
+  tcharge_ekf= 23.7; hr
+  voc_filt= 13.639; V
+  voc_stat= 13.678; V
+  y_filt=  0.000; Res EKF, V
+Mon::Coulombs:
+ q_cap_rated= 390240.0; At t_rated, C
+ q_cap_rated_scaled= 390240.0; Act at t_rated_, C
+ q_capacity= 376682.0; Sat q at temp, C
+ q= 333009.8; Avail, except q_min_, C
+ q_min=   2873.6; Low volt shutdown, C
+ delta_q -43672.2; Change since sat, C
+ soc=  0.8841; Frac of q_cap avail (0-1);
+ sat=0; T=saturated
+ t_rated= 25.0; Rated, dg C
+ t_last= 28.5; past, dg C
+ t_rlim=  0.017; Tb RL, deg C / s
+ resetting=0; Coord user testing of CC
+ soc_min=  0.0076; soc BMS shuts off
+ mod=Battleborn; Chem e.g. Battleborn or LION
+ mod_code=0; Chem code
+ coul_eff=  0.99850; Coul Eff
+Coulombs::Chemistry:
+  dqdt=  0.010; frac/dg C
+  low_voc= 10.000; BMS turn off, V
+  hys_cap=360000.000; F
+  v_sat= 13.850; V
+  dvoc_dt=  0.004; V/dg C
+  dv=  0.010; Cal err, V
+  r_0= 0.003000; Randles R0, ohm
+  r_ct= 0.001600; Charge trans, ohm
+  r_diff= 0.007700; Diff, ohm
+  tau_ct=  0.200; Charge tran, s (=1/Rct/Cct)
+  tau_diff= 83.000; Diff, s (=1/Rdif/Cdif)
+  tau_sd=25000000.000; EKF. Parasitic disch, s
+  r_sd= 70.000; EKF. Parasitic disch, ohm
+  r_ss=  0.012; SS init, ohm
+  voc(t, soc):
+    t={  5.000,  11.100,  20.000,  40.000, };
+    soc={ -0.150,   0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.990,   0.995,   1.000, };
+    voc={
+      {  4.000,   4.000,   4.000,   4.000,  10.200,  11.700,  12.450,  12.700,  12.770,  12.900,  12.910,  12.980,  13.050,  13.110,  13.170,  13.220,  13.590,  14.450, },
+      {  4.000,   4.000,   4.000,   9.500,  12.000,  12.500,  12.700,  12.800,  12.900,  12.960,  13.010,  13.060,  13.110,  13.170,  13.200,  13.230,  13.600,  14.460, },
+      {  4.000,   4.000,  10.000,  12.600,  12.770,  12.850,  12.890,  12.950,  12.990,  13.030,  13.040,  13.090,  13.140,  13.210,  13.250,  13.270,  13.720,  14.500, },
+      {  4.000,  13.150,  13.450,  13.650,  13.770,  13.850,  13.890,  13.950,  13.990,  14.030,  14.060,  14.090,  14.140,  14.210,  14.250,  14.270,  14.500,  14.800, },
+         };
+  soc_min(temp_c):
+    temp_c={  5.000,  11.100,  20.000,  40.000, };
+    soc_min={  0.100,   0.070,   0.050,  -0.050, };
+  r(soc, dv):
+    soc={0.000000, 0.500000, 1.000000, };
+    dv={ -0.900,  -0.700,  -0.500,  -0.300,   0.000,   0.300,   0.500,   0.700,   0.900, };
+    r={
+      { 0.000001,  0.064000,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.046000,  0.000001, },
+      { 0.000001,  0.000001,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.000001,  0.000001, },
+      { 0.000001,  0.000001,  0.000001,  0.036000,  0.015000,  0.024000,  0.000001,  0.000001,  0.000001, },
+         };
+Mon::StateSpace:
+  dt =  0.100000
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.000852,  0.004252];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.532337, 13.668435];
+   C  =  [ -1.000000, -1.000000];
+   D  =  [ -0.003000,  1.000000];
+   x_dot  =  [  0.000000, -0.000002];
+   y  =  [ 13.661734];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res=0.0161; Null, Ohm
+  cap_init=  360000.0; F
+  cap=  360000.0; F
+  tau=    5400.0; Null, s
+  ib=  0.532; In, A
+  ioc= -0.981; Out, A
+  soc=  0.8841; Input
+  res=  0.016; Var, ohm
+  dv_dot=  0.000; V/s
+  dv_hys= -0.016; Delta state, V
+  disabled=0; input < 1e-5
+  rp.hys_scale=  1.00; Slr
+Mon::EKF_1x1:
+Inputs:
+  z  =    13.6775;  // 1x1 input, =voc, dynamic predicted by other model, V
+  R  =   0.250000;  // 1x1 Kalman state uncertainty
+  Q  =   0.000000;  // 1x1 Kalman process uncertainty
+  H  =      0.400;  // 1x1 Jacobian sensitivity dV/dSOC
+Outputs:
+  x  =     0.8836;  // 1x1 Kalman state variable = Vsoc (0-1 fraction)
+  hx =    13.6771;  // Output of observation function h(x)
+  y  =     0.0004;  // 1x1 Residual z-hx, V
+  P  =   0.000064;  // 1x1 Kalman uncertainty covariance
+  K  =   0.000102;  // 1x1 Kalman gain
+  S  =   0.250010;  // 1x1 system uncertainty
+
+rp.modeling = 0
+BM::Battery:
+  temp_c= 28.474; dg C
+ *rp_delt_q=  -43672.2;  C
+ *rp_t_last=      28.5; dg C
+  dvoc_dt=  0.004000; V/dg C
+  r_0=  0.003000;  ohm
+  r_ct =   0.001600;  ohm
+  tau_ct=  0.200000;  s (=1/Rct/Cct)
+  r_diff=  0.007700;  ohm
+  tau_diff = 83.000000;  s (=1/Rdif/Cdif)
+  r_sd =  70.000000;  ohm
+  tau_sd=25000000.0;  s
+  bms_off=0;
+  dv_dsoc=  0.399971; V/frac
+  ib=  0.532; A
+  Ib=  0.532; Bank, A
+  vb= 13.668; V
+  Vb= 13.668; Bank, V
+  voc= 13.662; V
+  voc_stat= 13.678; V
+  vsat= 13.814; V
+  dv_dyn=   0.007; V
+  sr=  1.000; sclr
+  dv=  0.010; Tab adj, V
+  dt=  0.100; s
+ *rp_nP= 1.00; P bank, e.g. '2P1S'
+ *rp_nS= 1.00; S bank, e.g. '2P1S'
+ BM::BM:
+  ah_rem_ekf_= 91.655; A-h
+  ah_rem_soc_= 91.704; A-h
+  EKF_conv=1;
+  q_ekf=  332831.8; C
+  soc_ekf=  0.8836; frac
+  tcharge= 22.8; hr
+  tcharge_ekf= 23.7; hr
+  voc_filt= 13.639; V
+  voc_stat= 13.678; V
+  y_filt=  0.000; Res EKF, V
+Coulombs:
+ q_cap_rated= 390240.0; At t_rated, C
+ q_cap_rated_scaled= 390240.0; Act at t_rated_, C
+ q_capacity= 376682.0; Sat q at temp, C
+ q= 333009.8; Avail, except q_min_, C
+ q_min=   2873.6; Low volt shutdown, C
+ delta_q -43672.2; Change since sat, C
+ soc=  0.8841; Frac of q_cap avail (0-1);
+ sat=0; T=saturated
+ t_rated= 25.0; Rated, dg C
+ t_last= 28.5; past, dg C
+ t_rlim=  0.017; Tb RL, deg C / s
+ resetting=0; Coord user testing of CC
+ soc_min=  0.0076; soc BMS shuts off
+ mod=Battleborn; Chem e.g. Battleborn or LION
+ mod_code=0; Chem code
+ coul_eff=  0.99850; Coul Eff
+Coulombs::Chemistry:
+  dqdt=  0.010; frac/dg C
+  low_voc= 10.000; BMS turn off, V
+  hys_cap=360000.000; F
+  v_sat= 13.850; V
+  dvoc_dt=  0.004; V/dg C
+  dv=  0.010; Cal err, V
+  r_0= 0.003000; Randles R0, ohm
+  r_ct= 0.001600; Charge trans, ohm
+  r_diff= 0.007700; Diff, ohm
+  tau_ct=  0.200; Charge tran, s (=1/Rct/Cct)
+  tau_diff= 83.000; Diff, s (=1/Rdif/Cdif)
+  tau_sd=25000000.000; EKF. Parasitic disch, s
+  r_sd= 70.000; EKF. Parasitic disch, ohm
+  r_ss=  0.012; SS init, ohm
+  voc(t, soc):
+    t={  5.000,  11.100,  20.000,  40.000, };
+    soc={ -0.150,   0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.990,   0.995,   1.000, };
+    voc={
+      {  4.000,   4.000,   4.000,   4.000,  10.200,  11.700,  12.450,  12.700,  12.770,  12.900,  12.910,  12.980,  13.050,  13.110,  13.170,  13.220,  13.590,  14.450, },
+      {  4.000,   4.000,   4.000,   9.500,  12.000,  12.500,  12.700,  12.800,  12.900,  12.960,  13.010,  13.060,  13.110,  13.170,  13.200,  13.230,  13.600,  14.460, },
+      {  4.000,   4.000,  10.000,  12.600,  12.770,  12.850,  12.890,  12.950,  12.990,  13.030,  13.040,  13.090,  13.140,  13.210,  13.250,  13.270,  13.720,  14.500, },
+      {  4.000,  13.150,  13.450,  13.650,  13.770,  13.850,  13.890,  13.950,  13.990,  14.030,  14.060,  14.090,  14.140,  14.210,  14.250,  14.270,  14.500,  14.800, },
+         };
+  soc_min(temp_c):
+    temp_c={  5.000,  11.100,  20.000,  40.000, };
+    soc_min={  0.100,   0.070,   0.050,  -0.050, };
+  r(soc, dv):
+    soc={0.000000, 0.500000, 1.000000, };
+    dv={ -0.900,  -0.700,  -0.500,  -0.300,   0.000,   0.300,   0.500,   0.700,   0.900, };
+    r={
+      { 0.000001,  0.064000,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.046000,  0.000001, },
+      { 0.000001,  0.000001,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.000001,  0.000001, },
+      { 0.000001,  0.000001,  0.000001,  0.036000,  0.015000,  0.024000,  0.000001,  0.000001,  0.000001, },
+         };
+StateSpace:
+  dt =  0.100000
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.000852,  0.004252];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.532337, 13.668435];
+   C  =  [ -1.000000, -1.000000];
+   D  =  [ -0.003000,  1.000000];
+   x_dot  =  [  0.000000, -0.000002];
+   y  =  [ 13.661734];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res=0.0161; Null, Ohm
+  cap_init=  360000.0; F
+  cap=  360000.0; F
+  tau=    5400.0; Null, s
+  ib=  0.532; In, A
+  ioc= -0.981; Out, A
+  soc=  0.8841; Input
+  res=  0.016; Var, ohm
+  dv_dot=  0.000; V/s
+  dv_hys= -0.016; Delta state, V
+  disabled=0; input < 1e-5
+  rp.hys_scale=  1.00; Slr
+EKF_1x1:
+Inputs:
+  z  =    13.6775;  // 1x1 input, =voc, dynamic predicted by other model, V
+  R  =   0.250000;  // 1x1 Kalman state uncertainty
+  Q  =   0.000000;  // 1x1 Kalman process uncertainty
+  H  =      0.400;  // 1x1 Jacobian sensitivity dV/dSOC
+Outputs:
+  x  =     0.8836;  // 1x1 Kalman state variable = Vsoc (0-1 fraction)
+  hx =    13.6771;  // Output of observation function h(x)
+  y  =     0.0004;  // 1x1 Residual z-hx, V
+  P  =   0.000064;  // 1x1 Kalman uncertainty covariance
+  K  =   0.000102;  // 1x1 Kalman gain
+  S  =   0.250010;  // 1x1 system uncertainty
+echo:  Ps, 0
+
+modeling=0
+Sim:BM::Battery:
+  temp_c= 28.474; dg C
+ *rp_delt_q=  -43503.6;  C
+ *rp_t_last=      28.4; dg C
+  dvoc_dt=  0.004000; V/dg C
+  r_0=  0.003000;  ohm
+  r_ct =   0.001600;  ohm
+  tau_ct=  0.200000;  s (=1/Rct/Cct)
+  r_diff=  0.007700;  ohm
+  tau_diff = 83.000000;  s (=1/Rdif/Cdif)
+  r_sd =  70.000000;  ohm
+  tau_sd=25000000.0;  s
+  bms_off=0;
+  dv_dsoc=  0.399971; V/frac
+  ib=  0.532; A
+  Ib=  0.532; Bank, A
+  vb= 13.668; V
+  Vb= 13.668; Bank, V
+  voc= 13.662; V
+  voc_stat= 13.678; V
+  vsat= 13.814; V
+  dv_dyn=   0.007; V
+  sr=  1.000; sclr
+  dv=  0.010; Tab adj, V
+  dt=  0.100; s
+ *rp_nP= 1.00; P bank, e.g. '2P1S'
+ *rp_nS= 1.00; S bank, e.g. '2P1S'
+ BM::BM:
+  sat_ib_max=  0.532; A
+  sat_ib_null=  0.000; A
+  sat_cutback_gain= 1000.0; voc>vsat
+  model_cutback=0;
+  model_saturated=0;
+  ib=  0.532; A
+  ib_in=  0.532; Saved, A
+  ib_fut=  0.532; A
+  ib_sat=  0.500;
+ *rp_s_cap_model=  1.000; Slr
+Sim::Coulombs:
+ q_cap_rated= 390240.0; At t_rated, C
+ q_cap_rated_scaled= 390240.0; Act at t_rated_, C
+ q_capacity= 376845.0; Sat q at temp, C
+ q= 379199.1; Avail, except q_min_, C
+ q_min=   2953.5; Low volt shutdown, C
+ delta_q -43503.6; Change since sat, C
+ soc=  0.8846; Frac of q_cap avail (0-1);
+ sat=0; T=saturated
+ t_rated= 25.0; Rated, dg C
+ t_last= 28.4; past, dg C
+ t_rlim=  0.017; Tb RL, deg C / s
+ resetting=0; Coord user testing of CC
+ soc_min=  0.0078; soc BMS shuts off
+ mod=Battleborn; Chem e.g. Battleborn or LION
+ mod_code=0; Chem code
+ coul_eff=  0.99850; Coul Eff
+Coulombs::Chemistry:
+  dqdt=  0.010; frac/dg C
+  low_voc= 10.000; BMS turn off, V
+  hys_cap=360000.000; F
+  v_sat= 13.850; V
+  dvoc_dt=  0.004; V/dg C
+  dv=  0.010; Cal err, V
+  r_0= 0.003000; Randles R0, ohm
+  r_ct= 0.001600; Charge trans, ohm
+  r_diff= 0.007700; Diff, ohm
+  tau_ct=  0.200; Charge tran, s (=1/Rct/Cct)
+  tau_diff= 83.000; Diff, s (=1/Rdif/Cdif)
+  tau_sd=25000000.000; EKF. Parasitic disch, s
+  r_sd= 70.000; EKF. Parasitic disch, ohm
+  r_ss=  0.012; SS init, ohm
+  voc(t, soc):
+    t={  5.000,  11.100,  20.000,  40.000, };
+    soc={ -0.150,   0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.990,   0.995,   1.000, };
+    voc={
+      {  4.000,   4.000,   4.000,   4.000,  10.200,  11.700,  12.450,  12.700,  12.770,  12.900,  12.910,  12.980,  13.050,  13.110,  13.170,  13.220,  13.590,  14.450, },
+      {  4.000,   4.000,   4.000,   9.500,  12.000,  12.500,  12.700,  12.800,  12.900,  12.960,  13.010,  13.060,  13.110,  13.170,  13.200,  13.230,  13.600,  14.460, },
+      {  4.000,   4.000,  10.000,  12.600,  12.770,  12.850,  12.890,  12.950,  12.990,  13.030,  13.040,  13.090,  13.140,  13.210,  13.250,  13.270,  13.720,  14.500, },
+      {  4.000,  13.150,  13.450,  13.650,  13.770,  13.850,  13.890,  13.950,  13.990,  14.030,  14.060,  14.090,  14.140,  14.210,  14.250,  14.270,  14.500,  14.800, },
+         };
+  soc_min(temp_c):
+    temp_c={  5.000,  11.100,  20.000,  40.000, };
+    soc_min={  0.100,   0.070,   0.050,  -0.050, };
+  r(soc, dv):
+    soc={0.000000, 0.500000, 1.000000, };
+    dv={ -0.900,  -0.700,  -0.500,  -0.300,   0.000,   0.300,   0.500,   0.700,   0.900, };
+    r={
+      { 0.000001,  0.064000,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.046000,  0.000001, },
+      { 0.000001,  0.000001,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.000001,  0.000001, },
+      { 0.000001,  0.000001,  0.000001,  0.036000,  0.015000,  0.024000,  0.000001,  0.000001,  0.000001, },
+         };
+Sim::StateSpace:
+  dt =  0.100000
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.000852,  0.004252];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.532337, 13.661735];
+   C  =  [  1.000000,  1.000000];
+   D  =  [  0.003000,  1.000000];
+   x_dot  =  [  0.000000, -0.000002];
+   y  =  [ 13.668436];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res=0.0161; Null, Ohm
+  cap_init=  360000.0; F
+  cap=  360000.0; F
+  tau=    5400.0; Null, s
+  ib=  0.532; In, A
+  ioc= -0.981; Out, A
+  soc=  0.8846; Input
+  res=  0.016; Var, ohm
+  dv_dot=  0.000; V/s
+  dv_hys= -0.016; Delta state, V
+  disabled=0; input < 1e-5
+  rp.hys_scale=  1.00; Slr
+echo:  Pr, 0
+
+retained parameters (rp):
+  debug=0;
+  delta_q=-43672.089;
+  t_last= 28.474; deg C
+  delta_q_model=  -43503.5;
+  t_last_model= 28.432; deg C
+  shunt_gain_sclr=   1.000; A
+  ib_scale_amp=   0.984; A
+  ib_bias_amp=  -0.940; A
+  ib_scale_noa=   1.033; A
+  ib_bias_noa= -0.170; A
+  ib_bias_all=  0.000; A 
+  ib_select=0; -1=noa, 0=auto, 1=amp
+  vb_bias=  0.000; V
+  modeling=0;
+  amp=  0.000; A pk
+  freq=  0.000; r/s
+  type=0; 0=sin, 1=sq, 2=tri
+  inj_bias=  0.000; A
+  tb_bias=  0.000; deg C
+  s_cap_model=  1.000;
+  cutback_gain_scalar=  1.000;
+  isum=73;
+  delta_q_cinf_amp=      430.5; C
+  delta_q_dinf_amp=   -19970.1; C
+  delta_q_cinf_noa=     319.2; C
+  delta_q_dinf_noa=  -23115.0; C
+  hys_scale=  1.000;
+  tweak_sclr_amp=  1.000;
+  tweak_sclr_noa=  1.000;
+  nP= 1.00; e.g. '2P1S'
+  nS= 1.00; e.g. '2P1S'
+  mon_mod=0; 0=Battleborn, 1=LION
+  sim_mod=0; 0=Battleborn, 1=LION
+
+command parameters(cp):
+  enable_wifi=0;
+  model_cutback=0;
+  model_saturated=0;
+  soft_reset=0;
+  write_summary=0;
+  ib_tot_bias_amp= -0.940;
+  ib_tot_bias_noa= -0.170;
+  dc_dc_on=0;
+  blynking=0;
+  publishS=0;
+echo:  PM, 0
+
+Tweak::Shunt(Amp)::
+ port=0x49;
+ bare=0;
+ *cp_ib_bias= -0.940; A
+ *cp_ib_scale=  0.984; A
+ v2a_s=-272.05; A/V
+ vshunt_int=-22; count
+ ishunt_cal=  0.532; A
+ *rp_shunt_gain_sclr=  1.000; A
+Shunt(Amp)::Tweak(Amp)::
+  max_change=  0.001; 'N/MC'
+  max_tweak=  0.000;  'N/Mx'
+  rp_delta_q_cinf=     430.5; 'N/Mi', Coulombs
+  rp_delta_q_dinf=  -19970.1; 'N/Mi', Coulombs
+  sat=0; T=sat
+  delta_hrs=  4.862613; 'N/Mz', hr
+  time_to_wait=  6.000000; 'N/Mw', hr
+  tweak_sclr=  1.000; 'N/Mk'
+  coul_eff=  0.99850;
+Shunt(Amp)::Adafruit_ADS1x15 (Amp):
+ m_bitShift =      4;
+ m_gain =       2048;
+ s_gain =       1024;
+ m_dataRate =    128;
+Adafruit_ADS1x15::Adafruit_I2CDevice (Amp):
+  _addr =        0x49;
+  _begun =          1;
+  _maxBufferSize = 32;
+Shunt(Amp)::
+ port=0x49;
+ bare=0;
+ *cp_ib_bias= -0.940; A
+ *cp_ib_scale=  0.984; A
+ v2a_s=-272.05; A/V
+ vshunt_int=-22; count
+ ishunt_cal=  0.532; A
+ *rp_shunt_gain_sclr=  1.000; A
+Shunt(Amp)::Tweak(Amp)::
+  max_change=  0.001; 'N/MC'
+  max_tweak=  0.000;  'N/Mx'
+  rp_delta_q_cinf=     430.5; 'N/Mi', Coulombs
+  rp_delta_q_dinf=  -19970.1; 'N/Mi', Coulombs
+  sat=0; T=sat
+  delta_hrs=  4.862614; 'N/Mz', hr
+  time_to_wait=  6.000000; 'N/Mw', hr
+  tweak_sclr=  1.000; 'N/Mk'
+  coul_eff=  0.99850;
+Shunt(Amp)::Adafruit_ADS1x15 (Amp):
+ m_bitShift =      4;
+ m_gain =       2048;
+ s_gain =       1024;
+ m_dataRate =    128;
+Adafruit_ADS1x15::Adafruit_I2CDevice (Amp):
+  _addr =        0x49;
+  _begun =          1;
+  _maxBufferSize = 32;
+echo:  PN, 0
+
+Tweak::Shunt(No Amp)::
+ port=0x48;
+ bare=0;
+ *cp_ib_bias= -0.170; A
+ *cp_ib_scale=  1.033; A
+ v2a_s=-1376.99; A/V
+ vshunt_int=-5; count
+ ishunt_cal=  0.719; A
+ *rp_shunt_gain_sclr=  1.000; A
+Shunt(No Amp)::Tweak(No Amp)::
+  max_change=  0.001; 'N/MC'
+  max_tweak=  0.000;  'N/Mx'
+  rp_delta_q_cinf=     319.4; 'N/Mi', Coulombs
+  rp_delta_q_dinf=  -23115.0; 'N/Mi', Coulombs
+  sat=0; T=sat
+  delta_hrs=  4.862641; 'N/Mz', hr
+  time_to_wait=  6.000000; 'N/Mw', hr
+  tweak_sclr=  1.000; 'N/Mk'
+  coul_eff=  0.99850;
+Shunt(No Amp)::Adafruit_ADS1x15 (No Amp):
+ m_bitShift =      4;
+ m_gain =       2560;
+ s_gain =       2560;
+ m_dataRate =    128;
+Adafruit_ADS1x15::Adafruit_I2CDevice (No Amp):
+  _addr =        0x48;
+  _begun =          1;
+  _maxBufferSize = 32;
+Shunt(No Amp)::
+ port=0x48;
+ bare=0;
+ *cp_ib_bias= -0.170; A
+ *cp_ib_scale=  1.033; A
+ v2a_s=-1376.99; A/V
+ vshunt_int=-5; count
+ ishunt_cal=  0.719; A
+ *rp_shunt_gain_sclr=  1.000; A
+Shunt(No Amp)::Tweak(No Amp)::
+  max_change=  0.001; 'N/MC'
+  max_tweak=  0.000;  'N/Mx'
+  rp_delta_q_cinf=     319.4; 'N/Mi', Coulombs
+  rp_delta_q_dinf=  -23115.0; 'N/Mi', Coulombs
+  sat=0; T=sat
+  delta_hrs=  4.862642; 'N/Mz', hr
+  time_to_wait=  6.000000; 'N/Mw', hr
+  tweak_sclr=  1.000; 'N/Mk'
+  coul_eff=  0.99850;
+Shunt(No Amp)::Adafruit_ADS1x15 (No Amp):
+ m_bitShift =      4;
+ m_gain =       2560;
+ s_gain =       2560;
+ m_dataRate =    128;
+Adafruit_ADS1x15::Adafruit_I2CDevice (No Amp):
+  _addr =        0x48;
+  _begun =          1;
+  _maxBufferSize = 32;
+echo:  Pf, 0
+
+Sen::Fault:
+ cc_diff = -0.000; thr= 20.000;
+ e_w_f   =  0.016; thr= -0.492,  0.787;
+ ib_diff = -0.009; thr= 10.000;
+ ib_quiet=  0.009; thr=  0.005;
+ voc_soc= 13.677;
+ soc=  0.884;
+ voc= 13.662;
+ disab_ib_fa=0;
+ disab_tb_fa=0;
+ disab_vb_fa=0;
+ imh=  0.532;
+ inh=  0.541;
+ imm=  0.532;
+ inm=  0.532;
+ ibd_f= -0.014;
+ mod_tb=0, mod_vb=0, mod_ib=0
+ tb_s_st=1, vb_s_st=0, ib_s_st=1
+ nbar=0;
+ mbar=0;
+ ib_dsc_ft=0;'Sq v'
+ ibd_lo_ft=0;'Sd, *SA/*SB ^'
+ ibd_hi_ft=0;'Sd, *SA/*SB ^'
+ red_loss=1;
+ wl_ft=0;    'Sb ^'
+ wh_ft=0;    'Sa ^'
+    4
+ ibn_ft=0;   'Fi 1'
+ ibm_ft=0;   'Fi 1'
+ vb_ft=0;    'Fv 1'
+ tb_ft=0;    'Ft 1'
+  0000010000000;
+  CBA98765x3210
+ fltw=128;
+ ib_dsc_fa=0;'Sq v'
+ ibd_lo_fa=0;'Sd, *SA/*SB ^'
+ ibd_hi_fa=0;'Sd, *SA/*SB ^'
+ wv_fa=1;    'Sd, Sa/Sb ^'
+ wl_fa=0;    'Sb ^'
+ wh_fa=0;    'Sa ^'
+ cc_dif_fa=0;'Sf ^'
+ ibn_fa=0;   'Fi 1'
+ ibm_fa=0;   'Fi 1'
+ vb_fa=0;    'Fv 1'
+ tb_fa=0;    'Ft 1'
+  00010000000;
+  A9876543210
+ falw=128;
+echo:  Pc, 4
+echo:  Pc, 0
+
+c ? 'h'
+echo:  Pr, 4
+echo:  Pr, 0
+
+retained parameters (rp):
+  debug=0;
+  delta_q=-43338.614;
+  t_last= 28.397; deg C
+  delta_q_model=  -43227.4;
+  t_last_model= 28.370; deg C
+  shunt_gain_sclr=   1.000; A
+  ib_scale_amp=   0.984; A
+  ib_bias_amp=  -0.940; A
+  ib_scale_noa=   1.033; A
+  ib_bias_noa= -0.170; A
+  ib_bias_all=  0.000; A 
+  ib_select=0; -1=noa, 0=auto, 1=amp
+  vb_bias=  0.000; V
+  modeling=0;
+  amp=  0.000; A pk
+  freq=  0.000; r/s
+  type=0; 0=sin, 1=sq, 2=tri
+  inj_bias=  0.000; A
+  tb_bias=  0.000; deg C
+  s_cap_model=  1.000;
+  cutback_gain_scalar=  1.000;
+  isum=73;
+  delta_q_cinf_amp=      470.9; C
+  delta_q_dinf_amp=   -19970.1; C
+  delta_q_cinf_noa=     358.6; C
+  delta_q_dinf_noa=  -23115.0; C
+  hys_scale=  1.000;
+  tweak_sclr_amp=  1.000;
+  tweak_sclr_noa=  1.000;
+  nP= 1.00; e.g. '2P1S'
+  nS= 1.00; e.g. '2P1S'
+  mon_mod=0; 0=Battleborn, 1=LION
+  sim_mod=0; 0=Battleborn, 1=LION
+
+command parameters(cp):
+  enable_wifi=0;
+  model_cutback=0;
+  model_saturated=0;
+  soft_reset=0;
+  write_summary=0;
+  ib_tot_bias_amp= -0.940;
+  ib_tot_bias_noa= -0.170;
+  dc_dc_on=0;
+  blynking=0;
+  publishS=1;
+Hi!
+Init DISPLAY
+DISP allocated
+Init CLOUD...done CLOUD
+          local    memory
+bias amp  -0.940    -0.940
+bias noa  -0.170    -0.170
+sclr amp   0.984     0.984
+sclr noa   1.033     1.033
+Do you wish to reset to local? [Y/n]:  moving on....
+End setup()
+SHUNT MON Amp init
+SHUNT MON No Amp init
+echo:  Ca.8841, 4
+echo:  Ca.8841, 0
+soc=  0.884, modeling = 0, delta_q=-46696.483, soc_model=  0.8841,   delta_q_model=-46696.483, soc_ekf=  0.1617, delta_q_ekf=-337737.966,
+soft reset...
+echo:  W3, 0
+echo:  W, 0
+..Wait.
+echo:  W, 0
+..Wait.
+echo:  W, 0
+..Wait.
+echo:  Ca.8841, 4
+echo:  Ca.8841, 0
+soc=  0.884, modeling = 0, delta_q=-46696.483, soc_model=  0.8841,   delta_q_model=-46696.483, soc_ekf=  0.1578, delta_q_ekf=-339339.974,
+soft reset...
+echo:  W3, 0
+echo:  W, 0
+..Wait.
+echo:  W, 0
+..Wait.
+echo:  W, 0
+..Wait.
+echo:  Ca.9, 4
+echo:  Ca.9, 0
+soc=  0.900, modeling = 0, delta_q=-40290.338, soc_model=  0.9000,   delta_q_model=-40290.338, soc_ekf=  0.1658, delta_q_ekf=-336094.062,
+soft reset...
+echo:  W3, 0
+echo:  W, 0
+..Wait.
+echo:  W, 0
+..Wait.
+echo:  W, 0
+..Wait.
+Summ...
+echo:  v4, 4
+echo:  v4, 0
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+soc0_20220907, 2022-09-07T07:51:42,  55858926.996, 0.100,   0,  0,  0,  0,  28.2,13.254,     0.398,     0.001,13.24469,    13.81298,0.00490,13.24896,13.24469,   0.004262, 0.15966,0.15967,0.15966,
+soc0_20220907, 2022-09-07T07:51:42,  55858927.396, 0.100,   0,  0,  0,  0,  28.2,13.258,     0.398,     0.001,13.24469,    13.81298,0.00490,13.25326,13.24470,   0.008566, 0.15966,0.15967,0.15966,
+soc0_20220907, 2022-09-07T07:51:42,  55858927.796, 0.100,   0,  0,  0,  0,  28.2,13.267,     0.398,     0.001,13.24469,    13.81298,0.00490,13.26187,13.24470,   0.017175, 0.15967,0.15967,0.15967,
+soc0_20220907, 2022-09-07T07:51:42,  55858928.197, 0.100,   0,  0,  0,  0,  28.2,13.254,     0.398,     0.001,13.24469,    13.81298,0.00490,13.24895,13.24470,   0.004256, 0.15967,0.15967,0.15967,
+soc0_20220907, 2022-09-07T07:51:44,  55858928.640, 0.100,   0,  0,  0,  0,  28.2,13.254,     0.398,     0.001,13.24469,    13.81298,0.00490,13.24895,13.24470,   0.004254, 0.15967,0.15967,0.15967,
+soc0_20220907, 2022-09-07T07:51:44,  55858929.040, 0.100,   0,  0,  0,  0,  28.2,13.262,     0.398,     0.001,13.24469,    13.81298,0.00490,13.25757,13.24470,   0.012864, 0.15967,0.15967,0.15967,
+soc0_20220907, 2022-09-07T07:51:44,  55858929.440, 0.100,   0,  0,  0,  0,  28.2,13.254,     0.398,     0.001,13.24469,    13.81298,0.00490,13.24895,13.24470,   0.004250, 0.15967,0.15967,0.15967,
+soc0_20220907, 2022-09-07T07:51:44,  55858929.840, 0.100,   0,  0,  0,  0,  28.2,13.271,     0.398,     0.001,13.24470,    13.81298,0.00490,13.26618,13.24470,   0.021472, 0.15967,0.15967,0.15967,
+echo:  v0, 4
+soc0_20220907, 2022-09-07T07:51:46,  55858930.240, 0.100,   0,  0,  0,  0,  28.2,13.254,     0.398,     0.001,13.24470,    13.81298,0.00490,13.24895,13.24471,   0.004247, 0.15967,0.15967,0.15967,
+echo:  v0, 0
+echo:  Bm2, 4
+echo:  Bs1, 4
+echo:  Bm2, 0
+Mon chem 0 to 2
+soft reset...
+echo:  Bs1, 0
+Sim chem 0 to 1
+soft reset...
+echo:  v4, 4
+echo:  v4, 0
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+soc0_20220907, 2022-09-07T07:52:46,  55858991.410, 0.100,   2,  0,  0,  0,  28.2,13.254,     0.398,     0.000,13.24119,    13.81273,0.00428,13.24959,13.24119,   0.008396, 0.15952,0.15952,0.15952,
+soc0_20220907, 2022-09-07T07:52:46,  55858991.809, 0.100,   2,  0,  0,  0,  28.2,13.262,     0.332,     0.000,13.24119,    13.81273,0.00414,13.25834,13.24119,   0.017145, 0.15952,0.15952,0.15952,
+soc0_20220907, 2022-09-07T07:52:48,  55858992.209, 0.100,   2,  0,  0,  0,  28.2,13.250,     0.332,     0.000,13.24119,    13.81273,0.00408,13.24547,13.24119,   0.004282, 0.15952,0.15952,0.15952,
+soc0_20220907, 2022-09-07T07:52:48,  55858992.609, 0.100,   2,  0,  0,  0,  28.2,13.258,     0.332,     0.000,13.24119,    13.81273,0.00412,13.25405,13.24119,   0.012854, 0.15952,0.15953,0.15952,
+soc0_20220907, 2022-09-07T07:52:48,  55858993.009, 0.100,   2,  0,  0,  0,  28.2,13.258,     0.398,     0.000,13.24119,    13.81273,0.00437,13.25380,13.24119,   0.012609, 0.15952,0.15953,0.15952,
+soc0_20220907, 2022-09-07T07:52:48,  55858993.450, 0.100,   2,  0,  0,  0,  28.2,13.245,     0.398,     0.000,13.24119,    13.81273,0.00429,13.24096,13.24120,  -0.000236, 0.15953,0.15953,0.15953,
+soc0_20220907, 2022-09-07T07:52:48,  55858993.850, 0.100,   2,  0,  0,  0,  28.2,13.271,     0.332,     0.000,13.24119,    13.81273,0.00410,13.26698,13.24120,   0.025785, 0.15953,0.15953,0.15953,
+soc0_20220907, 2022-09-07T07:52:50,  55858994.250, 0.100,   2,  0,  0,  0,  28.2,13.254,     0.332,     0.000,13.24119,    13.81273,0.00417,13.24970,13.24120,   0.008497, 0.15953,0.15953,0.15953,
+soc0_20220907, 2022-09-07T07:52:50,  55858994.650, 0.100,   2,  0,  0,  0,  28.2,13.250,     0.398,     0.000,13.24119,    13.81273,0.00429,13.24526,13.24120,   0.004064, 0.15953,0.15953,0.15953,
+soc0_20220907, 2022-09-07T07:52:50,  55858995.050, 0.100,   2,  0,  0,  0,  28.2,13.258,     0.332,     0.001,13.24120,    13.81273,0.00413,13.25403,13.24120,   0.012833, 0.15953,0.15953,0.15953,
+soc0_20220907, 2022-09-07T07:52:50,  55858995.450, 0.100,   2,  0,  0,  0,  28.2,13.245,     0.398,     0.001,13.24120,    13.81273,0.00439,13.24086,13.24120,  -0.000340, 0.15953,0.15953,0.15953,
+soc0_20220907, 2022-09-07T07:52:50,  55858995.850, 0.100,   2,  0,  0,  0,  28.2,13.254,     0.398,     0.001,13.24120,    13.81273,0.00432,13.24954,13.24120,   0.008340, 0.15953,0.15953,0.15953,
+soc0_20220907, 2022-09-07T07:52:52,  55858996.250, 0.100,   2,  0,  0,  0,  28.2,13.267,     0.398,     0.001,13.24120,    13.81273,0.00434,13.26244,13.24120,   0.021232, 0.15953,0.15953,0.15953,
+soc0_20220907, 2022-09-07T07:52:52,  55858996.650, 0.100,   2,  0,  0,  0,  28.2,13.254,     0.398,     0.001,13.24120,    13.81273,0.00436,13.24950,13.24121,   0.008296, 0.15953,0.15953,0.15953,
+soc0_20220907, 2022-09-07T07:52:52,  55858997.050, 0.100,   2,  0,  0,  0,  28.2,13.271,     0.332,     0.001,13.24120,    13.81273,0.00415,13.26694,13.24121,   0.025729, 0.15953,0.15953,0.15953,
+soc0_20220907, 2022-09-07T07:52:52,  55858997.450, 0.100,   2,  0,  0,  0,  28.2,13.250,     0.332,     0.001,13.24120,    13.81273,0.00418,13.24537,13.24121,   0.004164, 0.15953,0.15953,0.15953,
+echo:  v0, 4
+echo:  v0, 0
+echo:  Ca1, 4
+echo:  Ca1, 0
+soc=  1.000, modeling = 0, delta_q=  0.000, soc_model=  1.0000,   delta_q_model=  0.000, soc_ekf=  0.1595, delta_q_ekf=-338415.763,
+soft reset...
+echo:  W3, 0
+echo:  W, 0
+..Wait.
+echo:  W, 0
+..Wait.
+echo:  W, 0
+..Wait.
+echo:  Ps, 4
+echo:  Ps, 0
+
+modeling=0
+S:BS::Battery:
+  temp_c= 28.182; dg C
+ *rp_delt_q= -336469.7;  C
+ *rp_t_last=      28.2; dg C
+  dvoc_dt=  0.004000; V/dg C
+  r_0=  0.003000;  ohm
+  r_ct =   0.001600;  ohm
+  tau_ct=  0.200000;  s (=1/Rct/Cct)
+  r_diff=  0.007700;  ohm
+  tau_diff = 83.000000;  s (=1/Rdif/Cdif)
+  r_sd =  70.000000;  ohm
+  tau_sd=25000000.0;  s
+  bms_off=0;
+  dv_dsoc=  2.082443; V/frac
+  ib=  0.332; A
+  Ib=  0.332; Bank, A
+  vb= 13.258; V
+  Vb= 13.258; Bank, V
+  voc= 13.254; V
+  voc_stat= 13.254; V
+  vsat= 13.813; V
+  dv_dyn=   0.004; V
+  sr=  1.000; sclr
+  dv=  0.010; Tab adj, V
+  dt=  0.100; s
+ *rp_nP= 1.00; P bank, e.g. '2P1S'
+ *rp_nS= 1.00; S bank, e.g. '2P1S'
+ BS::BS:
+  sat_ib_max=  0.332; A
+  sat_ib_null=  0.000; A
+  sat_cutback_gain= 1000.0; voc>vsat
+  model_cutback=0;
+  model_saturated=0;
+  ib=  0.332; A
+  ib_in=  0.332; Saved, A
+  ib_fut=  0.332; A
+  ib_sat=  0.500;
+ *rp_s_cap_model=  1.000; Slr
+S::Coulombs:
+ q_cap_rated= 390240.0; At t_rated, C
+ q_cap_rated_scaled= 390240.0; Act at t_rated_, C
+ q_capacity= 402659.4; Sat q at temp, C
+ q=  66182.7; Avail, except q_min_, C
+ q_min=   3659.2; Low volt shutdown, C
+ delta_q-336469.7; Change since sat, C
+ soc=  0.1644; Frac of q_cap avail (0-1);
+ sat=0; T=saturated
+ t_rated= 25.0; Rated, dg C
+ t_last= 28.2; past, dg C
+ t_rlim=  0.017; Tb RL, deg C / s
+ resetting=0; Coord user testing of CC
+ soc_min=  0.0091; soc BMS shuts off
+ mod=LION; Chem e.g. Battleborn or LION
+ mod_code=1; Chem code
+ coul_eff=  0.99850; Coul Eff
+Coulombs::Chemistry:
+  dqdt=  0.010; frac/dg C
+  low_voc=  9.000; BMS turn off, V
+  hys_cap=360000.000; F
+  v_sat= 13.850; V
+  dvoc_dt=  0.004; V/dg C
+  dv=  0.010; Cal err, V
+  r_0= 0.003000; Randles R0, ohm
+  r_ct= 0.001600; Charge trans, ohm
+  r_diff= 0.007700; Diff, ohm
+  tau_ct=  0.200; Charge tran, s (=1/Rct/Cct)
+  tau_diff= 83.000; Diff, s (=1/Rdif/Cdif)
+  tau_sd=25000000.000; EKF. Parasitic disch, s
+  r_sd= 70.000; EKF. Parasitic disch, ohm
+  r_ss=  0.012; SS init, ohm
+  voc(t, soc):
+    t={  5.000,  11.100,  25.000,  40.000, };
+    soc={ -0.150,   0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.990,   0.995,   1.000, };
+    voc={
+      {  4.000,   4.000,   4.000,   4.000,  10.200,  11.700,  12.450,  12.700,  12.770,  12.900,  12.910,  12.980,  13.050,  13.110,  13.170,  13.220,  13.590,  14.450, },
+      {  4.000,   4.000,   4.000,   9.500,  12.000,  12.500,  12.700,  12.800,  12.900,  12.960,  13.010,  13.060,  13.110,  13.170,  13.200,  13.230,  13.600,  14.460, },
+      {  4.000,   4.000,  10.000,  12.600,  12.770,  12.850,  12.890,  12.950,  12.990,  13.030,  13.040,  13.090,  13.140,  13.210,  13.250,  13.270,  13.720,  14.500, },
+      {  4.000,   4.000,  11.000,  13.600,  13.770,  13.850,  13.890,  13.950,  13.990,  14.030,  14.040,  13.800,  13.540,  13.210,  13.250,  13.270,  14.720,  15.500, },
+         };
+  soc_min(temp_c):
+    temp_c={  5.000,  11.100,  20.000,  40.000, };
+    soc_min={  0.100,   0.070,   0.050,   0.030, };
+  r(soc, dv):
+    soc={0.000000, 0.500000, 1.000000, };
+    dv={ -0.900,  -0.700,  -0.500,  -0.300,   0.000,   0.300,   0.500,   0.700,   0.900, };
+    r={
+      { 0.000001,  0.064000,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.046000,  0.000001, },
+      { 0.000001,  0.000001,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.000001,  0.000001, },
+      { 0.000001,  0.000001,  0.000001,  0.036000,  0.015000,  0.024000,  0.000001,  0.000001,  0.000001, },
+         };
+S::StateSpace:
+  dt =  0.100000
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.000524,  0.002552];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.331564, 13.254162];
+   C  =  [  1.000000,  1.000000];
+   D  =  [  0.003000,  1.000000];
+   x_dot  =  [  0.000067,  0.000000];
+   y  =  [ 13.258226];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res=0.0150; Null, Ohm
+  cap_init=  360000.0; F
+  cap=  360000.0; F
+  tau=    5400.0; Null, s
+  ib=  0.332; In, A
+  ioc=  0.001; Out, A
+  soc=  0.1644; Input
+  res=  0.015; Var, ohm
+  dv_dot=  0.000; V/s
+  dv_hys=  0.000; Delta state, V
+  disabled=0; input < 1e-5
+  rp.hys_scale=  1.00; Slr
+Hi!
+Init DISPLAY
+DISP allocated
+Init CLOUD...done CLOUD
+          local    memory
+bias amp  -0.940    -0.940
+bias noa  -0.170    -0.170
+sclr amp   0.984     0.984
+sclr noa   1.033     1.033
+Do you wish to reset to local? [Y/n]:  moving on....
+End setup()
+SHUNT MON Amp init
+SHUNT MON No Amp init
+echo:  Ca.8841, 4
+echo:  Ca.8841, 0
+soc=  0.884, modeling = 0, delta_q=-46557.404, soc_model=  0.8841,   delta_q_model=-46557.404, soc_ekf=  0.7281, delta_q_ekf=-109213.537,
+soft reset...
+echo:  W3, 0
+echo:  W, 0
+..Wait.
+echo:  W, 0
+..Wait.
+echo:  W, 0
+..Wait.
+echo:  Pm, 4
+echo:  Pm, 0
+BM::Battery:
+  temp_c= 27.938; dg C
+ *rp_delt_q= -112597.0;  C
+ *rp_t_last=      27.9; dg C
+  dvoc_dt=  0.004000; V/dg C
+  r_0=  0.003000;  ohm
+  r_ct =   0.001600;  ohm
+  tau_ct=  0.200000;  s (=1/Rct/Cct)
+  r_diff=  0.007700;  ohm
+  tau_diff = 83.000000;  s (=1/Rdif/Cdif)
+  r_sd =  70.000000;  ohm
+  tau_sd=25000000.0;  s
+  bms_off=0;
+  dv_dsoc=  0.641251; V/frac
+  ib=  0.599; A
+  Ib=  0.599; Bank, A
+  vb= 13.250; V
+  Vb= 13.250; Bank, V
+  voc= 13.241; V
+  voc_stat= 13.241; V
+  vsat= 13.812; V
+  dv_dyn=   0.008; V
+  sr=  1.000; sclr
+  dv=  0.010; Tab adj, V
+  dt=  0.100; s
+ *rp_nP= 1.00; P bank, e.g. '2P1S'
+ *rp_nS= 1.00; S bank, e.g. '2P1S'
+ BM::BM:
+  ah_rem_ekf_= 76.943; A-h
+  ah_rem_soc_= 76.942; A-h
+  EKF_conv=0;
+  q_ekf=  289109.3; C
+  soc_ekf=  0.7197; frac
+  tcharge= 24.0; hr
+  tcharge_ekf= 24.0; hr
+  voc_filt= 13.221; V
+  voc_stat= 13.241; V
+  y_filt=  0.006; Res EKF, V
+Coulombs:
+ q_cap_rated= 390240.0; At t_rated, C
+ q_cap_rated_scaled= 390240.0; Act at t_rated_, C
+ q_capacity= 401703.3; Sat q at temp, C
+ q= 289106.3; Avail, except q_min_, C
+ q_min=  12113.9; Low volt shutdown, C
+ delta_q-112597.0; Change since sat, C
+ soc=  0.7197; Frac of q_cap avail (0-1);
+ sat=0; T=saturated
+ t_rated= 25.0; Rated, dg C
+ t_last= 27.9; past, dg C
+ t_rlim=  0.017; Tb RL, deg C / s
+ resetting=0; Coord user testing of CC
+ soc_min=  0.0302; soc BMS shuts off
+ mod=LIE; Chem e.g. Battleborn or LION
+ mod_code=2; Chem code
+ coul_eff=  0.99850; Coul Eff
+Coulombs::Chemistry:
+  dqdt=  0.010; frac/dg C
+  low_voc=  9.000; BMS turn off, V
+  hys_cap=360000.000; F
+  v_sat= 13.850; V
+  dvoc_dt=  0.004; V/dg C
+  dv=  0.010; Cal err, V
+  r_0= 0.003000; Randles R0, ohm
+  r_ct= 0.001600; Charge trans, ohm
+  r_diff= 0.007700; Diff, ohm
+  tau_ct=  0.200; Charge tran, s (=1/Rct/Cct)
+  tau_diff= 83.000; Diff, s (=1/Rdif/Cdif)
+  tau_sd=25000000.000; EKF. Parasitic disch, s
+  r_sd= 70.000; EKF. Parasitic disch, ohm
+  r_ss=  0.012; SS init, ohm
+  voc(t, soc):
+    t={  5.000,  11.100,  25.000,  40.000, };
+    soc={ -0.150,   0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.990,   0.995,   1.000, };
+    voc={
+      {  4.000,   4.000,   4.000,   4.000,  10.200,  11.700,  12.450,  12.700,  12.770,  12.900,  12.910,  12.980,  13.050,  13.110,  13.170,  13.220,  13.590,  14.450, },
+      {  4.000,   4.000,   4.000,   9.500,  12.000,  12.500,  12.700,  12.800,  12.900,  12.960,  13.010,  13.060,  13.110,  13.170,  13.200,  13.230,  13.600,  14.460, },
+      {  4.000,   4.000,  10.000,  12.600,  12.770,  12.850,  12.890,  12.950,  12.990,  13.030,  13.040,  13.090,  13.140,  13.210,  13.250,  13.270,  13.720,  14.500, },
+      {  4.000,   4.000,  10.500,  13.100,  13.270,  13.310,  13.440,  13.460,  13.400,  13.440,  13.480,  13.520,  13.560,  13.600,  13.640,  13.680,  14.220,  15.000, },
+         };
+  soc_min(temp_c):
+    temp_c={  5.000,  11.100,  20.000,  40.000, };
+    soc_min={  0.100,   0.070,   0.050,   0.000, };
+  r(soc, dv):
+    soc={0.000000, 0.500000, 1.000000, };
+    dv={ -0.900,  -0.700,  -0.500,  -0.300,   0.000,   0.300,   0.500,   0.700,   0.900, };
+    r={
+      { 0.000001,  0.064000,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.046000,  0.000001, },
+      { 0.000001,  0.000001,  0.050000,  0.036000,  0.015000,  0.024000,  0.030000,  0.000001,  0.000001, },
+      { 0.000001,  0.000001,  0.000001,  0.036000,  0.015000,  0.024000,  0.000001,  0.000001,  0.000001, },
+         };
+StateSpace:
+  dt =  0.100000
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.000959,  0.005485];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.599262, 13.249562];
+   C  =  [ -1.000000, -1.000000];
+   D  =  [ -0.003000,  1.000000];
+   x_dot  =  [  0.000000, -0.000011];
+   y  =  [ 13.241319];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+  ::Hysteresis:
+  res=0.0150; Null, Ohm
+  cap_init=  360000.0; F
+  cap=  360000.0; F
+  tau=    5400.0; Null, s
+  ib=  0.599; In, A
+  ioc=  0.004; Out, A
+  soc=  0.7197; Input
+  res=  0.015; Var, ohm
+  dv_dot=  0.000; V/s
+  dv_hys=  0.000; Delta state, V
+  disabled=0; input < 1e-5
+  rp.hys_scale=  1.00; Slr
+EKF_1x1:
+Inputs:
+  z  =    13.2413;  // 1x1 input, =voc, dynamic predicted by other model, V
+  R  =   0.250000;  // 1x1 Kalman state uncertainty
+  Q  =   0.000000;  // 1x1 Kalman process uncertainty
+  H  =      0.641;  // 1x1 Jacobian sensitivity dV/dSOC
+Outputs:
+  x  =     0.7197;  // 1x1 Kalman state variable = Vsoc (0-1 fraction)
+  hx =    13.2449;  // Output of observation function h(x)
+  y  =    -0.0036;  // 1x1 Residual z-hx, V
+  P  =   0.000001;  // 1x1 Kalman uncertainty covariance
+  K  =   0.000002;  // 1x1 Kalman gain
+  S  =   0.250000;  // 1x1 system uncertainty
+echo:  v4, 4
+echo:  v4, 0
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+soc0_20220907, 2022-09-07T07:56:14,  55859207.473, 0.100,   2,  0,  0,  0,  27.9,13.245,     0.599,     0.004,13.24489,    13.81175,0.00819,13.23700,13.24489,  -0.007894, 0.71971,0.71972,0.71971,
+soc0_20220907, 2022-09-07T07:56:14,  55859207.873, 0.100,   2,  0,  0,  0,  27.9,13.280,     0.599,     0.004,13.24489,    13.81175,0.00819,13.27145,13.24489,   0.026557, 0.71971,0.71972,0.71971,
+soc0_20220907, 2022-09-07T07:56:16,  55859208.315, 0.141,   2,  0,  0,  0,  27.9,13.254,     0.599,     0.004,13.24489,    13.81175,0.00818,13.24562,13.24490,   0.000723, 0.71971,0.71972,0.71971,
+soc0_20220907, 2022-09-07T07:56:16,  55859208.714, 0.100,   2,  0,  0,  0,  27.9,13.258,     0.599,     0.004,13.24489,    13.81175,0.00818,13.24993,13.24490,   0.005033, 0.71971,0.71972,0.71971,
+soc0_20220907, 2022-09-07T07:56:16,  55859209.115, 0.100,   2,  0,  0,  0,  27.9,13.262,     0.599,     0.004,13.24489,    13.81175,0.00818,13.25424,13.24490,   0.009342, 0.71971,0.71972,0.71971,
+soc0_20220907, 2022-09-07T07:56:16,  55859209.514, 0.100,   2,  0,  0,  0,  27.9,13.254,     0.599,     0.005,13.24489,    13.81175,0.00817,13.24563,13.24490,   0.000732, 0.71971,0.71972,0.71971,
+soc0_20220907, 2022-09-07T07:56:16,  55859209.914, 0.100,   2,  0,  0,  0,  27.9,13.262,     0.599,     0.005,13.24489,    13.81175,0.00817,13.25424,13.24490,   0.009347, 0.71971,0.71972,0.71971,
+echo:  v0, 4
+soc0_20220907, 2022-09-07T07:56:18,  55859210.314, 0.100,   2,  0,  0,  0,  27.9,13.267,     0.599,     0.005,13.24489,    13.81175,0.00816,13.25855,13.24490,   0.013656, 0.71971,0.71972,0.71971,
+echo:  v0, 0
+Summ...
+echo:  Ca.8841, 4
+echo:  Ca.8841, 0
+soc=  0.884, modeling = 0, delta_q=-46557.404, soc_model=  0.8841,   delta_q_model=-46557.404, soc_ekf=  0.7197, delta_q_ekf=-112578.970,
+soft reset...
+echo:  W3, 0
+echo:  W, 0
+..Wait.
+echo:  W, 0
+..Wait.
+echo:  W, 0
+..Wait.
+echo:  v4, 4
+echo:  v4, 0
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+soc0_20220907, 2022-09-07T07:56:48,  55859241.837, 0.100,   2,  0,  0,  0,  27.9,13.271,     0.532,     0.002,13.24734,    13.81175,0.00655,13.26452,13.24734,   0.017180, 0.72353,0.72353,0.72353,
+soc0_20220907, 2022-09-07T07:56:50,  55859242.278, 0.100,   2,  0,  0,  0,  27.9,13.254,     0.532,     0.002,13.24734,    13.81175,0.00655,13.24729,13.24734,  -0.000044, 0.72353,0.72353,0.72353,
+soc0_20220907, 2022-09-07T07:56:50,  55859242.678, 0.100,   2,  0,  0,  0,  27.9,13.245,     0.532,     0.002,13.24734,    13.81175,0.00655,13.23868,13.24734,  -0.008658, 0.72353,0.72353,0.72353,
+soc0_20220907, 2022-09-07T07:56:50,  55859243.078, 0.100,   2,  0,  0,  0,  27.9,13.267,     0.532,     0.002,13.24734,    13.81175,0.00655,13.26021,13.24734,   0.012872, 0.72353,0.72353,0.72353,
+soc0_20220907, 2022-09-07T07:56:50,  55859243.478, 0.100,   2,  0,  0,  0,  27.9,13.250,     0.532,     0.002,13.24734,    13.81175,0.00655,13.24299,13.24734,  -0.004354, 0.72353,0.72353,0.72353,
+soc0_20220907, 2022-09-07T07:56:50,  55859243.878, 0.100,   2,  0,  0,  0,  27.9,13.262,     0.532,     0.002,13.24734,    13.81175,0.00655,13.25590,13.24734,   0.008564, 0.72353,0.72353,0.72353,
+soc0_20220907, 2022-09-07T07:56:52,  55859244.279, 0.100,   2,  0,  0,  0,  27.9,13.262,     0.532,     0.002,13.24734,    13.81175,0.00655,13.25590,13.24734,   0.008563, 0.72353,0.72353,0.72353,
+echo:  v0, 4
+echo:  v0, 0
+echo:  Ca.9, 4
+echo:  Ca.9, 0
+soc=  0.900, modeling = 0, delta_q=-40170.340, soc_model=  0.9000,   delta_q_model=-40170.340, soc_ekf=  0.7236, delta_q_ekf=-111045.882,
+soft reset...
+echo:  W3, 0
+echo:  W, 0
+..Wait.
+echo:  W, 0
+..Wait.
+echo:  W, 0
+..Wait.
+echo:  v4, 4
+echo:  v4, 0
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+soc0_20220907, 2022-09-07T07:57:20,  55859273.401, 0.100,   2,  0,  0,  0,  27.9,13.258,     0.666,     0.001,13.24220,    13.81175,0.00771,13.25044,13.24220,   0.008241, 0.71552,0.71552,0.71552,
+soc0_20220907, 2022-09-07T07:57:20,  55859273.801, 0.100,   2,  0,  0,  0,  27.9,13.262,     0.666,     0.001,13.24220,    13.81175,0.00771,13.25475,13.24220,   0.012544, 0.71552,0.71552,0.71552,
+soc0_20220907, 2022-09-07T07:57:22,  55859274.201, 0.100,   2,  0,  0,  0,  27.9,13.258,     0.666,     0.001,13.24220,    13.81175,0.00772,13.25044,13.24220,   0.008234, 0.71552,0.71552,0.71552,
+soc0_20220907, 2022-09-07T07:57:22,  55859274.601, 0.100,   2,  0,  0,  0,  27.9,13.262,     0.666,     0.001,13.24220,    13.81175,0.00772,13.25474,13.24221,   0.012536, 0.71552,0.71552,0.71552,
+soc0_20220907, 2022-09-07T07:57:22,  55859275.042, 0.100,   2,  0,  0,  0,  27.9,13.258,     0.666,     0.001,13.24220,    13.81175,0.00772,13.25043,13.24221,   0.008227, 0.71552,0.71552,0.71552,
+soc0_20220907, 2022-09-07T07:57:22,  55859275.442, 0.100,   2,  0,  0,  0,  27.9,13.250,     0.666,     0.002,13.24220,    13.81175,0.00772,13.24182,13.24221,  -0.000390, 0.71552,0.71553,0.71552,
+soc0_20220907, 2022-09-07T07:57:22,  55859275.842, 0.100,   2,  0,  0,  0,  27.9,13.271,     0.666,     0.002,13.24220,    13.81175,0.00773,13.26334,13.24221,   0.021137, 0.71552,0.71553,0.71552,
+soc0_20220907, 2022-09-07T07:57:24,  55859276.242, 0.100,   2,  0,  0,  0,  27.9,13.267,     0.666,     0.002,13.24220,    13.81175,0.00773,13.25903,13.24221,   0.016827, 0.71552,0.71553,0.71552,
+soc0_20220907, 2022-09-07T07:57:24,  55859276.642, 0.100,   2,  0,  0,  0,  27.9,13.250,     0.666,     0.002,13.24221,    13.81175,0.00773,13.24181,13.24221,  -0.000400, 0.71552,0.71553,0.71552,
+soc0_20220907, 2022-09-07T07:57:24,  55859277.042, 0.100,   2,  0,  0,  0,  27.9,13.271,     0.666,     0.002,13.24221,    13.81175,0.00773,13.26333,13.24221,   0.021126, 0.71553,0.71553,0.71553,
+soc0_20220907, 2022-09-07T07:57:24,  55859277.442, 0.100,   2,  0,  0,  0,  27.9,13.258,     0.666,     0.002,13.24221,    13.81175,0.00773,13.25041,13.24221,   0.008206, 0.71553,0.71553,0.71553,
+echo:  v0, 4
+echo:  v0, 0
+echo:  h, 4
+echo:  h, 0
+
+
+Help talk.   Entries followed by ';'
+B<?> Battery e.g.:
+ *Bm=  2.  Mon chem 0='BB', 1='LI' [2]
+ *Bs=  1.  Sim chem 0='BB', 1='LI' [1]
+ *BP=   1.00.  parallel in bank [ 1.00]'
+ *BS=   1.00.  series in bank [ 1.00]'
+c  clear talk queues, esp '-c;'
+C<?> Chg SOC e.g.:
+  Ca=  all - '(0-1.1)'
+  Cm=  model (& ekf if mod)- '(0-1.1)'
+D/S<?> Adj e.g.:
+ *DA=  -0.940: delta amp sense, A [ -0.940]
+ *DB=  -0.170: delta noa sense, A [ -0.170]
+ *Di=   0.000: delta all sense, A [  0.000]
+ *Dc=   0.000: delta sense, V [  0.000]
+  Du= 1.00: coul eff
+  Dm=   0.000: delta amp, A [0]
+  Dn=   0.000: delta noa, A [0]
+  DP= 4: print mult of Dr [4]
+  Dr= 100: minor frame, ms [100]
+ *Dt=   0.000: delta hdwe, deg C [  0.000]
+  D^=   0.000: delta model, deg C [  0.000]
+  Dv= 0.00: volt fault inj, V [0]
+  Dw= 0.01: Tab adjust, V [0.01]
+  DT=   0.000: Tb noise mod, deg C pk-pk [  0.000]
+  DV=   0.000: Vb noise mod, V pk-pk [  0.000]
+  DM=   0.000: Ib amp noise mod, A pk-pk [  0.000]
+  DN=   0.000: Ib noa noise mod, A pk-pk [  0.000]
+ *SA=   0.984: scale amp sen, A [  0.984]
+ *SB=   1.033: scale noa sen, A [  1.033]
+ *Sc= 1.00: rp. Scalar mod size
+ *SG=   1.000/  1.000: rp. scale shunt gains [1]
+  Sh=   1.000: hys sclr 1e-6 - 100 [1]
+  Sm=   1.000: sclr amp, [1]
+  Sn=   1.000: sclr noa [1]
+  Sr= 1.00: Scalar res sim
+ *Sk= 1.00: Sat mod cutback sclr
+F<?>   Faults
+  Fc=   1.000: sclr cc_diff thr ^ [1]
+  Fd=   1.000: sclr ib_diff thr ^ [1]
+  Fi=   1.000: sclr e_wrap_hi thr ^ [1]
+  Fo=   1.000: sclr e_wrap_lo thr ^ [1]
+  Fq=   1.000: sclr ib_quiet thr v [1]
+  FI= 0: Ib hard rng
+  FT= 0: Tb hard rng
+  FV= 0: Vb hard rng
+H<?>   Manage history
+  Hd= dump summ log
+  HR= reset summ log
+  Hs= save and print log
+M<?> Amp tweaks
+  MC=   0.001: Amp CE max change [0.001]
+ *Mk=   1.000: rp. Amp CE sclr [1]
+  Mw=   6.000: Amp next tweak, hr [18]
+  Mx=   0.000: Amp CE max sclr [0.01]
+  Mz=   0.034: Amp last twk, hr [var]
+N<?> No amp tweaks
+  NC=   0.001: Noa CE max change [0.001]
+ *Nk=   1.000: rp. Noa CE sclr [1]
+  Nw=   6.000: Noa next tweak, hr [18]
+  Nx=   0.000: Noa CE max sclr [0.01]
+  Nz=   0.034: Noa last twk, hr [var]
+P<?>   Print values
+  Pa= all
+  Pe= ekf
+  Pf= faults
+  Pm= Mon
+  PM= amp shunt
+  PN= noa shunt
+  Pr= retained and command
+  Ps= Sim
+  Px= ib select
+  Pv= vb details
+Q      vital stats
+R<?>   Reset
+  Rb= batteries to present inputs
+  Rf= fault logic latches
+  Ri= all delta_q_inf
+  Rr= saturate Mon and equalize Sim & Mon
+  RR= DEPLOY
+  Rs= small.  Reinitialize filters
+s   curr signal select (-1=noa, 0=auto, 1=amp) = 0
+v= 0: verbosity, -128 - +128. [4]
+  -<>: Negative - Arduino plot compatible
+  v-1: GP
+   v3: Power
+   v4: GP
+   v5: OLED display
+   v7: EKF solver init
+   v8: Randles SS init
+ v-11: Summary
+  v12: EKF
+  v14: vshunt and Ib raw
+  v15: vb raw
+  v16: Tb
+  v25: Blynk write
+  v26: GP, Sim & Sel
+  v37: EKF short
+  v41: Inj
+  v76: vb model
+  v78: Batt model sat
+  v79: sat_ib model
+  v96: CC sat
+w togg wifi = 0
+W<?> - iters to wait
+X<?> - Test Mode.   For example:
+ Xd= 0,   dc-dc charger on [0]
+ Xm= 0,   modeling bitmap [000]
+      0x8 tweak_test = 0
+      0x4 current = 0
+      0x2 voltage = 0
+      0x1 temp = 0
+ Xa=   0.000: Inj amp A pk (0-18.3) [0]
+ Xb=   0.000: Inj bias A [0]
+ Xf=   0.000: Inj freq Hz (0-2) [0]
+ Xt= 0: Inj type.  'o', 's', 'q', 't' (cos, sin, square, tri)
+ Xo=   0.000: Inj inj_bias A (-18.3-18.3) [0]
+ Xp= <?>, programmed inj settings...
+    Xp-1:  Off, modeling false
+    Xp0:  reset tests
+    Xp1:  1 Hz sine
+    Xp2:  1 Hz square
+    Xp3:  1 Hz triangle
+    Xp4:  -1C soft disch, reset xp0 or Di0
+    Xp5:  +1C soft chg
+    Xp6:  +/-500 A pulse
+    Xp9:  silent tweak test
+    Xp10: tweak cycle test
+    Xp11: slow cycle test
+    Xp12: slow half cycle reg test
+    Xp20: fast data collection
+    Xp21: slow data collection
+ XC=   0.000 cycles inj
+ XR  RUN inj
+ XS  STOP inj
+ XW= 2779096.58 s wait start inj
+ XT= 2779096.58 s tail end inj
+ Xu= 0 T=ignore Tb read
+ Xv=   1.00 scale Tb one-wire stale persistence
+z togg BLYNK = 0
+*Xx<> = SRAM saved
+
+urgency of cmds: -=ASAP,*=SOON, '',+=QUEUE
+h this
+echo:  v7, 4
+echo:  Ca.8841, 4
+echo:  v7, 0
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.934,  0.733,  0.7157, 13.227,  0.009, 13.236,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.934,  0.733,  0,  0.7158, 13.267, 13.258, 13.242,  0.009,  0.000,  0.015324,
+echo:  Ca.8841, 0
+soc=  0.884, modeling = 0, delta_q=-46555.708, soc_model=  0.8841,   delta_q_model=-46555.708, soc_ekf=  0.7158, delta_q_ekf=-114155.771,
+soft reset...
+init_battery: Randles to   0.733,  13.267
+StateSpace:
+  dt =  0.100000
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.001173,  0.005645];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.733110, 13.266787];
+   C  =  [  1.000000,  1.000000];
+   D  =  [  0.003000,  1.000000];
+   x_dot  =  [  0.000000,  0.000000];
+   y  =  [ 13.236115];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.009, 27.934,  0.733,  0.8841, 13.254,  0.009, 13.263,
+init_battery: Randles to   0.733,  13.267
+StateSpace:
+  dt =  0.100000
+   A  =  [ -5.000000,  0.000000,
+           0.000000, -0.012048];
+   x  =  [  0.001173,  0.005645];
+   B  =  [  0.008000,  0.000000,
+           0.000093,  0.000000];
+   u  =  [  0.733110, 13.266787];
+   C  =  [ -1.000000, -1.000000];
+   D  =  [ -0.003000,  1.000000];
+   x_dot  =  [  0.000000,  0.000000];
+   y  =  [ 13.257833];
+   AinvB =  [  0.001600,  0.000000,
+           0.007700,  0.000000];
+solve    :n_avg, Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, 1,  27.932, 13.267,  0.733,  1,  0.7400, 13.258, 13.258,  0.009,  0.000, -0.000000,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.267, 13.258, 13.258,  0.009,  0.000, -0.000000,
+echo:  W3, 0
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.118, 27.932,  0.733,  0.8841, 13.254,  0.009, 13.263,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.271, 13.262, 13.258,  0.009,  0.000,  0.004306,
+echo:  W, 0
+..Wait.
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.258, 13.249, 13.258,  0.009,  0.000, -0.008612,
+echo:  W, 0
+..Wait.
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.250, 13.241, 13.258,  0.009,  0.000, -0.017225,
+echo:  W, 0
+..Wait.
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.250, 13.241, 13.258,  0.009,  0.000, -0.017225,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.271, 13.262, 13.258,  0.009,  0.000,  0.004304,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.666,  0,  0.7400, 13.271, 13.262, 13.258,  0.009,  0.000,  0.004504,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.666,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.271, 13.262, 13.258,  0.009,  0.000,  0.004358,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.254, 13.245, 13.258,  0.009,  0.000, -0.012893,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.258, 13.249, 13.258,  0.009,  0.000, -0.008601,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.245, 13.236, 13.258,  0.009,  0.000, -0.021526,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.258, 13.249, 13.258,  0.009,  0.000, -0.008611,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.138, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.666,  0,  0.7400, 13.271, 13.262, 13.258,  0.009,  0.000,  0.004504,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.666,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.275, 13.266, 13.258,  0.009,  0.000,  0.008683,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.262, 13.254, 13.258,  0.009,  0.000, -0.004272,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.262, 13.253, 13.258,  0.009,  0.000, -0.004291,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.250, 13.241, 13.258,  0.009,  0.000, -0.017219,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.254, 13.245, 13.258,  0.009,  0.000, -0.012917,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.666,  0,  0.7400, 13.280, 13.271, 13.258,  0.009,  0.000,  0.013116,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.666,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.666,  0,  0.7400, 13.275, 13.267, 13.258,  0.009,  0.000,  0.008862,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.666,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.666,  0,  0.7400, 13.267, 13.258, 13.258,  0.009,  0.000,  0.000277,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.666,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.254, 13.245, 13.258,  0.009,  0.000, -0.012827,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.250, 13.241, 13.258,  0.009,  0.000, -0.017181,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.250, 13.241, 13.258,  0.009,  0.000, -0.017205,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.733,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.666,  0,  0.7400, 13.267, 13.258, 13.258,  0.009,  0.000,  0.000208,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.666,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.666,  0,  0.7400, 13.271, 13.262, 13.258,  0.009,  0.000,  0.004561,
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.666,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.666,  0,  0.7400, 13.275, 13.267, 13.258,  0.009,  0.000,  0.008891,
+echo:  v0, 4
+BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,  0.100, 27.932,  0.666,  0.7400, 13.225,  0.009, 13.234,
+calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err,  27.932,  0.733,  0,  0.7400, 13.258, 13.249, 13.258,  0.009,  0.000, -0.008521,
+echo:  v0, 0
