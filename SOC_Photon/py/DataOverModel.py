@@ -320,6 +320,12 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(so.time, so.reset_s, color='magenta', label='reset_s')
         plt.plot(smv.time, smv.reset_s, color='green', linestyle='--', label='reset_s_ver')
         plt.legend(loc=1)
+        plt.subplot(339)
+        plt.plot(mo.time, mo.chm, color='blue', linestyle='-', label='chem')
+        plt.plot(mv.time, mv.chm, color='cyan', linestyle='--', label='chm_ver')
+        plt.plot(so.time, so.chm_s, color='magenta', linestyle='-.', label='chem_s')
+        plt.plot(smv.time, smv.chm_s, color='black', linestyle='--', label='chm_s_ver')
+        plt.legend(loc=1)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
