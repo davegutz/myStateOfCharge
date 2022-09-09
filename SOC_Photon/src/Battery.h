@@ -93,7 +93,7 @@ const float T_R_BB[M_H_BB*N_H_BB] = // r(soc, dv) table.    // DAG 6/13/2022 tun
 const uint8_t M_T_LI  = 4;    // Number temperature breakpoints for voc table
 const uint8_t N_S_LI  = 18;   // Number soc breakpoints for voc table
 const float Y_T_LI[M_T_LI] =  //Temperature breakpoints for voc table
-        { 5., 11.1, 25., 40. }; 
+        { 5., 11.1, 20., 40. }; 
 const float X_SOC_LI[N_S_LI] =      //soc breakpoints for voc table
         { -0.15, 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99, 0.995, 1.00};
 const float T_VOC_LI[M_T_LI*N_S_LI] = // r(soc, dv) table
@@ -121,7 +121,7 @@ const float T_R_LI[M_H_LI*N_H_LI] = // r(soc, dv) table
 const uint8_t M_T_LIE  = 4;    // Number temperature breakpoints for voc table
 const uint8_t N_S_LIE  = 18;   // Number soc breakpoints for voc table
 const float Y_T_LIE[M_T_LIE] =  //Temperature breakpoints for voc table
-        { 5., 11.1, 25., 40. }; 
+        { 5., 11.1, 20., 40. }; 
 const float X_SOC_LIE[N_S_LIE] =      //soc breakpoints for voc table
         { -0.15, 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99, 0.995, 1.00};
 const float T_VOC_LIE[M_T_LIE*N_S_LIE] = // r(soc, dv) table

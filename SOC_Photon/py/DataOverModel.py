@@ -322,9 +322,11 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.legend(loc=1)
         plt.subplot(339)
         plt.plot(mo.time, mo.chm, color='blue', linestyle='-', label='chem')
-        plt.plot(mv.time, mv.chm, color='cyan', linestyle='--', label='chm_ver')
-        plt.plot(so.time, so.chm_s, color='magenta', linestyle='-.', label='chem_s')
-        plt.plot(smv.time, smv.chm_s, color='black', linestyle='--', label='chm_s_ver')
+        plt.plot(mv.time, mv.chm, color='red', linestyle='--', label='chm_ver')
+        plt.plot(so.time, so.chm_s, color='green', linestyle='-.', label='chem_s')
+        plt.plot(smv.time, smv.chm_s, color='orange', linestyle='--', label='smv.chm_s_ver')
+        plt.plot(sv.time, np.array(sv.chm)+3, color='red', linestyle='-', label='sv.chm_ver+3')
+        plt.plot(smv.time, np.array(smv.chm_s)+3, color='black', linestyle='--', label='smv.chm_s_ver+3')
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -393,9 +395,11 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mo.time, mo.soc, color='blue', linestyle='-', label='soc')
         plt.plot(mv.time, mv.soc, color='red', linestyle='--', label='soc_ver')
         plt.plot(so.time, so.soc_s, color='green', linestyle='-.', label='soc_s')
-        plt.plot(sv.time, sv.soc, color='orange', linestyle=':', label='soc_s_ver')
+        plt.plot(sv.time, sv.soc, color='orange', linestyle=':', label='sv.soc_s_ver')
         plt.plot(mo.time, mo.soc_ekf, color='cyan', linestyle='-', label='soc_ekf')
-        plt.plot(mv.time, mv.soc_ekf, color='black', linestyle='--', label='soc_ekf_ver')
+        plt.plot(mv.time, mv.soc_ekf, color='magenta', linestyle='--', label='soc_ekf_ver')
+        plt.plot(sv.time, np.array(sv.soc)-.2, color='orange', linestyle='-', label='sv.soc_s_ver-.2')
+        plt.plot(smv.time, np.array(smv.soc_s)-.2, color='black', linestyle='--', label='smv.soc_s_ver-.2')
         plt.legend(loc=1)
 
         plt.subplot(222)
@@ -405,6 +409,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(sv.soc, sv.voc_stat, color='orange', linestyle=':', label='voc_stat_s_ver')
         plt.plot(mo.soc, mo.Vsat, color='red', linestyle='-', label='vsat')
         plt.plot(mv.soc, mv.Vsat, color='black', linestyle='--', label='vsat_ver')
+        plt.plot(mo.soc, mo.Voc_stat, color='magenta', linestyle='-', label='Voc_stat')
         plt.legend(loc=1)
 
         plt.subplot(224)
@@ -414,6 +419,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(sv.time, sv.voc_stat, color='orange', linestyle=':', label='voc_stat_s_ver')
         plt.plot(mo.time, mo.Vsat, color='red', linestyle='-', label='vsat')
         plt.plot(mv.time, mv.Vsat, color='black', linestyle='--', label='vsat_ver')
+        plt.plot(mo.time, mo.Voc_stat, color='magenta', linestyle='-', label='Voc_stat')
         plt.legend(loc=1)
 
         fig_file_name = filename + '_' + str(n_fig) + ".png"

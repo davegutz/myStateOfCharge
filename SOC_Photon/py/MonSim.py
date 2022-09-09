@@ -31,7 +31,7 @@ from Scale import Scale
 
 def save_clean_file(mon_ver, csv_file, unit_key):
     default_header_str = "unit,               hm,                  cTime,        dt,       sat,sel,mod,\
-      Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,"
+      Tb,  Vb,  Ib,  ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,"
     n = len(mon_ver.time)
     date_time_start = datetime.now()
     with open(csv_file, "w") as output:
@@ -49,6 +49,8 @@ def save_clean_file(mon_ver, csv_file, unit_key):
             s += "{:7.3f},".format(mon_ver.Tb[i])
             s += "{:7.3f},".format(mon_ver.Vb[i])
             s += "{:7.3f},".format(mon_ver.Ib[i])
+            s += "{:7.3f},".format(mon_ver.ioc[i])
+            s += "{:7.3f},".format(mon_ver.voc_soc[i])
             s += "{:7.3f},".format(mon_ver.Vsat[i])
             s += "{:7.3f},".format(mon_ver.dV_dyn[i])
             s += "{:7.3f},".format(mon_ver.Voc_stat[i])
@@ -211,11 +213,17 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
             print('mon:  ', str(mon))
             print('time=', t[i])
             print('sim:  ', str(sim))
+        # if t[i]>19999.:
+        #     print('time=', t[i])
+        #     print('mon:  ', str(mon))
+        #     print('time=', t[i])
+        #     print('sim:  ', str(sim))
+        #     print(t[i])
 
     # Data
     print('time=', now)
-    # print('mon:  ', str(mon))
-    # print('sim:  ', str(sim))
+    print('mon:  ', str(mon))
+    print('sim:  ', str(sim))
 
     return mon.saved, sim.saved, mon.Randles.saved, sim.saved_s
 
@@ -233,7 +241,7 @@ if __name__ == '__main__':
 
         # Transient  inputs
         time_end = None
-        # time_end = 19.2
+        # time_end = 5000
         t_Ib_fail = None
         init_time_in = None
         use_ib_mon_in = False
@@ -256,12 +264,13 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220903.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowTweakRegressionBucket20220906.txt'; unit_key = 'pro_2022';Bsim=1;Bmon=2
         # data_file_old_txt = '../dataReduction/triTweakDischBucket20220907.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/real world Xp20 20220907.txt'; unit_key = 'soc0_2022';scale_in=1.084
         # data_file_old_txt = '../dataReduction/slowTweakRegression20220907.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/pulse20220829.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
         # data_file_old_txt = '../dataReduction/tbFailMod20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tbFailHdwe20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/triTweakRegression20220829.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/real world Xp20 20220907.txt'; unit_key = 'soc0_2022'
+        # data_file_old_txt = '../dataReduction/real world Xp20 20220907.txt'; unit_key = 'soc0_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"
