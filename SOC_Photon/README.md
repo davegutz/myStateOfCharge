@@ -432,8 +432,9 @@ Bucket list:
   Bucket:  Bm2;Bs1;D^15;
            Bm0;Bs0;D^0;
            use Bsim=1 and Bmon=2 in MonSim
-  triTweakDischBucket:  Xp0;v0;Bm2;Bs1;Xm15;D^15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-33000;XW5;XT5;XC3;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;W2;v26;W3;XR;
-                  v0;XS;
+  triTweakDischBucketMix: set Xm7;D^<>; or Xm0;Dt<>; +reset
+                  Xp0;v0;Bm2;Bs1;Xm0;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;SA0;SB0;DA0;DB0;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-33000;XW5;XT5;XC3;W2;v26;W3;XR;
+                  v0;XS;SA1;SB1;Dm0;Dn0;Bm0;Bs0;FV0;FI1;FT0;Xp0;Ca1.;Pf;
   slowTweakRegressionBucket: Bm2;Bs1;D^15;Xp11
 
 

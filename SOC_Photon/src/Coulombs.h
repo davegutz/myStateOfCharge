@@ -50,7 +50,7 @@ struct Chemistry
   float *t_r;       // r(soc, dv) table
   float v_sat;      // Saturation threshold at temperature, deg C
   float dvoc_dt;    // Change of VOC with operating temperature in range 0 - 50 C V/deg C
-  float dv;         // Adjustment for calibration error, V
+  float dvoc;       // Adjustment for calibration error, V
   float r_0;        // Randles R0, ohms
   float r_ct;       // Randles charge transfer resistance, ohms
   float r_diff;     // Randles diffusion resistance, ohms
@@ -59,6 +59,8 @@ struct Chemistry
   float tau_sd;     // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
   float r_sd;       // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
   float r_ss;       // Equivalent model for state space model initialization, ohms
+  TableInterp2D *voc_T_;      // SOC-VOC 2-D table, V
+  TableInterp1D *soc_min_T_;  // SOC-MIN 1-D table, V
   void assign_mod(const String mod_str);
   String decode(const uint8_t mod);
   uint8_t encode(const String mod_str);
@@ -125,7 +127,6 @@ protected:
   boolean resetting_ = false;  // Sticky flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
   double soc_min_;    // As battery cools, the voltage drops and there appears a minimum soc it can deliver
   double q_min_;      // Floor on charge available to use, C
-  TableInterp1D *soc_min_T_;   // SOC-MIN 1-D table, V
   Chemistry chem_; // Storage of chemistry information
   double coul_eff_;   // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
 };

@@ -47,7 +47,7 @@ void Chemistry::assign_mod(const String mod_str)
     low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
     if ( n_s )  delete x_soc;
     if ( m_t )  delete y_t;
-    if ( m_t && n_s )  delete t_voc;
+    if ( m_t && n_s ) { delete t_voc; delete voc_T_; }
     n_s     = N_S_BB;   //Number of soc breakpoints voc table
     m_t     = M_T_BB;   // Number temperature breakpoints for voc table
     x_soc = new float[n_s];
@@ -56,12 +56,14 @@ void Chemistry::assign_mod(const String mod_str)
     for (i=0; i<n_s; i++) x_soc[i] = X_SOC_BB[i];
     for (i=0; i<m_t; i++) y_t[i] = Y_T_BB[i];
     for (i=0; i<m_t*n_s; i++) t_voc[i] = T_VOC_BB[i];
-    if ( n_n ) { delete x_soc_min; delete t_soc_min;}
+    voc_T_ = new TableInterp2D(n_s, m_t, x_soc, y_t, t_voc);
+    if ( n_n ) { delete x_soc_min; delete t_soc_min; delete soc_min_T_; }
     n_n     = N_N_BB;   // Number of temperature breakpoints for x_soc_min table
     x_soc_min = new float[n_n];
     t_soc_min = new float[n_n];
     for (i=0; i<n_n; i++) x_soc_min[i] = X_SOC_MIN_BB[i];
     for (i=0; i<n_n; i++) t_soc_min[i] = T_SOC_MIN_BB[i];
+    soc_min_T_ = new TableInterp1D(n_n, x_soc_min, t_soc_min);
     hys_cap = 3.6e5;    // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data
     if ( n_h )  delete x_dv;
     if ( m_h )  delete y_soc;
@@ -76,7 +78,7 @@ void Chemistry::assign_mod(const String mod_str)
     for (i=0; i<m_h*n_h; i++) t_r[i] = T_R_BB[i];
     v_sat       = 13.85;  // Saturation threshold at temperature, deg C
     dvoc_dt     = 0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
-    dv          = 0.01;   // Adjustment for calibration error, V
+    dvoc        = 0.01;   // Adjustment for calibration error, V
     r_0         = 0.003;  // Randles R0, ohms   
     r_ct        = 0.0016; // Randles charge transfer resistance, ohms
     r_diff      = 0.0077; // Randles diffusion resistance, ohms
@@ -93,7 +95,7 @@ void Chemistry::assign_mod(const String mod_str)
     low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
     if ( n_s )  delete x_soc;
     if ( m_t )  delete y_t;
-    if ( m_t && n_s )  delete t_voc;
+    if ( m_t && n_s ) { delete t_voc; delete voc_T_; }
     n_s     = N_S_LI;   //Number of soc breakpoints voc table
     m_t     = M_T_LI;   // Number temperature breakpoints for voc table
     x_soc = new float[n_s];
@@ -102,12 +104,14 @@ void Chemistry::assign_mod(const String mod_str)
     for (i=0; i<n_s; i++) x_soc[i] = X_SOC_LI[i];
     for (i=0; i<m_t; i++) y_t[i] = Y_T_LI[i];
     for (i=0; i<m_t*n_s; i++) t_voc[i] = T_VOC_LI[i];
-    if ( n_n ) { delete x_soc_min; delete t_soc_min;}
+    voc_T_ = new TableInterp2D(n_s, m_t, x_soc, y_t, t_voc);
+    if ( n_n ) { delete x_soc_min; delete t_soc_min; delete soc_min_T_; }
     n_n     = N_N_LI;   // Number of temperature breakpoints for x_soc_min table
     x_soc_min = new float[n_n];
     t_soc_min = new float[n_n];
     for (i=0; i<n_n; i++) x_soc_min[i] = X_SOC_MIN_LI[i];
     for (i=0; i<n_n; i++) t_soc_min[i] = T_SOC_MIN_LI[i];
+    soc_min_T_ = new TableInterp1D(n_n, x_soc_min, t_soc_min);
     hys_cap = 3.6e5;    // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data
     if ( n_h )  delete x_dv;
     if ( m_h )  delete y_soc;
@@ -122,7 +126,7 @@ void Chemistry::assign_mod(const String mod_str)
     for (i=0; i<m_h*n_h; i++) t_r[i] = T_R_LI[i];
     v_sat       = 13.85;  // Saturation threshold at temperature, deg C
     dvoc_dt     = 0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
-    dv          = 0.01;   // Adjustment for calibration error, V
+    dvoc        = 0.01;   // Adjustment for calibration error, V
     r_0         = 0.003;  // Randles R0, ohms   
     r_ct        = 0.0016; // Randles charge transfer resistance, ohms
     r_diff      = 0.0077; // Randles diffusion resistance, ohms
@@ -139,7 +143,7 @@ void Chemistry::assign_mod(const String mod_str)
     low_t   = 0;        // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
     if ( n_s )  delete x_soc;
     if ( m_t )  delete y_t;
-    if ( m_t && n_s )  delete t_voc;
+    if ( m_t && n_s ) { delete t_voc; delete voc_T_; }
     n_s     = N_S_LIE;   //Number of soc breakpoints voc table
     m_t     = M_T_LIE;   // Number temperature breakpoints for voc table
     x_soc = new float[n_s];
@@ -148,12 +152,14 @@ void Chemistry::assign_mod(const String mod_str)
     for (i=0; i<n_s; i++) x_soc[i] = X_SOC_LIE[i];
     for (i=0; i<m_t; i++) y_t[i] = Y_T_LIE[i];
     for (i=0; i<m_t*n_s; i++) t_voc[i] = T_VOC_LIE[i];
-    if ( n_n ) { delete x_soc_min; delete t_soc_min;}
+    voc_T_ = new TableInterp2D(n_s, m_t, x_soc, y_t, t_voc);
+    if ( n_n ) { delete x_soc_min; delete t_soc_min; delete soc_min_T_; }
     n_n     = N_N_LIE;   // Number of temperature breakpoints for x_soc_min table
     x_soc_min = new float[n_n];
     t_soc_min = new float[n_n];
     for (i=0; i<n_n; i++) x_soc_min[i] = X_SOC_MIN_LIE[i];
     for (i=0; i<n_n; i++) t_soc_min[i] = T_SOC_MIN_LIE[i];
+    soc_min_T_ = new TableInterp1D(n_n, x_soc_min, t_soc_min);
     hys_cap = 3.6e5;    // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data
     if ( n_h )  delete x_dv;
     if ( m_h )  delete y_soc;
@@ -168,7 +174,7 @@ void Chemistry::assign_mod(const String mod_str)
     for (i=0; i<m_h*n_h; i++) t_r[i] = T_R_LI[i];
     v_sat       = 13.85;  // Saturation threshold at temperature, deg C
     dvoc_dt     = 0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
-    dv          = 0.01;   // Adjustment for calibration error, V
+    dvoc        = 0.01;   // Adjustment for calibration error, V
     r_0         = 0.003;  // Randles R0, ohms   
     r_ct        = 0.0016; // Randles charge transfer resistance, ohms
     r_diff      = 0.0077; // Randles diffusion resistance, ohms
@@ -220,7 +226,7 @@ void Chemistry::pretty_print(void)
   Serial.printf("  hys_cap=%7.3f; F\n", hys_cap);
   Serial.printf("  v_sat=%7.3f; V\n", v_sat);
   Serial.printf("  dvoc_dt=%7.3f; V/dg C\n", dvoc_dt);
-  Serial.printf("  dv=%7.3f; Cal err, V\n", dv);
+  Serial.printf("  dvoc=%7.3f; Cal err, V\n", dvoc);
   Serial.printf("  r_0=%9.6f; Randles R0, ohm\n", r_0);
   Serial.printf("  r_ct=%9.6f; Charge trans, ohm\n", r_ct);
   Serial.printf("  r_diff=%9.6f; Diff, ohm\n", r_diff);
@@ -262,10 +268,7 @@ Coulombs::Coulombs() {}
 Coulombs::Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rated, const double t_rated, 
   const double t_rlim, uint8_t *rp_mod_code, const double coul_eff)
   : rp_delta_q_(rp_delta_q), rp_t_last_(rp_t_last), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017),
-  soc_min_(0), chem_(rp_mod_code), coul_eff_(coul_eff)
-  {
-    soc_min_T_ = new TableInterp1D(chem_.n_n, chem_.x_soc_min, chem_.t_soc_min);
-  }
+  soc_min_(0), chem_(rp_mod_code), coul_eff_(coul_eff) {}
 Coulombs::~Coulombs() {}
 
 
@@ -404,7 +407,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const floa
 
     // Normalize
     soc_ = q_ / q_capacity_;
-    soc_min_ = soc_min_T_->interp(temp_lim);
+    soc_min_ = chem_.soc_min_T_->interp(temp_lim);
     q_min_ = soc_min_ * q_capacity_;
 
     if ( rp.debug==96 )

@@ -41,9 +41,6 @@ Battery::Battery(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_n
     : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, rp_mod_code, COULOMBIC_EFF),
     sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS)
 {
-    // Battery characteristic tables
-    voc_T_ = new TableInterp2D(chem_.n_s, chem_.m_t, chem_.x_soc, chem_.y_t, chem_.t_voc);
-    dv_ = chem_.dv;
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // Center in hysteresis
     hys_ = new Hysteresis(chem_.hys_cap, chem_);
 }
@@ -60,7 +57,6 @@ double Battery::calculate(const float temp_C, const double q, const double curr_
     INPUTS:
         soc         Fraction of saturation charge (q_capacity_) available (0-1) 
         temp_c      Battery temperature, deg C
-        dv_         Adjustment to compensate for tables generated without considering hys, V
     OUTPUTS:
         dv_dsoc     Derivative scaled, V/fraction
         voc_stat    Static model open circuit voltage from table (reference), V
@@ -69,7 +65,7 @@ double Battery::calc_soc_voc(const double soc, const float temp_c, double *dv_ds
 {
     double voc_stat;  // return value
     *dv_dsoc = calc_soc_voc_slope(soc, temp_c);
-    voc_stat = voc_T_->interp(soc, temp_c) + dv_;
+    voc_stat = chem_.voc_T_->interp(soc, temp_c) + chem_.dvoc;
     return (voc_stat);
 }
 
@@ -84,9 +80,9 @@ double Battery::calc_soc_voc_slope(const double soc, const float temp_c)
 {
     double dv_dsoc;  // return value
     if ( soc > 0.5 )
-        dv_dsoc = (voc_T_->interp(soc, temp_c) - voc_T_->interp(soc-0.01, temp_c)) / 0.01;
+        dv_dsoc = (chem_.voc_T_->interp(soc, temp_c) - chem_.voc_T_->interp(soc-0.01, temp_c)) / 0.01;
     else
-        dv_dsoc = (voc_T_->interp(soc+0.01, temp_c) - voc_T_->interp(soc, temp_c)) / 0.01;
+        dv_dsoc = (chem_.voc_T_->interp(soc+0.01, temp_c) - chem_.voc_T_->interp(soc, temp_c)) / 0.01;
     return (dv_dsoc);
 }
 
@@ -114,9 +110,9 @@ void Battery::init_battery(const boolean reset, Sensors *Sen)
     if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
     double u[2] = {ib_, vb_};
-    if ( rp.debug==8 || rp.debug==7 ) Serial.printf("init_battery: Randles to %7.3f, %7.3f\n", ib_, vb_);
+    // if ( rp.debug==8 || rp.debug==7 ) Serial.printf("init_battery: Randles to %7.3f, %7.3f\n", ib_, vb_);
     Randles_->init_state_space(u);
-    if ( rp.debug==8 || rp.debug==7 ) Randles_->pretty_print();
+    // if ( rp.debug==8 || rp.debug==7 ) Randles_->pretty_print();
     init_hys(0.0);
 }
 
@@ -146,7 +142,6 @@ void Battery::pretty_print(void)
     Serial.printf("  vsat=%7.3f; V\n", vsat_);
     Serial.printf("  dv_dyn= %7.3f; V\n", dv_dyn_);
     Serial.printf("  sr=%7.3f; sclr\n", sr_);
-    Serial.printf("  dv=%7.3f; Tab adj, V\n", dv_);
     Serial.printf("  dt=%7.3f; s\n", dt_);
     Serial.printf(" *rp_nP=%5.2f; P bank, e.g. '2P1S'\n", *rp_nP_);
     Serial.printf(" *rp_nS=%5.2f; S bank, e.g. '2P1S'\n", *rp_nS_);
@@ -189,7 +184,7 @@ BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_n
     rand_B_ = new double [rand_n*rand_p];
     rand_C_ = new double [rand_q*rand_n];
     rand_D_ = new double [rand_q*rand_p];
-    assign_rand();
+    assign_randles();
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
     SdVb_ = new SlidingDeadband(HDB_VBATT);  // Noise filter
     EKF_converged = new TFDelay(false, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT); // Convergence test debounce.  Initializes false
@@ -199,8 +194,8 @@ BatteryMonitor::~BatteryMonitor() {}
 // operators
 // functions
 
-// BatteryMonitor::assign_rand:    Assign constants from battery chemistry to arrays for state space model
-void BatteryMonitor::assign_rand(void)
+// BatteryMonitor::assign_randles:    Assign constants from battery chemistry to arrays for state space model
+void BatteryMonitor::assign_randles(void)
 {
     rand_A_[0] = -1./chem_.tau_ct;
     rand_A_[1] = 0.;
@@ -545,12 +540,12 @@ BatterySim::BatterySim(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_mod
     rand_B_ = new double [rand_n*rand_p];
     rand_C_ = new double [rand_q*rand_n];
     rand_D_ = new double [rand_q*rand_p];
-    assign_rand();
+    assign_randles();
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
 }
 
-// BatterySim::assign_rand:    Assign constants from battery chemistry to arrays for state space model
-void BatterySim::assign_rand(void)
+// BatterySim::assign_randles:    Assign constants from battery chemistry to arrays for state space model
+void BatterySim::assign_randles(void)
 {
     rand_A_[0] = -1./chem_.tau_ct;
     rand_A_[1] = 0.;
@@ -671,8 +666,8 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     // if ( rp.debug==75 ) Serial.printf("BatterySim::calculate: temp_c_, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
     //     temp_c_, soc_, voc_stat_, chem_.low_voc);
 
-    if ( rp.debug==79 ) Serial.printf("temp_c_, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib_fut, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f, %7.3f,\n",
-        temp_c_, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
+    // if ( rp.debug==79 ) Serial.printf("temp_c_, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib_fut, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f, %7.3f,\n",
+    //     temp_c_, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
 
     if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
      dt,temp_c_, ib_, soc_, voc_, dv_dyn_, vb_);
@@ -789,7 +784,7 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset, BatteryMoni
 
     // Normalize
     soc_ = q_ / q_capacity_;
-    soc_min_ = soc_min_T_->interp(temp_lim);
+    soc_min_ = chem_.soc_min_T_->interp(temp_lim);
     q_min_ = soc_min_ * q_capacity_;
 
     if ( rp.debug==26 && cp.publishS ) // print_serial_sim

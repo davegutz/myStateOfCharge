@@ -149,21 +149,21 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   case ( 0 ):  // Bm0: Mon Battleborn
                     Serial.printf("Mon chem %d", Mon->mod_code());
                     Mon->assign_mod("Battleborn");
-                    Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_rand();
+                    Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_randles();
                     cp.cmd_reset();
                     break;
 
                   case ( 1 ):  // Bm1: Mon LION
                     Serial.printf("Mon chem %d", Mon->mod_code());
                     Mon->assign_mod("LION");
-                    Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_rand();
+                    Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_randles();
                     cp.cmd_reset();
                     break;
 
                   case ( 2 ):  // Bm2: Mon LION EKF
                     Serial.printf("Mon chem %d", Mon->mod_code());
                     Mon->assign_mod("LIE");
-                    Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_rand();
+                    Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_randles();
                     cp.cmd_reset();
                     break;
 
@@ -178,21 +178,21 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 {
                   case ( 0 ):  // Bs0: Sim Battleborn
                     Serial.printf("Sim chem %d", Sen->Sim->mod_code());
-                    Sen->Sim->assign_mod("Battleborn"); Sen->Sim->assign_rand();
+                    Sen->Sim->assign_mod("Battleborn"); Sen->Sim->assign_randles();
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
 
                   case ( 1 ):  // Bs1: Sim LION
                     Serial.printf("Sim chem %d", Sen->Sim->mod_code());
-                    Sen->Sim->assign_mod("LION"); Sen->Sim->assign_rand();
+                    Sen->Sim->assign_mod("LION"); Sen->Sim->assign_randles();
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
 
                   case ( 2 ):  // Bs2: Sim LION EKF
                     Serial.printf("Sim chem %d", Sen->Sim->mod_code());
-                    Sen->Sim->assign_mod("LIE"); Sen->Sim->assign_rand();
+                    Sen->Sim->assign_mod("LIE"); Sen->Sim->assign_randles();
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
@@ -983,7 +983,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     if ( !rp.tweak_test() ) chit("Xb0.", ASAP);
                     chit("XS; Mk1; Nk1;", ASAP);  // Stop any injection
                     chit("Dn" + String(COULOMBIC_EFF), ASAP);
-                    chit("Di0;Dm0;Dn0;Dt0;Dv0;DT0;DV0.0;DI0;Xu0;Xv1.;Dr100;DP4;", ASAP);
+                    chit("Di0;Dm0;Dn0;Dv0;DT0;DV0.0;DI0;Xu0;Xv1.;Dr100;DP4;", ASAP);
                     break;
 
                   case ( 1 ):  // Xp1:  sine
@@ -1087,12 +1087,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("XR;", QUEUE);       // Run cycle
                     break;
 
-                  case( 20 ): case ( 21 ):    // Xp20:  Xp21:  20= 0.3 s data, 21= 2 s data, for nominal Dr100=0.1 s sample time
+                  case( 20 ): case ( 21 ):    // Xp20:  Xp21:  20= 0.5 s sample/2.0s print, 21= 2 s sample/8 s print
                     chit("v0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
                     chit("Pa;", QUEUE);       // Print all for record
                     if ( INT_in == 20 )
                     {
-                      chit("DP3;", QUEUE);    // 3x data collection, < RANDLES_T_MAX
+                      chit("Dr500;", QUEUE);  // 5x sample time, > RANDLES_T_MAX.  Randles dynamics disabled in Photon
+                      chit("DP4;", QUEUE);    // 4x data collection, > RANDLES_T_MAX.  Randles dynamics disabled in Python
                       chit("v26;", QUEUE);    // Large data set
                     }
                     else if ( INT_in == 21 )
@@ -1285,7 +1286,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("   v4: GP\n");
   Serial.printf("   v5: OLED display\n");
   Serial.printf("   v7: EKF solver init\n");
-  Serial.printf("   v8: Randles SS init\n");
+  // Serial.printf("   v8: Randles SS init\n");
   Serial.printf(" v-11: Summary\n");
   Serial.printf("  v12: EKF\n");
 //  Serial.printf(" v-13: ib_dscn\n");
@@ -1301,7 +1302,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   // Serial.printf("  v75: voc_low check mod\n");
   Serial.printf("  v76: vb model\n");
   Serial.printf("  v78: Batt model sat\n");
-  Serial.printf("  v79: sat_ib model\n");
+  // Serial.printf("  v79: sat_ib model\n");
   Serial.printf("  v96: CC sat\n");
 
   Serial.printf("w togg wifi = "); Serial.println(cp.enable_wifi);
