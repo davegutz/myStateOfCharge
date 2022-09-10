@@ -148,21 +148,21 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 {
                   case ( 0 ):  // Bm0: Mon Battleborn
                     Serial.printf("Mon chem %d", Mon->mod_code());
-                    Mon->assign_mod("Battleborn");
+                    Mon->assign_all_mod("Battleborn");
                     Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_randles();
                     cp.cmd_reset();
                     break;
 
                   case ( 1 ):  // Bm1: Mon LION
                     Serial.printf("Mon chem %d", Mon->mod_code());
-                    Mon->assign_mod("LION");
+                    Mon->assign_all_mod("LION");
                     Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_randles();
                     cp.cmd_reset();
                     break;
 
                   case ( 2 ):  // Bm2: Mon LION EKF
                     Serial.printf("Mon chem %d", Mon->mod_code());
-                    Mon->assign_mod("LIE");
+                    Mon->assign_all_mod("LIE");
                     Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_randles();
                     cp.cmd_reset();
                     break;
@@ -178,21 +178,21 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 {
                   case ( 0 ):  // Bs0: Sim Battleborn
                     Serial.printf("Sim chem %d", Sen->Sim->mod_code());
-                    Sen->Sim->assign_mod("Battleborn"); Sen->Sim->assign_randles();
+                    Sen->Sim->assign_all_mod("Battleborn"); Sen->Sim->assign_randles();
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
 
                   case ( 1 ):  // Bs1: Sim LION
                     Serial.printf("Sim chem %d", Sen->Sim->mod_code());
-                    Sen->Sim->assign_mod("LION"); Sen->Sim->assign_randles();
+                    Sen->Sim->assign_all_mod("LION"); Sen->Sim->assign_randles();
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
 
                   case ( 2 ):  // Bs2: Sim LION EKF
                     Serial.printf("Sim chem %d", Sen->Sim->mod_code());
-                    Sen->Sim->assign_mod("LIE"); Sen->Sim->assign_randles();
+                    Sen->Sim->assign_all_mod("LIE"); Sen->Sim->assign_randles();
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;

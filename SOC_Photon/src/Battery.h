@@ -73,7 +73,6 @@ const float T_VOC_BB[M_T_BB*N_S_BB] = // r(soc, dv) table
           4.00, 4.00,   10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14,  13.21, 13.25, 13.27, 13.72, 14.50,
           4.00, 4.00,   12.20, 12.80, 12.90, 13.00, 13.06, 13.10, 13.15, 13.18, 13.21, 13.22, 13.235, 13.25, 13.26, 13.27, 13.72, 14.50,
           4.00, 6.00,   12.27, 12.85, 12.95, 13.05, 13.11, 13.15, 13.20, 13.23, 13.26, 13.27, 13.285, 13.29, 13.30, 13.32, 13.72, 14.50};
-
 const uint8_t N_N_BB = 5;   // Number of temperature breakpoints for x_soc_min table
 const float X_SOC_MIN_BB[N_N_BB] =  { 5.,   11.1,  20.,  30.,  40.};  // Temperature breakpoints for soc_min table
 const float T_SOC_MIN_BB[N_N_BB] =  { 0.10, 0.07,  0.05, 0.00, -0.05}; // soc_min(t)
@@ -88,7 +87,6 @@ const float T_R_BB[M_H_BB*N_H_BB] = // r(soc, dv) table.    // DAG 6/13/2022 tun
         { 1e-6, 0.064,  0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
           1e-6, 1e-6,   0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
           1e-6, 1e-6,     1e-6, 0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6};
-
 
 // LION 100 Ah, 12v LiFePO4.  "LION" placeholder.  Data fabricated.   Useful to test weird shapes T=40 (Dt15)
 // shifted Battleborn because don't have real data yet; test structure of program
@@ -134,7 +132,6 @@ const float T_VOC_LIE[M_T_LIE*N_S_LIE] = // r(soc, dv) table
 const uint8_t N_N_LIE = 4;   // Number of temperature breakpoints for x_soc_min table
 const float X_SOC_MIN_LIE[N_N_LIE] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
 const float T_SOC_MIN_LIE[N_N_LIE] =  { 0.10, 0.07,  0.05, 0.0}; // soc_min(t)
-
 // Hysteresis: reservoir model of battery electrical hysteresis
 // Use variable resistor and capacitor to create hysteresis from an RC circuit
 class Hysteresis

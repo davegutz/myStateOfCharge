@@ -25,6 +25,8 @@
 #ifndef COULOMBS_H_
 #define COULOMBS_H_
 
+#include "Battery.h"
+
 class Sensors;
 
 // Battery chemistry
@@ -61,7 +63,13 @@ struct Chemistry
   float r_ss;       // Equivalent model for state space model initialization, ohms
   TableInterp2D *voc_T_;      // SOC-VOC 2-D table, V
   TableInterp1D *soc_min_T_;  // SOC-MIN 1-D table, V
-  void assign_mod(const String mod_str);
+  void assign_BB();   // Battleborn assignment
+  void assign_LI();   // LION assignment
+  void assign_LIE();  // LION monotonic for EKF
+  void assign_all_mod(const String mod_str);  // Assignment executive
+  void assign_hys(const int _n_h, const int _m_h, const float *x, const float *y, const float *t); // Worker bee Hys
+  void assign_soc_min(const int _n_n, const float *x, const float *t);  // Worker bee SOC_MIN
+  void assign_voc_soc(const int _n_s, const int _m_t, const float *x, const float *y, const float *t); // Worker bee VOC_SOC
   String decode(const uint8_t mod);
   uint8_t encode(const String mod_str);
   void pretty_print();
@@ -69,13 +77,13 @@ struct Chemistry
   Chemistry(const String mod_str)
   {
     rp_mod_code = new uint8_t(-1);
-    assign_mod(mod_str);
+    assign_all_mod(mod_str);
   }
   Chemistry(uint8_t *mod_code)
   {
     rp_mod_code = mod_code;
     String mod_str = decode(*rp_mod_code);
-    assign_mod(mod_str);
+    assign_all_mod(mod_str);
   }
 };
 
@@ -95,7 +103,7 @@ public:
   void apply_soc(const double soc, const float temp_c);
   void apply_delta_q_t(const boolean reset);
   void apply_delta_q_t(const double delta_q, const float temp_c);
-  void assign_mod(const String mod_str) { chem_.assign_mod(mod_str); };
+  void assign_all_mod(const String mod_str) { chem_.assign_all_mod(mod_str); };
   double calculate_capacity(const float temp_c);
   double coul_eff() { return ( coul_eff_ ); };
   void coul_eff(const double coul_eff) { coul_eff_ = coul_eff; };
