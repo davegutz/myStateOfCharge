@@ -254,10 +254,11 @@ if __name__ == '__main__':
         # Regression suite
         # data_file_old_txt = '../dataReduction/rapidTweakRegression20220910.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/rapidTweakRegression40C_20220910.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/ampHiFail20220910.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/ampLoFail20220903.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/triTweakDisch20220903.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/ampHiFailNoise20220903.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = '../dataReduction/slowTweakRegression20220910.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampHiFail20220910.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampLoFail20220910.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/triTweakDisch20220910.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/ampHiFailNoise20220910.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/satSit20220903.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/ampLoFailNoise20220903.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFailSlow20220903.txt'; unit_key = 'pro_2022';
