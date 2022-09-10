@@ -260,18 +260,14 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/triTweakDisch20220910.txt'; unit_key = 'pro_2022'
         data_file_old_txt = '../dataReduction/ampHiFailNoise20220910.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/satSit20220903.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/ampLoFailNoise20220903.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/ampHiFailSlow20220903.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/vHiFail20220903.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowHalfTweakRegressionTest20220903.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowTweakRegressionBucket20220906.txt'; unit_key = 'pro_2022';Bsim=1;Bmon=2
         # data_file_old_txt = '../dataReduction/triTweakDischBucketMix20220910.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220907.txt'; unit_key = 'soc0_2022';scale_in=1.084
-        # data_file_old_txt = '../dataReduction/slowTweakRegression20220907.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/pulse20220829.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
         # data_file_old_txt = '../dataReduction/tbFailMod20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tbFailHdwe20220829.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/triTweakRegression20220829.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/real world Xp20 20220907.txt'; unit_key = 'soc0_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
