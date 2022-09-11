@@ -503,7 +503,7 @@ void Fault::tb_stale(const boolean reset, Sensors *Sen)
   {
     faultAssign( Sen->SensorTb->tb_stale_flt(), TB_FLT );
     failAssign( TbStaleFail->calculate(tb_flt(), TB_STALE_SET*tb_stale_time_sclr_, TB_STALE_RESET*tb_stale_time_sclr_,
-      Sen->T, reset_loc), TB_FA );
+      Sen->T_temp, reset_loc), TB_FA );
   }
 }
 

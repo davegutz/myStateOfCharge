@@ -410,18 +410,16 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(sv.soc, sv.voc_stat, color='orange', linestyle=':', label='voc_stat_s_ver')
         plt.plot(mo.soc, mo.Vsat, color='red', linestyle='-', label='vsat')
         plt.plot(mv.soc, mv.Vsat, color='black', linestyle='--', label='vsat_ver')
-        plt.plot(mo.soc, mo.Voc_stat, color='magenta', linestyle='-', label='Voc_stat')
         plt.legend(loc=1)
 
         plt.subplot(224)
-        plt.plot(mo.time, mo.Voc_stat, color='magenta', linestyle=':', label='Voc_stat')
+        plt.plot(mo.time, mo.Voc_stat, color='cyan', linestyle=':', label='Voc_stat')
         plt.plot(mo.time, mo.voc_soc, color='blue', linestyle='-', label='voc_soc')
         plt.plot(mv.time, mv.voc_soc, color='red', linestyle='--', label='voc_soc_ver')
         plt.plot(so.time, so.voc_stat_s, color='green', linestyle='-.', label='voc_stat_s')
         plt.plot(sv.time, sv.voc_stat, color='orange', linestyle=':', label='voc_stat_s_ver')
         plt.plot(mo.time, mo.Vsat, color='red', linestyle='-', label='vsat')
         plt.plot(mv.time, mv.Vsat, color='black', linestyle='--', label='vsat_ver')
-        plt.plot(mo.time, mo.Voc_stat, color='cyan', linestyle='-', label='Voc_stat')
         plt.legend(loc=1)
 
         fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -449,10 +447,12 @@ def write_clean_file(txt_file, type_, title_key, unit_key):
     num_lines = 0
     num_skips = 0
     length = 0
+    unit_key_found = False
     with open(txt_file, "r", encoding='cp437') as input_file:  # reads all characters even bad ones
         with open(csv_file, "a") as output:
             for line in input_file:
                 if line.__contains__(unit_key):
+                    unit_key_found = True
                     if num_lines == 0:  # use first data line to screen out short and long lines that have key
                         length = line.count(",")
                     if line.count(",") == length:
@@ -463,6 +463,9 @@ def write_clean_file(txt_file, type_, title_key, unit_key):
     if not num_lines:
         csv_file = None
         print("I(write_clean_file): no data to write")
+        if not unit_key_found:
+            print("E(write_clean_file):  unit_key not found in ", txt_file,".  Looking with ", unit_key)
+            exit(1)
     else:
         print("Wrote(write_clean_file):", csv_file, num_lines, "lines", num_skips, "skips", length, "fields")
     return csv_file

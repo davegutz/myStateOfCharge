@@ -113,6 +113,11 @@ public:
   boolean calculate(const boolean in, const double Tt, const double Tf, const int RESET);
   boolean calculate(const boolean in, const double Tt, const double Tf, const double T, const int RESET);
   boolean state() { return ( timer_> 0 ); };
+  int timer() { return timer_; };
+  int nt() { return nt_; };
+  int nf() { return nf_; };
+  int T() { return T_; };
+  int T_init() { return T_init_; };
 protected:
   int timer_;
   int nt_;
