@@ -64,6 +64,7 @@ public:
   //operators
   //functions
   virtual float interp(const float x, const float y);
+  void pretty_print();
 
 protected:
   unsigned int n2_;

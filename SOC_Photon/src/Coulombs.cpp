@@ -259,39 +259,19 @@ void Chemistry::pretty_print(void)
   Serial.printf("  v_sat=%7.3f; V\n", v_sat);
   Serial.printf("  dvoc_dt=%7.3f; V/dg C\n", dvoc_dt);
   Serial.printf("  dvoc=%7.3f; Cal err, V\n", dvoc);
-  Serial.printf("  r_0=%9.6f; Randles R0, ohm\n", r_0);
-  Serial.printf("  r_ct=%9.6f; Charge trans, ohm\n", r_ct);
-  Serial.printf("  r_diff=%9.6f; Diff, ohm\n", r_diff);
-  Serial.printf("  tau_ct=%7.3f; Charge tran, s (=1/Rct/Cct)\n", tau_ct);
-  Serial.printf("  tau_diff=%7.3f; Diff, s (=1/Rdif/Cdif)\n", tau_diff);
+  Serial.printf("  Randles:");
+  Serial.printf("   r_0=%9.6f; R0, ohm\n", r_0);
+  Serial.printf("   r_ct=%9.6f; Chg trans, ohm\n", r_ct);
+  Serial.printf("   r_diff=%9.6f; Diffusion, ohm\n", r_diff);
+  Serial.printf("   tau_ct=%7.3f; ct, s (=1/Rct/Cct)\n", tau_ct);
+  Serial.printf("   tau_diff=%7.3f; diff, s (=1/Rdiff/Cdiff)\n", tau_diff);
   Serial.printf("  tau_sd=%7.3f; EKF. Parasitic disch, s\n", tau_sd);
   Serial.printf("  r_sd=%7.3f; EKF. Parasitic disch, ohm\n", r_sd);
   Serial.printf("  r_ss=%7.3f; SS init, ohm\n", r_ss);
   Serial.printf("  voc(t, soc):\n");
-  Serial.printf("    t={"); for ( int i=0; i<m_t; i++ ) Serial.printf("%7.3f, ", y_t[i]); Serial.printf("};\n");
-  Serial.printf("    soc={"); for ( int i=0; i<n_s; i++ ) Serial.printf("%7.3f, ", x_soc[i]); Serial.printf("};\n");
-  Serial.printf("    voc={\n");
-  for ( int i=0; i<m_t; i++ )
-  {
-    Serial.printf("      {");
-    for ( int j=0; j<n_s; j++ ) Serial.printf("%7.3f, ", t_voc[i*n_s+j]);
-    Serial.printf("},\n");
-  }
-  Serial.printf("         };\n");
+  voc_T_->pretty_print();
   Serial.printf("  soc_min(temp_c):\n");
-  Serial.printf("    temp_c={"); for ( int i=0; i<n_n; i++ ) Serial.printf("%7.3f, ", x_soc_min[i]); Serial.printf("};\n");
-  Serial.printf("    soc_min={"); for ( int i=0; i<n_n; i++ ) Serial.printf("%7.3f, ", t_soc_min[i]); Serial.printf("};\n");
-  Serial.printf("  r(soc, dv):\n");
-  Serial.printf("    soc={"); for ( int i=0; i<m_h; i++ ) Serial.printf("%8.6f, ", y_soc[i]); Serial.printf("};\n");
-  Serial.printf("    dv={"); for ( int i=0; i<n_h; i++ ) Serial.printf("%7.3f, ", x_dv[i]); Serial.printf("};\n");
-  Serial.printf("    r={\n");
-  for ( int i=0; i<m_h; i++ )
-  {
-    Serial.printf("      {");
-    for ( int j=0; j<n_h; j++ ) Serial.printf("%9.6f, ", t_r[i*n_h+j]);
-    Serial.printf("},\n");
-  }
-  Serial.printf("         };\n");
+  soc_min_T_->pretty_print();
 }
 
 

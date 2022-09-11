@@ -919,6 +919,8 @@ void Hysteresis::pretty_print()
     Serial.printf("  dv_hys=%7.3f; Delta state, V\n", dv_hys_);
     Serial.printf("  disabled=%d; input < 1e-5\n", disabled_);
     Serial.printf("  rp.hys_scale=%6.2f; Slr\n", rp.hys_scale);
+    Serial.printf("  r(soc, dv):\n");
+    hys_T_->pretty_print();
 }
 
 // Scale
