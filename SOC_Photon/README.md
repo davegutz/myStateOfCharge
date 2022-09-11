@@ -420,7 +420,8 @@ Full regression suite:
   pulse:  Xp6
   tbFailMod:    D^0;Ca.5;Xp0;W4;Xm7;DP1;Dr100;W2;v26;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;
-  tbFailHdwe:   D^0;Ca.5;Xp0;W4;Xm6;DP1;Dr100;W2;v26;W50;Xv.002;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
+  tbFailHdwe:   This script doesn't work but test performs fine manually
+                D^0;Ca.5;Xp0;W4;Xm6;DP1;Dr100;W2;v26;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;
   triTweakRegression:   D^0;Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;-DP1;Rb;Pa;Xf0.02;Xa-2000;XW5;XT5;XC3;W2;v26;W2;XR;
                 v0;XS;Dm0;Dn0;Xp0;Ca1.;Pf;

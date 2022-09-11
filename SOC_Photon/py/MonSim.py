@@ -263,8 +263,8 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/ampHiFailSlow20220910.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/vHiFail20220910.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/pulse20220910.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
-        data_file_old_txt = '../dataReduction/tbFailMod20220910.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/tbFailHdwe20220829.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/tbFailMod20220910.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/tbFailHdwe20220910.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/real world Xp20 20220907.txt'; unit_key = 'soc0_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
