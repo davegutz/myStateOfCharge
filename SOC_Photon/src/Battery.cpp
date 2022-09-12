@@ -295,7 +295,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     voc_stat_ = voc_ - dv_hys_;
     voc_filt_ = SdVb_->update(voc_);
     ioc_ = hys_->ioc();
-    bms_off_ = temp_c_ <= chem_.low_t;    // KISS
+    bms_off_ = (temp_c_<=chem_.low_t) || (temp_c_>chem_.high_t && soc_<soc_min_);    // KISS
     if ( bms_off_ )
     {
         voc_stat_ = voc_soc_;

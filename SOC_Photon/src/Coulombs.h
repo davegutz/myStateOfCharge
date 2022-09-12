@@ -117,6 +117,7 @@ public:
   double q_cap_scaled(){ return (q_cap_rated_scaled_); };
   double q_capacity(){ return (q_capacity_); };
   double soc() { return(soc_); };
+  double soc_min() { return(soc_min_); };
   boolean sat() { return(sat_); };
   double t_last() { return(*rp_t_last_); };
   virtual double vsat(void) = 0;

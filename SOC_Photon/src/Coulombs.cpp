@@ -69,6 +69,7 @@ void Chemistry::assign_BB()
   hys_cap = 3.6e5;  // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data
   low_voc = 9.;     // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
+  high_t  = 35.;    // BMS shuts off battery when t>high_t and soc<soc_min
   r_0     = 0.003;  // Randles R0, ohms   
   r_ct    = 0.0016; // Randles charge transfer resistance, ohms
   r_diff  = 0.0077; // Randles diffusion resistance, ohms
@@ -98,7 +99,8 @@ void Chemistry::assign_LI()
   hys_cap = 3.6e5;  // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data
   low_voc = 9.;     // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
-  r_0     = 0.003;  // Randles R0, ohms   
+  high_t  = 35.;    // BMS shuts off battery when t>high_t and soc<soc_min
+  r_0     = 0.003;  // Randles R0, ohms
   r_ct    = 0.0016; // Randles charge transfer resistance, ohms
   r_diff  = 0.0077; // Randles diffusion resistance, ohms
   r_sd    = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
@@ -127,6 +129,7 @@ void Chemistry::assign_LIE()
   hys_cap = 3.6e5;  // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data
   low_voc = 9.;     // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
+  high_t  = 35.;    // BMS shuts off battery when t>high_t and soc<soc_min
   r_0     = 0.003;  // Randles R0, ohms   
   r_ct    = 0.0016; // Randles charge transfer resistance, ohms
   r_diff  = 0.0077; // Randles diffusion resistance, ohms
