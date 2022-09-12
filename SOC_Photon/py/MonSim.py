@@ -90,13 +90,16 @@ def save_clean_file_sim(sim_ver, csv_file, unit_key):
 
 
 def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
-              t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=0, Bmon=0):
+              t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=0, Bmon=0, use_Vb_raw=False):
     if sim_old and len(sim_old.time) < len(mon_old.time):
         t = sim_old.time
     else:
         t = mon_old.time
     reset_sel = mon_old.res
-    Vb = mon_old.Vb
+    if use_Vb_raw:
+        Vb = mon_old.Vb_h
+    else:
+        Vb = mon_old.Vb
     Ib_past = mon_old.Ib_past
     Tb = mon_old.Tb
     soc_init = mon_old.soc[0]
@@ -248,6 +251,7 @@ if __name__ == '__main__':
         scale_in = None
         Bsim = None
         Bmon = None
+        use_Vb_raw = None
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
@@ -264,8 +268,9 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/vHiFail20220910.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/pulse20220910.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
         # data_file_old_txt = '../dataReduction/tbFailMod20220910.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/tbFailHdwe20220910.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220907.txt'; unit_key = 'soc0_2022'
+        # data_file_old_txt = '../dataReduction/tbFailHdwe20220910.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/real world Xp20 20220910.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True
+
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"
@@ -323,7 +328,7 @@ if __name__ == '__main__':
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
                                               dv_hys=dv_hys, sres=1.0, t_Ib_fail=t_Ib_fail, use_ib_mon=use_ib_mon_in,
-                                              scale_in=scale_in)
+                                              scale_in=scale_in, use_Vb_raw=use_Vb_raw)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots

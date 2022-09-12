@@ -403,6 +403,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.legend(loc=1)
 
         plt.subplot(222)
+        plt.plot(mo.soc, mo.Vb_h, color='magenta', linestyle=':', label='Vb_hdwe')
         plt.plot(mo.soc, mo.Voc_stat, color='cyan', linestyle=':', label='Voc_stat')
         plt.plot(mo.soc, mo.voc_soc, color='blue', linestyle='-', label='voc_soc')
         plt.plot(mv.soc, mv.voc_soc, color='red', linestyle='--', label='voc_soc_ver')
@@ -410,9 +411,11 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(sv.soc, sv.voc_stat, color='orange', linestyle=':', label='voc_stat_s_ver')
         plt.plot(mo.soc, mo.Vsat, color='red', linestyle='-', label='vsat')
         plt.plot(mv.soc, mv.Vsat, color='black', linestyle='--', label='vsat_ver')
+        plt.plot(mv.soc, mv.voc_stat, color='orange', linestyle='--', label='voc_stat_ver')
         plt.legend(loc=1)
 
         plt.subplot(224)
+        plt.plot(mo.time, mo.Vb_h, color='magenta', linestyle=':', label='Vb_hdwe')
         plt.plot(mo.time, mo.Voc_stat, color='cyan', linestyle=':', label='Voc_stat')
         plt.plot(mo.time, mo.voc_soc, color='blue', linestyle='-', label='voc_soc')
         plt.plot(mv.time, mv.voc_soc, color='red', linestyle='--', label='voc_soc_ver')
@@ -420,6 +423,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(sv.time, sv.voc_stat, color='orange', linestyle=':', label='voc_stat_s_ver')
         plt.plot(mo.time, mo.Vsat, color='red', linestyle='-', label='vsat')
         plt.plot(mv.time, mv.Vsat, color='black', linestyle='--', label='vsat_ver')
+        plt.plot(mv.time, mv.voc_stat, color='orange', linestyle='--', label='voc_stat_ver')
         plt.legend(loc=1)
 
         fig_file_name = filename + '_' + str(n_fig) + ".png"
