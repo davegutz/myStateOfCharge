@@ -42,6 +42,7 @@ class Coulombs:
         self.temp_lim = 0.
         self.t_last = 0.
         self.sat = True
+        self.chm = 0
         from pyDAGx import myTables
         # Battleborn
         t_x_soc_min0 = [5.,   11.1,  20., 40.]
@@ -58,6 +59,7 @@ class Coulombs:
         self.coul_eff = coul_eff_
         self.tweak_test = tweak_test
         self.reset = False
+        self.lut_soc_min = self.lut_soc_min0
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -142,11 +144,11 @@ class Coulombs:
             coul_eff        Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
         """
         self.chm = chem
-        if self.chm==0:
+        if self.chm == 0:
             self.lut_soc_min = self.lut_soc_min0
-        elif self.chm==1:
+        elif self.chm == 1:
             self.lut_soc_min = self.lut_soc_min1
-        elif self.chm==2:
+        elif self.chm == 2:
             self.lut_soc_min = self.lut_soc_min2
         else:
             print("BatteryMonitor.calculate:  bad chem value=", chem)

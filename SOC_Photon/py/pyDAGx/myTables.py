@@ -17,6 +17,7 @@ __author__ = 'Dave Gutz <davegutz@alum.mit.edu>'
 __version__ = '$Revision: 1.1 $'
 __date__ = '$Date: 2022/01/25 09:42:00 $'
 
+
 def binsearch(x, v, n):
     # Initialize to high and low
     low = 0
@@ -45,7 +46,7 @@ class Error(Exception):
     pass
 
 
-class TableInterp1D():
+class TableInterp1D:
     # Gridded lookup table, natively clipped
     """// 1-D Interpolation Table Lookup
     /* Example usage:
@@ -68,7 +69,7 @@ class TableInterp1D():
         return float(r_val)
 
 
-class TableInterp2D():
+class TableInterp2D:
     # Gridded lookup table, natively clipped
     """// 2-D Interpolation Table Lookup
     /* Example usage:  see voc_T_ in ../Battery.cpp.
@@ -97,8 +98,8 @@ class TableInterp2D():
         high2, low2, dx2 = binsearch(y, self.y, self.m)
         temp1 = low2 * self.n + low1
         temp2 = high2 * self.n + low1
-        r0 = self.v[temp1] + dx1 * ( self.v[low2*self.n + high1] - self.v[temp1])
-        r1 = self.v[temp2] + dx1 * ( self.v[high2*self.n + high1] - self.v[temp2])
+        r0 = self.v[temp1] + dx1 * (self.v[low2*self.n + high1] - self.v[temp1])
+        r1 = self.v[temp2] + dx1 * (self.v[high2*self.n + high1] - self.v[temp2])
         return float(r0 + dx2 * (r1 - r0))
 
 
@@ -117,7 +118,7 @@ if __name__ == '__main__':
     t_voc_i = [9.0, 11.8, 12.45, 12.61, 12.8, 12.83, 12.9, 13.00, 13.07, 13.11, 13.23, 13.5,
                9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.4]
     t_voc_l = [[9.0, 11.8, 12.45, 12.61, 12.8, 12.83, 12.9, 13.00, 13.07, 13.11, 13.23, 13.5],
-             [9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.4]]
+               [9.86, 12.66, 13.31, 13.47, 13.66, 13.69, 13.76, 13.86, 13.93, 13.97, 14.05, 14.4]]
     x = np.array(t_x_soc)
     y = np.array(t_y_t)
     data_interp = t_voc_i

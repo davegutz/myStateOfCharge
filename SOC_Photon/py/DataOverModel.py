@@ -468,7 +468,7 @@ def write_clean_file(txt_file, type_, title_key, unit_key):
         csv_file = None
         print("I(write_clean_file): no data to write")
         if not unit_key_found:
-            print("E(write_clean_file):  unit_key not found in ", txt_file,".  Looking with ", unit_key)
+            print("E(write_clean_file):  unit_key not found in ", txt_file, ".  Looking with ", unit_key)
             exit(1)
     else:
         print("Wrote(write_clean_file):", csv_file, num_lines, "lines", num_skips, "skips", length, "fields")
@@ -822,13 +822,13 @@ if __name__ == '__main__':
         cols = ('unit', 'hm', 'cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'Vsat', 'dV_dyn',
                 'Voc_stat', 'Voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
-                                 encoding=None).view(np.recarray)
+                                    encoding=None).view(np.recarray)
         mon_old = SavedData(mon_old_raw, time_end)
         cols_sim = ('unit_m', 'c_time', 'chm_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s',
                     'ib_s', 'ib_in_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
         try:
             sim_old_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
-                                         dtype=None, encoding=None).view(np.recarray)
+                                        dtype=None, encoding=None).view(np.recarray)
             sim_old = SavedDataSim(mon_old.time_ref, sim_old_raw, time_end)
         except IOError:
             sim_old = None
@@ -854,7 +854,7 @@ if __name__ == '__main__':
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         n_fig, fig_files = overall_batt(mon_ver, sim_ver, randles_ver, filename, fig_files, plot_title=plot_title,
-                                    n_fig=n_fig, suffix='_ver')  # Could be confusing because sim over mon
+                                        n_fig=n_fig, suffix='_ver')  # Could be confusing because sim over mon
         n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig)
         # if platform != 'linux':

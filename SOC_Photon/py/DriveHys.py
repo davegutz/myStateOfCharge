@@ -196,7 +196,7 @@ if __name__ == '__main__':
         data_file_clean = '../dataReduction/real world Xp20 20220626_sim.txt'
         cols_sim = ('unit_m', 'c_time', 'Tb_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s', 'soc_s', 'reset_s')
         mon_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
-                                  encoding=None).view(np.recarray)
+                                encoding=None).view(np.recarray)
         t_v = mon_old.c_time - mon_old.c_time[0]
         vb_t = mon_old.vb_m   # not useful except to back out voc
         ib_t = mon_old.ib_s

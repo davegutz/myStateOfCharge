@@ -82,6 +82,7 @@ EKF_Q_SD_REV = EKF_Q_SD_NORM
 EKF_R_SD_REV = EKF_R_SD_NORM
 IMAX_NUM = 100000.
 
+
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
     # """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
@@ -112,10 +113,10 @@ class Battery(Coulombs):
         t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
         t_y_t0 = [5.,  11.1,  20.,   30.,   40.]
         t_voc0 = [4.00, 4.00, 4.00,  10.00, 11.80, 12.45, 12.55, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.75, 14.45,
-                 4.00, 4.00,  8.00,  11.70, 12.50, 12.60, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.76, 14.46,
-                 4.00, 9.00,  12.45, 12.65, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.80, 14.50,
-                 4.00, 4.00,  12.20, 12.80, 12.90, 13.00, 13.06, 13.10, 13.15, 13.18, 13.21, 13.22, 13.235,13.25, 13.26, 13.27, 13.72, 14.50,
-                 4.00, 4.00,  4.00,  4.00,  10.20, 11.70, 12.23, 12.70, 12.85, 13.05, 13.13, 13.17, 13.20, 13.23, 13.26, 13.27, 13.72, 14.50]
+                  4.00, 4.00,  8.00,  11.70, 12.50, 12.60, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.76, 14.46,
+                  4.00, 9.00,  12.45, 12.65, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.80, 14.50,
+                  4.00, 4.00,  12.20, 12.80, 12.90, 13.00, 13.06, 13.10, 13.15, 13.18, 13.21, 13.22, 13.235, 13.25, 13.26, 13.27, 13.72, 14.50,
+                  4.00, 4.00,  4.00,  4.00,  10.20, 11.70, 12.23, 12.70, 12.85, 13.05, 13.13, 13.17, 13.20, 13.23, 13.26, 13.27, 13.72, 14.50]
         x0 = np.array(t_x_soc0)
         y0 = np.array(t_y_t0)
         data_interp0 = np.array(t_voc0)
@@ -289,7 +290,7 @@ class BatteryMonitor(Battery, EKF1x1):
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., scaler_q=None,
-                 scaler_r=None, Bmon=0):
+                 scaler_r=None):
         q_cap_rated_scaled = q_cap_rated * scale
         Battery.__init__(self, bat_v_sat, q_cap_rated_scaled, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres)
@@ -363,11 +364,11 @@ class BatteryMonitor(Battery, EKF1x1):
 
     def calculate(self, chem, temp_c, vb, ib, dt, reset, q_capacity=None, dc_dc_on=None, rp=None, d_voc=None):  # BatteryMonitor
         self.chm = chem
-        if self.chm==0:
+        if self.chm == 0:
             self.lut_voc = self.lut_voc0
-        elif self.chm==1:
+        elif self.chm == 1:
             self.lut_voc = self.lut_voc1
-        elif self.chm==2:
+        elif self.chm == 2:
             self.lut_voc = self.lut_voc2
         else:
             print("BatteryMonitor.calculate:  bad chem value=", chem)
@@ -594,7 +595,7 @@ class BatterySim(Battery):
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., Bsim=0):
+                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1.):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres)
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
@@ -650,11 +651,11 @@ class BatterySim(Battery):
 
     def calculate(self, chem, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None, sat_init=None):  # BatterySim
         self.chm = chem
-        if self.chm==0:
+        if self.chm == 0:
             self.lut_voc = self.lut_voc0
-        elif self.chm==1:
+        elif self.chm == 1:
             self.lut_voc = self.lut_voc1
-        elif self.chm==2:
+        elif self.chm == 2:
             self.lut_voc = self.lut_voc2
         else:
             print("BatterySim.calculate:  bad chem value=", chem)
@@ -757,11 +758,11 @@ class BatterySim(Battery):
             soc     State of charge, fraction (0-1.5)
         """
         self.chm = chem
-        if self.chm==0:
+        if self.chm == 0:
             self.lut_soc_min = self.lut_soc_min0
-        elif self.chm==1:
+        elif self.chm == 1:
             self.lut_soc_min = self.lut_soc_min1
-        elif self.chm==2:
+        elif self.chm == 2:
             self.lut_soc_min = self.lut_soc_min2
         else:
             print("BatteryMonitor.calculate:  bad chem value=", chem)

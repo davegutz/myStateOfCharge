@@ -350,7 +350,7 @@ class LookupTable:
         for axis in self.axes:
             adjacent_axis_values = zip(axis[:-1], axis[1:])
             delta_signs = [cmp(x, x_next)
-                            for x, x_next in adjacent_axis_values]
+                           for x, x_next in adjacent_axis_values]
             # todo: Generate error messages? Perhaps to supplied file object.
             if 0 in delta_signs:
                 valid = False
@@ -455,12 +455,9 @@ class LookupTable:
 
         # Linearly interpolate x on the line from (x1, y1) to (x2, y2).
         # interp(x, (x1, y1), (x2, y2))
-        import numpy as np
         if self.clip_x:
             x = min(max(x, x1), x2)
-        # slope = (y2 - y1) / (x2 - x1)
-        # val = slope * (x - x1) + y1
-        val = ( y2*(x-x1) + y1*(x2-x) ) / (x2 - x1)
+        val = (y2*(x-x1) + y1*(x2-x)) / (x2 - x1)
 
         return val
 
@@ -493,6 +490,7 @@ def nestedSequenceSize(nested_sequence):
     else:
         return first_sub_sequence_size + level_len,
 
+
 def crosscheck3d():
     """This is just here for testing/debug purposes."""
     t_dv = [-0.9, -0.7,     -0.5,   -0.3,   0.0,    0.3,    0.5,    0.7,    0.9]
@@ -510,6 +508,7 @@ def crosscheck3d():
     res = lut.lookup(x=-.902, y=0.0957)
     ev = 1e-6
     print("ev=", ev, "got", res)
+
 
 def crosscheck2d():
     """This is just here for testing/debug purposes.

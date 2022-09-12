@@ -43,6 +43,7 @@ __date__ = '$Date: 2010/12/17 13:15:02 $'
 
 from pyDAGx.lookup_table import LookupTable
 
+
 def crosscheck3d():
     """This is just here for testing/debug purposes."""
     t_dv = [-0.9, -0.7,     -0.5,   -0.3,   0.0,    0.3,    0.5,    0.7,    0.9]
@@ -65,5 +66,4 @@ def main():
 
 
 if __name__ == '__main__':
-    import sys
     main()

@@ -126,7 +126,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
     s_q = Scale(1., 3., 0.000005, 0.00005)
     s_r = Scale(1., 3., 0.001, 1.)   # t_Ib_fail = 1000 o
     sim = BatterySim(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
-                       dv_hys=dv_hys, sres=sres, Bsim=Bsim)
+                     dv_hys=dv_hys, sres=sres, Bsim=Bsim)
     mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
                          temp_c=temp_c, scale=scale, hys_scale=hys_scale_monitor, tweak_test=tweak_test, dv_hys=dv_hys, sres=sres,
                          scaler_q=s_q, scaler_r=s_r, Bmon=Bmon)
@@ -249,9 +249,9 @@ if __name__ == '__main__':
         init_time_in = None
         use_ib_mon_in = False
         scale_in = None
-        Bsim = None
-        Bmon = None
-        use_Vb_raw = None
+        use_Vb_raw = False
+        unit_key = None
+        data_file_old_txt = None
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
@@ -270,7 +270,6 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/tbFailMod20220910.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tbFailHdwe20220910.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/real world Xp20 20220910.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True
-        data_file_old_txt = '../dataReduction/e_wrap_init20220912.txt'; unit_key = 'pro_2022'
 
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
@@ -283,7 +282,7 @@ if __name__ == '__main__':
         cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'ioc', 'voc_soc', 'Vsat', 'dV_dyn', 'Voc_stat',
                 'Voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
-                                 encoding=None).view(np.recarray)
+                                    encoding=None).view(np.recarray)
 
         # Load sel (old)
         sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
@@ -299,7 +298,7 @@ if __name__ == '__main__':
         sel_old_raw = None
         if sel_file_clean:
             sel_old_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,
-                                    encoding=None).view(np.recarray)
+                                        encoding=None).view(np.recarray)
         mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, time_end=time_end)
 
         # Load _m v24 portion of real-time run (old)
@@ -309,7 +308,7 @@ if __name__ == '__main__':
                     'ib_in_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
         if data_file_sim_clean:
             sim_old_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
-                                         dtype=float, encoding=None).view(np.recarray)
+                                        dtype=float, encoding=None).view(np.recarray)
             sim_old = SavedDataSim(time_ref=mon_old.time_ref, data=sim_old_raw, time_end=time_end)
         else:
             sim_old = None
@@ -328,8 +327,9 @@ if __name__ == '__main__':
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
-                                              dv_hys=dv_hys, sres=1.0, t_Ib_fail=t_Ib_fail, use_ib_mon=use_ib_mon_in,
-                                              scale_in=scale_in, use_Vb_raw=use_Vb_raw)
+                                                             dv_hys=dv_hys, sres=1.0, t_Ib_fail=t_Ib_fail,
+                                                             use_ib_mon=use_ib_mon_in, scale_in=scale_in,
+                                                             use_Vb_raw=use_Vb_raw)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots
@@ -338,8 +338,8 @@ if __name__ == '__main__':
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        n_fig, fig_files = overall_batt(mon_ver, sim_ver, randles_ver, filename, fig_files, plot_title=plot_title, n_fig=n_fig,
-                                    suffix='_ver')  # sim over mon
+        n_fig, fig_files = overall_batt(mon_ver, sim_ver, randles_ver, filename, fig_files, plot_title=plot_title,
+                                        n_fig=n_fig, suffix='_ver')  # sim over mon
         n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig)  # mon over data
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
