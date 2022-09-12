@@ -177,8 +177,14 @@ void Fault::cc_diff(Sensors *Sen, BatteryMonitor *Mon)
 {
   cc_diff_ = Mon->soc_ekf() - Mon->soc(); // These are filtered in their construction (EKF is a dynamic filter and 
                                           // Coulomb counter is wrapa big integrator)
-  if ( Mon->soc()<=WRAP_LO_SOC_OFF ) cc_diff_empty_sclr_ = CC_DIFF_LO_SOC_SCLR;
-  else ewsat_sclr_ = 1.;
+  if ( Mon->soc() <= max(Mon->soc_min()+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS) )
+  {
+    cc_diff_empty_sclr_ = CC_DIFF_LO_SOC_SCLR;
+  }
+  else
+  {
+    ewsat_sclr_ = 1.;
+  }
 
   cc_diff_thr_ = CC_DIFF_SOC_DIS_THRESH*cc_diff_sclr_;
   failAssign( abs(cc_diff_)>=cc_diff_thr_ , CC_DIFF_FA );
@@ -190,8 +196,14 @@ void Fault::ib_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   boolean reset_loc = reset || reset_all_faults_;
 
   // Difference error, filter, check, persist
-  if ( rp.mod_ib() ) ib_diff_ = (Sen->Ib_amp_model - Sen->Ib_noa_model) / Mon->nP();
-  else ib_diff_ = (Sen->Ib_amp_hdwe - Sen->Ib_noa_hdwe) / Mon->nP();
+  if ( rp.mod_ib() )
+  {
+    ib_diff_ = (Sen->Ib_amp_model - Sen->Ib_noa_model) / Mon->nP();
+  }
+  else
+  {
+    ib_diff_ = (Sen->Ib_amp_hdwe - Sen->Ib_noa_hdwe) / Mon->nP();
+  }
   ib_diff_f_ = IbErrFilt->calculate(ib_diff_, reset_loc, min(Sen->T, MAX_ERR_T));
   ib_diff_thr_ = IBATT_DISAGREE_THRESH*ib_diff_sclr_;
   faultAssign( ib_diff_f_>=ib_diff_thr_, IB_DIFF_HI_FLT );
@@ -226,10 +238,22 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   boolean reset_loc = reset | reset_all_faults_;
   e_wrap_ = Mon->voc_soc() - Mon->voc();
-  if ( Mon->soc()>=WRAP_HI_SOC_OFF ) ewsat_sclr_ = WRAP_HI_SOC_SCLR;
-  else if ( Mon->soc()<=WRAP_LO_SOC_OFF ) ewsat_sclr_ = WRAP_LO_SOC_SCLR;
-  else if ( Mon->voc_soc()>(Mon->vsat()-WRAP_HI_SAT_MARG) ) ewsat_sclr_ = WRAP_HI_SAT_SCLR;
-  else ewsat_sclr_ = 1.;
+  if ( Mon->soc()>=WRAP_SOC_HI_OFF )
+  {
+    ewsat_sclr_ = WRAP_SOC_HI_SCLR;
+  }
+  else if ( Mon->soc() <= max(Mon->soc_min()+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS)  )
+  {
+    ewsat_sclr_ = WRAP_SOC_LO_SCLR;
+  }
+  else if ( Mon->voc_soc()>(Mon->vsat()-WRAP_HI_SAT_MARG) )
+  {
+    ewsat_sclr_ = WRAP_HI_SAT_SCLR;
+  }
+  else
+  {
+    ewsat_sclr_ = 1.;
+  }
   e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
   // sat logic screens out voc jumps when ib>0 when saturated
   // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor

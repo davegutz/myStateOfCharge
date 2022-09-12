@@ -99,7 +99,7 @@ struct CommandPars
   void pretty_print(void)
   {
     Serial.printf("command parameters(cp):\n");
-    Serial.printf(" enable_wifi=%d;\n", this->enable_wifi);
+    Serial.printf(" enable_wifi=%d;*w\n", this->enable_wifi);
     Serial.printf(" model_cutback=%d;\n", this->model_cutback);
     Serial.printf(" model_saturated=%d;\n", this->model_saturated);
     Serial.printf(" soft_reset=%d;\n", this->soft_reset);
@@ -107,7 +107,7 @@ struct CommandPars
     Serial.printf(" ib_tot_bias_amp=%7.3f;\n", this->ib_tot_bias_amp);
     Serial.printf(" ib_tot_bias_noa=%7.3f;\n", this->ib_tot_bias_noa);
     Serial.printf(" dc_dc_on=%d;\n", this->dc_dc_on);
-    Serial.printf(" blynking=%d;\n", this->blynking);
+    Serial.printf(" blynking=%d;*z\n", this->blynking);
     Serial.printf(" publishS=%d;\n", this->publishS);
     Serial.printf(" tb_bias_mode=%7.3f;\n", this->tb_bias_model);
   }

@@ -72,10 +72,10 @@ const float T_VOC_BB[M_T_BB*N_S_BB] = // r(soc, dv) table
           4.00, 4.00,   4.00,  9.50,  12.00, 12.50, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11,  13.17, 13.20, 13.23, 13.60, 14.46,
           4.00, 4.00,   10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14,  13.21, 13.25, 13.27, 13.72, 14.50,
           4.00, 4.00,   12.20, 12.80, 12.90, 13.00, 13.06, 13.10, 13.15, 13.18, 13.21, 13.22, 13.235, 13.25, 13.26, 13.27, 13.72, 14.50,
-          4.00, 6.00,   12.27, 12.85, 12.95, 13.05, 13.11, 13.15, 13.20, 13.23, 13.26, 13.27, 13.285, 13.29, 13.30, 13.32, 13.72, 14.50};
+          4.00, 4.00,   4.00,  4.00,  10.20, 11.70, 12.23, 12.70, 12.85, 13.05, 13.13, 13.17, 13.20,  13.23, 13.26, 13.27, 13.72, 14.50};
 const uint8_t N_N_BB = 5;   // Number of temperature breakpoints for x_soc_min table
 const float X_SOC_MIN_BB[N_N_BB] =  { 5.,   11.1,  20.,  30.,  40.};  // Temperature breakpoints for soc_min table
-const float T_SOC_MIN_BB[N_N_BB] =  { 0.10, 0.07,  0.05, 0.00, -0.05}; // soc_min(t)
+const float T_SOC_MIN_BB[N_N_BB] =  { 0.10, 0.07,  0.05, 0.00, 0.20}; // soc_min(t).  At 40C BMS shuts off at 12V
 // Hysteresis
 const uint8_t M_H_BB  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
 const uint8_t N_H_BB  = 9;          // Number of dv breakpoints in r(dv) table t_r

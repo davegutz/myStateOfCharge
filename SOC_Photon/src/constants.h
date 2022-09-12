@@ -132,11 +132,12 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define TB_STALE_SET    3600.           // Tb read from one-wire stale persistence for failure, s (3600, 1 hr)
 #define TB_STALE_RESET  0.              // Tb read from one-wire stale persistence for reset, s (0)
 #define NOMINAL_TB      15.             // Middle of the road Tb for decent reversionary operation, deg C (15.)
-#define WRAP_HI_SOC_OFF 0.97            // Disable e_wrap_hi when saturated
-#define WRAP_HI_SOC_SCLR 1000.          // Huge to disable e_wrap
-#define WRAP_LO_SOC_OFF     0.35        // Disable e_wrap_lo when near empty
-#define WRAP_LO_SOC_SCLR    4.          // Large to disable e_wrap
 #define IMAX_NUM        100000.         // Simulation limit to prevent NaN, A (1e5)
+#define WRAP_SOC_HI_OFF     0.97        // Disable e_wrap_hi when saturated
+#define WRAP_SOC_HI_SCLR    1000.       // Huge to disable e_wrap
+#define WRAP_SOC_LO_OFF_ABS 0.35        // Disable e_wrap when near empty (soc lo any Tb)
+#define WRAP_SOC_LO_OFF_REL 0.2         // Disable e_wrap when near empty (soc lo for high Tb where soc_min=.2, voltage cutback)
+#define WRAP_SOC_LO_SCLR    4.          // Large to disable e_wrap
 
 // Conversion gains
 const float SHUNT_NOA_GAIN = SHUNT_GAIN * CURR_SCALE_NOA;
