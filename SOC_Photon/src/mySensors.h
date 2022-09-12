@@ -35,11 +35,11 @@
 #include "mySync.h"
 
 // Temp sensor
-#include <hardware/OneWire.h>
-#include <hardware/DS18.h>
+#include "hardware/OneWire.h"
+#include "hardware/DS18.h"
 
 // AD
-#include <Adafruit/Adafruit_ADS1X15.h>
+#include "Adafruit/Adafruit_ADS1X15.h"
 
 extern RetainedPars rp; // Various parameters to be static at system level
 extern PublishPars pp;  // For publishing

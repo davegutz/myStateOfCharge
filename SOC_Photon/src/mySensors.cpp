@@ -270,95 +270,84 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
 {
   Serial.printf("Fault:\n");
-  Serial.printf(" cc_diff =%7.3f; thr=%7.3f Fc^\n", cc_diff_, cc_diff_thr_);
-  Serial.printf(" ib_diff =%7.3f; thr=%7.3f Fd^\n", ib_diff_, ib_diff_thr_);
-  Serial.printf(" e_wrap  =%7.3f; thr=%7.3f Fo^; %7.3f Fi^\n", e_wrap_filt_, ewlo_thr_, ewhi_thr_);
-  Serial.printf(" ib_quiet=%7.3f; thr=%7.3f Fq v\n", ib_quiet_, ib_quiet_thr_);
-  Serial.printf(" voc_soc=%7.3f;\n", Mon->voc_soc());
-  Serial.printf(" soc=%7.3f;\n", Mon->soc());
-  Serial.printf(" voc=%7.3f;\n", Mon->voc());
-  Serial.printf(" dis_ib_fa=%d;\n", disab_ib_fa_);
-  Serial.printf(" dis_tb_fa=%d;\n", disab_tb_fa_);
-  Serial.printf(" dis_vb_fa=%d;\n", disab_vb_fa_);
-  Serial.printf(" imh=%7.3f;\n", Sen->Ib_amp_hdwe);
-  Serial.printf(" inh=%7.3f;\n", Sen->Ib_noa_hdwe);
-  Serial.printf(" imm=%7.3f;\n", Sen->Ib_amp_model);
-  Serial.printf(" inm=%7.3f;\n", Sen->Ib_noa_model);
-  Serial.printf(" ibd_f=%7.3f;\n", ib_diff_f_);
-  Serial.printf(" mod_tb=%d, mod_vb=%d, mod_ib=%d\n", rp.mod_tb(), rp.mod_vb(), rp.mod_ib());
-  Serial.printf(" tb_s_st=%d, vb_s_st=%d, ib_s_st=%d\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_);
-  Serial.printf(" nbar=%d;\n", Sen->ShuntNoAmp->bare());
-  Serial.printf(" mbar=%d;\n", Sen->ShuntAmp->bare());
-  Serial.printf(" ib_dsc_ft=%d;'Fq v'\n", ib_dscn_flt());
-  Serial.printf(" ibd_lo_ft=%d;'Fd ^, *SA/*SB'\n", ib_diff_lo_flt());
-  Serial.printf(" ibd_hi_ft=%d;'Fd ^, *SA/*SB'\n", ib_diff_hi_flt());
-  Serial.printf(" red_loss=%d;\n", red_loss());
-  Serial.printf(" wl_ft=%d;    'Fo ^'\n", wrap_lo_flt());
-  Serial.printf(" wh_ft=%d;    'Fi ^'\n    4\n", wrap_hi_flt());
-  Serial.printf(" ibn_ft=%d;   'Fi 1'\n", ib_noa_flt());
-  Serial.printf(" ibm_ft=%d;   'Fi 1'\n", ib_amp_flt());
-  Serial.printf(" vb_ft=%d;    'Fv 1'\n", vb_flt());
-  Serial.printf(" tb_ft=%d;    'Ft 1'\n  ", tb_flt());
+  Serial.printf(" cc_diff  %7.3f  thr=%7.3f Fc^\n", cc_diff_, cc_diff_thr_);
+  Serial.printf(" ib_diff  %7.3f  thr=%7.3f Fd^\n", ib_diff_f_, ib_diff_thr_);
+  Serial.printf(" e_wrap   %7.3f  thr=%7.3f Fo^%7.3f Fi^\n", e_wrap_filt_, ewlo_thr_, ewhi_thr_);
+  Serial.printf(" ib_quiet %7.3f  thr=%7.3f Fq v\n\n", ib_quiet_, ib_quiet_thr_);
+
+  Serial.printf(" soc  %7.3f  voc %7.3f  voc_soc %7.3f\n", Mon->soc(), Mon->voc(), Mon->voc_soc());
+  Serial.printf(" dis_tb_fa %d  dis_vb_fa %d  dis_ib_fa %d\n", disab_tb_fa_, disab_vb_fa_, disab_ib_fa_);
+  Serial.printf(" bms_off   %d\n\n", Mon->bms_off());
+
+  Serial.printf(" Tbh=%7.3f  Tbm=%7.3f\n", Sen->Tb_hdwe, Sen->Tb_model);
+  Serial.printf(" Vbh %7.3f  Vbm %7.3f\n", Sen->Vb_hdwe, Sen->Vb_model);
+  Serial.printf(" imh %7.3f  imm %7.3f\n", Sen->Ib_amp_hdwe, Sen->Ib_amp_model);
+  Serial.printf(" inh %7.3f  inm %7.3f\n\n", Sen->Ib_noa_hdwe, Sen->Ib_noa_model);
+
+  Serial.printf(" mod_tb  %d  mod_vb  %d  mod_ib  %d\n", rp.mod_tb(), rp.mod_vb(), rp.mod_ib());
+  Serial.printf(" tb_s_st %d  vb_s_st %d  ib_s_st %d\n\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_);
+
+  Serial.printf(" bare n  %d  x \n", Sen->ShuntNoAmp->bare());
+  Serial.printf(" bare m  %d  x \n", Sen->ShuntAmp->bare());
+  Serial.printf(" ib_dsc  %d  %d 'Fq v'\n", ib_dscn_flt(), ib_dscn_fa());
+  Serial.printf(" ibd_lo  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_lo_flt(), ib_diff_lo_fa());
+  Serial.printf(" ibd_hi  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_hi_flt(), ib_diff_hi_fa());
+  Serial.printf(" loss wv %d  %d   'Fd, Fi/Fo ^'\n",  red_loss(), wrap_vb_fa());
+  Serial.printf(" wl      %d  %d 'Fo ^'\n", wrap_lo_flt(), wrap_lo_fa());
+  Serial.printf(" wh      %d  %d 'Fi ^'\n", wrap_hi_flt(), wrap_hi_fa());
+  Serial.printf(" cc_dif  x  %d 'Fc ^'\n", cc_diff_fa());
+  Serial.printf(" ib n    %d  %d 'Fi 1'\n", ib_noa_flt(), ib_noa_fa());
+  Serial.printf(" ib m    %d  %d 'Fi 1'\n", ib_amp_flt(), ib_amp_fa());
+  Serial.printf(" vb      %d  %d 'Fv 1  *Dc/*Dv'\n", vb_flt(), vb_fa());
+  Serial.printf(" tb      %d  %d 'Ft 1'\n  ", tb_flt(), tb_fa());
   bitMapPrint(cp.buffer, fltw_, NUM_FLT);
   Serial.print(cp.buffer);
-  Serial.printf(";\n");
-  Serial.printf("  CBA98765x3210\n");
-  Serial.printf(" fltw=%d;\n", fltw_);
-  Serial.printf(" ib_dsc_fa=%d;'Fq v'\n", ib_dscn_fa());
-  Serial.printf(" ibd_lo_fa=%d;'Fd ^, *SA/*SB'\n", ib_diff_lo_fa());
-  Serial.printf(" ibd_hi_fa=%d;'Fd ^, *SA/*SB'\n", ib_diff_hi_fa());
-  Serial.printf(" wv_fa=%d;    'Fd, Fi/Fo ^'\n", wrap_vb_fa());
-  Serial.printf(" wl_fa=%d;    'Fo ^'\n", wrap_lo_fa());
-  Serial.printf(" wh_fa=%d;    'Fi ^'\n", wrap_hi_fa());
-  Serial.printf(" cc_dif_fa=%d;'Fc ^'\n", cc_diff_fa());
-  Serial.printf(" ibn_fa=%d;   'Fi 1'\n", ib_noa_fa());
-  Serial.printf(" ibm_fa=%d;   'Fi 1'\n", ib_amp_fa());
-  Serial.printf(" vb_fa=%d;    'Fv 1'\n", vb_fa());
-  Serial.printf(" tb_fa=%d;    'Ft 1'\n  ", tb_fa());
+  Serial.printf("   ");
   bitMapPrint(cp.buffer, falw_, NUM_FA);
-  Serial.print(cp.buffer);
-  Serial.printf(";\n");
-  Serial.printf("  A9876543210\n");
-  Serial.printf(" falw=%d;\n", falw_);
+  Serial.println(cp.buffer);
+  Serial.printf("  CBA98765x3210 xxA9876543210\n");
+  Serial.printf("  fltw=%d     falw=%d\n", fltw_, falw_);
 }
 void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 {
   Serial1.printf("Fault:\n");
-  Serial1.printf(" mbar=%d;\n", Sen->ShuntAmp->bare());
-  Serial1.printf(" nbar=%d;\n", Sen->ShuntNoAmp->bare());
-  Serial1.printf(" cc_diff =%7.3f; thr=%7.3f Fc^\n", cc_diff_, cc_diff_thr_);
-  Serial1.printf(" ib_diff =%7.3f; thr=%7.3f Fd^, *SA/*SB\n", ib_diff_, ib_diff_thr_);
-  Serial1.printf(" e_wrap  =%7.3f; thr=%7.3f Fo^; %7.3f Fi^\n", e_wrap_filt_, ewlo_thr_, ewhi_thr_);
-  Serial1.printf(" ib_quiet=%7.3f; thr=%7.3f Fq v\n", ib_quiet_, ib_quiet_thr_);
-  Serial1.printf(" voc_soc=%7.3f;\n", Mon->voc_soc());
-  Serial1.printf(" soc=%7.3f;\n", Mon->soc());
-  Serial1.printf(" voc=%7.3f;\n", Mon->voc());
-  Serial1.printf(" red_loss=%d;\n", red_loss());
-  Serial1.printf(" imh=%7.3f;\n", Sen->Ib_amp_hdwe);
-  Serial1.printf(" inh=%7.3f;\n", Sen->Ib_noa_hdwe);
-  Serial1.printf(" ibd_f=%7.3f;\n", ib_diff_f_);
-  Serial1.printf(" mod_tb=%d,  mod_vb=%d,  mod_ib=%d\n", rp.mod_tb(), rp.mod_vb(), rp.mod_ib());
-  Serial1.printf(" tb_s_st=%d, vb_s_st=%d, ib_s_st=%d\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_);
-  Serial1.printf(" nbar=%d;\n", Sen->ShuntNoAmp->bare());
-  Serial1.printf(" mbar=%d;\n", Sen->ShuntAmp->bare());
-  Serial1.printf(" fltw=%d;  ", fltw_);
-  Serial1.printf(";\n");
-  Serial1.printf(" ib_dsc_fa=%d;'Fq v'\n", ib_dscn_fa());
-  Serial1.printf(" ibd_lo_fa=%d;'Fd, *SA/*SB ^'\n", ib_diff_lo_fa());
-  Serial1.printf(" ibd_hi_fa=%d;'Fd, *SA/*SB ^'\n", ib_diff_hi_fa());
-  Serial1.printf(" wv_fa=%d;    'Fd', Fi/Fo ^'\\n", wrap_vb_fa());
-  Serial1.printf(" wl_fa=%d;    'Fo ^'\n", wrap_lo_fa());
-  Serial1.printf(" wh_fa=%d;    'Fi ^'\n", wrap_hi_fa());
-  Serial1.printf(" cc_dif_fa=%d;'Fc ^'\n", cc_diff_fa());
-  Serial1.printf(" ibn_fa=%d;   'Fi 1'\n", ib_noa_fa());
-  Serial1.printf(" ibm_fa=%d;   'Fi 1'\n", ib_amp_fa());
-  Serial1.printf(" vb_fa=%d;    'Fv 1'\n", vb_fa());
-  Serial1.printf(" tb_fa=%d;    'Fv 1'\n  ", tb_fa());
-  bitMapPrint(cp.buffer, falw_, NUM_FA);
+  Serial1.printf(" cc_diff  %7.3f  thr=%7.3f Fc^\n", cc_diff_, cc_diff_thr_);
+  Serial1.printf(" ib_diff  %7.3f  thr=%7.3f Fd^\n", ib_diff_f_, ib_diff_thr_);
+  Serial1.printf(" e_wrap   %7.3f  thr=%7.3f Fo^%7.3f Fi^\n", e_wrap_filt_, ewlo_thr_, ewhi_thr_);
+  Serial1.printf(" ib_quiet %7.3f  thr=%7.3f Fq v\n\n", ib_quiet_, ib_quiet_thr_);
+
+  Serial1.printf(" soc  %7.3f  voc %7.3f  voc_soc %7.3f\n", Mon->soc(), Mon->voc(), Mon->voc_soc());
+  Serial1.printf(" dis_tb_fa %d  dis_vb_fa %d  dis_ib_fa %d\n", disab_tb_fa_, disab_vb_fa_, disab_ib_fa_);
+  Serial1.printf(" bms_off   %d\n\n", Mon->bms_off());
+
+  Serial1.printf(" Tbh=%7.3f  Tbm=%7.3f\n", Sen->Tb_hdwe, Sen->Tb_model);
+  Serial1.printf(" Vbh %7.3f  Vbm %7.3f\n", Sen->Vb_hdwe, Sen->Vb_model);
+  Serial1.printf(" imh %7.3f  imm %7.3f\n", Sen->Ib_amp_hdwe, Sen->Ib_amp_model);
+  Serial1.printf(" inh %7.3f  inm %7.3f\n\n", Sen->Ib_noa_hdwe, Sen->Ib_noa_model);
+
+  Serial1.printf(" mod_tb  %d  mod_vb  %d  mod_ib  %d\n", rp.mod_tb(), rp.mod_vb(), rp.mod_ib());
+  Serial1.printf(" tb_s_st %d  vb_s_st %d  ib_s_st %d\n\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_);
+
+  Serial1.printf(" bare n  %d  x \n", Sen->ShuntNoAmp->bare());
+  Serial1.printf(" bare m  %d  x \n", Sen->ShuntAmp->bare());
+  Serial1.printf(" ib_dsc  %d  %d 'Fq v'\n", ib_dscn_flt(), ib_dscn_fa());
+  Serial1.printf(" ibd_lo  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_lo_flt(), ib_diff_lo_fa());
+  Serial1.printf(" ibd_hi  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_hi_flt(), ib_diff_hi_fa());
+  Serial1.printf(" loss wv %d  %d   'Fd  Fi/Fo ^'\n",  red_loss(), wrap_vb_fa());
+  Serial1.printf(" wl      %d  %d 'Fo ^'\n", wrap_lo_flt(), wrap_lo_fa());
+  Serial1.printf(" wh      %d  %d 'Fi ^'\n", wrap_hi_flt(), wrap_hi_fa());
+  Serial1.printf(" cc_dif  x  %d 'Fc ^'\n", cc_diff_fa());
+  Serial1.printf(" ib n    %d  %d 'Fi 1'\n", ib_noa_flt(), ib_noa_fa());
+  Serial1.printf(" ib m    %d  %d 'Fi 1'\n", ib_amp_flt(), ib_amp_fa());
+  Serial1.printf(" vb      %d  %d 'Fv 1, *Dc/*Dv'\n", vb_flt(), vb_fa());
+  Serial1.printf(" tb      %d  %d 'Ft 1'\n  ", tb_flt(), tb_fa());
+  bitMapPrint(cp.buffer, fltw_, NUM_FLT);
   Serial1.print(cp.buffer);
-  Serial1.printf(";\n");
-  Serial1.printf("  A9876543210\n");
-  Serial1.printf(" falw=%d;\n", falw_);
+  Serial1.printf("   ");
+  bitMapPrint(cp.buffer, falw_, NUM_FA);
+  Serial1.println(cp.buffer);
+  Serial1.printf("  CBA98765x3210 xxA9876543210\n");
+  Serial1.printf("  fltw=%d     falw=%d\n", fltw_, falw_);
   Serial1.printf("v0; to return\n");
 }
 
@@ -436,7 +425,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   {
     vb_sel_stat_ = 0;   // Latch
   }
-  if (  wrap_vb_fa() )
+  if (  wrap_vb_fa() || vb_fa() )
   {
     vb_sel_stat_ = 0;
   }
@@ -546,7 +535,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vb_min, con
   }
   else
   {
-    faultAssign( (Sen->Vb_hdwe<=_Vb_min*Mon->nS()) || (Sen->Vb_hdwe>=_Vb_max*Mon->nS()), VB_FLT);
+    faultAssign( (Sen->Vb_hdwe<=_Vb_min*Mon->nS() && Sen->Ib_hdwe>IB_MIN_UP) || (Sen->Vb_hdwe>=_Vb_max*Mon->nS()), VB_FLT);
     failAssign( vb_fa() || VbHardFail->calculate(vb_flt(), VBATT_HARD_SET, VBATT_HARD_RESET, Sen->T, reset_loc), VB_FA);
   }
 }

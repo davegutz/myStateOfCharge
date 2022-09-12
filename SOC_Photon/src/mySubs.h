@@ -38,8 +38,8 @@
 #include "mySensors.h"
 
 // Display
-#include <Adafruit/Adafruit_GFX.h>
-#include <Adafruit/Adafruit_SSD1306.h>
+#include "Adafruit/Adafruit_GFX.h"
+#include "Adafruit/Adafruit_SSD1306.h"
 
 extern RetainedPars rp; // Various parameters to be static at system level
 extern PublishPars pp;  // For publishing

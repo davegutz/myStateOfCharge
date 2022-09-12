@@ -309,7 +309,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   // Hrs EHK
   sprintf(cp.buffer, "%3.0f", pp.pubList.Amp_hrs_remaining_ekf);
   disp_0 = cp.buffer;
-  if ( frame==0 )
+  if ( frame==0 || frame==1 || frame==2 )
   {
     if ( Sen->Flt->cc_diff_fa() )
       disp_0 = "---";

@@ -176,6 +176,7 @@ public:
   // operators
   // functions
   virtual void assign_randles(void) { Serial.printf("ERROR:  Battery::assign_randles called\n"); };
+  boolean bms_off() { return bms_off_; };
   double calc_soc_voc(const double soc, const float temp_c, double *dv_dsoc);
   double calc_soc_voc_slope(double soc, float temp_c);
   double calc_vsat(void);

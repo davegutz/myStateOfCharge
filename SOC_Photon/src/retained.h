@@ -147,7 +147,7 @@ struct RetainedPars
     Serial.printf("  ib_bias_noa=%7.3f;*DB<> A\n", this->ib_bias_noa);
     Serial.printf("  ib_bias_all=%7.3f;*Di<> A \n", this->ib_bias_all);
     Serial.printf("  ib_select=%d;*s<> -1=noa, 0=auto, 1=amp\n", this->ib_select);
-    Serial.printf("  vb_bias=%7.3f;*Dv<> V\n", this->vb_bias);
+    Serial.printf("  vb_bias=%7.3f;*Dv,*Dc<> V\n", this->vb_bias);
     Serial.printf("  modeling=%d;*Xm<>\n", this->modeling);
     Serial.printf("  amp=%7.3f;*Xa<> A pk\n", this->amp);
     Serial.printf("  freq=%7.3f;*Xf<> r/s\n", this->freq);
