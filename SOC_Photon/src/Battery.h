@@ -58,6 +58,7 @@ const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1,
 #define RANDLES_T_MAX   0.31      // Maximum update time of Randles state space model to avoid aliasing and instability (0.31 allows DP3)
 const double MXEPS = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness) (1-1e-6)
 #define TWEAK_SOC_CHANGE 0.2      // Minimum charge change to tweak sensor
+#define S_HYS           0.3       // Scalar on hysteresis.   Best I know is what observed Tb=40C (0.3)
 // BattleBorn 100 Ah, 12v LiFePO4
 // See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
 // >13.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
@@ -138,11 +139,11 @@ class Hysteresis
 {
 public:
   Hysteresis();
-  Hysteresis(const double cap, Chemistry chem);
+  Hysteresis(const double cap, Chemistry chem, float *rp_hys_scale);
   ~Hysteresis();
   // operators
   // functions
-  void apply_scale(const double scale);
+  void apply_scale(const float sclr) { *rp_hys_scale_ = max(sclr, 0.); };
   double calculate(const double ib, const double soc);
   void init(const double dv_init);
   double look_hys(const double dv, const double soc);
@@ -150,7 +151,7 @@ public:
   double update(const double dt);
   double ioc() { return (ioc_); };
   double dv_hys() { return (dv_hys_); };
-  double scale();
+  float scale() { return *rp_hys_scale_; };
 protected:
   boolean disabled_;    // Hysteresis disabled by low scale input < 1e-5, T=disabled
   double cap_;          // Capacitance, Farads
@@ -161,8 +162,8 @@ protected:
   double dv_hys_;       // State, voc_-voc_stat_, V
   double dv_dot_;       // Calculated voltage rate, V/s
   double tau_;          // Null time constant, sec
-  TableInterp2D *hys_T_;   // dv-soc 2-D table, V
-  double cap_init_;     // Initial capacitance specification, Farads
+  TableInterp2D *hys_T_;// dv-soc 2-D table, V
+  float *rp_hys_scale_; // Scalar on output of update
 };
 
 
@@ -171,7 +172,7 @@ class Battery : public Coulombs
 {
 public:
   Battery();
-  Battery(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code);
+  Battery(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code, float *rp_hys_scale);
   ~Battery();
   // operators
   // functions
@@ -248,7 +249,7 @@ class BatteryMonitor: public Battery, public EKF_1x1
 {
 public:
   BatteryMonitor();
-  BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code);
+  BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code, float *rp_hys_scale);
   ~BatteryMonitor();
   // operators
   // functions
@@ -307,7 +308,7 @@ class BatterySim: public Battery
 {
 public:
   BatterySim();
-  BatterySim(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code);
+  BatterySim(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code, float *rp_hys_scale);
   ~BatterySim();
   // operators
   // functions

@@ -555,7 +555,7 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *ReadSensors):
     &cp.ib_tot_bias_noa, &rp.ib_scale_noa, SHUNT_NOA_GAIN, &rp.shunt_gain_sclr);
   this->SensorTb = new TempSensor(pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
   this->TbSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
-  this->Sim = new BatterySim(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS, &rp.sim_mod);
+  this->Sim = new BatterySim(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS, &rp.sim_mod, &rp.hys_scale);
   this->elapsed_inj = 0UL;
   this->start_inj = 0UL;
   this->stop_inj = 0UL;

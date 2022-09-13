@@ -37,12 +37,12 @@ extern PublishPars pp;            // For publishing
 // class Battery
 // constructors
 Battery::Battery() {}
-Battery::Battery(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code)
+Battery::Battery(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code, float *rp_hys_scale)
     : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, rp_mod_code, COULOMBIC_EFF),
     sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS)
 {
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // Center in hysteresis
-    hys_ = new Hysteresis(chem_.hys_cap, chem_);
+    hys_ = new Hysteresis(chem_.hys_cap, chem_, rp_hys_scale);
 }
 Battery::~Battery() {}
 // operators
@@ -166,8 +166,8 @@ double Battery::voc_soc_tab(const double soc, const float temp_c)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery monitor class
 BatteryMonitor::BatteryMonitor(): Battery() {}
-BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code):
-    Battery(rp_delta_q, rp_t_last, rp_nP, rp_nS, rp_mod_code)
+BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code, float *rp_hys_scale):
+    Battery(rp_delta_q, rp_t_last, rp_nP, rp_nS, rp_mod_code, rp_hys_scale)
 {
     voc_filt_ = chem_.v_sat-HDB_VBATT;
     // EKF
@@ -514,8 +514,8 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, Sensors *Sen)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
 BatterySim::BatterySim() : Battery() {}
-BatterySim::BatterySim(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code) :
-    Battery(rp_delta_q, rp_t_last, rp_nP, rp_nS, rp_mod_code), q_(RATED_BATT_CAP*3600.), rp_s_cap_model_(rp_s_cap_model)
+BatterySim::BatterySim(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code, float *rp_hys_scale) :
+    Battery(rp_delta_q, rp_t_last, rp_nP, rp_nS, rp_mod_code, rp_hys_scale), q_(RATED_BATT_CAP*3600.), rp_s_cap_model_(rp_s_cap_model)
 {
     // Randles dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery
@@ -828,34 +828,13 @@ void BatterySim::pretty_print(void)
 
 
 Hysteresis::Hysteresis()
-: disabled_(false), res_(0), soc_(0), ib_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0),
-   cap_init_(0){};
-Hysteresis::Hysteresis(const double cap, Chemistry chem)
-: disabled_(false), res_(0), soc_(0), ib_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0),
-   cap_init_(cap)
+: disabled_(false), cap_(0), res_(0), soc_(0), ib_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0){};
+Hysteresis::Hysteresis(const double cap, Chemistry chem, float *rp_hys_scale)
+: disabled_(false), cap_(0), res_(0), soc_(0), ib_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0), rp_hys_scale_(rp_hys_scale)
 {
     // Characteristic table
     hys_T_ = new TableInterp2D(chem.n_h, chem.m_h, chem.x_dv, chem.y_soc, chem.t_r);
 
-    // Disabled logic
-    disabled_ = rp.hys_scale < 1e-5;
-
-    // Capacitance logic
-    if ( disabled_ ) cap_ = cap_init_;
-    else cap_ = cap_init_ / rp.hys_scale;    // maintain time constant = R*C
-}
-
-// Apply scale
-void Hysteresis::apply_scale(const double scale)
-{
-    rp.hys_scale = max(scale, 1e-6);
-    disabled_ = rp.hys_scale < 1e-5;
-    if ( disabled_ )
-    {
-        cap_ = cap_init_;
-        init(0.);
-    }
-    else cap_ = cap_init_ / rp.hys_scale;    // maintain time constant = R*C
 }
 
 // Calculate
@@ -865,19 +844,17 @@ double Hysteresis::calculate(const double ib, const double soc)
     soc_ = soc;
 
     // Disabled logic
-    disabled_ = rp.hys_scale < 1e-5;
+    disabled_ = *rp_hys_scale_ < 1e-5;
 
     // Calculate
     if ( disabled_ )
     {
-        cap_ = cap_init_;
         res_ = 0.;
         ioc_ = ib;
         dv_dot_ = 0.;
     }
     else
     {
-        cap_ = cap_init_ / rp.hys_scale;    // maintain time constant = R*C
         res_ = look_hys(dv_hys_, soc_);
         ioc_ = dv_hys_ / res_;
         dv_dot_ = (ib_ - dv_hys_/res_) / cap_;  // Capacitor ode
@@ -907,7 +884,6 @@ void Hysteresis::pretty_print()
 {
     Serial.printf("Hysteresis:\n");
     Serial.printf("  res=%6.4f; Null, Ohm\n", res_);
-    Serial.printf("  cap_init=%10.1f; F\n", cap_init_);
     Serial.printf("  cap=%10.1f; F\n", cap_);
     double res = look_hys(0., 0.8);
     Serial.printf("  tau=%10.1f; Null, s\n", res*cap_);
@@ -918,21 +894,15 @@ void Hysteresis::pretty_print()
     Serial.printf("  dv_dot=%7.3f; V/s\n", dv_dot_);
     Serial.printf("  dv_hys=%7.3f; Delta state, V\n", dv_hys_);
     Serial.printf("  disabled=%d; input < 1e-5\n", disabled_);
-    Serial.printf("  rp.hys_scale=%6.2f; Slr\n", rp.hys_scale);
+    Serial.printf(" *rp_hys_scale=%6.2f; Slr\n", *rp_hys_scale_);
     Serial.printf("  r(soc, dv):\n");
     hys_T_->pretty_print();
-}
-
-// Scale
-double Hysteresis::scale()
-{
-    return rp.hys_scale;
 }
 
 // Dynamic update
 double Hysteresis::update(const double dt)
 {
     dv_hys_ += dv_dot_ * dt;
-    return dv_hys_;
+    return dv_hys_ * (*rp_hys_scale_);
 }
 

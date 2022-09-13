@@ -110,7 +110,7 @@ struct RetainedPars
     this->delta_q_cinf_noa = -RATED_BATT_CAP*3600.;
     this->delta_q_dinf_amp = RATED_BATT_CAP*3600.;
     this->delta_q_dinf_noa = RATED_BATT_CAP*3600.;
-    this->hys_scale = 1.;
+    this->hys_scale = S_HYS;
     this->tweak_sclr_amp = 1.;
     this->tweak_sclr_noa = 1.;
     this->nP = NP;
