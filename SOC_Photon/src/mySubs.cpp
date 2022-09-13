@@ -290,6 +290,8 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
       disp_2 = "*fail";
     else if ( Sen->Flt->dscn_fa() && !rp.mod_ib() )
       disp_2 = " conn ";
+    else if ( Sen->Flt->ib_diff_fa() )
+      disp_2 = " diff ";
     else if ( Sen->Flt->red_loss() )
       disp_2 = " data ";
   }

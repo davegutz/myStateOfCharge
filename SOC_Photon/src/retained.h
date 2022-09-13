@@ -191,7 +191,6 @@ struct RetainedPars
     ib_scale_noa = CURR_SCALE_NOA;
     mon_mod = MON_CHEM;
     sim_mod = SIM_CHEM;
-    print_versus_local_config();
   }
 };            
 

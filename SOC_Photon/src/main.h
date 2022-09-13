@@ -147,12 +147,13 @@ void setup()
   Serial.println("Init DISPLAY");
   if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // Seems to return true even if depowered
   {
-    Serial.println(F("SSD1306 DISP alloc FAIL"));
-    for(;;); // Don't proceed, loop forever
+    Serial.println(F("DISP FAIL"));
+    // for(;;); // Don't proceed, loop forever // Use Bluetooth if needed
   }
-  Serial.println("DISP allocated");
-  display->display();   // Adafruit splash
-  delay(2000); // Pause for 2 seconds
+  else
+    Serial.println("DISP allocated");
+  // display->display();   // Adafruit splash
+  // delay(2000); // Pause for 2 seconds
   display->clearDisplay();
 
   // Cloud
@@ -208,9 +209,9 @@ void setup()
     display->setTextSize(1);              // Normal 1:1 pixel scale
     display->setTextColor(SSD1306_WHITE); // Draw white text
     display->setCursor(0,0);              // Start at top-left corner    rp.print_versus_local_config();
-    display->println("Waiting for user talk");
+    display->println("Waiting for user talk\ntimes out in 60s\nwithout change");
     display->display();
-    Serial.printf("Do you wish to reset to local? [Y/n]:  "); Serial1.printf("Do you wish to reset to local? [Y/n]:  ");
+    Serial.printf("Do you wish to reset to local? [Y/n]:"); Serial1.printf("Do you wish to reset to local? [Y/n]:");
     uint8_t count = 0;
     while ( !Serial.available() && !Serial1.available() && ++count<60 ) delay(1000);
     byte answer = 'n';
@@ -218,12 +219,13 @@ void setup()
     else if ( Serial1.available() ) answer=Serial1.read();
     if ( answer=='Y' )
     {
+      Serial.printf(" Y\n"); Serial1.printf(" Y\n");
       rp.renominalize_to_local_config();
       rp.print_versus_local_config();
     }
     else
     {
-      Serial.printf("moving on....\n"); Serial1.printf("moving on....\n");
+      Serial.printf(" N\nmoving on....\n"); Serial1.printf(" N\nmoving on....\n");
     }
   }
 
