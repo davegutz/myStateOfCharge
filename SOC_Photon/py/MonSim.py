@@ -90,7 +90,8 @@ def save_clean_file_sim(sim_ver, csv_file, unit_key):
 
 
 def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
-              t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=0, Bmon=0, use_Vb_raw=False):
+              t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=0, Bmon=0, use_Vb_raw=False,
+              scale_r_ss=1., s_hys=1.):
     if sim_old and len(sim_old.time) < len(mon_old.time):
         t = sim_old.time
     else:
@@ -126,10 +127,10 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
     s_q = Scale(1., 3., 0.000005, 0.00005)
     s_r = Scale(1., 3., 0.001, 1.)   # t_Ib_fail = 1000 o
     sim = BatterySim(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
-                     dv_hys=dv_hys, sres=sres, Bsim=Bsim)
+                     dv_hys=dv_hys, sres=sres, scale_r_ss=scale_r_ss, s_hys=s_hys)
     mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
                          temp_c=temp_c, scale=scale, hys_scale=hys_scale_monitor, tweak_test=tweak_test, dv_hys=dv_hys, sres=sres,
-                         scaler_q=s_q, scaler_r=s_r, Bmon=Bmon)
+                         scaler_q=s_q, scaler_r=s_r, scale_r_ss=scale_r_ss, s_hys=s_hys)
     # need Tb input.   perhaps need higher order to enforce basic type 1 response
     Is_sat_delay = TFDelay(in_=mon_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
@@ -252,6 +253,8 @@ if __name__ == '__main__':
         use_Vb_raw = False
         unit_key = None
         data_file_old_txt = None
+        scale_r_ss_in = 1.
+        scale_hys_in = 1.
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
@@ -269,7 +272,7 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/pulse20220910.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
         # data_file_old_txt = '../dataReduction/tbFailMod20220910.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tbFailHdwe20220910.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220910.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True
+        data_file_old_txt = '../dataReduction/real world Xp20 20220910.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True; scale_r_ss_in = 1.; scale_hys_in = 0.3
 
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
@@ -329,7 +332,8 @@ if __name__ == '__main__':
         mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
                                                              dv_hys=dv_hys, sres=1.0, t_Ib_fail=t_Ib_fail,
                                                              use_ib_mon=use_ib_mon_in, scale_in=scale_in,
-                                                             use_Vb_raw=use_Vb_raw)
+                                                             use_Vb_raw=use_Vb_raw, scale_r_ss=scale_r_ss_in,
+                                                             s_hys=scale_hys_in)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots

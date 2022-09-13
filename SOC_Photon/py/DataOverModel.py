@@ -426,6 +426,40 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mv.time, mv.voc_stat, color='orange', linestyle='--', label='voc_stat_ver')
         plt.legend(loc=1)
 
+        plt.figure()  # sim_s  4
+        n_fig += 1
+        plt.subplot(221)
+        plt.plot(mo.time, mo.soc, color='blue', linestyle='-', label='soc')
+        plt.plot(mv.time, mv.soc, color='red', linestyle='--', label='soc_ver')
+        plt.plot(so.time, so.soc_s, color='green', linestyle='-.', label='soc_s')
+        plt.plot(sv.time, sv.soc, color='orange', linestyle=':', label='sv.soc_s_ver')
+        plt.plot(mo.time, mo.soc_ekf, color='cyan', linestyle='-', label='soc_ekf')
+        plt.plot(mv.time, mv.soc_ekf, color='magenta', linestyle='--', label='soc_ekf_ver')
+        plt.legend(loc=1)
+
+        plt.subplot(222)
+        plt.plot(mo.soc, mo.Voc_stat, color='magenta', linestyle='-', label='Voc_stat(soc) = z_')
+        plt.plot(mo.soc, mo.Voc_ekf, color='cyan', linestyle='--', label='Voc_ekf(soc) = Hx_')
+        plt.plot(mo.soc, mo.voc_soc, color='green', linestyle='-.', label='voc_soc')
+        plt.plot(mv.soc, mv.voc_soc, color='orange', linestyle=':', label='voc_soc_ver')
+        plt.plot(mo.soc, mo.Vb_h, color='blue', linestyle='-', label='Vb')
+        plt.legend(loc=1)
+
+        plt.subplot(223)
+        plt.plot(mo.soc, mo.Voc_stat, color='magenta', linestyle='-', label='Voc_stat(soc) = z_')
+        plt.plot(mv.soc, mv.Voc_stat, color='black', linestyle='--', label='Voc_stat(soc) = z_  ver')
+        plt.plot(mo.soc, mo.Vb_h, color='blue', linestyle='-', label='Vb')
+        plt.legend(loc=1)
+
+        plt.subplot(224)
+        plt.plot(mo.time, mo.Voc_stat, color='magenta', linestyle='-', label='Voc_stat(soc) = z_')
+        plt.plot(mo.time, mo.Voc_ekf, color='cyan', linestyle='--', label='Voc_ekf(soc) = Hx_')
+        plt.plot(mo.time, mo.voc_soc, color='green', linestyle='-.', label='voc_soc')
+        plt.plot(mv.time, mv.voc_soc, color='orange', linestyle=':', label='voc_soc_ver')
+        plt.plot(mo.time, mo.Vb_h, color='blue', linestyle='-', label='Vb')
+        plt.plot(mv.time, mv.Voc_stat, color='black', linestyle=':', label='Voc_stat(soc) = z_  ver')
+        plt.legend(loc=1)
+
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
