@@ -160,7 +160,8 @@ class Battery(Coulombs):
         self.sr = 1  # Resistance scalar
         self.nom_vsat = bat_v_sat  # Normal battery cell saturation for SOC=99.7, V
         self.vsat = bat_v_sat  # Saturation voltage, V
-        self.dv = 0.01  # Adjustment for voltage level, V (0.01)
+        # self.dv = 0.01  # Adjustment for voltage level, V (0.01)
+        self.dv = -0.05  # Adjustment for voltage level, V (0.01) dag 20220914
         self.dvoc_dt = BATT_DVOC_DT  # Change of VOC with operating temperature in
         # range 0 - 50 C, V/deg C
         self.dt = 0  # Update time, s

@@ -92,7 +92,7 @@ class Hysteresis:
         if self.disabled:
             self.res = 0.
         else:
-            self.res = self.lut.lookup(x=dv/self.scale, y=soc)*self.scale
+            self.res = self.lut.lookup(x=dv, y=soc)
         return self.res
 
     def save(self, time):
@@ -106,7 +106,7 @@ class Hysteresis:
 
     def update(self, dt):
         self.dv_hys += self.dv_dot * dt
-        return self.dv_hys
+        return self.dv_hys*self.scale
 
 
 class Saved:

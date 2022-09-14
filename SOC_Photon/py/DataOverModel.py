@@ -444,6 +444,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mv.soc, mv.voc_soc, color='orange', linestyle=':', label='voc_soc_ver')
         plt.plot(mo.soc, mo.Vb_h, color='blue', linestyle='-', label='Vb')
         plt.plot(sv.soc, sv.voc_stat, color='red', linestyle=':', label='voc_stat_s_ver')
+        plt.ylim(12.5, 14.5)
         plt.legend(loc=1)
 
         plt.subplot(223)
@@ -451,6 +452,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mv.soc, mv.Voc_stat, color='black', linestyle='--', label='Voc_stat(soc) = z_  ver')
         plt.plot(mo.soc, mo.Vb_h, color='blue', linestyle='-', label='Vb')
         plt.plot(sv.soc, sv.voc_stat, color='red', linestyle=':', label='voc_stat_s_ver')
+        plt.ylim(12.5, 14.5)
         plt.legend(loc=1)
 
         plt.subplot(224)
@@ -461,6 +463,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mo.time, mo.Vb_h, color='blue', linestyle='-', label='Vb')
         plt.plot(mv.time, mv.Voc_stat, color='black', linestyle=':', label='Voc_stat(soc) = z_  ver')
         plt.plot(sv.time, sv.voc_stat, color='red', linestyle=':', label='voc_stat_s_ver')
+        plt.ylim(12.5, 14.5)
         plt.legend(loc=1)
 
         fig_file_name = filename + '_' + str(n_fig) + ".png"
