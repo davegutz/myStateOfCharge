@@ -281,7 +281,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
         Randles_->update(dt_);
         voc_ = Randles_->y(0);
     }
-    else    // aliased, unstable if T<0.5  TODO:  consider deleting Randles model (hardware filters)
+    else    // aliased, unstable if T>0.5  TODO:  consider deleting Randles model (hardware filters)
         voc_ = vb_ - chem_.r_ss * ib_;
     // if ( rp.debug==35 )
     // {
@@ -295,7 +295,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     voc_stat_ = voc_ - dv_hys_;
     voc_filt_ = SdVb_->update(voc_);
     ioc_ = hys_->ioc();
-    bms_off_ = temp_c_ <= chem_.low_t || ( vb_<VBATT_MIN && !Sen->Flt->vb_fa() );    // KISS
+    bms_off_ = temp_c_ <= chem_.low_t || ( vb_<VBATT_MIN && !Sen->Flt->vb_fa() && !rp.tweak_test() );    // KISS
     if ( bms_off_ )
     {
         voc_stat_ = voc_soc_;

@@ -269,13 +269,13 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
         # Regression suite
-        data_file_old_txt = '../dataReduction/ampHiFail20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/ampLoFail20220910.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/ampHiFailNoise20220910.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/rapidTweakRegression20220910.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/rapidTweakRegression40C_20220910.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/slowTweakRegression20220910.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/triTweakDisch20220910.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampHiFail20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampLoFail20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/ampHiFailNoise20220914.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = '../dataReduction/rapidTweakRegression20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/rapidTweakRegression40C_20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/slowTweakRegression20220914.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/triTweakDisch20220914.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/satSit20220910.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/ampHiFailSlow20220910.txt'; unit_key = 'pro_2022';
         # data_file_old_txt = '../dataReduction/vHiFail20220910.txt'; unit_key = 'pro_2022'
