@@ -830,7 +830,7 @@ void BatterySim::pretty_print(void)
 Hysteresis::Hysteresis()
 : disabled_(false), cap_(0), res_(0), soc_(0), ib_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0){};
 Hysteresis::Hysteresis(const double cap, Chemistry chem, float *rp_hys_scale)
-: disabled_(false), cap_(0), res_(0), soc_(0), ib_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0), rp_hys_scale_(rp_hys_scale)
+: disabled_(false), cap_(cap), res_(0), soc_(0), ib_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0), rp_hys_scale_(rp_hys_scale)
 {
     // Characteristic table
     hys_T_ = new TableInterp2D(chem.n_h, chem.m_h, chem.x_dv, chem.y_soc, chem.t_r);
@@ -859,7 +859,6 @@ double Hysteresis::calculate(const double ib, const double soc)
         ioc_ = dv_hys_ / res_;
         dv_dot_ = (ib_ - dv_hys_/res_) / cap_;  // Capacitor ode
     }
-    Serial.printf("res,cap,dv_hys_in,soc_,ib_,ioc_,dv_dot,dt,dv_hys=%7.3f, %7.3f,%7.3f, %7.3f, %7.3f, %7.3f, ", res_, cap_, dv_hys_, soc_, ib_, ioc_);
 
     return ( dv_dot_ );
 }
@@ -905,7 +904,6 @@ void Hysteresis::pretty_print()
 double Hysteresis::update(const double dt)
 {
     dv_hys_ += dv_dot_ * dt;
-    Serial.printf("%7.3f, %7.3f, %7.3f\n", dv_dot_, dt, dv_hys_);
     return (dv_hys_ * (*rp_hys_scale_)); // Scale on output only.   Don't retain it for feedback to ode
 }
 
