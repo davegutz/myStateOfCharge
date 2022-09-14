@@ -275,13 +275,13 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/rapidTweakRegression20220914.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/rapidTweakRegression40C_20220914.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/slowTweakRegression20220914.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/triTweakDisch20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/satSit20220910.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/ampHiFailSlow20220910.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/vHiFail20220910.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/pulse20220910.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
-        # data_file_old_txt = '../dataReduction/tbFailMod20220910.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/tbFailHdwe20220910.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/triTweakDisch20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/satSit20220914.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = '../dataReduction/ampHiFailSlow20220914.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = '../dataReduction/vHiFail20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = '../dataReduction/pulse20220914.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
+        # data_file_old_txt = '../dataReduction/tbFailMod20220914.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = '../dataReduction/tbFailHdwe20220914.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/real world Xp20 20220907.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True; scale_r_ss_in = 1.; scale_hys_in = 0.3; Bsim_in = 0; skip=4
         # data_file_old_txt = '../dataReduction/real world Xp20 20220910.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True; scale_r_ss_in = 1.; scale_hys_in = 0.3
 

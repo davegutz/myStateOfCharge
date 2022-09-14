@@ -411,8 +411,8 @@ Full regression suite:
   triTweakDisch:  D^0;Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-29500;XW5;XT5;XC3;W2;v26;W2;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;XR;
                   v0;XS;Dm0;Dn0;Fi1;Fo1;Fc1;Fd1;FV0;FI0;FT0;Xp0;Ca1.;Pf;
   satSit:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat
-         D^0;Xp0;Xm15;Ca0.9955;Rb;Rf;Dr100;DP1;Xts;Xa-17;Xf0.002;XW10;XT10;XC1;W2;v26;W5;XR;
-          XS;v0;Xp0;Ca.9955;W5;Pf;Rf;Pf;v0;
+         D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-17;Xf0.002;XW10;XT10;XC1;W2;v26;W5;XR;
+          XS;v0;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;
   ampHiFailSlow:  D^0;Xm7;Ca0.5;v26;W2;Dr1000;DP1;Dm6;Dn0.0001;Fc.02;Fd.5;
                   Xp0;Pf;Rf;W2;+v0;Dr100;Fc1;Fd1;Rf;Pf;
   vHiFail:        D^0;Xm7;Ca0.5;Dr100;DP1;v26;W50;Dv0.25;
@@ -420,14 +420,9 @@ Full regression suite:
   pulse:  Xp6
   tbFailMod:    D^0;Ca.5;Xp0;W4;Xm7;DP1;Dr100;W2;v26;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;
-  tbFailHdwe:   This script doesn't work but test performs fine manually
+  tbFailHdwe:   This script sometimes doesn't work but test performs fine manually
                 D^0;Ca.5;Xp0;W4;Xm6;DP1;Dr100;W2;v26;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;
-  triTweakRegression:   D^0;Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;-DP1;Rb;Pa;Xf0.02;Xa-2000;XW5;XT5;XC3;W2;v26;W2;XR;
-                v0;XS;Dm0;Dn0;Xp0;Ca1.;Pf;
-  pulse30:      D^0;Xm7;Ca1;DP1;v26;W50;Di-30;
-                Di30
-                Di0;Dp400;DP4;
 
 Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
   Bucket:  Bm2;Bs1;D^15;
