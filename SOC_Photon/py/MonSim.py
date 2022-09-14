@@ -90,7 +90,7 @@ def save_clean_file_sim(sim_ver, csv_file, unit_key):
 
 
 def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
-              t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=0, Bmon=0, use_Vb_raw=False,
+              t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=None, Bmon=None, use_Vb_raw=False,
               scale_r_ss=1., s_hys=1.):
     if sim_old and len(sim_old.time) < len(mon_old.time):
         t = sim_old.time
@@ -107,7 +107,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
     soc_ekf_init = mon_old.soc_ekf[0]
     soc_s_init = mon_old.soc_s[0]
     sat_init = mon_old.sat[0]
-    chm = mon_old.chm
+    chm_m = mon_old.chm
     chm_s = sim_old.chm_s
     if sim_old:
         sat_s_init = sim_old.sat_s[0]
@@ -164,10 +164,14 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
             ib_in_s = sim_old.ib_in_s[i]
         else:
             ib_in_s = Ib_past[i]
-        sim.calculate(chem=chm_s[i], temp_c=Tb[i], soc=sim.soc, curr_in=ib_in_s, dt=T, q_capacity=sim.q_capacity,
+        if Bsim is None:
+            _chm_s = chm_s[i]
+        else:
+            _chm_s = Bsim
+        sim.calculate(chem=_chm_s, temp_c=Tb[i], soc=sim.soc, curr_in=ib_in_s, dt=T, q_capacity=sim.q_capacity,
                       dc_dc_on=dc_dc_on, reset=reset, rp=rp, sat_init=sat_s_init)
         charge_curr = sim.ib
-        sim.count_coulombs(chem=chm_s[i], dt=T, reset=reset, temp_c=Tb[i], charge_curr=charge_curr, sat=False, soc_s_init=soc_s_init,
+        sim.count_coulombs(chem=_chm_s, dt=T, reset=reset, temp_c=Tb[i], charge_curr=charge_curr, sat=False, soc_s_init=soc_s_init,
                            mon_sat=mon.sat, mon_delta_q=mon.delta_q)
 
         # EKF
@@ -182,7 +186,10 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
 
         # Monitor calculations including ekf
         Tb_ = Tb[i]
-        chm_ = chm[i]
+        if Bmon is None:
+            _chm_m = chm_m[i]
+        else:
+            _chm_m = Bmon
         if t_Ib_fail and t[i] > t_Ib_fail:
             Ib_ = Ib_fail
         else:
@@ -192,16 +199,16 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
         else:
             Vb_ = Vb[i]
         if rp.modeling == 0:
-            mon.calculate(chm_, Tb_, Vb_, Ib_, T, rp=rp, reset=reset)
+            mon.calculate(_chm_m, Tb_, Vb_, Ib_, T, rp=rp, reset=reset)
         else:
-            mon.calculate(chm_, Tb_, Vb_ + randn() * v_std + dv_sense, Ib_ + randn() * i_std + di_sense, T, rp=rp,
+            mon.calculate(_chm_m, Tb_, Vb_ + randn() * v_std + dv_sense, Ib_ + randn() * i_std + di_sense, T, rp=rp,
                           reset=reset, d_voc=None)
         sat = is_sat(Tb[i], mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
         if rp.modeling == 0:
-            mon.count_coulombs(chem=chm_, dt=T, reset=reset, temp_c=Tb[i], charge_curr=Ib_, sat=saturated)
+            mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb[i], charge_curr=Ib_, sat=saturated)
         else:
-            mon.count_coulombs(chem=chm_, dt=T, reset=reset, temp_c=temp_c, charge_curr=Ib_, sat=saturated)
+            mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=temp_c, charge_curr=Ib_, sat=saturated)
         mon.calc_charge_time(mon.q, mon.q_capacity, charge_curr, mon.soc)
         # mon.regauge(Tb[i])
         mon.assign_soc_s(sim.soc)
@@ -217,7 +224,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
             print('mon:  ', str(mon))
             print('time=', t[i])
             print('sim:  ', str(sim))
-        # if t[i]>19999.:
+        # if t[i]>29495:
         #     print('time=', t[i])
         #     print('mon:  ', str(mon))
         #     print('time=', t[i])
@@ -245,7 +252,7 @@ if __name__ == '__main__':
 
         # Transient  inputs
         time_end = None
-        # time_end = 5000
+        # time_end = 29500
         t_Ib_fail = None
         init_time_in = None
         use_ib_mon_in = False
@@ -255,6 +262,9 @@ if __name__ == '__main__':
         data_file_old_txt = None
         scale_r_ss_in = 1.
         scale_hys_in = 1.
+        Bmon_in = None
+        Bsim_in = None
+        skip = 1
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
@@ -272,8 +282,8 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/pulse20220910.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
         # data_file_old_txt = '../dataReduction/tbFailMod20220910.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tbFailHdwe20220910.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/real world Xp20 20220907.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True; scale_r_ss_in = 1.; scale_hys_in = 0.3
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220910.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True; scale_r_ss_in = 1.; scale_hys_in = 0.3
+        # data_file_old_txt = '../dataReduction/real world Xp20 20220907.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True; scale_r_ss_in = 1.; scale_hys_in = 0.3; Bsim_in = 0; skip=4
+        data_file_old_txt = '../dataReduction/real world Xp20 20220910.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True; scale_r_ss_in = 1.; scale_hys_in = 0.3
 
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
@@ -282,7 +292,7 @@ if __name__ == '__main__':
         unit_key_sim = "unit_sim"
 
         # Load mon v4 (old)
-        data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key)
+        data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key, skip=skip)
         cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'ioc', 'voc_soc', 'Vsat', 'dV_dyn', 'Voc_stat',
                 'Voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
@@ -290,7 +300,7 @@ if __name__ == '__main__':
 
         # Load sel (old)
         sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
-                                          unit_key=unit_key_sel)
+                                          unit_key=unit_key_sel, skip=skip)
         cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
                     'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_diff', 'ib_diff_f',
                     'voc_soc', 'e_w', 'e_w_f',
@@ -307,7 +317,7 @@ if __name__ == '__main__':
 
         # Load _m v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
-                                               unit_key=unit_key_sim)
+                                               unit_key=unit_key_sim, skip=skip)
         cols_sim = ('c_time', 'chm_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
                     'ib_in_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
         if data_file_sim_clean:
@@ -334,7 +344,7 @@ if __name__ == '__main__':
                                                              dv_hys=dv_hys, sres=1.0, t_Ib_fail=t_Ib_fail,
                                                              use_ib_mon=use_ib_mon_in, scale_in=scale_in,
                                                              use_Vb_raw=use_Vb_raw, scale_r_ss=scale_r_ss_in,
-                                                             s_hys=scale_hys_in)
+                                                             s_hys=scale_hys_in, Bmon=Bmon_in, Bsim=Bsim_in)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots
@@ -344,9 +354,9 @@ if __name__ == '__main__':
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         n_fig, fig_files = overall_batt(mon_ver, sim_ver, randles_ver, filename, fig_files, plot_title=plot_title,
-                                        n_fig=n_fig, suffix='_ver')  # sim over mon
+                                        n_fig=n_fig, suffix='_ver')  # sim over mon verify
         n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                   plot_title=plot_title, n_fig=n_fig)  # mon over data
+                                   plot_title=plot_title, n_fig=n_fig)  # all over all
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
         cleanup_fig_files(fig_files)
 

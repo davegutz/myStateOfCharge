@@ -324,9 +324,9 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mo.time, mo.chm, color='blue', linestyle='-', label='chem')
         plt.plot(mv.time, mv.chm, color='red', linestyle='--', label='chm_ver')
         plt.plot(so.time, so.chm_s, color='green', linestyle='-.', label='chem_s')
-        plt.plot(smv.time, smv.chm_s, color='orange', linestyle='--', label='smv.chm_s_ver')
-        plt.plot(sv.time, np.array(sv.chm)+3, color='red', linestyle='-', label='sv.chm_ver+3')
-        plt.plot(smv.time, np.array(smv.chm_s)+3, color='black', linestyle='--', label='smv.chm_s_ver+3')
+        plt.plot(smv.time, smv.chm_s, color='orange', linestyle=':', label='smv.chm_s_ver')
+        plt.plot(sv.time, np.array(sv.chm)+4, color='red', linestyle='-', label='sv.chm_ver+4')
+        plt.plot(smv.time, np.array(smv.chm_s)+4, color='black', linestyle='--', label='smv.chm_s_ver+4')
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -443,12 +443,14 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mo.soc, mo.voc_soc, color='green', linestyle='-.', label='voc_soc')
         plt.plot(mv.soc, mv.voc_soc, color='orange', linestyle=':', label='voc_soc_ver')
         plt.plot(mo.soc, mo.Vb_h, color='blue', linestyle='-', label='Vb')
+        plt.plot(sv.soc, sv.voc_stat, color='red', linestyle=':', label='voc_stat_s_ver')
         plt.legend(loc=1)
 
         plt.subplot(223)
         plt.plot(mo.soc, mo.Voc_stat, color='magenta', linestyle='-', label='Voc_stat(soc) = z_')
         plt.plot(mv.soc, mv.Voc_stat, color='black', linestyle='--', label='Voc_stat(soc) = z_  ver')
         plt.plot(mo.soc, mo.Vb_h, color='blue', linestyle='-', label='Vb')
+        plt.plot(sv.soc, sv.voc_stat, color='red', linestyle=':', label='voc_stat_s_ver')
         plt.legend(loc=1)
 
         plt.subplot(224)
@@ -458,6 +460,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mv.time, mv.voc_soc, color='orange', linestyle=':', label='voc_soc_ver')
         plt.plot(mo.time, mo.Vb_h, color='blue', linestyle='-', label='Vb')
         plt.plot(mv.time, mv.Voc_stat, color='black', linestyle=':', label='Voc_stat(soc) = z_  ver')
+        plt.plot(sv.time, sv.voc_stat, color='red', linestyle=':', label='voc_stat_s_ver')
         plt.legend(loc=1)
 
         fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -467,7 +470,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     return n_fig, fig_files
 
 
-def write_clean_file(txt_file, type_, title_key, unit_key):
+def write_clean_file(txt_file, type_, title_key, unit_key, skip=1):
     csv_file = txt_file.replace('.txt', type_ + '.csv', 1)
     # Header
     have_header_str = None
@@ -483,6 +486,7 @@ def write_clean_file(txt_file, type_, title_key, unit_key):
                 print("DataOverModel381:", line)  # last line
     # Data
     num_lines = 0
+    num_lines_in = 0
     num_skips = 0
     length = 0
     unit_key_found = False
@@ -493,11 +497,12 @@ def write_clean_file(txt_file, type_, title_key, unit_key):
                     unit_key_found = True
                     if num_lines == 0:  # use first data line to screen out short and long lines that have key
                         length = line.count(",")
-                    if line.count(",") == length:
+                    if line.count(",") == length and (num_lines==0 or ((num_lines_in+1) % skip) == 0):
                         output.write(line)
                         num_lines += 1
                     else:
                         num_skips += 1
+                    num_lines_in += 1
     if not num_lines:
         csv_file = None
         print("I(write_clean_file): no data to write")
