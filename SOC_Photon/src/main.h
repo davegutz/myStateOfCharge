@@ -209,7 +209,7 @@ void setup()
     display->setTextSize(1);              // Normal 1:1 pixel scale
     display->setTextColor(SSD1306_WHITE); // Draw white text
     display->setCursor(0,0);              // Start at top-left corner    rp.print_versus_local_config();
-    display->println("Waiting for user talk\ntimes out in 60s\nwithout change");
+    display->println("Waiting for user talk\n\nignores after 60s");
     display->display();
     Serial.printf("Do you wish to reset to local? [Y/n]:"); Serial1.printf("Do you wish to reset to local? [Y/n]:");
     uint8_t count = 0;

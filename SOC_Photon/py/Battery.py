@@ -160,8 +160,8 @@ class Battery(Coulombs):
         self.sr = 1  # Resistance scalar
         self.nom_vsat = bat_v_sat  # Normal battery cell saturation for SOC=99.7, V
         self.vsat = bat_v_sat  # Saturation voltage, V
-        # self.dv = 0.01  # Adjustment for voltage level, V (0.01)
-        self.dv = -0.05  # Adjustment for voltage level, V (0.01) dag 20220914
+        # self.dvoc = 0.01  # Adjustment for voltage level, V (0.01)
+        self.dvoc = -0.05  # Adjustment for voltage level, V (0.01) dag 20220914
         self.dvoc_dt = BATT_DVOC_DT  # Change of VOC with operating temperature in
         # range 0 - 50 C, V/deg C
         self.dt = 0  # Update time, s
@@ -211,7 +211,7 @@ class Battery(Coulombs):
         s += "  dv_dyn =  {:7.3f}  // Current-induced back emf, V\n".format(self.dv_dyn)
         s += "  q =       {:7.3f}  // Present charge available to use, except q_min_, C\n".format(self.q)
         s += "  sr =      {:7.3f}  // Resistance scalar\n".format(self.sr)
-        s += "  dv_ =     {:7.3f}  // Delta voltage, V\n".format(self.dv)
+        s += "  dvoc_ =   {:7.3f}  // Delta voltage, V\n".format(self.dvoc)
         s += "  dt_ =     {:7.3f}  // Update time, s\n".format(self.dt)
         s += "  dv_hys  = {:7.3f}  // Hysteresis delta v, V\n".format(self.dv_hys)
         s += "  tweak_test={:d}     // Driving signal injection completely using software inj_soft_bias\n".format(self.tweak_test)
@@ -241,7 +241,7 @@ class Battery(Coulombs):
     def calc_soc_voc(self, soc, temp_c):
         """SOC-OCV curve fit method per Zhang, etal """
         dv_dsoc = self.calc_h_jacobian(soc, temp_c)
-        voc = self.lut_voc.interp(soc, temp_c) + self.dv
+        voc = self.lut_voc.interp(soc, temp_c) + self.dvoc
         return voc, dv_dsoc
 
     def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None, sat_init=None):

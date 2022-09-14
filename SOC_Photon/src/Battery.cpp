@@ -63,10 +63,10 @@ double Battery::calculate(const float temp_C, const double q, const double curr_
 */
 double Battery::calc_soc_voc(const double soc, const float temp_c, double *dv_dsoc)
 {
-    double voc_stat;  // return value
+    double voc_soc_stat;  // return value
     *dv_dsoc = calc_soc_voc_slope(soc, temp_c);
-    voc_stat = chem_.voc_T_->interp(soc, temp_c) + chem_.dvoc;
-    return (voc_stat);
+    voc_soc_stat = chem_.voc_T_->interp(soc, temp_c) + chem_.dvoc;
+    return (voc_soc_stat);
 }
 
 /* calc_soc_voc_slope:  Derivative model read from tables
@@ -859,6 +859,8 @@ double Hysteresis::calculate(const double ib, const double soc)
         ioc_ = dv_hys_ / res_;
         dv_dot_ = (ib_ - dv_hys_/res_) / cap_;  // Capacitor ode
     }
+    Serial.printf("res,cap,dv_hys_in,soc_,ib_,ioc_,dv_dot,dt,dv_hys=%7.3f, %7.3f,%7.3f, %7.3f, %7.3f, %7.3f, ", res_, cap_, dv_hys_, soc_, ib_, ioc_);
+
     return ( dv_dot_ );
 }
 
@@ -875,7 +877,7 @@ double Hysteresis::look_hys(const double dv, const double soc)
     if ( disabled_ )
         res = 0.;
     else
-        res = hys_T_->interp(dv/rp.hys_scale, soc) * rp.hys_scale;
+        res = hys_T_->interp(dv, soc);
     return res;
 }
 
@@ -903,6 +905,7 @@ void Hysteresis::pretty_print()
 double Hysteresis::update(const double dt)
 {
     dv_hys_ += dv_dot_ * dt;
-    return dv_hys_ * (*rp_hys_scale_);
+    Serial.printf("%7.3f, %7.3f, %7.3f\n", dv_dot_, dt, dv_hys_);
+    return (dv_hys_ * (*rp_hys_scale_)); // Scale on output only.   Don't retain it for feedback to ode
 }
 

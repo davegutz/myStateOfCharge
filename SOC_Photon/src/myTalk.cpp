@@ -1220,7 +1220,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" *Sc= "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println(": rp. Scalar mod size"); 
   Serial.printf(" *SG= "); Serial.printf("%7.3f/%7.3f", Sen->ShuntAmp->rp_shunt_gain_sclr(), Sen->ShuntAmp->rp_shunt_gain_sclr());
   Serial.printf(": rp. scale shunt gains [1]\n"); 
-  Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.println(": hys sclr 1e-6 - 100 [1]");
+  Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.printf(": hys sclr 1e-6 - 100 [%5.2f]\n", HYS_SCALE);
   Serial.printf("  Sm= "); Serial.printf("%7.3f", Sen->ShuntAmp->sclr()); Serial.printf(": sclr amp, [1]\n"); 
   Serial.printf("  Sn= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->sclr()); Serial.printf(": sclr noa [1]\n"); 
   Serial.printf("  Sr= "); Serial.print(Sen->Sim->Sr()); Serial.println(": Scalar res sim"); 

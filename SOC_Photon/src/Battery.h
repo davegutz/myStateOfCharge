@@ -58,7 +58,7 @@ const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1,
 #define RANDLES_T_MAX   0.31      // Maximum update time of Randles state space model to avoid aliasing and instability (0.31 allows DP3)
 const double MXEPS = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness) (1-1e-6)
 #define TWEAK_SOC_CHANGE 0.2      // Minimum charge change to tweak sensor
-#define S_HYS           0.3       // Scalar on hysteresis.   Best I know is what observed Tb=40C (0.3)
+#define HYS_SCALE        0.3      // Scalar on hysteresis.   Best I know is what observed Tb=40C (0.3)
 // BattleBorn 100 Ah, 12v LiFePO4
 // See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
 // >13.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
@@ -85,9 +85,9 @@ const float X_DV_BB[N_H_BB] =       // dv breakpoints for r(soc, dv) table t_r. 
 const float Y_SOC_BB[M_H_BB] =      // soc breakpoints for r(soc, dv) table t_r
         { 0.0,  0.5,    1.0};
 const float T_R_BB[M_H_BB*N_H_BB] = // r(soc, dv) table.    // DAG 6/13/2022 tune x10 to match data
-        { 1e-6, 0.064,  0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
-          1e-6, 1e-6,   0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
-          1e-6, 1e-6,     1e-6, 0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6};
+        { 1e-6, 0.064, 0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
+          1e-6, 1e-6,  0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
+          1e-6, 1e-6,  1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6};
 
 // LION 100 Ah, 12v LiFePO4.  "LION" placeholder.  Data fabricated.   Useful to test weird shapes T=40 (Dt15)
 // shifted Battleborn because don't have real data yet; test structure of program

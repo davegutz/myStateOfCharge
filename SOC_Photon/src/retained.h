@@ -64,7 +64,7 @@ struct RetainedPars
   float delta_q_cinf_noa = -RATED_BATT_CAP*3600.;   // Dyn tweak.  Charge delta_q since last reset.  Simple integration of non-amplified current
   float delta_q_dinf_amp = RATED_BATT_CAP*3600.;    // Dyn tweak.  Discharge delta_q since last reset.  Simple integration of amplified current
   float delta_q_dinf_noa = RATED_BATT_CAP*3600.;    // Dyn tweak.  Discharge delta_q since last reset.  Simple integration of non-amplified current
-  float hys_scale = 1.;         // Hysteresis scalar
+  float hys_scale = HYS_SCALE;  // Hysteresis scalar
   float tweak_sclr_amp = 1.;    // Dyn tweak.  Tweak calibration for amplified current sensor
   float tweak_sclr_noa = 1.;    // Dyn tweak.  Tweak calibration for non-amplified current sensor
   float nP = NP;                // Number of parallel batteries in bank, e.g. '2P1S'
@@ -110,7 +110,7 @@ struct RetainedPars
     this->delta_q_cinf_noa = -RATED_BATT_CAP*3600.;
     this->delta_q_dinf_amp = RATED_BATT_CAP*3600.;
     this->delta_q_dinf_noa = RATED_BATT_CAP*3600.;
-    this->hys_scale = S_HYS;
+    this->hys_scale = HYS_SCALE;
     this->tweak_sclr_amp = 1.;
     this->tweak_sclr_noa = 1.;
     this->nP = NP;

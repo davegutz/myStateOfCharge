@@ -65,7 +65,7 @@ void Chemistry::assign_BB()
   // Constants
   dqdt    = 0.01;   // Change of charge with temperature, fraction/deg C (0.01 from literature)
   dvoc_dt = 0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
-  dvoc    = 0.01;   // Adjustment for calibration error, V
+  dvoc    = -0.05;  // Adjustment for calibration error, V (systematic error; may change in future)
   hys_cap = 3.6e5;  // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data
   low_voc = 9.;     // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
@@ -94,7 +94,7 @@ void Chemistry::assign_LI()
   // Constants
   dqdt    = 0.01;   // Change of charge with temperature, fraction/deg C (0.01 from literature)
   dvoc_dt = 0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
-  dvoc    = 0.01;   // Adjustment for calibration error, V
+  dvoc    = -0.05;  // Adjustment for calibration error, V (systematic error; may change in future)
   hys_cap = 3.6e5;  // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data
   low_voc = 9.;     // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
@@ -123,7 +123,7 @@ void Chemistry::assign_LIE()
   // Constants
   dqdt    = 0.01;   // Change of charge with temperature, fraction/deg C (0.01 from literature)
   dvoc_dt = 0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
-  dvoc    = 0.01;   // Adjustment for calibration error, V
+  dvoc    = -0.05;  // Adjustment for calibration error, V (systematic error; may change in future)
   hys_cap = 3.6e5;  // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data
   low_voc = 9.;     // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
