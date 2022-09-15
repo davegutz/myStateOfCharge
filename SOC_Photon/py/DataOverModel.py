@@ -34,6 +34,7 @@ from Battery import overall_batt
 # if platform != 'linux':
 #     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
+plt.rcParams.update({'figure.max_open_warning': 0})
 
 
 def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fig=None):

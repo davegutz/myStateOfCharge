@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 from TFDelay import TFDelay
 from myFilters import LagTustin, General2Pole, RateLimit
 from Scale import Scale
+plt.rcParams.update({'figure.max_open_warning': 0})
 
 
 class Retained:
