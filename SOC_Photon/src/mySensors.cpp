@@ -740,6 +740,11 @@ void Sensors::shunt_bias(void)
     ShuntAmp->bias( rp.ib_bias_amp + rp.ib_bias_all + rp.inj_bias );
     ShuntNoAmp->bias( rp.ib_bias_noa + rp.ib_bias_all + rp.inj_bias );
   }
+  else if ( rp.tweak_test() )
+  {
+    ShuntAmp->bias( rp.inj_bias );
+    ShuntNoAmp->bias( rp.inj_bias );
+  }
 }
 
 // Read and convert shunt Sensors

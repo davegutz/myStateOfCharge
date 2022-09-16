@@ -983,7 +983,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     if ( !rp.tweak_test() ) chit("Xb0.", ASAP);
                     chit("XS; Mk1; Nk1;", ASAP);  // Stop any injection
                     chit("Dn" + String(COULOMBIC_EFF), ASAP);
-                    chit("Di0;Dm0;Dn0;Dv0;DT0;DV0.0;DI0;Xu0;Xv1.;Dr100;DP4;", ASAP);
+                    chit("Xs1.0;Di0;Dm0;Dn0;Dv0;DT0;DV0.0;DI0;Xu0;Xv1.;Dr100;DP4;", ASAP);
                     break;
 
                   case ( 1 ):  // Xp1:  sine
@@ -1046,11 +1046,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Pa;", QUEUE);       // Print all for record
                     if ( INT_in == 9 )  // Xp9:  silent tweak test
                     {
-                      chit("Xf0.02;", QUEUE); // Frequency 0.02 Hz
-                      chit("XW5;", QUEUE);    // Wait time before starting to cycle
-                      chit("XT5;", QUEUE);    // Wait time after cycle to print
-                      chit("Xa-2000;", QUEUE);// Amplitude -2000 A
-                      chit("XC20;", QUEUE);   // Number of injection cycles
+                      chit("Xs0.1;", QUEUE);  // t_sat scaled to detect saturation in short dwell with Xf, sclr (0.1)
+                      chit("Xf0.02;", QUEUE); // Frequency, Hz (0.02)
+                      chit("XW5;", QUEUE);    // Wait time before starting to cycle (5)
+                      chit("XT5;", QUEUE);    // Wait time after cycle to print (5)
+                      chit("Xa-6000;", QUEUE);// Amplitude, A (-6000)
+                      chit("XC20;", QUEUE);   // Number of injection cycles (20)
                       chit("v0;", QUEUE);     // Silent
                     }
                     else if ( INT_in == 10 )  // Xp10:  rapid tweak
@@ -1132,6 +1133,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Sen->end_inj = 0UL;
                 Sen->elapsed_inj = 0;
                 Serial.printf("STOP\n");
+                break;
+
+              case ( 's' ): // Xs:  scale T_SAT
+                FP_in = cp.input_string.substring(2).toFloat();
+                Serial.printf("s_t_sat %7.1f s to \n", cp.s_t_sat);
+                cp.s_t_sat = max(FP_in, 0.);
+                Serial.printf("%7.1f\n", cp.s_t_sat);
                 break;
 
               case ( 'W' ):  // XW<>:  Wait beginning of programmed transient
@@ -1339,6 +1347,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" XC= "); Serial.printf("%7.3f cycles inj\n", Sen->cycles_inj);
   Serial.printf(" XR  "); Serial.printf("RUN inj\n");
   Serial.printf(" XS  "); Serial.printf("STOP inj\n");
+  Serial.printf(" Xs= "); Serial.printf("%6.2f scalar on T_SAT\n", cp.s_t_sat);
   Serial.printf(" XW= "); Serial.printf("%6.2f s wait start inj\n", float(Sen->wait_inj)/1000.);
   Serial.printf(" XT= "); Serial.printf("%6.2f s tail end inj\n", float(Sen->tail_inj)/1000.);
   Serial.printf(" Xu= "); Serial.printf("%d T=ignore Tb read\n", Sen->Flt->fail_tb());

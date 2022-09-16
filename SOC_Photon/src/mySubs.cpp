@@ -241,7 +241,7 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
 
   // Debounce saturation calculation done in ekf using voc model
   boolean sat = Mon->is_sat(reset);
-  Sen->saturated = Is_sat_delay->calculate(sat, T_SAT, T_DESAT, min(Sen->T, T_SAT/2.), reset);
+  Sen->saturated = Is_sat_delay->calculate(sat, T_SAT*cp.s_t_sat, T_DESAT*cp.s_t_sat, min(Sen->T, T_SAT/2.), reset);
 
   // Memory store // TODO:  simplify arg list here.  Unpack Sen inside count_coulombs
   // Initialize to ekf when not saturated

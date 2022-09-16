@@ -74,17 +74,18 @@ void Tweak::adjust(unsigned long now, const double q_capacity)
   new_tweak_sclr = max(min(new_tweak_sclr, 1.+max_tweak_), 1.-max_tweak_);
 
   // Result
-  if ( *rp_delta_q_cinf_>=0. && *rp_delta_q_dinf_<=0. )  // Exclude first cycle after boot:  uncertain history
+  double delta_soc = (*rp_delta_q_dinf_-*rp_delta_q_cinf_) / 2. / q_capacity;
+  // Exclude first cycle after boot:  uncertain history.   Also exclude small cycles:  small SNR
+  if ( *rp_delta_q_cinf_>=0. && *rp_delta_q_dinf_<=0. && abs(delta_soc)>TWEAK_SOC_CHANGE )
   {
-    double delta_soc = (*rp_delta_q_dinf_-*rp_delta_q_cinf_) / 2. / q_capacity;
-    if ( delta_soc > TWEAK_SOC_CHANGE ) *rp_tweak_sclr_ = new_tweak_sclr;
+    *rp_tweak_sclr_ = new_tweak_sclr;
     Serial.printf("          Tweak(%s)::adjust:, cinf=%10.1f, dinf=%10.1f, delta_soc=%7.3f, coul_eff=%9.6f, scaler=%9.6f, effective coul_eff=%9.6f\n",
       name_.c_str(), *rp_delta_q_cinf_, *rp_delta_q_dinf_, delta_soc, coul_eff_, *rp_tweak_sclr_, coul_eff_*(*rp_tweak_sclr_));
   }
   else
   {
-    Serial.printf("          Tweak(%s)::ignore:, cinf=%10.1f, dinf=%10.1f, coul_eff=%9.6f, scaler=%9.6f, effective coul_eff=%9.6f\n",
-      name_.c_str(), *rp_delta_q_cinf_, *rp_delta_q_dinf_, coul_eff_, *rp_tweak_sclr_, coul_eff_*(*rp_tweak_sclr_));
+    Serial.printf("          Tweak(%s)::ignore:, cinf=%10.1f, dinf=%10.1f, delta_soc=%7.3f, coul_eff=%9.6f, scaler=%9.6f, effective coul_eff=%9.6f\n",
+      name_.c_str(), *rp_delta_q_cinf_, *rp_delta_q_dinf_, 0.0, coul_eff_, *rp_tweak_sclr_, coul_eff_*(*rp_tweak_sclr_));
   }
 
 

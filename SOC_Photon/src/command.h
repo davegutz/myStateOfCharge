@@ -58,6 +58,7 @@ struct CommandPars
   uint8_t print_mult;       // Print multiplier for objects
   unsigned long num_v_print;// Number of print echos made, for checking on BLE
   float tb_bias_model;      // Bias on Tb for model, C
+  float s_t_sat;            // Scalar on saturation test time set and reset
 
   CommandPars(void)
   {
@@ -75,6 +76,7 @@ struct CommandPars
     print_mult = 4;
     num_v_print = 0UL;
     tb_bias_model = 0.;
+    s_t_sat = 1.;
   }
 
   void cmd_reset(void)
@@ -110,6 +112,7 @@ struct CommandPars
     Serial.printf(" blynking=%d; z\n", this->blynking);
     Serial.printf(" publishS=%d;\n", this->publishS);
     Serial.printf(" tb_bias_mode=%7.3f;\n", this->tb_bias_model);
+    Serial.printf(" s_t_sat=%7.3f;\n", this->s_t_sat);
   }
 
   void assign_print_mult(const uint8_t count)
