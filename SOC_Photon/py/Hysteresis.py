@@ -36,18 +36,12 @@ class Hysteresis:
                    1e-6, 1e-6,     0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
                    1e-6, 1e-6,     1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6]
         self.scale = scale
-        for i in range(len(t_dv)):
-            t_dv[i] *= self.scale
-            t_r[i] *= self.scale
         self.disabled = self.scale < 1e-5
         self.lut = LookupTable(clip_x=True)
         self.lut.addAxis('x', t_dv)
         self.lut.addAxis('y', t_soc)
         self.lut.setValueTable(t_r)
-        if self.disabled:
-            self.cap = cap
-        else:
-            self.cap = cap / self.scale  # maintain time constant = R*C
+        self.cap = cap
         self.res = 0.
         self.soc = 0.
         self.ib = 0.
