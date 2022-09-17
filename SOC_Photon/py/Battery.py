@@ -149,7 +149,6 @@ class Battery(Coulombs):
         y2 = np.array(t_y_t2)
         data_interp2 = np.array(t_voc2)
         self.lut_voc2 = myTables.TableInterp2D(x2, y2, data_interp2)
-        # self.dvoc = 0.01  # Adjustment for voltage level, V (0.01)
         self.dvoc = dvoc
         self.nz = None
         self.q = 0  # Charge, C
