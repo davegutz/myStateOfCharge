@@ -82,6 +82,7 @@ EKF_R_SD_NORM = 0.5  # Standard deviation of normal EKF state uncertainty, fract
 EKF_Q_SD_REV = EKF_Q_SD_NORM
 EKF_R_SD_REV = EKF_R_SD_NORM
 IMAX_NUM = 100000.
+DVOC = -0.05
 
 
 class Battery(Coulombs):
@@ -98,7 +99,7 @@ class Battery(Coulombs):
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, tweak_test=False, t_max=0.31, sres=1., scale_r_ss=1., s_hys=1.):
+                 temp_c=RATED_TEMP, tweak_test=False, t_max=0.31, sres=1., scale_r_ss=1., s_hys=1., dvoc=DVOC):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -148,6 +149,8 @@ class Battery(Coulombs):
         y2 = np.array(t_y_t2)
         data_interp2 = np.array(t_voc2)
         self.lut_voc2 = myTables.TableInterp2D(x2, y2, data_interp2)
+        # self.dvoc = 0.01  # Adjustment for voltage level, V (0.01)
+        self.dvoc = dvoc
         self.nz = None
         self.q = 0  # Charge, C
         self.voc = NOM_SYS_VOLT  # Model open circuit voltage, V
@@ -161,8 +164,6 @@ class Battery(Coulombs):
         self.sr = 1  # Resistance scalar
         self.nom_vsat = bat_v_sat  # Normal battery cell saturation for SOC=99.7, V
         self.vsat = bat_v_sat  # Saturation voltage, V
-        # self.dvoc = 0.01  # Adjustment for voltage level, V (0.01)
-        self.dvoc = -0.05  # Adjustment for voltage level, V (0.01) dag 20220914
         self.dvoc_dt = BATT_DVOC_DT  # Change of VOC with operating temperature in
         # range 0 - 50 C, V/deg C
         self.dt = 0  # Update time, s
