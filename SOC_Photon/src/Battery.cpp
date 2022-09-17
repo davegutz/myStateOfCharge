@@ -39,7 +39,7 @@ extern PublishPars pp;            // For publishing
 Battery::Battery() {}
 Battery::Battery(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code, float *rp_hys_scale)
     : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, rp_mod_code, COULOMBIC_EFF),
-    sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS)
+    sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS), ds_voc_soc_(0), dv_voc_soc_(0)
 {
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // Center in hysteresis
     hys_ = new Hysteresis(chem_.hys_cap, chem_, rp_hys_scale);
@@ -64,8 +64,8 @@ double Battery::calculate(const float temp_C, const double q, const double curr_
 double Battery::calc_soc_voc(const double soc, const float temp_c, double *dv_dsoc)
 {
     double voc_soc_stat;  // return value
-    *dv_dsoc = calc_soc_voc_slope(soc, temp_c);
-    voc_soc_stat = chem_.voc_T_->interp(soc, temp_c) + chem_.dvoc;
+    *dv_dsoc = calc_soc_voc_slope(soc + ds_voc_soc_, temp_c);
+    voc_soc_stat = chem_.voc_T_->interp(soc + ds_voc_soc_, temp_c) + chem_.dvoc + dv_voc_soc_;
     return (voc_soc_stat);
 }
 
@@ -669,11 +669,11 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     // if ( rp.debug==79 ) Serial.printf("temp_c_, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib_fut, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f, %7.3f,\n",
     //     temp_c_, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
 
-    if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
-     dt,temp_c_, ib_, soc_, voc_, dv_dyn_, vb_);
+    // if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
+    //  dt,temp_c_, ib_, soc_, voc_, dv_dyn_, vb_);
     
-    if ( rp.debug==76 ) Serial.printf("BatterySim::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in=%7.3f,ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
-        soc_, temp_c_, ib_in_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);
+    // if ( rp.debug==76 ) Serial.printf("BatterySim::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in=%7.3f,ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
+    //     soc_, temp_c_, ib_in_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);
 
     return ( vb_*(*rp_nS_) );
 }

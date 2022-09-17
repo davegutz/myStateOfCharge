@@ -257,6 +257,7 @@ protected:
   boolean disab_vb_fa_;     // Disable hard fault range failures for vb
   float ewhi_sclr_;         // Scale wrap hi detection thresh, scalar
   float ewlo_sclr_;         // Scale wrap lo detection thresh, scalar
+  float ewmin_sclr_;        // Scale wrap detection thresh when voc(soc) less than min, scalar
   float ewsat_sclr_;        // Scale wrap detection thresh when voc(soc) saturated, scalar
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V

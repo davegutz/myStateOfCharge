@@ -138,7 +138,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define WRAP_SOC_HI_SCLR    1000.       // Huge to disable e_wrap
 #define WRAP_SOC_LO_OFF_ABS 0.35        // Disable e_wrap when near empty (soc lo any Tb)
 #define WRAP_SOC_LO_OFF_REL 0.2         // Disable e_wrap when near empty (soc lo for high Tb where soc_min=.2, voltage cutback)
-#define WRAP_SOC_LO_SCLR    4.          // Large to disable e_wrap
+#define WRAP_SOC_LO_SCLR    30.         // Large to disable e_wrap (30. for startup)
 
 // Conversion gains
 const float SHUNT_NOA_GAIN = SHUNT_GAIN * CURR_SCALE_NOA;

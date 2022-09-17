@@ -838,6 +838,39 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             rp.debug = cp.input_string.substring(1).toInt();
             break;
 
+          case ( 'V' ):
+            switch ( cp.input_string.charAt(1) )
+            {
+
+              case ( 'M' ):  //   VM<>:  delta Mon curve voltage out
+                Serial.printf("Mon dv_voc_soc %7.3f to ", Mon->dv_voc_soc());
+                Mon->dv_voc_soc(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", Mon->dv_voc_soc());
+                break;
+
+              case ( 'm' ):  //   Vm<>:  delta Mon curve soc in
+                Serial.printf("Mon ds_voc_soc %7.3f to ", Mon->ds_voc_soc());
+                Mon->ds_voc_soc(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", Mon->ds_voc_soc());
+                break;
+
+              case ( 'S' ):  //   VS<>:  delta Sim curve voltage out
+                Serial.printf("Sim dv_voc_soc %7.3f to ", Sen->Sim->dv_voc_soc());
+                Sen->Sim->dv_voc_soc(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", Sen->Sim->dv_voc_soc());
+                break;
+
+              case ( 's' ):  //   Vs<>:  delta Sim curve soc in
+                Serial.printf("Sim ds_voc_soc %7.3f to ", Sen->Sim->ds_voc_soc());
+                Sen->Sim->ds_voc_soc(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", Sen->Sim->ds_voc_soc());
+                break;
+
+              default:
+                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+            }
+            break;
+
           case ( 'w' ):  //   w:  toggle wifi
             cp.enable_wifi = !cp.enable_wifi; // not remembered in rp. Photon reset turns this false
             Serial.printf("Wifi togg %d\n", cp.enable_wifi);
@@ -1301,17 +1334,24 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  v14: vshunt and Ib raw\n");
   Serial.printf("  v15: vb raw\n");
   Serial.printf("  v16: Tb\n");
-  Serial.printf("  v25: Blynk write\n");
+  #ifdef USE_BLYNK
+    Serial.printf("  v25: Blynk write\n");
+  #endif
   Serial.printf("  v26: GP, Sim & Sel\n");
   // Serial.printf("  v34: EKF detail\n");
   // Serial.printf("  v35: Randles balance\n");
   Serial.printf("  v37: EKF short\n");
-  Serial.printf("  v41: Inj\n");
   // Serial.printf("  v75: voc_low check mod\n");
-  Serial.printf("  v76: vb model\n");
-  Serial.printf("  v78: Batt model sat\n");
+  // Serial.printf("  v76: vb model\n");
+  // Serial.printf("  v78: Batt model sat\n");
   // Serial.printf("  v79: sat_ib model\n");
   Serial.printf("  v96: CC sat\n");
+
+  Serial.printf("V<?> - VOC(SOC) curve deltas\n");
+  Serial.printf(" VM= "); Serial.printf("%7.3f", Mon->dv_voc_soc()); Serial.println(": Mon vsoc out, V [0]"); 
+  Serial.printf(" VS= "); Serial.printf("%7.3f", Sen->Sim->dv_voc_soc()); Serial.println(": Sim vsoc out, V [0]"); 
+  Serial.printf(" Vm= "); Serial.printf("%7.3f", Mon->ds_voc_soc()); Serial.println(": Mon soc in [0]"); 
+  Serial.printf(" Vs= "); Serial.printf("%7.3f", Sen->Sim->ds_voc_soc()); Serial.println(": Sim soc in[0]"); 
 
   Serial.printf("w togg wifi = "); Serial.println(cp.enable_wifi);
 

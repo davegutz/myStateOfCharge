@@ -251,8 +251,8 @@ if __name__ == '__main__':
         date_ = datetime.now().strftime("%y%m%d")
 
         # Transient  inputs
-        time_end = None
-        # time_end = 29500
+        # time_end = None
+        time_end = 35200
         t_Ib_fail = None
         init_time_in = None
         use_ib_mon_in = False
@@ -282,10 +282,10 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/pulse20220914.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
         # data_file_old_txt = '../dataReduction/tbFailMod20220914.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = '../dataReduction/tbFailHdwe20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220907.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True; scale_r_ss_in = 1.; scale_hys_in = 0.3; Bsim_in = 0; skip=4
-        # data_file_old_txt = '../dataReduction/real world Xp20 20220910.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True; scale_r_ss_in = 1.; scale_hys_in = 0.3
-        data_file_old_txt = '../dataReduction/real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True; scale_r_ss_in = 1.; scale_hys_in = 0.3
-
+        # data_file_old_txt = '../dataReduction/real world Xp20 20220907.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True; scale_r_ss_in = 1.; scale_hys_in = 3.3; Bsim_in = 0; skip=4
+        # data_file_old_txt = '../dataReduction/real world Xp20 20220910.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = True; scale_r_ss_in = 1.; scale_hys_in = 3.3
+        data_file_old_txt = '../dataReduction/real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_in =1.
+        # data_file_old_txt = '../dataReduction/real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_in = 1.0
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"

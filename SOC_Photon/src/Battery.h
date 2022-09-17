@@ -183,11 +183,15 @@ public:
   double calc_vsat(void);
   virtual double calculate(const float temp_C, const double soc_frac, double curr_in, const double dt, const boolean dc_dc_on);
   String decode(const uint8_t mod);
+  void ds_voc_soc(const float _ds) { ds_voc_soc_ = _ds; };
+  float ds_voc_soc() { return ds_voc_soc_; };
   void Dv(const double _dv) { chem_.dvoc = _dv; };
   double Dv() { return (chem_.dvoc); };
   double dv_dsoc() { return (dv_dsoc_); };
   double dv_dyn() { return (dv_dyn_); };
   double dV_dyn() { return (dv_dyn_*(*rp_nS_)); };
+  void dv_voc_soc(const float _dv) { dv_voc_soc_ = _dv; };
+  float dv_voc_soc() { return dv_voc_soc_; };
   uint8_t encode(const String mod_str);
   double hys_scale() { return (hys_->scale()); };
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
@@ -241,6 +245,8 @@ protected:
   float *rp_nP_;    // Number of parallel batteries in bank, e.g. '2P1S'
   float *rp_nS_;    // Number of series batteries in bank, e.g. '2P1S'
   boolean print_now_; // Print command
+  float ds_voc_soc_;    // VOC(SOC) delta soc on input
+  float dv_voc_soc_;    // VOC(SOC) delta voc on output
 };
 
 
