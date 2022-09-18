@@ -28,6 +28,20 @@ def cleanup_fig_files(fig_files):
             pass
 
 
+def precleanup_fig_files(output_pdf_name='unite_pictures.pdf', path_to_pdfs='.'):
+    # Clean up before itself.   Other fig files already in root will get plotted by unite_pictures_into_pdf
+    # Cleanup other figures in root folder by hand
+    from glob import glob
+    from os import chdir, remove
+    chdir(path_to_pdfs)
+    for file in glob(output_pdf_name + '*.pdf'):
+        print(file)
+        try:
+            remove(file)
+        except OSError:
+            pass
+
+
 # ----------------------------------------------------------------------
 def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', pathToSavePdfTo='.', pathToPictures='.', splitType="picture",
                             numberOfEntitiesInOnePdf=9, listWithImagesExtensions=["png", "jpg"],
