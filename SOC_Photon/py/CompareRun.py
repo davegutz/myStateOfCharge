@@ -161,7 +161,7 @@ if __name__ == '__main__':
                                         n_fig=n_fig, suffix='_ver')  # sim over mon verify
         n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig)  # all over all
-        precleanup_fig_files(output_pdf_name=filename+'_'+date_time+'.pdf', path_to_pdfs=pathToSavePdfTo)
+        precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
         cleanup_fig_files(fig_files)
 
