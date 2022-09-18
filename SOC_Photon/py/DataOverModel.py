@@ -478,11 +478,12 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     return n_fig, fig_files
 
 
-def write_clean_file(txt_file, type_, title_key, unit_key, skip=1):
-    csv_file = txt_file.replace('.txt', type_ + '.csv', 1)
+def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, pathToData='.', pathToTemp='.'):
+    data_file = pathToData+'/'+txt_file
+    csv_file = pathToTemp+'/'+txt_file.replace('.txt', type_ + '.csv', 1)
     # Header
     have_header_str = None
-    with open(txt_file, "r", encoding='cp437') as input_file:
+    with open(data_file, "r", encoding='cp437') as input_file:
         with open(csv_file, "w") as output:
             try:
                 for line in input_file:
@@ -498,7 +499,7 @@ def write_clean_file(txt_file, type_, title_key, unit_key, skip=1):
     num_skips = 0
     length = 0
     unit_key_found = False
-    with open(txt_file, "r", encoding='cp437') as input_file:  # reads all characters even bad ones
+    with open(data_file, "r", encoding='cp437') as input_file:  # reads all characters even bad ones
         with open(csv_file, "a") as output:
             for line in input_file:
                 if line.__contains__(unit_key):

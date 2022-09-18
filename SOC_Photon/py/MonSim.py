@@ -251,8 +251,8 @@ if __name__ == '__main__':
         date_ = datetime.now().strftime("%y%m%d")
 
         # Transient  inputs
-        # time_end = None
-        time_end = 35200
+        time_end = None
+        # time_end = 35200
         t_Ib_fail = None
         init_time_in = None
         use_ib_mon_in = False
@@ -272,30 +272,42 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
         # Regression suite
-        # data_file_old_txt = '../dataReduction/ampHiFail20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/ampLoFail20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/ampHiFailNoise20220914.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/rapidTweakRegression20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/rapidTweakRegression40C_20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/slowTweakRegression20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/triTweakDisch20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/satSit20220914.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/ampHiFailSlow20220914.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = '../dataReduction/vHiFail20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/pulse20220914.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
-        # data_file_old_txt = '../dataReduction/tbFailMod20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = '../dataReduction/tbFailHdwe20220914.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = '../dataReduction/real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
-        # data_file_old_txt = '../dataReduction/real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
-        # data_file_old_txt = '../dataReduction/real world Xp20 30C 20220917.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -11110
+        # data_file_old_txt = 'ampHiFail20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'ampLoFail20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'ampHiFailNoise20220914.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = 'rapidTweakRegression20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'rapidTweakRegression40C_20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'slowTweakRegression20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'triTweakDisch20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'satSit20220914.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = 'ampHiFailSlow20220914.txt'; unit_key = 'pro_2022';
+        # data_file_old_txt = 'vHiFail20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'pulse20220914.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
+        # data_file_old_txt = 'tbFailMod20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'tbFailHdwe20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
+        # data_file_old_txt = 'real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
+        # data_file_old_txt = 'real world Xp20 30C 20220917.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -11110
+        # data_file_old_txt = 'EKF_Track 20200917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr100 20200917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr200 20200917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr300 20200917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr400 20200917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr1000 20200917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr2000 20200917.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = 'EKF_Track Dr2000 Noise 20200917.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
+        pathToSavePdfTo = '../dataReduction/figures'
+        pathToData = '../dataReduction'
+        pathToTemp = '../dataReduction/temp'
 
         # Load mon v4 (old)
-        data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key, skip=skip)
+        data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
+                                           skip=skip, pathToData=pathToData, pathToTemp=pathToTemp)
         cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'ioc', 'voc_soc', 'Vsat', 'dV_dyn', 'Voc_stat',
                 'Voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
@@ -303,7 +315,8 @@ if __name__ == '__main__':
 
         # Load sel (old)
         sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
-                                          unit_key=unit_key_sel, skip=skip)
+                                          unit_key=unit_key_sel, skip=skip, pathToData=pathToData,
+                                          pathToTemp=pathToTemp)
         cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
                     'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_diff', 'ib_diff_f',
                     'voc_soc', 'e_w', 'e_w_f',
@@ -320,7 +333,8 @@ if __name__ == '__main__':
 
         # Load _m v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
-                                               unit_key=unit_key_sim, skip=skip)
+                                               unit_key=unit_key_sim, skip=skip, pathToData=pathToData,
+                                               pathToTemp=pathToTemp)
         cols_sim = ('c_time', 'chm_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
                     'ib_in_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
         if data_file_sim_clean:
@@ -362,7 +376,7 @@ if __name__ == '__main__':
                                         n_fig=n_fig, suffix='_ver')  # sim over mon verify
         n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig)  # all over all
-        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='../dataReduction/figures')
+        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
         cleanup_fig_files(fig_files)
 
         plt.show()

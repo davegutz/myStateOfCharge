@@ -8,10 +8,10 @@ const String unit = "pro_20220917";  // Disable e_wrap saturated; tweak, history
 
 // Sensor biases
 #define SHUNT_GAIN            -1333.// Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)
-#define CURR_BIAS_AMP         -0.24 // Calibration of amplified shunt sensor (* 'DA'), A
-#define CURR_BIAS_NOA         -1.1  // Calibration of non-amplified shunt sensor (* 'DB'), A
-#define CURR_SCALE_NOA        0.94  // Hardware to match data (* 'SA')
-#define CURR_SCALE_AMP        0.892 // Hardware to match data (* 'SB')
+#define CURR_BIAS_AMP         0.    // Calibration of amplified shunt sensor (* 'DA'), A
+#define CURR_BIAS_NOA         0.    // Calibration of non-amplified shunt sensor (* 'DB'), A
+#define CURR_SCALE_NOA        1.    // Hardware to match data (* 'SA')
+#define CURR_SCALE_AMP        1.    // Hardware to match data (* 'SB')
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'Di'), A
 #define VOLT_BIAS             1.8   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
