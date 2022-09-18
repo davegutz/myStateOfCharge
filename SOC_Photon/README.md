@@ -434,7 +434,7 @@ Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
   slowTweakRegressionBucket: Bm2;Bs1;D^15;Xp11
 
   EKF_Track:  investigate EKF tracking
-         D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr2000;DP1;v26;XR;
+         D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr100;DP1;v26;XR;
           XS;v0;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;
 
   EKF_Track Noise:  investigate EKF tracking

@@ -289,13 +289,14 @@ if __name__ == '__main__':
         # data_file_old_txt = 'real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
         # data_file_old_txt = 'real world Xp20 30C 20220917.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -11110
         # data_file_old_txt = 'EKF_Track 20200917.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'EKF_Track Dr100 20200917.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'EKF_Track Dr200 20200917.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'EKF_Track Dr300 20200917.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'EKF_Track Dr400 20200917.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'EKF_Track Dr1000 20200917.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'EKF_Track Dr2000 20200917.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = 'EKF_Track Dr2000 Noise 20200917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr100 v20220917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr200 v20220917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr400 v20220917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr800 v20220917.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = 'EKF_Track Dr2000 v20220917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr200 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr400 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr800 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"
