@@ -29,6 +29,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     plt.rcParams['axes.grid'] = True
     from datetime import datetime, timedelta
+    global mon_old
 
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
@@ -53,6 +54,7 @@ if __name__ == '__main__':
         Bsim_in = None
         skip = 1
         zero_zero_in = False
+        drive_ekf_in = False
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
@@ -83,7 +85,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'EKF_Track Dr400 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr100 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr800 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = 'EKF_Track Dr100 zero v20220917.txt'; unit_key = 'pro_2022'; zero_zero_in = True
+        data_file_old_txt = 'EKF_Track Dr100 zero v20220917.txt'; unit_key = 'pro_2022'; zero_zero_in = True; drive_ekf_in = True
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"
@@ -165,7 +167,7 @@ if __name__ == '__main__':
                                                              use_Vb_raw=use_Vb_raw, scale_r_ss=scale_r_ss_in,
                                                              s_hys_sim=scale_hys_sim_in, s_hys_mon=scale_hys_mon_in,
                                                              dvoc_sim=dvoc_sim_in, dvoc_mon=dvoc_mon_in,
-                                                             Bmon=Bmon_in, Bsim=Bsim_in)
+                                                             Bmon=Bmon_in, Bsim=Bsim_in, drive_ekf=drive_ekf_in)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots

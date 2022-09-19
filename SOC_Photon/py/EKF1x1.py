@@ -16,6 +16,8 @@
 """1x1 General Purpose Extended Kalman Filter.   Inherit from this class and include ekf_predict and
 ekf_update methods in the parent."""
 
+global mon_old
+
 
 class EKF1x1:
     """1x1 General Purpose Extended Kalman Filter.   Inherit from this class and include ekf_predict and
@@ -70,7 +72,7 @@ class EKF1x1:
         self.x_ekf = soc
         self.P = p_init
 
-    def predict_ekf(self, u):
+    def predict_ekf(self, u, u_old=None):
         """1x1 Extended Kalman Filter predict
         Inputs:
             u   1x1 input, =ib, A
@@ -80,14 +82,17 @@ class EKF1x1:
             x   1x1 Kalman state variable = Vsoc (0-1 fraction)
             P   1x1 Kalman probability
         """
-        self.u_ekf = u
+        if u_old:
+            self.u_ekf = u_old
+        else:
+            self.u_ekf = u
         self.Fx, self.Bu = self.ekf_predict()
         self.x_ekf = self.Fx*self.x_ekf + self.Bu*self.u_ekf
         self.P = self.Fx * self.P * self.Fx + self.Q
         self.x_prior = self.x_ekf
         self.P_prior = self.P
 
-    def update_ekf(self, z, x_min, x_max):
+    def update_ekf(self, z, x_min, x_max, z_old=None):
         """ 1x1 Extended Kalman Filter update
             Inputs:
                 z   1x1 input, =voc, dynamic predicted by other model, V
@@ -103,7 +108,10 @@ class EKF1x1:
                 SI  1x1 system uncertainty inverse
         """
         self.hx, self.H = self.ekf_update()
-        self.z_ekf = z
+        if z_old:
+            self.z_ekf = z_old
+        else:
+            self.z_ekf = z
         pht = self.P*self.H
         self.S = self.H*pht + self.R
         if abs(self.S) > 1e-12:

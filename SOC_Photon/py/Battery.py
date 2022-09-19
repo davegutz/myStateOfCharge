@@ -367,7 +367,8 @@ class BatteryMonitor(Battery, EKF1x1):
     def assign_soc_s(self, soc_s):
         self.soc_s = soc_s
 
-    def calculate(self, chem, temp_c, vb, ib, dt, reset, q_capacity=None, dc_dc_on=None, rp=None, d_voc=None):  # BatteryMonitor
+    def calculate(self, chem, temp_c, vb, ib, dt, reset, q_capacity=None, dc_dc_on=None, rp=None, d_voc=None,  # BatteryMonitor
+                  u_old=None, z_old=None):
         self.chm = chem
         if self.chm == 0:
             self.lut_voc = self.lut_voc0
@@ -420,8 +421,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.R = self.scaler_r.calculate(ddq_dt)  # TODO this doesn't work right
         self.Q = EKF_Q_SD_NORM**2  # override
         self.R = EKF_R_SD_NORM**2  # override
-        self.predict_ekf(u=ddq_dt)  # u = d(q)/dt
-        self.update_ekf(z=self.voc_stat, x_min=0., x_max=1.)  # z = voc, voc_filtered = hx
+        self.predict_ekf(u=ddq_dt, u_old=u_old)  # u = d(q)/dt
+        self.update_ekf(z=self.voc_stat, x_min=0., x_max=1., z_old=z_old)  # z = voc, voc_filtered = hx
         self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         self.q_ekf = self.soc_ekf * self.q_capacity
         self.y_filt = self.y_filt_lag.calculate(in_=self.y_ekf, dt=min(dt, EKF_T_RESET), reset=False)
