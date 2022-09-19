@@ -1338,14 +1338,14 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   #ifdef USE_BLYNK
     Serial.printf("  v25: Blynk write\n");
   #endif
-  // Serial.printf("  v34: EKF detail\n");
+  Serial.printf("  v34: EKF detail\n");
   // Serial.printf("  v35: Randles balance\n");
-  Serial.printf("  v37: EKF short\n");
+  // Serial.printf("  v37: EKF short\n");
   // Serial.printf("  v75: voc_low check mod\n");
   // Serial.printf("  v76: vb model\n");
   // Serial.printf("  v78: Batt model sat\n");
   // Serial.printf("  v79: sat_ib model\n");
-  Serial.printf("  v96: CC sat\n");
+  // Serial.printf("  v96: CC sat\n");
 
   Serial.printf("V<?> - VOC(SOC) curve deltas\n");
   Serial.printf(" VM= "); Serial.printf("%7.3f", Mon->dv_voc_soc()); Serial.println(": Mon vsoc out, V [0]"); 
