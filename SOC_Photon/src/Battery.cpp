@@ -315,7 +315,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     if ( ddq_dt>0. && !rp.tweak_test() ) ddq_dt *= coul_eff_ * Sen->sclr_coul_eff;
     ddq_dt -= chem_.dqdt * q_capacity_ * T_rate;
     predict_ekf(ddq_dt);       // u = d(dq)/dt
-    update_ekf(voc_stat_, 0., 1.);  // z = voc_stat, estimated = voc_filtered = hx, predicted = est past
+    update_ekf(voc_stat_, 0., 1., Sen->control_time, Sen->now);  // z = voc_stat, estimated = voc_filtered = hx, predicted = est past
     soc_ekf_ = x_ekf();             // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
     q_ekf_ = soc_ekf_ * q_capacity_;
     delta_q_ekf_ = q_ekf_ - q_capacity_;
@@ -787,7 +787,7 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset, BatteryMoni
     soc_min_ = chem_.soc_min_T_->interp(temp_lim);
     q_min_ = soc_min_ * q_capacity_;
 
-    if ( rp.debug==26 && cp.publishS ) // print_serial_sim
+    if ( (rp.debug==2 || rp.debug==3)  && cp.publishS ) // print_serial_sim
     {
         double cTime;
         if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;

@@ -26,8 +26,9 @@
 #endif
 #include "EKF_1x1.h"
 #include <math.h>
-
-extern int8_t debug;
+#include "retained.h"
+extern RetainedPars rp; // Various parameters to be static at system level
+// extern int8_t debug;
 
 
 // class EKF_1x1
@@ -87,7 +88,7 @@ void EKF_1x1::init_ekf(double soc, double Pinit)
 
 // y <- C@x + D@u
 // Backward Euler integration of x
-void EKF_1x1::update_ekf(const double z, double x_min, double x_max)
+void EKF_1x1::update_ekf(const double z, double x_min, double x_max, const double control_time, const unsigned long int now)
 {
   /*1x1 Extended Kalman Filter update
   Inputs:
@@ -115,4 +116,12 @@ void EKF_1x1::update_ekf(const double z, double x_min, double x_max)
   P_ *= i_kh;
   x_post_ = x_;
   P_post_ = P_;
+  if ( rp.debug==3 )
+  {
+    double cTime;
+    if ( rp.tweak_test() ) cTime = double(now)/1000.;
+    else cTime = control_time;
+    Serial.printf("unit_e,%13.3f,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,\n",
+      cTime, Fx_, Bu_, Q_, R_, P_, S_, K_, u_, x_, y_, z_, x_prior_, P_prior_, x_post_, P_post_, hx_, H_);
+  }
 }

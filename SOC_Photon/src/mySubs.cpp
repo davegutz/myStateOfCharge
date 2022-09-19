@@ -38,16 +38,21 @@ extern RetainedPars rp;         // Various parameters to be static at system lev
 void print_all_header(void)
 {
     print_serial_header();
-  if ( rp.debug==26 )
+  if ( rp.debug==2  )
   {
     print_serial_sim_header();
     print_signal_sel_header();
+  }
+  if ( rp.debug==3  )
+  {
+    print_serial_sim_header();
+    print_serial_ekf_header();
   }
 }
 void print_high_speed_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   static uint8_t last_read_debug = rp.debug;     // Remember first time with new debug to print headers
-  if ( ( rp.debug==4 || rp.debug==26 ) )
+  if ( ( rp.debug==1 || rp.debug==2 || rp.debug==3 ) )
   {
     if ( reset || (last_read_debug != rp.debug) )
     {
@@ -69,7 +74,7 @@ void print_high_speed_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mo
 }
 void print_serial_header(void)
 {
-  if ( ( rp.debug==4 || rp.debug==26 ) )
+  if ( ( rp.debug==1 || rp.debug==2  || rp.debug==3 ) )
   {
     Serial.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
     if ( !cp.blynking )
@@ -78,12 +83,12 @@ void print_serial_header(void)
 }
 void print_serial_sim_header(void)
 {
-  if ( rp.debug==26 ) // print_serial_sim_header
+  if ( rp.debug==2  || rp.debug==3 ) // print_serial_sim_header
     Serial.printf("unit_m,  c_time,       chm_s,  Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,\n");
 }
 void print_signal_sel_header(void)
 {
-  if ( rp.debug==26 ) // print_signal_sel_header
+  if ( rp.debug==2  ) // print_signal_sel_header
     Serial.printf("unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,");
     Serial.printf("    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f, ");
     Serial.printf("  fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,\n");
@@ -95,6 +100,11 @@ void print_signal_sel_header(void)
           //                                                          vb_sel_stat, Vb_hdwe, Vb_model,mod_vb(), Vb,
           //                                                                                    Tb_hdwe, Tb, mod_tb(), Tb_filt,
           //         fltw_, falw_, ib_rate_, ib_quiet_, tb_sel_stat_, cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_,
+}
+void print_serial_ekf_header(void)
+{
+  if ( rp.debug==3  ) // print_serial_ekf_header
+    Serial.printf("unit_e,c_time,Fx_, Bu_, Q_, R_, P_, S_, K_, u_, x_, y_, z_, x_prior_, P_prior_, x_post_, P_post_, hx_, H_,\n");
 }
 
 // Print strings
@@ -351,7 +361,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nv-2;Pf; for fails.  prints=%ld\n\n",
       disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
 
-  if ( rp.debug==5 ) debug_5();
+  // if ( rp.debug==5 ) debug_5();
 
   frame += 1;
   if (frame>3) frame = 0;

@@ -80,6 +80,7 @@ void print_high_speed_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mo
 void print_serial_header(void);
 void print_serial_sim_header(void);
 void print_signal_sel_header(void);
+void print_serial_ekf_header(void);
 void sense_synth_select(const boolean reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen);
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);

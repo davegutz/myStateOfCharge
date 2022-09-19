@@ -1323,9 +1323,10 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("v= "); Serial.print(rp.debug); Serial.println(": verbosity, -128 - +128. [4]");
   Serial.printf("  -<>: Negative - Arduino plot compatible\n");
   Serial.printf("  v-1: GP\n");
-  Serial.printf("   v3: Power\n");
-  Serial.printf("   v4: GP\n");
-  Serial.printf("   v5: OLED display\n");
+  Serial.printf("   v1: GP\n");
+  Serial.printf("   v2: GP, Sim & Sel\n");
+  Serial.printf("   v3: EKF\n");
+  // Serial.printf("   v5: OLED display\n");
   Serial.printf("   v7: EKF solver init\n");
   // Serial.printf("   v8: Randles SS init\n");
   Serial.printf(" v-11: Summary\n");
@@ -1337,7 +1338,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   #ifdef USE_BLYNK
     Serial.printf("  v25: Blynk write\n");
   #endif
-  Serial.printf("  v26: GP, Sim & Sel\n");
   // Serial.printf("  v34: EKF detail\n");
   // Serial.printf("  v35: Randles balance\n");
   Serial.printf("  v37: EKF short\n");
