@@ -610,12 +610,11 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
 {
     temp_c_ = Sen->Tb_filt;
     double curr_in = Sen->Ib_model_in;
-    const double dt = min(Sen->T, F_MAX_T);
+    dt_ = Sen->T;
     ib_in_ = curr_in;
     if ( reset ) ib_fut_ = ib_in_;
     ib_ = max(min(ib_fut_, IMAX_NUM), -IMAX_NUM);  //  Past value ib_.  Overflow protection when ib_ past value used
 
-    dt_ = dt;
     vsat_ = calc_vsat();
 
     double soc_lim = max(min(soc_, 1.0), -0.2);  // slightly beyond
@@ -629,7 +628,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     // Dynamic emf
     // Hysteresis model
     hys_->calculate(ib_in_, soc_);
-    dv_hys_ = hys_->update(dt);
+    dv_hys_ = hys_->update(dt_);
     voc_ = voc_stat_ + dv_hys_;
     ioc_ = hys_->ioc();
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
@@ -637,7 +636,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     Randles_->calc_x_dot(u);
     if ( dt_<=RANDLES_T_MAX )
     {
-        Randles_->update(dt);
+        Randles_->update(dt_);
         vb_ = Randles_->y(0);
     }
     else    // aliased, unstable if T<0.5.  TODO:  consider deleting Randles model (hardware filters)
@@ -669,8 +668,8 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     // if ( rp.debug==79 ) Serial.printf("temp_c_, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib_fut, ib,=   %7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f, %7.3f,\n",
     //     temp_c_, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
 
-    // if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatterySim::calculate:,  dt,tempC,curr,soc_,voc,,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
-    //  dt,temp_c_, ib_, soc_, voc_, dv_dyn_, vb_);
+    // if ( rp.debug==78 || rp.debug==7 ) Serial.printf("BatterySim::calculate:,  dt_,tempC,curr,soc_,voc,,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
+    //  dt_,temp_c_, ib_, soc_, voc_, dv_dyn_, vb_);
     
     // if ( rp.debug==76 ) Serial.printf("BatterySim::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in=%7.3f,ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, vb_dc_dc=%7.3f, vb=%7.3f\n",
     //     soc_, temp_c_, ib_in_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, vb_dc_dc, vb_);

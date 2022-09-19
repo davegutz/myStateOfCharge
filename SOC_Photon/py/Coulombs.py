@@ -128,7 +128,7 @@ class Coulombs:
         """Capacity"""
         try:
             res = self.q_cap_rated_scaled * (1. + dqdt * (temp_c - self.t_rated))
-        finally:
+        except:
             res = 1
         return res
         # return self.q_cap_rated_scaled * (1. + dqdt * (temp_c - self.t_rated))

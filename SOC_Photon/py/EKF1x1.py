@@ -48,17 +48,17 @@ class EKF1x1:
         """Returns representation of the object"""
         s = prefix + "EKF1x1:\n"
         s += "  Inputs:\n"
-        s += "  z = {:7.3f}\n".format(self.z_ekf)
-        s += "  R = {:10.6f}\n".format(self.R)
-        s += "  Q = {:10.6f}\n".format(self.Q)
-        s += "  H = {:7.3f}\n".format(self.H)
+        s += "  z = {:10.6g}\n".format(self.z_ekf)
+        s += "  R = {:10.6g}\n".format(self.R)
+        s += "  Q = {:10.6g}\n".format(self.Q)
+        s += "  H = {:10.6g}\n".format(self.H)
         s += "  Outputs:\n"
-        s += "  x  = {:7.3f}\n".format(self.x_ekf)
-        s += "  hx = {:7.3f}\n".format(self.hx)
-        s += "  y  = {:7.3f}\n".format(self.y_ekf)
-        s += "  P  = {:10.6f}\n".format(self.P)
-        s += "  K  = {:10.6f}\n".format(self.K)
-        s += "  S  = {:10.6f}\n".format(self.S)
+        s += "  x  = {:10.6g}\n".format(self.x_ekf)
+        s += "  hx = {:10.6g}\n".format(self.hx)
+        s += "  y  = {:10.6g}\n".format(self.y_ekf)
+        s += "  P  = {:10.6g}\n".format(self.P)
+        s += "  K  = {:10.6g}\n".format(self.K)
+        s += "  S  = {:10.6g}\n".format(self.S)
         return s
 
     def ekf_predict(self):

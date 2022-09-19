@@ -41,7 +41,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     if fig_files is None:
         fig_files = []
 
-    if mo.ibmh:
+    if mo.ibmh is not None:
         plt.figure()  # 1a
         n_fig += 1
         plt.subplot(321)
@@ -267,14 +267,14 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.legend(loc=1)
     plt.subplot(132)
     plt.plot(mo.time, mo.Vb, color='orange', linestyle='-', label='Vb')
-    if mo.Vb_h:
+    if mo.Vb_h is not None:
         plt.plot(mo.time, mo.Vb_h, color='cyan', linestyle='--', label='Vb_hdwe')
     plt.plot(mv.time, mv.Vb, color='green', linestyle='-.', label='Vb_ver')
     plt.plot(sv.time, sv.vb, color='black', linestyle='-.', label='Vb_s_ver')
     plt.legend(loc=1)
     plt.subplot(133)
     plt.plot(mo.soc, mo.Vb, color='orange', linestyle='-', label='Vb')
-    if mo.Vb_h:
+    if mo.Vb_h is not None:
         plt.plot(mo.soc, mo.Vb_h, color='cyan', linestyle='--', label='Vb_hdwe')
     plt.plot(mv.soc, mv.Vb, color='green', linestyle='-.', label='Vb_ver')
     plt.plot(sv.soc, sv.vb, color='black', linestyle='-.', label='Vb_s_ver')
@@ -352,7 +352,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mo.time, mo.Vb, color='red', linestyle='-', label='Vb')
         plt.plot(mo.time, mo.Voc, color='blue',  linestyle='--', label='Voc')
         plt.plot(mo.time, mo.Voc_stat, color='green', linestyle='-.', label='Voc_stat')
-        if mo.Vb_h:
+        if mo.Vb_h is not None:
             plt.plot(mo.time, mo.voc_soc, color='black', linestyle=':', label='voc_soc')
             plt.plot(mo.time, mo.Vb_h, color='cyan', linestyle=':', label='Vb_hdwe')
         plt.legend(loc=1)
@@ -416,10 +416,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(smv.time, np.array(smv.soc_s)-.2, color='black', linestyle='--', label='smv.soc_s_ver-.2')
         plt.legend(loc=1)
         plt.subplot(222)
-        if mo.Vb_h:
+        if mo.Vb_h is not None:
             plt.plot(mo.soc, mo.Vb_h, color='magenta', linestyle=':', label='Vb_hdwe')
         plt.plot(mo.soc, mo.Voc_stat, color='cyan', linestyle=':', label='Voc_stat')
-        if mo.voc_soc:
+        if mo.voc_soc is not None:
             plt.plot(mo.soc, mo.voc_soc, color='blue', linestyle='-', label='voc_soc')
         plt.plot(mv.soc, mv.voc_soc, color='red', linestyle='--', label='voc_soc_ver')
         plt.plot(so.soc_s, so.voc_stat_s, color='green', linestyle='-.', label='voc_stat_s')
@@ -429,10 +429,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mv.soc, mv.voc_stat, color='orange', linestyle='--', label='voc_stat_ver')
         plt.legend(loc=1)
         plt.subplot(224)
-        if mo.Vb_h:
+        if mo.Vb_h is not None:
             plt.plot(mo.time, mo.Vb_h, color='magenta', linestyle=':', label='Vb_hdwe')
         plt.plot(mo.time, mo.Voc_stat, color='cyan', linestyle=':', label='Voc_stat')
-        if mo.voc_soc:
+        if mo.voc_soc is not None:
             plt.plot(mo.time, mo.voc_soc, color='blue', linestyle='-', label='voc_soc')
         plt.plot(mv.time, mv.voc_soc, color='red', linestyle='--', label='voc_soc_ver')
         plt.plot(so.time, so.voc_stat_s, color='green', linestyle='-.', label='voc_stat_s')
@@ -455,10 +455,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.subplot(222)
         plt.plot(mo.soc, mo.Voc_stat, color='magenta', linestyle='-', label='Voc_stat(soc) = z_')
         plt.plot(mo.soc, mo.Voc_ekf, color='cyan', linestyle='--', label='Voc_ekf(soc) = Hx_')
-        if mo.voc_soc:
+        if mo.voc_soc is not None:
             plt.plot(mo.soc, mo.voc_soc, color='green', linestyle='-.', label='voc_soc')
         plt.plot(mv.soc, mv.voc_soc, color='orange', linestyle=':', label='voc_soc_ver')
-        if mo.Vb_h:
+        if mo.Vb_h is not None:
             plt.plot(mo.soc, mo.Vb_h, color='blue', linestyle='-', label='Vb')
         plt.plot(sv.soc, sv.voc_stat, color='red', linestyle=':', label='voc_stat_s_ver')
         plt.ylim(12.5, 14.5)
@@ -467,7 +467,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mo.soc, mo.Voc_stat, color='magenta', linestyle='-', label='Voc_stat(soc) = z_')
         plt.plot(mv.soc, mv.Voc_stat, color='black', linestyle='--', label='Voc_stat(soc) = z_  ver')
         plt.plot(mv.soc, mv.Voc_ekf, color='cyan', linestyle=':', label='Voc_ekf(soc) = Hx_ ver')
-        if mo.Vb_h:
+        if mo.Vb_h is not None:
             plt.plot(mo.soc, mo.Vb_h, color='blue', linestyle='-', label='Vb')
         plt.plot(sv.soc, sv.voc_stat, color='red', linestyle=':', label='voc_stat_s_ver')
         plt.ylim(12.5, 14.5)
@@ -475,10 +475,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.subplot(224)
         plt.plot(mo.time, mo.Voc_stat, color='magenta', linestyle='-', label='Voc_stat(soc) = z_')
         plt.plot(mo.time, mo.Voc_ekf, color='cyan', linestyle='--', label='Voc_ekf(soc) = Hx_')
-        if mo.voc_soc:
+        if mo.voc_soc is not None:
             plt.plot(mo.time, mo.voc_soc, color='green', linestyle='-.', label='voc_soc')
         plt.plot(mv.time, mv.voc_soc, color='orange', linestyle=':', label='voc_soc_ver')
-        if mo.Vb_h:
+        if mo.Vb_h is not None:
             plt.plot(mo.time, mo.Vb_h, color='blue', linestyle='-', label='Vb')
         plt.plot(mv.time, mv.Voc_stat, color='black', linestyle=':', label='Voc_stat(soc) = z_  ver')
         plt.plot(mv.time, mv.Voc_ekf, color='cyan', linestyle=':', label='Voc_ekf(soc) = Hx_ ver')
@@ -486,7 +486,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.ylim(12.5, 14.5)
         plt.legend(loc=1)
 
-        if mo.Fx.any():
+        if mo.Fx is not None:
             plt.figure()  # ekf  5
             n_fig += 1
             plt.subplot(331)
@@ -496,6 +496,9 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
             plt.subplot(332)
             plt.plot(mo.time, mo.z, color='blue', linestyle='-', label='z')
             plt.plot(mv.time, mv.z_ekf, color='red', linestyle='--', label='z ver')
+            plt.legend(loc=1)
+            plt.subplot(333)
+            plt.plot(smv.time, smv.reset_s, color='green', linestyle='--', label='reset_s_ver')
             plt.legend(loc=1)
             plt.subplot(334)
             plt.plot(mo.time, mo.Fx, color='blue', linestyle='-', label='Fx')
@@ -583,7 +586,7 @@ def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, path_to_data=
                         if have_header_str is None:
                             have_header_str = True  # write one title only
                             output.write(line)
-            finally:
+            except:
                 print("DataOverModel381:", line)  # last line
     # Data
     num_lines = 0
@@ -661,7 +664,7 @@ class SavedData:
                     while self.Ib[self.zero_end] == 0.0:  # stop after first non-zero
                         self.zero_end += 1
                     self.zero_end -= 1  # backup one
-                finally:
+                except:
                     self.zero_end = 0
             self.time_ref = self.time[self.zero_end]
             self.time -= self.time_ref
