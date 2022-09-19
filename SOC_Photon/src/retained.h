@@ -71,7 +71,7 @@ struct RetainedPars
   float nS = NS;                // Number of series batteries in bank, e.g. '2P1S'
   uint8_t mon_mod = MON_CHEM;   // Monitor battery chemistry type
   uint8_t sim_mod = SIM_CHEM;   // Simulation battery chemistry type
-  float vb_scale = VB_CONV_GAIN;  // Calibration scalar for Vb. V/count
+  float vb_scale = 1.;          // Calibration scalar for Vb. V/count
 
   // Corruption test on bootup.  Needed because retained parameter memory is not managed by the compiler as it relies on
   // battery.  Small compilation changes can change where in this memory the program points, too.
@@ -118,7 +118,7 @@ struct RetainedPars
     this->nS = NS;
     this->mon_mod = MON_CHEM;
     this->sim_mod = SIM_CHEM;
-    this->vb_scale = VB_CONV_GAIN;
+    this->vb_scale = VB_SCALE;
   }
   void large_reset()
   {
@@ -170,7 +170,7 @@ struct RetainedPars
     Serial.printf("  nS=%5.2f;*BS<> e.g. '2P1S'\n", this->nS);
     Serial.printf("  mon_mod=%d;*Bm<> 0=Battle, 1=LION\n", this->mon_mod);
     Serial.printf("  sim_mod=%d;*Bs<> 0=Battle, 1=LION\n", this->sim_mod);
-    Serial.printf("  vb_scale=%d;*SV<>\n", this->sim_mod);
+    Serial.printf("  vb_scale=%7.3f;*SV<>\n", this->vb_scale);
   }
 
   // Compare memory to local_config.h
@@ -181,7 +181,7 @@ struct RetainedPars
     Serial.printf("bias noa %7.3f   %7.3f\n", CURR_BIAS_NOA, ib_bias_noa);
     Serial.printf("sclr amp %7.3f   %7.3f\n", CURR_SCALE_AMP, ib_scale_amp);
     Serial.printf("sclr noa %7.3f   %7.3f\n", CURR_SCALE_NOA, ib_scale_noa);
-    Serial.printf("sclr vb  %9.6f   %9.6f\n", VB_CONV_GAIN,   vb_scale);
+    Serial.printf("sclr vb  %7.3f   %7.3f\n", VB_SCALE, vb_scale);
     Serial.printf("mon chem %d   %d\n", MON_CHEM, mon_mod);
     Serial.printf("sim chem %d   %d\n", SIM_CHEM, sim_mod);
   }
@@ -193,7 +193,7 @@ struct RetainedPars
     ib_bias_noa = CURR_BIAS_NOA;
     ib_scale_amp = CURR_SCALE_AMP;
     ib_scale_noa = CURR_SCALE_NOA;
-    vb_scale = VB_CONV_GAIN;
+    vb_scale = VB_SCALE;
     mon_mod = MON_CHEM;
     sim_mod = SIM_CHEM;
   }

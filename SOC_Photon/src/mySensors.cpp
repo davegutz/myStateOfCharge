@@ -842,7 +842,7 @@ void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const 
 void Sensors::vb_load(const byte vb_pin)
 {
     Vb_raw = analogRead(vb_pin);
-    Vb_hdwe =  float(Vb_raw)*rp.vb_scale + float(VBATT_A) + rp.vb_bias;
+    Vb_hdwe =  float(Vb_raw)*VB_CONV_GAIN*rp.vb_scale + float(VBATT_A) + rp.vb_bias;
 }
 
 // Print analog voltage

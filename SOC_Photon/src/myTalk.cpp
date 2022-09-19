@@ -1272,7 +1272,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Sn= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->sclr()); Serial.printf(": sclr noa [1]\n"); 
   Serial.printf("  Sr= "); Serial.print(Sen->Sim->Sr()); Serial.println(": Scalar res sim"); 
   Serial.printf(" *Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println(": Sat mod ctbk sclr"); 
-  Serial.printf(" *SV= "); Serial.printf("%7.3f", rp.vb_scale); Serial.printf(": scale vb sen [%7.3f]\n", VB_CONV_GAIN); 
+  Serial.printf(" *SV= "); Serial.printf("%7.3f", rp.vb_scale); Serial.printf(": scale vb sen [%7.3f]\n", VB_SCALE); 
 
   Serial.printf("F<?>   Faults\n");
   Serial.printf("  Fc= "); Serial.printf("%7.3f", Sen->Flt->cc_diff_sclr()); Serial.printf(": sclr cc_diff thr ^ [1]\n"); 
