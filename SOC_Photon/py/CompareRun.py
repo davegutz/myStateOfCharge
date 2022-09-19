@@ -52,6 +52,7 @@ if __name__ == '__main__':
         Bmon_in = None
         Bsim_in = None
         skip = 1
+        zero_zero_in = False
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
@@ -80,8 +81,9 @@ if __name__ == '__main__':
         # data_file_old_txt = 'EKF_Track Dr2000 v20220917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr200 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr400 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = 'EKF_Track Dr100 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr100 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr800 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = 'EKF_Track Dr100 zero v20220917.txt'; unit_key = 'pro_2022'; zero_zero_in = True
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"
@@ -128,7 +130,8 @@ if __name__ == '__main__':
         if ekf_file_clean:
             ekf_old_raw = np.genfromtxt(ekf_file_clean, delimiter=',', names=True, usecols=cols_ekf, dtype=float,
                                         encoding=None).view(np.recarray)
-        mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, ekf=ekf_old_raw, time_end=time_end)
+        mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, ekf=ekf_old_raw, time_end=time_end,
+                            zero_zero=zero_zero_in)
 
         # Load sim _s v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,

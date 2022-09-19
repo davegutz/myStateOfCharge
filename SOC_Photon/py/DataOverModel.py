@@ -490,40 +490,36 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
             plt.figure()  # ekf  5
             n_fig += 1
             plt.subplot(331)
-            plt.plot(mo.time, mo.Fx, color='blue', linestyle='-', label='Fx')
-            plt.plot(mv.time, mv.Fx, color='red', linestyle='--', label='Fx ver')
-            plt.legend(loc=1)
-            plt.subplot(332)
-            plt.plot(mo.time, mo.Bu, color='blue', linestyle='-', label='Bu')
-            plt.plot(mv.time, mv.Bu, color='red', linestyle='--', label='Bu ver')
-            plt.legend(loc=1)
-            plt.subplot(333)
-            plt.plot(mo.time, mo.Q, color='blue', linestyle='-', label='Q')
-            plt.plot(mv.time, mv.Q, color='red', linestyle='--', label='Q ver')
-            plt.legend(loc=1)
-            plt.subplot(334)
-            plt.plot(mo.time, mo.R, color='blue', linestyle='-', label='R')
-            plt.plot(mv.time, mv.R, color='red', linestyle='--', label='R ver')
-            plt.legend(loc=1)
-            plt.subplot(335)
-            plt.plot(mo.time, mo.P, color='blue', linestyle='-', label='P')
-            plt.plot(mv.time, mv.P, color='red', linestyle='--', label='P ver')
-            plt.legend(loc=1)
-            plt.subplot(336)
-            plt.plot(mo.time, mo.S, color='blue', linestyle='-', label='S')
-            plt.plot(mv.time, mv.S, color='red', linestyle='--', label='S ver')
-            plt.legend(loc=1)
-            plt.subplot(337)
-            plt.plot(mo.time, mo.K, color='blue', linestyle='-', label='K')
-            plt.plot(mv.time, mv.K, color='red', linestyle='--', label='K ver')
-            plt.legend(loc=1)
-            plt.subplot(338)
             plt.plot(mo.time, mo.u, color='blue', linestyle='-', label='u')
             plt.plot(mv.time, mv.u_ekf, color='red', linestyle='--', label='u ver')
             plt.legend(loc=1)
+            plt.subplot(332)
+            plt.plot(mo.time, mo.z, color='blue', linestyle='-', label='z')
+            plt.plot(mv.time, mv.z_ekf, color='red', linestyle='--', label='z ver')
+            plt.legend(loc=1)
+            plt.subplot(334)
+            plt.plot(mo.time, mo.Fx, color='blue', linestyle='-', label='Fx')
+            plt.plot(mv.time, mv.Fx, color='red', linestyle='--', label='Fx ver')
+            plt.legend(loc=1)
+            plt.subplot(335)
+            plt.plot(mo.time, mo.Bu, color='blue', linestyle='-', label='Bu')
+            plt.plot(mv.time, mv.Bu, color='red', linestyle='--', label='Bu ver')
+            plt.legend(loc=1)
+            plt.subplot(336)
+            plt.plot(mo.time, mo.Q, color='blue', linestyle='-', label='Q')
+            plt.plot(mv.time, mv.Q, color='red', linestyle='--', label='Q ver')
+            plt.legend(loc=1)
+            plt.subplot(337)
+            plt.plot(mo.time, mo.R, color='blue', linestyle='-', label='R')
+            plt.plot(mv.time, mv.R, color='red', linestyle='--', label='R ver')
+            plt.legend(loc=1)
+            plt.subplot(338)
+            plt.plot(mo.time, mo.P, color='blue', linestyle='-', label='P')
+            plt.plot(mv.time, mv.P, color='red', linestyle='--', label='P ver')
+            plt.legend(loc=1)
             plt.subplot(339)
-            plt.plot(mo.time, mo.x, color='blue', linestyle='-', label='x')
-            plt.plot(mv.time, mv.x_ekf, color='red', linestyle='--', label='x ver')
+            plt.plot(mo.time, mo.S, color='blue', linestyle='-', label='S')
+            plt.plot(mv.time, mv.S, color='red', linestyle='--', label='S ver')
             plt.legend(loc=1)
             fig_file_name = filename + '_' + str(n_fig) + ".png"
             fig_files.append(fig_file_name)
@@ -532,34 +528,38 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
             plt.figure()  # ekf  5
             n_fig += 1
             plt.subplot(331)
+            plt.plot(mo.time, mo.K, color='blue', linestyle='-', label='K')
+            plt.plot(mv.time, mv.K, color='red', linestyle='--', label='K ver')
+            plt.legend(loc=1)
+            plt.subplot(332)
+            plt.plot(mo.time, mo.x, color='blue', linestyle='-', label='x')
+            plt.plot(mv.time, mv.x_ekf, color='red', linestyle='--', label='x ver')
+            plt.legend(loc=1)
+            plt.subplot(333)
             plt.plot(mo.time, mo.y, color='blue', linestyle='-', label='y')
             plt.plot(mv.time, mv.y_ekf, color='red', linestyle='--', label='y ver')
             plt.legend(loc=1)
-            plt.subplot(332)
-            plt.plot(mo.time, mo.z, color='blue', linestyle='-', label='z')
-            plt.plot(mv.time, mv.z_ekf, color='red', linestyle='--', label='z ver')
-            plt.legend(loc=1)
-            plt.subplot(333)
+            plt.subplot(334)
             plt.plot(mo.time, mo.x_prior, color='blue', linestyle='-', label='x_prior')
             plt.plot(mv.time, mv.x_prior, color='red', linestyle='--', label='x_prior ver')
             plt.legend(loc=1)
-            plt.subplot(334)
+            plt.subplot(335)
             plt.plot(mo.time, mo.P_prior, color='blue', linestyle='-', label='P_prior')
             plt.plot(mv.time, mv.P_prior, color='red', linestyle='--', label='P_prior ver')
             plt.legend(loc=1)
-            plt.subplot(335)
+            plt.subplot(336)
             plt.plot(mo.time, mo.x_post, color='blue', linestyle='-', label='x_post')
             plt.plot(mv.time, mv.x_post, color='red', linestyle='--', label='x_post ver')
             plt.legend(loc=1)
-            plt.subplot(336)
+            plt.subplot(337)
             plt.plot(mo.time, mo.P_post, color='blue', linestyle='-', label='P_post')
             plt.plot(mv.time, mv.P_post, color='red', linestyle='--', label='P_post ver')
             plt.legend(loc=1)
-            plt.subplot(337)
+            plt.subplot(338)
             plt.plot(mo.time, mo.hx, color='blue', linestyle='-', label='hx')
             plt.plot(mv.time, mv.hx, color='red', linestyle='--', label='hx ver')
             plt.legend(loc=1)
-            plt.subplot(338)
+            plt.subplot(339)
             plt.plot(mo.time, mo.H, color='blue', linestyle='-', label='H')
             plt.plot(mv.time, mv.H, color='red', linestyle='--', label='H ver')
             plt.legend(loc=1)
@@ -615,7 +615,7 @@ def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, path_to_data=
 
 
 class SavedData:
-    def __init__(self, data=None, sel=None, ekf=None, time_end=None):
+    def __init__(self, data=None, sel=None, ekf=None, time_end=None, zero_zero=False):
         if data is None:
             self.i = 0
             self.time = None
@@ -652,14 +652,17 @@ class SavedData:
             # manage data shape
             # Find first non-zero Ib and use to adjust time
             # Ignore initial run of non-zero Ib because resetting from previous run
-            try:
-                zero_start = np.where(self.Ib == 0.0)[0][0]
-                self.zero_end = zero_start
-                while self.Ib[self.zero_end] == 0.0:  # stop after first non-zero
-                    self.zero_end += 1
-                self.zero_end -= 1  # backup one
-            finally:
+            if zero_zero:
                 self.zero_end = 0
+            else:
+                try:
+                    zero_start = np.where(self.Ib == 0.0)[0][0]
+                    self.zero_end = zero_start
+                    while self.Ib[self.zero_end] == 0.0:  # stop after first non-zero
+                        self.zero_end += 1
+                    self.zero_end -= 1  # backup one
+                finally:
+                    self.zero_end = 0
             self.time_ref = self.time[self.zero_end]
             self.time -= self.time_ref
             # Truncate
