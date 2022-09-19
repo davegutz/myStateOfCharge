@@ -664,3 +664,362 @@ Sen::Fault:
   0000000000000   00000000000
   CBA98765x3210 xxA9876543210
   fltw=0     falw=0
+echo:  Pr, 4
+echo:  Pr, 0
+
+retained parameters (rp):
+  debug=0;*v<>
+  delta_q=-180047.158;*Ca<>
+  t_last= 25.000; deg C
+  delta_q_model= -180047.7;*Ca<>,*Cm<>
+  t_last_model= 25.000; deg C
+  shunt_gain_sclr=   1.000; A
+  ib_scale_amp=   1.000;*SA<> A
+  ib_bias_amp=   0.000;*DA<> A
+  ib_scale_noa=   1.000;*SB<> A
+  ib_bias_noa=  0.000;*DB<> A
+  ib_bias_all=  0.000;*Di<> A 
+  ib_select=0;*s<> -1=noa, 0=auto, 1=amp
+  vb_bias=  1.500;*Dv,*Dc<> V
+  modeling=7;*Xm<>
+  amp=  0.000;*Xa<> A pk
+  freq=  0.126;*Xf<> r/s
+  type=1;*Xt<> 0=sin, 1=sq, 2=tri
+  inj_bias=  0.000; A
+  tb_bias_hdwe=  0.000;*Dt<> deg C
+  s_cap_model=  1.000;*Sc<>
+  cutback_gain_scalar=  1.000;*Sk<>
+  isum=77;
+  delta_q_cinf_amp=  -296517.1; C
+  delta_q_dinf_amp=   296421.8; C
+  delta_q_cinf_noa= -296517.1; C
+  delta_q_dinf_noa=  296421.8; C
+  hys_scale=  0.300;*Sh
+  tweak_sclr_amp=  1.000;*Mk<>
+  tweak_sclr_noa=  1.000;*Nk<>
+  nP= 1.00;*BP<> e.g. '2P1S'
+  nS= 1.00;*BS<> e.g. '2P1S'
+  mon_mod=0;*Bm<> 0=Battle, 1=LION
+  sim_mod=0;*Bs<> 0=Battle, 1=LION
+
+command parameters(cp):
+ enable_wifi=0; w
+ model_cutback=0;
+ model_saturated=0;
+ soft_reset=0;
+ write_summary=0;
+ ib_tot_bias_amp=  0.000;
+ ib_tot_bias_noa=  0.000;
+ dc_dc_on=0;
+ blynking=0; z
+ publishS=1;
+ tb_bias_mode=  0.000;
+ s_t_sat=  1.000;
+echo:  h, 4
+echo:  h, 0
+
+
+Help talk.   Entries followed by ';'
+B<?> Battery e.g.:
+ *Bm=  0.  Mon chem 0='BB', 1='LI' [0]
+ *Bs=  0.  Sim chem 0='BB', 1='LI' [0]
+ *BP=   1.00.  parallel in bank [ 1.00]'
+ *BS=   1.00.  series in bank [ 1.00]'
+c  clear talk queues, esp '-c;'
+C<?> Chg SOC e.g.:
+  Ca=  all - '(0-1.1)'
+  Cm=  model (& ekf if mod)- '(0-1.1)'
+D/S<?> Adj e.g.:
+ *DA=   0.000: delta amp sense, A [  0.000]
+ *DB=   0.000: delta noa sense, A [  0.000]
+ *Di=   0.000: delta all sense, A [  0.000]
+ *Dc=   1.500: delta sense, V [  1.800]
+  Du= 1.00: coul eff
+  Dm=   0.000: delta amp, A [0]
+  Dn=   0.000: delta noa, A [0]
+  DP= 1: print mult of Dr [4]
+  Dr= 2000: minor frame, ms [100]
+ *Dt=   0.000: delta hdwe, deg C [  0.000]
+  D^=   0.000: delta model, deg C [  0.000]
+  Dv= 0.00: volt fault inj, V [0]
+  Dw= 0.00: Tab adjust, V [0.01]
+  DT=   0.000: Tb noise mod, deg C pk-pk [  0.000]
+  DV=   0.000: Vb noise mod, V pk-pk [  0.000]
+  DM=   0.000: Ib amp noise mod, A pk-pk [  0.000]
+  DN=   0.000: Ib noa noise mod, A pk-pk [  0.000]
+ *SA=   1.000: scale amp sen, A [  1.000]
+ *SB=   1.000: scale noa sen, A [  1.000]
+ *Sc= 1.00: rp. Scalar mod size
+ *SG=   1.000/  1.000: rp. scale shunt gains [1]
+  Sh=   0.300: hys sclr 1e-6 - 100 [ 0.30]
+  Sm=   1.000: sclr amp, [1]
+  Sn=   1.000: sclr noa [1]
+  Sr= 1.00: Scalar res sim
+ *Sk= 1.00: Sat mod cutback sclr
+F<?>   Faults
+  Fc=   1.000: sclr cc_diff thr ^ [1]
+  Fd=   1.000: sclr ib_diff thr ^ [1]
+  Fi=   1.000: sclr e_wrap_hi thr ^ [1]
+  Fo=   1.000: sclr e_wrap_lo thr ^ [1]
+  Fq=   1.000: sclr ib_quiet thr v [1]
+  FI= 0: Ib hard rng
+  FT= 0: Tb hard rng
+  FV= 0: Vb hard rng
+H<?>   Manage history
+  Hd= dump summ log
+  HR= reset summ log
+  Hs= save and print log
+M<?> Amp tweaks
+  MC=   0.001: Amp CE max change [0.001]
+ *Mk=   1.000: rp. Amp CE sclr [1]
+  Mw=   6.000: Amp next tweak, hr [18]
+  Mx=   0.010: Amp CE max sclr [0.01]
+  Mz=   0.131: Amp last twk, hr [var]
+N<?> No amp tweaks
+  NC=   0.001: Noa CE max change [0.001]
+ *Nk=   1.000: rp. Noa CE sclr [1]
+  Nw=   6.000: Noa next tweak, hr [18]
+  Nx=   0.010: Noa CE max sclr [0.01]
+  Nz=   0.131: Noa last twk, hr [var]
+P<?>   Print values
+  Pa= all
+  Pe= ekf
+  Pf= faults
+  Pm= Mon
+  PM= amp shunt
+  PN= noa shunt
+  Pr= retained and command
+  Ps= Sim
+  Px= ib select
+  Pv= vb details
+Q      vital stats
+R<?>   Reset
+  Rb= batteries to present inputs
+  Rf= fault logic latches
+  Ri= all delta_q_inf
+  Rr= saturate Mon and equalize Sim & Mon
+  RR= DEPLOY
+  Rs= small.  Reinitialize filters
+s   curr signal select (-1=noa, 0=auto, 1=amp) = 0
+v= 0: verbosity, -128 - +128. [4]
+  -<>: Negative - Arduino plot compatible
+  v-1: GP
+   v1: GP
+   v2: GP, Sim & Sel
+   v3: EKF
+   v7: EKF solver init
+ v-11: Summary
+  v12: EKF
+  v14: vshunt and Ib raw
+  v15: vb raw
+  v16: Tb
+  v34: EKF detail
+V<?> - VOC(SOC) curve deltas
+ VM=   0.000: Mon vsoc out, V [0]
+ VS=   0.000: Sim vsoc out, V [0]
+ Vm=   0.000: Mon soc in [0]
+ Vs=   0.000: Sim soc in[0]
+w togg wifi = 0
+W<?> - iters to wait
+X<?> - Test Mode.   For example:
+ Xd= 0,   dc-dc charger on [0]
+ Xm= 7,   modeling bitmap [000]
+      0x8 tweak_test = 0
+      0x4 current = 1
+      0x2 voltage = 1
+      0x1 temp = 1
+ Xa=   0.000: Inj amp A pk (0-18.3) [0]
+ Xb=   0.000: Inj bias A [0]
+ Xf=   0.020: Inj freq Hz (0-2) [0]
+ Xt= 1: Inj type.  'o', 's', 'q', 't' (cos, sin, square, tri)
+ Xo=   0.000: Inj inj_bias A (-18.3-18.3) [0]
+ Xp= <?>, programmed inj settings...
+    Xp-1:  Off, modeling false
+    Xp0:  reset tests
+    Xp1:  1 Hz sine
+    Xp2:  1 Hz square
+    Xp3:  1 Hz triangle
+    Xp4:  -1C soft disch, reset xp0 or Di0
+    Xp5:  +1C soft chg
+    Xp6:  +/-500 A pulse
+    Xp9:  silent tweak test
+    Xp10: tweak cycle test
+    Xp11: slow cycle test
+    Xp12: slow half cycle reg test
+    Xp20: fast data collection
+    Xp21: slow data collection
+ XC=   1.000 cycles inj
+ XR  RUN inj
+ XS  STOP inj
+ Xs=   1.00 scalar on T_SAT
+ XW=   6.00 s wait start inj
+ XT=   6.00 s tail end inj
+ Xu= 0 T=ignore Tb read
+ Xv=   1.00 scale Tb one-wire stale persistence
+z togg BLYNK = 0
+*Xx<> = SRAM saved
+
+urgency of cmds: -=ASAP,*=SOON, '',+=QUEUE
+h this
+Hi!
+Init DISPLAY
+DISP allocated
+Init CLOUD...done CLOUD
+          local    memory
+bias amp   0.000     0.000
+bias noa   0.000     0.000
+sclr amp   1.000     1.000
+sclr noa   1.000     1.000
+mon chem 0   0
+sim chem 0   0
+Do you wish to reset to local? [Y/n]: N
+moving on....
+End setup()
+SHUNT MON Amp init
+SHUNT MON No Amp init
+echo:  h, 4
+echo:  h, 0
+
+
+Help talk.   Entries followed by ';'
+B<?> Battery e.g.:
+ *Bm=  0.  Mon chem 0='BB', 1='LI' [0]
+ *Bs=  0.  Sim chem 0='BB', 1='LI' [0]
+ *BP=   1.00.  parallel in bank [ 1.00]'
+ *BS=   1.00.  series in bank [ 1.00]'
+c  clear talk queues, esp '-c;'
+C<?> Chg SOC e.g.:
+  Ca=  all - '(0-1.1)'
+  Cm=  model (& ekf if mod)- '(0-1.1)'
+D/S<?> Adj e.g.:
+ *DA=   0.000: delta amp sense, A [  0.000]
+ *DB=   0.000: delta noa sense, A [  0.000]
+ *Di=   0.000: delta all sense, A [  0.000]
+ *Dc=   1.500: delta sense, V [  1.800]
+  Du= 1.00: coul eff
+  Dm=   0.000: delta amp, A [0]
+  Dn=   0.000: delta noa, A [0]
+  DP= 4: print mult of Dr [4]
+  Dr= 100: minor frame, ms [100]
+ *Dt=   0.000: delta hdwe, deg C [  0.000]
+  D^=   0.000: delta model, deg C [  0.000]
+  Dv= 0.00: volt fault inj, V [0]
+  Dw= 0.00: Tab adjust, V [0.01]
+  DT=   0.000: Tb noise mod, deg C pk-pk [  0.000]
+  DV=   0.000: Vb noise mod, V pk-pk [  0.000]
+  DM=   0.000: Ib amp noise mod, A pk-pk [  0.000]
+  DN=   0.000: Ib noa noise mod, A pk-pk [  0.000]
+ *SA=   1.000: scale amp sen, A [  1.000]
+ *SB=   1.000: scale noa sen, A [  1.000]
+ *Sc= 1.00: rp. Scalar mod size
+ *SG=   1.000/  1.000: rp. scale shunt gains [1]
+  Sh=   0.300: hys sclr 1e-6 - 100 [ 0.30]
+  Sm=   1.000: sclr amp, [1]
+  Sn=   1.000: sclr noa [1]
+  Sr= 1.00: Scalar res sim
+ *Sk= 1.00: Sat mod cutback sclr
+F<?>   Faults
+  Fc=   1.000: sclr cc_diff thr ^ [1]
+  Fd=   1.000: sclr ib_diff thr ^ [1]
+  Fi=   1.000: sclr e_wrap_hi thr ^ [1]
+  Fo=   1.000: sclr e_wrap_lo thr ^ [1]
+  Fq=   1.000: sclr ib_quiet thr v [1]
+  FI= 0: Ib hard rng
+  FT= 0: Tb hard rng
+  FV= 0: Vb hard rng
+H<?>   Manage history
+  Hd= dump summ log
+  HR= reset summ log
+  Hs= save and print log
+M<?> Amp tweaks
+  MC=   0.001: Amp CE max change [0.001]
+ *Mk=   1.000: rp. Amp CE sclr [1]
+  Mw=   6.000: Amp next tweak, hr [18]
+  Mx=   0.010: Amp CE max sclr [0.01]
+  Mz=   0.001: Amp last twk, hr [var]
+N<?> No amp tweaks
+  NC=   0.001: Noa CE max change [0.001]
+ *Nk=   1.000: rp. Noa CE sclr [1]
+  Nw=   6.000: Noa next tweak, hr [18]
+  Nx=   0.010: Noa CE max sclr [0.01]
+  Nz=   0.001: Noa last twk, hr [var]
+P<?>   Print values
+  Pa= all
+  Pe= ekf
+  Pf= faults
+  Pm= Mon
+  PM= amp shunt
+  PN= noa shunt
+  Pr= retained and command
+  Ps= Sim
+  Px= ib select
+  Pv= vb details
+Q      vital stats
+R<?>   Reset
+  Rb= batteries to present inputs
+  Rf= fault logic latches
+  Ri= all delta_q_inf
+  Rr= saturate Mon and equalize Sim & Mon
+  RR= DEPLOY
+  Rs= small.  Reinitialize filters
+s   curr signal select (-1=noa, 0=auto, 1=amp) = 0
+v= 0: verbosity, -128 - +128. [4]
+  -<>: Negative - Arduino plot compatible
+  v-1: GP
+   v1: GP
+   v2: GP, Sim & Sel
+   v3: EKF
+   v7: EKF solver init
+ v-11: Summary
+  v12: EKF
+  v14: vshunt and Ib raw
+  v15: vb raw
+  v16: Tb
+  v34: EKF detail
+V<?> - VOC(SOC) curve deltas
+ VM=   0.000: Mon vsoc out, V [0]
+ VS=   0.000: Sim vsoc out, V [0]
+ Vm=   0.000: Mon soc in [0]
+ Vs=   0.000: Sim soc in[0]
+w togg wifi = 0
+W<?> - iters to wait
+X<?> - Test Mode.   For example:
+ Xd= 0,   dc-dc charger on [0]
+ Xm= 7,   modeling bitmap [000]
+      0x8 tweak_test = 0
+      0x4 current = 1
+      0x2 voltage = 1
+      0x1 temp = 1
+ Xa=   0.000: Inj amp A pk (0-18.3) [0]
+ Xb=   0.000: Inj bias A [0]
+ Xf=   0.020: Inj freq Hz (0-2) [0]
+ Xt= 1: Inj type.  'o', 's', 'q', 't' (cos, sin, square, tri)
+ Xo=   0.000: Inj inj_bias A (-18.3-18.3) [0]
+ Xp= <?>, programmed inj settings...
+    Xp-1:  Off, modeling false
+    Xp0:  reset tests
+    Xp1:  1 Hz sine
+    Xp2:  1 Hz square
+    Xp3:  1 Hz triangle
+    Xp4:  -1C soft disch, reset xp0 or Di0
+    Xp5:  +1C soft chg
+    Xp6:  +/-500 A pulse
+    Xp9:  silent tweak test
+    Xp10: tweak cycle test
+    Xp11: slow cycle test
+    Xp12: slow half cycle reg test
+    Xp20: fast data collection
+    Xp21: slow data collection
+ XC=   0.000 cycles inj
+ XR  RUN inj
+ XS  STOP inj
+ Xs=   1.00 scalar on T_SAT
+ XW= 135136.78 s wait start inj
+ XT= 168232.46 s tail end inj
+ Xu= 0 T=ignore Tb read
+ Xv=   1.00 scale Tb one-wire stale persistence
+z togg BLYNK = 0
+*Xx<> = SRAM saved
+
+urgency of cmds: -=ASAP,*=SOON, '',+=QUEUE
+h this
