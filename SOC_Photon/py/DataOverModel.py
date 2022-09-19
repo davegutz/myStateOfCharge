@@ -41,124 +41,125 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     if fig_files is None:
         fig_files = []
 
-    plt.figure()  # 1a
-    n_fig += 1
-    plt.subplot(321)
-    plt.title(plot_title)
-    plt.plot(mo.time, mo.ibmh, color='black', linestyle='-', label='Ib_amp_hdwe')
-    plt.plot(mo.time, mo.ibnh, color='green', linestyle='--', label='Ib_noa_hdwe')
-    plt.plot(mo.time, mo.Ib, color='red', linestyle='-.', label='Ib')
-    plt.legend(loc=1)
-    plt.subplot(322)
-    plt.title(plot_title)
-    plt.plot(mo.time, mo.ib_diff, color='black', linestyle='-', label='ib_diff')
-    plt.plot(mo.time, mo.ib_diff_f, color='magenta', linestyle='--', label='ib_diff_f')
-    plt.plot(mo.time, mo.ibd_thr, color='red', linestyle='-.', label='ib_diff_thr')
-    plt.plot(mo.time, -mo.ibd_thr, color='red', linestyle='-.')
-    plt.legend(loc=1)
-    plt.subplot(323)
-    plt.plot(mo.time, mo.ib_quiet, color='green', linestyle='-', label='ib_quiet')
-    plt.plot(mo.time, mo.ibq_thr, color='red', linestyle='--', label='ib_quiet_thr')
-    plt.plot(mo.time, -mo.ibq_thr, color='red', linestyle='--')
-    plt.plot(mo.time, mo.dscn_fa-.02, color='magenta', linestyle='-.', label='dscn_fa-0.02')
-    plt.ylim(-.1, .1)
-    plt.legend(loc=1)
-    plt.subplot(324)
-    plt.plot(mo.time, mo.ib_rate, color='orange', linestyle='-', label='ib_rate')
-    plt.plot(mo.time, mo.ib_quiet, color='green', linestyle='--', label='ib_quiet')
-    plt.plot(mo.time, mo.ibq_thr, color='red', linestyle='-.', label='ib_quiet_thr')
-    plt.plot(mo.time, -mo.ibq_thr, color='red', linestyle='-.')
-    plt.ylim(-6, 6)
-    plt.legend(loc=1)
-    plt.subplot(325)
-    plt.plot(mo.time, mo.e_w, color='magenta', linestyle='-', label='e_wrap')
-    plt.plot(mo.time, mo.e_w_f, color='black', linestyle='--', label='e_wrap_filt')
-    plt.legend(loc=1)
-    plt.subplot(326)
-    plt.plot(mo.time, mo.cc_dif, color='black', linestyle='-', label='cc_diff')
-    plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
-    fig_files.append(fig_file_name)
-    plt.savefig(fig_file_name, format="png")
+    if mo.ibmh:
+        plt.figure()  # 1a
+        n_fig += 1
+        plt.subplot(321)
+        plt.title(plot_title)
+        plt.plot(mo.time, mo.ibmh, color='black', linestyle='-', label='Ib_amp_hdwe')
+        plt.plot(mo.time, mo.ibnh, color='green', linestyle='--', label='Ib_noa_hdwe')
+        plt.plot(mo.time, mo.Ib, color='red', linestyle='-.', label='Ib')
+        plt.legend(loc=1)
+        plt.subplot(322)
+        plt.title(plot_title)
+        plt.plot(mo.time, mo.ib_diff, color='black', linestyle='-', label='ib_diff')
+        plt.plot(mo.time, mo.ib_diff_f, color='magenta', linestyle='--', label='ib_diff_f')
+        plt.plot(mo.time, mo.ibd_thr, color='red', linestyle='-.', label='ib_diff_thr')
+        plt.plot(mo.time, -mo.ibd_thr, color='red', linestyle='-.')
+        plt.legend(loc=1)
+        plt.subplot(323)
+        plt.plot(mo.time, mo.ib_quiet, color='green', linestyle='-', label='ib_quiet')
+        plt.plot(mo.time, mo.ibq_thr, color='red', linestyle='--', label='ib_quiet_thr')
+        plt.plot(mo.time, -mo.ibq_thr, color='red', linestyle='--')
+        plt.plot(mo.time, mo.dscn_fa-.02, color='magenta', linestyle='-.', label='dscn_fa-0.02')
+        plt.ylim(-.1, .1)
+        plt.legend(loc=1)
+        plt.subplot(324)
+        plt.plot(mo.time, mo.ib_rate, color='orange', linestyle='-', label='ib_rate')
+        plt.plot(mo.time, mo.ib_quiet, color='green', linestyle='--', label='ib_quiet')
+        plt.plot(mo.time, mo.ibq_thr, color='red', linestyle='-.', label='ib_quiet_thr')
+        plt.plot(mo.time, -mo.ibq_thr, color='red', linestyle='-.')
+        plt.ylim(-6, 6)
+        plt.legend(loc=1)
+        plt.subplot(325)
+        plt.plot(mo.time, mo.e_w, color='magenta', linestyle='-', label='e_wrap')
+        plt.plot(mo.time, mo.e_w_f, color='black', linestyle='--', label='e_wrap_filt')
+        plt.legend(loc=1)
+        plt.subplot(326)
+        plt.plot(mo.time, mo.cc_dif, color='black', linestyle='-', label='cc_diff')
+        plt.legend(loc=1)
+        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 1
-    n_fig += 1
-    plt.subplot(331)
-    plt.title(plot_title)
-    plt.plot(mo.time, mo.Ib, color='green', linestyle='-', label='Ib')
-    plt.plot(mv.time, mv.Ib, color='orange', linestyle='--', label='Ib_ver')
-    plt.plot(mo.time, mo.ib_diff, color='black', linestyle='-.', label='ib_diff')
-    plt.plot(mo.time, mo.ib_diff_f, color='magenta', linestyle=':', label='ib_diff_f')
-    plt.plot(mo.time, mo.ibd_thr, color='red', linestyle='-.', label='ib_diff_thr')
-    plt.plot(mo.time, -mo.ibd_thr, color='red', linestyle='-.')
-    plt.legend(loc=1)
-    plt.subplot(332)
-    plt.plot(mo.time, mo.mod_data, color='blue', linestyle='-', label='mod')
-    plt.plot(mv.time, mv.mod_data, color='red', linestyle='--', label='mod_ver')
-    plt.plot(mo.time, mo.sat+2, color='magenta', linestyle='-',  label='sat+2')
-    plt.plot(mv.time, np.array(mv.sat)+2, color='cyan', linestyle='--', label='sat_new+2')
-    plt.plot(mo.time, mo.sel, color='red', linestyle='-.', label='sel')
-    plt.plot(mv.time, mv.sel, color='blue', linestyle=':', label='sel_ver')
-    plt.plot(mo.time, mo.ib_sel-2, color='black', linestyle='-', label='ib_sel_stat-2')
-    plt.plot(mo.time, mo.vb_sel-2, color='green', linestyle='--', label='vb_sel_stat-2')
-    plt.legend(loc=1)
-    plt.subplot(333)
-    plt.plot(mo.time, mo.Vb, color='green', linestyle='-', label='Vb')
-    plt.plot(mv.time, mv.Vb, color='orange', linestyle='--', label='Vb_ver')
-    plt.legend(loc=1)
-    plt.subplot(334)
-    plt.plot(mo.time, mo.Voc_stat, color='green', linestyle='-', label='Voc_stat')
-    plt.plot(mv.time, mv.Voc_stat, color='orange', linestyle='--', label='Voc_stat_ver')
-    plt.plot(mo.time, mo.Vsat, color='blue', linestyle='-', label='Vsat')
-    plt.plot(mv.time, mv.Vsat, color='red', linestyle='--', label='Vsat_ver')
-    plt.plot(mo.time, mo.voc_soc+0.1, color='black', linestyle='-.', label='voc_soc+0.1')
-    plt.plot(mo.time, mo.voc+0.1, color='green', linestyle=':', label='voc+0.1')
-    plt.plot(mv.time, np.array(mv.voc)+0.1, color='red', linestyle=':', label='voc_new+0.1')
-    plt.legend(loc=1)
-    plt.subplot(335)
-    plt.plot(mo.time, mo.e_w, color='magenta', linestyle='-', label='e_wrap')
-    plt.plot(mo.time, mo.e_w_f, color='black', linestyle='--', label='e_wrap_filt')
-    plt.plot(mo.time, mo.ewh_thr, color='red', linestyle='-.', label='ewh_thr')
-    plt.plot(mo.time, mo.ewl_thr, color='red', linestyle='-.', label='ewl_thr')
-    plt.ylim(-1, 1)
-    plt.legend(loc=1)
-    plt.subplot(336)
-    plt.plot(mo.time, mo.wh_flt+4, color='black', linestyle='-', label='wrap_hi_flt+4')
-    plt.plot(mo.time, mo.wl_flt+4, color='magenta', linestyle='--', label='wrap_lo_flt+4')
-    plt.plot(mo.time, mo.wh_fa+2, color='cyan', linestyle='-', label='wrap_hi_fa+2')
-    plt.plot(mo.time, mo.wl_fa+2, color='red', linestyle='--', label='wrap_lo_fa+2')
-    plt.plot(mo.time, mo.wv_fa+2, color='orange', linestyle='-.', label='wrap_vb_fa+2')
-    plt.plot(mo.time, mo.ccd_fa, color='green', linestyle='-', label='cc_diff_fa')
-    plt.plot(mo.time, mo.red_loss, color='blue', linestyle='--', label='red_loss')
-    plt.legend(loc=1)
-    plt.subplot(337)
-    plt.plot(mo.time, mo.cc_dif, color='black', linestyle='-', label='cc_diff')
-    plt.plot(mo.time, mo.ccd_thr, color='red', linestyle='--', label='cc_diff_thr')
-    plt.plot(mo.time, -mo.ccd_thr, color='red', linestyle='--')
-    plt.ylim(-.01, .01)
-    plt.legend(loc=1)
-    plt.subplot(338)
-    # plt.plot(mo.time, mo.ib_rate, color='orange', linestyle='--', label='ib_rate')
-    plt.plot(mo.time, mo.ib_quiet, color='black', linestyle='-', label='ib_quiet')
-    plt.plot(mo.time, mo.ibq_thr, color='red', linestyle='--', label='ib_quiet_thr')
-    plt.plot(mo.time, -mo.ibq_thr, color='red', linestyle='--')
-    plt.plot(mo.time, mo.dscn_flt-4, color='blue', linestyle='-.', label='dscn_flt-4')
-    plt.plot(mo.time, mo.dscn_fa+4, color='red', linestyle='-', label='dscn_fa+4')
-    plt.legend(loc=1)
-    plt.subplot(339)
-    plt.plot(mo.time, mo.ib_diff_flt, color='cyan', linestyle='-', label='ib_diff_flt')
-    plt.plot(mo.time, mo.ib_diff_fa, color='magenta', linestyle='--', label='ib_diff_fa')
-    plt.plot(mo.time, mo.vb_flt, color='blue', linestyle='-.', label='vb_flt')
-    plt.plot(mo.time, mo.vb_fa, color='black', linestyle=':', label='vb_fa')
-    plt.plot(mo.time, mo.tb_flt, color='red', linestyle='-', label='tb_flt')
-    plt.plot(mo.time, mo.tb_fa, color='cyan', linestyle='--', label='tb_fa')
-    plt.plot(mo.time, mo.ib_sel-2, color='black', linestyle='-', label='ib_sel_stat-2')
-    plt.plot(mo.time, mo.vb_sel-2, color='green', linestyle='--', label='vb_sel_stat-2')
-    plt.plot(mo.time, mo.tb_sel-2, color='red', linestyle='-.', label='tb_sel_stat-2')
-    plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
-    fig_files.append(fig_file_name)
-    plt.savefig(fig_file_name, format="png")
+        plt.figure()  # 1
+        n_fig += 1
+        plt.subplot(331)
+        plt.title(plot_title)
+        plt.plot(mo.time, mo.Ib, color='green', linestyle='-', label='Ib')
+        plt.plot(mv.time, mv.Ib, color='orange', linestyle='--', label='Ib_ver')
+        plt.plot(mo.time, mo.ib_diff, color='black', linestyle='-.', label='ib_diff')
+        plt.plot(mo.time, mo.ib_diff_f, color='magenta', linestyle=':', label='ib_diff_f')
+        plt.plot(mo.time, mo.ibd_thr, color='red', linestyle='-.', label='ib_diff_thr')
+        plt.plot(mo.time, -mo.ibd_thr, color='red', linestyle='-.')
+        plt.legend(loc=1)
+        plt.subplot(332)
+        plt.plot(mo.time, mo.mod_data, color='blue', linestyle='-', label='mod')
+        plt.plot(mv.time, mv.mod_data, color='red', linestyle='--', label='mod_ver')
+        plt.plot(mo.time, mo.sat+2, color='magenta', linestyle='-',  label='sat+2')
+        plt.plot(mv.time, np.array(mv.sat)+2, color='cyan', linestyle='--', label='sat_new+2')
+        plt.plot(mo.time, mo.sel, color='red', linestyle='-.', label='sel')
+        plt.plot(mv.time, mv.sel, color='blue', linestyle=':', label='sel_ver')
+        plt.plot(mo.time, mo.ib_sel-2, color='black', linestyle='-', label='ib_sel_stat-2')
+        plt.plot(mo.time, mo.vb_sel-2, color='green', linestyle='--', label='vb_sel_stat-2')
+        plt.legend(loc=1)
+        plt.subplot(333)
+        plt.plot(mo.time, mo.Vb, color='green', linestyle='-', label='Vb')
+        plt.plot(mv.time, mv.Vb, color='orange', linestyle='--', label='Vb_ver')
+        plt.legend(loc=1)
+        plt.subplot(334)
+        plt.plot(mo.time, mo.Voc_stat, color='green', linestyle='-', label='Voc_stat')
+        plt.plot(mv.time, mv.Voc_stat, color='orange', linestyle='--', label='Voc_stat_ver')
+        plt.plot(mo.time, mo.Vsat, color='blue', linestyle='-', label='Vsat')
+        plt.plot(mv.time, mv.Vsat, color='red', linestyle='--', label='Vsat_ver')
+        plt.plot(mo.time, mo.voc_soc+0.1, color='black', linestyle='-.', label='voc_soc+0.1')
+        plt.plot(mo.time, mo.voc+0.1, color='green', linestyle=':', label='voc+0.1')
+        plt.plot(mv.time, np.array(mv.voc)+0.1, color='red', linestyle=':', label='voc_new+0.1')
+        plt.legend(loc=1)
+        plt.subplot(335)
+        plt.plot(mo.time, mo.e_w, color='magenta', linestyle='-', label='e_wrap')
+        plt.plot(mo.time, mo.e_w_f, color='black', linestyle='--', label='e_wrap_filt')
+        plt.plot(mo.time, mo.ewh_thr, color='red', linestyle='-.', label='ewh_thr')
+        plt.plot(mo.time, mo.ewl_thr, color='red', linestyle='-.', label='ewl_thr')
+        plt.ylim(-1, 1)
+        plt.legend(loc=1)
+        plt.subplot(336)
+        plt.plot(mo.time, mo.wh_flt+4, color='black', linestyle='-', label='wrap_hi_flt+4')
+        plt.plot(mo.time, mo.wl_flt+4, color='magenta', linestyle='--', label='wrap_lo_flt+4')
+        plt.plot(mo.time, mo.wh_fa+2, color='cyan', linestyle='-', label='wrap_hi_fa+2')
+        plt.plot(mo.time, mo.wl_fa+2, color='red', linestyle='--', label='wrap_lo_fa+2')
+        plt.plot(mo.time, mo.wv_fa+2, color='orange', linestyle='-.', label='wrap_vb_fa+2')
+        plt.plot(mo.time, mo.ccd_fa, color='green', linestyle='-', label='cc_diff_fa')
+        plt.plot(mo.time, mo.red_loss, color='blue', linestyle='--', label='red_loss')
+        plt.legend(loc=1)
+        plt.subplot(337)
+        plt.plot(mo.time, mo.cc_dif, color='black', linestyle='-', label='cc_diff')
+        plt.plot(mo.time, mo.ccd_thr, color='red', linestyle='--', label='cc_diff_thr')
+        plt.plot(mo.time, -mo.ccd_thr, color='red', linestyle='--')
+        plt.ylim(-.01, .01)
+        plt.legend(loc=1)
+        plt.subplot(338)
+        # plt.plot(mo.time, mo.ib_rate, color='orange', linestyle='--', label='ib_rate')
+        plt.plot(mo.time, mo.ib_quiet, color='black', linestyle='-', label='ib_quiet')
+        plt.plot(mo.time, mo.ibq_thr, color='red', linestyle='--', label='ib_quiet_thr')
+        plt.plot(mo.time, -mo.ibq_thr, color='red', linestyle='--')
+        plt.plot(mo.time, mo.dscn_flt-4, color='blue', linestyle='-.', label='dscn_flt-4')
+        plt.plot(mo.time, mo.dscn_fa+4, color='red', linestyle='-', label='dscn_fa+4')
+        plt.legend(loc=1)
+        plt.subplot(339)
+        plt.plot(mo.time, mo.ib_diff_flt, color='cyan', linestyle='-', label='ib_diff_flt')
+        plt.plot(mo.time, mo.ib_diff_fa, color='magenta', linestyle='--', label='ib_diff_fa')
+        plt.plot(mo.time, mo.vb_flt, color='blue', linestyle='-.', label='vb_flt')
+        plt.plot(mo.time, mo.vb_fa, color='black', linestyle=':', label='vb_fa')
+        plt.plot(mo.time, mo.tb_flt, color='red', linestyle='-', label='tb_flt')
+        plt.plot(mo.time, mo.tb_fa, color='cyan', linestyle='--', label='tb_fa')
+        plt.plot(mo.time, mo.ib_sel-2, color='black', linestyle='-', label='ib_sel_stat-2')
+        plt.plot(mo.time, mo.vb_sel-2, color='green', linestyle='--', label='vb_sel_stat-2')
+        plt.plot(mo.time, mo.tb_sel-2, color='red', linestyle='-.', label='tb_sel_stat-2')
+        plt.legend(loc=1)
+        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
 
     plt.figure()  # 2
     n_fig += 1
@@ -266,13 +267,15 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.legend(loc=1)
     plt.subplot(132)
     plt.plot(mo.time, mo.Vb, color='orange', linestyle='-', label='Vb')
-    plt.plot(mo.time, mo.Vb_h, color='cyan', linestyle='--', label='Vb_hdwe')
+    if mo.Vb_h:
+        plt.plot(mo.time, mo.Vb_h, color='cyan', linestyle='--', label='Vb_hdwe')
     plt.plot(mv.time, mv.Vb, color='green', linestyle='-.', label='Vb_ver')
     plt.plot(sv.time, sv.vb, color='black', linestyle='-.', label='Vb_s_ver')
     plt.legend(loc=1)
     plt.subplot(133)
     plt.plot(mo.soc, mo.Vb, color='orange', linestyle='-', label='Vb')
-    plt.plot(mo.soc, mo.Vb_h, color='cyan', linestyle='--', label='Vb_hdwe')
+    if mo.Vb_h:
+        plt.plot(mo.soc, mo.Vb_h, color='cyan', linestyle='--', label='Vb_hdwe')
     plt.plot(mv.soc, mv.Vb, color='green', linestyle='-.', label='Vb_ver')
     plt.plot(sv.soc, sv.vb, color='black', linestyle='-.', label='Vb_s_ver')
     plt.legend(loc=1)
@@ -349,8 +352,9 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mo.time, mo.Vb, color='red', linestyle='-', label='Vb')
         plt.plot(mo.time, mo.Voc, color='blue',  linestyle='--', label='Voc')
         plt.plot(mo.time, mo.Voc_stat, color='green', linestyle='-.', label='Voc_stat')
-        plt.plot(mo.time, mo.voc_soc, color='black', linestyle=':', label='voc_soc')
-        plt.plot(mo.time, mo.Vb_h, color='cyan', linestyle=':', label='Vb_hdwe')
+        if mo.Vb_h:
+            plt.plot(mo.time, mo.voc_soc, color='black', linestyle=':', label='voc_soc')
+            plt.plot(mo.time, mo.Vb_h, color='cyan', linestyle=':', label='Vb_hdwe')
         plt.legend(loc=1)
         plt.subplot(332)
         plt.plot(so.time, so.vb_s, color='red', linestyle='-', label='vb_s')
@@ -411,11 +415,12 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(sv.time, np.array(sv.soc)-.2, color='orange', linestyle='-', label='sv.soc_s_ver-.2')
         plt.plot(smv.time, np.array(smv.soc_s)-.2, color='black', linestyle='--', label='smv.soc_s_ver-.2')
         plt.legend(loc=1)
-
         plt.subplot(222)
-        plt.plot(mo.soc, mo.Vb_h, color='magenta', linestyle=':', label='Vb_hdwe')
+        if mo.Vb_h:
+            plt.plot(mo.soc, mo.Vb_h, color='magenta', linestyle=':', label='Vb_hdwe')
         plt.plot(mo.soc, mo.Voc_stat, color='cyan', linestyle=':', label='Voc_stat')
-        plt.plot(mo.soc, mo.voc_soc, color='blue', linestyle='-', label='voc_soc')
+        if mo.voc_soc:
+            plt.plot(mo.soc, mo.voc_soc, color='blue', linestyle='-', label='voc_soc')
         plt.plot(mv.soc, mv.voc_soc, color='red', linestyle='--', label='voc_soc_ver')
         plt.plot(so.soc_s, so.voc_stat_s, color='green', linestyle='-.', label='voc_stat_s')
         plt.plot(sv.soc, sv.voc_stat, color='orange', linestyle=':', label='voc_stat_s_ver')
@@ -423,11 +428,12 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mv.soc, mv.Vsat, color='black', linestyle='--', label='vsat_ver')
         plt.plot(mv.soc, mv.voc_stat, color='orange', linestyle='--', label='voc_stat_ver')
         plt.legend(loc=1)
-
         plt.subplot(224)
-        plt.plot(mo.time, mo.Vb_h, color='magenta', linestyle=':', label='Vb_hdwe')
+        if mo.Vb_h:
+            plt.plot(mo.time, mo.Vb_h, color='magenta', linestyle=':', label='Vb_hdwe')
         plt.plot(mo.time, mo.Voc_stat, color='cyan', linestyle=':', label='Voc_stat')
-        plt.plot(mo.time, mo.voc_soc, color='blue', linestyle='-', label='voc_soc')
+        if mo.voc_soc:
+            plt.plot(mo.time, mo.voc_soc, color='blue', linestyle='-', label='voc_soc')
         plt.plot(mv.time, mv.voc_soc, color='red', linestyle='--', label='voc_soc_ver')
         plt.plot(so.time, so.voc_stat_s, color='green', linestyle='-.', label='voc_stat_s')
         plt.plot(sv.time, sv.voc_stat, color='orange', linestyle=':', label='voc_stat_s_ver')
@@ -446,48 +452,127 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mo.time, mo.soc_ekf, color='cyan', linestyle='-', label='soc_ekf')
         plt.plot(mv.time, mv.soc_ekf, color='magenta', linestyle='--', label='soc_ekf_ver')
         plt.legend(loc=1)
-
         plt.subplot(222)
         plt.plot(mo.soc, mo.Voc_stat, color='magenta', linestyle='-', label='Voc_stat(soc) = z_')
         plt.plot(mo.soc, mo.Voc_ekf, color='cyan', linestyle='--', label='Voc_ekf(soc) = Hx_')
-        plt.plot(mo.soc, mo.voc_soc, color='green', linestyle='-.', label='voc_soc')
+        if mo.voc_soc:
+            plt.plot(mo.soc, mo.voc_soc, color='green', linestyle='-.', label='voc_soc')
         plt.plot(mv.soc, mv.voc_soc, color='orange', linestyle=':', label='voc_soc_ver')
-        plt.plot(mo.soc, mo.Vb_h, color='blue', linestyle='-', label='Vb')
+        if mo.Vb_h:
+            plt.plot(mo.soc, mo.Vb_h, color='blue', linestyle='-', label='Vb')
         plt.plot(sv.soc, sv.voc_stat, color='red', linestyle=':', label='voc_stat_s_ver')
         plt.ylim(12.5, 14.5)
         plt.legend(loc=1)
-
         plt.subplot(223)
         plt.plot(mo.soc, mo.Voc_stat, color='magenta', linestyle='-', label='Voc_stat(soc) = z_')
         plt.plot(mv.soc, mv.Voc_stat, color='black', linestyle='--', label='Voc_stat(soc) = z_  ver')
         plt.plot(mv.soc, mv.Voc_ekf, color='cyan', linestyle=':', label='Voc_ekf(soc) = Hx_ ver')
-        plt.plot(mo.soc, mo.Vb_h, color='blue', linestyle='-', label='Vb')
+        if mo.Vb_h:
+            plt.plot(mo.soc, mo.Vb_h, color='blue', linestyle='-', label='Vb')
         plt.plot(sv.soc, sv.voc_stat, color='red', linestyle=':', label='voc_stat_s_ver')
         plt.ylim(12.5, 14.5)
         plt.legend(loc=1)
-
         plt.subplot(224)
         plt.plot(mo.time, mo.Voc_stat, color='magenta', linestyle='-', label='Voc_stat(soc) = z_')
         plt.plot(mo.time, mo.Voc_ekf, color='cyan', linestyle='--', label='Voc_ekf(soc) = Hx_')
-        plt.plot(mo.time, mo.voc_soc, color='green', linestyle='-.', label='voc_soc')
+        if mo.voc_soc:
+            plt.plot(mo.time, mo.voc_soc, color='green', linestyle='-.', label='voc_soc')
         plt.plot(mv.time, mv.voc_soc, color='orange', linestyle=':', label='voc_soc_ver')
-        plt.plot(mo.time, mo.Vb_h, color='blue', linestyle='-', label='Vb')
+        if mo.Vb_h:
+            plt.plot(mo.time, mo.Vb_h, color='blue', linestyle='-', label='Vb')
         plt.plot(mv.time, mv.Voc_stat, color='black', linestyle=':', label='Voc_stat(soc) = z_  ver')
         plt.plot(mv.time, mv.Voc_ekf, color='cyan', linestyle=':', label='Voc_ekf(soc) = Hx_ ver')
         plt.plot(sv.time, sv.voc_stat, color='red', linestyle=':', label='voc_stat_s_ver')
         plt.ylim(12.5, 14.5)
         plt.legend(loc=1)
 
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
-        fig_files.append(fig_file_name)
-        plt.savefig(fig_file_name, format="png")
+        if mo.Fx.any():
+            plt.figure()  # ekf  5
+            n_fig += 1
+            plt.subplot(331)
+            plt.plot(mo.time, mo.Fx, color='blue', linestyle='-', label='Fx')
+            plt.plot(mv.time, mv.Fx, color='red', linestyle='--', label='Fx ver')
+            plt.legend(loc=1)
+            plt.subplot(332)
+            plt.plot(mo.time, mo.Bu, color='blue', linestyle='-', label='Bu')
+            plt.plot(mv.time, mv.Bu, color='red', linestyle='--', label='Bu ver')
+            plt.legend(loc=1)
+            plt.subplot(333)
+            plt.plot(mo.time, mo.Q, color='blue', linestyle='-', label='Q')
+            plt.plot(mv.time, mv.Q, color='red', linestyle='--', label='Q ver')
+            plt.legend(loc=1)
+            plt.subplot(334)
+            plt.plot(mo.time, mo.R, color='blue', linestyle='-', label='R')
+            plt.plot(mv.time, mv.R, color='red', linestyle='--', label='R ver')
+            plt.legend(loc=1)
+            plt.subplot(335)
+            plt.plot(mo.time, mo.P, color='blue', linestyle='-', label='P')
+            plt.plot(mv.time, mv.P, color='red', linestyle='--', label='P ver')
+            plt.legend(loc=1)
+            plt.subplot(336)
+            plt.plot(mo.time, mo.S, color='blue', linestyle='-', label='S')
+            plt.plot(mv.time, mv.S, color='red', linestyle='--', label='S ver')
+            plt.legend(loc=1)
+            plt.subplot(337)
+            plt.plot(mo.time, mo.K, color='blue', linestyle='-', label='K')
+            plt.plot(mv.time, mv.K, color='red', linestyle='--', label='K ver')
+            plt.legend(loc=1)
+            plt.subplot(338)
+            plt.plot(mo.time, mo.u, color='blue', linestyle='-', label='u')
+            plt.plot(mv.time, mv.u_ekf, color='red', linestyle='--', label='u ver')
+            plt.legend(loc=1)
+            plt.subplot(339)
+            plt.plot(mo.time, mo.x, color='blue', linestyle='-', label='x')
+            plt.plot(mv.time, mv.x_ekf, color='red', linestyle='--', label='x ver')
+            plt.legend(loc=1)
+            fig_file_name = filename + '_' + str(n_fig) + ".png"
+            fig_files.append(fig_file_name)
+            plt.savefig(fig_file_name, format="png")
+
+            plt.figure()  # ekf  5
+            n_fig += 1
+            plt.subplot(331)
+            plt.plot(mo.time, mo.y, color='blue', linestyle='-', label='y')
+            plt.plot(mv.time, mv.y_ekf, color='red', linestyle='--', label='y ver')
+            plt.legend(loc=1)
+            plt.subplot(332)
+            plt.plot(mo.time, mo.z, color='blue', linestyle='-', label='z')
+            plt.plot(mv.time, mv.z_ekf, color='red', linestyle='--', label='z ver')
+            plt.legend(loc=1)
+            plt.subplot(333)
+            plt.plot(mo.time, mo.x_prior, color='blue', linestyle='-', label='x_prior')
+            plt.plot(mv.time, mv.x_prior, color='red', linestyle='--', label='x_prior ver')
+            plt.legend(loc=1)
+            plt.subplot(334)
+            plt.plot(mo.time, mo.P_prior, color='blue', linestyle='-', label='P_prior')
+            plt.plot(mv.time, mv.P_prior, color='red', linestyle='--', label='P_prior ver')
+            plt.legend(loc=1)
+            plt.subplot(335)
+            plt.plot(mo.time, mo.x_post, color='blue', linestyle='-', label='x_post')
+            plt.plot(mv.time, mv.x_post, color='red', linestyle='--', label='x_post ver')
+            plt.legend(loc=1)
+            plt.subplot(336)
+            plt.plot(mo.time, mo.P_post, color='blue', linestyle='-', label='P_post')
+            plt.plot(mv.time, mv.P_post, color='red', linestyle='--', label='P_post ver')
+            plt.legend(loc=1)
+            plt.subplot(337)
+            plt.plot(mo.time, mo.hx, color='blue', linestyle='-', label='hx')
+            plt.plot(mv.time, mv.hx, color='red', linestyle='--', label='hx ver')
+            plt.legend(loc=1)
+            plt.subplot(338)
+            plt.plot(mo.time, mo.H, color='blue', linestyle='-', label='H')
+            plt.plot(mv.time, mv.H, color='red', linestyle='--', label='H ver')
+            plt.legend(loc=1)
+            fig_file_name = filename + '_' + str(n_fig) + ".png"
+            fig_files.append(fig_file_name)
+            plt.savefig(fig_file_name, format="png")
 
     return n_fig, fig_files
 
 
-def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, pathToData='.', pathToTemp='.'):
-    data_file = pathToData+'/'+txt_file
-    csv_file = pathToTemp+'/'+txt_file.replace('.txt', type_ + '.csv', 1)
+def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, path_to_data='.', path_to_temp='.'):
+    data_file = path_to_data+'/'+txt_file
+    csv_file = path_to_temp+'/'+txt_file.replace('.txt', type_ + '.csv', 1)
     # Header
     have_header_str = None
     with open(data_file, "r", encoding='cp437') as input_file:
@@ -498,7 +583,7 @@ def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, pathToData='.
                         if have_header_str is None:
                             have_header_str = True  # write one title only
                             output.write(line)
-            except:
+            finally:
                 print("DataOverModel381:", line)  # last line
     # Data
     num_lines = 0
@@ -513,7 +598,7 @@ def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, pathToData='.
                     unit_key_found = True
                     if num_lines == 0:  # use first data line to screen out short and long lines that have key
                         length = line.count(",")
-                    if line.count(",") == length and (num_lines==0 or ((num_lines_in+1) % skip) == 0):
+                    if line.count(",") == length and (num_lines == 0 or ((num_lines_in+1) % skip) == 0):
                         output.write(line)
                         num_lines += 1
                     else:
@@ -523,42 +608,41 @@ def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, pathToData='.
         csv_file = None
         print("I(write_clean_file): no data to write")
         if not unit_key_found:
-            print("E(write_clean_file):  unit_key not found in ", txt_file, ".  Looking with ", unit_key)
-            exit(1)
+            print("W(write_clean_file):  unit_key not found in ", txt_file, ".  Looking with ", unit_key)
     else:
         print("Wrote(write_clean_file):", csv_file, num_lines, "lines", num_skips, "skips", length, "fields")
     return csv_file
 
 
 class SavedData:
-    def __init__(self, data=None, sel=None, time_end=None):
+    def __init__(self, data=None, sel=None, ekf=None, time_end=None):
         if data is None:
             self.i = 0
-            self.time = []
-            self.dt = []  # Update time, s
-            self.unit = []  # text title
-            self.hm = []  # hours, minutes
-            self.cTime = []  # Control time, s
-            self.Ib = []  # Bank current, A
-            self.ioc = []  # Hys indicator current, A
-            self.voc_soc = []
-            self.Ib_past = []  # Past bank current, A
-            self.Vb = []  # Bank voltage, V
-            self.chm = []  # Battery chemistry code
-            self.sat = []  # Indication that battery is saturated, T=saturated
-            self.sel = []  # Current source selection, 0=amp, 1=no amp
-            self.mod = []  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
-            self.Tb = []  # Battery bank temperature, deg C
-            self.Vsat = []  # Monitor Bank saturation threshold at temperature, deg C
-            self.dV_dyn = []  # Monitor Bank current induced back emf, V
-            self.dv_hys = []  # Drop across hysteresis, V
-            self.Voc_stat = []  # Monitor Static bank open circuit voltage, V
-            self.Voc = []  # Bank VOC estimated from Vb and RC model, V
-            self.Voc_ekf = []  # Monitor bank solved static open circuit voltage, V
-            self.y_ekf = []  # Monitor single battery solver error, V
-            self.soc_s = []  # Simulated state of charge, fraction
-            self.soc_ekf = []  # Solved state of charge, fraction
-            self.soc = []  # Coulomb Counter fraction of saturation charge (q_capacity_) available (0-1)
+            self.time = None
+            self.dt = None  # Update time, s
+            self.unit = None  # text title
+            self.hm = None  # hours, minutes
+            self.cTime = None  # Control time, s
+            self.Ib = None  # Bank current, A
+            self.ioc = None  # Hys indicator current, A
+            self.voc_soc = None
+            self.Ib_past = None  # Past bank current, A
+            self.Vb = None  # Bank voltage, V
+            self.chm = None  # Battery chemistry code
+            self.sat = None  # Indication that battery is saturated, T=saturated
+            self.sel = None  # Current source selection, 0=amp, 1=no amp
+            self.mod = None  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
+            self.Tb = None  # Battery bank temperature, deg C
+            self.Vsat = None  # Monitor Bank saturation threshold at temperature, deg C
+            self.dV_dyn = None  # Monitor Bank current induced back emf, V
+            self.dv_hys = None  # Drop across hysteresis, V
+            self.Voc_stat = None  # Monitor Static bank open circuit voltage, V
+            self.Voc = None  # Bank VOC estimated from Vb and RC model, V
+            self.Voc_ekf = None  # Monitor bank solved static open circuit voltage, V
+            self.y_ekf = None  # Monitor single battery solver error, V
+            self.soc_s = None  # Simulated state of charge, fraction
+            self.soc_ekf = None  # Solved state of charge, fraction
+            self.soc = None  # Coulomb Counter fraction of saturation charge (q_capacity_) available (0-1)
             self.time_ref = 0.  # Adjust time for start of Ib input
         else:
             self.i = 0
@@ -574,7 +658,7 @@ class SavedData:
                 while self.Ib[self.zero_end] == 0.0:  # stop after first non-zero
                     self.zero_end += 1
                 self.zero_end -= 1  # backup one
-            except:
+            finally:
                 self.zero_end = 0
             self.time_ref = self.time[self.zero_end]
             self.time -= self.time_ref
@@ -616,20 +700,20 @@ class SavedData:
             self.soc_ekf = np.array(data.soc_ekf[:i_end])
             self.soc = np.array(data.soc[:i_end])
         if sel is None:
-            self.c_time_s = []
+            self.c_time_s = None
             self.res = None
-            self.user_sel = []
-            self.cc_dif = []
-            self.ccd_fa = []
-            self.ibmh = []
-            self.ibnh = []
-            self.ibmm = []
-            self.ibnm = []
-            self.ibm = []
-            self.ib_diff = []
-            self.ib_diff_f = []
-            self.ib_diff_flt = []
-            self.ib_diff_fa = []
+            self.user_sel = None
+            self.cc_dif = None
+            self.ccd_fa = None
+            self.ibmh = None
+            self.ibnh = None
+            self.ibmm = None
+            self.ibnm = None
+            self.ibm = None
+            self.ib_diff = None
+            self.ib_diff_f = None
+            self.ib_diff_flt = None
+            self.ib_diff_fa = None
             self.voc_soc = None
             self.e_w = None
             self.e_w_f = None
@@ -639,20 +723,20 @@ class SavedData:
             self.wh_fa = None
             self.wl_fa = None
             self.wv_fa = None
-            self.ib_sel = []
-            self.Ib_h = []
-            self.Ib_s = []
-            self.mib = []
-            self.Ib = []
-            self.Vb_h = []
-            self.Vb_s = []
-            self.mvb = []
-            self.Vb = []
-            self.Tb_h = []
-            self.Tb_s = []
-            self.mtb = []
-            self.Tb_f = []
-            self.vb_sel = []
+            self.ib_sel = None
+            self.Ib_h = None
+            self.Ib_s = None
+            self.mib = None
+            self.Ib = self.Ib_past
+            self.Vb_h = None
+            self.Vb_s = None
+            self.mvb = None
+            self.Vb = self.Vb
+            self.Tb_h = None
+            self.Tb_s = None
+            self.mtb = None
+            self.Tb_f = None
+            self.vb_sel = None
             self.ib_rate = None
             self.ib_quiet = None
             self.dscn_flt = None
@@ -662,7 +746,7 @@ class SavedData:
             self.Ib_finj = None
             self.Tb_finj = None
             self.Vb_finj = None
-            self.tb_sel = []
+            self.tb_sel = None
             self.tb_flt = None
             self.tb_fa = None
             self.ccd_thr = None
@@ -725,6 +809,44 @@ class SavedData:
             self.ewl_thr = np.array(sel.ewl_thr[:i_end])
             self.ibd_thr = np.array(sel.ibd_thr[:i_end])
             self.ibq_thr = np.array(sel.ibq_thr[:i_end])
+        if ekf is None:
+            self.c_time_e = None
+            self.Fx = None
+            self.Bu = None
+            self.Q = None
+            self.R = None
+            self.P = None
+            self.S = None
+            self.K = None
+            self.u = None
+            self.x = None
+            self.y = None
+            self.z = None
+            self.x_prior = None
+            self.P_prior = None
+            self.x_post = None
+            self.P_post = None
+            self.hx = None
+            self.H = None
+        else:
+            self.c_time_s = np.array(ekf.c_time[:i_end])
+            self.Fx = np.array(ekf.Fx_[:i_end])
+            self.Bu = np.array(ekf.Bu_[:i_end])
+            self.Q = np.array(ekf.Q_[:i_end])
+            self.R = np.array(ekf.R_[:i_end])
+            self.P = np.array(ekf.P_[:i_end])
+            self.S = np.array(ekf.S_[:i_end])
+            self.K = np.array(ekf.K_[:i_end])
+            self.u = np.array(ekf.u_[:i_end])
+            self.x = np.array(ekf.x_[:i_end])
+            self.y = np.array(ekf.y_[:i_end])
+            self.z = np.array(ekf.z_[:i_end])
+            self.x_prior = np.array(ekf.x_prior_[:i_end])
+            self.P_prior = np.array(ekf.P_prior_[:i_end])
+            self.x_post = np.array(ekf.x_post_[:i_end])
+            self.P_post = np.array(ekf.P_post_[:i_end])
+            self.hx = np.array(ekf.hx_[:i_end])
+            self.H = np.array(ekf.H_[:i_end])
 
     def __str__(self):
         s = "{},".format(self.unit[self.i])
@@ -750,25 +872,25 @@ class SavedDataSim:
     def __init__(self, time_ref, data=None, time_end=None):
         if data is None:
             self.i = 0
-            self.time = []
-            self.unit = []  # text title
-            self.c_time = []  # Control time, s
-            self.chm_s = []
-            self.Tb_s = []
-            self.Tbl_s = []
-            self.vsat_s = []
-            self.voc_s = []
-            self.voc_stat_s = []
-            self.dv_dyn_s = []
-            self.dv_hys_s = []
-            self.vb_s = []
-            self.ib_in_s = []
-            self.ioc_s = []
-            self.ib_s = []
-            self.sat_s = []
-            self.dq_s = []
-            self.soc_s = []
-            self.reset_s = []
+            self.time = None
+            self.unit = None  # text title
+            self.c_time = None  # Control time, s
+            self.chm_s = None
+            self.Tb_s = None
+            self.Tbl_s = None
+            self.vsat_s = None
+            self.voc_s = None
+            self.voc_stat_s = None
+            self.dv_dyn_s = None
+            self.dv_hys_s = None
+            self.vb_s = None
+            self.ib_in_s = None
+            self.ioc_s = None
+            self.ib_s = None
+            self.sat_s = None
+            self.dq_s = None
+            self.soc_s = None
+            self.reset_s = None
         else:
             self.i = 0
             self.c_time = np.array(data.c_time)
@@ -808,9 +930,9 @@ class SavedDataSim:
         s += "{:5.2f},".format(self.vb_s[self.i])
         s += "{:8.3f},".format(self.ib_s[self.i])
         s += "{:7.3f},".format(self.sat_s[self.i])
-        s += "{:5.3f},".format(self.ddq_s[self.i])
+        # s += "{:5.3f},".format(self.ddq_s[self.i])
         s += "{:5.3f},".format(self.dq_s[self.i])
-        s += "{:5.3f},".format(self.qcap_s[self.i])
+        # s += "{:5.3f},".format(self.qcap_s[self.i])
         s += "{:7.3f},".format(self.soc_s[self.i])
         s += "{:d},".format(self.reset_s[self.i])
         return s

@@ -303,12 +303,12 @@ if __name__ == '__main__':
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
         pathToSavePdfTo = '../dataReduction/figures'
-        pathToData = '../dataReduction'
-        pathToTemp = '../dataReduction/temp'
+        path_to_data = '../dataReduction'
+        path_to_temp = '../dataReduction/temp'
 
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
-                                           skip=skip, pathToData=pathToData, pathToTemp=pathToTemp)
+                                           skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp)
         cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'ioc', 'voc_soc', 'Vsat', 'dV_dyn', 'Voc_stat',
                 'Voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
@@ -316,8 +316,8 @@ if __name__ == '__main__':
 
         # Load sel (old)
         sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
-                                          unit_key=unit_key_sel, skip=skip, pathToData=pathToData,
-                                          pathToTemp=pathToTemp)
+                                          unit_key=unit_key_sel, skip=skip, path_to_data=path_to_data,
+                                          path_to_temp=path_to_temp)
         cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
                     'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_diff', 'ib_diff_f',
                     'voc_soc', 'e_w', 'e_w_f',
@@ -334,8 +334,8 @@ if __name__ == '__main__':
 
         # Load _m v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
-                                               unit_key=unit_key_sim, skip=skip, pathToData=pathToData,
-                                               pathToTemp=pathToTemp)
+                                               unit_key=unit_key_sim, skip=skip, path_to_data=path_to_data,
+                                               path_to_temp=path_to_temp)
         cols_sim = ('c_time', 'chm_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
                     'ib_in_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
         if data_file_sim_clean:

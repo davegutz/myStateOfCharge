@@ -77,22 +77,24 @@ if __name__ == '__main__':
         # data_file_old_txt = 'EKF_Track Dr200 v20220917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr400 v20220917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr800 v20220917.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = 'EKF_Track Dr2000 v20220917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track Dr2000 v20220917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr200 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr400 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'EKF_Track Dr800 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = 'EKF_Track Dr800 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"
+        title_key_ekf = "unit_e,"  # Find one instance of title
+        unit_key_ekf = "unit_ekf"
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
         pathToSavePdfTo = '../dataReduction/figures'
-        pathToData = '../dataReduction'
-        pathToTemp = '../dataReduction/temp'
+        path_to_data = '../dataReduction'
+        path_to_temp = '../dataReduction/temp'
 
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
-                                           skip=skip, pathToData=pathToData, pathToTemp=pathToTemp)
+                                           skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp)
         cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'ioc', 'voc_soc', 'Vsat', 'dV_dyn', 'Voc_stat',
                 'Voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
@@ -100,8 +102,8 @@ if __name__ == '__main__':
 
         # Load sel (old)
         sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
-                                          unit_key=unit_key_sel, skip=skip, pathToData=pathToData,
-                                          pathToTemp=pathToTemp)
+                                          unit_key=unit_key_sel, skip=skip, path_to_data=path_to_data,
+                                          path_to_temp=path_to_temp)
         cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
                     'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_diff', 'ib_diff_f',
                     'voc_soc', 'e_w', 'e_w_f',
@@ -114,12 +116,23 @@ if __name__ == '__main__':
         if sel_file_clean:
             sel_old_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,
                                         encoding=None).view(np.recarray)
-        mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, time_end=time_end)
 
-        # Load _m v24 portion of real-time run (old)
+        # Load ekf (old)
+        ekf_file_clean = write_clean_file(data_file_old_txt, type_='_ekf', title_key=title_key_ekf,
+                                          unit_key=unit_key_ekf, skip=skip, path_to_data=path_to_data,
+                                          path_to_temp=path_to_temp)
+        cols_ekf = ('c_time', 'Fx_', 'Bu_', 'Q_', 'R_', 'P_', 'S_', 'K_', 'u_', 'x_', 'y_', 'z_', 'x_prior_',
+                    'P_prior_', 'x_post_', 'P_post_', 'hx_', 'H_')
+        ekf_old_raw = None
+        if ekf_file_clean:
+            ekf_old_raw = np.genfromtxt(ekf_file_clean, delimiter=',', names=True, usecols=cols_ekf, dtype=float,
+                                        encoding=None).view(np.recarray)
+        mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, ekf=ekf_old_raw, time_end=time_end)
+
+        # Load sim _s v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
-                                               unit_key=unit_key_sim, skip=skip, pathToData=pathToData,
-                                               pathToTemp=pathToTemp)
+                                               unit_key=unit_key_sim, skip=skip, path_to_data=path_to_data,
+                                               path_to_temp=path_to_temp)
         cols_sim = ('c_time', 'chm_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
                     'ib_in_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
         if data_file_sim_clean:

@@ -559,6 +559,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.Fx.append(self.Fx)
         self.saved.Bu.append(self.Bu)
         self.saved.P.append(self.P)
+        self.saved.Q.append(self.Q)
+        self.saved.R.append(self.R)
         self.saved.H.append(self.H)
         self.saved.S.append(self.S)
         self.saved.K.append(self.K)
@@ -911,6 +913,8 @@ class Saved:
         self.Fx = []
         self.Bu = []
         self.P = []
+        self.Q = []
+        self.R = []
         self.H = []
         self.S = []
         self.K = []

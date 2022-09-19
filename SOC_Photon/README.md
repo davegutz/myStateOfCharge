@@ -333,7 +333,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   20. The easiest way to confirm that the EKF is working correctly is to set 'modeling' using Talk('Xm7') and verify that soc_ekf equals soc_mod.
   21. Lessons-learned from installation in truck.  Worked fine driving both A/D with D2 from main board.    But when installed in truck all hell broke loose.   The root cause was grounding the Vlow fuse side of shunt legs of the A/D converters.   In theory the fuse side is the same as ground of power supply.   But the wires are gage 20-22 and I detected a 75 mA current in the Vh and Vl legs which is enough to put about 50% error on detection.   Very sensitive.   But if float both legs and avoid ground looping it works fine.   And as long as ground loops avoided, there is no need to beef up the sense wire gage because there will be no current to speak of.  I revised the schematics.   There are now two pin-outs:  one for installed in truck and another when driving with the D2 pin and PWM into the RC circuits.
   22. Regression testing:  
-    a. Saturation test.  Run Talk('Xp7').   This will initialize monitor at 0.5 and model near saturation then drive toward saturation.   Watch voc vs v_sat and sat in the v4 debug display that gets started.  Reset with 'Xp-1'.  If starting up Xp7 it initializes saturated just enter 'm< val >' with lower 'val' than what 'Xp7' started it with until it initializes without saturation.  Should saturate soon and reset soc of monitor to 1.0.  Then setting 'Di-1000' you should see it reset after a very little time. Again, reset the whole mess with 'Xp-1'.
+    a. Saturation test.  Run Talk('Xp7').   This will initialize monitor at 0.5 and model near saturation then drive toward saturation.   Watch voc vs v_sat and sat in the v1 debug display that gets started.  Reset with 'Xp-1'.  If starting up Xp7 it initializes saturated just enter 'm< val >' with lower 'val' than what 'Xp7' started it with until it initializes without saturation.  Should saturate soon and reset soc of monitor to 1.0.  Then setting 'Di-1000' you should see it reset after a very little time. Again, reset the whole mess with 'Xp-1'.
     b.  
   23. 'Talk' refers to using CoolTerm to transmit commands through the myTalk.cpp functions. Talk is not threaded so can only send off a barage of commands open loop and hope for the best.
   24. I had to add persistence to the 'log on boot' function.   When in a cold shutoff, the BMS of the battery periodically 'looks' at the state of the battery by turning it on for a few seconds. The summary filled up quickly with these useless logs.  I used a 60 second persistence.
@@ -375,15 +375,15 @@ Rapid tweak test 02:30 min using models 'tweakMod'
     run py script DataOverModel.py, using suggestions at bottom of file to recognize the new data
 
 Throughput test
-  v4;Dr1;
+  v1;Dr1;
     look at T print, estimate X-2s value (0.049s, ~50% margin)
   Dr100;
     confirm T restored to 0.100s
     .
-37. Android running of data collection.   The very best I could accompish is to run BLESerial App and save to file. You can use BLE transmit to change anything, echoed still on USB so flying a little blind.   Best for changing 'v0' to 'v4' and vice-versa.  The script 'DataOverModel.py' WILL RUN ON ANDROID using PyDroid and a bunch of stupid setup work.  But live plots I couldn't get to work because USB support is buggy.  The author of best tools usbserial4 said using Python 2 was best - forget that!  Easiest to collect data using BLESerial and move to PC for analysis.  Could use laptop PC to collect either BLE or USB and that should work really well.   Plug laptop into truck cab inverter.
+37. Android running of data collection.   The very best I could accompish is to run BLESerial App and save to file. You can use BLE transmit to change anything, echoed still on USB so flying a little blind.   Best for changing 'v0' to 'v1' and vice-versa.  The script 'DataOverModel.py' WILL RUN ON ANDROID using PyDroid and a bunch of stupid setup work.  But live plots I couldn't get to work because USB support is buggy.  The author of best tools usbserial4 said using Python 2 was best - forget that!  Easiest to collect data using BLESerial and move to PC for analysis.  Could use laptop PC to collect either BLE or USB and that should work really well.   Plug laptop into truck cab inverter.
 38. Capitalized parameters, violation of coding standards, are "Bank" values, e.g. for '2P3S' parallelSerial banks of batteries while lower case are per 12V battery unit.
 39. Signal injection examples:
- Ca0.5;Xts;Xa100;Xf0.1;XW5;XC5;v4;XR;
+ Ca0.5;Xts;Xa100;Xf0.1;XW5;XC5;v1;XR;
 40.  Expected anomolies:
   a.  real world collection sometimes run sample times longer than RANDLES_T_MAX.   When that happens the modeled simulation of Randles system will oscillate so it is bypassed.   Real data will appear to have first order response and simulation in python will appear to be step.
 41.  Manual tests to check initialzation of real world.   Set 'Xm=4;' to over-ride current sensor.  Set 'Dc<>' to place Vb where you want it.   Press hard reset button to force reinitialization to the EKF.  If get stuck saturated or not, remember to add a little bit of current 'Di<>' positive to engage saturation and negative to disengage saturation.
@@ -398,30 +398,30 @@ Throughput test
 45. Fault injection testing
 
 Full regression suite:
-  ampHiFail:      D^0;Xm7;Ca0.5;Dr100;DP1;v26;W50;Dm50;Dn0.0001;
+  ampHiFail:      D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm50;Dn0.0001;
                   Xp0;Pf;Rf;W10;+v0;Dr100;Rf;Pf;
-  ampLoFail:      D^0;Xm7;Ca0.5;Dr100;DP1;v26;W50;Dm-50;Dn0.0001;
+  ampLoFail:      D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm-50;Dn0.0001;
                   Xp0;Pf;Rf;W10;+v0;Dr100;Rf;Pf;
-  ampHiFailNoise: D^0;Xm7;Ca0.5;Dr100;DP1;v26;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;
+  ampHiFailNoise: D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;
                   DV0;DM0;DN0;Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
   rapidTweakRegression:  Xp10;
   rapidTweakRegression40C_:   D^15;Xp10;
                               D^0;
   slowTweakRegression:  Xp11;
-  triTweakDisch:  D^0;Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-29500;XW5;XT5;XC3;W2;v26;W2;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;XR;
+  triTweakDisch:  D^0;Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-29500;XW5;XT5;XC3;W2;v2;W2;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;XR;
                   v0;XS;Dm0;Dn0;Fi1;Fo1;Fc1;Fd1;FV0;FI0;FT0;Xp0;Ca1.;Pf;
   satSit:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat
-         D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-17;Xf0.002;XW10;XT10;XC1;W2;v26;W5;XR;
+         D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-17;Xf0.002;XW10;XT10;XC1;W2;v2;W5;XR;
           XS;v0;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;
-  ampHiFailSlow:  D^0;Xm7;Ca0.5;v26;W2;Dr1000;DP1;Dm6;Dn0.0001;Fc.02;Fd.5;
+  ampHiFailSlow:  D^0;Xm7;Ca0.5;v2;W2;Dr1000;DP1;Dm6;Dn0.0001;Fc.02;Fd.5;
                   Xp0;Pf;Rf;W2;+v0;Dr100;Fc1;Fd1;Rf;Pf;
-  vHiFail:        D^0;Xm7;Ca0.5;Dr100;DP1;v26;W50;Dv0.25;
+  vHiFail:        D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dv0.25;
                   Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
   pulse:  Xp6
-  tbFailMod:    D^0;Ca.5;Xp0;W4;Xm7;DP1;Dr100;W2;v26;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
+  tbFailMod:    D^0;Ca.5;Xp0;W4;Xm7;DP1;Dr100;W2;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;
   tbFailHdwe:   This script sometimes doesn't work but test performs fine manually
-                D^0;Ca.5;Xp0;W4;Xm6;DP1;Dr100;W2;v26;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
+                D^0;Ca.5;Xp0;W4;Xm6;DP1;Dr100;W2;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;
 
 Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
@@ -429,16 +429,16 @@ Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
            Bm0;Bs0;D^0;
            use Bsim=1 and Bmon=2 in MonSim
   triTweakDischBucketMix: set Xm7;D^<>; or Xm0;Dt<>; +reset
-                  Xp0;v0;Bm2;Bs1;Xm0;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;SA0;SB0;DA0;DB0;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-33000;XW5;XT5;XC3;W2;v26;W3;XR;
+                  Xp0;v0;Bm2;Bs1;Xm0;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;SA0;SB0;DA0;DB0;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-33000;XW5;XT5;XC3;W2;v2;W3;XR;
                   v0;XS;SA1;SB1;Dm0;Dn0;Bm0;Bs0;FV0;FI1;FT0;Xp0;Ca1.;Pf;
   slowTweakRegressionBucket: Bm2;Bs1;D^15;Xp11
 
   EKF_Track:  investigate EKF tracking
-         D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr100;DP1;v26;XR;
+         D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr100;DP1;v3;XR;
           XS;v0;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;
 
   EKF_Track Noise:  investigate EKF tracking
-         D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;DT.05;DV0.05;DM.2;DN2;Dr2000;DP1;v26;XR;
+         D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;DT.05;DV0.05;DM.2;DN2;Dr2000;DP1;v2;XR;
           Dr100;DT0;DV0;DM0;DN0;XS;v0;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;
           
 
