@@ -727,7 +727,7 @@ class SavedData:
             self.Ib_h = None
             self.Ib_s = None
             self.mib = None
-            self.Ib = self.Ib_past
+            self.Ib = np.append(np.array(self.Ib_past[1:]), self.Ib_past[-1])  # shift time to present
             self.Vb_h = None
             self.Vb_s = None
             self.mvb = None

@@ -104,7 +104,7 @@ def unscented_transform(sigmas, Wm, Wc, noise_cov=None,
             x = np.dot(Wm, sigmas)    # dot = \Sigma^n_1 (W[k]*Xi[k])
         else:
             x = mean_fn(sigmas, Wm)
-    except:
+    finally:
         print(sigmas)
         raise
 
