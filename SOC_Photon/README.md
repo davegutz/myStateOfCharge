@@ -423,6 +423,15 @@ Full regression suite:
   tbFailHdwe:   This script sometimes doesn't work but test performs fine manually
                 D^0;Ca.5;Xp0;W4;Xm6;DP1;Dr100;W2;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;
+  EKF_Track:  investigate EKF tracking
+         D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr100;DP1;v3;XR;
+          XS;v0;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;
+  EKF_Track Dr2000:  investigate EKF tracking.   Confirm proper operation with Dr!=100
+         D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr2000;DP1;v3;XR;
+          XS;v0;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;
+  Hardware Up:
+    
+         
 
 Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
   Bucket:  Bm2;Bs1;D^15;
@@ -433,14 +442,6 @@ Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
                   v0;XS;SA1;SB1;Dm0;Dn0;Bm0;Bs0;FV0;FI1;FT0;Xp0;Ca1.;Pf;
   slowTweakRegressionBucket: Bm2;Bs1;D^15;Xp11
 
-  EKF_Track:  investigate EKF tracking
-         D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr100;DP1;v3;XR;
-          XS;v0;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;
-
-  EKF_Track Dr2000:  investigate EKF tracking
-         D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr2000;DP1;v3;XR;
-          XS;v0;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;
-         
 
 ## Accuracy
 

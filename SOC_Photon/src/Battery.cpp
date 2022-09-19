@@ -324,9 +324,9 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     soc_ = q_ / q_capacity_;
 
     y_filt_ = y_filt->calculate(y_, min(Sen->T, EKF_T_RESET));
-    if ( rp.debug==7 )
-        Serial.printf("calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err, %7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-            Sen->Tb_filt, Sen->Ib, 0, soc_ekf_, vb_, voc_, hx_, dv_dyn_, dv_hys_, y_);
+    // if ( rp.debug==7 )
+    //     Serial.printf("calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err, %7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
+    //         Sen->Tb_filt, Sen->Ib, 0, soc_ekf_, vb_, voc_, hx_, dv_dyn_, dv_hys_, y_);
 
     // EKF convergence.  Audio industry found that detection of quietness requires no more than
     // second order filter of the signal.   Anything more is 'gilding the lily'
@@ -492,7 +492,6 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, Sensors *Sen)
     double vb = Vb_avg/(*rp_nS_);
     double dv_dyn = Ib_avg/(*rp_nP_)*chem_.r_ss;
     double voc =  vb - dv_dyn;
-    double dv_hys_ = 0.;
     int8_t count = 0;
     static double soc_solved = 1.0;
     double dv_dsoc;
@@ -505,9 +504,9 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, Sensors *Sen)
         err = voc - voc_solved;
     }
     init_soc_ekf(soc_solved);
-    if ( rp.debug==7 )
-            Serial.printf("solve    :n_avg, Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %d, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-            n_avg, Tb_avg, Vb_avg, Ib_avg, count, soc_solved, voc, voc_solved, dv_dyn, dv_hys_, err);
+    // if ( rp.debug==7 )
+    //         Serial.printf("solve    :n_avg, Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %d, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
+    //         n_avg, Tb_avg, Vb_avg, Ib_avg, count, soc_solved, voc, voc_solved, dv_dyn, dv_hys_, err);
     return ( count<SOLV_MAX_COUNTS );
 }
 

@@ -302,7 +302,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" cc_dif  x  %d 'Fc ^'\n", cc_diff_fa());
   Serial.printf(" ib n    %d  %d 'Fi 1'\n", ib_noa_flt(), ib_noa_fa());
   Serial.printf(" ib m    %d  %d 'Fi 1'\n", ib_amp_flt(), ib_amp_fa());
-  Serial.printf(" vb      %d  %d 'Fv 1  *Dc/*Dv'\n", vb_flt(), vb_fa());
+  Serial.printf(" vb      %d  %d 'Fv 1  *SV, *Dc/*Dv'\n", vb_flt(), vb_fa());
   Serial.printf(" tb      %d  %d 'Ft 1'\n  ", tb_flt(), tb_fa());
   bitMapPrint(cp.buffer, fltw_, NUM_FLT);
   Serial.print(cp.buffer);
@@ -343,7 +343,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf(" cc_dif  x  %d 'Fc ^'\n", cc_diff_fa());
   Serial1.printf(" ib n    %d  %d 'Fi 1'\n", ib_noa_flt(), ib_noa_fa());
   Serial1.printf(" ib m    %d  %d 'Fi 1'\n", ib_amp_flt(), ib_amp_fa());
-  Serial1.printf(" vb      %d  %d 'Fv 1, *Dc/*Dv'\n", vb_flt(), vb_fa());
+  Serial1.printf(" vb      %d  %d 'Fv 1, *SV, *Dc/*Dv'\n", vb_flt(), vb_fa());
   Serial1.printf(" tb      %d  %d 'Ft 1'\n  ", tb_flt(), tb_fa());
   bitMapPrint(cp.buffer, fltw_, NUM_FLT);
   Serial1.print(cp.buffer);
@@ -842,7 +842,7 @@ void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const 
 void Sensors::vb_load(const byte vb_pin)
 {
     Vb_raw = analogRead(vb_pin);
-    Vb_hdwe =  float(Vb_raw)*VB_CONV_GAIN + float(VBATT_A) + rp.vb_bias;
+    Vb_hdwe =  float(Vb_raw)*rp.vb_scale + float(VBATT_A) + rp.vb_bias;
 }
 
 // Print analog voltage
