@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "pro_20220917";  // Disable e_wrap saturated; tweak, history falw, cal noa, 5 A ibdif, print stuff, thresh tune, new curve
+const String unit = "pro_20220917a";  // dt fix for ekf
 
 #define ASK_DURING_BOOT         1   // Flag to ask for application of this file to * retained adjustements
 // * = SRAM EEPROM adjustments, retained on power reset

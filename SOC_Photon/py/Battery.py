@@ -41,7 +41,7 @@ class Retained:
         self.nP = 1  # assumed for this 'model'
 
     def tweak_test(self):
-        return 0b001 & int(self.modeling)
+        return 0b1000 & int(self.modeling)
 
 
 # Battery constants
@@ -83,7 +83,7 @@ EKF_Q_SD_REV = EKF_Q_SD_NORM
 EKF_R_SD_REV = EKF_R_SD_NORM
 IMAX_NUM = 100000.
 DVOC = -0.05
-
+VBATT_MIN = 9.0
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -404,7 +404,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.dv_hys = self.hys.update(self.dt)*self.s_hys
         self.voc_stat = self.voc - self.dv_hys
         self.ioc = self.hys.ioc
-        self.bms_off = self.temp_c <= low_t  # KISS
+        self.bms_off = self.temp_c <= low_t or (self.vb < VBATT_MIN and not rp.tweak_test())  # KISS
         self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
         if self.bms_off:
             self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
@@ -595,6 +595,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.mod_data.append(self.mod)
         self.saved.soc_s.append(self.soc_s)
         self.Randles.save(time)
+        self.saved.bms_off.append(self.bms_off)
 
 
 class BatterySim(Battery):
@@ -955,6 +956,7 @@ class Saved:
         self.delta_q = []  # Charge change since saturated, C
         self.q_capacity = []  # Saturation charge at temperature, C
         self.t_last = []  # Past value of battery temperature used for rate limit memory, deg C
+        self.bms_off = []  # Voltage low without faults, battery management system has shut off battery
 
 
 def overall_batt(mv, sv, rv, filename, fig_files=None, plot_title=None, n_fig=None, suffix=''):

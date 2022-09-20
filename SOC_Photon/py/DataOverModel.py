@@ -98,6 +98,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mv.time, mv.mod_data, color='red', linestyle='--', label='mod_ver')
         plt.plot(mo.time, mo.sat+2, color='magenta', linestyle='-',  label='sat+2')
         plt.plot(mv.time, np.array(mv.sat)+2, color='cyan', linestyle='--', label='sat_new+2')
+        plt.plot(mv.time, np.array(mv.bms_off)+2, color='orange', linestyle='-.', label='bms_off+2')
         plt.plot(mo.time, mo.sel, color='red', linestyle='-.', label='sel')
         plt.plot(mv.time, mv.sel, color='blue', linestyle=':', label='sel_ver')
         plt.plot(mo.time, mo.ib_sel-2, color='black', linestyle='-', label='ib_sel_stat-2')

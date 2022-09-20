@@ -334,6 +334,7 @@ public:
   double control_time;        // Decimal time, seconds since 1/1/2021
   boolean display;            // Use display
   double sclr_coul_eff;       // Scalar on Coulombic Efficiency
+  boolean bms_off;            // Calculated by BatteryMonitor, battery off, low voltage, switched by battery management system?
   void bias_all_model();      // Bias model outputs for sensor fault injection
   void final_assignments(BatteryMonitor *Mon);   // Make final signal selection
   void shunt_bias(void);      // Load biases into Shunt objects

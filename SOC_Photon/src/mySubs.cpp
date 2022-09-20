@@ -290,6 +290,8 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   disp_1 = cp.buffer;
   if ( Sen->Flt->vb_sel_stat()==0 && (frame==1 || frame==2) )
     disp_1 = "*fail";
+  else if ( Sen->bms_off )
+    disp_1 = " off ";
 
   // Ib
   sprintf(cp.buffer, "%6.1f", pp.pubList.Ib);
