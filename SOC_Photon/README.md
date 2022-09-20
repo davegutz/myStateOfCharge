@@ -430,7 +430,9 @@ Full regression suite:
          D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr2000;DP1;v3;XR;
           XS;v0;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;
   on_off_on:    Xm5;v2;Ca.09;W10;SV.9;W10;SV.8;W10;SV.7;W10;SV.6;W10;SV1;W50;v0;Pf;
-  Hardware Up:
+          XS;v0;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;
+  start_up:  D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Xts;Xa-500;Xf0.02;XW6;XT6;XC1;Dr100;DP1;v3;XR;
+          XS;v0;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;
 
          
 

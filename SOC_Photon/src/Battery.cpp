@@ -619,9 +619,11 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
 
     // VOC-OCV model
     voc_stat_ = calc_soc_voc(soc_, temp_c_, &dv_dsoc_);
-    voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, vsat_*1.2);  // slightly beyond but don't windup
+    voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, vsat_*1.2);  // slightly beyond sat but don't windup
+
+    // Battery management system (bms)
     bms_off_ = (( temp_c_ <= chem_.low_t ) || ( voc_stat_ < chem_.low_voc )) && !rp.tweak_test();
-    if ( bms_off_ && rp.mod_ib() ) ib_in_ = 0.;  // keep running when real world.  Input ib represents bms
+    if ( bms_off_ && rp.mod_ib() ) ib_in_ = 0.;  // keep running sim when real world.  ib_in represents bms
 
     // Dynamic emf
     // Hysteresis model

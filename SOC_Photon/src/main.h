@@ -204,7 +204,7 @@ void setup()
   // Ask to renominalize
   if ( ASK_DURING_BOOT )
   {
-    rp.print_versus_local_config();
+    rp.pretty_print();
     display->clearDisplay();
     display->setTextSize(1);              // Normal 1:1 pixel scale
     display->setTextColor(SSD1306_WHITE); // Draw white text
@@ -220,8 +220,8 @@ void setup()
     if ( answer=='Y' )
     {
       Serial.printf(" Y\n"); Serial1.printf(" Y\n");
-      rp.renominalize_to_local_config();
-      rp.print_versus_local_config();
+      rp.nominal();
+      rp.pretty_print();
     }
     else
     {

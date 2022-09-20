@@ -96,7 +96,7 @@ struct RetainedPars
     this->ib_scale_noa = CURR_SCALE_NOA;
     this->ib_bias_noa = CURR_BIAS_NOA;
     this->ib_bias_all = CURR_BIAS_ALL;
-    this->ib_select = false;
+    this->ib_select = 0;
     this->vb_bias = VOLT_BIAS;
     this->modeling = 0;
     this->amp = 0.;
@@ -136,67 +136,44 @@ struct RetainedPars
   // Print
   void pretty_print(void)
   {
-    Serial.printf("retained parameters (rp):\n");
-    Serial.printf("  debug=%d;*v<>\n", this->debug);
-    Serial.printf("  delta_q=%7.3f;*Ca<>\n", this->delta_q);
-    Serial.printf("  t_last=%7.3f; deg C\n", this->t_last);
-    Serial.printf("  delta_q_model=%10.1f;*Ca<>,*Cm<>\n", this->delta_q_model);
-    Serial.printf("  t_last_model=%7.3f; deg C\n", this->t_last_model);
-    Serial.printf("  shunt_gain_sclr= %7.3f;\n", this->shunt_gain_sclr);
-    Serial.printf("  ib_scale_amp= %7.3f;*SA<>\n", this->ib_scale_amp);
-    Serial.printf("  ib_bias_amp= %7.3f;*DA<> A\n", this->ib_bias_amp);
-    Serial.printf("  ib_scale_noa= %7.3f;*SB<>\n", this->ib_scale_noa);
-    Serial.printf("  ib_bias_noa=%7.3f;*DB<> A\n", this->ib_bias_noa);
-    Serial.printf("  ib_bias_all=%7.3f;*Di<> A \n", this->ib_bias_all);
-    Serial.printf("  ib_select=%d;*s<> -1=noa, 0=auto, 1=amp\n", this->ib_select);
-    Serial.printf("  vb_bias=%7.3f;*Dv,*Dc<> V\n", this->vb_bias);
-    Serial.printf("  modeling=%d;*Xm<>\n", this->modeling);
-    Serial.printf("  amp=%7.3f;*Xa<> A pk\n", this->amp);
-    Serial.printf("  freq=%7.3f;*Xf<> r/s\n", this->freq);
-    Serial.printf("  type=%d;*Xt<> 0=sin, 1=sq, 2=tri\n", this->type);
-    Serial.printf("  inj_bias=%7.3f; A\n", this->inj_bias);
-    Serial.printf("  tb_bias_hdwe=%7.3f;*Dt<> deg C\n", this->tb_bias_hdwe);
-    Serial.printf("  s_cap_model=%7.3f;*Sc<>\n", this->s_cap_model);
-    Serial.printf("  cutback_gain_scalar=%7.3f;*Sk<>\n", this->cutback_gain_scalar);
-    Serial.printf("  isum=%d;\n", this->isum);
-    Serial.printf("  delta_q_cinf_amp= %10.1f; C\n", this->delta_q_cinf_amp);
-    Serial.printf("  delta_q_dinf_amp= %10.1f; C\n", this->delta_q_dinf_amp);
-    Serial.printf("  delta_q_cinf_noa=%10.1f; C\n", this->delta_q_cinf_noa);
-    Serial.printf("  delta_q_dinf_noa=%10.1f; C\n", this->delta_q_dinf_noa);
-    Serial.printf("  hys_scale=%7.3f;*Sh\n", this->hys_scale);
-    Serial.printf("  tweak_sclr_amp=%7.3f;*Mk<>\n", this->tweak_sclr_amp);
-    Serial.printf("  tweak_sclr_noa=%7.3f;*Nk<>\n", this->tweak_sclr_noa);
-    Serial.printf("  nP=%5.2f;*BP<> e.g. '2P1S'\n", this->nP);
-    Serial.printf("  nS=%5.2f;*BS<> e.g. '2P1S'\n", this->nS);
-    Serial.printf("  mon_mod=%d;*Bm<> 0=Battle, 1=LION\n", this->mon_mod);
-    Serial.printf("  sim_mod=%d;*Bs<> 0=Battle, 1=LION\n", this->sim_mod);
-    Serial.printf("  vb_scale=%7.3f;*SV<>\n", this->vb_scale);
+    Serial.printf("\nretained parameters (rp):\n");
+    Serial.printf("                 local     memory\n");
+    Serial.printf(" isum                           %d tbl ptr\n", isum);
+    Serial.printf(" dq_cinf_amp%10.1f %10.1f C\n", -RATED_BATT_CAP*3600., delta_q_cinf_amp);
+    Serial.printf(" dq_dinf_amp%10.1f %10.1f C\n", RATED_BATT_CAP*3600., delta_q_dinf_amp);
+    Serial.printf(" dq_cinf_noa%10.1f %10.1f C\n", -RATED_BATT_CAP*3600., delta_q_cinf_noa);
+    Serial.printf(" dq_dinf_noa%10.1f %10.1f C\n", RATED_BATT_CAP*3600., delta_q_dinf_noa);
+    Serial.printf(" t_last          %5.2f      %5.2f dg C\n", RATED_TEMP, t_last);
+    Serial.printf(" t_last_sim      %5.2f      %5.2f dg C\n", RATED_TEMP, t_last_model);
+    Serial.printf(" shunt_gn_slr  %7.3f    %7.3f ?\n", 1., shunt_gain_sclr);  // TODO:  no talk value
+    Serial.printf(" debug               %d          %d *v<>\n", 0, debug);
+    Serial.printf(" delta_q    %10.1f %10.1f *Ca<>, C\n", 0., delta_q);
+    Serial.printf(" dq_sim     %10.1f %10.1f *Ca<>, *Cm<>, C\n", 0., delta_q_model);
+    Serial.printf(" scale_amp     %7.3f    %7.3f *SA<>\n", CURR_SCALE_AMP, ib_scale_amp);
+    Serial.printf(" bias_amp      %7.3f    %7.3f *DA<>\n", CURR_BIAS_AMP, ib_bias_amp);
+    Serial.printf(" scale_noa     %7.3f    %7.3f *SB<>\n", CURR_SCALE_NOA, ib_scale_noa);
+    Serial.printf(" bias_noa      %7.3f    %7.3f *DB<>\n", CURR_BIAS_NOA, ib_bias_noa);
+    Serial.printf(" ib_bias_all   %7.3f    %7.3f *Di<> A\n", CURR_BIAS_ALL, ib_bias_all);
+    Serial.printf(" ib_select           %d          %d *s<> -1=noa, 0=auto, 1=amp\n", 0, ib_select);
+    Serial.printf(" vb_bias       %7.3f    %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, vb_bias);
+    Serial.printf(" modeling            %d          %d *Xm<>\n", 0, modeling);
+    Serial.printf(" inj amp       %7.3f    %7.3f *Xa<> A pk\n", 0., amp);
+    Serial.printf(" inj frq       %7.3f    %7.3f *Xf<> r/s\n", 0., freq);
+    Serial.printf(" inj typ             %d          %d *Xt<> 1=sin, 2=sq, 3=tri\n", 0, type);
+    Serial.printf(" inj_bias      %7.3f    %7.3f *Xb<> A\n", 0., inj_bias);
+    Serial.printf(" tb_bias_hdwe  %7.3f    %7.3f *Dt<> dg C\n", TEMP_BIAS, tb_bias_hdwe);
+    Serial.printf(" s_cap_model   %7.3f    %7.3f *Sc<>\n", 1., s_cap_model);
+    Serial.printf(" cut_gn_slr    %7.3f    %7.3f *Sk<>\n", 1., cutback_gain_scalar);
+    Serial.printf(" hys_scale     %7.3f    %7.3f *Sh<>\n", HYS_SCALE, hys_scale);
+    Serial.printf(" tweak_sclr_amp%7.3f    %7.3f *Mk<>\n", 1., tweak_sclr_amp);
+    Serial.printf(" tweak_sclr_noa%7.3f    %7.3f *Nk<>\n", 1., tweak_sclr_noa);
+    Serial.printf(" nP            %7.3f    %7.3f *BP<> eg '2P1S'\n", NP, nP);
+    Serial.printf(" nS            %7.3f    %7.3f *BP<> eg '2P1S'\n", NS, nS);
+    Serial.printf(" mon chem            %d          %d *Bm<> 0=Battle, 1=LION\n", MON_CHEM, mon_mod);
+    Serial.printf(" sim chem            %d          %d *Bs<>\n", SIM_CHEM, sim_mod);
+    Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n\n", VB_SCALE, vb_scale);
   }
 
-  // Compare memory to local_config.h
-  void print_versus_local_config()
-  {
-    Serial.printf("          local    memory\n");
-    Serial.printf("bias amp %7.3f   %7.3f\n", CURR_BIAS_AMP, ib_bias_amp);
-    Serial.printf("bias noa %7.3f   %7.3f\n", CURR_BIAS_NOA, ib_bias_noa);
-    Serial.printf("sclr amp %7.3f   %7.3f\n", CURR_SCALE_AMP, ib_scale_amp);
-    Serial.printf("sclr noa %7.3f   %7.3f\n", CURR_SCALE_NOA, ib_scale_noa);
-    Serial.printf("sclr vb  %7.3f   %7.3f\n", VB_SCALE, vb_scale);
-    Serial.printf("mon chem %d   %d\n", MON_CHEM, mon_mod);
-    Serial.printf("sim chem %d   %d\n", SIM_CHEM, sim_mod);
-  }
-
-  // Renominalize as requested in setup()
-  void renominalize_to_local_config()
-  {
-    ib_bias_amp = CURR_BIAS_AMP;
-    ib_bias_noa = CURR_BIAS_NOA;
-    ib_scale_amp = CURR_SCALE_AMP;
-    ib_scale_noa = CURR_SCALE_NOA;
-    vb_scale = VB_SCALE;
-    mon_mod = MON_CHEM;
-    sim_mod = SIM_CHEM;
-  }
 };            
 
 #endif

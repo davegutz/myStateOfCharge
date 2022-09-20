@@ -78,7 +78,8 @@ if __name__ == '__main__':
         # data_file_old_txt = 'EKF_Track v20220917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr2000 v20220917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'gorilla v20220917a.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = 'on_off_on v20220917a.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'on_off_on v20220917a.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = 'start_up v20220917a.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr2000 fault v20220917.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
