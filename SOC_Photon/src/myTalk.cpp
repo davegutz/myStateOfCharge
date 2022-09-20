@@ -1059,7 +1059,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                   case ( 6 ):  // Xp6:  Program a pulse
-                    chit("XS;Dm0;Dn0;v0;Xm7;Ca0.5;Pm;Dr100;DP1;v26;", QUEUE);  // setup
+                    chit("XS;Dm0;Dn0;v0;Xm7;Ca0.5;Pm;Dr100;DP1;v2;", QUEUE);  // setup
                     chit("Dn0.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
                     chit("W10;Pm;v0;", QUEUE);  // finish
                     break;
@@ -1101,7 +1101,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                       chit("XT5;", QUEUE);    // Wait time after cycle to print
                       chit("XC3;", QUEUE);    // Number of injection cycles
                       chit("W2;", QUEUE);     // Wait
-                      chit("v26;", QUEUE);    // Data collection
+                      chit("v2;", QUEUE);    // Data collection
                     }
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
                     {
@@ -1111,7 +1111,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                       chit("XT600;", QUEUE);  // Wait time after cycle to print
                       chit("XC1;", QUEUE);    // Number of injection cycles
                       chit("W2;", QUEUE);     // Wait
-                      chit("v26;", QUEUE);    // Data collection
+                      chit("v2;", QUEUE);    // Data collection
                     }
                     else if ( INT_in == 12 )  // Xp12:  slow half tweak
                     {
@@ -1121,7 +1121,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                       chit("XT2400;", QUEUE); // Wait time after cycle to print
                       chit("XC0.5;", QUEUE);  // Number of injection cycles
                       chit("W2;", QUEUE);     // Wait
-                      chit("v26;", QUEUE);    // Data collection
+                      chit("v2;", QUEUE);    // Data collection
                     }
                     chit("W2;", QUEUE);       // Wait
                     chit("XR;", QUEUE);       // Run cycle
@@ -1134,12 +1134,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     {
                       chit("Dr500;", QUEUE);  // 5x sample time, > RANDLES_T_MAX.  Randles dynamics disabled in Photon
                       chit("DP4;", QUEUE);    // 4x data collection, > RANDLES_T_MAX.  Randles dynamics disabled in Python
-                      chit("v26;", QUEUE);    // Large data set
+                      chit("v2;", QUEUE);    // Large data set
                     }
                     else if ( INT_in == 21 )
                     {
                       chit("DP20;", QUEUE);    // 20x data collection
-                      chit("v26;", QUEUE);     // Slow data collection
+                      chit("v2;", QUEUE);     // Slow data collection
                     }
                     chit("Rb;", QUEUE);       // Large data set
                     break;

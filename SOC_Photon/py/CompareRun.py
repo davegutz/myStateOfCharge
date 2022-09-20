@@ -59,10 +59,10 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
         # Regression suite
-        # data_file_old_txt = 'ampHiFail20220914.txt'; unit_key = 'pro_2022'
+        data_file_old_txt = 'ampHiFail v20220917a.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'ampLoFail20220914.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'ampHiFailNoise20220914.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = 'rapidTweakRegression20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'rapidTweakRegression v20220917a.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'rapidTweakRegression40C_20220914.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'slowTweakRegression20220914.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'triTweakDisch20220914.txt'; unit_key = 'pro_2022'
@@ -79,7 +79,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'EKF_Track Dr2000 v20220917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'gorilla v20220917a.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'on_off_on v20220917a.txt'; unit_key = 'pro_2022'
-        data_file_old_txt = 'start_up v20220917a.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'start_up v20220917a.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr2000 fault v20220917.txt'; unit_key = 'pro_2022'
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title

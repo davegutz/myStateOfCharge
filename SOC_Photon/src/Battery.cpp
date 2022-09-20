@@ -607,9 +607,8 @@ void BatterySim::assign_randles(void)
 double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset)
 {
     temp_c_ = Sen->Tb_filt;
-    double curr_in = Sen->Ib_model_in;
     dt_ = Sen->T;
-    ib_in_ = curr_in;
+    ib_in_ = Sen->Ib_model_in;
     if ( reset ) ib_fut_ = ib_in_;
     ib_ = max(min(ib_fut_, IMAX_NUM), -IMAX_NUM);  //  Past value ib_.  Overflow protection when ib_ past value used
 
@@ -622,7 +621,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, vsat_*1.2);  // slightly beyond sat but don't windup
 
     // Battery management system (bms)
-    bms_off_ = (( temp_c_ <= chem_.low_t ) || ( voc_stat_ < chem_.low_voc )) && !rp.tweak_test();
+    bms_off_ = ( (temp_c_<=chem_.low_t) || ((voc_stat_<chem_.low_voc) && (ib_in_<IB_MIN_UP)) ) && !rp.tweak_test();
     if ( bms_off_ && rp.mod_ib() ) ib_in_ = 0.;  // keep running sim when real world.  ib_in represents bms
 
     // Dynamic emf
