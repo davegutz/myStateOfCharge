@@ -196,7 +196,7 @@ void Fault::ib_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   boolean reset_loc = reset || reset_all_faults_;
 
-  // Difference error, filter, check, persist
+  // Difference error, filter, check, persist, doesn't latch
   if ( rp.mod_ib() )
   {
     ib_diff_ = (Sen->Ib_amp_model - Sen->Ib_noa_model) / Mon->nP();
@@ -401,7 +401,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     {
       ib_sel_stat_ = -1;
     }
-    else if ( ib_diff_fa() )
+    else if ( ib_diff_fa() )  // this input doesn't latch
     {
       if ( vb_sel_stat_ && wrap_fa() )
       {
@@ -412,7 +412,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
         ib_sel_stat_ = -1;
       }
     }
-    else if ( ib_sel_stat_last_ >= 0 )  // Must reset to move out of no amp selection
+    else if ( ib_sel_stat_last_ >= 0 )  // Latch.  Must reset to move out of no amp selection
     {
       ib_sel_stat_ = 1;
     }
