@@ -291,9 +291,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'c' ):  // * Dc<>:  Vb bias
-                Serial.printf("rp.vb_bias %7.3f to ", rp.vb_bias);
-                rp.vb_bias = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.vb_bias);
+                Serial.printf("rp.Vb_bias %7.3f to ", rp.Vb_bias);
+                rp.Vb_bias = cp.input_string.substring(2).toFloat();
+                Serial.printf("%7.3f\n", rp.Vb_bias);
                 break;
 
               case ( 'i' ):  // * Di<>:  Bias all current sensors (same way as Da and Db)
@@ -398,15 +398,15 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( cp.input_string.charAt(1) )
             {
               case ( 'A' ):  // * SA<>:  Amp sensor scalar
-                Serial.printf("rp.ib_bias_amp %7.3f to ", rp.ib_scale_amp);
-                rp.ib_scale_amp = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.ib_scale_amp);
+                Serial.printf("rp.ib_bias_amp %7.3f to ", rp.Ib_scale_amp);
+                rp.Ib_scale_amp = cp.input_string.substring(2).toFloat();
+                Serial.printf("%7.3f\n", rp.Ib_scale_amp);
                 break;
 
               case ( 'B' ):  // * SB<>:  No Amp sensor scalar
-                Serial.printf("rp.ib_scale_noa %7.3f to ", rp.ib_scale_noa);
-                rp.ib_scale_noa = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.ib_scale_noa);
+                Serial.printf("rp.Ib_scale_noa %7.3f to ", rp.Ib_scale_noa);
+                rp.Ib_scale_noa = cp.input_string.substring(2).toFloat();
+                Serial.printf("%7.3f\n", rp.Ib_scale_noa);
                 break;
 
               case ( 'c' ):  // * Sc<>: scale capacity
@@ -477,9 +477,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
             
               case ( 'V' ):  // * SV<>:  Vb sensor scalar
-                Serial.printf("rp.vb_scale %7.3f to ", rp.vb_scale);
-                rp.vb_scale = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.vb_scale);
+                Serial.printf("rp.Vb_scale %7.3f to ", rp.Vb_scale);
+                rp.Vb_scale = cp.input_string.substring(2).toFloat();
+                Serial.printf("%7.3f\n", rp.Vb_scale);
                 break;
 
               default:
@@ -754,8 +754,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'v' ):  // Pv:  Print Vb measure
-                Serial.printf("\nVolt: ");   Serial.printf("vb_bias, Vb_m, mod, Vb=, %7.3f, %7.3f, %d, %7.3f,\n", 
-                  rp.vb_bias, Sen->Vb_model, rp.modeling, Sen->Vb);
+                Serial.printf("\nVolt: ");   Serial.printf("Vb_bias, Vb_m, mod, Vb=, %7.3f, %7.3f, %d, %7.3f,\n", 
+                  rp.Vb_bias, Sen->Vb_model, rp.modeling, Sen->Vb);
                 break;
 
               default:
@@ -965,11 +965,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 't' ): // Xt<>:  injection type
                 switch ( cp.input_string.charAt(2) )
                 {
-                  case ( 'o' ):  // Xto:  cosine
-                    rp.type = 8;
-                    Serial.printf("Set cos.  rp.type = %d\n", rp.type);
-                    break;
-
                   case ( 's' ):  // Xts:  sine
                     rp.type = 1;
                     Serial.printf("Set sin.  rp.type = %d\n", rp.type);
@@ -993,6 +988,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   case ( 'd' ):  // Xtd:  discharge rate
                     rp.type = 5;
                     Serial.printf("Set 1C disch.  rp.type = %d\n", rp.type);
+                    break;
+
+                  case ( 'o' ):  // Xto:  cosine
+                    rp.type = 8;
+                    Serial.printf("Set cos.  rp.type = %d\n", rp.type);
                     break;
 
                   default:
@@ -1231,80 +1231,80 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 // Talk Help
 void talkH(BatteryMonitor *Mon, Sensors *Sen)
 {
-  Serial.printf("\n\nHelp talk.   Entries followed by ';'\n");
+  Serial.printf("\n\nHelp menu.  End entry with ';'.  SRAM='*'.  May omit '='\n");
 
-  Serial.printf("B<?> Battery e.g.:\n");
+  Serial.printf("\nB<?> Battery e.g.:\n");
   Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='LI' [%d]\n", rp.mon_mod, MON_CHEM); 
   Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='LI' [%d]\n", rp.sim_mod, SIM_CHEM); 
-  Serial.printf(" *BP=  %5.2f.  parallel in bank [%5.2f]'\n", rp.nP, NP); 
-  Serial.printf(" *BS=  %5.2f.  series in bank [%5.2f]'\n", rp.nS, NS); 
+  Serial.printf(" *BP=  %4.2f.  parallel in bank [%4.2f]'\n", rp.nP, NP); 
+  Serial.printf(" *BS=  %4.2f.  series in bank [%4.2f]'\n", rp.nS, NS); 
 
-  Serial.printf("c  clear talk, esp '-c;'\n");
+  Serial.printf("\nc  clear talk, esp '-c;'\n");
 
-  Serial.printf("C<?> Chg SOC e.g.:\n");
+  Serial.printf("\nC<?> Chg SOC e.g.:\n");
   Serial.printf("  Ca=  all - '(0-1.1)'\n"); 
   Serial.printf("  Cm=  model (& ekf if mod)- '(0-1.1)'\n"); 
 
-  Serial.printf("D/S<?> Adj e.g.:\n");
-  Serial.printf(" *DA= "); Serial.printf("%7.3f", rp.ib_bias_amp); Serial.printf(": delta amp, A [%7.3f]\n", CURR_BIAS_AMP); 
-  Serial.printf(" *DB= "); Serial.printf("%7.3f", rp.ib_bias_noa); Serial.printf(": delta noa, A [%7.3f]\n", CURR_BIAS_NOA); 
-  Serial.printf(" *Di= "); Serial.printf("%7.3f", rp.ib_bias_all); Serial.printf(": delta all, A [%7.3f]\n", CURR_BIAS_ALL); 
-  Serial.printf(" *Dc= "); Serial.printf("%7.3f", rp.vb_bias); Serial.printf(": delta, V [%7.3f]\n", VOLT_BIAS); 
-  Serial.printf("  Du= "); Serial.print(Sen->Sim->coul_eff()); Serial.println(": coul eff"); 
-  Serial.printf("  Dm= "); Serial.printf("%7.3f", Sen->ShuntAmp->add()); Serial.printf(": delta amp inj, A [0]\n"); 
-  Serial.printf("  Dn= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->add()); Serial.printf(": delta noa inj, A [0]\n"); 
-  Serial.printf("  DP= "); Serial.print(cp.print_mult); Serial.println(": print mult Dr [4]"); 
-  Serial.printf("  Dr= "); Serial.print(Sen->ReadSensors->delay()); Serial.println(": minor frame, ms [100]"); 
-  Serial.printf(" *Dt= "); Serial.printf("%7.3f", rp.tb_bias_hdwe); Serial.printf(": delta hdwe, deg C [%7.3f]\n", TEMP_BIAS); 
-  Serial.printf("  D^= "); Serial.printf("%7.3f", cp.tb_bias_model); Serial.printf(": delta model, deg C [%7.3f]\n", TEMP_BIAS); 
-  Serial.printf("  Dv= "); Serial.print(Sen->vb_add()); Serial.println(": volt fault inj, V [0]"); 
-  Serial.printf("  Dw= "); Serial.print(Sen->Sim->Dv()); Serial.println(": Tab adj, V [0.01]"); 
-  Serial.printf("  DT= "); Serial.printf("%7.3f", Sen->Tb_noise_amp()); Serial.printf(": noise mod, deg C pk-pk [%7.3f]\n", TB_NOISE); 
-  Serial.printf("  DV= "); Serial.printf("%7.3f", Sen->Vb_noise_amp()); Serial.printf(": noise mod, V pk-pk [%7.3f]\n", VB_NOISE); 
-  Serial.printf("  DM= "); Serial.printf("%7.3f", Sen->Ib_amp_noise_amp()); Serial.printf(": amp noise mod, A pk-pk [%7.3f]\n", IB_AMP_NOISE); 
-  Serial.printf("  DN= "); Serial.printf("%7.3f", Sen->Ib_noa_noise_amp()); Serial.printf(": noa noise mod, A pk-pk [%7.3f]\n", IB_NOA_NOISE); 
-  Serial.printf(" *SA= "); Serial.printf("%7.3f", rp.ib_scale_amp); Serial.printf(": scale amp [%7.3f]\n", CURR_SCALE_AMP); 
-  Serial.printf(" *SB= "); Serial.printf("%7.3f", rp.ib_scale_noa); Serial.printf(": scale noa [%7.3f]\n", CURR_SCALE_NOA); 
-  Serial.printf(" *Sc= "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println(": rp. Scalar cap"); 
-  Serial.printf(" *SG= "); Serial.printf("%7.3f/%7.3f", Sen->ShuntAmp->rp_shunt_gain_sclr(), Sen->ShuntAmp->rp_shunt_gain_sclr());
+  Serial.printf("\nD/S<?> Adj e.g.:\n");
+  Serial.printf(" *DA= "); Serial.printf("%6.3f", rp.ib_bias_amp); Serial.printf(": delta amp, A [%6.3f]\n", CURR_BIAS_AMP); 
+  Serial.printf(" *DB= "); Serial.printf("%6.3f", rp.ib_bias_noa); Serial.printf(": delta noa, A [%6.3f]\n", CURR_BIAS_NOA); 
+  Serial.printf(" *Di= "); Serial.printf("%6.3f", rp.ib_bias_all); Serial.printf(": delta all, A [%6.3f]\n", CURR_BIAS_ALL); 
+  Serial.printf(" *Dc= "); Serial.printf("%6.3f", rp.Vb_bias); Serial.printf(": delta, V [%6.3f]\n", VOLT_BIAS); 
+  Serial.printf("  Du=  "); Serial.print(Sen->Sim->coul_eff()); Serial.println(": coul eff"); 
+  Serial.printf("  Dm= "); Serial.printf("%6.3f", Sen->ShuntAmp->add()); Serial.printf(": delta amp inj, A [0]\n"); 
+  Serial.printf("  Dn= "); Serial.printf("%6.3f", Sen->ShuntNoAmp->add()); Serial.printf(": delta noa inj, A [0]\n"); 
+  Serial.printf("  DP=  "); Serial.print(cp.print_mult); Serial.println(": print mult Dr [4]"); 
+  Serial.printf("  Dr=  "); Serial.print(Sen->ReadSensors->delay()); Serial.println(": minor frame, ms [100]"); 
+  Serial.printf(" *Dt= "); Serial.printf("%6.3f", rp.tb_bias_hdwe); Serial.printf(": delta hdwe, deg C [%6.3f]\n", TEMP_BIAS); 
+  Serial.printf("  D^= "); Serial.printf("%6.3f", cp.tb_bias_model); Serial.printf(": delta model, deg C [%6.3f]\n", TEMP_BIAS); 
+  Serial.printf("  Dv=  "); Serial.print(Sen->vb_add()); Serial.println(": volt fault inj, V [0]"); 
+  Serial.printf("  Dw=  "); Serial.print(Sen->Sim->Dv()); Serial.println(": Tab adj, V [0.01]"); 
+  Serial.printf("  DT= "); Serial.printf("%6.3f", Sen->Tb_noise_amp()); Serial.printf(": noise mod, deg C pk-pk [%6.3f]\n", TB_NOISE); 
+  Serial.printf("  DV= "); Serial.printf("%6.3f", Sen->Vb_noise_amp()); Serial.printf(": noise mod, V pk-pk [%6.3f]\n", VB_NOISE); 
+  Serial.printf("  DM= "); Serial.printf("%6.3f", Sen->Ib_amp_noise_amp()); Serial.printf(": amp noise mod, A pk-pk [%6.3f]\n", IB_AMP_NOISE); 
+  Serial.printf("  DN= "); Serial.printf("%6.3f", Sen->Ib_noa_noise_amp()); Serial.printf(": noa noise mod, A pk-pk [%6.3f]\n", IB_NOA_NOISE); 
+  Serial.printf(" *SA= "); Serial.printf("%6.3f", rp.Ib_scale_amp); Serial.printf(": scale amp [%6.3f]\n", CURR_SCALE_AMP); 
+  Serial.printf(" *SB= "); Serial.printf("%6.3f", rp.Ib_scale_noa); Serial.printf(": scale noa [%6.3f]\n", CURR_SCALE_NOA); 
+  Serial.printf(" *Sc=  "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println(": rp. Scalar cap"); 
+  Serial.printf(" *SG= "); Serial.printf("%6.3f/%6.3f", Sen->ShuntAmp->rp_shunt_gain_sclr(), Sen->ShuntAmp->rp_shunt_gain_sclr());
   Serial.printf(": rp. scale shunt gains [1]\n"); 
-  Serial.printf("  Sh= "); Serial.printf("%7.3f", rp.hys_scale); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
-  Serial.printf("  Sm= "); Serial.printf("%7.3f", Sen->ShuntAmp->sclr()); Serial.printf(": sclr amp, [1]\n"); 
-  Serial.printf("  Sn= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->sclr()); Serial.printf(": sclr noa [1]\n"); 
-  Serial.printf("  Sr= "); Serial.print(Sen->Sim->Sr()); Serial.println(": Scalar res sim"); 
-  Serial.printf(" *Sk= "); Serial.print(rp.cutback_gain_scalar); Serial.println(": Sat mod ctbk sclr"); 
-  Serial.printf(" *SV= "); Serial.printf("%7.3f", rp.vb_scale); Serial.printf(": scale vb sen [%7.3f]\n", VB_SCALE); 
+  Serial.printf("  Sh= "); Serial.printf("%6.3f", rp.hys_scale); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
+  Serial.printf("  Sm= "); Serial.printf("%6.3f", Sen->ShuntAmp->sclr()); Serial.printf(": sclr amp, [1]\n"); 
+  Serial.printf("  Sn= "); Serial.printf("%6.3f", Sen->ShuntNoAmp->sclr()); Serial.printf(": sclr noa [1]\n"); 
+  Serial.printf("  Sr=  "); Serial.print(Sen->Sim->Sr()); Serial.println(": Scalar res sim"); 
+  Serial.printf(" *Sk=  "); Serial.print(rp.cutback_gain_scalar); Serial.println(": Sat mod ctbk sclr"); 
+  Serial.printf(" *SV= "); Serial.printf("%6.3f", rp.Vb_scale); Serial.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
 
-  Serial.printf("F<?>   Faults\n");
-  Serial.printf("  Fc= "); Serial.printf("%7.3f", Sen->Flt->cc_diff_sclr()); Serial.printf(": sclr cc_diff thr ^ [1]\n"); 
-  Serial.printf("  Fd= "); Serial.printf("%7.3f", Sen->Flt->ib_diff_sclr()); Serial.printf(": sclr ib_diff thr ^ [1]\n"); 
-  Serial.printf("  Fi= "); Serial.printf("%7.3f", Sen->Flt->ewhi_sclr()); Serial.printf(": sclr e_wrap_hi thr ^ [1]\n"); 
-  Serial.printf("  Fo= "); Serial.printf("%7.3f", Sen->Flt->ewlo_sclr()); Serial.printf(": sclr e_wrap_lo thr ^ [1]\n"); 
-  Serial.printf("  Fq= "); Serial.printf("%7.3f", Sen->Flt->ib_quiet_sclr()); Serial.printf(": sclr ib_quiet thr v [1]\n"); 
-  Serial.printf("  FI= "); Serial.print(Sen->Flt->disab_ib_fa()); Serial.println(": Ib hard rng"); 
-  Serial.printf("  FT= "); Serial.print(Sen->Flt->disab_tb_fa()); Serial.println(": Tb hard rng"); 
-  Serial.printf("  FV= "); Serial.print(Sen->Flt->disab_vb_fa()); Serial.println(": Vb hard rng"); 
+  Serial.printf("\nF<?>   Faults\n");
+  Serial.printf("  Fc= "); Serial.printf("%6.3f", Sen->Flt->cc_diff_sclr()); Serial.printf(": sclr cc_diff thr ^ [1]\n"); 
+  Serial.printf("  Fd= "); Serial.printf("%6.3f", Sen->Flt->ib_diff_sclr()); Serial.printf(": sclr ib_diff thr ^ [1]\n"); 
+  Serial.printf("  Fi= "); Serial.printf("%6.3f", Sen->Flt->ewhi_sclr()); Serial.printf(": sclr e_wrap_hi thr ^ [1]\n"); 
+  Serial.printf("  Fo= "); Serial.printf("%6.3f", Sen->Flt->ewlo_sclr()); Serial.printf(": sclr e_wrap_lo thr ^ [1]\n"); 
+  Serial.printf("  Fq= "); Serial.printf("%6.3f", Sen->Flt->ib_quiet_sclr()); Serial.printf(": sclr ib_quiet thr v [1]\n"); 
+  Serial.printf("  FI=  "); Serial.print(Sen->Flt->disab_ib_fa()); Serial.println(": disab Ib rng"); 
+  Serial.printf("  FT=  "); Serial.print(Sen->Flt->disab_tb_fa()); Serial.println(": disab Tb rng"); 
+  Serial.printf("  FV=  "); Serial.print(Sen->Flt->disab_vb_fa()); Serial.println(": disab Vb rng"); 
 
-  Serial.printf("H<?>   Manage history\n");
+  Serial.printf("\nH<?>   Manage history\n");
   Serial.printf("  Hd= "); Serial.printf("dump summ log\n");
   Serial.printf("  HR= "); Serial.printf("reset summ log\n");
   Serial.printf("  Hs= "); Serial.printf("save and print log\n");
 
-  Serial.printf("M<?> Amp tweaks\n");
-  Serial.printf("  MC= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_change()); Serial.println(": Amp CE max change [0.001]"); 
-  Serial.printf(" *Mk= "); Serial.printf("%7.3f", Sen->ShuntAmp->tweak_sclr()); Serial.println(": rp. Amp CE sclr [1]"); 
-  Serial.printf("  Mw= "); Serial.printf("%7.3f", Sen->ShuntAmp->time_to_wait()); Serial.println(": Amp next tweak, hr [18]"); 
-  Serial.printf("  Mx= "); Serial.printf("%7.3f", Sen->ShuntAmp->max_tweak()); Serial.println(": Amp CE max sclr [0.01]"); 
-  Serial.printf("  Mz= "); Serial.printf("%7.3f", Sen->ShuntAmp->time_sat_past()); Serial.println(": Amp last twk, hr [var]"); 
+  Serial.printf("\nM<?> Amp tweaks on Coulombic Eff (CE)\n");
+  Serial.printf("  MC= "); Serial.printf("%6.3f", Sen->ShuntAmp->max_change()); Serial.printf(": max step dCE [%6.4f]\n", TWEAK_MAX_CHANGE); 
+  Serial.printf(" *Mk= "); Serial.printf("%6.3f", Sen->ShuntAmp->tweak_sclr()); Serial.println(": rp. CE sclr [1]"); 
+  Serial.printf("  Mw= "); Serial.printf("%6.3f", Sen->ShuntAmp->time_to_wait()); Serial.printf(": next tweak, hr [%4.1f]\n", TWEAK_WAIT); 
+  Serial.printf("  Mx= "); Serial.printf("%6.3f", Sen->ShuntAmp->max_tweak()); Serial.printf(": abs max dCE [%6.4f]\n", TWEAK_MAX); 
+  Serial.printf("  Mz= "); Serial.printf("%6.3f", Sen->ShuntAmp->time_sat_past()); Serial.println(": mem of last twk, hr"); 
 
-  Serial.printf("N<?> No amp tweaks\n");
-  Serial.printf("  NC= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_change()); Serial.println(": Noa CE max change [0.001]"); 
-  Serial.printf(" *Nk= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->tweak_sclr()); Serial.println(": rp. Noa CE sclr [1]"); 
-  Serial.printf("  Nw= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->time_to_wait()); Serial.println(": Noa next tweak, hr [18]"); 
-  Serial.printf("  Nx= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->max_tweak()); Serial.println(": Noa CE max sclr [0.01]"); 
-  Serial.printf("  Nz= "); Serial.printf("%7.3f", Sen->ShuntNoAmp->time_sat_past()); Serial.println(": Noa last twk, hr [var]"); 
+  Serial.printf("N<?> No-amp tweaks same parameters as Amp\n");
+  Serial.printf("  NC= "); Serial.printf("%6.3f\n", Sen->ShuntNoAmp->max_change());
+  Serial.printf(" *Nk= "); Serial.printf("%6.3f\n", Sen->ShuntNoAmp->tweak_sclr());
+  Serial.printf("  Nw= "); Serial.printf("%6.3f\n", Sen->ShuntNoAmp->time_to_wait());
+  Serial.printf("  Nx= "); Serial.printf("%6.3f\n", Sen->ShuntNoAmp->max_tweak());
+  Serial.printf("  Nz= "); Serial.printf("%6.3f\n", Sen->ShuntNoAmp->time_sat_past());
 
-  Serial.printf("P<?>   Print values\n");
+  Serial.printf("\nP<?>   Print values\n");
   Serial.printf("  Pa= "); Serial.printf("all\n");
   Serial.printf("  Pe= "); Serial.printf("ekf\n");
   Serial.printf("  Pf= "); Serial.printf("faults\n");
@@ -1316,9 +1316,9 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Px= "); Serial.printf("ib select\n");
   Serial.printf("  Pv= "); Serial.printf("vb details\n");
 
-  Serial.printf("Q      vital stats\n");
+  Serial.printf("\nQ      vital stats\n");
 
-  Serial.printf("R<?>   Reset\n");
+  Serial.printf("\nR<?>   Reset\n");
   Serial.printf("  Rb= "); Serial.printf("batteries to present inputs\n");
   Serial.printf("  Rf= "); Serial.printf("fault logic latches\n");
   Serial.printf("  Ri= "); Serial.printf("all delta_q_inf\n");
@@ -1326,9 +1326,9 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  RR= "); Serial.printf("DEPLOY\n");
   Serial.printf("  Rs= "); Serial.printf("small.  Reinitialize filters\n");
 
-  Serial.printf("s   curr signal select (-1=noa, 0=auto, 1=amp) = "); Serial.println(rp.ib_select);
+  Serial.printf("\ns  curr select mode (-1=noa, 0=auto, 1=amp) = "); Serial.println(rp.ib_select);
 
-  Serial.printf("v= "); Serial.print(rp.debug); Serial.println(": verbosity, -128 - +128. [4]");
+  Serial.printf("\nv= "); Serial.print(rp.debug); Serial.println(": verbosity, -128 - +128. [4]");
   Serial.printf("  -<>: Negative - Arduino plot compatible\n");
   Serial.printf("  v-1: GP\n");
   Serial.printf("   v1: GP\n");
@@ -1355,29 +1355,29 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   // Serial.printf("  v79: sat_ib model\n");
   // Serial.printf("  v96: CC sat\n");
 
-  Serial.printf("V<?> - VOC(SOC) curve deltas\n");
-  Serial.printf(" VM= "); Serial.printf("%7.3f", Mon->dv_voc_soc()); Serial.println(": Mon vsoc out, V [0]"); 
-  Serial.printf(" VS= "); Serial.printf("%7.3f", Sen->Sim->dv_voc_soc()); Serial.println(": Sim vsoc out, V [0]"); 
-  Serial.printf(" Vm= "); Serial.printf("%7.3f", Mon->ds_voc_soc()); Serial.println(": Mon soc in [0]"); 
-  Serial.printf(" Vs= "); Serial.printf("%7.3f", Sen->Sim->ds_voc_soc()); Serial.println(": Sim soc in[0]"); 
+  Serial.printf("\nV<?> - VOC(SOC) curve deltas\n");
+  Serial.printf(" VM= "); Serial.printf("%6.3f", Mon->dv_voc_soc()); Serial.println(": Mon vsoc out, V [0]"); 
+  Serial.printf(" VS= "); Serial.printf("%6.3f", Sen->Sim->dv_voc_soc()); Serial.println(": Sim vsoc out, V [0]"); 
+  Serial.printf(" Vm= "); Serial.printf("%6.3f", Mon->ds_voc_soc()); Serial.println(": Mon soc in [0]"); 
+  Serial.printf(" Vs= "); Serial.printf("%6.3f", Sen->Sim->ds_voc_soc()); Serial.println(": Sim soc in[0]"); 
 
-  Serial.printf("w togg wifi = "); Serial.println(cp.enable_wifi);
+  Serial.printf("\nw togg wifi = "); Serial.println(cp.enable_wifi);
 
-  Serial.printf("W<?> - iters to wait\n");
+  Serial.printf("\nW<?> - iters to wait\n");
 
-  Serial.printf("X<?> - Test Mode.   For example:\n");
-  Serial.printf(" Xd= "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
-  Serial.printf(" Xm= "); Serial.printf("%d,   modeling bitmap [000]\n", rp.modeling);
+  Serial.printf("\nX<?> - Test Mode.   For example:\n");
+  Serial.printf(" Xd=  "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
+  Serial.printf(" Xm=  "); Serial.printf("%d,   modeling bitmap [0b0000]\n", rp.modeling);
   Serial.printf("      0x8 tweak_test = %d\n", rp.tweak_test());
   Serial.printf("      0x4 current = %d\n", rp.mod_ib());
   Serial.printf("      0x2 voltage = %d\n", rp.mod_vb());
   Serial.printf("      0x1 temp = %d\n", rp.mod_tb());
-  Serial.printf(" Xa= "); Serial.printf("%7.3f", rp.amp); Serial.println(": Inj amp A pk (0-18.3) [0]");
-  Serial.printf(" Xb= "); Serial.printf("%7.3f", rp.inj_bias); Serial.println(": Inj bias A [0]");
-  Serial.printf(" Xf= "); Serial.printf("%7.3f", rp.freq/2./PI); Serial.println(": Inj freq Hz (0-2) [0]");
-  Serial.printf(" Xt= "); Serial.printf("%d", rp.type); Serial.println(": Inj type.  'o', 's', 'q', 't' (cos, sin, square, tri)");
-  Serial.printf(" Xo= "); Serial.printf("%7.3f", rp.inj_bias); Serial.println(": Inj inj_bias A (-18.3-18.3) [0]");
-  Serial.printf(" Xp= <?>, programmed inj settings...\n"); 
+  Serial.printf(" Xa= "); Serial.printf("%6.3f", rp.amp); Serial.println(": Inj amp A pk (0-18.3) [0]");
+  Serial.printf(" Xb= "); Serial.printf("%6.3f", rp.inj_bias); Serial.println(": Inj bias A [0]");
+  Serial.printf(" Xf= "); Serial.printf("%6.3f", rp.freq/2./PI); Serial.println(": Inj freq Hz (0-2) [0]");
+  Serial.printf(" Xt=  "); Serial.printf("%d", rp.type); Serial.println(": Inj 's'=sin(1), 'q'=square(2), 't'=tri(3), biases(4,5,6), 'o'=cos(8))");
+ Serial.printf(" Xo= "); Serial.printf("%6.3f", rp.inj_bias); Serial.println(": Inj inj_bias A (-18.3-18.3) [0]");
+  Serial.printf(" Xp= <?>, scripted tests...\n"); 
   Serial.printf("    Xp-1:  Off, modeling false\n");
   Serial.printf("    Xp0:  reset tests\n");
   Serial.printf("    Xp1:  1 Hz sine\n");
@@ -1390,18 +1390,18 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("    Xp10: tweak cycle test\n");
   Serial.printf("    Xp11: slow cycle test\n");
   Serial.printf("    Xp12: slow half cycle reg test\n");
-  Serial.printf("    Xp20: fast data collection\n");
-  Serial.printf("    Xp21: slow data collection\n");
-  Serial.printf(" XC= "); Serial.printf("%7.3f cycles inj\n", Sen->cycles_inj);
+  Serial.printf("    Xp20: collect fast data\n");
+  Serial.printf("    Xp21: collect slow data\n");
+  Serial.printf(" XC= "); Serial.printf("%6.3f cycles inj\n", Sen->cycles_inj);
   Serial.printf(" XR  "); Serial.printf("RUN inj\n");
   Serial.printf(" XS  "); Serial.printf("STOP inj\n");
-  Serial.printf(" Xs= "); Serial.printf("%6.2f scalar on T_SAT\n", cp.s_t_sat);
-  Serial.printf(" XW= "); Serial.printf("%6.2f s wait start inj\n", float(Sen->wait_inj)/1000.);
-  Serial.printf(" XT= "); Serial.printf("%6.2f s tail end inj\n", float(Sen->tail_inj)/1000.);
+  Serial.printf(" Xs= "); Serial.printf("%4.2f scalar on T_SAT\n", cp.s_t_sat);
+  Serial.printf(" XW= "); Serial.printf("%7.2f s wait start inj\n", float(Sen->wait_inj)/1000.);
+  Serial.printf(" XT= "); Serial.printf("%7.2f s tail end inj\n", float(Sen->tail_inj)/1000.);
   Serial.printf(" Xu= "); Serial.printf("%d T=ignore Tb read\n", Sen->Flt->fail_tb());
-  Serial.printf(" Xv= "); Serial.printf("%6.2f scale Tb one-wire stale persistence\n", Sen->Flt->tb_stale_time_sclr());
-  Serial.printf("z togg BLYNK = %d\n", cp.blynking );
-  Serial.printf("*Xx<> = SRAM saved\n");
-  Serial.printf("\nurgency of cmds: -=ASAP,*=SOON, '',+=QUEUE\n"); 
-  Serial.printf("h this\n");
+  Serial.printf(" Xv= "); Serial.printf("%4.2f scale Tb 1-wire stale persist\n", Sen->Flt->tb_stale_time_sclr());
+  Serial.printf("\nz togg BLYNK = %d\n", cp.blynking );
+  Serial.printf("\n*Xx<> = SRAM saved\n");
+  Serial.printf("\nurgency of cmds: -=ASAP,*=SOON, '' or +=QUEUE\n"); 
+  Serial.printf("\nh this\n");
 }

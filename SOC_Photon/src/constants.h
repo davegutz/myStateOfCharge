@@ -85,6 +85,7 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define TWEAK_MAX             0.01      // Maximum tweak allowed, scalar +/- (0.01)
 #define TWEAK_WAIT            6.        // Time to persist unsaturated before allowing peak, hrs (6)
 #define TWEAK_GAIN            0.66      // Tweak change limit gain to make soft landing (0.66)
+#define TWEAK_SOC_CHANGE      0.2       // Minimum charge change to tweak sensor
 #define TT_WAIT               10.       // Before tweak test print wait, s (10)
 #define TT_TAIL               60.       // After tweak test print wait, s (60)
 #define CC_DIFF_SOC_DIS_THRESH  0.2     // Signal selection threshold for Coulomb counter EKF disagree test (0.2, 0.1 too small on truck)

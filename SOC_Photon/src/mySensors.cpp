@@ -41,6 +41,7 @@ TempSensor::TempSensor(const uint16_t pin, const bool parasitic, const uint16_t 
 : DS18(pin, parasitic, conversion_delay), tb_stale_flt_(true)
 {
    SdTb = new SlidingDeadband(HDB_TBATT);
+   Serial.printf("DS18 1-wire Tb started\n");
 }
 TempSensor::~TempSensor() {}
 // operators
@@ -68,7 +69,7 @@ float TempSensor::load(Sensors *Sen)
   }
   else
   {
-    Serial.printf("E: DS18, t=%8.1f, ct=%d, using lgv=%8.1f\n", temp, count, Tb_hdwe);
+    Serial.printf("DS18 1-wire Tb, t=%8.1f, ct=%d, using lgv=%8.1f\n", temp, count, Tb_hdwe);
     tb_stale_flt_ = true;
     // Using last-good-value:  no assignment
   }
@@ -98,7 +99,7 @@ Shunt::Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, floa
     Serial.printf("FAILED init ADS SHUNT MON %s\n", name_.c_str());
     bare_ = true;
   }
-  else Serial.printf("SHUNT MON %s init\n", name_.c_str());
+  else Serial.printf("SHUNT MON %s started\n", name_.c_str());
 }
 Shunt::~Shunt() {}
 // operators
@@ -554,9 +555,9 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *ReadSensors):
   this->T_filt = T;
   this->T_temp = T_temp;
   this->ShuntAmp = new Shunt("Amp", 0x49, &rp.delta_q_cinf_amp, &rp.delta_q_dinf_amp, &rp.tweak_sclr_amp,
-    &cp.ib_tot_bias_amp, &rp.ib_scale_amp, SHUNT_AMP_GAIN, &rp.shunt_gain_sclr);
+    &cp.ib_tot_bias_amp, &rp.Ib_scale_amp, SHUNT_AMP_GAIN, &rp.shunt_gain_sclr);
   this->ShuntNoAmp = new Shunt("No Amp", 0x48, &rp.delta_q_cinf_noa, &rp.delta_q_dinf_noa, &rp.tweak_sclr_noa,
-    &cp.ib_tot_bias_noa, &rp.ib_scale_noa, SHUNT_NOA_GAIN, &rp.shunt_gain_sclr);
+    &cp.ib_tot_bias_noa, &rp.Ib_scale_noa, SHUNT_NOA_GAIN, &rp.shunt_gain_sclr);
   this->SensorTb = new TempSensor(pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
   this->TbSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
   this->Sim = new BatterySim(&rp.delta_q_model, &rp.t_last_model, &rp.s_cap_model, &rp.nP, &rp.nS, &rp.sim_mod, &rp.hys_scale);
@@ -574,6 +575,7 @@ Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *ReadSensors):
   Prbn_Ib_amp_ = new PRBS_7(IB_AMP_NOISE_SEED);
   Prbn_Ib_noa_ = new PRBS_7(IB_NOA_NOISE_SEED);
   Flt = new Fault(T);
+  Serial.printf("Vb sense ADC pin started\n");
 }
 
 // Bias model outputs for sensor fault injection
@@ -773,8 +775,8 @@ void Sensors::shunt_scale(void)
 {
   if ( !rp.mod_ib() )
   {
-    ShuntAmp->scale( rp.ib_scale_amp );
-    ShuntNoAmp->scale( rp.ib_scale_noa );
+    ShuntAmp->scale( rp.Ib_scale_amp );
+    ShuntNoAmp->scale( rp.Ib_scale_noa );
   }
 }
 
@@ -842,12 +844,12 @@ void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const 
 void Sensors::vb_load(const byte vb_pin)
 {
     Vb_raw = analogRead(vb_pin);
-    Vb_hdwe =  float(Vb_raw)*VB_CONV_GAIN*rp.vb_scale + float(VBATT_A) + rp.vb_bias;
+    Vb_hdwe =  float(Vb_raw)*VB_CONV_GAIN*rp.Vb_scale + float(VBATT_A) + rp.Vb_bias;
 }
 
 // Print analog voltage
 void Sensors::vb_print()
 {
-  Serial.printf("reset, T, Vb_raw, rp.vb_bias, Vb_hdwe, vb_flt(), vb_fa(), wv_fa=, %d, %7.3f, %d, %7.3f,  %7.3f, %d, %d, %d,\n",
-    reset, T, Vb_raw, rp.vb_bias, Vb_hdwe, Flt->vb_flt(), Flt->vb_fa(), Flt->wrap_vb_fa());
+  Serial.printf("reset, T, Vb_raw, rp.Vb_bias, Vb_hdwe, vb_flt(), vb_fa(), wv_fa=, %d, %7.3f, %d, %7.3f,  %7.3f, %d, %d, %d,\n",
+    reset, T, Vb_raw, rp.Vb_bias, Vb_hdwe, Flt->vb_flt(), Flt->vb_fa(), Flt->wrap_vb_fa());
 }

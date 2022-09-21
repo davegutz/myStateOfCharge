@@ -57,7 +57,6 @@ const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1,
 #define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction (0.2)
 #define RANDLES_T_MAX   0.31      // Maximum update time of Randles state space model to avoid aliasing and instability (0.31 allows DP3)
 const double MXEPS = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness) (1-1e-6)
-#define TWEAK_SOC_CHANGE 0.2      // Minimum charge change to tweak sensor
 #define HYS_SCALE        0.3      // Scalar on hysteresis.   Best I know is what observed Tb=40C (0.3)
 // BattleBorn 100 Ah, 12v LiFePO4
 // See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.

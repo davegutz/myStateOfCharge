@@ -5,7 +5,7 @@
   * Extended Kalman Filter (EKF) method is developed alongside though not used to
   * improve the CC yet.
   * By:  Dave Gutz September 2021
-  * 09-Aug-2021   Initial Git committ.   Unamplified ASD1013 12-bit shunt voltage sensor
+  * 09-Aug-2021   Initial Git commit.   Unamplified ASD1013 12-bit shunt voltage sensor
   * ??-Sep-2021   Added 1 Hz anti-alias filters (AAF) in hardware to cleanup the 60 Hz
   * inverter noise on Vb and Ib.
   * 27-Oct-2021   Add amplified (OPA333) current sensor ASD1013 with Texas Instruments (TI)
@@ -20,6 +20,7 @@
   * 18-May-2022   Bunch of cleanup and reorganization
   * 20-Jul-2022   Add low-emission bluetooth (BLE).  Initialize to EKF when unsaturated.
   *               Correct time skews to align Vb and Ib.
+  * 21-Sep-2022   Alpha release v20220917.   Branch GitHub repository.  Added signal redundancy checks and fault handling.
   * 
 //
 // MIT License
@@ -127,6 +128,7 @@ void setup()
       Serial.printf("done");
     }
   #endif
+
   // Peripherals
   myPins = new Pins(D6, D7, A1, D2);
 
@@ -225,11 +227,11 @@ void setup()
     }
     else
     {
-      Serial.printf(" N\nmoving on....\n"); Serial1.printf(" N\nmoving on....\n");
+      Serial.printf(" N.  moving on....\n\n"); Serial1.printf(" N.  moving on....\n\n");
     }
   }
 
-  Serial.printf("End setup()\n");
+  Serial.printf("End setup()\n\n");
 } // setup
 
 
@@ -271,7 +273,7 @@ void loop()
   static boolean reset_publish = true;        // Dynamic reset
  
   // Sensor conversions
-  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins->pin_1_wire, ReadSensors); // Manage sensor data
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins->pin_1_wire, ReadSensors); // Manage sensor data.  Sim is in here.
 
    // Mon, used to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last, &rp.nP, &rp.nS, &rp.mon_mod, &rp.hys_scale);

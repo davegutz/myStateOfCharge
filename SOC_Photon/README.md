@@ -327,7 +327,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   the rp structure.   You have to reset to force them to take effect.
   15. The minor frame time (READ_DELAY) could be run as fast as 5.   The application runs in 0.005 seconds.  The anti-alias filters in hardware need to run at 1 Hz -3dB bandwidth (tau = 0.159 s) to filter out the PWM-like activity of the inverter that is trying to regulate 60 Hz power.   With that kind of hardware filtering, there is no value added to running the logic any faster than 10 Hz (READ_DELAY = 100).   There's lots of throughput margin available for adding more EKF logic, etc.
   16. The hardware AAF filters effectively smooth out the PWM test input to look analog.   This is desired behavior:  the system must filter 60 Hz inverter activity.   The testing is done with PWM signal to give us an opportunity to test the hardware A/D behavior.  The user must remember to move the internal jumper wire from 3-5 (testing) to 4-5 (installed).
-  17. Regression test:   For installed with real signal, could disconnect solar panels and inject using Talk('Di<>') or Talk('Xp5') and Talk('Xp6').  Uninstalled, should run through them all:  Talk('Xp<>,) 0-6.  Uninstalled should also run onto and off of limits (7 & 8 [TODO]).
+  17. Regression test:   For installed with real signal, could disconnect solar panels and inject using Talk('Di<>') or Talk('Xp5') and Talk('Xp6').  Uninstalled, should run through them all:  Talk('Xp<>,) 0-6.  Uninstalled should runs onto and off of limits.
   18. In modeling mode the Battery Model passes all sensed signals on to the Battery Monitor.   The Model does things like cutting back current near saturation, and injecting test signals both hard and soft.  The Signal Sense logic needs to perform some injection especially soft so Model not needed for some regression.
   19. All logic uses a counting scheme that debits Coulombs since last known saturation.   The prime requirement of using saturation to periodically reset logic is reflected in use of change since saturation.
   20. The easiest way to confirm that the EKF is working correctly is to set 'modeling' using Talk('Xm7') and verify that soc_ekf equals soc_mod.
@@ -365,8 +365,6 @@ Rapid tweak test 02:30 min using models 'tweakMod'
     to end prematurely
   XS; Dn0.9985; Ca1; Mk0; Nk0;
     run py script DataOverModel.py, using suggestions at bottom of file to recognize the new data
-    [TODO]: still need to square any differences between Mon and Sim (even though overplots look good - those are sim-sim and mon-mon).  Make sure dv_hys is same - both driven by same current.   Delete the direx feature of Hysteresis and use dv_hys explicitly.
-
   Slow cycle test 10:00 min using models 'cycleMod'
     start recording, save to ../dataReduction/< name >.txt
   Xp11;
@@ -394,7 +392,7 @@ Throughput test
   Wrap logic 0.2 v=16 A. There is an inflection in voc(soc) that requires forgiveness during saturation.  0.25 v = 20 A for wrap hi.   Sized so wrap_lo_fa trips before false saturating with delta I=-100 with soc=.95
   The tweak logic is small and limited and does not significantly interact with fault logic.
   If Tb is never read on boot up it should fail to NOMINAL_TB.
-45. Tweak shall be disabled for small <10% charge swings <TODO:  
+45. Tweak shall be disabled for small <20% charge swings
 45. Fault injection testing
 
 Full regression suite:
@@ -466,8 +464,30 @@ Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
   a. Not sure this is even needed to due to low bandwidth of daily charge cycle.   Average out.
   b. Leave this in design for now for study.   Able to disable
 8. EKF
-  a. Failures.  [TODO]:  need to implement signal selection and screen flashing status
+  a. Failure isolation
+  b. A-hr displayed on oled for reference - quick check on EKF.
 9. Redundancy
-  a. [TODO]:  need results of tests above
-10. Selection between EKF and Coulomb Counter.  Disabled.   [TODO]: need to replace amp hrs weighted with straight CC.
-11.  
+  a. Virtual triplex Ib_Amp, Ib_No-amp, Vb
+
+
+## Calibration checklist
+1. Delta adjustment for Vb.
+2. Nothing to do for Tb.   If heater kit, make sure Tb is inside the jacket next to the battery case.
+3. Collect extreme ranges of data.
+  a. 0, +/- 0.3C (30% of max A-h capacity in A)
+  b. S/W:  Ib amp, Ib no amp, Vb
+  c. Hardware: clamp multimeter next to shunt, multimeter on Vb
+4. Use spreadsheet to estimate first order polynomial fit to current data.   Checks bias and gain for linearity.  These devices are linear so if that's not what is seen on plots, check data.
+5. To date, my work has not been precise enough to see temperature dependence on shunt calibration.
+6. Real runs using battery heater to establish VOC(SOC, Tb) and determine capacity, which should be > rating.
+7. To disable tweak logic:  Mk=Nk=1  , MC=NC=0 (max tweak = 0)
+
+## Boot checklist - after new software load
+1. Update the version in local_conig.h for 'unit ='.
+2. Start CoolTerm record.  Record Hd, Pf, Pa, brief v1 burst for the previous load.
+3. On restart after load, check the retained parameter list (SRAM battery backed up).   The list is displayed on startup for convenience.   Go slowly with this if you've been tuning.
+4. Record Hd, Pf, Pa, brief v1 burst.   Confirm the 'unit =' is for the intended build install.
+5. Check Xm=0 before walk away from installed system.
+6. Enable tweak logic if desired (default values in [] in 'h' printout.)
+
+

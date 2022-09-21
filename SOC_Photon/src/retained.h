@@ -43,13 +43,13 @@ struct RetainedPars
   double delta_q_model = 0.;    // Coulomb Counter state for model, C
   float t_last_model = RATED_TEMP;        // Battery temperature past value for rate limit memory, deg C
   float shunt_gain_sclr = 1.;             // Shunt gain scalar
-  float ib_scale_amp = CURR_SCALE_AMP;    // Calibration scalar of amplified shunt sensor, A
+  float Ib_scale_amp = CURR_SCALE_AMP;    // Calibration scalar of amplified shunt sensor, A
   float ib_bias_amp = CURR_BIAS_AMP;      // Calibration adder of amplified shunt sensor, A
-  float ib_scale_noa = CURR_SCALE_NOA;    // Calibration scalar of non-amplified shunt sensor, A
+  float Ib_scale_noa = CURR_SCALE_NOA;    // Calibration scalar of non-amplified shunt sensor, A
   float ib_bias_noa = CURR_BIAS_NOA;      // Calibration adder of non-amplified shunt sensor, A
   float ib_bias_all = CURR_BIAS_ALL;      // Bias on all shunt sensors, A
   int8_t ib_select = 0;         // Force current sensor (-1=non-amp, 0=auto, 1=amp)
-  float vb_bias = VOLT_BIAS;    // Calibrate Vb, V
+  float Vb_bias = VOLT_BIAS;    // Calibrate Vb, V
   uint8_t modeling = 0;         // Driving saturation calculation with model.  Bits specify which signals use model
   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
   float freq = 0.;              // Injected frequency, Hz (0-2)
@@ -71,7 +71,7 @@ struct RetainedPars
   float nS = NS;                // Number of series batteries in bank, e.g. '2P1S'
   uint8_t mon_mod = MON_CHEM;   // Monitor battery chemistry type
   uint8_t sim_mod = SIM_CHEM;   // Simulation battery chemistry type
-  float vb_scale = 1.;          // Calibration scalar for Vb. V/count
+  float Vb_scale = 1.;          // Calibration scalar for Vb. V/count
 
   // Corruption test on bootup.  Needed because retained parameter memory is not managed by the compiler as it relies on
   // battery.  Small compilation changes can change where in this memory the program points, too.
@@ -91,13 +91,13 @@ struct RetainedPars
     this->delta_q_model = 0.;
     this->t_last_model = RATED_TEMP;
     this->shunt_gain_sclr = 1.;
-    this->ib_scale_amp = CURR_SCALE_AMP;
+    this->Ib_scale_amp = CURR_SCALE_AMP;
     this->ib_bias_amp = CURR_BIAS_AMP;
-    this->ib_scale_noa = CURR_SCALE_NOA;
+    this->Ib_scale_noa = CURR_SCALE_NOA;
     this->ib_bias_noa = CURR_BIAS_NOA;
     this->ib_bias_all = CURR_BIAS_ALL;
     this->ib_select = 0;
-    this->vb_bias = VOLT_BIAS;
+    this->Vb_bias = VOLT_BIAS;
     this->modeling = 0;
     this->amp = 0.;
     this->freq = 0.;
@@ -118,7 +118,7 @@ struct RetainedPars
     this->nS = NS;
     this->mon_mod = MON_CHEM;
     this->sim_mod = SIM_CHEM;
-    this->vb_scale = VB_SCALE;
+    this->Vb_scale = VB_SCALE;
   }
   void large_reset()
   {
@@ -149,13 +149,13 @@ struct RetainedPars
     Serial.printf(" debug               %d          %d *v<>\n", 0, debug);
     Serial.printf(" delta_q    %10.1f %10.1f *Ca<>, C\n", 0., delta_q);
     Serial.printf(" dq_sim     %10.1f %10.1f *Ca<>, *Cm<>, C\n", 0., delta_q_model);
-    Serial.printf(" scale_amp     %7.3f    %7.3f *SA<>\n", CURR_SCALE_AMP, ib_scale_amp);
+    Serial.printf(" scale_amp     %7.3f    %7.3f *SA<>\n", CURR_SCALE_AMP, Ib_scale_amp);
     Serial.printf(" bias_amp      %7.3f    %7.3f *DA<>\n", CURR_BIAS_AMP, ib_bias_amp);
-    Serial.printf(" scale_noa     %7.3f    %7.3f *SB<>\n", CURR_SCALE_NOA, ib_scale_noa);
+    Serial.printf(" scale_noa     %7.3f    %7.3f *SB<>\n", CURR_SCALE_NOA, Ib_scale_noa);
     Serial.printf(" bias_noa      %7.3f    %7.3f *DB<>\n", CURR_BIAS_NOA, ib_bias_noa);
     Serial.printf(" ib_bias_all   %7.3f    %7.3f *Di<> A\n", CURR_BIAS_ALL, ib_bias_all);
     Serial.printf(" ib_select           %d          %d *s<> -1=noa, 0=auto, 1=amp\n", 0, ib_select);
-    Serial.printf(" vb_bias       %7.3f    %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, vb_bias);
+    Serial.printf(" Vb_bias       %7.3f    %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, Vb_bias);
     Serial.printf(" modeling            %d          %d *Xm<>\n", 0, modeling);
     Serial.printf(" inj amp       %7.3f    %7.3f *Xa<> A pk\n", 0., amp);
     Serial.printf(" inj frq       %7.3f    %7.3f *Xf<> r/s\n", 0., freq);
@@ -171,7 +171,7 @@ struct RetainedPars
     Serial.printf(" nS            %7.3f    %7.3f *BP<> eg '2P1S'\n", NS, nS);
     Serial.printf(" mon chem            %d          %d *Bm<> 0=Battle, 1=LION\n", MON_CHEM, mon_mod);
     Serial.printf(" sim chem            %d          %d *Bs<>\n", SIM_CHEM, sim_mod);
-    Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n\n", VB_SCALE, vb_scale);
+    Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n\n", VB_SCALE, Vb_scale);
   }
 
 };            
