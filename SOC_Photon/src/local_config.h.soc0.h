@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "pro_20220917a";  // dt fix for ekf
+const String unit = "soc0_20220917b";  // dt fix for ekf, wrap_lo_thr
 
 #define ASK_DURING_BOOT         1   // Flag to ask for application of this file to * retained adjustements
 // * = SRAM EEPROM adjustments, retained on power reset
