@@ -571,6 +571,16 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
             fig_files.append(fig_file_name)
             plt.savefig(fig_file_name, format="png")
 
+        plt.figure()  # ekf  5
+        n_fig += 1
+        plt.subplot(111)
+        plt.plot(mo.soc, mo.Voc_stat, color='red', linestyle='-', label='Voc_stat')
+        plt.plot(mo.soc, mo.voc_soc, color='black', linestyle=':', label='voc_soc')
+        plt.legend(loc=1)
+        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
+
     return n_fig, fig_files
 
 
