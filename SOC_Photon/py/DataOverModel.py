@@ -584,7 +584,8 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     return n_fig, fig_files
 
 
-def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, path_to_data='.', path_to_temp='.'):
+def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, path_to_data='.', path_to_temp='.',
+                     comment_str='#'):
     data_file = path_to_data+'/'+txt_file
     csv_file = path_to_temp+'/'+txt_file.replace('.txt', type_ + '.csv', 1)
     # Header
@@ -612,7 +613,8 @@ def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, path_to_data=
                     unit_key_found = True
                     if num_lines == 0:  # use first data line to screen out short and long lines that have key
                         length = line.count(",")
-                    if line.count(",") == length and (num_lines == 0 or ((num_lines_in+1) % skip) == 0):
+                    if line.count(",") == length and (num_lines == 0 or ((num_lines_in+1) % skip) == 0)\
+                            and line.count(comment_str) == 0:
                         output.write(line)
                         num_lines += 1
                     else:

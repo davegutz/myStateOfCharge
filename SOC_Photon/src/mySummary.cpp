@@ -34,17 +34,15 @@ void print_all_summary(struct Sum_st *sum, const int isum, const int nsum)
   while ( ++n < nsum )
   {
     if ( ++i > (nsum-1) ) i = 0; // circular buffer
-    Serial.printf("%d,  ", n);
-    if ( !cp.blynking ) Serial1.printf("%d,  ", n);
 
     sum[i].print();
 
     Serial.printf("\n");
     if ( !cp.blynking ) Serial1.printf("\n");
   }
-  Serial.printf("i,  date,                time,    Tb, Vb, Ib, soc, soc_ekf, Voc_dyn, Voc_stat, tweak_sclr_amp, tweak_sclr_noa, falw,\n");
+  Serial.printf("hist,  date,                time,    Tb, Vb, Ib, soc, soc_ekf, Voc_dyn, Voc_stat, tweak_sclr_amp, tweak_sclr_noa, falw,\n");
   if ( !cp.blynking )
-    Serial1.printf("i,  date,                time,    Tb, Vb, Ib, soc, soc_ekf, Voc_dyn, Voc_stat, tweak_sclr_amp, tweak_sclr_noa, falw,\n");
+    Serial1.printf("hist,  date,                time,    Tb, Vb, Ib, soc, soc_ekf, Voc_dyn, Voc_stat, tweak_sclr_amp, tweak_sclr_noa, falw,\n");
 }
 
 // reset helper
