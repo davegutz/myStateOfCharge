@@ -409,7 +409,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const floa
         else if ( reset )
           *rp_delta_q_ = 0.;
     }
-    else if ( reset ) *rp_delta_q_ = delta_q_ekf;  // Solution to booting up unsaturated
+    // else if ( reset ) *rp_delta_q_ = delta_q_ekf;  // Solution to booting up unsaturated
     resetting_ = false;     // one pass flag
 
     // Integration.   Can go to negative

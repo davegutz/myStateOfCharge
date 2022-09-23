@@ -48,7 +48,7 @@ struct RetainedPars
   float Ib_scale_noa = CURR_SCALE_NOA;    // Calibration scalar of non-amplified shunt sensor, A
   float ib_bias_noa = CURR_BIAS_NOA;      // Calibration adder of non-amplified shunt sensor, A
   float ib_bias_all = CURR_BIAS_ALL;      // Bias on all shunt sensors, A
-  int8_t ib_select = 0;         // Force current sensor (-1=non-amp, 0=auto, 1=amp)
+  int8_t ib_select = FAKE_FAULTS;         // Force current sensor (-1=non-amp, 0=auto, 1=amp)
   float Vb_bias = VOLT_BIAS;    // Calibrate Vb, V
   uint8_t modeling = 0;         // Driving saturation calculation with model.  Bits specify which signals use model
   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
@@ -96,7 +96,7 @@ struct RetainedPars
     this->Ib_scale_noa = CURR_SCALE_NOA;
     this->ib_bias_noa = CURR_BIAS_NOA;
     this->ib_bias_all = CURR_BIAS_ALL;
-    this->ib_select = 0;
+    this->ib_select = FAKE_FAULTS;
     this->Vb_bias = VOLT_BIAS;
     this->modeling = 0;
     this->amp = 0.;
@@ -154,7 +154,7 @@ struct RetainedPars
     Serial.printf(" scale_noa     %7.3f    %7.3f *SB<>\n", CURR_SCALE_NOA, Ib_scale_noa);
     Serial.printf(" bias_noa      %7.3f    %7.3f *DB<>\n", CURR_BIAS_NOA, ib_bias_noa);
     Serial.printf(" ib_bias_all   %7.3f    %7.3f *Di<> A\n", CURR_BIAS_ALL, ib_bias_all);
-    Serial.printf(" ib_select           %d          %d *s<> -1=noa, 0=auto, 1=amp\n", 0, ib_select);
+    Serial.printf(" ib_select           %d          %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select);
     Serial.printf(" Vb_bias       %7.3f    %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, Vb_bias);
     Serial.printf(" modeling            %d          %d *Xm<>\n", 0, modeling);
     Serial.printf(" inj amp       %7.3f    %7.3f *Xa<> A pk\n", 0., amp);

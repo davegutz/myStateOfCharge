@@ -188,7 +188,7 @@ void Fault::cc_diff(Sensors *Sen, BatteryMonitor *Mon)
   }
 
   cc_diff_thr_ = CC_DIFF_SOC_DIS_THRESH*cc_diff_sclr_*cc_diff_empty_sclr_;
-  failAssign( abs(cc_diff_)>=cc_diff_thr_ , CC_DIFF_FA );
+  failAssign( abs(cc_diff_)>=cc_diff_thr_ , CC_DIFF_FA );  // Not latched
 }
 
 // Compare current sensors - failure conditions large difference
@@ -209,8 +209,8 @@ void Fault::ib_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   ib_diff_thr_ = IBATT_DISAGREE_THRESH*ib_diff_sclr_;
   faultAssign( ib_diff_f_>=ib_diff_thr_, IB_DIFF_HI_FLT );
   faultAssign( ib_diff_f_<=-ib_diff_thr_, IB_DIFF_LO_FLT );
-  failAssign( IbdHiPer->calculate(ib_diff_hi_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIFF_HI_FA ); // IB_DIF_FA
-  failAssign( IbdLoPer->calculate(ib_diff_lo_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIFF_LO_FA ); // IB_DIF_FA
+  failAssign( IbdHiPer->calculate(ib_diff_hi_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIFF_HI_FA ); // IB_DIF_FA not latched
+  failAssign( IbdLoPer->calculate(ib_diff_lo_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIFF_LO_FA ); // IB_DIF_FA not latched
 }
 
 // Detect no signal present based on detection of quiet signal.
@@ -267,9 +267,9 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
   ewlo_thr_ = Mon->r_ss()*WRAP_LO_A*ewlo_sclr_*ewsat_sclr_*ewmin_sclr_;
   faultAssign( (e_wrap_filt_ <= ewlo_thr_), WRAP_LO_FLT);
-  failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );
-  failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );
-  failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_fa()), WRAP_VB_FA);
+  failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // non-latching
+  failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // non-latching
+  failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_fa()), WRAP_VB_FA);    // latches
 }
 
 void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
@@ -379,9 +379,13 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     ib_sel_stat_last_ = 1;
     Serial.printf("reset ib flt\n");
   }
-    if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() )
+  if ( FAKE_FAULTS )
   {
-    ib_sel_stat_ = 0;
+    ib_sel_stat_ = rp.ib_select;
+  }
+  else if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() )  // these inputs don't latch
+  {
+   ib_sel_stat_ = 0;    // takes two non-latching inputs to set and latch
   }
   else if ( rp.ib_select>0 && !Sen->ShuntAmp->bare() )
   {
@@ -391,25 +395,25 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   {
     ib_sel_stat_ = -1;
   }
-  else if ( rp.ib_select<0 && !Sen->ShuntNoAmp->bare() )
+  else if ( rp.ib_select<0 && !Sen->ShuntNoAmp->bare() )  // latch - use reset
   {
     ib_sel_stat_ = -1;
   }
   else if ( rp.ib_select==0 )  // auto
   {
-    if ( Sen->ShuntAmp->bare() && !Sen->ShuntNoAmp->bare() )
+    if ( Sen->ShuntAmp->bare() && !Sen->ShuntNoAmp->bare() )  // these inputs don't latch
     {
-      ib_sel_stat_ = -1;
+      ib_sel_stat_ = -1;    // TODO:  takes ONE non-latching input to set and latch this ib_sel
     }
     else if ( ib_diff_fa() )  // this input doesn't latch
     {
-      if ( vb_sel_stat_ && wrap_fa() )
+      if ( vb_sel_stat_ && wrap_fa() )    // wrap_fa is non-latching
       {
-        ib_sel_stat_ = -1;
+        ib_sel_stat_ = -1;      // TODO:  takes ONE non-latching input to set and latch this ib_sel
       }
-      else if ( cc_diff_fa() )
+      else if ( cc_diff_fa() )  // this input doesn't latch
       {
-        ib_sel_stat_ = -1;
+        ib_sel_stat_ = -1;      // takes two non-latching inputs to isolate ib failure and to set and latch ib_sel
       }
     }
     else if ( ib_sel_stat_last_ >= 0 )  // Latch.  Must reset to move out of no amp selection
@@ -426,13 +430,16 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     vb_sel_stat_ = 1;
     Serial.printf("reset vb flts\n");
   }
-  if ( !vb_sel_stat_last_ )
+  if ( !FAKE_FAULTS )
   {
-    vb_sel_stat_ = 0;   // Latch
-  }
-  if (  wrap_vb_fa() || vb_fa() )
-  {
-    vb_sel_stat_ = 0;
+    if ( !vb_sel_stat_last_ )
+    {
+      vb_sel_stat_ = 0;   // Latch
+    }
+    if (  wrap_vb_fa() || vb_fa() )
+    {
+      vb_sel_stat_ = 0;
+    }
   }
 
   // tb failure from inactivity. Does not latch because can heal and failure not critical
@@ -454,8 +461,8 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   {
     Serial.printf("Sel chg:  Amp->bare=%d, NoAmp->bare=%d, ib_diff_fa=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, cc_diff_fa_=%d,\n rp.ib_select=%d, ib_sel_stat=%d, vb_sel_stat=%d, tb_sel_stat=%d, vb_fail=%d, Tb_fail=%d,\n",
       Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_diff_fa_, rp.ib_select, ib_sel_stat_, vb_sel_stat_, tb_sel_stat_, vb_fa(), tb_fa());
-    Serial.printf("ibss=%d, ibssl=%d, vbss=%d, vbssl=%d, tbss=%d, tbssl=%d\n",
-      ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, tb_sel_stat_, tb_sel_stat_last_);
+    Serial.printf("fake=%d,ibss=%d, ibssl=%d, vbss=%d, vbssl=%d, tbss=%d, tbssl=%d\n",
+      FAKE_FAULTS, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, tb_sel_stat_, tb_sel_stat_last_);
   }
   if ( ib_sel_stat_ != ib_sel_stat_last_ )
   {

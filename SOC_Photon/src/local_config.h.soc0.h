@@ -15,7 +15,7 @@ const String unit = "soc0_20220917d";  // dt fix for ekf, e_wrap_lo thr, <*remov
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'Di'), A
 #define VOLT_BIAS             0.0   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
-#define VB_SCALE              1.0   // Scale Vb sensor
+#define VB_SCALE              1.0   // Scale Vb sensor (* 'SV')
 
 // Battery.  One 12 V 100 Ah battery bank would have RATED_BATT_CAP 100, NS 1, and NP 1
 // Two 12 V 100 Ah series battery bank would have RATED_BATT_CAP 100, NS 2, and NP 1
@@ -28,5 +28,7 @@ const String unit = "soc0_20220917d";  // dt fix for ekf, e_wrap_lo thr, <*remov
 #define NS                    1.0     // Number of series batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BS')
 #define NP                    1.0     // Number of parallel batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BP')
 
+// Faults
+#define FAKE_FAULTS           true    // What to do with faults, T=detect and display them but don't change signals
 
 #endif
