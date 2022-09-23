@@ -214,7 +214,8 @@ public:
   void pretty_print(Sensors *Sen, BatteryMonitor *Mon);
   void pretty_print1(Sensors *Sen, BatteryMonitor *Mon);
   boolean red_loss() { return faultRead(RED_LOSS); };
-  boolean red_loss_calc() { return (ib_sel_stat_!=1 || rp.ib_select!=0 || ib_diff_fa() || vb_fail()); };
+  boolean red_loss_calc() { return (ib_sel_stat_!=1 || (rp.ib_select!=0 && !FAKE_FAULTS)
+   || ib_diff_fa() || vb_fail()); };
   void reset_all_faults() { reset_all_faults_ = true; };
   void select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ib signals
