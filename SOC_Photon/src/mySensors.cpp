@@ -665,7 +665,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   }
   else
   {
-    if ( Flt->wrap_vb_fa() || Flt->vb_fa() )
+    if ( (Flt->wrap_vb_fa() || Flt->vb_fa()) && !FAKE_FAULTS )
     {
       Vb = Vb_model;
     }
