@@ -18,6 +18,17 @@
 from pyDAGx import myTables
 
 
+# Unix-like cat function
+# e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
+def cat(out_file_name, in_file_names, in_path='./', out_path='./'):
+    with open(out_path+'./'+out_file_name, 'w') as out_file:
+        for in_file_name in in_file_names:
+            with open(in_path+'/'+in_file_name) as in_file:
+                for line in in_file:
+                    if line.strip():
+                        out_file.write(line)
+
+
 class SavedHist:
     def __init__(self, data=None, schedule=None):
         if data is None:
@@ -78,6 +89,45 @@ class SavedHist:
 def overall_hist(hi, filename, fig_files=None, plot_title=None, n_fig=None):
     if fig_files is None:
         fig_files = []
+    # Markers
+    #
+    # light symbols
+    # '.' point
+    # ',' pixel
+    # '1' tri down
+    # '2' tri up
+    # '3' tri left
+    # '4' tri right
+    # '+' plus
+    # 'x' x
+    # '|' vline
+    # '_' hline
+    # 0 (TICKLEFT) tickleft
+    # 1 (TICKRIGHT) tickright
+    # 2 (TICKUP) tickup
+    # 3 (TICKDOWN) tickdown
+    #
+    # bold filled symbols
+    # 'o' circle
+    # 'v' triangle down
+    # '^' triangle up
+    # '<' triangle left
+    # '>' triangle right
+    # '8' octagon
+    # 's' square
+    # 'p' pentagon
+    # 'P' filled plus
+    # '*' star
+    # 'h' hexagon1
+    # 'H' hexagon2
+    # 4 (CARETLEFT) caretleft
+    # 5 (CARETRIGHT) caretright
+    # 6 (CARETUP) caretup
+    # 7 (CARETDOWN) caretdown
+    # 8 (CARETLEFTBASE) caretleft centered at base
+    # 9 (CARETRIGHTBASE) caretright centered at base
+    # 10 (CARETUPBASE) caretup centered at base
+    # 11 (CARETDOWNBASE) caretdown centered at base
 
     plt.figure()  # 1
     n_fig += 1
@@ -113,14 +163,25 @@ def overall_hist(hi, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.figure()  # 1
     n_fig += 1
     plt.subplot(111)
-    plt.plot(hi.soc, hi.Voc_stat, marker='+', markersize='3', linestyle='None', color='red', label='Voc_stat')
-    plt.plot(hi.soc, hi.sch, marker='.', markersize='2', linestyle='None', color='black', label='Schedule')
+    plt.plot(hi.soc, hi.Voc_stat, marker='3', markersize='3', linestyle='None', color='magenta', label='Voc_stat')
+    plt.plot(hi.soc, hi.sch, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
     plt.legend(loc=1)
     plt.title(plot_title)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
+    plt.figure()  # 1
+    n_fig += 1
+    plt.subplot(111)
+    plt.plot(hi.soc, hi.Voc_stat, marker=0, markersize='3', linestyle='None', color='red', label='Voc_stat')
+    plt.plot(hi.soc, hi.sch, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
+    plt.legend(loc=1)
+    plt.title(plot_title)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+    plt.ylim(10, 13.5)
     return n_fig, fig_files
 
 
@@ -156,22 +217,25 @@ if __name__ == '__main__':
 
         # Regression suite
         # data_file_old_txt = 'install20220914.txt';
-        data_file_old_txt = 'real world ble 20220917c.txt';
+        input_files = ['real world ble 20220917c.txt', 'real world ble 20220917c.txt']
         title_key = "hist"  # Find one instance of title
         unit_key = 'unit_h'  # happens to be what the long int of time starts with
         path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
+        # cat files
+        data_file_old_txt = 'compare_hist_temp.txt'
+        cat(data_file_old_txt, input_files, in_path=path_to_data, out_path=path_to_temp)
 
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_hist', title_key=title_key, unit_key=unit_key,
-                                           skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp,
+                                           skip=skip, path_to_data=path_to_temp, path_to_temp=path_to_temp,
                                            comment_str='---')
         if data_file_clean:
             cols = ('date', 'time', 'Tb', 'Vb', 'Ib', 'soc', 'soc_ekf', 'Voc_dyn', 'Voc_stat', 'tweak_sclr_amp',
                     'tweak_sclr_noa', 'falw')
-            hist_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=None,
-                                        encoding=None).view(np.recarray)
+            hist_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,
+                                         dtype=None, encoding=None).view(np.recarray)
             # Sort unique
             hist_old_unique = np.unique(hist_old_raw)
             hist_old = SavedHist(data=hist_old_unique, schedule=lut_voc)
