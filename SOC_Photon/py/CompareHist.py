@@ -89,6 +89,45 @@ class SavedHist:
 def overall_hist(hi, filename, fig_files=None, plot_title=None, n_fig=None):
     if fig_files is None:
         fig_files = []
+    # Markers
+    #
+    # light symbols
+    # '.' point
+    # ',' pixel
+    # '1' tri down
+    # '2' tri up
+    # '3' tri left
+    # '4' tri right
+    # '+' plus
+    # 'x' x
+    # '|' vline
+    # '_' hline
+    # 0 (TICKLEFT) tickleft
+    # 1 (TICKRIGHT) tickright
+    # 2 (TICKUP) tickup
+    # 3 (TICKDOWN) tickdown
+    #
+    # bold filled symbols
+    # 'o' circle
+    # 'v' triangle down
+    # '^' triangle up
+    # '<' triangle left
+    # '>' triangle right
+    # '8' octagon
+    # 's' square
+    # 'p' pentagon
+    # 'P' filled plus
+    # '*' star
+    # 'h' hexagon1
+    # 'H' hexagon2
+    # 4 (CARETLEFT) caretleft
+    # 5 (CARETRIGHT) caretright
+    # 6 (CARETUP) caretup
+    # 7 (CARETDOWN) caretdown
+    # 8 (CARETLEFTBASE) caretleft centered at base
+    # 9 (CARETRIGHTBASE) caretright centered at base
+    # 10 (CARETUPBASE) caretup centered at base
+    # 11 (CARETDOWNBASE) caretdown centered at base
 
     plt.figure()  # 1
     n_fig += 1
@@ -124,14 +163,25 @@ def overall_hist(hi, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.figure()  # 1
     n_fig += 1
     plt.subplot(111)
-    plt.plot(hi.soc, hi.Voc_stat, marker='+', markersize='3', linestyle='None', color='red', label='Voc_stat')
-    plt.plot(hi.soc, hi.sch, marker='.', markersize='2', linestyle='None', color='black', label='Schedule')
+    plt.plot(hi.soc, hi.Voc_stat, marker='3', markersize='3', linestyle='None', color='magenta', label='Voc_stat')
+    plt.plot(hi.soc, hi.sch, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
     plt.legend(loc=1)
     plt.title(plot_title)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
+    plt.figure()  # 1
+    n_fig += 1
+    plt.subplot(111)
+    plt.plot(hi.soc, hi.Voc_stat, marker=0, markersize='3', linestyle='None', color='red', label='Voc_stat')
+    plt.plot(hi.soc, hi.sch, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
+    plt.legend(loc=1)
+    plt.title(plot_title)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+    plt.ylim(10, 13.5)
     return n_fig, fig_files
 
 
