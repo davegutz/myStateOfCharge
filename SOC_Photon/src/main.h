@@ -373,7 +373,7 @@ void loop()
     // Debug for read
     if ( rp.debug==12 ) debug_12(Mon, Sen);  // EKF
     if ( rp.debug==-4 ) debug_m4(Mon, Sen);
- 
+
     // Print
     print_high_speed_data(reset, Sen, Mon);
 
@@ -445,7 +445,6 @@ void loop()
     Serial.printf("soft reset...\n");
   }
   cp.soft_reset = false;
-
 } // loop
 
 

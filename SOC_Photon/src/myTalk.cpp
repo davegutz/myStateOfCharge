@@ -1346,7 +1346,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   #ifdef USE_BLYNK
     Serial.printf("  v25: Blynk write\n");
   #endif
-  Serial.printf("  v34: EKF detail\n");
+  // Serial.printf("  v34: EKF detail\n");
   // Serial.printf("  v35: Randles balance\n");
   // Serial.printf("  v37: EKF short\n");
   // Serial.printf("  v75: voc_low check mod\n");
