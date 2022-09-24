@@ -17,6 +17,10 @@
 
 from pyDAGx import myTables
 
+RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
+BATT_DVOC_DT = 0.004  # 5/30/2022
+bat_v_sat = 13.8
+
 
 # Unix-like cat function
 # e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
@@ -44,7 +48,17 @@ class SavedHist:
             self.tweak_sclr_amp = None
             self.tweak_sclr_noa = None
             self.falw = None
-            self.sch = None
+            self.dscn_fa = None
+            self.ib_diff_fa = None
+            self.wv_fa = None
+            self.wl_fa = None
+            self.wh_fa = None
+            self.ccd_fa = None
+            self.ib_noa_fa = None
+            self.ib_amp_fa = None
+            self.vb_fa = None
+            self.tb_fa = None
+            self.voc_soc = None
         else:
             # Load raw data.  Assume soc is accurate (GIGO)
             self.date = np.array(data.date)
@@ -62,11 +76,25 @@ class SavedHist:
             # Convert time to decimal days
             min_time = np.min(self.time)
             self.time = (self.time - min_time)/3600./24.
+            falw = np.array(self.falw, dtype=np.uint16)
+            self.dscn_fa = np.bool8(np.array(falw) & 2**10)
+            self.ib_diff_fa = np.bool8((np.array(falw) & 2**8) | (np.array(falw) & 2**9))
+            self.wv_fa = np.bool8(np.array(falw) & 2**7)
+            self.wl_fa = np.bool8(np.array(falw) & 2**6)
+            self.wh_fa = np.bool8(np.array(falw) & 2**5)
+            self.ccd_fa = np.bool8(np.array(falw) & 2**4)
+            self.ib_noa_fa = np.bool8(np.array(falw) & 2**3)
+            self.ib_amp_fa = np.bool8(np.array(falw) & 2**2)
+            self.vb_fa = np.bool8(np.array(falw) & 2**1)
+            self.tb_fa = np.bool8(np.array(falw) & 2**0)
             # Add the schedule for reference
             if schedule is not None:
-                self.sch = []
+                self.voc_soc = []
+                self.Vsat = []
                 for i in range(len(self.time)):
-                    self.sch.append(schedule.interp(self.soc[i], self.Tb[i]))
+                    self.voc_soc.append(schedule.interp(self.soc[i], self.Tb[i]))
+                    self.Vsat.append(bat_v_sat + (self.Tb[i] - RATED_TEMP) * BATT_DVOC_DT)
+
 
     def __str__(self):
         s = ""
@@ -160,22 +188,50 @@ def overall_hist(hi, filename, fig_files=None, plot_title=None, n_fig=None):
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 1
+    plt.figure()  # 2
+    n_fig += 1
+    plt.subplot(221)
+    plt.plot(hi.time, hi.Vsat, marker='^', markersize='3', linestyle='None', color='red', label='Vsat')
+    plt.plot(hi.time, hi.Vb, marker='1', markersize='3', linestyle='None', color='black', label='Vb')
+    plt.plot(hi.time, hi.Voc_dyn,marker='.', markersize='3', linestyle='None', color='orange', label='Voc_dyn')
+    plt.plot(hi.time, hi.Voc_stat, marker='_', markersize='3', linestyle='None', color='green', label='Voc_stat')
+    plt.plot(hi.time, hi.voc_soc, marker='2', markersize='3', linestyle='None', color='cyan', label='voc_soc')
+    plt.legend(loc=1)
+    plt.subplot(122)
+    plt.plot(hi.time, hi.dscn_fa + 10, marker='o', markersize='3', linestyle='None', color='black', label='dscn_fa+10')
+    plt.plot(hi.time, hi.ib_diff_fa + 8, marker='^', markersize='3', linestyle='None', color='blue', label='ib_diff_fa+8')
+    plt.plot(hi.time, hi.wv_fa + 7, marker='s', markersize='3', linestyle='None', color='cyan', label='wrap_vb_fa+7')
+    plt.plot(hi.time, hi.wl_fa + 6, marker='p', markersize='3', linestyle='None', color='orange', label='wrap_lo_fa+6')
+    plt.plot(hi.time, hi.wh_fa + 5,marker='h', markersize='3', linestyle='None', color='green', label='wrap_hi_fa+5')
+    plt.plot(hi.time, hi.ccd_fa + 4, marker='H', markersize='3', linestyle='None', color='blue', label='cc_diff_fa+4')
+    plt.plot(hi.time, hi.ib_noa_fa + 3, marker='+', markersize='3', linestyle='None', color='red', label='ib_noa_fa+3')
+    plt.plot(hi.time, hi.ib_amp_fa + 2, marker='_', markersize='3', linestyle='None', color='magenta', label='ib_amp_fa+2')
+    plt.plot(hi.time, hi.vb_fa + 1, marker='1', markersize='3', linestyle='None', color='cyan', label='vb_fa+1')
+    plt.plot(hi.time, hi.tb_fa, marker='2', markersize='3', linestyle='None', color='orange', label='tb_fa')
+    plt.legend(loc=1)
+    plt.subplot(223)
+    plt.plot(hi.time, hi.Ib, marker='.', markersize='3', linestyle='None', color='red', label='Ib')
+    plt.legend(loc=1)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
+    plt.figure()  # 3
     n_fig += 1
     plt.subplot(111)
     plt.plot(hi.soc, hi.Voc_stat, marker='3', markersize='3', linestyle='None', color='magenta', label='Voc_stat')
-    plt.plot(hi.soc, hi.sch, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
+    plt.plot(hi.soc, hi.voc_soc, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
     plt.legend(loc=1)
     plt.title(plot_title)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 1
+    plt.figure()  # 4
     n_fig += 1
     plt.subplot(111)
     plt.plot(hi.soc, hi.Voc_stat, marker=0, markersize='3', linestyle='None', color='red', label='Voc_stat')
-    plt.plot(hi.soc, hi.sch, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
+    plt.plot(hi.soc, hi.voc_soc, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
     plt.legend(loc=1)
     plt.title(plot_title)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -217,7 +273,7 @@ if __name__ == '__main__':
 
         # Regression suite
         # data_file_old_txt = 'install20220914.txt';
-        input_files = ['real world ble 20220917c.txt', 'real world ble 20220917c.txt']
+        input_files = ['hist 20220917d-1.txt']
         title_key = "hist"  # Find one instance of title
         unit_key = 'unit_h'  # happens to be what the long int of time starts with
         path_to_pdfs = '../dataReduction/figures'

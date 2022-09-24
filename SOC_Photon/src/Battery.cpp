@@ -297,16 +297,19 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     ioc_ = hys_->ioc();
     bms_off_ = temp_c_ <= chem_.low_t || ( vb_<VBATT_MIN && !Sen->Flt->vb_fa() && !rp.tweak_test() );    // KISS
     Sen->bms_off = bms_off_;
-    if ( bms_off_ )
+    if ( !FAKE_FAULTS )
     {
-        voc_ = voc_stat_ = voc_filt_ = voc_soc_;
-        dv_dyn_ = dv_hys_ = 0;
-        ib_ = 0.;   // Give an update to turn back on without faulting
-    }
-    if ( Sen->Flt->vb_fa() )
-    {
-        voc_ = voc_stat_ = voc_filt_ = voc_soc_;
-        dv_dyn_ = dv_hys_ = 0;
+        if ( bms_off_ )
+        {
+            voc_ = voc_stat_ = voc_filt_ = voc_soc_;
+            dv_dyn_ = dv_hys_ = 0;
+            ib_ = 0.;   // Give an update to turn back on without faulting
+        }
+        if ( Sen->Flt->vb_fa() )
+        {
+            voc_ = voc_stat_ = voc_filt_ = voc_soc_;
+            dv_dyn_ = dv_hys_ = 0;
+        }
     }
 
     // EKF 1x1
