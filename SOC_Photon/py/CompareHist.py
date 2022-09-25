@@ -218,7 +218,8 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.plot(hi.time, hi.Tb, marker='.', markersize='3', linestyle='None', color='black', label='Tb')
     plt.plot(hi.time, hi.Vb, marker='.', markersize='3', linestyle='None', color='red', label='Vb')
     plt.plot(hi.time, hi.Voc_dyn, marker='.', markersize='3', linestyle='None', color='blue', label='Voc_dyn')
-    plt.plot(hi.time, hi.Voc_stat, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat')
+    plt.plot(hi.time, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_chg')
+    plt.plot(hi.time, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_dis')
     plt.legend(loc=1)
     plt.subplot(323)
     plt.plot(hi.time, hi.Ib, marker='+', markersize='3', linestyle='None', color='green', label='Ib')
@@ -246,7 +247,8 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.plot(hi.time, hi.Vsat, marker='^', markersize='3', linestyle='None', color='red', label='Vsat')
     plt.plot(hi.time, hi.Vb, marker='1', markersize='3', linestyle='None', color='black', label='Vb')
     plt.plot(hi.time, hi.Voc_dyn, marker='.', markersize='3', linestyle='None', color='orange', label='Voc_dyn')
-    plt.plot(hi.time, hi.Voc_stat, marker='_', markersize='3', linestyle='None', color='green', label='Voc_stat')
+    plt.plot(hi.time, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_chg')
+    plt.plot(hi.time, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_dis')
     plt.plot(hi.time, hi.voc_soc, marker='2', markersize='3', linestyle='None', color='cyan', label='voc_soc')
     plt.legend(loc=1)
     plt.subplot(122)
@@ -273,20 +275,8 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.subplot(111)
     plt.title(plot_title)
     plt.suptitle(subtitle)
-    plt.plot(hi.soc, hi.Voc_stat, marker='3', markersize='3', linestyle='None', color='magenta', label='Voc_stat')
-    plt.plot(hi.soc, hi.voc_soc, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
-    plt.legend(loc=1)
-    plt.title(plot_title)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
-    fig_files.append(fig_file_name)
-    plt.savefig(fig_file_name, format="png")
-
-    plt.figure()  # 4
-    n_fig += 1
-    plt.subplot(111)
-    plt.title(plot_title)
-    plt.suptitle(subtitle)
-    plt.plot(hi.soc, hi.Voc_stat, marker=0, markersize='3', linestyle='None', color='red', label='Voc_stat')
+    plt.plot(hi.soc, hi.Voc_stat_dis, marker=0, markersize='3', linestyle='None', color='red', label='Voc_stat_dis')
+    plt.plot(hi.soc, hi.Voc_stat_chg, marker=0, markersize='3', linestyle='None', color='green', label='Voc_stat_chg')
     plt.plot(hi.soc, hi.voc_soc, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
     plt.legend(loc=1)
     plt.title(plot_title)
@@ -326,6 +316,15 @@ def add_stuff(d_ra, voc_soc_tbl):
     d_mod = rf.rec_append_fields(d_mod, 'ib_amp_fa', np.array(ib_amp_fa, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'vb_fa', np.array(vb_fa, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'tb_fa', np.array(tb_fa, dtype=float))
+    Voc_stat_chg = np.copy(d_mod.Voc_stat)
+    Voc_stat_dis = np.copy(d_mod.Voc_stat)
+    for i in range(len(Voc_stat_chg)):
+        if d_mod.Ib[i] > -0.5:
+            Voc_stat_dis[i] = None
+        elif d_mod.Ib[i] < 0.5:
+            Voc_stat_chg[i] = None
+    d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_chg', np.array(Voc_stat_chg, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_dis', np.array(Voc_stat_dis, dtype=float))
     return d_mod
 
 
