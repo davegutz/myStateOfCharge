@@ -27,7 +27,11 @@ BATT_DVOC_DT = 0.004  # Change of VOC with operating temperature in range 0 - 50
 RATED_BATT_CAP = 108.4  # A-hr capacity of test article
 IB_BAND = 1.  # Threshold to declare charging or discharging
 TB_BAND = 5.  # Band around temperature to group data and correct
-
+HYS_SCALE = 0.3  # Original hys scalar inside photon code
+#  Rescale parameters design
+HYS_RESCALE_CHG = 0.5  # Attempt to rescale to match voc_soc to all data
+HYS_RESCALE_DIS = 0.3  # Attempt to rescale to match voc_soc to all data
+VOC_RESET = 0.  # Attempt to rescale to match voc_soc to all data
 
 # Unix-like cat function
 # e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
@@ -144,7 +148,7 @@ def overall_hist(hi, filename, fig_files=None, plot_title=None, n_fig=None):
 
     plt.figure()  # 3
     n_fig += 1
-    plt.subplot(111)
+    plt.subplot(121)
     plt.plot(hi.soc, hi.Voc_stat, marker='3', markersize='3', linestyle='None', color='magenta', label='Voc_stat')
     plt.plot(hi.soc, hi.voc_soc, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
     plt.legend(loc=1)
@@ -152,10 +156,7 @@ def overall_hist(hi, filename, fig_files=None, plot_title=None, n_fig=None):
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
-
-    plt.figure()  # 4
-    n_fig += 1
-    plt.subplot(111)
+    plt.subplot(121)
     plt.plot(hi.soc, hi.Voc_stat, marker=0, markersize='3', linestyle='None', color='red', label='Voc_stat')
     plt.plot(hi.soc, hi.voc_soc, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
     plt.legend(loc=1)
@@ -167,7 +168,8 @@ def overall_hist(hi, filename, fig_files=None, plot_title=None, n_fig=None):
     return n_fig, fig_files
 
 
-def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None,  x_sch=None, z_sch=None):
+def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None,  x_sch=None, z_sch=None,
+              voc_reset=0.):
     if fig_files is None:
         fig_files = []
     # Markers
@@ -212,41 +214,45 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
 
     plt.figure()  # 1
     n_fig += 1
-    plt.subplot(321)
+    plt.subplot(331)
     plt.title(plot_title)
     plt.suptitle(subtitle)
     plt.plot(hi.time_d, hi.soc, marker='.', markersize='3', linestyle='None', color='black', label='soc')
     plt.plot(hi.time_d, hi.soc_ekf, marker='.', markersize='3', linestyle='None', color='blue', label='soc_ekf')
     plt.legend(loc=1)
-    plt.subplot(322)
+    plt.subplot(332)
     plt.plot(hi.time_d, hi.Tb, marker='.', markersize='3', linestyle='None', color='black', label='Tb')
     plt.plot(hi.time_d, hi.Vb, marker='.', markersize='3', linestyle='None', color='red', label='Vb')
     plt.plot(hi.time_d, hi.Voc_dyn, marker='.', markersize='3', linestyle='None', color='blue', label='Voc_dyn')
     plt.plot(hi.time_d, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_chg')
     plt.plot(hi.time_d, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_dis')
     plt.legend(loc=1)
-    plt.subplot(323)
+    plt.subplot(333)
     plt.plot(hi.time_d, hi.Ib, marker='+', markersize='3', linestyle='None', color='green', label='Ib')
     plt.legend(loc=1)
-    plt.subplot(324)
+    plt.subplot(334)
     plt.plot(hi.time_d, hi.tweak_sclr_amp, marker='+', markersize='3', linestyle='None', color='orange', label='tweak_sclr_amp')
     plt.plot(hi.time_d, hi.tweak_sclr_noa, marker='^', markersize='3', linestyle='None', color='green', label='tweak_sclr_noa')
     plt.ylim(-6, 6)
     plt.legend(loc=1)
-    plt.subplot(325)
+    plt.subplot(335)
     plt.plot(hi.time_d, hi.falw, marker='+', markersize='3', linestyle='None', color='magenta', label='falw')
     plt.legend(loc=0)
-    plt.subplot(326)
+    plt.subplot(336)
     plt.plot(hi.soc, hi.soc_ekf, marker='+', markersize='3', linestyle='None', color='blue', label='soc_ekf')
     plt.plot([0, 1], [0, 1], linestyle='--', color='black')
     plt.legend(loc=4)
+    plt.subplot(337)
+    plt.plot(hi.time, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='black', label='dv_hys')
+    plt.plot(hi.time, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
+    plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
     plt.figure()  # 2
     n_fig += 1
-    plt.subplot(221)
+    plt.subplot(321)
     plt.title(plot_title)
     plt.suptitle(subtitle)
     plt.plot(hi.time_d, hi.Vsat, marker='^', markersize='3', linestyle='None', color='red', label='Vsat')
@@ -277,7 +283,7 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
 
     plt.figure()  # 3
     n_fig += 1
-    plt.subplot(111)
+    plt.subplot(121)
     plt.title(plot_title)
     plt.suptitle(subtitle)
     plt.plot(hi.soc_r, hi.Voc_stat_r_dis, marker='o', markersize='3', linestyle='-', color='cyan', label='Voc_stat_r_dis')
@@ -286,11 +292,22 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.plot(hi.soc, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_chg')
     plt.plot(x_sch, z_sch, marker='+', markersize='2', linestyle='--', color='black', label='Schedule')
     plt.legend(loc=4)
-    plt.title(plot_title)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
     plt.ylim(12, 13.5)
+    plt.subplot(122)
+    plt.plot(hi.soc_r, hi.Voc_stat_rescaled_r_dis, marker='o', markersize='3', linestyle='-', color='cyan', label='Voc_stat_rescaled_r_dis')
+    plt.plot(hi.soc_r, hi.Voc_stat_rescaled_r_chg, marker='o', markersize='3', linestyle='-', color='orange', label='Voc_stat_rescaled_r_chg')
+    # plt.plot(hi.soc, hi.Voc_stat_rescaled_dis, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_rescaled_dis')
+    # plt.plot(hi.soc, hi.Voc_stat_rescaled_chg, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_rescaled_chg')
+    plt.plot(x_sch, z_sch+voc_reset, marker='+', markersize='2', linestyle='--', color='black', label='Schedule RESET')
+    plt.legend(loc=4)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+    plt.ylim(12, 13.5)
+
     return n_fig, fig_files
 
 
@@ -335,6 +352,18 @@ def add_stuff(d_ra, voc_soc_tbl, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_dis', np.array(Voc_stat_dis, dtype=float))
     time_d = (d_mod.time-d_mod.time[0])/3600./24.
     d_mod = rf.rec_append_fields(d_mod, 'time_d', np.array(time_d, dtype=float))
+    dv_hys = d_mod.Voc_dyn - d_mod.Voc_stat
+    d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
+    dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE
+    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
+    dv_hys_rescaled = d_mod.dv_hys_unscaled
+    pos = dv_hys_rescaled >= 0
+    neg = dv_hys_rescaled < 0
+    dv_hys_rescaled[pos] *= HYS_RESCALE_CHG
+    dv_hys_rescaled[neg] *= HYS_RESCALE_DIS
+    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_rescaled', np.array(dv_hys_rescaled, dtype=float))
+    Voc_stat_rescaled = d_mod.Voc_dyn - d_mod.dv_hys_rescaled
+    d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_rescaled', np.array(Voc_stat_rescaled, dtype=float))
     return d_mod
 
 
@@ -354,15 +383,20 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
     q_cap_r = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=temp_corr, t_rated=BATT_RATED_TEMP)
     h.soc_r = 1. + dq / q_cap_r
     h.Voc_stat_r = h.Voc_stat - (h.Tb - temp_corr) * BATT_DVOC_DT
+    h.Voc_stat_rescaled_r = h.Voc_stat_rescaled - (h.Tb - temp_corr) * BATT_DVOC_DT
 
     # delineate charging and discharging
     h.Voc_stat_r_chg = np.copy(h.Voc_stat)
     h.Voc_stat_r_dis = np.copy(h.Voc_stat)
+    h.Voc_stat_rescaled_r_chg = np.copy(h.Voc_stat_rescaled)
+    h.Voc_stat_rescaled_r_dis = np.copy(h.Voc_stat_rescaled)
     for i in range(len(h.Voc_stat_r_chg)):
         if h.Ib[i] > -0.5:
             h.Voc_stat_r_dis[i] = None
+            h.Voc_stat_rescaled_r_dis[i] = None
         elif h.Ib[i] < 0.5:
             h.Voc_stat_r_chg[i] = None
+            h.Voc_stat_rescaled_r_chg[i] = None
 
     return h
 
@@ -448,13 +482,13 @@ if __name__ == '__main__':
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         if len(h_05C.time) > 1:
-            n_fig, fig_files = over_easy(h_05C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_05C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc05)
+            n_fig, fig_files = over_easy(h_05C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_05C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc05, voc_reset=VOC_RESET)
         if len(h_11C.time) > 1:
-            n_fig, fig_files = over_easy(h_11C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_11C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc11)
+            n_fig, fig_files = over_easy(h_11C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_11C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc11, voc_reset=VOC_RESET)
         if len(h_20C.time) > 1:
-            n_fig, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc20)
+            n_fig, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET)
         if len(h_30C.time) > 1:
-            n_fig, fig_files = over_easy(h_30C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_30C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc30)
+            n_fig, fig_files = over_easy(h_30C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_30C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc30, voc_reset=VOC_RESET)
         if len(h_40C.time) > 1:
             n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc40)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
