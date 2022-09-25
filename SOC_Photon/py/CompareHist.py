@@ -20,9 +20,11 @@ import numpy as np
 import numpy.lib.recfunctions as rf
 import matplotlib.pyplot as plt
 
-RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
-BATT_DVOC_DT = 0.004  # 5/30/2022
-bat_v_sat = 13.8
+BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
+BATT_V_SAT = 13.8
+BATT_DQDT = 0.01  # Change of charge with temperature, fraction / deg C (0.01 from literature)
+BATT_DVOC_DT = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V / deg C
+RATED_BATT_CAP = 108.4  # A-hr capacity of test article
 
 
 # Unix-like cat function
@@ -163,7 +165,7 @@ def overall_hist(hi, filename, fig_files=None, plot_title=None, n_fig=None):
     return n_fig, fig_files
 
 
-def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None):
+def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None,  x_sch=None, z_sch=None):
     if fig_files is None:
         fig_files = []
     # Markers
@@ -275,10 +277,12 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.subplot(111)
     plt.title(plot_title)
     plt.suptitle(subtitle)
-    plt.plot(hi.soc, hi.Voc_stat_dis, marker=0, markersize='3', linestyle='None', color='red', label='Voc_stat_dis')
-    plt.plot(hi.soc, hi.Voc_stat_chg, marker=0, markersize='3', linestyle='None', color='green', label='Voc_stat_chg')
-    plt.plot(hi.soc, hi.voc_soc, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
-    plt.legend(loc=1)
+    plt.plot(hi.soc_r, hi.Voc_stat_r_dis, marker='o', markersize='3', linestyle='-', color='orange', label='Voc_stat_r_dis')
+    plt.plot(hi.soc_r, hi.Voc_stat_r_chg, marker='o', markersize='3', linestyle='-', color='cyan', label='Voc_stat_r_chg')
+    plt.plot(hi.soc, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_dis')
+    plt.plot(hi.soc, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_chg')
+    plt.plot(x_sch, z_sch, marker='+', markersize='2', linestyle='--', color='black', label='Schedule')
+    plt.legend(loc=4)
     plt.title(plot_title)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -287,12 +291,13 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     return n_fig, fig_files
 
 
+# Add schedule lookups and do some rack and stack
 def add_stuff(d_ra, voc_soc_tbl):
     voc_soc = []
     Vsat = []
     for i in range(len(d_ra.time)):
         voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
-        Vsat.append(bat_v_sat + (d_ra.Tb[i] - RATED_TEMP) * BATT_DVOC_DT)
+        Vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
         # np.
     d_mod = rf.rec_append_fields(d_ra, 'voc_soc', np.array(voc_soc, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'Vsat', np.array(voc_soc, dtype=float))
@@ -326,6 +331,35 @@ def add_stuff(d_ra, voc_soc_tbl):
     d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_chg', np.array(Voc_stat_chg, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_dis', np.array(Voc_stat_dis, dtype=float))
     return d_mod
+
+
+def calculate_capacity(q_cap_rated_scaled=None, dqdt=None, temp=None, t_rated=None):
+    q_cap = q_cap_rated_scaled * (1. + dqdt * (temp - t_rated))
+    return q_cap
+
+
+# Make an array useful for analysis (around temp) and add some metrics
+def filter_Tb(raw, temp_corr, vb_band=5., rated_batt_cap=100.):
+    h = raw[abs(raw.Tb-temp_corr) < vb_band]
+
+    # Correct for temp
+    q_cap = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=h.Tb, t_rated=BATT_RATED_TEMP)
+    dq = (h.soc - 1.) * q_cap
+    dq -= BATT_DQDT * q_cap * (temp_corr - h.Tb)
+    q_cap_r = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=temp_corr, t_rated=BATT_RATED_TEMP)
+    h.soc_r = 1. + dq / q_cap_r
+    h.Voc_stat_r = h.Voc_stat - (h.Tb - temp_corr) * BATT_DVOC_DT
+
+    # delineate charging and discharging
+    h.Voc_stat_r_chg = np.copy(h.Voc_stat)
+    h.Voc_stat_r_dis = np.copy(h.Voc_stat)
+    for i in range(len(h.Voc_stat_r_chg)):
+        if h.Ib[i] > -0.5:
+            h.Voc_stat_r_dis[i] = None
+        elif h.Ib[i] < 0.5:
+            h.Voc_stat_r_chg[i] = None
+
+    return h
 
 
 if __name__ == '__main__':
@@ -384,10 +418,13 @@ if __name__ == '__main__':
 
         # Rack and stack
         h = add_stuff(h_raw, lut_voc)
-        h_11C = h[abs(h.Tb-11.1) < 5]
-        h_20C = h[abs(h.Tb-20) < 5]
-        h_30C = h[abs(h.Tb-30) < 5]
-        h_40C = h[abs(h.Tb-40) < 5]
+        h_11C = filter_Tb(h, 11.1, vb_band=5., rated_batt_cap=RATED_BATT_CAP)
+        x_soc = x0; voc_soc20 = x0.copy()
+        for i in range(len(x_soc)):
+            voc_soc20[i] = lut_voc.interp(x_soc[i], 20.)
+        h_20C = filter_Tb(h, 20., vb_band=5., rated_batt_cap=RATED_BATT_CAP)
+        h_30C = filter_Tb(h, 30., vb_band=5., rated_batt_cap=RATED_BATT_CAP)
+        h_40C = filter_Tb(h, 40., vb_band=5., rated_batt_cap=RATED_BATT_CAP)
 
         # Plots
         n_fig = 0
@@ -396,13 +433,13 @@ if __name__ == '__main__':
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         # n_fig, fig_files = over_easy(h_11C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_11C',
-        #                              n_fig=n_fig)
+        #                              n_fig=n_fig, x_sch=x_soc, z_sch=voc_soc20)
         n_fig, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C',
-                                     n_fig=n_fig)
+                                     n_fig=n_fig, x_sch=x_soc, z_sch=voc_soc20)
         # n_fig, fig_files = over_easy(h_30C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_30C',
-        #                              n_fig=n_fig)
+        #                              n_fig=n_fig, x_sch=x_soc, z_sch=voc_soc20)
         # n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C',
-        #                              n_fig=n_fig)
+        #                              n_fig=n_fig, x_sch=x_soc, z_sch=voc_soc20)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=path_to_pdfs)
         cleanup_fig_files(fig_files)
