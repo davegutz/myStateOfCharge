@@ -25,6 +25,8 @@ BATT_V_SAT = 13.8
 BATT_DQDT = 0.01  # Change of charge with temperature, fraction / deg C (0.01 from literature)
 BATT_DVOC_DT = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V / deg C
 RATED_BATT_CAP = 108.4  # A-hr capacity of test article
+IB_BAND = 1.  # Threshold to declare charging or discharging
+TB_BAND = 5.  # Band around temperature to group data and correct
 
 
 # Unix-like cat function
@@ -293,7 +295,7 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
 
 
 # Add schedule lookups and do some rack and stack
-def add_stuff(d_ra, voc_soc_tbl):
+def add_stuff(d_ra, voc_soc_tbl, ib_band=0.5):
     voc_soc = []
     Vsat = []
     for i in range(len(d_ra.time)):
@@ -325,9 +327,9 @@ def add_stuff(d_ra, voc_soc_tbl):
     Voc_stat_chg = np.copy(d_mod.Voc_stat)
     Voc_stat_dis = np.copy(d_mod.Voc_stat)
     for i in range(len(Voc_stat_chg)):
-        if d_mod.Ib[i] > -0.5:
+        if d_mod.Ib[i] > -ib_band:
             Voc_stat_dis[i] = None
-        elif d_mod.Ib[i] < 0.5:
+        elif d_mod.Ib[i] < ib_band:
             Voc_stat_chg[i] = None
     d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_chg', np.array(Voc_stat_chg, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_dis', np.array(Voc_stat_dis, dtype=float))
@@ -342,8 +344,8 @@ def calculate_capacity(q_cap_rated_scaled=None, dqdt=None, temp=None, t_rated=No
 
 
 # Make an array useful for analysis (around temp) and add some metrics
-def filter_Tb(raw, temp_corr, vb_band=5., rated_batt_cap=100.):
-    h = raw[abs(raw.Tb-temp_corr) < vb_band]
+def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
+    h = raw[abs(raw.Tb-temp_corr) < tb_band]
 
     # Correct for temp
     q_cap = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=h.Tb, t_rated=BATT_RATED_TEMP)
@@ -363,6 +365,14 @@ def filter_Tb(raw, temp_corr, vb_band=5., rated_batt_cap=100.):
             h.Voc_stat_r_chg[i] = None
 
     return h
+
+
+# Table lookup vector
+def look_it(x, tab, temp):
+    voc = x.copy()
+    for i in range(len(x)):
+        voc[i] = tab.interp(x[i], temp)
+    return voc
 
 
 if __name__ == '__main__':
@@ -393,7 +403,7 @@ if __name__ == '__main__':
         # Save these
 
         # User inputs
-        input_files = ['hist 20220917d-1.txt', '20220917d-20C_sat.txt']
+        input_files = ['hist 20220917d-1.txt', '20220917d-20C_sat.txt', 'hist begin30C 20220917d.txt']
         data_file = 'data.txt'
         path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
@@ -418,16 +428,18 @@ if __name__ == '__main__':
         # Sort unique
         h_raw = np.unique(h_raw)
         print(h_raw)
-
         # Rack and stack
-        h = add_stuff(h_raw, lut_voc)
-        h_11C = filter_Tb(h, 11.1, vb_band=5., rated_batt_cap=RATED_BATT_CAP)
-        x_soc = x0; voc_soc20 = x0.copy()
-        for i in range(len(x_soc)):
-            voc_soc20[i] = lut_voc.interp(x_soc[i], 20.)
-        h_20C = filter_Tb(h, 20., vb_band=5., rated_batt_cap=RATED_BATT_CAP)
-        h_30C = filter_Tb(h, 30., vb_band=5., rated_batt_cap=RATED_BATT_CAP)
-        h_40C = filter_Tb(h, 40., vb_band=5., rated_batt_cap=RATED_BATT_CAP)
+        h = add_stuff(h_raw, lut_voc, ib_band=IB_BAND)
+        voc_soc05 = look_it(x0, lut_voc, 5.)
+        h_05C = filter_Tb(h, 5., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        voc_soc11 = look_it(x0, lut_voc, 11.1)
+        h_11C = filter_Tb(h, 11.1, tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        voc_soc20 = look_it(x0, lut_voc, 20.)
+        h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        voc_soc30 = look_it(x0, lut_voc, 30.)
+        h_30C = filter_Tb(h, 30., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        voc_soc40 = look_it(x0, lut_voc, 40.)
+        h_40C = filter_Tb(h, 40., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
 
         # Plots
         n_fig = 0
@@ -435,14 +447,16 @@ if __name__ == '__main__':
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        # n_fig, fig_files = over_easy(h_11C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_11C',
-        #                              n_fig=n_fig, x_sch=x_soc, z_sch=voc_soc20)
-        n_fig, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C',
-                                     n_fig=n_fig, x_sch=x_soc, z_sch=voc_soc20)
-        # n_fig, fig_files = over_easy(h_30C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_30C',
-        #                              n_fig=n_fig, x_sch=x_soc, z_sch=voc_soc20)
-        # n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C',
-        #                              n_fig=n_fig, x_sch=x_soc, z_sch=voc_soc20)
+        if len(h_05C.time) > 1:
+            n_fig, fig_files = over_easy(h_05C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_05C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc05)
+        if len(h_11C.time) > 1:
+            n_fig, fig_files = over_easy(h_11C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_11C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc11)
+        if len(h_20C.time) > 1:
+            n_fig, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc20)
+        if len(h_30C.time) > 1:
+            n_fig, fig_files = over_easy(h_30C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_30C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc30)
+        if len(h_40C.time) > 1:
+            n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc40)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=path_to_pdfs)
         cleanup_fig_files(fig_files)
