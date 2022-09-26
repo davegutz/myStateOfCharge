@@ -31,7 +31,11 @@ HYS_SCALE = 0.3  # Original hys scalar inside photon code
 #  Rescale parameters design
 HYS_RESCALE_CHG = 0.5  # Attempt to rescale to match voc_soc to all data
 HYS_RESCALE_DIS = 0.3  # Attempt to rescale to match voc_soc to all data
-VOC_RESET = 0.  # Attempt to rescale to match voc_soc to all data
+VOC_RESET_05 = 0.  # Attempt to rescale to match voc_soc to all data
+VOC_RESET_11 = 0.  # Attempt to rescale to match voc_soc to all data
+VOC_RESET_20 = 0.  # Attempt to rescale to match voc_soc to all data
+VOC_RESET_30 = -0.03  # Attempt to rescale to match voc_soc to all data
+VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
 
 # Unix-like cat function
 # e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
@@ -217,18 +221,14 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.subplot(331)
     plt.title(plot_title)
     plt.suptitle(subtitle)
-    plt.plot(hi.time_d, hi.soc, marker='.', markersize='3', linestyle='None', color='black', label='soc')
-    plt.plot(hi.time_d, hi.soc_ekf, marker='+', markersize='3', linestyle='None', color='blue', label='soc_ekf')
+    plt.plot(hi.time_d, hi.soc, marker='.', markersize='3', linestyle='-', color='black', label='soc')
+    plt.plot(hi.time_d, hi.soc_ekf, marker='+', markersize='3', linestyle='--', color='blue', label='soc_ekf')
     plt.legend(loc=1)
     plt.subplot(332)
-    plt.plot(hi.time_d, hi.Tb, marker='.', markersize='3', linestyle='None', color='black', label='Tb')
-    plt.plot(hi.time_d, hi.Vb, marker='.', markersize='3', linestyle='None', color='red', label='Vb')
-    plt.plot(hi.time_d, hi.Voc_dyn, marker='.', markersize='3', linestyle='None', color='blue', label='Voc_dyn')
-    plt.plot(hi.time_d, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_chg')
-    plt.plot(hi.time_d, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_dis')
+    plt.plot(hi.time_d, hi.Tb, marker='.', markersize='3', linestyle='-', color='black', label='Tb')
     plt.legend(loc=1)
     plt.subplot(333)
-    plt.plot(hi.time_d, hi.Ib, marker='+', markersize='3', linestyle='None', color='green', label='Ib')
+    plt.plot(hi.time_d, hi.Ib, marker='+', markersize='3', linestyle='-', color='green', label='Ib')
     plt.legend(loc=1)
     plt.subplot(334)
     plt.plot(hi.time_d, hi.tweak_sclr_amp, marker='+', markersize='3', linestyle='None', color='orange', label='tweak_sclr_amp')
@@ -239,20 +239,33 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.plot(hi.time_d, hi.falw, marker='+', markersize='3', linestyle='None', color='magenta', label='falw')
     plt.legend(loc=0)
     plt.subplot(336)
-    plt.plot(hi.soc, hi.soc_ekf, marker='+', markersize='3', linestyle='None', color='blue', label='soc_ekf')
-    plt.plot([0, 1], [0, 1], linestyle='--', color='black')
+    plt.plot(hi.soc, hi.soc_ekf, marker='+', markersize='3', linestyle='-', color='blue', label='soc_ekf')
+    plt.plot([0, 1], [0.2, 1.2], linestyle=':', color='red')
+    plt.plot([0, 1], [-0.2, 0.8], linestyle=':', color='red')
+    plt.xlim(0, 1)
+    plt.ylim(0, 1)
+    plt.xlabel('soc')
     plt.legend(loc=4)
     plt.subplot(337)
     plt.plot(hi.time_d, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
     plt.plot(hi.time_d, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
     plt.plot(hi.time_d, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
     plt.plot(hi.time_d, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
+    plt.xlabel('days')
     plt.legend(loc=1)
     plt.subplot(338)
     plt.plot(hi.time_d, hi.e_wrap, marker='o', markersize='3', linestyle='-', color='black', label='e_wrap')
-    plt.plot(hi.time_d, hi.wv_fa, marker='s', markersize='3', linestyle='None', color='red', label='wrap_vb_fa')
-    plt.plot(hi.time_d, hi.wl_fa-2, marker='p', markersize='3', linestyle='None', color='orange', label='wrap_lo_fa-2')
-    plt.plot(hi.time_d, hi.wh_fa+2, marker='h', markersize='3', linestyle='None', color='green', label='wrap_hi_fa+2')
+    plt.plot(hi.time_d, hi.wv_fa, marker=0, markersize='4', linestyle=':', color='red', label='wrap_vb_fa')
+    plt.plot(hi.time_d, hi.wl_fa-1, marker=2, markersize='4', linestyle=':', color='orange', label='wrap_lo_fa-1')
+    plt.plot(hi.time_d, hi.wh_fa+1, marker=3, markersize='4', linestyle=':', color='green', label='wrap_hi_fa+1')
+    plt.xlabel('days')
+    plt.legend(loc=1)
+    plt.subplot(339)
+    plt.plot(hi.time_d, hi.Vb, marker='.', markersize='3', linestyle='None', color='red', label='Vb')
+    plt.plot(hi.time_d, hi.Voc_dyn, marker='.', markersize='3', linestyle='None', color='blue', label='Voc_dyn')
+    plt.plot(hi.time_d, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_chg')
+    plt.plot(hi.time_d, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_dis')
+    plt.xlabel('days')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -260,30 +273,34 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
 
     plt.figure()  # 2
     n_fig += 1
-    plt.subplot(321)
+    plt.subplot(221)
     plt.title(plot_title)
     plt.suptitle(subtitle)
-    plt.plot(hi.time_d, hi.Vsat, marker='^', markersize='3', linestyle='None', color='red', label='Vsat')
+    plt.plot(hi.time_d, hi.Vsat, marker='.', markersize='1', linestyle='-', color='orange', linewidth='1', label='Vsat')
     plt.plot(hi.time_d, hi.Vb, marker='1', markersize='3', linestyle='None', color='black', label='Vb')
     plt.plot(hi.time_d, hi.Voc_dyn, marker='.', markersize='3', linestyle='None', color='orange', label='Voc_dyn')
-    plt.plot(hi.time_d, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_chg')
-    plt.plot(hi.time_d, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_dis')
-    plt.plot(hi.time_d, hi.voc_soc, marker='2', markersize='3', linestyle='None', color='cyan', label='voc_soc')
+    plt.plot(hi.time_d, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='-', color='red', label='Voc_stat_chg')
+    plt.plot(hi.time_d, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='-', color='green', label='Voc_stat_dis')
+    plt.plot(hi.time_d, hi.voc_soc, marker='2', markersize='3', linestyle=':', color='cyan', label='voc_soc')
+    plt.xlabel('days')
     plt.legend(loc=1)
     plt.subplot(122)
-    plt.plot(hi.time_d, hi.dscn_fa + 18, marker='o', markersize='3', linestyle='None', color='black', label='dscn_fa+18')
-    plt.plot(hi.time_d, hi.ib_diff_fa + 16, marker='^', markersize='3', linestyle='None', color='blue', label='ib_diff_fa+16')
-    plt.plot(hi.time_d, hi.wv_fa + 14, marker='s', markersize='3', linestyle='None', color='cyan', label='wrap_vb_fa+14')
-    plt.plot(hi.time_d, hi.wl_fa + 12, marker='p', markersize='3', linestyle='None', color='orange', label='wrap_lo_fa+12')
-    plt.plot(hi.time_d, hi.wh_fa + 10, marker='h', markersize='3', linestyle='None', color='green', label='wrap_hi_fa+10')
-    plt.plot(hi.time_d, hi.ccd_fa + 8, marker='H', markersize='3', linestyle='None', color='blue', label='cc_diff_fa+8')
-    plt.plot(hi.time_d, hi.ib_noa_fa + 6, marker='+', markersize='3', linestyle='None', color='red', label='ib_noa_fa+6')
-    plt.plot(hi.time_d, hi.ib_amp_fa + 4, marker='_', markersize='3', linestyle='None', color='magenta', label='ib_amp_fa+4')
-    plt.plot(hi.time_d, hi.vb_fa + 2, marker='1', markersize='3', linestyle='None', color='cyan', label='vb_fa+2')
-    plt.plot(hi.time_d, hi.tb_fa, marker='2', markersize='3', linestyle='None', color='orange', label='tb_fa')
+    plt.plot(hi.time_d, hi.dscn_fa + 18, marker='o', markersize='3', linestyle='-', color='black', label='dscn_fa+18')
+    plt.plot(hi.time_d, hi.ib_diff_fa + 16, marker='^', markersize='3', linestyle='-', color='blue', label='ib_diff_fa+16')
+    plt.plot(hi.time_d, hi.wv_fa + 14, marker='s', markersize='3', linestyle='-', color='cyan', label='wrap_vb_fa+14')
+    plt.plot(hi.time_d, hi.wl_fa + 12, marker='p', markersize='3', linestyle='-', color='orange', label='wrap_lo_fa+12')
+    plt.plot(hi.time_d, hi.wh_fa + 10, marker='h', markersize='3', linestyle='-', color='green', label='wrap_hi_fa+10')
+    plt.plot(hi.time_d, hi.ccd_fa + 8, marker='H', markersize='3', linestyle='-', color='blue', label='cc_diff_fa+8')
+    plt.plot(hi.time_d, hi.ib_noa_fa + 6, marker='+', markersize='3', linestyle='-', color='red', label='ib_noa_fa+6')
+    plt.plot(hi.time_d, hi.ib_amp_fa + 4, marker='_', markersize='3', linestyle='-', color='magenta', label='ib_amp_fa+4')
+    plt.plot(hi.time_d, hi.vb_fa + 2, marker='1', markersize='3', linestyle='-', color='cyan', label='vb_fa+2')
+    plt.plot(hi.time_d, hi.tb_fa, marker='2', markersize='3', linestyle='-', color='orange', label='tb_fa')
+    plt.ylim(-1, 24)
+    plt.xlabel('days')
     plt.legend(loc=1)
     plt.subplot(223)
-    plt.plot(hi.time_d, hi.Ib, marker='.', markersize='3', linestyle='None', color='red', label='Ib')
+    plt.plot(hi.time_d, hi.Ib, marker='.', markersize='3', linestyle='-', color='red', label='Ib')
+    plt.xlabel('days')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -299,10 +316,8 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.plot(hi.soc, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_dis')
     plt.plot(hi.soc, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_chg')
     plt.plot(x_sch, z_sch, marker='+', markersize='2', linestyle='--', color='black', label='Schedule')
+    plt.xlabel('soc')
     plt.legend(loc=4)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
-    fig_files.append(fig_file_name)
-    plt.savefig(fig_file_name, format="png")
     plt.ylim(12, 13.5)
     plt.subplot(122)
     plt.plot(hi.soc_r, hi.Voc_stat_rescaled_r_dis, marker='o', markersize='3', linestyle='-', color='cyan', label='Voc_stat_rescaled_r_dis')
@@ -310,11 +325,12 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     # plt.plot(hi.soc, hi.Voc_stat_rescaled_dis, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_rescaled_dis')
     # plt.plot(hi.soc, hi.Voc_stat_rescaled_chg, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_rescaled_chg')
     plt.plot(x_sch, z_sch+voc_reset, marker='+', markersize='2', linestyle='--', color='black', label='Schedule RESET')
+    plt.xlabel('soc_r')
     plt.legend(loc=4)
+    plt.ylim(12, 13.5)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
-    plt.ylim(12, 13.5)
 
     return n_fig, fig_files
 
@@ -326,9 +342,8 @@ def add_stuff(d_ra, voc_soc_tbl, ib_band=0.5):
     for i in range(len(d_ra.time)):
         voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
         Vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
-        # np.
     d_mod = rf.rec_append_fields(d_ra, 'voc_soc', np.array(voc_soc, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'Vsat', np.array(voc_soc, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'Vsat', np.array(Vsat, dtype=float))
     dscn_fa = np.bool8(d_ra.falw & 2 ** 10)
     ib_diff_fa = np.bool8((d_ra.falw & 2 ** 8) | (d_ra.falw & 2 ** 9))
     wv_fa = np.bool8(d_ra.falw & 2 ** 7)
@@ -449,7 +464,8 @@ if __name__ == '__main__':
         # Save these
 
         # User inputs
-        input_files = ['hist 20220917d-1.txt', '20220917d-20C_sat.txt', 'hist begin30C 20220917d.txt']
+        input_files = ['hist 20220917d-1.txt', '20220917d-20C_sat.txt', 'hist begin30C 20220917d.txt',
+                       'hist dead 30C 20220917d.txt']
         data_file = 'data.txt'
         path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
@@ -494,15 +510,15 @@ if __name__ == '__main__':
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         if len(h_05C.time) > 1:
-            n_fig, fig_files = over_easy(h_05C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_05C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc05, voc_reset=VOC_RESET)
+            n_fig, fig_files = over_easy(h_05C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_05C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc05, voc_reset=VOC_RESET_05)
         if len(h_11C.time) > 1:
-            n_fig, fig_files = over_easy(h_11C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_11C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc11, voc_reset=VOC_RESET)
+            n_fig, fig_files = over_easy(h_11C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_11C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc11, voc_reset=VOC_RESET_11)
         if len(h_20C.time) > 1:
-            n_fig, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET)
+            n_fig, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
         if len(h_30C.time) > 1:
-            n_fig, fig_files = over_easy(h_30C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_30C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc30, voc_reset=VOC_RESET)
+            n_fig, fig_files = over_easy(h_30C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_30C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc30, voc_reset=VOC_RESET_30)
         if len(h_40C.time) > 1:
-            n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc40)
+            n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc40, voc_reset=VOC_RESET_40)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=path_to_pdfs)
         cleanup_fig_files(fig_files)
