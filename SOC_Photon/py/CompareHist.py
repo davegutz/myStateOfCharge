@@ -20,6 +20,7 @@ import numpy as np
 import numpy.lib.recfunctions as rf
 import matplotlib.pyplot as plt
 from Hysteresis_20220917d import Hysteresis_20220917d
+from Hysteresis_20220926 import Hysteresis_20220926
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -30,6 +31,7 @@ RATED_BATT_CAP = 108.4  # A-hr capacity of test article
 IB_BAND = 1.  # Threshold to declare charging or discharging
 TB_BAND = 5.  # Band around temperature to group data and correct
 HYS_SCALE_20220917d = 0.3  # Original hys_remodel scalar inside photon code
+HYS_SCALE_20220926 = 1.0  # Original hys_remodel scalar inside photon code
 
 #  Rescale parameters design.  Minimal tuning attempt
 #  This didn't work because low soc response of original design is too slow
@@ -42,7 +44,7 @@ VOC_RESET_30 = -0.03  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
 
 #  Redesign Hysteresis_20220917d.  Make a new Hysteresis_20220917d.py with new curved
-
+HYS_CAP_REDESIGN = 3.6e4
 
 # Unix-like cat function
 # e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
@@ -99,6 +101,9 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     # 10 (CARETUPBASE) caretup centered at base
     # 11 (CARETDOWNBASE) caretdown centered at base
 
+    # Colors
+
+
     plt.figure()  # 1
     n_fig += 1
     plt.subplot(331)
@@ -134,7 +139,8 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.plot(hi.time_d, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
     plt.plot(hi.time_d, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
     plt.plot(hi.time_d, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
-    plt.plot(hi.time_d, hi.dv_hys_remodel, marker='x', markersize='3', linestyle=':', color='orange', label='dv_hys_remodel')
+    plt.plot(hi.time_d, hi.dv_hys_remodel, marker='x', markersize='3', linestyle=':', color='lawngreen', label='dv_hys_remodel')
+    plt.plot(hi.time_d, hi.dv_hys_redesign, marker=3, markersize='3', linestyle=':', color='pink', label='dv_hys_redesign')
     plt.xlabel('days')
     plt.legend(loc=1)
     plt.subplot(338)
@@ -212,6 +218,29 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.xlabel('soc_r')
     plt.legend(loc=4)
     plt.ylim(12, 13.5)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
+    plt.figure()  # 4
+    n_fig += 1
+    plt.subplot(211)
+    plt.title(plot_title)
+    plt.suptitle(subtitle)
+    plt.plot(hi.time_d, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
+    plt.plot(hi.time_d, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
+    plt.plot(hi.time_d, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
+    plt.plot(hi.time_d, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
+    plt.plot(hi.time_d, hi.dv_hys_remodel, marker='x', markersize='3', linestyle=':', color='lawngreen', label='dv_hys_remodel')
+    plt.plot(hi.time_d, hi.dv_hys_redesign, marker=3, markersize='3', linestyle=':', color='pink', label='dv_hys_redesign')
+    plt.xlabel('days')
+    plt.legend(loc=4)
+    plt.ylim(-0.7, 0.7)
+    plt.subplot(212)
+    plt.plot(hi.time_d, hi.Ib, color='black', label='Ib')
+    plt.plot(hi.time_d, hi.soc*10, color='green', label='soc*10')
+    plt.xlabel('days')
+    plt.legend(loc=4)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
@@ -312,7 +341,7 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
             h.Voc_stat_r_chg[i] = None
             h.Voc_stat_rescaled_r_chg[i] = None
 
-    # Hysteresis_20220917d redesign
+    # Hysteresis_20220917d confirm equals data with HYS_SCALE_20220917d
     if len(h.time) > 1:
         hys_remodel = Hysteresis_20220917d(scale=HYS_SCALE_20220917d)  # Battery hysteresis model - drift of voc
         t_s = min(h.time)
@@ -332,12 +361,37 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
             hys_remodel.calculate_hys(ib, soc)
             dvh = hys_remodel.update(dt_hys_sec)
             dv_hys_remodel.append(dvh)
-            print(t_sec, ib, soc, dvh)
         dv_hys_remodel = np.array(dv_hys_remodel)
         h.dv_hys_remodel = np.copy(h.soc)
         for i in range(len(h.time)):
             t_min = int(float(h.time[i] - h.time[0]) / 60.)
             h.dv_hys_remodel[i] = np.interp(t_min, hys_time_min, dv_hys_remodel)
+
+    # Hysteresis_20220926 redesign.
+    if len(h.time) > 1:
+        hys_redesign = Hysteresis_20220926(scale=HYS_SCALE_20220926, cap=HYS_CAP_REDESIGN)  # Battery hysteresis model - drift of voc
+        t_s = min(h.time)
+        t_e = max(h.time)
+        d_t_min = int(float(t_e - t_s) / 60.)  # Round down to be bounded by data
+        dt_hys_min = 1.
+        dt_hys_sec = dt_hys_min * 60.
+        hys_time_min = np.arange(0, d_t_min, dt_hys_min)
+        ib_vec = h.Ib
+        # Note:  Hysteresis_20220926 instantiates hysteresis state to 0. unless told otherwise
+        dv_hys_redesign = []
+        h_time_sec = h.time
+        for i in range(len(hys_time_min)):
+            t_sec = hys_time_min[i] * 60
+            ib = np.interp(t_sec, h.time_sec, h.Ib)
+            soc = np.interp(t_sec, h.time_sec, h.soc)
+            hys_redesign.calculate_hys(ib, soc)
+            dvh = hys_redesign.update(dt_hys_sec)
+            dv_hys_redesign.append(dvh)
+        dv_hys_redesign = np.array(dv_hys_redesign)
+        h.dv_hys_redesign = np.copy(h.soc)
+        for i in range(len(h.time)):
+            t_min = int(float(h.time[i] - h.time[0]) / 60.)
+            h.dv_hys_redesign[i] = np.interp(t_min, hys_time_min, dv_hys_redesign)
 
     return h
 
