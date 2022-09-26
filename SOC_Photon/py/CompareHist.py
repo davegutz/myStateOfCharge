@@ -92,7 +92,7 @@ def overall_hist(hi, filename, fig_files=None, plot_title=None, n_fig=None):
     plt.subplot(321)
     plt.title(plot_title)
     plt.plot(hi.time_d, hi.soc, marker='.', markersize='3', linestyle='None', color='black', label='soc')
-    plt.plot(hi.time_d, hi.soc_ekf, marker='.', markersize='3', linestyle='None', color='green', label='soc_ekf')
+    plt.plot(hi.time_d, hi.soc_ekf, marker='+', markersize='3', linestyle='None', color='green', label='soc_ekf')
     plt.legend(loc=1)
     plt.subplot(322)
     plt.plot(hi.time_d, hi.Tb, marker='.', markersize='3', linestyle='None', color='black', label='Tb')
@@ -218,7 +218,7 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.title(plot_title)
     plt.suptitle(subtitle)
     plt.plot(hi.time_d, hi.soc, marker='.', markersize='3', linestyle='None', color='black', label='soc')
-    plt.plot(hi.time_d, hi.soc_ekf, marker='.', markersize='3', linestyle='None', color='blue', label='soc_ekf')
+    plt.plot(hi.time_d, hi.soc_ekf, marker='+', markersize='3', linestyle='None', color='blue', label='soc_ekf')
     plt.legend(loc=1)
     plt.subplot(332)
     plt.plot(hi.time_d, hi.Tb, marker='.', markersize='3', linestyle='None', color='black', label='Tb')
@@ -243,8 +243,16 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.plot([0, 1], [0, 1], linestyle='--', color='black')
     plt.legend(loc=4)
     plt.subplot(337)
-    plt.plot(hi.time, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='black', label='dv_hys')
-    plt.plot(hi.time, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
+    plt.plot(hi.time_d, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
+    plt.plot(hi.time_d, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
+    plt.plot(hi.time_d, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
+    plt.plot(hi.time_d, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
+    plt.legend(loc=1)
+    plt.subplot(338)
+    plt.plot(hi.time_d, hi.e_wrap, marker='o', markersize='3', linestyle='-', color='black', label='e_wrap')
+    plt.plot(hi.time_d, hi.wv_fa, marker='s', markersize='3', linestyle='None', color='red', label='wrap_vb_fa')
+    plt.plot(hi.time_d, hi.wl_fa-2, marker='p', markersize='3', linestyle='None', color='orange', label='wrap_lo_fa-2')
+    plt.plot(hi.time_d, hi.wh_fa+2, marker='h', markersize='3', linestyle='None', color='green', label='wrap_hi_fa+2')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -331,6 +339,8 @@ def add_stuff(d_ra, voc_soc_tbl, ib_band=0.5):
     ib_amp_fa = np.bool8(d_ra.falw & 2 ** 2)
     vb_fa = np.bool8(d_ra.falw & 2 ** 1)
     tb_fa = np.bool8(d_ra.falw & 2 ** 0)
+    e_wrap = d_mod.voc_soc - d_mod.Voc_dyn
+    d_mod = rf.rec_append_fields(d_mod, 'e_wrap', np.array(e_wrap, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'dscn_fa', np.array(dscn_fa, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_diff_fa', np.array(ib_diff_fa, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'wv_fa', np.array(wv_fa, dtype=float))
@@ -356,6 +366,8 @@ def add_stuff(d_ra, voc_soc_tbl, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
     dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
+    dv_hys_required = d_mod.Voc_dyn - voc_soc
+    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_required', np.array(dv_hys_required, dtype=float))
     dv_hys_rescaled = d_mod.dv_hys_unscaled
     pos = dv_hys_rescaled >= 0
     neg = dv_hys_rescaled < 0

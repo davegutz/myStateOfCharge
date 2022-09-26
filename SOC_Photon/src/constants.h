@@ -115,7 +115,7 @@ const float WRAP_LO_R = (WRAP_LO_S/2.); // Wrap low failure reset time, sec ('up
 const float WRAP_HI_S = WRAP_LO_S;      // Wrap high failure set time, sec (WRAP_LO_S)
 const float WRAP_HI_R = (WRAP_HI_S/2.); // Wrap high failure reset time, sec ('up 1, down 2')
 #define WRAP_HI_A       32.             // Wrap high voltage threshold, A (32 after testing; 16=0.2v)
-#define WRAP_LO_A       -20.            // Wrap high voltage threshold, A (-20, -16 too small on truck -16=-0.2v)
+#define WRAP_LO_A       -32.            // Wrap high voltage threshold, A (-32, -20 too small on truck -16=-0.2v)
 #define WRAP_HI_SAT_MARG  0.2           // Wrap voltage margin to saturation, V (0.2)
 #define WRAP_HI_SAT_SCLR  2.0           // Wrap voltage margin scalar when saturated (2.0)
 #define F_MAX_T_WRAP    1.4             // Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (1.4)
