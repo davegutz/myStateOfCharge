@@ -1,4 +1,4 @@
-# Hysteresis class to model battery charging / discharge hysteresis
+# Hysteresis_20220917d class to model battery charging / discharge hysteresis
 # Copyright (C) 2022 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
@@ -22,7 +22,7 @@ from pyDAGx.lookup_table import LookupTable
 from unite_pictures import cleanup_fig_files
 
 
-class Hysteresis:
+class Hysteresis_20220917d:
     # Use variable resistor to create hysteresis from an RC circuit
 
     def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e5, scale=1., dv_hys=0.0):
@@ -51,7 +51,7 @@ class Hysteresis:
         self.saved = Saved()
 
     def __str__(self, prefix=''):
-        s = prefix + "Hysteresis:\n"
+        s = prefix + "Hysteresis_20220917d:\n"
         res = self.look_hys(dv=0., soc=0.8)
         s += "  res(median) =  {:6.4f}  // Null resistance, Ohms\n".format(res)
         s += "  cap      = {:10.1f}  // Capacitance, Farads\n".format(self.cap)
@@ -62,7 +62,7 @@ class Hysteresis:
         s += "  res      =    {:7.3f}  // Variable resistance value, ohms\n".format(self.res)
         s += "  dv_dot   =    {:7.3f}  // Calculated voltage rate, V/s\n".format(self.dv_dot)
         s += "  dv_hys   =    {:7.3f}  // Delta voltage state, V\n".format(self.dv_hys)
-        s += "  disabled =     {:2.0f}      // Hysteresis disabled by low scale input < 1e-5, T=disabled\n".format(self.disabled)
+        s += "  disabled =     {:2.0f}      // Hysteresis_20220917d disabled by low scale input < 1e-5, T=disabled\n".format(self.disabled)
         s += "  hys_scale=    {:7.3f}  // Scalar on hys\n".format(self.scale)
         return s
 
@@ -125,7 +125,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
 
-    def overall(hys=Hysteresis().saved, filename='', fig_files=None, plot_title=None, n_fig=None):
+    def overall(hys=Hysteresis_20220917d().saved, filename='', fig_files=None, plot_title=None, n_fig=None):
         if fig_files is None:
             fig_files = []
 
@@ -211,7 +211,7 @@ if __name__ == '__main__':
         pull = Pulsar()
         time_end = pull.time_end()
 
-        hys = Hysteresis()
+        hys = Hysteresis_20220917d()
 
         # Executive tasks
         t = np.arange(0, time_end + dt, dt)

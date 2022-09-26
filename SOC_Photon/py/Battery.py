@@ -20,7 +20,7 @@ import math
 from EKF1x1 import EKF1x1
 from Coulombs import Coulombs, dqdt
 from StateSpace import StateSpace
-from Hysteresis import Hysteresis
+from Hysteresis_20220917d import Hysteresis_20220917d
 import matplotlib.pyplot as plt
 from TFDelay import TFDelay
 from myFilters import LagTustin, General2Pole, RateLimit
@@ -212,7 +212,7 @@ class Battery(Coulombs):
         s += "  sr =      {:7.3f}  // Resistance scalar\n".format(self.sr)
         s += "  dvoc_ =   {:7.3f}  // Delta voltage, V\n".format(self.dvoc)
         s += "  dt_ =     {:7.3f}  // Update time, s\n".format(self.dt)
-        s += "  dv_hys  = {:7.3f}  // Hysteresis delta v, V\n".format(self.dv_hys)
+        s += "  dv_hys  = {:7.3f}  // Hysteresis_20220917d delta v, V\n".format(self.dv_hys)
         s += "  tweak_test={:d}     // Driving signal injection completely using software inj_soft_bias\n".format(self.tweak_test)
         s += "\n  "
         s += Coulombs.__str__(self, prefix + 'Battery:')
@@ -327,7 +327,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.scaler_r = scaler_r
         self.Q = EKF_Q_SD_NORM * EKF_Q_SD_NORM  # EKF process uncertainty
         self.R = EKF_R_SD_NORM * EKF_R_SD_NORM  # EKF state uncertainty
-        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
+        self.hys = Hysteresis_20220917d(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
         self.soc_s = 0.  # Model information
         self.EKF_converged = TFDelay(False, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT)
         self.y_filt_lag = LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
@@ -397,7 +397,7 @@ class BatteryMonitor(Battery, EKF1x1):
         if d_voc:
             self.voc = d_voc
         self.dv_dyn = self.vb - self.voc
-        # Hysteresis model
+        # Hysteresis_20220917d model
         self.hys.calculate_hys(self.ib, self.soc)
         self.dv_hys = self.hys.update(self.dt)*self.s_hys
         self.voc_stat = self.voc - self.dv_hys
@@ -621,7 +621,7 @@ class BatterySim(Battery):
         self.s_cap = scale  # Rated capacity scalar
         if scale is not None:
             self.apply_cap_scale(scale)
-        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
+        self.hys = Hysteresis_20220917d(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
         self.tweak_test = tweak_test
         self.voc = 0.  # Charging voltage, V
         self.d_delta_q = 0.  # Charging rate, Coulombs/sec
@@ -689,7 +689,7 @@ class BatterySim(Battery):
             curr_in = 0.
 
         # Dynamic emf
-        # Hysteresis model
+        # Hysteresis_20220917d model
         self.hys.calculate_hys(curr_in, self.soc)
         self.dv_hys = self.hys.update(self.dt)*self.s_hys
         self.voc = self.voc_stat + self.dv_hys

@@ -1,4 +1,4 @@
-# Hysteresis class to model battery charging / discharge hysteresis
+# Table utility
 # Copyright (C) 2022 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or

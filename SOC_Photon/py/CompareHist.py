@@ -19,7 +19,7 @@ from pyDAGx import myTables
 import numpy as np
 import numpy.lib.recfunctions as rf
 import matplotlib.pyplot as plt
-from Hysteresis import Hysteresis
+from Hysteresis_20220917d import Hysteresis_20220917d
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -29,9 +29,10 @@ BATT_DVOC_DT = 0.004  # Change of VOC with operating temperature in range 0 - 50
 RATED_BATT_CAP = 108.4  # A-hr capacity of test article
 IB_BAND = 1.  # Threshold to declare charging or discharging
 TB_BAND = 5.  # Band around temperature to group data and correct
-HYS_SCALE = 0.3  # Original hys scalar inside photon code
+HYS_SCALE_20220917d = 0.3  # Original hys_remodel scalar inside photon code
 
-#  Rescale parameters design
+#  Rescale parameters design.  Minimal tuning attempt
+#  This didn't work because low soc response of original design is too slow
 HYS_RESCALE_CHG = 0.5  # Attempt to rescale to match voc_soc to all data
 HYS_RESCALE_DIS = 0.3  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_05 = 0.  # Attempt to rescale to match voc_soc to all data
@@ -40,8 +41,8 @@ VOC_RESET_20 = 0.  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_30 = -0.03  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
 
-#  Redesign Hysteresis
-HYS_SCALE_REMODEL = 0.3  # For redesign hyst
+#  Redesign Hysteresis_20220917d.  Make a new Hysteresis_20220917d.py with new curved
+
 
 # Unix-like cat function
 # e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
@@ -133,6 +134,7 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.plot(hi.time_d, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
     plt.plot(hi.time_d, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
     plt.plot(hi.time_d, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
+    plt.plot(hi.time_d, hi.dv_hys_remodel, marker='x', markersize='3', linestyle=':', color='orange', label='dv_hys_remodel')
     plt.xlabel('days')
     plt.legend(loc=1)
     plt.subplot(338)
@@ -221,11 +223,14 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
 def add_stuff(d_ra, voc_soc_tbl, ib_band=0.5):
     voc_soc = []
     Vsat = []
+    time_sec = []
     for i in range(len(d_ra.time)):
         voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
         Vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
+        time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
     d_mod = rf.rec_append_fields(d_ra, 'voc_soc', np.array(voc_soc, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'Vsat', np.array(Vsat, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'time_sec', np.array(time_sec, dtype=float))
     dscn_fa = np.bool8(d_ra.falw & 2 ** 10)
     ib_diff_fa = np.bool8((d_ra.falw & 2 ** 8) | (d_ra.falw & 2 ** 9))
     wv_fa = np.bool8(d_ra.falw & 2 ** 7)
@@ -261,7 +266,7 @@ def add_stuff(d_ra, voc_soc_tbl, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'time_d', np.array(time_d, dtype=float))
     dv_hys = d_mod.Voc_dyn - d_mod.Voc_stat
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
-    dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE
+    dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE_20220917d
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
     dv_hys_required = d_mod.Voc_dyn - voc_soc
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_required', np.array(dv_hys_required, dtype=float))
@@ -307,9 +312,9 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
             h.Voc_stat_r_chg[i] = None
             h.Voc_stat_rescaled_r_chg[i] = None
 
-    # Hysteresis redesign
+    # Hysteresis_20220917d redesign
     if len(h.time) > 1:
-        hys = Hysteresis(scale=HYS_SCALE_REMODEL)  # Battery hysteresis model - drift of voc
+        hys_remodel = Hysteresis_20220917d(scale=HYS_SCALE_20220917d)  # Battery hysteresis model - drift of voc
         t_s = min(h.time)
         t_e = max(h.time)
         d_t_min = int(float(t_e - t_s) / 60.)  # Round down to be bounded by data
@@ -317,23 +322,22 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
         dt_hys_sec = dt_hys_min * 60.
         hys_time_min = np.arange(0, d_t_min, dt_hys_min)
         ib_vec = h.Ib
-        # Note:  Hysteresis instantiates hysteresis state to 0. unless told otherwise
+        # Note:  Hysteresis_20220917d instantiates hysteresis state to 0. unless told otherwise
         dv_hys_remodel = []
+        h_time_sec = h.time
         for i in range(len(hys_time_min)):
             t_sec = hys_time_min[i] * 60
-            ib = np.interp(t_sec, h.time, h.Ib, )
-            soc = np.interp(t_sec, h.time, h.soc,)
-            hys.calculate_hys(ib, soc)
-            dv_hys_remodel.append(hys.update(dt_hys_sec))
+            ib = np.interp(t_sec, h.time_sec, h.Ib)
+            soc = np.interp(t_sec, h.time_sec, h.soc)
+            hys_remodel.calculate_hys(ib, soc)
+            dvh = hys_remodel.update(dt_hys_sec)
+            dv_hys_remodel.append(dvh)
+            print(t_sec, ib, soc, dvh)
         dv_hys_remodel = np.array(dv_hys_remodel)
-        h.dv_hys_remodel = np.copy(h.time)
+        h.dv_hys_remodel = np.copy(h.soc)
         for i in range(len(h.time)):
             t_min = int(float(h.time[i] - h.time[0]) / 60.)
             h.dv_hys_remodel[i] = np.interp(t_min, hys_time_min, dv_hys_remodel)
-        print(t_s, t_e, d_t_min)
-        print("hys_time_min", hys_time_min)
-        print("dv_hys_remodel", dv_hys_remodel)
-        print("h.dv_hys_remodel", h.dv_hys_remodel)
 
     return h
 
