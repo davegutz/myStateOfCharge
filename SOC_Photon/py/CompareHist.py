@@ -19,7 +19,9 @@ from pyDAGx import myTables
 import numpy as np
 import numpy.lib.recfunctions as rf
 import matplotlib.pyplot as plt
+from Hysteresis import Hysteresis
 
+#  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
 BATT_V_SAT = 13.8
 BATT_DQDT = 0.01  # Change of charge with temperature, fraction / deg C (0.01 from literature)
@@ -28,6 +30,7 @@ RATED_BATT_CAP = 108.4  # A-hr capacity of test article
 IB_BAND = 1.  # Threshold to declare charging or discharging
 TB_BAND = 5.  # Band around temperature to group data and correct
 HYS_SCALE = 0.3  # Original hys scalar inside photon code
+
 #  Rescale parameters design
 HYS_RESCALE_CHG = 0.5  # Attempt to rescale to match voc_soc to all data
 HYS_RESCALE_DIS = 0.3  # Attempt to rescale to match voc_soc to all data
@@ -36,6 +39,9 @@ VOC_RESET_11 = 0.  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_20 = 0.  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_30 = -0.03  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
+
+#  Redesign Hysteresis
+HYS_SCALE_REMODEL = 0.3  # For redesign hyst
 
 # Unix-like cat function
 # e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
@@ -46,130 +52,6 @@ def cat(out_file_name, in_file_names, in_path='./', out_path='./'):
                 for line in in_file:
                     if line.strip():
                         out_file.write(line)
-
-
-def overall_hist(hi, filename, fig_files=None, plot_title=None, n_fig=None):
-    if fig_files is None:
-        fig_files = []
-    # Markers
-    #
-    # light symbols
-    # '.' point
-    # ',' pixel
-    # '1' tri down
-    # '2' tri up
-    # '3' tri left
-    # '4' tri right
-    # '+' plus
-    # 'x' x
-    # '|' vline
-    # '_' hline
-    # 0 (TICKLEFT) tickleft
-    # 1 (TICKRIGHT) tickright
-    # 2 (TICKUP) tickup
-    # 3 (TICKDOWN) tickdown
-    #
-    # bold filled symbols
-    # 'o' circle
-    # 'v' triangle down
-    # '^' triangle up
-    # '<' triangle left
-    # '>' triangle right
-    # '8' octagon
-    # 's' square
-    # 'p' pentagon
-    # 'P' filled plus
-    # '*' star
-    # 'h' hexagon1
-    # 'H' hexagon2
-    # 4 (CARETLEFT) caretleft
-    # 5 (CARETRIGHT) caretright
-    # 6 (CARETUP) caretup
-    # 7 (CARETDOWN) caretdown
-    # 8 (CARETLEFTBASE) caretleft centered at base
-    # 9 (CARETRIGHTBASE) caretright centered at base
-    # 10 (CARETUPBASE) caretup centered at base
-    # 11 (CARETDOWNBASE) caretdown centered at base
-
-    plt.figure()  # 1
-    n_fig += 1
-    plt.subplot(321)
-    plt.title(plot_title)
-    plt.plot(hi.time_d, hi.soc, marker='.', markersize='3', linestyle='None', color='black', label='soc')
-    plt.plot(hi.time_d, hi.soc_ekf, marker='+', markersize='3', linestyle='None', color='green', label='soc_ekf')
-    plt.legend(loc=1)
-    plt.subplot(322)
-    plt.plot(hi.time_d, hi.Tb, marker='.', markersize='3', linestyle='None', color='black', label='Tb')
-    plt.plot(hi.time_d, hi.Vb, marker='.', markersize='3', linestyle='None', color='red', label='Vb')
-    plt.plot(hi.time_d, hi.Voc_dyn, marker='.', markersize='3', linestyle='None', color='blue', label='Voc_dyn')
-    plt.plot(hi.time_d, hi.Voc_stat, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat')
-    plt.legend(loc=1)
-    plt.subplot(323)
-    plt.plot(hi.time_d, hi.Ib, marker='+', markersize='3', linestyle='None', color='green', label='Ib')
-    plt.legend(loc=1)
-    plt.subplot(324)
-    plt.plot(hi.time_d, hi.tweak_sclr_amp, marker='+', markersize='3', linestyle='None', color='orange', label='tweak_sclr_amp')
-    plt.plot(hi.time_d, hi.tweak_sclr_noa, marker='^', markersize='3', linestyle='None', color='green', label='tweak_sclr_noa')
-    plt.ylim(-6, 6)
-    plt.legend(loc=1)
-    plt.subplot(325)
-    plt.plot(hi.time_d, hi.falw, marker='+', markersize='3', linestyle='None', color='magenta', label='falw')
-    plt.legend(loc=1)
-    plt.subplot(326)
-    plt.plot(hi.soc, hi.soc_ekf, marker='+', markersize='3', linestyle='None', color='magenta', label='soc_ekf')
-    plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
-    fig_files.append(fig_file_name)
-    plt.savefig(fig_file_name, format="png")
-
-    plt.figure()  # 2
-    n_fig += 1
-    plt.subplot(221)
-    plt.plot(hi.time_d, hi.Vsat, marker='^', markersize='3', linestyle='None', color='red', label='Vsat')
-    plt.plot(hi.time_d, hi.Vb, marker='1', markersize='3', linestyle='None', color='black', label='Vb')
-    plt.plot(hi.time_d, hi.Voc_dyn, marker='.', markersize='3', linestyle='None', color='orange', label='Voc_dyn')
-    plt.plot(hi.time_d, hi.Voc_stat, marker='_', markersize='3', linestyle='None', color='green', label='Voc_stat')
-    plt.plot(hi.time_d, hi.voc_soc, marker='2', markersize='3', linestyle='None', color='cyan', label='voc_soc')
-    plt.legend(loc=1)
-    plt.subplot(122)
-    plt.plot(hi.time_d, hi.dscn_fa + 10, marker='o', markersize='3', linestyle='None', color='black', label='dscn_fa+10')
-    plt.plot(hi.time_d, hi.ib_diff_fa + 8, marker='^', markersize='3', linestyle='None', color='blue', label='ib_diff_fa+8')
-    plt.plot(hi.time_d, hi.wv_fa + 7, marker='s', markersize='3', linestyle='None', color='cyan', label='wrap_vb_fa+7')
-    plt.plot(hi.time_d, hi.wl_fa + 6, marker='p', markersize='3', linestyle='None', color='orange', label='wrap_lo_fa+6')
-    plt.plot(hi.time_d, hi.wh_fa + 5, marker='h', markersize='3', linestyle='None', color='green', label='wrap_hi_fa+5')
-    plt.plot(hi.time_d, hi.ccd_fa + 4, marker='H', markersize='3', linestyle='None', color='blue', label='cc_diff_fa+4')
-    plt.plot(hi.time_d, hi.ib_noa_fa + 3, marker='+', markersize='3', linestyle='None', color='red', label='ib_noa_fa+3')
-    plt.plot(hi.time_d, hi.ib_amp_fa + 2, marker='_', markersize='3', linestyle='None', color='magenta', label='ib_amp_fa+2')
-    plt.plot(hi.time_d, hi.vb_fa + 1, marker='1', markersize='3', linestyle='None', color='cyan', label='vb_fa+1')
-    plt.plot(hi.time_d, hi.tb_fa, marker='2', markersize='3', linestyle='None', color='orange', label='tb_fa')
-    plt.legend(loc=1)
-    plt.subplot(223)
-    plt.plot(hi.time_d, hi.Ib, marker='.', markersize='3', linestyle='None', color='red', label='Ib')
-    plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
-    fig_files.append(fig_file_name)
-    plt.savefig(fig_file_name, format="png")
-
-    plt.figure()  # 3
-    n_fig += 1
-    plt.subplot(121)
-    plt.plot(hi.soc, hi.Voc_stat, marker='3', markersize='3', linestyle='None', color='magenta', label='Voc_stat')
-    plt.plot(hi.soc, hi.voc_soc, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
-    plt.legend(loc=1)
-    plt.title(plot_title)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
-    fig_files.append(fig_file_name)
-    plt.savefig(fig_file_name, format="png")
-    plt.subplot(121)
-    plt.plot(hi.soc, hi.Voc_stat, marker=0, markersize='3', linestyle='None', color='red', label='Voc_stat')
-    plt.plot(hi.soc, hi.voc_soc, marker='_', markersize='2', linestyle='None', color='black', label='Schedule')
-    plt.legend(loc=1)
-    plt.title(plot_title)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
-    fig_files.append(fig_file_name)
-    plt.savefig(fig_file_name, format="png")
-    plt.ylim(10, 13.5)
-    return n_fig, fig_files
 
 
 def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None,  x_sch=None, z_sch=None,
@@ -401,7 +283,7 @@ def calculate_capacity(q_cap_rated_scaled=None, dqdt=None, temp=None, t_rated=No
 
 # Make an array useful for analysis (around temp) and add some metrics
 def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
-    h = raw[abs(raw.Tb-temp_corr) < tb_band]
+    h = raw[abs(raw.Tb - temp_corr) < tb_band]
 
     # Correct for temp
     q_cap = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=h.Tb, t_rated=BATT_RATED_TEMP)
@@ -424,6 +306,34 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
         elif h.Ib[i] < 0.5:
             h.Voc_stat_r_chg[i] = None
             h.Voc_stat_rescaled_r_chg[i] = None
+
+    # Hysteresis redesign
+    if len(h.time) > 1:
+        hys = Hysteresis(scale=HYS_SCALE_REMODEL)  # Battery hysteresis model - drift of voc
+        t_s = min(h.time)
+        t_e = max(h.time)
+        d_t_min = int(float(t_e - t_s) / 60.)  # Round down to be bounded by data
+        dt_hys_min = 1.
+        dt_hys_sec = dt_hys_min * 60.
+        hys_time_min = np.arange(0, d_t_min, dt_hys_min)
+        ib_vec = h.Ib
+        # Note:  Hysteresis instantiates hysteresis state to 0. unless told otherwise
+        dv_hys_remodel = []
+        for i in range(len(hys_time_min)):
+            t_sec = hys_time_min[i] * 60
+            ib = np.interp(t_sec, h.time, h.Ib, )
+            soc = np.interp(t_sec, h.time, h.soc,)
+            hys.calculate_hys(ib, soc)
+            dv_hys_remodel.append(hys.update(dt_hys_sec))
+        dv_hys_remodel = np.array(dv_hys_remodel)
+        h.dv_hys_remodel = np.copy(h.time)
+        for i in range(len(h.time)):
+            t_min = int(float(h.time[i] - h.time[0]) / 60.)
+            h.dv_hys_remodel[i] = np.interp(t_min, hys_time_min, dv_hys_remodel)
+        print(t_s, t_e, d_t_min)
+        print("hys_time_min", hys_time_min)
+        print("dv_hys_remodel", dv_hys_remodel)
+        print("h.dv_hys_remodel", h.dv_hys_remodel)
 
     return h
 
