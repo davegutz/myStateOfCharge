@@ -102,8 +102,10 @@ class Hysteresis_20220926:
     def update(self, dt):
         if self.soc > 0.99:
             self.dv_hys = self.dv_hys_min
-        elif self.soc < 0.05 and self.ib > -0.1:
+        elif self.soc < 0.15 and self.ib > -1:
             self.dv_hys = self.dv_hys_max
+        # if self.soc < 0.15:
+        #     print("Hysteresis_20220926:  soc, ib, dv_hys_max, dv_hys", self.soc, self.ib, self.dv_hys_max, self.dv_hys)
         self.dv_hys += self.dv_dot * dt
         return self.dv_hys*self.scale
 

@@ -18,7 +18,8 @@ __version__ = '$Revision: 1.1 $'
 __date__ = '$Date: 2022/05/30 13:15:02 $'
 
 import numpy as np
-from pyDAGx.lookup_table import LookupTable
+# from pyDAGx.lookup_table import LookupTable
+from pyDAGx.myTables import TableInterp2D
 from unite_pictures import cleanup_fig_files
 
 
@@ -41,10 +42,7 @@ class Hysteresis:
             t_dv[i] *= self.scale
             t_r[i] *= self.scale
         self.disabled = self.scale < 1e-5
-        self.lut = LookupTable()
-        self.lut.addAxis('x', t_dv)
-        self.lut.addAxis('y', t_soc)
-        self.lut.setValueTable(t_r)
+        self.lut = TableInterp2D(t_dv, t_soc, t_r)
         if self.disabled:
             self.cap = cap
         else:

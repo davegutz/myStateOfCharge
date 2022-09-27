@@ -111,22 +111,22 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.subplot(331)
     plt.title(plot_title)
     plt.suptitle(subtitle)
-    plt.plot(hi.time_d, hi.soc, marker='.', markersize='3', linestyle='-', color='black', label='soc')
-    plt.plot(hi.time_d, hi.soc_ekf, marker='+', markersize='3', linestyle='--', color='blue', label='soc_ekf')
+    plt.plot(hi.time_day, hi.soc, marker='.', markersize='3', linestyle='-', color='black', label='soc')
+    plt.plot(hi.time_day, hi.soc_ekf, marker='+', markersize='3', linestyle='--', color='blue', label='soc_ekf')
     plt.legend(loc=1)
     plt.subplot(332)
-    plt.plot(hi.time_d, hi.Tb, marker='.', markersize='3', linestyle='-', color='black', label='Tb')
+    plt.plot(hi.time_day, hi.Tb, marker='.', markersize='3', linestyle='-', color='black', label='Tb')
     plt.legend(loc=1)
     plt.subplot(333)
-    plt.plot(hi.time_d, hi.Ib, marker='+', markersize='3', linestyle='-', color='green', label='Ib')
+    plt.plot(hi.time_day, hi.Ib, marker='+', markersize='3', linestyle='-', color='green', label='Ib')
     plt.legend(loc=1)
     plt.subplot(334)
-    plt.plot(hi.time_d, hi.tweak_sclr_amp, marker='+', markersize='3', linestyle='None', color='orange', label='tweak_sclr_amp')
-    plt.plot(hi.time_d, hi.tweak_sclr_noa, marker='^', markersize='3', linestyle='None', color='green', label='tweak_sclr_noa')
+    plt.plot(hi.time_day, hi.tweak_sclr_amp, marker='+', markersize='3', linestyle='None', color='orange', label='tweak_sclr_amp')
+    plt.plot(hi.time_day, hi.tweak_sclr_noa, marker='^', markersize='3', linestyle='None', color='green', label='tweak_sclr_noa')
     plt.ylim(-6, 6)
     plt.legend(loc=1)
     plt.subplot(335)
-    plt.plot(hi.time_d, hi.falw, marker='+', markersize='3', linestyle='None', color='magenta', label='falw')
+    plt.plot(hi.time_day, hi.falw, marker='+', markersize='3', linestyle='None', color='magenta', label='falw')
     plt.legend(loc=0)
     plt.subplot(336)
     plt.plot(hi.soc, hi.soc_ekf, marker='+', markersize='3', linestyle='-', color='blue', label='soc_ekf')
@@ -137,26 +137,26 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.xlabel('soc')
     plt.legend(loc=4)
     plt.subplot(337)
-    plt.plot(hi.time_d, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
-    plt.plot(hi.time_d, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
-    plt.plot(hi.time_d, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
-    plt.plot(hi.time_d, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
-    plt.plot(hi.time_d, hi.dv_hys_remodel, marker='x', markersize='3', linestyle=':', color='lawngreen', label='dv_hys_remodel')
-    plt.plot(hi.time_d, hi.dv_hys_redesign, marker=3, markersize='3', linestyle=':', color='pink', label='dv_hys_redesign')
+    plt.plot(hi.time_day, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
+    plt.plot(hi.time_day, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
+    plt.plot(hi.time_day, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
+    plt.plot(hi.time_day, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
+    plt.plot(hi.time_day, hi.dv_hys_remodel, marker='x', markersize='3', linestyle=':', color='lawngreen', label='dv_hys_remodel')
+    plt.plot(hi.time_day, hi.dv_hys_redesign, marker=3, markersize='3', linestyle=':', color='pink', label='dv_hys_redesign')
     plt.xlabel('days')
     plt.legend(loc=1)
     plt.subplot(338)
-    plt.plot(hi.time_d, hi.e_wrap, marker='o', markersize='3', linestyle='-', color='black', label='e_wrap')
-    plt.plot(hi.time_d, hi.wv_fa, marker=0, markersize='4', linestyle=':', color='red', label='wrap_vb_fa')
-    plt.plot(hi.time_d, hi.wl_fa-1, marker=2, markersize='4', linestyle=':', color='orange', label='wrap_lo_fa-1')
-    plt.plot(hi.time_d, hi.wh_fa+1, marker=3, markersize='4', linestyle=':', color='green', label='wrap_hi_fa+1')
+    plt.plot(hi.time_day, hi.e_wrap, marker='o', markersize='3', linestyle='-', color='black', label='e_wrap')
+    plt.plot(hi.time_day, hi.wv_fa, marker=0, markersize='4', linestyle=':', color='red', label='wrap_vb_fa')
+    plt.plot(hi.time_day, hi.wl_fa-1, marker=2, markersize='4', linestyle=':', color='orange', label='wrap_lo_fa-1')
+    plt.plot(hi.time_day, hi.wh_fa+1, marker=3, markersize='4', linestyle=':', color='green', label='wrap_hi_fa+1')
     plt.xlabel('days')
     plt.legend(loc=1)
     plt.subplot(339)
-    plt.plot(hi.time_d, hi.Vb, marker='.', markersize='3', linestyle='None', color='red', label='Vb')
-    plt.plot(hi.time_d, hi.Voc_dyn, marker='.', markersize='3', linestyle='None', color='blue', label='Voc_dyn')
-    plt.plot(hi.time_d, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_chg')
-    plt.plot(hi.time_d, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_dis')
+    plt.plot(hi.time_day, hi.Vb, marker='.', markersize='3', linestyle='None', color='red', label='Vb')
+    plt.plot(hi.time_day, hi.Voc_dyn, marker='.', markersize='3', linestyle='None', color='blue', label='Voc_dyn')
+    plt.plot(hi.time_day, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_chg')
+    plt.plot(hi.time_day, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_dis')
     plt.xlabel('days')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -168,30 +168,30 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.subplot(221)
     plt.title(plot_title)
     plt.suptitle(subtitle)
-    plt.plot(hi.time_d, hi.Vsat, marker='.', markersize='1', linestyle='-', color='orange', linewidth='1', label='Vsat')
-    plt.plot(hi.time_d, hi.Vb, marker='1', markersize='3', linestyle='None', color='black', label='Vb')
-    plt.plot(hi.time_d, hi.Voc_dyn, marker='.', markersize='3', linestyle='None', color='orange', label='Voc_dyn')
-    plt.plot(hi.time_d, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='-', color='red', label='Voc_stat_chg')
-    plt.plot(hi.time_d, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='-', color='green', label='Voc_stat_dis')
-    plt.plot(hi.time_d, hi.voc_soc, marker='2', markersize='3', linestyle=':', color='cyan', label='voc_soc')
+    plt.plot(hi.time_day, hi.Vsat, marker='.', markersize='1', linestyle='-', color='orange', linewidth='1', label='Vsat')
+    plt.plot(hi.time_day, hi.Vb, marker='1', markersize='3', linestyle='None', color='black', label='Vb')
+    plt.plot(hi.time_day, hi.Voc_dyn, marker='.', markersize='3', linestyle='None', color='orange', label='Voc_dyn')
+    plt.plot(hi.time_day, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='-', color='red', label='Voc_stat_chg')
+    plt.plot(hi.time_day, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='-', color='green', label='Voc_stat_dis')
+    plt.plot(hi.time_day, hi.voc_soc, marker='2', markersize='3', linestyle=':', color='cyan', label='voc_soc')
     plt.xlabel('days')
     plt.legend(loc=1)
     plt.subplot(122)
-    plt.plot(hi.time_d, hi.dscn_fa + 18, marker='o', markersize='3', linestyle='-', color='black', label='dscn_fa+18')
-    plt.plot(hi.time_d, hi.ib_diff_fa + 16, marker='^', markersize='3', linestyle='-', color='blue', label='ib_diff_fa+16')
-    plt.plot(hi.time_d, hi.wv_fa + 14, marker='s', markersize='3', linestyle='-', color='cyan', label='wrap_vb_fa+14')
-    plt.plot(hi.time_d, hi.wl_fa + 12, marker='p', markersize='3', linestyle='-', color='orange', label='wrap_lo_fa+12')
-    plt.plot(hi.time_d, hi.wh_fa + 10, marker='h', markersize='3', linestyle='-', color='green', label='wrap_hi_fa+10')
-    plt.plot(hi.time_d, hi.ccd_fa + 8, marker='H', markersize='3', linestyle='-', color='blue', label='cc_diff_fa+8')
-    plt.plot(hi.time_d, hi.ib_noa_fa + 6, marker='+', markersize='3', linestyle='-', color='red', label='ib_noa_fa+6')
-    plt.plot(hi.time_d, hi.ib_amp_fa + 4, marker='_', markersize='3', linestyle='-', color='magenta', label='ib_amp_fa+4')
-    plt.plot(hi.time_d, hi.vb_fa + 2, marker='1', markersize='3', linestyle='-', color='cyan', label='vb_fa+2')
-    plt.plot(hi.time_d, hi.tb_fa, marker='2', markersize='3', linestyle='-', color='orange', label='tb_fa')
+    plt.plot(hi.time_day, hi.dscn_fa + 18, marker='o', markersize='3', linestyle='-', color='black', label='dscn_fa+18')
+    plt.plot(hi.time_day, hi.ib_diff_fa + 16, marker='^', markersize='3', linestyle='-', color='blue', label='ib_diff_fa+16')
+    plt.plot(hi.time_day, hi.wv_fa + 14, marker='s', markersize='3', linestyle='-', color='cyan', label='wrap_vb_fa+14')
+    plt.plot(hi.time_day, hi.wl_fa + 12, marker='p', markersize='3', linestyle='-', color='orange', label='wrap_lo_fa+12')
+    plt.plot(hi.time_day, hi.wh_fa + 10, marker='h', markersize='3', linestyle='-', color='green', label='wrap_hi_fa+10')
+    plt.plot(hi.time_day, hi.ccd_fa + 8, marker='H', markersize='3', linestyle='-', color='blue', label='cc_diff_fa+8')
+    plt.plot(hi.time_day, hi.ib_noa_fa + 6, marker='+', markersize='3', linestyle='-', color='red', label='ib_noa_fa+6')
+    plt.plot(hi.time_day, hi.ib_amp_fa + 4, marker='_', markersize='3', linestyle='-', color='magenta', label='ib_amp_fa+4')
+    plt.plot(hi.time_day, hi.vb_fa + 2, marker='1', markersize='3', linestyle='-', color='cyan', label='vb_fa+2')
+    plt.plot(hi.time_day, hi.tb_fa, marker='2', markersize='3', linestyle='-', color='orange', label='tb_fa')
     plt.ylim(-1, 24)
     plt.xlabel('days')
     plt.legend(loc=1)
     plt.subplot(223)
-    plt.plot(hi.time_d, hi.Ib, marker='.', markersize='3', linestyle='-', color='red', label='Ib')
+    plt.plot(hi.time_day, hi.Ib, marker='.', markersize='3', linestyle='-', color='red', label='Ib')
     plt.xlabel('days')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -234,27 +234,27 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.subplot(221)
     plt.title(plot_title)
     plt.suptitle(subtitle)
-    plt.plot(hi.time_d, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
-    plt.plot(hi.time_d, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
-    plt.plot(hi.time_d, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
-    plt.plot(hi.time_d, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
-    plt.plot(hi.time_d, hi.dv_hys_remodel, marker='x', markersize='3', linestyle=':', color='lawngreen', label='dv_hys_remodel')
-    plt.plot(hi.time_d, hi.dv_hys_redesign, marker=3, markersize='3', linestyle=':', color='pink', label='dv_hys_redesign')
+    plt.plot(hi.time_day, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
+    plt.plot(hi.time_day, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
+    plt.plot(hi.time_day, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
+    plt.plot(hi.time_day, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
+    plt.plot(hi.time_day, hi.dv_hys_remodel, marker='x', markersize='3', linestyle=':', color='lawngreen', label='dv_hys_remodel')
+    plt.plot(hi.time_day, hi.dv_hys_redesign, marker=3, markersize='3', linestyle=':', color='pink', label='dv_hys_redesign')
     plt.xlabel('days')
     plt.legend(loc=4)
     plt.ylim(-0.7, 0.7)
     plt.subplot(222)
-    plt.plot(hi.time_d, hi.res_redesign, marker='o', markersize='3', linestyle='-', color='blue', label='res_redesign')
+    plt.plot(hi.time_day, hi.res_redesign, marker='o', markersize='3', linestyle='-', color='blue', label='res_redesign')
     plt.xlabel('days')
     plt.legend(loc=4)
     plt.subplot(223)
-    plt.plot(hi.time_d, hi.Ib, color='black', label='Ib')
-    plt.plot(hi.time_d, hi.soc*10, color='green', label='soc*10')
-    plt.plot(hi.time_d, hi.ioc_redesign, marker='o', markersize='3', linestyle='-', color='cyan', label='ioc_redesign')
+    plt.plot(hi.time_day, hi.Ib, color='black', label='Ib')
+    plt.plot(hi.time_day, hi.soc*10, color='green', label='soc*10')
+    plt.plot(hi.time_day, hi.ioc_redesign, marker='o', markersize='3', linestyle='-', color='cyan', label='ioc_redesign')
     plt.xlabel('days')
     plt.legend(loc=4)
     plt.subplot(224)
-    plt.plot(hi.time_d, hi.dv_dot_redesign, linestyle='--', color='black', label='dv_dot_redesign')
+    plt.plot(hi.time_day, hi.dv_dot_redesign, linestyle='--', color='black', label='dv_dot_redesign')
     plt.xlabel('days')
     plt.legend(loc=4)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -339,8 +339,10 @@ def add_stuff(d_ra, voc_soc_tbl, ib_band=0.5):
             Voc_stat_chg[i] = None
     d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_chg', np.array(Voc_stat_chg, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_dis', np.array(Voc_stat_dis, dtype=float))
-    time_d = (d_mod.time-d_mod.time[0])/3600./24.
-    d_mod = rf.rec_append_fields(d_mod, 'time_d', np.array(time_d, dtype=float))
+    time_day = (d_mod.time-d_mod.time[0])/3600./24.
+    d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
+    time_min = (d_mod.time-d_mod.time[0])/60.
+    d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
     dv_hys = d_mod.Voc_dyn - d_mod.Voc_stat
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
     dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE_20220917d
@@ -394,18 +396,17 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
     # Hysteresis_20220917d confirm equals data with HYS_SCALE_20220917d
     if len(h.time) > 1:
         hys_remodel = Hysteresis_20220917d(scale=HYS_SCALE_20220917d)  # Battery hysteresis model - drift of voc
-        t_s = min(h.time)
-        t_e = max(h.time)
-        d_t_min = int(float(t_e - t_s) / 60.)  # Round down to be bounded by data
+        t_s_min = h.time_min[0]
+        t_e_min = h.time_min[-1]
         dt_hys_min = 1.
         dt_hys_sec = dt_hys_min * 60.
-        hys_time_min = np.arange(0, d_t_min, dt_hys_min)
+        hys_time_min = np.arange(t_s_min, t_e_min, dt_hys_min, dtype=float)
         ib_vec = h.Ib
         # Note:  Hysteresis_20220917d instantiates hysteresis state to 0. unless told otherwise
         dv_hys_remodel = []
         h_time_sec = h.time
         for i in range(len(hys_time_min)):
-            t_sec = hys_time_min[i] * 60
+            t_sec = hys_time_min[i] * 60.
             ib = np.interp(t_sec, h.time_sec, h.Ib)
             soc = np.interp(t_sec, h.time_sec, h.soc)
             hys_remodel.calculate_hys(ib, soc)
@@ -414,18 +415,17 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
         dv_hys_remodel = np.array(dv_hys_remodel)
         h.dv_hys_remodel = np.copy(h.soc)
         for i in range(len(h.time)):
-            t_min = int(float(h.time[i] - h.time[0]) / 60.)
+            t_min = int(float(h.time[i]) / 60.)
             h.dv_hys_remodel[i] = np.interp(t_min, hys_time_min, dv_hys_remodel)
 
     # Hysteresis_20220926 redesign.
     if len(h.time) > 1:
         hys_redesign = Hysteresis_20220926(scale=HYS_SCALE_20220926, cap=HYS_CAP_REDESIGN)  # Battery hysteresis model - drift of voc
-        t_s = min(h.time)
-        t_e = max(h.time)
-        d_t_min = int(float(t_e - t_s) / 60.)  # Round down to be bounded by data
+        t_s_min = h.time_min[0]
+        t_e_min = h.time_min[-1]
         dt_hys_min = 1.
         dt_hys_sec = dt_hys_min * 60.
-        hys_time_min = np.arange(0, d_t_min, dt_hys_min)
+        hys_time_min = np.arange(t_s_min, t_e_min, dt_hys_min, dtype=float)
         ib_vec = h.Ib
         # Note:  Hysteresis_20220926 instantiates hysteresis state to 0. unless told otherwise
         dv_hys_redesign = []
@@ -434,7 +434,7 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
         dv_dot_redesign = []
         voc_stat_redesign = []
         voc_stat_redesign_r = []
-        h_time_sec = h.time
+        print("top redesign loop:  t_s_min", t_s_min, "t_e_min", t_e_min, "hys_t_m", hys_time_min)
         for i in range(len(hys_time_min)):
             t_sec = hys_time_min[i] * 60
             tb = np.interp(t_sec, h.time_sec, h.Tb)
@@ -443,6 +443,8 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
             Voc = np.interp(t_sec, h.time_sec, h.Voc_dyn)
             hys_redesign.calculate_hys(ib, soc)
             dvh = hys_redesign.update(dt_hys_sec)
+            if soc<.1:
+                print("creation loop: t_s_min, t_e_min, min, days, soc, A, dV", t_s_min, t_e_min, hys_time_min[i], hys_time_min[i]/60./24., soc, ib, dvh)
             res = hys_redesign.res
             ioc = hys_redesign.ioc
             dv_dot = hys_redesign.dv_dot
@@ -464,9 +466,18 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
         h.dv_dot_redesign = np.copy(h.soc)
         h.Voc_stat_redesign = np.copy(h.soc)
         h.Voc_stat_redesign_r = np.copy(h.soc)
+        dtsec = h.time[-1]-h.time[0]
+        dtmin = dtsec/60.
+        dthr = dtmin/60.
+        dtday = dthr/24.
+        print("h.time: beg, end, delta", h.time[0], h.time[-1], dtday)
         for i in range(len(h.time)):
             t_min = int(float(h.time[i] - h.time[0]) / 60.)
+            t_hr = t_min / 60.
+            t_days = t_hr / 24.
             h.dv_hys_redesign[i] = np.interp(t_min, hys_time_min, dv_hys_redesign)
+            if h.soc[i] < .1:
+                print("interp: min, days, dV", t_min, t_days, h.soc[i], h.Ib[i], h.dv_hys_redesign[i])
             h.res_redesign[i] = np.interp(t_min, hys_time_min, res_redesign)
             h.ioc_redesign[i] = np.interp(t_min, hys_time_min, ioc_redesign)
             h.dv_dot_redesign[i] = np.interp(t_min, hys_time_min, dv_dot_redesign)
@@ -520,7 +531,7 @@ if __name__ == '__main__':
 
         # User inputs
         input_files = ['hist 20220917d-1.txt', '20220917d-20C_sat.txt', 'hist begin30C 20220917d.txt',
-                       'hist dead 30C 20220917d.txt']
+                       'hist dead 30C 20220917d.txt', 'hist 20220917d partial 30C chg.txt']
         data_file = 'data.txt'
         path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
