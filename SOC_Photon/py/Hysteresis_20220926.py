@@ -33,7 +33,7 @@ class Hysteresis_20220926:
         if t_soc is None:
             t_soc = [0, .5, 1]
         if t_r is None:
-            t_r = [  1e-6, 0.021, 0.017, 0.018, 0.008, 0.015, 0.020, 0.030, 1e-6,
+            t_r = [  1e-6, 0.021, 0.017, 0.018, 0.008, 0.008, 0.018, 0.025, 1e-6,
                      1e-6, 1e-6,  0.016, 0.012, 0.005, 0.009, 0.012, 1e-6,  1e-6,
                      1e-6, 1e-6,  1e-6,  0.018, 0.005, 0.009, 1e-6,  1e-6,  1e-6]
         self.dv_hys_min = -0.3  # read off table for soc=1
@@ -102,7 +102,7 @@ class Hysteresis_20220926:
     def update(self, dt):
         if self.soc > 0.99:
             self.dv_hys = self.dv_hys_min
-        elif self.soc < 0.15 and self.ib > -.5:
+        elif self.soc < 0.12 and self.ib > -.5:
             self.dv_hys = self.dv_hys_max
         # if self.soc < 0.15:
         #     print("Hysteresis_20220926:  soc, ib, dv_hys_max, dv_hys", self.soc, self.ib, self.dv_hys_max, self.dv_hys)
