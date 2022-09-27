@@ -531,7 +531,9 @@ if __name__ == '__main__':
 
         # User inputs
         input_files = ['hist 20220917d-1.txt', '20220917d-20C_sat.txt', 'hist begin30C 20220917d.txt',
-                       'hist dead 30C 20220917d.txt', 'hist 20220917d partial 30C chg.txt']
+                       'hist dead 30C 20220917d.txt', 'hist 20220917d partial 30C chg.txt', 'hist 20230917d 30C chg.txt']
+        exclusions = [(1664048488, 1664125892)]  # 30C before full saturation
+        # exclusions = None
         data_file = 'data.txt'
         path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
@@ -557,6 +559,11 @@ if __name__ == '__main__':
         h_raw = np.unique(h_raw)
         print(h_raw)
         # Rack and stack
+        if exclusions:
+            for i in range(len(exclusions)):
+                test_res0 = np.where(h_raw.time < exclusions[i][0])
+                test_res1 = np.where(h_raw.time > exclusions[i][1])
+                h_raw = h_raw[np.hstack((test_res0, test_res1))[0]]
         h = add_stuff(h_raw, lut_voc, ib_band=IB_BAND)
         voc_soc05 = look_it(x0, lut_voc, 5.)
         h_05C = filter_Tb(h, 5., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
