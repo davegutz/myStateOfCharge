@@ -44,7 +44,9 @@ VOC_RESET_30 = -0.03  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
 
 #  Redesign Hysteresis_20220917d.  Make a new Hysteresis_20220917d.py with new curved
-HYS_CAP_REDESIGN = 3.6e4
+HYS_CAP_REDESIGN = 3.6e4  # faster time constant needed
+HYS_RESHAPE_CHG = 1.  # start again
+HYS_RESHAPE_DIS = 1.  # start again
 
 # Unix-like cat function
 # e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
@@ -198,7 +200,7 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
 
     plt.figure()  # 3
     n_fig += 1
-    plt.subplot(121)
+    plt.subplot(131)
     plt.title(plot_title)
     plt.suptitle(subtitle)
     plt.plot(hi.soc_r, hi.Voc_stat_r_dis, marker='o', markersize='3', linestyle='-', color='cyan', label='Voc_stat_r_dis')
@@ -209,11 +211,16 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.xlabel('soc')
     plt.legend(loc=4)
     plt.ylim(12, 13.5)
-    plt.subplot(122)
+    plt.subplot(132)
     plt.plot(hi.soc_r, hi.Voc_stat_rescaled_r_dis, marker='o', markersize='3', linestyle='-', color='cyan', label='Voc_stat_rescaled_r_dis')
     plt.plot(hi.soc_r, hi.Voc_stat_rescaled_r_chg, marker='o', markersize='3', linestyle='-', color='orange', label='Voc_stat_rescaled_r_chg')
-    # plt.plot(hi.soc, hi.Voc_stat_rescaled_dis, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_rescaled_dis')
-    # plt.plot(hi.soc, hi.Voc_stat_rescaled_chg, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_rescaled_chg')
+    plt.plot(x_sch, z_sch+voc_reset, marker='+', markersize='2', linestyle='--', color='black', label='Schedule RESET')
+    plt.xlabel('soc_r')
+    plt.legend(loc=4)
+    plt.ylim(12, 13.5)
+    plt.subplot(133)
+    plt.plot(hi.soc_r, hi.Voc_stat_redesign_r_dis, marker='x', markersize='3', linestyle='-', color='magenta', label='Voc_stat_redesign_r_dis')
+    plt.plot(hi.soc_r, hi.Voc_stat_redesign_r_chg, marker='x', markersize='3', linestyle='-', color='springgreen', label='Voc_stat_redesign_r_chg')
     plt.plot(x_sch, z_sch+voc_reset, marker='+', markersize='2', linestyle='--', color='black', label='Schedule RESET')
     plt.xlabel('soc_r')
     plt.legend(loc=4)
@@ -224,7 +231,7 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
 
     plt.figure()  # 4
     n_fig += 1
-    plt.subplot(211)
+    plt.subplot(221)
     plt.title(plot_title)
     plt.suptitle(subtitle)
     plt.plot(hi.time_d, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
@@ -236,10 +243,51 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.xlabel('days')
     plt.legend(loc=4)
     plt.ylim(-0.7, 0.7)
-    plt.subplot(212)
+    plt.subplot(222)
+    plt.plot(hi.time_d, hi.res_redesign, marker='o', markersize='3', linestyle='-', color='blue', label='res_redesign')
+    plt.xlabel('days')
+    plt.legend(loc=4)
+    plt.subplot(223)
     plt.plot(hi.time_d, hi.Ib, color='black', label='Ib')
     plt.plot(hi.time_d, hi.soc*10, color='green', label='soc*10')
+    plt.plot(hi.time_d, hi.ioc_redesign, marker='o', markersize='3', linestyle='-', color='cyan', label='ioc_redesign')
     plt.xlabel('days')
+    plt.legend(loc=4)
+    plt.subplot(224)
+    plt.plot(hi.time_d, hi.dv_dot_redesign, linestyle='--', color='black', label='dv_dot_redesign')
+    plt.xlabel('days')
+    plt.legend(loc=4)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
+    plt.figure()  # 5
+    n_fig += 1
+    plt.subplot(221)
+    plt.title(plot_title)
+    plt.suptitle(subtitle)
+    plt.plot(hi.soc, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
+    plt.plot(hi.soc, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
+    plt.plot(hi.soc, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
+    plt.plot(hi.soc, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
+    plt.plot(hi.soc, hi.dv_hys_remodel, marker='x', markersize='3', linestyle=':', color='lawngreen', label='dv_hys_remodel')
+    plt.plot(hi.soc, hi.dv_hys_redesign, marker=3, markersize='3', linestyle=':', color='pink', label='dv_hys_redesign')
+    plt.xlabel('soc')
+    plt.legend(loc=4)
+    plt.ylim(-0.7, 0.7)
+    plt.subplot(222)
+    plt.plot(hi.soc, hi.res_redesign, marker='o', markersize='3', linestyle='-', color='blue', label='res_redesign')
+    plt.xlabel('soc')
+    plt.legend(loc=4)
+    plt.subplot(223)
+    plt.plot(hi.soc, hi.Ib, color='black', label='Ib')
+    plt.plot(hi.soc, hi.soc*10, color='green', label='soc*10')
+    plt.plot(hi.soc, hi.ioc_redesign, marker='o', markersize='3', linestyle='-', color='cyan', label='ioc_redesign')
+    plt.xlabel('soc')
+    plt.legend(loc=4)
+    plt.subplot(224)
+    plt.plot(hi.soc, hi.dv_dot_redesign, linestyle='--', color='black', label='dv_dot_redesign')
+    plt.xlabel('soc')
     plt.legend(loc=4)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -299,6 +347,7 @@ def add_stuff(d_ra, voc_soc_tbl, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
     dv_hys_required = d_mod.Voc_dyn - voc_soc
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_required', np.array(dv_hys_required, dtype=float))
+
     dv_hys_rescaled = d_mod.dv_hys_unscaled
     pos = dv_hys_rescaled >= 0
     neg = dv_hys_rescaled < 0
@@ -307,6 +356,7 @@ def add_stuff(d_ra, voc_soc_tbl, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_rescaled', np.array(dv_hys_rescaled, dtype=float))
     Voc_stat_rescaled = d_mod.Voc_dyn - d_mod.dv_hys_rescaled
     d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_rescaled', np.array(Voc_stat_rescaled, dtype=float))
+
     return d_mod
 
 
@@ -379,19 +429,56 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
         ib_vec = h.Ib
         # Note:  Hysteresis_20220926 instantiates hysteresis state to 0. unless told otherwise
         dv_hys_redesign = []
+        res_redesign = []
+        ioc_redesign = []
+        dv_dot_redesign = []
+        voc_stat_redesign = []
+        voc_stat_redesign_r = []
         h_time_sec = h.time
         for i in range(len(hys_time_min)):
             t_sec = hys_time_min[i] * 60
+            tb = np.interp(t_sec, h.time_sec, h.Tb)
             ib = np.interp(t_sec, h.time_sec, h.Ib)
             soc = np.interp(t_sec, h.time_sec, h.soc)
+            Voc = np.interp(t_sec, h.time_sec, h.Voc_dyn)
             hys_redesign.calculate_hys(ib, soc)
             dvh = hys_redesign.update(dt_hys_sec)
+            res = hys_redesign.res
+            ioc = hys_redesign.ioc
+            dv_dot = hys_redesign.dv_dot
+            voc_stat = Voc - dvh
+            voc_stat_r = voc_stat - (tb - temp_corr) * BATT_DVOC_DT
             dv_hys_redesign.append(dvh)
+            res_redesign.append(res)
+            ioc_redesign.append(ioc)
+            dv_dot_redesign.append(dv_dot)
+            voc_stat_redesign.append(voc_stat)
+            voc_stat_redesign_r.append(voc_stat_r)
         dv_hys_redesign = np.array(dv_hys_redesign)
+        res_redesign = np.array(res_redesign)
+        ioc_redesign = np.array(ioc_redesign)
+        dv_dot_redesign = np.array(dv_dot_redesign)
         h.dv_hys_redesign = np.copy(h.soc)
+        h.res_redesign = np.copy(h.soc)
+        h.ioc_redesign = np.copy(h.soc)
+        h.dv_dot_redesign = np.copy(h.soc)
+        h.Voc_stat_redesign = np.copy(h.soc)
+        h.Voc_stat_redesign_r = np.copy(h.soc)
         for i in range(len(h.time)):
             t_min = int(float(h.time[i] - h.time[0]) / 60.)
             h.dv_hys_redesign[i] = np.interp(t_min, hys_time_min, dv_hys_redesign)
+            h.res_redesign[i] = np.interp(t_min, hys_time_min, res_redesign)
+            h.ioc_redesign[i] = np.interp(t_min, hys_time_min, ioc_redesign)
+            h.dv_dot_redesign[i] = np.interp(t_min, hys_time_min, dv_dot_redesign)
+            h.Voc_stat_redesign[i] = np.interp(t_min, hys_time_min, voc_stat_redesign)
+            h.Voc_stat_redesign_r[i] = np.interp(t_min, hys_time_min, voc_stat_redesign_r)
+        h.Voc_stat_redesign_r_chg = np.copy(h.Voc_stat_redesign_r)
+        h.Voc_stat_redesign_r_dis = np.copy(h.Voc_stat_redesign_r)
+        for i in range(len(h.Voc_stat_r_chg)):
+            if h.Ib[i] > -0.5:
+                h.Voc_stat_redesign_r_dis[i] = None
+            elif h.Ib[i] < 0.5:
+                h.Voc_stat_redesign_r_chg[i] = None
 
     return h
 

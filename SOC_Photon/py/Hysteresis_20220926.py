@@ -18,7 +18,8 @@ __version__ = '$Revision: 1.1 $'
 __date__ = '$Date: 2022/05/30 13:15:02 $'
 
 import numpy as np
-from pyDAGx.lookup_table import LookupTable
+# from pyDAGx.lookup_table import LookupTable
+from pyDAGx.myTables import TableInterp2D
 from unite_pictures import cleanup_fig_files
 
 
@@ -28,24 +29,18 @@ class Hysteresis_20220926:
     def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e5, scale=1., dv_hys=0.0):
         # Defaults
         if t_dv is None:
-            t_dv = [-0.9, -0.7,     -0.5,   -0.3,   0.0,    0.3,    0.5,    0.7,    0.9]
+            t_dv = [-0.9, -0.7,   -0.5,  -0.3,  0.0,   0.15,   0.3,   0.7,   0.9]
         if t_soc is None:
             t_soc = [0, .5, 1]
         if t_r is None:
-            # t_r = [1e-6, 0.064,    0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
-            #        1e-6, 1e-6,     0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
-            #        1e-6, 1e-6,     1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6]
-            t_r = [1e-6, 0.021, 0.017, 0.018, 0.015, 0.008, 0.010, 0.015, 1e-6,
-                   1e-6, 1e-6, 0.017, 0.018, 0.015, 0.008, 0.010, 1e-6, 1e-6,
-                   1e-6, 1e-6, 1e-6, 0.018, 0.015, 0.008, 1e-6, 1e-6, 1e-6]
+            t_r = [  1e-6, 0.021, 0.017, 0.018, 0.008, 0.015, 0.020, 0.030, 1e-6,
+                     1e-6, 1e-6,  0.016, 0.012, 0.005, 0.009, 0.012, 1e-6,  1e-6,
+                     1e-6, 1e-6,  1e-6,  0.018, 0.005, 0.009, 1e-6,  1e-6,  1e-6]
         self.dv_hys_min = -0.3  # read off table for soc=1
         self.dv_hys_max = 0.7   # read off table for soc=0
         self.scale = scale
         self.disabled = self.scale < 1e-5
-        self.lut = LookupTable(clip_x=True)
-        self.lut.addAxis('x', t_dv)
-        self.lut.addAxis('y', t_soc)
-        self.lut.setValueTable(t_r)
+        self.lut = TableInterp2D(t_dv, t_soc, t_r)
         self.cap = cap
         self.res = 0.
         self.soc = 0.
@@ -82,6 +77,7 @@ class Hysteresis_20220926:
             self.res = self.look_hys(self.dv_hys, self.soc)
             self.ioc = self.dv_hys / self.res
             self.dv_dot = (self.ib - self.dv_hys/self.res) / self.cap
+            # print(self.dv_hys, self.soc, self.res, self.ib, self.dv_dot)
         return self.dv_dot
 
     def init(self, dv_init):
@@ -91,7 +87,7 @@ class Hysteresis_20220926:
         if self.disabled:
             self.res = 0.
         else:
-            self.res = self.lut.lookup(x=dv, y=soc)
+            self.res = self.lut.interp(x=dv, y=soc)
         return self.res
 
     def save(self, time):

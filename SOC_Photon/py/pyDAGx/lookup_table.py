@@ -496,17 +496,29 @@ def crosscheck3d():
     t_dv = [-0.9, -0.7,     -0.5,   -0.3,   0.0,    0.3,    0.5,    0.7,    0.9]
     t_soc = [0, .5, 1]
     t_r = [1e-6, 0.064,    0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
-           1e-6, 1e-6,     0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
-           1e-6, 1e-6,     1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6]
-    lut = LookupTable()
+           1e-6, 1e-6,     0.041,  0.021,  0.007,  0.010,  0.020,  1e-6,   1e-6,
+           1e-6, 1e-6,     1e-6,   0.011,  0.005,  0.008,  1e-6,   1e-6,   1e-6]
+    lut = LookupTable(clip_x=True)
     lut.addAxis('x', t_dv)
     lut.addAxis('y', t_soc)
     lut.setValueTable(t_r)
     res = lut.lookup(x=-.9, y=0)
     ev = 1e-6
     print("ev=", ev, "got", res)
-    res = lut.lookup(x=-.902, y=0.0957)
+    res = lut.lookup(x=0.5, y=0.5)
+    ev = 0.029
+    print("ev=", ev, "got", res)
+    res = lut.lookup(x=0.7, y=0.)
+    ev = 0.046
+    print("ev=", ev, "got", res)
+    res = lut.lookup(x=0.9, y=0.)
     ev = 1e-6
+    print("ev=", ev, "got", res)
+    res = lut.lookup(x=1.0, y=0.)
+    ev = 1e-6
+    print("ev=", ev, "got", res)
+    res = lut.lookup(x=-0.3, y=1.)
+    ev = 0.011
     print("ev=", ev, "got", res)
 
 
@@ -562,7 +574,7 @@ def crosscheck2d():
 
 
 def main():
-    crosscheck2d()
+    crosscheck3d()
 
 
 if __name__ == '__main__':

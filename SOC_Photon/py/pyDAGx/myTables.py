@@ -145,7 +145,7 @@ if __name__ == '__main__':
     print('time per call=', t_in)
     print('')
 
-    print("Testing scipy interp")
+    print("Testing scipy lutt")
     for y in t_y_t:
         for x in t_x_soc:
             print('x=', x, 'y=', y, 'lut_voc=', lut_voc([x, y]))
@@ -160,3 +160,22 @@ if __name__ == '__main__':
     print('time per call=', t_rg)
 
     print('ratio=', t_rg/t_in)
+    print('')
+
+    t_dv = [-0.9, -0.7, -0.5, -0.3, 0.0, 0.1, 0.3, 0.5, 0.7, 0.9]
+    t_soc = [0, .2, .5, 1]
+    t_r = [1e-6, 0.021, 0.017, 0.018, 0.006, 0.008, 0.020, 0.026, 0.040, 1e-6,
+           1e-6, 1e-6, 0.016, 0.012, 0.002, 0.003, 0.006, 0.006, 1e-6, 1e-6,
+           1e-6, 1e-6, 0.016, 0.012, 0.005, 0.006, 0.008, 0.010, 1e-6, 1e-6,
+           1e-6, 1e-6, 1e-6, 0.018, 0.005, 0.005, 0.006, 1e-6, 1e-6, 1e-6]
+    # x = np.array(t_dv)
+    # y = np.array(t_soc)
+    # data_interp = t_r
+
+    # local solution
+    table2 = TableInterp2D(t_dv, t_soc, t_r)
+    print("Testing local interp")
+    for y in t_soc:
+        for x in t_dv:
+            print('x=', x, 'y=', y, 'table2=', table2.interp(x, y))
+
