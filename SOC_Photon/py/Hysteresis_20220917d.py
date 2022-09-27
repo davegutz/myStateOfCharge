@@ -18,7 +18,8 @@ __version__ = '$Revision: 1.1 $'
 __date__ = '$Date: 2022/05/30 13:15:02 $'
 
 import numpy as np
-from pyDAGx.lookup_table import LookupTable
+# from pyDAGx.lookup_table import LookupTable   dag 9/27/2022 fix it.   LookupTable doesn't work right
+from pyDAGx.myTables import TableInterp2D
 from unite_pictures import cleanup_fig_files
 
 
@@ -37,10 +38,7 @@ class Hysteresis_20220917d:
                    1e-6, 1e-6,     1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6]
         self.scale = scale
         self.disabled = self.scale < 1e-5
-        self.lut = LookupTable(clip_x=True)
-        self.lut.addAxis('x', t_dv)
-        self.lut.addAxis('y', t_soc)
-        self.lut.setValueTable(t_r)
+        self.lut = TableInterp2D(t_dv, t_soc, t_r)
         self.cap = cap
         self.res = 0.
         self.soc = 0.
@@ -86,7 +84,7 @@ class Hysteresis_20220917d:
         if self.disabled:
             self.res = 0.
         else:
-            self.res = self.lut.lookup(x=dv, y=soc)
+            self.res = self.lut.interp(x=dv, y=soc)
         return self.res
 
     def save(self, time):

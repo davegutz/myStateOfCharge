@@ -43,7 +43,7 @@ VOC_RESET_20 = 0.  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_30 = -0.03  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
 
-#  Redesign Hysteresis_20220917d.  Make a new Hysteresis_20220917d.py with new curved
+#  Redesign Hysteresis_20220917d.  Make a new Hysteresis_20220926.py with new curve
 HYS_CAP_REDESIGN = 3.6e4  # faster time constant needed
 HYS_RESHAPE_CHG = 1.  # start again
 HYS_RESHAPE_DIS = 1.  # start again
