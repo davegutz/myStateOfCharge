@@ -434,7 +434,6 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
         dv_dot_redesign = []
         voc_stat_redesign = []
         voc_stat_redesign_r = []
-        print("top redesign loop:  t_s_min", t_s_min, "t_e_min", t_e_min, "hys_t_m", hys_time_min)
         for i in range(len(hys_time_min)):
             t_sec = hys_time_min[i] * 60
             tb = np.interp(t_sec, h.time_sec, h.Tb)
@@ -443,8 +442,6 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
             Voc = np.interp(t_sec, h.time_sec, h.Voc_dyn)
             hys_redesign.calculate_hys(ib, soc)
             dvh = hys_redesign.update(dt_hys_sec)
-            if soc<.1:
-                print("creation loop: t_s_min, t_e_min, min, days, soc, A, dV", t_s_min, t_e_min, hys_time_min[i], hys_time_min[i]/60./24., soc, ib, dvh)
             res = hys_redesign.res
             ioc = hys_redesign.ioc
             dv_dot = hys_redesign.dv_dot
@@ -456,28 +453,15 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
             dv_dot_redesign.append(dv_dot)
             voc_stat_redesign.append(voc_stat)
             voc_stat_redesign_r.append(voc_stat_r)
-        dv_hys_redesign = np.array(dv_hys_redesign)
-        res_redesign = np.array(res_redesign)
-        ioc_redesign = np.array(ioc_redesign)
-        dv_dot_redesign = np.array(dv_dot_redesign)
         h.dv_hys_redesign = np.copy(h.soc)
         h.res_redesign = np.copy(h.soc)
         h.ioc_redesign = np.copy(h.soc)
         h.dv_dot_redesign = np.copy(h.soc)
         h.Voc_stat_redesign = np.copy(h.soc)
         h.Voc_stat_redesign_r = np.copy(h.soc)
-        dtsec = h.time[-1]-h.time[0]
-        dtmin = dtsec/60.
-        dthr = dtmin/60.
-        dtday = dthr/24.
-        print("h.time: beg, end, delta", h.time[0], h.time[-1], dtday)
         for i in range(len(h.time)):
-            t_min = int(float(h.time[i] - h.time[0]) / 60.)
-            t_hr = t_min / 60.
-            t_days = t_hr / 24.
+            t_min = h.time_min[i]
             h.dv_hys_redesign[i] = np.interp(t_min, hys_time_min, dv_hys_redesign)
-            if h.soc[i] < .1:
-                print("interp: min, days, dV", t_min, t_days, h.soc[i], h.Ib[i], h.dv_hys_redesign[i])
             h.res_redesign[i] = np.interp(t_min, hys_time_min, res_redesign)
             h.ioc_redesign[i] = np.interp(t_min, hys_time_min, ioc_redesign)
             h.dv_dot_redesign[i] = np.interp(t_min, hys_time_min, dv_dot_redesign)
