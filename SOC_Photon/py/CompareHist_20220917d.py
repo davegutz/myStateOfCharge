@@ -247,7 +247,8 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     # plt.ylim(-0.7, 0.7)
     plt.ylim(bottom=-0.7)
     plt.subplot(222)
-    plt.plot(hi.time_day, hi.res_redesign, marker='o', markersize='3', linestyle='-', color='blue', label='res_redesign')
+    plt.plot(hi.time_day, hi.res_redesign_chg, marker='o', markersize='3', linestyle='-', color='green', label='res_redesign_chg')
+    plt.plot(hi.time_day, hi.res_redesign_dis, marker='o', markersize='3', linestyle='-', color='red', label='res_redesign_dis')
     plt.xlabel('days')
     plt.legend(loc=4)
     plt.subplot(223)
@@ -280,7 +281,8 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     # plt.ylim(-0.7, 0.7)
     plt.ylim(bottom=-0.7)
     plt.subplot(222)
-    plt.plot(hi.soc, hi.res_redesign, marker='o', markersize='3', linestyle='-', color='blue', label='res_redesign')
+    plt.plot(hi.soc, hi.res_redesign_chg, marker='o', markersize='3', linestyle='-', color='green', label='res_redesign_chg')
+    plt.plot(hi.soc, hi.res_redesign_dis, marker='o', markersize='3', linestyle='-', color='red', label='res_redesign_dis')
     plt.xlabel('soc')
     plt.legend(loc=4)
     plt.subplot(223)
@@ -480,13 +482,17 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
         h.Voc_stat_redesign_r_dis = np.copy(h.Voc_stat_redesign_r)
         h.dv_hys_redesign_chg = np.copy(h.dv_hys_redesign)
         h.dv_hys_redesign_dis = np.copy(h.dv_hys_redesign)
+        h.res_redesign_chg = np.copy(h.res_redesign)
+        h.res_redesign_dis = np.copy(h.res_redesign)
         for i in range(len(h.Voc_stat_r_chg)):
             if h.Ib[i] > -0.5:
                 h.Voc_stat_redesign_r_dis[i] = None
                 h.dv_hys_redesign_dis[i] = None
+                h.res_redesign_dis[i] = None
             elif h.Ib[i] < 0.5:
                 h.Voc_stat_redesign_r_chg[i] = None
                 h.dv_hys_redesign_chg[i] = None
+                h.res_redesign_chg[i] = None
 
     return h
 
