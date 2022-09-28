@@ -48,6 +48,7 @@ HYS_CAP_REDESIGN = 3.6e4  # faster time constant needed
 HYS_SOC_MIN_MARG = 0.2  # add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
 HYS_SOC_MAX = 0.98  # detect high endpoint condition for reset of hysteresis
 HYS_E_WRAP_THR = 0.1 # detect e_wrap going the other way; need to reset dv_hys at endpoints
+HYS_IB_THR = 1.  # ignore reset if opposite situation exists
 
 # Unix-like cat function
 # e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
@@ -452,7 +453,7 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
             # dvh = hys_redesign.update(dt_hys_sec, trusting_sensors=True, soc_min=soc_min, soc_min_marg=HYS_SOC_MIN_MARG,
             #                           soc_max=HYS_SOC_MAX, e_wrap=e_wrap, e_wrap_thr=HYS_E_WRAP_THR)
             dvh = hys_redesign.update(dt_hys_sec, trusting_sensors=True, soc_min=soc_min, soc_min_marg=HYS_SOC_MIN_MARG,
-                                      soc_max=HYS_SOC_MAX, e_wrap=e_wrap, e_wrap_thr=HYS_E_WRAP_THR)
+                                      soc_max=HYS_SOC_MAX, e_wrap=e_wrap, e_wrap_thr=HYS_E_WRAP_THR, ib_thr=HYS_IB_THR)
             res = hys_redesign.res
             ioc = hys_redesign.ioc
             dv_dot = hys_redesign.dv_dot
