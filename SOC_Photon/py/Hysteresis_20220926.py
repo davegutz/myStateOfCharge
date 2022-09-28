@@ -77,7 +77,7 @@ class Hysteresis_20220926:
             self.res = self.look_hys(self.dv_hys, self.soc)
             self.ioc = self.dv_hys / self.res
             self.dv_dot = (self.ib - self.dv_hys/self.res) / self.cap
-            # print(self.dv_hys, self.soc, self.res, self.ib, self.dv_dot)
+            print("calc:", self.dv_hys, self.soc, self.res, self.ib, self.dv_dot, self.cap)
         return self.dv_dot
 
     def init(self, dv_init):
@@ -100,19 +100,26 @@ class Hysteresis_20220926:
         self.saved.ioc.append(self.ioc)
 
     def update(self, dt, trusting_sensors=False, soc_min=0., soc_min_marg=0., soc_max=.99, e_wrap=0., e_wrap_thr=10.):
-        # Initialize if at endpoints.   e_wrap is an actual measurement of hysteresis if trust sensors.  But once
-        # dv_hys is reset it regenerates e_wrap, so use max/min to remember it
-        if self.soc > soc_max and e_wrap > +e_wrap_thr and trusting_sensors:
-            self.dv_hys = self.dv_hys_min
-            # self.dv_hys = 0.
-            # self.dv_hys = -max(self.dv_hys, e_wrap)
-            # print("soc, soc_max, trusting, e_wrap, thr, dv_hys,", self.soc, soc_max, trusting_sensors, -e_wrap, e_wrap_thr, self.dv_hys)
-        elif self.soc < (soc_min + soc_min_marg) and e_wrap < -e_wrap_thr and trusting_sensors:
-            self.dv_hys = self.dv_hys_max
-            # self.dv_hys = 0.
-            # self.dv_hys = -min(self.dv_hys, -e_wrap)
-            print("soc, soc_min+marg, soc_min, marg, trusting, e_wrap, thr, dv_hys", self.soc, soc_min+soc_min_marg, soc_min, soc_min_marg, trusting_sensors, -e_wrap, -e_wrap_thr, self.dv_hys)
+
+        # Reset if at endpoints.   e_wrap is an actual measurement of hysteresis if trust sensors.  But once
+        # dv_hys is reset it regenerates e_wrap so e_wrap in logic breaks that.   Also, dv_hys regenerates dv_dot
+        # so free that
+        if self.soc < (soc_min + soc_min_marg) and e_wrap < -e_wrap_thr and trusting_sensors:  # charging
+            if self.dv_hys < -e_wrap:  # one-way break positive feedback loop.  Should set only once
+                self.dv_hys = -e_wrap
+                self.dv_dot = 0.  # break another positive feedback loop
+            # self.dv_hys = max(self.dv_hys, -e_wrap)   # dv_hys break positive feedback loop
+            # self.dv_dot = 0.  # break positive feedback loop
+            # print("soc, soc_min+marg, soc_min, marg, trusting, e_wrap, thr, dv_hys", self.soc, soc_min+soc_min_marg, soc_min, soc_min_marg, trusting_sensors, -e_wrap, -e_wrap_thr, self.dv_hys)
+        elif self.soc > soc_max and e_wrap > +e_wrap_thr and trusting_sensors:  # discharging
+            if self.dv_hys > -e_wrap:  # one-way break positive feedback loop.  Should set only once
+                self.dv_hys = -e_wrap
+                self.dv_dot = 0.  # break another positive feedback loop
+            print("soc, soc_max, trusting, e_wrap, thr, dv_hys, dv_dot, dt", self.soc, soc_max, trusting_sensors, -e_wrap, e_wrap_thr, self.dv_hys, self.dv_dot, dt)
+
+        # normal ODE integration
         self.dv_hys += self.dv_dot * dt
+
         return self.dv_hys*self.scale
 
 
