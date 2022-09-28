@@ -244,7 +244,8 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.plot(hi.time_day, hi.dv_hys_redesign_dis, marker=3, markersize='3', linestyle='-', color='red', label='dv_hys_redesign_dis')
     plt.xlabel('days')
     plt.legend(loc=4)
-    plt.ylim(-0.7, 0.7)
+    # plt.ylim(-0.7, 0.7)
+    plt.ylim(bottom=-0.7)
     plt.subplot(222)
     plt.plot(hi.time_day, hi.res_redesign, marker='o', markersize='3', linestyle='-', color='blue', label='res_redesign')
     plt.xlabel('days')
@@ -276,7 +277,8 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.plot(hi.soc, hi.dv_hys_redesign_dis, marker=3, markersize='3', linestyle='-', color='red', label='dv_hys_redesign_dis')
     plt.xlabel('soc')
     plt.legend(loc=4)
-    plt.ylim(-0.7, 0.7)
+    # plt.ylim(-0.7, 0.7)
+    plt.ylim(bottom=-0.7)
     plt.subplot(222)
     plt.plot(hi.soc, hi.res_redesign, marker='o', markersize='3', linestyle='-', color='blue', label='res_redesign')
     plt.xlabel('soc')
@@ -309,10 +311,14 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
         soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
         Vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
         time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
-    d_mod = rf.rec_append_fields(d_ra, 'voc_soc', np.array(voc_soc, dtype=float))
+    time_min = (d_ra.time-d_ra.time[0])/60.
+    time_day = (d_ra.time-d_ra.time[0])/3600./24.
+    d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'Vsat', np.array(Vsat, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'time_sec', np.array(time_sec, dtype=float))
     dscn_fa = np.bool8(d_ra.falw & 2 ** 10)
     ib_diff_fa = np.bool8((d_ra.falw & 2 ** 8) | (d_ra.falw & 2 ** 9))
     wv_fa = np.bool8(d_ra.falw & 2 ** 7)
@@ -344,10 +350,6 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
             Voc_stat_chg[i] = None
     d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_chg', np.array(Voc_stat_chg, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_dis', np.array(Voc_stat_dis, dtype=float))
-    time_day = (d_mod.time-d_mod.time[0])/3600./24.
-    d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
-    time_min = (d_mod.time-d_mod.time[0])/60.
-    d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
     dv_hys = d_mod.Voc_dyn - d_mod.Voc_stat
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
     dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE_20220917d
@@ -456,7 +458,7 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
             voc_stat_r = voc_stat - (tb - temp_corr) * BATT_DVOC_DT
             dv_hys_redesign.append(dvh)
             res_redesign.append(res)
-            ioc_redesign.append(ioc)
+            ioc_redesign.append(max(min(ioc, 40.), -40.))
             dv_dot_redesign.append(dv_dot)
             voc_stat_redesign.append(voc_stat)
             voc_stat_redesign_r.append(voc_stat_r)
@@ -530,7 +532,7 @@ if __name__ == '__main__':
         # User inputs
         input_files = ['hist 20220917d-1.txt', '20220917d-20C_sat.txt', 'hist begin30C 20220917d.txt',
                        'hist dead 30C 20220917d.txt', 'hist 20220917d partial 30C chg.txt', 'hist 20230917d 30C chg.txt']
-        exclusions = [(1664048488, 1664125892)]  # 30C before full saturation
+        exclusions = [(1664048488, 1664125892), (1664183495, 1664191685)]  # 30C before full saturation
         # exclusions = None
         data_file = 'data.txt'
         path_to_pdfs = '../dataReduction/figures'
@@ -555,7 +557,6 @@ if __name__ == '__main__':
 
         # Sort unique
         h_raw = np.unique(h_raw)
-        print(h_raw)
         # Rack and stack
         if exclusions:
             for i in range(len(exclusions)):
@@ -563,6 +564,7 @@ if __name__ == '__main__':
                 test_res1 = np.where(h_raw.time > exclusions[i][1])
                 h_raw = h_raw[np.hstack((test_res0, test_res1))[0]]
         h = add_stuff(h_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
+        print(h)
         voc_soc05 = look_it(x0, lut_voc, 5.)
         h_05C = filter_Tb(h, 5., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
         voc_soc11 = look_it(x0, lut_voc, 11.1)
