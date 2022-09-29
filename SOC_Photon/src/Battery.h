@@ -57,7 +57,11 @@ const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1,
 #define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction (0.2)
 #define RANDLES_T_MAX   0.31      // Maximum update time of Randles state space model to avoid aliasing and instability (0.31 allows DP3)
 const double MXEPS = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness) (1-1e-6)
-#define HYS_SCALE        0.3      // Scalar on hysteresis.   Best I know is what observed Tb=40C (0.3)
+#define HYS_SCALE        1.0      // Scalar on hysteresis.   Best I know is what observed Tb=40C (0.3)
+#define HYS_SOC_MIN_MARG 0.2      // Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
+#define HYS_SOC_MAX     0.98      // Detect high endpoint condition for reset of hysteresis
+#define HYS_E_WRAP_THR  0.1       // Detect e_wrap going the other way; need to reset dv_hys at endpoints
+#define HYS_IB_THR      1.        // Ignore reset if opposite situation exists
 // BattleBorn 100 Ah, 12v LiFePO4
 // See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
 // >13.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
@@ -147,7 +151,7 @@ public:
   void init(const double dv_init);
   double look_hys(const double dv, const double soc);
   void pretty_print();
-  double update(const double dt);
+  double update(const double dt, const boolean vb_valid, const float soc_min, const float e_wrap);
   double ioc() { return (ioc_); };
   double dv_hys() { return (dv_hys_); };
   float scale() { return *rp_hys_scale_; };

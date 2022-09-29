@@ -246,7 +246,7 @@ void BatteryMonitor::assign_randles(void)
        |
     ___|___
     |      |
-    | HYS  |   |              HYS stores charge ib-ioc
+    | HYS  |   |              HYS stores charge ib-ioc.  dv_hys = voc - voc_stat
     |______|   |
        |       v  ioc ~= ib
        +   voc_stat
@@ -290,7 +290,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     dv_dyn_ = vb_ - voc_;
     // Hysteresis model
     hys_->calculate(ib_, soc_);
-    dv_hys_ = hys_->update(dt_);
+    dv_hys_ = hys_->update(dt_, true, soc_min_, Sen->Flt->e_wrap());
     voc_soc_ = voc_soc_tab(soc_, Sen->Tb_filt);
     voc_stat_ = voc_ - dv_hys_;
     voc_filt_ = SdVb_->update(voc_);
@@ -590,7 +590,7 @@ void BatterySim::assign_randles(void)
        |
     ___|___
     |      |
-    | HYS  |   |              HYS stores charge ib-ioc
+    | HYS  |   |              HYS stores charge ib-ioc.  dv_hys = voc - voc_stat
     |______|   |
        |       v  ioc ~= ib
        +   voc_stat
@@ -630,7 +630,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     // Dynamic emf
     // Hysteresis model
     hys_->calculate(ib_in_, soc_);
-    dv_hys_ = hys_->update(dt_);
+    dv_hys_ = hys_->update(dt_, true, soc_min_, Sen->Flt->e_wrap());
     voc_ = voc_stat_ + dv_hys_;
     ioc_ = hys_->ioc();
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
@@ -901,9 +901,29 @@ void Hysteresis::pretty_print()
     hys_T_->pretty_print();
 }
 
-// Dynamic update
-double Hysteresis::update(const double dt)
+// Dynamic update  // TODO:  change sign of e_wrap everywhere
+double Hysteresis::update(const double dt, const boolean vb_valid, const float soc_min, const float e_wrap)
 {
+    // Reset if at endpoints.   e_wrap is an actual measurement of hysteresis if trust sensors.  But once
+    // dv_hys is reset it regenerates e_wrap so e_wrap in logic breaks that.   Also, dv_hys regenerates dv_dot
+    if ( soc_ < (soc_min + HYS_SOC_MIN_MARG) && e_wrap < -HYS_E_WRAP_THR && this->ib_ > -HYS_IB_THR && vb_valid )  // Charging
+    {
+        if ( dv_hys_ < -e_wrap) // one-way nature of compare breaks positive feedback loop
+        {
+            dv_hys_ = -e_wrap;
+            dv_dot_ = 0.;       // break another positive feedback loop
+        }
+    }
+    else if ( soc_ > HYS_SOC_MAX && e_wrap > +HYS_E_WRAP_THR && vb_valid )  // discharging
+    {
+        if ( dv_hys_ > -e_wrap && ib_ < HYS_IB_THR) // one-way nature of compare breaks positive feedback loop
+        {
+            dv_hys_ = -e_wrap;
+            dv_dot_ = 0.;       // break another positive feedback loop
+        }
+    }
+
+    // Normal ODE integration
     dv_hys_ += dv_dot_ * dt;
     return (dv_hys_ * (*rp_hys_scale_)); // Scale on output only.   Don't retain it for feedback to ode
 }
