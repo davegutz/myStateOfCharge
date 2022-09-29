@@ -91,6 +91,7 @@ const float T_R_BB[M_H_BB*N_H_BB] = // r(soc, dv) table.    // DAG 9/29/2022 tun
         { 1e-6, 0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030, 1e-6,
           1e-6, 1e-6,  0.014, 0.010, 0.008, 0.010, 0.015, 1e-6,  1e-6,
           1e-6, 1e-6,  1e-6,  0.016, 0.005, 0.010, 1e-6,  1e-6,  1e-6};
+const float max_dv_hys = 0.9;
 
 // LION 100 Ah, 12v LiFePO4.  "LION" placeholder.  Data fabricated.   Useful to test weird shapes T=40 (Dt15)
 // shifted Battleborn because don't have real data yet; test structure of program

@@ -626,10 +626,6 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mo.soc, mo.ioc, linestyle='--', color='cyan', label='ioc')
         plt.xlabel('soc')
         plt.legend(loc=4)
-        plt.subplot(326)
-        plt.plot(mo.time, mo.soc, linestyle='-', color='green', label='soc')
-        plt.xlabel('soc')
-        plt.legend(loc=4)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")

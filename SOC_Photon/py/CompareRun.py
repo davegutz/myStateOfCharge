@@ -36,8 +36,6 @@ if __name__ == '__main__':
         date_ = datetime.now().strftime("%y%m%d")
 
         # Transient  inputs
-        time_end = None
-        # time_end = 4
         t_Ib_fail = None
         init_time_in = None
         use_ib_mon_in = False
@@ -55,6 +53,7 @@ if __name__ == '__main__':
         skip = 1
         zero_zero_in = False
         drive_ekf_in = False
+        time_end_in = None
         unit_key = 'pro_2022'
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
@@ -63,11 +62,12 @@ if __name__ == '__main__':
         # data_file_old_txt = 'ampHiFail v20220926.txt'
         # data_file_old_txt = 'ampLoFail20220914.txt'
         # data_file_old_txt = 'ampHiFailNoise20220914.txt'
-        data_file_old_txt = 'rapidTweakRegression v20220926.txt'
+        # data_file_old_txt = 'rapidTweakRegression v20220926.txt'
         # data_file_old_txt = 'rapidTweakRegression40C_20220914.txt'
         # data_file_old_txt = 'slowTweakRegression20220914.txt'
         # data_file_old_txt = 'triTweakDisch v20220917a.txt'
-        # data_file_old_txt = 'satSit20220914.txt';
+        # data_file_old_txt = 'satSit20220926.txt';
+        data_file_old_txt = 'satSitHys20220926.txt'; #time_end_in = 2000.
         # data_file_old_txt = 'ampHiFailSlow20220914.txt';
         # data_file_old_txt = 'vHiFail v20220917a.txt'
         # data_file_old_txt = 'pulse20220914.txt'; init_time_in=-0.001;
@@ -130,7 +130,7 @@ if __name__ == '__main__':
         if ekf_file_clean:
             ekf_old_raw = np.genfromtxt(ekf_file_clean, delimiter=',', names=True, usecols=cols_ekf, dtype=float,
                                         encoding=None).view(np.recarray)
-        mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, ekf=ekf_old_raw, time_end=time_end,
+        mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, ekf=ekf_old_raw, time_end=time_end_in,
                             zero_zero=zero_zero_in)
 
         # Load sim _s v24 portion of real-time run (old)
@@ -142,7 +142,7 @@ if __name__ == '__main__':
         if data_file_sim_clean:
             sim_old_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
                                         dtype=float, encoding=None).view(np.recarray)
-            sim_old = SavedDataSim(time_ref=mon_old.time_ref, data=sim_old_raw, time_end=time_end)
+            sim_old = SavedDataSim(time_ref=mon_old.time_ref, data=sim_old_raw, time_end=time_end_in)
         else:
             sim_old = None
 
