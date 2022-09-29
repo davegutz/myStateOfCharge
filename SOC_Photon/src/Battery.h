@@ -80,13 +80,13 @@ const float T_SOC_MIN_BB[N_N_BB] =  { 0.10, 0.07,  0.05, 0.00, 0.20}; // soc_min
 const uint8_t M_H_BB  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
 const uint8_t N_H_BB  = 9;          // Number of dv breakpoints in r(dv) table t_r
 const float X_DV_BB[N_H_BB] =       // dv breakpoints for r(soc, dv) table t_r. // DAG 6/13/2022 tune x10 to match data
-        { -0.9, -0.7,   -0.5,  -0.3,    0.0,    0.3,    0.5,    0.7,    0.9 };
+        { -0.9, -0.7,  -0.5,  -0.3,  0.0,   0.15,  0.3,   0.7,   0.9 };
 const float Y_SOC_BB[M_H_BB] =      // soc breakpoints for r(soc, dv) table t_r
-        { 0.0,  0.5,    1.0};
-const float T_R_BB[M_H_BB*N_H_BB] = // r(soc, dv) table.    // DAG 6/13/2022 tune x10 to match data
-        { 1e-6, 0.064, 0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
-          1e-6, 1e-6,  0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
-          1e-6, 1e-6,  1e-6,   0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6};
+        { 0.0,  0.5,   1.0};
+const float T_R_BB[M_H_BB*N_H_BB] = // r(soc, dv) table.    // DAG 9/29/2022 tune to match hist data
+        { 1e-6, 0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030, 1e-6,
+          1e-6, 1e-6,  0.014, 0.010, 0.008, 0.010, 0.015, 1e-6,  1e-6,
+          1e-6, 1e-6,  1e-6,  0.016, 0.005, 0.010, 1e-6,  1e-6,  1e-6};
 
 // LION 100 Ah, 12v LiFePO4.  "LION" placeholder.  Data fabricated.   Useful to test weird shapes T=40 (Dt15)
 // shifted Battleborn because don't have real data yet; test structure of program
@@ -108,13 +108,13 @@ const float T_SOC_MIN_LI[N_N_LI] =  { 0.10, 0.07,  0.05, 0.03}; // soc_min(t)
 const uint8_t M_H_LI  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
 const uint8_t N_H_LI  = 9;          // Number of dv breakpoints in r(dv) table t_r
 const float X_DV_LI[N_H_LI] =       // dv breakpoints for r(soc, dv) table t_r
-        { -0.9, -0.7,   -0.5,  -0.3,    0.0,    0.3,    0.5,    0.7,    0.9};
+        { -0.9, -0.7,  -0.5,  -0.3,  0.0,   0.15,  0.3,   0.7,   0.9 };
 const float Y_SOC_LI[M_H_LI] =      // soc breakpoints for r(soc, dv) table t_r
-        { 0.0,  0.5,    1.0};
-const float T_R_LI[M_H_LI*N_H_LI] = // r(soc, dv) table
-        { 1e-6, 0.064,  0.050,  0.036,  0.015,  0.024,  0.030,  0.046,  1e-6,
-          1e-6, 1e-6,   0.050,  0.036,  0.015,  0.024,  0.030,  1e-6,   1e-6,
-          1e-6, 1e-6,     1e-6, 0.036,  0.015,  0.024,  1e-6,   1e-6,   1e-6};
+        { 0.0,  0.5,   1.0};
+const float T_R_LI[M_H_LI*N_H_LI] = // r(soc, dv) table.    // DAG 9/29/2022 tune to match hist data
+        { 1e-6, 0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030, 1e-6,
+          1e-6, 1e-6,  0.014, 0.010, 0.008, 0.010, 0.015, 1e-6,  1e-6,
+          1e-6, 1e-6,  1e-6,  0.016, 0.005, 0.010, 1e-6,  1e-6,  1e-6};
 
 
 // LION control EKF curve that is monotonic increasing

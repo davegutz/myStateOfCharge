@@ -47,7 +47,7 @@ VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
 HYS_CAP_REDESIGN = 3.6e4  # faster time constant needed
 HYS_SOC_MIN_MARG = 0.2  # add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
 HYS_SOC_MAX = 0.98  # detect high endpoint condition for reset of hysteresis
-HYS_E_WRAP_THR = 0.1 # detect e_wrap going the other way; need to reset dv_hys at endpoints
+HYS_E_WRAP_THR = 0.1  # detect e_wrap going the other way; need to reset dv_hys at endpoints
 HYS_IB_THR = 1.  # ignore reset if opposite situation exists
 
 # Unix-like cat function
