@@ -407,6 +407,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.figure()  # sim_s  3
         n_fig += 1
         plt.subplot(221)
+        plt.title(plot_title)
         plt.plot(mo.time, mo.soc, color='blue', linestyle='-', label='soc')
         plt.plot(mv.time, mv.soc, color='red', linestyle='--', label='soc_ver')
         plt.plot(so.time, so.soc_s, color='green', linestyle='-.', label='soc_s')
@@ -446,6 +447,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.figure()  # sim_s  4
         n_fig += 1
         plt.subplot(221)
+        plt.title(plot_title)
         plt.plot(mo.time, mo.soc, color='blue', linestyle='-', label='soc')
         plt.plot(mv.time, mv.soc, color='red', linestyle='--', label='soc_ver')
         plt.plot(so.time, so.soc_s, color='green', linestyle='-.', label='soc_s')
@@ -487,10 +489,11 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.ylim(12.5, 14.5)
         plt.legend(loc=1)
 
-        if mo.Fx is not None:
+        if mo.Fx is not None:  # ekf
             plt.figure()  # ekf  5
             n_fig += 1
             plt.subplot(331)
+            plt.title(plot_title)
             plt.plot(mo.time, mo.u, color='blue', linestyle='-', label='u')
             plt.plot(mv.time, mv.u_ekf, color='red', linestyle='--', label='u ver')
             plt.legend(loc=1)
@@ -532,6 +535,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
             plt.figure()  # ekf  5
             n_fig += 1
             plt.subplot(331)
+            plt.title(plot_title)
             plt.plot(mo.time, mo.K, color='blue', linestyle='-', label='K')
             plt.plot(mv.time, mv.K, color='red', linestyle='--', label='K ver')
             plt.legend(loc=1)
@@ -574,9 +578,52 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.figure()  # ekf  5
         n_fig += 1
         plt.subplot(111)
+        plt.title(plot_title)
         plt.plot(mo.soc, mo.Voc_stat, color='red', linestyle='-', label='Voc_stat')
         plt.plot(mo.soc, mo.voc_soc, color='black', linestyle=':', label='voc_soc')
         plt.legend(loc=1)
+        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
+
+        plt.figure()  # 6 Hyst
+        n_fig += 1
+        plt.subplot(321)
+        plt.title(plot_title)
+        plt.plot(mo.time, mo.dV_hys, linestyle='-', color='blue', label='dV_hys')
+        # plt.plot(mo.time, mo.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
+        plt.plot(mo.time, -mo.e_w, linestyle='-.', color='red', label='-e_wrap')
+        plt.plot(mo.time, mo.dV_hys, linestyle=':', color='orange', label='dV_hys')
+        # plt.plot(mo.time, mo.dv_hys_chg, color='green', label='dv_hys_chg')
+        # plt.plot(mo.time, mo.dv_hys_dis, color='red', label='dv_hys_dis')
+        plt.xlabel('sec')
+        plt.legend(loc=4)
+        plt.subplot(323)
+        plt.plot(mo.time, mo.Ib, linestyle='-', color='black', label='Ib')
+        plt.plot(mo.time, mo.ioc, linestyle='--', color='cyan', label='ioc_')
+        plt.xlabel('sec')
+        plt.legend(loc=4)
+        plt.subplot(325)
+        plt.plot(mo.time, mo.soc, linestyle='-', color='green', label='soc')
+        plt.xlabel('sec')
+        plt.legend(loc=4)
+        plt.subplot(322)
+        plt.plot(mo.soc, mo.dV_hys, linestyle='-', color='blue', label='dV_hys')
+        # plt.plot(mo.soc, mo.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
+        plt.plot(mo.soc, -mo.e_w, linestyle='-.', color='red', label='-e_wrap')
+        # plt.plot(mo.soc, mo.dv_hys_chg, color='green', label='dv_hys_chg')
+        # plt.plot(mo.soc, mo.dv_hys_dis, color='red', label='dv_hys_dis')
+        plt.xlabel('soc')
+        plt.legend(loc=4)
+        plt.subplot(324)
+        plt.plot(mo.soc, mo.Ib, linestyle='-', color='black', label='Ib')
+        plt.plot(mo.soc, mo.ioc, linestyle='--', color='cyan', label='ioc')
+        plt.xlabel('soc')
+        plt.legend(loc=4)
+        plt.subplot(326)
+        plt.plot(mo.time, mo.soc, linestyle='-', color='green', label='soc')
+        plt.xlabel('soc')
+        plt.legend(loc=4)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")

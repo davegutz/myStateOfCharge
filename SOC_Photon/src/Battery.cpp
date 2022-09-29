@@ -290,7 +290,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     dv_dyn_ = vb_ - voc_;
     // Hysteresis model
     hys_->calculate(ib_, soc_);
-    dv_hys_ = hys_->update(dt_, true, soc_min_, Sen->Flt->e_wrap());
+    dv_hys_ = hys_->update(dt_, true, soc_min_, Sen->Flt->e_wrap());  // Sim modeling: vb_valid by definition
     voc_soc_ = voc_soc_tab(soc_, Sen->Tb_filt);
     voc_stat_ = voc_ - dv_hys_;
     voc_filt_ = SdVb_->update(voc_);

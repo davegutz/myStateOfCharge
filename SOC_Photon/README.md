@@ -397,9 +397,9 @@ Throughput test
 
 Full regression suite:
   ampHiFail:      D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm50;Dn0.0001;
-                  Xp0;Pf;Rf;W10;+v0;Dr100;Rf;Pf;
+                  DV0;DM0;DN0;Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
   ampLoFail:      D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm-50;Dn0.0001;
-                  Xp0;Pf;Rf;W10;+v0;Dr100;Rf;Pf;
+                  DV0;DM0;DN0;Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
   ampHiFailNoise: D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;
                   DV0;DM0;DN0;Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
   rapidTweakRegression:  Xp10;

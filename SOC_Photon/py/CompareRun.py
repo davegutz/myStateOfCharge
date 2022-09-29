@@ -55,32 +55,33 @@ if __name__ == '__main__':
         skip = 1
         zero_zero_in = False
         drive_ekf_in = False
+        unit_key = 'pro_2022'
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
         # Regression suite
-        # data_file_old_txt = 'ampHiFail v20220917a.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'ampLoFail20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'ampHiFailNoise20220914.txt'; unit_key = 'pro_2022';
-        data_file_old_txt = 'rapidTweakRegression v20220917a.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'rapidTweakRegression40C_20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'slowTweakRegression20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'triTweakDisch v20220917a.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'satSit20220914.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = 'ampHiFailSlow20220914.txt'; unit_key = 'pro_2022';
-        # data_file_old_txt = 'vHiFail v20220917a.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'pulse20220914.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
-        # data_file_old_txt = 'tbFailMod20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'tbFailHdwe20220914.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'ampHiFail v20220926.txt'
+        # data_file_old_txt = 'ampLoFail20220914.txt'
+        # data_file_old_txt = 'ampHiFailNoise20220914.txt'
+        data_file_old_txt = 'rapidTweakRegression v20220926.txt'
+        # data_file_old_txt = 'rapidTweakRegression40C_20220914.txt'
+        # data_file_old_txt = 'slowTweakRegression20220914.txt'
+        # data_file_old_txt = 'triTweakDisch v20220917a.txt'
+        # data_file_old_txt = 'satSit20220914.txt';
+        # data_file_old_txt = 'ampHiFailSlow20220914.txt';
+        # data_file_old_txt = 'vHiFail v20220917a.txt'
+        # data_file_old_txt = 'pulse20220914.txt'; init_time_in=-0.001;
+        # data_file_old_txt = 'tbFailMod20220914.txt'
+        # data_file_old_txt = 'tbFailHdwe20220914.txt'
         # data_file_old_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
         # data_file_old_txt = 'real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
         # data_file_old_txt = 'real world Xp20 30C 20220917.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -11110
-        # data_file_old_txt = 'EKF_Track v20220917.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'EKF_Track Dr2000 v20220917.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'gorilla v20220917a.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'on_off_on v20220917a.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'start_up v20220917a.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'EKF_Track Dr2000 fault v20220917.txt'; unit_key = 'pro_2022'
+        # data_file_old_txt = 'EKF_Track v20220917.txt'
+        # data_file_old_txt = 'EKF_Track Dr2000 v20220917.txt'
+        # data_file_old_txt = 'gorilla v20220917a.txt'
+        # data_file_old_txt = 'on_off_on v20220917a.txt'
+        # data_file_old_txt = 'start_up v20220917a.txt'
+        # data_file_old_txt = 'EKF_Track Dr2000 fault v20220917.txt'
         # data_file_old_txt = 'real world Xp20 v20220917a.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -69900
         # data_file_old_txt = 'weird v20220917d.txt'; unit_key = 'soc0_2022'; scale_in = 1.084
         title_key = "unit,"  # Find one instance of title
