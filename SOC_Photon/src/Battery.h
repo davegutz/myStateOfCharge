@@ -91,7 +91,7 @@ const float T_R_BB[M_H_BB*N_H_BB] = // r(soc, dv) table.    // DAG 9/29/2022 tun
         { 1e-6, 0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030, 1e-6,
           1e-6, 1e-6,  0.014, 0.010, 0.008, 0.010, 0.015, 1e-6,  1e-6,
           1e-6, 1e-6,  1e-6,  0.016, 0.005, 0.010, 1e-6,  1e-6,  1e-6};
-const float max_dv_hys = 0.9;
+#define MAX_DV_HYS      (X_DV_BB[N_H_BB-1])    // Maximum value of hysteresis states, prevent integrator windup
 
 // LION 100 Ah, 12v LiFePO4.  "LION" placeholder.  Data fabricated.   Useful to test weird shapes T=40 (Dt15)
 // shifted Battleborn because don't have real data yet; test structure of program
@@ -153,8 +153,9 @@ public:
   double look_hys(const double dv, const double soc);
   void pretty_print();
   double update(const double dt, const boolean vb_valid, const float soc_min, const float e_wrap);
-  double ioc() { return (ioc_); };
-  double dv_hys() { return (dv_hys_); };
+  double ioc() { return ioc_; };
+  double dv_hys() { return dv_hys_; };
+  void dv_hys(const float st) { dv_hys_ = st; };
   float scale() { return *rp_hys_scale_; };
 protected:
   boolean disabled_;    // Hysteresis disabled by low scale input < 1e-5, T=disabled
@@ -199,6 +200,8 @@ public:
   uint8_t encode(const String mod_str);
   double hys_scale() { return (hys_->scale()); };
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
+  double hys_state() { return (hys_->dv_hys()); };
+  void hys_state(const double st) { hys_->dv_hys(st); };
   void init_battery(const boolean reset, Sensors *Sen);
   void init_hys(const double hys) { hys_->init(hys); };
   double ib() { return (ib_); };            // Battery terminal current, A

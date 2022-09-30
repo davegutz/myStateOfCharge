@@ -141,6 +141,7 @@ void Battery::pretty_print(void)
     Serial.printf("  voc_stat=%7.3f; V\n", voc_stat_);
     Serial.printf("  vsat=%7.3f; V\n", vsat_);
     Serial.printf("  dv_dyn= %7.3f; V\n", dv_dyn_);
+    Serial.printf("  dv_hys=%7.3f; V\n", hys_->dv_hys());
     Serial.printf("  sr=%7.3f; sclr\n", sr_);
     Serial.printf("  dt=%7.3f; s\n", dt_);
     Serial.printf(" *rp_nP=%5.2f; P bank, e.g. '2P1S'\n", *rp_nP_);
@@ -445,6 +446,8 @@ void BatteryMonitor::pretty_print(void)
     Serial.printf("  tcharge_ekf=%5.1f; hr\n", tcharge_ekf_);
     Serial.printf("  voc_filt=%7.3f; V\n", voc_filt_);
     Serial.printf("  voc_stat=%7.3f; V\n", voc_stat_);
+    Serial.printf("  voc_soc=%7.3f; V\n", voc_soc_);
+    Serial.printf("  dv_hys=%7.3f; V\n", hys_->dv_hys());
     Serial.printf("  y_filt=%7.3f; Res EKF, V\n", y_filt_);
 }
 
@@ -894,7 +897,7 @@ void Hysteresis::pretty_print()
     Serial.printf("  soc=%8.4f; Input\n", soc_);
     Serial.printf("  res=%7.3f; Var, ohm\n", res_);
     Serial.printf("  dv_dot=%7.3f; V/s\n", dv_dot_);
-    Serial.printf("  dv_hys=%7.3f; Delta state, V\n", dv_hys_);
+    Serial.printf("  dv_hys=%7.3f; Delta state, V, SH\n", dv_hys_);
     Serial.printf("  disabled=%d; input < 1e-5\n", disabled_);
     Serial.printf(" *rp_hys_scale=%6.2f; Slr\n", *rp_hys_scale_);
     Serial.printf("  r(soc, dv):\n");
@@ -925,7 +928,7 @@ double Hysteresis::update(const double dt, const boolean vb_valid, const float s
 
     // Normal ODE integration
     dv_hys_ += dv_dot_ * dt;
-    dv_hys_ = max(min(dv_hys_, max_dv_hys), -max_dv_hys);
+    dv_hys_ = max(min(dv_hys_, MAX_DV_HYS), -MAX_DV_HYS);
     return (dv_hys_ * (*rp_hys_scale_)); // Scale on output only.   Don't retain it for feedback to ode
 }
 

@@ -441,6 +441,15 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("to  %7.3f & %7.3f\n", Mon->hys_scale(), Sen->Sim->hys_scale());
                 break;
 
+              case ( 'H' ):  //   SH<>: state of all hysteresis
+                scale = max(min(cp.input_string.substring(2).toFloat(), MAX_DV_HYS), -MAX_DV_HYS);
+
+                Serial.printf("\nHys::dv_hys %7.3f & %7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
+                Mon->hys_state(scale);
+                Sen->Sim->hys_state(scale);
+                Serial.printf("to  %7.3f & %7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
+                break;
+
               case ( 'm' ):  //   Sm<>:  Amp signal scalar for faults
                 Serial.printf("ShuntAmp.sclr %7.3f to ", Sen->ShuntAmp->sclr());
                 Sen->ShuntAmp->sclr(cp.input_string.substring(2).toFloat());
@@ -1269,6 +1278,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" *SG= "); Serial.printf("%6.3f/%6.3f", Sen->ShuntAmp->rp_shunt_gain_sclr(), Sen->ShuntAmp->rp_shunt_gain_sclr());
   Serial.printf(": rp. scale shunt gains [1]\n"); 
   Serial.printf("  Sh= "); Serial.printf("%6.3f", rp.hys_scale); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
+  Serial.printf("  SH= "); Serial.printf("%6.3f", Sen->Sim->hys_state()); Serial.printf(": hys states [0]\n");
   Serial.printf("  Sm= "); Serial.printf("%6.3f", Sen->ShuntAmp->sclr()); Serial.printf(": sclr amp, [1]\n"); 
   Serial.printf("  Sn= "); Serial.printf("%6.3f", Sen->ShuntNoAmp->sclr()); Serial.printf(": sclr noa [1]\n"); 
   Serial.printf("  Sr=  "); Serial.print(Sen->Sim->Sr()); Serial.println(": Scalar res sim"); 

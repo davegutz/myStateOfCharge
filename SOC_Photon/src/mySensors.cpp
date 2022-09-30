@@ -117,7 +117,7 @@ void Shunt::pretty_print()
   Serial.printf(" ishunt_cal=%7.3f; A\n", ishunt_cal_);
   Serial.printf(" *rp_shunt_gain_sclr=%7.3f; A\n", *rp_shunt_gain_sclr_);
   Serial.printf("Shunt(%s)::", name_.c_str()); Tweak::pretty_print();
-  Serial.printf("Shunt(%s)::", name_.c_str()); Adafruit_ADS1015::pretty_print(name_);
+  // Serial.printf("Shunt(%s)::", name_.c_str()); Adafruit_ADS1015::pretty_print(name_);
 }
 
 // load
