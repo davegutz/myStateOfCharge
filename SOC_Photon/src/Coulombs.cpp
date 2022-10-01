@@ -259,21 +259,21 @@ uint8_t Chemistry::encode(const String mod_str)
 void Chemistry::pretty_print(void)
 {
   Serial.printf("Chemistry:\n");
-  Serial.printf("  dqdt=%7.3f; frac/dg C\n", dqdt);
-  Serial.printf("  low_voc=%7.3f; BMS turn off, V\n", low_voc);
-  Serial.printf("  hys_cap=%7.3f; F\n", hys_cap);
-  Serial.printf("  v_sat=%7.3f; V\n", v_sat);
-  Serial.printf("  dvoc_dt=%7.3f; V/dg C\n", dvoc_dt);
-  Serial.printf("  dvoc=%7.3f; Cal err, V\n", dvoc);
+  Serial.printf("  dqdt%7.3f, frac/dg C\n", dqdt);
+  Serial.printf("  low_voc%7.3f, V\n", low_voc);
+  Serial.printf("  hys_cap%7.3f, F\n", hys_cap);
+  Serial.printf("  v_sat%7.3f, V\n", v_sat);
+  Serial.printf("  dvoc_dt%7.3f, V/dg C\n", dvoc_dt);
+  Serial.printf("  dvoc%7.3f, V\n", dvoc);
   Serial.printf("  Randles:");
-  Serial.printf("   r_0=%9.6f; R0, ohm\n", r_0);
-  Serial.printf("   r_ct=%9.6f; Chg trans, ohm\n", r_ct);
-  Serial.printf("   r_diff=%9.6f; Diffusion, ohm\n", r_diff);
-  Serial.printf("   tau_ct=%7.3f; ct, s (=1/Rct/Cct)\n", tau_ct);
-  Serial.printf("   tau_diff=%7.3f; diff, s (=1/Rdiff/Cdiff)\n", tau_diff);
-  Serial.printf("  tau_sd=%7.3f; EKF. Parasitic disch, s\n", tau_sd);
-  Serial.printf("  r_sd=%7.3f; EKF. Parasitic disch, ohm\n", r_sd);
-  Serial.printf("  r_ss=%7.3f; SS init, ohm\n", r_ss);
+  Serial.printf("   r_0%9.6f, ohm\n", r_0);
+  Serial.printf("   r_ct%9.6f, ohm\n", r_ct);
+  Serial.printf("   r_diff%9.6f, ohm\n", r_diff);
+  Serial.printf("   tau_ct%7.3f, s\n", tau_ct);
+  Serial.printf("   tau_diff%7.3f, s\n", tau_diff);
+  Serial.printf("  tau_sd%7.3f; EKF. Par disch, s\n", tau_sd);
+  Serial.printf("  r_sd%7.3f; EKF. Par disch, ohm\n", r_sd);
+  Serial.printf("  r_ss%7.3f; SS init, ohm\n", r_ss);
   Serial.printf("  voc(t, soc):\n");
   voc_T_->pretty_print();
   Serial.printf("  soc_min(temp_c):\n");
@@ -295,22 +295,22 @@ Coulombs::~Coulombs() {}
 void Coulombs::pretty_print(void)
 {
   Serial.printf("Coulombs:\n");
-  Serial.printf(" q_cap_rated=%9.1f; At t_rated, C\n", q_cap_rated_);
-  Serial.printf(" q_cap_rated_scaled=%9.1f; Act at t_rated_, C\n", q_cap_rated_scaled_);
-  Serial.printf(" q_capacity=%9.1f; Sat q at temp, C\n", q_capacity_);
-  Serial.printf(" q=%9.1f; Avail, except q_min_, C\n", q_);
-  Serial.printf(" q_min=%9.1f; Low volt shutdown, C\n", q_min_);
-  Serial.printf(" delta_q%9.1f; Change since sat, C\n", *rp_delta_q_);
-  Serial.printf(" soc=%8.4f; Frac of q_cap avail (0-1);\n", soc_);
-  Serial.printf(" sat=%d; T=saturated\n", sat_);
-  Serial.printf(" t_rated=%5.1f; Rated, dg C\n", t_rated_);
-  Serial.printf(" t_last=%5.1f; past, dg C\n", *rp_t_last_);
-  Serial.printf(" t_rlim=%7.3f; Tb RL, deg C / s\n", t_rlim_);
-  Serial.printf(" resetting=%d; Coord user testing of CC\n", resetting_);
-  Serial.printf(" soc_min=%8.4f; soc BMS shuts off\n", soc_min_);
-  Serial.printf(" mod=%s; Chem e.g. Battleborn or LION\n", chem_.decode(mod_code()).c_str());
-  Serial.printf(" mod_code=%d; Chem code\n", mod_code());
-  Serial.printf(" coul_eff=%9.5f; Coul Eff\n", coul_eff_);
+  Serial.printf(" q_cap_rated %9.1f, C\n", q_cap_rated_);
+  Serial.printf(" q_cap_rated_scaled %9.1f, C\n", q_cap_rated_scaled_);
+  Serial.printf(" q_capacity %9.1f, C\n", q_capacity_);
+  Serial.printf(" q %9.1f, C\n", q_);
+  Serial.printf(" q_min %9.1f, C\n", q_min_);
+  Serial.printf(" delta_q %9.1f, C\n", *rp_delta_q_);
+  Serial.printf(" soc %8.4f\n", soc_);
+  Serial.printf(" sat %d\n", sat_);
+  Serial.printf(" t_rated %5.1f dg C\n", t_rated_);
+  Serial.printf(" t_last %5.1f dg C\n", *rp_t_last_);
+  Serial.printf(" t_rlim %7.3f dg C / s\n", t_rlim_);
+  Serial.printf(" resetting %d\n", resetting_);
+  Serial.printf(" soc_min %8.4f\n", soc_min_);
+  Serial.printf(" mod %s\n", chem_.decode(mod_code()).c_str());
+  Serial.printf(" mod_code %d\n", mod_code());
+  Serial.printf(" coul_eff %9.5f\n", coul_eff_);
   Serial.printf("Coulombs::");
   chem_.pretty_print();
 }

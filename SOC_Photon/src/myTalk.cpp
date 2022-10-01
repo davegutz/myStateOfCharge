@@ -413,7 +413,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 scale = cp.input_string.substring(2).toFloat();
                 rp.s_cap_model = scale;
             
-                Serial.printf("Sim.q_cap_rated scaled by %7.3f %7.3f to ", scale, Sen->Sim->q_cap_scaled());
+                Serial.printf("Sim.q_cap_rated %7.3f %7.3f to ", scale, Sen->Sim->q_cap_scaled());
             
                 Sen->Sim->apply_cap_scale(rp.s_cap_model);
                 if ( rp.modeling ) Mon->init_soc_ekf(Sen->Sim->soc());
@@ -424,7 +424,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             
               case ( 'G' ):  // * SG<>: scale shunt gain both shunts simultaneously
                 scale = cp.input_string.substring(2).toFloat();
-                Serial.printf("shunt gn scl simultaneous %7.3f/%7.3f to ", Sen->ShuntAmp->rp_shunt_gain_sclr(), Sen->ShuntNoAmp->rp_shunt_gain_sclr());
+                Serial.printf("shunt gn scl %7.3f/%7.3f to ", Sen->ShuntAmp->rp_shunt_gain_sclr(), Sen->ShuntNoAmp->rp_shunt_gain_sclr());
                 Sen->ShuntAmp->rp_shunt_gain_sclr(scale);
                 Sen->ShuntNoAmp->rp_shunt_gain_sclr(scale);
                 Serial.printf("%7.3f/%7.3f\n", Sen->ShuntAmp->rp_shunt_gain_sclr(), Sen->ShuntNoAmp->rp_shunt_gain_sclr());
@@ -598,7 +598,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( rp.debug )
             {
               case ( -1 ):  // l-1:
-                Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt_amp  ,Ishunt_noa  ,Vbat_fo*10-110  ,voc_s*10-110  ,dv_dyn_s*10  ,v_s*10-110  , voc_dyn*10-110,,,,,,,,,,,\n");
+                // Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt_amp  ,Ishunt_noa  ,Vbat_fo*10-110  ,voc_s*10-110  ,dv_dyn_s*10  ,v_s*10-110  , voc_dyn*10-110,,,,,,,,,,,\n");
                 break;
               case ( 14 ):  // l14:
                 print_serial_sim_header();
@@ -716,10 +716,23 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 }
                 break;
 
+              case ( 'h' ):  // Ph:  Print hysteresis
+                Mon->hys_pretty_print();
+                Sen->Sim->hys_pretty_print();
+                Serial.printf("\n Mon    Sim\n");
+                Serial.printf("vb        %5.2f  %5.2f\n", Mon->vb(), Sen->Sim->vb());
+                Serial.printf("voc       %5.2f  %5.2f\n", Mon->voc(), Sen->Sim->voc());
+                Serial.printf("voc_stat  %5.2f  %5.2f\n", Mon->Voc_stat(), Sen->Sim->voc_stat());
+                Serial.printf("dh_hys  %7.3f  %7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
+                Serial.printf("voc_soc   %5.2f\n", Mon->voc_soc());
+                Serial.printf("e_wrap    %7.3f\n", Sen->Flt->e_wrap());
+                Serial.printf("e_wrap_f  %7.3f\n", Sen->Flt->e_wrap_filt());
+                break;
+
               case ( 'm' ):  // Pm:  Print mon
                 if ( !cp.blynking )
                 {
-                  Serial1.printf("\nM:"); Mon->pretty_print();
+                  Serial1.printf("\nM:"); Mon->pretty_print(Sen);
                   Serial1.printf("M::"); Mon->Coulombs::pretty_print();
                   Serial1.printf("M::"); Mon->pretty_print_ss();
                   Serial1.printf("M::"); Mon->EKF_1x1::pretty_print();

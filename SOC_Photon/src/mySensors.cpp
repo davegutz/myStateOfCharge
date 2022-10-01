@@ -108,14 +108,14 @@ Shunt::~Shunt() {}
 void Shunt::pretty_print()
 {
   Serial.printf("Shunt(%s)::\n", name_.c_str());
-  Serial.printf(" port=0x%X;\n", port_);
-  Serial.printf(" bare=%d;\n", bare_);
-  Serial.printf(" *cp_ib_bias=%7.3f; A\n", *cp_ib_bias_);
-  Serial.printf(" *cp_ib_scale=%7.3f; A\n", *cp_ib_scale_);
-  Serial.printf(" v2a_s=%7.2f; A/V\n", v2a_s_);
-  Serial.printf(" vshunt_int=%d; count\n", vshunt_int_);
-  Serial.printf(" ishunt_cal=%7.3f; A\n", ishunt_cal_);
-  Serial.printf(" *rp_shunt_gain_sclr=%7.3f; A\n", *rp_shunt_gain_sclr_);
+  Serial.printf(" port 0x%X;\n", port_);
+  Serial.printf(" bare%d;\n", bare_);
+  Serial.printf(" *cp_ib_bias%7.3f; A\n", *cp_ib_bias_);
+  Serial.printf(" *cp_ib_scale%7.3f; A\n", *cp_ib_scale_);
+  Serial.printf(" v2a_s%7.2f; A/V\n", v2a_s_);
+  Serial.printf(" vshunt_int%d; count\n", vshunt_int_);
+  Serial.printf(" ishunt_cal%7.3f; A\n", ishunt_cal_);
+  Serial.printf(" *rp_shunt_gain_sclr%7.3f; A\n", *rp_shunt_gain_sclr_);
   Serial.printf("Shunt(%s)::", name_.c_str()); Tweak::pretty_print();
   // Serial.printf("Shunt(%s)::", name_.c_str()); Adafruit_ADS1015::pretty_print(name_);
 }

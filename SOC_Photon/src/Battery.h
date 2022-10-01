@@ -57,7 +57,7 @@ const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1,
 #define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction (0.2)
 #define RANDLES_T_MAX   0.31      // Maximum update time of Randles state space model to avoid aliasing and instability (0.31 allows DP3)
 const double MXEPS = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness) (1-1e-6)
-#define HYS_SCALE        1.0      // Scalar on hysteresis.   Best I know is what observed Tb=40C (0.3)
+#define HYS_SCALE        1.0      // Scalar on hysteresis
 #define HYS_SOC_MIN_MARG 0.2      // Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
 #define HYS_SOC_MAX     0.98      // Detect high endpoint condition for reset of hysteresis
 #define HYS_E_WRAP_THR  0.1       // Detect e_wrap going the other way; need to reset dv_hys at endpoints
@@ -209,6 +209,7 @@ public:
   void dv_voc_soc(const float _dv) { dv_voc_soc_ = _dv; };
   float dv_voc_soc() { return dv_voc_soc_; };
   uint8_t encode(const String mod_str);
+  void hys_pretty_print () { hys_->pretty_print(); };
   double hys_scale() { return (hys_->scale()); };
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
   double hys_state() { return (hys_->dv_hys()); };
@@ -291,7 +292,7 @@ public:
   void init_soc_ekf(const double soc);
   boolean is_sat(const boolean reset);
   double K_ekf() { return (K_); };
-  void pretty_print(void);
+  void pretty_print(Sensors *Sen);
   void regauge(const float temp_c);
   float r_sd () { return ( chem_.r_sd ); };
   float r_ss () { return ( chem_.r_ss ); };
