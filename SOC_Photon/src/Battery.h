@@ -59,7 +59,7 @@ const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1,
 const double MXEPS = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness) (1-1e-6)
 #define HYS_SCALE        1.0      // Scalar on hysteresis
 #define HYS_SOC_MIN_MARG 0.2      // Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
-#define HYS_SOC_MAX     0.98      // Detect high endpoint condition for reset of hysteresis
+#define HYS_SOC_MAX     0.99      // Detect high endpoint condition for reset of hysteresis
 #define HYS_E_WRAP_THR  0.1       // Detect e_wrap going the other way; need to reset dv_hys at endpoints
 #define HYS_IB_THR      1.        // Ignore reset if opposite situation exists
 // BattleBorn 100 Ah, 12v LiFePO4
