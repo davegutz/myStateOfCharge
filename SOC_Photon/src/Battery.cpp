@@ -838,6 +838,8 @@ Hysteresis::Hysteresis(const double cap, Chemistry chem, float *rp_hys_scale)
 {
     // Characteristic table
     hys_T_ = new TableInterp2D(chem.n_h, chem.m_h, chem.x_dv, chem.y_soc, chem.t_r);
+    hys_Tx_ = new TableInterp1D(chem.m_h, chem.y_soc, chem.t_x);
+    hys_Tn_ = new TableInterp1D(chem.m_h, chem.y_soc, chem.t_n);
 
 }
 
@@ -902,6 +904,10 @@ void Hysteresis::pretty_print()
     Serial.printf(" *rp_hys_scale=%6.2f; Slr\n", *rp_hys_scale_);
     Serial.printf("  r(soc, dv):\n");
     hys_T_->pretty_print();
+    Serial.printf("  r_max(soc):\n");
+    hys_Tx_->pretty_print();
+    Serial.printf("  r_min(soc):\n");
+    hys_Tn_->pretty_print();
 }
 
 // Dynamic update  // TODO:  change sign of e_wrap everywhere
@@ -927,8 +933,10 @@ double Hysteresis::update(const double dt, const boolean vb_valid, const float s
     }
 
     // Normal ODE integration
+    float dv_max = hys_Tx_->interp(soc_);
+    float dv_min = hys_Tn_->interp(soc_);
     dv_hys_ += dv_dot_ * dt;
-    dv_hys_ = max(min(dv_hys_, MAX_DV_HYS), -MAX_DV_HYS);
+    dv_hys_ = max(min(dv_hys_, dv_max), dv_min);
     return (dv_hys_ * (*rp_hys_scale_)); // Scale on output only.   Don't retain it for feedback to ode
 }
 

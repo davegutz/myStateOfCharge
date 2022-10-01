@@ -19,28 +19,33 @@ __date__ = '$Date: 2022/05/30 13:15:02 $'
 
 import numpy as np
 # from pyDAGx.lookup_table import LookupTable
-from pyDAGx.myTables import TableInterp2D
+from pyDAGx.myTables import TableInterp2D, TableInterp1D
 from unite_pictures import cleanup_fig_files
 
 
 class Hysteresis_20220926:
     # Use variable resistor to create hysteresis from an RC circuit
 
-    def __init__(self, t_dv=None, t_soc=None, t_r=None, cap=3.6e4, scale=1., dv_hys=0.0):
+    def __init__(self, t_dv=None, t_soc=None, t_r=None, t_dv_min=None, t_dv_max=None, cap=3.6e4, scale=1., dv_hys=0.0):
         # Defaults
         if t_dv is None:
-            t_dv = [-0.9, -0.7,   -0.5,  -0.3,  0.0,   0.15,   0.3,   0.7,   0.9]
+            t_dv = [-0.7,   -0.5,  -0.3,  0.0,   0.15,   0.3,   0.7]
         if t_soc is None:
             t_soc = [0, .5, 1]
         if t_r is None:
-            t_r = [1e-6, 0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030, 1e-6,
-                   1e-6, 1e-6,  0.014, 0.010, 0.008, 0.010, 0.015, 1e-6, 1e-6,
-                   1e-6, 1e-6,  1e-6,  0.016, 0.005, 0.010, 1e-6, 1e-6, 1e-6]
-        self.dv_hys_min = -0.3  # read off table for soc=1
-        self.dv_hys_max = 0.7   # read off table for soc=0
+            t_r = [0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
+                   0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
+                   0.016, 0.016, 0.016, 0.005, 0.010, 0.010, 0.010]
+        if t_dv_min is None:
+            t_dv_min = [-0.7, -0.5, -0.3]
+        if t_dv_max is None:
+            t_dv_max = [0.7, 0.3, 0.15]
+
         self.scale = scale
         self.disabled = self.scale < 1e-5
         self.lut = TableInterp2D(t_dv, t_soc, t_r)
+        self.lu_x = TableInterp1D(t_soc, t_dv_max)
+        self.lu_n = TableInterp1D(t_soc, t_dv_min)
         self.cap = cap
         self.res = 0.
         self.soc = 0.
@@ -113,7 +118,10 @@ class Hysteresis_20220926:
                 self.dv_dot = 0.  # break another positive feedback loop
 
         # normal ODE integration
+        dv_max = self.lu_x.interp(x=self.soc)
+        dv_min = self.lu_n.interp(x=self.soc)
         self.dv_hys += self.dv_dot * dt
+        self.dv_hys = max(min(self.dv_hys, dv_max), dv_min)
 
         return self.dv_hys*self.scale
 

@@ -85,7 +85,7 @@ void Chemistry::assign_BB()
   assign_soc_min(N_N_BB, X_SOC_MIN_BB, T_SOC_MIN_BB);
 
   // Hys table
-  assign_hys(N_H_BB, M_H_BB, X_DV_BB, Y_SOC_BB, T_R_BB);
+  assign_hys(N_H_BB, M_H_BB, X_DV_BB, Y_SOC_BB, T_R_BB, T_DV_MAX_BB, T_DV_MIN_BB);
 }
 
 // LION Chemistry
@@ -114,7 +114,7 @@ void Chemistry::assign_LI()
   assign_soc_min(N_N_LI, X_SOC_MIN_LI, T_SOC_MIN_LI);
 
   // Hys table
-  assign_hys(N_H_LI, M_H_LI, X_DV_LI, Y_SOC_LI, T_R_LI);
+  assign_hys(N_H_LI, M_H_LI, X_DV_LI, Y_SOC_LI, T_R_LI, T_DV_MAX_LI, T_DV_MIN_LI);
 }
 
 // LION Chemistry monotonic for EKF
@@ -143,11 +143,11 @@ void Chemistry::assign_LIE()
   assign_soc_min(N_N_LIE, X_SOC_MIN_LIE, T_SOC_MIN_LIE);
 
   // Hys table
-  assign_hys(N_H_LI, M_H_LI, X_DV_LI, Y_SOC_LI, T_R_LI);
+  assign_hys(N_H_LI, M_H_LI, X_DV_LI, Y_SOC_LI, T_R_LI, T_DV_MAX_LI, T_DV_MIN_LI);
 }
 
 // Workhorse assignment function for Hysteresis
-void Chemistry::assign_hys(const int _n_h, const int _m_h, const float *x, const float *y, const float *t)
+void Chemistry::assign_hys(const int _n_h, const int _m_h, const float *x, const float *y, const float *t, const float *tx, const float *tn)
 {
   int i;
 
@@ -155,6 +155,8 @@ void Chemistry::assign_hys(const int _n_h, const int _m_h, const float *x, const
   if ( n_h )  delete x_dv;
   if ( m_h )  delete y_soc;
   if ( m_h && n_h )  delete t_r;
+  if ( m_h )  delete t_x;
+  if ( m_h )  delete t_n;
 
   // Instantiate
   n_h = _n_h;
@@ -162,12 +164,16 @@ void Chemistry::assign_hys(const int _n_h, const int _m_h, const float *x, const
   x_dv = new float[n_h];
   y_soc = new float[m_h];
   t_r = new float[m_h*n_h];
+  t_x = new float[m_h];
+  t_n = new float[m_h];
 
   // Assign
   for (i=0; i<n_h; i++) x_dv[i] = x[i];
   for (i=0; i<m_h; i++) y_soc[i] = y[i];
   for (i=0; i<m_h*n_h; i++) t_r[i] = t[i];
-
+  for (i=0; i<m_h; i++) t_x[i] = tx[i];
+  for (i=0; i<m_h; i++) t_n[i] = tn[i];
+ 
   // Finalize
   //  ...see Class Hysteresis
 }

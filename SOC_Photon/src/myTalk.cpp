@@ -442,7 +442,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'H' ):  //   SH<>: state of all hysteresis
-                scale = max(min(cp.input_string.substring(2).toFloat(), MAX_DV_HYS), -MAX_DV_HYS);
+                scale = cp.input_string.substring(2).toFloat();
 
                 Serial.printf("\nHys::dv_hys %7.3f & %7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
                 Mon->hys_state(scale);

@@ -82,16 +82,19 @@ const float X_SOC_MIN_BB[N_N_BB] =  { 5.,   11.1,  20.,  30.,  40.};  // Tempera
 const float T_SOC_MIN_BB[N_N_BB] =  { 0.10, 0.07,  0.05, 0.00, 0.20}; // soc_min(t).  At 40C BMS shuts off at 12V
 // Hysteresis
 const uint8_t M_H_BB  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
-const uint8_t N_H_BB  = 9;          // Number of dv breakpoints in r(dv) table t_r
+const uint8_t N_H_BB  = 7;          // Number of dv breakpoints in r(dv) table t_r
 const float X_DV_BB[N_H_BB] =       // dv breakpoints for r(soc, dv) table t_r. // DAG 6/13/2022 tune x10 to match data
-        { -0.9, -0.7,  -0.5,  -0.3,  0.0,   0.15,  0.3,   0.7,   0.9 };
+        { -0.7,  -0.5,  -0.3,  0.0,   0.15,  0.3,   0.7};
 const float Y_SOC_BB[M_H_BB] =      // soc breakpoints for r(soc, dv) table t_r
         { 0.0,  0.5,   1.0};
 const float T_R_BB[M_H_BB*N_H_BB] = // r(soc, dv) table.    // DAG 9/29/2022 tune to match hist data
-        { 1e-6, 0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030, 1e-6,
-          1e-6, 1e-6,  0.014, 0.010, 0.008, 0.010, 0.015, 1e-6,  1e-6,
-          1e-6, 1e-6,  1e-6,  0.016, 0.005, 0.010, 1e-6,  1e-6,  1e-6};
-#define MAX_DV_HYS      (X_DV_BB[N_H_BB-1])    // Maximum value of hysteresis states, prevent integrator windup
+        { 0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
+          0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
+          0.016, 0.016, 0.016, 0.005, 0.010, 0.010, 0.010};
+const float T_DV_MAX_BB[M_H_BB] =   // dv_max(soc) table.  Pulled values from insp of T_R_BB where flattens
+        {0.7, 0.3, 0.15};
+const float T_DV_MIN_BB[M_H_BB] =   // dv_max(soc) table.  Pulled values from insp of T_R_BB where flattens
+        {-0.7, -0.5, -0.3};
 
 // LION 100 Ah, 12v LiFePO4.  "LION" placeholder.  Data fabricated.   Useful to test weird shapes T=40 (Dt15)
 // shifted Battleborn because don't have real data yet; test structure of program
@@ -111,15 +114,19 @@ const float X_SOC_MIN_LI[N_N_LI] =  { 5.,   11.1,  20.,  40.};  // Temperature b
 const float T_SOC_MIN_LI[N_N_LI] =  { 0.10, 0.07,  0.05, 0.03}; // soc_min(t)
 // Hysteresis
 const uint8_t M_H_LI  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
-const uint8_t N_H_LI  = 9;          // Number of dv breakpoints in r(dv) table t_r
+const uint8_t N_H_LI  = 7;          // Number of dv breakpoints in r(dv) table t_r
 const float X_DV_LI[N_H_LI] =       // dv breakpoints for r(soc, dv) table t_r
-        { -0.9, -0.7,  -0.5,  -0.3,  0.0,   0.15,  0.3,   0.7,   0.9 };
+        { -0.7,  -0.5,  -0.3,  0.0,   0.15,  0.3,   0.7 };
 const float Y_SOC_LI[M_H_LI] =      // soc breakpoints for r(soc, dv) table t_r
         { 0.0,  0.5,   1.0};
 const float T_R_LI[M_H_LI*N_H_LI] = // r(soc, dv) table.    // DAG 9/29/2022 tune to match hist data
-        { 1e-6, 0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030, 1e-6,
-          1e-6, 1e-6,  0.014, 0.010, 0.008, 0.010, 0.015, 1e-6,  1e-6,
-          1e-6, 1e-6,  1e-6,  0.016, 0.005, 0.010, 1e-6,  1e-6,  1e-6};
+        { 0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
+          0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
+          0.016, 0.016, 0.016, 0.005, 0.010, 0.010, 0.010};
+const float T_DV_MAX_LI[M_H_LI] =   // dv_max(soc) table.  Pulled values from insp of T_R_LI where flattens
+        {0.7, 0.3, 0.15};
+const float T_DV_MIN_LI[M_H_LI] =   // dv_max(soc) table.  Pulled values from insp of T_R_LI where flattens
+        {-0.7, -0.5, -0.3};
 
 
 // LION control EKF curve that is monotonic increasing
@@ -149,13 +156,15 @@ public:
   // functions
   void apply_scale(const float sclr) { *rp_hys_scale_ = max(sclr, 0.); };
   double calculate(const double ib, const double soc);
+  float dv_max(const float soc) { return hys_Tx_->interp(soc); };
+  float dv_min(const float soc) { return hys_Tn_->interp(soc); };
   void init(const double dv_init);
   double look_hys(const double dv, const double soc);
   void pretty_print();
   double update(const double dt, const boolean vb_valid, const float soc_min, const float e_wrap);
   double ioc() { return ioc_; };
   double dv_hys() { return dv_hys_; };
-  void dv_hys(const float st) { dv_hys_ = st; };
+  void dv_hys(const float st) { dv_hys_ = max(min(st, dv_max(soc_)), dv_min(soc_)); };
   float scale() { return *rp_hys_scale_; };
 protected:
   boolean disabled_;    // Hysteresis disabled by low scale input < 1e-5, T=disabled
@@ -168,6 +177,8 @@ protected:
   double dv_dot_;       // Calculated voltage rate, V/s
   double tau_;          // Null time constant, sec
   TableInterp2D *hys_T_;// dv-soc 2-D table, V
+  TableInterp1D *hys_Tx_;// soc 1-D table, V_max
+  TableInterp1D *hys_Tn_;// soc 1-D table, V_min
   float *rp_hys_scale_; // Scalar on output of update
 };
 

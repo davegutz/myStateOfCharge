@@ -48,8 +48,10 @@ struct Chemistry
   uint8_t n_h = 0;  // Number of dv breakpoints in r(soc, dv) table t_r
   uint8_t m_h = 0;  // Number of soc breakpoints in r(soc, dv) table t_r
   float *x_dv;      // dv breakpoints for r(soc, dv) table t_r
-  float *y_soc;     // soc breakpoints for r(soc, dv) table t_r
+  float *y_soc;     // soc breakpoints for r(soc, dv) tables t_r, t_x, t_n
   float *t_r;       // r(soc, dv) table
+  float *t_x;       // r_max(soc) table
+  float *t_n;       // r_min(soc) table
   float v_sat;      // Saturation threshold at temperature, deg C
   float dvoc_dt;    // Change of VOC with operating temperature in range 0 - 50 C V/deg C
   float dvoc;       // Adjustment for calibration error, V
@@ -67,7 +69,7 @@ struct Chemistry
   void assign_LI();   // LION assignment
   void assign_LIE();  // LION monotonic for EKF
   void assign_all_mod(const String mod_str);  // Assignment executive
-  void assign_hys(const int _n_h, const int _m_h, const float *x, const float *y, const float *t); // Worker bee Hys
+  void assign_hys(const int _n_h, const int _m_h, const float *x, const float *y, const float *t, const float *tx, const float *tn); // Worker bee Hys
   void assign_soc_min(const int _n_n, const float *x, const float *t);  // Worker bee SOC_MIN
   void assign_voc_soc(const int _n_s, const int _m_t, const float *x, const float *y, const float *t); // Worker bee VOC_SOC
   String decode(const uint8_t mod);
