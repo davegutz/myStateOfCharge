@@ -415,9 +415,9 @@ Full regression suite:
 	satSitHys:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset
          D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;v2;W5;XR;
           XS;v0;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;
-	offSitHys:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset
-         D^0;Xp0;Xm15;Ca0.02;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;v2;W5;XR;
-          XS;v0;Xp0;Ca.02;W5;Pf;Rf;Pf;v0;
+	offSitHys:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset		
+		D^0;Xp0;Xm7;Ca0.04;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;v2;W5;XR;
+          XS;v0;Xp0;Ca.04;W5;Pf;Rf;Pf;v0;
   ampHiFailSlow:  D^0;Xm7;Ca0.5;v2;W2;Dr1000;DP1;Dm6;Dn0.0001;Fc.02;Fd.5;
                   Xp0;Pf;Rf;W2;+v0;Dr100;Fc1;Fd1;Rf;Pf;
   vHiFail:        D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dv0.25;
