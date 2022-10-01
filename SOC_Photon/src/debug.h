@@ -27,6 +27,7 @@
 #define DEBUG_H_
 #include "mySubs.h"
 
+void debug_h(BatteryMonitor *Mon, Sensors *Sen);
 void debug_m4(BatteryMonitor *Mon, Sensors *Sen);
 void debug_4(BatteryMonitor *Mon, Sensors *Sen);
 // void debug_5(void);

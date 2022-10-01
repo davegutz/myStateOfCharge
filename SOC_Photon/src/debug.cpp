@@ -78,6 +78,29 @@ void debug_m13(Sensors *Sen)
 //     pp.pubList.Tb, pp.pubList.Vb, pp.pubList.Ib, pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge, pp.pubList.Amp_hrs_remaining_soc);
 // }
 
+// Hysteresis pring
+void debug_h(BatteryMonitor *Mon, Sensors *Sen)
+{
+  Mon->hys_pretty_print();
+  Sen->Sim->hys_pretty_print();
+  Serial.printf("\n Mon    Sim\n");
+  Serial.printf("vb        %5.2f  %5.2f\n", Mon->vb(), Sen->Sim->vb());
+  Serial.printf("voc       %5.2f  %5.2f\n", Mon->voc(), Sen->Sim->voc());
+  Serial.printf("voc_stat  %5.2f  %5.2f\n", Mon->Voc_stat(), Sen->Sim->voc_stat());
+  Serial.printf("dh_hys  %7.3f  %7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
+  Serial.printf("voc_soc   %5.2f\n", Mon->voc_soc());
+  Serial.printf("e_wrap   %6.3f\n", Sen->Flt->e_wrap());
+  Serial.printf("e_wrap_f %6.3f\n", Sen->Flt->e_wrap_filt());
+  Serial1.printf("\n Mon    Sim\n");
+  Serial1.printf("vb        %5.2f  %5.2f\n", Mon->vb(), Sen->Sim->vb());
+  Serial1.printf("voc       %5.2f  %5.2f\n", Mon->voc(), Sen->Sim->voc());
+  Serial1.printf("voc_stat  %5.2f  %5.2f\n", Mon->Voc_stat(), Sen->Sim->voc_stat());
+  Serial1.printf("dh_hys  %7.3f  %7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
+  Serial1.printf("voc_soc   %5.2f\n", Mon->voc_soc());
+  Serial1.printf("e_wrap   %6.3f\n", Sen->Flt->e_wrap());
+  Serial1.printf("e_wrap_f %6.3f\n", Sen->Flt->e_wrap_filt());
+}
+
 // Q quick print critical parameters
 void debug_q(BatteryMonitor *Mon, Sensors *Sen)
 {

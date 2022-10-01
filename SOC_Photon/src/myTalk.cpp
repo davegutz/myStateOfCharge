@@ -697,6 +697,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 chit("Pr;", SOON);
                 chit("PM;", SOON);
                 chit("PN;", SOON);
+                chit("Ph;", SOON);
                 chit("Pf;", SOON);
                 break;
 
@@ -717,16 +718,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'h' ):  // Ph:  Print hysteresis
-                Mon->hys_pretty_print();
-                Sen->Sim->hys_pretty_print();
-                Serial.printf("\n Mon    Sim\n");
-                Serial.printf("vb        %5.2f  %5.2f\n", Mon->vb(), Sen->Sim->vb());
-                Serial.printf("voc       %5.2f  %5.2f\n", Mon->voc(), Sen->Sim->voc());
-                Serial.printf("voc_stat  %5.2f  %5.2f\n", Mon->Voc_stat(), Sen->Sim->voc_stat());
-                Serial.printf("dh_hys  %7.3f  %7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
-                Serial.printf("voc_soc   %5.2f\n", Mon->voc_soc());
-                Serial.printf("e_wrap    %7.3f\n", Sen->Flt->e_wrap());
-                Serial.printf("e_wrap_f  %7.3f\n", Sen->Flt->e_wrap_filt());
+                debug_h(Mon, Sen);
                 break;
 
               case ( 'm' ):  // Pm:  Print mon
