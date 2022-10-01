@@ -84,6 +84,10 @@ EKF_R_SD_REV = EKF_R_SD_NORM
 IMAX_NUM = 100000.
 DVOC = -0.05
 VBATT_MIN = 9.0
+HYS_SOC_MIN_MARG = 0.2  # Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
+HYS_SOC_MAX = 0.99  # Detect high endpoint condition for reset of hysteresis
+HYS_E_WRAP_THR = 0.1  # Detect e_wrap going the other way; need to reset dv_hys at endpoints
+HYS_IB_THR = 1.  # Ignore reset if opposite situation exists
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -399,7 +403,10 @@ class BatteryMonitor(Battery, EKF1x1):
         self.dv_dyn = self.vb - self.voc
         # Hysteresis_20220926 model
         self.hys.calculate_hys(self.ib, self.soc)
-        self.dv_hys = self.hys.update(self.dt)*self.s_hys
+        e_wrap = self.voc_soc - self.voc
+        self.dv_hys = self.hys.update(self.dt, soc_min=self.soc_min, soc_min_marg=HYS_SOC_MIN_MARG,
+                                      soc_max=HYS_SOC_MAX, e_wrap=e_wrap, e_wrap_thr=HYS_E_WRAP_THR,
+                                      ib_thr=HYS_IB_THR, trusting_sensors=True)*self.s_hys
         self.voc_stat = self.voc - self.dv_hys
         self.ioc = self.hys.ioc
         self.bms_off = self.temp_c <= low_t or (self.vb < VBATT_MIN and not rp.tweak_test())  # KISS
@@ -691,7 +698,10 @@ class BatterySim(Battery):
         # Dynamic emf
         # Hysteresis_20220926 model
         self.hys.calculate_hys(curr_in, self.soc)
-        self.dv_hys = self.hys.update(self.dt)*self.s_hys
+        e_wrap = self.voc_stat - self.voc
+        self.dv_hys = self.hys.update(self.dt, soc_min=self.soc_min, soc_min_marg=HYS_SOC_MIN_MARG,
+                                      soc_max=HYS_SOC_MAX, e_wrap=e_wrap, e_wrap_thr=HYS_E_WRAP_THR,
+                                      ib_thr=HYS_IB_THR, trusting_sensors=True)*self.s_hys
         self.voc = self.voc_stat + self.dv_hys
         self.ioc = self.hys.ioc
         self.voc = self.voc
