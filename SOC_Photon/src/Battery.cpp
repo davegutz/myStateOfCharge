@@ -271,6 +271,9 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     dt_ =  Sen->T;
     double T_rate = T_RLim->calculate(temp_c_, T_RLIM, T_RLIM, reset, Sen->T);
 
+    // Table lookup
+    voc_soc_ = voc_soc_tab(soc_, Sen->Tb_filt);
+
     // Dynamic emf
     vb_ = Sen->Vb / (*rp_nS_);
     ib_ = Sen->Ib / (*rp_nP_);
@@ -292,7 +295,6 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     // Hysteresis model
     hys_->calculate(ib_, soc_);
     dv_hys_ = hys_->update(dt_, Sen->Flt->vb_sel_stat(), soc_min_, Sen->Flt->e_wrap());  // Sim modeling: vb_valid by definition
-    voc_soc_ = voc_soc_tab(soc_, Sen->Tb_filt);
     voc_stat_ = voc_ - dv_hys_;
     voc_filt_ = SdVb_->update(voc_);
     ioc_ = hys_->ioc();
@@ -920,7 +922,6 @@ double Hysteresis::update(const double dt, const boolean vb_valid, const float s
 
     // Reset if at endpoints.   e_wrap is an actual measurement of hysteresis if trust sensors.  But once
     // dv_hys is reset it regenerates e_wrap so e_wrap in logic breaks that.   Also, dv_hys regenerates dv_dot
-    /*
     if ( soc_ < (soc_min + HYS_SOC_MIN_MARG) && e_wrap < -HYS_E_WRAP_THR && this->ib_ > -HYS_IB_THR && vb_valid )  // Charging
     {
         if ( dv_hys_ < -e_wrap) // one-way nature of compare breaks positive feedback loop
@@ -929,20 +930,19 @@ double Hysteresis::update(const double dt, const boolean vb_valid, const float s
             dv_dot_ = 0.;       // break another positive feedback loop
         }
     }
-    else if ( soc_ > HYS_SOC_MAX && e_wrap > +HYS_E_WRAP_THR && vb_valid )  // discharging
-    {
-        if ( dv_hys_ > -e_wrap && ib_ < HYS_IB_THR) // one-way nature of compare breaks positive feedback loop
-        {
-            dv_hys_ = -e_wrap;
-            dv_dot_ = 0.;       // break another positive feedback loop
-        }
-    }
-    */
-    if ( soc_ < (soc_min + HYS_SOC_MIN_MARG) && this->ib_ > -HYS_IB_THR && vb_valid )  // Charging
-    {
-        dv_hys_ = dv_max;
-        dv_dot_ = 0.;       // break another positive feedback loop
-    }
+    // else if ( soc_ > HYS_SOC_MAX && e_wrap > +HYS_E_WRAP_THR && vb_valid )  // discharging
+    // {
+    //     if ( dv_hys_ > -e_wrap && ib_ < HYS_IB_THR) // one-way nature of compare breaks positive feedback loop
+    //     {
+    //         dv_hys_ = -e_wrap;
+    //         dv_dot_ = 0.;       // break another positive feedback loop
+    //     }
+    // }
+    // if ( soc_ < (soc_min + HYS_SOC_MIN_MARG) && this->ib_ > -HYS_IB_THR && vb_valid )  // Charging
+    // {
+    //     dv_hys_ = dv_max;
+    //     dv_dot_ = 0.;       // break another positive feedback loop
+    // }
     else if ( soc_ > HYS_SOC_MAX && vb_valid )  // discharging
     {
         dv_hys_ = dv_min;

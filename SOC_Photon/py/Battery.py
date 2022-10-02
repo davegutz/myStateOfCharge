@@ -388,6 +388,9 @@ class BatteryMonitor(Battery, EKF1x1):
         self.T_Rlim.update(x=self.temp_c, reset=reset, dt=dt, max_=0.017, min_=-.017)
         T_rate = self.T_Rlim.rate
 
+        # Table lookup
+        self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
+
         # Dynamics
         self.vb = vb
         self.ib = max(min(ib, IMAX_NUM), -IMAX_NUM)  # Overflow protection since ib past value used
@@ -404,13 +407,16 @@ class BatteryMonitor(Battery, EKF1x1):
         # Hysteresis_20220926 model
         self.hys.calculate_hys(self.ib, self.soc)
         e_wrap = self.voc_soc - self.voc
+        if reset:
+            print("BM:calc before hys.update voc_soc, voc, e_wrap, dv_hys", self.voc_soc, self.voc, e_wrap, self.dv_hys)
         self.dv_hys = self.hys.update(self.dt, soc_min=self.soc_min, soc_min_marg=HYS_SOC_MIN_MARG,
                                       soc_max=HYS_SOC_MAX, e_wrap=e_wrap, e_wrap_thr=HYS_E_WRAP_THR,
                                       ib_thr=HYS_IB_THR, trusting_sensors=True)*self.s_hys
+        if reset:
+            print("BM:calc after hys.update dv_hys", self.dv_hys)
         self.voc_stat = self.voc - self.dv_hys
         self.ioc = self.hys.ioc
         self.bms_off = self.temp_c <= low_t or (self.vb < VBATT_MIN and not rp.tweak_test())  # KISS
-        self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
         if self.bms_off:
             self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
             self.ib = 0.

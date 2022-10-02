@@ -158,6 +158,7 @@ if __name__ == '__main__':
                 init_time = -4.
         # Get dv_hys from data
         dv_hys = mon_old.dV_hys[0]
+        print("dv_hys[0]", dv_hys)
 
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
