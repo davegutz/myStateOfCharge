@@ -270,14 +270,19 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     vsat_ = calc_vsat();
     dt_ =  Sen->T;
     double T_rate = T_RLim->calculate(temp_c_, T_RLIM, T_RLIM, reset, Sen->T);
+    vb_ = Sen->Vb / (*rp_nS_);
 
     // Table lookup
-    voc_soc_ = voc_soc_tab(soc_, Sen->Tb_filt);
+    voc_soc_ = voc_soc_tab(soc_, temp_c_);
+
+    // Battery management system model
+    bms_off_ = temp_c_ <= chem_.low_t || ( vb_<chem_.low_voc && !Sen->Flt->vb_fa() && !rp.tweak_test() );    // KISS
+    Sen->bms_off = bms_off_;
+    if ( bms_off_ ) ib_ = 0.;
+    else ib_ = Sen->Ib / (*rp_nP_);
+    ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
 
     // Dynamic emf
-    vb_ = Sen->Vb / (*rp_nS_);
-    ib_ = Sen->Ib / (*rp_nP_);
-    ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
     double u[2] = {ib_, vb_};
     Randles_->calc_x_dot(u);
     if ( dt_<=RANDLES_T_MAX )
@@ -287,33 +292,20 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     }
     else    // aliased, unstable if T>0.5  TODO:  consider deleting Randles model (hardware filters)
         voc_ = vb_ - chem_.r_ss * ib_;
-    // if ( rp.debug==35 )
-    // {
-    //     Serial.printf("BatteryMonitor::calculate:"); Randles_->pretty_print();
-    // }
-    dv_dyn_ = vb_ - voc_;
-    // Hysteresis model
-    hys_->calculate(ib_, soc_);
-    dv_hys_ = hys_->update(dt_, Sen->Flt->vb_sel_stat(), soc_min_, Sen->Flt->e_wrap());  // Sim modeling: vb_valid by definition
-    voc_stat_ = voc_ - dv_hys_;
-    voc_filt_ = SdVb_->update(voc_);
-    ioc_ = hys_->ioc();
-    bms_off_ = temp_c_ <= chem_.low_t || ( vb_<VBATT_MIN && !Sen->Flt->vb_fa() && !rp.tweak_test() );    // KISS
-    Sen->bms_off = bms_off_;
     if ( !FAKE_FAULTS )
     {
-        if ( bms_off_ )
+        if ( bms_off_ ||  Sen->Flt->vb_fa())
         {
             voc_ = voc_stat_ = voc_filt_ = voc_soc_;
-            dv_dyn_ = dv_hys_ = 0;
-            ib_ = 0.;   // Give an update to turn back on without faulting
-        }
-        if ( Sen->Flt->vb_fa() )
-        {
-            voc_ = voc_stat_ = voc_filt_ = voc_soc_;
-            dv_dyn_ = dv_hys_ = 0;
         }
     }
+    dv_dyn_ = vb_ - voc_;
+
+    // Hysteresis model
+    hys_->calculate(ib_, soc_);
+    dv_hys_ = hys_->update(dt_, bms_off_, sat_);  // Sim modeling: vb_valid by definition
+    voc_stat_ = voc_ - dv_hys_;
+    ioc_ = hys_->ioc();
 
     // EKF 1x1
     double ddq_dt = ib_;
@@ -328,15 +320,18 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     // Normalize
     soc_ = q_ / q_capacity_;
 
+    // Filter
+    voc_filt_ = SdVb_->update(voc_);   // used for saturation test
     y_filt_ = y_filt->calculate(y_, min(Sen->T, EKF_T_RESET));
-    // if ( rp.debug==7 )
-    //     Serial.printf("calculate:Tb_f,ib,count,soc_ekf,vb,voc,voc_m_s,dv_dyn,dv_hys,err, %7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-    //         Sen->Tb_filt, Sen->Ib, 0, soc_ekf_, vb_, voc_, hx_, dv_dyn_, dv_hys_, y_);
 
     // EKF convergence.  Audio industry found that detection of quietness requires no more than
     // second order filter of the signal.   Anything more is 'gilding the lily'
     boolean conv = abs(y_filt_)<EKF_CONV && !cp.soft_reset;  // Initialize false
     EKF_converged->calculate(conv, EKF_T_CONV, EKF_T_RESET, min(Sen->T, EKF_T_RESET), cp.soft_reset);
+
+    if ( rp.debug==13 || rp.debug==2 )
+        Serial.printf("bms_off,soc,ib,vb,voc,voc_stat,voc_soc,dv_hys,dv_dyn,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+        bms_off_, soc_, ib_, vb_, voc_, voc_stat_, voc_soc_, dv_hys_, dv_dyn_);
 
     // if ( rp.debug==34 || rp.debug==7 )
     //     Serial.printf("BatteryMonitor:dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, soc, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,  %d,\n",
@@ -616,14 +611,13 @@ void BatterySim::assign_randles(void)
 */
 double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset)
 {
+    // Inputs
     temp_c_ = Sen->Tb_filt;
     dt_ = Sen->T;
     ib_in_ = Sen->Ib_model_in;
     if ( reset ) ib_fut_ = ib_in_;
     ib_ = max(min(ib_fut_, IMAX_NUM), -IMAX_NUM);  //  Past value ib_.  Overflow protection when ib_ past value used
-
     vsat_ = calc_vsat();
-
     double soc_lim = max(min(soc_, 1.0), -0.2);  // slightly beyond
 
     // VOC-OCV model
@@ -632,14 +626,19 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
 
     // Battery management system (bms)
     bms_off_ = ( (temp_c_<=chem_.low_t) || ((voc_stat_<chem_.low_voc) && (ib_in_<IB_MIN_UP)) ) && !rp.tweak_test();
-    if ( bms_off_ && rp.mod_ib() ) ib_in_ = 0.;  // keep running sim when real world.  ib_in represents bms
+    if ( bms_off_ )
+    {
+        if ( rp.mod_ib() ) ib_in_ = 0.;  // keep running sim when real world.  ib_in_ represents bms model
+        voc_ = voc_stat_;
+        ib_ = 0.;
+    }
 
-    // Dynamic emf
     // Hysteresis model
     hys_->calculate(ib_in_, soc_);
-    dv_hys_ = hys_->update(dt_, true, soc_min_, Sen->Flt->e_wrap());
+    dv_hys_ = hys_->update(dt_, bms_off_, sat_);
     voc_ = voc_stat_ + dv_hys_;
     ioc_ = hys_->ioc();
+
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
     double u[2] = {ib_, voc_};
     Randles_->calc_x_dot(u);
@@ -650,17 +649,18 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     }
     else    // aliased, unstable if T<0.5.  TODO:  consider deleting Randles model (hardware filters)
         vb_ = voc_ + chem_.r_ss * ib_;
-    dv_dyn_ = vb_ - voc_;
+
     // Special cases override
     if ( bms_off_ )
     {
-        dv_dyn_ = 0.;
-        voc_ = voc_stat_;
+        vb_ = voc_ = voc_stat_;
+        ib_ = 0.;
     }
     if ( bms_off_ && dc_dc_on )
     {
         vb_ = vb_dc_dc;
     }
+    dv_dyn_ = vb_ - voc_;
 
     // Saturation logic, both full and empty
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
@@ -915,38 +915,20 @@ void Hysteresis::pretty_print()
 }
 
 // Dynamic update  // TODO:  change sign of e_wrap everywhere
-double Hysteresis::update(const double dt, const boolean vb_valid, const float soc_min, const float e_wrap)
+double Hysteresis::update(const double dt, const boolean init_low, const boolean init_high)
 {
     float dv_max = hys_Tx_->interp(soc_);
     float dv_min = hys_Tn_->interp(soc_);
 
-    // Reset if at endpoints.   e_wrap is an actual measurement of hysteresis if trust sensors.  But once
-    // dv_hys is reset it regenerates e_wrap so e_wrap in logic breaks that.   Also, dv_hys regenerates dv_dot
-    if ( soc_ < (soc_min + HYS_SOC_MIN_MARG) && e_wrap < -HYS_E_WRAP_THR && this->ib_ > -HYS_IB_THR && vb_valid )  // Charging
+    if ( init_low )
     {
-        if ( dv_hys_ < -e_wrap) // one-way nature of compare breaks positive feedback loop
-        {
-            dv_hys_ = -e_wrap;
-            dv_dot_ = 0.;       // break another positive feedback loop
-        }
+        dv_hys_ = 0.5; // TODO:  hys init values
+        dv_dot_ = 0.;
     }
-    // else if ( soc_ > HYS_SOC_MAX && e_wrap > +HYS_E_WRAP_THR && vb_valid )  // discharging
-    // {
-    //     if ( dv_hys_ > -e_wrap && ib_ < HYS_IB_THR) // one-way nature of compare breaks positive feedback loop
-    //     {
-    //         dv_hys_ = -e_wrap;
-    //         dv_dot_ = 0.;       // break another positive feedback loop
-    //     }
-    // }
-    // if ( soc_ < (soc_min + HYS_SOC_MIN_MARG) && this->ib_ > -HYS_IB_THR && vb_valid )  // Charging
-    // {
-    //     dv_hys_ = dv_max;
-    //     dv_dot_ = 0.;       // break another positive feedback loop
-    // }
-    else if ( soc_ > HYS_SOC_MAX && vb_valid )  // discharging
+    if ( init_high )
     {
-        dv_hys_ = dv_min;
-        dv_dot_ = 0.;       // break another positive feedback loop
+        dv_hys_ = -0.2; // TODO:  hys init values
+        dv_dot_ = 0.;
     }
 
     // Normal ODE integration

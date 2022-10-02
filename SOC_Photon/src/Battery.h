@@ -161,7 +161,7 @@ public:
   void init(const double dv_init);
   double look_hys(const double dv, const double soc);
   void pretty_print();
-  double update(const double dt, const boolean vb_valid, const float soc_min, const float e_wrap);
+  double update(const double dt, const boolean init_low, const boolean init_high);
   double ioc() { return ioc_; };
   double dv_hys() { return dv_hys_; };
   void dv_hys(const float st) { dv_hys_ = max(min(st, dv_max(soc_)), dv_min(soc_)); };

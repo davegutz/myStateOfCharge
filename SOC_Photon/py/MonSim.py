@@ -92,7 +92,6 @@ def save_clean_file_sim(sim_ver, csv_file, unit_key):
 def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
               t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=None, Bmon=None, use_Vb_raw=False,
               scale_r_ss=1., s_hys_sim=1., s_hys_mon=1., dvoc_sim=0., dvoc_mon=0., drive_ekf=False):
-    print("dv_hys[0] replicate", dv_hys)
     if sim_old and len(sim_old.time) < len(mon_old.time):
         t = sim_old.time
     else:
@@ -134,7 +133,6 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
                          scaler_q=s_q, scaler_r=s_r, scale_r_ss=scale_r_ss, s_hys=s_hys_mon, dvoc=dvoc_mon)
     # need Tb input.   perhaps need higher order to enforce basic type 1 response
     Is_sat_delay = TFDelay(in_=mon_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
-    print("instatiate: dv_hys sim/mon", sim.dv_hys, mon.dv_hys)
 
     # time loop
     now = t[0]
@@ -152,8 +150,6 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
         # dc_dc_on = bool(lut_dc.interp(t[i]))
         dc_dc_on = False
 
-        if t[i] < 10:
-            print("toop loop: dv_hys sim/mon", sim.dv_hys, mon.dv_hys)
         if reset:
             sim.apply_soc(soc_s_init, Tb[i])
             rp.delta_q_model = sim.delta_q
@@ -208,14 +204,11 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
         else:
             u_old = None
             z_old = None
-        if t[i] < 10:
-            print("toop loop before mon.calc: reset, dv_hys sim/mon", reset, sim.dv_hys, mon.dv_hys)
         if rp.modeling == 0:
             mon.calculate(_chm_m, Tb_, Vb_, Ib_, T, rp=rp, reset=reset, u_old=u_old, z_old=z_old)
         else:
             mon.calculate(_chm_m, Tb_, Vb_ + randn() * v_std + dv_sense, Ib_ + randn() * i_std + di_sense, T, rp=rp,
                           reset=reset, d_voc=None, u_old=u_old, z_old=z_old)
-        print("toop loop after mon.calc: dv_hys sim/mon", sim.dv_hys, mon.dv_hys)
         sat = is_sat(Tb[i], mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
         if rp.modeling == 0:

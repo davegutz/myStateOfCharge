@@ -103,26 +103,18 @@ class Hysteresis_20220926:
         self.saved.ib.append(self.ib)
         self.saved.ioc.append(self.ioc)
 
-    def update(self, dt, trusting_sensors=False, soc_min=0., soc_min_marg=0., soc_max=.99, e_wrap=0., e_wrap_thr=10.,ib_thr=0.):
+    def update(self, dt, trusting_sensors=False, init_low=False, init_high=False):
         dv_max = self.lu_x.interp(x=self.soc)
         dv_min = self.lu_n.interp(x=self.soc)
 
         # Reset if at endpoints.   e_wrap is an actual measurement of hysteresis if trust sensors.  But once
         # dv_hys is reset it regenerates e_wrap so e_wrap in logic breaks that.   Also, dv_hys regenerates dv_dot
         # so free that  TODO:  change sign of e_wrap everywhere
-        if self.soc < (soc_min + soc_min_marg) and e_wrap < -e_wrap_thr and self.ib > -ib_thr and trusting_sensors:  # charging
-            if self.dv_hys < -e_wrap:  # one-way nature of compare breaks positive feedback loop
-                self.dv_hys = -e_wrap
-                self.dv_dot = 0.  # break another positive feedback loop
-        # elif self.soc > soc_max and e_wrap > +e_wrap_thr and trusting_sensors:  # discharging
-        #     if self.dv_hys > -e_wrap and self.ib < ib_thr:  # one-way nature of compare breaks positive feedback loop
-        #         self.dv_hys = -e_wrap
-        #         self.dv_dot = 0.  # break another positive feedback loop
-        # if self.soc < (soc_min + soc_min_marg) and self.ib > -ib_thr and trusting_sensors:  # charging
-        #     self.dv_hys = dv_max
-        #     self.dv_dot = 0.  # break another positive feedback loop
-        elif self.soc > soc_max and trusting_sensors:  # discharging
-            self.dv_hys = dv_min
+        if init_low:
+            self.dv_hys = 0.5
+            self.dv_dot = 0.  # break another positive feedback loop
+        if init_high:
+            self.dv_hys = -0.2
             self.dv_dot = 0.  # break another positive feedback loop
 
         # normal ODE integration

@@ -67,7 +67,7 @@ void Chemistry::assign_BB()
   dvoc_dt = 0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
   dvoc    = 0.;     // Adjustment for calibration error, V (systematic error; may change in future)
   hys_cap = 3.6e4;  // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data. // div 10 again 9/29/2022
-  low_voc = 9.;     // Voltage threshold for BMS to turn off battery;
+  low_voc = 9.0;     // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
   r_0     = 0.003;  // Randles R0, ohms   
   r_ct    = 0.0016; // Randles charge transfer resistance, ohms

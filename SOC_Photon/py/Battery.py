@@ -88,6 +88,7 @@ HYS_SOC_MIN_MARG = 0.2  # Add to soc_min to set thr for detecting low endpoint c
 HYS_SOC_MAX = 0.99  # Detect high endpoint condition for reset of hysteresis
 HYS_E_WRAP_THR = 0.1  # Detect e_wrap going the other way; need to reset dv_hys at endpoints
 HYS_IB_THR = 1.  # Ignore reset if opposite situation exists
+IB_MIN_UP = 0.2
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -391,9 +392,17 @@ class BatteryMonitor(Battery, EKF1x1):
         # Table lookup
         self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
 
-        # Dynamics
+        # Battery management system model
+        self.bms_off = self.temp_c <= low_t or (self.vb < VBATT_MIN and not rp.tweak_test())  # KISS
+        if self.bms_off:
+            self.ib = 0.
+            self.dv_dyn = 0.
+        else:
+            self.ib = ib
+        self.ib = max(min(self.ib, IMAX_NUM), -IMAX_NUM)  # Overflow protection since ib past value used
+
+        # Dynamic emf
         self.vb = vb
-        self.ib = max(min(ib, IMAX_NUM), -IMAX_NUM)  # Overflow protection since ib past value used
         u = np.array([ib, vb]).T
         self.Randles.calc_x_dot(u)
         if dt < self.t_max:
@@ -403,25 +412,16 @@ class BatteryMonitor(Battery, EKF1x1):
             self.voc = vb - self.r_ss * self.ib
         if d_voc:
             self.voc = d_voc
+        if self.bms_off:
+            self.voc_stat = self.voc_soc
+            self.voc = self.voc_stat
         self.dv_dyn = self.vb - self.voc
+
         # Hysteresis_20220926 model
         self.hys.calculate_hys(self.ib, self.soc)
-        e_wrap = self.voc_soc - self.voc
-        if reset:
-            print("BM:calc before hys.update voc_soc, voc, e_wrap, dv_hys", self.voc_soc, self.voc, e_wrap, self.dv_hys)
-        self.dv_hys = self.hys.update(self.dt, soc_min=self.soc_min, soc_min_marg=HYS_SOC_MIN_MARG,
-                                      soc_max=HYS_SOC_MAX, e_wrap=e_wrap, e_wrap_thr=HYS_E_WRAP_THR,
-                                      ib_thr=HYS_IB_THR, trusting_sensors=True)*self.s_hys
-        if reset:
-            print("BM:calc after hys.update dv_hys", self.dv_hys)
+        self.dv_hys = self.hys.update(self.dt, self.bms_off, self.sat)*self.s_hys
         self.voc_stat = self.voc - self.dv_hys
         self.ioc = self.hys.ioc
-        self.bms_off = self.temp_c <= low_t or (self.vb < VBATT_MIN and not rp.tweak_test())  # KISS
-        if self.bms_off:
-            self.voc_stat, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
-            self.ib = 0.
-            self.voc = self.voc_stat
-            self.dv_dyn = 0.
 
         # EKF 1x1
         ddq_dt = self.ib
@@ -682,35 +682,33 @@ class BatterySim(Battery):
         else:
             print("BatterySim.calculate:  bad chem value=", chem)
             exit(1)
-        self.dt = dt
         self.temp_c = temp_c
-        self.mod = rp.modeling
+        self.dt = dt
         self.ib_in = curr_in
         if reset:
             self.ib_fut = self.ib_in
-        self.ib = self.ib_fut
-
+        self.ib = max(min(self.ib_fut, IMAX_NUM), -IMAX_NUM)
+        self.mod = rp.modeling
         soc_lim = max(min(soc, 1.), -0.2)  # dag 9/3/2022
 
-        # VOC - OCV model
+        # VOC-OCV model
         self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc, temp_c)
         # slightly beyond but don't windup
         self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)
 
-        self.bms_off = ((self.temp_c < low_t) or (self.voc < low_voc)) and not self.tweak_test
+        # Battery management system (bms)
+        self.bms_off = ((self.temp_c < low_t) or ((self.voc < low_voc) and (self.ib_in < IB_MIN_UP))
+                        and not self.tweak_test)
         if self.bms_off:
-            curr_in = 0.
+            self.voc = self.voc_stat
+            self.ib_in = 0.
 
-        # Dynamic emf
         # Hysteresis_20220926 model
         self.hys.calculate_hys(curr_in, self.soc)
-        e_wrap = self.voc_stat - self.voc
-        self.dv_hys = self.hys.update(self.dt, soc_min=self.soc_min, soc_min_marg=HYS_SOC_MIN_MARG,
-                                      soc_max=HYS_SOC_MAX, e_wrap=e_wrap, e_wrap_thr=HYS_E_WRAP_THR,
-                                      ib_thr=HYS_IB_THR, trusting_sensors=True)*self.s_hys
+        self.dv_hys = self.hys.update(self.dt, self.bms_off, self.sat)*self.s_hys
         self.voc = self.voc_stat + self.dv_hys
         self.ioc = self.hys.ioc
-        self.voc = self.voc
+
         # Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
         u = np.array([self.ib, self.voc]).T  # past value self.ib
         self.Randles.calc_x_dot(u)
@@ -720,11 +718,12 @@ class BatterySim(Battery):
         else:  # aliased, unstable if update Randles
             self.vb = self.voc + self.r_ss * self.ib
 
-        self.dv_dyn = self.vb - self.voc
+        if self.bms_off:
+            self.voc = self.voc_stat
+            self.vb = self.voc
         if self.bms_off and dc_dc_on:
             self.vb = 13.5
-            self.dv_dyn = self.voc_stat
-            self.voc = self.voc_stat
+        self.dv_dyn = self.vb - self.voc
 
         # Saturation logic, both full and empty   dag 9/3/2022 modify empty
         self.vsat = self.nom_vsat + (temp_c - 25.) * self.dvoc_dt

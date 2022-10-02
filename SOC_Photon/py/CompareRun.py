@@ -68,7 +68,8 @@ if __name__ == '__main__':
         # data_file_old_txt = 'triTweakDisch v20220917a.txt'
         # data_file_old_txt = 'satSit20220926.txt'
         # data_file_old_txt = 'satSitHys20220926.txt'; #time_end_in=50
-        data_file_old_txt = 'offSitHys20220926.txt'; #time_end_in=50
+        # data_file_old_txt = 'offSitHys20220926.txt'; #time_end_in=50
+        data_file_old_txt = 'offSitHysBms20220926.txt'; #time_end_in=50
         # data_file_old_txt = 'init Ca1 v20220926.txt'
         # data_file_old_txt = 'ampHiFailSlow20220914.txt'
         # data_file_old_txt = 'vHiFail v20220917a.txt'
@@ -158,7 +159,6 @@ if __name__ == '__main__':
                 init_time = -4.
         # Get dv_hys from data
         dv_hys = mon_old.dV_hys[0]
-        print("dv_hys[0]", dv_hys)
 
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
