@@ -209,12 +209,13 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
         else:
             mon.calculate(_chm_m, Tb_, Vb_ + randn() * v_std + dv_sense, Ib_ + randn() * i_std + di_sense, T, rp=rp,
                           reset=reset, d_voc=None, u_old=u_old, z_old=z_old)
+        Ib_charge = mon.ib_charge
         sat = is_sat(Tb[i], mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
         if rp.modeling == 0:
-            mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb[i], charge_curr=Ib_, sat=saturated)
+            mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb[i], charge_curr=Ib_charge, sat=saturated)
         else:
-            mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=temp_c, charge_curr=Ib_, sat=saturated)
+            mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=temp_c, charge_curr=Ib_charge, sat=saturated)
         mon.calc_charge_time(mon.q, mon.q_capacity, charge_curr, mon.soc)
         # mon.regauge(Tb[i])
         mon.assign_soc_s(sim.soc)

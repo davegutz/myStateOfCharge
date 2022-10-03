@@ -255,7 +255,7 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
 
   // Memory store // TODO:  simplify arg list here.  Unpack Sen inside count_coulombs
   // Initialize to ekf when not saturated
-  Mon->count_coulombs(Sen->T, reset_temp, Sen->Tb_filt, Sen->Ib, Sen->saturated, Sen->sclr_coul_eff,
+  Mon->count_coulombs(Sen->T, reset_temp, Sen->Tb_filt, Mon->ib_charge(), Sen->saturated, Sen->sclr_coul_eff,
     Mon->delta_q_ekf());
 
   // Charge time for display

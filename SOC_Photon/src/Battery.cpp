@@ -271,16 +271,24 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     dt_ =  Sen->T;
     double T_rate = T_RLim->calculate(temp_c_, T_RLIM, T_RLIM, reset, Sen->T);
     vb_ = Sen->Vb / (*rp_nS_);
+    ib_ = Sen->Ib / (*rp_nP_);
+    ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
 
     // Table lookup
     voc_soc_ = voc_soc_tab(soc_, temp_c_);
 
     // Battery management system model
-    bms_off_ = temp_c_ <= chem_.low_t || ( voc_stat_<V_BATT_OFF && !Sen->Flt->vb_fa() && !rp.tweak_test() );    // KISS
+    boolean bms_off_local, bms_charging;
+    if ( !bms_off_ )
+        bms_off_local = voc_stat_ < V_BATT_DOWN;
+    else
+        bms_off_local = voc_stat_ < V_BATT_RISING;
+    bms_charging = ib_ > IB_MIN_UP;
+    bms_off_ = (temp_c_ <= chem_.low_t) || ( bms_off_local && !Sen->Flt->vb_fa() && !rp.tweak_test() );    // KISS
     Sen->bms_off = bms_off_;
-    if ( bms_off_ ) ib_ = 0.;
-    else ib_ = Sen->Ib / (*rp_nP_);
-    ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
+    ib_charge_ = ib_;
+    if ( bms_off_ && !bms_charging ) ib_charge_ = 0.;
+    if ( bms_off_ && bms_off_local ) ib_ = 0.;
 
     // Dynamic emf
     double u[2] = {ib_, vb_};
@@ -294,7 +302,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
         voc_ = vb_ - chem_.r_ss * ib_;
     if ( !FAKE_FAULTS )
     {
-        if ( bms_off_ ||  Sen->Flt->vb_fa())
+        if ( (bms_off_ && bms_off_local) ||  Sen->Flt->vb_fa())
         {
             voc_ = voc_stat_ = voc_filt_ = voc_soc_;
         }
@@ -341,11 +349,11 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     //         ib_, vb_, voc_stat_, voc_,     K_, y_, soc_ekf_, y_filt_, converged_ekf());
 
     // Charge time if used ekf 
-    if ( ib_ > 0.1 )
-        tcharge_ekf_ = min(RATED_BATT_CAP / ib_ * (1. - soc_ekf_), 24.);
-    else if ( ib_ < -0.1 )
-        tcharge_ekf_ = max(RATED_BATT_CAP / ib_ * soc_ekf_, -24.);
-    else if ( ib_ >= 0. )
+    if ( ib_charge_ > 0.1 )
+        tcharge_ekf_ = min(RATED_BATT_CAP / ib_charge_ * (1. - soc_ekf_), 24.);
+    else if ( ib_charge_ < -0.1 )
+        tcharge_ekf_ = max(RATED_BATT_CAP / ib_charge_ * soc_ekf_, -24.);
+    else if ( ib_charge_ >= 0. )
         tcharge_ekf_ = 24.*(1. - soc_ekf_);
     else 
         tcharge_ekf_ = -24.*soc_ekf_;

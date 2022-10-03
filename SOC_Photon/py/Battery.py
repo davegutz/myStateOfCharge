@@ -90,6 +90,8 @@ IB_MIN_UP = 0.2  # Min up charge current for come alive, BMS logic, and fault
 V_BATT_OFF = 10.  # Shutoff point in Mon, V (10.)
 V_BATT_DOWN_SIM = 9.5  # Shutoff point in Sim before off, V (9.5)
 V_BATT_RISING_SIM = 9.75  # Shutoff point in Sim when off, V (9.5)
+V_BATT_DOWN = 9.8  # Shutoff point before off, V (9.75)
+V_BATT_RISING = 10.3  # Shutoff point when off, V (10.25)
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -349,6 +351,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.dV_dyn = 0.
         self.Voc_ekf = 0.
         self.T_Rlim = RateLimit()
+        self.ib_charge = 0.
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -389,18 +392,23 @@ class BatteryMonitor(Battery, EKF1x1):
         self.mod = rp.modeling
         self.T_Rlim.update(x=self.temp_c, reset=reset, dt=dt, max_=0.017, min_=-.017)
         T_rate = self.T_Rlim.rate
+        self.ib = max(min(ib, IMAX_NUM), -IMAX_NUM)  # Overflow protection since ib past value used
 
         # Table lookup
         self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
 
         # Battery management system model
-        self.bms_off = self.temp_c <= low_t or (self.voc_stat < V_BATT_OFF and not rp.tweak_test())  # KISS
-        if self.bms_off:
-            self.ib = 0.
-            self.dv_dyn = 0.
+        if not self.bms_off:
+            bms_off_local = self.voc_stat < V_BATT_DOWN
         else:
-            self.ib = ib
-        self.ib = max(min(self.ib, IMAX_NUM), -IMAX_NUM)  # Overflow protection since ib past value used
+            bms_off_local = self.voc_stat < V_BATT_RISING
+        bms_charging = self.ib > IB_MIN_UP
+        self.bms_off = self.temp_c <= low_t or (bms_off_local and not rp.tweak_test())  # KISS
+        self.ib_charge = self.ib
+        if self.bms_off and not bms_charging:
+            self.ib_charge = 0.
+        if self.bms_off and bms_off_local:
+            self.ib = 0.
 
         # Dynamic emf
         self.vb = vb
@@ -413,7 +421,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.voc = vb - self.r_ss * self.ib
         if d_voc:
             self.voc = d_voc
-        if self.bms_off:
+        if self.bms_off and bms_off_local:
             self.voc_stat = self.voc_soc
             self.voc = self.voc_stat
         self.dv_dyn = self.vb - self.voc

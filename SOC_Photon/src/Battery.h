@@ -62,8 +62,10 @@ const double MXEPS = 1-1e-6;      // Level of soc that indicates mathematically 
 #define HYS_IB_THR      1.0       // Ignore reset if opposite situation exists, A (1.0)
 #define HYS_DV_MIN      0.2       // Minimum value of hysteresis reset, V (0.2)
 #define V_BATT_OFF      10.       // Shutoff point in Mon, V (10.)
-#define V_BATT_DOWN_SIM   9.5       // Shutoff point in Sim, V (9.5)
-#define V_BATT_RISING_SIM  9.75      // Shutoff point in Sim when off, V (9.75)
+#define V_BATT_DOWN     9.8       // Shutoff point, V (9.8)
+#define V_BATT_RISING   10.3      // Shutoff point when off, V (10.2)
+#define V_BATT_DOWN_SIM   9.5     // Shutoff point in Sim, V (9.5)
+#define V_BATT_RISING_SIM 9.75    // Shutoff point in Sim when off, V (9.75)
 
 
 // BattleBorn 100 Ah, 12v LiFePO4
@@ -294,6 +296,7 @@ public:
   double delta_q_ekf() { return delta_q_ekf_; };
   double hx() { return hx_; };
   double Hx() { return hx_*(*rp_nS_); };
+  double ib_charge() { return ib_charge_; };
   void init_soc_ekf(const double soc);
   boolean is_sat(const boolean reset);
   double K_ekf() { return K_; };
@@ -330,6 +333,7 @@ protected:
   void ekf_update(double *hx, double *H);
   RateLimit *T_RLim = new RateLimit();
   float voc_soc_;  // Raw table lookup of voc, V
+  double ib_charge_;  // Current input avaiable for charging, A
 };
 
 
