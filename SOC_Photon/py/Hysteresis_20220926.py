@@ -22,6 +22,7 @@ import numpy as np
 from pyDAGx.myTables import TableInterp2D, TableInterp1D
 from unite_pictures import cleanup_fig_files
 
+HYS_DV_MIN = 0.2
 
 class Hysteresis_20220926:
     # Use variable resistor to create hysteresis from an RC circuit
@@ -103,7 +104,7 @@ class Hysteresis_20220926:
         self.saved.ib.append(self.ib)
         self.saved.ioc.append(self.ioc)
 
-    def update(self, dt, trusting_sensors=False, init_low=False, init_high=False):
+    def update(self, dt, trusting_sensors=False, init_low=False, init_high=False, e_wrap=0.):
         dv_max = self.lu_x.interp(x=self.soc)
         dv_min = self.lu_n.interp(x=self.soc)
 
@@ -111,11 +112,11 @@ class Hysteresis_20220926:
         # dv_hys is reset it regenerates e_wrap so e_wrap in logic breaks that.   Also, dv_hys regenerates dv_dot
         # so free that  TODO:  change sign of e_wrap everywhere
         if init_low:
-            self.dv_hys = 0.5
-            self.dv_dot = 0.  # break another positive feedback loop
+            self.dv_hys = max(HYS_DV_MIN, -e_wrap)
+            self.dv_dot = 0.  # break positive feedback loop
         if init_high:
-            self.dv_hys = -0.2
-            self.dv_dot = 0.  # break another positive feedback loop
+            self.dv_hys = -HYS_DV_MIN
+            self.dv_dot = 0.  # break positive feedback loop
 
         # normal ODE integration
         self.dv_hys += self.dv_dot * dt

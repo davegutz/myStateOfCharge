@@ -303,7 +303,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
 
     // Hysteresis model
     hys_->calculate(ib_, soc_);
-    dv_hys_ = hys_->update(dt_, bms_off_, sat_);  // Sim modeling: vb_valid by definition
+    dv_hys_ = hys_->update(dt_, sat_, bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR), Sen->Flt->e_wrap());
     voc_stat_ = voc_ - dv_hys_;
     ioc_ = hys_->ioc();
 
@@ -635,7 +635,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
 
     // Hysteresis model
     hys_->calculate(ib_in_, soc_);
-    dv_hys_ = hys_->update(dt_, bms_off_, sat_);
+    dv_hys_ = hys_->update(dt_, sat_, bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR), 0.0);
     voc_ = voc_stat_ + dv_hys_;
     ioc_ = hys_->ioc();
 
@@ -915,19 +915,19 @@ void Hysteresis::pretty_print()
 }
 
 // Dynamic update  // TODO:  change sign of e_wrap everywhere
-double Hysteresis::update(const double dt, const boolean init_low, const boolean init_high)
+double Hysteresis::update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap)
 {
     float dv_max = hys_Tx_->interp(soc_);
     float dv_min = hys_Tn_->interp(soc_);
 
     if ( init_low )
     {
-        dv_hys_ = 0.5; // TODO:  hys init values
+        dv_hys_ = max(HYS_DV_MIN, -e_wrap); // TODO:  hys init values
         dv_dot_ = 0.;
     }
     if ( init_high )
     {
-        dv_hys_ = -0.2; // TODO:  hys init values
+        dv_hys_ = -HYS_DV_MIN; // TODO:  hys init values
         dv_dot_ = 0.;
     }
 

@@ -21,6 +21,7 @@ import numpy.lib.recfunctions as rf
 import matplotlib.pyplot as plt
 from Hysteresis_20220917d import Hysteresis_20220917d
 from Hysteresis_20220926 import Hysteresis_20220926
+from Battery import is_sat, low_t, low_voc, IB_MIN_UP
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -45,7 +46,7 @@ VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
 
 #  Redesign Hysteresis_20220917d.  Make a new Hysteresis_20220926.py with new curve
 HYS_CAP_REDESIGN = 3.6e4  # faster time constant needed
-HYS_SOC_MIN_MARG = 0.2  # add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
+HYS_SOC_MIN_MARG = 0.15  # add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
 HYS_SOC_MAX = 0.98  # detect high endpoint condition for reset of hysteresis
 HYS_E_WRAP_THR = 0.1  # detect e_wrap going the other way; need to reset dv_hys at endpoints
 HYS_IB_THR = 1.  # ignore reset if opposite situation exists
@@ -180,6 +181,8 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.xlabel('days')
     plt.legend(loc=1)
     plt.subplot(122)
+    plt.plot(hi.time_day, hi.bms_off + 22, marker='h', markersize='3', linestyle='-', color='blue', label='bms_off+22')
+    plt.plot(hi.time_day, hi.sat + 20, marker='s', markersize='3', linestyle='-', color='red', label='sat+20')
     plt.plot(hi.time_day, hi.dscn_fa + 18, marker='o', markersize='3', linestyle='-', color='black', label='dscn_fa+18')
     plt.plot(hi.time_day, hi.ib_diff_fa + 16, marker='^', markersize='3', linestyle='-', color='blue', label='ib_diff_fa+16')
     plt.plot(hi.time_day, hi.wv_fa + 14, marker='s', markersize='3', linestyle='-', color='cyan', label='wrap_vb_fa+14')
@@ -380,6 +383,12 @@ def calculate_capacity(q_cap_rated_scaled=None, dqdt=None, temp=None, t_rated=No
 # Make an array useful for analysis (around temp) and add some metrics
 def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
     h = raw[abs(raw.Tb - temp_corr) < tb_band]
+    h.sat = np.copy(h.Tb)
+    h.bms_off = np.copy(h.Tb)
+    for i in range(len(h.Tb)):
+        h.sat[i] = is_sat(h.Tb[i], h.Voc_dyn[i], h.soc[i])
+        # h.bms_off[i] = (h.Tb[i] < low_t) or ((h.Voc_dyn[i] < low_voc) and (h.Ib[i] < IB_MIN_UP))
+        h.bms_off[i] = (h.Tb[i] < low_t) or ((h.Voc_dyn[i] < 10.5) and (h.Ib[i] < IB_MIN_UP))
 
     # Correct for temp
     q_cap = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=h.Tb, t_rated=BATT_RATED_TEMP)
@@ -447,13 +456,13 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
             ib = np.interp(t_sec, h.time_sec, h.Ib)
             soc = np.interp(t_sec, h.time_sec, h.soc)
             soc_min = np.interp(t_sec, h.time_sec, h.soc_min)
-            e_wrap = np.interp(t_sec, h.time_sec, h.e_wrap)
+            sat = np.interp(t_sec, h.time_sec, h.sat)
+            bms_off = np.interp(t_sec, h.time_sec, h.bms_off) > 0.5
             Voc = np.interp(t_sec, h.time_sec, h.Voc_dyn)
+            e_wrap = np.interp(t_sec, h.time_sec, h.e_wrap)
             hys_redesign.calculate_hys(ib, soc)
-            # dvh = hys_redesign.update(dt_hys_sec, trusting_sensors=True, soc_min=soc_min, soc_min_marg=HYS_SOC_MIN_MARG,
-            #                           soc_max=HYS_SOC_MAX, e_wrap=e_wrap, e_wrap_thr=HYS_E_WRAP_THR)
-            dvh = hys_redesign.update(dt_hys_sec, trusting_sensors=True, soc_min=soc_min, soc_min_marg=HYS_SOC_MIN_MARG,
-                                      soc_max=HYS_SOC_MAX, e_wrap=e_wrap, e_wrap_thr=HYS_E_WRAP_THR, ib_thr=HYS_IB_THR)
+            init_low = bms_off or (soc < (soc_min + HYS_SOC_MIN_MARG) and ib > HYS_IB_THR)
+            dvh = hys_redesign.update(dt_hys_sec, init_high=sat, init_low=init_low, e_wrap=e_wrap)
             res = hys_redesign.res
             ioc = hys_redesign.ioc
             dv_dot = hys_redesign.dv_dot

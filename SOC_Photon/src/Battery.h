@@ -57,11 +57,11 @@ const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1,
 #define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction (0.2)
 #define RANDLES_T_MAX   0.31      // Maximum update time of Randles state space model to avoid aliasing and instability (0.31 allows DP3)
 const double MXEPS = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness) (1-1e-6)
-#define HYS_SCALE        1.0      // Scalar on hysteresis
-#define HYS_SOC_MIN_MARG 0.2      // Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
-#define HYS_SOC_MAX     0.99      // Detect high endpoint condition for reset of hysteresis
-#define HYS_E_WRAP_THR  0.1       // Detect e_wrap going the other way; need to reset dv_hys at endpoints
-#define HYS_IB_THR      1.        // Ignore reset if opposite situation exists
+#define HYS_SCALE       1.0       // Scalar on hysteresis (1.0)
+#define HYS_SOC_MIN_MARG 0.15     // Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis (0.15)
+#define HYS_IB_THR      1.0       // Ignore reset if opposite situation exists, A (1.0)
+#define HYS_DV_MIN      0.2       // Minimum value of hysteresis reset, V (0.2)
+
 // BattleBorn 100 Ah, 12v LiFePO4
 // See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
 // >13.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
@@ -161,7 +161,7 @@ public:
   void init(const double dv_init);
   double look_hys(const double dv, const double soc);
   void pretty_print();
-  double update(const double dt, const boolean init_low, const boolean init_high);
+  double update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap);
   double ioc() { return ioc_; };
   double dv_hys() { return dv_hys_; };
   void dv_hys(const float st) { dv_hys_ = max(min(st, dv_max(soc_)), dv_min(soc_)); };
@@ -202,42 +202,43 @@ public:
   void ds_voc_soc(const float _ds) { ds_voc_soc_ = _ds; };
   float ds_voc_soc() { return ds_voc_soc_; };
   void Dv(const double _dv) { chem_.dvoc = _dv; };
-  double Dv() { return (chem_.dvoc); };
-  double dv_dsoc() { return (dv_dsoc_); };
-  double dv_dyn() { return (dv_dyn_); };
-  double dV_dyn() { return (dv_dyn_*(*rp_nS_)); };
+  double Dv() { return chem_.dvoc; };
+  double dv_dsoc() { return dv_dsoc_; };
+  double dv_dyn() { return dv_dyn_; };
+  double dV_dyn() { return dv_dyn_*(*rp_nS_); };
   void dv_voc_soc(const float _dv) { dv_voc_soc_ = _dv; };
   float dv_voc_soc() { return dv_voc_soc_; };
   uint8_t encode(const String mod_str);
   void hys_pretty_print () { hys_->pretty_print(); };
-  double hys_scale() { return (hys_->scale()); };
+  double hys_scale() { return hys_->scale(); };
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
-  double hys_state() { return (hys_->dv_hys()); };
+  double hys_state() { return hys_->dv_hys(); };
   void hys_state(const double st) { hys_->dv_hys(st); };
   void init_battery(const boolean reset, Sensors *Sen);
   void init_hys(const double hys) { hys_->init(hys); };
-  double ib() { return (ib_); };            // Battery terminal current, A
-  double Ib() { return (ib_*(*rp_nP_)); };  // Battery bank current, A
-  double ioc() { return (ioc_); };
-  double nP() { return (*rp_nP_); };
+  double ib() { return ib_; };            // Battery terminal current, A
+  double Ib() { return ib_*(*rp_nP_); };  // Battery bank current, A
+  double ioc() { return ioc_; };
+  double nP() { return *rp_nP_; };
   void nP(const double np) { *rp_nP_ = np; };
-  double nS() { return (*rp_nS_); };
+  double nS() { return *rp_nS_; };
   void nS(const double ns) { *rp_nS_ = ns; };
   virtual void pretty_print();
   void pretty_print_ss();
   void print_signal(const boolean print) { print_now_ = print; };
   void Sr(const double sr) { sr_ = sr; Randles_->insert_D(0, 0, -chem_.r_0*sr_); };
-  double Sr() { return (sr_); };
-  float temp_c() { return (temp_c_); };    // Battery temperature, deg C
-  double Tb() { return (temp_c_); };        // Battery bank temperature, deg C
-  double vb() { return (vb_); };            // Battery terminal voltage, V
-  double Vb() { return (vb_*(*rp_nS_)); };  // Battery bank voltage, V
-  double voc() { return (voc_); };
-  double Voc() { return (voc_*(*rp_nS_)); };
-  double Voc_stat() { return (voc_stat_*(*rp_nS_)); };
+  double Sr() { return sr_; };
+  float temp_c() { return temp_c_; };    // Battery temperature, deg C
+  double Tb() { return temp_c_; };        // Battery bank temperature, deg C
+  double vb() { return vb_; };            // Battery terminal voltage, V
+  double Vb() { return vb_*(*rp_nS_); };  // Battery bank voltage, V
+  double voc() { return voc_; };
+  double Voc() { return voc_*(*rp_nS_); };
+  double voc_stat() { return voc_stat_; };
+  double Voc_stat() { return voc_stat_*(*rp_nS_); };
   double voc_soc_tab(const double soc, const float temp_c);
-  double vsat() { return (vsat_); };
-  double Vsat() { return (vsat_*(*rp_nS_)); };
+  double vsat() { return vsat_; };
+  double Vsat() { return vsat_*(*rp_nS_); };
 protected:
   double voc_;      // Static model open circuit voltage, V
   double dv_dyn_;   // ib-induced back emf, V
@@ -278,35 +279,35 @@ public:
   ~BatteryMonitor();
   // operators
   // functions
-  double amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_); };
-  double amp_hrs_remaining_soc() { return (amp_hrs_remaining_soc_); };
-  double Amp_hrs_remaining_ekf() { return (amp_hrs_remaining_ekf_*(*rp_nP_)*(*rp_nS_)); };
-  double Amp_hrs_remaining_soc() { return (amp_hrs_remaining_soc_*(*rp_nP_)*(*rp_nS_)); };
+  double amp_hrs_remaining_ekf() { return amp_hrs_remaining_ekf_; };
+  double amp_hrs_remaining_soc() { return amp_hrs_remaining_soc_; };
+  double Amp_hrs_remaining_ekf() { return amp_hrs_remaining_ekf_*(*rp_nP_)*(*rp_nS_); };
+  double Amp_hrs_remaining_soc() { return amp_hrs_remaining_soc_*(*rp_nP_)*(*rp_nS_); };
   virtual void assign_randles(void);
   double calc_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   double calculate(Sensors *Sen, const boolean reset);
-  boolean converged_ekf() { return(EKF_converged->state()); };
-  double delta_q_ekf() { return (delta_q_ekf_); };
-  double hx() { return (hx_); };
-  double Hx() { return (hx_*(*rp_nS_)); };
+  boolean converged_ekf() { return EKF_converged->state(); };
+  double delta_q_ekf() { return delta_q_ekf_; };
+  double hx() { return hx_; };
+  double Hx() { return hx_*(*rp_nS_); };
   void init_soc_ekf(const double soc);
   boolean is_sat(const boolean reset);
-  double K_ekf() { return (K_); };
+  double K_ekf() { return K_; };
   void pretty_print(Sensors *Sen);
   void regauge(const float temp_c);
-  float r_sd () { return ( chem_.r_sd ); };
-  float r_ss () { return ( chem_.r_ss ); };
-  double soc_ekf() { return (soc_ekf_); };
+  float r_sd () { return chem_.r_sd; };
+  float r_ss () { return chem_.r_ss; };
+  double soc_ekf() { return soc_ekf_; };
   boolean solve_ekf(const boolean reset, Sensors *Sen);
-  double tcharge() { return (tcharge_); };
-  double dv_dyn() { return (dv_dyn_); };
-  double dV_dyn() { return (dv_dyn_*(*rp_nS_)); };
-  double voc_filt() { return (voc_filt_); };
-  double Voc_filt() { return (voc_filt_*(*rp_nS_)); };
-  double voc_soc() { return (voc_soc_); };
-  double Voc_tab() { return (voc_soc_*(*rp_nS_)); };
-  double y_ekf() { return (y_); };
-  double y_ekf_filt() { return (y_filt_); };
+  double tcharge() { return tcharge_; };
+  double dv_dyn() { return dv_dyn_; };
+  double dV_dyn() { return dv_dyn_*(*rp_nS_); };
+  double voc_filt() { return voc_filt_; };
+  double Voc_filt() { return voc_filt_*(*rp_nS_); };
+  double voc_soc() { return voc_soc_; };
+  double Voc_tab() { return voc_soc_*(*rp_nS_); };
+  double y_ekf() { return y_; };
+  double y_ekf_filt() { return y_filt_; };
   double delta_q_ekf_;         // Charge deficit represented by charge calculated by ekf, C
 protected:
   double tcharge_ekf_;  // Solved charging time to 100% from ekf, hr
@@ -347,8 +348,8 @@ public:
   void pretty_print(void);
   boolean cutback() { return model_cutback_; };
   boolean saturated() { return model_saturated_; };
-  double voc() { return (voc_); };
-  double voc_stat() { return (voc_stat_); };
+  double voc() { return voc_; };
+  double voc_stat() { return voc_stat_; };
 protected:
   double q_;                // Charge, C
   SinInj *Sin_inj_;         // Class to create sine waves
