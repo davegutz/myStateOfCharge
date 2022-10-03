@@ -104,7 +104,7 @@ class Hysteresis_20220926:
         self.saved.ib.append(self.ib)
         self.saved.ioc.append(self.ioc)
 
-    def update(self, dt, trusting_sensors=False, init_low=False, init_high=False, e_wrap=0.):
+    def update(self, dt, trusting_sensors=False, init_high=False, init_low=False, e_wrap=0.):
         dv_max = self.lu_x.interp(x=self.soc)
         dv_min = self.lu_n.interp(x=self.soc)
 

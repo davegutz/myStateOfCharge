@@ -276,7 +276,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     voc_soc_ = voc_soc_tab(soc_, temp_c_);
 
     // Battery management system model
-    bms_off_ = temp_c_ <= chem_.low_t || ( vb_<chem_.low_voc && !Sen->Flt->vb_fa() && !rp.tweak_test() );    // KISS
+    bms_off_ = temp_c_ <= chem_.low_t || ( voc_stat_<chem_.low_voc && !Sen->Flt->vb_fa() && !rp.tweak_test() );    // KISS
     Sen->bms_off = bms_off_;
     if ( bms_off_ ) ib_ = 0.;
     else ib_ = Sen->Ib / (*rp_nP_);
@@ -329,9 +329,9 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     boolean conv = abs(y_filt_)<EKF_CONV && !cp.soft_reset;  // Initialize false
     EKF_converged->calculate(conv, EKF_T_CONV, EKF_T_RESET, min(Sen->T, EKF_T_RESET), cp.soft_reset);
 
-    if ( rp.debug==13 || rp.debug==2 )
-        Serial.printf("bms_off,soc,ib,vb,voc,voc_stat,voc_soc,dv_hys,dv_dyn,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
-        bms_off_, soc_, ib_, vb_, voc_, voc_stat_, voc_soc_, dv_hys_, dv_dyn_);
+    // if ( rp.debug==13 || rp.debug==2 )
+    //     Serial.printf("bms_off,soc,ib,vb,voc,voc_stat,voc_soc,dv_hys,dv_dyn,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
+    //     bms_off_, soc_, ib_, vb_, voc_, voc_stat_, voc_soc_, dv_hys_, dv_dyn_);
 
     // if ( rp.debug==34 || rp.debug==7 )
     //     Serial.printf("BatteryMonitor:dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, soc, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,  %d,\n",
@@ -625,6 +625,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, vsat_*1.2);  // slightly beyond sat but don't windup
 
     // Battery management system (bms)
+    if ( reset ) vb_ = voc_stat_;
     bms_off_ = ( (temp_c_<=chem_.low_t) || ((voc_stat_<chem_.low_voc) && (ib_in_<IB_MIN_UP)) ) && !rp.tweak_test();
     if ( bms_off_ )
     {

@@ -51,8 +51,8 @@ BATT_DVOC_DT = 0.004  # 5/30/2022
                             >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C"""
 BATT_V_SAT = 13.8  # Normal battery cell saturation for SOC=99.7, V (13.8)
 NOM_SYS_VOLT = 12.  # Nominal system output, V, at which the reported amps are used (12)
-low_voc = 10  # Minimum voltage for battery below which BMS shutsoff current
-low_t = 8  # Minimum temperature for valid saturation check, because BMS shuts off battery low.
+low_voc = 9.  # Minimum voltage for battery below which BMS shutsoff current
+low_t = 8.  # Minimum temperature for valid saturation check, because BMS shuts off battery low.
 # Heater should keep >8, too
 mxeps_bb = 1-1e-6  # Numerical maximum of coefficient model with scaled soc
 mneps_bb = 1e-6  # Numerical minimum of coefficient model without scaled soc
@@ -393,7 +393,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
 
         # Battery management system model
-        self.bms_off = self.temp_c <= low_t or (self.vb < VBATT_MIN and not rp.tweak_test())  # KISS
+        self.bms_off = self.temp_c <= low_t or (self.voc_stat < low_voc and not rp.tweak_test())  # KISS
         if self.bms_off:
             self.ib = 0.
             self.dv_dyn = 0.
@@ -419,7 +419,9 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Hysteresis_20220926 model
         self.hys.calculate_hys(self.ib, self.soc)
-        self.dv_hys = self.hys.update(self.dt, self.bms_off, self.sat)*self.s_hys
+        e_wrap = self.Voc_stat - self.voc_soc
+        init_low = self.bms_off or (self.soc < (self.soc_min + HYS_SOC_MIN_MARG) and self.ib > HYS_IB_THR)
+        self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=e_wrap)*self.s_hys
         self.voc_stat = self.voc - self.dv_hys
         self.ioc = self.hys.ioc
 
@@ -697,7 +699,7 @@ class BatterySim(Battery):
         self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)
 
         # Battery management system (bms)
-        self.bms_off = ((self.temp_c < low_t) or ((self.voc < low_voc) and (self.ib_in < IB_MIN_UP))
+        self.bms_off = ((self.temp_c < low_t) or ((self.voc_stat < low_voc) and (self.ib_in < IB_MIN_UP))
                         and not self.tweak_test)
         if self.bms_off:
             self.voc = self.voc_stat
@@ -705,7 +707,8 @@ class BatterySim(Battery):
 
         # Hysteresis_20220926 model
         self.hys.calculate_hys(curr_in, self.soc)
-        self.dv_hys = self.hys.update(self.dt, self.bms_off, self.sat)*self.s_hys
+        init_low = self.bms_off or (self.soc < (self.soc_min + HYS_SOC_MIN_MARG) and self.ib > HYS_IB_THR)
+        self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=0.)*self.s_hys
         self.voc = self.voc_stat + self.dv_hys
         self.ioc = self.hys.ioc
 

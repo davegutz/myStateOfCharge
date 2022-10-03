@@ -47,8 +47,6 @@ VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
 #  Redesign Hysteresis_20220917d.  Make a new Hysteresis_20220926.py with new curve
 HYS_CAP_REDESIGN = 3.6e4  # faster time constant needed
 HYS_SOC_MIN_MARG = 0.15  # add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
-HYS_SOC_MAX = 0.98  # detect high endpoint condition for reset of hysteresis
-HYS_E_WRAP_THR = 0.1  # detect e_wrap going the other way; need to reset dv_hys at endpoints
 HYS_IB_THR = 1.  # ignore reset if opposite situation exists
 
 # Unix-like cat function
@@ -388,7 +386,7 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
     for i in range(len(h.Tb)):
         h.sat[i] = is_sat(h.Tb[i], h.Voc_dyn[i], h.soc[i])
         # h.bms_off[i] = (h.Tb[i] < low_t) or ((h.Voc_dyn[i] < low_voc) and (h.Ib[i] < IB_MIN_UP))
-        h.bms_off[i] = (h.Tb[i] < low_t) or ((h.Voc_dyn[i] < 10.5) and (h.Ib[i] < IB_MIN_UP))
+        h.bms_off[i] = (h.Tb[i] < low_t) or ((h.Voc_stat[i] < 10.5) and (h.Ib[i] < IB_MIN_UP))
 
     # Correct for temp
     q_cap = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=h.Tb, t_rated=BATT_RATED_TEMP)
