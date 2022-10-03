@@ -276,7 +276,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     voc_soc_ = voc_soc_tab(soc_, temp_c_);
 
     // Battery management system model
-    bms_off_ = temp_c_ <= chem_.low_t || ( voc_stat_<chem_.low_voc && !Sen->Flt->vb_fa() && !rp.tweak_test() );    // KISS
+    bms_off_ = temp_c_ <= chem_.low_t || ( voc_stat_<V_BATT_OFF && !Sen->Flt->vb_fa() && !rp.tweak_test() );    // KISS
     Sen->bms_off = bms_off_;
     if ( bms_off_ ) ib_ = 0.;
     else ib_ = Sen->Ib / (*rp_nP_);
@@ -545,6 +545,7 @@ BatterySim::BatterySim(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_mod
     rand_D_ = new double [rand_q*rand_p];
     assign_randles();
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
+    ib_charge_ = 0.;
 }
 
 // BatterySim::assign_randles:    Assign constants from battery chemistry to arrays for state space model
@@ -624,21 +625,32 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     voc_stat_ = calc_soc_voc(soc_, temp_c_, &dv_dsoc_);
     voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, vsat_*1.2);  // slightly beyond sat but don't windup
 
-    // Battery management system (bms)
-    if ( reset ) vb_ = voc_stat_;
-    bms_off_ = ( (temp_c_<=chem_.low_t) || ((voc_stat_<chem_.low_voc) && (ib_in_<IB_MIN_UP)) ) && !rp.tweak_test();
-    if ( bms_off_ )
-    {
-        if ( rp.mod_ib() ) ib_in_ = 0.;  // keep running sim when real world.  ib_in_ represents bms model
-        voc_ = voc_stat_;
-        ib_ = 0.;
-    }
 
     // Hysteresis model
     hys_->calculate(ib_in_, soc_);
     dv_hys_ = hys_->update(dt_, sat_, bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR), 0.0);
     voc_ = voc_stat_ + dv_hys_;
     ioc_ = hys_->ioc();
+
+    // Battery management system (bms).   I believe bms can see only vb but using this for a model causes
+    // lots of chatter as it shuts off, restores vb due to loss of dynamic current, then repeats shutoff.
+    // Using voc_ is not better because change in dv_hys_ causes the same effect.   So using nice quiet
+    // voc_stat_ for ease of simulation, not accuracy.
+    if ( reset ) vb_ = voc_stat_;
+    boolean bms_off_local, bms_charging;
+    if ( !bms_off_ )
+        bms_off_local = voc_stat_ < V_BATT_DOWN_SIM;
+    else
+        bms_off_local = voc_stat_ < V_BATT_RISING_SIM;
+    bms_charging = ib_in_ > IB_MIN_UP;
+    bms_off_ = (temp_c_ <= chem_.low_t) || (bms_off_local && !rp.tweak_test());
+    ib_charge_ = ib_in_;  // Pass along current to charge unless bms_off
+    if ( bms_off_ && rp.mod_ib() && !bms_charging) ib_charge_ = 0.;
+    if ( bms_off_ && bms_off_local )
+    {
+        ib_ = 0.;
+        voc_ = voc_stat_;
+    }
 
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
     double u[2] = {ib_, voc_};
@@ -649,13 +661,12 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
         vb_ = Randles_->y(0);
     }
     else    // aliased, unstable if T<0.5.  TODO:  consider deleting Randles model (hardware filters)
-        vb_ = voc_ + chem_.r_ss * ib_;
+        vb_ = voc_ + chem_.r_ss * ib_charge_;
 
     // Special cases override
     if ( bms_off_ )
     {
         vb_ = voc_ = voc_stat_;
-        ib_ = 0.;
     }
     if ( bms_off_ && dc_dc_on )
     {
@@ -665,9 +676,9 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
 
     // Saturation logic, both full and empty
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
-    if ( rp.tweak_test() || !rp.modeling ) sat_ib_max_ = ib_in_;   // Disable cutback when real world or when doing tweak_test test
-    ib_fut_ = min(ib_in_/(*rp_nP_), sat_ib_max_);      // the feedback of ib_
-    if ( (q_ <= 0.) && (ib_in_ < 0.) ) ib_fut_ = 0.;   //  empty
+    if ( rp.tweak_test() || !rp.modeling ) sat_ib_max_ = ib_charge_;   // Disable cutback when real world or when doing tweak_test test
+    ib_fut_ = min(ib_charge_/(*rp_nP_), sat_ib_max_);      // the feedback of ib_
+    if ( (q_ <= 0.) && (ib_charge_ < 0.) ) ib_fut_ = 0.;   //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_fut_ == sat_ib_max_);
     model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
@@ -759,7 +770,7 @@ Outputs:
 double BatterySim::count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon) 
 {
     // float charge_curr = Sen->Ib / (*rp_nP_); TODO:  re-run Xp10 with this change
-    float charge_curr = ib_in_;
+    float charge_curr = ib_charge_;
     double d_delta_q = charge_curr * Sen->T;
     if ( charge_curr>0. ) d_delta_q *= coul_eff_;
 

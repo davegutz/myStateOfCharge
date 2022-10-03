@@ -61,6 +61,10 @@ const double MXEPS = 1-1e-6;      // Level of soc that indicates mathematically 
 #define HYS_SOC_MIN_MARG 0.15     // Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis (0.15)
 #define HYS_IB_THR      1.0       // Ignore reset if opposite situation exists, A (1.0)
 #define HYS_DV_MIN      0.2       // Minimum value of hysteresis reset, V (0.2)
+#define V_BATT_OFF      10.       // Shutoff point in Mon, V (10.)
+#define V_BATT_DOWN_SIM   9.5       // Shutoff point in Sim, V (9.5)
+#define V_BATT_RISING_SIM  9.75      // Shutoff point in Sim when off, V (9.75)
+
 
 // BattleBorn 100 Ah, 12v LiFePO4
 // See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
@@ -368,6 +372,7 @@ protected:
   float *rp_s_cap_model_;   // Rated capacity scalar
   double ib_fut_;           // Future value of limited current, A
   double ib_in_;            // Saved value of current input, A
+  double ib_charge_;        // Current input avaiable for charging, A
 };
 
 

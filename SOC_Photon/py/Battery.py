@@ -81,14 +81,15 @@ EKF_R_SD_NORM = 0.5  # Standard deviation of normal EKF state uncertainty, fract
 # EKF_R_SD_REV = 0.3
 EKF_Q_SD_REV = EKF_Q_SD_NORM
 EKF_R_SD_REV = EKF_R_SD_NORM
-IMAX_NUM = 100000.
-DVOC = -0.05
-VBATT_MIN = 9.0
+IMAX_NUM = 100000.  # Overflow protection since ib past value used
 HYS_SOC_MIN_MARG = 0.15  # Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
 HYS_SOC_MAX = 0.99  # Detect high endpoint condition for reset of hysteresis
 HYS_E_WRAP_THR = 0.1  # Detect e_wrap going the other way; need to reset dv_hys at endpoints
 HYS_IB_THR = 1.  # Ignore reset if opposite situation exists
-IB_MIN_UP = 0.2
+IB_MIN_UP = 0.2  # Min up charge current for come alive, BMS logic, and fault
+V_BATT_OFF = 10.  # Shutoff point in Mon, V (10.)
+V_BATT_DOWN_SIM = 9.5  # Shutoff point in Sim before off, V (9.5)
+V_BATT_RISING_SIM = 9.75  # Shutoff point in Sim when off, V (9.5)
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -393,7 +394,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
 
         # Battery management system model
-        self.bms_off = self.temp_c <= low_t or (self.voc_stat < low_voc and not rp.tweak_test())  # KISS
+        self.bms_off = self.temp_c <= low_t or (self.voc_stat < V_BATT_OFF and not rp.tweak_test())  # KISS
         if self.bms_off:
             self.ib = 0.
             self.dv_dyn = 0.
@@ -643,6 +644,7 @@ class BatterySim(Battery):
         self.charge_curr = 0.  # Charge current, A
         self.saved_s = SavedS()  # for plots and prints
         self.ib_in = 0.  # Saved value of current input, A
+        self.ib_charge = 0. # Always used to charge/discharge, A
         self.ib_fut = 0.  # Future value of limited current, A
 
     def __str__(self, prefix=''):
@@ -698,19 +700,29 @@ class BatterySim(Battery):
         # slightly beyond but don't windup
         self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)
 
-        # Battery management system (bms)
-        self.bms_off = ((self.temp_c < low_t) or ((self.voc_stat < low_voc) and (self.ib_in < IB_MIN_UP))
-                        and not self.tweak_test)
-        if self.bms_off:
-            self.voc = self.voc_stat
-            self.ib_in = 0.
-
         # Hysteresis_20220926 model
         self.hys.calculate_hys(curr_in, self.soc)
         init_low = self.bms_off or (self.soc < (self.soc_min + HYS_SOC_MIN_MARG) and self.ib > HYS_IB_THR)
         self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=0.)*self.s_hys
         self.voc = self.voc_stat + self.dv_hys
         self.ioc = self.hys.ioc
+
+        # Battery management system (bms)   I believe bms can see only vb but using this for a model causes
+        # lots of chatter as it shuts off, restores vb due to loss of dynamic current, then repeats shutoff.
+        # Using voc_ is not better because change in dv_hys_ causes the same effect.   So using nice quiet
+        # voc_stat_ for ease of simulation, not accuracy.
+        if not self.bms_off:
+            bms_off_local = self.voc < V_BATT_DOWN_SIM
+        else:
+            bms_off_local = self.voc < V_BATT_RISING_SIM
+        bms_charging = self.ib_in > IB_MIN_UP
+        self.bms_off = ((self.temp_c < low_t) or (bms_off_local and not bms_charging) and not self.tweak_test)
+        self.ib_charge = self.ib_in
+        if self.bms_off and not bms_charging:
+            self.ib_charge = 0.
+        if self.bms_off and bms_off_local:
+            self.voc = self.voc_stat
+            self.ib = 0.
 
         # Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
         u = np.array([self.ib, self.voc]).T  # past value self.ib
@@ -733,9 +745,9 @@ class BatterySim(Battery):
         self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
         # if self.tweak_test:
         if self.tweak_test or (not rp.modeling):
-            self.sat_ib_max = self.ib_in
-        self.ib_fut = min(self.ib_in, self.sat_ib_max)  # the feedback of self.ib
-        if (self.q <= -self.q_cap_rated_scaled*1.2) & (self.ib_in < 0.):
+            self.sat_ib_max = self.ib_charge
+        self.ib_fut = min(self.ib_charge, self.sat_ib_max)  # the feedback of self.ib
+        if (self.q <= -self.q_cap_rated_scaled*1.2) & (self.ib_charge < 0.):
             print("q", self.q, "empty", -self.q_cap_rated_scaled*1.2)
             self.ib_fut = 0.  # empty
         self.model_cutback = (self.voc_stat > self.vsat) & (self.ib_fut == self.sat_ib_max)
