@@ -62,16 +62,14 @@ if __name__ == '__main__':
         # data_file_old_txt = 'ampHiFail v20220926.txt'
         # data_file_old_txt = 'ampLoFail20220914.txt'
         # data_file_old_txt = 'ampHiFailNoise20220914.txt'
-        data_file_old_txt = 'rapidTweakRegression v20220926.txt'
+        # data_file_old_txt = 'rapidTweakRegression v20220926.txt'
         # data_file_old_txt = 'rapidTweakRegression40C_20220914.txt'
         # data_file_old_txt = 'slowTweakRegression20220914.txt'
         # data_file_old_txt = 'triTweakDisch v20220917a.txt'
         # data_file_old_txt = 'satSit20220926.txt'
-        # data_file_old_txt = 'satSitHys20220926.txt'; #time_end_in=50
-        # data_file_old_txt = 'offSitHys20220926.txt'; #time_end_in=50
         # data_file_old_txt = 'offSitHysBms20220926.txt'; #time_end_in=50
         # data_file_old_txt = 'offSitHysBmsNoise20220926.txt'; #time_end_in=50
-        # data_file_old_txt = 'init Ca1 v20220926.txt'
+        data_file_old_txt = 'init Ca1 v20220926.txt'
         # data_file_old_txt = 'ampHiFailSlow20220914.txt'
         # data_file_old_txt = 'vHiFail v20220917a.txt'
         # data_file_old_txt = 'pulse20220914.txt'; init_time_in=-0.001;
