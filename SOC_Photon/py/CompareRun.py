@@ -62,14 +62,15 @@ if __name__ == '__main__':
         # data_file_old_txt = 'ampHiFail v20220926.txt'
         # data_file_old_txt = 'ampLoFail20220914.txt'
         # data_file_old_txt = 'ampHiFailNoise20220914.txt'
-        # data_file_old_txt = 'rapidTweakRegression v20220926.txt'
+        data_file_old_txt = 'rapidTweakRegression v20220926.txt'
         # data_file_old_txt = 'rapidTweakRegression40C_20220914.txt'
         # data_file_old_txt = 'slowTweakRegression20220914.txt'
         # data_file_old_txt = 'triTweakDisch v20220917a.txt'
         # data_file_old_txt = 'satSit20220926.txt'
         # data_file_old_txt = 'satSitHys20220926.txt'; #time_end_in=50
         # data_file_old_txt = 'offSitHys20220926.txt'; #time_end_in=50
-        data_file_old_txt = 'offSitHysBms20220926.txt'; #time_end_in=50
+        # data_file_old_txt = 'offSitHysBms20220926.txt'; #time_end_in=50
+        # data_file_old_txt = 'offSitHysBmsNoise20220926.txt'; #time_end_in=50
         # data_file_old_txt = 'init Ca1 v20220926.txt'
         # data_file_old_txt = 'ampHiFailSlow20220914.txt'
         # data_file_old_txt = 'vHiFail v20220917a.txt'
@@ -177,8 +178,8 @@ if __name__ == '__main__':
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        n_fig, fig_files = overall_batt(mon_ver, sim_ver, randles_ver, filename, fig_files, plot_title=plot_title,
-                                        n_fig=n_fig, suffix='_ver')  # sim over mon verify
+        # n_fig, fig_files = overall_batt(mon_ver, sim_ver, randles_ver, filename, fig_files, plot_title=plot_title,
+        #                                 n_fig=n_fig, suffix='_ver')  # sim over mon verify
         n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig)  # all over all
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)

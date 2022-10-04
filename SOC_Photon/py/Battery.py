@@ -90,8 +90,8 @@ IB_MIN_UP = 0.2  # Min up charge current for come alive, BMS logic, and fault
 V_BATT_OFF = 10.  # Shutoff point in Mon, V (10.)
 V_BATT_DOWN_SIM = 9.5  # Shutoff point in Sim before off, V (9.5)
 V_BATT_RISING_SIM = 9.75  # Shutoff point in Sim when off, V (9.5)
-V_BATT_DOWN = 9.8  # Shutoff point before off, V (9.75)
-V_BATT_RISING = 10.3  # Shutoff point when off, V (10.25)
+V_BATT_DOWN = 9.5  # Shutoff point before off, V (9.75)
+V_BATT_RISING = 10.5  # Shutoff point when off, V (10.25)
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -374,8 +374,9 @@ class BatteryMonitor(Battery, EKF1x1):
     def assign_soc_s(self, soc_s):
         self.soc_s = soc_s
 
-    def calculate(self, chem, temp_c, vb, ib, dt, reset, q_capacity=None, dc_dc_on=None, rp=None, d_voc=None,  # BatteryMonitor
-                  u_old=None, z_old=None):
+    # BatteryMonitor::calculate()
+    def calculate(self, chem, temp_c, vb, ib, dt, reset, q_capacity=None, dc_dc_on=None,  # BatteryMonitor
+                  rp=None, d_voc=None, u_old=None, z_old=None):
         self.chm = chem
         if self.chm == 0:
             self.lut_voc = self.lut_voc0
@@ -403,7 +404,7 @@ class BatteryMonitor(Battery, EKF1x1):
         else:
             bms_off_local = self.voc_stat < V_BATT_RISING
         bms_charging = self.ib > IB_MIN_UP
-        self.bms_off = self.temp_c <= low_t or (bms_off_local and not rp.tweak_test())  # KISS
+        self.bms_off = (self.temp_c <= low_t) or (bms_off_local and not rp.tweak_test())  # KISS
         self.ib_charge = self.ib
         if self.bms_off and not bms_charging:
             self.ib_charge = 0.
@@ -428,7 +429,7 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Hysteresis_20220926 model
         self.hys.calculate_hys(self.ib, self.soc)
-        e_wrap = self.Voc_stat - self.voc_soc
+        e_wrap = self.voc_soc - self.Voc_stat
         init_low = self.bms_off or (self.soc < (self.soc_min + HYS_SOC_MIN_MARG) and self.ib > HYS_IB_THR)
         self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=e_wrap)*self.s_hys
         self.voc_stat = self.voc - self.dv_hys
@@ -683,7 +684,9 @@ class BatterySim(Battery):
         s += Battery.__str__(self, prefix + 'BatterySim:')
         return s
 
-    def calculate(self, chem, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None, sat_init=None):  # BatterySim
+    # BatterySim::calculate()
+    def calculate(self, chem, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset,  # BatterySim
+                  rp=None, sat_init=None):
         self.chm = chem
         if self.chm == 0:
             self.lut_voc = self.lut_voc0
@@ -725,7 +728,7 @@ class BatterySim(Battery):
             bms_off_local = self.voc < V_BATT_RISING_SIM
         bms_charging = self.ib_in > IB_MIN_UP
         self.bms_off = ((self.temp_c < low_t) or (bms_off_local and not bms_charging) and not self.tweak_test)
-        self.ib_charge = self.ib_in
+        self.ib_charge = self.ib_in  # pass along current unless truly off
         if self.bms_off and not bms_charging:
             self.ib_charge = 0.
         if self.bms_off and bms_off_local:

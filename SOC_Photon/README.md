@@ -402,7 +402,7 @@ Full regression suite:
                   DV0;DM0;DN0;Xp0;Rf;W1
 				  0;+v0;Dr100;Rf;Pf;
   ampHiFailNoise: D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;
-                  DV0;DM0;DN0;Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
+                  DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
   rapidTweakRegression:  Xp10;
   rapidTweakRegression40C_:   D^15;Xp10;
                               D^0;
@@ -412,12 +412,19 @@ Full regression suite:
   satSit:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat
          D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-17;Xf0.002;XW10;XT10;XC1;W2;v2;W5;XR;
           XS;v0;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;
-	satSitHys:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset
+	
+  satSitHys:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset
          D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;v2;W5;XR;
           XS;v0;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;
-	offSitHys:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset		
+
+	offSitHysBms:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset		
 		D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;v2;W5;XR;
           XS;v0;Xp0;Ca.05;W5;Pf;Rf;Pf;v0;
+
+	offSitHysBmsNoise:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset		
+		D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.05;DM.2;DN2;Ph;v2;W5;XR;
+          XS;v0;Xp0;DT0;DV0;DM0;DN0;Ca.05;W5;Pf;Rf;Pf;v0;
+
   ampHiFailSlow:  D^0;Xm7;Ca0.5;v2;W2;Dr1000;DP1;Dm6;Dn0.0001;Fc.02;Fd.5;
                   Xp0;Pf;Rf;W2;+v0;Dr100;Fc1;Fd1;Rf;Pf;
   vHiFail:        D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dv0.25;
