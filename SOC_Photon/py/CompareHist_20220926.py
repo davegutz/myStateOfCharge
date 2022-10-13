@@ -30,7 +30,7 @@ BATT_DQDT = 0.01  # Change of charge with temperature, fraction / deg C (0.01 fr
 BATT_DVOC_DT = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V / deg C
 RATED_BATT_CAP = 108.4  # A-hr capacity of test article
 IB_BAND = 1.  # Threshold to declare charging or discharging
-TB_BAND = 5.  # Band around temperature to group data and correct
+TB_BAND = 15.  # Band around temperature to group data and correct
 HYS_SCALE_20220917d = 0.3  # Original hys_remodel scalar inside photon code
 HYS_SCALE_20220926 = 1.0  # Original hys_remodel scalar inside photon code
 
@@ -546,8 +546,8 @@ if __name__ == '__main__':
         # User inputs
         input_files = ['hist v20220926 20221006.txt', 'hist v20220926 20221006a.txt', 'hist v20220926 20221008.txt',
                        'hist v20220926 20221010.txt', 'hist v20220926 20221011.txt']
-        # exclusions = [(1664048488, 1664125892), (1664183495, 1664191685)]  # 30C before full saturation
-        exclusions = None
+        exclusions = [(0, 1665334404)]  # before faults
+        # exclusions = None
         data_file = 'data20220926.txt'
         path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
@@ -579,16 +579,18 @@ if __name__ == '__main__':
                 h_raw = h_raw[np.hstack((test_res0, test_res1))[0]]
         h = add_stuff(h_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
         print(h)
-        voc_soc05 = look_it(x0, lut_voc, 5.)
-        h_05C = filter_Tb(h, 5., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
-        voc_soc11 = look_it(x0, lut_voc, 11.1)
-        h_11C = filter_Tb(h, 11.1, tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        # voc_soc05 = look_it(x0, lut_voc, 5.)
+        # h_05C = filter_Tb(h, 5., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        # voc_soc11 = look_it(x0, lut_voc, 11.1)
+        # h_11C = filter_Tb(h, 11.1, tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        # voc_soc20 = look_it(x0, lut_voc, 20.)
+        # h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        # voc_soc30 = look_it(x0, lut_voc, 30.)
+        # h_30C = filter_Tb(h, 30., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        # voc_soc40 = look_it(x0, lut_voc, 40.)
+        # h_40C = filter_Tb(h, 40., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
         voc_soc20 = look_it(x0, lut_voc, 20.)
         h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
-        voc_soc30 = look_it(x0, lut_voc, 30.)
-        h_30C = filter_Tb(h, 30., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
-        voc_soc40 = look_it(x0, lut_voc, 40.)
-        h_40C = filter_Tb(h, 40., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
 
         # Plots
         n_fig = 0
@@ -596,16 +598,18 @@ if __name__ == '__main__':
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        if len(h_05C.time) > 1:
-            n_fig, fig_files = over_easy(h_05C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_05C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc05, voc_reset=VOC_RESET_05)
-        if len(h_11C.time) > 1:
-            n_fig, fig_files = over_easy(h_11C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_11C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc11, voc_reset=VOC_RESET_11)
+        # if len(h_05C.time) > 1:
+        #     n_fig, fig_files = over_easy(h_05C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_05C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc05, voc_reset=VOC_RESET_05)
+        # if len(h_11C.time) > 1:
+        #     n_fig, fig_files = over_easy(h_11C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_11C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc11, voc_reset=VOC_RESET_11)
+        # if len(h_20C.time) > 1:
+        #     n_fig, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
+        # if len(h_30C.time) > 1:
+        #     n_fig, fig_files = over_easy(h_30C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_30C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc30, voc_reset=VOC_RESET_30)
+        # if len(h_40C.time) > 1:
+        #     n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc40, voc_reset=VOC_RESET_40)
         if len(h_20C.time) > 1:
             n_fig, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
-        if len(h_30C.time) > 1:
-            n_fig, fig_files = over_easy(h_30C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_30C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc30, voc_reset=VOC_RESET_30)
-        if len(h_40C.time) > 1:
-            n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc40, voc_reset=VOC_RESET_40)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=path_to_pdfs)
         cleanup_fig_files(fig_files)
