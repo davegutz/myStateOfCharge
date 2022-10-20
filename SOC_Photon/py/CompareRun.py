@@ -69,7 +69,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'satSit20220926.txt'
         # data_file_old_txt = 'offSitHysBms20220926.txt'; #time_end_in=50
         # data_file_old_txt = 'offSitHysBmsNoise20220926.txt'; #time_end_in=50
-        data_file_old_txt = 'init Ca1 v20220926.txt'
+        # data_file_old_txt = 'init Ca1 v20220926.txt'
         # data_file_old_txt = 'ampHiFailSlow20220914.txt'
         # data_file_old_txt = 'vHiFail v20220917a.txt'
         # data_file_old_txt = 'pulse20220914.txt'; init_time_in=-0.001;
@@ -86,6 +86,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'EKF_Track Dr2000 fault v20220917.txt'
         # data_file_old_txt = 'real world Xp20 v20220917a.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -69900
         # data_file_old_txt = 'weird v20220917d.txt'; unit_key = 'soc0_2022'; scale_in = 1.084
+        data_file_old_txt = 'dwell noise Ca.5 v20220926.txt'
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"

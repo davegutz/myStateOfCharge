@@ -600,9 +600,17 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( -1 ):  // l-1:
                 // Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt_amp  ,Ishunt_noa  ,Vbat_fo*10-110  ,voc_s*10-110  ,dv_dyn_s*10  ,v_s*10-110  , voc_dyn*10-110,,,,,,,,,,,\n");
                 break;
-              case ( 14 ):  // l14:
+              case ( 1 ):  // l1:
+                print_serial_header();
+                break;
+              case ( 2 ):  // l2:
+                print_signal_sel_header();
                 print_serial_sim_header();
-              case ( 4 ):  // l4:
+                print_serial_header();
+                break;
+              case ( 3 ):  // l3:
+                print_serial_ekf_header();
+                print_serial_sim_header();
                 print_serial_header();
                 break;
               default:

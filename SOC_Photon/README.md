@@ -397,9 +397,9 @@ Throughput test
 
 Full regression suite:
   ampHiFail:      D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm50;Dn0.0001;
-                  DV0;DM0;DN0;Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
+                  DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
   ampLoFail:      D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm-50;Dn0.0001;
-                  DV0;DM0;DN0;Xp0;Rf;W1
+                  DT0;DV0;DM0;DN0;Xp0;Rf;W1
 				  0;+v0;Dr100;Rf;Pf;
   ampHiFailNoise: D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;
                   DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
@@ -447,8 +447,10 @@ Full regression suite:
   start_up:  using current
           D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Xts;Xa-500;Xf0.02;XW6;XT6;XC1;Dr100;DP1;v2;XR;
           XS;v0;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;
-
-         
+  
+  dwell Ca.5:
+		DP1;v3;Ca.5;DT.05;DV0.05;DM.2;DN2;Di.1;Dv0.1;
+        Xp0;v0;DT0;DV0;DM0;DN0;
 
 Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
   Bucket:  Bm2;Bs1;D^15;
