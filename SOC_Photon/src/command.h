@@ -42,7 +42,6 @@ struct CommandPars
   char buffer[256];         // Auxiliary print buffer
   String input_string;      // Hold incoming data
   boolean token;            // Whether input_string is complete
-  boolean enable_wifi;      // Enable wifi
   boolean model_cutback;    // On model cutback
   boolean model_saturated;  // Sim on cutback and saturated
   boolean soft_reset;       // Use talk to reset main
@@ -63,7 +62,6 @@ struct CommandPars
   CommandPars(void)
   {
     this->token = false;
-    this->enable_wifi = false;
     this->model_cutback = false;
     this->model_saturated = false;
     this->soft_reset = false;
@@ -91,7 +89,6 @@ struct CommandPars
 
   void large_reset(void)
   {
-    this->enable_wifi = false;
     this->model_cutback = true;
     this->model_saturated = true;
     this->soft_reset = true;
@@ -101,7 +98,6 @@ struct CommandPars
   void pretty_print(void)
   {
     Serial.printf("command parameters(cp):\n");
-    Serial.printf(" enable_wifi=%d; w\n", this->enable_wifi);
     Serial.printf(" model_cutback=%d;\n", this->model_cutback);
     Serial.printf(" model_saturated=%d;\n", this->model_saturated);
     Serial.printf(" soft_reset=%d;\n", this->soft_reset);

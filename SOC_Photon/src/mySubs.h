@@ -71,7 +71,6 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
 void finish_request(void);
 void get_string(String *source);
 void load_ib_vb(const boolean reset, const unsigned long now, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon);
-void manage_wifi(unsigned long now, Wifi *wifi);
 void monitor(const boolean reset, const boolean reset_temp, const unsigned long now,
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen);
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen);

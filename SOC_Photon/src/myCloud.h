@@ -3,28 +3,6 @@
 
 #include "Battery.h"
 
-// Wifi
-struct Wifi
-{
-  unsigned int lastAttempt;
-  unsigned int last_disconnect;
-  boolean connected = false;
-  boolean blynk_started = false;
-  boolean particle_connected_last = false;
-  boolean particle_connected_now = false;
-  Wifi(void) {}
-  Wifi(unsigned int lastAttempt, unsigned int last_disconnect, boolean connected, boolean blynk_started,
-        boolean particle_connected)
-  {
-    this->lastAttempt = lastAttempt;
-    this->last_disconnect = last_disconnect;
-    this->connected = connected;
-    this->blynk_started = blynk_started;
-    this->particle_connected_last = particle_connected;
-    this->particle_connected_now = particle_connected;
-  }
-};
-
 // Publishing
 struct Publish
 {
@@ -58,11 +36,6 @@ struct Publish
   float voc_soc;
 };
 
-void publish1(void);
-void publish2(void);
-void publish3(void);
-void publish4(void);
-void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi);
 void assign_publist(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
   Sensors* Sen, const int num_timeouts, BatteryMonitor* Mon);
 

@@ -35,34 +35,6 @@
 extern CommandPars cp;            // Various parameters to be common at system level (reset on PLC reset)
 extern PublishPars pp;            // For publishing
 
-// Check connection and publish Particle
-void publish_particle(unsigned long now, Wifi *wifi, const boolean enable_wifi)
-{
-  // Forgiving wifi connection logic
-  manage_wifi(now, wifi);
-
-  // Publish if valid
-  if ( wifi->connected )
-  {
-    // Create print string
-    create_print_string(&pp.pubList);
- 
-    unsigned nowSec = now/1000UL;
-    unsigned sec = nowSec%60;
-    unsigned min = (nowSec%3600)/60;
-    unsigned hours = (nowSec%86400)/3600;
-    char publishString[40];     // For uptime recording
-    sprintf(publishString,"%u:%u:%u",hours,min,sec);
-    Particle.publish("Uptime",publishString);
-    Particle.publish("stat", cp.buffer);
-  }
-  else
-  {
-    pp.pubList.num_timeouts++;
-  }
-}
-
-
 // Assignments
 void assign_publist(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
   Sensors* Sen, const int num_timeouts, BatteryMonitor* Mon)

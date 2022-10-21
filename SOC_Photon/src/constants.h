@@ -38,7 +38,6 @@
 // Constants always defined
 #define ONE_HOUR_MILLIS       3600000UL // Number of milliseconds in one hour (60*60*1000)
 #define ONE_DAY_MILLIS        86400000UL// Number of milliseconds in one day (24*60*60*1000)
-#define PUBLISH_BLYNK_DELAY   10000UL   // Blynk cloud updates, ms (10000UL = 10 sec)
 #define PUBLISH_PARTICLE_DELAY 2000UL   // Particle cloud updates (2000UL = 2 sec)
 #define READ_DELAY            100UL     // Sensor read wait, ms (100UL = 0.1 sec)
 #define READ_TEMP_DELAY       6000UL    // Sensor read wait, ms (6000UL = 6 sec)

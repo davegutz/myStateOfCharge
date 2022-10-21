@@ -899,11 +899,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             }
             break;
 
-          case ( 'w' ):  //   w:  toggle wifi
-            cp.enable_wifi = !cp.enable_wifi; // not remembered in rp. Photon reset turns this false
-            Serial.printf("Wifi togg %d\n", cp.enable_wifi);
-            break;
-
           case ( 'W' ):  // W<>:  wait.  Skip
             if ( cp.input_string.substring(1).length() )
             {
@@ -920,15 +915,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
               Serial.printf("..Wait.\n");
             }
-            break;
-
-          case ( 'z' ):  //   z:  toggle Blynk
-            // For this to do anything need #define USE_BLYNK in main.h
-            // I don't think Blynk works with 115200 baud.  Meanwhile 9600 isn't fast enough to prevent
-            // clogging IPC.   If try starting Blynk with 115200 as presently configured both in this application
-            // and on the HC-06 device, the Blynk.begin() blocks after entering 'z' and have to reset.
-            cp.blynking = !cp.blynking;
-            Serial.printf("blynking togg %d\n", cp.blynking);
             break;
 
           case ( 'X' ):  // X
@@ -1360,15 +1346,11 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   // Serial.printf("   v5: OLED display\n");
   // Serial.printf("   v7: EKF solver init\n");
   // Serial.printf("   v8: Randles SS init\n");
-  Serial.printf(" v-11: Summary\n");
   Serial.printf("  v12: EKF\n");
 //  Serial.printf(" v-13: ib_dscn\n");
   Serial.printf("  v14: vshunt and Ib raw\n");
   Serial.printf("  v15: vb raw\n");
   Serial.printf("  v16: Tb\n");
-  #ifdef USE_BLYNK
-    Serial.printf("  v25: Blynk write\n");
-  #endif
   // Serial.printf("  v34: EKF detail\n");
   // Serial.printf("  v35: Randles balance\n");
   // Serial.printf("  v37: EKF short\n");
@@ -1383,8 +1365,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" VS= "); Serial.printf("%6.3f", Sen->Sim->dv_voc_soc()); Serial.println(": Sim vsoc out, V [0]"); 
   Serial.printf(" Vm= "); Serial.printf("%6.3f", Mon->ds_voc_soc()); Serial.println(": Mon soc in [0]"); 
   Serial.printf(" Vs= "); Serial.printf("%6.3f", Sen->Sim->ds_voc_soc()); Serial.println(": Sim soc in[0]"); 
-
-  Serial.printf("\nw togg wifi = "); Serial.println(cp.enable_wifi);
 
   Serial.printf("\nW<?> - iters to wait\n");
 
@@ -1423,7 +1403,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" XT= "); Serial.printf("%7.2f s tail end inj\n", float(Sen->tail_inj)/1000.);
   Serial.printf(" Xu= "); Serial.printf("%d T=ignore Tb read\n", Sen->Flt->fail_tb());
   Serial.printf(" Xv= "); Serial.printf("%4.2f scale Tb 1-wire stale persist\n", Sen->Flt->tb_stale_time_sclr());
-  Serial.printf("\nz togg BLYNK = %d\n", cp.blynking );
   Serial.printf("\n*Xx<> = SRAM saved\n");
   Serial.printf("\nurgency of cmds: -=ASAP,*=SOON, '' or +=QUEUE\n"); 
   Serial.printf("\nh this\n");

@@ -54,6 +54,7 @@
   //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
   #include "application.h"  // Should not be needed if file ino or Arduino
   SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
+  SYSTEM_MODE(MANUAL);      // Turn off wifi
   #include <Arduino.h>      // Used instead of Print.h - breaks Serial
 #else
   #undef PHOTON
@@ -62,32 +63,16 @@
   #undef min
 #endif
 
-#undef USE_BLYNK              // Change this to #define to use BLYNK
-
 #include "constants.h"
 
 // Dependent includes.   Easier to rp.debug code if remove unused include files
 #include "mySync.h"
 #include "mySubs.h"
 
-#ifdef USE_BLYNK
-  #define BLYNK_AUTH_TOKEN  "DU9igmWDh6RuwYh6QAI_fWsi-KPkb7Aa"
-  #define BLYNK_USE_DIRECT_CONNECT
-  #define BLYNK_PRINT Serial
-  #include "Blynk/BlynkSimpleSerialBLE.h"
-  char auth[] = BLYNK_AUTH_TOKEN;
-#endif
-
 #include "mySummary.h"
 #include "myCloud.h"
 #include "Tweak.h"
 #include "debug.h"
-
-#ifdef USE_BLYNK
-  extern BlynkStream Blynk;       // Blynk object
-  extern BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4; // Time Blynk events
-  BlynkTimer blynk_timer_1, blynk_timer_2, blynk_timer_3, blynk_timer_4;        // Time Blynk events
-#endif
 
 // Globals
 extern CommandPars cp;            // Various parameters to be common at system level
@@ -106,7 +91,6 @@ int num_timeouts = 0;           // Number of Particle.connect() needed to unfree
 String hm_string = "00:00";     // time, hh:mm
 Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_SSD1306 *display;      // Main OLED display
-Wifi *myWifi;                   // Manage Wifi
 
 // Setup
 void setup()
@@ -120,14 +104,6 @@ void setup()
   // Bluetooth Serial1.  Use BT-AT project in this GitHub repository to change.  Directions
   // for HC-06 inside main.h of ../../BT-AT/src.   AT+BAUD8; to set 115200.
   Serial1.begin(115200);
-  #ifdef USE_BLYNK
-    if ( cp.blynking )
-    {
-      Serial.printf("Starting Blynk...");
-      Blynk.begin(Serial1, auth);     // Blocking
-      Serial.printf("done");
-    }
-  #endif
 
   // Peripherals
   myPins = new Pins(D6, D7, A1, D2);
@@ -160,21 +136,7 @@ void setup()
 
   // Cloud
   Time.zone(GMT);
-  unsigned long now = millis();
-  myWifi = new Wifi(now-CHECK_INTERVAL+CONNECT_WAIT, now, false, false, Particle.connected());  // lastAttempt, last_disconnect, connected, blynk_started, Particle.connected
-  Serial.printf("Init CLOUD...");
-  Particle.disconnect();
-  myWifi->last_disconnect = now;
   WiFi.off();
-  myWifi->connected = false;
-  if ( rp.debug >= 100 ) Serial.printf("wifi dscn...");
-  #ifdef USE_BLYNK
-    Serial.printf("Set up blynk...");
-    blynk_timer_1.setInterval(PUBLISH_BLYNK_DELAY, publish1);
-    blynk_timer_2.setTimeout(1*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_2.setInterval(PUBLISH_BLYNK_DELAY, publish2);});
-    blynk_timer_3.setTimeout(2*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_3.setInterval(PUBLISH_BLYNK_DELAY, publish3);});
-    blynk_timer_4.setTimeout(3*PUBLISH_BLYNK_DELAY/4, [](){blynk_timer_4.setInterval(PUBLISH_BLYNK_DELAY, publish4);});
-  #endif
   Serial.printf("done CLOUD\n");
 
   // Clean boot logic.  This occurs only when doing a structural rebuild clean make on initial flash, because
@@ -238,20 +200,13 @@ void setup()
 // Loop
 void loop()
 {
+
   // Synchronization
-  boolean publishP;                           // Particle publish, T/F
-  static Sync *PublishParticle = new Sync(PUBLISH_PARTICLE_DELAY);
-
-  boolean publishB;                           // Particle publish, T/F
-  static Sync *PublishBlynk = new Sync(PUBLISH_BLYNK_DELAY);
-
   boolean read;                               // Read, T/F
   static Sync *ReadSensors = new Sync(READ_DELAY);
 
   boolean read_temp;                          // Read temp, T/F
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
-
-  // boolean publishS;                           // Serial print, T/F see cp.publishS
 
   boolean display_to_user;                    // User display, T/F
   static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
@@ -271,7 +226,7 @@ void loop()
   static boolean reset = true;                // Dynamic reset
   static boolean reset_temp = true;           // Dynamic reset
   static boolean reset_publish = true;        // Dynamic reset
- 
+
   // Sensor conversions
   static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins->pin_1_wire, ReadSensors); // Manage sensor data.  Sim is in here.
 
@@ -281,28 +236,7 @@ void loop()
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);   // Time persistence
 
-  
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
-
-  // Run Blynk
-  #ifdef USE_BLYNK
-    static boolean blynk_began = cp.blynking;
-    if ( cp.blynking )
-    {
-      if ( !blynk_began )
-      {
-        Serial.printf("Starting Blynk...\n");
-        Blynk.begin(Serial1, auth);     // Blocking
-        Serial.printf("Starting Blynk done\n");
-        blynk_began = true;
-      }
-      Blynk.run();
-      blynk_timer_1.run();
-      blynk_timer_2.run();
-      blynk_timer_3.run();
-      blynk_timer_4.run(); 
-    }
-  #endif
 
   // Synchronize
   now = millis();
@@ -316,12 +250,10 @@ void loop()
   elapsed = ReadSensors->now() - start;
   control = ControlSync->update(millis(), reset);             //  now || reset
   display_to_user = DisplayUserSync->update(millis(), reset); //  now || reset
-  publishP = PublishParticle->update(millis(), false);        //  now || false
-  publishB = PublishBlynk->update(millis(), false);           //  now || false
   boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !rp.modeling;
   if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
   summarizing = Summarize->update(millis(), false); // now || boot_summ && !rp.modeling
-  summarizing = summarizing || (rp.debug==-11 && publishB) || boot_summ;
+  summarizing = summarizing || boot_summ;
 
   // Load temperature
   // Outputs:   Sen->Tb,  Sen->Tb_filt
@@ -377,32 +309,23 @@ void loop()
     // Print
     print_high_speed_data(reset, Sen, Mon);
 
+    // Publish for variable print rate
+    if ( cp.publishS )
+    {
+      assign_publist(&pp.pubList, ReadSensors->now(), unit, hm_string, Sen, num_timeouts, Mon);
+      static boolean wrote_last_time = false;
+      if ( wrote_last_time )
+        digitalWrite(myPins->status_led, LOW);
+      else
+        digitalWrite(myPins->status_led, HIGH);
+      wrote_last_time = !wrote_last_time;
+    }
   }  // end read (high speed frame)
 
   // OLED and Bluetooth display drivers
   if ( display_to_user )
   {
     oled_display(display, Sen);
-  }
-
-  // Publish to Particle cloud if desired (different than Blynk)
-  // Visit https://console.particle.io/events.   Click on "view events on a terminal"
-  // to get a curl command to run
-  // TODO:  publish_main(publishP, reset_publish, publishS) in myCloud
-  if ( publishP )
-  {
-    assign_publist(&pp.pubList, PublishParticle->now(), unit, hm_string, Sen, num_timeouts, Mon);
- 
-    // Publish to Particle cloud - how data is reduced by SciLab in ../dataReduction
-    if ( publishP )
-    {
-      publish_particle(PublishParticle->now(), myWifi, cp.enable_wifi);
-    }
-    if ( reset_publish )
-      digitalWrite(myPins->status_led, HIGH);
-    else
-      digitalWrite(myPins->status_led, LOW);
-
   }
 
   // Discuss things with the user
@@ -432,59 +355,14 @@ void loop()
 
   // Initialize complete once sensors and models started and summary written
   if ( read ) reset = false;
-
   if ( read_temp && elapsed>TEMP_INIT_DELAY ) reset_temp = false;
-  if ( publishP || cp.publishS ) reset_publish = false;
+  if ( cp.publishS ) reset_publish = false;
 
   // Soft reset
   if ( cp.soft_reset )
   {
-    reset = true;
-    reset_temp = true;
-    reset_publish = true;
+    reset = reset_temp = reset_publish = true;
     Serial.printf("soft reset...\n");
   }
   cp.soft_reset = false;
 } // loop
-
-
-// TODO:  move to myCloud.cpp
-#ifdef USE_BLYNK
-  // Publish1 Blynk
-  void publish1(void)
-  {
-    if (rp.debug==25) Serial.printf("Blynk write1\n");
-    Blynk.virtualWrite(V2,  pp.pubList.Vb);
-    Blynk.virtualWrite(V3,  pp.pubList.Voc);
-    Blynk.virtualWrite(V4,  pp.pubList.Vb);
-  }
-
-
-  // Publish2 Blynk
-  void publish2(void)
-  {
-    if (rp.debug==25) Serial.printf("Blynk write2\n");
-    Blynk.virtualWrite(V6,  pp.pubList.soc);
-    Blynk.virtualWrite(V8,  pp.pubList.T);
-    Blynk.virtualWrite(V10, pp.pubList.Tb);
-  }
-
-
-  // Publish3 Blynk
-  void publish3(void)
-  {
-    if (rp.debug==25) Serial.printf("Blynk write3\n");
-    Blynk.virtualWrite(V15, pp.pubList.hm_string);
-    Blynk.virtualWrite(V16, pp.pubList.tcharge);
-  }
-
-
-  // Publish4 Blynk
-  void publish4(void)
-  {
-    if (rp.debug==25) Serial.printf("Blynk write4\n");
-    Blynk.virtualWrite(V18, pp.pubList.Ib);
-    Blynk.virtualWrite(V20, pp.pubList.Wb);
-    Blynk.virtualWrite(V21, pp.pubList.soc_ekf);
-  }
-#endif

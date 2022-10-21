@@ -29,6 +29,7 @@
 #include "local_config.h"
 #include <math.h>
 #include "debug.h"
+// #include <WiFi.h>
 
 extern CommandPars cp;          // Various parameters shared at system level
 extern PublishPars pp;            // For publishing
@@ -194,42 +195,6 @@ void load_ib_vb(const boolean reset, const unsigned long now, Sensors *Sen, Pins
 
   // Power calculation
   Sen->Wb = Sen->Vb*Sen->Ib;
-}
-
-// Manage wifi
-void manage_wifi(unsigned long now, Wifi *wifi)
-{
-  if ( rp.debug >= 100 )
-  {
-    Serial.printf("P.cn=%i, dscn chk: %ld >=? %ld, on chk: %ld >=? %ld, conf chk: %ld >=? %ld, cn=%i, bly_strt=%i,\n",
-      Particle.connected(), now-wifi->last_disconnect, DISCONNECT_DELAY, now-wifi->lastAttempt,  CHECK_INTERVAL, now-wifi->lastAttempt, CONFIRMATION_DELAY, wifi->connected, wifi->blynk_started);
-  }
-  wifi->particle_connected_now = Particle.connected();
-  if ( wifi->particle_connected_last && !wifi->particle_connected_now )  // reset timer
-  {
-    wifi->last_disconnect = now;
-  }
-  if ( !wifi->particle_connected_now && now-wifi->last_disconnect>=DISCONNECT_DELAY )
-  {
-    wifi->last_disconnect = now;
-    WiFi.off();
-    wifi->connected = false;
-    if ( rp.debug >= 100 ) Serial.printf("wifi off\n");
-  }
-  if ( now-wifi->lastAttempt>=CHECK_INTERVAL && cp.enable_wifi )
-  {
-    wifi->last_disconnect = now;   // Give it a chance
-    wifi->lastAttempt = now;
-    WiFi.on();
-    Particle.connect();
-    if ( rp.debug >= 100 ) Serial.printf("wifi retry\n");
-  }
-  if ( now-wifi->lastAttempt>=CONFIRMATION_DELAY )
-  {
-    wifi->connected = Particle.connected();
-    if ( rp.debug >= 100 ) Serial.printf("wifi dsc chk\n");
-  }
-  wifi->particle_connected_last = wifi->particle_connected_now;
 }
 
 // Calculate Ah remaining
