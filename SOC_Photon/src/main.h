@@ -175,7 +175,7 @@ void setup()
     display->setCursor(0,0);              // Start at top-left corner    rp.print_versus_local_config();
     display->println("Waiting for user talk\n\nignores after 60s");
     display->display();
-    Serial.printf("Do you wish to reset to local? [Y/n]:"); Serial1.printf("Do you wish to reset to local? [Y/n]:");
+    Serial.printf("Do you wish to reset to defaults? [Y/n]:"); Serial1.printf("Do you wish to reset to defaults? [Y/n]:");
     uint8_t count = 0;
     while ( !Serial.available() && !Serial1.available() && ++count<60 ) delay(1000);
     byte answer = 'n';

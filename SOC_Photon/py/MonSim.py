@@ -27,6 +27,7 @@ from TFDelay import TFDelay
 from MonSimNomConfig import *  # Global config parameters.   Overwrite in your own calls for studies
 from datetime import datetime, timedelta
 from Scale import Scale
+from pyDAGx import myTables
 
 
 def save_clean_file(mon_ver, csv_file, unit_key):
@@ -91,7 +92,7 @@ def save_clean_file_sim(sim_ver, csv_file, unit_key):
 
 def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
               t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=None, Bmon=None, use_Vb_raw=False,
-              scale_r_ss=1., s_hys_sim=1., s_hys_mon=1., dvoc_sim=0., dvoc_mon=0., drive_ekf=False):
+              scale_r_ss=1., s_hys_sim=1., s_hys_mon=1., dvoc_sim=0., dvoc_mon=0., drive_ekf=False, dTb_in=None):
     if sim_old and len(sim_old.time) < len(mon_old.time):
         t = sim_old.time
     else:
@@ -119,6 +120,10 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
     print("rp.modeling is ", rp.modeling)
     tweak_test = rp.tweak_test()
     temp_c = mon_old.Tb[0]
+    if dTb_in is not None:
+        dTb_in = np.array(dTb_in)
+        temp_c += dTb_in[1, 0]
+        lut_dTb = myTables.TableInterp1D( np.array(dTb_in[0,:]), np.array(dTb_in[1,:]))
 
     # Setup
     scale = model_bat_cap / Battery.RATED_BATT_CAP
@@ -146,14 +151,18 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
             T = t[1] - t[0]
         else:
             T = t[i] - t[i - 1]
-
+        if dTb_in is not None:
+            dTb = lut_dTb.interp(t[i])
+        else:
+            dTb = 0.
         # dc_dc_on = bool(lut_dc.interp(t[i]))
         dc_dc_on = False
+        Tb_ = Tb[i]+dTb
 
         if reset:
-            sim.apply_soc(soc_s_init, Tb[i])
+            sim.apply_soc(soc_s_init, Tb_)
             rp.delta_q_model = sim.delta_q
-            rp.t_last_model = Tb[i] + dt_model
+            rp.t_last_model = Tb_ + dt_model
             sim.load(rp.delta_q_model, rp.t_last_model)
             sim.init_battery()
             sim.apply_delta_q_t(rp.delta_q_model, rp.t_last_model)
@@ -168,24 +177,23 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
             _chm_s = chm_s[i]
         else:
             _chm_s = Bsim
-        sim.calculate(chem=_chm_s, temp_c=Tb[i], soc=sim.soc, curr_in=ib_in_s, dt=T, q_capacity=sim.q_capacity,
+        sim.calculate(chem=_chm_s, temp_c=Tb_, soc=sim.soc, curr_in=ib_in_s, dt=T, q_capacity=sim.q_capacity,
                       dc_dc_on=dc_dc_on, reset=reset, rp=rp, sat_init=sat_s_init)
         charge_curr = sim.ib
-        sim.count_coulombs(chem=_chm_s, dt=T, reset=reset, temp_c=Tb[i], charge_curr=charge_curr, sat=False, soc_s_init=soc_s_init,
+        sim.count_coulombs(chem=_chm_s, dt=T, reset=reset, temp_c=Tb_, charge_curr=charge_curr, sat=False, soc_s_init=soc_s_init,
                            mon_sat=mon.sat, mon_delta_q=mon.delta_q)
 
         # EKF
         if reset:
-            mon.apply_soc(soc_init, Tb[i])
+            mon.apply_soc(soc_init, Tb_)
             rp.delta_q = mon.delta_q
-            rp.t_last = Tb[i]
+            rp.t_last = Tb_
             mon.load(rp.delta_q, rp.t_last)
-            mon.assign_temp_c(Tb[i])
+            mon.assign_temp_c(Tb_)
             mon.init_battery()
             mon.init_soc_ekf(soc_ekf_init)  # when modeling (assumed in python) ekf wants to equal model
 
         # Monitor calculations including ekf
-        Tb_ = Tb[i]
         if Bmon is None:
             _chm_m = chm_m[i]
         else:
@@ -210,14 +218,14 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
             mon.calculate(_chm_m, Tb_, Vb_ + randn() * v_std + dv_sense, Ib_ + randn() * i_std + di_sense, T, rp=rp,
                           reset=reset, d_voc=None, u_old=u_old, z_old=z_old)
         Ib_charge = mon.ib_charge
-        sat = is_sat(Tb[i], mon.voc, mon.soc)
+        sat = is_sat(Tb_, mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
         if rp.modeling == 0:
-            mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb[i], charge_curr=Ib_charge, sat=saturated)
+            mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb_, charge_curr=Ib_charge, sat=saturated)
         else:
-            mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=temp_c, charge_curr=Ib_charge, sat=saturated)
+            mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb_, charge_curr=Ib_charge, sat=saturated)
         mon.calc_charge_time(mon.q, mon.q_capacity, charge_curr, mon.soc)
-        # mon.regauge(Tb[i])
+        # mon.regauge(Tb_)
         mon.assign_soc_s(sim.soc)
 
         # Plot stuff

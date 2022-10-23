@@ -449,8 +449,8 @@ Full regression suite:
           XS;v0;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;
   
   dwell Ca.5:
-		DP1;v3;Ca.5;DT.05;DV0.05;DM.2;DN2;Di.1;Dv0.1;
-        Xp0;v0;DT0;DV0;DM0;DN0;
+		v3;Ca.5;DT.05;DV0.05;DM.2;DN2;Di.1;Dv0;DP1;
+        Xp0;v0;DT0;DV0;DM0;DN0;Di0;Dv0;
 
 Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
   Bucket:  Bm2;Bs1;D^15;

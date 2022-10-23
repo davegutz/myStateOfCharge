@@ -55,6 +55,8 @@ if __name__ == '__main__':
         drive_ekf_in = False
         time_end_in = None
         unit_key = 'pro_2022'
+        dTb = None
+
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
@@ -86,7 +88,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'EKF_Track Dr2000 fault v20220917.txt'
         # data_file_old_txt = 'real world Xp20 v20220917a.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -69900
         # data_file_old_txt = 'weird v20220917d.txt'; unit_key = 'soc0_2022'; scale_in = 1.084
-        data_file_old_txt = 'dwell noise Ca.5 v20220926.txt'
+        data_file_old_txt = 'dwell noise Ca.5 v20220926.txt'#; dTb = [[0., 18000.],  [0, 8.]]
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"
@@ -168,7 +170,8 @@ if __name__ == '__main__':
                                                              use_Vb_raw=use_Vb_raw, scale_r_ss=scale_r_ss_in,
                                                              s_hys_sim=scale_hys_sim_in, s_hys_mon=scale_hys_mon_in,
                                                              dvoc_sim=dvoc_sim_in, dvoc_mon=dvoc_mon_in,
-                                                             Bmon=Bmon_in, Bsim=Bsim_in, drive_ekf=drive_ekf_in)
+                                                             Bmon=Bmon_in, Bsim=Bsim_in, drive_ekf=drive_ekf_in,
+                                                             dTb_in = dTb)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots
