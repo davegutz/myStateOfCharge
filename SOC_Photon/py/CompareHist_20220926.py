@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 from Hysteresis_20220917d import Hysteresis_20220917d
 from Hysteresis_20220926 import Hysteresis_20220926
 from Battery import is_sat, low_t, low_voc, IB_MIN_UP
+from resample import resample
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -381,6 +382,7 @@ def calculate_capacity(q_cap_rated_scaled=None, dqdt=None, temp=None, t_rated=No
 # Make an array useful for analysis (around temp) and add some metrics
 def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
     h = raw[abs(raw.Tb - temp_corr) < tb_band]
+
     h.sat = np.copy(h.Tb)
     h.bms_off = np.copy(h.Tb)
     for i in range(len(h.Tb)):
@@ -552,7 +554,7 @@ if __name__ == '__main__':
         path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
-        cols = ('date', 'time', 'Tb', 'Vb', 'Ib', 'soc', 'soc_ekf', 'Voc_dyn', 'Voc_stat', 'tweak_sclr_amp',
+        cols = ('time', 'Tb', 'Vb', 'Ib', 'soc', 'soc_ekf', 'Voc_dyn', 'Voc_stat', 'tweak_sclr_amp',
                 'tweak_sclr_noa', 'falw')
 
         # cat files
@@ -591,6 +593,12 @@ if __name__ == '__main__':
         # h_40C = filter_Tb(h, 40., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
         voc_soc20 = look_it(x0, lut_voc, 20.)
         h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        T = 1800
+        h_20C = resample(data=h_20C, dt_resamp=T, time_var='time',
+                         specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0), ('wl_fa', 0),
+                                   ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0), ('ib_amp_fa', 0), ('vb_fa', 0),
+                                   ('tb_fa', 0), ])
+
 
         # Plots
         n_fig = 0
@@ -609,7 +617,8 @@ if __name__ == '__main__':
         # if len(h_40C.time) > 1:
         #     n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc40, voc_reset=VOC_RESET_40)
         if len(h_20C.time) > 1:
-            n_fig, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
+            n_fig, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C',
+                                         n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=path_to_pdfs)
         cleanup_fig_files(fig_files)
