@@ -383,34 +383,35 @@ def calculate_capacity(q_cap_rated_scaled=None, dqdt=None, temp=None, t_rated=No
 def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
     h = raw[abs(raw.Tb - temp_corr) < tb_band]
 
-    h.sat = np.copy(h.Tb)
-    h.bms_off = np.copy(h.Tb)
+    sat_ = np.copy(h.Tb)
+    bms_off_ = np.copy(h.Tb)
     for i in range(len(h.Tb)):
-        h.sat[i] = is_sat(h.Tb[i], h.Voc_dyn[i], h.soc[i])
+        sat_[i] = is_sat(h.Tb[i], h.Voc_dyn[i], h.soc[i])
         # h.bms_off[i] = (h.Tb[i] < low_t) or ((h.Voc_dyn[i] < low_voc) and (h.Ib[i] < IB_MIN_UP))
-        h.bms_off[i] = (h.Tb[i] < low_t) or ((h.Voc_stat[i] < 10.5) and (h.Ib[i] < IB_MIN_UP))
+        bms_off_[i] = (h.Tb[i] < low_t) or ((h.Voc_stat[i] < 10.5) and (h.Ib[i] < IB_MIN_UP))
 
     # Correct for temp
     q_cap = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=h.Tb, t_rated=BATT_RATED_TEMP)
     dq = (h.soc - 1.) * q_cap
     dq -= BATT_DQDT * q_cap * (temp_corr - h.Tb)
     q_cap_r = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=temp_corr, t_rated=BATT_RATED_TEMP)
-    h.soc_r = 1. + dq / q_cap_r
+    soc_r = 1. + dq / q_cap_r
+    h = rf.rec_append_fields(h, 'soc_r', soc_r)
     h.Voc_stat_r = h.Voc_stat - (h.Tb - temp_corr) * BATT_DVOC_DT
     h.Voc_stat_rescaled_r = h.Voc_stat_rescaled - (h.Tb - temp_corr) * BATT_DVOC_DT
 
     # delineate charging and discharging
-    h.Voc_stat_r_chg = np.copy(h.Voc_stat)
-    h.Voc_stat_r_dis = np.copy(h.Voc_stat)
-    h.Voc_stat_rescaled_r_chg = np.copy(h.Voc_stat_rescaled)
-    h.Voc_stat_rescaled_r_dis = np.copy(h.Voc_stat_rescaled)
-    for i in range(len(h.Voc_stat_r_chg)):
+    Voc_stat_r_chg = np.copy(h.Voc_stat)
+    Voc_stat_r_dis = np.copy(h.Voc_stat)
+    Voc_stat_rescaled_r_chg = np.copy(h.Voc_stat_rescaled)
+    Voc_stat_rescaled_r_dis = np.copy(h.Voc_stat_rescaled)
+    for i in range(len(Voc_stat_r_chg)):
         if h.Ib[i] > -0.5:
-            h.Voc_stat_r_dis[i] = None
-            h.Voc_stat_rescaled_r_dis[i] = None
+            Voc_stat_r_dis[i] = None
+            Voc_stat_rescaled_r_dis[i] = None
         elif h.Ib[i] < 0.5:
-            h.Voc_stat_r_chg[i] = None
-            h.Voc_stat_rescaled_r_chg[i] = None
+            Voc_stat_r_chg[i] = None
+            Voc_stat_rescaled_r_chg[i] = None
 
     # Hysteresis_20220917d confirm equals data with HYS_SCALE_20220917d
     if len(h.time) > 1:
@@ -430,10 +431,10 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
             dvh = hys_remodel.update(dt_hys_sec)
             dv_hys_remodel.append(dvh)
         dv_hys_remodel = np.array(dv_hys_remodel)
-        h.dv_hys_remodel = np.copy(h.soc)
+        dv_hys_remodel_ = np.copy(h.soc)
         for i in range(len(h.time)):
             t_min = int(float(h.time[i]) / 60.)
-            h.dv_hys_remodel[i] = np.interp(t_min, hys_time_min, dv_hys_remodel)
+            dv_hys_remodel_[i] = np.interp(t_min, hys_time_min, dv_hys_remodel)
 
     # Hysteresis_20220926 redesign.
     if len(h.time) > 1:
@@ -456,8 +457,8 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
             ib = np.interp(t_sec, h.time_sec, h.Ib)
             soc = np.interp(t_sec, h.time_sec, h.soc)
             soc_min = np.interp(t_sec, h.time_sec, h.soc_min)
-            sat = np.interp(t_sec, h.time_sec, h.sat)
-            bms_off = np.interp(t_sec, h.time_sec, h.bms_off) > 0.5
+            sat = np.interp(t_sec, h.time_sec, sat_)
+            bms_off = np.interp(t_sec, h.time_sec, bms_off_) > 0.5
             Voc = np.interp(t_sec, h.time_sec, h.Voc_dyn)
             e_wrap = np.interp(t_sec, h.time_sec, h.e_wrap)
             hys_redesign.calculate_hys(ib, soc)
@@ -474,35 +475,52 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
             dv_dot_redesign.append(dv_dot)
             voc_stat_redesign.append(voc_stat)
             voc_stat_redesign_r.append(voc_stat_r)
-        h.dv_hys_redesign = np.copy(h.soc)
-        h.res_redesign = np.copy(h.soc)
-        h.ioc_redesign = np.copy(h.soc)
-        h.dv_dot_redesign = np.copy(h.soc)
+        dv_hys_redesign_ = np.copy(h.soc)
+        res_redesign_ = np.copy(h.soc)
+        ioc_redesign_ = np.copy(h.soc)
+        dv_dot_redesign_ = np.copy(h.soc)
         h.Voc_stat_redesign = np.copy(h.soc)
         h.Voc_stat_redesign_r = np.copy(h.soc)
         for i in range(len(h.time)):
             t_min = h.time_min[i]
-            h.dv_hys_redesign[i] = np.interp(t_min, hys_time_min, dv_hys_redesign)
-            h.res_redesign[i] = np.interp(t_min, hys_time_min, res_redesign)
-            h.ioc_redesign[i] = np.interp(t_min, hys_time_min, ioc_redesign)
-            h.dv_dot_redesign[i] = np.interp(t_min, hys_time_min, dv_dot_redesign)
+            dv_hys_redesign_[i] = np.interp(t_min, hys_time_min, dv_hys_redesign)
+            res_redesign_[i] = np.interp(t_min, hys_time_min, res_redesign)
+            ioc_redesign_[i] = np.interp(t_min, hys_time_min, ioc_redesign)
+            dv_dot_redesign_[i] = np.interp(t_min, hys_time_min, dv_dot_redesign)
             h.Voc_stat_redesign[i] = np.interp(t_min, hys_time_min, voc_stat_redesign)
             h.Voc_stat_redesign_r[i] = np.interp(t_min, hys_time_min, voc_stat_redesign_r)
-        h.Voc_stat_redesign_r_chg = np.copy(h.Voc_stat_redesign_r)
-        h.Voc_stat_redesign_r_dis = np.copy(h.Voc_stat_redesign_r)
-        h.dv_hys_redesign_chg = np.copy(h.dv_hys_redesign)
-        h.dv_hys_redesign_dis = np.copy(h.dv_hys_redesign)
-        h.res_redesign_chg = np.copy(h.res_redesign)
-        h.res_redesign_dis = np.copy(h.res_redesign)
-        for i in range(len(h.Voc_stat_r_chg)):
+        Voc_stat_redesign_r_chg = np.copy(h.Voc_stat_redesign_r)
+        Voc_stat_redesign_r_dis = np.copy(h.Voc_stat_redesign_r)
+        dv_hys_redesign_chg = np.copy(dv_hys_redesign_)
+        dv_hys_redesign_dis = np.copy(dv_hys_redesign_)
+        res_redesign_chg = np.copy(res_redesign_)
+        res_redesign_dis = np.copy(res_redesign_)
+        for i in range(len(Voc_stat_r_chg)):
             if h.Ib[i] > -0.5:
-                h.Voc_stat_redesign_r_dis[i] = None
-                h.dv_hys_redesign_dis[i] = None
-                h.res_redesign_dis[i] = None
+                Voc_stat_redesign_r_dis[i] = None
+                dv_hys_redesign_dis[i] = None
+                res_redesign_dis[i] = None
             elif h.Ib[i] < 0.5:
-                h.Voc_stat_redesign_r_chg[i] = None
-                h.dv_hys_redesign_chg[i] = None
-                h.res_redesign_chg[i] = None
+                Voc_stat_redesign_r_chg[i] = None
+                dv_hys_redesign_chg[i] = None
+                res_redesign_chg[i] = None
+        h = rf.rec_append_fields(h, 'Voc_stat_redesign_r_dis', Voc_stat_redesign_r_dis)
+        h = rf.rec_append_fields(h, 'Voc_stat_redesign_r_chg', Voc_stat_redesign_r_chg)
+        h = rf.rec_append_fields(h, 'dv_hys_redesign_dis', dv_hys_redesign_dis)
+        h = rf.rec_append_fields(h, 'dv_hys_redesign_chg', dv_hys_redesign_chg)
+        h = rf.rec_append_fields(h, 'res_redesign_dis', res_redesign_dis)
+        h = rf.rec_append_fields(h, 'res_redesign_chg', res_redesign_chg)
+        h = rf.rec_append_fields(h, 'sat', sat_)
+        h = rf.rec_append_fields(h, 'bms_off', bms_off_)
+        h = rf.rec_append_fields(h, 'dv_hys_remodel', dv_hys_remodel_)
+        h = rf.rec_append_fields(h, 'Voc_stat_r_dis', Voc_stat_r_dis)
+        h = rf.rec_append_fields(h, 'Voc_stat_r_chg', Voc_stat_r_chg)
+        h = rf.rec_append_fields(h, 'Voc_stat_rescaled_r_dis', Voc_stat_rescaled_r_dis)
+        h = rf.rec_append_fields(h, 'Voc_stat_rescaled_r_chg', Voc_stat_rescaled_r_chg)
+        h = rf.rec_append_fields(h, 'ioc_redesign', ioc_redesign_)
+        h = rf.rec_append_fields(h, 'dv_dot_redesign', dv_dot_redesign_)
+        h = rf.rec_append_fields(h, 'dv_hys_redesign', dv_hys_redesign_)
+        h = rf.rec_append_fields(h, 'res_redesign', res_redesign_)
 
     return h
 
