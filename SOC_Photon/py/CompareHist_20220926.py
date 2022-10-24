@@ -23,6 +23,7 @@ from Hysteresis_20220917d import Hysteresis_20220917d
 from Hysteresis_20220926 import Hysteresis_20220926
 from Battery import is_sat, low_t, IB_MIN_UP
 from resample import resample
+from MonSim import replicate
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -619,6 +620,14 @@ if __name__ == '__main__':
                          specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0), ('wl_fa', 0),
                                    ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0), ('ib_amp_fa', 0), ('vb_fa', 0),
                                    ('tb_fa', 0), ])
+        res = np.zeros(len(h_20C.time))
+        res[0:10] = 1
+        Ib_past = h_20C['Ib'].copy()
+        soc_s = h_20C['soc'].copy()
+        mon_old = rf.rec_append_fields(h_20C, 'res', res)
+        mon_old = rf.rec_append_fields(mon_old, 'Ib_past', Ib_past)
+        mon_old = rf.rec_append_fields(mon_old, 'soc_s', soc_s)
+        mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, init_time=1.)
 
         # Plots
         n_fig = 0
