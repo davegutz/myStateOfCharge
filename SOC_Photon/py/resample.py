@@ -19,8 +19,8 @@ __date__ = '$Date: 2022/10/23 03:44:00 $'
 
 # https://www.programcreek.com/python/example/95947/scipy.ndimage.interpolation.zoom  example 22
 
-import scipy.ndimage as nd
 import numpy as np
+import numpy.lib.recfunctions as rf
 
 
 # Unix-like cat function
@@ -35,30 +35,54 @@ def cat(out_file_name, in_file_names, in_path='./', out_path='./'):
 
 
 # Limited capability resample.   Interpolates floating point (foh) or holds value (zoh) according to order input
-def resample(data, spacing, new_spacing, specials=None):
+def resample(data, spacing, factor, specials=None):
+    # Check inputs
+    if type(factor) is not int or factor < 1:
+        raise Exception('factor=', factor, 'must be positive integer > 0')
+
+    # Factors
     n = len(data)
-    new_n = int(np.round(n * spacing / new_spacing))
-    sub = float(n / new_n)
-    mult = int(new_n / n)
-    true_spacing = spacing * n / new_n
-    resize_factor = int(new_n / n)
+    new_n = (n - 1) * factor + 1
+    rat = 1. / float(factor)
+    true_spacing = spacing * rat
+
+    # Index for new array
+    irec = np.zeros(new_n)
+    for i in range(new_n):
+        irec[i] = i + 1
+
+    # New array
+    recon = np.array(irec, dtype=[('i', 'i4')])
     for var_name, typ in data.dtype.descr:
         var = data[var_name]
-        new_var = []
-        new_var.append(var[0])
         order = 1
         if specials is not None:
             for spec in specials:
                 if spec[0] == var_name:
                     order = spec[1]
-        for i in range(len(var)-1):
+        new_var = []
+        num = 0
+        for i in range(n-1):
             base = var[i]
             ext = var[i+1]
-            for j in range(mult):
-                new_var.append(base + (ext-base)*float(order*j)*sub)
-        print('new ', var_name, ' = ', new_var)
+            if typ == '<f8':
+                for j in range(factor):
+                    val = base + (ext-base)*float(order*j)*rat
+                    new_var.append(val)
+            else:
+                for j in range(factor):
+                    val = int(base + (ext-base)*float(order*j)*rat)
+                    num += 1
+                    new_var.append(val)
+        num += 1
+        val = ext
+        new_var.append(val)
+        if typ == '<f8':
+            recon = rf.rec_append_fields(recon, var_name, np.array(new_var, dtype=float))
+        else:
+            recon = rf.rec_append_fields(recon, var_name, np.array(new_var, dtype=int))
 
-    return data, true_spacing
+    return recon, true_spacing
 
 
 if __name__ == '__main__':
@@ -71,11 +95,10 @@ if __name__ == '__main__':
         exclusions = [(0, 1665334404)]  # before faults
         # exclusions = None
         data_file = 'data20220926.txt'
-        path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
         cols = ('time', 'Tb', 'Vb', 'Ib', 'soc', 'soc_ekf', 'Voc_dyn', 'Voc_stat', 'tweak_sclr_amp',
-                    'tweak_sclr_noa', 'falw')
+                'tweak_sclr_noa', 'falw')
 
         # cat files
         cat(data_file, input_files, in_path=path_to_data, out_path=path_to_temp)
@@ -84,12 +107,13 @@ if __name__ == '__main__':
         data_file_clean = write_clean_file(data_file, type_='', title_key='hist', unit_key='unit_h',
                                            path_to_data=path_to_temp, path_to_temp=path_to_temp,
                                            comment_str='---')
-        if data_file_clean:
-            raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
-                                    encoding=None).view(np.recarray)
-        else:
+        if not data_file_clean:
             print("data from", data_file, "empty after loading")
             exit(1)
+
+        # load
+        raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
+                            encoding=None).view(np.recarray)
 
         # Sort unique
         raw = np.unique(raw)
@@ -106,8 +130,7 @@ if __name__ == '__main__':
 
         # Now do the resample
         T_raw = raw.time[1] - raw.time[0]
-        T = T_raw / 2.
-        recon = resample(raw, T_raw, T, specials=[('falw', 0)])
+        recon = resample(raw, T_raw, 2, specials=[('falw', 0)])
 
         print("recon")
         print(recon)
