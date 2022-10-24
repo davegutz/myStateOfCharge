@@ -104,12 +104,12 @@ def resample(data, spacing, factor, specials=None, time_var=None):
         else:
             new_var = []
             for i in range(n-1):
-                time_base = data[time_var][i]
-                time_ext = data[time_var][i+1]
+                time_base = float(data[time_var][i])
+                time_ext = float(data[time_var][i+1])
                 dtime = time_ext - time_base
                 time = time_base
-                base = var[i]
-                ext = var[i+1]
+                base = float(var[i])
+                ext = float(var[i+1])
                 if typ == '<f8':
                     while time < time_ext:
                         val = base + (ext-base) * (time-time_base) / dtime
@@ -177,7 +177,7 @@ if __name__ == '__main__':
 
         # Now do the resample
         T_raw = raw.time[1] - raw.time[0]
-        recon = resample(raw, T_raw, 2, specials=[('falw', 0)], time_var='time')
+        recon = resample(raw, T_raw, 1, specials=[('falw', 0)], time_var='time')
 
         print("recon")
         print(recon)
