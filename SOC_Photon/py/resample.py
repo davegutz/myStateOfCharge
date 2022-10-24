@@ -35,25 +35,22 @@ def cat(out_file_name, in_file_names, in_path='./', out_path='./'):
 
 
 # Limited capability resample.   Interpolates floating point (foh) or holds value (zoh) according to order input
-def resample(data, T_data, T_resamp, specials=None, time_var=None, make_time_float=True):
+def resample(data, dt_resamp, time_var, specials=None, make_time_float=True):
 
     # Factors
-    factor = int(T_data / T_resamp)
     n = len(data)
-    if time_var is None:
-        new_n = (n - 1) * factor + 1
-    else:  # detect time factors
-        time = data[time_var]
-        time_type = data[time_var].dtype
-        start = time[0]
-        end = time[-1]
-        span = end - start
-        new_spacing = T_data / float(factor)
-        new_n = int(span / new_spacing) + 1
-        new_time = np.zeros(new_n)
-        for i in range(new_n):
-            new_time[i] = data[time_var][0] + float(i) * T_resamp
-    rat = 1. / float(factor)
+    time = data[time_var]
+    time_type = data[time_var].dtype
+    start = float(time[0])
+    end = float(time[-1])
+    new_time = [start]
+    new_n = 0
+    print("start", start, "end", end)
+    while new_time[new_n] < end:
+        new_n += 1
+        new_time.append(start + float(new_n) * dt_resamp)
+    print("resample:  new time", new_time)
+    print("resample:  start new", new_time[0], "end new", new_time[-1], "len new", len(new_time), "end new - end", new_time[-1]-end, "dt_resamp", dt_resamp)
 
     # Index for new array
     irec = np.zeros(new_n)
@@ -61,15 +58,14 @@ def resample(data, T_data, T_resamp, specials=None, time_var=None, make_time_flo
         irec[i] = i + 1
 
     # New array
-    if time_var is None:
-        recon = np.array(irec, dtype=[('i', 'i4')])
+    if make_time_float:
+        resamp = np.array(new_time, dtype=[(time_var, 'float64')])
     else:
-        if make_time_float:
-            recon = np.array(new_time, dtype=[(time_var, 'float64')])
-        else:
-            recon = np.array(new_time, dtype=[(time_var, time_type)])
+        resamp = np.array(new_time, dtype=[(time_var, time_type)])
     for var_name, typ in data.dtype.descr:
         var = data[var_name]
+
+        # Verify order
         order = 1
         if specials is not None:
             for spec in specials:
@@ -79,53 +75,37 @@ def resample(data, T_data, T_resamp, specials=None, time_var=None, make_time_flo
                         raise Exception('order=', order, 'from', spec, 'must be 0 or 1')
 
         # Add interpolated values
-        if time_var is None:
-            new_var = []
-            for i in range(n-1):
-                base = var[i]
-                ext = var[i+1]
-                if typ == '<f8':
-                    for j in range(factor):
-                        val = base + (ext-base)*float(order*j)*rat
-                        new_var.append(val)
-                else:
-                    for j in range(factor):
-                        val = int(round(base + (ext-base)*float(order*j)*rat))
-                        new_var.append(val)
-            val = ext
-            new_var.append(val)
-        else:
-            new_var = []
-            num = 0
-            for i in range(n-1):
-                time_base = float(data[time_var][i])
-                time_ext = float(data[time_var][i+1])
-                dtime = time_ext - time_base
-                base = float(var[i])
-                ext = float(var[i+1])
-                if typ == '<f8':
-                    while num < new_n-1:
-                        time = new_time[num]
-                        val = base + (ext-base) * (time-time_base) / dtime
-                        new_var.append(val)
-                        num += 1
-                else:
-                    while num < new_n-1:
-                        time = new_time[num]
-                        val = int(round(base + (ext-base) * (time-time_base) / dtime))
-                        new_var.append(val)
-                        num += 1
-            val = ext
-            new_var.append(val)
-            num += 1
+        new_var = []
+        num = 0
+        for i in range(n-1):
+            time_base = float(data[time_var][i])
+            time_ext = float(data[time_var][i+1])
+            dtime = time_ext - time_base
+            base = float(var[i])
+            ext = float(var[i+1])
+            time = time_base
+            if typ == '<f8':
+                while time < time_ext and num < new_n:
+                    val = base + (ext-base) * (time-time_base) * order / dtime
+                    new_var.append(val)
+                    num += 1
+                    time = new_time[num]
+            else:
+                while time < time_ext and num < new_n:
+                    val = int(round(base + (ext-base) * (time-time_base) * order / dtime))
+                    new_var.append(val)
+                    num += 1
+                    time = new_time[num]
+        new_var.append(ext)
+        num += 1
 
         if var_name != time_var:
             if typ == '<f8':
-                recon = rf.rec_append_fields(recon, var_name, np.array(new_var, dtype=float))
+                resamp = rf.rec_append_fields(resamp, var_name, np.array(new_var, dtype=float))
             else:
-                recon = rf.rec_append_fields(recon, var_name, np.array(new_var, dtype=int))
+                resamp = rf.rec_append_fields(resamp, var_name, np.array(new_var, dtype=int))
 
-    return recon
+    return resamp
 
 
 if __name__ == '__main__':
@@ -136,6 +116,8 @@ if __name__ == '__main__':
         input_files = ['hist v20220926 20221006.txt', 'hist v20220926 20221006a.txt', 'hist v20220926 20221008.txt',
                        'hist v20220926 20221010.txt', 'hist v20220926 20221011.txt']
         exclusions = [(0, 1665334404)]  # before faults
+        # exclusions = [(0, 1665518004)]  # small test set for debugging
+
         # exclusions = None
         data_file = 'data20220926.txt'
         path_to_data = '../dataReduction'
@@ -173,13 +155,12 @@ if __name__ == '__main__':
 
         # Now do the resample
         T_raw = raw.time[1] - raw.time[0]
-        T = T_raw/1.
-        recon = resample(data=raw, T_data=T_raw, T_resamp=T, specials=[('falw', 0)], time_var='time')
+        T = 0.1
+        resamp = resample(data=raw, dt_resamp=T, specials=[('falw', 0)], time_var='time')
 
-        print("recon")
-        print(recon)
-        print("len raw", len(raw), "len recon", len(recon))
-        print("raw time range", raw['time'][0], '-', raw['time'][-1])
-        print("recon time range", recon['time'][0], '-', recon['time'][-1])
+        print("resamp")
+        print(resamp)
+        print("raw time range", raw['time'][0], '-', raw['time'][-1], "length=", len(raw), "dt=", T_raw)
+        print("resamp time range", resamp['time'][0], '-', resamp['time'][-1], "length=", len(resamp), "dt=", T)
 
 main()
