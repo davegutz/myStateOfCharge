@@ -479,18 +479,18 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
         res_redesign_ = np.copy(h.soc)
         ioc_redesign_ = np.copy(h.soc)
         dv_dot_redesign_ = np.copy(h.soc)
-        h.Voc_stat_redesign = np.copy(h.soc)
-        h.Voc_stat_redesign_r = np.copy(h.soc)
+        Voc_stat_redesign_ = np.copy(h.soc)
+        Voc_stat_redesign_r_ = np.copy(h.soc)
         for i in range(len(h.time)):
             t_min = h.time_min[i]
             dv_hys_redesign_[i] = np.interp(t_min, hys_time_min, dv_hys_redesign)
             res_redesign_[i] = np.interp(t_min, hys_time_min, res_redesign)
             ioc_redesign_[i] = np.interp(t_min, hys_time_min, ioc_redesign)
             dv_dot_redesign_[i] = np.interp(t_min, hys_time_min, dv_dot_redesign)
-            h.Voc_stat_redesign[i] = np.interp(t_min, hys_time_min, voc_stat_redesign)
-            h.Voc_stat_redesign_r[i] = np.interp(t_min, hys_time_min, voc_stat_redesign_r)
-        Voc_stat_redesign_r_chg = np.copy(h.Voc_stat_redesign_r)
-        Voc_stat_redesign_r_dis = np.copy(h.Voc_stat_redesign_r)
+            Voc_stat_redesign_[i] = np.interp(t_min, hys_time_min, voc_stat_redesign)
+            Voc_stat_redesign_r_[i] = np.interp(t_min, hys_time_min, voc_stat_redesign_r)
+        Voc_stat_redesign_r_chg = np.copy(Voc_stat_redesign_r_)
+        Voc_stat_redesign_r_dis = np.copy(Voc_stat_redesign_r_)
         dv_hys_redesign_chg = np.copy(dv_hys_redesign_)
         dv_hys_redesign_dis = np.copy(dv_hys_redesign_)
         res_redesign_chg = np.copy(res_redesign_)
@@ -521,6 +521,8 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
         h = rf.rec_append_fields(h, 'dv_dot_redesign', dv_dot_redesign_)
         h = rf.rec_append_fields(h, 'dv_hys_redesign', dv_hys_redesign_)
         h = rf.rec_append_fields(h, 'res_redesign', res_redesign_)
+        h = rf.rec_append_fields(h, 'Voc_stat_redesign', Voc_stat_redesign_)
+        h = rf.rec_append_fields(h, 'Voc_stat_redesign_r', Voc_stat_redesign_r_)
 
     return h
 
