@@ -35,12 +35,10 @@ def cat(out_file_name, in_file_names, in_path='./', out_path='./'):
 
 
 # Limited capability resample.   Interpolates floating point (foh) or holds value (zoh) according to order input
-def resample(data, spacing, factor, specials=None, time_var=None):
-    # Check inputs
-    if type(factor) is not int or factor < 1:
-        raise Exception('factor=', factor, 'must be positive integer > 0')
+def resample(data, T_data, T_resamp, specials=None, time_var=None, make_time_float=True):
 
     # Factors
+    factor = int(T_data / T_resamp)
     n = len(data)
     if time_var is None:
         new_n = (n - 1) * factor + 1
@@ -50,20 +48,12 @@ def resample(data, spacing, factor, specials=None, time_var=None):
         start = time[0]
         end = time[-1]
         span = end - start
-        dt = time.copy()
-        for i in range(len(time)-1):
-            dt[i] = time[i+1] - time[i]
-        dt[-1] = dt[-2]
-        min_dt = min(dt)
-        if spacing != min_dt:
-            print('Warning(resample):  spacing changed due to time input from', spacing, 'to', min_dt)
-            spacing = min_dt
-        new_n = int(span / spacing) + 1
+        new_spacing = T_data / float(factor)
+        new_n = int(span / new_spacing) + 1
         new_time = np.zeros(new_n)
         for i in range(new_n):
-            new_time[i] = data[time_var][0] + float(i) * spacing
+            new_time[i] = data[time_var][0] + float(i) * T_resamp
     rat = 1. / float(factor)
-    true_spacing = spacing * rat
 
     # Index for new array
     irec = np.zeros(new_n)
@@ -74,7 +64,10 @@ def resample(data, spacing, factor, specials=None, time_var=None):
     if time_var is None:
         recon = np.array(irec, dtype=[('i', 'i4')])
     else:
-        recon = np.array(new_time, dtype=[(time_var, time_type)])
+        if make_time_float:
+            recon = np.array(new_time, dtype=[(time_var, 'float64')])
+        else:
+            recon = np.array(new_time, dtype=[(time_var, time_type)])
     for var_name, typ in data.dtype.descr:
         var = data[var_name]
         order = 1
@@ -103,25 +96,28 @@ def resample(data, spacing, factor, specials=None, time_var=None):
             new_var.append(val)
         else:
             new_var = []
+            num = 0
             for i in range(n-1):
                 time_base = float(data[time_var][i])
                 time_ext = float(data[time_var][i+1])
                 dtime = time_ext - time_base
-                time = time_base
                 base = float(var[i])
                 ext = float(var[i+1])
                 if typ == '<f8':
-                    while time < time_ext:
+                    while num < new_n-1:
+                        time = new_time[num]
                         val = base + (ext-base) * (time-time_base) / dtime
                         new_var.append(val)
-                        time += spacing
+                        num += 1
                 else:
-                    while time < time_ext:
+                    while num < new_n-1:
+                        time = new_time[num]
                         val = int(round(base + (ext-base) * (time-time_base) / dtime))
                         new_var.append(val)
-                        time += spacing
+                        num += 1
             val = ext
             new_var.append(val)
+            num += 1
 
         if var_name != time_var:
             if typ == '<f8':
@@ -129,7 +125,7 @@ def resample(data, spacing, factor, specials=None, time_var=None):
             else:
                 recon = rf.rec_append_fields(recon, var_name, np.array(new_var, dtype=int))
 
-    return recon, true_spacing
+    return recon
 
 
 if __name__ == '__main__':
@@ -177,9 +173,13 @@ if __name__ == '__main__':
 
         # Now do the resample
         T_raw = raw.time[1] - raw.time[0]
-        recon = resample(raw, T_raw, 1, specials=[('falw', 0)], time_var='time')
+        T = T_raw/1.
+        recon = resample(data=raw, T_data=T_raw, T_resamp=T, specials=[('falw', 0)], time_var='time')
 
         print("recon")
         print(recon)
+        print("len raw", len(raw), "len recon", len(recon))
+        print("raw time range", raw['time'][0], '-', raw['time'][-1])
+        print("recon time range", recon['time'][0], '-', recon['time'][-1])
 
 main()
