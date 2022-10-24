@@ -21,7 +21,7 @@ import numpy.lib.recfunctions as rf
 import matplotlib.pyplot as plt
 from Hysteresis_20220917d import Hysteresis_20220917d
 from Hysteresis_20220926 import Hysteresis_20220926
-from Battery import is_sat, low_t, low_voc, IB_MIN_UP
+from Battery import is_sat, low_t, IB_MIN_UP
 from resample import resample
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
@@ -49,6 +49,7 @@ VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
 HYS_CAP_REDESIGN = 3.6e4  # faster time constant needed
 HYS_SOC_MIN_MARG = 0.15  # add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
 HYS_IB_THR = 1.  # ignore reset if opposite situation exists
+
 
 # Unix-like cat function
 # e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
@@ -106,7 +107,6 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     # 11 (CARETDOWNBASE) caretdown centered at base
 
     # Colors
-
 
     plt.figure()  # 1
     n_fig += 1
@@ -619,7 +619,6 @@ if __name__ == '__main__':
                          specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0), ('wl_fa', 0),
                                    ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0), ('ib_amp_fa', 0), ('vb_fa', 0),
                                    ('tb_fa', 0), ])
-
 
         # Plots
         n_fig = 0
