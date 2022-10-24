@@ -44,8 +44,9 @@ def resample(data, spacing, factor, specials=None, time_var=None):
     n = len(data)
     if time_var is None:
         new_n = (n - 1) * factor + 1
-    else:  # detect
+    else:  # detect time factors
         time = data[time_var]
+        time_type = data[time_var].dtype
         start = time[0]
         end = time[-1]
         span = end - start
@@ -53,8 +54,14 @@ def resample(data, spacing, factor, specials=None, time_var=None):
         for i in range(len(time)-1):
             dt[i] = time[i+1] - time[i]
         dt[-1] = dt[-2]
-        spacing = min(dt)
+        min_dt = min(dt)
+        if spacing != min_dt:
+            print('Warning(resample):  spacing changed due to time input from', spacing, 'to', min_dt)
+            spacing = min_dt
         new_n = int(span / spacing) + 1
+        new_time = np.zeros(new_n)
+        for i in range(new_n):
+            new_time[i] = data[time_var][0] + float(i) * spacing
     rat = 1. / float(factor)
     true_spacing = spacing * rat
 
@@ -64,7 +71,10 @@ def resample(data, spacing, factor, specials=None, time_var=None):
         irec[i] = i + 1
 
     # New array
-    recon = np.array(irec, dtype=[('i', 'i4')])
+    if time_var is None:
+        recon = np.array(irec, dtype=[('i', 'i4')])
+    else:
+        recon = np.array(new_time, dtype=[(time_var, time_type)])
     for var_name, typ in data.dtype.descr:
         var = data[var_name]
         order = 1
@@ -74,27 +84,50 @@ def resample(data, spacing, factor, specials=None, time_var=None):
                     order = spec[1]
                     if type(order) is not int or order < 0 or order > 1:
                         raise Exception('order=', order, 'from', spec, 'must be 0 or 1')
-        new_var = []
-        num = 0
-        for i in range(n-1):
-            base = var[i]
-            ext = var[i+1]
-            if typ == '<f8':
-                for j in range(factor):
-                    val = base + (ext-base)*float(order*j)*rat
-                    new_var.append(val)
-            else:
-                for j in range(factor):
-                    val = int(round(base + (ext-base)*float(order*j)*rat))
-                    num += 1
-                    new_var.append(val)
-        num += 1
-        val = ext
-        new_var.append(val)
-        if typ == '<f8':
-            recon = rf.rec_append_fields(recon, var_name, np.array(new_var, dtype=float))
+
+        # Add interpolated values
+        if time_var is None:
+            new_var = []
+            for i in range(n-1):
+                base = var[i]
+                ext = var[i+1]
+                if typ == '<f8':
+                    for j in range(factor):
+                        val = base + (ext-base)*float(order*j)*rat
+                        new_var.append(val)
+                else:
+                    for j in range(factor):
+                        val = int(round(base + (ext-base)*float(order*j)*rat))
+                        new_var.append(val)
+            val = ext
+            new_var.append(val)
         else:
-            recon = rf.rec_append_fields(recon, var_name, np.array(new_var, dtype=int))
+            new_var = []
+            for i in range(n-1):
+                time_base = data[time_var][i]
+                time_ext = data[time_var][i+1]
+                dtime = time_ext - time_base
+                time = time_base
+                base = var[i]
+                ext = var[i+1]
+                if typ == '<f8':
+                    while time < time_ext:
+                        val = base + (ext-base) * (time-time_base) / dtime
+                        new_var.append(val)
+                        time += spacing
+                else:
+                    while time < time_ext:
+                        val = int(round(base + (ext-base) * (time-time_base) / dtime))
+                        new_var.append(val)
+                        time += spacing
+            val = ext
+            new_var.append(val)
+
+        if var_name != time_var:
+            if typ == '<f8':
+                recon = rf.rec_append_fields(recon, var_name, np.array(new_var, dtype=float))
+            else:
+                recon = rf.rec_append_fields(recon, var_name, np.array(new_var, dtype=int))
 
     return recon, true_spacing
 
@@ -144,8 +177,7 @@ if __name__ == '__main__':
 
         # Now do the resample
         T_raw = raw.time[1] - raw.time[0]
-        # recon = resample(raw, T_raw, 2, specials=[('falw', 0)], time_var='time')
-        recon = resample(raw, T_raw, 2, specials=[('falw', 0)])
+        recon = resample(raw, T_raw, 2, specials=[('falw', 0)], time_var='time')
 
         print("recon")
         print(recon)
