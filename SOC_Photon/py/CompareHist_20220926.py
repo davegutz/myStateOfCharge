@@ -613,7 +613,8 @@ if __name__ == '__main__':
         # h_40C = filter_Tb(h, 40., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
         voc_soc20 = look_it(x0, lut_voc, 20.)
         h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
-        T = 1800
+        # T = 0.3  # still allows Randles to run
+        T = 10
         h_20C = resample(data=h_20C, dt_resamp=T, time_var='time',
                          specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0), ('wl_fa', 0),
                                    ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0), ('ib_amp_fa', 0), ('vb_fa', 0),
