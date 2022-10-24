@@ -163,4 +163,4 @@ if __name__ == '__main__':
         print("raw time range", raw['time'][0], '-', raw['time'][-1], "length=", len(raw), "dt=", T_raw)
         print("resamp time range", resamp['time'][0], '-', resamp['time'][-1], "length=", len(resamp), "dt=", T)
 
-main()
+    main()
