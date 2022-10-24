@@ -35,14 +35,26 @@ def cat(out_file_name, in_file_names, in_path='./', out_path='./'):
 
 
 # Limited capability resample.   Interpolates floating point (foh) or holds value (zoh) according to order input
-def resample(data, spacing, factor, specials=None):
+def resample(data, spacing, factor, specials=None, time_var=None):
     # Check inputs
     if type(factor) is not int or factor < 1:
         raise Exception('factor=', factor, 'must be positive integer > 0')
 
     # Factors
     n = len(data)
-    new_n = (n - 1) * factor + 1
+    if time_var is None:
+        new_n = (n - 1) * factor + 1
+    else:  # detect
+        time = data[time_var]
+        start = time[0]
+        end = time[-1]
+        span = end - start
+        dt = time.copy()
+        for i in range(len(time)-1):
+            dt[i] = time[i+1] - time[i]
+        dt[-1] = dt[-2]
+        spacing = min(dt)
+        new_n = int(span / spacing) + 1
     rat = 1. / float(factor)
     true_spacing = spacing * rat
 
@@ -60,6 +72,8 @@ def resample(data, spacing, factor, specials=None):
             for spec in specials:
                 if spec[0] == var_name:
                     order = spec[1]
+                    if type(order) is not int or order < 0 or order > 1:
+                        raise Exception('order=', order, 'from', spec, 'must be 0 or 1')
         new_var = []
         num = 0
         for i in range(n-1):
@@ -71,7 +85,7 @@ def resample(data, spacing, factor, specials=None):
                     new_var.append(val)
             else:
                 for j in range(factor):
-                    val = int(base + (ext-base)*float(order*j)*rat)
+                    val = int(round(base + (ext-base)*float(order*j)*rat))
                     num += 1
                     new_var.append(val)
         num += 1
@@ -130,6 +144,7 @@ if __name__ == '__main__':
 
         # Now do the resample
         T_raw = raw.time[1] - raw.time[0]
+        # recon = resample(raw, T_raw, 2, specials=[('falw', 0)], time_var='time')
         recon = resample(raw, T_raw, 2, specials=[('falw', 0)])
 
         print("recon")
