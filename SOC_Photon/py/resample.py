@@ -49,7 +49,7 @@ def resample(data, dt_resamp, time_var, specials=None, make_time_float=True):
     while new_time[new_n] < end:
         new_n += 1
         new_time.append(start + float(new_n) * dt_resamp)
-    print("resample:  new time", new_time)
+    # print("resample:  new time", new_time)
     print("resample:  start new", new_time[0], "end new", new_time[-1], "len new", len(new_time), "end new - end", new_time[-1]-end, "dt_resamp", dt_resamp)
 
     # Index for new array

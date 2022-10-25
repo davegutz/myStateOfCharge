@@ -24,6 +24,7 @@ from Hysteresis_20220926 import Hysteresis_20220926
 from Battery import is_sat, low_t, IB_MIN_UP
 from resample import resample
 from MonSim import replicate
+from Battery import overall_batt
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -63,8 +64,8 @@ def cat(out_file_name, in_file_names, in_path='./', out_path='./'):
                         out_file.write(line)
 
 
-def over_easy(hi, filename, mv=None, fig_files=None, plot_title=None, n_fig=None, subtitle=None,  x_sch=None, z_sch=None,
-              voc_reset=0.):
+def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_title=None, n_fig=None, subtitle=None,
+              x_sch=None, z_sch=None, voc_reset=0.):
     if fig_files is None:
         fig_files = []
     # Markers
@@ -116,8 +117,10 @@ def over_easy(hi, filename, mv=None, fig_files=None, plot_title=None, n_fig=None
     plt.suptitle(subtitle)
     plt.plot(hi.time_day, hi.soc, marker='.', markersize='3', linestyle='-', color='black', label='soc')
     plt.plot(hi.time_day, hi.soc_ekf, marker='+', markersize='3', linestyle='--', color='blue', label='soc_ekf')
-    plt.plot(mv.time_day-mv.time_day[0], mv.soc, linestyle='-.', color='red', label='soc_ver')
-    plt.plot(mv.time_day-mv.time_day[0], mv.soc_ekf, linestyle=':', color='green', label='soc_ekf_ver')
+    plt.plot(mv_fast.time_day-mv_fast.time_day[0], mv_fast.soc, linestyle='-.', color='red', label='soc_ver_300')
+    plt.plot(mv_fast.time_day-mv_fast.time_day[0], mv_fast.soc_ekf, linestyle=':', color='green', label='soc_ekf_ver_300')
+    plt.plot(mv_slow.time_day-mv_slow.time_day[0], mv_slow.soc, linestyle='--', color='magenta', label='soc_ver_1000')
+    plt.plot(mv_slow.time_day-mv_slow.time_day[0], mv_slow.soc_ekf, linestyle='-.', color='cyan', label='soc_ekf_ver_1000')
     plt.legend(loc=1)
     plt.subplot(332)
     plt.plot(hi.time_day, hi.Tb, marker='.', markersize='3', linestyle='-', color='black', label='Tb')
@@ -595,8 +598,11 @@ if __name__ == '__main__':
         # User inputs
         input_files = ['hist v20220926 20221006.txt', 'hist v20220926 20221006a.txt', 'hist v20220926 20221008.txt',
                        'hist v20220926 20221010.txt', 'hist v20220926 20221011.txt']
-        exclusions = [(0, 1665334404)]  # before faults
+        # exclusions = [(0, 1665334404)]  # before faults
+        # exclusions = [(0, 1665404608), (1665433410, 1670000000)]  # EKF wander full
+        exclusions = [(0, 1665404608), (1665419009, 1670000000)]  # EKF wander first part
         # exclusions = None
+
         data_file = 'data20220926.txt'
         path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
@@ -640,14 +646,23 @@ if __name__ == '__main__':
         # h_40C = filter_Tb(h, 40., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
         voc_soc20 = look_it(x0, lut_voc, 20.)
         h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
-        T = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
-        # T = 10  # For debugging
-        h_20C_resamp = resample(data=h_20C, dt_resamp=T, time_var='time',
-                                specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0), ('wl_fa', 0),
-                                          ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0), ('ib_amp_fa', 0), ('vb_fa', 0),
-                                          ('tb_fa', 0), ])
-        mon_old, sim_old = bandaid(h_20C_resamp)
-        mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=1.)
+        T_300 = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
+        T_1000 = 1  # For debugging
+        # T_1000 = 10  # For debugging
+        h_20C_resamp_300 = resample(data=h_20C, dt_resamp=T_300, time_var='time',
+                                    specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
+                                              ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
+                                              ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0), ])
+        mon_old_300, sim_old_300 = bandaid(h_20C_resamp_300)
+        mon_ver_300, sim_ver_300, randles_ver_300, sim_s_ver_300 = replicate(mon_old_300, sim_old=sim_old_300,
+                                                                             init_time=1.)
+        h_20C_resamp_1000 = resample(data=h_20C, dt_resamp=T_1000, time_var='time',
+                                     specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
+                                               ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
+                                               ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0), ])
+        mon_old_1000, sim_old_1000 = bandaid(h_20C_resamp_1000)
+        mon_ver_1000, sim_ver_1000, randles_ver_1000, sim_s_ver_1000 = replicate(mon_old_1000, sim_old=sim_old_1000,
+                                                                                 init_time=1.)
 
         # Plots
         n_fig = 0
@@ -666,9 +681,13 @@ if __name__ == '__main__':
         # if len(h_40C.time) > 1:
         #     n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc40, voc_reset=VOC_RESET_40)
         if len(h_20C.time) > 1:
-            n_fig, fig_files = over_easy(h_20C, filename, mv=mon_ver, fig_files=fig_files, plot_title=plot_title,
-                                         subtitle='h_20C',
+            n_fig, fig_files = over_easy(h_20C, filename, mv_fast=mon_ver_300, mv_slow=mon_ver_1000,
+                                         fig_files=fig_files, plot_title=plot_title, subtitle='h_20C',
                                          n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
+            n_fig, fig_files = overall_batt(mon_ver_300, sim_ver_300, randles_ver_300, suffix='_300',
+                                            filename=filename, fig_files=fig_files,
+                                            mv1=mon_ver_1000, sv1=sim_ver_1000, rv1=randles_ver_1000, suffix1='_1000',
+                                            plot_title=plot_title, n_fig=n_fig)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=path_to_pdfs)
         cleanup_fig_files(fig_files)

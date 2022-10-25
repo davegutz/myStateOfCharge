@@ -1002,25 +1002,22 @@ class Saved:
         self.bms_off = []  # Voltage low without faults, battery management system has shut off battery
 
 
-def overall_batt(mv, sv, rv, filename, fig_files=None, plot_title=None, n_fig=None, suffix=''):
+def overall_batt(mv, sv, rv, filename,
+                 mv1=None, sv1=None, rv1=None, suffix1=None, fig_files=None, plot_title=None, n_fig=None, suffix=''):
     if fig_files is None:
         fig_files = []
 
     plt.figure()
-    # plt.subplot_mosaic("AB;CD;CE")
     n_fig += 1
     plt.subplot(321)
-    # plt.subplot_mosaic("A")
     plt.title(plot_title)
-    plt.plot(mv.time, mv.ib, color='green', label='ib'+suffix)
+    plt.plot(mv.time, mv.ib, color='green',   linestyle='-', label='ib'+suffix)
     plt.plot(sv.time, sv.ioc, color='magenta', linestyle='--', label='ioc'+suffix)
     plt.plot(mv.time, mv.irc, color='red', linestyle='-.', label='i_r_ct'+suffix)
     plt.plot(mv.time, mv.icd, color='cyan', linestyle=':', label='i_c_dif'+suffix)
     plt.plot(mv.time, mv.ird, color='orange', linestyle=':', label='i_r_dif'+suffix)
-    # plt.plot(mv.time, mv.ib, color='black', linestyle='--', label='Ioc'+suffix)
     plt.legend(loc=1)
     plt.subplot(323)
-    # plt.subplot_mosaic("C")
     plt.plot(mv.time, mv.vb, color='green', label='vb'+suffix)
     plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_s'+suffix)
     plt.plot(mv.time, mv.vc, color='blue', linestyle='-.', label='vc'+suffix)
@@ -1055,6 +1052,49 @@ def overall_batt(mv, sv, rv, filename, fig_files=None, plot_title=None, n_fig=No
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
+
+    if mv1 is not None:
+        plt.figure()
+        n_fig += 1
+        plt.subplot(331)
+        plt.title(plot_title)
+        plt.plot(mv.time, mv.ib, color='green',   linestyle='-', label='ib'+suffix)
+        plt.plot(mv1.time, mv1.ib, color='black', linestyle='--', label='ib' + suffix1)
+        plt.plot(sv.time, sv.ioc, color='magenta', linestyle='-.', label='ioc'+suffix)
+        plt.plot(sv1.time, sv1.ioc, color='orange', linestyle=':', label='ioc' + suffix1)
+        plt.legend(loc=1)
+        plt.subplot(332)
+        plt.plot(mv.time, mv.irc, color='red', linestyle='-', label='i_r_ct' + suffix)
+        plt.plot(mv1.time, mv1.irc, color='blue', linestyle='--', label='i_r_ct' + suffix1)
+        plt.legend(loc=1)
+        plt.subplot(333)
+        plt.plot(mv.time, mv.icd, color='cyan', linestyle='-', label='i_c_dif' + suffix)
+        plt.plot(mv1.time, mv1.icd, color='green', linestyle='--', label='i_c_dif' + suffix1)
+        plt.legend(loc=1)
+        plt.subplot(333)
+        plt.plot(mv.time, mv.ird, color='orange', linestyle=':', label='i_r_dif' + suffix)
+        plt.plot(mv1.time, mv1.ird, color='magenta', linestyle='-.', label='i_r_dif' + suffix1)
+        plt.legend(loc=1)
+        plt.subplot(334)
+        plt.plot(mv.time, mv.vb, color='green', linestyle='-', label='vb' + suffix)
+        plt.plot(mv1.time, mv1.vb, color='black', linestyle='--', label='vb' + suffix1)
+        plt.plot(mv.time, mv.vc, color='magenta', linestyle='-.', label='vc' + suffix)
+        plt.plot(mv1.time, mv1.vc, color='orange', linestyle=':', label='vc' + suffix1)
+        plt.legend(loc=1)
+        plt.subplot(335)
+        plt.plot(mv.time, mv.vd, color='green', linestyle='-', label='vd' + suffix)
+        plt.plot(mv1.time, mv1.vd, color='black', linestyle='--', label='vd' + suffix1)
+        plt.plot(mv.time, mv.voc_stat, color='magenta', linestyle='-.', label='voc_stat' + suffix)
+        plt.plot(mv1.time, mv1.voc_stat, color='orange', linestyle=':', label='voc_stat' + suffix1)
+        plt.legend(loc=1)
+        plt.subplot(336)
+        plt.plot(mv.time, mv.voc, color='green', linestyle='-', label='voc' + suffix)
+        plt.plot(mv1.time, mv1.voc, color='black', linestyle='--', label='voc' + suffix1)
+        plt.legend(loc=1)
+        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
+
 
     plt.figure()
     n_fig += 1
