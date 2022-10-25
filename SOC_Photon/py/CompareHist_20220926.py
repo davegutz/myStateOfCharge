@@ -543,6 +543,27 @@ if __name__ == '__main__':
     plt.rcParams['axes.grid'] = True
     from datetime import datetime
 
+    def bandaid(h):
+        res = np.zeros(len(h.time))
+        res[0:10] = 1
+        mod = np.zeros(len(h.time))
+        ib_in_s = h['Ib'].copy()
+        soc_s = h['soc'].copy()
+        sat_s = h['sat'].copy()
+        chm = np.zeros(len(h.time))
+        chm_s = np.zeros(len(h.time))
+        mon_old = rf.rec_append_fields(h, 'res', res)
+        mon_old = rf.rec_append_fields(mon_old, 'mod_data', mod)
+        mon_old = rf.rec_append_fields(mon_old, 'Ib_past', ib_in_s)
+        mon_old = rf.rec_append_fields(mon_old, 'soc_s', soc_s)
+        mon_old = rf.rec_append_fields(mon_old, 'chm', chm)
+        sim_old = np.array(np.zeros(len(h.time), dtype=[('time', '<i4')])).view(np.recarray)
+        sim_old.time = mon_old.time.copy()
+        sim_old = rf.rec_append_fields(sim_old, 'chm_s', chm_s)
+        sim_old = rf.rec_append_fields(sim_old, 'sat_s', sat_s)
+        sim_old = rf.rec_append_fields(sim_old, 'ib_in_s', ib_in_s)
+        return mon_old, sim_old
+
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         # date_ = datetime.now().strftime("%y%m%d")
@@ -620,24 +641,7 @@ if __name__ == '__main__':
                          specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0), ('wl_fa', 0),
                                    ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0), ('ib_amp_fa', 0), ('vb_fa', 0),
                                    ('tb_fa', 0), ])
-        res = np.zeros(len(h_20C.time))
-        res[0:10] = 1
-        mod = np.zeros(len(h_20C.time))
-        ib_in_s = h_20C['Ib'].copy()
-        soc_s = h_20C['soc'].copy()
-        sat_s = h_20C['sat'].copy()
-        chm = np.zeros(len(h_20C.time))
-        chm_s = np.zeros(len(h_20C.time))
-        mon_old = rf.rec_append_fields(h_20C, 'res', res)
-        mon_old = rf.rec_append_fields(mon_old, 'mod_data', mod)
-        mon_old = rf.rec_append_fields(mon_old, 'Ib_past', ib_in_s)
-        mon_old = rf.rec_append_fields(mon_old, 'soc_s', soc_s)
-        mon_old = rf.rec_append_fields(mon_old, 'chm', chm)
-        sim_old = np.array(np.zeros(len(h_20C.time), dtype=[('time', '<i4')])).view(np.recarray)
-        sim_old.time = mon_old.time.copy()
-        sim_old = rf.rec_append_fields(sim_old, 'chm_s', chm_s)
-        sim_old = rf.rec_append_fields(sim_old, 'sat_s', sat_s)
-        sim_old = rf.rec_append_fields(sim_old, 'ib_in_s', ib_in_s)
+        mon_old, sim_old = bandaid(h_20C)
         mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=1.)
 
         # Plots
