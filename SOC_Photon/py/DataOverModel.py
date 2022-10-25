@@ -847,6 +847,8 @@ class SavedData:
         if data is None:
             self.i = 0
             self.time = None
+            self.time_min = None
+            self.time_day = None
             self.dt = None  # Update time, s
             self.unit = None  # text title
             self.hm = None  # hours, minutes
@@ -894,6 +896,8 @@ class SavedData:
                     self.zero_end = 0
             self.time_ref = self.time[self.zero_end]
             self.time -= self.time_ref
+            self.time_min = self.time / 60.
+            self.time_day = self.time / 3600. / 24.
             # Truncate
             if time_end is None:
                 i_end = len(self.time)
@@ -1114,6 +1118,8 @@ class SavedDataSim:
         if data is None:
             self.i = 0
             self.time = None
+            self.time_min = None
+            self.time_day = None
             self.unit = None  # text title
             self.c_time = None  # Control time, s
             self.chm_s = None
@@ -1143,6 +1149,8 @@ class SavedDataSim:
                 i_end = np.where(self.time <= time_end)[0][-1] + 1
             self.c_time = self.c_time[:i_end]
             self.time = self.time[:i_end]
+            self.time_min = self.time / 60.
+            self.time_day = self.time / 3600. / 24.
             self.chm_s = data.chm_s[:i_end]
             self.Tb_s = data.Tb_s[:i_end]
             self.Tbl_s = data.Tbl_s[:i_end]

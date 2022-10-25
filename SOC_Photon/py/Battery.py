@@ -558,6 +558,8 @@ class BatteryMonitor(Battery, EKF1x1):
 
     def save(self, time, dt, soc_ref, voc_ref):
         self.saved.time.append(time)
+        self.saved.time_min.append(time / 60.)
+        self.saved.time_day.append(time / 3600. / 24.)
         self.saved.dt.append(dt)
         self.saved.chm.append(self.chm)
         self.saved.ib.append(self.ib)
@@ -928,6 +930,8 @@ class Saved:
     # For plot savings.   A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
     def __init__(self):
         self.time = []
+        self.time_min = []
+        self.time_day = []
         self.dt = []
         self.chm = []
         self.ib = []
@@ -1274,6 +1278,8 @@ class SavedS:
     # For plot savings.   A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
     def __init__(self):
         self.time = []
+        self.time_min = []
+        self.time_day = []
         self.unit = []  # text title
         self.c_time = []  # Control time, s
         self.chm_s = []

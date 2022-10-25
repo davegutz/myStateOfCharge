@@ -63,7 +63,7 @@ def cat(out_file_name, in_file_names, in_path='./', out_path='./'):
                         out_file.write(line)
 
 
-def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None,  x_sch=None, z_sch=None,
+def over_easy(hi, filename, mv=None, fig_files=None, plot_title=None, n_fig=None, subtitle=None,  x_sch=None, z_sch=None,
               voc_reset=0.):
     if fig_files is None:
         fig_files = []
@@ -116,6 +116,7 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.suptitle(subtitle)
     plt.plot(hi.time_day, hi.soc, marker='.', markersize='3', linestyle='-', color='black', label='soc')
     plt.plot(hi.time_day, hi.soc_ekf, marker='+', markersize='3', linestyle='--', color='blue', label='soc_ekf')
+    plt.plot(mv.time_day-mv.time_day[0], mv.soc_ekf, linestyle='-.', color='green', label='soc_ekf_ver')
     plt.legend(loc=1)
     plt.subplot(332)
     plt.plot(hi.time_day, hi.Tb, marker='.', markersize='3', linestyle='-', color='black', label='Tb')
@@ -640,11 +641,11 @@ if __name__ == '__main__':
         h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
         # T = 0.3  # still allows Randles to run
         T = 10
-        h_20C = resample(data=h_20C, dt_resamp=T, time_var='time',
-                         specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0), ('wl_fa', 0),
-                                   ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0), ('ib_amp_fa', 0), ('vb_fa', 0),
-                                   ('tb_fa', 0), ])
-        mon_old, sim_old = bandaid(h_20C)
+        h_20C_resamp = resample(data=h_20C, dt_resamp=T, time_var='time',
+                                specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0), ('wl_fa', 0),
+                                          ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0), ('ib_amp_fa', 0), ('vb_fa', 0),
+                                          ('tb_fa', 0), ])
+        mon_old, sim_old = bandaid(h_20C_resamp)
         mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=1.)
 
         # Plots
@@ -664,7 +665,8 @@ if __name__ == '__main__':
         # if len(h_40C.time) > 1:
         #     n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc40, voc_reset=VOC_RESET_40)
         if len(h_20C.time) > 1:
-            n_fig, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C',
+            n_fig, fig_files = over_easy(h_20C, filename, mv=mon_ver, fig_files=fig_files, plot_title=plot_title,
+                                         subtitle='h_20C',
                                          n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=path_to_pdfs)
