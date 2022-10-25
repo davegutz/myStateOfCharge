@@ -622,12 +622,23 @@ if __name__ == '__main__':
                                    ('tb_fa', 0), ])
         res = np.zeros(len(h_20C.time))
         res[0:10] = 1
-        Ib_past = h_20C['Ib'].copy()
+        mod = np.zeros(len(h_20C.time))
+        ib_in_s = h_20C['Ib'].copy()
         soc_s = h_20C['soc'].copy()
+        sat_s = h_20C['sat'].copy()
+        chm = np.zeros(len(h_20C.time))
+        chm_s = np.zeros(len(h_20C.time))
         mon_old = rf.rec_append_fields(h_20C, 'res', res)
-        mon_old = rf.rec_append_fields(mon_old, 'Ib_past', Ib_past)
+        mon_old = rf.rec_append_fields(mon_old, 'mod_data', mod)
+        mon_old = rf.rec_append_fields(mon_old, 'Ib_past', ib_in_s)
         mon_old = rf.rec_append_fields(mon_old, 'soc_s', soc_s)
-        mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, init_time=1.)
+        mon_old = rf.rec_append_fields(mon_old, 'chm', chm)
+        sim_old = np.array(np.zeros(len(h_20C.time), dtype=[('time', '<i4')])).view(np.recarray)
+        sim_old.time = mon_old.time.copy()
+        sim_old = rf.rec_append_fields(sim_old, 'chm_s', chm_s)
+        sim_old = rf.rec_append_fields(sim_old, 'sat_s', sat_s)
+        sim_old = rf.rec_append_fields(sim_old, 'ib_in_s', ib_in_s)
+        mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=1.)
 
         # Plots
         n_fig = 0
