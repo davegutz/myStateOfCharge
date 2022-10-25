@@ -375,6 +375,29 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     return d_mod
 
 
+# Fake stuff to get replicate to accept inputs and run
+def bandaid(h):
+    res = np.zeros(len(h.time))
+    res[0:10] = 1
+    mod = np.zeros(len(h.time))
+    ib_in_s = h['Ib'].copy()
+    soc_s = h['soc'].copy()
+    sat_s = h['sat'].copy()
+    chm = np.zeros(len(h.time))
+    chm_s = np.zeros(len(h.time))
+    mon_old = rf.rec_append_fields(h, 'res', res)
+    mon_old = rf.rec_append_fields(mon_old, 'mod_data', mod)
+    mon_old = rf.rec_append_fields(mon_old, 'Ib_past', ib_in_s)
+    mon_old = rf.rec_append_fields(mon_old, 'soc_s', soc_s)
+    mon_old = rf.rec_append_fields(mon_old, 'chm', chm)
+    sim_old = np.array(np.zeros(len(h.time), dtype=[('time', '<i4')])).view(np.recarray)
+    sim_old.time = mon_old.time.copy()
+    sim_old = rf.rec_append_fields(sim_old, 'chm_s', chm_s)
+    sim_old = rf.rec_append_fields(sim_old, 'sat_s', sat_s)
+    sim_old = rf.rec_append_fields(sim_old, 'ib_in_s', ib_in_s)
+    return mon_old, sim_old
+
+
 def calculate_capacity(q_cap_rated_scaled=None, dqdt=None, temp=None, t_rated=None):
     q_cap = q_cap_rated_scaled * (1. + dqdt * (temp - t_rated))
     return q_cap
@@ -543,26 +566,6 @@ if __name__ == '__main__':
     plt.rcParams['axes.grid'] = True
     from datetime import datetime
 
-    def bandaid(h):
-        res = np.zeros(len(h.time))
-        res[0:10] = 1
-        mod = np.zeros(len(h.time))
-        ib_in_s = h['Ib'].copy()
-        soc_s = h['soc'].copy()
-        sat_s = h['sat'].copy()
-        chm = np.zeros(len(h.time))
-        chm_s = np.zeros(len(h.time))
-        mon_old = rf.rec_append_fields(h, 'res', res)
-        mon_old = rf.rec_append_fields(mon_old, 'mod_data', mod)
-        mon_old = rf.rec_append_fields(mon_old, 'Ib_past', ib_in_s)
-        mon_old = rf.rec_append_fields(mon_old, 'soc_s', soc_s)
-        mon_old = rf.rec_append_fields(mon_old, 'chm', chm)
-        sim_old = np.array(np.zeros(len(h.time), dtype=[('time', '<i4')])).view(np.recarray)
-        sim_old.time = mon_old.time.copy()
-        sim_old = rf.rec_append_fields(sim_old, 'chm_s', chm_s)
-        sim_old = rf.rec_append_fields(sim_old, 'sat_s', sat_s)
-        sim_old = rf.rec_append_fields(sim_old, 'ib_in_s', ib_in_s)
-        return mon_old, sim_old
 
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
