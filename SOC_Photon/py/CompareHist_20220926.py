@@ -116,7 +116,8 @@ def over_easy(hi, filename, mv=None, fig_files=None, plot_title=None, n_fig=None
     plt.suptitle(subtitle)
     plt.plot(hi.time_day, hi.soc, marker='.', markersize='3', linestyle='-', color='black', label='soc')
     plt.plot(hi.time_day, hi.soc_ekf, marker='+', markersize='3', linestyle='--', color='blue', label='soc_ekf')
-    plt.plot(mv.time_day-mv.time_day[0], mv.soc_ekf, linestyle='-.', color='green', label='soc_ekf_ver')
+    plt.plot(mv.time_day-mv.time_day[0], mv.soc, linestyle='-.', color='red', label='soc_ver')
+    plt.plot(mv.time_day-mv.time_day[0], mv.soc_ekf, linestyle=':', color='green', label='soc_ekf_ver')
     plt.legend(loc=1)
     plt.subplot(332)
     plt.plot(hi.time_day, hi.Tb, marker='.', markersize='3', linestyle='-', color='black', label='Tb')
@@ -639,8 +640,8 @@ if __name__ == '__main__':
         # h_40C = filter_Tb(h, 40., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
         voc_soc20 = look_it(x0, lut_voc, 20.)
         h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
-        # T = 0.3  # still allows Randles to run
-        T = 10
+        T = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
+        # T = 10  # For debugging
         h_20C_resamp = resample(data=h_20C, dt_resamp=T, time_var='time',
                                 specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0), ('wl_fa', 0),
                                           ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0), ('ib_amp_fa', 0), ('vb_fa', 0),
