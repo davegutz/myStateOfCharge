@@ -655,14 +655,14 @@ if __name__ == '__main__':
                                               ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0), ])
         mon_old_300, sim_old_300 = bandaid(h_20C_resamp_300)
         mon_ver_300, sim_ver_300, randles_ver_300, sim_s_ver_300 = replicate(mon_old_300, sim_old=sim_old_300,
-                                                                             init_time=1.)
+                                                                             init_time=1., verbose=False)
         h_20C_resamp_1000 = resample(data=h_20C, dt_resamp=T_1000, time_var='time',
                                      specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
                                                ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
                                                ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0), ])
         mon_old_1000, sim_old_1000 = bandaid(h_20C_resamp_1000)
         mon_ver_1000, sim_ver_1000, randles_ver_1000, sim_s_ver_1000 = replicate(mon_old_1000, sim_old=sim_old_1000,
-                                                                                 init_time=1.)
+                                                                                 init_time=1., verbose=False)
 
         # Plots
         n_fig = 0

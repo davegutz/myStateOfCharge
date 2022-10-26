@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 from TFDelay import TFDelay
 from myFilters import LagTustin, General2Pole, RateLimit
 from Scale import Scale
+from numpy.linalg import inv
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
@@ -257,7 +258,9 @@ class Battery(Coulombs):
         raise NotImplementedError
 
     def init_battery(self):
-        self.Randles.init_state_space([0., 0.])
+        # TODO init Randles like in Battery::init_battery() of source code
+        # self.Randles.init_state_space([0., 0.])
+        self.Randles.init_state_space([self.ib, self.vb])
 
     def look_hys(self, dv, soc):
         raise NotImplementedError
@@ -416,7 +419,7 @@ class BatteryMonitor(Battery, EKF1x1):
         u = np.array([ib, vb]).T
         if dt < self.t_max:
             self.Randles.calc_x_dot(u)
-            self.Randles.update(self.dt)
+            self.Randles.update(self.dt, reset=reset)
             self.voc = self.Randles.y
         else:  # aliased, unstable if update Randles
             self.voc = vb - self.r_ss * self.ib
@@ -645,7 +648,8 @@ class BatterySim(Battery):
         self.model_saturated = False  # Indicator of maximal cutback, T = cutback saturated
         self.ib_sat = 0.5  # Threshold to declare saturation.  This regeneratively slows down charging so if too
         # small takes too long, A
-        self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_model()
+        self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D, self.Randles.AinvB =\
+            self.construct_state_space_model()
         self.s_cap = scale  # Rated capacity scalar
         if scale is not None:
             self.apply_cap_scale(scale)
@@ -794,7 +798,8 @@ class BatterySim(Battery):
                       [1 / self.c_dif,  0]])
         c = np.array([1., 1])
         d = np.array([self.r0, 1])
-        return a, b, c, d
+        ainvb = inv(a) * b
+        return a, b, c, d, ainvb
 
     def count_coulombs(self, chem, dt, reset, temp_c, charge_curr, sat, soc_s_init=None, mon_delta_q=None, mon_sat=None):
         # BatterySim

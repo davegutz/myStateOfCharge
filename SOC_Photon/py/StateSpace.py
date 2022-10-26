@@ -14,6 +14,7 @@
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
 import numpy as np
+from numpy.linalg import inv
 
 
 class StateSpace:
@@ -26,6 +27,7 @@ class StateSpace:
         self.u = np.zeros(shape=p)
         self.A = np.zeros(shape=(n, n))
         self.B = np.zeros(shape=(n, p))
+        self.AinvB = np.zeros(shape=(n, p))  # TODO:  c-code n,n should be n,p too?
         self.C = np.zeros(shape=(q, n))
         self.D = np.zeros(shape=(q, p))
         self.y = np.zeros(shape=q)
@@ -54,10 +56,13 @@ class StateSpace:
         # Ax = self.A@self.x
         # Bu = self.B@self.u
 
-    def init_state_space(self, x_init):
-        self.x = np.array(x_init)
+    def init_state_space(self, u_init):
+        self.u = np.array(u_init)
+        self.x = -self.AinvB @ self.u
         self.x_past = self.x
-        self.x_dot = self.x * 0.
+        self.calc_x_dot(self.u)
+        self.y = self.C @ self.x_past + self.D @ self.u  # u
+        return
 
     def save(self, time):
         self.saved.time = np.append(self.saved.time, time)
@@ -75,12 +80,16 @@ class StateSpace:
             self.saved.x_dot = self.x_dot.reshape(1, 2)
             self.saved.x_past = self.x_past.reshape(1, 2)
 
-    def update(self, dt):
+    def update(self, dt, reset=False):
         if dt is not None:
             self.dt = dt
         self.x_past = self.x.copy()  # Backwards Euler has extra delay
-        self.x += self.x_dot * self.dt
+        if not reset:
+            self.x += self.x_dot * self.dt
         self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
+        if reset:
+            print('reset', reset, 'dt', self.dt)
+            print(self.__str__())
         return self.y
 
 
@@ -133,7 +142,8 @@ if __name__ == '__main__':
                       [1 / c_dif,  0]])
         c = np.array([-1., -1])
         d = np.array([-r0, 1])
-        return a, b, c, d
+        AinvB = inv(a)*b
+        return a, b, c, d, AinvB
 
     def construct_state_space_model():
         r0 = 0.003  # Randles R0, ohms
@@ -152,22 +162,25 @@ if __name__ == '__main__':
                       [1 / c_dif,  0]])
         c = np.array([1., 1])
         d = np.array([r0, 1])
-        return a, b, c, d
+        AinvB = inv(a)*b
+        return a, b, c, d, AinvB
 
     def main():
         ss = StateSpace(2, 2, 1)
-        ss.A, ss.B, ss.C, ss.D = construct_state_space_monitor()
+        ss.A, ss.B, ss.C, ss.D, ss.AinvB = construct_state_space_monitor()
         print('Monitor::')
         print('A=', ss.A)
         print('B=', ss.B)
         print('C=', ss.C)
         print('D=', ss.D)
-        ss.A, ss.B, ss.C, ss.D = construct_state_space_model()
+        print('AinvB=', ss.AinvB)
+        ss.A, ss.B, ss.C, ss.D, ss.AinvB = construct_state_space_model()
         print('Model::')
         print('A=', ss.A)
         print('B=', ss.B)
         print('C=', ss.C)
         print('D=', ss.D)
+        print('AinvB=', ss.AinvB)
 
 
     main()

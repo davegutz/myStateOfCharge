@@ -45,12 +45,12 @@ StateSpace::StateSpace(double *A, double *B, double *C, double *D, const int8_t 
     {
       double Adet = A_[0]*A_[3] - A_[1]*A_[2];
       double *mAinv_ = new double[n*n];
-      AinvB_ = new double[n*n];
+      AinvB_ = new double[n*n]; // TODO:  n*p?
       mAinv_[0] = -A_[3] / Adet;
       mAinv_[1] =  A_[1] / Adet;
       mAinv_[2] =  A_[2] / Adet;
       mAinv_[3] = -A_[0] / Adet;
-      mulmat(mAinv_, B_, AinvB_, n, n, p);
+      mulmat(mAinv_, B_, AinvB_, n, n, p);  // TODO:  see n*p above
     }
 
   }
@@ -79,6 +79,7 @@ void StateSpace::init_state_space(double *u)
   if ( n_==2 && p_==2 )
   {
     mulmat(AinvB_, u_, x_, n_, n_, 1);
+    // TODO:?  x_ = -x_;
     calc_x_dot(u_);
   }
   else  // All zero
