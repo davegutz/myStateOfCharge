@@ -414,12 +414,13 @@ class BatteryMonitor(Battery, EKF1x1):
         # Dynamic emf
         self.vb = vb
         u = np.array([ib, vb]).T
-        self.Randles.calc_x_dot(u)
         if dt < self.t_max:
+            self.Randles.calc_x_dot(u)
             self.Randles.update(self.dt)
             self.voc = self.Randles.y
         else:  # aliased, unstable if update Randles
             self.voc = vb - self.r_ss * self.ib
+            self.Randles.y = self.voc
         if d_voc:
             self.voc = d_voc
         if self.bms_off and bms_off_local:
@@ -1003,11 +1004,17 @@ class Saved:
 
 
 def overall_batt(mv, sv, rv, filename,
-                 mv1=None, sv1=None, rv1=None, suffix1=None, fig_files=None, plot_title=None, n_fig=None, suffix=''):
+                 mv1=None, sv1=None, rv1=None, suffix1=None, fig_files=None, plot_title=None, n_fig=None, suffix='',
+                 use_time_day=False):
     if fig_files is None:
         fig_files = []
 
     if mv1 is None:
+        if use_time_day:
+            mv.time = mv.time_day - mv.time_day[0]
+            sv.time = sv.time_day - sv.time_day[0]
+            rv.time = rv.time_day - rv.time_day[0]
+
         plt.figure()
         n_fig += 1
         plt.subplot(321)
@@ -1264,6 +1271,20 @@ def overall_batt(mv, sv, rv, filename,
         plt.savefig(fig_file_name, format="png")
 
     else:
+        if use_time_day:
+            mv.time = mv.time_day - mv.time_day[0]
+            try:
+                sv.time = sv.time_day - sv.time_day[0]
+            except:
+                pass
+            rv.time = rv.time_day - rv.time_day[0]
+            mv1.time = mv1.time_day - mv1.time_day[0]
+            try:
+                sv1.time = sv1.time_day - sv1.time_day[0]
+            except:
+                pass
+            rv1.time = rv1.time_day - rv1.time_day[0]
+
         plt.figure()
         n_fig += 1
         plt.subplot(331)
@@ -1327,7 +1348,6 @@ def overall_batt(mv, sv, rv, filename,
         plt.plot(mv1.time, mv1.ioc, color='blue', linestyle=':', label='ioc' + suffix1)
         plt.legend(loc=1)
         plt.subplot(312)
-        plt.title(plot_title)
         plt.plot(mv.time, mv.dv_dyn, color='green', linestyle='-', label='dv_dyn'+suffix)
         plt.plot(mv1.time, mv1.dv_dyn, color='black', linestyle='--', label='dv_dyn'+suffix1)
         plt.legend(loc=1)
@@ -1384,7 +1404,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.plot(mv1.time, mv1.e_voc_ekf, color='black', linestyle='--', label='e_voc' + suffix1)
         plt.plot(mv.time, mv.e_soc_ekf, color='magenta', linestyle='-.', label='e_soc_ekf' + suffix)
         plt.plot(mv1.time, mv1.e_soc_ekf, color='blue', linestyle=':', label='e_soc_ekf' + suffix1)
-        plt.ylim(-0.01, 0.01)
+        # plt.ylim(-0.01, 0.01)
         plt.legend(loc=2)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -1392,26 +1412,32 @@ def overall_batt(mv, sv, rv, filename,
 
         plt.figure()
         n_fig += 1
-        plt.subplot(221)
+        plt.subplot(331)
         plt.title(plot_title)
         plt.plot(rv.time[1:], rv.u[1:, 1], color='green', linestyle='-', label='Mon Randles u[2]=vb'+suffix)
         plt.plot(rv1.time[1:], rv1.u[1:, 1], color='black', linestyle='--', label='Mon Randles u[2]=vb'+suffix1)
-        plt.plot(rv.time[1:], rv.y[1:], color='magenta', linestyle='-.', label='Mon Randles y=voc'+suffix)
-        plt.plot(rv1.time[1:], rv1.y[1:], color='blue', linestyle=':', label='Mon Randles y=voc'+suffix1)
         plt.legend(loc=2)
-        plt.subplot(222)
+        plt.subplot(332)
+        plt.plot(rv.time[1:], rv.y[1:], color='green', linestyle='-', label='Mon Randles y=voc'+suffix)
+        plt.plot(rv1.time[1:], rv1.y[1:], color='black', linestyle='--', label='Mon Randles y=voc'+suffix1)
+        plt.legend(loc=2)
+        plt.subplot(333)
         plt.plot(rv.time[1:], rv.x[1:, 0], color='green', linestyle='-', label='Mon Randles x[1]'+suffix)
         plt.plot(rv1.time[1:], rv1.x[1:, 0], color='black', linestyle='--', label='Mon Randles x[1]'+suffix1)
-        plt.plot(rv.time[1:], rv.x[1:, 1], color='magenta', linestyle='-.', label='Mon Randles x[2]'+suffix)
-        plt.plot(rv1.time[1:], rv1.x[1:, 1], color='blue', linestyle=':', label='Mon Randles x[2]'+suffix1)
         plt.legend(loc=2)
-        plt.subplot(223)
+        plt.subplot(334)
+        plt.plot(rv.time[1:], rv.x[1:, 1], color='green', linestyle='-', label='Mon Randles x[2]'+suffix)
+        plt.plot(rv1.time[1:], rv1.x[1:, 1], color='black', linestyle='--', label='Mon Randles x[2]'+suffix1)
+        plt.legend(loc=2)
+        plt.subplot(335)
         plt.plot(rv.time[1:], rv.x_dot[1:, 0], color='green', linestyle='-', label='Mon Randles x_dot[1]'+suffix)
         plt.plot(rv1.time[1:], rv1.x_dot[1:, 0], color='black', linestyle='--', label='Mon Randles x_dot[1]'+suffix1)
-        plt.plot(rv.time[1:], rv.x_dot[1:, 1], color='magenta', linestyle='-.', label='Mon Randles x_dot[2]'+suffix)
-        plt.plot(rv1.time[1:], rv1.x_dot[1:, 1], color='blue', linestyle=':', label='Mon Randles x_dot[2]'+suffix1)
         plt.legend(loc=2)
-        plt.subplot(224)
+        plt.subplot(336)
+        plt.plot(rv.time[1:], rv.x_dot[1:, 1], color='green', linestyle='-', label='Mon Randles x_dot[2]'+suffix)
+        plt.plot(rv1.time[1:], rv1.x_dot[1:, 1], color='black', linestyle='--', label='Mon Randles x_dot[2]'+suffix1)
+        plt.legend(loc=2)
+        plt.subplot(337)
         plt.plot(rv.time[1:], rv.u[1:, 0], color='green', linestyle='-', label='Mon Randles u[1]=Ib'+suffix)
         plt.plot(rv1.time[1:], rv1.u[1:, 0], color='black', linestyle='--', label='Mon Randles u[1]=Ib'+suffix1)
         plt.legend(loc=2)

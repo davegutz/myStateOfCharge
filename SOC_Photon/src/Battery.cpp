@@ -292,9 +292,9 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
 
     // Dynamic emf
     double u[2] = {ib_, vb_};
-    Randles_->calc_x_dot(u);
     if ( dt_<=RANDLES_T_MAX )
     {
+        Randles_->calc_x_dot(u);
         Randles_->update(dt_);
         voc_ = Randles_->y(0);
     }

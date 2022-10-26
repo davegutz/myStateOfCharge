@@ -61,11 +61,19 @@ class StateSpace:
 
     def save(self, time):
         self.saved.time = np.append(self.saved.time, time)
-        self.saved.u = np.append(self.saved.u, self.u.reshape(1, 2), axis=0)
+        self.saved.time_min = np.append(self.saved.time_min, time / 60.)
+        self.saved.time_day = np.append(self.saved.time_day, time / 3600. / 24.)
         self.saved.y = np.append(self.saved.y, self.y)
-        self.saved.x = np.append(self.saved.x, self.x.reshape(1, 2), axis=0)
-        self.saved.x_dot = np.append(self.saved.x_dot, self.x_dot.reshape(1, 2), axis=0)
-        self.saved.x_past = np.append(self.saved.x_past, self.x_past.reshape(1, 2), axis=0)
+        if self.saved.u != []:
+            self.saved.u = np.append(self.saved.u, self.u.reshape(1, 2), axis=0)
+            self.saved.x = np.append(self.saved.x, self.x.reshape(1, 2), axis=0)
+            self.saved.x_dot = np.append(self.saved.x_dot, self.x_dot.reshape(1, 2), axis=0)
+            self.saved.x_past = np.append(self.saved.x_past, self.x_past.reshape(1, 2), axis=0)
+        else:
+            self.saved.u = self.u.reshape(1, 2)
+            self.saved.x = self.x.reshape(1, 2)
+            self.saved.x_dot = self.x_dot.reshape(1, 2)
+            self.saved.x_past = self.x_past.reshape(1, 2)
 
     def update(self, dt):
         if dt is not None:
@@ -79,15 +87,28 @@ class StateSpace:
 class Saved:
     # For plot savings.   A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
     def __init__(self, n=0, p=0, q=0):
-        self.time = np.zeros(shape=1)
-        self.n = n
-        self.p = p
-        self.q = q
-        self.u = np.zeros(shape=(1, p))
-        self.y = np.zeros(shape=q)
-        self.x = np.zeros(shape=(1, n))
-        self.x_dot = self.x
-        self.x_past = self.x
+        # self.time = np.zeros(shape=1)
+        # self.time_min = np.zeros(shape=1)
+        # self.time_day = np.zeros(shape=1)
+        # self.n = n
+        # self.p = p
+        # self.q = q
+        # self.u = np.zeros(shape=(1, p))
+        # self.y = np.zeros(shape=q)
+        # self.x = np.zeros(shape=(1, n))
+        # self.x_dot = self.x
+        # self.x_past = self.x
+        self.time = []
+        self.time_min = []
+        self.time_day = []
+        self.n = []
+        self.p = []
+        self.q = []
+        self.u = []
+        self.y = []
+        self.x = []
+        self.x_dot = []
+        self.x_past = []
 
 
 if __name__ == '__main__':

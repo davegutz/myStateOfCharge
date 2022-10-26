@@ -684,10 +684,10 @@ if __name__ == '__main__':
             n_fig, fig_files = over_easy(h_20C, filename, mv_fast=mon_ver_300, mv_slow=mon_ver_1000,
                                          fig_files=fig_files, plot_title=plot_title, subtitle='h_20C',
                                          n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
-            n_fig, fig_files = overall_batt(mon_ver_300, sim_ver_300, randles_ver_300, suffix='_300',
+            n_fig, fig_files = overall_batt(mon_ver_1000, sim_ver_1000, randles_ver_1000, suffix='_1000',
                                             filename=filename, fig_files=fig_files,
-                                            mv1=mon_ver_1000, sv1=sim_ver_1000, rv1=randles_ver_1000, suffix1='_1000',
-                                            plot_title=plot_title, n_fig=n_fig)
+                                            mv1=mon_ver_300, sv1=sim_ver_300, rv1=randles_ver_300, suffix1='_300',
+                                            plot_title=plot_title, n_fig=n_fig, use_time_day=True)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=path_to_pdfs)
         cleanup_fig_files(fig_files)

@@ -133,7 +133,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
     if scale_in:
         scale *= scale_in
     s_q = Scale(1., 3., 0.000005, 0.00005)
-    s_r = Scale(1., 3., 0.001, 1.)   # t_Ib_fail = 1000 o
+    s_r = Scale(1., 3., 0.001, 1.)   # t_Ib_fail = 1000
     sim = BatterySim(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
                      dv_hys=dv_hys, sres=sres, scale_r_ss=scale_r_ss, s_hys=s_hys_sim, dvoc=dvoc_sim)
     mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
