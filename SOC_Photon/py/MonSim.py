@@ -93,11 +93,14 @@ def save_clean_file_sim(sim_ver, csv_file, unit_key):
 def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
               t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=None, Bmon=None, use_Vb_raw=False,
               scale_r_ss=1., s_hys_sim=1., s_hys_mon=1., dvoc_sim=0., dvoc_mon=0., drive_ekf=False, dTb_in=None,
-              verbose=True):
+              verbose=True, t_max=None):
     if sim_old is not None and len(sim_old.time) < len(mon_old.time):
         t = sim_old.time
     else:
         t = mon_old.time
+    if t_max is not None:
+        t_delt = t - t[0]
+        t = t[np.where(t_delt <= t_max)]
     reset_sel = mon_old.res
     if use_Vb_raw:
         Vb = mon_old.Vb_h

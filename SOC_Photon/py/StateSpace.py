@@ -48,6 +48,7 @@ class StateSpace:
         s += "  D = \n {}\n".format(self.D)
         s += "  x_dot = {}\n".format(self.x_dot)
         s += "  y = {}\n".format(self.y)
+        s += "  AinvB = \n {}\n".format(self.AinvB)
         return s
 
     def calc_x_dot(self, u):
@@ -58,6 +59,7 @@ class StateSpace:
 
     def init_state_space(self, u_init):
         self.u = np.array(u_init)
+        self.AinvB = inv(self.A) @ self.B
         self.x = -self.AinvB @ self.u
         self.x_past = self.x
         self.calc_x_dot(self.u)
@@ -69,16 +71,16 @@ class StateSpace:
         self.saved.time_min = np.append(self.saved.time_min, time / 60.)
         self.saved.time_day = np.append(self.saved.time_day, time / 3600. / 24.)
         self.saved.y = np.append(self.saved.y, self.y)
-        if self.saved.u != []:
-            self.saved.u = np.append(self.saved.u, self.u.reshape(1, 2), axis=0)
-            self.saved.x = np.append(self.saved.x, self.x.reshape(1, 2), axis=0)
-            self.saved.x_dot = np.append(self.saved.x_dot, self.x_dot.reshape(1, 2), axis=0)
-            self.saved.x_past = np.append(self.saved.x_past, self.x_past.reshape(1, 2), axis=0)
-        else:
+        if self.saved.u == []:
             self.saved.u = self.u.reshape(1, 2)
             self.saved.x = self.x.reshape(1, 2)
             self.saved.x_dot = self.x_dot.reshape(1, 2)
             self.saved.x_past = self.x_past.reshape(1, 2)
+        else:
+            self.saved.u = np.append(self.saved.u, self.u.reshape(1, 2), axis=0)
+            self.saved.x = np.append(self.saved.x, self.x.reshape(1, 2), axis=0)
+            self.saved.x_dot = np.append(self.saved.x_dot, self.x_dot.reshape(1, 2), axis=0)
+            self.saved.x_past = np.append(self.saved.x_past, self.x_past.reshape(1, 2), axis=0)
 
     def update(self, dt, reset=False):
         if dt is not None:

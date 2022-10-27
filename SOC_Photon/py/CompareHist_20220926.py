@@ -594,10 +594,12 @@ if __name__ == '__main__':
         lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
 
         # Save these
+        t_max_in = None
 
         # User inputs
         input_files = ['hist v20220926 20221006.txt', 'hist v20220926 20221006a.txt', 'hist v20220926 20221008.txt',
                        'hist v20220926 20221010.txt', 'hist v20220926 20221011.txt']
+        # t_max_in = 20.
         # exclusions = [(0, 1665334404)]  # before faults
         # exclusions = [(0, 1665404608), (1665433410, 1670000000)]  # EKF wander full
         exclusions = [(0, 1665404608), (1665419009, 1670000000)]  # EKF wander first part
@@ -655,14 +657,16 @@ if __name__ == '__main__':
                                               ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0), ])
         mon_old_300, sim_old_300 = bandaid(h_20C_resamp_300)
         mon_ver_300, sim_ver_300, randles_ver_300, sim_s_ver_300 = replicate(mon_old_300, sim_old=sim_old_300,
-                                                                             init_time=1., verbose=False)
+                                                                             init_time=1., verbose=False,
+                                                                             t_max=t_max_in)
         h_20C_resamp_1000 = resample(data=h_20C, dt_resamp=T_1000, time_var='time',
                                      specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
                                                ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
                                                ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0), ])
         mon_old_1000, sim_old_1000 = bandaid(h_20C_resamp_1000)
         mon_ver_1000, sim_ver_1000, randles_ver_1000, sim_s_ver_1000 = replicate(mon_old_1000, sim_old=sim_old_1000,
-                                                                                 init_time=1., verbose=False)
+                                                                                 init_time=1., verbose=False,
+                                                                                 t_max=t_max_in)
 
         # Plots
         n_fig = 0

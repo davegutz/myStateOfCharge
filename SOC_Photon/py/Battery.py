@@ -258,9 +258,7 @@ class Battery(Coulombs):
         raise NotImplementedError
 
     def init_battery(self):
-        # TODO init Randles like in Battery::init_battery() of source code
-        # self.Randles.init_state_space([0., 0.])
-        self.Randles.init_state_space([self.ib, self.vb])
+        raise NotImplementedError
 
     def look_hys(self, dv, soc):
         raise NotImplementedError
@@ -549,6 +547,9 @@ class BatteryMonitor(Battery, EKF1x1):
         self.H = self.dv_dsoc
         return self.hx, self.H
 
+    def init_battery(self):
+        self.Randles.init_state_space([self.ib, self.vb])
+
     def init_soc_ekf(self, soc):
         self.soc_ekf = soc
         self.init_ekf(soc, 0.0)
@@ -625,6 +626,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.soc_s.append(self.soc_s)
         self.Randles.save(time)
         self.saved.bms_off.append(self.bms_off)
+        self.saved.reset.append(self.reset)
 
 
 class BatterySim(Battery):
@@ -863,6 +865,9 @@ class BatterySim(Battery):
         self.t_last = self.temp_lim
         return self.soc
 
+    def init_battery(self):
+        self.Randles.init_state_space([self.ib, self.voc])
+
     def save(self, time, dt):  # BatterySim
         self.saved.time.append(time)
         self.saved.dt.append(dt)
@@ -1006,6 +1011,7 @@ class Saved:
         self.q_capacity = []  # Saturation charge at temperature, C
         self.t_last = []  # Past value of battery temperature used for rate limit memory, deg C
         self.bms_off = []  # Voltage low without faults, battery management system has shut off battery
+        self.reset = []  # Reset flag used for initialization
 
 
 def overall_batt(mv, sv, rv, filename,
@@ -1020,7 +1026,7 @@ def overall_batt(mv, sv, rv, filename,
             sv.time = sv.time_day - sv.time_day[0]
             rv.time = rv.time_day - rv.time_day[0]
 
-        plt.figure()
+        plt.figure()  # Batt 1
         n_fig += 1
         plt.subplot(321)
         plt.title(plot_title)
@@ -1062,7 +1068,7 @@ def overall_batt(mv, sv, rv, filename,
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()
+        plt.figure()  # Batt 2
         n_fig += 1
         plt.subplot(111)
         plt.title(plot_title)
@@ -1081,7 +1087,7 @@ def overall_batt(mv, sv, rv, filename,
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()
+        plt.figure()  # Batt 3
         n_fig += 1
         plt.subplot(321)
         plt.title(plot_title+' **SIM')
@@ -1111,7 +1117,7 @@ def overall_batt(mv, sv, rv, filename,
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()  # 3
+        plt.figure()  # Batt 4
         n_fig += 1
         plt.subplot(321)
         plt.title(plot_title+' MON vs SIM')
@@ -1148,7 +1154,7 @@ def overall_batt(mv, sv, rv, filename,
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()
+        plt.figure()  # Batt 5
         n_fig += 1
         plt.subplot(331)
         plt.title(plot_title+' **EKF')
@@ -1183,7 +1189,7 @@ def overall_batt(mv, sv, rv, filename,
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()
+        plt.figure()  # Batt 6
         n_fig += 1
         plt.title(plot_title)
         plt.plot(mv.time, mv.e_voc_ekf, color='blue', linestyle='-.', label='e_voc'+suffix)
@@ -1194,7 +1200,7 @@ def overall_batt(mv, sv, rv, filename,
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()
+        plt.figure()  # Batt 7
         n_fig += 1
         plt.title(plot_title)
         plt.plot(mv.time, mv.voc, color='red', linestyle='-', label='voc'+suffix)
@@ -1205,7 +1211,7 @@ def overall_batt(mv, sv, rv, filename,
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()
+        plt.figure()  # Batt 8
         n_fig += 1
         plt.title(plot_title)
         plt.plot(mv.time, mv.soc_ekf, color='blue', linestyle='-', label='soc_ekf'+suffix)
@@ -1216,7 +1222,7 @@ def overall_batt(mv, sv, rv, filename,
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()
+        plt.figure()  # Batt 9
         n_fig += 1
         plt.title(plot_title)
         plt.plot(mv.time, mv.e_voc_ekf, color='blue', linestyle='-.', label='e_voc'+suffix)
@@ -1226,7 +1232,7 @@ def overall_batt(mv, sv, rv, filename,
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()
+        plt.figure()  # Batt 10
         n_fig += 1
         plt.subplot(221)
         plt.title(plot_title)
@@ -1243,7 +1249,7 @@ def overall_batt(mv, sv, rv, filename,
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()
+        plt.figure()  # Batt 11
         n_fig += 1
         plt.subplot(111)
         plt.title(plot_title)
@@ -1253,7 +1259,7 @@ def overall_batt(mv, sv, rv, filename,
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()
+        plt.figure()  # Batt 12
         n_fig += 1
         plt.subplot(221)
         plt.title(plot_title)
@@ -1289,11 +1295,20 @@ def overall_batt(mv, sv, rv, filename,
             except:
                 pass
             rv1.time = rv1.time_day - rv1.time_day[0]
+        reset_max = max(abs(min(mv.vbc_dot)), max(mv.vbc_dot), abs(min(mv1.vbc_dot)), max(mv1.vbc_dot))
+        reset_index_max = max(np.where(np.array(mv1.reset) > 0))
+        t_init = mv1.time[reset_index_max[-1]]
+        mv.time -= t_init
+        mv1.time -= t_init
+        sv.time -= t_init
+        sv1.time -= t_init
+        rv.time -= t_init
+        rv1.time -= t_init
 
         plt.figure()
         n_fig += 1
         plt.subplot(331)
-        plt.title(plot_title)
+        plt.title(plot_title + 'Battover 1')
         plt.plot(mv.time, mv.ib, color='green',   linestyle='-', label='ib'+suffix)
         plt.plot(mv1.time, mv1.ib, color='black', linestyle='--', label='ib' + suffix1)
         plt.plot(mv.time, mv.ioc, color='magenta', linestyle='-.', label='ioc'+suffix)
@@ -1328,6 +1343,8 @@ def overall_batt(mv, sv, rv, filename,
         plt.subplot(337)
         plt.plot(mv.time, mv.vbc_dot, color='green', linestyle='-', label='vbc_dot' + suffix)
         plt.plot(mv1.time, mv1.vbc_dot, color='black', linestyle='--', label='vbc_dot' + suffix1)
+        plt.plot(mv.time, np.array(mv.reset)*reset_max, color='orange', linestyle='-', label='reset'+suffix)
+        plt.plot(mv1.time, np.array(mv1.reset)*reset_max, color='cyan', linestyle='--', label='reset'+suffix1)
         plt.legend(loc=1)
         plt.subplot(338)
         plt.plot(mv.time, mv.vcd_dot, color='green', linestyle='-', label='vcd_dot' + suffix)
@@ -1346,7 +1363,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.figure()
         n_fig += 1
         plt.subplot(311)
-        plt.title(plot_title)
+        plt.title(plot_title + 'Battover 2')
         plt.plot(mv.time, mv.ib, color='green',   linestyle='-', label='ib'+suffix)
         plt.plot(mv1.time, mv1.ib, color='black', linestyle='--', label='ib' + suffix1)
         plt.plot(mv.time, mv.ioc, color='magenta', linestyle='-.', label='ioc'+suffix)
@@ -1367,7 +1384,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.figure()
         n_fig += 1
         plt.subplot(331)
-        plt.title(plot_title + ' **EKF')
+        plt.title(plot_title + ' **EKF' + 'Battover 3')
         plt.plot(mv.time, mv.x_ekf, color='green', linestyle='-', label='x ekf' + suffix)
         plt.plot(mv1.time, mv1.x_ekf, color='black', linestyle='--', label='x ekf' + suffix1)
         plt.legend(loc=4)
@@ -1418,7 +1435,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.figure()
         n_fig += 1
         plt.subplot(331)
-        plt.title(plot_title)
+        plt.title(plot_title + 'Battover 4')
         plt.plot(rv.time[1:], rv.u[1:, 1], color='green', linestyle='-', label='Mon Randles u[2]=vb'+suffix)
         plt.plot(rv1.time[1:], rv1.u[1:, 1], color='black', linestyle='--', label='Mon Randles u[2]=vb'+suffix1)
         plt.legend(loc=2)
