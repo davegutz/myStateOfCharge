@@ -16,7 +16,6 @@
 """Define a general purpose battery model including Randles' model and SoC-VOV model."""
 
 import numpy as np
-import math
 from EKF1x1 import EKF1x1
 from Coulombs import Coulombs, dqdt
 from StateSpace import StateSpace
@@ -52,7 +51,7 @@ BATT_DVOC_DT = 0.004  # 5/30/2022
                             >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C"""
 BATT_V_SAT = 13.8  # Normal battery cell saturation for SOC=99.7, V (13.8)
 NOM_SYS_VOLT = 12.  # Nominal system output, V, at which the reported amps are used (12)
-low_voc = 9.  # Minimum voltage for battery below which BMS shutsoff current
+low_voc = 9.  # Minimum voltage for battery below which BMS shuts off current
 low_t = 8.  # Minimum temperature for valid saturation check, because BMS shuts off battery low.
 # Heater should keep >8, too
 mxeps_bb = 1-1e-6  # Numerical maximum of coefficient model with scaled soc
@@ -77,11 +76,8 @@ ZETA_Y_FILT = 0.9  # EKF y-filter-2 damping factor (0.9)
 TMAX_FILT = 3.  # Maximum y-filter-2 sample time, s (3.)
 EKF_Q_SD_NORM = 0.00005  # Standard deviation of normal EKF process uncertainty, V (0.00005)
 EKF_R_SD_NORM = 0.5  # Standard deviation of normal EKF state uncertainty, fraction (0-1) (0.5)
-# disable because not in particle photon logic
-# EKF_Q_SD_REV = 0.7
-# EKF_R_SD_REV = 0.3
-EKF_Q_SD_REV = EKF_Q_SD_NORM
-EKF_R_SD_REV = EKF_R_SD_NORM
+EKF_Q_SD_REV = EKF_Q_SD_NORM  # TODO:  delete
+EKF_R_SD_REV = EKF_R_SD_NORM  # TODO: delete
 IMAX_NUM = 100000.  # Overflow protection since ib past value used
 HYS_SOC_MIN_MARG = 0.15  # Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
 HYS_SOC_MAX = 0.99  # Detect high endpoint condition for reset of hysteresis
@@ -93,11 +89,14 @@ V_BATT_DOWN_SIM = 9.5  # Shutoff point in Sim before off, V (9.5)
 V_BATT_RISING_SIM = 9.75  # Shutoff point in Sim when off, V (9.5)
 V_BATT_DOWN = 9.5  # Shutoff point before off, V (9.75)
 V_BATT_RISING = 10.5  # Shutoff point when off, V (10.25)
+RANDLES_T_MAX = 0.31  # Maximum update time of Randles state space model to avoid aliasing and instability (0.31 allows DP3)
+cp_eframe_mult = 20  # Run EKF 20 times slower than Coulomb Counter and Randles models
+
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
     # """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
-    #                         what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
+    #                         what gets delivered, e.g. Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
     #                         or 20 - 40 A for a 100 Ah battery"""
 
     # Battery model:  Randles' dynamics, SOC-VOC model
@@ -108,7 +107,7 @@ class Battery(Coulombs):
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, tweak_test=False, t_max=0.31, sres=1., scale_r_ss=1., s_hys=1., dvoc=0.):
+                 temp_c=RATED_TEMP, tweak_test=False, t_max=RANDLES_T_MAX, sres=1., scale_r_ss=1., s_hys=1., dvoc=0.):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -155,6 +154,7 @@ class Battery(Coulombs):
         x2 = np.array(t_x_soc2)
         y2 = np.array(t_y_t2)
         data_interp2 = np.array(t_voc2)
+        self.lut_voc = None
         self.lut_voc2 = myTables.TableInterp2D(x2, y2, data_interp2)
         self.dvoc = dvoc
         self.nz = None
@@ -183,8 +183,8 @@ class Battery(Coulombs):
         self.r_dif = r_dif*sres
         self.c_dif = self.tau_dif / self.r_dif
         self.t_max = t_max
-        self.Randles = StateSpace(2, 2, 1)
-        # self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
+        # self.Randles = StateSpace(2, 2, 1)
+        self.Randles = StateSpace(1, 1, 1)
         self.temp_c = temp_c
         self.saved = Saved()  # for plots and prints
         self.dv_hys = 0.  # Placeholder so BatterySim can be plotted
@@ -301,7 +301,7 @@ class BatteryMonitor(Battery, EKF1x1):
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., scaler_q=None,
-                 scaler_r=None, scale_r_ss=1., s_hys=1., dvoc=1.):
+                 scaler_r=None, scale_r_ss=1., s_hys=1., dvoc=1., eframe_mult=cp_eframe_mult):
         q_cap_rated_scaled = q_cap_rated * scale
         Battery.__init__(self, bat_v_sat, q_cap_rated_scaled, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres,
@@ -353,6 +353,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.Voc_ekf = 0.
         self.T_Rlim = RateLimit()
         self.ib_charge = 0.
+        self.eframe = 0
+        self.eframe_mult = eframe_mult
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -438,20 +440,25 @@ class BatteryMonitor(Battery, EKF1x1):
         self.ioc = self.hys.ioc
 
         # EKF 1x1
-        ddq_dt = self.ib
-        if ddq_dt > 0. and not self.tweak_test:
-            ddq_dt *= self.coul_eff
-        ddq_dt -= dqdt*self.q_capacity*T_rate
-        self.Q = self.scaler_q.calculate(ddq_dt)  # TODO this doesn't work right
-        self.R = self.scaler_r.calculate(ddq_dt)  # TODO this doesn't work right
-        self.Q = EKF_Q_SD_NORM**2  # override
-        self.R = EKF_R_SD_NORM**2  # override
-        self.predict_ekf(u=ddq_dt, u_old=u_old)  # u = d(q)/dt
-        self.update_ekf(z=self.voc_stat, x_min=0., x_max=1., z_old=z_old)  # z = voc, voc_filtered = hx
-        self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
-        self.q_ekf = self.soc_ekf * self.q_capacity
-        self.y_filt = self.y_filt_lag.calculate(in_=self.y_ekf, dt=min(dt, EKF_T_RESET), reset=False)
-        self.y_filt2 = self.y_filt_2Ord.calculate(in_=self.y_ekf, dt=min(dt, TMAX_FILT), reset=False)
+        if self.eframe == 0:
+            dt_eframe = self.dt * float(self.eframe_mult)
+            ddq_dt = self.ib
+            if ddq_dt > 0. and not self.tweak_test:
+                ddq_dt *= self.coul_eff
+            ddq_dt -= dqdt*self.q_capacity*T_rate
+            self.Q = self.scaler_q.calculate(ddq_dt)  # TODO this doesn't work right
+            self.R = self.scaler_r.calculate(ddq_dt)  # TODO this doesn't work right
+            self.Q = EKF_Q_SD_NORM**2  # override
+            self.R = EKF_R_SD_NORM**2  # override
+            self.predict_ekf(u=ddq_dt, u_old=u_old)  # u = d(q)/dt
+            self.update_ekf(z=self.voc_stat, x_min=0., x_max=1., z_old=z_old)  # z = voc, voc_filtered = hx
+            self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
+            self.q_ekf = self.soc_ekf * self.q_capacity
+            self.y_filt = self.y_filt_lag.calculate(in_=self.y_ekf, dt=min(dt_eframe, EKF_T_RESET), reset=False)
+            self.y_filt2 = self.y_filt_2Ord.calculate(in_=self.y_ekf, dt=min(dt_eframe, TMAX_FILT), reset=False)
+        self.eframe += 1
+        if self.eframe == self.eframe_mult:
+            self.eframe = 0
 
         # EKF convergence
         conv = abs(self.y_filt) < EKF_CONV
@@ -495,10 +502,8 @@ class BatteryMonitor(Battery, EKF1x1):
             self.amp_hrs_remaining_wt = amp_hrs_remaining * (self.soc - self.soc_min) /\
                 (soc - self.soc_min)
         elif soc < self.soc_min:
-            self.amp_hrs_remaining_ekf = amp_hrs_remaining * (self.soc_ekf - self.soc_min) / \
-                                         (soc - self.soc_min)
-            self.amp_hrs_remaining_wt = amp_hrs_remaining * (self.soc - self.soc_min) / \
-                                        (soc - self.soc_min)
+            self.amp_hrs_remaining_ekf = amp_hrs_remaining * (self.soc_ekf - self.soc_min) / (soc - self.soc_min)
+            self.amp_hrs_remaining_wt = amp_hrs_remaining * (self.soc - self.soc_min) / (soc - self.soc_min)
         else:
             self.amp_hrs_remaining_ekf = 0.
             self.amp_hrs_remaining_wt = 0.
@@ -535,8 +540,10 @@ class BatteryMonitor(Battery, EKF1x1):
 
     def ekf_predict(self):
         """Process model"""
-        self.Fx = math.exp(-self.dt / self.tau_sd)
-        self.Bu = (1. - self.Fx)*self.r_sd
+        # self.Fx = math.exp(-self.dt / self.tau_sd)
+        # self.Bu = (1. - self.Fx)*self.r_sd
+        self.Fx = 1. - self.dt / self.tau_sd
+        self.Bu = self.dt / self.tau_sd * self.r_sd
         return self.Fx, self.Bu
 
     def ekf_update(self):
@@ -640,6 +647,7 @@ class BatterySim(Battery):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres,
                          scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc)
+        self.lut_voc = None
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A
         self.sat_ib_null = 0.  # Current cutback value for soc=1, A
@@ -662,7 +670,7 @@ class BatterySim(Battery):
         self.charge_curr = 0.  # Charge current, A
         self.saved_s = SavedS()  # for plots and prints
         self.ib_in = 0.  # Saved value of current input, A
-        self.ib_charge = 0. # Always used to charge/discharge, A
+        self.ib_charge = 0.  # Always used to charge/discharge, A
         self.ib_fut = 0.  # Future value of limited current, A
 
     def __str__(self, prefix=''):

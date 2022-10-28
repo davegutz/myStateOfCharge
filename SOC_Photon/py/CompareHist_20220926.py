@@ -24,7 +24,7 @@ from Hysteresis_20220926 import Hysteresis_20220926
 from Battery import is_sat, low_t, IB_MIN_UP
 from resample import resample
 from MonSim import replicate
-from Battery import overall_batt
+from Battery import overall_batt, cp_eframe_mult
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -117,10 +117,10 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.suptitle(subtitle)
     plt.plot(hi.time_day, hi.soc, marker='.', markersize='3', linestyle='-', color='black', label='soc')
     plt.plot(hi.time_day, hi.soc_ekf, marker='+', markersize='3', linestyle='--', color='blue', label='soc_ekf')
-    plt.plot(mv_fast.time_day-mv_fast.time_day[0], mv_fast.soc, linestyle='-.', color='red', label='soc_ver_300')
-    plt.plot(mv_fast.time_day-mv_fast.time_day[0], mv_fast.soc_ekf, linestyle=':', color='green', label='soc_ekf_ver_300')
-    plt.plot(mv_slow.time_day-mv_slow.time_day[0], mv_slow.soc, linestyle='--', color='magenta', label='soc_ver_1000')
-    plt.plot(mv_slow.time_day-mv_slow.time_day[0], mv_slow.soc_ekf, linestyle='-.', color='cyan', label='soc_ekf_ver_1000')
+    plt.plot(mv_fast.time_day-mv_fast.time_day[0], mv_fast.soc, linestyle='-.', color='red', label='soc_ver_300new')
+    plt.plot(mv_fast.time_day-mv_fast.time_day[0], mv_fast.soc_ekf, linestyle=':', color='green', label='soc_ekf_ver_300new')
+    plt.plot(mv_slow.time_day-mv_slow.time_day[0], mv_slow.soc, linestyle='--', color='magenta', label='soc_ver_300old')
+    plt.plot(mv_slow.time_day-mv_slow.time_day[0], mv_slow.soc_ekf, linestyle='-.', color='cyan', label='soc_ekf_ver_300old')
     plt.legend(loc=1)
     plt.subplot(332)
     plt.plot(hi.time_day, hi.Tb, marker='.', markersize='3', linestyle='-', color='black', label='Tb')
@@ -648,25 +648,26 @@ if __name__ == '__main__':
         # h_40C = filter_Tb(h, 40., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
         voc_soc20 = look_it(x0, lut_voc, 20.)
         h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
-        T_300 = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
-        T_1000 = 1  # For debugging
-        # T_1000 = 10  # For debugging
-        h_20C_resamp_300 = resample(data=h_20C, dt_resamp=T_300, time_var='time',
+        T_300new = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
+        T_300old = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
+        # T_300old = 10  # For debugging
+        h_20C_resamp_300old = resample(data=h_20C, dt_resamp=T_300old, time_var='time',
+                                       specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
+                                                 ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
+                                                 ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
+        mon_old_300old, sim_old_300old = bandaid(h_20C_resamp_300old)
+        mon_ver_300old, sim_ver_300old, randles_ver_300old, sim_s_ver_300old =\
+            replicate(mon_old_300old, sim_old=sim_old_300old, init_time=1., verbose=False, t_max=t_max_in,
+                      eframe_mult=1)
+        h_20C_resamp_300new = resample(data=h_20C, dt_resamp=T_300new, time_var='time',
                                     specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
                                               ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
-                                              ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0), ])
-        mon_old_300, sim_old_300 = bandaid(h_20C_resamp_300)
-        mon_ver_300, sim_ver_300, randles_ver_300, sim_s_ver_300 = replicate(mon_old_300, sim_old=sim_old_300,
-                                                                             init_time=1., verbose=False,
-                                                                             t_max=t_max_in)
-        h_20C_resamp_1000 = resample(data=h_20C, dt_resamp=T_1000, time_var='time',
-                                     specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
-                                               ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
-                                               ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0), ])
-        mon_old_1000, sim_old_1000 = bandaid(h_20C_resamp_1000)
-        mon_ver_1000, sim_ver_1000, randles_ver_1000, sim_s_ver_1000 = replicate(mon_old_1000, sim_old=sim_old_1000,
-                                                                                 init_time=1., verbose=False,
-                                                                                 t_max=t_max_in)
+                                              ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
+        mon_old_300new, sim_old_300new = bandaid(h_20C_resamp_300new)
+        eframe_mult = int(0.1*cp_eframe_mult / T_300new)
+        mon_ver_300new, sim_ver_300new, randles_ver_300new, sim_s_ver_300new =\
+            replicate(mon_old_300new, sim_old=sim_old_300new, init_time=1., verbose=False, t_max=t_max_in,
+                      eframe_mult=eframe_mult)
 
         # Plots
         n_fig = 0
@@ -685,13 +686,13 @@ if __name__ == '__main__':
         # if len(h_40C.time) > 1:
         #     n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc40, voc_reset=VOC_RESET_40)
         if len(h_20C.time) > 1:
-            n_fig, fig_files = over_easy(h_20C, filename, mv_fast=mon_ver_300, mv_slow=mon_ver_1000,
+            n_fig, fig_files = over_easy(h_20C, filename, mv_fast=mon_ver_300new, mv_slow=mon_ver_300old,
                                          fig_files=fig_files, plot_title=plot_title, subtitle='h_20C',
                                          n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
-            n_fig, fig_files = overall_batt(mon_ver_1000, sim_ver_1000, randles_ver_1000, suffix='_1000',
+            n_fig, fig_files = overall_batt(mon_ver_300old, sim_ver_300old, randles_ver_300old, suffix='_300old',
                                             filename=filename, fig_files=fig_files,
-                                            mv1=mon_ver_300, sv1=sim_ver_300, rv1=randles_ver_300, suffix1='_300',
-                                            plot_title=plot_title, n_fig=n_fig, use_time_day=True)
+                                            mv1=mon_ver_300new, sv1=sim_ver_300new, rv1=randles_ver_300new,
+                                            suffix1='_300new', plot_title=plot_title, n_fig=n_fig, use_time_day=True)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=path_to_pdfs)
         cleanup_fig_files(fig_files)

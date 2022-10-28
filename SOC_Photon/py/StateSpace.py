@@ -147,6 +147,21 @@ if __name__ == '__main__':
         AinvB = inv(a)*b
         return a, b, c, d, AinvB
 
+    def construct_state_space_monitor_1():
+        r0 = 0.003 + 0.0016  # Randles R0, ohms
+        tau_dif = 83  # Randles diffusion time constant, s (=1/Rdif/Cdif)
+        r_dif = 0.0077  # Randles diffusion resistance, ohms
+        c_dif = tau_dif / r_dif
+        print('-1/Rd/Cd=', -1/tau_dif)
+        print('1/Cd=', 1/c_dif)
+        print('r0=', r0)
+        a = np.array(-1 / tau_dif)
+        b = np.array(1. / c_dif)
+        c = np.array(-1)
+        d = np.array(-r0)
+        AinvB = b / a
+        return a, b, c, d, AinvB
+
     def construct_state_space_model():
         r0 = 0.003  # Randles R0, ohms
         tau_ct = 0.2  # Randles charge transfer time constant, s (=1/Rct/Cct)
@@ -167,6 +182,21 @@ if __name__ == '__main__':
         AinvB = inv(a)*b
         return a, b, c, d, AinvB
 
+    def construct_state_space_model_1():
+        r0 = 0.003 + 0.0016  # Randles R0, ohms
+        tau_dif = 83  # Randles diffusion time constant, s (=1/Rdif/Cdif)
+        r_dif = 0.0077  # Randles diffusion resistance, ohms
+        c_dif = tau_dif / r_dif
+        print('-1/Rd/Cd=', -1/tau_dif)
+        print('1/Cd=', 1/c_dif)
+        print('r0=', r0)
+        a = np.array(-1 / tau_dif)
+        b = np.array(1 / c_dif)
+        c = np.array(1.)
+        d = np.array(r0)
+        AinvB = b / a
+        return a, b, c, d, AinvB
+
     def main():
         ss = StateSpace(2, 2, 1)
         ss.A, ss.B, ss.C, ss.D, ss.AinvB = construct_state_space_monitor()
@@ -178,6 +208,22 @@ if __name__ == '__main__':
         print('AinvB=', ss.AinvB)
         ss.A, ss.B, ss.C, ss.D, ss.AinvB = construct_state_space_model()
         print('Model::')
+        print('A=', ss.A)
+        print('B=', ss.B)
+        print('C=', ss.C)
+        print('D=', ss.D)
+        print('AinvB=', ss.AinvB)
+
+        ss = StateSpace(1, 1, 1)
+        ss.A, ss.B, ss.C, ss.D, ss.AinvB = construct_state_space_monitor_1()
+        print('Monitor_1::')
+        print('A=', ss.A)
+        print('B=', ss.B)
+        print('C=', ss.C)
+        print('D=', ss.D)
+        print('AinvB=', ss.AinvB)
+        ss.A, ss.B, ss.C, ss.D, ss.AinvB = construct_state_space_model_1()
+        print('Model_1::')
         print('A=', ss.A)
         print('B=', ss.B)
         print('C=', ss.C)
