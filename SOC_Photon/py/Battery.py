@@ -458,7 +458,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.y_filt = self.y_filt_lag.calculate(in_=self.y_ekf, dt=min(self.dt_eframe, EKF_T_RESET), reset=False)
             self.y_filt2 = self.y_filt_2Ord.calculate(in_=self.y_ekf, dt=min(self.dt_eframe, TMAX_FILT), reset=False)
         self.eframe += 1
-        if self.eframe == self.eframe_mult:
+        if reset or self.eframe == self.eframe_mult:
             self.eframe = 0
 
         # EKF convergence
