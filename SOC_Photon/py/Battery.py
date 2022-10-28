@@ -355,6 +355,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.ib_charge = 0.
         self.eframe = 0
         self.eframe_mult = eframe_mult
+        self.dt_eframe = self.dt*self.eframe_mult
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -441,7 +442,7 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # EKF 1x1
         if self.eframe == 0:
-            dt_eframe = self.dt * float(self.eframe_mult)
+            self.dt_eframe = self.dt * float(self.eframe_mult)
             ddq_dt = self.ib
             if ddq_dt > 0. and not self.tweak_test:
                 ddq_dt *= self.coul_eff
@@ -454,8 +455,8 @@ class BatteryMonitor(Battery, EKF1x1):
             self.update_ekf(z=self.voc_stat, x_min=0., x_max=1., z_old=z_old)  # z = voc, voc_filtered = hx
             self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
             self.q_ekf = self.soc_ekf * self.q_capacity
-            self.y_filt = self.y_filt_lag.calculate(in_=self.y_ekf, dt=min(dt_eframe, EKF_T_RESET), reset=False)
-            self.y_filt2 = self.y_filt_2Ord.calculate(in_=self.y_ekf, dt=min(dt_eframe, TMAX_FILT), reset=False)
+            self.y_filt = self.y_filt_lag.calculate(in_=self.y_ekf, dt=min(self.dt_eframe, EKF_T_RESET), reset=False)
+            self.y_filt2 = self.y_filt_2Ord.calculate(in_=self.y_ekf, dt=min(self.dt_eframe, TMAX_FILT), reset=False)
         self.eframe += 1
         if self.eframe == self.eframe_mult:
             self.eframe = 0
@@ -542,8 +543,8 @@ class BatteryMonitor(Battery, EKF1x1):
         """Process model"""
         # self.Fx = math.exp(-self.dt / self.tau_sd)
         # self.Bu = (1. - self.Fx)*self.r_sd
-        self.Fx = 1. - self.dt / self.tau_sd
-        self.Bu = self.dt / self.tau_sd * self.r_sd
+        self.Fx = 1. - self.dt_eframe / self.tau_sd
+        self.Bu = self.dt_eframe / self.tau_sd * self.r_sd
         return self.Fx, self.Bu
 
     def ekf_update(self):
