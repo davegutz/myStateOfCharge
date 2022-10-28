@@ -651,6 +651,7 @@ if __name__ == '__main__':
         T_300new = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
         T_300old = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
         # T_300old = 10  # For debugging
+
         h_20C_resamp_300old = resample(data=h_20C, dt_resamp=T_300old, time_var='time',
                                        specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
                                                  ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
@@ -659,10 +660,11 @@ if __name__ == '__main__':
         mon_ver_300old, sim_ver_300old, randles_ver_300old, sim_s_ver_300old =\
             replicate(mon_old_300old, sim_old=sim_old_300old, init_time=1., verbose=False, t_max=t_max_in,
                       eframe_mult=1)
+
         h_20C_resamp_300new = resample(data=h_20C, dt_resamp=T_300new, time_var='time',
-                                    specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
-                                              ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
-                                              ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
+                                       specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
+                                                 ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
+                                                 ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
         mon_old_300new, sim_old_300new = bandaid(h_20C_resamp_300new)
         eframe_mult = int(0.1*cp_eframe_mult / T_300new)
         mon_ver_300new, sim_ver_300new, randles_ver_300new, sim_s_ver_300new =\
