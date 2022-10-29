@@ -62,6 +62,7 @@ struct Chemistry
   float tau_diff;   // Randles diffusion time constant, s (=1/Rdif/Cdif)
   float tau_sd;     // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
   float r_sd;       // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
+  float c_sd;       // Equivalent model for EKF reference.  Parasitic discharge equivalent, Farads
   float r_ss;       // Equivalent model for state space model initialization, ohms
   TableInterp2D *voc_T_;      // SOC-VOC 2-D table, V
   TableInterp1D *soc_min_T_;  // SOC-MIN 1-D table, V

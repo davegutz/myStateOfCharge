@@ -326,7 +326,7 @@ protected:
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
   double amp_hrs_remaining_soc_;  // Discharge amp*time left if drain soc_ to 0, A-h
   double y_filt_;       // Filtered EKF y value, V
-  General2_Pole *y_filt = new General2_Pole(0.1, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
+  General2_Pole *y_filt = new General2_Pole(2.0, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
   SlidingDeadband *SdVb_;  // Sliding deadband filter for Vb
   TFDelay *EKF_converged;     // Time persistence
   void ekf_predict(double *Fx, double *Bu);
@@ -334,6 +334,8 @@ protected:
   RateLimit *T_RLim = new RateLimit();
   float voc_soc_;  // Raw table lookup of voc, V
   double ib_charge_;  // Current input avaiable for charging, A
+  uint8_t eframe_;      // Counter to run EKF slower than Coulomb Counter and Randles models
+  double dt_eframe_;    // Update time for EKF major frame
 };
 
 

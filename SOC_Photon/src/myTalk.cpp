@@ -296,6 +296,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%7.3f\n", rp.Vb_bias);
                 break;
 
+              case ( 'E' ):  //   DE<>:  EKF execution frame multiplier
+                Serial.printf("Eframe mult interval %d to ", cp.eframe_mult);
+                cp.assign_eframe_mult(max(min(cp.input_string.substring(2).toInt(), UINT8_MAX), 0));
+                Serial.printf("%d\n", cp.eframe_mult);
+                break;
+
               case ( 'i' ):  // * Di<>:  Bias all current sensors (same way as Da and Db)
                 Serial.printf("rp.ib_bias_all %7.3f to ", rp.ib_bias_all);
                 rp.ib_bias_all = cp.input_string.substring(2).toFloat();
@@ -1258,6 +1264,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" *DB= "); Serial.printf("%6.3f", rp.ib_bias_noa); Serial.printf(": delta noa, A [%6.3f]\n", CURR_BIAS_NOA); 
   Serial.printf(" *Di= "); Serial.printf("%6.3f", rp.ib_bias_all); Serial.printf(": delta all, A [%6.3f]\n", CURR_BIAS_ALL); 
   Serial.printf(" *Dc= "); Serial.printf("%6.3f", rp.Vb_bias); Serial.printf(": delta, V [%6.3f]\n", VOLT_BIAS); 
+  Serial.printf("  DE= "); Serial.printf("%d", cp.eframe_mult); Serial.printf(": eframe mult Dr [20]\n"); 
   Serial.printf("  Du=  "); Serial.print(Sen->Sim->coul_eff()); Serial.println(": coul eff"); 
   Serial.printf("  Dm= "); Serial.printf("%6.3f", Sen->ShuntAmp->add()); Serial.printf(": delta amp inj, A [0]\n"); 
   Serial.printf("  Dn= "); Serial.printf("%6.3f", Sen->ShuntNoAmp->add()); Serial.printf(": delta noa inj, A [0]\n"); 

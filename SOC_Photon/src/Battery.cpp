@@ -130,7 +130,8 @@ void Battery::pretty_print(void)
     Serial.printf("  r_diff=%10.6f;  ohm\n", chem_.r_diff);
     Serial.printf("  tau_diff =%10.6f;  s (=1/Rdif/Cdif)\n", chem_.tau_diff);
     Serial.printf("  r_sd = %10.6f;  ohm\n", chem_.r_sd);
-    Serial.printf("  tau_sd=%10.1f;  s\n", chem_.tau_sd);
+    Serial.printf("  tau_sd=%9.3g;  s\n", chem_.tau_sd);
+    Serial.printf("  c_sd=%9.3g;  farad\n", chem_.c_sd);
     Serial.printf("  bms_off=%d;\n", bms_off_);
     Serial.printf("  dv_dsoc=%10.6f; V/frac\n", dv_dsoc_);
     Serial.printf("  ib=%7.3f; A\n", ib_);
@@ -316,26 +317,32 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     ioc_ = hys_->ioc();
 
     // EKF 1x1
-    double ddq_dt = ib_;
-    if ( ddq_dt>0. && !rp.tweak_test() ) ddq_dt *= coul_eff_ * Sen->sclr_coul_eff;
-    ddq_dt -= chem_.dqdt * q_capacity_ * T_rate;
-    predict_ekf(ddq_dt);       // u = d(dq)/dt
-    update_ekf(voc_stat_, 0., 1., Sen->control_time, Sen->now);  // z = voc_stat, estimated = voc_filtered = hx, predicted = est past
-    soc_ekf_ = x_ekf();             // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
-    q_ekf_ = soc_ekf_ * q_capacity_;
-    delta_q_ekf_ = q_ekf_ - q_capacity_;
+    if ( eframe_ == 0 )
+    {
+        double ddq_dt = ib_;
+        dt_eframe_ = dt_ * float(cp.eframe_mult);
+        if ( ddq_dt>0. && !rp.tweak_test() ) ddq_dt *= coul_eff_ * Sen->sclr_coul_eff;
+        ddq_dt -= chem_.dqdt * q_capacity_ * T_rate;
+        predict_ekf(ddq_dt);       // u = d(dq)/dt
+        update_ekf(voc_stat_, 0., 1., Sen->control_time, Sen->now);  // z = voc_stat, estimated = voc_filtered = hx, predicted = est past
+        soc_ekf_ = x_ekf();             // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
+        q_ekf_ = soc_ekf_ * q_capacity_;
+        delta_q_ekf_ = q_ekf_ - q_capacity_;
+        y_filt_ = y_filt->calculate(y_, min(dt_eframe_, EKF_T_RESET));
+        // EKF convergence.  Audio industry found that detection of quietness requires no more than
+        // second order filter of the signal.   Anything more is 'gilding the lily'
+        boolean conv = abs(y_filt_)<EKF_CONV && !cp.soft_reset;  // Initialize false
+        EKF_converged->calculate(conv, EKF_T_CONV, EKF_T_RESET, min(dt_eframe_, EKF_T_RESET), cp.soft_reset);
+    }
+    eframe_++;
+
+    if ( reset || cp.soft_reset || eframe_ == cp.eframe_mult ) eframe_ = 0;
 
     // Normalize
     soc_ = q_ / q_capacity_;
 
     // Filter
     voc_filt_ = SdVb_->update(voc_);   // used for saturation test
-    y_filt_ = y_filt->calculate(y_, min(Sen->T, EKF_T_RESET));
-
-    // EKF convergence.  Audio industry found that detection of quietness requires no more than
-    // second order filter of the signal.   Anything more is 'gilding the lily'
-    boolean conv = abs(y_filt_)<EKF_CONV && !cp.soft_reset;  // Initialize false
-    EKF_converged->calculate(conv, EKF_T_CONV, EKF_T_RESET, min(Sen->T, EKF_T_RESET), cp.soft_reset);
 
     // if ( rp.debug==13 || rp.debug==2 )
     //     Serial.printf("bms_off,soc,ib,vb,voc,voc_stat,voc_soc,dv_hys,dv_dyn,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
@@ -397,9 +404,11 @@ double BatteryMonitor::calc_charge_time(const double q, const double q_capacity,
 // EKF model for predict
 void BatteryMonitor::ekf_predict(double *Fx, double *Bu)
 {
-    // Process model
-    *Fx = exp(-dt_ / chem_.tau_sd);
-    *Bu = (1. - *Fx) * chem_.r_sd;
+    // Process model  dt_eframe_<<chem_.tau_sd
+    // *Fx = exp(-dt_eframe_ / chem_.tau_sd);
+    *Fx = 1. - dt_eframe_ / chem_.tau_sd;
+    // *Bu = (1. - *Fx) * chem_.r_sd;
+    *Bu = dt_eframe_ / chem_.c_sd;
 }
 
 // EKF model for update

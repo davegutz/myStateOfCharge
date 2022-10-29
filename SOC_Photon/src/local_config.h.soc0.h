@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "soc0_20220926x";  // hist hyst redesign
+const String unit = "soc0_20221028";  // multi-frame EKF
 
 #define ASK_DURING_BOOT         1   // Flag to ask for application of this file to * retained adjustements
 // * = SRAM EEPROM adjustments, retained on power reset

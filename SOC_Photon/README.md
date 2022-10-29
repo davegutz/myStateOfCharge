@@ -248,6 +248,10 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
 
   CoolTerm - Options - Terminal:  Enter Key Emulation:  CR
 
+### Problem:  cTime very long.  If look at year, it is 1999.
+
+  Connect the photon to the network.   Use Particle app on phone to connect it to wifi at least once.
+
 ## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
 
 ## To get debug data

@@ -54,7 +54,8 @@
   //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
   #include "application.h"  // Should not be needed if file ino or Arduino
   SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
-  SYSTEM_MODE(MANUAL);      // Turn off wifi
+  // SYSTEM_MODE(MANUAL);      // Turn off wifi
+  // SYSTEM_MODE(SEMI_AUTOMATIC);      // Turn off wifi
   #include <Arduino.h>      // Used instead of Print.h - breaks Serial
 #else
   #undef PHOTON
@@ -134,9 +135,12 @@ void setup()
   // delay(2000); // Pause for 2 seconds
   display->clearDisplay();
 
-  // Cloud
-  Time.zone(GMT);
+  // Cloud, to synchronize clock.   Device needs to be configured for wifi (hold setup 3 sec run Particle app) and in range of wifi
+  WiFi.disconnect();
+  delay(2000);
   WiFi.off();
+  delay(1000);
+  Serial.printf("Done WiFi\n");
   Serial.printf("done CLOUD\n");
 
   // Clean boot logic.  This occurs only when doing a structural rebuild clean make on initial flash, because

@@ -457,13 +457,13 @@ class BatteryMonitor(Battery, EKF1x1):
             self.q_ekf = self.soc_ekf * self.q_capacity
             self.y_filt = self.y_filt_lag.calculate(in_=self.y_ekf, dt=min(self.dt_eframe, EKF_T_RESET), reset=False)
             self.y_filt2 = self.y_filt_2Ord.calculate(in_=self.y_ekf, dt=min(self.dt_eframe, TMAX_FILT), reset=False)
+            # EKF convergence
+            conv = abs(self.y_filt) < EKF_CONV
+            self.EKF_converged.calculate(conv, EKF_T_CONV, EKF_T_RESET, min(self.dt_eframe, EKF_T_RESET), False)
         self.eframe += 1
         if reset or self.eframe == self.eframe_mult:
             self.eframe = 0
 
-        # EKF convergence
-        conv = abs(self.y_filt) < EKF_CONV
-        self.EKF_converged.calculate(conv, EKF_T_CONV, EKF_T_RESET, min(dt, EKF_T_RESET), False)
 
         # Charge time
         if self.ib > 0.1:

@@ -58,6 +58,7 @@ struct CommandPars
   unsigned long num_v_print;// Number of print echos made, for checking on BLE
   float tb_bias_model;      // Bias on Tb for model, C
   float s_t_sat;            // Scalar on saturation test time set and reset
+  uint8_t eframe_mult;      // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
 
   CommandPars(void)
   {
@@ -75,6 +76,7 @@ struct CommandPars
     num_v_print = 0UL;
     tb_bias_model = 0.;
     s_t_sat = 1.;
+    eframe_mult = 20;
   }
 
   void cmd_reset(void)
@@ -107,8 +109,15 @@ struct CommandPars
     Serial.printf(" dc_dc_on=%d;\n", this->dc_dc_on);
     Serial.printf(" blynking=%d; z\n", this->blynking);
     Serial.printf(" publishS=%d;\n", this->publishS);
+    Serial.printf(" priint_mult=%d;\n", this->print_mult);
     Serial.printf(" tb_bias_mode=%7.3f;\n", this->tb_bias_model);
     Serial.printf(" s_t_sat=%7.3f;\n", this->s_t_sat);
+    Serial.printf(" eframe_mult=%d;\n", this->eframe_mult);
+  }
+
+  void assign_eframe_mult(const uint8_t count)
+  {
+    this->eframe_mult = count;
   }
 
   void assign_print_mult(const uint8_t count)

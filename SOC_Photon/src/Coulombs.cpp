@@ -76,6 +76,7 @@ void Chemistry::assign_BB()
   tau_ct  = 0.2;    // Randles charge transfer time constant, s (=1/Rct/Cct)
   tau_diff = 83.;   // Randles diffusion time constant, s (=1/Rdif/Cdif)
   tau_sd  = 2.5e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
+  c_sd    = tau_sd / r_sd;
   v_sat   = 13.85;  // Saturation threshold at temperature, deg C
 
   // VOC_SOC table
@@ -105,6 +106,7 @@ void Chemistry::assign_LI()
   tau_ct  = 0.2;    // Randles charge transfer time constant, s (=1/Rct/Cct)
   tau_diff = 83.;   // Randles diffusion time constant, s (=1/Rdif/Cdif)
   tau_sd  = 2.5e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
+  c_sd    = tau_sd / r_sd;
   v_sat   = 13.85;  // Saturation threshold at temperature, deg C
 
   // VOC_SOC table
@@ -134,6 +136,7 @@ void Chemistry::assign_LIE()
   tau_ct  = 0.2;    // Randles charge transfer time constant, s (=1/Rct/Cct)
   tau_diff = 83.;   // Randles diffusion time constant, s (=1/Rdif/Cdif)
   tau_sd  = 2.5e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
+  c_sd    = tau_sd / r_sd;
   v_sat   = 13.85;  // Saturation threshold at temperature, deg C
 
   // VOC_SOC table
@@ -265,13 +268,14 @@ void Chemistry::pretty_print(void)
   Serial.printf("  v_sat%7.3f, V\n", v_sat);
   Serial.printf("  dvoc_dt%7.3f, V/dg C\n", dvoc_dt);
   Serial.printf("  dvoc%7.3f, V\n", dvoc);
-  Serial.printf("  Randles:");
-  Serial.printf("   r_0%9.6f, ohm\n", r_0);
-  Serial.printf("   r_ct%9.6f, ohm\n", r_ct);
-  Serial.printf("   r_diff%9.6f, ohm\n", r_diff);
-  Serial.printf("   tau_ct%7.3f, s\n", tau_ct);
-  Serial.printf("   tau_diff%7.3f, s\n", tau_diff);
-  Serial.printf("  tau_sd%7.3f; EKF. Par disch, s\n", tau_sd);
+  Serial.printf("  Randles:\n");
+  Serial.printf("  r_0%9.6f, ohm\n", r_0);
+  Serial.printf("  r_ct%9.6f, ohm\n", r_ct);
+  Serial.printf("  r_diff%9.6f, ohm\n", r_diff);
+  Serial.printf("  tau_ct%7.3f, s\n", tau_ct);
+  Serial.printf("  tau_diff%7.3f, s\n", tau_diff);
+  Serial.printf("  tau_sd%9.3g; EKF. Par disch, s\n", tau_sd);
+  Serial.printf("  c_sd%9.3g; EKF. Par disch, farad\n", c_sd);
   Serial.printf("  r_sd%7.3f; EKF. Par disch, ohm\n", r_sd);
   Serial.printf("  r_ss%7.3f; SS init, ohm\n", r_ss);
   Serial.printf("  voc(t, soc):\n");

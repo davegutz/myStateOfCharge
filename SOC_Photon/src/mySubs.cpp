@@ -169,7 +169,9 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
   // Convert the decimal
   static double cTimeInit = ((( (double(year-2021)*12 + double(month))*30.4375 + double(day))*24.0 + double(hours))*60.0 + double(minutes))*60.0 + \
                       double(seconds) + double(now-millis_flip)/1000.;
+  // Serial.printf("y %ld m %d d %d h %d m %d s %d now %ld millis_flip %ld\n", year, month, day, hours, minutes, seconds, now, millis_flip);
   double cTime = cTimeInit + double(now-millis_flip)/1000.;
+  // Serial.printf("%ld - %ld = %18.12g, cTimeInit=%18.12g, cTime=%18.12g\n", now, millis_flip, double(now-millis_flip)/1000., cTimeInit, cTime);
   return ( cTime );
 }
 
