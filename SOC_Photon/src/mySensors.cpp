@@ -145,7 +145,7 @@ void Shunt::load()
 Fault::Fault(const double T):
   cc_diff_(0.), cc_diff_sclr_(1), cc_diff_empty_sclr_(1), disab_ib_fa_(false), disab_tb_fa_(false), disab_vb_fa_(false), 
   ewhi_sclr_(1), ewlo_sclr_(1), ewmin_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0), fail_tb_(false),
-  ib_diff_sclr_(1), ib_quiet_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), tb_sel_stat_(1),
+  ib_diff_sclr_(1), ib_quiet_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), latched_fail_(false), tb_sel_stat_(1),
   tb_stale_time_sclr_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
   tb_sel_stat_last_(1), vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL)
 {
@@ -373,17 +373,13 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
 {
   // Truth tables
-  if ( reset )
-  {
-    large_reset_fault_buffer(myFlt, rp.iflt, NFLT);
-  }
-
   // ib
   // Serial.printf("\nTopTruth: rpibs,rloc,raf,ibss,ibssl,vbss,vbssl,ampb,noab,ibdf,whf,wlf,ccdf, %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,\n",
   //  rp.ib_select, reset_loc, reset_all_faults_, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fa(), wrap_lo_fa(), cc_diff_fa_);
   if ( reset_all_faults_ )
   {
-    ib_sel_stat_last_ = 1;
+    if ( rp.ib_select < 0 ) ib_sel_stat_last_ = -1;
+    if ( rp.ib_select >=0 ) ib_sel_stat_last_ =  1;
     Serial.printf("reset ib flt\n");
   }
   latched_fail_ = false;
@@ -405,7 +401,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   {
     ib_sel_stat_ = -1;
     latched_fail_ = true;
-  }
+    }
   else if ( rp.ib_select<0 && !Sen->ShuntNoAmp->bare() )  // latch - use reset
   {
     ib_sel_stat_ = -1;
@@ -431,13 +427,14 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
         latched_fail_ = true;
       }
     }
-    else if ( ib_sel_stat_last_ >= 0 )  // Latch.  Must reset to move out of no amp selection
+    else if ( ( (rp.ib_select <  0) && ib_sel_stat_last_>-1 ) ||
+              ( (rp.ib_select >= 0) && ib_sel_stat_last_< 1 )   )  // Latch.  Must reset to move out of no amp selection
     {
-      ib_sel_stat_ = 1;
       latched_fail_ = true;
-   }
+    }
   }
   faultAssign(red_loss_calc(), RED_LOSS); // ib_sel_stat<0
+  if ( rp.debug==-99) Serial.printf("ibss=%d,_last=%d,rp.ibs=%d,lf=%d\n", ib_sel_stat_, ib_sel_stat_last_, rp.ib_select, latched_fail_);
 
   // vb failure from wrap result.  Latches
   if ( reset_all_faults_ )

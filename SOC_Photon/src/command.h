@@ -106,7 +106,7 @@ struct CommandPars
     Serial.printf(" ib_tot_bias_noa=%7.3f;\n", this->ib_tot_bias_noa);
     Serial.printf(" dc_dc_on=%d;\n", this->dc_dc_on);
     Serial.printf(" publishS=%d;\n", this->publishS);
-    Serial.printf(" priint_mult=%d;\n", this->print_mult);
+    Serial.printf(" print_mult=%d;\n", this->print_mult);
     Serial.printf(" tb_bias_mode=%7.3f;\n", this->tb_bias_model);
     Serial.printf(" s_t_sat=%7.3f;\n", this->s_t_sat);
     Serial.printf(" eframe_mult=%d;\n", this->eframe_mult);

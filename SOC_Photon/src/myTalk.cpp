@@ -139,6 +139,23 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         // Serial.printf("IN:%s,\n", cp.input_string.c_str());
         switch ( cp.input_string.charAt(0) )
         {
+          case ( 'b' ):  // Fault buffer
+            switch ( cp.input_string.charAt(1) )
+            {
+              case ( 'd' ):  // bd: fault buffer dump
+                Serial.printf("\n");
+                print_all_fault_buffer(myFlt, rp.iflt, NFLT);
+                break;
+
+              case ( 'R' ):  // bR: Fault buffer reset
+                large_reset_fault_buffer(myFlt, rp.iflt, NFLT);
+                break;
+
+              default:
+                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+            }
+            break;
+
           case ( 'B' ):
             switch ( cp.input_string.charAt(1) )
             {
@@ -573,6 +590,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 print_all_fault_buffer(myFlt, rp.iflt, NFLT);
                 break;
 
+              case ( 'f' ):  // Hf: History dump faults only
+                Serial.printf("\n");
+                print_all_fault_buffer(myFlt, rp.iflt, NFLT);
+                break;
+
               case ( 'R' ):  // HR: History reset
                 large_reset_summary(mySum, rp.isum, NSUM);
                 large_reset_fault_buffer(myFlt, rp.iflt, NFLT);
@@ -724,9 +746,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'f' ):  // Pf:  Print faults
-                Serial.printf ("\nSen::");
+                Serial.printf ("\nSen::\n");
+                print_all_fault_buffer(myFlt, rp.iflt, NFLT);
                 Sen->Flt->pretty_print (Sen, Mon);
-                Serial1.printf("\nSen::");
+                Serial1.printf("\nSen::\n");
                 Sen->Flt->pretty_print1(Sen, Mon);
                 break;
 
@@ -1242,6 +1265,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 void talkH(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("\n\nHelp menu.  End entry with ';'.  SRAM='*'.  May omit '='\n");
+
+  Serial.printf("\nb<?>   Manage fault buffer\n");
+  Serial.printf("  bd= "); Serial.printf("dump fault buffer\n");
+  Serial.printf("  bR= "); Serial.printf("reset fault buffer\n");
 
   Serial.printf("\nB<?> Battery e.g.:\n");
   Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='LI' [%d]\n", rp.mon_mod, MON_CHEM); 

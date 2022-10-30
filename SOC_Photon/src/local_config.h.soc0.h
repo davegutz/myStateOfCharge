@@ -3,8 +3,11 @@
 
 const String unit = "soc0_20221028";  // multi-frame EKF
 
-#define ASK_DURING_BOOT         1   // Flag to ask for application of this file to * retained adjustements
 // * = SRAM EEPROM adjustments, retained on power reset
+
+// Miscelaneous
+#define ASK_DURING_BOOT       1   // Flag to ask for application of this file to * retained adjustements
+#define MODELING              0   // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model    
 
 // Sensor biases
 #define SHUNT_GAIN            -1333.// Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)

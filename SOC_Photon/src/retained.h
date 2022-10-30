@@ -50,7 +50,7 @@ struct RetainedPars
   float ib_bias_all = CURR_BIAS_ALL;      // Bias on all shunt sensors, A
   int8_t ib_select = FAKE_FAULTS;         // Force current sensor (-1=non-amp, 0=auto, 1=amp)
   float Vb_bias = VOLT_BIAS;    // Calibrate Vb, V
-  uint8_t modeling = 0;         // Driving saturation calculation with model.  Bits specify which signals use model
+  uint8_t modeling = MODELING;  // Driving saturation calculation with model.  Bits specify which signals use model
   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
   float freq = 0.;              // Injected frequency, Hz (0-2)
   uint8_t type = 0;             // Injected waveform type.   0=sine, 1=square, 2=triangle
@@ -104,7 +104,7 @@ struct RetainedPars
     this->ib_bias_all = CURR_BIAS_ALL;
     this->ib_select = FAKE_FAULTS;
     this->Vb_bias = VOLT_BIAS;
-    this->modeling = 0;
+    this->modeling = MODELING;
     this->amp = 0.;
     this->freq = 0.;
     this->type = 0;
@@ -144,15 +144,15 @@ struct RetainedPars
     //   n++;
     // if ( RATED_TEMP != t_last_model )
     //   n++;
+    // if ( 0. != delta_q )
+    //   n++;
+    // if ( 0. != delta_q_model )
+    //   n++;
 
 
     if ( 1. != shunt_gain_sclr )
       n++;
     if ( 0 != debug )
-      n++;
-    if ( 0. != delta_q )
-      n++;
-    if ( 0. != delta_q_model )
       n++;
     if ( CURR_SCALE_AMP != Ib_scale_amp )
       n++;
@@ -168,7 +168,7 @@ struct RetainedPars
       n++;
     if ( float(VOLT_BIAS) != Vb_bias )
       n++;
-    if ( 0 != modeling )
+    if ( MODELING != modeling )
       n++;
     if ( 0. != amp )
       n++;
@@ -226,15 +226,13 @@ struct RetainedPars
       Serial.printf(" dq_dinf_noa%10.1f %10.1f C\n", RATED_BATT_CAP*3600., delta_q_dinf_noa);
       Serial.printf(" t_last          %5.2f      %5.2f dg C\n", RATED_TEMP, t_last);
       Serial.printf(" t_last_sim      %5.2f      %5.2f dg C\n", RATED_TEMP, t_last_model);
+      Serial.printf(" delta_q    %10.1f %10.1f *Ca<>, C\n", 0., delta_q);
+      Serial.printf(" dq_sim     %10.1f %10.1f *Ca<>, *Cm<>, C\n", 0., delta_q_model);
     }
     if ( all || 1. != shunt_gain_sclr )
       Serial.printf(" shunt_gn_slr  %7.3f    %7.3f ?\n", 1., shunt_gain_sclr);  // TODO:  no talk value
     if ( all || 0 != debug )
       Serial.printf(" debug               %d          %d *v<>\n", 0, debug);
-    if ( all || 0. != delta_q )
-      Serial.printf(" delta_q    %10.1f %10.1f *Ca<>, C\n", 0., delta_q);
-    if ( all || 0. != delta_q_model )
-      Serial.printf(" dq_sim     %10.1f %10.1f *Ca<>, *Cm<>, C\n", 0., delta_q_model);
     if ( all || CURR_SCALE_AMP != Ib_scale_amp )
       Serial.printf(" scale_amp     %7.3f    %7.3f *SA<>\n", CURR_SCALE_AMP, Ib_scale_amp);
     if ( all || CURR_BIAS_AMP != ib_bias_amp )
@@ -249,8 +247,8 @@ struct RetainedPars
       Serial.printf(" ib_select           %d          %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select);
     if ( all || float(VOLT_BIAS) != Vb_bias )
       Serial.printf(" Vb_bias       %7.3f    %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, Vb_bias);
-    if ( all || 0 != modeling )
-      Serial.printf(" modeling            %d          %d *Xm<>\n", 0, modeling);
+    if ( all || MODELING != modeling )
+      Serial.printf(" modeling            %d          %d *Xm<>\n", MODELING, modeling);
     if ( all || 0. != amp )
       Serial.printf(" inj amp       %7.3f    %7.3f *Xa<> A pk\n", 0., amp);
     if ( all || 0. != freq )
