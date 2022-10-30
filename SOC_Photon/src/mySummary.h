@@ -78,7 +78,7 @@ struct Flt_st
     {
       time_long_2_str(this->t, buffer);
     }
-    Serial.printf("unit_h, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,",
+    Serial.printf("unit_f, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,",
       buffer, this->t,
       double(this->Tb_hdwe)/600.,
       double(this->vb_hdwe)/1200.,
@@ -94,7 +94,7 @@ struct Flt_st
       double(this->e_wrap_filt)/1200.,
       this->fltw,
       this->falw);
-    Serial1.printf("unit_h, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,",
+    Serial1.printf("unit_f, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,",
       buffer, this->t,
       double(this->Tb_hdwe)/600.,
       double(this->vb_hdwe)/1200.,

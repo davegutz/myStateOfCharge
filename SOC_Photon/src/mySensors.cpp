@@ -67,7 +67,7 @@ float TempSensor::load(Sensors *Sen)
   {
     Tb_hdwe = SdTb->update(temp);
     tb_stale_flt_ = false;
-    if ( rp.debug==16 ) Serial.printf("I:  t=%7.3f ct=%d, Tb_hdwe=%7.3f,\n", temp, count, Tb_hdwe);
+    // if ( rp.debug==16 ) Serial.printf("I:  t=%7.3f ct=%d, Tb_hdwe=%7.3f,\n", temp, count, Tb_hdwe);
   }
   else
   {
@@ -788,14 +788,14 @@ void Sensors::shunt_load(void)
 }
 
 // Print Shunt selection data
-void Sensors::shunt_print()
-{
-    Serial.printf("reset,T,select,inj_bias,vs_int_a,Vshunt_a,Ib_hdwe_a,vs_int_na,Vshunt_na,Ib_hdwe_na,Ib_hdwe,T,sclr_coul_eff,Ib_amp_fault,Ib_amp_fail,Ib_noa_fault,Ib_noa_fail,=,    %d,%7.3f,%d,%7.3f,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,  %7.3f, %d,%d,  %d,%d,\n",
-        reset, T, rp.ib_select, rp.inj_bias, ShuntAmp->vshunt_int(), ShuntAmp->vshunt(), ShuntAmp->ishunt_cal(),
-        ShuntNoAmp->vshunt_int(), ShuntNoAmp->vshunt(), ShuntNoAmp->ishunt_cal(),
-        Ib_hdwe, T, sclr_coul_eff,
-        Flt->ib_amp_flt(), Flt->ib_amp_fa(), Flt->ib_noa_flt(), Flt->ib_noa_fa());
-}
+// void Sensors::shunt_print()
+// {
+//     Serial.printf("reset,T,select,inj_bias,vs_int_a,Vshunt_a,Ib_hdwe_a,vs_int_na,Vshunt_na,Ib_hdwe_na,Ib_hdwe,T,sclr_coul_eff,Ib_amp_fault,Ib_amp_fail,Ib_noa_fault,Ib_noa_fail,=,    %d,%7.3f,%d,%7.3f,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f,  %7.3f, %d,%d,  %d,%d,\n",
+//         reset, T, rp.ib_select, rp.inj_bias, ShuntAmp->vshunt_int(), ShuntAmp->vshunt(), ShuntAmp->ishunt_cal(),
+//         ShuntNoAmp->vshunt_int(), ShuntNoAmp->vshunt(), ShuntNoAmp->ishunt_cal(),
+//         Ib_hdwe, T, sclr_coul_eff,
+//         Flt->ib_amp_flt(), Flt->ib_amp_fa(), Flt->ib_noa_flt(), Flt->ib_noa_fa());
+// }
 
 // Current scale.  Feeds into signal conversion
 void Sensors::shunt_scale(void)
@@ -855,8 +855,8 @@ void Sensors::temp_filter(const boolean reset_loc, const float t_rlim)
         Tb_hdwe_filt = TbSenseFilt->calculate(Tb_hdwe, reset_loc, min(T_temp, F_MAX_T_TEMP)) + t_bias_loc;
         Tb_hdwe += t_bias_loc;
     }
-    if ( rp.debug==16 ) Serial.printf("reset_loc,t_bias_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",
-      reset_loc,t_bias_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt );
+    // if ( rp.debug==16 ) Serial.printf("reset_loc,t_bias_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",
+    //   reset_loc,t_bias_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt );
 }
 
 // Filter temp
@@ -875,8 +875,8 @@ void Sensors::vb_load(const byte vb_pin)
 }
 
 // Print analog voltage
-void Sensors::vb_print()
-{
-  Serial.printf("reset, T, Vb_raw, rp.Vb_bias, Vb_hdwe, vb_flt(), vb_fa(), wv_fa=, %d, %7.3f, %d, %7.3f,  %7.3f, %d, %d, %d,\n",
-    reset, T, Vb_raw, rp.Vb_bias, Vb_hdwe, Flt->vb_flt(), Flt->vb_fa(), Flt->wrap_vb_fa());
-}
+// void Sensors::vb_print()
+// {
+//   Serial.printf("reset, T, Vb_raw, rp.Vb_bias, Vb_hdwe, vb_flt(), vb_fa(), wv_fa=, %d, %7.3f, %d, %7.3f,  %7.3f, %d, %d, %d,\n",
+//     reset, T, Vb_raw, rp.Vb_bias, Vb_hdwe, Flt->vb_flt(), Flt->vb_fa(), Flt->wrap_vb_fa());
+// }

@@ -174,28 +174,37 @@ void setup()
   // Ask to renominalize
   if ( ASK_DURING_BOOT )
   {
-    rp.pretty_print();
-    display->clearDisplay();
-    display->setTextSize(1);              // Normal 1:1 pixel scale
-    display->setTextColor(SSD1306_WHITE); // Draw white text
-    display->setCursor(0,0);              // Start at top-left corner    rp.print_versus_local_config();
-    display->println("Waiting for user talk\n\nignores after 60s");
-    display->display();
-    Serial.printf("Do you wish to reset to defaults? [Y/n]:"); Serial1.printf("Do you wish to reset to defaults? [Y/n]:");
-    uint8_t count = 0;
-    while ( !Serial.available() && !Serial1.available() && ++count<60 ) delay(1000);
-    byte answer = 'n';
-    if ( Serial.available() ) answer=Serial.read();
-    else if ( Serial1.available() ) answer=Serial1.read();
-    if ( answer=='Y' )
+    if ( rp.num_diffs() )
     {
-      Serial.printf(" Y\n"); Serial1.printf(" Y\n");
-      rp.nominal();
-      rp.pretty_print();
+      Serial.printf("#off-nominal = %d", rp.num_diffs());
+      rp.pretty_print( false );
+      display->clearDisplay();
+      display->setTextSize(1);              // Normal 1:1 pixel scale
+      display->setTextColor(SSD1306_WHITE); // Draw white text
+      display->setCursor(0,0);              // Start at top-left corner    rp.print_versus_local_config();
+      display->println("Waiting for user talk\n\nignores after 60s");
+      display->display();
+      Serial.printf("Do you wish to reset to defaults? [Y/n]:"); Serial1.printf("Do you wish to reset to defaults? [Y/n]:");
+      uint8_t count = 0;
+      while ( !Serial.available() && !Serial1.available() && ++count<60 ) delay(1000);
+      byte answer = 'n';
+      if ( Serial.available() ) answer=Serial.read();
+      else if ( Serial1.available() ) answer=Serial1.read();
+      if ( answer=='Y' )
+      {
+        Serial.printf(" Y\n"); Serial1.printf(" Y\n");
+        rp.nominal();
+        rp.pretty_print( true );
+      }
+      else
+      {
+        Serial.printf(" N.  moving on...\n\n"); Serial1.printf(" N.  moving on...\n\n");
+      }
     }
     else
     {
-      Serial.printf(" N.  moving on....\n\n"); Serial1.printf(" N.  moving on....\n\n");
+      rp.pretty_print( true );
+      Serial.printf(" No diffs in retained...\n\n"); Serial1.printf(" No diffs in retained...\n\n");
     }
   }
 

@@ -187,13 +187,13 @@ void load_ib_vb(const boolean reset, const unsigned long now, Sensors *Sen, Pins
   Sen->shunt_load();
   Sen->Flt->shunt_check(Sen, Mon, reset);
   Sen->shunt_select_initial();
-  if ( rp.debug==14 ) Sen->shunt_print();
+  // if ( rp.debug==14 ) Sen->shunt_print();
 
   // Vb
   // Outputs:  Sen->Vb
   Sen->vb_load(myPins->Vb_pin);
   Sen->Flt->vb_check(Sen, Mon, VBATT_MIN, VBATT_MAX, reset);
-  if ( rp.debug==15 ) Sen->vb_print();
+  // if ( rp.debug==15 ) Sen->vb_print();
 
   // Power calculation
   Sen->Wb = Sen->Vb*Sen->Ib;
