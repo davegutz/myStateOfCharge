@@ -217,7 +217,8 @@ public:
   boolean red_loss() { return faultRead(RED_LOSS); };
   boolean red_loss_calc() { return (ib_sel_stat_!=1 || (rp.ib_select!=0 && !FAKE_FAULTS)
    || ib_diff_fa() || vb_fail()); };
-  void reset_all_faults() { reset_all_faults_ = true; };
+  void reset_all_faults(const boolean cmd) { reset_all_faults_ = cmd; };
+  boolean reset_all_faults() { return ( reset_all_faults_ ); };
   void select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ib signals
   void shunt_select_initial();   // Choose between shunts for model
