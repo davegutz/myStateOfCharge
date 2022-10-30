@@ -389,18 +389,22 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 
   // Fault snap buffer management
   static uint8_t no_fails_repeated = 99;
-  if ( Sen->Flt->no_fails() )
-    no_fails_repeated = 0;
-  else
-    no_fails_repeated = min(no_fails_repeated++, 99);
-    
-  if ( rp.debug==-99 ) Serial.printf("no_fails=%d, no_fails_repeated=%d\n", Sen->Flt->no_fails(), no_fails_repeated);
-
-  if ( storing_fault_data && Sen->Flt->no_fails() && (no_fails_repeated < 3) )
+  static boolean no_fails_past = Sen->Flt->no_fails();
+  boolean instant_of_failure = no_fails_past && !Sen->Flt->no_fails();
+  if ( storing_fault_data || instant_of_failure )
   {
-    if ( ++rp.iflt>NFLT-1 ) rp.iflt = 0;  // wrap buffer
-    myFlt[rp.iflt].assign(Time.now(), Mon, Sen);
+    if ( Sen->Flt->no_fails() )
+      no_fails_repeated = 0;
+    else
+      no_fails_repeated = min(no_fails_repeated + 1, 99);
+    if ( instant_of_failure || ( Sen->Flt->no_fails() && (no_fails_repeated < 3) ) )
+    {
+      if ( ++rp.iflt>NFLT-1 ) rp.iflt = 0;  // wrap buffer
+      myFlt[rp.iflt].assign(Time.now(), Mon, Sen);
+    }
+    if ( instant_of_failure ) last_snap = now;
   }
+  no_fails_past = Sen->Flt->no_fails();
 
   // Charge calculation and memory store
   // Inputs: Sim.model_saturated, Sen->Tb, Sen->Ib, and Sim.soc

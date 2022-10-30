@@ -434,7 +434,6 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     }
   }
   faultAssign(red_loss_calc(), RED_LOSS); // ib_sel_stat<0
-  if ( rp.debug==-99) Serial.printf("ibss=%d,_last=%d,rp.ibs=%d,lf=%d\n", ib_sel_stat_, ib_sel_stat_last_, rp.ib_select, latched_fail_);
 
   // vb failure from wrap result.  Latches
   if ( reset_all_faults_ )
