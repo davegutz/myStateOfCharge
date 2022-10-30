@@ -29,11 +29,12 @@
 #include "local_config.h"
 #include <math.h>
 #include "debug.h"
-// #include <WiFi.h>
+#include "mySummary.h"
 
 extern CommandPars cp;          // Various parameters shared at system level
 extern PublishPars pp;            // For publishing
 extern RetainedPars rp;         // Various parameters to be static at system level
+extern Flt_st myFlt[NFLT];        // Summaries for saving fault history
 
 // Print consolidation
 void print_all_header(void)
@@ -77,9 +78,8 @@ void print_serial_header(void)
 {
   if ( ( rp.debug==1 || rp.debug==2  || rp.debug==3 ) )
   {
-    Serial.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
-    if ( !cp.blynking )
-      Serial1.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc, voc_soc,   Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
+    Serial.printf ("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
+    Serial1.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc, voc_soc,   Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
   }
 }
 void print_serial_sim_header(void)
@@ -326,7 +326,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
   pass = !pass;
 
   // Text basic Bluetooth (use serial bluetooth app)
-  if ( rp.debug!=4 && rp.debug!=-2 && !cp.blynking )
+  if ( rp.debug!=4 && rp.debug!=-2 )
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nv-2;Pf; for fails.  prints=%ld\n\n",
       disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
 
@@ -348,6 +348,9 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 void sense_synth_select(const boolean reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen)
 {
+  static unsigned long int last_snap = now;
+  boolean storing_fault_data = ( now - last_snap )>SNAP_WAIT;
+  if ( storing_fault_data || reset ) last_snap = now;
 
   // Load Ib and Vb
   // Outputs: Sen->Ib_model_in, Sen->Ib, Sen->Vb 
@@ -383,6 +386,13 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   //  constant,         Tb_hdwe, Tb_hdwe_filt       --->   Tb, Tb_filt
   Sen->Flt->select_all(Sen, Mon, reset);
   Sen->final_assignments(Mon);
+
+  // Fault snap buffer management
+  if ( storing_fault_data && Sen->Flt->no_fails() )
+  {
+    if ( ++rp.iflt>NFLT-1 ) rp.iflt = 0;  // wrap buffer
+    myFlt[rp.iflt].assign(Time.now(), Mon, Sen);
+  }
 
   // Charge calculation and memory store
   // Inputs: Sim.model_saturated, Sen->Tb, Sen->Ib, and Sim.soc
@@ -489,7 +499,6 @@ void serialEvent()
  */
 void serialEvent1()
 {
-  if ( cp.blynking ) return;
   while (!cp.token && Serial1.available())
   {
     // get the new byte:

@@ -211,6 +211,7 @@ public:
   float ib_quiet() { return ib_quiet_; };
   float ib_rate() { return ib_rate_; };
   void ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
+  boolean no_fails() { return !latched_fail_; };
   void pretty_print(Sensors *Sen, BatteryMonitor *Mon);
   void pretty_print1(Sensors *Sen, BatteryMonitor *Mon);
   boolean red_loss() { return faultRead(RED_LOSS); };
@@ -226,7 +227,7 @@ public:
   void tb_stale(const boolean reset, Sensors *Sen);
   void tb_stale_time_sclr(const float sclr) { tb_stale_time_sclr_ = sclr; };
   float tb_stale_time_sclr() { return tb_stale_time_sclr_; };
-  void vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vb_min, const float _Vb_max, const boolean reset);  // Range check Vb
+  void vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, const float _vb_max, const boolean reset);  // Range check Vb
   boolean vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
   int8_t vb_sel_stat() { return vb_sel_stat_; };
   boolean vb_fa() { return failRead(VB_FA); };
@@ -269,6 +270,7 @@ protected:
   float ib_diff_f_;         // Filtered sensor difference error, A
   float ib_quiet_;          // ib hardware noise, A/s
   float ib_rate_;           // ib rate, A/s
+  boolean latched_fail_;    // There is a latched fail, T=latched fail
   int8_t tb_sel_stat_;      // Memory of Tb signal selection, 0=none, 1=sensor
   float tb_stale_time_sclr_; // Scalar on persistences of Tb hardware stale chec, (1)
   int8_t vb_sel_stat_;      // Memory of Vb signal selection, 0=none, 1=sensor
@@ -337,7 +339,7 @@ public:
   double sclr_coul_eff;       // Scalar on Coulombic Efficiency
   boolean bms_off;            // Calculated by BatteryMonitor, battery off, low voltage, switched by battery management system?
   void bias_all_model();      // Bias model outputs for sensor fault injection
-  void final_assignments(BatteryMonitor *Mon);   // Make final signal selection
+  void final_assignments(BatteryMonitor *Mon);  // Make final signal selection
   void shunt_bias(void);      // Load biases into Shunt objects
   void shunt_load(void);      // Load ADS015 protocol
   void shunt_print();         // Print selection result

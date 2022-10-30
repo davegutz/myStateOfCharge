@@ -60,6 +60,7 @@ struct RetainedPars
   float cutback_gain_scalar = 1.;        // Scalar on battery model saturation cutback function
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
   int isum = -1;                // Summary location.   Begins at -1 because first action is to increment isum
+  int iflt = -1;                // Fault snap location.   Begins at -1 because first action is to increment iflt
   float delta_q_cinf_amp = -RATED_BATT_CAP*3600.;   // Dyn tweak.  Charge delta_q since last reset.  Simple integration of amplified current
   float delta_q_cinf_noa = -RATED_BATT_CAP*3600.;   // Dyn tweak.  Charge delta_q since last reset.  Simple integration of non-amplified current
   float delta_q_dinf_amp = RATED_BATT_CAP*3600.;    // Dyn tweak.  Discharge delta_q since last reset.  Simple integration of amplified current

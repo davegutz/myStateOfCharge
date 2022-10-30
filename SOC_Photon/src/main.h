@@ -80,9 +80,11 @@ extern CommandPars cp;            // Various parameters to be common at system l
 extern RetainedPars rp;           // Various parameters to be static at system level
 extern Sum_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
+extern Flt_st myFlt[NFLT];        // Summaries for saving fault history
 
 retained RetainedPars rp;             // Various control parameters static at system level
 retained Sum_st mySum[NSUM];          // Summaries
+retained Flt_st myFlt[NFLT];          // Summaries
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
 unsigned long millis_flip = millis(); // Timekeeping

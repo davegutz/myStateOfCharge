@@ -38,7 +38,6 @@
 // Constants always defined
 #define ONE_HOUR_MILLIS       3600000UL // Number of milliseconds in one hour (60*60*1000)
 #define ONE_DAY_MILLIS        86400000UL// Number of milliseconds in one day (24*60*60*1000)
-#define PUBLISH_PARTICLE_DELAY 2000UL   // Particle cloud updates (2000UL = 2 sec)
 #define READ_DELAY            100UL     // Sensor read wait, ms (100UL = 0.1 sec)
 #define READ_TEMP_DELAY       6000UL    // Sensor read wait, ms (6000UL = 6 sec)
 #define SUMMARIZE_DELAY       1800000UL // Battery state tracking and reporting, ms (1800000UL = 30 min)
@@ -46,10 +45,7 @@
 #define PUBLISH_SERIAL_DELAY  400UL     // Serial print interval (400UL = 0.4 sec)
 #define DISPLAY_USER_DELAY    1200UL    // User display update (1200UL = 1.2 sec)
 #define CONTROL_DELAY         100UL     // Control read wait, ms (100UL = 0.1 sec)
-#define DISCONNECT_DELAY      75000UL   // After these milliseconds no WiFi, disconnect (75000UL = 1:15 min)
-#define CHECK_INTERVAL        180000UL  // How often to check for WiFi once disconnected (180000UL = 3 min)
-#define CONNECT_WAIT          10000UL   // How long after setup that we try WiFi for first time (10000UL = 10 sec)
-#define CONFIRMATION_DELAY    10000UL   // How long to confirm WiFi on before streaming (10000UL = 10 sec)
+#define SNAP_WAIT             10000UL   // Interval between fault snapshots (10000UL = 10 sec)
 #define GMT                   -5        // Enter time different to zulu (does not respect DST) (-5)
 #define USE_DST               1         // Whether to apply DST or not, 0 or 1 (1)
 #define TBATT_TEMPCAL         0.56      // Maxim 1-wire plenum temp sense calibrate (0.56), C
@@ -72,7 +68,8 @@
 #define F_MAX_T_TEMP          18.0      // Maximum call update time filters (18.0)
 #define F_W_T                 0.05      // Temperature filter wn, r/s (0.05)   
 #define F_Z_T                 0.80      // Temperature filter zeta (0.80)
-#define NSUM                  120       // Number of saved summaries.   If too large, will get compile error BACKUPSRAM
+#define NSUM                  110       // Number of saved SRAM summaries.   If too large, will get compile error BACKUPSRAM
+#define NFLT                  7         // Number of saved SRAM fault data slices.  If too large...
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)
 #define HDB_VBATT             0.05      // Half deadband to filter Vb, V (0.05)
 #define T_SAT                 10        // Saturation time, sec (10, >=10 for no sat ib lo fault of -100 A)

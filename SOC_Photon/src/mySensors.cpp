@@ -29,10 +29,12 @@
 #include "local_config.h"
 #include <math.h>
 #include "debug.h"
+#include "mySummary.h"
 
 extern CommandPars cp;          // Various parameters shared at system level
 extern PublishPars pp;            // For publishing
 extern RetainedPars rp;         // Various parameters to be static at system level
+extern Flt_st myFlt[NFLT];        // Summaries for saving fault history
 
 
 // class TempSensor
@@ -367,9 +369,14 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 // Outputs: Ib,
 //          Vb,
 //          Tb, Tb_filt
+//          latched_fail_
 void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
 {
   // Truth tables
+  if ( reset )
+  {
+    large_reset_fault_buffer(myFlt, rp.iflt, NFLT);
+  }
 
   // ib
   // Serial.printf("\nTopTruth: rpibs,rloc,raf,ibss,ibssl,vbss,vbssl,ampb,noab,ibdf,whf,wlf,ccdf, %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,\n",
@@ -379,47 +386,56 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     ib_sel_stat_last_ = 1;
     Serial.printf("reset ib flt\n");
   }
+  latched_fail_ = false;
   if ( FAKE_FAULTS )
   {
-    ib_sel_stat_ = rp.ib_select;
+    ib_sel_stat_ = rp.ib_select;  // Can manually select using talk when FAKE_FAULTS is set
   }
   else if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() )  // these inputs don't latch
   {
-   ib_sel_stat_ = 0;    // takes two non-latching inputs to set and latch
+    ib_sel_stat_ = 0;    // takes two non-latching inputs to set and latch
+    latched_fail_ = true;
   }
   else if ( rp.ib_select>0 && !Sen->ShuntAmp->bare() )
   {
     ib_sel_stat_ = 1;
+    latched_fail_ = true;
   }
   else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare() )  // latch - use reset
   {
     ib_sel_stat_ = -1;
+    latched_fail_ = true;
   }
   else if ( rp.ib_select<0 && !Sen->ShuntNoAmp->bare() )  // latch - use reset
   {
     ib_sel_stat_ = -1;
+    latched_fail_ = true;
   }
   else if ( rp.ib_select==0 )  // auto
   {
     if ( Sen->ShuntAmp->bare() && !Sen->ShuntNoAmp->bare() )  // these inputs don't latch
     {
       ib_sel_stat_ = -1;    // TODO:  takes ONE non-latching input to set and latch this ib_sel
+      latched_fail_ = true;
     }
     else if ( ib_diff_fa() )  // this input doesn't latch
     {
       if ( vb_sel_stat_ && wrap_fa() )    // wrap_fa is non-latching
       {
         ib_sel_stat_ = -1;      // TODO:  takes ONE non-latching input to set and latch this ib_sel
+        latched_fail_ = true;
       }
       else if ( cc_diff_fa() )  // this input doesn't latch
       {
         ib_sel_stat_ = -1;      // takes two non-latching inputs to isolate ib failure and to set and latch ib_sel
+        latched_fail_ = true;
       }
     }
     else if ( ib_sel_stat_last_ >= 0 )  // Latch.  Must reset to move out of no amp selection
     {
       ib_sel_stat_ = 1;
-    }
+      latched_fail_ = true;
+   }
   }
   faultAssign(red_loss_calc(), RED_LOSS); // ib_sel_stat<0
 
@@ -435,10 +451,12 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     if ( !vb_sel_stat_last_ )
     {
       vb_sel_stat_ = 0;   // Latch
+      latched_fail_ = true;
     }
     if (  wrap_vb_fa() || vb_fa() )
     {
       vb_sel_stat_ = 0;
+      latched_fail_ = true;
     }
   }
 
@@ -452,7 +470,8 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   if ( tb_fa() )
   {
     tb_sel_stat_ = 0;
-  }
+    latched_fail_ = true;
+}
   else
     tb_sel_stat_ = 1;
 
@@ -480,6 +499,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     if ( ( falw_==0 && fltw_==0 ) || count>1 )
     {
       reset_all_faults_ = false;
+      latched_fail_ = false;
       count = 0;
     }
     else
@@ -533,7 +553,7 @@ void Fault::tb_stale(const boolean reset, Sensors *Sen)
 }
 
 // Check analog voltage.  Latches
-void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vb_min, const float _Vb_max, const boolean reset)
+void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, const float _vb_max, const boolean reset)
 {
   boolean reset_loc = reset | reset_all_faults_;
   if ( reset_loc )
@@ -547,7 +567,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _Vb_min, con
   }
   else
   {
-    faultAssign( (Sen->Vb_hdwe<=_Vb_min*Mon->nS() && Sen->Ib_hdwe>IB_MIN_UP) || (Sen->Vb_hdwe>=_Vb_max*Mon->nS()), VB_FLT);
+    faultAssign( (Sen->Vb_hdwe<=_vb_min*Mon->nS() && Sen->Ib_hdwe>IB_MIN_UP) || (Sen->Vb_hdwe>=_vb_max*Mon->nS()), VB_FLT);
     failAssign( vb_fa() || VbHardFail->calculate(vb_flt(), VBATT_HARD_SET, VBATT_HARD_RESET, Sen->T, reset_loc), VB_FA);
   }
 }
