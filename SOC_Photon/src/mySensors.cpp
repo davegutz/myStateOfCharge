@@ -378,8 +378,15 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   //  rp.ib_select, reset_loc, reset_all_faults_, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fa(), wrap_lo_fa(), cc_diff_fa_);
   if ( reset_all_faults_ )
   {
-    if ( rp.ib_select < 0 ) ib_sel_stat_last_ = -1;
-    if ( rp.ib_select >=0 ) ib_sel_stat_last_ =  1;
+    if ( rp.ib_select < 0 )
+    {
+      ib_sel_stat_ = -1;
+    }
+    if ( rp.ib_select >=0 )
+    {
+      ib_sel_stat_ = 1;
+    }
+    ib_sel_stat_last_ =  ib_sel_stat_;
     Serial.printf("reset ib flt\n");
   }
   latched_fail_ = false;
