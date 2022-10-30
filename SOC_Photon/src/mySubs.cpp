@@ -388,7 +388,13 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   Sen->final_assignments(Mon);
 
   // Fault snap buffer management
-  if ( storing_fault_data && Sen->Flt->no_fails() )
+  static uint8_t no_fails_repeated = 99;
+  if ( Sen->Flt->no_fails() )
+    no_fails_repeated = 0;
+  else
+    no_fails_repeated = min(no_fails_repeated++, 99);
+
+  if ( storing_fault_data && (no_fails_repeated < 3) )
   {
     if ( ++rp.iflt>NFLT-1 ) rp.iflt = 0;  // wrap buffer
     myFlt[rp.iflt].assign(Time.now(), Mon, Sen);
