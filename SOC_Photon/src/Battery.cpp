@@ -264,13 +264,13 @@ void BatteryMonitor::assign_randles(void)
         -
         gnd
 */ 
-double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
+double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
 {
     // Inputs
     temp_c_ = Sen->Tb_filt;
     vsat_ = calc_vsat();
     dt_ =  Sen->T;
-    double T_rate = T_RLim->calculate(temp_c_, T_RLIM, T_RLIM, reset, Sen->T);
+    double T_rate = T_RLim->calculate(temp_c_, T_RLIM, T_RLIM, reset_temp, Sen->T);
     vb_ = Sen->Vb / (*rp_nS_);
     ib_ = Sen->Ib / (*rp_nP_);
     ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
@@ -336,7 +336,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     }
     eframe_++;
 
-    if ( reset || cp.soft_reset || eframe_ == cp.eframe_mult ) eframe_ = 0;
+    if ( reset_temp || cp.soft_reset || eframe_ == cp.eframe_mult ) eframe_ = 0;
 
     // Normalize
     soc_ = q_ / q_capacity_;
@@ -428,6 +428,7 @@ void BatteryMonitor::init_soc_ekf(const double soc)
     soc_ekf_ = soc;
     init_ekf(soc_ekf_, 0.0);
     q_ekf_ = soc_ekf_ * q_capacity_;
+    delta_q_ekf_ = q_ekf_ - q_capacity_;
 }
 
 /* is_sat:  Calculate saturation status
@@ -485,14 +486,14 @@ void BatteryMonitor::regauge(const float temp_c)
     OUTPUTS:
         Mon->soc_ekf
 */
-boolean BatteryMonitor::solve_ekf(const boolean reset, Sensors *Sen)
+boolean BatteryMonitor::solve_ekf(const boolean reset_temp, Sensors *Sen)
 {
     // Average dynamic inputs through the initialization period before apply EKF
     static float Tb_avg = Sen->Tb_filt;
     static float Vb_avg = Sen->Vb;
     static float Ib_avg = Sen->Ib;
     static uint16_t n_avg = 0;
-    if ( !reset )
+    if ( !reset_temp )
     {
         Tb_avg = Sen->Tb_filt;
         Vb_avg = Sen->Vb;
@@ -784,7 +785,7 @@ Outputs:
     soc_min_        Estimated soc where battery BMS will shutoff current, fraction
     q_min_          Estimated charge at low voltage shutdown, C\
 */
-double BatterySim::count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon) 
+double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, BatteryMonitor *Mon) 
 {
     // float charge_curr = Sen->Ib / (*rp_nP_); TODO:  re-run Xp10 with this change
     float charge_curr = ib_charge_;
@@ -792,27 +793,27 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset, BatteryMoni
     if ( charge_curr>0. ) d_delta_q *= coul_eff_;
 
     // Rate limit temperature.  When modeling, initialize to no change
-    if ( reset && rp.mod_vb() ) *rp_t_last_ = Sen->Tb;
+    if ( reset_temp && rp.mod_vb() ) *rp_t_last_ = Sen->Tb;
     double temp_lim = max(min(Sen->Tb, *rp_t_last_ + T_RLIM*Sen->T), *rp_t_last_ - T_RLIM*Sen->T);
     
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status
-    // But if not modeling in real world, set to Monitor when Monitor saturated and reset to EKF otherwise
-    static boolean reset_past = reset;   // needed because model called first in reset path; need to pick up latest
+    // But if not modeling in real world, set to Monitor when Monitor saturated and reset_temp to EKF otherwise
+    static boolean reset_temp_past = reset_temp;   // needed because model called first in reset_temp path; need to pick up latest
     if ( !rp.mod_vb() )  // Real world
     {
         if ( Mon->sat() ) apply_delta_q(Mon->delta_q());
-        else if ( reset_past && !cp.fake_faults ) apply_delta_q(Mon->delta_q_ekf());  // Solution to boot up unsaturated
+        else if ( reset_temp_past && !cp.fake_faults ) apply_delta_q(Mon->delta_q_ekf());  // Solution to boot up unsaturated
     }
-    else if ( model_saturated_ )  // Modeling initializes on reset to Tb=RATED_TEMP
+    else if ( model_saturated_ )  // Modeling initializes on reset_temp to Tb=RATED_TEMP
     {
-        if ( reset ) *rp_delta_q_ = 0.;
+        if ( reset_temp ) *rp_delta_q_ = 0.;
     }
-    reset_past = reset;
+    reset_temp_past = reset_temp;
     resetting_ = false;     // one pass flag
 
     // Integration can go to -10%
     q_capacity_ = calculate_capacity(temp_lim);
-    if ( !reset )
+    if ( !reset_temp )
     {
         *rp_delta_q_ += d_delta_q - chem_.dqdt*q_capacity_*(temp_lim-*rp_t_last_);
         *rp_delta_q_ = max(min(*rp_delta_q_, 0.), -q_capacity_*1.2);
@@ -830,7 +831,7 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset, BatteryMoni
         if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;
         else cTime = Sen->control_time;
         sprintf(cp.buffer, "unit_sim, %13.3f, %d, %7.5f,%7.5f, %7.5f,%7.5f,%7.5f,%7.5f, %7.3f,%7.3f,%7.3f,  %d,  %9.1f,  %8.5f, %d, %c",
-            cTime, rp.sim_mod,  Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, ioc_, model_saturated_, *rp_delta_q_, soc_, reset,'\0');
+            cTime, rp.sim_mod,  Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, ioc_, model_saturated_, *rp_delta_q_, soc_, reset_temp,'\0');
         Serial.println(cp.buffer);
     }
 

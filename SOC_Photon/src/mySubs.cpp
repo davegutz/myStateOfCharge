@@ -175,6 +175,25 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
   return ( cTime );
 }
 
+// Monitor initializes EKF.  Works perfectly in model
+void initialize_all(const float soc_in, BatteryMonitor *Mon, Sensors *Sen)
+{
+  Sen->Sim->init_battery(true, Sen);
+  Sen->Sim->calculate(Sen, cp.dc_dc_on, true);
+  Sen->Sim->apply_soc(soc_in, Sen->Tb_filt);
+  Mon->apply_soc(soc_in, Sen->Tb_filt);
+  Mon->init_battery(true, Sen);
+  Mon->solve_ekf(true, Sen);
+}
+
+// Monitor initializes EKF.  Works perfectly in model
+void initialize_simple(const float soc_in, BatteryMonitor *Mon, Sensors *Sen)
+{
+  Mon->apply_soc(soc_in, Sen->Tb_filt);
+  Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tb_filt);
+  Mon->init_soc_ekf(Mon->soc());
+}
+
 // Load all others
 // Outputs:   Sen->Ib_model_in, Sen->Ib_hdwe, 
 void load_ib_vb(const boolean reset, const unsigned long now, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon)
@@ -327,7 +346,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 
   // Text basic Bluetooth (use serial bluetooth app)
   if ( rp.debug!=4 && rp.debug!=-2 )
-    Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nv-2;Pf; for fails.  prints=%ld\n\n",
+    Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
       disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
 
   // if ( rp.debug==5 ) debug_5();

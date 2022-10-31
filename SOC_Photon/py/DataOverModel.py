@@ -53,6 +53,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.legend(loc=1)
         plt.subplot(222)
         plt.plot(so.time, so.Tb_s, color='black', linestyle='-', label='Tb_s')
+
         plt.plot(sv.time, sv.Tb, color='red', linestyle='--', label='Tb_s_ver')
         plt.plot(mo.time, mo.Tb, color='blue', linestyle='-.', label='Tb')
         plt.plot(mv.time, mv.Tb, color='green', linestyle=':', label='Tb_ver')

@@ -389,7 +389,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   }
 
   // Ib truth table
-  if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() )  // these inputs don't latch
+  if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() )  // these separate inputs don't latch
   {
     ib_sel_stat_ = 0;    // takes two non-latching inputs to set and latch
     latched_fail_ = true;
@@ -399,12 +399,12 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     ib_sel_stat_ = 1;
     latched_fail_ = true;
   }
-  else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare() )  // latch - use reset
+  else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare() )  // latches - use reset
   {
     ib_sel_stat_ = -1;
     latched_fail_ = true;
     }
-  else if ( rp.ib_select<0 && !Sen->ShuntNoAmp->bare() )  // latch - use reset
+  else if ( rp.ib_select<0 && !Sen->ShuntNoAmp->bare() )  // latches - use reset
   {
     ib_sel_stat_ = -1;
     latched_fail_ = true;
@@ -423,14 +423,14 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
         ib_sel_stat_ = -1;      // TODO:  takes ONE non-latching input to set and latch this ib_sel
         latched_fail_ = true;
       }
-      else if ( cc_diff_fa() )  // this input doesn't latch
+      else if ( cc_diff_fa() )  // this input doesn't latch but result of 'and' with ib_diff_fa is latched
       {
         ib_sel_stat_ = -1;      // takes two non-latching inputs to isolate ib failure and to set and latch ib_sel
         latched_fail_ = true;
       }
     }
     else if ( ( (rp.ib_select <  0) && ib_sel_stat_last_>-1 ) ||
-              ( (rp.ib_select >= 0) && ib_sel_stat_last_< 1 )   )  // Latch.  Must reset to move out of no amp selection
+              ( (rp.ib_select >= 0) && ib_sel_stat_last_< 1 )   )  // Latches.  Must reset to move out of no amp selection
     {
       latched_fail_ = true;
     }
@@ -440,13 +440,13 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     latched_fail_ = false;
   }
 
-  faultAssign(red_loss_calc(), RED_LOSS); // ib_sel_stat<0
+  faultAssign(red_loss_calc(), RED_LOSS); // redundancy loss anytime ib_sel_stat<0
   if ( cp.fake_faults )
   {
-    ib_sel_stat_ = rp.ib_select;  // Can manually select using talk when cp.fake_faults is set
+    ib_sel_stat_ = rp.ib_select;  // Can manually select ib amp or noa using talk when cp.fake_faults is set
   }
 
-  // vb failure from wrap result.  Latches
+  // vb failure from wrap result
   if ( reset_all_faults_ )
   {
     vb_sel_stat_last_ = 1;
@@ -457,12 +457,12 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   {
     if ( !vb_sel_stat_last_ )
     {
-      vb_sel_stat_ = 0;   // Latch
+      vb_sel_stat_ = 0;   // Latches
       latched_fail_ = true;
     }
     if (  wrap_vb_fa() || vb_fa() )
     {
-      vb_sel_stat_ = 0;
+      vb_sel_stat_ = 0; // Latches
       latched_fail_ = true;
     }
   }
@@ -474,7 +474,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     tb_sel_stat_ = 1;
     Serial.printf("reset tb flts\n");
   }
-  if ( tb_fa() )
+  if ( tb_fa() )  // Latches
   {
     tb_sel_stat_ = 0;
     latched_fail_ = true;

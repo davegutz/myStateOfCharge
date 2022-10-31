@@ -395,11 +395,11 @@ Outputs:
   soc_min_        Estimated soc where battery BMS will shutoff current, fraction
   q_min_          Estimated charge at low voltage shutdown, C\
 */
-double Coulombs::count_coulombs(const double dt, const boolean reset, const float temp_c, const double charge_curr,
+double Coulombs::count_coulombs(const double dt, const boolean reset_temp, const float temp_c, const double charge_curr,
   const boolean sat, const double sclr_coul_eff, const double delta_q_ekf)
 {
-    // Rate limit temperature.   When modeling, reset.  In real world, rate limited Tb ramps Coulomb count since bms_off
-    if ( reset && rp.mod_vb() ) *rp_t_last_ = temp_c;
+    // Rate limit temperature.   When modeling, reset_temp.  In real world, rate limited Tb ramps Coulomb count since bms_off
+    if ( reset_temp && rp.mod_vb() ) *rp_t_last_ = temp_c;
     double temp_lim = max(min( temp_c, *rp_t_last_ + t_rlim_*dt), *rp_t_last_ - t_rlim_*dt);
 
     // State change
@@ -416,15 +416,15 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const floa
             d_delta_q = 0.;
             if ( !resetting_ ) *rp_delta_q_ = 0.;
         }
-        else if ( reset )
+        else if ( reset_temp )
           *rp_delta_q_ = 0.;
     }
-    else if ( reset && !cp.fake_faults ) *rp_delta_q_ = delta_q_ekf;  // Solution to booting up unsaturated
+    // else if ( reset_temp && !cp.fake_faults ) *rp_delta_q_ = delta_q_ekf;  // Solution to booting up unsaturated
     resetting_ = false;     // one pass flag
 
     // Integration.   Can go to negative
     q_capacity_ = calculate_capacity(temp_lim);
-    if ( !reset ) *rp_delta_q_ = max(min(*rp_delta_q_ + d_delta_q, 0.0), -q_capacity_*1.5);
+    if ( !reset_temp ) *rp_delta_q_ = max(min(*rp_delta_q_ + d_delta_q, 0.0), -q_capacity_*1.5);
     q_ = q_capacity_ + *rp_delta_q_;
 
     // Normalize
@@ -433,7 +433,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset, const floa
     q_min_ = soc_min_ * q_capacity_;
 
     // if ( rp.debug==96 )
-    //     Serial.printf("cc:,reset,dt,voc, Voc_filt, V_sat, temp_c, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_cap, soc, %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
+    //     Serial.printf("cc:,reset_temp,dt,voc, Voc_filt, V_sat, temp_c, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_cap, soc, %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
     //                 reset, dt, pp.pubList.Voc, pp.pubList.Voc_filt,  this->Vsat(), temp_c, temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 
     // Save and return

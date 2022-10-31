@@ -78,7 +78,7 @@ void debug_m13(Sensors *Sen)
 //     pp.pubList.Tb, pp.pubList.Vb, pp.pubList.Ib, pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge, pp.pubList.Amp_hrs_remaining_soc);
 // }
 
-// Hysteresis pring
+// Hysteresis print
 void debug_h(BatteryMonitor *Mon, Sensors *Sen)
 {
   Mon->hys_pretty_print();
@@ -125,3 +125,11 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
   if ( Sen->Flt->falw() || Sen->Flt->fltw() ) chit("Pf;", QUEUE);
 }
 
+// Various parameters to debug initialization stuff as needed
+void debug_m1(BatteryMonitor *Mon, Sensors *Sen)
+{
+  Serial.printf("mod %d fake_f %d reset_temp %d\nTb_s%6.2f Tl%6.2f soc_s%8.4f dq_s%10.1f\nTb  %6.2f Tl%6.2f soc  %8.4f dq  %10.1f soc_ekf%8.4f dq_ekf%10.1f\n",
+      rp.modeling, cp.fake_faults, Sen->reset_temp(),
+      Sen->Sim->Tb(), rp.t_last_model, Sen->Sim->soc(), Sen->Sim->delta_q(),
+      Mon->Tb(), rp.t_last, Mon->soc(), Mon->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf());
+}
