@@ -583,7 +583,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *ReadSensors):
   rp_tb_bias_(&rp.tb_bias_hdwe), tb_bias_last_(0.), Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE),
-  Ib_amp_noise_amp_(IB_AMP_NOISE), Ib_noa_noise_amp_(IB_NOA_NOISE)
+  Ib_amp_noise_amp_(IB_AMP_NOISE), Ib_noa_noise_amp_(IB_NOA_NOISE), reset_temp_(false)
 {
   this->T = T;
   this->T_filt = T;
@@ -869,6 +869,7 @@ void Sensors::temp_filter(const boolean reset_loc, const float t_rlim)
 // Filter temp
 void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim)
 {
+    reset_temp(reset_loc);
     Tb_hdwe = SensorTb->load(Sen);
     temp_filter(reset_loc, T_RLIM);
     Flt->tb_stale(reset_loc, Sen);

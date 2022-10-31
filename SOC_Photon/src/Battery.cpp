@@ -472,7 +472,7 @@ void BatteryMonitor::regauge(const float temp_c)
 {
     if ( converged_ekf() && abs(soc_ekf_-soc_)>DF2 )
     {
-        Serial.printf("CC Mon from %7.3f to EKF=%7.3f...", soc_, soc_ekf_);
+        Serial.printf("CC Mon from%7.3f to EKF%7.3f...", soc_, soc_ekf_);
         apply_soc(soc_ekf_, temp_c);
         Serial.printf("conf %7.3f\n", soc_);
     }

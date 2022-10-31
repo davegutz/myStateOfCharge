@@ -341,6 +341,8 @@ public:
   boolean bms_off;            // Calculated by BatteryMonitor, battery off, low voltage, switched by battery management system?
   void bias_all_model();      // Bias model outputs for sensor fault injection
   void final_assignments(BatteryMonitor *Mon);  // Make final signal selection
+  void reset_temp(const boolean reset) { reset_temp_ = reset; };
+  boolean reset_temp() { return ( reset_temp_ ); };
   void shunt_bias(void);      // Load biases into Shunt objects
   void shunt_load(void);      // Load ADS015 protocol
   void shunt_print();         // Print selection result
@@ -380,6 +382,7 @@ protected:
   float Ib_amp_noise_amp_;  // Ib noise on amplified sensor, amplitude model only, A pk-pk
   float Ib_noa_noise_amp_;  // Ib noise on non-amplified sensor, amplitude model only, A pk-pk
   float vb_add_;        // Fault injection bias, V
+  boolean reset_temp_;  // Keep track of temperature reset, stored for plotting, T=reset
 };
 
 

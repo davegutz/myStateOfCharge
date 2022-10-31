@@ -259,10 +259,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 FP_in = cp.input_string.substring(2).toFloat();
                 if ( FP_in<1.1 )  // Apply crude limit to prevent user error
                 {
+                  Serial.printf("Tb res %d\n", Sen->reset_temp());
                   Mon->apply_soc(FP_in, Sen->Tb_filt);
                   Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tb_filt);
                   if ( !rp.modeling ) Mon->init_soc_ekf(Mon->soc());
-                  Serial.printf("soc=%7.3f, modeling = %d, delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f, soc_ekf=%8.4f, delta_q_ekf=%7.3f,\n",
+                  Serial.printf("soc%7.3f, modeling %d, delta_q%7.3f, soc_model%8.4f, delta_q_model%7.3f, soc_ekf%8.4f, delta_q_ekf %7.3f,\n",
                       Mon->soc(), rp.modeling, Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf());
                   if ( rp.modeling )
                   {
@@ -271,7 +272,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   }
                 }
                 else
-                  Serial.printf("soc = %8.4f; err 0-1.1\n", FP_in);
+                  Serial.printf("soc%8.4f; err 0-1.1\n", FP_in);
                 break;
 
               case ( 'm' ):  // Cm<>:  assign curve charge state in fraction to model only (ekf if modeling)
@@ -279,12 +280,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 if ( FP_in<1.1 )   // Apply crude limit to prevent user error
                 {
                   Sen->Sim->apply_soc(FP_in, Sen->Tb_filt);
-                  Serial.printf("soc=%8.4f,   delta_q=%7.3f, soc_model=%8.4f,   delta_q_model=%7.3f,\n",
+                  Serial.printf("soc%8.4f, dq%7.3f, soc_mod%8.4f, dq mod%7.3f,\n",
                       Mon->soc(), Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q());
                   if ( rp.modeling ) cp.cmd_reset();
                 }
                 else
-                  Serial.printf("soc = %8.4f; must be 0-1.1\n", FP_in);
+                  Serial.printf("soc%8.4f; must be 0-1.1\n", FP_in);
                 break;
 
               default:
@@ -314,7 +315,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'E' ):  //   DE<>:  EKF execution frame multiplier
-                Serial.printf("Eframe mult interval %d to ", cp.eframe_mult);
+                Serial.printf("Eframe mult %d to ", cp.eframe_mult);
                 cp.assign_eframe_mult(max(min(cp.input_string.substring(2).toInt(), UINT8_MAX), 0));
                 Serial.printf("%d\n", cp.eframe_mult);
                 break;
@@ -338,7 +339,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'P' ):  //   DP<>:  PRINT multiplier
-                Serial.printf("Print interval %d to ", cp.print_mult);
+                Serial.printf("Print int %d to ", cp.print_mult);
                 cp.assign_print_mult(max(min(cp.input_string.substring(2).toInt(), UINT8_MAX), 0));
                 Serial.printf("%d\n", cp.print_mult);
                 break;
@@ -389,25 +390,25 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'T' ):  //   DT<>:  Tb noise
-                Serial.printf("Sen.Tb_noise_amp_ %7.3f to ", Sen->Tb_noise_amp());
+                Serial.printf("Sen.Tb_noise_amp_%7.3f to ", Sen->Tb_noise_amp());
                 Sen->Tb_noise_amp(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->Tb_noise_amp());
                 break;
 
               case ( 'V' ):  //   DV<>:  Vb noise
-                Serial.printf("Sen.Vb_noise_amp_ %7.3f to ", Sen->Vb_noise_amp());
+                Serial.printf("Sen.Vb_noise_amp_%7.3f to ", Sen->Vb_noise_amp());
                 Sen->Vb_noise_amp(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->Vb_noise_amp());
                 break;
 
               case ( 'M' ):  //   DM<>:  Ib amp noise
-                Serial.printf("Sen.Ib_amp_noise_amp_ %7.3f to ", Sen->Ib_amp_noise_amp());
+                Serial.printf("Sen.Ib_amp_noise_amp_%7.3f to ", Sen->Ib_amp_noise_amp());
                 Sen->Ib_amp_noise_amp(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->Ib_amp_noise_amp());
                 break;
 
               case ( 'N' ):  //   DN<>:  Ib noa noise
-                Serial.printf("Sen.Ib_noa_noise_amp_ %7.3f to ", Sen->Ib_noa_noise_amp());
+                Serial.printf("Sen.Ib_noa_noise_amp_%7.3f to ", Sen->Ib_noa_noise_amp());
                 Sen->Ib_noa_noise_amp(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->Ib_noa_noise_amp());
                 break;
@@ -421,13 +422,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( cp.input_string.charAt(1) )
             {
               case ( 'A' ):  // * SA<>:  Amp sensor scalar
-                Serial.printf("rp.ib_bias_amp %7.3f to ", rp.Ib_scale_amp);
+                Serial.printf("rp.ib_bias_amp%7.3f to ", rp.Ib_scale_amp);
                 rp.Ib_scale_amp = cp.input_string.substring(2).toFloat();
                 Serial.printf("%7.3f\n", rp.Ib_scale_amp);
                 break;
 
               case ( 'B' ):  // * SB<>:  No Amp sensor scalar
-                Serial.printf("rp.Ib_scale_noa %7.3f to ", rp.Ib_scale_noa);
+                Serial.printf("rp.Ib_scale_noa%7.3f to ", rp.Ib_scale_noa);
                 rp.Ib_scale_noa = cp.input_string.substring(2).toFloat();
                 Serial.printf("%7.3f\n", rp.Ib_scale_noa);
                 break;
@@ -436,7 +437,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 scale = cp.input_string.substring(2).toFloat();
                 rp.s_cap_model = scale;
             
-                Serial.printf("Sim.q_cap_rated %7.3f %7.3f to ", scale, Sen->Sim->q_cap_scaled());
+                Serial.printf("Sim.q_cap_rated%7.3f %7.3f to ", scale, Sen->Sim->q_cap_scaled());
             
                 Sen->Sim->apply_cap_scale(rp.s_cap_model);
                 if ( rp.modeling ) Mon->init_soc_ekf(Sen->Sim->soc());
@@ -447,7 +448,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             
               case ( 'G' ):  // * SG<>: scale shunt gain both shunts simultaneously
                 scale = cp.input_string.substring(2).toFloat();
-                Serial.printf("shunt gn scl %7.3f/%7.3f to ", Sen->ShuntAmp->rp_shunt_gain_sclr(), Sen->ShuntNoAmp->rp_shunt_gain_sclr());
+                Serial.printf("shunt gn scl%7.3f/%7.3f to ", Sen->ShuntAmp->rp_shunt_gain_sclr(), Sen->ShuntNoAmp->rp_shunt_gain_sclr());
                 Sen->ShuntAmp->rp_shunt_gain_sclr(scale);
                 Sen->ShuntNoAmp->rp_shunt_gain_sclr(scale);
                 Serial.printf("%7.3f/%7.3f\n", Sen->ShuntAmp->rp_shunt_gain_sclr(), Sen->ShuntNoAmp->rp_shunt_gain_sclr());
@@ -456,31 +457,31 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'h' ):  //   Sh<>: scale hysteresis
                 scale = cp.input_string.substring(2).toFloat();
 
-                Serial.printf("\nHys::scale %7.3f & %7.3f\n", Mon->hys_scale(), Sen->Sim->hys_scale());
+                Serial.printf("\nHys::scale%7.3f & %7.3f\n", Mon->hys_scale(), Sen->Sim->hys_scale());
                 rp.hys_scale = scale;
-                Serial.printf("scale= %7.3f\n", scale);
+                Serial.printf("scale%7.3f\n", scale);
                 Mon->hys_scale(scale);
                 Sen->Sim->hys_scale(scale);
-                Serial.printf("to  %7.3f & %7.3f\n", Mon->hys_scale(), Sen->Sim->hys_scale());
+                Serial.printf("to%7.3f &%7.3f\n", Mon->hys_scale(), Sen->Sim->hys_scale());
                 break;
 
               case ( 'H' ):  //   SH<>: state of all hysteresis
                 scale = cp.input_string.substring(2).toFloat();
 
-                Serial.printf("\nHys::dv_hys %7.3f & %7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
+                Serial.printf("\nHys::dv_hys%7.3f &%7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
                 Mon->hys_state(scale);
                 Sen->Sim->hys_state(scale);
-                Serial.printf("to  %7.3f & %7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
+                Serial.printf("to%7.3f &%7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
                 break;
 
               case ( 'm' ):  //   Sm<>:  Amp signal scalar for faults
-                Serial.printf("ShuntAmp.sclr %7.3f to ", Sen->ShuntAmp->sclr());
+                Serial.printf("ShuntAmp.sclr%7.3f to", Sen->ShuntAmp->sclr());
                 Sen->ShuntAmp->sclr(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->ShuntAmp->sclr());
                 break;
 
               case ( 'n' ):  //   Sn<>:  No Amp signal scalar for faults
-                Serial.printf("ShuntNoAmp.sclr %7.3f to ", Sen->ShuntNoAmp->sclr());
+                Serial.printf("ShuntNoAmp.sclr%7.3f to", Sen->ShuntNoAmp->sclr());
                 Sen->ShuntNoAmp->sclr(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->ShuntNoAmp->sclr());
                 break;
@@ -488,28 +489,28 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'r' ):  //   Sr<>:  scalar sim resistor
                 scale = cp.input_string.substring(2).toFloat();
             
-                Serial.printf("\nBefore Sim:::\n"); Sen->Sim->pretty_print_ss();
-                Serial.printf("\nScaling D[0, 0] = -r0 by Sr= %7.3f\n", scale);
+                Serial.printf("\nBefore Sim::\n"); Sen->Sim->pretty_print_ss();
+                Serial.printf("\nScaling D[0, 0]=-r0 by Sr%7.3f\n", scale);
             
                 Sen->Sim->Sr(scale);
             
                 Serial.printf("\nAfter Sim::\n"); Mon->pretty_print_ss();
                 Serial.printf("\nBefore Mon::\n"); Mon->pretty_print_ss();
-                Serial.printf("\nScaling D[0, 0] = -r0 by Sr= %7.3f\n", scale);
+                Serial.printf("\nScaling D[0, 0]=-r0 by Sr%7.3f\n", scale);
             
                 Mon->Sr(scale);
             
-                Serial.printf("\nAfter Mon::StateSpace:\n"); Mon->pretty_print_ss();
+                Serial.printf("\nAfter Mon::SS:\n"); Mon->pretty_print_ss();
                 break;
             
               case ( 'k' ):  // * Sk<>:  scale cutback gain for sim rep of BMS
                 scale = cp.input_string.substring(2).toFloat();
                 rp.cutback_gain_scalar = scale;
-                Serial.printf("rp.cutback_gain_scalar to %7.3f\n", rp.cutback_gain_scalar);
+                Serial.printf("rp.cutback_gain_scalar to%7.3f\n", rp.cutback_gain_scalar);
                 break;
             
               case ( 'V' ):  // * SV<>:  Vb sensor scalar
-                Serial.printf("rp.Vb_scale %7.3f to ", rp.Vb_scale);
+                Serial.printf("rp.Vb_scale%7.3f to", rp.Vb_scale);
                 rp.Vb_scale = cp.input_string.substring(2).toFloat();
                 Serial.printf("%7.3f\n", rp.Vb_scale);
                 break;
@@ -524,14 +525,14 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
               case ( 'c' ):  //   Fc<>: scale cc_diff threshold
                 scale = cp.input_string.substring(2).toFloat();
-                Serial.printf("cc_diff scl %7.3f to ", Sen->Flt->cc_diff_sclr());
+                Serial.printf("cc_diff scl%7.3f to", Sen->Flt->cc_diff_sclr());
                 Sen->Flt->cc_diff_sclr(scale);
                 Serial.printf("%7.3f\n", Sen->Flt->cc_diff_sclr());
                 break;
 
               case ( 'd' ):  //   Fd<>: scale ib_diff threshold
                 scale = cp.input_string.substring(2).toFloat();
-                Serial.printf("ib_diff scl %7.3f to ", Sen->Flt->ib_diff_sclr());
+                Serial.printf("ib_diff scl%7.3f to", Sen->Flt->ib_diff_sclr());
                 Sen->Flt->ib_diff_sclr(scale);
                 Serial.printf("%7.3f\n", Sen->Flt->ib_diff_sclr());
                 break;
@@ -553,21 +554,21 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'i' ):  //   Fi<>: scale e_wrap_hi threshold
                 scale = cp.input_string.substring(2).toFloat();
-                Serial.printf("e_wrap_hi scl %7.3f to ", Sen->Flt->ewhi_sclr());
+                Serial.printf("e_wrap_hi scl%7.3f to", Sen->Flt->ewhi_sclr());
                 Sen->Flt->ewhi_sclr(scale);
                 Serial.printf("%7.3f\n", Sen->Flt->ewhi_sclr());
                 break;
 
               case ( 'o' ):  //   Fo<>: scale e_wrap_lo threshold
                 scale = cp.input_string.substring(2).toFloat();
-                Serial.printf("e_wrap_lo scl %7.3f to ", Sen->Flt->ewlo_sclr());
+                Serial.printf("e_wrap_lo scl%7.3f to", Sen->Flt->ewlo_sclr());
                 Sen->Flt->ewlo_sclr(scale);
                 Serial.printf("%7.3f\n", Sen->Flt->ewlo_sclr());
                 break;
 
               case ( 'q' ):  //   Fq<>: scale ib_quiet threshold
                 scale = cp.input_string.substring(2).toFloat();
-                Serial.printf("ib_quiet scl %7.3f to ", Sen->Flt->ib_quiet_sclr());
+                Serial.printf("ib_quiet scl%7.3f to", Sen->Flt->ib_quiet_sclr());
                 Sen->Flt->ib_quiet_sclr(scale);
                 Serial.printf("%7.3f\n", Sen->Flt->ib_quiet_sclr());
                 break;
@@ -622,18 +623,18 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'i' ): // i<>:  
-            Serial.printf("Amp CC reset %9.1f ", Sen->ShuntAmp->delta_q_cinf());
+            Serial.printf("Amp CC reset%9.1f ", Sen->ShuntAmp->delta_q_cinf());
             Sen->ShuntAmp->delta_q_cinf(-RATED_BATT_CAP*3600.);
-            Serial.printf("to %9.1f\n", Sen->ShuntAmp->delta_q_cinf());
-            Serial.printf("Amp CC reset %9.1f ", Sen->ShuntAmp->delta_q_dinf());
+            Serial.printf("to%9.1f\n", Sen->ShuntAmp->delta_q_cinf());
+            Serial.printf("Amp CC reset%9.1f ", Sen->ShuntAmp->delta_q_dinf());
             Sen->ShuntAmp->delta_q_dinf(RATED_BATT_CAP*3600.);
-            Serial.printf("to %9.1f\n", Sen->ShuntAmp->delta_q_dinf());
-            Serial.printf("No amp CC reset %9.1f ", Sen->ShuntNoAmp->delta_q_cinf());
+            Serial.printf("to%9.1f\n", Sen->ShuntAmp->delta_q_dinf());
+            Serial.printf("Noa CC reset%9.1f ", Sen->ShuntNoAmp->delta_q_cinf());
             Sen->ShuntNoAmp->delta_q_cinf(-RATED_BATT_CAP*3600.);
-            Serial.printf("to %9.1f\n", Sen->ShuntNoAmp->delta_q_cinf());
-            Serial.printf("No amp CC reset %9.1f ", Sen->ShuntNoAmp->delta_q_dinf());
+            Serial.printf("to%9.1f\n", Sen->ShuntNoAmp->delta_q_cinf());
+            Serial.printf("Noa CC reset%9.1f ", Sen->ShuntNoAmp->delta_q_dinf());
             Sen->ShuntNoAmp->delta_q_dinf(RATED_BATT_CAP*3600.);
-            Serial.printf("to %9.1f\n", Sen->ShuntNoAmp->delta_q_dinf());
+            Serial.printf("to%9.1f\n", Sen->ShuntNoAmp->delta_q_dinf());
             break;
 
           case ( 'l' ):
@@ -665,31 +666,31 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
 
               case ( 'C' ):  //   MC<>:
-                Serial.printf("Amp->max_change_ %10.6f to ", Sen->ShuntAmp->max_change());
+                Serial.printf("Amp->max_change_%10.6f to", Sen->ShuntAmp->max_change());
                 Sen->ShuntAmp->max_change(cp.input_string.substring(2).toFloat());
                 Serial.printf("%10.6f\n", Sen->ShuntAmp->max_change());
                 break;
 
               case ( 'k' ):  // * Mk<>:
-                Serial.printf("amp tweak_sclr %7.3f to ", Sen->ShuntAmp->tweak_sclr());
+                Serial.printf("amp tweak_sclr%7.3f to", Sen->ShuntAmp->tweak_sclr());
                 Sen->ShuntAmp->tweak_sclr(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->ShuntAmp->tweak_sclr());
                 break;
 
               case ( 'w' ):  //   Mw<>:
-                Serial.printf("Amp->time_to_wait %7.3f to ", Sen->ShuntAmp->time_to_wait());
+                Serial.printf("Amp->time_to_wait%7.3f to", Sen->ShuntAmp->time_to_wait());
                 Sen->ShuntAmp->time_to_wait(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->ShuntAmp->time_to_wait());
                 break;
 
               case ( 'x' ):  //   Mx<>:
-                Serial.printf("Amp->max_tweak %7.3f to ", Sen->ShuntAmp->max_tweak());
+                Serial.printf("Amp->max_tweak%7.3f to", Sen->ShuntAmp->max_tweak());
                 Sen->ShuntAmp->max_tweak(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->ShuntAmp->max_tweak());
                 break;
 
               case ( 'z' ):  //   Mz<>:
-                Serial.printf("Amp->time_sat_past %7.3f to ", Sen->ShuntAmp->time_sat_past());
+                Serial.printf("Amp->time_sat_past%7.3f to", Sen->ShuntAmp->time_sat_past());
                 Sen->ShuntAmp->time_sat_past(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->ShuntAmp->time_sat_past());
                 break;
@@ -704,31 +705,31 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
 
               case ( 'C' ):  //   NC<>:
-                Serial.printf("Noa->max_change_ %10.6f to ", Sen->ShuntNoAmp->max_change());
+                Serial.printf("Noa->max_change_%10.6f to", Sen->ShuntNoAmp->max_change());
                 Sen->ShuntNoAmp->max_change(cp.input_string.substring(2).toFloat());
                 Serial.printf("%10.6f\n", Sen->ShuntNoAmp->max_change());
                 break;
 
               case ( 'k' ):  // * Nk<>:
-                Serial.printf("Noa tweak_sclr %7.3f to ", Sen->ShuntNoAmp->tweak_sclr());
+                Serial.printf("Noa tweak_sclr%7.3f to", Sen->ShuntNoAmp->tweak_sclr());
                 Sen->ShuntNoAmp->tweak_sclr(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->ShuntNoAmp->tweak_sclr());
                 break;
 
               case ( 'w' ):  //   Nw<>:
-                Serial.printf("Noa->time_to_wait %7.3f to ", Sen->ShuntNoAmp->time_to_wait());
+                Serial.printf("Noa->time_to_wait%7.3f to", Sen->ShuntNoAmp->time_to_wait());
                 Sen->ShuntNoAmp->time_to_wait(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->ShuntNoAmp->time_to_wait());
                 break;
 
               case ( 'x' ):  //   Nx<>:
-                Serial.printf("Noa->max_tweak %7.3f to ", Sen->ShuntNoAmp->max_tweak());
+                Serial.printf("Noa->max_tweak%7.3f to", Sen->ShuntNoAmp->max_tweak());
                 Sen->ShuntNoAmp->max_tweak(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->ShuntNoAmp->max_tweak());
                 break;
 
               case ( 'z' ):  //   Nz<>:
-                Serial.printf("Noa->time_sat_past %7.3f to ", Sen->ShuntNoAmp->time_sat_past());
+                Serial.printf("Noa->time_sat_past%7.3f to", Sen->ShuntNoAmp->time_sat_past());
                 Sen->ShuntNoAmp->time_sat_past(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->ShuntNoAmp->time_sat_past());
                 break;
@@ -774,11 +775,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf ("M::"); Mon->pretty_print_ss();
                 Serial.printf ("M::"); Mon->EKF_1x1::pretty_print();
                 Serial.printf ("\nmodeling = %d\n", rp.modeling);
-                Serial1.printf("\nM:"); Mon->pretty_print(Sen);
-                Serial1.printf("M::"); Mon->Coulombs::pretty_print();
-                Serial1.printf("M::"); Mon->pretty_print_ss();
-                Serial1.printf("M::"); Mon->EKF_1x1::pretty_print();
-                Serial1.printf("\nmodeling = %d\n", rp.modeling);
                 break;
 
               case ( 'M' ):  // PM:  Print shunt Amp
@@ -804,20 +800,20 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'x' ):  // Px:  Print shunt measure
-                Serial.printf("\nAmp: "); Serial.printf("Vshunt_int, Vshunt, ib_tot_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
+                Serial.printf("\nAmp: "); Serial.printf("Vshunt_int,Vshunt,ib_tot_bias,Ishunt_cal=,%d,%7.3f,%7.3f,%7.3f,\n", 
                   Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), cp.ib_tot_bias_amp, Sen->ShuntAmp->ishunt_cal());
-                Serial.printf("Noa:"); Serial.printf("Vshunt_int, Vshunt, ib_tot_bias, Ishunt_cal=, %d, %7.3f, %7.3f, %7.3f,\n", 
+                Serial.printf("Noa:"); Serial.printf("Vshunt_int,Vshunt,ib_tot_bias,Ishunt_cal=,%d,%7.3f,%7.3f,%7.3f,\n", 
                   Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), cp.ib_tot_bias_noa, Sen->ShuntNoAmp->ishunt_cal());
-                Serial.printf("Sel: Noa, Ib=,  %d, %7.3f\n", rp.ib_select, Sen->Ib);
+                Serial.printf("Sel:Noa,Ib=,%d,%7.3f\n", rp.ib_select, Sen->Ib);
                 break;
 
               case ( 'v' ):  // Pv:  Print Vb measure
-                Serial.printf("\nVolt: ");   Serial.printf("Vb_bias, Vb_m, mod, Vb=, %7.3f, %7.3f, %d, %7.3f,\n", 
+                Serial.printf("\nVolt:");   Serial.printf("Vb_bias,Vb_m,mod,Vb=,%7.3f,%7.3f,%d,%7.3f,\n", 
                   rp.Vb_bias, Sen->Vb_model, rp.modeling, Sen->Vb);
                 break;
 
               default:
-                Serial.println("");Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+                Serial.println("");Serial.print(cp.input_string.charAt(1)); Serial.println("? 'h'");
             }
             break;
 
@@ -839,18 +835,18 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'i' ):  // Ri:
-                Serial.printf("Amp chg CC %9.1f ", Sen->ShuntAmp->delta_q_cinf());
+                Serial.printf("Amp chg CC%9.1f ", Sen->ShuntAmp->delta_q_cinf());
                 Sen->ShuntAmp->delta_q_cinf(-RATED_BATT_CAP*3600.);
-                Serial.printf("to %9.1f\n", Sen->ShuntAmp->delta_q_cinf());
-                Serial.printf("Amp dchg CC %9.1f ", Sen->ShuntAmp->delta_q_dinf());
+                Serial.printf("to%9.1f\n", Sen->ShuntAmp->delta_q_cinf());
+                Serial.printf("Amp dchg CC%9.1f ", Sen->ShuntAmp->delta_q_dinf());
                 Sen->ShuntAmp->delta_q_dinf(RATED_BATT_CAP*3600.);
-                Serial.printf("to %9.1f\n", Sen->ShuntAmp->delta_q_dinf());
-                Serial.printf("Noa chg CC %9.1f ", Sen->ShuntNoAmp->delta_q_cinf());
+                Serial.printf("to%9.1f\n", Sen->ShuntAmp->delta_q_dinf());
+                Serial.printf("Noa chg CC%9.1f ", Sen->ShuntNoAmp->delta_q_cinf());
                 Sen->ShuntNoAmp->delta_q_cinf(-RATED_BATT_CAP*3600.);
-                Serial.printf("to %9.1f\n", Sen->ShuntNoAmp->delta_q_cinf());
-                Serial.printf("Noa dchg CC %9.1f ", Sen->ShuntNoAmp->delta_q_dinf());
+                Serial.printf("to%9.1f\n", Sen->ShuntNoAmp->delta_q_cinf());
+                Serial.printf("Noa dchg CC%9.1f ", Sen->ShuntNoAmp->delta_q_dinf());
                 Sen->ShuntNoAmp->delta_q_dinf(RATED_BATT_CAP*3600.);
-                Serial.printf("to %9.1f\n", Sen->ShuntNoAmp->delta_q_dinf());
+                Serial.printf("to%9.1f\n", Sen->ShuntNoAmp->delta_q_dinf());
                 break;
 
               case ( 'r' ):  // Rr:  small reset counters
@@ -907,25 +903,25 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
 
               case ( 'M' ):  //   VM<>:  delta Mon curve voltage out
-                Serial.printf("Mon dv_voc_soc %7.3f to ", Mon->dv_voc_soc());
+                Serial.printf("Mon dv_voc_soc%7.3f to", Mon->dv_voc_soc());
                 Mon->dv_voc_soc(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Mon->dv_voc_soc());
                 break;
 
               case ( 'm' ):  //   Vm<>:  delta Mon curve soc in
-                Serial.printf("Mon ds_voc_soc %7.3f to ", Mon->ds_voc_soc());
+                Serial.printf("Mon ds_voc_soc%7.3f to", Mon->ds_voc_soc());
                 Mon->ds_voc_soc(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Mon->ds_voc_soc());
                 break;
 
               case ( 'S' ):  //   VS<>:  delta Sim curve voltage out
-                Serial.printf("Sim dv_voc_soc %7.3f to ", Sen->Sim->dv_voc_soc());
+                Serial.printf("Sim dv_voc_soc%7.3f to", Sen->Sim->dv_voc_soc());
                 Sen->Sim->dv_voc_soc(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->Sim->dv_voc_soc());
                 break;
 
               case ( 's' ):  //   Vs<>:  delta Sim curve soc in
-                Serial.printf("Sim ds_voc_soc %7.3f to ", Sen->Sim->ds_voc_soc());
+                Serial.printf("Sim ds_voc_soc%7.3f to", Sen->Sim->ds_voc_soc());
                 Sen->Sim->ds_voc_soc(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->Sim->ds_voc_soc());
                 break;
@@ -991,19 +987,19 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'a' ): // Xa<>:  injection amplitude
                 rp.amp = cp.input_string.substring(2).toFloat();
-                Serial.printf("Inj amp set %7.3f & inj_bias set %7.3f\n", rp.amp, rp.inj_bias);
+                Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", rp.amp, rp.inj_bias);
                 break;
 
               case ( 'f' ): // Xf<>:  injection frequency
                 rp.freq = max(min(cp.input_string.substring(2).toFloat(), 2.0), 0.0);
-                Serial.printf("Injected freq set %7.3f Hz =", rp.freq);
+                Serial.printf("Injected freq set%7.3f Hz =", rp.freq);
                 rp.freq *= (2. * PI);
-                Serial.printf(" %7.3f r/s\n", rp.freq);
+                Serial.printf("%7.3f r/s\n", rp.freq);
                 break;
 
               case ( 'b' ): // Xb<>:  injection bias
                 rp.inj_bias = cp.input_string.substring(2).toFloat();
-                Serial.printf("Inj_bias set %7.3f\n", rp.inj_bias);
+                Serial.printf("Inj_bias set%7.3f\n", rp.inj_bias);
                 break;
 
               case ( 't' ): // Xt<>:  injection type
@@ -1011,32 +1007,32 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 {
                   case ( 's' ):  // Xts:  sine
                     rp.type = 1;
-                    Serial.printf("Set sin.  rp.type = %d\n", rp.type);
+                    Serial.printf("Set sin. rp.type %d\n", rp.type);
                     break;
 
                   case ( 'q' ):  // Xtq:  square
                     rp.type = 2;
-                    Serial.printf("Set square.  rp.type = %d\n", rp.type);
+                    Serial.printf("Set square. rp.type %d\n", rp.type);
                     break;
 
                   case ( 't' ):  // Xtt:  triangle
                     rp.type = 3;
-                    Serial.printf("Set tri.  rp.type = %d\n", rp.type);
+                    Serial.printf("Set tri. rp.type %d\n", rp.type);
                     break;
 
                   case ( 'c' ):  // Xtc:  charge rate
                     rp.type = 4;
-                    Serial.printf("Set 1C charge.  rp.type = %d\n", rp.type);
+                    Serial.printf("Set 1C charge. rp.type %d\n", rp.type);
                     break;
 
                   case ( 'd' ):  // Xtd:  discharge rate
                     rp.type = 5;
-                    Serial.printf("Set 1C disch.  rp.type = %d\n", rp.type);
+                    Serial.printf("Set 1C disch. rp.type %d\n", rp.type);
                     break;
 
                   case ( 'o' ):  // Xto:  cosine
                     rp.type = 8;
-                    Serial.printf("Set cos.  rp.type = %d\n", rp.type);
+                    Serial.printf("Set cos. rp.type %d\n", rp.type);
                     break;
 
                   default:
@@ -1046,7 +1042,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'o' ): // Xo<>:  injection dc offset
                 rp.inj_bias = max(min(cp.input_string.substring(2).toFloat(), 18.3), -18.3);
-                Serial.printf("inj_bias set %7.3f\n", rp.inj_bias);
+                Serial.printf("inj_bias set%7.3f\n", rp.inj_bias);
                 break;
 
               case ( 'p' ): // Xp<>:  injection program
@@ -1195,7 +1191,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'C' ): // XC:  injection number of cycles
                 Sen->cycles_inj = max(min(cp.input_string.substring(2).toFloat(), 10000.), 0);
-                Serial.printf("#inj cycles to %7.3f\n", Sen->cycles_inj);
+                Serial.printf("#inj cycles to%7.3f\n", Sen->cycles_inj);
                 break;
 
               case ( 'R' ): // XR:  Start injection now
@@ -1204,11 +1200,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   Sen->start_inj = Sen->wait_inj + Sen->now;
                   Sen->stop_inj = Sen->wait_inj + (Sen->now + min((unsigned long int)(Sen->cycles_inj / max(rp.freq/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
                   Sen->end_inj = Sen->stop_inj + Sen->tail_inj;
-                  Serial.printf("**\n*************** RUN: at %ld, %7.3f cycles %7.3f to %7.3f with %7.3f wait and %7.3f tail *******************\n**\n",
+                  Serial.printf("**\n*** RUN: at %ld,%7.3f cycles%7.3f to%7.3f with%7.3f wait and%7.3f tail ****\n**\n",
                     Sen->now, Sen->cycles_inj, float(Sen->start_inj)/1000., float(Sen->stop_inj)/1000., float(Sen->wait_inj)/1000.,
                     float(Sen->tail_inj)/1000.);
                 }
-                else Serial.printf("Wait %5.1f s for init\n", float(TEMP_INIT_DELAY-Sen->now)/1000.);
+                else Serial.printf("Wait%5.1fs for init\n", float(TEMP_INIT_DELAY-Sen->now)/1000.);
                 break;
 
               case ( 'S' ): // XS:  Stop injection now
@@ -1221,7 +1217,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 's' ): // Xs:  scale T_SAT
                 FP_in = cp.input_string.substring(2).toFloat();
-                Serial.printf("s_t_sat %7.1f s to \n", cp.s_t_sat);
+                Serial.printf("s_t_sat%7.1f s to\n", cp.s_t_sat);
                 cp.s_t_sat = max(FP_in, 0.);
                 Serial.printf("%7.1f\n", cp.s_t_sat);
                 break;
@@ -1229,13 +1225,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'W' ):  // XW<>:  Wait beginning of programmed transient
                 FP_in = cp.input_string.substring(2).toFloat();
                 Sen->wait_inj = (unsigned long int)(max(FP_in, 0.))*1000;
-                Serial.printf("Wait %7.1f s to inj\n", FP_in);
+                Serial.printf("Wait%7.1f s to inj\n", FP_in);
                 break;
 
               case ( 'T' ):  // XT<>:  Tail
                 FP_in = cp.input_string.substring(2).toFloat();
                 Sen->tail_inj = (unsigned long int)(max(FP_in, 0.))*1000;
-                Serial.printf("Wait %7.1f s tail after\n", FP_in);
+                Serial.printf("Wait%7.1f s tail after\n", FP_in);
                 break;
 
               case ( 'u' ):  // Xu<>:  Tb, fail it
@@ -1247,7 +1243,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'v' ):  // Xv<>:  Tb stale time scalar
                 FP_in = cp.input_string.substring(2).toFloat();
-                Serial.printf("Stale tb time sclr %9.4f to ", Sen->Flt->tb_stale_time_sclr());
+                Serial.printf("Stale tb time sclr%9.4f to", Sen->Flt->tb_stale_time_sclr());
                 Sen->Flt->tb_stale_time_sclr(FP_in);
                 Serial.printf("%9.4f\n", Sen->Flt->tb_stale_time_sclr());
                 break;
