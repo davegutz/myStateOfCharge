@@ -398,8 +398,8 @@ Outputs:
 double Coulombs::count_coulombs(const double dt, const boolean reset, const float temp_c, const double charge_curr,
   const boolean sat, const double sclr_coul_eff, const double delta_q_ekf)
 {
-    // Rate limit temperature
-    if ( reset ) *rp_t_last_ = temp_c;
+    // Rate limit temperature.   When modeling, reset.  In real world, rate limited Tb ramps Coulomb count since bms_off
+    if ( reset && rp.mod_vb() ) *rp_t_last_ = temp_c;
     double temp_lim = max(min( temp_c, *rp_t_last_ + t_rlim_*dt), *rp_t_last_ - t_rlim_*dt);
 
     // State change

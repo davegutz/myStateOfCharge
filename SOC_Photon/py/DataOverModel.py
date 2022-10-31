@@ -37,9 +37,39 @@ from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
-def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fig=None):
+def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fig=None, plot_init_in=False):
     if fig_files is None:
         fig_files = []
+
+    if plot_init_in:
+        plt.figure()  # init 1
+        n_fig += 1
+        plt.subplot(221)
+        plt.title(plot_title + 'init 1')
+        plt.plot(so.time, so.reset_s, color='black', linestyle='-', label='reset_s')
+        plt.plot(smv.time, smv.reset_s, color='red', linestyle='--', label='reset_s_ver')
+        # plt.plot(mo.time, mo.reset, color='magenta', linestyle='-', label='reset')
+        plt.plot(mv.time, mv.reset, color='cyan', linestyle='--', label='reset_ver')
+        plt.legend(loc=1)
+        plt.subplot(222)
+        plt.plot(so.time, so.Tb_s, color='black', linestyle='-', label='Tb_s')
+        plt.plot(sv.time, sv.Tb, color='red', linestyle='--', label='Tb_s_ver')
+        plt.plot(mo.time, mo.Tb, color='blue', linestyle='-.', label='Tb')
+        plt.plot(mv.time, mv.Tb, color='green', linestyle=':', label='Tb_ver')
+        plt.legend(loc=1)
+        plt.subplot(223)
+        plt.plot(so.time, so.soc_s, color='black', linestyle='-', label='soc_s')
+        plt.plot(sv.time, sv.soc, color='red', linestyle='--', label='soc_s_ver')
+        plt.plot(mo.time, mo.soc, color='blue', linestyle='-.', label='soc')
+        plt.plot(mv.time, mv.soc, color='green', linestyle=':', label='soc_ver')
+        plt.plot(mo.time, mo.soc_ekf, marker='^', markersize='5', markevery=32, linestyle='None', color='orange', label='soc_ekf')
+        plt.plot(mv.time, mv.soc_ekf, marker='+', markersize='5', markevery=32, linestyle='None', color='cyan',  label='soc_ekf_ver')
+        plt.legend(loc=1)
+        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
+
+        return n_fig, fig_files
 
     if mo.ibmh is not None:
         plt.figure()  # 1a
@@ -51,7 +81,6 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mo.time, mo.Ib, color='red', linestyle='-.', label='Ib')
         plt.legend(loc=1)
         plt.subplot(322)
-        plt.title(plot_title)
         plt.plot(mo.time, mo.ib_diff, color='black', linestyle='-', label='ib_diff')
         plt.plot(mo.time, mo.ib_diff_f, color='magenta', linestyle='--', label='ib_diff_f')
         plt.plot(mo.time, mo.ibd_thr, color='red', linestyle='-.', label='ib_diff_thr')

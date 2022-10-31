@@ -400,18 +400,21 @@ Throughput test
 45. Fault injection testing
 
 Full regression suite:
-  ampHiFail:      D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm50;Dn0.0001;Ff0;
+  initModel:	Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;v2;Rs;W160;Pf;Ca0.6;W160;v0;Pf;
+				DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Ca.5;Dr100;Rf;Pf;
+  initModelSat:	Ff0;D^0;Xm7
+  ampHiFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm50;Dn0.0001;
                   DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Ca.5;Dr100;Rf;Pf;
   ampHiFailFf:    Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm50;Dn0.0001;
                   Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Ca.5;Dr100;Rf;Pf;
-  ampLoFail:      D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm-50;Dn0.0001;Ff0;
+  ampLoFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm-50;Dn0.0001;Ff0;
                   DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Ca.5;Dr100;Rf;Pf;
-  ampHiFailNoise: D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;Ff0;
+  ampHiFailNoise: Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;Ff0;
                   DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Ca.5;Dr100;Rf;Pf;
   rapidTweakRegression:  Ff0;Xp10;
   rapidTweakRegression40C_:   Ff0;D^15;Xp10;
                               D^0;
-  slowTweakRegression:  Xp11;
+  slowTweakRegression:  Ff0;Xp11;
   triTweakDisch:  Ff0;D^0;Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-29500;XW5;XT5;XC3;W2;v2;W2;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;XR;
                   v0;XS;Dm0;Dn0;Fi1;Fo1;Fc1;Fd1;FV0;FI0;FT0;Xp0;Ca1.;Pf;
   satSit:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat

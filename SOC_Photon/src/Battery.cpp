@@ -791,8 +791,8 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset, BatteryMoni
     double d_delta_q = charge_curr * Sen->T;
     if ( charge_curr>0. ) d_delta_q *= coul_eff_;
 
-    // Rate limit temperature
-    if ( reset ) *rp_t_last_ = Sen->Tb;
+    // Rate limit temperature.  When modeling, initialize to no change
+    if ( reset && rp.mod_vb() ) *rp_t_last_ = Sen->Tb;
     double temp_lim = max(min(Sen->Tb, *rp_t_last_ + T_RLIM*Sen->T), *rp_t_last_ - T_RLIM*Sen->T);
     
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status
@@ -803,7 +803,7 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset, BatteryMoni
         if ( Mon->sat() ) apply_delta_q(Mon->delta_q());
         else if ( reset_past && !cp.fake_faults ) apply_delta_q(Mon->delta_q_ekf());  // Solution to boot up unsaturated
     }
-    else if ( model_saturated_ )  // Modeling
+    else if ( model_saturated_ )  // Modeling initializes on reset to Tb=RATED_TEMP
     {
         if ( reset ) *rp_delta_q_ = 0.;
     }

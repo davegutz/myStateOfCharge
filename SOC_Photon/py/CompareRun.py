@@ -56,13 +56,15 @@ if __name__ == '__main__':
         time_end_in = None
         unit_key = 'pro_2022'
         dTb = None
+        plot_init_in = False
 
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
         # Regression suite
         # data_file_old_txt = 'ampHiFail v20221028.txt'
-        data_file_old_txt = 'ampHiFailFf v20221028.txt'
+        # data_file_old_txt = 'ampHiFailFf v20221028.txt'
+        data_file_old_txt = 'initModel v20221028.txt'; plot_init_in = True;
         # data_file_old_txt = 'ampLoFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'
         # data_file_old_txt = 'rapidTweakRegression v20221028.txt'
@@ -184,7 +186,7 @@ if __name__ == '__main__':
         # n_fig, fig_files = overall_batt(mon_ver, sim_ver, randles_ver, filename, fig_files, plot_title=plot_title,
         #                                 n_fig=n_fig, suffix='_ver')  # sim over mon verify
         n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                   plot_title=plot_title, n_fig=n_fig)  # all over all
+                                   plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
         cleanup_fig_files(fig_files)
