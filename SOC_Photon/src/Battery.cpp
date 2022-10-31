@@ -301,7 +301,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset)
     }
     else    // aliased, unstable if T>0.5  TODO:  consider deleting Randles model (hardware filters)
         voc_ = vb_ - chem_.r_ss * ib_;
-    if ( !FAKE_FAULTS )
+    if ( !cp.fake_faults )
     {
         if ( (bms_off_ && bms_off_local) ||  Sen->Flt->vb_fa())
         {
@@ -801,7 +801,7 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset, BatteryMoni
     if ( !rp.mod_vb() )  // Real world
     {
         if ( Mon->sat() ) apply_delta_q(Mon->delta_q());
-        else if ( reset_past && !FAKE_FAULTS ) apply_delta_q(Mon->delta_q_ekf());  // Solution to boot up unsaturated
+        else if ( reset_past && !cp.fake_faults ) apply_delta_q(Mon->delta_q_ekf());  // Solution to boot up unsaturated
     }
     else if ( model_saturated_ )  // Modeling
     {

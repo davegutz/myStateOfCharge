@@ -536,10 +536,19 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%7.3f\n", Sen->Flt->ib_diff_sclr());
                 break;
 
+              case ( 'f' ):  //   Ff<>:  fake faults
+                INT_in = cp.input_string.substring(2).toInt();
+                Serial.printf("cp.fake_faults, rp.ib_select %d, %d to", cp.fake_faults, rp.ib_select);
+                cp.fake_faults = INT_in;
+                rp.ib_select = INT_in;
+                Serial.printf("%d, %d\n", cp.fake_faults, rp.ib_select);
+                break;
+
               case ( 'I' ):  //   FI<>:  Fault disable ib hard
                 INT_in = cp.input_string.substring(2).toInt();
+                Serial.printf("Sen->Flt->disab_ib_fa %d to ", Sen->Flt->disab_ib_fa());
                 Sen->Flt->disab_ib_fa(INT_in);
-                Serial.printf("Sen->Flt->disab_ib_fa to %d\n", Sen->Flt->disab_ib_fa());
+                Serial.printf("%d\n", Sen->Flt->disab_ib_fa());
                 break;
 
               case ( 'i' ):  //   Fi<>: scale e_wrap_hi threshold
@@ -565,14 +574,16 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'T' ):  //   FT<>:  Fault disable tb stale
                 INT_in = cp.input_string.substring(2).toInt();
+                Serial.printf("Sen->Flt->disab_tb_fa %d to ", Sen->Flt->disab_tb_fa());
                 Sen->Flt->disab_tb_fa(INT_in);
-                Serial.printf("Sen->Flt->disab_tb_fa to %d\n", Sen->Flt->disab_tb_fa());
+                Serial.printf("%d\n", Sen->Flt->disab_tb_fa());
                 break;
 
               case ( 'V' ):  //   FV<>:  Fault disable vb hard
                 INT_in = cp.input_string.substring(2).toInt();
+                Serial.printf("Sen->Flt->disab_vb_fa %d to", Sen->Flt->disab_vb_fa());
                 Sen->Flt->disab_vb_fa(INT_in);
-                Serial.printf("Sen->Flt->disab_vb_fa to %d\n", Sen->Flt->disab_vb_fa());
+                Serial.printf("%d\n", Sen->Flt->disab_vb_fa());
                 break;
 
               default:
@@ -1317,6 +1328,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("\nF<?>   Faults\n");
   Serial.printf("  Fc= "); Serial.printf("%6.3f", Sen->Flt->cc_diff_sclr()); Serial.printf(": sclr cc_diff thr ^ [1]\n"); 
   Serial.printf("  Fd= "); Serial.printf("%6.3f", Sen->Flt->ib_diff_sclr()); Serial.printf(": sclr ib_diff thr ^ [1]\n"); 
+  Serial.printf("  Ff= "); Serial.printf("%d", cp.fake_faults); Serial.printf(": faults faked (ignored)[%d]\n", FAKE_FAULTS); 
   Serial.printf("  Fi= "); Serial.printf("%6.3f", Sen->Flt->ewhi_sclr()); Serial.printf(": sclr e_wrap_hi thr ^ [1]\n"); 
   Serial.printf("  Fo= "); Serial.printf("%6.3f", Sen->Flt->ewlo_sclr()); Serial.printf(": sclr e_wrap_lo thr ^ [1]\n"); 
   Serial.printf("  Fq= "); Serial.printf("%6.3f", Sen->Flt->ib_quiet_sclr()); Serial.printf(": sclr ib_quiet thr v [1]\n"); 

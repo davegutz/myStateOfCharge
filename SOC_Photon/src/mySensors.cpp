@@ -299,7 +299,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" ib_dsc  %d  %d 'Fq v'\n", ib_dscn_flt(), ib_dscn_fa());
   Serial.printf(" ibd_lo  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_lo_flt(), ib_diff_lo_fa());
   Serial.printf(" ibd_hi  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_hi_flt(), ib_diff_hi_fa());
-  Serial.printf(" loss wv %d  %d   'Fd, Fi/Fo ^'\n",  red_loss(), wrap_vb_fa());
+  Serial.printf(" red wv  %d  %d   'Fd, Fi/Fo ^'\n",  red_loss(), wrap_vb_fa());
   Serial.printf(" wl      %d  %d 'Fo ^'\n", wrap_lo_flt(), wrap_lo_fa());
   Serial.printf(" wh      %d  %d 'Fi ^'\n", wrap_hi_flt(), wrap_hi_fa());
   Serial.printf(" cc_dif  x  %d 'Fc ^'\n", cc_diff_fa());
@@ -340,7 +340,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf(" ib_dsc  %d  %d 'Fq v'\n", ib_dscn_flt(), ib_dscn_fa());
   Serial1.printf(" ibd_lo  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_lo_flt(), ib_diff_lo_fa());
   Serial1.printf(" ibd_hi  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_hi_flt(), ib_diff_hi_fa());
-  Serial1.printf(" loss wv %d  %d   'Fd  Fi/Fo ^'\n",  red_loss(), wrap_vb_fa());
+  Serial1.printf(" red wv  %d  %d   'Fd  Fi/Fo ^'\n",  red_loss(), wrap_vb_fa());
   Serial1.printf(" wl      %d  %d 'Fo ^'\n", wrap_lo_flt(), wrap_lo_fa());
   Serial1.printf(" wh      %d  %d 'Fi ^'\n", wrap_hi_flt(), wrap_hi_fa());
   Serial1.printf(" cc_dif  x  %d 'Fc ^'\n", cc_diff_fa());
@@ -368,14 +368,12 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 //          ----------------, Sen->Tb_hdwe, Sen->Tb_hdwe_filt
 // Outputs: Ib,
 //          Vb,
+
 //          Tb, Tb_filt
 //          latched_fail_
 void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
 {
-  // Truth tables
-  // ib
-  // Serial.printf("\nTopTruth: rpibs,rloc,raf,ibss,ibssl,vbss,vbssl,ampb,noab,ibdf,whf,wlf,ccdf, %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,\n",
-  //  rp.ib_select, reset_loc, reset_all_faults_, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa_, wrap_hi_fa(), wrap_lo_fa(), cc_diff_fa_);
+  // Reset
   if ( reset_all_faults_ )
   {
     if ( rp.ib_select < 0 )
@@ -389,12 +387,9 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     ib_sel_stat_last_ =  ib_sel_stat_;
     Serial.printf("reset ib flt\n");
   }
-  latched_fail_ = false;
-  if ( FAKE_FAULTS )
-  {
-    ib_sel_stat_ = rp.ib_select;  // Can manually select using talk when FAKE_FAULTS is set
-  }
-  else if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() )  // these inputs don't latch
+
+  // Ib truth table
+  if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() )  // these inputs don't latch
   {
     ib_sel_stat_ = 0;    // takes two non-latching inputs to set and latch
     latched_fail_ = true;
@@ -440,7 +435,16 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       latched_fail_ = true;
     }
   }
+  else
+  {
+    latched_fail_ = false;
+  }
+
   faultAssign(red_loss_calc(), RED_LOSS); // ib_sel_stat<0
+  if ( cp.fake_faults )
+  {
+    ib_sel_stat_ = rp.ib_select;  // Can manually select using talk when cp.fake_faults is set
+  }
 
   // vb failure from wrap result.  Latches
   if ( reset_all_faults_ )
@@ -449,7 +453,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     vb_sel_stat_ = 1;
     Serial.printf("reset vb flts\n");
   }
-  if ( !FAKE_FAULTS )
+  if ( !cp.fake_faults )
   {
     if ( !vb_sel_stat_last_ )
     {
@@ -484,7 +488,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     Serial.printf("Sel chg:  Amp->bare=%d, NoAmp->bare=%d, ib_diff_fa=%d, wh_fa=%d, wl_fa=%d, wv_fa=%d, cc_diff_fa_=%d,\n rp.ib_select=%d, ib_sel_stat=%d, vb_sel_stat=%d, tb_sel_stat=%d, vb_fail=%d, Tb_fail=%d,\n",
       Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_diff_fa_, rp.ib_select, ib_sel_stat_, vb_sel_stat_, tb_sel_stat_, vb_fa(), tb_fa());
     Serial.printf("fake=%d,ibss=%d, ibssl=%d, vbss=%d, vbssl=%d, tbss=%d, tbssl=%d\n",
-      FAKE_FAULTS, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, tb_sel_stat_, tb_sel_stat_last_);
+      cp.fake_faults, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, tb_sel_stat_, tb_sel_stat_last_);
   }
   if ( ib_sel_stat_ != ib_sel_stat_last_ )
   {
@@ -688,7 +692,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   }
   else
   {
-    if ( (Flt->wrap_vb_fa() || Flt->vb_fa()) && !FAKE_FAULTS )
+    if ( (Flt->wrap_vb_fa() || Flt->vb_fa()) && !cp.fake_faults )
     {
       Vb = Vb_model;
     }

@@ -58,6 +58,7 @@ struct CommandPars
   float tb_bias_model;      // Bias on Tb for model, C
   float s_t_sat;            // Scalar on saturation test time set and reset
   uint8_t eframe_mult;      // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
+  boolean fake_faults;      // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
 
   CommandPars(void)
   {
@@ -75,6 +76,7 @@ struct CommandPars
     tb_bias_model = 0.;
     s_t_sat = 1.;
     eframe_mult = 20;
+    fake_faults = FAKE_FAULTS;
   }
 
   void cmd_reset(void)
@@ -110,6 +112,7 @@ struct CommandPars
     Serial.printf(" tb_bias_mode=%7.3f;\n", this->tb_bias_model);
     Serial.printf(" s_t_sat=%7.3f;\n", this->s_t_sat);
     Serial.printf(" eframe_mult=%d;\n", this->eframe_mult);
+    Serial.printf(" fake_faults=%d;\n", this->fake_faults);
   }
 
   void assign_eframe_mult(const uint8_t count)
