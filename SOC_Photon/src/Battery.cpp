@@ -526,7 +526,8 @@ boolean BatteryMonitor::solve_ekf(const boolean reset_temp, Sensors *Sen)
         err = voc - voc_solved;
     }
     init_soc_ekf(soc_solved);
-    if ( rp.debug==-1) Serial.printf("sol_ek: voc%7.3f voc_sol%7.3f cnt %d\n", voc, voc_solved, count);    
+    if ( rp.debug==-1) Serial.printf("sol_ek: Vb%7.3f Vba%7.3f voc%7.3f voc_sol%7.3f cnt %d soc_sol%8.4f\n",
+        Sen->Vb, Vb_avg, voc, voc_solved, count, soc_solved);    
     // if ( rp.debug==7 )
     //         Serial.printf("solve    :n_avg, Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %d, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
     //         n_avg, Tb_avg, Vb_avg, Ib_avg, count, soc_solved, voc, voc_solved, dv_dyn, dv_hys_, err);
@@ -826,7 +827,7 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
     soc_min_ = chem_.soc_min_T_->interp(temp_lim);
     q_min_ = soc_min_ * q_capacity_;
 
-    if ( (rp.debug==2 || rp.debug==3)  && cp.publishS ) // print_serial_sim
+    if ( (rp.debug==2 || rp.debug==3)  && cp.publishS )  // print_serial_sim
     {
         double cTime;
         if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;

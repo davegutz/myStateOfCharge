@@ -178,20 +178,25 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
 // Monitor initializes EKF.  Works perfectly in model
 void initialize_all(const float soc_in, BatteryMonitor *Mon, Sensors *Sen)
 {
-  Sen->Sim->apply_delta_q_t(true);
-  Mon->apply_delta_q_t(true);
+  Mon->apply_soc(soc_in, Sen->Tb_filt);
+  Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tb_filt);
+  // Mon->apply_delta_q_t(true);
   if ( rp.debug==-1){ Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);}
   Sen->Sim->init_battery(true, Sen);
   if ( rp.debug==-1){ Serial.printf("S.i_b:"); debug_m1(Mon, Sen);}
-  Sen->Sim->calculate(Sen, cp.dc_dc_on, true);
-  if ( rp.debug==-1){ Serial.printf("S.c:"); debug_m1(Mon, Sen);}
+  Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true);
+  Sen->Sim->pretty_print();
+  if ( rp.mod_vb() ) Sen->Vb = Sen->Vb_model;
+  else Sen->Vb = Sen->Vb_hdwe;
+  if ( rp.debug==-1){ Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("S.c:"); debug_m1(Mon, Sen);}
   Sen->Sim->apply_soc(soc_in, Sen->Tb_filt);
   Mon->apply_soc(soc_in, Sen->Tb_filt);
   if ( rp.debug==-1){ Serial.printf("S/M.a_s:"); debug_m1(Mon, Sen);}
   Mon->init_battery(true, Sen);
   if ( rp.debug==-1){ Serial.printf("M.i_b:"); debug_m1(Mon, Sen);}
-  // Sen->temp_load_and_filter(Sen, true, rp.t_last_model);   didn't help
+  Sen->temp_load_and_filter(Sen, true, rp.t_last_model);
   Mon->calculate(Sen, true);
+  if ( rp.debug==-1){ Serial.printf("to solv: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); debug_m1(Mon, Sen);}
   Mon->solve_ekf(true, Sen);
 }
 
