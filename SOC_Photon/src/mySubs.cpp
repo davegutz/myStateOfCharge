@@ -181,37 +181,30 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   if ( use_soc_in )
     Mon->apply_soc(soc_in, Sen->Tb_filt);  // saves rp.delta_q and rp.t_last
   Sen->Sim->apply_delta_q_t(Mon->delta_q(), Mon->t_last());  // applies rp.delta_q and rp.t_last
-  // Mon->apply_delta_q_t(true);
-  if ( rp.debug==-1){ Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);}
+  // if ( rp.debug==-1){ Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);}
   Sen->Sim->init_battery(true, Sen);
-  if ( rp.debug==-1){ Serial.printf("S.i_b:"); debug_m1(Mon, Sen);}
+  // if ( rp.debug==-1){ Serial.printf("S.i_b:"); debug_m1(Mon, Sen);}
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true);
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true);  // Call again because sat is a UBC
   // not strictly needed for init.  Calculates some things not otherwise calculated for 'all'
   Sen->Sim->count_coulombs(Sen, true, Mon);
   if ( rp.mod_vb() ) Sen->Vb = Sen->Vb_model;
   else Sen->Vb = Sen->Vb_hdwe;
-  if ( rp.debug==-1 ){ Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("S.c:"); debug_m1(Mon, Sen);}
-  Sen->Sim->apply_soc(soc_in, Sen->Tb_filt);
-  Mon->apply_soc(soc_in, Sen->Tb_filt);
-  if ( rp.debug==-1){ Serial.printf("S/M.a_s:"); debug_m1(Mon, Sen);}
+  // if ( rp.debug==-1 ){ Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("S.c:"); debug_m1(Mon, Sen);}
+  // Sen->Sim->apply_soc(soc_in, Sen->Tb_filt);
+  // Mon->apply_soc(soc_in, Sen->Tb_filt);
+  Sen->Sim->apply_soc(Sen->Sim->soc(), Sen->Tb_filt);
+  Mon->apply_soc(Sen->Sim->soc(), Sen->Tb_filt);
+  // if ( rp.debug==-1){ Serial.printf("S/M.a_s:"); debug_m1(Mon, Sen);}
   Mon->init_battery(true, Sen);
-  if ( rp.debug==-1){ Serial.printf("M.i_b:"); debug_m1(Mon, Sen);}
+  // if ( rp.debug==-1){ Serial.printf("M.i_b:"); debug_m1(Mon, Sen);}
   Sen->temp_load_and_filter(Sen, true, rp.t_last_model);
   Mon->calculate(Sen, true);
   Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), Sen->sclr_coul_eff, 0.);
   Mon->calculate(Sen, true);  // Call again because sat is a UBC
   Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), Sen->sclr_coul_eff, 0.);
-  if ( rp.debug==-1){ Serial.printf("to solv: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); debug_m1(Mon, Sen);}
+  // if ( rp.debug==-1){ Serial.printf("to solv: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); debug_m1(Mon, Sen);}
   Mon->solve_ekf(true, true, Sen);
-}
-
-// Monitor initializes EKF.  Works perfectly in model
-void initialize_simple(const float soc_in, BatteryMonitor *Mon, Sensors *Sen)
-{
-  Mon->apply_soc(soc_in, Sen->Tb_filt);
-  Sen->Sim->apply_delta_q_t(Mon->delta_q(), Sen->Tb_filt);
-  Mon->init_soc_ekf(Mon->soc());
 }
 
 // Load all others
@@ -401,6 +394,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
    
 
   // Sim initialize as needed from memory
+  if ( reset_temp ) initialize_all(Mon, Sen, 0., false);
   Sen->Sim->apply_delta_q_t(reset);
   Sen->Sim->init_battery(reset, Sen);
 

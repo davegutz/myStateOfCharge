@@ -100,15 +100,15 @@ void Tweak::adjust(unsigned long now, const double q_capacity)
 void Tweak::pretty_print(void)
 {
     Serial.printf("Tweak(%s)::\n", name_.c_str());
-    // Serial.printf("  max_change%7.3f; 'N/MC'\n", max_change_);
-    // Serial.printf("  max_tweak%7.3f;  'N/Mx'\n", max_tweak_);
-    // Serial.printf("  rp_delta_q_cinf%10.1f; 'N/Mi', Coulombs\n", *rp_delta_q_cinf_);
-    // Serial.printf("  rp_delta_q_dinf%10.1f; 'N/Mi', Coulombs\n", *rp_delta_q_dinf_);
-    // Serial.printf("  sat %d; T=sat\n", sat_);
-    // Serial.printf("  delta_hrs%10.6f; 'N/Mz', hr\n", double(millis()-time_sat_past_)/3600000.);
-    // Serial.printf("  time_to_wait%10.6f; 'N/Mw', hr\n", time_to_wait_);
-    // Serial.printf("  tweak_sclr%7.3f; 'N/Mk'\n", *rp_tweak_sclr_);
-    // Serial.printf("  coul_eff%9.5f;\n", coul_eff_);
+    Serial.printf("  max_change%7.3f; 'N/MC'\n", max_change_);
+    Serial.printf("  max_tweak%7.3f;  'N/Mx'\n", max_tweak_);
+    Serial.printf("  rp_delta_q_cinf%10.1f; 'N/Mi', Coulombs\n", *rp_delta_q_cinf_);
+    Serial.printf("  rp_delta_q_dinf%10.1f; 'N/Mi', Coulombs\n", *rp_delta_q_dinf_);
+    Serial.printf("  sat %d; T=sat\n", sat_);
+    Serial.printf("  delta_hrs%10.6f; 'N/Mz', hr\n", double(millis()-time_sat_past_)/3600000.);
+    Serial.printf("  time_to_wait%10.6f; 'N/Mw', hr\n", time_to_wait_);
+    Serial.printf("  tweak_sclr%7.3f; 'N/Mk'\n", *rp_tweak_sclr_);
+    Serial.printf("  coul_eff%9.5f;\n", coul_eff_);
 }
 
 // reset:  Reset on call.   Reset all indicators and states to boot status.
