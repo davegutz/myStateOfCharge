@@ -264,7 +264,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   // if ( rp.debug==-1) { Serial.printf("end:"); debug_m1(Mon, Sen);}
                   // if ( rp.debug==-1) { Serial.printf("\n\ntop soc:"); debug_m1(Mon, Sen);}
                   initialize_all(Mon, Sen, FP_in, true);
-                  // if ( rp.debug==-1) { Serial.printf("end:"); debug_m1(Mon, Sen);}
+                  debug_m1(Mon, Sen);
                   // debug_m1(Mon, Sen);
                   if ( rp.modeling )
                   {

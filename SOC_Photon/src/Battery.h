@@ -35,7 +35,7 @@
 class Sensors;
 #define t_float float
 
-#define RATED_TEMP      20.       // Temperature at RATED_BATT_CAP, deg C (25)  TODO:  restore this to 25
+#define RATED_TEMP      25.       // Temperature at RATED_BATT_CAP, deg C (25)
 #define TCHARGE_DISPLAY_DEADBAND  0.1 // Inside this +/- deadband, charge time is displayed '---', A
 #define T_RLIM          0.017     // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s (0.017 allows 1 deg for 1 minute)
 const float vb_dc_dc = 13.5;      // DC-DC charger estimated voltage, V (13.5 < v_sat = 13.85)
