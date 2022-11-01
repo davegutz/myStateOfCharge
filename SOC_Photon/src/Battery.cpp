@@ -123,6 +123,7 @@ void Battery::pretty_print(void)
     Serial.printf("  temp_c=%7.3f; dg C\n", temp_c_);
     Serial.printf(" *rp_delt_q=%10.1f;  C\n", *rp_delta_q_);
     Serial.printf(" *rp_t_last=%10.1f; dg C\n", *rp_t_last_);
+    Serial.printf("  soc=%8.4f;\n", soc_);
     Serial.printf("  dvoc_dt=%10.6f; V/dg C\n", chem_.dvoc_dt);
     Serial.printf("  r_0=%10.6f;  ohm\n", chem_.r_0);
     Serial.printf("  r_ct = %10.6f;  ohm\n", chem_.r_ct);
@@ -312,7 +313,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
 
     // Hysteresis model
     hys_->calculate(ib_, soc_);
-    dv_hys_ = hys_->update(dt_, sat_, bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR), Sen->Flt->e_wrap());
+    dv_hys_ = hys_->update(dt_, sat_, bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR), Sen->Flt->e_wrap(), reset_temp);
     voc_stat_ = voc_ - dv_hys_;
     ioc_ = hys_->ioc();
 
@@ -486,27 +487,34 @@ void BatteryMonitor::regauge(const float temp_c)
     OUTPUTS:
         Mon->soc_ekf
 */
-boolean BatteryMonitor::solve_ekf(const boolean reset_temp, Sensors *Sen)
+boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp, Sensors *Sen)
 {
     // Average dynamic inputs through the initialization period before apply EKF
     static float Tb_avg = Sen->Tb_filt;
     static float Vb_avg = Sen->Vb;
     static float Ib_avg = Sen->Ib;
     static uint16_t n_avg = 0;
-    if ( !reset_temp )
+    if ( reset )
+    {
+        Tb_avg = Sen->Tb_filt;
+        Vb_avg = Sen->Vb;
+        Ib_avg = Sen->Ib;
+        n_avg = 0;
+    }
+    if ( reset_temp )  // The idea is to average the noisey inputs that happen over reset_temp time period
+    {
+        n_avg++;
+        Tb_avg = (Tb_avg*float(n_avg-1) + Sen->Tb_filt) / float(n_avg);
+        Vb_avg = (Vb_avg*float(n_avg-1) + Sen->Vb) / float(n_avg);
+        Ib_avg = (Ib_avg*float(n_avg-1) + Sen->Ib) / float(n_avg);
+    }
+    else  // remember inputs in avg and return
     {
         Tb_avg = Sen->Tb_filt;
         Vb_avg = Sen->Vb;
         Ib_avg = Sen->Ib;
         n_avg = 0;
         return ( true );
-    }
-    else
-    {
-        n_avg++;
-        Tb_avg = (Tb_avg*float(n_avg-1) + Sen->Tb_filt) / float(n_avg);
-        Vb_avg = (Vb_avg*float(n_avg-1) + Sen->Vb) / float(n_avg);
-        Ib_avg = (Ib_avg*float(n_avg-1) + Sen->Ib) / float(n_avg);
     }
 
     // Solver, steady
@@ -526,7 +534,7 @@ boolean BatteryMonitor::solve_ekf(const boolean reset_temp, Sensors *Sen)
         err = voc - voc_solved;
     }
     init_soc_ekf(soc_solved);
-    if ( rp.debug==-1) Serial.printf("sol_ek: Vb%7.3f Vba%7.3f voc%7.3f voc_sol%7.3f cnt %d soc_sol%8.4f\n",
+    if ( rp.debug==-1 && reset_temp) Serial.printf("sol_ek: Vb%7.3f Vba%7.3f voc%7.3f voc_sol%7.3f cnt %d soc_sol%8.4f\n",
         Sen->Vb, Vb_avg, voc, voc_solved, count, soc_solved);    
     // if ( rp.debug==7 )
     //         Serial.printf("solve    :n_avg, Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %d, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
@@ -596,6 +604,8 @@ void BatterySim::assign_randles(void)
 //    Sen->Ib_model_in  Battery bank current input to model, A
 //    ib_fut_(past)     Past future value of limited current, A
 //    Sen->T            Update time, sec
+//    sat
+//    bms_off
 //
 //  States:
 //    soc_              State of Charge, fraction
@@ -648,7 +658,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
 
     // Hysteresis model
     hys_->calculate(ib_in_, soc_);
-    dv_hys_ = hys_->update(dt_, sat_, bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR), 0.0);
+    dv_hys_ = hys_->update(dt_, sat_, bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR), 0.0, reset);
     voc_ = voc_stat_ + dv_hys_;
     ioc_ = hys_->ioc();
 
@@ -857,8 +867,8 @@ void BatterySim::pretty_print(void)
     Serial.printf("  sat_ib_max%7.3f, A\n", sat_ib_max_);
     Serial.printf("  sat_ib_null%7.3f, A\n", sat_ib_null_);
     Serial.printf("  sat_cb_gn%7.1f\n", sat_cutback_gain_);
-    Serial.printf("  mod_cb%d\n", model_cutback_);
-    Serial.printf("  mod_sat%d\n", model_saturated_);
+    Serial.printf("  mod_cb %d\n", model_cutback_);
+    Serial.printf("  mod_sat %d\n", model_saturated_);
     Serial.printf("  ib%7.3f, A\n", ib_);
     Serial.printf("  ib_in%7.3f, A\n", ib_in_);
     Serial.printf("  ib_fut%7.3f, A\n", ib_fut_);
@@ -947,20 +957,24 @@ void Hysteresis::pretty_print()
 }
 
 // Dynamic update  // TODO:  change sign of e_wrap everywhere
-double Hysteresis::update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap)
+double Hysteresis::update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap, const boolean reset)
 {
     float dv_max = hys_Tx_->interp(soc_);
     float dv_min = hys_Tn_->interp(soc_);
 
-    if ( init_low )
-    {
-        dv_hys_ = max(HYS_DV_MIN, -e_wrap); // TODO:  hys init values
-        dv_dot_ = 0.;
-    }
     if ( init_high )
     {
         dv_hys_ = -HYS_DV_MIN; // TODO:  hys init values
         dv_dot_ = 0.;
+    }
+    else if ( init_low )
+    {
+        dv_hys_ = max(HYS_DV_MIN, -e_wrap); // TODO:  hys init values
+        dv_dot_ = 0.;
+    }
+    else if ( reset )
+    {
+        dv_hys_ = dv_dot_ = 0.;
     }
 
     // Normal ODE integration

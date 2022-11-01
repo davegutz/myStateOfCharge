@@ -35,7 +35,7 @@
 class Sensors;
 #define t_float float
 
-#define RATED_TEMP      25.       // Temperature at RATED_BATT_CAP, deg C
+#define RATED_TEMP      20.       // Temperature at RATED_BATT_CAP, deg C (25)  TODO:  restore this to 25
 #define TCHARGE_DISPLAY_DEADBAND  0.1 // Inside this +/- deadband, charge time is displayed '---', A
 #define T_RLIM          0.017     // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s (0.017 allows 1 deg for 1 minute)
 const float vb_dc_dc = 13.5;      // DC-DC charger estimated voltage, V (13.5 < v_sat = 13.85)
@@ -167,7 +167,7 @@ public:
   void init(const double dv_init);
   double look_hys(const double dv, const double soc);
   void pretty_print();
-  double update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap);
+  double update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap, const boolean reset);
   double ioc() { return ioc_; };
   double dv_hys() { return dv_hys_; };
   void dv_hys(const float st) { dv_hys_ = max(min(st, dv_max(soc_)), dv_min(soc_)); };
@@ -305,7 +305,7 @@ public:
   float r_sd () { return chem_.r_sd; };
   float r_ss () { return chem_.r_ss; };
   double soc_ekf() { return soc_ekf_; };
-  boolean solve_ekf(const boolean reset, Sensors *Sen);
+  boolean solve_ekf(const boolean reset, const boolean reset_temp, Sensors *Sen);
   double tcharge() { return tcharge_; };
   double dv_dyn() { return dv_dyn_; };
   double dV_dyn() { return dv_dyn_*(*rp_nS_); };
