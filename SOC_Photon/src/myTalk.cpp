@@ -259,11 +259,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 FP_in = cp.input_string.substring(2).toFloat();
                 if ( FP_in<1.1 )  // Apply crude limit to prevent user error
                 {
-                  debug_m1(Mon, Sen);
+                  if ( rp.debug==-1) { Serial.printf("top:"); debug_m1(Mon, Sen);}
                   initialize_all(FP_in, Mon, Sen);
-                  debug_m1(Mon, Sen);
-                  initialize_simple(FP_in, Mon, Sen);
-                  debug_m1(Mon, Sen);
+                  if ( rp.debug==-1) { Serial.printf("end:"); debug_m1(Mon, Sen);}
+                  // initialize_simple(FP_in, Mon, Sen);
+                  // debug_m1(Mon, Sen);
                   if ( rp.modeling )
                   {
                     cp.cmd_reset();

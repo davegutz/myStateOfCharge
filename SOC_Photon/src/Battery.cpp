@@ -126,9 +126,9 @@ void Battery::pretty_print(void)
     Serial.printf("  dvoc_dt=%10.6f; V/dg C\n", chem_.dvoc_dt);
     Serial.printf("  r_0=%10.6f;  ohm\n", chem_.r_0);
     Serial.printf("  r_ct = %10.6f;  ohm\n", chem_.r_ct);
-    Serial.printf("  tau_ct=%10.6f;  s (=1/Rct/Cct)\n", chem_.tau_ct);
+    Serial.printf("  tau_ct=%10.6f;  s (=1/R/C)\n", chem_.tau_ct);
     Serial.printf("  r_diff=%10.6f;  ohm\n", chem_.r_diff);
-    Serial.printf("  tau_diff =%10.6f;  s (=1/Rdif/Cdif)\n", chem_.tau_diff);
+    Serial.printf("  tau_diff =%10.6f;  s (=1/R/C)\n", chem_.tau_diff);
     Serial.printf("  r_sd = %10.6f;  ohm\n", chem_.r_sd);
     Serial.printf("  tau_sd=%9.3g;  s\n", chem_.tau_sd);
     Serial.printf("  c_sd=%9.3g;  farad\n", chem_.c_sd);
@@ -145,15 +145,15 @@ void Battery::pretty_print(void)
     Serial.printf("  dv_hys=%7.3f; V\n", hys_->dv_hys());
     Serial.printf("  sr=%7.3f; sclr\n", sr_);
     Serial.printf("  dt=%7.3f; s\n", dt_);
-    Serial.printf(" *rp_nP=%5.2f; P bk, as in '2P1S'\n", *rp_nP_);
-    Serial.printf(" *rp_nS=%5.2f; S bk, as in '2P1S'\n", *rp_nS_);
+    Serial.printf(" *rp_nP=%5.2f; P bk, eg '2P1S'\n", *rp_nP_);
+    Serial.printf(" *rp_nS=%5.2f; S bk, eg '2P1S'\n", *rp_nS_);
 }
 
 // Print State Space
 void Battery::pretty_print_ss(void)
 {
     Randles_->pretty_print();
-    Serial.printf("  ::"); hys_->pretty_print();
+    Serial.printf("::"); hys_->pretty_print();
 }
 
 // EKF model for update
@@ -452,20 +452,20 @@ void BatteryMonitor::pretty_print(Sensors *Sen)
     Serial.printf("BM::");
     this->Battery::pretty_print();
     Serial.printf(" BM::BM:\n");
-    Serial.printf("  ah_rem_ekf_=%7.3f; A-h\n", amp_hrs_remaining_ekf_);
-    Serial.printf("  ah_rem_soc_=%7.3f; A-h\n", amp_hrs_remaining_soc_);
-    Serial.printf("  EKF_conv=%d;\n", converged_ekf());
-    Serial.printf("  q_ekf=%10.1f; C\n", q_ekf_);
-    Serial.printf("  soc_ekf=%8.4f; frac\n", soc_ekf_);
-    Serial.printf("  tcharge=%5.1f; hr\n", tcharge_);
-    Serial.printf("  tcharge_ekf=%5.1f; hr\n", tcharge_ekf_);
-    Serial.printf("  voc_filt=%7.3f; V\n", voc_filt_);
-    Serial.printf("  voc_stat=%7.3f; V\n", voc_stat_);
-    Serial.printf("  voc_soc=%7.3f; V\n", voc_soc_);
-    Serial.printf("  dv_hys=%7.3f; V\n", hys_->dv_hys());
-    Serial.printf("  e_wrap=%7.3f; V\n", Sen->Flt->e_wrap());
-    Serial.printf("  dv_hys_sim=%7.3f; V\n", Sen->Sim->hys_state());
-    Serial.printf("  y_filt=%7.3f; Res EKF, V\n", y_filt_);
+    Serial.printf("  ah_ekf_%7.3f; A-h\n", amp_hrs_remaining_ekf_);
+    Serial.printf("  ah_soc_%7.3f; A-h\n", amp_hrs_remaining_soc_);
+    Serial.printf("  EKF_conv %d;\n", converged_ekf());
+    Serial.printf("  q_ekf%10.1f; C\n", q_ekf_);
+    Serial.printf("  soc_ekf%8.4f; frac\n", soc_ekf_);
+    Serial.printf("  tc%5.1f; hr\n", tcharge_);
+    Serial.printf("  tc_ekf%5.1f; hr\n", tcharge_ekf_);
+    Serial.printf("  voc_filt%7.3f; V\n", voc_filt_);
+    Serial.printf("  voc_stat%7.3f; V\n", voc_stat_);
+    Serial.printf("  voc_soc%7.3f; V\n", voc_soc_);
+    Serial.printf("  dv_hys%7.3f; V\n", hys_->dv_hys());
+    Serial.printf("  e_wrap%7.3f; V\n", Sen->Flt->e_wrap());
+    Serial.printf("  dv_hys_sim%7.3f; V\n", Sen->Sim->hys_state());
+    Serial.printf("  y_filt%7.3f; Res EKF, V\n", y_filt_);
 }
 
 // Reset Coulomb Counter to EKF under restricted conditions especially new boot no history of saturation
@@ -526,6 +526,7 @@ boolean BatteryMonitor::solve_ekf(const boolean reset_temp, Sensors *Sen)
         err = voc - voc_solved;
     }
     init_soc_ekf(soc_solved);
+    if ( rp.debug==-1) Serial.printf("sol_ek: voc%7.3f voc_sol%7.3f cnt %d\n", voc, voc_solved, count);    
     // if ( rp.debug==7 )
     //         Serial.printf("solve    :n_avg, Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %d, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
     //         n_avg, Tb_avg, Vb_avg, Ib_avg, count, soc_solved, voc, voc_solved, dv_dyn, dv_hys_, err);
@@ -802,7 +803,7 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
     if ( !rp.mod_vb() )  // Real world
     {
         if ( Mon->sat() ) apply_delta_q(Mon->delta_q());
-        else if ( reset_temp_past && !cp.fake_faults ) apply_delta_q(Mon->delta_q_ekf());  // Solution to boot up unsaturated
+        else if ( reset_temp_past && !cp.fake_faults ) apply_delta_q(Mon->delta_q_ekf());  // Solution to boot up unsaturated.  TODO:   delete??
     }
     else if ( model_saturated_ )  // Modeling initializes on reset_temp to Tb=RATED_TEMP
     {
