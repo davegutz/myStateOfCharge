@@ -826,8 +826,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( cp.input_string.charAt(1) )
             {
               case ( 'b' ):  // Rb:  Reset battery states (also hys)
-                Sen->Sim->init_battery(true, Sen);  // Reset sim battery state
-                Mon->init_battery(true, Sen);       // Reset mon battery state
+                Sen->Sim->init_battery_sim(true, Sen);  // Reset sim battery state
+                Mon->init_battery_mon(true, Sen);       // Reset mon battery state
                 break;
 
               case ( 'f' ):  // Rf:  Reset fault Rf

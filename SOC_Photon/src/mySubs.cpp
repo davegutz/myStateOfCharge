@@ -175,24 +175,48 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
   return ( cTime );
 }
 
-// Monitor initializes EKF.  Works perfectly in model
+// Complete initialization of all parameters in Mon and Sim including EKF
+// Force current to be zero because initial condition undefined otherwise with charge integration
 void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const boolean use_soc_in)
 {
-  // if ( rp.debug==-1){ Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);}   // sample debug statement
+  // Sample debug statements
+  // if ( rp.debug==-1){ Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);} 
   // if ( rp.debug==-1 ){ Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("S.c:"); debug_m1(Mon, Sen);}
+
+  // Inputs
+  if ( rp.mod_ib() )
+    Sen->Ib_model_in = rp.inj_bias + rp.ib_bias_all;
+  else
+    Sen->Ib_model_in = Sen->Ib_hdwe;
+
   if ( use_soc_in )
     Mon->apply_soc(soc_in, Sen->Tb_filt);  // saves rp.delta_q and rp.t_last
   Sen->Sim->apply_delta_q_t(Mon->delta_q(), Mon->t_last());  // applies rp.delta_q and rp.t_last
   if ( rp.debug==-1){ Serial.printf("S.a_d_q_t:"); debug_m1(Mon, Sen);}
-  Sen->Sim->init_battery(true, Sen);
+  
+  // Make Sim accurate even if not used
+  Sen->Sim->init_battery_sim(true, Sen);
+  if ( !rp.mod_vb() )
+  {
+    Sen->Sim->apply_soc(Sen->Sim->soc(), Sen->Tb_filt);
+  }
+  // Call calculate twice because sat_ is a used-before-calculated (UBC)
+  // Simple 'call twice' method because sat_ is discrete no analog which would require iteration
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true);
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true);  // Call again because sat is a UBC
-  // not strictly needed for init.  Calculates some things not otherwise calculated for 'all'
+
+  // Call to count_coulombs not strictly needed for init.  Calculates some things not otherwise calculated for 'all'
   Sen->Sim->count_coulombs(Sen, true, Mon);
-  if ( rp.mod_vb() ) Sen->Vb = Sen->Vb_model;
-  else Sen->Vb = Sen->Vb_hdwe;
-  // if ( !rp.mod_vb() )
-  //   Sen->Sim->apply_soc(Sen->Sim->soc(), Sen->Tb_filt);
+
+  // Signal preparations
+  if ( rp.mod_vb() )
+  {
+    Sen->Vb = Sen->Vb_model;
+  }
+  else
+  {
+    Sen->Vb = Sen->Vb_hdwe;
+  }
   if ( rp.mod_vb() )
   {
     Mon->apply_soc(Sen->Sim->soc(), Sen->Tb_filt);
@@ -200,14 +224,19 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   else
     Sen->Sim->apply_soc(Mon->soc(), Sen->Tb_filt);
   if ( rp.debug==-1){ Serial.printf("S/M.a_s:"); debug_m1(Mon, Sen);}
-  Mon->init_battery(true, Sen);
+  Mon->init_battery_mon(true, Sen);
   Sen->temp_load_and_filter(Sen, true, rp.t_last_model);
   if ( rp.debug==-1){ Serial.printf("M.i_b:"); debug_m1(Mon, Sen);}
+
+  // Call calculate/count_coulombs twice because sat_ is a used-before-calculated (UBC)
+  // Simple 'call twice' method because sat_ is discrete no analog which would require iteration
   Mon->calculate(Sen, true);
   Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), Sen->sclr_coul_eff, 0.);
   Mon->calculate(Sen, true);  // Call again because sat is a UBC
   Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), Sen->sclr_coul_eff, 0.);
   if ( rp.debug==-1){ Serial.printf("M.c_c:"); debug_m1(Mon, Sen);}
+
+  // Solve EKF
   Mon->solve_ekf(true, true, Sen);
   if ( rp.debug==-1){ Serial.printf("end:"); debug_m1(Mon, Sen);}
 }
@@ -247,7 +276,7 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
   // Initialize charge state if temperature initial condition changed
   // Needed here in this location to have a value for Sen->Tb_filt
   Mon->apply_delta_q_t(reset_temp);  // From memory
-  Mon->init_battery(reset_temp, Sen);
+  Mon->init_battery_mon(reset_temp, Sen);
   Mon->solve_ekf(reset, reset_temp, Sen);
 
   // EKF - calculates temp_c_, voc_stat_, voc_ as functions of sensed parameters vb & ib (not soc)
@@ -401,7 +430,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   // Sim initialize as needed from memory
   if ( reset_temp ) initialize_all(Mon, Sen, 0., false);
   Sen->Sim->apply_delta_q_t(reset);
-  Sen->Sim->init_battery(reset, Sen);
+  Sen->Sim->init_battery_sim(reset, Sen);
 
   // Sim calculation
   //  Inputs:  Sen->Tb_filt(past), Sen->Ib_model_in

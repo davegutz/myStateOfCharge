@@ -220,7 +220,6 @@ public:
   void hys_scale(const double scale) { hys_->apply_scale(scale); };
   double hys_state() { return hys_->dv_hys(); };
   void hys_state(const double st) { hys_->dv_hys(st); };
-  void init_battery(const boolean reset, Sensors *Sen);
   void init_hys(const double hys) { hys_->init(hys); };
   double ib() { return ib_; };            // Battery terminal current, A
   double Ib() { return ib_*(*rp_nP_); };  // Battery bank current, A
@@ -297,6 +296,7 @@ public:
   double hx() { return hx_; };
   double Hx() { return hx_*(*rp_nS_); };
   double ib_charge() { return ib_charge_; };
+  void init_battery_mon(const boolean reset, Sensors *Sen);
   void init_soc_ekf(const double soc);
   boolean is_sat(const boolean reset);
   double K_ekf() { return K_; };
@@ -353,9 +353,10 @@ public:
   float calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq);
   double count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon);
   double delta_q() { return *rp_delta_q_; };
-  float t_last() { return *rp_t_last_; };
+  void init_battery_sim(const boolean reset, Sensors *Sen);
   void load();
   void pretty_print(void);
+  float t_last() { return *rp_t_last_; };
   boolean cutback() { return model_cutback_; };
   boolean saturated() { return model_saturated_; };
   double voc() { return voc_; };

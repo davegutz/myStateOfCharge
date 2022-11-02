@@ -274,10 +274,10 @@ void Chemistry::pretty_print(void)
   Serial.printf("  r_diff%9.6f, ohm\n", r_diff);
   Serial.printf("  tau_ct%7.3f, s\n", tau_ct);
   Serial.printf("  tau_diff%7.3f, s\n", tau_diff);
-  Serial.printf("  tau_sd%9.3g; EKF. Par disch, s\n", tau_sd);
-  Serial.printf("  c_sd%9.3g; EKF. Par disch, farad\n", c_sd);
-  Serial.printf("  r_sd%7.3f; EKF. Par disch, ohm\n", r_sd);
-  Serial.printf("  r_ss%7.3f; SS init, ohm\n", r_ss);
+  Serial.printf("  tau_sd%9.3g; EKF, s\n", tau_sd);
+  Serial.printf("  c_sd%9.3g; EKK, farad\n", c_sd);
+  Serial.printf("  r_sd%9.6f; EKF, ohm\n", r_sd);
+  Serial.printf("  r_ss%9.6f; SS init, ohm\n", r_ss);
   Serial.printf("  voc(t, soc):\n");
   voc_T_->pretty_print();
   Serial.printf("  soc_min(temp_c):\n");

@@ -46,11 +46,13 @@ StateSpace::StateSpace(double *A, double *B, double *C, double *D, const int8_t 
       double Adet = A_[0]*A_[3] - A_[1]*A_[2];
       double *mAinv_ = new double[n*n];
       AinvB_ = new double[n*n]; // TODO:  n*p?
-      mAinv_[0] = -A_[3] / Adet;
-      mAinv_[1] =  A_[1] / Adet;
-      mAinv_[2] =  A_[2] / Adet;
-      mAinv_[3] = -A_[0] / Adet;
+      mAinv_[0] =  A_[3] / Adet;
+      mAinv_[1] = -A_[1] / Adet;
+      mAinv_[2] = -A_[2] / Adet;
+      mAinv_[3] =  A_[0] / Adet;
       mulmat(mAinv_, B_, AinvB_, n, n, p);  // TODO:  see n*p above
+      // if ( rp.debug==-1 ) Serial.printf("A\n%9.6f %9.6f\n%9.6f %9.6f\n", A_[0], A_[1], A_[2], A_[3]);
+      // if ( rp.debug==-1 ) Serial.printf("AinvB\n%9.6f %9.6f\n%9.6f %9.6f\n", mAinv_[0], mAinv_[1], mAinv_[2], mAinv_[3]);
     }
 
   }
@@ -74,7 +76,7 @@ void StateSpace::calc_x_dot(double *u)
 // Initialize
 void StateSpace::init_state_space(double *u)
 {
-  // Explicit initialization 2x2
+  // Explicit initialization 2x2 (first use)
   for (int i=0; i<p_; i++) u_[i] = u[i];
   if ( n_==2 && p_==2 )
   {
@@ -82,7 +84,7 @@ void StateSpace::init_state_space(double *u)
     for (int i=0; i<n_; i++) x_[i] = -x_[i];
     calc_x_dot(u_);
   }
-  else  // All zero
+  else  // All zero.  (need more time)
   {
     for ( int i=0; i<n_; i++ )
     {

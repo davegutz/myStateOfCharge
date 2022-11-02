@@ -99,23 +99,6 @@ double_t Battery::calc_vsat(void)
     return ( nom_vsat_ + (temp_c_-25.)*chem_.dvoc_dt );
 }
 
-// Initialize
-// Works in 12 V batteryunits.   Scales up/down to number of series/parallel batteries on output/input.
-void Battery::init_battery(const boolean reset, Sensors *Sen)
-{
-    if ( !reset ) return;
-    vb_ = Sen->Vb / (*rp_nS_);
-    ib_ = Sen->Ib / (*rp_nP_);
-    ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
-    if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
-    if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
-    double u[2] = {ib_, vb_};
-    // if ( rp.debug==8 || rp.debug==7 ) Serial.printf("init_battery: Randles to %7.3f, %7.3f\n", ib_, vb_);
-    Randles_->init_state_space(u);
-    // if ( rp.debug==8 || rp.debug==7 ) Randles_->pretty_print();
-    init_hys(0.0);
-}
-
 // Print
 void Battery::pretty_print(void)
 {
@@ -421,6 +404,27 @@ void BatteryMonitor::ekf_update(double *hx, double *H)
 
     // Jacodian of measurement function
     *H = dv_dsoc_;
+}
+
+// Initialize
+// Works in 12 V batteryunits.   Scales up/down to number of series/parallel batteries on output/input.
+void BatteryMonitor::init_battery_mon(const boolean reset, Sensors *Sen)
+{
+    if ( !reset ) return;
+    vb_ = Sen->Vb / (*rp_nS_);
+    ib_ = Sen->Ib / (*rp_nP_);
+    ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
+    if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
+    if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
+    double u[2] = {ib_, vb_};
+    Randles_->init_state_space(u);
+    voc_ = Randles_->y(0);
+    if ( rp.debug==-1 )
+    {
+        Serial.printf("mon: ib%7.3f vb%7.3f voc%7.3f\n", ib_, vb_, voc_);
+        Randles_->pretty_print();
+    }
+    init_hys(0.0);
 }
 
 // Init EKF
@@ -850,6 +854,29 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
     // Save and return
     *rp_t_last_ = temp_lim;
     return ( soc_ );
+}
+
+// Initialize
+// Works in 12 V batteryunits.   Scales up/down to number of series/parallel batteries on output/input.
+void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
+{
+    if ( !reset ) return;
+    ib_ = Sen->Ib_model_in / (*rp_nP_);
+    ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
+    vb_ = Sen->Vb / (*rp_nS_);
+    voc_ = vb_ - ib_ * chem_.r_ss;
+    if ( isnan(voc_) ) voc_ = 13.;    // reset overflow
+    if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
+    double u[2] = {ib_, voc_};
+    Randles_->init_state_space(u);
+    vb_ = Randles_->y(0);
+    ib_fut_ = ib_;
+    if ( rp.debug==-1 )
+    {
+        Serial.printf("sim: ib%7.3f voc%7.3f vb%7.3f\n", ib_, voc_, vb_);
+        Randles_->pretty_print();
+    }
+    init_hys(0.0);
 }
 
 // Load states from retained memory
