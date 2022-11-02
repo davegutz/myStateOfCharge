@@ -419,12 +419,12 @@ void BatteryMonitor::init_battery_mon(const boolean reset, Sensors *Sen)
     double u[2] = {ib_, vb_};
     Randles_->init_state_space(u);
     voc_ = Randles_->y(0);
-    if ( rp.debug==-1 )
-    {
-        Serial.printf("mon: ib%7.3f vb%7.3f voc%7.3f\n", ib_, vb_, voc_);
-        Randles_->pretty_print();
-    }
     init_hys(0.0);
+    // if ( rp.debug==-1 )
+    // {
+    //     Serial.printf("mon: ib%7.3f vb%7.3f voc%7.3f\n", ib_, vb_, voc_);
+    //     Randles_->pretty_print();
+    // }
 }
 
 // Init EKF
@@ -523,23 +523,25 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
 
     // Solver, steady
     const double meps = 1-1e-6;
-    double vb = Vb_avg/(*rp_nS_);
-    double dv_dyn = Ib_avg/(*rp_nP_)*chem_.r_ss;
-    double voc =  vb - dv_dyn;
+    // double vb = Vb_avg/(*rp_nS_);
+    // double dv_dyn = Ib_avg/(*rp_nP_)*chem_.r_ss;
+    // double voc =  vb - dv_dyn;
     int8_t count = 0;
     static double soc_solved = 1.0;
     double dv_dsoc;
     double voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
-    double err = voc - voc_solved;
+    // double err = voc - voc_solved;
+    double err = voc_stat_ - voc_solved;
     while( abs(err)>SOLV_ERR && count++<SOLV_MAX_COUNTS )
     {
         soc_solved = max(min(soc_solved + max(min( err/dv_dsoc, SOLV_MAX_STEP), -SOLV_MAX_STEP), meps), 1e-6);
         voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
-        err = voc - voc_solved;
+        // err = voc - voc_solved;
+        err = voc_stat_ - voc_solved;
     }
     init_soc_ekf(soc_solved);
     if ( rp.debug==-1 && reset_temp) Serial.printf("sol_ek: Vb%7.3f Vba%7.3f voc%7.3f voc_sol%7.3f cnt %d soc_sol%8.4f\n",
-        Sen->Vb, Vb_avg, voc, voc_solved, count, soc_solved);    
+        Sen->Vb, Vb_avg, voc_stat_, voc_solved, count, soc_solved);    
     // if ( rp.debug==7 )
     //         Serial.printf("solve    :n_avg, Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %d, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
     //         n_avg, Tb_avg, Vb_avg, Ib_avg, count, soc_solved, voc, voc_solved, dv_dyn, dv_hys_, err);
@@ -871,12 +873,12 @@ void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
     Randles_->init_state_space(u);
     vb_ = Randles_->y(0);
     ib_fut_ = ib_;
-    if ( rp.debug==-1 )
-    {
-        Serial.printf("sim: ib%7.3f voc%7.3f vb%7.3f\n", ib_, voc_, vb_);
-        Randles_->pretty_print();
-    }
     init_hys(0.0);
+    // if ( rp.debug==-1 )
+    // {
+    //     Serial.printf("sim: ib%7.3f voc%7.3f vb%7.3f\n", ib_, voc_, vb_);
+    //     Randles_->pretty_print();
+    // }
 }
 
 // Load states from retained memory
@@ -1001,7 +1003,17 @@ double Hysteresis::update(const double dt, const boolean init_high, const boolea
     }
     else if ( reset )
     {
-        dv_hys_ = dv_dot_ = 0.;
+        ioc_ = ib_;
+        dv_dot_ = 0.;
+        int count = 0;
+        float dv_hys_past = 1e5;
+        while ( ++count<HYS_INIT_COUNTS && abs(dv_hys_past-dv_hys_)>HYS_INIT_TOL)
+        {
+            dv_hys_past = dv_hys_;
+            dv_hys_ = ioc_ * res_;
+            res_ = look_hys(dv_hys_, soc_);
+            if ( rp.debug==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
+        }
     }
 
     // Normal ODE integration
