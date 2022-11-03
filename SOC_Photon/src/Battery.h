@@ -355,6 +355,7 @@ public:
   float calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq);
   double count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon);
   double delta_q() { return *rp_delta_q_; };
+  float ib_fut() { return ib_fut_; };
   void init_battery_sim(const boolean reset, Sensors *Sen);
   void load();
   void pretty_print(void);

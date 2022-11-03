@@ -356,7 +356,7 @@ void loop()
   {
     chat();         // Work on internal chit-chat
   }
-  talk(Mon, Sen); // Work on user inputs
+  talk(Mon, Sen);   // Collect user inputs
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)

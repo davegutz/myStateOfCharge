@@ -128,8 +128,8 @@ no amp delta_q_cinf = %10.1f,\nno amp delta_q_dinf = %10.1f,\nno amp tweak_sclr 
 // Various parameters to debug initialization stuff as needed
 void debug_m1(BatteryMonitor *Mon, Sensors *Sen)
 {
-  Serial.printf("mod %d fake_f %d reset_temp %d Ib%7.3f\nTb_s%6.2f Tl%6.2f soc_s%8.4f dq_s%10.1f\nTb  %6.2f Tl%6.2f soc  %8.4f dq  %10.1f soc_ekf%8.4f dq_ekf%10.1f\n",
-      rp.modeling, cp.fake_faults, Sen->reset_temp(), Sen->Ib,
-      Sen->Sim->Tb(), rp.t_last_model, Sen->Sim->soc(), Sen->Sim->delta_q(),
-      Mon->Tb(), rp.t_last, Mon->soc(), Mon->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf());
+  Serial.printf("mod %d fake_f %d reset_temp %d Tb%7.3f Tb_f%7.3f Vb%7.3f Ib%7.3f\nTb_s%6.2f Tl%6.2f ib_s%7.3f soc_s%8.4f dq_s%10.1f\nTb  %6.2f Tl%6.2f ib%7.3f soc  %8.4f dq  %10.1f soc_ekf%8.4f dq_ekf%10.1f\n",
+      rp.modeling, cp.fake_faults, Sen->reset_temp(), Sen->Tb, Sen->Tb_filt, Sen->Vb, Sen->Ib,
+      Sen->Sim->Tb(), rp.t_last_model, Sen->Sim->ib(), Sen->Sim->soc(), Sen->Sim->delta_q(),
+      Mon->Tb(), rp.t_last, Mon->ib(), Mon->soc(), Mon->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf());
 }

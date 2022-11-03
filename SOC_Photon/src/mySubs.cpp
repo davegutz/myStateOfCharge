@@ -188,7 +188,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
     Sen->Ib_model_in = rp.inj_bias + rp.ib_bias_all;
   else
     Sen->Ib_model_in = Sen->Ib_hdwe;
-
+  Sen->temp_load_and_filter(Sen, true, rp.t_last_model);
   if ( use_soc_in )
     Mon->apply_soc(soc_in, Sen->Tb_filt);  // saves rp.delta_q and rp.t_last
   Sen->Sim->apply_delta_q_t(Mon->delta_q(), Mon->t_last());  // applies rp.delta_q and rp.t_last
@@ -196,6 +196,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   
   // Make Sim accurate even if not used
   Sen->Sim->init_battery_sim(true, Sen);
+  if ( rp.debug==-1){ Serial.printf("S.i_b:"); debug_m1(Mon, Sen);}
   if ( !rp.mod_vb() )
   {
     Sen->Sim->apply_soc(Sen->Sim->soc(), Sen->Tb_filt);
@@ -204,6 +205,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   // Simple 'call twice' method because sat_ is discrete no analog which would require iteration
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true);
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true);  // Call again because sat is a UBC
+  Sen->Ib_model = Sen->Sim->ib_fut();
 
   // Call to count_coulombs not strictly needed for init.  Calculates some things not otherwise calculated for 'all'
   Sen->Sim->count_coulombs(Sen, true, Mon);
@@ -217,15 +219,20 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   {
     Sen->Vb = Sen->Vb_hdwe;
   }
+  if ( rp.mod_ib() )
+  {
+    Sen->Ib = Sen->Ib_model;
+  }
+  else
+  {
+    Sen->Ib = Sen->Ib_hdwe;
+  }
+  if ( rp.debug==-1){ Serial.printf("SENIB:"); debug_m1(Mon, Sen);}
   if ( rp.mod_vb() )
   {
     Mon->apply_soc(Sen->Sim->soc(), Sen->Tb_filt);
   }
-  else
-    Sen->Sim->apply_soc(Mon->soc(), Sen->Tb_filt);
-  if ( rp.debug==-1){ Serial.printf("S/M.a_s:"); debug_m1(Mon, Sen);}
   Mon->init_battery_mon(true, Sen);
-  Sen->temp_load_and_filter(Sen, true, rp.t_last_model);
   if ( rp.debug==-1){ Serial.printf("M.i_b:"); debug_m1(Mon, Sen);}
 
   // Call calculate/count_coulombs twice because sat_ is a used-before-calculated (UBC)
