@@ -70,6 +70,7 @@ void create_short_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
 double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
 void finish_request(void);
 void get_string(String *source);
+void harvest_temp_change(const float temp_c, BatteryMonitor *Mon, BatterySim *Sim);
 void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const boolean use_soc_in);
 void load_ib_vb(const boolean reset, const unsigned long now, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon);
 void monitor(const boolean reset, const boolean reset_temp, const unsigned long now,

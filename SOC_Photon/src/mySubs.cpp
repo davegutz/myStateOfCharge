@@ -175,6 +175,14 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
   return ( cTime );
 }
 
+void harvest_temp_change(const float temp_c, BatteryMonitor *Mon, BatterySim *Sim)
+{
+  rp.delta_q -= Mon->dqdt() * Mon->q_capacity() * (temp_c - rp.t_last);
+  rp.t_last = temp_c;
+  rp.delta_q_model -= Sim->dqdt() * Sim->q_capacity() * (temp_c - rp.t_last_model);
+  rp.t_last_model = temp_c;
+}
+
 // Complete initialization of all parameters in Mon and Sim including EKF
 // Force current to be zero because initial condition undefined otherwise with charge integration
 void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const boolean use_soc_in)
@@ -184,6 +192,8 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   // if ( rp.debug==-1 ){ Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("S.c:"); debug_m1(Mon, Sen);}
 
   // Inputs
+  if ( rp.debug==-1){ Serial.printf("top:"); debug_m1(Mon, Sen);}
+  harvest_temp_change(Sen->Tb_filt, Mon, Sen->Sim);
   if ( rp.mod_ib() )
     Sen->Ib_model_in = rp.inj_bias + rp.ib_bias_all;
   else

@@ -207,6 +207,7 @@ public:
   double calc_vsat(void);
   virtual double calculate(const float temp_C, const double soc_frac, double curr_in, const double dt, const boolean dc_dc_on);
   String decode(const uint8_t mod);
+  float dqdt() { return chem_.dqdt; };
   void ds_voc_soc(const float _ds) { ds_voc_soc_ = _ds; };
   float ds_voc_soc() { return ds_voc_soc_; };
   void Dv(const double _dv) { chem_.dvoc = _dv; };
