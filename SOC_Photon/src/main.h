@@ -275,7 +275,7 @@ void loop()
   if ( read_temp )
   {
     Sen->T_temp =  ReadTemp->updateTime();
-    Sen->temp_load_and_filter(Sen, reset_temp, T_RLIM);
+    Sen->temp_load_and_filter(Sen, reset_temp);
   }
 
   // Input all other sensors and do high rate calculations

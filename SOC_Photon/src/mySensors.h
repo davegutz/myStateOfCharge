@@ -348,8 +348,7 @@ public:
   void shunt_print();         // Print selection result
   void shunt_scale(void);     // Load scalars into Shunt objects
   void shunt_select_initial();   // Choose between shunts for model
-  void temp_filter(const boolean reset_loc, const float t_rlim);
-  void temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim);
+  void temp_load_and_filter(Sensors *Sen, const boolean reset_temp);
   void vb_load(const byte vb_pin);  // Analog read of Vb
   float Tb_noise();
   float Tb_noise_amp() { return ( Tb_noise_amp_ ); };
@@ -370,8 +369,8 @@ public:
   float Vb_add() { return ( vb_add_ * rp.nS ); };
   Fault *Flt;
 protected:
-  float *rp_tb_bias_hdwe_;   // Location of retained bias, deg C
-  float tb_bias_hdwe_last_;  // Last value of bias for rate limit, deg C
+  float *rp_Tb_bias_hdwe_;   // Location of retained Tb bias, deg C
+  float *rp_Vb_bias_hdwe_;   // Location of retained Vb bias, V
   void choose_(void);   // Deliberate choice based on inputs and results
   PRBS_7 *Prbn_Tb_;     // Tb noise generator model only
   PRBS_7 *Prbn_Vb_;     // Vb noise generator model only

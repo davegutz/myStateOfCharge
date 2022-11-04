@@ -582,7 +582,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *ReadSensors):
-  rp_tb_bias_hdwe_(&rp.tb_bias_hdwe), tb_bias_hdwe_last_(0.), Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE),
+  rp_Tb_bias_hdwe_(&rp.Tb_bias_hdwe), rp_Vb_bias_hdwe_(&rp.Vb_bias_hdwe), Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE),
   Ib_amp_noise_amp_(IB_AMP_NOISE), Ib_noa_noise_amp_(IB_NOA_NOISE), reset_temp_(false)
 {
   this->T = T;
@@ -667,8 +667,8 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
     }
     else
     {
-      Tb = RATED_TEMP + Tb_noise() + cp.tb_bias_model;
-      Tb_filt = RATED_TEMP + cp.tb_bias_model;
+      Tb = RATED_TEMP + Tb_noise() + cp.Tb_bias_model;
+      Tb_filt = RATED_TEMP + cp.Tb_bias_model;
     }
   }
   else
@@ -680,9 +680,8 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
     }
     else
     {
-      Tb = Tb_hdwe + rp.tb_bias_hdwe;
-      Tb_filt = Tb_hdwe_filt + rp.tb_bias_hdwe;
-      if ( rp.debug==-1 ) Serial.printf("Tbh%7.3f Tbhf%7.3f Tb%7.3f Tbf%7.3f\n", Tb_hdwe, Tb_hdwe_filt, Tb, Tb_filt);
+      Tb = Tb_hdwe;
+      Tb_filt = Tb_hdwe_filt;
     }
   }
 
@@ -843,49 +842,41 @@ void Sensors::shunt_select_initial()
         Ib_model_in = Ib_hdwe;
 }
 
-// Filter temp
-void Sensors::temp_filter(const boolean reset_loc, const float t_rlim)
+// Load and filter Tb
+void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp)
 {
-    // Rate limit the temperature bias, 2x so not to interact with rate limits in logic that also use t_rlim
-    if ( reset_loc ) tb_bias_hdwe_last_ = *rp_tb_bias_hdwe_;
-    float tb_bias_hdwe_loc = max(min(*rp_tb_bias_hdwe_,  tb_bias_hdwe_last_ + t_rlim*2.*T_temp),
-                                            tb_bias_hdwe_last_ - t_rlim*2.*T_temp);
-    tb_bias_hdwe_last_ = tb_bias_hdwe_loc;
+  reset_temp_ = reset_temp;
+  Tb_hdwe = SensorTb->load(Sen);
 
-    // Filter and add rate limited bias
-    if ( reset_loc && Tb>40. )  // Bootup T=85.5 C
-    {
-        Tb_hdwe = RATED_TEMP + tb_bias_hdwe_loc;
-        Tb_hdwe_filt = TbSenseFilt->calculate(RATED_TEMP, reset_loc, min(T_temp, F_MAX_T_TEMP)) + tb_bias_hdwe_loc;
-    }
-    else
-    {
-        Tb_hdwe_filt = TbSenseFilt->calculate(Tb_hdwe, reset_loc, min(T_temp, F_MAX_T_TEMP)) + tb_bias_hdwe_loc;
-        Tb_hdwe += tb_bias_hdwe_loc;
-    }
-    if ( rp.debug==16 ) Serial.printf("reset_loc,tb_bias_hdwe_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",
-      reset_loc, tb_bias_hdwe_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt );
-}
+  // Filter and add rate limited bias
+  if ( reset_temp_ && Tb_hdwe>TEMP_RANGE_CHECK_MAX )  // Bootup T=85.5 C
+  {
+      Tb_hdwe = RATED_TEMP;
+      Tb_hdwe_filt = TbSenseFilt->calculate(RATED_TEMP, reset_temp_, min(T_temp, F_MAX_T_TEMP));
+  }
+  else
+  {
+      Tb_hdwe_filt = TbSenseFilt->calculate(Tb_hdwe, reset_temp_, min(T_temp, F_MAX_T_TEMP));
+  }
+  Tb_hdwe += *rp_Tb_bias_hdwe_;
+  Tb_hdwe_filt += *rp_Tb_bias_hdwe_;
 
-// Filter temp
-void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_loc, const float t_rlim)
-{
-    reset_temp(reset_loc);
-    Tb_hdwe = SensorTb->load(Sen);
-    temp_filter(reset_loc, T_RLIM);
-    Flt->tb_stale(reset_loc, Sen);
+  if ( rp.debug==16 ) Serial.printf("reset_temp_,Tb_bias_hdwe_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",
+    reset_temp_, *rp_Tb_bias_hdwe_, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt );
+
+  Flt->tb_stale(reset_temp_, Sen);
 }
 
 // Load analog voltage
 void Sensors::vb_load(const byte vb_pin)
 {
     Vb_raw = analogRead(vb_pin);
-    Vb_hdwe =  float(Vb_raw)*VB_CONV_GAIN*rp.Vb_scale + float(VBATT_A) + rp.Vb_bias;
+    Vb_hdwe =  float(Vb_raw)*VB_CONV_GAIN*rp.Vb_scale + float(VBATT_A) + *rp_Vb_bias_hdwe_;
 }
 
 // Print analog voltage
 // void Sensors::vb_print()
 // {
-//   Serial.printf("reset, T, Vb_raw, rp.Vb_bias, Vb_hdwe, vb_flt(), vb_fa(), wv_fa=, %d, %7.3f, %d, %7.3f,  %7.3f, %d, %d, %d,\n",
-//     reset, T, Vb_raw, rp.Vb_bias, Vb_hdwe, Flt->vb_flt(), Flt->vb_fa(), Flt->wrap_vb_fa());
+//   Serial.printf("reset, T, Vb_raw, rp_Vb_bias_hdwe_, Vb_hdwe, vb_flt(), vb_fa(), wv_fa=, %d, %7.3f, %d, %7.3f,  %7.3f, %d, %d, %d,\n",
+//     reset, T, Vb_raw, *rp_Vb_bias_hdwe_, Vb_hdwe, Flt->vb_flt(), Flt->vb_fa(), Flt->wrap_vb_fa());
 // }

@@ -191,13 +191,23 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   // if ( rp.debug==-1){ Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);} 
   // if ( rp.debug==-1 ){ Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("S.c:"); debug_m1(Mon, Sen);}
 
-  // Inputs
-  harvest_temp_change(Sen->Tb_filt, Mon, Sen->Sim);
+  // Gather and apply inputs
   if ( rp.mod_ib() )
     Sen->Ib_model_in = rp.inj_bias + rp.ib_bias_all;
   else
     Sen->Ib_model_in = Sen->Ib_hdwe;
-  Sen->temp_load_and_filter(Sen, true, rp.t_last_model);
+  Sen->temp_load_and_filter(Sen, true);
+  if ( rp.mod_tb() )
+  {
+    Sen->Tb = Sen->Tb_model;
+    Sen->Tb_filt = Sen->Tb_model_filt;
+  }
+  else
+  {
+    Sen->Tb = Sen->Tb_hdwe;
+    Sen->Tb_filt = Sen->Tb_hdwe_filt;
+  }
+  harvest_temp_change(Sen->Tb_filt, Mon, Sen->Sim);
   if ( use_soc_in )
     Mon->apply_soc(soc_in, Sen->Tb_filt);  // saves rp.delta_q and rp.t_last
   Sen->Sim->apply_delta_q_t(Mon->delta_q(), Mon->t_last());  // applies rp.delta_q and rp.t_last

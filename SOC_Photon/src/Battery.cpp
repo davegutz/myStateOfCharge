@@ -530,17 +530,17 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
     static double soc_solved = 1.0;
     double dv_dsoc;
     double voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
-    // double err = voc - voc_solved;
     double err = voc_stat_ - voc_solved;
     while( abs(err)>SOLV_ERR && count++<SOLV_MAX_COUNTS )
     {
         soc_solved = max(min(soc_solved + max(min( err/dv_dsoc, SOLV_MAX_STEP), -SOLV_MAX_STEP), meps), 1e-6);
         voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
-        // err = voc - voc_solved;
         err = voc_stat_ - voc_solved;
+        if ( rp.debug==-1 && reset_temp) Serial.printf("sol_ek: Vb%7.3f Vba%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d soc_sol%8.4f\n",
+            Sen->Vb, Vb_avg, voc_stat_, voc_solved, count, soc_solved);    
     }
     init_soc_ekf(soc_solved);
-    if ( rp.debug==-1 && reset_temp) Serial.printf("sol_ek: Vb%7.3f Vba%7.3f voc%7.3f voc_sol%7.3f cnt %d soc_sol%8.4f\n",
+    if ( rp.debug==-1 && reset_temp) Serial.printf("sol_ek: Vb%7.3f Vba%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d soc_sol%8.4f\n",
         Sen->Vb, Vb_avg, voc_stat_, voc_solved, count, soc_solved);    
     // if ( rp.debug==7 )
     //         Serial.printf("solve    :n_avg, Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %d, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",

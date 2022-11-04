@@ -55,7 +55,7 @@ struct CommandPars
   boolean publishS;         // Print serial monitor data
   uint8_t print_mult;       // Print multiplier for objects
   unsigned long num_v_print;// Number of print echos made, for checking on BLE
-  float tb_bias_model;      // Bias on Tb for model, C
+  float Tb_bias_model;      // Bias on Tb for model, C
   float s_t_sat;            // Scalar on saturation test time set and reset
   uint8_t eframe_mult;      // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
   boolean fake_faults;      // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
@@ -73,7 +73,7 @@ struct CommandPars
     publishS = false;
     print_mult = 4;
     num_v_print = 0UL;
-    tb_bias_model = 0.;
+    Tb_bias_model = 0.;
     s_t_sat = 1.;
     eframe_mult = 20;
     fake_faults = FAKE_FAULTS;
@@ -109,7 +109,7 @@ struct CommandPars
     Serial.printf(" dc_dc_on=%d;\n", this->dc_dc_on);
     Serial.printf(" publishS=%d;\n", this->publishS);
     Serial.printf(" print_mult=%d;\n", this->print_mult);
-    Serial.printf(" tb_bias_mod=%7.3f;\n", this->tb_bias_model);
+    Serial.printf(" tb_bias_mod=%7.3f;\n", this->Tb_bias_model);
     Serial.printf(" s_t_sat=%7.3f;\n", this->s_t_sat);
     Serial.printf(" eframe_mult=%d;\n", this->eframe_mult);
     Serial.printf(" fake_faults=%d;\n", this->fake_faults);

@@ -49,15 +49,15 @@ struct RetainedPars
   float ib_bias_noa = CURR_BIAS_NOA;      // Calibration adder of non-amplified shunt sensor, A
   float ib_bias_all = CURR_BIAS_ALL;      // Bias on all shunt sensors, A
   int8_t ib_select = FAKE_FAULTS;         // Force current sensor (-1=non-amp, 0=auto, 1=amp)
-  float Vb_bias = VOLT_BIAS;    // Calibrate Vb, V
+  float Vb_bias_hdwe = VOLT_BIAS;         // Calibrate Vb, V
   uint8_t modeling = MODELING;  // Driving saturation calculation with model.  Bits specify which signals use model
   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
   float freq = 0.;              // Injected frequency, Hz (0-2)
   uint8_t type = 0;             // Injected waveform type.   0=sine, 1=square, 2=triangle
   float inj_bias = 0.;          // Constant bias, A
-  float tb_bias_hdwe = TEMP_BIAS;    // Bias on Tb sensor, deg C
-  float s_cap_model = 1.;       // Scalar on battery model size
-  float cutback_gain_scalar = 1.;        // Scalar on battery model saturation cutback function
+  float Tb_bias_hdwe = TEMP_BIAS; // Bias on Tb sensor, deg C
+  float s_cap_model = 1.;         // Scalar on battery model size
+  float cutback_gain_scalar = 1.; // Scalar on battery model saturation cutback function
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
   int isum = -1;                // Summary location.   Begins at -1 because first action is to increment isum
   int iflt = -1;                // Fault snap location.   Begins at -1 because first action is to increment iflt
@@ -103,13 +103,13 @@ struct RetainedPars
     this->ib_bias_noa = CURR_BIAS_NOA;
     this->ib_bias_all = CURR_BIAS_ALL;
     this->ib_select = FAKE_FAULTS;
-    this->Vb_bias = VOLT_BIAS;
+    this->Vb_bias_hdwe = VOLT_BIAS;
     this->modeling = MODELING;
     this->amp = 0.;
     this->freq = 0.;
     this->type = 0;
     this->inj_bias = 0.;
-    this->tb_bias_hdwe = TEMP_BIAS;
+    this->Tb_bias_hdwe = TEMP_BIAS;
     this->s_cap_model = 1.;
     this->cutback_gain_scalar = 1.;
     this->isum = -1;
@@ -166,7 +166,7 @@ struct RetainedPars
       n++;
     if ( FAKE_FAULTS != ib_select )
       n++;
-    if ( float(VOLT_BIAS) != Vb_bias )
+    if ( float(VOLT_BIAS) != Vb_bias_hdwe )
       n++;
     if ( MODELING != modeling )
       n++;
@@ -178,7 +178,7 @@ struct RetainedPars
       n++;
     if ( 0. != inj_bias )
       n++;
-    if ( TEMP_BIAS != tb_bias_hdwe )
+    if ( TEMP_BIAS != Tb_bias_hdwe )
       n++;
     if ( 1. != s_cap_model )
       n++;
@@ -245,8 +245,8 @@ struct RetainedPars
       Serial.printf(" ib_bias_all   %7.3f    %7.3f *Di<> A\n", CURR_BIAS_ALL, ib_bias_all);
     if ( all || FAKE_FAULTS != ib_select )
       Serial.printf(" ib_select           %d          %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select);
-    if ( all || float(VOLT_BIAS) != Vb_bias )
-      Serial.printf(" Vb_bias       %7.3f    %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, Vb_bias);
+    if ( all || float(VOLT_BIAS) != Vb_bias_hdwe )
+      Serial.printf(" Vb_bias_hdwe       %7.3f    %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe);
     if ( all || MODELING != modeling )
       Serial.printf(" modeling            %d          %d *Xm<>\n", MODELING, modeling);
     if ( all || 0. != amp )
@@ -257,8 +257,8 @@ struct RetainedPars
       Serial.printf(" inj typ             %d          %d *Xt<> 1=sin, 2=sq, 3=tri\n", 0, type);
     if ( all || 0. != inj_bias )
       Serial.printf(" inj_bias      %7.3f    %7.3f *Xb<> A\n", 0., inj_bias);
-    if ( all || TEMP_BIAS != tb_bias_hdwe )
-      Serial.printf(" tb_bias_hdwe  %7.3f    %7.3f *Dt<> dg C\n", TEMP_BIAS, tb_bias_hdwe);
+    if ( all || TEMP_BIAS != Tb_bias_hdwe )
+      Serial.printf(" Tb_bias_hdwe  %7.3f    %7.3f *Dt<> dg C\n", TEMP_BIAS, Tb_bias_hdwe);
     if ( all || 1. != s_cap_model )
       Serial.printf(" s_cap_model   %7.3f    %7.3f *Sc<>\n", 1., s_cap_model);
     if ( all || 1. != cutback_gain_scalar )

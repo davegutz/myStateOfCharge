@@ -310,9 +310,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'c' ):  // * Dc<>:  Vb bias
-                Serial.printf("rp.Vb_bias%7.3f to", rp.Vb_bias);
-                rp.Vb_bias = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.Vb_bias);
+                Serial.printf("rp.Vb_bias_hdwe%7.3f to", rp.Vb_bias_hdwe);
+                rp.Vb_bias_hdwe = cp.input_string.substring(2).toFloat();
+                Serial.printf("%7.3f\n", rp.Vb_bias_hdwe);
                 break;
 
               case ( 'E' ):  //   DE<>:  EKF execution frame multiplier
@@ -352,16 +352,16 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 't' ):  // * Dt<>:  Temp bias change hardware
-                Serial.printf("rp.tb_bias_hdwe%7.3f to", rp.tb_bias_hdwe);
-                rp.tb_bias_hdwe = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\nreset\n", rp.tb_bias_hdwe);
+                Serial.printf("rp.Tb_bias_hdwe%7.3f to", rp.Tb_bias_hdwe);
+                rp.Tb_bias_hdwe = cp.input_string.substring(2).toFloat();
+                Serial.printf("%7.3f\nreset\n", rp.Tb_bias_hdwe);
                 cp.cmd_reset();
                 break;
 
               case ( '^' ):  // * D^<>:  Temp bias change model
-                Serial.printf("rp.tb_bias_model%7.3f to", cp.tb_bias_model);
-                cp.tb_bias_model = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\nreset\n", cp.tb_bias_model);
+                Serial.printf("rp.Tb_bias_model%7.3f to", cp.Tb_bias_model);
+                cp.Tb_bias_model = cp.input_string.substring(2).toFloat();
+                Serial.printf("%7.3f\nreset\n", cp.Tb_bias_model);
                 cp.cmd_reset();
                 break;
 
@@ -809,8 +809,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'v' ):  // Pv:  Print Vb measure
-                Serial.printf("\nVolt:");   Serial.printf("Vb_bias,Vb_m,mod,Vb=,%7.3f,%7.3f,%d,%7.3f,\n", 
-                  rp.Vb_bias, Sen->Vb_model, rp.modeling, Sen->Vb);
+                Serial.printf("\nVolt:");   Serial.printf("Vb_bias_hdwe,Vb_m,mod,Vb=,%7.3f,%7.3f,%d,%7.3f,\n", 
+                  rp.Vb_bias_hdwe, Sen->Vb_model, rp.modeling, Sen->Vb);
                 break;
 
               default:
@@ -1294,15 +1294,15 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" *DA= "); Serial.printf("%6.3f", rp.ib_bias_amp); Serial.printf(": delta amp, A [%6.3f]\n", CURR_BIAS_AMP); 
   Serial.printf(" *DB= "); Serial.printf("%6.3f", rp.ib_bias_noa); Serial.printf(": delta noa, A [%6.3f]\n", CURR_BIAS_NOA); 
   Serial.printf(" *Di= "); Serial.printf("%6.3f", rp.ib_bias_all); Serial.printf(": delta all, A [%6.3f]\n", CURR_BIAS_ALL); 
-  Serial.printf(" *Dc= "); Serial.printf("%6.3f", rp.Vb_bias); Serial.printf(": delta, V [%6.3f]\n", VOLT_BIAS); 
+  Serial.printf(" *Dc= "); Serial.printf("%6.3f", rp.Vb_bias_hdwe); Serial.printf(": delta, V [%6.3f]\n", VOLT_BIAS); 
   Serial.printf("  DE= "); Serial.printf("%d", cp.eframe_mult); Serial.printf(": eframe mult Dr [20]\n"); 
   Serial.printf("  Du=  "); Serial.print(Sen->Sim->coul_eff()); Serial.println(": coul eff"); 
   Serial.printf("  Dm= "); Serial.printf("%6.3f", Sen->ShuntAmp->add()); Serial.printf(": delta amp inj, A [0]\n"); 
   Serial.printf("  Dn= "); Serial.printf("%6.3f", Sen->ShuntNoAmp->add()); Serial.printf(": delta noa inj, A [0]\n"); 
   Serial.printf("  DP=  "); Serial.print(cp.print_mult); Serial.println(": print mult Dr [4]"); 
   Serial.printf("  Dr=  "); Serial.print(Sen->ReadSensors->delay()); Serial.println(": minor frame, ms [100]"); 
-  Serial.printf(" *Dt= "); Serial.printf("%6.3f", rp.tb_bias_hdwe); Serial.printf(": delta hdwe, deg C [%6.3f]\n", TEMP_BIAS); 
-  Serial.printf("  D^= "); Serial.printf("%6.3f", cp.tb_bias_model); Serial.printf(": delta model, deg C [%6.3f]\n", TEMP_BIAS); 
+  Serial.printf(" *Dt= "); Serial.printf("%6.3f", rp.Tb_bias_hdwe); Serial.printf(": delta hdwe, deg C [%6.3f]\n", TEMP_BIAS); 
+  Serial.printf("  D^= "); Serial.printf("%6.3f", cp.Tb_bias_model); Serial.printf(": delta model, deg C [%6.3f]\n", TEMP_BIAS); 
   Serial.printf("  Dv=  "); Serial.print(Sen->vb_add()); Serial.println(": volt fault inj, V [0]"); 
   Serial.printf("  Dw=  "); Serial.print(Sen->Sim->Dv()); Serial.println(": Tab adj, V [0.01]"); 
   Serial.printf("  DT= "); Serial.printf("%6.3f", Sen->Tb_noise_amp()); Serial.printf(": noise mod, deg C pk-pk [%6.3f]\n", TB_NOISE); 
