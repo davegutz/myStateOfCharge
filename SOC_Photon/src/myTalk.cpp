@@ -354,15 +354,15 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 't' ):  // * Dt<>:  Temp bias change hardware
                 Serial.printf("rp.tb_bias_hdwe%7.3f to", rp.tb_bias_hdwe);
                 rp.tb_bias_hdwe = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.tb_bias_hdwe);
-                rp.debug = 0;
-                Serial.printf("*** reset **\n");
+                Serial.printf("%7.3f\nreset\n", rp.tb_bias_hdwe);
+                cp.cmd_reset();
                 break;
 
               case ( '^' ):  // * D^<>:  Temp bias change model
-                Serial.printf("rp.tb_bias_hdwe%7.3f to", cp.tb_bias_model);
+                Serial.printf("rp.tb_bias_model%7.3f to", cp.tb_bias_model);
                 cp.tb_bias_model = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", cp.tb_bias_model);
+                Serial.printf("%7.3f\nreset\n", cp.tb_bias_model);
+                cp.cmd_reset();
                 break;
 
               case ( 'u' ):  //   Du<>:  Coulombic Efficiency change

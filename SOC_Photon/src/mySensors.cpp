@@ -582,7 +582,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *ReadSensors):
-  rp_tb_bias_(&rp.tb_bias_hdwe), tb_bias_last_(0.), Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE),
+  rp_tb_bias_hdwe_(&rp.tb_bias_hdwe), tb_bias_hdwe_last_(0.), Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE),
   Ib_amp_noise_amp_(IB_AMP_NOISE), Ib_noa_noise_amp_(IB_NOA_NOISE), reset_temp_(false)
 {
   this->T = T;
@@ -680,8 +680,9 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
     }
     else
     {
-      Tb = Tb_hdwe;
-      Tb_filt = Tb_hdwe_filt;
+      Tb = Tb_hdwe + rp.tb_bias_hdwe;
+      Tb_filt = Tb_hdwe_filt + rp.tb_bias_hdwe;
+      if ( rp.debug==-1 ) Serial.printf("Tbh%7.3f Tbhf%7.3f Tb%7.3f Tbf%7.3f\n", Tb_hdwe, Tb_hdwe_filt, Tb, Tb_filt);
     }
   }
 
@@ -846,24 +847,24 @@ void Sensors::shunt_select_initial()
 void Sensors::temp_filter(const boolean reset_loc, const float t_rlim)
 {
     // Rate limit the temperature bias, 2x so not to interact with rate limits in logic that also use t_rlim
-    if ( reset_loc ) tb_bias_last_ = *rp_tb_bias_;
-    float t_bias_loc = max(min(*rp_tb_bias_,  tb_bias_last_ + t_rlim*2.*T_temp),
-                                            tb_bias_last_ - t_rlim*2.*T_temp);
-    tb_bias_last_ = t_bias_loc;
+    if ( reset_loc ) tb_bias_hdwe_last_ = *rp_tb_bias_hdwe_;
+    float tb_bias_hdwe_loc = max(min(*rp_tb_bias_hdwe_,  tb_bias_hdwe_last_ + t_rlim*2.*T_temp),
+                                            tb_bias_hdwe_last_ - t_rlim*2.*T_temp);
+    tb_bias_hdwe_last_ = tb_bias_hdwe_loc;
 
     // Filter and add rate limited bias
     if ( reset_loc && Tb>40. )  // Bootup T=85.5 C
     {
-        Tb_hdwe = RATED_TEMP + t_bias_loc;
-        Tb_hdwe_filt = TbSenseFilt->calculate(RATED_TEMP, reset_loc, min(T_temp, F_MAX_T_TEMP)) + t_bias_loc;
+        Tb_hdwe = RATED_TEMP + tb_bias_hdwe_loc;
+        Tb_hdwe_filt = TbSenseFilt->calculate(RATED_TEMP, reset_loc, min(T_temp, F_MAX_T_TEMP)) + tb_bias_hdwe_loc;
     }
     else
     {
-        Tb_hdwe_filt = TbSenseFilt->calculate(Tb_hdwe, reset_loc, min(T_temp, F_MAX_T_TEMP)) + t_bias_loc;
-        Tb_hdwe += t_bias_loc;
+        Tb_hdwe_filt = TbSenseFilt->calculate(Tb_hdwe, reset_loc, min(T_temp, F_MAX_T_TEMP)) + tb_bias_hdwe_loc;
+        Tb_hdwe += tb_bias_hdwe_loc;
     }
-    // if ( rp.debug==16 ) Serial.printf("reset_loc,t_bias_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",
-    //   reset_loc,t_bias_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt );
+    if ( rp.debug==16 ) Serial.printf("reset_loc,tb_bias_hdwe_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",
+      reset_loc, tb_bias_hdwe_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt );
 }
 
 // Filter temp

@@ -370,8 +370,8 @@ public:
   float Vb_add() { return ( vb_add_ * rp.nS ); };
   Fault *Flt;
 protected:
-  float *rp_tb_bias_;   // Location of retained bias, deg C
-  float tb_bias_last_;  // Last value of bias for rate limit, deg C
+  float *rp_tb_bias_hdwe_;   // Location of retained bias, deg C
+  float tb_bias_hdwe_last_;  // Last value of bias for rate limit, deg C
   void choose_(void);   // Deliberate choice based on inputs and results
   PRBS_7 *Prbn_Tb_;     // Tb noise generator model only
   PRBS_7 *Prbn_Vb_;     // Vb noise generator model only

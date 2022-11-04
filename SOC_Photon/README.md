@@ -252,6 +252,10 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
 
   The VBAT battery died or was disconnected.  Restore the battery.  Connect the photon to the network.   Use Particle app on phone to connect it to wifi at least once.
 
+### Problem:  Tbh = Tbm in display 'Pf' (print faults)
+
+This is normal for temperature.   Modeled Tb is very simple = to a constant + bias.   So I chose to display what is actually used in the model rather than what is actually used in signal selection.
+
 ## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
 
 ## To get debug data

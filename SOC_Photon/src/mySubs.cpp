@@ -192,7 +192,6 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   // if ( rp.debug==-1 ){ Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("S.c:"); debug_m1(Mon, Sen);}
 
   // Inputs
-  if ( rp.debug==-1){ Serial.printf("top:"); debug_m1(Mon, Sen);}
   harvest_temp_change(Sen->Tb_filt, Mon, Sen->Sim);
   if ( rp.mod_ib() )
     Sen->Ib_model_in = rp.inj_bias + rp.ib_bias_all;

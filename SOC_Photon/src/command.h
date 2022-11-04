@@ -109,7 +109,7 @@ struct CommandPars
     Serial.printf(" dc_dc_on=%d;\n", this->dc_dc_on);
     Serial.printf(" publishS=%d;\n", this->publishS);
     Serial.printf(" print_mult=%d;\n", this->print_mult);
-    Serial.printf(" tb_bias_mode=%7.3f;\n", this->tb_bias_model);
+    Serial.printf(" tb_bias_mod=%7.3f;\n", this->tb_bias_model);
     Serial.printf(" s_t_sat=%7.3f;\n", this->s_t_sat);
     Serial.printf(" eframe_mult=%d;\n", this->eframe_mult);
     Serial.printf(" fake_faults=%d;\n", this->fake_faults);
