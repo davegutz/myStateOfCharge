@@ -536,8 +536,8 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
         ice_->iterate(rp.debug==-1 && reset_temp, SOLV_SUCC_COUNTS, false);
     }
     init_soc_ekf(soc_solved);
-    if ( rp.debug==-1 && reset_temp) Serial.printf("sek: Vb%7.3f Vba%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d dx%7.3f e%10.6f soc_sol%8.4f\n",
-        Sen->Vb, Vb_avg, voc_stat_, voc_solved, ice_->count(), ice_->dx(), ice_->e(), soc_solved);    
+    // if ( rp.debug==-1 && reset_temp) Serial.printf("sek: Vb%7.3f Vba%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d dx%8.4f e%10.6f soc_sol%8.4f\n",
+    //     Sen->Vb, Vb_avg, voc_stat_, voc_solved, ice_->count(), ice_->dx(), ice_->e(), soc_solved);    
     // if ( rp.debug==7 )
     //         Serial.printf("solve    :n_avg, Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %d, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
     //         n_avg, Tb_avg, Vb_avg, Ib_avg, ice_->count(), soc_solved, voc, voc_solved, dv_dyn, dv_hys_, ice_->e());
@@ -1008,7 +1008,7 @@ double Hysteresis::update(const double dt, const boolean init_high, const boolea
             dv_hys_past = dv_hys_;
             dv_hys_ = ioc_ * res_;
             res_ = look_hys(dv_hys_, soc_);
-            if ( rp.debug==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
+            // if ( rp.debug==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
         }
         // if ( rp.debug==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
     }

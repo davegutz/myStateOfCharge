@@ -286,7 +286,7 @@ void loop()
 
     // Set print frame
     static uint8_t print_count = 0;
-    if (print_count>=cp.print_mult-1 || print_count==UINT8_MAX )  // > avoids lockup on change by user
+    if ( print_count>=cp.print_mult-1 || print_count==UINT8_MAX )  // > avoids lockup on change by user
     {
       print_count = 0;
       cp.publishS = true;
@@ -321,9 +321,6 @@ void loop()
     if ( rp.debug==12 ) debug_12(Mon, Sen);  // EKF
     if ( rp.debug==-4 ) debug_m4(Mon, Sen);
 
-    // Print
-    print_high_speed_data(reset, Sen, Mon);
-
     // Publish for variable print rate
     if ( cp.publishS )
     {
@@ -335,6 +332,10 @@ void loop()
         digitalWrite(myPins->status_led, HIGH);
       wrote_last_time = !wrote_last_time;
     }
+
+    // Print
+    print_high_speed_data(reset, Sen, Mon);
+
   }  // end read (high speed frame)
 
   // OLED and Bluetooth display drivers

@@ -188,7 +188,7 @@ void harvest_temp_change(const float temp_c, BatteryMonitor *Mon, BatterySim *Si
 void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const boolean use_soc_in)
 {
   // Sample debug statements
-  // if ( rp.debug==-1){ Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);} 
+  // if ( rp.debug==-1 ){ Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);} 
   // if ( rp.debug==-1 ){ Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("S.c:"); debug_m1(Mon, Sen);}
 
   // Gather and apply inputs
@@ -211,11 +211,11 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   if ( use_soc_in )
     Mon->apply_soc(soc_in, Sen->Tb_filt);  // saves rp.delta_q and rp.t_last
   Sen->Sim->apply_delta_q_t(Mon->delta_q(), Mon->t_last());  // applies rp.delta_q and rp.t_last
-  if ( rp.debug==-1){ Serial.printf("S.a_d_q_t:"); debug_m1(Mon, Sen);}
+  // if ( rp.debug==-1 ){ Serial.printf("S.a_d_q_t:"); debug_m1(Mon, Sen);}
   
   // Make Sim accurate even if not used
   Sen->Sim->init_battery_sim(true, Sen);
-  if ( rp.debug==-1){ Serial.printf("S.i_b:"); debug_m1(Mon, Sen);}
+  // if ( rp.debug==-1 ){ Serial.printf("S.i_b:"); debug_m1(Mon, Sen);}
   if ( !rp.mod_vb() )
   {
     Sen->Sim->apply_soc(Sen->Sim->soc(), Sen->Tb_filt);
@@ -246,13 +246,13 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   {
     Sen->Ib = Sen->Ib_hdwe;
   }
-  if ( rp.debug==-1){ Serial.printf("SENIB:"); debug_m1(Mon, Sen);}
+  // if ( rp.debug==-1 ){ Serial.printf("SENIB:"); debug_m1(Mon, Sen);}
   if ( rp.mod_vb() )
   {
     Mon->apply_soc(Sen->Sim->soc(), Sen->Tb_filt);
   }
   Mon->init_battery_mon(true, Sen);
-  if ( rp.debug==-1){ Serial.printf("M.i_b:"); debug_m1(Mon, Sen);}
+  // if ( rp.debug==-1 ) { Serial.printf("M.i_b:"); debug_m1(Mon, Sen);}
 
   // Call calculate/count_coulombs twice because sat_ is a used-before-calculated (UBC)
   // Simple 'call twice' method because sat_ is discrete no analog which would require iteration
@@ -260,11 +260,11 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), Sen->sclr_coul_eff, 0.);
   Mon->calculate(Sen, true);  // Call again because sat is a UBC
   Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), Sen->sclr_coul_eff, 0.);
-  if ( rp.debug==-1){ Serial.printf("M.c_c:"); debug_m1(Mon, Sen);}
+  // if ( rp.debug==-1 ){ Serial.printf("M.c_c:"); debug_m1(Mon, Sen);}
 
   // Solve EKF
   Mon->solve_ekf(true, true, Sen);
-  if ( rp.debug==-1){ Serial.printf("end:"); debug_m1(Mon, Sen);}
+  // if ( rp.debug==-1 ){ Serial.printf("end:"); debug_m1(Mon, Sen);}
 }
 
 // Load all others
@@ -364,7 +364,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
     else if ( Sen->Flt->ib_diff_fa() )
       disp_2 = " diff ";
     else if ( Sen->Flt->red_loss() )
-      disp_2 = " data ";
+      disp_2 = " redl ";
   }
   else if ( frame==3 )
   {

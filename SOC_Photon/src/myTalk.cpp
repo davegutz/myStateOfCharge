@@ -259,12 +259,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 FP_in = cp.input_string.substring(2).toFloat();
                 if ( FP_in<1.1 )  // Apply crude limit to prevent user error
                 {
-                  // if ( rp.debug==-1) { Serial.printf("\n\ntop delta_q:"); debug_m1(Mon, Sen);}
-                  // initialize_all(Mon, Sen, FP_in, false);
-                  // if ( rp.debug==-1) { Serial.printf("end:"); debug_m1(Mon, Sen);}
-                  // if ( rp.debug==-1) { Serial.printf("\n\ntop soc:"); debug_m1(Mon, Sen);}
                   initialize_all(Mon, Sen, FP_in, true);
-                  debug_m1(Mon, Sen);
                   // debug_m1(Mon, Sen);
                   if ( rp.modeling )
                   {
@@ -324,7 +319,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'i' ):  // * Di<>:  Bias all current sensors (same way as Da and Db)
                 Serial.printf("rp.ib_bias_all%7.3f to", rp.ib_bias_all);
                 rp.ib_bias_all = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.ib_bias_all);
+                Serial.printf("%7.3f\nreset\n", rp.ib_bias_all);
+                cp.cmd_reset();
                 break;
 
               case ( 'm' ):  //   Dm<>:  Amp signal adder for faults
@@ -358,11 +354,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 cp.cmd_reset();
                 break;
 
-              case ( '^' ):  // * D^<>:  Temp bias change model
-                Serial.printf("rp.Tb_bias_model%7.3f to", cp.Tb_bias_model);
+              case ( '^' ):  // * D^<>:  Temp bias change model for faults
+                Serial.printf("cp.Tb_bias_model%7.3f to", cp.Tb_bias_model);
                 cp.Tb_bias_model = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\nreset\n", cp.Tb_bias_model);
-                cp.cmd_reset();
+                Serial.printf("%7.3f\n", cp.Tb_bias_model);
                 break;
 
               case ( 'u' ):  //   Du<>:  Coulombic Efficiency change
@@ -1378,7 +1373,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("\nv= "); Serial.print(rp.debug); Serial.println(": verbosity, -128 - +128. [4]");
   Serial.printf("  -<>: Negative - Arduino plot compatible\n");
-  Serial.printf("  v-1: GP\n");
+  // Serial.printf("  v-1: Debug\n");
   Serial.printf("   v1: GP\n");
   Serial.printf("   v2: GP, Sim & Sel\n");
   Serial.printf("   v3: EKF\n");

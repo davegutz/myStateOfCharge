@@ -314,6 +314,8 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.println(cp.buffer);
   Serial.printf("  CBA98765x3210 xxA9876543210\n");
   Serial.printf("  fltw=%d     falw=%d\n", fltw_, falw_);
+  if ( cp.fake_faults )
+    Serial.printf("fake_faults=>redl");
 }
 void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 {
@@ -355,6 +357,8 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.println(cp.buffer);
   Serial1.printf("  CBA98765x3210 xxA9876543210\n");
   Serial1.printf("  fltw=%d     falw=%d\n", fltw_, falw_);
+  if ( cp.fake_faults )
+    Serial1.printf("fake_faults=>redl");
   Serial1.printf("v0; to return\n");
 }
 
