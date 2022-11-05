@@ -1008,8 +1008,9 @@ double Hysteresis::update(const double dt, const boolean init_high, const boolea
             dv_hys_past = dv_hys_;
             dv_hys_ = ioc_ * res_;
             res_ = look_hys(dv_hys_, soc_);
+            if ( rp.debug==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
         }
-        if ( rp.debug==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
+        // if ( rp.debug==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
     }
 
     // Normal ODE integration

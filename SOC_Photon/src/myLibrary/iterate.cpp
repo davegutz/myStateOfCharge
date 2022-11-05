@@ -43,7 +43,7 @@ double Iterator::iterate(const boolean verbose, const uint16_t success_count, co
     dx_   = x_ - xp_;
     if ( verbose )
     {
-        Serial.printf("%s(%d): xmin%12.8f x%12.8f xmax%12.8f e%12.8f  des%12.8f dx%12.8f de%12.8f\n", desc_.c_str(), count_, xmin_, x_, xmax_, e_, des_, dx_, de_);
+        // Serial.printf("%s(%d): xmin%12.8f x%12.8f xmax%12.8f e%12.8f  des%12.8f dx%12.8f de%12.8f\n", desc_.c_str(), count_, xmin_, x_, xmax_, e_, des_, dx_, de_);
     }
 
     // Check min max sign change

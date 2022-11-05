@@ -454,7 +454,11 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
    
 
   // Sim initialize as needed from memory
-  if ( reset_temp ) initialize_all(Mon, Sen, 0., false);
+  if ( reset_temp )
+  {
+    Sen->Tb_model = Sen->Tb_model_filt = RATED_TEMP + cp.Tb_bias_model;
+    initialize_all(Mon, Sen, 0., false);
+  }
   Sen->Sim->apply_delta_q_t(reset);
   Sen->Sim->init_battery_sim(reset, Sen);
 
