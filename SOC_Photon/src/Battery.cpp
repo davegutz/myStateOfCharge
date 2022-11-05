@@ -174,6 +174,7 @@ BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_n
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
     SdVb_ = new SlidingDeadband(HDB_VBATT);  // Noise filter
     EKF_converged = new TFDelay(false, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT); // Convergence test debounce.  Initializes false
+    ice_ = new Iterator("EKF solver");
 }
 BatteryMonitor::~BatteryMonitor() {}
 
@@ -521,31 +522,26 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
         return ( true );
     }
 
-    // Solver, steady
-    const double meps = 1-1e-6;
-    // double vb = Vb_avg/(*rp_nS_);
-    // double dv_dyn = Ib_avg/(*rp_nP_)*chem_.r_ss;
-    // double voc =  vb - dv_dyn;
-    int8_t count = 0;
-    static double soc_solved = 1.0;
+    // Solver
+    static double soc_solved = 1.;
     double dv_dsoc;
     double voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
-    double err = voc_stat_ - voc_solved;
-    while( abs(err)>SOLV_ERR && count++<SOLV_MAX_COUNTS )
+    ice_->init(1., soc_min_, 2*SOLV_ERR);
+    while ( abs(ice_->e())>SOLV_ERR && ice_->count()<SOLV_MAX_COUNTS && abs(ice_->dx())>0. )
     {
-        soc_solved = max(min(soc_solved + max(min( err/dv_dsoc, SOLV_MAX_STEP), -SOLV_MAX_STEP), meps), 1e-6);
+        ice_->increment();
+        soc_solved = ice_->x();
         voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
-        err = voc_stat_ - voc_solved;
-        if ( rp.debug==-1 && reset_temp) Serial.printf("sol_ek: Vb%7.3f Vba%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d soc_sol%8.4f\n",
-            Sen->Vb, Vb_avg, voc_stat_, voc_solved, count, soc_solved);    
+        ice_->e(voc_solved - voc_stat_);
+        ice_->iterate(rp.debug==-1 && reset_temp, SOLV_SUCC_COUNTS, false);
     }
     init_soc_ekf(soc_solved);
-    if ( rp.debug==-1 && reset_temp) Serial.printf("sol_ek: Vb%7.3f Vba%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d soc_sol%8.4f\n",
-        Sen->Vb, Vb_avg, voc_stat_, voc_solved, count, soc_solved);    
+    if ( rp.debug==-1 && reset_temp) Serial.printf("sek: Vb%7.3f Vba%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d dx%7.3f e%10.6f soc_sol%8.4f\n",
+        Sen->Vb, Vb_avg, voc_stat_, voc_solved, ice_->count(), ice_->dx(), ice_->e(), soc_solved);    
     // if ( rp.debug==7 )
     //         Serial.printf("solve    :n_avg, Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %d, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-    //         n_avg, Tb_avg, Vb_avg, Ib_avg, count, soc_solved, voc, voc_solved, dv_dyn, dv_hys_, err);
-    return ( count<SOLV_MAX_COUNTS );
+    //         n_avg, Tb_avg, Vb_avg, Ib_avg, ice_->count(), soc_solved, voc, voc_solved, dv_dyn, dv_hys_, ice_->e());
+    return ( ice_->count()<SOLV_MAX_COUNTS );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
