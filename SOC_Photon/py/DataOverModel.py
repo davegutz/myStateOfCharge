@@ -45,10 +45,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.figure()  # init 1
         n_fig += 1
         plt.subplot(221)
-        plt.title(plot_title + 'init 1')
+        plt.title(plot_title + ' init 1')
         plt.plot(so.time, so.reset_s, color='black', linestyle='-', label='reset_s')
         plt.plot(smv.time, smv.reset_s, color='red', linestyle='--', label='reset_s_ver')
-        # plt.plot(mo.time, mo.reset, color='magenta', linestyle='-', label='reset')
+        plt.plot(mo.time, mo.reset, color='magenta', linestyle='-', label='reset')
         plt.plot(mv.time, mv.reset, color='cyan', linestyle='--', label='reset_ver')
         plt.legend(loc=1)
         plt.subplot(222)
@@ -76,7 +76,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.figure()  # 1a
         n_fig += 1
         plt.subplot(321)
-        plt.title(plot_title)
+        plt.title(plot_title + ' 1a')
         plt.plot(mo.time, mo.ibmh, color='black', linestyle='-', label='Ib_amp_hdwe')
         plt.plot(mo.time, mo.ibnh, color='green', linestyle='--', label='Ib_noa_hdwe')
         plt.plot(mo.time, mo.Ib, color='red', linestyle='-.', label='Ib')
@@ -112,10 +112,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()  # 1
+        plt.figure()  # DOM 1
         n_fig += 1
         plt.subplot(331)
-        plt.title(plot_title)
+        plt.title(plot_title + ' DOM 1')
         plt.plot(mo.time, mo.Ib, color='green', linestyle='-', label='Ib')
         plt.plot(mv.time, mv.Ib, color='orange', linestyle='--', label='Ib_ver')
         plt.plot(mo.time, mo.ib_diff, color='black', linestyle='-.', label='ib_diff')
@@ -192,10 +192,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 2
+    plt.figure()  # DOM 2
     n_fig += 1
     plt.subplot(321)
-    plt.title(plot_title)
+    plt.title(plot_title + ' DOM 2')
     plt.plot(mo.time, mo.dV_dyn, color='green', linestyle='-', label='dV_dyn')
     plt.plot(mv.time, mv.dv_dyn, color='orange', linestyle='--', label='dv_dyn_ver')
     plt.legend(loc=1)
@@ -260,10 +260,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 3
+    plt.figure()  # DOM 3
     n_fig += 1
     plt.subplot(221)
-    plt.title(plot_title)
+    plt.title(plot_title + ' DOM 3')
     plt.plot(mo.time, mo.soc, color='blue', linestyle='-', label='soc')
     plt.plot(mv.time, mv.soc, color='red', linestyle='--', label='soc_ver')
     plt.legend(loc=1)
@@ -287,10 +287,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 4
+    plt.figure()  # DOM 4
     n_fig += 1
     plt.subplot(131)
-    plt.title(plot_title)
+    plt.title(plot_title + ' DOM 4')
     plt.plot(mo.time, mo.soc, color='orange', linestyle='-', label='soc')
     plt.plot(mv.time, mv.soc, color='green', linestyle='--', label='soc_ver')
     plt.plot(sv.time, sv.soc, color='black', linestyle='-.', label='soc_s_ver')
@@ -318,7 +318,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.figure()  # sim_s  1
         n_fig += 1
         plt.subplot(331)
-        plt.title(plot_title)
+        plt.title(plot_title + ' sim_s 1')
         plt.plot(so.time, so.ib_s, color='magenta', linestyle='-', label='ib_s')
         plt.plot(smv.time, smv.ib_s, color='green', linestyle='--', label='ib_s_ver')
         plt.plot(mo.time, mo.Ib, color='blue',  linestyle='-.', label='ib')
@@ -381,7 +381,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.figure()  # sim_s  2
         n_fig += 1
         plt.subplot(331)
-        plt.title(plot_title)
+        plt.title(plot_title + ' sim_s 2')
         plt.plot(mo.time, mo.Vb, color='red', linestyle='-', label='Vb')
         plt.plot(mo.time, mo.Voc, color='blue',  linestyle='--', label='Voc')
         plt.plot(mo.time, mo.Voc_stat, color='green', linestyle='-.', label='Voc_stat')
@@ -416,21 +416,18 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(smv.time, smv.soc_s, color='cyan', linestyle='--', label='soc_s_ver')
         plt.legend(loc=1)
         plt.subplot(333)
-        plt.title(plot_title)
         plt.plot(mo.time, mo.Vb, color='red', linestyle='-', label='Vb')
         plt.plot(so.time, so.vb_s, color='blue', linestyle='--',  label='vb_s')
         plt.plot(mv.time, mv.vb, color='black', linestyle='-.', label='vb_ver')
         plt.plot(smv.time, smv.vb_s, color='green', linestyle=':', label='vb_s_ver')
         plt.legend(loc=1)
         plt.subplot(336)
-        plt.title(plot_title)
         plt.plot(mo.time, mo.Voc, color='red', linestyle='-', label='Voc')
         plt.plot(mv.time, mv.voc, color='black', linestyle='--', label='voc_ver')
         plt.plot(so.time, so.voc_s, color='blue', linestyle='-.', label='voc_s')
         plt.plot(smv.time, smv.voc_s, color='green', linestyle=':', label='voc_s_ver')
         plt.legend(loc=1)
         plt.subplot(339)
-        plt.title(plot_title)
         plt.plot(mo.time, mo.Voc_stat, color='red', linestyle='-', label='Voc_stat')
         plt.plot(so.time, so.voc_stat_s, color='blue',  linestyle='--', label='voc_stat_s')
         plt.plot(mv.time, mv.voc_stat, color='black', linestyle='-.', label='voc_stat_ver')
@@ -440,7 +437,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.figure()  # sim_s  3
         n_fig += 1
         plt.subplot(221)
-        plt.title(plot_title)
+        plt.title(plot_title + ' sim_s 3')
         plt.plot(mo.time, mo.soc, color='blue', linestyle='-', label='soc')
         plt.plot(mv.time, mv.soc, color='red', linestyle='--', label='soc_ver')
         plt.plot(so.time, so.soc_s, color='green', linestyle='-.', label='soc_s')
@@ -480,7 +477,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.figure()  # sim_s  4
         n_fig += 1
         plt.subplot(221)
-        plt.title(plot_title)
+        plt.title(plot_title + ' sim_s 4')
         plt.plot(mo.time, mo.soc, color='blue', linestyle='-', label='soc')
         plt.plot(mv.time, mv.soc, color='red', linestyle='--', label='soc_ver')
         plt.plot(so.time, so.soc_s, color='green', linestyle='-.', label='soc_s')
@@ -523,10 +520,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.legend(loc=1)
 
         if mo.Fx is not None:  # ekf
-            plt.figure()  # ekf  5
+            plt.figure()  # EKF  1
             n_fig += 1
             plt.subplot(331)
-            plt.title(plot_title)
+            plt.title(plot_title + ' EKF 1')
             plt.plot(mo.time, mo.u, color='blue', linestyle='-', label='u')
             plt.plot(mv.time, mv.u_ekf, color='red', linestyle='--', label='u ver')
             plt.legend(loc=1)
@@ -567,10 +564,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
             fig_files.append(fig_file_name)
             plt.savefig(fig_file_name, format="png")
 
-            plt.figure()  # ekf  5
+            plt.figure()  # EKF  2
             n_fig += 1
             plt.subplot(331)
-            plt.title(plot_title)
+            plt.title(plot_title + ' EKF 2')
             plt.plot(mo.time, mo.K, color='blue', linestyle='-', label='K')
             plt.plot(mv.time, mv.K, color='red', linestyle='--', label='K ver')
             plt.legend(loc=1)
@@ -611,10 +608,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
             plt.savefig(fig_file_name, format="png")
 
         if mo.voc_soc is not None:
-            plt.figure()  # ekf  5
+            plt.figure()  # EKF  3
             n_fig += 1
             plt.subplot(111)
-            plt.title(plot_title)
+            plt.title(plot_title + ' EKF 3')
             plt.plot(mo.soc, mo.Voc_stat, color='red', linestyle='-', label='Voc_stat')
             plt.plot(mo.soc, mo.voc_soc, color='black', linestyle=':', label='voc_soc')
             plt.legend(loc=1)
@@ -622,10 +619,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
             fig_files.append(fig_file_name)
             plt.savefig(fig_file_name, format="png")
 
-            plt.figure()  # 6 Hyst
+            plt.figure()  # Hyst 1
             n_fig += 1
             plt.subplot(331)
-            plt.title(plot_title)
+            plt.title(plot_title + ' Hyst 1')
             # plt.plot(mo.time, mo.dv_hys_required, linestyle='-', color='black', label='dv_hys_required')
             plt.plot(mo.time, -mo.e_w, linestyle='-', color='red', label='-e_wrap')
             plt.plot(mv.time, (np.array(mv.Voc_stat)-np.array(mv.voc_soc)),linestyle='--', color='blue', label='-e_wrap_ver')
@@ -703,7 +700,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.figure()  # 7 off/on sim
         n_fig += 1
         plt.subplot(221)
-        plt.title(plot_title)
+        plt.title(plot_title + ' off/on sim 1')
         plt.plot(so.time, so.vb_s, color='black', linestyle='-', label='vb_s')
         plt.plot(sv.time, sv.vb, color='orange', linestyle=':', label='vb_s_ver')
         plt.plot(so.time, so.voc_s, color='blue', linestyle='--', label='voc_s')
@@ -730,7 +727,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.figure()  # 8 off/on mon
         n_fig += 1
         plt.subplot(221)
-        plt.title(plot_title)
+        plt.title(plot_title + ' off/on mon 1')
         plt.plot(mo.time, mo.Vb, color='black', linestyle='-', label='Vb')
         plt.plot(mo.time, mo.Voc, color='blue', linestyle='--', label='Voc')
         plt.plot(mo.time, mo.Voc_stat, color='magenta', linestyle='-.', label='Voc_stat')
@@ -750,10 +747,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 7 off/on sim
+    plt.figure()  # GP 1
     n_fig += 1
     plt.subplot(221)
-    plt.title(plot_title)
+    plt.title(plot_title + ' GP 1')
     plt.plot(so.time, so.vb_s, color='black', linestyle='-', label='vb_s')
     plt.plot(sv.time, sv.vb, color='orange', linestyle=':', label='vb_s_ver')
     plt.plot(so.time, so.voc_s, color='blue', linestyle='--', label='voc_s')
@@ -777,10 +774,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 8 off/on mon
+    plt.figure()  # GP 2
     n_fig += 1
     plt.subplot(221)
-    plt.title(plot_title)
+    plt.title(plot_title + ' GP 2')
     plt.plot(mo.time, mo.Vb, color='black', linestyle='-', label='Vb')
     plt.plot(mv.time, mv.vb, color='orange', linestyle=':', label='vb_ver')
     plt.plot(mo.time, mo.Voc, color='blue', linestyle='--', label='Voc')
@@ -804,10 +801,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 8 off/on mon
+    plt.figure()  # GP 3
     n_fig += 1
     plt.subplot(221)
-    plt.title(plot_title)
+    plt.title(plot_title + ' GP 3')
     plt.plot(mv.time, mv.vb, color='orange', linestyle=':', label='vb_ver')
     plt.plot(mv.time, mv.voc, color='red', linestyle='--', label='voc_ver')
     plt.plot(mv.time, mv.voc_stat, color='green', linestyle=':', label='voc_stat_ver')

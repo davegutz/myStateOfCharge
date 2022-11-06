@@ -1038,7 +1038,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.figure()  # Batt 1
         n_fig += 1
         plt.subplot(321)
-        plt.title(plot_title)
+        plt.title(plot_title + ' B 1')
         plt.plot(mv.time, mv.ib, color='green',   linestyle='-', label='ib'+suffix)
         plt.plot(mv.time, mv.ioc, color='magenta', linestyle='--', label='ioc'+suffix)
         plt.plot(mv.time, mv.irc, color='red', linestyle='-.', label='i_r_ct'+suffix)
@@ -1080,7 +1080,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.figure()  # Batt 2
         n_fig += 1
         plt.subplot(111)
-        plt.title(plot_title)
+        plt.title(plot_title + ' B 2')
         plt.plot(mv.time, mv.vb, color='green', linestyle='-', label='vb'+suffix)
         plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_s'+suffix)
         plt.plot(mv.time, mv.vc, color='blue', linestyle='-.', label='vc'+suffix)
@@ -1099,7 +1099,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.figure()  # Batt 3
         n_fig += 1
         plt.subplot(321)
-        plt.title(plot_title+' **SIM')
+        plt.title(plot_title+' B 3 **SIM')
         plt.plot(sv.time, sv.ib, color='green', linestyle='-', label='ib'+suffix)
         plt.plot(sv.time, sv.irc, color='red',  linestyle='--', label='i_r_ct'+suffix)
         plt.plot(sv.time, sv.icd, color='cyan',  linestyle='-.', label='i_c_dif'+suffix)
@@ -1129,7 +1129,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.figure()  # Batt 4
         n_fig += 1
         plt.subplot(321)
-        plt.title(plot_title+' MON vs SIM')
+        plt.title(plot_title+' B 4 MON vs SIM')
         plt.plot(mv.time, mv.ib, color='green', linestyle='-', label='ib'+suffix)
         plt.plot(sv.time, sv.ib, color='black', linestyle='--', label='ib_s'+suffix)
         plt.legend(loc=1)
@@ -1166,7 +1166,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.figure()  # Batt 5
         n_fig += 1
         plt.subplot(331)
-        plt.title(plot_title+' **EKF')
+        plt.title(plot_title+' B 5 **EKF')
         plt.plot(mv.time, mv.x_ekf, color='red', linestyle='-', label='x ekf'+suffix)
         plt.legend(loc=4)
         plt.subplot(332)
@@ -1200,7 +1200,7 @@ def overall_batt(mv, sv, rv, filename,
 
         plt.figure()  # Batt 6
         n_fig += 1
-        plt.title(plot_title)
+        plt.title(plot_title + ' B 6')
         plt.plot(mv.time, mv.e_voc_ekf, color='blue', linestyle='-.', label='e_voc'+suffix)
         plt.plot(mv.time, mv.e_soc_ekf, color='red', linestyle='dotted', label='e_soc_ekf'+suffix)
         plt.ylim(-0.01, 0.01)
@@ -1211,7 +1211,7 @@ def overall_batt(mv, sv, rv, filename,
 
         plt.figure()  # Batt 7
         n_fig += 1
-        plt.title(plot_title)
+        plt.title(plot_title + ' B 7')
         plt.plot(mv.time, mv.voc, color='red', linestyle='-', label='voc'+suffix)
         plt.plot(mv.time, mv.Voc_ekf, color='blue', linestyle='-.', label='Voc_ekf'+suffix)
         plt.plot(sv.time, sv.voc, color='green', linestyle=':', label='voc_s'+suffix)
@@ -1222,7 +1222,7 @@ def overall_batt(mv, sv, rv, filename,
 
         plt.figure()  # Batt 8
         n_fig += 1
-        plt.title(plot_title)
+        plt.title(plot_title + ' B 8')
         plt.plot(mv.time, mv.soc_ekf, color='blue', linestyle='-', label='soc_ekf'+suffix)
         plt.plot(sv.time, sv.soc, color='green', linestyle='-.', label='soc_s'+suffix)
         plt.plot(mv.time, mv.soc, color='red', linestyle=':', label='soc'+suffix)
@@ -1233,7 +1233,7 @@ def overall_batt(mv, sv, rv, filename,
 
         plt.figure()  # Batt 9
         n_fig += 1
-        plt.title(plot_title)
+        plt.title(plot_title + ' B 9')
         plt.plot(mv.time, mv.e_voc_ekf, color='blue', linestyle='-.', label='e_voc'+suffix)
         plt.plot(mv.time, mv.e_soc_ekf, color='red', linestyle='dotted', label='e_soc_ekf'+suffix)
         plt.legend(loc=2)
@@ -1244,7 +1244,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.figure()  # Batt 10
         n_fig += 1
         plt.subplot(221)
-        plt.title(plot_title)
+        plt.title(plot_title + ' B 10')
         plt.plot(sv.time, sv.soc, color='red', linestyle='-', label='soc'+suffix)
         plt.legend(loc=1)
         plt.subplot(223)
@@ -1261,7 +1261,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.figure()  # Batt 11
         n_fig += 1
         plt.subplot(111)
-        plt.title(plot_title)
+        plt.title(plot_title + ' B 11')
         plt.plot(sv.soc, sv.voc_stat, color='black', linestyle='dotted', label='SIM voc_stat vs soc'+suffix)
         plt.legend(loc=2)
         fig_file_name = filename + "_" + str(n_fig) + ".png"
@@ -1271,7 +1271,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.figure()  # Batt 12
         n_fig += 1
         plt.subplot(221)
-        plt.title(plot_title)
+        plt.title(plot_title + ' B 12')
         plt.plot(rv.time[1:], rv.u[1:, 1], color='red', linestyle='-', label='Mon Randles u[2]=vb'+suffix)
         plt.plot(rv.time[1:], rv.y[1:], color='blue', linestyle='-', label='Mon Randles y=voc'+suffix)
         plt.legend(loc=2)
@@ -1317,7 +1317,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.figure()
         n_fig += 1
         plt.subplot(331)
-        plt.title(plot_title + 'Battover 1')
+        plt.title(plot_title + ' Battover 1')
         plt.plot(mv.time, mv.ib, color='green',   linestyle='-', label='ib'+suffix)
         plt.plot(mv1.time, mv1.ib, color='black', linestyle='--', label='ib' + suffix1)
         plt.plot(mv.time, mv.ioc, color='magenta', linestyle='-.', label='ioc'+suffix)
@@ -1372,7 +1372,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.figure()
         n_fig += 1
         plt.subplot(311)
-        plt.title(plot_title + 'Battover 2')
+        plt.title(plot_title + ' Battover 2')
         plt.plot(mv.time, mv.ib, color='green',   linestyle='-', label='ib'+suffix)
         plt.plot(mv1.time, mv1.ib, color='black', linestyle='--', label='ib' + suffix1)
         plt.plot(mv.time, mv.ioc, color='magenta', linestyle='-.', label='ioc'+suffix)
@@ -1444,7 +1444,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.figure()
         n_fig += 1
         plt.subplot(331)
-        plt.title(plot_title + 'Battover 4')
+        plt.title(plot_title + ' Battover 4')
         plt.plot(rv.time[1:], rv.u[1:, 1], color='green', linestyle='-', label='Mon Randles u[2]=vb'+suffix)
         plt.plot(rv1.time[1:], rv1.u[1:, 1], color='black', linestyle='--', label='Mon Randles u[2]=vb'+suffix1)
         plt.legend(loc=2)
