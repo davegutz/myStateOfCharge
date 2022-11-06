@@ -61,13 +61,7 @@ struct RetainedPars
           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
   int isum = -1;                // Summary location.   Begins at -1 because first action is to increment isum
   int iflt = -1;                // Fault snap location.   Begins at -1 because first action is to increment iflt
-  float delta_q_cinf_amp = -RATED_BATT_CAP*3600.;   // Dyn tweak.  Charge delta_q since last reset.  Simple integration of amplified current
-  float delta_q_cinf_noa = -RATED_BATT_CAP*3600.;   // Dyn tweak.  Charge delta_q since last reset.  Simple integration of non-amplified current
-  float delta_q_dinf_amp = RATED_BATT_CAP*3600.;    // Dyn tweak.  Discharge delta_q since last reset.  Simple integration of amplified current
-  float delta_q_dinf_noa = RATED_BATT_CAP*3600.;    // Dyn tweak.  Discharge delta_q since last reset.  Simple integration of non-amplified current
   float hys_scale = HYS_SCALE;  // Hysteresis scalar
-  float tweak_sclr_amp = 1.;    // Dyn tweak.  Tweak calibration for amplified current sensor
-  float tweak_sclr_noa = 1.;    // Dyn tweak.  Tweak calibration for non-amplified current sensor
   float nP = NP;                // Number of parallel batteries in bank, e.g. '2P1S'
   float nS = NS;                // Number of series batteries in bank, e.g. '2P1S'
   uint8_t mon_mod = MON_CHEM;   // Monitor battery chemistry type
@@ -112,14 +106,7 @@ struct RetainedPars
     this->Tb_bias_hdwe = TEMP_BIAS;
     this->s_cap_model = 1.;
     this->cutback_gain_scalar = 1.;
-    this->isum = -1;
-    this->delta_q_cinf_amp = -RATED_BATT_CAP*3600.;
-    this->delta_q_cinf_noa = -RATED_BATT_CAP*3600.;
-    this->delta_q_dinf_amp = RATED_BATT_CAP*3600.;
-    this->delta_q_dinf_noa = RATED_BATT_CAP*3600.;
-    this->hys_scale = HYS_SCALE;
-    this->tweak_sclr_amp = 1.;
-    this->tweak_sclr_noa = 1.;
+    this->isum = -1;    this->hys_scale = HYS_SCALE;
     this->nP = NP;
     this->nS = NS;
     this->mon_mod = MON_CHEM;
@@ -132,14 +119,6 @@ struct RetainedPars
   {
     int n = 0;
 
-    // if ( -RATED_BATT_CAP*3600. != delta_q_cinf_amp )
-    //   n++;
-    // if ( RATED_BATT_CAP*3600. != delta_q_dinf_amp )
-    //   n++;
-    // if ( -RATED_BATT_CAP*3600. != delta_q_cinf_noa )
-    //   n++;
-    // if ( RATED_BATT_CAP*3600. != delta_q_dinf_noa )
-    //   n++;
     // if ( RATED_TEMP != t_last )
     //   n++;
     // if ( RATED_TEMP != t_last_model )
@@ -186,10 +165,6 @@ struct RetainedPars
       n++;
     if ( HYS_SCALE != hys_scale )
       n++;
-    if ( 1. != tweak_sclr_amp )
-      n++;
-    if ( 1. != tweak_sclr_noa )
-      n++;
     if ( NP != nP )
       n++;
     if ( NS != nS )
@@ -220,10 +195,6 @@ struct RetainedPars
     if ( all )
     {
       Serial.printf(" isum                           %d tbl ptr\n", isum);
-      Serial.printf(" dq_cinf_amp%10.1f %10.1f C\n", -RATED_BATT_CAP*3600., delta_q_cinf_amp);
-      Serial.printf(" dq_dinf_amp%10.1f %10.1f C\n", RATED_BATT_CAP*3600., delta_q_dinf_amp);
-      Serial.printf(" dq_cinf_noa%10.1f %10.1f C\n", -RATED_BATT_CAP*3600., delta_q_cinf_noa);
-      Serial.printf(" dq_dinf_noa%10.1f %10.1f C\n", RATED_BATT_CAP*3600., delta_q_dinf_noa);
       Serial.printf(" t_last          %5.2f      %5.2f dg C\n", RATED_TEMP, t_last);
       Serial.printf(" t_last_sim      %5.2f      %5.2f dg C\n", RATED_TEMP, t_last_model);
       Serial.printf(" delta_q    %10.1f %10.1f *Ca<>, C\n", 0., delta_q);
@@ -265,10 +236,6 @@ struct RetainedPars
       Serial.printf(" cut_gn_slr    %7.3f    %7.3f *Sk<>\n", 1., cutback_gain_scalar);
     if ( all || HYS_SCALE != hys_scale )
       Serial.printf(" hys_scale     %7.3f    %7.3f *Sh<>\n", HYS_SCALE, hys_scale);
-    if ( all || 1. != tweak_sclr_amp )
-      Serial.printf(" tweak_sclr_amp%7.3f    %7.3f *Mk<>\n", 1., tweak_sclr_amp);
-    if ( all || 1. != tweak_sclr_noa )
-      Serial.printf(" tweak_sclr_noa%7.3f    %7.3f *Nk<>\n", 1., tweak_sclr_noa);
     if ( all || NP != nP )
       Serial.printf(" nP            %7.3f    %7.3f *BP<> eg '2P1S'\n", NP, nP);
     if ( all || NS != nS )

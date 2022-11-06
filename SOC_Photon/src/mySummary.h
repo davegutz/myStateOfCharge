@@ -158,8 +158,6 @@ struct Sum_st
     this->soc_ekf = int16_t(Mon->soc_ekf()*16000.);
     this->Voc_dyn = int16_t(Mon->Voc()*1200.);
     this->Voc_stat = int16_t(Mon->Voc_stat()*1200.);
-    this->tweak_sclr_amp = int16_t(Sen->ShuntAmp->tweak_sclr()*16000.);
-    this->tweak_sclr_noa = int16_t(Sen->ShuntNoAmp->tweak_sclr()*16000.);
     this->falw = Sen->Flt->falw();
     time_long_2_str(now, buffer);
   }

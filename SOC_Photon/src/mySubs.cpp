@@ -257,9 +257,9 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   // Call calculate/count_coulombs twice because sat_ is a used-before-calculated (UBC)
   // Simple 'call twice' method because sat_ is discrete no analog which would require iteration
   Mon->calculate(Sen, true);
-  Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), Sen->sclr_coul_eff, 0.);
+  Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), 0.);
   Mon->calculate(Sen, true);  // Call again because sat is a UBC
-  Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), Sen->sclr_coul_eff, 0.);
+  Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), 0.);
   // if ( rp.debug==-1 ){ Serial.printf("M.c_c:"); debug_m1(Mon, Sen);}
 
   // Solve EKF
@@ -314,8 +314,7 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
 
   // Memory store // TODO:  simplify arg list here.  Unpack Sen inside count_coulombs
   // Initialize to ekf when not saturated
-  Mon->count_coulombs(Sen->T, reset_temp, Sen->Tb_filt, Mon->ib_charge(), Sen->saturated, Sen->sclr_coul_eff,
-    Mon->delta_q_ekf());
+  Mon->count_coulombs(Sen->T, reset_temp, Sen->Tb_filt, Mon->ib_charge(), Sen->saturated, Mon->delta_q_ekf());
 
   // Charge time for display
   Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ib, Mon->soc());
@@ -698,16 +697,3 @@ String tryExtractString(String str, const char* start, const char* end)
   }
   return str.substring(idx + strlen(start), endIdx);
 }
-
-// Tweak
-void tweak_on_new_desat(BatteryMonitor *Mon, Sensors *Sen, unsigned long int now)
-{
-
-  if ( Sen->ShuntAmp->new_desat(Sen->ShuntAmp->ishunt_cal(), Sen->T, Sen->saturated, now) )
-    Sen->ShuntAmp->adjust(now, Mon->q_capacity());
-
-  if ( Sen->ShuntNoAmp->new_desat(Sen->ShuntNoAmp->ishunt_cal(), Sen->T, Sen->saturated, now) )
-    Sen->ShuntNoAmp->adjust(now, Mon->q_capacity());
-
-}
-

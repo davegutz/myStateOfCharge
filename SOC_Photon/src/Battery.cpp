@@ -306,7 +306,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     {
         double ddq_dt = ib_;
         dt_eframe_ = dt_ * float(cp.eframe_mult);
-        if ( ddq_dt>0. && !rp.tweak_test() ) ddq_dt *= coul_eff_ * Sen->sclr_coul_eff;
+        if ( ddq_dt>0. && !rp.tweak_test() ) ddq_dt *= coul_eff_;
         ddq_dt -= chem_.dqdt * q_capacity_ * T_rate;
         predict_ekf(ddq_dt);       // u = d(dq)/dt
         update_ekf(voc_stat_, 0., 1., Sen->control_time, Sen->now);  // z = voc_stat, estimated = voc_filtered = hx, predicted = est past

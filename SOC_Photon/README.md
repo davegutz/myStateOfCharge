@@ -405,16 +405,16 @@ Throughput test
 
 Full regression suite:
   initModel:	Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;v2;Rs;W160;Pf;Ca0.6;W160;v0;Pf;
-				DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Ca.5;Dr100;Rf;Pf;
+				DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Ca.5;Dr100;Rf;Pf;
   initModelSat:	Ff0;D^0;Xm7
   ampHiFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm50;Dn0.0001;
-                  DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Ca.5;Dr100;Rf;Pf;
+                  DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Ca.5;Dr100;Rf;Pf;
   ampHiFailFf:    Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm50;Dn0.0001;
-                  Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Ca.5;Dr100;Rf;Pf;
+                  Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Ca.5;Dr100;Rf;Pf;
   ampLoFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm-50;Dn0.0001;Ff0;
-                  DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Ca.5;Dr100;Rf;Pf;
+                  DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Ca.5;Dr100;Rf;Pf;
   ampHiFailNoise: Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;Ff0;
-                  DT0;DV0;DM0;DN0;Xp0;Rf;W10;+v0;Ca.5;Dr100;Rf;Pf;
+                  DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Ca.5;Dr100;Rf;Pf;
   rapidTweakRegression:  Ff0;Xp10;
   rapidTweakRegression40C_:   Ff0;D^15;Xp10;
                               D^0;
@@ -440,7 +440,7 @@ Full regression suite:
   ampHiFailSlow:  Ff0;D^0;Xm7;Ca0.5;v2;W2;Dr1000;DP1;Dm6;Dn0.0001;Fc.02;Fd.5;
                   Xp0;Pf;Rf;W2;+v0;Dr100;Fc1;Fd1;Rf;Pf;
   vHiFail:        Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dv0.25;
-                  Xp0;Rf;W10;+v0;Dr100;Rf;Pf;
+                  Xp0;Rf;W100;+v0;Dr100;Rf;Pf;
   pulse:  Xp6
   tbFailMod:    Ff0;D^0;Ca.5;Xp0;W4;Xm7;DP1;Dr100;W2;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;

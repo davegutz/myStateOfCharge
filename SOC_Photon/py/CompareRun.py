@@ -62,9 +62,9 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
         # Regression suite
-        # data_file_old_txt = 'ampHiFail v20221028.txt'
+        data_file_old_txt = 'ampHiFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
-        data_file_old_txt = 'initModel v20221028.txt'; plot_init_in = True;
+        # data_file_old_txt = 'initModel v20221028.txt'; plot_init_in = True;
         # data_file_old_txt = 'ampLoFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'
         # data_file_old_txt = 'rapidTweakRegression v20221028.txt'

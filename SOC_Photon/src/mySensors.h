@@ -31,7 +31,6 @@
 #include "myTalk.h"
 #include "retained.h"
 #include "command.h"
-#include "Tweak.h"
 #include "mySync.h"
 
 // Temp sensor
@@ -64,12 +63,11 @@ protected:
 
 
 // ADS1015-based shunt
-class Shunt: public Tweak, Adafruit_ADS1015
+class Shunt: public Adafruit_ADS1015
 {
 public:
   Shunt();
-  Shunt(const String name, const uint8_t port, float *rp_delta_q_cinf, float *rp_delta_q_dinf, float *rp_tweak_sclr,
-    float *cp_ib_bias, float *cp_ib_scale, const float v2a_s, float *rp_shunt_gain_sclr);
+  Shunt(const String name, const uint8_t port, float *cp_ib_bias, float *cp_ib_scale, const float v2a_s, float *rp_shunt_gain_sclr);
   ~Shunt();
   // operators
   // functions
@@ -337,7 +335,6 @@ public:
   float cycles_inj;           // Number of injection cycles
   double control_time;        // Decimal time, seconds since 1/1/2021
   boolean display;            // Use display
-  double sclr_coul_eff;       // Scalar on Coulombic Efficiency
   boolean bms_off;            // Calculated by BatteryMonitor, battery off, low voltage, switched by battery management system?
   void bias_all_model();      // Bias model outputs for sensor fault injection
   void final_assignments(BatteryMonitor *Mon);  // Make final signal selection

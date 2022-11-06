@@ -111,7 +111,7 @@ public:
   double coul_eff() { return ( coul_eff_ ); };
   void coul_eff(const double coul_eff) { coul_eff_ = coul_eff; };
   virtual double count_coulombs(const double dt, const boolean reset, const float temp_c, const double charge_curr,
-    const boolean sat, const double sclr_coul_eff, const double delta_q_ekf);
+    const boolean sat, const double delta_q_ekf);
   double delta_q() { return(*rp_delta_q_); };
   uint8_t mod_code() { return (*chem_.rp_mod_code); };
   virtual void pretty_print();

@@ -167,6 +167,9 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
         dc_dc_on = False
         Tb_ = Tb[i]+dTb
 
+        # Basic reset model verification is to init to the input data
+        # Tried hard not to re-implement solvers in the Python verification  tool
+        # Also, BTW, did not implement signal selection or tweak logic
         if reset:
             sim.apply_soc(soc_s_init, Tb_)
             rp.delta_q_model = sim.delta_q

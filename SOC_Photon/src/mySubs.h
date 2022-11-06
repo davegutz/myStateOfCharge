@@ -31,7 +31,6 @@
 #include "myTalk.h"
 #include "retained.h"
 #include "command.h"
-#include "Tweak.h"
 #include "mySync.h"
 
 // Sensors
@@ -87,7 +86,6 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);
 String time_long_2_str(const unsigned long current_time, char *tempStr);
 String tryExtractString(String str, const char* start, const char* end);
-void tweak_on_new_desat(BatteryMonitor *Mon, Sensors *Sen, unsigned long int now);
 void short_print(Sensors *Sen, BatteryMonitor *Mon);
 
 #endif

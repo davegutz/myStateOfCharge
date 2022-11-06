@@ -385,7 +385,6 @@ Inputs:
   sat             Indication that battery is saturated, T=saturated
   tlast           Past value of battery temperature used for rate limit memory, deg C
   coul_eff_       Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
-  sclr_coul_eff   Scalar on coul_eff determined by tweak test
 Outputs:
   q_capacity_     Saturation charge at temperature, C
   *rp_delta_q_    Charge change since saturated, C
@@ -396,7 +395,7 @@ Outputs:
   q_min_          Estimated charge at low voltage shutdown, C\
 */
 double Coulombs::count_coulombs(const double dt, const boolean reset_temp, const float temp_c, const double charge_curr,
-  const boolean sat, const double sclr_coul_eff, const double delta_q_ekf)
+  const boolean sat, const double delta_q_ekf)
 {
     // Rate limit temperature.   When modeling, reset_temp.  In real world, rate limited Tb ramps Coulomb count since bms_off
     if ( reset_temp && rp.mod_vb() ) *rp_t_last_ = temp_c;
@@ -404,7 +403,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset_temp, const
 
     // State change
     double d_delta_q = charge_curr * dt;
-    if ( charge_curr>0. ) d_delta_q *= coul_eff_ * sclr_coul_eff;
+    if ( charge_curr>0. ) d_delta_q *= coul_eff_;
     d_delta_q -= chem_.dqdt*q_capacity_*(temp_lim - *rp_t_last_);
     sat_ = sat;
 

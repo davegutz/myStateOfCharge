@@ -72,7 +72,6 @@
 
 #include "mySummary.h"
 #include "myCloud.h"
-#include "Tweak.h"
 #include "debug.h"
 
 // Globals
@@ -307,9 +306,6 @@ void loop()
     // States:  Mon.soc
     // Outputs: tcharge_wt, tcharge_ekf
     monitor(reset, reset_temp, now, Is_sat_delay, Mon, Sen);
-
-    // Adjust current sensors
-    tweak_on_new_desat(Mon, Sen, now);
 
     // Re-init Coulomb Counter to EKF if it is different than EKF or if never saturated
     Mon->regauge(Sen->Tb_filt);
