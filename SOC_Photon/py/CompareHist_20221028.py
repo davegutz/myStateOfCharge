@@ -432,8 +432,15 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     Voc_stat_rescaled = d_mod.voc - d_mod.dv_hys_rescaled
     d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_rescaled', np.array(Voc_stat_rescaled, dtype=float))
 
+    Vb = d_mod.vb.copy()
+    d_mod = rf.rec_append_fields(d_mod, 'Vb', np.array(Vb, dtype=float))
+    Voc_dyn = d_mod.voc.copy()
+    d_mod = rf.rec_append_fields(d_mod, 'Voc_dyn', np.array(Voc_dyn, dtype=float))
     Ib = d_mod.ib.copy()
     d_mod = rf.rec_append_fields(d_mod, 'Ib', np.array(Ib, dtype=float))
+    d_zero = d_mod.ib.copy()*0.
+    d_mod = rf.rec_append_fields(d_mod, 'tweak_sclr_amp', np.array(d_zero, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'tweak_sclr_noa', np.array(d_zero, dtype=float))
 
     return d_mod
 
@@ -699,6 +706,7 @@ if __name__ == '__main__':
         f_raw = np.unique(f_raw)
         f = add_stuff_f(f_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
         print("\nf:\n", f, "\n")
+        f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=RATED_BATT_CAP)
 
         # Sort unique
         h_raw = np.unique(h_raw)
