@@ -52,6 +52,75 @@ HYS_CAP_REDESIGN = 3.6e4  # faster time constant needed
 HYS_SOC_MIN_MARG = 0.15  # add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
 HYS_IB_THR = 1.  # ignore reset if opposite situation exists
 
+# Battleborn properties for fault thresholds
+X_SOC_MIN_BB = [5.,   11.1,   20.,  30.,  40.]  # Temperature breakpoints for soc_min table
+T_SOC_MIN_BB = [0.10, 0.07,  0.05, 0.00, 0.20]  # soc_min(t).  At 40C BMS shuts off at 12V
+lut_soc_min_bb = myTables.TableInterp1D(np.array(X_SOC_MIN_BB), np.array(T_SOC_MIN_BB))
+HDB_VBATT = 0.05  # Half deadband to filter Vb, V (0.05)
+V_SAT_BB = 13.85  # Saturation threshold at temperature, deg C
+NOM_VSAT_BB = V_SAT_BB - HDB_VBATT  # Center in hysteresis
+DVOC_DT_BB = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V/deg C
+WRAP_HI_A = 32.  # Wrap high voltage threshold, A (32 after testing; 16=0.2v)
+WRAP_LO_A = -32.  # Wrap high voltage threshold, A (-32, -20 too small on truck -16=-0.2v)
+WRAP_HI_SAT_MARG = 0.2  # Wrap voltage margin to saturation, V (0.2)
+WRAP_HI_SAT_SCLR = 2.0  # Wrap voltage margin scalar when saturated (2.0)
+IBATT_DISAGREE_THRESH = 10.  # Signal selection threshold for current disagree test, A (10.)
+QUIET_A = 0.005  # Quiet set threshold, sec (0.005, 0.01 too large in truck)
+NOMINAL_TB = 15.  # Middle of the road Tb for decent reversionary operation, deg C (15.)
+WRAP_SOC_HI_OFF = 0.97  # Disable e_wrap_hi when saturated
+WRAP_SOC_HI_SCLR = 1000.  # Huge to disable e_wrap
+WRAP_SOC_LO_OFF_ABS = 0.35  # Disable e_wrap when near empty (soc lo any Tb)
+WRAP_SOC_LO_OFF_REL = 0.2  # Disable e_wrap when near empty (soc lo for high Tb where soc_min=.2, voltage cutback)
+WRAP_SOC_LO_SCLR = 60.  # Large to disable e_wrap (60. for startup)
+CC_DIFF_SOC_DIS_THRESH = 0.2  # Signal selection threshold for Coulomb counter EKF disagree test (0.2)
+CC_DIFF_LO_SOC_SCLR = 4.  # Large to disable cc_diff
+r_0 = 0.003  # Randles R0, ohms
+r_ct = 0.0016  # Randles charge transfer resistance, ohms
+r_diff = 0.0077  # Randles diffusion resistance, ohms
+r_ss = r_0 + r_ct + r_diff
+
+
+# Calculate thresholds from global input values listed above (review these)
+def fault_thr_bb(Tb, soc, voc_soc, soc_min_tbl=lut_soc_min_bb):
+    vsat_ = NOM_VSAT_BB + (Tb-25.)*DVOC_DT_BB
+
+    # cc_diff
+    soc_min = soc_min_tbl.interp(Tb)
+    if soc <= max(soc_min+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS):
+        cc_diff_empty_sclr_ = CC_DIFF_LO_SOC_SCLR
+    else:
+        cc_diff_empty_sclr_ = 1.
+    cc_diff_sclr_ = 1.  # ram adjusts during data collection
+    cc_diff_thr = CC_DIFF_SOC_DIS_THRESH * cc_diff_sclr_ * cc_diff_empty_sclr_
+
+    # wrap
+    if soc >= WRAP_SOC_HI_OFF:
+        ewsat_sclr_ = WRAP_SOC_HI_SCLR
+        ewmin_sclr_ = 1.
+    elif soc <= max(soc_min+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS):
+        ewsat_sclr_ = 1.
+        ewmin_sclr_ = WRAP_SOC_LO_SCLR
+    elif voc_soc > (vsat_ - WRAP_HI_SAT_MARG):
+        ewsat_sclr_ = WRAP_HI_SAT_SCLR
+        ewmin_sclr_ = 1.
+    else:
+        ewsat_sclr_ = 1.
+        ewmin_sclr_ = 1.
+    ewhi_sclr_ = 1.  # ram adjusts during data collection
+    ewhi_thr = r_ss * WRAP_HI_A * ewhi_sclr_ * ewsat_sclr_ * ewmin_sclr_
+    ewlo_sclr_ = 1.  # ram adjusts during data collection
+    ewlo_thr = r_ss * WRAP_LO_A * ewlo_sclr_ * ewsat_sclr_ * ewmin_sclr_
+
+    # ib_diff
+    ib_diff_sclr_ = 1.  # ram adjusts during data collection
+    ib_diff_thr = IBATT_DISAGREE_THRESH * ib_diff_sclr_
+
+    # ib_quiet
+    ib_quiet_sclr_ = 1.  # ram adjusts during data collection
+    ib_quiet_thr = QUIET_A * ib_quiet_sclr_
+
+    return cc_diff_thr, ewhi_thr, ewlo_thr, ib_diff_thr, ib_quiet_thr
+
 
 # Unix-like cat function
 # e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
@@ -113,7 +182,7 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.figure()  # 1
     n_fig += 1
     plt.subplot(331)
-    plt.title(plot_title + ' p1')
+    plt.title(plot_title + ' h1')
     plt.suptitle(subtitle)
     plt.plot(hi.time_day, hi.soc, marker='.', markersize='3', linestyle='-', color='black', label='soc')
     plt.plot(hi.time_day, hi.soc_ekf, marker='+', markersize='3', linestyle='--', color='blue', label='soc_ekf')
@@ -175,7 +244,7 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.figure()  # 2
     n_fig += 1
     plt.subplot(221)
-    plt.title(plot_title)
+    plt.title(plot_title + ' h2')
     plt.suptitle(subtitle)
     plt.plot(hi.time_day, hi.Vsat, marker='.', markersize='1', linestyle='-', color='orange', linewidth='1', label='Vsat')
     plt.plot(hi.time_day, hi.Vb, marker='1', markersize='3', linestyle='None', color='black', label='Vb')
@@ -212,7 +281,7 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.figure()  # 3
     n_fig += 1
     plt.subplot(131)
-    plt.title(plot_title)
+    plt.title(plot_title + ' h3')
     plt.suptitle(subtitle)
     plt.plot(hi.soc_r, hi.Voc_stat_r_dis, marker='o', markersize='3', linestyle='-', color='orange', label='Voc_stat_r_dis')
     plt.plot(hi.soc_r, hi.Voc_stat_r_chg, marker='o', markersize='3', linestyle='-', color='cyan', label='Voc_stat_r_chg')
@@ -243,7 +312,7 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.figure()  # 4
     n_fig += 1
     plt.subplot(221)
-    plt.title(plot_title)
+    plt.title(plot_title + ' h4')
     plt.suptitle(subtitle)
     plt.plot(hi.time_day, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
     plt.plot(hi.time_day, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
@@ -277,7 +346,7 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.figure()  # 5
     n_fig += 1
     plt.subplot(221)
-    plt.title(plot_title)
+    plt.title(plot_title + ' h5')
     plt.suptitle(subtitle)
     plt.plot(hi.soc, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
     plt.plot(hi.soc, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
@@ -319,7 +388,7 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
     plt.figure()  # 1
     n_fig += 1
     plt.subplot(331)
-    plt.title(plot_title + ' p1')
+    plt.title(plot_title + ' f1')
     plt.suptitle(subtitle)
     plt.plot(hi.time_day, hi.soc, marker='.', markersize='3', linestyle='-', color='black', label='soc')
     plt.plot(hi.time_day, hi.soc_ekf, marker='+', markersize='3', linestyle='--', color='blue', label='soc_ekf')
@@ -377,7 +446,7 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
     plt.figure()  # 2
     n_fig += 1
     plt.subplot(221)
-    plt.title(plot_title)
+    plt.title(plot_title + ' f2')
     plt.suptitle(subtitle)
     plt.plot(hi.time_day, hi.Vsat, marker='.', markersize='1', linestyle='-', color='orange', linewidth='1', label='Vsat')
     plt.plot(hi.time_day, hi.Vb, marker='1', markersize='3', linestyle='None', color='black', label='Vb')
@@ -413,39 +482,8 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
 
     plt.figure()  # 3
     n_fig += 1
-    plt.subplot(131)
-    plt.title(plot_title)
-    plt.suptitle(subtitle)
-    plt.plot(hi.soc_r, hi.Voc_stat_r_dis, marker='o', markersize='3', linestyle='-', color='orange', label='Voc_stat_r_dis')
-    plt.plot(hi.soc_r, hi.Voc_stat_r_chg, marker='o', markersize='3', linestyle='-', color='cyan', label='Voc_stat_r_chg')
-    plt.plot(hi.soc, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_dis')
-    plt.plot(hi.soc, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_chg')
-    plt.plot(x_sch, z_sch, marker='+', markersize='2', linestyle='--', color='black', label='Schedule')
-    plt.xlabel('soc')
-    plt.legend(loc=4)
-    plt.ylim(12, 13.5)
-    plt.subplot(132)
-    plt.plot(hi.soc_r, hi.Voc_stat_rescaled_r_dis, marker='o', markersize='3', linestyle='-', color='orangered', label='Voc_stat_rescaled_r_dis')
-    plt.plot(hi.soc_r, hi.Voc_stat_rescaled_r_chg, marker='o', markersize='3', linestyle='-', color='springgreen', label='Voc_stat_rescaled_r_chg')
-    plt.plot(x_sch, z_sch+voc_reset, marker='+', markersize='2', linestyle='--', color='black', label='Schedule RESET')
-    plt.xlabel('soc_r')
-    plt.legend(loc=4)
-    plt.ylim(12, 13.5)
-    plt.subplot(133)
-    plt.plot(hi.soc_r, hi.Voc_stat_redesign_r_dis, marker='x', markersize='3', linestyle='-', color='red', label='Voc_stat_redesign_r_dis')
-    plt.plot(hi.soc_r, hi.Voc_stat_redesign_r_chg, marker='x', markersize='3', linestyle='-', color='green', label='Voc_stat_redesign_r_chg')
-    plt.plot(x_sch, z_sch+voc_reset, marker='+', markersize='2', linestyle='--', color='black', label='Schedule RESET')
-    plt.xlabel('soc_r')
-    plt.legend(loc=4)
-    plt.ylim(12, 13.5)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
-    fig_files.append(fig_file_name)
-    plt.savefig(fig_file_name, format="png")
-
-    plt.figure()  # 4
-    n_fig += 1
     plt.subplot(221)
-    plt.title(plot_title)
+    plt.title(plot_title + ' f3')
     plt.suptitle(subtitle)
     plt.plot(hi.time_day, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
     plt.plot(hi.time_day, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
@@ -476,10 +514,10 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 5
+    plt.figure()  # 4
     n_fig += 1
     plt.subplot(221)
-    plt.title(plot_title)
+    plt.title(plot_title + ' f4')
     plt.suptitle(subtitle)
     plt.plot(hi.soc, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
     plt.plot(hi.soc, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
@@ -595,7 +633,22 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     soc_min = []
     Vsat = []
     time_sec = []
+    cc_diff_thr = []
+    ewhi_thr = []
+    ewlo_thr = []
+    ib_diff_thr = []
+    ib_quiet_thr = []
     for i in range(len(d_ra.time)):
+        soc = d_ra.soc[i]
+        voc_stat = d_ra.Voc_stat[i]
+        Tb = d_ra.Tb[i]
+        cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = fault_thr_bb(Tb, soc, voc_stat,
+                                                                                       soc_min_tbl=soc_min_tbl)
+        cc_diff_thr.append(cc_diff_thr_)
+        ewhi_thr.append(ewhi_thr_)
+        ewlo_thr.append(ewlo_thr_)
+        ib_diff_thr.append(ib_diff_thr_)
+        ib_quiet_thr.append(ib_quiet_thr_)
         voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
         soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
         Vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
@@ -608,6 +661,11 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'Vsat', np.array(Vsat, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'cc_diff_thr', np.array(cc_diff_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ewhi_thr', np.array(ewhi_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ewlo_thr', np.array(ewlo_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_diff_thr', np.array(ib_diff_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_quiet_thr', np.array(ib_quiet_thr, dtype=float))
     d_mod = calc_fault(d_ra, d_mod)
     Voc_stat_chg = np.copy(d_mod.Voc_stat)
     Voc_stat_dis = np.copy(d_mod.Voc_stat)
