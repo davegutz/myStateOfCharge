@@ -26,10 +26,35 @@ if __name__ == '__main__':
     from MonSim import replicate, save_clean_file, save_clean_file_sim
     from DataOverModel import SavedData, SavedDataSim, write_clean_file, overall
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
+    from CompareHist_20221028 import add_stuff_f, over_fault, filter_Tb, X_SOC_MIN_BB, T_SOC_MIN_BB, IB_BAND, RATED_BATT_CAP
     import matplotlib.pyplot as plt
     plt.rcParams['axes.grid'] = True
     from datetime import datetime, timedelta
+    from pyDAGx import myTables
     global mon_old
+
+    # Battleborn Bmon=0, Bsim=0
+    t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17, 0.20, 0.25, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.99, 0.995,
+                1.00]
+    t_y_t0 = [5., 11.1, 20., 30., 40.]
+    t_voc0 = [4.00, 4.00, 9.00, 11.80, 12.50, 12.60, 12.67, 12.76, 12.82, 12.93, 12.98, 13.03, 13.07, 13.11, 13.17,
+              13.22, 13.59, 14.45,
+              4.00, 4.00, 10.00, 12.30, 12.60, 12.65, 12.71, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20,
+              13.23, 13.60, 14.46,
+              4.00, 12.22, 12.66, 12.74, 12.80, 12.85, 12.89, 12.95, 12.99, 13.05, 13.08, 13.13, 13.18, 13.21, 13.25,
+              13.27, 13.72, 14.50,
+              4.00, 4.00, 12.00, 12.65, 12.75, 12.80, 12.85, 12.95, 13.00, 13.08, 13.12, 13.16, 13.20, 13.24, 13.26,
+              13.27, 13.72, 14.50,
+              4.00, 4.00, 4.00, 4.00, 10.50, 11.93, 12.78, 12.83, 12.89, 12.97, 13.06, 13.10, 13.13, 13.16, 13.19,
+              13.20, 13.72, 14.50]
+    x0 = np.array(t_x_soc0)
+    y0 = np.array(t_y_t0)
+    data_interp0 = np.array(t_voc0)
+    lut_voc = myTables.TableInterp2D(x0, y0, data_interp0)
+    t_x_soc_min = [5., 11.1, 20., 30., 40.]
+    t_soc_min = [0.07, 0.05, -0.05, 0.00, 0.20]
+    lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
+
 
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
@@ -99,6 +124,7 @@ if __name__ == '__main__':
         unit_key_ekf = "unit_ekf"
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
+        temp_flt_file = 'flt_compareRun.txt'
         pathToSavePdfTo = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
@@ -154,6 +180,23 @@ if __name__ == '__main__':
         else:
             sim_old = None
 
+        # Load fault
+        temp_flt_file_clean = write_clean_file(data_file_old_txt, type_='_flt', title_key='fltb', unit_key='unit_f',
+                                               skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp,
+                                               comment_str='---')
+        cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'Voc_stat',
+                  'e_w_f', 'fltw', 'falw')
+        if temp_flt_file_clean:
+            f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
+                                  encoding=None).view(np.recarray)
+        else:
+            print("data from", temp_flt_file, "empty after loading")
+            exit(1)
+        f_raw = np.unique(f_raw)
+        f = add_stuff_f(f_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
+        print("\nf:\n", f, "\n")
+        f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=RATED_BATT_CAP)
+
         # How to initialize
         if mon_old.time[0] == 0.:  # no initialization flat detected at beginning of recording
             init_time = 1.
@@ -187,6 +230,9 @@ if __name__ == '__main__':
         #                                 n_fig=n_fig, suffix='_ver')  # sim over mon verify
         n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
+        if len(f.time) > 1:
+            n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
+                                          n_fig=n_fig, x_sch=X_SOC_MIN_BB, z_sch=T_SOC_MIN_BB, voc_reset=0.)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
         cleanup_fig_files(fig_files)

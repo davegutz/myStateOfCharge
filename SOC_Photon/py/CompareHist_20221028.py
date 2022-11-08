@@ -79,7 +79,6 @@ r_ct = 0.0016  # Randles charge transfer resistance, ohms
 r_diff = 0.0077  # Randles diffusion resistance, ohms
 r_ss = r_0 + r_ct + r_diff
 
-
 # Calculate thresholds from global input values listed above (review these)
 def fault_thr_bb(Tb, soc, voc_soc, soc_min_tbl=lut_soc_min_bb):
     vsat_ = NOM_VSAT_BB + (Tb-25.)*DVOC_DT_BB
