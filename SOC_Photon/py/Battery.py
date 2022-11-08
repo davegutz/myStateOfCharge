@@ -295,7 +295,7 @@ class Battery(Coulombs):
 
 
 class BatteryMonitor(Battery, EKF1x1):
-    """Extend basic class to monitor"""
+    """Extend Battery class to make a monitor"""
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
@@ -638,7 +638,7 @@ class BatteryMonitor(Battery, EKF1x1):
 
 
 class BatterySim(Battery):
-    """Extend basic class to run a model"""
+    """Extend Battery class to make a model"""
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,

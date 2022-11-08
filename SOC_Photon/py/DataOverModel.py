@@ -220,6 +220,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.legend(loc=1)
     plt.subplot(325)
     plt.plot(mo.time, mo.dV_hys, color='green', linestyle='-', label='dV_hys')
+    plt.plot(mv.time, mv.dv_hys, color='cyan', linestyle='--', label='dv_hys_ver')
     if sv:
         from pyDAGx import myTables
         lut_vb = myTables.TableInterp1D(np.array(mo.time), np.array(mo.Vb))
@@ -231,8 +232,8 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
             voc_req[i] = lut_vb.interp(sv.time[i]) - sv.dv_dyn[i]
             voc_stat_req[i] = sv.voc_stat[i]
             dv_hys_req[i] = voc_req[i] - sv.voc_stat[i]
-        plt.plot(sv.time, sv.dv_hys, color='red', linestyle='--', label='dv_hys_s_ver')
-        plt.plot(sv.time, dv_hys_req, color='black', linestyle='-.', label='dv_hys_req_s_ver')
+        plt.plot(sv.time, np.array(sv.dv_hys)+0.1, color='red', linestyle='-', label='dv_hys_s_ver+0.1')
+        plt.plot(sv.time, np.array(dv_hys_req)+0.1, color='black', linestyle='--', label='dv_hys_req_s_ver+0.1')
 
     if so:
         from pyDAGx import myTables
@@ -245,9 +246,8 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
             voc_req[i] = lut_vb.interp(so.time[i]) - so.dv_dyn_s[i]
             voc_stat_req[i] = so.voc_stat_s[i]
             dv_hys_req[i] = voc_req[i] - so.voc_stat_s[i]
-        plt.plot(so.time, so.dv_hys_s, color='magenta',  linestyle=':', label='dv_hys_s')
-        plt.plot(so.time, dv_hys_req, color='orange', linestyle='--', label='dv_hys_req_s')
-    plt.plot(mv.time, mv.dv_hys, color='cyan', linestyle=':', label='dv_hys_ver')
+        plt.plot(so.time, np.array(so.dv_hys_s)-0.1, color='magenta',  linestyle='-', label='dv_hys_s-0.1')
+        plt.plot(so.time, np.array(dv_hys_req)-0.1, color='orange', linestyle='--', label='dv_hys_req_s-0.1')
     plt.legend(loc=1)
     plt.subplot(326)
     plt.plot(mo.time, mo.Tb, color='green', linestyle='-', label='temp_c')
