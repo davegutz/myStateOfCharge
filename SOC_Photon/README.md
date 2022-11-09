@@ -404,14 +404,11 @@ Throughput test
 45. Fault injection testing
 
 Full regression suite:
-  initModel:	Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;v2;Rs;W160;Pf;Ca0.6;W160;v0;Pf;
-				DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Ca.5;Dr100;Rf;Pf;DP4;
-  initModelSat:	Ff0;D^0;Xm7
   ampHiFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm50;Dn0.0001;
                   Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Ca.5;Dr100;Rf;Pf;DP4;
   ampHiFailFf:    Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm50;Dn0.0001;
                   Hd;Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Ca.5;Dr100;Rf;Pf;DP4;
-  ampLoFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm-50;Dn0.0001;Ff0;
+  ampLoFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;Dm-50;Dn0.0001;
                   Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Ca.5;Dr100;Rf;Pf;DP4;
   ampHiFailNoise: Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;v2;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;Ff0;
                   Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Ca.5;Dr100;Rf;Pf;DP4;
