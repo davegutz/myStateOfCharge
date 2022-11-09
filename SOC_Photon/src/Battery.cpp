@@ -536,8 +536,8 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
         ice_->iterate(rp.debug==-1 && reset_temp, SOLV_SUCC_COUNTS, false);
     }
     init_soc_ekf(soc_solved);
-    // if ( rp.debug==-1 && reset_temp) Serial.printf("sek: Vb%7.3f Vba%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d dx%8.4f e%10.6f soc_sol%8.4f\n",
-    //     Sen->Vb, Vb_avg, voc_stat_, voc_solved, ice_->count(), ice_->dx(), ice_->e(), soc_solved);    
+    if ( rp.debug==-1 && reset_temp) Serial.printf("sek: Vb%7.3f Vba%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d dx%8.4f e%10.6f soc_sol%8.4f\n",
+        Sen->Vb, Vb_avg, voc_stat_, voc_solved, ice_->count(), ice_->dx(), ice_->e(), soc_solved);    
     // if ( rp.debug==7 )
     //         Serial.printf("solve    :n_avg, Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %d, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
     //         n_avg, Tb_avg, Vb_avg, Ib_avg, ice_->count(), soc_solved, voc, voc_solved, dv_dyn, dv_hys_, ice_->e());
@@ -801,7 +801,6 @@ Outputs:
 */
 double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, BatteryMonitor *Mon) 
 {
-    // float charge_curr = Sen->Ib / (*rp_nP_); TODO:  re-run Xp10 with this change
     float charge_curr = ib_charge_;
     double d_delta_q = charge_curr * Sen->T;
     if ( charge_curr>0. ) d_delta_q *= coul_eff_;
@@ -870,11 +869,11 @@ void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
     vb_ = Randles_->y(0);
     ib_fut_ = ib_;
     init_hys(0.0);
-    // if ( rp.debug==-1 )
-    // {
-    //     Serial.printf("sim: ib%7.3f voc%7.3f vb%7.3f\n", ib_, voc_, vb_);
-    //     Randles_->pretty_print();
-    // }
+    if ( rp.debug==-1 )
+    {
+        Serial.printf("sim: ib%7.3f voc%7.3f vb%7.3f\n", ib_, voc_, vb_);
+        Randles_->pretty_print();
+    }
 }
 
 // Load states from retained memory
@@ -982,7 +981,7 @@ void Hysteresis::pretty_print()
 }
 
 // Dynamic update  // TODO:  change sign of e_wrap everywhere
-double Hysteresis::update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap, const boolean reset)
+double Hysteresis::update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap, const boolean reset_temp)
 {
     float dv_max = hys_Tx_->interp(soc_);
     float dv_min = hys_Tn_->interp(soc_);
@@ -997,7 +996,7 @@ double Hysteresis::update(const double dt, const boolean init_high, const boolea
         dv_hys_ = max(HYS_DV_MIN, -e_wrap); // TODO:  hys init values
         dv_dot_ = 0.;
     }
-    else if ( reset )
+    else if ( reset_temp )
     {
         ioc_ = ib_;
         dv_dot_ = 0.;
@@ -1010,7 +1009,7 @@ double Hysteresis::update(const double dt, const boolean init_high, const boolea
             res_ = look_hys(dv_hys_, soc_);
             // if ( rp.debug==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
         }
-        // if ( rp.debug==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
+        if ( rp.debug==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
     }
 
     // Normal ODE integration

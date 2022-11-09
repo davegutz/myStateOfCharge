@@ -642,6 +642,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 chit("PM;", SOON);
                 chit("PN;", SOON);
                 chit("Ph;", SOON);
+                chit("Hd;", SOON);
                 chit("Pf;", SOON);
                 break;
 
@@ -939,8 +940,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Xf0.; Xa0.", ASAP);
                     if ( !rp.tweak_test() ) chit("Xb0.", ASAP);
                     chit("XS; Mk1; Nk1;", ASAP);  // Stop any injection
-                    chit("Dn" + String(COULOMBIC_EFF), ASAP);
-                    chit("Xs1.0;Di0;Dm0;Dn0;Dv0;DT0;DV0.0;DI0;Xu0;Xv1.;Dr100;DP4;", ASAP);
+                    chit("Xs1.0;Di0;Dm0;Dn0;Dv0;DT0;DV0.0;DI0;Xu0;Xv1.;Dr100;", ASAP);
                     break;
 
                   case ( 1 ):  // Xp1:  sine

@@ -51,8 +51,6 @@ StateSpace::StateSpace(double *A, double *B, double *C, double *D, const int8_t 
       mAinv_[2] = -A_[2] / Adet;
       mAinv_[3] =  A_[0] / Adet;
       mulmat(mAinv_, B_, AinvB_, n, n, p);  // TODO:  see n*p above
-      // if ( rp.debug==-1 ) Serial.printf("A\n%9.6f %9.6f\n%9.6f %9.6f\n", A_[0], A_[1], A_[2], A_[3]);
-      // if ( rp.debug==-1 ) Serial.printf("AinvB\n%9.6f %9.6f\n%9.6f %9.6f\n", mAinv_[0], mAinv_[1], mAinv_[2], mAinv_[3]);
     }
 
   }

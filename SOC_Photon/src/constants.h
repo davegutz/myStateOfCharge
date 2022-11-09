@@ -77,13 +77,6 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define TEMP_PARASITIC        true      // DS18 sensor power. true means leave it on all the time (true)
 #define TEMP_DELAY            1         // Time to block temperature sensor read in DS18 routine, ms (1)
 #define TEMP_INIT_DELAY       10000     // It takes 10 seconds first read of DS18 (10000)
-#define TWEAK_MAX_CHANGE      0.001     // Maximum allowed tweak per charge cycle, scalar +/- (0.001)
-#define TWEAK_MAX             0.01      // Maximum tweak allowed, scalar +/- (0.01)
-#define TWEAK_WAIT            6.        // Time to persist unsaturated before allowing peak, hrs (6)
-#define TWEAK_GAIN            0.66      // Tweak change limit gain to make soft landing (0.66)
-#define TWEAK_SOC_CHANGE      0.2       // Minimum charge change to tweak sensor
-#define TT_WAIT               10.       // Before tweak test print wait, s (10)
-#define TT_TAIL               60.       // After tweak test print wait, s (60)
 #define CC_DIFF_SOC_DIS_THRESH  0.2     // Signal selection threshold for Coulomb counter EKF disagree test (0.2, 0.1 too small on truck)
 #define CC_DIFF_LO_SOC_SCLR   4.        // Large to disable cc_diff
 #define TAU_ERR_FILT          5.        // Current sensor difference filter time constant, s (5.)

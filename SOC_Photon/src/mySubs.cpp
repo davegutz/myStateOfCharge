@@ -189,7 +189,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
 {
   // Sample debug statements
   // if ( rp.debug==-1 ){ Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);} 
-  // if ( rp.debug==-1 ){ Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("S.c:"); debug_m1(Mon, Sen);}
+  // if ( rp.debug==-1 ){ Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("Top:"); debug_m1(Mon, Sen);}
 
   // Gather and apply inputs
   if ( rp.mod_ib() )
