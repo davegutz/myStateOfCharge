@@ -211,13 +211,12 @@ if __name__ == '__main__':
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
-                                                             dv_hys=dv_hys, sres=1.0, t_Ib_fail=t_Ib_fail,
-                                                             use_ib_mon=use_ib_mon_in, scale_in=scale_in,
-                                                             use_Vb_raw=use_Vb_raw, scale_r_ss=scale_r_ss_in,
-                                                             s_hys_sim=scale_hys_sim_in, s_hys_mon=scale_hys_mon_in,
-                                                             dvoc_sim=dvoc_sim_in, dvoc_mon=dvoc_mon_in,
-                                                             Bmon=Bmon_in, Bsim=Bsim_in, drive_ekf=drive_ekf_in,
-                                                             dTb_in = dTb)
+                                                             sres=1.0, t_Ib_fail=t_Ib_fail, use_ib_mon=use_ib_mon_in,
+                                                             scale_in=scale_in, use_Vb_raw=use_Vb_raw,
+                                                             scale_r_ss=scale_r_ss_in, s_hys_sim=scale_hys_sim_in,
+                                                             s_hys_mon=scale_hys_mon_in, dvoc_sim=dvoc_sim_in,
+                                                             dvoc_mon=dvoc_mon_in, Bmon=Bmon_in, Bsim=Bsim_in,
+                                                             drive_ekf=drive_ekf_in, dTb_in=dTb)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots

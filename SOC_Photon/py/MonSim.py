@@ -90,7 +90,7 @@ def save_clean_file_sim(sim_ver, csv_file, unit_key):
         print("Wrote(save_clean_file_sim):", csv_file)
 
 
-def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fail=None, Vb_fail=13.2,
+def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_fail=13.2,
               t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=None, Bmon=None, use_Vb_raw=False,
               scale_r_ss=1., s_hys_sim=1., s_hys_mon=1., dvoc_sim=0., dvoc_mon=0., drive_ekf=False, dTb_in=None,
               verbose=True, t_max=None, eframe_mult=cp_eframe_mult):
@@ -108,10 +108,9 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
         Vb = mon_old.Vb
     Ib_past = mon_old.Ib_past
     Tb = mon_old.Tb
-    soc_init = mon_old.soc[0]
-    soc_ekf_init = mon_old.soc_ekf[0]
     soc_s_init = mon_old.soc_s[0]
     sat_init = mon_old.sat[0]
+    dv_hys_init = mon_old.dV_hys[0]
     chm_m = mon_old.chm
     chm_s = sim_old.chm_s
     if sim_old is not None:
@@ -139,11 +138,11 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
     s_q = Scale(1., 3., 0.000005, 0.00005)
     s_r = Scale(1., 3., 0.001, 1.)   # t_Ib_fail = 1000
     sim = BatterySim(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
-                     dv_hys=dv_hys, sres=sres, scale_r_ss=scale_r_ss, s_hys=s_hys_sim, dvoc=dvoc_sim)
+                     dv_hys=dv_hys_init, sres=sres, scale_r_ss=scale_r_ss, s_hys=s_hys_sim, dvoc=dvoc_sim)
     mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
-                         temp_c=temp_c, scale=scale, hys_scale=hys_scale_monitor, tweak_test=tweak_test, dv_hys=dv_hys,
-                         sres=sres, scaler_q=s_q, scaler_r=s_r, scale_r_ss=scale_r_ss, s_hys=s_hys_mon, dvoc=dvoc_mon,
-                         eframe_mult=eframe_mult)
+                         temp_c=temp_c, scale=scale, hys_scale=hys_scale_monitor, tweak_test=tweak_test,
+                         dv_hys=dv_hys_init, sres=sres, scaler_q=s_q, scaler_r=s_r, scale_r_ss=scale_r_ss,
+                         s_hys=s_hys_mon, dvoc=dvoc_mon, eframe_mult=eframe_mult)
     # need Tb input.   perhaps need higher order to enforce basic type 1 response
     Is_sat_delay = TFDelay(in_=mon_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
@@ -171,14 +170,19 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
         # Tried hard not to re-implement solvers in the Python verification  tool
         # Also, BTW, did not implement signal selection or tweak logic
         if reset:
-            sim.apply_soc(soc_s_init, Tb_)
+            sim.apply_soc(mon_old.soc_s[i], Tb_)
             rp.delta_q_model = sim.delta_q
             rp.t_last_model = Tb_ + dt_model
             sim.load(rp.delta_q_model, rp.t_last_model)
             sim.init_battery()
             sim.apply_delta_q_t(rp.delta_q_model, rp.t_last_model)
+            if sim_old is not None:
+                sat_s_init = sim_old.sat_s[0]
+            else:
+                sat_s_init = mon_old.Voc_stat[0] > mon_old.Vsat[0]
             sim.sat = sat_s_init
             mon.sat = sat_init
+            mon.hys.dv_hys = mon_old.dV_hys[i]
 
         # Models
         if sim_old is not None and not use_ib_mon:
@@ -197,13 +201,13 @@ def replicate(mon_old, sim_old=None, init_time=-4., dv_hys=0., sres=1., t_Vb_fai
 
         # EKF
         if reset:
-            mon.apply_soc(soc_init, Tb_)
+            mon.apply_soc(mon_old.soc[i], Tb_)
             rp.delta_q = mon.delta_q
             rp.t_last = Tb_
             mon.load(rp.delta_q, rp.t_last)
             mon.assign_temp_c(Tb_)
             mon.init_battery()
-            mon.init_soc_ekf(soc_ekf_init)  # when modeling (assumed in python) ekf wants to equal model
+            mon.init_soc_ekf(mon_old.soc_ekf[i])  # when modeling (assumed in python) ekf wants to equal model
 
         # Monitor calculations including ekf
         if Bmon is None:
@@ -381,13 +385,11 @@ if __name__ == '__main__':
                 init_time = init_time_in
             else:
                 init_time = -4.
-        # Get dv_hys from data
-        dv_hys = mon_old.dV_hys[0]
 
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
-                                                             dv_hys=dv_hys, sres=1.0, t_Ib_fail=t_Ib_fail,
+                                                             sres=1.0, t_Ib_fail=t_Ib_fail,
                                                              use_ib_mon=use_ib_mon_in, scale_in=scale_in,
                                                              use_Vb_raw=use_Vb_raw, scale_r_ss=scale_r_ss_in,
                                                              s_hys_sim=scale_hys_sim_in, s_hys_mon=scale_hys_mon_in,
