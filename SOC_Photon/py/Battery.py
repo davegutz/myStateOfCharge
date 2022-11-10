@@ -784,7 +784,7 @@ class BatterySim(Battery):
         if reset and sat_init is not None:
             self.model_saturated = sat_init
             self.sat = sat_init
-        Coulombs.sat = self.model_saturated
+        self.sat = self.model_saturated
 
         return self.vb
 
