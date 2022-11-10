@@ -108,7 +108,7 @@ protected:
   float *rp_shunt_gain_sclr_; // Scalar on shunt gain
 };
 
-// Fault word bits
+// Fault word bits.   All faults heal
 #define TB_FLT        0   // Momentary isolation of Tb failure, T=faulted
 #define VB_FLT        1   // Momentary isolation of Vb failure, T=faulted
 #define IB_AMP_FLT    2   // Momentary isolation of Ib amp failure, T=faulted 
@@ -124,17 +124,17 @@ protected:
 #define IB_NOA_BARE   12  // Unconnected ib bus, T = bare bus
 #define NUM_FLT       13  // Number of these
 
-// Fail word bits
-#define TB_FA         0   // Peristed, latched isolation of Tb failure, heals soft type, T=failed
-#define VB_FA         1   // Peristed, latched isolation of Vb failure, latches hard type, T=failed
-#define IB_AMP_FA     2   // Amp sensor selection memory, latches hard type, T = amp failed
-#define IB_NOA_FA     3   // Noamp sensor selection memory, latches hard type, T = no amp failed
+// Fail word bits.   A couple don't latch because single sensor fail in dual sensor system
+#define TB_FA         0   // Peristed, latched isolation of Tb failure, heals because soft type, T=failed
+#define VB_FA         1   // Peristed, latched isolation of Vb failure, latches because hard type, T=failed
+#define IB_AMP_FA     2   // Amp sensor selection memory, latches because hard type, T = amp failed
+#define IB_NOA_FA     3   // Noamp sensor selection memory, latches because hard type, T = no amp failed
 #define CC_DIFF_FA    4   // Accumulated Coulomb Counter difference used to isolate IB differences, heals functional type, T = faulted=failed 
-#define WRAP_HI_FA    5   // Wrap isolates to Ib high fail, heals dual sensor (no latch)
-#define WRAP_LO_FA    6   // Wrap isolates to Ib low fail, heals dual sensor (no latch)
-#define WRAP_VB_FA    7   // Wrap isolates to Vb fail, latches single sensor (latch)
-#define IB_DIFF_HI_FA 8   // Persisted sensor difference error, latches hard type, T = fail
-#define IB_DIFF_LO_FA 9   // Persisted sensor difference error, latches hard type, T = fail
+#define WRAP_HI_FA    5   // Wrap isolates to Ib high fail, heals because dual sensor (no latch)
+#define WRAP_LO_FA    6   // Wrap isolates to Ib low fail, heals because dual sensor (no latch)
+#define WRAP_VB_FA    7   // Wrap isolates to Vb fail, latches because single sensor (latch)
+#define IB_DIFF_HI_FA 8   // Persisted sensor difference error, latches because hard type, T = fail
+#define IB_DIFF_LO_FA 9   // Persisted sensor difference error, latches because hard type, T = fail
 #define IB_DSCN_FA    10  // Dual persisted quiet error, heals functional type, T = disconnected shunt
 #define NUM_FA        11  // Number of these
 
