@@ -546,6 +546,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       reset_all_faults_ = false;
       latched_fail_ = false;
       latched_fail_fake_ = false;
+      preserving_ = false;
       count = 0;
     }
     else
