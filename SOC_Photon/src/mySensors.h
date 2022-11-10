@@ -210,13 +210,17 @@ public:
   float ib_rate() { return ib_rate_; };
   void ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
   boolean no_fails() { return !latched_fail_; };
+  boolean no_fails_fake() { return !latched_fail_fake_; };
+  void preserving(const boolean cmd) { preserving_ = cmd; };
+  boolean preserving() { return preserving_; };
   void pretty_print(Sensors *Sen, BatteryMonitor *Mon);
   void pretty_print1(Sensors *Sen, BatteryMonitor *Mon);
+  boolean record() { if ( cp.fake_faults ) return no_fails_fake(); else return no_fails(); };
   boolean red_loss() { return faultRead(RED_LOSS); };
   boolean red_loss_calc() { return (ib_sel_stat_!=1 || (rp.ib_select!=0 && !cp.fake_faults)
    || ib_diff_fa() || vb_fail()); };
   void reset_all_faults(const boolean cmd) { reset_all_faults_ = cmd; };
-  boolean reset_all_faults() { return ( reset_all_faults_ ); };
+  boolean reset_all_faults() { return reset_all_faults_; };
   void select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ib signals
   void shunt_select_initial();   // Choose between shunts for model
@@ -270,6 +274,7 @@ protected:
   float ib_quiet_;          // ib hardware noise, A/s
   float ib_rate_;           // ib rate, A/s
   boolean latched_fail_;    // There is a latched fail, T=latched fail
+  boolean latched_fail_fake_;  // There would be a latched fail if not faking, T=latched fail
   int8_t tb_sel_stat_;      // Memory of Tb signal selection, 0=none, 1=sensor
   float tb_stale_time_sclr_; // Scalar on persistences of Tb hardware stale chec, (1)
   int8_t vb_sel_stat_;      // Memory of Vb signal selection, 0=none, 1=sensor
@@ -282,6 +287,7 @@ protected:
   uint16_t falw_;           // Bitmapped fails
   TFDelay *WrapHi;          // Time high wrap fail persistence
   TFDelay *WrapLo;          // Time low wrap fail persistence
+  boolean preserving_;      // Saving fault buffer.   Stopped recording.  T=preserve
 };
 
 

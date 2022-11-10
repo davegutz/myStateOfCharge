@@ -357,7 +357,7 @@ if __name__ == '__main__':
                     'vb_sel', 'Vb_h', 'Vb_s', 'mvb', 'Vb',
                     'Tb_h', 'Tb_s', 'mtb', 'Tb_f',
                     'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel',
-                    'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr')
+                    'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr', 'preserving')
         sel_old_raw = None
         if sel_file_clean:
             sel_old_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,

@@ -92,7 +92,7 @@ void print_signal_sel_header(void)
   if ( rp.debug==2  ) // print_signal_sel_header
     Serial.printf("unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,");
     Serial.printf("    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f, ");
-    Serial.printf("  fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,\n");
+    Serial.printf("  fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,\n");
           // -----, cTime, reset, rp.ib_select,
           //                                     cc_diff_,
           //                                              Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model, Ib_model,
@@ -485,21 +485,30 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 
   // Fault snap buffer management
   static uint8_t fails_repeated = 0;
-  if ( Sen->Flt->reset_all_faults() ) fails_repeated = 0;
-  static boolean no_fails_past = Sen->Flt->no_fails();
-  boolean instant_of_failure = no_fails_past && !Sen->Flt->no_fails();
+  if ( Sen->Flt->reset_all_faults() )
+  {
+    fails_repeated = 0;
+    Sen->Flt->preserving(false);
+  }
+  static boolean record_past = Sen->Flt->record();
+  boolean instant_of_failure = record_past && !Sen->Flt->record();
   if ( storing_fault_data || instant_of_failure )
   {
-    if ( Sen->Flt->no_fails() ) fails_repeated = 0;
+    if ( Sen->Flt->record() ) fails_repeated = 0;
     else fails_repeated = min(fails_repeated + 1, 99);
     if ( fails_repeated < 3 )
     {
       if ( ++rp.iflt>NFLT-1 ) rp.iflt = 0;  // wrap buffer
       myFlt[rp.iflt].assign(Time.now(), Mon, Sen);
     }
+    else if ( fails_repeated < 4 )
+    {
+      Serial.printf("preserving fault buffer\n");
+      Sen->Flt->preserving(true);
+    }
     if ( instant_of_failure ) last_snap = now;
   }
-  no_fails_past = Sen->Flt->no_fails();
+  record_past = Sen->Flt->record();
 
   // Charge calculation and memory store
   // Inputs: Sim.model_saturated, Sen->Tb, Sen->Ib, and Sim.soc

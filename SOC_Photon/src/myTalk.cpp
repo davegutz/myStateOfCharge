@@ -525,7 +525,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'f' ):  //   Ff<>:  fake faults
                 INT_in = cp.input_string.substring(2).toInt();
-                Serial.printf("cp.fake_faults, rp.ib_select %d, %d to", cp.fake_faults, rp.ib_select);
+                Serial.printf("cp.fake_faults, rp.ib_select %d, %d to ", cp.fake_faults, rp.ib_select);
                 cp.fake_faults = INT_in;
                 rp.ib_select = INT_in;
                 Serial.printf("%d, %d\n", cp.fake_faults, rp.ib_select);
@@ -568,7 +568,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'V' ):  //   FV<>:  Fault disable vb hard
                 INT_in = cp.input_string.substring(2).toInt();
-                Serial.printf("Sen->Flt->disab_vb_fa %d to", Sen->Flt->disab_vb_fa());
+                Serial.printf("Sen->Flt->disab_vb_fa %d to ", Sen->Flt->disab_vb_fa());
                 Sen->Flt->disab_vb_fa(INT_in);
                 Serial.printf("%d\n", Sen->Flt->disab_vb_fa());
                 break;

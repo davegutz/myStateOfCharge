@@ -88,10 +88,10 @@ if __name__ == '__main__':
 
         # Regression suite
         # data_file_old_txt = 'ampHiFail v20221028.txt'
-        # data_file_old_txt = 'ampHiFailFf v20221028.txt'
+        data_file_old_txt = 'ampHiFailFf v20221028.txt'
         # data_file_old_txt = 'ampLoFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'
-        data_file_old_txt = 'rapidTweakRegression v20221028.txt'
+        # data_file_old_txt = 'rapidTweakRegression v20221028.txt'
         # data_file_old_txt = 'rapidTweakRegression40C v20221028.txt'
         # data_file_old_txt = 'slowTweakRegression v20221028.txt'
         # data_file_old_txt = 'triTweakDisch v20221028.txt'
@@ -147,7 +147,7 @@ if __name__ == '__main__':
                     'vb_sel', 'Vb_h', 'Vb_s', 'mvb', 'Vb',
                     'Tb_h', 'Tb_s', 'mtb', 'Tb_f',
                     'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel',
-                    'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr')
+                    'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr', 'preserving')
         sel_old_raw = None
         if sel_file_clean:
             sel_old_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,

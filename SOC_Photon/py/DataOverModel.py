@@ -133,6 +133,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mv.time, mv.sel, color='blue', linestyle=':', label='sel_ver')
         plt.plot(mo.time, mo.ib_sel-2, color='black', linestyle='-', label='ib_sel_stat-2')
         plt.plot(mo.time, mo.vb_sel-2, color='green', linestyle='--', label='vb_sel_stat-2')
+        plt.plot(mo.time, mo.preserving-2, color='cyan', linestyle='-.', label='preserving-2')
         plt.legend(loc=1)
         plt.subplot(333)
         plt.plot(mo.time, mo.Vb, color='green', linestyle='-', label='Vb')
@@ -1030,6 +1031,7 @@ class SavedData:
             self.ewl_thr = None
             self.ibd_thr = None
             self.ibq_thr = None
+            self.preserving = None
         else:
             falw = np.array(sel.falw[:i_end], dtype=np.uint16)
             fltw = np.array(sel.fltw[:i_end], dtype=np.uint16)
@@ -1085,6 +1087,7 @@ class SavedData:
             self.ewl_thr = np.array(sel.ewl_thr[:i_end])
             self.ibd_thr = np.array(sel.ibd_thr[:i_end])
             self.ibq_thr = np.array(sel.ibq_thr[:i_end])
+            self.preserving = np.array(sel.preserving[:i_end])
         if ekf is None:
             self.c_time_e = None
             self.Fx = None
