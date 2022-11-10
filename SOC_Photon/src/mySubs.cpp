@@ -78,8 +78,8 @@ void print_serial_header(void)
 {
   if ( ( rp.debug==1 || rp.debug==2  || rp.debug==3 ) )
   {
-    Serial.printf ("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
-    Serial1.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc, voc_soc,     Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
+    Serial.printf ("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
+    Serial1.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   ioc, voc_soc,     Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
   }
 }
 void print_serial_sim_header(void)
@@ -109,26 +109,15 @@ void print_serial_ekf_header(void)
 }
 
 // Print strings
-void create_print_string(Publish *pubList)
-{
-  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %d,  %5.2f,%7.5f,%7.5f,%7.5f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
-    pubList->unit.c_str(), pubList->hm_string.c_str(), pubList->control_time, pubList->T,
-    rp.mon_mod, pubList->sat, rp.ib_select, rp.modeling,
-    pubList->Tb, pubList->Vb, pubList->Ib, pubList->ioc, pubList->voc_soc,
-    pubList->Vsat, pubList->dV_dyn, pubList->Voc_stat, pubList->Voc_ekf,
-    pubList->y_ekf,
-    pubList->soc_model, pubList->soc_ekf, pubList->soc,
-    '\0');
-}
 void create_short_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
   double cTime;
   if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;
   else cTime = Sen->control_time;
 
-  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %d,  %4.1f,%6.3f,%10.3f,%10.3f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
+  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %d,  %d, %4.1f,%6.3f,%10.3f,%10.3f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
-    rp.mon_mod, pubList->sat, rp.ib_select, rp.modeling,
+    rp.mon_mod, pubList->sat, rp.ib_select, rp.modeling, Mon->bms_off(),
     Mon->Tb(), Mon->Vb(), Mon->Ib(), Mon->ioc(), Mon->voc_soc(), 
     Mon->Vsat(), Mon->dV_dyn(), Mon->Voc_stat(), Mon->Hx(),
     Mon->y_ekf(),

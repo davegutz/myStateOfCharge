@@ -127,8 +127,9 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mo.time, mo.mod_data, color='blue', linestyle='-', label='mod')
         plt.plot(mv.time, mv.mod_data, color='red', linestyle='--', label='mod_ver')
         plt.plot(mo.time, mo.sat+2, color='magenta', linestyle='-',  label='sat+2')
-        plt.plot(mv.time, np.array(mv.sat)+2, color='cyan', linestyle='--', label='sat_new+2')
-        plt.plot(mv.time, np.array(mv.bms_off)+2, color='orange', linestyle='-.', label='bms_off+2')
+        plt.plot(mv.time, np.array(mv.sat)+2, color='red', linestyle='--', label='sat_ver+2')
+        plt.plot(mo.time, np.array(mo.bms_off)+2, color='blue', linestyle='-.', label='bms_off+2')
+        plt.plot(mv.time, np.array(mv.bms_off)+2, color='magenta', linestyle=':', label='bms_off_ver+2')
         plt.plot(mo.time, mo.sel, color='red', linestyle='-.', label='sel')
         plt.plot(mv.time, mv.sel, color='blue', linestyle=':', label='sel_ver')
         plt.plot(mo.time, mo.ib_sel-2, color='black', linestyle='-', label='ib_sel_stat-2')
@@ -895,6 +896,7 @@ class SavedData:
             self.sat = None  # Indication that battery is saturated, T=saturated
             self.sel = None  # Current source selection, 0=amp, 1=no amp
             self.mod = None  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
+            self.bms_off = None  # Battery management system off, T=off
             self.Tb = None  # Battery bank temperature, deg C
             self.Vsat = None  # Monitor Bank saturation threshold at temperature, deg C
             self.dV_dyn = None  # Monitor Bank current induced back emf, V
@@ -964,6 +966,7 @@ class SavedData:
             self.sat = np.array(data.sat[:i_end])
             self.sel = np.array(data.sel[:i_end])
             self.mod_data = np.array(data.mod[:i_end])
+            self.bms_off = np.array(data.bmso[:i_end])
             self.Tb = np.array(data.Tb[:i_end])
             self.Vsat = np.array(data.Vsat[:i_end])
             self.dV_dyn = np.array(data.dV_dyn[:i_end])

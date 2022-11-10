@@ -297,7 +297,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
 
     // Hysteresis model
     hys_->calculate(ib_, soc_);
-    dv_hys_ = hys_->update(dt_, sat_, bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR), Sen->Flt->e_wrap(), reset_temp);
+    dv_hys_ = hys_->update(dt_, sat_, bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR ), Sen->Flt->e_wrap(), reset_temp);
     voc_stat_ = voc_ - dv_hys_;
     ioc_ = hys_->ioc();
 
