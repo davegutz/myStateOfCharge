@@ -198,6 +198,7 @@ public:
   float ib_quiet_thr_;     // Threshold below which ib is quiet, A pk
   float ib_quiet_thr() { return ib_quiet_thr_; };
   int8_t ib_sel_stat() { return ib_sel_stat_; };
+  void ib_sel_stat(const boolean cmd) { ib_sel_stat_ = cmd; };
   float ib_diff() { return ( ib_diff_ ); };
   float ib_diff_f() { return ( ib_diff_f_ ); };
   boolean ib_diff_fa() { return ( failRead(IB_DIFF_HI_FA) || failRead(IB_DIFF_LO_FA) ); };
@@ -209,6 +210,10 @@ public:
   float ib_quiet() { return ib_quiet_; };
   float ib_rate() { return ib_rate_; };
   void ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
+  int8_t latched_fail() { return latched_fail_; };
+  void latched_fail(const boolean cmd) { latched_fail_ = cmd; };
+  int8_t latched_fail_fake() { return latched_fail_fake_; };
+  void latched_fail_fake(const boolean cmd) { latched_fail_fake_ = cmd; };
   boolean no_fails() { return !latched_fail_; };
   boolean no_fails_fake() { return !latched_fail_fake_; };
   void preserving(const boolean cmd) { preserving_ = cmd; };

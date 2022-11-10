@@ -432,11 +432,11 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
         latched_fail_ = true;
       }
     }
-    else if ( ( (rp.ib_select <  0) && ib_sel_stat_last_>-1 ) ||  // TODO:  this is always false
-              ( (rp.ib_select >= 0) && ib_sel_stat_last_< 1 )   )  // Latches.  Must reset to move out of no amp selection
-    {
-      latched_fail_ = true;
-    }
+  }
+  else if ( ( (rp.ib_select <  0) && ib_sel_stat_last_>-1 ) ||
+            ( (rp.ib_select >= 0) && ib_sel_stat_last_< 1 )   )  // Latches.  Must reset to move out of no amp selection
+  {
+    latched_fail_ = true;
   }
   else
   {
@@ -447,10 +447,6 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   if ( cp.fake_faults )
   {
     if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() )  // these separate inputs don't latch
-    {
-      latched_fail_fake_ = true;
-    }
-    else if ( rp.ib_select>0 && !Sen->ShuntAmp->bare() )
     {
       latched_fail_fake_ = true;
     }
@@ -476,11 +472,6 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       {
         latched_fail_fake_ = true;
       }
-    }
-    else if ( ( (rp.ib_select <  0) && ib_sel_stat_last_>-1 ) ||  // TODO:  this is always false
-              ( (rp.ib_select >= 0) && ib_sel_stat_last_< 1 )   )  // Latches.  Must reset to move out of no amp selection
-    {
-      latched_fail_fake_ = true;
     }
     else
       latched_fail_fake_ = false;
