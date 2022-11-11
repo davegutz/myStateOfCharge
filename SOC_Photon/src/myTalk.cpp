@@ -1156,8 +1156,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  bR= "); Serial.printf("reset fault buffer\n");
 
   Serial.printf("\nB<?> Battery e.g.:\n");
-  Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='LI' [%d]\n", rp.mon_mod, MON_CHEM); 
-  Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='LI' [%d]\n", rp.sim_mod, SIM_CHEM); 
+  Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='LI' [%d]\n", rp.mon_chm, MON_CHEM); 
+  Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='LI' [%d]\n", rp.sim_chm, SIM_CHEM); 
   Serial.printf(" *BP=  %4.2f.  parallel in bank [%4.2f]'\n", rp.nP, NP); 
   Serial.printf(" *BS=  %4.2f.  series in bank [%4.2f]'\n", rp.nS, NS); 
 

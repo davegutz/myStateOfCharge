@@ -245,7 +245,7 @@ void loop()
   static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins->pin_1_wire, ReadSensors); // Manage sensor data.  Sim is in here.
 
    // Mon, used to count Coulombs and run EKF
-  static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last, &rp.nP, &rp.nS, &rp.mon_mod, &rp.hys_scale);
+  static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last, &rp.nP, &rp.nS, &rp.mon_chm, &rp.hys_scale);
 
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);   // Time persistence
@@ -297,12 +297,12 @@ void loop()
     }
 
     // Read sensors, model signals, select between them, synthesize injection signals on current
-    // Inputs:  rp.config, rp.sim_mod
+    // Inputs:  rp.config, rp.sim_chm
     // Outputs: Sen->Ib, Sen->Vb, Sen->Tb_filt, rp.inj_bias
     sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen);
 
     // Calculate Ah remaining
-    // Inputs:  rp.mon_mod, Sen->Ib, Sen->Vb, Sen->Tb_filt
+    // Inputs:  rp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_filt
     // States:  Mon.soc
     // Outputs: tcharge_wt, tcharge_ekf
     monitor(reset, reset_temp, now, Is_sat_delay, Mon, Sen);

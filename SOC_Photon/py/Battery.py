@@ -739,9 +739,9 @@ class BatterySim(Battery):
         # Using voc_ is not better because change in dv_hys_ causes the same effect.   So using nice quiet
         # voc_stat_ for ease of simulation, not accuracy.
         if not self.bms_off:
-            bms_off_local = self.voc < V_BATT_DOWN_SIM
+            bms_off_local = self.voc_stat < V_BATT_DOWN_SIM
         else:
-            bms_off_local = self.voc < V_BATT_RISING_SIM
+            bms_off_local = self.voc_stat < V_BATT_RISING_SIM
         bms_charging = self.ib_in > IB_MIN_UP
         self.bms_off = (self.temp_c < low_t) or (bms_off_local and not self.tweak_test)
         self.ib_charge = self.ib_in  # pass along current unless truly off
@@ -783,6 +783,7 @@ class BatterySim(Battery):
             self.model_saturated = sat_init
             self.sat = sat_init
         self.sat = self.model_saturated
+        # print("ib_in_s", self.ib_in, "voc", self.voc, "voc_stat", self.voc_stat, "bms_off_local", bms_off_local, "bms_charging", bms_charging, "twk_tst", self.tweak_test, "bms_off", self.bms_off, "ib_charge", self.ib_charge)
 
         return self.vb
 
@@ -880,6 +881,7 @@ class BatterySim(Battery):
         self.saved.dt.append(dt)
         self.saved.ib.append(self.ib)
         self.saved.chm.append(self.chm)
+        self.saved.bmso.append(self.bms_off)
         self.saved.ioc.append(self.ioc)
         self.saved.vb.append(self.vb)
         self.saved.vc.append(self.vc())
@@ -906,10 +908,12 @@ class BatterySim(Battery):
         self.saved.delta_q.append(self.delta_q)
         self.saved.q.append(self.q)
         self.saved.q_capacity.append(self.q_capacity)
+        self.saved.bms_off.append(self.bms_off)
 
     def save_s(self, time):
         self.saved_s.time.append(time)
         self.saved_s.chm_s.append(self.chm)
+        self.saved_s.bmso_s.append(self.bms_off)
         self.saved_s.Tb_s.append(self.temp_c)
         self.saved_s.Tbl_s.append(self.temp_lim)
         self.saved_s.vsat_s.append(self.vsat)
@@ -952,6 +956,7 @@ class Saved:
         self.time_day = []
         self.dt = []
         self.chm = []
+        self.bmso = []
         self.ib = []
         self.ioc = []
         self.vb = []
@@ -1486,6 +1491,7 @@ class SavedS:
         self.unit = []  # text title
         self.c_time = []  # Control time, s
         self.chm_s = []
+        self.bmso_s = []
         self.Tb_s = []
         self.Tbl_s = []
         self.vsat_s = []

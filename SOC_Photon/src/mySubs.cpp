@@ -85,7 +85,7 @@ void print_serial_header(void)
 void print_serial_sim_header(void)
 {
   if ( rp.debug==2  || rp.debug==3 ) // print_serial_sim_header
-    Serial.printf("unit_m,  c_time,       chm_s,  Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,\n");
+    Serial.printf("unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,\n");
 }
 void print_signal_sel_header(void)
 {
@@ -117,7 +117,7 @@ void create_high_speed_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mo
 
   sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %d,  %d, %4.1f,%6.3f,%10.3f,%10.3f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
-    rp.mon_mod, pubList->sat, rp.ib_select, rp.modeling, Mon->bms_off(),
+    rp.mon_chm, pubList->sat, rp.ib_select, rp.modeling, Mon->bms_off(),
     Mon->Tb(), Mon->Vb(), Mon->Ib(), Mon->ioc(), Mon->voc_soc(), 
     Mon->Vsat(), Mon->dV_dyn(), Mon->Voc_stat(), Mon->Hx(),
     Mon->y_ekf(),
@@ -281,7 +281,7 @@ void load_ib_vb(const boolean reset, const unsigned long now, Sensors *Sen, Pins
 }
 
 // Calculate Ah remaining
-// Inputs:  rp.mon_mod, Sen->Ib, Sen->Vb, Sen->Tb_filt
+// Inputs:  rp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_filt
 // States:  Mon.soc, Mon.soc_ekf
 // Outputs: tcharge_wt, tcharge_ekf, Voc, Voc_filt
 void  monitor(const boolean reset, const boolean reset_temp, const unsigned long now,
@@ -421,7 +421,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
 //    Needed here in this location to have available a value for
 //    Sen->Tb_filt when called.   Recalculates Sen->Ib accounting for
 //    saturation.  Sen->Ib is a feedback (used-before-calculated).
-// Inputs:  rp.config, rp.sim_mod, Sen->Tb, Sen->Ib_model_in
+// Inputs:  rp.config, rp.sim_chm, Sen->Tb, Sen->Ib_model_in
 // States:  Sim.soc
 // Outputs: Sim.temp_c_, Sen->Tb_filt, Sen->Ib, Sen->Ib_model,
 //   Sen->Vb_model, Sen->Tb_filt, rp.inj_bias

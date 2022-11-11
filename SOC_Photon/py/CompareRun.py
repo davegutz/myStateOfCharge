@@ -170,7 +170,7 @@ if __name__ == '__main__':
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
                                                unit_key=unit_key_sim, skip=skip, path_to_data=path_to_data,
                                                path_to_temp=path_to_temp)
-        cols_sim = ('c_time', 'chm_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
+        cols_sim = ('c_time', 'chm_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
                     'ib_in_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
         if data_file_sim_clean:
             sim_old_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,

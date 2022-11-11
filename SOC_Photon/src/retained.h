@@ -64,15 +64,15 @@ struct RetainedPars
   float hys_scale = HYS_SCALE;  // Hysteresis scalar
   float nP = NP;                // Number of parallel batteries in bank, e.g. '2P1S'
   float nS = NS;                // Number of series batteries in bank, e.g. '2P1S'
-  uint8_t mon_mod = MON_CHEM;   // Monitor battery chemistry type
-  uint8_t sim_mod = SIM_CHEM;   // Simulation battery chemistry type
+  uint8_t mon_chm = MON_CHEM;   // Monitor battery chemistry type
+  uint8_t sim_chm = SIM_CHEM;   // Simulation battery chemistry type
   float Vb_scale = 1.;          // Calibration scalar for Vb. V/count
 
   // Corruption test on bootup.  Needed because retained parameter memory is not managed by the compiler as it relies on
   // battery.  Small compilation changes can change where in this memory the program points, too.
   boolean is_corrupt()
   {
-    return ( this->nP==0 || this->nS==0 || this->mon_mod>10 || isnan(this->amp) || this->freq>2. ||
+    return ( this->nP==0 || this->nS==0 || this->mon_chm>10 || isnan(this->amp) || this->freq>2. ||
      abs(this->ib_bias_amp)>500. || abs(this->cutback_gain_scalar)>1000. || abs(this->ib_bias_noa)>500. ||
      this->t_last_model<-10. || this->t_last_model>70. );
   }
@@ -109,8 +109,8 @@ struct RetainedPars
     this->isum = -1;    this->hys_scale = HYS_SCALE;
     this->nP = NP;
     this->nS = NS;
-    this->mon_mod = MON_CHEM;
-    this->sim_mod = SIM_CHEM;
+    this->mon_chm = MON_CHEM;
+    this->sim_chm = SIM_CHEM;
     this->Vb_scale = VB_SCALE;
   }
 
@@ -169,9 +169,9 @@ struct RetainedPars
       n++;
     if ( NS != nS )
       n++;
-    if ( MON_CHEM != mon_mod )
+    if ( MON_CHEM != mon_chm )
       n++;
-    if ( SIM_CHEM != sim_mod )
+    if ( SIM_CHEM != sim_chm )
       n++;
     if ( VB_SCALE != Vb_scale )
       n++;
@@ -240,10 +240,10 @@ struct RetainedPars
       Serial.printf(" nP            %7.3f    %7.3f *BP<> eg '2P1S'\n", NP, nP);
     if ( all || NS != nS )
       Serial.printf(" nS            %7.3f    %7.3f *BP<> eg '2P1S'\n", NS, nS);
-    if ( all || MON_CHEM != mon_mod )
-      Serial.printf(" mon chem            %d          %d *Bm<> 0=Battle, 1=LION\n", MON_CHEM, mon_mod);
-    if ( all || SIM_CHEM != sim_mod )
-      Serial.printf(" sim chem            %d          %d *Bs<>\n", SIM_CHEM, sim_mod);
+    if ( all || MON_CHEM != mon_chm )
+      Serial.printf(" mon chem            %d          %d *Bm<> 0=Battle, 1=LION\n", MON_CHEM, mon_chm);
+    if ( all || SIM_CHEM != sim_chm )
+      Serial.printf(" sim chem            %d          %d *Bs<>\n", SIM_CHEM, sim_chm);
     if ( all || VB_SCALE != Vb_scale )
       Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n\n", VB_SCALE, Vb_scale);
   }

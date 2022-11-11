@@ -195,7 +195,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
             _chm_s = Bsim
         sim.calculate(chem=_chm_s, temp_c=Tb_, soc=sim.soc, curr_in=ib_in_s, dt=T, q_capacity=sim.q_capacity,
                       dc_dc_on=dc_dc_on, reset=reset, rp=rp, sat_init=sat_s_init)
-        sim.count_coulombs(chem=_chm_s, dt=T, reset=reset, temp_c=Tb_, charge_curr=sim.ib, sat=False, soc_s_init=soc_s_init,
+        sim.count_coulombs(chem=_chm_s, dt=T, reset=reset, temp_c=Tb_, charge_curr=sim.ib_charge, sat=False, soc_s_init=soc_s_init,
                            mon_sat=mon.sat, mon_delta_q=mon.delta_q)
 
         # EKF

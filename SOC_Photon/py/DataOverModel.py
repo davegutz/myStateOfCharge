@@ -128,8 +128,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mv.time, mv.mod_data, color='red', linestyle='--', label='mod_ver')
         plt.plot(mo.time, mo.sat+2, color='black', linestyle='-',  label='sat+2')
         plt.plot(mv.time, np.array(mv.sat)+2, color='green', linestyle='--', label='sat_ver+2')
-        plt.plot(mo.time, np.array(mo.bms_off)+2, color='blue', linestyle='-.', label='bms_off+2')
-        plt.plot(mv.time, np.array(mv.bms_off)+2, color='magenta', linestyle=':', label='bms_off_ver+2')
+        plt.plot(mo.time, np.array(mo.bms_off)+4, color='red', linestyle='-', label='bms_off+4')
+        plt.plot(mv.time, np.array(mv.bms_off)+4, color='green', linestyle='--', label='bms_off_ver+4')
+        plt.plot(so.time, np.array(so.bms_off_s)+4, color='blue', linestyle='-.', label='bms_off_s+4')
+        plt.plot(sv.time, np.array(sv.bms_off)+4, color='orange', linestyle=':', label='bms_off_s_ver+4')
         plt.plot(mo.time, mo.sel, color='red', linestyle='-.', label='sel')
         plt.plot(mv.time, mv.sel, color='blue', linestyle=':', label='sel_ver')
         plt.plot(mo.time, mo.ib_sel-2, color='black', linestyle='-', label='ib_sel_stat-2')
@@ -770,7 +772,9 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.legend(loc=1)
     plt.subplot(224)
     plt.plot(so.time, so.ib_s, linestyle='-', color='black', label='ib_s')
-    plt.plot(sv.time, sv.ib, linestyle='--', color='orange', label='ib_s_ver')
+    plt.plot(smv.time, smv.ib_s, linestyle='--', color='green', label='ib_s_ver')
+    plt.plot(smv.time, smv.ib_in_s, linestyle='-.', color='blue', label='ib_in_s_ver')
+    plt.plot(smv.time, smv.ib_fut_s, linestyle=':', color='red', label='ib_fut_s_ver')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -1160,6 +1164,7 @@ class SavedDataSim:
             self.unit = None  # text title
             self.c_time = None  # Control time, s
             self.chm_s = None
+            self.bms_off_s = None
             self.Tb_s = None
             self.Tbl_s = None
             self.vsat_s = None
@@ -1189,6 +1194,7 @@ class SavedDataSim:
             self.time_min = self.time / 60.
             self.time_day = self.time / 3600. / 24.
             self.chm_s = data.chm_s[:i_end]
+            self.bms_off_s = data.bmso_s[:i_end]
             self.Tb_s = data.Tb_s[:i_end]
             self.Tbl_s = data.Tbl_s[:i_end]
             self.vb_s = data.vb_s[:i_end]
@@ -1287,7 +1293,7 @@ if __name__ == '__main__':
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                     encoding=None).view(np.recarray)
         mon_old = SavedData(mon_old_raw, time_end)
-        cols_sim = ('unit_m', 'c_time', 'chm_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s',
+        cols_sim = ('unit_m', 'c_time', 'chm_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s',
                     'ib_s', 'ib_in_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
         try:
             sim_old_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
