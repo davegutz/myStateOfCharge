@@ -68,7 +68,7 @@ void print_high_speed_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mo
     }
     if ( cp.publishS )
     {
-      short_print(Sen, Mon);
+      high_speed_print(Sen, Mon);
       cp.num_v_print++;
     }
   }
@@ -109,7 +109,7 @@ void print_serial_ekf_header(void)
 }
 
 // Print strings
-void create_short_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
+void create_high_speed_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
   double cTime;
   if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;
@@ -621,9 +621,9 @@ void serialEvent1()
 }
 
 // Inputs serial print
-void short_print(Sensors *Sen, BatteryMonitor *Mon)
+void high_speed_print(Sensors *Sen, BatteryMonitor *Mon)
 {
-  create_short_string(&pp.pubList, Sen, Mon);
+  create_high_speed_string(&pp.pubList, Sen, Mon);
   Serial.println(cp.buffer);
 }
 

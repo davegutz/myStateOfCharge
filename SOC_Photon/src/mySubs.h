@@ -64,7 +64,7 @@ struct Pins
 
 
 // Headers
-void create_short_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
+void create_high_speed_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
 double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
 void finish_request(void);
 void get_string(String *source);
@@ -85,6 +85,6 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);
 String time_long_2_str(const unsigned long current_time, char *tempStr);
 String tryExtractString(String str, const char* start, const char* end);
-void short_print(Sensors *Sen, BatteryMonitor *Mon);
+void high_speed_print(Sensors *Sen, BatteryMonitor *Mon);
 
 #endif

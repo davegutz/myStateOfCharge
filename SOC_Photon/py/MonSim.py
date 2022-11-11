@@ -195,8 +195,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
             _chm_s = Bsim
         sim.calculate(chem=_chm_s, temp_c=Tb_, soc=sim.soc, curr_in=ib_in_s, dt=T, q_capacity=sim.q_capacity,
                       dc_dc_on=dc_dc_on, reset=reset, rp=rp, sat_init=sat_s_init)
-        charge_curr = sim.ib
-        sim.count_coulombs(chem=_chm_s, dt=T, reset=reset, temp_c=Tb_, charge_curr=charge_curr, sat=False, soc_s_init=soc_s_init,
+        sim.count_coulombs(chem=_chm_s, dt=T, reset=reset, temp_c=Tb_, charge_curr=sim.ib, sat=False, soc_s_init=soc_s_init,
                            mon_sat=mon.sat, mon_delta_q=mon.delta_q)
 
         # EKF
@@ -218,6 +217,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
             Ib_ = Ib_fail
         else:
             Ib_ = mon_old.Ib[i]
+            # Ib_ = sim.ib
         if t_Vb_fail and t[i] >= t_Vb_fail:
             Vb_ = Vb_fail
         else:
@@ -232,7 +232,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
             mon.calculate(_chm_m, Tb_, Vb_, Ib_, T, rp=rp, reset=reset, u_old=u_old, z_old=z_old)
         else:
             mon.calculate(_chm_m, Tb_, Vb_ + randn() * v_std + dv_sense, Ib_ + randn() * i_std + di_sense, T, rp=rp,
-                          reset=reset, d_voc=None, u_old=u_old, z_old=z_old)
+                          reset=reset, u_old=u_old, z_old=z_old)
         Ib_charge = mon.ib_charge
         sat = is_sat(Tb_, mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
@@ -240,8 +240,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
             mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb_, charge_curr=Ib_charge, sat=saturated)
         else:
             mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb_, charge_curr=Ib_charge, sat=saturated)
-        mon.calc_charge_time(mon.q, mon.q_capacity, charge_curr, mon.soc)
-        # mon.regauge(Tb_)
+        mon.calc_charge_time(mon.q, mon.q_capacity, Ib_charge, mon.soc)
         mon.assign_soc_s(sim.soc)
 
         # Plot stuff

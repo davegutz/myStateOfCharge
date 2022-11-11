@@ -86,12 +86,12 @@ HYS_IB_THR = 1.  # Ignore reset if opposite situation exists
 IB_MIN_UP = 0.2  # Min up charge current for come alive, BMS logic, and fault
 V_BATT_OFF = 10.  # Shutoff point in Mon, V (10.)
 V_BATT_DOWN_SIM = 9.5  # Shutoff point in Sim before off, V (9.5)
-V_BATT_RISING_SIM = 9.75  # Shutoff point in Sim when off, V (9.5)
-V_BATT_DOWN = 9.5  # Shutoff point before off, V (9.75)
-V_BATT_RISING = 10.5  # Shutoff point when off, V (10.25)
+V_BATT_RISING_SIM = 9.75  # Shutoff point in Sim when off, V (9.75)
+V_BATT_DOWN = 9.8  # Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V (9.8)
+V_BATT_RISING = 10.3  # Shutoff point when off, V (10.3)
 RANDLES_T_MAX = 0.31  # Maximum update time of Randles state space model to avoid aliasing and instability (0.31 allows DP3)
 cp_eframe_mult = 20  # Run EKF 20 times slower than Coulomb Counter and Randles models
-
+vb_dc_dc = 13.5  # Estimated dc-dc charger, V
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -380,7 +380,7 @@ class BatteryMonitor(Battery, EKF1x1):
 
     # BatteryMonitor::calculate()
     def calculate(self, chem, temp_c, vb, ib, dt, reset, q_capacity=None, dc_dc_on=None,  # BatteryMonitor
-                  rp=None, d_voc=None, u_old=None, z_old=None):
+                  rp=None, u_old=None, z_old=None):
         self.chm = chem
         if self.chm == 0:
             self.lut_voc = self.lut_voc0
@@ -425,11 +425,9 @@ class BatteryMonitor(Battery, EKF1x1):
         else:  # aliased, unstable if update Randles
             self.voc = vb - self.r_ss * self.ib
             self.Randles.y = self.voc
-        if d_voc:
-            self.voc = d_voc
         if self.bms_off and bms_off_local:
             self.voc_stat = self.voc_soc
-            self.voc = self.voc_stat
+            self.voc = self.voc_soc
         self.dv_dyn = self.vb - self.voc
 
         # Hysteresis_20220926 model
@@ -640,7 +638,7 @@ class BatteryMonitor(Battery, EKF1x1):
 class BatterySim(Battery):
     """Extend Battery class to make a model"""
 
-    def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP * 3600,
+    def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., scale_r_ss=1., s_hys=1.,
@@ -745,7 +743,7 @@ class BatterySim(Battery):
         else:
             bms_off_local = self.voc < V_BATT_RISING_SIM
         bms_charging = self.ib_in > IB_MIN_UP
-        self.bms_off = ((self.temp_c < low_t) or (bms_off_local and not bms_charging) and not self.tweak_test)
+        self.bms_off = (self.temp_c < low_t) or (bms_off_local and not self.tweak_test)
         self.ib_charge = self.ib_in  # pass along current unless truly off
         if self.bms_off and not bms_charging:
             self.ib_charge = 0.
@@ -766,7 +764,7 @@ class BatterySim(Battery):
             self.voc = self.voc_stat
             self.vb = self.voc
         if self.bms_off and dc_dc_on:
-            self.vb = 13.5
+            self.vb = vb_dc_dc
         self.dv_dyn = self.vb - self.voc
 
         # Saturation logic, both full and empty   dag 9/3/2022 modify empty
@@ -776,11 +774,11 @@ class BatterySim(Battery):
         if self.tweak_test or (not rp.modeling):
             self.sat_ib_max = self.ib_charge
         self.ib_fut = min(self.ib_charge, self.sat_ib_max)  # the feedback of self.ib
-        if (self.q <= -self.q_cap_rated_scaled*1.2) & (self.ib_charge < 0.):
-            print("q", self.q, "empty", -self.q_cap_rated_scaled*1.2)
+        if (self.q <= 0.) & (self.ib_charge < 0.):
+            print("q", self.q, "empty")
             self.ib_fut = 0.  # empty
         self.model_cutback = (self.voc_stat > self.vsat) & (self.ib_fut == self.sat_ib_max)
-        self.model_saturated = (self.temp_c > low_t) and (self.model_cutback & (self.ib_fut < self.ib_sat))
+        self.model_saturated = self.model_cutback & (self.ib_fut < self.ib_sat)
         if reset and sat_init is not None:
             self.model_saturated = sat_init
             self.sat = sat_init
