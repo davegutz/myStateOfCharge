@@ -24,6 +24,7 @@ from unite_pictures import cleanup_fig_files
 
 HYS_DV_MIN = 0.2
 
+
 class Hysteresis_20220926:
     # Use variable resistor to create hysteresis from an RC circuit
 

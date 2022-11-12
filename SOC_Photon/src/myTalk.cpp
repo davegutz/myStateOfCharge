@@ -228,7 +228,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   Serial.printf("to%5.2f/%5.2f\n", Mon->nP(), Sen->Sim->nP());
                 }
                 else
-                  Serial.printf("err%5.2f; <=0.\n", FP_in);
+                  Serial.printf("err%5.2f; <=0\n", FP_in);
                 break;
 
               case ( 'S' ):  // BS<>:  Number of series batteries in bank, e.g. '2P1S'
@@ -240,7 +240,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   Serial.printf("to%5.2f/%5.2f\n", Mon->nS(), Sen->Sim->nS());
                 }
                 else
-                  Serial.printf("err%5.2f; <=0.\n", FP_in);
+                  Serial.printf("err%5.2f; <=0\n", FP_in);
                 break;
 
               default:
@@ -931,37 +931,37 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
                   case ( -1 ):  // Xp-1:  full reset
                     chit("Xp0;", ASAP);
-                    chit("Ca0.5;", SOON);
+                    chit("Ca.5;", SOON);
                     chit("Xm0;", SOON);
                     break;
 
                   case ( 0 ):  // Xp0:  reset stop
                     if ( !rp.tweak_test() ) chit("Xm7;", ASAP);  // Prevent upset of time in Xp9, Xp10, Xp11, etc
-                    chit("Xf0.; Xa0.", ASAP);
-                    if ( !rp.tweak_test() ) chit("Xb0.", ASAP);
-                    chit("XS; Mk1; Nk1;", ASAP);  // Stop any injection
-                    chit("Xs1.0;Di0;Dm0;Dn0;Dv0;DT0;DV0.0;DI0;Xu0;Xv1.;Dr100;", ASAP);
+                    chit("Xf0;Xa0;Xt0;", ASAP);
+                    if ( !rp.tweak_test() ) chit("Xb0;", ASAP);
+                    chit("XS;Mk1;Nk1;", ASAP);  // Stop any injection
+                    chit("Xs1;Di0;Dm0;Dn0;Dv0;DT0;DV0;DI0;Xu0;Xv1;Dr100;", ASAP);
                     break;
 
                   case ( 1 ):  // Xp1:  sine
                     chit("Xp0;", QUEUE);
-                    chit("Ca0.5;", QUEUE);
-                    chit("Xts; Xf0.05; Xa6.;", QUEUE);
-                    if ( !rp.tweak_test() ) chit("Xb-6.", QUEUE);
+                    chit("Ca.5;", QUEUE);
+                    chit("Xts;Xf.05;Xa6;", QUEUE);
+                    if ( !rp.tweak_test() ) chit("Xb-6;", QUEUE);
                     break;
 
                   case ( 2 ):  // Xp2:  
                     chit("Xp0;", QUEUE);
-                    chit("Ca0.5;", QUEUE);
-                    chit("Xtq; Xf0.10; Xa6.;", QUEUE);
-                    if ( !rp.tweak_test() ) chit("Xb-6.", QUEUE);
+                    chit("Ca.5;", QUEUE);
+                    chit("Xtq;Xf.1;Xa6;", QUEUE);
+                    if ( !rp.tweak_test() ) chit("Xb-6;", QUEUE);
                     break;
 
                   case ( 3 ):  // Xp3:  
                     chit("Xp0;", QUEUE);
-                    chit("Ca0.5;", QUEUE);
-                    chit("Xtt; Xf0.05; Xa6.;", QUEUE);
-                    if ( !rp.tweak_test() ) chit("Xb-6.", QUEUE);
+                    chit("Ca.5;", QUEUE);
+                    chit("Xtt;Xf.05;Xa6;", QUEUE);
+                    if ( !rp.tweak_test() ) chit("Xb-6;", QUEUE);
                     break;
 
                   case ( 4 ):  // Xp4:  
@@ -977,8 +977,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                   case ( 6 ):  // Xp6:  Program a pulse
-                    chit("XS;Dm0;Dn0;v0;Xm7;Ca0.5;Pm;Dr100;DP1;v2;", QUEUE);  // setup
-                    chit("Dn0.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
+                    chit("XS;Dm0;Dn0;v0;Xm7;Ca.5;Pm;Dr100;DP1;v2;", QUEUE);  // setup
+                    chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
                     chit("W10;Pm;v0;", QUEUE);  // finish
                     break;
 
@@ -992,10 +992,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Ca1;", QUEUE);      // After restarting with sine running, soc will not be at 1.  Reset them all to 1
                     chit("Ri;", QUEUE);       // Reset the delta_q's
                     chit("Mw0;Nw0;", QUEUE);  // Allow tweak bias to work immediately instead of waiting several hours
-                    chit("MC0.004;", QUEUE);  // Give tweak bias logic a large adjustment range to quickly converge
-                    chit("Mx0.04;", QUEUE);   // Give tweak bias logic a large adjustment range to quickly converge
-                    chit("NC0.004;", QUEUE);  // Give tweak bias logic a large adjustment range to quickly converge
-                    chit("Nx0.04;", QUEUE);   // Give tweak bias logic a large adjustment range to quickly converge
+                    chit("MC.004;", QUEUE);  // Give tweak bias logic a large adjustment range to quickly converge
+                    chit("Mx.04;", QUEUE);   // Give tweak bias logic a large adjustment range to quickly converge
+                    chit("NC.004;", QUEUE);  // Give tweak bias logic a large adjustment range to quickly converge
+                    chit("Nx.04;", QUEUE);   // Give tweak bias logic a large adjustment range to quickly converge
                     chit("Mk1;Nk1;", QUEUE);  // Reset the tweak biases to 1 for new count
                     chit("Dm1;Dn1;", ASAP);   // Slight positive current so sat logic is functional.  ASAP so synchronized and ib_diff flat.
                     chit("DP2;", QUEUE);      // Fast data collection
@@ -1003,8 +1003,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Pa;", QUEUE);       // Print all for record
                     if ( INT_in == 9 )  // Xp9:  silent tweak test
                     {
-                      chit("Xs0.1;", QUEUE);  // t_sat scaled to detect saturation in short dwell with Xf, sclr (0.1)
-                      chit("Xf0.02;", QUEUE); // Frequency, Hz (0.02)
+                      chit("Xs.1;", QUEUE);  // t_sat scaled to detect saturation in short dwell with Xf, sclr (0.1)
+                      chit("Xf.02;", QUEUE); // Frequency, Hz (0.02)
                       chit("XW5;", QUEUE);    // Wait time before starting to cycle (5)
                       chit("XT5;", QUEUE);    // Wait time after cycle to print (5)
                       chit("Xa-6000;", QUEUE);// Amplitude, A (-6000)
@@ -1013,7 +1013,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     }
                     else if ( INT_in == 10 )  // Xp10:  rapid tweak
                     {
-                      chit("Xf0.02;", QUEUE); // Frequency 0.02 Hz
+                      chit("Xf.02;", QUEUE); // Frequency 0.02 Hz
                       chit("Xa-2000;", QUEUE);// Amplitude -2000 A
                       chit("XW5;", QUEUE);    // Wait time before starting to cycle
                       chit("XT5;", QUEUE);    // Wait time after cycle to print
@@ -1023,7 +1023,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     }
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
                     {
-                      chit("Xf0.002;", QUEUE);// Frequency 0.002 Hz
+                      chit("Xf.002;", QUEUE);// Frequency 0.002 Hz
                       chit("Xa-60;", QUEUE);  // Amplitude -60 A
                       chit("XW60;", QUEUE);   // Wait time before starting to cycle
                       chit("XT600;", QUEUE);  // Wait time after cycle to print
@@ -1033,11 +1033,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     }
                     else if ( INT_in == 12 )  // Xp12:  slow half tweak
                     {
-                      chit("Xf0.0002;", QUEUE); // Frequency 0.002 Hz
+                      chit("Xf.0002;", QUEUE); // Frequency 0.002 Hz
                       chit("Xa-6;", QUEUE);   // Amplitude -60 A
                       chit("XW60;", QUEUE);   // Wait time before starting to cycle
                       chit("XT2400;", QUEUE); // Wait time after cycle to print
-                      chit("XC0.5;", QUEUE);  // Number of injection cycles
+                      chit("XC.5;", QUEUE);  // Number of injection cycles
                       chit("W2;", QUEUE);     // Wait
                       chit("v2;", QUEUE);    // Data collection
                     }
@@ -1180,7 +1180,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" *Dt= "); Serial.printf("%6.3f", rp.Tb_bias_hdwe); Serial.printf(": delta hdwe, deg C [%6.3f]\n", TEMP_BIAS); 
   Serial.printf("  D^= "); Serial.printf("%6.3f", cp.Tb_bias_model); Serial.printf(": delta model, deg C [%6.3f]\n", TEMP_BIAS); 
   Serial.printf("  Dv=  "); Serial.print(Sen->vb_add()); Serial.println(": volt fault inj, V [0]"); 
-  Serial.printf("  Dw=  "); Serial.print(Sen->Sim->Dv()); Serial.println(": Tab adj, V [0.01]"); 
+  Serial.printf("  Dw=  "); Serial.print(Sen->Sim->Dv()); Serial.println(": Tab adj, V [.01]"); 
   Serial.printf("  DT= "); Serial.printf("%6.3f", Sen->Tb_noise_amp()); Serial.printf(": noise mod, deg C pk-pk [%6.3f]\n", TB_NOISE); 
   Serial.printf("  DV= "); Serial.printf("%6.3f", Sen->Vb_noise_amp()); Serial.printf(": noise mod, V pk-pk [%6.3f]\n", VB_NOISE); 
   Serial.printf("  DM= "); Serial.printf("%6.3f", Sen->Ib_amp_noise_amp()); Serial.printf(": amp noise mod, A pk-pk [%6.3f]\n", IB_AMP_NOISE); 
@@ -1304,6 +1304,5 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" Xu= "); Serial.printf("%d T=ignore Tb read\n", Sen->Flt->fail_tb());
   Serial.printf(" Xv= "); Serial.printf("%4.2f scale Tb 1-wire stale persist\n", Sen->Flt->tb_stale_time_sclr());
   Serial.printf("\n*Xx<> = SRAM saved\n");
-  Serial.printf("\nurgency of cmds: -=ASAP,*=SOON, '' or +=QUEUE\n"); 
-  Serial.printf("\nh this\n");
+  Serial.printf("\nurgency of cmds: -=ASAP,*=SOON, '' or +=QUEUE\n");
 }

@@ -264,17 +264,19 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     voc_soc_ = voc_soc_tab(soc_, temp_c_);
 
     // Battery management system model
-    boolean bms_off_local, bms_charging;
+    boolean voltage_low, bms_charging;
     if ( !bms_off_ )
-        bms_off_local = voc_stat_ < V_BATT_DOWN;
+        voltage_low = voc_stat_ < V_BATT_DOWN;
     else
-        bms_off_local = voc_stat_ < V_BATT_RISING;
+        voltage_low = voc_stat_ < V_BATT_RISING;
     bms_charging = ib_ > IB_MIN_UP;
-    bms_off_ = (temp_c_ <= chem_.low_t) || ( bms_off_local && !Sen->Flt->vb_fa() && !rp.tweak_test() );    // KISS
+    bms_off_ = (temp_c_ <= chem_.low_t) || ( voltage_low && !Sen->Flt->vb_fa() && !rp.tweak_test() );    // KISS
     Sen->bms_off = bms_off_;
     ib_charge_ = ib_;
-    if ( bms_off_ && !bms_charging ) ib_charge_ = 0.;
-    if ( bms_off_ && bms_off_local ) ib_ = 0.;
+    if ( bms_off_ && !bms_charging )
+        ib_charge_ = 0.;
+    if ( bms_off_ && voltage_low )
+        ib_ = 0.;
 
     // Dynamic emf
     double u[2] = {ib_, vb_};
@@ -288,7 +290,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
         voc_ = vb_ - chem_.r_ss * ib_;
     if ( !cp.fake_faults )
     {
-        if ( (bms_off_ && bms_off_local) ||  Sen->Flt->vb_fa())
+        if ( (bms_off_ && voltage_low) ||  Sen->Flt->vb_fa())
         {
             voc_ = voc_stat_ = voc_filt_ = voc_soc_;
         }
@@ -297,7 +299,8 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
 
     // Hysteresis model
     hys_->calculate(ib_, soc_);
-    dv_hys_ = hys_->update(dt_, sat_, bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR ), Sen->Flt->e_wrap(), reset_temp);
+    boolean init_low = bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR );
+    dv_hys_ = hys_->update(dt_, sat_, init_low, Sen->Flt->e_wrap(), reset_temp);
     voc_stat_ = voc_ - dv_hys_;
     ioc_ = hys_->ioc();
 
@@ -660,7 +663,8 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
 
     // Hysteresis model
     hys_->calculate(ib_in_, soc_);
-    dv_hys_ = hys_->update(dt_, sat_, bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR), 0.0, reset);
+    boolean init_low = bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR );
+    dv_hys_ = hys_->update(dt_, sat_, init_low, 0.0, reset);
     voc_ = voc_stat_ + dv_hys_;
     ioc_ = hys_->ioc();
 
@@ -669,20 +673,18 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     // Using voc_ is not better because change in dv_hys_ causes the same effect.   So using nice quiet
     // voc_stat_ for ease of simulation, not accuracy.
     if ( reset ) vb_ = voc_stat_;
-    boolean bms_off_local, bms_charging;
+    boolean voltage_low, bms_charging;
     if ( !bms_off_ )
-        bms_off_local = voc_stat_ < V_BATT_DOWN_SIM;
+        voltage_low = voc_stat_ < V_BATT_DOWN_SIM;
     else
-        bms_off_local = voc_stat_ < V_BATT_RISING_SIM;
+        voltage_low = voc_stat_ < V_BATT_RISING_SIM;
     bms_charging = ib_in_ > IB_MIN_UP;
-    bms_off_ = (temp_c_ <= chem_.low_t) || (bms_off_local && !rp.tweak_test());
+    bms_off_ = (temp_c_ <= chem_.low_t) || (voltage_low && !rp.tweak_test());
     ib_charge_ = ib_in_;  // Pass along current to charge unless bms_off
-    if ( bms_off_ && rp.mod_ib() && !bms_charging) ib_charge_ = 0.;
-    if ( bms_off_ && bms_off_local )
-    {
+    if ( bms_off_ && rp.mod_ib() && !bms_charging)
+        ib_charge_ = 0.;
+    if ( bms_off_ && voltage_low )
         ib_ = 0.;
-        voc_ = voc_stat_;
-    }
 
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
     double u[2] = {ib_, voc_};
@@ -698,7 +700,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     // Special cases override
     if ( bms_off_ )
     {
-        vb_ = voc_ = voc_stat_;
+        vb_ = voc_;
     }
     if ( bms_off_ && dc_dc_on )
     {

@@ -19,7 +19,7 @@ import numpy as np
 from EKF1x1 import EKF1x1
 from Coulombs import Coulombs, dqdt
 from StateSpace import StateSpace
-from Hysteresis_20220926 import Hysteresis_20220926
+from Hysteresis import Hysteresis
 import matplotlib.pyplot as plt
 from TFDelay import TFDelay
 from myFilters import LagTustin, General2Pole, RateLimit
@@ -221,7 +221,7 @@ class Battery(Coulombs):
         s += "  sr =      {:7.3f}  // Resistance scalar\n".format(self.sr)
         s += "  dvoc_ =   {:7.3f}  // Delta voltage, V\n".format(self.dvoc)
         s += "  dt_ =     {:7.3f}  // Update time, s\n".format(self.dt)
-        s += "  dv_hys  = {:7.3f}  // Hysteresis_20220926 delta v, V\n".format(self.dv_hys)
+        s += "  dv_hys  = {:7.3f}  // Hysteresis delta v, V\n".format(self.dv_hys)
         s += "  tweak_test={:d}     // Driving signal injection completely using software inj_soft_bias\n".format(self.tweak_test)
         s += "\n  "
         s += Coulombs.__str__(self, prefix + 'Battery:')
@@ -336,7 +336,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.scaler_r = scaler_r
         self.Q = EKF_Q_SD_NORM * EKF_Q_SD_NORM  # EKF process uncertainty
         self.R = EKF_R_SD_NORM * EKF_R_SD_NORM  # EKF state uncertainty
-        self.hys = Hysteresis_20220926(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
+        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
         self.soc_s = 0.  # Model information
         self.EKF_converged = TFDelay(False, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT)
         self.y_filt_lag = LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
@@ -404,15 +404,15 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Battery management system model
         if not self.bms_off:
-            bms_off_local = self.voc_stat < V_BATT_DOWN
+            voltage_low = self.voc_stat < V_BATT_DOWN
         else:
-            bms_off_local = self.voc_stat < V_BATT_RISING
+            voltage_low = self.voc_stat < V_BATT_RISING
         bms_charging = self.ib > IB_MIN_UP
-        self.bms_off = (self.temp_c <= low_t) or (bms_off_local and not rp.tweak_test())  # KISS
+        self.bms_off = (self.temp_c <= low_t) or (voltage_low and not rp.tweak_test())  # KISS
         self.ib_charge = self.ib
         if self.bms_off and not bms_charging:
             self.ib_charge = 0.
-        if self.bms_off and bms_off_local:
+        if self.bms_off and voltage_low:
             self.ib = 0.
 
         # Dynamic emf
@@ -425,12 +425,12 @@ class BatteryMonitor(Battery, EKF1x1):
         else:  # aliased, unstable if update Randles
             self.voc = vb - self.r_ss * self.ib
             self.Randles.y = self.voc
-        if self.bms_off and bms_off_local:
+        if self.bms_off and voltage_low:
             self.voc_stat = self.voc_soc
             self.voc = self.voc_soc
         self.dv_dyn = self.vb - self.voc
 
-        # Hysteresis_20220926 model
+        # Hysteresis model
         self.hys.calculate_hys(self.ib, self.soc)
         e_wrap = self.voc_soc - self.Voc_stat
         init_low = self.bms_off or (self.soc < (self.soc_min + HYS_SOC_MIN_MARG) and self.ib > HYS_IB_THR)
@@ -662,7 +662,7 @@ class BatterySim(Battery):
         self.s_cap = scale  # Rated capacity scalar
         if scale is not None:
             self.apply_cap_scale(scale)
-        self.hys = Hysteresis_20220926(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
+        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
         self.tweak_test = tweak_test
         self.voc = 0.  # Charging voltage, V
         self.d_delta_q = 0.  # Charging rate, Coulombs/sec
@@ -727,7 +727,7 @@ class BatterySim(Battery):
         # slightly beyond but don't windup
         self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)
 
-        # Hysteresis_20220926 model
+        # Hysteresis model
         self.hys.calculate_hys(curr_in, self.soc)
         init_low = self.bms_off or (self.soc < (self.soc_min + HYS_SOC_MIN_MARG) and self.ib > HYS_IB_THR)
         self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=0.)*self.s_hys
@@ -739,16 +739,15 @@ class BatterySim(Battery):
         # Using voc_ is not better because change in dv_hys_ causes the same effect.   So using nice quiet
         # voc_stat_ for ease of simulation, not accuracy.
         if not self.bms_off:
-            bms_off_local = self.voc_stat < V_BATT_DOWN_SIM
+            voltage_low = self.voc_stat < V_BATT_DOWN_SIM
         else:
-            bms_off_local = self.voc_stat < V_BATT_RISING_SIM
+            voltage_low = self.voc_stat < V_BATT_RISING_SIM
         bms_charging = self.ib_in > IB_MIN_UP
-        self.bms_off = (self.temp_c < low_t) or (bms_off_local and not self.tweak_test)
+        self.bms_off = (self.temp_c < low_t) or (voltage_low and not self.tweak_test)
         self.ib_charge = self.ib_in  # pass along current unless truly off
         if self.bms_off and not bms_charging:
             self.ib_charge = 0.
-        if self.bms_off and bms_off_local:
-            self.voc = self.voc_stat
+        if self.bms_off and voltage_low:
             self.ib = 0.
 
         # Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
@@ -761,7 +760,6 @@ class BatterySim(Battery):
             self.vb = self.voc + self.r_ss * self.ib
 
         if self.bms_off:
-            self.voc = self.voc_stat
             self.vb = self.voc
         if self.bms_off and dc_dc_on:
             self.vb = vb_dc_dc
@@ -783,7 +781,6 @@ class BatterySim(Battery):
             self.model_saturated = sat_init
             self.sat = sat_init
         self.sat = self.model_saturated
-        # print("ib_in_s", self.ib_in, "voc", self.voc, "voc_stat", self.voc_stat, "bms_off_local", bms_off_local, "bms_charging", bms_charging, "twk_tst", self.tweak_test, "bms_off", self.bms_off, "ib_charge", self.ib_charge)
 
         return self.vb
 
