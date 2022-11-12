@@ -216,7 +216,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   Sen->Ib_model = Sen->Sim->ib_fut();
 
   // Call to count_coulombs not strictly needed for init.  Calculates some things not otherwise calculated for 'all'
-  Sen->Sim->count_coulombs(Sen, true, Mon);
+  Sen->Sim->count_coulombs(Sen, true, Mon, true);
 
   // Signal preparations
   if ( rp.mod_vb() )
@@ -502,7 +502,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   // Charge calculation and memory store
   // Inputs: Sim.model_saturated, Sen->Tb, Sen->Ib, and Sim.soc
   // Outputs: Sim.soc
-  Sen->Sim->count_coulombs(Sen, reset_temp, Mon);
+  Sen->Sim->count_coulombs(Sen, reset_temp, Mon, false);
 
   // Injection tweak test
   if ( (Sen->start_inj <= Sen->now) && (Sen->now <= Sen->end_inj) ) // in range, test in progress

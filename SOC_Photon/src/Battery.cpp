@@ -801,7 +801,7 @@ Outputs:
     soc_min_        Estimated soc where battery BMS will shutoff current, fraction
     q_min_          Estimated charge at low voltage shutdown, C\
 */
-double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, BatteryMonitor *Mon) 
+double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, BatteryMonitor *Mon, const boolean initializing_all) 
 {
     float charge_curr = ib_charge_;
     double d_delta_q = charge_curr * Sen->T;
@@ -840,7 +840,7 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
     soc_min_ = chem_.soc_min_T_->interp(temp_lim);
     q_min_ = soc_min_ * q_capacity_;
 
-    if ( (rp.debug==2 || rp.debug==3)  && cp.publishS )  // print_serial_sim
+    if ( (rp.debug==2 || rp.debug==3)  && cp.publishS && !initializing_all)  // print_serial_sim
     {
         double cTime;
         if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;

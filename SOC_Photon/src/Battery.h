@@ -357,7 +357,7 @@ public:
   virtual void assign_randles(void);
   double calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset);
   float calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq);
-  double count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon);
+  double count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon, const boolean initializing_all);
   double delta_q() { return *rp_delta_q_; };
   float ib_fut() { return ib_fut_; };
   void init_battery_sim(const boolean reset, Sensors *Sen);

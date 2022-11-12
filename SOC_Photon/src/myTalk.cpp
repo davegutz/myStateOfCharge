@@ -884,6 +884,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 't' ): // Xt<>:  injection type
                 switch ( cp.input_string.charAt(2) )
                 {
+                  case ( 'n' ):  // Xtn:  none
+                    rp.type = 0;
+                    Serial.printf("Set none. rp.type %d\n", rp.type);
+                    break;
+
                   case ( 's' ):  // Xts:  sine
                     rp.type = 1;
                     Serial.printf("Set sin. rp.type %d\n", rp.type);
@@ -937,7 +942,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
                   case ( 0 ):  // Xp0:  reset stop
                     if ( !rp.tweak_test() ) chit("Xm7;", ASAP);  // Prevent upset of time in Xp9, Xp10, Xp11, etc
-                    chit("Xf0;Xa0;Xt0;", ASAP);
+                    chit("Xf0;Xa0;Xtn;", ASAP);
                     if ( !rp.tweak_test() ) chit("Xb0;", ASAP);
                     chit("XS;Mk1;Nk1;", ASAP);  // Stop any injection
                     chit("Xs1;Di0;Dm0;Dn0;Dv0;DT0;DV0;DI0;Xu0;Xv1;Dr100;", ASAP);
@@ -1278,7 +1283,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" Xa= "); Serial.printf("%6.3f", rp.amp); Serial.println(": Inj amp A pk (0-18.3) [0]");
   Serial.printf(" Xb= "); Serial.printf("%6.3f", rp.inj_bias); Serial.println(": Inj bias A [0]");
   Serial.printf(" Xf= "); Serial.printf("%6.3f", rp.freq/2./PI); Serial.println(": Inj freq Hz (0-2) [0]");
-  Serial.printf(" Xt=  "); Serial.printf("%d", rp.type); Serial.println(": Inj 's'=sin(1), 'q'=square(2), 't'=tri(3), biases(4,5,6), 'o'=cos(8))");
+  Serial.printf(" Xt=  "); Serial.printf("%d", rp.type); Serial.println(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))");
  Serial.printf(" Xo= "); Serial.printf("%6.3f", rp.inj_bias); Serial.println(": Inj inj_bias A (-18.3-18.3) [0]");
   Serial.printf(" Xp= <?>, scripted tests...\n"); 
   Serial.printf("    Xp-1:  Off, modeling false\n");

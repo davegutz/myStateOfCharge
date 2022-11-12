@@ -574,6 +574,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.dt.append(dt)
         self.saved.chm.append(self.chm)
         self.saved.ib.append(self.ib)
+        self.saved.ib_charge.append(self.ib_charge)
         self.saved.ioc.append(self.ioc)
         self.saved.vb.append(self.vb)
         self.saved.vc.append(self.vc())
@@ -955,6 +956,7 @@ class Saved:
         self.chm = []
         self.bmso = []
         self.ib = []
+        self.ib_charge = []
         self.ioc = []
         self.vb = []
         self.vc = []
