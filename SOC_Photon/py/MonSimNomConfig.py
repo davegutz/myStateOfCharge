@@ -19,8 +19,7 @@
 # MonSim nominal inputs
 dv_sense = 0.  # (0.-->0.1) ++++++++ flat curve
 di_sense = 0.  # (0.-->0.5) ++++++++  i does not go to zero steady state
-dt_model = 0.  # (0.-->25.) +++++++  TODO:   ?????????
-model_bat_cap = 100.  # (100.-->80) ++++++++++ dyn only provided reset soc periodically  TODO:  ???????
+model_bat_cap = 100.  # (100.-->80) ++++++++++ dyn only provided reset soc periodically
 r0 = 0.003  # (0.003-->0.006)  +++ dyn only provided reset soc periodically
 rct = 0.0016  # (0.0016-->0.0032) ++++++++++ dyn only provided reset soc periodically
 tau_dif = 83  # (83-->100)  +++++++++++ dyn only provided reset soc periodically

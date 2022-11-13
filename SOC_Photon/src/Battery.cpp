@@ -286,7 +286,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
         Randles_->update(dt_);
         voc_ = Randles_->y(0);
     }
-    else    // aliased, unstable if T>0.5  TODO:  consider deleting Randles model (hardware filters)
+    else    // aliased, unstable if T>0.5
         voc_ = vb_ - chem_.r_ss * ib_;
     if ( !cp.fake_faults )
     {
@@ -694,7 +694,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
         Randles_->update(dt_);
         vb_ = Randles_->y(0);
     }
-    else    // aliased, unstable if T<0.5.  TODO:  consider deleting Randles model (hardware filters)
+    else    // aliased, unstable if T<0.5.
         vb_ = voc_ + chem_.r_ss * ib_charge_;
 
     // Special cases override
@@ -817,7 +817,7 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
     if ( !rp.mod_vb() )  // Real world
     {
         if ( Mon->sat() ) apply_delta_q(Mon->delta_q());
-        else if ( reset_temp_past && !cp.fake_faults ) apply_delta_q(Mon->delta_q_ekf());  // Solution to boot up unsaturated.  TODO:   delete??
+        else if ( reset_temp_past && !cp.fake_faults ) apply_delta_q(Mon->delta_q_ekf());  // Solution to boot up unsaturated
     }
     else if ( model_saturated_ )  // Modeling initializes on reset_temp to Tb=RATED_TEMP
     {
@@ -982,7 +982,7 @@ void Hysteresis::pretty_print()
     hys_Tn_->pretty_print();
 }
 
-// Dynamic update  // TODO:  change sign of e_wrap everywhere
+// Dynamic update
 double Hysteresis::update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap, const boolean reset_temp)
 {
     float dv_max = hys_Tx_->interp(soc_);
@@ -990,12 +990,12 @@ double Hysteresis::update(const double dt, const boolean init_high, const boolea
 
     if ( init_high )
     {
-        dv_hys_ = -HYS_DV_MIN; // TODO:  hys init values
+        dv_hys_ = -HYS_DV_MIN;
         dv_dot_ = 0.;
     }
     else if ( init_low )
     {
-        dv_hys_ = max(HYS_DV_MIN, -e_wrap); // TODO:  hys init values
+        dv_hys_ = max(HYS_DV_MIN, -e_wrap);
         dv_dot_ = 0.;
     }
     else if ( reset_temp )

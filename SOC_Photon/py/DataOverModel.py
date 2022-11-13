@@ -1282,8 +1282,7 @@ if __name__ == '__main__':
         #   hyst in ekf
         # saturation provides periodic anchor to reset filter
         # reset soc periodically anchor user display
-        # tau_sd creating an anchor.   So large it's just a pass through.  TODO:  Why x correct??
-        # TODO:  filter soc for saturation calculation in model
+        # tau_sd creating an anchor.   So large it's just a pass through
         # TODO:  temp sensitivities and mitigation
 
         # Config inputs

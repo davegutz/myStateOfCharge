@@ -309,10 +309,7 @@ class LookupTable:
 
         This will raise an error if the value table already exists.
 
-        # todo: Add doctests.
-
         """
-        # todo: Is raising an error here necessary?
         if self.value_table is not None:
             raise Error("Cannot define axis once value table has been set.")
         axis_i = self.axis_names[axis_name]
@@ -351,7 +348,6 @@ class LookupTable:
             adjacent_axis_values = zip(axis[:-1], axis[1:])
             delta_signs = [cmp(x, x_next)
                            for x, x_next in adjacent_axis_values]
-            # todo: Generate error messages? Perhaps to supplied file object.
             if 0 in delta_signs:
                 valid = False
             elif -1 in delta_signs and 1 in delta_signs:
@@ -360,11 +356,9 @@ class LookupTable:
         # Check that value_table size matches the axis definitions.
         axis_size = tuple([len(axis) for axis in self.axes])
 
-        # todo: Handle possible exception.
         table_size = nestedSequenceSize(self.value_table)
         
         if table_size != axis_size:
-            # todo: Error message.
             valid = False
 
         return valid
@@ -400,7 +394,6 @@ class LookupTable:
                 axis_i = self.axis_names[axis_name]
             except KeyError:
                 # Ignore axis name/values for axes that do not exist.
-                # todo: Is this the right way to go?
                 continue
             axis = self.axes[axis_i]
 
@@ -524,8 +517,6 @@ def crosscheck3d():
 
 def crosscheck2d():
     """This is just here for testing/debug purposes.
-
-    # todo: Integrate this into the unittests somehow?
 
     """
     lut = LookupTable()

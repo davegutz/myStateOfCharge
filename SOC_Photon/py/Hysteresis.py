@@ -111,7 +111,7 @@ class Hysteresis:
 
         # Reset if at endpoints.   e_wrap is an actual measurement of hysteresis if trust sensors.  But once
         # dv_hys is reset it regenerates e_wrap so e_wrap in logic breaks that.   Also, dv_hys regenerates dv_dot
-        # so break that too by setting it to 0.  TODO:  change sign of e_wrap everywhere
+        # so break that too by setting it to 0
         if init_low:
             self.dv_hys = max(HYS_DV_MIN, -e_wrap)
             self.dv_dot = 0.  # break positive feedback loop

@@ -45,12 +45,12 @@ StateSpace::StateSpace(double *A, double *B, double *C, double *D, const int8_t 
     {
       double Adet = A_[0]*A_[3] - A_[1]*A_[2];
       double *mAinv_ = new double[n*n];
-      AinvB_ = new double[n*n]; // TODO:  n*p?
+      AinvB_ = new double[n*n];
       mAinv_[0] =  A_[3] / Adet;
       mAinv_[1] = -A_[1] / Adet;
       mAinv_[2] = -A_[2] / Adet;
       mAinv_[3] =  A_[0] / Adet;
-      mulmat(mAinv_, B_, AinvB_, n, n, p);  // TODO:  see n*p above
+      mulmat(mAinv_, B_, AinvB_, n, n, p);
     }
 
   }

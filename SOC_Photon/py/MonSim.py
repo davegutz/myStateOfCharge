@@ -172,7 +172,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
         if reset:
             sim.apply_soc(mon_old.soc_s[i], Tb_)
             rp.delta_q_model = sim.delta_q
-            rp.t_last_model = Tb_ + dt_model
+            rp.t_last_model = Tb_
             sim.load(rp.delta_q_model, rp.t_last_model)
             sim.init_battery()
             sim.apply_delta_q_t(rp.delta_q_model, rp.t_last_model)

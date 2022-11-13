@@ -365,7 +365,6 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 // Use model instead of sensors when running tests as user
 // Equivalent to using voc(soc) as voter between two hardware currrents
 // Over-ride sensed Ib, Vb and Tb with model when running tests
-// TODO:  fix this nomenclature
 // Inputs:  Sen->Ib_model, Sen->Ib_hdwe,
 //          Sen->Vb_model, Sen->Vb_hdwe,
 //          ----------------, Sen->Tb_hdwe, Sen->Tb_hdwe_filt
@@ -416,7 +415,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   {
     if ( Sen->ShuntAmp->bare() && !Sen->ShuntNoAmp->bare() )  // these inputs don't latch
     {
-      ib_sel_stat_ = -1;    // TODO:  takes ONE non-latching input to set and latch this ib_sel
+      ib_sel_stat_ = -1;
       latched_fail_ = true;
     }
     else if ( ib_diff_fa() )  // this input doesn't latch

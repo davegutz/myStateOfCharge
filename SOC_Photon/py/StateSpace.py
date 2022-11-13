@@ -27,7 +27,7 @@ class StateSpace:
         self.u = np.zeros(shape=p)
         self.A = np.zeros(shape=(n, n))
         self.B = np.zeros(shape=(n, p))
-        self.AinvB = np.zeros(shape=(n, p))  # TODO:  c-code n,n should be n,p too?
+        self.AinvB = np.zeros(shape=(n, p))
         self.C = np.zeros(shape=(q, n))
         self.D = np.zeros(shape=(q, p))
         self.y = np.zeros(shape=q)
@@ -89,9 +89,6 @@ class StateSpace:
         if not reset:
             self.x += self.x_dot * self.dt
         self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
-        if reset:
-            print('reset', reset, 'dt', self.dt)
-            print(self.__str__())
         return self.y
 
 

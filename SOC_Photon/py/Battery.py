@@ -76,8 +76,6 @@ ZETA_Y_FILT = 0.9  # EKF y-filter-2 damping factor (0.9)
 TMAX_FILT = 3.  # Maximum y-filter-2 sample time, s (3.)
 EKF_Q_SD_NORM = 0.00005  # Standard deviation of normal EKF process uncertainty, V (0.00005)
 EKF_R_SD_NORM = 0.5  # Standard deviation of normal EKF state uncertainty, fraction (0-1) (0.5)
-EKF_Q_SD_REV = EKF_Q_SD_NORM  # TODO:  delete
-EKF_R_SD_REV = EKF_R_SD_NORM  # TODO: delete
 IMAX_NUM = 100000.  # Overflow protection since ib past value used
 HYS_SOC_MIN_MARG = 0.15  # Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
 HYS_SOC_MAX = 0.99  # Detect high endpoint condition for reset of hysteresis
@@ -326,11 +324,11 @@ class BatteryMonitor(Battery, EKF1x1):
         # self.Q = 0.001*0.001  # EKF process uncertainty
         # self.R = 0.1*0.1  # EKF state uncertainty
         if scaler_q is None:
-            self.scaler_q = Scale(1, 4, EKF_Q_SD_REV, EKF_Q_SD_NORM)
+            self.scaler_q = Scale(1, 4, EKF_Q_SD_NORM, EKF_Q_SD_NORM)
         else:
             self.scaler_q = scaler_q
         if scaler_r is None:
-            self.scaler_r = Scale(1, 4, EKF_R_SD_REV, EKF_R_SD_NORM)
+            self.scaler_r = Scale(1, 4, EKF_R_SD_NORM, EKF_R_SD_NORM)
         else:
             self.scaler_r = scaler_r
         self.Q = EKF_Q_SD_NORM * EKF_Q_SD_NORM  # EKF process uncertainty
