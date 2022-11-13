@@ -96,13 +96,13 @@ if __name__ == '__main__':
         # data_file_old_txt = 'slowTweakRegression v20221028.txt'
         # data_file_old_txt = 'triTweakDisch v20221028.txt'
         # data_file_old_txt = 'satSit v20221028.txt'
-        # data_file_old_txt = 'offSitHysBms v20221028.txt'; #time_end_in=161.5
+        data_file_old_txt = 'offSitHysBms v20221028.txt'; #time_end_in=161.5
         # data_file_old_txt = 'offSitHysBmsNoise20220926.txt'; #time_end_in=50
         # data_file_old_txt = 'init Ca1 v20220926.txt'
         # data_file_old_txt = 'ampHiFailSlow20220914.txt'
         # data_file_old_txt = 'vHiFail v20220917a.txt'
         # data_file_old_txt = 'pulseEKF v20221028.txt'; init_time_in=-0.001;  # TODO:  broken
-        data_file_old_txt = 'pulseSS v20221028.txt'; init_time_in=-0.001;
+        # data_file_old_txt = 'pulseSS v20221028.txt'; init_time_in=-0.001;
         # data_file_old_txt = 'tbFailMod20220914.txt'
         # data_file_old_txt = 'tbFailHdwe20220914.txt'
         # data_file_old_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05

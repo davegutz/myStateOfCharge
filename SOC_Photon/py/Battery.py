@@ -416,7 +416,7 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Dynamic emf
         self.vb = vb
-        u = np.array([ib, vb]).T
+        u = np.array([self.ib, self.vb]).T
         if dt < self.t_max:
             self.Randles.calc_x_dot(u)
             self.Randles.update(self.dt, reset=reset)
