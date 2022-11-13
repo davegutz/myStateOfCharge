@@ -301,6 +301,7 @@ public:
   double hx() { return hx_; };
   double Hx() { return hx_*(*rp_nS_); };
   double ib_charge() { return ib_charge_; };
+  double Ib_charge() { return ib_charge_*(*rp_nP_); };
   void init_battery_mon(const boolean reset, Sensors *Sen);
   void init_soc_ekf(const double soc);
   boolean is_sat(const boolean reset);

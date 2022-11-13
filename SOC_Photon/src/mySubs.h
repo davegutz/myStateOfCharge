@@ -64,7 +64,7 @@ struct Pins
 
 
 // Headers
-void create_high_speed_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
+void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
 double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
 void finish_request(void);
 void get_string(String *source);
@@ -75,7 +75,7 @@ void monitor(const boolean reset, const boolean reset_temp, const unsigned long 
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen);
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen);
 void print_all_header(void);
-void print_high_speed_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
+void print_rapid_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
 void print_serial_header(void);
 void print_serial_sim_header(void);
 void print_signal_sel_header(void);
@@ -85,6 +85,6 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);
 String time_long_2_str(const unsigned long current_time, char *tempStr);
 String tryExtractString(String str, const char* start, const char* end);
-void high_speed_print(Sensors *Sen, BatteryMonitor *Mon);
+void rapid_print(Sensors *Sen, BatteryMonitor *Mon);
 
 #endif

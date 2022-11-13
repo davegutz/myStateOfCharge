@@ -330,7 +330,7 @@ void loop()
     }
 
     // Print
-    print_high_speed_data(reset, Sen, Mon);
+    print_rapid_data(reset, Sen, Mon);
 
   }  // end read (high speed frame)
 

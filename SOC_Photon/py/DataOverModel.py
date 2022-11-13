@@ -26,7 +26,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
 from MonSim import replicate, save_clean_file, save_clean_file_sim
-from Battery import overall_batt
+from Battery import overall_batt, IB_MIN_UP
 # below suppresses runtime error display******************
 # import os
 # os.environ["KIVY_NO_CONSOLELOG"] = "1"
@@ -80,7 +80,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mo.time, mo.ibmh, color='black', linestyle='-', label='Ib_amp_hdwe')
         plt.plot(mo.time, mo.ibnh, color='green', linestyle='--', label='Ib_noa_hdwe')
         plt.plot(mo.time, mo.Ib, color='red', linestyle='-.', label='Ib')
-        plt.plot(mv.time, mv.ib_charge, linestyle=':', color='blue', label='ib_charge_ver')
+        plt.plot(mv.time, mo.Ib_charge, linestyle=':', color='blue', label='Ib_charge')
         plt.legend(loc=1)
         plt.subplot(322)
         plt.plot(mo.time, mo.ib_diff, color='black', linestyle='-', label='ib_diff')
@@ -117,9 +117,8 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         n_fig += 1
         plt.subplot(331)
         plt.title(plot_title + ' DOM 1')
-        plt.plot(mo.time, mo.Ib, color='green', linestyle='-', label='Ib')
-        plt.plot(mv.time, mv.Ib, color='orange', linestyle='--', label='Ib_ver')
-        plt.plot(mv.time, mv.ib_charge, linestyle='-.', color='blue', label='ib_charge_ver')
+        plt.plot(mo.time, mo.Ib_charge, color='green', linestyle='-', label='Ib_charge')
+        plt.plot(mv.time, mv.ib_charge, linestyle='--', color='blue', label='ib_charge_ver')
         plt.plot(mo.time, mo.ib_diff, color='black', linestyle='-', label='ib_diff')
         plt.plot(mo.time, mo.ib_diff_f, color='magenta', linestyle='--', label='ib_diff_f')
         plt.plot(mo.time, mo.ibd_thr, color='red', linestyle='-.', label='ib_diff_thr')
@@ -751,7 +750,8 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.subplot(224)
         plt.plot(mo.time, mo.Ib, linestyle='-', color='green', label='Ib')
         plt.plot(mo.time, so.ib_s, linestyle='--', color='cyan', label='ib_in_s')
-        plt.plot(mv.time, mv.ib_charge, linestyle='-.', color='orange', label='ib_charge_ver')
+        plt.plot(mo.time, mo.Ib_charge, linestyle='-.', color='blue', label='Ib_charge')
+        plt.plot(mv.time, mv.ib_charge, linestyle=':', color='orange', label='ib_charge_ver')
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -904,6 +904,7 @@ class SavedData:
             self.voc = None
             self.voc_soc = None
             self.Ib_past = None  # Past bank current, A
+            self.Ib_charge = None  # BMS switched current, A
             self.Vb = None  # Bank voltage, V
             self.chm = None  # Battery chemistry code
             self.sat = None  # Indication that battery is saturated, T=saturated
@@ -980,6 +981,9 @@ class SavedData:
             self.sel = np.array(data.sel[:i_end])
             self.mod_data = np.array(data.mod[:i_end])
             self.bms_off = np.array(data.bmso[:i_end])
+            bms_charging = self.Ib > IB_MIN_UP
+            not_bms_off = self.bms_off < 1
+            self.Ib_charge = self.Ib * (not_bms_off * bms_charging)
             self.Tb = np.array(data.Tb[:i_end])
             self.Vsat = np.array(data.Vsat[:i_end])
             self.dV_dyn = np.array(data.dV_dyn[:i_end])

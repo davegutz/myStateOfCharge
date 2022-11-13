@@ -51,7 +51,7 @@ void print_all_header(void)
     print_serial_ekf_header();
   }
 }
-void print_high_speed_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
+void print_rapid_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   static uint8_t last_read_debug = rp.debug;     // Remember first time with new debug to print headers
   if ( ( rp.debug==1 || rp.debug==2 || rp.debug==3 ) )
@@ -68,7 +68,7 @@ void print_high_speed_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mo
     }
     if ( cp.publishS )
     {
-      high_speed_print(Sen, Mon);
+      rapid_print(Sen, Mon);
       cp.num_v_print++;
     }
   }
@@ -109,7 +109,7 @@ void print_serial_ekf_header(void)
 }
 
 // Print strings
-void create_high_speed_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
+void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
   double cTime;
   if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;
@@ -621,9 +621,9 @@ void serialEvent1()
 }
 
 // Inputs serial print
-void high_speed_print(Sensors *Sen, BatteryMonitor *Mon)
+void rapid_print(Sensors *Sen, BatteryMonitor *Mon)
 {
-  create_high_speed_string(&pp.pubList, Sen, Mon);
+  create_rapid_string(&pp.pubList, Sen, Mon);
   Serial.println(cp.buffer);
 }
 
