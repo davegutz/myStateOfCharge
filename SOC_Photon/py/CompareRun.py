@@ -87,7 +87,7 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
         # Regression suite
-        data_file_old_txt = 'ampHiFail v20221028.txt'
+        # data_file_old_txt = 'ampHiFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
         # data_file_old_txt = 'ampLoFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'
@@ -96,7 +96,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'slowTweakRegression v20221028.txt'
         # data_file_old_txt = 'triTweakDisch v20221028.txt'
         # data_file_old_txt = 'satSit v20221028.txt'
-        # data_file_old_txt = 'offSitHysBms v20221028.txt'; #time_end_in=5
+        data_file_old_txt = 'offSitHysBms v20221028.txt'; #time_end_in=5
         # data_file_old_txt = 'offSitHysBmsNoise20220926.txt'; #time_end_in=50
         # data_file_old_txt = 'init Ca1 v20220926.txt'
         # data_file_old_txt = 'ampHiFailSlow20220914.txt'
