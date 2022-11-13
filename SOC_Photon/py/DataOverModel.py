@@ -748,7 +748,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mv.time, mv.soc, linestyle='--', color='orange', label='soc_ver')
         plt.legend(loc=1)
         plt.subplot(224)
-        plt.plot(mo.time, mo.Ib, linestyle='-', color='green', label='Ib')
+        plt.plot(mo.time, mo.Ib_sel, linestyle='-', color='red', label='Ib_sel')
         plt.plot(mo.time, so.ib_s, linestyle='--', color='cyan', label='ib_in_s')
         plt.plot(mo.time, mo.Ib_charge, linestyle='-.', color='blue', label='Ib_charge')
         plt.plot(mv.time, mv.ib_charge, linestyle=':', color='orange', label='ib_charge_ver')
@@ -1025,6 +1025,7 @@ class SavedData:
             self.Ib_s = None
             self.mib = None
             self.Ib = np.append(np.array(self.Ib_past[1:]), self.Ib_past[-1])  # shift time to present
+            self.Ib_sel = None
             self.Vb_h = None
             self.Vb_s = None
             self.mvb = None
@@ -1083,7 +1084,7 @@ class SavedData:
             self.Ib_h = np.array(sel.Ib_h[:i_end])
             self.Ib_s = np.array(sel.Ib_s[:i_end])
             self.mib = np.array(sel.mib[:i_end])
-            self.Ib = np.array(sel.Ib[:i_end])
+            self.Ib_sel = np.array(sel.Ib[:i_end])
             self.Vb_h = np.array(sel.Vb_h[:i_end])
             self.Vb_s = np.array(sel.Vb_s[:i_end])
             self.mvb = np.array(sel.mvb[:i_end])

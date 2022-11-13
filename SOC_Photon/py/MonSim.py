@@ -216,8 +216,11 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
         if t_Ib_fail and t[i] > t_Ib_fail:
             Ib_ = Ib_fail
         else:
-            Ib_ = mon_old.Ib[i]
-            # Ib_ = sim.ib
+            if mon_old.Ib_sel is not None:
+                Ib_ = mon_old.Ib_sel[i]
+            else:
+                Ib_ = mon_old.Ib[i]
+                # Ib_ = sim.ib
         if t_Vb_fail and t[i] >= t_Vb_fail:
             Vb_ = Vb_fail
         else:
