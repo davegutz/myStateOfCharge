@@ -87,7 +87,7 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
         # Regression suite
-        # data_file_old_txt = 'ampHiFail v20221028.txt'
+        data_file_old_txt = 'ampHiFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
         # data_file_old_txt = 'ampLoFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'
@@ -96,7 +96,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'slowTweakRegression v20221028.txt'
         # data_file_old_txt = 'triTweakDisch v20221028.txt'
         # data_file_old_txt = 'satSit v20221028.txt'
-        data_file_old_txt = 'offSitHysBms v20221028.txt'; #time_end_in=5
+        # data_file_old_txt = 'offSitHysBms v20221028.txt'; #time_end_in=5
         # data_file_old_txt = 'offSitHysBmsNoise20220926.txt'; #time_end_in=50
         # data_file_old_txt = 'init Ca1 v20220926.txt'
         # data_file_old_txt = 'ampHiFailSlow20220914.txt'
@@ -224,13 +224,14 @@ if __name__ == '__main__':
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
+        if len(f.time) > 1:
+            n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
+                                          n_fig=n_fig, x_sch=X_SOC_MIN_BB, z_sch=T_SOC_MIN_BB, voc_reset=0.,
+                                          long_term=False)
         # n_fig, fig_files = overall_batt(mon_ver, sim_ver, randles_ver, filename, fig_files, plot_title=plot_title,
         #                                 n_fig=n_fig, suffix='_ver')  # sim over mon verify
         n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
-        if len(f.time) > 1:
-            n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                          n_fig=n_fig, x_sch=X_SOC_MIN_BB, z_sch=T_SOC_MIN_BB, voc_reset=0.)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
         cleanup_fig_files(fig_files)

@@ -143,8 +143,6 @@ struct Sum_st
   int16_t soc_ekf;  // Battery state of charge, ekf, %
   int16_t Voc_dyn;  // Battery modeled charge voltage at soc, V
   int16_t Voc_stat; // Ekf reference charge voltage, V
-  int16_t tweak_sclr_amp;  // Amplified Coulombic Efficiency scalar
-  int16_t tweak_sclr_noa;  // Non-Amplified Coulombic Efficiency scalar
   uint16_t falw;    // Fail word
   Sum_st(void){}
   void assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
@@ -168,7 +166,7 @@ struct Sum_st
     {
       time_long_2_str(this->t, buffer);
     }
-    Serial.printf("unit_h, %s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %10.6f, %10.6f, %d,",
+    Serial.printf("unit_h, %s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %d,",
       buffer, this->t,
       double(this->Tb)/600.,
       double(this->Vb)/1200.,
@@ -177,10 +175,8 @@ struct Sum_st
       double(this->soc_ekf)/16000.,
       double(this->Voc_dyn)/1200.,
       double(this->Voc_stat)/1200.,
-      double(this->tweak_sclr_amp)/16000.,
-      double(this->tweak_sclr_noa)/16000.,
       this->falw);
-    Serial1.printf("unit_h, %s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %10.6f, %10.6f, %d,",
+    Serial1.printf("unit_h, %s, %ld, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %d,",
       buffer, this->t,
       double(this->Tb)/600.,
       double(this->Vb)/1200.,
@@ -189,8 +185,6 @@ struct Sum_st
       double(this->soc_ekf)/16000.,
       double(this->Voc_dyn)/1200.,
       double(this->Voc_stat)/1200.,
-      double(this->tweak_sclr_amp)/16000.,
-      double(this->tweak_sclr_noa)/16000.,
       this->falw);
   }
   void nominal()
@@ -203,8 +197,6 @@ struct Sum_st
     this->soc_ekf = 0.;
     this->Voc_dyn = 0.;
     this->Voc_stat = 0.;
-    this->tweak_sclr_amp = 1.;
-    this->tweak_sclr_noa = 1.;
     this->falw = 0;
   }
 };

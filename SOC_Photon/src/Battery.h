@@ -39,7 +39,7 @@ class Sensors;
 #define RATED_TEMP      25.       // Temperature at RATED_BATT_CAP, deg C (25)
 #define TCHARGE_DISPLAY_DEADBAND  0.1 // Inside this +/- deadband, charge time is displayed '---', A
 #define T_RLIM          0.017     // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s (0.017 allows 1 deg for 1 minute)
-const float vb_dc_dc = 13.5;      // DC-DC charger estimated voltage, V (13.5 < v_sat = 13.85)
+const float VB_DC_DC = 13.5;      // DC-DC charger estimated voltage, V (13.5 < v_sat = 13.85)
 #define EKF_CONV        1.5e-3    // EKF tracking error indicating convergence, V (1.5e-3)
 #define EKF_T_CONV      30.       // EKF set convergence test time, sec (30.)
 const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1, down 2')

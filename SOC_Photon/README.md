@@ -404,70 +404,70 @@ Throughput test
 45. Fault injection testing
 
 Full regression suite:
-  ampHiFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;Pf;v2;W50;Dm50;Dn0.0001;
-                  Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Ca.5;Dr100;Rf;Pf;DP4;
-  ampHiFailFf:    Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;Pf;v2;W50;Dm50;Dn0.0001;
-			Pf;Hd;Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Ca.5;Dr100;Rf;Pf;DP4;
-  ampLoFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;Pf;v2;W50;Dm-50;Dn0.0001;
-                  Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Ca.5;Dr100;Rf;Pf;DP4;
-  ampHiFailNoise: Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;Pf;v2;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;Ff0;
-                  Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W100;+v0;Ca.5;Dr100;Rf;Pf;DP4;
-  rapidTweakRegression:  Ff0;Xp10;
-  rapidTweakRegression40C_:   Ff0;D^15;Xp10;
+  ampHiFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;
+                  Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
+  ampHiFailFf:    Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;
+			Pf;Hd;Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
+  ampLoFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm-50;Dn0.0001;
+                  Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
+  ampHiFailNoise: Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;Ff0;
+                  Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
+  rapidTweakRegression:  Ff0;HR;Xp10;
+  rapidTweakRegression40C_:   Ff0;HR;D^15;Xp10;
                               D^0;
-  slowTweakRegression:  Ff0;Xp11;
-  triTweakDisch:  Ff0;D^0;Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-29500;XW5;XT5;XC3;W2;Pf;v2;W2;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;XR;
+  slowTweakRegression:  Ff0;HR;Xp11;
+  triTweakDisch:  Ff0;D^0;Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-29500;XW5;XT5;XC3;W2;HR;Pf;v2;W2;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;XR;
                   v0;Hd;XS;Dm0;Dn0;Fi1;Fo1;Fc1;Fd1;FV0;FI0;FT0;Xp0;Ca1.;Pf;DP4;
   satSit:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat
-         Ff0;D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-17;Xf0.002;XW10;XT10;XC1;W2;Pf;v2;W5;XR;
+         Ff0;D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;
           XS;v0;Hd;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;DP4;
 	
   satSitHys:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset
-         Ff0;D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;Pf;v2;W5;XR;
+         Ff0;D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;
           XS;v0;Hd;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;DP4;
 
 	offSitHysBms:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset		
-		Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;Pf;v2;W5;XR;
+		Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;
           XS;v0;Hd;Xp0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;
 
 	offSitHysBmsNoise:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset		
-		Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.05;DM.2;DN2;Ph;Pf;v2;W5;XR;
+		Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.05;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;
           XS;v0;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;
 
-  ampHiFailSlow:  Ff0;D^0;Xm7;Ca0.5;Pf;v2;W2;Dr1000;DP1;Dm6;Dn0.0001;Fc.02;Fd.5;
+  ampHiFailSlow:  Ff0;D^0;Xm7;Ca0.5;Pf;v2;W2;Dr1000;DP1;HR;Dm6;Dn0.0001;Fc.02;Fd.5;
                   Hd;Xp0;Pf;Rf;W2;+v0;Dr100;Fc1;Fd1;Rf;Pf;
-  vHiFail:        Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;Pf;v2;W50;Dv0.25;
-                  Hd;Xp0;Rf;W100;+v0;Dr100;Rf;Pf;DP4;
+  vHiFail:        Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.25;
+                  Hd;Xp0;Rf;W200;+v0;Dr100;Rf;Pf;DP4;
   pulse:  Xp6
-  tbFailMod:    Ff0;D^0;Ca.5;Xp0;W4;Xm7;DP1;Dr100;W2;Pf;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
+  tbFailMod:    Ff0;D^0;Ca.5;Xp0;W4;Xm7;DP1;Dr100;W2;HR;Pf;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Hd;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;
   tbFailHdwe:   This script sometimes doesn't work but test performs fine manually
-                Ff0;D^0;Ca.5;Xp0;W4;Xm6;DP1;Dr100;W2;Pf;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
+                Ff0;D^0;Ca.5;Xp0;W4;Xm6;DP1;Dr100;W2;HR;Pf;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Hd;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;
   EKF_Track:  investigate EKF tracking
-         Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr100;DP1;Pf;v3;XR;
+         Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr100;DP1;HR;Pf;v3;XR;
           XS;v0;Hd;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
   EKF_Track Dr2000:  investigate EKF tracking.   Confirm proper operation with Dr!=100
-         Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr2000;DP1;Pf;v3;XR;
+         Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr2000;DP1;HR;Pf;v3;XR;
           XS;v0;Hd;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
   on_off_on:  using voltage
-          Ff0;Xm5;v2;Ca.09;W10;SV.9;W10;SV.8;W10;SV.7;W10;SV.6;W10;SV1;W50;v0;Pf;
+          Ff0;Xm5;v2;Ca.09;W10;SV.9;W10;SV.8;W10;SV.7;W10;SV.6;W10;SV1;W50;v0;HR;Pf;
           XS;v0;Hd;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
   start_up:  using current
-          Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Xts;Xa-500;Xf0.02;XW6;XT6;XC1;Dr100;DP1;v2;XR;
+          Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Xts;Xa-500;Xf0.02;XW6;XT6;XC1;Dr100;DP1;HR;Pf;v2;XR;
           XS;v0;Hd;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
   
   dwell Ca.5:
-		Ff0;v3;Ca.5;DT.05;DV0.05;DM.2;DN2;Di.1;Dv0;DP1;
+		Ff0;HR;v3;Ca.5;DT.05;DV0.05;DM.2;DN2;Di.1;Dv0;DP1;
         Xp0;v0;Hd;DT0;DV0;DM0;DN0;Di0;Dv0;DP4;
 
 Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
-  Bucket:  Ff0;Bm2;Bs1;D^15;
+  Bucket:  Ff0;HR;Bm2;Bs1;D^15;
            Bm0;Bs0;D^0;
            use Bsim=1 and Bmon=2 in MonSim
   triTweakDischBucketMix: set Xm7;D^<>; or Xm0;Dt<>; +reset
                   Ff0;Xp0;v0;Bm2;Bs1;Xm0;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FHd;T1;SA0;SB0;DA0;DB0;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-33000;XW5;XT5;XC3;W2;v2;W3;XR;
-                  v0;XS;SA1;SB1;Dm0;Dn0;Bm0;Bs0;FV0;FI1;FT0;Xp0;Ca1.;Pf;DP4;
+                  v0;XS;SA1;SB1;Dm0;Dn0;Bm0;Bs0;FV0;FI1;FT0;Xp0;Ca1.;HR;Pf;DP4;
   slowTweakRegressionBucket: Ff0;Bm2;Bs1;D^15;Xp11
 
 

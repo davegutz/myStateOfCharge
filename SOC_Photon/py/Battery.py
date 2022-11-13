@@ -91,7 +91,7 @@ V_BATT_DOWN = 9.8  # Shutoff point.  Diff to RISING needs to be larger than delt
 V_BATT_RISING = 10.3  # Shutoff point when off, V (10.3)
 RANDLES_T_MAX = 0.31  # Maximum update time of Randles state space model to avoid aliasing and instability (0.31 allows DP3)
 cp_eframe_mult = 20  # Run EKF 20 times slower than Coulomb Counter and Randles models
-vb_dc_dc = 13.5  # Estimated dc-dc charger, V
+VB_DC_DC = 13.5  # Estimated dc-dc charger, V
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -763,7 +763,7 @@ class BatterySim(Battery):
         if self.bms_off:
             self.vb = self.voc
         if self.bms_off and dc_dc_on:
-            self.vb = vb_dc_dc
+            self.vb = VB_DC_DC
         self.dv_dyn = self.vb - self.voc
 
         # Saturation logic, both full and empty   dag 9/3/2022 modify empty
