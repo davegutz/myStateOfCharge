@@ -332,7 +332,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     // Filter
     voc_filt_ = SdVb_->update(voc_);   // used for saturation test
 
-    // if ( rp.debug==13 || rp.debug==2 )
+    // if ( rp.debug==13 || rp.debug==2 || rp.debug==4 )
     //     Serial.printf("bms_off,soc,ib,vb,voc,voc_stat,voc_soc,dv_hys,dv_dyn,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
     //     bms_off_, soc_, ib_, vb_, voc_, voc_stat_, voc_soc_, dv_hys_, dv_dyn_);
 
@@ -840,7 +840,7 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
     soc_min_ = chem_.soc_min_T_->interp(temp_lim);
     q_min_ = soc_min_ * q_capacity_;
 
-    if ( (rp.debug==2 || rp.debug==3)  && cp.publishS && !initializing_all)  // print_serial_sim
+    if ( (rp.debug==2 || rp.debug==3 || rp.debug==4 )  && cp.publishS && !initializing_all)  // print_serial_sim
     {
         double cTime;
         if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;

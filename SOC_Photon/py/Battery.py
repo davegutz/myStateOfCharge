@@ -183,8 +183,7 @@ class Battery(Coulombs):
         self.r_dif = r_dif*sres
         self.c_dif = self.tau_dif / self.r_dif
         self.t_max = t_max
-        # self.Randles = StateSpace(2, 2, 1)
-        self.Randles = StateSpace(1, 1, 1)
+        self.Randles = StateSpace(2, 2, 1)
         self.temp_c = temp_c
         self.saved = Saved()  # for plots and prints
         self.dv_hys = 0.  # Placeholder so BatterySim can be plotted

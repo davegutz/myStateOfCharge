@@ -50,11 +50,17 @@ void print_all_header(void)
     print_serial_sim_header();
     print_serial_ekf_header();
   }
+  if ( rp.debug==4  )
+  {
+    print_serial_sim_header();
+    print_signal_sel_header();
+    print_serial_ekf_header();
+  }
 }
 void print_rapid_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   static uint8_t last_read_debug = rp.debug;     // Remember first time with new debug to print headers
-  if ( ( rp.debug==1 || rp.debug==2 || rp.debug==3 ) )
+  if ( ( rp.debug==1 || rp.debug==2 || rp.debug==3 || rp.debug==4 ) )
   {
     if ( reset || (last_read_debug != rp.debug) )
     {
@@ -76,7 +82,7 @@ void print_rapid_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 }
 void print_serial_header(void)
 {
-  if ( ( rp.debug==1 || rp.debug==2  || rp.debug==3 ) )
+  if ( ( rp.debug==1 || rp.debug==2 || rp.debug==3 || rp.debug==4 ) )
   {
     Serial.printf ("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
     Serial1.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   ioc, voc_soc,     Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
@@ -84,12 +90,12 @@ void print_serial_header(void)
 }
 void print_serial_sim_header(void)
 {
-  if ( rp.debug==2  || rp.debug==3 ) // print_serial_sim_header
+  if ( rp.debug==2  || rp.debug==3 || rp.debug==4 ) // print_serial_sim_header
     Serial.printf("unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,\n");
 }
 void print_signal_sel_header(void)
 {
-  if ( rp.debug==2  ) // print_signal_sel_header
+  if ( rp.debug==2 || rp.debug==4 ) // print_signal_sel_header
     Serial.printf("unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,");
     Serial.printf("    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f, ");
     Serial.printf("  fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,\n");
@@ -104,7 +110,7 @@ void print_signal_sel_header(void)
 }
 void print_serial_ekf_header(void)
 {
-  if ( rp.debug==3  ) // print_serial_ekf_header
+  if ( rp.debug==3 || rp.debug==4 ) // print_serial_ekf_header
     Serial.printf("unit_e,c_time,Fx_, Bu_, Q_, R_, P_, S_, K_, u_, x_, y_, z_, x_prior_, P_prior_, x_post_, P_post_, hx_, H_,\n");
 }
 

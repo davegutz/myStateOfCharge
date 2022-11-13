@@ -438,7 +438,8 @@ Full regression suite:
                   Hd;Xp0;Pf;Rf;W2;+v0;Dr100;Fc1;Fd1;Rf;Pf;
   vHiFail:        Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.25;
                   Hd;Xp0;Rf;W200;+v0;Dr100;Rf;Pf;DP4;
-  pulse:  Xp6
+  pulseEKF:  Xp6  # TODO: doesn't work now.
+  pulseSS:  Xp7
   tbFailMod:    Ff0;D^0;Ca.5;Xp0;W4;Xm7;DP1;Dr100;W2;HR;Pf;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Hd;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;
   tbFailHdwe:   This script sometimes doesn't work but test performs fine manually

@@ -167,7 +167,7 @@ void setup()
 
   // Summary
   System.enableFeature(FEATURE_RETAINED_MEMORY);
-  if ( rp.debug==1 || rp.debug==2 || rp.debug==3 )
+  if ( rp.debug==1 || rp.debug==2 || rp.debug==3 || rp.debug==4 )
     print_all_summary(mySum, rp.isum, NSUM);
 
   // Ask to renominalize

@@ -116,7 +116,7 @@ void EKF_1x1::update_ekf(const double z, double x_min, double x_max, const doubl
   P_ *= i_kh;
   x_post_ = x_;
   P_post_ = P_;
-  if ( rp.debug==3 )
+  if ( rp.debug==3 || rp.debug==4 )
   {
     double cTime;
     if ( rp.tweak_test() ) cTime = double(now)/1000.;

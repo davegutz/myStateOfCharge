@@ -981,7 +981,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Di100;", QUEUE);
                     break;
 
-                  case ( 6 ):  // Xp6:  Program a pulse
+                  case ( 6 ):  // Xp6:  Program a pulse for EKF test
+                    chit("XS;Dm0;Dn0;v0;Xm7;Ca.5;Pm;Dr100;DP20;v4;", QUEUE);  // setup
+                    chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
+                    chit("W10;Pm;v0;", QUEUE);  // finish
+                    break;
+
+                  case ( 7 ):  // Xp7:  Program a pulse for State Space test
                     chit("XS;Dm0;Dn0;v0;Xm7;Ca.5;Pm;Dr100;DP1;v2;", QUEUE);  // setup
                     chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
                     chit("W10;Pm;v0;", QUEUE);  // finish
@@ -1248,6 +1254,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("   v1: GP\n");
   Serial.printf("   v2: GP, Sim & Sel\n");
   Serial.printf("   v3: EKF\n");
+  Serial.printf("   v4: GP, Sim, Sel, & EKF\n");
   // Serial.printf("   v5: OLED display\n");
   // Serial.printf("   v7: EKF solver init\n");
   // Serial.printf("   v8: Randles SS init\n");
@@ -1286,20 +1293,21 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" Xt=  "); Serial.printf("%d", rp.type); Serial.println(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))");
  Serial.printf(" Xo= "); Serial.printf("%6.3f", rp.inj_bias); Serial.println(": Inj inj_bias A (-18.3-18.3) [0]");
   Serial.printf(" Xp= <?>, scripted tests...\n"); 
-  Serial.printf("    Xp-1:  Off, modeling false\n");
-  Serial.printf("    Xp0:  reset tests\n");
-  Serial.printf("    Xp1:  1 Hz sine\n");
-  Serial.printf("    Xp2:  1 Hz square\n");
-  Serial.printf("    Xp3:  1 Hz triangle\n");
-  Serial.printf("    Xp4:  -1C soft disch, reset xp0 or Di0\n");
-  Serial.printf("    Xp5:  +1C soft chg\n");
-  Serial.printf("    Xp6:  +/-500 A pulse\n");
-  Serial.printf("    Xp9:  silent tweak test\n");
-  Serial.printf("    Xp10: tweak cycle test\n");
-  Serial.printf("    Xp11: slow cycle test\n");
-  Serial.printf("    Xp12: slow half cycle reg test\n");
-  Serial.printf("    Xp20: collect fast data\n");
-  Serial.printf("    Xp21: collect slow data\n");
+  Serial.printf("  Xp-1: Off, modeling false\n");
+  Serial.printf("  Xp0: reset tests\n");
+  Serial.printf("  Xp1: 1 Hz sine\n");
+  Serial.printf("  Xp2: 1 Hz square\n");
+  Serial.printf("  Xp3: 1 Hz triangle\n");
+  Serial.printf("  Xp4: -1C soft disch, reset xp0 or Di0\n");
+  Serial.printf("  Xp5: +1C soft chg\n");
+  Serial.printf("  Xp6: +/-500 A pulse EKF\n");
+  Serial.printf("  Xp7: +/-500 A pulse SS\n");
+  Serial.printf("  Xp9: silent tweak test\n");
+  Serial.printf("  Xp10:tweak cycle test\n");
+  Serial.printf("  Xp11:slow cycle test\n");
+  Serial.printf("  Xp12:slow half cycle reg test\n");
+  Serial.printf("  Xp20:collect fast data\n");
+  Serial.printf("  Xp21:collect slow data\n");
   Serial.printf(" XC= "); Serial.printf("%6.3f cycles inj\n", Sen->cycles_inj);
   Serial.printf(" XR  "); Serial.printf("RUN inj\n");
   Serial.printf(" XS  "); Serial.printf("STOP inj\n");

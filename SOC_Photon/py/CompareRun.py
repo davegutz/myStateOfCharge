@@ -96,12 +96,13 @@ if __name__ == '__main__':
         # data_file_old_txt = 'slowTweakRegression v20221028.txt'
         # data_file_old_txt = 'triTweakDisch v20221028.txt'
         # data_file_old_txt = 'satSit v20221028.txt'
-        data_file_old_txt = 'offSitHysBms v20221028.txt'; #time_end_in=5
+        # data_file_old_txt = 'offSitHysBms v20221028.txt'; #time_end_in=161.5
         # data_file_old_txt = 'offSitHysBmsNoise20220926.txt'; #time_end_in=50
         # data_file_old_txt = 'init Ca1 v20220926.txt'
         # data_file_old_txt = 'ampHiFailSlow20220914.txt'
         # data_file_old_txt = 'vHiFail v20220917a.txt'
-        # data_file_old_txt = 'pulse20220914.txt'; init_time_in=-0.001;
+        # data_file_old_txt = 'pulseEKF v20221028.txt'; init_time_in=-0.001;  # TODO:  broken
+        data_file_old_txt = 'pulseSS v20221028.txt'; init_time_in=-0.001;
         # data_file_old_txt = 'tbFailMod20220914.txt'
         # data_file_old_txt = 'tbFailHdwe20220914.txt'
         # data_file_old_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
@@ -190,11 +191,11 @@ if __name__ == '__main__':
                                   encoding=None).view(np.recarray)
         else:
             print("data from", temp_flt_file, "empty after loading")
-            exit(1)
-        f_raw = np.unique(f_raw)
-        f = add_stuff_f(f_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
-        print("\nf:\n", f, "\n")
-        f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=RATED_BATT_CAP)
+        if temp_flt_file_clean:
+            f_raw = np.unique(f_raw)
+            f = add_stuff_f(f_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
+            print("\nf:\n", f, "\n")
+            f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=RATED_BATT_CAP)
 
         # How to initialize
         if mon_old.time[0] == 0.:  # no initialization flat detected at beginning of recording
@@ -224,7 +225,7 @@ if __name__ == '__main__':
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        if len(f.time) > 1:
+        if temp_flt_file_clean and len(f.time) > 1:
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                           n_fig=n_fig, x_sch=X_SOC_MIN_BB, z_sch=T_SOC_MIN_BB, voc_reset=0.,
                                           long_term=False)
