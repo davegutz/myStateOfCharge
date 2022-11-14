@@ -84,6 +84,7 @@ public:
   float scale() { return ( *cp_ib_scale_ ); };
   void rp_shunt_gain_sclr(const float sclr) { *rp_shunt_gain_sclr_ = sclr; };
   float rp_shunt_gain_sclr() { return *rp_shunt_gain_sclr_; };
+  unsigned long int sample_time(void) { return sample_time_; };
   float sclr() { return ( sclr_ ); };
   void sclr(const float sclr) { sclr_ = sclr; };
   float v2a_s() { return v2a_s_ ; };
@@ -106,6 +107,7 @@ protected:
   float sclr_;          // Scalar for fault test
   float add_;           // Adder for fault test, A
   float *rp_shunt_gain_sclr_; // Scalar on shunt gain
+  unsigned long int sample_time_;  // Exact moment of hardware sample
 };
 
 // Fault word bits.   All faults heal
@@ -349,32 +351,34 @@ public:
   boolean bms_off;            // Calculated by BatteryMonitor, battery off, low voltage, switched by battery management system?
   void bias_all_model();      // Bias model outputs for sensor fault injection
   void final_assignments(BatteryMonitor *Mon);  // Make final signal selection
-  void reset_temp(const boolean reset) { reset_temp_ = reset; };
-  boolean reset_temp() { return ( reset_temp_ ); };
-  void shunt_bias(void);      // Load biases into Shunt objects
-  void shunt_load(void);      // Load ADS015 protocol
-  void shunt_print();         // Print selection result
-  void shunt_scale(void);     // Load scalars into Shunt objects
-  void shunt_select_initial();   // Choose between shunts for model
-  void temp_load_and_filter(Sensors *Sen, const boolean reset_temp);
-  void vb_load(const byte vb_pin);  // Analog read of Vb
-  float Tb_noise();
-  float Tb_noise_amp() { return ( Tb_noise_amp_ ); };
-  void Tb_noise_amp(const float noise) { Tb_noise_amp_ = noise; };
-  float Vb_noise();
-  float Vb_noise_amp() { return ( Vb_noise_amp_ ); };
-  void Vb_noise_amp(const float noise) { Vb_noise_amp_ = noise; };
-  float Ib_noise();
   float Ib_amp_noise();
   float Ib_amp_noise_amp() { return ( Ib_amp_noise_amp_ ); };
   void Ib_amp_noise_amp(const float noise) { Ib_amp_noise_amp_ = noise; };
   float Ib_noa_noise();
   float Ib_noa_noise_amp() { return ( Ib_noa_noise_amp_ ); };
   void Ib_noa_noise_amp(const float noise) { Ib_noa_noise_amp_ = noise; };
-  void vb_print(void);     // Print Vb result
+  float Ib_noise();
+  void reset_temp(const boolean reset) { reset_temp_ = reset; };
+  boolean reset_temp() { return ( reset_temp_ ); };
+  unsigned long int sample_time_ib(void) { return sample_time_ib_; };
+  unsigned long int sample_time_vb(void) { return sample_time_vb_; };
+  void shunt_bias(void);      // Load biases into Shunt objects
+  void shunt_load(void);      // Load ADS015 protocol
+  void shunt_print();         // Print selection result
+  void shunt_scale(void);     // Load scalars into Shunt objects
+  void shunt_select_initial();   // Choose between shunts for model
+  void temp_load_and_filter(Sensors *Sen, const boolean reset_temp);
+  float Tb_noise();
+  float Tb_noise_amp() { return ( Tb_noise_amp_ ); };
+  void Tb_noise_amp(const float noise) { Tb_noise_amp_ = noise; };
   float vb_add() { return ( vb_add_ ); };
   void vb_add(const float add) { vb_add_ = add; };
   float Vb_add() { return ( vb_add_ * rp.nS ); };
+  void vb_load(const byte vb_pin);  // Analog read of Vb
+  float Vb_noise();
+  float Vb_noise_amp() { return ( Vb_noise_amp_ ); };
+  void Vb_noise_amp(const float noise) { Vb_noise_amp_ = noise; };
+  void vb_print(void);     // Print Vb result
   Fault *Flt;
 protected:
   float *rp_Tb_bias_hdwe_;   // Location of retained Tb bias, deg C
@@ -390,6 +394,10 @@ protected:
   float Ib_noa_noise_amp_;  // Ib noise on non-amplified sensor, amplitude model only, A pk-pk
   float vb_add_;        // Fault injection bias, V
   boolean reset_temp_;  // Keep track of temperature reset, stored for plotting, T=reset
+  unsigned long int sample_time_ib_;   // Exact moment of selected Ib sample, ms
+  unsigned long int sample_time_vb_;   // Exact moment of selected Vb sample, ms
+  unsigned long int sample_time_ib_hdwe_;   // Exact moment of Ib sample, ms
+  unsigned long int sample_time_vb_hdwe_;   // Exact moment of Vb sample, ms
 };
 
 

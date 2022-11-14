@@ -904,7 +904,7 @@ class SavedData:
             self.ioc = None  # Hys indicator current, A
             self.voc = None
             self.voc_soc = None
-            self.Ib_past = None  # Past bank current, A
+            # self.Ib_past = None  # Past bank current, A
             self.Ib_charge = None  # BMS switched current, A
             self.Vb = None  # Bank voltage, V
             self.chm = None  # Battery chemistry code
@@ -974,8 +974,8 @@ class SavedData:
             self.Ib = np.array(data.Ib[:i_end])
             self.ioc = np.array(data.ioc[:i_end])
             self.voc_soc = np.array(data.voc_soc[:i_end])
-            self.Ib_past = np.append(np.zeros((1, 1)), np.array(data.Ib[:(i_end-1)]))
-            self.Ib_past[0] = self.Ib_past[1]
+            # self.Ib_past = np.append(np.zeros((1, 1)), np.array(data.Ib[:(i_end-1)]))
+            # self.Ib_past[0] = self.Ib_past[1]
             self.Vb = np.array(data.Vb[:i_end])
             self.chm = np.array(data.chm[:i_end])
             self.sat = np.array(data.sat[:i_end])
@@ -1025,7 +1025,7 @@ class SavedData:
             self.Ib_h = None
             self.Ib_s = None
             self.mib = None
-            self.Ib = np.append(np.array(self.Ib_past[1:]), self.Ib_past[-1])  # shift time to present
+            # self.Ib = np.append(np.array(self.Ib_past[1:]), self.Ib_past[-1])  # shift time to present
             self.Ib_sel = None
             self.Vb_h = None
             self.Vb_s = None

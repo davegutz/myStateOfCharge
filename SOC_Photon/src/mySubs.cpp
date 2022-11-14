@@ -264,11 +264,10 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
 
 // Load all others
 // Outputs:   Sen->Ib_model_in, Sen->Ib_hdwe, 
-void load_ib_vb(const boolean reset, const unsigned long now, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon)
+void load_ib_vb(const boolean reset, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon)
 {
   // Load shunts
   // Outputs:  Sen->Ib_model_in, Sen->Ib_hdwe, Sen->Vb, Sen->Wb
-  Sen->now = now;
   Sen->shunt_scale();
   Sen->shunt_bias();
   Sen->shunt_load();
@@ -440,7 +439,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 
   // Load Ib and Vb
   // Outputs: Sen->Ib_model_in, Sen->Ib, Sen->Vb 
-  load_ib_vb(reset, now, Sen, myPins, Mon);
+  load_ib_vb(reset, Sen, myPins, Mon);
   Sen->Flt->ib_wrap(reset, Sen, Mon);
   Sen->Flt->ib_quiet(reset, Sen);
   Sen->Flt->cc_diff(Sen, Mon);
@@ -477,6 +476,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   //  constant,         Tb_hdwe, Tb_hdwe_filt       --->   Tb, Tb_filt
   Sen->Flt->select_all(Sen, Mon, reset);
   Sen->final_assignments(Mon);
+  Sen->now = Sen->sample_time_ib();
 
   // Fault snap buffer management
   static uint8_t fails_repeated = 0;
@@ -526,7 +526,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     // Turn off amplitude of injection and wait for end_inj
     if (Sen->now > Sen->stop_inj) rp.amp = 0;
   }
-  else if ( Sen->elapsed_inj && rp.tweak_test() )  // Done.  Turn things off by setting 0
+  else if ( Sen->elapsed_inj && rp.tweak_test() )  // Done.  Start and turn things off by setting 0
   {
     Sen->elapsed_inj = 0;
     chit("v0;", ASAP);    // Turn off echo

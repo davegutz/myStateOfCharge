@@ -106,7 +106,8 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
         Vb = mon_old.Vb_h
     else:
         Vb = mon_old.Vb
-    Ib_past = mon_old.Ib_past
+    # Ib_past = mon_old.Ib_past
+    Ib_in = mon_old.Ib
     Tb = mon_old.Tb
     soc_s_init = mon_old.soc_s[0]
     sat_init = mon_old.sat[0]
@@ -188,7 +189,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
         if sim_old is not None and not use_ib_mon:
             ib_in_s = sim_old.ib_in_s[i]
         else:
-            ib_in_s = Ib_past[i]
+            ib_in_s = Ib_in[i]
         if Bsim is None:
             _chm_s = chm_s[i]
         else:

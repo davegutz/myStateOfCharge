@@ -359,14 +359,15 @@ public:
   double calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset);
   float calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq);
   double count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon, const boolean initializing_all);
+  boolean cutback() { return model_cutback_; };
   double delta_q() { return *rp_delta_q_; };
   float ib_fut() { return ib_fut_; };
   void init_battery_sim(const boolean reset, Sensors *Sen);
   void load();
   void pretty_print(void);
-  float t_last() { return *rp_t_last_; };
-  boolean cutback() { return model_cutback_; };
+  unsigned long int sample_time(void) { return sample_time_; };
   boolean saturated() { return model_saturated_; };
+  float t_last() { return *rp_t_last_; };
   double voc() { return voc_; };
   double voc_stat() { return voc_stat_; };
 protected:
@@ -388,6 +389,7 @@ protected:
   double ib_fut_;           // Future value of limited current, A
   double ib_in_;            // Saved value of current input, A
   double ib_charge_;        // Current input avaiable for charging, A
+  unsigned long int sample_time_;       // Exact moment of hardware signal generation, ms
 };
 
 

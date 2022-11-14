@@ -779,6 +779,7 @@ float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const do
     if ( type!=3 ) rp.inj_bias = inj_bias - rp.amp;
     else rp.inj_bias = inj_bias;
 
+    sample_time_ = millis();
     return ( rp.inj_bias );
 }
 

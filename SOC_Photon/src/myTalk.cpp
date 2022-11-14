@@ -672,13 +672,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'M' ):  // PM:  Print shunt Amp
-                Serial.printf ("\nTweak::"); Sen->ShuntAmp->pretty_print();
-                Serial1.printf("\nTweak::"); Sen->ShuntAmp->pretty_print();
+                Serial.printf ("\n"); Sen->ShuntAmp->pretty_print();
+                Serial1.printf("\n"); Sen->ShuntAmp->pretty_print();
                 break;
 
               case ( 'N' ):  // PN:  Print shunt no amp
-                Serial.printf ("\nTweak::"); Sen->ShuntNoAmp->pretty_print();
-                Serial1.printf("\nTweak::"); Sen->ShuntNoAmp->pretty_print();
+                Serial.printf ("\n"); Sen->ShuntNoAmp->pretty_print();
+                Serial1.printf("\n"); Sen->ShuntNoAmp->pretty_print();
                 break;
 
               case ( 'r' ):  // Pr:  Print retained
@@ -1089,8 +1089,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   Sen->start_inj = Sen->wait_inj + Sen->now;
                   Sen->stop_inj = Sen->wait_inj + (Sen->now + min((unsigned long int)(Sen->cycles_inj / max(rp.freq/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
                   Sen->end_inj = Sen->stop_inj + Sen->tail_inj;
-                  Serial.printf("**\n*** RUN: at %ld,%7.3f cycles%7.3f to%7.3f with%7.3f wait and%7.3f tail ****\n**\n",
-                    Sen->now, Sen->cycles_inj, float(Sen->start_inj)/1000., float(Sen->stop_inj)/1000., float(Sen->wait_inj)/1000.,
+                  Serial.printf("**\n*** RUN: at%7.3f,%7.3f cycles %7.3f to %7.3f with %7.3f wait and %7.3f tail\n\n",
+                    float(Sen->now)/1000., Sen->cycles_inj, float(Sen->start_inj)/1000., float(Sen->stop_inj)/1000., float(Sen->wait_inj)/1000.,
                     float(Sen->tail_inj)/1000.);
                 }
                 else Serial.printf("Wait%5.1fs for init\n", float(TEMP_INIT_DELAY-Sen->now)/1000.);
