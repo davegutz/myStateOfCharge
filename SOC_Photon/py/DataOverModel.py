@@ -324,12 +324,14 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         n_fig += 1
         plt.subplot(331)
         plt.title(plot_title + ' sim_s 1')
-        plt.plot(so.time, so.ib_s, color='magenta', linestyle='-', label='ib_s')
-        plt.plot(smv.time, smv.ib_s, color='green', linestyle='--', label='ib_s_ver')
-        plt.plot(mv.time, mv.ib_charge, linestyle=':', color='blue', label='ib_charge_ver')
-        plt.plot(smv.time, smv.ib_in_s, color='orange', linestyle='-.', label='ib_in_s_ver')
-        plt.plot(mo.time, mo.Ib_sel, color='blue',  linestyle=':', label='Ib_sel')
-        plt.plot(mv.time, mv.Ib, color='cyan', linestyle=':', label='Ib_ver')
+        plt.plot(mo.time, mo.Ib_sel, color='blue',  linestyle='-', label='Ib_sel=Ib_in')
+        plt.plot(mv.time, mv.ib_in, color='cyan', linestyle='--', label='ib_in_ver')
+        plt.plot(so.time, so.ib_in_s, color='magenta', linestyle='-.', label='ib_in_s')
+        plt.plot(smv.time, smv.ib_in_s, color='orange', linestyle=':', label='ib_in_s_ver')
+        plt.plot(mo.time, np.array(mo.Ib_charge)-1, color='black',  linestyle='-', label='Ib_charge-1')
+        plt.plot(mv.time, np.array(mv.ib_charge)-1, color='orange', linestyle='--', label='ib_charge_ver-1')
+        plt.plot(so.time, np.array(so.ib_charge_s)-1, color='blue', linestyle='-.', label='ib_charge_s-1')
+        plt.plot(smv.time, np.array(smv.ib_charge_s)-1, color='red', linestyle=':', label='ib_charge_s_ver-1')
         plt.legend(loc=1)
         plt.subplot(332)
         plt.plot(so.time, so.soc_s, color='magenta', linestyle='-', label='soc_s')
@@ -1186,6 +1188,7 @@ class SavedDataSim:
             self.dv_hys_s = None
             self.vb_s = None
             self.ib_in_s = None
+            self.ib_charge_s = None
             self.ioc_s = None
             self.ib_s = None
             self.sat_s = None
@@ -1217,6 +1220,7 @@ class SavedDataSim:
             self.dv_hys_s = self.voc_s - self.voc_stat_s
             self.ib_s = data.ib_s[:i_end]
             self.ib_in_s = data.ib_in_s[:i_end]
+            self.ib_charge_s = data.ib_charge_s[:i_end]
             self.ioc_s = data.ioc_s[:i_end]
             self.sat_s = data.sat_s[:i_end]
             self.dq_s = data.dq_s[:i_end]
@@ -1227,6 +1231,7 @@ class SavedDataSim:
         s = "{},".format(self.unit[self.i])
         s += "{:13.3f},".format(self.c_time[self.i])
         s += "{:5.2f},".format(self.Tb_s[self.i])
+        s += "{:5.2f},".format(self.Tbl_s[self.i])
         s += "{:5.2f},".format(self.Tbl_s[self.i])
         s += "{:8.3f},".format(self.vsat_s[self.i])
         s += "{:5.2f},".format(self.voc_stat_s[self.i])

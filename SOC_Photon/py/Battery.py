@@ -161,7 +161,9 @@ class Battery(Coulombs):
         self.voc_stat = self.voc  # Static model open circuit voltage from charge process, V
         self.dv_dyn = 0.  # Model current induced back emf, V
         self.vb = NOM_SYS_VOLT  # Battery voltage at post, V
-        self.ib = 0  # Current into battery post, A
+        self.ib = 0.  # Current into battery post, A
+        self.ib_in = 0.  # Current into calculate, A
+        self.ib_charge = 0.  # Current into count_coulombs, A
         self.ioc = 0  # Current into battery process accounting for hysteresis, A
         self.dv_dsoc = 0.  # Slope of soc-voc curve, V/%
         self.tcharge = 0.  # Charging time to 100%, hr
@@ -349,7 +351,6 @@ class BatteryMonitor(Battery, EKF1x1):
         self.dV_dyn = 0.
         self.Voc_ekf = 0.
         self.T_Rlim = RateLimit()
-        self.ib_charge = 0.
         self.eframe = 0
         self.eframe_mult = eframe_mult
         self.dt_eframe = self.dt*self.eframe_mult
@@ -391,10 +392,11 @@ class BatteryMonitor(Battery, EKF1x1):
         self.temp_c = temp_c
         self.vsat = calc_vsat(self.temp_c)
         self.dt = dt
+        self.ib_in = ib
         self.mod = rp.modeling
         self.T_Rlim.update(x=self.temp_c, reset=reset, dt=dt, max_=0.017, min_=-.017)
         T_rate = self.T_Rlim.rate
-        self.ib = max(min(ib, IMAX_NUM), -IMAX_NUM)  # Overflow protection since ib past value used
+        self.ib = max(min(self.ib_in, IMAX_NUM), -IMAX_NUM)  # Overflow protection since ib past value used
 
         # Table lookup
         self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
@@ -571,6 +573,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.dt.append(dt)
         self.saved.chm.append(self.chm)
         self.saved.ib.append(self.ib)
+        self.saved.ib_in.append(self.ib_in)
         self.saved.ib_charge.append(self.ib_charge)
         self.saved.ioc.append(self.ioc)
         self.saved.vb.append(self.vb)
@@ -666,8 +669,6 @@ class BatterySim(Battery):
         self.d_delta_q = 0.  # Charging rate, Coulombs/sec
         self.charge_curr = 0.  # Charge current, A
         self.saved_s = SavedS()  # for plots and prints
-        self.ib_in = 0.  # Saved value of current input, A
-        self.ib_charge = 0.  # Always used to charge/discharge, A
         self.ib_fut = 0.  # Future value of limited current, A
 
     def __str__(self, prefix=''):
@@ -875,6 +876,8 @@ class BatterySim(Battery):
         self.saved.time.append(time)
         self.saved.dt.append(dt)
         self.saved.ib.append(self.ib)
+        self.saved.ib_in.append(self.ib_in)
+        self.saved.ib_charge.append(self.ib_charge)
         self.saved.chm.append(self.chm)
         self.saved.bmso.append(self.bms_off)
         self.saved.ioc.append(self.ioc)
@@ -918,6 +921,7 @@ class BatterySim(Battery):
         self.saved_s.vb_s.append(self.vb)
         self.saved_s.ib_s.append(self.ib)
         self.saved_s.ib_in_s.append(self.ib_in)
+        self.saved_s.ib_charge_s.append(self.ib_charge)
         self.saved_s.ib_fut_s.append(self.ib_fut)
         self.saved_s.sat_s.append(int(self.sat))
         self.saved_s.dq_s.append(self.delta_q)
@@ -953,6 +957,7 @@ class Saved:
         self.chm = []
         self.bmso = []
         self.ib = []
+        self.ib_in = []
         self.ib_charge = []
         self.ioc = []
         self.vb = []
@@ -1497,6 +1502,7 @@ class SavedS:
         self.vb_s = []
         self.ib_s = []
         self.ib_in_s = []
+        self.ib_charge_s = []
         self.ib_fut_s = []
         self.sat_s = []
         self.ddq_s = []

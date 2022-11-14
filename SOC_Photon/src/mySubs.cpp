@@ -91,7 +91,7 @@ void print_serial_header(void)
 void print_serial_sim_header(void)
 {
   if ( rp.debug==2  || rp.debug==3 || rp.debug==4 ) // print_serial_sim_header
-    Serial.printf("unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,\n");
+    Serial.printf("unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,\n");
 }
 void print_signal_sel_header(void)
 {
@@ -532,6 +532,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     chit("v0;", ASAP);    // Turn off echo
     chit("Xm7;", QUEUE);  // Turn off tweak_test
     chit("Pa;", QUEUE);   // Print all for record.  Last so Pf last and visible
+    chit("Xp0;", QUEUE);  // Reset
   }
   // Perform the calculation of injection signals 
   rp.inj_bias = Sen->Sim->calc_inj(Sen->elapsed_inj, rp.type, rp.amp, rp.freq);

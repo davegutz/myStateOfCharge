@@ -91,12 +91,12 @@ if __name__ == '__main__':
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
         # data_file_old_txt = 'ampLoFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'
-        # data_file_old_txt = 'rapidTweakRegression v20221028.txt'
+        data_file_old_txt = 'rapidTweakRegression v20221028.txt'
         # data_file_old_txt = 'rapidTweakRegression40C v20221028.txt'
         # data_file_old_txt = 'slowTweakRegression v20221028.txt'
         # data_file_old_txt = 'triTweakDisch v20221028.txt'
         # data_file_old_txt = 'satSit v20221028.txt'
-        data_file_old_txt = 'offSitHysBms v20221028.txt'
+        # data_file_old_txt = 'offSitHysBms v20221028.txt'
         # data_file_old_txt = 'offSitHysBmsNoise20220926.txt'; #time_end_in=50
         # data_file_old_txt = 'init Ca1 v20220926.txt'
         # data_file_old_txt = 'ampHiFailSlow20220914.txt'
@@ -172,7 +172,7 @@ if __name__ == '__main__':
                                                unit_key=unit_key_sim, skip=skip, path_to_data=path_to_data,
                                                path_to_temp=path_to_temp)
         cols_sim = ('c_time', 'chm_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
-                    'ib_in_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
+                    'ib_in_s', 'ib_charge_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
         if data_file_sim_clean:
             sim_old_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
                                         dtype=float, encoding=None).view(np.recarray)

@@ -584,6 +584,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'd' ):  // Hd: History dump
                 Serial.printf("\n");
                 print_all_summary(mySum, rp.isum, NSUM);
+                chit("Pr;Q;", QUEUE);
                 Serial.printf("\n");
                 print_all_fault_buffer(myFlt, rp.iflt, NFLT);
                 break;
@@ -600,7 +601,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 's' ):  // Hs: History snapshot
                 cp.cmd_summarize();
-                chit("Pr;Hd;Q;", QUEUE);
                 break;
 
               default:
