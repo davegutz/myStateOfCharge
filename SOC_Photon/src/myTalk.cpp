@@ -1001,17 +1001,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Xm15;", QUEUE);     // Modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
                     chit("Xts;", QUEUE);      // Start up a sine wave
                     chit("Ca1;", QUEUE);      // After restarting with sine running, soc will not be at 1.  Reset them all to 1
-                    chit("Ri;", QUEUE);       // Reset the delta_q's
-                    chit("Mw0;Nw0;", QUEUE);  // Allow tweak bias to work immediately instead of waiting several hours
-                    chit("MC.004;", QUEUE);  // Give tweak bias logic a large adjustment range to quickly converge
-                    chit("Mx.04;", QUEUE);   // Give tweak bias logic a large adjustment range to quickly converge
-                    chit("NC.004;", QUEUE);  // Give tweak bias logic a large adjustment range to quickly converge
-                    chit("Nx.04;", QUEUE);   // Give tweak bias logic a large adjustment range to quickly converge
-                    chit("Mk1;Nk1;", QUEUE);  // Reset the tweak biases to 1 for new count
                     chit("Dm1;Dn1;", ASAP);   // Slight positive current so sat logic is functional.  ASAP so synchronized and ib_diff flat.
                     chit("DP2;", QUEUE);      // Fast data collection
                     chit("Rb;", QUEUE);       // Reset battery states
-                    chit("Pa;", QUEUE);       // Print all for record
+                    // chit("Pa;", QUEUE);       // Print all for record
                     if ( INT_in == 9 )  // Xp9:  silent tweak test
                     {
                       chit("Xs.1;", QUEUE);  // t_sat scaled to detect saturation in short dwell with Xf, sclr (0.1)
@@ -1089,9 +1082,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   Sen->start_inj = Sen->wait_inj + Sen->now;
                   Sen->stop_inj = Sen->wait_inj + (Sen->now + min((unsigned long int)(Sen->cycles_inj / max(rp.freq/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
                   Sen->end_inj = Sen->stop_inj + Sen->tail_inj;
-                  Serial.printf("**\n*** RUN: at%7.3f,%7.3f cycles %7.3f to %7.3f with %7.3f wait and %7.3f tail\n\n",
-                    float(Sen->now)/1000., Sen->cycles_inj, float(Sen->start_inj)/1000., float(Sen->stop_inj)/1000., float(Sen->wait_inj)/1000.,
-                    float(Sen->tail_inj)/1000.);
+                  Serial.printf("**\n*** RUN: at %ld, %7.3f cycles %ld to %ld with %ld wait and %ld tail\n\n",
+                    Sen->now, Sen->cycles_inj, Sen->start_inj, Sen->stop_inj, Sen->wait_inj, Sen->tail_inj);
                 }
                 else Serial.printf("Wait%5.1fs for init\n", float(TEMP_INIT_DELAY-Sen->now)/1000.);
                 break;

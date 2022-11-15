@@ -476,7 +476,6 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   //  constant,         Tb_hdwe, Tb_hdwe_filt       --->   Tb, Tb_filt
   Sen->Flt->select_all(Sen, Mon, reset);
   Sen->final_assignments(Mon);
-  Sen->now = Sen->sample_time_ib();
 
   // Fault snap buffer management
   static uint8_t fails_repeated = 0;

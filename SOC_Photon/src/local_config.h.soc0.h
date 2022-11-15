@@ -24,7 +24,7 @@ const String unit = "soc0_20221028";  // multi-frame EKF
 // Two 12 V 100 Ah series battery bank would have RATED_BATT_CAP 100, NS 2, and NP 1
 // Four 12 V 200 Ah with two in parallel joined with two more in series
 //   would have  RATED_BATT_CAP 200, NS 2, and NP 2
-#define COULOMBIC_EFF         0.9985  // Coulombic efficiency of battery (Perm scale * 'Mk' for amp, * 'Nk' for noa), fraction of charge that gets used
+#define COULOMBIC_EFF         0.9985  // Coulombic efficiency of battery, fraction of charge that gets used
 #define MON_CHEM              0       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=LION 
 #define SIM_CHEM              0       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=LION 
 #define RATED_BATT_CAP        108.4   // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah

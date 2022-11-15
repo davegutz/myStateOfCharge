@@ -735,6 +735,9 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
 // Injection model, calculate inj bias based on time since boot
 float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq)
 {
+    // Sample at instant of signal injection
+    sample_time_ = millis();
+
     // Return if time 0
     if ( now== 0UL )
     {
@@ -779,7 +782,6 @@ float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const do
     if ( type!=3 ) rp.inj_bias = inj_bias - rp.amp;
     else rp.inj_bias = inj_bias;
 
-    sample_time_ = millis();
     return ( rp.inj_bias );
 }
 
