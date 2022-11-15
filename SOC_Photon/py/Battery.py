@@ -743,9 +743,9 @@ class BatterySim(Battery):
             voltage_low = self.voc_stat < V_BATT_RISING_SIM
         bms_charging = self.ib_in > IB_MIN_UP
         self.bms_off = (self.temp_c < low_t) or (voltage_low and not self.tweak_test)
-        self.ib_charge = self.ib_in  # pass along current unless truly off
+        ib_charge_fut = self.ib_in
         if self.bms_off and not bms_charging:
-            self.ib_charge = 0.
+            ib_charge_fut = 0.
         if self.bms_off and voltage_low:
             self.ib = 0.
 
@@ -769,8 +769,11 @@ class BatterySim(Battery):
         self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
         # if self.tweak_test:
         if self.tweak_test or (not rp.modeling):
-            self.sat_ib_max = self.ib_charge
-        self.ib_fut = min(self.ib_charge, self.sat_ib_max)  # the feedback of self.ib
+            self.sat_ib_max = ib_charge_fut
+        self.ib_fut = min(ib_charge_fut, self.sat_ib_max)  # the feedback of self.ib
+
+        self.ib_charge = self.ib  # same time plane as volt calcs
+
         if (self.q <= 0.) & (self.ib_charge < 0.):
             print("q", self.q, "empty")
             self.ib_fut = 0.  # empty

@@ -680,9 +680,9 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
         voltage_low = voc_stat_ < V_BATT_RISING_SIM;
     bms_charging = ib_in_ > IB_MIN_UP;
     bms_off_ = (temp_c_ <= chem_.low_t) || (voltage_low && !rp.tweak_test());
-    ib_charge_ = ib_in_;  // Pass along current to charge unless bms_off
+    float ib_charge_fut = ib_in_;  // Pass along current to charge unless bms_off
     if ( bms_off_ && rp.mod_ib() && !bms_charging)
-        ib_charge_ = 0.;
+        ib_charge_fut = 0.;
     if ( bms_off_ && voltage_low )
         ib_ = 0.;
 
@@ -695,7 +695,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
         vb_ = Randles_->y(0);
     }
     else    // aliased, unstable if T<0.5.
-        vb_ = voc_ + chem_.r_ss * ib_charge_;
+        vb_ = voc_ + chem_.r_ss * ib_charge_fut;
 
     // Special cases override
     if ( bms_off_ )
@@ -710,8 +710,9 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
 
     // Saturation logic, both full and empty
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * rp.cutback_gain_scalar;
-    if ( rp.tweak_test() || !rp.modeling ) sat_ib_max_ = ib_charge_;   // Disable cutback when real world or when doing tweak_test test
-    ib_fut_ = min(ib_charge_/(*rp_nP_), sat_ib_max_);      // the feedback of ib_
+    if ( rp.tweak_test() || !rp.modeling ) sat_ib_max_ = ib_charge_fut;   // Disable cutback when real world or when doing tweak_test test
+    ib_fut_ = min(ib_charge_fut/(*rp_nP_), sat_ib_max_);      // the feedback of ib_
+    ib_charge_ = ib_;  // Same time plane as volt calcs, added past value
     if ( (q_ <= 0.) && (ib_charge_ < 0.) ) ib_fut_ = 0.;   //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_fut_ == sat_ib_max_);
     model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);

@@ -91,7 +91,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
         # data_file_old_txt = 'ampLoFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'
-        data_file_old_txt = 'rapidTweakRegression v20221028.txt'; time_end_in=0.5;
+        data_file_old_txt = 'rapidTweakRegression v20221028.txt'; #time_end_in=0.5;
         # data_file_old_txt = 'rapidTweakRegression40C v20221028.txt'
         # data_file_old_txt = 'slowTweakRegression v20221028.txt'
         # data_file_old_txt = 'triTweakDisch v20221028.txt'
