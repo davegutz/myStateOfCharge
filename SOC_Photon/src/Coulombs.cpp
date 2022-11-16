@@ -427,7 +427,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset_temp, const
     q_ = q_capacity_ + *rp_delta_q_;
 
     // Normalize
-    soc_ = q_ / q_capacity_; // CAUTION, this soc_ is not visible in child Monitor::calculate
+    soc_ = q_ / q_capacity_;
     soc_min_ = chem_.soc_min_T_->interp(temp_lim);
     q_min_ = soc_min_ * q_capacity_;
 

@@ -966,6 +966,7 @@ class SavedData:
             self.time -= self.time_ref
             self.time_min = self.time / 60.
             self.time_day = self.time / 3600. / 24.
+
             # Truncate
             if time_end is None:
                 i_end = len(self.time)
@@ -993,8 +994,6 @@ class SavedData:
             self.Ib = np.array(data.Ib[:i_end])
             self.ioc = np.array(data.ioc[:i_end])
             self.voc_soc = np.array(data.voc_soc[:i_end])
-            # self.Ib_past = np.append(np.zeros((1, 1)), np.array(data.Ib[:(i_end-1)]))
-            # self.Ib_past[0] = self.Ib_past[1]
             self.Vb = np.array(data.Vb[:i_end])
             self.chm = np.array(data.chm[:i_end])
             self.sat = np.array(data.sat[:i_end])
@@ -1030,7 +1029,7 @@ class SavedData:
             self.ib_diff_f = None
             self.ib_diff_flt = None
             self.ib_diff_fa = None
-            self.voc_soc = None
+            self.voc_soc_sel = None
             self.e_w = None
             self.e_w_f = None
             self.wh_flt = None
@@ -1089,7 +1088,7 @@ class SavedData:
             self.ib_diff_f = np.array(sel.ib_diff_f[:i_end])
             self.ib_diff_flt = np.bool8((np.array(fltw) & 2**8) | (np.array(fltw) & 2**9))
             self.ib_diff_fa = np.bool8((np.array(falw) & 2**8) | (np.array(falw) & 2**9))
-            self.voc_soc = np.array(sel.voc_soc[:i_end])
+            self.voc_soc_sel = np.array(sel.voc_soc[:i_end])
             self.e_w = np.array(sel.e_w[:i_end])
             self.e_w_f = np.array(sel.e_w_f[:i_end])
             self.wh_flt = np.bool8(np.array(fltw) & 2**5)

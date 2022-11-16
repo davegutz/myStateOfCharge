@@ -292,13 +292,6 @@ void load_ib_vb(const boolean reset, Sensors *Sen, Pins *myPins, BatteryMonitor 
 void  monitor(const boolean reset, const boolean reset_temp, const unsigned long now,
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen)
 {
-
-  // Initialize charge state if temperature initial condition changed
-  // Needed here in this location to have a value for Sen->Tb_filt
-  Mon->apply_delta_q_t(reset_temp);  // From memory
-  Mon->init_battery_mon(reset_temp, Sen);
-  Mon->solve_ekf(reset, reset_temp, Sen);
-
   // EKF - calculates temp_c_, voc_stat_, voc_ as functions of sensed parameters vb & ib (not soc)
   Mon->calculate(Sen, reset_temp);
 

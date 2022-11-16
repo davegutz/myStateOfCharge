@@ -301,7 +301,7 @@ void loop()
     sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen);
     Sen->T =  double(Sen->dt_ib())/1000.;
 
-    // Calculate Ah remaining
+    // Calculate Ah remaining`
     // Inputs:  rp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_filt
     // States:  Mon.soc
     // Outputs: tcharge_wt, tcharge_ekf

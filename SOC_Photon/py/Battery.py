@@ -400,7 +400,6 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Table lookup
         self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
-        # print("monitor soc", self.soc, "Tb", temp_c, "voc_soc", self.voc_soc)
 
         # Battery management system model
         if not self.bms_off:

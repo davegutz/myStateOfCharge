@@ -246,7 +246,6 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
             mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb_, charge_curr=Ib_charge, sat=saturated)
         mon.calc_charge_time(mon.q, mon.q_capacity, Ib_charge, mon.soc)
         mon.assign_soc_s(sim.soc)
-        # print("dt", mon_old.dt[i], "dt_ver", T, "Tb", mon_old.Tb[i], "Tb_ver", Tb_, "Ib_", Ib_, "Ib_charge_ver", Ib_charge, "soc", mon_old.soc[i], "soc_ver", mon.soc, "voc_soc", mon_old.voc_soc[i], "voc_soc_ver", mon.voc_soc)
 
         # Plot stuff
         mon.save(t[i], T, mon.soc, sim.voc)
