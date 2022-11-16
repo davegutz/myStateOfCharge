@@ -1002,49 +1002,38 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Xts;", QUEUE);      // Start up a sine wave
                     chit("Ca1;", QUEUE);      // After restarting with sine running, soc will not be at 1.  Reset them all to 1
                     chit("Dm1;Dn1;", ASAP);   // Slight positive current so sat logic is functional.  ASAP so synchronized and ib_diff flat.
-                    // chit("DP2;", QUEUE);      // Fast data collection
-                    chit("DP1;", QUEUE);      // Fast data collection (may cause trouble in CoolTerm.  if so, try DP2)
+                    chit("DP1;", QUEUE);      // Fast data collection (may cause trouble in CoolTerm.  if so, try Dr200)
                     chit("Rb;", QUEUE);       // Reset battery states
                     // chit("Pa;", QUEUE);       // Print all for record
-                    if ( INT_in == 9 )  // Xp9:  silent tweak test
+                    if ( INT_in == 10 )  // Xp10:  rapid tweak
                     {
-                      chit("Xs.1;", QUEUE);  // t_sat scaled to detect saturation in short dwell with Xf, sclr (0.1)
-                      chit("Xf.02;", QUEUE); // Frequency, Hz (0.02)
-                      chit("XW5;", QUEUE);    // Wait time before starting to cycle (5)
-                      chit("XT5;", QUEUE);    // Wait time after cycle to print (5)
-                      chit("Xa-6000;", QUEUE);// Amplitude, A (-6000)
-                      chit("XC20;", QUEUE);   // Number of injection cycles (20)
-                      chit("v0;", QUEUE);     // Silent
-                    }
-                    else if ( INT_in == 10 )  // Xp10:  rapid tweak
-                    {
-                      chit("Xf.02;", QUEUE); // Frequency 0.02 Hz
+                      chit("Xf.02;", QUEUE);  // Frequency 0.02 Hz
                       chit("Xa-2000;", QUEUE);// Amplitude -2000 A
                       chit("XW5;", QUEUE);    // Wait time before starting to cycle
                       chit("XT5;", QUEUE);    // Wait time after cycle to print
                       chit("XC3;", QUEUE);    // Number of injection cycles
                       chit("W2;", QUEUE);     // Wait
-                      chit("v2;", QUEUE);    // Data collection
+                      chit("v2;", QUEUE);     // Data collection
                     }
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
                     {
-                      chit("Xf.002;", QUEUE);// Frequency 0.002 Hz
+                      chit("Xf.002;", QUEUE); // Frequency 0.002 Hz
                       chit("Xa-60;", QUEUE);  // Amplitude -60 A
                       chit("XW60;", QUEUE);   // Wait time before starting to cycle
                       chit("XT600;", QUEUE);  // Wait time after cycle to print
                       chit("XC1;", QUEUE);    // Number of injection cycles
                       chit("W2;", QUEUE);     // Wait
-                      chit("v2;", QUEUE);    // Data collection
+                      chit("v2;", QUEUE);     // Data collection
                     }
                     else if ( INT_in == 12 )  // Xp12:  slow half tweak
                     {
-                      chit("Xf.0002;", QUEUE); // Frequency 0.002 Hz
-                      chit("Xa-6;", QUEUE);   // Amplitude -60 A
-                      chit("XW60;", QUEUE);   // Wait time before starting to cycle
-                      chit("XT2400;", QUEUE); // Wait time after cycle to print
-                      chit("XC.5;", QUEUE);  // Number of injection cycles
-                      chit("W2;", QUEUE);     // Wait
-                      chit("v2;", QUEUE);    // Data collection
+                      chit("Xf.0002;", QUEUE);  // Frequency 0.002 Hz
+                      chit("Xa-6;", QUEUE);     // Amplitude -60 A
+                      chit("XW60;", QUEUE);     // Wait time before starting to cycle
+                      chit("XT2400;", QUEUE);   // Wait time after cycle to print
+                      chit("XC.5;", QUEUE);     // Number of injection cycles
+                      chit("W2;", QUEUE);       // Wait
+                      chit("v2;", QUEUE);       // Data collection
                     }
                     chit("W2;", QUEUE);       // Wait
                     chit("XR;", QUEUE);       // Run cycle
@@ -1057,11 +1046,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     {
                       chit("Dr500;", QUEUE);  // 5x sample time, > RANDLES_T_MAX.  Randles dynamics disabled in Photon
                       chit("DP4;", QUEUE);    // 4x data collection, > RANDLES_T_MAX.  Randles dynamics disabled in Python
-                      chit("v2;", QUEUE);    // Large data set
+                      chit("v2;", QUEUE);     // Large data set
                     }
                     else if ( INT_in == 21 )
                     {
-                      chit("DP20;", QUEUE);    // 20x data collection
+                      chit("DP20;", QUEUE);   // 20x data collection
                       chit("v2;", QUEUE);     // Slow data collection
                     }
                     chit("Rb;", QUEUE);       // Large data set
@@ -1295,7 +1284,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Xp5: +1C soft chg\n");
   Serial.printf("  Xp6: +/-500 A pulse EKF\n");
   Serial.printf("  Xp7: +/-500 A pulse SS\n");
-  Serial.printf("  Xp9: silent tweak test\n");
   Serial.printf("  Xp10:tweak cycle test\n");
   Serial.printf("  Xp11:slow cycle test\n");
   Serial.printf("  Xp12:slow half cycle reg test\n");

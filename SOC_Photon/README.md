@@ -98,7 +98,7 @@ conversion.   A 100A/.075V shunt is nominally 1333 A/V.
 
 Do a discharge-charge cycle to get a good practical value for the bias of the conversion.    Calculate integral of A over cycle and get endpoint to match start point.   This will also provide a good estimate for battery capacity to populate the model.  (R1 visible easily).
 
-Tweak logic should be used to get rid of drift of small A measurement.
+Tweak logic could be used to get rid of drift of small A measurement.   This integrates each freely counted current input and compares endpoints after long cycle.   Should be no difference.   If there is, tweak.   Not implemented - not worth complexity.
 
 >13.7 V is decent approximation for SoC>99.7, correct for temperature.
 
@@ -359,14 +359,6 @@ This is normal for temperature.   Modeled Tb is very simple = to a constant + bi
   ........................................................................................
   35. Regression tests:
 
-Rapid tweak test 1 min using models Xm15 'tweakMod' to test tweak onlya_ (no data collection, v0)
-  Xp9;
-    to end prematurely
-  XS; Dn0.9985; Ca1; Mk0; Nk0;
-    expected result (may have small values of abs(Di)<0.01 ):
-       Tweak(Amp)::adjust:, past=       1.1, pres=       1.1, error=      -0.0, gain= -0.039993, delta_hrs=  0.013891, Di=  0.000, new_Di=  0.000,
-       Tweak(No Amp)::adjust:, past=       1.1, pres=       1.1, error=      -0.0, gain= -0.039993, delta_hrs=  0.013891, Di=  0.000, new_Di=  0.000,
-
 Rapid tweak test 02:30 min using models 'tweakMod'
     start recording, save to ../dataReduction/< name >.txt
   Xp10;
@@ -398,9 +390,7 @@ Throughput test
 44. Other fault notes:
   Every fail fault must change something on the display.  Goal is to make user run 'Pf' to see cause
   Wrap logic 0.2 v=16 A. There is an inflection in voc(soc) that requires forgiveness during saturation.  0.25 v = 20 A for wrap hi.   Sized so wrap_lo_fa trips before false saturating with delta I=-100 with soc=.95
-  The tweak logic is small and limited and does not significantly interact with fault logic.
   If Tb is never read on boot up it should fail to NOMINAL_TB.
-45. Tweak shall be disabled for small <20% charge swings
 45. Fault injection testing
 
 Full regression suite:
@@ -505,12 +495,12 @@ Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
 1. Current Sensor
   a. Gain - component calibration at install
   b. Bias - component calibration at install
-  c. Drift - Tweak test
-  d. Amplifier vs non-amplifier.  Observations of tweak function show over long averaging time the non-amplified sensor provides equivalent results.  Could probably get by with two non-amplified sensors.
+  c. Drift - Tweak test (not implemented)
+  d. Amplifier vs non-amplifier.  Observations of tweak function show over long averaging time the non-amplified sensor provides equivalent results.  Could probably get by with two non-amplified sensors.  (tweak not implemented.  Not worth the complexity.)
 2. Voltage Sensor
 3. Temperature Sensor
 4. Hysteresis Model
-5. Coulombic Efficiency and Tweaking and Drift
+5. Coulombic Efficiency and Drift
 6. Coulomb Counter
   a.  Temperature derivative on counting is a new concept.  I believe I am pioneering this idea of technology.   That the temperature effects are large enough to fundamentally increase the order of Coulomb Counting.
   b. My notion seems to be backed up by high sensitiviy
@@ -534,7 +524,6 @@ Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
 4. Use spreadsheet to estimate first order polynomial fit to current data.   Checks bias and gain for linearity.  These devices are linear so if that's not what is seen on plots, check data.
 5. To date, my work has not been precise enough to see temperature dependence on shunt calibration.
 6. Real runs using battery heater to establish VOC(SOC, Tb) and determine capacity, which should be > rating.
-7. To disable tweak logic:  Mk=Nk=1  , MC=NC=0 (max tweak = 0)
 
 ## Boot checklist - after new software load
 1. Update the version in local_conig.h for 'unit ='.
@@ -542,6 +531,5 @@ Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
 3. On restart after load, check the retained parameter list (SRAM battery backed up).   The list is displayed on startup for convenience.   Go slowly with this if you've been tuning.
 4. Record Hd, Pf, Pa, brief v1 burst.   Confirm the 'unit =' is for the intended build install.
 5. Check Xm=0 before walk away from installed system.
-6. Enable tweak logic if desired (default values in [] in 'h' printout.)
 
 
