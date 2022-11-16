@@ -832,7 +832,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.legend(loc=1)
     plt.subplot(334)
     plt.plot(mo.time, mo.Ib_sel, linestyle='-', color='black', label='Ib_sel')
-    plt.plot(mo.time, so.ib_s, linestyle='--', color='cyan', label='ib_in_s')
+    plt.plot(so.time, so.ib_s, linestyle='--', color='cyan', label='ib_in_s')
     plt.plot(mv.time, mv.ib_charge, linestyle='-.', color='orange', label='ib_charge_ver')
     plt.legend(loc=1)
     plt.subplot(335)

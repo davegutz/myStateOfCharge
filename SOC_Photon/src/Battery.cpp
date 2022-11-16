@@ -326,9 +326,6 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
 
     if ( reset_temp || cp.soft_reset || eframe_ == cp.eframe_mult ) eframe_ = 0;
 
-    // Normalize
-    soc_ = q_ / q_capacity_;
-
     // Filter
     voc_filt_ = SdVb_->update(voc_);   // used for saturation test
 

@@ -328,7 +328,6 @@ protected:
   double tcharge_;      // Counted charging time to 100%, hr
   double q_ekf_;        // Filtered charge calculated by ekf, C
   double voc_filt_;     // Filtered, static model open circuit voltage, V
-  double soc_;          // Weighted selection of ekf state of charge and coulomb counter (0-1)
   double amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
   double amp_hrs_remaining_soc_;  // Discharge amp*time left if drain soc_ to 0, A-h
   double y_filt_;       // Filtered EKF y value, V
