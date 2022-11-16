@@ -87,7 +87,7 @@ Shunt::Shunt(const String name, const uint8_t port, float *cp_ib_bias, float *cp
 : Adafruit_ADS1015(),
   name_(name), port_(port), bare_(false), cp_ib_bias_(cp_ib_bias), cp_ib_scale_(cp_ib_scale), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0), sclr_(1.), add_(0.),
-  rp_shunt_gain_sclr_(rp_shunt_gain_sclr), sample_time_(0UL)
+  rp_shunt_gain_sclr_(rp_shunt_gain_sclr), sample_time_(0UL), sample_time_z_(0UL)
 {
   if ( name_=="No Amp")
     setGain(GAIN_SIXTEEN, GAIN_SIXTEEN); // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
@@ -125,6 +125,7 @@ void Shunt::load()
   if ( !bare_ && !rp.mod_ib() )
   {
     vshunt_int_ = readADC_Differential_0_1();
+    sample_time_z_ = sample_time_;
     sample_time_ = millis();
     
     // if ( rp.debug==-14 ) { vshunt_int_0_ = readADC_SingleEnded(0);  vshunt_int_1_ = readADC_SingleEnded(1); }
@@ -668,6 +669,7 @@ void Sensors::choose_()
     Ib_hdwe = Ib_amp_hdwe;
     Ib_hdwe_model = Ib_amp_model;
     sample_time_ib_hdwe_ = ShuntAmp->sample_time();
+    dt_ib_hdwe_ = ShuntAmp->dt();
   }
   else if ( Flt->ib_sel_stat()<0 )
   {
@@ -675,6 +677,7 @@ void Sensors::choose_()
     Ib_hdwe = Ib_noa_hdwe;
     Ib_hdwe_model = Ib_noa_model;
     sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
+    dt_ib_hdwe_ = ShuntNoAmp->dt();
   }
   else
   {
@@ -682,6 +685,7 @@ void Sensors::choose_()
     Ib_hdwe = 0.;
     Ib_hdwe_model = 0.;
     sample_time_ib_hdwe_ = 0UL;
+    dt_ib_hdwe_ = 0UL;
   }
 }
 
@@ -748,11 +752,13 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   {
     Ib = Ib_hdwe_model;
     sample_time_ib_ = Sim->sample_time();
+    dt_ib_ = Sim->dt();
   }
   else
   {
     Ib = Ib_hdwe;
     sample_time_ib_ = sample_time_ib_hdwe_;
+    dt_ib_ = dt_ib_hdwe_;
   }
   now = sample_time_ib_;
 

@@ -551,7 +551,8 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
 // Battery model class for reference use mainly in jumpered hardware testing
 BatterySim::BatterySim() : Battery() {}
 BatterySim::BatterySim(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code, float *rp_hys_scale) :
-    Battery(rp_delta_q, rp_t_last, rp_nP, rp_nS, rp_mod_code, rp_hys_scale), q_(RATED_BATT_CAP*3600.), rp_s_cap_model_(rp_s_cap_model)
+    Battery(rp_delta_q, rp_t_last, rp_nP, rp_nS, rp_mod_code, rp_hys_scale), q_(RATED_BATT_CAP*3600.), rp_s_cap_model_(rp_s_cap_model),
+    sample_time_(0UL), sample_time_z_(0UL)
 {
     // Randles dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery
@@ -737,6 +738,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
 float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq)
 {
     // Sample at instant of signal injection
+    sample_time_z_ = sample_time_;
     sample_time_ = millis();
 
     // Return if time 0

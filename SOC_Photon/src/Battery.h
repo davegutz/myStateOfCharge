@@ -361,6 +361,7 @@ public:
   double count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon, const boolean initializing_all);
   boolean cutback() { return model_cutback_; };
   double delta_q() { return *rp_delta_q_; };
+  unsigned long int dt(void) { return sample_time_ - sample_time_z_; };
   float ib_fut() { return ib_fut_; };
   void init_battery_sim(const boolean reset, Sensors *Sen);
   void load();
@@ -390,6 +391,7 @@ protected:
   double ib_in_;            // Saved value of current input, A
   double ib_charge_;        // Current input avaiable for charging, A
   unsigned long int sample_time_;       // Exact moment of hardware signal generation, ms
+  unsigned long int sample_time_z_;     // Exact moment of past hardware signal generation, ms
 };
 
 

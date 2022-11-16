@@ -77,6 +77,7 @@ public:
   void bias(const float bias) { *cp_ib_bias_ = bias; };
   float bias() { return ( *cp_ib_bias_*sclr_ + add_ ); };
   float bias_any(const float Ib) { return ( Ib*sclr_ + add_ ); };
+  unsigned long int dt(void) { return sample_time_ - sample_time_z_; };
   float ishunt_cal() { return ( ishunt_cal_*sclr_ + add_ ); };
   void load();
   void pretty_print();
@@ -107,7 +108,8 @@ protected:
   float sclr_;          // Scalar for fault test
   float add_;           // Adder for fault test, A
   float *rp_shunt_gain_sclr_; // Scalar on shunt gain
-  unsigned long int sample_time_;  // Exact moment of hardware sample
+  unsigned long int sample_time_;   // Exact moment of hardware sample
+  unsigned long int sample_time_z_; // Exact moment of past hardware sample
 };
 
 // Fault word bits.   All faults heal
@@ -350,6 +352,7 @@ public:
   boolean display;            // Use display
   boolean bms_off;            // Calculated by BatteryMonitor, battery off, low voltage, switched by battery management system?
   void bias_all_model();      // Bias model outputs for sensor fault injection
+  unsigned long int dt_ib(void) { return dt_ib_; };
   void final_assignments(BatteryMonitor *Mon);  // Make final signal selection
   float Ib_amp_noise();
   float Ib_amp_noise_amp() { return ( Ib_amp_noise_amp_ ); };
@@ -394,10 +397,12 @@ protected:
   float Ib_noa_noise_amp_;  // Ib noise on non-amplified sensor, amplitude model only, A pk-pk
   float vb_add_;        // Fault injection bias, V
   boolean reset_temp_;  // Keep track of temperature reset, stored for plotting, T=reset
-  unsigned long int sample_time_ib_;   // Exact moment of selected Ib sample, ms
-  unsigned long int sample_time_vb_;   // Exact moment of selected Vb sample, ms
-  unsigned long int sample_time_ib_hdwe_;   // Exact moment of Ib sample, ms
-  unsigned long int sample_time_vb_hdwe_;   // Exact moment of Vb sample, ms
+  unsigned long int sample_time_ib_;      // Exact moment of selected Ib sample, ms
+  unsigned long int sample_time_vb_;      // Exact moment of selected Vb sample, ms
+  unsigned long int sample_time_ib_hdwe_; // Exact moment of Ib sample, ms
+  unsigned long int sample_time_vb_hdwe_; // Exact moment of Vb sample, ms
+  unsigned long int dt_ib_hdwe_;          // Delta update of Ib sample, ms
+  unsigned long int dt_ib_;               // Delta update of selected Ib sample, ms
 };
 
 

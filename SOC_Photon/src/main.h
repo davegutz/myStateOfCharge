@@ -280,7 +280,6 @@ void loop()
   // Input all other sensors and do high rate calculations
   if ( read )
   {
-    Sen->T =  ReadSensors->updateTime();
     Sen->reset = reset;
 
     // Set print frame
@@ -300,6 +299,7 @@ void loop()
     // Inputs:  rp.config, rp.sim_chm
     // Outputs: Sen->Ib, Sen->Vb, Sen->Tb_filt, rp.inj_bias
     sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen);
+    Sen->T =  double(Sen->dt_ib())/1000.;
 
     // Calculate Ah remaining
     // Inputs:  rp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_filt
