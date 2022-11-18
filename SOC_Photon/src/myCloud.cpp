@@ -42,6 +42,7 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->now = now;
   pubList->unit = unit;
   pubList->hm_string =hm_string;
+  pubList->Tb = Sen->Tb;
   pubList->Ib = Sen->Ib;
   pubList->tcharge = Mon->tcharge();
   pubList->Voc = Mon->Voc();

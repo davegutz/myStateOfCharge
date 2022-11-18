@@ -31,7 +31,7 @@ void debug_h(BatteryMonitor *Mon, Sensors *Sen);
 // void debug_m1(BatteryMonitor *Mon, Sensors *Sen);
 void debug_m4(BatteryMonitor *Mon, Sensors *Sen);
 void debug_4(BatteryMonitor *Mon, Sensors *Sen);
-// void debug_5(void);
+void debug_5(BatteryMonitor *Mon, Sensors *Sen);
 void debug_m7(BatteryMonitor *Mon, Sensors *Sen);
 void debug_12(BatteryMonitor *Mon, Sensors *Sen);
 // void debug_m13(Sensors *Sen);

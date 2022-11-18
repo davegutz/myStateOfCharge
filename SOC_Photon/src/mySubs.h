@@ -73,7 +73,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
 void load_ib_vb(const boolean reset, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon);
 void monitor(const boolean reset, const boolean reset_temp, const unsigned long now,
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen);
-void oled_display(Adafruit_SSD1306 *display, Sensors *Sen);
+void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon);
 void print_all_header(void);
 void print_rapid_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
 void print_serial_header(void);

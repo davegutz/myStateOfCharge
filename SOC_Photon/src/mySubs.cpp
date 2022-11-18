@@ -313,7 +313,7 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
    35  13.71 -4.2    Tb,C  VOC,V  Ib,A 
    45  -10.0  46     EKF,Ah  chg,hrs  CC, Ah
 */
-void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
+void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
 {
   static uint8_t frame = 0;
   static boolean pass = false;
@@ -409,7 +409,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen)
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
       disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
 
-  // if ( rp.debug==5 ) debug_5();
+  if ( rp.debug==5 ) debug_5(Mon, Sen);
 
   frame += 1;
   if (frame>3) frame = 0;

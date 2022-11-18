@@ -337,7 +337,7 @@ void loop()
   // OLED and Bluetooth display drivers
   if ( display_to_user )
   {
-    oled_display(display, Sen);
+    oled_display(display, Sen, Mon);
   }
 
   // Discuss things with the user

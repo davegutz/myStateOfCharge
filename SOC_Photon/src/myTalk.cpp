@@ -1237,7 +1237,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("   v2: GP, Sim & Sel\n");
   Serial.printf("   v3: EKF\n");
   Serial.printf("   v4: GP, Sim, Sel, & EKF\n");
-  // Serial.printf("   v5: OLED display\n");
+  Serial.printf("   v5: OLED display\n");
   // Serial.printf("   v7: EKF solver init\n");
   // Serial.printf("   v8: Randles SS init\n");
   Serial.printf("  v12: EKF\n");

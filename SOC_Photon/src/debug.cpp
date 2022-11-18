@@ -72,11 +72,11 @@ void debug_m13(Sensors *Sen)
 */
 
 // rp.debug==5 Charge time
-// void debug_5(void)
-// {
-//   Serial.printf("oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt, %3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
-//     pp.pubList.Tb, pp.pubList.Vb, pp.pubList.Ib, pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge, pp.pubList.Amp_hrs_remaining_soc);
-// }
+void debug_5(BatteryMonitor *Mon, Sensors *Sen)
+{
+  Serial.printf("oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt, %3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
+    pp.pubList.Tb, pp.pubList.Voc, pp.pubList.Ib, pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge, pp.pubList.Amp_hrs_remaining_soc);
+}
 
 // Hysteresis print
 void debug_h(BatteryMonitor *Mon, Sensors *Sen)

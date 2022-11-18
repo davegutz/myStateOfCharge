@@ -407,7 +407,7 @@ Full regression suite:
 
   ampHiFailFf:    Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;
 				  Hs;Hs;Hs;Hs;Pf;Hd;Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
-		# Should detect but not switch amp current failure.  Start looking at 'DOM 1' fig 3.  No fault record (keeps recording)
+		# Should detect but not switch amp current failure.  Run about 60s.  Start looking at 'DOM 1' fig 3.  No fault record (keeps recording)
 
   ampLoFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm-50;Dn0.0001;
                   Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
