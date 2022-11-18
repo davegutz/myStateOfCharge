@@ -219,7 +219,8 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   // Simple 'call twice' method because sat_ is discrete no analog which would require iteration
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true);
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true);  // Call again because sat is a UBC
-  Sen->Ib_model = Sen->Sim->Ib_charge();
+  Sen->Ib_model = Sen->Sim->ib_fut();
+  // dag 11/18/2022 Sen->Ib_model = Sen->Sim->Ib_charge();
 
   // Call to count_coulombs not strictly needed for init.  Calculates some things not otherwise calculated for 'all'
   Sen->Sim->count_coulombs(Sen, true, Mon, true);
@@ -454,7 +455,8 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   //  Outputs:  Sim->temp_c(), Sim->Ib(), Sim->Vb(), rp.inj_bias, Sim.model_saturated
   Sen->Tb_model = Sen->Tb_model_filt = Sen->Sim->temp_c();
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, reset) + Sen->Vb_add();
-  Sen->Ib_model = Sen->Sim->Ib_charge();
+  // Sen->Ib_model = Sen->Sim->ib_fut();
+  Sen->Ib_model = Sen->Sim->Ib_charge();  // dag 11/18/2022 
   cp.model_cutback = Sen->Sim->cutback();
   cp.model_saturated = Sen->Sim->saturated();
 

@@ -480,7 +480,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(sv.time, sv.voc_stat, color='orange', linestyle=':', label='voc_stat_s_ver')
         plt.plot(mo.time, mo.Vsat, color='red', linestyle='-', label='vsat')
         plt.plot(mv.time, mv.Vsat, color='black', linestyle='--', label='vsat_ver')
-        plt.plot(mv.time, mv.voc_stat, color='orange', linestyle='--', label='voc_stat_ver')
+        plt.plot(mv.time, mv.voc_stat, color='orange', linestyle='-.', label='voc_stat_ver')
         plt.legend(loc=1)
 
         plt.figure()  # sim_s  4
