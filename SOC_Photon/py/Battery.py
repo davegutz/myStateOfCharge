@@ -776,7 +776,7 @@ class BatterySim(Battery):
 
         if (self.q <= 0.) & (self.ib_charge < 0.):
             print("q", self.q, "empty")
-            self.ib_fut = 0.  # empty
+            self.ib_charge = 0.  # empty
         self.model_cutback = (self.voc_stat > self.vsat) & (self.ib_fut == self.sat_ib_max)
         self.model_saturated = self.model_cutback & (self.ib_fut < self.ib_sat)
         if reset and sat_init is not None:

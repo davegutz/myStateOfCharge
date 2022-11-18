@@ -693,8 +693,8 @@ void Sensors::choose_()
 void Sensors::final_assignments(BatteryMonitor *Mon)
 {
   // Reselect since may be changed
-  // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model
-  // Outputs:  Ib_hdwe_model, Ib_hdwe, Vshunt
+  // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noa_hdwe, Ib_hdwe_model
+  // Outputs:  Tb, Tb_filt, Vb, Ib, sample_time_ib
   choose_();
 
   // Final assignments

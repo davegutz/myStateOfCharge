@@ -361,6 +361,7 @@ public:
   boolean cutback() { return model_cutback_; };
   double delta_q() { return *rp_delta_q_; };
   unsigned long int dt(void) { return sample_time_ - sample_time_z_; };
+  double Ib_charge() { return ib_charge_*(*rp_nP_); };
   float ib_fut() { return ib_fut_; };
   void init_battery_sim(const boolean reset, Sensors *Sen);
   void load();

@@ -711,7 +711,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     if ( rp.tweak_test() || !rp.modeling ) sat_ib_max_ = ib_charge_fut;   // Disable cutback when real world or when doing tweak_test test
     ib_fut_ = min(ib_charge_fut/(*rp_nP_), sat_ib_max_);      // the feedback of ib_
     ib_charge_ = ib_;  // Same time plane as volt calcs, added past value
-    if ( (q_ <= 0.) && (ib_charge_ < 0.) ) ib_fut_ = 0.;   //  empty
+    if ( (q_ <= 0.) && (ib_charge_ < 0.) ) ib_charge_ = 0.;   //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_fut_ == sat_ib_max_);
     model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
@@ -843,7 +843,8 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
     soc_min_ = chem_.soc_min_T_->interp(temp_lim);
     q_min_ = soc_min_ * q_capacity_;
 
-    if ( (rp.debug==2 || rp.debug==3 || rp.debug==4 )  && cp.publishS && !initializing_all)  // print_serial_sim
+    // print_serial_sim
+    if ( (rp.debug==2 || rp.debug==3 || rp.debug==4 )  && cp.publishS && !initializing_all)
     {
         double cTime;
         if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;

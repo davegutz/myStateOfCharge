@@ -94,7 +94,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'rapidTweakRegression v20221028.txt'; #time_end_in=4.8;
         # data_file_old_txt = 'rapidTweakRegression40C v20221028.txt'; #time_end_in=4.8;
         # data_file_old_txt = 'slowTweakRegression v20221028.txt'
-        data_file_old_txt = 'triTweakDisch v20221028.txt'
+        data_file_old_txt = 'triTweakDisch v20221028.txt'; #time_end_in=25.4
         # data_file_old_txt = 'satSit v20221028.txt'
         # data_file_old_txt = 'offSitHysBms v20221028.txt'
         # data_file_old_txt = 'offSitHysBmsNoise20220926.txt'; #time_end_in=50
