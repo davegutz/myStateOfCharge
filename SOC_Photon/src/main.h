@@ -98,14 +98,17 @@ Adafruit_SSD1306 *display;      // Main OLED display
 void setup()
 {
   // Serial
+  // Serial.blockOnOverrun(false);  doesn't work
   Serial.begin(115200);
   Serial.flush();
-  delay(1000);          // Ensures a clean display on Arduino Serial startup on CoolTerm
+  delay(1000);          // Ensures a clean display on Serial startup on CoolTerm
   Serial.println("Hi!");
 
   // Bluetooth Serial1.  Use BT-AT project in this GitHub repository to change.  Directions
   // for HC-06 inside main.h of ../../BT-AT/src.   AT+BAUD8; to set 115200.
+  // Serial1.blockOnOverrun(false); doesn't work
   Serial1.begin(115200);
+  Serial1.flush();
 
   // Peripherals
   myPins = new Pins(D6, D7, A1, D2);
