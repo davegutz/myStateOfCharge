@@ -28,6 +28,7 @@ from MonSimNomConfig import *  # Global config parameters.   Overwrite in your o
 from datetime import datetime, timedelta
 from Scale import Scale
 from pyDAGx import myTables
+import statistics as sts
 
 
 def save_clean_file(mon_ver, csv_file, unit_key):
@@ -98,6 +99,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
         t = sim_old.time
     else:
         t = mon_old.time
+    updateTimeIn = sts.mode(mon_old.dt)
     if t_max is not None:
         t_delt = t - t[0]
         t = t[np.where(t_delt <= t_max)]
@@ -195,7 +197,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
         else:
             _chm_s = Bsim
         sim.calculate(chem=_chm_s, temp_c=Tb_, soc=sim.soc, curr_in=ib_in_s, dt=T, q_capacity=sim.q_capacity,
-                      dc_dc_on=dc_dc_on, reset=reset, rp=rp, sat_init=sat_s_init)
+                      dc_dc_on=dc_dc_on, reset=reset, updateTimeIn=updateTimeIn, rp=rp, sat_init=sat_s_init)
         sim.count_coulombs(chem=_chm_s, dt=T, reset=reset, temp_c=Tb_, charge_curr=sim.ib_charge, sat=False, soc_s_init=soc_s_init,
                            mon_sat=mon.sat, mon_delta_q=mon.delta_q)
 
@@ -233,10 +235,11 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
             u_old = None
             z_old = None
         if rp.modeling == 0:
-            mon.calculate(_chm_m, Tb_, Vb_, Ib_, T, rp=rp, reset=reset, u_old=u_old, z_old=z_old)
+            mon.calculate(_chm_m, Tb_, Vb_, Ib_, T, rp=rp, reset=reset, updateTimeIn=updateTimeIn, u_old=u_old,
+                          z_old=z_old)
         else:
             mon.calculate(_chm_m, Tb_, Vb_ + randn() * v_std + dv_sense, Ib_ + randn() * i_std + di_sense, T, rp=rp,
-                          reset=reset, u_old=u_old, z_old=z_old)
+                          reset=reset, updateTimeIn=updateTimeIn, u_old=u_old, z_old=z_old)
         Ib_charge = mon.ib_charge
         sat = is_sat(Tb_, mon.voc, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)

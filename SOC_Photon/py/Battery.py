@@ -377,7 +377,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.soc_s = soc_s
 
     # BatteryMonitor::calculate()
-    def calculate(self, chem, temp_c, vb, ib, dt, reset, q_capacity=None, dc_dc_on=None,  # BatteryMonitor
+    def calculate(self, chem, temp_c, vb, ib, dt, reset, updateTimeIn, q_capacity=None, dc_dc_on=None,  # BatteryMonitor
                   rp=None, u_old=None, z_old=None):
         self.chm = chem
         if self.chm == 0:
@@ -417,7 +417,7 @@ class BatteryMonitor(Battery, EKF1x1):
         # Dynamic emf
         self.vb = vb
         u = np.array([self.ib, self.vb]).T
-        if dt < self.t_max:
+        if updateTimeIn < self.t_max:
             self.Randles.calc_x_dot(u)
             self.Randles.update(self.dt, reset=reset)
             self.voc = self.Randles.y
@@ -700,7 +700,7 @@ class BatterySim(Battery):
         return s
 
     # BatterySim::calculate()
-    def calculate(self, chem, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset,  # BatterySim
+    def calculate(self, chem, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, updateTimeIn,  # BatterySim
                   rp=None, sat_init=None):
         self.chm = chem
         if self.chm == 0:
@@ -752,7 +752,7 @@ class BatterySim(Battery):
         # Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
         u = np.array([self.ib, self.voc]).T  # past value self.ib
         self.Randles.calc_x_dot(u)
-        if dt < self.t_max:
+        if updateTimeIn < self.t_max:
             self.Randles.update(dt)
             self.vb = self.Randles.y
         else:  # aliased, unstable if update Randles
