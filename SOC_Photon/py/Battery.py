@@ -419,8 +419,12 @@ class BatteryMonitor(Battery, EKF1x1):
         u = np.array([self.ib, self.vb]).T
         if updateTimeIn < self.t_max:
             self.Randles.calc_x_dot(u)
-            self.Randles.update(self.dt, reset=reset)
-            self.voc = self.Randles.y
+            if self.dt < self.t_max:
+                self.Randles.update(self.dt, reset=reset)
+                self.voc = self.Randles.y
+            else:
+                self.voc = np.nan
+                print("mon nan")
         else:  # aliased, unstable if update Randles
             self.voc = vb - self.r_ss * self.ib
             self.Randles.y = self.voc
@@ -754,7 +758,11 @@ class BatterySim(Battery):
         self.Randles.calc_x_dot(u)
         if updateTimeIn < self.t_max:
             self.Randles.update(dt)
-            self.vb = self.Randles.y
+            if self.dt < self.t_max:
+                self.vb = self.Randles.y
+            else:
+                self.vb = np.nan
+                print("sim nan")
         else:  # aliased, unstable if update Randles
             self.vb = self.voc + self.r_ss * self.ib
 
