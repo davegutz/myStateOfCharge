@@ -34,7 +34,9 @@ Sync::Sync()
 {}
 Sync::Sync(unsigned long delay)
     : delay_(delay), last_(0UL), now_(0UL), stat_(false), updateDiff_(0), updateTime_(0)
-{}
+{
+  updateTimeInput_ = float(delay_)/1000.;
+}
 
 // Check and count 
 boolean Sync::update(boolean reset, unsigned long now, boolean andCheck)

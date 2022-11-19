@@ -280,13 +280,13 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
 
     // Dynamic emf
     double u[2] = {ib_, vb_};
-    if ( dt_<=RANDLES_T_MAX )
+    if ( Sen->ReadSensors->updateTimeInput()<=RANDLES_T_MAX )  // Intentionally sub-sampled
     {
         Randles_->calc_x_dot(u);
         Randles_->update(dt_);
         voc_ = Randles_->y(0);
     }
-    else    // aliased, unstable if T>0.5
+    else    // aliased, unstable if T>RANDLES_T_MAX is deliberate.
         voc_ = vb_ - chem_.r_ss * ib_;
     if ( !cp.fake_faults )
     {
@@ -687,12 +687,12 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
     double u[2] = {ib_, voc_};
     Randles_->calc_x_dot(u);
-    if ( dt_<=RANDLES_T_MAX )
+    if ( Sen->ReadSensors->updateTimeInput()<=RANDLES_T_MAX )  // Intentionally sub-sampled
     {
         Randles_->update(dt_);
         vb_ = Randles_->y(0);
     }
-    else    // aliased, unstable if T<0.5.
+    else    // aliased, unstable if T>RANDLES_T_MAX is deliberate.
         vb_ = voc_ + chem_.r_ss * ib_charge_fut;
 
     // Special cases override

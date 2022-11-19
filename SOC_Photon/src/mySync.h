@@ -38,10 +38,11 @@ public:
   boolean update(unsigned long now, boolean reset);
   boolean updateN(unsigned long now, boolean reset, boolean orCheck);
   unsigned long delay() { return(delay_); };
-  void delay(unsigned long new_delay) { delay_ = new_delay; };
+  void delay(unsigned long new_delay) { delay_ = new_delay; updateTimeInput_ = float(delay_)/1000.; };
   unsigned long last() { return(last_); };
   boolean stat() { return(stat_); };
   double updateTime() { return(updateTime_); };
+  double updateTimeInput() { return(updateTimeInput_); };
   unsigned long now() { return(now_); };
 private:
   unsigned long delay_;
@@ -50,6 +51,7 @@ private:
   boolean stat_;
   unsigned long updateDiff_;
   double updateTime_;
+  double updateTimeInput_;
 };
 
 #endif
