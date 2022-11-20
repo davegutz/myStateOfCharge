@@ -241,7 +241,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
             mon.calculate(_chm_m, Tb_, Vb_ + randn() * v_std + dv_sense, Ib_ + randn() * i_std + di_sense, T, rp=rp,
                           reset=reset, updateTimeIn=updateTimeIn, u_old=u_old, z_old=z_old)
         Ib_charge = mon.ib_charge
-        sat = is_sat(Tb_, mon.voc, mon.soc)
+        sat = is_sat(Tb_, mon.voc_filt, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
         if rp.modeling == 0:
             mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb_, charge_curr=Ib_charge, sat=saturated)

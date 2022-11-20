@@ -22,7 +22,7 @@ from StateSpace import StateSpace
 from Hysteresis import Hysteresis
 import matplotlib.pyplot as plt
 from TFDelay import TFDelay
-from myFilters import LagTustin, General2Pole, RateLimit
+from myFilters import LagTustin, General2Pole, RateLimit, SlidingDeadband
 from Scale import Scale
 from numpy.linalg import inv
 plt.rcParams.update({'figure.max_open_warning': 0})
@@ -90,6 +90,8 @@ V_BATT_RISING = 10.3  # Shutoff point when off, V (10.3)
 RANDLES_T_MAX = 0.31  # Maximum update time of Randles state space model to avoid aliasing and instability (0.31 allows DP3)
 cp_eframe_mult = 20  # Run EKF 20 times slower than Coulomb Counter and Randles models
 VB_DC_DC = 13.5  # Estimated dc-dc charger, V
+HDB_VBATT = 0.05  # Half deadband to filter Vb, V (0.05)
+
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -347,6 +349,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.Voc_stat = 0.
         self.voc_soc = 0.
         self.Voc = 0.
+        self.voc_filt = 0.
         self.Vsat = 0.
         self.dV_dyn = 0.
         self.Voc_ekf = 0.
@@ -354,6 +357,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.eframe = 0
         self.eframe_mult = eframe_mult
         self.dt_eframe = self.dt*self.eframe_mult
+        self.sdb_voc = SlidingDeadband(HDB_VBATT)
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -465,6 +469,8 @@ class BatteryMonitor(Battery, EKF1x1):
         if reset or self.eframe == self.eframe_mult:
             self.eframe = 0
 
+        # Filtered voc
+        self.voc_filt = self.sdb_voc.update_res(self.voc, reset)
 
         # Charge time
         if self.ib > 0.1:

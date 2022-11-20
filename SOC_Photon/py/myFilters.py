@@ -41,6 +41,23 @@ class RateLimit:
         return self.y
 
 
+class SlidingDeadband:
+    def __init__(self, hdb):
+        self.z = 0.
+        self.hdb = hdb
+
+    def update(self, in_):
+        self.z = max(min( self.z, in_+self.hdb), in_-self.hdb)
+        return self.z
+
+    def update_res(self, in_, reset):
+        if reset:
+            self.z = in_
+            return self.z
+        out = self.update(in_)
+        return out
+
+
 # 1-pole filters
 class DiscreteFilter:
     # Base class for 1-pole filters
