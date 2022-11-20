@@ -326,7 +326,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.title(plot_title + ' sim_s 1')
         plt.plot(mo.time, mo.Ib_sel, color='blue',  linestyle='-', label='Ib_sel=Ib_in')
         plt.plot(mv.time, mv.ib_in, color='cyan', linestyle='--', label='ib_in_ver')
-        plt.plot(so.time, so.ib_in_s, color='magenta', linestyle='-.', label='ib_in_s')
+        plt.plot(so.time, so.ib_in_s, color='green', linestyle='-.', label='ib_in_s')
         plt.plot(smv.time, smv.ib_in_s, color='orange', linestyle=':', label='ib_in_s_ver')
         plt.plot(mo.time, np.array(mo.Ib_charge)-1, color='black',  linestyle='-', label='Ib_charge-1')
         plt.plot(mv.time, np.array(mv.ib_charge)-1, color='orange', linestyle='--', label='ib_charge_ver-1')
@@ -1001,9 +1001,10 @@ class SavedData:
             self.sel = np.array(data.sel[:i_end])
             self.mod_data = np.array(data.mod[:i_end])
             self.bms_off = np.array(data.bmso[:i_end])
-            not_bms_off = self.bms_off < 1
-            bms_off_and_not_charging = self.bms_off * not_bms_off
-            self.Ib_charge = self.Ib * (bms_off_and_not_charging < 1)
+            # not_bms_off = self.bms_off < 1
+            # bms_off_and_not_charging = self.bms_off * not_bms_off
+            # self.Ib_charge = self.Ib * (bms_off_and_not_charging < 1)
+            self.Ib_charge = np.array(data.Ib_charge[:i_end])
             self.Tb = np.array(data.Tb[:i_end])
             self.Vsat = np.array(data.Vsat[:i_end])
             self.dV_dyn = np.array(data.dV_dyn[:i_end])

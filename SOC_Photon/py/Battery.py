@@ -778,16 +778,13 @@ class BatterySim(Battery):
             self.vb = VB_DC_DC
         self.dv_dyn = self.vb - self.voc
 
-        # Saturation logic, both full and empty   dag 9/3/2022 modify empty
+        # Saturation logic, both full and empty
         self.vsat = self.nom_vsat + (temp_c - 25.) * self.dvoc_dt
         self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
-        # if self.tweak_test:
         if self.tweak_test or (not rp.modeling):
             self.sat_ib_max = ib_charge_fut
         self.ib_fut = min(ib_charge_fut, self.sat_ib_max)  # the feedback of self.ib
-
-        self.ib_charge = self.ib  # same time plane as volt calcs
-
+        self.ib_charge = ib_charge_fut  # same time plane as volt calcs
         if (self.q <= 0.) & (self.ib_charge < 0.):
             print("q", self.q, "empty")
             self.ib_charge = 0.  # empty

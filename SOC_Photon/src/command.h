@@ -39,7 +39,7 @@ struct PublishPars
 
 struct CommandPars
 {
-  char buffer[256];         // Auxiliary print buffer
+  char buffer[280];         // Auxiliary print buffer
   String input_string;      // Hold incoming data
   boolean token;            // Whether input_string is complete
   boolean model_cutback;    // On model cutback

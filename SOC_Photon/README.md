@@ -407,7 +407,7 @@ Full regression suite:
 
   ampHiFailFf:    Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;
 				  Hs;Hs;Hs;Hs;Pf;Hd;Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
-		# Should detect but not switch amp current failure.  Run about 60s.  Start looking at 'DOM 1' fig 3.  No fault record (keeps recording)
+		# Should detect but not switch amp current failure.  Run about 60s.  Start by looking at 'DOM 1' fig 3.  No fault record (keeps recording).   Verify that on Fig 3 the e_wrap goes through a threshold ~0.4 without tripping faults.
 
   ampLoFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm-50;Dn0.0001;
                   Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
@@ -430,7 +430,7 @@ Full regression suite:
 
   triTweakDisch:  Ff0;D^0;Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-29500;XW5;XT5;XC3;W2;HR;Pf;v2;W2;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;XR;
                   v0;Hd;XS;Dm0;Dn0;Fi1;Fo1;Fc1;Fd1;FV0;FI0;FT0;Xp0;Ca1.;Pf;DP4;
-		# Should run three very large current discharge/recharge cycles without fault
+		# Should run three very large current discharge/recharge cycles without fault.   It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.
 
   satSit:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat
          Ff0;D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;
@@ -440,11 +440,11 @@ Full regression suite:
   satSitHys:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset
          Ff0;D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;
           XS;v0;Hd;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;DP4;
+		# Should run one de-saturation and saturation event without fault and exercise hysteresis reset
 
-	offSitHysBms:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset		
-		Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;
+	offSitHysBms:  operate around bms off, starting above, go below, come back up.		Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;
           XS;v0;Hd;Xp0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;
-		# Best test for seeing Randles model differences
+		# Best test for seeing Randles model differences.   No faults
 		# Only test to see on/off behavior
 
 	offSitHysBmsNoise:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset		

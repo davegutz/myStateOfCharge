@@ -89,14 +89,14 @@ if __name__ == '__main__':
         # Regression suite
         # data_file_old_txt = 'ampHiFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
-        # data_file_old_txt = 'ampLoFail v20221028.txt'
+        data_file_old_txt = 'ampLoFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'
         # data_file_old_txt = 'rapidTweakRegression v20221028.txt'; #time_end_in=4.8;
         # data_file_old_txt = 'rapidTweakRegression40C v20221028.txt'; #time_end_in=4.8;
         # data_file_old_txt = 'slowTweakRegression v20221028.txt'
         # data_file_old_txt = 'triTweakDisch v20221028.txt'; #time_end_in=25.4
-        data_file_old_txt = 'satSit v20221028.txt'
-        # data_file_old_txt = 'offSitHysBms v20221028.txt'
+        # data_file_old_txt = 'satSit v20221028.txt'
+        # data_file_old_txt = 'offSitHysBms v20221028.txt'; #time_end_in = 137.
         # data_file_old_txt = 'offSitHysBmsNoise20220926.txt'; #time_end_in=50
         # data_file_old_txt = 'init Ca1 v20220926.txt'
         # data_file_old_txt = 'ampHiFailSlow20220914.txt'
@@ -132,8 +132,8 @@ if __name__ == '__main__':
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
                                            skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp)
-        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'Vb', 'Ib', 'ioc', 'voc_soc', 'Vsat', 'dV_dyn', 'Voc_stat',
-                'Voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
+        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'Vb', 'Ib', 'Ib_charge', 'ioc', 'voc_soc',
+                'Vsat', 'dV_dyn', 'Voc_stat', 'Voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
                                     encoding=None).view(np.recarray)
 
@@ -216,7 +216,7 @@ if __name__ == '__main__':
                                                              scale_r_ss=scale_r_ss_in, s_hys_sim=scale_hys_sim_in,
                                                              s_hys_mon=scale_hys_mon_in, dvoc_sim=dvoc_sim_in,
                                                              dvoc_mon=dvoc_mon_in, Bmon=Bmon_in, Bsim=Bsim_in,
-                                                             drive_ekf=drive_ekf_in, dTb_in=dTb)
+                                                             drive_ekf=drive_ekf_in, dTb_in=dTb, verbose=False)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots
