@@ -475,18 +475,24 @@ Full regression suite:
   pulseEKF:  Xp6  # TODO: doesn't work now.
 
   pulseSS:  Xp7
-		# Should 
+		# Should generate a very short <10 sec data burst with a pulse.   Look at plots for good overlay.  e_wrap will have a delay.
 		
   tbFailMod:    Ff0;D^0;Ca.5;Xp0;W4;Xm7;DP1;Dr100;W2;HR;Pf;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Hd;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;
-		# Should momentary flash '***' then clear itself.
+		# Should momentary flash '***' then clear itself.   All within 60 sec.
 
   tbFailHdwe:   This script sometimes doesn't work but test performs fine manually
-                Ff0;D^0;Ca.5;Xp0;W4;Xm6;DP1;Dr100;W2;HR;Pf;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
+		Ff0;D^0;Ca.5;Xp0;W4;Xm6;DP1;Dr100;W2;HR;Pf;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Hd;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;
+		# Should momentary flash '***' then clear itself.   All within 60 sec.
+		# This script sometimes doesn't work but test performs fine manually
+
   EKF_Track:  investigate EKF tracking
-         Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr100;DP1;HR;Pf;v3;XR;
+		Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr100;DP1;HR;Pf;v3;XR;
           XS;v0;Hd;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
+		# This operating condition found EKF failure one time.   Led to multi-framing the EKF as update time so short that internal filter parameters were truncating.  Should run a short transient that when plotted shows EKF staying on point, not wandeirng off.
+		  
+		  
   EKF_Track Dr2000:  investigate EKF tracking.   Confirm proper operation with Dr!=100
          Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr2000;DE1;DP1;HR;Pf;v3;XR;
           XS;v0;Hd;Xp0;DE20;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
