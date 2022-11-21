@@ -426,7 +426,7 @@ Full regression suite:
 		# Should run three very large current discharge/recharge cycles without fault
 
   slowTweakRegression:  Ff0;HR;Xp11;
-		# Should run one very large slow current discharge/recharge cycle without fault
+		# Should run one very large slow (~15 min) current discharge/recharge cycle without fault
 
   triTweakDisch:  Ff0;D^0;Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-29500;XW5;XT5;XC3;W2;HR;Pf;v2;W2;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;XR;
                   v0;Hd;XS;Dm0;Dn0;Fi1;Fo1;Fc1;Fd1;FV0;FI0;FT0;Xp0;Ca1.;Pf;DP4;
