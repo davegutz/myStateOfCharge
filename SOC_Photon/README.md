@@ -470,14 +470,17 @@ Full regression suite:
 
   vHiFail:        Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.45;
                   Hd;Xp0;Rf;W200;+v0;Dr100;Rf;Pf;DP4;
-		# Should detect voltage failure and display 'vfail'
+		# Should detect voltage failure and display '*fail' and 'redl'
 
   pulseEKF:  Xp6  # TODO: doesn't work now.
 
   pulseSS:  Xp7
-
+		# Should 
+		
   tbFailMod:    Ff0;D^0;Ca.5;Xp0;W4;Xm7;DP1;Dr100;W2;HR;Pf;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Hd;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;
+		# Should momentary flash '***' then clear itself.
+
   tbFailHdwe:   This script sometimes doesn't work but test performs fine manually
                 Ff0;D^0;Ca.5;Xp0;W4;Xm6;DP1;Dr100;W2;HR;Pf;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Hd;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;
