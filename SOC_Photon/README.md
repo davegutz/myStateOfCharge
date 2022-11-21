@@ -323,7 +323,7 @@ This is normal for temperature.   Modeled Tb is very simple = to a constant + bi
   5. Current calibrated using clamping ammeter turning large loads off and on.
   6. Battleborn nominal capacity determined by load tests.
   7. An iterative solver for SOC-VOC model works extremely well given calculatable derivative for the equations from reference.  PI observer removed in favor of solver.  The solver could be used to initialize soc for the Coulomb Counter but probaly not worth the trouble.   Leave this device in more future possible usage.  An EKF
-  then replaced the solver because it essentially does the same thing and was much quieter.
+  then replaced the solver because it essentially does the same thing and was much quieter and could be used for fault detection / isolation.
   8. Note that there is no effect of the device on system operation so debugging via serial can be more extensive than usual.
   9. Two-pole filters and update time framing, determined experimentally and by experience to provide best possible Coulommb Counter and display behavior.
   10. Wifi turned off immediately.  Can be turned on by 'Talk('w')'
@@ -392,6 +392,14 @@ Throughput test
   Wrap logic 0.2 v=16 A. There is an inflection in voc(soc) that requires forgiveness during saturation.  0.25 v = 20 A for wrap hi.   Sized so wrap_lo_fa trips before false saturating with delta I=-100 with soc=.95
   If Tb is never read on boot up it should fail to NOMINAL_TB.
 45. Fault injection testing
+46. Tuning EKF (R & Q):
+	- Depends on update time.   Presently designed for 2.0 sec.
+	- If update time changes (combo of Dr and DE), need to retune R and Q
+	- Reqmts:
+		1. 'AmpHiFailSlow' 6 min to cc_diff = 0.004
+		2. 'rapidTweakRegression40C' abs(soc_ekf-soc)/soc <0.25
+		3. 0.1 < R < 1 (Q will be <<1)
+	- Behavior goes with R/Q.   Could retune R 2x and Q 2x and get same result.
 
 Full regression suite:
 # All these must self initialize
