@@ -415,7 +415,7 @@ Full regression suite:
 
   ampHiFailNoise: Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;Ff0;
                   Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
-		# Noisy ampHiFail
+		# Noisy ampHiFail.  Should detect and switch amp current failure.  Start looking at 'DOM 1' fig 3.  Fault record (frozen).  Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).
 
   rapidTweakRegression:  Ff0;HR;Xp10;
 		# Should run three very large current discharge/recharge cycles without fault
@@ -430,7 +430,7 @@ Full regression suite:
 
   triTweakDisch:  Ff0;D^0;Xp0;v0;Bm0;Bs0;Xm15;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-29500;XW5;XT5;XC3;W2;HR;Pf;v2;W2;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FT1;XR;
                   v0;Hd;XS;Dm0;Dn0;Fi1;Fo1;Fc1;Fd1;FV0;FI0;FT0;Xp0;Ca1.;Pf;DP4;
-		# Should run three very large current discharge/recharge cycles without fault.   It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.
+		# Should run three very large current discharge/recharge cycles without fault.   
 
   satSit:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat
          Ff0;D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;
@@ -440,22 +440,29 @@ Full regression suite:
   satSitHys:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset
          Ff0;D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;
           XS;v0;Hd;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;DP4;
-		# Should run one de-saturation and saturation event without fault and exercise hysteresis reset
+		# Should run one de-saturation and saturation event without fault and exercise hysteresis reset, dv_hys 0-->-0.3
 
 	offSitHysBms:  operate around bms off, starting above, go below, come back up.		Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;
           XS;v0;Hd;Xp0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;
 		# Best test for seeing Randles model differences.   No faults
-		# Only test to see on/off behavior
+		# Only test to confirm on/off behavior.   Make sure comes back on.
+		# It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.
 
 	offSitHysBmsNoise:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset		
 		Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.05;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;
           XS;v0;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;
+		# Best test for seeing Randles model differences.   No faults
+		# Only test to confirm on/off behavior.   Make sure comes back on.
+		# It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.
 
-  ampHiFailSlow:  Ff0;D^0;Xm7;Ca0.5;Pf;v2;W2;Dr1000;DP1;HR;Dm6;Dn0.0001;Fc.02;Fd.5;
-                  Hd;Xp0;Pf;Rf;W2;+v0;Dr100;Fc1;Fd1;Rf;Pf;
+  ampHiFailSlow:  Ff0;D^0;Xm7;Ca0.5;Pf;v2;W2;Dr100;DP1;HR;Dm6;Dn0.0001;Fc.02;Fd.5;
+                  Hd;Xp0;Pf;Rf;W2;+v0;Dr100;DE20;Fc1;Fd1;Rf;Pf;
+		# Should detect and switch amp current failure.  Will be slow (~6 min) detection as it waits for the EKF to wind up.   EKF should tend to follow voltage while soc wanders away.
+		
 
-  vHiFail:        Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.25;
+  vHiFail:        Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.45;
                   Hd;Xp0;Rf;W200;+v0;Dr100;Rf;Pf;DP4;
+		# Should detect voltage failure and display 'vfail'
 
   pulseEKF:  Xp6  # TODO: doesn't work now.
 
@@ -470,8 +477,8 @@ Full regression suite:
          Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr100;DP1;HR;Pf;v3;XR;
           XS;v0;Hd;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
   EKF_Track Dr2000:  investigate EKF tracking.   Confirm proper operation with Dr!=100
-         Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr2000;DP1;HR;Pf;v3;XR;
-          XS;v0;Hd;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
+         Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr2000;DE1;DP1;HR;Pf;v3;XR;
+          XS;v0;Hd;Xp0;DE20;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
   on_off_on:  using voltage
           Ff0;Xm5;v2;Ca.09;W10;SV.9;W10;SV.8;W10;SV.7;W10;SV.6;W10;SV1;W50;v0;HR;Pf;
           XS;v0;Hd;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
