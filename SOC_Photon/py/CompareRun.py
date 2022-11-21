@@ -107,9 +107,8 @@ if __name__ == '__main__':
         # data_file_old_txt = 'tbFailHdwe v20221028.txt'
         # data_file_old_txt = 'EKF_Track v20221028.txt'
         # data_file_old_txt = 'EKF_Track Dr2000 v20221028.txt'
-        data_file_old_txt = 'on_off_on v20221028.txt'
-        # data_file_old_txt = 'start_up v20221028.txt'
-        # data_file_old_txt = 'dwellNoiseCa.5 v20221029.txt'
+        # data_file_old_txt = 'on_off_on v20221028.txt'
+        data_file_old_txt = 'dwell noise Ca.5 v20221028.txt'  # ; dTb = [[0., 18000.],  [0, 8.]]
         #
         # data_file_old_txt = 'init Ca1 v20220926.txt'
         # data_file_old_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05

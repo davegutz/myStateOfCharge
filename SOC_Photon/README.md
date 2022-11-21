@@ -409,8 +409,7 @@ Full regression suite:
 	# Terminate by watching for reset of failure condition (or wait long enough) and running second line in second talk.
 # Move to pyCharm and run 'CompareRun' after proper comment/uncomment in 'data_file_old_txt' assignment
 
-  ampHiFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;
-                  Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
+  ampHiFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;                  Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
 		# Should detect and switch amp current failure.  Start looking at 'DOM 1' fig 3.  Fault record (frozen).  Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).
 
   ampHiFailFf:    Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;
@@ -490,11 +489,10 @@ Full regression suite:
   EKF_Track:  investigate EKF tracking
 		Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr100;DP1;HR;Pf;v4;XR;
           XS;v0;Hd;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
-		# This operating condition found EKF failure one time.   Led to multi-framing the EKF as update time so short that internal filter parameters were truncating.  Should run a short transient that when plotted shows EKF staying on point, not wandeirng off.
 		  
 		  
   EKF_Track Dr2000:  investigate EKF tracking.   Confirm proper operation with Dr!=100
-         Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr2000;DE1;DP1;HR;Pf;v3;XR;
+         Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr2000;DE1;DP1;HR;Pf;v4;XR;
           XS;v0;Hd;Xp0;DE20;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
 		  
   on_off_on:  using voltage
@@ -502,15 +500,11 @@ Full regression suite:
           XS;v0;Hd;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
 		  # Use voltage with current shutoff to set various conditions that may be encountered during bms events.
 		  
-  start_up:  using current
-          Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Xts;Xa-500;Xf0.02;XW6;XT6;XC1;Dr100;DP1;HR;Pf;v2;XR;
-          XS;v0;Hd;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
-		# Use current 
-		
- 
-  dwell Ca.5:
-		Ff0;HR;v3;Ca.5;DT.05;DV0.05;DM.2;DN2;Di.1;Dv0;DP1;
+  dwell noise Ca.5:
+		Ff0;HR;v4;Ca.5;DT.05;DV0.05;DM.2;DN2;Di.1;Dv0;DP1;
         Xp0;v0;Hd;DT0;DV0;DM0;DN0;Di0;Dv0;DP4;
+		# Dwell for about 5 minutes.  This operating condition found EKF failure one time.   Led to multi-framing the EKF as update time so short that internal filter parameters were truncating.  When plotted shows EKF staying on point, not wandering off.
+
 
 Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
   Bucket:  Ff0;HR;Bm2;Bs1;D^15;
