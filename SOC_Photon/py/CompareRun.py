@@ -97,8 +97,8 @@ if __name__ == '__main__':
         # data_file_old_txt = 'triTweakDisch v20221028.txt'  #; time_end_in=25.4
         # data_file_old_txt = 'satSit v20221028.txt'
         # data_file_old_txt = 'satSitHys v20221028.txt'
-        data_file_old_txt = 'offSitHysBms v20221028.txt'  # ; time_end_in = 137.
-        # data_file_old_txt = 'offSitHysBmsNoise v20221028.txt'  # ; time_end_in=50
+        # data_file_old_txt = 'offSitHysBms v20221028.txt'  # ; time_end_in = 137.
+        data_file_old_txt = 'offSitHysBmsNoise v20221028.txt'  # ; time_end_in=50
         # data_file_old_txt = 'ampHiFailSlow v20221028.txt'  # ; time_end_in=360
         # data_file_old_txt = 'vHiFail v20221028.txt'
         # data_file_old_txt = 'pulseEKF v20221028.txt'; init_time_in=-0.001;  # TODO:  broken

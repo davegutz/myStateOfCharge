@@ -456,10 +456,10 @@ Full regression suite:
 		# It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.
 
 	offSitHysBmsNoise:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset		
-		Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.05;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;
+		Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;
           XS;v0;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;
-		# Best test for seeing Randles model differences.   No faults
-		# Only test to confirm on/off behavior.   Make sure comes back on.
+		# Stress test with 2x normal Vb noise DV0.10.
+		# Make sure comes back on.
 		# It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.
 
   ampHiFailSlow:  Ff0;D^0;Xm7;Ca0.5;Pf;v2;W2;Dr100;DP1;HR;Dm6;Dn0.0001;Fc.02;Fd.5;
