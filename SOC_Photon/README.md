@@ -489,21 +489,22 @@ Full regression suite:
   EKF_Track:  investigate EKF tracking
 		Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr100;DP1;HR;Pf;v4;XR;
           XS;v0;Hd;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
-		  
-		  
-  EKF_Track Dr2000:  investigate EKF tracking.   Confirm proper operation with Dr!=100
+		 # One cycle to focus on EKF.   This is tested by others now; could delete.
+		   
+  EKF_Track Dr2000:  investigate EKF tracking.   Confirm proper operation with Dr!=100 (have to adjust DE to compensate)
          Ff0;D^0;Xp0;Xm15;Ca0.5;Rb;Rf;Xts;Xa2000;Xf0.02;XW6;XT6;XC1;Dr2000;DE1;DP1;HR;Pf;v4;XR;
           XS;v0;Hd;Xp0;DE20;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
+		  # TODO:  manage Dr and DE automatically in program.  T=2.0 always.  Limit Dr.  Delete DE.
 		  
   on_off_on:  using voltage
-          Ff0;Xm5;v2;Ca.09;W10;SV.9;W10;SV.8;W10;SV.7;W10;SV.6;W10;SV1;W50;v0;HR;Pf;
+          Ff0;Xm5;Dr100;DP1;v2;Ca.09;W10;SV.9;W10;SV.8;W10;SV.7;W10;SV.6;W10;SV1;W50;v0;HR;Pf;
           XS;v0;Hd;Xp0;Ca.5;W5;Pf;Rf;Pf;v0;DP4;
 		  # Use voltage with current shutoff to set various conditions that may be encountered during bms events.
 		  
   dwell noise Ca.5:
-		Ff0;HR;v4;Ca.5;DT.05;DV0.05;DM.2;DN2;Di.1;Dv0;DP1;
+		Ff0;HR;Dr100;DP1;v4;Ca.5;DT.05;DV0.05;DM.2;DN2;Di.1;Dv0;
         Xp0;v0;Hd;DT0;DV0;DM0;DN0;Di0;Dv0;DP4;
-		# Dwell for about 5 minutes.  This operating condition found EKF failure one time.   Led to multi-framing the EKF as update time so short that internal filter parameters were truncating.  When plotted shows EKF staying on point, not wandering off.
+		# Dwell for >5 minutes.  This operating condition found EKF failure one time.   Led to multi-framing the EKF (update time = 2.0).   Before change, update time of EKF was so short (0.1) that internal filter parameters were truncating.  When plotted shows EKF staying on point, not wandering off.
 
 
 Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):

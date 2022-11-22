@@ -292,7 +292,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     {
         if ( (bms_off_ && voltage_low) ||  Sen->Flt->vb_fa())
         {
-            voc_ = voc_stat_ = voc_filt_ = voc_soc_;
+            voc_ = voc_stat_ = voc_filt_ = vb_;  // Keep high to avoid chatter with voc_stat_ used above in voltage_low
         }
     }
     dv_dyn_ = vb_ - voc_;
@@ -312,7 +312,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
         if ( ddq_dt>0. && !rp.tweak_test() ) ddq_dt *= coul_eff_;
         ddq_dt -= chem_.dqdt * q_capacity_ * T_rate;
         predict_ekf(ddq_dt);       // u = d(dq)/dt
-        update_ekf(voc_stat_, 0., 1., Sen->control_time, Sen->now);  // z = voc_stat, estimated = voc_filtered = hx, predicted = est past
+        update_ekf(voc_stat_, 0., 1.);  // z = voc_stat, estimated = voc_filtered = hx, predicted = est past
         soc_ekf_ = x_ekf();             // x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
         q_ekf_ = soc_ekf_ * q_capacity_;
         delta_q_ekf_ = q_ekf_ - q_capacity_;
@@ -323,8 +323,8 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
         EKF_converged->calculate(conv, EKF_T_CONV, EKF_T_RESET, min(dt_eframe_, EKF_T_RESET), cp.soft_reset);
     }
     eframe_++;
-
     if ( reset_temp || cp.soft_reset || eframe_ == cp.eframe_mult ) eframe_ = 0;
+    if ( rp.debug==3 || rp.debug==4 ) EKF_1x1::serial_print(Sen->control_time, Sen->now);  // print EKF in Read frame
 
     // Filter
     voc_filt_ = SdVb_->update(voc_);   // used for saturation test

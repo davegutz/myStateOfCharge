@@ -433,8 +433,10 @@ class BatteryMonitor(Battery, EKF1x1):
             self.voc = vb - self.r_ss * self.ib
             self.Randles.y = self.voc
         if self.bms_off and voltage_low:
-            self.voc_stat = self.voc_soc
-            self.voc = self.voc_soc
+            # self.voc_stat = self.voc_soc
+            # self.voc = self.voc_soc
+            self.voc_stat = self.vb
+            self.voc = self.vb
         self.dv_dyn = self.vb - self.voc
 
         # Hysteresis model
