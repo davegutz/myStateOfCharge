@@ -471,6 +471,10 @@ Full regression suite:
                   Hd;Xp0;Rf;W200;+v0;Dr100;Rf;Pf;DP4;
 		# Should detect voltage failure and display '*fail' and 'redl'
 
+  vHiFailFf:        Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.45;
+                  Ff0;Hd;Xp0;Rf;W200;+v0;Dr100;Rf;Pf;DP4;
+		# Should detect voltage failure but not display anything.
+
   pulseEKF:  Xp6  # TODO: doesn't work now.
 
   pulseSS:  Xp7

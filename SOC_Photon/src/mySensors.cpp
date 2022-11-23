@@ -505,7 +505,18 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       latched_fail_ = true;
     }
   }
-
+  else  // fake_faults
+  {
+    if ( !vb_sel_stat_last_ )
+    {
+      latched_fail_fake_ = true;
+    }
+    if (  wrap_vb_fa() || vb_fa() )
+    {
+      latched_fail_fake_ = true;
+    }
+  }
+  
   // tb failure from inactivity. Does not latch because can heal and failure not critical
   if ( reset_all_faults_ )
   {
