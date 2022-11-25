@@ -125,6 +125,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define NOMINAL_TB      15.             // Middle of the road Tb for decent reversionary operation, deg C (15.)
 #define IMAX_NUM        100000.         // Simulation limit to prevent NaN, A (1e5)
 #define WRAP_SOC_HI_OFF     0.97        // Disable e_wrap_hi when saturated
+#define WRAP_SOC_MD_OFF     0.90        // Detune e_wrap_hi when approaching saturated 
 #define WRAP_SOC_HI_SCLR    1000.       // Huge to disable e_wrap
 #define WRAP_SOC_LO_OFF_ABS 0.35        // Disable e_wrap when near empty (soc lo any Tb)
 #define WRAP_SOC_LO_OFF_REL 0.2         // Disable e_wrap when near empty (soc lo for high Tb where soc_min=.2, voltage cutback)
