@@ -257,7 +257,7 @@ void loop()
 
   // Synchronize
   now = millis();
-  time_now = Time.now();
+  time_now = Time.now();  // Seconds since start of epoch
   sync_time(now, &last_sync, &millis_flip);      // Refresh time synchronization
   char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
   Sen->control_time = decimalTime(&current_time, tempStr, Sen->now, millis_flip);

@@ -134,7 +134,7 @@ void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 // Convert time to decimal for easy lookup
 double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip)
 {
-  *current_time = Time.now();
+  *current_time = Time.now();  // Seconds since start of epoch
   uint32_t year = Time.year(*current_time);
   uint8_t month = Time.month(*current_time);
   uint8_t day = Time.day(*current_time);
@@ -149,7 +149,7 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
       !(month==11 && ((day-dayOfWeek)>=0) && hours>0) )  // >=first Sunday Nov
       {
         Time.zone(GMT+1);
-        *current_time = Time.now();
+        *current_time = Time.now();  // Seconds since start of epoch
         day = Time.day(*current_time);
         hours = Time.hour(*current_time);
       }
@@ -639,7 +639,7 @@ void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *milli
     if ( Particle.connected() ) Particle.syncTime();
 
     // Refresh millis() at turn of Time.now
-    long time_begin = Time.now();
+    long time_begin = Time.now();  // Seconds since start of epoch
     while ( Time.now()==time_begin )
     {
       delay(1);

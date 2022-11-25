@@ -85,7 +85,7 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define IBATT_HARD_SET        1.        // Signal selection volt range fail persistence, s (1.)
 #define IBATT_HARD_RESET      1.        // Signal selection volt range fail reset persistence, s (1.)
 #define VBATT_MAX             17.       // Signal selection hard fault threshold, V (17. < VB_CONV_GAIN*4095)
-#define VBATT_MIN             8.        // Signal selection hard fault threshold, V (0.  < 9. < 10 bms shutoff)
+#define VBATT_MIN             8.        // Signal selection hard fault threshold, V (0.  < 8. < 10 bms shutoff)
 #define IB_MIN_UP             0.2       // Min up charge current for come alive, BMS logic, and fault
 #define VBATT_HARD_SET        1.        // Signal selection volt range fail persistence, s (1.)
 #define VBATT_HARD_RESET      1.        // Signal selection volt range fail reset persistence, s (1.)

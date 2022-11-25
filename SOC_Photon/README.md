@@ -471,6 +471,10 @@ Full regression suite:
                   Hd;Xp0;Rf;W200;+v0;Dr100;Rf;Pf;DP4;
 		# Should detect voltage failure and display '*fail' and 'redl'
 
+  vHiFailFf:        Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.45;
+                  Ff0;Hd;Xp0;Rf;W200;+v0;Dr100;Rf;Pf;DP4;
+		# Should detect voltage failure but not display anything.
+
   pulseEKF:  Xp6  # TODO: doesn't work now.
 
   pulseSS:  Xp7
@@ -502,9 +506,14 @@ Full regression suite:
 		  # Use voltage with current shutoff to set various conditions that may be encountered during bms events.
 		  
   dwell noise Ca.5:
-		Ff0;HR;Dr100;DP1;v4;Ca.5;DT.05;DV0.05;DM.2;DN2;Di.1;Dv0;
+		Ff0;HR;Di.1;Dv0;Dr100;DP1;v4;Ca.5;DT.05;DV0.05;DM.2;DN2;
         Xp0;v0;Hd;DT0;DV0;DM0;DN0;Di0;Dv0;DP4;
-		# Dwell for >5 minutes.  This operating condition found EKF failure one time.   Led to multi-framing the EKF (update time = 2.0).   Before change, update time of EKF was so short (0.1) that internal filter parameters were truncating.  When plotted shows EKF staying on point, not wandering off.
+		# Dwell for >5 minutes.  This operating condition found EKF failure one time.   Led to multi-framing the EKF (update time = 2.0).   Before change, update time of EKF was so short (0.1) that internal filter parameters were truncating.  When plotted shows EKF staying on point, not wandering off.   Beware, a dwell has most parameters changing slowly.   Auto-scaling in python plots combined with truncation in data stream (but not  python) makes some interesting artifacts.
+
+  dwell Ca.5:
+		Ff0;HR;Di.1;Dr100;DP1;v4;Ca.5;
+        Xp0;v0;Hd;DT0;DV0;DM0;DN0;Di0;Dv0;DP4;
+		# Dwell for >5 minutes.  This operating condition found EKF failure one time.   Led to multi-framing the EKF (update time = 2.0).   Before change, update time of EKF was so short (0.1) that internal filter parameters were truncating.  When plotted shows EKF staying on point, not wandering off. Auto-scaling in python plots combined with truncation in data stream (but not  python) makes some interesting artifacts.
 
 
 Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
@@ -553,10 +562,11 @@ Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
 6. Real runs using battery heater to establish VOC(SOC, Tb) and determine capacity, which should be > rating.
 
 ## Boot checklist - after new software load
-1. Update the version in local_conig.h for 'unit ='.
-2. Start CoolTerm record.  Record Hd, Pf, Pa, brief v1 burst for the previous load.
-3. On restart after load, check the retained parameter list (SRAM battery backed up).   The list is displayed on startup for convenience.   Go slowly with this if you've been tuning.
-4. Record Hd, Pf, Pa, brief v1 burst.   Confirm the 'unit =' is for the intended build install.
-5. Check Xm=0 before walk away from installed system.
+1. Synchronize time if necessary.  Use hotspot on phone.   Press left button and hold 3 sec to get blink blue.  Use particle app to '+' device.  Reset using right button to complete the process.   Time is UTC.
+2. Update the version in local_conig.h for 'unit ='.
+3. Start CoolTerm record.  Record Hd, Pf, Pa, brief v1 burst for the previous load.
+4. On restart after load, check the retained parameter list (SRAM battery backed up).   The list is displayed on startup for convenience.   Go slowly with this if you've been tuning.
+5. Record Hd, Pf, Pa, brief v1 burst.   Confirm the 'unit =' is for the intended build install.
+6. Check Xm=0 before walk away from installed system. 
 
-
+##

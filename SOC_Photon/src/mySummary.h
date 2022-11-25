@@ -34,7 +34,7 @@ extern CommandPars cp;
 // SRAM retention summary
 struct Flt_st
 {
-  unsigned long t;  // Timestamp
+  unsigned long t;  // Timestamp seconds since start of epoch
   int16_t Tb_hdwe;  // Battery temperature, hardware, C
   int16_t vb_hdwe;  // Battery measured potential, hardware, V
   int16_t ib_amp_hdwe;  // Battery measured input current, amp, A
@@ -135,7 +135,7 @@ struct Flt_st
 // SRAM retention summary
 struct Sum_st
 {
-  unsigned long t;  // Timestamp
+  unsigned long t;  // Timestamp seconds since start of epoch
   int16_t Tb;       // Battery temperature, filtered, C
   int16_t Vb;       // Battery measured potential, filtered, V
   int16_t Ib;       // Battery measured input current, filtered, A

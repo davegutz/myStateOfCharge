@@ -26,7 +26,7 @@ if __name__ == '__main__':
     from MonSim import replicate, save_clean_file, save_clean_file_sim
     from DataOverModel import SavedData, SavedDataSim, write_clean_file, overall
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
-    from CompareHist_20221028 import add_stuff_f, over_fault, filter_Tb, X_SOC_MIN_BB, T_SOC_MIN_BB, IB_BAND, RATED_BATT_CAP
+    from CompareHist_20221028 import add_stuff_f, over_fault, filter_Tb, X_SOC_MIN_BB, T_SOC_MIN_BB, IB_BAND, RATED_BATT_CAP, over_easy
     import matplotlib.pyplot as plt
     plt.rcParams['axes.grid'] = True
     from datetime import datetime, timedelta
@@ -82,6 +82,8 @@ if __name__ == '__main__':
         unit_key = 'pro_2022'
         dTb = None
         plot_init_in = False
+        long_term_in = False
+        plot_overall_in = True
 
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
@@ -98,7 +100,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'satSit v20221028.txt'
         # data_file_old_txt = 'satSitHys v20221028.txt'
         # data_file_old_txt = 'offSitHysBms v20221028.txt'  # ; time_end_in = 137.
-        data_file_old_txt = 'offSitHysBmsNoise v20221028.txt'  # ; time_end_in=50
+        # data_file_old_txt = 'offSitHysBmsNoise v20221028.txt'  # ; time_end_in=50
         # data_file_old_txt = 'ampHiFailSlow v20221028.txt'  # ; time_end_in=360
         # data_file_old_txt = 'vHiFail v20221028.txt'
         # data_file_old_txt = 'pulseEKF v20221028.txt'; init_time_in=-0.001;  # TODO:  broken
@@ -108,8 +110,10 @@ if __name__ == '__main__':
         # data_file_old_txt = 'EKF_Track v20221028.txt'
         # data_file_old_txt = 'EKF_Track Dr2000 v20221028.txt'
         # data_file_old_txt = 'on_off_on v20221028.txt'  # ; time_end_in=6
-        # data_file_old_txt = 'dwell noise Ca.5 v20221028.txt'  # ; dTb = [[0., 18000.],  [0, 8.]]
+        data_file_old_txt = 'dwell noise Ca.5 v20221028.txt'  # ; dTb = [[0., 18000.],  [0, 8.]]
+        # data_file_old_txt = 'dwell Ca.5 v20221028.txt'  # ; time_end_in=0.5  # ; dTb = [[0., 18000.],  [0, 8.]]
         #
+        # data_file_old_txt = 'fail 20221124.txt';  plot_overall_in=False;  # ; long_term_in=True;
         # data_file_old_txt = 'init Ca1 v20220926.txt'
         # data_file_old_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
         # data_file_old_txt = 'real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
@@ -230,11 +234,16 @@ if __name__ == '__main__':
         if temp_flt_file_clean and len(f.time) > 1:
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                           n_fig=n_fig, x_sch=X_SOC_MIN_BB, z_sch=T_SOC_MIN_BB, voc_reset=0.,
-                                          long_term=False)
+                                          long_term=long_term_in)
+        # if temp_hist_file_clean and len(h.time) > 1:
+        #         n_fig, fig_files = over_easy(h_20C, filename, mv_fast=mon_ver_300new, mv_slow=mon_ver_300old,
+        #                                  fig_files=fig_files, plot_title=plot_title, subtitle='h_20C',
+        #                                  n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
         # n_fig, fig_files = overall_batt(mon_ver, sim_ver, randles_ver, filename, fig_files, plot_title=plot_title,
         #                                 n_fig=n_fig, suffix='_ver')  # sim over mon verify
-        n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                   plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
+        if plot_overall_in:
+            n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                       plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
         cleanup_fig_files(fig_files)
