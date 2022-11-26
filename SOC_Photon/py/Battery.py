@@ -52,7 +52,8 @@ BATT_DVOC_DT = 0.004  # 5/30/2022
 BATT_V_SAT = 13.8  # Normal battery cell saturation for SOC=99.7, V (13.8)
 NOM_SYS_VOLT = 12.  # Nominal system output, V, at which the reported amps are used (12)
 low_voc = 9.  # Minimum voltage for battery below which BMS shuts off current
-low_t = 8.  # Minimum temperature for valid saturation check, because BMS shuts off battery low.
+# low_t = 8.  # Minimum temperature for valid saturation check, because BMS shuts off battery low.
+low_t = 4.  # Minimum temperature for valid saturation check, because BMS shuts off battery low.
 # Heater should keep >8, too
 mxeps_bb = 1-1e-6  # Numerical maximum of coefficient model with scaled soc
 mneps_bb = 1e-6  # Numerical minimum of coefficient model without scaled soc
@@ -1152,6 +1153,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.title(plot_title+' B 4 MON vs SIM')
         plt.plot(mv.time, mv.ib, color='green', linestyle='-', label='ib'+suffix)
         plt.plot(sv.time, sv.ib, color='black', linestyle='--', label='ib_s'+suffix)
+        plt.plot(sv.time, sv.ib_in, color='red', linestyle='-.', label='ib_in_s'+suffix)
         plt.legend(loc=1)
         plt.subplot(322)
         plt.plot(mv.time, mv.vb, color='green', linestyle='-', label='vb'+suffix)
