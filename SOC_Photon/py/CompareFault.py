@@ -325,6 +325,70 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
     return n_fig, fig_files
 
 
+def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_fig=None):
+    if fig_files is None:
+        fig_files = []
+
+    plt.figure()  # of 1
+    n_fig += 1
+    plt.subplot(331)
+    plt.title(plot_title + ' O_F 1')
+    plt.plot(mo.time, mo.Ib_sel, color='black', linestyle='-', label='Ib_sel=Ib_in')
+    plt.plot(mv.time, mv.ib_in, color='cyan', linestyle='--', label='ib_in_ver')
+    plt.plot(smv.time, smv.ib_in_s, color='orange', linestyle='-.', label='ib_in_s_ver')
+    plt.legend(loc=1)
+    plt.subplot(332)
+    plt.plot(mo.time, mo.ioc, color='black', linestyle='-', label='ioc')
+    plt.plot(mv.time, mv.ioc, color='cyan', linestyle='--', label='ioc_ver')
+    plt.plot(sv.time, sv.ioc, color='orange', linestyle=':', label='ioc_s_ver')
+    plt.legend(loc=1)
+    plt.subplot(333)
+    plt.plot(mo.time, mo.Tb, color='black', linestyle='-', label='temp_c')
+    plt.plot(mv.time, mv.Tb, color='cyan', linestyle='--', label='temp_c_ver')
+    plt.plot(smv.time, mv.Tb, color='orange', linestyle='-.', label='temp_c_s_ver')
+    plt.legend(loc=1)
+    plt.subplot(334)
+    plt.plot(mo.time, mo.Vb, color='black', linestyle='-', label='Vb')
+    plt.plot(mv.time, mv.Vb, color='cyan', linestyle='--', label='Vb_ver')
+    plt.plot(smv.time, smv.vb_s, color='orange', linestyle='-.', label='vb_s_ver')
+    plt.legend(loc=1)
+    plt.subplot(335)
+    plt.plot(mo.time, mo.Voc, color='black', linestyle='-', label='Voc')
+    plt.plot(mv.time, mv.Voc, color='cyan', linestyle='--', label='Voc_ver')
+    plt.plot(smv.time, smv.voc_s, color='orange', linestyle='-.', label='Voc_s_ver')
+    plt.legend(loc=1)
+    plt.subplot(336)
+    plt.plot(mo.time, mo.soc, color='black', linestyle='-', label='soc')
+    plt.plot(mv.time, mv.soc, color='cyan', linestyle='--', label='soc_ver')
+    plt.plot(smv.time, smv.soc_s, color='orange', linestyle='-.', label='soc_s_ver')
+    plt.legend(loc=1)
+    plt.subplot(337)
+    plt.plot(mo.time, mo.Voc_stat, color='black', linestyle='-', label='Voc_stat')
+    plt.plot(mv.time, mv.Voc_stat, color='cyan', linestyle='--', label='Voc_stat_ver')
+    plt.plot(smv.time, smv.voc_stat_s, color='orange', linestyle='-.', label='Voc_stat_s_ver')
+    plt.legend(loc=1)
+    plt.subplot(338)
+    plt.plot(mo.time, mo.e_w, color='black', linestyle='-', label='e_wrap')
+    plt.plot(mv.time, np.array(mv.voc_soc) - np.array(mv.Voc_stat), color='cyan', linestyle='--', label='e_wrap_ver')
+    # plt.plot(smv.time, np.array(smv.voc_soc_s) - np.array(smv.voc_stat_s), color='orange', linestyle='-.', label='e_wrap_filt_s_ver')
+    plt.plot(mo.time, mo.ewh_thr, color='red', linestyle='-.', label='ewhi_thr')
+    plt.plot(mo.time, mo.ewl_thr, color='red', linestyle='-.', label='ewlo_thr')
+    plt.legend(loc=1)
+    plt.subplot(339)
+    plt.plot(mo.time, mo.dV_dyn, color='black', linestyle='-', label='dV_dyn')
+    plt.plot(mv.time, mv.dV_dyn, color='cyan', linestyle='--', label='dV_dyn_ver')
+    plt.plot(smv.time, smv.dv_dyn_s, color='orange', linestyle='-.', label='dv_dyn_s_ver')
+    plt.legend(loc=1)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
+    return n_fig, fig_files
+
+
 def calc_fault(d_ra, d_mod):
     dscn_fa = np.bool8(d_ra.falw & 2 ** 10)
     ib_diff_fa = np.bool8((d_ra.falw & 2 ** 8) | (d_ra.falw & 2 ** 9))
@@ -385,7 +449,12 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     ewlo_thr = []
     ib_diff_thr = []
     ib_quiet_thr = []
+    dv_hys = d_ra.voc - d_ra.Voc_stat
+    hys_redesign = Hysteresis_20220926(scale=HYS_SCALE_20220926, cap=HYS_CAP_REDESIGN)
+    ioc = []
     for i in range(len(d_ra.time)):
+        res = hys_redesign.look_hys(dv_hys[i], d_ra.soc[i])
+        ioc.append(dv_hys[i] / res)
         voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
         soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
         Vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
@@ -412,6 +481,7 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     time_min = (d_ra.time-d_ra.time[0])/60.
     time_day = (d_ra.time-d_ra.time[0])/3600./24.
     d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ioc', np.array(np.copy(ioc), dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ibmh', np.array(np.copy(d_ra.ibah), dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'e_w', np.array(np.copy(d_ra.e_w_f), dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'cc_dif', np.array(cc_dif, dtype=float))
@@ -860,15 +930,15 @@ if __name__ == '__main__':
         data_root = temp_hist_file_clean.split('/')[-1].replace('.csv', '-')
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
+        if len(f.time) > 1:
+            n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
+                                          n_fig=n_fig)
         if len(h_20C.time) > 1:
             n_fig, fig_files = overall_batt(mon_ver_100, sim_ver_100, randles_ver_100, suffix='_100',
                                             filename=filename, fig_files=fig_files,
                                             plot_title=plot_title, n_fig=n_fig)
-            n_fig, fig_files = overall(mon_old_100, mon_ver_100, None, sim_ver_100, sim_s_ver_100, filename,
-                                       fig_files, plot_title=plot_title, n_fig=n_fig)
-        if len(f.time) > 1:
-            n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                          n_fig=n_fig)
+            n_fig, fig_files = overall_fault(mon_old_100, mon_ver_100, sim_ver_100, sim_s_ver_100, filename,
+                                             fig_files, plot_title=plot_title, n_fig=n_fig)
 
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=path_to_pdfs)
