@@ -48,12 +48,12 @@ extern CommandPars cp;  // Various parameters to be static at system level
 // Pins
 struct Pins
 {
-  byte pin_1_wire;  // 1-wire Plenum temperature sensor
-  byte status_led;  // On-board led
-  byte Vb_pin;      // Battery voltage
+  uint16_t pin_1_wire;  // 1-wire Plenum temperature sensor
+  uint16_t status_led;  // On-board led
+  uint16_t Vb_pin;      // Battery voltage
   pin_t pwm_pin;    // External signal injection
   Pins(void) {}
-  Pins(byte pin_1_wire, byte status_led, byte Vb_pin, pin_t pwm_pin)
+  Pins(uint16_t pin_1_wire, uint16_t status_led, uint16_t Vb_pin, pin_t pwm_pin)
   {
     this->pin_1_wire = pin_1_wire;
     this->status_led = status_led;

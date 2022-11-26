@@ -305,7 +305,7 @@ class Sensors
 {
 public:
   Sensors();
-  Sensors(double T, double T_temp, byte pin_1_wire, Sync *ReadSensors);
+  Sensors(double T, double T_temp,uint16_t pin_1_wire, Sync *ReadSensors);
   ~Sensors();
   int Vb_raw;                 // Raw analog read, integer
   float Vb;                   // Selected battery bank voltage, V
@@ -377,7 +377,7 @@ public:
   float vb_add() { return ( vb_add_ ); };
   void vb_add(const float add) { vb_add_ = add; };
   float Vb_add() { return ( vb_add_ * rp.nS ); };
-  void vb_load(const byte vb_pin);  // Analog read of Vb
+  void vb_load(const uint16_t vb_pin);  // Analog read of Vb
   float Vb_noise();
   float Vb_noise_amp() { return ( Vb_noise_amp_ ); };
   void Vb_noise_amp(const float noise) { Vb_noise_amp_ = noise; };

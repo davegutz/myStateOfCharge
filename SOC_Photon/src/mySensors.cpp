@@ -633,7 +633,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 
 
 // Class Sensors
-Sensors::Sensors(double T, double T_temp, byte pin_1_wire, Sync *ReadSensors):
+Sensors::Sensors(double T, double T_temp,uint16_t pin_1_wire, Sync *ReadSensors):
   rp_Tb_bias_hdwe_(&rp.Tb_bias_hdwe), rp_Vb_bias_hdwe_(&rp.Vb_bias_hdwe), Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE),
   Ib_amp_noise_amp_(IB_AMP_NOISE), Ib_noa_noise_amp_(IB_NOA_NOISE), reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL),
   sample_time_ib_hdwe_(0UL), sample_time_vb_hdwe_(0UL)
@@ -929,7 +929,7 @@ void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp)
 }
 
 // Load analog voltage
-void Sensors::vb_load(const byte vb_pin)
+void Sensors::vb_load(const uint16_t vb_pin)
 {
     Vb_raw = analogRead(vb_pin);
     sample_time_vb_hdwe_ = millis();

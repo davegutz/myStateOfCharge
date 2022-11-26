@@ -189,7 +189,7 @@ void setup()
       Serial.printf("Do you wish to reset to defaults? [Y/n]:"); Serial1.printf("Do you wish to reset to defaults? [Y/n]:");
       uint8_t count = 0;
       while ( !Serial.available() && !Serial1.available() && ++count<60 ) delay(1000);
-      byte answer = 'n';
+      uint16_t answer = 'n';
       if ( Serial.available() ) answer=Serial.read();
       else if ( Serial1.available() ) answer=Serial1.read();
       if ( answer=='Y' )
@@ -257,7 +257,7 @@ void loop()
 
   // Synchronize
   now = millis();
-  time_now = Time.now();  // Seconds since start of epoch
+  time_now = Time.now();
   sync_time(now, &last_sync, &millis_flip);      // Refresh time synchronization
   char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
   Sen->control_time = decimalTime(&current_time, tempStr, Sen->now, millis_flip);
