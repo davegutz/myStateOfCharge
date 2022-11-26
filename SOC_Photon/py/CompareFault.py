@@ -24,7 +24,8 @@ from Hysteresis_20220926 import Hysteresis_20220926
 from Battery import is_sat, low_t, IB_MIN_UP
 from resample import resample
 from MonSim import replicate
-from Battery import overall_batt, cp_eframe_mult
+from Battery import overall_batt
+from DataOverModel import overall
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -79,6 +80,7 @@ r_ct = 0.0016  # Randles charge transfer resistance, ohms
 r_diff = 0.0077  # Randles diffusion resistance, ohms
 r_ss = r_0 + r_ct + r_diff
 
+
 # Calculate thresholds from global input values listed above (review these)
 def fault_thr_bb(Tb, soc, voc_soc, soc_min_tbl=lut_soc_min_bb):
     vsat_ = NOM_VSAT_BB + (Tb-25.)*DVOC_DT_BB
@@ -132,255 +134,7 @@ def cat(out_file_name, in_file_names, in_path='./', out_path='./'):
                         out_file.write(line)
 
 
-def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_title=None, n_fig=None, subtitle=None,
-              x_sch=None, z_sch=None, voc_reset=0.):
-    if fig_files is None:
-        fig_files = []
-    # Markers
-    #
-    # light symbols
-    # '.' point
-    # ',' pixel
-    # '1' tri down
-    # '2' tri up
-    # '3' tri left
-    # '4' tri right
-    # '+' plus
-    # 'x' x
-    # '|' vline
-    # '_' hline
-    # 0 (TICKLEFT) tickleft
-    # 1 (TICKRIGHT) tickright
-    # 2 (TICKUP) tickup
-    # 3 (TICKDOWN) tickdown
-    #
-    # bold filled symbols
-    # 'o' circle
-    # 'v' triangle down
-    # '^' triangle up
-    # '<' triangle left
-    # '>' triangle right
-    # '8' octagon
-    # 's' square
-    # 'p' pentagon
-    # 'P' filled plus
-    # '*' star
-    # 'h' hexagon1
-    # 'H' hexagon2
-    # 4 (CARETLEFT) caretleft
-    # 5 (CARETRIGHT) caretright
-    # 6 (CARETUP) caretup
-    # 7 (CARETDOWN) caretdown
-    # 8 (CARETLEFTBASE) caretleft centered at base
-    # 9 (CARETRIGHTBASE) caretright centered at base
-    # 10 (CARETUPBASE) caretup centered at base
-    # 11 (CARETDOWNBASE) caretdown centered at base
-
-    # Colors
-
-    plt.figure()  # 1
-    n_fig += 1
-    plt.subplot(331)
-    plt.title(plot_title + ' h1')
-    plt.suptitle(subtitle)
-    plt.plot(hi.time_day, hi.soc, marker='.', markersize='3', linestyle='-', color='black', label='soc')
-    plt.plot(hi.time_day, hi.soc_ekf, marker='+', markersize='3', linestyle='--', color='blue', label='soc_ekf')
-    plt.plot(mv_fast.time_day-mv_fast.time_day[0], mv_fast.soc, linestyle='-.', color='red', label='soc_ver_100new')
-    plt.plot(mv_fast.time_day-mv_fast.time_day[0], mv_fast.soc_ekf, linestyle=':', color='green', label='soc_ekf_ver_100new')
-    plt.plot(mv_slow.time_day-mv_slow.time_day[0], mv_slow.soc, linestyle='--', color='magenta', label='soc_ver_100old')
-    plt.plot(mv_slow.time_day-mv_slow.time_day[0], mv_slow.soc_ekf, linestyle='-.', color='cyan', label='soc_ekf_ver_100old')
-    plt.legend(loc=1)
-    plt.subplot(332)
-    plt.plot(hi.time_day, hi.Tb, marker='.', markersize='3', linestyle='-', color='black', label='Tb')
-    plt.legend(loc=1)
-    plt.subplot(333)
-    plt.plot(hi.time_day, hi.ib, marker='+', markersize='3', linestyle='-', color='green', label='ib')
-    plt.legend(loc=1)
-    plt.subplot(334)
-    plt.plot(hi.time_day, hi.tweak_sclr_amp, marker='+', markersize='3', linestyle='None', color='orange', label='tweak_sclr_amp')
-    plt.plot(hi.time_day, hi.tweak_sclr_noa, marker='^', markersize='3', linestyle='None', color='green', label='tweak_sclr_noa')
-    plt.ylim(-6, 6)
-    plt.legend(loc=1)
-    plt.subplot(335)
-    plt.plot(hi.time_day, hi.falw, marker='+', markersize='3', linestyle='None', color='magenta', label='falw')
-    plt.legend(loc=0)
-    plt.subplot(336)
-    plt.plot(hi.soc, hi.soc_ekf, marker='+', markersize='3', linestyle='-', color='blue', label='soc_ekf')
-    plt.plot([0, 1], [0.2, 1.2], linestyle=':', color='red')
-    plt.plot([0, 1], [-0.2, 0.8], linestyle=':', color='red')
-    plt.xlim(0, 1)
-    plt.ylim(0, 1)
-    plt.xlabel('soc')
-    plt.legend(loc=4)
-    plt.subplot(337)
-    plt.plot(hi.time_day, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
-    plt.plot(hi.time_day, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
-    plt.plot(hi.time_day, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
-    plt.plot(hi.time_day, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
-    plt.plot(hi.time_day, hi.dv_hys_remodel, marker='x', markersize='3', linestyle=':', color='lawngreen', label='dv_hys_remodel')
-    plt.plot(hi.time_day, hi.dv_hys_redesign_chg, marker=3, markersize='3', linestyle=':', color='springgreen', label='dv_hys_redesign_chg')
-    plt.plot(hi.time_day, hi.dv_hys_redesign_dis, marker=3, markersize='3', linestyle=':', color='orangered', label='dv_hys_redesign_dis')
-    plt.xlabel('days')
-    plt.legend(loc=1)
-    plt.subplot(338)
-    plt.plot(hi.time_day, hi.e_wrap, marker='o', markersize='3', linestyle='-', color='black', label='e_wrap')
-    plt.plot(hi.time_day, hi.wv_fa, marker=0, markersize='4', linestyle=':', color='red', label='wrap_vb_fa')
-    plt.plot(hi.time_day, hi.wl_fa-1, marker=2, markersize='4', linestyle=':', color='orange', label='wrap_lo_fa-1')
-    plt.plot(hi.time_day, hi.wh_fa+1, marker=3, markersize='4', linestyle=':', color='green', label='wrap_hi_fa+1')
-    plt.xlabel('days')
-    plt.legend(loc=1)
-    plt.subplot(339)
-    plt.plot(hi.time_day, hi.Vb, marker='.', markersize='3', linestyle='None', color='red', label='Vb')
-    plt.plot(hi.time_day, hi.voc, marker='.', markersize='3', linestyle='None', color='blue', label='voc')
-    plt.plot(hi.time_day, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_chg')
-    plt.plot(hi.time_day, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_dis')
-    plt.xlabel('days')
-    plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
-    fig_files.append(fig_file_name)
-    plt.savefig(fig_file_name, format="png")
-
-    plt.figure()  # 2
-    n_fig += 1
-    plt.subplot(221)
-    plt.title(plot_title + ' h2')
-    plt.suptitle(subtitle)
-    plt.plot(hi.time_day, hi.Vsat, marker='.', markersize='1', linestyle='-', color='orange', linewidth='1', label='Vsat')
-    plt.plot(hi.time_day, hi.Vb, marker='1', markersize='3', linestyle='None', color='black', label='Vb')
-    plt.plot(hi.time_day, hi.voc, marker='.', markersize='3', linestyle='None', color='orange', label='voc')
-    plt.plot(hi.time_day, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='-', color='green', label='Voc_stat_chg')
-    plt.plot(hi.time_day, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='-', color='red', label='Voc_stat_dis')
-    plt.plot(hi.time_day, hi.voc_soc, marker='2', markersize='3', linestyle=':', color='cyan', label='voc_soc')
-    plt.xlabel('days')
-    plt.legend(loc=1)
-    plt.subplot(122)
-    plt.plot(hi.time_day, hi.bms_off + 22, marker='h', markersize='3', linestyle='-', color='blue', label='bms_off+22')
-    plt.plot(hi.time_day, hi.sat + 20, marker='s', markersize='3', linestyle='-', color='red', label='sat+20')
-    plt.plot(hi.time_day, hi.dscn_fa + 18, marker='o', markersize='3', linestyle='-', color='black', label='dscn_fa+18')
-    plt.plot(hi.time_day, hi.ib_diff_fa + 16, marker='^', markersize='3', linestyle='-', color='blue', label='ib_diff_fa+16')
-    plt.plot(hi.time_day, hi.wv_fa + 14, marker='s', markersize='3', linestyle='-', color='cyan', label='wrap_vb_fa+14')
-    plt.plot(hi.time_day, hi.wl_fa + 12, marker='p', markersize='3', linestyle='-', color='orange', label='wrap_lo_fa+12')
-    plt.plot(hi.time_day, hi.wh_fa + 10, marker='h', markersize='3', linestyle='-', color='green', label='wrap_hi_fa+10')
-    plt.plot(hi.time_day, hi.ccd_fa + 8, marker='H', markersize='3', linestyle='-', color='blue', label='cc_diff_fa+8')
-    plt.plot(hi.time_day, hi.ib_noa_fa + 6, marker='+', markersize='3', linestyle='-', color='red', label='ib_noa_fa+6')
-    plt.plot(hi.time_day, hi.ib_amp_fa + 4, marker='_', markersize='3', linestyle='-', color='magenta', label='ib_amp_fa+4')
-    plt.plot(hi.time_day, hi.vb_fa + 2, marker='1', markersize='3', linestyle='-', color='cyan', label='vb_fa+2')
-    plt.plot(hi.time_day, hi.tb_fa, marker='2', markersize='3', linestyle='-', color='orange', label='tb_fa')
-    plt.ylim(-1, 24)
-    plt.xlabel('days')
-    plt.legend(loc=1)
-    plt.subplot(223)
-    plt.plot(hi.time_day, hi.ib, marker='.', markersize='3', linestyle='-', color='red', label='ib')
-    plt.xlabel('days')
-    plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
-    fig_files.append(fig_file_name)
-    plt.savefig(fig_file_name, format="png")
-
-    plt.figure()  # 3
-    n_fig += 1
-    plt.subplot(131)
-    plt.title(plot_title + ' h3')
-    plt.suptitle(subtitle)
-    plt.plot(hi.soc_r, hi.Voc_stat_r_dis, marker='o', markersize='3', linestyle='-', color='orange', label='Voc_stat_r_dis')
-    plt.plot(hi.soc_r, hi.Voc_stat_r_chg, marker='o', markersize='3', linestyle='-', color='cyan', label='Voc_stat_r_chg')
-    plt.plot(hi.soc, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_dis')
-    plt.plot(hi.soc, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_chg')
-    plt.plot(x_sch, z_sch, marker='+', markersize='2', linestyle='--', color='black', label='Schedule')
-    plt.xlabel('soc')
-    plt.legend(loc=4)
-    plt.ylim(12, 13.5)
-    plt.subplot(132)
-    plt.plot(hi.soc_r, hi.Voc_stat_rescaled_r_dis, marker='o', markersize='3', linestyle='-', color='orangered', label='Voc_stat_rescaled_r_dis')
-    plt.plot(hi.soc_r, hi.Voc_stat_rescaled_r_chg, marker='o', markersize='3', linestyle='-', color='springgreen', label='Voc_stat_rescaled_r_chg')
-    plt.plot(x_sch, z_sch+voc_reset, marker='+', markersize='2', linestyle='--', color='black', label='Schedule RESET')
-    plt.xlabel('soc_r')
-    plt.legend(loc=4)
-    plt.ylim(12, 13.5)
-    plt.subplot(133)
-    plt.plot(hi.soc_r, hi.Voc_stat_redesign_r_dis, marker='x', markersize='3', linestyle='-', color='red', label='Voc_stat_redesign_r_dis')
-    plt.plot(hi.soc_r, hi.Voc_stat_redesign_r_chg, marker='x', markersize='3', linestyle='-', color='green', label='Voc_stat_redesign_r_chg')
-    plt.plot(x_sch, z_sch+voc_reset, marker='+', markersize='2', linestyle='--', color='black', label='Schedule RESET')
-    plt.xlabel('soc_r')
-    plt.legend(loc=4)
-    plt.ylim(12, 13.5)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
-    fig_files.append(fig_file_name)
-    plt.savefig(fig_file_name, format="png")
-
-    plt.figure()  # 4
-    n_fig += 1
-    plt.subplot(221)
-    plt.title(plot_title + ' h4')
-    plt.suptitle(subtitle)
-    plt.plot(hi.time_day, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
-    plt.plot(hi.time_day, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
-    plt.plot(hi.time_day, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
-    plt.plot(hi.time_day, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
-    plt.plot(hi.time_day, hi.dv_hys_redesign_chg, marker=3, markersize='3', linestyle='-', color='green', label='dv_hys_redesign_chg')
-    plt.plot(hi.time_day, hi.dv_hys_redesign_dis, marker=3, markersize='3', linestyle='-', color='red', label='dv_hys_redesign_dis')
-    plt.xlabel('days')
-    plt.legend(loc=4)
-    # plt.ylim(-0.7, 0.7)
-    plt.ylim(bottom=-0.7)
-    plt.subplot(222)
-    plt.plot(hi.time_day, hi.res_redesign_chg, marker='o', markersize='3', linestyle='-', color='green', label='res_redesign_chg')
-    plt.plot(hi.time_day, hi.res_redesign_dis, marker='o', markersize='3', linestyle='-', color='red', label='res_redesign_dis')
-    plt.xlabel('days')
-    plt.legend(loc=4)
-    plt.subplot(223)
-    plt.plot(hi.time_day, hi.ib, color='black', label='ib')
-    plt.plot(hi.time_day, hi.soc*10, color='green', label='soc*10')
-    plt.plot(hi.time_day, hi.ioc_redesign, marker='o', markersize='3', linestyle='-', color='cyan', label='ioc_redesign')
-    plt.xlabel('days')
-    plt.legend(loc=4)
-    plt.subplot(224)
-    plt.plot(hi.time_day, hi.dv_dot_redesign, linestyle='--', color='black', label='dv_dot_redesign')
-    plt.xlabel('days')
-    plt.legend(loc=4)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
-    fig_files.append(fig_file_name)
-    plt.savefig(fig_file_name, format="png")
-
-    plt.figure()  # 5
-    n_fig += 1
-    plt.subplot(221)
-    plt.title(plot_title + ' h5')
-    plt.suptitle(subtitle)
-    plt.plot(hi.soc, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
-    plt.plot(hi.soc, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
-    plt.plot(hi.soc, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
-    plt.plot(hi.soc, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
-    plt.plot(hi.soc, hi.dv_hys_redesign_chg, marker=3, markersize='3', linestyle='-', color='green', label='dv_hys_redesign_chg')
-    plt.plot(hi.soc, hi.dv_hys_redesign_dis, marker=3, markersize='3', linestyle='-', color='red', label='dv_hys_redesign_dis')
-    plt.xlabel('soc')
-    plt.legend(loc=4)
-    # plt.ylim(-0.7, 0.7)
-    plt.ylim(bottom=-0.7)
-    plt.subplot(222)
-    plt.plot(hi.soc, hi.res_redesign_chg, marker='o', markersize='3', linestyle='-', color='green', label='res_redesign_chg')
-    plt.plot(hi.soc, hi.res_redesign_dis, marker='o', markersize='3', linestyle='-', color='red', label='res_redesign_dis')
-    plt.xlabel('soc')
-    plt.legend(loc=4)
-    plt.subplot(223)
-    plt.plot(hi.soc, hi.ib, color='black', label='ib')
-    plt.plot(hi.soc, hi.soc*10, color='green', label='soc*10')
-    plt.plot(hi.soc, hi.ioc_redesign, marker='o', markersize='3', linestyle='-', color='cyan', label='ioc_redesign')
-    plt.xlabel('soc')
-    plt.legend(loc=4)
-    plt.subplot(224)
-    plt.plot(hi.soc, hi.dv_dot_redesign, linestyle='--', color='black', label='dv_dot_redesign')
-    plt.xlabel('soc')
-    plt.legend(loc=4)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
-    fig_files.append(fig_file_name)
-    plt.savefig(fig_file_name, format="png")
-
-    return n_fig, fig_files
-
-
-def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None,
-               x_sch=None, z_sch=None, voc_reset=0., long_term=True):
+def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None, long_term=True):
     if fig_files is None:
         fig_files = []
 
@@ -623,6 +377,14 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     Vsat = []
     time_sec = []
     dt = []
+    dV_dyn = []
+    ib_diff = []
+    cc_dif = []
+    cc_diff_thr = []
+    ewhi_thr = []
+    ewlo_thr = []
+    ib_diff_thr = []
+    ib_quiet_thr = []
     for i in range(len(d_ra.time)):
         voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
         soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
@@ -632,9 +394,37 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
             dt.append(float(d_ra.time[i] - d_ra.time[i - 1]))
         else:
             dt.append(float(d_ra.time[1] - d_ra.time[0]))
+        ib_diff_ = d_ra.ibah[i] - d_ra.ibnh[i]
+        ib_diff.append(ib_diff_)
+        Tb = d_ra.Tb[i]
+        soc = d_ra.soc[i]
+        cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
+        cc_dif.append(cc_dif_)
+        voc_stat = d_ra.Voc_stat[i]
+        dV_dyn.append(d_ra.vb[i] - d_ra.voc[i])
+        cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = fault_thr_bb(Tb, soc, voc_stat,
+                                                                                       soc_min_tbl=soc_min_tbl)
+        cc_diff_thr.append(cc_diff_thr_)
+        ib_quiet_thr.append(ib_quiet_thr_)
+        ewhi_thr.append(ewhi_thr_)
+        ewlo_thr.append(ewlo_thr_)
+        ib_diff_thr.append(ib_diff_thr_)
     time_min = (d_ra.time-d_ra.time[0])/60.
     time_day = (d_ra.time-d_ra.time[0])/3600./24.
     d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ibmh', np.array(np.copy(d_ra.ibah), dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'e_w', np.array(np.copy(d_ra.e_w_f), dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'cc_dif', np.array(cc_dif, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'dV_dyn', np.array(dV_dyn, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_diff', np.array(ib_diff, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_diff_f', np.array(ib_diff, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_diff_thr', np.array(ib_diff_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_quiet_thr', np.array(ib_quiet_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ibq_thr', np.array(ib_quiet_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_quiet', np.array(ib_quiet_thr, dtype=float)*0.)
+    d_mod = rf.rec_append_fields(d_mod, 'ib_rate', np.array(ib_quiet_thr, dtype=float)*0.)
+    d_mod = rf.rec_append_fields(d_mod, 'ibd_thr', np.array(ib_diff_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'Ib_charge', np.array(np.copy(d_ra.ib), dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'dt', np.array(dt, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
@@ -651,6 +441,7 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
             Voc_stat_chg[i] = None
     Vb = np.copy(d_mod.vb)
     d_mod = rf.rec_append_fields(d_mod, 'Vb', np.array(Vb, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'Vb_h', np.array(Vb, dtype=float))
     Ib = np.copy(d_mod.ib)
     d_mod = rf.rec_append_fields(d_mod, 'Ib', np.array(Ib, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'Ib_sel', np.array(Ib, dtype=float))
@@ -725,11 +516,13 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'Vsat', np.array(Vsat, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_diff', np.array(ib_diff, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_diff_f', np.array(ib_diff, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'cc_diff_thr', np.array(cc_diff_thr, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'cc_dif', np.array(cc_dif, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ewhi_thr', np.array(ewhi_thr, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ewlo_thr', np.array(ewlo_thr, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_diff_thr', np.array(ib_diff_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_quiet', np.array(ib_quiet_thr, dtype=float)*0.)
     d_mod = rf.rec_append_fields(d_mod, 'ib_quiet_thr', np.array(ib_quiet_thr, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'dt', np.array(dt, dtype=float))
     d_mod = calc_fault(d_ra, d_mod)
@@ -773,21 +566,43 @@ def bandaid(h):
     res = np.zeros(len(h.time))
     res[0:10] = 1
     mod = np.zeros(len(h.time))
+    ib_sel = h['ib'].copy()
+    vb_sel = h['vb'].copy()
+    tb_sel = h['Tb'].copy()
+    Voc = h['voc'].copy()
     ib_in_s = h['ib'].copy()
     soc_s = h['soc'].copy()
+    bms_off_s = h['bms_off'].copy()
     sat_s = h['sat'].copy()
     chm = np.zeros(len(h.time))
+    sel = np.zeros(len(h.time))
+    preserving = np.ones(len(h.time))
     chm_s = np.zeros(len(h.time))
     mon_old = rf.rec_append_fields(h, 'res', res)
     mon_old = rf.rec_append_fields(mon_old, 'mod_data', mod)
     mon_old = rf.rec_append_fields(mon_old, 'Ib_past', ib_in_s)
+    mon_old = rf.rec_append_fields(mon_old, 'ib_sel', ib_sel)
+    mon_old = rf.rec_append_fields(mon_old, 'tb_sel', tb_sel)
+    mon_old = rf.rec_append_fields(mon_old, 'Voc', Voc)
+    mon_old = rf.rec_append_fields(mon_old, 'preserving', preserving)
+    mon_old = rf.rec_append_fields(mon_old, 'vb_sel', vb_sel)
     mon_old = rf.rec_append_fields(mon_old, 'soc_s', soc_s)
     mon_old = rf.rec_append_fields(mon_old, 'chm', chm)
+    mon_old = rf.rec_append_fields(mon_old, 'sel', sel)
+    mon_old = rf.rec_append_fields(mon_old, 'ewh_thr', sel)
+    mon_old = rf.rec_append_fields(mon_old, 'ewl_thr', sel)
+    mon_old = rf.rec_append_fields(mon_old, 'ccd_thr', sel)
+    mon_old = rf.rec_append_fields(mon_old, 'Voc_ekf', sel)
+    mon_old = rf.rec_append_fields(mon_old, 'y_ekf', sel)
     sim_old = np.array(np.zeros(len(h.time), dtype=[('time', '<i4')])).view(np.recarray)
     sim_old.time = mon_old.time.copy()
     sim_old = rf.rec_append_fields(sim_old, 'chm_s', chm_s)
     sim_old = rf.rec_append_fields(sim_old, 'sat_s', sat_s)
     sim_old = rf.rec_append_fields(sim_old, 'ib_in_s', ib_in_s)
+    sim_old = rf.rec_append_fields(sim_old, 'bms_off_s', bms_off_s)
+    sim_old = rf.rec_append_fields(sim_old, 'dv_dyn_s', bms_off_s)
+    sim_old = rf.rec_append_fields(sim_old, 'dv_hys_s', bms_off_s)
+    sim_old = rf.rec_append_fields(sim_old, 'voc_stat_s', bms_off_s)
     return mon_old, sim_old
 
 
@@ -853,8 +668,6 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
             t_min = int(float(h.time[i]) / 60.)
             dv_hys_remodel_[i] = np.interp(t_min, hys_time_min, dv_hys_remodel)
 
-    # Hysteresis_20220926 redesign.
-    if len(h.time) > 1:
         hys_redesign = Hysteresis_20220926(scale=HYS_SCALE_20220926, cap=HYS_CAP_REDESIGN)  # Battery hysteresis model - drift of voc
         t_s_min = h.time_min[0]
         t_e_min = h.time_min[-1]
@@ -1006,6 +819,7 @@ if __name__ == '__main__':
             h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
                                   encoding=None).view(np.recarray)
         else:
+            h_raw = None
             print("data from", temp_hist_file, "empty after loading")
             exit(1)
 
@@ -1017,6 +831,7 @@ if __name__ == '__main__':
             f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
                                   encoding=None).view(np.recarray)
         else:
+            f_raw = None
             print("data from", temp_flt_file, "empty after loading")
             exit(1)
         f_raw = np.unique(f_raw)
@@ -1028,26 +843,17 @@ if __name__ == '__main__':
         h_raw = np.unique(h_raw)
         h = add_stuff(h_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
         print("\nh:\n", h, "\n")
-        voc_soc20 = look_it(x0, lut_voc, 20.)
         h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
         T_100 = 0.1
 
-        h_20C_resamp_100old = resample(data=h_20C, dt_resamp=T_100, time_var='time',
-                                       specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
-                                                 ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
-                                                 ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
-        mon_old_100old, sim_old_100old = bandaid(h_20C_resamp_100old)
-        mon_ver_100old, sim_ver_100old, randles_ver_100old, sim_s_ver_100old =\
-            replicate(mon_old_100old, sim_old=sim_old_100old, init_time=1., verbose=False, t_max=t_max_in)
+        h_20C_resamp_100 = resample(data=h_20C, dt_resamp=T_100, time_var='time',
+                                    specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
+                                              ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
+                                              ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
+        mon_old_100, sim_old_100 = bandaid(h_20C_resamp_100)
+        mon_ver_100, sim_ver_100, randles_ver_100, sim_s_ver_100 =\
+            replicate(mon_old_100, sim_old=sim_old_100, init_time=1., verbose=False, t_max=t_max_in)
 
-        h_20C_resamp_100new = resample(data=h_20C, dt_resamp=T_100, time_var='time',
-                                       specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
-                                                 ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
-                                                 ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
-        mon_old_100new, sim_old_100new = bandaid(h_20C_resamp_100new)
-        mon_ver_100new, sim_ver_100new, randles_ver_100new, sim_s_ver_100new =\
-            replicate(mon_old_100new, sim_old=sim_old_100new, init_time=1., verbose=False, t_max=t_max_in)
-                
         # Plots
         n_fig = 0
         fig_files = []
@@ -1055,16 +861,14 @@ if __name__ == '__main__':
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         if len(h_20C.time) > 1:
-            n_fig, fig_files = over_easy(h_20C, filename, mv_fast=mon_ver_100new, mv_slow=mon_ver_100old,
-                                         fig_files=fig_files, plot_title=plot_title, subtitle='h_20C',
-                                         n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
-            n_fig, fig_files = overall_batt(mon_ver_100old, sim_ver_100old, randles_ver_100old, suffix='_100old',
+            n_fig, fig_files = overall_batt(mon_ver_100, sim_ver_100, randles_ver_100, suffix='_100',
                                             filename=filename, fig_files=fig_files,
-                                            mv1=mon_ver_100new, sv1=sim_ver_100new, rv1=randles_ver_100new,
-                                            suffix1='_100new', plot_title=plot_title, n_fig=n_fig, use_time_day=True)
+                                            plot_title=plot_title, n_fig=n_fig)
+            n_fig, fig_files = overall(mon_old_100, mon_ver_100, None, sim_ver_100, sim_s_ver_100, filename,
+                                       fig_files, plot_title=plot_title, n_fig=n_fig)
         if len(f.time) > 1:
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                          n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
+                                          n_fig=n_fig)
 
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=path_to_pdfs)

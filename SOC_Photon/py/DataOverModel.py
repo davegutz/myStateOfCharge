@@ -131,7 +131,8 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mv.time, np.array(mv.sat)+2, color='green', linestyle='--', label='sat_ver+2')
         plt.plot(mo.time, np.array(mo.bms_off)+4, color='red', linestyle='-', label='bms_off+4')
         plt.plot(mv.time, np.array(mv.bms_off)+4, color='green', linestyle='--', label='bms_off_ver+4')
-        plt.plot(so.time, np.array(so.bms_off_s)+4, color='blue', linestyle='-.', label='bms_off_s+4')
+        if so is not None:
+            plt.plot(so.time, np.array(so.bms_off_s)+4, color='blue', linestyle='-.', label='bms_off_s+4')
         plt.plot(sv.time, np.array(sv.bms_off)+4, color='orange', linestyle=':', label='bms_off_s_ver+4')
         plt.plot(mo.time, mo.sel, color='red', linestyle='-.', label='sel')
         plt.plot(mv.time, mv.sel, color='blue', linestyle=':', label='sel_ver')
@@ -240,7 +241,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(sv.time, np.array(sv.dv_hys)+0.1, color='red', linestyle='-', label='dv_hys_s_ver+0.1')
         plt.plot(sv.time, np.array(dv_hys_req)+0.1, color='black', linestyle='--', label='dv_hys_req_s_ver+0.1')
 
-    if so:
+    if so is not None:
         from pyDAGx import myTables
         lut_vb = myTables.TableInterp1D(np.array(mo.time), np.array(mo.Vb))
         n = len(so.time)
@@ -258,7 +259,8 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.plot(mo.time, mo.Tb, color='green', linestyle='-', label='temp_c')
     plt.plot(mv.time, mv.Tb, color='orange', linestyle='--', label='temp_c_ver')
     plt.plot(mo.time, mo.chm, color='black', linestyle='-', label='mon_mod')
-    plt.plot(so.time, so.chm_s, color='cyan', linestyle='--', label='sim_mod')
+    if so is not None:
+        plt.plot(so.time, so.chm_s, color='cyan', linestyle='--', label='sim_mod')
     plt.ylim(0., 50.)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -762,23 +764,29 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     n_fig += 1
     plt.subplot(221)
     plt.title(plot_title + ' GP 1')
-    plt.plot(so.time, so.vb_s, color='black', linestyle='-', label='vb_s')
+    if so is not None:
+        plt.plot(so.time, so.vb_s, color='black', linestyle='-', label='vb_s')
     plt.plot(sv.time, sv.vb, color='orange', linestyle='--', label='vb_s_ver')
-    plt.plot(so.time, so.voc_s, color='blue', linestyle='-.', label='voc_s')
+    if so is not None:
+        plt.plot(so.time, so.voc_s, color='blue', linestyle='-.', label='voc_s')
     plt.plot(sv.time, sv.voc, color='red', linestyle=':', label='voc_s_ver')
-    plt.plot(so.time, so.voc_stat_s, color='magenta', linestyle='-.', label='voc_stat_s')
+    if so is not None:
+        plt.plot(so.time, so.voc_stat_s, color='magenta', linestyle='-.', label='voc_stat_s')
     plt.plot(sv.time, sv.voc_stat, color='green', linestyle=':', label='voc_stat_s_ver')
     plt.legend(loc=1)
     plt.subplot(222)
-    plt.plot(so.time, so.dv_hys_s, linestyle='-', color='black', label='dv_hys_s')
+    if so is not None:
+        plt.plot(so.time, so.dv_hys_s, linestyle='-', color='black', label='dv_hys_s')
     plt.plot(sv.time, sv.dv_hys, linestyle='--', color='orange', label='dv_hys_s_ver')
     plt.legend(loc=1)
     plt.subplot(223)
-    plt.plot(so.time, so.soc_s, linestyle='-', color='black', label='soc_s')
+    if so is not None:
+        plt.plot(so.time, so.soc_s, linestyle='-', color='black', label='soc_s')
     plt.plot(sv.time, sv.soc, linestyle='--', color='orange', label='soc_s_ver')
     plt.legend(loc=1)
     plt.subplot(224)
-    plt.plot(so.time, so.ib_in_s, linestyle='-', color='blue', label='ib_in_s')
+    if so is not None:
+        plt.plot(so.time, so.ib_in_s, linestyle='-', color='blue', label='ib_in_s')
     plt.plot(smv.time, smv.ib_in_s, linestyle='--', color='red', label='ib_in_s_ver')
     plt.plot(smv.time, smv.ib_fut_s, linestyle='-.', color='orange', label='ib_fut_s_ver')
     plt.legend(loc=1)
@@ -807,7 +815,8 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.legend(loc=1)
     plt.subplot(224)
     plt.plot(mo.time, mo.Ib_sel, linestyle='-', color='black', label='Ib_sel')
-    plt.plot(so.time, so.ib_s, linestyle='--', color='cyan', label='ib_in_s')
+    if so is not None:
+        plt.plot(so.time, so.ib_s, linestyle='--', color='cyan', label='ib_in_s')
     plt.plot(mv.time, mv.ib_charge, linestyle='-.', color='orange', label='ib_charge_ver')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -832,8 +841,9 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.legend(loc=1)
     plt.subplot(334)
     plt.plot(mo.time, mo.Ib_sel, linestyle='-', color='black', label='Ib_sel')
-    plt.plot(so.time, so.ib_s, linestyle='--', color='cyan', label='ib_in_s')
-    plt.plot(so.time, so.ib_charge_s, linestyle='-.', color='blue', label='ib_charge_s')
+    if so is not None:
+        plt.plot(so.time, so.ib_s, linestyle='--', color='cyan', label='ib_in_s')
+        plt.plot(so.time, so.ib_charge_s, linestyle='-.', color='blue', label='ib_charge_s')
     plt.plot(smv.time, smv.ib_charge_s, linestyle=':', color='red', label='ib_charge_s_ver')
     plt.legend(loc=1)
     plt.subplot(335)
