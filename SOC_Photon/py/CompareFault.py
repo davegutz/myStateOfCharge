@@ -336,6 +336,9 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.plot(mo.time, mo.Ib_sel, color='black', linestyle='-', label='Ib_sel=Ib_in')
     plt.plot(mv.time, mv.ib_in, color='cyan', linestyle='--', label='ib_in_ver')
     plt.plot(smv.time, smv.ib_in_s, color='orange', linestyle='-.', label='ib_in_s_ver')
+    plt.plot(mo.time, mo.Tb, color='red', linestyle='-', label='temp_c')
+    plt.plot(mv.time, mv.Tb, color='blue', linestyle='--', label='temp_c_ver')
+    plt.plot(smv.time, mv.Tb, color='green', linestyle='-.', label='temp_c_s_ver')
     plt.legend(loc=1)
     plt.subplot(332)
     plt.plot(mo.time, mo.ioc, color='black', linestyle='-', label='ioc')
@@ -343,9 +346,9 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.plot(sv.time, sv.ioc, color='orange', linestyle=':', label='ioc_s_ver')
     plt.legend(loc=1)
     plt.subplot(333)
-    plt.plot(mo.time, mo.Tb, color='black', linestyle='-', label='temp_c')
-    plt.plot(mv.time, mv.Tb, color='cyan', linestyle='--', label='temp_c_ver')
-    plt.plot(smv.time, mv.Tb, color='orange', linestyle='-.', label='temp_c_s_ver')
+    plt.plot(mo.time, mo.dV_hys, color='black', linestyle='-', label='dV_hys')
+    plt.plot(mv.time, mv.dv_hys, color='cyan', linestyle='--', label='dv_hys_ver')
+    plt.plot(sv.time, sv.dv_hys, color='orange', linestyle='-.', label='dv_hys_s_ver')
     plt.legend(loc=1)
     plt.subplot(334)
     plt.plot(mo.time, mo.Vb, color='black', linestyle='-', label='Vb')
@@ -869,8 +872,8 @@ if __name__ == '__main__':
 
         # Save these
         t_max_in = None
-        sres_in = 1.
-        staudif_in = 1.
+        sres_in = 1.5
+        staudif_in = .2
         stauct_in = 1.
 
         # User inputs
