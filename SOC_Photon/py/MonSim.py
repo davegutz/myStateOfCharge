@@ -91,10 +91,10 @@ def save_clean_file_sim(sim_ver, csv_file, unit_key):
         print("Wrote(save_clean_file_sim):", csv_file)
 
 
-def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_fail=13.2,
+def replicate(mon_old, sim_old=None, init_time=-4., t_Vb_fail=None, Vb_fail=13.2,
               t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=None, Bmon=None, use_Vb_raw=False,
               scale_r_ss=1., s_hys_sim=1., s_hys_mon=1., dvoc_sim=0., dvoc_mon=0., drive_ekf=False, dTb_in=None,
-              verbose=True, t_max=None, eframe_mult=cp_eframe_mult):
+              verbose=True, t_max=None, eframe_mult=cp_eframe_mult, sres=1., staudif=1., stauct=1., use_vb_sim=False):
     if sim_old is not None and len(sim_old.time) < len(mon_old.time):
         t = sim_old.time
     else:
@@ -141,11 +141,12 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
     s_q = Scale(1., 3., 0.000005, 0.00005)
     s_r = Scale(1., 3., 0.001, 1.)   # t_Ib_fail = 1000
     sim = BatterySim(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
-                     dv_hys=dv_hys_init, sres=sres, scale_r_ss=scale_r_ss, s_hys=s_hys_sim, dvoc=dvoc_sim)
+                     dv_hys=dv_hys_init, sres=sres, staudif=staudif, stauct=stauct, scale_r_ss=scale_r_ss,
+                     s_hys=s_hys_sim, dvoc=dvoc_sim)
     mon = BatteryMonitor(r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
                          temp_c=temp_c, scale=scale, hys_scale=hys_scale_monitor, tweak_test=tweak_test,
-                         dv_hys=dv_hys_init, sres=sres, scaler_q=s_q, scaler_r=s_r, scale_r_ss=scale_r_ss,
-                         s_hys=s_hys_mon, dvoc=dvoc_mon, eframe_mult=eframe_mult)
+                         dv_hys=dv_hys_init, sres=sres, staudif=staudif, stauct=stauct, scaler_q=s_q, scaler_r=s_r,
+                         scale_r_ss=scale_r_ss, s_hys=s_hys_mon, dvoc=dvoc_mon, eframe_mult=eframe_mult)
     # need Tb input.   perhaps need higher order to enforce basic type 1 response
     Is_sat_delay = TFDelay(in_=mon_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
 
@@ -224,7 +225,9 @@ def replicate(mon_old, sim_old=None, init_time=-4., sres=1., t_Vb_fail=None, Vb_
             else:
                 Ib_ = mon_old.Ib[i]
                 # Ib_ = sim.ib
-        if t_Vb_fail and t[i] >= t_Vb_fail:
+        if use_vb_sim:
+            Vb_ = sim.vb
+        elif t_Vb_fail and t[i] >= t_Vb_fail:
             Vb_ = Vb_fail
         else:
             Vb_ = Vb[i]
