@@ -872,8 +872,8 @@ if __name__ == '__main__':
 
         # Save these
         t_max_in = None
-        sres_in = 1.5
-        staudif_in = .2
+        sres_in = 1.
+        staudif_in = 1.
         stauct_in = 1.
 
         # User inputs
