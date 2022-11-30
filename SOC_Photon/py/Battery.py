@@ -92,6 +92,10 @@ RANDLES_T_MAX = 0.31  # Maximum update time of Randles state space model to avoi
 cp_eframe_mult = 20  # Run EKF 20 times slower than Coulomb Counter and Randles models
 VB_DC_DC = 13.5  # Estimated dc-dc charger, V
 HDB_VBATT = 0.05  # Half deadband to filter Vb, V (0.05)
+HYS_CAP = 3.6e3  # Capacitance of hysteresis, Farads (3.6e3)
+WRAP_ERR_FILT = 4.  # Wrap error filter time constant, s (4)
+MAX_WRAP_ERR_FILT = 10.  # Anti-windup wrap error filter, V (10)
+F_MAX_T_WRAP = 2.8  # Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (2.8)
 
 
 class Battery(Coulombs):
@@ -339,10 +343,11 @@ class BatteryMonitor(Battery, EKF1x1):
             self.scaler_r = scaler_r
         self.Q = EKF_Q_SD_NORM * EKF_Q_SD_NORM  # EKF process uncertainty
         self.R = EKF_R_SD_NORM * EKF_R_SD_NORM  # EKF state uncertainty
-        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
+        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys, cap=HYS_CAP)  # Battery hysteresis model - drift of voc
         self.soc_s = 0.  # Model information
         self.EKF_converged = TFDelay(False, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT)
         self.y_filt_lag = LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
+        self.WrapErrFilt = LagTustin(0.1, WRAP_ERR_FILT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT)
         self.y_filt = 0.
         self.y_filt_2Ord = General2Pole(0.1, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
         self.y_filt2 = 0.
@@ -360,6 +365,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.eframe_mult = eframe_mult
         self.dt_eframe = self.dt*self.eframe_mult
         self.sdb_voc = SlidingDeadband(HDB_VBATT)
+        self.e_wrap = 0.
+        self.e_wrap_filt = 0.
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -400,7 +407,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.dt = dt
         self.ib_in = ib
         self.mod = rp.modeling
-        self.T_Rlim.update(x=self.temp_c, reset=reset, dt=dt, max_=0.017, min_=-.017)
+        self.T_Rlim.update(x=self.temp_c, reset=reset, dt=self.dt, max_=0.017, min_=-.017)
         T_rate = self.T_Rlim.rate
         self.ib = max(min(self.ib_in, IMAX_NUM), -IMAX_NUM)  # Overflow protection since ib past value used
 
@@ -427,10 +434,9 @@ class BatteryMonitor(Battery, EKF1x1):
             self.Randles.calc_x_dot(u)
             if self.dt < self.t_max:
                 self.Randles.update(self.dt, reset=reset)
-                self.voc = self.Randles.y
             else:
-                self.voc = np.nan
-                print("mon nan")
+                print("mon nan")  # freeze Randles.y
+            self.voc = self.Randles.y
         else:  # aliased, unstable if update Randles
             self.voc = vb - self.r_ss * self.ib
             self.Randles.y = self.voc
@@ -443,11 +449,12 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Hysteresis model
         self.hys.calculate_hys(self.ib, self.soc)
-        e_wrap = self.voc_soc - self.Voc_stat
+        self.e_wrap = self.voc_soc - self.voc_stat
         init_low = self.bms_off or (self.soc < (self.soc_min + HYS_SOC_MIN_MARG) and self.ib > HYS_IB_THR)
-        self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=e_wrap)*self.s_hys
+        self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=self.e_wrap)*self.s_hys
         self.voc_stat = self.voc - self.dv_hys
         self.ioc = self.hys.ioc
+        self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap, dt=min(self.dt, F_MAX_T_WRAP), reset=reset)
 
         # EKF 1x1
         if self.eframe == 0:
@@ -580,7 +587,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.apply_soc(self.soc_ekf, temp_c)
             print("confirmed ", self.soc)
 
-    def save(self, time, dt, soc_ref, voc_ref):
+    def save(self, time, dt, soc_ref, voc_ref):  # BatteryMonitor
         self.saved.time.append(time)
         self.saved.time_min.append(time / 60.)
         self.saved.time_day.append(time / 3600. / 24.)
@@ -648,6 +655,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.Randles.save(time)
         self.saved.bms_off.append(self.bms_off)
         self.saved.reset.append(self.reset)
+        self.saved.e_wrap.append(self.e_wrap)
+        self.saved.e_wrap_filt.append(self.e_wrap_filt)
 
 
 class BatterySim(Battery):
@@ -677,7 +686,7 @@ class BatterySim(Battery):
         self.s_cap = scale  # Rated capacity scalar
         if scale is not None:
             self.apply_cap_scale(scale)
-        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys)  # Battery hysteresis model - drift of voc
+        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys, cap=HYS_CAP)  # Battery hysteresis model - drift of voc
         self.tweak_test = tweak_test
         self.voc = 0.  # Charging voltage, V
         self.d_delta_q = 0.  # Charging rate, Coulombs/sec
@@ -1043,6 +1052,8 @@ class Saved:
         self.t_last = []  # Past value of battery temperature used for rate limit memory, deg C
         self.bms_off = []  # Voltage low without faults, battery management system has shut off battery
         self.reset = []  # Reset flag used for initialization
+        self.e_wrap = []  # Verification of wrap calculation, V
+        self.e_wrap_filt = []  # Verification of filtered wrap calculation, V
 
 
 def overall_batt(mv, sv, rv, filename,

@@ -37,6 +37,6 @@
         "xhash": "cpp"
     },
     "particle.firmwareVersion": "3.3.1",
-    "particle.targetPlatform": "argon",
-    "particle.targetDevice": "soc1a"
+    "particle.targetPlatform": "photon",
+    "particle.targetDevice": "soc0"
 }

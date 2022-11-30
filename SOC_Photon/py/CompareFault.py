@@ -877,7 +877,8 @@ if __name__ == '__main__':
         stauct_in = 1.
 
         # User inputs
-        input_files = ['fail 20221125.txt']
+        # input_files = ['fail 20221125.txt']
+        input_files = ['coldCharge1 v20221028.txt']
 
         temp_hist_file = 'hist20221028.txt'
         temp_flt_file = 'flt20221028.txt'

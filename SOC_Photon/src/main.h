@@ -20,7 +20,8 @@
   * 18-May-2022   Bunch of cleanup and reorganization
   * 20-Jul-2022   Add low-emission bluetooth (BLE).  Initialize to EKF when unsaturated.
   *               Correct time skews to align Vb and Ib.
-  * 21-Sep-2022   Alpha release v20220917.   Branch GitHub repository.  Added signal redundancy checks and fault handling.
+  * 21-Sep-2022   Alpha release v20220917.  Branch GitHub repository.  Added signal redundancy checks and fault handling.
+  * 26-Nov-2022   Beta release v20221028.   Branch GitHub repository.  Various debugging fixes hysteresis.
   * 
 //
 // MIT License
@@ -49,8 +50,7 @@
 */
 
 // For Photon
-#if (PLATFORM_ID==6)
-  #define PHOTON
+#if (PLATFORM_ID==6 || PLATFORM_ID==12)  // Photon, Argon
   //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
   #include "application.h"  // Should not be needed if file ino or Arduino
   SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
@@ -58,10 +58,14 @@
   // SYSTEM_MODE(SEMI_AUTOMATIC);      // Turn off wifi
   #include <Arduino.h>      // Used instead of Print.h - breaks Serial
 #else
-  #undef PHOTON
   using namespace std;
   #undef max
   #undef min
+#endif
+
+#if (PLATFORM_ID==12)  // Argon only
+  #include "hardware/BleSerialPeripheralRK.h"
+  SerialLogHandler logHandler;
 #endif
 
 #include "constants.h"
@@ -94,12 +98,20 @@ String hm_string = "00:00";     // time, hh:mm
 Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_SSD1306 *display;      // Main OLED display
 
+#if (PLATFORM_ID==12)  // Argon only
+  // First parameter is the transmit buffer size, second parameter is the receive buffer size
+  BleSerialPeripheralStatic<32, 256> bleSerial;
+  const unsigned long TRANSMIT_PERIOD_MS = 2000;
+  unsigned long lastTransmit = 0;
+  int counter = 0;
+#endif
+
 // Setup
 void setup()
 {
   // Serial
   // Serial.blockOnOverrun(false);  doesn't work
-  Serial.begin(115200);
+  Serial.begin();
   Serial.flush();
   delay(1000);          // Ensures a clean display on Serial startup on CoolTerm
   Serial.println("Hi!");
@@ -109,6 +121,12 @@ void setup()
   // Serial1.blockOnOverrun(false); doesn't work
   Serial1.begin(115200);
   Serial1.flush();
+
+  #if (PLATFORM_ID==12)  // Argon only BLE
+    bleSerial.setup();
+    bleSerial.advertise();
+    Serial.printf("BLE mac=>%s\n", BLE.address().toString().c_str());
+  #endif
 
   // Peripherals
   myPins = new Pins(D6, D7, A1, D2);
@@ -271,6 +289,23 @@ void loop()
   if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
   summarizing = Summarize->update(millis(), false); // now || boot_summ && !rp.modeling
   summarizing = summarizing || boot_summ;
+
+  #if (PLATFORM_ID==12)
+    // This must be called from loop() on every call to loop.
+    bleSerial.loop();
+    // Print out anything we receive
+    if(bleSerial.available()) {
+        String s = bleSerial.readString();
+        Log.info("received: %s", s.c_str());
+    }
+    if (millis() - lastTransmit >= TRANSMIT_PERIOD_MS) {
+        lastTransmit = millis();
+        // Every two seconds, send something to the other side
+        bleSerial.printlnf("testing %d", ++counter);
+        Log.info("counter=%d", counter);
+        Serial.printf("passing argon bleSerial\n");
+    }
+  #endif
 
   // Load temperature
   // Outputs:   Sen->Tb,  Sen->Tb_filt

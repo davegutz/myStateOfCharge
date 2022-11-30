@@ -744,6 +744,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 rp.large_reset();
                 cp.large_reset();
                 cp.cmd_reset();
+                chit("HR;", SOON);
                 chit("Rf;", SOON);
                 chit("W3;", SOON);
                 chit("Hs;", SOON);

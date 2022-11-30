@@ -970,6 +970,7 @@ if __name__ == '__main__':
 
         # User inputs
         input_files = ['ampHiFail v20221028.txt']
+        # input_files = ['coldCharge1 v20221028.txt']
         # t_max_in = 20.
         # exclusions = [(0, 1665334404)]  # before faults
         # exclusions = [(0, 1665404608), (1665433410, 1670000000)]  # EKF wander full

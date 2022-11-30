@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "soc0_20221028";  // multi-frame EKF
+const String unit = "soc0_20221130b";  // tune hys
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

@@ -26,12 +26,6 @@
 #ifndef CONSTANTS_H_
 #define CONSTANTS_H_
 
-#if (PLATFORM_ID == 6)
-#define PHOTON
-#else
-#undef PHOTON
-#endif
-
 // Disable flags if needed for debugging, usually commented
 #include "local_config.h"       // this is not in GitHub repository.  Normally empty file
 
@@ -97,7 +91,8 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define IB_NOA_NOISE          0.        // Ib non-amplified sensor added noise amplitude, A pk-pk
 #define IB_AMP_NOISE_SEED     0x01      // Ib amplified sensor added noise seed 0-255 = 0x00-0xFF (0x01) 
 #define IB_NOA_NOISE_SEED     0x0a      // Ib non-amplified sensor added noise seed 0-255 = 0x00-0xFF (0x01) 
-#define WRAP_ERR_FILT         2.        // Wrap error filter time constant, s (2)
+#define WRAP_ERR_FILT         4.        // Wrap error filter time constant, s (4)
+#define F_MAX_T_WRAP          2.8       // Maximum update time of Wrap filter for stability at WRAP_ERR_FILT (0.7*T for Tustin), s (2.8)
 #define MAX_WRAP_ERR_FILT     10.       // Anti-windup wrap error filter, V (10)
 const float WRAP_LO_S = (T_SAT-1.);     // Wrap low failure set time, sec (T_SAT-1) // must be quicker than SAT test
 const float WRAP_LO_R = (WRAP_LO_S/2.); // Wrap low failure reset time, sec ('up 1, down 2')
@@ -107,7 +102,6 @@ const float WRAP_HI_R = (WRAP_HI_S/2.); // Wrap high failure reset time, sec ('u
 #define WRAP_LO_A       -32.            // Wrap high voltage threshold, A (-32, -20 too small on truck -16=-0.2v)
 #define WRAP_HI_SAT_MARG  0.2           // Wrap voltage margin to saturation, V (0.2)
 #define WRAP_HI_SAT_SCLR  2.0           // Wrap voltage margin scalar when saturated (2.0)
-#define F_MAX_T_WRAP    1.4             // Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (1.4)
 #define IBATT_DISAGREE_THRESH 10.       // Signal selection threshold for current disagree test, A (10.)
 const float IBATT_DISAGREE_SET = (WRAP_LO_S-1.); // Signal selection current disagree fail persistence, s (WRAP_LO_S-1) // must be quicker than wrap lo
 #define IBATT_DISAGREE_RESET  1.        // Signal selection current disagree reset persistence, s (1.)
@@ -125,7 +119,6 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define NOMINAL_TB      15.             // Middle of the road Tb for decent reversionary operation, deg C (15.)
 #define IMAX_NUM        100000.         // Simulation limit to prevent NaN, A (1e5)
 #define WRAP_SOC_HI_OFF     0.97        // Disable e_wrap_hi when saturated
-#define WRAP_SOC_MD_OFF     0.90        // Detune e_wrap_hi when approaching saturated 
 #define WRAP_SOC_HI_SCLR    1000.       // Huge to disable e_wrap
 #define WRAP_SOC_LO_OFF_ABS 0.35        // Disable e_wrap when near empty (soc lo any Tb)
 #define WRAP_SOC_LO_OFF_REL 0.2         // Disable e_wrap when near empty (soc lo for high Tb where soc_min=.2, voltage cutback)
