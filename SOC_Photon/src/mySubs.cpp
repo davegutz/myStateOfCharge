@@ -164,6 +164,8 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
   // Convert the decimal
   static double cTimeInit = ((( (double(year-2021)*12 + double(month))*30.4375 + double(day))*24.0 + double(hours))*60.0 + double(minutes))*60.0 + \
                       double(seconds) + double(now-millis_flip)/1000.;
+  // Ignore Time.now if corrupt
+  if ( year<2020 ) cTimeInit = 0.;
   // Serial.printf("y %ld m %d d %d h %d m %d s %d now %ld millis_flip %ld\n", year, month, day, hours, minutes, seconds, now, millis_flip);
   double cTime = cTimeInit + double(now-millis_flip)/1000.;
   // Serial.printf("%ld - %ld = %18.12g, cTimeInit=%18.12g, cTime=%18.12g\n", now, millis_flip, double(now-millis_flip)/1000., cTimeInit, cTime);
@@ -220,7 +222,6 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true);
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true);  // Call again because sat is a UBC
   Sen->Ib_model = Sen->Sim->ib_fut();
-  // dag 11/18/2022 Sen->Ib_model = Sen->Sim->Ib_charge();
 
   // Call to count_coulombs not strictly needed for init.  Calculates some things not otherwise calculated for 'all'
   Sen->Sim->count_coulombs(Sen, true, Mon, true);
@@ -274,13 +275,13 @@ void load_ib_vb(const boolean reset, Sensors *Sen, Pins *myPins, BatteryMonitor 
   Sen->shunt_load();
   Sen->Flt->shunt_check(Sen, Mon, reset);
   Sen->shunt_select_initial();
-  // if ( rp.debug==14 ) Sen->shunt_print();
+  if ( rp.debug==14 ) Sen->shunt_print();
 
   // Vb
   // Outputs:  Sen->Vb
   Sen->vb_load(myPins->Vb_pin);
   Sen->Flt->vb_check(Sen, Mon, VBATT_MIN, VBATT_MAX, reset);
-  // if ( rp.debug==15 ) Sen->vb_print();
+  if ( rp.debug==15 ) Sen->vb_print();
 
   // Power calculation
   Sen->Wb = Sen->Vb*Sen->Ib;
@@ -455,8 +456,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   //  Outputs:  Sim->temp_c(), Sim->Ib(), Sim->Vb(), rp.inj_bias, Sim.model_saturated
   Sen->Tb_model = Sen->Tb_model_filt = Sen->Sim->temp_c();
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, reset) + Sen->Vb_add();
-  // Sen->Ib_model = Sen->Sim->ib_fut();
-  Sen->Ib_model = Sen->Sim->Ib_charge();  // dag 11/18/2022 
+  Sen->Ib_model = Sen->Sim->Ib_charge();
   cp.model_cutback = Sen->Sim->cutback();
   cp.model_saturated = Sen->Sim->saturated();
 

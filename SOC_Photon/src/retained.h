@@ -133,15 +133,15 @@ struct RetainedPars
       n++;
     if ( 0 != debug )
       n++;
-    if ( CURR_SCALE_AMP != Ib_scale_amp )
+    if ( float(CURR_SCALE_AMP) != Ib_scale_amp )
       n++;
-    if ( CURR_BIAS_AMP != ib_bias_amp )
+    if ( float(CURR_BIAS_AMP) != ib_bias_amp )
       n++;
-    if ( CURR_SCALE_NOA != Ib_scale_noa )
+    if ( float(CURR_SCALE_NOA) != Ib_scale_noa )
       n++;
-    if ( CURR_BIAS_NOA != ib_bias_noa )
+    if ( float(CURR_BIAS_NOA) != ib_bias_noa )
       n++;
-    if ( CURR_BIAS_ALL != ib_bias_all )
+    if ( float(CURR_BIAS_ALL) != ib_bias_all )
       n++;
     if ( FAKE_FAULTS != ib_select )
       n++;
@@ -157,23 +157,23 @@ struct RetainedPars
       n++;
     if ( 0. != inj_bias )
       n++;
-    if ( TEMP_BIAS != Tb_bias_hdwe )
+    if ( float(TEMP_BIAS) != Tb_bias_hdwe )
       n++;
     if ( 1. != s_cap_model )
       n++;
     if ( 1. != cutback_gain_scalar )
       n++;
-    if ( HYS_SCALE != hys_scale )
+    if ( float(HYS_SCALE) != hys_scale )
       n++;
-    if ( NP != nP )
+    if ( float(NP) != nP )
       n++;
-    if ( NS != nS )
+    if ( float(NS) != nS )
       n++;
     if ( MON_CHEM != mon_chm )
       n++;
     if ( SIM_CHEM != sim_chm )
       n++;
-    if ( VB_SCALE != Vb_scale )
+    if ( float(VB_SCALE) != Vb_scale )
       n++;
 
     return ( n );
@@ -206,13 +206,13 @@ struct RetainedPars
       Serial.printf(" debug               %d          %d *v<>\n", 0, debug);
     if ( all || CURR_SCALE_AMP != Ib_scale_amp )
       Serial.printf(" scale_amp     %7.3f    %7.3f *SA<>\n", CURR_SCALE_AMP, Ib_scale_amp);
-    if ( all || CURR_BIAS_AMP != ib_bias_amp )
+    if ( all || float(CURR_BIAS_AMP) != ib_bias_amp )
       Serial.printf(" bias_amp      %7.3f    %7.3f *DA<>\n", CURR_BIAS_AMP, ib_bias_amp);
-    if ( all || CURR_SCALE_NOA != Ib_scale_noa )
+    if ( all || float(CURR_SCALE_NOA) != Ib_scale_noa )
       Serial.printf(" scale_noa     %7.3f    %7.3f *SB<>\n", CURR_SCALE_NOA, Ib_scale_noa);
-    if ( all || CURR_BIAS_NOA != ib_bias_noa )
+    if ( all || float(CURR_BIAS_NOA) != ib_bias_noa )
       Serial.printf(" bias_noa      %7.3f    %7.3f *DB<>\n", CURR_BIAS_NOA, ib_bias_noa);
-    if ( all || CURR_BIAS_ALL != ib_bias_all )
+    if ( all || float(CURR_BIAS_ALL) != ib_bias_all )
       Serial.printf(" ib_bias_all   %7.3f    %7.3f *Di<> A\n", CURR_BIAS_ALL, ib_bias_all);
     if ( all || FAKE_FAULTS != ib_select )
       Serial.printf(" ib_select           %d          %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select);
@@ -228,23 +228,23 @@ struct RetainedPars
       Serial.printf(" inj typ             %d          %d *Xt<> 1=sin, 2=sq, 3=tri\n", 0, type);
     if ( all || 0. != inj_bias )
       Serial.printf(" inj_bias      %7.3f    %7.3f *Xb<> A\n", 0., inj_bias);
-    if ( all || TEMP_BIAS != Tb_bias_hdwe )
+    if ( all || float(TEMP_BIAS) != Tb_bias_hdwe )
       Serial.printf(" Tb_bias_hdwe  %7.3f    %7.3f *Dt<> dg C\n", TEMP_BIAS, Tb_bias_hdwe);
     if ( all || 1. != s_cap_model )
       Serial.printf(" s_cap_model   %7.3f    %7.3f *Sc<>\n", 1., s_cap_model);
     if ( all || 1. != cutback_gain_scalar )
       Serial.printf(" cut_gn_slr    %7.3f    %7.3f *Sk<>\n", 1., cutback_gain_scalar);
-    if ( all || HYS_SCALE != hys_scale )
+    if ( all || float(HYS_SCALE) != hys_scale )
       Serial.printf(" hys_scale     %7.3f    %7.3f *Sh<>\n", HYS_SCALE, hys_scale);
-    if ( all || NP != nP )
+    if ( all || float(NP) != nP )
       Serial.printf(" nP            %7.3f    %7.3f *BP<> eg '2P1S'\n", NP, nP);
-    if ( all || NS != nS )
+    if ( all || float(NS) != nS )
       Serial.printf(" nS            %7.3f    %7.3f *BP<> eg '2P1S'\n", NS, nS);
     if ( all || MON_CHEM != mon_chm )
       Serial.printf(" mon chem            %d          %d *Bm<> 0=Battle, 1=LION\n", MON_CHEM, mon_chm);
     if ( all || SIM_CHEM != sim_chm )
       Serial.printf(" sim chem            %d          %d *Bs<>\n", SIM_CHEM, sim_chm);
-    if ( all || VB_SCALE != Vb_scale )
+    if ( all || float(VB_SCALE) != Vb_scale )
       Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n\n", VB_SCALE, Vb_scale);
   }
 

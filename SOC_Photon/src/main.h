@@ -118,7 +118,7 @@ void setup()
 
   // Bluetooth Serial1.  Use BT-AT project in this GitHub repository to change.  Directions
   // for HC-06 inside main.h of ../../BT-AT/src.   AT+BAUD8; to set 115200.
-  // Serial1.blockOnOverrun(false); doesn't work
+  // Serial1.blockOnOverrun(false); doesn't work.  Mess; partial lines galore
   Serial1.begin(115200);
   Serial1.flush();
 
@@ -302,8 +302,8 @@ void loop()
         lastTransmit = millis();
         // Every two seconds, send something to the other side
         bleSerial.printlnf("testing %d", ++counter);
-        Log.info("counter=%d", counter);
-        Serial.printf("passing argon bleSerial\n");
+        // Log.info("counter=%d", counter);
+        // Serial.printf("passing argon bleSerial\n");
     }
   #endif
 

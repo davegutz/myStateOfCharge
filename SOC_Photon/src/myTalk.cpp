@@ -1243,8 +1243,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   // Serial.printf("   v8: Randles SS init\n");
   Serial.printf("  v12: EKF\n");
 //  Serial.printf(" v-13: ib_dscn\n");
-  // Serial.printf("  v14: vshunt and Ib raw\n");
-  // Serial.printf("  v15: vb raw\n");
+  Serial.printf("  v14: vshunt and Ib raw\n");
+  Serial.printf("  v15: vb raw\n");
   // Serial.printf("  v16: Tb\n");
   // Serial.printf("  v34: EKF detail\n");
   // Serial.printf("  v35: Randles balance\n");
