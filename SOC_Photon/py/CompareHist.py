@@ -622,11 +622,16 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     soc_min = []
     Vsat = []
     time_sec = []
+    dt = []
     for i in range(len(d_ra.time)):
         voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
         soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
         Vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
         time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
+        if i > 0:
+            dt.append(float(d_ra.time[i] - d_ra.time[i - 1]))
+        else:
+            dt.append(float(d_ra.time[1] - d_ra.time[0]))
     time_min = (d_ra.time-d_ra.time[0])/60.
     time_day = (d_ra.time-d_ra.time[0])/3600./24.
     d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
@@ -635,6 +640,7 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'Vsat', np.array(Vsat, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'Ib_sel', np.array(d_mod.Ib, dtype=float))
     voc = d_mod.Voc_dyn.copy()
     d_mod = rf.rec_append_fields(d_mod, 'voc', np.array(voc, dtype=float))
     d_mod = calc_fault(d_ra, d_mod)
@@ -649,10 +655,12 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_dis', np.array(Voc_stat_dis, dtype=float))
     dv_hys = d_mod.Voc_dyn - d_mod.Voc_stat
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'dV_hys', np.array(dv_hys, dtype=float))
     dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE_20220917d
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
     dv_hys_required = d_mod.Voc_dyn - voc_soc + dv_hys
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_required', np.array(dv_hys_required, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'dt', np.array(dt, dtype=float))
 
     dv_hys_rescaled = d_mod.dv_hys_unscaled
     pos = dv_hys_rescaled >= 0
@@ -679,6 +687,7 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     ib_diff_thr = []
     ib_quiet_thr = []
     ib_diff = []
+    dt = []
     for i in range(len(d_ra.time)):
         soc = d_ra.soc[i]
         voc_stat = d_ra.Voc_stat[i]
@@ -698,6 +707,10 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
         soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
         Vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
         time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
+        if i > 0:
+            dt.append(float(d_ra.time[i] - d_ra.time[i - 1]))
+        else:
+            dt.append(float(d_ra.time[1] - d_ra.time[0]))
     time_min = (d_ra.time-d_ra.time[0])/60.
     time_day = (d_ra.time-d_ra.time[0])/3600./24.
     d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
@@ -713,6 +726,7 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'ewlo_thr', np.array(ewlo_thr, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_diff_thr', np.array(ib_diff_thr, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_quiet_thr', np.array(ib_quiet_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'dt', np.array(dt, dtype=float))
     d_mod = calc_fault(d_ra, d_mod)
     Voc_stat_chg = np.copy(d_mod.Voc_stat)
     Voc_stat_dis = np.copy(d_mod.Voc_stat)
@@ -725,6 +739,7 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_dis', np.array(Voc_stat_dis, dtype=float))
     dv_hys = d_mod.voc - d_mod.Voc_stat
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'dV_hys', np.array(dv_hys, dtype=float))
     dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE_20220917d
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
     dv_hys_required = d_mod.voc - voc_soc + dv_hys
@@ -745,6 +760,7 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'Voc_dyn', np.array(Voc_dyn, dtype=float))
     Ib = d_mod.ib.copy()
     d_mod = rf.rec_append_fields(d_mod, 'Ib', np.array(Ib, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'Ib_sel', np.array(Ib, dtype=float))
     d_zero = d_mod.ib.copy()*0.
     d_mod = rf.rec_append_fields(d_mod, 'tweak_sclr_amp', np.array(d_zero, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'tweak_sclr_noa', np.array(d_zero, dtype=float))
@@ -969,7 +985,8 @@ if __name__ == '__main__':
         t_max_in = None
 
         # User inputs
-        input_files = ['coldCharge1 v20221028.txt']
+        # input_files = ['coldCharge1 v20221028.txt']
+        input_files = ['fault_20221206.txt']
         # t_max_in = 20.
         # exclusions = [(0, 1665334404)]  # before faults
         # exclusions = [(0, 1665404608), (1665433410, 1670000000)]  # EKF wander full

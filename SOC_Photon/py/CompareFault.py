@@ -34,7 +34,7 @@ BATT_DQDT = 0.01  # Change of charge with temperature, fraction / deg C (0.01 fr
 BATT_DVOC_DT = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V / deg C
 RATED_BATT_CAP = 108.4  # A-hr capacity of test article
 IB_BAND = 1.  # Threshold to declare charging or discharging
-TB_BAND = 15.  # Band around temperature to group data and correct
+TB_BAND = 25.  # Band around temperature to group data and correct
 HYS_SCALE_20220917d = 0.3  # Original hys_remodel scalar inside photon code
 HYS_SCALE_20220926 = 1.0  # Original hys_remodel scalar inside photon code
 
@@ -878,8 +878,8 @@ if __name__ == '__main__':
 
         # User inputs
         # input_files = ['fail 20221125.txt']
-        input_files = ['coldCharge1 v20221028.txt']
-
+        # input_files = ['coldCharge1 v20221028.txt']
+        input_files = ['fault_20221206.txt']
         temp_hist_file = 'hist20221028.txt'
         temp_flt_file = 'flt20221028.txt'
         path_to_pdfs = '../dataReduction/figures'
