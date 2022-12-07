@@ -21,17 +21,7 @@ __date__ = '$Date: 2022/10/23 03:44:00 $'
 
 import numpy as np
 import numpy.lib.recfunctions as rf
-
-
-# Unix-like cat function
-# e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
-def cat(out_file_name, in_file_names, in_path='./', out_path='./'):
-    with open(out_path + './' + out_file_name, 'w') as out_file:
-        for in_file_name in in_file_names:
-            with open(in_path + '/' + in_file_name) as in_file:
-                for line in in_file:
-                    if line.strip():
-                        out_file.write(line)
+from Util import cat
 
 
 # Limited capability resample.   Interpolates floating point (foh) or holds value (zoh) according to order input

@@ -25,6 +25,8 @@ from Battery import is_sat, low_t, IB_MIN_UP
 from resample import resample
 from MonSim import replicate
 from Battery import overall_batt, cp_eframe_mult
+from CompareFault import fault_thr_bb
+from Util import cat
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -78,58 +80,6 @@ r_0 = 0.003  # Randles R0, ohms
 r_ct = 0.0016  # Randles charge transfer resistance, ohms
 r_diff = 0.0077  # Randles diffusion resistance, ohms
 r_ss = r_0 + r_ct + r_diff
-
-# Calculate thresholds from global input values listed above (review these)
-def fault_thr_bb(Tb, soc, voc_soc, soc_min_tbl=lut_soc_min_bb):
-    vsat_ = NOM_VSAT_BB + (Tb-25.)*DVOC_DT_BB
-
-    # cc_diff
-    soc_min = soc_min_tbl.interp(Tb)
-    if soc <= max(soc_min+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS):
-        cc_diff_empty_sclr_ = CC_DIFF_LO_SOC_SCLR
-    else:
-        cc_diff_empty_sclr_ = 1.
-    cc_diff_sclr_ = 1.  # ram adjusts during data collection
-    cc_diff_thr = CC_DIFF_SOC_DIS_THRESH * cc_diff_sclr_ * cc_diff_empty_sclr_
-
-    # wrap
-    if soc >= WRAP_SOC_HI_OFF:
-        ewsat_sclr_ = WRAP_SOC_HI_SCLR
-        ewmin_sclr_ = 1.
-    elif soc <= max(soc_min+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS):
-        ewsat_sclr_ = 1.
-        ewmin_sclr_ = WRAP_SOC_LO_SCLR
-    elif voc_soc > (vsat_ - WRAP_HI_SAT_MARG):
-        ewsat_sclr_ = WRAP_HI_SAT_SCLR
-        ewmin_sclr_ = 1.
-    else:
-        ewsat_sclr_ = 1.
-        ewmin_sclr_ = 1.
-    ewhi_sclr_ = 1.  # ram adjusts during data collection
-    ewhi_thr = r_ss * WRAP_HI_A * ewhi_sclr_ * ewsat_sclr_ * ewmin_sclr_
-    ewlo_sclr_ = 1.  # ram adjusts during data collection
-    ewlo_thr = r_ss * WRAP_LO_A * ewlo_sclr_ * ewsat_sclr_ * ewmin_sclr_
-
-    # ib_diff
-    ib_diff_sclr_ = 1.  # ram adjusts during data collection
-    ib_diff_thr = IBATT_DISAGREE_THRESH * ib_diff_sclr_
-
-    # ib_quiet
-    ib_quiet_sclr_ = 1.  # ram adjusts during data collection
-    ib_quiet_thr = QUIET_A * ib_quiet_sclr_
-
-    return cc_diff_thr, ewhi_thr, ewlo_thr, ib_diff_thr, ib_quiet_thr
-
-
-# Unix-like cat function
-# e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
-def cat(out_file_name, in_file_names, in_path='./', out_path='./'):
-    with open(out_path+'./'+out_file_name, 'w') as out_file:
-        for in_file_name in in_file_names:
-            with open(in_path+'/'+in_file_name) as in_file:
-                for line in in_file:
-                    if line.strip():
-                        out_file.write(line)
 
 
 def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_title=None, n_fig=None, subtitle=None,
@@ -691,7 +641,8 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
         ib_diff_ = d_ra.ibah[i] - d_ra.ibnh[i]
         cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
         ib_diff.append(ib_diff_)
-        cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = fault_thr_bb(Tb, soc, voc_stat,
+        voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
+        cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = fault_thr_bb(Tb, soc, voc_soc[i],
                                                                                        soc_min_tbl=soc_min_tbl)
         cc_dif.append(cc_dif_)
         cc_diff_thr.append(cc_diff_thr_)
@@ -699,7 +650,6 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
         ewlo_thr.append(ewlo_thr_)
         ib_diff_thr.append(ib_diff_thr_)
         ib_quiet_thr.append(ib_quiet_thr_)
-        voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
         soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
         Vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
         time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
@@ -1050,9 +1000,10 @@ if __name__ == '__main__':
         voc_soc20 = look_it(x0, lut_voc, 20.)
         print('filter h')
         h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
-        T_300new = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
-        T_300old = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
-        # T_300old = 10  # For debugging
+        # T_300new = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
+        # T_300old = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
+        T_300new = 10  # For debugging
+        T_300old = 10  # For debugging
         print('resample old')
         h_20C_resamp_300old = resample(data=h_20C, dt_resamp=T_300old, time_var='time',
                                        specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
@@ -1071,10 +1022,10 @@ if __name__ == '__main__':
                                                  ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
         print('bandaid new')
         mon_old_300new, sim_old_300new = bandaid(h_20C_resamp_300new)
-        eframe_mult = int(0.1*cp_eframe_mult / T_300new)
+        eframe_mult = max(int(0.1*cp_eframe_mult / T_300new), 1)
         print("replicate new")
         mon_ver_300new, sim_ver_300new, randles_ver_300new, sim_s_ver_300new =\
-            replicate(mon_old_300new, sim_old=sim_old_300new, init_time=1., verbose=False, t_max=t_max_in,
+            replicate(mon_old_300new, sim_old=sim_old_300new, init_time=max(1., T_300new), verbose=False, t_max=t_max_in,
                       eframe_mult=eframe_mult)
 
         # Plots

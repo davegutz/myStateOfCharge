@@ -25,6 +25,7 @@ from Battery import is_sat, low_t, IB_MIN_UP
 from resample import resample
 from MonSim import replicate
 from Battery import overall_batt, cp_eframe_mult
+from Util import cat
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -51,17 +52,6 @@ VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
 HYS_CAP_REDESIGN = 3.6e4  # faster time constant needed
 HYS_SOC_MIN_MARG = 0.15  # add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
 HYS_IB_THR = 1.  # ignore reset if opposite situation exists
-
-
-# Unix-like cat function
-# e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
-def cat(out_file_name, in_file_names, in_path='./', out_path='./'):
-    with open(out_path+'./'+out_file_name, 'w') as out_file:
-        for in_file_name in in_file_names:
-            with open(in_path+'/'+in_file_name) as in_file:
-                for line in in_file:
-                    if line.strip():
-                        out_file.write(line)
 
 
 def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_title=None, n_fig=None, subtitle=None,

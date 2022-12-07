@@ -22,10 +22,10 @@ import matplotlib.pyplot as plt
 from Hysteresis_20220917d import Hysteresis_20220917d
 from Hysteresis_20220926 import Hysteresis_20220926
 from Battery import is_sat, low_t, IB_MIN_UP
-from resample import resample
 from MonSim import replicate
 from Battery import overall_batt
-from DataOverModel import overall
+from Util import cat
+from resample import resample
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -121,17 +121,6 @@ def fault_thr_bb(Tb, soc, voc_soc, soc_min_tbl=lut_soc_min_bb):
     ib_quiet_thr = QUIET_A * ib_quiet_sclr_
 
     return cc_diff_thr, ewhi_thr, ewlo_thr, ib_diff_thr, ib_quiet_thr
-
-
-# Unix-like cat function
-# e.g. > cat('out', ['in0', 'in1'], path_to_in='./')
-def cat(out_file_name, in_file_names, in_path='./', out_path='./'):
-    with open(out_path+'./'+out_file_name, 'w') as out_file:
-        for in_file_name in in_file_names:
-            with open(in_path+'/'+in_file_name) as in_file:
-                for line in in_file:
-                    if line.strip():
-                        out_file.write(line)
 
 
 def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None, long_term=True):
@@ -474,7 +463,7 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
         cc_dif.append(cc_dif_)
         voc_stat = d_ra.Voc_stat[i]
         dV_dyn.append(d_ra.vb[i] - d_ra.voc[i])
-        cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = fault_thr_bb(Tb, soc, voc_stat,
+        cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = fault_thr_bb(Tb, soc, voc_soc[i],
                                                                                        soc_min_tbl=soc_min_tbl)
         cc_diff_thr.append(cc_diff_thr_)
         ib_quiet_thr.append(ib_quiet_thr_)
@@ -567,7 +556,8 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
         ib_diff_ = d_ra.ibah[i] - d_ra.ibnh[i]
         cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
         ib_diff.append(ib_diff_)
-        cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = fault_thr_bb(Tb, soc, voc_stat,
+        voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
+        cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = fault_thr_bb(Tb, soc, voc_soc[i],
                                                                                        soc_min_tbl=soc_min_tbl)
         cc_dif.append(cc_dif_)
         cc_diff_thr.append(cc_diff_thr_)
@@ -575,7 +565,6 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
         ewlo_thr.append(ewlo_thr_)
         ib_diff_thr.append(ib_diff_thr_)
         ib_quiet_thr.append(ib_quiet_thr_)
-        voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
         soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
         Vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
         time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
