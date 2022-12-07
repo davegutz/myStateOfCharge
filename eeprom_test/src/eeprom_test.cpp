@@ -60,6 +60,7 @@ void setup() {
   Serial.println("Hi");
   Serial.flush();
   ram.begin(0, 0);
+  ram.setAutoStore(true);
 }
 
 void loop() {
