@@ -22,7 +22,7 @@ void loop();
   SerialLogHandler logHandler;
 #endif
 
-#include "SerialRAM/SerialRAM.h"
+#include "hardware/SerialRAM.h"
 SerialRAM ram;
 
 #if (PLATFORM_ID==12)  // Argon only
@@ -63,8 +63,6 @@ void loop() {
   uint8_t buffer = 0x00;
   uint8_t randomByte = random(256);
   uint16_t randomAddress = random(0x0200);
-  
-  
 
   ram.write(randomAddress, randomByte);
   buffer = ram.read(randomAddress);
@@ -80,6 +78,11 @@ void loop() {
     Serial.println(" ERROR! Values do not match! Check your pullup resistors and wiring");
   }
   
+    // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
+  asap();
+  chat();   // Work on internal chit-chat
+  talk();   // Collect user inputs
+
   delay(1000);
 
 }
