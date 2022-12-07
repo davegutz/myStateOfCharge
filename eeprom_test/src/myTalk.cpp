@@ -27,12 +27,14 @@
 #include "retained.h"
 #include "command.h"
 #include "mySummary.h"
+#include "parameters.h"
 #include <math.h>
 
 extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
 extern Sum_st mySum[NSUM];      // Summaries for saving charge history
 extern Flt_st myFlt[NFLT];      // Summaries for saving charge history
+extern SavedPars sp;
 
 // Process asap commands
 void asap()
@@ -266,25 +268,19 @@ void talk()
         // Serial.printf("IN:%s,\n", cp.input_string.c_str());
         switch ( cp.input_string.charAt(0) )
         {
-          case ( 'b' ):  // Fault buffer
+
+          case ( 'P' ):  // P: print
             switch ( cp.input_string.charAt(1) )
             {
-              case ( 'd' ):  // bd: fault buffer dump
-                Serial.printf("\n");
-                print_all_fault_buffer(myFlt, rp.iflt, NFLT);
-                break;
 
-              case ( 'R' ):  // bR: Fault buffer reset
-                large_reset_fault_buffer(myFlt, rp.iflt, NFLT);
+              case ( 'S' ):  // PS: print saved pars
+                Serial.printf("\n");
+                sp.pretty_print(true);
                 break;
 
               default:
                 Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
             }
-            break;
-
-          case ( 'c' ):  // c:  clear queues
-            clear_queues();
             break;
 
           case ( 'D' ):
@@ -424,25 +420,6 @@ void talk()
             }
             break;
 
-          case ( 'P' ):
-            switch ( cp.input_string.charAt(1) )
-            {
-
-              case ( 'f' ):  // Pf:  Print faults
-                Serial.printf ("\nSen::\n");
-                print_all_fault_buffer(myFlt, rp.iflt, NFLT);
-                break;
-
-              case ( 'r' ):  // Pr:  Print retained
-                Serial.printf("\n"); rp.pretty_print( true );
-                Serial.printf("\n"); cp.pretty_print();
-                break;
-
-              default:
-                Serial.println("");Serial.print(cp.input_string.charAt(1)); Serial.println("? 'h'");
-            }
-            break;
-
           case ( 's' ):  // s<>:  select amp or noa
             if ( cp.input_string.substring(1).toInt()>0 )
             {
@@ -502,24 +479,19 @@ void talk()
                 if ( INT_in>=0 && INT_in<16 )
                 {
                   boolean reset = rp.modeling != INT_in;
-                  Serial.printf("modeling %d to ", rp.modeling);
-                  rp.modeling = INT_in;
-                  Serial.printf("%d\n", rp.modeling);
-                  if ( reset )
-                  {
-                    Serial.printf("Chg...reset\n");
-                    cp.cmd_reset();
-                  }
+                  Serial.printf("modeling %d to ", sp.modeling());
+                  sp.modeling(INT_in);
+                  Serial.printf("%d\n", sp.modeling());
                 }
                 else
                 {
                   Serial.printf("err %d, modeling 0-7. 'h'\n", INT_in);
                 }
-                Serial.printf("Modeling %d\n", rp.modeling);
-                Serial.printf("tweak_test %d\n", rp.tweak_test());
-                Serial.printf("mod_ib %d\n", rp.mod_ib());
-                Serial.printf("mod_vb %d\n", rp.mod_vb());
-                Serial.printf("mod_tb %d\n", rp.mod_tb());
+                Serial.printf("Modeling %d\n", sp.modeling());
+                Serial.printf("tweak_test %d\n", sp.tweak_test());
+                Serial.printf("mod_ib %d\n", sp.mod_ib());
+                Serial.printf("mod_vb %d\n", sp.mod_vb());
+                Serial.printf("mod_tb %d\n", sp.mod_tb());
                 break;
 
               case ( 'a' ): // Xa<>:  injection amplitude

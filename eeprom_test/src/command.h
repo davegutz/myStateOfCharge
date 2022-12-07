@@ -24,6 +24,7 @@
 #ifndef _COMMAND_H
 #define _COMMAND_H
 #include "local_config.h"
+
 struct CommandPars
 {
   char buffer[280];         // Auxiliary print buffer
