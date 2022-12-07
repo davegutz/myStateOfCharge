@@ -283,6 +283,19 @@ void talk()
             }
             break;
 
+          case ( 'R' ):  // R: reset
+            switch ( cp.input_string.charAt(1) )
+            {
+
+              case ( 'S' ):  // RS: reset saved pars
+                sp.nominal();
+                break;
+
+              default:
+                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+            }
+            break;
+
           case ( 'D' ):
             switch ( cp.input_string.charAt(1) )
             {
@@ -433,7 +446,7 @@ void talk()
             break;
 
           case ( 'v' ):  // v<>:  verbose level
-            rp.debug = cp.input_string.substring(1).toInt();
+            sp.debug(cp.input_string.substring(1).toInt());
             break;
 
           case ( 'V' ):
@@ -720,17 +733,7 @@ void talkH()
   Serial.printf("  bd= "); Serial.printf("dump fault buffer\n");
   Serial.printf("  bR= "); Serial.printf("reset fault buffer\n");
 
-  Serial.printf("\nB<?> Battery e.g.:\n");
-  Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='LI' [%d]\n", rp.mon_chm, MON_CHEM); 
-  Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='LI' [%d]\n", rp.sim_chm, SIM_CHEM); 
-  Serial.printf(" *BP=  %4.2f.  parallel in bank [%4.2f]'\n", rp.nP, NP); 
-  Serial.printf(" *BS=  %4.2f.  series in bank [%4.2f]'\n", rp.nS, NS); 
-
   Serial.printf("\nc  clear talk, esp '-c;'\n");
-
-  Serial.printf("\nC<?> Chg SOC e.g.:\n");
-  Serial.printf("  Ca=  all - '(0-1.1)'\n"); 
-  Serial.printf("  Cm=  model (& ekf if mod)- '(0-1.1)'\n"); 
 
   Serial.printf("\nD/S<?> Adj e.g.:\n");
   Serial.printf(" *DA= "); Serial.printf("%6.3f", rp.ib_bias_amp); Serial.printf(": delta amp, A [%6.3f]\n", CURR_BIAS_AMP); 
@@ -748,42 +751,14 @@ void talkH()
   Serial.printf("  Hs= "); Serial.printf("save and print log\n");
 
   Serial.printf("\nP<?>   Print values\n");
-  Serial.printf("  Pa= "); Serial.printf("all\n");
-  Serial.printf("  Pe= "); Serial.printf("ekf\n");
-  Serial.printf("  Pf= "); Serial.printf("faults\n");
-  Serial.printf("  Pm= "); Serial.printf("Mon\n");
-  Serial.printf("  PM= "); Serial.printf("amp shunt\n");
-  Serial.printf("  PN= "); Serial.printf("noa shunt\n");
-  Serial.printf("  Pr= "); Serial.printf("retained and command\n");
-  Serial.printf("  Ps= "); Serial.printf("Sim\n");
-  Serial.printf("  Px= "); Serial.printf("ib select\n");
-  Serial.printf("  Pv= "); Serial.printf("vb details\n");
+  Serial.printf("  PS= "); Serial.printf("SavedPars\n");
 
-  Serial.printf("\nQ      vital stats\n");
 
   Serial.printf("\nR<?>   Reset\n");
-  Serial.printf("  Rb= "); Serial.printf("batteries to present inputs\n");
-  Serial.printf("  Rf= "); Serial.printf("fault logic latches\n");
-  Serial.printf("  Rr= "); Serial.printf("saturate Mon and equalize Sim & Mon\n");
-  Serial.printf("  RR= "); Serial.printf("DEPLOY\n");
-  Serial.printf("  Rs= "); Serial.printf("small.  Reinitialize filters\n");
-
-  Serial.printf("\ns  curr select mode (-1=noa, 0=auto, 1=amp) = "); Serial.println(rp.ib_select);
+  Serial.printf("  RS= "); Serial.printf("SavedPars: Reinitialize saved\n");
 
   Serial.printf("\nv= "); Serial.print(rp.debug); Serial.println(": verbosity, -128 - +128. [4]");
   Serial.printf("  -<>: Negative - Arduino plot compatible\n");
-  // Serial.printf("  v-1: Debug\n");
-  Serial.printf("   v1: GP\n");
-  Serial.printf("   v2: GP, Sim & Sel\n");
-  Serial.printf("   v3: EKF\n");
-  Serial.printf("   v4: GP, Sim, Sel, & EKF\n");
-  Serial.printf("   v5: OLED display\n");
-  // Serial.printf("   v7: EKF solver init\n");
-  // Serial.printf("   v8: Randles SS init\n");
-  Serial.printf("  v12: EKF\n");
-//  Serial.printf(" v-13: ib_dscn\n");
-  Serial.printf("  v14: vshunt and Ib raw\n");
-  Serial.printf("  v15: vb raw\n");
 
   Serial.printf("\nW<?> - iters to wait\n");
 
