@@ -31,7 +31,8 @@
 SavedPars::SavedPars() {}
 SavedPars::SavedPars(SerialRAM *ram): rP_(ram)
 {
-    modeling_.a16 = 0x000;
+    debug_.a16 = 0x000;
+    modeling_.a16 = 0x000+0x004;
 }
 SavedPars::~SavedPars() {}
 // operators
@@ -50,6 +51,7 @@ boolean SavedPars::is_corrupt()
 // Nominalize
 void SavedPars::nominal()
 {
+    debug(int8_t(0));
     // this->debug = 0;
     // this->delta_q = 0.;
     // this->t_last = RATED_TEMP;
@@ -96,8 +98,8 @@ int SavedPars::num_diffs()
 
     // if ( 1. != shunt_gain_sclr )
     //   n++;
-    // if ( 0 != debug )
-    //   n++;
+    if ( 0 != debug() )
+        n++;
     // if ( float(CURR_SCALE_AMP) != Ib_scale_amp )
     //   n++;
     // if ( float(CURR_BIAS_AMP) != ib_bias_amp )
@@ -161,8 +163,8 @@ void SavedPars::pretty_print(const boolean all )
         // }
         // if ( all || 1. != shunt_gain_sclr )
         //   Serial.printf(" shunt_gn_slr  %7.3f    %7.3f ?\n", 1., shunt_gain_sclr);  // TODO:  no talk value
-        // if ( all || 0 != debug )
-        //   Serial.printf(" debug               %d          %d *v<>\n", 0, debug);
+        if ( all || 0 != debug() )
+          Serial.printf(" debug               %d          %d *v<>\n", 0, debug());
         // if ( all || CURR_SCALE_AMP != Ib_scale_amp )
         //   Serial.printf(" scale_amp     %7.3f    %7.3f *SA<>\n", CURR_SCALE_AMP, Ib_scale_amp);
         // if ( all || float(CURR_BIAS_AMP) != ib_bias_amp )

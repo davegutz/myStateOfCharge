@@ -41,26 +41,28 @@
 class SavedPars
 {
 public:
-  SavedPars();
-  SavedPars(SerialRAM *ram);
-  ~SavedPars();
-  // operators
-  // functions
-  boolean is_corrupt();
-  void large_reset() { nominal(); }
-  boolean mod_any() { return ( 0<modeling() ); }        // Using any
-  boolean mod_ib() { return ( 0x4 & modeling() ); }     // Using Sim as source of ib
-  boolean mod_none() { return ( 0==modeling() ); }      // Using nothing
-  boolean mod_tb() { return ( 0x1 & modeling() ); }     // Using Sim as source of tb
-  boolean mod_vb() { return ( 0x2 & modeling() ); }     // Using Sim as source of vb
-  uint8_t modeling() { return rP_->read(modeling_.a16); }
-  void modeling(const uint8_t input) { rP_->write(modeling_.a16, input); }
-  void nominal();
-  int num_diffs();
-  void pretty_print(const boolean all);
-  boolean tweak_test() { return ( 0x8 & modeling() ); } // Driving signal injection completely using software inj_bias 
+    SavedPars();
+    SavedPars(SerialRAM *ram);
+    ~SavedPars();
+    // operators
+    // functions
+    boolean is_corrupt();
+    void large_reset() { nominal(); }
+    boolean mod_any() { return ( 0<modeling() ); }        // Using any
+    boolean mod_ib() { return ( 0x4 & modeling() ); }     // Using Sim as source of ib
+    boolean mod_none() { return ( 0==modeling() ); }      // Using nothing
+    boolean mod_tb() { return ( 0x1 & modeling() ); }     // Using Sim as source of tb
+    boolean mod_vb() { return ( 0x2 & modeling() ); }     // Using Sim as source of vb
+    int8_t debug() { return rP_->read(debug_.a16); }
+    void debug(const int8_t input) { rP_->write(debug_.a16, input); }
+    uint8_t modeling() { return rP_->read(modeling_.a16); }
+    void modeling(const uint8_t input) { rP_->write(modeling_.a16, input); }
+    void nominal();
+    int num_diffs();
+    void pretty_print(const boolean all);
+    boolean tweak_test() { return ( 0x8 & modeling() ); } // Driving signal injection completely using software inj_bias 
 protected:
-//   int8_t debug = 0;             // Level of debug printing
+    address16b debug_;                  // Level of debug printing, int8_t
 //   double delta_q = 0.;          // Charge change since saturated, C
 //   float t_last = RATED_TEMP;    // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
 //   double delta_q_model = 0.;    // Coulomb Counter state for model, C
@@ -73,7 +75,7 @@ protected:
 //   float ib_bias_all = CURR_BIAS_ALL;      // Bias on all shunt sensors, A
 //   int8_t ib_select = FAKE_FAULTS;         // Force current sensor (-1=non-amp, 0=auto, 1=amp)
 //   float Vb_bias_hdwe = VOLT_BIAS;         // Calibrate Vb, V
-    address16b modeling_;
+    address16b modeling_;       // Driving saturation calculation with model.  Bits specify which signals use model, uint8_t
     //   uint8_t modeling = MODELING;  // Driving saturation calculation with model.  Bits specify which signals use model
 //   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
 //   float freq = 0.;              // Injected frequency, Hz (0-2)

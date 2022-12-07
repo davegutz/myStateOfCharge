@@ -55,25 +55,9 @@ void setup() {
   ram.setAutoStore(true);
 }
 
-void loop() {
-  uint8_t buffer = 0x00;
-  uint8_t randomByte = random(256);
-  uint16_t randomAddress = random(0x0200);
-
-  ram.write(randomAddress, randomByte);
-  buffer = ram.read(randomAddress);
-
-  Serial.printf("Wrote byte: 0x%d ", randomByte);
-  Serial.printf(" at address 0x%d ", randomAddress);
-  Serial.printf(" - Read back value: 0x%d ", buffer);
-
-  if(randomByte == buffer){
-    Serial.println(" - OK!");
-  }
-  else{
-    Serial.println(" ERROR! Values do not match! Check your pullup resistors and wiring");
-  }
-  
+void loop()
+{
+ 
     // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
   asap();
   chat();   // Work on internal chit-chat
