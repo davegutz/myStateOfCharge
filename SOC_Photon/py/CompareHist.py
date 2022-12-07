@@ -196,10 +196,6 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.subplot(333)
     plt.plot(hi.time_day, hi.Ib, marker='+', markersize='3', linestyle='-', color='green', label='Ib')
     plt.legend(loc=1)
-    plt.subplot(334)
-    plt.plot(hi.time_day, hi.tweak_sclr_amp, marker='+', markersize='3', linestyle='None', color='orange', label='tweak_sclr_amp')
-    plt.plot(hi.time_day, hi.tweak_sclr_noa, marker='^', markersize='3', linestyle='None', color='green', label='tweak_sclr_noa')
-    plt.ylim(-6, 6)
     plt.legend(loc=1)
     plt.subplot(335)
     plt.plot(hi.time_day, hi.falw, marker='+', markersize='3', linestyle='None', color='magenta', label='falw')
@@ -1052,26 +1048,31 @@ if __name__ == '__main__':
         # voc_soc40 = look_it(x0, lut_voc, 40.)
         # h_40C = filter_Tb(h, 40., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
         voc_soc20 = look_it(x0, lut_voc, 20.)
+        print('filter h')
         h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
         T_300new = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
         T_300old = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
         # T_300old = 10  # For debugging
-
+        print('resample old')
         h_20C_resamp_300old = resample(data=h_20C, dt_resamp=T_300old, time_var='time',
                                        specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
                                                  ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
                                                  ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
+        print('bandaid old')
         mon_old_300old, sim_old_300old = bandaid(h_20C_resamp_300old)
+        print('replicate old')
         mon_ver_300old, sim_ver_300old, randles_ver_300old, sim_s_ver_300old =\
             replicate(mon_old_300old, sim_old=sim_old_300old, init_time=1., verbose=False, t_max=t_max_in,
                       eframe_mult=1)
-
+        print('resample new')
         h_20C_resamp_300new = resample(data=h_20C, dt_resamp=T_300new, time_var='time',
                                        specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
                                                  ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
                                                  ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
+        print('bandaid new')
         mon_old_300new, sim_old_300new = bandaid(h_20C_resamp_300new)
         eframe_mult = int(0.1*cp_eframe_mult / T_300new)
+        print("replicate new")
         mon_ver_300new, sim_ver_300new, randles_ver_300new, sim_s_ver_300new =\
             replicate(mon_old_300new, sim_old=sim_old_300new, init_time=1., verbose=False, t_max=t_max_in,
                       eframe_mult=eframe_mult)
@@ -1093,14 +1094,17 @@ if __name__ == '__main__':
         # if len(h_40C.time) > 1:
         #     n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc40, voc_reset=VOC_RESET_40)
         if len(h_20C.time) > 1:
+            print("over_easy")
             n_fig, fig_files = over_easy(h_20C, filename, mv_fast=mon_ver_300new, mv_slow=mon_ver_300old,
                                          fig_files=fig_files, plot_title=plot_title, subtitle='h_20C',
                                          n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
+            print("overall_batt")
             n_fig, fig_files = overall_batt(mon_ver_300old, sim_ver_300old, randles_ver_300old, suffix='_300old',
                                             filename=filename, fig_files=fig_files,
                                             mv1=mon_ver_300new, sv1=sim_ver_300new, rv1=randles_ver_300new,
                                             suffix1='_300new', plot_title=plot_title, n_fig=n_fig, use_time_day=True)
         if len(f.time) > 1:
+            print('over_fault')
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                           n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
 
