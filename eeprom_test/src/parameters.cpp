@@ -209,3 +209,27 @@ void SavedPars::pretty_print(const boolean all )
         //   Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n\n", VB_SCALE, Vb_scale);
     }
 }
+
+// Assign all EERAM values to temp variable for pursposes of timing
+int SavedPars::read_all()
+{
+    int n = 0;
+    float tempf;
+    uint8_t tempu;
+    tempu = debug(); n++;
+    tempf = delta_q(); n++;
+    tempu = modeling(); n++;
+    return n;
+}
+
+// Assign all RAM values to a temp variable for purposes of timing tare
+int SavedPars::assign_all()
+{
+    int n = 0;
+    float tempf;
+    uint8_t tempu;
+    tempu = debug_ram; n++;
+    tempf = delta_q_ram; n++;
+    tempu = modeling_ram; n++;
+    return n;
+}

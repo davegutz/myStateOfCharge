@@ -53,19 +53,24 @@ public:
     boolean mod_none() { return ( 0==modeling() ); }      // Using nothing
     boolean mod_tb() { return ( 0x1 & modeling() ); }     // Using Sim as source of tb
     boolean mod_vb() { return ( 0x2 & modeling() ); }     // Using Sim as source of vb
+    int8_t debug_ram;                   // Level of debug printing, int8_t
     int8_t debug() { return rP_->read(debug_.a16); }
-    void debug(const int8_t input) { rP_->write(debug_.a16, input); }
+    void debug(const int8_t input) { rP_->write(debug_.a16, input); debug_ram = input; }
+    double delta_q_ram;                 // Charge change since saturated, C
     double delta_q() { double value; rP_->get(delta_q_.a16, value); return value; }
-    void delta_q(const double input) { rP_->put(delta_q_.a16, input); }
+    void delta_q(const double input) { rP_->put(delta_q_.a16, input); delta_q_ram = input; }
+    uint8_t modeling_ram;               // Driving saturation calculation with model.  Bits specify which signals use model, uint8_t
     uint8_t modeling() { return rP_->read(modeling_.a16); }
-    void modeling(const uint8_t input) { rP_->write(modeling_.a16, input); }
+    void modeling(const uint8_t input) { rP_->write(modeling_.a16, input); modeling_ram = input; }
     void nominal();
     int num_diffs();
     void pretty_print(const boolean all);
+    int read_all();
+    int assign_all();
     boolean tweak_test() { return ( 0x8 & modeling() ); } // Driving signal injection completely using software inj_bias 
 protected:
-    address16b debug_;                  // Level of debug printing, int8_t
-    address16b delta_q_;                // Charge change since saturated, C
+    address16b debug_;
+    address16b delta_q_;
 //   float t_last = RATED_TEMP;    // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
 //   double delta_q_model = 0.;    // Coulomb Counter state for model, C
 //   float t_last_model = RATED_TEMP;        // Battery temperature past value for rate limit memory, deg C
@@ -77,7 +82,7 @@ protected:
 //   float ib_bias_all = CURR_BIAS_ALL;      // Bias on all shunt sensors, A
 //   int8_t ib_select = FAKE_FAULTS;         // Force current sensor (-1=non-amp, 0=auto, 1=amp)
 //   float Vb_bias_hdwe = VOLT_BIAS;         // Calibrate Vb, V
-    address16b modeling_;       // Driving saturation calculation with model.  Bits specify which signals use model, uint8_t
+    address16b modeling_;
     //   uint8_t modeling = MODELING;  // Driving saturation calculation with model.  Bits specify which signals use model
 //   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
 //   float freq = 0.;              // Injected frequency, Hz (0-2)
