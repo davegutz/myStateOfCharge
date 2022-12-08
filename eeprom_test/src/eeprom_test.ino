@@ -49,16 +49,17 @@ SavedPars sp = SavedPars(&ram);           // Various parameters to be common at 
 
 void setup() {
   Serial.begin(115200);
+  delay(1000);
   Serial.println("Hi");
-  Serial.flush();
   ram.begin(0, 0);
   ram.setAutoStore(true);
+  Serial.printf("Check corruption\n");
   if ( sp.is_corrupt() ) 
   {
     sp.nominal();
     Serial.printf("Fixed corruption\n");
-    sp.pretty_print(true);
   }
+  sp.pretty_print(true);
 }
 
 void loop()
@@ -69,6 +70,6 @@ void loop()
   chat();   // Work on internal chit-chat
   talk();   // Collect user inputs
 
-  delay(1000);
+  delay(100);
 
 }

@@ -151,8 +151,8 @@ int SavedPars::num_diffs()
 // Print
 void SavedPars::pretty_print(const boolean all )
 {
-    Serial.printf("\nretained parameters (rp):\n");
-    Serial.printf("             defaults    current SRAM values\n");
+    Serial.printf("saved parameters (rp):\n");
+    Serial.printf("             defaults    current EERAM values\n");
     if ( all )
     {
         //   Serial.printf(" isum                           %d tbl ptr\n", isum);
