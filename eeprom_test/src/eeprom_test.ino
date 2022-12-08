@@ -53,6 +53,12 @@ void setup() {
   Serial.flush();
   ram.begin(0, 0);
   ram.setAutoStore(true);
+  if ( sp.is_corrupt() ) 
+  {
+    sp.nominal();
+    Serial.printf("Fixed corruption\n");
+    sp.pretty_print(true);
+  }
 }
 
 void loop()

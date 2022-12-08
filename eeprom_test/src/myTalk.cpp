@@ -495,7 +495,7 @@ void talk()
 
               case ( 'm' ):  // Xm<>:  code for modeling level
                 INT_in =  cp.input_string.substring(2).toInt();
-                if ( INT_in>=0 && INT_in<16 )
+                if ( INT_in>=0 && INT_in<1000 )
                 {
                   boolean reset = rp.modeling != INT_in;
                   Serial.printf("modeling %d to ", sp.modeling());
