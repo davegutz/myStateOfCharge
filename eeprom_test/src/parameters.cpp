@@ -31,6 +31,7 @@
 SavedPars::SavedPars() {}
 SavedPars::SavedPars(SerialRAM *ram): rP_(ram)
 {
+    // Memory map
     debug_.a16 = 0x000;
     delta_q_.a16 = debug_.a16 + 0x001;
     modeling_.a16 = delta_q_.a16 + 0x008;
