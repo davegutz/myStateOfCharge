@@ -337,9 +337,9 @@ void talk()
                 break;
 
               case ( 'Q' ):  // * DQ<>:  delta_q
-                Serial.printf("sp.delta_q%7.3f to", sp.delta_q());
-                sp.delta_q(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\nreset\n", sp.delta_q());
+                Serial.printf("sp.delta_q%7.3f to", sp.delta_q);
+                sp.delta_q_put(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\nreset\n", sp.delta_q);
                 break;
 
               case ( 't' ):  // * Dt<>:  Temp bias change hardware
@@ -452,7 +452,7 @@ void talk()
             break;
 
           case ( 'v' ):  // v<>:  verbose level
-            sp.debug(cp.input_string.substring(1).toInt());
+            sp.debug_put(cp.input_string.substring(1).toInt());
             break;
 
           case ( 'V' ):
@@ -498,15 +498,15 @@ void talk()
                 if ( INT_in>=0 && INT_in<1000 )
                 {
                   boolean reset = rp.modeling != INT_in;
-                  Serial.printf("modeling %d to ", sp.modeling());
-                  sp.modeling(INT_in);
-                  Serial.printf("%d\n", sp.modeling());
+                  Serial.printf("modeling %d to ", sp.modeling);
+                  sp.modeling_put(INT_in);
+                  Serial.printf("%d\n", sp.modeling);
                 }
                 else
                 {
                   Serial.printf("err %d, modeling 0-7. 'h'\n", INT_in);
                 }
-                Serial.printf("Modeling %d\n", sp.modeling());
+                Serial.printf("Modeling %d\n", sp.modeling);
                 Serial.printf("tweak_test %d\n", sp.tweak_test());
                 Serial.printf("mod_ib %d\n", sp.mod_ib());
                 Serial.printf("mod_vb %d\n", sp.mod_vb());

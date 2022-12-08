@@ -45,39 +45,49 @@ public:
     SavedPars(SerialRAM *ram);
     ~SavedPars();
     // operators
+
+    // parameter list
+    int8_t debug;                   // Level of debug printing, int8_t
+    double delta_q;                 // Charge change since saturated, C
+    double delta_q_model;           // Charge change since saturated, C
+    int isum;                       // Summary location.   Begins at -1 because first action is to increment isum
+    uint8_t modeling;               // Driving saturation calculation with model.  Bits specify which signals use model, uint8_t
+    float t_last;                   // Updated value of battery temperature injection when sp.modeling and proper wire connections made, deg C
+    float t_last_model;             // Battery temperature past value for rate limit memory, deg C
+
     // functions
     boolean is_corrupt();
     void large_reset() { nominal(); }
-    boolean mod_any() { return ( 0<modeling() ); }        // Using any
-    boolean mod_ib() { return ( 0x4 & modeling() ); }     // Using Sim as source of ib
-    boolean mod_none() { return ( 0==modeling() ); }      // Using nothing
-    boolean mod_tb() { return ( 0x1 & modeling() ); }     // Using Sim as source of tb
-    boolean mod_vb() { return ( 0x2 & modeling() ); }     // Using Sim as source of vb
-    int8_t debug_ram;                   // Level of debug printing, int8_t
-    int8_t debug() { return rP_->read(debug_.a16); }
-    void debug(const int8_t input) { rP_->write(debug_.a16, input); debug_ram = input; }
-    double delta_q_ram;                 // Charge change since saturated, C
-    double delta_q() { double value; rP_->get(delta_q_.a16, value); return value; }
-    void delta_q(const double input) { rP_->put(delta_q_.a16, input); delta_q_ram = input; }
+    boolean mod_any() { return ( 0<modeling ); }        // Using any
+    boolean mod_ib() { return ( 0x4 & modeling ); }     // Using Sim as source of ib
+    boolean mod_none() { return ( 0==modeling ); }      // Using nothing
+    boolean mod_tb() { return ( 0x1 & modeling ); }     // Using Sim as source of tb
+    boolean mod_vb() { return ( 0x2 & modeling ); }     // Using Sim as source of vb
+    int8_t debug_get() { int8_t value; rP_->get(debug_eeram_.a16, value); return value; }
+    void debug_put(const int8_t input) { rP_->put(debug_eeram_.a16, input); debug = input; }
+    double delta_q_get() { double value; rP_->get(delta_q_eeram_.a16, value); return value; }
+    void delta_q_put(const double input) { rP_->put(delta_q_eeram_.a16, input); delta_q = input; }
+    double delta_q_model_get() { double value; rP_->get(delta_q_model_eeram_.a16, value); return value; }
+    void delta_q_model_put(const double input) { rP_->put(delta_q_model_eeram_.a16, input); delta_q_model = input; }
+    double isum_get() { int value; rP_->get(isum_eeram_.a16, value); return value; }
+    void isum_put(const int input) { rP_->put(isum_eeram_.a16, input); isum = input; }
     void load_all();
-    uint8_t modeling_ram;               // Driving saturation calculation with model.  Bits specify which signals use model, uint8_t
-    uint8_t modeling() { return rP_->read(modeling_.a16); }
-    void modeling(const uint8_t input) { rP_->write(modeling_.a16, input); modeling_ram = input; }
+    uint8_t modeling_get() { return rP_->read(modeling_eeram_.a16); }
+    void modeling_put(const uint8_t input) { rP_->write(modeling_eeram_.a16, input); modeling = input; }
     void nominal();
     int num_diffs();
     void pretty_print(const boolean all);
     int read_all();
     int assign_all();
-    float t_last_ram;                   // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
-    int8_t t_last() { return rP_->read(t_last_.a16); }
-    void t_last(const float input) { rP_->write(t_last_.a16, input); t_last_ram = input; }
-    boolean tweak_test() { return ( 0x8 & modeling() ); } // Driving signal injection completely using software inj_bias 
+    int8_t t_last_get() { float value; rP_->get(t_last_eeram_.a16, value); return value; }
+    void t_last_put(const float input) { rP_->put(t_last_eeram_.a16, input); t_last = input; }
+    int8_t t_last_model_get() { float value; rP_->get(t_last_model_eeram_.a16, value); return value; }
+    void t_last_model_put(const float input) { rP_->put(t_last_model_eeram_.a16, input); t_last_model = input; }
+    boolean tweak_test() { return ( 0x8 & modeling ); } // Driving signal injection completely using software inj_bias 
 protected:
-    address16b debug_;
-    address16b delta_q_;
-//   float t_last = RATED_TEMP;    // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
-//   double delta_q_model = 0.;    // Coulomb Counter state for model, C
-//   float t_last_model = RATED_TEMP;        // Battery temperature past value for rate limit memory, deg C
+    address16b debug_eeram_;
+    address16b delta_q_eeram_;
+    address16b delta_q_model_eeram_;
 //   float shunt_gain_sclr = 1.;             // Shunt gain scalar
 //   float Ib_scale_amp = CURR_SCALE_AMP;    // Calibration scalar of amplified shunt sensor, A
 //   float ib_bias_amp = CURR_BIAS_AMP;      // Calibration adder of amplified shunt sensor, A
@@ -86,7 +96,8 @@ protected:
 //   float ib_bias_all = CURR_BIAS_ALL;      // Bias on all shunt sensors, A
 //   int8_t ib_select = FAKE_FAULTS;         // Force current sensor (-1=non-amp, 0=auto, 1=amp)
 //   float Vb_bias_hdwe = VOLT_BIAS;         // Calibrate Vb, V
-    address16b modeling_;
+    address16b isum_eeram_;
+    address16b modeling_eeram_;
     //   uint8_t modeling = MODELING;  // Driving saturation calculation with model.  Bits specify which signals use model
 //   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
 //   float freq = 0.;              // Injected frequency, Hz (0-2)
@@ -96,7 +107,6 @@ protected:
 //   float s_cap_model = 1.;         // Scalar on battery model size
 //   float cutback_gain_scalar = 1.; // Scalar on battery model saturation cutback function
 //           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
-//   int isum = -1;                // Summary location.   Begins at -1 because first action is to increment isum
 //   int iflt = -1;                // Fault snap location.   Begins at -1 because first action is to increment iflt
 //   float hys_scale = HYS_SCALE;  // Hysteresis scalar
 //   float nP = NP;                // Number of parallel batteries in bank, e.g. '2P1S'
@@ -105,7 +115,8 @@ protected:
 //   uint8_t sim_chm = SIM_CHEM;   // Simulation battery chemistry type
 //   float Vb_scale = 1.;          // Calibration scalar for Vb. V/count
     SerialRAM *rP_;
-    address16b t_last_;
+    address16b t_last_eeram_;
+    address16b t_last_model_eeram_;
 };
 
 #endif

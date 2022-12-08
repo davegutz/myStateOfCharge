@@ -77,7 +77,7 @@ void loop()
   unsigned long int then = micros();
   sp.assign_all();
   float all = ( (then - now) - (micros() - then) ) /1e6;
-  Serial.printf("read each avg %7.6f s, all %7.6fs\n", all/float(num), all);
+  // Serial.printf("read each avg %7.6f s, all %7.6fs\n", all/float(num), all);
 
   delay(100);
 
