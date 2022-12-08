@@ -452,7 +452,9 @@ void talk()
             break;
 
           case ( 'v' ):  // v<>:  verbose level
+            Serial.printf("sp.debug %ld sp.debug_get %ld to ", sp.debug, sp.debug_get());
             sp.debug_put(cp.input_string.substring(1).toInt());
+            Serial.printf("%ld %ld\n", sp.debug, sp.debug_get());
             break;
 
           case ( 'V' ):
