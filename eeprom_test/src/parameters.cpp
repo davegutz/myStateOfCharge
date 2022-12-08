@@ -32,7 +32,8 @@ SavedPars::SavedPars() {}
 SavedPars::SavedPars(SerialRAM *ram): rP_(ram)
 {
     debug_.a16 = 0x000;
-    modeling_.a16 = 0x000+0x004;
+    delta_q_.a16 = debug_.a16 + 0x004;
+    modeling_.a16 = delta_q_.a16 + 0x008;
 }
 SavedPars::~SavedPars() {}
 // operators
@@ -52,8 +53,7 @@ boolean SavedPars::is_corrupt()
 void SavedPars::nominal()
 {
     debug(int8_t(0));
-    // this->debug = 0;
-    // this->delta_q = 0.;
+    delta_q(0.);
     // this->t_last = RATED_TEMP;
     // this->delta_q_model = 0.;
     // this->t_last_model = RATED_TEMP;
@@ -158,7 +158,7 @@ void SavedPars::pretty_print(const boolean all )
         //   Serial.printf(" isum                           %d tbl ptr\n", isum);
         //   Serial.printf(" t_last          %5.2f      %5.2f dg C\n", RATED_TEMP, t_last);
         //   Serial.printf(" t_last_sim      %5.2f      %5.2f dg C\n", RATED_TEMP, t_last_model);
-        //   Serial.printf(" delta_q    %10.1f %10.1f *Ca<>, C\n", 0., delta_q);
+          Serial.printf(" delta_q    %10.1f %10.1f *DQ<>\n", 0., delta_q());
         //   Serial.printf(" dq_sim     %10.1f %10.1f *Ca<>, *Cm<>, C\n", 0., delta_q_model);
         // }
         // if ( all || 1. != shunt_gain_sclr )

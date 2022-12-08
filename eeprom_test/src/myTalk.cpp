@@ -336,6 +336,12 @@ void talk()
                 Serial.printf("%d\n", cp.print_mult);
                 break;
 
+              case ( 'Q' ):  // * DQ<>:  delta_q
+                Serial.printf("sp.delta_q%7.3f to", sp.delta_q());
+                sp.delta_q(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\nreset\n", sp.delta_q());
+                break;
+
               case ( 't' ):  // * Dt<>:  Temp bias change hardware
                 Serial.printf("rp.Tb_bias_hdwe%7.3f to", rp.Tb_bias_hdwe);
                 rp.Tb_bias_hdwe = cp.input_string.substring(2).toFloat();
@@ -563,138 +569,6 @@ void talk()
               case ( 'o' ): // Xo<>:  injection dc offset
                 rp.inj_bias = max(min(cp.input_string.substring(2).toFloat(), 18.3), -18.3);
                 Serial.printf("inj_bias set%7.3f\n", rp.inj_bias);
-                break;
-
-              case ( 'p' ): // Xp<>:  injection program
-                INT_in = cp.input_string.substring(2).toInt();
-                switch ( INT_in )
-                {
-
-                  case ( -1 ):  // Xp-1:  full reset
-                    chit("Xp0;", ASAP);
-                    chit("Ca.5;", SOON);
-                    chit("Xm0;", SOON);
-                    break;
-
-                  case ( 0 ):  // Xp0:  reset stop
-                    if ( !rp.tweak_test() ) chit("Xm7;", ASAP);  // Prevent upset of time in Xp9, Xp10, Xp11, etc
-                    chit("Xf0;Xa0;Xtn;", ASAP);
-                    if ( !rp.tweak_test() ) chit("Xb0;", ASAP);
-                    chit("XS;Mk1;Nk1;", ASAP);  // Stop any injection
-                    chit("Xs1;Di0;Dm0;Dn0;Dv0;DT0;DV0;DI0;Xu0;Xv1;Dr100;", ASAP);
-                    break;
-
-                  case ( 1 ):  // Xp1:  sine
-                    chit("Xp0;", QUEUE);
-                    chit("Ca.5;", QUEUE);
-                    chit("Xts;Xf.05;Xa6;", QUEUE);
-                    if ( !rp.tweak_test() ) chit("Xb-6;", QUEUE);
-                    break;
-
-                  case ( 2 ):  // Xp2:  
-                    chit("Xp0;", QUEUE);
-                    chit("Ca.5;", QUEUE);
-                    chit("Xtq;Xf.1;Xa6;", QUEUE);
-                    if ( !rp.tweak_test() ) chit("Xb-6;", QUEUE);
-                    break;
-
-                  case ( 3 ):  // Xp3:  
-                    chit("Xp0;", QUEUE);
-                    chit("Ca.5;", QUEUE);
-                    chit("Xtt;Xf.05;Xa6;", QUEUE);
-                    if ( !rp.tweak_test() ) chit("Xb-6;", QUEUE);
-                    break;
-
-                  case ( 4 ):  // Xp4:  
-                    chit("Xp0;", QUEUE);
-                    chit("Xtc;", QUEUE);
-                    chit("Di-100;", QUEUE);
-                    break;
-
-                  case ( 5 ):  // Xp5:  
-                    chit("Xp0;", QUEUE);
-                    chit("Xtc;", QUEUE);
-                    chit("Di100;", QUEUE);
-                    break;
-
-                  case ( 6 ):  // Xp6:  Program a pulse for EKF test
-                    chit("XS;Dm0;Dn0;v0;Xm7;Ca.5;Pm;Dr100;DP20;v4;", QUEUE);  // setup
-                    chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
-                    chit("W10;Pm;v0;", QUEUE);  // finish
-                    break;
-
-                  case ( 7 ):  // Xp7:  Program a pulse for State Space test
-                    chit("XS;Dm0;Dn0;v0;Xm7;Ca.5;Pm;Dr100;DP1;v2;", QUEUE);  // setup
-                    chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
-                    chit("W10;Pm;v0;", QUEUE);  // finish
-                    break;
-
-                  case ( 9 ): case( 10 ): case ( 11 ): case( 12 ):  // Xp9: Xp10: Xp11: Xp12:  Program regression
-                              // Regression tests 9=tweak, 10=tweak w data, 11=cycle, 12 1/2 cycle
-                    chit("Xp0;", QUEUE);      // Reset nominal
-                    chit("v0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
-                    chit("Bm0;Bs0;", QUEUE);  // Set Battleborn configuration
-                    chit("Xm15;", QUEUE);     // Modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
-                    chit("Xts;", QUEUE);      // Start up a sine wave
-                    chit("Ca1;", QUEUE);      // After restarting with sine running, soc will not be at 1.  Reset them all to 1
-                    chit("Dm1;Dn1;", ASAP);   // Slight positive current so sat logic is functional.  ASAP so synchronized and ib_diff flat.
-                    chit("DP1;", QUEUE);      // Fast data collection (may cause trouble in CoolTerm.  if so, try Dr200)
-                    chit("Rb;", QUEUE);       // Reset battery states
-                    // chit("Pa;", QUEUE);       // Print all for record
-                    if ( INT_in == 10 )  // Xp10:  rapid tweak
-                    {
-                      chit("Xf.02;", QUEUE);  // Frequency 0.02 Hz
-                      chit("Xa-2000;", QUEUE);// Amplitude -2000 A
-                      chit("XW5;", QUEUE);    // Wait time before starting to cycle
-                      chit("XT5;", QUEUE);    // Wait time after cycle to print
-                      chit("XC3;", QUEUE);    // Number of injection cycles
-                      chit("W2;", QUEUE);     // Wait
-                      chit("v2;", QUEUE);     // Data collection
-                    }
-                    else if ( INT_in == 11 )  // Xp11:  slow tweak
-                    {
-                      chit("Xf.002;", QUEUE); // Frequency 0.002 Hz
-                      chit("Xa-60;", QUEUE);  // Amplitude -60 A
-                      chit("XW60;", QUEUE);   // Wait time before starting to cycle
-                      chit("XT600;", QUEUE);  // Wait time after cycle to print
-                      chit("XC1;", QUEUE);    // Number of injection cycles
-                      chit("W2;", QUEUE);     // Wait
-                      chit("v2;", QUEUE);     // Data collection
-                    }
-                    else if ( INT_in == 12 )  // Xp12:  slow half tweak
-                    {
-                      chit("Xf.0002;", QUEUE);  // Frequency 0.002 Hz
-                      chit("Xa-6;", QUEUE);     // Amplitude -60 A
-                      chit("XW60;", QUEUE);     // Wait time before starting to cycle
-                      chit("XT2400;", QUEUE);   // Wait time after cycle to print
-                      chit("XC.5;", QUEUE);     // Number of injection cycles
-                      chit("W2;", QUEUE);       // Wait
-                      chit("v2;", QUEUE);       // Data collection
-                    }
-                    chit("W2;", QUEUE);       // Wait
-                    chit("XR;", QUEUE);       // Run cycle
-                    break;
-
-                  case( 20 ): case ( 21 ):    // Xp20:  Xp21:  20= 0.5 s sample/2.0s print, 21= 2 s sample/8 s print
-                    chit("v0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
-                    chit("Pa;", QUEUE);       // Print all for record
-                    if ( INT_in == 20 )
-                    {
-                      chit("Dr500;", QUEUE);  // 5x sample time, > RANDLES_T_MAX.  Randles dynamics disabled in Photon
-                      chit("DP4;", QUEUE);    // 4x data collection, > RANDLES_T_MAX.  Randles dynamics disabled in Python
-                      chit("v2;", QUEUE);     // Large data set
-                    }
-                    else if ( INT_in == 21 )
-                    {
-                      chit("DP20;", QUEUE);   // 20x data collection
-                      chit("v2;", QUEUE);     // Slow data collection
-                    }
-                    chit("Rb;", QUEUE);       // Large data set
-                    break;
-
-                  default:
-                    Serial.printf("Xp=%d unk.  see 'h'\n", INT_in);
-                }
                 break;
 
               case ( 's' ): // Xs:  scale T_SAT
