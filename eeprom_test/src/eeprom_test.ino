@@ -53,6 +53,7 @@ void setup() {
   Serial.println("Hi");
   ram.begin(0, 0);
   ram.setAutoStore(true);
+  sp.load_all();
   Serial.printf("Check corruption\n");
   if ( sp.is_corrupt() ) 
   {

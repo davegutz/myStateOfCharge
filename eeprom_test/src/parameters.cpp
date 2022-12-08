@@ -32,8 +32,9 @@ SavedPars::SavedPars() {}
 SavedPars::SavedPars(SerialRAM *ram): rP_(ram)
 {
     debug_.a16 = 0x000;
-    delta_q_.a16 = debug_.a16 + 0x004;
+    delta_q_.a16 = debug_.a16 + 0x001;
     modeling_.a16 = delta_q_.a16 + 0x008;
+    t_last_.a16 = modeling_.a16 + 0x001;
 }
 SavedPars::~SavedPars() {}
 // operators
@@ -43,10 +44,21 @@ SavedPars::~SavedPars() {}
 // battery.  Small compilation changes can change where in this memory the program points, too.
 boolean SavedPars::is_corrupt()
 {
-    return ( this->modeling()<0 || this->modeling()>15 );
+    return (
+        debug_ram<-100 || debug_ram>100 ||
+        modeling_ram<0 || modeling_ram>15 ||
+        t_last_ram>100. || t_last_ram<-20. );
     // return ( this->nP==0 || this->nS==0 || this->mon_chm>10 || isnan(this->amp) || this->freq>2. ||
     //  abs(this->ib_bias_amp)>500. || abs(this->cutback_gain_scalar)>1000. || abs(this->ib_bias_noa)>500. ||
     //  this->t_last_model<-10. || this->t_last_model>70. );
+}
+
+// Assign all save EERAM to RAM
+void SavedPars::load_all()
+{
+    debug_ram = debug();
+    modeling_ram = modeling();
+    t_last_ram = t_last();
 }
 
 // Nominalize
@@ -79,15 +91,14 @@ void SavedPars::nominal()
     // this->mon_chm = MON_CHEM;
     // this->sim_chm = SIM_CHEM;
     // this->Vb_scale = VB_SCALE;
-}
+    t_last(float(RATED_TEMP));    
+ }
 
 // Number of differences between SRAM and actual
 int SavedPars::num_diffs()
 {
     int n = 0;
 
-    // if ( RATED_TEMP != t_last )
-    //   n++;
     // if ( RATED_TEMP != t_last_model )
     //   n++;
     // if ( 0. != delta_q )
@@ -98,7 +109,7 @@ int SavedPars::num_diffs()
 
     // if ( 1. != shunt_gain_sclr )
     //   n++;
-    if ( 0 != debug() )
+    if ( 0 != debug_ram )
         n++;
     // if ( float(CURR_SCALE_AMP) != Ib_scale_amp )
     //   n++;
@@ -114,7 +125,7 @@ int SavedPars::num_diffs()
     //   n++;
     // if ( float(VOLT_BIAS) != Vb_bias_hdwe )
     //   n++;
-    if ( MODELING != modeling() )
+    if ( MODELING != modeling_ram )
         n++;
     // if ( 0. != amp )
     //   n++;
@@ -142,6 +153,8 @@ int SavedPars::num_diffs()
     //   n++;
     // if ( float(VB_SCALE) != Vb_scale )
     //   n++;
+    if ( RATED_TEMP != t_last_ram )
+      n++;
 
     return ( n );
 }
@@ -219,6 +232,7 @@ int SavedPars::read_all()
     tempu = debug(); n++;
     tempf = delta_q(); n++;
     tempu = modeling(); n++;
+    tempf = t_last(); n++;
     return n;
 }
 
@@ -231,5 +245,6 @@ int SavedPars::assign_all()
     tempu = debug_ram; n++;
     tempf = delta_q_ram; n++;
     tempu = modeling_ram; n++;
+    tempf = t_last_ram; n++;
     return n;
 }

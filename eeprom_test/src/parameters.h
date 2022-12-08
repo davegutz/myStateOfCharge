@@ -59,6 +59,7 @@ public:
     double delta_q_ram;                 // Charge change since saturated, C
     double delta_q() { double value; rP_->get(delta_q_.a16, value); return value; }
     void delta_q(const double input) { rP_->put(delta_q_.a16, input); delta_q_ram = input; }
+    void load_all();
     uint8_t modeling_ram;               // Driving saturation calculation with model.  Bits specify which signals use model, uint8_t
     uint8_t modeling() { return rP_->read(modeling_.a16); }
     void modeling(const uint8_t input) { rP_->write(modeling_.a16, input); modeling_ram = input; }
@@ -67,6 +68,9 @@ public:
     void pretty_print(const boolean all);
     int read_all();
     int assign_all();
+    float t_last_ram;                   // Updated value of battery temperature injection when rp.modeling and proper wire connections made, deg C
+    int8_t t_last() { return rP_->read(t_last_.a16); }
+    void t_last(const float input) { rP_->write(t_last_.a16, input); t_last_ram = input; }
     boolean tweak_test() { return ( 0x8 & modeling() ); } // Driving signal injection completely using software inj_bias 
 protected:
     address16b debug_;
@@ -101,6 +105,7 @@ protected:
 //   uint8_t sim_chm = SIM_CHEM;   // Simulation battery chemistry type
 //   float Vb_scale = 1.;          // Calibration scalar for Vb. V/count
     SerialRAM *rP_;
+    address16b t_last_;
 };
 
 #endif
