@@ -79,15 +79,13 @@ void SavedPars::load_all()
 void SavedPars::nominal()
 {
     put_debug(int(0));
-    put_delta_q(0.);
+    put_delta_q(double(0.));
+    put_delta_q_model(double(0.));
     put_isum(int(-1));
     put_modeling(uint8_t(MODELING));
     put_t_last(float(RATED_TEMP));    
     put_t_last_model(float(RATED_TEMP));    
-    // this->t_last = RATED_TEMP;
-    // this->delta_q_model = 0.;
-    // this->t_last_model = RATED_TEMP;
-    // this->shunt_gain_sclr = 1.;
+    put_shunt_gain_sclr(float(1.));
     // this->Ib_scale_amp = CURR_SCALE_AMP;
     // this->ib_bias_amp = CURR_BIAS_AMP;
     // this->Ib_scale_noa = CURR_SCALE_NOA;
