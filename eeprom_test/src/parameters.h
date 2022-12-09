@@ -58,6 +58,7 @@ public:
     int debug;              // Level of debug printing
     double delta_q;         // Charge change since saturated, C
     double delta_q_model;   // Charge change since saturated, C
+    float freq;             // Injected frequency, Hz (0-2)
     float Ib_bias_all;      // Bias on all shunt sensors, A
     float Ib_bias_amp;      // Calibration adder of amplified shunt sensor, A
     float Ib_bias_noa;      // Calibration adder of non-amplified shunt sensor, A
@@ -84,6 +85,7 @@ public:
     void get_debug() { int value; rP_->get(debug_eeram_.a16, value); debug = value; }
     void get_delta_q() { double value; rP_->get(delta_q_eeram_.a16, value); delta_q = value; }
     void get_delta_q_model() { double value; rP_->get(delta_q_model_eeram_.a16, value); delta_q_model = value; }
+    void get_freq() { float value; rP_->get(freq_eeram_.a16, value); freq = value; }
     void get_Ib_bias_all() { float value; rP_->get(Ib_bias_all_eeram_.a16, value); Ib_bias_all = value; }
     void get_Ib_bias_amp() { float value; rP_->get(Ib_bias_amp_eeram_.a16, value); Ib_bias_amp = value; }
     void get_Ib_bias_noa() { float value; rP_->get(Ib_bias_noa_eeram_.a16, value); Ib_bias_noa = value; }
@@ -104,6 +106,7 @@ public:
     void put_debug(const int input) { rP_->put(debug_eeram_.a16, input); debug = input; }
     void put_delta_q(const double input) { rP_->put(delta_q_eeram_.a16, input); delta_q = input; }
     void put_delta_q_model(const double input) { rP_->put(delta_q_model_eeram_.a16, input); delta_q_model = input; }
+    void put_freq(const float input) { rP_->put(freq_eeram_.a16, input); freq = input; }
     void put_Ib_bias_all(const float input) { rP_->put(Ib_bias_all_eeram_.a16, input); Ib_bias_all = input; }
     void put_Ib_bias_amp(const float input) { rP_->put(Ib_bias_amp_eeram_.a16, input); Ib_bias_amp = input; }
     void put_Ib_bias_noa(const float input) { rP_->put(Ib_bias_noa_eeram_.a16, input); Ib_bias_noa = input; }
@@ -122,6 +125,7 @@ protected:
     address16b debug_eeram_;
     address16b delta_q_eeram_;
     address16b delta_q_model_eeram_;
+    address16b freq_eeram_;
     address16b Ib_bias_all_eeram_;
     address16b Ib_bias_amp_eeram_;
     address16b Ib_bias_noa_eeram_;
@@ -134,7 +138,6 @@ protected:
     address16b shunt_gain_sclr_eeram_;
     address16b t_last_eeram_;
     address16b t_last_model_eeram_;
-//   float freq = 0.;              // Injected frequency, Hz (0-2)
 //   uint8_t type = 0;             // Injected waveform type.   0=sine, 1=square, 2=triangle
 //   float inj_bias = 0.;          // Constant bias, A
 //   float Tb_bias_hdwe = TEMP_BIAS; // Bias on Tb sensor, deg C

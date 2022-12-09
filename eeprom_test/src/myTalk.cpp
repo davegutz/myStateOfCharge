@@ -532,6 +532,11 @@ void talk()
                 Serial.printf("Inj_bias set%7.3f\n", rp.inj_bias);
                 break;
 
+              case ( 'f' ): // Xf<>:  injection freq
+                sp.put_freq(cp.input_string.substring(2).toFloat());
+                Serial.printf("Inj freq set%7.3f\n", sp.freq);
+                break;
+
               case ( 't' ): // Xt<>:  injection type
                 switch ( cp.input_string.charAt(2) )
                 {

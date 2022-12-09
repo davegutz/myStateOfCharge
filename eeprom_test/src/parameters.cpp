@@ -37,6 +37,7 @@ SavedPars::SavedPars(SerialRAM *ram): rP_(ram)
     debug_eeram_.a16 = next_loc; next_loc += sizeof(debug);
     delta_q_eeram_.a16 = next_loc;  next_loc += sizeof(delta_q);
     delta_q_model_eeram_.a16 = next_loc;  next_loc += sizeof(delta_q_model);
+    freq_eeram_.a16 = next_loc; next_loc += sizeof(freq);
     Ib_bias_all_eeram_.a16 =  next_loc;  next_loc += sizeof(Ib_bias_all);
     Ib_bias_amp_eeram_.a16 =  next_loc;  next_loc += sizeof(Ib_bias_amp);
     Ib_bias_noa_eeram_.a16 =  next_loc;  next_loc += sizeof(Ib_bias_noa);
@@ -64,6 +65,7 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(delta_q, -1e8, 1e5) ||
         is_val_corrupt(delta_q, -1e8, 1e5) ||
         is_val_corrupt(delta_q_model, -1e8, 1e5) ||
+        is_val_corrupt(freq, float(0.), float(2.)) ||
         is_val_corrupt(Ib_bias_all, float(-1e5), float(1e5)) ||
         is_val_corrupt(Ib_bias_amp, float(-1e5), float(1e5)) ||
         is_val_corrupt(Ib_bias_noa, float(-1e5), float(1e5)) ||
@@ -87,6 +89,7 @@ void SavedPars::load_all()
     get_debug();
     get_delta_q();
     get_delta_q_model();
+    get_freq();
     get_Ib_bias_all();
     get_Ib_bias_amp();
     get_Ib_bias_noa();
@@ -108,6 +111,7 @@ void SavedPars::nominal()
     put_debug(int(0));
     put_delta_q(double(0.));
     put_delta_q_model(double(0.));
+    put_freq(float(0));
     put_Ib_bias_all(float(CURR_BIAS_ALL));
     put_Ib_bias_amp(float(CURR_BIAS_AMP));
     put_Ib_bias_noa(float(CURR_BIAS_NOA));
@@ -121,7 +125,6 @@ void SavedPars::nominal()
     put_t_last_model(float(RATED_TEMP));  
     // this->Vb_scale = VB_SCALE;
     // this->Vb_bias_hdwe = VOLT_BIAS;
-    // this->freq = 0.;
     // this->type = 0;
     // this->inj_bias = 0.;
     // this->Tb_bias_hdwe = TEMP_BIAS;
@@ -156,6 +159,8 @@ int SavedPars::num_diffs()
       n++;
     if ( int(0) != debug )
         n++;
+    if ( float(0.) != freq )
+      n++;
     if ( float(CURR_BIAS_ALL) != Ib_bias_all )
       n++;
     if ( float(CURR_BIAS_AMP) != Ib_bias_amp )
@@ -170,8 +175,6 @@ int SavedPars::num_diffs()
       n++;
     if ( uint8_t(MODELING) != modeling )
         n++;
-    // if ( 0. != freq )
-    //   n++;
     // if ( 0 != type )
     //   n++;
     // if ( 0. != inj_bias )
@@ -215,6 +218,8 @@ void SavedPars::pretty_print(const boolean all )
           Serial.printf(" delta_q    %10.1f %10.1f *DQ<>\n", double(0.), delta_q);
     if ( all )
           Serial.printf(" dq_sim     %10.1f %10.1f *Ca<>, *Cm<>, C\n", double(0.), delta_q_model);
+    if ( all || float(0.) != freq )
+      Serial.printf(" inj frq       %7.3f    %7.3f *Xf<> r/s\n", 0., freq);
     if ( all || float(CURR_BIAS_ALL) != Ib_bias_all )
       Serial.printf(" ib_bias_all   %7.3f    %7.3f *Di<> A\n", CURR_BIAS_ALL, Ib_bias_all);
     if ( all || float(CURR_BIAS_AMP) != Ib_bias_amp )
@@ -237,8 +242,6 @@ void SavedPars::pretty_print(const boolean all )
           Serial.printf(" t_last          %5.2f      %5.2f dg C\n", float(RATED_TEMP), t_last);
     if ( all )
           Serial.printf(" t_last_sim      %5.2f      %5.2f dg C\n", float(RATED_TEMP), t_last_model);
-    // if ( all || 0. != freq )
-    //   Serial.printf(" inj frq       %7.3f    %7.3f *Xf<> r/s\n", 0., freq);
     // if ( all || 0 != type )
     //   Serial.printf(" inj typ             %d          %d *Xt<> 1=sin, 2=sq, 3=tri\n", 0, type);
     // if ( all || 0. != inj_bias )
@@ -276,6 +279,7 @@ int SavedPars::read_all()
     get_debug(); n++;
     get_delta_q(); n++;
     get_delta_q_model(); n++;
+    get_freq(); n++;
     get_Ib_bias_all(); n++;
     get_Ib_bias_amp(); n++;
     get_Ib_bias_noa(); n++;
@@ -302,6 +306,7 @@ int SavedPars::assign_all()
     tempi = debug; n++;
     tempd = delta_q; n++;
     tempd = delta_q_model; n++;
+    tempf = freq; n++;
     tempf = Ib_bias_all; n++;
     tempf = Ib_bias_amp; n++;
     tempf = Ib_bias_noa; n++;
