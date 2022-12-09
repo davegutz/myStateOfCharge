@@ -325,9 +325,9 @@ void talk()
                 break;
 
               case ( 'i' ):  // * Di<>:  Bias all current sensors (same way as Da and Db)
-                Serial.printf("rp.ib_bias_all%7.3f to", rp.ib_bias_all);
-                rp.ib_bias_all = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\nreset\n", rp.ib_bias_all);
+                Serial.printf("sp.ib_bias_all%7.3f to", sp.Ib_bias_all);
+                sp.put_Ib_bias_all(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\nreset\n", sp.Ib_bias_all);
                 cp.cmd_reset();
                 break;
 
@@ -619,13 +619,13 @@ void talkH()
   Serial.printf("\nc  clear talk, esp '-c;'\n");
 
   Serial.printf("\nD/S<?> Adj e.g.:\n");
-  Serial.printf(" *DA= "); Serial.printf("%6.3f", rp.ib_bias_amp); Serial.printf(": delta amp, A [%6.3f]\n", CURR_BIAS_AMP); 
-  Serial.printf(" *DB= "); Serial.printf("%6.3f", rp.ib_bias_noa); Serial.printf(": delta noa, A [%6.3f]\n", CURR_BIAS_NOA); 
-  Serial.printf(" *Di= "); Serial.printf("%6.3f", rp.ib_bias_all); Serial.printf(": delta all, A [%6.3f]\n", CURR_BIAS_ALL); 
+  Serial.printf(" *Di= "); Serial.printf("%6.3f", sp.Ib_bias_all); Serial.printf(": delta all, A [%6.3f]\n", CURR_BIAS_ALL); 
+  Serial.printf(" *DA= "); Serial.printf("%6.3f", sp.Ib_bias_amp); Serial.printf(": delta amp, A [%6.3f]\n", CURR_BIAS_AMP); 
+  Serial.printf(" *DB= "); Serial.printf("%6.3f", sp.Ib_bias_noa); Serial.printf(": delta noa, A [%6.3f]\n", CURR_BIAS_NOA); 
+  Serial.printf(" *SA= "); Serial.printf("%6.3f", sp.ib_scale_amp); Serial.printf(": scale amp [%6.3f]\n", CURR_SCALE_AMP); 
+  Serial.printf(" *SB= "); Serial.printf("%6.3f", sp.ib_scale_noa); Serial.printf(": scale noa [%6.3f]\n", CURR_SCALE_NOA); 
   Serial.printf(" *Dc= "); Serial.printf("%6.3f", rp.Vb_bias_hdwe); Serial.printf(": delta, V [%6.3f]\n", VOLT_BIAS); 
   Serial.printf(" *Dt= "); Serial.printf("%6.3f", rp.Tb_bias_hdwe); Serial.printf(": delta hdwe, deg C [%6.3f]\n", TEMP_BIAS); 
-  Serial.printf(" *SA= "); Serial.printf("%6.3f", rp.Ib_scale_amp); Serial.printf(": scale amp [%6.3f]\n", CURR_SCALE_AMP); 
-  Serial.printf(" *SB= "); Serial.printf("%6.3f", rp.Ib_scale_noa); Serial.printf(": scale noa [%6.3f]\n", CURR_SCALE_NOA); 
   Serial.printf(" *SG= "); Serial.printf("%6.3f", sp.shunt_gain_sclr); Serial.printf(": rp. scale shunt gains [1]\n"); 
   Serial.printf(" *Sh= "); Serial.printf("%6.3f", rp.hys_scale); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
   Serial.printf(" *Sk=  "); Serial.print(rp.cutback_gain_scalar); Serial.println(": Sat mod ctbk sclr"); 

@@ -57,6 +57,7 @@ public:
     int debug;              // Level of debug printing
     double delta_q;         // Charge change since saturated, C
     double delta_q_model;   // Charge change since saturated, C
+    float Ib_bias_all;      // Bias on all shunt sensors, A
     float Ib_bias_amp;      // Calibration adder of amplified shunt sensor, A
     float Ib_bias_noa;      // Calibration adder of non-amplified shunt sensor, A
     float ib_scale_amp;     // Calibration scalar of amplified shunt sensor
@@ -80,6 +81,7 @@ public:
     void get_debug() { int value; rP_->get(debug_eeram_.a16, value); debug = value; }
     void get_delta_q() { double value; rP_->get(delta_q_eeram_.a16, value); delta_q = value; }
     void get_delta_q_model() { double value; rP_->get(delta_q_model_eeram_.a16, value); delta_q_model = value; }
+    void get_Ib_bias_all() { float value; rP_->get(Ib_bias_all_eeram_.a16, value); Ib_bias_all = value; }
     void get_Ib_bias_amp() { float value; rP_->get(Ib_bias_amp_eeram_.a16, value); Ib_bias_amp = value; }
     void get_Ib_bias_noa() { float value; rP_->get(Ib_bias_noa_eeram_.a16, value); Ib_bias_noa = value; }
     void get_ib_scale_amp() { float value; rP_->get(ib_scale_amp_eeram_.a16, value); ib_scale_amp = value; }
@@ -97,6 +99,7 @@ public:
     void put_debug(const int input) { rP_->put(debug_eeram_.a16, input); debug = input; }
     void put_delta_q(const double input) { rP_->put(delta_q_eeram_.a16, input); delta_q = input; }
     void put_delta_q_model(const double input) { rP_->put(delta_q_model_eeram_.a16, input); delta_q_model = input; }
+    void put_Ib_bias_all(const float input) { rP_->put(Ib_bias_all_eeram_.a16, input); Ib_bias_all = input; }
     void put_Ib_bias_amp(const float input) { rP_->put(Ib_bias_amp_eeram_.a16, input); Ib_bias_amp = input; }
     void put_Ib_bias_noa(const float input) { rP_->put(Ib_bias_noa_eeram_.a16, input); Ib_bias_noa = input; }
     void put_ib_scale_amp(const float input) { rP_->put(ib_scale_amp_eeram_.a16, input); ib_scale_amp = input; }
@@ -112,6 +115,7 @@ protected:
     address16b debug_eeram_;
     address16b delta_q_eeram_;
     address16b delta_q_model_eeram_;
+    address16b Ib_bias_all_eeram_;
     address16b Ib_bias_amp_eeram_;
     address16b Ib_bias_noa_eeram_;
     address16b ib_scale_amp_eeram_;
@@ -122,7 +126,6 @@ protected:
     address16b shunt_gain_sclr_eeram_;
     address16b t_last_eeram_;
     address16b t_last_model_eeram_;
-//   float ib_bias_all = CURR_BIAS_ALL;      // Bias on all shunt sensors, A
 //   int8_t ib_select = FAKE_FAULTS;         // Force current sensor (-1=non-amp, 0=auto, 1=amp)
 //   float Vb_bias_hdwe = VOLT_BIAS;         // Calibrate Vb, V
     //   uint8_t modeling = MODELING;  // Driving saturation calculation with model.  Bits specify which signals use model
