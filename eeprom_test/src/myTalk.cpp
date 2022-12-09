@@ -405,10 +405,10 @@ void talk()
 
               case ( 'f' ):  //   Ff<>:  fake faults
                 INT_in = cp.input_string.substring(2).toInt();
-                Serial.printf("cp.fake_faults, rp.ib_select %d, %d to ", cp.fake_faults, rp.ib_select);
+                Serial.printf("cp.fake_faults, sp.ib_select %d, %d to ", cp.fake_faults, sp.ib_select);
                 cp.fake_faults = INT_in;
-                rp.ib_select = INT_in;
-                Serial.printf("%d, %d\n", cp.fake_faults, rp.ib_select);
+                sp.put_ib_select(INT_in);
+                Serial.printf("%d, %d\n", cp.fake_faults, sp.ib_select);
                 break;
 
               default:
@@ -449,13 +449,13 @@ void talk()
           case ( 's' ):  // s<>:  select amp or noa
             if ( cp.input_string.substring(1).toInt()>0 )
             {
-              rp.ib_select = 1;
+              sp.put_ib_select(1);
             }
             else if ( cp.input_string.substring(1).toInt()<0 )
-              rp.ib_select = -1;
+              sp.put_ib_select(-1);
             else
-              rp.ib_select = 0;
-            Serial.printf("Sig ( -1=noa, 0=auto, 1=amp,) set %d\n", rp.ib_select);
+              sp.put_ib_select(0);
+            Serial.printf("Sig ( -1=noa, 0=auto, 1=amp,) set %d\n", sp.ib_select);
             break;
 
           case ( 'v' ):  // v<>:  verbose level

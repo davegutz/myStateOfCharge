@@ -41,6 +41,7 @@ SavedPars::SavedPars(SerialRAM *ram): rP_(ram)
     Ib_bias_noa_eeram_.a16 =  next_loc;  next_loc += sizeof(Ib_bias_noa);
     ib_scale_amp_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_scale_amp);
     ib_scale_noa_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_scale_noa);
+    ib_select_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_select);
     isum_eeram_.a16 =  next_loc;  next_loc += sizeof(isum);
     modeling_eeram_.a16 =  next_loc;  next_loc += sizeof(modeling);
     shunt_gain_sclr_eeram_.a16 = next_loc;  next_loc += sizeof(shunt_gain_sclr);
@@ -66,6 +67,7 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(Ib_bias_noa, float(-1e5), float(1e5)) ||
         is_val_corrupt(ib_scale_amp, float(-1e6), float(1e6)) ||
         is_val_corrupt(ib_scale_noa, float(-1e6), float(1e6)) ||
+        is_val_corrupt(ib_select, int8_t(-1), int8_t(1)) ||
         is_val_corrupt(isum, -1, NSUM+1) ||
         is_val_corrupt(modeling, uint8_t(0), uint8_t(15)) ||
         is_val_corrupt(shunt_gain_sclr, float(-1e6), float(1e6)) ||
@@ -87,6 +89,7 @@ void SavedPars::load_all()
     get_Ib_bias_noa();
     get_ib_scale_amp();
     get_ib_scale_noa();
+    get_ib_select();
     get_isum();
     get_modeling();
     get_shunt_gain_sclr();
@@ -106,12 +109,12 @@ void SavedPars::nominal()
     put_Ib_bias_noa(float(CURR_BIAS_NOA));
     put_ib_scale_amp(float(CURR_SCALE_AMP));
     put_ib_scale_noa(float(CURR_SCALE_NOA));
+    put_ib_select(int8_t(FAKE_FAULTS));
     put_isum(int(-1));
     put_modeling(uint8_t(MODELING));
     put_shunt_gain_sclr(float(1.));
     put_t_last(float(RATED_TEMP));    
     put_t_last_model(float(RATED_TEMP));  
-    // this->ib_select = FAKE_FAULTS;
     // this->Vb_bias_hdwe = VOLT_BIAS;
     // this->amp = 0.;
     // this->freq = 0.;
@@ -157,8 +160,8 @@ int SavedPars::num_diffs()
       n++;
     if ( float(CURR_SCALE_NOA) != ib_scale_noa )
       n++;
-    // if ( FAKE_FAULTS != ib_select )
-    //   n++;
+    if ( int8_t(FAKE_FAULTS) != ib_select )
+      n++;
     // if ( float(VOLT_BIAS) != Vb_bias_hdwe )
     //   n++;
     if ( uint8_t(MODELING) != modeling )
@@ -216,6 +219,8 @@ void SavedPars::pretty_print(const boolean all )
       Serial.printf(" scale_amp     %7.3f    %7.3f *SA<>\n", CURR_SCALE_AMP, ib_scale_amp);
     if ( all || float(CURR_SCALE_NOA) != ib_scale_noa )
       Serial.printf(" scale_noa     %7.3f    %7.3f *SB<>\n", CURR_SCALE_NOA, ib_scale_noa);
+    if ( all || int8_t(FAKE_FAULTS) != ib_select )
+      Serial.printf(" ib_select           %d          %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select);
     if ( all )
           Serial.printf(" isum                           %d tbl ptr\n", isum);
     if ( all || uint8_t(MODELING) != modeling )
@@ -226,8 +231,6 @@ void SavedPars::pretty_print(const boolean all )
           Serial.printf(" t_last          %5.2f      %5.2f dg C\n", float(RATED_TEMP), t_last);
     if ( all )
           Serial.printf(" t_last_sim      %5.2f      %5.2f dg C\n", float(RATED_TEMP), t_last_model);
-    // if ( all || FAKE_FAULTS != ib_select )
-    //   Serial.printf(" ib_select           %d          %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select);
     // if ( all || float(VOLT_BIAS) != Vb_bias_hdwe )
     //   Serial.printf(" Vb_bias_hdwe       %7.3f    %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe);
     // if ( all || 0. != amp )
@@ -273,6 +276,7 @@ int SavedPars::read_all()
     get_Ib_bias_noa(); n++;
     get_ib_scale_amp(); n++;
     get_ib_scale_noa(); n++;
+    get_ib_select(); n++;
     get_isum(); n++;
     get_modeling(); n++;
     get_t_last(); n++;
@@ -287,6 +291,7 @@ int SavedPars::assign_all()
     float tempf;
     double tempd;
     int tempi;
+    int8_t tempi8;
     uint8_t tempu;
     tempi = debug; n++;
     tempd = delta_q; n++;
@@ -296,11 +301,13 @@ int SavedPars::assign_all()
     tempf = Ib_bias_noa; n++;
     tempf = ib_scale_amp; n++;
     tempf = ib_scale_noa; n++;
+    tempi8 = ib_select; n++;
     tempi = isum; n++;
     tempu = modeling; n++;
     tempf = t_last; n++;
     tempf = t_last_model; n++;
     tempi = tempu;
+    tempi = tempi8;
     tempi = tempf;
     tempi = tempd;
     tempu = tempi;

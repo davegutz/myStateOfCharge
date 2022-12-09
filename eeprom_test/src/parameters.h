@@ -62,6 +62,7 @@ public:
     float Ib_bias_noa;      // Calibration adder of non-amplified shunt sensor, A
     float ib_scale_amp;     // Calibration scalar of amplified shunt sensor
     float ib_scale_noa;     // Calibration scalar of non-amplified shunt sensor
+    int8_t ib_select;       // Force current sensor (-1=non-amp, 0=auto, 1=amp)
     int isum;               // Summary location.   Begins at -1 because first action is to increment isum
     uint8_t modeling;       // Driving saturation calculation with model.  Bits specify which signals use model, uint8_t
     float shunt_gain_sclr;  // Shunt gain scalar
@@ -86,6 +87,7 @@ public:
     void get_Ib_bias_noa() { float value; rP_->get(Ib_bias_noa_eeram_.a16, value); Ib_bias_noa = value; }
     void get_ib_scale_amp() { float value; rP_->get(ib_scale_amp_eeram_.a16, value); ib_scale_amp = value; }
     void get_ib_scale_noa() { float value; rP_->get(ib_scale_noa_eeram_.a16, value); ib_scale_noa = value; }
+    void get_ib_select() { int8_t value; rP_->get(ib_select_eeram_.a16, value); ib_select = value; }
     void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum = value; }
     void get_modeling() { modeling = rP_->read(modeling_eeram_.a16); }
     void get_shunt_gain_sclr() { float value; rP_->get(shunt_gain_sclr_eeram_.a16, value); shunt_gain_sclr = value; }
@@ -104,6 +106,7 @@ public:
     void put_Ib_bias_noa(const float input) { rP_->put(Ib_bias_noa_eeram_.a16, input); Ib_bias_noa = input; }
     void put_ib_scale_amp(const float input) { rP_->put(ib_scale_amp_eeram_.a16, input); ib_scale_amp = input; }
     void put_ib_scale_noa(const float input) { rP_->put(ib_scale_noa_eeram_.a16, input); ib_scale_noa = input; }
+    void put_ib_select(const int8_t input) { rP_->put(ib_select_eeram_.a16, input); ib_select = input; }
     void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum = input; }
     void put_modeling(const uint8_t input) { rP_->write(modeling_eeram_.a16, input); modeling = input; }
     void put_shunt_gain_sclr(const float input) { rP_->put(shunt_gain_sclr_eeram_.a16, input); shunt_gain_sclr = input; }
@@ -120,13 +123,13 @@ protected:
     address16b Ib_bias_noa_eeram_;
     address16b ib_scale_amp_eeram_;
     address16b ib_scale_noa_eeram_;
+    address16b ib_select_eeram_;
     address16b isum_eeram_;
     address16b modeling_eeram_;
     SerialRAM *rP_;
     address16b shunt_gain_sclr_eeram_;
     address16b t_last_eeram_;
     address16b t_last_model_eeram_;
-//   int8_t ib_select = FAKE_FAULTS;         // Force current sensor (-1=non-amp, 0=auto, 1=amp)
 //   float Vb_bias_hdwe = VOLT_BIAS;         // Calibrate Vb, V
     //   uint8_t modeling = MODELING;  // Driving saturation calculation with model.  Bits specify which signals use model
 //   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
