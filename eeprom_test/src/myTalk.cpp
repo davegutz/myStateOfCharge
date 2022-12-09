@@ -376,6 +376,12 @@ void talk()
                 Serial.printf("%7.3f\n", rp.Ib_scale_noa);
                 break;
            
+              case ( 'G' ):  // * SG<>:  Shunt gain scalar
+                Serial.printf("sp.shunt_gain_sclr%7.3f to ", sp.shunt_gain_sclr);
+                sp.put_shunt_gain_sclr(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.shunt_gain_sclr);
+                break;
+           
               case ( 'k' ):  // * Sk<>:  scale cutback gain for sim rep of BMS
                 scale = cp.input_string.substring(2).toFloat();
                 rp.cutback_gain_scalar = scale;
@@ -617,7 +623,13 @@ void talkH()
   Serial.printf(" *DB= "); Serial.printf("%6.3f", rp.ib_bias_noa); Serial.printf(": delta noa, A [%6.3f]\n", CURR_BIAS_NOA); 
   Serial.printf(" *Di= "); Serial.printf("%6.3f", rp.ib_bias_all); Serial.printf(": delta all, A [%6.3f]\n", CURR_BIAS_ALL); 
   Serial.printf(" *Dc= "); Serial.printf("%6.3f", rp.Vb_bias_hdwe); Serial.printf(": delta, V [%6.3f]\n", VOLT_BIAS); 
-  Serial.printf("  DE= "); Serial.printf("%d", cp.eframe_mult); Serial.printf(": eframe mult Dr [20]\n");
+  Serial.printf(" *Dt= "); Serial.printf("%6.3f", rp.Tb_bias_hdwe); Serial.printf(": delta hdwe, deg C [%6.3f]\n", TEMP_BIAS); 
+  Serial.printf(" *SA= "); Serial.printf("%6.3f", rp.Ib_scale_amp); Serial.printf(": scale amp [%6.3f]\n", CURR_SCALE_AMP); 
+  Serial.printf(" *SB= "); Serial.printf("%6.3f", rp.Ib_scale_noa); Serial.printf(": scale noa [%6.3f]\n", CURR_SCALE_NOA); 
+  Serial.printf(" *SG= "); Serial.printf("%6.3f", sp.shunt_gain_sclr); Serial.printf(": rp. scale shunt gains [1]\n"); 
+  Serial.printf(" *Sh= "); Serial.printf("%6.3f", rp.hys_scale); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
+  Serial.printf(" *Sk=  "); Serial.print(rp.cutback_gain_scalar); Serial.println(": Sat mod ctbk sclr"); 
+  Serial.printf(" *SV= "); Serial.printf("%6.3f", rp.Vb_scale); Serial.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
 
   Serial.printf("\nF<?>   Faults\n");
   // Serial.printf("  Fc= "); Serial.printf("%6.3f", Sen->Flt->cc_diff_sclr()); Serial.printf(": sclr cc_diff thr ^ [1]\n"); 

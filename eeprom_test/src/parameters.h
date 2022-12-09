@@ -31,6 +31,13 @@
 #include "Battery.h"
 #include "hardware/SerialRAM.h"
 
+// Corruption test
+template <typename T>
+boolean is_val_corrupt(T val, T minval, T maxval)
+{
+    return isnan(val) || val < minval || val > maxval;
+}
+
 // Definition of structure to be saved in EERAM.  Many are needed to calibrate.  Others are
 // needed to allow testing with resets.  Others allow application to remember dynamic
 // tweaks.  Default values below are important:  they prevent junk
@@ -70,6 +77,7 @@ public:
     void get_delta_q_model() { double value; rP_->get(delta_q_model_eeram_.a16, value); delta_q_model = value; }
     void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum = value; }
     void get_modeling() { modeling = rP_->read(modeling_eeram_.a16); }
+    void get_shunt_gain_sclr() { float value; rP_->get(shunt_gain_sclr_eeram_.a16, value); shunt_gain_sclr = value; }
     void get_t_last() { float value; rP_->get(t_last_eeram_.a16, value); t_last = value; }
     void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model = value; }
     void load_all();
@@ -90,6 +98,12 @@ protected:
     address16b debug_eeram_;
     address16b delta_q_eeram_;
     address16b delta_q_model_eeram_;
+    address16b isum_eeram_;
+    address16b modeling_eeram_;
+    SerialRAM *rP_;
+    address16b shunt_gain_sclr_eeram_;
+    address16b t_last_eeram_;
+    address16b t_last_model_eeram_;
 //   float Ib_scale_amp = CURR_SCALE_AMP;    // Calibration scalar of amplified shunt sensor, A
 //   float ib_bias_amp = CURR_BIAS_AMP;      // Calibration adder of amplified shunt sensor, A
 //   float Ib_scale_noa = CURR_SCALE_NOA;    // Calibration scalar of non-amplified shunt sensor, A
@@ -97,8 +111,6 @@ protected:
 //   float ib_bias_all = CURR_BIAS_ALL;      // Bias on all shunt sensors, A
 //   int8_t ib_select = FAKE_FAULTS;         // Force current sensor (-1=non-amp, 0=auto, 1=amp)
 //   float Vb_bias_hdwe = VOLT_BIAS;         // Calibrate Vb, V
-    address16b isum_eeram_;
-    address16b modeling_eeram_;
     //   uint8_t modeling = MODELING;  // Driving saturation calculation with model.  Bits specify which signals use model
 //   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
 //   float freq = 0.;              // Injected frequency, Hz (0-2)
@@ -115,10 +127,6 @@ protected:
 //   uint8_t mon_chm = MON_CHEM;   // Monitor battery chemistry type
 //   uint8_t sim_chm = SIM_CHEM;   // Simulation battery chemistry type
 //   float Vb_scale = 1.;          // Calibration scalar for Vb. V/count
-    SerialRAM *rP_;
-    address16b shunt_gain_sclr_eeram_;
-    address16b t_last_eeram_;
-    address16b t_last_model_eeram_;
 };
 
 #endif

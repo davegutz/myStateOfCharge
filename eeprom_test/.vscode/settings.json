@@ -2,7 +2,8 @@
     "extensions.ignoreRecommendations": true,
     "C_Cpp.default.configurationProvider": "particle.particle-vscode-core",
     "files.associations": {
-        "*.ino": "cpp"
+        "*.ino": "cpp",
+        "cmath": "cpp"
     },
     "particle.targetDevice": "soc1a",
     "particle.firmwareVersion": "4.0.1",

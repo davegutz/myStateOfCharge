@@ -37,7 +37,8 @@ SavedPars::SavedPars(SerialRAM *ram): rP_(ram)
     delta_q_model_eeram_.a16 = delta_q_eeram_.a16 + 0x008;
     isum_eeram_.a16 = delta_q_model_eeram_.a16 + 0x008;
     modeling_eeram_.a16 = isum_eeram_.a16 + 0x004;
-    t_last_eeram_.a16 = modeling_eeram_.a16 + 0x001;
+    shunt_gain_sclr_eeram_.a16 = modeling_eeram_.a16 + 0x001;
+    t_last_eeram_.a16 = shunt_gain_sclr_eeram_.a16 + 0x004;
     t_last_model_eeram_.a16 = t_last_eeram_.a16 + 0x004;
 }
 SavedPars::~SavedPars() {}
@@ -45,19 +46,19 @@ SavedPars::~SavedPars() {}
 // functions
 
 // Corruption test on bootup.  Needed because retained parameter memory is not managed by the compiler as it relies on
-// battery.  Small compilation changes can change where in this memory the program points, too.
+// battery.  Small compilation changes can change where in this memory the program points, too
 boolean SavedPars::is_corrupt()
 {
-    Serial.printf("%d %10.1f %10.1f %d %d %7.3f %7.3f\n", debug, delta_q, delta_q_model, isum, modeling, t_last, t_last_model);
-    Serial.printf("sizeof(int)=%d sizeof(float)=%d\n", sizeof(int), sizeof(float));
     return (
-        debug < -100 || debug > 100 || isnan(debug) ||
-        delta_q < -1e8 || delta_q > 1e5 || isnan(delta_q) ||
-        delta_q_model < -1e8 || delta_q_model > 1e5 || isnan(delta_q_model) ||
-        isum < -1 || isum > NSUM + 1 || isnan(isum) ||
-        modeling < 0 || modeling > 15 || isnan(modeling) ||
-        t_last > 100. || t_last < -20. || isnan(t_last) ||
-        t_last_model > 100. || t_last_model < -20. || isnan(t_last_model));
+        is_val_corrupt(debug, -100, 100) ||
+        is_val_corrupt(delta_q, -1e8, 1e5) ||
+        is_val_corrupt(delta_q, -1e8, 1e5) ||
+        is_val_corrupt(delta_q_model, -1e8, 1e5) ||
+        is_val_corrupt(isum, -1, NSUM+1) ||
+        is_val_corrupt(modeling, uint8_t(0), uint8_t(15)) ||
+        is_val_corrupt(shunt_gain_sclr, float(-1e6), float(1e6)) ||
+        is_val_corrupt(t_last, float(-20.), float(100.)) ||
+        is_val_corrupt(t_last_model, float(-20.), float(100.)) );
     // return ( this->nP==0 || this->nS==0 || this->mon_chm>10 || isnan(this->amp) || this->freq>2. ||
     //  abs(this->ib_bias_amp)>500. || abs(this->cutback_gain_scalar)>1000. || abs(this->ib_bias_noa)>500. ||
     //  this->t_last_model<-10. || this->t_last_model>70. );
@@ -71,6 +72,7 @@ void SavedPars::load_all()
     get_delta_q_model();
     get_isum();
     get_modeling();
+    get_shunt_gain_sclr();
     get_t_last();
     get_t_last_model();
 }
@@ -83,9 +85,9 @@ void SavedPars::nominal()
     put_delta_q_model(double(0.));
     put_isum(int(-1));
     put_modeling(uint8_t(MODELING));
-    put_t_last(float(RATED_TEMP));    
-    put_t_last_model(float(RATED_TEMP));    
     put_shunt_gain_sclr(float(1.));
+    put_t_last(float(RATED_TEMP));    
+    put_t_last_model(float(RATED_TEMP));  
     // this->Ib_scale_amp = CURR_SCALE_AMP;
     // this->ib_bias_amp = CURR_BIAS_AMP;
     // this->Ib_scale_noa = CURR_SCALE_NOA;
@@ -185,19 +187,19 @@ void SavedPars::pretty_print(const boolean all )
     if ( all || int(0) != debug )
         Serial.printf(" debug              %d          %d *v<>\n", int(0), debug);
     if ( all )
-    {
           Serial.printf(" delta_q    %10.1f %10.1f *DQ<>\n", double(0.), delta_q);
+    if ( all )
           Serial.printf(" dq_sim     %10.1f %10.1f *Ca<>, *Cm<>, C\n", double(0.), delta_q_model);
+    if ( all )
           Serial.printf(" isum                           %d tbl ptr\n", isum);
-    }
     if ( all || uint8_t(MODELING) != modeling )
         Serial.printf(" modeling            %d          %d *Xm<>\n", uint8_t(MODELING), modeling);
+    if ( all || float(1.) != shunt_gain_sclr )
+        Serial.printf(" shunt_gn_slr  %7.3f    %7.3f *SG\n", 1., shunt_gain_sclr);   // TODO:  no talk value
     if ( all )
           Serial.printf(" t_last          %5.2f      %5.2f dg C\n", float(RATED_TEMP), t_last);
     if ( all )
           Serial.printf(" t_last_sim      %5.2f      %5.2f dg C\n", float(RATED_TEMP), t_last_model);
-    // if ( all || 1. != shunt_gain_sclr )
-    //   Serial.printf(" shunt_gn_slr  %7.3f    %7.3f ?\n", 1., shunt_gain_sclr);  // TODO:  no talk value
     // if ( all || CURR_SCALE_AMP != Ib_scale_amp )
     //   Serial.printf(" scale_amp     %7.3f    %7.3f *SA<>\n", CURR_SCALE_AMP, Ib_scale_amp);
     // if ( all || float(CURR_BIAS_AMP) != ib_bias_amp )
