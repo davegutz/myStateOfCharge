@@ -32,14 +32,15 @@ SavedPars::SavedPars() {}
 SavedPars::SavedPars(SerialRAM *ram): rP_(ram)
 {
     // Memory map
-    debug_eeram_.a16 = 0x000;
-    delta_q_eeram_.a16 = debug_eeram_.a16 + 0x004;
-    delta_q_model_eeram_.a16 = delta_q_eeram_.a16 + 0x008;
-    isum_eeram_.a16 = delta_q_model_eeram_.a16 + 0x008;
-    modeling_eeram_.a16 = isum_eeram_.a16 + 0x004;
-    shunt_gain_sclr_eeram_.a16 = modeling_eeram_.a16 + 0x001;
-    t_last_eeram_.a16 = shunt_gain_sclr_eeram_.a16 + 0x004;
-    t_last_model_eeram_.a16 = t_last_eeram_.a16 + 0x004;
+    uint16_t next_loc = 0x000;
+    debug_eeram_.a16 = next_loc; next_loc += sizeof(int);
+    delta_q_eeram_.a16 = next_loc;  next_loc += sizeof(double);
+    delta_q_model_eeram_.a16 = next_loc;  next_loc += sizeof(double);
+    isum_eeram_.a16 =  next_loc;  next_loc += sizeof(int);
+    modeling_eeram_.a16 =  next_loc;  next_loc += sizeof(uint8_t);
+    shunt_gain_sclr_eeram_.a16 = next_loc;  next_loc += sizeof(float);
+    t_last_eeram_.a16 =  next_loc;  next_loc += sizeof(float);
+    t_last_model_eeram_.a16 =  next_loc;  next_loc += sizeof(float);
 }
 SavedPars::~SavedPars() {}
 // operators
