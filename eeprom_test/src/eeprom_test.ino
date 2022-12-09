@@ -49,10 +49,11 @@ SavedPars sp = SavedPars(&ram);           // Various parameters to be common at 
 
 void setup() {
   Serial.begin(115200);
-  delay(1000);
+  delay(100);
   Serial.println("Hi");
   ram.begin(0, 0);
   ram.setAutoStore(true);
+  delay(1000);
   sp.load_all();
   Serial.printf("Check corruption\n");
   if ( sp.is_corrupt() ) 

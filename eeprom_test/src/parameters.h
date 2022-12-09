@@ -47,15 +47,17 @@ public:
     // operators
 
     // parameter list
-    int8_t debug;                   // Level of debug printing, int8_t
-    double delta_q;                 // Charge change since saturated, C
-    double delta_q_model;           // Charge change since saturated, C
-    int isum;                       // Summary location.   Begins at -1 because first action is to increment isum
-    uint8_t modeling;               // Driving saturation calculation with model.  Bits specify which signals use model, uint8_t
-    float t_last;                   // Updated value of battery temperature injection when sp.modeling and proper wire connections made, deg C
-    float t_last_model;             // Battery temperature past value for rate limit memory, deg C
+    int debug;              // Level of debug printing
+    double delta_q;         // Charge change since saturated, C
+    double delta_q_model;   // Charge change since saturated, C
+    int isum;               // Summary location.   Begins at -1 because first action is to increment isum
+    uint8_t modeling;       // Driving saturation calculation with model.  Bits specify which signals use model, uint8_t
+    float shunt_gain_sclr;  // Shunt gain scalar
+    float t_last;           // Updated value of battery temperature injection when sp.modeling and proper wire connections made, deg C
+    float t_last_model;     // Battery temperature past value for rate limit memory, deg C
 
     // functions
+    int assign_all();
     boolean is_corrupt();
     void large_reset() { nominal(); }
     boolean mod_any() { return ( 0<modeling ); }        // Using any
@@ -63,32 +65,31 @@ public:
     boolean mod_none() { return ( 0==modeling ); }      // Using nothing
     boolean mod_tb() { return ( 0x1 & modeling ); }     // Using Sim as source of tb
     boolean mod_vb() { return ( 0x2 & modeling ); }     // Using Sim as source of vb
-    int8_t debug_get() { int8_t value; rP_->get(debug_eeram_.a16, value); return value; }
-    void debug_put(const int8_t input) { rP_->put(debug_eeram_.a16, input); debug = input; }
-    double delta_q_get() { double value; rP_->get(delta_q_eeram_.a16, value); return value; }
-    void delta_q_put(const double input) { rP_->put(delta_q_eeram_.a16, input); delta_q = input; }
-    double delta_q_model_get() { double value; rP_->get(delta_q_model_eeram_.a16, value); return value; }
-    void delta_q_model_put(const double input) { rP_->put(delta_q_model_eeram_.a16, input); delta_q_model = input; }
-    double isum_get() { int value; rP_->get(isum_eeram_.a16, value); return value; }
-    void isum_put(const int input) { rP_->put(isum_eeram_.a16, input); isum = input; }
+    void get_debug() { float debug_f; rP_->get(debug_eeram_.a16, debug_f); debug = int(debug_f); }
+    void get_delta_q() { double value; rP_->get(delta_q_eeram_.a16, value); delta_q = value; }
+    void get_delta_q_model() { double value; rP_->get(delta_q_model_eeram_.a16, value); delta_q_model = value; }
+    void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum = value; }
+    void get_modeling() { modeling = rP_->read(modeling_eeram_.a16); }
+    void get_t_last() { float value; rP_->get(t_last_eeram_.a16, value); t_last = value; }
+    void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model = value; }
     void load_all();
-    uint8_t modeling_get() { return rP_->read(modeling_eeram_.a16); }
-    void modeling_put(const uint8_t input) { rP_->write(modeling_eeram_.a16, input); modeling = input; }
     void nominal();
     int num_diffs();
     void pretty_print(const boolean all);
+    void put_debug(const int input) { float debug_f = float(input); rP_->put(debug_eeram_.a16, debug_f); debug = input; }
+    void put_delta_q(const double input) { rP_->put(delta_q_eeram_.a16, input); delta_q = input; }
+    void put_delta_q_model(const double input) { rP_->put(delta_q_model_eeram_.a16, input); delta_q_model = input; }
+    void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum = input; }
+    void put_modeling(const uint8_t input) { rP_->write(modeling_eeram_.a16, input); modeling = input; }
+    void put_shunt_gain_sclr(const float input) { rP_->put(shunt_gain_sclr_eeram_.a16, input); shunt_gain_sclr = input; }
+    void put_t_last(const float input) { rP_->put(t_last_eeram_.a16, input); t_last = input; }
+    void put_t_last_model(const float input) { rP_->put(t_last_model_eeram_.a16, input); t_last_model = input; }
     int read_all();
-    int assign_all();
-    int8_t t_last_get() { float value; rP_->get(t_last_eeram_.a16, value); return value; }
-    void t_last_put(const float input) { rP_->put(t_last_eeram_.a16, input); t_last = input; }
-    int8_t t_last_model_get() { float value; rP_->get(t_last_model_eeram_.a16, value); return value; }
-    void t_last_model_put(const float input) { rP_->put(t_last_model_eeram_.a16, input); t_last_model = input; }
     boolean tweak_test() { return ( 0x8 & modeling ); } // Driving signal injection completely using software inj_bias 
 protected:
     address16b debug_eeram_;
     address16b delta_q_eeram_;
     address16b delta_q_model_eeram_;
-//   float shunt_gain_sclr = 1.;             // Shunt gain scalar
 //   float Ib_scale_amp = CURR_SCALE_AMP;    // Calibration scalar of amplified shunt sensor, A
 //   float ib_bias_amp = CURR_BIAS_AMP;      // Calibration adder of amplified shunt sensor, A
 //   float Ib_scale_noa = CURR_SCALE_NOA;    // Calibration scalar of non-amplified shunt sensor, A
@@ -115,6 +116,7 @@ protected:
 //   uint8_t sim_chm = SIM_CHEM;   // Simulation battery chemistry type
 //   float Vb_scale = 1.;          // Calibration scalar for Vb. V/count
     SerialRAM *rP_;
+    address16b shunt_gain_sclr_eeram_;
     address16b t_last_eeram_;
     address16b t_last_model_eeram_;
 };

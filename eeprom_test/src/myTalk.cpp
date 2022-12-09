@@ -289,6 +289,7 @@ void talk()
 
               case ( 'S' ):  // RS: reset saved pars
                 sp.nominal();
+                sp.pretty_print(true);
                 break;
 
               default:
@@ -338,7 +339,7 @@ void talk()
 
               case ( 'Q' ):  // * DQ<>:  delta_q
                 Serial.printf("sp.delta_q%7.3f to", sp.delta_q);
-                sp.delta_q_put(cp.input_string.substring(2).toFloat());
+                sp.put_delta_q(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\nreset\n", sp.delta_q);
                 break;
 
@@ -452,9 +453,9 @@ void talk()
             break;
 
           case ( 'v' ):  // v<>:  verbose level
-            Serial.printf("sp.debug %ld sp.debug_get %ld to ", sp.debug, sp.debug_get());
-            sp.debug_put(cp.input_string.substring(1).toInt());
-            Serial.printf("%ld %ld\n", sp.debug, sp.debug_get());
+            Serial.printf("sp.debug %d to ", sp.debug);
+            sp.put_debug(cp.input_string.substring(1).toInt());
+            Serial.printf("%d\n", sp.debug);
             break;
 
           case ( 'V' ):
@@ -501,7 +502,7 @@ void talk()
                 {
                   boolean reset = rp.modeling != INT_in;
                   Serial.printf("modeling %d to ", sp.modeling);
-                  sp.modeling_put(INT_in);
+                  sp.put_modeling(INT_in);
                   Serial.printf("%d\n", sp.modeling);
                 }
                 else
