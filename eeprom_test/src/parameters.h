@@ -54,6 +54,7 @@ public:
     // operators
 
     // parameter list
+    float amp;              // Injected amplitude, A pk (0-18.3)
     int debug;              // Level of debug printing
     double delta_q;         // Charge change since saturated, C
     double delta_q_model;   // Charge change since saturated, C
@@ -79,6 +80,7 @@ public:
     boolean mod_tb() { return ( 0x1 & modeling ); }     // Using Sim as source of tb
     boolean mod_vb() { return ( 0x2 & modeling ); }     // Using Sim as source of vb
     // void get_debug() { float debug_f; rP_->get(debug_eeram_.a16, debug_f); debug = int(debug_f); }  // Don't understand why have to use float.  isum is ok!
+    void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp = value; }
     void get_debug() { int value; rP_->get(debug_eeram_.a16, value); debug = value; }
     void get_delta_q() { double value; rP_->get(delta_q_eeram_.a16, value); delta_q = value; }
     void get_delta_q_model() { double value; rP_->get(delta_q_model_eeram_.a16, value); delta_q_model = value; }
@@ -98,6 +100,7 @@ public:
     int num_diffs();
     void pretty_print(const boolean all);
     // void put_debug(const int input) { float debug_f = float(input); rP_->put(debug_eeram_.a16, debug_f); debug = input; }
+    void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp = input; }
     void put_debug(const int input) { rP_->put(debug_eeram_.a16, input); debug = input; }
     void put_delta_q(const double input) { rP_->put(delta_q_eeram_.a16, input); delta_q = input; }
     void put_delta_q_model(const double input) { rP_->put(delta_q_model_eeram_.a16, input); delta_q_model = input; }
@@ -115,6 +118,7 @@ public:
     int read_all();
     boolean tweak_test() { return ( 0x8 & modeling ); } // Driving signal injection completely using software inj_bias 
 protected:
+    address16b amp_eeram_;
     address16b debug_eeram_;
     address16b delta_q_eeram_;
     address16b delta_q_model_eeram_;
@@ -130,9 +134,6 @@ protected:
     address16b shunt_gain_sclr_eeram_;
     address16b t_last_eeram_;
     address16b t_last_model_eeram_;
-//   float Vb_bias_hdwe = VOLT_BIAS;         // Calibrate Vb, V
-    //   uint8_t modeling = MODELING;  // Driving saturation calculation with model.  Bits specify which signals use model
-//   float amp = 0.;               // Injected amplitude, A pk (0-18.3)
 //   float freq = 0.;              // Injected frequency, Hz (0-2)
 //   uint8_t type = 0;             // Injected waveform type.   0=sine, 1=square, 2=triangle
 //   float inj_bias = 0.;          // Constant bias, A
@@ -146,6 +147,7 @@ protected:
 //   float nS = NS;                // Number of series batteries in bank, e.g. '2P1S'
 //   uint8_t mon_chm = MON_CHEM;   // Monitor battery chemistry type
 //   uint8_t sim_chm = SIM_CHEM;   // Simulation battery chemistry type
+//   float Vb_bias_hdwe = VOLT_BIAS;         // Calibrate Vb, V
 //   float Vb_scale = 1.;          // Calibration scalar for Vb. V/count
 };
 

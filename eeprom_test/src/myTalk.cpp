@@ -523,8 +523,8 @@ void talk()
                 break;
 
               case ( 'a' ): // Xa<>:  injection amplitude
-                rp.amp = cp.input_string.substring(2).toFloat();
-                Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", rp.amp, rp.inj_bias);
+                sp.put_amp(cp.input_string.substring(2).toFloat());
+                Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", sp.amp, rp.inj_bias);
                 break;
 
               case ( 'b' ): // Xb<>:  injection bias
