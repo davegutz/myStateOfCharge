@@ -20,6 +20,7 @@
 	#include "WProgram.h"
 #endif
 
+const uint16_t MAX_EERAM = 0x07FF;
 
 typedef union {
 	uint16_t a16;

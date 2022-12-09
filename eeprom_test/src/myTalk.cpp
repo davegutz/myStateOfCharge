@@ -301,15 +301,15 @@ void talk()
             switch ( cp.input_string.charAt(1) )
             {
               case ( 'A' ):  // * DA<>:  Amp sensor bias
-                Serial.printf("rp.ib_bias_amp%7.3f to", rp.ib_bias_amp);
-                rp.ib_bias_amp = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.ib_bias_amp);
+                Serial.printf("sp.Ib_bias_amp%7.3f to", sp.Ib_bias_amp);
+                sp.put_Ib_bias_amp(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.Ib_bias_amp);
                 break;
 
               case ( 'B' ):  // * DB<>:  No Amp sensor bias
                 Serial.printf("rp.ib_bias_noa%7.3f to", rp.ib_bias_noa);
-                rp.ib_bias_noa = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.ib_bias_noa);
+                sp.put_Ib_bias_noa(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.Ib_bias_noa);
                 break;
 
               case ( 'c' ):  // * Dc<>:  Vb bias
@@ -365,15 +365,15 @@ void talk()
             switch ( cp.input_string.charAt(1) )
             {
               case ( 'A' ):  // * SA<>:  Amp sensor scalar
-                Serial.printf("rp.ib_bias_amp%7.3f to ", rp.Ib_scale_amp);
-                rp.Ib_scale_amp = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.Ib_scale_amp);
+                Serial.printf("sp.ib_bias_amp%7.3f to ", sp.ib_scale_amp);
+                sp.put_ib_scale_amp(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.ib_scale_amp);
                 break;
 
               case ( 'B' ):  // * SB<>:  No Amp sensor scalar
-                Serial.printf("rp.Ib_scale_noa%7.3f to ", rp.Ib_scale_noa);
-                rp.Ib_scale_noa = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.Ib_scale_noa);
+                Serial.printf("sp.Ib_scale_noa%7.3f to ", sp.ib_scale_noa);
+                sp.put_ib_scale_noa(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.ib_scale_noa);
                 break;
            
               case ( 'G' ):  // * SG<>:  Shunt gain scalar

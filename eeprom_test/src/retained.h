@@ -190,7 +190,7 @@ struct RetainedPars
   // Print
   void pretty_print(const boolean all )
   {
-    Serial.printf("\nretained parameters (rp):\n");
+    Serial.printf("\nretained parameters (sp):\n");
     Serial.printf("             defaults    current SRAM values\n");
     if ( all )
     {
