@@ -72,7 +72,7 @@ public:
     boolean mod_none() { return ( 0==modeling ); }      // Using nothing
     boolean mod_tb() { return ( 0x1 & modeling ); }     // Using Sim as source of tb
     boolean mod_vb() { return ( 0x2 & modeling ); }     // Using Sim as source of vb
-    void get_debug() { float debug_f; rP_->get(debug_eeram_.a16, debug_f); debug = int(debug_f); }
+    void get_debug() { float debug_f; rP_->get(debug_eeram_.a16, debug_f); debug = int(debug_f); }  // Don't understand why have to use float.  isum is ok!
     void get_delta_q() { double value; rP_->get(delta_q_eeram_.a16, value); delta_q = value; }
     void get_delta_q_model() { double value; rP_->get(delta_q_model_eeram_.a16, value); delta_q_model = value; }
     void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum = value; }

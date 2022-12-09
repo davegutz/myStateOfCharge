@@ -33,14 +33,14 @@ SavedPars::SavedPars(SerialRAM *ram): rP_(ram)
 {
     // Memory map
     uint16_t next_loc = 0x000;
-    debug_eeram_.a16 = next_loc; next_loc += sizeof(int);
-    delta_q_eeram_.a16 = next_loc;  next_loc += sizeof(double);
-    delta_q_model_eeram_.a16 = next_loc;  next_loc += sizeof(double);
-    isum_eeram_.a16 =  next_loc;  next_loc += sizeof(int);
-    modeling_eeram_.a16 =  next_loc;  next_loc += sizeof(uint8_t);
-    shunt_gain_sclr_eeram_.a16 = next_loc;  next_loc += sizeof(float);
-    t_last_eeram_.a16 =  next_loc;  next_loc += sizeof(float);
-    t_last_model_eeram_.a16 =  next_loc;  next_loc += sizeof(float);
+    debug_eeram_.a16 = next_loc; next_loc += sizeof(debug);
+    delta_q_eeram_.a16 = next_loc;  next_loc += sizeof(delta_q);
+    delta_q_model_eeram_.a16 = next_loc;  next_loc += sizeof(delta_q_model);
+    isum_eeram_.a16 =  next_loc;  next_loc += sizeof(isum);
+    modeling_eeram_.a16 =  next_loc;  next_loc += sizeof(modeling);
+    shunt_gain_sclr_eeram_.a16 = next_loc;  next_loc += sizeof(shunt_gain_sclr);
+    t_last_eeram_.a16 =  next_loc;  next_loc += sizeof(t_last);
+    t_last_model_eeram_.a16 =  next_loc;  next_loc += sizeof(t_last_model);
 }
 SavedPars::~SavedPars() {}
 // operators
