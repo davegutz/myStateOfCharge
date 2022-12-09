@@ -46,7 +46,7 @@ public:
 	//Functionality to 'get' and 'put' objects to and from EERAM
 	// https://github.com/sparkfun/SparkFun_External_EEPROM_Arduino_Library/blob/master/src/SparkFun_External_EEPROM.h
 	template <typename T>
-	T &get(uint32_t idx, T &t)
+	T &get(uint16_t idx, T &t)
 	{
 		uint8_t *ptr = (uint8_t *)&t;
 		read(idx, ptr, sizeof(T)); //Address, data, sizeOfData
@@ -54,7 +54,7 @@ public:
 	}
 
 	template <typename T>
-	const T &put(uint32_t idx, const T &t) //Address, data
+	const T &put(uint16_t idx, const T &t) //Address, data
 	{
 		const uint8_t *ptr = (const uint8_t *)&t;
 		write(idx, ptr, sizeof(T)); //Address, data, sizeOfData
