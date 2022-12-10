@@ -87,7 +87,7 @@ extern Flt_st myFlt[NFLT];        // Summaries for saving fault history
 
 retained RetainedPars rp;             // Various control parameters static at system level
 retained Sum_st mySum[NSUM];          // Summaries
-retained Flt_st myFlt[NFLT];          // Summaries
+retained Flt_st myFlt[NFLT];          // Summaries   TODO:  make parameters same as Sum_st  TODO:  add 2 hist snaps
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
 unsigned long millis_flip = millis(); // Timekeeping
