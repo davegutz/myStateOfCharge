@@ -84,6 +84,7 @@ if __name__ == '__main__':
         plot_init_in = False
         long_term_in = False
         plot_overall_in = True
+        use_vb_sim_in = False
 
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
@@ -113,8 +114,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'dwell noise Ca.5 v20221028.txt'  # ; dTb = [[0., 18000.],  [0, 8.]]
         # data_file_old_txt = 'dwell Ca.5 v20221028.txt'  # ; time_end_in=0.5  # ; dTb = [[0., 18000.],  [0, 8.]]
         #
-        # data_file_old_txt = 'coldCharge1 v20221028.txt'; unit_key = 'soc0_2022';
-        data_file_old_txt = 'coldCharge2 v20221028.txt'; unit_key = 'soc0_2022';
+        data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
         # data_file_old_txt = 'vb_mess.txt'; unit_key = 'pro1a_2022';
         # data_file_old_txt = 'fail 20221124.txt';  plot_overall_in=False;  # ; long_term_in=True;
         # data_file_old_txt = 'init Ca1 v20220926.txt'
@@ -225,7 +225,8 @@ if __name__ == '__main__':
                                                              scale_r_ss=scale_r_ss_in, s_hys_sim=scale_hys_sim_in,
                                                              s_hys_mon=scale_hys_mon_in, dvoc_sim=dvoc_sim_in,
                                                              dvoc_mon=dvoc_mon_in, Bmon=Bmon_in, Bsim=Bsim_in,
-                                                             drive_ekf=drive_ekf_in, dTb_in=dTb, verbose=False)
+                                                             drive_ekf=drive_ekf_in, dTb_in=dTb, verbose=False,
+                                                             use_vb_sim=use_vb_sim_in)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots
