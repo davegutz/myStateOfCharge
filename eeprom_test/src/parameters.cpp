@@ -53,7 +53,7 @@ SavedPars::SavedPars(SerialRAM *ram): rP_(ram)
     Tb_bias_hdwe_eeram_.a16 = next_loc; next_loc += sizeof(Tb_bias_hdwe);
     type_eeram_.a16 =  next_loc;  next_loc += sizeof(type);
     t_last_eeram_.a16 =  next_loc;  next_loc += sizeof(t_last);
-    t_last_model_eeram_.a16 =  next_loc; 
+    t_last_model_eeram_.a16 =  next_loc; next_loc += sizeof(t_last_model);
     Vb_bias_hdwe_eeram_.a16 = next_loc; next_loc += sizeof(Vb_bias_hdwe);
     if ( next_loc > MAX_EERAM ) Serial.printf("SavedPars::SavedPars - BAD MEMORY MAP\n");
 }
@@ -231,49 +231,49 @@ void SavedPars::pretty_print(const boolean all)
     Serial.printf("saved parameters (sp):\n");
     Serial.printf("             defaults    current EERAM values\n");
     if ( all || float(0.) != amp )
-        Serial.printf(" inj amp       %7.3f    %7.3f *Xa<> A pk\n", 0., amp);
+        Serial.printf(" inj amp%7.3f  %7.3f *Xa<> A pk\n", 0., amp);
     if ( all || 1. != cutback_gain_sclr )
-        Serial.printf(" cut_gn_slr    %7.3f    %7.3f *Sk<>\n", 1., cutback_gain_sclr);
+        Serial.printf(" cut_gn_slr%7.3f  %7.3f *Sk<>\n", 1., cutback_gain_sclr);
     if ( all || int(0) != debug )
-        Serial.printf(" debug              %d          %d *v<>\n", int(0), debug);
+        Serial.printf(" debug  %d  %d *v<>\n", int(0), debug);
     if ( all )
-        Serial.printf(" delta_q    %10.1f %10.1f *DQ<>\n", double(0.), delta_q);
+        Serial.printf(" delta_q%10.1f %10.1f *DQ<>\n", double(0.), delta_q);
     if ( all )
-        Serial.printf(" dq_sim     %10.1f %10.1f *Ca<>, *Cm<>, C\n", double(0.), delta_q_model);
+        Serial.printf(" dq_sim %10.1f %10.1f *Ca<>, *Cm<>, C\n", double(0.), delta_q_model);
     if ( all || float(0.) != freq )
-        Serial.printf(" inj frq       %7.3f    %7.3f *Xf<> r/s\n", 0., freq);
+        Serial.printf(" inj frq%7.3f  %7.3f *Xf<> r/s\n", 0., freq);
     if ( all || float(CURR_BIAS_ALL) != Ib_bias_all )
-        Serial.printf(" ib_bias_all   %7.3f    %7.3f *Di<> A\n", CURR_BIAS_ALL, Ib_bias_all);
+        Serial.printf(" ib_bias_all%7.3f  %7.3f *Di<> A\n", CURR_BIAS_ALL, Ib_bias_all);
     if ( all || float(CURR_BIAS_AMP) != Ib_bias_amp )
-        Serial.printf(" bias_amp      %7.3f    %7.3f *DA<>\n", CURR_BIAS_AMP, Ib_bias_amp);
+        Serial.printf(" bias_amp%7.3f  %7.3f *DA<>\n", CURR_BIAS_AMP, Ib_bias_amp);
     if ( all || float(CURR_BIAS_NOA) != Ib_bias_noa )
-        Serial.printf(" bias_noa      %7.3f    %7.3f *DB<>\n", CURR_BIAS_NOA, Ib_bias_noa);
+        Serial.printf(" bias_noa%7.3f  %7.3f *DB<>\n", CURR_BIAS_NOA, Ib_bias_noa);
     if ( all || float(CURR_SCALE_AMP) != ib_scale_amp )
-        Serial.printf(" ib_scale_amp     %7.3f    %7.3f *SA<>\n", CURR_SCALE_AMP, ib_scale_amp);
+        Serial.printf(" ib_scale_amp%7.3f  %7.3f *SA<>\n", CURR_SCALE_AMP, ib_scale_amp);
     if ( all || float(CURR_SCALE_NOA) != ib_scale_noa )
-        Serial.printf(" ib_scale_noa     %7.3f    %7.3f *SB<>\n", CURR_SCALE_NOA, ib_scale_noa);
+        Serial.printf(" ib_scale_noa%7.3f  %7.3f *SB<>\n", CURR_SCALE_NOA, ib_scale_noa);
     if ( all || int8_t(FAKE_FAULTS) != ib_select )
-        Serial.printf(" ib_select           %d          %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select);
+        Serial.printf(" ib_select %d  %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select);
     if ( all || float(0.) != inj_bias )
-        Serial.printf(" inj_bias      %7.3f    %7.3f *Xb<> A\n", 0., inj_bias);
+        Serial.printf(" inj_bias%7.3f  %7.3f *Xb<> A\n", 0., inj_bias);
     if ( all )
         Serial.printf(" isum                           %d tbl ptr\n", isum);
     if ( all || uint8_t(MODELING) != modeling )
-        Serial.printf(" modeling            %d          %d *Xm<>\n", uint8_t(MODELING), modeling);
+        Serial.printf(" modeling %d  %d *Xm<>\n", uint8_t(MODELING), modeling);
     if ( all || float(1.) != s_cap_model )
-        Serial.printf(" s_cap_model   %7.3f    %7.3f *Sc<>\n", 1., s_cap_model);
+        Serial.printf(" s_cap_model%7.3f  %7.3f *Sc<>\n", 1., s_cap_model);
     if ( all || float(1.) != shunt_gain_sclr )
-        Serial.printf(" shunt_gn_slr  %7.3f    %7.3f *SG\n", 1., shunt_gain_sclr);   // TODO:  no talk value
+        Serial.printf(" shunt_gn_slr%7.3f  %7.3f *SG\n", 1., shunt_gain_sclr);   // TODO:  no talk value
     if ( all || float(TEMP_BIAS) != Tb_bias_hdwe )
-        Serial.printf(" Tb_bias_hdwe  %7.3f    %7.3f *Dt<> dg C\n", TEMP_BIAS, Tb_bias_hdwe);
-    if ( all )
-        Serial.printf(" t_last          %5.2f      %5.2f dg C\n", float(RATED_TEMP), t_last);
-    if ( all )
-        Serial.printf(" t_last_sim      %5.2f      %5.2f dg C\n", float(RATED_TEMP), t_last_model);
+        Serial.printf(" Tb_bias_hdwe%7.3f  %7.3f *Dt<> dg C\n", TEMP_BIAS, Tb_bias_hdwe);
     if ( all || uint8_t(0) != type )
-      Serial.printf(" inj typ             %d          %d *Xt<> 1=sin, 2=sq, 3=tri, 4=1C, 5=-1C, 8=cos\n", 0, type);
+        Serial.printf(" type inj %d  %d *Xt<> 1=sin, 2=sq, 3=tri, 4=1C, 5=-1C, 8=cos\n", 0, type);
+    if ( all )
+        Serial.printf(" t_last %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last);
+    if ( all )
+        Serial.printf(" t_last_sim %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_model);
     if ( all || float(VOLT_BIAS) != Vb_bias_hdwe )
-        Serial.printf(" Vb_bias_hdwe       %7.3f    %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe);
+        Serial.printf(" Vb_bias_hdwe %7.3f  %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe);
     // if ( all || float(HYS_SCALE) != hys_scale )
     //   Serial.printf(" hys_scale     %7.3f    %7.3f *Sh<>\n", HYS_SCALE, hys_scale);
     // if ( all || float(NP) != nP )
