@@ -55,6 +55,8 @@ public:
 
     // parameter list
     float amp;              // Injected amplitude, A pk (0-18.3)
+    float cutback_gain_sclr; // Scalar on battery model saturation cutback function
+                                // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
     int debug;              // Level of debug printing
     double delta_q;         // Charge change since saturated, C
     double delta_q_model;   // Charge change since saturated, C
@@ -65,11 +67,16 @@ public:
     float ib_scale_amp;     // Calibration scalar of amplified shunt sensor
     float ib_scale_noa;     // Calibration scalar of non-amplified shunt sensor
     int8_t ib_select;       // Force current sensor (-1=non-amp, 0=auto, 1=amp)
+    float inj_bias;         // Constant bias, A
     int isum;               // Summary location.   Begins at -1 because first action is to increment isum
     uint8_t modeling;       // Driving saturation calculation with model.  Bits specify which signals use model, uint8_t
+    float s_cap_model;      // Scalar on battery model size
     float shunt_gain_sclr;  // Shunt gain scalar
+    float Tb_bias_hdwe;     // Bias on Tb sensor, deg C
+    uint8_t type;           // Injected waveform type.   0=sine, 1=square, 2=triangle
     float t_last;           // Updated value of battery temperature injection when sp.modeling and proper wire connections made, deg C
     float t_last_model;     // Battery temperature past value for rate limit memory, deg C
+    float Vb_bias_hdwe;     // Calibrate Vb, V
 
     // functions
     int assign_all();
@@ -82,6 +89,7 @@ public:
     boolean mod_vb() { return ( 0x2 & modeling ); }     // Using Sim as source of vb
     // void get_debug() { float debug_f; rP_->get(debug_eeram_.a16, debug_f); debug = int(debug_f); }  // Don't understand why have to use float.  isum is ok!
     void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp = value; }
+    void get_cutback_gain_sclr() { float value; rP_->get(cutback_gain_sclr_eeram_.a16, value); cutback_gain_sclr = value; }
     void get_debug() { int value; rP_->get(debug_eeram_.a16, value); debug = value; }
     void get_delta_q() { double value; rP_->get(delta_q_eeram_.a16, value); delta_q = value; }
     void get_delta_q_model() { double value; rP_->get(delta_q_model_eeram_.a16, value); delta_q_model = value; }
@@ -92,17 +100,24 @@ public:
     void get_ib_scale_amp() { float value; rP_->get(ib_scale_amp_eeram_.a16, value); ib_scale_amp = value; }
     void get_ib_scale_noa() { float value; rP_->get(ib_scale_noa_eeram_.a16, value); ib_scale_noa = value; }
     void get_ib_select() { int8_t value; rP_->get(ib_select_eeram_.a16, value); ib_select = value; }
+    void get_inj_bias() { float value; rP_->get(inj_bias_eeram_.a16, value); inj_bias = value; }
     void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum = value; }
     void get_modeling() { modeling = rP_->read(modeling_eeram_.a16); }
+    void get_s_cap_model() { float value; rP_->get(s_cap_model_eeram_.a16, value); s_cap_model = value; }
     void get_shunt_gain_sclr() { float value; rP_->get(shunt_gain_sclr_eeram_.a16, value); shunt_gain_sclr = value; }
+    void get_Tb_bias_hdwe() { float value; rP_->get(Tb_bias_hdwe_eeram_.a16, value); Tb_bias_hdwe = value; }
+    void get_type() { type = rP_->read(type_eeram_.a16); }
     void get_t_last() { float value; rP_->get(t_last_eeram_.a16, value); t_last = value; }
     void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model = value; }
+    void get_Vb_bias_hdwe() { float value; rP_->get(Vb_bias_hdwe_eeram_.a16, value); Vb_bias_hdwe = value; }
     void load_all();
+    void mem_print();
     void nominal();
     int num_diffs();
     void pretty_print(const boolean all);
     // void put_debug(const int input) { float debug_f = float(input); rP_->put(debug_eeram_.a16, debug_f); debug = input; }
     void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp = input; }
+    void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr = input; }
     void put_debug(const int input) { rP_->put(debug_eeram_.a16, input); debug = input; }
     void put_delta_q(const double input) { rP_->put(delta_q_eeram_.a16, input); delta_q = input; }
     void put_delta_q_model(const double input) { rP_->put(delta_q_model_eeram_.a16, input); delta_q_model = input; }
@@ -113,15 +128,21 @@ public:
     void put_ib_scale_amp(const float input) { rP_->put(ib_scale_amp_eeram_.a16, input); ib_scale_amp = input; }
     void put_ib_scale_noa(const float input) { rP_->put(ib_scale_noa_eeram_.a16, input); ib_scale_noa = input; }
     void put_ib_select(const int8_t input) { rP_->put(ib_select_eeram_.a16, input); ib_select = input; }
+    void put_inj_bias(const float input) { rP_->put(inj_bias_eeram_.a16, input); inj_bias = input; }
     void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum = input; }
     void put_modeling(const uint8_t input) { rP_->write(modeling_eeram_.a16, input); modeling = input; }
+    void put_s_cap_model(const float input) { rP_->put(s_cap_model_eeram_.a16, input); s_cap_model = input; }
     void put_shunt_gain_sclr(const float input) { rP_->put(shunt_gain_sclr_eeram_.a16, input); shunt_gain_sclr = input; }
+    void put_Tb_bias_hdwe(const float input) { rP_->put(Tb_bias_hdwe_eeram_.a16, input); Tb_bias_hdwe = input; }
+    void put_type(const uint8_t input) { rP_->write(type_eeram_.a16, input); type = input; }
     void put_t_last(const float input) { rP_->put(t_last_eeram_.a16, input); t_last = input; }
     void put_t_last_model(const float input) { rP_->put(t_last_model_eeram_.a16, input); t_last_model = input; }
+    void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe = input; }
     int read_all();
     boolean tweak_test() { return ( 0x8 & modeling ); } // Driving signal injection completely using software inj_bias 
 protected:
     address16b amp_eeram_;
+    address16b cutback_gain_sclr_eeram_;
     address16b debug_eeram_;
     address16b delta_q_eeram_;
     address16b delta_q_model_eeram_;
@@ -132,25 +153,23 @@ protected:
     address16b ib_scale_amp_eeram_;
     address16b ib_scale_noa_eeram_;
     address16b ib_select_eeram_;
+    address16b inj_bias_eeram_;
     address16b isum_eeram_;
     address16b modeling_eeram_;
     SerialRAM *rP_;
     address16b shunt_gain_sclr_eeram_;
+    address16b s_cap_model_eeram_;
+    address16b Tb_bias_hdwe_eeram_;
+    address16b type_eeram_;
     address16b t_last_eeram_;
     address16b t_last_model_eeram_;
-//   uint8_t type = 0;             // Injected waveform type.   0=sine, 1=square, 2=triangle
-//   float inj_bias = 0.;          // Constant bias, A
-//   float Tb_bias_hdwe = TEMP_BIAS; // Bias on Tb sensor, deg C
-//   float s_cap_model = 1.;         // Scalar on battery model size
-//   float cutback_gain_scalar = 1.; // Scalar on battery model saturation cutback function
-//           // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
+    address16b Vb_bias_hdwe_eeram_;
 //   int iflt = -1;                // Fault snap location.   Begins at -1 because first action is to increment iflt
 //   float hys_scale = HYS_SCALE;  // Hysteresis scalar
 //   float nP = NP;                // Number of parallel batteries in bank, e.g. '2P1S'
 //   float nS = NS;                // Number of series batteries in bank, e.g. '2P1S'
 //   uint8_t mon_chm = MON_CHEM;   // Monitor battery chemistry type
 //   uint8_t sim_chm = SIM_CHEM;   // Simulation battery chemistry type
-//   float Vb_bias_hdwe = VOLT_BIAS;         // Calibrate Vb, V
 //   float Vb_scale = 1.;          // Calibration scalar for Vb. V/count
 };
 

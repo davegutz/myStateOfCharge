@@ -313,9 +313,9 @@ void talk()
                 break;
 
               case ( 'c' ):  // * Dc<>:  Vb bias
-                Serial.printf("rp.Vb_bias_hdwe%7.3f to", rp.Vb_bias_hdwe);
-                rp.Vb_bias_hdwe = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.Vb_bias_hdwe);
+                Serial.printf("rp.Vb_bias_hdwe%7.3f to", sp.Vb_bias_hdwe);
+                sp.put_Vb_bias_hdwe(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.Vb_bias_hdwe);
                 break;
 
               case ( 'E' ):  //   DE<>:  EKF execution frame multiplier
@@ -344,16 +344,10 @@ void talk()
                 break;
 
               case ( 't' ):  // * Dt<>:  Temp bias change hardware
-                Serial.printf("rp.Tb_bias_hdwe%7.3f to", rp.Tb_bias_hdwe);
-                rp.Tb_bias_hdwe = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\nreset\n", rp.Tb_bias_hdwe);
+                Serial.printf("sp.Tb_bias_hdwe%7.3f to", sp.Tb_bias_hdwe);
+                sp.put_Tb_bias_hdwe(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\nreset\n", sp.Tb_bias_hdwe);
                 cp.cmd_reset();
-                break;
-
-              case ( '^' ):  // * D^<>:  Temp bias change model for faults
-                Serial.printf("cp.Tb_bias_model%7.3f to", cp.Tb_bias_model);
-                cp.Tb_bias_model = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", cp.Tb_bias_model);
                 break;
 
               default:
@@ -375,7 +369,22 @@ void talk()
                 sp.put_ib_scale_noa(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", sp.ib_scale_noa);
                 break;
-           
+
+              case ( 'c' ):  // * Sc<>: scale capacity
+                Serial.printf("sp.s_cap_model%7.3f to ", sp.s_cap_model);
+                scale = cp.input_string.substring(2).toFloat();
+                sp.put_s_cap_model(scale);
+                Serial.printf("%7.3f\n", sp.s_cap_model);
+            
+                // Serial.printf("Sim.q_cap_rated%7.3f %7.3f to ", scale, Sen->Sim->q_cap_scaled());
+            
+                // Sen->Sim->apply_cap_scale(rp.s_cap_model);
+                // if ( rp.modeling ) Mon->init_soc_ekf(Sen->Sim->soc());
+            
+                // Serial.printf("%7.3f\n", Sen->Sim->q_cap_scaled());
+                // Serial.printf("Sim:"); Sen->Sim->pretty_print(); Sen->Sim->Coulombs::pretty_print();
+                break;
+                       
               case ( 'G' ):  // * SG<>:  Shunt gain scalar
                 Serial.printf("sp.shunt_gain_sclr%7.3f to ", sp.shunt_gain_sclr);
                 sp.put_shunt_gain_sclr(cp.input_string.substring(2).toFloat());
@@ -384,8 +393,9 @@ void talk()
            
               case ( 'k' ):  // * Sk<>:  scale cutback gain for sim rep of BMS
                 scale = cp.input_string.substring(2).toFloat();
-                rp.cutback_gain_scalar = scale;
-                Serial.printf("rp.cutback_gain_scalar to%7.3f\n", rp.cutback_gain_scalar);
+                Serial.printf("sp.cutback_gain_sclr%7.3f to ", sp.cutback_gain_sclr);
+                sp.put_cutback_gain_sclr(scale);
+                Serial.printf("%7.3f\n", sp.cutback_gain_sclr);
                 break;
             
               case ( 'V' ):  // * SV<>:  Vb sensor scalar
@@ -528,8 +538,8 @@ void talk()
                 break;
 
               case ( 'b' ): // Xb<>:  injection bias
-                rp.inj_bias = cp.input_string.substring(2).toFloat();
-                Serial.printf("Inj_bias set%7.3f\n", rp.inj_bias);
+                sp.put_inj_bias(cp.input_string.substring(2).toFloat());
+                Serial.printf("Inj_bias set%7.3f\n", sp.inj_bias);
                 break;
 
               case ( 'f' ): // Xf<>:  injection freq
@@ -541,38 +551,38 @@ void talk()
                 switch ( cp.input_string.charAt(2) )
                 {
                   case ( 'n' ):  // Xtn:  none
-                    rp.type = 0;
-                    Serial.printf("Set none. rp.type %d\n", rp.type);
+                    sp.put_type(0);
+                    Serial.printf("Set none. sp.type %d\n", sp.type);
                     break;
 
                   case ( 's' ):  // Xts:  sine
-                    rp.type = 1;
-                    Serial.printf("Set sin. rp.type %d\n", rp.type);
+                    sp.put_type(1);
+                    Serial.printf("Set sin. sp.type %d\n", sp.type);
                     break;
 
                   case ( 'q' ):  // Xtq:  square
-                    rp.type = 2;
-                    Serial.printf("Set square. rp.type %d\n", rp.type);
+                    sp.put_type(2);
+                    Serial.printf("Set square. sp.type %d\n", sp.type);
                     break;
 
                   case ( 't' ):  // Xtt:  triangle
-                    rp.type = 3;
-                    Serial.printf("Set tri. rp.type %d\n", rp.type);
+                    sp.put_type(3);
+                    Serial.printf("Set tri. sp.type %d\n", sp.type);
                     break;
 
                   case ( 'c' ):  // Xtc:  charge rate
-                    rp.type = 4;
-                    Serial.printf("Set 1C charge. rp.type %d\n", rp.type);
+                    sp.put_type(4);
+                    Serial.printf("Set 1C charge. sp.type %d\n", sp.type);
                     break;
 
                   case ( 'd' ):  // Xtd:  discharge rate
-                    rp.type = 5;
-                    Serial.printf("Set 1C disch. rp.type %d\n", rp.type);
+                    sp.put_type(5);
+                    Serial.printf("Set 1C disch. sp.type %d\n", sp.type);
                     break;
 
                   case ( 'o' ):  // Xto:  cosine
-                    rp.type = 8;
-                    Serial.printf("Set cos. rp.type %d\n", rp.type);
+                    sp.put_type(8);
+                    Serial.printf("Set cos. sp.type %d\n", sp.type);
                     break;
 
                   default:
@@ -581,15 +591,8 @@ void talk()
                 break;
 
               case ( 'o' ): // Xo<>:  injection dc offset
-                rp.inj_bias = max(min(cp.input_string.substring(2).toFloat(), 18.3), -18.3);
-                Serial.printf("inj_bias set%7.3f\n", rp.inj_bias);
-                break;
-
-              case ( 's' ): // Xs:  scale T_SAT
-                FP_in = cp.input_string.substring(2).toFloat();
-                Serial.printf("s_t_sat%7.1f s to\n", cp.s_t_sat);
-                cp.s_t_sat = max(FP_in, 0.);
-                Serial.printf("%7.1f\n", cp.s_t_sat);
+                sp.put_inj_bias(max(min(cp.input_string.substring(2).toFloat(), 18.3), -18.3));
+                Serial.printf("inj_bias set%7.3f\n", sp.inj_bias);
                 break;
 
               default:
@@ -629,8 +632,8 @@ void talkH()
   Serial.printf(" *DB= "); Serial.printf("%6.3f", sp.Ib_bias_noa); Serial.printf(": delta noa, A [%6.3f]\n", CURR_BIAS_NOA); 
   Serial.printf(" *SA= "); Serial.printf("%6.3f", sp.ib_scale_amp); Serial.printf(": scale amp [%6.3f]\n", CURR_SCALE_AMP); 
   Serial.printf(" *SB= "); Serial.printf("%6.3f", sp.ib_scale_noa); Serial.printf(": scale noa [%6.3f]\n", CURR_SCALE_NOA); 
-  Serial.printf(" *Dc= "); Serial.printf("%6.3f", rp.Vb_bias_hdwe); Serial.printf(": delta, V [%6.3f]\n", VOLT_BIAS); 
-  Serial.printf(" *Dt= "); Serial.printf("%6.3f", rp.Tb_bias_hdwe); Serial.printf(": delta hdwe, deg C [%6.3f]\n", TEMP_BIAS); 
+  Serial.printf(" *Dc= "); Serial.printf("%6.3f", sp.Vb_bias_hdwe); Serial.printf(": delta, V [%6.3f]\n", VOLT_BIAS); 
+  Serial.printf(" *Dt= "); Serial.printf("%6.3f", sp.Tb_bias_hdwe); Serial.printf(": delta hdwe, deg C [%6.3f]\n", TEMP_BIAS); 
   Serial.printf(" *SG= "); Serial.printf("%6.3f", sp.shunt_gain_sclr); Serial.printf(": rp. scale shunt gains [1]\n"); 
   Serial.printf(" *Sh= "); Serial.printf("%6.3f", rp.hys_scale); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
   Serial.printf(" *Sk=  "); Serial.print(rp.cutback_gain_scalar); Serial.println(": Sat mod ctbk sclr"); 

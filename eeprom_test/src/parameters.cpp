@@ -34,6 +34,7 @@ SavedPars::SavedPars(SerialRAM *ram): rP_(ram)
     // Memory map
     uint16_t next_loc = 0x000;
     amp_eeram_.a16 = next_loc; next_loc += sizeof(amp);
+    cutback_gain_sclr_eeram_.a16 = next_loc; next_loc += sizeof(cutback_gain_sclr);
     debug_eeram_.a16 = next_loc; next_loc += sizeof(debug);
     delta_q_eeram_.a16 = next_loc;  next_loc += sizeof(delta_q);
     delta_q_model_eeram_.a16 = next_loc;  next_loc += sizeof(delta_q_model);
@@ -44,11 +45,16 @@ SavedPars::SavedPars(SerialRAM *ram): rP_(ram)
     ib_scale_amp_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_scale_amp);
     ib_scale_noa_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_scale_noa);
     ib_select_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_select);
+    inj_bias_eeram_.a16 =  next_loc;  next_loc += sizeof(inj_bias);
     isum_eeram_.a16 =  next_loc;  next_loc += sizeof(isum);
     modeling_eeram_.a16 =  next_loc;  next_loc += sizeof(modeling);
+    s_cap_model_eeram_.a16 = next_loc;  next_loc += sizeof(s_cap_model);
     shunt_gain_sclr_eeram_.a16 = next_loc;  next_loc += sizeof(shunt_gain_sclr);
+    Tb_bias_hdwe_eeram_.a16 = next_loc; next_loc += sizeof(Tb_bias_hdwe);
+    type_eeram_.a16 =  next_loc;  next_loc += sizeof(type);
     t_last_eeram_.a16 =  next_loc;  next_loc += sizeof(t_last);
     t_last_model_eeram_.a16 =  next_loc; 
+    Vb_bias_hdwe_eeram_.a16 = next_loc; next_loc += sizeof(Vb_bias_hdwe);
     if ( next_loc > MAX_EERAM ) Serial.printf("SavedPars::SavedPars - BAD MEMORY MAP\n");
 }
 SavedPars::~SavedPars() {}
@@ -61,6 +67,7 @@ boolean SavedPars::is_corrupt()
 {
     return (
         is_val_corrupt(amp, float(-1e6), float(1e6)) ||
+        is_val_corrupt(cutback_gain_sclr, float(-1000.), float(1000.)) ||
         is_val_corrupt(debug, -100, 100) ||
         is_val_corrupt(delta_q, -1e8, 1e5) ||
         is_val_corrupt(delta_q, -1e8, 1e5) ||
@@ -72,20 +79,24 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(ib_scale_amp, float(-1e6), float(1e6)) ||
         is_val_corrupt(ib_scale_noa, float(-1e6), float(1e6)) ||
         is_val_corrupt(ib_select, int8_t(-1), int8_t(1)) ||
+        is_val_corrupt(inj_bias, float(-100.), float(100.)) ||
         is_val_corrupt(isum, -1, NSUM+1) ||
         is_val_corrupt(modeling, uint8_t(0), uint8_t(15)) ||
+        is_val_corrupt(s_cap_model, float(0.), float(1000.)) ||
         is_val_corrupt(shunt_gain_sclr, float(-1e6), float(1e6)) ||
-        is_val_corrupt(t_last, float(-20.), float(100.)) ||
-        is_val_corrupt(t_last_model, float(-20.), float(100.)) );
-    // return ( this->nP==0 || this->nS==0 || this->mon_chm>10 || this->freq>2. ||
-    //  abs(this->ib_bias_amp)>500. || abs(this->cutback_gain_scalar)>1000. || abs(this->ib_bias_noa)>500. ||
-    //  this->t_last_model<-10. || this->t_last_model>70. );
+        is_val_corrupt(Tb_bias_hdwe, float(-500.), float(500.)) ||
+        is_val_corrupt(type, uint8_t(0), uint8_t(10)) ||
+        is_val_corrupt(t_last, float(-10.), float(70.)) ||
+        is_val_corrupt(t_last_model, float(-10.), float(70.)) ||
+        is_val_corrupt(Vb_bias_hdwe, float(-500.), float(500.)) );
+    // return ( this->nP==0 || this->nS==0 || this->mon_chm>10 
 }
 
 // Assign all save EERAM to RAM
 void SavedPars::load_all()
 {
     get_amp();
+    get_cutback_gain_sclr();
     get_debug();
     get_delta_q();
     get_delta_q_model();
@@ -96,18 +107,23 @@ void SavedPars::load_all()
     get_ib_scale_amp();
     get_ib_scale_noa();
     get_ib_select();
+    get_inj_bias();
     get_isum();
     get_modeling();
+    get_s_cap_model();
     get_shunt_gain_sclr();
+    get_Tb_bias_hdwe();
+    get_type();
     get_t_last();
     get_t_last_model();
+    get_Vb_bias_hdwe();
 }
 
 // Nominalize
 void SavedPars::nominal()
 {
-    // for ( uint16_t i=0x0000; i<MAX_EERAM; i++ ) rP_->write(i, uint8_t(0));
     put_amp(float(0));
+    put_cutback_gain_sclr(float(1.));
     put_debug(int(0));
     put_delta_q(double(0.));
     put_delta_q_model(double(0.));
@@ -118,19 +134,17 @@ void SavedPars::nominal()
     put_ib_scale_amp(float(CURR_SCALE_AMP));
     put_ib_scale_noa(float(CURR_SCALE_NOA));
     put_ib_select(int8_t(FAKE_FAULTS));
+    put_inj_bias(float(0.));
     put_isum(int(-1));
     put_modeling(uint8_t(MODELING));
+    put_s_cap_model(float(1.));
     put_shunt_gain_sclr(float(1.));
+    put_Tb_bias_hdwe(float(TEMP_BIAS));
+    put_type(uint8_t(0));    
     put_t_last(float(RATED_TEMP));    
     put_t_last_model(float(RATED_TEMP));  
+    put_Vb_bias_hdwe(float(VOLT_BIAS));
     // this->Vb_scale = VB_SCALE;
-    // this->Vb_bias_hdwe = VOLT_BIAS;
-    // this->type = 0;
-    // this->inj_bias = 0.;
-    // this->Tb_bias_hdwe = TEMP_BIAS;
-    // this->s_cap_model = 1.;
-    // this->cutback_gain_scalar = 1.;
-    // this->isum = -1;
     // this->hys_scale = HYS_SCALE;
     // this->nP = NP;
     // this->nS = NS;
@@ -138,11 +152,12 @@ void SavedPars::nominal()
     // this->sim_chm = SIM_CHEM;
  }
 
-// Number of differences between SRAM and actual
+// Number of differences between nominal EERAM and actual (don't count integator memories because they always change)
 int SavedPars::num_diffs()
 {
     int n = 0;
 
+    // Don't count memories
     // if ( float(RATED_TEMP) != t_last )
     //   n++;
     // if ( float(RATED_TEMP) != t_last_model )
@@ -153,9 +168,9 @@ int SavedPars::num_diffs()
     //   n++;
 
 
-    if ( float(1.) != shunt_gain_sclr )
-      n++;
     if ( float(0.) != amp )
+      n++;
+    if ( float(1.) != cutback_gain_sclr )
       n++;
     if ( int(0) != debug )
         n++;
@@ -173,18 +188,20 @@ int SavedPars::num_diffs()
       n++;
     if ( int8_t(FAKE_FAULTS) != ib_select )
       n++;
+    if ( float(0.) != inj_bias )
+      n++;
     if ( uint8_t(MODELING) != modeling )
         n++;
-    // if ( 0 != type )
-    //   n++;
-    // if ( 0. != inj_bias )
-    //   n++;
-    // if ( float(TEMP_BIAS) != Tb_bias_hdwe )
-    //   n++;
-    // if ( 1. != s_cap_model )
-    //   n++;
-    // if ( 1. != cutback_gain_scalar )
-    //   n++;
+    if ( float(1.) != shunt_gain_sclr )
+      n++;
+    if ( float(TEMP_BIAS) != Tb_bias_hdwe )
+      n++;
+    if ( uint8_t(0) != type )
+      n++;
+    if ( float(VOLT_BIAS) != Vb_bias_hdwe )
+      n++;
+    if ( float(1.) != s_cap_model )
+      n++;
     // if ( float(HYS_SCALE) != hys_scale )
     //   n++;
     // if ( float(NP) != nP )
@@ -195,8 +212,6 @@ int SavedPars::num_diffs()
     //   n++;
     // if ( SIM_CHEM != sim_chm )
     //   n++;
-    // if ( float(VOLT_BIAS) != Vb_bias_hdwe )
-    //   n++;
     // if ( float(VB_SCALE) != Vb_scale )
     //   n++;
 
@@ -206,52 +221,59 @@ int SavedPars::num_diffs()
 // Configuration functions
 
 // Print
-void SavedPars::pretty_print(const boolean all )
+void SavedPars::mem_print()
+{
+    for ( uint16_t i=0x0000; i<MAX_EERAM; i++ ) Serial.printf("%d ", rP_->read(i));
+    Serial.printf("\n");
+}
+void SavedPars::pretty_print(const boolean all)
 {
     Serial.printf("saved parameters (sp):\n");
     Serial.printf("             defaults    current EERAM values\n");
     if ( all || float(0.) != amp )
-      Serial.printf(" inj amp       %7.3f    %7.3f *Xa<> A pk\n", 0., amp);
+        Serial.printf(" inj amp       %7.3f    %7.3f *Xa<> A pk\n", 0., amp);
+    if ( all || 1. != cutback_gain_sclr )
+        Serial.printf(" cut_gn_slr    %7.3f    %7.3f *Sk<>\n", 1., cutback_gain_sclr);
     if ( all || int(0) != debug )
         Serial.printf(" debug              %d          %d *v<>\n", int(0), debug);
     if ( all )
-          Serial.printf(" delta_q    %10.1f %10.1f *DQ<>\n", double(0.), delta_q);
+        Serial.printf(" delta_q    %10.1f %10.1f *DQ<>\n", double(0.), delta_q);
     if ( all )
-          Serial.printf(" dq_sim     %10.1f %10.1f *Ca<>, *Cm<>, C\n", double(0.), delta_q_model);
+        Serial.printf(" dq_sim     %10.1f %10.1f *Ca<>, *Cm<>, C\n", double(0.), delta_q_model);
     if ( all || float(0.) != freq )
-      Serial.printf(" inj frq       %7.3f    %7.3f *Xf<> r/s\n", 0., freq);
+        Serial.printf(" inj frq       %7.3f    %7.3f *Xf<> r/s\n", 0., freq);
     if ( all || float(CURR_BIAS_ALL) != Ib_bias_all )
-      Serial.printf(" ib_bias_all   %7.3f    %7.3f *Di<> A\n", CURR_BIAS_ALL, Ib_bias_all);
+        Serial.printf(" ib_bias_all   %7.3f    %7.3f *Di<> A\n", CURR_BIAS_ALL, Ib_bias_all);
     if ( all || float(CURR_BIAS_AMP) != Ib_bias_amp )
-      Serial.printf(" bias_amp      %7.3f    %7.3f *DA<>\n", CURR_BIAS_AMP, Ib_bias_amp);
+        Serial.printf(" bias_amp      %7.3f    %7.3f *DA<>\n", CURR_BIAS_AMP, Ib_bias_amp);
     if ( all || float(CURR_BIAS_NOA) != Ib_bias_noa )
-      Serial.printf(" bias_noa      %7.3f    %7.3f *DB<>\n", CURR_BIAS_NOA, Ib_bias_noa);
+        Serial.printf(" bias_noa      %7.3f    %7.3f *DB<>\n", CURR_BIAS_NOA, Ib_bias_noa);
     if ( all || float(CURR_SCALE_AMP) != ib_scale_amp )
-      Serial.printf(" scale_amp     %7.3f    %7.3f *SA<>\n", CURR_SCALE_AMP, ib_scale_amp);
+        Serial.printf(" ib_scale_amp     %7.3f    %7.3f *SA<>\n", CURR_SCALE_AMP, ib_scale_amp);
     if ( all || float(CURR_SCALE_NOA) != ib_scale_noa )
-      Serial.printf(" scale_noa     %7.3f    %7.3f *SB<>\n", CURR_SCALE_NOA, ib_scale_noa);
+        Serial.printf(" ib_scale_noa     %7.3f    %7.3f *SB<>\n", CURR_SCALE_NOA, ib_scale_noa);
     if ( all || int8_t(FAKE_FAULTS) != ib_select )
-      Serial.printf(" ib_select           %d          %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select);
+        Serial.printf(" ib_select           %d          %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select);
+    if ( all || float(0.) != inj_bias )
+        Serial.printf(" inj_bias      %7.3f    %7.3f *Xb<> A\n", 0., inj_bias);
     if ( all )
-          Serial.printf(" isum                           %d tbl ptr\n", isum);
+        Serial.printf(" isum                           %d tbl ptr\n", isum);
     if ( all || uint8_t(MODELING) != modeling )
         Serial.printf(" modeling            %d          %d *Xm<>\n", uint8_t(MODELING), modeling);
+    if ( all || float(1.) != s_cap_model )
+        Serial.printf(" s_cap_model   %7.3f    %7.3f *Sc<>\n", 1., s_cap_model);
     if ( all || float(1.) != shunt_gain_sclr )
         Serial.printf(" shunt_gn_slr  %7.3f    %7.3f *SG\n", 1., shunt_gain_sclr);   // TODO:  no talk value
+    if ( all || float(TEMP_BIAS) != Tb_bias_hdwe )
+        Serial.printf(" Tb_bias_hdwe  %7.3f    %7.3f *Dt<> dg C\n", TEMP_BIAS, Tb_bias_hdwe);
     if ( all )
-          Serial.printf(" t_last          %5.2f      %5.2f dg C\n", float(RATED_TEMP), t_last);
+        Serial.printf(" t_last          %5.2f      %5.2f dg C\n", float(RATED_TEMP), t_last);
     if ( all )
-          Serial.printf(" t_last_sim      %5.2f      %5.2f dg C\n", float(RATED_TEMP), t_last_model);
-    // if ( all || 0 != type )
-    //   Serial.printf(" inj typ             %d          %d *Xt<> 1=sin, 2=sq, 3=tri\n", 0, type);
-    // if ( all || 0. != inj_bias )
-    //   Serial.printf(" inj_bias      %7.3f    %7.3f *Xb<> A\n", 0., inj_bias);
-    // if ( all || float(TEMP_BIAS) != Tb_bias_hdwe )
-    //   Serial.printf(" Tb_bias_hdwe  %7.3f    %7.3f *Dt<> dg C\n", TEMP_BIAS, Tb_bias_hdwe);
-    // if ( all || 1. != s_cap_model )
-    //   Serial.printf(" s_cap_model   %7.3f    %7.3f *Sc<>\n", 1., s_cap_model);
-    // if ( all || 1. != cutback_gain_scalar )
-    //   Serial.printf(" cut_gn_slr    %7.3f    %7.3f *Sk<>\n", 1., cutback_gain_scalar);
+        Serial.printf(" t_last_sim      %5.2f      %5.2f dg C\n", float(RATED_TEMP), t_last_model);
+    if ( all || uint8_t(0) != type )
+      Serial.printf(" inj typ             %d          %d *Xt<> 1=sin, 2=sq, 3=tri, 4=1C, 5=-1C, 8=cos\n", 0, type);
+    if ( all || float(VOLT_BIAS) != Vb_bias_hdwe )
+        Serial.printf(" Vb_bias_hdwe       %7.3f    %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe);
     // if ( all || float(HYS_SCALE) != hys_scale )
     //   Serial.printf(" hys_scale     %7.3f    %7.3f *Sh<>\n", HYS_SCALE, hys_scale);
     // if ( all || float(NP) != nP )
@@ -262,13 +284,9 @@ void SavedPars::pretty_print(const boolean all )
     //   Serial.printf(" mon chem            %d          %d *Bm<> 0=Battle, 1=LION\n", MON_CHEM, mon_chm);
     // if ( all || SIM_CHEM != sim_chm )
     //   Serial.printf(" sim chem            %d          %d *Bs<>\n", SIM_CHEM, sim_chm);
-    // if ( all || float(VOLT_BIAS) != Vb_bias_hdwe )
-    //   Serial.printf(" Vb_bias_hdwe       %7.3f    %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe);
     // if ( all || float(VB_SCALE) != Vb_scale )
     //   Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n\n", VB_SCALE, Vb_scale);
 
-    // for ( uint16_t i=0x0000; i<MAX_EERAM; i++ ) Serial.printf("%d ", rP_->read(i));
-    // Serial.printf("\n");
 }
 
 // Assign all EERAM values to temp variable for pursposes of timing
@@ -276,6 +294,7 @@ int SavedPars::read_all()
 {
     int n = 0;
     get_amp(); n++;
+    get_cutback_gain_sclr(); n++;
     get_debug(); n++;
     get_delta_q(); n++;
     get_delta_q_model(); n++;
@@ -286,10 +305,15 @@ int SavedPars::read_all()
     get_ib_scale_amp(); n++;
     get_ib_scale_noa(); n++;
     get_ib_select(); n++;
+    get_inj_bias(); n++;
     get_isum(); n++;
     get_modeling(); n++;
+    get_s_cap_model(); n++;
+    get_Tb_bias_hdwe(); n++;
+    get_type(); n++;
     get_t_last(); n++;
     get_t_last_model(); n++;
+    get_Vb_bias_hdwe(); n++;
     return n;
 }
 
@@ -303,6 +327,7 @@ int SavedPars::assign_all()
     int8_t tempi8;
     uint8_t tempu;
     tempf = amp; n++;
+    tempf = cutback_gain_sclr; n++;
     tempi = debug; n++;
     tempd = delta_q; n++;
     tempd = delta_q_model; n++;
@@ -313,10 +338,15 @@ int SavedPars::assign_all()
     tempf = ib_scale_amp; n++;
     tempf = ib_scale_noa; n++;
     tempi8 = ib_select; n++;
+    tempf = inj_bias; n++;
     tempi = isum; n++;
     tempu = modeling; n++;
+    tempf = s_cap_model; n++;
+    tempf = Tb_bias_hdwe; n++;
+    tempu = type; n++;
     tempf = t_last; n++;
     tempf = t_last_model; n++;
+    tempf = Vb_bias_hdwe; n++;
     tempi = tempu;
     tempi = tempi8;
     tempi = tempf;

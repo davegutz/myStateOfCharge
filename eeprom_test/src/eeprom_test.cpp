@@ -74,19 +74,25 @@ void setup() {
 
 void loop()
 {
- 
-    // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
+
+  // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
   asap();
   chat();   // Work on internal chit-chat
   talk();   // Collect user inputs
 
-  unsigned int num = 0;
-  unsigned long int now = micros();
-  num = sp.read_all();
-  unsigned long int then = micros();
-  sp.assign_all();
-  float all = ( (then - now) - (micros() - then) ) /1e6;
-  // Serial.printf("read each avg %7.6f s, all %7.6fs\n", all/float(num), all);
+  static uint16_t count = 0;
+  if ( count==0 )
+  {
+    unsigned int num = 0;
+    unsigned long int now = micros();
+    num = sp.read_all();
+    unsigned long int then = micros();
+    sp.assign_all();
+    float all = ( (then - now) - (micros() - then) ) /1e6;
+    Serial.printf("\nread each avg %7.6f s, all %7.6fs\n\n", all/float(num), all);
+    sp.mem_print();
+  }
+  if (++count == 100) count = 0;
 
   delay(100);
 
