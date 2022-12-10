@@ -26,7 +26,7 @@ if __name__ == '__main__':
     from MonSim import replicate, save_clean_file, save_clean_file_sim
     from DataOverModel import SavedData, SavedDataSim, write_clean_file, overall
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
-    from CompareHist_20221028 import add_stuff_f, over_fault, filter_Tb, X_SOC_MIN_BB, T_SOC_MIN_BB, IB_BAND, RATED_BATT_CAP, over_easy
+    from CompareHist import add_stuff_f, over_fault, filter_Tb, X_SOC_MIN_BB, T_SOC_MIN_BB, IB_BAND, RATED_BATT_CAP, over_easy
     import matplotlib.pyplot as plt
     plt.rcParams['axes.grid'] = True
     from datetime import datetime, timedelta

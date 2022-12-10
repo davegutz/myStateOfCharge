@@ -84,13 +84,13 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define VBATT_HARD_SET        1.        // Signal selection volt range fail persistence, s (1.)
 #define VBATT_HARD_RESET      1.        // Signal selection volt range fail reset persistence, s (1.)
 #define TB_NOISE              0.        // Tb added noise amplitude, deg C pk-pk
-#define TB_NOISE_SEED         0xe2      // Tb added noise seed 0-255 = 0x00-0xFF (0x01) 
+#define TB_NOISE_SEED         0xe2      // Tb added noise seed 0-255 = 0x00-0xFF (0xe2) 
 #define VB_NOISE              0.        // Vb added noise amplitude, V pk-pk
-#define VB_NOISE_SEED         0xb2      // Vb added noise seed 0-255 = 0x00-0xFF (0x01)
+#define VB_NOISE_SEED         0xb2      // Vb added noise seed 0-255 = 0x00-0xFF (0xb2)
 #define IB_AMP_NOISE          0.        // Ib amplified sensor added noise amplitude, A pk-pk
 #define IB_NOA_NOISE          0.        // Ib non-amplified sensor added noise amplitude, A pk-pk
 #define IB_AMP_NOISE_SEED     0x01      // Ib amplified sensor added noise seed 0-255 = 0x00-0xFF (0x01) 
-#define IB_NOA_NOISE_SEED     0x0a      // Ib non-amplified sensor added noise seed 0-255 = 0x00-0xFF (0x01) 
+#define IB_NOA_NOISE_SEED     0x0a      // Ib non-amplified sensor added noise seed 0-255 = 0x00-0xFF (0x0a) 
 #define WRAP_ERR_FILT         4.        // Wrap error filter time constant, s (4)
 #define F_MAX_T_WRAP          2.8       // Maximum update time of Wrap filter for stability at WRAP_ERR_FILT (0.7*T for Tustin), s (2.8)
 #define MAX_WRAP_ERR_FILT     10.       // Anti-windup wrap error filter, V (10)
@@ -118,9 +118,9 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define TB_STALE_RESET  0.              // Tb read from one-wire stale persistence for reset, s (0)
 #define NOMINAL_TB      15.             // Middle of the road Tb for decent reversionary operation, deg C (15.)
 #define IMAX_NUM        100000.         // Simulation limit to prevent NaN, A (1e5)
-#define WRAP_SOC_HI_OFF     0.97        // Disable e_wrap_hi when saturated
-#define WRAP_SOC_HI_SCLR    1000.       // Huge to disable e_wrap
-#define WRAP_SOC_LO_OFF_ABS 0.35        // Disable e_wrap when near empty (soc lo any Tb)
+#define WRAP_SOC_HI_OFF     0.97        // Disable e_wrap_hi when saturated (0.97)
+#define WRAP_SOC_HI_SCLR    1000.       // Huge to disable e_wrap (1000)
+#define WRAP_SOC_LO_OFF_ABS 0.35        // Disable e_wrap when near empty (soc lo any Tb, 0.35)
 #define WRAP_SOC_LO_OFF_REL 0.2         // Disable e_wrap when near empty (soc lo for high Tb where soc_min=.2, voltage cutback)
 #define WRAP_SOC_LO_SCLR    60.         // Large to disable e_wrap (60. for startup)
 

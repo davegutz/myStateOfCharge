@@ -250,7 +250,7 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
     ewsat_sclr_ = 1.;
     ewmin_sclr_ = WRAP_SOC_LO_SCLR;
   }
-  else if ( Mon->voc_soc()>(Mon->vsat()-WRAP_HI_SAT_MARG) )
+  else if ( Mon->voc_stat()>(Mon->vsat()-WRAP_HI_SAT_MARG) ) // Use voc_stat, not voc_soc, to get some anticipation
   {
     ewsat_sclr_ = WRAP_HI_SAT_SCLR;
     ewmin_sclr_ = 1.;

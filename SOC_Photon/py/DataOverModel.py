@@ -150,7 +150,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mo.time, mo.Vsat, color='blue', linestyle='-', label='Vsat')
         plt.plot(mv.time, mv.Vsat, color='red', linestyle='--', label='Vsat_ver')
         plt.plot(mo.time, mo.voc_soc+0.1*0, color='black', linestyle='-.', label='voc_soc+0.1')
-        plt.plot(mo.time, mo.Voc+0.1*0, color='green', linestyle=':', label='Voc+0.1')
+        plt.plot(mo.time, mo.Voc+0.1*0, color='cyan', linestyle=':', label='Voc+0.1')
         plt.plot(mv.time, np.array(mv.voc)+0.1*0, color='red', linestyle=':', label='voc_ver+0.1')
         plt.legend(loc=1)
         plt.subplot(335)
