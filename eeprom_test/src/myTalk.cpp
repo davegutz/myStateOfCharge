@@ -307,13 +307,13 @@ void talk()
                 break;
 
               case ( 'B' ):  // * DB<>:  No Amp sensor bias
-                Serial.printf("rp.ib_bias_noa%7.3f to", rp.ib_bias_noa);
+                Serial.printf("sp.ib_bias_noa%7.3f to", sp.Ib_bias_noa);
                 sp.put_Ib_bias_noa(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", sp.Ib_bias_noa);
                 break;
 
               case ( 'c' ):  // * Dc<>:  Vb bias
-                Serial.printf("rp.Vb_bias_hdwe%7.3f to", sp.Vb_bias_hdwe);
+                Serial.printf("sp.Vb_bias_hdwe%7.3f to", sp.Vb_bias_hdwe);
                 sp.put_Vb_bias_hdwe(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", sp.Vb_bias_hdwe);
                 break;
@@ -378,8 +378,8 @@ void talk()
             
                 // Serial.printf("Sim.q_cap_rated%7.3f %7.3f to ", scale, Sen->Sim->q_cap_scaled());
             
-                // Sen->Sim->apply_cap_scale(rp.s_cap_model);
-                // if ( rp.modeling ) Mon->init_soc_ekf(Sen->Sim->soc());
+                // Sen->Sim->apply_cap_scale(sp.s_cap_model);
+                // if ( sp.modeling ) Mon->init_soc_ekf(Sen->Sim->soc());
             
                 // Serial.printf("%7.3f\n", Sen->Sim->q_cap_scaled());
                 // Serial.printf("Sim:"); Sen->Sim->pretty_print(); Sen->Sim->Coulombs::pretty_print();
@@ -431,20 +431,20 @@ void talk()
             {
               case ( 'd' ):  // Hd: History dump
                 Serial.printf("\n");
-                print_all_summary(mySum, rp.isum, NSUM);
+                print_all_summary(mySum, sp.isum, NSUM);
                 chit("Pr;Q;", QUEUE);
                 Serial.printf("\n");
-                print_all_fault_buffer(myFlt, rp.iflt, NFLT);
+                print_all_fault_buffer(myFlt, sp.iflt, NFLT);
                 break;
 
               case ( 'f' ):  // Hf: History dump faults only
                 Serial.printf("\n");
-                print_all_fault_buffer(myFlt, rp.iflt, NFLT);
+                print_all_fault_buffer(myFlt, sp.iflt, NFLT);
                 break;
 
               case ( 'R' ):  // HR: History reset
-                large_reset_summary(mySum, rp.isum, NSUM);
-                large_reset_fault_buffer(myFlt, rp.iflt, NFLT);
+                large_reset_summary(mySum, sp.isum, NSUM);
+                large_reset_fault_buffer(myFlt, sp.iflt, NFLT);
                 break;
 
               case ( 's' ):  // Hs: History snapshot
@@ -516,7 +516,7 @@ void talk()
                 INT_in =  cp.input_string.substring(2).toInt();
                 if ( INT_in>=0 && INT_in<1000 )
                 {
-                  boolean reset = rp.modeling != INT_in;
+                  boolean reset = sp.modeling != INT_in;
                   Serial.printf("modeling %d to ", sp.modeling);
                   sp.put_modeling(INT_in);
                   Serial.printf("%d\n", sp.modeling);
@@ -534,7 +534,7 @@ void talk()
 
               case ( 'a' ): // Xa<>:  injection amplitude
                 sp.put_amp(cp.input_string.substring(2).toFloat());
-                Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", sp.amp, rp.inj_bias);
+                Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", sp.amp, sp.inj_bias);
                 break;
 
               case ( 'b' ): // Xb<>:  injection bias
@@ -634,9 +634,9 @@ void talkH()
   Serial.printf(" *SB= "); Serial.printf("%6.3f", sp.ib_scale_noa); Serial.printf(": scale noa [%6.3f]\n", CURR_SCALE_NOA); 
   Serial.printf(" *Dc= "); Serial.printf("%6.3f", sp.Vb_bias_hdwe); Serial.printf(": delta, V [%6.3f]\n", VOLT_BIAS); 
   Serial.printf(" *Dt= "); Serial.printf("%6.3f", sp.Tb_bias_hdwe); Serial.printf(": delta hdwe, deg C [%6.3f]\n", TEMP_BIAS); 
-  Serial.printf(" *SG= "); Serial.printf("%6.3f", sp.shunt_gain_sclr); Serial.printf(": rp. scale shunt gains [1]\n"); 
+  Serial.printf(" *SG= "); Serial.printf("%6.3f", sp.shunt_gain_sclr); Serial.printf(": sp. scale shunt gains [1]\n"); 
   Serial.printf(" *Sh= "); Serial.printf("%6.3f", rp.hys_scale); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
-  Serial.printf(" *Sk=  "); Serial.print(rp.cutback_gain_scalar); Serial.println(": Sat mod ctbk sclr"); 
+  Serial.printf(" *Sk=  "); Serial.print(sp.cutback_gain_sclr); Serial.println(": Sat mod ctbk sclr"); 
   Serial.printf(" *SV= "); Serial.printf("%6.3f", rp.Vb_scale); Serial.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
 
   Serial.printf("\nF<?>   Faults\n");
@@ -654,7 +654,7 @@ void talkH()
   Serial.printf("\nR<?>   Reset\n");
   Serial.printf("  RS= "); Serial.printf("SavedPars: Reinitialize saved\n");
 
-  Serial.printf("\nv= "); Serial.print(rp.debug); Serial.println(": verbosity, -128 - +128. [4]");
+  Serial.printf("\nv= "); Serial.print(sp.debug); Serial.println(": verbosity, -128 - +128. [4]");
   Serial.printf("  -<>: Negative - Arduino plot compatible\n");
 
   Serial.printf("\nW<?> - iters to wait\n");

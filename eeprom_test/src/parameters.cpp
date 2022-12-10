@@ -45,6 +45,7 @@ SavedPars::SavedPars(SerialRAM *ram): rP_(ram)
     ib_scale_amp_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_scale_amp);
     ib_scale_noa_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_scale_noa);
     ib_select_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_select);
+    iflt_eeram_.a16 =  next_loc;  next_loc += sizeof(iflt);
     inj_bias_eeram_.a16 =  next_loc;  next_loc += sizeof(inj_bias);
     isum_eeram_.a16 =  next_loc;  next_loc += sizeof(isum);
     modeling_eeram_.a16 =  next_loc;  next_loc += sizeof(modeling);
@@ -79,6 +80,7 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(ib_scale_amp, float(-1e6), float(1e6)) ||
         is_val_corrupt(ib_scale_noa, float(-1e6), float(1e6)) ||
         is_val_corrupt(ib_select, int8_t(-1), int8_t(1)) ||
+        is_val_corrupt(iflt, -1, NFLT+1) ||
         is_val_corrupt(inj_bias, float(-100.), float(100.)) ||
         is_val_corrupt(isum, -1, NSUM+1) ||
         is_val_corrupt(modeling, uint8_t(0), uint8_t(15)) ||
@@ -107,6 +109,7 @@ void SavedPars::load_all()
     get_ib_scale_amp();
     get_ib_scale_noa();
     get_ib_select();
+    get_iflt();
     get_inj_bias();
     get_isum();
     get_modeling();
@@ -134,6 +137,7 @@ void SavedPars::nominal()
     put_ib_scale_amp(float(CURR_SCALE_AMP));
     put_ib_scale_noa(float(CURR_SCALE_NOA));
     put_ib_select(int8_t(FAKE_FAULTS));
+    put_iflt(int(-1));
     put_inj_bias(float(0.));
     put_isum(int(-1));
     put_modeling(uint8_t(MODELING));
@@ -166,6 +170,10 @@ int SavedPars::num_diffs()
     //   n++;
     // if ( 0. != delta_q_model )
     //   n++;
+    // if ( int(-1) != iflt )
+    //     n++;
+    // if ( int(-1) != isum )
+    //     n++;
 
 
     if ( float(0.) != amp )
@@ -254,6 +262,8 @@ void SavedPars::pretty_print(const boolean all)
         Serial.printf(" ib_scale_noa%7.3f  %7.3f *SB<>\n", CURR_SCALE_NOA, ib_scale_noa);
     if ( all || int8_t(FAKE_FAULTS) != ib_select )
         Serial.printf(" ib_select %d  %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select);
+    if ( all )
+        Serial.printf(" iflt                           %d flt ptr\n", iflt);
     if ( all || float(0.) != inj_bias )
         Serial.printf(" inj_bias%7.3f  %7.3f *Xb<> A\n", 0., inj_bias);
     if ( all )
@@ -305,6 +315,7 @@ int SavedPars::read_all()
     get_ib_scale_amp(); n++;
     get_ib_scale_noa(); n++;
     get_ib_select(); n++;
+    get_iflt(); n++;
     get_inj_bias(); n++;
     get_isum(); n++;
     get_modeling(); n++;
@@ -338,6 +349,7 @@ int SavedPars::assign_all()
     tempf = ib_scale_amp; n++;
     tempf = ib_scale_noa; n++;
     tempi8 = ib_select; n++;
+    tempi = iflt; n++;
     tempf = inj_bias; n++;
     tempi = isum; n++;
     tempu = modeling; n++;

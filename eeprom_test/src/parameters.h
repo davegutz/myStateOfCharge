@@ -68,6 +68,7 @@ public:
     float ib_scale_noa;     // Calibration scalar of non-amplified shunt sensor
     int8_t ib_select;       // Force current sensor (-1=non-amp, 0=auto, 1=amp)
     float inj_bias;         // Constant bias, A
+    int iflt;               // Fault snap location.   Begins at -1 because first action is to increment iflt
     int isum;               // Summary location.   Begins at -1 because first action is to increment isum
     uint8_t modeling;       // Driving saturation calculation with model.  Bits specify which signals use model, uint8_t
     float s_cap_model;      // Scalar on battery model size
@@ -100,6 +101,7 @@ public:
     void get_ib_scale_amp() { float value; rP_->get(ib_scale_amp_eeram_.a16, value); ib_scale_amp = value; }
     void get_ib_scale_noa() { float value; rP_->get(ib_scale_noa_eeram_.a16, value); ib_scale_noa = value; }
     void get_ib_select() { int8_t value; rP_->get(ib_select_eeram_.a16, value); ib_select = value; }
+    void get_iflt() { int value; rP_->get(iflt_eeram_.a16, value); iflt = value; }
     void get_inj_bias() { float value; rP_->get(inj_bias_eeram_.a16, value); inj_bias = value; }
     void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum = value; }
     void get_modeling() { modeling = rP_->read(modeling_eeram_.a16); }
@@ -128,6 +130,7 @@ public:
     void put_ib_scale_amp(const float input) { rP_->put(ib_scale_amp_eeram_.a16, input); ib_scale_amp = input; }
     void put_ib_scale_noa(const float input) { rP_->put(ib_scale_noa_eeram_.a16, input); ib_scale_noa = input; }
     void put_ib_select(const int8_t input) { rP_->put(ib_select_eeram_.a16, input); ib_select = input; }
+    void put_iflt(const int input) { rP_->put(iflt_eeram_.a16, input); iflt = input; }
     void put_inj_bias(const float input) { rP_->put(inj_bias_eeram_.a16, input); inj_bias = input; }
     void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum = input; }
     void put_modeling(const uint8_t input) { rP_->write(modeling_eeram_.a16, input); modeling = input; }
@@ -153,6 +156,7 @@ protected:
     address16b ib_scale_amp_eeram_;
     address16b ib_scale_noa_eeram_;
     address16b ib_select_eeram_;
+    address16b iflt_eeram_;
     address16b inj_bias_eeram_;
     address16b isum_eeram_;
     address16b modeling_eeram_;
@@ -164,7 +168,6 @@ protected:
     address16b t_last_eeram_;
     address16b t_last_model_eeram_;
     address16b Vb_bias_hdwe_eeram_;
-//   int iflt = -1;                // Fault snap location.   Begins at -1 because first action is to increment iflt
 //   float hys_scale = HYS_SCALE;  // Hysteresis scalar
 //   float nP = NP;                // Number of parallel batteries in bank, e.g. '2P1S'
 //   float nS = NS;                // Number of series batteries in bank, e.g. '2P1S'
