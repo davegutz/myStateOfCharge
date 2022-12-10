@@ -49,6 +49,7 @@ SavedPars::SavedPars(SerialRAM *ram): rP_(ram)
     inj_bias_eeram_.a16 =  next_loc;  next_loc += sizeof(inj_bias);
     isum_eeram_.a16 =  next_loc;  next_loc += sizeof(isum);
     modeling_eeram_.a16 =  next_loc;  next_loc += sizeof(modeling);
+    preserving_eeram_.a16 =  next_loc;  next_loc += sizeof(preserving); // TODO:  connect this to legacy preserving logic
     s_cap_model_eeram_.a16 = next_loc;  next_loc += sizeof(s_cap_model);
     shunt_gain_sclr_eeram_.a16 = next_loc;  next_loc += sizeof(shunt_gain_sclr);
     Tb_bias_hdwe_eeram_.a16 = next_loc; next_loc += sizeof(Tb_bias_hdwe);
@@ -84,6 +85,7 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(inj_bias, float(-100.), float(100.)) ||
         is_val_corrupt(isum, -1, NSUM+1) ||
         is_val_corrupt(modeling, uint8_t(0), uint8_t(15)) ||
+        is_val_corrupt(preserving, uint8_t(0), uint8_t(1)) ||
         is_val_corrupt(s_cap_model, float(0.), float(1000.)) ||
         is_val_corrupt(shunt_gain_sclr, float(-1e6), float(1e6)) ||
         is_val_corrupt(Tb_bias_hdwe, float(-500.), float(500.)) ||
@@ -113,6 +115,7 @@ void SavedPars::load_all()
     get_inj_bias();
     get_isum();
     get_modeling();
+    get_preserving();
     get_s_cap_model();
     get_shunt_gain_sclr();
     get_Tb_bias_hdwe();
@@ -141,6 +144,7 @@ void SavedPars::nominal()
     put_inj_bias(float(0.));
     put_isum(int(-1));
     put_modeling(uint8_t(MODELING));
+    put_preserving(uint8_t(0));
     put_s_cap_model(float(1.));
     put_shunt_gain_sclr(float(1.));
     put_Tb_bias_hdwe(float(TEMP_BIAS));
@@ -173,6 +177,8 @@ int SavedPars::num_diffs()
     // if ( int(-1) != iflt )
     //     n++;
     // if ( int(-1) != isum )
+    //     n++;
+    // if ( uint8_t(0) != preserving )
     //     n++;
 
 
@@ -270,6 +276,8 @@ void SavedPars::pretty_print(const boolean all)
         Serial.printf(" isum                           %d tbl ptr\n", isum);
     if ( all || uint8_t(MODELING) != modeling )
         Serial.printf(" modeling %d  %d *Xm<>\n", uint8_t(MODELING), modeling);
+    if ( all )
+        Serial.printf(" modeling %d  %d *Xm<>\n", uint8_t(0), preserving);
     if ( all || float(1.) != s_cap_model )
         Serial.printf(" s_cap_model%7.3f  %7.3f *Sc<>\n", 1., s_cap_model);
     if ( all || float(1.) != shunt_gain_sclr )
@@ -319,6 +327,7 @@ int SavedPars::read_all()
     get_inj_bias(); n++;
     get_isum(); n++;
     get_modeling(); n++;
+    get_preserving(); n++;
     get_s_cap_model(); n++;
     get_Tb_bias_hdwe(); n++;
     get_type(); n++;
@@ -353,6 +362,7 @@ int SavedPars::assign_all()
     tempf = inj_bias; n++;
     tempi = isum; n++;
     tempu = modeling; n++;
+    tempu = preserving; n++;
     tempf = s_cap_model; n++;
     tempf = Tb_bias_hdwe; n++;
     tempu = type; n++;

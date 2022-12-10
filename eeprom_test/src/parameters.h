@@ -70,7 +70,8 @@ public:
     float inj_bias;         // Constant bias, A
     int iflt;               // Fault snap location.   Begins at -1 because first action is to increment iflt
     int isum;               // Summary location.   Begins at -1 because first action is to increment isum
-    uint8_t modeling;       // Driving saturation calculation with model.  Bits specify which signals use model, uint8_t
+    uint8_t modeling;       // Driving saturation calculation with model.  Bits specify which signals use model
+    uint8_t preserving;     // Preserving fault buffer
     float s_cap_model;      // Scalar on battery model size
     float shunt_gain_sclr;  // Shunt gain scalar
     float Tb_bias_hdwe;     // Bias on Tb sensor, deg C
@@ -104,6 +105,7 @@ public:
     void get_iflt() { int value; rP_->get(iflt_eeram_.a16, value); iflt = value; }
     void get_inj_bias() { float value; rP_->get(inj_bias_eeram_.a16, value); inj_bias = value; }
     void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum = value; }
+    void get_preserving() { preserving = rP_->read(preserving_eeram_.a16); }
     void get_modeling() { modeling = rP_->read(modeling_eeram_.a16); }
     void get_s_cap_model() { float value; rP_->get(s_cap_model_eeram_.a16, value); s_cap_model = value; }
     void get_shunt_gain_sclr() { float value; rP_->get(shunt_gain_sclr_eeram_.a16, value); shunt_gain_sclr = value; }
@@ -134,6 +136,7 @@ public:
     void put_inj_bias(const float input) { rP_->put(inj_bias_eeram_.a16, input); inj_bias = input; }
     void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum = input; }
     void put_modeling(const uint8_t input) { rP_->write(modeling_eeram_.a16, input); modeling = input; }
+    void put_preserving(const uint8_t input) { rP_->write(preserving_eeram_.a16, input); preserving = input; }
     void put_s_cap_model(const float input) { rP_->put(s_cap_model_eeram_.a16, input); s_cap_model = input; }
     void put_shunt_gain_sclr(const float input) { rP_->put(shunt_gain_sclr_eeram_.a16, input); shunt_gain_sclr = input; }
     void put_Tb_bias_hdwe(const float input) { rP_->put(Tb_bias_hdwe_eeram_.a16, input); Tb_bias_hdwe = input; }
@@ -160,6 +163,7 @@ protected:
     address16b inj_bias_eeram_;
     address16b isum_eeram_;
     address16b modeling_eeram_;
+    address16b preserving_eeram_;
     SerialRAM *rP_;
     address16b shunt_gain_sclr_eeram_;
     address16b s_cap_model_eeram_;
