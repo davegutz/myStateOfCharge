@@ -269,6 +269,51 @@ void talk()
         switch ( cp.input_string.charAt(0) )
         {
 
+          case ( 'B' ):  // B: battery
+            switch ( cp.input_string.charAt(1) )
+            {
+
+              case ( 'm' ):  //   Bm<>:  mon_chm
+                Serial.printf("Print mon_chm %d to ", sp.mon_chm);
+                sp.put_mon_chm(max(min(cp.input_string.substring(2).toInt(), UINT8_MAX), 0));
+                Serial.printf("%d\n", sp.mon_chm);
+                break;
+
+              case ( 'P' ):  // BP<>:  Number of parallel batteries in bank, e.g. '2P1S'
+                FP_in = cp.input_string.substring(2).toFloat();
+                if ( FP_in>0 )  // Apply crude limit to prevent user error
+                {
+                  Serial.printf("nP%5.2f to", sp.nP);
+                  sp.put_nP(FP_in);
+                  Serial.printf("%5.2f\n", sp.nP);
+                }
+                else
+                  Serial.printf("err%5.2f; <=0\n", FP_in);
+                break;
+
+              case ( 'S' ):  // BS<>:  Number of series batteries in bank, e.g. '2P1S'
+                FP_in = cp.input_string.substring(2).toFloat();
+                if ( FP_in>0 )  // Apply crude limit to prevent user error
+                {
+                  Serial.printf("nP%5.2f to", sp.nS);
+                  sp.put_nS(FP_in);
+                  Serial.printf("%5.2f\n", sp.nS);
+                }
+                else
+                  Serial.printf("err%5.2f; <=0\n", FP_in);
+                break;
+
+              case ( 's' ):  //   Bs<>:  sim_chm
+                Serial.printf("Print sim_chm %d to ", sp.sim_chm);
+                sp.put_sim_chm(max(min(cp.input_string.substring(2).toInt(), UINT8_MAX), 0));
+                Serial.printf("%d\n", sp.sim_chm);
+                break;
+
+              default:
+                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+            }
+            break;
+
           case ( 'P' ):  // P: print
             switch ( cp.input_string.charAt(1) )
             {
@@ -391,6 +436,12 @@ void talk()
                 Serial.printf("%7.3f\n", sp.shunt_gain_sclr);
                 break;
            
+              case ( 'h' ):  //   Sh<>: scale hysteresis
+                Serial.printf("sp.hys_sale%7.3f to ", sp.hys_scale);
+                sp.put_hys_scale(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.hys_scale);
+                break;
+
               case ( 'k' ):  // * Sk<>:  scale cutback gain for sim rep of BMS
                 scale = cp.input_string.substring(2).toFloat();
                 Serial.printf("sp.cutback_gain_sclr%7.3f to ", sp.cutback_gain_sclr);
@@ -399,9 +450,9 @@ void talk()
                 break;
             
               case ( 'V' ):  // * SV<>:  Vb sensor scalar
-                Serial.printf("rp.Vb_scale%7.3f to", rp.Vb_scale);
-                rp.Vb_scale = cp.input_string.substring(2).toFloat();
-                Serial.printf("%7.3f\n", rp.Vb_scale);
+                Serial.printf("sp.Vb_scale%7.3f to", sp.Vb_scale);
+                sp.put_Vb_scale(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.Vb_scale);
                 break;
 
               default:
@@ -626,6 +677,12 @@ void talkH()
 
   Serial.printf("\nc  clear talk, esp '-c;'\n");
 
+  Serial.printf("\nB<?> Battery e.g.:\n");
+  Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='LI' [%d]\n", sp.mon_chm, MON_CHEM); 
+  Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='LI' [%d]\n", sp.sim_chm, SIM_CHEM); 
+  Serial.printf(" *BP=  %4.2f.  parallel in bank [%4.2f]'\n", sp.nP, NP); 
+  Serial.printf(" *BS=  %4.2f.  series in bank [%4.2f]'\n", sp.nS, NS); 
+
   Serial.printf("\nD/S<?> Adj e.g.:\n");
   Serial.printf(" *Di= "); Serial.printf("%6.3f", sp.Ib_bias_all); Serial.printf(": delta all, A [%6.3f]\n", CURR_BIAS_ALL); 
   Serial.printf(" *DA= "); Serial.printf("%6.3f", sp.Ib_bias_amp); Serial.printf(": delta amp, A [%6.3f]\n", CURR_BIAS_AMP); 
@@ -635,9 +692,9 @@ void talkH()
   Serial.printf(" *Dc= "); Serial.printf("%6.3f", sp.Vb_bias_hdwe); Serial.printf(": delta, V [%6.3f]\n", VOLT_BIAS); 
   Serial.printf(" *Dt= "); Serial.printf("%6.3f", sp.Tb_bias_hdwe); Serial.printf(": delta hdwe, deg C [%6.3f]\n", TEMP_BIAS); 
   Serial.printf(" *SG= "); Serial.printf("%6.3f", sp.shunt_gain_sclr); Serial.printf(": sp. scale shunt gains [1]\n"); 
-  Serial.printf(" *Sh= "); Serial.printf("%6.3f", rp.hys_scale); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
+  Serial.printf(" *Sh= "); Serial.printf("%6.3f", sp.hys_scale); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
   Serial.printf(" *Sk=  "); Serial.print(sp.cutback_gain_sclr); Serial.println(": Sat mod ctbk sclr"); 
-  Serial.printf(" *SV= "); Serial.printf("%6.3f", rp.Vb_scale); Serial.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
+  Serial.printf(" *SV= "); Serial.printf("%6.3f", sp.Vb_scale); Serial.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
 
   Serial.printf("\nF<?>   Faults\n");
   // Serial.printf("  Fc= "); Serial.printf("%6.3f", Sen->Flt->cc_diff_sclr()); Serial.printf(": sclr cc_diff thr ^ [1]\n"); 

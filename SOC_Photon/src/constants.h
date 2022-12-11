@@ -123,6 +123,8 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define WRAP_SOC_LO_OFF_ABS 0.35        // Disable e_wrap when near empty (soc lo any Tb, 0.35)
 #define WRAP_SOC_LO_OFF_REL 0.2         // Disable e_wrap when near empty (soc lo for high Tb where soc_min=.2, voltage cutback)
 #define WRAP_SOC_LO_SCLR    60.         // Large to disable e_wrap (60. for startup)
+#define WRAP_MOD_C_RATE     .05         // Moderate charge rate threshold to engage wrap threshold 0
+#define WRAP_SOC_MOD_OFF    0.85        // Disable e_wrap_lo when nearing saturated and moderate C_rate (0.85)
 
 // Conversion gains
 const float SHUNT_NOA_GAIN = SHUNT_GAIN * CURR_SCALE_NOA;
