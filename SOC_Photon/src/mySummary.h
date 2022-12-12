@@ -56,12 +56,12 @@ struct Flt_st
     char buffer[32];
     this->t = now;
     this->Tb_hdwe = int16_t(Sen->Tb_hdwe*600.);
-    this->vb_hdwe = int16_t(Sen->Vb/rp.nS*1200.);
-    this->ib_amp_hdwe = int16_t(Sen->Ib_amp_hdwe/rp.nP*600.);
-    this->ib_noa_hdwe = int16_t(Sen->Ib_noa_hdwe/rp.nP*600.);
+    this->vb_hdwe = int16_t(Sen->Vb/sp.nS*1200.);
+    this->ib_amp_hdwe = int16_t(Sen->Ib_amp_hdwe/sp.nP*600.);
+    this->ib_noa_hdwe = int16_t(Sen->Ib_noa_hdwe/sp.nP*600.);
     this->Tb = int16_t(Sen->Tb*600.);
-    this->vb = int16_t(Sen->Vb/rp.nS*1200.);
-    this->ib = int16_t(Sen->Ib/rp.nP*600.);
+    this->vb = int16_t(Sen->Vb/sp.nS*1200.);
+    this->ib = int16_t(Sen->Ib/sp.nP*600.);
     this->soc = int16_t(Mon->soc()*16000.);
     this->soc_ekf = int16_t(Mon->soc_ekf()*16000.);
     this->voc = int16_t(Mon->voc()*1200.);

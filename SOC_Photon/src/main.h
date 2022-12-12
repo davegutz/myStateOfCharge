@@ -22,6 +22,7 @@
   *               Correct time skews to align Vb and Ib.
   * 21-Sep-2022   Alpha release v20220917.  Branch GitHub repository.  Added signal redundancy checks and fault handling.
   * 26-Nov-2022   Beta release v20221028.   Branch GitHub repository.  Various debugging fixes hysteresis.
+  * 12-Dec-2022   RetainedPars-->SavedPars to support Argon with 47L16 EERAM device
   * 
 //
 // MIT License
@@ -54,8 +55,6 @@
   //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
   #include "application.h"  // Should not be needed if file ino or Arduino
   SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
-  // SYSTEM_MODE(MANUAL);      // Turn off wifi
-  // SYSTEM_MODE(SEMI_AUTOMATIC);      // Turn off wifi
   #include <Arduino.h>      // Used instead of Print.h - breaks Serial
 #else
   using namespace std;
@@ -64,13 +63,15 @@
 #endif
 
 #if (PLATFORM_ID==12)  // Argon only
+  #include "hardware/SerialRAM.h"
+  SerialRAM ram;
   #include "hardware/BleSerialPeripheralRK.h"
   SerialLogHandler logHandler;
 #endif
 
 #include "constants.h"
 
-// Dependent includes.   Easier to rp.debug code if remove unused include files
+// Dependent includes.   Easier to sp.debug code if remove unused include files
 #include "mySync.h"
 #include "mySubs.h"
 
@@ -80,12 +81,15 @@
 
 // Globals
 extern CommandPars cp;            // Various parameters to be common at system level
-extern RetainedPars rp;           // Various parameters to be static at system level
 extern Sum_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
 extern Flt_st myFlt[NFLT];        // Summaries for saving fault history
 
-retained RetainedPars rp;             // Various control parameters static at system level
+#if (PLATFORM_ID==6) // Photon
+  retained SavedPars sp = SavedPars();           // Various parameters to be common at system level
+#elif (PLATFORM_ID==12)  // Argon
+  SavedPars sp = SavedPars(&ram);           // Various parameters to be common at system level
+#endif
 retained Sum_st mySum[NSUM];          // Summaries
 retained Flt_st myFlt[NFLT];          // Summaries   TODO:  make parameters same as Sum_st  TODO:  add 2 hist snaps
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level
@@ -111,7 +115,7 @@ void setup()
 {
   // Serial
   // Serial.blockOnOverrun(false);  doesn't work
-  Serial.begin();
+  Serial.begin(115200);
   Serial.flush();
   delay(1000);          // Ensures a clean display on Serial startup on CoolTerm
   Serial.println("Hi!");
@@ -122,7 +126,11 @@ void setup()
   Serial1.begin(115200);
   Serial1.flush();
 
-  #if (PLATFORM_ID==12)  // Argon only BLE
+  #if (PLATFORM_ID==12)  // Argon
+    ram.begin(0, 0);
+    ram.setAutoStore(true);
+    delay(1000);
+    sp.load_all();
     bleSerial.setup();
     bleSerial.advertise();
     Serial.printf("BLE mac=>%s\n", BLE.address().toString().c_str());
@@ -168,14 +176,16 @@ void setup()
   // Clean boot logic.  This occurs only when doing a structural rebuild clean make on initial flash, because
   // the SRAM is not explicitly initialized.   This is by design, as SRAM must be remembered between boots.
 #ifdef BOOT_CLEAN
-  rp.nominal();
+  sp.nominal();
   Serial.printf("Force nominal rp %s\n", cp.buffer);
-  rp.pretty_print();
+  sp.pretty_print();
 #endif
-  if ( rp.is_corrupt() ) 
+  Serial.printf("Check corruption\n");
+  if ( sp.is_corrupt() ) 
   {
-    rp.nominal();
-    Serial.printf("\n****MSG(setup): Corrupt SRAM- force nom *** %s\n", cp.buffer);
+    sp.nominal();
+    Serial.printf("Fixed corruption\n");
+    sp.pretty_print(true);
   }
 
   // Determine millis() at turn of Time.now
@@ -188,20 +198,20 @@ void setup()
 
   // Summary
   System.enableFeature(FEATURE_RETAINED_MEMORY);
-  if ( rp.debug==1 || rp.debug==2 || rp.debug==3 || rp.debug==4 )
-    print_all_summary(mySum, rp.isum, NSUM);
+  if ( sp.debug==1 || sp.debug==2 || sp.debug==3 || sp.debug==4 )
+    print_all_summary(mySum, sp.isum, NSUM);
 
   // Ask to renominalize
   if ( ASK_DURING_BOOT )
   {
-    if ( rp.num_diffs() )
+    if ( sp.num_diffs() )
     {
-      Serial.printf("#off-nominal = %d", rp.num_diffs());
-      rp.pretty_print( false );
+      Serial.printf("#off-nominal = %d", sp.num_diffs());
+      sp.pretty_print( false );
       display->clearDisplay();
       display->setTextSize(1);              // Normal 1:1 pixel scale
       display->setTextColor(SSD1306_WHITE); // Draw white text
-      display->setCursor(0,0);              // Start at top-left corner    rp.print_versus_local_config();
+      display->setCursor(0,0);              // Start at top-left corner    sp.print_versus_local_config();
       display->println("Waiting for user talk\n\nignores after 60s");
       display->display();
       Serial.printf("Do you wish to reset to defaults? [Y/n]:"); Serial1.printf("Do you wish to reset to defaults? [Y/n]:");
@@ -213,8 +223,8 @@ void setup()
       if ( answer=='Y' )
       {
         Serial.printf(" Y\n"); Serial1.printf(" Y\n");
-        rp.nominal();
-        rp.pretty_print( true );
+        sp.nominal();
+        sp.pretty_print( true );
       }
       else
       {
@@ -223,7 +233,7 @@ void setup()
     }
     else
     {
-      rp.pretty_print( true );
+      sp.pretty_print( true );
       Serial.printf(" No diffs in retained...\n\n"); Serial1.printf(" No diffs in retained...\n\n");
     }
   }
@@ -266,7 +276,7 @@ void loop()
   static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins->pin_1_wire, ReadSensors); // Manage sensor data.  Sim is in here.
 
    // Mon, used to count Coulombs and run EKF
-  static BatteryMonitor *Mon = new BatteryMonitor(&rp.delta_q, &rp.t_last, &rp.nP, &rp.nS, &rp.mon_chm, &rp.hys_scale);
+  static BatteryMonitor *Mon = new BatteryMonitor(&sp.delta_q, &sp.t_last, &sp.nP, &sp.nS, &sp.mon_chm, &sp.hys_scale);
 
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);   // Time persistence
@@ -285,9 +295,9 @@ void loop()
   elapsed = ReadSensors->now() - start;
   control = ControlSync->update(millis(), reset);             //  now || reset
   display_to_user = DisplayUserSync->update(millis(), reset); //  now || reset
-  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !rp.modeling;
+  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !sp.modeling;
   if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
-  summarizing = Summarize->update(millis(), false); // now || boot_summ && !rp.modeling
+  summarizing = Summarize->update(millis(), false); // now || boot_summ && !sp.modeling
   summarizing = summarizing || boot_summ;
 
   #if (PLATFORM_ID==12)
@@ -334,13 +344,13 @@ void loop()
     }
 
     // Read sensors, model signals, select between them, synthesize injection signals on current
-    // Inputs:  rp.config, rp.sim_chm
-    // Outputs: Sen->Ib, Sen->Vb, Sen->Tb_filt, rp.inj_bias
+    // Inputs:  sp.config, sp.sim_chm
+    // Outputs: Sen->Ib, Sen->Vb, Sen->Tb_filt, sp.inj_bias
     sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen);
     Sen->T =  double(Sen->dt_ib())/1000.;
 
     // Calculate Ah remaining`
-    // Inputs:  rp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_filt
+    // Inputs:  sp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_filt
     // States:  Mon.soc
     // Outputs: tcharge_wt, tcharge_ekf
     monitor(reset, reset_temp, now, Is_sat_delay, Mon, Sen);
@@ -349,11 +359,11 @@ void loop()
     Mon->regauge(Sen->Tb_filt);
 
     // Empty battery
-    if ( rp.modeling && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
+    if ( sp.modeling && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
 
     // Debug for read
-    if ( rp.debug==12 ) debug_12(Mon, Sen);  // EKF
-    if ( rp.debug==-4 ) debug_m4(Mon, Sen);
+    if ( sp.debug==12 ) debug_12(Mon, Sen);  // EKF
+    if ( sp.debug==-4 ) debug_m4(Mon, Sen);
 
     // Publish for variable print rate
     if ( cp.publishS )
@@ -397,8 +407,8 @@ void loop()
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
   if ( (!boot_wait && summarizing) || cp.write_summary )
   {
-    if ( ++rp.isum>NSUM-1 ) rp.isum = 0;
-    mySum[rp.isum].assign(time_now, Mon, Sen);
+    if ( ++sp.isum>NSUM-1 ) sp.isum = 0;
+    mySum[sp.isum].assign(time_now, Mon, Sen);
     Serial.printf("Summ...\n");
     cp.write_summary = false;
   }

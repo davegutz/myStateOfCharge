@@ -27,8 +27,8 @@
 #include <math.h>
 #include "Battery.h"
 #include "Coulombs.h"
-#include "retained.h"
-extern RetainedPars rp; // Various parameters to be static at system level
+#include "parameters.h"
+extern SavedPars sp; // Various parameters to be static at system level
 #include "command.h"
 extern CommandPars cp;
 extern PublishPars pp;            // For publishing
@@ -398,7 +398,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset_temp, const
   const boolean sat, const double delta_q_ekf)
 {
     // Rate limit temperature.   When modeling, reset_temp.  In real world, rate limited Tb ramps Coulomb count since bms_off
-    if ( reset_temp && rp.mod_vb() ) *rp_t_last_ = temp_c;
+    if ( reset_temp && sp.mod_vb() ) *rp_t_last_ = temp_c;
     double temp_lim = max(min( temp_c, *rp_t_last_ + t_rlim_*dt), *rp_t_last_ - t_rlim_*dt);
 
     // State change
@@ -431,7 +431,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset_temp, const
     soc_min_ = chem_.soc_min_T_->interp(temp_lim);
     q_min_ = soc_min_ * q_capacity_;
 
-    // if ( rp.debug==96 )
+    // if ( sp.debug==96 )
     //     Serial.printf("cc:,reset_temp,dt,voc, Voc_filt, V_sat, temp_c, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_cap, soc, %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
     //                 reset, dt, pp.pubList.Voc, pp.pubList.Voc_filt,  this->Vsat(), temp_c, temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
 

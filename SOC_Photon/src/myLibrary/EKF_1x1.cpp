@@ -26,8 +26,8 @@
 #endif
 #include "EKF_1x1.h"
 #include <math.h>
-#include "retained.h"
-extern RetainedPars rp; // Various parameters to be static at system level
+#include "parameters.h"
+extern SavedPars sp; // Various parameters to be static at system level
 // extern int8_t debug;
 
 
@@ -90,7 +90,7 @@ void EKF_1x1::init_ekf(double soc, double Pinit)
  void EKF_1x1::serial_print(const double control_time, const unsigned long int now)
  {
   double cTime;
-  if ( rp.tweak_test() ) cTime = double(now)/1000.;
+  if ( sp.tweak_test() ) cTime = double(now)/1000.;
   else cTime = control_time;
   Serial.printf("unit_ekf,%13.3f,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,\n",
     cTime, Fx_, Bu_, Q_, R_, P_, S_, K_, u_, x_, y_, z_, x_prior_, P_prior_, x_post_, P_post_, hx_, H_);

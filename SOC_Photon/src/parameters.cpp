@@ -32,7 +32,7 @@ SavedPars::SavedPars() {}
 SavedPars::SavedPars(SerialRAM *ram)
 {
     #if (PLATFORM_ID==12)  // Argon
-        rp_ = ram;
+        rP_ = ram;
         // Memory map
         uint16_t next_loc = 0x000;
         amp_eeram_.a16 = next_loc; next_loc += sizeof(amp);
@@ -238,7 +238,7 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )                                  Serial.printf(" dq_sim %10.1f %10.1f *Ca<>, *Cm<>, C\n", double(0.), delta_q_model);
     if ( all || float(0.) != freq )             Serial.printf(" inj frq%7.3f  %7.3f *Xf<> r/s\n", 0., freq);
     if ( all || float(HYS_SCALE) != hys_scale ) Serial.printf(" hys_scale     %7.3f    %7.3f *Sh<>\n", HYS_SCALE, hys_scale);
-    if ( all || float(CURR_BIAS_ALL) != Ib_bias_all )   Serial.printf(" ib_bias_all%7.3f  %7.3f *Di<> A\n", CURR_BIAS_ALL, Ib_bias_all);
+    if ( all || float(CURR_BIAS_ALL) != Ib_bias_all )   Serial.printf(" Ib_bias_all%7.3f  %7.3f *Di<> A\n", CURR_BIAS_ALL, Ib_bias_all);
     if ( all || float(CURR_BIAS_AMP) != Ib_bias_amp )   Serial.printf(" bias_amp%7.3f  %7.3f *DA<>\n", CURR_BIAS_AMP, Ib_bias_amp);
     if ( all || float(CURR_BIAS_NOA) != Ib_bias_noa )   Serial.printf(" bias_noa%7.3f  %7.3f *DB<>\n", CURR_BIAS_NOA, Ib_bias_noa);
     if ( all || float(CURR_SCALE_AMP) != ib_scale_amp ) Serial.printf(" ib_scale_amp%7.3f  %7.3f *SA<>\n", CURR_SCALE_AMP, ib_scale_amp);

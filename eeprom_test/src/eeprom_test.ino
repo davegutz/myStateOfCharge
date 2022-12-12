@@ -29,23 +29,24 @@ SerialRAM ram;
 // Globals
 #include "myTalk.h"
 #include "mySummary.h"
-#include "retained.h"
 #include "command.h"
 #include "local_config.h"
 #include "constants.h"
 #include "parameters.h"
 
 extern CommandPars cp;            // Various parameters to be common at system level
-extern RetainedPars rp;           // Various parameters to be static at system level
 extern Sum_st mySum[NSUM];        // Summaries for saving charge history
 extern Flt_st myFlt[NFLT];        // Summaries for saving fault history
-extern SavedPars sp;             // Various parameters to be common at system level
+extern SavedPars sp;              // Various parameters to be common at system level
 
-retained RetainedPars rp;             // Various control parameters static at system level
 retained Sum_st mySum[NSUM];          // Summaries
 retained Flt_st myFlt[NFLT];          // Summaries
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level
-SavedPars sp = SavedPars(&ram);           // Various parameters to be common at system level
+#if (PLATFORM_ID==6) // Photon
+  retained SavedPars sp = SavedPars(&ram);           // Various parameters to be common at system level
+#elif (PLATFORM_ID==12)  // Argon
+  SavedPars sp = SavedPars(&ram);           // Various parameters to be common at system level
+#endif
 
 void setup() {
   Serial.begin(115200);

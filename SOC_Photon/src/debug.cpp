@@ -25,7 +25,7 @@
 
 #include "debug.h"
 
-// rp.debug==-4  // General Arduino plot
+// sp.debug==-4  // General Arduino plot
 void debug_m4(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("Tb,Vb*10-110,Ib, voc*10-110,dv_dyn*100,voc_ekf*10-110,voc*10-110,vsat*10-110,  y_ekf*1000,  soc_sim*100,soc_ekf*100,soc*100,\n\
@@ -36,7 +36,7 @@ void debug_m4(BatteryMonitor *Mon, Sensors *Sen)
     Sen->Sim->soc()*100., Mon->x_ekf()*100., Mon->soc()*100.);
 }
 
-// rp.debug==12 EKF
+// sp.debug==12 EKF
 void debug_12(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("ib,ib_mod,   vb,vb_mod,  voc,voc_stat_mod,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
@@ -47,7 +47,7 @@ void debug_12(BatteryMonitor *Mon, Sensors *Sen)
   Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc());
 }
 
-// rp.debug==-13 ib_dscn for Arduino.
+// sp.debug==-13 ib_dscn for Arduino.
 // Start Arduino serial plotter.  Toggle v like 'v0;v-13;' to produce legend
 /*
 void debug_m13(Sensors *Sen)
@@ -55,12 +55,12 @@ void debug_m13(Sensors *Sen)
 
   // Arduinio header
   static int8_t last_call = 0;
-  if ( rp.debug!=last_call && rp.debug==-13 )
+  if ( sp.debug!=last_call && sp.debug==-13 )
     Serial.printf("ib_sel_st:, ib_amph:, ib_noah:, ib_rate:, ib_quiet:,  dscn_flt:, dscn_fa:\n");
-  last_call = rp.debug;
+  last_call = sp.debug;
 
   // Plot
-  if ( rp.debug!=-13)
+  if ( sp.debug!=-13)
     return;
   else
       Serial.printf("%d, %7.3f,%7.3f,  %7.3f,%7.3f,   %d,%d\n",
@@ -71,7 +71,7 @@ void debug_m13(Sensors *Sen)
 }
 */
 
-// rp.debug==5 Charge time
+// sp.debug==5 Charge time
 void debug_5(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt, %3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
@@ -109,13 +109,13 @@ Tb  = %7.3f,\nVb  = %7.3f,\nVoc = %7.3f,\nvoc_filt  = %7.3f,\nVsat = %7.3f,\nIb 
 soc_ekf= %8.4f,\nsoc = %8.4f,\nmodeling = %d,\n",
     Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
     Mon->temp_c(), Mon->Vb(), Mon->Voc(), Mon->Voc_filt(), Mon->Vsat(), Mon->Ib(), Sen->Sim->soc(), Mon->soc_ekf(),
-    Mon->soc(), rp.modeling);
+    Mon->soc(), sp.modeling);
   Serial1.printf("ib_amp_fail = %d,\nib_noa_fail = %d,\nvb_fail = %d,\n\
 Tb  = %7.3f,\nVb  = %7.3f,\nVoc = %7.3f,\nvoc_filt  = %7.3f,\nVsat = %7.3f,\nIb  = %7.3f,\nsoc_m = %8.4f,\n\
 soc_ekf= %8.4f,\nsoc = %8.4f,\nmodeling = %d,\n",
       Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
       Mon->temp_c(), Mon->Vb(), Mon->Voc(), Mon->Voc_filt(), Mon->Vsat(), Mon->Ib(), Sen->Sim->soc(), Mon->soc_ekf(),
-      Mon->soc(), rp.modeling);
+      Mon->soc(), sp.modeling);
   if ( Sen->Flt->falw() || Sen->Flt->fltw() ) chit("Pf;", QUEUE);
 }
 
@@ -123,7 +123,7 @@ soc_ekf= %8.4f,\nsoc = %8.4f,\nmodeling = %d,\n",
 // void debug_m1(BatteryMonitor *Mon, Sensors *Sen)
 // {
 //   Serial.printf("mod %d fake_f %d reset_temp %d Tb%7.3f Tb_f%7.3f Vb%7.3f Ib%7.3f\nTb_s%6.2f Tl_s%6.2f ib_s%7.3f soc_s%8.4f dq_s%10.1f\nTb  %6.2f Tl%6.2f ib%7.3f soc  %8.4f dq  %10.1f soc_ekf%8.4f dq_ekf%10.1f\n",
-//       rp.modeling, cp.fake_faults, Sen->reset_temp(), Sen->Tb, Sen->Tb_filt, Sen->Vb, Sen->Ib,
-//       Sen->Sim->Tb(), rp.t_last_model, Sen->Sim->ib(), Sen->Sim->soc(), Sen->Sim->delta_q(),
-//       Mon->Tb(), rp.t_last, Mon->ib(), Mon->soc(), Mon->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf());
+//       sp.modeling, cp.fake_faults, Sen->reset_temp(), Sen->Tb, Sen->Tb_filt, Sen->Vb, Sen->Ib,
+//       Sen->Sim->Tb(), sp.t_last_model, Sen->Sim->ib(), Sen->Sim->soc(), Sen->Sim->delta_q(),
+//       Mon->Tb(), sp.t_last, Mon->ib(), Mon->soc(), Mon->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf());
 // }

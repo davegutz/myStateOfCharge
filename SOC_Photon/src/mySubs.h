@@ -29,7 +29,7 @@
 #include "constants.h"
 #include "myCloud.h"
 #include "myTalk.h"
-#include "retained.h"
+#include "parameters.h"
 #include "command.h"
 #include "mySync.h"
 
@@ -40,7 +40,7 @@
 #include "Adafruit/Adafruit_GFX.h"
 #include "Adafruit/Adafruit_SSD1306.h"
 
-extern RetainedPars rp; // Various parameters to be static at system level
+extern SavedPars sp; // Various parameters to be static at system level
 extern PublishPars pp;  // For publishing
 extern CommandPars cp;  // Various parameters to be static at system level
 

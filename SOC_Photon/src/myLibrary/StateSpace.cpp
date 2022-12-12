@@ -26,8 +26,8 @@
 #endif
 #include "myLibrary/StateSpace.h"
 #include <math.h>
-#include "retained.h"
-extern RetainedPars rp;
+#include "parameters.h"
+extern SavedPars sp;
 
 
 // class StateSpace

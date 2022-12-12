@@ -17,9 +17,12 @@
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
 #else
-	#include "WProgram.h"
+	#if (PLATFORM_ID==12)
+		#include "WProgram.h"
+	#endif
 #endif
 
+const uint16_t MAX_EERAM = 0x07FF;
 
 typedef union {
 	uint16_t a16;
@@ -43,7 +46,23 @@ public:
 	uint8_t write(const uint16_t address, const uint8_t* values, const uint16_t size);
 	void read(const uint16_t address, uint8_t* values, const uint16_t size);
 
+	//Functionality to 'get' and 'put' objects to and from EERAM
+	// https://github.com/sparkfun/SparkFun_External_EEPROM_Arduino_Library/blob/master/src/SparkFun_External_EEPROM.h
+	template <typename T>
+	T &get(uint16_t idx, T &t)
+	{
+		uint8_t *ptr = (uint8_t *)&t;
+		read(idx, ptr, sizeof(T)); //Address, data, sizeOfData
+		return t;
+	}
 
+	template <typename T>
+	const T &put(uint16_t idx, const T &t) //Address, data
+	{
+		const uint8_t *ptr = (const uint8_t *)&t;
+		write(idx, ptr, sizeof(T)); //Address, data, sizeOfData
+		return t;
+	}
 };
 
 

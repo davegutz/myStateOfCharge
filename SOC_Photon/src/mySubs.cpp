@@ -33,24 +33,24 @@
 
 extern CommandPars cp;          // Various parameters shared at system level
 extern PublishPars pp;            // For publishing
-extern RetainedPars rp;         // Various parameters to be static at system level
+extern SavedPars sp;         // Various parameters to be static at system level
 extern Flt_st myFlt[NFLT];        // Summaries for saving fault history
 
 // Print consolidation
 void print_all_header(void)
 {
     print_serial_header();
-  if ( rp.debug==2  )
+  if ( sp.debug==2  )
   {
     print_serial_sim_header();
     print_signal_sel_header();
   }
-  if ( rp.debug==3  )
+  if ( sp.debug==3  )
   {
     print_serial_sim_header();
     print_serial_ekf_header();
   }
-  if ( rp.debug==4  )
+  if ( sp.debug==4  )
   {
     print_serial_sim_header();
     print_signal_sel_header();
@@ -59,15 +59,15 @@ void print_all_header(void)
 }
 void print_rapid_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
-  static uint8_t last_read_debug = rp.debug;     // Remember first time with new debug to print headers
-  if ( ( rp.debug==1 || rp.debug==2 || rp.debug==3 || rp.debug==4 ) )
+  static uint8_t last_read_debug = sp.debug;     // Remember first time with new debug to print headers
+  if ( ( sp.debug==1 || sp.debug==2 || sp.debug==3 || sp.debug==4 ) )
   {
-    if ( reset || (last_read_debug != rp.debug) )
+    if ( reset || (last_read_debug != sp.debug) )
     {
       cp.num_v_print = 0UL;
       print_all_header();
     }
-    if ( rp.tweak_test() )
+    if ( sp.tweak_test() )
     {
       // no print, done by sub-functions
       cp.num_v_print++;
@@ -78,11 +78,11 @@ void print_rapid_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
       cp.num_v_print++;
     }
   }
-  last_read_debug = rp.debug;
+  last_read_debug = sp.debug;
 }
 void print_serial_header(void)
 {
-  if ( ( rp.debug==1 || rp.debug==2 || rp.debug==3 || rp.debug==4 ) )
+  if ( ( sp.debug==1 || sp.debug==2 || sp.debug==3 || sp.debug==4 ) )
   {
     Serial.printf ("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
     Serial1.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc, voc_soc,     Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
@@ -90,16 +90,16 @@ void print_serial_header(void)
 }
 void print_serial_sim_header(void)
 {
-  if ( rp.debug==2  || rp.debug==3 || rp.debug==4 ) // print_serial_sim_header
+  if ( sp.debug==2  || sp.debug==3 || sp.debug==4 ) // print_serial_sim_header
     Serial.printf("unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,\n");
 }
 void print_signal_sel_header(void)
 {
-  if ( rp.debug==2 || rp.debug==4 ) // print_signal_sel_header
+  if ( sp.debug==2 || sp.debug==4 ) // print_signal_sel_header
     Serial.printf("unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,");
     Serial.printf("    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f, ");
     Serial.printf("  fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,\n");
-          // -----, cTime, reset, rp.ib_select,
+          // -----, cTime, reset, sp.ib_select,
           //                                     cc_diff_,
           //                                              Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model, Ib_model,
           //                                                                           ib_diff_, ib_diff_f,
@@ -110,7 +110,7 @@ void print_signal_sel_header(void)
 }
 void print_serial_ekf_header(void)
 {
-  if ( rp.debug==3 || rp.debug==4 ) // print_serial_ekf_header
+  if ( sp.debug==3 || sp.debug==4 ) // print_serial_ekf_header
     Serial.printf("unit_e,c_time,Fx_, Bu_, Q_, R_, P_, S_, K_, u_, x_, y_, z_, x_prior_, P_prior_, x_post_, P_post_, hx_, H_,\n");
 }
 
@@ -118,12 +118,12 @@ void print_serial_ekf_header(void)
 void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
   double cTime;
-  if ( rp.tweak_test() ) cTime = double(Sen->now)/1000.;
+  if ( sp.tweak_test() ) cTime = double(Sen->now)/1000.;
   else cTime = Sen->control_time;
 
   sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %d,  %d, %4.1f,%6.3f,%10.3f,%10.3f,%10.3f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
-    rp.mon_chm, pubList->sat, rp.ib_select, rp.modeling, Mon->bms_off(),
+    sp.mon_chm, pubList->sat, sp.ib_select, sp.modeling, Mon->bms_off(),
     Mon->Tb(), Mon->Vb(), Mon->Ib(), Mon->Ib_charge(), Mon->ioc(), Mon->voc_soc(), 
     Mon->Vsat(), Mon->dV_dyn(), Mon->Voc_stat(), Mon->Hx(),
     Mon->y_ekf(),
@@ -174,10 +174,10 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
 
 void harvest_temp_change(const float temp_c, BatteryMonitor *Mon, BatterySim *Sim)
 {
-  rp.delta_q -= Mon->dqdt() * Mon->q_capacity() * (temp_c - rp.t_last);
-  rp.t_last = temp_c;
-  rp.delta_q_model -= Sim->dqdt() * Sim->q_capacity() * (temp_c - rp.t_last_model);
-  rp.t_last_model = temp_c;
+  sp.put_delta_q(sp.delta_q - Mon->dqdt() * Mon->q_capacity() * (temp_c - sp.t_last));
+  sp.put_t_last(temp_c);
+  sp.put_delta_q_model(sp.delta_q_model - Sim->dqdt() * Sim->q_capacity() * (temp_c - sp.t_last_model));
+  sp.put_t_last_model(temp_c);
 }
 
 // Complete initialization of all parameters in Mon and Sim including EKF
@@ -185,16 +185,16 @@ void harvest_temp_change(const float temp_c, BatteryMonitor *Mon, BatterySim *Si
 void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const boolean use_soc_in)
 {
   // Sample debug statements
-  // if ( rp.debug==-1 ){ Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);} 
-  // if ( rp.debug==-1 ){ Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("Top:"); debug_m1(Mon, Sen);}
+  // if ( sp.debug==-1 ){ Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);} 
+  // if ( sp.debug==-1 ){ Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("Top:"); debug_m1(Mon, Sen);}
 
   // Gather and apply inputs
-  if ( rp.mod_ib() )
-    Sen->Ib_model_in = rp.inj_bias + rp.ib_bias_all;
+  if ( sp.mod_ib() )
+    Sen->Ib_model_in = sp.inj_bias + sp.Ib_bias_all;
   else
     Sen->Ib_model_in = Sen->Ib_hdwe;
   Sen->temp_load_and_filter(Sen, true);
-  if ( rp.mod_tb() )
+  if ( sp.mod_tb() )
   {
     Sen->Tb = Sen->Tb_model;
     Sen->Tb_filt = Sen->Tb_model_filt;
@@ -206,14 +206,14 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   }
   harvest_temp_change(Sen->Tb_filt, Mon, Sen->Sim);
   if ( use_soc_in )
-    Mon->apply_soc(soc_in, Sen->Tb_filt);  // saves rp.delta_q and rp.t_last
-  Sen->Sim->apply_delta_q_t(Mon->delta_q(), Mon->t_last());  // applies rp.delta_q and rp.t_last
-  // if ( rp.debug==-1 ){ Serial.printf("S.a_d_q_t:"); debug_m1(Mon, Sen);}
+    Mon->apply_soc(soc_in, Sen->Tb_filt);  // saves sp.delta_q and sp.t_last
+  Sen->Sim->apply_delta_q_t(Mon->delta_q(), Mon->t_last());  // applies sp.delta_q and sp.t_last
+  // if ( sp.debug==-1 ){ Serial.printf("S.a_d_q_t:"); debug_m1(Mon, Sen);}
   
   // Make Sim accurate even if not used
   Sen->Sim->init_battery_sim(true, Sen);
-  // if ( rp.debug==-1 ){ Serial.printf("S.i_b:"); debug_m1(Mon, Sen);}
-  if ( !rp.mod_vb() )
+  // if ( sp.debug==-1 ){ Serial.printf("S.i_b:"); debug_m1(Mon, Sen);}
+  if ( !sp.mod_vb() )
   {
     Sen->Sim->apply_soc(Sen->Sim->soc(), Sen->Tb_filt);
   }
@@ -227,7 +227,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   Sen->Sim->count_coulombs(Sen, true, Mon, true);
 
   // Signal preparations
-  if ( rp.mod_vb() )
+  if ( sp.mod_vb() )
   {
     Sen->Vb = Sen->Vb_model;
   }
@@ -235,7 +235,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   {
     Sen->Vb = Sen->Vb_hdwe;
   }
-  if ( rp.mod_ib() )
+  if ( sp.mod_ib() )
   {
     Sen->Ib = Sen->Ib_model;
   }
@@ -243,13 +243,13 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   {
     Sen->Ib = Sen->Ib_hdwe;
   }
-  // if ( rp.debug==-1 ){ Serial.printf("SENIB:"); debug_m1(Mon, Sen);}
-  if ( rp.mod_vb() )
+  // if ( sp.debug==-1 ){ Serial.printf("SENIB:"); debug_m1(Mon, Sen);}
+  if ( sp.mod_vb() )
   {
     Mon->apply_soc(Sen->Sim->soc(), Sen->Tb_filt);
   }
   Mon->init_battery_mon(true, Sen);
-  // if ( rp.debug==-1 ) { Serial.printf("M.i_b:"); debug_m1(Mon, Sen);}
+  // if ( sp.debug==-1 ) { Serial.printf("M.i_b:"); debug_m1(Mon, Sen);}
 
   // Call calculate/count_coulombs twice because sat_ is a used-before-calculated (UBC)
   // Simple 'call twice' method because sat_ is discrete no analog which would require iteration
@@ -257,11 +257,11 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), 0.);
   Mon->calculate(Sen, true);  // Call again because sat is a UBC
   Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), 0.);
-  // if ( rp.debug==-1 ){ Serial.printf("M.c_c:"); debug_m1(Mon, Sen);}
+  // if ( sp.debug==-1 ){ Serial.printf("M.c_c:"); debug_m1(Mon, Sen);}
 
   // Solve EKF
   Mon->solve_ekf(true, true, Sen);
-  // if ( rp.debug==-1 ){ Serial.printf("end:"); debug_m1(Mon, Sen);}
+  // if ( sp.debug==-1 ){ Serial.printf("end:"); debug_m1(Mon, Sen);}
 }
 
 // Load all others
@@ -275,20 +275,20 @@ void load_ib_vb(const boolean reset, Sensors *Sen, Pins *myPins, BatteryMonitor 
   Sen->shunt_load();
   Sen->Flt->shunt_check(Sen, Mon, reset);
   Sen->shunt_select_initial();
-  if ( rp.debug==14 ) Sen->shunt_print();
+  if ( sp.debug==14 ) Sen->shunt_print();
 
   // Vb
   // Outputs:  Sen->Vb
   Sen->vb_load(myPins->Vb_pin);
   Sen->Flt->vb_check(Sen, Mon, VBATT_MIN, VBATT_MAX, reset);
-  if ( rp.debug==15 ) Sen->vb_print();
+  if ( sp.debug==15 ) Sen->vb_print();
 
   // Power calculation
   Sen->Wb = Sen->Vb*Sen->Ib;
 }
 
 // Calculate Ah remaining
-// Inputs:  rp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_filt
+// Inputs:  sp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_filt
 // States:  Mon.soc, Mon.soc_ekf
 // Outputs: tcharge_wt, tcharge_ekf, Voc, Voc_filt
 void  monitor(const boolean reset, const boolean reset_temp, const unsigned long now,
@@ -345,9 +345,9 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   disp_2 = cp.buffer;
   if ( frame==2 )
   {
-    if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() && !rp.mod_ib() )
+    if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() && !sp.mod_ib() )
       disp_2 = "*fail";
-    else if ( Sen->Flt->dscn_fa() && !rp.mod_ib() )
+    else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
       disp_2 = " conn ";
     else if ( Sen->Flt->ib_diff_fa() )
       disp_2 = " diff ";
@@ -356,9 +356,9 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   }
   else if ( frame==3 )
   {
-    if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() && !rp.mod_ib() )
+    if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() && !sp.mod_ib() )
       disp_2 = "*fail";
-    else if ( Sen->Flt->dscn_fa() && !rp.mod_ib() )
+    else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
       disp_2 = " conn ";
   }
   String disp_Tbop = disp_0.substring(0, 4) + " " + disp_1.substring(0, 6) + " " + disp_2.substring(0, 7);
@@ -406,25 +406,25 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   pass = !pass;
 
   // Text basic Bluetooth (use serial bluetooth app)
-  if ( rp.debug!=4 && rp.debug!=-2 )
+  if ( sp.debug!=4 && sp.debug!=-2 )
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
       disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
 
-  if ( rp.debug==5 ) debug_5(Mon, Sen);
+  if ( sp.debug==5 ) debug_5(Mon, Sen);
 
   frame += 1;
   if (frame>3) frame = 0;
 }
 
 // Read sensors, model signals, select between them.
-// Sim used for built-in testing (rp.modeling = 7 and jumper wire).
+// Sim used for built-in testing (sp.modeling = 7 and jumper wire).
 //    Needed here in this location to have available a value for
 //    Sen->Tb_filt when called.   Recalculates Sen->Ib accounting for
 //    saturation.  Sen->Ib is a feedback (used-before-calculated).
-// Inputs:  rp.config, rp.sim_chm, Sen->Tb, Sen->Ib_model_in
+// Inputs:  sp.config, sp.sim_chm, Sen->Tb, Sen->Ib_model_in
 // States:  Sim.soc
 // Outputs: Sim.temp_c_, Sen->Tb_filt, Sen->Ib, Sen->Ib_model,
-//   Sen->Vb_model, Sen->Tb_filt, rp.inj_bias
+//   Sen->Vb_model, Sen->Tb_filt, sp.inj_bias
 void sense_synth_select(const boolean reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen)
 {
@@ -453,7 +453,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   // Sim calculation
   //  Inputs:  Sen->Tb_filt(past), Sen->Ib_model_in
   //  States: Sim->soc(past)
-  //  Outputs:  Sim->temp_c(), Sim->Ib(), Sim->Vb(), rp.inj_bias, Sim.model_saturated
+  //  Outputs:  Sim->temp_c(), Sim->Ib(), Sim->Vb(), sp.inj_bias, Sim.model_saturated
   Sen->Tb_model = Sen->Tb_model_filt = Sen->Sim->temp_c();
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, reset) + Sen->Vb_add();
   Sen->Ib_model = Sen->Sim->Ib_charge();
@@ -487,8 +487,9 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     else fails_repeated = min(fails_repeated + 1, 99);
     if ( fails_repeated < 3 )
     {
-      if ( ++rp.iflt>NFLT-1 ) rp.iflt = 0;  // wrap buffer
-      myFlt[rp.iflt].assign(Time.now(), Mon, Sen);
+      sp.put_iflt(sp.iflt+1);
+      if ( sp.iflt>NFLT-1 ) sp.put_iflt(0);  // wrap buffer
+      myFlt[sp.iflt].assign(Time.now(), Mon, Sen);
     }
     else if ( fails_repeated < 4 )
     {
@@ -518,9 +519,9 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     Sen->elapsed_inj = Sen->now - Sen->start_inj + 1UL; // Shift by 1 because using ==0 to turn off
 
     // Turn off amplitude of injection and wait for end_inj
-    if (Sen->now > Sen->stop_inj) rp.amp = 0;
+    if (Sen->now > Sen->stop_inj) sp.put_amp(0);
   }
-  else if ( Sen->elapsed_inj && rp.tweak_test() )  // Done.  Start and turn things off by setting 0
+  else if ( Sen->elapsed_inj && sp.tweak_test() )  // Done.  Start and turn things off by setting 0
   {
     Sen->elapsed_inj = 0;
     chit("v0;", ASAP);    // Turn off echo
@@ -529,7 +530,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     chit("Xp0;", QUEUE);  // Reset
   }
   // Perform the calculation of injection signals 
-  rp.inj_bias = Sen->Sim->calc_inj(Sen->elapsed_inj, rp.type, rp.amp, rp.freq);
+  sp.put_inj_bias(Sen->Sim->calc_inj(Sen->elapsed_inj, sp.type, sp.amp, sp.freq));
 }
 
 // If false token, get new string from source

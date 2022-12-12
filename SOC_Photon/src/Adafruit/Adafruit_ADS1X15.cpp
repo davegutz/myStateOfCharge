@@ -20,8 +20,8 @@
 /**************************************************************************/
 #include "Adafruit_ADS1X15.h"
 
-#include "../retained.h"
-extern RetainedPars rp; // Various parameters to be static at system level
+#include "../parameters.h"
+extern SavedPars sp; // Various parameters to be static at system level
 const uint16_t count_max = 200;
 
 /**************************************************************************/
@@ -158,7 +158,7 @@ int16_t Adafruit_ADS1X15::readADC_SingleEnded(uint8_t channel) {
   uint16_t count = 0;
   while ( !conversionComplete() && ++count<count_max )
     ;
-  if ( count==count_max && rp.debug>0 && !rp.modeling ) Serial.printf("WARNING(readADC_SingleEnded):  timed out hardcoded count limit**********************\n");
+  if ( count==count_max && sp.debug>0 && !sp.modeling ) Serial.printf("WARNING(readADC_SingleEnded):  timed out hardcoded count limit**********************\n");
 
   // Read the conversion results
   return getLastConversionResults();
@@ -201,7 +201,7 @@ int16_t Adafruit_ADS1X15::readADC_Differential_0_1() {
   uint16_t count = 0;
   while ( !conversionComplete() && ++count<count_max )
     ;
-  if ( count==count_max && rp.debug>0 && !rp.modeling ) Serial.printf("WARNING(readADC_Differential_0_1):  timed out hardcoded count limit**********************\n");
+  if ( count==count_max && sp.debug>0 && !sp.modeling ) Serial.printf("WARNING(readADC_Differential_0_1):  timed out hardcoded count limit**********************\n");
 
   // Read the conversion results
   return getLastConversionResults();
@@ -244,7 +244,7 @@ int16_t Adafruit_ADS1X15::readADC_Differential_2_3() {
   uint16_t count = 0;
   while ( !conversionComplete() && ++count<count_max )
     ;
-  if (  count==count_max && rp.debug>0 && !rp.modeling ) Serial.printf("WARNING(readADC_Differential_2_3):  timed out hardcoded count limit**********************\n");
+  if (  count==count_max && sp.debug>0 && !sp.modeling ) Serial.printf("WARNING(readADC_Differential_2_3):  timed out hardcoded count limit**********************\n");
 
   // Read the conversion results
   return getLastConversionResults();
