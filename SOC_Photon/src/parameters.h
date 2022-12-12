@@ -161,6 +161,7 @@ public:
         void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model = value; }
         void get_Vb_bias_hdwe() { float value; rP_->get(Vb_bias_hdwe_eeram_.a16, value); Vb_bias_hdwe = value; }
         void get_Vb_scale() { float value; rP_->get(Vb_scale_eeram_.a16, value); Vb_scale = value; }
+        address16b next() { return next_; }
     #endif
     //
     void load_all();
@@ -271,6 +272,7 @@ protected:
         address16b Vb_bias_hdwe_eeram_;
         address16b Vb_scale_eeram_;
         SerialRAM *rP_;
+        address16b next_;
     #endif
 };
 

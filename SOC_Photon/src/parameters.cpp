@@ -34,39 +34,39 @@ SavedPars::SavedPars(SerialRAM *ram)
     #if (PLATFORM_ID==12)  // Argon
         rP_ = ram;
         // Memory map
-        uint16_t next_loc = 0x000;
-        amp_eeram_.a16 = next_loc; next_loc += sizeof(amp);
-        cutback_gain_sclr_eeram_.a16 = next_loc; next_loc += sizeof(cutback_gain_sclr);
-        debug_eeram_.a16 = next_loc; next_loc += sizeof(debug);
-        delta_q_eeram_.a16 = next_loc;  next_loc += sizeof(delta_q);
-        delta_q_model_eeram_.a16 = next_loc;  next_loc += sizeof(delta_q_model);
-        freq_eeram_.a16 = next_loc; next_loc += sizeof(freq);
-        hys_scale_eeram_.a16 = next_loc; next_loc += sizeof(hys_scale);
-        Ib_bias_all_eeram_.a16 =  next_loc;  next_loc += sizeof(Ib_bias_all);
-        Ib_bias_amp_eeram_.a16 =  next_loc;  next_loc += sizeof(Ib_bias_amp);
-        Ib_bias_noa_eeram_.a16 =  next_loc;  next_loc += sizeof(Ib_bias_noa);
-        ib_scale_amp_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_scale_amp);
-        ib_scale_noa_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_scale_noa);
-        ib_select_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_select);
-        iflt_eeram_.a16 =  next_loc;  next_loc += sizeof(iflt);
-        inj_bias_eeram_.a16 =  next_loc;  next_loc += sizeof(inj_bias);
-        islt_eeram_.a16 =  next_loc;  next_loc += sizeof(islt);
-        isum_eeram_.a16 =  next_loc;  next_loc += sizeof(isum);
-        mon_chm_eeram_.a16 =  next_loc;  next_loc += sizeof(mon_chm);
-        modeling_eeram_.a16 =  next_loc;  next_loc += sizeof(modeling);
-        nP_eeram_.a16 = next_loc; next_loc += sizeof(nP);
-        nS_eeram_.a16 = next_loc; next_loc += sizeof(nS);
-        preserving_eeram_.a16 =  next_loc;  next_loc += sizeof(preserving); // TODO:  connect this to legacy preserving logic
-        shunt_gain_sclr_eeram_.a16 = next_loc;  next_loc += sizeof(shunt_gain_sclr);
-        sim_chm_eeram_.a16 =  next_loc;  next_loc += sizeof(sim_chm);
-        s_cap_model_eeram_.a16 = next_loc;  next_loc += sizeof(s_cap_model);
-        Tb_bias_hdwe_eeram_.a16 = next_loc; next_loc += sizeof(Tb_bias_hdwe);
-        type_eeram_.a16 =  next_loc;  next_loc += sizeof(type);
-        t_last_eeram_.a16 =  next_loc;  next_loc += sizeof(t_last);
-        t_last_model_eeram_.a16 =  next_loc; next_loc += sizeof(t_last_model);
-        Vb_bias_hdwe_eeram_.a16 = next_loc; next_loc += sizeof(Vb_bias_hdwe);
-        Vb_scale_eeram_.a16 = next_loc; next_loc += sizeof(Vb_scale);
-        if ( next_loc > MAX_EERAM ) Serial.printf("SavedPars::SavedPars - BAD MEMORY MAP\n");
+        next_ = 0x000;
+        amp_eeram_.a16 = next_; next_ += sizeof(amp);
+        cutback_gain_sclr_eeram_.a16 = next_; next_ += sizeof(cutback_gain_sclr);
+        debug_eeram_.a16 = next_; next_ += sizeof(debug);
+        delta_q_eeram_.a16 = next_;  next_ += sizeof(delta_q);
+        delta_q_model_eeram_.a16 = next_;  next_ += sizeof(delta_q_model);
+        freq_eeram_.a16 = next_; next_ += sizeof(freq);
+        hys_scale_eeram_.a16 = next_; next_ += sizeof(hys_scale);
+        Ib_bias_all_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_all);
+        Ib_bias_amp_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_amp);
+        Ib_bias_noa_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_noa);
+        ib_scale_amp_eeram_.a16 =  next_;  next_ += sizeof(ib_scale_amp);
+        ib_scale_noa_eeram_.a16 =  next_;  next_ += sizeof(ib_scale_noa);
+        ib_select_eeram_.a16 =  next_;  next_ += sizeof(ib_select);
+        iflt_eeram_.a16 =  next_;  next_ += sizeof(iflt);
+        inj_bias_eeram_.a16 =  next_;  next_ += sizeof(inj_bias);
+        islt_eeram_.a16 =  next_;  next_ += sizeof(islt);
+        isum_eeram_.a16 =  next_;  next_ += sizeof(isum);
+        mon_chm_eeram_.a16 =  next_;  next_ += sizeof(mon_chm);
+        modeling_eeram_.a16 =  next_;  next_ += sizeof(modeling);
+        nP_eeram_.a16 = next_; next_ += sizeof(nP);
+        nS_eeram_.a16 = next_; next_ += sizeof(nS);
+        preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving); // TODO:  connect this to legacy preserving logic (delete Sen->Flt->preserving)
+        shunt_gain_sclr_eeram_.a16 = next_;  next_ += sizeof(shunt_gain_sclr);
+        sim_chm_eeram_.a16 =  next_;  next_ += sizeof(sim_chm);
+        s_cap_model_eeram_.a16 = next_;  next_ += sizeof(s_cap_model);
+        Tb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Tb_bias_hdwe);
+        type_eeram_.a16 =  next_;  next_ += sizeof(type);
+        t_last_eeram_.a16 =  next_;  next_ += sizeof(t_last);
+        t_last_model_eeram_.a16 =  next_; next_ += sizeof(t_last_model);
+        Vb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Vb_bias_hdwe);
+        Vb_scale_eeram_.a16 = next_; next_ += sizeof(Vb_scale);
+        if ( next_ > MAX_EERAM ) Serial.printf("SavedPars::SavedPars - BAD MEMORY MAP\n");
     #endif
 }
 SavedPars::~SavedPars() {}
@@ -128,6 +128,7 @@ void SavedPars::load_all()
     get_ib_select();
     get_iflt();
     get_inj_bias();
+    get_islt();
     get_isum();
     get_modeling();
     get_mon_chm();
