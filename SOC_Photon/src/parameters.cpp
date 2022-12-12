@@ -50,6 +50,7 @@ SavedPars::SavedPars(SerialRAM *ram)
         ib_select_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_select);
         iflt_eeram_.a16 =  next_loc;  next_loc += sizeof(iflt);
         inj_bias_eeram_.a16 =  next_loc;  next_loc += sizeof(inj_bias);
+        islt_eeram_.a16 =  next_loc;  next_loc += sizeof(islt);
         isum_eeram_.a16 =  next_loc;  next_loc += sizeof(isum);
         mon_chm_eeram_.a16 =  next_loc;  next_loc += sizeof(mon_chm);
         modeling_eeram_.a16 =  next_loc;  next_loc += sizeof(modeling);
@@ -162,6 +163,7 @@ void SavedPars::nominal()
     put_ib_select(int8_t(FAKE_FAULTS));
     put_iflt(int(-1));
     put_inj_bias(float(0.));
+    put_islt(int(-1));
     put_isum(int(-1));
     put_modeling(uint8_t(MODELING));
     put_mon_chm(uint8_t(MON_CHEM));
@@ -190,6 +192,7 @@ int SavedPars::num_diffs()
     // if ( 0. != delta_q_model )    //   n++;
     // if ( int(-1) != iflt )    //     n++;
     // if ( int(-1) != isum )    //     n++;
+    // if ( int(-1) != islt )    //     n++;
     // if ( uint8_t(0) != preserving )    //     n++;
     if ( float(0.) != amp ) n++;
     if ( float(1.) != cutback_gain_sclr ) n++;
@@ -246,6 +249,7 @@ void SavedPars::pretty_print(const boolean all)
     if ( all || int8_t(FAKE_FAULTS) != ib_select )      Serial.printf(" ib_select %d  %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select);
     if ( all )                                  Serial.printf(" iflt                           %d flt ptr\n", iflt);
     if ( all || float(0.) != inj_bias )         Serial.printf(" inj_bias%7.3f  %7.3f *Xb<> A\n", 0., inj_bias);
+    if ( all )                                  Serial.printf(" islt                           %d flt h ptr\n", islt);
     if ( all )                                  Serial.printf(" isum                           %d tbl ptr\n", isum);
     if ( all || uint8_t(MODELING) != modeling ) Serial.printf(" modeling %d  %d *Xm<>\n", uint8_t(MODELING), modeling);
     if ( all || MON_CHEM != mon_chm )           Serial.printf(" mon chem            %d          %d *Bm<> 0=Battle, 1=LION\n", MON_CHEM, mon_chm);
@@ -282,6 +286,7 @@ int SavedPars::read_all()
     get_ib_select(); n++;
     get_iflt(); n++;
     get_inj_bias(); n++;
+    get_islt(); n++;
     get_isum(); n++;
     get_modeling(); n++;
     get_mon_chm(); n++;
@@ -324,6 +329,7 @@ int SavedPars::assign_all()
     tempi8 = ib_select; n++;
     tempi = iflt; n++;
     tempf = inj_bias; n++;
+    tempi = islt; n++;
     tempi = isum; n++;
     tempu = modeling; n++;
     tempu = mon_chm; n++;

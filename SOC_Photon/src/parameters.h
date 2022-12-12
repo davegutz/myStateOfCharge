@@ -68,8 +68,9 @@ public:
     float ib_scale_amp;     // Calibration scalar of amplified shunt sensor
     float ib_scale_noa;     // Calibration scalar of non-amplified shunt sensor
     int8_t ib_select;       // Force current sensor (-1=non-amp, 0=auto, 1=amp)
-    float inj_bias;         // Constant bias, A
     int iflt;               // Fault snap location.   Begins at -1 because first action is to increment iflt
+    float inj_bias;         // Constant bias, A
+    int islt;               // Summary before fault snap location.   Begins at -1 because first action is to increment iflt
     int isum;               // Summary location.   Begins at -1 because first action is to increment isum
     uint8_t modeling;       // Driving saturation calculation with model.  Bits specify which signals use model
     uint8_t mon_chm;        // Monitor battery chemistry type
@@ -112,6 +113,7 @@ public:
         void get_ib_select() { }
         void get_iflt() { }
         void get_inj_bias() { }
+        void get_islt() { }
         void get_isum() { }
         void get_modeling() { }
         void get_mon_chm() { }
@@ -143,6 +145,7 @@ public:
         void get_ib_select() { int8_t value; rP_->get(ib_select_eeram_.a16, value); ib_select = value; }
         void get_iflt() { int value; rP_->get(iflt_eeram_.a16, value); iflt = value; }
         void get_inj_bias() { float value; rP_->get(inj_bias_eeram_.a16, value); inj_bias = value; }
+        void get_islt() { int value; rP_->get(islt_eeram_.a16, value); islt = value; }
         void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum = value; }
         void get_modeling() { modeling = rP_->read(modeling_eeram_.a16); }
         void get_mon_chm() { mon_chm = rP_->read(mon_chm_eeram_.a16); }
@@ -182,6 +185,7 @@ public:
         void put_ib_select(const int8_t input) { ib_select = input; }
         void put_iflt(const int input) { iflt = input; }
         void put_inj_bias(const float input) { inj_bias = input; }
+        void put_islt(const int input) { islt = input; }
         void put_isum(const int input) { isum = input; }
         void put_modeling(const uint8_t input) { modeling = input; }
         void put_mon_chm(const uint8_t input) { mon_chm = input; }
@@ -213,6 +217,7 @@ public:
         void put_ib_select(const int8_t input) { rP_->put(ib_select_eeram_.a16, input); ib_select = input; }
         void put_iflt(const int input) { rP_->put(iflt_eeram_.a16, input); iflt = input; }
         void put_inj_bias(const float input) { rP_->put(inj_bias_eeram_.a16, input); inj_bias = input; }
+        void put_islt(const int input) { rP_->put(islt_eeram_.a16, input); islt = input; }
         void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum = input; }
         void put_modeling(const uint8_t input) { rP_->write(modeling_eeram_.a16, input); modeling = input; }
         void put_mon_chm(const uint8_t input) { rP_->write(mon_chm_eeram_.a16, input); mon_chm = input; }
@@ -249,6 +254,7 @@ protected:
         address16b ib_select_eeram_;
         address16b iflt_eeram_;
         address16b inj_bias_eeram_;
+        address16b islt_eeram_;
         address16b isum_eeram_;
         address16b modeling_eeram_;
         address16b mon_chm_eeram_;

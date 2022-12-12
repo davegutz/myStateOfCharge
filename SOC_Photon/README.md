@@ -240,9 +240,13 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
 
   Too much text being stored by Serial.printf statements.
 
+### Problem:  'Insufficient room for heap.' or 'Insufficient room for .data and .bss sections!' on compilation, or flashing red lights after flash
+
+  You probaby added some code and overflowed PROM.  Smaller NSUM in constants.h or rp in retained.h or cp in command.h
+
 ### Problem:  The application overflows BACKUPSRAM on compilation
 
-  Smaller NSUM in constants.h or rp in retained.h or cp in command.h
+  Smaller NFLT/NSLT in constants.h or sp in retained.h
 
 ### Problem:  . ? h
 

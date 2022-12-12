@@ -32,10 +32,11 @@
 #include <math.h>
 #include "debug.h"
 
-extern CommandPars cp;          // Various parameters shared at system level
-extern SavedPars sp;         // Various parameters to be static at system level
-extern Sum_st mySum[NSUM];      // Summaries for saving charge history
-extern Flt_st myFlt[NFLT];      // Summaries for saving charge history
+extern CommandPars cp;            // Various parameters shared at system level
+extern SavedPars sp;              // Various parameters to be static at system level
+extern Flt_st mySum[NSUM];        // Summaries for saving charge history
+extern Flt_st myFlt[NFLT];        // Fault snapshot
+extern Flt_st mySlt[NSLT];        // Summaries leading to fault snapshot
 
 // Process asap commands
 void asap()
@@ -144,10 +145,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
               case ( 'd' ):  // bd: fault buffer dump
                 Serial.printf("\n");
-                print_all_fault_buffer(myFlt, sp.iflt, NFLT);
+                print_all_fault_buffer("unit_f", mySlt, sp.islt, NSLT);
+                print_all_fault_buffer("unif_f", myFlt, sp.iflt, NFLT);
                 break;
 
               case ( 'R' ):  // bR: Fault buffer reset
+                large_reset_fault_buffer(mySlt, sp.islt, NSLT);
                 large_reset_fault_buffer(myFlt, sp.iflt, NFLT);
                 break;
 
@@ -589,19 +592,22 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
               case ( 'd' ):  // Hd: History dump
                 Serial.printf("\n");
-                print_all_summary(mySum, sp.isum, NSUM);
+                print_all_fault_buffer("unit_h", mySum, sp.isum, NSUM);
                 chit("Pr;Q;", QUEUE);
                 Serial.printf("\n");
-                print_all_fault_buffer(myFlt, sp.iflt, NFLT);
+                print_all_fault_buffer("unit_f", mySlt, sp.islt, NSLT);
+                print_all_fault_buffer("unit_f", myFlt, sp.iflt, NFLT);
                 break;
 
               case ( 'f' ):  // Hf: History dump faults only
                 Serial.printf("\n");
-                print_all_fault_buffer(myFlt, sp.iflt, NFLT);
+                print_all_fault_buffer("unit_f", mySlt, sp.islt, NSLT);
+                print_all_fault_buffer("unit_f", myFlt, sp.iflt, NFLT);
                 break;
 
               case ( 'R' ):  // HR: History reset
-                large_reset_summary(mySum, sp.isum, NSUM);
+                large_reset_fault_buffer(mySum, sp.isum, NSUM);
+                large_reset_fault_buffer(mySlt, sp.islt, NSLT);
                 large_reset_fault_buffer(myFlt, sp.iflt, NFLT);
                 break;
 
@@ -659,7 +665,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'f' ):  // Pf:  Print faults
                 Serial.printf ("\nSen::\n");
-                print_all_fault_buffer(myFlt, sp.iflt, NFLT);
+                print_all_fault_buffer("unit_f", mySlt, sp.islt, NSLT);
+                print_all_fault_buffer("unit_f", myFlt, sp.iflt, NFLT);
                 Sen->Flt->pretty_print (Sen, Mon);
                 Serial1.printf("\nSen::\n");
                 Sen->Flt->pretty_print1(Sen, Mon);

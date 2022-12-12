@@ -81,17 +81,19 @@
 
 // Globals
 extern CommandPars cp;            // Various parameters to be common at system level
-extern Sum_st mySum[NSUM];        // Summaries for saving charge history
+extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
-extern Flt_st myFlt[NFLT];        // Summaries for saving fault history
+extern Flt_st myFlt[NFLT];        // Fault snapshot
+extern Flt_st mySlt[NSLT];        // Summaries leading up to fault snapshot
 
 #if (PLATFORM_ID==6) // Photon
   retained SavedPars sp = SavedPars();           // Various parameters to be common at system level
 #elif (PLATFORM_ID==12)  // Argon
   SavedPars sp = SavedPars(&ram);           // Various parameters to be common at system level
 #endif
-retained Sum_st mySum[NSUM];          // Summaries
-retained Flt_st myFlt[NFLT];          // Summaries   TODO:  make parameters same as Sum_st  TODO:  add 2 hist snaps
+Flt_st mySum[NSUM];                   // Summaries
+retained Flt_st myFlt[NFLT];          // Fault snapshot
+retained Flt_st mySlt[NSLT];          // Summaries leading up to fault snapshot
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
 unsigned long millis_flip = millis(); // Timekeeping
@@ -199,7 +201,7 @@ void setup()
   // Summary
   System.enableFeature(FEATURE_RETAINED_MEMORY);
   if ( sp.debug==1 || sp.debug==2 || sp.debug==3 || sp.debug==4 )
-    print_all_summary(mySum, sp.isum, NSUM);
+    print_all_fault_buffer("unit_h", mySum, sp.isum, NSUM);
 
   // Ask to renominalize
   if ( ASK_DURING_BOOT )
@@ -409,6 +411,12 @@ void loop()
   {
     if ( ++sp.isum>NSUM-1 ) sp.isum = 0;
     mySum[sp.isum].assign(time_now, Mon, Sen);
+    if ( !Sen->Flt->preserving() )
+    {
+      if ( ++sp.islt>NSLT-1 ) sp.islt = 0;
+      mySlt[sp.islt].assign(time_now, Mon, Sen);
+      Serial.printf("Slt...\n");
+    }
     Serial.printf("Summ...\n");
     cp.write_summary = false;
   }

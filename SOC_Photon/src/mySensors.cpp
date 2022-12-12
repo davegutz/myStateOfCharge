@@ -31,10 +31,11 @@
 #include "debug.h"
 #include "mySummary.h"
 
-extern CommandPars cp;          // Various parameters shared at system level
+extern CommandPars cp;            // Various parameters shared at system level
 extern PublishPars pp;            // For publishing
-extern SavedPars sp;         // Various parameters to be static at system level
-extern Flt_st myFlt[NFLT];        // Summaries for saving fault history
+extern SavedPars sp;              // Various parameters to be static at system level
+extern Flt_st myFlt[NFLT];        // Fault snapshot
+extern Flt_st mySlt[NSLT];        // Summaries leading to fault snapshot
 
 
 // class TempSensor

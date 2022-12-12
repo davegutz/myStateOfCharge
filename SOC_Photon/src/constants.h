@@ -62,8 +62,13 @@
 #define F_MAX_T_TEMP          18.0      // Maximum call update time filters (18.0)
 #define F_W_T                 0.05      // Temperature filter wn, r/s (0.05)   
 #define F_Z_T                 0.80      // Temperature filter zeta (0.80)
-#define NSUM                  134       // Number of saved SRAM summaries.   If too large, will get compile error BACKUPSRAM (130)
-#define NFLT                  7         // Number of saved SRAM fault data slices.  If too large, " "
+#if (PLATFORM_ID==6)  // Photon
+    #define NSUM              1000      // Number of saved SRAM summaries.   If too large, will get flashing red or compile error 'Insufficient room for heap.' (1000)
+#elif (PLATFORM_ID==12)  // Argon
+    #define NSUM              2400      // Number of saved SRAM summaries.   If too large, will get flashing red or compile error 'Insufficient room for .data and .bss sections!' (2400)
+#endif
+#define NFLT                  7         // Number of saved SRAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)
+#define NSLT                  7         // Number of saved SRAM history data slices.  If too large, will get compile error BACKUPSRAM (7)
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)
 #define HDB_VBATT             0.05      // Half deadband to filter Vb, V (0.05)
 #define T_SAT                 10        // Saturation time, sec (10, >=10 for no sat ib lo fault of -100 A)
