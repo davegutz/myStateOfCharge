@@ -30,6 +30,7 @@
 #include "local_config.h"
 #include "Battery.h"
 #include "hardware/SerialRAM.h"
+#include "fault.h"
 
 // Corruption test
 template <typename T>
@@ -129,7 +130,8 @@ public:
         void get_t_last_model() { }
         void get_Vb_bias_hdwe() { }
         void get_Vb_scale() { }
-    #elif (PLATFORM_ID==12) // Argon
+        void get_fault_array() { }
+    #elif PLATFORM_ID == PLATFORM_ARGON
         void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp = value; }
         void get_cutback_gain_sclr() { float value; rP_->get(cutback_gain_sclr_eeram_.a16, value); cutback_gain_sclr = value; }
         void get_debug() { int value; rP_->get(debug_eeram_.a16, value); debug = value; }
@@ -161,7 +163,8 @@ public:
         void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model = value; }
         void get_Vb_bias_hdwe() { float value; rP_->get(Vb_bias_hdwe_eeram_.a16, value); Vb_bias_hdwe = value; }
         void get_Vb_scale() { float value; rP_->get(Vb_scale_eeram_.a16, value); Vb_scale = value; }
-        address16b next() { return next_; }
+        void get_fault_array(const uint8_t i) { Flt_st value; rP_->get(fault_array_eeram_[i].a16, value); fault_array_[i] = value; }
+        uint16_t next() { return next_; }
     #endif
     //
     void load_all();
@@ -202,7 +205,8 @@ public:
         void put_t_last_model(const float input) { t_last_model = input; }
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { Vb_scale = input; }
-    #elif (PLATFORM_ID==12)  // Argon
+        void put_fault_array(Flt_st *input, const uint8_t i) { fault_array_[i].copy_from(input); }
+    #elif PLATFORM_ID == PLATFORM_ARGON
         void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp = input; }
         void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr = input; }
         void put_debug(const int input) { rP_->put(debug_eeram_.a16, input); debug = input; }
@@ -234,12 +238,13 @@ public:
         void put_t_last_model(const float input) { rP_->put(t_last_model_eeram_.a16, input); t_last_model = input; }
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale = input; }
+        void put_fault_array(Flt_st *input, const uint8_t i) { rP_->put(fault_array_eeram_[i].a16, *input); fault_array_[i].copy_from(input); }
     #endif
     //
     int read_all();
     boolean tweak_test() { return ( 0x8 & modeling ); } // Driving signal injection completely using software inj_bias 
 protected:
-    #if (PLATFORM_ID==12)  // Argon
+    #if PLATFORM_ID == PLATFORM_ARGON
         address16b amp_eeram_;
         address16b cutback_gain_sclr_eeram_;
         address16b debug_eeram_;
@@ -272,7 +277,9 @@ protected:
         address16b Vb_bias_hdwe_eeram_;
         address16b Vb_scale_eeram_;
         SerialRAM *rP_;
-        address16b next_;
+        uint16_t next_;
+        Flt_st *fault_array_;
+        address16b *fault_array_eeram_;
     #endif
 };
 

@@ -365,6 +365,10 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("v0; to return\n");
 }
 
+// Redundancy loss.   Here in cpp because sp circular reference in .h files
+boolean Fault::red_loss_calc() { return (ib_sel_stat_!=1 || (sp.ib_select!=0 && !cp.fake_faults)
+  || ib_diff_fa() || vb_fail()); };
+
 // Calculate selection for choice
 // Use model instead of sensors when running tests as user
 // Equivalent to using voc(soc) as voter between two hardware currrents
@@ -809,6 +813,9 @@ float Sensors::Tb_noise()
   float noise = (float(raw)/127. - 0.5) * Tb_noise_amp_;
   return ( noise );
 }
+
+// Conversion.   Here to avoid circular reference to sp in headers.
+float Sensors::Vb_add() { return ( vb_add_ * sp.nS ); };
 
 // Vb noise
 float Sensors::Vb_noise()

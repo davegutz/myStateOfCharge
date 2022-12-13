@@ -17,7 +17,7 @@
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
 #else
-	#if (PLATFORM_ID==12)
+	#if PLATFORM_ID == PLATFORM_ARGON
 		#include "WProgram.h"
 	#endif
 #endif

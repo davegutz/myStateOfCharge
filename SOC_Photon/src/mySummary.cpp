@@ -25,6 +25,7 @@
 #include "application.h" // Should not be needed if file .ino or Arduino
 #endif
 #include "mySummary.h"
+#include "parameters.h"
 
 // print helpler
 void print_all_fault_buffer(const String code, struct Flt_st *flt, const int iflt, const int nflt)
@@ -67,4 +68,3 @@ void large_reset_summary(struct Flt_st *sum, const int isum, const int nsum)
     sum[i].nominal();
   }
 }
-

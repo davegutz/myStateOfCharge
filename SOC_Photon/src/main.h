@@ -51,18 +51,18 @@
 */
 
 // For Photon
-#if (PLATFORM_ID==6 || PLATFORM_ID==12)  // Photon, Argon
+#if PLATFORM_ID == 6 || PLATFORM_ID == PLATFORM_ARGON
   //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
-  #include "application.h"  // Should not be needed if file ino or Arduino
+  // #include "application.h"  // Should not be needed if file ino or Arduino
   SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
-  #include <Arduino.h>      // Used instead of Print.h - breaks Serial
+  // #include <Arduino.h>      // Used instead of Print.h - breaks Serial
 #else
   using namespace std;
   #undef max
   #undef min
 #endif
 
-#if (PLATFORM_ID==12)  // Argon only
+#if PLATFORM_ID == PLATFORM_ARGON
   #include "hardware/SerialRAM.h"
   SerialRAM ram;
   #include "hardware/BleSerialPeripheralRK.h"
@@ -80,16 +80,17 @@
 #include "debug.h"
 
 // Globals
+extern SavedPars sp;              // Various parameters to be common at system level
 extern CommandPars cp;            // Various parameters to be common at system level
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
 extern Flt_st myFlt[NFLT];        // Fault snapshot
 extern Flt_st mySlt[NSLT];        // Summaries leading up to fault snapshot
 
-#if (PLATFORM_ID==6) // Photon
-  retained SavedPars sp = SavedPars();           // Various parameters to be common at system level
-#elif (PLATFORM_ID==12)  // Argon
-  SavedPars sp = SavedPars(&ram);           // Various parameters to be common at system level
+#if PLATFORM_ID == 6 // Photon
+  retained SavedPars sp = SavedPars();// Various parameters to be common at system level
+#elif PLATFORM_ID == PLATFORM_ARGON
+  SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
 #endif
 Flt_st mySum[NSUM];                   // Summaries
 retained Flt_st myFlt[NFLT];          // Fault snapshot
@@ -104,7 +105,7 @@ String hm_string = "00:00";     // time, hh:mm
 Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_SSD1306 *display;      // Main OLED display
 
-#if (PLATFORM_ID==12)  // Argon only
+#if PLATFORM_ID == PLATFORM_ARGON
   // First parameter is the transmit buffer size, second parameter is the receive buffer size
   BleSerialPeripheralStatic<32, 256> bleSerial;
   const unsigned long TRANSMIT_PERIOD_MS = 2000;
@@ -115,6 +116,7 @@ Adafruit_SSD1306 *display;      // Main OLED display
 // Setup
 void setup()
 {
+
   // Serial
   // Serial.blockOnOverrun(false);  doesn't work
   Serial.begin(115200);
@@ -128,7 +130,7 @@ void setup()
   Serial1.begin(115200);
   Serial1.flush();
 
-  #if (PLATFORM_ID==12)  // Argon
+  #if PLATFORM_ID == PLATFORM_ARGON
     ram.begin(0, 0);
     ram.setAutoStore(true);
     delay(1000);
@@ -302,7 +304,7 @@ void loop()
   summarizing = Summarize->update(millis(), false); // now || boot_summ && !sp.modeling
   summarizing = summarizing || boot_summ;
 
-  #if (PLATFORM_ID==12)
+  #if PLATFORM_ID == PLATFORM_ARGON
     // This must be called from loop() on every call to loop.
     bleSerial.loop();
     // Print out anything we receive

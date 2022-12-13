@@ -29,9 +29,9 @@
 #include "constants.h"
 #include "myCloud.h"
 #include "myTalk.h"
-#include "parameters.h"
 #include "command.h"
 #include "mySync.h"
+#include "parameters.h"
 
 // Temp sensor
 #include "hardware/OneWire.h"
@@ -40,7 +40,6 @@
 // AD
 #include "Adafruit/Adafruit_ADS1X15.h"
 
-extern SavedPars sp; // Various parameters to be static at system level
 extern PublishPars pp;  // For publishing
 extern CommandPars cp;  // Various parameters to be static at system level
 
@@ -226,8 +225,7 @@ public:
   void pretty_print1(Sensors *Sen, BatteryMonitor *Mon);
   boolean record() { if ( cp.fake_faults ) return no_fails_fake(); else return no_fails(); };
   boolean red_loss() { return faultRead(RED_LOSS); };
-  boolean red_loss_calc() { return (ib_sel_stat_!=1 || (sp.ib_select!=0 && !cp.fake_faults)
-   || ib_diff_fa() || vb_fail()); };
+  boolean red_loss_calc();
   void reset_all_faults(const boolean cmd) { reset_all_faults_ = cmd; };
   boolean reset_all_faults() { return reset_all_faults_; };
   void select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
@@ -376,7 +374,7 @@ public:
   void Tb_noise_amp(const float noise) { Tb_noise_amp_ = noise; };
   float vb_add() { return ( vb_add_ ); };
   void vb_add(const float add) { vb_add_ = add; };
-  float Vb_add() { return ( vb_add_ * sp.nS ); };
+  float Vb_add();
   void vb_load(const uint16_t vb_pin);  // Analog read of Vb
   float Vb_noise();
   float Vb_noise_amp() { return ( Vb_noise_amp_ ); };

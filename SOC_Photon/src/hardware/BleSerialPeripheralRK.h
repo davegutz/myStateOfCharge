@@ -1,6 +1,5 @@
 #ifndef __BLESERIALPERIPHERAL_H
 #define __BLESERIALPERIPHERAL_H
-#if (PLATFORM_ID==12)
 #include "Particle.h"
 #include "RingBuffer.h"
 
@@ -234,5 +233,4 @@ protected:
 	BleSerialPeripheralBase *parent;
 };
 
-#endif /* PLATFORM_ID==12 */
 #endif /* __BLESERIALPERIPHERAL_H */

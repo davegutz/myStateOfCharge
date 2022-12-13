@@ -21,17 +21,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
-#ifndef _MY_SUMMARY_H
-#define _MY_SUMMARY_H
-
-#include "application.h"
-#include "mySensors.h"
-#include "command.h"
-#include "fault.h"
-
-// Function prototypes
-void large_reset_fault_buffer(struct Flt_st *flt, const int iflt, const int nflt);
-void print_all_fault_buffer(const String code, struct Flt_st *sum, const int iflt, const int nflt);
-
+#ifndef ARDUINO
+#include "application.h" // Should not be needed if file .ino or Arduino
 #endif
+#include "fault.h"
+#include "mySensors.h"
+extern SavedPars sp;              // Various parameters to be static at system level
+
+// struct Flt_st
+void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
+{
+  char buffer[32];
+  this->t = now;
+  this->Tb_hdwe = int16_t(Sen->Tb_hdwe*600.);
+  this->vb_hdwe = int16_t(Sen->Vb/sp.nS*1200.);
+  this->ib_amp_hdwe = int16_t(Sen->Ib_amp_hdwe/sp.nP*600.);
+  this->ib_noa_hdwe = int16_t(Sen->Ib_noa_hdwe/sp.nP*600.);
+  this->Tb = int16_t(Sen->Tb*600.);
+  this->vb = int16_t(Sen->Vb/sp.nS*1200.);
+  this->ib = int16_t(Sen->Ib/sp.nP*600.);
+  this->soc = int16_t(Mon->soc()*16000.);
+  this->soc_ekf = int16_t(Mon->soc_ekf()*16000.);
+  this->voc = int16_t(Mon->voc()*1200.);
+  this->voc_stat = int16_t(Mon->voc_stat()*1200.);
+  this->e_wrap_filt = int16_t(Sen->Flt->e_wrap_filt()*1200.);
+  this->fltw = Sen->Flt->fltw();
+  this->falw = Sen->Flt->falw();
+  time_long_2_str(now, buffer);
+}
