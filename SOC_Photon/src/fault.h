@@ -55,7 +55,6 @@ struct Flt_st
   void assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen);
   void copy_from(Flt_st input)
   {
-    input.print("copy_from input");
     t = input.t;
     Tb_hdwe = input.Tb_hdwe;
     vb_hdwe = input.vb_hdwe;
@@ -63,7 +62,6 @@ struct Flt_st
     ib_noa_hdwe = input.ib_noa_hdwe;
     Tb = input.Tb;
     vb = input.vb;
-    Serial.printf("input.vb %d vb %d\n", input.vb, vb);
     ib = input.ib;
     soc = input.soc;
     soc_ekf = input.soc_ekf;
@@ -72,7 +70,6 @@ struct Flt_st
     e_wrap_filt =input.e_wrap_filt;
     fltw = input.fltw;
     falw = input.falw;
-    print("copy_from result");
   }
   void nominal()
   {

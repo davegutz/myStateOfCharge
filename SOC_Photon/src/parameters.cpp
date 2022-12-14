@@ -67,9 +67,9 @@ SavedPars::SavedPars(SerialRAM *ram)
         Vb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Vb_bias_hdwe);
         Vb_scale_eeram_.a16 = next_; next_ += sizeof(Vb_scale);
         fault_array_eeram_ = new address16b[NFLT];
+        fault_array_ptr_ = new Flt_st[NFLT];
         for ( int i=0; i<NFLT; i++ )
         {
-            // fault_array_ptr_[i] = new Flt_st();
             fault_array_eeram_[i].a16 = next_;
             next_ += sizeof(fault_array_ptr_[i]);
             fault_array_ptr_[i].nominal();
