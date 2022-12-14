@@ -932,7 +932,8 @@ if __name__ == '__main__':
 
         # User inputs
         # input_files = ['coldCharge1 v20221028.txt']
-        input_files = ['fault_20221206.txt']
+        # input_files = ['fault_20221206.txt']
+        input_files = ['hist_v20221028c_20221213.txt']
         # t_max_in = 20.
         # exclusions = [(0, 1665334404)]  # before faults
         # exclusions = [(0, 1665404608), (1665433410, 1670000000)]  # EKF wander full
@@ -1002,8 +1003,8 @@ if __name__ == '__main__':
         h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
         # T_300new = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
         # T_300old = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
-        T_300new = 10  # For debugging
-        T_300old = 10  # For debugging
+        T_300new = 10  # For long histories
+        T_300old = 10  # For long histories
         print('resample old')
         h_20C_resamp_300old = resample(data=h_20C, dt_resamp=T_300old, time_var='time',
                                        specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),

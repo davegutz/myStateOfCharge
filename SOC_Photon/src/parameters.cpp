@@ -66,14 +66,14 @@ SavedPars::SavedPars(SerialRAM *ram)
         t_last_model_eeram_.a16 =  next_; next_ += sizeof(t_last_model);
         Vb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Vb_bias_hdwe);
         Vb_scale_eeram_.a16 = next_; next_ += sizeof(Vb_scale);
+        fault_array_eeram_ = new address16b[NFLT];
         for ( int i=0; i<NFLT; i++ )
         {
-            fault_array_[i] = Flt_st();
+            // fault_array_ptr_[i] = new Flt_st();
             fault_array_eeram_[i].a16 = next_;
-            next_ += sizeof(fault_array_[i]);
+            next_ += sizeof(fault_array_ptr_[i]);
+            fault_array_ptr_[i].nominal();
         }
-        Serial.printf("SavedPars::SavedPars - MEMORY MAP %d > %d\n", next_, MAX_EERAM);
-        // if ( next_ > MAX_EERAM ) Serial.printf("SavedPars::SavedPars - BAD MEMORY MAP %d > %d\n", next_, MAX_EERAM);
     #endif
 }
 SavedPars::~SavedPars() {}
@@ -153,7 +153,7 @@ void SavedPars::load_all()
     get_Vb_scale();
     for ( int i=0; i<NFLT; i++ )
     {
-        get_fault_array(i);
+        get_fault_array_elem(i);
     }
 }
 
@@ -193,9 +193,20 @@ void SavedPars::nominal()
     put_Vb_scale(float(VB_SCALE));
     for ( int i=0; i<NFLT; i++ )
     {
-        fault_array_[i].nominal();
-        put_fault_array(fault_array_, i);
+        Serial.printf("mem for %d:  0x%X\n", i, fault_array_eeram_[i].a16);
+        fault_array_ptr_[i].nominal();
+        Serial.printf("nominal fault array =\n");
+        fault_array_ptr_[i].print("put");
+        Serial.printf("\n");
+        // fault_array_ptr_[i]->pretty_print("put");
+        put_fault_array_elem(fault_array_ptr_[i], i);
+        get_fault_array_elem(i);
+        fault_array_ptr_[i].print("get");
+        Serial.printf("\n");
+        // fault_array_ptr_[i].pretty_print("get");
     }
+    Serial.printf("Temp mem map print\n");
+    mem_print();
  }
 
 // Number of differences between nominal EERAM and actual (don't count integator memories because they always change)
@@ -243,8 +254,9 @@ int SavedPars::num_diffs()
 void SavedPars::mem_print()
 {
     #if PLATFORM_ID == PLATFORM_ARGON
-        for ( uint16_t i=0x0000; i<MAX_EERAM; i++ ) Serial.printf("%d ", rP_->read(i));
-        Serial.printf("\n");
+        Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X > 0x%X, sizeof Flt_st=0x%X\n", next_, MAX_EERAM, sizeof(Flt_st));
+        Serial.printf("Temp mem map print\n");
+        for ( uint16_t i=0x0000; i<MAX_EERAM; i++ ) Serial.printf("0x%X ", rP_->read(i));
     #endif
 }
 void SavedPars::pretty_print(const boolean all)
@@ -287,14 +299,17 @@ void SavedPars::pretty_print(const boolean all)
         Serial.printf("fault array:\n");
         for ( int i=0; i<NFLT; i++ )
         {
-            fault_array_[i].print("unit_f");
-            Serial.printf("\n");
+            fault_array_ptr_[i].print("unit_f");
         }
         Serial.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,\n");
+        // for ( int i=0; i<NFLT; i++ )
+        // {
+        //     fault_array_ptr_[i].pretty_print("unit_f");
+        // }
     }
 
     // Temporary
-    Serial.printf("SavedPars::SavedPars - MEMORY MAP %d > %d\n", next_, MAX_EERAM);
+    Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X > 0x%X, sizeof Flt_st=0x%X\n", next_, MAX_EERAM, sizeof(Flt_st));
     Serial.printf("Temp mem map print\n");
     mem_print();
 }

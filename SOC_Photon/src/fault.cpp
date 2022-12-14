@@ -32,6 +32,7 @@ extern SavedPars sp;              // Various parameters to be static at system l
 void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
 {
   char buffer[32];
+  time_long_2_str(now, buffer);
   this->t = now;
   this->Tb_hdwe = int16_t(Sen->Tb_hdwe*600.);
   this->vb_hdwe = int16_t(Sen->Vb/sp.nS*1200.);
@@ -47,5 +48,5 @@ void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
   this->e_wrap_filt = int16_t(Sen->Flt->e_wrap_filt()*1200.);
   this->fltw = Sen->Flt->fltw();
   this->falw = Sen->Flt->falw();
-  time_long_2_str(now, buffer);
+  print("assign");
 }

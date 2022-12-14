@@ -491,6 +491,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
       sp.put_iflt(sp.iflt+1);
       if ( sp.iflt>NFLT-1 ) sp.put_iflt(0);  // wrap buffer
       myFlt[sp.iflt].assign(Time.now(), Mon, Sen);
+      sp.put_fault_array_elem(myFlt[sp.iflt], sp.iflt);
     }
     else if ( fails_repeated < 4 )
     {
