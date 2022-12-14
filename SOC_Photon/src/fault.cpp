@@ -48,5 +48,4 @@ void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
   this->e_wrap_filt = int16_t(Sen->Flt->e_wrap_filt()*1200.);
   this->fltw = Sen->Flt->fltw();
   this->falw = Sen->Flt->falw();
-  print("assign");
 }

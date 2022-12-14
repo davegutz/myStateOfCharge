@@ -195,18 +195,17 @@ void SavedPars::nominal()
     {
         Serial.printf("mem for %d:  0x%X\n", i, fault_array_eeram_[i].a16);
         fault_array_ptr_[i].nominal();
-        Serial.printf("nominal fault array =\n");
-        fault_array_ptr_[i].print("put");
-        Serial.printf("\n");
+        // Serial.printf("nominal fault array =\n");
+        // fault_array_ptr_[i].print("put");
         // fault_array_ptr_[i]->pretty_print("put");
         put_fault_array_elem(fault_array_ptr_[i], i);
         get_fault_array_elem(i);
-        fault_array_ptr_[i].print("get");
-        Serial.printf("\n");
+        // fault_array_ptr_[i].print("get");
+        // Serial.printf("\n");
         // fault_array_ptr_[i].pretty_print("get");
     }
-    Serial.printf("Temp mem map print\n");
-    mem_print();
+    // Serial.printf("Temp mem map print\n");
+    // mem_print();
  }
 
 // Number of differences between nominal EERAM and actual (don't count integator memories because they always change)
@@ -310,8 +309,8 @@ void SavedPars::pretty_print(const boolean all)
 
     // Temporary
     Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X > 0x%X, sizeof Flt_st=0x%X\n", next_, MAX_EERAM, sizeof(Flt_st));
-    Serial.printf("Temp mem map print\n");
-    mem_print();
+    // Serial.printf("Temp mem map print\n");
+    // mem_print();
 }
 
 // Assign all EERAM values to temp variable for pursposes of timing

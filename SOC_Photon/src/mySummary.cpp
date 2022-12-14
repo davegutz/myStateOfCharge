@@ -35,11 +35,7 @@ void print_all_fault_buffer(const String code, struct Flt_st *flt, const int ifl
   while ( ++n < nflt )
   {
     if ( ++i > (nflt-1) ) i = 0; // circular buffer
-
     flt[i].print(code);
-
-    Serial.printf("\n");
-    Serial1.printf("\n");
   }
   Serial.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,\n");
   Serial1.printf("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,\n");

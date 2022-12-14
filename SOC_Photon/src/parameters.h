@@ -163,7 +163,7 @@ public:
         void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model = value; }
         void get_Vb_bias_hdwe() { float value; rP_->get(Vb_bias_hdwe_eeram_.a16, value); Vb_bias_hdwe = value; }
         void get_Vb_scale() { float value; rP_->get(Vb_scale_eeram_.a16, value); Vb_scale = value; }
-        void get_fault_array_elem(const uint8_t i) { Flt_st value; rP_->get(fault_array_eeram_[i].a16, value); fault_array_ptr_[i] = value; fault_array_ptr_[i].print("get elem"); }
+        void get_fault_array_elem(const uint8_t i) { Flt_st value; rP_->get(fault_array_eeram_[i].a16, value); fault_array_ptr_[i] = value; }
         uint16_t next() { return next_; }
     #endif
     //

@@ -120,7 +120,7 @@ struct Flt_st
     {
       time_long_2_str(this->t, buffer);
     }
-    Serial.printf("%s, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, fltw%d, falw%d,\n",
+    Serial.printf("%s, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
       code.c_str(), buffer, this->t,
       double(this->Tb_hdwe)/600.,
       double(this->vb_hdwe)/1200.,
