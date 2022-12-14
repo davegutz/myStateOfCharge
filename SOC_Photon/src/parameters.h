@@ -169,7 +169,9 @@ public:
     //
     void load_all();
     void mem_print();
+    uint16_t nflt() { return nflt_; }
     void nominal();
+    void nominalize_fault_array();
     int num_diffs();
     void pretty_print(const boolean all);
     // put
@@ -241,6 +243,7 @@ public:
         void put_fault_array_elem(Flt_st input, const uint8_t i) { rP_->put(fault_array_eeram_[i].a16, input); fault_array_ptr_[i].copy_from(input); }
     #endif
     //
+    void print_fault_array();
     int read_all();
     boolean tweak_test() { return ( 0x8 & modeling ); } // Driving signal injection completely using software inj_bias 
 protected:
@@ -280,6 +283,7 @@ protected:
         uint16_t next_;
         Flt_st *fault_array_ptr_;
         address16b *fault_array_eeram_;
+        uint16_t nflt_;         // Length of Flt_st array for faults
     #endif
 };
 

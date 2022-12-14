@@ -66,9 +66,10 @@ SavedPars::SavedPars(SerialRAM *ram)
         t_last_model_eeram_.a16 =  next_; next_ += sizeof(t_last_model);
         Vb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Vb_bias_hdwe);
         Vb_scale_eeram_.a16 = next_; next_ += sizeof(Vb_scale);
-        fault_array_eeram_ = new address16b[NFLT];
-        fault_array_ptr_ = new Flt_st[NFLT];
-        for ( int i=0; i<NFLT; i++ )
+        nflt_ = int( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
+        fault_array_eeram_ = new address16b[nflt_];
+        fault_array_ptr_ = new Flt_st[nflt_];
+        for ( int i=0; i<nflt_; i++ )
         {
             fault_array_eeram_[i].a16 = next_;
             next_ += sizeof(fault_array_ptr_[i]);
@@ -98,7 +99,7 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(ib_scale_amp, float(-1e6), float(1e6)) ||
         is_val_corrupt(ib_scale_noa, float(-1e6), float(1e6)) ||
         is_val_corrupt(ib_select, int8_t(-1), int8_t(1)) ||
-        is_val_corrupt(iflt, -1, NFLT+1) ||
+        is_val_corrupt(iflt, -1, nflt_+1) ||
         is_val_corrupt(inj_bias, float(-100.), float(100.)) ||
         is_val_corrupt(isum, -1, NSUM+1) ||
         is_val_corrupt(modeling, uint8_t(0), uint8_t(15)) ||
@@ -151,7 +152,7 @@ void SavedPars::load_all()
     get_t_last_model();
     get_Vb_bias_hdwe();
     get_Vb_scale();
-    for ( int i=0; i<NFLT; i++ )
+    for ( int i=0; i<nflt_; i++ )
     {
         get_fault_array_elem(i);
     }
@@ -191,7 +192,7 @@ void SavedPars::nominal()
     put_t_last_model(float(RATED_TEMP));  
     put_Vb_bias_hdwe(float(VOLT_BIAS));
     put_Vb_scale(float(VB_SCALE));
-    for ( int i=0; i<NFLT; i++ )
+    for ( int i=0; i<nflt_; i++ )
     {
         Serial.printf("mem for %d:  0x%X\n", i, fault_array_eeram_[i].a16);
         fault_array_ptr_[i].nominal();
@@ -249,7 +250,7 @@ int SavedPars::num_diffs()
 
 // Configuration functions
 
-// Print
+// Print memory map
 void SavedPars::mem_print()
 {
     #if PLATFORM_ID == PLATFORM_ARGON
@@ -258,6 +259,17 @@ void SavedPars::mem_print()
         for ( uint16_t i=0x0000; i<MAX_EERAM; i++ ) Serial.printf("0x%X ", rP_->read(i));
     #endif
 }
+
+// Reset fault array
+void SavedPars::nominalize_fault_array()
+{
+    for ( int i=0; i<nflt_; i++ )
+    {
+        fault_array_ptr_[i].nominal();
+    }
+}
+
+// Print
 void SavedPars::pretty_print(const boolean all)
 {
     Serial.printf("saved parameters (sp):\n");
@@ -296,12 +308,12 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )
     {
         Serial.printf("fault array:\n");
-        for ( int i=0; i<NFLT; i++ )
+        for ( int i=0; i<nflt_; i++ )
         {
             fault_array_ptr_[i].print("unit_f");
         }
         Serial.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,\n");
-        // for ( int i=0; i<NFLT; i++ )
+        // for ( int i=0; i<nflt; i++ )
         // {
         //     fault_array_ptr_[i].pretty_print("unit_f");
         // }
@@ -311,6 +323,19 @@ void SavedPars::pretty_print(const boolean all)
     Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X > 0x%X, sizeof Flt_st=0x%X\n", next_, MAX_EERAM, sizeof(Flt_st));
     // Serial.printf("Temp mem map print\n");
     // mem_print();
+}
+
+// Print faults
+void SavedPars::print_fault_array()
+{
+  int i = iflt;  // Last one written was iflt
+  int n = -1;
+  while ( ++n < nflt_ )
+  {
+    if ( ++i > (nflt_-1) ) i = 0; // circular buffer
+    fault_array_ptr_[i].print("unit_f");
+  }
+  Serial.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,\n");
 }
 
 // Assign all EERAM values to temp variable for pursposes of timing

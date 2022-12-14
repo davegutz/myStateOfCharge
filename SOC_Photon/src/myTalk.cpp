@@ -597,18 +597,21 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("\n");
                 print_all_fault_buffer("unit_f", mySlt, sp.islt, NSLT);
                 print_all_fault_buffer("unit_f", myFlt, sp.iflt, NFLT);
+                sp.print_fault_array();
                 break;
 
               case ( 'f' ):  // Hf: History dump faults only
                 Serial.printf("\n");
                 print_all_fault_buffer("unit_f", mySlt, sp.islt, NSLT);
                 print_all_fault_buffer("unit_f", myFlt, sp.iflt, NFLT);
+                sp.print_fault_array();
                 break;
 
               case ( 'R' ):  // HR: History reset
                 large_reset_fault_buffer(mySum, sp.isum, NSUM);
                 large_reset_fault_buffer(mySlt, sp.islt, NSLT);
                 large_reset_fault_buffer(myFlt, sp.iflt, NFLT);
+                sp.nominalize_fault_array();
                 break;
 
               case ( 's' ):  // Hs: History snapshot
