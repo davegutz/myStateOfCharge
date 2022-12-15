@@ -35,8 +35,8 @@
 extern CommandPars cp;            // Various parameters shared at system level
 extern SavedPars sp;              // Various parameters to be static at system level
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
-extern Flt_st myFlt[NFLT];        // Fault snapshot
-extern Flt_st mySlt[NSLT];        // Summaries leading to fault snapshot
+extern Flt_st myFlt[NFLT];        // Fault snapshot// TODO:  delete
+extern Flt_st mySlt[NSLT];        // Summaries leading to fault snapshot// TODO:  delete
 
 // Process asap commands
 void asap()
@@ -137,7 +137,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         break;
 
       case ( INCOMING ):
-        // Serial.printf("IN:%s,\n", cp.input_string.c_str());
         switch ( cp.input_string.charAt(0) )
         {
           case ( 'b' ):  // Fault buffer
@@ -145,13 +144,21 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
               case ( 'd' ):  // bd: fault buffer dump
                 Serial.printf("\n");
-                print_all_fault_buffer("unit_f", mySlt, sp.islt, NSLT);
-                print_all_fault_buffer("unif_f", myFlt, sp.iflt, NFLT);
+                print_all_fault_buffer("unit_f", mySlt, sp.islt, NSLT);  // TODO: delete
+                print_all_fault_header();  // TODO: delete
+                print_all_fault_buffer("unif_f", myFlt, sp.iflt, NFLT);  // TODO: delete
+                print_all_fault_header();  // TODO: delete
+                sp.print_history_array();
+                sp.print_fault_header();
+                sp.print_fault_array();
+                sp.print_fault_header();
                 break;
 
               case ( 'R' ):  // bR: Fault buffer reset
-                large_reset_fault_buffer(mySlt, sp.islt, NSLT);
-                large_reset_fault_buffer(myFlt, sp.iflt, NFLT);
+                // TODO: delete mySlt, sp.islt, myFlt, sp.iflt, NSLT
+                large_reset_fault_buffer(mySlt, sp.islt, NSLT);  // TODO: delete
+                large_reset_fault_buffer(myFlt, sp.iflt, NFLT);  // TODO: delete
+                sp.large_reset();
                 break;
 
               default:
@@ -593,25 +600,34 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'd' ):  // Hd: History dump
                 Serial.printf("\n");
                 print_all_fault_buffer("unit_h", mySum, sp.isum, NSUM);
+                print_all_fault_header();
                 chit("Pr;Q;", QUEUE);
                 Serial.printf("\n");
-                print_all_fault_buffer("unit_f", mySlt, sp.islt, NSLT);
-                print_all_fault_buffer("unit_f", myFlt, sp.iflt, NFLT);
+                print_all_fault_buffer("unit_f", mySlt, sp.islt, NSLT);  // TODO:  delete
+                print_all_fault_header();  // TODO:  delete
+                print_all_fault_buffer("unit_f", myFlt, sp.iflt, NFLT);  // TODO:  delete
+                print_all_fault_header();  // TODO:  delete
+                sp.print_history_array();
+                sp.print_fault_header();
                 sp.print_fault_array();
+                sp.print_fault_header();
                 break;
 
               case ( 'f' ):  // Hf: History dump faults only
                 Serial.printf("\n");
-                print_all_fault_buffer("unit_f", mySlt, sp.islt, NSLT);
-                print_all_fault_buffer("unit_f", myFlt, sp.iflt, NFLT);
+                print_all_fault_buffer("unit_f", mySlt, sp.islt, NSLT);  // TODO:  delete
+                print_all_fault_header();  // TODO:  delete
+                print_all_fault_buffer("unit_f", myFlt, sp.iflt, NFLT);  // TODO:  delete
+                print_all_fault_header();  // TODO:  delete
                 sp.print_fault_array();
+                sp.print_fault_header();
                 break;
 
               case ( 'R' ):  // HR: History reset
                 large_reset_fault_buffer(mySum, sp.isum, NSUM);
-                large_reset_fault_buffer(mySlt, sp.islt, NSLT);
-                large_reset_fault_buffer(myFlt, sp.iflt, NFLT);
-                sp.nominalize_fault_array();
+                large_reset_fault_buffer(mySlt, sp.islt, NSLT);  // TODO:  delete
+                large_reset_fault_buffer(myFlt, sp.iflt, NFLT);  // TODO:  delete
+                sp.large_reset();
                 break;
 
               case ( 's' ):  // Hs: History snapshot
@@ -669,7 +685,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'f' ):  // Pf:  Print faults
                 Serial.printf ("\nSen::\n");
                 print_all_fault_buffer("unit_f", mySlt, sp.islt, NSLT);
+                print_all_fault_header();
                 print_all_fault_buffer("unit_f", myFlt, sp.iflt, NFLT);
+                print_all_fault_header();
                 Sen->Flt->pretty_print (Sen, Mon);
                 Serial1.printf("\nSen::\n");
                 Sen->Flt->pretty_print1(Sen, Mon);

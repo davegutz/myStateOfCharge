@@ -27,7 +27,7 @@
 #include "mySummary.h"
 #include "parameters.h"
 
-// print helpler
+// print helpler  TODO delete print_all_fault_buffer, large_reset_fault_buffer, print_all_fault_header
 void print_all_fault_buffer(const String code, struct Flt_st *flt, const int iflt, const int nflt)
 {
   int i = iflt;  // Last one written was iflt
@@ -37,6 +37,11 @@ void print_all_fault_buffer(const String code, struct Flt_st *flt, const int ifl
     if ( ++i > (nflt-1) ) i = 0; // circular buffer
     flt[i].print(code);
   }
+}
+
+// print header
+void print_all_fault_header()
+{
   Serial.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,\n");
   Serial1.printf("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,\n");
 }

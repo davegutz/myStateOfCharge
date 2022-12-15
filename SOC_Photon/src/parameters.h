@@ -70,8 +70,9 @@ public:
     float ib_scale_noa;     // Calibration scalar of non-amplified shunt sensor
     int8_t ib_select;       // Force current sensor (-1=non-amp, 0=auto, 1=amp)
     int iflt;               // Fault snap location.   Begins at -1 because first action is to increment iflt
+    int ihis;               // History location.   Begins at -1 because first action is to increment ihis
     float inj_bias;         // Constant bias, A
-    int islt;               // Summary before fault snap location.   Begins at -1 because first action is to increment iflt
+    int islt;               // Summary before fault snap location.   Begins at -1 because first action is to increment islt
     int isum;               // Summary location.   Begins at -1 because first action is to increment isum
     uint8_t modeling;       // Driving saturation calculation with model.  Bits specify which signals use model
     uint8_t mon_chm;        // Monitor battery chemistry type
@@ -113,6 +114,7 @@ public:
         void get_ib_scale_noa() { }
         void get_ib_select() { }
         void get_iflt() { }
+        void get_ihis() { }
         void get_inj_bias() { }
         void get_islt() { }
         void get_isum() { }
@@ -131,6 +133,7 @@ public:
         void get_Vb_bias_hdwe() { }
         void get_Vb_scale() { }
         void get_fault_array_elem() { }
+        void get_history_array_elem() { }
     #elif PLATFORM_ID == PLATFORM_ARGON
         void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp = value; }
         void get_cutback_gain_sclr() { float value; rP_->get(cutback_gain_sclr_eeram_.a16, value); cutback_gain_sclr = value; }
@@ -146,6 +149,7 @@ public:
         void get_ib_scale_noa() { float value; rP_->get(ib_scale_noa_eeram_.a16, value); ib_scale_noa = value; }
         void get_ib_select() { int8_t value; rP_->get(ib_select_eeram_.a16, value); ib_select = value; }
         void get_iflt() { int value; rP_->get(iflt_eeram_.a16, value); iflt = value; }
+        void get_ihis() { int value; rP_->get(ihis_eeram_.a16, value); ihis = value; }
         void get_inj_bias() { float value; rP_->get(inj_bias_eeram_.a16, value); inj_bias = value; }
         void get_islt() { int value; rP_->get(islt_eeram_.a16, value); islt = value; }
         void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum = value; }
@@ -164,16 +168,22 @@ public:
         void get_Vb_bias_hdwe() { float value; rP_->get(Vb_bias_hdwe_eeram_.a16, value); Vb_bias_hdwe = value; }
         void get_Vb_scale() { float value; rP_->get(Vb_scale_eeram_.a16, value); Vb_scale = value; }
         void get_fault_array_elem(const uint8_t i) { Flt_st value; rP_->get(fault_array_eeram_[i].a16, value); fault_array_ptr_[i] = value; }
+        void get_history_array_elem(const uint8_t i) { Flt_st value; rP_->get(history_array_eeram_[i].a16, value); history_array_ptr_[i] = value; }
         uint16_t next() { return next_; }
     #endif
     //
     void load_all();
     void mem_print();
     uint16_t nflt() { return nflt_; }
+    uint16_t nhis() { return nhis_; }
     void nominal();
     void nominalize_fault_array();
+    void nominalize_history_array();
     int num_diffs();
     void pretty_print(const boolean all);
+    void print_fault_array();
+    void print_fault_header();
+    void print_history_array();
     // put
     #if (PLATFORM_ID==6)  // Photon
         void put_amp(const float input) { amp = input; }
@@ -190,6 +200,7 @@ public:
         void put_ib_scale_noa(const float input) { ib_scale_noa = input; }
         void put_ib_select(const int8_t input) { ib_select = input; }
         void put_iflt(const int input) { iflt = input; }
+        void put_ihis(const int input) { ihis = input; }
         void put_inj_bias(const float input) { inj_bias = input; }
         void put_islt(const int input) { islt = input; }
         void put_isum(const int input) { isum = input; }
@@ -223,6 +234,7 @@ public:
         void put_ib_scale_noa(const float input) { rP_->put(ib_scale_noa_eeram_.a16, input); ib_scale_noa = input; }
         void put_ib_select(const int8_t input) { rP_->put(ib_select_eeram_.a16, input); ib_select = input; }
         void put_iflt(const int input) { rP_->put(iflt_eeram_.a16, input); iflt = input; }
+        void put_ihis(const int input) { rP_->put(ihis_eeram_.a16, input); ihis = input; }
         void put_inj_bias(const float input) { rP_->put(inj_bias_eeram_.a16, input); inj_bias = input; }
         void put_islt(const int input) { rP_->put(islt_eeram_.a16, input); islt = input; }
         void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum = input; }
@@ -241,9 +253,9 @@ public:
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale = input; }
         void put_fault_array_elem(Flt_st input, const uint8_t i) { rP_->put(fault_array_eeram_[i].a16, input); fault_array_ptr_[i].copy_from(input); }
+        void put_history_array_elem(Flt_st input, const uint8_t i) { rP_->put(history_array_eeram_[i].a16, input); history_array_ptr_[i].copy_from(input); }
     #endif
     //
-    void print_fault_array();
     int read_all();
     boolean tweak_test() { return ( 0x8 & modeling ); } // Driving signal injection completely using software inj_bias 
 protected:
@@ -262,6 +274,7 @@ protected:
         address16b ib_scale_noa_eeram_;
         address16b ib_select_eeram_;
         address16b iflt_eeram_;
+        address16b ihis_eeram_;
         address16b inj_bias_eeram_;
         address16b islt_eeram_;
         address16b isum_eeram_;
@@ -284,6 +297,9 @@ protected:
         Flt_st *fault_array_ptr_;
         address16b *fault_array_eeram_;
         uint16_t nflt_;         // Length of Flt_st array for faults
+        Flt_st *history_array_ptr_;
+        address16b *history_array_eeram_;
+        uint16_t nhis_;         // Length of Flt_st array for history
     #endif
 };
 

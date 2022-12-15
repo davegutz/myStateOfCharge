@@ -84,8 +84,8 @@ extern SavedPars sp;              // Various parameters to be common at system l
 extern CommandPars cp;            // Various parameters to be common at system level
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
-extern Flt_st myFlt[NFLT];        // Fault snapshot
-extern Flt_st mySlt[NSLT];        // Summaries leading up to fault snapshot
+extern Flt_st myFlt[NFLT];        // Fault snapshot   // TODO:  delete
+extern Flt_st mySlt[NSLT];        // Summaries leading up to fault snapshot// TODO:  delete
 
 #if PLATFORM_ID == 6 // Photon
   retained SavedPars sp = SavedPars();// Various parameters to be common at system level
@@ -93,8 +93,8 @@ extern Flt_st mySlt[NSLT];        // Summaries leading up to fault snapshot
   SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
 #endif
 Flt_st mySum[NSUM];                   // Summaries
-retained Flt_st myFlt[NFLT];          // Fault snapshot
-retained Flt_st mySlt[NSLT];          // Summaries leading up to fault snapshot
+retained Flt_st myFlt[NFLT];          // Fault snapshot// TODO:  delete
+retained Flt_st mySlt[NSLT];          // Summaries leading up to fault snapshot// TODO:  delete
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
 unsigned long millis_flip = millis(); // Timekeeping
@@ -203,7 +203,12 @@ void setup()
   // Summary
   System.enableFeature(FEATURE_RETAINED_MEMORY);
   if ( sp.debug==1 || sp.debug==2 || sp.debug==3 || sp.debug==4 )
+  {
     print_all_fault_buffer("unit_h", mySum, sp.isum, NSUM);
+    print_all_fault_header();
+    sp.print_history_array();
+    sp.print_fault_header();
+  }
 
   // Ask to renominalize
   if ( ASK_DURING_BOOT )
@@ -411,8 +416,17 @@ void loop()
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
   if ( (!boot_wait && summarizing) || cp.write_summary )
   {
+    sp.put_ihis(sp.ihis+1);
+    if ( sp.ihis>sp.nhis()-1 ) sp.put_ihis(0);  // wrap buffer
+    Flt_st hist_snap;
+    hist_snap.assign(time_now, Mon, Sen);
+    sp.put_history_array_elem(hist_snap, sp.ihis);
+
+    // TODO:  bounce the sp.hist elements to mySum instead of assigning new
     if ( ++sp.isum>NSUM-1 ) sp.isum = 0;
     mySum[sp.isum].assign(time_now, Mon, Sen);
+
+    // TODO:  delete islt, NSLT, mySLT
     if ( !Sen->Flt->preserving() )
     {
       if ( ++sp.islt>NSLT-1 ) sp.islt = 0;

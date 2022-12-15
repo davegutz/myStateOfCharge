@@ -68,6 +68,7 @@
     #define NSUM              2400      // Number of saved SRAM summaries.   If too large, will get flashing red or compile error 'Insufficient room for .data and .bss sections!' (2400)
 #endif
 #define NFLT                  7         // Number of saved SRAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)
+#define NHIS                  46        // Number of saved SRAM fault data slices.  If too large, will get compile error BACKUPSRAM (46 from Argon compile to leftover EERAM)
 #define NSLT                  7         // Number of saved SRAM history data slices.  If too large, will get compile error BACKUPSRAM (7)
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)
 #define HDB_VBATT             0.05      // Half deadband to filter Vb, V (0.05)
