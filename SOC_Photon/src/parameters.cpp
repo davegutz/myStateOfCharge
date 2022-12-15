@@ -270,7 +270,6 @@ void SavedPars::nominalize_fault_array()
     {
         fault_array_ptr_[i].nominal();
         put_fault_array_elem(fault_array_ptr_[i], i);
-        get_fault_array_elem(i);
     }
 }
 
@@ -281,7 +280,6 @@ void SavedPars::nominalize_history_array()
     {
         history_array_ptr_[i].nominal();
         put_history_array_elem(history_array_ptr_[i], i);
-        get_history_array_elem(i);
     }
 }
 
