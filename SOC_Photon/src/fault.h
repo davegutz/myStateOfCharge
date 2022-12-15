@@ -44,7 +44,6 @@ struct Flt_st
   int16_t soc_ekf = 0;  // Battery state of charge, ekf, frac
   int16_t voc = 0;      // Battery open circuit voltage measured vb-ib*Z, V
   int16_t voc_stat = 0; // Stored charge voltage from measurement, V
-  int16_t voc_soc = 0;  // Stored charge voltage from lookup, V
   int16_t e_wrap_filt = 0; // Wrap model error, filtered, V
   uint16_t fltw = 0;    // Fault word
   uint16_t falw = 0;    // Fail word

@@ -418,13 +418,12 @@ void loop()
   {
     sp.put_ihis(sp.ihis+1);
     if ( sp.ihis>sp.nhis()-1 ) sp.put_ihis(0);  // wrap buffer
-    Flt_st hist_snap;
+    Flt_st hist_snap, hist_bounced;
     hist_snap.assign(time_now, Mon, Sen);
-    sp.put_history_array_elem(hist_snap, sp.ihis);
+    hist_bounced = sp.put_history_array_elem(hist_snap, sp.ihis);
 
-    // TODO:  bounce the sp.hist elements to mySum instead of assigning new
     if ( ++sp.isum>NSUM-1 ) sp.isum = 0;
-    mySum[sp.isum].assign(time_now, Mon, Sen);
+    mySum[sp.isum].copy_from(hist_bounced);
 
     // TODO:  delete islt, NSLT, mySLT
     if ( !Sen->Flt->preserving() )

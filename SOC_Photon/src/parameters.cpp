@@ -190,6 +190,7 @@ void SavedPars::nominal()
     put_ib_scale_noa(float(CURR_SCALE_NOA));
     put_ib_select(int8_t(FAKE_FAULTS));
     put_iflt(int(-1));
+    put_ihis(int(-1));
     put_inj_bias(float(0.));
     put_islt(int(-1));
     put_isum(int(-1));
@@ -351,7 +352,7 @@ void SavedPars::print_fault_array()
 // Print faults
 void SavedPars::print_fault_header()
 {
-  Serial.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,\n");
+  Serial.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
 }
 
 // Print history

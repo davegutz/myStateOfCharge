@@ -253,7 +253,14 @@ public:
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale = input; }
         void put_fault_array_elem(Flt_st input, const uint8_t i) { rP_->put(fault_array_eeram_[i].a16, input); fault_array_ptr_[i].copy_from(input); }
-        void put_history_array_elem(Flt_st input, const uint8_t i) { rP_->put(history_array_eeram_[i].a16, input); history_array_ptr_[i].copy_from(input); }
+        Flt_st put_history_array_elem(Flt_st input, const uint8_t i)
+        {
+            Flt_st bounced_sum;
+            bounced_sum.copy_from(history_array_ptr_[i]);
+            rP_->put(history_array_eeram_[i].a16, input);
+            history_array_ptr_[i].copy_from(input);
+            return bounced_sum;
+        }
     #endif
     //
     int read_all();
