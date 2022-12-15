@@ -624,10 +624,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'R' ):  // HR: History reset
+                sp.large_reset();
                 large_reset_fault_buffer(mySum, sp.isum, NSUM);
                 large_reset_fault_buffer(mySlt, sp.islt, NSLT);  // TODO:  delete
                 large_reset_fault_buffer(myFlt, sp.iflt, NFLT);  // TODO:  delete
-                sp.large_reset();
                 break;
 
               case ( 's' ):  // Hs: History snapshot

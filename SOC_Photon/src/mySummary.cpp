@@ -42,8 +42,8 @@ void print_all_fault_buffer(const String code, struct Flt_st *flt, const int ifl
 // print header
 void print_all_fault_header()
 {
-  Serial.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,\n");
-  Serial1.printf("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,\n");
+  Serial.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
+  Serial1.printf("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
 }
 
 // Flt_st reset helper
