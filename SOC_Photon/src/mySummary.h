@@ -31,10 +31,9 @@
 #include "fault.h"
 
 // Function prototypes
-// TODO:  change name print_all_fault_buffer to print_all_history_buffer
-// TODO:  change name print_all_fault_header to print_all_history_header
-void large_reset_fault_buffer(struct Flt_st *flt, const int iflt, const int nflt);
+void large_reset_summary(struct Flt_st *sum, const int isum, const int nsum);
+void print_all_history_buffer(struct Flt_st *flt, const int iflt, const int nflt);
 void print_all_fault_buffer(const String code, struct Flt_st *sum, const int iflt, const int nflt);
-void print_all_fault_header();
+void print_all_history_header();
 
 #endif

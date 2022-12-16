@@ -591,7 +591,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'd' ):  // Hd: History dump
                 Serial.printf("\n");
                 print_all_fault_buffer("unit_h", mySum, sp.isum, NSUM);
-                print_all_fault_header();
+                print_all_history_header();
                 chit("Pr;Q;", QUEUE);
                 Serial.printf("\n");
                 sp.print_history_array();
@@ -608,7 +608,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'R' ):  // HR: History reset
                 sp.large_reset();
-                large_reset_fault_buffer(mySum, sp.isum, NSUM);
+                large_reset_summary(mySum, sp.isum, NSUM);
                 break;
 
               case ( 's' ):  // Hs: History snapshot

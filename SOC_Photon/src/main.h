@@ -200,8 +200,8 @@ void setup()
   System.enableFeature(FEATURE_RETAINED_MEMORY);
   if ( sp.debug==1 || sp.debug==2 || sp.debug==3 || sp.debug==4 )
   {
-    print_all_fault_buffer("unit_h", mySum, sp.isum, NSUM);
-    print_all_fault_header();
+    // print_all_fault_buffer("unit_h", mySum, sp.isum, NSUM);
+    // print_all_history_header();
     sp.print_history_array();
     sp.print_fault_header();
   }

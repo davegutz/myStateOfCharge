@@ -27,7 +27,7 @@
 #include "mySummary.h"
 #include "parameters.h"
 
-// print helpler  TODO delete print_all_fault_buffer, large_reset_fault_buffer, print_all_fault_header
+// print helpler
 void print_all_fault_buffer(const String code, struct Flt_st *flt, const int iflt, const int nflt)
 {
   int i = iflt;  // Last one written was iflt
@@ -40,14 +40,14 @@ void print_all_fault_buffer(const String code, struct Flt_st *flt, const int ifl
 }
 
 // print header
-void print_all_fault_header()
+void print_all_history_header()
 {
   Serial.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
   Serial1.printf("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
 }
 
 // Flt_st reset helper
-void large_reset_fault_buffer(struct Flt_st *flt, const int iflt, const int nflt)
+void print_all_history_buffer(struct Flt_st *flt, const int iflt, const int nflt)
 {
   int i = iflt;  // Last one written was isum
   int n = -1;
