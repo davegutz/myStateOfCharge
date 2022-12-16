@@ -132,8 +132,8 @@ public:
         void get_t_last_model() { }
         void get_Vb_bias_hdwe() { }
         void get_Vb_scale() { }
-        void get_fault_array_elem() { }
-        void get_history_array_elem() { }
+        void get_fault() { }
+        void get_history() { }
     #elif PLATFORM_ID == PLATFORM_ARGON
         void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp = value; }
         void get_cutback_gain_sclr() { float value; rP_->get(cutback_gain_sclr_eeram_.a16, value); cutback_gain_sclr = value; }
@@ -167,26 +167,8 @@ public:
         void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model = value; }
         void get_Vb_bias_hdwe() { float value; rP_->get(Vb_bias_hdwe_eeram_.a16, value); Vb_bias_hdwe = value; }
         void get_Vb_scale() { float value; rP_->get(Vb_scale_eeram_.a16, value); Vb_scale = value; }
-
-        void get_fault_array_elem(const uint8_t i) { Flt_st value;
-        Serial.printf("enter get_fault_array_elem");
-        for ( uint16_t e =fault_array_eeram_[i].a16; e<fault_array_eeram_[i].a16+sizeof(Flt_st); e++ ) Serial.printf(" %X", rP_->read(e) );
-        Serial.printf("\n");
-         rP_->get(fault_array_eeram_[i].a16, value); fault_array_ptr_[i].copy_from(value); 
-        Serial.printf("after get");
-        for ( uint16_t e =fault_array_eeram_[i].a16; e<fault_array_eeram_[i].a16+sizeof(Flt_st); e++ ) Serial.printf(" %X", rP_->read(e) );
-        Serial.printf("\n");
-         }
-
-        void get_history_array_elem(const uint8_t i) { Flt_st value;
-        Serial.printf("enter get_history_array_elem");
-        for ( uint16_t e =history_array_eeram_[i].a16; e<history_array_eeram_[i].a16+sizeof(Flt_st); e++ ) Serial.printf(" %X", rP_->read(e) );
-        Serial.printf("\n");
-         rP_->get(history_array_eeram_[i].a16, value); history_array_ptr_[i].copy_from(value);
-        Serial.printf("after get");
-        for ( uint16_t e =history_array_eeram_[i].a16; e<history_array_eeram_[i].a16+sizeof(Flt_st); e++ ) Serial.printf(" %X", rP_->read(e) );
-        Serial.printf("\n");
-        }
+        void get_fault(const uint8_t i) { fault_[i].get(); }
+        void get_history(const uint8_t i) { history_[i].get(); }
         uint16_t next() { return next_; }
     #endif
     //
@@ -236,7 +218,8 @@ public:
         void put_t_last_model(const float input) { t_last_model = input; }
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { Vb_scale = input; }
-        void put_fault_array_elem(Flt_st *input, const uint8_t i) { fault_array_ptr_[i].copy_from(input); }
+        void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_from(input); }
+        void put_history(const Flt_st input, const uint8_t i) { history_[i].copy_from(input); }
     #elif PLATFORM_ID == PLATFORM_ARGON
         void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp = input; }
         void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr = input; }
@@ -270,26 +253,8 @@ public:
         void put_t_last_model(const float input) { rP_->put(t_last_model_eeram_.a16, input); t_last_model = input; }
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale = input; }
-        void put_fault_array_elem(Flt_st input, const uint8_t i) { rP_->put(fault_array_eeram_[i].a16, input); fault_array_ptr_[i].copy_from(input); }
-
-        Flt_st put_history_array_elem(Flt_st input, const uint8_t i)
-        {
-            Flt_st bounced_sum;
-            bounced_sum.copy_from(history_array_ptr_[i]);
-        Serial.printf("\nenter put_history_array_elem");
-        for ( uint16_t e =history_array_eeram_[i].a16; e<history_array_eeram_[i].a16+sizeof(Flt_st); e++ ) Serial.printf(" %X", rP_->read(e) );
-        Serial.printf("\n");
-            rP_->put(history_array_eeram_[i].a16, input);
-        Serial.printf("after put");
-        for ( uint16_t e =history_array_eeram_[i].a16; e<history_array_eeram_[i].a16+sizeof(Flt_st); e++ ) Serial.printf(" %X", rP_->read(e) );
-        Serial.printf("\n");
-            history_array_ptr_[i].copy_from(input);
-            input.print("put h ar e input");
-            history_array_ptr_[i].print("put h ar e put");
-            get_history_array_elem(i);
-            history_array_ptr_[i].print("put h ar e  aft get");
-            return bounced_sum;
-        }
+        void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
+        Flt_st put_history(const Flt_st input, const uint8_t i);
     #endif
     //
     int read_all();
@@ -330,12 +295,10 @@ protected:
         address16b Vb_scale_eeram_;
         SerialRAM *rP_;
         uint16_t next_;
-        Flt_st *fault_array_ptr_;
-        address16b *fault_array_eeram_;
-        uint16_t nflt_;         // Length of Flt_st array for faults
-        Flt_st *history_array_ptr_;
-        address16b *history_array_eeram_;
-        uint16_t nhis_;         // Length of Flt_st array for history
+        Flt_ram *fault_;
+        uint16_t nflt_;         // Length of Flt_ram array for faults
+        Flt_ram *history_;
+        uint16_t nhis_;         // Length of Flt_ram array for history
     #endif
 };
 

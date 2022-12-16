@@ -420,7 +420,7 @@ void loop()
     if ( sp.ihis>sp.nhis()-1 ) sp.put_ihis(0);  // wrap buffer
     Flt_st hist_snap, hist_bounced;
     hist_snap.assign(time_now, Mon, Sen);
-    hist_bounced = sp.put_history_array_elem(hist_snap, sp.ihis);
+    hist_bounced = sp.put_history(hist_snap, sp.ihis);
 
     if ( ++sp.isum>NSUM-1 ) sp.isum = 0;
     mySum[sp.isum].copy_from(hist_bounced);

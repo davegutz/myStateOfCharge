@@ -68,22 +68,16 @@ SavedPars::SavedPars(SerialRAM *ram)
         Vb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Vb_bias_hdwe);
         Vb_scale_eeram_.a16 = next_; next_ += sizeof(Vb_scale);
         nflt_ = int( NFLT ); 
-        fault_array_eeram_ = new address16b[nflt_];
-        fault_array_ptr_ = new Flt_st[nflt_];
+        fault_ = new Flt_ram[nflt_];
         for ( int i=0; i<nflt_; i++ )
         {
-            fault_array_eeram_[i].a16 = next_;
-            next_ += sizeof(fault_array_ptr_[i]);
-            fault_array_ptr_[i].nominal();
+            fault_[i].instantiate(ram, &next_);
         }
         nhis_ = int( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
-        history_array_eeram_ = new address16b[nhis_];
-        history_array_ptr_ = new Flt_st[nhis_];
+        history_ = new Flt_ram[nhis_];
         for ( int i=0; i<nhis_; i++ )
         {
-            history_array_eeram_[i].a16 = next_;
-            next_ += sizeof(history_array_ptr_[i]);
-            history_array_ptr_[i].nominal();
+            history_[i].instantiate(ram, &next_);
         }
     #endif
 }
@@ -165,11 +159,11 @@ void SavedPars::load_all()
     get_Vb_scale();
     for ( int i=0; i<nflt_; i++ )
     {
-        get_fault_array_elem(i);
+        fault_[i].get();
     }
     for ( int i=0; i<nhis_; i++ )
     {
-        get_history_array_elem(i);
+        history_[i].get();
     }
 }
 
@@ -208,8 +202,14 @@ void SavedPars::nominal()
     put_t_last_model(float(RATED_TEMP));  
     put_Vb_bias_hdwe(float(VOLT_BIAS));
     put_Vb_scale(float(VB_SCALE));
-    nominalize_fault_array();
-    nominalize_history_array();
+    for ( int i=0; i<nflt_; i++ )
+    {
+        fault_[i].put_nominal();
+    }
+    for ( int i=0; i<nhis_; i++ )
+    {
+        history_[i].put_nominal();
+    }
  }
 
 // Number of differences between nominal EERAM and actual (don't count integator memories because they always change)
@@ -261,26 +261,6 @@ void SavedPars::mem_print()
         Serial.printf("Temp mem map print\n");
         for ( uint16_t i=0x0000; i<MAX_EERAM; i++ ) Serial.printf("0x%X ", rP_->read(i));
     #endif
-}
-
-// Reset fault array
-void SavedPars::nominalize_fault_array()
-{
-    for ( int i=0; i<nflt_; i++ )
-    {
-        fault_array_ptr_[i].nominal();
-        put_fault_array_elem(fault_array_ptr_[i], i);
-    }
-}
-
-// Reset fault array
-void SavedPars::nominalize_history_array()
-{
-    for ( int i=0; i<nhis_; i++ )
-    {
-        history_array_ptr_[i].nominal();
-        put_history_array_elem(history_array_ptr_[i], i);
-    }
 }
 
 // Print
@@ -343,7 +323,7 @@ void SavedPars::print_fault_array()
   while ( ++n < nflt_ )
   {
     if ( ++i > (nflt_-1) ) i = 0; // circular buffer
-    fault_array_ptr_[i].print("unit_f");
+    fault_[i].print("unit_f");
   }
 }
 
@@ -361,8 +341,17 @@ void SavedPars::print_history_array()
   while ( ++n < nhis_ )
   {
     if ( ++i > (nhis_-1) ) i = 0; // circular buffer
-    history_array_ptr_[i].print("unit_h");
+    history_[i].print("unit_h");
   }
+}
+
+// Bounce history elements
+Flt_st SavedPars::put_history(Flt_st input, const uint8_t i)
+{
+    Flt_st bounced_sum;
+    bounced_sum.copy_from(history_[i]);
+    history_[i].put(input);
+    return bounced_sum;
 }
 
 // Assign all EERAM values to temp variable for pursposes of timing

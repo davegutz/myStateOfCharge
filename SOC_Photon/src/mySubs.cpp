@@ -494,7 +494,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
       fault_snap.assign(Time.now(), Mon, Sen);
       // TODO:  delete myFlt
       myFlt[sp.iflt].assign(Time.now(), Mon, Sen);
-      sp.put_fault_array_elem(fault_snap, sp.iflt);
+      sp.put_fault(fault_snap, sp.iflt);
     }
     else if ( fails_repeated < 4 )
     {
