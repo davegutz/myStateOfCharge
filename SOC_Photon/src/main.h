@@ -84,8 +84,6 @@ extern SavedPars sp;              // Various parameters to be common at system l
 extern CommandPars cp;            // Various parameters to be common at system level
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
-extern Flt_st myFlt[NFLT];        // Fault snapshot   // TODO:  delete
-extern Flt_st mySlt[NSLT];        // Summaries leading up to fault snapshot// TODO:  delete
 
 #if PLATFORM_ID == 6 // Photon
   retained SavedPars sp = SavedPars();// Various parameters to be common at system level
@@ -93,8 +91,6 @@ extern Flt_st mySlt[NSLT];        // Summaries leading up to fault snapshot// TO
   SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
 #endif
 Flt_st mySum[NSUM];                   // Summaries
-retained Flt_st myFlt[NFLT];          // Fault snapshot// TODO:  delete
-retained Flt_st mySlt[NSLT];          // Summaries leading up to fault snapshot// TODO:  delete
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
 unsigned long millis_flip = millis(); // Timekeeping
@@ -425,13 +421,6 @@ void loop()
     if ( ++sp.isum>NSUM-1 ) sp.isum = 0;
     mySum[sp.isum].copy_from(hist_bounced);
 
-    // TODO:  delete islt, NSLT, mySLT
-    if ( !Sen->Flt->preserving() )
-    {
-      if ( ++sp.islt>NSLT-1 ) sp.islt = 0;
-      mySlt[sp.islt].assign(time_now, Mon, Sen);
-      Serial.printf("Slt...\n");
-    }
     Serial.printf("Summ...\n");
     cp.write_summary = false;
   }
