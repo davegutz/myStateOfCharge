@@ -58,6 +58,7 @@ public:
 	const T &put(uint16_t idx, const T &t) //Address, data
 	{
 		const uint8_t *ptr = (const uint8_t *)&t;
+		Serial.printf("put write idx %X size %d: ", idx, sizeof(T));
 		write(idx, ptr, sizeof(T)); //Address, data, sizeOfData
 		return t;
 	}

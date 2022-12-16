@@ -30,6 +30,7 @@
 #include "local_config.h"
 #include "Battery.h"
 #include "hardware/SerialRAM.h"
+#include "fault.h"
 
 // Corruption test
 template <typename T>
@@ -68,8 +69,10 @@ public:
     float ib_scale_amp;     // Calibration scalar of amplified shunt sensor
     float ib_scale_noa;     // Calibration scalar of non-amplified shunt sensor
     int8_t ib_select;       // Force current sensor (-1=non-amp, 0=auto, 1=amp)
-    float inj_bias;         // Constant bias, A
     int iflt;               // Fault snap location.   Begins at -1 because first action is to increment iflt
+    int ihis;               // History location.   Begins at -1 because first action is to increment ihis
+    float inj_bias;         // Constant bias, A
+    int islt;               // Summary before fault snap location.   Begins at -1 because first action is to increment islt
     int isum;               // Summary location.   Begins at -1 because first action is to increment isum
     uint8_t modeling;       // Driving saturation calculation with model.  Bits specify which signals use model
     uint8_t mon_chm;        // Monitor battery chemistry type
@@ -89,7 +92,7 @@ public:
     // functions
     int assign_all();
     boolean is_corrupt();
-    void large_reset() { nominal(); }
+    void large_reset() { Serial.printf("large_reset\n"); nominal(); }
     boolean mod_any() { return ( 0<modeling ); }        // Using any
     boolean mod_ib() { return ( 0x4 & modeling ); }     // Using Sim as source of ib
     boolean mod_none() { return ( 0==modeling ); }      // Using nothing
@@ -111,7 +114,9 @@ public:
         void get_ib_scale_noa() { }
         void get_ib_select() { }
         void get_iflt() { }
+        void get_ihis() { }
         void get_inj_bias() { }
+        void get_islt() { }
         void get_isum() { }
         void get_modeling() { }
         void get_mon_chm() { }
@@ -127,7 +132,11 @@ public:
         void get_t_last_model() { }
         void get_Vb_bias_hdwe() { }
         void get_Vb_scale() { }
-    #elif (PLATFORM_ID==12) // Argon
+        void get_fault1_array_elem() { }
+        void get_fault2_array_elem() { }
+        void get_history1_array_elem() { }
+        void get_history2_array_elem() { }
+    #elif PLATFORM_ID == PLATFORM_ARGON
         void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp = value; }
         void get_cutback_gain_sclr() { float value; rP_->get(cutback_gain_sclr_eeram_.a16, value); cutback_gain_sclr = value; }
         void get_debug() { int value; rP_->get(debug_eeram_.a16, value); debug = value; }
@@ -142,7 +151,9 @@ public:
         void get_ib_scale_noa() { float value; rP_->get(ib_scale_noa_eeram_.a16, value); ib_scale_noa = value; }
         void get_ib_select() { int8_t value; rP_->get(ib_select_eeram_.a16, value); ib_select = value; }
         void get_iflt() { int value; rP_->get(iflt_eeram_.a16, value); iflt = value; }
+        void get_ihis() { int value; rP_->get(ihis_eeram_.a16, value); ihis = value; }
         void get_inj_bias() { float value; rP_->get(inj_bias_eeram_.a16, value); inj_bias = value; }
+        void get_islt() { int value; rP_->get(islt_eeram_.a16, value); islt = value; }
         void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum = value; }
         void get_modeling() { modeling = rP_->read(modeling_eeram_.a16); }
         void get_mon_chm() { mon_chm = rP_->read(mon_chm_eeram_.a16); }
@@ -158,13 +169,82 @@ public:
         void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model = value; }
         void get_Vb_bias_hdwe() { float value; rP_->get(Vb_bias_hdwe_eeram_.a16, value); Vb_bias_hdwe = value; }
         void get_Vb_scale() { float value; rP_->get(Vb_scale_eeram_.a16, value); Vb_scale = value; }
+
+        void get_fault1_array_elem(const uint8_t i) { Flt1_st value;
+        Serial.printf("enter get_fault1_array_elem state of mem1: ");
+        for ( uint16_t e =fault1_array_eeram_[i].a16; e<fault1_array_eeram_[i].a16+sizeof(Flt1_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+         rP_->get(fault1_array_eeram_[i].a16, value); fault1_array_ptr_[i].copy_from(value); 
+        Serial.printf("after get1 state of mem1: ");
+        for ( uint16_t e =fault1_array_eeram_[i].a16; e<fault1_array_eeram_[i].a16+sizeof(Flt1_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+         }
+
+        void get_fault2_array_elem(const uint8_t i) { Flt2_st value;
+        Serial.printf("enter get_fault2_array_elem state of mem2: ");
+        for ( uint16_t e =fault2_array_eeram_[i].a16; e<fault2_array_eeram_[i].a16+sizeof(Flt2_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+         rP_->get(fault2_array_eeram_[i].a16, value); fault2_array_ptr_[i].copy_from(value); 
+        Serial.printf("after get2 state of mem2: ");
+        for ( uint16_t e =fault2_array_eeram_[i].a16; e<fault2_array_eeram_[i].a16+sizeof(Flt2_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+         }
+
+        void get_fault3_array_elem(const uint8_t i) { Flt3_st value;
+        Serial.printf("enter get_fault3_array_elem state of mem3: ");
+        for ( uint16_t e =fault3_array_eeram_[i].a16; e<fault3_array_eeram_[i].a16+sizeof(Flt3_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+         rP_->get(fault3_array_eeram_[i].a16, value); fault3_array_ptr_[i].copy_from(value); 
+        Serial.printf("after get3 state of mem3: ");
+        for ( uint16_t e =fault3_array_eeram_[i].a16; e<fault3_array_eeram_[i].a16+sizeof(Flt3_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+         }
+
+        void get_history1_array_elem(const uint8_t i) { Flt1_st value;
+        Serial.printf("enter get_history1_array_elem state of mem1: ");
+        for ( uint16_t e =history1_array_eeram_[i].a16; e<history1_array_eeram_[i].a16+sizeof(Flt1_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+         rP_->get(history1_array_eeram_[i].a16, value); history1_array_ptr_[i].copy_from(value);
+        Serial.printf("after get1 state of mem1: ");
+        for ( uint16_t e =history1_array_eeram_[i].a16; e<history1_array_eeram_[i].a16+sizeof(Flt1_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+        }
+
+        void get_history2_array_elem(const uint8_t i) { Flt2_st value;
+        Serial.printf("enter get_history2_array_elem state of mem2: ");
+        for ( uint16_t e =history2_array_eeram_[i].a16; e<history2_array_eeram_[i].a16+sizeof(Flt2_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+         rP_->get(history2_array_eeram_[i].a16, value); history2_array_ptr_[i].copy_from(value);
+        Serial.printf("after get2 state of mem2: ");
+        for ( uint16_t e =history2_array_eeram_[i].a16; e<history2_array_eeram_[i].a16+sizeof(Flt2_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+        }
+
+        void get_history3_array_elem(const uint8_t i) { Flt3_st value;
+        Serial.printf("enter get_history3_array_elem state of mem3: ");
+        for ( uint16_t e =history3_array_eeram_[i].a16; e<history3_array_eeram_[i].a16+sizeof(Flt3_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+         rP_->get(history3_array_eeram_[i].a16, value); history3_array_ptr_[i].copy_from(value);
+        Serial.printf("after get3 state of mem3: ");
+        for ( uint16_t e =history3_array_eeram_[i].a16; e<history3_array_eeram_[i].a16+sizeof(Flt3_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+        }
+
+        uint16_t next() { return next_; }
     #endif
     //
     void load_all();
     void mem_print();
+    uint16_t nflt() { return nflt_; }
+    uint16_t nhis() { return nhis_; }
     void nominal();
+    void nominalize_fault_array();
+    void nominalize_history_array();
     int num_diffs();
     void pretty_print(const boolean all);
+    void print_fault_array();
+    void print_fault_header();
+    void print_history_array();
     // put
     #if (PLATFORM_ID==6)  // Photon
         void put_amp(const float input) { amp = input; }
@@ -181,7 +261,9 @@ public:
         void put_ib_scale_noa(const float input) { ib_scale_noa = input; }
         void put_ib_select(const int8_t input) { ib_select = input; }
         void put_iflt(const int input) { iflt = input; }
+        void put_ihis(const int input) { ihis = input; }
         void put_inj_bias(const float input) { inj_bias = input; }
+        void put_islt(const int input) { islt = input; }
         void put_isum(const int input) { isum = input; }
         void put_modeling(const uint8_t input) { modeling = input; }
         void put_mon_chm(const uint8_t input) { mon_chm = input; }
@@ -197,7 +279,8 @@ public:
         void put_t_last_model(const float input) { t_last_model = input; }
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { Vb_scale = input; }
-    #elif (PLATFORM_ID==12)  // Argon
+        void put_fault_array_elem(Flt_st *input, const uint8_t i) { fault_array_ptr_[i].copy_from(input); }
+    #elif PLATFORM_ID == PLATFORM_ARGON
         void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp = input; }
         void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr = input; }
         void put_debug(const int input) { rP_->put(debug_eeram_.a16, input); debug = input; }
@@ -212,7 +295,9 @@ public:
         void put_ib_scale_noa(const float input) { rP_->put(ib_scale_noa_eeram_.a16, input); ib_scale_noa = input; }
         void put_ib_select(const int8_t input) { rP_->put(ib_select_eeram_.a16, input); ib_select = input; }
         void put_iflt(const int input) { rP_->put(iflt_eeram_.a16, input); iflt = input; }
+        void put_ihis(const int input) { rP_->put(ihis_eeram_.a16, input); ihis = input; }
         void put_inj_bias(const float input) { rP_->put(inj_bias_eeram_.a16, input); inj_bias = input; }
+        void put_islt(const int input) { rP_->put(islt_eeram_.a16, input); islt = input; }
         void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum = input; }
         void put_modeling(const uint8_t input) { rP_->write(modeling_eeram_.a16, input); modeling = input; }
         void put_mon_chm(const uint8_t input) { rP_->write(mon_chm_eeram_.a16, input); mon_chm = input; }
@@ -228,12 +313,130 @@ public:
         void put_t_last_model(const float input) { rP_->put(t_last_model_eeram_.a16, input); t_last_model = input; }
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale = input; }
+
+        void put_fault1_array_elem(Flt1_st input, const uint8_t i) 
+        { 
+        Serial.printf("\nenter put_fault1_array_elem state of mem1: ");
+        for ( uint16_t e =fault1_array_eeram_[i].a16; e<fault1_array_eeram_[i].a16+sizeof(Flt1_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+            rP_->put(fault1_array_eeram_[i].a16, input); 
+        Serial.printf("state of mem1 after put1: ");
+        for ( uint16_t e =fault1_array_eeram_[i].a16; e<fault1_array_eeram_[i].a16+sizeof(Flt1_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+            fault1_array_ptr_[i].copy_from(input); 
+            input.print("input");
+            fault1_array_ptr_[i].print("after copy_from1");
+            get_fault1_array_elem(i);
+            fault1_array_ptr_[i].print("after get1"); Serial.printf("\n");
+        }
+
+        void put_fault2_array_elem(Flt2_st input, const uint8_t i) 
+        { 
+        Serial.printf("\nenter put_fault2_array_elem state of mem2: ");
+        for ( uint16_t e =fault2_array_eeram_[i].a16; e<fault2_array_eeram_[i].a16+sizeof(Flt2_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+            rP_->put(fault2_array_eeram_[i].a16, input); 
+        Serial.printf("state of mem2 after put2: ");
+        for ( uint16_t e =fault2_array_eeram_[i].a16; e<fault2_array_eeram_[i].a16+sizeof(Flt2_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+            fault2_array_ptr_[i].copy_from(input); 
+            input.print();
+            fault2_array_ptr_[i].print();
+            get_fault2_array_elem(i);
+            fault2_array_ptr_[i].print();
+        }
+
+        void put_fault3_array_elem(Flt3_st input, const uint8_t i) 
+        { 
+        Serial.printf("\nenter put_fault3_array_elem state of mem3: ");
+        for ( uint16_t e =fault3_array_eeram_[i].a16; e<fault3_array_eeram_[i].a16+sizeof(Flt3_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+            rP_->put(fault3_array_eeram_[i].a16, input); 
+        Serial.printf("state of mem3 after put3: ");
+        for ( uint16_t e =fault3_array_eeram_[i].a16; e<fault3_array_eeram_[i].a16+sizeof(Flt3_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+            fault3_array_ptr_[i].copy_from(input); 
+            input.print();
+            fault3_array_ptr_[i].print();
+            get_fault3_array_elem(i);
+            fault3_array_ptr_[i].print();
+        }
+
+        Flt1_st put_history1_array_elem(Flt1_st input, const uint8_t i)
+        {
+            Flt1_st bounced_sum;
+        Serial.printf("\n");
+            bounced_sum.copy_from(history1_array_ptr_[i]);
+            bounced_sum.print("put_history1_array_elem  bounced_sum");
+        Serial.printf("state of me1: ");
+        for ( uint16_t e =history1_array_eeram_[i].a16; e<history1_array_eeram_[i].a16+sizeof(Flt1_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+            Flt1_st put_sum;
+            put_sum.copy_from(rP_->put(history1_array_eeram_[i].a16, input));
+            put_sum.print("put_sum after put1");
+        Serial.printf("state of mem1 after put1: ");
+        for ( uint16_t e =history1_array_eeram_[i].a16; e<history1_array_eeram_[i].a16+sizeof(Flt1_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+            history1_array_ptr_[i].copy_from(input);
+            input.print("input1");
+            history1_array_ptr_[i].print("after copy_from1");
+            get_history1_array_elem(i);
+            history1_array_ptr_[i].print("after get1"); Serial.printf("\n");
+            return bounced_sum;
+        }
+
+        Flt2_st put_history2_array_elem(Flt2_st input, const uint8_t i)
+        {
+            Flt2_st bounced_sum;
+        Serial.printf("\n");
+            bounced_sum.copy_from(history2_array_ptr_[i]);
+            bounced_sum.print();
+        Serial.printf("state of mem2: ");
+        for ( uint16_t e =history2_array_eeram_[i].a16; e<history2_array_eeram_[i].a16+sizeof(Flt2_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+            Flt2_st put_sum;
+            put_sum.copy_from(rP_->put(history2_array_eeram_[i].a16, input));
+            put_sum.print();
+        Serial.printf("state of mem2 after put2: ");
+        for ( uint16_t e =history2_array_eeram_[i].a16; e<history2_array_eeram_[i].a16+sizeof(Flt2_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+            history2_array_ptr_[i].copy_from(input);
+            input.print();
+            history2_array_ptr_[i].print();
+            get_history2_array_elem(i);
+            Serial.printf("after get2: ");history2_array_ptr_[i].print();
+            return bounced_sum;
+        }
+
+        Flt3_st put_history3_array_elem(Flt3_st input, const uint8_t i)
+        {
+            Flt3_st bounced_sum;
+        Serial.printf("\n");
+            bounced_sum.copy_from(history3_array_ptr_[i]);
+            bounced_sum.print();
+        Serial.printf("state of mem3: ");
+        for ( uint16_t e =history3_array_eeram_[i].a16; e<history3_array_eeram_[i].a16+sizeof(Flt3_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+            Flt3_st put_sum;
+            put_sum.copy_from(rP_->put(history3_array_eeram_[i].a16, input));
+            put_sum.print();
+        Serial.printf("state of mem3 after put3: ");
+        for ( uint16_t e =history3_array_eeram_[i].a16; e<history3_array_eeram_[i].a16+sizeof(Flt3_st); e++ ) Serial.printf(" %X", rP_->read(e) );
+        Serial.printf("\n");
+            history3_array_ptr_[i].copy_from(input);
+            input.print();
+            history3_array_ptr_[i].print();
+            get_history3_array_elem(i);
+            Serial.printf("after get3: ");history3_array_ptr_[i].print();
+            return bounced_sum;
+        }
+
     #endif
     //
     int read_all();
     boolean tweak_test() { return ( 0x8 & modeling ); } // Driving signal injection completely using software inj_bias 
 protected:
-    #if (PLATFORM_ID==12)  // Argon
+    #if PLATFORM_ID == PLATFORM_ARGON
         address16b amp_eeram_;
         address16b cutback_gain_sclr_eeram_;
         address16b debug_eeram_;
@@ -248,7 +451,9 @@ protected:
         address16b ib_scale_noa_eeram_;
         address16b ib_select_eeram_;
         address16b iflt_eeram_;
+        address16b ihis_eeram_;
         address16b inj_bias_eeram_;
+        address16b islt_eeram_;
         address16b isum_eeram_;
         address16b modeling_eeram_;
         address16b mon_chm_eeram_;
@@ -265,6 +470,21 @@ protected:
         address16b Vb_bias_hdwe_eeram_;
         address16b Vb_scale_eeram_;
         SerialRAM *rP_;
+        uint16_t next_;
+        Flt1_st *fault1_array_ptr_;
+        address16b *fault1_array_eeram_;
+        Flt2_st *fault2_array_ptr_;
+        address16b *fault2_array_eeram_;
+        Flt3_st *fault3_array_ptr_;
+        address16b *fault3_array_eeram_;
+        uint16_t nflt_;         // Length of Flt_st array for faults
+        Flt1_st *history1_array_ptr_;
+        address16b *history1_array_eeram_;
+        Flt2_st *history2_array_ptr_;
+        address16b *history2_array_eeram_;
+        Flt3_st *history3_array_ptr_;
+        address16b *history3_array_eeram_;
+        uint16_t nhis_;         // Length of Flt_st array for history
     #endif
 };
 

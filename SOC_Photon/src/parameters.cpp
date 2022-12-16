@@ -361,7 +361,7 @@ void SavedPars::print_history_array()
   while ( ++n < nhis_ )
   {
     if ( ++i > (nhis_-1) ) i = 0; // circular buffer
-    history_array_ptr_[i].print("unit_f");
+    history_array_ptr_[i].print("unit_h");
   }
 }
 

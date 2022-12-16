@@ -26,14 +26,14 @@
 #endif
 #include "retained.h"
 #include "command.h"
-#include "mySummary.h"
+#include "myTalk.h"
 #include "parameters.h"
 #include <math.h>
 
 extern CommandPars cp;          // Various parameters shared at system level
 extern RetainedPars rp;         // Various parameters to be static at system level
-extern Sum_st mySum[NSUM];      // Summaries for saving charge history
-extern Flt_st myFlt[NFLT];      // Summaries for saving charge history
+// extern Flt_st mySum[NSUM];      // Summaries for saving charge history
+// extern Flt_st myFlt[NFLT];      // Summaries for saving charge history
 extern SavedPars sp;
 
 // Process asap commands
@@ -269,6 +269,27 @@ void talk()
         switch ( cp.input_string.charAt(0) )
         {
 
+          case ( 'b' ):  // Fault buffer
+            switch ( cp.input_string.charAt(1) )
+            {
+              case ( 'd' ):  // bd: fault buffer dump
+                Serial.printf("\n");
+                sp.print_history_array();
+                sp.print_fault_header();
+                sp.print_fault_array();
+                sp.print_fault_header();
+                break;
+
+              case ( 'R' ):  // bR: Fault buffer reset
+                Serial.printf("bR large reset\n");
+                sp.large_reset();
+                break;
+
+              default:
+                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+            }
+            break;
+
           case ( 'B' ):  // B: battery
             switch ( cp.input_string.charAt(1) )
             {
@@ -420,14 +441,6 @@ void talk()
                 scale = cp.input_string.substring(2).toFloat();
                 sp.put_s_cap_model(scale);
                 Serial.printf("%7.3f\n", sp.s_cap_model);
-            
-                // Serial.printf("Sim.q_cap_rated%7.3f %7.3f to ", scale, Sen->Sim->q_cap_scaled());
-            
-                // Sen->Sim->apply_cap_scale(sp.s_cap_model);
-                // if ( sp.modeling ) Mon->init_soc_ekf(Sen->Sim->soc());
-            
-                // Serial.printf("%7.3f\n", Sen->Sim->q_cap_scaled());
-                // Serial.printf("Sim:"); Sen->Sim->pretty_print(); Sen->Sim->Coulombs::pretty_print();
                 break;
                        
               case ( 'G' ):  // * SG<>:  Shunt gain scalar
@@ -477,35 +490,6 @@ void talk()
             }
             break;
 
-          case ( 'H' ):  // History
-            switch ( cp.input_string.charAt(1) )
-            {
-              case ( 'd' ):  // Hd: History dump
-                Serial.printf("\n");
-                print_all_summary(mySum, sp.isum, NSUM);
-                chit("Pr;Q;", QUEUE);
-                Serial.printf("\n");
-                print_all_fault_buffer(myFlt, sp.iflt, NFLT);
-                break;
-
-              case ( 'f' ):  // Hf: History dump faults only
-                Serial.printf("\n");
-                print_all_fault_buffer(myFlt, sp.iflt, NFLT);
-                break;
-
-              case ( 'R' ):  // HR: History reset
-                large_reset_summary(mySum, sp.isum, NSUM);
-                large_reset_fault_buffer(myFlt, sp.iflt, NFLT);
-                break;
-
-              case ( 's' ):  // Hs: History snapshot
-                cp.cmd_summarize();
-                break;
-
-              default:
-                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
-            }
-            break;
 
           case ( 's' ):  // s<>:  select amp or noa
             if ( cp.input_string.substring(1).toInt()>0 )

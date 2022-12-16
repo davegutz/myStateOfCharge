@@ -126,14 +126,19 @@ bool SerialRAM::getAutoStore()
 ///</summary>
 uint8_t SerialRAM::write(const uint16_t address, const uint8_t* values, const uint16_t size)
 {
+	for ( int i=0; i<size; i++) Serial.printf("%X ", values[i]);
+	 Serial.printf("\n");
+
 	address16b a;
 	a.a16 = address;
-
+	uint8_t result;
 	Wire.beginTransmission(this->SRAM_REGISTER);
 	Wire.write(a.a8[1]);
 	Wire.write(a.a8[0]);
-	Wire.write(values, size);
-	return Wire.endTransmission();
+	uint8_t writer = Wire.write(values, size); Serial.printf("writer %d\n", writer);
+	result = Wire.endTransmission();
+	Serial.printf("result=%d:", result);
+	return result;
 }
 
 ///<summary>

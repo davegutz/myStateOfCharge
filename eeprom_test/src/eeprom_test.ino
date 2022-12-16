@@ -28,19 +28,18 @@ SerialRAM ram;
 
 // Globals
 #include "myTalk.h"
-#include "mySummary.h"
 #include "command.h"
 #include "local_config.h"
 #include "constants.h"
 #include "parameters.h"
 
 extern CommandPars cp;            // Various parameters to be common at system level
-extern Sum_st mySum[NSUM];        // Summaries for saving charge history
-extern Flt_st myFlt[NFLT];        // Summaries for saving fault history
+// extern Flt_st mySum[NSUM];        // Summaries for saving charge history
+// extern Flt_st myFlt[NFLT];        // Summaries for saving fault history
 extern SavedPars sp;              // Various parameters to be common at system level
 
-retained Sum_st mySum[NSUM];          // Summaries
-retained Flt_st myFlt[NFLT];          // Summaries
+// retained Flt_st mySum[NSUM];          // Summaries
+// retained Flt_st myFlt[NFLT];          // Summaries
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level
 #if (PLATFORM_ID==6) // Photon
   retained SavedPars sp = SavedPars(&ram);           // Various parameters to be common at system level
@@ -52,6 +51,12 @@ void setup() {
   Serial.begin(115200);
   delay(100);
   Serial.println("Hi");
+
+  // I2C
+  Wire.setSpeed(CLOCK_SPEED_400KHZ);
+  Wire.begin();
+
+
   ram.begin(0, 0);
   ram.setAutoStore(true);
   delay(1000);
@@ -85,7 +90,7 @@ void loop()
     Serial.printf("\nread each avg %7.6f s, all %7.6fs\n\n", all/float(num), all);
     sp.mem_print();
   }
-  if (++count == 100) count = 0;
+  if (++count == 500) count = 0;
 
   delay(100);
 

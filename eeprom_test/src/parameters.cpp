@@ -31,41 +31,94 @@
 SavedPars::SavedPars() {}
 SavedPars::SavedPars(SerialRAM *ram)
 {
-    #if (PLATFORM_ID==12)  // Argon
-        rp_ = ram;
+    #if PLATFORM_ID == PLATFORM_ARGON
+        rP_ = ram;
         // Memory map
-        uint16_t next_loc = 0x000;
-        amp_eeram_.a16 = next_loc; next_loc += sizeof(amp);
-        cutback_gain_sclr_eeram_.a16 = next_loc; next_loc += sizeof(cutback_gain_sclr);
-        debug_eeram_.a16 = next_loc; next_loc += sizeof(debug);
-        delta_q_eeram_.a16 = next_loc;  next_loc += sizeof(delta_q);
-        delta_q_model_eeram_.a16 = next_loc;  next_loc += sizeof(delta_q_model);
-        freq_eeram_.a16 = next_loc; next_loc += sizeof(freq);
-        hys_scale_eeram_.a16 = next_loc; next_loc += sizeof(hys_scale);
-        Ib_bias_all_eeram_.a16 =  next_loc;  next_loc += sizeof(Ib_bias_all);
-        Ib_bias_amp_eeram_.a16 =  next_loc;  next_loc += sizeof(Ib_bias_amp);
-        Ib_bias_noa_eeram_.a16 =  next_loc;  next_loc += sizeof(Ib_bias_noa);
-        ib_scale_amp_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_scale_amp);
-        ib_scale_noa_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_scale_noa);
-        ib_select_eeram_.a16 =  next_loc;  next_loc += sizeof(ib_select);
-        iflt_eeram_.a16 =  next_loc;  next_loc += sizeof(iflt);
-        inj_bias_eeram_.a16 =  next_loc;  next_loc += sizeof(inj_bias);
-        isum_eeram_.a16 =  next_loc;  next_loc += sizeof(isum);
-        mon_chm_eeram_.a16 =  next_loc;  next_loc += sizeof(mon_chm);
-        modeling_eeram_.a16 =  next_loc;  next_loc += sizeof(modeling);
-        nP_eeram_.a16 = next_loc; next_loc += sizeof(nP);
-        nS_eeram_.a16 = next_loc; next_loc += sizeof(nS);
-        preserving_eeram_.a16 =  next_loc;  next_loc += sizeof(preserving); // TODO:  connect this to legacy preserving logic
-        shunt_gain_sclr_eeram_.a16 = next_loc;  next_loc += sizeof(shunt_gain_sclr);
-        sim_chm_eeram_.a16 =  next_loc;  next_loc += sizeof(sim_chm);
-        s_cap_model_eeram_.a16 = next_loc;  next_loc += sizeof(s_cap_model);
-        Tb_bias_hdwe_eeram_.a16 = next_loc; next_loc += sizeof(Tb_bias_hdwe);
-        type_eeram_.a16 =  next_loc;  next_loc += sizeof(type);
-        t_last_eeram_.a16 =  next_loc;  next_loc += sizeof(t_last);
-        t_last_model_eeram_.a16 =  next_loc; next_loc += sizeof(t_last_model);
-        Vb_bias_hdwe_eeram_.a16 = next_loc; next_loc += sizeof(Vb_bias_hdwe);
-        Vb_scale_eeram_.a16 = next_loc; next_loc += sizeof(Vb_scale);
-        if ( next_loc > MAX_EERAM ) Serial.printf("SavedPars::SavedPars - BAD MEMORY MAP\n");
+        next_ = 0x000;
+        amp_eeram_.a16 = next_; next_ += sizeof(amp);
+        cutback_gain_sclr_eeram_.a16 = next_; next_ += sizeof(cutback_gain_sclr);
+        debug_eeram_.a16 = next_; next_ += sizeof(debug);
+        delta_q_eeram_.a16 = next_;  next_ += sizeof(delta_q);
+        delta_q_model_eeram_.a16 = next_;  next_ += sizeof(delta_q_model);
+        freq_eeram_.a16 = next_; next_ += sizeof(freq);
+        hys_scale_eeram_.a16 = next_; next_ += sizeof(hys_scale);
+        Ib_bias_all_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_all);
+        Ib_bias_amp_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_amp);
+        Ib_bias_noa_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_noa);
+        ib_scale_amp_eeram_.a16 =  next_;  next_ += sizeof(ib_scale_amp);
+        ib_scale_noa_eeram_.a16 =  next_;  next_ += sizeof(ib_scale_noa);
+        ib_select_eeram_.a16 =  next_;  next_ += sizeof(ib_select);
+        iflt_eeram_.a16 =  next_;  next_ += sizeof(iflt);
+        ihis_eeram_.a16 =  next_;  next_ += sizeof(ihis);
+        inj_bias_eeram_.a16 =  next_;  next_ += sizeof(inj_bias);
+        islt_eeram_.a16 =  next_;  next_ += sizeof(islt);
+        isum_eeram_.a16 =  next_;  next_ += sizeof(isum);
+        mon_chm_eeram_.a16 =  next_;  next_ += sizeof(mon_chm);
+        modeling_eeram_.a16 =  next_;  next_ += sizeof(modeling);
+        nP_eeram_.a16 = next_; next_ += sizeof(nP);
+        nS_eeram_.a16 = next_; next_ += sizeof(nS);
+        preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving); // TODO:  connect this to legacy preserving logic (delete Sen->Flt->preserving)
+        shunt_gain_sclr_eeram_.a16 = next_;  next_ += sizeof(shunt_gain_sclr);
+        sim_chm_eeram_.a16 =  next_;  next_ += sizeof(sim_chm);
+        s_cap_model_eeram_.a16 = next_;  next_ += sizeof(s_cap_model);
+        Tb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Tb_bias_hdwe);
+        type_eeram_.a16 =  next_;  next_ += sizeof(type);
+        t_last_eeram_.a16 =  next_;  next_ += sizeof(t_last);
+        t_last_model_eeram_.a16 =  next_; next_ += sizeof(t_last_model);
+        Vb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Vb_bias_hdwe);
+        Vb_scale_eeram_.a16 = next_; next_ += sizeof(Vb_scale);
+        nflt_ = int( NFLT );
+        fault1_array_eeram_ = new address16b[nflt_];
+        fault1_array_ptr_ = new Flt1_st[nflt_];
+        for ( int i=0; i<nflt_; i++ )
+        {
+            fault1_array_eeram_[i].a16 = next_;
+            next_ += sizeof(fault1_array_ptr_[i]);
+            fault1_array_ptr_[i].nominal();
+        }
+        fault2_array_eeram_ = new address16b[nflt_];
+        fault2_array_ptr_ = new Flt2_st[nflt_];
+        for ( int i=0; i<nflt_; i++ )
+        {
+            fault2_array_eeram_[i].a16 = next_;
+            next_ += sizeof(fault2_array_ptr_[i]);
+            fault2_array_ptr_[i].nominal();
+        }
+        fault3_array_eeram_ = new address16b[nflt_];
+        fault3_array_ptr_ = new Flt3_st[nflt_];
+        for ( int i=0; i<nflt_; i++ )
+        {
+            fault3_array_eeram_[i].a16 = next_;
+            next_ += sizeof(fault3_array_ptr_[i]);
+            fault3_array_ptr_[i].nominal();
+        }
+
+        // nhis_ = int( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
+        nhis_ = int( NFLT - 2 ); 
+        history1_array_eeram_ = new address16b[nhis_];
+        history1_array_ptr_ = new Flt1_st[nhis_];
+        for ( int i=0; i<nhis_; i++ )
+        {
+            history1_array_eeram_[i].a16 = next_;
+            next_ += sizeof(history1_array_ptr_[i]);
+            history1_array_ptr_[i].nominal();
+        }
+        history2_array_eeram_ = new address16b[nhis_];
+        history2_array_ptr_ = new Flt2_st[nhis_];
+        for ( int i=0; i<nhis_; i++ )
+        {
+            history2_array_eeram_[i].a16 = next_;
+            next_ += sizeof(history2_array_ptr_[i]);
+            history2_array_ptr_[i].nominal();
+        }
+        history3_array_eeram_ = new address16b[nhis_];
+        history3_array_ptr_ = new Flt3_st[nhis_];
+        for ( int i=0; i<nhis_; i++ )
+        {
+            history3_array_eeram_[i].a16 = next_;
+            next_ += sizeof(history3_array_ptr_[i]);
+            history3_array_ptr_[i].nominal();
+        }
     #endif
 }
 SavedPars::~SavedPars() {}
@@ -90,7 +143,8 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(ib_scale_amp, float(-1e6), float(1e6)) ||
         is_val_corrupt(ib_scale_noa, float(-1e6), float(1e6)) ||
         is_val_corrupt(ib_select, int8_t(-1), int8_t(1)) ||
-        is_val_corrupt(iflt, -1, NFLT+1) ||
+        is_val_corrupt(iflt, -1, nflt_+1) ||
+        is_val_corrupt(ihis, -1, nhis_+1) ||
         is_val_corrupt(inj_bias, float(-100.), float(100.)) ||
         is_val_corrupt(isum, -1, NSUM+1) ||
         is_val_corrupt(modeling, uint8_t(0), uint8_t(15)) ||
@@ -127,6 +181,7 @@ void SavedPars::load_all()
     get_ib_select();
     get_iflt();
     get_inj_bias();
+    get_islt();
     get_isum();
     get_modeling();
     get_mon_chm();
@@ -142,6 +197,12 @@ void SavedPars::load_all()
     get_t_last_model();
     get_Vb_bias_hdwe();
     get_Vb_scale();
+    for ( int i=0; i<nflt_; i++ ) get_fault1_array_elem(i);
+    for ( int i=0; i<nflt_; i++ ) get_fault2_array_elem(i);
+    for ( int i=0; i<nflt_; i++ ) get_fault3_array_elem(i);
+    for ( int i=0; i<nhis_; i++ ) get_history1_array_elem(i);
+    for ( int i=0; i<nhis_; i++ ) get_history2_array_elem(i);
+    for ( int i=0; i<nhis_; i++ ) get_history3_array_elem(i);
 }
 
 // Nominalize
@@ -161,7 +222,9 @@ void SavedPars::nominal()
     put_ib_scale_noa(float(CURR_SCALE_NOA));
     put_ib_select(int8_t(FAKE_FAULTS));
     put_iflt(int(-1));
+    put_ihis(int(-1));
     put_inj_bias(float(0.));
+    put_islt(int(-1));
     put_isum(int(-1));
     put_modeling(uint8_t(MODELING));
     put_mon_chm(uint8_t(MON_CHEM));
@@ -177,6 +240,10 @@ void SavedPars::nominal()
     put_t_last_model(float(RATED_TEMP));  
     put_Vb_bias_hdwe(float(VOLT_BIAS));
     put_Vb_scale(float(VB_SCALE));
+    Serial.printf("in nominal bef flt\n");
+    nominalize_fault_array();
+    Serial.printf("in nominal bef his\n");
+    nominalize_history_array();
  }
 
 // Number of differences between nominal EERAM and actual (don't count integator memories because they always change)
@@ -190,6 +257,7 @@ int SavedPars::num_diffs()
     // if ( 0. != delta_q_model )    //   n++;
     // if ( int(-1) != iflt )    //     n++;
     // if ( int(-1) != isum )    //     n++;
+    // if ( int(-1) != islt )    //     n++;
     // if ( uint8_t(0) != preserving )    //     n++;
     if ( float(0.) != amp ) n++;
     if ( float(1.) != cutback_gain_sclr ) n++;
@@ -219,14 +287,59 @@ int SavedPars::num_diffs()
 
 // Configuration functions
 
-// Print
+// Print memory map
 void SavedPars::mem_print()
 {
-    #if (PLATFORM_ID==12)  // Argon
-        for ( uint16_t i=0x0000; i<MAX_EERAM; i++ ) Serial.printf("%d ", rP_->read(i));
-        Serial.printf("\n");
+    #if PLATFORM_ID == PLATFORM_ARGON
+        Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X > 0x%X\n", next_, MAX_EERAM);
+        Serial.printf("Temp mem map print\n");
+        for ( uint16_t i=0x0000; i<MAX_EERAM; i++ ) Serial.printf("%X ", rP_->read(i));
     #endif
 }
+
+// Reset fault array
+void SavedPars::nominalize_fault_array()
+{
+    Serial.printf("in nom_flt_array\n");
+    for ( int i=0; i<nflt_; i++ )
+    {
+        fault1_array_ptr_[i].nominal();
+        put_fault1_array_elem(fault1_array_ptr_[i], i);
+    }
+    for ( int i=0; i<nflt_; i++ )
+    {
+        fault2_array_ptr_[i].nominal();
+        put_fault2_array_elem(fault2_array_ptr_[i], i);
+    }
+    for ( int i=0; i<nflt_; i++ )
+    {
+        fault3_array_ptr_[i].nominal();
+        put_fault3_array_elem(fault3_array_ptr_[i], i);
+    }
+}
+
+// Reset fault array
+void SavedPars::nominalize_history_array()
+{
+    Serial.printf("in nom_his_array, nhis_=%d\n", nhis_);
+    for ( int i=0; i<nhis_; i++ )
+    {
+        history1_array_ptr_[i].nominal();
+        put_history1_array_elem(history1_array_ptr_[i], i);
+    }
+    for ( int i=0; i<nhis_; i++ )
+    {
+        history2_array_ptr_[i].nominal();
+        put_history2_array_elem(history2_array_ptr_[i], i);
+    }
+    for ( int i=0; i<nhis_; i++ )
+    {
+        history3_array_ptr_[i].nominal();
+        put_history3_array_elem(history3_array_ptr_[i], i);
+    }
+}
+
+// Print
 void SavedPars::pretty_print(const boolean all)
 {
     Serial.printf("saved parameters (sp):\n");
@@ -238,7 +351,7 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )                                  Serial.printf(" dq_sim %10.1f %10.1f *Ca<>, *Cm<>, C\n", double(0.), delta_q_model);
     if ( all || float(0.) != freq )             Serial.printf(" inj frq%7.3f  %7.3f *Xf<> r/s\n", 0., freq);
     if ( all || float(HYS_SCALE) != hys_scale ) Serial.printf(" hys_scale     %7.3f    %7.3f *Sh<>\n", HYS_SCALE, hys_scale);
-    if ( all || float(CURR_BIAS_ALL) != Ib_bias_all )   Serial.printf(" ib_bias_all%7.3f  %7.3f *Di<> A\n", CURR_BIAS_ALL, Ib_bias_all);
+    if ( all || float(CURR_BIAS_ALL) != Ib_bias_all )   Serial.printf(" Ib_bias_all%7.3f  %7.3f *Di<> A\n", CURR_BIAS_ALL, Ib_bias_all);
     if ( all || float(CURR_BIAS_AMP) != Ib_bias_amp )   Serial.printf(" bias_amp%7.3f  %7.3f *DA<>\n", CURR_BIAS_AMP, Ib_bias_amp);
     if ( all || float(CURR_BIAS_NOA) != Ib_bias_noa )   Serial.printf(" bias_noa%7.3f  %7.3f *DB<>\n", CURR_BIAS_NOA, Ib_bias_noa);
     if ( all || float(CURR_SCALE_AMP) != ib_scale_amp ) Serial.printf(" ib_scale_amp%7.3f  %7.3f *SA<>\n", CURR_SCALE_AMP, ib_scale_amp);
@@ -246,6 +359,7 @@ void SavedPars::pretty_print(const boolean all)
     if ( all || int8_t(FAKE_FAULTS) != ib_select )      Serial.printf(" ib_select %d  %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select);
     if ( all )                                  Serial.printf(" iflt                           %d flt ptr\n", iflt);
     if ( all || float(0.) != inj_bias )         Serial.printf(" inj_bias%7.3f  %7.3f *Xb<> A\n", 0., inj_bias);
+    if ( all )                                  Serial.printf(" islt                           %d flt h ptr\n", islt);
     if ( all )                                  Serial.printf(" isum                           %d tbl ptr\n", isum);
     if ( all || uint8_t(MODELING) != modeling ) Serial.printf(" modeling %d  %d *Xm<>\n", uint8_t(MODELING), modeling);
     if ( all || MON_CHEM != mon_chm )           Serial.printf(" mon chem            %d          %d *Bm<> 0=Battle, 1=LION\n", MON_CHEM, mon_chm);
@@ -261,6 +375,54 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )                                  Serial.printf(" t_last_sim %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_model);
     if ( all || float(VOLT_BIAS) != Vb_bias_hdwe )      Serial.printf(" Vb_bias_hdwe %7.3f  %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe);
     if ( all || float(VB_SCALE) != Vb_scale )   Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n\n", VB_SCALE, Vb_scale);
+    if ( all )
+    {
+        Serial.printf("history array (%d):\n", nhis_);
+        print_history_array();
+        print_fault_header();
+        Serial.printf("fault array (%d):\n", nflt_);
+        print_fault_array();
+        print_fault_header();
+    }
+
+    // Temporary
+    Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X > 0x%X\n", next_, MAX_EERAM);
+    // Serial.printf("Temp mem map print\n");
+    // mem_print();
+}
+
+// Print faults
+void SavedPars::print_fault_array()
+{
+  int i = iflt;  // Last one written was iflt
+  int n = -1;
+  while ( ++n < nflt_ )
+  {
+    if ( ++i > (nflt_-1) ) i = 0; // circular buffer
+    fault1_array_ptr_[i].print("unit_f");
+    fault2_array_ptr_[i].print();
+    fault3_array_ptr_[i].print();
+  }
+}
+
+// Print faults
+void SavedPars::print_fault_header()
+{
+  Serial.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
+}
+
+// Print history
+void SavedPars::print_history_array()
+{
+  int i = ihis;  // Last one written was iflt
+  int n = -1;
+  while ( ++n < nhis_ )
+  {
+    if ( ++i > (nhis_-1) ) i = 0; // circular buffer
+    history1_array_ptr_[i].print("unit_f");
+    history2_array_ptr_[i].print();
+    history3_array_ptr_[i].print();
+  }
 }
 
 // Assign all EERAM values to temp variable for pursposes of timing
@@ -282,6 +444,7 @@ int SavedPars::read_all()
     get_ib_select(); n++;
     get_iflt(); n++;
     get_inj_bias(); n++;
+    get_islt(); n++;
     get_isum(); n++;
     get_modeling(); n++;
     get_mon_chm(); n++;
@@ -324,6 +487,7 @@ int SavedPars::assign_all()
     tempi8 = ib_select; n++;
     tempi = iflt; n++;
     tempf = inj_bias; n++;
+    tempi = islt; n++;
     tempi = isum; n++;
     tempu = modeling; n++;
     tempu = mon_chm; n++;
