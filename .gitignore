@@ -39,3 +39,4 @@ SOC_Photon/py/.idea/py.iml
 *.ld
 *.d
 *.crc_block
+eeprom_test/src/eeprom_test.cpp

@@ -61,7 +61,6 @@ void setup() {
   Serial.println("Hi");
 
   // I2C
-  Wire.setSpeed(CLOCK_SPEED_400KHZ);
   Wire.begin();
 
 
