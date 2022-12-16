@@ -27,6 +27,8 @@
 
 #include "application.h"
 #include "Battery.h"
+#include "./hardware/SerialRAM.h"
+
 String time_long_2_str(const unsigned long current_time, char *tempStr);
 
 // SRAM retention summary
@@ -48,128 +50,52 @@ struct Flt_st
   uint16_t fltw = 0;    // Fault word
   uint16_t falw = 0;    // Fail word
   unsigned long dummy = 0;  // padding to absorb Wire.write corruption
-  Flt_st()
-  {
-    nominal();
-  }
   void assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen);
-  void copy_from(Flt_st input)
-  {
-    t = input.t;
-    Tb_hdwe = input.Tb_hdwe;
-    vb_hdwe = input.vb_hdwe;
-    ib_amp_hdwe = input.ib_amp_hdwe;
-    ib_noa_hdwe = input.ib_noa_hdwe;
-    Tb = input.Tb;
-    vb = input.vb;
-    ib = input.ib;
-    soc = input.soc;
-    soc_ekf = input.soc_ekf;
-    voc = input.voc;
-    voc_stat = input.voc_stat;
-    e_wrap_filt =input.e_wrap_filt;
-    fltw = input.fltw;
-    falw = input.falw;
-  }
-  void nominal()
-  {
-    this->t = 1L;
-    this->Tb_hdwe = int16_t(0);
-    this->vb_hdwe = int16_t(0);
-    this->ib_amp_hdwe = int16_t(0);
-    this->ib_noa_hdwe = int16_t(0);
-    this->Tb = int16_t(0);
-    this->vb = int16_t(0);
-    this->ib = int16_t(0);
-    this->soc = int16_t(0);
-    this->soc_ekf = int16_t(0);
-    this->voc = int16_t(0);
-    this->voc_stat = int16_t(0);
-    this->e_wrap_filt = int16_t(0);
-    this->fltw = uint16_t(0);
-    this->falw = uint16_t(0);
-    this->dummy = 0L;
-  }
-  void pretty_print(const String code)
-  {
-    char buffer[32] = "---";
-    if ( this->t>0 )
-    {
-      time_long_2_str(this->t, buffer);
-    }
-    Serial.printf("code %s\n", code.c_str());
-    Serial.printf("buffer %s\n", buffer);
-    Serial.printf("t %ld\n", this->t);
-    Serial.printf("Tb_hdwe %7.3f\n", double(this->Tb_hdwe)/600.);
-    Serial.printf("vb_hdwe %7.3f\n", double(this->vb_hdwe)/1200.);
-    Serial.printf("ib_amp_hdwe %7.3f\n", double(this->ib_amp_hdwe)/600.);
-    Serial.printf("ib_noa_hdwe %7.3f\n", double(this->ib_noa_hdwe)/600.);
-    Serial.printf("Tb %7.3f\n", double(this->Tb)/600.);
-    Serial.printf("vb %7.3f\n", double(this->vb)/1200.);
-    Serial.printf("ib %7.3f\n", double(this->ib)/600.);
-    Serial.printf("soc %7.4f\n", double(this->soc)/16000.);
-    Serial.printf("soc_ekf %7.4f\n", double(this->soc_ekf)/16000.);
-    Serial.printf("voc %7.3f\n", double(this->voc)/1200.);
-    Serial.printf("voc_stat %7.3f\n", double(this->voc_stat)/1200.);
-    Serial.printf("e_wrap_filt %7.3f\n", double(this->e_wrap_filt)/1200.);
-    Serial.printf("fltw %d falw %d\n", this->fltw, this->falw);
-  }
-  void print(const String code)
-  {
-    char buffer[32] = "---";
-    if ( this->t>0 )
-    {
-      time_long_2_str(this->t, buffer);
-    }
-    Serial.printf("%s, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
-      code.c_str(), buffer, this->t,
-      double(this->Tb_hdwe)/600.,
-      double(this->vb_hdwe)/1200.,
-      double(this->ib_amp_hdwe)/600.,
-      double(this->ib_noa_hdwe)/600.,
-      double(this->Tb)/600.,
-      double(this->vb)/1200.,
-      double(this->ib)/600.,
-      double(this->soc)/16000.,
-      double(this->soc_ekf)/16000.,
-      double(this->voc)/1200.,
-      double(this->voc_stat)/1200.,
-      double(this->e_wrap_filt)/1200.,
-      this->fltw,
-      this->falw);
-    // Serial.printf("%s, %s, %ld, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, 0x%X, fltw0x%X, falw0x%X,\n",
-    //   code.c_str(), buffer, this->t,
-    //   this->Tb_hdwe,
-    //   this->vb_hdwe,
-    //   this->ib_amp_hdwe,
-    //   this->ib_noa_hdwe,
-    //   this->Tb,
-    //   this->vb,
-    //   this->ib,
-    //   this->soc,
-    //   this->soc_ekf,
-    //   this->voc,
-    //   this->voc_stat,
-    //   this->e_wrap_filt,
-    //   this->fltw,
-    //   this->falw);
-    Serial1.printf("unit_f, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
-      buffer, this->t,
-      double(this->Tb_hdwe)/600.,
-      double(this->vb_hdwe)/1200.,
-      double(this->ib_amp_hdwe)/600.,
-      double(this->ib_noa_hdwe)/600.,
-      double(this->Tb)/600.,
-      double(this->vb)/1200.,
-      double(this->ib)/600.,
-      double(this->soc)/16000.,
-      double(this->soc_ekf)/16000.,
-      double(this->voc)/1200.,
-      double(this->voc_stat)/1200.,
-      double(this->e_wrap_filt)/1200.,
-      this->fltw,
-      this->falw);
-  }
+  void copy_from(Flt_st input);
+  void nominal();
+  void pretty_print(const String code);
+  void print(const String code);
+};
+
+class Flt_ram : public Flt_st
+{
+public:
+  Flt_ram();
+  ~Flt_ram();
+  void get_t()            { unsigned long value;  rP_->get(t_eeram_.a16, value);            t = value; };
+  void get_Tb_hdwe()      { float value;          rP_->get(Tb_hdwe_eeram_.a16, value);      Tb_hdwe = value; };
+  void get_vb_hdwe()      { float value;          rP_->get(vb_hdwe_eeram_.a16, value);      vb_hdwe = value; };
+  void get_ib_amp_hdwe()  { float value;          rP_->get(ib_amp_hdwe_eeram_.a16, value);  ib_amp_hdwe = value; };
+  void get_ib_noa_hdwe()  { float value;          rP_->get(ib_noa_hdwe_eeram_.a16, value);  ib_noa_hdwe = value; };
+  void get_Tb()           { float value;          rP_->get(Tb_eeram_.a16, value);           Tb = value; };
+  void get_vb()           { float value;          rP_->get(vb_eeram_.a16, value);           vb = value; };
+  void get_ib()           { float value;          rP_->get(ib_eeram_.a16, value);           ib = value; };
+  void get_soc()          { float value;          rP_->get(soc_eeram_.a16, value);          soc = value; };
+  void get_soc_ekf()      { float value;          rP_->get(soc_ekf_eeram_.a16, value);      soc_ekf = value; };
+  void get_voc()          { float value;          rP_->get(voc_eeram_.a16, value);          voc = value; };
+  void get_voc_stat()     { float value;          rP_->get(voc_stat_eeram_.a16, value);     voc_stat = value; };
+  void get_e_wrap_filt()  { float value;          rP_->get(e_wrap_filt_eeram_.a16, value);  e_wrap_filt = value; };
+  void get_fltw()         { float value;          rP_->get(fltw_eeram_.a16, value);         fltw = value; };
+  void get_falw()         { float value;          rP_->get(falw_eeram_.a16, value);         falw = value; };
+  void instantiate(SerialRAM *ram, uint16_t *next);
+  void load_all();
+protected:
+  SerialRAM *rP_;
+  address16b t_eeram_;
+  address16b Tb_hdwe_eeram_;
+  address16b vb_hdwe_eeram_;
+  address16b ib_amp_hdwe_eeram_;
+  address16b ib_noa_hdwe_eeram_;
+  address16b Tb_eeram_;
+  address16b vb_eeram_;
+  address16b ib_eeram_;
+  address16b soc_eeram_;
+  address16b soc_ekf_eeram_;
+  address16b voc_eeram_;
+  address16b voc_stat_eeram_;
+  address16b e_wrap_filt_eeram_;
+  address16b fltw_eeram_;
+  address16b falw_eeram_;
 };
 
 #endif

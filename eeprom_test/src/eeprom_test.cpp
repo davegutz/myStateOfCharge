@@ -61,7 +61,7 @@ void setup() {
   Serial.println("Hi");
 
   // I2C
-  Wire.begin();
+  Wire1.begin();
 
 
   ram.begin(0, 0);

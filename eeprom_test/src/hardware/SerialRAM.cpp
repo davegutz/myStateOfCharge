@@ -31,7 +31,7 @@ void SerialRAM::begin(const uint8_t a0, const uint8_t a1) {
 	this->CONTROL_REGISTER = 0x18 | mask;
 
 	//Arduino I2C lib
-	Wire.begin();
+	Wire1.begin();
 }
 
 
@@ -46,11 +46,11 @@ void SerialRAM::begin(const uint8_t a0, const uint8_t a1) {
 uint8_t SerialRAM::write(const uint16_t address, const uint8_t value) {
 	address16b a;
 	a.a16 = address;
-	Wire.beginTransmission(this->SRAM_REGISTER);
-	Wire.write(a.a8[1]);
-	Wire.write(a.a8[0]);
-	Wire.write(value);
-	return Wire.endTransmission();
+	Wire1.beginTransmission(this->SRAM_REGISTER);
+	Wire1.write(a.a8[1]);
+	Wire1.write(a.a8[0]);
+	Wire1.write(value);
+	return Wire1.endTransmission();
 }
 
 ///<summary>
@@ -66,14 +66,14 @@ uint8_t SerialRAM::read(const uint16_t address) {
 	a.a16 = address;
 
 	
-	Wire.beginTransmission(this->SRAM_REGISTER);
-	Wire.write(a.a8[1]);
-	Wire.write(a.a8[0]);
-	Wire.endTransmission();
+	Wire1.beginTransmission(this->SRAM_REGISTER);
+	Wire1.write(a.a8[1]);
+	Wire1.write(a.a8[0]);
+	Wire1.endTransmission();
 
-	Wire.requestFrom(this->SRAM_REGISTER, 1);
-	buffer = Wire.read();
-	Wire.endTransmission();
+	Wire1.requestFrom(this->SRAM_REGISTER, 1);
+	buffer = Wire1.read();
+	Wire1.endTransmission();
 
 	return buffer;
 }
@@ -81,13 +81,13 @@ uint8_t SerialRAM::read(const uint16_t address) {
 uint8_t SerialRAM::readControlRegister() {
 	uint8_t buffer = 0x80;
 
-	Wire.beginTransmission(this->CONTROL_REGISTER);
-	Wire.write(0x00); //status register
-	Wire.endTransmission();
+	Wire1.beginTransmission(this->CONTROL_REGISTER);
+	Wire1.write(0x00); //status register
+	Wire1.endTransmission();
 
-	Wire.requestFrom(this->CONTROL_REGISTER, 1);
-	buffer = Wire.read();
-	Wire.endTransmission();
+	Wire1.requestFrom(this->CONTROL_REGISTER, 1);
+	buffer = Wire1.read();
+	Wire1.endTransmission();
 
 	return buffer;
 }
@@ -100,10 +100,10 @@ void SerialRAM::setAutoStore(const bool value)
 {
 	uint8_t buffer = this->readControlRegister();
 	buffer = value ? buffer|0x02 : buffer&0xfd;
-	Wire.beginTransmission(this->CONTROL_REGISTER);
-	Wire.write(0x00); //status register
-	Wire.write(buffer);
-	Wire.endTransmission();
+	Wire1.beginTransmission(this->CONTROL_REGISTER);
+	Wire1.write(0x00); //status register
+	Wire1.write(buffer);
+	Wire1.endTransmission();
 }
 
 ///<summary>
@@ -132,11 +132,11 @@ uint8_t SerialRAM::write(const uint16_t address, const uint8_t* values, const ui
 	address16b a;
 	a.a16 = address;
 	uint8_t result;
-	Wire.beginTransmission(this->SRAM_REGISTER);
-	Wire.write(a.a8[1]);
-	Wire.write(a.a8[0]);
-	uint8_t writer = Wire.write(values, size); Serial.printf("writer %d\n", writer);
-	result = Wire.endTransmission();
+	Wire1.beginTransmission(this->SRAM_REGISTER);
+	Wire1.write(a.a8[1]);
+	Wire1.write(a.a8[0]);
+	uint8_t writer = Wire1.write(values, size); Serial.printf("writer %d\n", writer);
+	result = Wire1.endTransmission();
 	Serial.printf("result=%d:", result);
 	return result;
 }
@@ -153,15 +153,15 @@ void SerialRAM::read(const uint16_t address, uint8_t * values, const uint16_t si
 	address16b a;
 	a.a16 = address;
 
-	Wire.beginTransmission(this->SRAM_REGISTER);
-	Wire.write(a.a8[1]);
-	Wire.write(a.a8[0]);
-	Wire.endTransmission();
+	Wire1.beginTransmission(this->SRAM_REGISTER);
+	Wire1.write(a.a8[1]);
+	Wire1.write(a.a8[0]);
+	Wire1.endTransmission();
 
-	Wire.requestFrom(this->SRAM_REGISTER, size);
+	Wire1.requestFrom(this->SRAM_REGISTER, size);
 	for (uint16_t i = 0; i < size; i++) {
-		values[i] = Wire.read();
+		values[i] = Wire1.read();
 	}
-	Wire.endTransmission();
+	Wire1.endTransmission();
 }
 
