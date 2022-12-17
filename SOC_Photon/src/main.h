@@ -83,8 +83,6 @@ extern CommandPars cp;            // Various parameters to be common at system l
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
 
-extern Flt_st saved_faults[NFLT];  // *****************temp
-
 #if PLATFORM_ID == 6 // Photon
   retained Flt_st saved_hist[NHIS];    // For displaying faults
   retained Flt_st saved_faults[NFLT];  // For displaying faults
@@ -184,15 +182,14 @@ void setup()
   Serial.printf("Force nominal rp %s\n", cp.buffer);
   sp.pretty_print();
 #endif
-  Serial.printf("Check corruption\n");
+  Serial.printf("Check corruption......");
   if ( sp.is_corrupt() ) 
   {
     sp.reset_pars();
     Serial.printf("Fixed corruption\n");
     sp.pretty_print(true);
   }
-  for (int i=0; i<NFLT; i++) saved_faults[i].print("root***in setup after corruption check");
-  sp.print_fault_array();
+  else Serial.printf("clean\n");
 
   // Determine millis() at turn of Time.now
   long time_begin = Time.now();

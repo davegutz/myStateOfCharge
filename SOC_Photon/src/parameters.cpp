@@ -25,8 +25,6 @@
 #include "Battery.h"
 #include "parameters.h"
 
-extern Flt_st saved_faults[NFLT];  // *****************temp
-
 // class SavedPars 
 SavedPars::SavedPars()
 {
@@ -172,18 +170,8 @@ void SavedPars::load_all()
     get_t_last_model();
     get_Vb_bias_hdwe();
     get_Vb_scale();
-      for (int i=0; i<NFLT; i++) saved_faults[i].print("root***in load_all_before get");
-    for ( int i=0; i<nflt_; i++ )
-    {
-        fault_[i].print("in load_all before get");
-        fault_[i].get();
-        fault_[i].print("in load_all after get");
-    }
-      for (int i=0; i<NFLT; i++) saved_faults[i].print("root***in load_all_after get");
-    for ( int i=0; i<nhis_; i++ )
-    {
-        history_[i].get();
-    }
+    for ( int i=0; i<nflt_; i++ ) fault_[i].get();
+    for ( int i=0; i<nhis_; i++ ) history_[i].get();
 }
 
 
@@ -272,15 +260,15 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )                                  Serial.printf(" t_last_sim %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_model);
     if ( all || float(VOLT_BIAS) != Vb_bias_hdwe )      Serial.printf(" Vb_bias_hdwe %7.3f  %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe);
     if ( all || float(VB_SCALE) != Vb_scale )   Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n\n", VB_SCALE, Vb_scale);
-    if ( all )
-    {
-        Serial.printf("history array (%d):\n", nhis_);
-        print_history_array();
-        print_fault_header();
-        Serial.printf("fault array (%d):\n", nflt_);
-        print_fault_array();
-        print_fault_header();
-    }
+    // if ( all )
+    // {
+    //     Serial.printf("history array (%d):\n", nhis_);
+    //     print_history_array();
+    //     print_fault_header();
+    //     Serial.printf("fault array (%d):\n", nflt_);
+    //     print_fault_array();
+    //     print_fault_header();
+    // }
     #if PLATFORM_ID == PLATFORM_ARGON
         Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
         // Serial.printf("Temp mem map print\n");
