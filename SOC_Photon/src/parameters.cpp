@@ -303,9 +303,11 @@ void SavedPars::pretty_print(const boolean all)
         print_fault_array();
         print_fault_header();
     }
-    Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
-    // Serial.printf("Temp mem map print\n");
-    // mem_print();
+    #if PLATFORM_ID == PLATFORM_ARGON
+        Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
+        // Serial.printf("Temp mem map print\n");
+        // mem_print();
+    #endif
 }
 
 // Print faults

@@ -215,7 +215,6 @@ public:
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { Vb_scale = input; }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_from(input); }
-        void put_history(const Flt_st input, const uint8_t i) { history_[i].copy_from(input); }
     #elif PLATFORM_ID == PLATFORM_ARGON
         void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp = input; }
         void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr = input; }
@@ -249,9 +248,9 @@ public:
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale = input; }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
-        Flt_st put_history(const Flt_st input, const uint8_t i);
     #endif
     //
+    Flt_st put_history(const Flt_st input, const uint8_t i);
     int read_all();
     boolean tweak_test() { return ( 0x8 & modeling ); } // Driving signal injection completely using software inj_bias 
 protected:
@@ -289,11 +288,11 @@ protected:
         address16b Vb_scale_eeram_;
         SerialRAM *rP_;
         uint16_t next_;
+    #endif
         Flt_ram *fault_;
         uint16_t nflt_;         // Length of Flt_ram array for faults
         Flt_ram *history_;
         uint16_t nhis_;         // Length of Flt_ram array for history
-    #endif
 };
 
 #endif
