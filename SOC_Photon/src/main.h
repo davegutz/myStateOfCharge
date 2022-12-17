@@ -60,15 +60,13 @@
 #include "debug.h"
 #include "parameters.h"
 
-// // For Photon
-#ifndef PLATFORM_ARGON
-  #define PLATFORM_ARGON  12
-  #define PLATFORM_ID     6
+#ifndef PLATFORM_ID
+  #define PLATFORM_ID 12
 #endif
-#define PLATFORM_ID     6
+#define PLATFORM_ARGON 12
+
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
-// #include <Arduino.h>      // Used instead of Print.h - breaks Serial
 
 #if PLATFORM_ID == PLATFORM_ARGON
   #include "hardware/SerialRAM.h"

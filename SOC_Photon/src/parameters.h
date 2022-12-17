@@ -254,8 +254,8 @@ protected:
         address16b Vb_bias_hdwe_eeram_;
         address16b Vb_scale_eeram_;
         SerialRAM *rP_;
-        Flt_ram fault_[NFLT];
-        Flt_ram history_[NHIS];
+        Flt_ram *fault_;
+        Flt_ram *history_;
     #else
         Flt_st *fault_;
         Flt_st *history_;

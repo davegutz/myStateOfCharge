@@ -31,13 +31,15 @@ SavedPars::SavedPars()
   nflt_ = int( NFLT ); 
   nhis_ = int( NHIS ); 
 }
-SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
-{
-    nhis_ = nhis;
-    nflt_ = nflt;
-    history_ = hist;
-    fault_ = faults;
-}
+#if PLATFORM_ID == 6  // Photon
+    SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
+    {
+        nhis_ = nhis;
+        nflt_ = nflt;
+        history_ = hist;
+        fault_ = faults;
+    }
+#endif
 SavedPars::SavedPars(SerialRAM *ram)
 {
     next_ = 0x000;
