@@ -50,17 +50,23 @@
 // See README.md
 */
 
-// For Photon
-#if PLATFORM_ID == 6 || PLATFORM_ID == PLATFORM_ARGON
-  //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
-  // #include "application.h"  // Should not be needed if file ino or Arduino
-  SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
-  // #include <Arduino.h>      // Used instead of Print.h - breaks Serial
-#else
-  using namespace std;
-  #undef max
-  #undef min
+#include "constants.h"
+
+// Dependent includes.   Easier to sp.debug code if remove unused include files
+#include "mySync.h"
+#include "mySubs.h"
+#include "mySummary.h"
+#include "myCloud.h"
+#include "debug.h"
+
+// // For Photon
+#ifndef PLATFORM_ARGON
+  #define PLATFORM_ARGON  12
+  #define PLATFORM_ID     6
 #endif
+//#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
+SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
+// #include <Arduino.h>      // Used instead of Print.h - breaks Serial
 
 #if PLATFORM_ID == PLATFORM_ARGON
   #include "hardware/SerialRAM.h"
@@ -69,16 +75,6 @@
   SerialLogHandler logHandler;
 #endif
 
-#include "constants.h"
-
-// Dependent includes.   Easier to sp.debug code if remove unused include files
-#include "mySync.h"
-#include "mySubs.h"
-
-#include "mySummary.h"
-#include "myCloud.h"
-#include "debug.h"
-
 // Globals
 extern SavedPars sp;              // Various parameters to be common at system level
 extern CommandPars cp;            // Various parameters to be common at system level
@@ -86,7 +82,7 @@ extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
 
 #if PLATFORM_ID == 6 // Photon
-  retained SavedPars sp = SavedPars();// Various parameters to be common at system level
+  retained SavedPars sp = SavedPars();  // Various parameters to be common at system level
 #elif PLATFORM_ID == PLATFORM_ARGON
   SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
 #endif
@@ -200,8 +196,6 @@ void setup()
   System.enableFeature(FEATURE_RETAINED_MEMORY);
   if ( sp.debug==1 || sp.debug==2 || sp.debug==3 || sp.debug==4 )
   {
-    // print_all_fault_buffer("unit_h", mySum, sp.isum, NSUM);
-    // print_all_history_header();
     sp.print_history_array();
     sp.print_fault_header();
   }

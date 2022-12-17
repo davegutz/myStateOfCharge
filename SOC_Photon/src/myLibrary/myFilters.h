@@ -12,7 +12,7 @@
 #ifndef _myFilters_H
 #define _myFilters_H
 
-#include "application.h" // Should not be needed if file ino or Arduino
+#include "application.h"
 #include <math.h>
 
 #define DEAD(X, HDB)  ( max(X-HDB, 0) + min(X+HDB, 0) )

@@ -21,9 +21,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef ARDUINO
-#include "application.h" // Should not be needed if file .ino or Arduino
-#endif
 #include "mySummary.h"
 #include "parameters.h"
 
@@ -46,17 +43,6 @@ void print_all_history_header()
   Serial1.printf("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
 }
 
-// Flt_st reset helper
-void print_all_history_buffer(struct Flt_st *flt, const int iflt, const int nflt)
-{
-  int i = iflt;  // Last one written was isum
-  int n = -1;
-  while ( ++n < nflt )
-  {
-    if ( ++i>nflt-1 ) i = 0;  // Increment beyond last one written
-    flt[i].nominal();
-  }
-}
 
 // Flt_st reset helper
 void large_reset_summary(struct Flt_st *sum, const int isum, const int nsum)

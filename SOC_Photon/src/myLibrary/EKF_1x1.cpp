@@ -21,9 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef ARDUINO
-#include "application.h" // Should not be needed if file .ino or Arduino
-#endif
+#include "application.h"
 #include "EKF_1x1.h"
 #include <math.h>
 #include "parameters.h"

@@ -25,7 +25,6 @@
 #ifndef _FAULT_H
 #define _FAULT_H
 
-#include "application.h"
 #include "Battery.h"
 #include "./hardware/SerialRAM.h"
 
@@ -94,16 +93,10 @@ public:
     void get_e_wrap_filt()  { int16_t value;        rP_->get(e_wrap_filt_eeram_.a16, value);  e_wrap_filt = value; };
     void get_fltw()         { uint16_t value;       rP_->get(fltw_eeram_.a16, value);         fltw = value; };
     void get_falw()         { uint16_t value;       rP_->get(falw_eeram_.a16, value);         falw = value; };
+    void instantiate(SerialRAM *ram, uint16_t *next);
   #endif
 
   void get();
-  
-  #if PLATFORM_ID == 6
-    void instantiate(uint16_t *next);
-  #elif PLATFORM_ID == PLATFORM_ARGON
-    void instantiate(SerialRAM *ram, uint16_t *next);
-  #endif
-  
   void put(const Flt_st input);
   void put_nominal();
 
@@ -173,21 +166,23 @@ public:
 
 protected:
   SerialRAM *rP_;
-  address16b t_eeram_;
-  address16b Tb_hdwe_eeram_;
-  address16b vb_hdwe_eeram_;
-  address16b ib_amp_hdwe_eeram_;
-  address16b ib_noa_hdwe_eeram_;
-  address16b Tb_eeram_;
-  address16b vb_eeram_;
-  address16b ib_eeram_;
-  address16b soc_eeram_;
-  address16b soc_ekf_eeram_;
-  address16b voc_eeram_;
-  address16b voc_stat_eeram_;
-  address16b e_wrap_filt_eeram_;
-  address16b fltw_eeram_;
-  address16b falw_eeram_;
+  #if PLATFORM_ID == PLATFORM_ARGON
+    address16b t_eeram_;
+    address16b Tb_hdwe_eeram_;
+    address16b vb_hdwe_eeram_;
+    address16b ib_amp_hdwe_eeram_;
+    address16b ib_noa_hdwe_eeram_;
+    address16b Tb_eeram_;
+    address16b vb_eeram_;
+    address16b ib_eeram_;
+    address16b soc_eeram_;
+    address16b soc_ekf_eeram_;
+    address16b voc_eeram_;
+    address16b voc_stat_eeram_;
+    address16b e_wrap_filt_eeram_;
+    address16b fltw_eeram_;
+    address16b falw_eeram_;
+  #endif
 };
 
 #endif

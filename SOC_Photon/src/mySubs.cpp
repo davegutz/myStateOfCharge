@@ -21,9 +21,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef ARDUINO
-#include "application.h" // Should not be needed if file .ino or Arduino
-#endif
 #include "mySubs.h"
 #include "command.h"
 #include "local_config.h"

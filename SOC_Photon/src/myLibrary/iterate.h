@@ -9,7 +9,7 @@
 #ifndef _iterate_H
 #define _iterate_H
 
-#include "application.h" // Should not be needed if file ino or Arduino
+#include "application.h"
 #include <math.h>
 
 // signum/sgn function

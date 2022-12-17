@@ -21,9 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef ARDUINO
-#include "application.h" // Should not be needed if file .ino or Arduino
-#endif
+#include "application.h"
 #include "fault.h"
 #include "mySensors.h"
 extern SavedPars sp;              // Various parameters to be static at system level
@@ -201,9 +199,6 @@ void Flt_ram::get()
 }
 
 // Initialize each structure
-void Flt_ram::instantiate(uint16_t *next)
-{
-}
 #if PLATFORM_ID == PLATFORM_ARGON
   void Flt_ram::instantiate(SerialRAM *ram, uint16_t *next)
   {

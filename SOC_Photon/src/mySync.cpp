@@ -21,9 +21,8 @@
 // SOFTWARE.
 //
 // 17-Feb-2021  Dave Gutz   Create
-#ifndef ARDUINO
-#include "application.h" // Should not be needed if file .ino or Arduino
-#endif
+
+#include "application.h"
 #include "mySync.h"
 #include "parameters.h"
 extern SavedPars sp;

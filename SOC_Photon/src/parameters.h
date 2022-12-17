@@ -285,11 +285,12 @@ protected:
         address16b Vb_bias_hdwe_eeram_;
         address16b Vb_scale_eeram_;
         SerialRAM *rP_;
+    #else
+        Flt_ram fault_[NFLT];
+        Flt_ram history_[NHIS];
     #endif
         uint16_t next_;
-        Flt_ram *fault_;
         uint16_t nflt_;         // Length of Flt_ram array for faults
-        Flt_ram *history_;
         uint16_t nhis_;         // Length of Flt_ram array for history
 };
 

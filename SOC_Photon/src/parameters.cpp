@@ -21,27 +21,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef ARDUINO
-#include "application.h" // Should not be needed if file .ino or Arduino
-#endif
+#include "application.h"
 #include "Battery.h"
 #include "parameters.h"
 
 // class SavedPars 
 SavedPars::SavedPars()
 {
-    nflt_ = int( NFLT ); 
-    fault_ = new Flt_ram[nflt_];
-    for ( int i=0; i<nflt_; i++ )
-    {
-        fault_[i].instantiate(&next_);
-    }
-    nhis_ = int( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
-    history_ = new Flt_ram[nhis_];
-    for ( int i=0; i<nhis_; i++ )
-    {
-        history_[i].instantiate(&next_);
-    }
+  nflt_ = int( NFLT ); 
+  nhis_ = int( NHIS ); 
 }
 SavedPars::SavedPars(SerialRAM *ram)
 {

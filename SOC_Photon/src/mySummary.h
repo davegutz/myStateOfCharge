@@ -25,14 +25,12 @@
 #ifndef _MY_SUMMARY_H
 #define _MY_SUMMARY_H
 
-#include "application.h"
 #include "mySensors.h"
 #include "command.h"
 #include "fault.h"
 
 // Function prototypes
 void large_reset_summary(struct Flt_st *sum, const int isum, const int nsum);
-void print_all_history_buffer(struct Flt_st *flt, const int iflt, const int nflt);
 void print_all_fault_buffer(const String code, struct Flt_st *sum, const int iflt, const int nflt);
 void print_all_history_header();
 

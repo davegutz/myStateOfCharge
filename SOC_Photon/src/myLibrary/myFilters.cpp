@@ -12,9 +12,7 @@
 
 //#include <Arduino.h> //needed for Serial.println
 
-#ifndef ARDUINO
-#include "application.h" // Should not be needed if file .ino or Arduino
-#endif
+#include "application.h"
 
 
 // class Debounce
