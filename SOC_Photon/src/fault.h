@@ -64,23 +64,7 @@ class Flt_ram : public Flt_st
 public:
   Flt_ram();
   ~Flt_ram();
-  #if PLATFORM_ID == 6
-    void get_t()            {};
-    void get_Tb_hdwe()      {};
-    void get_vb_hdwe()      {};
-    void get_ib_amp_hdwe()  {};
-    void get_ib_noa_hdwe()  {};
-    void get_Tb()           {};
-    void get_vb()           {};
-    void get_ib()           {};
-    void get_soc()          {};
-    void get_soc_ekf()      {};
-    void get_voc()          {};
-    void get_voc_stat()     {};
-    void get_e_wrap_filt()  {};
-    void get_fltw()         {};
-    void get_falw()         {};
-  #elif PLATFORM_ID == PLATFORM_ARGON
+  #if PLATFORM_ID == PLATFORM_ARGON
     void get_t()            { unsigned long value;  rP_->get(t_eeram_.a16, value);            t = value; };
     void get_Tb_hdwe()      { int16_t value;        rP_->get(Tb_hdwe_eeram_.a16, value);      Tb_hdwe = value; };
     void get_vb_hdwe()      { int16_t value;        rP_->get(vb_hdwe_eeram_.a16, value);      vb_hdwe = value; };
@@ -104,21 +88,6 @@ public:
   void put_nominal();
 
   #if PLATFORM_ID == 6
-    void put_t()            {};
-    void put_Tb_hdwe()      {};
-    void put_vb_hdwe()      {};
-    void put_ib_amp_hdwe()  {};
-    void put_ib_noa_hdwe()  {};
-    void put_Tb()           {};
-    void put_vb()           {};
-    void put_ib()           {};
-    void put_soc()          {};
-    void put_soc_ekf()      {};
-    void put_voc()          {};
-    void put_voc_stat()     {};
-    void put_e_wrap_filt()  {};
-    void put_fltw()         {};
-    void put_falw()         {};
     void put_t(const unsigned long value)         { t = value; };
     void put_Tb_hdwe(const int16_t value)         { Tb_hdwe = value; };
     void put_vb_hdwe(const int16_t value)         { vb_hdwe = value; };

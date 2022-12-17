@@ -193,27 +193,27 @@ Flt_ram::Flt_ram()
 Flt_ram::~Flt_ram(){}
 
 // Load all
-void Flt_ram::get()
-{
-  get_t();
-  get_Tb_hdwe();
-  get_vb_hdwe();
-  get_ib_amp_hdwe();
-  get_ib_noa_hdwe();
-  get_Tb();
-  get_vb();
-  get_ib();
-  get_soc();
-  get_soc_ekf();
-  get_voc();
-  get_voc_stat();
-  get_e_wrap_filt();
-  get_fltw();
-  get_falw();
-}
+#if PLATFORM_ID == PLATFORM_ARGON
+  void Flt_ram::get()
+  {
+    get_t();
+    get_Tb_hdwe();
+    get_vb_hdwe();
+    get_ib_amp_hdwe();
+    get_ib_noa_hdwe();
+    get_Tb();
+    get_vb();
+    get_ib();
+    get_soc();
+    get_soc_ekf();
+    get_voc();
+    get_voc_stat();
+    get_e_wrap_filt();
+    get_fltw();
+    get_falw();
+  }
 
 // Initialize each structure
-#if PLATFORM_ID == PLATFORM_ARGON
   void Flt_ram::instantiate(SerialRAM *ram, uint16_t *next)
   {
     t_eeram_.a16 = *next; *next += sizeof(t);
@@ -240,21 +240,23 @@ void Flt_ram::get()
 void Flt_ram::put(const Flt_st value)
 {
   copy_from(value);
-  put_t();
-  put_Tb_hdwe();
-  put_vb_hdwe();
-  put_ib_amp_hdwe();
-  put_ib_noa_hdwe();
-  put_Tb();
-  put_vb();
-  put_ib();
-  put_soc();
-  put_soc_ekf();
-  put_voc();
-  put_voc_stat();
-  put_e_wrap_filt();
-  put_fltw();
-  put_falw();
+  #if PLATFORM_ID == PLATFORM_ARGON
+    put_t();
+    put_Tb_hdwe();
+    put_vb_hdwe();
+    put_ib_amp_hdwe();
+    put_ib_noa_hdwe();
+    put_Tb();
+    put_vb();
+    put_ib();
+    put_soc();
+    put_soc_ekf();
+    put_voc();
+    put_voc_stat();
+    put_e_wrap_filt();
+    put_fltw();
+    put_falw();
+  #endif
 }
 
 // nominalize
@@ -263,19 +265,21 @@ void Flt_ram::put_nominal()
   Flt_st source;
   source.nominal();
   copy_from(source);
-  put_t();
-  put_Tb_hdwe();
-  put_vb_hdwe();
-  put_ib_amp_hdwe();
-  put_ib_noa_hdwe();
-  put_Tb();
-  put_vb();
-  put_ib();
-  put_soc();
-  put_soc_ekf();
-  put_voc();
-  put_voc_stat();
-  put_e_wrap_filt();
-  put_fltw();
-  put_falw();
+  #if PLATFORM_ID == PLATFORM_ARGON
+    put_t();
+    put_Tb_hdwe();
+    put_vb_hdwe();
+    put_ib_amp_hdwe();
+    put_ib_noa_hdwe();
+    put_Tb();
+    put_vb();
+    put_ib();
+    put_soc();
+    put_soc_ekf();
+    put_voc();
+    put_voc_stat();
+    put_e_wrap_filt();
+    put_fltw();
+    put_falw();
+  #endif
 }

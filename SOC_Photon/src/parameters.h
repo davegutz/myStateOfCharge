@@ -100,41 +100,7 @@ public:
     boolean mod_tb() { return ( 0x1 & modeling ); }     // Using Sim as source of tb
     boolean mod_vb() { return ( 0x2 & modeling ); }     // Using Sim as source of vb
     // get
-    #if PLATFORM_ID == 6  // Photon
-        void get_amp() { }
-        void get_cutback_gain_sclr() { }
-        void get_debug() { }
-        void get_delta_q() { }
-        void get_delta_q_model() { }
-        void get_freq() { }
-        void get_hys_scale() { }
-        void get_Ib_bias_all() { }
-        void get_Ib_bias_amp() { }
-        void get_Ib_bias_noa() { }
-        void get_ib_scale_amp() { }
-        void get_ib_scale_noa() { }
-        void get_ib_select() { }
-        void get_iflt() { }
-        void get_ihis() { }
-        void get_inj_bias() { }
-        void get_isum() { }
-        void get_modeling() { }
-        void get_mon_chm() { }
-        void get_nP() { }
-        void get_nS() { }
-        void get_preserving() { }
-        void get_shunt_gain_sclr() { }
-        void get_sim_chm() { }
-        void get_s_cap_model() { }
-        void get_Tb_bias_hdwe() { }
-        void get_type() { }
-        void get_t_last() { }
-        void get_t_last_model() { }
-        void get_Vb_bias_hdwe() { }
-        void get_Vb_scale() { }
-        void get_fault() { }
-        void get_history() { }
-    #elif PLATFORM_ID == PLATFORM_ARGON
+    #if PLATFORM_ID == PLATFORM_ARGON
         void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp = value; }
         void get_cutback_gain_sclr() { float value; rP_->get(cutback_gain_sclr_eeram_.a16, value); cutback_gain_sclr = value; }
         void get_debug() { int value; rP_->get(debug_eeram_.a16, value); debug = value; }
