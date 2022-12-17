@@ -24,6 +24,8 @@
 */
 
 #include "debug.h"
+#include "parameters.h"
+extern SavedPars sp;              // Various parameters to be static at system level
 
 // sp.debug==-4  // General Arduino plot
 void debug_m4(BatteryMonitor *Mon, Sensors *Sen)

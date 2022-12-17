@@ -58,12 +58,14 @@
 #include "mySummary.h"
 #include "myCloud.h"
 #include "debug.h"
+#include "parameters.h"
 
 // // For Photon
 #ifndef PLATFORM_ARGON
   #define PLATFORM_ARGON  12
   #define PLATFORM_ID     6
 #endif
+#define PLATFORM_ID     6
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
 // #include <Arduino.h>      // Used instead of Print.h - breaks Serial
@@ -81,8 +83,12 @@ extern CommandPars cp;            // Various parameters to be common at system l
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
 
+extern Flt_st saved_faults[NFLT];  // *****************temp
+
 #if PLATFORM_ID == 6 // Photon
-  retained SavedPars sp = SavedPars();  // Various parameters to be common at system level
+  retained Flt_st saved_hist[NHIS];    // For displaying faults
+  retained Flt_st saved_faults[NFLT];  // For displaying faults
+  retained SavedPars sp = SavedPars(saved_hist, NHIS, saved_faults, NFLT);  // Various parameters to be common at system level
 #elif PLATFORM_ID == PLATFORM_ARGON
   SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
 #endif
@@ -130,6 +136,8 @@ void setup()
     bleSerial.setup();
     bleSerial.advertise();
     Serial.printf("BLE mac=>%s\n", BLE.address().toString().c_str());
+  #else
+    sp.load_all();
   #endif
 
   // Peripherals
@@ -170,7 +178,7 @@ void setup()
   Serial.printf("done CLOUD\n");
 
   // Clean boot logic.  This occurs only when doing a structural rebuild clean make on initial flash, because
-  // the SRAM is not explicitly initialized.   This is by design, as SRAM must be remembered between boots.
+  // the SRAM is not explicitly initialized.   This is by design, as SRAM must be remembered between boots
 #ifdef BOOT_CLEAN
   sp.nominal();
   Serial.printf("Force nominal rp %s\n", cp.buffer);
@@ -179,10 +187,12 @@ void setup()
   Serial.printf("Check corruption\n");
   if ( sp.is_corrupt() ) 
   {
-    sp.nominal();
+    sp.reset_pars();
     Serial.printf("Fixed corruption\n");
     sp.pretty_print(true);
   }
+  for (int i=0; i<NFLT; i++) saved_faults[i].print("root***in setup after corruption check");
+  sp.print_fault_array();
 
   // Determine millis() at turn of Time.now
   long time_begin = Time.now();
@@ -222,7 +232,7 @@ void setup()
       if ( answer=='Y' )
       {
         Serial.printf(" Y\n"); Serial1.printf(" Y\n");
-        sp.nominal();
+        sp.reset_pars();
         sp.pretty_print( true );
       }
       else

@@ -171,6 +171,20 @@ void Flt_st::print(const String code)
     this->falw);
 }
 
+// Regular put
+void Flt_st::put(Flt_st source)
+{
+  copy_from(source);
+}
+
+// nominalize
+void Flt_st::put_nominal()
+{
+  Flt_st source;
+  source.nominal();
+  copy_from(source);
+}
+
 // Class fault ram to interface Flt_st to ram
 Flt_ram::Flt_ram()
 {

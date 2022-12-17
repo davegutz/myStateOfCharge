@@ -44,12 +44,12 @@ boolean is_val_corrupt(T val, T minval, T maxval)
 // tweaks.  Default values below are important:  they prevent junk
 // behavior on initial build. Don't put anything in here that you can't live with normal running
 // because could get set by testing and forgotten.  Not reset by hard reset
-// ********CAUTION:  any special includes or logic in here breaks retained function
-// Coulomb Counter Class
+// SavedPars Class
 class SavedPars
 {
 public:
     SavedPars();
+    SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt);
     SavedPars(SerialRAM *ram);
     ~SavedPars();
     // operators
@@ -90,14 +90,17 @@ public:
 
     // functions
     boolean is_corrupt();
-    void large_reset() { nominal(); }
+    void large_reset() { reset_pars(); reset_flt(); reset_his(); }
+    void reset_flt();
+    void reset_his();
+    void reset_pars();
     boolean mod_any() { return ( 0<modeling ); }        // Using any
     boolean mod_ib() { return ( 0x4 & modeling ); }     // Using Sim as source of ib
     boolean mod_none() { return ( 0==modeling ); }      // Using nothing
     boolean mod_tb() { return ( 0x1 & modeling ); }     // Using Sim as source of tb
     boolean mod_vb() { return ( 0x2 & modeling ); }     // Using Sim as source of vb
     // get
-    #if (PLATFORM_ID==6)  // Photon
+    #if PLATFORM_ID == 6  // Photon
         void get_amp() { }
         void get_cutback_gain_sclr() { }
         void get_debug() { }
@@ -285,9 +288,11 @@ protected:
         address16b Vb_bias_hdwe_eeram_;
         address16b Vb_scale_eeram_;
         SerialRAM *rP_;
-    #else
         Flt_ram fault_[NFLT];
         Flt_ram history_[NHIS];
+    #else
+        Flt_st *fault_;
+        Flt_st *history_;
     #endif
         uint16_t next_;
         uint16_t nflt_;         // Length of Flt_ram array for faults

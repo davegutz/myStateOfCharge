@@ -145,8 +145,17 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 sp.print_fault_header();
                 break;
 
-              case ( 'R' ):  // bR: Fault buffer reset
-                sp.large_reset();
+              case ( 'h' ):  // bh: History buffer reset
+                sp.reset_flt();
+                break;
+
+              case ( 'r' ):  // br: Fault buffer reset
+                sp.reset_flt();
+                break;
+
+              case ( 'R' ):  // bR: Reset all buffers
+                sp.reset_flt();
+                sp.reset_his();
                 break;
 
               default:
@@ -604,7 +613,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'R' ):  // HR: History reset
-                sp.large_reset();
                 large_reset_summary(mySum, sp.isum, NSUM);
                 break;
 
@@ -770,7 +778,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'S' ):  // RS: reset saved pars
-                sp.nominal();
+                sp.reset_pars();
                 sp.pretty_print(true);
                 break;
 
@@ -1166,7 +1174,9 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("\nb<?>   Manage fault buffer\n");
   Serial.printf("  bd= "); Serial.printf("dump fault buffer\n");
-  Serial.printf("  bR= "); Serial.printf("reset fault buffer\n");
+  Serial.printf("  bh= "); Serial.printf("reset history buffer\n");
+  Serial.printf("  br= "); Serial.printf("reset fault buffer\n");
+  Serial.printf("  bR= "); Serial.printf("reset all buffers\n");
 
   Serial.printf("\nB<?> Battery e.g.:\n");
   Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='LI' [%d]\n", sp.mon_chm, MON_CHEM); 

@@ -31,6 +31,7 @@
 extern CommandPars cp;            // Various parameters shared at system level
 extern PublishPars pp;            // For publishing
 extern SavedPars sp;              // Various parameters to be static at system level
+extern Flt_st saved_faults[NFLT];  // *****************temp
 
 // Print consolidation
 void print_all_header(void)
@@ -488,6 +489,9 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
       Flt_st fault_snap;
       fault_snap.assign(Time.now(), Mon, Sen);
       sp.put_fault(fault_snap, sp.iflt);
+  Serial.printf("added fault\n");
+  sp.print_fault_array();
+      for (int i=0; i<NFLT; i++) saved_faults[i].print("root***in sense_synth_select");
     }
     else if ( fails_repeated < 4 )
     {

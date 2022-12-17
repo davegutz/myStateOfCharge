@@ -25,11 +25,20 @@
 #include "Battery.h"
 #include "parameters.h"
 
+extern Flt_st saved_faults[NFLT];  // *****************temp
+
 // class SavedPars 
 SavedPars::SavedPars()
 {
   nflt_ = int( NFLT ); 
   nhis_ = int( NHIS ); 
+}
+SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
+{
+    nhis_ = nhis;
+    nflt_ = nflt;
+    history_ = hist;
+    fault_ = faults;
 }
 SavedPars::SavedPars(SerialRAM *ram)
 {
@@ -90,7 +99,7 @@ SavedPars::~SavedPars() {}
 // battery.  Small compilation changes can change where in this memory the program points, too
 boolean SavedPars::is_corrupt()
 {
-    return (
+    boolean corruption = 
         is_val_corrupt(amp, float(-1e6), float(1e6)) ||
         is_val_corrupt(cutback_gain_sclr, float(-1000.), float(1000.)) ||
         is_val_corrupt(debug, -100, 100) ||
@@ -121,7 +130,13 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(t_last, float(-10.), float(70.)) ||
         is_val_corrupt(t_last_model, float(-10.), float(70.)) ||
         is_val_corrupt(Vb_bias_hdwe, float(-10.), float(70.)) ||
-        is_val_corrupt(Vb_scale, float(-1e6), float(1e6)) );
+        is_val_corrupt(Vb_scale, float(-1e6), float(1e6)) ;
+        if ( corruption )
+        {
+            Serial.printf("corrupt*********\n");
+            pretty_print(true);
+        }
+        return corruption;
 }
 
 // Assign all save EERAM to RAM
@@ -157,59 +172,20 @@ void SavedPars::load_all()
     get_t_last_model();
     get_Vb_bias_hdwe();
     get_Vb_scale();
+      for (int i=0; i<NFLT; i++) saved_faults[i].print("root***in load_all_before get");
     for ( int i=0; i<nflt_; i++ )
     {
+        fault_[i].print("in load_all before get");
         fault_[i].get();
+        fault_[i].print("in load_all after get");
     }
+      for (int i=0; i<NFLT; i++) saved_faults[i].print("root***in load_all_after get");
     for ( int i=0; i<nhis_; i++ )
     {
         history_[i].get();
     }
 }
 
-// Nominalize
-void SavedPars::nominal()
-{
-    put_amp(float(0));
-    put_cutback_gain_sclr(float(1.));
-    put_debug(int(0));
-    put_delta_q(double(0.));
-    put_delta_q_model(double(0.));
-    put_freq(float(0));
-    put_hys_scale(HYS_SCALE);
-    put_Ib_bias_all(float(CURR_BIAS_ALL));
-    put_Ib_bias_amp(float(CURR_BIAS_AMP));
-    put_Ib_bias_noa(float(CURR_BIAS_NOA));
-    put_ib_scale_amp(float(CURR_SCALE_AMP));
-    put_ib_scale_noa(float(CURR_SCALE_NOA));
-    put_ib_select(int8_t(FAKE_FAULTS));
-    put_iflt(int(-1));
-    put_ihis(int(-1));
-    put_inj_bias(float(0.));
-    put_isum(int(-1));
-    put_modeling(uint8_t(MODELING));
-    put_mon_chm(uint8_t(MON_CHEM));
-    put_nP(float(NP));
-    put_nS(float(NS));
-    put_preserving(uint8_t(0));
-    put_shunt_gain_sclr(float(1.));
-    put_sim_chm(uint8_t(SIM_CHEM));
-    put_s_cap_model(float(1.));
-    put_Tb_bias_hdwe(float(TEMP_BIAS));
-    put_type(uint8_t(0));    
-    put_t_last(float(RATED_TEMP));    
-    put_t_last_model(float(RATED_TEMP));  
-    put_Vb_bias_hdwe(float(VOLT_BIAS));
-    put_Vb_scale(float(VB_SCALE));
-    for ( int i=0; i<nflt_; i++ )
-    {
-        fault_[i].put_nominal();
-    }
-    for ( int i=0; i<nhis_; i++ )
-    {
-        history_[i].put_nominal();
-    }
- }
 
 // Number of differences between nominal EERAM and actual (don't count integator memories because they always change)
 int SavedPars::num_diffs()
@@ -350,3 +326,53 @@ Flt_st SavedPars::put_history(Flt_st input, const uint8_t i)
     history_[i].put(input);
     return bounced_sum;
 }
+
+// Reset arrays
+void SavedPars::reset_flt()
+{
+    for ( int i=0; i<nflt_; i++ )
+    {
+        fault_[i].put_nominal();
+    }
+ }
+void SavedPars::reset_his()
+{
+    for ( int i=0; i<nhis_; i++ )
+    {
+        history_[i].put_nominal();
+    }
+ }
+void SavedPars::reset_pars()
+{
+    put_amp(float(0));
+    put_cutback_gain_sclr(float(1.));
+    put_debug(int(0));
+    put_delta_q(double(0.));
+    put_delta_q_model(double(0.));
+    put_freq(float(0));
+    put_hys_scale(HYS_SCALE);
+    put_Ib_bias_all(float(CURR_BIAS_ALL));
+    put_Ib_bias_amp(float(CURR_BIAS_AMP));
+    put_Ib_bias_noa(float(CURR_BIAS_NOA));
+    put_ib_scale_amp(float(CURR_SCALE_AMP));
+    put_ib_scale_noa(float(CURR_SCALE_NOA));
+    put_ib_select(int8_t(FAKE_FAULTS));
+    put_iflt(int(-1));
+    put_ihis(int(-1));
+    put_inj_bias(float(0.));
+    put_isum(int(-1));
+    put_modeling(uint8_t(MODELING));
+    put_mon_chm(uint8_t(MON_CHEM));
+    put_nP(float(NP));
+    put_nS(float(NS));
+    put_preserving(uint8_t(0));
+    put_shunt_gain_sclr(float(1.));
+    put_sim_chm(uint8_t(SIM_CHEM));
+    put_s_cap_model(float(1.));
+    put_Tb_bias_hdwe(float(TEMP_BIAS));
+    put_type(uint8_t(0));    
+    put_t_last(float(RATED_TEMP));    
+    put_t_last_model(float(RATED_TEMP));  
+    put_Vb_bias_hdwe(float(VOLT_BIAS));
+    put_Vb_scale(float(VB_SCALE));
+ }
