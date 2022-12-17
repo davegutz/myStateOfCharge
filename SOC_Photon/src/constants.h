@@ -63,13 +63,11 @@
 #define F_W_T                 0.05      // Temperature filter wn, r/s (0.05)   
 #define F_Z_T                 0.80      // Temperature filter zeta (0.80)
 #if PLATFORM_ID == 6  // Photon
-    #define NSUM              180       // Number of saved SRAM summaries.   If too large, will get flashing red or compile error `.data' will not fit in region `APP_FLASH' (180)
+    #define NSUM              170       // Number of saved SRAM summaries.   If too large, will get flashing red or compile error `.data' will not fit in region `APP_FLASH' (170)
 #elif PLATFORM_ID == PLATFORM_ARGON
     #define NSUM              2400      // Number of saved SRAM summaries.   If too large, will get compile error 'Insufficient room for .data and .bss sections!' or flashing red (2400)
 #endif
 #define NFLT                  7         // Number of saved SRAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)
-#define NHIS                  53        // Number of saved SRAM fault data slices.  If too large, will get compile error BACKUPSRAM (53 from Argon compile to leftover EERAM)
-#define NSLT                  7         // Number of saved SRAM history data slices.  If too large, will get compile error BACKUPSRAM (7)
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)
 #define HDB_VBATT             0.05      // Half deadband to filter Vb, V (0.05)
 #define T_SAT                 10        // Saturation time, sec (10, >=10 for no sat ib lo fault of -100 A)

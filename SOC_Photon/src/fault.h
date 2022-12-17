@@ -78,7 +78,11 @@ public:
   void get_fltw()         { uint16_t value;       rP_->get(fltw_eeram_.a16, value);         fltw = value; };
   void get_falw()         { uint16_t value;       rP_->get(falw_eeram_.a16, value);         falw = value; };
   void get();
-  void instantiate(SerialRAM *ram, uint16_t *next);
+  #if PLATFORM_ID == 6
+    void instantiate(uint16_t *next);
+  #elif PLATFORM_ID == PLATFORM_ARGON
+    void instantiate(SerialRAM *ram, uint16_t *next);
+  #endif
   void put(const Flt_st input);
   void put_nominal();
   void put_t()            { rP_->put(t_eeram_.a16, t); };

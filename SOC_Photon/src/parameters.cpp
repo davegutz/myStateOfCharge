@@ -28,13 +28,27 @@
 #include "parameters.h"
 
 // class SavedPars 
-SavedPars::SavedPars() {}
+SavedPars::SavedPars()
+{
+    nflt_ = int( NFLT ); 
+    fault_ = new Flt_ram[nflt_];
+    for ( int i=0; i<nflt_; i++ )
+    {
+        fault_[i].instantiate(&next_);
+    }
+    nhis_ = int( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
+    history_ = new Flt_ram[nhis_];
+    for ( int i=0; i<nhis_; i++ )
+    {
+        history_[i].instantiate(&next_);
+    }
+}
 SavedPars::SavedPars(SerialRAM *ram)
 {
+    next_ = 0x000;
     #if PLATFORM_ID == PLATFORM_ARGON
         rP_ = ram;
         // Memory map
-        next_ = 0x000;
         amp_eeram_.a16 = next_; next_ += sizeof(amp);
         cutback_gain_sclr_eeram_.a16 = next_; next_ += sizeof(cutback_gain_sclr);
         debug_eeram_.a16 = next_; next_ += sizeof(debug);
