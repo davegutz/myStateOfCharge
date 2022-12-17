@@ -178,6 +178,7 @@ Flt_ram::Flt_ram()
 {
   Flt_st();
 }
+Flt_ram::~Flt_ram(){}
 
 // Load all
 void Flt_ram::get()

@@ -89,7 +89,6 @@ public:
     float Vb_scale;         // Calibrate Vb scale
 
     // functions
-    int assign_all();
     boolean is_corrupt();
     void large_reset() { nominal(); }
     boolean mod_any() { return ( 0<modeling ); }        // Using any
@@ -251,7 +250,6 @@ public:
     #endif
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
-    int read_all();
     boolean tweak_test() { return ( 0x8 & modeling ); } // Driving signal injection completely using software inj_bias 
 protected:
     #if PLATFORM_ID == PLATFORM_ARGON
