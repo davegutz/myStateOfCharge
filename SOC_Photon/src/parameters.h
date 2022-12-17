@@ -169,9 +169,9 @@ public:
         void get_fault(const uint8_t i) { fault_[i].get(); }
         void get_history(const uint8_t i) { history_[i].get(); }
         uint16_t next() { return next_; }
+        void load_all();
     #endif
     //
-    void load_all();
     void mem_print();
     uint16_t nflt() { return nflt_; }
     uint16_t nhis() { return nhis_; }

@@ -138,42 +138,43 @@ boolean SavedPars::is_corrupt()
 }
 
 // Assign all save EERAM to RAM
-void SavedPars::load_all()
-{
-    get_amp();
-    get_cutback_gain_sclr();
-    get_debug();
-    get_delta_q();
-    get_delta_q_model();
-    get_freq();
-    get_hys_scale();
-    get_Ib_bias_all();
-    get_Ib_bias_amp();
-    get_Ib_bias_noa();
-    get_ib_scale_amp();
-    get_ib_scale_noa();
-    get_ib_select();
-    get_iflt();
-    get_inj_bias();
-    get_isum();
-    get_modeling();
-    get_mon_chm();
-    get_nP();
-    get_nS();
-    get_preserving();
-    get_shunt_gain_sclr();
-    get_sim_chm();
-    get_s_cap_model();
-    get_Tb_bias_hdwe();
-    get_type();
-    get_t_last();
-    get_t_last_model();
-    get_Vb_bias_hdwe();
-    get_Vb_scale();
-    for ( int i=0; i<nflt_; i++ ) fault_[i].get();
-    for ( int i=0; i<nhis_; i++ ) history_[i].get();
-}
-
+#if PLATFORM_ID == PLATFORM_ARGON
+    void SavedPars::load_all()
+    {
+        get_amp();
+        get_cutback_gain_sclr();
+        get_debug();
+        get_delta_q();
+        get_delta_q_model();
+        get_freq();
+        get_hys_scale();
+        get_Ib_bias_all();
+        get_Ib_bias_amp();
+        get_Ib_bias_noa();
+        get_ib_scale_amp();
+        get_ib_scale_noa();
+        get_ib_select();
+        get_iflt();
+        get_inj_bias();
+        get_isum();
+        get_modeling();
+        get_mon_chm();
+        get_nP();
+        get_nS();
+        get_preserving();
+        get_shunt_gain_sclr();
+        get_sim_chm();
+        get_s_cap_model();
+        get_Tb_bias_hdwe();
+        get_type();
+        get_t_last();
+        get_t_last_model();
+        get_Vb_bias_hdwe();
+        get_Vb_scale();
+        for ( int i=0; i<nflt_; i++ ) fault_[i].get();
+        for ( int i=0; i<nhis_; i++ ) history_[i].get();
+    }
+#endif
 
 // Number of differences between nominal EERAM and actual (don't count integator memories because they always change)
 int SavedPars::num_diffs()

@@ -134,8 +134,6 @@ void setup()
     bleSerial.setup();
     bleSerial.advertise();
     Serial.printf("BLE mac=>%s\n", BLE.address().toString().c_str());
-  #else
-    sp.load_all();
   #endif
 
   // Peripherals
