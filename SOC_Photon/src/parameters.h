@@ -26,7 +26,7 @@
 
 #define t_float float
 
-#include "math.h"
+//#include "math.h"  // Needed for Photon?
 #include "local_config.h"
 #include "Battery.h"
 #include "hardware/SerialRAM.h"
@@ -73,7 +73,6 @@ public:
     int ihis;               // History location.   Begins at -1 because first action is to increment ihis
     float inj_bias;         // Constant bias, A
     int isum;               // Summary location.   Begins at -1 because first action is to increment isum
-    uint8_t modeling;       // Driving saturation calculation with model.  Bits specify which signals use model
     uint8_t mon_chm;        // Monitor battery chemistry type
     float nP;               // Number of parallel batteries in bank, e.g. '2P1S'
     float nS;               // Number of series batteries in bank, e.g. '2P1S'
@@ -83,7 +82,7 @@ public:
     uint8_t sim_chm;        // Simulation battery chemistry type
     float Tb_bias_hdwe;     // Bias on Tb sensor, deg C
     uint8_t type;           // Injected waveform type.   0=sine, 1=square, 2=triangle
-    float t_last;           // Updated value of battery temperature injection when sp.modeling and proper wire connections made, deg C
+    float t_last;           // Updated value of battery temperature injection when sp.modeling_ and proper wire connections made, deg C
     float t_last_model;     // Battery temperature past value for rate limit memory, deg C
     float Vb_bias_hdwe;     // Calibrate Vb, V
     float Vb_scale;         // Calibrate Vb scale
@@ -94,11 +93,22 @@ public:
     void reset_flt();
     void reset_his();
     void reset_pars();
-    boolean mod_any() { return ( 0<modeling ); }        // Using any
-    boolean mod_ib() { return ( 0x4 & modeling ); }     // Using Sim as source of ib
-    boolean mod_none() { return ( 0==modeling ); }      // Using nothing
-    boolean mod_tb() { return ( 0x1 & modeling ); }     // Using Sim as source of tb
-    boolean mod_vb() { return ( 0x2 & modeling ); }     // Using Sim as source of vb
+    uint8_t modeling() { return modeling_; }
+    void modeling(const uint8_t input, Sensors *Sen);
+    boolean mod_all_dscn() { return ( 111<modeling_ ); }       // Bare all
+    boolean mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); } // Modeing any
+    boolean mod_any_dscn() { return ( 15<modeling_ ); }        // Bare any
+    boolean mod_ib() { return ( 0x4 & modeling_ || mod_ib_all_dscn() ); }     // Using Sim as source of ib
+    boolean mod_ib_all_dscn() { return ( 191<modeling_ ); }        // Nothing connected to ib sensors in I2C on SDA/SCL
+    boolean mod_ib_amp_dscn() { return ( 0x64 & modeling_ ); }     // Nothing connected to amp ib sensors in I2C on SDA/SCL
+    boolean mod_ib_any_dscn() { return ( mod_ib_amp_dscn() || mod_ib_noa_dscn() ); }  // Nothing connected to ib sensors in I2C on SDA/SCL
+    boolean mod_ib_noa_dscn() { return ( 0x128 & modeling_ ); }    // Nothing connected to noa ib sensors in I2C on SDA/SCL
+    boolean mod_none() { return ( 0==modeling_ ); }                   // Using all
+    boolean mod_none_dscn() { return ( 16>modeling_ ); }       // Bare nothing
+    boolean mod_tb() { return ( 0x1 & modeling_ || mod_tb_dscn() ); }     // Using Sim as source of tb
+    boolean mod_tb_dscn() { return ( 0x16 & modeling_ ); }     // Nothing connected to one-wire Tb sensor on D6
+    boolean mod_vb() { return ( 0x2 & modeling_ || mod_vb_dscn() ); }     // Using Sim as source of vb
+    boolean mod_vb_dscn() { return ( 0x32 & modeling_ ); }     // Nothing connected to vb on A1
     // get
     #if PLATFORM_ID == PLATFORM_ARGON
         void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp = value; }
@@ -118,7 +128,7 @@ public:
         void get_ihis() { int value; rP_->get(ihis_eeram_.a16, value); ihis = value; }
         void get_inj_bias() { float value; rP_->get(inj_bias_eeram_.a16, value); inj_bias = value; }
         void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum = value; }
-        void get_modeling() { modeling = rP_->read(modeling_eeram_.a16); }
+        void get_modeling() { modeling_ = rP_->read(modeling_eeram_.a16); }
         void get_mon_chm() { mon_chm = rP_->read(mon_chm_eeram_.a16); }
         void get_nP() { float value; rP_->get(nP_eeram_.a16, value); nP = value; }
         void get_nS() { float value; rP_->get(nS_eeram_.a16, value); nS = value; }
@@ -168,7 +178,7 @@ public:
         void put_ihis(const int input) { ihis = input; }
         void put_inj_bias(const float input) { inj_bias = input; }
         void put_isum(const int input) { isum = input; }
-        void put_modeling(const uint8_t input) { modeling = input; }
+        void put_modeling(const uint8_t input) { modeling_ = input; }
         void put_mon_chm(const uint8_t input) { mon_chm = input; }
         void put_nP(const float input) { nP = input; }
         void put_nS(const float input) { nS = input; }
@@ -201,7 +211,7 @@ public:
         void put_ihis(const int input) { rP_->put(ihis_eeram_.a16, input); ihis = input; }
         void put_inj_bias(const float input) { rP_->put(inj_bias_eeram_.a16, input); inj_bias = input; }
         void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum = input; }
-        void put_modeling(const uint8_t input) { rP_->write(modeling_eeram_.a16, input); modeling = input; }
+        void put_modeling(const uint8_t input) { rP_->write(modeling_eeram_.a16, input); modeling_ = input; }
         void put_mon_chm(const uint8_t input) { rP_->write(mon_chm_eeram_.a16, input); mon_chm = input; }
         void put_nP(const float input) { rP_->put(nP_eeram_.a16, input); nP = input; }
         void put_nS(const float input) { rP_->put(nS_eeram_.a16, input); nS = input; }
@@ -219,8 +229,9 @@ public:
     #endif
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
-    boolean tweak_test() { return ( 0x8 & modeling ); } // Driving signal injection completely using software inj_bias 
+    boolean tweak_test() { return ( 0x8 & modeling_ ); } // Driving signal injection completely using software inj_bias 
 protected:
+    uint8_t modeling_;       // Driving saturation calculation with model.  Bits specify which signals use model
     #if PLATFORM_ID == PLATFORM_ARGON
         address16b amp_eeram_;
         address16b cutback_gain_sclr_eeram_;

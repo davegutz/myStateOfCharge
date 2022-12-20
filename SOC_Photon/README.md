@@ -412,12 +412,15 @@ Full regression suite:
 	# Initiate by running first line in first talk.  Those without second line self-terminate.  Still have to stop recording.
 	# Terminate by watching for reset of failure condition (or wait long enough) and running second line in second talk.
 # Move to pyCharm and run 'CompareRun' after proper comment/uncomment in 'data_file_old_txt' assignment
+# Running with a bare device, need to set the modeling dscn bits 16, 32, 64, and 128. (Add 240 to whatever Xm you normally run with)
+# The second lines below are to reset.   I recommend opening a second transmit window if using CoolTerm to have these ready to go.
 
-  ampHiFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;                  Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
+  ampHiFail:  Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;
+              Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
 		# Should detect and switch amp current failure.  Start looking at 'DOM 1' fig 3.  Fault record (frozen).  Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).
 
-  ampHiFailFf:    Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;
-				  Hs;Hs;Hs;Hs;Pf;Hd;Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
+  ampHiFailFf:  Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;
+				        Hs;Hs;Hs;Hs;Pf;Hd;Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
 		# Should detect but not switch amp current failure.  Run about 60s.  Start by looking at 'DOM 1' fig 3.  No fault record (keeps recording).   Verify that on Fig 3 the e_wrap goes through a threshold ~0.4 without tripping faults.   Will see 'diff' flashing on OLED.
 
   ampLoFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm-50;Dn0.0001;

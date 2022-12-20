@@ -49,7 +49,6 @@
 //
 // See README.md
 */
-
 #include "constants.h"
 
 // Dependent includes.   Easier to sp.debug code if remove unused include files
@@ -60,6 +59,7 @@
 #include "debug.h"
 #include "parameters.h"
 
+// This works when I'm using two platforms:   PHOTON = 6 and ARGON = 12
 #ifndef PLATFORM_ID
   #define PLATFORM_ID 12
 #endif
@@ -275,7 +275,7 @@ void loop()
   static boolean reset_publish = true;        // Dynamic reset
 
   // Sensor conversions
-  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins->pin_1_wire, ReadSensors); // Manage sensor data.  Sim is in here.
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins->pin_1_wire, ReadSensors, &sp.nP, &sp.nS); // Manage sensor data.  Sim is in here.
 
    // Mon, used to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor(&sp.delta_q, &sp.t_last, &sp.nP, &sp.nS, &sp.mon_chm, &sp.hys_scale);
@@ -297,9 +297,9 @@ void loop()
   elapsed = ReadSensors->now() - start;
   control = ControlSync->update(millis(), reset);             //  now || reset
   display_to_user = DisplayUserSync->update(millis(), reset); //  now || reset
-  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !sp.modeling;
+  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !sp.modeling();
   if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
-  summarizing = Summarize->update(millis(), false); // now || boot_summ && !sp.modeling
+  summarizing = Summarize->update(millis(), false); // now || boot_summ && !sp.modeling()
   summarizing = summarizing || boot_summ;
 
   #if PLATFORM_ID == PLATFORM_ARGON
@@ -361,7 +361,7 @@ void loop()
     Mon->regauge(Sen->Tb_filt);
 
     // Empty battery
-    if ( sp.modeling && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
+    if ( sp.modeling() && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
 
     // Debug for read
     if ( sp.debug==12 ) debug_12(Mon, Sen);  // EKF

@@ -1,4 +1,3 @@
-//
 // MIT License
 //
 // Copyright (C) 2021 - Dave Gutz
@@ -32,7 +31,7 @@ class Sensors;
 // Battery chemistry
 struct Chemistry
 {
-  uint8_t *rp_mod_code;  // Chemistry code integer
+  uint8_t *sp_mod_code;  // Chemistry code integer
   float dqdt;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
   float low_voc;    // Voltage threshold for BMS to turn off battery, V
   float low_t;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C 
@@ -79,13 +78,13 @@ struct Chemistry
   Chemistry();
   Chemistry(const String mod_str)
   {
-    rp_mod_code = new uint8_t(-1);
+    sp_mod_code = new uint8_t(-1);
     assign_all_mod(mod_str);
   }
   Chemistry(uint8_t *mod_code)
   {
-    rp_mod_code = mod_code;
-    String mod_str = decode(*rp_mod_code);
+    sp_mod_code = mod_code;
+    String mod_str = decode(*sp_mod_code);
     assign_all_mod(mod_str);
   }
 };
@@ -95,8 +94,8 @@ class Coulombs
 {
 public:
   Coulombs();
-  Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rated, const double t_rated, const double t_rlim,
-    uint8_t *rp_mod_code, const double coul_eff);
+  Coulombs(double *sp_delta_q, float *sp_t_last, const double q_cap_rated, const double t_rated, const double t_rlim,
+    uint8_t *sp_mod_code, const double coul_eff);
   ~Coulombs();
   // operators
   // functions
@@ -112,8 +111,8 @@ public:
   void coul_eff(const double coul_eff) { coul_eff_ = coul_eff; };
   virtual double count_coulombs(const double dt, const boolean reset, const float temp_c, const double charge_curr,
     const boolean sat, const double delta_q_ekf);
-  double delta_q() { return(*rp_delta_q_); };
-  uint8_t mod_code() { return (*chem_.rp_mod_code); };
+  double delta_q() { return(*sp_delta_q_); };
+  uint8_t mod_code() { return (*chem_.sp_mod_code); };
   virtual void pretty_print();
   double q(){ return (q_); };
   double q_cap_rated(){ return (q_cap_rated_); };
@@ -122,12 +121,12 @@ public:
   double soc() { return(soc_); };
   double soc_min() { return(soc_min_); };
   boolean sat() { return(sat_); };
-  double t_last() { return(*rp_t_last_); };
+  double t_last() { return(*sp_t_last_); };
   virtual double vsat(void) = 0;
   virtual double Vsat(void) = 0;
 protected:
-  double *rp_delta_q_;// Charge since saturated, C
-  float *rp_t_last_;  // Last battery temperature for rate limit memory, deg C
+  double *sp_delta_q_;// Charge since saturated, C
+  float *sp_t_last_;  // Last battery temperature for rate limit memory, deg C
   double q_cap_rated_;// Rated capacity at t_rated_, saved for future scaling, C
   double q_cap_rated_scaled_;// Applied rated capacity at t_rated_, after scaling, C
   double q_capacity_; // Saturation charge at temperature, C

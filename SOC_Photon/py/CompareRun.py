@@ -61,11 +61,11 @@ if __name__ == '__main__':
         date_ = datetime.now().strftime("%y%m%d")
 
         # Transient  inputs
-        t_Ib_fail = None
+        t_ib_fail = None
         init_time_in = None
         use_ib_mon_in = False
         scale_in = None
-        use_Vb_raw = False
+        use_vb_raw = False
         unit_key = None
         data_file_old_txt = None
         scale_r_ss_in = 1.
@@ -90,7 +90,7 @@ if __name__ == '__main__':
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
         # Regression suite
-        # data_file_old_txt = 'ampHiFail v20221028.txt'
+        data_file_old_txt = 'ampHiFail v20221220.txt'
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
         # data_file_old_txt = 'ampLoFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'
@@ -114,12 +114,12 @@ if __name__ == '__main__':
         # data_file_old_txt = 'dwell noise Ca.5 v20221028.txt'  # ; dTb = [[0., 18000.],  [0, 8.]]
         # data_file_old_txt = 'dwell Ca.5 v20221028.txt'  # ; time_end_in=0.5  # ; dTb = [[0., 18000.],  [0, 8.]]
         #
-        data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
+        # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
         # data_file_old_txt = 'vb_mess.txt'; unit_key = 'pro1a_2022';
         # data_file_old_txt = 'fail 20221124.txt';  plot_overall_in=False;  # ; long_term_in=True;
         # data_file_old_txt = 'init Ca1 v20220926.txt'
-        # data_file_old_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
-        # data_file_old_txt = 'real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
+        # data_file_old_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
+        # data_file_old_txt = 'real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
         # data_file_old_txt = 'real world Xp20 30C 20220917.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -11110
         # data_file_old_txt = 'gorilla v20220917a.txt'
         # data_file_old_txt = 'EKF_Track Dr2000 fault v20220917.txt'
@@ -141,8 +141,8 @@ if __name__ == '__main__':
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
                                            skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp)
-        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'Vb', 'Ib', 'Ib_charge', 'ioc', 'voc_soc',
-                'Vsat', 'dV_dyn', 'Voc_stat', 'Voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
+        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib', 'ib_charge', 'ioc', 'voc_soc',
+                'vsat', 'dV_dyn', 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
                                     encoding=None).view(np.recarray)
 
@@ -153,8 +153,8 @@ if __name__ == '__main__':
         cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
                     'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_diff', 'ib_diff_f',
                     'voc_soc', 'e_w', 'e_w_f',
-                    'ib_sel', 'Ib_h', 'Ib_s', 'mib', 'Ib',
-                    'vb_sel', 'Vb_h', 'Vb_s', 'mvb', 'Vb',
+                    'ib_sel_stat', 'ib_h', 'ib_s', 'mib', 'ib',
+                    'vb_sel', 'vb_h', 'vb_s', 'mvb', 'vb',
                     'Tb_h', 'Tb_s', 'mtb', 'Tb_f',
                     'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel',
                     'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr', 'preserving')
@@ -193,7 +193,7 @@ if __name__ == '__main__':
         temp_flt_file_clean = write_clean_file(data_file_old_txt, type_='_flt', title_key='fltb', unit_key='unit_f',
                                                skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp,
                                                comment_str='---')
-        cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'Voc_stat',
+        cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
                   'e_w_f', 'fltw', 'falw')
         if temp_flt_file_clean:
             f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
@@ -220,8 +220,8 @@ if __name__ == '__main__':
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
-                                                             sres=1.0, t_Ib_fail=t_Ib_fail, use_ib_mon=use_ib_mon_in,
-                                                             scale_in=scale_in, use_Vb_raw=use_Vb_raw,
+                                                             sres=1.0, t_ib_fail=t_ib_fail, use_ib_mon=use_ib_mon_in,
+                                                             scale_in=scale_in, use_vb_raw=use_vb_raw,
                                                              scale_r_ss=scale_r_ss_in, s_hys_sim=scale_hys_sim_in,
                                                              s_hys_mon=scale_hys_mon_in, dvoc_sim=dvoc_sim_in,
                                                              dvoc_mon=dvoc_mon_in, Bmon=Bmon_in, Bsim=Bsim_in,

@@ -80,8 +80,8 @@ void print_serial_header(void)
 {
   if ( ( sp.debug==1 || sp.debug==2 || sp.debug==3 || sp.debug==4 ) )
   {
-    Serial.printf ("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
-    Serial1.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc, voc_soc,     Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
+    Serial.printf ("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dV_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
+    Serial1.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dV_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
   }
 }
 void print_serial_sim_header(void)
@@ -93,7 +93,7 @@ void print_signal_sel_header(void)
 {
   if ( sp.debug==2 || sp.debug==4 ) // print_signal_sel_header
     Serial.printf("unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,");
-    Serial.printf("    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f, ");
+    Serial.printf("    voc_soc,e_w,e_w_f,  ib_sel_stat,ib_h,ib_s,mib,ib, vb_sel,vb_h,vb_s,mvb,vb,  Tb_h,Tb_s,mtb,Tb_f, ");
     Serial.printf("  fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,\n");
           // -----, cTime, reset, sp.ib_select,
           //                                     cc_diff_,
@@ -119,9 +119,9 @@ void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 
   sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %d,  %d, %4.1f,%6.3f,%10.3f,%10.3f,%10.3f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
-    sp.mon_chm, pubList->sat, sp.ib_select, sp.modeling, Mon->bms_off(),
-    Mon->Tb(), Mon->Vb(), Mon->Ib(), Mon->Ib_charge(), Mon->ioc(), Mon->voc_soc(), 
-    Mon->Vsat(), Mon->dV_dyn(), Mon->Voc_stat(), Mon->Hx(),
+    sp.mon_chm, pubList->sat, sp.ib_select, sp.modeling(), Mon->bms_off(),
+    Mon->Tb(), Mon->vb(), Mon->ib(), Mon->ib_charge(), Mon->ioc(), Mon->voc_soc(), 
+    Mon->vsat(), Mon->dV_dyn(), Mon->voc_stat(), Mon->Hx(),
     Mon->y_ekf(),
     Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(),
     '\0');
@@ -341,7 +341,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   disp_2 = cp.buffer;
   if ( frame==2 )
   {
-    if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() && !sp.mod_ib() )
+    if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() && !sp.mod_ib() )
       disp_2 = "*fail";
     else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
       disp_2 = " conn ";
@@ -352,7 +352,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   }
   else if ( frame==3 )
   {
-    if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() && !sp.mod_ib() )
+    if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() && !sp.mod_ib() )
       disp_2 = "*fail";
     else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
       disp_2 = " conn ";
@@ -413,7 +413,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
 }
 
 // Read sensors, model signals, select between them.
-// Sim used for built-in testing (sp.modeling = 7 and jumper wire).
+// Sim used for any missing signals (Tb, Vb, Ib)
 //    Needed here in this location to have available a value for
 //    Sen->Tb_filt when called.   Recalculates Sen->Ib accounting for
 //    saturation.  Sen->Ib is a feedback (used-before-calculated).

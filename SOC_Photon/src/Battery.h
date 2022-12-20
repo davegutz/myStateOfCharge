@@ -160,11 +160,11 @@ class Hysteresis
 {
 public:
   Hysteresis();
-  Hysteresis(const double cap, Chemistry chem, float *rp_hys_scale);
+  Hysteresis(const double cap, Chemistry chem, float *sp_hys_scale);
   ~Hysteresis();
   // operators
   // functions
-  void apply_scale(const float sclr) { *rp_hys_scale_ = max(sclr, 0.); };
+  void apply_scale(const float sclr) { *sp_hys_scale_ = max(sclr, 0.); };
   double calculate(const double ib, const double soc);
   float dv_max(const float soc) { return hys_Tx_->interp(soc); };
   float dv_min(const float soc) { return hys_Tn_->interp(soc); };
@@ -175,7 +175,7 @@ public:
   double ioc() { return ioc_; };
   double dv_hys() { return dv_hys_; };
   void dv_hys(const float st) { dv_hys_ = max(min(st, dv_max(soc_)), dv_min(soc_)); };
-  float scale() { return *rp_hys_scale_; };
+  float scale() { return *sp_hys_scale_; };
 protected:
   boolean disabled_;    // Hysteresis disabled by low scale input < 1e-5, T=disabled
   double cap_;          // Capacitance, Farads
@@ -189,7 +189,7 @@ protected:
   TableInterp2D *hys_T_;// dv-soc 2-D table, V
   TableInterp1D *hys_Tx_;// soc 1-D table, V_max
   TableInterp1D *hys_Tn_;// soc 1-D table, V_min
-  float *rp_hys_scale_; // Scalar on output of update
+  float *sp_hys_scale_; // Scalar on output of update
 };
 
 
@@ -198,7 +198,7 @@ class Battery : public Coulombs
 {
 public:
   Battery();
-  Battery(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code, float *rp_hys_scale);
+  Battery(double *sp_delta_q, float *sp_t_last, float *sp_nP, float *sp_nS, uint8_t *sp_mod_code, float *sp_hys_scale);
   ~Battery();
   // operators
   // functions
@@ -217,7 +217,7 @@ public:
   double Dv() { return chem_.dvoc; };
   double dv_dsoc() { return dv_dsoc_; };
   double dv_dyn() { return dv_dyn_; };
-  double dV_dyn() { return dv_dyn_*(*rp_nS_); };
+  double dV_dyn() { return dv_dyn_*(*sp_nS_); };
   void dv_voc_soc(const float _dv) { dv_voc_soc_ = _dv; };
   float dv_voc_soc() { return dv_voc_soc_; };
   uint8_t encode(const String mod_str);
@@ -228,12 +228,12 @@ public:
   void hys_state(const double st) { hys_->dv_hys(st); };
   void init_hys(const double hys) { hys_->init(hys); };
   double ib() { return ib_; };            // Battery terminal current, A
-  double Ib() { return ib_*(*rp_nP_); };  // Battery bank current, A
+  double Ib() { return ib_*(*sp_nP_); };  // Battery bank current, A
   double ioc() { return ioc_; };
-  double nP() { return *rp_nP_; };
-  void nP(const double np) { *rp_nP_ = np; };
-  double nS() { return *rp_nS_; };
-  void nS(const double ns) { *rp_nS_ = ns; };
+  double nP() { return *sp_nP_; };
+  void nP(const double np) { *sp_nP_ = np; };
+  double nS() { return *sp_nS_; };
+  void nS(const double ns) { *sp_nS_ = ns; };
   virtual void pretty_print();
   void pretty_print_ss();
   void print_signal(const boolean print) { print_now_ = print; };
@@ -242,14 +242,14 @@ public:
   float temp_c() { return temp_c_; };    // Battery temperature, deg C
   double Tb() { return temp_c_; };        // Battery bank temperature, deg C
   double vb() { return vb_; };            // Battery terminal voltage, V
-  double Vb() { return vb_*(*rp_nS_); };  // Battery bank voltage, V
+  double Vb() { return vb_*(*sp_nS_); };  // Battery bank voltage, V
   double voc() { return voc_; };
-  double Voc() { return voc_*(*rp_nS_); };
+  double Voc() { return voc_*(*sp_nS_); };
   double voc_stat() { return voc_stat_; };
-  double Voc_stat() { return voc_stat_*(*rp_nS_); };
+  double Voc_stat() { return voc_stat_*(*sp_nS_); };
   double voc_soc_tab(const double soc, const float temp_c);
   double vsat() { return vsat_; };
-  double Vsat() { return vsat_*(*rp_nS_); };
+  double Vsat() { return vsat_*(*sp_nS_); };
 protected:
   double voc_;      // Static model open circuit voltage, V
   double dv_dyn_;   // ib-induced back emf, V
@@ -273,8 +273,8 @@ protected:
   Hysteresis *hys_;
   double ioc_;      // Current into charge portion of battery, A
   double voc_stat_; // Static, table lookup value of voc before applying hysteresis, V
-  float *rp_nP_;    // Number of parallel batteries in bank, e.g. '2P1S'
-  float *rp_nS_;    // Number of series batteries in bank, e.g. '2P1S'
+  float *sp_nP_;    // Number of parallel batteries in bank, e.g. '2P1S'
+  float *sp_nS_;    // Number of series batteries in bank, e.g. '2P1S'
   boolean print_now_; // Print command
   float ds_voc_soc_;    // VOC(SOC) delta soc on input
   float dv_voc_soc_;    // VOC(SOC) delta voc on output
@@ -286,23 +286,23 @@ class BatteryMonitor: public Battery, public EKF_1x1
 {
 public:
   BatteryMonitor();
-  BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code, float *rp_hys_scale);
+  BatteryMonitor(double *sp_delta_q, float *sp_t_last, float *sp_nP, float *sp_nS, uint8_t *sp_mod_code, float *sp_hys_scale);
   ~BatteryMonitor();
   // operators
   // functions
   double amp_hrs_remaining_ekf() { return amp_hrs_remaining_ekf_; };
   double amp_hrs_remaining_soc() { return amp_hrs_remaining_soc_; };
-  double Amp_hrs_remaining_ekf() { return amp_hrs_remaining_ekf_*(*rp_nP_)*(*rp_nS_); };
-  double Amp_hrs_remaining_soc() { return amp_hrs_remaining_soc_*(*rp_nP_)*(*rp_nS_); };
+  double Amp_hrs_remaining_ekf() { return amp_hrs_remaining_ekf_*(*sp_nP_)*(*sp_nS_); };
+  double Amp_hrs_remaining_soc() { return amp_hrs_remaining_soc_*(*sp_nP_)*(*sp_nS_); };
   virtual void assign_randles(void);
   double calc_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   double calculate(Sensors *Sen, const boolean reset);
   boolean converged_ekf() { return EKF_converged->state(); };
   double delta_q_ekf() { return delta_q_ekf_; };
   double hx() { return hx_; };
-  double Hx() { return hx_*(*rp_nS_); };
+  double Hx() { return hx_*(*sp_nS_); };
   double ib_charge() { return ib_charge_; };
-  double Ib_charge() { return ib_charge_*(*rp_nP_); };
+  double Ib_charge() { return ib_charge_*(*sp_nP_); };
   void init_battery_mon(const boolean reset, Sensors *Sen);
   void init_soc_ekf(const double soc);
   boolean is_sat(const boolean reset);
@@ -315,11 +315,11 @@ public:
   boolean solve_ekf(const boolean reset, const boolean reset_temp, Sensors *Sen);
   double tcharge() { return tcharge_; };
   double dv_dyn() { return dv_dyn_; };
-  double dV_dyn() { return dv_dyn_*(*rp_nS_); };
+  double dV_dyn() { return dv_dyn_*(*sp_nS_); };
   double voc_filt() { return voc_filt_; };
-  double Voc_filt() { return voc_filt_*(*rp_nS_); };
+  double Voc_filt() { return voc_filt_*(*sp_nS_); };
   double voc_soc() { return voc_soc_; };
-  double Voc_tab() { return voc_soc_*(*rp_nS_); };
+  double Voc_tab() { return voc_soc_*(*sp_nS_); };
   double y_ekf() { return y_; };
   double y_ekf_filt() { return y_filt_; };
   double delta_q_ekf_;         // Charge deficit represented by charge calculated by ekf, C
@@ -351,7 +351,7 @@ class BatterySim: public Battery
 {
 public:
   BatterySim();
-  BatterySim(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code, float *rp_hys_scale);
+  BatterySim(double *sp_delta_q, float *sp_t_last, float *sp_s_cap_model, float *sp_nP, float *sp_nS, uint8_t *sp_mod_code, float *sp_hys_scale);
   ~BatterySim();
   // operators
   // functions
@@ -360,16 +360,16 @@ public:
   float calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq);
   double count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon, const boolean initializing_all);
   boolean cutback() { return model_cutback_; };
-  double delta_q() { return *rp_delta_q_; };
+  double delta_q() { return *sp_delta_q_; };
   unsigned long int dt(void) { return sample_time_ - sample_time_z_; };
-  double Ib_charge() { return ib_charge_*(*rp_nP_); };
+  double Ib_charge() { return ib_charge_*(*sp_nP_); };
   float ib_fut() { return ib_fut_; };
   void init_battery_sim(const boolean reset, Sensors *Sen);
   void load();
   void pretty_print(void);
   unsigned long int sample_time(void) { return sample_time_; };
   boolean saturated() { return model_saturated_; };
-  float t_last() { return *rp_t_last_; };
+  float t_last() { return *sp_t_last_; };
   double voc() { return voc_; };
   double voc_stat() { return voc_stat_; };
 protected:
@@ -385,9 +385,9 @@ protected:
   boolean model_cutback_;   // Indicate that modeled current being limited on saturation cutback, T = cutback limited
   boolean model_saturated_; // Indicator of maximal cutback, T = cutback saturated
   double ib_sat_;           // Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
-  double *rp_delta_q_model_;// Charge change since saturated, C
-  float *rp_t_last_model_;  // Battery temperature past value for rate limit memory, deg C
-  float *rp_s_cap_model_;   // Rated capacity scalar
+  double *sp_delta_q_model_;// Charge change since saturated, C
+  float *sp_t_last_model_;  // Battery temperature past value for rate limit memory, deg C
+  float *sp_s_cap_model_;   // Rated capacity scalar
   double ib_fut_;           // Future value of limited current, A
   double ib_in_;            // Saved value of current input, A
   double ib_charge_;        // Current input avaiable for charging, A

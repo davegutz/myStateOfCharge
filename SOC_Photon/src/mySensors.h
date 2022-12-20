@@ -66,24 +66,25 @@ class Shunt: public Adafruit_ADS1015
 {
 public:
   Shunt();
-  Shunt(const String name, const uint8_t port, float *cp_ib_bias, float *cp_ib_scale, const float v2a_s, float *rp_shunt_gain_sclr);
+  Shunt(const String name, const uint8_t port, float *cp_ib_bias, float *cp_ib_scale, const float v2a_s, float *sp_shunt_gain_sclr);
   ~Shunt();
   // operators
   // functions
   float add() { return ( add_ ); };
   void add(const float add) { add_ = add; };
-  boolean bare() { return ( bare_ ); };
+  boolean bare_detected() { return ( bare_detected_ ); };
   void bias(const float bias) { *cp_ib_bias_ = bias; };
   float bias() { return ( *cp_ib_bias_*sclr_ + add_ ); };
-  float bias_any(const float Ib) { return ( Ib*sclr_ + add_ ); };
+  float adj_Ib(const float Ib) { return ( Ib*sclr_ + add_ ); };
+  void dscn_cmd(const boolean cmd) { dscn_cmd_ = cmd; };
   unsigned long int dt(void) { return sample_time_ - sample_time_z_; };
   float ishunt_cal() { return ( ishunt_cal_*sclr_ + add_ ); };
   void load();
   void pretty_print();
   void scale(const float sclr) { *cp_ib_scale_ = sclr; };
   float scale() { return ( *cp_ib_scale_ ); };
-  void rp_shunt_gain_sclr(const float sclr) { *rp_shunt_gain_sclr_ = sclr; };
-  float rp_shunt_gain_sclr() { return *rp_shunt_gain_sclr_; };
+  void sp_shunt_gain_sclr(const float sclr) { *sp_shunt_gain_sclr_ = sclr; };
+  float sp_shunt_gain_sclr() { return *sp_shunt_gain_sclr_; };
   unsigned long int sample_time(void) { return sample_time_; };
   float sclr() { return ( sclr_ ); };
   void sclr(const float sclr) { sclr_ = sclr; };
@@ -95,7 +96,7 @@ public:
 protected:
   String name_;         // For print statements, multiple instances
   uint8_t port_;        // Octal I2C port used by Acafruit_ADS1015
-  boolean bare_;        // If ADS to be ignored
+  boolean bare_detected_;        // If ADS to be ignored
   float *cp_ib_bias_;   // Global bias, A
   float *cp_ib_scale_;  // Global scale, A
   float v2a_s_;         // Selected shunt conversion gain, A/V
@@ -106,9 +107,10 @@ protected:
   float ishunt_cal_;    // Sensed, calibrated ADC, A
   float sclr_;          // Scalar for fault test
   float add_;           // Adder for fault test, A
-  float *rp_shunt_gain_sclr_; // Scalar on shunt gain
+  float *sp_shunt_gain_sclr_; // Scalar on shunt gain
   unsigned long int sample_time_;   // Exact moment of hardware sample
   unsigned long int sample_time_z_; // Exact moment of past hardware sample
+  boolean dscn_cmd_;    // User command to ignore hardware, T=ignore
 };
 
 // Fault word bits.   All faults heal
@@ -303,7 +305,7 @@ class Sensors
 {
 public:
   Sensors();
-  Sensors(double T, double T_temp,uint16_t pin_1_wire, Sync *ReadSensors);
+  Sensors(double T, double T_temp,uint16_t pin_1_wire, Sync *ReadSensors, float *sp_nP_, float *sp_nS_);
   ~Sensors();
   int Vb_raw;                 // Raw analog read, integer
   float Vb;                   // Selected battery bank voltage, V
@@ -352,6 +354,14 @@ public:
   void bias_all_model();      // Bias model outputs for sensor fault injection
   unsigned long int dt_ib(void) { return dt_ib_; };
   void final_assignments(BatteryMonitor *Mon);  // Make final signal selection
+  float ib() { return Ib / *sp_nP_; };                            // Battery unit current, A
+  float ib_amp_hdwe() { return Ib_amp_hdwe / *sp_nP_; };          // Battery amp unit current, A
+  float ib_amp_model() { return Ib_amp_model / *sp_nP_; };        // Battery amp model unit current, A
+  float ib_hdwe() { return Ib_hdwe / *sp_nP_; };                  // Battery select hardware unit current, A
+  float ib_hdwe_model() { return Ib_hdwe_model / *sp_nP_; };      // Battery select hardware model unit current, A
+  float ib_model() { return Ib_model / *sp_nP_; };                // Battery select model unit current, A
+  float ib_noa_hdwe() { return Ib_noa_hdwe / *sp_nP_; };          // Battery no amp unit current, A
+  float ib_noa_model() { return Ib_noa_model / *sp_nP_; };        // Battery no amp model unit current, A
   float Ib_amp_noise();
   float Ib_amp_noise_amp() { return ( Ib_amp_noise_amp_ ); };
   void Ib_amp_noise_amp(const float noise) { Ib_amp_noise_amp_ = noise; };
@@ -372,18 +382,21 @@ public:
   float Tb_noise();
   float Tb_noise_amp() { return ( Tb_noise_amp_ ); };
   void Tb_noise_amp(const float noise) { Tb_noise_amp_ = noise; };
+  float vb() { return Vb / *sp_nS_; };                            // Battery select unit voltage, V
   float vb_add() { return ( vb_add_ ); };
   void vb_add(const float add) { vb_add_ = add; };
-  float Vb_add();
+  float vb_hdwe() { return Vb_hdwe / *sp_nS_; };                  // Battery select hardware unit voltage, V
   void vb_load(const uint16_t vb_pin);  // Analog read of Vb
+  float vb_model() { return Vb_model / *sp_nS_; };                // Battery select model unit voltage, V
+  float Vb_add();
   float Vb_noise();
   float Vb_noise_amp() { return ( Vb_noise_amp_ ); };
   void Vb_noise_amp(const float noise) { Vb_noise_amp_ = noise; };
   void vb_print(void);     // Print Vb result
   Fault *Flt;
 protected:
-  float *rp_Tb_bias_hdwe_;   // Location of retained Tb bias, deg C
-  float *rp_Vb_bias_hdwe_;   // Location of retained Vb bias, V
+  float *sp_Tb_bias_hdwe_;   // Location of retained Tb bias, deg C
+  float *sp_Vb_bias_hdwe_;   // Location of retained Vb bias, V
   void choose_(void);   // Deliberate choice based on inputs and results
   PRBS_7 *Prbn_Tb_;     // Tb noise generator model only
   PRBS_7 *Prbn_Vb_;     // Vb noise generator model only
@@ -401,6 +414,8 @@ protected:
   unsigned long int sample_time_vb_hdwe_; // Exact moment of Vb sample, ms
   unsigned long int dt_ib_hdwe_;          // Delta update of Ib sample, ms
   unsigned long int dt_ib_;               // Delta update of selected Ib sample, ms
+  float *sp_nP_;    // Number of parallel batteries in bank, e.g. '2P1S'
+  float *sp_nS_;    // Number of series batteries in bank, e.g. '2P1S'
 };
 
 

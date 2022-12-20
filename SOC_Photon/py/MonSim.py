@@ -33,7 +33,7 @@ import statistics as sts
 
 def save_clean_file(mon_ver, csv_file, unit_key):
     default_header_str = "unit,               hm,                  cTime,        dt,       sat,sel,mod,\
-      Tb,  Vb,  Ib,  ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,"
+      Tb,  vb,  ib,  ioc,  voc_soc,    vsat,dV_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,"
     n = len(mon_ver.time)
     date_time_start = datetime.now()
     with open(csv_file, "w") as output:
@@ -49,14 +49,14 @@ def save_clean_file(mon_ver, csv_file, unit_key):
             s += "{:1.0f},".format(mon_ver.sel[i])
             s += "{:1.0f},".format(mon_ver.mod_data[i])
             s += "{:7.3f},".format(mon_ver.Tb[i])
-            s += "{:7.3f},".format(mon_ver.Vb[i])
-            s += "{:7.3f},".format(mon_ver.Ib[i])
+            s += "{:7.3f},".format(mon_ver.vb[i])
+            s += "{:7.3f},".format(mon_ver.ib[i])
             s += "{:7.3f},".format(mon_ver.ioc[i])
             s += "{:7.3f},".format(mon_ver.voc_soc[i])
-            s += "{:7.3f},".format(mon_ver.Vsat[i])
+            s += "{:7.3f},".format(mon_ver.vsat[i])
             s += "{:7.3f},".format(mon_ver.dV_dyn[i])
-            s += "{:7.3f},".format(mon_ver.Voc_stat[i])
-            s += "{:7.3f},".format(mon_ver.Voc_ekf[i])
+            s += "{:7.3f},".format(mon_ver.voc_stat[i])
+            s += "{:7.3f},".format(mon_ver.voc_ekf[i])
             s += "{:7.3f},".format(mon_ver.y_ekf[i])
             s += "{:7.3f},".format(mon_ver.soc_s[i])
             s += "{:7.3f},".format(mon_ver.soc_ekf[i])
@@ -91,8 +91,8 @@ def save_clean_file_sim(sim_ver, csv_file, unit_key):
         print("Wrote(save_clean_file_sim):", csv_file)
 
 
-def replicate(mon_old, sim_old=None, init_time=-4., t_Vb_fail=None, Vb_fail=13.2,
-              t_Ib_fail=None, Ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=None, Bmon=None, use_Vb_raw=False,
+def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2,
+              t_ib_fail=None, ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=None, Bmon=None, use_vb_raw=False,
               scale_r_ss=1., s_hys_sim=1., s_hys_mon=1., dvoc_sim=0., dvoc_mon=0., drive_ekf=False, dTb_in=None,
               verbose=True, t_max=None, eframe_mult=cp_eframe_mult, sres=1., staudif=1., stauct=1., use_vb_sim=False):
     if sim_old is not None and len(sim_old.time) < len(mon_old.time):
@@ -104,12 +104,12 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_Vb_fail=None, Vb_fail=13.2
         t_delt = t - t[0]
         t = t[np.where(t_delt <= t_max)]
     reset_sel = mon_old.res
-    if use_Vb_raw:
-        Vb = mon_old.Vb_h
+    if use_vb_raw:
+        vb = mon_old.vb_h
     else:
-        Vb = mon_old.Vb
-    # Ib_past = mon_old.Ib_past
-    Ib_in = mon_old.Ib
+        vb = mon_old.vb
+    # ib_past = mon_old.ib_past
+    ib_in = mon_old.ib
     Tb = mon_old.Tb
     soc_s_init = mon_old.soc_s[0]
     sat_init = mon_old.sat[0]
@@ -119,7 +119,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_Vb_fail=None, Vb_fail=13.2
     if sim_old is not None:
         sat_s_init = sim_old.sat_s[0]
     else:
-        sat_s_init = mon_old.Voc_stat[0] > mon_old.Vsat[0]
+        sat_s_init = mon_old.voc_stat[0] > mon_old.vsat[0]
     t_len = len(t)
     rp = Retained()
     try:
@@ -139,7 +139,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_Vb_fail=None, Vb_fail=13.2
     if scale_in:
         scale *= scale_in
     s_q = Scale(1., 3., 0.000005, 0.00005)
-    s_r = Scale(1., 3., 0.001, 1.)   # t_Ib_fail = 1000
+    s_r = Scale(1., 3., 0.001, 1.)   # t_ib_fail = 1000
     sim = BatterySim(temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
                      dv_hys=dv_hys_init, sres=sres, staudif=staudif, stauct=stauct, scale_r_ss=scale_r_ss,
                      s_hys=s_hys_sim, dvoc=dvoc_sim)
@@ -183,7 +183,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_Vb_fail=None, Vb_fail=13.2
             if sim_old is not None:
                 sat_s_init = sim_old.sat_s[0]
             else:
-                sat_s_init = mon_old.Voc_stat[0] > mon_old.Vsat[0]
+                sat_s_init = mon_old.voc_stat[0] > mon_old.vsat[0]
             sim.sat = sat_s_init
             mon.sat = sat_init
             mon.hys.dv_hys = mon_old.dV_hys[i]
@@ -192,7 +192,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_Vb_fail=None, Vb_fail=13.2
         if sim_old is not None and not use_ib_mon:
             ib_in_s = sim_old.ib_in_s[i]
         else:
-            ib_in_s = Ib_in[i]
+            ib_in_s = ib_in[i]
         if Bsim is None:
             _chm_s = chm_s[i]
         else:
@@ -217,20 +217,20 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_Vb_fail=None, Vb_fail=13.2
             _chm_m = chm_m[i]
         else:
             _chm_m = Bmon
-        if t_Ib_fail and t[i] > t_Ib_fail:
-            Ib_ = Ib_fail
+        if t_ib_fail and t[i] > t_ib_fail:
+            ib_ = ib_fail
         else:
-            if mon_old.Ib_sel is not None:
-                Ib_ = mon_old.Ib_sel[i]
+            if mon_old.ib_sel is not None:
+                ib_ = mon_old.ib_sel[i]
             else:
-                Ib_ = mon_old.Ib[i]
-                # Ib_ = sim.ib
+                ib_ = mon_old.ib[i]
+                # ib_ = sim.ib
         if use_vb_sim:
-            Vb_ = sim.vb
-        elif t_Vb_fail and t[i] >= t_Vb_fail:
-            Vb_ = Vb_fail
+            vb_ = sim.vb
+        elif t_vb_fail and t[i] >= t_vb_fail:
+            vb_ = vb_fail
         else:
-            Vb_ = Vb[i]
+            vb_ = vb[i]
         if drive_ekf:
             u_old = mon_old.u[i]
             z_old = mon_old.z[i]
@@ -238,19 +238,19 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_Vb_fail=None, Vb_fail=13.2
             u_old = None
             z_old = None
         if rp.modeling == 0:
-            mon.calculate(_chm_m, Tb_, Vb_, Ib_, T, rp=rp, reset=reset, updateTimeIn=updateTimeIn, u_old=u_old,
+            mon.calculate(_chm_m, Tb_, vb_, ib_, T, rp=rp, reset=reset, updateTimeIn=updateTimeIn, u_old=u_old,
                           z_old=z_old)
         else:
-            mon.calculate(_chm_m, Tb_, Vb_ + randn() * v_std + dv_sense, Ib_ + randn() * i_std + di_sense, T, rp=rp,
+            mon.calculate(_chm_m, Tb_, vb_ + randn() * v_std + dv_sense, ib_ + randn() * i_std + di_sense, T, rp=rp,
                           reset=reset, updateTimeIn=updateTimeIn, u_old=u_old, z_old=z_old)
-        Ib_charge = mon.ib_charge
+        ib_charge = mon.ib_charge
         sat = is_sat(Tb_, mon.voc_filt, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
         if rp.modeling == 0:
-            mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb_, charge_curr=Ib_charge, sat=saturated)
+            mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb_, charge_curr=ib_charge, sat=saturated)
         else:
-            mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb_, charge_curr=Ib_charge, sat=saturated)
-        mon.calc_charge_time(mon.q, mon.q_capacity, Ib_charge, mon.soc)
+            mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb_, charge_curr=ib_charge, sat=saturated)
+        mon.calc_charge_time(mon.q, mon.q_capacity, ib_charge, mon.soc)
         mon.assign_soc_s(sim.soc)
 
         # Plot stuff
@@ -294,11 +294,11 @@ if __name__ == '__main__':
         # Transient  inputs
         time_end = None
         # time_end = 35200
-        t_Ib_fail = None
+        t_ib_fail = None
         init_time_in = None
         use_ib_mon_in = False
         scale_in = None
-        use_Vb_raw = False
+        use_vb_raw = False
         unit_key = None
         data_file_old_txt = None
         scale_r_ss_in = 1.
@@ -326,8 +326,8 @@ if __name__ == '__main__':
         # data_file_old_txt = 'pulse20220914.txt'; unit_key = 'pro_2022'; init_time_in=-0.001;
         # data_file_old_txt = 'tbFailMod20220914.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'tbFailHdwe20220914.txt'; unit_key = 'pro_2022'
-        # data_file_old_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
-        # data_file_old_txt = 'real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_Vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
+        # data_file_old_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
+        # data_file_old_txt = 'real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; scale_hys_sim_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
         # data_file_old_txt = 'real world Xp20 30C 20220917.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -11110
         # data_file_old_txt = 'EKF_Track 20200917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr100 v20220917.txt'; unit_key = 'pro_2022'
@@ -350,8 +350,8 @@ if __name__ == '__main__':
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
                                            skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp)
-        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'Vb', 'Ib', 'ioc', 'voc_soc', 'Vsat', 'dV_dyn', 'Voc_stat',
-                'Voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
+        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'vb', 'ib', 'ioc', 'voc_soc', 'vsat', 'dV_dyn', 'voc_stat',
+                'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
                                     encoding=None).view(np.recarray)
 
@@ -362,8 +362,8 @@ if __name__ == '__main__':
         cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
                     'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_diff', 'ib_diff_f',
                     'voc_soc', 'e_w', 'e_w_f',
-                    'ib_sel', 'Ib_h', 'Ib_s', 'mib', 'Ib',
-                    'vb_sel', 'Vb_h', 'Vb_s', 'mvb', 'Vb',
+                    'ib_sel_stat', 'ib_h', 'ib_s', 'mib', 'ib',
+                    'vb_sel', 'vb_h', 'vb_s', 'mvb', 'vb',
                     'Tb_h', 'Tb_s', 'mtb', 'Tb_f',
                     'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel',
                     'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr', 'preserving')
@@ -398,9 +398,9 @@ if __name__ == '__main__':
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
-                                                             sres=1.0, t_Ib_fail=t_Ib_fail,
+                                                             sres=1.0, t_ib_fail=t_ib_fail,
                                                              use_ib_mon=use_ib_mon_in, scale_in=scale_in,
-                                                             use_Vb_raw=use_Vb_raw, scale_r_ss=scale_r_ss_in,
+                                                             use_vb_raw=use_vb_raw, scale_r_ss=scale_r_ss_in,
                                                              s_hys_sim=scale_hys_sim_in, s_hys_mon=scale_hys_mon_in,
                                                              dvoc_sim=dvoc_sim_in, dvoc_mon=dvoc_mon_in,
                                                              Bmon=Bmon_in, Bsim=Bsim_in)

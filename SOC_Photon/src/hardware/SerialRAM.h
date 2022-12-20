@@ -18,7 +18,7 @@
 	#include "arduino.h"
 #else
 	#if PLATFORM_ID == PLATFORM_ARGON
-		#include "WProgram.h"
+		// #include "WProgram.h"
 	#endif
 #endif
 

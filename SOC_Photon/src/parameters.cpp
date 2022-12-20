@@ -24,6 +24,7 @@
 #include "application.h"
 #include "Battery.h"
 #include "parameters.h"
+#include "mySensors.h"
 
 // class SavedPars 
 SavedPars::SavedPars()
@@ -64,7 +65,7 @@ SavedPars::SavedPars(SerialRAM *ram)
         inj_bias_eeram_.a16 =  next_;  next_ += sizeof(inj_bias);
         isum_eeram_.a16 =  next_;  next_ += sizeof(isum);
         mon_chm_eeram_.a16 =  next_;  next_ += sizeof(mon_chm);
-        modeling_eeram_.a16 =  next_;  next_ += sizeof(modeling);
+        modeling_eeram_.a16 =  next_;  next_ += sizeof(modeling_);
         nP_eeram_.a16 = next_; next_ += sizeof(nP);
         nS_eeram_.a16 = next_; next_ += sizeof(nS);
         preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving); // TODO:  connect this to legacy preserving logic (delete Sen->Flt->preserving)
@@ -117,7 +118,7 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(ihis, -1, nhis_+1) ||
         is_val_corrupt(inj_bias, float(-100.), float(100.)) ||
         is_val_corrupt(isum, -1, NSUM+1) ||
-        is_val_corrupt(modeling, uint8_t(0), uint8_t(15)) ||
+        is_val_corrupt(modeling_, uint8_t(0), uint8_t(15)) ||
         is_val_corrupt(mon_chm, uint8_t(0), uint8_t(10)) ||
         is_val_corrupt(nP, float(1e-6), float(100.)) ||
         is_val_corrupt(nS, float(1e-6), float(100.)) ||
@@ -202,7 +203,7 @@ int SavedPars::num_diffs()
     if ( float(CURR_SCALE_NOA) != ib_scale_noa ) n++;
     if ( int8_t(FAKE_FAULTS) != ib_select ) n++;
     if ( float(0.) != inj_bias ) n++;
-    if ( uint8_t(MODELING) != modeling ) n++;
+    if ( uint8_t(MODELING) != modeling_ ) n++;
     if ( uint8_t(MON_CHEM) != mon_chm ) n++;
     if ( float(NP) != nP ) n++;
     if ( float(NS) != nS ) n++;
@@ -228,6 +229,15 @@ void SavedPars::mem_print()
     #endif
 }
 
+// Manage changes to modeling configuration
+void SavedPars::modeling(const uint8_t input, Sensors *Sen)
+{
+    modeling_ = input;
+    put_modeling(modeling_);
+    Sen->ShuntAmp->dscn_cmd(mod_ib_amp_dscn());
+    Sen->ShuntNoAmp->dscn_cmd(mod_ib_noa_dscn());
+}
+
 // Print
 void SavedPars::pretty_print(const boolean all)
 {
@@ -249,7 +259,7 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )                                  Serial.printf(" iflt                           %d flt ptr\n", iflt);
     if ( all || float(0.) != inj_bias )         Serial.printf(" inj_bias%7.3f  %7.3f *Xb<> A\n", 0., inj_bias);
     if ( all )                                  Serial.printf(" isum                           %d tbl ptr\n", isum);
-    if ( all || uint8_t(MODELING) != modeling ) Serial.printf(" modeling %d  %d *Xm<>\n", uint8_t(MODELING), modeling);
+    if ( all || uint8_t(MODELING) != modeling_ ) Serial.printf(" modeling %d  %d *Xm<>\n", uint8_t(MODELING), modeling_);
     if ( all || MON_CHEM != mon_chm )           Serial.printf(" mon chem            %d          %d *Bm<> 0=Battle, 1=LION\n", MON_CHEM, mon_chm);
     if ( all )                                  Serial.printf(" modeling %d  %d *Xm<>\n", uint8_t(0), preserving);
     if ( all || float(NP) != nP )               Serial.printf(" nP            %7.3f    %7.3f *BP<> eg '2P1S'\n", NP, nP);

@@ -26,8 +26,8 @@
 #ifndef INJECTION_H
 #define INJECTION_H
 
-#include <math.h>
-#include <spark_wiring_arduino_constants.h>
+#include "math.h"
+#define PI          3.1415926535897932384626433832795
 
 // Signal construction classes - convenient because they control their own memory
 // Sine wave signal generation

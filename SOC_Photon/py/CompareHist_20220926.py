@@ -116,7 +116,7 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.plot(hi.time_day, hi.Tb, marker='.', markersize='3', linestyle='-', color='black', label='Tb')
     plt.legend(loc=1)
     plt.subplot(333)
-    plt.plot(hi.time_day, hi.Ib, marker='+', markersize='3', linestyle='-', color='green', label='Ib')
+    plt.plot(hi.time_day, hi.ib, marker='+', markersize='3', linestyle='-', color='green', label='ib')
     plt.legend(loc=1)
     plt.subplot(334)
     plt.plot(hi.time_day, hi.tweak_sclr_amp, marker='+', markersize='3', linestyle='None', color='orange', label='tweak_sclr_amp')
@@ -152,10 +152,10 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.xlabel('days')
     plt.legend(loc=1)
     plt.subplot(339)
-    plt.plot(hi.time_day, hi.Vb, marker='.', markersize='3', linestyle='None', color='red', label='Vb')
-    plt.plot(hi.time_day, hi.Voc_dyn, marker='.', markersize='3', linestyle='None', color='blue', label='Voc_dyn')
-    plt.plot(hi.time_day, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_chg')
-    plt.plot(hi.time_day, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_dis')
+    plt.plot(hi.time_day, hi.vb, marker='.', markersize='3', linestyle='None', color='red', label='vb')
+    plt.plot(hi.time_day, hi.voc_dyn, marker='.', markersize='3', linestyle='None', color='blue', label='voc_dyn')
+    plt.plot(hi.time_day, hi.voc_stat_chg, marker='.', markersize='3', linestyle='None', color='green', label='voc_stat_chg')
+    plt.plot(hi.time_day, hi.voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='voc_stat_dis')
     plt.xlabel('days')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -167,11 +167,11 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.subplot(221)
     plt.title(plot_title)
     plt.suptitle(subtitle)
-    plt.plot(hi.time_day, hi.Vsat, marker='.', markersize='1', linestyle='-', color='orange', linewidth='1', label='Vsat')
-    plt.plot(hi.time_day, hi.Vb, marker='1', markersize='3', linestyle='None', color='black', label='Vb')
-    plt.plot(hi.time_day, hi.Voc_dyn, marker='.', markersize='3', linestyle='None', color='orange', label='Voc_dyn')
-    plt.plot(hi.time_day, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='-', color='green', label='Voc_stat_chg')
-    plt.plot(hi.time_day, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='-', color='red', label='Voc_stat_dis')
+    plt.plot(hi.time_day, hi.vsat, marker='.', markersize='1', linestyle='-', color='orange', linewidth='1', label='vsat')
+    plt.plot(hi.time_day, hi.vb, marker='1', markersize='3', linestyle='None', color='black', label='vb')
+    plt.plot(hi.time_day, hi.voc_dyn, marker='.', markersize='3', linestyle='None', color='orange', label='voc_dyn')
+    plt.plot(hi.time_day, hi.voc_stat_chg, marker='.', markersize='3', linestyle='-', color='green', label='voc_stat_chg')
+    plt.plot(hi.time_day, hi.voc_stat_dis, marker='.', markersize='3', linestyle='-', color='red', label='voc_stat_dis')
     plt.plot(hi.time_day, hi.voc_soc, marker='2', markersize='3', linestyle=':', color='cyan', label='voc_soc')
     plt.xlabel('days')
     plt.legend(loc=1)
@@ -192,7 +192,7 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.xlabel('days')
     plt.legend(loc=1)
     plt.subplot(223)
-    plt.plot(hi.time_day, hi.Ib, marker='.', markersize='3', linestyle='-', color='red', label='Ib')
+    plt.plot(hi.time_day, hi.ib, marker='.', markersize='3', linestyle='-', color='red', label='ib')
     plt.xlabel('days')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -204,24 +204,24 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.subplot(131)
     plt.title(plot_title)
     plt.suptitle(subtitle)
-    plt.plot(hi.soc_r, hi.Voc_stat_r_dis, marker='o', markersize='3', linestyle='-', color='orange', label='Voc_stat_r_dis')
-    plt.plot(hi.soc_r, hi.Voc_stat_r_chg, marker='o', markersize='3', linestyle='-', color='cyan', label='Voc_stat_r_chg')
-    plt.plot(hi.soc, hi.Voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='Voc_stat_dis')
-    plt.plot(hi.soc, hi.Voc_stat_chg, marker='.', markersize='3', linestyle='None', color='green', label='Voc_stat_chg')
+    plt.plot(hi.soc_r, hi.voc_stat_r_dis, marker='o', markersize='3', linestyle='-', color='orange', label='voc_stat_r_dis')
+    plt.plot(hi.soc_r, hi.voc_stat_r_chg, marker='o', markersize='3', linestyle='-', color='cyan', label='voc_stat_r_chg')
+    plt.plot(hi.soc, hi.voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='voc_stat_dis')
+    plt.plot(hi.soc, hi.voc_stat_chg, marker='.', markersize='3', linestyle='None', color='green', label='voc_stat_chg')
     plt.plot(x_sch, z_sch, marker='+', markersize='2', linestyle='--', color='black', label='Schedule')
     plt.xlabel('soc')
     plt.legend(loc=4)
     plt.ylim(12, 13.5)
     plt.subplot(132)
-    plt.plot(hi.soc_r, hi.Voc_stat_rescaled_r_dis, marker='o', markersize='3', linestyle='-', color='orangered', label='Voc_stat_rescaled_r_dis')
-    plt.plot(hi.soc_r, hi.Voc_stat_rescaled_r_chg, marker='o', markersize='3', linestyle='-', color='springgreen', label='Voc_stat_rescaled_r_chg')
+    plt.plot(hi.soc_r, hi.voc_stat_rescaled_r_dis, marker='o', markersize='3', linestyle='-', color='orangered', label='voc_stat_rescaled_r_dis')
+    plt.plot(hi.soc_r, hi.voc_stat_rescaled_r_chg, marker='o', markersize='3', linestyle='-', color='springgreen', label='voc_stat_rescaled_r_chg')
     plt.plot(x_sch, z_sch+voc_reset, marker='+', markersize='2', linestyle='--', color='black', label='Schedule RESET')
     plt.xlabel('soc_r')
     plt.legend(loc=4)
     plt.ylim(12, 13.5)
     plt.subplot(133)
-    plt.plot(hi.soc_r, hi.Voc_stat_redesign_r_dis, marker='x', markersize='3', linestyle='-', color='red', label='Voc_stat_redesign_r_dis')
-    plt.plot(hi.soc_r, hi.Voc_stat_redesign_r_chg, marker='x', markersize='3', linestyle='-', color='green', label='Voc_stat_redesign_r_chg')
+    plt.plot(hi.soc_r, hi.voc_stat_redesign_r_dis, marker='x', markersize='3', linestyle='-', color='red', label='voc_stat_redesign_r_dis')
+    plt.plot(hi.soc_r, hi.voc_stat_redesign_r_chg, marker='x', markersize='3', linestyle='-', color='green', label='voc_stat_redesign_r_chg')
     plt.plot(x_sch, z_sch+voc_reset, marker='+', markersize='2', linestyle='--', color='black', label='Schedule RESET')
     plt.xlabel('soc_r')
     plt.legend(loc=4)
@@ -251,7 +251,7 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.xlabel('days')
     plt.legend(loc=4)
     plt.subplot(223)
-    plt.plot(hi.time_day, hi.Ib, color='black', label='Ib')
+    plt.plot(hi.time_day, hi.ib, color='black', label='ib')
     plt.plot(hi.time_day, hi.soc*10, color='green', label='soc*10')
     plt.plot(hi.time_day, hi.ioc_redesign, marker='o', markersize='3', linestyle='-', color='cyan', label='ioc_redesign')
     plt.xlabel('days')
@@ -285,7 +285,7 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.xlabel('soc')
     plt.legend(loc=4)
     plt.subplot(223)
-    plt.plot(hi.soc, hi.Ib, color='black', label='Ib')
+    plt.plot(hi.soc, hi.ib, color='black', label='ib')
     plt.plot(hi.soc, hi.soc*10, color='green', label='soc*10')
     plt.plot(hi.soc, hi.ioc_redesign, marker='o', markersize='3', linestyle='-', color='cyan', label='ioc_redesign')
     plt.xlabel('soc')
@@ -305,12 +305,12 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
 def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     voc_soc = []
     soc_min = []
-    Vsat = []
+    vsat = []
     time_sec = []
     for i in range(len(d_ra.time)):
         voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
         soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
-        Vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
+        vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
         time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
     time_min = (d_ra.time-d_ra.time[0])/60.
     time_day = (d_ra.time-d_ra.time[0])/3600./24.
@@ -319,7 +319,7 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'Vsat', np.array(Vsat, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'vsat', np.array(vsat, dtype=float))
     dscn_fa = np.bool8(d_ra.falw & 2 ** 10)
     ib_diff_fa = np.bool8((d_ra.falw & 2 ** 8) | (d_ra.falw & 2 ** 9))
     wv_fa = np.bool8(d_ra.falw & 2 ** 7)
@@ -330,7 +330,7 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     ib_amp_fa = np.bool8(d_ra.falw & 2 ** 2)
     vb_fa = np.bool8(d_ra.falw & 2 ** 1)
     tb_fa = np.bool8(d_ra.falw & 2 ** 0)
-    e_wrap = d_mod.voc_soc - d_mod.Voc_dyn
+    e_wrap = d_mod.voc_soc - d_mod.voc_dyn
     d_mod = rf.rec_append_fields(d_mod, 'e_wrap', np.array(e_wrap, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'dscn_fa', np.array(dscn_fa, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_diff_fa', np.array(ib_diff_fa, dtype=float))
@@ -342,20 +342,20 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'ib_amp_fa', np.array(ib_amp_fa, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'vb_fa', np.array(vb_fa, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'tb_fa', np.array(tb_fa, dtype=float))
-    Voc_stat_chg = np.copy(d_mod.Voc_stat)
-    Voc_stat_dis = np.copy(d_mod.Voc_stat)
-    for i in range(len(Voc_stat_chg)):
-        if d_mod.Ib[i] > -ib_band:
-            Voc_stat_dis[i] = None
-        elif d_mod.Ib[i] < ib_band:
-            Voc_stat_chg[i] = None
-    d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_chg', np.array(Voc_stat_chg, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_dis', np.array(Voc_stat_dis, dtype=float))
-    dv_hys = d_mod.Voc_dyn - d_mod.Voc_stat
+    voc_stat_chg = np.copy(d_mod.voc_stat)
+    voc_stat_dis = np.copy(d_mod.voc_stat)
+    for i in range(len(voc_stat_chg)):
+        if d_mod.ib[i] > -ib_band:
+            voc_stat_dis[i] = None
+        elif d_mod.ib[i] < ib_band:
+            voc_stat_chg[i] = None
+    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_chg', np.array(voc_stat_chg, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_dis', np.array(voc_stat_dis, dtype=float))
+    dv_hys = d_mod.voc_dyn - d_mod.voc_stat
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
     dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE_20220917d
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
-    dv_hys_required = d_mod.Voc_dyn - voc_soc + dv_hys
+    dv_hys_required = d_mod.voc_dyn - voc_soc + dv_hys
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_required', np.array(dv_hys_required, dtype=float))
 
     dv_hys_rescaled = d_mod.dv_hys_unscaled
@@ -364,8 +364,8 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     dv_hys_rescaled[pos] *= HYS_RESCALE_CHG
     dv_hys_rescaled[neg] *= HYS_RESCALE_DIS
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_rescaled', np.array(dv_hys_rescaled, dtype=float))
-    Voc_stat_rescaled = d_mod.Voc_dyn - d_mod.dv_hys_rescaled
-    d_mod = rf.rec_append_fields(d_mod, 'Voc_stat_rescaled', np.array(Voc_stat_rescaled, dtype=float))
+    voc_stat_rescaled = d_mod.voc_dyn - d_mod.dv_hys_rescaled
+    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_rescaled', np.array(voc_stat_rescaled, dtype=float))
 
     return d_mod
 
@@ -375,14 +375,14 @@ def bandaid(h):
     res = np.zeros(len(h.time))
     res[0:10] = 1
     mod = np.zeros(len(h.time))
-    ib_in_s = h['Ib'].copy()
+    ib_in_s = h['ib'].copy()
     soc_s = h['soc'].copy()
     sat_s = h['sat'].copy()
     chm = np.zeros(len(h.time))
     chm_s = np.zeros(len(h.time))
     mon_old = rf.rec_append_fields(h, 'res', res)
     mon_old = rf.rec_append_fields(mon_old, 'mod_data', mod)
-    mon_old = rf.rec_append_fields(mon_old, 'Ib_past', ib_in_s)
+    mon_old = rf.rec_append_fields(mon_old, 'ib_past', ib_in_s)
     mon_old = rf.rec_append_fields(mon_old, 'soc_s', soc_s)
     mon_old = rf.rec_append_fields(mon_old, 'chm', chm)
     sim_old = np.array(np.zeros(len(h.time), dtype=[('time', '<i4')])).view(np.recarray)
@@ -405,9 +405,9 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
     sat_ = np.copy(h.Tb)
     bms_off_ = np.copy(h.Tb)
     for i in range(len(h.Tb)):
-        sat_[i] = is_sat(h.Tb[i], h.Voc_dyn[i], h.soc[i])
-        # h.bms_off[i] = (h.Tb[i] < low_t) or ((h.Voc_dyn[i] < low_voc) and (h.Ib[i] < IB_MIN_UP))
-        bms_off_[i] = (h.Tb[i] < low_t) or ((h.Voc_stat[i] < 10.5) and (h.Ib[i] < IB_MIN_UP))
+        sat_[i] = is_sat(h.Tb[i], h.voc_dyn[i], h.soc[i])
+        # h.bms_off[i] = (h.Tb[i] < low_t) or ((h.voc_dyn[i] < low_voc) and (h.ib[i] < IB_MIN_UP))
+        bms_off_[i] = (h.Tb[i] < low_t) or ((h.voc_stat[i] < 10.5) and (h.ib[i] < IB_MIN_UP))
 
     # Correct for temp
     q_cap = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=h.Tb, t_rated=BATT_RATED_TEMP)
@@ -416,21 +416,21 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
     q_cap_r = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=temp_corr, t_rated=BATT_RATED_TEMP)
     soc_r = 1. + dq / q_cap_r
     h = rf.rec_append_fields(h, 'soc_r', soc_r)
-    h.Voc_stat_r = h.Voc_stat - (h.Tb - temp_corr) * BATT_DVOC_DT
-    h.Voc_stat_rescaled_r = h.Voc_stat_rescaled - (h.Tb - temp_corr) * BATT_DVOC_DT
+    h.voc_stat_r = h.voc_stat - (h.Tb - temp_corr) * BATT_DVOC_DT
+    h.voc_stat_rescaled_r = h.voc_stat_rescaled - (h.Tb - temp_corr) * BATT_DVOC_DT
 
     # delineate charging and discharging
-    Voc_stat_r_chg = np.copy(h.Voc_stat)
-    Voc_stat_r_dis = np.copy(h.Voc_stat)
-    Voc_stat_rescaled_r_chg = np.copy(h.Voc_stat_rescaled)
-    Voc_stat_rescaled_r_dis = np.copy(h.Voc_stat_rescaled)
-    for i in range(len(Voc_stat_r_chg)):
-        if h.Ib[i] > -0.5:
-            Voc_stat_r_dis[i] = None
-            Voc_stat_rescaled_r_dis[i] = None
-        elif h.Ib[i] < 0.5:
-            Voc_stat_r_chg[i] = None
-            Voc_stat_rescaled_r_chg[i] = None
+    voc_stat_r_chg = np.copy(h.voc_stat)
+    voc_stat_r_dis = np.copy(h.voc_stat)
+    voc_stat_rescaled_r_chg = np.copy(h.voc_stat_rescaled)
+    voc_stat_rescaled_r_dis = np.copy(h.voc_stat_rescaled)
+    for i in range(len(voc_stat_r_chg)):
+        if h.ib[i] > -0.5:
+            voc_stat_r_dis[i] = None
+            voc_stat_rescaled_r_dis[i] = None
+        elif h.ib[i] < 0.5:
+            voc_stat_r_chg[i] = None
+            voc_stat_rescaled_r_chg[i] = None
 
     # Hysteresis_20220917d confirm equals data with HYS_SCALE_20220917d
     if len(h.time) > 1:
@@ -444,7 +444,7 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
         dv_hys_remodel = []
         for i in range(len(hys_time_min)):
             t_sec = hys_time_min[i] * 60.
-            ib = np.interp(t_sec, h.time_sec, h.Ib)
+            ib = np.interp(t_sec, h.time_sec, h.ib)
             soc = np.interp(t_sec, h.time_sec, h.soc)
             hys_remodel.calculate_hys(ib, soc)
             dvh = hys_remodel.update(dt_hys_sec)
@@ -473,12 +473,12 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
         for i in range(len(hys_time_min)):
             t_sec = hys_time_min[i] * 60
             tb = np.interp(t_sec, h.time_sec, h.Tb)
-            ib = np.interp(t_sec, h.time_sec, h.Ib)
+            ib = np.interp(t_sec, h.time_sec, h.ib)
             soc = np.interp(t_sec, h.time_sec, h.soc)
             soc_min = np.interp(t_sec, h.time_sec, h.soc_min)
             sat = np.interp(t_sec, h.time_sec, sat_)
             bms_off = np.interp(t_sec, h.time_sec, bms_off_) > 0.5
-            Voc = np.interp(t_sec, h.time_sec, h.Voc_dyn)
+            voc = np.interp(t_sec, h.time_sec, h.voc_dyn)
             e_wrap = np.interp(t_sec, h.time_sec, h.e_wrap)
             hys_redesign.calculate_hys(ib, soc)
             init_low = bms_off or (soc < (soc_min + HYS_SOC_MIN_MARG) and ib > HYS_IB_THR)
@@ -486,7 +486,7 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
             res = hys_redesign.res
             ioc = hys_redesign.ioc
             dv_dot = hys_redesign.dv_dot
-            voc_stat = Voc - dvh
+            voc_stat = voc - dvh
             voc_stat_r = voc_stat - (tb - temp_corr) * BATT_DVOC_DT
             dv_hys_redesign.append(dvh)
             res_redesign.append(res)
@@ -498,33 +498,33 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
         res_redesign_ = np.copy(h.soc)
         ioc_redesign_ = np.copy(h.soc)
         dv_dot_redesign_ = np.copy(h.soc)
-        Voc_stat_redesign_ = np.copy(h.soc)
-        Voc_stat_redesign_r_ = np.copy(h.soc)
+        voc_stat_redesign_ = np.copy(h.soc)
+        voc_stat_redesign_r_ = np.copy(h.soc)
         for i in range(len(h.time)):
             t_min = h.time_min[i]
             dv_hys_redesign_[i] = np.interp(t_min, hys_time_min, dv_hys_redesign)
             res_redesign_[i] = np.interp(t_min, hys_time_min, res_redesign)
             ioc_redesign_[i] = np.interp(t_min, hys_time_min, ioc_redesign)
             dv_dot_redesign_[i] = np.interp(t_min, hys_time_min, dv_dot_redesign)
-            Voc_stat_redesign_[i] = np.interp(t_min, hys_time_min, voc_stat_redesign)
-            Voc_stat_redesign_r_[i] = np.interp(t_min, hys_time_min, voc_stat_redesign_r)
-        Voc_stat_redesign_r_chg = np.copy(Voc_stat_redesign_r_)
-        Voc_stat_redesign_r_dis = np.copy(Voc_stat_redesign_r_)
+            voc_stat_redesign_[i] = np.interp(t_min, hys_time_min, voc_stat_redesign)
+            voc_stat_redesign_r_[i] = np.interp(t_min, hys_time_min, voc_stat_redesign_r)
+        voc_stat_redesign_r_chg = np.copy(voc_stat_redesign_r_)
+        voc_stat_redesign_r_dis = np.copy(voc_stat_redesign_r_)
         dv_hys_redesign_chg = np.copy(dv_hys_redesign_)
         dv_hys_redesign_dis = np.copy(dv_hys_redesign_)
         res_redesign_chg = np.copy(res_redesign_)
         res_redesign_dis = np.copy(res_redesign_)
-        for i in range(len(Voc_stat_r_chg)):
-            if h.Ib[i] > -0.5:
-                Voc_stat_redesign_r_dis[i] = None
+        for i in range(len(voc_stat_r_chg)):
+            if h.ib[i] > -0.5:
+                voc_stat_redesign_r_dis[i] = None
                 dv_hys_redesign_dis[i] = None
                 res_redesign_dis[i] = None
-            elif h.Ib[i] < 0.5:
-                Voc_stat_redesign_r_chg[i] = None
+            elif h.ib[i] < 0.5:
+                voc_stat_redesign_r_chg[i] = None
                 dv_hys_redesign_chg[i] = None
                 res_redesign_chg[i] = None
-        h = rf.rec_append_fields(h, 'Voc_stat_redesign_r_dis', Voc_stat_redesign_r_dis)
-        h = rf.rec_append_fields(h, 'Voc_stat_redesign_r_chg', Voc_stat_redesign_r_chg)
+        h = rf.rec_append_fields(h, 'voc_stat_redesign_r_dis', voc_stat_redesign_r_dis)
+        h = rf.rec_append_fields(h, 'voc_stat_redesign_r_chg', voc_stat_redesign_r_chg)
         h = rf.rec_append_fields(h, 'dv_hys_redesign_dis', dv_hys_redesign_dis)
         h = rf.rec_append_fields(h, 'dv_hys_redesign_chg', dv_hys_redesign_chg)
         h = rf.rec_append_fields(h, 'res_redesign_dis', res_redesign_dis)
@@ -532,16 +532,16 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
         h = rf.rec_append_fields(h, 'sat', sat_)
         h = rf.rec_append_fields(h, 'bms_off', bms_off_)
         h = rf.rec_append_fields(h, 'dv_hys_remodel', dv_hys_remodel_)
-        h = rf.rec_append_fields(h, 'Voc_stat_r_dis', Voc_stat_r_dis)
-        h = rf.rec_append_fields(h, 'Voc_stat_r_chg', Voc_stat_r_chg)
-        h = rf.rec_append_fields(h, 'Voc_stat_rescaled_r_dis', Voc_stat_rescaled_r_dis)
-        h = rf.rec_append_fields(h, 'Voc_stat_rescaled_r_chg', Voc_stat_rescaled_r_chg)
+        h = rf.rec_append_fields(h, 'voc_stat_r_dis', voc_stat_r_dis)
+        h = rf.rec_append_fields(h, 'voc_stat_r_chg', voc_stat_r_chg)
+        h = rf.rec_append_fields(h, 'voc_stat_rescaled_r_dis', voc_stat_rescaled_r_dis)
+        h = rf.rec_append_fields(h, 'voc_stat_rescaled_r_chg', voc_stat_rescaled_r_chg)
         h = rf.rec_append_fields(h, 'ioc_redesign', ioc_redesign_)
         h = rf.rec_append_fields(h, 'dv_dot_redesign', dv_dot_redesign_)
         h = rf.rec_append_fields(h, 'dv_hys_redesign', dv_hys_redesign_)
         h = rf.rec_append_fields(h, 'res_redesign', res_redesign_)
-        h = rf.rec_append_fields(h, 'Voc_stat_redesign', Voc_stat_redesign_)
-        h = rf.rec_append_fields(h, 'Voc_stat_redesign_r', Voc_stat_redesign_r_)
+        h = rf.rec_append_fields(h, 'voc_stat_redesign', voc_stat_redesign_)
+        h = rf.rec_append_fields(h, 'voc_stat_redesign_r', voc_stat_redesign_r_)
 
     return h
 
@@ -599,7 +599,7 @@ if __name__ == '__main__':
         path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
-        cols = ('time', 'Tb', 'Vb', 'Ib', 'soc', 'soc_ekf', 'Voc_dyn', 'Voc_stat', 'tweak_sclr_amp',
+        cols = ('time', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc_dyn', 'voc_stat', 'tweak_sclr_amp',
                 'tweak_sclr_noa', 'falw')
 
         # cat files

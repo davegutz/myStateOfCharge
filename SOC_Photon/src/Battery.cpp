@@ -35,12 +35,12 @@ extern PublishPars pp;            // For publishing
 // class Battery
 // constructors
 Battery::Battery() {}
-Battery::Battery(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code, float *rp_hys_scale)
-    : Coulombs(rp_delta_q, rp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, rp_mod_code, COULOMBIC_EFF),
-    sr_(1), rp_nP_(rp_nP), rp_nS_(rp_nS), ds_voc_soc_(0), dv_voc_soc_(0)
+Battery::Battery(double *sp_delta_q, float *sp_t_last, float *sp_nP, float *sp_nS, uint8_t *sp_mod_code, float *sp_hys_scale)
+    : Coulombs(sp_delta_q, sp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, sp_mod_code, COULOMBIC_EFF),
+    sr_(1), sp_nP_(sp_nP), sp_nS_(sp_nS), ds_voc_soc_(0), dv_voc_soc_(0)
 {
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // Center in hysteresis
-    hys_ = new Hysteresis(chem_.hys_cap, chem_, rp_hys_scale);
+    hys_ = new Hysteresis(chem_.hys_cap, chem_, sp_hys_scale);
 }
 Battery::~Battery() {}
 // operators
@@ -102,8 +102,8 @@ void Battery::pretty_print(void)
 {
     Serial.printf("Battery:\n");
     Serial.printf("  temp_c=%7.3f; dg C\n", temp_c_);
-    Serial.printf(" *rp_delt_q=%10.1f;  C\n", *rp_delta_q_);
-    Serial.printf(" *rp_t_last=%10.1f; dg C\n", *rp_t_last_);
+    Serial.printf(" *sp_delt_q=%10.1f;  C\n", *sp_delta_q_);
+    Serial.printf(" *sp_t_last=%10.1f; dg C\n", *sp_t_last_);
     Serial.printf("  soc=%8.4f;\n", soc_);
     Serial.printf("  dvoc_dt=%10.6f; V/dg C\n", chem_.dvoc_dt);
     Serial.printf("  r_0=%10.6f;  ohm\n", chem_.r_0);
@@ -117,9 +117,9 @@ void Battery::pretty_print(void)
     Serial.printf("  bms_off=%d;\n", bms_off_);
     Serial.printf("  dv_dsoc=%10.6f; V/frac\n", dv_dsoc_);
     Serial.printf("  ib=%7.3f; A\n", ib_);
-    Serial.printf("  Ib=%7.3f; Bank, A\n", ib_*(*rp_nP_));
+    Serial.printf("  Ib=%7.3f; Bank, A\n", ib_*(*sp_nP_));
     Serial.printf("  vb=%7.3f; V\n", vb_);
-    Serial.printf("  Vb=%7.3f; Bank, V\n", vb_*(*rp_nS_));
+    Serial.printf("  Vb=%7.3f; Bank, V\n", vb_*(*sp_nS_));
     Serial.printf("  voc=%7.3f; V\n", voc_);
     Serial.printf("  voc_stat=%7.3f; V\n", voc_stat_);
     Serial.printf("  vsat=%7.3f; V\n", vsat_);
@@ -127,8 +127,8 @@ void Battery::pretty_print(void)
     Serial.printf("  dv_hys=%7.3f; V\n", hys_->dv_hys());
     Serial.printf("  sr=%7.3f; sclr\n", sr_);
     Serial.printf("  dt=%7.3f; s\n", dt_);
-    Serial.printf(" *rp_nP=%5.2f; P bk, eg '2P1S'\n", *rp_nP_);
-    Serial.printf(" *rp_nS=%5.2f; S bk, eg '2P1S'\n", *rp_nS_);
+    Serial.printf(" *sp_nP=%5.2f; P bk, eg '2P1S'\n", *sp_nP_);
+    Serial.printf(" *sp_nS=%5.2f; S bk, eg '2P1S'\n", *sp_nS_);
 }
 
 // Print State Space
@@ -150,8 +150,8 @@ double Battery::voc_soc_tab(const double soc, const float temp_c)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery monitor class
 BatteryMonitor::BatteryMonitor(): Battery() {}
-BatteryMonitor::BatteryMonitor(double *rp_delta_q, float *rp_t_last, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code, float *rp_hys_scale):
-    Battery(rp_delta_q, rp_t_last, rp_nP, rp_nS, rp_mod_code, rp_hys_scale)
+BatteryMonitor::BatteryMonitor(double *sp_delta_q, float *sp_t_last, float *sp_nP, float *sp_nS, uint8_t *sp_mod_code, float *sp_hys_scale):
+    Battery(sp_delta_q, sp_t_last, sp_nP, sp_nS, sp_mod_code, sp_hys_scale)
 {
     voc_filt_ = chem_.v_sat-HDB_VBATT;
     // EKF
@@ -254,8 +254,8 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     vsat_ = calc_vsat();
     dt_ =  Sen->T;
     double T_rate = T_RLim->calculate(temp_c_, T_RLIM, T_RLIM, reset_temp, Sen->T);
-    vb_ = Sen->Vb / (*rp_nS_);
-    ib_ = Sen->Ib / (*rp_nP_);
+    vb_ = Sen->Vb / (*sp_nS_);
+    ib_ = Sen->Ib / (*sp_nP_);
     ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
 
     // Table lookup
@@ -410,8 +410,8 @@ void BatteryMonitor::ekf_update(double *hx, double *H)
 void BatteryMonitor::init_battery_mon(const boolean reset, Sensors *Sen)
 {
     if ( !reset ) return;
-    vb_ = Sen->Vb / (*rp_nS_);
-    ib_ = Sen->Ib / (*rp_nP_);
+    vb_ = Sen->Vb / (*sp_nS_);
+    ib_ = Sen->Ib / (*sp_nP_);
     ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
     if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
@@ -545,8 +545,8 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
 BatterySim::BatterySim() : Battery() {}
-BatterySim::BatterySim(double *rp_delta_q, float *rp_t_last, float *rp_s_cap_model, float *rp_nP, float *rp_nS, uint8_t *rp_mod_code, float *rp_hys_scale) :
-    Battery(rp_delta_q, rp_t_last, rp_nP, rp_nS, rp_mod_code, rp_hys_scale), q_(RATED_BATT_CAP*3600.), rp_s_cap_model_(rp_s_cap_model),
+BatterySim::BatterySim(double *sp_delta_q, float *sp_t_last, float *sp_s_cap_model, float *sp_nP, float *sp_nS, uint8_t *sp_mod_code, float *sp_hys_scale) :
+    Battery(sp_delta_q, sp_t_last, sp_nP, sp_nS, sp_mod_code, sp_hys_scale), q_(RATED_BATT_CAP*3600.), sp_s_cap_model_(sp_s_cap_model),
     sample_time_(0UL), sample_time_z_(0UL)
 {
     // Randles dynamic model for EKF
@@ -706,8 +706,8 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
 
     // Saturation logic, both full and empty
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * sp.cutback_gain_sclr;
-    if ( sp.tweak_test() || !sp.modeling ) sat_ib_max_ = ib_charge_fut;   // Disable cutback when real world or when doing tweak_test test
-    ib_fut_ = min(ib_charge_fut/(*rp_nP_), sat_ib_max_);      // the feedback of ib_
+    if ( sp.tweak_test() || !sp.modeling() ) sat_ib_max_ = ib_charge_fut;   // Disable cutback when real world or when doing tweak_test test
+    ib_fut_ = min(ib_charge_fut/(*sp_nP_), sat_ib_max_);      // the feedback of ib_
     ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past value
     if ( (q_ <= 0.) && (ib_charge_ < 0.) ) ib_charge_ = 0.;   //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_fut_ == sat_ib_max_);
@@ -726,7 +726,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     if ( sp.debug==76 ) Serial.printf("BatterySim::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in=%7.3f,ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, VB_DC_DC=%7.3f, vb=%7.3f\n",
         soc_, temp_c_, ib_in_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, VB_DC_DC, vb_);
 
-    return ( vb_*(*rp_nS_) );
+    return ( vb_*(*sp_nS_) );
 }
 
 // Injection model, calculate inj bias based on time since boot
@@ -793,8 +793,8 @@ Inputs:
     t_last          Past value of battery temperature used for rate limit memory, deg C
     coul_eff_       Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
 States:
-    *rp_delta_q_    Charge change since saturated, C
-    *rp_t_last_     Updated value of battery temperature used for rate limit memory, deg C
+    *sp_delta_q_    Charge change since saturated, C
+    *sp_t_last_     Updated value of battery temperature used for rate limit memory, deg C
     soc_            Fraction of saturation charge (q_capacity_) available (0-1) 
 Outputs:
     q_capacity_     Saturation charge at temperature, C
@@ -809,8 +809,8 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
     if ( charge_curr>0. ) d_delta_q *= coul_eff_;
 
     // Rate limit temperature.  When modeling, initialize to no change
-    if ( reset_temp && sp.mod_vb() ) *rp_t_last_ = Sen->Tb;
-    double temp_lim = max(min(Sen->Tb, *rp_t_last_ + T_RLIM*Sen->T), *rp_t_last_ - T_RLIM*Sen->T);
+    if ( reset_temp && sp.mod_vb() ) *sp_t_last_ = Sen->Tb;
+    double temp_lim = max(min(Sen->Tb, *sp_t_last_ + T_RLIM*Sen->T), *sp_t_last_ - T_RLIM*Sen->T);
     
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status
     // But if not modeling in real world, set to Monitor when Monitor saturated and reset_temp to EKF otherwise
@@ -822,7 +822,7 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
     }
     else if ( model_saturated_ )  // Modeling initializes on reset_temp to Tb=RATED_TEMP
     {
-        if ( reset_temp ) *rp_delta_q_ = 0.;
+        if ( reset_temp ) *sp_delta_q_ = 0.;
     }
     reset_temp_past = reset_temp;
     resetting_ = false;     // one pass flag
@@ -831,10 +831,10 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
     q_capacity_ = calculate_capacity(temp_lim);
     if ( !reset_temp )
     {
-        *rp_delta_q_ += d_delta_q - chem_.dqdt*q_capacity_*(temp_lim-*rp_t_last_);
-        *rp_delta_q_ = max(min(*rp_delta_q_, 0.), -q_capacity_*1.2);
+        *sp_delta_q_ += d_delta_q - chem_.dqdt*q_capacity_*(temp_lim-*sp_t_last_);
+        *sp_delta_q_ = max(min(*sp_delta_q_, 0.), -q_capacity_*1.2);
     }
-    q_ = q_capacity_ + *rp_delta_q_;
+    q_ = q_capacity_ + *sp_delta_q_;
 
     // Normalize
     soc_ = q_ / q_capacity_;
@@ -848,12 +848,12 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
         if ( sp.tweak_test() ) cTime = double(Sen->now)/1000.;
         else cTime = Sen->control_time;
         sprintf(cp.buffer, "unit_sim, %13.3f, %d, %d, %7.5f,%7.5f, %7.5f,%7.5f,%7.5f,%7.5f, %7.3f,%7.3f,%7.3f,%7.3f,  %d,  %9.1f,  %8.5f, %d, %c",
-            cTime, sp.sim_chm,  bms_off_, Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, ib_charge_, ioc_, model_saturated_, *rp_delta_q_, soc_, reset_temp,'\0');
+            cTime, sp.sim_chm,  bms_off_, Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, ib_charge_, ioc_, model_saturated_, *sp_delta_q_, soc_, reset_temp,'\0');
         Serial.println(cp.buffer);
     }
 
     // Save and return
-    *rp_t_last_ = temp_lim;
+    *sp_t_last_ = temp_lim;
     return ( soc_ );
 }
 
@@ -862,9 +862,9 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
 void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
 {
     if ( !reset ) return;
-    ib_ = Sen->Ib_model_in / (*rp_nP_);
+    ib_ = Sen->Ib_model_in / (*sp_nP_);
     ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
-    vb_ = Sen->Vb / (*rp_nS_);
+    vb_ = Sen->Vb / (*sp_nS_);
     voc_ = vb_ - ib_ * chem_.r_ss;
     if ( isnan(voc_) ) voc_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
@@ -883,7 +883,7 @@ void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
 // Load states from retained memory
 void BatterySim::load()
 {
-    apply_cap_scale(*rp_s_cap_model_);
+    apply_cap_scale(*sp_s_cap_model_);
 }
 
 // Print
@@ -901,14 +901,14 @@ void BatterySim::pretty_print(void)
     Serial.printf("  ib_in%7.3f, A\n", ib_in_);
     Serial.printf("  ib_fut%7.3f, A\n", ib_fut_);
     Serial.printf("  ib_sat%7.3f\n", ib_sat_);
-    Serial.printf(" *rp_s_cap_model%7.3f Slr\n", *rp_s_cap_model_);
+    Serial.printf(" *sp_s_cap_model%7.3f Slr\n", *sp_s_cap_model_);
 }
 
 
 Hysteresis::Hysteresis()
 : disabled_(false), cap_(0), res_(0), soc_(0), ib_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0){};
-Hysteresis::Hysteresis(const double cap, Chemistry chem, float *rp_hys_scale)
-: disabled_(false), cap_(cap), res_(0), soc_(0), ib_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0), rp_hys_scale_(rp_hys_scale)
+Hysteresis::Hysteresis(const double cap, Chemistry chem, float *sp_hys_scale)
+: disabled_(false), cap_(cap), res_(0), soc_(0), ib_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0), sp_hys_scale_(sp_hys_scale)
 {
     // Characteristic table
     hys_T_ = new TableInterp2D(chem.n_h, chem.m_h, chem.x_dv, chem.y_soc, chem.t_r);
@@ -924,7 +924,7 @@ double Hysteresis::calculate(const double ib, const double soc)
     soc_ = soc;
 
     // Disabled logic
-    disabled_ = *rp_hys_scale_ < 1e-5;
+    disabled_ = *sp_hys_scale_ < 1e-5;
 
     // Calculate
     if ( disabled_ )
@@ -975,7 +975,7 @@ void Hysteresis::pretty_print()
     Serial.printf("  dv_dot%7.3f, V/s\n", dv_dot_);
     Serial.printf("  dv_hys%7.3f, V, SH\n", dv_hys_);
     Serial.printf("  disab%d\n", disabled_);
-    Serial.printf(" *rp_hys_scale%6.2f Slr\n", *rp_hys_scale_);
+    Serial.printf(" *sp_hys_scale%6.2f Slr\n", *sp_hys_scale_);
     Serial.printf("  r(soc, dv):\n");
     hys_T_->pretty_print();
     Serial.printf("  r_max(soc):\n");
@@ -1019,6 +1019,6 @@ double Hysteresis::update(const double dt, const boolean init_high, const boolea
     // Normal ODE integration
     dv_hys_ += dv_dot_ * dt;
     dv_hys_ = max(min(dv_hys_, dv_max), dv_min);
-    return (dv_hys_ * (*rp_hys_scale_)); // Scale on output only.   Don't retain it for feedback to ode
+    return (dv_hys_ * (*sp_hys_scale_)); // Scale on output only.   Don't retain it for feedback to ode
 }
 

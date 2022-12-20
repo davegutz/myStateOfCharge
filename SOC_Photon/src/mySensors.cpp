@@ -53,7 +53,7 @@ float TempSensor::load(Sensors *Sen)
   float temp = 0.;
   static float Tb_hdwe = 0.;
   // Read hardware and check
-  while ( ++count<MAX_TEMP_READS && temp==0 && !sp.mod_tb() )
+  while ( ++count<MAX_TEMP_READS && temp==0 && !sp.mod_tb_dscn() )
   {
     if ( read() ) temp = celsius() + (TBATT_TEMPCAL);
     delay(1);
@@ -79,12 +79,12 @@ float TempSensor::load(Sensors *Sen)
 // class Shunt
 // constructors
 Shunt::Shunt()
-: Adafruit_ADS1015(), name_("None"), port_(0x00), bare_(false){}
-Shunt::Shunt(const String name, const uint8_t port, float *cp_ib_bias, float *cp_ib_scale, const float v2a_s, float *rp_shunt_gain_sclr)
+: Adafruit_ADS1015(), name_("None"), port_(0x00), bare_detected_(false){}
+Shunt::Shunt(const String name, const uint8_t port, float *cp_ib_bias, float *cp_ib_scale, const float v2a_s, float *sp_shunt_gain_sclr)
 : Adafruit_ADS1015(),
-  name_(name), port_(port), bare_(false), cp_ib_bias_(cp_ib_bias), cp_ib_scale_(cp_ib_scale), v2a_s_(v2a_s),
+  name_(name), port_(port), bare_detected_(false), cp_ib_bias_(cp_ib_bias), cp_ib_scale_(cp_ib_scale), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0), sclr_(1.), add_(0.),
-  rp_shunt_gain_sclr_(rp_shunt_gain_sclr), sample_time_(0UL), sample_time_z_(0UL)
+  sp_shunt_gain_sclr_(sp_shunt_gain_sclr), sample_time_(0UL), sample_time_z_(0UL), dscn_cmd_(false)
 {
   if ( name_=="No Amp")
     setGain(GAIN_SIXTEEN, GAIN_SIXTEEN); // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
@@ -94,7 +94,7 @@ Shunt::Shunt(const String name, const uint8_t port, float *cp_ib_bias, float *cp
     setGain(GAIN_EIGHT, GAIN_TWO); // First argument is differential, second is single-ended.
   if (!begin(port_)) {
     Serial.printf("FAILED init ADS SHUNT MON %s\n", name_.c_str());
-    bare_ = true;
+    bare_detected_ = true;
   }
   else Serial.printf("SHUNT MON %s started\n", name_.c_str());
 }
@@ -106,20 +106,20 @@ void Shunt::pretty_print()
 {
   Serial.printf("Shunt(%s)::\n", name_.c_str());
   Serial.printf(" port 0x%X;\n", port_);
-  Serial.printf(" bare%d;\n", bare_);
+  Serial.printf(" bare_det%d dscn_cmd%d\n", bare_detected_, dscn_cmd_);
   Serial.printf(" *cp_ib_bias%7.3f; A\n", *cp_ib_bias_);
   Serial.printf(" *cp_ib_scale%7.3f; A\n", *cp_ib_scale_);
   Serial.printf(" v2a_s%7.2f; A/V\n", v2a_s_);
   Serial.printf(" vshunt_int%d; count\n", vshunt_int_);
   Serial.printf(" ishunt_cal%7.3f; A\n", ishunt_cal_);
-  Serial.printf(" *rp_shunt_gain_sclr%7.3f; A\n", *rp_shunt_gain_sclr_);
+  Serial.printf(" *sp_shunt_gain_sclr%7.3f; A\n", *sp_shunt_gain_sclr_);
   // Serial.printf("Shunt(%s)::", name_.c_str()); Adafruit_ADS1015::pretty_print(name_);
 }
 
 // load
 void Shunt::load()
 {
-  if ( !bare_ && !sp.mod_ib() )
+  if ( !bare_detected_ && !dscn_cmd_ )
   {
     vshunt_int_ = readADC_Differential_0_1();
     sample_time_z_ = sample_time_;
@@ -133,7 +133,7 @@ void Shunt::load()
     vshunt_int_0_ = 0; vshunt_int_1_ = 0; vshunt_int_ = 0;
   }
   vshunt_ = computeVolts(vshunt_int_);
-  ishunt_cal_ = vshunt_*v2a_s_*float(!sp.mod_ib())*(*cp_ib_scale_)*(*rp_shunt_gain_sclr_) + *cp_ib_bias_;
+  ishunt_cal_ = vshunt_*v2a_s_*float(!sp.mod_ib())*(*cp_ib_scale_)*(*sp_shunt_gain_sclr_) + *cp_ib_bias_;
 }
 
 
@@ -184,8 +184,8 @@ void Fault::cc_diff(Sensors *Sen, BatteryMonitor *Mon)
   {
     cc_diff_empty_sclr_ = 1.;
   }
-
-  cc_diff_thr_ = CC_DIFF_SOC_DIS_THRESH*cc_diff_sclr_*cc_diff_empty_sclr_;
+  // ewsat_sclr_ used here because voc_soc map inaccurate on cold days
+  cc_diff_thr_ = CC_DIFF_SOC_DIS_THRESH*cc_diff_sclr_*cc_diff_empty_sclr_*ewsat_sclr_;
   failAssign( abs(cc_diff_)>=cc_diff_thr_ , CC_DIFF_FA );  // Not latched
 }
 
@@ -288,12 +288,13 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" imh %7.3f  imm %7.3f\n", Sen->Ib_amp_hdwe, Sen->Ib_amp_model);
   Serial.printf(" inh %7.3f  inm %7.3f\n\n", Sen->Ib_noa_hdwe, Sen->Ib_noa_model);
 
-  Serial.printf(" mod_tb  %d  mod_vb  %d  mod_ib  %d\n", sp.mod_tb(), sp.mod_vb(), sp.mod_ib());
+  Serial.printf(" mod_tb %d mod_vb %d mod_ib  %d\n", sp.mod_tb(), sp.mod_vb(), sp.mod_ib());
+  Serial.printf(" mod_tb_dscn %d mod_vb_dscn %d mod_ib_amp_dscn %d mod_ib_noa_dscn %d\n", sp.mod_tb_dscn(), sp.mod_vb_dscn(), sp.mod_ib_amp_dscn(), sp.mod_ib_noa_dscn());
   Serial.printf(" tb_s_st %d  vb_s_st %d  ib_s_st %d\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_);
   Serial.printf(" fake_faults %d latched_fail %d latched_fail_fake %d preserving %d\n\n", cp.fake_faults, latched_fail_, latched_fail_fake_, preserving_);
 
-  Serial.printf(" bare n  %d  x \n", Sen->ShuntNoAmp->bare());
-  Serial.printf(" bare m  %d  x \n", Sen->ShuntAmp->bare());
+  Serial.printf(" bare n  %d  x \n", Sen->ShuntNoAmp->bare_detected());
+  Serial.printf(" bare m  %d  x \n", Sen->ShuntAmp->bare_detected());
   Serial.printf(" ib_dsc  %d  %d 'Fq v'\n", ib_dscn_flt(), ib_dscn_fa());
   Serial.printf(" ibd_lo  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_lo_flt(), ib_diff_lo_fa());
   Serial.printf(" ibd_hi  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_hi_flt(), ib_diff_hi_fa());
@@ -336,8 +337,8 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf(" tb_s_st %d  vb_s_st %d  ib_s_st %d\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_);
   Serial1.printf(" fake_faults %d latched_fail %d latched_fail_fake %d preserving %d\n\n", cp.fake_faults, latched_fail_, latched_fail_fake_, preserving_);
 
-  Serial1.printf(" bare n  %d  x \n", Sen->ShuntNoAmp->bare());
-  Serial1.printf(" bare m  %d  x \n", Sen->ShuntAmp->bare());
+  Serial1.printf(" bare n  %d  x \n", Sen->ShuntNoAmp->bare_detected());
+  Serial1.printf(" bare m  %d  x \n", Sen->ShuntAmp->bare_detected());
   Serial1.printf(" ib_dsc  %d  %d 'Fq v'\n", ib_dscn_flt(), ib_dscn_fa());
   Serial1.printf(" ibd_lo  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_lo_flt(), ib_diff_lo_fa());
   Serial1.printf(" ibd_hi  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_hi_flt(), ib_diff_hi_fa());
@@ -395,29 +396,29 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   }
 
   // Ib truth table
-  if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() )  // these separate inputs don't latch
+  if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() )  // these separate inputs don't latch
   {
     ib_sel_stat_ = 0;    // takes two non-latching inputs to set and latch
     latched_fail_ = true;
   }
-  else if ( sp.ib_select>0 && !Sen->ShuntAmp->bare() )
+  else if ( sp.ib_select>0 && !Sen->ShuntAmp->bare_detected() )
   {
     ib_sel_stat_ = 1;
     latched_fail_ = true;
   }
-  else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare() )  // latches - use reset
+  else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_detected() )  // latches - use reset
   {
     ib_sel_stat_ = -1;
     latched_fail_ = true;
   }
-  else if ( sp.ib_select<0 && !Sen->ShuntNoAmp->bare() )  // latches - use reset
+  else if ( sp.ib_select<0 && !Sen->ShuntNoAmp->bare_detected() )  // latches - use reset
   {
     ib_sel_stat_ = -1;
     latched_fail_ = true;
   }
   else if ( sp.ib_select==0 )  // auto
   {
-    if ( Sen->ShuntAmp->bare() && !Sen->ShuntNoAmp->bare() )  // these inputs don't latch
+    if ( Sen->ShuntAmp->bare_detected() && !Sen->ShuntNoAmp->bare_detected() )  // these inputs don't latch
     {
       ib_sel_stat_ = -1;
       latched_fail_ = true;
@@ -449,19 +450,19 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // Fake faults.  Objective is to provide same recording behavior as normal operation so can see debug faults without shutdown of anything
   if ( cp.fake_faults )
   {
-    if ( Sen->ShuntAmp->bare() && Sen->ShuntNoAmp->bare() )  // these separate inputs don't latch
+    if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() )  // these separate inputs don't latch
     {
       latched_fail_fake_ = true;
     }
-    else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare() )  // latches - use reset
+    else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_detected() )  // latches - use reset
     {
       latched_fail_fake_ = true;
     }
-    else if ( sp.ib_select<0 && !Sen->ShuntNoAmp->bare() )  // latches - use reset
+    else if ( sp.ib_select<0 && !Sen->ShuntNoAmp->bare_detected() )  // latches - use reset
     {
       latched_fail_fake_ = true;
     }
-    else if ( Sen->ShuntAmp->bare() && !Sen->ShuntNoAmp->bare() )  // these inputs don't latch
+    else if ( Sen->ShuntAmp->bare_detected() && !Sen->ShuntNoAmp->bare_detected() )  // these inputs don't latch
     {
       latched_fail_fake_ = true;
     }
@@ -538,7 +539,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   if ( ib_sel_stat_ != ib_sel_stat_last_ || vb_sel_stat_ != vb_sel_stat_last_ || tb_sel_stat_ != tb_sel_stat_last_ )
   {
     Serial.printf("Sel chg:  Amp->bare %d NoAmp->bare %d ib_diff_fa %d wh_fa %d wl_fa %d wv_fa %d cc_diff_fa_ %d\n sp.ib_select %d ib_sel_stat %d vb_sel_stat %d tb_sel_stat %d vb_fail %d Tb_fail %d\n",
-      Sen->ShuntAmp->bare(), Sen->ShuntNoAmp->bare(), ib_diff_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_diff_fa_, sp.ib_select, ib_sel_stat_, vb_sel_stat_, tb_sel_stat_, vb_fa(), tb_fa());
+      Sen->ShuntAmp->bare_detected(), Sen->ShuntNoAmp->bare_detected(), ib_diff_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_diff_fa_, sp.ib_select, ib_sel_stat_, vb_sel_stat_, tb_sel_stat_, vb_fa(), tb_fa());
     Serial.printf("fake %d ibss %d ibssl %d vbss %d vbssl %d tbss %d  tbssl %d latched_fail %d latched_fail_fake %d\n",
       cp.fake_faults, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, tb_sel_stat_, tb_sel_stat_last_, latched_fail_, latched_fail_fake_);
   }
@@ -635,10 +636,10 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 
 
 // Class Sensors
-Sensors::Sensors(double T, double T_temp,uint16_t pin_1_wire, Sync *ReadSensors):
-  rp_Tb_bias_hdwe_(&sp.Tb_bias_hdwe), rp_Vb_bias_hdwe_(&sp.Vb_bias_hdwe), Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE),
+Sensors::Sensors(double T, double T_temp,uint16_t pin_1_wire, Sync *ReadSensors, float *sp_nP, float *sp_nS):
+  sp_Tb_bias_hdwe_(&sp.Tb_bias_hdwe), sp_Vb_bias_hdwe_(&sp.Vb_bias_hdwe), Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE),
   Ib_amp_noise_amp_(IB_AMP_NOISE), Ib_noa_noise_amp_(IB_NOA_NOISE), reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL),
-  sample_time_ib_hdwe_(0UL), sample_time_vb_hdwe_(0UL)
+  sample_time_ib_hdwe_(0UL), sample_time_vb_hdwe_(0UL), sp_nP_(sp_nP), sp_nS_(sp_nS)
 {
   this->T = T;
   this->T_filt = T;
@@ -667,8 +668,8 @@ Sensors::Sensors(double T, double T_temp,uint16_t pin_1_wire, Sync *ReadSensors)
 // Bias model outputs for sensor fault injection
 void Sensors::bias_all_model()
 {
-  Ib_amp_model = ShuntAmp->bias_any( Ib_model ) + Ib_amp_noise();
-  Ib_noa_model = ShuntNoAmp->bias_any( Ib_model ) + Ib_noa_noise();
+  Ib_amp_model = ShuntAmp->adj_Ib( Ib_model ) + Ib_amp_noise();
+  Ib_noa_model = ShuntNoAmp->adj_Ib( Ib_model ) + Ib_noa_noise();
 }
 
 // Deliberate choice based on results and inputs
@@ -784,13 +785,13 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
       sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,  %10.7f,  %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,  %7.5f,%7.5f, ",
           cTime, reset, sp.ib_select,
           Flt->cc_diff(),
-          Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model, Ib_model, 
+          ib_amp_hdwe(), ib_noa_hdwe(), ib_amp_model(), ib_noa_model(), ib_model(), 
           Flt->ib_diff(), Flt->ib_diff_f());
       Serial.print(cp.buffer);
       sprintf(cp.buffer, "  %7.5f,%7.5f,%7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %5.2f,%5.2f, %d, %5.2f, ",
           Mon->voc_soc(), Flt->e_wrap(), Flt->e_wrap_filt(),
-          Flt->ib_sel_stat(), Ib_hdwe, Ib_hdwe_model, sp.mod_ib(), Ib,
-          Flt->vb_sel_stat(), Vb_hdwe, Vb_model, sp.mod_vb(), Vb,
+          Flt->ib_sel_stat(), ib_hdwe(), ib_hdwe_model(), sp.mod_ib(), ib(),
+          Flt->vb_sel_stat(), vb_hdwe(), vb_model(), sp.mod_vb(), vb(),
           Tb_hdwe, Tb, sp.mod_tb(), Tb_filt);
       Serial.print(cp.buffer);
       sprintf(cp.buffer, "%d, %d, %7.3f, %7.3f, %d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,",
@@ -891,8 +892,8 @@ void Sensors::shunt_select_initial()
     // Over-ride 'permanent' with Talk(sp.ib_select) = Talk('s')
 
     // Retrieve values.   Return values include scalar/adder for fault
-    Ib_amp_model = ShuntAmp->bias_any( Ib_model );      // uses past Ib
-    Ib_noa_model = ShuntNoAmp->bias_any( Ib_model );  // uses pst Ib
+    Ib_amp_model = ShuntAmp->adj_Ib( Ib_model );      // uses past Ib
+    Ib_noa_model = ShuntNoAmp->adj_Ib( Ib_model );    // uses past Ib
     Ib_amp_hdwe = ShuntAmp->ishunt_cal();
     Ib_noa_hdwe = ShuntNoAmp->ishunt_cal();
 
@@ -924,11 +925,11 @@ void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp)
   {
       Tb_hdwe_filt = TbSenseFilt->calculate(Tb_hdwe, reset_temp_, min(T_temp, F_MAX_T_TEMP));
   }
-  Tb_hdwe += *rp_Tb_bias_hdwe_;
-  Tb_hdwe_filt += *rp_Tb_bias_hdwe_;
+  Tb_hdwe += *sp_Tb_bias_hdwe_;
+  Tb_hdwe_filt += *sp_Tb_bias_hdwe_;
 
   if ( sp.debug==16 ) Serial.printf("reset_temp_,Tb_bias_hdwe_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",
-    reset_temp_, *rp_Tb_bias_hdwe_, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt );
+    reset_temp_, *sp_Tb_bias_hdwe_, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt );
 
   Flt->tb_stale(reset_temp_, Sen);
 }
@@ -936,14 +937,22 @@ void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp)
 // Load analog voltage
 void Sensors::vb_load(const uint16_t vb_pin)
 {
-  Vb_raw = analogRead(vb_pin);
+  if ( !sp.mod_vb_dscn() )
+  {
+    Vb_raw = analogRead(vb_pin);
+    Vb_hdwe =  float(Vb_raw)*VB_CONV_GAIN*sp.Vb_scale + float(VBATT_A) + *sp_Vb_bias_hdwe_;
+  }
+  else
+  {
+    Vb_raw = 0;
+    Vb_hdwe = 0.;
+  }
   sample_time_vb_hdwe_ = millis();
-  Vb_hdwe =  float(Vb_raw)*VB_CONV_GAIN*sp.Vb_scale + float(VBATT_A) + *rp_Vb_bias_hdwe_;
 }
 
 // Print analog voltage
 void Sensors::vb_print()
 {
-  Serial.printf("reset, T, Vb_raw, rp_Vb_bias_hdwe_, Vb_hdwe, vb_flt(), vb_fa(), wv_fa=, %d, %7.3f, %d, %7.3f,  %7.3f, %d, %d, %d,\n",
-    reset, T, Vb_raw, *rp_Vb_bias_hdwe_, Vb_hdwe, Flt->vb_flt(), Flt->vb_fa(), Flt->wrap_vb_fa());
+  Serial.printf("reset, T, vb_dscn, Vb_raw, sp_Vb_bias_hdwe_, Vb_hdwe, vb_flt(), vb_fa(), wv_fa=, %d, %7.3f, %d, %d, %7.3f,  %7.3f, %d, %d, %d,\n",
+    reset, T, sp.mod_vb_dscn(), Vb_raw, *sp_Vb_bias_hdwe_, Vb_hdwe, Flt->vb_flt(), Flt->vb_fa(), Flt->wrap_vb_fa());
 }

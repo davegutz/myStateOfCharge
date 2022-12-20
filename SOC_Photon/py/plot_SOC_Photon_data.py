@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 
 def plot_soc_photon_data(r, key):
-    var_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,"
+    var_str = "unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  vb,  ib,        vsat,dV_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,"
     count = 0
     i = 0
     cTime_last = None
@@ -57,17 +57,17 @@ def plot_soc_photon_data(r, key):
                 sel = int(list_r[5])
                 mod = int(list_r[6])
                 Tb = float(list_r[7])
-                Vb = float(list_r[8])
-                Ib = float(list_r[9])
-                Vsat = float(list_r[10])
+                vb = float(list_r[8])
+                ib = float(list_r[9])
+                vsat = float(list_r[10])
                 dV_dyn = float(list_r[11])
-                Voc_stat = float(list_r[12])
-                Voc_ekf = float(list_r[13])
+                voc_stat = float(list_r[12])
+                voc_ekf = float(list_r[13])
                 y_ekf = float(list_r[14])
                 soc_s = float(list_r[15])
                 soc_ekf = float(list_r[16])
                 soc = float(list_r[17])
-                print(count, unit, hm, cTime, dt, sat, sel, mod, Tb, Vb, Ib, Vsat, dV_dyn, Voc_stat, Voc_ekf, y_ekf, soc_s,
+                print(count, unit, hm, cTime, dt, sat, sel, mod, Tb, vb, ib, vsat, dV_dyn, voc_stat, voc_ekf, y_ekf, soc_s,
                       soc_ekf, soc)
                 i += 1
                 # Plot when have at least 2 points available
@@ -83,12 +83,12 @@ def plot_soc_photon_data(r, key):
                         y_vec0[:, 1] = soc_ekf
                         y_vec0[:, 2] = soc
                         y_vec1 = np.zeros((len(t_v), 1))
-                        y_vec1[:, 0] = Ib
+                        y_vec1[:, 0] = ib
                         y_vec2 = np.zeros((len(t_v), 4))
-                        y_vec2[:, 0] = Vb
-                        y_vec2[:, 1] = Voc_stat
-                        y_vec2[:, 2] = Voc_ekf
-                        y_vec2[:, 3] = Vsat
+                        y_vec2[:, 0] = vb
+                        y_vec2[:, 1] = voc_stat
+                        y_vec2[:, 2] = voc_ekf
+                        y_vec2[:, 3] = vsat
                         print('Point#', i, 'at cTime=', cTime, 'T may be=', T_maybe, 'N=', n_v)
                         # print('t_v=', t_v)
                         # print('y_vec1=', y_vec1, 'y_vec2=', y_vec2)
@@ -99,11 +99,11 @@ def plot_soc_photon_data(r, key):
                     y_vec0[-1][0] = soc_s
                     y_vec0[-1][1] = soc_ekf
                     y_vec0[-1][2] = soc
-                    y_vec1[-1][0] = Ib
-                    y_vec2[-1][0] = Vb
-                    y_vec2[-1][1] = Voc_stat
-                    y_vec2[-1][2] = Voc_ekf
-                    y_vec2[-1][3] = Vsat
+                    y_vec1[-1][0] = ib
+                    y_vec2[-1][0] = vb
+                    y_vec2[-1][1] = voc_stat
+                    y_vec2[-1][2] = voc_ekf
+                    y_vec2[-1][3] = vsat
                     if linen_x1 is None:
                         fig = plt.figure(figsize=(12, 5))
                     linen_x0, axx0 = liven_plotter(t_v, y_vec0, linen_x0, fig, subplot=311, ax=axx0, y_label='Amps',
@@ -111,9 +111,9 @@ def plot_soc_photon_data(r, key):
                                                    labels=['soc_s', 'soc_ekf', 'soc'])
                     linen_x1, axx1 = liven_plotter(t_v, y_vec1, linen_x1, fig, subplot=312, ax=axx1, y_label='Amps',
                                                    pause_time=0.01,
-                                                   labels='Ib')
+                                                   labels='ib')
                     linen_x2, axx2 = liven_plotter(t_v, y_vec2, linen_x2, fig, subplot=313, ax=axx2, y_label='Volts',
-                                                   pause_time=0.01, labels=['Vb', 'Voc_stat', 'Voc_ekf', 'Vsat'])
+                                                   pause_time=0.01, labels=['vb', 'voc_stat', 'voc_ekf', 'vsat'])
                     y_vec0 = np.append(y_vec0[1:][:], np.zeros((1, 3)), axis=0)
                     y_vec1 = np.append(y_vec1[1:][:], np.zeros((1, 1)), axis=0)
                     y_vec2 = np.append(y_vec2[1:][:], np.zeros((1, 4)), axis=0)

@@ -270,7 +270,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 {
                   initialize_all(Mon, Sen, FP_in, true);
                   // debug_m1(Mon, Sen);
-                  if ( sp.modeling )
+                  if ( sp.modeling() )
                   {
                     cp.cmd_reset();
                     chit("W3;", SOON);  // Wait 3 passes of Control
@@ -287,7 +287,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   Sen->Sim->apply_soc(FP_in, Sen->Tb_filt);
                   Serial.printf("soc%8.4f, dq%7.3f, soc_mod%8.4f, dq mod%7.3f,\n",
                       Mon->soc(), Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q());
-                  if ( sp.modeling ) cp.cmd_reset();
+                  if ( sp.modeling() ) cp.cmd_reset();
                 }
                 else
                   Serial.printf("soc%8.4f; must be 0-1.1\n", FP_in);
@@ -437,7 +437,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("Sim.q_cap_rated%7.3f %7.3f to ", scale, Sen->Sim->q_cap_scaled());
             
                 Sen->Sim->apply_cap_scale(sp.s_cap_model);
-                if ( sp.modeling ) Mon->init_soc_ekf(Sen->Sim->soc());
+                if ( sp.modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
             
                 Serial.printf("%7.3f\n", Sen->Sim->q_cap_scaled());
                 Serial.printf("Sim:"); Sen->Sim->pretty_print(); Sen->Sim->Coulombs::pretty_print();
@@ -445,10 +445,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             
               case ( 'G' ):  // * SG<>: scale shunt gain both shunts simultaneously
                 scale = cp.input_string.substring(2).toFloat();
-                Serial.printf("sh gn scl%7.3f/%7.3f to", Sen->ShuntAmp->rp_shunt_gain_sclr(), Sen->ShuntNoAmp->rp_shunt_gain_sclr());
-                Sen->ShuntAmp->rp_shunt_gain_sclr(scale);
-                Sen->ShuntNoAmp->rp_shunt_gain_sclr(scale);
-                Serial.printf("%7.3f/%7.3f\n", Sen->ShuntAmp->rp_shunt_gain_sclr(), Sen->ShuntNoAmp->rp_shunt_gain_sclr());
+                Serial.printf("sh gn scl%7.3f/%7.3f to", Sen->ShuntAmp->sp_shunt_gain_sclr(), Sen->ShuntNoAmp->sp_shunt_gain_sclr());
+                Sen->ShuntAmp->sp_shunt_gain_sclr(scale);
+                Sen->ShuntNoAmp->sp_shunt_gain_sclr(scale);
+                Serial.printf("%7.3f/%7.3f\n", Sen->ShuntAmp->sp_shunt_gain_sclr(), Sen->ShuntNoAmp->sp_shunt_gain_sclr());
                 break;
 
               case ( 'h' ):  //   Sh<>: scale hysteresis
@@ -688,7 +688,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf ("M::"); Mon->Coulombs::pretty_print();
                 Serial.printf ("M::"); Mon->pretty_print_ss();
                 Serial.printf ("M::"); Mon->EKF_1x1::pretty_print();
-                Serial.printf ("\nmodeling = %d\n", sp.modeling);
+                Serial.printf ("\nmodeling = %d\n", sp.modeling());
                 break;
 
               case ( 'M' ):  // PM:  Print shunt Amp
@@ -707,7 +707,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 's' ):  // Ps:  Print sim
-                Serial.printf("\nmodeling=%d\n", sp.modeling);
+                Serial.printf("\nmodeling=%d\n", sp.modeling());
                 Serial.printf("S:");  Sen->Sim->pretty_print();
                 Serial.printf("S::"); Sen->Sim->Coulombs::pretty_print();
                 Serial.printf("S::"); Sen->Sim->pretty_print_ss();
@@ -723,7 +723,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'v' ):  // Pv:  Print Vb measure
                 Serial.printf("\nVolt:");   Serial.printf("Vb_bias_hdwe,Vb_m,mod,Vb=,%7.3f,%7.3f,%d,%7.3f,\n", 
-                  sp.Vb_bias_hdwe, Sen->Vb_model, sp.modeling, Sen->Vb);
+                  sp.Vb_bias_hdwe, Sen->Vb_model, sp.modeling(), Sen->Vb);
                 break;
 
               default:
@@ -871,10 +871,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 INT_in =  cp.input_string.substring(2).toInt();
                 if ( INT_in>=0 && INT_in<16 )
                 {
-                  boolean reset = sp.modeling != INT_in;
-                  Serial.printf("modeling %d to ", sp.modeling);
-                  sp.put_modeling(INT_in);
-                  Serial.printf("%d\n", sp.modeling);
+                  boolean reset = sp.modeling() != INT_in;
+                  Serial.printf("modeling %d to ", sp.modeling());
+                  sp.modeling(INT_in, Sen);
+                  Serial.printf("%d\n", sp.modeling());
                   if ( reset )
                   {
                     Serial.printf("Chg...reset\n");
@@ -885,7 +885,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 {
                   Serial.printf("err %d, modeling 0-7. 'h'\n", INT_in);
                 }
-                Serial.printf("Modeling %d\n", sp.modeling);
+                Serial.printf("Modeling %d\n", sp.modeling());
                 Serial.printf("tweak_test %d\n", sp.tweak_test());
                 Serial.printf("mod_ib %d\n", sp.mod_ib());
                 Serial.printf("mod_vb %d\n", sp.mod_vb());
@@ -1211,7 +1211,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" *SA= "); Serial.printf("%6.3f", sp.ib_scale_amp); Serial.printf(": scale amp [%6.3f]\n", CURR_SCALE_AMP); 
   Serial.printf(" *SB= "); Serial.printf("%6.3f", sp.ib_scale_noa); Serial.printf(": scale noa [%6.3f]\n", CURR_SCALE_NOA); 
   Serial.printf(" *Sc=  "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println(": sp. Scalar cap"); 
-  Serial.printf(" *SG= "); Serial.printf("%6.3f/%6.3f", Sen->ShuntAmp->rp_shunt_gain_sclr(), Sen->ShuntAmp->rp_shunt_gain_sclr());
+  Serial.printf(" *SG= "); Serial.printf("%6.3f/%6.3f", Sen->ShuntAmp->sp_shunt_gain_sclr(), Sen->ShuntAmp->sp_shunt_gain_sclr());
   Serial.printf(": sp. scale shunt gains [1]\n"); 
   Serial.printf(" *Sh= "); Serial.printf("%6.3f", sp.hys_scale); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
   Serial.printf("  SH= "); Serial.printf("%6.3f", Sen->Sim->hys_state()); Serial.printf(": hys states [0]\n");
@@ -1295,7 +1295,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("\nX<?> - Test Mode.   For example:\n");
   Serial.printf(" Xd=  "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
-  Serial.printf(" Xm=  "); Serial.printf("%d,   modeling bitmap [0b0000]\n", sp.modeling);
+  Serial.printf(" Xm=  "); Serial.printf("%d,   modeling bitmap [0b0000]\n", sp.modeling());
   Serial.printf("      0x8 tweak_test = %d\n", sp.tweak_test());
   Serial.printf("      0x4 current = %d\n", sp.mod_ib());
   Serial.printf("      0x2 voltage = %d\n", sp.mod_vb());

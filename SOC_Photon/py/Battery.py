@@ -91,7 +91,7 @@ V_BATT_RISING = 10.3  # Shutoff point when off, V (10.3)
 RANDLES_T_MAX = 0.31  # Maximum update time of Randles state space model to avoid aliasing and instability (0.31 allows DP3)
 cp_eframe_mult = 20  # Run EKF 20 times slower than Coulomb Counter and Randles models
 VB_DC_DC = 13.5  # Estimated dc-dc charger, V
-HDB_VBATT = 0.05  # Half deadband to filter Vb, V (0.05)
+HDB_VBATT = 0.05  # Half deadband to filter vb, V (0.05)
 HYS_CAP = 3.6e3  # Capacitance of hysteresis, Farads (3.6e3)
 WRAP_ERR_FILT = 4.  # Wrap error filter time constant, s (4)
 MAX_WRAP_ERR_FILT = 10.  # Anti-windup wrap error filter, V (10)
@@ -351,15 +351,15 @@ class BatteryMonitor(Battery, EKF1x1):
         self.y_filt = 0.
         self.y_filt_2Ord = General2Pole(0.1, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
         self.y_filt2 = 0.
-        self.Ib = 0.
-        self.Vb = 0.
-        self.Voc_stat = 0.
+        self.ib = 0.
+        self.vb = 0.
+        self.voc_stat = 0.
         self.voc_soc = 0.
-        self.Voc = 0.
+        self.voc = 0.
         self.voc_filt = 0.
-        self.Vsat = 0.
+        self.vsat = 0.
         self.dV_dyn = 0.
-        self.Voc_ekf = 0.
+        self.voc_ekf = 0.
         self.T_Rlim = RateLimit()
         self.eframe = 0
         self.eframe_mult = eframe_mult
@@ -493,13 +493,8 @@ class BatteryMonitor(Battery, EKF1x1):
         else:
             self.tcharge_ekf = -24.*self.soc_ekf
 
-        self.Ib = self.ib * rp.nP
-        self.Vb = self.vb * rp.nS
-        self.Voc = self.voc * rp.nS
-        self.Voc_stat = self.voc_stat * rp.nS
-        self.Vsat = self.vsat * rp.nS
         self.dV_dyn = self.dv_dyn * rp.nS
-        self.Voc_ekf = self.hx * rp.nS
+        self.voc_ekf = self.hx * rp.nS
 
         return self.soc_ekf
 
@@ -534,7 +529,7 @@ class BatteryMonitor(Battery, EKF1x1):
     def construct_state_space_monitor(self):
         """ State-space representation of dynamics
         Inputs:
-            ib      Current at = Vb = current at shunt, A
+            ib      Current at = vb = current at shunt, A
             vb      Voltage at terminal, V
         Outputs:
             voc     Voltage at storage, A
@@ -640,14 +635,10 @@ class BatteryMonitor(Battery, EKF1x1):
         self.e_voc_ekf = (self.voc - voc_ref) / voc_ref
         self.saved.e_soc_ekf.append(self.e_soc_ekf)
         self.saved.e_voc_ekf.append(self.e_voc_ekf)
-        self.saved.Ib.append(self.Ib)
-        self.saved.Vb.append(self.Vb)
         self.saved.Tb.append(self.temp_c)
-        self.saved.Voc.append(self.Voc)
-        self.saved.Voc_stat.append(self.Voc_stat)
-        self.saved.Vsat.append(self.Vsat)
+        self.saved.vsat.append(self.vsat)
         self.saved.dV_dyn.append(self.dV_dyn)
-        self.saved.Voc_ekf.append(self.Voc_ekf)
+        self.saved.voc_ekf.append(self.voc_ekf)
         self.saved.sat.append(int(self.sat))
         self.saved.sel.append(self.sel)
         self.saved.mod_data.append(self.mod)
@@ -813,7 +804,7 @@ class BatterySim(Battery):
     def construct_state_space_model(self):
         """ State-space representation of dynamics
         Inputs:
-            ib      Current at = Vb = current at shunt, A
+            ib      Current at = vb = current at shunt, A
             voc     Voltage at storage, A
         Outputs:
             vb      Voltage at terminal, V
@@ -927,7 +918,7 @@ class BatterySim(Battery):
         self.saved.d_delta_q.append(self.d_delta_q)
         self.saved.Tb.append(self.temp_c)
         self.saved.t_last.append(self.t_last)
-        self.saved.Vsat.append(self.vsat)
+        self.saved.vsat.append(self.vsat)
         self.saved.charge_curr.append(self.charge_curr)
         self.saved.sat.append(int(self.model_saturated))
         self.saved.delta_q.append(self.delta_q)
@@ -1027,17 +1018,17 @@ class Saved:
         self.P_post = []
         self.e_soc_ekf = []
         self.e_voc_ekf = []
-        self.Ib = []  # Bank current, A
-        self.Vb = []  # Bank voltage, V
+        self.ib = []  # Bank current, A
+        self.vb = []  # Bank voltage, V
         self.sat = []  # Indication that battery is saturated, T=saturated
         self.sel = []  # Current source selection, 0=amp, 1=no amp
         self.mod_data = []  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
         self.Tb = []  # Battery bank temperature, deg C
-        self.Vsat = []  # Monitor Bank saturation threshold at temperature, deg C
+        self.vsat = []  # Monitor Bank saturation threshold at temperature, deg C
         self.dV_dyn = []  # Monitor Bank current induced back emf, V
-        self.Voc_stat = []  # Monitor Static bank open circuit voltage, V
-        self.Voc = []  # Monitor Static bank open circuit voltage, V
-        self.Voc_ekf = []  # Monitor bank solved static open circuit voltage, V
+        self.voc_stat = []  # Monitor Static bank open circuit voltage, V
+        self.voc = []  # Monitor Static bank open circuit voltage, V
+        self.voc_ekf = []  # Monitor bank solved static open circuit voltage, V
         self.y_ekf = []  # Monitor single battery solver error, V
         self.y_filt = []  # Filtered EKF y residual value, V
         self.y_filt2 = []  # Filtered EKF y residual value, V
@@ -1247,7 +1238,7 @@ def overall_batt(mv, sv, rv, filename,
         n_fig += 1
         plt.title(plot_title + ' B 7')
         plt.plot(mv.time, mv.voc, color='red', linestyle='-', label='voc'+suffix)
-        plt.plot(mv.time, mv.Voc_ekf, color='blue', linestyle='-.', label='Voc_ekf'+suffix)
+        plt.plot(mv.time, mv.voc_ekf, color='blue', linestyle='-.', label='voc_ekf'+suffix)
         plt.plot(sv.time, sv.voc, color='green', linestyle=':', label='voc_s'+suffix)
         plt.legend(loc=4)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -1318,7 +1309,7 @@ def overall_batt(mv, sv, rv, filename,
         plt.plot(rv.time[1:], rv.x_dot[1:, 1], color='red', linestyle='-', label='Mon Randles x_dot[2]'+suffix)
         plt.legend(loc=2)
         plt.subplot(224)
-        plt.plot(rv.time[1:], rv.u[1:, 0], color='blue', linestyle='-', label='Mon Randles u[1]=Ib'+suffix)
+        plt.plot(rv.time[1:], rv.u[1:, 0], color='blue', linestyle='-', label='Mon Randles u[1]=ib'+suffix)
         plt.legend(loc=2)
         fig_file_name = filename + "_" + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -1503,8 +1494,8 @@ def overall_batt(mv, sv, rv, filename,
         plt.plot(rv1.time[1:], rv1.x_dot[1:, 1], color='black', linestyle='--', label='Mon Randles x_dot[2]'+suffix1)
         plt.legend(loc=2)
         plt.subplot(337)
-        plt.plot(rv.time[1:], rv.u[1:, 0], color='green', linestyle='-', label='Mon Randles u[1]=Ib'+suffix)
-        plt.plot(rv1.time[1:], rv1.u[1:, 0], color='black', linestyle='--', label='Mon Randles u[1]=Ib'+suffix1)
+        plt.plot(rv.time[1:], rv.u[1:, 0], color='green', linestyle='-', label='Mon Randles u[1]=ib'+suffix)
+        plt.plot(rv1.time[1:], rv1.u[1:, 0], color='black', linestyle='--', label='Mon Randles u[1]=ib'+suffix1)
         plt.legend(loc=2)
         fig_file_name = filename + "_" + str(n_fig) + ".png"
         fig_files.append(fig_file_name)

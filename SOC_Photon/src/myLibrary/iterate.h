@@ -9,8 +9,8 @@
 #ifndef _iterate_H
 #define _iterate_H
 
-#include "application.h"
-#include <math.h>
+#include "application.h"   // Needed for Photon?
+#include "math.h"
 
 // signum/sgn function
 template <typename T> int sgn(T val)

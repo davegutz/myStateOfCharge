@@ -1,4 +1,3 @@
-//
 // MIT License
 //
 // Copyright (C) 2021 - Dave Gutz

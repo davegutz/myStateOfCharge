@@ -112,7 +112,7 @@ if __name__ == '__main__':
         data_file = 'data20220926.txt'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
-        cols = ('time', 'Tb', 'Vb', 'Ib', 'soc', 'soc_ekf', 'Voc_dyn', 'Voc_stat', 'tweak_sclr_amp',
+        cols = ('time', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc_dyn', 'voc_stat', 'tweak_sclr_amp',
                 'tweak_sclr_noa', 'falw')
 
         # cat files

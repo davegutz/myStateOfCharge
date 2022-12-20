@@ -40,17 +40,17 @@ void Chemistry::assign_all_mod(const String mod_str)
   uint8_t mod = encode(mod_str);
   if ( mod==0 )  // "Battleborn";
   {
-    *rp_mod_code = mod;
+    *sp_mod_code = mod;
     assign_BB();
   }
   else if ( mod==1 )  // "LION" placeholder.  Data fabricated
   {
-    *rp_mod_code = mod;
+    *sp_mod_code = mod;
     assign_LI();
   }
   else if ( mod==2 )  // "LION" EKF placeholder.  Data fabricated
   {
-    *rp_mod_code = mod;
+    *sp_mod_code = mod;
     assign_LIE();
   }
   else Serial.printf("Battery::assign_all_mod:  unknown mod = %d.  Type 'h' for help\n", mod);
@@ -285,10 +285,10 @@ void Chemistry::pretty_print(void)
 
 // class Coulombs
 Coulombs::Coulombs() {}
-Coulombs::Coulombs(double *rp_delta_q, float *rp_t_last, const double q_cap_rated, const double t_rated, 
-  const double t_rlim, uint8_t *rp_mod_code, const double coul_eff)
-  : rp_delta_q_(rp_delta_q), rp_t_last_(rp_t_last), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017),
-  soc_min_(0), chem_(rp_mod_code), coul_eff_(coul_eff) {}
+Coulombs::Coulombs(double *sp_delta_q, float *sp_t_last, const double q_cap_rated, const double t_rated, 
+  const double t_rlim, uint8_t *sp_mod_code, const double coul_eff)
+  : sp_delta_q_(sp_delta_q), sp_t_last_(sp_t_last), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017),
+  soc_min_(0), chem_(sp_mod_code), coul_eff_(coul_eff) {}
 Coulombs::~Coulombs() {}
 
 
@@ -302,11 +302,11 @@ void Coulombs::pretty_print(void)
   Serial.printf(" q_cap%9.1f, C\n", q_capacity_);
   Serial.printf(" q%9.1f, C\n", q_);
   Serial.printf(" q_min%9.1f, C\n", q_min_);
-  Serial.printf(" delta_q%9.1f, C\n", *rp_delta_q_);
+  Serial.printf(" delta_q%9.1f, C\n", *sp_delta_q_);
   Serial.printf(" soc%8.4f\n", soc_);
   Serial.printf(" sat %d\n", sat_);
   Serial.printf(" t_rat%5.1f dg C\n", t_rated_);
-  Serial.printf(" t_last%5.1f dg C\n", *rp_t_last_);
+  Serial.printf(" t_last%5.1f dg C\n", *sp_t_last_);
   Serial.printf(" t_rlim%7.3f dg C / s\n", t_rlim_);
   Serial.printf(" resetting %d\n", resetting_);
   Serial.printf(" soc_min%8.4f\n", soc_min_);
@@ -327,8 +327,8 @@ void Coulombs::pretty_print(void)
 void Coulombs::apply_cap_scale(const double scale)
 {
   q_cap_rated_scaled_ = scale * q_cap_rated_;
-  q_capacity_ = calculate_capacity(*rp_t_last_);
-  q_ = *rp_delta_q_ + q_capacity_; // preserve delta_q, deficit since last saturation (like real life)
+  q_capacity_ = calculate_capacity(*sp_t_last_);
+  q_ = *sp_delta_q_ + q_capacity_; // preserve delta_q, deficit since last saturation (like real life)
   soc_ = q_ / q_capacity_;
   resetting_ = true;     // momentarily turn off saturation check
 }
@@ -336,8 +336,8 @@ void Coulombs::apply_cap_scale(const double scale)
 // Memory set, adjust book-keeping as needed.  delta_q, capacity, temp preserved
 void Coulombs::apply_delta_q(const double delta_q)
 {
-  *rp_delta_q_ = delta_q;
-  q_ = *rp_delta_q_ + q_capacity_;
+  *sp_delta_q_ = delta_q;
+  q_ = *sp_delta_q_ + q_capacity_;
   soc_ = q_ / q_capacity_;
   resetting_ = true;     // momentarily turn off saturation check
 }
@@ -346,15 +346,15 @@ void Coulombs::apply_delta_q(const double delta_q)
 void Coulombs::apply_delta_q_t(const boolean reset)
 {
   if ( !reset ) return;
-  q_capacity_ = calculate_capacity(*rp_t_last_);
-  q_ = q_capacity_ + *rp_delta_q_;
+  q_capacity_ = calculate_capacity(*sp_t_last_);
+  q_ = q_capacity_ + *sp_delta_q_;
   soc_ = q_ / q_capacity_;
   resetting_ = true;
 }
 void Coulombs::apply_delta_q_t(const double delta_q, const float temp_c)
 {
-  *rp_delta_q_ = delta_q;
-  *rp_t_last_ = temp_c;
+  *sp_delta_q_ = delta_q;
+  *sp_t_last_ = temp_c;
   apply_delta_q_t(true);
 }
 
@@ -365,7 +365,7 @@ void Coulombs::apply_soc(const double soc, const float temp_c)
   soc_ = soc;
   q_capacity_ = calculate_capacity(temp_c);
   q_ = soc*q_capacity_;
-  *rp_delta_q_ = q_ - q_capacity_;
+  *sp_delta_q_ = q_ - q_capacity_;
   resetting_ = true;     // momentarily turn off saturation check
 }
 
@@ -385,8 +385,8 @@ Inputs:
   coul_eff_       Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
 Outputs:
   q_capacity_     Saturation charge at temperature, C
-  *rp_delta_q_    Charge change since saturated, C
-  *rp_t_last_     Updated value of battery temperature used for rate limit memory, deg C
+  *sp_delta_q_    Charge change since saturated, C
+  *sp_t_last_     Updated value of battery temperature used for rate limit memory, deg C
   resetting_      Sticky flag for initialization, T=reset
   soc_            Fraction of saturation charge (q_capacity_) available (0-1) 
   soc_min_        Estimated soc where battery BMS will shutoff current, fraction
@@ -396,13 +396,13 @@ double Coulombs::count_coulombs(const double dt, const boolean reset_temp, const
   const boolean sat, const double delta_q_ekf)
 {
     // Rate limit temperature.   When modeling, reset_temp.  In real world, rate limited Tb ramps Coulomb count since bms_off
-    if ( reset_temp && sp.mod_vb() ) *rp_t_last_ = temp_c;
-    double temp_lim = max(min( temp_c, *rp_t_last_ + t_rlim_*dt), *rp_t_last_ - t_rlim_*dt);
+    if ( reset_temp && sp.mod_vb() ) *sp_t_last_ = temp_c;
+    double temp_lim = max(min( temp_c, *sp_t_last_ + t_rlim_*dt), *sp_t_last_ - t_rlim_*dt);
 
     // State change
     double d_delta_q = charge_curr * dt;
     if ( charge_curr>0. ) d_delta_q *= coul_eff_;
-    d_delta_q -= chem_.dqdt*q_capacity_*(temp_lim - *rp_t_last_);
+    d_delta_q -= chem_.dqdt*q_capacity_*(temp_lim - *sp_t_last_);
     sat_ = sat;
 
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status.
@@ -411,18 +411,18 @@ double Coulombs::count_coulombs(const double dt, const boolean reset_temp, const
         if ( d_delta_q > 0 )
         {
             d_delta_q = 0.;
-            if ( !resetting_ ) *rp_delta_q_ = 0.;
+            if ( !resetting_ ) *sp_delta_q_ = 0.;
         }
         else if ( reset_temp )
-          *rp_delta_q_ = 0.;
+          *sp_delta_q_ = 0.;
     }
-    // else if ( reset_temp && !cp.fake_faults ) *rp_delta_q_ = delta_q_ekf;  // Solution to booting up unsaturated
+    // else if ( reset_temp && !cp.fake_faults ) *sp_delta_q_ = delta_q_ekf;  // Solution to booting up unsaturated
     resetting_ = false;     // one pass flag
 
     // Integration.   Can go to negative
     q_capacity_ = calculate_capacity(temp_lim);
-    if ( !reset_temp ) *rp_delta_q_ = max(min(*rp_delta_q_ + d_delta_q, 0.0), -q_capacity_*1.5);
-    q_ = q_capacity_ + *rp_delta_q_;
+    if ( !reset_temp ) *sp_delta_q_ = max(min(*sp_delta_q_ + d_delta_q, 0.0), -q_capacity_*1.5);
+    q_ = q_capacity_ + *sp_delta_q_;
 
     // Normalize
     soc_ = q_ / q_capacity_;
@@ -431,9 +431,9 @@ double Coulombs::count_coulombs(const double dt, const boolean reset_temp, const
 
     // if ( sp.debug==96 )
     //     Serial.printf("cc:,reset_temp,dt,voc, Voc_filt, V_sat, temp_c, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_cap, soc, %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
-    //                 reset, dt, pp.pubList.Voc, pp.pubList.Voc_filt,  this->Vsat(), temp_c, temp_lim, sat, charge_curr, d_delta_q, *rp_delta_q_, q_, q_capacity_, soc_);
+    //                 reset, dt, pp.pubList.Voc, pp.pubList.Voc_filt,  this->Vsat(), temp_c, temp_lim, sat, charge_curr, d_delta_q, *sp_delta_q_, q_, q_capacity_, soc_);
 
     // Save and return
-    *rp_t_last_ = temp_lim;
+    *sp_t_last_ = temp_lim;
     return ( soc_ );
 }
