@@ -276,7 +276,8 @@ void load_ib_vb(const boolean reset, Sensors *Sen, Pins *myPins, BatteryMonitor 
   // Vb
   // Outputs:  Sen->Vb
   Sen->vb_load(myPins->Vb_pin);
-  Sen->Flt->vb_check(Sen, Mon, VBATT_MIN, VBATT_MAX, reset);
+  if ( !sp.mod_vb_dscn() )  Sen->Flt->vb_check(Sen, Mon, VBATT_MIN, VBATT_MAX, reset);
+  else                      Sen->Flt->vb_check(Sen, Mon, -1.0, 1.0, reset);
   if ( sp.debug==15 ) Sen->vb_print();
 
   // Power calculation
