@@ -197,11 +197,11 @@ void Fault::ib_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   // Difference error, filter, check, persist, doesn't latch
   if ( sp.mod_ib() )
   {
-    ib_diff_ = (Sen->Ib_amp_model - Sen->Ib_noa_model) / Mon->nP();
+    ib_diff_ = Sen->ib_amp_model() - Sen->ib_noa_model();
   }
   else
   {
-    ib_diff_ = (Sen->Ib_amp_hdwe - Sen->Ib_noa_hdwe) / Mon->nP();
+    ib_diff_ = Sen->ib_amp_hdwe() - Sen->ib_noa_hdwe();
   }
   ib_diff_f_ = IbErrFilt->calculate(ib_diff_, reset_loc, min(Sen->T, MAX_ERR_T));
   ib_diff_thr_ = IBATT_DISAGREE_THRESH*ib_diff_sclr_;
@@ -581,7 +581,7 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       failAssign(false, IB_AMP_FA);
       failAssign(false, IB_NOA_FA);
     }
-    float current_max = RATED_BATT_CAP * Mon->nP();
+    float current_max = RATED_BATT_CAP * sp.nP;
     faultAssign( abs(Sen->ShuntAmp->ishunt_cal()) >= current_max && !disab_ib_fa_, IB_AMP_FLT );
     faultAssign( abs(Sen->ShuntNoAmp->ishunt_cal()) >= current_max && !disab_ib_fa_, IB_NOA_FLT );
     if ( disab_ib_fa_ )
@@ -629,7 +629,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
   }
   else
   {
-    faultAssign( (Sen->Vb_hdwe<=_vb_min*Mon->nS() && Sen->Ib_hdwe>IB_MIN_UP) || (Sen->Vb_hdwe>=_vb_max*Mon->nS()), VB_FLT);
+    faultAssign( (Sen->vb_hdwe()<=_vb_min && Sen->ib_hdwe()*sp.nP>IB_MIN_UP) || (Sen->vb_hdwe()>=_vb_max), VB_FLT);
     failAssign( vb_fa() || VbHardFail->calculate(vb_flt(), VBATT_HARD_SET, VBATT_HARD_RESET, Sen->T, reset_loc), VB_FA);
   }
 }
@@ -648,7 +648,7 @@ Sensors::Sensors(double T, double T_temp,uint16_t pin_1_wire, Sync *ReadSensors,
   this->ShuntNoAmp = new Shunt("No Amp", 0x48, &cp.ib_tot_bias_noa, &sp.ib_scale_noa, SHUNT_NOA_GAIN, &sp.shunt_gain_sclr);
   this->SensorTb = new TempSensor(pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
   this->TbSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
-  this->Sim = new BatterySim(&sp.delta_q_model, &sp.t_last_model, &sp.s_cap_model, &sp.nP, &sp.nS, &sp.sim_chm, &sp.hys_scale);
+  this->Sim = new BatterySim(&sp.delta_q_model, &sp.t_last_model, &sp.s_cap_model, &sp.sim_chm, &sp.hys_scale);
   this->elapsed_inj = 0UL;
   this->start_inj = 0UL;
   this->stop_inj = 0UL;

@@ -97,10 +97,10 @@ void print_signal_sel_header(void)
     Serial.printf("  fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,\n");
           // -----, cTime, reset, sp.ib_select,
           //                                     cc_diff_,
-          //                                              Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model, Ib_model,
+          //                                              ib_amp_hdwe, ib_noa_hdwe, ib_amp_model, ib_noa_model, ib_model,
           //                                                                           ib_diff_, ib_diff_f,
-          //         voc_soc, e_wrap_, e_wrap_filt_, ib_sel_stat_, Ib_hdwe, Ib_hdwe_model, mod_ib(), Ib,
-          //                                                          vb_sel_stat, Vb_hdwe, Vb_model,mod_vb(), Vb,
+          //         voc_soc, e_wrap_, e_wrap_filt_, ib_sel_stat_, ib_hdwe, ib_hdwe_model, mod_ib(), ib,
+          //                                                          vb_sel_stat, vb_hdwe, vb_model,mod_vb(), Vb,
           //                                                                                    Tb_hdwe, Tb, mod_tb(), Tb_filt,
           //         fltw_, falw_, ib_rate_, ib_quiet_, tb_sel_stat_, cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_,
 }
@@ -121,7 +121,7 @@ void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
     sp.mon_chm, pubList->sat, sp.ib_select, sp.modeling(), Mon->bms_off(),
     Mon->Tb(), Mon->vb(), Mon->ib(), Mon->ib_charge(), Mon->ioc(), Mon->voc_soc(), 
-    Mon->vsat(), Mon->dV_dyn(), Mon->voc_stat(), Mon->Hx(),
+    Mon->vsat(), Mon->dv_dyn(), Mon->voc_stat(), Mon->hx(),
     Mon->y_ekf(),
     Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(),
     '\0');
@@ -215,9 +215,9 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   }
   // Call calculate twice because sat_ is a used-before-calculated (UBC)
   // Simple 'call twice' method because sat_ is discrete no analog which would require iteration
-  Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true);
-  Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true);  // Call again because sat is a UBC
-  Sen->Ib_model = Sen->Sim->ib_fut();
+  Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true) * sp.nS;
+  Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, true) * sp.nS;  // Call again because sat is a UBC
+  Sen->Ib_model = Sen->Sim->ib_fut() * sp.nP;
 
   // Call to count_coulombs not strictly needed for init.  Calculates some things not otherwise calculated for 'all'
   Sen->Sim->count_coulombs(Sen, true, Mon, true);
@@ -452,7 +452,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   //  Outputs:  Sim->temp_c(), Sim->Ib(), Sim->Vb(), sp.inj_bias, Sim.model_saturated
   Sen->Tb_model = Sen->Tb_model_filt = Sen->Sim->temp_c();
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, reset) + Sen->Vb_add();
-  Sen->Ib_model = Sen->Sim->Ib_charge();
+  Sen->Ib_model = Sen->Sim->ib_charge() * sp.nP;
   cp.model_cutback = Sen->Sim->cutback();
   cp.model_saturated = Sen->Sim->saturated();
 

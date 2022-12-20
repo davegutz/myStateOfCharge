@@ -42,8 +42,8 @@ void debug_m4(BatteryMonitor *Mon, Sensors *Sen)
 void debug_12(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("ib,ib_mod,   vb,vb_mod,  voc,voc_stat_mod,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
-  Mon->Ib(), Sen->Sim->Ib(),
-  Mon->Vb(), Sen->Sim->Vb(),
+  Mon->ib(), Sen->Sim->ib(),
+  Mon->vb(), Sen->Sim->vb(),
   Mon->voc(), Sen->Sim->voc_stat(), Sen->Sim->voc(),
   Mon->K_ekf(), Mon->y_ekf(),
   Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc());
@@ -88,7 +88,7 @@ void debug_h(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("\n Mon    Sim\n");
   Serial.printf("vb%5.2f,%5.2f\n", Mon->vb(), Sen->Sim->vb());
   Serial.printf("voc%5.2f,%5.2f\n", Mon->voc(), Sen->Sim->voc());
-  Serial.printf("voc_stat%5.2f,%5.2f\n", Mon->Voc_stat(), Sen->Sim->voc_stat());
+  Serial.printf("voc_stat%5.2f,%5.2f\n", Mon->voc_stat(), Sen->Sim->voc_stat());
   Serial.printf("dh_hys%7.3f,%7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
   Serial.printf("voc_soc%5.2f\n", Mon->voc_soc());
   Serial.printf("e_wrap%6.3f\n", Sen->Flt->e_wrap());
@@ -96,7 +96,7 @@ void debug_h(BatteryMonitor *Mon, Sensors *Sen)
   Serial1.printf("\n Mon    Sim\n");
   Serial1.printf("vb%5.2f,%5.2f\n", Mon->vb(), Sen->Sim->vb());
   Serial1.printf("voc%5.2f,%5.2f\n", Mon->voc(), Sen->Sim->voc());
-  Serial1.printf("voc_stat%5.2f,%5.2f\n", Mon->Voc_stat(), Sen->Sim->voc_stat());
+  Serial1.printf("voc_stat%5.2f,%5.2f\n", Mon->voc_stat(), Sen->Sim->voc_stat());
   Serial1.printf("dh_hys%7.3f,%7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
   Serial1.printf("voc_soc%5.2f\n", Mon->voc_soc());
   Serial1.printf("e_wrap%6.3f\n", Sen->Flt->e_wrap());
@@ -107,16 +107,16 @@ void debug_h(BatteryMonitor *Mon, Sensors *Sen)
 void debug_q(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("ib_amp_fail = %d,\nib_noa_fail = %d,\nvb_fail = %d,\n\
-Tb  = %7.3f,\nVb  = %7.3f,\nVoc = %7.3f,\nvoc_filt  = %7.3f,\nVsat = %7.3f,\nIb  = %7.3f,\nsoc_m = %8.4f,\n\
+Tb  = %7.3f,\nvb  = %7.3f,\nvoc = %7.3f,\nvoc_filt  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc_m = %8.4f,\n\
 soc_ekf= %8.4f,\nsoc = %8.4f,\nmodeling = %d,\n",
     Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
-    Mon->temp_c(), Mon->Vb(), Mon->Voc(), Mon->Voc_filt(), Mon->Vsat(), Mon->Ib(), Sen->Sim->soc(), Mon->soc_ekf(),
+    Mon->temp_c(), Mon->vb(), Mon->voc(), Mon->voc_filt(), Mon->vsat(), Mon->ib(), Sen->Sim->soc(), Mon->soc_ekf(),
     Mon->soc(), sp.modeling());
   Serial1.printf("ib_amp_fail = %d,\nib_noa_fail = %d,\nvb_fail = %d,\n\
-Tb  = %7.3f,\nVb  = %7.3f,\nVoc = %7.3f,\nvoc_filt  = %7.3f,\nVsat = %7.3f,\nIb  = %7.3f,\nsoc_m = %8.4f,\n\
+Tb  = %7.3f,\nvb  = %7.3f,\nvoc = %7.3f,\nvoc_filt  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc_m = %8.4f,\n\
 soc_ekf= %8.4f,\nsoc = %8.4f,\nmodeling = %d,\n",
       Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
-      Mon->temp_c(), Mon->Vb(), Mon->Voc(), Mon->Voc_filt(), Mon->Vsat(), Mon->Ib(), Sen->Sim->soc(), Mon->soc_ekf(),
+      Mon->temp_c(), Mon->vb(), Mon->voc(), Mon->voc_filt(), Mon->vsat(), Mon->ib(), Sen->Sim->soc(), Mon->soc_ekf(),
       Mon->soc(), sp.modeling());
   if ( Sen->Flt->falw() || Sen->Flt->fltw() ) chit("Pf;", QUEUE);
 }

@@ -35,9 +35,9 @@ extern PublishPars pp;            // For publishing
 // class Battery
 // constructors
 Battery::Battery() {}
-Battery::Battery(double *sp_delta_q, float *sp_t_last, float *sp_nP, float *sp_nS, uint8_t *sp_mod_code, float *sp_hys_scale)
+Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, float *sp_hys_scale)
     : Coulombs(sp_delta_q, sp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, sp_mod_code, COULOMBIC_EFF),
-    sr_(1), sp_nP_(sp_nP), sp_nS_(sp_nS), ds_voc_soc_(0), dv_voc_soc_(0)
+    sr_(1), ds_voc_soc_(0), dv_voc_soc_(0)
 {
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // Center in hysteresis
     hys_ = new Hysteresis(chem_.hys_cap, chem_, sp_hys_scale);
@@ -117,9 +117,7 @@ void Battery::pretty_print(void)
     Serial.printf("  bms_off=%d;\n", bms_off_);
     Serial.printf("  dv_dsoc=%10.6f; V/frac\n", dv_dsoc_);
     Serial.printf("  ib=%7.3f; A\n", ib_);
-    Serial.printf("  Ib=%7.3f; Bank, A\n", ib_*(*sp_nP_));
     Serial.printf("  vb=%7.3f; V\n", vb_);
-    Serial.printf("  Vb=%7.3f; Bank, V\n", vb_*(*sp_nS_));
     Serial.printf("  voc=%7.3f; V\n", voc_);
     Serial.printf("  voc_stat=%7.3f; V\n", voc_stat_);
     Serial.printf("  vsat=%7.3f; V\n", vsat_);
@@ -127,8 +125,6 @@ void Battery::pretty_print(void)
     Serial.printf("  dv_hys=%7.3f; V\n", hys_->dv_hys());
     Serial.printf("  sr=%7.3f; sclr\n", sr_);
     Serial.printf("  dt=%7.3f; s\n", dt_);
-    Serial.printf(" *sp_nP=%5.2f; P bk, eg '2P1S'\n", *sp_nP_);
-    Serial.printf(" *sp_nS=%5.2f; S bk, eg '2P1S'\n", *sp_nS_);
 }
 
 // Print State Space
@@ -150,8 +146,8 @@ double Battery::voc_soc_tab(const double soc, const float temp_c)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery monitor class
 BatteryMonitor::BatteryMonitor(): Battery() {}
-BatteryMonitor::BatteryMonitor(double *sp_delta_q, float *sp_t_last, float *sp_nP, float *sp_nS, uint8_t *sp_mod_code, float *sp_hys_scale):
-    Battery(sp_delta_q, sp_t_last, sp_nP, sp_nS, sp_mod_code, sp_hys_scale)
+BatteryMonitor::BatteryMonitor(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, float *sp_hys_scale):
+    Battery(sp_delta_q, sp_t_last, sp_mod_code, sp_hys_scale)
 {
     voc_filt_ = chem_.v_sat-HDB_VBATT;
     // EKF
@@ -254,8 +250,8 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     vsat_ = calc_vsat();
     dt_ =  Sen->T;
     double T_rate = T_RLim->calculate(temp_c_, T_RLIM, T_RLIM, reset_temp, Sen->T);
-    vb_ = Sen->Vb / (*sp_nS_);
-    ib_ = Sen->Ib / (*sp_nP_);
+    vb_ = Sen->vb();
+    ib_ = Sen->ib();
     ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
 
     // Table lookup
@@ -410,8 +406,8 @@ void BatteryMonitor::ekf_update(double *hx, double *H)
 void BatteryMonitor::init_battery_mon(const boolean reset, Sensors *Sen)
 {
     if ( !reset ) return;
-    vb_ = Sen->Vb / (*sp_nS_);
-    ib_ = Sen->Ib / (*sp_nP_);
+    vb_ = Sen->vb();
+    ib_ = Sen->ib();
     ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
     if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
@@ -545,8 +541,8 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
 BatterySim::BatterySim() : Battery() {}
-BatterySim::BatterySim(double *sp_delta_q, float *sp_t_last, float *sp_s_cap_model, float *sp_nP, float *sp_nS, uint8_t *sp_mod_code, float *sp_hys_scale) :
-    Battery(sp_delta_q, sp_t_last, sp_nP, sp_nS, sp_mod_code, sp_hys_scale), q_(RATED_BATT_CAP*3600.), sp_s_cap_model_(sp_s_cap_model),
+BatterySim::BatterySim(double *sp_delta_q, float *sp_t_last, float *sp_s_cap_model, uint8_t *sp_mod_code, float *sp_hys_scale) :
+    Battery(sp_delta_q, sp_t_last, sp_mod_code, sp_hys_scale), q_(RATED_BATT_CAP*3600.), sp_s_cap_model_(sp_s_cap_model),
     sample_time_(0UL), sample_time_z_(0UL)
 {
     // Randles dynamic model for EKF
@@ -707,7 +703,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     // Saturation logic, both full and empty
     sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * sp.cutback_gain_sclr;
     if ( sp.tweak_test() || !sp.modeling() ) sat_ib_max_ = ib_charge_fut;   // Disable cutback when real world or when doing tweak_test test
-    ib_fut_ = min(ib_charge_fut/(*sp_nP_), sat_ib_max_);      // the feedback of ib_
+    ib_fut_ = min(ib_charge_fut, sat_ib_max_);      // the feedback of ib_
     ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past value
     if ( (q_ <= 0.) && (ib_charge_ < 0.) ) ib_charge_ = 0.;   //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_fut_ == sat_ib_max_);
@@ -726,7 +722,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     if ( sp.debug==76 ) Serial.printf("BatterySim::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in=%7.3f,ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, VB_DC_DC=%7.3f, vb=%7.3f\n",
         soc_, temp_c_, ib_in_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, VB_DC_DC, vb_);
 
-    return ( vb_*(*sp_nS_) );
+    return ( vb_ );
 }
 
 // Injection model, calculate inj bias based on time since boot
@@ -862,9 +858,9 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
 void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
 {
     if ( !reset ) return;
-    ib_ = Sen->Ib_model_in / (*sp_nP_);
+    ib_ = Sen->ib_model_in();
     ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
-    vb_ = Sen->Vb / (*sp_nS_);
+    vb_ = Sen->vb();
     voc_ = vb_ - ib_ * chem_.r_ss;
     if ( isnan(voc_) ) voc_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow

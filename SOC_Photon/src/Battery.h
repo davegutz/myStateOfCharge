@@ -198,7 +198,7 @@ class Battery : public Coulombs
 {
 public:
   Battery();
-  Battery(double *sp_delta_q, float *sp_t_last, float *sp_nP, float *sp_nS, uint8_t *sp_mod_code, float *sp_hys_scale);
+  Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, float *sp_hys_scale);
   ~Battery();
   // operators
   // functions
@@ -217,7 +217,6 @@ public:
   double Dv() { return chem_.dvoc; };
   double dv_dsoc() { return dv_dsoc_; };
   double dv_dyn() { return dv_dyn_; };
-  double dV_dyn() { return dv_dyn_*(*sp_nS_); };
   void dv_voc_soc(const float _dv) { dv_voc_soc_ = _dv; };
   float dv_voc_soc() { return dv_voc_soc_; };
   uint8_t encode(const String mod_str);
@@ -228,12 +227,7 @@ public:
   void hys_state(const double st) { hys_->dv_hys(st); };
   void init_hys(const double hys) { hys_->init(hys); };
   double ib() { return ib_; };            // Battery terminal current, A
-  double Ib() { return ib_*(*sp_nP_); };  // Battery bank current, A
   double ioc() { return ioc_; };
-  double nP() { return *sp_nP_; };
-  void nP(const double np) { *sp_nP_ = np; };
-  double nS() { return *sp_nS_; };
-  void nS(const double ns) { *sp_nS_ = ns; };
   virtual void pretty_print();
   void pretty_print_ss();
   void print_signal(const boolean print) { print_now_ = print; };
@@ -242,14 +236,10 @@ public:
   float temp_c() { return temp_c_; };    // Battery temperature, deg C
   double Tb() { return temp_c_; };        // Battery bank temperature, deg C
   double vb() { return vb_; };            // Battery terminal voltage, V
-  double Vb() { return vb_*(*sp_nS_); };  // Battery bank voltage, V
   double voc() { return voc_; };
-  double Voc() { return voc_*(*sp_nS_); };
   double voc_stat() { return voc_stat_; };
-  double Voc_stat() { return voc_stat_*(*sp_nS_); };
   double voc_soc_tab(const double soc, const float temp_c);
   double vsat() { return vsat_; };
-  double Vsat() { return vsat_*(*sp_nS_); };
 protected:
   double voc_;      // Static model open circuit voltage, V
   double dv_dyn_;   // ib-induced back emf, V
@@ -273,8 +263,6 @@ protected:
   Hysteresis *hys_;
   double ioc_;      // Current into charge portion of battery, A
   double voc_stat_; // Static, table lookup value of voc before applying hysteresis, V
-  float *sp_nP_;    // Number of parallel batteries in bank, e.g. '2P1S'
-  float *sp_nS_;    // Number of series batteries in bank, e.g. '2P1S'
   boolean print_now_; // Print command
   float ds_voc_soc_;    // VOC(SOC) delta soc on input
   float dv_voc_soc_;    // VOC(SOC) delta voc on output
@@ -286,23 +274,19 @@ class BatteryMonitor: public Battery, public EKF_1x1
 {
 public:
   BatteryMonitor();
-  BatteryMonitor(double *sp_delta_q, float *sp_t_last, float *sp_nP, float *sp_nS, uint8_t *sp_mod_code, float *sp_hys_scale);
+  BatteryMonitor(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, float *sp_hys_scale);
   ~BatteryMonitor();
   // operators
   // functions
   double amp_hrs_remaining_ekf() { return amp_hrs_remaining_ekf_; };
   double amp_hrs_remaining_soc() { return amp_hrs_remaining_soc_; };
-  double Amp_hrs_remaining_ekf() { return amp_hrs_remaining_ekf_*(*sp_nP_)*(*sp_nS_); };
-  double Amp_hrs_remaining_soc() { return amp_hrs_remaining_soc_*(*sp_nP_)*(*sp_nS_); };
   virtual void assign_randles(void);
   double calc_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc);
   double calculate(Sensors *Sen, const boolean reset);
   boolean converged_ekf() { return EKF_converged->state(); };
   double delta_q_ekf() { return delta_q_ekf_; };
   double hx() { return hx_; };
-  double Hx() { return hx_*(*sp_nS_); };
-  double ib_charge() { return ib_charge_; };
-  double Ib_charge() { return ib_charge_*(*sp_nP_); };
+  float ib_charge() { return ib_charge_; };
   void init_battery_mon(const boolean reset, Sensors *Sen);
   void init_soc_ekf(const double soc);
   boolean is_sat(const boolean reset);
@@ -315,11 +299,8 @@ public:
   boolean solve_ekf(const boolean reset, const boolean reset_temp, Sensors *Sen);
   double tcharge() { return tcharge_; };
   double dv_dyn() { return dv_dyn_; };
-  double dV_dyn() { return dv_dyn_*(*sp_nS_); };
   double voc_filt() { return voc_filt_; };
-  double Voc_filt() { return voc_filt_*(*sp_nS_); };
   double voc_soc() { return voc_soc_; };
-  double Voc_tab() { return voc_soc_*(*sp_nS_); };
   double y_ekf() { return y_; };
   double y_ekf_filt() { return y_filt_; };
   double delta_q_ekf_;         // Charge deficit represented by charge calculated by ekf, C
@@ -351,7 +332,7 @@ class BatterySim: public Battery
 {
 public:
   BatterySim();
-  BatterySim(double *sp_delta_q, float *sp_t_last, float *sp_s_cap_model, float *sp_nP, float *sp_nS, uint8_t *sp_mod_code, float *sp_hys_scale);
+  BatterySim(double *sp_delta_q, float *sp_t_last, float *sp_s_cap_model, uint8_t *sp_mod_code, float *sp_hys_scale);
   ~BatterySim();
   // operators
   // functions
@@ -362,7 +343,7 @@ public:
   boolean cutback() { return model_cutback_; };
   double delta_q() { return *sp_delta_q_; };
   unsigned long int dt(void) { return sample_time_ - sample_time_z_; };
-  double Ib_charge() { return ib_charge_*(*sp_nP_); };
+  float ib_charge() { return ib_charge_; };
   float ib_fut() { return ib_fut_; };
   void init_battery_sim(const boolean reset, Sensors *Sen);
   void load();

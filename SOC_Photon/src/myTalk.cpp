@@ -232,9 +232,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 FP_in = cp.input_string.substring(2).toFloat();
                 if ( FP_in>0 )  // Apply crude limit to prevent user error
                 {
-                  Serial.printf("nP%5.2f/%5.2f ", Mon->nP(), Sen->Sim->nP());
+                  Serial.printf("nP%5.2f to", sp.nP);
                   sp.put_nP(FP_in);
-                  Serial.printf("to%5.2f/%5.2f\n", Mon->nP(), Sen->Sim->nP());
+                  Serial.printf("%5.2f\n", sp.nP);
                 }
                 else
                   Serial.printf("err%5.2f; <=0\n", FP_in);
@@ -244,9 +244,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 FP_in = cp.input_string.substring(2).toFloat();
                 if ( FP_in>0 )  // Apply crude limit to prevent user error
                 {
-                  Serial.printf("nS%5.2f/%5.2f ", Mon->nS(), Sen->Sim->nS());
+                  Serial.printf("nS%5.2f to", sp.nS);
                   sp.put_nS(FP_in);
-                  Serial.printf("to%5.2f/%5.2f\n", Mon->nS(), Sen->Sim->nS());
+                  Serial.printf("%5.2f\n", sp.nS);
                 }
                 else
                   Serial.printf("err%5.2f; <=0\n", FP_in);

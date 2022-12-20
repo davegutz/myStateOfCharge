@@ -278,7 +278,7 @@ void loop()
   static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins->pin_1_wire, ReadSensors, &sp.nP, &sp.nS); // Manage sensor data.  Sim is in here.
 
    // Mon, used to count Coulombs and run EKF
-  static BatteryMonitor *Mon = new BatteryMonitor(&sp.delta_q, &sp.t_last, &sp.nP, &sp.nS, &sp.mon_chm, &sp.hys_scale);
+  static BatteryMonitor *Mon = new BatteryMonitor(&sp.delta_q, &sp.t_last, &sp.mon_chm, &sp.hys_scale);
 
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);   // Time persistence

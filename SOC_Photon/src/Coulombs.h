@@ -123,7 +123,6 @@ public:
   boolean sat() { return(sat_); };
   double t_last() { return(*sp_t_last_); };
   virtual double vsat(void) = 0;
-  virtual double Vsat(void) = 0;
 protected:
   double *sp_delta_q_;// Charge since saturated, C
   float *sp_t_last_;  // Last battery temperature for rate limit memory, deg C

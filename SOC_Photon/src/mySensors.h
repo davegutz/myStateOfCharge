@@ -360,6 +360,7 @@ public:
   float ib_hdwe() { return Ib_hdwe / *sp_nP_; };                  // Battery select hardware unit current, A
   float ib_hdwe_model() { return Ib_hdwe_model / *sp_nP_; };      // Battery select hardware model unit current, A
   float ib_model() { return Ib_model / *sp_nP_; };                // Battery select model unit current, A
+  float ib_model_in() { return Ib_model_in / *sp_nP_; };          // Battery select model input unit current, A
   float ib_noa_hdwe() { return Ib_noa_hdwe / *sp_nP_; };          // Battery no amp unit current, A
   float ib_noa_model() { return Ib_noa_model / *sp_nP_; };        // Battery no amp model unit current, A
   float Ib_amp_noise();
