@@ -118,7 +118,7 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(ihis, -1, nhis_+1) ||
         is_val_corrupt(inj_bias, float(-100.), float(100.)) ||
         is_val_corrupt(isum, -1, NSUM+1) ||
-        is_val_corrupt(modeling_, uint8_t(0), uint8_t(15)) ||
+        // is_val_corrupt(modeling_, uint8_t(0), uint8_t(255)) ||  // pointless to check this
         is_val_corrupt(mon_chm, uint8_t(0), uint8_t(10)) ||
         is_val_corrupt(nP, float(1e-6), float(100.)) ||
         is_val_corrupt(nS, float(1e-6), float(100.)) ||

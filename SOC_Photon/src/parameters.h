@@ -98,17 +98,17 @@ public:
     boolean mod_all_dscn() { return ( 111<modeling_ ); }       // Bare all
     boolean mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); } // Modeing any
     boolean mod_any_dscn() { return ( 15<modeling_ ); }        // Bare any
-    boolean mod_ib() { return ( 0x4 & modeling_ || mod_ib_all_dscn() ); }     // Using Sim as source of ib
+    boolean mod_ib() { return ( 1<<2 & modeling_ || mod_ib_all_dscn() ); }     // Using Sim as source of ib
     boolean mod_ib_all_dscn() { return ( 191<modeling_ ); }        // Nothing connected to ib sensors in I2C on SDA/SCL
-    boolean mod_ib_amp_dscn() { return ( 0x64 & modeling_ ); }     // Nothing connected to amp ib sensors in I2C on SDA/SCL
+    boolean mod_ib_amp_dscn() { return ( 1<<6 & modeling_ ); }     // Nothing connected to amp ib sensors in I2C on SDA/SCL
     boolean mod_ib_any_dscn() { return ( mod_ib_amp_dscn() || mod_ib_noa_dscn() ); }  // Nothing connected to ib sensors in I2C on SDA/SCL
-    boolean mod_ib_noa_dscn() { return ( 0x128 & modeling_ ); }    // Nothing connected to noa ib sensors in I2C on SDA/SCL
+    boolean mod_ib_noa_dscn() { return ( 1<<7 & modeling_ ); }    // Nothing connected to noa ib sensors in I2C on SDA/SCL
     boolean mod_none() { return ( 0==modeling_ ); }                   // Using all
     boolean mod_none_dscn() { return ( 16>modeling_ ); }       // Bare nothing
-    boolean mod_tb() { return ( 0x1 & modeling_ || mod_tb_dscn() ); }     // Using Sim as source of tb
-    boolean mod_tb_dscn() { return ( 0x16 & modeling_ ); }     // Nothing connected to one-wire Tb sensor on D6
-    boolean mod_vb() { return ( 0x2 & modeling_ || mod_vb_dscn() ); }     // Using Sim as source of vb
-    boolean mod_vb_dscn() { return ( 0x32 & modeling_ ); }     // Nothing connected to vb on A1
+    boolean mod_tb() { return ( 1<<0 & modeling_ || mod_tb_dscn() ); }     // Using Sim as source of tb
+    boolean mod_tb_dscn() { return ( 1<<4 & modeling_ ); }     // Nothing connected to one-wire Tb sensor on D6
+    boolean mod_vb() { return ( 1<<1 & modeling_ || mod_vb_dscn() ); }     // Using Sim as source of vb
+    boolean mod_vb_dscn() { return ( 1<<5 & modeling_ ); }     // Nothing connected to vb on A1
     // get
     #if PLATFORM_ID == PLATFORM_ARGON
         void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp = value; }

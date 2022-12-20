@@ -869,7 +869,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'm' ):  // Xm<>:  code for modeling level
                 INT_in =  cp.input_string.substring(2).toInt();
-                if ( INT_in>=0 && INT_in<16 )
+                if ( INT_in>=0 && INT_in<256 )
                 {
                   boolean reset = sp.modeling() != INT_in;
                   Serial.printf("modeling %d to ", sp.modeling());
@@ -886,6 +886,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   Serial.printf("err %d, modeling 0-7. 'h'\n", INT_in);
                 }
                 Serial.printf("Modeling %d\n", sp.modeling());
+                Serial.printf("ib_noa_dscn %d\n", sp.mod_ib_noa_dscn());
+                Serial.printf("ib_amp_dscn %d\n", sp.mod_ib_amp_dscn());
+                Serial.printf("vb_dscn %d\n", sp.mod_vb_dscn());
+                Serial.printf("tb_dscn %d\n", sp.mod_tb_dscn());
                 Serial.printf("tweak_test %d\n", sp.tweak_test());
                 Serial.printf("mod_ib %d\n", sp.mod_ib());
                 Serial.printf("mod_vb %d\n", sp.mod_vb());
@@ -1295,11 +1299,15 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("\nX<?> - Test Mode.   For example:\n");
   Serial.printf(" Xd=  "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
-  Serial.printf(" Xm=  "); Serial.printf("%d,   modeling bitmap [0b0000]\n", sp.modeling());
-  Serial.printf("      0x8 tweak_test = %d\n", sp.tweak_test());
-  Serial.printf("      0x4 current = %d\n", sp.mod_ib());
-  Serial.printf("      0x2 voltage = %d\n", sp.mod_vb());
-  Serial.printf("      0x1 temp = %d\n", sp.mod_tb());
+  Serial.printf(" Xm=  "); Serial.printf("%d,   modeling bitmap [0b00000000]\n", sp.modeling());
+  Serial.printf("      0x128=1<<7 ib_noa_dscn = %d\n", sp.mod_ib_noa_dscn());
+  Serial.printf("      0x64 =1<<6 ib_amp_dscn = %d\n", sp.mod_ib_amp_dscn());
+  Serial.printf("      0x32 =1<<5 vb_dscn = %d\n", sp.mod_vb_dscn());
+  Serial.printf("      0x16 =1<<4 temp_dscn = %d\n", sp.mod_tb_dscn());
+  Serial.printf("      0x8  =1<<3 tweak_test = %d\n", sp.tweak_test());
+  Serial.printf("      0x4  =1<<2 current = %d\n", sp.mod_ib());
+  Serial.printf("      0x2  =1<<1 voltage = %d\n", sp.mod_vb());
+  Serial.printf("      0x1  =1<<0 temp = %d\n", sp.mod_tb());
   Serial.printf(" Xa= "); Serial.printf("%6.3f", sp.amp); Serial.println(": Inj amp A pk (0-18.3) [0]");
   Serial.printf(" Xb= "); Serial.printf("%6.3f", sp.inj_bias); Serial.println(": Inj bias A [0]");
   Serial.printf(" Xf= "); Serial.printf("%6.3f", sp.freq/2./PI); Serial.println(": Inj freq Hz (0-2) [0]");
