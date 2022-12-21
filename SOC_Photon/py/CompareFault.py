@@ -368,7 +368,7 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.legend(loc=1)
     plt.subplot(339)
     plt.plot(mo.time, mo.dv_dyn, color='black', linestyle='-', label='dv_dyn')
-    plt.plot(mv.time, mv.dv_dyn, color='cyan', linestyle='--', label='dV_dyn_ver')
+    plt.plot(mv.time, mv.dv_dyn, color='cyan', linestyle='--', label='dv_dyn_ver')
     plt.plot(smv.time, smv.dv_dyn_s, color='orange', linestyle='-.', label='dv_dyn_s_ver')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"

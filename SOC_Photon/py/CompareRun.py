@@ -79,7 +79,7 @@ if __name__ == '__main__':
         zero_zero_in = False
         drive_ekf_in = False
         time_end_in = None
-        unit_key = 'pro_2022'
+        unit_key = 'pro0p_2022'
         dTb = None
         plot_init_in = False
         long_term_in = False
@@ -94,8 +94,8 @@ if __name__ == '__main__':
         # data_file_old_txt = 'ampHiFailBare v20221220.txt'
         # data_file_old_txt = 'rapidTweakRegression v20221220.txt'  # ; time_end_in=4.8;
         # data_file_old_txt = 'offSitHysBms v20221220.txt'  # ; time_end_in = 137.
-        # data_file_old_txt = 'ampHiFail va20221220.txt'; unit_key = 'pro1a'
-        data_file_old_txt = 'triTweakDisch v20221220.txt'  #; time_end_in=25.4
+        data_file_old_txt = 'ampHiFail va20221220.txt'; unit_key = 'pro1a'
+        # data_file_old_txt = 'triTweakDisch v20221220.txt'  #; time_end_in=25.4
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
         # data_file_old_txt = 'ampLoFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'

@@ -637,7 +637,6 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.e_voc_ekf.append(self.e_voc_ekf)
         self.saved.Tb.append(self.temp_c)
         self.saved.vsat.append(self.vsat)
-        self.saved.dv_dyn.append(self.dv_dyn)
         self.saved.voc_ekf.append(self.voc_ekf)
         self.saved.sat.append(int(self.sat))
         self.saved.sel.append(self.sel)
