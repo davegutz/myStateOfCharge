@@ -423,6 +423,17 @@ Full regression suite:
               Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
 		# Should detect and switch amp current failure.  Start looking at 'DOM 1' fig 3.  Fault record (frozen).  Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).
 
+  rapidTweakRegression:  Ff0;HR;Xp10;
+		# Should run three very large current discharge/recharge cycles without fault
+		# Best test for seeing time skews and checking fault logic for false trips
+
+  offSitHysBms:  operate around bms off, starting above, go below, come back up.  Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;
+          XS;v0;Hd;Xp0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;
+		# Best test for seeing Randles model differences.   No faults
+		# Only test to confirm on/off behavior.   Make sure comes back on.
+		# It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.
+		# reset_s_ver because device reset on power up
+
   ampHiFailFf:  Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;
 				        Hs;Hs;Hs;Hs;Pf;Hd;Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
 		# Should detect but not switch amp current failure.  Run about 60s.  Start by looking at 'DOM 1' fig 3.  No fault record (keeps recording).   Verify that on Fig 3 the e_wrap goes through a threshold ~0.4 without tripping faults.   Will see 'diff' flashing on OLED.
@@ -434,10 +445,6 @@ Full regression suite:
   ampHiFailNoise: Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;Ff0;
                   Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
 		# Noisy ampHiFail.  Should detect and switch amp current failure.  Start looking at 'DOM 1' fig 3.  Fault record (frozen).  Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).
-
-  rapidTweakRegression:  Ff0;HR;Xp10;
-		# Should run three very large current discharge/recharge cycles without fault
-		# Best test for seeing time skews
 
   rapidTweakRegression40C_:   Ff0;HR;D^15;Xp10;
                               D^0;
@@ -459,12 +466,6 @@ Full regression suite:
          Ff0;D^0;Xp0;Xm15;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;
           XS;v0;Hd;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;DP4;
 		# Should run one de-saturation and saturation event without fault and exercise hysteresis reset, dv_hys 0-->-0.3
-
-	offSitHysBms:  operate around bms off, starting above, go below, come back up.		Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;
-          XS;v0;Hd;Xp0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;
-		# Best test for seeing Randles model differences.   No faults
-		# Only test to confirm on/off behavior.   Make sure comes back on.
-		# It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.
 
 	offSitHysBmsNoise:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset		
 		Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;

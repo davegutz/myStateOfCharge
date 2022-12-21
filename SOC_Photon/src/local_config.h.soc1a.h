@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "soc1a_20221130c";  // voc_stat
+const String unit = "soc1a_20221220";  // voc_stat
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
