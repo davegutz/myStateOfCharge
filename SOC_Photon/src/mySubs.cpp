@@ -80,8 +80,8 @@ void print_serial_header(void)
 {
   if ( ( sp.debug==1 || sp.debug==2 || sp.debug==3 || sp.debug==4 ) )
   {
-    Serial.printf ("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dV_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
-    Serial1.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dV_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
+    Serial.printf ("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
+    Serial1.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
   }
 }
 void print_serial_sim_header(void)

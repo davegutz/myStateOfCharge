@@ -358,7 +358,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.voc = 0.
         self.voc_filt = 0.
         self.vsat = 0.
-        self.dV_dyn = 0.
+        self.dv_dyn = 0.
         self.voc_ekf = 0.
         self.T_Rlim = RateLimit()
         self.eframe = 0
@@ -493,7 +493,7 @@ class BatteryMonitor(Battery, EKF1x1):
         else:
             self.tcharge_ekf = -24.*self.soc_ekf
 
-        self.dV_dyn = self.dv_dyn * rp.nS
+        self.dv_dyn = self.dv_dyn * rp.nS
         self.voc_ekf = self.hx * rp.nS
 
         return self.soc_ekf
@@ -637,7 +637,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.e_voc_ekf.append(self.e_voc_ekf)
         self.saved.Tb.append(self.temp_c)
         self.saved.vsat.append(self.vsat)
-        self.saved.dV_dyn.append(self.dV_dyn)
+        self.saved.dv_dyn.append(self.dv_dyn)
         self.saved.voc_ekf.append(self.voc_ekf)
         self.saved.sat.append(int(self.sat))
         self.saved.sel.append(self.sel)
@@ -1025,7 +1025,7 @@ class Saved:
         self.mod_data = []  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
         self.Tb = []  # Battery bank temperature, deg C
         self.vsat = []  # Monitor Bank saturation threshold at temperature, deg C
-        self.dV_dyn = []  # Monitor Bank current induced back emf, V
+        self.dv_dyn = []  # Monitor Bank current induced back emf, V
         self.voc_stat = []  # Monitor Static bank open circuit voltage, V
         self.voc = []  # Monitor Static bank open circuit voltage, V
         self.voc_ekf = []  # Monitor bank solved static open circuit voltage, V

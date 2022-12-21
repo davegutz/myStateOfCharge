@@ -33,7 +33,7 @@ import statistics as sts
 
 def save_clean_file(mon_ver, csv_file, unit_key):
     default_header_str = "unit,               hm,                  cTime,        dt,       sat,sel,mod,\
-      Tb,  vb,  ib,  ioc,  voc_soc,    vsat,dV_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,"
+      Tb,  vb,  ib,  ioc,  voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,"
     n = len(mon_ver.time)
     date_time_start = datetime.now()
     with open(csv_file, "w") as output:
@@ -54,7 +54,7 @@ def save_clean_file(mon_ver, csv_file, unit_key):
             s += "{:7.3f},".format(mon_ver.ioc[i])
             s += "{:7.3f},".format(mon_ver.voc_soc[i])
             s += "{:7.3f},".format(mon_ver.vsat[i])
-            s += "{:7.3f},".format(mon_ver.dV_dyn[i])
+            s += "{:7.3f},".format(mon_ver.dv_dyn[i])
             s += "{:7.3f},".format(mon_ver.voc_stat[i])
             s += "{:7.3f},".format(mon_ver.voc_ekf[i])
             s += "{:7.3f},".format(mon_ver.y_ekf[i])
@@ -350,7 +350,7 @@ if __name__ == '__main__':
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
                                            skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp)
-        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'vb', 'ib', 'ioc', 'voc_soc', 'vsat', 'dV_dyn', 'voc_stat',
+        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'vb', 'ib', 'ioc', 'voc_soc', 'vsat', 'dv_dyn', 'voc_stat',
                 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
                                     encoding=None).view(np.recarray)

@@ -367,8 +367,8 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.plot(mo.time, mo.ewlo_thr, color='red', linestyle='-.', label='ewlo_thr')
     plt.legend(loc=1)
     plt.subplot(339)
-    plt.plot(mo.time, mo.dV_dyn, color='black', linestyle='-', label='dV_dyn')
-    plt.plot(mv.time, mv.dV_dyn, color='cyan', linestyle='--', label='dV_dyn_ver')
+    plt.plot(mo.time, mo.dv_dyn, color='black', linestyle='-', label='dv_dyn')
+    plt.plot(mv.time, mv.dv_dyn, color='cyan', linestyle='--', label='dV_dyn_ver')
     plt.plot(smv.time, smv.dv_dyn_s, color='orange', linestyle='-.', label='dv_dyn_s_ver')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
@@ -433,7 +433,7 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     vsat = []
     time_sec = []
     dt = []
-    dV_dyn = []
+    dv_dyn = []
     ib_diff = []
     cc_dif = []
     cc_diff_thr = []
@@ -462,7 +462,7 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
         cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
         cc_dif.append(cc_dif_)
         voc_stat = d_ra.voc_stat[i]
-        dV_dyn.append(d_ra.vb[i] - d_ra.voc[i])
+        dv_dyn.append(d_ra.vb[i] - d_ra.voc[i])
         cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = fault_thr_bb(Tb, soc, voc_soc[i],
                                                                                        soc_min_tbl=soc_min_tbl)
         cc_diff_thr.append(cc_diff_thr_)
@@ -477,7 +477,7 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'ibmh', np.array(np.copy(d_ra.ibah), dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'e_w', np.array(np.copy(d_ra.e_w_f), dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'cc_dif', np.array(cc_dif, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'dV_dyn', np.array(dV_dyn, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'dv_dyn', np.array(dv_dyn, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_diff', np.array(ib_diff, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_diff_f', np.array(ib_diff, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_diff_thr', np.array(ib_diff_thr, dtype=float))

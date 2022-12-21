@@ -204,8 +204,8 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     n_fig += 1
     plt.subplot(321)
     plt.title(plot_title + ' DOM 2')
-    plt.plot(mo.time, mo.dV_dyn, color='green', linestyle='-', label='dV_dyn')
-    plt.plot(mv.time, mv.dV_dyn, color='orange', linestyle='--', label='dV_dyn_ver')
+    plt.plot(mo.time, mo.dv_dyn, color='green', linestyle='-', label='dv_dyn')
+    plt.plot(mv.time, mv.dv_dyn, color='orange', linestyle='--', label='dV_dyn_ver')
     plt.legend(loc=1)
     plt.subplot(322)
     plt.plot(mo.time, mo.voc_stat, color='green', linestyle='-', label='voc_stat')
@@ -358,8 +358,8 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.subplot(335)
         plt.plot(so.time, so.dv_dyn_s, color='magenta', linestyle='-', label='dv_dyn_s')
         plt.plot(smv.time, smv.dv_dyn_s, color='green', linestyle='--', label='dv_dyn_s_ver')
-        plt.plot(mo.time, mo.dV_dyn, color='blue', linestyle='-.', label='dV_dyn')
-        plt.plot(mv.time, mv.dV_dyn, color='cyan', linestyle=':', label='dV_dyn_ver')
+        plt.plot(mo.time, mo.dv_dyn, color='blue', linestyle='-.', label='dv_dyn')
+        plt.plot(mv.time, mv.dv_dyn, color='cyan', linestyle=':', label='dV_dyn_ver')
         plt.legend(loc=1)
         plt.subplot(336)
         plt.plot(mo.time, mo.ib_sel, color='blue', linestyle='-', label='ib_sel')
@@ -861,8 +861,8 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.plot(mv.time, np.array(mv.voc_soc) - np.array(mv.voc_stat), linestyle=':', color='blue', label='voc_soc_ver - voc_stat_ver')
     plt.legend(loc=1)
     plt.subplot(337)
-    plt.plot(mo.time, mo.dV_dyn, color='black', linestyle='-', label='dV_dyn')
-    plt.plot(mv.time, mv.dV_dyn, color='orange', linestyle='--', label='dV_dyn_ver')
+    plt.plot(mo.time, mo.dv_dyn, color='black', linestyle='-', label='dv_dyn')
+    plt.plot(mv.time, mv.dv_dyn, color='orange', linestyle='--', label='dV_dyn_ver')
     plt.legend(loc=1)
     plt.subplot(338)
     plt.plot(mo.time, mo.dV_hys, color='blue', linestyle='-.', label='dV_hys')
@@ -946,7 +946,7 @@ class SavedData:
             self.bms_off = None  # Battery management system off, T=off
             self.Tb = None  # Battery bank temperature, deg C
             self.vsat = None  # Monitor Bank saturation threshold at temperature, deg C
-            self.dV_dyn = None  # Monitor Bank current induced back emf, V
+            self.dv_dyn = None  # Monitor Bank current induced back emf, V
             self.dv_hys = None  # Drop across hysteresis, V
             self.voc_stat = None  # Monitor Static bank open circuit voltage, V
             self.voc = None  # Bank VOC estimated from vb and RC model, V
@@ -1019,9 +1019,9 @@ class SavedData:
             self.ib_charge = np.array(data.ib_charge[:i_end])
             self.Tb = np.array(data.Tb[:i_end])
             self.vsat = np.array(data.vsat[:i_end])
-            self.dV_dyn = np.array(data.dV_dyn[:i_end])
+            self.dv_dyn = np.array(data.dv_dyn[:i_end])
             self.voc_stat = np.array(data.voc_stat[:i_end])
-            self.voc = self.vb - self.dV_dyn
+            self.voc = self.vb - self.dv_dyn
             self.dV_hys = self.voc - self.voc_stat
             self.voc_ekf = np.array(data.voc_ekf[:i_end])
             self.y_ekf = np.array(data.y_ekf[:i_end])
@@ -1186,7 +1186,7 @@ class SavedData:
         # s += "{},".format(self.T[self.i])
         s += "{:8.3f},".format(self.ib[self.i])
         s += "{:7.2f},".format(self.vsat[self.i])
-        s += "{:5.2f},".format(self.dV_dyn[self.i])
+        s += "{:5.2f},".format(self.dv_dyn[self.i])
         s += "{:5.2f},".format(self.voc_stat[self.i])
         s += "{:5.2f},".format(self.voc_ekf[self.i])
         s += "{:10.6f},".format(self.y_ekf[self.i])
@@ -1286,7 +1286,7 @@ if __name__ == '__main__':
     plt.rcParams['axes.grid'] = True
 
     def compare_print(mo, mv):
-        s = " time,      ib,                   vb,              dV_dyn,          voc_stat,\
+        s = " time,      ib,                   vb,              dv_dyn,          voc_stat,\
                     voc,        voc_ekf,         y_ekf,               soc_ekf,      soc,\n"
         for i in range(len(mv.time)):
             s += "{:7.3f},".format(mo.time[i])
@@ -1294,8 +1294,8 @@ if __name__ == '__main__':
             s += "{:9.3f},".format(mv.ib[i])
             s += "{:9.2f},".format(mo.vb[i])
             s += "{:5.2f},".format(mv.vb[i])
-            s += "{:9.2f},".format(mo.dV_dyn[i])
-            s += "{:5.2f},".format(mv.dV_dyn[i])
+            s += "{:9.2f},".format(mo.dv_dyn[i])
+            s += "{:5.2f},".format(mv.dv_dyn[i])
             s += "{:9.2f},".format(mo.voc_stat[i])
             s += "{:5.2f},".format(mv.voc_stat[i])
             s += "{:9.2f},".format(mo.voc[i])
@@ -1335,7 +1335,7 @@ if __name__ == '__main__':
                                                unit_key='unit_sim,')
 
         # Load
-        cols = ('unit', 'hm', 'cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'vb', 'ib', 'vsat', 'dV_dyn',
+        cols = ('unit', 'hm', 'cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'vb', 'ib', 'vsat', 'dv_dyn',
                 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                     encoding=None).view(np.recarray)

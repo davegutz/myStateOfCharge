@@ -38,5 +38,5 @@
     },
     "particle.firmwareVersion": "5.1.0",
     "particle.targetPlatform": "argon",
-    "particle.targetDevice": "soc1a"
+    "particle.targetDevice": "pro1a"
 }
