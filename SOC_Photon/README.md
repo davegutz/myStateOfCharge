@@ -419,6 +419,10 @@ Full regression suite:
               Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
 		# Should detect and switch amp current failure.  Start looking at 'DOM 1' fig 3.  Fault record (frozen).  Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).
 
+  ampHiFailBare:  Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;
+              Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
+		# Should detect and switch amp current failure.  Start looking at 'DOM 1' fig 3.  Fault record (frozen).  Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).
+
   ampHiFailFf:  Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;
 				        Hs;Hs;Hs;Hs;Pf;Hd;Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
 		# Should detect but not switch amp current failure.  Run about 60s.  Start by looking at 'DOM 1' fig 3.  No fault record (keeps recording).   Verify that on Fig 3 the e_wrap goes through a threshold ~0.4 without tripping faults.   Will see 'diff' flashing on OLED.

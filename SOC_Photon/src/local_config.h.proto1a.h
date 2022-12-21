@@ -33,5 +33,6 @@ const String unit = "pro1a_20221130c";  // voc_stat
 
 // Faults
 #define FAKE_FAULTS           false   // What to do with faults, T=detect and display them but don't change signals
+// #define DEBUG_INIT                   // Use this to debug initialization using 'v-1;'
 
 #endif

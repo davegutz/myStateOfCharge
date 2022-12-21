@@ -51,7 +51,6 @@ void debug_12(BatteryMonitor *Mon, Sensors *Sen)
 
 // sp.debug==-13 ib_dscn for Arduino.
 // Start Arduino serial plotter.  Toggle v like 'v0;v-13;' to produce legend
-/*
 void debug_m13(Sensors *Sen)
 {
 
@@ -71,7 +70,6 @@ void debug_m13(Sensors *Sen)
   max(min(Sen->Flt->ib_rate(),2), -2), max(min(Sen->Flt->ib_quiet(), 2), -2),
   Sen->Flt->ib_dscn_fa(), Sen->Flt->ib_dscn_fa());
 }
-*/
 
 // sp.debug==5 Charge time
 void debug_5(BatteryMonitor *Mon, Sensors *Sen)
@@ -121,11 +119,13 @@ soc_ekf= %8.4f,\nsoc = %8.4f,\nmodeling = %d,\n",
   if ( Sen->Flt->falw() || Sen->Flt->fltw() ) chit("Pf;", QUEUE);
 }
 
-// Various parameters to debug initialization stuff as needed
-// void debug_m1(BatteryMonitor *Mon, Sensors *Sen)
-// {
-//   Serial.printf("mod %d fake_f %d reset_temp %d Tb%7.3f Tb_f%7.3f Vb%7.3f Ib%7.3f\nTb_s%6.2f Tl_s%6.2f ib_s%7.3f soc_s%8.4f dq_s%10.1f\nTb  %6.2f Tl%6.2f ib%7.3f soc  %8.4f dq  %10.1f soc_ekf%8.4f dq_ekf%10.1f\n",
-//       sp.modeling(), cp.fake_faults, Sen->reset_temp(), Sen->Tb, Sen->Tb_filt, Sen->Vb, Sen->Ib,
-//       Sen->Sim->Tb(), sp.t_last_model, Sen->Sim->ib(), Sen->Sim->soc(), Sen->Sim->delta_q(),
-//       Mon->Tb(), sp.t_last, Mon->ib(), Mon->soc(), Mon->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf());
-// }
+#ifdef DEBUG_INIT
+  // Various parameters to debug initialization stuff as needed
+  void debug_m1(BatteryMonitor *Mon, Sensors *Sen)
+  {
+    Serial.printf("mod %d fake_f %d reset_temp %d Tb%7.3f Tb_f%7.3f Vb%7.3f Ib%7.3f\nTb_s%6.2f Tl_s%6.2f ib_s%7.3f soc_s%8.4f dq_s%10.1f\nTb  %6.2f Tl%6.2f ib%7.3f soc  %8.4f dq  %10.1f soc_ekf%8.4f dq_ekf%10.1f\n",
+        sp.modeling(), cp.fake_faults, Sen->reset_temp(), Sen->Tb, Sen->Tb_filt, Sen->Vb, Sen->Ib,
+        Sen->Sim->Tb(), sp.t_last_model, Sen->Sim->ib(), Sen->Sim->soc(), Sen->Sim->delta_q(),
+        Mon->Tb(), sp.t_last, Mon->ib(), Mon->soc(), Mon->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf());
+  }
+#endif

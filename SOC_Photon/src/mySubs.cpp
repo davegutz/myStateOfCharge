@@ -181,8 +181,17 @@ void harvest_temp_change(const float temp_c, BatteryMonitor *Mon, BatterySim *Si
 void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const boolean use_soc_in)
 {
   // Sample debug statements
+  #ifdef DEBUG_INIT
+    if ( sp.debug==-1 )
+    {
+      Serial.printf("\n\n");
+      sp.pretty_print(true);
+      Serial.printf("falw %d tb_fa %d\n", Sen->Flt->falw(), Sen->Flt->tb_fa());
+      // Sen->Flt->disab_tb_fa(1);
+    }
   // if ( sp.debug==-1 ){ Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);} 
   // if ( sp.debug==-1 ){ Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("Top:"); debug_m1(Mon, Sen);}
+  #endif
 
   // Gather and apply inputs
   if ( sp.mod_ib() )
@@ -200,15 +209,28 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
     Sen->Tb = Sen->Tb_hdwe;
     Sen->Tb_filt = Sen->Tb_hdwe_filt;
   }
-  harvest_temp_change(Sen->Tb_filt, Mon, Sen->Sim);
+  #ifdef DEBUG_INIT
+    if ( sp.debug==-1 )
+    { 
+      Serial.printf("before harvest_temp, falw %d tb_fa %d:", Sen->Flt->falw(), Sen->Flt->tb_fa()); debug_m1(Mon, Sen);
+    }
+  #endif
+  if ( !Sen->Flt->tb_fa() ) harvest_temp_change(Sen->Tb_filt, Mon, Sen->Sim);
+  #ifdef DEBUG_INIT
+    if ( sp.debug==-1 ){ Serial.printf("after harvest_temp:"); debug_m1(Mon, Sen);}
+  #endif
   if ( use_soc_in )
     Mon->apply_soc(soc_in, Sen->Tb_filt);  // saves sp.delta_q and sp.t_last
   Sen->Sim->apply_delta_q_t(Mon->delta_q(), Mon->t_last());  // applies sp.delta_q and sp.t_last
-  // if ( sp.debug==-1 ){ Serial.printf("S.a_d_q_t:"); debug_m1(Mon, Sen);}
-  
+  #ifdef DEBUG_INIT
+    if ( sp.debug==-1 ){ Serial.printf("S.a_d_q_t:"); debug_m1(Mon, Sen);}
+  #endif
+
   // Make Sim accurate even if not used
   Sen->Sim->init_battery_sim(true, Sen);
-  // if ( sp.debug==-1 ){ Serial.printf("S.i_b:"); debug_m1(Mon, Sen);}
+  #ifdef DEBUG_INIT
+    if ( sp.debug==-1 ){ Serial.printf("S.i_b:"); debug_m1(Mon, Sen);}
+  #endif
   if ( !sp.mod_vb() )
   {
     Sen->Sim->apply_soc(Sen->Sim->soc(), Sen->Tb_filt);
@@ -239,13 +261,17 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   {
     Sen->Ib = Sen->Ib_hdwe;
   }
-  // if ( sp.debug==-1 ){ Serial.printf("SENIB:"); debug_m1(Mon, Sen);}
+  #ifdef DEBUG_INIT
+    if ( sp.debug==-1 ){ Serial.printf("SENIB:"); debug_m1(Mon, Sen);}
+  #endif
   if ( sp.mod_vb() )
   {
     Mon->apply_soc(Sen->Sim->soc(), Sen->Tb_filt);
   }
   Mon->init_battery_mon(true, Sen);
-  // if ( sp.debug==-1 ) { Serial.printf("M.i_b:"); debug_m1(Mon, Sen);}
+  #ifdef DEBUG_INIT
+    if ( sp.debug==-1 ) { Serial.printf("M.i_b:"); debug_m1(Mon, Sen);}
+  #endif
 
   // Call calculate/count_coulombs twice because sat_ is a used-before-calculated (UBC)
   // Simple 'call twice' method because sat_ is discrete no analog which would require iteration
@@ -253,11 +279,15 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), 0.);
   Mon->calculate(Sen, true);  // Call again because sat is a UBC
   Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), 0.);
-  // if ( sp.debug==-1 ){ Serial.printf("M.c_c:"); debug_m1(Mon, Sen);}
-
+  #ifdef DEBUG_INIT
+    if ( sp.debug==-1 ){ Serial.printf("M.c_c:"); debug_m1(Mon, Sen);}
+  #endif
+  
   // Solve EKF
   Mon->solve_ekf(true, true, Sen);
-  // if ( sp.debug==-1 ){ Serial.printf("end:"); debug_m1(Mon, Sen);}
+  #ifdef DEBUG_INIT
+    if ( sp.debug==-1 ){ Serial.printf("end:"); debug_m1(Mon, Sen);}
+  #endif
 }
 
 // Load all others

@@ -68,7 +68,7 @@ float TempSensor::load(Sensors *Sen)
   }
   else
   {
-    Serial.printf("DS18 1-wire Tb, t=%8.1f, ct=%d, using lgv=%8.1f\n", temp, count, Tb_hdwe);
+    Serial.printf("DS18 1-wire Tb, t=%8.1f, ct=%d, sending Tb_hdwe=%8.1f\n", temp, count, Tb_hdwe);
     tb_stale_flt_ = true;
     // Using last-good-value:  no assignment
   }
@@ -531,7 +531,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   {
     tb_sel_stat_ = 0;
     latched_fail_ = true;
-}
+  }
   else
     tb_sel_stat_ = 1;
 
@@ -601,7 +601,7 @@ void Fault::tb_stale(const boolean reset, Sensors *Sen)
 {
   boolean reset_loc = reset | reset_all_faults_;
 
-  if ( disab_tb_fa_ )
+  if ( disab_tb_fa_ || sp.mod_tb() )
   {
     faultAssign( false, TB_FLT );
     failAssign( false, TB_FA );
@@ -611,6 +611,7 @@ void Fault::tb_stale(const boolean reset, Sensors *Sen)
     faultAssign( Sen->SensorTb->tb_stale_flt(), TB_FLT );
     failAssign( TbStaleFail->calculate(tb_flt(), TB_STALE_SET*tb_stale_time_sclr_, TB_STALE_RESET*tb_stale_time_sclr_,
       Sen->T_temp, reset_loc), TB_FA );
+    // if ( sp.debug==-1 ) Serial.printf("failAssign TB_FA reset_loc %d tb_flt %d fa %d falw %d\n", reset_loc, tb_flt(), tb_fa(), falw());
   }
 }
 
@@ -622,7 +623,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
   {
     failAssign(false, VB_FA);
   }
-  if ( disab_vb_fa_ )
+  if ( disab_vb_fa_ || sp.mod_vb() )
   {
     faultAssign(false, VB_FLT);
     failAssign( false, VB_FA);
@@ -928,7 +929,7 @@ void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp)
   Tb_hdwe += *sp_Tb_bias_hdwe_;
   Tb_hdwe_filt += *sp_Tb_bias_hdwe_;
 
-  if ( sp.debug==16 ) Serial.printf("reset_temp_,Tb_bias_hdwe_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",
+  if ( sp.debug==16 || sp.debug==-1 ) Serial.printf("reset_temp_,Tb_bias_hdwe_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",
     reset_temp_, *sp_Tb_bias_hdwe_, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt );
 
   Flt->tb_stale(reset_temp_, Sen);

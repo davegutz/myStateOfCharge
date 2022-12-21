@@ -261,7 +261,7 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )                                  Serial.printf(" isum                           %d tbl ptr\n", isum);
     if ( all || uint8_t(MODELING) != modeling_ ) Serial.printf(" modeling %d  %d *Xm<>\n", uint8_t(MODELING), modeling_);
     if ( all || MON_CHEM != mon_chm )           Serial.printf(" mon chem            %d          %d *Bm<> 0=Battle, 1=LION\n", MON_CHEM, mon_chm);
-    if ( all )                                  Serial.printf(" modeling %d  %d *Xm<>\n", uint8_t(0), preserving);
+    if ( all )                                  Serial.printf(" preserving %d  %d *Xm<>\n", uint8_t(0), preserving);
     if ( all || float(NP) != nP )               Serial.printf(" nP            %7.3f    %7.3f *BP<> eg '2P1S'\n", NP, nP);
     if ( all || float(NS) != nS )               Serial.printf(" nS            %7.3f    %7.3f *BS<> eg '2P1S'\n", NS, nS);
     if ( all || float(1.) != shunt_gain_sclr )  Serial.printf(" shunt_gn_slr%7.3f  %7.3f *SG\n", 1., shunt_gain_sclr);

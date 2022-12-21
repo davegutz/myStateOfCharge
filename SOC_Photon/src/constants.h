@@ -63,8 +63,12 @@
 #define F_W_T                 0.05      // Temperature filter wn, r/s (0.05)   
 #define F_Z_T                 0.80      // Temperature filter zeta (0.80)
 #if PLATFORM_ID == 6  // Photon
-    #define NSUM              110       // Number of saved SRAM summaries (110)
-                                        // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
+    #ifdef DEBUG_INIT
+        #define NSUM              90       // Number of saved SRAM summaries (110)
+    #else
+        #define NSUM              110       // Number of saved SRAM summaries (110)
+                                            // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
+    #endif
 #elif PLATFORM_ID == PLATFORM_ARGON
     #define NSUM              2400      // Number of saved SRAM summaries (2400)
                                         //If too large, will get compile error 'Insufficient room for .data and .bss sections!' or flashing red

@@ -415,11 +415,13 @@ void BatteryMonitor::init_battery_mon(const boolean reset, Sensors *Sen)
     Randles_->init_state_space(u);
     voc_ = Randles_->y(0);
     init_hys(0.0);
-    // if ( sp.debug==-1 )
-    // {
-    //     Serial.printf("mon: ib%7.3f vb%7.3f voc%7.3f\n", ib_, vb_, voc_);
-    //     Randles_->pretty_print();
-    // }
+    #ifdef DEBUG_INIT
+        if ( sp.debug==-1 )
+        {
+            Serial.printf("mon: ib%7.3f vb%7.3f voc%7.3f\n", ib_, vb_, voc_);
+            Randles_->pretty_print();
+        }
+    #endif
 }
 
 // Init EKF
@@ -1007,7 +1009,9 @@ double Hysteresis::update(const double dt, const boolean init_high, const boolea
             dv_hys_past = dv_hys_;
             dv_hys_ = ioc_ * res_;
             res_ = look_hys(dv_hys_, soc_);
-            // if ( sp.debug==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
+            #ifdef DEBUG_INIT
+                if ( sp.debug==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
+            #endif
         }
         if ( sp.debug==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
     }
