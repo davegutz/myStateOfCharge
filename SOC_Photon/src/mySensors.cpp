@@ -601,7 +601,7 @@ void Fault::tb_stale(const boolean reset, Sensors *Sen)
 {
   boolean reset_loc = reset | reset_all_faults_;
 
-  if ( disab_tb_fa_ || sp.mod_tb() )
+  if ( disab_tb_fa_ || (sp.mod_tb() && !fail_tb_) )
   {
     faultAssign( false, TB_FLT );
     failAssign( false, TB_FA );
@@ -611,7 +611,6 @@ void Fault::tb_stale(const boolean reset, Sensors *Sen)
     faultAssign( Sen->SensorTb->tb_stale_flt(), TB_FLT );
     failAssign( TbStaleFail->calculate(tb_flt(), TB_STALE_SET*tb_stale_time_sclr_, TB_STALE_RESET*tb_stale_time_sclr_,
       Sen->T_temp, reset_loc), TB_FA );
-    // if ( sp.debug==-1 ) Serial.printf("failAssign TB_FA reset_loc %d tb_flt %d fa %d falw %d\n", reset_loc, tb_flt(), tb_fa(), falw());
   }
 }
 
