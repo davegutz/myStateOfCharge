@@ -38,6 +38,10 @@ When you're ready to compile your project, make sure you have the correct Partic
 - The `project.properties` file for your project
 - Any libraries stored under `lib/<libraryname>/src`
 
+## Powering your device
+
+The system is designed to be powered completely either from USB hooked to phone or device or from 12 V dc connector.   Normally in service the battery bank supplies 12 V and no USB is used.   The device saves fault information (EERAM) for cases when the battery banks management system powers off.  If the battery bank is off you can power with phone or device to extract information using UART terminal.   There are two UART terminals:  USB and HC-06 bluetooth.
+
 ## Redo Loop
 
 ***********************

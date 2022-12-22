@@ -22,14 +22,12 @@ Coulomb Counter built in."""
 if __name__ == '__main__':
     import numpy as np
     import sys
-    from Battery import overall_batt
-    from MonSim import replicate, save_clean_file, save_clean_file_sim
     from DataOverModel import SavedData, SavedDataSim, write_clean_file, overall
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
-    from CompareHist import add_stuff_f, over_fault, filter_Tb, X_SOC_MIN_BB, T_SOC_MIN_BB, IB_BAND, RATED_BATT_CAP, over_easy
+    from CompareHist import add_stuff_f, over_fault, filter_Tb, X_SOC_MIN_BB, T_SOC_MIN_BB, IB_BAND, RATED_BATT_CAP
     import matplotlib.pyplot as plt
     plt.rcParams['axes.grid'] = True
-    from datetime import datetime, timedelta
+    from datetime import datetime
     from pyDAGx import myTables
     global mon_old
 
@@ -58,32 +56,15 @@ if __name__ == '__main__':
 
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-        date_ = datetime.now().strftime("%y%m%d")
 
         # Transient  inputs
-        t_ib_fail = None
         init_time_in = None
-        use_ib_mon_in = False
-        scale_in = None
-        use_vb_raw = False
-        unit_key = None
-        data_file_old_txt = None
-        scale_r_ss_in = 1.
-        scale_hys_sim_in = 1.
-        scale_hys_mon_in = 1.
-        dvoc_sim_in = 0.
-        dvoc_mon_in = 0.
-        Bmon_in = None
-        Bsim_in = None
         skip = 1
         zero_zero_in = False
-        drive_ekf_in = False
         time_end_in = None
-        dTb = None
         plot_init_in = False
         long_term_in = False
         plot_overall_in = True
-        use_vb_sim_in = False
         title_key = "unit,"  # Find one instance of title
         title_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"
@@ -103,6 +84,7 @@ if __name__ == '__main__':
         data_file_new_txt = keys[1][0]
         unit_key_new = keys[1][1]
 
+#########################
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
                                            skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp)
@@ -138,6 +120,7 @@ if __name__ == '__main__':
         if ekf_file_clean:
             ekf_old_raw = np.genfromtxt(ekf_file_clean, delimiter=',', names=True, usecols=cols_ekf, dtype=float,
                                         encoding=None).view(np.recarray)
+
         mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, ekf=ekf_old_raw, time_end=time_end_in,
                             zero_zero=zero_zero_in)
 
@@ -170,46 +153,18 @@ if __name__ == '__main__':
             f = add_stuff_f(f_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
             print("\nf:\n", f, "\n")
             f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=RATED_BATT_CAP)
-
-        # How to initialize
-        if mon_old.time[0] == 0.:  # no initialization flat detected at beginning of recording
-            init_time = 1.
-        else:
-            if init_time_in:
-                init_time = init_time_in
-            else:
-                init_time = -4.
-        # Get dv_hys from data
-        dv_hys = mon_old.dV_hys[0]
-
-        # New run
-        mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
-        mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
-                                                             sres=1.0, t_ib_fail=t_ib_fail, use_ib_mon=use_ib_mon_in,
-                                                             scale_in=scale_in, use_vb_raw=use_vb_raw,
-                                                             scale_r_ss=scale_r_ss_in, s_hys_sim=scale_hys_sim_in,
-                                                             s_hys_mon=scale_hys_mon_in, dvoc_sim=dvoc_sim_in,
-                                                             dvoc_mon=dvoc_mon_in, Bmon=Bmon_in, Bsim=Bsim_in,
-                                                             drive_ekf=drive_ekf_in, dTb_in=dTb, verbose=False,
-                                                             use_vb_sim=use_vb_sim_in)
-        save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
+###################
 
         # Plots
         n_fig = 0
         fig_files = []
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
-        filename = data_root + sys.argv[0].split('/')[-1]
+        filename = data_root + sys.argv[0].split('\\')[-1]
         plot_title = filename + '   ' + date_time
         if temp_flt_file_clean and len(f.time) > 1:
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                           n_fig=n_fig, x_sch=X_SOC_MIN_BB, z_sch=T_SOC_MIN_BB, voc_reset=0.,
                                           long_term=long_term_in)
-        # if temp_hist_file_clean and len(h.time) > 1:
-        #         n_fig, fig_files = over_easy(h_20C, filename, mv_fast=mon_ver_300new, mv_slow=mon_ver_300old,
-        #                                  fig_files=fig_files, plot_title=plot_title, subtitle='h_20C',
-        #                                  n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
-        # n_fig, fig_files = overall_batt(mon_ver, sim_ver, randles_ver, filename, fig_files, plot_title=plot_title,
-        #                                 n_fig=n_fig, suffix='_ver')  # sim over mon verify
         if plot_overall_in:
             n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
