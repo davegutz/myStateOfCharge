@@ -5,9 +5,10 @@ const String unit = "pro1a_20221220";  // voc_stat
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
-// Miscelaneous
+// Miscellaneous
 #define ASK_DURING_BOOT       1   // Flag to ask for application of this file to * retained adjustements
 #define MODELING              7   // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model    
+#undef USE_BLE
 
 // Sensor biases
 #define SHUNT_GAIN            -1333.// Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)

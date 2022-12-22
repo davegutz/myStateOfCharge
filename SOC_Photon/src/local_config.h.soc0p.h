@@ -5,7 +5,7 @@ const String unit = "soc0p_20221220";  // voc_stat
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
-// Miscelaneous
+// Miscellaneous
 #define ASK_DURING_BOOT       1   // Flag to ask for application of this file to * retained adjustements
 #define MODELING              0   // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model    
 

@@ -68,11 +68,13 @@
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
 
-#if PLATFORM_ID == PLATFORM_ARGON
+#if ( PLATFORM_ID == PLATFORM_ARGON )
   #include "hardware/SerialRAM.h"
   SerialRAM ram;
-  #include "hardware/BleSerialPeripheralRK.h"
-  SerialLogHandler logHandler;
+  #ifdef USE_BLE
+    #include "hardware/BleSerialPeripheralRK.h"
+    SerialLogHandler logHandler;
+  #endif
 #endif
 
 // Globals
@@ -81,12 +83,12 @@ extern CommandPars cp;            // Various parameters to be common at system l
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
 
-#if PLATFORM_ID == 6 // Photon
+#if ( PLATFORM_ID == PLATFORM_ARGON )
+  SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
+#else
   retained Flt_st saved_hist[NHIS];    // For displaying faults
   retained Flt_st saved_faults[NFLT];  // For displaying faults
   retained SavedPars sp = SavedPars(saved_hist, NHIS, saved_faults, NFLT);  // Various parameters to be common at system level
-#elif PLATFORM_ID == PLATFORM_ARGON
-  SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
 #endif
 Flt_st mySum[NSUM];                   // Summaries
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level
@@ -99,7 +101,7 @@ String hm_string = "00:00";     // time, hh:mm
 Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_SSD1306 *display;      // Main OLED display
 
-#if PLATFORM_ID == PLATFORM_ARGON
+  #if ( PLATFORM_ID == PLATFORM_ARGON ) & defined( USE_BLE )
   // First parameter is the transmit buffer size, second parameter is the receive buffer size
   BleSerialPeripheralStatic<32, 256> bleSerial;
   const unsigned long TRANSMIT_PERIOD_MS = 2000;
@@ -123,8 +125,7 @@ void setup()
   // Serial1.blockOnOverrun(false); doesn't work.  Mess; partial lines galore
   Serial1.begin(115200);
   Serial1.flush();
-
-  #if PLATFORM_ID == PLATFORM_ARGON
+  #if ( PLATFORM_ID == PLATFORM_ARGON ) & defined( USE_BLE )
     ram.begin(0, 0);
     ram.setAutoStore(true);
     delay(1000);
@@ -302,7 +303,7 @@ void loop()
   summarizing = Summarize->update(millis(), false); // now || boot_summ && !sp.modeling()
   summarizing = summarizing || boot_summ;
 
-  #if PLATFORM_ID == PLATFORM_ARGON
+  #if ( PLATFORM_ID == PLATFORM_ARGON ) & defined( USE_BLE )
     // This must be called from loop() on every call to loop.
     bleSerial.loop();
     // Print out anything we receive

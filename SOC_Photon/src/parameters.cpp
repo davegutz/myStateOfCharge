@@ -32,7 +32,7 @@ SavedPars::SavedPars()
   nflt_ = int( NFLT ); 
   nhis_ = int( NHIS ); 
 }
-#if PLATFORM_ID == 6  // Photon
+#if PLATFORM_ID == 6
     SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
     {
         nhis_ = nhis;
