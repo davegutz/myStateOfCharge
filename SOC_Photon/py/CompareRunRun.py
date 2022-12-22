@@ -18,11 +18,43 @@ a monitor object (MON) and a simulation object (SIM).   The monitor is
 the EKF and Coulomb Counter.   The SIM is a battery model, that also has a
 Coulomb Counter built in."""
 
+import numpy as np
+from DataOverModel import SavedData, SavedDataSim, write_clean_file, overall
+from CompareHist import add_stuff_f, over_fault, filter_Tb, X_SOC_MIN_BB, T_SOC_MIN_BB, IB_BAND, RATED_BATT_CAP
+from pyDAGx import myTables
+
+# Battleborn Bmon=0, Bsim=0
+t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17, 0.20, 0.25, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.99, 0.995,
+            1.00]
+t_y_t0 = [5., 11.1, 20., 30., 40.]
+t_voc0 = [4.00, 4.00, 9.00, 11.80, 12.50, 12.60, 12.67, 12.76, 12.82, 12.93, 12.98, 13.03, 13.07, 13.11, 13.17,
+          13.22, 13.59, 14.45,
+          4.00, 4.00, 10.00, 12.30, 12.60, 12.65, 12.71, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20,
+          13.23, 13.60, 14.46,
+          4.00, 12.22, 12.66, 12.74, 12.80, 12.85, 12.89, 12.95, 12.99, 13.05, 13.08, 13.13, 13.18, 13.21, 13.25,
+          13.27, 13.72, 14.50,
+          4.00, 4.00, 12.00, 12.65, 12.75, 12.80, 12.85, 12.95, 13.00, 13.08, 13.12, 13.16, 13.20, 13.24, 13.26,
+          13.27, 13.72, 14.50,
+          4.00, 4.00, 4.00, 4.00, 10.50, 11.93, 12.78, 12.83, 12.89, 12.97, 13.06, 13.10, 13.13, 13.16, 13.19,
+          13.20, 13.72, 14.50]
+x0 = np.array(t_x_soc0)
+y0 = np.array(t_y_t0)
+data_interp0 = np.array(t_voc0)
+lut_voc = myTables.TableInterp2D(x0, y0, data_interp0)
+t_x_soc_min = [5., 11.1, 20., 30., 40.]
+t_soc_min = [0.07, 0.05, -0.05, 0.00, 0.20]
+lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
+
 
 # Load from files
-def load_data(data_file_old_txt, skip, path_to_data, path_to_temp,
-              title_key, unit_key, title_key_sel, unit_key_sel, title_key_ekf, unit_key_ekf, title_key_sim, unit_key_sim,
-              zero_zero_in, time_end_in):
+def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zero_zero_in, time_end_in):
+    title_key = "unit,"  # Find one instance of title
+    title_key_sel = "unit_s,"  # Find one instance of title
+    unit_key_sel = "unit_sel"
+    title_key_ekf = "unit_e,"  # Find one instance of title
+    unit_key_ekf = "unit_ekf"
+    title_key_sim = "unit_m,"  # Find one instance of title
+    unit_key_sim = "unit_sim"
     temp_flt_file = 'flt_compareRunSim.txt'
     data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
                                        skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp)
@@ -95,63 +127,29 @@ def load_data(data_file_old_txt, skip, path_to_data, path_to_temp,
 
 
 if __name__ == '__main__':
-    import numpy as np
     import sys
-    from DataOverModel import SavedData, SavedDataSim, write_clean_file, overall
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
-    from CompareHist import add_stuff_f, over_fault, filter_Tb, X_SOC_MIN_BB, T_SOC_MIN_BB, IB_BAND, RATED_BATT_CAP
     import matplotlib.pyplot as plt
     plt.rcParams['axes.grid'] = True
     from datetime import datetime
-    from pyDAGx import myTables
-
-    # Battleborn Bmon=0, Bsim=0
-    t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17, 0.20, 0.25, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.99, 0.995,
-                1.00]
-    t_y_t0 = [5., 11.1, 20., 30., 40.]
-    t_voc0 = [4.00, 4.00, 9.00, 11.80, 12.50, 12.60, 12.67, 12.76, 12.82, 12.93, 12.98, 13.03, 13.07, 13.11, 13.17,
-              13.22, 13.59, 14.45,
-              4.00, 4.00, 10.00, 12.30, 12.60, 12.65, 12.71, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20,
-              13.23, 13.60, 14.46,
-              4.00, 12.22, 12.66, 12.74, 12.80, 12.85, 12.89, 12.95, 12.99, 13.05, 13.08, 13.13, 13.18, 13.21, 13.25,
-              13.27, 13.72, 14.50,
-              4.00, 4.00, 12.00, 12.65, 12.75, 12.80, 12.85, 12.95, 13.00, 13.08, 13.12, 13.16, 13.20, 13.24, 13.26,
-              13.27, 13.72, 14.50,
-              4.00, 4.00, 4.00, 4.00, 10.50, 11.93, 12.78, 12.83, 12.89, 12.97, 13.06, 13.10, 13.13, 13.16, 13.19,
-              13.20, 13.72, 14.50]
-    x0 = np.array(t_x_soc0)
-    y0 = np.array(t_y_t0)
-    data_interp0 = np.array(t_voc0)
-    lut_voc = myTables.TableInterp2D(x0, y0, data_interp0)
-    t_x_soc_min = [5., 11.1, 20., 30., 40.]
-    t_soc_min = [0.07, 0.05, -0.05, 0.00, 0.20]
-    lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
-
 
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
+        keys = [('ampHiFailBare v20221220.txt', 'pro0p_2022'), ('ampHiFailBare vA20221220.txt', 'pro1a')]
+
         # Transient  inputs
-        init_time_in = None
         skip = 1
         zero_zero_in = False
         time_end_in = None
         plot_init_in = False
         long_term_in = False
         plot_overall_in = True
-        title_key = "unit,"  # Find one instance of title
-        title_key_sel = "unit_s,"  # Find one instance of title
-        unit_key_sel = "unit_sel"
-        title_key_ekf = "unit_e,"  # Find one instance of title
-        unit_key_ekf = "unit_ekf"
-        title_key_sim = "unit_m,"  # Find one instance of title
-        unit_key_sim = "unit_sim"
         pathToSavePdfTo = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
 
         # Regression suite
-        keys = [('ampHiFailBare v20221220.txt', 'pro0p_2022'), ('ampHiFailBare vA20221220.txt', 'pro1a')]
         data_file_old_txt = keys[0][0]
         unit_key_old = keys[0][1]
         data_file_new_txt = keys[1][0]
@@ -159,15 +157,9 @@ if __name__ == '__main__':
 
         # Load mon v4 (old)
         mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
-            load_data(data_file_old_txt, skip, path_to_data, path_to_temp,
-                      title_key, unit_key_old, title_key_sel, unit_key_sel, title_key_ekf, unit_key_ekf,
-                      title_key_sim, unit_key_sim,
-                      zero_zero_in, time_end_in)
-        mon_new, sim_new, f_new, dummy1, dummy2  = \
-            load_data(data_file_new_txt, skip, path_to_data, path_to_temp,
-                      title_key, unit_key_new, title_key_sel, unit_key_sel, title_key_ekf, unit_key_ekf,
-                      title_key_sim, unit_key_sim,
-                      zero_zero_in, time_end_in)
+            load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key_old, zero_zero_in, time_end_in)
+        mon_new, sim_new, f_new, dummy1, dummy2 = \
+            load_data(data_file_new_txt, skip, path_to_data, path_to_temp, unit_key_new, zero_zero_in, time_end_in)
 
         # Plots
         n_fig = 0

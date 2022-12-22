@@ -31,6 +31,7 @@ if __name__ == '__main__':
     plt.rcParams['axes.grid'] = True
     from datetime import datetime, timedelta
     from pyDAGx import myTables
+    from CompareRunRun import load_data
     global mon_old
 
     # Battleborn Bmon=0, Bsim=0
@@ -129,85 +130,91 @@ if __name__ == '__main__':
         # data_file_old_txt = 'real world Xp20 v20220917a.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -69900
         # data_file_old_txt = 'weird v20220917d.txt'; unit_key = 'soc0_2022'; scale_in = 1.084
         # data_file_old_txt = 'dwell noise Ca.5 v20220926.txt'#; dTb = [[0., 18000.],  [0, 8.]]
-        title_key = "unit,"  # Find one instance of title
-        title_key_sel = "unit_s,"  # Find one instance of title
-        unit_key_sel = "unit_sel"
-        title_key_ekf = "unit_e,"  # Find one instance of title
-        unit_key_ekf = "unit_ekf"
-        title_key_sim = "unit_m,"  # Find one instance of title
-        unit_key_sim = "unit_sim"
-        temp_flt_file = 'flt_compareRunSim.txt'
+
+
+        # title_key = "unit,"  # Find one instance of title
+        # title_key_sel = "unit_s,"  # Find one instance of title
+        # unit_key_sel = "unit_sel"
+        # title_key_ekf = "unit_e,"  # Find one instance of title
+        # unit_key_ekf = "unit_ekf"
+        # title_key_sim = "unit_m,"  # Find one instance of title
+        # unit_key_sim = "unit_sim"
+        # temp_flt_file = 'flt_compareRunSim.txt'
         pathToSavePdfTo = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
 
-        # Load mon v4 (old)
-        data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
-                                           skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp)
-        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib', 'ib_charge', 'ioc', 'voc_soc',
-                'vsat', 'dv_dyn', 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
-        mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
-                                    encoding=None).view(np.recarray)
+        # # Load mon v4 (old)
+        # data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
+        #                                    skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp)
+        # cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib', 'ib_charge', 'ioc', 'voc_soc',
+        #         'vsat', 'dv_dyn', 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
+        # mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
+        #                             encoding=None).view(np.recarray)
+        #
+        # # Load sel (old)
+        # sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
+        #                                   unit_key=unit_key_sel, skip=skip, path_to_data=path_to_data,
+        #                                   path_to_temp=path_to_temp)
+        # cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
+        #             'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_diff', 'ib_diff_f',
+        #             'voc_soc', 'e_w', 'e_w_f',
+        #             'ib_sel_stat', 'ib_h', 'ib_s', 'mib', 'ib',
+        #             'vb_sel', 'vb_h', 'vb_s', 'mvb', 'vb',
+        #             'Tb_h', 'Tb_s', 'mtb', 'Tb_f',
+        #             'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel',
+        #             'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr', 'preserving')
+        # sel_old_raw = None
+        # if sel_file_clean:
+        #     sel_old_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,
+        #                                 encoding=None).view(np.recarray)
+        #
+        # # Load ekf (old)
+        # ekf_file_clean = write_clean_file(data_file_old_txt, type_='_ekf', title_key=title_key_ekf,
+        #                                   unit_key=unit_key_ekf, skip=skip, path_to_data=path_to_data,
+        #                                   path_to_temp=path_to_temp)
+        # cols_ekf = ('c_time', 'Fx_', 'Bu_', 'Q_', 'R_', 'P_', 'S_', 'K_', 'u_', 'x_', 'y_', 'z_', 'x_prior_',
+        #             'P_prior_', 'x_post_', 'P_post_', 'hx_', 'H_')
+        # ekf_old_raw = None
+        # if ekf_file_clean:
+        #     ekf_old_raw = np.genfromtxt(ekf_file_clean, delimiter=',', names=True, usecols=cols_ekf, dtype=float,
+        #                                 encoding=None).view(np.recarray)
+        # mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, ekf=ekf_old_raw, time_end=time_end_in,
+        #                     zero_zero=zero_zero_in)
+        #
+        # # Load sim _s v24 portion of real-time run (old)
+        # data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
+        #                                        unit_key=unit_key_sim, skip=skip, path_to_data=path_to_data,
+        #                                        path_to_temp=path_to_temp)
+        # cols_sim = ('c_time', 'chm_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
+        #             'ib_in_s', 'ib_charge_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
+        # if data_file_sim_clean:
+        #     sim_old_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
+        #                                 dtype=float, encoding=None).view(np.recarray)
+        #     sim_old = SavedDataSim(time_ref=mon_old.time_ref, data=sim_old_raw, time_end=time_end_in)
+        # else:
+        #     sim_old = None
+        #
+        # # Load fault
+        # temp_flt_file_clean = write_clean_file(data_file_old_txt, type_='_flt', title_key='fltb', unit_key='unit_f',
+        #                                        skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp,
+        #                                        comment_str='---')
+        # cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
+        #           'e_w_f', 'fltw', 'falw')
+        # if temp_flt_file_clean:
+        #     f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
+        #                           encoding=None).view(np.recarray)
+        # else:
+        #     print("data from", temp_flt_file, "empty after loading")
+        # if temp_flt_file_clean:
+        #     f_raw = np.unique(f_raw)
+        #     f = add_stuff_f(f_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
+        #     print("\nf:\n", f, "\n")
+        #     f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=RATED_BATT_CAP)
 
-        # Load sel (old)
-        sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
-                                          unit_key=unit_key_sel, skip=skip, path_to_data=path_to_data,
-                                          path_to_temp=path_to_temp)
-        cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
-                    'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_diff', 'ib_diff_f',
-                    'voc_soc', 'e_w', 'e_w_f',
-                    'ib_sel_stat', 'ib_h', 'ib_s', 'mib', 'ib',
-                    'vb_sel', 'vb_h', 'vb_s', 'mvb', 'vb',
-                    'Tb_h', 'Tb_s', 'mtb', 'Tb_f',
-                    'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel',
-                    'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr', 'preserving')
-        sel_old_raw = None
-        if sel_file_clean:
-            sel_old_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,
-                                        encoding=None).view(np.recarray)
+        mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
+            load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zero_zero_in, time_end_in)
 
-        # Load ekf (old)
-        ekf_file_clean = write_clean_file(data_file_old_txt, type_='_ekf', title_key=title_key_ekf,
-                                          unit_key=unit_key_ekf, skip=skip, path_to_data=path_to_data,
-                                          path_to_temp=path_to_temp)
-        cols_ekf = ('c_time', 'Fx_', 'Bu_', 'Q_', 'R_', 'P_', 'S_', 'K_', 'u_', 'x_', 'y_', 'z_', 'x_prior_',
-                    'P_prior_', 'x_post_', 'P_post_', 'hx_', 'H_')
-        ekf_old_raw = None
-        if ekf_file_clean:
-            ekf_old_raw = np.genfromtxt(ekf_file_clean, delimiter=',', names=True, usecols=cols_ekf, dtype=float,
-                                        encoding=None).view(np.recarray)
-        mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, ekf=ekf_old_raw, time_end=time_end_in,
-                            zero_zero=zero_zero_in)
-
-        # Load sim _s v24 portion of real-time run (old)
-        data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
-                                               unit_key=unit_key_sim, skip=skip, path_to_data=path_to_data,
-                                               path_to_temp=path_to_temp)
-        cols_sim = ('c_time', 'chm_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
-                    'ib_in_s', 'ib_charge_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
-        if data_file_sim_clean:
-            sim_old_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
-                                        dtype=float, encoding=None).view(np.recarray)
-            sim_old = SavedDataSim(time_ref=mon_old.time_ref, data=sim_old_raw, time_end=time_end_in)
-        else:
-            sim_old = None
-
-        # Load fault
-        temp_flt_file_clean = write_clean_file(data_file_old_txt, type_='_flt', title_key='fltb', unit_key='unit_f',
-                                               skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp,
-                                               comment_str='---')
-        cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
-                  'e_w_f', 'fltw', 'falw')
-        if temp_flt_file_clean:
-            f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
-                                  encoding=None).view(np.recarray)
-        else:
-            print("data from", temp_flt_file, "empty after loading")
-        if temp_flt_file_clean:
-            f_raw = np.unique(f_raw)
-            f = add_stuff_f(f_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
-            print("\nf:\n", f, "\n")
-            f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=RATED_BATT_CAP)
 
         # How to initialize
         if mon_old.time[0] == 0.:  # no initialization flat detected at beginning of recording
