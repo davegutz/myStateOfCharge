@@ -113,7 +113,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
     Tb = mon_old.Tb
     soc_s_init = mon_old.soc_s[0]
     sat_init = mon_old.sat[0]
-    dv_hys_init = mon_old.dV_hys[0]
+    dv_hys_init = mon_old.dv_hys[0]
     chm_m = mon_old.chm
     chm_s = sim_old.chm_s
     if sim_old is not None:
@@ -186,7 +186,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
                 sat_s_init = mon_old.voc_stat[0] > mon_old.vsat[0]
             sim.sat = sat_s_init
             mon.sat = sat_init
-            mon.hys.dv_hys = mon_old.dV_hys[i]
+            mon.hys.dv_hys = mon_old.dv_hys[i]
 
         # Models
         if sim_old is not None and not use_ib_mon:
@@ -361,7 +361,7 @@ if __name__ == '__main__':
                                           path_to_temp=path_to_temp)
         cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
                     'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_diff', 'ib_diff_f',
-                    'voc_soc', 'e_w', 'e_w_f',
+                    'voc_soc', 'e_wrap', 'e_wrap_filt',
                     'ib_sel_stat', 'ib_h', 'ib_s', 'mib', 'ib',
                     'vb_sel', 'vb_h', 'vb_s', 'mvb', 'vb',
                     'Tb_h', 'Tb_s', 'mtb', 'Tb_f',

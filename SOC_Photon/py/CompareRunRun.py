@@ -166,7 +166,9 @@ if __name__ == '__main__':
                                           n_fig=n_fig, x_sch=X_SOC_MIN_BB, z_sch=T_SOC_MIN_BB, voc_reset=0.,
                                           long_term=long_term_in)
         if plot_overall_in:
-            n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+            mon_ver = mon_old
+            sim_ver = sim_old
+            n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_ver, filename, fig_files,
                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)

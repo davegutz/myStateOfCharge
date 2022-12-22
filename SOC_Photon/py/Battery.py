@@ -935,6 +935,7 @@ class BatterySim(Battery):
         self.saved_s.voc_s.append(self.voc)
         self.saved_s.voc_stat_s.append(self.voc_stat)
         self.saved_s.dv_dyn_s.append(self.dv_dyn)
+        self.saved_s.dv_hys_s.append(self.dv_hys)
         self.saved_s.vb_s.append(self.vb)
         self.saved_s.ib_s.append(self.ib)
         self.saved_s.ib_in_s.append(self.ib_in)
@@ -1519,6 +1520,7 @@ class SavedS:
         self.voc_s = []
         self.voc_stat_s = []
         self.dv_dyn_s = []
+        self.dv_hys_s = []
         self.vb_s = []
         self.ib_s = []
         self.ib_in_s = []

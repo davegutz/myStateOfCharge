@@ -218,7 +218,7 @@ if __name__ == '__main__':
             else:
                 init_time = -4.
         # Get dv_hys from data
-        dv_hys = mon_old.dV_hys[0]
+        dv_hys = mon_old.dv_hys[0]
 
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
@@ -236,7 +236,7 @@ if __name__ == '__main__':
         n_fig = 0
         fig_files = []
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
-        filename = data_root + sys.argv[0].split('/')[-1]
+        filename = data_root + sys.argv[0].split('\\')[-1]
         plot_title = filename + '   ' + date_time
         if temp_flt_file_clean and len(f.time) > 1:
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',

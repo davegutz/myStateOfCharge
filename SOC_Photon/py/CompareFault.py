@@ -279,7 +279,7 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
     plt.plot(hi.time, hi.voc + 0.1, color='green', linestyle=':', label='voc+0.1')
     plt.legend(loc=1)
     plt.subplot(335)
-    plt.plot(hi.time, hi.e_w_f, color='black', linestyle='--', label='e_wrap_filt')
+    plt.plot(hi.time, hi.e_wrap_filt, color='black', linestyle='--', label='e_wrap_filt')
     plt.plot(hi.time, hi.ewhi_thr, color='red', linestyle='-.', label='ewhi_thr')
     plt.plot(hi.time, hi.ewlo_thr, color='red', linestyle='-.', label='ewlo_thr')
     plt.ylim(-1, 1)
@@ -360,7 +360,7 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.plot(smv.time, smv.voc_stat_s, color='orange', linestyle='-.', label='voc_stat_s_ver')
     plt.legend(loc=1)
     plt.subplot(338)
-    plt.plot(mo.time, mo.e_w, color='black', linestyle='-', label='e_wrap')
+    plt.plot(mo.time, mo.e_wrap, color='black', linestyle='-', label='e_wrap')
     plt.plot(mv.time, np.array(mv.voc_soc) - np.array(mv.voc_stat), color='cyan', linestyle='--', label='e_wrap_ver')
     # plt.plot(smv.time, np.array(smv.voc_soc_s) - np.array(smv.voc_stat_s), color='orange', linestyle='-.', label='e_wrap_filt_s_ver')
     plt.plot(mo.time, mo.ewhi_thr, color='red', linestyle='-.', label='ewhi_thr')
@@ -475,7 +475,7 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ioc', np.array(np.copy(ioc), dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ibmh', np.array(np.copy(d_ra.ibah), dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'e_w', np.array(np.copy(d_ra.e_w_f), dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'e_wrap', np.array(np.copy(d_ra.e_wrap_filt), dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'cc_dif', np.array(cc_dif, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'dv_dyn', np.array(dv_dyn, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_diff', np.array(ib_diff, dtype=float))
@@ -875,7 +875,7 @@ if __name__ == '__main__':
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
         cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
-                  'e_w_f', 'fltw', 'falw')
+                  'e_wrap_filt', 'fltw', 'falw')
 
         # cat files
         cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
