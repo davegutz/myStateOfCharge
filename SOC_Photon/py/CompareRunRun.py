@@ -155,7 +155,7 @@ if __name__ == '__main__':
         data_file_new_txt = keys[1][0]
         unit_key_new = keys[1][1]
 
-        # Load mon v4 (old)
+        # Load data
         mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
             load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key_old, zero_zero_in, time_end_in)
         mon_new, sim_new, f_new, dummy1, dummy2 = \

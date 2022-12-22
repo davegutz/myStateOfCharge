@@ -20,41 +20,16 @@ Coulomb Counter built in."""
 
 
 if __name__ == '__main__':
-    import numpy as np
     import sys
-    from Battery import overall_batt
-    from MonSim import replicate, save_clean_file, save_clean_file_sim
-    from DataOverModel import SavedData, SavedDataSim, write_clean_file, overall
+    from MonSim import replicate, save_clean_file
+    from DataOverModel import overall
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
-    from CompareHist import add_stuff_f, over_fault, filter_Tb, X_SOC_MIN_BB, T_SOC_MIN_BB, IB_BAND, RATED_BATT_CAP, over_easy
+    from CompareHist import over_fault, X_SOC_MIN_BB, T_SOC_MIN_BB
     import matplotlib.pyplot as plt
     plt.rcParams['axes.grid'] = True
-    from datetime import datetime, timedelta
-    from pyDAGx import myTables
+    from datetime import datetime
     from CompareRunRun import load_data
-    global mon_old
-
-    # Battleborn Bmon=0, Bsim=0
-    t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17, 0.20, 0.25, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.99, 0.995,
-                1.00]
-    t_y_t0 = [5., 11.1, 20., 30., 40.]
-    t_voc0 = [4.00, 4.00, 9.00, 11.80, 12.50, 12.60, 12.67, 12.76, 12.82, 12.93, 12.98, 13.03, 13.07, 13.11, 13.17,
-              13.22, 13.59, 14.45,
-              4.00, 4.00, 10.00, 12.30, 12.60, 12.65, 12.71, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20,
-              13.23, 13.60, 14.46,
-              4.00, 12.22, 12.66, 12.74, 12.80, 12.85, 12.89, 12.95, 12.99, 13.05, 13.08, 13.13, 13.18, 13.21, 13.25,
-              13.27, 13.72, 14.50,
-              4.00, 4.00, 12.00, 12.65, 12.75, 12.80, 12.85, 12.95, 13.00, 13.08, 13.12, 13.16, 13.20, 13.24, 13.26,
-              13.27, 13.72, 14.50,
-              4.00, 4.00, 4.00, 4.00, 10.50, 11.93, 12.78, 12.83, 12.89, 12.97, 13.06, 13.10, 13.13, 13.16, 13.19,
-              13.20, 13.72, 14.50]
-    x0 = np.array(t_x_soc0)
-    y0 = np.array(t_y_t0)
-    data_interp0 = np.array(t_voc0)
-    lut_voc = myTables.TableInterp2D(x0, y0, data_interp0)
-    t_x_soc_min = [5., 11.1, 20., 30., 40.]
-    t_soc_min = [0.07, 0.05, -0.05, 0.00, 0.20]
-    lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
+    # global mon_old
 
 
     def main():
