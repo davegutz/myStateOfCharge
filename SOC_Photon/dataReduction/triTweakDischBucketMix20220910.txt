@@ -632,7 +632,7 @@ echo:  W, 0
 echo:  v26, 0
 unit_sel, 56106612.458, 0, 0,  -0.0006714,  0.00000,0.00000,0.00000,0.00000,0.00000,  0.00000,0.00000,   14.99906,1.48244,1.22558,  1, 0.00000,0.00000, 0, 0.00000,  1, 13.52093,15.48812, 0, 13.52093,  39.56,39.56, 0, 39.56, 1024, 0,   0.000,   0.000, 1, 200.000,393600.000,-245999.984,10000.000,  0.005,
 unit_sim,  56106612.458, 1, 39.56250,39.56250, 13.85825,15.48812,0.00000,15.48812,   0.000,  0.000,  0.000,  1,        0.0,   1.00000, 0, 
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s,  Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
 unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,
 pro_20220910, 2022-09-10T04:39:40,  56106612.458, 0.100,   2,  0,  0,  0,  39.6,13.521,     0.000,     0.000,14.99906,    13.85825,0.00000,13.52093,14.89433,  -1.373393, 1.00000,0.99928,1.00000,

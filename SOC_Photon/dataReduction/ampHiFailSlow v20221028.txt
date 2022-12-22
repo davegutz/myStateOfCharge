@@ -79,7 +79,7 @@ Fault:
   CBA98765x3210 xxA9876543210
   fltw=0     falw=0
 echo: v2, 0
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
 unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,
 echo: W2, 0
@@ -10715,7 +10715,7 @@ pro_20221028, 2022-11-21T14:16:59,  66646250.220, 0.100,   0,  0,  0,  7,  0, 25
 soft reset...
 unit_sel, 66646250.320, 1, 0,  -0.0040011,  6.00000,0.00010,6.00000,0.00010,0.00000,  5.99990,5.99990,   13.08265,0.09240,0.09240,  -1, 0.00010,0.00010, 1, 0.00010,  1, 13.49940,13.08265, 1, 13.08265,   0.00,25.00, 1, 25.00, 384, 272,   0.000,   0.000, 1,   0.004,  0.394, -0.394,  5.000,  0.005,0,
 unit_sim,  66646250.320, 0, 0, 25.00000,25.00000, 13.80000,13.08265,0.00000,13.08265,   0.000,  0.000,  0.000,  0.000,  0,  -177884.0,   0.50588, 1, 
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
 unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,
 pro_20221028, 2022-11-21T14:16:59,  66646250.320, 0.101,   0,  0,  0,  7,  0, 25.0,13.083,     0.000,     0.000,     0.000,13.08265,    13.80000,0.00000,13.08264,13.08265,  -0.000001, 0.50588,0.50588,0.50588,
@@ -11187,7 +11187,7 @@ reset
 soft reset...
 unit_sel, 66646259.626, 1, 0,  -0.0000001,  6.00000,0.00010,6.00000,0.00010,0.00000,  5.99990,5.99990,   13.08265,0.00000,0.00000,  -1, 0.00010,0.00010, 1, 0.00010,  1, 13.49510,13.08265, 1, 13.08265,   0.00,25.00, 1, 25.00, 384, 256,   0.000,   0.000, 1,   0.004,  0.394, -0.394,  5.000,  0.005,0,
 unit_sim,  66646259.626, 0, 0, 25.00000,25.00000, 13.80000,13.08265,0.00000,13.08265,   0.000,  0.000,  0.000,  0.000,  0,  -177884.0,   0.50588, 1, 
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
 unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,
 pro_20221028, 2022-11-21T14:17:10,  66646259.626, 1.066,   0,  0,  0,  7,  0, 25.0,13.083,     0.000,     0.000,     0.000,13.08265,    13.80000,0.00000,13.08264,13.08265,  -0.000001, 0.50588,0.50588,0.50588,

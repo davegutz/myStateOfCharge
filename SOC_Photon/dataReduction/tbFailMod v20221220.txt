@@ -220,7 +220,7 @@ echo: v2, 0
 sp.debug 0 to 2
 unit_sel, 65134717.606, 0, 0,  -0.0000034,  0.00000,0.00000,0.00000,0.00000,0.00000,  0.00000,0.00000,   13.08000,0.00000,0.00000,  1, 0.00000,0.00000, 1, 0.00000,  1, 13.51232,13.08000, 1, 13.08000,  21.25,25.00, 1, 25.00, 0, 0,   0.000,   0.000, 1,   0.200,  0.394, -0.394, 10.000,  0.005,1,
 unit_sim,  65134717.606, 0, 0, 25.00000,25.00000, 13.80000,13.08000,0.00000,13.08000,   0.000,  0.000,  0.000,  0.000,  0,  -180000.0,   0.50000, 0, 
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dV_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
 unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel_stat,ib_h,ib_s,mib,ib, vb_sel,vb_h,vb_s,mvb,vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,
 pro_20221220, 2022-12-21T19:26:18,  65134717.606, 1.004,   0,  0,  0,  7,  0, 25.0,13.080,     0.000,     0.000,     0.000,13.08000,    13.80000,0.00000,13.08000,13.08000,   0.000000, 0.50000,0.50000,0.50000,

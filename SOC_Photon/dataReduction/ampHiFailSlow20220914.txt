@@ -29,7 +29,7 @@ echo:  W, 0
 echo:  W, 0
 ..Wait.
 echo:  v26, 0
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s,  Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
 unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,
 echo:  W2, 0
@@ -1112,7 +1112,7 @@ pro_20220914, 2022-09-14T14:48:10,  56488702.730, 1.000,   0,  0,  0,  7,  25.0,
 soft reset...
 unit_sel, 56488702.794, 1, 0,  -0.0040050,  6.00000,0.00010,6.00000,0.00010,0.00000,  5.99990,5.99990,   13.03261,0.04589,0.04589,  -1, 0.00010,0.00010, 1, 0.00010,  1, 13.23816,13.03000, 1, 13.03000,   0.00,25.00, 1, 25.00, 384, 272,   0.000,   0.000, 1,   0.004,  0.394, -0.246,  5.000,  0.005,
 unit_sim,  56488702.794, 0, 25.00000,25.00000, 13.80000,13.03000,0.00000,13.03000,   0.000,  0.000,  0.000,  0,  -180000.0,   0.50000, 1, 
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s,  Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
 unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,
 pro_20220914, 2022-09-14T14:48:10,  56488702.794, 0.064,   0,  0,  0,  7,  25.0,13.030,     0.000,     0.000,13.03261,    13.80000,0.00000,13.03000,13.03000,  -0.000000, 0.50000,0.50000,0.50000,

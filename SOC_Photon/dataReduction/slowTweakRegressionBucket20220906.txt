@@ -580,7 +580,7 @@ echo:  W, 0
 echo:  W, 0
 ..Wait.
 echo:  v26, 0
-unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,   ioc,     Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,   ioc,     Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,
 unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_stat_m, dv_dyn_m, vb_m, ib_m, ib_in_m, ioc_m, sat_m, dq_m, soc_m, reset_m,
 unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_m,mib,Ib_s, vb_sel,Vb_h,Vb_m,mvb,Vb_s,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,
 echo:  W2, 0

@@ -26,7 +26,7 @@ PublishSerial 400 to 100
 echo:  v26, 0
 unit_sel, 54697905.464, 0, 0,  0, 0,  -0.0000010,  0.00000,0.00000,0.00000,0.00000,0.00000,  0.00000,0.00000,   14.53000,0.00000,0.00000,  1, 0.00000,0.00000, 1, 0.00000,  1, 13.40467,14.53000, 1, 14.53000,   0.00,25.00, 1, 25.00, 0, 0,   0.000,   0.000, 1,
 unit_sim,  54697905.464, 25.00000,25.00000, 13.80000,14.53000,0.00000,14.53000,   0.000,  0.000,  1,    0.000000,      0.0, 360000.0, 360000.0,   1.00000, 0, 
-unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,,
+unit,               hm,                  cTime,       dt,       sat,sel,mod,  Tb,  Vb,  Ib,        Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_m,soc_ekf,soc,,
 unit_m,  c_time,       Tb_m,Tbl_m,  vsat_m, voc_stat_m, dv_dyn_m, vb_m, ib_m, ib_in_m, sat_m, ddq_m, dq_m, q_m, qcap_m, soc_m, reset_m,
 unit_s,c_time,res,user_sel,   m_bare,n_bare,  cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_dif,ib_dif_f,    voc_tab,e_w,e_w_f,  ib_sel,Ib_h,Ib_m,mib,Ib_s, vb_sel,Vb_h,Vb_m,mvb,Vb_s,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel,
 pro_20220822, 2022-08-24T07:51:39,  54697905.464, 0.100,   1,  0,  7,  25.00,14.53000,0.00000,    13.80000,0.00000,14.53000,14.52986,   0.000143, 1.00000,1.00000,1.00000,

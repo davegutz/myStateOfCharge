@@ -15,7 +15,7 @@ Print interval 4 to 1
 echo:  v3, 0
 unit_sim,  59539157.681, 0, 25.00000,25.00000, 13.80000,13.08043,0.00000,13.26449,   0.000,  0.000, 16.551,  0,  -179657.4,   0.50095, 0, 
 unit_ekf, 59539157.681,         1,   2.8e-06,   2.5e-09,      0.25,4.89986e-07, 0.2500001,8.964436e-07,         0, 0.9900323,-0.008425713,  13.26449, 0.9900323,4.899862e-07, 0.9900323,4.89986e-07,  13.27291, 0.4573822,
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s,  Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
 unit_e,c_time,Fx_, Bu_, Q_, R_, P_, S_, K_, u_, x_, y_, z_, x_prior_, P_prior_, x_post_, P_post_, hx_, H_,
 pro_20220926, 2022-10-19T11:39:03,  59539157.681, 1.000,   0,  0,  0,  7,  25.0,13.264,     0.000,     0.000,13.27302,    13.80000,0.00000,13.26449,13.27291,  -0.008426, 0.50095,0.99003,0.99003,
@@ -24,7 +24,7 @@ soc=  0.500, modeling = 7, delta_q=-180000.000, soc_model=  0.5000,   delta_q_mo
 soft reset...
 unit_sim,  59539157.703, 0, 25.00000,25.00000, 13.80000,13.08000,0.00000,13.08000,   0.000,  0.000,  0.000,  0,  -180000.0,   0.50000, 1, 
 unit_ekf, 59539157.703,         1,  5.88e-08,   2.5e-09,      0.25,   2.5e-09,      0.25,4.499435e-09,         0, 0.4999964,9.536743e-07,     13.08, 0.4999964,   2.5e-09, 0.4999964,   2.5e-09,     13.08, 0.4499435,
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s,  Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
 unit_e,c_time,Fx_, Bu_, Q_, R_, P_, S_, K_, u_, x_, y_, z_, x_prior_, P_prior_, x_post_, P_post_, hx_, H_,
 pro_20220926, 2022-10-19T11:39:03,  59539157.703, 0.021,   0,  0,  0,  7,  25.0,13.080,     0.000,     0.000,13.27302,    13.80000,0.00000,13.08000,13.08000,   0.000001, 0.50000,0.50000,0.50000,

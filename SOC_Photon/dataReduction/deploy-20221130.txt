@@ -686,7 +686,7 @@ soc =   0.9926,
 modeling = 0,
 echo: v2, 4
 echo: v2, 0
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
 unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,
 unit_sel, 65901757.852, 0, 1,  -0.0178156,  -0.53845,-0.52561,-0.53845,-0.53845,-0.53845,  -0.01285,0.05411,   13.40428,0.19430,0.20134,  1, -0.53845,-0.53845, 0, -0.53845,  1, 13.19789,13.39436, 0, 13.19789,   5.81, 5.81, 0,  5.81, 0, 0,  -0.180,   0.017, 1,   0.200,393.600,-393.600, 10.000,  0.005,0,
@@ -834,7 +834,7 @@ fake_faults=>redlecho: v2, 4
 echo: v2, 0
 unit_sel, 65901881.578, 0, 1,  -0.0633384,  -0.47153,-0.52561,-0.47153,-0.47153,-0.47153,  0.05408,0.09356,   14.33867,1.13689,1.13636,  1, -0.47153,-0.47153, 0, -0.47153,  1, 13.17636,14.13284, 0, 13.17636,   5.88, 5.88, 0,  5.88, 0, 0,   0.116,  -0.018, 1,   0.200,393.600,-393.600, 10.000,  0.005,0,
 unit_sim,  65901881.578, 0, 0, 5.87500,5.87500, 13.72350,14.33864,-0.00580,14.13284,  -0.472, -0.472, -0.472,-16.221,  1,     -207.0,   0.99934, 0, 
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
 unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,
 soc0_20221130b, 2022-11-30T12:36:05,  65901881.578, 0.101,   0,  0,  1,  0,  0,  5.9,13.176,    -0.472,    -0.472,    -0.472,14.33864,    13.72350,-0.00580,13.18456,13.19316,   0.017239, 0.99934,0.93601,0.99934,
@@ -869,7 +869,7 @@ echo: Ca.9925, 4
 echo: Ca.9925, 0
 echo: v2, 4
 echo: v2, 0
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
 unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,
 unit_sel, 65901925.179, 0, 1,  -0.0317635,  -0.47153,-0.52561,-0.47153,-0.47153,-0.47153,  0.05408,0.10620,   13.40505,0.20756,0.24174,  1, -0.47153,-0.47153, 0, -0.47153,  1, 13.18497,13.39682, 0, 13.18497,   5.88, 5.88, 0,  5.88, 0, 0,   0.107,   0.006, 1,   0.200,393.600,-393.600, 10.000,  0.005,0,

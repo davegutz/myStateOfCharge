@@ -161,7 +161,7 @@ Fault:
 echo: v2, 0
 unit_sel, 66647245.232, 0, 0,  -0.0555530,  0.00000,0.00000,0.00000,0.00000,0.00000,  0.00000,0.00000,   13.13745,-0.19972,-0.05949,  1, 0.00000,0.00000, 1, 0.00000,  1, 13.52954,13.33712, 1, 13.33712,   0.00,15.00, 0, 15.00, 1, 1,   0.000,   0.000, 0,   0.200,  0.394, -0.394, 10.000,  0.005,1,
 unit_sim,  66647245.232, 0, 0, 15.00000,15.00000, 13.76000,13.13745,0.00000,13.33712,   0.000,  0.000,  0.000, 18.288,  0,   -90000.0,   0.72222, 0, 
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dV_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
 unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,
 pro_20221028, 2022-11-21T14:33:34,  66647245.232, 0.159,   0,  0,  0,  6,  0, 15.0,13.337,     0.000,     0.000,     0.000,13.13745,    13.76000,0.00000,13.33712,13.10648,   0.230973, 0.72222,0.66667,0.72222,
