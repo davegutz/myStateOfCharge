@@ -25,7 +25,6 @@ from Battery import is_sat, low_t, IB_MIN_UP
 from resample import resample
 from MonSim import replicate
 from Battery import overall_batt, cp_eframe_mult
-from CompareFault import fault_thr_bb
 from Util import cat
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
@@ -80,6 +79,48 @@ r_0 = 0.003  # Randles R0, ohms
 r_ct = 0.0016  # Randles charge transfer resistance, ohms
 r_diff = 0.0077  # Randles diffusion resistance, ohms
 r_ss = r_0 + r_ct + r_diff
+
+
+# Calculate thresholds from global input values listed above (review these)
+def fault_thr_bb(Tb, soc, voc_soc, soc_min_tbl=lut_soc_min_bb):
+    vsat_ = NOM_VSAT_BB + (Tb-25.)*DVOC_DT_BB
+
+    # cc_diff
+    soc_min = soc_min_tbl.interp(Tb)
+    if soc <= max(soc_min+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS):
+        cc_diff_empty_sclr_ = CC_DIFF_LO_SOC_SCLR
+    else:
+        cc_diff_empty_sclr_ = 1.
+    cc_diff_sclr_ = 1.  # ram adjusts during data collection
+    cc_diff_thr = CC_DIFF_SOC_DIS_THRESH * cc_diff_sclr_ * cc_diff_empty_sclr_
+
+    # wrap
+    if soc >= WRAP_SOC_HI_OFF:
+        ewsat_sclr_ = WRAP_SOC_HI_SCLR
+        ewmin_sclr_ = 1.
+    elif soc <= max(soc_min+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS):
+        ewsat_sclr_ = 1.
+        ewmin_sclr_ = WRAP_SOC_LO_SCLR
+    elif voc_soc > (vsat_ - WRAP_HI_SAT_MARG):
+        ewsat_sclr_ = WRAP_HI_SAT_SCLR
+        ewmin_sclr_ = 1.
+    else:
+        ewsat_sclr_ = 1.
+        ewmin_sclr_ = 1.
+    ewhi_sclr_ = 1.  # ram adjusts during data collection
+    ewhi_thr = r_ss * WRAP_HI_A * ewhi_sclr_ * ewsat_sclr_ * ewmin_sclr_
+    ewlo_sclr_ = 1.  # ram adjusts during data collection
+    ewlo_thr = r_ss * WRAP_LO_A * ewlo_sclr_ * ewsat_sclr_ * ewmin_sclr_
+
+    # ib_diff
+    ib_diff_sclr_ = 1.  # ram adjusts during data collection
+    ib_diff_thr = IBATT_DISAGREE_THRESH * ib_diff_sclr_
+
+    # ib_quiet
+    ib_quiet_sclr_ = 1.  # ram adjusts during data collection
+    ib_quiet_thr = QUIET_A * ib_quiet_sclr_
+
+    return cc_diff_thr, ewhi_thr, ewlo_thr, ib_diff_thr, ib_quiet_thr
 
 
 def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_title=None, n_fig=None, subtitle=None,
@@ -587,8 +628,9 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'vsat', np.array(vsat, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_sel', np.array(d_mod.ib, dtype=float))
-    voc = d_mod.voc_dyn.copy()
-    d_mod = rf.rec_append_fields(d_mod, 'voc', np.array(voc, dtype=float))
+    if hasattr(d_mod, 'voc_dyn'):
+        voc = d_mod.voc_dyn.copy()
+        d_mod = rf.rec_append_fields(d_mod, 'voc', np.array(voc, dtype=float))
     d_mod = calc_fault(d_ra, d_mod)
     voc_stat_chg = np.copy(d_mod.voc_stat)
     voc_stat_dis = np.copy(d_mod.voc_stat)
@@ -599,12 +641,18 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
             voc_stat_chg[i] = None
     d_mod = rf.rec_append_fields(d_mod, 'voc_stat_chg', np.array(voc_stat_chg, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'voc_stat_dis', np.array(voc_stat_dis, dtype=float))
-    dv_hys = d_mod.voc_dyn - d_mod.voc_stat
+    if hasattr(d_mod, 'voc_dyn'):
+        dv_hys = d_mod.voc_dyn - d_mod.voc_stat
+    else:
+        dv_hys = d_mod.voc - d_mod.voc_stat
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'dV_hys', np.array(dv_hys, dtype=float))
     dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE_20220917d
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
-    dv_hys_required = d_mod.voc_dyn - voc_soc + dv_hys
+    if hasattr(d_mod, 'voc_dyn'):
+        dv_hys_required = d_mod.voc_dyn - voc_soc + dv_hys
+    else:
+        dv_hys_required = d_mod.voc - voc_soc + dv_hys
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_required', np.array(dv_hys_required, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'dt', np.array(dt, dtype=float))
 
@@ -614,7 +662,10 @@ def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
     dv_hys_rescaled[pos] *= HYS_RESCALE_CHG
     dv_hys_rescaled[neg] *= HYS_RESCALE_DIS
     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_rescaled', np.array(dv_hys_rescaled, dtype=float))
-    voc_stat_rescaled = d_mod.voc_dyn - d_mod.dv_hys_rescaled
+    if hasattr(d_mod, 'voc_dyn'):
+        voc_stat_rescaled = d_mod.voc_dyn - d_mod.dv_hys_rescaled
+    else:
+        voc_stat_rescaled = d_mod.voc - d_mod.dv_hys_rescaled
     d_mod = rf.rec_append_fields(d_mod, 'voc_stat_rescaled', np.array(voc_stat_rescaled, dtype=float))
 
     return d_mod
@@ -947,7 +998,7 @@ if __name__ == '__main__':
         path_to_temp = '../dataReduction/temp'
         cols_h = ('time', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc_dyn', 'voc_stat', 'falw')
         cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
-                  'e_wrap_filt', 'fltw', 'falw')
+                  'e_w_f', 'fltw', 'falw')
 
         # cat files
         cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
