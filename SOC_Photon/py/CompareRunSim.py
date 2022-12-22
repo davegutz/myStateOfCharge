@@ -136,7 +136,7 @@ if __name__ == '__main__':
         unit_key_ekf = "unit_ekf"
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
-        temp_flt_file = 'flt_compareRun.txt'
+        temp_flt_file = 'flt_compareRunSim.txt'
         pathToSavePdfTo = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
