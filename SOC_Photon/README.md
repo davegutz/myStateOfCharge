@@ -58,25 +58,11 @@ Desktop settings
     .json has "particle.targetDevice": "proto"
     local_config.h has
         const   String    unit = "proto";
-        //#define BARE
 
 Laptop settings.json has  "particle.targetDevice": "soc0"
     .json has "particle.targetDevice": "soc0"
     local_config.h has
         const   String    unit = "soc0";
-        //#define BARE
-
-On desktop (has curlParticleProto.py running in cygwin)
-    after observing outputs from long cURL run, Modify main.h etc.   Make sure it compiles.
-    flash to target 'proto' and test
-    be sure to build OS and flash OS too the first time
-    push into GitHub repository
-    get address of curl from particle.io console - pick device - click on 'view events in terminal' --> edit curl??.py file
-    cd /cygdrive/c/Users/Dave/Documents/GitHub/myStateOfCharge/SOC_Photon/dataReduction/
-    python curlParticleProto.py
-    (add to .bashrc the above two lines as [emacs .bashrc]:
-    alias soc='cd ...; python cur...'
-    )
 
 On laptop (same as desktop?)
     pull from GitHub repository changes just made on desktop
@@ -85,8 +71,11 @@ On laptop (same as desktop?)
     be sure to build OS and flash OS too the first time
 
 View results
-    Prototype realtime using Blynk (SoC)
-    Target post-process using SoC_data_reduce.sce in sciLab
+  pycharm
+  'CompareRunRun'   run to run overplot
+  'CompareRunSim'   run vs sim overplot
+  'CompareHist'     history vs sim overplot
+  'CompareFault'    fault vs sim overplot
 
 ## Hardware notes
 
@@ -106,7 +95,7 @@ Tweak logic could be used to get rid of drift of small A measurement.   This int
 
 >13.7 V is decent approximation for SoC>99.7, correct for temperature.
 
-Temperature correction in ambient range is about BATT_DVOC_DT=0.001875 V/deg C from 25 * number of cells = 4.  This is estimated from the Battleborn characterization model.
+Temperature correction in ambient range is about BATT_DVOC_DT=0.001875 V/deg C from 25 * number of cells = 4.  This is estimated from the Battleborn characterization model I performed.
 
 The ADS module is delicate (ESD and handling).   I burned one out by
 accidentally touching terminals to back of OLED board.   I now mount the
@@ -118,9 +107,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
 
 ### Passive shunt low pass filter (LPF)
 
-1 - Green = 150K resistor from shunt high side
-1 - Green = 1uF cap to 2 - yellow
-2 - Yellow = from shunt low side
+1 Hz LPF built into board
 
 ### ASD 1015 12-bit
 
@@ -175,13 +162,6 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   Y-C   = Photon D6
   R-VDD = 5V Rail
   B-GND = GND Rail
-
-### Used Elego power module mounted to 5V and 3v3 and GND rails
-
-  5V jumper = 5V RAIL on "A-side" of Photon
-  Jumper "D-side" of Photon set to OFF
-  Round power supply = round power supply plug 12 VDC x 1.0A Csec CS12b20100FUF
-  Use Photon to power 3v3 so can still use microusb to power everything from laptop
 
 ### Display SSD1306-compatible OLED 128x32
 
@@ -585,4 +565,21 @@ Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
 5. Record Hd, Pf, Pa, brief v1 burst.   Confirm the 'unit =' is for the intended build install.
 6. Check Xm=0 before walk away from installed system. 
 
-##
+## Changelog
+
+20221220 Beta 
+  - Functional
+    a. hys_cap Hysteresis Capacitance decreased by factor of 10 to match cold charging (coldCharge v20221028 20221210.txt) (7 deg C).
+    b. The voc-soc curve shifts low about 0.07 (7% soc) on cold days, causing cc_diff and e_wrap_lo faults.   As a result, an additional scalar was put on saturation scalar for those fault logics.
+
+  - Argon Related.   Cannot get Photon anymore.   Also will not have Argon available but Photon 2 will be someday.   Argon very much like Photon 2 with no EERAM built into the A/S (retained).   Retained on Argon lasts only for reset.   For power, bought EERAM.
+    a. parameters.cpp/.h to manage EERAM dump.   rp --> sp
+    b. BLE logic.  Nominally disabled (#undef USE_BLE) because there is no good UART terminal for BLE.   Using HC-06 same as Photon
+
+  - Simulation neatness
+    a. Everything in python verification model is lower case for battery unit (12 VDC bank).
+    b. nP and  nS done at hardware interfaces (mySensors.cpp/h and myCloud.cpp/h::assign_publist)
+    c. load function defined
+    d. add_stuff consolidated in one place
+    e. Complete set of overplotting functions:   run/run and run/sim
+

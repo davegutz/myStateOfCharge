@@ -94,10 +94,10 @@ if __name__ == '__main__':
 
         # data_file_old_txt = 'ampHiFail vA20221220.txt'; unit_key = 'pro1a'
         # data_file_old_txt = 'ampHiFailBare vA20221220.txt'; unit_key = 'pro1a'
-        data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'pro1a'  # ; time_end_in=4.8;
+        # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'pro1a'  # ; time_end_in=4.8;
 
         #
-        # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
+        data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
         # data_file_old_txt = 'vb_mess.txt'; unit_key = 'pro1a_2022';
         # data_file_old_txt = 'fail 20221124.txt';  plot_overall_in=False;  # ; long_term_in=True;
         # data_file_old_txt = 'init Ca1 v20220926.txt'
