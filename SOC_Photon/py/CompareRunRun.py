@@ -136,9 +136,13 @@ if __name__ == '__main__':
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
-        # keys = [('ampHiFailBare v20221220.txt', 'pro0p_2022'), ('ampHiFailBare vA20221220.txt', 'pro1a_2022')]
+        # Regression
         # keys = [('ampHiFail v20221028.txt', 'pro0p_2022'), ('ampHiFail v20221220.txt', 'pro0p_2022')]
-        keys = [('rapidTweakRegression v20221220.txt', 'pro0p_2022'), ('rapidTweakRegression vA20221220.txt', 'pro1a_2022')]
+
+        # Compare
+        # keys = [('ampHiFail v20221220.txt', 'pro0p_2022'), ('ampHiFail vA20221220.txt', 'pro1a_2022')]
+        # keys = [('ampHiFailBare v20221220.txt', 'pro0p_2022'), ('ampHiFailBare vA20221220.txt', 'pro1a_2022')]
+        # keys = [('rapidTweakRegression v20221220.txt', 'pro0p_2022'), ('rapidTweakRegression vA20221220.txt', 'pro1a_2022')]
 
         # Transient  inputs
         skip = 1
