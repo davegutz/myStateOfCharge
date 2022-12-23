@@ -105,9 +105,9 @@ Print interval 4 to 1
 echo:  v2, 0
 unit_sel,       26.289, 0, 0,   0.0000000,  0.00000,0.00000,0.00000,0.00000,0.00000,  0.00000,0.00000,   13.07055,-0.00945,-0.01064,  1, 0.00000,0.00000, 1, 0.00000,  1, 13.21663,13.08000, 1, 13.08000,   0.00,25.00, 1, 25.00, 0, 0,   0.000,   0.000, 1,   0.200,  0.394, -0.246, 10.000,  0.005,
 unit_sim,        26.289, 0, 25.00000,25.00000, 13.80000,13.08000,0.00000,13.08000,   0.000,  0.000,  0.000,  0,  -180000.0,   0.50000, 1, 
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s,  Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
-unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,
+unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel_stat,ib_h,ib_s,mib,ib, vb_sel,vb_h,vb_s,mvb,vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,
 pro_20220917, 2022-09-19T14:28:18,        26.289, 2.000,   0,  0,  0,  15,  25.0,13.080,     0.000,     0.000,13.07105,    13.80000,0.00000,13.08000,13.07190,   0.008102, 0.50000,0.46759,0.46759,
 echo:  XR, 0
 RUN: at 26289,   1.000 cycles 32289 to 82289 with 6000 wait and 6000 tail

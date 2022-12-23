@@ -91,7 +91,7 @@ Print interval 4 to 1
 echo:  v3, 0
 unit_sim,        25.731, 0, 25.00000,25.00000, 13.80000,13.08000,0.00000,13.08000,   0.000,  0.000,  0.000,  0,  -180000.0,   0.50000, 0, 
 unit_ekf,       25.731,         1,   2.8e-07,   2.5e-09,      0.25,3.999999e-08,      0.25,7.199095e-08,         0,  0.499999,         0,     13.08,  0.499999,3.999999e-08,  0.499999,3.999999e-08,     13.08, 0.4499435,
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s,  Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
 unit_e,c_time,Fx_, Bu_, Q_, R_, P_, S_, K_, u_, x_, y_, z_, x_prior_, P_prior_, x_post_, P_post_, hx_, H_,
 pro_20220917, 2022-09-19T13:18:50,        25.731, 0.100,   0,  0,  0,  15,  25.0,13.080,     0.000,     0.000,13.08000,    13.80000,0.00000,13.08000,13.08000,   0.000000, 0.50000,0.50000,0.50000,

@@ -474,9 +474,9 @@ ReadSensors 100 to 500
 echo:  DP4, 0
 Print interval 4 to 4
 echo:  v26, 0
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s,  Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
-unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,
+unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel_stat,ib_h,ib_s,mib,ib, vb_sel,vb_h,vb_s,mvb,vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,
 echo:  Rb, 0
 unit_sel, 56745674.567, 0, 0,  -0.0000007,  -0.06998,-0.17000,-0.06998,-0.06998,-0.06998,  0.10002,0.10292,   13.08195,0.00807,0.00163,  1, -0.06998,-0.06998, 0, -0.06998,  1, 13.08593,13.08109, 0, 13.08593,  27.69,27.69, 0, 27.69, 0, 0,   0.027,  -0.006, 1,   0.200,  0.394, -0.246, 10.000,  0.005,
 unit_sim,  56745674.567, 0, 27.68750,27.68750, 13.81075,13.08195,-0.00086,13.08109,  -0.070, -0.070, -0.000,  0,  -224062.6,   0.44086, 0, 
@@ -3375,9 +3375,9 @@ echo:  v26, 4
 echo:  v26, 0
 unit_sel, 56747620.567, 0, 0,   0.0592578,  -4.95547,-5.32631,-4.95547,-4.95547,-4.95547,  0.37084,0.41843,   12.91417,-0.05678,-0.06134,  1, -4.95547,-4.95547, 0, -4.95547,  1, 12.71992,12.59739, 0, 12.71992,  28.94,28.94, 0, 28.88, 0, 0,   0.012,   0.167, 1,   0.800, 11.808, -7.380, 10.000,  0.005,
 unit_sim,  56747620.567, 0, 28.93750,28.93750, 13.81549,12.91382,-0.27686,12.59739,  -4.955, -4.955, -5.443,  0,  -311891.0,   0.23105, 0, 
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s,  Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
-unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,
+unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel_stat,ib_h,ib_s,mib,ib, vb_sel,vb_h,vb_s,mvb,vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,
 soc0_20220917, 2022-09-17T14:43:06,  56747620.567, 0.500,   0,  0,  0,  0,  28.9,12.720,    -4.955,    -5.443,12.91414,    13.81553,-0.27619,13.03568,12.98952,   0.046168, 0.23105,0.29042,0.23120,
 unit_sel, 56747622.568, 0, 0,   0.0592220,  -4.95547,-5.32631,-4.95547,-4.95547,-4.95547,  0.37084,0.38887,   12.91405,-0.05377,-0.05950,  1, -4.95547,-4.95547, 0, -4.95547,  1, 12.71562,12.60046, 0, 12.71562,  28.94,28.94, 0, 28.88, 0, 0,  -0.090,   0.108, 1,   0.800, 11.808, -7.380, 10.000,  0.005,
 unit_sim,  56747622.568, 0, 28.93750,28.93750, 13.81553,12.91376,-0.27373,12.60046,  -4.955, -4.955, -5.443,  0,  -311900.9,   0.23102, 0, 

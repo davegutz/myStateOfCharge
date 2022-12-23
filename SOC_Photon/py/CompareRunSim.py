@@ -71,8 +71,6 @@ if __name__ == '__main__':
         # data_file_old_txt = 'ampHiFailBare v20221220.txt'
         # data_file_old_txt = 'rapidTweakRegression v20221220.txt'  # ; time_end_in=4.8;
         # data_file_old_txt = 'offSitHysBms v20221220.txt'  # ; time_end_in = 137.
-        # data_file_old_txt = 'ampHiFail vA20221220.txt'; unit_key = 'pro1a'
-        data_file_old_txt = 'ampHiFailBare vA20221220.txt'; unit_key = 'pro1a'
         # data_file_old_txt = 'triTweakDisch v20221220.txt'  #; time_end_in=25.4
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
         # data_file_old_txt = 'ampLoFail v20221028.txt'
@@ -93,6 +91,11 @@ if __name__ == '__main__':
         # data_file_old_txt = 'on_off_on v20221028.txt'  # ; time_end_in=6
         # data_file_old_txt = 'dwell noise Ca.5 v20221028.txt'  # ; dTb = [[0., 18000.],  [0, 8.]]
         # data_file_old_txt = 'dwell Ca.5 v20221028.txt'  # ; time_end_in=0.5  # ; dTb = [[0., 18000.],  [0, 8.]]
+
+        # data_file_old_txt = 'ampHiFail vA20221220.txt'; unit_key = 'pro1a'
+        # data_file_old_txt = 'ampHiFailBare vA20221220.txt'; unit_key = 'pro1a'
+        data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'pro1a'  # ; time_end_in=4.8;
+
         #
         # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
         # data_file_old_txt = 'vb_mess.txt'; unit_key = 'pro1a_2022';
@@ -156,7 +159,8 @@ if __name__ == '__main__':
                                           long_term=long_term_in)
         if plot_overall_in:
             n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                       plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
+                                       plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
+                                       new_str='_ver')
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
         cleanup_fig_files(fig_files)

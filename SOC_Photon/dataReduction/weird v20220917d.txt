@@ -37,9 +37,9 @@ Sen::Fault:
   fltw=128     falw=128
 echo:  v2, 4
 echo:  v2, 0
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,  Tb,  Vb,  Ib,   ioc,  voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s,  Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
-unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,
+unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel_stat,ib_h,ib_s,mib,ib, vb_sel,vb_h,vb_s,mvb,vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr,
 unit_sel, 57262430.764, 0, 1,   0.0229798,  3.41009,3.74168,3.41009,3.41009,3.41009,  -0.33159,-0.30553,   13.26601,-0.00106,-0.00125,  1, 3.41009,3.41009, 0, 3.41009,  1, 14.20549,13.30204, 0, 13.30204,  24.24,24.24, 0, 24.24, 128, 128,   0.133,  -0.057, 1,   0.200,  0.394, -0.246, 10.000,  0.005,
 unit_sim,  57262430.764, 0, 24.24500,24.24500, 13.79698,13.26601,0.03478,13.30204,   3.410,  3.410,  0.275,  0,   -12693.4,   0.96723, 0, 
 soc0_20220917d, 2022-09-23T13:42:50,  57262430.764, 0.100,   0,  0,  1,  0,  24.2,13.302,     3.410,     0.275,13.26601,    13.79698,0.03483,13.26596,13.28862,  -0.022651, 0.96723,0.99021,0.96723,

@@ -574,7 +574,7 @@ unit_f, 2022-11-30T08:32:47, 1669811567,   5.812,  13.197,  -0.538,  -0.703,   5
 unit_f, 2022-11-30T08:32:57, 1669811577,   5.812,  13.202,  -0.538,  -0.703,   5.812,  13.202,  -0.538,  0.9926,  0.9758,  13.203,  13.204,   0.206, 0, 0,
 unit_f, 2022-11-30T08:33:07, 1669811587,   5.812,  13.193,  -0.538,  -0.703,   5.812,  13.193,  -0.538,  0.9926,  0.9756,  13.220,  13.222,   0.203, 0, 0,
 unit_f, 2022-11-30T08:33:17, 1669811597,   5.812,  13.215,  -0.538,  -0.525,   5.812,  13.215,  -0.538,  0.9926,  0.9755,  13.216,  13.217,   0.204, 1024, 0,
-fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,
+fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
 echo: Pf, 0
 
 Sen::
@@ -585,7 +585,7 @@ unit_f, 2022-11-30T08:32:47, 1669811567,   5.812,  13.197,  -0.538,  -0.703,   5
 unit_f, 2022-11-30T08:32:57, 1669811577,   5.812,  13.202,  -0.538,  -0.703,   5.812,  13.202,  -0.538,  0.9926,  0.9758,  13.203,  13.204,   0.206, 0, 0,
 unit_f, 2022-11-30T08:33:07, 1669811587,   5.812,  13.193,  -0.538,  -0.703,   5.812,  13.193,  -0.538,  0.9926,  0.9756,  13.220,  13.222,   0.203, 0, 0,
 unit_f, 2022-11-30T08:33:17, 1669811597,   5.812,  13.215,  -0.538,  -0.525,   5.812,  13.215,  -0.538,  0.9926,  0.9755,  13.216,  13.217,   0.204, 1024, 0,
-fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,
+fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
 Fault:
  cc_diff   -0.017  thr=  0.200 Fc^
  ib_diff    0.032  thr= 10.000 Fd^
@@ -686,9 +686,9 @@ soc =   0.9926,
 modeling = 0,
 echo: v2, 4
 echo: v2, 0
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc,  voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
-unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,
+unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel_stat,ib_h,ib_s,mib,ib, vb_sel,vb_h,vb_s,mvb,vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,
 unit_sel, 65901757.852, 0, 1,  -0.0178156,  -0.53845,-0.52561,-0.53845,-0.53845,-0.53845,  -0.01285,0.05411,   13.40428,0.19430,0.20134,  1, -0.53845,-0.53845, 0, -0.53845,  1, 13.19789,13.39436, 0, 13.19789,   5.81, 5.81, 0,  5.81, 0, 0,  -0.180,   0.017, 1,   0.200,393.600,-393.600, 10.000,  0.005,0,
 unit_sim,  65901757.852, 0, 0, 5.81250,5.81250, 13.72325,13.40215,-0.00599,13.39436,  -0.538, -0.538, -0.538, -0.351,  0,    -2383.1,   0.99244, 0, 
 soc0_20221028, 2022-11-30T08:34:12,  65901757.852, 0.099,   0,  0,  1,  0,  0,  5.8,13.198,    -0.538,    -0.538,    -0.351,13.40427,    13.72325,-0.00600,13.20569,13.21328,  -0.012184, 0.99244,0.97466,0.99247,
@@ -794,7 +794,7 @@ unit_f, 2022-11-30T12:33:47, 1669811627,   5.812,  13.193,  -0.538,  -0.703,   5
 unit_f, 2022-11-30T12:33:58, 1669811638,   5.812,  13.210,  -0.538,  -0.525,   5.812,  13.210,  -0.538,  0.9924,  0.9749,  13.212,  13.213,   0.203, 0, 0,
 unit_f, 2022-11-30T12:34:08, 1669811648,   5.812,  13.197,  -0.538,  -0.525,   5.812,  13.197,  -0.538,  0.9924,  0.9748,  13.199,  13.201,   0.200, 0, 0,
 unit_f, 2022-11-30T12:34:18, 1669811658,   5.812,  13.193,  -0.538,  -0.703,   5.812,  13.193,  -0.538,  0.9924,  0.9746,  13.186,  13.188,   0.200, 1024, 0,
-fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,
+fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
 Fault:
  cc_diff   -0.030  thr=  0.200 Fc^
  ib_diff    0.105  thr= 10.000 Fd^
@@ -834,9 +834,9 @@ fake_faults=>redlecho: v2, 4
 echo: v2, 0
 unit_sel, 65901881.578, 0, 1,  -0.0633384,  -0.47153,-0.52561,-0.47153,-0.47153,-0.47153,  0.05408,0.09356,   14.33867,1.13689,1.13636,  1, -0.47153,-0.47153, 0, -0.47153,  1, 13.17636,14.13284, 0, 13.17636,   5.88, 5.88, 0,  5.88, 0, 0,   0.116,  -0.018, 1,   0.200,393.600,-393.600, 10.000,  0.005,0,
 unit_sim,  65901881.578, 0, 0, 5.87500,5.87500, 13.72350,14.33864,-0.00580,14.13284,  -0.472, -0.472, -0.472,-16.221,  1,     -207.0,   0.99934, 0, 
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc,  voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
-unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,
+unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel_stat,ib_h,ib_s,mib,ib, vb_sel,vb_h,vb_s,mvb,vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,
 soc0_20221130b, 2022-11-30T12:36:05,  65901881.578, 0.101,   0,  0,  1,  0,  0,  5.9,13.176,    -0.472,    -0.472,    -0.472,14.33864,    13.72350,-0.00580,13.18456,13.19316,   0.017239, 0.99934,0.93601,0.99934,
 unit_sel, 65901881.979, 0, 1,  -0.0633378,  -0.47153,-0.52561,-0.47153,-0.47153,-0.47153,  0.05408,0.09725,   14.33857,1.12387,1.13658,  1, -0.47153,-0.47153, 0, -0.47153,  1, 13.20650,14.13274, 0, 13.20650,   5.88, 5.88, 0,  5.88, 0, 0,   0.148,  -0.020, 1,   0.200,393.600,-393.600, 10.000,  0.005,0,
 unit_sim,  65901881.979, 0, 0, 5.87500,5.87500, 13.72350,14.33854,-0.00580,14.13274,  -0.472, -0.472, -0.472,-16.221,  1,     -207.2,   0.99934, 0, 
@@ -869,9 +869,9 @@ echo: Ca.9925, 4
 echo: Ca.9925, 0
 echo: v2, 4
 echo: v2, 0
-unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  Vb,  Ib,   Ib_charge, ioc,  voc_soc,    Vsat,dv_dyn,Voc_stat,Voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
+unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc,  voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,
 unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,
-unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel,Ib_h,Ib_s,mib,Ib, vb_sel,Vb_h,Vb_s,mvb,Vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,
+unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,    voc_soc,e_w,e_w_f,  ib_sel_stat,ib_h,ib_s,mib,ib, vb_sel,vb_h,vb_s,mvb,vb,  Tb_h,Tb_s,mtb,Tb_f,   fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,
 unit_sel, 65901925.179, 0, 1,  -0.0317635,  -0.47153,-0.52561,-0.47153,-0.47153,-0.47153,  0.05408,0.10620,   13.40505,0.20756,0.24174,  1, -0.47153,-0.47153, 0, -0.47153,  1, 13.18497,13.39682, 0, 13.18497,   5.88, 5.88, 0,  5.88, 0, 0,   0.107,   0.006, 1,   0.200,393.600,-393.600, 10.000,  0.005,0,
 unit_sim,  65901925.179, 0, 0, 5.87500,5.87500, 13.72350,13.40504,-0.00580,13.39682,  -0.472, -0.472, -0.472, -0.472,  0,    -2373.0,   0.99248, 0, 
 soc0_20221130b, 2022-11-30T12:36:48,  65901925.179, 0.100,   0,  0,  1,  0,  0,  5.9,13.185,    -0.472,    -0.472,    -0.472,13.40504,    13.72350,-0.00580,13.19319,13.20610,  -0.008602, 0.99248,0.96072,0.99248,
@@ -1041,7 +1041,7 @@ unit_f, 2022-11-30T08:36:42, 1669811802,   5.875,  13.197,  -0.470,  -0.703,   5
 unit_f, 2022-11-30T08:36:52, 1669811812,   5.875,  13.202,  -0.470,  -0.525,   5.875,  13.202,  -0.470,  0.9924,  0.9607,  13.203,  13.206,   0.217, 1024, 0,
 unit_f, 2022-11-30T08:37:02, 1669811822,   5.875,  13.193,  -0.538,  -0.525,   5.875,  13.193,  -0.538,  0.9924,  0.9607,  13.199,  13.202,   0.202, 0, 0,
 unit_f, 2022-11-30T08:37:12, 1669811832,   5.875,  13.180,  -0.538,  -0.525,   5.875,  13.180,  -0.538,  0.9924,  0.9606,  13.195,  13.197,   0.201, 0, 0,
-fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,
+fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
 echo: Pr, 0
 
 
@@ -1256,7 +1256,7 @@ unit_f, ---, 0,   0.000,   0.000,   0.000,   0.000,   0.000,   0.000,   0.000,  
 unit_f, ---, 0,   0.000,   0.000,   0.000,   0.000,   0.000,   0.000,   0.000,  0.0000,  0.0000,   0.000,   0.000,   0.000, 0, 0,
 unit_f, ---, 0,   0.000,   0.000,   0.000,   0.000,   0.000,   0.000,   0.000,  0.0000,  0.0000,   0.000,   0.000,   0.000, 0, 0,
 unit_f, ---, 0,   0.000,   0.000,   0.000,   0.000,   0.000,   0.000,   0.000,  0.0000,  0.0000,   0.000,   0.000,   0.000, 0, 0,
-fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,
+fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
 echo: Pr, 0
 
 
@@ -1469,7 +1469,7 @@ unit_f, ---, 0,   0.000,   0.000,   0.000,   0.000,   0.000,   0.000,   0.000,  
 unit_f, 2022-11-30T08:37:43, 1669811863,   5.875,  13.193,  -0.538,  -0.525,   5.875,  13.193,  -0.538,  0.9924,  0.9606,  13.195,  13.197,   0.196, 0, 0,
 unit_f, 2022-11-30T08:37:53, 1669811873,   5.875,  13.189,  -0.538,  -0.525,   5.875,  13.189,  -0.538,  0.9923,  0.9606,  13.199,  13.203,   0.195, 0, 0,
 unit_f, 2022-11-30T08:38:03, 1669811883,   5.875,  13.202,  -0.538,  -0.525,   5.875,  13.202,  -0.538,  0.9923,  0.9606,  13.213,  13.215,   0.194, 0, 0,
-fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, Voc_stat, e_w_f, fltw, falw,
+fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
 echo: Pr, 0
 
 
