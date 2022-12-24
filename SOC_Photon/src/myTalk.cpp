@@ -356,6 +356,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%ld\n", Sen->ReadSensors->delay());
                 break;
 
+              case ( 's' ):  //   Ds<>:  d_soc to Sim.voc_soc
+                Serial.printf("Sim d_soc %7.3f to ", Sen->Sim->ds_voc_soc());
+                Sen->Sim->ds_voc_soc(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", Sen->Sim->ds_voc_soc());
+                break;
+
               case ( 't' ):  // * Dt<>:  Temp bias change hardware
                 Serial.printf("sp.Tb_bias_hdwe%7.3f to", sp.Tb_bias_hdwe);
                 sp.put_Tb_bias_hdwe(cp.input_string.substring(2).toFloat());
@@ -908,9 +914,15 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%7.3f r/s\n", sp.freq);
                 break;
 
-              case ( 'b' ): // Xb<>:  injection bias
+              case ( 'b' ): // Xb<>:  injection bias   TODO:  does this do anything?
                 sp.put_inj_bias(cp.input_string.substring(2).toFloat());
                 Serial.printf("Inj_bias set%7.3f\n", sp.inj_bias);
+                break;
+
+              case ( 'B' ): // XB<>:  injection bias - manual
+                Serial.printf("inj bias%7.3f tp", cp.injection_curr);
+                cp.inject(cp.input_string.substring(2).toFloat());
+                Serial.printf("%7.3f\n", cp.injection_curr);
                 break;
 
               case ( 't' ): // Xt<>:  injection type
@@ -957,7 +969,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'o' ): // Xo<>:  injection dc offset
-                sp.put_inj_bias(max(min(cp.input_string.substring(2).toFloat(), 18.3), -18.3));
+                sp.put_inj_bias(cp.input_string.substring(2).toFloat());
                 Serial.printf("inj_bias set%7.3f\n", sp.inj_bias);
                 break;
 
@@ -991,7 +1003,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Xp0;", QUEUE);
                     chit("Ca.5;", QUEUE);
                     chit("Xtq;Xf.1;Xa6;", QUEUE);
-                    if ( !sp.tweak_test() ) chit("Xb-6;", QUEUE);
+                    if ( !sp.tweak_test() ) chit("Xb-6;", QUEUE);  // TODO:   do these do anything?
                     break;
 
                   case ( 3 ):  // Xp3:  
@@ -1204,6 +1216,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Dn= "); Serial.printf("%6.3f", Sen->ShuntNoAmp->add()); Serial.printf(": delta noa inj, A [0]\n"); 
   Serial.printf("  DP=  "); Serial.print(cp.print_mult); Serial.println(": print mult Dr [4]"); 
   Serial.printf("  Dr=  "); Serial.print(Sen->ReadSensors->delay()); Serial.println(": minor frame, ms [100]"); 
+  Serial.printf("  Ds=  "); Serial.print(Sen->Sim->ds_voc_soc()); Serial.println(": d_soc to Sim.voc-soc, fraction [0]"); 
   Serial.printf(" *Dt= "); Serial.printf("%6.3f", sp.Tb_bias_hdwe); Serial.printf(": delta hdwe, deg C [%6.3f]\n", TEMP_BIAS); 
   Serial.printf("  D^= "); Serial.printf("%6.3f", cp.Tb_bias_model); Serial.printf(": delta model, deg C [%6.3f]\n", TEMP_BIAS); 
   Serial.printf("  Dv=  "); Serial.print(Sen->vb_add()); Serial.println(": volt fault inj, V [0]"); 
@@ -1310,9 +1323,10 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("      0x1  =1<<0 temp = %d\n", sp.mod_tb());
   Serial.printf(" Xa= "); Serial.printf("%6.3f", sp.amp); Serial.println(": Inj amp A pk (0-18.3) [0]");
   Serial.printf(" Xb= "); Serial.printf("%6.3f", sp.inj_bias); Serial.println(": Inj bias A [0]");
+  Serial.printf(" XB= "); Serial.printf("%6.3f", cp.injection_curr); Serial.println(": manual inj curren  A [0]");
   Serial.printf(" Xf= "); Serial.printf("%6.3f", sp.freq/2./PI); Serial.println(": Inj freq Hz (0-2) [0]");
   Serial.printf(" Xt=  "); Serial.printf("%d", sp.type); Serial.println(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))");
-  Serial.printf(" Xo= "); Serial.printf("%6.3f", sp.inj_bias); Serial.println(": Inj inj_bias A (-18.3-18.3) [0]");
+  Serial.printf(" Xo= "); Serial.printf("%6.3f", sp.inj_bias); Serial.println(": Inj inj_bias A [0]");
   Serial.printf(" Xp= <?>, scripted tests...\n"); 
   Serial.printf("  Xp-1: Off, modeling false\n");
   Serial.printf("  Xp0: reset tests\n");

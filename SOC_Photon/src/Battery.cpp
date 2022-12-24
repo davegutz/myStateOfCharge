@@ -574,6 +574,7 @@ BatterySim::BatterySim(double *sp_delta_q, float *sp_t_last, float *sp_s_cap_mod
     Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
     ib_charge_ = 0.;
 }
+BatterySim::~BatterySim() {}
 
 // BatterySim::assign_randles:    Assign constants from battery chemistry to arrays for state space model
 void BatterySim::assign_randles(void)
@@ -703,8 +704,8 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     dv_dyn_ = vb_ - voc_;
 
     // Saturation logic, both full and empty
-    sat_ib_max_ = sat_ib_null_ + (1. - soc_) * sat_cutback_gain_ * sp.cutback_gain_sclr;
-    if ( sp.tweak_test() || !sp.modeling() ) sat_ib_max_ = ib_charge_fut;   // Disable cutback when real world or when doing tweak_test test
+    sat_ib_max_ = sat_ib_null_ + (1. - (soc_ + ds_voc_soc_) ) * sat_cutback_gain_ * sp.cutback_gain_sclr;
+    if ( sp.tweak_test() || !sp.mod_ib() ) sat_ib_max_ = ib_charge_fut;   // Disable cutback when real world or when doing tweak_test test
     ib_fut_ = min(ib_charge_fut, sat_ib_max_);      // the feedback of ib_
     ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past value
     if ( (q_ <= 0.) && (ib_charge_ < 0.) ) ib_charge_ = 0.;   //  empty

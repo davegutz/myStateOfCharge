@@ -422,6 +422,11 @@ Full regression suite:
                   v0;Hd;XS;Dm0;Dn0;Fi1;Fo1;Fc1;Fd1;FV0;FI0;FT0;Xp0;Ca1.;Pf;DP4;
 		# Should run three very large current discharge/recharge cycles without fault.   
 
+  coldStart:  Ff0;D^-18;Xp0;Xm7;Ca0.91;Ds0.07,Rb;Rf;Dr100;DP1;v2;W200;XB40;
+          XB0;W1000;v0;W5;Pf;Rf;Pf;v0;DP4;
+		  D^0;Ds0;
+		# Run until 'SAT' is displayed.  Should charge for a bit then hit cutback on bms
+
   ampHiFailFf:  Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;
 				        Hs;Hs;Hs;Hs;Pf;Hd;Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
 		# Should detect but not switch amp current failure.  Run about 60s.  Start by looking at 'DOM 1' fig 3.  No fault record (keeps recording).   Verify that on Fig 3 the e_wrap goes through a threshold ~0.4 without tripping faults.   Will see 'diff' flashing on OLED.
@@ -451,7 +456,7 @@ Full regression suite:
           XS;v0;Hd;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;DP4;
 		# Should run one de-saturation and saturation event without fault and exercise hysteresis reset, dv_hys 0-->-0.3
 
-	offSitHysBmsNoise:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset		
+  offSitHysBmsNoise:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset		
 		Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;
           XS;v0;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;
 		# Stress test with 2x normal Vb noise DV0.10.
@@ -462,9 +467,8 @@ Full regression suite:
                   Hd;Xp0;Pf;Rf;W2;+v0;Dr100;DE20;Fc1;Fd1;Rf;Pf;
 		# Should detect and switch amp current failure.  Will be slow (~6 min) detection as it waits for the EKF to wind up.   EKF should tend to follow voltage while soc wanders away.
 		
-
-  vHiFail:        Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.45;
-                  Hd;Xp0;Rf;W200;+v0;Dr100;Rf;Pf;DP4;
+  vHiFail:  Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.45;
+            Hd;Xp0;Rf;W200;+v0;Dr100;Rf;Pf;DP4;
 		# Should detect voltage failure and display '*fail' and 'redl'
 
   vHiFailFf:        Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.45;

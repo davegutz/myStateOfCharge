@@ -123,6 +123,8 @@ def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zer
         f = add_stuff_f(f_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
         print("\nf:\n", f, "\n")
         f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=RATED_BATT_CAP)
+    else:
+        f = None
     return mon, sim, f, data_file_clean, temp_flt_file_clean
 
 

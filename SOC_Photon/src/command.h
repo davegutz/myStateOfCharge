@@ -59,6 +59,7 @@ struct CommandPars
   float s_t_sat;            // Scalar on saturation test time set and reset
   uint8_t eframe_mult;      // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
   boolean fake_faults;      // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
+  float injection_curr;     // Manual injection path, A
 
   CommandPars(void)
   {
@@ -77,6 +78,17 @@ struct CommandPars
     s_t_sat = 1.;
     eframe_mult = 20;
     fake_faults = FAKE_FAULTS;
+    injection_curr = 0.;
+  }
+
+  void assign_eframe_mult(const uint8_t count)
+  {
+    this->eframe_mult = count;
+  }
+
+  void assign_print_mult(const uint8_t count)
+  {
+    this->print_mult = count;
   }
 
   void cmd_reset(void)
@@ -87,6 +99,11 @@ struct CommandPars
   void cmd_summarize(void)
   {
     this->write_summary = true;
+  }
+
+  void inject(const float value)
+  {
+    injection_curr = value;
   }
 
   void large_reset(void)
@@ -113,16 +130,7 @@ struct CommandPars
     Serial.printf(" s_t_sat=%7.3f;\n", this->s_t_sat);
     Serial.printf(" eframe_mult=%d;\n", this->eframe_mult);
     Serial.printf(" fake_faults=%d;\n", this->fake_faults);
-  }
-
-  void assign_eframe_mult(const uint8_t count)
-  {
-    this->eframe_mult = count;
-  }
-
-  void assign_print_mult(const uint8_t count)
-  {
-    this->print_mult = count;
+    Serial.printf(" injection_curr=%7.3f;\n", this->injection_curr);
   }
 
 };            

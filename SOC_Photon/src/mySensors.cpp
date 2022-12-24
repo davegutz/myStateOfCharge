@@ -904,9 +904,9 @@ void Sensors::shunt_select_initial()
 
     // Check for modeling
     if ( sp.mod_ib() )
-        Ib_model_in = sp.inj_bias + sp.Ib_bias_all;
+        Ib_model_in = sp.inj_bias + sp.Ib_bias_all + cp.injection_curr;
     else
-        Ib_model_in = Ib_hdwe;
+        Ib_model_in = Ib_hdwe + cp.injection_curr;
 }
 
 // Load and filter Tb

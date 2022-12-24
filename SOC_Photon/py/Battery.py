@@ -96,7 +96,7 @@ HYS_CAP = 3.6e3  # Capacitance of hysteresis, Farads (3.6e3)
 WRAP_ERR_FILT = 4.  # Wrap error filter time constant, s (4)
 MAX_WRAP_ERR_FILT = 10.  # Anti-windup wrap error filter, V (10)
 F_MAX_T_WRAP = 2.8  # Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (2.8)
-
+D_SOC_S = 0.  # Bias on soc to voc-soc lookup to simulate error in estimation, esp cold battery near 0 C
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -735,7 +735,7 @@ class BatterySim(Battery):
         soc_lim = max(min(soc, 1.), -0.2)  # dag 9/3/2022
 
         # VOC-OCV model
-        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc, temp_c)
+        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc + D_SOC_S, temp_c)
         # slightly beyond but don't windup
         self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)
 

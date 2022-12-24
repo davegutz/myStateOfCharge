@@ -72,6 +72,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'rapidTweakRegression v20221220.txt'  # ; time_end_in=4.8;
         # data_file_old_txt = 'offSitHysBms v20221220.txt'  # ; time_end_in = 137.
         # data_file_old_txt = 'triTweakDisch v20221220.txt'  #; time_end_in=25.4
+        data_file_old_txt = 'coldStart v20221220.txt'  #; time_end_in=25.4
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
         # data_file_old_txt = 'ampLoFail v20221028.txt'
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'
@@ -97,7 +98,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'pro1a'  # ; time_end_in=4.8;
 
         #
-        data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
+        # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
         # data_file_old_txt = 'vb_mess.txt'; unit_key = 'pro1a_2022';
         # data_file_old_txt = 'fail 20221124.txt';  plot_overall_in=False;  # ; long_term_in=True;
         # data_file_old_txt = 'init Ca1 v20220926.txt'

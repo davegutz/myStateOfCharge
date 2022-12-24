@@ -195,7 +195,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
 
   // Gather and apply inputs
   if ( sp.mod_ib() )
-    Sen->Ib_model_in = sp.inj_bias + sp.Ib_bias_all;
+    Sen->Ib_model_in = sp.inj_bias + sp.Ib_bias_all + cp.injection_curr;
   else
     Sen->Ib_model_in = Sen->Ib_hdwe;
   Sen->temp_load_and_filter(Sen, true);
