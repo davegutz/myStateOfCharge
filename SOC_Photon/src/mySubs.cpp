@@ -559,7 +559,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     chit("Xp0;", QUEUE);  // Reset
   }
   // Perform the calculation of injection signals 
-  sp.put_inj_bias(Sen->Sim->calc_inj(Sen->elapsed_inj, sp.type, sp.amp, sp.freq));
+  Sen->Sim->calc_inj(Sen->elapsed_inj, sp.type, sp.amp, sp.freq);
 }
 
 // If false token, get new string from source

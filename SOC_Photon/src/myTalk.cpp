@@ -915,8 +915,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'b' ): // Xb<>:  injection bias   TODO:  does this do anything?
+                Serial.printf("Inj_bias set%7.3f to ", sp.inj_bias);
                 sp.put_inj_bias(cp.input_string.substring(2).toFloat());
-                Serial.printf("Inj_bias set%7.3f\n", sp.inj_bias);
+                Serial.printf("%7.3f\n", sp.inj_bias);
                 break;
 
               case ( 'B' ): // XB<>:  injection bias - manual
@@ -968,11 +969,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 }
                 break;
 
-              case ( 'o' ): // Xo<>:  injection dc offset
-                sp.put_inj_bias(cp.input_string.substring(2).toFloat());
-                Serial.printf("inj_bias set%7.3f\n", sp.inj_bias);
-                break;
-
               case ( 'p' ): // Xp<>:  injection program
                 INT_in = cp.input_string.substring(2).toInt();
                 switch ( INT_in )
@@ -988,29 +984,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     if ( !sp.tweak_test() ) chit("Xm7;", ASAP);  // Prevent upset of time in Xp9, Xp10, Xp11, etc
                     chit("Xf0;Xa0;Xtn;", ASAP);
                     if ( !sp.tweak_test() ) chit("Xb0;", ASAP);
-                    chit("XS;Mk1;Nk1;", ASAP);  // Stop any injection
+                    chit("Mk1;Nk1;", ASAP);  // Stop any injection
                     chit("Xs1;Di0;Dm0;Dn0;Dv0;DT0;DV0;DI0;Xu0;Xv1;Dr100;", ASAP);
-                    break;
-
-                  case ( 1 ):  // Xp1:  sine
-                    chit("Xp0;", QUEUE);
-                    chit("Ca.5;", QUEUE);
-                    chit("Xts;Xf.05;Xa6;", QUEUE);
-                    if ( !sp.tweak_test() ) chit("Xb-6;", QUEUE);
-                    break;
-
-                  case ( 2 ):  // Xp2:  
-                    chit("Xp0;", QUEUE);
-                    chit("Ca.5;", QUEUE);
-                    chit("Xtq;Xf.1;Xa6;", QUEUE);
-                    if ( !sp.tweak_test() ) chit("Xb-6;", QUEUE);  // TODO:   do these do anything?
-                    break;
-
-                  case ( 3 ):  // Xp3:  
-                    chit("Xp0;", QUEUE);
-                    chit("Ca.5;", QUEUE);
-                    chit("Xtt;Xf.05;Xa6;", QUEUE);
-                    if ( !sp.tweak_test() ) chit("Xb-6;", QUEUE);
                     break;
 
                   case ( 4 ):  // Xp4:  
@@ -1127,6 +1102,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Sen->stop_inj = 0UL;
                 Sen->end_inj = 0UL;
                 Sen->elapsed_inj = 0;
+                chit("Xp0;", QUEUE);  // Reset
                 Serial.printf("STOP\n");
                 break;
 
@@ -1326,13 +1302,9 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" XB= "); Serial.printf("%6.3f", cp.injection_curr); Serial.println(": manual inj curren  A [0]");
   Serial.printf(" Xf= "); Serial.printf("%6.3f", sp.freq/2./PI); Serial.println(": Inj freq Hz (0-2) [0]");
   Serial.printf(" Xt=  "); Serial.printf("%d", sp.type); Serial.println(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))");
-  Serial.printf(" Xo= "); Serial.printf("%6.3f", sp.inj_bias); Serial.println(": Inj inj_bias A [0]");
   Serial.printf(" Xp= <?>, scripted tests...\n"); 
   Serial.printf("  Xp-1: Off, modeling false\n");
   Serial.printf("  Xp0: reset tests\n");
-  Serial.printf("  Xp1: 1 Hz sine\n");
-  Serial.printf("  Xp2: 1 Hz square\n");
-  Serial.printf("  Xp3: 1 Hz triangle\n");
   Serial.printf("  Xp4: -1C soft disch, reset xp0 or Di0\n");
   Serial.printf("  Xp5: +1C soft chg\n");
   Serial.printf("  Xp6: +/-500 A pulse EKF\n");

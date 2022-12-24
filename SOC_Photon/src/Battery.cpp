@@ -745,41 +745,37 @@ float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const do
 
     // Injection.  time shifted by 1UL
     double t = (now-1UL)/1e3;
-    double sin_bias = 0.;
-    double square_bias = 0.;
-    double tri_bias = 0.;
     double inj_bias = 0.;
-    double bias = 0.;
-    double cos_bias = 0.;
     // Calculate injection amounts from user inputs (talk).
     switch ( type )
     {
         case ( 0 ):   // Nothing
-        break;
+            inj_bias = sp.inj_bias;
+            break;
         case ( 1 ):   // Sine wave
-        sin_bias = Sin_inj_->signal(amp, freq, t, 0.0);
-        break;
+            inj_bias = Sin_inj_->signal(amp, freq, t, 0.0) - sp.amp;
+            break;
         case ( 2 ):   // Square wave
-        square_bias = Sq_inj_->signal(amp, freq, t, 0.0);
-        break;
+            inj_bias = Sq_inj_->signal(amp, freq, t, 0.0) - sp.amp;
+            break;
         case ( 3 ):   // Triangle wave
-        tri_bias = Tri_inj_->signal(amp, freq, t, 0.0);
+            inj_bias = Tri_inj_->signal(amp, freq, t, 0.0);
+            break;
         case ( 4 ): case ( 5 ): // Software biases only
-        break;
+            inj_bias = sp.inj_bias - sp.amp;
+            break;
         case ( 6 ):   // Positve bias
-        bias = amp;
-        break;
+            inj_bias = amp - sp.amp;
+            break;
         case ( 8 ):   // Cosine wave
-        cos_bias = Cos_inj_->signal(amp, freq, t, 0.0);
-        break;
+            inj_bias = Cos_inj_->signal(amp, freq, t, 0.0) - sp.amp;
+            break;
         default:
-        break;
+            inj_bias = -sp.amp;
+            break;
     }
-    inj_bias = sin_bias + square_bias + tri_bias + bias + cos_bias;
-    if ( type!=3 ) sp.inj_bias = inj_bias - sp.amp;
-    else sp.inj_bias = inj_bias;
-
-    return ( sp.inj_bias );
+    sp.put_inj_bias(inj_bias);
+    return ( inj_bias );
 }
 
 /* BatterySim::count_coulombs: Count coulombs based on assumed model true=actual capacity.
