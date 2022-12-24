@@ -422,10 +422,11 @@ Full regression suite:
                   v0;Hd;XS;Dm0;Dn0;Fi1;Fo1;Fc1;Fd1;FV0;FI0;FT0;Xp0;Ca1.;Pf;DP4;
 		# Should run three very large current discharge/recharge cycles without fault.   
 
-  coldStart:  Ff0;D^-18;Xp0;Xm7;Ca0.91;Ds0.07,Rb;Rf;Dr100;DP1;v2;W200;XB40;
-          XB0;W1000;v0;W5;Pf;Rf;Pf;v0;DP4;
-		  D^0;Ds0;
+  coldStart:  Ff0;D^-18;Xp0;Xm7;Ca0.91;Ds0.07,Sk0.5,Rb;Rf;Dr100;DP1;v2;W100;Xb40;
+          XB0;W100;v0;W5;Pf;Rf;Pf;v0;DP4;
+		  D^0;Ds0;Sk1;
 		# Run until 'SAT' is displayed.  Should charge for a bit then hit cutback on bms
+		# Look at chart 'DOM 1' and verify that e_wrap misses ewlo_thr
 
   ampHiFailFf:  Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm50;Dn0.0001;
 				        Hs;Hs;Hs;Hs;Pf;Hd;Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;

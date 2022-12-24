@@ -920,12 +920,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%7.3f\n", sp.inj_bias);
                 break;
 
-              case ( 'B' ): // XB<>:  injection bias - manual
-                Serial.printf("inj bias%7.3f tp", cp.injection_curr);
-                cp.inject(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\n", cp.injection_curr);
-                break;
-
               case ( 't' ): // Xt<>:  injection type
                 switch ( cp.input_string.charAt(2) )
                 {
@@ -1299,7 +1293,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("      0x1  =1<<0 temp = %d\n", sp.mod_tb());
   Serial.printf(" Xa= "); Serial.printf("%6.3f", sp.amp); Serial.println(": Inj amp A pk (0-18.3) [0]");
   Serial.printf(" Xb= "); Serial.printf("%6.3f", sp.inj_bias); Serial.println(": Inj bias A [0]");
-  Serial.printf(" XB= "); Serial.printf("%6.3f", cp.injection_curr); Serial.println(": manual inj curren  A [0]");
   Serial.printf(" Xf= "); Serial.printf("%6.3f", sp.freq/2./PI); Serial.println(": Inj freq Hz (0-2) [0]");
   Serial.printf(" Xt=  "); Serial.printf("%d", sp.type); Serial.println(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))");
   Serial.printf(" Xp= <?>, scripted tests...\n"); 

@@ -26,7 +26,7 @@ from resample import resample
 from MonSim import replicate
 from Battery import overall_batt, cp_eframe_mult
 from Util import cat
-from CompareFault import fault_thr_bb
+from CompareHist import fault_thr_bb
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -637,8 +637,8 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
         ib_diff_ = d_ra.ibah[i] - d_ra.ibnh[i]
         cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
         ib_diff.append(ib_diff_)
-        cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = fault_thr_bb(Tb, soc, voc_stat,
-                                                                                       soc_min_tbl=soc_min_tbl)
+        cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ =\
+            fault_thr_bb(Tb, soc, voc_stat, voc_stat, soc_min_tbl=soc_min_tbl)
         cc_dif.append(cc_dif_)
         cc_diff_thr.append(cc_diff_thr_)
         ewhi_thr.append(ewhi_thr_)

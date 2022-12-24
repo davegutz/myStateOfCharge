@@ -65,6 +65,8 @@ WRAP_HI_A = 32.  # Wrap high voltage threshold, A (32 after testing; 16=0.2v)
 WRAP_LO_A = -32.  # Wrap high voltage threshold, A (-32, -20 too small on truck -16=-0.2v)
 WRAP_HI_SAT_MARG = 0.2  # Wrap voltage margin to saturation, V (0.2)
 WRAP_HI_SAT_SCLR = 2.0  # Wrap voltage margin scalar when saturated (2.0)
+WRAP_MOD_C_RATE = .05  # Moderate charge rate threshold to engage wrap threshold 0
+WRAP_SOC_MOD_OFF = 0.85  # Disable e_wrap_lo when nearing saturated and moderate C_rate (0.85)
 IBATT_DISAGREE_THRESH = 10.  # Signal selection threshold for current disagree test, A (10.)
 QUIET_A = 0.005  # Quiet set threshold, sec (0.005, 0.01 too large in truck)
 NOMINAL_TB = 15.  # Middle of the road Tb for decent reversionary operation, deg C (15.)
@@ -82,7 +84,7 @@ r_ss = r_0 + r_ct + r_diff
 
 
 # Calculate thresholds from global input values listed above (review these)
-def fault_thr_bb(Tb, soc, voc_soc, soc_min_tbl=lut_soc_min_bb):
+def fault_thr_bb(Tb, soc, voc_soc, voc_stat, C_rate, soc_min_tbl=lut_soc_min_bb):
     vsat_ = NOM_VSAT_BB + (Tb-25.)*DVOC_DT_BB
 
     # cc_diff
@@ -101,7 +103,8 @@ def fault_thr_bb(Tb, soc, voc_soc, soc_min_tbl=lut_soc_min_bb):
     elif soc <= max(soc_min+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS):
         ewsat_sclr_ = 1.
         ewmin_sclr_ = WRAP_SOC_LO_SCLR
-    elif voc_soc > (vsat_ - WRAP_HI_SAT_MARG):
+    elif voc_soc > (vsat_ - WRAP_HI_SAT_MARG) or \
+            (voc_stat > (vsat_ - WRAP_HI_SAT_MARG) and C_rate > WRAP_MOD_C_RATE and soc > WRAP_SOC_MOD_OFF):
         ewsat_sclr_ = WRAP_HI_SAT_SCLR
         ewmin_sclr_ = 1.
     else:
@@ -692,9 +695,10 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
         ib_diff_ = d_ra.ibah[i] - d_ra.ibnh[i]
         cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
         ib_diff.append(ib_diff_)
+        C_rate = d_ra.ib[i] / RATED_BATT_CAP
         voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
-        cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = fault_thr_bb(Tb, soc, voc_soc[i],
-                                                                                       soc_min_tbl=soc_min_tbl)
+        cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = \
+            fault_thr_bb(Tb, soc, voc_soc[i], voc_stat, C_rate, soc_min_tbl=soc_min_tbl)
         cc_dif.append(cc_dif_)
         cc_diff_thr.append(cc_diff_thr_)
         ewhi_thr.append(ewhi_thr_)

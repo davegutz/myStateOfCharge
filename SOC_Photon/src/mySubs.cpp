@@ -483,12 +483,15 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   //  Outputs:  Sim->temp_c(), Sim->Ib(), Sim->Vb(), sp.inj_bias, Sim.model_saturated
   Sen->Tb_model = Sen->Tb_model_filt = Sen->Sim->temp_c();
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, reset) + Sen->Vb_add();
-  Sen->Ib_model = Sen->Sim->ib_charge() * sp.nP;
+  Sen->Ib_model = Sen->Sim->ib_fut() * sp.nP;
   cp.model_cutback = Sen->Sim->cutback();
   cp.model_saturated = Sen->Sim->saturated();
 
   // Inputs:  Sim->Ib
   Sen->bias_all_model();   // Bias model outputs for sensor fault injection
+
+  if ( sp.debug==79 ) Serial.printf("ib_fut, Ib_model, ibmm, ibnm: %7.3f %7.3f %7.3f %7.3f \n",
+    Sen->Sim->ib_fut(), Sen->Ib_model, Sen->Ib_amp_model, Sen->Ib_noa_model);
 
   // Use model instead of sensors when running tests as user
   //  Inputs:                                             --->   Outputs:
