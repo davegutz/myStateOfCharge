@@ -73,7 +73,7 @@ SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network sta
   #include "hardware/SerialRAM.h"
   SerialRAM ram;
   #ifdef USE_BLE
-    #include "hardware/BleSerialPeripheralRK.h"
+    #include <BleSerialPeripheralRK.h>
     SerialLogHandler logHandler;
   #endif
 #endif

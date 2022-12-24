@@ -1,16 +1,15 @@
 
-#if PLATFORM_ID == 12  // Argon
 #include "BleSerialPeripheralRK.h"
 
 static const BleUuid serviceUuid("6E400001-B5A3-F393-E0A9-E50E24DCCA9E");
 static const BleUuid rxUuid("6E400002-B5A3-F393-E0A9-E50E24DCCA9E");
 static const BleUuid txUuid("6E400003-B5A3-F393-E0A9-E50E24DCCA9E");
 
-// #define ENABLE_LOG_DEBUG_LOCAL
-#ifdef ENABLE_LOG_DEBUG_LOCAL
-# define LOG_DEBUG_LOCAL(x) Log.info x;
+// #define ENABLE_LOG_DEBUG
+#ifdef ENABLE_LOG_DEBUG
+# define LOG_DEBUG(x) Log.info x;
 #else
-# define LOG_DEBUG_LOCAL(x)
+# define LOG_DEBUG(x)
 #endif
 
 BleSerialPeripheralBase::BleSerialPeripheralBase(uint8_t *txBuf, size_t txBufSize, uint8_t *rxBuf, size_t rxBufSize) :
@@ -32,12 +31,12 @@ void BleSerialPeripheralBase::setup() {
 
 	os_mutex_create(&mutex);
 
-	LOG_DEBUG_LOCAL(("setup complete"));
+	LOG_DEBUG(("setup complete"));
 }
 
 void BleSerialPeripheralBase::loop() {
     if (txCur > 0 && BLE.connected()) {
-    	LOG_DEBUG_LOCAL(("txCur=%u", txCur));
+    	LOG_DEBUG(("txCur=%u", txCur));
 
     	BleSerialPeripheralLock lock(this);
 
@@ -46,7 +45,7 @@ void BleSerialPeripheralBase::loop() {
     		count = txMaxWrite;
     	}
         txCharacteristic.setValue(txBuf, count);
-    	LOG_DEBUG_LOCAL(("sent count=%u", count));
+    	LOG_DEBUG(("sent count=%u", count));
 
     	if (count < txCur) {
     		// If transmitting a partial buffer, move the data to the beginning of the buffer.
@@ -62,7 +61,7 @@ void BleSerialPeripheralBase::advertise() {
 	BleAdvertisingData data;
 	data.appendServiceUUID(serviceUuid);
 	BLE.advertise(&data);
-	LOG_DEBUG_LOCAL(("advertising"));
+	LOG_DEBUG(("advertising"));
 }
 
 BleUuid BleSerialPeripheralBase::getServiceUuid() const {
@@ -124,7 +123,7 @@ size_t BleSerialPeripheralBase::write(uint8_t data) {
 void BleSerialPeripheralBase::onDataReceived(const uint8_t* data, size_t len, const BlePeerDevice& peer) {
 	// Log.trace("Received data from: %02X:%02X:%02X:%02X:%02X:%02X:", peer.address()[0], peer.address()[1], peer.address()[2], peer.address()[3], peer.address()[4], peer.address()[5]);
 
-	LOG_DEBUG_LOCAL(("dataReceived %u", len));
+	LOG_DEBUG(("dataReceived %u", len));
 
 	// Copy data into the buffer. Discards data that will not fit!
 	for(size_t ii = 0; ii < len; ii++) {
@@ -198,5 +197,3 @@ void loop() {
 }
  *
  */
-
-#endif  // PLATFORM_ID==PLATFORM_ARGON

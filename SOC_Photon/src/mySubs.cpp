@@ -490,9 +490,6 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   // Inputs:  Sim->Ib
   Sen->bias_all_model();   // Bias model outputs for sensor fault injection
 
-  if ( sp.debug==79 ) Serial.printf("ib_fut, Ib_model, ibmm, ibnm: %7.3f %7.3f %7.3f %7.3f \n",
-    Sen->Sim->ib_fut(), Sen->Ib_model, Sen->Ib_amp_model, Sen->Ib_noa_model);
-
   // Use model instead of sensors when running tests as user
   //  Inputs:                                             --->   Outputs:
   // TODO:  control parameter list here...vb_fa, soc, soc_ekf,

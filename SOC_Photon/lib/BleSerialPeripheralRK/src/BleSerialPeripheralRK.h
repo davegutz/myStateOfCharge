@@ -1,5 +1,6 @@
 #ifndef __BLESERIALPERIPHERAL_H
 #define __BLESERIALPERIPHERAL_H
+
 #include "Particle.h"
 #include "RingBuffer.h"
 
