@@ -245,6 +245,7 @@ int16_t Adafruit_ADS1X15::readADC_Differential_2_3(const String name) {
   while ( !conversionComplete() && ++count<count_max )
     ;
   if ( count==count_max && sp.debug>0 ) Serial.printf("WARNING(readADC_Differential_2_3)%s:  timed out hardcoded count limit**********************\n", name.c_str());
+  if ( sp.debug==-2 ) Serial.printf("count for ADS%s:  %d\n", name.c_str(), count);
 
   // Read the conversion results
   return getLastConversionResults();

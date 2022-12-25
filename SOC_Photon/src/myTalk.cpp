@@ -1250,6 +1250,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("\nv= "); Serial.print(sp.debug); Serial.println(": verbosity, -128 - +128. [4]");
   Serial.printf("  -<>: Negative - Arduino plot compatible\n");
+  Serial.printf("  v-2: ADS counts for throughput meas\n");
   // Serial.printf("  v-1: Debug\n");
   Serial.printf("   v1: GP\n");
   Serial.printf("   v2: GP, Sim & Sel\n");
