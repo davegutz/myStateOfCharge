@@ -121,7 +121,7 @@ void Shunt::load()
 {
   if ( !bare_detected_ && !dscn_cmd_ )
   {
-    vshunt_int_ = readADC_Differential_0_1();
+    vshunt_int_ = readADC_Differential_0_1(name_);
     sample_time_z_ = sample_time_;
     sample_time_ = millis();
     

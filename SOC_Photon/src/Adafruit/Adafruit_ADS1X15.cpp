@@ -173,7 +173,7 @@ int16_t Adafruit_ADS1X15::readADC_SingleEnded(uint8_t channel) {
     @return the ADC reading
 */
 /**************************************************************************/
-int16_t Adafruit_ADS1X15::readADC_Differential_0_1() {
+int16_t Adafruit_ADS1X15::readADC_Differential_0_1(const String name) {
   // Start with default values
   uint16_t config =
       ADS1X15_REG_CONFIG_CQUE_NONE |    // Disable the comparator (default val)
@@ -198,10 +198,10 @@ int16_t Adafruit_ADS1X15::readADC_Differential_0_1() {
   writeRegister(ADS1X15_REG_POINTER_CONFIG, config);
 
   // Wait for the conversion to complete
-  uint16_t count = 0;
+  uint16_t count = 1;
   while ( !conversionComplete() && ++count<count_max )
     ;
-  if ( count==count_max && sp.debug>0 && !sp.modeling() ) Serial.printf("WARNING(readADC_Differential_0_1):  timed out hardcoded count limit**********************\n");
+  if ( count==count_max && sp.debug>0 ) Serial.printf("WARNING(readADC_Differential_0_1)%s:  timed out hardcoded count limit**********************\n", name.c_str());
 
   // Read the conversion results
   return getLastConversionResults();
@@ -216,7 +216,7 @@ int16_t Adafruit_ADS1X15::readADC_Differential_0_1() {
     @return the ADC reading
 */
 /**************************************************************************/
-int16_t Adafruit_ADS1X15::readADC_Differential_2_3() {
+int16_t Adafruit_ADS1X15::readADC_Differential_2_3(const String name) {
   // Start with default values
   uint16_t config =
       ADS1X15_REG_CONFIG_CQUE_NONE |    // Disable the comparator (default val)
@@ -241,10 +241,10 @@ int16_t Adafruit_ADS1X15::readADC_Differential_2_3() {
   writeRegister(ADS1X15_REG_POINTER_CONFIG, config);
 
   // Wait for the conversion to complete
-  uint16_t count = 0;
+  uint16_t count = 1;
   while ( !conversionComplete() && ++count<count_max )
     ;
-  if (  count==count_max && sp.debug>0 && !sp.modeling() ) Serial.printf("WARNING(readADC_Differential_2_3):  timed out hardcoded count limit**********************\n");
+  if ( count==count_max && sp.debug>0 ) Serial.printf("WARNING(readADC_Differential_2_3)%s:  timed out hardcoded count limit**********************\n", name.c_str());
 
   // Read the conversion results
   return getLastConversionResults();

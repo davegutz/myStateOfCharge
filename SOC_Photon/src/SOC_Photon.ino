@@ -144,7 +144,7 @@ void setup()
   digitalWrite(myPins->status_led, LOW);
 
   // I2C
-  Wire.setSpeed(200000);
+  Wire.setSpeed(CLOCK_SPEED_100KHZ);
   Wire.begin();
 
   // AD

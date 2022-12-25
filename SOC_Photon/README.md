@@ -399,21 +399,17 @@ Full regression suite:
 # Running with a bare device, need to set the modeling dscn bits 16, 32, 64, and 128. (Add 240 to whatever Xm you normally run with)
 # The second lines below are to reset.   I recommend opening a second transmit window if using CoolTerm to have these ready to go.
 
-  ampHiFail:  Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;
+  ampHiFail:  Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;
               Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
 		# Should detect and switch amp current failure. 
 		# 'diff' will be displayed.  After a bit more, current display will change to 0.
 		# To evaluate plots, start looking at 'DOM 1' fig 3.  Fault record (frozen).  Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).
 
-  ampHiFailBare:  Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;
-              Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
-		# Should detect and switch amp current failure.  Start looking at 'DOM 1' fig 3.  Fault record (frozen).  Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).
-
   rapidTweakRegression:  Ff0;HR;Xp10;
 		# Should run three very large current discharge/recharge cycles without fault
 		# Best test for seeing time skews and checking fault logic for false trips
 
-  offSitHysBms:  operate around bms off, starting above, go below, come back up.  Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;
+  offSitHysBms:  operate around bms off, starting above, go below, come back up.  Ff0;D^0;Xp0;Xm247;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;
           XS;v0;Hd;Xp0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;
 		# Best test for seeing Randles model differences.   No faults
 		# Only test to confirm on/off behavior.   Make sure comes back on.
@@ -424,21 +420,21 @@ Full regression suite:
                   v0;Hd;XS;Dm0;Dn0;Fi1;Fo1;Fc1;Fd1;FV0;FI0;FT0;Xp0;Ca1.;Pf;DP4;
 		# Should run three very large current discharge/recharge cycles without fault.   
 
-  coldStart:  Ff0;D^-18;Xp0;Xm7;Ca0.91;Ds0.07,Sk0.5,Rb;Rf;Dr100;DP1;v2;W100;Xb40;
+  coldStart:  Ff0;D^-18;Xp0;Xm247;Ca0.91;Ds0.07,Sk0.5,Rb;Rf;Dr100;DP1;v2;W100;Xb40;
           XB0;W100;v0;W5;Pf;Rf;Pf;v0;DP4;
 		  D^0;Ds0;Sk1;
 		# Run until 'SAT' is displayed.  Should charge for a bit then hit cutback on bms
 		# Look at chart 'DOM 1' and verify that e_wrap misses ewlo_thr
 
-  ampHiFailFf:  Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;
+  ampHiFailFf:  Ff1;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;
 				        Hs;Hs;Hs;Hs;Pf;Hd;Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
 		# Should detect but not switch amp current failure.  Run about 60s.  Start by looking at 'DOM 1' fig 3.  No fault record (keeps recording).   Verify that on Fig 3 the e_wrap goes through a threshold ~0.4 without tripping faults.   Will see 'diff' flashing on OLED.
 
-  ampLoFail:      Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm-50;Dn0.0001;
+  ampLoFail:      Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm-50;Dn0.0001;
                   Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
 		# Should detect and switch amp current failure.  Start looking at 'DOM 1' fig 3.  Fault record (frozen).  Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).
 
-  ampHiFailNoise: Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;Ff0;
+  ampHiFailNoise: Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;Ff0;
                   Hs;Hs;Hs;Hs;Hd;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
 		# Noisy ampHiFail.  Should detect and switch amp current failure.  Start looking at 'DOM 1' fig 3.  Fault record (frozen).  Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).
 
@@ -460,21 +456,21 @@ Full regression suite:
 		# Should run one de-saturation and saturation event without fault and exercise hysteresis reset, dv_hys 0-->-0.3
 
   offSitHysBmsNoise:  operate around saturation, starting above, go below, come back up.  Tune Ca to start just above vsat.  Go low enough to exercise hys reset		
-		Ff0;D^0;Xp0;Xm7;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;
+		Ff0;D^0;Xp0;Xm247;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;
           XS;v0;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;
 		# Stress test with 2x normal Vb noise DV0.10.
 		# Make sure comes back on.
 		# It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.
 
-  ampHiFailSlow:  Ff0;D^0;Xm7;Ca0.5;Pf;v2;W2;Dr100;DP1;HR;Dm6;Dn0.0001;Fc.02;Fd.5;
+  ampHiFailSlow:  Ff0;D^0;Xm247;Ca0.5;Pf;v2;W2;Dr100;DP1;HR;Dm6;Dn0.0001;Fc.02;Fd.5;
                   Hd;Xp0;Pf;Rf;W2;+v0;Dr100;DE20;Fc1;Fd1;Rf;Pf;
 		# Should detect and switch amp current failure.  Will be slow (~6 min) detection as it waits for the EKF to wind up.   EKF should tend to follow voltage while soc wanders away.
 		
-  vHiFail:  Ff0;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.45;
+  vHiFail:  Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.45;
             Hd;Xp0;Rf;W200;+v0;Dr100;Rf;Pf;DP4;
 		# Should detect voltage failure and display '*fail' and 'redl'
 
-  vHiFailFf:        Ff1;D^0;Xm7;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.45;
+  vHiFailFf:        Ff1;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.45;
                   Ff0;Hd;Xp0;Rf;W200;+v0;Dr100;Rf;Pf;DP4;
 		# Should detect voltage failure but not display anything.
 
@@ -483,7 +479,7 @@ Full regression suite:
   pulseSS:  Xp7
 		# Should generate a very short <10 sec data burst with a pulse.   Look at plots for good overlay.  e_wrap will have a delay.
 		
-  tbFailMod:    Ff0;D^0;Ca.5;Xp0;W4;Xm7;DP1;Dr100;W2;HR;Pf;v2;Xv.002;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
+  tbFailMod:    Ff0;D^0;Ca.5;Xp0;W4;Xm247;DP1;Dr100;W2;HR;Pf;v2;Xv.002;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
                 Hd;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;
 		# Should momentary flash '***' then clear itself.   All within 60 sec.
 
@@ -523,7 +519,7 @@ Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
   Bucket:  Ff0;HR;Bm2;Bs1;D^15;
            Bm0;Bs0;D^0;
            use Bsim=1 and Bmon=2 in MonSim
-  triTweakDischBucketMix: set Xm7;D^<>; or Xm0;Dt<>; +reset
+  triTweakDischBucketMix: set Xm247;D^<>; or Xm0;Dt<>; +reset
                   Ff0;Xp0;v0;Bm2;Bs1;Xm0;Fi1000;Fo1000;Fc1000;Fd1000;FV1;FI1;FHd;T1;SA0;SB0;DA0;DB0;Xtt;Ca1.;Ri;Mw0;Nw0;MC0.004;Mx0.04;NC0.004;Nx0.04;Mk1;Nk1;-Dm1;-Dn1;DP1;Rb;Pa;Xf0.02;Xa-33000;XW5;XT5;XC3;W2;v2;W3;XR;
                   v0;XS;SA1;SB1;Dm0;Dn0;Bm0;Bs0;FV0;FI1;FT0;Xp0;Ca1.;HR;Pf;DP4;
   slowTweakRegressionBucket: Ff0;Bm2;Bs1;D^15;Xp11
@@ -571,6 +567,15 @@ Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
 4. On restart after load, check the retained parameter list (SRAM battery backed up).   The list is displayed on startup for convenience.   Go slowly with this if you've been tuning.
 5. Record Hd, Pf, Pa, brief v1 burst.   Confirm the 'unit =' is for the intended build install.
 6. Check Xm=0 before walk away from installed system. 
+
+## Throughput
+1. Driven by ADC read of ADS1013 device (current AD).
+2. Probably wiring quality drives the conversion count for (busy wait for I2C comm). Or could be flaky ADS devices.
+3. Per unit
+	pro0p:  amp 62 cts, 0.0320 sec; noa 200 cts, 0.0460 sec
+	soc0p:
+	pro1a:  amp 46 cts, 0.0330 sec; noa 1   cts, 0.0030 sec
+	soc1a:
 
 ## Changelog
 
