@@ -722,10 +722,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'x' ):  // Px:  Print shunt measure
-                Serial.printf("\nAmp: "); Serial.printf("Vshunt_int,Vshunt,ib_tot_bias,Ishunt_cal=,%d,%7.3f,%7.3f,%7.3f,\n", 
-                  Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), cp.ib_tot_bias_amp, Sen->ShuntAmp->ishunt_cal());
-                Serial.printf("Noa:"); Serial.printf("Vshunt_int,Vshunt,ib_tot_bias,Ishunt_cal=,%d,%7.3f,%7.3f,%7.3f,\n", 
-                  Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), cp.ib_tot_bias_noa, Sen->ShuntNoAmp->ishunt_cal());
+                Serial.printf("\nAmp: "); Serial.printf("Vshunt_int,Vshunt,Vc,Vo,ib_tot_bias,Ishunt_cal=,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
+                  Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), Sen->ShuntAmp->Vc(), Sen->ShuntAmp->Vo(), cp.ib_tot_bias_amp, Sen->ShuntAmp->ishunt_cal());
+                Serial.printf("Noa:"); Serial.printf("Vshunt_int,Vshunt,Vc,Vo,ib_tot_bias,Ishunt_cal=,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
+                  Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->Vc(), Sen->ShuntNoAmp->Vo(), cp.ib_tot_bias_noa, Sen->ShuntNoAmp->ishunt_cal());
                 Serial.printf("Sel:Noa,Ib=,%d,%7.3f\n", sp.ib_select, Sen->Ib);
                 break;
 

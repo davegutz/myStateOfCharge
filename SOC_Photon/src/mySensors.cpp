@@ -890,8 +890,8 @@ void Sensors::shunt_load(void)
 // Print Shunt selection data
 void Sensors::shunt_print()
 {
-    Serial.printf("reset,T,select,inj_bias,vs_int_a,Vshunt_a,Ib_hdwe_a,vs_int_na,Vshunt_na,Ib_hdwe_na,Ib_hdwe,T,Ib_amp_fault,Ib_amp_fail,Ib_noa_fault,Ib_noa_fail,=,    %d,%7.3f,%d,%7.3f,    %d,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f, %d,%d,  %d,%d,\n",
-        reset, T, sp.ib_select, sp.inj_bias, ShuntAmp->vshunt_int(), ShuntAmp->vshunt(), ShuntAmp->ishunt_cal(),
+    Serial.printf("reset,T,select,inj_bias,vs_int_a,Vshunt_a,Vc_a,Vo_a,Ib_hdwe_a,vs_int_na,Vshunt_na,Ib_hdwe_na,Ib_hdwe,T,Ib_amp_fault,Ib_amp_fail,Ib_noa_fault,Ib_noa_fail,=,    %d,%7.3f,%d,%7.3f,    %d,%7.3f,%7.3f,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f, %d,%d,  %d,%d,\n",
+        reset, T, sp.ib_select, sp.inj_bias, ShuntAmp->vshunt_int(), ShuntAmp->vshunt(), ShuntAmp->Vc(), ShuntAmp->Vo(), ShuntAmp->ishunt_cal(),
         ShuntNoAmp->vshunt_int(), ShuntNoAmp->vshunt(), ShuntNoAmp->ishunt_cal(),
         Ib_hdwe, T,
         Flt->ib_amp_flt(), Flt->ib_amp_fa(), Flt->ib_noa_flt(), Flt->ib_noa_fa());

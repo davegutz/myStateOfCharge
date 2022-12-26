@@ -95,6 +95,8 @@ public:
   int16_t vshunt_int() { return vshunt_int_; };
   int16_t vshunt_int_0() { return vshunt_int_0_; };
   int16_t vshunt_int_1() { return vshunt_int_1_; };
+  float Vc() { return Vc_; };
+  float Vo() { return Vo_; };
 protected:
   String name_;         // For print statements, multiple instances
   uint8_t port_;        // Octal I2C port used by Acafruit_ADS1015
