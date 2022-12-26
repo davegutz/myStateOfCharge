@@ -3,7 +3,7 @@
 /******************************************************/
 
 #include "Particle.h"
-#line 1 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 1 "c:/Users/daveg/OneDrive/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
 /*
  * Project SOC_Photon
   * Description:
@@ -69,7 +69,7 @@
 // This works when I'm using two platforms:   PHOTON = 6 and ARGON = 12
 void setup();
 void loop();
-#line 64 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 64 "c:/Users/daveg/OneDrive/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
 #ifndef PLATFORM_ID
   #define PLATFORM_ID 12
 #endif
