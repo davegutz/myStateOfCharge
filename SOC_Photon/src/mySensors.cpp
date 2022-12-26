@@ -142,13 +142,12 @@ void Shunt::load()
   #else
     if ( !bare_detected_ && !dscn_cmd_ )
     {
-      Vc_raw_ = analogRead(vc_pin);
-      Vc_ =  float(Vc_raw)*VC_CONV_GAIN;
-      Vo_raw_ = analogRead(vo_pin);
-      Vo_ =  float(Vo_raw)*VO_CONV_GAIN;
+      Vc_raw_ = analogRead(vc_pin_);
+      Vc_ =  float(Vc_raw_)*VC_CONV_GAIN;
+      Vo_raw_ = analogRead(vo_pin_);
+      Vo_ =  float(Vo_raw_)*VO_CONV_GAIN;
       vshunt_ = Vo_ - Vc_;
       vshunt_int_0_ = 0; vshunt_int_1_ = 0; vshunt_int_ = 0;
-      }
       sample_time_z_ = sample_time_;
       sample_time_ = millis();
     }

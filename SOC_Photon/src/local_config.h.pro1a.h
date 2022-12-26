@@ -11,7 +11,7 @@ const String unit = "pro1a_20221220";  // voc_stat
 // #define USE_BLE
 
 // Sensor biases
-#define USE_ADS                 // Instead of using ADS device to read amp by I2C, use analog pins
+// #define USE_ADS                 // Instead of using ADS device to read amp by I2C, use analog pins
 #ifdef USE_ADS
     #define CURR_BIAS_AMP         9.7   // Calibration of amplified shunt sensor (* 'DA'), A
     #define CURR_SCALE_AMP        1.    // Hardware to match data (* 'SB')
