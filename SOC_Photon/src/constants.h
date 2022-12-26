@@ -54,7 +54,11 @@
 #define PHOTON_ADC_COUNT      4096      // Photon ADC range, counts (4096)
 #define PHOTON_ADC_VOLT       3.3       // Photon ADC range, V (3.3)
 #define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms
-#define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms
+#if (PLATFORM_ID==6)  // Photon
+    #define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms
+#else
+    #define SHUNT_AMP_R2          98000.    // Amplifed shunt ADS resistance, ohms
+#endif
 #define SCREEN_WIDTH          128       // OLED display width, in pixels (128)
 #define SCREEN_HEIGHT         32        // OLED display height, in pixels (4)
 #define OLED_RESET            4         // Reset pin # (or -1 if sharing Arduino reset pin) (4)
