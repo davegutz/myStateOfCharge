@@ -619,7 +619,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'R' ):  // HR: History reset
+                Serial.printf("Resetting history...");
                 large_reset_summary(mySum, sp.isum, NSUM);
+                Serial.printf("done\n");
                 break;
 
               case ( 's' ):  // Hs: History snapshot
@@ -665,7 +667,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 chit("PM;", SOON);
                 chit("PN;", SOON);
                 chit("Ph;", SOON);
-                chit("Hd;", SOON);
+                // chit("Hd;", SOON);
                 chit("Pf;", SOON);
                 break;
 
@@ -975,7 +977,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                   case ( 0 ):  // Xp0:  reset stop
-                    if ( !sp.tweak_test() ) chit("Xm7;", ASAP);  // Prevent upset of time in Xp9, Xp10, Xp11, etc
+                    if ( !sp.tweak_test() ) chit("Xm247;", ASAP);  // Prevent upset of time in Xp9, Xp10, Xp11, etc
                     chit("Xf0;Xa0;Xtn;", ASAP);
                     if ( !sp.tweak_test() ) chit("Xb0;", ASAP);
                     chit("Mk1;Nk1;", ASAP);  // Stop any injection
@@ -1011,7 +1013,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Xp0;", QUEUE);      // Reset nominal
                     chit("v0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
                     chit("Bm0;Bs0;", QUEUE);  // Set Battleborn configuration
-                    chit("Xm15;", QUEUE);     // Modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
+                    chit("Xm255;", QUEUE);     // Modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
                     chit("Xts;", QUEUE);      // Start up a sine wave
                     chit("Ca1;", QUEUE);      // After restarting with sine running, soc will not be at 1.  Reset them all to 1
                     chit("Dm1;Dn1;", ASAP);   // Slight positive current so sat logic is functional.  ASAP so synchronized and ib_diff flat.

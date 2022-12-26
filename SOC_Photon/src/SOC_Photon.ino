@@ -137,7 +137,7 @@ void setup()
   #endif
 
   // Peripherals
-  myPins = new Pins(D6, D7, A1, D2);
+  myPins = new Pins(D6, D7, A1, D2, A4, A5);
 
   // Status
   pinMode(myPins->status_led, OUTPUT);
@@ -277,7 +277,7 @@ void loop()
   static boolean reset_publish = true;        // Dynamic reset
 
   // Sensor conversions
-  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins->pin_1_wire, ReadSensors, &sp.nP, &sp.nS); // Manage sensor data.  Sim is in here.
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, *myPins, ReadSensors, &sp.nP, &sp.nS); // Manage sensor data.  Sim is in here.
 
    // Mon, used to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor(&sp.delta_q, &sp.t_last, &sp.mon_chm, &sp.hys_scale);

@@ -42,6 +42,7 @@
 
 extern PublishPars pp;  // For publishing
 extern CommandPars cp;  // Various parameters to be static at system level
+struct Pins;
 
 // DS18-based temp sensor
 class TempSensor: public DS18
@@ -66,7 +67,8 @@ class Shunt: public Adafruit_ADS1015
 {
 public:
   Shunt();
-  Shunt(const String name, const uint8_t port, float *cp_ib_bias, float *cp_ib_scale, const float v2a_s, float *sp_shunt_gain_sclr);
+  Shunt(const String name, const uint8_t port, float *cp_ib_bias, float *cp_ib_scale, const float v2a_s, float *sp_shunt_gain_sclr,
+    const uint8_t vc_pin, const uint8_t vo_pin);
   ~Shunt();
   // operators
   // functions
@@ -111,6 +113,12 @@ protected:
   unsigned long int sample_time_;   // Exact moment of hardware sample
   unsigned long int sample_time_z_; // Exact moment of past hardware sample
   boolean dscn_cmd_;    // User command to ignore hardware, T=ignore
+  uint8_t vc_pin_;      // Common voltage pin, for !USE_ADS
+  uint8_t vo_pin_;      // Output voltage pin, for !USE_ADS
+  int Vc_raw_;          // Raw analog read, integer       
+  float Vc_;            // Sensed Vc, common op amp voltage ref, V
+  int Vo_raw_;          // Raw analog read, integer       
+  float Vo_;            // Sensed Vo, output of op amp V
 };
 
 // Fault word bits.   All faults heal
@@ -305,7 +313,7 @@ class Sensors
 {
 public:
   Sensors();
-  Sensors(double T, double T_temp,uint16_t pin_1_wire, Sync *ReadSensors, float *sp_nP_, float *sp_nS_);
+  Sensors(double T, double T_temp, Pins pins, Sync *ReadSensors, float *sp_nP_, float *sp_nS_);
   ~Sensors();
   int Vb_raw;                 // Raw analog read, integer
   float Vb;                   // Selected battery bank voltage, V
@@ -393,7 +401,7 @@ public:
   float Vb_noise();
   float Vb_noise_amp() { return ( Vb_noise_amp_ ); };
   void Vb_noise_amp(const float noise) { Vb_noise_amp_ = noise; };
-  void vb_print(void);     // Print Vb result
+  void vb_print(void);                  // Print Vb result
   Fault *Flt;
 protected:
   float *sp_Tb_bias_hdwe_;   // Location of retained Tb bias, deg C
@@ -409,10 +417,10 @@ protected:
   float Ib_noa_noise_amp_;  // Ib noise on non-amplified sensor, amplitude model only, A pk-pk
   float vb_add_;        // Fault injection bias, V
   boolean reset_temp_;  // Keep track of temperature reset, stored for plotting, T=reset
-  unsigned long int sample_time_ib_;      // Exact moment of selected Ib sample, ms
-  unsigned long int sample_time_vb_;      // Exact moment of selected Vb sample, ms
-  unsigned long int sample_time_ib_hdwe_; // Exact moment of Ib sample, ms
-  unsigned long int sample_time_vb_hdwe_; // Exact moment of Vb sample, ms
+  unsigned long int sample_time_ib_;          // Exact moment of selected Ib sample, ms
+  unsigned long int sample_time_vb_;          // Exact moment of selected Vb sample, ms
+  unsigned long int sample_time_ib_hdwe_;     // Exact moment of Ib sample, ms
+  unsigned long int sample_time_vb_hdwe_;     // Exact moment of Vb sample, ms
   unsigned long int dt_ib_hdwe_;          // Delta update of Ib sample, ms
   unsigned long int dt_ib_;               // Delta update of selected Ib sample, ms
   float *sp_nP_;    // Number of parallel batteries in bank, e.g. '2P1S'

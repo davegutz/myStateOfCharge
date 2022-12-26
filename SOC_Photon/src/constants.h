@@ -136,13 +136,18 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define WRAP_SOC_LO_SCLR    60.         // Large to disable e_wrap (60. for startup)
 #define WRAP_MOD_C_RATE     .05         // Moderate charge rate threshold to engage wrap threshold 0
 #define WRAP_SOC_MOD_OFF    0.85        // Disable e_wrap_lo when nearing saturated and moderate C_rate (0.85)
+#define VC_S                1.0         // Vc sense scalar (1.0)
+#define VO_S                1.0         // Vo sense scalar (1.0)
 
 // Conversion gains
 const float SHUNT_NOA_GAIN = SHUNT_GAIN * CURR_SCALE_NOA;
 const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2 * CURR_SCALE_AMP;
 
-// Battery voltage measurement gain
-const float VB_CONV_GAIN = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI+VBATT_SENSE_R_LO) /
+// Voltage measurement gains
+const float VB_CONV_GAIN = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI + VBATT_SENSE_R_LO) /
                               double(VBATT_SENSE_R_LO) / double(PHOTON_ADC_COUNT) * double(VBATT_S);
+const float VC_CONV_GAIN = double(PHOTON_ADC_VOLT) / double(PHOTON_ADC_COUNT) * double(VC_S);
+const float VO_CONV_GAIN = double(PHOTON_ADC_VOLT) * double(SHUNT_AMP_R1) /
+                              double(SHUNT_AMP_R2) / double(PHOTON_ADC_COUNT) * double(VO_S);
 
 #endif // CONSTANTS_H_

@@ -553,10 +553,10 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   else if ( Sen->elapsed_inj && sp.tweak_test() )  // Done.  Start and turn things off by setting 0
   {
     Sen->elapsed_inj = 0;
-    chit("v0;", ASAP);    // Turn off echo
-    chit("Xm7;", QUEUE);  // Turn off tweak_test
-    chit("Pa;", QUEUE);   // Print all for record.  Last so Pf last and visible
-    chit("Xp0;", QUEUE);  // Reset
+    chit("v0;", ASAP);      // Turn off echo
+    chit("Xm247;", QUEUE);  // Turn off tweak_test
+    chit("Pa;", QUEUE);     // Print all for record.  Last so Pf last and visible
+    chit("Xp0;", QUEUE);    // Reset
   }
   // Perform the calculation of injection signals 
   Sen->Sim->calc_inj(Sen->elapsed_inj, sp.type, sp.amp, sp.freq);
