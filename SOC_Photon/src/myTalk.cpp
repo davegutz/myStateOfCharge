@@ -701,12 +701,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'M' ):  // PM:  Print shunt Amp
                 Serial.printf ("\n"); Sen->ShuntAmp->pretty_print();
-                Serial1.printf("\n"); Sen->ShuntAmp->pretty_print();
                 break;
 
               case ( 'N' ):  // PN:  Print shunt no amp
                 Serial.printf ("\n"); Sen->ShuntNoAmp->pretty_print();
-                Serial1.printf("\n"); Sen->ShuntNoAmp->pretty_print();
                 break;
 
               case ( 'r' ):  // Pr:  Print retained
