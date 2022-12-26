@@ -86,7 +86,7 @@ Shunt::Shunt(const String name, const uint8_t port, float *cp_ib_bias, float *cp
   name_(name), port_(port), bare_detected_(false), cp_ib_bias_(cp_ib_bias), cp_ib_scale_(cp_ib_scale), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), ishunt_cal_(0), sclr_(1.), add_(0.),
   sp_shunt_gain_sclr_(sp_shunt_gain_sclr), sample_time_(0UL), sample_time_z_(0UL), dscn_cmd_(false),
-  vc_pin_(vc_pin), vo_pin_(vo_pin), Vc_raw_(0), Vc_(0.)
+  vc_pin_(vc_pin), vo_pin_(vo_pin), Vc_raw_(0), Vc_(0.), Vo_Vc_(0.), Vo_Vc_f_(0.)
 {
   #ifdef USE_ADS
     if ( name_=="No Amp")
@@ -100,6 +100,8 @@ Shunt::Shunt(const String name, const uint8_t port, float *cp_ib_bias, float *cp
       bare_detected_ = true;
     }
     else Serial.printf("SHUNT MON %s started\n", name_.c_str());
+  #else
+    Vo_Vc_Filt_ = new LagTustin(sample_time_, TAU_VO_VC_FILT, -MAX_VO_VC_FILT, MAX_VO_VC_FILT);  // actual update time provided run time
   #endif
 }
 Shunt::~Shunt() {}
@@ -143,14 +145,8 @@ void Shunt::load()
   #else
     if ( !bare_detected_ && !dscn_cmd_ )
     {
-      Vc_raw_ = analogRead(vc_pin_);
-      Vc_ =  float(Vc_raw_)*VC_CONV_GAIN;
-      Vo_raw_ = analogRead(vo_pin_);
-      Vo_ =  float(Vo_raw_)*VO_CONV_GAIN;
-      vshunt_ = Vo_ - Vc_;
+      vshunt_ = Vo_Vc_f_;
       vshunt_int_0_ = 0; vshunt_int_1_ = 0; vshunt_int_ = 0;
-      sample_time_z_ = sample_time_;
-      sample_time_ = millis();
     }
     else
     {
@@ -160,6 +156,23 @@ void Shunt::load()
     }
   #endif
   ishunt_cal_ = vshunt_*v2a_s_*float(!sp.mod_ib())*(*cp_ib_scale_)*(*sp_shunt_gain_sclr_) + *cp_ib_bias_;
+}
+
+// Sample and filter Vo-Vc
+void Shunt::sample(const boolean reset_loc)
+{
+  static unsigned int t_us_last = micros();
+  unsigned int t_us_now = micros();
+  float T = float(t_us_now - t_us_last) / 1e6;
+  t_us_last = t_us_now;
+  Vc_raw_ = analogRead(vc_pin_);
+  Vc_ =  float(Vc_raw_)*VC_CONV_GAIN;
+  Vo_raw_ = analogRead(vo_pin_);
+  sample_time_z_ = sample_time_;
+  sample_time_ = millis();
+  Vo_ =  float(Vo_raw_)*VO_CONV_GAIN;
+  Vo_Vc_ = Vo_ - Vc_;
+  Vo_Vc_f_ = Vo_Vc_Filt_->calculate(Vo_Vc_, reset_loc, min(T, MAX_VO_VC_T));
 }
 
 

@@ -254,6 +254,9 @@ void loop()
   boolean read;                               // Read, T/F
   static Sync *ReadSensors = new Sync(READ_DELAY);
 
+  boolean samp;                               // Samp, T/F
+  static Sync *SampIb = new Sync(SAMP_DELAY);
+
   boolean read_temp;                          // Read temp, T/F
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
 
@@ -297,6 +300,7 @@ void loop()
   read_temp = ReadTemp->update(millis(), reset);              //  now || reset
   read = ReadSensors->update(millis(), reset);                //  now || reset
   elapsed = ReadSensors->now() - start;
+  samp = SampIb->update(millis(), reset);                     //  now || reset
   control = ControlSync->update(millis(), reset);             //  now || reset
   display_to_user = DisplayUserSync->update(millis(), reset); //  now || reset
   boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !sp.modeling();
@@ -329,6 +333,15 @@ void loop()
     Sen->temp_load_and_filter(Sen, reset_temp);
   }
 
+  // Sample Ib
+  #ifndef USE_ADS
+    if ( samp )
+    {
+      Sen->ShuntAmp->sample(reset);
+      Sen->ShuntNoAmp->sample(reset);
+    }
+  #endif
+  
   // Input all other sensors and do high rate calculations
   if ( read )
   {

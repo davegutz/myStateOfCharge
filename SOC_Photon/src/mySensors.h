@@ -83,6 +83,7 @@ public:
   float ishunt_cal() { return ( ishunt_cal_*sclr_ + add_ ); };
   void load();
   void pretty_print();
+  void sample(const boolean reset_loc);
   void scale(const float sclr) { *cp_ib_scale_ = sclr; };
   float scale() { return ( *cp_ib_scale_ ); };
   void sp_shunt_gain_sclr(const float sclr) { *sp_shunt_gain_sclr_ = sclr; };
@@ -97,6 +98,8 @@ public:
   int16_t vshunt_int_1() { return vshunt_int_1_; };
   float Vc() { return Vc_; };
   float Vo() { return Vo_; };
+  float Vo_Vc() { return Vo_Vc_; };
+  float Vo_Vc_f() { return Vo_Vc_f_; };
 protected:
   String name_;         // For print statements, multiple instances
   uint8_t port_;        // Octal I2C port used by Acafruit_ADS1015
@@ -120,7 +123,10 @@ protected:
   int Vc_raw_;          // Raw analog read, integer       
   float Vc_;            // Sensed Vc, common op amp voltage ref, V
   int Vo_raw_;          // Raw analog read, integer       
-  float Vo_;            // Sensed Vo, output of op amp V
+  float Vo_;            // Sensed Vo, output of op amp, V
+  float Vo_Vc_;         // Sensed Vo-Vc, difference in output of op amps, V
+  float Vo_Vc_f_;       // Sensed, filtered Vo-Vc, difference in output of op amps, V
+  LagTustin *Vo_Vc_Filt_; // Noise filter for Vo-Vc calculation
 };
 
 // Fault word bits.   All faults heal

@@ -33,6 +33,7 @@
 #define ONE_HOUR_MILLIS       3600000UL // Number of milliseconds in one hour (60*60*1000)
 #define ONE_DAY_MILLIS        86400000UL// Number of milliseconds in one day (24*60*60*1000)
 #define READ_DELAY            100UL     // Sensor read wait, ms (100UL = 0.1 sec)
+#define SAMP_DELAY            20UL      // Ib sample wait, ms (20UL = 0.02 sec)
 #define READ_TEMP_DELAY       6000UL    // Sensor read wait, ms (6000UL = 6 sec)
 #define SUMMARIZE_DELAY       1800000UL // Battery state tracking and reporting, ms (1800000UL = 30 min)
 #define SUMMARIZE_WAIT        60000UL   // Summarize alive time before first save, ms (60000UL = 1 min)
@@ -138,6 +139,9 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define WRAP_SOC_MOD_OFF    0.85        // Disable e_wrap_lo when nearing saturated and moderate C_rate (0.85)
 #define VC_S                1.0         // Vc sense scalar (1.0)
 #define VO_S                1.0         // Vo sense scalar (1.0)
+#define TAU_VO_VC_FILT      0.080       // Current sensor difference filter time constant, s (half of hardware RC, 0.159 = 0.08)
+#define MAX_VO_VC_FILT      2.          // Vo-Vc Filter maximum windup, V (2.)
+const float MAX_VO_VC_T = (TAU_VO_VC_FILT * 0.7);  // Maximum update time allowed to avoid instability, s (0.05)
 
 // Conversion gains
 #ifdef USE_ADS
