@@ -126,27 +126,24 @@ void setup()
   // Serial1.blockOnOverrun(false); doesn't work.  Mess; partial lines galore
   Serial1.begin(115200);
   Serial1.flush();
-  #if ( PLATFORM_ID == PLATFORM_ARGON ) & defined( USE_BLE )
+  #if ( PLATFORM_ID == PLATFORM_ARGON )
     ram.begin(0, 0);
     ram.setAutoStore(true);
     delay(1000);
     sp.load_all();
-    bleSerial.setup();
-    bleSerial.advertise();
-    Serial.printf("BLE mac=>%s\n", BLE.address().toString().c_str());
+    #ifdef USE_BLE
+      bleSerial.setup();
+      bleSerial.advertise();
+      Serial.printf("BLE mac=>%s\n", BLE.address().toString().c_str());
+    #endif
   #endif
 
   // Peripherals
   myPins = new Pins(D6, D7, A1, A3, A4, A5);
 
   // Status
-  pinMode(myPins->pin_1_wire, INPUT);
   pinMode(myPins->status_led, OUTPUT);
   digitalWrite(myPins->status_led, LOW);
-  pinMode(myPins->Vb_pin, INPUT);
-  pinMode(myPins->Von_pin, INPUT);
-  pinMode(myPins->Vc_pin, INPUT);
-  pinMode(myPins->Vom_pin, INPUT);
 
   // I2C
   Wire.setSpeed(CLOCK_SPEED_100KHZ);
@@ -259,8 +256,10 @@ void loop()
   boolean read;                               // Read, T/F
   static Sync *ReadSensors = new Sync(READ_DELAY);
 
-  boolean samp;                               // Samp, T/F
-  static Sync *SampIb = new Sync(SAMP_DELAY);
+  #ifndef USE_ADS
+    boolean samp;                               // Samp, T/F
+    static Sync *SampIb = new Sync(SAMP_DELAY);
+  #endif
 
   boolean read_temp;                          // Read temp, T/F
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
@@ -305,7 +304,9 @@ void loop()
   read_temp = ReadTemp->update(millis(), reset);              //  now || reset
   read = ReadSensors->update(millis(), reset);                //  now || reset
   elapsed = ReadSensors->now() - start;
-  samp = SampIb->update(millis(), reset);                     //  now || reset
+  #ifndef USE_ADS
+    samp = SampIb->update(millis(), reset);                     //  now || reset
+  #endif
   control = ControlSync->update(millis(), reset);             //  now || reset
   display_to_user = DisplayUserSync->update(millis(), reset); //  now || reset
   boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !sp.modeling();
@@ -342,8 +343,12 @@ void loop()
   #ifndef USE_ADS
     if ( samp )
     {
-      Sen->ShuntAmp->sample(reset);
-      Sen->ShuntNoAmp->sample(reset);
+      static unsigned int t_us_last = micros();
+      unsigned int t_us_now = micros();
+      float T = float(t_us_now - t_us_last) / 1e6;
+      t_us_last = t_us_now;
+      Sen->ShuntAmp->sample(reset, T);
+      Sen->ShuntNoAmp->sample(reset, T);
     }
   #endif
   

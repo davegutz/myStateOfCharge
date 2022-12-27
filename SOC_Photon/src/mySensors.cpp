@@ -128,7 +128,7 @@ void Shunt::pretty_print()
 }
 
 // load
-void Shunt::load()
+void Shunt::load(const boolean disconnect)
 {
   #ifdef USE_ADS
     if ( !bare_detected_ && !dscn_cmd_ )
@@ -155,16 +155,12 @@ void Shunt::load()
       ishunt_cal_ = 0.;
     }
   #endif
-  ishunt_cal_ = vshunt_*v2a_s_*float(!sp.mod_ib())*(*cp_ib_scale_)*(*sp_shunt_gain_sclr_) + *cp_ib_bias_;
+  ishunt_cal_ = vshunt_*v2a_s_*float(!disconnect)*(*cp_ib_scale_)*(*sp_shunt_gain_sclr_) + *cp_ib_bias_;
 }
 
 // Sample and filter Vo-Vc
-void Shunt::sample(const boolean reset_loc)
+void Shunt::sample(const boolean reset_loc, const float T)
 {
-  static unsigned int t_us_last = micros();
-  unsigned int t_us_now = micros();
-  float T = float(t_us_now - t_us_last) / 1e6;
-  t_us_last = t_us_now;
   Vc_raw_ = analogRead(vc_pin_);
   Vc_ =  float(Vc_raw_)*VC_CONV_GAIN;
   Vo_raw_ = analogRead(vo_pin_);
@@ -896,8 +892,8 @@ void Sensors::shunt_bias(void)
 // Read and convert shunt Sensors
 void Sensors::shunt_load(void)
 {
-    ShuntAmp->load();
-    ShuntNoAmp->load();
+    ShuntAmp->load( sp.mod_ib_amp_dscn() );
+    ShuntNoAmp->load( sp.mod_ib_noa_dscn() );
 }
 
 // Print Shunt selection data

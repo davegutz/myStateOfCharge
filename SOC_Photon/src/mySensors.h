@@ -81,9 +81,9 @@ public:
   void dscn_cmd(const boolean cmd) { dscn_cmd_ = cmd; };
   unsigned long int dt(void) { return sample_time_ - sample_time_z_; };
   float ishunt_cal() { return ( ishunt_cal_*sclr_ + add_ ); };
-  void load();
+  void load(const boolean disconnect);
   void pretty_print();
-  void sample(const boolean reset_loc);
+  void sample(const boolean reset_loc, const float T);
   void scale(const float sclr) { *cp_ib_scale_ = sclr; };
   float scale() { return ( *cp_ib_scale_ ); };
   void sp_shunt_gain_sclr(const float sclr) { *sp_shunt_gain_sclr_ = sclr; };
