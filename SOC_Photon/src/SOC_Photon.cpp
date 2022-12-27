@@ -146,11 +146,16 @@ void setup()
   #endif
 
   // Peripherals
-  myPins = new Pins(D6, D7, A1, D2, A4, A5);
+  myPins = new Pins(D6, D7, A1, A3, A4, A5);
 
   // Status
+  pinMode(myPins->pin_1_wire, INPUT);
   pinMode(myPins->status_led, OUTPUT);
   digitalWrite(myPins->status_led, LOW);
+  pinMode(myPins->Vb_pin, INPUT);
+  pinMode(myPins->Von_pin, INPUT);
+  pinMode(myPins->Vc_pin, INPUT);
+  pinMode(myPins->Vom_pin, INPUT);
 
   // I2C
   Wire.setSpeed(CLOCK_SPEED_100KHZ);
@@ -289,7 +294,7 @@ void loop()
   static boolean reset_publish = true;        // Dynamic reset
 
   // Sensor conversions
-  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, *myPins, ReadSensors, &sp.nP, &sp.nS); // Manage sensor data.  Sim is in here.
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, &sp.nP, &sp.nS); // Manage sensor data.  Sim is in here.
 
    // Mon, used to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor(&sp.delta_q, &sp.t_last, &sp.mon_chm, &sp.hys_scale);

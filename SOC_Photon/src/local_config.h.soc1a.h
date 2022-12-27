@@ -11,20 +11,13 @@ const String unit = "soc1a_20221220";  // voc_stat
 // #define USE_BLE
 
 // Sensor biases
-#define USE_ADS                 // Instead of using ADS device to read amp by I2C, use analog pins
-#ifdef USE_ADS
-    #define CURR_BIAS_AMP         -6.152 // Calibration of amplified shunt sensor (* 'DA'), A
-    #define CURR_SCALE_AMP        1.    // Hardware to match data (* 'SB')
-    #define CURR_BIAS_NOA         0.    // Calibration of non-amplified shunt sensor (* 'DB'), A
-    #define CURR_SCALE_NOA        1.    // Hardware to match data (* 'SA')
-    #define SHUNT_GAIN            -1333.// Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)
-#else
-    #define CURR_BIAS_AMP         0.    // Calibration of amplified shunt sensor (* 'DA'), A
-    #define CURR_SCALE_AMP        1.    // Hardware to match data (* 'SB')
-    #define CURR_BIAS_NOA         0.    // Calibration of non-amplified shunt sensor (* 'DB'), A
-    #define CURR_SCALE_NOA        1.    // Hardware to match data (* 'SA')
-    #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SG'), A/V (1333 is 100A/0.075V)
-#endif
+#undef USE_ADS                 // Instead of using ADS device to read amp by I2C, use analog pins
+#define CURR_BIAS_AMP         0.    // Calibration of amplified shunt sensor (* 'DA'), A
+#define CURR_SCALE_AMP        1.    // Hardware to match data (* 'SB')
+#define CURR_BIAS_NOA         0.    // Calibration of non-amplified shunt sensor (* 'DB'), A
+#define CURR_SCALE_NOA        1.    // Hardware to match data (* 'SA')
+#define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SG'), A/V (1333 is 100A/0.075V)
+#define SHUNT_AMP_R1          5100.     // Amplifed shunt ADS resistance, ohms
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'Di'), A
 #define VOLT_BIAS             1.8   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
@@ -37,7 +30,7 @@ const String unit = "soc1a_20221220";  // voc_stat
 #define COULOMBIC_EFF         0.9985  // Coulombic efficiency of battery, fraction of charge that gets used
 #define MON_CHEM              0       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=LION 
 #define SIM_CHEM              0       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=LION 
-#define RATED_BATT_CAP        108.4   // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
+#define RATED_BATT_CAP        100.    // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
 #define NS                    1.0     // Number of series batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BS')
 #define NP                    1.0     // Number of parallel batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BP')
 

@@ -25,6 +25,7 @@ const String unit = "pro1a_20221220";  // voc_stat
     #define CURR_SCALE_NOA        1.    // Hardware to match data (* 'SA')
     #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SG'), A/V (1333 is 100A/0.075V)
 #endif
+#define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'Di'), A
 #define VOLT_BIAS             1.8   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C

@@ -53,7 +53,6 @@
 #define VBATT_A               0.0       // Vb sense adder, V (0)
 #define PHOTON_ADC_COUNT      4096      // Photon ADC range, counts (4096)
 #define PHOTON_ADC_VOLT       3.3       // Photon ADC range, V (3.3)
-#define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms
 #if (PLATFORM_ID==6)  // Photon
     #define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms
 #else

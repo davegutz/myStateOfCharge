@@ -675,7 +675,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 
 
 // Class Sensors
-Sensors::Sensors(double T, double T_temp, Pins pins, Sync *ReadSensors, float *sp_nP, float *sp_nS):
+Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, float *sp_nP, float *sp_nS):
   sp_Tb_bias_hdwe_(&sp.Tb_bias_hdwe), sp_Vb_bias_hdwe_(&sp.Vb_bias_hdwe), Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE),
   Ib_amp_noise_amp_(IB_AMP_NOISE), Ib_noa_noise_amp_(IB_NOA_NOISE), reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL),
   sample_time_ib_hdwe_(0UL), sample_time_vb_hdwe_(0UL), sp_nP_(sp_nP), sp_nS_(sp_nS)
@@ -683,9 +683,9 @@ Sensors::Sensors(double T, double T_temp, Pins pins, Sync *ReadSensors, float *s
   this->T = T;
   this->T_filt = T;
   this->T_temp = T_temp;
-  this->ShuntAmp = new Shunt("Amp", 0x49, &cp.ib_tot_bias_amp, &sp.ib_scale_amp, SHUNT_AMP_GAIN, &sp.shunt_gain_sclr, pins.Vc_pin, pins.Vo_pin);
-  this->ShuntNoAmp = new Shunt("No Amp", 0x48, &cp.ib_tot_bias_noa, &sp.ib_scale_noa, SHUNT_NOA_GAIN, &sp.shunt_gain_sclr, pins.Vc_pin, pins.Vo_pin);
-  this->SensorTb = new TempSensor(pins.pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
+  this->ShuntAmp = new Shunt("Amp", 0x49, &cp.ib_tot_bias_amp, &sp.ib_scale_amp, SHUNT_AMP_GAIN, &sp.shunt_gain_sclr, pins->Vc_pin, pins->Vom_pin);
+  this->ShuntNoAmp = new Shunt("No Amp", 0x48, &cp.ib_tot_bias_noa, &sp.ib_scale_noa, SHUNT_NOA_GAIN, &sp.shunt_gain_sclr, pins->Vc_pin, pins->Von_pin);
+  this->SensorTb = new TempSensor(pins->pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
   this->TbSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
   this->Sim = new BatterySim(&sp.delta_q_model, &sp.t_last_model, &sp.s_cap_model, &sp.sim_chm, &sp.hys_scale);
   this->elapsed_inj = 0UL;
@@ -903,9 +903,10 @@ void Sensors::shunt_load(void)
 // Print Shunt selection data
 void Sensors::shunt_print()
 {
-    Serial.printf("reset,T,select,inj_bias,vs_int_a,Vshunt_a,Vc_a,Vo_a,Ib_hdwe_a,vs_int_na,Vshunt_na,Ib_hdwe_na,Ib_hdwe,T,Ib_amp_fault,Ib_amp_fail,Ib_noa_fault,Ib_noa_fail,=,    %d,%7.3f,%d,%7.3f,    %d,%7.3f,%7.3f,%7.3f,%7.3f,    %d,%7.3f,%7.3f,    %7.3f,%7.3f, %d,%d,  %d,%d,\n",
-        reset, T, sp.ib_select, sp.inj_bias, ShuntAmp->vshunt_int(), ShuntAmp->vshunt(), ShuntAmp->Vc(), ShuntAmp->Vo(), ShuntAmp->ishunt_cal(),
-        ShuntNoAmp->vshunt_int(), ShuntNoAmp->vshunt(), ShuntNoAmp->ishunt_cal(),
+    Serial.printf("reset,T,select,inj_bias,  vs_int_a,Vshunt_a,Vc_a,Vo_a,Ib_hdwe_a,  vs_int_na,Vshunt_na,Vc_na,Vo_na,Ib_hdwe_na,  Ib_hdwe,T,Ib_amp_fault,Ib_amp_fail,Ib_noa_fault,Ib_noa_fail,=,    %d,%7.3f,%d,%7.3f,    %d,%7.3f,%7.3f,%7.3f,%7.3f,    %d,%7.3f,%7.3f,%7.3f,%7.3f,    %7.3f,%7.3f, %d,%d,  %d,%d,\n",
+        reset, T, sp.ib_select, sp.inj_bias,
+        ShuntAmp->vshunt_int(), ShuntAmp->vshunt(), ShuntAmp->Vc(), ShuntAmp->Vo(), ShuntAmp->ishunt_cal(),
+        ShuntNoAmp->vshunt_int(), ShuntNoAmp->vshunt(), ShuntNoAmp->Vc(), ShuntNoAmp->Vo(), ShuntNoAmp->ishunt_cal(),
         Ib_hdwe, T,
         Flt->ib_amp_flt(), Flt->ib_amp_fa(), Flt->ib_noa_flt(), Flt->ib_noa_fa());
 }

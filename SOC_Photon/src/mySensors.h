@@ -321,7 +321,7 @@ class Sensors
 {
 public:
   Sensors();
-  Sensors(double T, double T_temp, Pins pins, Sync *ReadSensors, float *sp_nP_, float *sp_nS_);
+  Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, float *sp_nP_, float *sp_nS_);
   ~Sensors();
   int Vb_raw;                 // Raw analog read, integer
   float Vb;                   // Selected battery bank voltage, V
