@@ -391,7 +391,7 @@ class BatteryMonitor(Battery, EKF1x1):
 
     # BatteryMonitor::calculate()
     def calculate(self, chem, temp_c, vb, ib, dt, reset, updateTimeIn, q_capacity=None, dc_dc_on=None,  # BatteryMonitor
-                  rp=None, u_old=None, z_old=None):
+                  rp=None, u_old=None, z_old=None, bms_off_init=None):
         self.chm = chem
         if self.chm == 0:
             self.lut_voc = self.lut_voc0
@@ -420,7 +420,10 @@ class BatteryMonitor(Battery, EKF1x1):
         else:
             voltage_low = self.voc_stat < V_BATT_RISING
         bms_charging = self.ib > IB_MIN_UP
-        self.bms_off = (self.temp_c <= low_t) or (voltage_low and not rp.tweak_test())  # KISS
+        if reset and bms_off_init is not None:
+            self.bms_off = bms_off_init
+        else:
+            self.bms_off = (self.temp_c <= low_t) or (voltage_low and not rp.tweak_test())  # KISS
         self.ib_charge = self.ib
         if self.bms_off and not bms_charging:
             self.ib_charge = 0.
@@ -432,7 +435,7 @@ class BatteryMonitor(Battery, EKF1x1):
         u = np.array([self.ib, self.vb]).T
         if updateTimeIn < self.t_max:
             self.Randles.calc_x_dot(u)
-            if self.dt < self.t_max:
+            if reset or self.dt < self.t_max:
                 self.Randles.update(self.dt, reset=reset)
             else:
                 print("mon nan")  # freeze Randles.y
@@ -449,10 +452,10 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Hysteresis model
         self.hys.calculate_hys(self.ib, self.soc)
-        self.e_wrap = self.voc_soc - self.voc_stat
         init_low = self.bms_off or (self.soc < (self.soc_min + HYS_SOC_MIN_MARG) and self.ib > HYS_IB_THR)
         self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=self.e_wrap)*self.s_hys
         self.voc_stat = self.voc - self.dv_hys
+        self.e_wrap = self.voc_soc - self.voc_stat
         self.ioc = self.hys.ioc
         self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap, dt=min(self.dt, F_MAX_T_WRAP), reset=reset)
 
@@ -714,7 +717,7 @@ class BatterySim(Battery):
 
     # BatterySim::calculate()
     def calculate(self, chem, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, updateTimeIn,  # BatterySim
-                  rp=None, sat_init=None):
+                  rp=None, sat_init=None, bms_off_init=None):
         self.chm = chem
         if self.chm == 0:
             self.lut_voc = self.lut_voc0
@@ -755,7 +758,10 @@ class BatterySim(Battery):
         else:
             voltage_low = self.voc_stat < V_BATT_RISING_SIM
         bms_charging = self.ib_in > IB_MIN_UP
-        self.bms_off = (self.temp_c < low_t) or (voltage_low and not self.tweak_test)
+        if reset and bms_off_init is not None:
+            self.bms_off = bms_off_init
+        else:
+            self.bms_off = (self.temp_c < low_t) or (voltage_low and not self.tweak_test)
         ib_charge_fut = self.ib_in
         if self.bms_off and not bms_charging:
             ib_charge_fut = 0.

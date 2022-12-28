@@ -149,6 +149,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
                          scale_r_ss=scale_r_ss, s_hys=s_hys_mon, dvoc=dvoc_mon, eframe_mult=eframe_mult)
     # need Tb input.   perhaps need higher order to enforce basic type 1 response
     Is_sat_delay = TFDelay(in_=mon_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
+    bms_off_init = mon_old.bms_off[0]
 
     # time loop
     now = t[0]
@@ -198,7 +199,8 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         else:
             _chm_s = Bsim
         sim.calculate(chem=_chm_s, temp_c=Tb_, soc=sim.soc, curr_in=ib_in_s, dt=T, q_capacity=sim.q_capacity,
-                      dc_dc_on=dc_dc_on, reset=reset, updateTimeIn=updateTimeIn, rp=rp, sat_init=sat_s_init)
+                      dc_dc_on=dc_dc_on, reset=reset, updateTimeIn=updateTimeIn, rp=rp, sat_init=sat_s_init,
+                      bms_off_init=bms_off_init)
         sim.count_coulombs(chem=_chm_s, dt=T, reset=reset, temp_c=Tb_, charge_curr=sim.ib_charge, sat=False, soc_s_init=soc_s_init,
                            mon_sat=mon.sat, mon_delta_q=mon.delta_q)
 
@@ -239,10 +241,10 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
             z_old = None
         if rp.modeling == 0:
             mon.calculate(_chm_m, Tb_, vb_, ib_, T, rp=rp, reset=reset, updateTimeIn=updateTimeIn, u_old=u_old,
-                          z_old=z_old)
+                          z_old=z_old, bms_off_init=bms_off_init)
         else:
             mon.calculate(_chm_m, Tb_, vb_ + randn() * v_std + dv_sense, ib_ + randn() * i_std + di_sense, T, rp=rp,
-                          reset=reset, updateTimeIn=updateTimeIn, u_old=u_old, z_old=z_old)
+                          reset=reset, updateTimeIn=updateTimeIn, u_old=u_old, z_old=z_old, bms_off_init=bms_off_init)
         ib_charge = mon.ib_charge
         sat = is_sat(Tb_, mon.voc_filt, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
