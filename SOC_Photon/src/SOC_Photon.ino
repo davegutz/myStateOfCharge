@@ -239,7 +239,7 @@ void setup()
     }
     else
     {
-      sp.pretty_print( true );
+      // sp.pretty_print( true );
       Serial.printf(" No diffs in retained...\n\n"); Serial1.printf(" No diffs in retained...\n\n");
     }
   }
