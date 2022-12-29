@@ -126,7 +126,6 @@ protected:
   float Vo_;            // Sensed Vo, output of op amp, V
   float Vo_Vc_;         // Sensed Vo-Vc, difference in output of op amps, V
   float Vo_Vc_f_;       // Sensed, filtered Vo-Vc, difference in output of op amps, V
-  LagTustin *Vo_Vc_Filt_; // Noise filter for Vo-Vc calculation
 };
 
 // Fault word bits.   All faults heal

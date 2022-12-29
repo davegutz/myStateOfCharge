@@ -21,7 +21,7 @@ const String unit = "soc1a_20221220";  // voc_stat
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'Di'), A
 #define VOLT_BIAS             1.8   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
-#define VB_SCALE              1.0   // Scale Vb sensor (* 'SV')
+#define VB_SCALE              0.9877 // Scale Vb sensor (* 'SV')
 
 // Battery.  One 12 V 100 Ah battery bank would have RATED_BATT_CAP 100, NS 1, and NP 1
 // Two 12 V 100 Ah series battery bank would have RATED_BATT_CAP 100, NS 2, and NP 1

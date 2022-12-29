@@ -142,9 +142,6 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define WRAP_SOC_MOD_OFF    0.85        // Disable e_wrap_lo when nearing saturated and moderate C_rate (0.85)
 #define VC_S                1.0         // Vc sense scalar (1.0)
 #define VO_S                1.0         // Vo sense scalar (1.0)
-#define TAU_VO_VC_FILT      0.080       // Current sensor difference filter time constant, s (half of hardware RC, 0.159 = 0.08)
-#define MAX_VO_VC_FILT      2.          // Vo-Vc Filter maximum windup, V (2.)
-const float MAX_VO_VC_T = (TAU_VO_VC_FILT * 0.7);  // Maximum update time allowed to avoid instability, s (0.05)
 
 // Conversion gains
 #ifdef USE_ADS
