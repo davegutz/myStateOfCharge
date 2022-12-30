@@ -535,10 +535,10 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   Sen->Sim->count_coulombs(Sen, reset_temp, Mon, false);
 
   // Injection tweak test
-  if ( (Sen->start_inj <= Sen->now) && (Sen->now <= Sen->end_inj) ) // in range, test in progress
+  if ( (Sen->start_inj <= Sen->now) && (Sen->now <= Sen->end_inj) && (Sen->now > 0UL) ) // in range, test in progress
   {
     // Shift times because sampling is asynchronous: improve repeatibility
-    if ( Sen->elapsed_inj==0 )
+    if ( Sen->elapsed_inj==0UL )
     {
       Sen->end_inj += Sen->now - Sen->start_inj;
       Sen->stop_inj += Sen->now - Sen->start_inj;
@@ -552,7 +552,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   }
   else if ( Sen->elapsed_inj && sp.tweak_test() )  // Done.  Start and turn things off by setting 0
   {
-    Sen->elapsed_inj = 0;
+    Sen->elapsed_inj = 0UL;
     chit("v0;", ASAP);      // Turn off echo
     chit("Xm247;", QUEUE);  // Turn off tweak_test
     chit("Pa;", QUEUE);     // Print all for record.  Last so Pf last and visible

@@ -75,10 +75,11 @@ def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zer
                 'Tb_h', 'Tb_s', 'mtb', 'Tb_f',
                 'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel',
                 'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr', 'preserving')
-    sel_old_raw = None
     if sel_file_clean:
         sel_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,
                                     encoding=None).view(np.recarray)
+    else:
+        sel_raw = None
 
     # Load ekf (old)
     ekf_file_clean = write_clean_file(data_file_old_txt, type_='_ekf', title_key=title_key_ekf,

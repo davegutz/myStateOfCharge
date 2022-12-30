@@ -975,6 +975,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                   case ( 0 ):  // Xp0:  reset stop
+                    Serial.printf("**************Xp0\n");
                     if ( !sp.tweak_test() ) chit("Xm247;", ASAP);  // Prevent upset of time in Xp9, Xp10, Xp11, etc
                     chit("Xf0;Xa0;Xtn;", ASAP);
                     if ( !sp.tweak_test() ) chit("Xb0;", ASAP);
@@ -1095,14 +1096,14 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Sen->start_inj = 0UL;
                 Sen->stop_inj = 0UL;
                 Sen->end_inj = 0UL;
-                Sen->elapsed_inj = 0;
+                Sen->elapsed_inj = 0UL;
                 chit("Xp0;", QUEUE);  // Reset
                 Serial.printf("STOP\n");
                 break;
 
               case ( 's' ): // Xs:  scale T_SAT
                 FP_in = cp.input_string.substring(2).toFloat();
-                Serial.printf("s_t_sat%7.1f s to\n", cp.s_t_sat);
+                Serial.printf("s_t_sat%7.1f s to ", cp.s_t_sat);
                 cp.s_t_sat = max(FP_in, 0.);
                 Serial.printf("%7.1f\n", cp.s_t_sat);
                 break;
