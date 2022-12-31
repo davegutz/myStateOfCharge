@@ -19,7 +19,7 @@ const String unit = "soc1a_20221220";  // voc_stat
 #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SG'), A/V (1333 is 100A/0.075V)
 #define SHUNT_AMP_R1          5100.     // Amplifed shunt ADS resistance, ohms
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'Di'), A
-#define VOLT_BIAS             1.8   // Bias on Vb sensor (* 'Dc'), V
+#define VOLT_BIAS             8.0   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
 #define VB_SCALE              0.9877 // Scale Vb sensor (* 'SV')
 

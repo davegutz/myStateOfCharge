@@ -1,7 +1,7 @@
 //
 // MIT License
 //
-// Copyright (C) 2021 - Dave Gutz
+// Copyright (C) 2023 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -192,7 +192,7 @@ public:
         void put_t_last_model(const float input) { t_last_model = input; }
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { Vb_scale = input; }
-        void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_from(input); }
+        void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     #elif PLATFORM_ID == PLATFORM_ARGON
         void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp = input; }
         void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr = input; }

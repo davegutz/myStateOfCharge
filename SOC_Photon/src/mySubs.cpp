@@ -1,7 +1,7 @@
 //
 // MIT License
 //
-// Copyright (C) 2021 - Dave Gutz
+// Copyright (C) 2023 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,9 +28,9 @@
 #include "debug.h"
 #include "mySummary.h"
 
-extern CommandPars cp;            // Various parameters shared at system level
-extern PublishPars pp;            // For publishing
-extern SavedPars sp;              // Various parameters to be static at system level
+extern CommandPars cp;  // Various parameters shared at system level
+extern PublishPars pp;  // For publishing
+extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
 // Print consolidation
 void print_all_header(void)
@@ -274,7 +274,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   #endif
 
   // Call calculate/count_coulombs twice because sat_ is a used-before-calculated (UBC)
-  // Simple 'call twice' method because sat_ is discrete no analog which would require iteration
+  // Simple 'call twice' method because sat_ is discrete not analog which would require iteration
   Mon->calculate(Sen, true);
   Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), 0.);
   Mon->calculate(Sen, true);  // Call again because sat is a UBC
@@ -290,20 +290,20 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   #endif
 }
 
-// Load all others
+// Load high fidelity signals; filtered in hardware the same bandwidth, sampled the same
 // Outputs:   Sen->Ib_model_in, Sen->Ib_hdwe, 
 void load_ib_vb(const boolean reset, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon)
 {
-  // Load shunts
+  // Load shunts Ib
   // Outputs:  Sen->Ib_model_in, Sen->Ib_hdwe, Sen->Vb, Sen->Wb
   Sen->shunt_scale();
   Sen->shunt_bias();
-  Sen->shunt_load();
+  Sen->shunt_convert();
   Sen->Flt->shunt_check(Sen, Mon, reset);
   Sen->shunt_select_initial();
   if ( sp.debug==14 ) Sen->shunt_print();
 
-  // Vb
+  // Load voltage Vb
   // Outputs:  Sen->Vb
   Sen->vb_load(myPins->Vb_pin);
   if ( !sp.mod_vb_dscn() )  Sen->Flt->vb_check(Sen, Mon, VBATT_MIN, VBATT_MAX, reset);
@@ -314,7 +314,7 @@ void load_ib_vb(const boolean reset, Sensors *Sen, Pins *myPins, BatteryMonitor 
   Sen->Wb = Sen->Vb*Sen->Ib;
 }
 
-// Calculate Ah remaining
+// Calculate Ah remaining for display to user
 // Inputs:  sp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_filt
 // States:  Mon.soc, Mon.soc_ekf
 // Outputs: tcharge_wt, tcharge_ekf, Voc, Voc_filt
@@ -328,7 +328,7 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
   boolean sat = Mon->is_sat(reset);
   Sen->saturated = Is_sat_delay->calculate(sat, T_SAT*cp.s_t_sat, T_DESAT*cp.s_t_sat, min(Sen->T, T_SAT/2.), reset);
 
-  // Memory store // TODO:  simplify arg list here.  Unpack Sen inside count_coulombs
+  // Memory store
   // Initialize to ekf when not saturated
   Mon->count_coulombs(Sen->T, reset_temp, Sen->Tb_filt, Mon->ib_charge(), Sen->saturated, Mon->delta_q_ekf());
 
@@ -343,8 +343,7 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
 */
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
 {
-  static uint8_t frame = 0;
-  static boolean pass = false;
+  static uint8_t blink = 0;
   String disp_0, disp_1, disp_2;
 
   display->clearDisplay();
@@ -352,17 +351,17 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner
 
-  // ---------- Top Line  ------------------------------------------------
+  // ---------- Top Line of Display -------------------------------------------
   // Tb
   sprintf(cp.buffer, "%3.0f", pp.pubList.Tb);
   disp_0 = cp.buffer;
-  if ( Sen->Flt->tb_fa() && (frame==0 || frame==1) )
+  if ( Sen->Flt->tb_fa() && (blink==0 || blink==1) )
     disp_0 = "***";
 
   // Voc
   sprintf(cp.buffer, "%5.2f", pp.pubList.Voc);
   disp_1 = cp.buffer;
-  if ( Sen->Flt->vb_sel_stat()==0 && (frame==1 || frame==2) )
+  if ( Sen->Flt->vb_sel_stat()==0 && (blink==1 || blink==2) )
     disp_1 = "*fail";
   else if ( Sen->bms_off )
     disp_1 = " off ";
@@ -370,7 +369,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   // Ib
   sprintf(cp.buffer, "%6.1f", pp.pubList.Ib);
   disp_2 = cp.buffer;
-  if ( frame==2 )
+  if ( blink==2 )
   {
     if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() && !sp.mod_ib() )
       disp_2 = "*fail";
@@ -381,7 +380,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
     else if ( Sen->Flt->red_loss() )
       disp_2 = " redl ";
   }
-  else if ( frame==3 )
+  else if ( blink==3 )
   {
     if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() && !sp.mod_ib() )
       disp_2 = "*fail";
@@ -393,11 +392,11 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   display->println(F(""));
   display->setTextColor(SSD1306_WHITE);
 
-  // --------------------- Bottom line  ---------------------------------
+  // --------------------- Bottom line of Display ------------------------------
   // Hrs EHK
   sprintf(cp.buffer, "%3.0f", pp.pubList.Amp_hrs_remaining_ekf);
   disp_0 = cp.buffer;
-  if ( frame==0 || frame==1 || frame==2 )
+  if ( blink==0 || blink==1 || blink==2 )
   {
     if ( Sen->Flt->cc_diff_fa() )
       disp_0 = "---";
@@ -418,7 +417,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
 
   // Hrs large
   display->setTextSize(2);             // Draw 2X-scale text
-  if ( frame==1 || frame==3 || !Sen->saturated )
+  if ( blink==1 || blink==3 || !Sen->saturated )
   {
     sprintf(cp.buffer, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
     disp_2 = cp.buffer;
@@ -430,7 +429,6 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
 
   // Display
   display->display();
-  pass = !pass;
 
   // Text basic Bluetooth (use serial bluetooth app)
   if ( sp.debug!=4 && sp.debug!=-2 )
@@ -439,8 +437,8 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
 
   if ( sp.debug==5 ) debug_5(Mon, Sen);
 
-  frame += 1;
-  if (frame>3) frame = 0;
+  blink += 1;
+  if (blink>3) blink = 0;
 }
 
 // Read sensors, model signals, select between them.
@@ -491,8 +489,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   Sen->bias_all_model();   // Bias model outputs for sensor fault injection
 
   // Use model instead of sensors when running tests as user
-  //  Inputs:                                             --->   Outputs:
-  // TODO:  control parameter list here...vb_fa, soc, soc_ekf,
+  //  Inputs:                                       --->   Outputs:
   //  Ib_model, Ib_hdwe,                            --->   Ib
   //  Vb_model, Vb_hdwe,                            --->   Vb
   //  constant,         Tb_hdwe, Tb_hdwe_filt       --->   Tb, Tb_filt
@@ -530,8 +527,8 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   record_past = Sen->Flt->record();
 
   // Charge calculation and memory store
-  // Inputs: Sim.model_saturated, Sen->Tb, Sen->Ib, and Sim.soc
-  // Outputs: Sim.soc
+  // Inputs: Sim.model_saturated, Sen->Tb, Sen->Ib
+  // States: Sim.soc
   Sen->Sim->count_coulombs(Sen, reset_temp, Mon, false);
 
   // Injection tweak test
@@ -545,12 +542,12 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
       Sen->start_inj = Sen->now;
     }
 
-    Sen->elapsed_inj = Sen->now - Sen->start_inj + 1UL; // Shift by 1 because using ==0 to turn off
+    Sen->elapsed_inj = Sen->now - Sen->start_inj + 1UL; // Shift by 1 because using ==0 as reset button
 
-    // Turn off amplitude of injection and wait for end_inj
+    // Put a stop to this
     if (Sen->now > Sen->stop_inj) sp.put_amp(0);
   }
-  else if ( Sen->elapsed_inj && sp.tweak_test() )  // Done.  Start and turn things off by setting 0
+  else if ( Sen->elapsed_inj && sp.tweak_test() )  // Done.  elapsed_inj set to 0 is the reset button
   {
     Sen->elapsed_inj = 0UL;
     chit("v0;", ASAP);      // Turn off echo
@@ -558,7 +555,6 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     chit("Pa;", QUEUE);     // Print all for record.  Last so Pf last and visible
     chit("Xp0;", QUEUE);    // Reset
   }
-  // Perform the calculation of injection signals 
   Sen->Sim->calc_inj(Sen->elapsed_inj, sp.type, sp.amp, sp.freq);
 }
 
@@ -594,7 +590,7 @@ void finish_request(void)
 }
 
 /*
-  Special handler that uses built-in callback.
+  Special handler for UART usb that uses built-in callback.
   SerialEvent occurs whenever a new data comes in the
   hardware serial RX.  This routine is run between each
   time loop() runs, so using delay inside loop can delay
@@ -627,7 +623,7 @@ void serialEvent()
 }
 
 /*
-  Special handler that uses built-in callback.
+  Special handler for Bluetooth UART that uses built-in callback.
   SerialEvent occurs whenever a new data comes in the
   hardware serial RX.  This routine is run between each
   time loop() runs, so using delay inside loop can delay

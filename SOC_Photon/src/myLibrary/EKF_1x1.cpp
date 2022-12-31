@@ -1,7 +1,7 @@
 //
 // MIT License
 //
-// Copyright (C) 2021 - Dave Gutz
+// Copyright (C) 2023 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 #include "EKF_1x1.h"
 #include <math.h>
 #include "parameters.h"
-extern SavedPars sp; // Various parameters to be static at system level
+extern SavedPars sp; // Various parameters to be static at system level and saved through power cycle
 // extern int8_t debug;
 
 

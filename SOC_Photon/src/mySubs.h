@@ -1,7 +1,7 @@
 //
 // MIT License
 //
-// Copyright (C) 2021 - Dave Gutz
+// Copyright (C) 2023 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,7 @@
 #include "Adafruit/Adafruit_GFX.h"
 #include "Adafruit/Adafruit_SSD1306.h"
 
-extern SavedPars sp; // Various parameters to be static at system level
+extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 extern PublishPars pp;  // For publishing
 extern CommandPars cp;  // Various parameters to be static at system level
 

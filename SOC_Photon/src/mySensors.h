@@ -1,7 +1,7 @@
 //
 // MIT License
 //
-// Copyright (C) 2021 - Dave Gutz
+// Copyright (C) 2023 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,7 @@
 
 extern PublishPars pp;  // For publishing
 extern CommandPars cp;  // Various parameters to be static at system level
+extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 struct Pins;
 
 // DS18-based temp sensor
@@ -54,7 +55,7 @@ public:
   // operators
   // functions
   boolean tb_stale_flt() { return tb_stale_flt_; };
-  float load(Sensors *Sen);
+  float sample(Sensors *Sen);
   float noise();
 protected:
   SlidingDeadband *SdTb;
@@ -81,7 +82,7 @@ public:
   void dscn_cmd(const boolean cmd) { dscn_cmd_ = cmd; };
   unsigned long int dt(void) { return sample_time_ - sample_time_z_; };
   float ishunt_cal() { return ( ishunt_cal_*sclr_ + add_ ); };
-  void load(const boolean disconnect);
+  void convert(const boolean disconnect);
   void pretty_print();
   void sample(const boolean reset_loc, const float T);
   void scale(const float sclr) { *cp_ib_scale_ = sclr; };
@@ -170,7 +171,7 @@ class Fault
 {
 public:
   Fault();
-  Fault(const double T);
+  Fault(const double T, uint8_t *sp_preserving);
   ~Fault();
   void bitMapPrint(char *buf, const int16_t fw, const uint8_t num);
   float cc_diff() { return cc_diff_; };
@@ -236,8 +237,8 @@ public:
   void latched_fail_fake(const boolean cmd) { latched_fail_fake_ = cmd; };
   boolean no_fails() { return !latched_fail_; };
   boolean no_fails_fake() { return !latched_fail_fake_; };
-  void preserving(const boolean cmd) { preserving_ = cmd; };
-  boolean preserving() { return preserving_; };
+  void preserving(const boolean cmd) {  sp.put_preserving(cmd); }; // TODO:  Parameter class with = operator --> put. Then *sp_preserving = cmd
+  boolean preserving() { return *sp_preserving_; };
   void pretty_print(Sensors *Sen, BatteryMonitor *Mon);
   void pretty_print1(Sensors *Sen, BatteryMonitor *Mon);
   boolean record() { if ( cp.fake_faults ) return no_fails_fake(); else return no_fails(); };
@@ -311,7 +312,7 @@ protected:
   uint16_t falw_;           // Bitmapped fails
   TFDelay *WrapHi;          // Time high wrap fail persistence
   TFDelay *WrapLo;          // Time low wrap fail persistence
-  boolean preserving_;      // Saving fault buffer.   Stopped recording.  T=preserve
+  uint8_t *sp_preserving_;  // Saving fault buffer.   Stopped recording.  T=preserve
 };
 
 
@@ -390,7 +391,7 @@ public:
   unsigned long int sample_time_ib(void) { return sample_time_ib_; };
   unsigned long int sample_time_vb(void) { return sample_time_vb_; };
   void shunt_bias(void);      // Load biases into Shunt objects
-  void shunt_load(void);      // Load ADS015 protocol
+  void shunt_convert(void);      // Load ADS015 protocol
   void shunt_print();         // Print selection result
   void shunt_scale(void);     // Load scalars into Shunt objects
   void shunt_select_initial();   // Choose between shunts for model

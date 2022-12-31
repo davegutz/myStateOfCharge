@@ -1,7 +1,7 @@
 //
 // MIT License
 //
-// Copyright (C) 2021 - Dave Gutz
+// Copyright (C) 2023 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,9 +28,9 @@
 #include "constants.h"
 #include "command.h"
 #include "mySubs.h"
-extern SavedPars sp; // Various parameters to be static at system level
-extern CommandPars cp;
-extern PublishPars pp;            // For publishing
+extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
+extern CommandPars cp;  // Various parameters to be static at system level
+extern PublishPars pp;  // For publishing
 
 // class Battery
 // constructors
@@ -873,12 +873,6 @@ void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
         Serial.printf("sim: ib%7.3f voc%7.3f vb%7.3f\n", ib_, voc_, vb_);
         Randles_->pretty_print();
     }
-}
-
-// Load states from retained memory
-void BatterySim::load()
-{
-    apply_cap_scale(*sp_s_cap_model_);
 }
 
 // Print

@@ -1,7 +1,7 @@
 //
 // MIT License
 //
-// Copyright (C) 2021 - Dave Gutz
+// Copyright (C) 2023 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -68,7 +68,7 @@ SavedPars::SavedPars(SerialRAM *ram)
         modeling_eeram_.a16 =  next_;  next_ += sizeof(modeling_);
         nP_eeram_.a16 = next_; next_ += sizeof(nP);
         nS_eeram_.a16 = next_; next_ += sizeof(nS);
-        preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving); // TODO:  connect this to legacy preserving logic (delete Sen->Flt->preserving)
+        preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving);
         shunt_gain_sclr_eeram_.a16 = next_;  next_ += sizeof(shunt_gain_sclr);
         sim_chm_eeram_.a16 =  next_;  next_ += sizeof(sim_chm);
         s_cap_model_eeram_.a16 = next_;  next_ += sizeof(s_cap_model);
@@ -323,7 +323,7 @@ void SavedPars::print_history_array()
 Flt_st SavedPars::put_history(Flt_st input, const uint8_t i)
 {
     Flt_st bounced_sum;
-    bounced_sum.copy_from(history_[i]);
+    bounced_sum.copy_to_Flt_ram_from(history_[i]);
     history_[i].put(input);
     return bounced_sum;
 }

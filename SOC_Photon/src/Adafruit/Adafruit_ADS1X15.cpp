@@ -21,7 +21,7 @@
 #include "Adafruit_ADS1X15.h"
 
 #include "../parameters.h"
-extern SavedPars sp; // Various parameters to be static at system level
+extern SavedPars sp; // Various parameters to be static at system level and saved through power cycle
 const uint16_t count_max = 200;
 
 /**************************************************************************/

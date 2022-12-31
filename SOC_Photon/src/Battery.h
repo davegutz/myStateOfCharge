@@ -1,7 +1,7 @@
 //
 // MIT License
 //
-// Copyright (C) 2021 - Dave Gutz
+// Copyright (C) 2023 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -346,7 +346,6 @@ public:
   float ib_charge() { return ib_charge_; };
   float ib_fut() { return ib_fut_; };
   void init_battery_sim(const boolean reset, Sensors *Sen);
-  void load();
   void pretty_print(void);
   unsigned long int sample_time(void) { return sample_time_; };
   boolean saturated() { return model_saturated_; };
@@ -358,7 +357,7 @@ protected:
   SinInj *Sin_inj_;         // Class to create sine waves
   SqInj *Sq_inj_;           // Class to create square waves
   TriInj *Tri_inj_;         // Class to create triangle waves
-  CosInj *Cos_inj_;         // Class to create sosine waves
+  CosInj *Cos_inj_;         // Class to create cosine waves
   uint32_t duty_;           // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
   double sat_ib_max_;       // Current cutback to be applied to modeled ib output, A
   double sat_ib_null_;      // Current cutback value for voc=vsat, A

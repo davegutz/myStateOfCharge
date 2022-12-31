@@ -1,7 +1,7 @@
 //
 // MIT License
 //
-// Copyright (C) 2021 - Dave Gutz
+// Copyright (C) 2023 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,9 @@
 #include "debug.h"
 #include "mySummary.h"
 
-extern CommandPars cp;            // Various parameters shared at system level
-extern PublishPars pp;            // For publishing
-extern SavedPars sp;              // Various parameters to be static at system level
+extern CommandPars cp;  // Various parameters shared at system level
+extern PublishPars pp;  // For publishing
+extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
 
 // class TempSensor
@@ -45,7 +45,7 @@ TempSensor::TempSensor(const uint16_t pin, const bool parasitic, const uint16_t 
 TempSensor::~TempSensor() {}
 // operators
 // functions
-float TempSensor::load(Sensors *Sen)
+float TempSensor::sample(Sensors *Sen)
 {
   // Read Sensor
   // MAXIM conversion 1-wire Tp plenum temperature
@@ -100,6 +100,8 @@ Shunt::Shunt(const String name, const uint8_t port, float *cp_ib_bias, float *cp
       bare_detected_ = true;
     }
     else Serial.printf("SHUNT MON %s started\n", name_.c_str());
+  #else
+    Serial.printf("Ib %s sense ADC pins %d and %d started\n", name_.c_str(), vo_pin_, vc_pin_);
   #endif
 }
 Shunt::~Shunt() {}
@@ -125,8 +127,8 @@ void Shunt::pretty_print()
   // Serial.printf("Shunt(%s)::", name_.c_str()); Adafruit_ADS1015::pretty_print(name_);
 }
 
-// load
-void Shunt::load(const boolean disconnect)
+// Convert sampled shunt data to Ib engineering units
+void Shunt::convert(const boolean disconnect)
 {
   #ifdef USE_ADS
     if ( !bare_detected_ && !dscn_cmd_ )
@@ -156,7 +158,7 @@ void Shunt::load(const boolean disconnect)
   ishunt_cal_ = vshunt_*v2a_s_*float(!disconnect)*(*cp_ib_scale_)*(*sp_shunt_gain_sclr_) + *cp_ib_bias_;
 }
 
-// Sample and filter Vo-Vc
+// Sample amplifier Vo-Vc
 void Shunt::sample(const boolean reset_loc, const float T)
 {
   Vc_raw_ = analogRead(vc_pin_);
@@ -170,12 +172,12 @@ void Shunt::sample(const boolean reset_loc, const float T)
 
 
 // Class Fault
-Fault::Fault(const double T):
+Fault::Fault(const double T, uint8_t *preserving):
   cc_diff_(0.), cc_diff_sclr_(1), cc_diff_empty_sclr_(1), disab_ib_fa_(false), disab_tb_fa_(false), disab_vb_fa_(false), 
   ewhi_sclr_(1), ewlo_sclr_(1), ewmin_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0), fail_tb_(false),
   ib_diff_sclr_(1), ib_quiet_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), latched_fail_(false), 
   latched_fail_fake_(false), tb_sel_stat_(1), tb_stale_time_sclr_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
-  tb_sel_stat_last_(1), vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL), preserving_(false)
+  tb_sel_stat_last_(1), vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL), sp_preserving_(preserving)
 {
   IbErrFilt = new LagTustin(T, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
   IbdHiPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
@@ -323,7 +325,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" mod_tb %d mod_vb %d mod_ib  %d\n", sp.mod_tb(), sp.mod_vb(), sp.mod_ib());
   Serial.printf(" mod_tb_dscn %d mod_vb_dscn %d mod_ib_amp_dscn %d mod_ib_noa_dscn %d\n", sp.mod_tb_dscn(), sp.mod_vb_dscn(), sp.mod_ib_amp_dscn(), sp.mod_ib_noa_dscn());
   Serial.printf(" tb_s_st %d  vb_s_st %d  ib_s_st %d\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_);
-  Serial.printf(" fake_faults %d latched_fail %d latched_fail_fake %d preserving %d\n\n", cp.fake_faults, latched_fail_, latched_fail_fake_, preserving_);
+  Serial.printf(" fake_faults %d latched_fail %d latched_fail_fake %d preserving %d\n\n", cp.fake_faults, latched_fail_, latched_fail_fake_, *sp_preserving_);
 
   Serial.printf(" bare det n  %d  x \n", Sen->ShuntNoAmp->bare_detected());
   Serial.printf(" bare det m  %d  x \n", Sen->ShuntAmp->bare_detected());
@@ -367,7 +369,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 
   Serial1.printf(" mod_tb  %d  mod_vb  %d  mod_ib  %d\n", sp.mod_tb(), sp.mod_vb(), sp.mod_ib());
   Serial1.printf(" tb_s_st %d  vb_s_st %d  ib_s_st %d\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_);
-  Serial1.printf(" fake_faults %d latched_fail %d latched_fail_fake %d preserving %d\n\n", cp.fake_faults, latched_fail_, latched_fail_fake_, preserving_);
+  Serial1.printf(" fake_faults %d latched_fail %d latched_fail_fake %d preserving %d\n\n", cp.fake_faults, latched_fail_, latched_fail_fake_, *sp_preserving_);
 
   Serial1.printf(" bare n  %d  x \n", Sen->ShuntNoAmp->bare_detected());
   Serial1.printf(" bare m  %d  x \n", Sen->ShuntAmp->bare_detected());
@@ -486,11 +488,11 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     {
       latched_fail_fake_ = true;
     }
-    else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_detected() )  // latches - use reset
+    else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_detected() )  // latches
     {
       latched_fail_fake_ = true;
     }
-    else if ( sp.ib_select<0 && !Sen->ShuntNoAmp->bare_detected() )  // latches - use reset
+    else if ( sp.ib_select<0 && !Sen->ShuntNoAmp->bare_detected() )  // latches
     {
       latched_fail_fake_ = true;
     }
@@ -504,7 +506,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       {
         latched_fail_fake_ = true;
       }
-      else if ( cc_diff_fa() )  // this input doesn't latch but result of 'and' with ib_diff_fa is latched
+      else if ( cc_diff_fa() )  // this input doesn't latch but result is latched
       {
         latched_fail_fake_ = true;
       }
@@ -572,8 +574,9 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   {
     Serial.printf("Sel chg:  Amp->bare %d NoAmp->bare %d ib_diff_fa %d wh_fa %d wl_fa %d wv_fa %d cc_diff_fa_ %d\n sp.ib_select %d ib_sel_stat %d vb_sel_stat %d tb_sel_stat %d vb_fail %d Tb_fail %d\n",
       Sen->ShuntAmp->bare_detected(), Sen->ShuntNoAmp->bare_detected(), ib_diff_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_diff_fa_, sp.ib_select, ib_sel_stat_, vb_sel_stat_, tb_sel_stat_, vb_fa(), tb_fa());
-    Serial.printf("fake %d ibss %d ibssl %d vbss %d vbssl %d tbss %d  tbssl %d latched_fail %d latched_fail_fake %d\n",
+    Serial.printf("  fake %d ibss %d ibssl %d vbss %d vbssl %d tbss %d  tbssl %d latched_fail %d latched_fail_fake %d\n",
       cp.fake_faults, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, tb_sel_stat_, tb_sel_stat_last_, latched_fail_, latched_fail_fake_);
+    Serial.printf("  preserving %d\n", *sp_preserving_);
   }
   if ( ib_sel_stat_ != ib_sel_stat_last_ )
   {
@@ -593,7 +596,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       reset_all_faults_ = false;
       latched_fail_ = false;
       latched_fail_fake_ = false;
-      preserving_ = false;
+      preserving(false);
       count = 0;
     }
     else
@@ -693,7 +696,7 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, float *
   Prbn_Vb_ = new PRBS_7(VB_NOISE_SEED);
   Prbn_Ib_amp_ = new PRBS_7(IB_AMP_NOISE_SEED);
   Prbn_Ib_noa_ = new PRBS_7(IB_NOA_NOISE_SEED);
-  Flt = new Fault(T);
+  Flt = new Fault(T, &sp.preserving);
   Serial.printf("Vb sense ADC pin started\n");
 }
 
@@ -808,7 +811,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   }
   now = sample_time_ib_;
 
-  // print_signal_select
+  // print_signal_select for data collection
   if ( (sp.debug==2 || sp.debug==4)  && cp.publishS )
   {
       double cTime;
@@ -886,11 +889,11 @@ void Sensors::shunt_bias(void)
   }
 }
 
-// Read and convert shunt Sensors
-void Sensors::shunt_load(void)
+// Convert shunt Sensors
+void Sensors::shunt_convert(void)
 {
-    ShuntAmp->load( sp.mod_ib_amp_dscn() );
-    ShuntNoAmp->load( sp.mod_ib_noa_dscn() );
+    ShuntAmp->convert( sp.mod_ib_amp_dscn() );
+    ShuntNoAmp->convert( sp.mod_ib_noa_dscn() );
 }
 
 // Print Shunt selection data
@@ -946,7 +949,7 @@ void Sensors::shunt_select_initial()
 void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp)
 {
   reset_temp_ = reset_temp;
-  Tb_hdwe = SensorTb->load(Sen);
+  Tb_hdwe = SensorTb->sample(Sen);
 
   // Filter and add rate limited bias
   if ( reset_temp_ && Tb_hdwe>TEMP_RANGE_CHECK_MAX )  // Bootup T=85.5 C

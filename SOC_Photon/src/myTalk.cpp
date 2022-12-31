@@ -1,7 +1,7 @@
 //
 // MIT License
 //
-// Copyright (C) 2021 - Dave Gutz
+// Copyright (C) 2023 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@
 #include "debug.h"
 
 extern CommandPars cp;            // Various parameters shared at system level
-extern SavedPars sp;              // Various parameters to be static at system level
+extern SavedPars sp;              // Various parameters to be static at system level and saved through power cycle
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 
 // Process asap commands
@@ -914,7 +914,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%7.3f r/s\n", sp.freq);
                 break;
 
-              case ( 'b' ): // Xb<>:  injection bias   TODO:  does this do anything?
+              case ( 'b' ): // Xb<>:  injection bias
                 Serial.printf("Inj_bias set%7.3f to ", sp.inj_bias);
                 sp.put_inj_bias(cp.input_string.substring(2).toFloat());
                 Serial.printf("%7.3f\n", sp.inj_bias);

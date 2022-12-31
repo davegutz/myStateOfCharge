@@ -1,7 +1,7 @@
 /*  Heart rate and pulseox calculation Constants
 
 18-Dec-2020 	DA Gutz 	Created from MAXIM code.
-// Copyright (C) 2020 - Dave Gutz
+// Copyright (C) 2023 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal

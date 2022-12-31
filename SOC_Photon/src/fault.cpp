@@ -1,7 +1,7 @@
 //
 // MIT License
 //
-// Copyright (C) 2021 - Dave Gutz
+// Copyright (C) 2023 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 #include "application.h"
 #include "fault.h"
 #include "mySensors.h"
-extern SavedPars sp;              // Various parameters to be static at system level
+extern SavedPars sp;       // Various parameters to be static at system level and saved through power cycle
 
 // struct Flt_st.  This file needed to avoid circular reference to sp in header files
 void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
@@ -49,7 +49,7 @@ void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
 }
 
 // Copy function
-void Flt_st::copy_from(Flt_st input)
+void Flt_st::copy_to_Flt_ram_from(Flt_st input)
 {
   t = input.t;
   Tb_hdwe = input.Tb_hdwe;
@@ -158,7 +158,7 @@ void Flt_st::print(const String code)
 // Regular put
 void Flt_st::put(Flt_st source)
 {
-  copy_from(source);
+  copy_to_Flt_ram_from(source);
 }
 
 // nominalize
@@ -166,7 +166,7 @@ void Flt_st::put_nominal()
 {
   Flt_st source;
   source.nominal();
-  copy_from(source);
+  copy_to_Flt_ram_from(source);
 }
 
 // Class fault ram to interface Flt_st to ram
@@ -223,7 +223,7 @@ Flt_ram::~Flt_ram(){}
 // Save all
 void Flt_ram::put(const Flt_st value)
 {
-  copy_from(value);
+  copy_to_Flt_ram_from(value);
   #if PLATFORM_ID == PLATFORM_ARGON
     put_t();
     put_Tb_hdwe();
@@ -248,22 +248,5 @@ void Flt_ram::put_nominal()
 {
   Flt_st source;
   source.nominal();
-  copy_from(source);
-  #if PLATFORM_ID == PLATFORM_ARGON
-    put_t();
-    put_Tb_hdwe();
-    put_vb_hdwe();
-    put_ib_amp_hdwe();
-    put_ib_noa_hdwe();
-    put_Tb();
-    put_vb();
-    put_ib();
-    put_soc();
-    put_soc_ekf();
-    put_voc();
-    put_voc_stat();
-    put_e_wrap_filt();
-    put_fltw();
-    put_falw();
-  #endif
+  put(source);
 }

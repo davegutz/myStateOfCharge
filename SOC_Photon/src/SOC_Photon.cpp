@@ -27,8 +27,9 @@
   * 20-Jul-2022   Add low-emission bluetooth (BLE).  Initialize to EKF when unsaturated.
   *               Correct time skews to align Vb and Ib.
   * 21-Sep-2022   Alpha release v20220917.  Branch GitHub repository.  Added signal redundancy checks and fault handling.
-  * 26-Nov-2022   Beta release v20221028.   Branch GitHub repository.  Various debugging fixes hysteresis.
+  * 26-Nov-2022   First Beta release v20221028.   Branch GitHub repository.  Various debugging fixes hysteresis.
   * 12-Dec-2022   RetainedPars-->SavedPars to support Argon with 47L16 EERAM device
+  * 22-Dec-2022   Dual amplifier replaces dual ADS.  Beta release v20221220.  ADS still used on Photon.
   * 
 //
 // MIT License
@@ -69,7 +70,7 @@
 // This works when I'm using two platforms:   PHOTON = 6 and ARGON = 12
 void setup();
 void loop();
-#line 64 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 65 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
 #ifndef PLATFORM_ID
   #define PLATFORM_ID 12
 #endif
@@ -88,7 +89,7 @@ SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network sta
 #endif
 
 // Globals
-extern SavedPars sp;              // Various parameters to be common at system level
+extern SavedPars sp;              // Various parameters to be static at system level and saved through power cycle
 extern CommandPars cp;            // Various parameters to be common at system level
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
@@ -132,7 +133,7 @@ void setup()
 
   // Bluetooth Serial1.  Use BT-AT project in this GitHub repository to change.  Directions
   // for HC-06 inside main.h of ../../BT-AT/src.   AT+BAUD8; to set 115200.
-  // Serial1.blockOnOverrun(false); doesn't work.  Mess; partial lines galore
+  // Serial1.blockOnOverrun(false); doesn't work:  it's a mess; partial lines galore
   Serial1.begin(115200);
   Serial1.flush();
   #if ( PLATFORM_ID == PLATFORM_ARGON )
@@ -140,6 +141,7 @@ void setup()
     ram.setAutoStore(true);
     delay(1000);
     sp.load_all();
+    // Argon built-in BLE does not have friendly UART terminal app available.  Using HC-06
     #ifdef USE_BLE
       bleSerial.setup();
       bleSerial.advertise();
@@ -148,35 +150,35 @@ void setup()
   #endif
 
   // Peripherals
+  // D6 - one-wire temp sensor
+  // D7 - status led heartbeat
+  // A1 - Vb
+  // A3 - Backup Ib amp (called by old ADS name Non Amplified, noa)
+  // A4 - Ib amp common
+  // A5 - Primary Ib amp (called by old ADS name Amplified, amp)
   myPins = new Pins(D6, D7, A1, A3, A4, A5);
-
-  // Status
   pinMode(myPins->status_led, OUTPUT);
   digitalWrite(myPins->status_led, LOW);
 
-  // I2C
+  // I2C for OLED, ADS, backup EERAM
   Wire.setSpeed(CLOCK_SPEED_100KHZ);
   Wire.begin();
 
-  // AD
-  // Shunts initialized in Sensors as static loop() instantiation
-
   // Display
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
   Serial.println("Init DISPLAY");
   if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // Seems to return true even if depowered
   {
     Serial.println(F("DISP FAIL"));
-    // for(;;); // Don't proceed, loop forever // Use Bluetooth if needed
+    // Can Use Bluetooth as workaround
   }
   else
     Serial.println("DISP allocated");
-  // display->display();   // Adafruit splash
-  // delay(2000); // Pause for 2 seconds
   display->clearDisplay();
 
-  // Cloud, to synchronize clock.   Device needs to be configured for wifi (hold setup 3 sec run Particle app) and in range of wifi
+  // Synchronize clock
+  // Device needs to be configured for wifi (hold setup 3 sec run Particle app) and in range of wifi
+  // Phone hotspot is very convenient
   WiFi.disconnect();
   delay(2000);
   WiFi.off();
@@ -186,11 +188,6 @@ void setup()
 
   // Clean boot logic.  This occurs only when doing a structural rebuild clean make on initial flash, because
   // the SRAM is not explicitly initialized.   This is by design, as SRAM must be remembered between boots
-#ifdef BOOT_CLEAN
-  sp.nominal();
-  Serial.printf("Force nominal rp %s\n", cp.buffer);
-  sp.pretty_print();
-#endif
   Serial.printf("Check corruption......");
   if ( sp.is_corrupt() ) 
   {
@@ -200,7 +197,7 @@ void setup()
   }
   else Serial.printf("clean\n");
 
-  // Determine millis() at turn of Time.now
+  // Determine millis() at turn of Time.now   Used to improve accuracy of timing.
   long time_begin = Time.now();
   while ( Time.now()==time_begin )
   {
@@ -208,7 +205,7 @@ void setup()
     millis_flip = millis()%1000;
   }
 
-  // Summary
+  // Enable and print stored history
   System.enableFeature(FEATURE_RETAINED_MEMORY);
   if ( sp.debug==1 || sp.debug==2 || sp.debug==3 || sp.debug==4 )
   {
@@ -262,44 +259,38 @@ void loop()
 {
 
   // Synchronization
-  boolean read;                               // Read, T/F
+  boolean read;
   static Sync *ReadSensors = new Sync(READ_DELAY);
-
   #ifndef USE_ADS
-    boolean samp;                               // Samp, T/F
+    boolean samp;
     static Sync *SampIb = new Sync(SAMP_DELAY);
   #endif
-
-  boolean read_temp;                          // Read temp, T/F
+  boolean read_temp;
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
-
-  boolean display_to_user;                    // User display, T/F
+  boolean display_to_user;
   static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
-
-  boolean summarizing;                        // Summarize, T/F
+  boolean summarizing;
   static boolean boot_wait = true;  // waiting for a while before summarizing
   static Sync *Summarize = new Sync(SUMMARIZE_DELAY);
-
-  boolean control;                            // Summarize, T/F
+  boolean control;
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
+  unsigned long current_time;
+  static unsigned long now = millis();
+  time32_t time_now;
+  static unsigned long start = millis();
+  unsigned long elapsed = 0;
+  static boolean reset = true;
+  static boolean reset_temp = true;
+  static boolean reset_publish = true;
 
-  unsigned long current_time;                 // Time result
-  static unsigned long now = millis();        // Keep track of time
-  time32_t time_now;                          // Keep track of time
-  static unsigned long start = millis();      // Keep track of time
-  unsigned long elapsed = 0;                  // Keep track of time
-  static boolean reset = true;                // Dynamic reset
-  static boolean reset_temp = true;           // Dynamic reset
-  static boolean reset_publish = true;        // Dynamic reset
+  // Sensor conversions.  The embedded model 'Sim' is contained in Sensors
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, &sp.nP, &sp.nS);
 
-  // Sensor conversions
-  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, &sp.nP, &sp.nS); // Manage sensor data.  Sim is in here.
-
-   // Mon, used to count Coulombs and run EKF
+   // Monitor to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor(&sp.delta_q, &sp.t_last, &sp.mon_chm, &sp.hys_scale);
 
   // Battery saturation debounce
-  static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);   // Time persistence
+  static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);
 
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
@@ -310,17 +301,17 @@ void loop()
   char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
   Sen->control_time = decimalTime(&current_time, tempStr, Sen->now, millis_flip);
   hm_string = String(tempStr);
-  read_temp = ReadTemp->update(millis(), reset);              //  now || reset
-  read = ReadSensors->update(millis(), reset);                //  now || reset
+  read_temp = ReadTemp->update(millis(), reset);
+  read = ReadSensors->update(millis(), reset);
   elapsed = ReadSensors->now() - start;
   #ifndef USE_ADS
-    samp = SampIb->update(millis(), reset);                     //  now || reset
+    samp = SampIb->update(millis(), reset);
   #endif
-  control = ControlSync->update(millis(), reset);             //  now || reset
-  display_to_user = DisplayUserSync->update(millis(), reset); //  now || reset
+  control = ControlSync->update(millis(), reset);
+  display_to_user = DisplayUserSync->update(millis(), reset);
   boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !sp.modeling();
   if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
-  summarizing = Summarize->update(millis(), false); // now || boot_summ && !sp.modeling()
+  summarizing = Summarize->update(millis(), false);
   summarizing = summarizing || boot_summ;
 
   #if ( PLATFORM_ID == PLATFORM_ARGON ) & defined( USE_BLE )
@@ -340,11 +331,11 @@ void loop()
     }
   #endif
 
-  // Load temperature
+  // Sample temperature
   // Outputs:   Sen->Tb,  Sen->Tb_filt
   if ( read_temp )
   {
-    Sen->T_temp =  ReadTemp->updateTime();
+    Sen->T_temp = ReadTemp->updateTime();
     Sen->temp_load_and_filter(Sen, reset_temp);
   }
 
@@ -398,7 +389,7 @@ void loop()
     if ( sp.modeling() && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
 
     // Debug for read
-    if ( sp.debug==12 ) debug_12(Mon, Sen);  // EKF
+    if ( sp.debug==12 ) debug_12(Mon, Sen);
     if ( sp.debug==-4 ) debug_m4(Mon, Sen);
 
     // Publish for variable print rate
@@ -450,7 +441,7 @@ void loop()
     hist_bounced = sp.put_history(hist_snap, sp.ihis);
 
     if ( ++sp.isum>NSUM-1 ) sp.isum = 0;
-    mySum[sp.isum].copy_from(hist_bounced);
+    mySum[sp.isum].copy_to_Flt_ram_from(hist_bounced);
 
     Serial.printf("Summ...\n");
     cp.write_summary = false;

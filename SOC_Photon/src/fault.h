@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (C) 2021 - Dave Gutz
+// Copyright (C) 2023 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ struct Flt_st
   uint16_t falw = 0;    // Fail word
   unsigned long dummy = 0;  // padding to absorb Wire.write corruption
   void assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen);
-  void copy_from(Flt_st input);
+  void copy_to_Flt_ram_from(Flt_st input);
   void get() {};
   void nominal();
   void pretty_print(const String code);
