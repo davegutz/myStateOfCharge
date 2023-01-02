@@ -122,16 +122,18 @@ void setup()
   delay(1000);          // Ensures a clean display on Serial startup on CoolTerm
   Serial.println("Hi!");
 
-  // Bluetooth Serial1.  Use BT-AT project in this GitHub repository to change.  Directions
+  // EERAM and Bluetooth Serial1.  Use BT-AT project in this GitHub repository to change.  Directions
   // for HC-06 inside main.h of ../../BT-AT/src.   AT+BAUD8; to set 115200.
   // Serial1.blockOnOverrun(false); doesn't work:  it's a mess; partial lines galore
   Serial1.begin(115200);
   Serial1.flush();
+  // EERAM
   #if ( PLATFORM_ID == PLATFORM_ARGON )
     ram.begin(0, 0);
     ram.setAutoStore(true);
     delay(1000);
     sp.load_all();
+    sp.addresses();
     // Argon built-in BLE does not have friendly UART terminal app available.  Using HC-06
     #ifdef USE_BLE
       bleSerial.setup();

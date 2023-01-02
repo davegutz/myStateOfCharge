@@ -31,6 +31,7 @@
 #include "Battery.h"
 #include "hardware/SerialRAM.h"
 #include "fault.h"
+#include "Parameter.h"
 
 // Corruption test
 template <typename T>
@@ -38,6 +39,7 @@ boolean is_val_corrupt(T val, T minval, T maxval)
 {
     return isnan(val) || val < minval || val > maxval;
 }
+
 
 // Definition of structure to be saved in EERAM.  Many are needed to calibrate.  Others are
 // needed to allow testing with resets.  Others allow application to remember dynamic
@@ -86,6 +88,8 @@ public:
     float t_last_model;     // Battery temperature past value for rate limit memory, deg C
     float Vb_bias_hdwe;     // Calibrate Vb, V
     float Vb_scale;         // Calibrate Vb scale
+    Parameter <int> test_int;
+    Parameter <uint8_t> test_uint8;
 
     // functions
     boolean is_corrupt();
@@ -226,6 +230,16 @@ public:
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale = input; }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
+        void test_float(const float input) { *test_float_ = input; }
+        float test_float() { return test_float_->val(); }
+        Parameter <float> *test_float_;
+        void addresses()
+        {
+            Serial.printf("Vb_scale_eeram.a16 = %d\n", Vb_scale_eeram_.a16);
+            Serial.printf("test_float.addr = %d\n", test_float_->address());
+            Serial.printf("test_int.addr = %d\n", test_int.address());
+            Serial.printf("test_unit8.addr = %d\n", test_uint8.address());
+        };
     #endif
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
