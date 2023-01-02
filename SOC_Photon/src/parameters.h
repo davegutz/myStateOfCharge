@@ -31,7 +31,6 @@
 #include "Battery.h"
 #include "hardware/SerialRAM.h"
 #include "fault.h"
-#include "Parameter.h"
 
 // Corruption test
 template <typename T>
@@ -195,12 +194,6 @@ public:
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { Vb_scale = input; }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
-        void test_float(const float input) { test_float_ = input; }
-        float test_float() { return test_float_.val(); }
-        void test_int(const int input) { test_int_ = input; }
-        int test_int() { return test_int_.val(); }
-        void test_uint8(const uint8_t input) { test_uint8_ = input; }
-        uint8_t test_uint8() { return test_uint8_.val(); }
     #elif PLATFORM_ID == PLATFORM_ARGON
         void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp = input; }
         void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr = input; }
@@ -234,22 +227,6 @@ public:
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale = input; }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
-        void test_float(const float input) { *test_float_ = input; }
-        float test_float() { return test_float_->val(); }
-        Parameter <float> *test_float_;
-        void test_int(const int input) { *test_int_ = input; }
-        int test_int() { return test_int_->val(); }
-        Parameter <int> *test_int_;
-        Parameter <uint8_t> *test_uint8_;
-        void test_uint8(const uint8_t input) { *test_uint8_ = input; }
-        uint8_t test_uint8() { return test_uint8_->val(); }
-        void addresses()
-        {
-            Serial.printf("Vb_scale_eeram.a16 = %d\n", Vb_scale_eeram_.a16);
-            Serial.printf("test_float.addr = %d\n", test_float_->address());
-            Serial.printf("test_int.addr = %d\n", test_int_->address());
-            Serial.printf("test_unit8.addr = %d\n", test_uint8_->address());
-        };
     #endif
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
@@ -292,9 +269,6 @@ protected:
         Flt_ram *fault_;
         Flt_ram *history_;
     #else
-        ParameterBase <float> test_float_;
-        ParameterBase <int> test_int_;
-        ParameterBase <uint8_t> test_uint8_;
         Flt_st *fault_;
         Flt_st *history_;
     #endif

@@ -142,7 +142,6 @@ void setup()
     ram.setAutoStore(true);
     delay(1000);
     sp.load_all();
-    sp.addresses();
     // Argon built-in BLE does not have friendly UART terminal app available.  Using HC-06
     #ifdef USE_BLE
       bleSerial.setup();

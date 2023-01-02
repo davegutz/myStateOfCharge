@@ -920,18 +920,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%7.3f\n", sp.inj_bias);
                 break;
 
-              case ( 'X' ): // XX<>:  test
-                Serial.printf("sp.test_float%7.3f to ", sp.test_float());
-                sp.test_float(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.test_float());
-                Serial.printf("sp.test_int%d to ", sp.test_int());
-                sp.test_int(cp.input_string.substring(2).toInt());
-                Serial.printf("%d\n", sp.test_int());
-                Serial.printf("sp.test_uint8%d to ", sp.test_uint8());
-                sp.test_uint8(cp.input_string.substring(2).toInt());
-                Serial.printf("%d\n", sp.test_uint8());
-                break;
-
               case ( 't' ): // Xt<>:  injection type
                 switch ( cp.input_string.charAt(2) )
                 {

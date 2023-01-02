@@ -79,9 +79,6 @@ SavedPars::SavedPars(SerialRAM *ram)
         t_last_model_eeram_.a16 =  next_; next_ += sizeof(t_last_model);
         Vb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Vb_bias_hdwe);
         Vb_scale_eeram_.a16 = next_; next_ += sizeof(Vb_scale);
-        test_float_ = new Parameter <float> (rP_, &next_, 0.);
-        test_int_ = new Parameter <int> (rP_, &next_, 0.);
-        test_uint8_ = new Parameter <uint8_t> (rP_, &next_, 0.);
         nflt_ = int( NFLT ); 
         fault_ = new Flt_ram[nflt_];
         for ( int i=0; i<nflt_; i++ )
@@ -135,15 +132,6 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(t_last, float(-10.), float(70.)) ||
         is_val_corrupt(t_last_model, float(-10.), float(70.)) ||
         is_val_corrupt(Vb_bias_hdwe, float(-10.), float(70.)) ||
-        #if PLATFORM_ID==PLATFORM_ARGON
-            test_float_->is_val_corrupt(-10, 10) ||
-            test_int_->is_val_corrupt(-10, 10) ||
-            test_uint8_->is_val_corrupt(0, 10) ||
-        #else
-            test_float_.is_val_corrupt(-10, 10) ||
-            test_int_.is_val_corrupt(-10, 10) ||
-            test_uint8_.is_val_corrupt(0, 10) ||
-        #endif
         is_val_corrupt(Vb_scale, float(-1e6), float(1e6)) ;
         if ( corruption )
         {
@@ -187,9 +175,6 @@ boolean SavedPars::is_corrupt()
         get_t_last_model();
         get_Vb_bias_hdwe();
         get_Vb_scale();
-        test_float_->get();
-        test_int_->get();
-        test_uint8_->get();
         for ( int i=0; i<nflt_; i++ ) fault_[i].get();
         for ( int i=0; i<nhis_; i++ ) history_[i].get();
     }
@@ -303,9 +288,6 @@ void SavedPars::pretty_print(const boolean all)
         // Serial.printf("Temp mem map print\n");
         // mem_print();
     #endif
-    if ( all )   Serial.printf("    test_float %7.3f  %7.3f  *test\n", 0., test_float());
-    if ( all )   Serial.printf("    test_int %d      %d  *test\n", 0, test_int());
-    if ( all )   Serial.printf("    test_uint8 %d      %d  *test\n", 0, test_uint8());
 }
 
 // Print faults
@@ -395,7 +377,4 @@ void SavedPars::reset_pars()
     put_t_last_model(float(RATED_TEMP));  
     put_Vb_bias_hdwe(float(VOLT_BIAS));
     put_Vb_scale(float(VB_SCALE));
-    test_float(0.);
-    test_int(0);
-    test_uint8(0);
  }
