@@ -39,13 +39,6 @@ public:
         rP_ = ram;
         put_(input);
     }
-    void instantiate(SerialRAM *ram, uint16_t *next, const T input)
-    {
-        eeram_.a16 = *next;
-        *next += sizeof(input);
-        rP_ = ram;
-        put_(input);
-    }
 	~Parameter() {}
 
     // operators

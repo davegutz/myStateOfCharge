@@ -88,8 +88,6 @@ public:
     float t_last_model;     // Battery temperature past value for rate limit memory, deg C
     float Vb_bias_hdwe;     // Calibrate Vb, V
     float Vb_scale;         // Calibrate Vb scale
-    Parameter <int> test_int;
-    Parameter <uint8_t> test_uint8;
 
     // functions
     boolean is_corrupt();
@@ -233,12 +231,18 @@ public:
         void test_float(const float input) { *test_float_ = input; }
         float test_float() { return test_float_->val(); }
         Parameter <float> *test_float_;
+        void test_int(const int input) { *test_int_ = input; }
+        int test_int() { return test_int_->val(); }
+        Parameter <int> *test_int_;
+        Parameter <uint8_t> *test_uint8_;
+        void test_uint8(const uint8_t input) { *test_uint8_ = input; }
+        uint8_t test_uint8() { return test_uint8_->val(); }
         void addresses()
         {
             Serial.printf("Vb_scale_eeram.a16 = %d\n", Vb_scale_eeram_.a16);
             Serial.printf("test_float.addr = %d\n", test_float_->address());
-            Serial.printf("test_int.addr = %d\n", test_int.address());
-            Serial.printf("test_unit8.addr = %d\n", test_uint8.address());
+            Serial.printf("test_int.addr = %d\n", test_int_->address());
+            Serial.printf("test_unit8.addr = %d\n", test_uint8_->address());
         };
     #endif
     //
