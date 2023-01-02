@@ -135,9 +135,15 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(t_last, float(-10.), float(70.)) ||
         is_val_corrupt(t_last_model, float(-10.), float(70.)) ||
         is_val_corrupt(Vb_bias_hdwe, float(-10.), float(70.)) ||
-        test_float_->is_val_corrupt(-10, 10) ||
-        test_int_->is_val_corrupt(-10, 10) ||
-        test_uint8_->is_val_corrupt(0, 10) ||
+        #if PLATFORM_ID==PLATFORM_ARGON
+            test_float_->is_val_corrupt(-10, 10) ||
+            test_int_->is_val_corrupt(-10, 10) ||
+            test_uint8_->is_val_corrupt(0, 10) ||
+        #else
+            test_float_.is_val_corrupt(-10, 10) ||
+            test_int_.is_val_corrupt(-10, 10) ||
+            test_uint8_.is_val_corrupt(0, 10) ||
+        #endif
         is_val_corrupt(Vb_scale, float(-1e6), float(1e6)) ;
         if ( corruption )
         {

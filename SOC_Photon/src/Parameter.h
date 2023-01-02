@@ -29,6 +29,50 @@
 
 // class Parameter  TODO:  use this to build the stuff in parameters.h
 template <class T>
+class ParameterBase {
+public:
+    ParameterBase(){}
+    ParameterBase(const T input)
+    {
+        put_(input);
+    }
+	~ParameterBase() {}
+
+    // operators
+    operator T()
+    {
+        return val_;
+    }
+    ParameterBase operator = (const T input)
+    {
+        put_(input);
+        return *this;
+    }
+    ParameterBase operator = (ParameterBase& input)
+    {
+        val_ = input.val_;
+    }
+
+    // functions
+    void get() {}
+    boolean is_val_corrupt(T minval, T maxval)
+    {
+        return isnan(val_) || val_ < minval || val_ > maxval;
+    }
+    T val()
+    {
+        return val_;
+    }
+
+private:
+    void put_(const T input)
+    {
+        val_ = input;
+    }
+    T val_;
+};
+
+template <class T>
 class Parameter {
 public:
     Parameter(){}

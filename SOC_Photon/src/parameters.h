@@ -195,6 +195,12 @@ public:
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { Vb_scale = input; }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
+        void test_float(const float input) { test_float_ = input; }
+        float test_float() { return test_float_.val(); }
+        void test_int(const int input) { test_int_ = input; }
+        int test_int() { return test_int_.val(); }
+        void test_uint8(const uint8_t input) { test_uint8_ = input; }
+        uint8_t test_uint8() { return test_uint8_.val(); }
     #elif PLATFORM_ID == PLATFORM_ARGON
         void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp = input; }
         void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr = input; }
@@ -286,12 +292,15 @@ protected:
         Flt_ram *fault_;
         Flt_ram *history_;
     #else
+        ParameterBase <float> test_float_;
+        ParameterBase <int> test_int_;
+        ParameterBase <uint8_t> test_uint8_;
         Flt_st *fault_;
         Flt_st *history_;
     #endif
-        uint16_t next_;
-        uint16_t nflt_;         // Length of Flt_ram array for faults
-        uint16_t nhis_;         // Length of Flt_ram array for history
+    uint16_t next_;
+    uint16_t nflt_;         // Length of Flt_ram array for faults
+    uint16_t nhis_;         // Length of Flt_ram array for history
 };
 
 #endif
