@@ -135,7 +135,7 @@ public:
         void get_nS() { float value; rP_->get(nS_eeram_.a16, value); nS = value; }
         void get_preserving() { preserving = rP_->read(preserving_eeram_.a16); }
         void get_shunt_gain_sclr() { float value; rP_->get(shunt_gain_sclr_eeram_.a16, value); shunt_gain_sclr = value; }
-        void get_sim_chm() { mon_chm = rP_->read(sim_chm_eeram_.a16); }
+        void get_sim_chm() { sim_chm = rP_->read(sim_chm_eeram_.a16); }
         void get_s_cap_model() { float value; rP_->get(s_cap_model_eeram_.a16, value); s_cap_model = value; }
         void get_Tb_bias_hdwe() { float value; rP_->get(Tb_bias_hdwe_eeram_.a16, value); Tb_bias_hdwe = value; }
         void get_type() { type = rP_->read(type_eeram_.a16); }

@@ -166,7 +166,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
           case ( 'B' ):
             switch ( cp.input_string.charAt(1) )
             {
-              case ( 'm' ):  // B:  Monitor chemistry change
+              case ( 'm' ):  // Bm:  Monitor chemistry change
                 INT_in = cp.input_string.substring(2).toInt();
                 sp.put_mon_chm(max(min(INT_in, UINT8_MAX), 0));
                 switch ( INT_in )
@@ -197,7 +197,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 }
                 break;
 
-              case ( 's' ):  // B:  Simulation chemistry change
+              case ( 's' ):  // Bs:  Simulation chemistry change
                 INT_in = cp.input_string.substring(2).toInt();
                 sp.put_sim_chm(max(min(INT_in, UINT8_MAX), 0));
                 switch ( INT_in )
