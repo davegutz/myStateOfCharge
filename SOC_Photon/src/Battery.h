@@ -164,7 +164,7 @@ public:
   ~Hysteresis();
   // operators
   // functions
-  void apply_scale(const float sclr) { *sp_hys_scale_ = max(sclr, 0.); };
+  void apply_scale(const float sclr);
   double calculate(const double ib, const double soc);
   float dv_max(const float soc) { return hys_Tx_->interp(soc); };
   float dv_min(const float soc) { return hys_Tn_->interp(soc); };

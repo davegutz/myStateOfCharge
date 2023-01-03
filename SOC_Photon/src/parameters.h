@@ -166,9 +166,12 @@ public:
         void put_cutback_gain_sclr(const float input) { cutback_gain_sclr = input; }
         void put_debug(const int input) { debug = input; }
         void put_delta_q(const double input) { delta_q = input; }
+        void put_delta_q() {}
         void put_delta_q_model(const double input) { delta_q_model = input; }
+        void put_delta_q_model() {}
         void put_freq(const float input) { freq = input; }
         void put_hys_scale(const float input) { hys_scale = input; }
+        void put_hys_scale() {}
         void put_Ib_bias_all(const float input) { Ib_bias_all = input; }
         void put_Ib_bias_amp(const float input) { Ib_bias_amp = input; }
         void put_Ib_bias_noa(const float input) { Ib_bias_noa = input; }
@@ -181,16 +184,20 @@ public:
         void put_isum(const int input) { isum = input; }
         void put_modeling(const uint8_t input) { modeling_ = input; }
         void put_mon_chm(const uint8_t input) { mon_chm = input; }
+        void put_mon_chm() {}
         void put_nP(const float input) { nP = input; }
         void put_nS(const float input) { nS = input; }
         void put_preserving(const uint8_t input) { preserving = input; }
         void put_shunt_gain_sclr(const float input) { shunt_gain_sclr = input; }
         void put_sim_chm(const uint8_t input) { sim_chm = input; }
+        void put_sim_chm() {}
         void put_s_cap_model(const float input) { s_cap_model = input; }
         void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe = input; }
         void put_type(const uint8_t input) { type = input; }
         void put_t_last(const float input) { t_last = input; }
+        void put_t_last() {}
         void put_t_last_model(const float input) { t_last_model = input; }
+        void put_t_last_model() {}
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { Vb_scale = input; }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
@@ -199,9 +206,12 @@ public:
         void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr = input; }
         void put_debug(const int input) { rP_->put(debug_eeram_.a16, input); debug = input; }
         void put_delta_q(const double input) { rP_->put(delta_q_eeram_.a16, input); delta_q = input; }
+        void put_delta_q() { rP_->put(delta_q_eeram_.a16, delta_q); }
         void put_delta_q_model(const double input) { rP_->put(delta_q_model_eeram_.a16, input); delta_q_model = input; }
+        void put_delta_q_model() { rP_->put(delta_q_model_eeram_.a16, delta_q_model); }
         void put_freq(const float input) { rP_->put(freq_eeram_.a16, input); freq = input; }
         void put_hys_scale(const float input) { rP_->put(hys_scale_eeram_.a16, input); hys_scale = input; }
+        void put_hys_scale() { rP_->put(hys_scale_eeram_.a16, hys_scale); }
         void put_Ib_bias_all(const float input) { rP_->put(Ib_bias_all_eeram_.a16, input); Ib_bias_all = input; }
         void put_Ib_bias_amp(const float input) { rP_->put(Ib_bias_amp_eeram_.a16, input); Ib_bias_amp = input; }
         void put_Ib_bias_noa(const float input) { rP_->put(Ib_bias_noa_eeram_.a16, input); Ib_bias_noa = input; }
@@ -214,16 +224,20 @@ public:
         void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum = input; }
         void put_modeling(const uint8_t input) { rP_->write(modeling_eeram_.a16, input); modeling_ = input; }
         void put_mon_chm(const uint8_t input) { rP_->write(mon_chm_eeram_.a16, input); mon_chm = input; }
+        void put_mon_chm() { rP_->write(mon_chm_eeram_.a16, mon_chm); }
         void put_nP(const float input) { rP_->put(nP_eeram_.a16, input); nP = input; }
         void put_nS(const float input) { rP_->put(nS_eeram_.a16, input); nS = input; }
         void put_preserving(const uint8_t input) { rP_->write(preserving_eeram_.a16, input); preserving = input; }
         void put_shunt_gain_sclr(const float input) { rP_->put(shunt_gain_sclr_eeram_.a16, input); shunt_gain_sclr = input; }
         void put_sim_chm(const uint8_t input) { rP_->write(sim_chm_eeram_.a16, input); sim_chm = input; }
+        void put_sim_chm() { rP_->write(sim_chm_eeram_.a16, sim_chm); }
         void put_s_cap_model(const float input) { rP_->put(s_cap_model_eeram_.a16, input); s_cap_model = input; }
         void put_Tb_bias_hdwe(const float input) { rP_->put(Tb_bias_hdwe_eeram_.a16, input); Tb_bias_hdwe = input; }
         void put_type(const uint8_t input) { rP_->write(type_eeram_.a16, input); type = input; }
         void put_t_last(const float input) { rP_->put(t_last_eeram_.a16, input); t_last = input; }
+        void put_t_last() { rP_->put(t_last_eeram_.a16, t_last); }
         void put_t_last_model(const float input) { rP_->put(t_last_model_eeram_.a16, input); t_last_model = input; }
+        void put_t_last_model() { rP_->put(t_last_model_eeram_.a16, t_last_model); }
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale = input; }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }

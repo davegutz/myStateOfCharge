@@ -41,16 +41,22 @@ void Chemistry::assign_all_mod(const String mod_str)
   if ( mod==0 )  // "Battleborn";
   {
     *sp_mod_code = mod;
+    sp.put_mon_chm();
+    sp.put_sim_chm();
     assign_BB();
   }
   else if ( mod==1 )  // "LION" placeholder.  Data fabricated
   {
     *sp_mod_code = mod;
+    sp.put_mon_chm();
+    sp.put_sim_chm();
     assign_LI();
   }
   else if ( mod==2 )  // "LION" EKF placeholder.  Data fabricated
   {
     *sp_mod_code = mod;
+    sp.put_mon_chm();
+    sp.put_sim_chm();
     assign_LIE();
   }
   else Serial.printf("Battery::assign_all_mod:  unknown mod = %d.  Type 'h' for help\n", mod);
@@ -337,6 +343,7 @@ void Coulombs::apply_cap_scale(const double scale)
 void Coulombs::apply_delta_q(const double delta_q)
 {
   *sp_delta_q_ = delta_q;
+  sp.put_delta_q();
   q_ = *sp_delta_q_ + q_capacity_;
   soc_ = q_ / q_capacity_;
   resetting_ = true;     // momentarily turn off saturation check
@@ -354,7 +361,9 @@ void Coulombs::apply_delta_q_t(const boolean reset)
 void Coulombs::apply_delta_q_t(const double delta_q, const float temp_c)
 {
   *sp_delta_q_ = delta_q;
+  sp.put_delta_q();
   *sp_t_last_ = temp_c;
+  sp.put_t_last();
   apply_delta_q_t(true);
 }
 
@@ -366,6 +375,7 @@ void Coulombs::apply_soc(const double soc, const float temp_c)
   q_capacity_ = calculate_capacity(temp_c);
   q_ = soc*q_capacity_;
   *sp_delta_q_ = q_ - q_capacity_;
+  sp.put_delta_q();
   resetting_ = true;     // momentarily turn off saturation check
 }
 
@@ -396,7 +406,11 @@ double Coulombs::count_coulombs(const double dt, const boolean reset_temp, const
   const boolean sat, const double delta_q_ekf)
 {
     // Rate limit temperature.   When modeling, reset_temp.  In real world, rate limited Tb ramps Coulomb count since bms_off
-    if ( reset_temp && sp.mod_vb() ) *sp_t_last_ = temp_c;
+    if ( reset_temp && sp.mod_vb() )
+    {
+      *sp_t_last_ = temp_c;
+      sp.put_t_last();
+    }
     double temp_lim = max(min( temp_c, *sp_t_last_ + t_rlim_*dt), *sp_t_last_ - t_rlim_*dt);
 
     // State change
@@ -411,17 +425,28 @@ double Coulombs::count_coulombs(const double dt, const boolean reset_temp, const
         if ( d_delta_q > 0 )
         {
             d_delta_q = 0.;
-            if ( !resetting_ ) *sp_delta_q_ = 0.;
+            if ( !resetting_ )
+            {
+              *sp_delta_q_ = 0.;
+              sp.put_delta_q();
+            }
         }
         else if ( reset_temp )
+        {
           *sp_delta_q_ = 0.;
+          sp.put_delta_q();
+        }
     }
     // else if ( reset_temp && !cp.fake_faults ) *sp_delta_q_ = delta_q_ekf;  // Solution to booting up unsaturated
     resetting_ = false;     // one pass flag
 
     // Integration.   Can go to negative
     q_capacity_ = calculate_capacity(temp_lim);
-    if ( !reset_temp ) *sp_delta_q_ = max(min(*sp_delta_q_ + d_delta_q, 0.0), -q_capacity_*1.5);
+    if ( !reset_temp )
+    {
+      *sp_delta_q_ = max(min(*sp_delta_q_ + d_delta_q, 0.0), -q_capacity_*1.5);
+      sp.put_delta_q();
+    }
     q_ = q_capacity_ + *sp_delta_q_;
 
     // Normalize
@@ -435,5 +460,6 @@ double Coulombs::count_coulombs(const double dt, const boolean reset_temp, const
 
     // Save and return
     *sp_t_last_ = temp_lim;
+    sp.put_t_last();
     return ( soc_ );
 }
