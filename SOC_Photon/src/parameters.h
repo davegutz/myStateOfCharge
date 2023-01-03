@@ -202,6 +202,7 @@ public:
         void put_Vb_scale(const float input) { Vb_scale = input; }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     #elif PLATFORM_ID == PLATFORM_ARGON
+        void put_all_dynamic();
         void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp = input; }
         void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr = input; }
         void put_debug(const int input) { rP_->put(debug_eeram_.a16, input); debug = input; }

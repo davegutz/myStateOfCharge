@@ -268,7 +268,7 @@ void loop()
   #endif
   boolean read_temp;
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
-  boolean display_to_user;
+  boolean display_and_remember;
   static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
   boolean summarizing;
   static boolean boot_wait = true;  // waiting for a while before summarizing
@@ -309,7 +309,7 @@ void loop()
     samp = SampIb->update(millis(), reset);
   #endif
   control = ControlSync->update(millis(), reset);
-  display_to_user = DisplayUserSync->update(millis(), reset);
+  display_and_remember = DisplayUserSync->update(millis(), reset);
   boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !sp.modeling();
   if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
   summarizing = Summarize->update(millis(), false);
@@ -410,10 +410,16 @@ void loop()
 
   }  // end read (high speed frame)
 
-  // OLED and Bluetooth display drivers
-  if ( display_to_user )
+  // OLED and Bluetooth display drivers.   Also convenient update time for saving parameters (remember)
+  if ( display_and_remember )
   {
     oled_display(display, Sen, Mon);
+
+    #if ( PLATFORM_ID == PLATFORM_ARGON )
+      // Save EERAM dynamic parameters
+      sp.put_all_dynamic();
+    #endif
+
   }
 
   // Discuss things with the user

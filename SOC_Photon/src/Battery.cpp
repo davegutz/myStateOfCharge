@@ -807,7 +807,6 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
     if ( reset_temp && sp.mod_vb() )
     {
         *sp_t_last_ = Sen->Tb;
-        sp.put_t_last_model();
     }
     double temp_lim = max(min(Sen->Tb, *sp_t_last_ + T_RLIM*Sen->T), *sp_t_last_ - T_RLIM*Sen->T);
     
@@ -824,7 +823,6 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
         if ( reset_temp )
         {
             *sp_delta_q_ = 0.;
-            sp.put_delta_q_model();
         }
     }
     reset_temp_past = reset_temp;
@@ -836,7 +834,6 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
     {
         *sp_delta_q_ += d_delta_q - chem_.dqdt*q_capacity_*(temp_lim-*sp_t_last_);
         *sp_delta_q_ = max(min(*sp_delta_q_, 0.), -q_capacity_*1.2);
-        sp.put_delta_q_model();
     }
     q_ = q_capacity_ + *sp_delta_q_;
 
@@ -858,7 +855,6 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
 
     // Save and return
     *sp_t_last_ = temp_lim;
-    sp.put_t_last_model();
     return ( soc_ );
 }
 
@@ -920,7 +916,6 @@ Hysteresis::Hysteresis(const double cap, Chemistry chem, float *sp_hys_scale)
 void Hysteresis::apply_scale(const float sclr)
 {
     *sp_hys_scale_ = max(sclr, 0.);
-    sp.put_hys_scale();
 }
 
 // Calculate

@@ -320,7 +320,49 @@ void SavedPars::print_history_array()
   }
 }
 
-// Bounce history elements
+// Dynamic parameters saved
+// This saves a lot of througput.   Without it, there are six put calls each 'read' minor frame at 1 ms each call
+void SavedPars::put_all_dynamic()
+{
+    static uint8_t blink = 0;
+    switch ( blink++ )
+    {
+        case ( 0 ):
+            put_delta_q();
+            break;
+
+        case ( 1 ):
+            put_delta_q_model();
+            break;
+
+        case ( 2 ):
+            put_hys_scale();
+            break;
+
+        case ( 3 ):
+            put_mon_chm();
+            break;
+
+        case ( 4 ):
+            put_sim_chm();
+            break;
+
+        case ( 5 ):
+            put_t_last();
+            break;
+
+        case ( 6 ):
+            put_t_last_model();
+            blink = 0;
+            break;
+
+        default:
+            blink = 0;
+            break;
+    }
+}
+ 
+ // Bounce history elements
 Flt_st SavedPars::put_history(Flt_st input, const uint8_t i)
 {
     Flt_st bounced_sum;
