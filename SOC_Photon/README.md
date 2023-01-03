@@ -40,7 +40,7 @@ When you're ready to compile your project, make sure you have the correct Partic
 
 ## Powering your device
 
-The system is designed to be powered completely either from USB hooked to phone or device or from 12 V dc connector.   Normally in service the battery bank supplies 12 V and no USB is used.   The device saves fault information (EERAM) for cases when the battery banks management system powers off.  If the battery bank is off you can power with phone or device to extract information using UART terminal.   There are two UART terminals:  USB and HC-06 bluetooth.
+The system is designed to be powered completely either from USB hooked to phone or device or from 12 V dc connector.   Normally in service the battery bank supplies 12 V and no USB is used.   The device saves fault information (EERAM 47L16) for cases when the battery banks management system powers off.  If the battery bank is off you can power with phone or device to extract information using UART terminal.   There are two UART terminals:  USB and HC-06 bluetooth.
 
 ## Redo Loop
 
@@ -571,13 +571,14 @@ Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
 6. Check Xm=0 before walk away from installed system. 
 
 ## Throughput
-1. Driven by ADC read of ADS1013 device (current AD).
-2. Probably wiring quality drives the conversion count for (busy wait for I2C comm). Or could be flaky ADS devices.
-3. Per unit
+1. Driven by ADC read of ADS1013 device (current AD).   For Argon with EERAM 47L16 it is ADC write of parameters at 0.001 each.  Manage this with blink logic in put_all_dynamic() of 'SavedPars' object, called with display update time DISPLAY_USER_DELAY (1.2 sec) in ino file.
+2. There is a 6 x 1.2 delay between some transient events and when it is remembered by the EERAM.   If you're pushing buttons rapidly and repeating scripts you may run into stale data issue especially remembered charge states 'delta_q...' --> soc...
+3. Probably wiring quality drives the conversion count for (busy wait for I2C comm). Or could be flaky ADS devices.
+4. Per unit
 	pro0p:  amp 62 cts, 0.0320 sec; noa 200 cts, 0.0460 sec
 	soc0p:
 	pro1a:  amp 46 cts, 0.0330 sec; noa 1   cts, 0.0030 sec
-	soc1a:
+	soc1a:  delete ADS:   ~0.0015 sec
 
 ## Changelog
 
@@ -586,8 +587,8 @@ Bucket list (optional. Used to debug bucket shaped VOC_SOC that wasn't real):
     a. hys_cap Hysteresis Capacitance decreased by factor of 10 to match cold charging (coldCharge v20221028 20221210.txt) (7 deg C).
     b. The voc-soc curve shifts low about 0.07 (7% soc) on cold days, causing cc_diff and e_wrap_lo faults.   As a result, an additional scalar was put on saturation scalar for those fault logics.
 
-  - Argon Related.   Cannot get Photon anymore.   Also will not have Argon available but Photon 2 will be someday.   Argon very much like Photon 2 with no EERAM built into the A/S (retained).   Retained on Argon lasts only for reset.   For power, bought EERAM.
-    a. parameters.cpp/.h to manage EERAM dump.   rp --> sp
+  - Argon Related.   Cannot get Photon anymore.   Also will not have Argon available but Photon 2 will be someday.   Argon very much like Photon 2 with no EERAM 47L16 built into the A/S (retained).   Retained on Argon lasts only for reset.   For power, bought EERAM 47L16.
+    a. parameters.cpp/.h to manage EERAM 47L16 dump.   rp --> sp
     b. BLE logic.  Nominally disabled (#undef USE_BLE) because there is no good UART terminal for BLE.   Using HC-06 same as Photon
 
   - Simulation neatness
