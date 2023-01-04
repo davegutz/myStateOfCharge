@@ -48,8 +48,10 @@ Battery::~Battery() {}
 
 // Placeholder; not used.  May write this base version if needed using BatterySim::calculate()
 // as a starting point but use the base class Randles formulation and re-arrange the i/o for that model.
-double Battery::calculate(const float temp_C, const double q, const double curr_in, const double dt,
-    const boolean dc_dc_on) { return 0.;}
+float Battery::calculate(const float temp_C, const float soc_frac, float curr_in, const double dt, const boolean dc_dc_on)
+{
+    return 0.;
+}
 
 /* calc_soc_voc:  VOC-OCV model
     INPUTS:
@@ -59,9 +61,9 @@ double Battery::calculate(const float temp_C, const double q, const double curr_
         dv_dsoc     Derivative scaled, V/fraction
         voc_stat    Static model open circuit voltage from table (reference), V
 */
-double Battery::calc_soc_voc(const double soc, const float temp_c, double *dv_dsoc)
+float Battery::calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc)
 {
-    double voc_soc_stat;  // return value
+    float voc_soc_stat;  // return value
     *dv_dsoc = calc_soc_voc_slope(soc + ds_voc_soc_, temp_c);
     voc_soc_stat = chem_.voc_T_->interp(soc + ds_voc_soc_, temp_c) + chem_.dvoc + dv_voc_soc_;
     return (voc_soc_stat);
@@ -74,9 +76,9 @@ double Battery::calc_soc_voc(const double soc, const float temp_c, double *dv_ds
     OUTPUTS:
         dv_dsoc     Derivative scaled, V/fraction
 */
-double Battery::calc_soc_voc_slope(const double soc, const float temp_c)
+float Battery::calc_soc_voc_slope(const float soc, const float temp_c)
 {
-    double dv_dsoc;  // return value
+    float dv_dsoc;  // return value
     if ( soc > 0.5 )
         dv_dsoc = (chem_.voc_T_->interp(soc, temp_c) - chem_.voc_T_->interp(soc-0.01, temp_c)) / 0.01;
     else
@@ -92,7 +94,7 @@ double Battery::calc_soc_voc_slope(const double soc, const float temp_c)
     OUTPUTS:
         vsat        Saturation threshold at temperature, deg C
 */  
-double_t Battery::calc_vsat(void)
+float_t Battery::calc_vsat(void)
 {
     return ( nom_vsat_ + (temp_c_-25.)*chem_.dvoc_dt );
 }
@@ -135,10 +137,10 @@ void Battery::pretty_print_ss(void)
 }
 
 // EKF model for update
-double Battery::voc_soc_tab(const double soc, const float temp_c)
+float Battery::voc_soc_tab(const float soc, const float temp_c)
 {
-    double voc_stat;     // return value
-    double dv_dsoc;
+    float voc_stat;     // return value
+    float dv_dsoc;
     voc_stat = calc_soc_voc(soc, temp_c, &dv_dsoc);
     return ( voc_stat );
 }
@@ -243,13 +245,13 @@ void BatteryMonitor::assign_randles(void)
         -
         gnd
 */ 
-double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
+float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
 {
     // Inputs
     temp_c_ = Sen->Tb_filt;
     vsat_ = calc_vsat();
     dt_ =  Sen->T;
-    double T_rate = T_RLim->calculate(temp_c_, T_RLIM, T_RLIM, reset_temp, Sen->T);
+    float T_rate = T_RLim->calculate(temp_c_, T_RLIM, T_RLIM, reset_temp, Sen->T);
     vb_ = Sen->vb();
     ib_ = Sen->ib();
     ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
@@ -301,7 +303,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     // EKF 1x1
     if ( eframe_ == 0 )
     {
-        double ddq_dt = ib_;
+        float ddq_dt = ib_;
         dt_eframe_ = dt_ * float(cp.eframe_mult);
         if ( ddq_dt>0. && !sp.tweak_test() ) ddq_dt *= coul_eff_;
         ddq_dt -= chem_.dqdt * q_capacity_ * T_rate;
@@ -348,7 +350,7 @@ double BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
 }
 
 // Charge time calculation
-double BatteryMonitor::calc_charge_time(const double q, const double q_capacity, const double charge_curr, const double soc)
+float BatteryMonitor::calc_charge_time(const double q, const float q_capacity, const float charge_curr, const float soc)
 {
     double delta_q = q - q_capacity;
     if ( charge_curr > TCHARGE_DISPLAY_DEADBAND )
@@ -360,7 +362,7 @@ double BatteryMonitor::calc_charge_time(const double q, const double q_capacity,
     else
         tcharge_ = -24.;
 
-    double amp_hrs_remaining = (q_capacity - q_min_ + delta_q) / 3600.;
+    float amp_hrs_remaining = (q_capacity - q_min_ + delta_q) / 3600.;
     if ( soc > soc_min_)
     {
         amp_hrs_remaining_ekf_ = amp_hrs_remaining * (soc_ekf_ - soc_min_) / (soc - soc_min_);
@@ -394,7 +396,7 @@ void BatteryMonitor::ekf_predict(double *Fx, double *Bu)
 void BatteryMonitor::ekf_update(double *hx, double *H)
 {
     // Measurement function hx(x), x=soc ideal capacitor
-    double x_lim = max(min(x_, 1.0), 0.0);
+    float x_lim = max(min(x_, 1.0), 0.0);
     *hx = Battery::calc_soc_voc(x_lim, temp_c_, &dv_dsoc_);
 
     // Jacodian of measurement function
@@ -425,7 +427,7 @@ void BatteryMonitor::init_battery_mon(const boolean reset, Sensors *Sen)
 }
 
 // Init EKF
-void BatteryMonitor::init_soc_ekf(const double soc)
+void BatteryMonitor::init_soc_ekf(const float soc)
 {
     soc_ekf_ = soc;
     init_ekf(soc_ekf_, 0.0);
@@ -519,9 +521,9 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
     }
 
     // Solver
-    static double soc_solved = 1.;
-    double dv_dsoc;
-    double voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
+    static float soc_solved = 1.;
+    float dv_dsoc;
+    float voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
     ice_->init(1., soc_min_, 2*SOLV_ERR);
     while ( abs(ice_->e())>SOLV_ERR && ice_->count()<SOLV_MAX_COUNTS && abs(ice_->dx())>0. )
     {
@@ -640,7 +642,7 @@ void BatterySim::assign_randles(void)
         gnd
 
 */
-double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset)
+float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset)
 {
     // Inputs
     temp_c_ = Sen->Tb_filt;
@@ -649,7 +651,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
     if ( reset ) ib_fut_ = ib_in_;
     ib_ = max(min(ib_fut_, IMAX_NUM), -IMAX_NUM);  //  Past value ib_.  Overflow protection when ib_ past value used
     vsat_ = calc_vsat();
-    double soc_lim = max(min(soc_, 1.0), -0.2);  // slightly beyond
+    float soc_lim = max(min(soc_, 1.0), -0.2);  // slightly beyond
 
     // VOC-OCV model
     voc_stat_ = calc_soc_voc(soc_, temp_c_, &dv_dsoc_);
@@ -729,7 +731,7 @@ double BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean
 }
 
 // Injection model, calculate inj bias based on time since boot
-float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const double amp, const double freq)
+float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const float amp, const double freq)
 {
     // Sample at instant of signal injection
     sample_time_z_ = sample_time_;
@@ -745,7 +747,7 @@ float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const do
 
     // Injection.  time shifted by 1UL
     double t = (now-1UL)/1e3;
-    double inj_bias = 0.;
+    float inj_bias = 0.;
     // Calculate injection amounts from user inputs (talk).
     switch ( type )
     {
@@ -797,7 +799,7 @@ Outputs:
     soc_min_        Estimated soc where battery BMS will shutoff current, fraction
     q_min_          Estimated charge at low voltage shutdown, C\
 */
-double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, BatteryMonitor *Mon, const boolean initializing_all) 
+float BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, BatteryMonitor *Mon, const boolean initializing_all) 
 {
     float charge_curr = ib_charge_;
     double d_delta_q = charge_curr * Sen->T;
@@ -808,7 +810,7 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
     {
         *sp_t_last_ = Sen->Tb;
     }
-    double temp_lim = max(min(Sen->Tb, *sp_t_last_ + T_RLIM*Sen->T), *sp_t_last_ - T_RLIM*Sen->T);
+    float temp_lim = max(min(Sen->Tb, *sp_t_last_ + T_RLIM*Sen->T), *sp_t_last_ - T_RLIM*Sen->T);
     
     // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status
     // But if not modeling in real world, set to Monitor when Monitor saturated and reset_temp to EKF otherwise
@@ -846,7 +848,7 @@ double BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Batter
     if ( (sp.debug==2 || sp.debug==3 || sp.debug==4 )  && cp.publishS && !initializing_all)
     {
         double cTime;
-        if ( sp.tweak_test() ) cTime = double(Sen->now)/1000.;
+        if ( sp.tweak_test() ) cTime = float(Sen->now)/1000.;
         else cTime = Sen->control_time;
         sprintf(cp.buffer, "unit_sim, %13.3f, %d, %d, %7.5f,%7.5f, %7.5f,%7.5f,%7.5f,%7.5f, %7.3f,%7.3f,%7.3f,%7.3f,  %d,  %9.1f,  %8.5f, %d, %c",
             cTime, sp.sim_chm,  bms_off_, Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, ib_charge_, ioc_, model_saturated_, *sp_delta_q_, soc_, reset_temp,'\0');
@@ -902,7 +904,7 @@ void BatterySim::pretty_print(void)
 
 Hysteresis::Hysteresis()
 : disabled_(false), cap_(0), res_(0), soc_(0), ib_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0){};
-Hysteresis::Hysteresis(const double cap, Chemistry chem, float *sp_hys_scale)
+Hysteresis::Hysteresis(const float cap, Chemistry chem, float *sp_hys_scale)
 : disabled_(false), cap_(cap), res_(0), soc_(0), ib_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0), sp_hys_scale_(sp_hys_scale)
 {
     // Characteristic table
@@ -919,7 +921,7 @@ void Hysteresis::apply_scale(const float sclr)
 }
 
 // Calculate
-double Hysteresis::calculate(const double ib, const double soc)
+float Hysteresis::calculate(const float ib, const float soc)
 {
     ib_ = ib;
     soc_ = soc;
@@ -945,15 +947,15 @@ double Hysteresis::calculate(const double ib, const double soc)
 }
 
 // Initialize
-void Hysteresis::init(const double dv_init)
+void Hysteresis::init(const float dv_init)
 {
     dv_hys_ = dv_init;
 }
 
 // Table lookup
-double Hysteresis::look_hys(const double dv, const double soc)
+float Hysteresis::look_hys(const float dv, const float soc)
 {
-    double res;         // return value
+    float res;         // return value
     if ( disabled_ )
         res = 0.;
     else
@@ -967,7 +969,7 @@ void Hysteresis::pretty_print()
     Serial.printf("Hysteresis:\n");
     Serial.printf("  res%6.4f, null Ohm\n", res_);
     Serial.printf("  cap%10.1f, F\n", cap_);
-    double res = look_hys(0., 0.8);
+    float res = look_hys(0., 0.8);
     Serial.printf("  tau%10.1f, null, s\n", res*cap_);
     Serial.printf("  ib%7.3f, A\n", ib_);
     Serial.printf("  ioc%7.3f, A\n", ioc_);
@@ -986,7 +988,7 @@ void Hysteresis::pretty_print()
 }
 
 // Dynamic update
-double Hysteresis::update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap, const boolean reset_temp)
+float Hysteresis::update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap, const boolean reset_temp)
 {
     float dv_max = hys_Tx_->interp(soc_);
     float dv_min = hys_Tn_->interp(soc_);

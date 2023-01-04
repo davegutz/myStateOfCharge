@@ -285,10 +285,10 @@ void Chemistry::pretty_print(void)
 
 // class Coulombs
 Coulombs::Coulombs() {}
-Coulombs::Coulombs(double *sp_delta_q, float *sp_t_last, const double q_cap_rated, const double t_rated, 
-  const double t_rlim, uint8_t *sp_mod_code, const double coul_eff)
-  : sp_delta_q_(sp_delta_q), sp_t_last_(sp_t_last), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated), t_rated_(t_rated), t_rlim_(0.017),
-  soc_min_(0), chem_(sp_mod_code), coul_eff_(coul_eff) {}
+Coulombs::Coulombs(double *sp_delta_q, float *sp_t_last, const float q_cap_rated, const float t_rated, const float t_rlim,
+  uint8_t *sp_mod_code, const float coul_eff)
+  : sp_delta_q_(sp_delta_q), sp_t_last_(sp_t_last), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated),
+    t_rated_(t_rated), t_rlim_(0.017), soc_min_(0), chem_(sp_mod_code), coul_eff_(coul_eff) {}
 Coulombs::~Coulombs() {}
 
 
@@ -324,7 +324,7 @@ void Coulombs::pretty_print(void)
 // test comparisons.   The rationale for this is that the battery is frequently saturated which
 // resets all the model parameters.   This happens daily.   Then both the model and the battery
 // are discharged by the same current so the delta_q will be the same.
-void Coulombs::apply_cap_scale(const double scale)
+void Coulombs::apply_cap_scale(const float scale)
 {
   q_cap_rated_scaled_ = scale * q_cap_rated_;
   q_capacity_ = calculate_capacity(*sp_t_last_);
@@ -360,7 +360,7 @@ void Coulombs::apply_delta_q_t(const double delta_q, const float temp_c)
 
 
 // Memory set, adjust book-keeping as needed.  delta_q preserved
-void Coulombs::apply_soc(const double soc, const float temp_c)
+void Coulombs::apply_soc(const float soc, const float temp_c)
 {
   soc_ = soc;
   q_capacity_ = calculate_capacity(temp_c);
@@ -392,7 +392,7 @@ Outputs:
   soc_min_        Estimated soc where battery BMS will shutoff current, fraction
   q_min_          Estimated charge at low voltage shutdown, C\
 */
-double Coulombs::count_coulombs(const double dt, const boolean reset_temp, const float temp_c, const double charge_curr,
+float Coulombs::count_coulombs(const double dt, const boolean reset_temp, const float temp_c, const float charge_curr,
   const boolean sat, const double delta_q_ekf)
 {
     // Rate limit temperature.   When modeling, reset_temp.  In real world, rate limited Tb ramps Coulomb count since bms_off
@@ -400,7 +400,7 @@ double Coulombs::count_coulombs(const double dt, const boolean reset_temp, const
     {
       *sp_t_last_ = temp_c;
     }
-    double temp_lim = max(min( temp_c, *sp_t_last_ + t_rlim_*dt), *sp_t_last_ - t_rlim_*dt);
+    float temp_lim = max(min( temp_c, *sp_t_last_ + t_rlim_*dt), *sp_t_last_ - t_rlim_*dt);
 
     // State change
     double d_delta_q = charge_curr * dt;

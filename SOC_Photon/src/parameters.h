@@ -162,6 +162,7 @@ public:
     void print_history_array();
     // put
     #if (PLATFORM_ID==6)  // Photon
+        void put_all_dynamic();
         void put_amp(const float input) { amp = input; }
         void put_cutback_gain_sclr(const float input) { cutback_gain_sclr = input; }
         void put_debug(const int input) { debug = input; }

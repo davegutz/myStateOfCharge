@@ -154,9 +154,9 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 
 
 // Voltage measurement gains
-const float VB_CONV_GAIN = double(PHOTON_ADC_VOLT) * double(VBATT_SENSE_R_HI + VBATT_SENSE_R_LO) /
-                              double(VBATT_SENSE_R_LO) / double(PHOTON_ADC_COUNT) * double(VBATT_S);
-const float VC_CONV_GAIN = double(PHOTON_ADC_VOLT) / double(PHOTON_ADC_COUNT) * double(VC_S);
-const float VO_CONV_GAIN = double(PHOTON_ADC_VOLT) / double(PHOTON_ADC_COUNT) * double(VO_S);
+const float VB_CONV_GAIN = float(PHOTON_ADC_VOLT) * float(VBATT_SENSE_R_HI + VBATT_SENSE_R_LO) /
+                              float(VBATT_SENSE_R_LO) / float(PHOTON_ADC_COUNT) * float(VBATT_S);
+const float VC_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VC_S);
+const float VO_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VO_S);
 
 #endif // CONSTANTS_H_

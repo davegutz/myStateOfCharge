@@ -50,7 +50,7 @@ class SinInj
   public:
     SinInj(){};
     ~SinInj();
-    double signal(const double amp, const double freq_rps, const double t, const double inj_bias)
+    float signal(const float amp, const double freq_rps, const double t, const float inj_bias)
     {
       return ( amp*(1. + sin(freq_rps*t)) + inj_bias );
     }
@@ -75,7 +75,7 @@ class CosInj
   public:
     CosInj(){};
     ~CosInj();
-    double signal(const double amp, const double freq_rps, const double t, const double inj_bias)
+    float signal(const float amp, const double freq_rps, const double t, const float inj_bias)
     {
       return ( amp*(cos(freq_rps*t)) + inj_bias );
     }
@@ -99,7 +99,7 @@ class SqInj
 {
   public:
     SqInj(): t_last_sq_(0), square_bias_(0){};
-    ~SqInj();    double signal(const double amp, const double freq_rps, const double t, const double inj_bias)
+    ~SqInj();    float signal(const float amp, const double freq_rps, const double t, const float inj_bias)
     {
       double sq_dt;
       if ( freq_rps>1e-6 )
@@ -120,7 +120,7 @@ class SqInj
     };
   protected:
     double t_last_sq_;
-    double square_bias_;
+    float square_bias_;
 };
 // Triangle wave signal generation
 /*
@@ -141,9 +141,9 @@ class TriInj
   public:
     TriInj(): t_last_(-1e6) {};
     ~TriInj();
-    double signal(const double amp, const double freq_rps, const double t, const double inj_bias)
+    float signal(const float amp, const float freq_rps, const float t, const float inj_bias)
     {
-      double res = 0.;   // return value
+      float res = 0.;   // return value
       double p = t;
       if ( freq_rps>1e-6 )
         p = 2. / freq_rps * PI;

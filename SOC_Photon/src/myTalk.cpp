@@ -78,9 +78,9 @@ void clear_queues()
 // Talk Executive
 void talk(BatteryMonitor *Mon, Sensors *Sen)
 {
-  double FP_in = -99.;
+  float FP_in = -99.;
   int INT_in = -1;
-  double scale = 1.;
+  float scale = 1.;
   urgency request;
   // Serial event  (terminate Send String data with 0A using CoolTerm)
   if (cp.token)

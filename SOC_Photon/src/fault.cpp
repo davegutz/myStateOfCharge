@@ -100,18 +100,18 @@ void Flt_st::pretty_print(const String code)
   Serial.printf("code %s\n", code.c_str());
   Serial.printf("buffer %s\n", buffer);
   Serial.printf("t %ld\n", this->t);
-  Serial.printf("Tb_hdwe %7.3f\n", double(this->Tb_hdwe)/600.);
-  Serial.printf("vb_hdwe %7.3f\n", double(this->vb_hdwe)/1200.);
-  Serial.printf("ib_amp_hdwe %7.3f\n", double(this->ib_amp_hdwe)/600.);
-  Serial.printf("ib_noa_hdwe %7.3f\n", double(this->ib_noa_hdwe)/600.);
-  Serial.printf("Tb %7.3f\n", double(this->Tb)/600.);
-  Serial.printf("vb %7.3f\n", double(this->vb)/1200.);
-  Serial.printf("ib %7.3f\n", double(this->ib)/600.);
-  Serial.printf("soc %7.4f\n", double(this->soc)/16000.);
-  Serial.printf("soc_ekf %7.4f\n", double(this->soc_ekf)/16000.);
-  Serial.printf("voc %7.3f\n", double(this->voc)/1200.);
-  Serial.printf("voc_stat %7.3f\n", double(this->voc_stat)/1200.);
-  Serial.printf("e_wrap_filt %7.3f\n", double(this->e_wrap_filt)/1200.);
+  Serial.printf("Tb_hdwe %7.3f\n", float(this->Tb_hdwe)/600.);
+  Serial.printf("vb_hdwe %7.3f\n", float(this->vb_hdwe)/1200.);
+  Serial.printf("ib_amp_hdwe %7.3f\n", float(this->ib_amp_hdwe)/600.);
+  Serial.printf("ib_noa_hdwe %7.3f\n", float(this->ib_noa_hdwe)/600.);
+  Serial.printf("Tb %7.3f\n", float(this->Tb)/600.);
+  Serial.printf("vb %7.3f\n", float(this->vb)/1200.);
+  Serial.printf("ib %7.3f\n", float(this->ib)/600.);
+  Serial.printf("soc %7.4f\n", float(this->soc)/16000.);
+  Serial.printf("soc_ekf %7.4f\n", float(this->soc_ekf)/16000.);
+  Serial.printf("voc %7.3f\n", float(this->voc)/1200.);
+  Serial.printf("voc_stat %7.3f\n", float(this->voc_stat)/1200.);
+  Serial.printf("e_wrap_filt %7.3f\n", float(this->e_wrap_filt)/1200.);
   Serial.printf("fltw %d falw %d\n", this->fltw, this->falw);
 }
 void Flt_st::print(const String code)
@@ -123,34 +123,34 @@ void Flt_st::print(const String code)
   }
   Serial.printf("%s, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
     code.c_str(), buffer, this->t,
-    double(this->Tb_hdwe)/600.,
-    double(this->vb_hdwe)/1200.,
-    double(this->ib_amp_hdwe)/600.,
-    double(this->ib_noa_hdwe)/600.,
-    double(this->Tb)/600.,
-    double(this->vb)/1200.,
-    double(this->ib)/600.,
-    double(this->soc)/16000.,
-    double(this->soc_ekf)/16000.,
-    double(this->voc)/1200.,
-    double(this->voc_stat)/1200.,
-    double(this->e_wrap_filt)/1200.,
+    float(this->Tb_hdwe)/600.,
+    float(this->vb_hdwe)/1200.,
+    float(this->ib_amp_hdwe)/600.,
+    float(this->ib_noa_hdwe)/600.,
+    float(this->Tb)/600.,
+    float(this->vb)/1200.,
+    float(this->ib)/600.,
+    float(this->soc)/16000.,
+    float(this->soc_ekf)/16000.,
+    float(this->voc)/1200.,
+    float(this->voc_stat)/1200.,
+    float(this->e_wrap_filt)/1200.,
     this->fltw,
     this->falw);
   Serial1.printf("unit_f, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
     buffer, this->t,
-    double(this->Tb_hdwe)/600.,
-    double(this->vb_hdwe)/1200.,
-    double(this->ib_amp_hdwe)/600.,
-    double(this->ib_noa_hdwe)/600.,
-    double(this->Tb)/600.,
-    double(this->vb)/1200.,
-    double(this->ib)/600.,
-    double(this->soc)/16000.,
-    double(this->soc_ekf)/16000.,
-    double(this->voc)/1200.,
-    double(this->voc_stat)/1200.,
-    double(this->e_wrap_filt)/1200.,
+    float(this->Tb_hdwe)/600.,
+    float(this->vb_hdwe)/1200.,
+    float(this->ib_amp_hdwe)/600.,
+    float(this->ib_noa_hdwe)/600.,
+    float(this->Tb)/600.,
+    float(this->vb)/1200.,
+    float(this->ib)/600.,
+    float(this->soc)/16000.,
+    float(this->soc_ekf)/16000.,
+    float(this->voc)/1200.,
+    float(this->voc_stat)/1200.,
+    float(this->e_wrap_filt)/1200.,
     this->fltw,
     this->falw);
 }
