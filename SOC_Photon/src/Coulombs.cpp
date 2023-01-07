@@ -261,21 +261,21 @@ void Chemistry::pretty_print(void)
 {
   Serial.printf("Chemistry:\n");
   Serial.printf("  dqdt%7.3f, frac/dg C\n", dqdt);
-  Serial.printf("  low_voc%7.3f, V\n", low_voc);
-  Serial.printf("  hys_cap%7.3f, F\n", hys_cap);
-  Serial.printf("  v_sat%7.3f, V\n", v_sat);
-  Serial.printf("  dvoc_dt%7.3f, V/dg C\n", dvoc_dt);
   Serial.printf("  dvoc%7.3f, V\n", dvoc);
+  Serial.printf("  dvoc_dt%7.3f, V/dg C\n", dvoc_dt);
+  Serial.printf("  hys_cap%7.3f, F\n", hys_cap);
+  Serial.printf("  low_voc%7.3f, V\n", low_voc);
+  Serial.printf("  v_sat%7.3f, V\n", v_sat);
   Serial.printf("  Randles:\n");
+  Serial.printf("  c_sd%9.3g; EKK, farad\n", c_sd);
   Serial.printf("  r_0%9.6f, ohm\n", r_0);
   Serial.printf("  r_ct%9.6f, ohm\n", r_ct);
   Serial.printf("  r_diff%9.6f, ohm\n", r_diff);
+  Serial.printf("  r_sd%9.6f; EKF, ohm\n", r_sd);
+  Serial.printf("  r_ss%9.6f; SS init, ohm\n", r_ss);
   Serial.printf("  tau_ct%7.3f, s\n", tau_ct);
   Serial.printf("  tau_diff%7.3f, s\n", tau_diff);
   Serial.printf("  tau_sd%9.3g; EKF, s\n", tau_sd);
-  Serial.printf("  c_sd%9.3g; EKK, farad\n", c_sd);
-  Serial.printf("  r_sd%9.6f; EKF, ohm\n", r_sd);
-  Serial.printf("  r_ss%9.6f; SS init, ohm\n", r_ss);
   Serial.printf("  voc(t, soc):\n");
   voc_T_->pretty_print();
   Serial.printf("  soc_min(temp_c):\n");
@@ -287,8 +287,9 @@ void Chemistry::pretty_print(void)
 Coulombs::Coulombs() {}
 Coulombs::Coulombs(double *sp_delta_q, float *sp_t_last, const float q_cap_rated, const float t_rated, const float t_rlim,
   uint8_t *sp_mod_code, const float coul_eff)
-  : sp_delta_q_(sp_delta_q), sp_t_last_(sp_t_last), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated),
-    t_rated_(t_rated), t_rlim_(0.017), soc_min_(0), chem_(sp_mod_code), coul_eff_(coul_eff) {}
+  : coul_eff_(coul_eff), q_(q_cap_rated), q_capacity_(q_cap_rated), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated),
+    q_min_(0.), sat_(true), soc_(1.), soc_min_(0.), sp_delta_q_(sp_delta_q), sp_t_last_(sp_t_last), t_rated_(t_rated), t_rlim_(0.017),
+    chem_(sp_mod_code) {}
 Coulombs::~Coulombs() {}
 
 
@@ -297,22 +298,22 @@ Coulombs::~Coulombs() {}
 void Coulombs::pretty_print(void)
 {
   Serial.printf("Coulombs:\n");
-  Serial.printf(" q_cap_rat%9.1f, C\n", q_cap_rated_);
-  Serial.printf(" q_cap_rat_scl%9.1f, C\n", q_cap_rated_scaled_);
-  Serial.printf(" q_cap%9.1f, C\n", q_capacity_);
-  Serial.printf(" q%9.1f, C\n", q_);
-  Serial.printf(" q_min%9.1f, C\n", q_min_);
+  Serial.printf(" coul_eff%9.5f\n", coul_eff_);
   Serial.printf(" delta_q%9.1f, C\n", *sp_delta_q_);
-  Serial.printf(" soc%8.4f\n", soc_);
-  Serial.printf(" sat %d\n", sat_);
-  Serial.printf(" t_rat%5.1f dg C\n", t_rated_);
-  Serial.printf(" t_last%5.1f dg C\n", *sp_t_last_);
-  Serial.printf(" t_rlim%7.3f dg C / s\n", t_rlim_);
-  Serial.printf(" resetting %d\n", resetting_);
-  Serial.printf(" soc_min%8.4f\n", soc_min_);
   Serial.printf(" mod %s\n", chem_.decode(mod_code()).c_str());
   Serial.printf(" mod_code %d\n", mod_code());
-  Serial.printf(" coul_eff%9.5f\n", coul_eff_);
+  Serial.printf(" q%9.1f, C\n", q_);
+  Serial.printf(" q_cap%9.1f, C\n", q_capacity_);
+  Serial.printf(" q_cap_rat%9.1f, C\n", q_cap_rated_);
+  Serial.printf(" q_cap_rat_scl%9.1f, C\n", q_cap_rated_scaled_);
+  Serial.printf(" q_min%9.1f, C\n", q_min_);
+  Serial.printf(" resetting %d\n", resetting_);
+  Serial.printf(" sat %d\n", sat_);
+  Serial.printf(" soc%8.4f\n", soc_);
+  Serial.printf(" soc_min%8.4f\n", soc_min_);
+  Serial.printf(" t_last%5.1f dg C\n", *sp_t_last_);
+  Serial.printf(" t_rat%5.1f dg C\n", t_rated_);
+  Serial.printf(" t_rlim%7.3f dg C / s\n", t_rlim_);
   Serial.printf("Coulombs::");
   chem_.pretty_print();
 }

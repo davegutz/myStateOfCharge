@@ -110,20 +110,20 @@ Shunt::~Shunt() {}
 
 void Shunt::pretty_print()
 {
-  Serial.printf("Shunt(%s)::\n", name_.c_str());
-  Serial.printf(" port 0x%X;\n", port_);
-  Serial.printf(" bare_det %d dscn_cmd %d\n", bare_detected_, dscn_cmd_);
   Serial.printf(" *cp_ib_bias%7.3f; A\n", *cp_ib_bias_);
   Serial.printf(" *cp_ib_scale%7.3f; A\n", *cp_ib_scale_);
-  Serial.printf(" v2a_s%7.2f; A/V\n", v2a_s_);
-  Serial.printf(" vshunt_int %d; count\n", vshunt_int_);
-  Serial.printf(" ishunt_cal%7.3f; A\n", ishunt_cal_);
   Serial.printf(" *sp_shunt_gain_sclr%7.3f; A\n", *sp_shunt_gain_sclr_);
-  Serial.printf(" Vc_raw %d;\n", Vc_raw_);
+  Serial.printf(" bare_det %d dscn_cmd %d\n", bare_detected_, dscn_cmd_);
+  Serial.printf(" ishunt_cal%7.3f; A\n", ishunt_cal_);
+  Serial.printf(" port 0x%X;\n", port_);
+  Serial.printf(" v2a_s%7.2f; A/V\n", v2a_s_);
   Serial.printf(" Vc%10.6f; V\n", Vc_);
-  Serial.printf(" Vo_raw %d;\n", Vo_raw_);
+  Serial.printf(" Vc_raw %d;\n", Vc_raw_);
   Serial.printf(" Vo%10.6f; V\n", Vo_);
   Serial.printf(" Vo-Vc%10.6f; V\n", Vo_-Vc_);
+  Serial.printf(" Vo_raw %d;\n", Vo_raw_);
+  Serial.printf(" vshunt_int %d; count\n", vshunt_int_);
+  Serial.printf("Shunt(%s)::\n", name_.c_str());
   // Serial.printf("Shunt(%s)::", name_.c_str()); Adafruit_ADS1015::pretty_print(name_);
 }
 

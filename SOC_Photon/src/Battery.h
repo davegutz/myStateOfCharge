@@ -241,16 +241,23 @@ public:
   float voc_soc_tab(const float soc, const float temp_c);
   float vsat() { return vsat_; };
 protected:
-  float voc_;      // Static model open circuit voltage, V
+  boolean bms_off_; // Indicator that battery management system is off, T = off preventing current flow
+  float ds_voc_soc_;    // VOC(SOC) delta soc on input
+  float dt_;       // Update time, s
+  float dv_dsoc_;  // Derivative scaled, V/fraction
   float dv_dyn_;   // ib-induced back emf, V
   float dv_hys_;   // Hysteresis state, voc-voc_out, V
-  float vb_;       // Battery terminal voltage, V
+  float dv_voc_soc_;    // VOC(SOC) delta voc on output
   float ib_;       // Battery terminal current, A
-  float dv_dsoc_;  // Derivative scaled, V/fraction
-  float sr_;       // Resistance scalar
+  float ioc_;      // Current into charge portion of battery, A
   float nom_vsat_; // Nominal saturation threshold at 25C, V
+  boolean print_now_; // Print command
+  float sr_;       // Resistance scalar
+  float temp_c_;    // Battery temperature, deg C
+  float vb_;       // Battery terminal voltage, V
+  float voc_;      // Static model open circuit voltage, V
+  float voc_stat_; // Static, table lookup value of voc before applying hysteresis, V
   float vsat_;     // Saturation threshold at temperature, V
-  float dt_;       // Update time, s
   // EKF declarations
   StateSpace *Randles_; // Randles model {ib, vb} --> {voc}, ioc=ib for Battery version
                         // Randles model {ib, voc} --> {vb}, ioc=ib for BatterySim version
@@ -258,14 +265,7 @@ protected:
   double *rand_B_;  // Randles model B
   double *rand_C_;  // Randles model C
   double *rand_D_;  // Randles model D
-  float temp_c_;    // Battery temperature, deg C
-  boolean bms_off_; // Indicator that battery management system is off, T = off preventing current flow
   Hysteresis *hys_;
-  float ioc_;      // Current into charge portion of battery, A
-  float voc_stat_; // Static, table lookup value of voc before applying hysteresis, V
-  boolean print_now_; // Print command
-  float ds_voc_soc_;    // VOC(SOC) delta soc on input
-  float dv_voc_soc_;    // VOC(SOC) delta voc on output
 };
 
 
@@ -305,25 +305,25 @@ public:
   double y_ekf_filt() { return y_filt_; };
   double delta_q_ekf_;         // Charge deficit represented by charge calculated by ekf, C
 protected:
-  float tcharge_ekf_;  // Solved charging time to 100% from ekf, hr
-  float soc_ekf_;      // Filtered state of charge from ekf (0-1)
-  float tcharge_;      // Counted charging time to 100%, hr
-  double q_ekf_;        // Filtered charge calculated by ekf, C
-  float voc_filt_;     // Filtered, static model open circuit voltage, V
-  float amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
-  float amp_hrs_remaining_soc_;  // Discharge amp*time left if drain soc_ to 0, A-h
-  float y_filt_;       // Filtered EKF y value, V
   General2_Pole *y_filt = new General2_Pole(2.0, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
   SlidingDeadband *SdVb_;  // Sliding deadband filter for Vb
   TFDelay *EKF_converged;     // Time persistence
+  RateLimit *T_RLim = new RateLimit();
+  Iterator *ice_;       // Iteration control for EKF solver
+  float amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
+  float amp_hrs_remaining_soc_;  // Discharge amp*time left if drain soc_ to 0, A-h
+  double dt_eframe_;    // Update time for EKF major frame
+  uint8_t eframe_;      // Counter to run EKF slower than Coulomb Counter and Randles models
+  float ib_charge_;  // Current input avaiable for charging, A
+  double q_ekf_;        // Filtered charge calculated by ekf, C
+  float soc_ekf_;      // Filtered state of charge from ekf (0-1)
+  float tcharge_;      // Counted charging time to 100%, hr
+  float tcharge_ekf_;  // Solved charging time to 100% from ekf, hr
+  float voc_filt_;     // Filtered, static model open circuit voltage, V
+  float voc_soc_;  // Raw table lookup of voc, V
+  float y_filt_;       // Filtered EKF y value, V
   void ekf_predict(double *Fx, double *Bu);
   void ekf_update(double *hx, double *H);
-  RateLimit *T_RLim = new RateLimit();
-  float voc_soc_;  // Raw table lookup of voc, V
-  float ib_charge_;  // Current input avaiable for charging, A
-  uint8_t eframe_;      // Counter to run EKF slower than Coulomb Counter and Randles models
-  double dt_eframe_;    // Update time for EKF major frame
-  Iterator *ice_;       // Iteration control for EKF solver
 };
 
 
@@ -353,26 +353,24 @@ public:
   float voc() { return voc_; };
   float voc_stat() { return voc_stat_; };
 protected:
-  double q_;                // Charge, C
   SinInj *Sin_inj_;         // Class to create sine waves
   SqInj *Sq_inj_;           // Class to create square waves
   TriInj *Tri_inj_;         // Class to create triangle waves
   CosInj *Cos_inj_;         // Class to create cosine waves
   uint32_t duty_;           // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
-  float sat_ib_max_;       // Current cutback to be applied to modeled ib output, A
-  float sat_ib_null_;      // Current cutback value for voc=vsat, A
-  float sat_cutback_gain_; // Gain to retard ib when voc exceeds vsat, dimensionless
-  boolean model_cutback_;   // Indicate that modeled current being limited on saturation cutback, T = cutback limited
-  boolean model_saturated_; // Indicator of maximal cutback, T = cutback saturated
-  float ib_sat_;           // Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
-  double *sp_delta_q_model_;// Charge change since saturated, C
-  float *sp_t_last_model_;  // Battery temperature past value for rate limit memory, deg C
-  float *sp_s_cap_model_;   // Rated capacity scalar
+  float ib_charge_;        // Current input avaiable for charging, A
   float ib_fut_;           // Future value of limited current, A
   float ib_in_;            // Saved value of current input, A
-  float ib_charge_;        // Current input avaiable for charging, A
+  float ib_sat_;           // Threshold to declare saturation.  This regeneratively slows down charging so if too small takes too long, A
+  boolean model_cutback_;   // Indicate that modeled current being limited on saturation cutback, T = cutback limited
+  boolean model_saturated_; // Indicator of maximal cutback, T = cutback saturated
+  double q_;                // Charge, C
   unsigned long int sample_time_;       // Exact moment of hardware signal generation, ms
   unsigned long int sample_time_z_;     // Exact moment of past hardware signal generation, ms
+  float sat_cutback_gain_; // Gain to retard ib when voc exceeds vsat, dimensionless
+  float sat_ib_max_;       // Current cutback to be applied to modeled ib output, A
+  float sat_ib_null_;      // Current cutback value for voc=vsat, A
+  float *sp_s_cap_model_;   // Rated capacity scalar
 };
 
 

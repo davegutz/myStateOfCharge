@@ -124,21 +124,21 @@ public:
   float t_last() { return(*sp_t_last_); };
   virtual float vsat(void) = 0;
 protected:
-  double *sp_delta_q_;// Charge since saturated, C
-  float *sp_t_last_;  // Last battery temperature for rate limit memory, deg C
+  boolean resetting_ = false;  // Sticky flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
+  float coul_eff_;   // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
+  double q_;          // Present charge available to use, except q_min_, C
+  double q_capacity_; // Saturation charge at temperature, C
   double q_cap_rated_;// Rated capacity at t_rated_, saved for future scaling, C
   double q_cap_rated_scaled_;// Applied rated capacity at t_rated_, after scaling, C
-  double q_capacity_; // Saturation charge at temperature, C
-  double q_;          // Present charge available to use, except q_min_, C
-  float soc_;        // Fraction of saturation charge (q_capacity_) available (0-1)
+  float q_min_;      // Floor on charge available to use, C
   boolean sat_;       // Indication that battery is saturated, T=saturated
+  float soc_;        // Fraction of saturation charge (q_capacity_) available (0-1)
+  float soc_min_;    // As battery cools, the voltage drops and there appears a minimum soc it can deliver
+  double *sp_delta_q_;// Charge since saturated, C
+  float *sp_t_last_;  // Last battery temperature for rate limit memory, deg C
   float t_rated_;    // Rated temperature, deg C
   float t_rlim_;     // Tb rate limit, deg C / s
-  boolean resetting_ = false;  // Sticky flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
-  float soc_min_;    // As battery cools, the voltage drops and there appears a minimum soc it can deliver
-  float q_min_;      // Floor on charge available to use, C
   Chemistry chem_; // Storage of chemistry information
-  float coul_eff_;   // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
 };
 
 #endif

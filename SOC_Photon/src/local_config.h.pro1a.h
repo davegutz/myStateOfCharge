@@ -8,10 +8,8 @@ const String unit = "pro1a_20221220";  // voc_stat
 // Miscellaneous
 #define ASK_DURING_BOOT       1   // Flag to ask for application of this file to * retained adjustements
 #define MODELING              247 // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn 
-#undef USE_BLE
 
 // Sensor biases
-#undef USE_ADS                 // Instead of using ADS device to read amp by I2C, use analog pins
 #define CURR_BIAS_AMP         0.5   // Calibration of amplified shunt sensor (* 'DA'), A
 #define CURR_SCALE_AMP        0.995 // Hardware to match data (* 'SB')
 #define CURR_BIAS_NOA         0.5   // Calibration of non-amplified shunt sensor (* 'DB'), A

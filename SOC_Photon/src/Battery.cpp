@@ -37,7 +37,9 @@ extern PublishPars pp;  // For publishing
 Battery::Battery() {}
 Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, float *sp_hys_scale)
     : Coulombs(sp_delta_q, sp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, sp_mod_code, COULOMBIC_EFF),
-    sr_(1), ds_voc_soc_(0), dv_voc_soc_(0)
+	bms_off_(false), ds_voc_soc_(0), dt_(0.1), dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.),
+    dv_voc_soc_(0.), ib_(0.), ioc_(0.), print_now_(false), sr_(1.), temp_c_(NOMINAL_TB), vb_(NOMINAL_VB), voc_(NOMINAL_VB),
+	voc_stat_(NOMINAL_VB), vsat_(NOMINAL_VB)
 {
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // Center in hysteresis
     hys_ = new Hysteresis(chem_.hys_cap, chem_, sp_hys_scale);
@@ -103,30 +105,30 @@ float_t Battery::calc_vsat(void)
 void Battery::pretty_print(void)
 {
     Serial.printf("Battery:\n");
-    Serial.printf("  temp_c=%7.3f; dg C\n", temp_c_);
-    Serial.printf(" *sp_delt_q=%10.1f;  C\n", *sp_delta_q_);
-    Serial.printf(" *sp_t_last=%10.1f; dg C\n", *sp_t_last_);
-    Serial.printf("  soc=%8.4f;\n", soc_);
+    Serial.printf("  bms_off=%d;\n", bms_off_);
+    Serial.printf("  c_sd=%9.3g;  farad\n", chem_.c_sd);
+    Serial.printf("  dt=%7.3f; s\n", dt_);
+    Serial.printf("  dv_dsoc=%10.6f; V/frac\n", dv_dsoc_);
+    Serial.printf("  dv_dyn= %7.3f; V\n", dv_dyn_);
+    Serial.printf("  dv_hys=%7.3f; V\n", hys_->dv_hys());
     Serial.printf("  dvoc_dt=%10.6f; V/dg C\n", chem_.dvoc_dt);
+    Serial.printf("  ib=%7.3f; A\n", ib_);
     Serial.printf("  r_0=%10.6f;  ohm\n", chem_.r_0);
     Serial.printf("  r_ct = %10.6f;  ohm\n", chem_.r_ct);
-    Serial.printf("  tau_ct=%10.6f;  s (=1/R/C)\n", chem_.tau_ct);
     Serial.printf("  r_diff=%10.6f;  ohm\n", chem_.r_diff);
-    Serial.printf("  tau_diff =%10.6f;  s (=1/R/C)\n", chem_.tau_diff);
     Serial.printf("  r_sd = %10.6f;  ohm\n", chem_.r_sd);
+    Serial.printf("  soc=%8.4f;\n", soc_);
+    Serial.printf(" *sp_delt_q=%10.1f;  C\n", *sp_delta_q_);
+    Serial.printf(" *sp_t_last=%10.1f; dg C\n", *sp_t_last_);
+    Serial.printf("  sr=%7.3f; sclr\n", sr_);
+    Serial.printf("  tau_ct=%10.6f;  s (=1/R/C)\n", chem_.tau_ct);
+    Serial.printf("  tau_diff =%10.6f;  s (=1/R/C)\n", chem_.tau_diff);
     Serial.printf("  tau_sd=%9.3g;  s\n", chem_.tau_sd);
-    Serial.printf("  c_sd=%9.3g;  farad\n", chem_.c_sd);
-    Serial.printf("  bms_off=%d;\n", bms_off_);
-    Serial.printf("  dv_dsoc=%10.6f; V/frac\n", dv_dsoc_);
-    Serial.printf("  ib=%7.3f; A\n", ib_);
+    Serial.printf("  temp_c=%7.3f; dg C\n", temp_c_);
     Serial.printf("  vb=%7.3f; V\n", vb_);
     Serial.printf("  voc=%7.3f; V\n", voc_);
     Serial.printf("  voc_stat=%7.3f; V\n", voc_stat_);
     Serial.printf("  vsat=%7.3f; V\n", vsat_);
-    Serial.printf("  dv_dyn= %7.3f; V\n", dv_dyn_);
-    Serial.printf("  dv_hys=%7.3f; V\n", hys_->dv_hys());
-    Serial.printf("  sr=%7.3f; sclr\n", sr_);
-    Serial.printf("  dt=%7.3f; s\n", dt_);
 }
 
 // Print State Space
@@ -149,7 +151,10 @@ float Battery::voc_soc_tab(const float soc, const float temp_c)
 // Battery monitor class
 BatteryMonitor::BatteryMonitor(): Battery() {}
 BatteryMonitor::BatteryMonitor(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, float *sp_hys_scale):
-    Battery(sp_delta_q, sp_t_last, sp_mod_code, sp_hys_scale)
+    Battery(sp_delta_q, sp_t_last, sp_mod_code, sp_hys_scale),
+	amp_hrs_remaining_ekf_(0.), amp_hrs_remaining_soc_(0.), dt_eframe_(0.1), eframe_(0), ib_charge_(0.),
+    q_ekf_(RATED_BATT_CAP*3600.), soc_ekf_(1.0), tcharge_(0.), tcharge_ekf_(0.), voc_filt_(NOMINAL_VB), voc_soc_(NOMINAL_VB),
+    y_filt_(0.)
 {
     voc_filt_ = chem_.v_sat-HDB_VBATT;
     // EKF
@@ -459,16 +464,16 @@ void BatteryMonitor::pretty_print(Sensors *Sen)
     Serial.printf("  ah_ekf_%7.3f; A-h\n", amp_hrs_remaining_ekf_);
     Serial.printf("  ah_soc_%7.3f; A-h\n", amp_hrs_remaining_soc_);
     Serial.printf("  EKF_conv %d;\n", converged_ekf());
+    Serial.printf("  dv_hys%7.3f; V\n", hys_->dv_hys());
+    Serial.printf("  dv_hys_sim%7.3f; V\n", Sen->Sim->hys_state());
+    Serial.printf("  e_wrap%7.3f; V\n", Sen->Flt->e_wrap());
     Serial.printf("  q_ekf%10.1f; C\n", q_ekf_);
     Serial.printf("  soc_ekf%8.4f; frac\n", soc_ekf_);
     Serial.printf("  tc%5.1f; hr\n", tcharge_);
     Serial.printf("  tc_ekf%5.1f; hr\n", tcharge_ekf_);
     Serial.printf("  voc_filt%7.3f; V\n", voc_filt_);
-    Serial.printf("  voc_stat%7.3f; V\n", voc_stat_);
     Serial.printf("  voc_soc%7.3f; V\n", voc_soc_);
-    Serial.printf("  dv_hys%7.3f; V\n", hys_->dv_hys());
-    Serial.printf("  e_wrap%7.3f; V\n", Sen->Flt->e_wrap());
-    Serial.printf("  dv_hys_sim%7.3f; V\n", Sen->Sim->hys_state());
+    Serial.printf("  voc_stat%7.3f; V\n", voc_stat_);
     Serial.printf("  y_filt%7.3f; Res EKF, V\n", y_filt_);
 }
 
@@ -546,8 +551,8 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
 // Battery model class for reference use mainly in jumpered hardware testing
 BatterySim::BatterySim() : Battery() {}
 BatterySim::BatterySim(double *sp_delta_q, float *sp_t_last, float *sp_s_cap_model, uint8_t *sp_mod_code, float *sp_hys_scale) :
-    Battery(sp_delta_q, sp_t_last, sp_mod_code, sp_hys_scale), q_(RATED_BATT_CAP*3600.), sp_s_cap_model_(sp_s_cap_model),
-    sample_time_(0UL), sample_time_z_(0UL)
+    Battery(sp_delta_q, sp_t_last, sp_mod_code, sp_hys_scale), duty_(0UL), ib_fut_(0.), ib_in_(0.), model_cutback_(true),
+    q_(RATED_BATT_CAP*3600.), sample_time_(0UL), sample_time_z_(0UL), sat_ib_max_(0.), sp_s_cap_model_(sp_s_cap_model)
 {
     // Randles dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery
@@ -721,7 +726,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     if ( sp.debug==79 ) Serial.printf("reset, mod_ib, temp_c_, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib_fut, ib,=%d,%d,%7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f, %7.3f,\n",
         reset, sp.mod_ib(), temp_c_, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
 
-    if ( sp.debug==78 || sp.debug==7 ) Serial.printf("BatterySim::calculate:,  dt_,tempC,curr,soc_,voc,,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
+    if ( sp.debug==78 || sp.debug==7 ) Serial.printf("BatterySim::calculate:,  dt_,tempC,curr,soc_,voc,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
      dt_,temp_c_, ib_, soc_, voc_, dv_dyn_, vb_);
     
     // if ( sp.debug==76 ) Serial.printf("BatterySim::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in=%7.3f,ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, VB_DC_DC=%7.3f, vb=%7.3f\n",
@@ -889,15 +894,15 @@ void BatterySim::pretty_print(void)
     Serial.printf("BS::");
     this->Battery::pretty_print();
     Serial.printf(" BS::BS:\n");
-    Serial.printf("  sat_ib_max%7.3f, A\n", sat_ib_max_);
-    Serial.printf("  sat_ib_null%7.3f, A\n", sat_ib_null_);
-    Serial.printf("  sat_cb_gn%7.1f\n", sat_cutback_gain_);
+    Serial.printf("  ib%7.3f, A\n", ib_);
+    Serial.printf("  ib_fut%7.3f, A\n", ib_fut_);
+    Serial.printf("  ib_in%7.3f, A\n", ib_in_);
+    Serial.printf("  ib_sat%7.3f\n", ib_sat_);
     Serial.printf("  mod_cb %d\n", model_cutback_);
     Serial.printf("  mod_sat %d\n", model_saturated_);
-    Serial.printf("  ib%7.3f, A\n", ib_);
-    Serial.printf("  ib_in%7.3f, A\n", ib_in_);
-    Serial.printf("  ib_fut%7.3f, A\n", ib_fut_);
-    Serial.printf("  ib_sat%7.3f\n", ib_sat_);
+    Serial.printf("  sat_cb_gn%7.1f\n", sat_cutback_gain_);
+    Serial.printf("  sat_ib_max%7.3f, A\n", sat_ib_max_);
+    Serial.printf("  sat_ib_null%7.3f, A\n", sat_ib_null_);
     Serial.printf(" *sp_s_cap_model%7.3f Slr\n", *sp_s_cap_model_);
 }
 
@@ -966,19 +971,19 @@ float Hysteresis::look_hys(const float dv, const float soc)
 // Print
 void Hysteresis::pretty_print()
 {
-    Serial.printf("Hysteresis:\n");
-    Serial.printf("  res%6.4f, null Ohm\n", res_);
-    Serial.printf("  cap%10.1f, F\n", cap_);
     float res = look_hys(0., 0.8);
-    Serial.printf("  tau%10.1f, null, s\n", res*cap_);
-    Serial.printf("  ib%7.3f, A\n", ib_);
-    Serial.printf("  ioc%7.3f, A\n", ioc_);
-    Serial.printf("  soc%8.4f\n", soc_);
-    Serial.printf("  res%7.3f, ohm\n", res_);
+    Serial.printf("Hysteresis:\n");
+    Serial.printf("  cap%10.1f, F\n", cap_);
+    Serial.printf("  disab%d\n", disabled_);
     Serial.printf("  dv_dot%7.3f, V/s\n", dv_dot_);
     Serial.printf("  dv_hys%7.3f, V, SH\n", dv_hys_);
-    Serial.printf("  disab%d\n", disabled_);
+    Serial.printf("  ib%7.3f, A\n", ib_);
+    Serial.printf("  ioc%7.3f, A\n", ioc_);
+    Serial.printf("  res%6.4f, null Ohm\n", res_);
+    Serial.printf("  res%7.3f, ohm\n", res_);
+    Serial.printf("  soc%8.4f\n", soc_);
     Serial.printf(" *sp_hys_scale%6.2f Slr\n", *sp_hys_scale_);
+    Serial.printf("  tau%10.1f, null, s\n", res*cap_);
     Serial.printf("  r(soc, dv):\n");
     hys_T_->pretty_print();
     Serial.printf("  r_max(soc):\n");
