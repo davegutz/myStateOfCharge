@@ -126,7 +126,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   9-A2 = NC
   10-A3 = NC
 
-### ASD 1015 12-bit Amplified with OPA333 my custom board.   Avoids using negative absolute voltages on inputs - centers on 3v3 / 2
+### PHOTON ONLY *****ASD 1013 12-bit Amplified with OPA333 my custom board.   Avoids using negative absolute voltages on inputs - centers on 3v3 / 2
 
 - HiLetgo ADS1015 12 Bit Analog to Digital Development Board ADC Converter Module ADC Development Board for Arduino
   $8.29 in Aug 2021
@@ -134,7 +134,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   Code from Adafruit ADS1X15 library.   Differential = A0-A1
   Ti OPA333 Used.   $11.00 for 5 Amazon OPA333AIDBVR SOT23-5 mounted on SOT23-6
   No special code for OPA.  Hardware only.   Pre-amp for ADC 5:1.
-  1-V 3v3 (+ [TODO]:  0.1uF to ground for transient power draws of the ADC)
+  1-V 3v3:  0.1uF to ground for transient power draws of the ADC
   2-G = Gnd
   3-SCL = Photon D1
   4-SDA  = Photon D0
@@ -145,22 +145,73 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   9-A2 = NC
   10-A3 = NC
 
-### Particle Photon 1A max
+### Amp ciruit 'amp'
+
+  Ti OPA333.  Vc formed by 2x 4k7 voltage divider on 3v3 rail to ground.  A4 to A3 and A5 with 106 10uF high cap
+  Use pSpice circuit model (SOC_photon/datasheets/opa333_asd1013_5beta.asc) to verify filters because 10uF cap interacts with 1uF cap.
+  Goal of filter design is 2*pi r/s = 1 hz -3dB bandwidth.
+  V+   = 3v3 rail
+  V-   = Gnd rail
+  Vo   = 8k2/1uF filter to A5 of device, 98k to pin+
+  pin- = 5k1 of G-Shunt
+  pin+ = 98k of Vc, 98k of Vo, and 5k1 of Y-Shunt
+
+### No Amp ciruit 'no amp'
+
+  For Argon Beta config, identical to 'amp' Amp circuit except A3 instead of A5.   Vc common to both amps (single failure point)
+  For Photon Alpha, direct feed to ADS-1013 and no OPA333
+
+### Particle Photon Device 1A max
 
 - Particle Photon boards have 9 PWM pins: D0, D1, D2, D3, A4, A5, WKP, RX, TX
   GND = to 2 GND rails
   A1  = L of 20k ohm from 12v and H of 4k7 ohm + 47uF to ground
+  A3  = H of 'no amp' amp circuit
+  A3  = 8k2/1uF filter of of Vc of both amp circuits (yes, single point of failure for both amps)
+  A5  = H of 'amp' amp circuit
   D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
   D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
   D6  = Y-C of DS18 for Tbatt and 4k7 3v3 jumper pullup
   VIN = 5V Rail 1A maximum from 7805CT home-made 12-->5 V regulator
-  3v3 = 3v3 rail out
+  3v3 = 3v3 rail out supply to common of amp circuits, supply of OPA333, and R-OLED
   micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm)
+  5v  = supply to VC-HC-06, R-1-wire
+  TX  = RX of HC-06
+  RX  = TX of HC-06
+  SDA = SDA-ADS-1013 amp, SDA-ADS-1013 no amp, Y-OLED
+  SCL = SCL-ADS-1013 amp, SCL-ADS-1013 no amp, B-OLED
+
+### Particle Argon Device - assumed at least 1A max
+
+  GND = to 2 GND rails
+  A1  = L of 20k ohm from 12v and H of 4k7 ohm + 47uF to ground
+  A3  = Filtered Vo of 'no amp' amp circuit
+  A3  = Filtered Vc of both amp circuits (yes, single point of failure for both amps)
+  A5  = Filtered Vo of 'amp' amp circuit
+  D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
+  D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
+  D6  = Y-C of DS18 for Tbatt and 4k7 3v3 jumper pullup
+  VIN = 5V Rail 1A maximum from 7805CT home-made 12-->5 V regulator
+  3v3 = 3v3 rail out supply to common of amp circuits, supply of OPA333, and R-OLED
+  micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm)
+  USB  = 5v supply to VC-HC-06, R-1-wire
+  TX  = RX of HC-06
+  RX  = TX of HC-06
+  D0-SDA = SDA-47L16 EERAM, Y-OLED
+  D1-SCL = SCL-47L16 EERAM, B-OLED
+
+### EERAM for Argon (47L16)
+
+  V+   = 5v rail
+  Vcap = Cap 106 10uF to Gnd rail.  Storage that powers EEPROM save on power loss
+  V-   = Gnd rail
+  SDA  = D0-SDA of Device
+  SCL  = D1-SCL of Device
 
 ### 1-wire Temp (MAXIM DS18B20)  library at "https://github.com/particle-iot/OneWireLibrary"
 
-  Y-C   = Photon D6
-  R-VDD = 5V Rail
+  Y-C   = Device D6
+  R-VDD = 3V3 Rail
   B-GND = GND Rail
 
 ### Display SSD1306-compatible OLED 128x32
@@ -169,16 +220,24 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   Code from Adafruit SSD1306 library
   1-GND = Gnd
   2-VCC = 3v3
-  3-SCL = Photon D1
-  4-SDA = Photon D0
+  3-SCL = Device D1-SCL
+  4-SDA = Device D0-SDA
 
 ### Shunt 75mv = 100A
 
-  Use custom box that contains Shunt as junction box to obtain 12v, Gnd, Vshunts
-  1-12v
-  2-Gnd
-  3-Yellow shunt high
-  4-Green shunt low
+  Use custom harness that contains Shunt as junction box to obtain 12v, Gnd, Vshunts
+  R-12v
+  B-Gnd
+  Y-Yellow shunt high
+  G-Green shunt low
+
+### HC-06 Bluetooth Module
+
+  Attach directly to 5V and TX/RX
+  VC  = 5v rail
+  GND = Gnd rail
+  TX  = RX of Device
+  RX  = TX of Device
 
 ## FAQ
 
