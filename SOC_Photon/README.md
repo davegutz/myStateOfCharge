@@ -99,7 +99,26 @@ Temperature correction in ambient range is about BATT_DVOC_DT=0.001875 V/deg C f
 
 The ADS module is delicate (ESD and handling).   I burned one out by
 accidentally touching terminals to back of OLED board.   I now mount the
-OLED board carefully off to the side.   Will need a hobby box to contain the final device.
+OLED board carefully off to the side.   Will need a hobby box to contain the final device
+
+### Particle Argon Device - assumed at least 1A max
+
+  GND = to 2 GND rails
+  A1  = L of 20k ohm from 12v and H of 4k7 ohm + 47uF to ground
+  A3  = Filtered Vo of 'no amp' amp circuit
+  A3  = Filtered Vc of both amp circuits (yes, single point of failure for both amps)
+  A5  = Filtered Vo of 'amp' amp circuit
+  D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
+  D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
+  D6  = Y-C of DS18 for Tbatt and 4k7 3v3 jumper pullup
+  VIN = 5V Rail 1A maximum from 7805CT home-made 12-->5 V regulator
+  3v3 = 3v3 rail out supply to common of amp circuits, supply of OPA333, and R-OLED
+  micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm).   There is sufficient power in Particle devices to power the peripherals of this project on USB only
+  USB  = 5v supply to VC-HC-06, R-1-wire
+  TX  = RX of HC-06
+  RX  = TX of HC-06
+  D0-SDA = SDA-47L16 EERAM, Y-OLED
+  D1-SCL = SCL-47L16 EERAM, B-OLED
 
 ### Voltage regulator (LM7805)
 
@@ -117,43 +136,6 @@ OPA333 10uF high cap interacts with 1uF filter cap.  The Vb filter is a little m
 Goal of filter design is 2*pi r/s = 1 hz -3dB bandwidth.  Large PWM inverter noise from system enters at 60 Hz.
 SOC calculation is equivalently a very slow time constant (integrator) so filter is between noise and usage.
 
-
-### ASD 1013 12-bit, ****Photon Alpha configuration only
-
-- HiLetgo ADS1015 12 Bit Analog to Digital Development Board ADC Converter Module ADC Development Board for Arduino
-  $8.29 in Aug 2021
-  I2C used.
-  Code from Adafruit ADS1X15 library.   Differential = A0-A1
-  1-V 3v3
-  2-G = Gnd
-  3-SCL = Photon D1
-  4-SDA  = Photon D0
-  5-ADDR = NC
-  6-ALERT = NC
-  7-A0 = Green from shunt lpf via 10k Resistor
-  8-A1 = Yellow from shunt lpf via 10k Resistor
-  9-A2 = NC
-  10-A3 = NC
-
-### PHOTON ALPHA ONLY *****ASD 1013 12-bit Amplified with OPA333 my custom board.   Avoids using negative absolute voltages on inputs - centers on 3v3 / 2
-
-- HiLetgo ADS1015 12 Bit Analog to Digital Development Board ADC Converter Module ADC Development Board for Arduino
-  $8.29 in Aug 2021
-  I2C used.
-  Code from Adafruit ADS1X15 library.   Differential = A0-A1
-  Ti OPA333 Used.   $11.00 for 5 Amazon OPA333AIDBVR SOT23-5 mounted on SOT23-6
-  No special code for OPA.  Hardware only.   Pre-amp for ADC 5:1.
-  1-V 3v3:  0.1uF to ground for transient power draws of the ADC
-  2-G = Gnd
-  3-SCL = Photon D1
-  4-SDA  = Photon D0
-  5-ADDR = 3v3
-  6-ALERT = NC
-  7-A0 = Green from shunt
-  8-A1 = Yellow from shunt
-  9-A2 = NC
-  10-A3 = NC
-
 ### Amp ciruit 'amp'
 
   Ti OPA333.  Vc formed by 2x 4k7 voltage divider on 3v3 rail to ground.  A4 to A3 and A5 with 106 10uF high cap.
@@ -168,45 +150,6 @@ SOC calculation is equivalently a very slow time constant (integrator) so filter
 
   For Argon Beta config, identical to 'amp' Amp circuit except A3 instead of A5.   Vc common to both amps (single failure point)
   For Photon Alpha, direct feed to ADS-1013 and no OPA333
-
-### Particle Photon Device 1A max
-
-- Particle Photon boards have 9 PWM pins: D0, D1, D2, D3, A4, A5, WKP, RX, TX
-  GND = to 2 GND rails
-  A1  = L of 20k ohm from 12v and H of 4k7 ohm + 47uF to ground
-  A3  = H of 'no amp' amp circuit
-  A3  = 8k2/1uF filter of of Vc of both amp circuits (yes, single point of failure for both amps)
-  A5  = H of 'amp' amp circuit
-  D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
-  D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
-  D6  = Y-C of DS18 for Tbatt and 4k7 3v3 jumper pullup
-  VIN = 5V Rail 1A maximum from 7805CT home-made 12-->5 V regulator
-  3v3 = 3v3 rail out supply to common of amp circuits, supply of OPA333, and R-OLED
-  micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm)
-  5v  = supply to VC-HC-06, R-1-wire
-  TX  = RX of HC-06
-  RX  = TX of HC-06
-  SDA = SDA-ADS-1013 amp, SDA-ADS-1013 no amp, Y-OLED
-  SCL = SCL-ADS-1013 amp, SCL-ADS-1013 no amp, B-OLED
-
-### Particle Argon Device - assumed at least 1A max
-
-  GND = to 2 GND rails
-  A1  = L of 20k ohm from 12v and H of 4k7 ohm + 47uF to ground
-  A3  = Filtered Vo of 'no amp' amp circuit
-  A3  = Filtered Vc of both amp circuits (yes, single point of failure for both amps)
-  A5  = Filtered Vo of 'amp' amp circuit
-  D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
-  D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
-  D6  = Y-C of DS18 for Tbatt and 4k7 3v3 jumper pullup
-  VIN = 5V Rail 1A maximum from 7805CT home-made 12-->5 V regulator
-  3v3 = 3v3 rail out supply to common of amp circuits, supply of OPA333, and R-OLED
-  micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm)
-  USB  = 5v supply to VC-HC-06, R-1-wire
-  TX  = RX of HC-06
-  RX  = TX of HC-06
-  D0-SDA = SDA-47L16 EERAM, Y-OLED
-  D1-SCL = SCL-47L16 EERAM, B-OLED
 
 ### EERAM for Argon (47L16)
 
@@ -247,6 +190,45 @@ SOC calculation is equivalently a very slow time constant (integrator) so filter
   TX  = RX of Device
   RX  = TX of Device
 
+### ASD 1013 12-bit PHOTON ALPHA ONLY *****Amplified with OPA333 my custom board.   Avoids using negative absolute voltages on inputs - centers on 3v3 / 2
+
+- HiLetgo ADS1015 12 Bit Analog to Digital Development Board ADC Converter Module ADC Development Board for Arduino
+  $8.29 in Aug 2021
+  I2C used.
+  Code from Adafruit ADS1X15 library.   Differential = A0-A1
+  Ti OPA333 Used.   $11.00 for 5 Amazon OPA333AIDBVR SOT23-5 mounted on SOT23-6
+  No special code for OPA.  Hardware only.   Pre-amp for ADC 5:1.
+  1-V 3v3:  0.1uF to ground for transient power draws of the ADC
+  2-G = Gnd
+  3-SCL = Photon D1
+  4-SDA  = Photon D0
+  5-ADDR = 3v3
+  6-ALERT = NC
+  7-A0 = Green from shunt
+  8-A1 = Yellow from shunt
+  9-A2 = NC
+  10-A3 = NC
+
+### Particle Photon Device 1A max PHOTON ALPHA
+
+- Particle Photon boards have 9 PWM pins: D0, D1, D2, D3, A4, A5, WKP, RX, TX
+  GND = to 2 GND rails
+  A1  = L of 20k ohm from 12v and H of 4k7 ohm + 47uF to ground
+  A3  = H of 'no amp' amp circuit
+  A3  = 8k2/1uF filter of of Vc of both amp circuits (yes, single point of failure for both amps)
+  A5  = H of 'amp' amp circuit
+  D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
+  D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
+  D6  = Y-C of DS18 for Tbatt and 4k7 3v3 jumper pullup
+  VIN = 5V Rail 1A maximum from 7805CT home-made 12-->5 V regulator
+  3v3 = 3v3 rail out supply to common of amp circuits, supply of OPA333, and R-OLED
+  micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm).   There is sufficient power in Particle devices to power the peripherals of this project on USB only
+  5v  = supply to VC-HC-06, R-1-wire
+  TX  = RX of HC-06
+  RX  = TX of HC-06
+  SDA = SDA-ADS-1013 amp, SDA-ADS-1013 no amp, Y-OLED
+  SCL = SCL-ADS-1013 amp, SCL-ADS-1013 no amp, B-OLED
+
 ## FAQ
 
 ### Problem:  CLI starts acting funny:  cannot login, gives strange errors ("cannot find module semver")
@@ -273,7 +255,7 @@ SOC calculation is equivalently a very slow time constant (integrator) so filter
 
 ### Problem:  Messages from devices:  "HTTP error 401 from ... - The access token provided is invalid."
 
-  This means you haven't signed into the particle cloud during this session.   Go to "Welcome to Particle Workbench" and click on "LOGIN."   Enter username and password for particle.io.  Usually hit enter for the 6-digit code - unless you set one up.
+  This means you haven't signed into the particle cloud during this session.   May proceed anyway.   If want message to go away, go to "Welcome to Particle Workbench" and click on "LOGIN."   Enter username and password for particle.io.  Usually hit enter for the 6-digit code - unless you set one up.
 
 ### Problem:  Hiccups in Arduino plots
 
@@ -285,11 +267,11 @@ SOC calculation is equivalently a very slow time constant (integrator) so filter
 
 ### Problem:  The EKF crashes to zero after some changes to operating conditions
 
-  You may temporarily fix this by running software reset talk ('Rs').   Permanently - work on the EKF to make it more robust.
+  You may temporarily fix this by running software reset talk ('Rs').   Permanently - work on the EKF to make it more robust.  One long term fix found to be running it with slower update time.
 
 ### Problem:  The application overflows APP_FLASH on compilation
 
-  Too much text being stored by Serial.printf statements.
+  Too much text being stored by Serial.printf statements.   May temporarily co-exist with the limit by reducinig NSUM summary memory size.
 
 ### Problem:  'Insufficient room for heap.' or 'Insufficient room for .data and .bss sections!' on compilation, or flashing red lights after flash
 
@@ -305,7 +287,9 @@ SOC calculation is equivalently a very slow time constant (integrator) so filter
 
 ### Problem:  cTime very long.  If look at year, it is 1999.
 
-  The VBAT battery died or was disconnected.  Restore the battery.  Connect the photon to the network.   Use Particle app on phone to connect it to wifi at least once.
+  The Photon ALPHA VBAT battery died or was disconnected.  Restore the battery.  Connect the photon to the network.   Use Particle app on phone to connect it to wifi at least once.
+
+  The Argon device hasn't synchronized since last power up.   Connect to wifi.  It is most convenient to setup the Argon devices' default wifi to be your phone running hotspot.   Then just do Particle setup from the phone - start and exit.   TODO:  may be possible to save time information to the Argon EERAM.
 
 ### Problem:  Tbh = Tbm in display 'Pf' (print faults)
 
