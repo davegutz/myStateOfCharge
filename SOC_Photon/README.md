@@ -101,15 +101,24 @@ The ADS module is delicate (ESD and handling).   I burned one out by
 accidentally touching terminals to back of OLED board.   I now mount the
 OLED board carefully off to the side.   Will need a hobby box to contain the final device.
 
-### Voltage regulator
+### Voltage regulator (LM7805)
 
-I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on 7805CT device with capacitors.
+LM7805CT device with capacitors and LPF for Vb and 5v.   Voltage divider series resistors (24k7) to ground combine
+with 0.33 uF cap to make LPF filter same bandwidth as Ib shunt LPF.
+Vc  = 12v, 20k/4k7 divider to Gnd rail, and 0.33uF to Gnd rail
+GND = Gnd rail
+Vo  = 5v rail
 
-### Passive shunt low pass filter (LPF)
+### Passive Ib shunt and Vb low pass filters (LPF)
 
-1 Hz LPF built into board
+1 Hz LPF built into board.
+Use pSpice circuit model (SOC_photon/datasheets/opa333_asd1013_5beta.asc) to verify filters because
+OPA333 10uF high cap interacts with 1uF filter cap.  The Vb filter is a little more straightforward and same goals.
+Goal of filter design is 2*pi r/s = 1 hz -3dB bandwidth.  Large PWM inverter noise from system enters at 60 Hz.
+SOC calculation is equivalently a very slow time constant (integrator) so filter is between noise and usage.
 
-### ASD 1015 12-bit
+
+### ASD 1013 12-bit, ****Photon Alpha configuration only
 
 - HiLetgo ADS1015 12 Bit Analog to Digital Development Board ADC Converter Module ADC Development Board for Arduino
   $8.29 in Aug 2021
@@ -126,7 +135,7 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
   9-A2 = NC
   10-A3 = NC
 
-### PHOTON ONLY *****ASD 1013 12-bit Amplified with OPA333 my custom board.   Avoids using negative absolute voltages on inputs - centers on 3v3 / 2
+### PHOTON ALPHA ONLY *****ASD 1013 12-bit Amplified with OPA333 my custom board.   Avoids using negative absolute voltages on inputs - centers on 3v3 / 2
 
 - HiLetgo ADS1015 12 Bit Analog to Digital Development Board ADC Converter Module ADC Development Board for Arduino
   $8.29 in Aug 2021
@@ -147,12 +156,11 @@ I salvaged a prototype 12-->5 VDC regulator from OBDII project.   It is based on
 
 ### Amp ciruit 'amp'
 
-  Ti OPA333.  Vc formed by 2x 4k7 voltage divider on 3v3 rail to ground.  A4 to A3 and A5 with 106 10uF high cap
-  Use pSpice circuit model (SOC_photon/datasheets/opa333_asd1013_5beta.asc) to verify filters because 10uF cap interacts with 1uF cap.
-  Goal of filter design is 2*pi r/s = 1 hz -3dB bandwidth.
+  Ti OPA333.  Vc formed by 2x 4k7 voltage divider on 3v3 rail to ground.  A4 to A3 and A5 with 106 10uF high cap.
+  See notes about 'LPF'
   V+   = 3v3 rail
   V-   = Gnd rail
-  Vo   = 8k2/1uF filter to A5 of device, 98k to pin+
+  Vo   = 8k2/1uF LPF to A5 of device, 98k to pin+
   pin- = 5k1 of G-Shunt
   pin+ = 98k of Vc, 98k of Vo, and 5k1 of Y-Shunt
 
