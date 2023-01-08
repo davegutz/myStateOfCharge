@@ -26,9 +26,12 @@ const String unit = "soc0p_20221220";  // voc_stat
     #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)
 #endif
 #define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms
+#define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'Di'), A
 #define VOLT_BIAS             0.0   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
+#define VBATT_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
+#define VBATT_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
 #define VB_SCALE              1.0   // Scale Vb sensor (* 'SV')
 
 // Battery.  One 12 V 100 Ah battery bank would have RATED_BATT_CAP 100, NS 1, and NP 1

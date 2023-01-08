@@ -321,7 +321,7 @@ This is normal for temperature.   Modeled Tb is very simple = to a constant + bi
   4. CPU hard and soft resets must not change the state of operation, either soc, display, or serial bus.
   5. Serial streams shall have an absolute Julien-type time for easy plotting and comparison.
   6. Built-in test function, engaged using 'talk' function.
-  7. Load software using USB.  Wifi to truck will not be reliable.
+  7. Load software using USB.  Wifi to truck or phone (hotspot) may not be reliable.   Related requirement:  provide holes to press Particle Device buttons:  sometimes setup long-press needed or manual flash request needed with these devices.
   8. Likewise, monitor USB using laptop or phone.  'Talk' function should change serial monitor and inject signals for debugging.
   9. Device shall have no effect on system operation.   Monitor function only.
   10. Bluetooth serial interface required.  ***This did not work due to age of Android phone (6 yrs) not compatible with the latest bluetooth devices.

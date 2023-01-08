@@ -1,11 +1,10 @@
 {
     "extensions.ignoreRecommendations": true,
     "C_Cpp.default.configurationProvider": "particle.particle-vscode-core",
-    "cortex-debug.openocdPath": "${command:particle.getDebuggerOpenocdPath}",
     "files.associations": {
         "*.ino": "cpp"
     },
-    "particle.targetDevice": "pro",
-    "particle.firmwareVersion": "3.1.0",
+    "particle.targetDevice": "proto",
+    "particle.firmwareVersion": "3.3.1",
     "particle.targetPlatform": "photon"
 }

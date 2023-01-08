@@ -1,11 +1,8 @@
 /*
-There is a pushbutton near to the EN pin of Bluetooth Module. Press that button and hold. Then connect
-the Arduino Uno to computer. Then release the button.
-
 Then the LED on the Bluetooth Module start blinking with the inter well of 2 seconds.  This indicates
 now the Bluetooth Module in command mode.
 
-Next open the serial monitor on Arduino Uno. And set the baud rate as 38400 and set output mode to
+Next open the serial monitor on Arduino Uno. And set the baud rate as 9600 and set output mode to
 "Both NL & CR". (box near the baud rate).
 
 Here we use the AT commands. First type AT on the serial monitor and press send. You will see a OK message
@@ -14,14 +11,15 @@ when everything is fine.
 I am going to set my Bluetooth Module name as Hackster
 Type AT+NAME=Hackster and press Send. It will return a OK message.
 
-The default password of HC-05 is 1234. And here I am going to change it to 7806.
-
-Type AT+PSWD="7806" and press Send. Alternatively you can change it to any password. Password must be in
-double quotes. Otherwise you will get an error. Once it was fine, OK message will return.
 */
 
 // hc-06
 // https://mcuoneclipse.com/2013/06/19/using-the-hc-06-bluetooth-module/
+
+// SOC_Photon
+//  AT+BAUD8
+//  AT+NAMEsoc1a
+
 // AT+BAUD4;    OK9600
 // AT+BAUD8;    OK115200
 // AT+VERSION;  OKlinvorV1.8
@@ -43,8 +41,7 @@ AT+BAUDA 	OK460800 	Sets the baud rate to 460800
 AT+BAUDB 	OK921600 	Sets the baud rate to 921600
 AT+BAUDC 	OK1382400 	Sets the baud rate to 1382400
 
-HC-05
-AT;   OK
+
 
 
 */
@@ -52,20 +49,11 @@ AT;   OK
 // Make this selection!!!
 #undef HC05
 
-// For Photon
-#if (PLATFORM_ID==6)
-  #define PHOTON
-  //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
-  #include "application.h"  // Should not be needed if file ino or Arduino
-  SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
-  #include <Arduino.h>      // Used instead of Print.h - breaks Serial
-#else
-  #undef PHOTON
-  using namespace std;
-  #undef max
-  #undef min
-#endif
-
+// For Photon/Argon
+#define PHOTON
+#include "application.h"  // Should not be needed if file ino or Arduino
+SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
+#include <Arduino.h>      // Used instead of Print.h - breaks Serial
 
 void serialEvent();
 boolean string_complete = false;
@@ -75,7 +63,7 @@ void setup()
 {
   // put your setup code here, to run once:
   Serial.begin(9600);	/* Define baud rate for serial communication */
-  Serial1.begin(9600); /* Define baud rate for serial1 communication */
+  Serial1.begin(38400); /* Define baud rate for serial1 communication */
 }
 
 void loop()

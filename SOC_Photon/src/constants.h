@@ -41,23 +41,16 @@
 #define DISPLAY_USER_DELAY    1200UL    // User display update (1200UL = 1.2 sec)
 #define CONTROL_DELAY         100UL     // Control read wait, ms (100UL = 0.1 sec)
 #define SNAP_WAIT             10000UL   // Interval between fault snapshots (10000UL = 10 sec)
-#define GMT                   -5        // Enter time different to zulu (does not respect DST) (-5)
-#define USE_DST               1         // Whether to apply DST or not, 0 or 1 (1)
+#define GMT                   0         // Enter time different to zulu (does not respect DST) (0)
+#define USE_DST               0         // Whether to apply DST or not, 0 or 1 (0)
 #define TBATT_TEMPCAL         0.56      // Maxim 1-wire plenum temp sense calibrate (0.56), C
 #define MAX_TEMP_READS        10        // Number of consequetive temp queries allowed (10)
 #define TEMP_RANGE_CHECK      -5.       // Minimum expected temp reading, C (-5.)
 #define TEMP_RANGE_CHECK_MAX  70.       // Maximum allowed temp reading, C (70.)
-#define VBATT_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
-#define VBATT_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
 #define VBATT_S               1.017     // Vb sense scalar (1.017)
 #define VBATT_A               0.0       // Vb sense adder, V (0)
 #define PHOTON_ADC_COUNT      4096      // Photon ADC range, counts (4096)
 #define PHOTON_ADC_VOLT       3.3       // Photon ADC range, V (3.3)
-#if (PLATFORM_ID==6)  // Photon
-    #define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms
-#else
-    #define SHUNT_AMP_R2          98000.    // Amplifed shunt ADS resistance, ohms
-#endif
 #define SCREEN_WIDTH          128       // OLED display width, in pixels (128)
 #define SCREEN_HEIGHT         32        // OLED display height, in pixels (4)
 #define OLED_RESET            4         // Reset pin # (or -1 if sharing Arduino reset pin) (4)

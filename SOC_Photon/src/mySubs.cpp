@@ -137,7 +137,7 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
   uint8_t hours = Time.hour(*current_time);
 
   // Second Sunday Mar and First Sunday Nov; 2:00 am; crude DST handling
-  if ( USE_DST)
+  if ( USE_DST )
   {
     uint8_t dayOfWeek = Time.weekday(*current_time);     // 1-7
     if (  month>2   && month<12 &&
