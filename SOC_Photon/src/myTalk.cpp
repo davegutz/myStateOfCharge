@@ -805,6 +805,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf("Sig ( -1=noa, 0=auto, 1=amp,) set %d\n", sp.ib_select);
             break;
 
+          case ( 'U' ):  // U<>:  Unix time since epoch
+            Serial.printf("Time.now() %ld to ", Time.now());
+            Time.setTime((time_t)cp.input_string.substring(1).toInt());
+            Serial.printf("%ld\n", Time.now());
+            break;
+
           case ( 'v' ):  // v<>:  verbose level
             Serial.printf("sp.debug %d to ", sp.debug);
             sp.put_debug(cp.input_string.substring(1).toInt());
@@ -1248,6 +1254,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  RS= "); Serial.printf("SavedPars: Reinitialize saved\n");
 
   Serial.printf("\ns  curr select mode (-1=noa, 0=auto, 1=amp) = "); Serial.println(sp.ib_select);
+
+  Serial.printf(" \nU= "); Serial.printf("%ld", Time.now()); Serial.printf(": Unix time [auto when wifie]\n"); 
 
   Serial.printf("\nv= "); Serial.print(sp.debug); Serial.println(": verbosity, -128 - +128. [4]");
   Serial.printf("  -<>: Negative - Arduino plot compatible\n");
