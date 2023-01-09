@@ -82,6 +82,7 @@ public:
     float shunt_gain_sclr;  // Shunt gain scalar
     uint8_t sim_chm;        // Simulation battery chemistry type
     float Tb_bias_hdwe;     // Bias on Tb sensor, deg C
+    time_t time_now;        // Time now, Unix time since epoch
     uint8_t type;           // Injected waveform type.   0=sine, 1=square, 2=triangle
     float t_last;           // Updated value of battery temperature injection when sp.modeling_ and proper wire connections made, deg C
     float t_last_model;     // Battery temperature past value for rate limit memory, deg C
@@ -138,6 +139,7 @@ public:
         void get_sim_chm() { sim_chm = rP_->read(sim_chm_eeram_.a16); }
         void get_s_cap_model() { float value; rP_->get(s_cap_model_eeram_.a16, value); s_cap_model = value; }
         void get_Tb_bias_hdwe() { float value; rP_->get(Tb_bias_hdwe_eeram_.a16, value); Tb_bias_hdwe = value; }
+        void get_time_now() { time_t value; rP_->get(time_now_eeram_.a16, value); time_now = value; Time.setTime(value); }
         void get_type() { type = rP_->read(type_eeram_.a16); }
         void get_t_last() { float value; rP_->get(t_last_eeram_.a16, value); t_last = value; }
         void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model = value; }
@@ -194,6 +196,7 @@ public:
         void put_sim_chm() {}
         void put_s_cap_model(const float input) { s_cap_model = input; }
         void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe = input; }
+        void put_time_now(const time_t input) { time_now = input; }
         void put_type(const uint8_t input) { type = input; }
         void put_t_last(const float input) { t_last = input; }
         void put_t_last() {}
@@ -235,6 +238,7 @@ public:
         void put_sim_chm() { rP_->write(sim_chm_eeram_.a16, sim_chm); }
         void put_s_cap_model(const float input) { rP_->put(s_cap_model_eeram_.a16, input); s_cap_model = input; }
         void put_Tb_bias_hdwe(const float input) { rP_->put(Tb_bias_hdwe_eeram_.a16, input); Tb_bias_hdwe = input; }
+        void put_time_now(const time_t input) { rP_->put(time_now_eeram_.a16, input); time_now = input; Time.setTime(time_now); }
         void put_type(const uint8_t input) { rP_->write(type_eeram_.a16, input); type = input; }
         void put_t_last(const float input) { rP_->put(t_last_eeram_.a16, input); t_last = input; }
         void put_t_last() { rP_->put(t_last_eeram_.a16, t_last); }
@@ -276,6 +280,7 @@ protected:
         address16b sim_chm_eeram_;
         address16b s_cap_model_eeram_;
         address16b Tb_bias_hdwe_eeram_;
+        address16b time_now_eeram_;
         address16b type_eeram_;
         address16b t_last_eeram_;
         address16b t_last_model_eeram_;

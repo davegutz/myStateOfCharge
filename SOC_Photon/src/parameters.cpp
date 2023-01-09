@@ -74,6 +74,7 @@ SavedPars::SavedPars(SerialRAM *ram)
         sim_chm_eeram_.a16 =  next_;  next_ += sizeof(sim_chm);
         s_cap_model_eeram_.a16 = next_;  next_ += sizeof(s_cap_model);
         Tb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Tb_bias_hdwe);
+        time_now_eeram_.a16 = next_; next_ += sizeof(time_now);
         type_eeram_.a16 =  next_;  next_ += sizeof(type);
         t_last_eeram_.a16 =  next_;  next_ += sizeof(t_last);
         t_last_model_eeram_.a16 =  next_; next_ += sizeof(t_last_model);
@@ -128,6 +129,7 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(sim_chm, uint8_t(0), uint8_t(10)) ||
         is_val_corrupt(s_cap_model, float(0.), float(1000.)) ||
         is_val_corrupt(Tb_bias_hdwe, float(-500.), float(500.)) ||
+        // is_val_corrupt(time_now, 0UL, 0UL) ||
         is_val_corrupt(type, uint8_t(0), uint8_t(10)) ||
         is_val_corrupt(t_last, float(-10.), float(70.)) ||
         is_val_corrupt(t_last_model, float(-10.), float(70.)) ||
@@ -170,6 +172,7 @@ boolean SavedPars::is_corrupt()
         get_sim_chm();
         get_s_cap_model();
         get_Tb_bias_hdwe();
+        get_time_now();
         get_type();
         get_t_last();
         get_t_last_model();
@@ -192,6 +195,7 @@ int SavedPars::num_diffs()
     // if ( int(-1) != iflt )    //     n++;
     // if ( int(-1) != isum )    //     n++;
     // if ( uint8_t(0) != preserving )    //     n++;
+    // if ( 0UL < time_now ) n++;
     if ( float(0.) != amp ) n++;
     if ( float(1.) != cutback_gain_sclr ) n++;
     if ( int(0) != debug ) n++;
@@ -269,6 +273,7 @@ void SavedPars::pretty_print(const boolean all)
     if ( all || SIM_CHEM != sim_chm )           Serial.printf(" sim chem            %d          %d *Bs<>\n", SIM_CHEM, sim_chm);
     if ( all || float(1.) != s_cap_model )      Serial.printf(" s_cap_model%7.3f  %7.3f *Sc<>\n", 1., s_cap_model);
     if ( all || float(TEMP_BIAS) != Tb_bias_hdwe )      Serial.printf(" Tb_bias_hdwe%7.3f  %7.3f *Dt<> dg C\n", TEMP_BIAS, Tb_bias_hdwe);
+    if ( all )                                  Serial.printf(" time_now %d %s *U<> Unix time\n", (int)Time.now(), Time.timeStr().c_str());
     if ( all || uint8_t(0) != type )            Serial.printf(" type inj %d  %d *Xt<> 1=sin, 2=sq, 3=tri, 4=1C, 5=-1C, 8=cos\n", 0, type);
     if ( all )                                  Serial.printf(" t_last %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last);
     if ( all )                                  Serial.printf(" t_last_sim %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_model);
@@ -353,6 +358,10 @@ void SavedPars::put_all_dynamic()
 
         case ( 6 ):
             put_t_last_model();
+            break;
+
+        case ( 7 ):
+            put_time_now(Time.now());  // If happen to connect to wifi (assume updated automatically), save new time
             blink = 0;
             break;
 

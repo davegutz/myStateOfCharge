@@ -161,11 +161,11 @@ void Shunt::convert(const boolean disconnect)
 // Sample amplifier Vo-Vc
 void Shunt::sample(const boolean reset_loc, const float T)
 {
-  Vc_raw_ = analogRead(vc_pin_);
-  Vc_ =  float(Vc_raw_)*VC_CONV_GAIN;
-  Vo_raw_ = analogRead(vo_pin_);
   sample_time_z_ = sample_time_;
+  Vc_raw_ = analogRead(vc_pin_);
   sample_time_ = millis();
+  Vo_raw_ = analogRead(vo_pin_);
+  Vc_ =  float(Vc_raw_)*VC_CONV_GAIN;
   Vo_ =  float(Vo_raw_)*VO_CONV_GAIN;
   Vo_Vc_ = Vo_ - Vc_;
 }
@@ -679,8 +679,8 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, float *
   this->T = T;
   this->T_filt = T;
   this->T_temp = T_temp;
-  this->ShuntAmp = new Shunt("Amp", 0x49, &cp.ib_tot_bias_amp, &sp.ib_scale_amp, SHUNT_AMP_GAIN, &sp.shunt_gain_sclr, pins->Vc_pin, pins->Vom_pin);
-  this->ShuntNoAmp = new Shunt("No Amp", 0x48, &cp.ib_tot_bias_noa, &sp.ib_scale_noa, SHUNT_NOA_GAIN, &sp.shunt_gain_sclr, pins->Vc_pin, pins->Von_pin);
+  this->ShuntAmp = new Shunt("Amp", 0x49, &cp.ib_tot_bias_amp, &sp.ib_scale_amp, SHUNT_AMP_GAIN, &sp.shunt_gain_sclr, pins->Vcm_pin, pins->Vom_pin);
+  this->ShuntNoAmp = new Shunt("No Amp", 0x48, &cp.ib_tot_bias_noa, &sp.ib_scale_noa, SHUNT_NOA_GAIN, &sp.shunt_gain_sclr, pins->Vcn_pin, pins->Von_pin);
   this->SensorTb = new TempSensor(pins->pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
   this->TbSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
   this->Sim = new BatterySim(&sp.delta_q_model, &sp.t_last_model, &sp.s_cap_model, &sp.sim_chm, &sp.hys_scale);
