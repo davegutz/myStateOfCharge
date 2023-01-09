@@ -441,6 +441,7 @@ Throughput test
 	- Behavior goes with R/Q.   Could retune R 2x and Q 2x and get same result.
 47. Shunt sampling:
   The ADS devices are really ugly.  Their main advantage is differential input for low noise, good resolution.   But they're expensive ($30 total), take up a lot of room, and use ALL the throughput.   We're not limited by throughput fortunately but just barely.  An equivalent solution is to increase the OpAmp333 gain by 5x then use the A-pins on the particle devices to sample the output of the OpAmp and the reference voltages separately.  (A0 and A1 of the former ADS - but remove the ADS.)   The main disadvantage of the OpAmps are noise so over-sample and filter them digitally.   The performance of the filtered high gain signals should be equal to the diffential ADS devices but I didn't do a study.   There is virtually no sample time hit for A-pin calls (<1 ms total for 2).
+48. A good idea to combine the analog commons into one feedback at A4 bit the dust because circuit analysis using LTSpice showed frequency response of shared common rolls off much more quickly due to 2x current in shared circuit.  Also makes a single point of failure.    These two reasons led to 2 analog inputs used for each current feedback, to create a differential.  The difference is done in logic because the Particle devices do not have differential hardware inputs.
 
 ## Full regression suite:
 # All these must self initialize
