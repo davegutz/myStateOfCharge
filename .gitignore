@@ -42,3 +42,4 @@ SOC_Photon/py/.idea/py.iml
 eeprom_test/src/eeprom_test.cpp
 SOC_Photon/src/SOC_Photon.cpp
 SOC_Photon/src/SOC_Photon.cpp
+*.odt#
