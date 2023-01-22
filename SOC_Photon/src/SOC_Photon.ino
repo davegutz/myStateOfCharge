@@ -50,8 +50,13 @@
 //
 // See README.md
 */
-#include "constants.h"
+// This works when I'm using two platforms:   PHOTON = 6 and ARGON = 12
+#ifndef PLATFORM_ID
+  #define PLATFORM_ID 12
+#endif
+#define PLATFORM_ARGON 12
 
+#include "constants.h"
 
 // Dependent includes.   Easier to sp.debug code if remove unused include files
 #include "mySync.h"
@@ -60,12 +65,6 @@
 #include "myCloud.h"
 #include "debug.h"
 #include "parameters.h"
-
-// This works when I'm using two platforms:   PHOTON = 6 and ARGON = 12
-#ifndef PLATFORM_ID
-  #define PLATFORM_ID 12
-#endif
-#define PLATFORM_ARGON 12
 
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status

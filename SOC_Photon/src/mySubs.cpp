@@ -431,7 +431,14 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   display->display();
 
   // Text basic Bluetooth (use serial bluetooth app)
-  if ( sp.debug!=4 && sp.debug!=-2 )
+  if ( sp.debug==99 ) // Calibration mode
+  {
+    Serial.printf("Tb, Vb, imh, inh, Dc, SA, DA, SB, DB = %7.2fdeg C, %7.3fv, %7.3fA, %7.3fA || %7.3fv  ||  %7.3f, %7.3fA || %7.3f, %7.3fA,\n",
+    Sen->Tb_hdwe, Sen->Vb_hdwe, Sen->Ib_amp_hdwe, Sen->Ib_noa_hdwe, sp.Vb_bias_hdwe, sp.ib_scale_amp, sp.Ib_bias_amp, sp.ib_scale_noa, sp.Ib_bias_noa);
+    Serial1.printf("Tb, Vb, imh, inh, Dc, SA, DA, SB, DB = %7.2fdeg C, %7.3fv, %7.3fA, %7.3fA || %7.3fv  ||  %7.3f, %7.3fA || %7.3f, %7.3fA,\n",
+    Sen->Tb_hdwe, Sen->Vb_hdwe, Sen->Ib_amp_hdwe, Sen->Ib_noa_hdwe, sp.Vb_bias_hdwe, sp.ib_scale_amp, sp.Ib_bias_amp, sp.ib_scale_noa, sp.Ib_bias_noa);
+  }
+  else if ( sp.debug!=4 && sp.debug!=-2 )
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
       disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
 

@@ -1281,6 +1281,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   // Serial.printf("  v78: Batt model sat\n");
   // Serial.printf("  v79: sat_ib model\n");
   // Serial.printf("  v96: CC sat\n");
+  Serial.printf("  v99: calibration\n");
 
   Serial.printf("\nV<?> - VOC(SOC) curve deltas\n");
   Serial.printf(" VM= "); Serial.printf("%6.3f", Mon->dv_voc_soc()); Serial.println(": Mon vsoc out, V [0]"); 

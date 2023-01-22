@@ -13,15 +13,15 @@ const String unit = "soc0p_20221220";  // voc_stat
 // Sensor biases
 #define USE_ADS                 // Instead of using ADS device to read amp by I2C, use analog pins
 #ifdef USE_ADS
-    #define CURR_BIAS_AMP         -0.94 // Calibration of amplified shunt sensor (* 'DA'), A
-    #define CURR_SCALE_AMP        0.984 // Hardware to match data (* 'SB')
-    #define CURR_BIAS_NOA         -0.17 // Calibration of non-amplified shunt sensor (* 'DB'), A
-    #define CURR_SCALE_NOA        1.033 // Hardware to match data (* 'SA')
-    #define SHUNT_GAIN            -1333.// Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)
+    #define CURR_BIAS_AMP         0.94  // Calibration of amplified shunt sensor (* 'DA'), A
+    #define CURR_SCALE_AMP        0.980 // Hardware to match data (* 'SA')
+    #define CURR_BIAS_NOA         0.1   // Calibration of non-amplified shunt sensor (* 'DB'), A
+    #define CURR_SCALE_NOA        0.958 // Hardware to match data (* 'SB')
+    #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)
 #else
     #define CURR_BIAS_AMP         0.0   // Calibration of amplified shunt sensor (* 'DA'), A
-    #define CURR_SCALE_AMP        1.0   // Hardware to match data (* 'SB')
-    #define CURR_BIAS_NOA         0.0   // Calibration of amplified shunt sensor (* 'DA'), A
+    #define CURR_SCALE_AMP        1.0   // Hardware to match data (* 'SA')
+    #define CURR_BIAS_NOA         0.0   // Calibration of amplified shunt sensor (* 'DB'), A
     #define CURR_SCALE_NOA        1.0   // Hardware to match data (* 'SB')
     #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)
 #endif
