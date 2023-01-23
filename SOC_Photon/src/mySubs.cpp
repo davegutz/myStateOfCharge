@@ -276,11 +276,20 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   // Call calculate/count_coulombs twice because sat_ is a used-before-calculated (UBC)
   // Simple 'call twice' method because sat_ is discrete not analog which would require iteration
   Mon->calculate(Sen, true);
-  Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), 0.);
-  Mon->calculate(Sen, true);  // Call again because sat is a UBC
+  #ifdef DEBUG_INIT
+    if ( sp.debug==-1 ){ Serial.printf("M.calc1:"); debug_m1(Mon, Sen);}
+  #endif
   Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), 0.);
   #ifdef DEBUG_INIT
-    if ( sp.debug==-1 ){ Serial.printf("M.c_c:"); debug_m1(Mon, Sen);}
+    if ( sp.debug==-1 ){ Serial.printf("M.c_c1:"); debug_m1(Mon, Sen);}
+  #endif
+  Mon->calculate(Sen, true);  // Call again because sat is a UBC
+  #ifdef DEBUG_INIT
+    if ( sp.debug==-1 ){ Serial.printf("M.calc2:"); debug_m1(Mon, Sen);}
+  #endif
+  Mon->count_coulombs(0., true, Mon->t_last(), 0., Mon->is_sat(true), 0.);
+  #ifdef DEBUG_INIT
+    if ( sp.debug==-1 ){ Serial.printf("M.c_c2:"); debug_m1(Mon, Sen);}
   #endif
   
   // Solve EKF

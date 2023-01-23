@@ -3,7 +3,7 @@
 /******************************************************/
 
 #include "Particle.h"
-#line 1 "c:/Users/daveg/OneDrive/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 1 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
 /*
  * Project SOC_Photon
   * Description:
@@ -59,7 +59,7 @@
 // This works when I'm using two platforms:   PHOTON = 6 and ARGON = 12
 void setup();
 void loop();
-#line 54 "c:/Users/daveg/OneDrive/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 54 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
 #ifndef PLATFORM_ID
   #define PLATFORM_ID 12
 #endif
@@ -457,19 +457,7 @@ void loop()
 
   // Initialize complete once sensors and models started and summary written
   if ( read ) reset = false;
-  #ifdef DEBUG_INIT
-    if ( sp.debug==-1 )
-    {
-      if ( read ) Serial.printf("before read read_temp, elapsed, reset_temp %d %d %ld %d\n", read, read_temp, elapsed, reset_temp);
-    }
-  #endif
   if ( read_temp && elapsed>TEMP_INIT_DELAY ) reset_temp = false;
-  #ifdef DEBUG_INIT
-    if ( sp.debug==-1 )
-    {
-      if ( read ) Serial.printf("after read read_temp, elapsed, reset_temp %d %d %ld %d\n", read, read_temp, elapsed, reset_temp);
-    }
-  #endif
   if ( cp.publishS ) reset_publish = false;
 
   // Soft reset

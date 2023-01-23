@@ -448,19 +448,7 @@ void loop()
 
   // Initialize complete once sensors and models started and summary written
   if ( read ) reset = false;
-  #ifdef DEBUG_INIT
-    if ( sp.debug==-1 )
-    {
-      if ( read ) Serial.printf("before read read_temp, elapsed, reset_temp %d %d %ld %d\n", read, read_temp, elapsed, reset_temp);
-    }
-  #endif
   if ( read_temp && elapsed>TEMP_INIT_DELAY ) reset_temp = false;
-  #ifdef DEBUG_INIT
-    if ( sp.debug==-1 )
-    {
-      if ( read ) Serial.printf("after read read_temp, elapsed, reset_temp %d %d %ld %d\n", read, read_temp, elapsed, reset_temp);
-    }
-  #endif
   if ( cp.publishS ) reset_publish = false;
 
   // Soft reset
