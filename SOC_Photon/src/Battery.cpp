@@ -823,13 +823,13 @@ float BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Battery
     }
     float temp_lim = max(min(Sen->Tb, *sp_t_last_ + T_RLIM*Sen->T), *sp_t_last_ - T_RLIM*Sen->T);
     
-    // Saturation.   Goal is to set q_capacity and hold it so remember last saturation status
+    // Saturation and re-init.   Goal is to set q_capacity and hold it so remember last saturation status
     // But if not modeling in real world, set to Monitor when Monitor saturated and reset_temp to EKF otherwise
     static boolean reset_temp_past = reset_temp;   // needed because model called first in reset_temp path; need to pick up latest
-    if ( !sp.mod_vb() )  // Real world
+    if ( !sp.mod_vb() )  // Real world init to track Monitor
     {
-        if ( Mon->sat() ) apply_delta_q(Mon->delta_q());
-        else if ( reset_temp_past && !cp.fake_faults ) apply_delta_q(Mon->delta_q_ekf());  // Solution to boot up unsaturated
+        if ( Mon->sat() || reset_temp_past )
+            apply_delta_q(Mon->delta_q());
     }
     else if ( model_saturated_ )  // Modeling initializes on reset_temp to Tb=RATED_TEMP
     {

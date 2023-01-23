@@ -201,8 +201,12 @@ int16_t Adafruit_ADS1X15::readADC_Differential_0_1(const String name) {
   uint16_t count = 1;
   while ( !conversionComplete() && ++count<count_max )
     ;
-  if ( count==count_max && sp.debug>0 ) Serial.printf("WARNING(readADC_Differential_0_1)%s:  timed out hardcoded count limit**********************\n", name.c_str());
-
+  static uint8_t yaks = 0;
+  if ( count==count_max )
+  {
+    if( ++yaks==1 && sp.debug>0 ) Serial.printf("WARNING(readADC_Differential_0_1)%s:  timed out hardcoded count limit**********************\n", name.c_str());
+  }
+  if ( yaks >= 50 )  yaks = 0;
   // Read the conversion results
   return getLastConversionResults();
 }
