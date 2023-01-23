@@ -38,6 +38,6 @@
     },
     "particle.firmwareVersion": "3.3.1",
     "particle.targetPlatform": "photon",
-    "particle.targetDevice": "proto",
+    "particle.targetDevice": "soc0p",
     "C_Cpp.errorSquiggles": "disabled"
 }

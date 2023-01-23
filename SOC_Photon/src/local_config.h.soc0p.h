@@ -13,10 +13,10 @@ const String unit = "soc0p_20221220";  // voc_stat
 // Sensor biases
 #define USE_ADS                 // Instead of using ADS device to read amp by I2C, use analog pins
 #ifdef USE_ADS
-    #define CURR_BIAS_AMP         0.94  // Calibration of amplified shunt sensor (* 'DA'), A
-    #define CURR_SCALE_AMP        0.980 // Hardware to match data (* 'SA')
-    #define CURR_BIAS_NOA         0.1   // Calibration of non-amplified shunt sensor (* 'DB'), A
-    #define CURR_SCALE_NOA        0.958 // Hardware to match data (* 'SB')
+    #define CURR_BIAS_AMP         0.98  // Calibration of amplified shunt sensor (* 'DA'), A
+    #define CURR_SCALE_AMP        1.003 // Hardware to match data (* 'SA')
+    #define CURR_BIAS_NOA         0.15  // Calibration of non-amplified shunt sensor (* 'DB'), A
+    #define CURR_SCALE_NOA        1.039 // Hardware to match data (* 'SB')
     #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)
 #else
     #define CURR_BIAS_AMP         0.0   // Calibration of amplified shunt sensor (* 'DA'), A
@@ -28,7 +28,7 @@ const String unit = "soc0p_20221220";  // voc_stat
 #define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms
 #define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'Di'), A
-#define VOLT_BIAS             0.0   // Bias on Vb sensor (* 'Dc'), V
+#define VOLT_BIAS             0.03  // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
 #define VBATT_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
 #define VBATT_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
