@@ -392,7 +392,6 @@ void loop()
 
     // Debug for read
     if ( sp.debug==12 ) debug_12(Mon, Sen);
-    if ( sp.debug==-4 ) debug_m4(Mon, Sen);
 
     // Publish for variable print rate
     if ( cp.publishS )

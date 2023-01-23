@@ -721,18 +721,22 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     model_cutback_ = (voc_stat_ > vsat_) && (ib_fut_ == sat_ib_max_);
     model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
-
-    // if ( sp.debug==75 ) Serial.printf("BatterySim::calculate: temp_c_, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
-    //     temp_c_, soc_, voc_stat_, chem_.low_voc);
-
-    if ( sp.debug==79 ) Serial.printf("reset, mod_ib, temp_c_, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib_fut, ib,=%d,%d,%7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f, %7.3f,\n",
-        reset, sp.mod_ib(), temp_c_, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
-
-    if ( sp.debug==78 || sp.debug==7 ) Serial.printf("BatterySim::calculate:,  dt_,tempC,curr,soc_,voc,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
-     dt_,temp_c_, ib_, soc_, voc_, dv_dyn_, vb_);
     
-    // if ( sp.debug==76 ) Serial.printf("BatterySim::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in=%7.3f,ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, VB_DC_DC=%7.3f, vb=%7.3f\n",
-    //     soc_, temp_c_, ib_in_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, VB_DC_DC, vb_);
+    #if PLATFORM_ID == PLATFORM_ARGON
+
+        if ( sp.debug==75 ) Serial.printf("BatterySim::calculate: temp_c_, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
+            temp_c_, soc_, voc_stat_, chem_.low_voc);
+
+        if ( sp.debug==76 ) Serial.printf("BatterySim::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in=%7.3f,ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, VB_DC_DC=%7.3f, vb=%7.3f\n",
+            soc_, temp_c_, ib_in_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, VB_DC_DC, vb_);
+
+        if ( sp.debug==78 || sp.debug==7 ) Serial.printf("BatterySim::calculate:,  dt_,tempC,curr,soc_,voc,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
+        dt_,temp_c_, ib_, soc_, voc_, dv_dyn_, vb_);
+ 
+        if ( sp.debug==79 ) Serial.printf("reset, mod_ib, temp_c_, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib_fut, ib,=%d,%d,%7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f, %7.3f,\n",
+            reset, sp.mod_ib(), temp_c_, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
+
+    #endif
 
     return ( vb_ );
 }

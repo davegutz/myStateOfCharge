@@ -61,9 +61,9 @@
 #define F_Z_T                 0.80      // Temperature filter zeta (0.80)
 #if PLATFORM_ID == 6  // Photon
     #ifdef DEBUG_INIT
-        #define NSUM              90       // Number of saved SRAM summaries (110)
+        #define NSUM              60       // Number of saved SRAM summaries (80)
     #else
-        #define NSUM              60       // Number of saved SRAM summaries (110)   TODO:   Use PLATFORM_ID around verbose hogs
+        #define NSUM              110       // Number of saved SRAM summaries (110)   TODO:   Use PLATFORM_ID around verbose hogs
                                             // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
     #endif
 #elif PLATFORM_ID == PLATFORM_ARGON

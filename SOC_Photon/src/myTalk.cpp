@@ -269,8 +269,15 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 if ( FP_in<1.1 )  // Apply crude limit to prevent user error
                 {
                   initialize_all(Mon, Sen, FP_in, true);
-                  // debug_m1(Mon, Sen);
+                  #ifdef DEBUG_INIT
+                    if ( sp.debug==-1 ){ Serial.printf("after initialize_all:"); debug_m1(Mon, Sen);}
+                  #endif
                   if ( sp.modeling() )
+                  {
+                    cp.cmd_reset();
+                    chit("W3;", SOON);  // Wait 3 passes of Control
+                  }
+                  else
                   {
                     cp.cmd_reset();
                     chit("W3;", SOON);  // Wait 3 passes of Control
@@ -1269,17 +1276,21 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   // Serial.printf("   v7: EKF solver init\n");
   // Serial.printf("   v8: Randles SS init\n");
   Serial.printf("  v12: EKF\n");
-//  Serial.printf(" v-13: ib_dscn\n");
+  #if PLATFORM_ID == PLATFORM_ARGON
+    Serial.printf(" v-13: ib_dscn\n");
+  #endif
   Serial.printf("  v14: vshunt and Ib raw\n");
   Serial.printf("  v15: vb raw\n");
   // Serial.printf("  v16: Tb\n");
   // Serial.printf("  v34: EKF detail\n");
   // Serial.printf("  v35: Randles balance\n");
   // Serial.printf("  v37: EKF short\n");
-  // Serial.printf("  v75: voc_low check mod\n");
-  // Serial.printf("  v76: vb model\n");
-  // Serial.printf("  v78: Batt model sat\n");
-  // Serial.printf("  v79: sat_ib model\n");
+  #if PLATFORM_ID == PLATFORM_ARGON
+    Serial.printf("  v75: voc_low check mod\n");
+    Serial.printf("  v76: vb model\n");
+    Serial.printf("  v78: Batt model sat\n");
+    Serial.printf("  v79: sat_ib model\n");
+  #endif
   // Serial.printf("  v96: CC sat\n");
   Serial.printf("  v99: calibration\n");
 

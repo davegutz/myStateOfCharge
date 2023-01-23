@@ -27,17 +27,6 @@
 #include "parameters.h"
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
-// sp.debug==-4  // General Arduino plot
-void debug_m4(BatteryMonitor *Mon, Sensors *Sen)
-{
-  Serial.printf("Tb,Vb*10-110,Ib, voc*10-110,dv_dyn*100,voc_ekf*10-110,voc*10-110,vsat*10-110,  y_ekf*1000,  soc_sim*100,soc_ekf*100,soc*100,\n\
-    %7.3f,%7.3f,%7.3f,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,  %10.6f,  %7.3f,%7.4f,%7.4f,\n",
-    Sen->Tb, Sen->Vb*10.-110., Sen->Ib,
-    Mon->voc()*10.-110., Mon->dv_dyn()*100., Mon->z_ekf()*10.-110., Mon->voc()*10.-110., Mon->vsat()*10.-110.,
-    Mon->y_ekf()*1000.,
-    Sen->Sim->soc()*100., Mon->x_ekf()*100., Mon->soc()*100.);
-}
-
 // sp.debug==12 EKF
 void debug_12(BatteryMonitor *Mon, Sensors *Sen)
 {
@@ -49,27 +38,29 @@ void debug_12(BatteryMonitor *Mon, Sensors *Sen)
   Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc());
 }
 
-// sp.debug==-13 ib_dscn for Arduino.
-// Start Arduino serial plotter.  Toggle v like 'v0;v-13;' to produce legend
-void debug_m13(Sensors *Sen)
-{
+#if PLATFORM_ID == PLATFORM_ARGON
+  // sp.debug==-13 ib_dscn for Arduino.
+  // Start Arduino serial plotter.  Toggle v like 'v0;v-13;' to produce legend
+  void debug_m13(Sensors *Sen)
+  {
 
-  // Arduinio header
-  static int8_t last_call = 0;
-  if ( sp.debug!=last_call && sp.debug==-13 )
-    Serial.printf("ib_sel_st:, ib_amph:, ib_noah:, ib_rate:, ib_quiet:,  dscn_flt:, dscn_fa:\n");
-  last_call = sp.debug;
+    // Arduinio header
+    static int8_t last_call = 0;
+    if ( sp.debug!=last_call && sp.debug==-13 )
+      Serial.printf("ib_sel_st:, ib_amph:, ib_noah:, ib_rate:, ib_quiet:,  dscn_flt:, dscn_fa:\n");
+    last_call = sp.debug;
 
-  // Plot
-  if ( sp.debug!=-13)
-    return;
-  else
-      Serial.printf("%d, %7.3f,%7.3f,  %7.3f,%7.3f,   %d,%d\n",
-  Sen->Flt->ib_sel_stat(),
-  max(min(Sen->Ib_amp_hdwe, 2), -2), max(min(Sen->Ib_noa_hdwe, 2), -2),
-  max(min(Sen->Flt->ib_rate(),2), -2), max(min(Sen->Flt->ib_quiet(), 2), -2),
-  Sen->Flt->ib_dscn_fa(), Sen->Flt->ib_dscn_fa());
-}
+    // Plot
+    if ( sp.debug!=-13)
+      return;
+    else
+        Serial.printf("%d, %7.3f,%7.3f,  %7.3f,%7.3f,   %d,%d\n",
+    Sen->Flt->ib_sel_stat(),
+    max(min(Sen->Ib_amp_hdwe, 2), -2), max(min(Sen->Ib_noa_hdwe, 2), -2),
+    max(min(Sen->Flt->ib_rate(),2), -2), max(min(Sen->Flt->ib_quiet(), 2), -2),
+    Sen->Flt->ib_dscn_fa(), Sen->Flt->ib_dscn_fa());
+  }
+#endif
 
 // sp.debug==5 Charge time
 void debug_5(BatteryMonitor *Mon, Sensors *Sen)
