@@ -43,15 +43,15 @@ void Chemistry::assign_all_mod(const String mod_str)
     *sp_mod_code = mod;
     assign_BB();
   }
-  else if ( mod==1 )  // "LION" placeholder.  Data fabricated
+  else if ( mod==1 )  // "CHINS" placeholder.  Data fabricated
   {
     *sp_mod_code = mod;
-    assign_LI();
+    assign_CH();
   }
-  else if ( mod==2 )  // "LION" EKF placeholder.  Data fabricated
+  else if ( mod==2 )  // "CHINS" EKF placeholder.  Data fabricated
   {
     *sp_mod_code = mod;
-    assign_LIE();
+    assign_CHE();
   }
   else Serial.printf("Battery::assign_all_mod:  unknown mod = %d.  Type 'h' for help\n", mod);
   r_ss = r_0 + r_ct + r_diff;
@@ -87,8 +87,8 @@ void Chemistry::assign_BB()
   assign_hys(N_H_BB, M_H_BB, X_DV_BB, Y_SOC_BB, T_R_BB, T_DV_MAX_BB, T_DV_MIN_BB);
 }
 
-// LION Chemistry
-void Chemistry::assign_LI()
+// CHINS Chemistry
+void Chemistry::assign_CH()
 {
   // Constants
   dqdt    = 0.01;   // Change of charge with temperature, fraction/deg C (0.01 from literature)
@@ -108,17 +108,17 @@ void Chemistry::assign_LI()
   v_sat   = 13.85;  // Saturation threshold at temperature, deg C
 
   // VOC_SOC table
-  assign_voc_soc(N_S_LI, M_T_LI, X_SOC_LI, Y_T_LI, T_VOC_LI);
+  assign_voc_soc(N_S_CH, M_T_CH, X_SOC_CH, Y_T_CH, T_VOC_CH);
 
   // Min SOC table
-  assign_soc_min(N_N_LI, X_SOC_MIN_LI, T_SOC_MIN_LI);
+  assign_soc_min(N_N_CH, X_SOC_MIN_CH, T_SOC_MIN_CH);
 
   // Hys table
-  assign_hys(N_H_LI, M_H_LI, X_DV_LI, Y_SOC_LI, T_R_LI, T_DV_MAX_LI, T_DV_MIN_LI);
+  assign_hys(N_H_CH, M_H_CH, X_DV_CH, Y_SOC_CH, T_R_CH, T_DV_MAX_CH, T_DV_MIN_CH);
 }
 
-// LION Chemistry monotonic for EKF
-void Chemistry::assign_LIE()
+// CHINS Chemistry monotonic for EKF
+void Chemistry::assign_CHE()
 {
   // Constants
   dqdt    = 0.01;   // Change of charge with temperature, fraction/deg C (0.01 from literature)
@@ -138,13 +138,13 @@ void Chemistry::assign_LIE()
   v_sat   = 13.85;  // Saturation threshold at temperature, deg C
 
   // VOC_SOC table
-  assign_voc_soc(N_S_LIE, M_T_LIE, X_SOC_LIE, Y_T_LIE, T_VOC_LIE);
+  assign_voc_soc(N_S_CHE, M_T_CHE, X_SOC_CHE, Y_T_CHE, T_VOC_CHE);
 
   // Min SOC table
-  assign_soc_min(N_N_LIE, X_SOC_MIN_LIE, T_SOC_MIN_LIE);
+  assign_soc_min(N_N_CHE, X_SOC_MIN_CHE, T_SOC_MIN_CHE);
 
   // Hys table
-  assign_hys(N_H_LI, M_H_LI, X_DV_LI, Y_SOC_LI, T_R_LI, T_DV_MAX_LI, T_DV_MIN_LI);
+  assign_hys(N_H_CH, M_H_CH, X_DV_CH, Y_SOC_CH, T_R_CH, T_DV_MAX_CH, T_DV_MIN_CH);
 }
 
 // Workhorse assignment function for Hysteresis
@@ -231,8 +231,8 @@ String Chemistry::decode(const uint8_t mod)
 {
     String result;
     if ( mod==0 ) result = "Battleborn";
-    else if ( mod==1 ) result = "LION";
-    else if ( mod==2 ) result = "LIE";
+    else if ( mod==1 ) result = "CHINS";
+    else if ( mod==2 ) result = "CHE";
     else
     {
       result = "unknown";
@@ -246,8 +246,8 @@ uint8_t Chemistry::encode(const String mod_str)
 {
     uint8_t result;
     if ( mod_str=="Battleborn" ) result = 0;
-    else if ( mod_str=="LION" ) result = 1;
-    else if ( mod_str=="LIE" ) result = 2;
+    else if ( mod_str=="CHINS" ) result = 1;
+    else if ( mod_str=="CHE" ) result = 2;
     else
     {
         result = 99;

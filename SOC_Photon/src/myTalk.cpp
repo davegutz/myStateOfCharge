@@ -178,16 +178,16 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     cp.cmd_reset();
                     break;
 
-                  case ( 1 ):  // Bm1: Mon LION
+                  case ( 1 ):  // Bm1: Mon CHINS
                     Serial.printf("Mon chem %d", Mon->mod_code());
-                    Mon->assign_all_mod("LION");
+                    Mon->assign_all_mod("CHINS");
                     Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_randles();
                     cp.cmd_reset();
                     break;
 
-                  case ( 2 ):  // Bm2: Mon LION EKF
+                  case ( 2 ):  // Bm2: Mon CHINS EKF
                     Serial.printf("Mon chem %d", Mon->mod_code());
-                    Mon->assign_all_mod("LIE");
+                    Mon->assign_all_mod("CHE");
                     Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_randles();
                     cp.cmd_reset();
                     break;
@@ -209,16 +209,16 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     cp.cmd_reset();
                     break;
 
-                  case ( 1 ):  // Bs1: Sim LION
+                  case ( 1 ):  // Bs1: Sim CHINS
                     Serial.printf("Sim chem %d", Sen->Sim->mod_code());
-                    Sen->Sim->assign_all_mod("LION"); Sen->Sim->assign_randles();
+                    Sen->Sim->assign_all_mod("CHINS"); Sen->Sim->assign_randles();
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
 
-                  case ( 2 ):  // Bs2: Sim LION EKF
+                  case ( 2 ):  // Bs2: Sim CHINS EKF
                     Serial.printf("Sim chem %d", Sen->Sim->mod_code());
-                    Sen->Sim->assign_all_mod("LIE"); Sen->Sim->assign_randles();
+                    Sen->Sim->assign_all_mod("CHE"); Sen->Sim->assign_randles();
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
@@ -1179,8 +1179,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  bR= "); Serial.printf("reset all buffers\n");
 
   Serial.printf("\nB<?> Battery e.g.:\n");
-  Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='LI' [%d]\n", sp.mon_chm, MON_CHEM); 
-  Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='LI' [%d]\n", sp.sim_chm, SIM_CHEM); 
+  Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='CH' [%d]\n", sp.mon_chm, MON_CHEM); 
+  Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='CH' [%d]\n", sp.sim_chm, SIM_CHEM); 
   Serial.printf(" *BP=  %4.2f.  parallel in bank [%4.2f]'\n", sp.nP, NP); 
   Serial.printf(" *BS=  %4.2f.  series in bank [%4.2f]'\n", sp.nS, NS); 
 

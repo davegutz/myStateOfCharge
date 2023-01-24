@@ -66,8 +66,8 @@ struct Chemistry
   TableInterp2D *voc_T_;      // SOC-VOC 2-D table, V
   TableInterp1D *soc_min_T_;  // SOC-MIN 1-D table, V
   void assign_BB();   // Battleborn assignment
-  void assign_LI();   // LION assignment
-  void assign_LIE();  // LION monotonic for EKF
+  void assign_CH();   // CHINS assignment
+  void assign_CHE();  // CHINS monotonic for EKF
   void assign_all_mod(const String mod_str);  // Assignment executive
   void assign_hys(const int _n_h, const int _m_h, const float *x, const float *y, const float *t, const float *tx, const float *tn); // Worker bee Hys
   void assign_soc_min(const int _n_n, const float *x, const float *t);  // Worker bee SOC_MIN

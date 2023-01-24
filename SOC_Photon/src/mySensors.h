@@ -77,7 +77,6 @@ public:
   void add(const float add) { add_ = add; };
   boolean bare_detected() { return ( bare_detected_ ); };
   void bias(const float bias) { *cp_ib_bias_ = bias; };
-  float bias() { return ( *cp_ib_bias_*sclr_ + add_ ); };
   float adj_Ib(const float Ib) { return ( Ib*sclr_ + add_ ); };
   void dscn_cmd(const boolean cmd) { dscn_cmd_ = cmd; };
   unsigned long int dt(void) { return sample_time_ - sample_time_z_; };
