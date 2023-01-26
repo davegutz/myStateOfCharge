@@ -3,7 +3,7 @@
 /******************************************************/
 
 #include "Particle.h"
-#line 1 "c:/Users/daveg/OneDrive/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 1 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
 /*
  * Project SOC_Photon
   * Description:
@@ -59,7 +59,7 @@
 // This works when I'm using two platforms:   PHOTON = 6 and ARGON = 12
 void setup();
 void loop();
-#line 54 "c:/Users/daveg/OneDrive/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 54 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
 #ifndef PLATFORM_ID
   #define PLATFORM_ID 12
 #endif
@@ -209,7 +209,7 @@ void setup()
 
   // Enable and print stored history
   System.enableFeature(FEATURE_RETAINED_MEMORY);
-  if ( sp.debug==1 || sp.debug==2 || sp.debug==3 || sp.debug==4 )
+  if ( sp.debug()==1 || sp.debug()==2 || sp.debug()==3 || sp.debug()==4 )
   {
     sp.print_history_array();
     sp.print_fault_header();
@@ -286,10 +286,10 @@ void loop()
   static boolean reset_publish = true;
 
   // Sensor conversions.  The embedded model 'Sim' is contained in Sensors
-  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, &sp.nP, &sp.nS);
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors);
 
    // Monitor to count Coulombs and run EKF
-  static BatteryMonitor *Mon = new BatteryMonitor(&sp.delta_q, &sp.t_last, &sp.mon_chm, &sp.hys_scale);
+  static BatteryMonitor *Mon = new BatteryMonitor();
 
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);
@@ -391,7 +391,7 @@ void loop()
     if ( sp.modeling() && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
 
     // Debug for read
-    if ( sp.debug==12 ) debug_12(Mon, Sen);
+    if ( sp.debug()==12 ) debug_12(Mon, Sen);
 
     // Publish for variable print rate
     if ( cp.publishS )
@@ -441,14 +441,15 @@ void loop()
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
   if ( (!boot_wait && summarizing) || cp.write_summary )
   {
-    sp.put_ihis(sp.ihis+1);
-    if ( sp.ihis>sp.nhis()-1 ) sp.put_ihis(0);  // wrap buffer
+    sp.put_ihis(sp.ihis()+1);
+    if ( sp.ihis()>sp.nhis()-1 ) sp.put_ihis(0);  // wrap buffer
     Flt_st hist_snap, hist_bounced;
     hist_snap.assign(time_now, Mon, Sen);
-    hist_bounced = sp.put_history(hist_snap, sp.ihis);
+    hist_bounced = sp.put_history(hist_snap, sp.ihis());
 
-    if ( ++sp.isum>NSUM-1 ) sp.isum = 0;
-    mySum[sp.isum].copy_to_Flt_ram_from(hist_bounced);
+    sp.put_isum(sp.isum()+1);
+    if ( sp.isum()>NSUM-1 ) sp.put_isum(0);
+    mySum[sp.isum()].copy_to_Flt_ram_from(hist_bounced);
 
     Serial.printf("Summ...\n");
     cp.write_summary = false;

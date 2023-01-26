@@ -27,7 +27,7 @@
 #include "parameters.h"
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
-// sp.debug==12 EKF
+// sp.debug()==12 EKF
 void debug_12(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("ib,ib_mod,   vb,vb_mod,  voc,voc_stat_mod,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
@@ -39,19 +39,19 @@ void debug_12(BatteryMonitor *Mon, Sensors *Sen)
 }
 
 #if PLATFORM_ID == PLATFORM_ARGON
-  // sp.debug==-13 ib_dscn for Arduino.
+  // sp.debug()==-13 ib_dscn for Arduino.
   // Start Arduino serial plotter.  Toggle v like 'v0;v-13;' to produce legend
   void debug_m13(Sensors *Sen)
   {
 
     // Arduinio header
     static int8_t last_call = 0;
-    if ( sp.debug!=last_call && sp.debug==-13 )
+    if ( sp.debug()!=last_call && sp.debug()==-13 )
       Serial.printf("ib_sel_st:, ib_amph:, ib_noah:, ib_rate:, ib_quiet:,  dscn_flt:, dscn_fa:\n");
-    last_call = sp.debug;
+    last_call = sp.debug();
 
     // Plot
-    if ( sp.debug!=-13)
+    if ( sp.debug()!=-13)
       return;
     else
         Serial.printf("%d, %7.3f,%7.3f,  %7.3f,%7.3f,   %d,%d\n",
@@ -62,7 +62,7 @@ void debug_12(BatteryMonitor *Mon, Sensors *Sen)
   }
 #endif
 
-// sp.debug==5 Charge time
+// sp.debug()==5 Charge time
 void debug_5(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt, %3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",

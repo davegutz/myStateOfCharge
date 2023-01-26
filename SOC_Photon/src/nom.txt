@@ -69,7 +69,7 @@
 		modeling		Driving saturation calculation with model.  Bits specify which signals use model.
 		model_cutback_	Indicate that modeled current being limited on saturation cutback, T = cutback limited
 		model_saturated_	Indicator of maximal cutback, T = cutback saturated
-		mod_			Model type of battery chemistry e.g. Battleborn or LION, integer code
+		mod_			Model type of battery chemistry e.g. Battleborn or CHINS, integer code
 		mod 			Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
 		mon_mod			Monitor battery chemistry type
 		m_h				Number of soc breakpoints in r(soc, dv) table t_r

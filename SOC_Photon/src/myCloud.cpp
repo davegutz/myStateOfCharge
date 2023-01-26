@@ -42,8 +42,8 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Tb = Sen->Tb;
   pubList->Ib = Sen->Ib;
   pubList->tcharge = Mon->tcharge();
-  pubList->Voc = Mon->voc()*sp.nS;
+  pubList->Voc = Mon->voc()*sp.nS();
   pubList->sat = Mon->sat();
-  pubList->Amp_hrs_remaining_ekf = Mon->amp_hrs_remaining_ekf()*sp.nS*sp.nP;
-  pubList->Amp_hrs_remaining_soc = Mon->amp_hrs_remaining_soc()*sp.nS*sp.nP;
+  pubList->Amp_hrs_remaining_ekf = Mon->amp_hrs_remaining_ekf()*sp.nS()*sp.nP();
+  pubList->Amp_hrs_remaining_soc = Mon->amp_hrs_remaining_soc()*sp.nS()*sp.nP();
 }

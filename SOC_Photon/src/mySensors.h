@@ -320,7 +320,7 @@ class Sensors
 {
 public:
   Sensors();
-  Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, float *sp_nP_, float *sp_nS_);
+  Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors);
   ~Sensors();
   int Vb_raw;                 // Raw analog read, integer
   float Vb;                   // Selected battery bank voltage, V
@@ -369,15 +369,15 @@ public:
   void bias_all_model();      // Bias model outputs for sensor fault injection
   unsigned long int dt_ib(void) { return dt_ib_; };
   void final_assignments(BatteryMonitor *Mon);  // Make final signal selection
-  float ib() { return Ib / *sp_nP_; };                            // Battery unit current, A
-  float ib_amp_hdwe() { return Ib_amp_hdwe / *sp_nP_; };          // Battery amp unit current, A
-  float ib_amp_model() { return Ib_amp_model / *sp_nP_; };        // Battery amp model unit current, A
-  float ib_hdwe() { return Ib_hdwe / *sp_nP_; };                  // Battery select hardware unit current, A
-  float ib_hdwe_model() { return Ib_hdwe_model / *sp_nP_; };      // Battery select hardware model unit current, A
-  float ib_model() { return Ib_model / *sp_nP_; };                // Battery select model unit current, A
-  float ib_model_in() { return Ib_model_in / *sp_nP_; };          // Battery select model input unit current, A
-  float ib_noa_hdwe() { return Ib_noa_hdwe / *sp_nP_; };          // Battery no amp unit current, A
-  float ib_noa_model() { return Ib_noa_model / *sp_nP_; };        // Battery no amp model unit current, A
+  float ib() { return Ib / sp.nP(); };                            // Battery unit current, A
+  float ib_amp_hdwe() { return Ib_amp_hdwe / sp.nP(); };          // Battery amp unit current, A
+  float ib_amp_model() { return Ib_amp_model / sp.nP(); };        // Battery amp model unit current, A
+  float ib_hdwe() { return Ib_hdwe / sp.nP(); };                  // Battery select hardware unit current, A
+  float ib_hdwe_model() { return Ib_hdwe_model / sp.nP(); };      // Battery select hardware model unit current, A
+  float ib_model() { return Ib_model / sp.nP(); };                // Battery select model unit current, A
+  float ib_model_in() { return Ib_model_in / sp.nP(); };          // Battery select model input unit current, A
+  float ib_noa_hdwe() { return Ib_noa_hdwe / sp.nP(); };          // Battery no amp unit current, A
+  float ib_noa_model() { return Ib_noa_model / sp.nP(); };        // Battery no amp model unit current, A
   float Ib_amp_noise();
   float Ib_amp_noise_amp() { return ( Ib_amp_noise_amp_ ); };
   void Ib_amp_noise_amp(const float noise) { Ib_amp_noise_amp_ = noise; };
@@ -398,12 +398,12 @@ public:
   float Tb_noise();
   float Tb_noise_amp() { return ( Tb_noise_amp_ ); };
   void Tb_noise_amp(const float noise) { Tb_noise_amp_ = noise; };
-  float vb() { return Vb / *sp_nS_; };                            // Battery select unit voltage, V
+  float vb() { return Vb / sp.nS(); };                            // Battery select unit voltage, V
   float vb_add() { return ( vb_add_ ); };
   void vb_add(const float add) { vb_add_ = add; };
-  float vb_hdwe() { return Vb_hdwe / *sp_nS_; };                  // Battery select hardware unit voltage, V
+  float vb_hdwe() { return Vb_hdwe / sp.nS(); };                  // Battery select hardware unit voltage, V
   void vb_load(const uint16_t vb_pin);  // Analog read of Vb
-  float vb_model() { return Vb_model / *sp_nS_; };                // Battery select model unit voltage, V
+  float vb_model() { return (Vb_model / sp.nS()); };                // Battery select model unit voltage, V
   float Vb_add();
   float Vb_noise();
   float Vb_noise_amp() { return ( Vb_noise_amp_ ); };
@@ -411,8 +411,6 @@ public:
   void vb_print(void);                  // Print Vb result
   Fault *Flt;
 protected:
-  float *sp_Tb_bias_hdwe_;   // Location of retained Tb bias, deg C
-  float *sp_Vb_bias_hdwe_;   // Location of retained Vb bias, V
   void choose_(void);   // Deliberate choice based on inputs and results
   PRBS_7 *Prbn_Tb_;     // Tb noise generator model only
   PRBS_7 *Prbn_Vb_;     // Vb noise generator model only
@@ -430,8 +428,6 @@ protected:
   unsigned long int sample_time_vb_hdwe_;     // Exact moment of Vb sample, ms
   unsigned long int dt_ib_hdwe_;          // Delta update of Ib sample, ms
   unsigned long int dt_ib_;               // Delta update of selected Ib sample, ms
-  float *sp_nP_;    // Number of parallel batteries in bank, e.g. '2P1S'
-  float *sp_nS_;    // Number of series batteries in bank, e.g. '2P1S'
 };
 
 

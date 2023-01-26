@@ -48,11 +48,11 @@ class Coulombs:
         t_x_soc_min0 = [5., 11.1,  20.,   30., 40.]
         t_soc_min0 = [0.07, 0.05,  -0.05, 0.00, 0.20]
         self.lut_soc_min0 = myTables.TableInterp1D(np.array(t_x_soc_min0), np.array(t_soc_min0))
-        # LION
+        # CHINS
         t_x_soc_min1 = [5.,   11.1,  20.,  40.]
         t_soc_min1 = [0.10, 0.07,  0.05, 0.03]
         self.lut_soc_min1 = myTables.TableInterp1D(np.array(t_x_soc_min1), np.array(t_soc_min1))
-        # LION EKF
+        # CHINS EKF
         t_x_soc_min2 = [5.,   11.1,  20.,  40.]
         t_soc_min2 = [0.10, 0.07,  0.05, 0.0]
         self.lut_soc_min2 = myTables.TableInterp1D(np.array(t_x_soc_min2), np.array(t_soc_min2))

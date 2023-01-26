@@ -26,7 +26,7 @@
 #include <math.h>
 #include "parameters.h"
 extern SavedPars sp; // Various parameters to be static at system level and saved through power cycle
-// extern int8_t debug;
+// extern int8_t debug();
 
 
 // class EKF_1x1

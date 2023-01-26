@@ -160,11 +160,10 @@ class Hysteresis
 {
 public:
   Hysteresis();
-  Hysteresis(const float cap, Chemistry chem, float *sp_hys_scale);
+  Hysteresis(const float cap, Chemistry chem);
   ~Hysteresis();
   // operators
   // functions
-  void apply_scale(const float sclr);
   float calculate(const float ib, const float soc);
   float dv_max(const float soc) { return hys_Tx_->interp(soc); };
   float dv_min(const float soc) { return hys_Tn_->interp(soc); };
@@ -175,7 +174,7 @@ public:
   float ioc() { return ioc_; };
   float dv_hys() { return dv_hys_; };
   void dv_hys(const float st) { dv_hys_ = max(min(st, dv_max(soc_)), dv_min(soc_)); };
-  float scale() { return *sp_hys_scale_; };
+//   float scale() { return sp.hys_scale(); };
 protected:
   boolean disabled_;    // Hysteresis disabled by low scale input < 1e-5, T=disabled
   float cap_;          // Capacitance, Farads
@@ -189,7 +188,6 @@ protected:
   TableInterp2D *hys_T_;// dv-soc 2-D table, V
   TableInterp1D *hys_Tx_;// soc 1-D table, V_max
   TableInterp1D *hys_Tn_;// soc 1-D table, V_min
-  float *sp_hys_scale_; // Scalar on output of update
 };
 
 
@@ -198,7 +196,7 @@ class Battery : public Coulombs
 {
 public:
   Battery();
-  Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, float *sp_hys_scale);
+  Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code);
   ~Battery();
   // operators
   // functions
@@ -221,8 +219,6 @@ public:
   float dv_voc_soc() { return dv_voc_soc_; };
   uint8_t encode(const String mod_str);
   void hys_pretty_print () { hys_->pretty_print(); };
-  float hys_scale() { return hys_->scale(); };
-  void hys_scale(const float scale) { hys_->apply_scale(scale); };
   float hys_state() { return hys_->dv_hys(); };
   void hys_state(const float st) { hys_->dv_hys(st); };
   void init_hys(const float hys) { hys_->init(hys); };
@@ -274,7 +270,6 @@ class BatteryMonitor: public Battery, public EKF_1x1
 {
 public:
   BatteryMonitor();
-  BatteryMonitor(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, float *sp_hys_scale);
   ~BatteryMonitor();
   // operators
   // functions
@@ -332,7 +327,6 @@ class BatterySim: public Battery
 {
 public:
   BatterySim();
-  BatterySim(double *sp_delta_q, float *sp_t_last, float *sp_s_cap_model, uint8_t *sp_mod_code, float *sp_hys_scale);
   ~BatterySim();
   // operators
   // functions
@@ -370,7 +364,6 @@ protected:
   float sat_cutback_gain_; // Gain to retard ib when voc exceeds vsat, dimensionless
   float sat_ib_max_;       // Current cutback to be applied to modeled ib output, A
   float sat_ib_null_;      // Current cutback value for voc=vsat, A
-  float *sp_s_cap_model_;   // Rated capacity scalar
 };
 
 

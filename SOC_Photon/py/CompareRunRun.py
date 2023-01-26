@@ -143,8 +143,9 @@ if __name__ == '__main__':
         # keys = [('ampHiFail v20221028.txt', 'pro0p_2022'), ('ampHiFail v20221220.txt', 'pro0p_2022')]
 
         # Compare
-        keys = [('ampHiFail v20221220.txt', 'pro0p'), ('ampHiFail vA20221220.txt', 'soc1a')]
-        keys = [('rapidTweakRegression v20221220.txt', 'pro0p_2022'), ('rapidTweakRegression vA20221220.txt', 'soc1a_2022')]
+        keys = [('ampHiFail v20221220.txt', 'pro0p'), ('ampHiFail v20230125.txt', 'pro0p')]
+        # keys = [('ampHiFail v20221220.txt', 'pro0p'), ('ampHiFail vA20221220.txt', 'soc1a')]
+        # keys = [('rapidTweakRegression v20221220.txt', 'pro0p_2022'), ('rapidTweakRegression vA20221220.txt', 'soc1a_2022')]
         # keys = [('offSitHysBms v20221220.txt', 'pro0p_2022'), ('offSitHysBms vA20221220.txt', 'soc1a_2022')]
 
         # Transient  inputs
@@ -174,7 +175,8 @@ if __name__ == '__main__':
         n_fig = 0
         fig_files = []
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
-        filename = data_root + sys.argv[0].split('\\')[-1]
+        # filename = data_root + sys.argv[0].split('\\')[-1]
+        filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         if temp_flt_file_clean and len(f.time) > 1:
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
