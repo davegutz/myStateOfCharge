@@ -45,14 +45,21 @@ The system is designed to be powered completely either from USB hooked to phone 
 ## Redo Loop
 
 ***********************
+Simple production mode:
+Welcome to Particle Workbench - Configure for device - (pick appropriate OS) - (pick device name set using Particle app)
+Make edits
+Press 'check' symbol when a .h or .cpp file is open and highlighted
+Press 'lightning' symbol
+'Talk' using CoolTerm
+
+More complex to deal with issues (always flashes despite device name difference)
 Ctrl-Shift-P - Particle:Clean Application and Device OS (local)
 Ctrl-Shift-P - Particle:Compile Application (local) or Check button in Visual Studio upper rc when select a source file
   Ctrl-Shift-P - Particle:Compile Application and Device OS (local) first time
 Ctrl-Shift-P - Particle:Cloud Flash or Ctrl-Shift-P - Particle:Local Flash
   Ctrl-Shift-P - Particle:Flash application and Device OS (local) first time
-Ctrl-Shift-P - Particle:Serial Monitor or CoolTerm
-  'Talk' function using CoolTerm.  Be sure to add line feed to end of Ctrl-T dialog of CoolTerm.
-  Arduino plot function works with debug=
+Ctrl-Shift-P - Particle:Serial Monitor or CoolTerm(saves data)
+  'Talk' function using Monitor or CoolTerm(saves data)
 
 Desktop settings
     .json has "particle.targetDevice": "proto"
@@ -64,7 +71,7 @@ Laptop settings.json has  "particle.targetDevice": "soc0"
     local_config.h has
         const   String    unit = "soc0";
 
-On laptop (same as desktop?)
+On laptop (same as desktop)
     pull from GitHub repository changes just made on desktop
     compile
     flash to target 'soc0'
