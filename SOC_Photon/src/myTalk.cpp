@@ -185,9 +185,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     cp.cmd_reset();
                     break;
 
-                  case ( 2 ):  // Bm2: Mon CHINS EKF
+                  case ( 2 ):  // Bm2: Mon Spare
                     Serial.printf("Mon chem %d", Mon->mod_code());
-                    Mon->assign_all_mod("CHE");
+                    Mon->assign_all_mod("Spare");
                     Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_randles();
                     cp.cmd_reset();
                     break;
@@ -216,9 +216,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     cp.cmd_reset();
                     break;
 
-                  case ( 2 ):  // Bs2: Sim CHINS EKF
+                  case ( 2 ):  // Bs2: Sim Spare
                     Serial.printf("Sim chem %d", Sen->Sim->mod_code());
-                    Sen->Sim->assign_all_mod("CHE"); Sen->Sim->assign_randles();
+                    Sen->Sim->assign_all_mod("Spare"); Sen->Sim->assign_randles();
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
@@ -340,7 +340,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'm' ):  //   Dm<>:  Amp signal adder for faults
-                Serial.printf("Ib_amp_add%7.3f to", Sen->ib_amp_add());
+                Serial.printf("ib_amp_add%7.3f to", Sen->ib_amp_add());
                 Sen->ib_amp_add(cp.input_str.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->ib_amp_add());
                 break;

@@ -407,7 +407,7 @@ void loop()
     oled_display(display, Sen, Mon);
 
     #if ( PLATFORM_ID == PLATFORM_ARGON )
-      // Save EERAM dynamic parameters
+      // Save EERAM dynamic parameters.  Saves critical few state parameters
       sp.put_all_dynamic();
     #endif
 

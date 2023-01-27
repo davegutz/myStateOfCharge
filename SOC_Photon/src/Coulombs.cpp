@@ -43,15 +43,15 @@ void Chemistry::assign_all_mod(const String mod_str)
     *sp_mod_code = mod;
     assign_BB();
   }
-  else if ( mod==1 )  // "CHINS" placeholder.  Data fabricated
+  else if ( mod==1 )  // "CHINS"
   {
     *sp_mod_code = mod;
     assign_CH();
   }
-  else if ( mod==2 )  // "CHINS" EKF placeholder.  Data fabricated
+  else if ( mod==2 )  // "Spare"  Data fabricated
   {
     *sp_mod_code = mod;
-    assign_CHE();
+    assign_SP();
   }
   else Serial.printf("Battery::assign_all_mod:  unknown mod = %d.  Type 'h' for help\n", mod);
   r_ss = r_0 + r_ct + r_diff;
@@ -117,8 +117,8 @@ void Chemistry::assign_CH()
   assign_hys(N_H_CH, M_H_CH, X_DV_CH, Y_SOC_CH, T_R_CH, T_DV_MAX_CH, T_DV_MIN_CH);
 }
 
-// CHINS Chemistry monotonic for EKF
-void Chemistry::assign_CHE()
+// Spare
+void Chemistry::assign_SP()
 {
   // Constants
   dqdt    = 0.01;   // Change of charge with temperature, fraction/deg C (0.01 from literature)
@@ -138,10 +138,10 @@ void Chemistry::assign_CHE()
   v_sat   = 13.85;  // Saturation threshold at temperature, deg C
 
   // VOC_SOC table
-  assign_voc_soc(N_S_CHE, M_T_CHE, X_SOC_CHE, Y_T_CHE, T_VOC_CHE);
+  assign_voc_soc(N_S_SP, M_T_SP, X_SOC_SP, Y_T_SP, T_VOC_SP);
 
   // Min SOC table
-  assign_soc_min(N_N_CHE, X_SOC_MIN_CHE, T_SOC_MIN_CHE);
+  assign_soc_min(N_N_SP, X_SOC_MIN_SP, T_SOC_MIN_SP);
 
   // Hys table
   assign_hys(N_H_CH, M_H_CH, X_DV_CH, Y_SOC_CH, T_R_CH, T_DV_MAX_CH, T_DV_MIN_CH);
@@ -232,7 +232,7 @@ String Chemistry::decode(const uint8_t mod)
     String result;
     if ( mod==0 ) result = "Battleborn";
     else if ( mod==1 ) result = "CHINS";
-    else if ( mod==2 ) result = "CHE";
+    else if ( mod==2 ) result = "Spare";
     else
     {
       result = "unknown";
@@ -247,7 +247,7 @@ uint8_t Chemistry::encode(const String mod_str)
     uint8_t result;
     if ( mod_str=="Battleborn" ) result = 0;
     else if ( mod_str=="CHINS" ) result = 1;
-    else if ( mod_str=="CHE" ) result = 2;
+    else if ( mod_str=="Spare" ) result = 2;
     else
     {
         result = 99;

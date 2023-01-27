@@ -106,8 +106,7 @@ const float T_DV_MAX_BB[M_H_BB] =   // dv_max(soc) table.  Pulled values from in
 const float T_DV_MIN_BB[M_H_BB] =   // dv_max(soc) table.  Pulled values from insp of T_R_BB where flattens
         {-0.7, -0.5, -0.3};
 
-// CHINS 100 Ah, 12v LiFePO4.  "CHINS" placeholder.  Data fabricated.   Useful to test weird shapes T=40 (Dt15)
-// shifted Battleborn because don't have real data yet; test structure of program
+// CHINS 100 Ah, 12v LiFePO4.  Initial data from manual
 const uint8_t M_T_CH  = 4;    // Number temperature breakpoints for voc table
 const uint8_t N_S_CH  = 18;   // Number soc breakpoints for voc table
 const float Y_T_CH[M_T_CH] =  //Temperature breakpoints for voc table
@@ -139,21 +138,21 @@ const float T_DV_MIN_CH[M_H_CH] =   // dv_max(soc) table.  Pulled values from in
         {-0.7, -0.5, -0.3};
 
 
-// CHINS control EKF curve that is monotonic increasing
-const uint8_t M_T_CHE  = 4;    // Number temperature breakpoints for voc table
-const uint8_t N_S_CHE  = 18;   // Number soc breakpoints for voc table
-const float Y_T_CHE[M_T_CHE] =  //Temperature breakpoints for voc table
+// SP spare to reserve memory, perhaps for LION
+const uint8_t M_T_SP  = 4;    // Number temperature breakpoints for voc table
+const uint8_t N_S_SP  = 18;   // Number soc breakpoints for voc table
+const float Y_T_SP[M_T_SP] =  //Temperature breakpoints for voc table
         { 5., 11.1, 20., 40. }; 
-const float X_SOC_CHE[N_S_CHE] =      //soc breakpoints for voc table
+const float X_SOC_SP[N_S_SP] =      //soc breakpoints for voc table
         { -0.15, 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99, 0.995, 1.00};
-const float T_VOC_CHE[M_T_CHE*N_S_CHE] = // r(soc, dv) table
+const float T_VOC_SP[M_T_SP*N_S_SP] = // r(soc, dv) table
         { 4.00, 4.00,  4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
           4.00, 4.00,  4.00,  9.50,  12.00, 12.50, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.2,  13.23, 13.60, 14.46,
           4.00, 4.00,  10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
           4.00, 4.00,  10.50, 13.10, 13.27, 13.31, 13.44, 13.46, 13.40, 13.44, 13.48, 13.52, 13.56, 13.60, 13.64, 13.68, 14.22, 15.00};
-const uint8_t N_N_CHE = 4;   // Number of temperature breakpoints for x_soc_min table
-const float X_SOC_MIN_CHE[N_N_CHE] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
-const float T_SOC_MIN_CHE[N_N_CHE] =  { 0.10, 0.07,  0.05, 0.0}; // soc_min(t)
+const uint8_t N_N_SP = 4;   // Number of temperature breakpoints for x_soc_min table
+const float X_SOC_MIN_SP[N_N_SP] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
+const float T_SOC_MIN_SP[N_N_SP] =  { 0.10, 0.07,  0.05, 0.0}; // soc_min(t)
 // Hysteresis: reservoir model of battery electrical hysteresis
 // Use variable resistor and capacitor to create hysteresis from an RC circuit
 class Hysteresis

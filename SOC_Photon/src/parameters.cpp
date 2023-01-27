@@ -264,7 +264,7 @@ void SavedPars::pretty_print(const boolean all)
     if ( all || float(0.) != inj_bias_ )        Serial.printf(" inj_bias%7.3f  %7.3f *Xb<> A\n", 0., inj_bias_);
     if ( all )                                  Serial.printf(" isum                           %d tbl ptr\n", isum_);
     if ( all || uint8_t(MODELING) != modeling_ ) Serial.printf(" modeling %d  %d *Xm<>\n", uint8_t(MODELING), modeling_);
-    if ( all || MON_CHEM != mon_chm_ )          Serial.printf(" mon chem            %d          %d *Bm<> 0=Battle, 1=CHINS\n", MON_CHEM, mon_chm_);
+    if ( all || MON_CHEM != mon_chm_ )          Serial.printf(" mon chem            %d          %d *Bm<> 0=Battleborn, 1=CHINS, 2=Spare\n", MON_CHEM, mon_chm_);
     if ( all )                                  Serial.printf(" preserving %d  %d *Xm<>\n", uint8_t(0), preserving_);
     if ( all || float(NP) != nP_ )              Serial.printf(" nP            %7.3f    %7.3f *BP<> eg '2P1S'\n", NP, nP_);
     if ( all || float(NS) != nS_ )              Serial.printf(" nS            %7.3f    %7.3f *BS<> eg '2P1S'\n", NS, nS_);
@@ -325,7 +325,7 @@ void SavedPars::print_history_array()
 }
 
 // Dynamic parameters saved
-// This saves a lot of througput.   Without it, there are six put calls each 'read' minor frame at 1 ms each call
+// This saves a lot of througput.   Without it, there are many put calls each 'read' minor frame at 1 ms each call
 void SavedPars::put_all_dynamic()
 {
     static uint8_t blink = 0;

@@ -39,8 +39,8 @@ const String unit = "soc0p_20221220";  // voc_stat
 // Four 12 V 200 Ah with two in parallel joined with two more in series
 //   would have  RATED_BATT_CAP 200, NS 2, and NP 2
 #define COULOMBIC_EFF         0.9985  // Coulombic efficiency of battery, fraction of charge that gets used
-#define MON_CHEM              1       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS 
-#define SIM_CHEM              1       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS 
+#define MON_CHEM              1       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
+#define SIM_CHEM              1       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
 #define RATED_BATT_CAP        105.    // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
 #define NS                    1.0     // Number of series batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BS')
 #define NP                    1.0     // Number of parallel batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BP')

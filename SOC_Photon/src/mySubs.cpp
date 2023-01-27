@@ -493,7 +493,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   // Sim calculation
   //  Inputs:  Sen->Tb_filt(past), Sen->Ib_model_in
   //  States: Sim->soc(past)
-  //  Outputs:  Sim->temp_c(), Sim->Ib(), Sim->Vb(), sp.inj_bias, Sim.model_saturated
+  //  Outputs:  Tb_hdwe, Ib_model, Vb_model, sp.inj_bias, Sim.model_saturated
   Sen->Tb_model = Sen->Tb_model_filt = Sen->Sim->temp_c();
   Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, reset) + Sen->Vb_add();
   Sen->Ib_model = Sen->Sim->ib_fut() * sp.nP();
@@ -501,10 +501,10 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   cp.model_saturated = Sen->Sim->saturated();
 
   // Inputs:  Sim->Ib
-  Sen->Ib_amp_model = Sen->Ib_model*Sen->ib_amp_sclr() + Sen->Ib_amp_add() + Sen->Ib_amp_noise();
-  Sen->Ib_noa_model = Sen->Ib_model*Sen->ib_noa_sclr() + Sen->Ib_noa_add() + Sen->Ib_noa_noise();
+  Sen->Ib_amp_model = Sen->Ib_model*Sen->ib_amp_sclr() + Sen->Ib_amp_add() + Sen->Ib_amp_noise();  // Sm/Dm
+  Sen->Ib_noa_model = Sen->Ib_model*Sen->ib_noa_sclr() + Sen->Ib_noa_add() + Sen->Ib_noa_noise();  // Sn/Dn
 
-  // Use model instead of sensors when running tests as user
+  // Select
   //  Inputs:                                       --->   Outputs:
   //  Ib_model, Ib_hdwe,                            --->   Ib
   //  Vb_model, Vb_hdwe,                            --->   Vb
