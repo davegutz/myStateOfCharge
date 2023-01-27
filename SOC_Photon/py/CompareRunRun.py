@@ -141,9 +141,9 @@ if __name__ == '__main__':
 
         # Regression
         # keys = [('ampHiFail v20221028.txt', 'pro0p_2022'), ('ampHiFail v20221220.txt', 'pro0p_2022')]
+        keys = [('ampHiFail v20221220.txt', 'pro0p'), ('ampHiFail v20230125.txt', 'pro0p')]
 
         # Compare
-        keys = [('ampHiFail v20221220.txt', 'pro0p'), ('ampHiFail v20230125.txt', 'pro0p')]
         # keys = [('ampHiFail v20221220.txt', 'pro0p'), ('ampHiFail vA20221220.txt', 'soc1a')]
         # keys = [('rapidTweakRegression v20221220.txt', 'pro0p_2022'), ('rapidTweakRegression vA20221220.txt', 'soc1a_2022')]
         # keys = [('offSitHysBms v20221220.txt', 'pro0p_2022'), ('offSitHysBms vA20221220.txt', 'soc1a_2022')]
@@ -186,7 +186,8 @@ if __name__ == '__main__':
             n_fig, fig_files = overall(mon_old, mon_new, sim_old, sim_new, sim_new, filename, fig_files,
                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
-        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
+        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo,
+                                listWithImagesExtensions=["png"])
         cleanup_fig_files(fig_files)
 
         plt.show()

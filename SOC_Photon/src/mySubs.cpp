@@ -195,7 +195,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
 
   // Gather and apply inputs
   if ( sp.mod_ib() )
-    Sen->Ib_model_in = sp.inj_bias() + sp.Ib_bias_all() + cp.injection_curr;
+    Sen->Ib_model_in = sp.inj_bias() + sp.Ib_bias_all();
   else
     Sen->Ib_model_in = Sen->Ib_hdwe;
   Sen->temp_load_and_filter(Sen, true);
@@ -305,9 +305,8 @@ void load_ib_vb(const boolean reset, Sensors *Sen, Pins *myPins, BatteryMonitor 
 {
   // Load shunts Ib
   // Outputs:  Sen->Ib_model_in, Sen->Ib_hdwe, Sen->Vb, Sen->Wb
-  Sen->shunt_scale();
-  Sen->shunt_bias();
-  Sen->shunt_convert();
+  Sen->ShuntAmp->convert( sp.mod_ib_amp_dscn() );
+  Sen->ShuntNoAmp->convert( sp.mod_ib_noa_dscn() );
   Sen->Flt->shunt_check(Sen, Mon, reset);
   Sen->shunt_select_initial();
   if ( sp.debug()==14 ) Sen->shunt_print();
@@ -502,7 +501,8 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   cp.model_saturated = Sen->Sim->saturated();
 
   // Inputs:  Sim->Ib
-  Sen->bias_all_model();   // Bias model outputs for sensor fault injection
+  Sen->Ib_amp_model = Sen->Ib_model*Sen->ib_amp_sclr() + Sen->Ib_amp_add() + Sen->Ib_amp_noise();
+  Sen->Ib_noa_model = Sen->Ib_model*Sen->ib_noa_sclr() + Sen->Ib_noa_add() + Sen->Ib_noa_noise();
 
   // Use model instead of sensors when running tests as user
   //  Inputs:                                       --->   Outputs:
@@ -582,11 +582,11 @@ void get_string(String *source)
     // get the new byte, add to input and check for completion
     char inChar = source->charAt(0);
     source->remove(0, 1);
-    cp.input_string += inChar;
+    cp.input_str += inChar;
     if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
     {
       finish_request();
-      cp.input_string = ">" + cp.input_string;
+      cp.input_str = ">" + cp.input_str;
       break;  // enable reading multiple inputs
     }
   }
@@ -596,12 +596,12 @@ void get_string(String *source)
 void finish_request(void)
 {
   // Remove whitespace
-  cp.input_string.trim();
-  cp.input_string.replace("\0","");
-  cp.input_string.replace(";","");
-  cp.input_string.replace(",","");
-  cp.input_string.replace(" ","");
-  cp.input_string.replace("=","");
+  cp.input_str.trim();
+  cp.input_str.replace("\0","");
+  cp.input_str.replace(";","");
+  cp.input_str.replace(",","");
+  cp.input_str.replace(" ","");
+  cp.input_str.replace("=","");
   cp.token = true;  // token:  temporarily inhibits while loop until talk() call resets token
 }
 
@@ -624,8 +624,8 @@ void serialEvent()
     // get the new byte:
     char inChar = (char)Serial.read();
 
-    // add it to the cp.input_string:
-    cp.input_string += inChar;
+    // add it to the cp.input_str:
+    cp.input_str += inChar;
 
     // if the incoming character is a newline, set a flag
     // so the main loop can do something about it:
@@ -635,7 +635,7 @@ void serialEvent()
       break;  // enable reading multiple inputs
     }
   }
-  // if ( cp.token ) Serial.printf("serialEvent:  %s\n", cp.input_string.c_str());
+  // if ( cp.token ) Serial.printf("serialEvent:  %s\n", cp.input_str.c_str());
 }
 
 /*
@@ -651,8 +651,8 @@ void serialEvent1()
   {
     // get the new byte:
     char inChar = (char)Serial1.read();
-    // add it to the cp.input_string:
-    cp.input_string += inChar;
+    // add it to the cp.input_str:
+    cp.input_str += inChar;
     // if the incoming character is a newline, set a flag
     // so the main loop can do something about it:
     if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',')
