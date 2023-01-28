@@ -349,6 +349,9 @@ void loop()
   if ( read )
   {
     Sen->reset = reset;
+    
+    // Check for really slow data capture and run EKF each read frame
+    cp.assign_eframe_mult(max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/float(ReadSensors->delay())+0.9999), 1));
 
     // Set print frame
     static uint8_t print_count = 0;

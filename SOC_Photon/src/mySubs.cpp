@@ -107,7 +107,7 @@ void print_signal_sel_header(void)
 void print_serial_ekf_header(void)
 {
   if ( sp.debug()==3 || sp.debug()==4 ) // print_serial_ekf_header
-    Serial.printf("unit_e,c_time,Fx_, Bu_, Q_, R_, P_, S_, K_, u_, x_, y_, z_, x_prior_, P_prior_, x_post_, P_post_, hx_, H_,\n");
+    Serial.printf("unit_e,c_time,dt,Fx_, Bu_, Q_, R_, P_, S_, K_, u_, x_, y_, z_, x_prior_, P_prior_, x_post_, P_post_, hx_, H_,\n");
 }
 
 // Print strings

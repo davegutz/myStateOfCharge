@@ -62,7 +62,7 @@ struct CommandPars
   {
     token = false;
     dc_dc_on = false;
-    eframe_mult = 20;
+    eframe_mult = EKF_EFRAME_MULT;
     fake_faults = FAKE_FAULTS;
     model_cutback = false;
     model_saturated = false;
