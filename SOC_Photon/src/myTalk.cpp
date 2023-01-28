@@ -26,6 +26,7 @@
 #include "Battery.h"
 #include "local_config.h"
 #include "mySummary.h"
+#include "parameters.h"
 #include <math.h>
 #include "debug.h"
 
@@ -605,7 +606,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'd' ):  // Hd: History dump
                 Serial.printf("\n");
                 print_all_fault_buffer("unit_h", mySum, sp.isum(), NSUM);
-                print_all_history_header();
+                sp.print_fault_header();
                 chit("Pr;Q;", QUEUE);
                 Serial.printf("\n");
                 // sp.print_history_array();
@@ -765,6 +766,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'R' ):  // RR:  large reset
                 Serial.printf("RESET\n");
+                Serial1.printf("RESET\n");
                 Sen->Sim->apply_soc(1.0, Sen->Tb_filt);
                 Mon->apply_soc(1.0, Sen->Tb_filt);
                 cp.cmd_reset();
@@ -778,6 +780,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 chit("Hs;", SOON);
                 chit("Pf;", SOON);
                 Serial.printf("Clean. Deploy\n");
+                Serial1.printf("Clean. Deploy\n");
                 break;
 
               case ( 's' ):  // Rs:  small reset filters

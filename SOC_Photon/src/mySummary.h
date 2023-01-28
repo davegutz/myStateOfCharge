@@ -32,6 +32,5 @@
 // Function prototypes
 void large_reset_summary(struct Flt_st *sum, const int isum, const int nsum);
 void print_all_fault_buffer(const String code, struct Flt_st *sum, const int iflt, const int nflt);
-void print_all_history_header();
 
 #endif

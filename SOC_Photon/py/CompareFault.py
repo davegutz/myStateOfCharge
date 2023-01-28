@@ -593,7 +593,7 @@ def calc_fault(d_ra, d_mod):
 #
 
 # Fake stuff to get replicate to accept inputs and run
-def bandaid(h):
+def bandaid(h, chm=0):
     res = np.zeros(len(h.time))
     res[0:10] = 1
     mod = np.zeros(len(h.time))
@@ -605,10 +605,10 @@ def bandaid(h):
     soc_s = h['soc'].copy()
     bms_off_s = h['bms_off'].copy()
     sat_s = h['sat'].copy()
-    chm = np.zeros(len(h.time))
+    chm = np.ones(len(h.time))*chm
     sel = np.zeros(len(h.time))
     preserving = np.ones(len(h.time))
-    chm_s = np.zeros(len(h.time))
+    chm_s = np.ones(len(h.time))*chm
     mon_old = rf.rec_append_fields(h, 'res', res)
     mon_old = rf.rec_append_fields(mon_old, 'mod_data', mod)
     mon_old = rf.rec_append_fields(mon_old, 'ib_past', ib_in_s)
@@ -836,9 +836,12 @@ if __name__ == '__main__':
         # User inputs
         # input_files = ['fail 20221125.txt']
         # input_files = ['coldCharge1 v20221028.txt']
-        input_files = ['fault_20221206.txt']
-        temp_hist_file = 'hist20221028.txt'
-        temp_flt_file = 'flt20221028.txt'
+        # input_files = ['fault_20221206.txt']
+        input_files = ['CH 20230128.txt']; chm_in = 1
+        # temp_hist_file = 'hist20221028.txt'
+        # temp_flt_file = 'flt20221028.txt'
+        temp_hist_file = 'hist_CompareFault.txt'
+        temp_flt_file = 'flt_CompareFault.txt'
         path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
@@ -884,7 +887,9 @@ if __name__ == '__main__':
         # Shift time and add data
         time0 = h_20C.time[0]
         h_20C.time -= time0
-        T_100 = 0.1
+        # T_100 = 0.1
+        T_100 = 0.3
+        T_100 = 10
         h_20C_resamp_100 = resample(data=h_20C, dt_resamp=T_100, time_var='time',
                                     specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
                                               ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
@@ -894,7 +899,7 @@ if __name__ == '__main__':
                 h_20C_resamp_100.dt[i] = h_20C_resamp_100.time[1] - h_20C_resamp_100.time[0]
             else:
                 h_20C_resamp_100.dt[i] = h_20C_resamp_100.time[i] - h_20C_resamp_100.time[i-1]
-        mon_old_100, sim_old_100 = bandaid(h_20C_resamp_100)
+        mon_old_100, sim_old_100 = bandaid(h_20C_resamp_100, chm=chm_in)
         mon_ver_100, sim_ver_100, randles_ver_100, sim_s_ver_100 =\
             replicate(mon_old_100, sim_old=sim_old_100, init_time=1., verbose=False, t_max=t_max_in,
                       sres=sres_in, staudif=staudif_in, stauct=stauct_in, use_vb_sim=True)

@@ -988,7 +988,8 @@ if __name__ == '__main__':
         # User inputs
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
-        input_files = ['hist_v20221028c_20221213.txt']
+        # input_files = ['hist_v20221028c_20221213.txt']
+        input_files = ['CH 20230128.txt']
         # t_max_in = 20.
         # exclusions = [(0, 1665334404)]  # before faults
         # exclusions = [(0, 1665404608), (1665433410, 1670000000)]  # EKF wander full
@@ -1000,19 +1001,17 @@ if __name__ == '__main__':
         path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
-        cols_h = ('time', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc_dyn', 'voc_stat', 'falw')
         cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
                   'e_w_f', 'fltw', 'falw')
-
         # cat files
         cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
 
         # Load history
-        temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='hist', unit_key='unit_h',
+        temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
                                                 skip=skip, path_to_data=path_to_temp, path_to_temp=path_to_temp,
                                                 comment_str='---')
         if temp_hist_file_clean:
-            h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, usecols=cols_h, dtype=None,
+            h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
                                   encoding=None).view(np.recarray)
         else:
             print("data from", temp_hist_file, "empty after loading")
@@ -1056,10 +1055,10 @@ if __name__ == '__main__':
         voc_soc20 = look_it(x0, lut_voc, 20.)
         print('filter h')
         h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
-        # T_300new = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
-        # T_300old = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
-        T_300new = 10  # For long histories
-        T_300old = 10  # For long histories
+        T_300new = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
+        T_300old = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
+        # T_300new = 10  # For long histories
+        # T_300old = 10  # For long histories
         print('resample old')
         h_20C_resamp_300old = resample(data=h_20C, dt_resamp=T_300old, time_var='time',
                                        specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
