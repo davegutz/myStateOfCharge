@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "soc1a_20221220";  // full up case
+const String unit = "soc1a_20230128";  // full up case
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
