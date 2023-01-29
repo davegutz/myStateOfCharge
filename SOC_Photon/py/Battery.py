@@ -90,6 +90,8 @@ V_BATT_DOWN = 9.8  # Shutoff point.  Diff to RISING needs to be larger than delt
 V_BATT_RISING = 10.3  # Shutoff point when off, V (10.3)
 RANDLES_T_MAX = 0.31  # Maximum update time of Randles state space model to avoid aliasing and instability (0.31 allows DP3)
 cp_eframe_mult = 20  # Run EKF 20 times slower than Coulomb Counter and Randles models
+READ_DELAY = 100  # nominal read time, ms
+EKF_EFRAME_MULT = 20  # Multiframe rate consistent with READ_DELAY (20 for READ_DELAY=100)
 VB_DC_DC = 13.5  # Estimated dc-dc charger, V
 HDB_VBATT = 0.05  # Half deadband to filter vb, V (0.05)
 HYS_CAP = 3.6e3  # Capacitance of hysteresis, Farads (3.6e3)
@@ -140,10 +142,10 @@ class Battery(Coulombs):
         # CHINS Bmon=1, Bsim=1
         t_x_soc1 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
         t_y_t1 = [5.,  11.1,   25.,   40.]
-        t_voc1 = [4.00, 4.00, 4.00,  4.00,  10.,   11.,   13.09, 13.15, 13.20, 13.26, 13.28, 13.31, 13.34, 13.37, 13.40, 13.42, 13.60, 14.45,
-                  4.00, 4.00, 4.00,  9.50,  13.01, 13.05, 13.09, 13.15, 13.20, 13.26, 13.28, 13.31, 13.34, 13.37, 13.40, 13.42, 13.60, 14.45,
-                  4.00, 4.00, 10.00, 12.97, 13.01, 13.05, 13.09, 13.15, 13.20, 13.26, 13.28, 13.31, 13.34, 13.37, 13.40, 13.42, 13.60, 14.45,
-                  4.00, 4.00, 11.00, 12.97, 13.01, 13.05, 13.09, 13.15, 13.20, 13.26, 13.28, 13.31, 13.34, 13.37, 13.40, 13.42, 13.60, 14.45]
+        t_voc1 = [4.00, 4.00,  4.00,  4.00,  10.,   11.,   12.94, 13.00, 13.05, 13.11, 13.13, 13.16, 13.19, 13.22, 13.25, 13.27, 13.45, 14.45,
+                  4.00, 4.00,  4.00,  9.50,  12.86, 12.90, 12.94, 13.00, 13.05, 13.11, 13.13, 13.16, 13.19, 13.22, 13.25, 13.27, 13.45, 14.45,
+                  4.00, 4.00,  10.00, 12.82, 12.86, 12.90, 12.94, 13.00, 13.05, 13.11, 13.13, 13.16, 13.19, 13.22, 13.25, 13.27, 13.45, 14.45,
+                  4.00, 4.00,  11.00, 12.82, 12.86, 12.90, 12.94, 13.00, 13.05, 13.11, 13.13, 13.16, 13.19, 13.22, 13.25, 13.27, 13.45, 14.45]
 
         x1 = np.array(t_x_soc1)
         y1 = np.array(t_y_t1)
@@ -460,6 +462,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap, dt=min(self.dt, F_MAX_T_WRAP), reset=reset)
 
         # EKF 1x1
+        self.eframe_mult = max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/1000./self.dt + 0.9999), 1)
         if self.eframe == 0:
             self.dt_eframe = self.dt * float(self.eframe_mult)
             ddq_dt = self.ib
@@ -479,8 +482,9 @@ class BatteryMonitor(Battery, EKF1x1):
             # EKF convergence
             conv = abs(self.y_filt) < EKF_CONV
             self.EKF_converged.calculate(conv, EKF_T_CONV, EKF_T_RESET, min(self.dt_eframe, EKF_T_RESET), False)
+            # print('dt', self.dt, 'dt_eframe', self.dt_eframe, 'eframe_mult', self.eframe_mult, 'ib', self.ib, 'temp_c', self.temp_c, 'T_rate', T_rate, 'ddq_dt', ddq_dt )
         self.eframe += 1
-        if reset or self.eframe == self.eframe_mult:
+        if reset or self.eframe >= self.eframe_mult:  # '>=' ensures reset with changes on the fly
             self.eframe = 0
 
         # Filtered voc

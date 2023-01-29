@@ -527,11 +527,12 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(mv.time, mv.soc_ekf, color='magenta', linestyle='--', label='soc_ekf'+new_str)
         plt.legend(loc=1)
         plt.subplot(222)
-        plt.plot(mo.soc, mo.voc_stat, color='magenta', linestyle='-', label='voc_stat(soc) = z '+old_str)
-        plt.plot(mo.soc, mo.voc_ekf, color='cyan', linestyle='--', label='voc_ekf(soc) = Hx '+old_str)
+        plt.plot(mo.soc, mo.voc_stat, color='blue', linestyle='-', label='voc_stat(soc) = z '+old_str)
+        plt.plot(mv.soc, mv.voc_stat, color='red', linestyle='--', label='voc_stat(soc) = z '+new_str)
+        plt.plot(mo.soc, mo.voc_ekf, color='green', linestyle='-.', label='voc_ekf(soc) = Hx '+old_str)
         if mo.voc_soc is not None:
-            plt.plot(mo.soc, mo.voc_soc, color='green', linestyle='-.', label='voc_soc'+old_str)
-        plt.plot(mv.soc, mv.voc_soc, color='orange', linestyle=':', label='voc_soc'+new_str)
+            plt.plot(mo.soc, mo.voc_soc, color='green', linestyle=':', label='voc_soc'+old_str)
+        plt.plot(mv.soc, mv.voc_soc, color='orange', linestyle='-', label='voc_soc'+new_str)
         if mo.vb_h is not None:
             plt.plot(mo.soc, mo.vb_h, color='blue', linestyle='-', label='vb'+old_str)
         if hasattr(sv, 'voc_stat'):
@@ -656,6 +657,34 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
             fig_file_name = filename + '_' + str(n_fig) + ".png"
             fig_files.append(fig_file_name)
             plt.savefig(fig_file_name, format="png")
+
+            plt.figure()  # EKF3
+            n_fig += 1
+            plt.subplot(221)
+            plt.title(plot_title + ' EKF 3')
+            plt.plot(mo.time, mo.ib, color='red', linestyle='-', label='ib' + old_str)
+            plt.plot(mv.time, mv.ib, color='black', linestyle='--', label='ib' + new_str)
+            plt.plot(mo.time, mo.u, color='cyan', linestyle='-.', label='u' + old_str)
+            plt.plot(mv.time, mv.u_ekf, color='orange', linestyle=':', label='u' + new_str)
+            plt.legend(loc=1)
+            plt.subplot(222)
+            plt.plot(mo.time, mo.vb, color='red', linestyle='-', label='vb'+old_str)
+            plt.plot(mv.time, mv.vb, color='black', linestyle='--', label='vb'+new_str)
+            plt.plot(mo.time, mo.voc_stat, color='cyan', linestyle='-.', label='z=voc_stat'+old_str)
+            plt.plot(mv.time, mv.voc_stat, color='orange', linestyle=':', label='z=voc_stat'+new_str)
+            plt.legend(loc=1)
+            plt.subplot(223)
+            plt.plot(mo.time, mo.soc, color='red', linestyle='-', label='soc'+old_str)
+            plt.plot(mv.time, mv.soc, color='black', linestyle='--', label='soc'+new_str)
+            plt.plot(mo.time, mo.soc_ekf, color='cyan',  linestyle='-.', label='x=soc_ekf'+old_str)
+            plt.plot(mv.time, mv.soc_ekf, color='orange', linestyle=':', label='x=soc_ekf'+new_str)
+            plt.legend(loc=1)
+            plt.subplot(224)
+            plt.plot(mo.time, mo.voc_stat, color='red', linestyle='-', label='z=voc_stat'+old_str)
+            plt.plot(mv.time, mv.voc_stat, color='black', linestyle='--', label='z=voc_stat'+new_str)
+            plt.plot(mo.time, mo.voc_ekf, color='cyan', linestyle='-.', label='voc_ekf(soc) = Hx'+old_str)
+            plt.plot(mv.time, mv.voc_ekf, color='orange', linestyle=':', label='voc_ekf(soc) = Hx'+new_str)
+            plt.legend(loc=1)
 
         if mo.voc_soc is not None:
             plt.figure()  # EKF  3

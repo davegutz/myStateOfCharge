@@ -29,6 +29,7 @@ if __name__ == '__main__':
     plt.rcParams['axes.grid'] = True
     from datetime import datetime
     from CompareRunRun import load_data
+    from Battery import cp_eframe_mult
     # global mon_old
 
 
@@ -70,8 +71,8 @@ if __name__ == '__main__':
         data_file_old_txt = 'ampHiFail v20221220.txt'; unit_key = 'pro0p'
         data_file_old_txt = 'ampHiFail vA20221220.txt';  unit_key = 'soc1a'
         data_file_old_txt = 'rapidTweakRegression v20221220.txt'; unit_key = 'pro0p_2022'  # ; time_end_in=4.8;
-        data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in=4.8;
-        data_file_old_txt = 'ekf CHINS v20230128 20230128.txt'; unit_key = 'soc0p'  # ; time_end_in=99.;
+        # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in=4.8;
+        data_file_old_txt = 'ekf CHINS v20230128 20230128.txt'; unit_key = 'soc0p'; # time_end_in=99.;
         # data_file_old_txt = 'offSitHysBms v20221220.txt'; unit_key = 'pro0p_2022'   # ; time_end_in = 137.
         # data_file_old_txt = 'offSitHysBms vA20221220.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
         # data_file_old_txt = 'Xm0VbFail.txt'; unit_key = 'soc1a'  #; time_end_in = 10.

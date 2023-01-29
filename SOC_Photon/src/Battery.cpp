@@ -61,7 +61,7 @@ float Battery::calculate(const float temp_C, const float soc_frac, float curr_in
         temp_c      Battery temperature, deg C
     OUTPUTS:
         dv_dsoc     Derivative scaled, V/fraction
-        voc_stat    Static model open circuit voltage from table (reference), V
+        voc_soc_stat    Static model open circuit voltage from table (reference), V
 */
 float Battery::calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc)
 {
