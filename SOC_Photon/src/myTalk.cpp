@@ -377,7 +377,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 cp.cmd_reset();
                 break;
 
-              case ( '^' ):  // * D^<>:  Temp bias change model for faults
+              case ( '^' ):  //   D^<>:  Temp bias change model for faults
                 Serial.printf("cp.Tb_bias_model%7.3f to", cp.Tb_bias_model);
                 cp.Tb_bias_model = cp.input_str.substring(2).toFloat();
                 Serial.printf("%7.3f\n", cp.Tb_bias_model);
