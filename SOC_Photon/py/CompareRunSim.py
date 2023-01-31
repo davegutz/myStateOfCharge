@@ -62,6 +62,8 @@ if __name__ == '__main__':
         long_term_in = False
         plot_overall_in = True
         use_vb_sim_in = False
+        sres_in = 1.
+        stauct_in = 1.
 
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
@@ -73,6 +75,7 @@ if __name__ == '__main__':
         data_file_old_txt = 'rapidTweakRegression v20221220.txt'; unit_key = 'pro0p_2022'  # ; time_end_in=4.8;
         # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in=4.8;
         data_file_old_txt = 'ekf CHINS v20230128 20230128.txt'; unit_key = 'soc0p'; # time_end_in=99.;
+        data_file_old_txt = 'saturation v20230128 20230131.txt'; unit_key = 'soc0p'; sres_in = 1.5;scale_hys_mon_in = 1.5; scale_hys_sim_in = 1.5;
         # data_file_old_txt = 'offSitHysBms v20221220.txt'; unit_key = 'pro0p_2022'   # ; time_end_in = 137.
         # data_file_old_txt = 'offSitHysBms vA20221220.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
         # data_file_old_txt = 'Xm0VbFail.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
@@ -143,13 +146,13 @@ if __name__ == '__main__':
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
-                                                             sres=1.0, t_ib_fail=t_ib_fail, use_ib_mon=use_ib_mon_in,
+                                                             sres=sres_in, t_ib_fail=t_ib_fail, use_ib_mon=use_ib_mon_in,
                                                              scale_in=scale_in, use_vb_raw=use_vb_raw,
                                                              scale_r_ss=scale_r_ss_in, s_hys_sim=scale_hys_sim_in,
                                                              s_hys_mon=scale_hys_mon_in, dvoc_sim=dvoc_sim_in,
                                                              dvoc_mon=dvoc_mon_in, Bmon=Bmon_in, Bsim=Bsim_in,
                                                              drive_ekf=drive_ekf_in, dTb_in=dTb, verbose=False,
-                                                             use_vb_sim=use_vb_sim_in)
+                                                             use_vb_sim=use_vb_sim_in, stauct=stauct_in)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots

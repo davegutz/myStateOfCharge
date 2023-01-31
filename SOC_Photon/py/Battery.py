@@ -112,7 +112,7 @@ class Battery(Coulombs):
                             what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
                             or 20 - 40 A for a 100 Ah battery"""
 
-    def __init__(self, bat_v_sat=13.8, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
+    def __init__(self, bat_v_sat=13.85, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, tweak_test=False, t_max=RANDLES_T_MAX, sres=1., stauct=1., staudif=1.,
                  scale_r_ss=1., s_hys=1., dvoc=0.):

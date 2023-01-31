@@ -620,7 +620,7 @@ void BatterySim::assign_randles(void)
 //  Outputs:
 //    temp_c_           Simulated Tb, deg C
 //    ib_fut_           Simulated over-ridden by saturation, A
-//    vb_               Simulated Vb, V
+//    vb_               Simulated vb, V
 //    sp.inj_bias       Used to inject fake shunt current, A
 
                 <---ib        ______________         <---ib
@@ -652,7 +652,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     // Inputs
     temp_c_ = Sen->Tb_filt;
     dt_ = Sen->T;
-    ib_in_ = Sen->Ib_model_in;
+    ib_in_ = Sen->Ib_model_in / sp.nP();
     if ( reset ) ib_fut_ = ib_in_;
     ib_ = max(min(ib_fut_, IMAX_NUM), -IMAX_NUM);  //  Past value ib_.  Overflow protection when ib_ past value used
     vsat_ = calc_vsat();

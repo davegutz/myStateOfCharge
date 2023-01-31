@@ -97,9 +97,9 @@ void Chemistry::assign_CH()
   hys_cap = 3.6e3;  // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data. // div 10 again 9/29/2022 // div 10 again 11/30/2022
   low_voc = 9.;     // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
-  r_0     = 0.003;  // Randles R0, ohms
-  r_ct    = 0.0016; // Randles charge transfer resistance, ohms
-  r_diff  = 0.0077; // Randles diffusion resistance, ohms
+  r_0     = 0.003*1.5;  // Randles R0, ohms
+  r_ct    = 0.0016*1.5; // Randles charge transfer resistance, ohms
+  r_diff  = 0.0077*1.5; // Randles diffusion resistance, ohms
   r_sd    = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
   tau_ct  = 0.2;    // Randles charge transfer time constant, s (=1/Rct/Cct)
   tau_diff = 83.;   // Randles diffusion time constant, s (=1/Rdif/Cdif)
