@@ -91,6 +91,9 @@ def save_clean_file_sim(sim_ver, csv_file, unit_key):
         print("Wrote(save_clean_file_sim):", csv_file)
 
 
+#  Replicate the application in its entirety here.
+#  There are no 'bank' parameters anywhere in this model.   It is assumed that all inputs from the application have
+#  been converted to the single battery unit 12v form, S1P1, lower-case nomenclature.
 def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2,
               t_ib_fail=None, ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=None, Bmon=None, use_vb_raw=False,
               scale_r_ss=1., s_hys_sim=1., s_hys_mon=1., dvoc_sim=0., dvoc_mon=0., drive_ekf=False, dTb_in=None,

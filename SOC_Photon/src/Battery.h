@@ -90,7 +90,8 @@ const float T_VOC_BB[M_T_BB*N_S_BB] = // r(soc, dv) table
 const uint8_t N_N_BB = 5;   // Number of temperature breakpoints for x_soc_min table
 const float X_SOC_MIN_BB[N_N_BB] =  { 5.,   11.1,  20.,  30.,  40.};  // Temperature breakpoints for soc_min table
 const float T_SOC_MIN_BB[N_N_BB] =  { 0.10, 0.07,  0.05, 0.00, 0.20}; // soc_min(t).  At 40C BMS shuts off at 12V
-// Hysteresis
+
+// Battleborn Hysteresis
 const uint8_t M_H_BB  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
 const uint8_t N_H_BB  = 7;          // Number of dv breakpoints in r(dv) table t_r
 const float X_DV_BB[N_H_BB] =       // dv breakpoints for r(soc, dv) table t_r. // DAG 6/13/2022 tune x10 to match data
@@ -121,7 +122,8 @@ const float T_VOC_CH[M_T_CH*N_S_CH] = // r(soc, dv) table
 const uint8_t N_N_CH = 4;   // Number of temperature breakpoints for x_soc_min table
 const float X_SOC_MIN_CH[N_N_CH] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
 const float T_SOC_MIN_CH[N_N_CH] =  { 0.10, 0.07,  0.05, 0.03}; // soc_min(t)
-// Hysteresis
+
+// CHINS Hysteresis
 const uint8_t M_H_CH  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
 const uint8_t N_H_CH  = 7;          // Number of dv breakpoints in r(dv) table t_r
 const float X_DV_CH[N_H_CH] =       // dv breakpoints for r(soc, dv) table t_r
