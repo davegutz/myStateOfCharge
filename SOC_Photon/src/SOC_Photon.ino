@@ -209,7 +209,6 @@ void setup()
   // Ask to renominalize
   if ( ASK_DURING_BOOT )
   {
-    delay(5000);  // Wait for CoolTerm on small laptops
     if ( sp.num_diffs() )
     {
       Serial.printf("#off-nominal = %d", sp.num_diffs());
@@ -222,19 +221,30 @@ void setup()
       display->display();
       Serial.printf("Do you wish to reset to defaults? [Y/n]:"); Serial1.printf("Do you wish to reset to defaults? [Y/n]:");
       uint8_t count = 0;
-      while ( !Serial.available() && !Serial1.available() && ++count<60 ) delay(1000);
-      uint16_t answer = 'n';
-      if ( Serial.available() ) answer=Serial.read();
-      else if ( Serial1.available() ) answer=Serial1.read();
-      if ( answer=='Y' )
+      uint16_t answer = '+';  // requires shift so safe non-answer
+      while ( count++<60 && answer!='Y' && answer!='n' && answer!='N' )
       {
-        Serial.printf(" Y\n"); Serial1.printf(" Y\n");
-        sp.reset_pars();
-        sp.pretty_print( true );
-      }
-      else
-      {
-        Serial.printf(" N.  moving on...\n\n"); Serial1.printf(" N.  moving on...\n\n");
+        delay(1000);
+        if ( Serial.available() )  answer=Serial.read();
+        else if ( Serial1.available() ) answer=Serial1.read();
+        if ( answer=='Y' )
+        {
+          Serial.printf(" Y\n"); Serial1.printf(" Y\n");
+          sp.reset_pars();
+          sp.pretty_print( true );
+        }
+        else if ( answer=='n' || answer=='N' )
+        {
+          Serial.printf(" N.  moving on...\n\n"); Serial1.printf(" N.  moving on...\n\n");
+        }
+        else if ( answer=='+' )  // requires shift so safe non-answer
+          continue;
+        else  // reprint
+        {
+          sp.pretty_print( false );
+          Serial.printf("Do you wish to reset to defaults? [Y/n]:"); Serial1.printf("Do you wish to reset to defaults? [Y/n]:");
+          answer = '+';  // continue looping;  requires shift so safe non-answer
+        }
       }
     }
     else
