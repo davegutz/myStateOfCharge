@@ -209,6 +209,7 @@ void setup()
   // Ask to renominalize
   if ( ASK_DURING_BOOT )
   {
+    delay(5000);  // Wait for CoolTerm on small laptops
     if ( sp.num_diffs() )
     {
       Serial.printf("#off-nominal = %d", sp.num_diffs());
