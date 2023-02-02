@@ -225,20 +225,27 @@ void setup()
       while ( count++<60 && answer!='Y' && answer!='n' && answer!='N' )
       {
         delay(1000);
-        if ( Serial.available() )  answer=Serial.read();
-        else if ( Serial1.available() ) answer=Serial1.read();
+        if ( Serial.available() )
+          answer=Serial.read();
+
+        else if ( Serial1.available() )
+          answer=Serial1.read();
+
         if ( answer=='Y' )
         {
           Serial.printf(" Y\n"); Serial1.printf(" Y\n");
           sp.reset_pars();
           sp.pretty_print( true );
         }
+
         else if ( answer=='n' || answer=='N' )
         {
           Serial.printf(" N.  moving on...\n\n"); Serial1.printf(" N.  moving on...\n\n");
         }
-        else if ( answer=='+' )  // requires shift so safe non-answer
+
+        else if ( answer=='+' || answer=='\r' || answer=='\n' )  // requires shift so safe non-answer
           continue;
+
         else  // reprint
         {
           sp.pretty_print( false );
