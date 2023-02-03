@@ -92,5 +92,6 @@ void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *milli
 String time_long_2_str(const unsigned long current_time, char *tempStr);
 String tryExtractString(String str, const char* start, const char* end);
 void rapid_print(Sensors *Sen, BatteryMonitor *Mon);
+void wait_on_user_input(Adafruit_SSD1306 *display);
 
 #endif

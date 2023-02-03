@@ -211,49 +211,7 @@ void setup()
   {
     if ( sp.num_diffs() )
     {
-      display->clearDisplay();
-      display->setTextSize(1);              // Normal 1:1 pixel scale
-      display->setTextColor(SSD1306_WHITE); // Draw white text
-      display->setCursor(0,0);              // Start at top-left corner    sp.print_versus_local_config();
-      display->println("Waiting for user talk\n\nignores after 120s");
-      display->display();
-      uint8_t count = 0;
-      const uint8_t max_count = 30;
-      uint16_t answer = '\r';
-      while ( ++count<max_count && answer!='Y' && answer!='n' && answer!='N' )
-      {
-        if ( count>1 ) delay(4000);
-        if ( Serial.available() )
-        {
-          answer=Serial.read();
-        }
-
-        else if ( Serial1.available() )
-        {
-          answer=Serial1.read();
-        }
-
-        if ( answer=='Y' )
-        {
-          Serial.printf(" Y\n"); Serial1.printf(" Y\n");
-          sp.reset_pars();
-          sp.pretty_print( true );
-        }
-
-        else if ( answer=='n' || answer=='N' )
-        {
-          Serial.printf(" N.  moving on...\n\n"); Serial1.printf(" N.  moving on...\n\n");
-        }
-
-        else
-        {
-          Serial.printf("\n\n");
-          sp.pretty_print( false );
-          Serial.printf("Do you wish to reset to defaults? [Y/n]:"); Serial1.printf("Do you wish to reset to defaults? [Y/n]:");
-        }
-
-      }
-      if ( count==max_count ) Serial.printf("time out; moving on\n");
+      wait_on_user_input(display);
     }
     else
     {
