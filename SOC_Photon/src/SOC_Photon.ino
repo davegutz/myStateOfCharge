@@ -221,15 +221,22 @@ void setup()
       display->display();
       Serial.printf("Do you wish to reset to defaults? [Y/n]:"); Serial1.printf("Do you wish to reset to defaults? [Y/n]:");
       uint8_t count = 0;
-      uint16_t answer = '+';  // requires shift so safe non-answer
+      uint16_t answer = '+';
+      uint16_t last_answer = '+';
       while ( count++<60 && answer!='Y' && answer!='n' && answer!='N' )
       {
         delay(1000);
         if ( Serial.available() )
+        {
+          last_answer = answer;
           answer=Serial.read();
+        }
 
         else if ( Serial1.available() )
+        {
+          last_answer = answer;
           answer=Serial1.read();
+        }
 
         if ( answer=='Y' )
         {
@@ -243,15 +250,19 @@ void setup()
           Serial.printf(" N.  moving on...\n\n"); Serial1.printf(" N.  moving on...\n\n");
         }
 
-        else if ( answer=='+' || answer=='\r' || answer=='\n' )  // requires shift so safe non-answer
-          continue;
-
-        else  // reprint
+        else if ( last_answer!=answer ) // reprint
         {
           sp.pretty_print( false );
           Serial.printf("Do you wish to reset to defaults? [Y/n]:"); Serial1.printf("Do you wish to reset to defaults? [Y/n]:");
-          answer = '+';  // continue looping;  requires shift so safe non-answer
+          last_answer = '+';
+          answer = '+';  // continue looping to get information
         }
+
+        else
+        {
+          continue;
+        }
+
       }
     }
     else
