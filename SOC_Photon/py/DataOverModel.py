@@ -925,7 +925,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.title(plot_title + ' GP 3 Tune')
     plt.plot(mo.time, mo.dv_dyn, color='blue', linestyle='-', label='dv_dyn'+old_str)
     plt.plot(mv.time, mv.dv_dyn, color='cyan', linestyle='--', label='dv_dyn'+new_str)
-    plt.plot(mo.time, so.dv_dyn_s, color='black', linestyle='-.', label='dv_dyn_s'+old_str)
+    plt.plot(so.time, so.dv_dyn_s, color='black', linestyle='-.', label='dv_dyn_s'+old_str)
     plt.plot(mv.time, smv.dv_dyn_s, color='magenta', linestyle=':', label='dv_dyn_s'+new_str)
     plt.xlabel('sec')
     plt.legend(loc=3)
