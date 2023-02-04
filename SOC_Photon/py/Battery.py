@@ -94,7 +94,6 @@ READ_DELAY = 100  # nominal read time, ms
 EKF_EFRAME_MULT = 20  # Multiframe rate consistent with READ_DELAY (20 for READ_DELAY=100)
 VB_DC_DC = 13.5  # Estimated dc-dc charger, V
 HDB_VBATT = 0.05  # Half deadband to filter vb, V (0.05)
-HYS_CAP = 3.6e3  # Capacitance of hysteresis, Farads (3.6e3)
 WRAP_ERR_FILT = 4.  # Wrap error filter time constant, s (4)
 MAX_WRAP_ERR_FILT = 10.  # Anti-windup wrap error filter, V (10)
 F_MAX_T_WRAP = 2.8  # Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (2.8)
@@ -142,10 +141,10 @@ class Battery(Coulombs):
         # CHINS Bmon=1, Bsim=1
         t_x_soc1 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
         t_y_t1 = [5.,  11.1,   25.,   40.]
-        t_voc1 = [4.00, 4.00,  4.00,  4.00,  10.,   11.,   12.94, 13.00, 13.05, 13.11, 13.13, 13.16, 13.19, 13.22, 13.25, 13.52, 13.70, 14.70,
-                  4.00, 4.00,  4.00,  9.50,  12.86, 12.90, 12.94, 13.00, 13.05, 13.11, 13.13, 13.16, 13.19, 13.22, 13.25, 13.52, 13.70, 14.70,
-                  4.00, 4.00,  10.00, 12.82, 12.86, 12.90, 12.94, 13.00, 13.05, 13.11, 13.13, 13.16, 13.19, 13.22, 13.25, 13.52, 13.70, 14.70,
-                  4.00, 4.00,  11.00, 12.82, 12.86, 12.90, 12.94, 13.00, 13.05, 13.11, 13.13, 13.16, 13.19, 13.22, 13.25, 13.52, 13.70, 14.70]
+        t_voc1 = [4.00, 4.00,  4.00,  4.00,  10.,   11.,   13.04, 13.10, 13.15, 13.21, 13.23, 13.26, 13.29, 13.32, 13.35, 13.52, 13.70, 14.70,
+                  4.00, 4.00,  4.00,  9.50,  12.96, 13.00, 13.04, 13.10, 13.15, 13.21, 13.23, 13.26, 13.29, 13.32, 13.35, 13.52, 13.70, 14.70,
+                  4.00, 4.00,  10.00, 12.92, 12.96, 13.00, 13.04, 13.10, 13.15, 13.21, 13.23, 13.26, 13.29, 13.32, 13.35, 13.52, 13.70, 14.70,
+                  4.00, 4.00,  11.00, 12.92, 12.96, 13.00, 13.04, 13.10, 13.15, 13.21, 13.23, 13.26, 13.29, 13.32, 13.35, 13.52, 13.70, 14.70]
 
         x1 = np.array(t_x_soc1)
         y1 = np.array(t_y_t1)
@@ -346,7 +345,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.scaler_r = scaler_r
         self.Q = EKF_Q_SD_NORM * EKF_Q_SD_NORM  # EKF process uncertainty
         self.R = EKF_R_SD_NORM * EKF_R_SD_NORM  # EKF state uncertainty
-        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys, cap=HYS_CAP*scale_hys_cap)  # Battery hysteresis model - drift of voc
+        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys, scale_cap=scale_hys_cap)  # Battery hysteresis model - drift of voc
         self.soc_s = 0.  # Model information
         self.EKF_converged = TFDelay(False, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT)
         self.y_filt_lag = LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
@@ -454,7 +453,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.dv_dyn = self.vb - self.voc
 
         # Hysteresis model
-        self.hys.calculate_hys(self.ib, self.soc)
+        self.hys.calculate_hys(self.ib, self.soc, self.chm)
         init_low = self.bms_off or (self.soc < (self.soc_min + HYS_SOC_MIN_MARG) and self.ib > HYS_IB_THR)
         self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=self.e_wrap)*self.s_hys
         self.voc_stat = self.voc - self.dv_hys
@@ -684,7 +683,7 @@ class BatterySim(Battery):
         self.s_cap = scale  # Rated capacity scalar
         if scale is not None:
             self.apply_cap_scale(scale)
-        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys, cap=HYS_CAP*scale_hys_cap)  # Battery hysteresis model - drift of voc
+        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys, scale_cap=scale_hys_cap)  # Battery hysteresis model - drift of voc
         self.tweak_test = tweak_test
         self.voc = 0.  # Charging voltage, V
         self.d_delta_q = 0.  # Charging rate, Coulombs/sec
@@ -748,7 +747,7 @@ class BatterySim(Battery):
         self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)
 
         # Hysteresis model
-        self.hys.calculate_hys(curr_in, self.soc)
+        self.hys.calculate_hys(curr_in, self.soc, self.chm)
         init_low = self.bms_off or (self.soc < (self.soc_min + HYS_SOC_MIN_MARG) and self.ib > HYS_IB_THR)
         self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=0.)*self.s_hys
         self.voc = self.voc_stat + self.dv_hys

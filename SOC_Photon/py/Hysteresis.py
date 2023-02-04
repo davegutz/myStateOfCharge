@@ -28,27 +28,62 @@ HYS_DV_MIN = 0.2
 class Hysteresis:
     # Use variable resistor to create hysteresis from an RC circuit
 
-    def __init__(self, t_dv=None, t_soc=None, t_r=None, t_dv_min=None, t_dv_max=None, cap=3.6e3, scale=1., dv_hys=0.0):
+    def __init__(self, scale=1., dv_hys=0.0, chem=0, scale_cap=1.,
+                 t_dv0=None, t_soc0=None, t_r0=None, t_dv_min0=None, t_dv_max0=None,
+                 t_dv1=None, t_soc1=None, t_r1=None, t_dv_min1=None, t_dv_max1=None):
         # Defaults
-        if t_dv is None:
-            t_dv = [-0.7,   -0.5,  -0.3,  0.0,   0.15,   0.3,   0.7]
-        if t_soc is None:
-            t_soc = [0, .5, 1]
-        if t_r is None:
-            t_r = [0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
-                   0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
-                   0.016, 0.016, 0.016, 0.005, 0.010, 0.010, 0.010]
-        if t_dv_min is None:
-            t_dv_min = [-0.7, -0.5, -0.3]
-        if t_dv_max is None:
-            t_dv_max = [0.7, 0.3, 0.15]
+        self.chm = chem
+        self.scale_cap = scale_cap
+
+        # Battleborn
+        self.cap0 = 3.6e3
+        if t_dv0 is None:
+            t_dv0 = [-0.7,   -0.5,  -0.3,  0.0,   0.15,   0.3,   0.7]
+        if t_soc0 is None:
+            t_soc0 = [0, .5, 1]
+        if t_r0 is None:
+            t_r0 = [0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
+                    0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
+                    0.016, 0.016, 0.016, 0.005, 0.010, 0.010, 0.010]
+        if t_dv_min0 is None:
+            t_dv_min0 = [-0.7, -0.5, -0.3]
+        if t_dv_max0 is None:
+            t_dv_max0 = [0.7, 0.3, 0.15]
+        self.lut0 = TableInterp2D(t_dv0, t_soc0, t_r0)
+        self.lu_x0 = TableInterp1D(t_soc0, t_dv_max0)
+        self.lu_n0 = TableInterp1D(t_soc0, t_dv_min0)
+
+        # CHINS
+        self.cap1 = 3.6e2
+        if t_dv1 is None:
+            t_dv1 = [-0.7,   -0.5,  -0.3,  0.0,   0.15,   0.3,   0.7]
+        if t_soc1 is None:
+            t_soc1 = [0, .5, 1]
+        if t_r1 is None:
+            t_r1 = [0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
+                    0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
+                    0.016, 0.016, 0.016, 0.005, 0.010, 0.010, 0.010]
+        if t_dv_min1 is None:
+            t_dv_min1 = [-0.7, -0.5, -0.3]
+        if t_dv_max1 is None:
+            t_dv_max1 = [0.7, 0.3, 0.15]
+        self.lut1 = TableInterp2D(t_dv1, t_soc1, t_r1)
+        self.lu_x1 = TableInterp1D(t_soc1, t_dv_max1)
+        self.lu_n1 = TableInterp1D(t_soc1, t_dv_min1)
+
+        if self.chm == 0:
+            self.cap = self.cap0
+            self.lut = self.lut0
+            self.lu_x = self.lu_x0
+            self.lu_n = self.lu_n0
+        elif self.chm == 1:
+            self.cap = self.cap1
+            self.lut = self.lut1
+            self.lu_x = self.lu_x1
+            self.lu_n = self.lu_n1
 
         self.scale = scale
         self.disabled = self.scale < 1e-5
-        self.lut = TableInterp2D(t_dv, t_soc, t_r)
-        self.lu_x = TableInterp1D(t_soc, t_dv_max)
-        self.lu_n = TableInterp1D(t_soc, t_dv_min)
-        self.cap = cap
         self.res = 0.
         self.soc = 0.
         self.ib = 0.
@@ -59,7 +94,7 @@ class Hysteresis:
 
     def __str__(self, prefix=''):
         s = prefix + "Hysteresis:\n"
-        res = self.look_hys(dv=0., soc=0.8)
+        res = self.look_hys(dv=0., soc=0.8, chem=self.chm)
         s += "  res(median) =  {:6.4f}  // Null resistance, Ohms\n".format(res)
         s += "  cap      = {:10.1f}  // Capacitance, Farads\n".format(self.cap)
         s += "  tau      = {:10.1f}  // Null time constant, sec\n".format(res*self.cap)
@@ -73,7 +108,8 @@ class Hysteresis:
         s += "  hys_scale=    {:7.3f}  // Scalar on hys\n".format(self.scale)
         return s
 
-    def calculate_hys(self, ib, soc):
+    def calculate_hys(self, ib, soc, chem=0):
+        self.chm = chem
         self.ib = ib
         self.soc = soc
         if self.disabled:
@@ -81,7 +117,7 @@ class Hysteresis:
             self.ioc = ib
             self.dv_dot = 0.
         else:
-            self.res = self.look_hys(self.dv_hys, self.soc)
+            self.res = self.look_hys(self.dv_hys, self.soc, self.chm)
             self.ioc = self.dv_hys / self.res
             self.dv_dot = (self.ib - self.dv_hys/self.res) / self.cap
         return self.dv_dot
@@ -89,11 +125,17 @@ class Hysteresis:
     def init(self, dv_init):
         self.dv_hys = dv_init
 
-    def look_hys(self, dv, soc):
+    def look_hys(self, dv, soc, chem=0):
+        self.chm = chem
         if self.disabled:
             self.res = 0.
         else:
-            self.res = self.lut.interp(x=dv, y=soc)
+            if chem == 0:
+                self.cap = self.cap0
+                self.res = self.lut0.interp(x=dv, y=soc)
+            elif chem == 1:
+                self.cap = self.cap1
+                self.res = self.lut1.interp(x=dv, y=soc)
         return self.res
 
     def save(self, time):
@@ -105,9 +147,16 @@ class Hysteresis:
         self.saved.ib.append(self.ib)
         self.saved.ioc.append(self.ioc)
 
-    def update(self, dt, trusting_sensors=False, init_high=False, init_low=False, e_wrap=0.):
-        dv_max = self.lu_x.interp(x=self.soc)
-        dv_min = self.lu_n.interp(x=self.soc)
+    def update(self, dt, trusting_sensors=False, init_high=False, init_low=False, e_wrap=0., chem=0):
+        self.chm = chem
+        if self.chm == 0:
+            self.cap = self.cap0
+            dv_max = self.lu_x0.interp(x=self.soc)
+            dv_min = self.lu_n0.interp(x=self.soc)
+        elif self.chm == 1:
+            self.cap = self.cap1
+            dv_max = self.lu_x1.interp(x=self.soc)
+            dv_min = self.lu_n1.interp(x=self.soc)
 
         # Reset if at endpoints.   e_wrap is an actual measurement of hysteresis if trust sensors.  But once
         # dv_hys is reset it regenerates e_wrap so e_wrap in logic breaks that.   Also, dv_hys regenerates dv_dot
