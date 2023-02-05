@@ -75,7 +75,7 @@ class Hysteresis:
             # sch = [0.012, 0.012, 0.012, 0.008, 0.020, 0.024, 0.029]  # ok negative, ? positive
             # sch = [0.012, 0.012, 0.012, 0.008, 0.012, 0.024, 0.029]  # ok negative,  not enough positive
             # sch = [0.012, 0.012, 0.012, 0.008, 0.016, 0.024, 0.029]  # ok negative,  almost enough positive 1 too much positive 2
-            sch = [0.012, 0.012, 0.012, 0.008, 0.014, 0.024, 0.029]  # ok negative,  not enough positive 1 good positive 2
+            sch = [0.012, 0.012, 0.012, 0.008, 0.014, 0.024, 0.024]  # ok negative,  not enough positive 1 good positive 2
 
         if t_r1 is None:
             t_r1 = sch+sch+sch

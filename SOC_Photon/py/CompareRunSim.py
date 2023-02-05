@@ -77,11 +77,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'rapidTweakRegression v20221220.txt'; unit_key = 'pro0p_2022'  # ; time_end_in=4.8;
         # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in=4.8;
         # data_file_old_txt = 'ekf CHINS v20230128 20230128.txt'; unit_key = 'soc0p'; # time_end_in=99.;
-        # in the following line I forgot to renom sp on load so scale_hys was 1.5 by mistake for baseline run.
-        # data_file_old_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in=1.05; scale_hys_mon_in = 1.5; scale_hys_sim_in = 1.5; scale_hys_sim_in = 1.15; #staudif_sim_in=0.1; scale_hys_cap_sim_in=1.;
-        # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; # scale_hys_mon_in = 1.0; scale_hys_sim_in = 1.0; scale_hys_sim_in = 1.0; staudif_sim_in=0.1; scale_hys_cap_sim_in=1.;
-        # data_file_old_txt = 'stepsshort v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05;
-        data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05;
+
         # data_file_old_txt = 'offSitHysBms v20221220.txt'; unit_key = 'pro0p_2022'   # ; time_end_in = 137.
         # data_file_old_txt = 'offSitHysBms vA20221220.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
         # data_file_old_txt = 'Xm0VbFail.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
@@ -109,6 +105,12 @@ if __name__ == '__main__':
         # data_file_old_txt = 'dwell noise Ca.5 v20221028.txt'  # ; dTb = [[0., 18000.],  [0, 8.]]
         # data_file_old_txt = 'dwell Ca.5 v20221028.txt'  # ; time_end_in=0.5  # ; dTb = [[0., 18000.],  [0, 8.]]
 
+        # The following CHINS runs were sources of figures in the .odt report
+        # in the following line I forgot to renom sp on load so scale_hys was 1.5 by mistake for baseline run.
+        # data_file_old_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in=1.05; scale_hys_mon_in = 1.5; scale_hys_sim_in = 1.5; scale_hys_sim_in = 1.15; #staudif_sim_in=0.1; scale_hys_cap_sim_in=1.;
+        data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; # scale_hys_mon_in = 1.0; scale_hys_sim_in = 1.0; scale_hys_sim_in = 1.0; staudif_sim_in=0.1; scale_hys_cap_sim_in=1.;
+        # data_file_old_txt = 'stepsshort v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05;
+        # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05;
 
         #
         # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
