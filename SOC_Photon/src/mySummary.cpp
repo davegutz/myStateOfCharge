@@ -35,15 +35,3 @@ void print_all_fault_buffer(const String code, struct Flt_st *flt, const int ifl
     flt[i].print(code);
   }
 }
-
-// Flt_st reset helper
-void large_reset_summary(struct Flt_st *sum, const int isum, const int nsum)
-{
-  int i = isum;  // Last one written was isum
-  int n = -1;
-  while ( ++n < nsum )
-  {
-    if ( ++i>nsum-1 ) i = 0;  // Increment beyond last one written
-    sum[i].nominal();
-  }
-}

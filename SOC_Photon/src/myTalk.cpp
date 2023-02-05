@@ -147,7 +147,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'h' ):  // bh: History buffer reset
-                sp.reset_flt();
+                sp.reset_his();
                 break;
 
               case ( 'r' ):  // br: Fault buffer reset
@@ -623,7 +623,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'R' ):  // HR: History reset
                 Serial.printf("Resetting history...");
-                large_reset_summary(mySum, sp.isum(), NSUM);
+                sp.reset_his();
+                sp.reset_flt();
                 Serial.printf("done\n");
                 break;
 
