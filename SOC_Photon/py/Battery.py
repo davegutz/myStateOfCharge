@@ -141,10 +141,10 @@ class Battery(Coulombs):
         # CHINS Bmon=1, Bsim=1
         t_x_soc1 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
         t_y_t1 = [5.,  11.1,   25.,   40.]
-        t_voc1 = [4.00, 4.00,  4.00,  4.00,  10.,   11.,   13.04, 13.10, 13.15, 13.21, 13.23, 13.26, 13.29, 13.32, 13.35, 13.52, 13.70, 14.70,
-                  4.00, 4.00,  4.00,  9.50,  12.96, 13.00, 13.04, 13.10, 13.15, 13.21, 13.23, 13.26, 13.29, 13.32, 13.35, 13.52, 13.70, 14.70,
-                  4.00, 4.00,  10.00, 12.92, 12.96, 13.00, 13.04, 13.10, 13.15, 13.21, 13.23, 13.26, 13.29, 13.32, 13.35, 13.52, 13.70, 14.70,
-                  4.00, 4.00,  11.00, 12.92, 12.96, 13.00, 13.04, 13.10, 13.15, 13.21, 13.23, 13.26, 13.29, 13.32, 13.35, 13.52, 13.70, 14.70]
+        t_voc1 = [4.00, 4.00,  4.00,  4.00,  10.,   11.,   12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.52, 13.70, 14.70,
+                  4.00, 4.00,  4.00,  9.50,  12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.52, 13.70, 14.70,
+                  4.00, 4.00,  10.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.52, 13.70, 14.70,
+                  4.00, 4.00,  11.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.52, 13.70, 14.70]
 
         x1 = np.array(t_x_soc1)
         y1 = np.array(t_y_t1)
@@ -455,7 +455,8 @@ class BatteryMonitor(Battery, EKF1x1):
         # Hysteresis model
         self.hys.calculate_hys(self.ib, self.soc, self.chm)
         init_low = self.bms_off or (self.soc < (self.soc_min + HYS_SOC_MIN_MARG) and self.ib > HYS_IB_THR)
-        self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=self.e_wrap)*self.s_hys
+        self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=self.e_wrap,
+                                      chem=self.chm)*self.s_hys
         self.voc_stat = self.voc - self.dv_hys
         self.e_wrap = self.voc_soc - self.voc_stat
         self.ioc = self.hys.ioc
@@ -749,7 +750,8 @@ class BatterySim(Battery):
         # Hysteresis model
         self.hys.calculate_hys(curr_in, self.soc, self.chm)
         init_low = self.bms_off or (self.soc < (self.soc_min + HYS_SOC_MIN_MARG) and self.ib > HYS_IB_THR)
-        self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=0.)*self.s_hys
+        self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=0.,
+                                      chem=self.chm)*self.s_hys
         self.voc = self.voc_stat + self.dv_hys
         self.ioc = self.hys.ioc
 
