@@ -64,7 +64,7 @@ const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1,
 const float MXEPS = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness) (1-1e-6)
 #define HYS_SOC_MIN_MARG 0.15     // Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis (0.15)
 #define HYS_IB_THR      1.0       // Ignore reset if opposite situation exists, A (1.0)
-#define HYS_DV_MIN      0.2       // Minimum value of hysteresis reset, V (0.2)
+#define HYS_DV_MIN      0.3       // Minimum value of hysteresis reset, V (0.3 for CHINS)
 #define V_BATT_OFF      10.       // Shutoff point in Mon, V (10.)
 #define V_BATT_DOWN     9.8       // Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V (9.8)
 #define V_BATT_RISING   10.3      // Shutoff point when off, V (10.3)
@@ -115,29 +115,31 @@ const float Y_T_CH[M_T_CH] =  //Temperature breakpoints for voc table
 const float X_SOC_CH[N_S_CH] =      //soc breakpoints for voc table
         { -0.15, 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99, 0.995, 1.00};
 const float T_VOC_CH[M_T_CH*N_S_CH] = // r(soc, dv) table
-        { 4.00, 4.00,  4.00,  4.00,  10.00, 11.00, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.52, 13.70, 14.70,
-          4.00, 4.00,  4.00,  9.50,  12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.52, 13.70, 14.70,
-          4.00, 4.00,  10.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.52, 13.70, 14.70,
-          4.00, 4.00,  11.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.52, 13.70, 14.70};
+        { 4.00, 4.00,  4.00,  4.00,  10.00, 11.00, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.35, 13.70, 14.70,
+          4.00, 4.00,  4.00,  9.50,  12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.35, 13.70, 14.70,
+          4.00, 4.00,  10.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.35, 13.70, 14.70,
+          4.00, 4.00,  11.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.35, 13.70, 14.70};
 const uint8_t N_N_CH = 4;   // Number of temperature breakpoints for x_soc_min table
 const float X_SOC_MIN_CH[N_N_CH] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
 const float T_SOC_MIN_CH[N_N_CH] =  { 0.10, 0.07,  0.05, 0.03}; // soc_min(t)
 
 // CHINS Hysteresis
-const uint8_t M_H_CH  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
+const uint8_t M_H_CH  = 5;          // Number of soc breakpoints in r(soc, dv) table t_r
 const uint8_t N_H_CH  = 7;          // Number of dv breakpoints in r(dv) table t_r
 const float X_DV_CH[N_H_CH] =       // dv breakpoints for r(soc, dv) table t_r
         { -0.7,  -0.5,  -0.3,  0.0,   0.15,  0.3,   0.85 };
 const float Y_SOC_CH[M_H_CH] =      // soc breakpoints for r(soc, dv) table t_r
-        { 0.0,  0.5,   1.0};
-const float T_R_CH[M_H_CH*N_H_CH] = // r(soc, dv) table.    // DAG 9/29/2022 tune to match hist data
+        { 0.0,  0.9,   0.92,   0.95,   1.0};
+const float T_R_CH[M_H_CH*N_H_CH] = // r(soc, dv) table.    // DAG 2/7/2023 tune to match data
         { 0.012, 0.012, 0.012, 0.008, 0.014, 0.024, 0.024,
           0.012, 0.012, 0.012, 0.008, 0.014, 0.024, 0.024,
-          0.012, 0.012, 0.012, 0.008, 0.014, 0.024, 0.024};
+          0.012, 0.012, 0.012, 0.008, 0.014, 0.024, 0.024,
+          0.048, 0.048, 0.048, 0.032, 0.056, 0.096, 0.096,
+          0.048, 0.048, 0.048, 0.032, 0.056, 0.096, 0.096};
 const float T_DV_MAX_CH[M_H_CH] =   // dv_max(soc) table.  Pulled values from insp of T_R_CH where flattens
-        {0.3,  0.3,  0.3};
+        {0.3,  0.3,  0.3,  0.3,  0.3};
 const float T_DV_MIN_CH[M_H_CH] =   // dv_max(soc) table.  Pulled values from insp of T_R_CH where flattens
-        {-0.3, -0.3, -0.3};
+        {-0.3, -0.3, -0.3, -0.3, -0.3};
 
 
 // SP spare to reserve memory, perhaps for LION

@@ -22,7 +22,7 @@ import numpy as np
 from pyDAGx.myTables import TableInterp2D, TableInterp1D
 from unite_pictures import cleanup_fig_files
 
-HYS_DV_MIN = 0.2
+HYS_DV_MIN = 0.3
 
 
 class Hysteresis:
@@ -59,7 +59,7 @@ class Hysteresis:
             # t_dv1 = [-0.7,   -0.5,  -0.3,  0.0,   0.3,   0.6,   1.7]
             t_dv1 = [-0.7,   -0.5,  -0.3,  0.0,   0.15,   0.3,   0.85]
         if t_soc1 is None:
-            t_soc1 = [0, .9, .92, .95]
+            t_soc1 = [0, .9, .92, .95, 1.]
             # tune tip:  use center point to set time constant.  rest of points for magnitude
 
             # t_dv1 = [-0.7,   -0.5,  -0.3,  0.0,   0.3,   0.6,   1.7]
@@ -81,11 +81,11 @@ class Hysteresis:
             sch1 = [0.048, 0.048, 0.048, 0.032, 0.056, 0.096, 0.096]  # ok negative,  not enough positive 1 good positive 2
 
         if t_r1 is None:
-            t_r1 = sch+sch+sch+sch1
+            t_r1 = sch+sch+sch+sch1+sch1
         if t_dv_min1 is None:
-            t_dv_min1 = [-0.3, -0.3, -0.3, -0.3]
+            t_dv_min1 = [-0.3, -0.3, -0.3, -0.3, -0.3]
         if t_dv_max1 is None:
-            t_dv_max1 = [0.3, 0.3, 0.3, 0.3]
+            t_dv_max1 = [0.3, 0.3, 0.3, 0.3, 0.3]
         self.lut1 = TableInterp2D(t_dv1, t_soc1, t_r1)
         self.lu_x1 = TableInterp1D(t_soc1, t_dv_max1)
         self.lu_n1 = TableInterp1D(t_soc1, t_dv_min1)

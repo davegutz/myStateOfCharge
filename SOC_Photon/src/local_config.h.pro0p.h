@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "pro0p_20230205";  // voc(soc)
+const String unit = "pro0p_20230207";  // voc(soc)
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
@@ -39,8 +39,8 @@ const String unit = "pro0p_20230205";  // voc(soc)
 // Four 12 V 200 Ah with two in parallel joined with two more in series
 //   would have  RATED_BATT_CAP 200, NS 2, and NP 2
 #define COULOMBIC_EFF         0.9985  // Coulombic efficiency of battery, fraction of charge that gets used
-#define MON_CHEM              0       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
-#define SIM_CHEM              0       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
+#define MON_CHEM              1       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
+#define SIM_CHEM              1       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
 #define RATED_BATT_CAP        100.    // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
 #define HYS_SCALE             1.0     // Scalar on hysteresis (1.0)
 #define NS                    1.0     // Number of series batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BS')

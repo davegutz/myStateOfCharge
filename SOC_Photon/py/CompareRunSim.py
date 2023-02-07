@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
         # data_file_old_txt = 'ampHiFail v20221220.txt'; unit_key = 'pro0p'
         # data_file_old_txt = 'ampHiFail vA20221220.txt';  unit_key = 'soc1a'
-        # data_file_old_txt = 'rapidTweakRegression v20221220.txt'; unit_key = 'pro0p_2022'  # ; time_end_in=4.8;
+        data_file_old_txt = 'rapidTweakRegression v20230207 CHINS.txt'; unit_key = 'pro0p_2023'  # ; time_end_in=4.8;
         # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in=4.8;
         # data_file_old_txt = 'ekf CHINS v20230128 20230128.txt'; unit_key = 'soc0p'; # time_end_in=99.;
 
@@ -110,7 +110,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in=1.05; scale_hys_mon_in = 1.5; scale_hys_sim_in = 1.5; scale_hys_sim_in = 1.15; #staudif_sim_in=0.1; scale_hys_cap_sim_in=1.;
         # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; # scale_hys_mon_in = 1.0; scale_hys_sim_in = 1.0; scale_hys_sim_in = 1.0; staudif_sim_in=0.1; scale_hys_cap_sim_in=1.;
         # data_file_old_txt = 'stepsshort v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05;
-        data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05;
+        # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05;
 
         #
         # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
