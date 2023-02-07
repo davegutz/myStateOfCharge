@@ -3,7 +3,7 @@
 /******************************************************/
 
 #include "Particle.h"
-#line 1 "c:/Users/daveg/OneDrive/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 1 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
 /*
  * Project SOC_Photon
   * Description:
@@ -59,7 +59,7 @@
 // This works when I'm using two platforms:   PHOTON = 6 and ARGON = 12
 void setup();
 void loop();
-#line 54 "c:/Users/daveg/OneDrive/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 54 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
 #ifndef PLATFORM_ID
   #define PLATFORM_ID 12
 #endif
@@ -220,30 +220,7 @@ void setup()
   {
     if ( sp.num_diffs() )
     {
-      Serial.printf("#off-nominal = %d", sp.num_diffs());
-      sp.pretty_print( false );
-      display->clearDisplay();
-      display->setTextSize(1);              // Normal 1:1 pixel scale
-      display->setTextColor(SSD1306_WHITE); // Draw white text
-      display->setCursor(0,0);              // Start at top-left corner    sp.print_versus_local_config();
-      display->println("Waiting for user talk\n\nignores after 60s");
-      display->display();
-      Serial.printf("Do you wish to reset to defaults? [Y/n]:"); Serial1.printf("Do you wish to reset to defaults? [Y/n]:");
-      uint8_t count = 0;
-      while ( !Serial.available() && !Serial1.available() && ++count<60 ) delay(1000);
-      uint16_t answer = 'n';
-      if ( Serial.available() ) answer=Serial.read();
-      else if ( Serial1.available() ) answer=Serial1.read();
-      if ( answer=='Y' )
-      {
-        Serial.printf(" Y\n"); Serial1.printf(" Y\n");
-        sp.reset_pars();
-        sp.pretty_print( true );
-      }
-      else
-      {
-        Serial.printf(" N.  moving on...\n\n"); Serial1.printf(" N.  moving on...\n\n");
-      }
+      wait_on_user_input(display);
     }
     else
     {

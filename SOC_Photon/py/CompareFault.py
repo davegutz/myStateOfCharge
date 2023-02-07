@@ -344,6 +344,101 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
+    old_str = ''
+    new_str = '_ver'
+
+    plt.figure()  # GP 3 Tune
+    n_fig += 1
+    plt.subplot(331)
+    plt.title(plot_title + ' GP 3 Tune')
+    mo.dv_dyn =  mo.vb - mo.voc
+    plt.plot(mo.time, mo.dv_dyn, color='blue', linestyle='-', label='dv_dyn'+old_str)
+    plt.plot(mv.time, mv.dv_dyn, color='cyan', linestyle='--', label='dv_dyn'+new_str)
+    # plt.plot(so.time, so.dv_dyn_s, color='black', linestyle='-.', label='dv_dyn_s'+old_str)
+    plt.plot(mv.time, smv.dv_dyn_s, color='magenta', linestyle=':', label='dv_dyn_s'+new_str)
+    plt.xlabel('sec')
+    plt.legend(loc=3)
+    plt.subplot(332)
+    plt.plot(mo.time, mo.soc, linestyle='-', color='blue', label='soc'+old_str)
+    plt.plot(mv.time, mv.soc, linestyle='--', color='cyan', label='soc'+new_str)
+    # plt.plot(so.time, so.soc_s, linestyle='-.', color='black', label='soc_s'+old_str)
+    plt.plot(sv.time, smv.soc_s, linestyle=':', color='magenta', label='soc_s'+new_str)
+    plt.plot(mo.time, mo.soc_ekf, linestyle='-', color='blue', label='soc_ekf'+old_str)
+    plt.plot(mv.time, mv.soc_ekf, linestyle='--', color='red', label='soc_ekf'+new_str)
+    plt.xlabel('sec')
+    plt.legend(loc=4)
+    plt.subplot(333)
+    plt.plot(mo.time, mo.ib_sel, linestyle='-', color='blue', label='ib_sel'+old_str)
+    plt.plot(mv.time, mv.ib_in, linestyle='-', color='cyan', label='ib_in'+new_str)
+    # plt.plot(so.time, so.ib_s, linestyle='--', color='black', label='ib_in_s'+old_str)
+    plt.plot(smv.time, smv.ib_in_s, linestyle=':', color='red', label='ib_in_s'+new_str)
+    plt.xlabel('sec')
+    plt.legend(loc=3)
+    plt.subplot(334)
+    plt.plot(mo.time, mo.voc, linestyle='-', color='blue', label='voc'+old_str)
+    plt.plot(mv.time, mv.voc, linestyle='--', color='cyan', label='voc'+new_str)
+    # plt.plot(so.time, so.voc_s, linestyle='-', color='blue', label='voc_s'+old_str)
+    # plt.plot(smv.time, smv.voc_s, linestyle='--', color='cyan', label='voc_s'+new_str)
+    # plt.plot(so.time, so.voc_stat_s, linestyle='-.', color='blue', label='voc_stat_s'+old_str)
+    plt.plot(smv.time, smv.voc_stat_s, linestyle=':', color='red', label='voc_stat_s'+new_str)
+    # plt.plot(so.time, so.vb_s, linestyle='-', color='orange', label='vb_s'+old_str)
+    plt.plot(sv.time, smv.vb_s, linestyle='--', color='pink', label='vb_s'+new_str)
+    plt.xlabel('sec')
+    plt.legend(loc=2)
+    plt.subplot(335)
+    plt.plot(mo.time, mo.e_wrap, color='black', linestyle='-', label='e_wrap'+old_str)
+    plt.plot(mv.time, mv.e_wrap, color='orange', linestyle='--', label='e_wrap'+new_str)
+    plt.xlabel('sec')
+    plt.legend(loc=2)
+    plt.subplot(336)
+    plt.plot(mo.soc, mo.vb, color='blue', linestyle='-', label='vb'+old_str)
+    plt.plot(mv.soc, mv.vb, color='cyan', linestyle='--', label='vb'+new_str)
+    # plt.plot(so.soc_s, so.vb_s, color='black', linestyle='-.', label='vb_s'+old_str)
+    plt.plot(smv.soc_s, smv.vb_s, color='magenta', linestyle=':', label='vb_s'+new_str)
+    plt.xlabel('state-of-charge')
+    plt.legend(loc=2)
+    plt.subplot(337)
+    plt.plot(mo.time, mo.vb, color='blue', linestyle='-', label='vb'+old_str)
+    plt.plot(mv.time, mv.vb, color='cyan', linestyle='--', label='vb'+new_str)
+    # plt.plot(so.time, so.vb_s, color='black', linestyle='-.', label='vb_s'+old_str)
+    plt.plot(smv.time, smv.vb_s, color='magenta', linestyle=':', label='vb_s'+new_str)
+    plt.xlabel('sec')
+    plt.legend(loc=2)
+    plt.subplot(338)
+    plt.plot(mo.time, mo.dv_hys, color='blue', linestyle='-', label='dv_hys'+old_str)
+    plt.plot(mv.time, mv.dv_hys, color='cyan', linestyle='--', label='dv_hys'+new_str)
+    # plt.plot(so.time, so.dv_hys_s, color='black', linestyle='-.', label='dv_hys_s'+old_str)
+    plt.plot(smv.time, smv.dv_hys_s, color='magenta', linestyle=':', label='dv_hys_s'+new_str)
+    plt.xlabel('sec')
+    plt.legend(loc=3)
+    plt.subplot(339)
+    plt.plot(mo.time, mo.Tb, color='blue', linestyle='-', label='Tb'+old_str)
+    plt.legend(loc=3)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
+    plt.figure()  # GP 3 Tune Summ
+    n_fig += 1
+    plt.subplot(121)
+    plt.title(plot_title + ' GP 3 Tune Summ')
+    plt.plot(mo.time, mo.vb, color='blue', linestyle='-', label='vb'+old_str)
+    plt.plot(mv.time, mv.vb, color='cyan', linestyle='--', label='vb'+new_str)
+    # plt.plot(so.time, so.vb_s, color='black', linestyle='-.', label='vb_s'+old_str)
+    plt.plot(smv.time, smv.vb_s, color='magenta', linestyle=':', label='vb_s'+new_str)
+    plt.xlabel('sec')
+    plt.legend(loc=2)
+    plt.subplot(122)
+    plt.plot(mo.soc, mo.vb, color='blue', linestyle='-', label='vb'+old_str)
+    plt.plot(mv.soc, mv.vb, color='cyan', linestyle='--', label='vb'+new_str)
+    # plt.plot(so.soc_s, so.vb_s, color='black', linestyle='-.', label='vb_s'+old_str)
+    plt.plot(smv.soc_s, smv.vb_s, color='magenta', linestyle=':', label='vb_s'+new_str)
+    plt.xlabel('state-of-charge')
+    plt.legend(loc=2)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
     return n_fig, fig_files
 
 
@@ -593,7 +688,7 @@ def calc_fault(d_ra, d_mod):
 #
 
 # Fake stuff to get replicate to accept inputs and run
-def bandaid(h, chm=0):
+def bandaid(h, chm_in=0):
     res = np.zeros(len(h.time))
     res[0:10] = 1
     mod = np.zeros(len(h.time))
@@ -605,10 +700,10 @@ def bandaid(h, chm=0):
     soc_s = h['soc'].copy()
     bms_off_s = h['bms_off'].copy()
     sat_s = h['sat'].copy()
-    chm = np.ones(len(h.time))*chm
+    chm = np.ones(len(h.time))*chm_in
     sel = np.zeros(len(h.time))
     preserving = np.ones(len(h.time))
-    chm_s = np.ones(len(h.time))*chm
+    chm_s = np.ones(len(h.time))*chm_in
     mon_old = rf.rec_append_fields(h, 'res', res)
     mon_old = rf.rec_append_fields(mon_old, 'mod_data', mod)
     mon_old = rf.rec_append_fields(mon_old, 'ib_past', ib_in_s)
@@ -811,7 +906,7 @@ if __name__ == '__main__':
         # date_ = datetime.now().strftime("%y%m%d")
         skip = 1
 
-        # Battleborn Bmon=0, Bsim=0
+        # Battleborn Bmon=0, Bsim=0  TODO:  should not duplicate here.  import it after init of Mon/Sim.  Same remark chem=1 CHINS
         t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
         t_y_t0 = [5.,  11.1,  20.,   30.,   40.]
         t_voc0 = [4.00, 4.00,  9.00,  11.80, 12.50, 12.60, 12.67, 12.76, 12.82, 12.93, 12.98, 13.03, 13.07, 13.11, 13.17, 13.22, 13.59, 14.45,
@@ -830,14 +925,15 @@ if __name__ == '__main__':
         # Save these
         t_max_in = None
         sres_in = 1.
-        staudif_in = 1.
         stauct_in = 1.
+        chm_in = 0
 
         # User inputs
         # input_files = ['fail 20221125.txt']
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
-        input_files = ['CH 20230128.txt']; chm_in = 1
+        # input_files = ['CH 20230128.txt']; chm_in = 1
+        input_files = ['hist v20230205 20230206.txt']; chm_in = 1;
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'
@@ -899,10 +995,10 @@ if __name__ == '__main__':
                 h_20C_resamp_100.dt[i] = h_20C_resamp_100.time[1] - h_20C_resamp_100.time[0]
             else:
                 h_20C_resamp_100.dt[i] = h_20C_resamp_100.time[i] - h_20C_resamp_100.time[i-1]
-        mon_old_100, sim_old_100 = bandaid(h_20C_resamp_100, chm=chm_in)
+        mon_old_100, sim_old_100 = bandaid(h_20C_resamp_100, chm_in=chm_in)
         mon_ver_100, sim_ver_100, randles_ver_100, sim_s_ver_100 =\
-            replicate(mon_old_100, sim_old=sim_old_100, init_time=1., verbose=False, t_max=t_max_in,
-                      sres=sres_in, staudif=staudif_in, stauct=stauct_in, use_vb_sim=True)
+            replicate(mon_old_100, sim_old=sim_old_100, init_time=1., verbose=True, t_max=t_max_in,
+                      sres=sres_in, stauct=stauct_in, use_vb_sim=False)
 
         # Plots
         n_fig = 0

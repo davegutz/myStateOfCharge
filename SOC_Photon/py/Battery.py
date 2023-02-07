@@ -139,12 +139,12 @@ class Battery(Coulombs):
         data_interp0 = np.array(t_voc0)
         self.lut_voc0 = myTables.TableInterp2D(x0, y0, data_interp0)
         # CHINS Bmon=1, Bsim=1
-        t_x_soc1 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
+        t_x_soc1 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.98,  0.995, 1.00]
         t_y_t1 = [5.,  11.1,   25.,   40.]
-        t_voc1 = [4.00, 4.00,  4.00,  4.00,  10.00, 11.00, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.52, 13.70, 14.70,
-                  4.00, 4.00,  4.00,  9.50,  12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.52, 13.70, 14.70,
-                  4.00, 4.00,  10.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.52, 13.70, 14.70,
-                  4.00, 4.00,  11.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.52, 13.70, 14.70]
+        t_voc1 = [4.00, 4.00,  4.00,  4.00,  10.00, 11.00, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.35, 13.70, 14.70,
+                  4.00, 4.00,  4.00,  9.50,  12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.35, 13.70, 14.70,
+                  4.00, 4.00,  10.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.35, 13.70, 14.70,
+                  4.00, 4.00,  11.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.35, 13.70, 14.70]
 
         x1 = np.array(t_x_soc1)
         y1 = np.array(t_y_t1)
@@ -217,7 +217,7 @@ class Battery(Coulombs):
         s += "  r_ss    = {:9.6f}  // Steady state equivalent battery resistance, for solver, Ohms\n".format(self.r_ss)
         s += "  r_sd    = {:9.6f}  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n".format(self.r_sd)
         s += "  tau_sd  = {:9.1f}  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n".format(self.tau_sd)
-        s += "  bms_off  = {:d}      // BMS off\n".format(self.bms_off)
+        s += "  bms_off  = {:7.1f}      // BMS off\n".format(self.bms_off)
         s += "  dv_dsoc = {:9.6f}  // Derivative scaled, V/fraction\n".format(self.dv_dsoc)
         s += "  ib =      {:7.3f}  // Battery terminal current, A\n".format(self.ib)
         s += "  vb =      {:7.3f}  // Battery terminal voltage, V\n".format(self.vb)

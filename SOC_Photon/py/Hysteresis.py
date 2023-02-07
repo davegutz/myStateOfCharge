@@ -59,7 +59,7 @@ class Hysteresis:
             # t_dv1 = [-0.7,   -0.5,  -0.3,  0.0,   0.3,   0.6,   1.7]
             t_dv1 = [-0.7,   -0.5,  -0.3,  0.0,   0.15,   0.3,   0.85]
         if t_soc1 is None:
-            t_soc1 = [0, .5, 1]
+            t_soc1 = [0, .9, .92, .95]
             # tune tip:  use center point to set time constant.  rest of points for magnitude
 
             # t_dv1 = [-0.7,   -0.5,  -0.3,  0.0,   0.3,   0.6,   1.7]
@@ -77,26 +77,30 @@ class Hysteresis:
             # sch = [0.012, 0.012, 0.012, 0.008, 0.016, 0.024, 0.029]  # ok negative,  almost enough positive 1 too much positive 2
             sch = [0.012, 0.012, 0.012, 0.008, 0.014, 0.024, 0.024]  # ok negative,  not enough positive 1 good positive 2
 
+            # t_dv1 = [-0.7,   -0.5,  -0.3,  0.0,   0.15,   0.3,   0.85]
+            sch1 = [0.048, 0.048, 0.048, 0.032, 0.056, 0.096, 0.096]  # ok negative,  not enough positive 1 good positive 2
+
         if t_r1 is None:
-            t_r1 = sch+sch+sch
+            t_r1 = sch+sch+sch+sch1
         if t_dv_min1 is None:
-            t_dv_min1 = [-0.7, -0.5, -0.3]
+            t_dv_min1 = [-0.3, -0.3, -0.3, -0.3]
         if t_dv_max1 is None:
-            t_dv_max1 = [1.7, 0.6, 0.3]
+            t_dv_max1 = [0.3, 0.3, 0.3, 0.3]
         self.lut1 = TableInterp2D(t_dv1, t_soc1, t_r1)
         self.lu_x1 = TableInterp1D(t_soc1, t_dv_max1)
         self.lu_n1 = TableInterp1D(t_soc1, t_dv_min1)
 
         if self.chm == 0:
-            self.cap = self.cap0
+            self.cap = self.cap0 * self.scale_cap
             self.lut = self.lut0
             self.lu_x = self.lu_x0
             self.lu_n = self.lu_n0
         elif self.chm == 1:
-            self.cap = self.cap1
+            self.cap = self.cap1 * self.scale_cap
             self.lut = self.lut1
             self.lu_x = self.lu_x1
             self.lu_n = self.lu_n1
+        print('chm', self.chm, 'cap', self.cap)
 
         self.scale = scale
         self.disabled = self.scale < 1e-5
@@ -112,6 +116,7 @@ class Hysteresis:
         s = prefix + "Hysteresis:\n"
         res = self.look_hys(dv=0., soc=0.8, chem=self.chm)
         s += "  res(median) =  {:6.4f}  // Null resistance, Ohms\n".format(res)
+        s += "  chm      =    {:7.3f}  // Chemistry\n".format(self.chm)
         s += "  cap      = {:10.1f}  // Capacitance, Farads\n".format(self.cap)
         s += "  tau      = {:10.1f}  // Null time constant, sec\n".format(res*self.cap)
         s += "  ib       =    {:7.3f}  // Current in, A\n".format(self.ib)
@@ -122,6 +127,7 @@ class Hysteresis:
         s += "  dv_hys   =    {:7.3f}  // Delta voltage state, V\n".format(self.dv_hys)
         s += "  disabled =     {:2.0f}      // Hysteresis disabled by low scale input < 1e-5, T=disabled\n".format(self.disabled)
         s += "  hys_scale=    {:7.3f}  // Scalar on hys\n".format(self.scale)
+        s += "  scale_cap=    {:7.3f}  // Scalar on cap\n".format(self.scale_cap)
         return s
 
     def calculate_hys(self, ib, soc, chem=0):
