@@ -144,11 +144,11 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         scale *= scale_in
     s_q = Scale(1., 3., 0.000005, 0.00005)
     s_r = Scale(1., 3., 0.001, 1.)   # t_ib_fail = 1000
-    sim = BatterySim(chem=chm_s[0], temp_c=temp_c, tau_ct=tau_ct, scale=scale, hys_scale=hys_scale, tweak_test=tweak_test,
+    sim = BatterySim(chem=chm_s[0], temp_c=temp_c, tau_ct=tau_ct, scale=scale, tweak_test=tweak_test,
                      dv_hys=dv_hys_init, sres=sres, staudif=staudif_sim, stauct=stauct, scale_r_ss=scale_r_ss,
                      s_hys=s_hys_sim, dvoc=dvoc_sim, scale_hys_cap=scale_hys_cap_sim)
     mon = BatteryMonitor(chem=chm_m[0], r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
-                         temp_c=temp_c, scale=scale, hys_scale=hys_scale_monitor, tweak_test=tweak_test,
+                         temp_c=temp_c, scale=scale, tweak_test=tweak_test,
                          dv_hys=dv_hys_init, sres=sres, staudif=staudif_mon, stauct=stauct, scaler_q=s_q, scaler_r=s_r,
                          scale_r_ss=scale_r_ss, s_hys=s_hys_mon, dvoc=dvoc_mon, eframe_mult=eframe_mult,
                          scale_hys_cap=scale_hys_cap_mon)

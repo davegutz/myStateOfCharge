@@ -380,6 +380,7 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     # plt.plot(so.time, so.voc_s, linestyle='-', color='blue', label='voc_s'+old_str)
     # plt.plot(smv.time, smv.voc_s, linestyle='--', color='cyan', label='voc_s'+new_str)
     # plt.plot(so.time, so.voc_stat_s, linestyle='-.', color='blue', label='voc_stat_s'+old_str)
+    plt.plot(mo.time, mo.voc_stat, color='orange', linestyle='-', label='voc_stat'+old_str)
     plt.plot(smv.time, smv.voc_stat_s, linestyle=':', color='red', label='voc_stat_s'+new_str)
     # plt.plot(so.time, so.vb_s, linestyle='-', color='orange', label='vb_s'+old_str)
     plt.plot(sv.time, smv.vb_s, linestyle='--', color='pink', label='vb_s'+new_str)
@@ -395,6 +396,7 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.plot(mv.soc, mv.vb, color='cyan', linestyle='--', label='vb'+new_str)
     # plt.plot(so.soc_s, so.vb_s, color='black', linestyle='-.', label='vb_s'+old_str)
     plt.plot(smv.soc_s, smv.vb_s, color='magenta', linestyle=':', label='vb_s'+new_str)
+    plt.plot(mo.soc, mo.voc_stat, color='orange', linestyle='-', label='voc_stat'+old_str)
     plt.xlabel('state-of-charge')
     plt.legend(loc=2)
     plt.subplot(337)
@@ -418,26 +420,49 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
+    # delineate charging and discharging
+    voc_stat_chg = np.copy(mv.voc_stat)
+    voc_stat_dis = np.copy(mv.voc_stat)
+    for i in range(len(voc_stat_chg)):
+        if smv.ib_in_s[i] > -0.5:
+            voc_stat_dis[i] = None
+        elif smv.ib_in_s[i] < 0.5:
+            voc_stat_chg[i] = None
+
     plt.figure()  # GP 3 Tune Summ
     n_fig += 1
-    plt.subplot(121)
+    plt.subplot(221)
     plt.title(plot_title + ' GP 3 Tune Summ')
     plt.plot(mo.time, mo.vb, color='blue', linestyle='-', label='vb'+old_str)
-    plt.plot(mv.time, mv.vb, color='cyan', linestyle='--', label='vb'+new_str)
-    # plt.plot(so.time, so.vb_s, color='black', linestyle='-.', label='vb_s'+old_str)
-    plt.plot(smv.time, smv.vb_s, color='magenta', linestyle=':', label='vb_s'+new_str)
+    plt.plot(smv.time, smv.vb_s, color='magenta', linestyle='--', label='vb_s'+new_str)
+    plt.plot(smv.time, smv.voc_stat_s, linestyle='-.', color='black', label='voc_stat_s'+new_str)
+    plt.plot(mv.time, voc_stat_chg, linestyle=':', color='green', label='voc_stat_chg'+new_str)
+    plt.plot(mv.time, voc_stat_dis, linestyle=':', color='red', label='voc_stat_dis'+new_str)
     plt.xlabel('sec')
     plt.legend(loc=2)
-    plt.subplot(122)
+    plt.subplot(222)
     plt.plot(mo.soc, mo.vb, color='blue', linestyle='-', label='vb'+old_str)
-    plt.plot(mv.soc, mv.vb, color='cyan', linestyle='--', label='vb'+new_str)
-    # plt.plot(so.soc_s, so.vb_s, color='black', linestyle='-.', label='vb_s'+old_str)
-    plt.plot(smv.soc_s, smv.vb_s, color='magenta', linestyle=':', label='vb_s'+new_str)
+    plt.plot(smv.soc_s, smv.vb_s, color='magenta', linestyle='--', label='vb_s'+new_str)
+    plt.plot(smv.soc_s, smv.voc_stat_s, linestyle='-.', color='black', label='voc_stat_s'+new_str)
+    plt.plot(mv.soc, voc_stat_chg, linestyle=':', color='green', label='voc_stat_chg'+new_str)
+    plt.plot(mv.soc, voc_stat_dis, linestyle=':', color='red', label='voc_stat_dis'+new_str)
     plt.xlabel('state-of-charge')
     plt.legend(loc=2)
+    plt.subplot(223)
+    plt.plot(mo.time, mo.Tb, color='red', linestyle='-', label='Tb'+old_str)
+    plt.plot(mo.time, mo.ib_sel, linestyle='--', color='blue', label='ib_sel'+old_str)
+    plt.plot(smv.time, smv.ib_in_s, linestyle='-.', color='magenta', label='ib_in_s'+new_str)
+    plt.xlabel('sec')
+    plt.legend(loc=3)
+    plt.subplot(224)
+    plt.plot(smv.time, smv.dv_dyn_s, color='black', linestyle=':', label='dv_dyn_s'+new_str)
+    plt.plot(smv.time, smv.dv_hys_s, color='magenta', linestyle=':', label='dv_hys_s'+new_str)
+    plt.xlabel('sec')
+    plt.legend(loc=3)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
+
 
     return n_fig, fig_files
 
@@ -486,206 +511,6 @@ def calc_fault(d_ra, d_mod):
 
     return d_mod
 
-
-# # Add schedule lookups and do some rack and stack
-# def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
-#     voc_soc = []
-#     soc_min = []
-#     vsat = []
-#     time_sec = []
-#     dt = []
-#     dv_dyn = []
-#     ib_diff = []
-#     cc_dif = []
-#     cc_diff_thr = []
-#     ewhi_thr = []
-#     ewlo_thr = []
-#     ib_diff_thr = []
-#     ib_quiet_thr = []
-#     dv_hys = d_ra.voc - d_ra.voc_stat
-#     hys_redesign = Hysteresis_20220926(scale=HYS_SCALE_20220926, cap=HYS_CAP_REDESIGN)
-#     ioc = []
-#     for i in range(len(d_ra.time)):
-#         res = hys_redesign.look_hys(dv_hys[i], d_ra.soc[i])
-#         ioc.append(dv_hys[i] / res)
-#         voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
-#         soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
-#         vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
-#         time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
-#         if i > 0:
-#             dt.append(float(d_ra.time[i] - d_ra.time[i - 1]))
-#         else:
-#             dt.append(float(d_ra.time[1] - d_ra.time[0]))
-#         ib_diff_ = d_ra.ibah[i] - d_ra.ibnh[i]
-#         ib_diff.append(ib_diff_)
-#         Tb = d_ra.Tb[i]
-#         soc = d_ra.soc[i]
-#         cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
-#         cc_dif.append(cc_dif_)
-#         voc_stat = d_ra.voc_stat[i]
-#         dv_dyn.append(d_ra.vb[i] - d_ra.voc[i])
-#         cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = fault_thr_bb(Tb, soc, voc_soc[i],
-#                                                                                        soc_min_tbl=soc_min_tbl)
-#         cc_diff_thr.append(cc_diff_thr_)
-#         ib_quiet_thr.append(ib_quiet_thr_)
-#         ewhi_thr.append(ewhi_thr_)
-#         ewlo_thr.append(ewlo_thr_)
-#         ib_diff_thr.append(ib_diff_thr_)
-#     time_min = (d_ra.time-d_ra.time[0])/60.
-#     time_day = (d_ra.time-d_ra.time[0])/3600./24.
-#     d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ioc', np.array(np.copy(ioc), dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ibmh', np.array(np.copy(d_ra.ibah), dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'e_wrap', np.array(np.copy(d_ra.e_w_f), dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'cc_dif', np.array(cc_dif, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'dv_dyn', np.array(dv_dyn, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ib_diff', np.array(ib_diff, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ib_diff_f', np.array(ib_diff, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ib_diff_thr', np.array(ib_diff_thr, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ibq_thr', np.array(ib_quiet_thr, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ib_quiet', np.array(ib_quiet_thr, dtype=float)*0.)
-#     d_mod = rf.rec_append_fields(d_mod, 'ib_rate', np.array(ib_quiet_thr, dtype=float)*0.)
-#     d_mod = rf.rec_append_fields(d_mod, 'ibd_thr', np.array(ib_diff_thr, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'cc_diff_thr', np.array(cc_diff_thr, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ewhi_thr', np.array(ewhi_thr, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ewlo_thr', np.array(ewlo_thr, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ib_quiet_thr', np.array(ib_quiet_thr, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ib_charge', np.array(np.copy(d_ra.ib), dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'dt', np.array(dt, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'vsat', np.array(vsat, dtype=float))
-#     d_mod = calc_fault(d_ra, d_mod)
-#     voc_stat_chg = np.copy(d_mod.voc_stat)
-#     voc_stat_dis = np.copy(d_mod.voc_stat)
-#     for i in range(len(voc_stat_chg)):
-#         if d_mod.ib[i] > -ib_band:
-#             voc_stat_dis[i] = None
-#         elif d_mod.ib[i] < ib_band:
-#             voc_stat_chg[i] = None
-#     vb = np.copy(d_mod.vb)
-#     d_mod = rf.rec_append_fields(d_mod, 'vb', np.array(vb, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'vb_h', np.array(vb, dtype=float))
-#     ib = np.copy(d_mod.ib)
-#     d_mod = rf.rec_append_fields(d_mod, 'ib', np.array(ib, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ib_sel', np.array(ib, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'voc_stat_chg', np.array(voc_stat_chg, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'voc_stat_dis', np.array(voc_stat_dis, dtype=float))
-#     dv_hys = d_mod.voc - d_mod.voc_stat
-#     d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'dV_hys', np.array(dv_hys, dtype=float))
-#     dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE_20220917d
-#     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
-#     dv_hys_required = d_mod.voc - voc_soc + dv_hys
-#     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_required', np.array(dv_hys_required, dtype=float))
-#
-#     dv_hys_rescaled = d_mod.dv_hys_unscaled
-#     pos = dv_hys_rescaled >= 0
-#     neg = dv_hys_rescaled < 0
-#     dv_hys_rescaled[pos] *= HYS_RESCALE_CHG
-#     dv_hys_rescaled[neg] *= HYS_RESCALE_DIS
-#     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_rescaled', np.array(dv_hys_rescaled, dtype=float))
-#     voc_stat_rescaled = d_mod.voc - d_mod.dv_hys_rescaled
-#     d_mod = rf.rec_append_fields(d_mod, 'voc_stat_rescaled', np.array(voc_stat_rescaled, dtype=float))
-#     d_zero = d_mod.ib.copy()*0.
-#     d_mod = rf.rec_append_fields(d_mod, 'tweak_sclr_amp', np.array(d_zero, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'tweak_sclr_noa', np.array(d_zero, dtype=float))
-#
-#     return d_mod
-#
-#
-# # Add schedule lookups and do some rack and stack
-# def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
-#     voc_soc = []
-#     soc_min = []
-#     vsat = []
-#     time_sec = []
-#     cc_diff_thr = []
-#     cc_dif = []
-#     ewhi_thr = []
-#     ewlo_thr = []
-#     ib_diff_thr = []
-#     ib_quiet_thr = []
-#     ib_diff = []
-#     dt = []
-#     for i in range(len(d_ra.time)):
-#         soc = d_ra.soc[i]
-#         voc_stat = d_ra.voc_stat[i]
-#         Tb = d_ra.Tb[i]
-#         ib_diff_ = d_ra.ibah[i] - d_ra.ibnh[i]
-#         cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
-#         ib_diff.append(ib_diff_)
-#         voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
-#         cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = fault_thr_bb(Tb, soc, voc_soc[i],
-#                                                                                        soc_min_tbl=soc_min_tbl)
-#         cc_dif.append(cc_dif_)
-#         cc_diff_thr.append(cc_diff_thr_)
-#         ewhi_thr.append(ewhi_thr_)
-#         ewlo_thr.append(ewlo_thr_)
-#         ib_diff_thr.append(ib_diff_thr_)
-#         ib_quiet_thr.append(ib_quiet_thr_)
-#         soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
-#         vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
-#         time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
-#         if i > 0:
-#             dt.append(float(d_ra.time[i] - d_ra.time[i - 1]))
-#         else:
-#             dt.append(float(d_ra.time[1] - d_ra.time[0]))
-#     time_min = (d_ra.time-d_ra.time[0])/60.
-#     time_day = (d_ra.time-d_ra.time[0])/3600./24.
-#     d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'vsat', np.array(vsat, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ib_diff', np.array(ib_diff, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ib_diff_f', np.array(ib_diff, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'cc_diff_thr', np.array(cc_diff_thr, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'cc_dif', np.array(cc_dif, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ewhi_thr', np.array(ewhi_thr, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ewlo_thr', np.array(ewlo_thr, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ib_diff_thr', np.array(ib_diff_thr, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'ib_quiet', np.array(ib_quiet_thr, dtype=float)*0.)
-#     d_mod = rf.rec_append_fields(d_mod, 'ib_quiet_thr', np.array(ib_quiet_thr, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'dt', np.array(dt, dtype=float))
-#     d_mod = calc_fault(d_ra, d_mod)
-#     voc_stat_chg = np.copy(d_mod.voc_stat)
-#     voc_stat_dis = np.copy(d_mod.voc_stat)
-#     for i in range(len(voc_stat_chg)):
-#         if d_mod.ib[i] > -ib_band:
-#             voc_stat_dis[i] = None
-#         elif d_mod.ib[i] < ib_band:
-#             voc_stat_chg[i] = None
-#     d_mod = rf.rec_append_fields(d_mod, 'voc_stat_chg', np.array(voc_stat_chg, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'voc_stat_dis', np.array(voc_stat_dis, dtype=float))
-#     dv_hys = d_mod.voc - d_mod.voc_stat
-#     d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'dV_hys', np.array(dv_hys, dtype=float))
-#     dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE_20220917d
-#     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
-#     dv_hys_required = d_mod.voc - voc_soc + dv_hys
-#     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_required', np.array(dv_hys_required, dtype=float))
-#
-#     dv_hys_rescaled = d_mod.dv_hys_unscaled
-#     pos = dv_hys_rescaled >= 0
-#     neg = dv_hys_rescaled < 0
-#     dv_hys_rescaled[pos] *= HYS_RESCALE_CHG
-#     dv_hys_rescaled[neg] *= HYS_RESCALE_DIS
-#     d_mod = rf.rec_append_fields(d_mod, 'dv_hys_rescaled', np.array(dv_hys_rescaled, dtype=float))
-#     voc_stat_rescaled = d_mod.voc - d_mod.dv_hys_rescaled
-#     d_mod = rf.rec_append_fields(d_mod, 'voc_stat_rescaled', np.array(voc_stat_rescaled, dtype=float))
-#
-#     # vb = d_mod.vb.copy()
-#     # d_mod = rf.rec_append_fields(d_mod, 'vb', np.array(vb, dtype=float))
-#     d_zero = d_mod.ib.copy()*0.
-#     d_mod = rf.rec_append_fields(d_mod, 'tweak_sclr_amp', np.array(d_zero, dtype=float))
-#     d_mod = rf.rec_append_fields(d_mod, 'tweak_sclr_noa', np.array(d_zero, dtype=float))
-#
-#     return d_mod
-#
 
 # Fake stuff to get replicate to accept inputs and run
 def bandaid(h, chm_in=0):
@@ -933,7 +758,7 @@ if __name__ == '__main__':
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
         # input_files = ['CH 20230128.txt']; chm_in = 1
-        input_files = ['hist v20230205 20230206.txt']; chm_in = 1;
+        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.8; staudif_in = 0.25; s_hys_in = 0.6;
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'
@@ -998,7 +823,8 @@ if __name__ == '__main__':
         mon_old_100, sim_old_100 = bandaid(h_20C_resamp_100, chm_in=chm_in)
         mon_ver_100, sim_ver_100, randles_ver_100, sim_s_ver_100 =\
             replicate(mon_old_100, sim_old=sim_old_100, init_time=1., verbose=True, t_max=t_max_in,
-                      sres=sres_in, stauct=stauct_in, use_vb_sim=False)
+                      sres=sres_in, stauct=stauct_in, use_vb_sim=False, s_hys_sim=s_hys_in,
+                      s_hys_mon=s_hys_in)
 
         # Plots
         n_fig = 0

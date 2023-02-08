@@ -37,8 +37,6 @@ class Retained:
         self.delta_q_model = 0.
         self.t_last_model = 25.
         self.modeling = 7  # assumed for this 'model'; over-ridden later
-        self.nS = 1  # assumed for this 'model'
-        self.nP = 1  # assumed for this 'model'
 
     def tweak_test(self):
         return 0b1000 & int(self.modeling)
@@ -208,7 +206,7 @@ class Battery(Coulombs):
     def __str__(self, prefix=''):
         """Returns representation of the object"""
         s = prefix + "Battery:\n"
-        s += "  chem      ={:d}     // Chemistry: 0=Battleborn, 1=CHINS\n".format(self.chem)
+        s += "  chem    = {:7.3f}  // Chemistry: 0=Battleborn, 1=CHINS\n".format(self.chem)
         s += "  temp_c  = {:7.3f}  // Battery temperature, deg C\n".format(self.temp_c)
         s += "  dvoc_dt = {:9.6f}  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n".format(self.dvoc_dt)
         s += "  r_0     = {:9.6f}  // Randles R0, ohms\n".format(self.r0)
@@ -503,8 +501,8 @@ class BatteryMonitor(Battery, EKF1x1):
         else:
             self.tcharge_ekf = -24.*self.soc_ekf
 
-        self.dv_dyn = self.dv_dyn * rp.nS
-        self.voc_ekf = self.hx * rp.nS
+        self.dv_dyn = self.dv_dyn
+        self.voc_ekf = self.hx
 
         return self.soc_ekf
 
