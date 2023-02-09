@@ -112,7 +112,7 @@ class Battery(Coulombs):
     def __init__(self, bat_v_sat=13.85, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, tweak_test=False, t_max=RANDLES_T_MAX, sres=1., stauct=1., staudif=1.,
-                 scale_r_ss=1., s_hys=1., dvoc=0., chem=0):
+                 scale_r_ss=1., s_hys=1., dvoc=0., chem=0, coul_eff=0.9985):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -120,7 +120,7 @@ class Battery(Coulombs):
         so equation error when soc<=0 to match data.    See Battery.h
         """
         # Parents
-        Coulombs.__init__(self, q_cap_rated,  q_cap_rated, t_rated, t_rlim, tweak_test)
+        Coulombs.__init__(self, q_cap_rated,  q_cap_rated, t_rated, t_rlim, tweak_test, coul_eff_=coul_eff)
 
         # Defaults
         self.chem = chem
@@ -310,11 +310,12 @@ class BatteryMonitor(Battery, EKF1x1):
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., stauct=1., staudif=1.,
                  scaler_q=None, scaler_r=None, scale_r_ss=1., s_hys=1., dvoc=1., eframe_mult=cp_eframe_mult,
-                 scale_hys_cap=1., chem=0):
+                 scale_hys_cap=1., chem=0, coul_eff=0.9985):
         q_cap_rated_scaled = q_cap_rated * scale
         Battery.__init__(self, bat_v_sat, q_cap_rated_scaled, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres,
-                         stauct=stauct, staudif=staudif, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc, chem=chem)
+                         stauct=stauct, staudif=staudif, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc, chem=chem,
+                         coul_eff=coul_eff)
         self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
 
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
@@ -664,10 +665,11 @@ class BatterySim(Battery):
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077, stauct=1.,
                  staudif=1., temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., scale_r_ss=1.,
-                 s_hys=1., dvoc=0., scale_hys_cap=1., chem=0):
+                 s_hys=1., dvoc=0., scale_hys_cap=1., chem=0, coul_eff=0.9985):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres,
-                         stauct=stauct, staudif=staudif, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc, chem=chem)
+                         stauct=stauct, staudif=staudif, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc, chem=chem,
+                         coul_eff=coul_eff)
         self.lut_voc = None
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A

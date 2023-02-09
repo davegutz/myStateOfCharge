@@ -434,7 +434,6 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.subplot(221)
     plt.title(plot_title + ' GP 3 Tune Summ')
     plt.plot(mo.time, mo.vb, color='blue', linestyle='-', label='vb'+old_str)
-    plt.plot(smv.time, smv.vb_s, color='magenta', linestyle='--', label='vb_s'+new_str)
     plt.plot(smv.time, smv.voc_stat_s, linestyle='-.', color='black', label='voc_stat_s'+new_str)
     plt.plot(mv.time, voc_stat_chg, linestyle=':', color='green', label='voc_stat_chg'+new_str)
     plt.plot(mv.time, voc_stat_dis, linestyle=':', color='red', label='voc_stat_dis'+new_str)
@@ -442,7 +441,6 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.legend(loc=2)
     plt.subplot(222)
     plt.plot(mo.soc, mo.vb, color='blue', linestyle='-', label='vb'+old_str)
-    plt.plot(smv.soc_s, smv.vb_s, color='magenta', linestyle='--', label='vb_s'+new_str)
     plt.plot(smv.soc_s, smv.voc_stat_s, linestyle='-.', color='black', label='voc_stat_s'+new_str)
     plt.plot(mv.soc, voc_stat_chg, linestyle=':', color='green', label='voc_stat_chg'+new_str)
     plt.plot(mv.soc, voc_stat_dis, linestyle=':', color='red', label='voc_stat_dis'+new_str)
@@ -753,13 +751,15 @@ if __name__ == '__main__':
         stauct_in = 1.
         chm_in = 0
         s_hys_in = 1.
+        s_hys_cap_in = 1.
+        coul_eff_in = 0.9985
 
         # User inputs
         # input_files = ['fail 20221125.txt']
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
         # input_files = ['CH 20230128.txt']; chm_in = 1
-        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.8; staudif_in = 0.25; # 0.9 - 1.0
+        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.8; staudif_in = 0.25; coul_eff_in = 0.9973; s_hys_cap_in = 10; # 0.9 - 1.0
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'
@@ -825,7 +825,8 @@ if __name__ == '__main__':
         mon_ver_100, sim_ver_100, randles_ver_100, sim_s_ver_100 =\
             replicate(mon_old_100, sim_old=sim_old_100, init_time=1., verbose=True, t_max=t_max_in,
                       sres=sres_in, stauct=stauct_in, use_vb_sim=False, s_hys_sim=s_hys_in,
-                      s_hys_mon=s_hys_in)
+                      s_hys_mon=s_hys_in, scale_hys_cap_mon=s_hys_cap_in, scale_hys_cap_sim=s_hys_cap_in,
+                      coul_eff=coul_eff_in)
 
         # Plots
         n_fig = 0

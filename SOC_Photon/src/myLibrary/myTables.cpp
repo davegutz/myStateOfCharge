@@ -125,7 +125,7 @@ float tab1clip(float x, float *v, float *y, int n)
 
 /* T A B 2
 *
-*   Purpose:    Bivariant arbitrarily spaced table look-up.
+*   Purpose:    Bivariant arbitrarily spaced table look-up.  Clips
 *
 *   Author:     Dave Gutz 20-Aug-90.
 *   Revisions:            16-Aug-93   Pointers.
@@ -144,7 +144,7 @@ float tab1clip(float x, float *v, float *y, int n)
 *   Hardware dependencies:  ANSI C.
 *   Header needed in scope of caller:   None.
 *   Global variables used:  None.
-*   Functions called:   binsearch.
+*   Functions called:   binsearch (natively clipping)
 */
 float tab2(float x1, float x2, float *v1, float *v2, float *y, int n1,
             int n2)
@@ -155,8 +155,8 @@ float tab2(float x1, float x2, float *v1, float *v2, float *y, int n1,
                  int *low, float *dx);
   if (n1 < 1 || n2 < 1)
     return y[0];
-  binsearch(x1, v1, n1, &high1, &low1, &dx1);
-  binsearch(x2, v2, n2, &high2, &low2, &dx2);
+  binsearch(x1, v1, n1, &high1, &low1, &dx1);  // clips
+  binsearch(x2, v2, n2, &high2, &low2, &dx2);  // clips
   temp1 = low2 * n1 + low1;
   temp2 = high2 * n1 + low1;
   r0 = *(y + temp1) + dx1 * (*(y + low2 * n1 + high1) - *(y + temp1));
@@ -276,7 +276,7 @@ TableInterp2D::~TableInterp2D() {}
 // functions
 float TableInterp2D::interp(float x, float y)
 {
-  return (tab2(x, y, x_, y_, v_, n1_, n2_));
+  return (tab2(x, y, x_, y_, v_, n1_, n2_));  // clips
 }
 //tab2(float x1, float x2, float *v1, float *v2, float *y, int n1, int n2);
 /*

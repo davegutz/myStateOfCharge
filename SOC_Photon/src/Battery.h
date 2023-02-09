@@ -131,12 +131,12 @@ const float X_DV_CH[N_H_CH] =       // dv breakpoints for r(soc, dv) table t_r
 const float Y_SOC_CH[M_H_CH] =      // soc breakpoints for r(soc, dv) table t_r
         { 0.8, 0.85 };
 const float T_R_CH[M_H_CH*N_H_CH] = // r(soc, dv) table.    // DAG 2/7/2023 tune to match data
-        { 0.001, 0.001, 0.001, 0.001, 0.001, 0.017, 0.017,
+        { 0.002, 0.002, 0.002, 0.001, 0.001, 0.017, 0.017,
           0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002};
 const float T_DV_MAX_CH[M_H_CH] =   // dv_max(soc) table.  Pulled values from insp of T_R_CH where flattens
         {0.3,  0.0};
 const float T_DV_MIN_CH[M_H_CH] =   // dv_max(soc) table.  Pulled values from insp of T_R_CH where flattens
-        {-0.3, 0.0};
+        {0.0, 0.0};
 
 
 // SP spare to reserve memory, perhaps for LION

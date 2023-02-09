@@ -100,7 +100,7 @@ class Hysteresis:
             t_r1 = sch + sch1
         if t_dv_min1 is None:
             t_dv_min1 = [-0.3, -0.3, -0.0, -0.0, -0.0]
-            t_dv_min1 = [-0.3, -0.0]
+            t_dv_min1 = [-0.0, -0.0]
         if t_dv_max1 is None:
             t_dv_max1 = [0.3, 0.3, 0.0, 0.0, 0.0]
             t_dv_max1 = [0.3, 0.0]

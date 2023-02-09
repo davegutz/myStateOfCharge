@@ -64,8 +64,8 @@ if __name__ == '__main__':
         sres_in = 1.
         staudif_in = 1;
         stauct_in = 1;
-        scale_hys_cap_sim_in = 1.
-        scale_hys_cap_mon_in = 1.
+        s_hys_cap_in = 1.
+        coul_eff_in = 0.9985  # Battleborn
 
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
         # data_file_old_txt = 'ampHiFail v20221220.txt'; unit_key = 'pro0p'
         # data_file_old_txt = 'ampHiFail vA20221220.txt';  unit_key = 'soc1a'
-        # data_file_old_txt = 'rapidTweakRegression v20230207 CHINS.txt'; unit_key = 'pro0p_2023'  # ; time_end_in=4.8;
+        # data_file_old_txt = 'rapidTweakRegression v20230209 CHINS.txt'; unit_key = 'pro0p_2023';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25; coul_eff_in = 0.9973; s_hys_cap_in = 10;#0.8 tune 2# ; time_end_in=4.8;
         # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in=4.8;
         # data_file_old_txt = 'ekf CHINS v20230128 20230128.txt'; unit_key = 'soc0p'; # time_end_in=99.;
 
@@ -107,9 +107,9 @@ if __name__ == '__main__':
 
         # The following CHINS runs were sources of figures in the .odt report
         # in the following line I forgot to renom sp on load so scale_hys was 1.5 by mistake for baseline run.
-        # data_file_old_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in=1.05; s_hys_in = 1.5; s_hys_in = 1.15; #staudif_in=0.1; scale_hys_cap_sim_in=1.;
-        # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25;  #0.9
-        data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25; #0.8
+        # data_file_old_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in=1.05; s_hys_in = 1.5; s_hys_in = 1.15; #staudif_in=0.1; s_hys_cap_in=1.;
+        # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25;  coul_eff_in = 0.9973; s_hys_cap_in = 10; #0.9 tune 2
+        data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25; coul_eff_in = 0.9973; s_hys_cap_in = 10; #0.8 tune 2
 
         # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
         # data_file_old_txt = 'vb_mess.txt'; unit_key = 'pro1a_2022';
@@ -158,10 +158,10 @@ if __name__ == '__main__':
                                                              s_hys_mon=s_hys_in, dvoc_sim=dvoc_sim_in,
                                                              dvoc_mon=dvoc_mon_in, Bmon=Bmon_in, Bsim=Bsim_in,
                                                              drive_ekf=drive_ekf_in, dTb_in=dTb, verbose=False,
-                                                             use_vb_sim=use_vb_sim_in, scale_hys_cap_sim=scale_hys_cap_sim_in,
-                                                             scale_hys_cap_mon=scale_hys_cap_mon_in,
+                                                             use_vb_sim=use_vb_sim_in, scale_hys_cap_sim=s_hys_cap_in,
+                                                             scale_hys_cap_mon=s_hys_cap_in,
                                                              staudif_sim=staudif_in, staudif_mon=staudif_in,
-                                                             stauct=stauct_in)
+                                                             stauct=stauct_in, coul_eff=coul_eff_in)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots
