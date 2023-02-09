@@ -108,8 +108,8 @@ if __name__ == '__main__':
         # The following CHINS runs were sources of figures in the .odt report
         # in the following line I forgot to renom sp on load so scale_hys was 1.5 by mistake for baseline run.
         # data_file_old_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in=1.05; s_hys_in = 1.5; s_hys_in = 1.15; #staudif_in=0.1; scale_hys_cap_sim_in=1.;
-        # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25; s_hys_in = 0.; #0.9
-        data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25; s_hys_in = 0.6; #0.8
+        # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25;  #0.9
+        data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25; #0.8
 
         # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
         # data_file_old_txt = 'vb_mess.txt'; unit_key = 'pro1a_2022';

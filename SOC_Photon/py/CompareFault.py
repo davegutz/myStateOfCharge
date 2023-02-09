@@ -752,13 +752,14 @@ if __name__ == '__main__':
         sres_in = 1.
         stauct_in = 1.
         chm_in = 0
+        s_hys_in = 1.
 
         # User inputs
         # input_files = ['fail 20221125.txt']
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
         # input_files = ['CH 20230128.txt']; chm_in = 1
-        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.8; staudif_in = 0.25; s_hys_in = 0.6;
+        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.8; staudif_in = 0.25; # 0.9 - 1.0
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'

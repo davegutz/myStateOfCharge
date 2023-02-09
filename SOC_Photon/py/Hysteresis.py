@@ -57,9 +57,14 @@ class Hysteresis:
         self.cap1 = 3.6e3
         if t_dv1 is None:
             # t_dv1 = [-0.7,   -0.5,  -0.3,  0.0,   0.3,   0.6,   1.7]
-            t_dv1 = [-0.7,   -0.5,  -0.3,  0.0,   0.15,   0.3,   0.85]
+            # t_dv1 = [-0.7,   -0.5,  -0.3,  0.0,   0.15,   0.3,   0.85]
+            # begin tune 2
+            t_dv1 = [-0.7, -0.5, -0.3, 0.0, 0.15, 0.3, 0.85]
         if t_soc1 is None:
             t_soc1 = [0, .9, .92, .95, 1.]
+            # begin tune 2
+            t_soc1 = [0, .8, .82, .9, 1.]
+            t_soc1 = [.8, .85 ]
             # tune tip:  use center point to set time constant.  rest of points for magnitude
 
             # t_dv1 = [-0.7,   -0.5,  -0.3,  0.0,   0.3,   0.6,   1.7]
@@ -75,17 +80,30 @@ class Hysteresis:
             # sch = [0.012, 0.012, 0.012, 0.008, 0.020, 0.024, 0.029]  # ok negative, ? positive
             # sch = [0.012, 0.012, 0.012, 0.008, 0.012, 0.024, 0.029]  # ok negative,  not enough positive
             # sch = [0.012, 0.012, 0.012, 0.008, 0.016, 0.024, 0.029]  # ok negative,  almost enough positive 1 too much positive 2
-            sch = [0.012, 0.012, 0.012, 0.008, 0.014, 0.024, 0.024]  # ok negative,  not enough positive 1 good positive 2
+            # sch = [0.012, 0.012, 0.012, 0.008, 0.014, 0.024, 0.024]  # ok negative,  not enough positive 1 good positive 2
+            # begin tune 2  (tune 1 uses s_hys)
+            t_dv1 = [-0.7, -0.5, -0.3, 0.0, 0.008, 0.2, 0.7]
+            sch = [0.008, 0.008, 0.002, 0.002, 0.002, 0.017, 0.017]  # too much negative,  ok positive 1 too much positive 2
+            t_dv1 = [-0.7, -0.5, -0.3,   0.0,  0.008, 0.2, 0.7]
+            sch = [0.008, 0.008, 0.001, 0.001, 0.001, 0.017, 0.017]  # too much negative,  ok positive 1 slightly too much positive 2
+            t_dv1 = [-0.7, -0.5, -0.3,   0.0,  0.010, 0.2, 0.7]
+            sch = [0.001, 0.001, 0.001, 0.001, 0.001, 0.017, 0.017]  # too much negative,  ok positive 1 ok positive 2
 
             # t_dv1 = [-0.7,   -0.5,  -0.3,  0.0,   0.15,   0.3,   0.85]
-            sch1 = [0.048, 0.048, 0.048, 0.032, 0.056, 0.096, 0.096]  # ok negative,  not enough positive 1 good positive 2
+            # sch1 = [0.048, 0.048, 0.048, 0.032, 0.056, 0.096, 0.096]  # ok negative,  not enough positive 1 good positive 2
+            # begin tune 2 (tune 1 uses s_hys)
+            # t_dv1 = [-0.7, -0.5, -0.3, 0.0, 0.15, 0.3, 0.85]
+            sch1 = [0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002]  # ok negative,  not enough positive 1 good positive 2
 
         if t_r1 is None:
             t_r1 = sch+sch+sch+sch1+sch1
+            t_r1 = sch + sch1
         if t_dv_min1 is None:
-            t_dv_min1 = [-0.3, -0.3, -0.3, -0.3, -0.3]
+            t_dv_min1 = [-0.3, -0.3, -0.0, -0.0, -0.0]
+            t_dv_min1 = [-0.3, -0.0]
         if t_dv_max1 is None:
-            t_dv_max1 = [0.3, 0.3, 0.3, 0.3, 0.3]
+            t_dv_max1 = [0.3, 0.3, 0.0, 0.0, 0.0]
+            t_dv_max1 = [0.3, 0.0]
         self.lut1 = TableInterp2D(t_dv1, t_soc1, t_r1)
         self.lu_x1 = TableInterp1D(t_soc1, t_dv_max1)
         self.lu_n1 = TableInterp1D(t_soc1, t_dv_min1)

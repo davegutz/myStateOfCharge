@@ -124,22 +124,19 @@ const float X_SOC_MIN_CH[N_N_CH] =  { 5.,   11.1,  20.,  40.};  // Temperature b
 const float T_SOC_MIN_CH[N_N_CH] =  { 0.10, 0.07,  0.05, 0.03}; // soc_min(t)
 
 // CHINS Hysteresis
-const uint8_t M_H_CH  = 5;          // Number of soc breakpoints in r(soc, dv) table t_r
+const uint8_t M_H_CH  = 2;          // Number of soc breakpoints in r(soc, dv) table t_r
 const uint8_t N_H_CH  = 7;          // Number of dv breakpoints in r(dv) table t_r
 const float X_DV_CH[N_H_CH] =       // dv breakpoints for r(soc, dv) table t_r
-        { -0.7,  -0.5,  -0.3,  0.0,   0.15,  0.3,   0.85 };
+        { -0.7,  -0.5,  -0.3,  0.0,   0.01,  0.20,   0.70 };
 const float Y_SOC_CH[M_H_CH] =      // soc breakpoints for r(soc, dv) table t_r
-        { 0.0,  0.9,   0.92,   0.95,   1.0};
+        { 0.8, 0.85 };
 const float T_R_CH[M_H_CH*N_H_CH] = // r(soc, dv) table.    // DAG 2/7/2023 tune to match data
-        { 0.012, 0.012, 0.012, 0.008, 0.014, 0.024, 0.024,
-          0.012, 0.012, 0.012, 0.008, 0.014, 0.024, 0.024,
-          0.012, 0.012, 0.012, 0.008, 0.014, 0.024, 0.024,
-          0.048, 0.048, 0.048, 0.032, 0.056, 0.096, 0.096,
-          0.048, 0.048, 0.048, 0.032, 0.056, 0.096, 0.096};
+        { 0.001, 0.001, 0.001, 0.001, 0.001, 0.017, 0.017,
+          0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002};
 const float T_DV_MAX_CH[M_H_CH] =   // dv_max(soc) table.  Pulled values from insp of T_R_CH where flattens
-        {0.3,  0.3,  0.3,  0.3,  0.3};
+        {0.3,  0.0};
 const float T_DV_MIN_CH[M_H_CH] =   // dv_max(soc) table.  Pulled values from insp of T_R_CH where flattens
-        {-0.3, -0.3, -0.3, -0.3, -0.3};
+        {-0.3, 0.0};
 
 
 // SP spare to reserve memory, perhaps for LION
