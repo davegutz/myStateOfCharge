@@ -759,7 +759,8 @@ if __name__ == '__main__':
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
         # input_files = ['CH 20230128.txt']; chm_in = 1
-        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.8; staudif_in = 0.25; coul_eff_in = 0.9973; s_hys_cap_in = 10; # 0.9 - 1.0
+        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.8; staudif_in = 0.25; coul_eff_in = 0.9973; s_hys_cap_in = 10; # 0.9 - 1.0 Tune1
+        input_files = ['hist v20230209 20230210.txt']; chm_in = 1; sres_in = 1.8; staudif_in = 0.25; coul_eff_in = 0.9973; s_hys_cap_in = 10; #Tune2
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'
