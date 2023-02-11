@@ -434,6 +434,7 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.subplot(221)
     plt.title(plot_title + ' GP 3 Tune Summ')
     plt.plot(mo.time, mo.vb, color='blue', linestyle='-', label='vb'+old_str)
+    plt.plot(smv.time, smv.vb_s, color='cyan', linestyle='-', label='vb_s'+new_str)
     plt.plot(smv.time, smv.voc_stat_s, linestyle='-.', color='black', label='voc_stat_s'+new_str)
     plt.plot(mv.time, voc_stat_chg, linestyle=':', color='green', label='voc_stat_chg'+new_str)
     plt.plot(mv.time, voc_stat_dis, linestyle=':', color='red', label='voc_stat_dis'+new_str)
@@ -441,6 +442,7 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.legend(loc=2)
     plt.subplot(222)
     plt.plot(mo.soc, mo.vb, color='blue', linestyle='-', label='vb'+old_str)
+    plt.plot(smv.soc_s, smv.vb_s, color='cyan', linestyle='-', label='vb_s'+new_str)
     plt.plot(smv.soc_s, smv.voc_stat_s, linestyle='-.', color='black', label='voc_stat_s'+new_str)
     plt.plot(mv.soc, voc_stat_chg, linestyle=':', color='green', label='voc_stat_chg'+new_str)
     plt.plot(mv.soc, voc_stat_dis, linestyle=':', color='red', label='voc_stat_dis'+new_str)
@@ -759,8 +761,9 @@ if __name__ == '__main__':
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
         # input_files = ['CH 20230128.txt']; chm_in = 1
-        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.8; staudif_in = 0.25; coul_eff_in = 0.9973; s_hys_cap_in = 10; # 0.9 - 1.0 Tune1
-        input_files = ['hist v20230209 20230210.txt']; chm_in = 1; sres_in = 1.8; staudif_in = 0.25; coul_eff_in = 0.9973; s_hys_cap_in = 10; #Tune2
+        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.8; staudif_in = 0.25; s_hys_in = 0.; # 0.9 - 1.0 Tune1
+        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.8; staudif_in = 0.25; coul_eff_in = 0.9973; s_hys_cap_in = 5; # 0.9 - 1.0 Tune2
+        # input_files = ['hist v20230209 20230210.txt']; chm_in = 1; sres_in = 1.8; staudif_in = 0.25; coul_eff_in = 0.9973; s_hys_cap_in = 5; #Tune2 check
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'
@@ -812,7 +815,7 @@ if __name__ == '__main__':
         h_20C.time -= time0
         # T_100 = 0.1
         T_100 = 0.3
-        T_100 = 10
+        T_100 = 5
         h_20C_resamp_100 = resample(data=h_20C, dt_resamp=T_100, time_var='time',
                                     specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
                                               ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
