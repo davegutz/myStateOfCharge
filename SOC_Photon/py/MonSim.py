@@ -98,7 +98,8 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
               t_ib_fail=None, ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=None, Bmon=None, use_vb_raw=False,
               scale_r_ss=1., s_hys_sim=1., s_hys_mon=1., dvoc_sim=0., dvoc_mon=0., drive_ekf=False, dTb_in=None,
               verbose=True, t_max=None, eframe_mult=cp_eframe_mult, sres=1., staudif_sim=1., staudif_mon=1, stauct=1., use_vb_sim=False,
-              scale_hys_cap_sim=1., scale_hys_cap_mon=1., coul_eff=0.9985):
+              scale_hys_cap_sim=1., scale_hys_cap_mon=1., coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1.,
+              s_hys_chg=1., s_hys_dis=1.):
     if sim_old is not None and len(sim_old.time) < len(mon_old.time):
         t = sim_old.time
     else:
@@ -146,12 +147,14 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
     s_r = Scale(1., 3., 0.001, 1.)   # t_ib_fail = 1000
     sim = BatterySim(chem=chm_s[0], temp_c=temp_c, tau_ct=tau_ct, scale=scale, tweak_test=tweak_test,
                      dv_hys=dv_hys_init, sres=sres, staudif=staudif_sim, stauct=stauct, scale_r_ss=scale_r_ss,
-                     s_hys=s_hys_sim, dvoc=dvoc_sim, scale_hys_cap=scale_hys_cap_sim, coul_eff=coul_eff)
+                     s_hys=s_hys_sim, dvoc=dvoc_sim, scale_hys_cap=scale_hys_cap_sim, coul_eff=coul_eff,
+                     s_cap_chg=s_cap_chg, s_cap_dis=s_cap_dis, s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis)
     mon = BatteryMonitor(chem=chm_m[0], r_sd=rsd, tau_sd=tau_sd, r0=r0, tau_ct=tau_ct, r_ct=rct, tau_dif=tau_dif, r_dif=r_dif,
                          temp_c=temp_c, scale=scale, tweak_test=tweak_test,
                          dv_hys=dv_hys_init, sres=sres, staudif=staudif_mon, stauct=stauct, scaler_q=s_q, scaler_r=s_r,
                          scale_r_ss=scale_r_ss, s_hys=s_hys_mon, dvoc=dvoc_mon, eframe_mult=eframe_mult,
-                         scale_hys_cap=scale_hys_cap_mon, coul_eff=coul_eff)
+                         scale_hys_cap=scale_hys_cap_mon, coul_eff=coul_eff, s_cap_chg=s_cap_chg, s_cap_dis=s_cap_dis,
+                         s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis)
     # need Tb input.   perhaps need higher order to enforce basic type 1 response
     Is_sat_delay = TFDelay(in_=mon_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
     bms_off_init = mon_old.bms_off[0]

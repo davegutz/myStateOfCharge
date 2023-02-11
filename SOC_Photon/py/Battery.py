@@ -140,10 +140,10 @@ class Battery(Coulombs):
         # CHINS Bmon=1, Bsim=1
         t_x_soc1 = [-0.15, 0.00, 0.05, 0.10, 0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.96,  0.98,  0.99,  1.00]
         t_y_t1 = [5.,  11.1,   25.,   40.]
-        t_voc1 = [4.00, 4.00,  4.00,  4.00,  10.00, 11.00, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.23, 13.27, 13.32, 14.70,
-                  4.00, 4.00,  4.00,  9.50,  12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.23, 13.27, 13.32, 14.70,
-                  4.00, 4.00,  10.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.23, 13.27, 13.32, 14.70,
-                  4.00, 4.00,  11.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.23, 13.27, 13.32, 14.70]
+        t_voc1 = [4.00, 4.00,  4.00,  4.00,  10.00, 11.00, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.27, 13.27, 13.42, 14.70,
+                  4.00, 4.00,  4.00,  9.50,  12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.27, 13.27, 13.42, 14.70,
+                  4.00, 4.00,  10.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.27, 13.27, 13.42, 14.70,
+                  4.00, 4.00,  11.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.27, 13.27, 13.42, 14.70]
 
         x1 = np.array(t_x_soc1)
         y1 = np.array(t_y_t1)
@@ -310,7 +310,7 @@ class BatteryMonitor(Battery, EKF1x1):
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
                  temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., stauct=1., staudif=1.,
                  scaler_q=None, scaler_r=None, scale_r_ss=1., s_hys=1., dvoc=1., eframe_mult=cp_eframe_mult,
-                 scale_hys_cap=1., chem=0, coul_eff=0.9985):
+                 scale_hys_cap=1., chem=0, coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1.):
         q_cap_rated_scaled = q_cap_rated * scale
         Battery.__init__(self, bat_v_sat, q_cap_rated_scaled, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres,
@@ -346,7 +346,8 @@ class BatteryMonitor(Battery, EKF1x1):
             self.scaler_r = scaler_r
         self.Q = EKF_Q_SD_NORM * EKF_Q_SD_NORM  # EKF process uncertainty
         self.R = EKF_R_SD_NORM * EKF_R_SD_NORM  # EKF state uncertainty
-        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys, scale_cap=scale_hys_cap, chem=self.chem)  # Battery hysteresis model - drift of voc
+        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys, scale_cap=scale_hys_cap, s_cap_chg=s_cap_chg,
+                              s_cap_dis=s_cap_dis, s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis, chem=self.chem)  # Battery hysteresis model - drift of voc
         self.soc_s = 0.  # Model information
         self.EKF_converged = TFDelay(False, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT)
         self.y_filt_lag = LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
@@ -665,7 +666,8 @@ class BatterySim(Battery):
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
                  r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077, stauct=1.,
                  staudif=1., temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., scale_r_ss=1.,
-                 s_hys=1., dvoc=0., scale_hys_cap=1., chem=0, coul_eff=0.9985):
+                 s_hys=1., dvoc=0., scale_hys_cap=1., chem=0, coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1.,
+                 s_hys_chg=1., s_hys_dis=1.):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
                          t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres,
                          stauct=stauct, staudif=staudif, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc, chem=chem,
@@ -686,7 +688,8 @@ class BatterySim(Battery):
         self.s_cap = scale  # Rated capacity scalar
         if scale is not None:
             self.apply_cap_scale(scale)
-        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys, scale_cap=scale_hys_cap, chem=self.chem)  # Battery hysteresis model - drift of voc
+        self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys, scale_cap=scale_hys_cap, s_cap_chg=s_cap_chg,
+                              s_cap_dis=s_cap_dis, s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis, chem=self.chem)  # Battery hysteresis model - drift of voc
         self.tweak_test = tweak_test
         self.voc = 0.  # Charging voltage, V
         self.d_delta_q = 0.  # Charging rate, Coulombs/sec

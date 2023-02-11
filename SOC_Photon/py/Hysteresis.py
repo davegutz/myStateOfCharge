@@ -28,12 +28,16 @@ HYS_DV_MIN = 0.3
 class Hysteresis:
     # Use variable resistor to create hysteresis from an RC circuit
 
-    def __init__(self, scale=1., dv_hys=0.0, chem=0, scale_cap=1.,
+    def __init__(self, scale=1., dv_hys=0.0, chem=0, scale_cap=1.,s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1.,
                  t_dv0=None, t_soc0=None, t_r0=None, t_dv_min0=None, t_dv_max0=None,
                  t_dv1=None, t_soc1=None, t_r1=None, t_dv_min1=None, t_dv_max1=None):
         # Defaults
         self.chm = chem
         self.scale_cap = scale_cap
+        self.s_cap_chg = s_cap_chg
+        self.s_cap_dis = s_cap_dis
+        self.s_hys_chg = s_hys_chg
+        self.s_hys_dis = s_hys_dis
 
         # Battleborn
         self.cap0 = 3.6e3
@@ -202,7 +206,12 @@ class Hysteresis:
         else:
             self.res = self.look_hys(self.dv_hys, self.soc, self.chm)
             self.ioc = self.dv_hys / self.res
-            self.dv_dot = (self.ib - self.dv_hys/self.res) / (self.cap*self.scale_cap)
+            self.dv_dot = (self.ib - self.ioc) / (self.cap*self.scale_cap)
+            if self.dv_hys >= 0.:
+                self.dv_dot /= self.s_cap_chg
+            else:
+                self.dv_dot /= self.s_cap_dis
+
         return self.dv_dot
 
     def init(self, dv_init):
@@ -255,7 +264,10 @@ class Hysteresis:
         # normal ODE integration
         self.dv_hys += self.dv_dot * dt
         self.dv_hys = max(min(self.dv_hys, dv_max), dv_min)
-        return max(min(self.dv_hys*self.scale*scale_in, dv_max), dv_min)
+        if self.dv_hys >= 0.:
+            return max(min(self.dv_hys*self.scale*self.s_hys_chg, dv_max), dv_min)
+        else:
+            return max(min(self.dv_hys*self.scale*self.s_hys_dis, dv_max), dv_min)
 
 
 class Saved:

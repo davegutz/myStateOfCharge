@@ -66,6 +66,10 @@ if __name__ == '__main__':
         stauct_in = 1;
         s_hys_cap_in = 1.
         coul_eff_in = 0.9985  # Battleborn
+        s_cap_chg_in = 1.
+        s_cap_dis_in = 1.
+        s_hys_chg_in = 1.
+        s_hys_dis_in = 1.
 
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
@@ -108,10 +112,8 @@ if __name__ == '__main__':
         # The following CHINS runs were sources of figures in the .odt report.  Chem is in data stream
         # in the following line I forgot to renom sp on load so scale_hys was 1.5 by mistake for baseline run.
         # data_file_old_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in=1.05; s_hys_in = 1.5; s_hys_in = 1.15; #staudif_in=0.1; s_hys_cap_in=1.;
-        data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.5; s_hys_in = 4.0; s_hys_cap_in = 90; #0.9 tune 1
-        # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.5; s_hys_in = 4.0; s_hys_cap_in = 90;  #0.8 tune 1
-        # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25;  coul_eff_in = 0.9973; s_hys_cap_in = 5.; #0.9 tune 2
-        # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25; coul_eff_in = 0.9973; s_hys_cap_in = 5.; #0.8 tune 2
+        data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.6; staudif_in = 0.3; s_hys_chg_in = 4.; s_hys_dis_in = 0.7; s_cap_chg_in = 90; s_cap_dis_in = 10;  #0.9 tune 1
+        # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.6; staudif_in = 0.3; s_hys_chg_in = 1.5; s_hys_dis_in = 2.; s_cap_chg_in = 4; s_cap_dis_in = 40;  #0.8 tune 1
 
         # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
         # data_file_old_txt = 'vb_mess.txt'; unit_key = 'pro1a_2022';
@@ -163,7 +165,9 @@ if __name__ == '__main__':
                                                              use_vb_sim=use_vb_sim_in, scale_hys_cap_sim=s_hys_cap_in,
                                                              scale_hys_cap_mon=s_hys_cap_in,
                                                              staudif_sim=staudif_in, staudif_mon=staudif_in,
-                                                             stauct=stauct_in, coul_eff=coul_eff_in)
+                                                             stauct=stauct_in, coul_eff=coul_eff_in,
+                                                             s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in,
+                                                             s_hys_chg=s_hys_chg_in, s_hys_dis=s_hys_dis_in)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots
