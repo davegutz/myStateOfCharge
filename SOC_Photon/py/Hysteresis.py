@@ -55,11 +55,11 @@ class Hysteresis:
 
         # CHINS
         self.cap1 = 3.6e3  # scaled later
-        tune = 2
+        tune = 1
         if t_soc1 is None:
             # tune tip:  use center point to set time constant.  rest of points for magnitude
 
-            if tune == 1:
+            if tune == 1:  # same as BB but scale s_hys and s_hys_cap in run, and t_dv_min = 0
                 t_soc1 = t_soc0
                 t_dv1 = t_dv0
                 t_r1 = t_r0
@@ -78,7 +78,11 @@ class Hysteresis:
                 # sch0 = [0.012, 0.012, 0.012, 0.008, 0.022, 0.027, 0.027]  # ok negative, not enough positive
                 # t_dv1 = [-0.7,   -0.5,  -0.3,  0.0,   0.3,   0.6,   1.7]
                 # sch0 = [0.012, 0.012, 0.012, 0.008, 0.024, 0.029, 0.029]  # ok negative, ok positive
+
                 t_dv_min1 = t_dv_min0
+                # t_dv_min1 = [-.1, -.1, -.1]
+                # t_dv_min1 = [0, 0, 0]
+                # HYS_DV_MIN = .1
                 t_dv_max1 = t_dv_max0
 
             elif tune == 2:
@@ -226,7 +230,7 @@ class Hysteresis:
         self.saved.ib.append(self.ib)
         self.saved.ioc.append(self.ioc)
 
-    def update(self, dt, trusting_sensors=False, init_high=False, init_low=False, e_wrap=0., chem=0):
+    def update(self, dt, trusting_sensors=False, init_high=False, init_low=False, scale_in=1., e_wrap=0., chem=0):
         self.chm = chem
         if self.chm == 0:
             self.cap = self.cap0
@@ -240,6 +244,7 @@ class Hysteresis:
         # Reset if at endpoints.   e_wrap is an actual measurement of hysteresis if trust sensors.  But once
         # dv_hys is reset it regenerates e_wrap so e_wrap in logic breaks that.   Also, dv_hys regenerates dv_dot
         # so break that too by setting it to 0
+
         if init_low:
             self.dv_hys = max(HYS_DV_MIN, -e_wrap)
             self.dv_dot = 0.  # break positive feedback loop
@@ -250,8 +255,7 @@ class Hysteresis:
         # normal ODE integration
         self.dv_hys += self.dv_dot * dt
         self.dv_hys = max(min(self.dv_hys, dv_max), dv_min)
-
-        return self.dv_hys*self.scale
+        return max(min(self.dv_hys*self.scale*scale_in, dv_max), dv_min)
 
 
 class Saved:

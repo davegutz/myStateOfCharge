@@ -105,13 +105,13 @@ if __name__ == '__main__':
         # data_file_old_txt = 'dwell noise Ca.5 v20221028.txt'  # ; dTb = [[0., 18000.],  [0, 8.]]
         # data_file_old_txt = 'dwell Ca.5 v20221028.txt'  # ; time_end_in=0.5  # ; dTb = [[0., 18000.],  [0, 8.]]
 
-        # The following CHINS runs were sources of figures in the .odt report
+        # The following CHINS runs were sources of figures in the .odt report.  Chem is in data stream
         # in the following line I forgot to renom sp on load so scale_hys was 1.5 by mistake for baseline run.
         # data_file_old_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in=1.05; s_hys_in = 1.5; s_hys_in = 1.15; #staudif_in=0.1; s_hys_cap_in=1.;
-        # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25; s_hys_in = 0.; #0.9 tune 1
-        # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25; s_hys_in = 0.6; #0.8 tune 1
+        data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.5; s_hys_in = 4.0; s_hys_cap_in = 90; #0.9 tune 1
+        # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.5; s_hys_in = 4.0; s_hys_cap_in = 90;  #0.8 tune 1
         # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25;  coul_eff_in = 0.9973; s_hys_cap_in = 5.; #0.9 tune 2
-        data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25; coul_eff_in = 0.9973; s_hys_cap_in = 5.; #0.8 tune 2
+        # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.8; staudif_in = 0.25; coul_eff_in = 0.9973; s_hys_cap_in = 5.; #0.8 tune 2
 
         # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
         # data_file_old_txt = 'vb_mess.txt'; unit_key = 'pro1a_2022';
