@@ -37,6 +37,29 @@ from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
+class inline_exp_lag:
+    def __init__(self, tau):
+        self.tau = tau
+        self.rstate = 0.
+        self.lstate = 0.
+        self.inp = 0.
+        self.rate = 0.
+
+    def update(self, inp, T, reset=False):
+        if reset:
+            self.lstate = inp
+            self.rstate = inp
+        eTt = np.exp(-T/self.tau)
+        meTt = 1. - eTt
+        a = self.tau/T - eTt/meTt
+        b = 1./meTt - self.tau/T
+        c = meTt/T
+        self.rate = c * (a*self.rstate + b*inp - self.lstate)
+        self.rstate = inp
+        self.lstate = self.lstate + T*self.rate
+        return self.lstate
+
+
 def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fig=None, plot_init_in=False,
             old_str='_old', new_str='_new'):
     if fig_files is None:
@@ -999,6 +1022,131 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
             voc_stat_dis[i] = None
         elif smv.ib_in_s[i] < 0.5:
             voc_stat_chg[i] = None
+
+    vb = np.copy(mv.vb)
+    voc = np.copy(mv.voc)
+    voc_soc = np.copy(mv.voc_soc)
+    voc_stat = np.copy(mv.voc_stat)
+    ib_f = np.copy(mv.ib)
+    ioc_f = np.copy(mv.ioc)
+    t = np.copy(mv.time)
+    dv_hys_calc = voc - voc_stat  # assumes Randles tuned
+    dv_hys_req = voc - voc_soc
+    dv_hys_calc_f = np.copy(dv_hys_calc)
+    dv_hys_req_f = np.copy(dv_hys_req)
+    dv_dot_calc = np.copy(dv_hys_calc)
+    dv_dot_req = np.copy(dv_hys_req)
+    dv_dot_cap = np.copy(dv_hys_calc)
+    dv_bleed = np.copy(dv_hys_calc)
+    ioc_req = np.copy(dv_hys_req)
+    r_calc = np.copy(dv_hys_req)
+    r_calc_from_dot = np.copy(dv_hys_req)
+    r_req = np.copy(dv_hys_req)
+    ioc_calc_from_dot = np.copy(dv_hys_req)
+
+    tau = 20
+    cap = 1000
+    n = len(dv_hys_req)
+    dv_hys_calc_filter = inline_exp_lag(tau)
+    dv_hys_req_filter = inline_exp_lag(tau)
+    ib_filter = inline_exp_lag(tau)
+    ios_filter = inline_exp_lag(tau)
+    dv_hys_dot_filter = inline_exp_lag(tau)
+    for i in range(n-1):
+        reset = i == 0
+        T = t[i+1]-t[i]
+
+        dv_hys_calc_f[i] = dv_hys_calc_filter.update(dv_hys_calc[i], T, reset=reset)
+        dv_hys_req_f[i] = dv_hys_req_filter.update(dv_hys_req[i], T, reset=reset)
+        ib_f[i] = ib_filter.update(mv.ib[i], T, reset=reset)
+        ioc_f[i] = ios_filter.update(mv.ioc[i], T, reset=reset)
+
+        dv_dot_calc[i] = dv_hys_calc_filter.rate
+        # dv_dot_req[i] = dv_hys_req_filter.rate
+        dv_dot_req[i] = dv_hys_dot_filter.update(dv_hys_req_filter.rate, T, reset=reset)
+        dv_dot_cap[i] = ib_f[i] / cap
+        dv_bleed[i] = dv_dot_cap[i] - dv_dot_req[i]
+
+        ioc_req[i] = dv_bleed[i] * cap
+        if abs(ib_f[i]) < 0.5:
+            r_req[i] = 0
+        else:
+            r_req[i] = max(min(dv_hys_req_f[i] / ioc_req[i], 0.1), -0.1)
+
+        ioc_calc_from_dot[i] = ib_f[i] - cap*dv_dot_calc[i]
+        r_calc_from_dot[i] = max(min(dv_hys_calc_f[i] / ioc_calc_from_dot[i], 0.1), -0.1)
+        # ioc_calc_from_dot[i] = mv.ib[i] - cap*dv_dot_calc[i]
+        # r_calc_from_dot[i] = max(min(dv_hys_calc[i] / ioc_calc_from_dot[i], 0.1), -0.1)
+
+        if abs(ioc_f[i]) < .5:
+            r_calc[i] = 0
+        else:
+            r_calc[i] = max(min(dv_hys_calc_f[i] / ioc_f[i], 0.1), -0.1)
+
+    dv_dot_calc[n-1] = dv_dot_calc[n-2]
+    dv_dot_req[n-1] = dv_dot_req[n-2]
+    r_calc[n-1] = r_calc[n-2]
+    r_calc_from_dot[n-1] = r_calc_from_dot[n-2]
+    ioc_req[n-1] = ioc_req[n-2]
+    dv_hys_req_f[n-1] = dv_hys_req_f[n-2]
+    dv_hys_calc_f[n-1] = dv_hys_calc_f[n-2]
+    ioc_calc_from_dot[n-1] = ioc_calc_from_dot[n-2]
+    ib_f[n-1] = ib_f[n-2]
+    ioc_f[n-1] = ioc_f[n-2]
+    dv_dot_cap[n-1] = dv_dot_cap[n-2]
+    dv_bleed[-1] = dv_bleed[-2]
+
+    print('dv', dv_hys_calc_f[-1], 'dvdot', dv_dot_calc[-1], 'Cdvdot', cap*dv_dot_calc[-1], 'ib', ib_f[-1], 'ioc_req', ioc_calc_from_dot[-1], 'r_req', r_calc_from_dot[-1])
+
+    plt.figure()  # GP 3 Tune R
+    n_fig += 1
+    plt.subplot(321)
+    plt.title(plot_title + ' GP 3 Tune R')
+    plt.plot(t, vb, color='blue', linestyle='-', label='vb_x')
+    plt.plot(t, smv.vb_s, color='cyan', linestyle='--', label='vb_s_ver')
+    plt.plot(t, voc, color='magenta', linestyle='-.', label='voc_x')
+    plt.plot(t, voc_soc, color='black', linestyle=':', label='voc_soc_x')
+    plt.xlabel('sec')
+    plt.legend(loc=2)
+    plt.subplot(322)
+    plt.plot(t, mv.dv_dyn, color='black', linestyle='-', label='dv_dyn_ver')
+    plt.plot(t, dv_hys_calc, color='blue', linestyle='-', label='dv_hys_calc_x')
+    plt.plot(t, dv_hys_req, color='magenta', linestyle='--', label='dv_hys_req_x')
+    plt.plot(t, dv_hys_calc_f, color='red', linestyle='-', label='dv_hys_calc_f_x')
+    plt.plot(t, dv_hys_req_f, color='cyan', linestyle='--', label='dv_hys_req_f_x')
+    plt.plot(t, mv.dv_hys, color='orange', linestyle=':', label='dv_hys_x')
+    plt.xlabel('sec')
+    plt.legend(loc=2)
+    plt.subplot(323)
+    plt.plot(t, r_calc_from_dot, color='cyan', linestyle='--', label='r_calc_from_dot_x')
+    plt.plot(t, r_calc, color='blue', linestyle='-', label='r_calc_x')
+    plt.plot(t, r_req, color='black', linestyle='-', label='r_req_x')
+    plt.xlabel('sec')
+    plt.legend(loc=2)
+    plt.subplot(324)
+    plt.plot(t, ioc_calc_from_dot, color='orange', linestyle='--', label='ioc_calc_from_dot_x')
+    plt.plot(t, mv.ib, color='blue', linestyle='-', label='ib_x')
+    plt.plot(t, ib_f, color='cyan', linestyle='--', label='ib_f_x')
+    plt.plot(t, mv.ioc, color='red', linestyle='-', label='ioc_x')
+    plt.plot(t, ioc_f, color='pink', linestyle='--', label='ioc_f_x')
+    plt.plot(t, ioc_req, color='magenta', linestyle=':', label='ioc_req_x')
+    plt.xlabel('sec')
+    plt.legend(loc=2)
+    plt.subplot(325)
+    plt.plot(t, ioc_req, color='magenta', linestyle='--', label='ioc_req_x')
+    plt.plot(t, mv.ib, color='blue', linestyle='-', label='ib_x')
+    plt.xlabel('sec')
+    plt.legend(loc=2)
+    plt.subplot(326)
+    plt.plot(t, dv_dot_req, color='magenta', linestyle='-', label='dv_dot_req_x')
+    plt.plot(t, dv_dot_cap, color='black', linestyle='--', label='dv_dot_cap_x')
+    plt.plot(t, dv_dot_calc, color='blue', linestyle='-.', label='dv_dot_calc_x')
+    plt.xlabel('sec')
+    plt.legend(loc=2)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
 
     plt.figure()  # GP 3 Tune Summ
     n_fig += 1

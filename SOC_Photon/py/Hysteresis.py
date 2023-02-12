@@ -72,13 +72,24 @@ class Hysteresis:
             elif myCH_Tuner == 2:
                 self.cap1 = 3.6e4  # scaled later
                 t_soc1 = [.80, .90,  0.95]
-                t_dv1 =  [-0.6,  -0.2,  -0.1,  0.0,   0.05,  0.1,   0.3]
-                schp8 =  [0.006, 0.005, 0.004, 0.004, 0.012, 0.016, 0.016]
-                schp9 =  [0.006, 0.005, 0.004, 0.004, 0.012, 0.014, 0.014]
-                schp95 = [0.050, 0.050, 0.030, 0.020, 0.050, 0.050, 0.050]
+                t_dv1 =  [-0.3,  -0.1,  0.0,   0.05,  0.1,   0.3]
+                schp8 =  [0.005, 0.004, 0.004, 0.012, 0.016, 0.016]
+                schp9 =  [0.005, 0.004, 0.004, 0.012, 0.014, 0.014]
+                schp95 = [0.050, 0.030, 0.020, 0.050, 0.050, 0.050]
                 t_r1 = schp8 + schp9 + schp95
                 t_dv_min1 = [-0.3, -0.3, -0.3]
                 t_dv_max1 = [0.3,  0.3,  0.3]
+
+            elif myCH_Tuner == 3:
+                self.cap1 = 1e4  # scaled later
+                t_soc1 = [.80, .90, 0.95]
+                t_dv1 = [-0.3, -0.1,    -.05,  -.04,  0.06, 0.07,  0.1,   0.3]
+                schp8 = [0.005, 0.004,  0.004,  0.4,  0.4,  0.010, 0.008, 0.008]
+                schp9 = [0.005, 0.004,  0.004,  0.01, 0.01, 0.012, 0.014, 0.014]
+                schp95 = [0.050, 0.030, 0.030,  0.02, 0.02, 0.050, 0.050, 0.050]
+                t_r1 = schp8 + schp9 + schp95
+                t_dv_min1 = [-0.3, -0.3, -0.3]
+                t_dv_max1 = [0.3, 0.3, 0.3]
 
             else:
                 print('Need to set myCH_Tuner for CHINS', myCH_Tuner)
@@ -98,7 +109,6 @@ class Hysteresis:
             self.lut = self.lut1
             self.lu_x = self.lu_x1
             self.lu_n = self.lu_n1
-            print('cap1', self.cap1, 'scale_cap', self.scale_cap, 'cap', self.cap)
         print('chm', self.chm, 'cap', self.cap)
 
         self.scale = scale
