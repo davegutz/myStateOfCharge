@@ -759,13 +759,15 @@ if __name__ == '__main__':
         coul_eff_in = 0.9985
         s_hys_chg_in = 1.
         s_hys_dis_in = 1.
+        myCH_Tuner_in = 1
 
         # User inputs
         # input_files = ['fail 20221125.txt']
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
         # input_files = ['CH 20230128.txt']; chm_in = 1
-        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.6; staudif_in = 0.3; s_hys_chg_in = 8.; s_hys_dis_in = 2.0; s_cap_chg_in = 90; s_cap_dis_in = 10; # 0.9 - 1.0 Tune 1
+        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.6; staudif_in = 0.3; s_hys_chg_in = 8.; s_hys_dis_in = 2.0; s_cap_chg_in = 90; s_cap_dis_in = 10; myCH_Tuner_in = 1; # 0.9 - 1.0 Tune 1
+        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.6; staudif_in = 0.3; s_hys_chg_in = 1.; s_hys_dis_in = 1.; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 2; # 0.9 - 1.0 Tune 2
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'
@@ -833,7 +835,7 @@ if __name__ == '__main__':
                       sres=sres_in, stauct=stauct_in, use_vb_sim=False, s_hys_sim=s_hys_in,
                       s_hys_mon=s_hys_in, scale_hys_cap_mon=s_hys_cap_in, scale_hys_cap_sim=s_hys_cap_in,
                       s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in, coul_eff=coul_eff_in, s_hys_chg=s_hys_chg_in,
-                      s_hys_dis=s_hys_dis_in)
+                      s_hys_dis=s_hys_dis_in, myCH_Tuner=myCH_Tuner_in)
 
         # Plots
         n_fig = 0
