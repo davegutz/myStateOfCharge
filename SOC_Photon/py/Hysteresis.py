@@ -29,8 +29,9 @@ class Hysteresis:
     # Use variable resistor to create hysteresis from an RC circuit
 
     def __init__(self, scale=1., dv_hys=0.0, chem=0, scale_cap=1.,s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1.,
-                 t_dv0=None, t_soc0=None, t_r0=None, t_dv_min0=None, t_dv_max0=None,
-                 t_dv1=None, t_soc1=None, t_r1=None, t_dv_min1=None, t_dv_max1=None, myCH_Tuner=1):
+                 t_dv0=None, t_soc0=None, t_r0=None, t_dv_min0=None, t_dv_max0=None, t_s0=None,
+                 t_dv1=None, t_soc1=None, t_r1=None, t_dv_min1=None, t_dv_max1=None, t_s1=None,
+                 myCH_Tuner=1):
         # Defaults
         self.chm = chem
         self.scale_cap = scale_cap
@@ -49,11 +50,16 @@ class Hysteresis:
             t_r0 = [0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
                     0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
                     0.016, 0.016, 0.016, 0.005, 0.010, 0.010, 0.010]
+        if t_s0 is None:
+            t_s0 = [1., 1., 1., 1., 1., 1., 1.,
+                    1., 1., 1., 1., 1., 1., 1.,
+                    1., 1., 1., 1., 1., 1., 1.]
         if t_dv_min0 is None:
             t_dv_min0 = [-0.7, -0.5, -0.3]
         if t_dv_max0 is None:
             t_dv_max0 = [0.7, 0.3, 0.15]
         self.lut0 = TableInterp2D(t_dv0, t_soc0, t_r0)
+        self.luts0 = TableInterp2D(t_dv0, t_soc0, t_s0)
         self.lu_x0 = TableInterp1D(t_soc0, t_dv_max0)
         self.lu_n0 = TableInterp1D(t_soc0, t_dv_min0)
 
@@ -82,31 +88,36 @@ class Hysteresis:
 
             elif myCH_Tuner == 3:
                 self.cap1 = 1e4  # scaled later
-                t_soc1 = [.80, .86, .92, 0.95]
-                t_dv1 = [-0.1,    -.05,  -.04,  0.0,  0.06,  0.07,  0.1]
-                schp8 = [0.004,  0.004,  0.4,  0.4,  0.4,   0.010, 0.008]
-                schp9 = [0.003,  0.003,  0.4,  0.4,  0.003, 0.003, 0.003]
-                schp95 = [0.03,  0.03,   0.4,  0.4,  0.08,  0.08,  0.08]
-                t_r1 = schp8 + schp9 + schp9 + schp95
-                t_dv_min1 = [-0.3, -0.3, -0.3, -0.3]
-                t_dv_max1 = [0.3, 0.3, 0.3, 0.3]
+                t_soc1 = [.80, .86]
+                t_dv1 = [-.10,   -.05,   -.04, 0.0,  .02,  .03,  .06,   .07,   .10]
+                schp8 = [0.004,  0.004,  0.4,  0.4,  0.4,  0.4,  0.4,   0.014, 0.012]
+                schp9 = [0.004,  0.004,  0.4,  0.4,  .2,  .1,    0.006, 0.006, 0.006]
+                t_r1 = schp8 + schp9
+                t_dv_min1 = [-0.3, -0.3]
+                t_dv_max1 = [0.3, 0.3]
+                SRs1p8 = [ 1.,    1.,    .2,   .2,   .2,   1.,   1.,    1.,   1.]
+                SRs1p9 = [ 1.,    1.,    .1,   .1,   .2,   1.,   1.,    1.,   1.]
+                t_s1 =  SRs1p8 + SRs1p9
 
             else:
                 print('Need to set myCH_Tuner for CHINS', myCH_Tuner)
                 exit(1)
 
         self.lut1 = TableInterp2D(t_dv1, t_soc1, t_r1)
+        self.luts1 = TableInterp2D(t_dv1, t_soc1, t_s1)
         self.lu_x1 = TableInterp1D(t_soc1, t_dv_max1)
         self.lu_n1 = TableInterp1D(t_soc1, t_dv_min1)
 
         if self.chm == 0:
             self.cap = self.cap0
             self.lut = self.lut0
+            self.luts = self.luts0
             self.lu_x = self.lu_x0
             self.lu_n = self.lu_n0
         elif self.chm == 1:
             self.cap = self.cap1
             self.lut = self.lut1
+            self.luts = self.luts1
             self.lu_x = self.lu_x1
             self.lu_n = self.lu_n1
         print('chm', self.chm, 'cap', self.cap)
@@ -114,8 +125,10 @@ class Hysteresis:
         self.scale = scale
         self.disabled = self.scale < 1e-5
         self.res = 0.
+        self.slr = 1.
         self.soc = 0.
         self.ib = 0.
+        self.ibs = 0.
         self.ioc = 0.
         self.dv_hys = dv_hys
         self.dv_dot = 0.
@@ -129,7 +142,9 @@ class Hysteresis:
         s += "  cap      = {:10.1f}  // Capacitance, Farads\n".format(self.cap)
         s += "  tau      = {:10.1f}  // Null time constant, sec\n".format(res*self.cap)
         s += "  ib       =    {:7.3f}  // Current in, A\n".format(self.ib)
+        s += "  ibs      =    {:7.3f}  // Scaled current in, A\n".format(self.ibs)
         s += "  ioc      =    {:7.3f}  // Current out, A\n".format(self.ioc)
+        s += "  slr      =    {:7.3f}  // Variable input current scalar\n".format(self.slr)
         s += "  soc      =   {:8.4f}  // State of charge input, dimensionless\n".format(self.soc)
         s += "  res      =    {:7.3f}  // Variable resistance value, ohms\n".format(self.res)
         s += "  dv_dot   =    {:7.3f}  // Calculated voltage rate, V/s\n".format(self.dv_dot)
@@ -145,12 +160,15 @@ class Hysteresis:
         self.soc = soc
         if self.disabled:
             self.res = 0.
+            self.slr = 1.
+            self.ibs = self.ib
             self.ioc = ib
             self.dv_dot = 0.
         else:
-            self.res = self.look_hys(self.dv_hys, self.soc, self.chm)
+            self.res, self.slr = self.look_hys(self.dv_hys, self.soc, self.chm)
             self.ioc = self.dv_hys / self.res
-            self.dv_dot = (self.ib - self.ioc) / (self.cap*self.scale_cap)
+            self.ibs = self.ib * self.slr
+            self.dv_dot = (self.ibs - self.ioc) / (self.cap*self.scale_cap)
             if self.dv_hys >= 0.:
                 self.dv_dot /= self.s_cap_chg
             else:
@@ -165,22 +183,27 @@ class Hysteresis:
         self.chm = chem
         if self.disabled:
             self.res = 0.
+            self.slr = 1.
         else:
             if chem == 0:
                 self.cap = self.cap0
                 self.res = self.lut0.interp(x=dv, y=soc)
+                self.slr = self.luts0.interp(x=dv, y=soc)
             elif chem == 1:
                 self.cap = self.cap1
                 self.res = self.lut1.interp(x=dv, y=soc)
-        return self.res
+                self.slr = self.luts1.interp(x=dv, y=soc)
+        return self.res, self.slr
 
     def save(self, time):
         self.saved.time.append(time)
         self.saved.soc.append(self.soc)
         self.saved.res.append(self.res)
+        self.saved.slr.append(self.slr)
         self.saved.dv_hys.append(self.dv_hys)
         self.saved.dv_dot.append(self.dv_dot)
         self.saved.ib.append(self.ib)
+        self.saved.ibs.append(self.ibs)
         self.saved.ioc.append(self.ioc)
 
     def update(self, dt, trusting_sensors=False, init_high=False, init_low=False, scale_in=1., e_wrap=0., chem=0):
@@ -221,8 +244,10 @@ class Saved:
         self.dv_hys = []
         self.dv_dot = []
         self.res = []
+        self.slr = []
         self.soc = []
         self.ib = []
+        self.ibs = []
         self.ioc = []
 
 
