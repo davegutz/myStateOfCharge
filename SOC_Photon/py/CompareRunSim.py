@@ -116,10 +116,8 @@ if __name__ == '__main__':
         # data_file_old_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in=1.05; s_hys_in = 1.5; s_hys_in = 1.15; #staudif_in=0.1; s_hys_cap_in=1.;
         # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.6; staudif_in = 0.3; s_hys_chg_in = 4.; s_hys_dis_in = 0.7; s_cap_chg_in = 90; s_cap_dis_in = 10;  myCH_Tuner_in = 1; #0.9 tune 1
         # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.6; staudif_in = 0.3; s_hys_chg_in = 1.5; s_hys_dis_in = 2.; s_cap_chg_in = 4; s_cap_dis_in = 40;  myCH_Tuner_in = 1; #0.8 tune 1
-#        data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.6; staudif_in = 0.3; s_hys_chg_in = 0.8; s_hys_dis_in = 0.5; s_cap_chg_in = 1.; s_cap_dis_in = 1.;  myCH_Tuner_in = 2; #0.9 tune 2
-#         data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.6; staudif_in = 0.3; s_hys_chg_in = 1.; s_hys_dis_in = 1.; s_cap_chg_in = 1.; s_cap_dis_in = 1.;  myCH_Tuner_in = 2; #0.9 tune 2
-#         data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.6; staudif_in = 0.3; s_hys_chg_in = 1.; s_hys_dis_in = 1.; s_cap_chg_in = 1.; s_cap_dis_in = 1.;  myCH_Tuner_in = 2;#0.8 tune 2
-        data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.6; staudif_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.;  myCH_Tuner_in = 3;#0.8 tune 3
+        # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.6; staudif_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.;  myCH_Tuner_in = 3; #0.9 tune 3
+        data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.6; staudif_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.;  myCH_Tuner_in = 3;#0.8 tune 3 set s_hys_chg/dis = 0 to see prediction for R
 
 
 
