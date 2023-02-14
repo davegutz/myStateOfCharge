@@ -92,16 +92,20 @@ const float X_SOC_MIN_BB[N_N_BB] =  { 5.,   11.1,  20.,  30.,  40.};  // Tempera
 const float T_SOC_MIN_BB[N_N_BB] =  { 0.10, 0.07,  0.05, 0.00, 0.20}; // soc_min(t).  At 40C BMS shuts off at 12V
 
 // Battleborn Hysteresis
-const uint8_t M_H_BB  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r
-const uint8_t N_H_BB  = 7;          // Number of dv breakpoints in r(dv) table t_r
+const uint8_t M_H_BB  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r, t_s
+const uint8_t N_H_BB  = 7;          // Number of dv breakpoints in r(dv) table t_r, t_s
 const float X_DV_BB[N_H_BB] =       // dv breakpoints for r(soc, dv) table t_r. // DAG 6/13/2022 tune x10 to match data
         { -0.7,  -0.5,  -0.3,  0.0,   0.15,  0.3,   0.7};
-const float Y_SOC_BB[M_H_BB] =      // soc breakpoints for r(soc, dv) table t_r
+const float Y_SOC_BB[M_H_BB] =      // soc breakpoints for r(soc, dv) table t_r, t_s
         { 0.0,  0.5,   1.0};
 const float T_R_BB[M_H_BB*N_H_BB] = // r(soc, dv) table.    // DAG 9/29/2022 tune to match hist data
         { 0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
           0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
           0.016, 0.016, 0.016, 0.005, 0.010, 0.010, 0.010};
+const float T_S_BB[M_H_BB*N_H_BB] = // r(soc, dv) table. Not used yet for BB
+        { 1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1, 1, 1, 1, 1};
 const float T_DV_MAX_BB[M_H_BB] =   // dv_max(soc) table.  Pulled values from insp of T_R_BB where flattens
         {0.7, 0.3, 0.15};
 const float T_DV_MIN_BB[M_H_BB] =   // dv_max(soc) table.  Pulled values from insp of T_R_BB where flattens
@@ -109,34 +113,37 @@ const float T_DV_MIN_BB[M_H_BB] =   // dv_max(soc) table.  Pulled values from in
 
 // CHINS 100 Ah, 12v LiFePO4.  Initial data from manual
 const uint8_t M_T_CH  = 4;    // Number temperature breakpoints for voc table
-const uint8_t N_S_CH  = 19;   // Number soc breakpoints for voc table
+const uint8_t N_S_CH  = 18;   // Number soc breakpoints for voc table
 const float Y_T_CH[M_T_CH] =  //Temperature breakpoints for voc table
         { 5., 11.1, 20., 40. }; 
 const float X_SOC_CH[N_S_CH] =      //soc breakpoints for voc table
-        { -0.15, 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.96,  0.98,  0.99, 1.00};
+        { -0.15, 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.98,  0.99, 1.00};
 const float T_VOC_CH[M_T_CH*N_S_CH] = // r(soc, dv) table
-        { 4.00, 4.00,  4.00,  4.00,  10.00, 11.00, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.23, 13.27, 13.32, 14.70,
-          4.00, 4.00,  4.00,  9.50,  12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.23, 13.27, 13.32, 14.70,
-          4.00, 4.00,  10.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.23, 13.27, 13.32, 14.70,
-          4.00, 4.00,  11.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.27, 13.30, 13.23, 13.27, 13.32, 14.70};
+        { 4.00, 4.00,  4.00,  4.00,  10.00, 11.00, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
+          4.00, 4.00,  4.00,  9.50,  12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
+          4.00, 4.00,  10.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
+          4.00, 4.00,  11.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70};
 const uint8_t N_N_CH = 4;   // Number of temperature breakpoints for x_soc_min table
 const float X_SOC_MIN_CH[N_N_CH] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
 const float T_SOC_MIN_CH[N_N_CH] =  { 0.10, 0.07,  0.05, 0.03}; // soc_min(t)
 
 // CHINS Hysteresis
-const uint8_t M_H_CH  = 2;          // Number of soc breakpoints in r(soc, dv) table t_r
-const uint8_t N_H_CH  = 7;          // Number of dv breakpoints in r(dv) table t_r
-const float X_DV_CH[N_H_CH] =       // dv breakpoints for r(soc, dv) table t_r
-        { -0.7,  -0.5,  -0.3,  0.0,   0.01,  0.20,   0.70 };
-const float Y_SOC_CH[M_H_CH] =      // soc breakpoints for r(soc, dv) table t_r
-        { 0.8, 0.85 };
-const float T_R_CH[M_H_CH*N_H_CH] = // r(soc, dv) table.    // DAG 2/7/2023 tune to match data
-        { 0.002, 0.002, 0.002, 0.001, 0.001, 0.017, 0.017,
-          0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002};
+const uint8_t M_H_CH  = 2;          // Number of soc breakpoints in r(soc, dv) table t_r, t_s
+const uint8_t N_H_CH  = 9;          // Number of dv breakpoints in r(dv) table t_r, t_s
+const float X_DV_CH[N_H_CH] =       // dv breakpoints for r(soc, dv) table t_r, t_s
+        { -0.10,  -0.05,  -0.04, 0.0,  0.02, 0.03, 0.06,  0.07,  0.10};
+const float Y_SOC_CH[M_H_CH] =      // soc breakpoints for r(soc, dv) table t_r, t_s
+        { 0.80, 0.86 };
+const float T_R_CH[M_H_CH*N_H_CH] = // r(soc, dv) table
+        { 0.004,  0.004,  0.4,   0.4,  0.4,  0.4,  0.4,   0.014, 0.012,
+          0.004,  0.004,  0.4,   0.4,  .2,  .1,    0.006, 0.006, 0.006};
+const float T_S_CH[M_H_CH*N_H_CH] = // s(soc, dv) table
+        { 1.,    1.,    .2,   .2,   .2,   1.,   1.,    1.,   1.,
+          1.,    1.,    .1,   .1,   .2,   1.,   1.,    1.,   1.};
 const float T_DV_MAX_CH[M_H_CH] =   // dv_max(soc) table.  Pulled values from insp of T_R_CH where flattens
-        {0.3,  0.0};
+        {0.3,  0.3};
 const float T_DV_MIN_CH[M_H_CH] =   // dv_max(soc) table.  Pulled values from insp of T_R_CH where flattens
-        {0.0, 0.0};
+        {-0.3, -0.3};
 
 
 // SP spare to reserve memory, perhaps for LION
@@ -169,8 +176,10 @@ public:
   float dv_min(const float soc) { return hys_Tn_->interp(soc); };
   void init(const float dv_init);
   float look_hys(const float dv, const float soc);
+  float look_slr(const float dv, const float soc);
   void pretty_print();
   float update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap, const boolean reset);
+  float ibs() { return ibs_; };
   float ioc() { return ioc_; };
   float dv_hys() { return dv_hys_; };
   void dv_hys(const float st) { dv_hys_ = max(min(st, dv_max(soc_)), dv_min(soc_)); };
@@ -179,13 +188,16 @@ protected:
   boolean disabled_;    // Hysteresis disabled by low scale input < 1e-5, T=disabled
   float cap_;          // Capacitance, Farads
   float res_;          // Variable resistance value, ohms
+  float slr_;          // Variable scalar
   float soc_;          // State of charge input, dimensionless
   float ib_;           // Current in, A
+  float ibs_;          // Scaled current in, A
   float ioc_;          // Current out, A
   float dv_hys_;       // State, voc_-voc_stat_, V
   float dv_dot_;       // Calculated voltage rate, V/s
   float tau_;          // Null time constant, sec
   TableInterp2D *hys_T_;// dv-soc 2-D table, V
+  TableInterp2D *hys_Ts_;// dv-soc 2-D table scalar
   TableInterp1D *hys_Tx_;// soc 1-D table, V_max
   TableInterp1D *hys_Tn_;// soc 1-D table, V_min
 };
@@ -223,7 +235,8 @@ public:
   void hys_state(const float st) { hys_->dv_hys(st); };
   void init_hys(const float hys) { hys_->init(hys); };
   float ib() { return ib_; };            // Battery terminal current, A
-  float ioc() { return ioc_; };
+  float ibs() { return ibs_; };          // Hysteresis input current, A
+  float ioc() { return ioc_; };          // Hysteresis output current, A
   virtual void pretty_print();
   void pretty_print_ss();
   void print_signal(const boolean print) { print_now_ = print; };
@@ -245,7 +258,8 @@ protected:
   float dv_hys_;   // Hysteresis state, voc-voc_out, V
   float dv_voc_soc_;    // VOC(SOC) delta voc on output
   float ib_;       // Battery terminal current, A
-  float ioc_;      // Current into charge portion of battery, A
+  float ibs_;      // Hysteresis input current, A
+  float ioc_;      // Hysteresis output current, A
   float nom_vsat_; // Nominal saturation threshold at 25C, V
   boolean print_now_; // Print command
   float sr_;       // Resistance scalar

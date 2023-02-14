@@ -85,7 +85,7 @@ void Chemistry::assign_BB()
   assign_soc_min(N_N_BB, X_SOC_MIN_BB, T_SOC_MIN_BB);
 
   // Hys table
-  assign_hys(N_H_BB, M_H_BB, X_DV_BB, Y_SOC_BB, T_R_BB, T_DV_MAX_BB, T_DV_MIN_BB);
+  assign_hys(N_H_BB, M_H_BB, X_DV_BB, Y_SOC_BB, T_R_BB, T_S_BB, T_DV_MAX_BB, T_DV_MIN_BB);
 }
 
 // CHINS Chemistry
@@ -95,16 +95,16 @@ void Chemistry::assign_CH()
   dqdt    = 0.01;   // Change of charge with temperature, fraction/deg C (0.01 from literature)
   dvoc_dt = 0.004;  // Change of VOC with operating temperature in range 0 - 50 C V/deg C
   dvoc    = 0.;     // Adjustment for calibration error, V (systematic error; may change in future)
-  hys_cap = 1.8e4;  // Capacitance of hysteresis, Farads.  tau_null = 1 / 0.001 / 1.8e4 = 0.056 s
+  hys_cap = 1.e4;  // Capacitance of hysteresis, Farads.  tau_null = 1 / 0.001 / 1.8e4 = 0.056 s
   low_voc = 9.;     // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
-  r_0     = 0.003*1.8;  // Randles R0, ohms
-  r_ct    = 0.0016*1.8; // Randles charge transfer resistance, ohms
-  r_diff  = 0.0077*1.8; // Randles diffusion resistance, ohms
+  r_0     = 0.003*1.6;  // Randles R0, ohms
+  r_ct    = 0.0016*1.6; // Randles charge transfer resistance, ohms
+  r_diff  = 0.0077*1.6; // Randles diffusion resistance, ohms
   r_sd    = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
   tau_ct  = 0.2;    // Randles charge transfer time constant, s (=1/Rct/Cct)
-  tau_diff = 83.*0.25;   // Randles diffusion time constant, s (=1/Rdif/Cdif)
-  tau_sd  = 2.5e7*1.8;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
+  tau_diff = 83.*0.8;   // Randles diffusion time constant, s (=1/Rdif/Cdif)
+  tau_sd  = 2.5e7*1.6;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
   c_sd    = tau_sd / r_sd;
   v_sat   = 13.85;  // Saturation threshold at temperature, deg C
 
@@ -115,7 +115,7 @@ void Chemistry::assign_CH()
   assign_soc_min(N_N_CH, X_SOC_MIN_CH, T_SOC_MIN_CH);
 
   // Hys table
-  assign_hys(N_H_CH, M_H_CH, X_DV_CH, Y_SOC_CH, T_R_CH, T_DV_MAX_CH, T_DV_MIN_CH);
+  assign_hys(N_H_CH, M_H_CH, X_DV_CH, Y_SOC_CH, T_R_CH, T_S_CH, T_DV_MAX_CH, T_DV_MIN_CH);
 }
 
 // Spare
@@ -145,11 +145,11 @@ void Chemistry::assign_SP()
   assign_soc_min(N_N_SP, X_SOC_MIN_SP, T_SOC_MIN_SP);
 
   // Hys table
-  assign_hys(N_H_CH, M_H_CH, X_DV_CH, Y_SOC_CH, T_R_CH, T_DV_MAX_CH, T_DV_MIN_CH);
+  assign_hys(N_H_CH, M_H_CH, X_DV_CH, Y_SOC_CH, T_R_CH, T_S_CH, T_DV_MAX_CH, T_DV_MIN_CH);
 }
 
 // Workhorse assignment function for Hysteresis
-void Chemistry::assign_hys(const int _n_h, const int _m_h, const float *x, const float *y, const float *t, const float *tx, const float *tn)
+void Chemistry::assign_hys(const int _n_h, const int _m_h, const float *x, const float *y, const float *t, const float *s, const float *tx, const float *tn)
 {
   int i;
 
@@ -157,6 +157,7 @@ void Chemistry::assign_hys(const int _n_h, const int _m_h, const float *x, const
   if ( n_h )  delete x_dv;
   if ( m_h )  delete y_soc;
   if ( m_h && n_h )  delete t_r;
+  if ( m_h && n_h )  delete t_s;
   if ( m_h )  delete t_x;
   if ( m_h )  delete t_n;
 
@@ -166,6 +167,7 @@ void Chemistry::assign_hys(const int _n_h, const int _m_h, const float *x, const
   x_dv = new float[n_h];
   y_soc = new float[m_h];
   t_r = new float[m_h*n_h];
+  t_s = new float[m_h*n_h];
   t_x = new float[m_h];
   t_n = new float[m_h];
 
@@ -173,6 +175,7 @@ void Chemistry::assign_hys(const int _n_h, const int _m_h, const float *x, const
   for (i=0; i<n_h; i++) x_dv[i] = x[i];
   for (i=0; i<m_h; i++) y_soc[i] = y[i];
   for (i=0; i<m_h*n_h; i++) t_r[i] = t[i];
+  for (i=0; i<m_h*n_h; i++) t_s[i] = s[i];
   for (i=0; i<m_h; i++) t_x[i] = tx[i];
   for (i=0; i<m_h; i++) t_n[i] = tn[i];
  

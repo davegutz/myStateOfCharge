@@ -38,8 +38,8 @@ Battery::Battery() {}
 Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code)
     : Coulombs(sp_delta_q, sp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, sp_mod_code, COULOMBIC_EFF),
 	bms_off_(false), ds_voc_soc_(0), dt_(0.1), dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.),
-    dv_voc_soc_(0.), ib_(0.), ioc_(0.), print_now_(false), sr_(1.), temp_c_(NOMINAL_TB), vb_(NOMINAL_VB), voc_(NOMINAL_VB),
-	voc_stat_(NOMINAL_VB), vsat_(NOMINAL_VB)
+    dv_voc_soc_(0.), ib_(0.), ibs_(0.), ioc_(0.), print_now_(false), sr_(1.), temp_c_(NOMINAL_TB), vb_(NOMINAL_VB),
+    voc_(NOMINAL_VB), voc_stat_(NOMINAL_VB), vsat_(NOMINAL_VB)
 {
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // Center in hysteresis
     hys_ = new Hysteresis(chem_.hys_cap, chem_);
@@ -885,10 +885,11 @@ void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
     vb_ = Randles_->y(0);
     ib_fut_ = ib_;
     init_hys(0.0);
+    ibs_ = hys_->ibs();
     #ifdef DEBUG_INIT
         if ( sp.debug()==-1 )
         {
-            Serial.printf("sim: ib%7.3f voc%7.3f vb%7.3f\n", ib_, voc_, vb_);
+            Serial.printf("sim: ib%7.3f ibs%7.3f voc%7.3f vb%7.3f\n", ib_, ibs_, voc_, vb_);
             Randles_->pretty_print();
         }
     #endif
@@ -914,12 +915,13 @@ void BatterySim::pretty_print(void)
 
 
 Hysteresis::Hysteresis()
-: disabled_(false), cap_(0), res_(0), soc_(0), ib_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0){};
+: disabled_(false), cap_(0), res_(0), soc_(0), ib_(0), ibs_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0){};
 Hysteresis::Hysteresis(const float cap, Chemistry chem)
-: disabled_(false), cap_(cap), res_(0), soc_(0), ib_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0)
+: disabled_(false), cap_(cap), res_(0), soc_(0), ib_(0), ibs_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0)
 {
     // Characteristic table
     hys_T_ = new TableInterp2D(chem.n_h, chem.m_h, chem.x_dv, chem.y_soc, chem.t_r);
+    hys_Ts_ = new TableInterp2D(chem.n_h, chem.m_h, chem.x_dv, chem.y_soc, chem.t_s);
     hys_Tx_ = new TableInterp1D(chem.m_h, chem.y_soc, chem.t_x);
     hys_Tn_ = new TableInterp1D(chem.m_h, chem.y_soc, chem.t_n);
 
@@ -938,14 +940,18 @@ float Hysteresis::calculate(const float ib, const float soc)
     if ( disabled_ )
     {
         res_ = 0.;
+        slr_ = 1.;
+        ibs_ = ib;
         ioc_ = ib;
         dv_dot_ = 0.;
     }
     else
     {
         res_ = look_hys(dv_hys_, soc_);
+        slr_ = look_slr(dv_hys_, soc_);
+        ibs_ = ib_ * slr_;
         ioc_ = dv_hys_ / res_;
-        dv_dot_ = (ib_ - dv_hys_/res_) / cap_;  // Capacitor ode
+        dv_dot_ = (ibs_ - dv_hys_/res_) / cap_;  // Capacitor ode
     }
 
     return ( dv_dot_ );
@@ -968,6 +974,16 @@ float Hysteresis::look_hys(const float dv, const float soc)
     return res;
 }
 
+float Hysteresis::look_slr(const float dv, const float soc)
+{
+    float slr;         // return value
+    if ( disabled_ )
+        slr = 1.;
+    else
+        slr = hys_Ts_->interp(dv, soc);
+    return slr;
+}
+
 // Print
 void Hysteresis::pretty_print()
 {
@@ -978,14 +994,18 @@ void Hysteresis::pretty_print()
     Serial.printf("  dv_dot%7.3f, V/s\n", dv_dot_);
     Serial.printf("  dv_hys%7.3f, V, SH\n", dv_hys_);
     Serial.printf("  ib%7.3f, A\n", ib_);
+    Serial.printf("  ibs%7.3f, A\n", ibs_);
     Serial.printf("  ioc%7.3f, A\n", ioc_);
     Serial.printf("  res%6.4f, null Ohm\n", res_);
     Serial.printf("  res%7.3f, ohm\n", res_);
+    Serial.printf("  slr%7.3f,\n", slr_);
     Serial.printf("  soc%8.4f\n", soc_);
     Serial.printf("  sp.hys_scale()%6.2f Slr\n", sp.hys_scale());
     Serial.printf("  tau%10.1f, null, s\n", res*cap_);
     Serial.printf("  r(soc, dv):\n");
     hys_T_->pretty_print();
+    Serial.printf("  s(soc, dv):\n");
+    hys_Ts_->pretty_print();
     Serial.printf("  r_max(soc):\n");
     hys_Tx_->pretty_print();
     Serial.printf("  r_min(soc):\n");
@@ -1011,20 +1031,15 @@ float Hysteresis::update(const double dt, const boolean init_high, const boolean
     else if ( reset_temp )
     {
         ioc_ = ib_;
+        res_ = look_hys(0., soc_);
+        slr_ = 1.;
         dv_dot_ = 0.;
-        int count = 0;
-        float dv_hys_past = 1e5;
-        while ( ++count<HYS_INIT_COUNTS && abs(dv_hys_past-dv_hys_)>HYS_INIT_TOL)
-        {
-            dv_hys_past = dv_hys_;
-            dv_hys_ = ioc_ * res_;
-            res_ = look_hys(dv_hys_, soc_);
-            #ifdef DEBUG_INIT
-                if ( sp.debug()==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
-            #endif
-        }
+        dv_hys_ = 0.;
+        res_ = look_hys(dv_hys_, soc_);
+        slr_ = look_slr(dv_hys_, soc_);
+        ioc_ = ib_ * slr_;
         #ifdef DEBUG_INIT
-            if ( sp.debug()==-1 ) Serial.printf("ioc %7.3f dv %9.6f dvp %9.6f count %d\n", ioc_, dv_hys_, dv_hys_past, count);
+            if ( sp.debug()==-1 ) Serial.printf("ib%7.3f ibs%7.3f ioc%7.3f dv%9.6f res%7.3f slr%7.3f\n", ib_, ibs_, ioc_, dv_hys_, res_, slr_);
         #endif
     }
 
