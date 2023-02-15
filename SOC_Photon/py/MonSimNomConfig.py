@@ -20,12 +20,10 @@
 dv_sense = 0.  # (0.-->0.1) ++++++++ flat curve
 di_sense = 0.  # (0.-->0.5) ++++++++  i does not go to zero steady state
 model_bat_cap = 100.  # (100.-->80) ++++++++++ dyn only provided reset soc periodically
-r0 = 0.003  # (0.003-->0.006)  +++ dyn only provided reset soc periodically
-rct = 0.0016  # (0.0016-->0.0032) ++++++++++ dyn only provided reset soc periodically
-tau_dif = 83  # (83-->100)  +++++++++++ dyn only provided reset soc periodically
-r_dif = 0.0077  # (0.0077-->0.015)   ++++++++++  dyn only provided reset soc periodically
+r_0 = 0.0046  # (0.0046-->0.0092)  +++ dyn only provided reset soc periodically
+tau_ct = 83  # (83-->100)  +++++++++++ dyn only provided reset soc periodically
+r_ct = 0.0077  # (0.0077-->0.015)   ++++++++++  dyn only provided reset soc periodically
 rsd = 70.  # (70.-->700)  ------- dyn only
-tau_ct = 0.2  # (0.2-->5.)  -------
 tau_sd = 2.5e7  # (2.5e7-->2.5e6) ++++++ dyn only
 v_std = 0.  # (0.01-->0) ------ noise
 i_std = 0.  # (0.1-->0) ------ noise

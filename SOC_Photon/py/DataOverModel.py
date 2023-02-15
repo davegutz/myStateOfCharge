@@ -1030,7 +1030,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     ib_f = np.copy(mv.ib)
     ioc_f = np.copy(mv.ioc)
     t = np.copy(mv.time)
-    dv_hys_calc = voc - voc_stat  # assumes Randles tuned
+    dv_hys_calc = voc - voc_stat  # assumes Charge Transfer tuned
     dv_hys_req = voc - voc_soc
     dv_hys_calc_f = np.copy(dv_hys_calc)
     dv_hys_req_f = np.copy(dv_hys_req)
@@ -1661,7 +1661,7 @@ if __name__ == '__main__':
             sim_old = None
 
         # Run model
-        mon_ver, sim_ver, randles_ver, sim_s_ver = replicate(mon_old, init_time=1.)
+        mon_ver, sim_ver, sim_s_ver = replicate(mon_old, init_time=1.)
         date_ = datetime.now().strftime("%y%m%d")
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         save_clean_file(mon_ver, mon_file_save, '_mon_rep' + date_)

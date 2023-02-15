@@ -175,21 +175,21 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   case ( 0 ):  // Bm0: Mon Battleborn
                     Serial.printf("Mon chem %d", Mon->mod_code());
                     Mon->assign_all_mod("Battleborn");
-                    Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_randles();
+                    Serial.printf(" to %d\n", Mon->mod_code());
                     cp.cmd_reset();
                     break;
 
                   case ( 1 ):  // Bm1: Mon CHINS
                     Serial.printf("Mon chem %d", Mon->mod_code());
                     Mon->assign_all_mod("CHINS");
-                    Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_randles();
+                    Serial.printf(" to %d\n", Mon->mod_code());
                     cp.cmd_reset();
                     break;
 
                   case ( 2 ):  // Bm2: Mon Spare
                     Serial.printf("Mon chem %d", Mon->mod_code());
                     Mon->assign_all_mod("Spare");
-                    Serial.printf(" to %d\n", Mon->mod_code()); Mon->assign_randles();
+                    Serial.printf(" to %d\n", Mon->mod_code());
                     cp.cmd_reset();
                     break;
 
@@ -205,21 +205,21 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 {
                   case ( 0 ):  // Bs0: Sim Battleborn
                     Serial.printf("Sim chem %d", Sen->Sim->mod_code());
-                    Sen->Sim->assign_all_mod("Battleborn"); Sen->Sim->assign_randles();
+                    Sen->Sim->assign_all_mod("Battleborn");
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
 
                   case ( 1 ):  // Bs1: Sim CHINS
                     Serial.printf("Sim chem %d", Sen->Sim->mod_code());
-                    Sen->Sim->assign_all_mod("CHINS"); Sen->Sim->assign_randles();
+                    Sen->Sim->assign_all_mod("CHINS");
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
 
                   case ( 2 ):  // Bs2: Sim Spare
                     Serial.printf("Sim chem %d", Sen->Sim->mod_code());
-                    Sen->Sim->assign_all_mod("Spare"); Sen->Sim->assign_randles();
+                    Sen->Sim->assign_all_mod("Spare");
                     Serial.printf(" to %d\n", Sen->Sim->mod_code());
                     cp.cmd_reset();
                     break;
@@ -493,21 +493,14 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%7.3f\n", Sen->ib_noa_sclr());
                 break;
             
-              case ( 'r' ):  //   Sr<>:  scalar sim resistor
+              case ( 'r' ):  //   Sr<>:  scalar resistor
                 scale = cp.input_str.substring(2).toFloat();
-            
-                Serial.printf("\nBefore Sim::\n"); Sen->Sim->pretty_print_ss();
-                Serial.printf("\nScaling D[0, 0]=-r0 by Sr%7.3f\n", scale);
-            
+                Serial.printf("\nSim resistance scale Sr%7.3f to", Sen->Sim->Sr());
                 Sen->Sim->Sr(scale);
-            
-                Serial.printf("\nAfter Sim::\n"); Mon->pretty_print_ss();
-                Serial.printf("\nBefore Mon::\n"); Mon->pretty_print_ss();
-                Serial.printf("\nScaling D[0, 0]=-r0 by Sr%7.3f\n", scale);
-            
+                Serial.printf("%7.3f\n", Sen->Sim->Sr());
+                Serial.printf("\nMon resistance scale Sr%7.3f to", Mon->Sr());
                 Mon->Sr(scale);
-            
-                Serial.printf("\nAfter Mon::SS:\n"); Mon->pretty_print_ss();
+                Serial.printf("%7.3f\n", Mon->Sr());
                 break;
             
               case ( 'k' ):  // * Sk<>:  scale cutback gain for sim rep of BMS
@@ -698,7 +691,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'm' ):  // Pm:  Print mon
                 Serial.printf ("\nM:"); Mon->pretty_print(Sen);
                 Serial.printf ("M::"); Mon->Coulombs::pretty_print();
-                Serial.printf ("M::"); Mon->pretty_print_ss();
                 Serial.printf ("M::"); Mon->EKF_1x1::pretty_print();
                 Serial.printf ("\nmodeling = %d\n", sp.modeling());
                 break;
@@ -720,7 +712,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("\nmodeling=%d\n", sp.modeling());
                 Serial.printf("S:");  Sen->Sim->pretty_print();
                 Serial.printf("S::"); Sen->Sim->Coulombs::pretty_print();
-                Serial.printf("S::"); Sen->Sim->pretty_print_ss();
                 break;
 
               case ( 'x' ):  // Px:  Print shunt measure
@@ -1070,8 +1061,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Pa;", QUEUE);       // Print all for record
                     if ( INT_in == 20 )
                     {
-                      chit("Dr500;", QUEUE);  // 5x sample time, > RANDLES_T_MAX.  Randles dynamics disabled in Photon
-                      chit("DP4;", QUEUE);    // 4x data collection, > RANDLES_T_MAX.  Randles dynamics disabled in Python
+                      chit("Dr500;", QUEUE);  // 5x sample time, > ChargeTransfer_T_MAX.  ChargeTransfer dynamics disabled in Photon
+                      chit("DP4;", QUEUE);    // 4x data collection, > ChargeTransfer_T_MAX.  ChargeTransfer dynamics disabled in Python
                       chit("v2;", QUEUE);     // Large data set
                     }
                     else if ( INT_in == 21 )
@@ -1269,7 +1260,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("   v4: GP, Sim, Sel, & EKF\n");
   Serial.printf("   v5: OLED display\n");
   // Serial.printf("   v7: EKF solver init\n");
-  // Serial.printf("   v8: Randles SS init\n");
+  // Serial.printf("   v8: ChargeTransfer SS init\n");
   Serial.printf("  v12: EKF\n");
   #if PLATFORM_ID == PLATFORM_ARGON
     Serial.printf(" v-13: ib_dscn\n");
@@ -1278,7 +1269,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  v15: vb raw\n");
   // Serial.printf("  v16: Tb\n");
   // Serial.printf("  v34: EKF detail\n");
-  // Serial.printf("  v35: Randles balance\n");
+  // Serial.printf("  v35: ChargeTransfer balance\n");
   // Serial.printf("  v37: EKF short\n");
   #if PLATFORM_ID == PLATFORM_ARGON
     Serial.printf("  v75: voc_low check mod\n");

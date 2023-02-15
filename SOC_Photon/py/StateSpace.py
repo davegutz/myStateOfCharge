@@ -125,7 +125,7 @@ if __name__ == '__main__':
     doctest.testmod(sys.modules['__main__'])
 
     def construct_state_space_monitor():
-        r0 = 0.003  # Randles R0, ohms
+        r_0 = 0.00  # Randles R0, ohms
         tau_ct = 0.2  # Randles charge transfer time constant, s (=1/Rct/Cct)
         rct = 0.0016  # Randles charge transfer resistance, ohms
         tau_dif = 83  # Randles diffusion time constant, s (=1/Rdif/Cdif)
@@ -134,33 +134,33 @@ if __name__ == '__main__':
         c_dif = tau_dif / r_dif
         print('-1/Rc/Cc=', -1/tau_ct, '-1/Rd/Cd=', -1/tau_dif)
         print('1/Cc=', 1/c_ct, '1/Cd=', 1/c_dif)
-        print('r0=', r0)
+        print('r_0=', r_0)
         a = np.array([[-1 / tau_ct, 0],
                       [0, -1 / tau_dif]])
         b = np.array([[1 / c_ct,   0],
                       [1 / c_dif,  0]])
         c = np.array([-1., -1])
-        d = np.array([-r0, 1])
+        d = np.array([-r_0, 1])
         AinvB = inv(a)*b
         return a, b, c, d, AinvB
 
     def construct_state_space_monitor_1():
-        r0 = 0.003 + 0.0016  # Randles R0, ohms
+        r_0 = 0.003 + 0.0016  # Randles R0, ohms
         tau_dif = 83  # Randles diffusion time constant, s (=1/Rdif/Cdif)
         r_dif = 0.0077  # Randles diffusion resistance, ohms
         c_dif = tau_dif / r_dif
         print('-1/Rd/Cd=', -1/tau_dif)
         print('1/Cd=', 1/c_dif)
-        print('r0=', r0)
+        print('r_0=', r_0)
         a = np.array(-1 / tau_dif)
         b = np.array(1. / c_dif)
         c = np.array(-1)
-        d = np.array(-r0)
+        d = np.array(-r_0)
         AinvB = b / a
         return a, b, c, d, AinvB
 
     def construct_state_space_model():
-        r0 = 0.003  # Randles R0, ohms
+        r_0 = 0.003  # Randles R0, ohms
         tau_ct = 0.2  # Randles charge transfer time constant, s (=1/Rct/Cct)
         rct = 0.0016  # Randles charge transfer resistance, ohms
         tau_dif = 83  # Randles diffusion time constant, s (=1/Rdif/Cdif)
@@ -169,28 +169,28 @@ if __name__ == '__main__':
         c_dif = tau_dif / r_dif
         print('-1/Rc/Cc=', -1/tau_ct, '-1/Rd/Cd=', -1/tau_dif)
         print('1/Cc=', 1/c_ct, '1/Cd=', 1/c_dif)
-        print('r0=', r0)
+        print('r_0=', r_0)
         a = np.array([[-1 / tau_ct, 0],
                       [0, -1 / tau_dif]])
         b = np.array([[1 / c_ct,   0],
                       [1 / c_dif,  0]])
         c = np.array([1., 1])
-        d = np.array([r0, 1])
+        d = np.array([r_0, 1])
         AinvB = inv(a)*b
         return a, b, c, d, AinvB
 
     def construct_state_space_model_1():
-        r0 = 0.003 + 0.0016  # Randles R0, ohms
+        r_0 = 0.003 + 0.0016  # Randles R0, ohms
         tau_dif = 83  # Randles diffusion time constant, s (=1/Rdif/Cdif)
         r_dif = 0.0077  # Randles diffusion resistance, ohms
         c_dif = tau_dif / r_dif
         print('-1/Rd/Cd=', -1/tau_dif)
         print('1/Cd=', 1/c_dif)
-        print('r0=', r0)
+        print('r_0=', r_0)
         a = np.array(-1 / tau_dif)
         b = np.array(1 / c_dif)
         c = np.array(1.)
-        d = np.array(r0)
+        d = np.array(r_0)
         AinvB = b / a
         return a, b, c, d, AinvB
 

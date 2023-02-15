@@ -17,6 +17,7 @@ __author__ = 'Dave Gutz <davegutz@alum.mit.edu>'
 __version__ = '$Revision: 1.1 $'
 __date__ = '$Date: 2022/06/10 13:15:02 $'
 
+import numpy as np
 
 class RateLimit:
     def __init__(self):
@@ -301,6 +302,96 @@ class General2Pole(DiscreteFilter2):
         self.saved.accel.append(self.accel)
 
 
+class LagExp(DiscreteFilter):
+    # Exponential lag calculator
+
+    def __init__(self, dt, tau, min_, max_):
+        DiscreteFilter.__init__(self, dt, tau, min_, max_)
+        self.a = 0.
+        self.b = 0.
+        self.c = 0.
+        self.rate = 0.
+        self.rstate = 0.
+        self.state = 0.
+        self.assign_coeff(tau)
+        self.saved = Saved1()
+        self.in_ = 0.
+        self.out_ = 0.
+
+    def __str__(self, prefix=''):
+        s = prefix + "LagExp:"
+        s += "\n  "
+        s += DiscreteFilter.__str__(self, prefix + 'LagExp:')
+        s += "  a        =    {:7.3f}  // Discrete coefficient\n".format(self.a)
+        s += "  b        =    {:7.3f}  // Discrete coefficient\n".format(self.b)
+        s += "  c        =    {:7.3f}  // Discrete coefficient\n".format(self.c)
+        s += "  tau      =    {:7.3f}  // Time constant, s\n".format(self.tau)
+        s += "  in_      =    {:7.3f}  // Input\n".format(self.in_)
+        s += "  out_     =    {:7.3f}  // Output\n".format(self.out_)
+        return s
+
+    def assign_coeff(self, _tau):
+        self.tau = _tau
+        eTt = np.exp(-self.dt / self.tau)
+        meTt = 1. - eTt
+        self.a = self.tau / self.dt - eTt / meTt
+        self.b = 1.0 / meTt - self.tau / self.dt
+        self.c = meTt / self.dt
+
+    def calc_state_(self, in_):
+        self.state = max(min(self.state + self.dt * self.rate, self.max), self.min)
+        self.rate = max(min(self.c * (self.a * self.rstate + self.b * in_ - self.state), self.max), self.min)
+        self.rstate = in_
+        self.state = max(min(in_ * (1.0 - self.b) + self.state * self.b, self.max), self.min)
+
+    def calc_state(self, in_, dt):
+        self.dt = dt
+        self.assign_coeff(self.tau)
+        self.calc_state_(in_)
+
+    def calculate(self, in_, reset, dt):
+        self.in_ = in_
+        if reset:
+            self.state = self.in_
+        self.calc_state(self.in_, dt)
+        self.out_ = self.state
+        return self.out_
+
+    def save(self, time):
+        self.saved.time.append(time)
+        self.saved.rate.append(self.rate)
+        self.saved.state.append(self.rstate)
+        self.saved.state.append(self.state)
+        self.saved.in_.append(self.in_)
+        self.saved.out_.append(self.out_)
+
+
+class Saved1:
+    # For plot 1st order filter savings.
+    # A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
+    def __init__(self):
+        self.time = []
+        self.rstate = []
+        self.state = []
+        self.rate = []
+        self.in_ = []
+        self.out_ = []
+
+
+class Saved2:
+    # For plot 1st order filter savings.
+    # A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
+    def __init__(self):
+        self.time = []
+        self.in_ = []
+        self.out_ = []
+        self.accel = []
+        self.AB2_state = []
+        self.AB2_rate_state = []
+        self.Tustin_state = []
+        self.Tustin_rate_state = []
+
+
 class LagTustin(DiscreteFilter):
     # Tustin lag calculator, non-pre-warped
 
@@ -378,8 +469,6 @@ class Saved2:
         self.AB2_rate_state = []
         self.Tustin_state = []
         self.Tustin_rate_state = []
-
-
 if __name__ == '__main__':
     import sys
     import doctest

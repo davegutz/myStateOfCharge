@@ -54,7 +54,7 @@ void Chemistry::assign_all_mod(const String mod_str)
     assign_SP();
   }
   else Serial.printf("Battery::assign_all_mod:  unknown mod = %d.  Type 'h' for help\n", mod);
-  r_ss = r_0 + r_ct + r_diff;
+  r_ss = r_0 + r_diff;
 }
 
 // BattleBorn Chemistry
@@ -68,12 +68,10 @@ void Chemistry::assign_BB()
                     // tau_null = 1 / 0.005 / 3.6e3 = 0.056 s
   low_voc = 9.0;     // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
-  r_0     = 0.003;  // Randles R0, ohms   
-  r_ct    = 0.0016; // Randles charge transfer resistance, ohms
-  r_diff  = 0.0077; // Randles diffusion resistance, ohms
+  r_0     = 0.0046; // ChargeTransfer R0, ohms   
+  r_diff  = 0.0077; // ChargeTransfer diffusion resistance, ohms
   r_sd    = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
-  tau_ct  = 0.2;    // Randles charge transfer time constant, s (=1/Rct/Cct)
-  tau_diff = 83.;   // Randles diffusion time constant, s (=1/Rdif/Cdif)
+  tau_ct = NOM_TAU_CT;  // ChargeTransfer diffusion time constant, s (=1/Rct/Cct)
   tau_sd  = 2.5e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
   c_sd    = tau_sd / r_sd;
   v_sat   = 13.85;  // Saturation threshold at temperature, deg C
@@ -98,12 +96,10 @@ void Chemistry::assign_CH()
   hys_cap = 1.e4;  // Capacitance of hysteresis, Farads.  tau_null = 1 / 0.001 / 1.8e4 = 0.056 s
   low_voc = 9.;     // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
-  r_0     = 0.003*1.6;  // Randles R0, ohms
-  r_ct    = 0.0016*1.6; // Randles charge transfer resistance, ohms
-  r_diff  = 0.0077*1.6; // Randles diffusion resistance, ohms
+  r_0     = 0.0046*1.6;  // ChargeTransfer R0, ohms
+  r_diff  = 0.0077*1.6; // ChargeTransfer diffusion resistance, ohms
   r_sd    = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
-  tau_ct  = 0.2;    // Randles charge transfer time constant, s (=1/Rct/Cct)
-  tau_diff = 83.*0.8;   // Randles diffusion time constant, s (=1/Rdif/Cdif)
+  tau_ct = NOM_TAU_CT*0.8;   // ChargeTransfer diffusion time constant, s (=1/Rct/Cct)
   tau_sd  = 2.5e7*1.6;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
   c_sd    = tau_sd / r_sd;
   v_sat   = 13.85;  // Saturation threshold at temperature, deg C
@@ -128,12 +124,10 @@ void Chemistry::assign_SP()
   hys_cap = 3.6e3;  // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data. // div 10 again 9/29/2022 // div 10 again 11/30/2022
   low_voc = 9.;     // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
-  r_0     = 0.003;  // Randles R0, ohms   
-  r_ct    = 0.0016; // Randles charge transfer resistance, ohms
-  r_diff  = 0.0077; // Randles diffusion resistance, ohms
+  r_0     = 0.003;  // ChargeTransfer R0, ohms   
+  r_diff  = 0.0077; // ChargeTransfer diffusion resistance, ohms
   r_sd    = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
-  tau_ct  = 0.2;    // Randles charge transfer time constant, s (=1/Rct/Cct)
-  tau_diff = 83.;   // Randles diffusion time constant, s (=1/Rdif/Cdif)
+  tau_ct = 83.;   // ChargeTransfer diffusion time constant, s (=1/Rct/Cct)
   tau_sd  = 2.5e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
   c_sd    = tau_sd / r_sd;
   v_sat   = 13.85;  // Saturation threshold at temperature, deg C
@@ -270,15 +264,13 @@ void Chemistry::pretty_print(void)
   Serial.printf("  hys_cap%7.3f, F\n", hys_cap);
   Serial.printf("  low_voc%7.3f, V\n", low_voc);
   Serial.printf("  v_sat%7.3f, V\n", v_sat);
-  Serial.printf("  Randles:\n");
+  Serial.printf("  ChargeTransfer:\n");
   Serial.printf("  c_sd%9.3g; EKK, farad\n", c_sd);
   Serial.printf("  r_0%9.6f, ohm\n", r_0);
-  Serial.printf("  r_ct%9.6f, ohm\n", r_ct);
   Serial.printf("  r_diff%9.6f, ohm\n", r_diff);
   Serial.printf("  r_sd%9.6f; EKF, ohm\n", r_sd);
   Serial.printf("  r_ss%9.6f; SS init, ohm\n", r_ss);
   Serial.printf("  tau_ct%7.3f, s\n", tau_ct);
-  Serial.printf("  tau_diff%7.3f, s\n", tau_diff);
   Serial.printf("  tau_sd%9.3g; EKF, s\n", tau_sd);
   Serial.printf("  voc(t, soc):\n");
   voc_T_->pretty_print();

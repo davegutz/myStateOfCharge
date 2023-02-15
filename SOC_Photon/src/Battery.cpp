@@ -42,14 +42,14 @@ Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code)
     voc_(NOMINAL_VB), voc_stat_(NOMINAL_VB), vsat_(NOMINAL_VB)
 {
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // Center in hysteresis
+    ChargeTransfer_ = new LagExp(EKF_NOM_DT, NOM_TAU_CT, -1., 1.);
     hys_ = new Hysteresis(chem_.hys_cap, chem_);
 }
 Battery::~Battery() {}
 // operators
 // functions
 
-// Placeholder; not used.  May write this base version if needed using BatterySim::calculate()
-// as a starting point but use the base class Randles formulation and re-arrange the i/o for that model.
+// Placeholder; not used
 float Battery::calculate(const float temp_C, const float soc_frac, float curr_in, const double dt, const boolean dc_dc_on)
 {
     return 0.;
@@ -114,28 +114,19 @@ void Battery::pretty_print(void)
     Serial.printf("  dvoc_dt=%10.6f; V/dg C\n", chem_.dvoc_dt);
     Serial.printf("  ib=%7.3f; A\n", ib_);
     Serial.printf("  r_0=%10.6f;  ohm\n", chem_.r_0);
-    Serial.printf("  r_ct = %10.6f;  ohm\n", chem_.r_ct);
     Serial.printf("  r_diff=%10.6f;  ohm\n", chem_.r_diff);
     Serial.printf("  r_sd = %10.6f;  ohm\n", chem_.r_sd);
     Serial.printf("  soc=%8.4f;\n", soc_);
     Serial.printf(" *sp_delt_q=%10.1f;  C\n", *sp_delta_q_);
     Serial.printf(" *sp_t_last=%10.1f; dg C\n", *sp_t_last_);
     Serial.printf("  sr=%7.3f; sclr\n", sr_);
-    Serial.printf("  tau_ct=%10.6f;  s (=1/R/C)\n", chem_.tau_ct);
-    Serial.printf("  tau_diff =%10.6f;  s (=1/R/C)\n", chem_.tau_diff);
+    Serial.printf("  tau_ct =%10.6f;  s (=1/R/C)\n", chem_.tau_ct);
     Serial.printf("  tau_sd=%9.3g;  s\n", chem_.tau_sd);
     Serial.printf("  temp_c=%7.3f; dg C\n", temp_c_);
     Serial.printf("  vb=%7.3f; V\n", vb_);
     Serial.printf("  voc=%7.3f; V\n", voc_);
     Serial.printf("  voc_stat=%7.3f; V\n", voc_stat_);
     Serial.printf("  vsat=%7.3f; V\n", vsat_);
-}
-
-// Print State Space
-void Battery::pretty_print_ss(void)
-{
-    Randles_->pretty_print();
-    Serial.printf("::"); hys_->pretty_print();
 }
 
 // EKF model for update
@@ -159,19 +150,6 @@ BatteryMonitor::BatteryMonitor():
     // EKF
     this->Q_ = EKF_Q_SD_NORM*EKF_Q_SD_NORM;
     this->R_ = EKF_R_SD_NORM*EKF_R_SD_NORM;
-    // Randles dynamic model for EKF, forward version based on sensor inputs {ib, vb} --> {voc}, ioc=ib
-    // Resistance values add up to same resistance loss as matched to installed battery
-    // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
-    // the state-space stability requires at least 0.1.   Used 0.2.
-    int rand_n = 2; // Rows A and B
-    int rand_p = 2; // Col B    
-    int rand_q = 1; // Row C and D
-    rand_A_ = new double [rand_n*rand_n];
-    rand_B_ = new double [rand_n*rand_p];
-    rand_C_ = new double [rand_q*rand_n];
-    rand_D_ = new double [rand_q*rand_p];
-    assign_randles();
-    Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
     SdVb_ = new SlidingDeadband(HDB_VBATT);  // Noise filter
     EKF_converged = new TFDelay(false, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT); // Convergence test debounce.  Initializes false
     ice_ = new Iterator("EKF solver");
@@ -180,24 +158,6 @@ BatteryMonitor::~BatteryMonitor() {}
 
 // operators
 // functions
-
-// BatteryMonitor::assign_randles:    Assign constants from battery chemistry to arrays for state space model
-void BatteryMonitor::assign_randles(void)
-{
-    rand_A_[0] = -1./chem_.tau_ct;
-    rand_A_[1] = 0.;
-    rand_A_[2] = 0.;
-    rand_A_[3] = -1/chem_.tau_diff;
-    rand_B_[0] = 1./(chem_.tau_ct / chem_.r_ct);
-    rand_B_[1] = 0.;
-    rand_B_[2] = 1./(chem_.tau_diff / chem_.r_diff);
-    rand_B_[3] = 0.;
-    rand_C_[0] = -1.;
-    rand_C_[1] = -1.;
-    rand_D_[0] = -chem_.r_0;
-    rand_D_[1] = 1.;
-}
-
 /* BatteryMonitor::calculate:  SOC-OCV curve fit solved by ekf.   Works in 12 V
    battery units.  Scales up/down to number of series/parallel batteries on output/input.
         Inputs:
@@ -228,12 +188,12 @@ void BatteryMonitor::assign_randles(void)
 
                 <---ib        ______________         <---ib
                  voc          |             |
-       -----------+-----------|   RANDLES   |----------+-----------+ vb
+       -----------+-----------|   ChargeTransfer   |----------+-----------+ vb
        |                      |_____________|
        |
     ___|___
     |      |
-    | HYS  |   |              HYS stores charge ib-ioc.  dv_hys = voc - voc_stat
+    | HYS  |   |              HYS stores charge ib-ioc.  dv_hys = voc - voc_stat,  Include tau_diff (diffusion)
     |______|   |
        |       v  ioc ~= ib
        +   voc_stat
@@ -279,15 +239,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
         ib_ = 0.;
 
     // Dynamic emf
-    double u[2] = {ib_, vb_};
-    if ( Sen->ReadSensors->updateTimeInput()<=RANDLES_T_MAX )  // Intentionally sub-sampled
-    {
-        Randles_->calc_x_dot(u);
-        Randles_->update(dt_);
-        voc_ = Randles_->y(0);
-    }
-    else    // aliased, unstable if T>RANDLES_T_MAX is deliberate.
-        voc_ = vb_ - chem_.r_ss * ib_;
+    voc_ = vb_ - (ChargeTransfer_->calculate(ib_, reset, dt_)*chem_.r_diff*sr_ + ib_*chem_.r_0*sr_);
     if ( !cp.fake_faults )
     {
         if ( (bms_off_ && voltage_low) ||  Sen->Flt->vb_fa())
@@ -417,15 +369,13 @@ void BatteryMonitor::init_battery_mon(const boolean reset, Sensors *Sen)
     ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
     if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
-    double u[2] = {ib_, vb_};
-    Randles_->init_state_space(u);
-    voc_ = Randles_->y(0);
+    dv_dyn_ = ib_*chem_.r_ss*sr_;
+    voc_ = vb_ - dv_dyn_;
     init_hys(0.0);
     #ifdef DEBUG_INIT
         if ( sp.debug()==-1 )
         {
             Serial.printf("mon: ib%7.3f vb%7.3f voc%7.3f\n", ib_, vb_, voc_);
-            Randles_->pretty_print();
         }
     #endif
 }
@@ -554,10 +504,8 @@ BatterySim::BatterySim() :
     Battery(&sp.delta_q_model_, &sp.t_last_model_, &sp.sim_chm_), duty_(0UL), ib_fut_(0.), ib_in_(0.), model_cutback_(true),
     q_(RATED_BATT_CAP*3600.), sample_time_(0UL), sample_time_z_(0UL), sat_ib_max_(0.)
 {
-    // Randles dynamic model for EKF
+    // ChargeTransfer dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery
-    // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
-    // the state-space stability requires at least 0.1.   Used 0.2.
     Sin_inj_ = new SinInj();
     Sq_inj_ = new SqInj();
     Tri_inj_ = new TriInj();
@@ -566,39 +514,9 @@ BatterySim::BatterySim() :
     sat_cutback_gain_ = 1000.;  // Gain to retard ib when soc approaches 1, dimensionless
     model_saturated_ = false;
     ib_sat_ = 0.5;              // deadzone for cutback actuation, A
-    // Randles dynamic model for EKF, backward version based on model {ib, voc} --> {vb}, ioc=ib
-    // Resistance values add up to same resistance loss as matched to installed battery
-    // tau_ct small as possible for numerical stability and 2x margin.   Original data match used 0.01 but
-    // the state-space stability requires at least 0.1.   Used 0.2.
-    int rand_n = 2; // Rows A and B
-    int rand_p = 2; // Col B    
-    int rand_q = 1; // Row C and D
-    rand_A_ = new double [rand_n*rand_n];
-    rand_B_ = new double [rand_n*rand_p];
-    rand_C_ = new double [rand_q*rand_n];
-    rand_D_ = new double [rand_q*rand_p];
-    assign_randles();
-    Randles_ = new StateSpace(rand_A_, rand_B_, rand_C_, rand_D_, rand_n, rand_p, rand_q);
     ib_charge_ = 0.;
 }
 BatterySim::~BatterySim() {}
-
-// BatterySim::assign_randles:    Assign constants from battery chemistry to arrays for state space model
-void BatterySim::assign_randles(void)
-{
-    rand_A_[0] = -1./chem_.tau_ct;
-    rand_A_[1] = 0.;
-    rand_A_[2] = 0.;
-    rand_A_[3] = -1/chem_.tau_diff;
-    rand_B_[0] = 1./(chem_.tau_ct / chem_.r_ct);
-    rand_B_[1] = 0.;
-    rand_B_[2] = 1./(chem_.tau_diff / chem_.r_diff);
-    rand_B_[3] = 0.;
-    rand_C_[0] = 1.;
-    rand_C_[1] = 1.;
-    rand_D_[0] = chem_.r_0;
-    rand_D_[1] = 1.;
-}
 
 /* BatterySim::calculate:  Sim SOC-OCV table with a Battery Management System (BMS) and hysteresis.
 // Makes a good reference model. Intervenes in sensor path to provide Mon with inputs
@@ -625,12 +543,12 @@ void BatterySim::assign_randles(void)
 
                 <---ib        ______________         <---ib
                  voc          |             |
-       -----------+-----------|   RANDLES   |----------+-----------+ vb
+       -----------+-----------|   ChargeTransfer   |----------+-----------+ vb
        |                      |_____________|
        |
     ___|___
     |      |
-    | HYS  |   |              HYS stores charge ib-ioc.  dv_hys = voc - voc_stat
+    | HYS  |   |              HYS stores charge ib-ioc.  dv_hys = voc - voc_stat,  Include tau_diff (diffusion)
     |______|   |
        |       v  ioc ~= ib
        +   voc_stat
@@ -688,16 +606,8 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     if ( bms_off_ && voltage_low )
         ib_ = 0.;
 
-    // Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
-    double u[2] = {ib_, voc_};
-    Randles_->calc_x_dot(u);
-    if ( Sen->ReadSensors->updateTimeInput()<=RANDLES_T_MAX )  // Intentionally sub-sampled
-    {
-        Randles_->update(dt_);
-        vb_ = Randles_->y(0);
-    }
-    else    // aliased, unstable if T>RANDLES_T_MAX is deliberate.
-        vb_ = voc_ + chem_.r_ss * ib_charge_fut;
+    // ChargeTransfer dynamic model for model, reverse version to generate sensor inputs
+    vb_ = voc_ + (ChargeTransfer_->calculate(ib_, reset, dt_)*chem_.r_diff*sr_ + ib_*chem_.r_0*sr_);
 
     // Special cases override
     if ( bms_off_ )
@@ -877,12 +787,10 @@ void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
     ib_ = Sen->ib_model_in();
     ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
     vb_ = Sen->vb();
-    voc_ = vb_ - ib_ * chem_.r_ss;
+    voc_ = vb_ - ib_*chem_.r_ss*sr_;
     if ( isnan(voc_) ) voc_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
-    double u[2] = {ib_, voc_};
-    Randles_->init_state_space(u);
-    vb_ = Randles_->y(0);
+    dv_dyn_ = vb_ - voc_;
     ib_fut_ = ib_;
     init_hys(0.0);
     ibs_ = hys_->ibs();
@@ -890,7 +798,6 @@ void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
         if ( sp.debug()==-1 )
         {
             Serial.printf("sim: ib%7.3f ibs%7.3f voc%7.3f vb%7.3f\n", ib_, ibs_, voc_, vb_);
-            Randles_->pretty_print();
         }
     #endif
 }

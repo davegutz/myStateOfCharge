@@ -18,13 +18,11 @@
 import numpy as np
 from EKF1x1 import EKF1x1
 from Coulombs import Coulombs, dqdt
-from StateSpace import StateSpace
 from Hysteresis import Hysteresis
 import matplotlib.pyplot as plt
 from TFDelay import TFDelay
-from myFilters import LagTustin, General2Pole, RateLimit, SlidingDeadband
+from myFilters import LagTustin, LagExp, General2Pole, RateLimit, SlidingDeadband
 from Scale import Scale
-from numpy.linalg import inv
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
@@ -86,8 +84,7 @@ V_BATT_DOWN_SIM = 9.5  # Shutoff point in Sim before off, V (9.5)
 V_BATT_RISING_SIM = 9.75  # Shutoff point in Sim when off, V (9.75)
 V_BATT_DOWN = 9.8  # Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V (9.8)
 V_BATT_RISING = 10.3  # Shutoff point when off, V (10.3)
-RANDLES_T_MAX = 0.31  # Maximum update time of Randles state space model to avoid aliasing and instability (0.31 allows DP3)
-cp_eframe_mult = 20  # Run EKF 20 times slower than Coulomb Counter and Randles models
+cp_eframe_mult = 20  # Run EKF 20 times slower than Coulomb Counter
 READ_DELAY = 100  # nominal read time, ms
 EKF_EFRAME_MULT = 20  # Multiframe rate consistent with READ_DELAY (20 for READ_DELAY=100)
 VB_DC_DC = 13.5  # Estimated dc-dc charger, V
@@ -96,6 +93,7 @@ WRAP_ERR_FILT = 4.  # Wrap error filter time constant, s (4)
 MAX_WRAP_ERR_FILT = 10.  # Anti-windup wrap error filter, V (10)
 F_MAX_T_WRAP = 2.8  # Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (2.8)
 D_SOC_S = 0.  # Bias on soc to voc-soc lookup to simulate error in estimation, esp cold battery near 0 C
+
 
 class Battery(Coulombs):
     RATED_BATT_CAP = 100.
@@ -110,8 +108,8 @@ class Battery(Coulombs):
                             or 20 - 40 A for a 100 Ah battery"""
 
     def __init__(self, bat_v_sat=13.85, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
-                 r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, tweak_test=False, t_max=RANDLES_T_MAX, sres=1., stauct=1., staudif=1.,
+                 r_sd=70., tau_sd=2.5e7, r_0=0.0046, tau_ct=83., r_ct=0.0077,
+                 temp_c=RATED_TEMP, tweak_test=False, sres=1., stauct=1.,
                  scale_r_ss=1., s_hys=1., dvoc=0., chem=0, coul_eff=0.9985):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
@@ -140,10 +138,10 @@ class Battery(Coulombs):
         # CHINS Bmon=1, Bsim=1
         t_x_soc1 = [-0.15, 0.00, 0.05, 0.10, 0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.98,  0.99,  1.00]
         t_y_t1 = [5.,  11.1,   25.,   40.]
-        t_voc1 = [4.00, 4.00,  4.00,  4.00,  10.00, 11.00, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
-                  4.00, 4.00,  4.00,  9.50,  12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
-                  4.00, 4.00,  10.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
-                  4.00, 4.00,  11.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70]
+        t_voc1 = [4.00, 4.00,  4.00,  4.00,  10.00, 10.95, 12.94, 13.00, 13.05, 13.10, 13.15, 13.20, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
+                  4.00, 4.00,  4.00,  9.50,  12.86, 12.90, 12.94, 13.00, 13.05, 13.10, 13.15, 13.20, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
+                  4.00, 4.00,  10.00, 12.82, 12.86, 12.90, 12.94, 13.00, 13.05, 13.10, 13.15, 13.20, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
+                  4.00, 4.00,  11.00, 12.82, 12.86, 12.90, 12.94, 13.00, 13.05, 13.10, 13.15, 13.20, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70]
 
         x1 = np.array(t_x_soc1)
         y1 = np.array(t_y_t1)
@@ -183,15 +181,11 @@ class Battery(Coulombs):
         self.dt = 0  # Update time, s
         self.r_sd = r_sd
         self.tau_sd = tau_sd
-        self.r0 = r0*sres
+        self.r_0 = r_0*sres
         self.tau_ct = tau_ct*stauct
-        self.r_ct = float(r_ct)*sres
+        self.r_ct = r_ct*sres
         self.c_ct = self.tau_ct / self.r_ct
-        self.tau_dif = tau_dif*staudif
-        self.r_dif = r_dif*sres
-        self.c_dif = self.tau_dif / self.r_dif
-        self.t_max = t_max
-        self.Randles = StateSpace(2, 2, 1)
+        self.ChargeTransfer = LagExp(dt=EKF_NOM_DT, max_=1., min_=-1., tau=self.tau_ct)
         self.temp_c = temp_c
         self.saved = Saved()  # for plots and prints
         self.dv_hys = 0.  # Placeholder so BatterySim can be plotted
@@ -200,7 +194,7 @@ class Battery(Coulombs):
         self.mod = 7
         self.sel = 0
         self.tweak_test = tweak_test
-        self.r_ss = (r0 + r_ct + r_dif) * scale_r_ss
+        self.r_ss = (r_0 + r_ct) * scale_r_ss
         self.s_hys = s_hys
 
     def __str__(self, prefix=''):
@@ -209,11 +203,9 @@ class Battery(Coulombs):
         s += "  chem    = {:7.3f}  // Chemistry: 0=Battleborn, 1=CHINS\n".format(self.chem)
         s += "  temp_c  = {:7.3f}  // Battery temperature, deg C\n".format(self.temp_c)
         s += "  dvoc_dt = {:9.6f}  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n".format(self.dvoc_dt)
-        s += "  r_0     = {:9.6f}  // Randles R0, ohms\n".format(self.r0)
-        s += "  r_ct    = {:9.6f}  // Randles charge transfer resistance, ohms\n".format(self.r_ct)
-        s += "  tau_ct  = {:9.6f}  // Randles charge transfer time constant, s (=1/Rct/Cct)\n".format(self.tau_ct)
-        s += "  r_dif   = {:9.6f}  // Randles diffusion resistance, ohms\n".format(self.r_dif)
-        s += "  tau_dif = {:9.6f}  // Randles diffusion time constant, s (=1/Rdif/Cdif)\n".format(self.tau_dif)
+        s += "  r_0     = {:9.6f}  // Charge Transfer R0, ohms\n".format(self.r_0)
+        s += "  r_ct    = {:9.6f}  // Charge Transfer resistance, ohms\n".format(self.r_ct)
+        s += "  tau_ct = {:9.6f}  // Charge Transfer time constant, s (=1/Rdif/Cdif)\n".format(self.tau_ct)
         s += "  r_ss    = {:9.6f}  // Steady state equivalent battery resistance, for solver, Ohms\n".format(self.r_ss)
         s += "  r_sd    = {:9.6f}  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n".format(self.r_sd)
         s += "  tau_sd  = {:9.1f}  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n".format(self.tau_sd)
@@ -233,8 +225,6 @@ class Battery(Coulombs):
         s += "  tweak_test={:d}     // Driving signal injection completely using software inj_soft_bias\n".format(self.tweak_test)
         s += "\n  "
         s += Coulombs.__str__(self, prefix + 'Battery:')
-        s += "\n  "
-        s += self.Randles.__str__(prefix + 'Battery:')
         return s
 
     def assign_temp_c(self, temp_c):
@@ -265,41 +255,8 @@ class Battery(Coulombs):
         # Battery
         raise NotImplementedError
 
-    def init_battery(self):
-        raise NotImplementedError
-
     def look_hys(self, dv, soc):
         raise NotImplementedError
-
-    def vbc(self):
-        return self.Randles.x[0]
-
-    def vcd(self):
-        return self.Randles.x[1]
-
-    def vbc_dot(self):
-        return self.Randles.x_dot[0]
-
-    def vcd_dot(self):
-        return self.Randles.x_dot[1]
-
-    def i_c_ct(self):
-        return self.vbc_dot() * self.c_ct
-
-    def i_c_dif(self):
-        return self.vcd_dot() * self.c_dif
-
-    def i_r_ct(self):
-        return self.vbc() / self.r_ct
-
-    def i_r_dif(self):
-        return self.vcd() / self.r_dif
-
-    def vd(self):
-        return self.voc + self.ib * self.r0
-
-    def vc(self):
-        return self.vd() + self.vcd()
 
 
 class BatteryMonitor(Battery, EKF1x1):
@@ -307,17 +264,16 @@ class BatteryMonitor(Battery, EKF1x1):
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
-                 r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077,
-                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., stauct=1., staudif=1.,
+                 r_sd=70., tau_sd=2.5e7, r_0=0.0046, tau_ct=83., r_ct=0.0077,
+                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., stauct=1.,
                  scaler_q=None, scaler_r=None, scale_r_ss=1., s_hys=1., dvoc=1., eframe_mult=cp_eframe_mult,
                  scale_hys_cap=1., chem=0, coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1.,
                  myCH_Tuner=1):
         q_cap_rated_scaled = q_cap_rated * scale
         Battery.__init__(self, bat_v_sat, q_cap_rated_scaled, t_rated,
-                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres,
-                         stauct=stauct, staudif=staudif, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc, chem=chem,
+                         t_rlim, r_sd, tau_sd, r_0, tau_ct, r_ct, temp_c, tweak_test, sres=sres,
+                         stauct=stauct, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc, chem=chem,
                          coul_eff=coul_eff)
-        self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D = self.construct_state_space_monitor()
 
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
@@ -438,20 +394,8 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Dynamic emf
         self.vb = vb
-        u = np.array([self.ib, self.vb]).T
-        if updateTimeIn < self.t_max:
-            self.Randles.calc_x_dot(u)
-            if reset or self.dt < self.t_max:
-                self.Randles.update(self.dt, reset=reset)
-            else:
-                print("mon nan")  # freeze Randles.y
-            self.voc = self.Randles.y
-        else:  # aliased, unstable if update Randles
-            self.voc = vb - self.r_ss * self.ib
-            self.Randles.y = self.voc
+        self.voc = self.vb - (self.ChargeTransfer.calculate(self.ib, reset, dt)*self.r_ct + self.ib*self.r_0)
         if self.bms_off and voltage_low:
-            # self.voc_stat = self.voc_soc
-            # self.voc = self.voc_soc
             self.voc_stat = self.vb
             self.voc = self.vb
         self.dv_dyn = self.vb - self.voc
@@ -538,29 +482,6 @@ class BatteryMonitor(Battery, EKF1x1):
     # def count_coulombs(self, dt=0., reset=False, temp_c=25., charge_curr=0., sat=True):
     #     raise NotImplementedError
 
-    def construct_state_space_monitor(self):
-        """ State-space representation of dynamics
-        Inputs:
-            ib      Current at = vb = current at shunt, A
-            vb      Voltage at terminal, V
-        Outputs:
-            voc     Voltage at storage, A
-        States:
-            vbc     RC vb-vc, V
-            vcd     RC vc-vd, V
-        Other:
-            ioc = ib     Charge current, A
-            vc      Voltage downstream of charge transfer model, ct-->c
-            vd      Voltage downstream of diffusion process model, dif-->d
-        """
-        a = np.array([[-1 / self.tau_ct, 0],
-                      [0, -1 / self.tau_dif]])
-        b = np.array([[1 / self.c_ct,   0],
-                      [1 / self.c_dif,  0]])
-        c = np.array([-1., -1])
-        d = np.array([-self.r0, 1])
-        return a, b, c, d
-
     def converged_ekf(self):
         return self.EKF_converged.state()
 
@@ -579,9 +500,6 @@ class BatteryMonitor(Battery, EKF1x1):
         # Jacobian of measurement function
         self.H = self.dv_dsoc
         return self.hx, self.H
-
-    def init_battery(self):
-        self.Randles.init_state_space([self.ib, self.vb])
 
     def init_soc_ekf(self, soc):
         self.soc_ekf = soc
@@ -605,21 +523,11 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.ib_charge.append(self.ib_charge)
         self.saved.ioc.append(self.ioc)
         self.saved.vb.append(self.vb)
-        self.saved.vc.append(self.vc())
-        self.saved.vd.append(self.vd())
         self.saved.dv_hys.append(self.dv_hys)
         self.saved.dv_dyn.append(self.dv_dyn)
         self.saved.voc.append(self.voc)
         self.saved.voc_soc.append(self.voc_soc)
         self.saved.voc_stat.append(self.voc_stat)
-        self.saved.vbc.append(self.vbc())
-        self.saved.vcd.append(self.vcd())
-        self.saved.icc.append(self.i_c_ct())
-        self.saved.irc.append(self.i_r_ct())
-        self.saved.icd.append(self.i_c_dif())
-        self.saved.ird.append(self.i_r_dif())
-        self.saved.vcd_dot.append(self.vcd_dot())
-        self.saved.vbc_dot.append(self.vbc_dot())
         self.saved.soc.append(self.soc)
         self.saved.soc_ekf.append(self.soc_ekf)
         self.saved.Fx.append(self.Fx)
@@ -654,7 +562,6 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.sel.append(self.sel)
         self.saved.mod_data.append(self.mod)
         self.saved.soc_s.append(self.soc_s)
-        self.Randles.save(time)
         self.saved.bms_off.append(self.bms_off)
         self.saved.reset.append(self.reset)
         self.saved.e_wrap.append(self.e_wrap)
@@ -666,13 +573,13 @@ class BatterySim(Battery):
 
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
                  t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
-                 r_sd=70., tau_sd=2.5e7, r0=0.003, tau_ct=0.2, r_ct=0.0016, tau_dif=83., r_dif=0.0077, stauct=1.,
-                 staudif=1., temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., scale_r_ss=1.,
+                 r_sd=70., tau_sd=2.5e7, r_0=0.0046, tau_ct=83., r_ct=0.0077,
+                 stauct=1., temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., scale_r_ss=1.,
                  s_hys=1., dvoc=0., scale_hys_cap=1., chem=0, coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1.,
                  s_hys_chg=1., s_hys_dis=1., myCH_Tuner=1):
         Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
-                         t_rlim, r_sd, tau_sd, r0, tau_ct, r_ct, tau_dif, r_dif, temp_c, tweak_test, sres=sres,
-                         stauct=stauct, staudif=staudif, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc, chem=chem,
+                         t_rlim, r_sd, tau_sd, r_0, tau_ct, r_ct, temp_c, tweak_test, sres=sres,
+                         stauct=stauct, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc, chem=chem,
                          coul_eff=coul_eff)
         self.lut_voc = None
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
@@ -685,8 +592,6 @@ class BatterySim(Battery):
         self.model_saturated = False  # Indicator of maximal cutback, T = cutback saturated
         self.ib_sat = 0.5  # Threshold to declare saturation.  This regeneratively slows down charging so if too
         # small takes too long, A
-        self.Randles.A, self.Randles.B, self.Randles.C, self.Randles.D, self.Randles.AinvB =\
-            self.construct_state_space_model()
         self.s_cap = scale  # Rated capacity scalar
         if scale is not None:
             self.apply_cap_scale(scale)
@@ -782,19 +687,8 @@ class BatterySim(Battery):
         if self.bms_off and voltage_low:
             self.ib = 0.
 
-        # Randles dynamic model for model, reverse version to generate sensor inputs {ib, voc} --> {vb}, ioc=ib
-        u = np.array([self.ib, self.voc]).T  # past value self.ib
-        self.Randles.calc_x_dot(u)
-        if updateTimeIn < self.t_max:
-            self.Randles.update(dt)
-            if self.dt < self.t_max:
-                self.vb = self.Randles.y
-            else:
-                self.vb = np.nan
-                print("sim nan")
-        else:  # aliased, unstable if update Randles
-            self.vb = self.voc + self.r_ss * self.ib
-
+        # Charge transfer dynamics
+        self.vb = self.voc + (self.ChargeTransfer.calculate(self.ib, reset, dt)*self.r_ct + self.ib*self.r_0)
         if self.bms_off:
             self.vb = self.voc
         if self.bms_off and dc_dc_on:
@@ -819,30 +713,6 @@ class BatterySim(Battery):
         self.sat = self.model_saturated
 
         return self.vb
-
-    def construct_state_space_model(self):
-        """ State-space representation of dynamics
-        Inputs:
-            ib      Current at = vb = current at shunt, A
-            voc     Voltage at storage, A
-        Outputs:
-            vb      Voltage at terminal, V
-        States:
-            vbc     RC vb-vc, V
-            vcd     RC vc-vd, V
-        Other:
-            ioc = ib     Voltage at positive, V
-            vc      Voltage downstream of charge transfer model, ct-->c
-            vd      Voltage downstream of diffusion process model, dif-->d
-        """
-        a = np.array([[-1 / self.tau_ct, 0],
-                      [0, -1 / self.tau_dif]])
-        b = np.array([[1 / self.c_ct,   0],
-                      [1 / self.c_dif,  0]])
-        c = np.array([1., 1])
-        d = np.array([self.r0, 1])
-        ainvb = inv(a) * b
-        return a, b, c, d, ainvb
 
     def count_coulombs(self, chem, dt, reset, temp_c, charge_curr, sat, soc_s_init=None, mon_delta_q=None, mon_sat=None):
         # BatterySim
@@ -906,9 +776,6 @@ class BatterySim(Battery):
         self.t_last = self.temp_lim
         return self.soc
 
-    def init_battery(self):
-        self.Randles.init_state_space([self.ib, self.voc])
-
     def save(self, time, dt):  # BatterySim
         self.saved.time.append(time)
         self.saved.dt.append(dt)
@@ -919,20 +786,10 @@ class BatterySim(Battery):
         self.saved.bmso.append(self.bms_off)
         self.saved.ioc.append(self.ioc)
         self.saved.vb.append(self.vb)
-        self.saved.vc.append(self.vc())
-        self.saved.vd.append(self.vd())
         self.saved.dv_hys.append(self.dv_hys)
         self.saved.dv_dyn.append(self.dv_dyn)
         self.saved.voc.append(self.voc)
         self.saved.voc_stat.append(self.voc_stat)
-        self.saved.vbc.append(self.vbc())
-        self.saved.vcd.append(self.vcd())
-        self.saved.icc.append(self.i_c_ct())
-        self.saved.irc.append(self.i_r_ct())
-        self.saved.icd.append(self.i_c_dif())
-        self.saved.ird.append(self.i_r_dif())
-        self.saved.vcd_dot.append(self.vcd_dot())
-        self.saved.vbc_dot.append(self.vbc_dot())
         self.saved.soc.append(self.soc)
         self.saved.d_delta_q.append(self.d_delta_q)
         self.saved.Tb.append(self.temp_c)
@@ -1085,9 +942,8 @@ def overall_batt(mv, sv, rv, filename,
         plt.title(plot_title + ' B 1')
         plt.plot(mv.time, mv.ib, color='green',   linestyle='-', label='ib'+suffix)
         plt.plot(mv.time, mv.ioc, color='magenta', linestyle='--', label='ioc'+suffix)
-        plt.plot(mv.time, mv.irc, color='red', linestyle='-.', label='i_r_ct'+suffix)
         plt.plot(mv.time, mv.icd, color='cyan', linestyle=':', label='i_c_dif'+suffix)
-        plt.plot(mv.time, mv.ird, color='orange', linestyle=':', label='i_r_dif'+suffix)
+        plt.plot(mv.time, mv.ird, color='orange', linestyle=':', label='i_r_ct'+suffix)
         plt.legend(loc=1)
         plt.subplot(323)
         plt.plot(mv.time, mv.vb, color='green', linestyle='-', label='vb'+suffix)
@@ -1135,36 +991,6 @@ def overall_batt(mv, sv, rv, filename,
         plt.plot(sv.time, sv.voc_stat, color='cyan', linestyle=':', label='voc_stat'+suffix)
         plt.plot(mv.time, mv.voc, color='magenta', linestyle='-', label='voc'+suffix)
         plt.plot(sv.time, sv.voc, color='black', linestyle='--', label='voc_s'+suffix)
-        plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
-        fig_files.append(fig_file_name)
-        plt.savefig(fig_file_name, format="png")
-
-        plt.figure()  # Batt 3
-        n_fig += 1
-        plt.subplot(321)
-        plt.title(plot_title+' B 3 **SIM')
-        plt.plot(sv.time, sv.ib, color='green', linestyle='-', label='ib'+suffix)
-        plt.plot(sv.time, sv.irc, color='red',  linestyle='--', label='i_r_ct'+suffix)
-        plt.plot(sv.time, sv.icd, color='cyan',  linestyle='-.', label='i_c_dif'+suffix)
-        plt.plot(sv.time, sv.ird, color='orange', linestyle=':', label='i_r_dif'+suffix)
-        plt.legend(loc=1)
-        plt.subplot(323)
-        plt.plot(sv.time, sv.vb, color='green', linestyle='-', label='vb'+suffix)
-        plt.plot(sv.time, sv.vc, color='blue', linestyle='--', label='vc'+suffix)
-        plt.plot(sv.time, sv.vd, color='red', linestyle='-.', label='vd'+suffix)
-        plt.plot(sv.time, sv.voc, color='orange', label='voc'+suffix)
-        plt.plot(sv.time, sv.voc_stat, color='magenta', linestyle=':', label='voc stat'+suffix)
-        plt.legend(loc=1)
-        plt.subplot(325)
-        plt.plot(sv.time, sv.vbc_dot, color='green', linestyle='-', label='vbc_dot'+suffix)
-        plt.plot(sv.time, sv.vcd_dot, color='blue', linestyle='-', label='vcd_dot'+suffix)
-        plt.legend(loc=1)
-        plt.subplot(322)
-        plt.plot(sv.time, sv.soc, color='red', linestyle='-', label='soc'+suffix)
-        plt.legend(loc=1)
-        plt.subplot(326)
-        plt.plot(sv.soc, sv.voc, color='black', linestyle='-', label='voc vs soc'+suffix)
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -1313,28 +1139,6 @@ def overall_batt(mv, sv, rv, filename,
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()  # Batt 12
-        n_fig += 1
-        plt.subplot(221)
-        plt.title(plot_title + ' B 12')
-        plt.plot(rv.time[1:], rv.u[1:, 1], color='red', linestyle='-', label='Mon Randles u[2]=vb'+suffix)
-        plt.plot(rv.time[1:], rv.y[1:], color='blue', linestyle='-', label='Mon Randles y=voc'+suffix)
-        plt.legend(loc=2)
-        plt.subplot(222)
-        plt.plot(rv.time[1:], rv.x[1:, 0], color='blue', linestyle='-', label='Mon Randles x[1]'+suffix)
-        plt.plot(rv.time[1:], rv.x[1:, 1], color='red', linestyle='-', label='Mon Randles x[2]'+suffix)
-        plt.legend(loc=2)
-        plt.subplot(223)
-        plt.plot(rv.time[1:], rv.x_dot[1:, 0], color='blue', linestyle='-', label='Mon Randles x_dot[1]'+suffix)
-        plt.plot(rv.time[1:], rv.x_dot[1:, 1], color='red', linestyle='-', label='Mon Randles x_dot[2]'+suffix)
-        plt.legend(loc=2)
-        plt.subplot(224)
-        plt.plot(rv.time[1:], rv.u[1:, 0], color='blue', linestyle='-', label='Mon Randles u[1]=ib'+suffix)
-        plt.legend(loc=2)
-        fig_file_name = filename + "_" + str(n_fig) + ".png"
-        fig_files.append(fig_file_name)
-        plt.savefig(fig_file_name, format="png")
-
     else:
         if use_time_day:
             mv.time = mv.time_day - mv.time_day[0]
@@ -1369,15 +1173,9 @@ def overall_batt(mv, sv, rv, filename,
         plt.plot(mv1.time, mv1.ioc, color='blue', linestyle=':', label='ioc' + suffix1)
         plt.legend(loc=1)
         plt.subplot(332)
-        plt.plot(mv.time, mv.irc, color='green', linestyle='-', label='i_r_ct' + suffix)
-        plt.plot(mv1.time, mv1.irc, color='black', linestyle='--', label='i_r_ct' + suffix1)
-        plt.legend(loc=1)
+        # plt.legend(loc=1)
         plt.subplot(333)
-        plt.plot(mv.time, mv.icd, color='green', linestyle='-', label='i_c_dif' + suffix)
-        plt.plot(mv1.time, mv1.icd, color='black', linestyle='--', label='i_c_dif' + suffix1)
-        plt.plot(mv.time, mv.ird, color='magenta', linestyle='-.', label='i_r_dif' + suffix)
-        plt.plot(mv1.time, mv1.ird, color='blue', linestyle=':', label='i_r_dif' + suffix1)
-        plt.legend(loc=1)
+        # plt.legend(loc=1)
         plt.subplot(334)
         plt.plot(mv.time, mv.vb, color='green', linestyle='-', label='vb' + suffix)
         plt.plot(mv1.time, mv1.vb, color='black', linestyle='--', label='vb' + suffix1)
@@ -1483,41 +1281,6 @@ def overall_batt(mv, sv, rv, filename,
         # plt.ylim(-0.01, 0.01)
         plt.legend(loc=2)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
-        fig_files.append(fig_file_name)
-        plt.savefig(fig_file_name, format="png")
-
-        plt.figure()
-        n_fig += 1
-        plt.subplot(331)
-        plt.title(plot_title + ' Battover 4')
-        plt.plot(rv.time[1:], rv.u[1:, 1], color='green', linestyle='-', label='Mon Randles u[2]=vb'+suffix)
-        plt.plot(rv1.time[1:], rv1.u[1:, 1], color='black', linestyle='--', label='Mon Randles u[2]=vb'+suffix1)
-        plt.legend(loc=2)
-        plt.subplot(332)
-        plt.plot(rv.time[1:], rv.y[1:], color='green', linestyle='-', label='Mon Randles y=voc'+suffix)
-        plt.plot(rv1.time[1:], rv1.y[1:], color='black', linestyle='--', label='Mon Randles y=voc'+suffix1)
-        plt.legend(loc=2)
-        plt.subplot(333)
-        plt.plot(rv.time[1:], rv.x[1:, 0], color='green', linestyle='-', label='Mon Randles x[1]'+suffix)
-        plt.plot(rv1.time[1:], rv1.x[1:, 0], color='black', linestyle='--', label='Mon Randles x[1]'+suffix1)
-        plt.legend(loc=2)
-        plt.subplot(334)
-        plt.plot(rv.time[1:], rv.x[1:, 1], color='green', linestyle='-', label='Mon Randles x[2]'+suffix)
-        plt.plot(rv1.time[1:], rv1.x[1:, 1], color='black', linestyle='--', label='Mon Randles x[2]'+suffix1)
-        plt.legend(loc=2)
-        plt.subplot(335)
-        plt.plot(rv.time[1:], rv.x_dot[1:, 0], color='green', linestyle='-', label='Mon Randles x_dot[1]'+suffix)
-        plt.plot(rv1.time[1:], rv1.x_dot[1:, 0], color='black', linestyle='--', label='Mon Randles x_dot[1]'+suffix1)
-        plt.legend(loc=2)
-        plt.subplot(336)
-        plt.plot(rv.time[1:], rv.x_dot[1:, 1], color='green', linestyle='-', label='Mon Randles x_dot[2]'+suffix)
-        plt.plot(rv1.time[1:], rv1.x_dot[1:, 1], color='black', linestyle='--', label='Mon Randles x_dot[2]'+suffix1)
-        plt.legend(loc=2)
-        plt.subplot(337)
-        plt.plot(rv.time[1:], rv.u[1:, 0], color='green', linestyle='-', label='Mon Randles u[1]=ib'+suffix)
-        plt.plot(rv1.time[1:], rv1.u[1:, 0], color='black', linestyle='--', label='Mon Randles u[1]=ib'+suffix1)
-        plt.legend(loc=2)
-        fig_file_name = filename + "_" + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 

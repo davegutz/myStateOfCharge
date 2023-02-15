@@ -27,7 +27,6 @@
 
 #include "myLibrary/myTables.h"
 #include "myLibrary/EKF_1x1.h"
-#include "myLibrary/StateSpace.h"
 #include "Coulombs.h"
 #include "myLibrary/injection.h"
 #include "myLibrary/myFilters.h"
@@ -60,7 +59,6 @@ const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1,
 #define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction (0.2)
 #define HYS_INIT_COUNTS 30        // Maximum initialization iterations hysteresis (50)
 #define HYS_INIT_TOL    1e-8      // Initialization tolerance hysteresis (1e-8)
-#define RANDLES_T_MAX   0.31      // Maximum update time of Randles state space model to avoid aliasing and instability (0.31 allows DP3)
 const float MXEPS = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness) (1-1e-6)
 #define HYS_SOC_MIN_MARG 0.15     // Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis (0.15)
 #define HYS_IB_THR      1.0       // Ignore reset if opposite situation exists, A (1.0)
@@ -70,6 +68,7 @@ const float MXEPS = 1-1e-6;      // Level of soc that indicates mathematically s
 #define V_BATT_RISING   10.3      // Shutoff point when off, V (10.3)
 #define V_BATT_DOWN_SIM   9.5     // Shutoff point in Sim, V (9.5)
 #define V_BATT_RISING_SIM 9.75    // Shutoff point in Sim when off, V (9.75)
+#define NOM_TAU_CT      83.       // Nominal charge transfer time constant, s (83. Battleborn)
 
 
 // BattleBorn 100 Ah, 12v LiFePO4
@@ -212,7 +211,6 @@ public:
   ~Battery();
   // operators
   // functions
-  virtual void assign_randles(void) { Serial.printf("ERROR:  Battery::assign_randles called\n"); };
   boolean bms_off() { return bms_off_; };
   float calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc);
   float calc_soc_voc_slope(float soc, float temp_c);
@@ -238,9 +236,8 @@ public:
   float ibs() { return ibs_; };          // Hysteresis input current, A
   float ioc() { return ioc_; };          // Hysteresis output current, A
   virtual void pretty_print();
-  void pretty_print_ss();
   void print_signal(const boolean print) { print_now_ = print; };
-  void Sr(const float sr) { sr_ = sr; Randles_->insert_D(0, 0, -chem_.r_0*sr_); };
+  void Sr(const float sr) { sr_ = sr; };
   float Sr() { return sr_; };
   float temp_c() { return temp_c_; };    // Battery temperature, deg C
   float Tb() { return temp_c_; };        // Battery bank temperature, deg C
@@ -269,12 +266,12 @@ protected:
   float voc_stat_; // Static, table lookup value of voc before applying hysteresis, V
   float vsat_;     // Saturation threshold at temperature, V
   // EKF declarations
-  StateSpace *Randles_; // Randles model {ib, vb} --> {voc}, ioc=ib for Battery version
-                        // Randles model {ib, voc} --> {vb}, ioc=ib for BatterySim version
-  double *rand_A_;  // Randles model A
-  double *rand_B_;  // Randles model B
-  double *rand_C_;  // Randles model C
-  double *rand_D_;  // Randles model D
+  LagExp *ChargeTransfer_; // ChargeTransfer model {ib, vb} --> {voc}, ioc=ib for Battery version
+                        // ChargeTransfer model {ib, voc} --> {vb}, ioc=ib for BatterySim version
+  double *rand_A_;  // ChargeTransfer model A
+  double *rand_B_;  // ChargeTransfer model B
+  double *rand_C_;  // ChargeTransfer model C
+  double *rand_D_;  // ChargeTransfer model D
   Hysteresis *hys_;
 };
 
@@ -289,7 +286,6 @@ public:
   // functions
   float amp_hrs_remaining_ekf() { return amp_hrs_remaining_ekf_; };
   float amp_hrs_remaining_soc() { return amp_hrs_remaining_soc_; };
-  virtual void assign_randles(void);
   float calc_charge_time(const double q, const float q_capacity, const float charge_curr, const float soc);
   float calculate(Sensors *Sen, const boolean reset);
   boolean converged_ekf() { return EKF_converged->state(); };
@@ -302,8 +298,8 @@ public:
   float K_ekf() { return K_; };
   void pretty_print(Sensors *Sen);
   void regauge(const float temp_c);
-  float r_sd () { return chem_.r_sd; };
-  float r_ss () { return chem_.r_ss; };
+  float r_sd () { return chem_.r_sd*sr_; };
+  float r_ss () { return chem_.r_ss*sr_; };
   float soc_ekf() { return soc_ekf_; };
   boolean solve_ekf(const boolean reset, const boolean reset_temp, Sensors *Sen);
   float tcharge() { return tcharge_; };
@@ -322,7 +318,7 @@ protected:
   float amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
   float amp_hrs_remaining_soc_;  // Discharge amp*time left if drain soc_ to 0, A-h
   double dt_eframe_;    // Update time for EKF major frame
-  uint8_t eframe_;      // Counter to run EKF slower than Coulomb Counter and Randles models
+  uint8_t eframe_;      // Counter to run EKF slower than Coulomb Counter and ChargeTransfer models
   float ib_charge_;  // Current input avaiable for charging, A
   double q_ekf_;        // Filtered charge calculated by ekf, C
   float soc_ekf_;      // Filtered state of charge from ekf (0-1)
@@ -344,7 +340,6 @@ public:
   ~BatterySim();
   // operators
   // functions
-  virtual void assign_randles(void);
   float calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset);
   float calc_inj(const unsigned long now, const uint8_t type, const float amp, const double freq);
   float count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon, const boolean initializing_all);

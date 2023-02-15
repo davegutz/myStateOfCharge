@@ -76,11 +76,10 @@ WRAP_SOC_LO_OFF_ABS = 0.35  # Disable e_wrap when near empty (soc lo any Tb)
 WRAP_SOC_LO_OFF_REL = 0.2  # Disable e_wrap when near empty (soc lo for high Tb where soc_min=.2, voltage cutback)
 WRAP_SOC_LO_SCLR = 60.  # Large to disable e_wrap (60. for startup)
 CC_DIFF_SOC_DIS_THRESH = 0.2  # Signal selection threshold for Coulomb counter EKF disagree test (0.2)
-CC_DIFF_LO_SOC_SCLR = 4.  # Large to disable cc_diff
-r_0 = 0.003  # Randles R0, ohms
-r_ct = 0.0016  # Randles charge transfer resistance, ohms
-r_diff = 0.0077  # Randles diffusion resistance, ohms
-r_ss = r_0 + r_ct + r_diff
+CC_DIFF_LO_SOC_SCLR = 4.  # Large to disable cc_ctf
+r_0 = 0.0046  # Randles R0, ohms
+r_ctf = 0.0077  # Randles diffusion resistance, ohms
+r_ss = r_0 + r_ctf
 
 
 def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None, long_term=True):
@@ -893,9 +892,9 @@ if __name__ == '__main__':
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
         # input_files = ['CH 20230128.txt']; chm_in = 1
-        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.6; staudif_in = 0.3; s_hys_chg_in = 8.; s_hys_dis_in = 2.0; s_cap_chg_in = 90; s_cap_dis_in = 10; myCH_Tuner_in = 1; # 0.9 - 1.0 Tune 1
-        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.6; staudif_in = 0.3; s_hys_chg_in = 1.; s_hys_dis_in = 1.; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 2; # 0.9 - 1.0 Tune 2
-        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; scale_in=1.05; sres_in = 1.6; staudif_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 3; # 0.9 - 1.0 Tune 3
+        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.6; stauct_in = 0.3; s_hys_chg_in = 8.; s_hys_dis_in = 2.0; s_cap_chg_in = 90; s_cap_dis_in = 10; myCH_Tuner_in = 1; # 0.9 - 1.0 Tune 1
+        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.6; stauct_in = 0.3; s_hys_chg_in = 1.; s_hys_dis_in = 1.; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 2; # 0.9 - 1.0 Tune 2
+        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; scale_in=1.05; sres_in = 1.6; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 3; # 0.9 - 1.0 Tune 3
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'

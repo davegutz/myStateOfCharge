@@ -77,10 +77,9 @@ WRAP_SOC_LO_OFF_REL = 0.2  # Disable e_wrap when near empty (soc lo for high Tb 
 WRAP_SOC_LO_SCLR = 60.  # Large to disable e_wrap (60. for startup)
 CC_DIFF_SOC_DIS_THRESH = 0.2  # Signal selection threshold for Coulomb counter EKF disagree test (0.2)
 CC_DIFF_LO_SOC_SCLR = 4.  # Large to disable cc_diff
-r_0 = 0.003  # Randles R0, ohms
-r_ct = 0.0016  # Randles charge transfer resistance, ohms
-r_diff = 0.0077  # Randles diffusion resistance, ohms
-r_ss = r_0 + r_ct + r_diff
+r_0 = 0.0046  # Randles R0, ohms
+r_ct = 0.0077  # Randles diffusion resistance, ohms
+r_ss = r_0 + r_ct
 
 
 # Calculate thresholds from global input values listed above (review these)
