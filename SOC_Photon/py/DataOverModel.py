@@ -26,7 +26,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
 from MonSim import replicate, save_clean_file, save_clean_file_sim
-from Battery import overall_batt, IB_MIN_UP
+from Battery import overall_batt
 # below suppresses runtime error display******************
 # import os
 # os.environ["KIVY_NO_CONSOLELOG"] = "1"
@@ -1027,8 +1027,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     return n_fig, fig_files
 
 
-def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, n_fig=None, plot_init_in=False,
-            old_str='_old', new_str='_new'):
+def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, n_fig=None, old_str='_old', new_str='_new'):
     # delineate charging and discharging
     voc_stat_chg = np.copy(mv.voc_stat)
     voc_stat_dis = np.copy(mv.voc_stat)
@@ -1167,7 +1166,6 @@ def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, n_fig=None, p
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-
     plt.figure()  # GP 3 Tune Summ
     n_fig += 1
     plt.subplot(221)
@@ -1252,6 +1250,7 @@ def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, path_to_data=
 
 class SavedData:
     def __init__(self, data=None, sel=None, ekf=None, time_end=None, zero_zero=False):
+        i_end = 0
         if data is None:
             self.i = 0
             self.time = None
@@ -1698,7 +1697,7 @@ if __name__ == '__main__':
         #     filename = data_root + sys.argv[0].split('/')[-1]
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        n_fig, fig_files = overall_batt(mon_ver, sim_ver, randles_ver, filename, fig_files, plot_title=plot_title,
+        n_fig, fig_files = overall_batt(mon_ver, sim_ver, filename, fig_files, plot_title=plot_title,
                                         n_fig=n_fig, suffix='_ver')  # Could be confusing because sim over mon
         n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig, old_str='', new_str='_ver')

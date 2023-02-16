@@ -26,8 +26,8 @@ from MonSim import replicate
 from Battery import overall_batt
 from Util import cat
 from resample import resample
-from CompareHist import add_stuff_f, add_stuff, fault_thr_bb
-from DataOverModel import inline_exp_lag, tune_r
+from CompareHist import add_stuff_f, add_stuff
+from DataOverModel import tune_r
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -351,7 +351,7 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     n_fig += 1
     plt.subplot(331)
     plt.title(plot_title + ' GP 3 Tune')
-    mo.dv_dyn =  mo.vb - mo.voc
+    mo.dv_dyn = mo.vb - mo.voc
     plt.plot(mo.time, mo.dv_dyn, color='blue', linestyle='-', label='dv_dyn'+old_str)
     plt.plot(mv.time, mv.dv_dyn, color='cyan', linestyle='--', label='dv_dyn'+new_str)
     # plt.plot(so.time, so.dv_dyn_s, color='black', linestyle='-.', label='dv_dyn_s'+old_str)
@@ -723,9 +723,9 @@ if __name__ == '__main__':
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
         # input_files = ['CH 20230128.txt']; chm_in = 1
-        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.6; stauct_in = 0.3; s_hys_chg_in = 8.; s_hys_dis_in = 2.0; s_cap_chg_in = 90; s_cap_dis_in = 10; myCH_Tuner_in = 1; # 0.9 - 1.0 Tune 1
-        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.6; stauct_in = 0.3; s_hys_chg_in = 1.; s_hys_dis_in = 1.; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 2; # 0.9 - 1.0 Tune 2
-        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; scale_in=1.05; sres_in = 1.6; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 3; # 0.9 - 1.0 Tune 3
+        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.6; stauct_in = 0.3; s_hys_chg_in = 8.; s_hys_dis_in = 2.0; s_cap_chg_in = 90; s_cap_dis_in = 10; myCH_Tuner_in = 1 # 0.9 - 1.0 Tune 1
+        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.6; stauct_in = 0.3; s_hys_chg_in = 1.; s_hys_dis_in = 1.; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 2 # 0.9 - 1.0 Tune 2
+        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; scale_in = 1.05; sres_in = 1.6; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 3  # 0.9 - 1.0 Tune 3
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'
@@ -783,7 +783,7 @@ if __name__ == '__main__':
                                               ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
                                               ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
         for i in range(len(h_20C_resamp_100.time)):
-            if i==0:
+            if i == 0:
                 h_20C_resamp_100.dt[i] = h_20C_resamp_100.time[1] - h_20C_resamp_100.time[0]
             else:
                 h_20C_resamp_100.dt[i] = h_20C_resamp_100.time[i] - h_20C_resamp_100.time[i-1]
@@ -810,8 +810,8 @@ if __name__ == '__main__':
                                             plot_title=plot_title, n_fig=n_fig)
             n_fig, fig_files = overall_fault(mon_old_100, mon_ver_100, sim_ver_100, sim_s_ver_100, filename,
                                              fig_files, plot_title=plot_title, n_fig=n_fig)
-            # n_fig, fig_files = tune_r(mon_old_100, mon_ver_100, sim_s_ver_100, filename,
-            #                           fig_files, plot_title=plot_title, n_fig=n_fig)
+            n_fig, fig_files = tune_r(mon_old_100, mon_ver_100, sim_s_ver_100, filename,
+                                      fig_files, plot_title=plot_title, n_fig=n_fig)
 
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=path_to_pdfs)

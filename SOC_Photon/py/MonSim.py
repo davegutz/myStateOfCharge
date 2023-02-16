@@ -421,7 +421,7 @@ if __name__ == '__main__':
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        n_fig, fig_files = overall_batt(mon_ver, sim_ver, randles_ver, filename, fig_files, plot_title=plot_title,
+        n_fig, fig_files = overall_batt(mon_ver, sim_ver, filename, fig_files, plot_title=plot_title,
                                         n_fig=n_fig, suffix='_ver')  # sim over mon verify
         n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig)  # all over all

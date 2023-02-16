@@ -29,10 +29,7 @@ if __name__ == '__main__':
     plt.rcParams['axes.grid'] = True
     from datetime import datetime
     from CompareRunRun import load_data
-    from Battery import cp_eframe_mult
-    # global mon_old
-    global tuner
-
+    from DataOverModel import tune_r
 
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
@@ -63,7 +60,7 @@ if __name__ == '__main__':
         plot_overall_in = True
         use_vb_sim_in = False
         sres_in = 1.
-        stauct_in = 1;
+        stauct_in = 1
         s_hys_cap_in = 1.
         coul_eff_in = 0.9985  # Battleborn
         s_cap_chg_in = 1.
@@ -79,10 +76,10 @@ if __name__ == '__main__':
 
         # data_file_old_txt = 'ampHiFail v20221220.txt'; unit_key = 'pro0p'
         # data_file_old_txt = 'ampHiFail vA20221220.txt';  unit_key = 'soc1a'
-        data_file_old_txt = 'rapidTweakRegression v20230215 CHINS.txt'; unit_key = 'pro0p_2023';  scale_in=1.05; sres_in = 1.6; stauct_in = 0.8; myCH_Tuner_in = 3;
-        # data_file_old_txt = 'flatSit v20220214 CHINS 20220214.txt'; unit_key = 'pro0p_2023';  scale_in=1.05; sres_in = 1.6; stauct_in = 0.8; myCH_Tuner_in = 3;
-        # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in=4.8;
-        # data_file_old_txt = 'ekf CHINS v20230128 20230128.txt'; unit_key = 'soc0p'; # time_end_in=99.;
+        data_file_old_txt = 'rapidTweakRegression v20230215 CHINS.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; sres_in = 1.6; stauct_in = 0.8; myCH_Tuner_in = 3
+        # data_file_old_txt = 'flatSit v20220214 CHINS 20220214.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; sres_in = 1.6; stauct_in = 0.8; myCH_Tuner_in = 3
+        # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in = 4.8;
+        # data_file_old_txt = 'ekf CHINS v20230128 20230128.txt'; unit_key = 'soc0p'; # time_end_in = 99.;
 
         # data_file_old_txt = 'offSitHysBms v20221220.txt'; unit_key = 'pro0p_2022'   # ; time_end_in = 137.
         # data_file_old_txt = 'offSitHysBms vA20221220.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
@@ -120,7 +117,6 @@ if __name__ == '__main__':
         # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.6; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.;  myCH_Tuner_in = 3;#0.8 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
         # data_file_old_txt = 'steps v20230128 20230214.txt'; unit_key = 'soc0p';  scale_in=1.05; sres_in = 1.6; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.;  myCH_Tuner_in = 3;#0.4 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
 
-
         # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
         # data_file_old_txt = 'vb_mess.txt'; unit_key = 'pro1a_2022';
         # data_file_old_txt = 'fail 20221124.txt';  plot_overall_in=False;  # ; long_term_in=True;
@@ -133,7 +129,6 @@ if __name__ == '__main__':
         # data_file_old_txt = 'real world Xp20 v20220917a.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -69900
         # data_file_old_txt = 'weird v20220917d.txt'; unit_key = 'soc0_2022'; scale_in = 1.084
         # data_file_old_txt = 'dwell noise Ca.5 v20220926.txt'#; dTb = [[0., 18000.],  [0, 8.]]
-
 
         # title_key = "unit,"  # Find one instance of title
         # title_key_sel = "unit_s,"  # Find one instance of title
@@ -157,7 +152,7 @@ if __name__ == '__main__':
             else:
                 init_time = -4.
         # Get dv_hys from data
-        dv_hys = mon_old.dv_hys[0]
+        # dv_hys = mon_old.dv_hys[0]
 
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
@@ -192,6 +187,8 @@ if __name__ == '__main__':
             n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
                                        new_str='_ver')
+            n_fig, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename, fig_files,
+                                      plot_title=plot_title, n_fig=n_fig, old_str='', new_str='_ver')
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
         cleanup_fig_files(fig_files)
