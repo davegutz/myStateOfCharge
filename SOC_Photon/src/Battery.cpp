@@ -42,7 +42,7 @@ Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code)
     voc_(NOMINAL_VB), voc_stat_(NOMINAL_VB), vsat_(NOMINAL_VB)
 {
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // Center in hysteresis
-    ChargeTransfer_ = new LagExp(EKF_NOM_DT, NOM_TAU_CT, -1., 1.);
+    ChargeTransfer_ = new LagExp(EKF_NOM_DT, NOM_TAU_CT, -RATED_BATT_CAP, RATED_BATT_CAP);
     hys_ = new Hysteresis(chem_.hys_cap, chem_);
 }
 Battery::~Battery() {}

@@ -185,7 +185,7 @@ class Battery(Coulombs):
         self.tau_ct = tau_ct*stauct
         self.r_ct = r_ct*sres
         self.c_ct = self.tau_ct / self.r_ct
-        self.ChargeTransfer = LagExp(dt=EKF_NOM_DT, max_=1., min_=-1., tau=self.tau_ct)
+        self.ChargeTransfer = LagExp(dt=EKF_NOM_DT, max_=100., min_=-100., tau=self.tau_ct)
         self.temp_c = temp_c
         self.saved = Saved()  # for plots and prints
         self.dv_hys = 0.  # Placeholder so BatterySim can be plotted
@@ -251,7 +251,8 @@ class Battery(Coulombs):
         # print("soc=", soc, "temp_c=", temp_c, "dvoc=", self.dvoc, "voc=", voc)
         return voc, dv_dsoc
 
-    def calculate(self, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, rp=None, sat_init=None):
+    def calculate(self, chem, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, updateTimeIn,  # BatterySim
+                  rp=None, sat_init=None, bms_off_init=None):
         # Battery
         raise NotImplementedError
 
@@ -915,7 +916,7 @@ class Saved:
 
 
 def overall_batt(mv, sv, filename,
-                 mv1=None, sv1=None, rv1=None, suffix1=None, fig_files=None, plot_title=None, n_fig=None, suffix='',
+                 mv1=None, sv1=None, suffix1=None, fig_files=None, plot_title=None, n_fig=None, suffix='',
                  use_time_day=False):
     if fig_files is None:
         fig_files = []

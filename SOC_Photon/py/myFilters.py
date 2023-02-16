@@ -339,10 +339,10 @@ class LagExp(DiscreteFilter):
         self.c = meTt / self.dt
 
     def calc_state_(self, in_):
-        self.state = max(min(self.state + self.dt * self.rate, self.max), self.min)
-        self.rate = max(min(self.c * (self.a * self.rstate + self.b * in_ - self.state), self.max), self.min)
+        self.rate = self.c * (self.a * self.rstate + self.b * in_ - self.state)
         self.rstate = in_
-        self.state = max(min(in_ * (1.0 - self.b) + self.state * self.b, self.max), self.min)
+        self.state = max(min(self.state + self.dt * self.rate, self.max), self.min)
+        # print('in_', in_, 'rate', self.rate, 'state', self.state)
 
     def calc_state(self, in_, dt):
         self.dt = dt
@@ -353,6 +353,7 @@ class LagExp(DiscreteFilter):
         self.in_ = in_
         if reset:
             self.state = self.in_
+            self.rstate = self.in_
         self.calc_state(self.in_, dt)
         self.out_ = self.state
         return self.out_

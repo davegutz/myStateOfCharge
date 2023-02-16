@@ -1128,6 +1128,7 @@ def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, n_fig=None, o
     plt.xlabel('sec')
     plt.legend(loc=2)
     plt.subplot(322)
+    plt.plot(t, mo.dv_dyn, color='red', linestyle='-', label='dv_dyn_x')
     plt.plot(t, mv.dv_dyn, color='black', linestyle='-', label='dv_dyn_ver')
     plt.plot(t, dv_hys_calc, color='blue', linestyle='-', label='dv_hys_calc_x')
     plt.plot(t, dv_hys_req, color='magenta', linestyle='--', label='dv_hys_req_x')
