@@ -54,7 +54,7 @@ void Chemistry::assign_all_mod(const String mod_str)
     assign_SP();
   }
   else Serial.printf("Battery::assign_all_mod:  unknown mod = %d.  Type 'h' for help\n", mod);
-  r_ss = r_0 + r_diff;
+  r_ss = r_0 + r_ct;
 }
 
 // BattleBorn Chemistry
@@ -66,10 +66,10 @@ void Chemistry::assign_BB()
   dvoc    = 0.;     // Adjustment for calibration error, V (systematic error; may change in future)
   hys_cap = 3.6e3;  // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data. // div 10 again 9/29/2022 // div 10 again 11/30/2022
                     // tau_null = 1 / 0.005 / 3.6e3 = 0.056 s
-  low_voc = 9.0;     // Voltage threshold for BMS to turn off battery;
+  low_voc = 9.0;    // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
   r_0     = 0.0046; // ChargeTransfer R0, ohms   
-  r_diff  = 0.0077; // ChargeTransfer diffusion resistance, ohms
+  r_ct  = 0.0077;   // ChargeTransfer diffusion resistance, ohms
   r_sd    = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
   tau_ct = NOM_TAU_CT;  // ChargeTransfer diffusion time constant, s (=1/Rct/Cct)
   tau_sd  = 2.5e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
@@ -96,11 +96,11 @@ void Chemistry::assign_CH()
   hys_cap = 1.e4;  // Capacitance of hysteresis, Farads.  tau_null = 1 / 0.001 / 1.8e4 = 0.056 s
   low_voc = 9.;     // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
-  r_0     = 0.0046*1.6;  // ChargeTransfer R0, ohms
-  r_diff  = 0.0077*1.6; // ChargeTransfer diffusion resistance, ohms
+  r_0     = 0.0046*3.;  // ChargeTransfer R0, ohms
+  r_ct    = 0.0077*0.76;// ChargeTransfer diffusion resistance, ohms
   r_sd    = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
-  tau_ct = NOM_TAU_CT*0.8;   // ChargeTransfer diffusion time constant, s (=1/Rct/Cct)
-  tau_sd  = 2.5e7*1.6;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
+  tau_ct = NOM_TAU_CT*0.3;   // ChargeTransfer diffusion time constant, s (=1/Rct/Cct)
+  tau_sd  = 2.5e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
   c_sd    = tau_sd / r_sd;
   v_sat   = 13.85;  // Saturation threshold at temperature, deg C
 
@@ -125,7 +125,7 @@ void Chemistry::assign_SP()
   low_voc = 9.;     // Voltage threshold for BMS to turn off battery;
   low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
   r_0     = 0.003;  // ChargeTransfer R0, ohms   
-  r_diff  = 0.0077; // ChargeTransfer diffusion resistance, ohms
+  r_ct  = 0.0077; // ChargeTransfer diffusion resistance, ohms
   r_sd    = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
   tau_ct = 83.;   // ChargeTransfer diffusion time constant, s (=1/Rct/Cct)
   tau_sd  = 2.5e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
@@ -267,7 +267,7 @@ void Chemistry::pretty_print(void)
   Serial.printf("  ChargeTransfer:\n");
   Serial.printf("  c_sd%9.3g; EKK, farad\n", c_sd);
   Serial.printf("  r_0%9.6f, ohm\n", r_0);
-  Serial.printf("  r_diff%9.6f, ohm\n", r_diff);
+  Serial.printf("  r_ct%9.6f, ohm\n", r_ct);
   Serial.printf("  r_sd%9.6f; EKF, ohm\n", r_sd);
   Serial.printf("  r_ss%9.6f; SS init, ohm\n", r_ss);
   Serial.printf("  tau_ct%7.3f, s\n", tau_ct);

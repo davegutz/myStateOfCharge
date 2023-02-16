@@ -15,6 +15,7 @@
 
 import numpy as np
 from numpy.linalg import inv
+from myFilters import LagExp
 
 
 class StateSpace:
@@ -53,17 +54,28 @@ class StateSpace:
 
     def calc_x_dot(self, u):
         self.u = u
-        self.x_dot = self.A @ self.x + self.B @ self.u
+        if len(self.A) > 1:
+            self.x_dot = self.A @ self.x + self.B @ self.u
+        else:
+            self.x_dot = self.A * self.x + self.B * self.u
+
         # Ax = self.A@self.x
         # Bu = self.B@self.u
 
     def init_state_space(self, u_init):
         self.u = np.array(u_init)
-        self.AinvB = inv(self.A) @ self.B
-        self.x = -self.AinvB @ self.u
-        self.x_past = self.x
-        self.calc_x_dot(self.u)
-        self.y = self.C @ self.x_past + self.D @ self.u  # u
+        if len(self.A) > 1:
+            self.AinvB = inv(self.A) @ self.B
+            self.x = -self.AinvB @ self.u
+            self.x_past = self.x
+            self.calc_x_dot(self.u)
+            self.y = self.C @ self.x_past + self.D @ self.u  # u
+        else:
+            self.AinvB = np.array(1/self.A)
+            self.x = -self.AinvB * self.u
+            self.x_past = self.x
+            self.calc_x_dot(self.u)
+            self.y = self.C * self.x_past + self.D * self.u  # u
         return
 
     def save(self, time):
@@ -88,7 +100,10 @@ class StateSpace:
         self.x_past = self.x.copy()  # Backwards Euler has extra delay
         if not reset:
             self.x += self.x_dot * self.dt
-        self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
+        if len(self.A) > 1:
+            self.y = self.C @ self.x_past + self.D @ self.u  # uses past (backward Euler)
+        else:
+            self.y = self.C * self.x_past + self.D * self.u
         return self.y
 
 
@@ -123,50 +138,30 @@ if __name__ == '__main__':
     import sys
     import doctest
     doctest.testmod(sys.modules['__main__'])
+    r_0 = 0.003
+    r_ctOld = 0.0016
+    r_ct = 0.0077
+    tau_ct = 0.2
+    tau_dif = 4
+    c_ct = tau_ct / r_ctOld
+    c_dif = tau_dif / r_ct
+    dt = 0.1
+    print('RcCc=', tau_ct, 'RdCd=', tau_dif)
+    print('Cc=', c_ct, 'Cd=', c_dif)
+    print('r_0=', r_0, 'r_ctOld=', r_ctOld, 'r_ct=', r_ct)
+    print('dt=', dt)
 
-    def construct_state_space_monitor():
-        r_0 = 0.00  # Randles R0, ohms
-        tau_ct = 0.2  # Randles charge transfer time constant, s (=1/Rct/Cct)
-        rct = 0.0016  # Randles charge transfer resistance, ohms
-        tau_dif = 83  # Randles diffusion time constant, s (=1/Rdif/Cdif)
-        r_dif = 0.0077  # Randles diffusion resistance, ohms
-        c_ct = tau_ct / rct
-        c_dif = tau_dif / r_dif
-        print('-1/Rc/Cc=', -1/tau_ct, '-1/Rd/Cd=', -1/tau_dif)
-        print('1/Cc=', 1/c_ct, '1/Cd=', 1/c_dif)
-        print('r_0=', r_0)
-        a = np.array([[-1 / tau_ct, 0],
-                      [0, -1 / tau_dif]])
-        b = np.array([[1 / c_ct,   0],
-                      [1 / c_dif,  0]])
-        c = np.array([-1., -1])
-        d = np.array([-r_0, 1])
-        AinvB = inv(a)*b
-        return a, b, c, d, AinvB
 
-    def construct_state_space_monitor_1():
-        r_0 = 0.003 + 0.0016  # Randles R0, ohms
-        tau_dif = 83  # Randles diffusion time constant, s (=1/Rdif/Cdif)
-        r_dif = 0.0077  # Randles diffusion resistance, ohms
-        c_dif = tau_dif / r_dif
-        print('-1/Rd/Cd=', -1/tau_dif)
-        print('1/Cd=', 1/c_dif)
-        print('r_0=', r_0)
-        a = np.array(-1 / tau_dif)
-        b = np.array(1. / c_dif)
-        c = np.array(-1)
-        d = np.array(-r_0)
+    # ss model dim 1 where r_ctOld combined with r_0
+    def construct_state_space_model_1():
+        a = np.array([-1 / tau_dif])
+        b = np.array([1. / c_dif])
+        c = np.array([1])
+        d = np.array([r_0 + r_ctOld])
         AinvB = b / a
         return a, b, c, d, AinvB
 
     def construct_state_space_model():
-        r_0 = 0.003  # Randles R0, ohms
-        tau_ct = 0.2  # Randles charge transfer time constant, s (=1/Rct/Cct)
-        rct = 0.0016  # Randles charge transfer resistance, ohms
-        tau_dif = 83  # Randles diffusion time constant, s (=1/Rdif/Cdif)
-        r_dif = 0.0077  # Randles diffusion resistance, ohms
-        c_ct = tau_ct / rct
-        c_dif = tau_dif / r_dif
         print('-1/Rc/Cc=', -1/tau_ct, '-1/Rd/Cd=', -1/tau_dif)
         print('1/Cc=', 1/c_ct, '1/Cd=', 1/c_dif)
         print('r_0=', r_0)
@@ -179,53 +174,77 @@ if __name__ == '__main__':
         AinvB = inv(a)*b
         return a, b, c, d, AinvB
 
-    def construct_state_space_model_1():
-        r_0 = 0.003 + 0.0016  # Randles R0, ohms
-        tau_dif = 83  # Randles diffusion time constant, s (=1/Rdif/Cdif)
-        r_dif = 0.0077  # Randles diffusion resistance, ohms
-        c_dif = tau_dif / r_dif
-        print('-1/Rd/Cd=', -1/tau_dif)
-        print('1/Cd=', 1/c_dif)
-        print('r_0=', r_0)
-        a = np.array(-1 / tau_dif)
-        b = np.array(1 / c_dif)
-        c = np.array(1.)
-        d = np.array(r_0)
-        AinvB = b / a
-        return a, b, c, d, AinvB
+
+    def construct_state_space_model_1l(dt_=0.1, tau_dif_=tau_dif, max_=100, min_=-100):
+        one_order = LagExp(dt_, tau=tau_dif_, min_=min_, max_=max_)
+        return one_order
 
     def main():
+
+        import matplotlib.pyplot as plt
+        plt.rcParams['axes.grid'] = True
+
         ss = StateSpace(2, 2, 1)
-        ss.A, ss.B, ss.C, ss.D, ss.AinvB = construct_state_space_monitor()
-        print('Monitor::')
-        print('A=', ss.A)
-        print('B=', ss.B)
-        print('C=', ss.C)
-        print('D=', ss.D)
-        print('AinvB=', ss.AinvB)
         ss.A, ss.B, ss.C, ss.D, ss.AinvB = construct_state_space_model()
+        print('')
         print('Model::')
         print('A=', ss.A)
         print('B=', ss.B)
         print('C=', ss.C)
         print('D=', ss.D)
         print('AinvB=', ss.AinvB)
+        ss.init_state_space([0., 0.])
 
-        ss = StateSpace(1, 1, 1)
-        ss.A, ss.B, ss.C, ss.D, ss.AinvB = construct_state_space_monitor_1()
-        print('Monitor_1::')
-        print('A=', ss.A)
-        print('B=', ss.B)
-        print('C=', ss.C)
-        print('D=', ss.D)
-        print('AinvB=', ss.AinvB)
-        ss.A, ss.B, ss.C, ss.D, ss.AinvB = construct_state_space_model_1()
-        print('Model_1::')
-        print('A=', ss.A)
-        print('B=', ss.B)
-        print('C=', ss.C)
-        print('D=', ss.D)
-        print('AinvB=', ss.AinvB)
+        ss1 = StateSpace(1, 1, 1)
+        ss1.A, ss1.B, ss1.C, ss1.D, ss1.AinvB = construct_state_space_model_1()
+        ss1.init_state_space(0.)
+
+        ssl = construct_state_space_model_1l(tau_dif)
+        print('')
+        print('Model_1l::')
+        print('tau_dif', tau_dif)
+
+        n = 200
+        t = []
+        inp_ = 0
+        inp = []
+        out = []
+        out_1 = []
+        out_1l = []
+        print('    t, reset, in,    out2x, out_1, out_1l')
+        s = ""
+        for i in range(n):
+            t.append(i*dt)
+            reset = t[i] == 0.
+            if t[i] > dt:
+                inp_ = 17.
+            inp.append(inp_)
+            ss.calc_x_dot([inp_, 0])
+            ss.update(dt, reset)
+            ss1.calc_x_dot(inp_)
+            ss1.update(dt, reset)
+            out.append(ss.y)
+            out_1.append(ss1.y[0])
+            dv_dyn = ssl.calculate(inp_, reset, dt)*r_ct + inp_*(r_0 + r_ctOld)
+            out_1l.append(dv_dyn)
+            s += "{:7.3f},".format(t[i])
+            s += "{:2d},".format(reset)
+            s += "{:7.3f},".format(inp_)
+            s += "{:7.3f},".format(out[i])
+            s += "{:7.3f},".format(out_1[i])
+            s += "{:7.3f},\n".format(out_1l[i])
+        print(s)
+        plt.figure()  # init 1
+        plt.subplot(211)
+        plt.title('StateSpace')
+        plt.plot(t, out, color='red', linestyle='--', label='out_2nd_ord')
+        plt.plot(t, out_1, color='blue', linestyle='-.', label='out_1st_ord')
+        plt.plot(t, out_1l, color='green', linestyle=':', label='out_exp_lag')
+        plt.legend(loc=1)
+        plt.subplot(212)
+        plt.plot(t, inp, color='black', linestyle='-', label='input')
+
+        plt.show()
 
 
     main()

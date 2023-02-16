@@ -114,7 +114,7 @@ void Battery::pretty_print(void)
     Serial.printf("  dvoc_dt=%10.6f; V/dg C\n", chem_.dvoc_dt);
     Serial.printf("  ib=%7.3f; A\n", ib_);
     Serial.printf("  r_0=%10.6f;  ohm\n", chem_.r_0);
-    Serial.printf("  r_diff=%10.6f;  ohm\n", chem_.r_diff);
+    Serial.printf("  r_ct=%10.6f;  ohm\n", chem_.r_ct);
     Serial.printf("  r_sd = %10.6f;  ohm\n", chem_.r_sd);
     Serial.printf("  soc=%8.4f;\n", soc_);
     Serial.printf(" *sp_delt_q=%10.1f;  C\n", *sp_delta_q_);
@@ -239,7 +239,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
         ib_ = 0.;
 
     // Dynamic emf
-    voc_ = vb_ - (ChargeTransfer_->calculate(ib_, reset, dt_)*chem_.r_diff*sr_ + ib_*chem_.r_0*sr_);
+    voc_ = vb_ - (ChargeTransfer_->calculate(ib_, reset, dt_)*chem_.r_ct*sr_ + ib_*chem_.r_0*sr_);
     if ( !cp.fake_faults )
     {
         if ( (bms_off_ && voltage_low) ||  Sen->Flt->vb_fa())
@@ -607,7 +607,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
         ib_ = 0.;
 
     // ChargeTransfer dynamic model for model, reverse version to generate sensor inputs
-    vb_ = voc_ + (ChargeTransfer_->calculate(ib_, reset, dt_)*chem_.r_diff*sr_ + ib_*chem_.r_0*sr_);
+    vb_ = voc_ + (ChargeTransfer_->calculate(ib_, reset, dt_)*chem_.r_ct*sr_ + ib_*chem_.r_0*sr_);
 
     // Special cases override
     if ( bms_off_ )

@@ -78,8 +78,8 @@ WRAP_SOC_LO_SCLR = 60.  # Large to disable e_wrap (60. for startup)
 CC_DIFF_SOC_DIS_THRESH = 0.2  # Signal selection threshold for Coulomb counter EKF disagree test (0.2)
 CC_DIFF_LO_SOC_SCLR = 4.  # Large to disable cc_ctf
 r_0 = 0.0046  # Randles R0, ohms
-r_ctf = 0.0077  # Randles diffusion resistance, ohms
-r_ss = r_0 + r_ctf
+r_ct = 0.0077  # Randles diffusion resistance, ohms
+r_ss = r_0 + r_ct
 
 
 def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None, long_term=True):
@@ -705,7 +705,8 @@ if __name__ == '__main__':
 
         # Save these
         t_max_in = None
-        sres_in = 1.
+        sres0_in = 1.
+        sresct_in = 1.
         stauct_in = 1.
         chm_in = 0
         s_hys_in = 1.
@@ -723,9 +724,9 @@ if __name__ == '__main__':
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
         # input_files = ['CH 20230128.txt']; chm_in = 1
-        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.6; stauct_in = 0.3; s_hys_chg_in = 8.; s_hys_dis_in = 2.0; s_cap_chg_in = 90; s_cap_dis_in = 10; myCH_Tuner_in = 1 # 0.9 - 1.0 Tune 1
-        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres_in = 1.6; stauct_in = 0.3; s_hys_chg_in = 1.; s_hys_dis_in = 1.; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 2 # 0.9 - 1.0 Tune 2
-        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; scale_in = 1.05; sres_in = 1.6; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 3  # 0.9 - 1.0 Tune 3
+        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.3; s_hys_chg_in = 8.; s_hys_dis_in = 2.0; s_cap_chg_in = 90; s_cap_dis_in = 10; myCH_Tuner_in = 1 # 0.9 - 1.0 Tune 1
+        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; sres0_in = 3.; sresct_in = 0.76; s_hys_chg_in = 1.; s_hys_dis_in = 1.; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 2 # 0.9 - 1.0 Tune 2
+        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; scale_in = 1.05; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 3  # 0.9 - 1.0 Tune 3
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'
@@ -789,11 +790,12 @@ if __name__ == '__main__':
                 h_20C_resamp_100.dt[i] = h_20C_resamp_100.time[i] - h_20C_resamp_100.time[i-1]
         mon_old_100, sim_old_100 = bandaid(h_20C_resamp_100, chm_in=chm_in)
         mon_ver_100, sim_ver_100, sim_s_ver_100 =\
-            replicate(mon_old_100, sim_old=sim_old_100, init_time=1., verbose=True, t_max=t_max_in,
-                      sres=sres_in, stauct_mon=stauct_in, stauct_sim=stauct_in, use_vb_sim=False, s_hys_sim=s_hys_in,
-                      s_hys_mon=s_hys_in, scale_hys_cap_mon=s_hys_cap_in, scale_hys_cap_sim=s_hys_cap_in,
-                      s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in, coul_eff=coul_eff_in, s_hys_chg=s_hys_chg_in,
-                      s_hys_dis=s_hys_dis_in, myCH_Tuner=myCH_Tuner_in, scale_in=scale_in)
+            replicate(mon_old_100, sim_old=sim_old_100, init_time=1., verbose=True, t_max=t_max_in, sres0=sres0_in,
+                      sresct=sresct_in, stauct_mon=stauct_in, stauct_sim=stauct_in, use_vb_sim=False,
+                      s_hys_sim=s_hys_in, s_hys_mon=s_hys_in, scale_hys_cap_mon=s_hys_cap_in,
+                      scale_hys_cap_sim=s_hys_cap_in, s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in,
+                      coul_eff=coul_eff_in, s_hys_chg=s_hys_chg_in, s_hys_dis=s_hys_dis_in, myCH_Tuner=myCH_Tuner_in,
+                      scale_in=scale_in)
 
         # Plots
         n_fig = 0

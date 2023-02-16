@@ -98,8 +98,8 @@ def save_clean_file_sim(sim_ver, csv_file, unit_key):
 def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2,
               t_ib_fail=None, ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=None, Bmon=None, use_vb_raw=False,
               scale_r_ss=1., s_hys_sim=1., s_hys_mon=1., dvoc_sim=0., dvoc_mon=0., drive_ekf=False, dTb_in=None,
-              verbose=True, t_max=None, eframe_mult=cp_eframe_mult, sres=1., stauct_sim=1., stauct_mon=1, use_vb_sim=False,
-              scale_hys_cap_sim=1., scale_hys_cap_mon=1., coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1.,
+              verbose=True, t_max=None, eframe_mult=cp_eframe_mult, sres0=1., sresct=1., stauct_sim=1., stauct_mon=1,
+              use_vb_sim=False, scale_hys_cap_sim=1., scale_hys_cap_mon=1., coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1.,
               s_hys_chg=1., s_hys_dis=1., myCH_Tuner=1):
     if sim_old is not None and len(sim_old.time) < len(mon_old.time):
         t = sim_old.time
@@ -147,13 +147,13 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
     s_q = Scale(1., 3., 0.000005, 0.00005)
     s_r = Scale(1., 3., 0.001, 1.)   # t_ib_fail = 1000
     sim = BatterySim(chem=chm_s[0], temp_c=temp_c, scale=scale, tweak_test=tweak_test,
-                     dv_hys=dv_hys_init, sres=sres, stauct=stauct_sim, scale_r_ss=scale_r_ss,
+                     dv_hys=dv_hys_init, sres0=sres0, sresct=sresct, stauct=stauct_sim, scale_r_ss=scale_r_ss,
                      s_hys=s_hys_sim, dvoc=dvoc_sim, scale_hys_cap=scale_hys_cap_sim, coul_eff=coul_eff,
                      s_cap_chg=s_cap_chg, s_cap_dis=s_cap_dis, s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis,
                      myCH_Tuner=myCH_Tuner)
     mon = BatteryMonitor(chem=chm_m[0], r_sd=rsd, tau_sd=tau_sd, r_0=r_0, tau_ct=tau_ct, r_ct=r_ct,
                          temp_c=temp_c, scale=scale, tweak_test=tweak_test,
-                         dv_hys=dv_hys_init, sres=sres, stauct=stauct_mon, scaler_q=s_q, scaler_r=s_r,
+                         dv_hys=dv_hys_init, sres0=sres0, sresct=sresct, stauct=stauct_mon, scaler_q=s_q, scaler_r=s_r,
                          scale_r_ss=scale_r_ss, s_hys=s_hys_mon, dvoc=dvoc_mon, eframe_mult=eframe_mult,
                          scale_hys_cap=scale_hys_cap_mon, coul_eff=coul_eff, s_cap_chg=s_cap_chg, s_cap_dis=s_cap_dis,
                          s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis, myCH_Tuner=myCH_Tuner)
@@ -407,7 +407,7 @@ if __name__ == '__main__':
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         mon_ver, sim_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
-                                                sres=1.0, t_ib_fail=t_ib_fail,
+                                                sres0=1.0, sresct=1.0, t_ib_fail=t_ib_fail,
                                                 use_ib_mon=use_ib_mon_in, scale_in=scale_in,
                                                 use_vb_raw=use_vb_raw, scale_r_ss=scale_r_ss_in,
                                                 s_hys_sim=scale_hys_sim_in, s_hys_mon=scale_hys_mon_in,

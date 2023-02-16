@@ -109,7 +109,7 @@ class Battery(Coulombs):
 
     def __init__(self, bat_v_sat=13.85, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=2.5e7, r_0=0.0046, tau_ct=83., r_ct=0.0077,
-                 temp_c=RATED_TEMP, tweak_test=False, sres=1., stauct=1.,
+                 temp_c=RATED_TEMP, tweak_test=False, sres0=1., sresct=1., stauct=1.,
                  scale_r_ss=1., s_hys=1., dvoc=0., chem=0, coul_eff=0.9985):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
@@ -181,9 +181,9 @@ class Battery(Coulombs):
         self.dt = 0  # Update time, s
         self.r_sd = r_sd
         self.tau_sd = tau_sd
-        self.r_0 = r_0*sres
+        self.r_0 = r_0*sres0
         self.tau_ct = tau_ct*stauct
-        self.r_ct = r_ct*sres
+        self.r_ct = r_ct*sresct
         self.c_ct = self.tau_ct / self.r_ct
         self.ChargeTransfer = LagExp(dt=EKF_NOM_DT, max_=100., min_=-100., tau=self.tau_ct)
         self.temp_c = temp_c
@@ -194,7 +194,7 @@ class Battery(Coulombs):
         self.mod = 7
         self.sel = 0
         self.tweak_test = tweak_test
-        self.r_ss = (r_0 + r_ct) * scale_r_ss
+        self.r_ss = (self.r_0 + self.r_ct) * scale_r_ss
         self.s_hys = s_hys
 
     def __str__(self, prefix=''):
@@ -263,18 +263,16 @@ class Battery(Coulombs):
 class BatteryMonitor(Battery, EKF1x1):
     """Extend Battery class to make a monitor"""
 
-    def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
-                 t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
-                 r_sd=70., tau_sd=2.5e7, r_0=0.0046, tau_ct=83., r_ct=0.0077,
-                 temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., stauct=1.,
-                 scaler_q=None, scaler_r=None, scale_r_ss=1., s_hys=1., dvoc=1., eframe_mult=cp_eframe_mult,
-                 scale_hys_cap=1., chem=0, coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1.,
-                 myCH_Tuner=1):
+    def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
+                 scale=1., r_sd=70., tau_sd=2.5e7, r_0=0.0046, tau_ct=83., r_ct=0.0077, temp_c=RATED_TEMP, hys_scale=1.,
+                 tweak_test=False, dv_hys=0., sres0=1., sresct=1., stauct=1., scaler_q=None, scaler_r=None,
+                 scale_r_ss=1., s_hys=1., dvoc=1., eframe_mult=cp_eframe_mult, scale_hys_cap=1., chem=0,
+                 coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1., myCH_Tuner=1):
         q_cap_rated_scaled = q_cap_rated * scale
-        Battery.__init__(self, bat_v_sat, q_cap_rated_scaled, t_rated,
-                         t_rlim, r_sd, tau_sd, r_0, tau_ct, r_ct, temp_c, tweak_test, sres=sres,
-                         stauct=stauct, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc, chem=chem,
-                         coul_eff=coul_eff)
+        Battery.__init__(self, bat_v_sat=bat_v_sat, q_cap_rated=q_cap_rated_scaled, t_rated=t_rated, t_rlim=t_rlim,
+                         r_sd=r_sd, tau_sd=tau_sd, r_0=r_0, tau_ct=tau_ct, r_ct=r_ct, temp_c=temp_c,
+                         tweak_test=tweak_test, sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss,
+                         s_hys=s_hys, dvoc=dvoc, chem=chem, coul_eff=coul_eff)
 
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
@@ -572,16 +570,15 @@ class BatteryMonitor(Battery, EKF1x1):
 class BatterySim(Battery):
     """Extend Battery class to make a model"""
 
-    def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600,
-                 t_rated=RATED_TEMP, t_rlim=0.017, scale=1.,
-                 r_sd=70., tau_sd=2.5e7, r_0=0.0046, tau_ct=83., r_ct=0.0077,
-                 stauct=1., temp_c=RATED_TEMP, hys_scale=1., tweak_test=False, dv_hys=0., sres=1., scale_r_ss=1.,
-                 s_hys=1., dvoc=0., scale_hys_cap=1., chem=0, coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1.,
-                 s_hys_chg=1., s_hys_dis=1., myCH_Tuner=1):
-        Battery.__init__(self, bat_v_sat, q_cap_rated, t_rated,
-                         t_rlim, r_sd, tau_sd, r_0, tau_ct, r_ct, temp_c, tweak_test, sres=sres,
-                         stauct=stauct, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc, chem=chem,
-                         coul_eff=coul_eff)
+    def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
+                 scale=1., r_sd=70., tau_sd=2.5e7, r_0=0.0046, tau_ct=83., r_ct=0.0077, stauct=1., temp_c=RATED_TEMP,
+                 hys_scale=1., tweak_test=False, dv_hys=0., sres0=1., sresct=1., scale_r_ss=1., s_hys=1., dvoc=0.,
+                 scale_hys_cap=1., chem=0, coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1.,
+                 myCH_Tuner=1):
+        Battery.__init__(self, bat_v_sat=bat_v_sat, q_cap_rated=q_cap_rated, t_rated=t_rated, t_rlim=t_rlim, r_sd=r_sd,
+                         tau_sd=tau_sd, r_0=r_0, tau_ct=tau_ct, r_ct=r_ct, temp_c=temp_c, tweak_test=tweak_test,
+                         sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc,
+                         chem=chem, coul_eff=coul_eff)
         self.lut_voc = None
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A

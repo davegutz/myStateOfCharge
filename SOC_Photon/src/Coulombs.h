@@ -56,7 +56,7 @@ struct Chemistry
   float dvoc_dt;    // Change of VOC with operating temperature in range 0 - 50 C V/deg C
   float dvoc;       // Adjustment for calibration error, V
   float r_0;        // ChargeTransfer R0, ohms
-  float r_diff;     // ChargeTransfer charge transfer resistance, ohms
+  float r_ct;     // ChargeTransfer charge transfer resistance, ohms
   float tau_ct;   // ChargeTransfer charge transfer time constant, s (=1/Rct/Cct)
   float tau_sd;     // Equivalent model for EKF reference.	Parasitic discharge time constant, sec
   float r_sd;       // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
