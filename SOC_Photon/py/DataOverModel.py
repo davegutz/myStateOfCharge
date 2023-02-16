@@ -1017,11 +1017,27 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     # delineate charging and discharging
     voc_stat_chg = np.copy(mv.voc_stat)
     voc_stat_dis = np.copy(mv.voc_stat)
-    for i in range(len(voc_stat_chg)):
-        if smv.ib_in_s[i] > -0.5:
-            voc_stat_dis[i] = None
-        elif smv.ib_in_s[i] < 0.5:
-            voc_stat_chg[i] = None
+    if hasattr(smv, 'ib_in_s'):
+        for i in range(len(voc_stat_chg)):
+            if smv.ib_in_s[i] > -0.5:
+                voc_stat_dis[i] = None
+            elif smv.ib_in_s[i] < 0.5:
+                voc_stat_chg[i] = None
+
+    return n_fig, fig_files
+
+
+def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, n_fig=None, plot_init_in=False,
+            old_str='_old', new_str='_new'):
+    # delineate charging and discharging
+    voc_stat_chg = np.copy(mv.voc_stat)
+    voc_stat_dis = np.copy(mv.voc_stat)
+    if hasattr(smv, 'ib_in_s'):
+        for i in range(len(voc_stat_chg)):
+            if smv.ib_in_s[i] > -0.1:
+                voc_stat_dis[i] = None
+            elif smv.ib_in_s[i] < 0.1:
+                voc_stat_chg[i] = None
 
     vb = np.copy(mv.vb)
     voc = np.copy(mv.voc)
@@ -1074,7 +1090,10 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
             r_req[i] = max(min(dv_hys_req_f[i] / ioc_req[i], 0.1), -0.1)
 
         ioc_calc_from_dot[i] = ib_f[i] - cap*dv_dot_calc[i]
-        r_calc_from_dot[i] = max(min(dv_hys_calc_f[i] / ioc_calc_from_dot[i], 0.1), -0.1)
+        if abs(ioc_calc_from_dot[i]) > 1e-9:
+            r_calc_from_dot[i] = max(min(dv_hys_calc_f[i] / ioc_calc_from_dot[i], 0.1), -0.1)
+        else:
+            r_calc_from_dot[i] = 0.
         # ioc_calc_from_dot[i] = mv.ib[i] - cap*dv_dot_calc[i]
         # r_calc_from_dot[i] = max(min(dv_hys_calc[i] / ioc_calc_from_dot[i], 0.1), -0.1)
 
@@ -1103,7 +1122,8 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.subplot(321)
     plt.title(plot_title + ' GP 3 Tune R')
     plt.plot(t, vb, color='blue', linestyle='-', label='vb_x')
-    plt.plot(t, smv.vb_s, color='cyan', linestyle='--', label='vb_s_ver')
+    if hasattr(smv, 'vb_s'):
+        plt.plot(t, smv.vb_s, color='cyan', linestyle='--', label='vb_s_ver')
     plt.plot(t, voc, color='magenta', linestyle='-.', label='voc_x')
     plt.plot(t, voc_soc, color='black', linestyle=':', label='voc_soc_x')
     plt.xlabel('sec')
@@ -1181,8 +1201,6 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
-
-
     return n_fig, fig_files
 
 
@@ -1684,10 +1702,8 @@ if __name__ == '__main__':
                                         n_fig=n_fig, suffix='_ver')  # Could be confusing because sim over mon
         n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig, old_str='', new_str='_ver')
-        # if platform != 'linux':
-        #     unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf',
-        #                             pathToSavePdfTo='../dataReduction/figures')
-        #     cleanup_fig_files(fig_files)
+        # n_fig, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename, fig_files,
+        #                           plot_title=plot_title, n_fig=n_fig, old_str='', new_str='_ver')
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf',
                                 pathToSavePdfTo='../dataReduction/figures')
         cleanup_fig_files(fig_files)

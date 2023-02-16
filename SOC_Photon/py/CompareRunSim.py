@@ -162,19 +162,19 @@ if __name__ == '__main__':
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         mon_ver, sim_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
-                                                             sres=sres_in, t_ib_fail=t_ib_fail, use_ib_mon=use_ib_mon_in,
-                                                             scale_in=scale_in, use_vb_raw=use_vb_raw,
-                                                             scale_r_ss=scale_r_ss_in, s_hys_sim=s_hys_in,
-                                                             s_hys_mon=s_hys_in, dvoc_sim=dvoc_sim_in,
-                                                             dvoc_mon=dvoc_mon_in, Bmon=Bmon_in, Bsim=Bsim_in,
-                                                             drive_ekf=drive_ekf_in, dTb_in=dTb, verbose=False,
-                                                             use_vb_sim=use_vb_sim_in, scale_hys_cap_sim=s_hys_cap_in,
-                                                             scale_hys_cap_mon=s_hys_cap_in,
-                                                             stauct_mon=stauct_in,
-                                                             coul_eff=coul_eff_in,
-                                                             s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in,
-                                                             s_hys_chg=s_hys_chg_in, s_hys_dis=s_hys_dis_in,
-                                                             myCH_Tuner=myCH_Tuner_in)
+                                                sres=sres_in, t_ib_fail=t_ib_fail, use_ib_mon=use_ib_mon_in,
+                                                scale_in=scale_in, use_vb_raw=use_vb_raw,
+                                                scale_r_ss=scale_r_ss_in, s_hys_sim=s_hys_in,
+                                                s_hys_mon=s_hys_in, dvoc_sim=dvoc_sim_in,
+                                                dvoc_mon=dvoc_mon_in, Bmon=Bmon_in, Bsim=Bsim_in,
+                                                drive_ekf=drive_ekf_in, dTb_in=dTb, verbose=False,
+                                                use_vb_sim=use_vb_sim_in, scale_hys_cap_sim=s_hys_cap_in,
+                                                scale_hys_cap_mon=s_hys_cap_in,
+                                                stauct_mon=stauct_in, stauct_sim=stauct_in,
+                                                coul_eff=coul_eff_in,
+                                                s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in,
+                                                s_hys_chg=s_hys_chg_in, s_hys_dis=s_hys_dis_in,
+                                                myCH_Tuner=myCH_Tuner_in)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots

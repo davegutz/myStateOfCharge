@@ -407,12 +407,12 @@ if __name__ == '__main__':
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
         mon_ver, sim_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
-                                                             sres=1.0, t_ib_fail=t_ib_fail,
-                                                             use_ib_mon=use_ib_mon_in, scale_in=scale_in,
-                                                             use_vb_raw=use_vb_raw, scale_r_ss=scale_r_ss_in,
-                                                             s_hys_sim=scale_hys_sim_in, s_hys_mon=scale_hys_mon_in,
-                                                             dvoc_sim=dvoc_sim_in, dvoc_mon=dvoc_mon_in,
-                                                             Bmon=Bmon_in, Bsim=Bsim_in)
+                                                sres=1.0, t_ib_fail=t_ib_fail,
+                                                use_ib_mon=use_ib_mon_in, scale_in=scale_in,
+                                                use_vb_raw=use_vb_raw, scale_r_ss=scale_r_ss_in,
+                                                s_hys_sim=scale_hys_sim_in, s_hys_mon=scale_hys_mon_in,
+                                                dvoc_sim=dvoc_sim_in, dvoc_mon=dvoc_mon_in,
+                                                Bmon=Bmon_in, Bsim=Bsim_in)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots

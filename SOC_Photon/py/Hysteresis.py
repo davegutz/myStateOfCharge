@@ -138,7 +138,7 @@ class Hysteresis:
 
     def __str__(self, prefix=''):
         s = prefix + "Hysteresis:\n"
-        res = self.look_hys(dv=0., soc=0.8, chem=self.chm)
+        res, slr = self.look_hys(dv=0., soc=0.8, chem=self.chm)
         s += "  res(median) =  {:6.4f}  // Null resistance, Ohms\n".format(res)
         s += "  chm      =    {:7.3f}  // Chemistry\n".format(self.chm)
         s += "  cap      = {:10.1f}  // Capacitance, Farads\n".format(self.cap)

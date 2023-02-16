@@ -856,21 +856,11 @@ class Saved:
         self.ib_charge = []
         self.ioc = []
         self.vb = []
-        self.vc = []
-        self.vd = []
         self.voc = []
         self.voc_soc = []
         self.voc_stat = []
         self.dv_hys = []
         self.dv_dyn = []
-        self.vbc = []
-        self.vcd = []
-        self.icc = []
-        self.irc = []
-        self.icd = []
-        self.ird = []
-        self.vcd_dot = []
-        self.vbc_dot = []
         self.soc = []
         self.soc_ekf = []
         self.voc = []
@@ -924,7 +914,7 @@ class Saved:
         self.e_wrap_filt = []  # Verification of filtered wrap calculation, V
 
 
-def overall_batt(mv, sv, rv, filename,
+def overall_batt(mv, sv, filename,
                  mv1=None, sv1=None, rv1=None, suffix1=None, fig_files=None, plot_title=None, n_fig=None, suffix='',
                  use_time_day=False):
     if fig_files is None:
@@ -934,7 +924,6 @@ def overall_batt(mv, sv, rv, filename,
         if use_time_day:
             mv.time = mv.time_day - mv.time_day[0]
             sv.time = sv.time_day - sv.time_day[0]
-            rv.time = rv.time_day - rv.time_day[0]
 
         plt.figure()  # Batt 1
         n_fig += 1
@@ -942,25 +931,17 @@ def overall_batt(mv, sv, rv, filename,
         plt.title(plot_title + ' B 1')
         plt.plot(mv.time, mv.ib, color='green',   linestyle='-', label='ib'+suffix)
         plt.plot(mv.time, mv.ioc, color='magenta', linestyle='--', label='ioc'+suffix)
-        plt.plot(mv.time, mv.icd, color='cyan', linestyle=':', label='i_c_dif'+suffix)
-        plt.plot(mv.time, mv.ird, color='orange', linestyle=':', label='i_r_ct'+suffix)
         plt.legend(loc=1)
         plt.subplot(323)
         plt.plot(mv.time, mv.vb, color='green', linestyle='-', label='vb'+suffix)
         plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_s'+suffix)
-        plt.plot(mv.time, mv.vc, color='blue', linestyle='-.', label='vc'+suffix)
-        plt.plot(sv.time, sv.vc, color='green', linestyle=':', label='vc_s'+suffix)
-        plt.plot(mv.time, mv.vd, color='red', label='vd'+suffix)
-        plt.plot(sv.time, sv.vd, color='orange', linestyle='--', label='vd_s'+suffix)
         plt.plot(mv.time, mv.voc_stat, color='orange', linestyle='-.', label='voc_stat'+suffix)
         plt.plot(sv.time, sv.voc_stat, color='cyan', linestyle=':', label='voc_stat_s,'+suffix)
         plt.plot(mv.time, mv.voc, color='magenta', label='voc'+suffix)
         plt.plot(sv.time, sv.voc, color='black', linestyle='--', label='voc_s'+suffix)
         plt.legend(loc=1)
         plt.subplot(324)
-        plt.plot(mv.time, mv.vbc_dot, color='green', linestyle='-', label='vbc_dot'+suffix)
-        plt.plot(mv.time, mv.vcd_dot, color='blue', linestyle='-', label='vcd_dot'+suffix)
-        plt.legend(loc=1)
+        # plt.legend(loc=1)
         plt.subplot(322)
         plt.plot(mv.time, mv.soc, color='red', linestyle='-', label='soc'+suffix)
         plt.plot(sv.time, sv.soc, color='black', linestyle='dotted', label='soc_s'+suffix)
@@ -983,10 +964,6 @@ def overall_batt(mv, sv, rv, filename,
         plt.title(plot_title + ' B 2')
         plt.plot(mv.time, mv.vb, color='green', linestyle='-', label='vb'+suffix)
         plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_s'+suffix)
-        plt.plot(mv.time, mv.vc, color='blue', linestyle='-.', label='vc'+suffix)
-        plt.plot(sv.time, sv.vc, color='green', linestyle=':', label='vc_s'+suffix)
-        plt.plot(mv.time, mv.vd, color='red', linestyle='-', label='vd'+suffix)
-        plt.plot(sv.time, sv.vd, color='orange', linestyle='--', label='vd_s'+suffix)
         plt.plot(mv.time, mv.voc_stat, color='orange', linestyle='-.', label='voc_stat'+suffix)
         plt.plot(sv.time, sv.voc_stat, color='cyan', linestyle=':', label='voc_stat'+suffix)
         plt.plot(mv.time, mv.voc, color='magenta', linestyle='-', label='voc'+suffix)
@@ -1146,13 +1123,11 @@ def overall_batt(mv, sv, rv, filename,
                 sv.time = sv.time_day - sv.time_day[0]
             except:
                 pass
-            rv.time = rv.time_day - rv.time_day[0]
             mv1.time = mv1.time_day - mv1.time_day[0]
             try:
                 sv1.time = sv1.time_day - sv1.time_day[0]
             except:
                 pass
-            rv1.time = rv1.time_day - rv1.time_day[0]
         reset_max = max(abs(min(mv.vbc_dot)), max(mv.vbc_dot), abs(min(mv1.vbc_dot)), max(mv1.vbc_dot))
         reset_index_max = max(np.where(np.array(mv1.reset) > 0))
         t_init = mv1.time[reset_index_max[-1]]
@@ -1160,8 +1135,6 @@ def overall_batt(mv, sv, rv, filename,
         mv1.time -= t_init
         sv.time -= t_init
         sv1.time -= t_init
-        rv.time -= t_init
-        rv1.time -= t_init
 
         plt.figure()
         n_fig += 1
@@ -1179,12 +1152,8 @@ def overall_batt(mv, sv, rv, filename,
         plt.subplot(334)
         plt.plot(mv.time, mv.vb, color='green', linestyle='-', label='vb' + suffix)
         plt.plot(mv1.time, mv1.vb, color='black', linestyle='--', label='vb' + suffix1)
-        plt.plot(mv.time, mv.vc, color='magenta', linestyle='-.', label='vc' + suffix)
-        plt.plot(mv1.time, mv1.vc, color='blue', linestyle=':', label='vc' + suffix1)
         plt.legend(loc=1)
         plt.subplot(335)
-        plt.plot(mv.time, mv.vd, color='green', linestyle='-', label='vd' + suffix)
-        plt.plot(mv1.time, mv1.vd, color='black', linestyle='--', label='vd' + suffix1)
         plt.plot(mv.time, mv.voc_stat, color='magenta', linestyle='-.', label='voc_stat' + suffix)
         plt.plot(mv1.time, mv1.voc_stat, color='blue', linestyle=':', label='voc_stat' + suffix1)
         plt.legend(loc=1)
