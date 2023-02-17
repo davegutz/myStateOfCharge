@@ -41,7 +41,7 @@ class Chemistry(BMS):
         self.hys_cap = 0.  # Capacitance of hysteresis, Farads
         self.n_h = 0  # Number of dv breakpoints in r(soc, dv) table t_r, t_s
         self.m_h = 0  # Number of soc breakpoints in r(soc, dv) table t_r, t_s
-        self.v_sat = 0.  # Saturation threshold at temperature, deg C
+        self.nom_vsat = 0.  # Saturation threshold at temperature, deg C
         self.dvoc_dt = 0.  # Change of VOC with operating temperature in range 0 - 50 C V/deg C
         self.dvoc = 0.  # Adjustment for calibration error, V
         self.r_0 = 0.  # ChargeTransfer R0, ohms
@@ -88,7 +88,7 @@ class Chemistry(BMS):
         self.vb_down_sim = 9.5  # Shutoff point in Sim, V (9.5)
         self.vb_rising = 10.3  # Shutoff point when off, V (10.3)
         self.vb_rising_sim = 9.75  # Shutoff point in Sim when off, V (9.75)
-        self.v_sat = 13.85  # Saturation threshold at temperature, deg C (13.85)
+        self.nom_vsat = 13.85  # Saturation threshold at temperature, deg C (13.85)
 
         # Tables Battleborn Bmon=0, Bsim=0
         # VOC_SOC table
@@ -153,7 +153,7 @@ class Chemistry(BMS):
         self.vb_down_sim = 11.35  # Shutoff point in Sim, V (11.35)
         self.vb_rising = 12.15  # Shutoff point when off, V (12.15)
         self.vb_rising_sim = 11.6  # Shutoff point in Sim when off, V (11.6)
-        self.v_sat = 13.85  # Saturation threshold at temperature, deg C (13.85)
+        self.nom_vsat = 13.85  # Saturation threshold at temperature, deg C (13.85)
 
         # Tables CHINS Bmon=1, Bsim=1
         # VOC_SOC table

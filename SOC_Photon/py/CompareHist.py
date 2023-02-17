@@ -797,13 +797,13 @@ def calculate_capacity(q_cap_rated_scaled=None, dqdt=None, temp=None, t_rated=No
 
 
 # Make an array useful for analysis (around temp) and add some metrics
-def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
+def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100., nom_vsat=13.85):
     h = raw[abs(raw.Tb - temp_corr) < tb_band]
 
     sat_ = np.copy(h.Tb)
     bms_off_ = np.copy(h.Tb)
     for i in range(len(h.Tb)):
-        sat_[i] = is_sat(h.Tb[i], h.voc_dyn[i], h.soc[i])
+        sat_[i] = is_sat(h.Tb[i], h.voc_dyn[i], h.soc[i], nom_vsat=nom_vsat)
         # h.bms_off[i] = (h.Tb[i] < low_t) or ((h.voc_dyn[i] < low_voc) and (h.ib[i] < IB_MIN_UP))
         bms_off_[i] = (h.Tb[i] < low_t) or ((h.voc_stat[i] < 10.5) and (h.ib[i] < IB_MIN_UP))
 

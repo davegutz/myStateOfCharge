@@ -57,7 +57,6 @@ mneps_bb = 1e-6  # Numerical minimum of coefficient model without scaled soc
 CAP_DROOP_C = 20.  # Temperature below which a floor on q arises, C (20)
 TCHARGE_DISPLAY_DEADBAND = 0.1  # Inside this +/- deadband, charge time is displayed '---', A
 max_voc = 1.2*NOM_SYS_VOLT  # Prevent windup of battery model, V
-batt_vsat = BATT_V_SAT  # Total bank saturation for 0.997=soc, V
 batt_vmax = 14.3  # Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
 DF1 = 0.02  # Weighted selection lower transition drift, fraction
 DF2 = 0.70  # Threshold to reset Coulomb Counter if different from ekf, fraction (0.05)
@@ -79,11 +78,6 @@ HYS_SOC_MAX = 0.99  # Detect high endpoint condition for reset of hysteresis
 HYS_E_WRAP_THR = 0.1  # Detect e_wrap going the other way; need to reset dv_hys at endpoints
 HYS_IB_THR = 1.  # Ignore reset if opposite situation exists
 IB_MIN_UP = 0.2  # Min up charge current for come alive, BMS logic, and fault
-V_BATT_OFF = 10.  # Shutoff point in Mon, V (10.)
-V_BATT_DOWN_SIM = 9.5  # Shutoff point in Sim before off, V (9.5)
-V_BATT_RISING_SIM = 9.75  # Shutoff point in Sim when off, V (9.75)
-V_BATT_DOWN = 9.8  # Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V (9.8)
-V_BATT_RISING = 10.3  # Shutoff point when off, V (10.3)
 cp_eframe_mult = 20  # Run EKF 20 times slower than Coulomb Counter
 READ_DELAY = 100  # nominal read time, ms
 EKF_EFRAME_MULT = 20  # Multiframe rate consistent with READ_DELAY (20 for READ_DELAY=100)
@@ -322,7 +316,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.chm = chem
 
         self.temp_c = temp_c
-        self.vsat = calc_vsat(self.temp_c)
+        self.vsat = calc_vsat(self.temp_c, self.chemistry.nom_vsat)
         self.dt = dt
         self.ib_in = ib
         self.mod = rp.modeling
@@ -335,9 +329,9 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Battery management system model
         if not self.bms_off:
-            voltage_low = self.voc_stat < V_BATT_DOWN
+            voltage_low = self.voc_stat < self.chemistry.vb_down
         else:
-            voltage_low = self.voc_stat < V_BATT_RISING
+            voltage_low = self.voc_stat < self.chemistry.vb_rising
         bms_charging = self.ib > IB_MIN_UP
         if reset and bms_off_init is not None:
             self.bms_off = bms_off_init
@@ -626,9 +620,9 @@ class BatterySim(Battery):
         # Using voc_ is not better because change in dv_hys_ causes the same effect.   So using nice quiet
         # voc_stat_ for ease of simulation, not accuracy.
         if not self.bms_off:
-            voltage_low = self.voc_stat < V_BATT_DOWN_SIM
+            voltage_low = self.voc_stat < self.chemistry.vb_down_sim
         else:
-            voltage_low = self.voc_stat < V_BATT_RISING_SIM
+            voltage_low = self.voc_stat < self.chemistry.vb_rising_sim
         bms_charging = self.ib_in > IB_MIN_UP
         if reset and bms_off_init is not None:
             self.bms_off = bms_off_init
@@ -771,8 +765,8 @@ class BatterySim(Battery):
 
 
 # Other functions
-def is_sat(temp_c, voc, soc):
-    vsat = sat_voc(temp_c)
+def is_sat(temp_c, voc, soc, nom_vsat):
+    vsat = sat_voc(temp_c, nom_vsat)
     return temp_c > low_t and (voc >= vsat or soc >= mxeps_bb)
 
 
@@ -780,12 +774,12 @@ def calculate_capacity(temp_c, t_sat, q_sat):
     return q_sat * (1-dqdt*(temp_c - t_sat))
 
 
-def calc_vsat(temp_c):
-    return sat_voc(temp_c)
+def calc_vsat(temp_c, vsat):
+    return sat_voc(temp_c, vsat)
 
 
-def sat_voc(temp_c):
-    return batt_vsat + (temp_c-25.)*BATT_DVOC_DT
+def sat_voc(temp_c, vsat):
+    return vsat + (temp_c-25.)*BATT_DVOC_DT
 
 
 class Saved:
