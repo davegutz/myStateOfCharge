@@ -124,43 +124,6 @@ class Battery(Coulombs):
         # Defaults
         self.chem = mod_code
         from pyDAGx import myTables
-        # Battleborn Bmon=0, Bsim=0
-        t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
-        t_y_t0 = [5.,  11.1,  20.,   30.,   40.]
-        t_voc0 = [4.00, 4.00, 4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
-                  4.00, 4.00, 4.00,  9.50,  12.00, 12.50, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.60, 14.46,
-                  4.00, 4.00, 10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
-                  4.00, 4.00, 12.00, 12.65, 12.75, 12.80, 12.85, 12.95, 13.00, 13.08, 13.12, 13.16, 13.20, 13.24, 13.26, 13.27, 13.72, 14.50,
-                  4.00, 4.00, 4.00,  4.00,  10.50, 11.93, 12.78, 12.83, 12.89, 12.97, 13.06, 13.10, 13.13, 13.16, 13.19, 13.20, 13.72, 14.50]
-        x0 = np.array(t_x_soc0)
-        y0 = np.array(t_y_t0)
-        data_interp0 = np.array(t_voc0)
-        self.lut_voc0 = myTables.TableInterp2D(x0, y0, data_interp0)
-        # CHINS Bmon=1, Bsim=1
-        t_x_soc1 = [-0.15, 0.00, 0.05, 0.10, 0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.98,  0.99,  1.00]
-        t_y_t1 = [5.,  11.1,   25.,   40.]
-        t_voc1 = [4.00, 4.00,  4.00,  4.00,  10.00, 10.95, 12.94, 13.00, 13.05, 13.10, 13.15, 13.20, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
-                  4.00, 4.00,  4.00,  9.50,  12.86, 12.90, 12.94, 13.00, 13.05, 13.10, 13.15, 13.20, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
-                  4.00, 4.00,  10.00, 12.82, 12.86, 12.90, 12.94, 13.00, 13.05, 13.10, 13.15, 13.20, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
-                  4.00, 4.00,  11.00, 12.82, 12.86, 12.90, 12.94, 13.00, 13.05, 13.10, 13.15, 13.20, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70]
-
-        x1 = np.array(t_x_soc1)
-        y1 = np.array(t_y_t1)
-        data_interp1 = np.array(t_voc1)
-        self.lut_voc1 = myTables.TableInterp2D(x1, y1, data_interp1)
-        # LIE Bmon=2
-        t_x_soc2 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
-        t_y_t2 = [5.,  11.1,   25.,   40.]
-        t_voc2 = [4.00, 4.00, 4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
-                  4.00, 4.00, 8.00,  11.70, 12.50, 12.60, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.76, 14.46,
-                  4.00, 4.00, 10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
-                  4.00, 4.00, 10.50, 13.10, 13.27, 13.31, 13.44, 13.46, 13.40, 13.44, 13.48, 13.52, 13.56, 13.60, 13.64, 13.68, 14.22, 15.00]
-
-        x2 = np.array(t_x_soc2)
-        y2 = np.array(t_y_t2)
-        data_interp2 = np.array(t_voc2)
-        self.lut_voc = None
-        self.lut_voc2 = myTables.TableInterp2D(x2, y2, data_interp2)
         self.dvoc = dvoc
         self.nz = None
         self.q = 0  # Charge, C
@@ -305,7 +268,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.R = EKF_R_SD_NORM * EKF_R_SD_NORM  # EKF state uncertainty
         self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys, scale_cap=scale_hys_cap, s_cap_chg=s_cap_chg,
                               s_cap_dis=s_cap_dis, s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis, chem=self.chem,
-                              myCH_Tuner=myCH_Tuner)  # Battery hysteresis model - drift of voc
+                              chemistry=self.chemistry)  # Battery hysteresis model - drift of voc
         self.soc_s = 0.  # Model information
         self.EKF_converged = TFDelay(False, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT)
         self.y_filt_lag = LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
@@ -357,17 +320,6 @@ class BatteryMonitor(Battery, EKF1x1):
         if self.chm != chem:
             self.chemistry.assign_all_mod(chem)
             self.chm = chem
-
-        # old stuff  TODO:  delete
-        if self.chm == 0:
-            self.lut_voc = self.lut_voc0
-        elif self.chm == 1:
-            self.lut_voc = self.lut_voc1
-        elif self.chm == 2:
-            self.lut_voc = self.lut_voc2
-        else:
-            print("BatteryMonitor.calculate:  bad chem value=", chem)
-            exit(1)
 
         self.temp_c = temp_c
         self.vsat = calc_vsat(self.temp_c)
@@ -604,7 +556,7 @@ class BatterySim(Battery):
             self.apply_cap_scale(scale)
         self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys, scale_cap=scale_hys_cap, s_cap_chg=s_cap_chg,
                               s_cap_dis=s_cap_dis, s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis, chem=self.chem,
-                              myCH_Tuner=myCH_Tuner)  # Battery hysteresis model - drift of voc
+                              chemistry=self.chemistry)  # Battery hysteresis model - drift of voc
         self.tweak_test = tweak_test
         self.voc = 0.  # Charging voltage, V
         self.d_delta_q = 0.  # Charging rate, Coulombs/sec
@@ -643,16 +595,10 @@ class BatterySim(Battery):
     # BatterySim::calculate()
     def calculate(self, chem, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, updateTimeIn,  # BatterySim
                   rp=None, sat_init=None, bms_off_init=None):
-        self.chm = chem
-        if self.chm == 0:
-            self.lut_voc = self.lut_voc0
-        elif self.chm == 1:
-            self.lut_voc = self.lut_voc1
-        elif self.chm == 2:
-            self.lut_voc = self.lut_voc2
-        else:
-            print("BatterySim.calculate:  bad chem value=", chem)
-            exit(1)
+        if self.chm != chem:
+            self.chemistry.assign_all_mod(chem)
+            self.chm = chem
+
         self.temp_c = temp_c
         self.dt = dt
         self.ib_in = curr_in
@@ -735,16 +681,9 @@ class BatterySim(Battery):
         Outputs:
             soc     State of charge, fraction (0-1.5)
         """
-        self.chm = chem
-        if self.chm == 0:
-            self.lut_soc_min = self.lut_soc_min0
-        elif self.chm == 1:
-            self.lut_soc_min = self.lut_soc_min1
-        elif self.chm == 2:
-            self.lut_soc_min = self.lut_soc_min2
-        else:
-            print("BatteryMonitor.calculate:  bad chem value=", chem)
-            exit(1)
+        if self.chm != chem:
+            self.chemistry.assign_all_mod(chem)
+            self.chm = chem
         self.reset = reset
         self.charge_curr = charge_curr
         self.d_delta_q = self.charge_curr * dt
@@ -776,7 +715,7 @@ class BatterySim(Battery):
 
         # Normalize
         self.soc = self.q / self.q_capacity
-        self.soc_min = self.lut_soc_min.interp(self.temp_lim)
+        self.soc_min = self.chemistry.lut_min_soc.interp(self.temp_lim)
         self.q_min = self.soc_min * self.q_capacity
 
         # Save and return

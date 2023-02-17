@@ -45,23 +45,9 @@ class Coulombs:
         self.t_last = 0.
         self.sat = True
         self.chm = 0
-        from pyDAGx import myTables
-        # Battleborn
-        t_x_soc_min0 = [5., 11.1,  20.,   30., 40.]
-        t_soc_min0 = [0.07, 0.05,  -0.05, 0.00, 0.20]
-        self.lut_soc_min0 = myTables.TableInterp1D(np.array(t_x_soc_min0), np.array(t_soc_min0))
-        # CHINS
-        t_x_soc_min1 = [5.,   11.1,  20.,  40.]
-        t_soc_min1 = [0.10, 0.07,  0.05, 0.03]
-        self.lut_soc_min1 = myTables.TableInterp1D(np.array(t_x_soc_min1), np.array(t_soc_min1))
-        # CHINS EKF
-        t_x_soc_min2 = [5.,   11.1,  20.,  40.]
-        t_soc_min2 = [0.10, 0.07,  0.05, 0.0]
-        self.lut_soc_min2 = myTables.TableInterp1D(np.array(t_x_soc_min2), np.array(t_soc_min2))
         self.coul_eff = coul_eff_
         self.tweak_test = tweak_test
         self.reset = False
-        self.lut_soc_min = self.lut_soc_min0
         self.chemistry = Chemistry(mod_code=mod_code)
 
     def __str__(self, prefix=''):
@@ -146,16 +132,9 @@ class Coulombs:
             t_last          Past value of battery temperature used for rate limit memory, deg C
             coul_eff        Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
         """
-        self.chm = chem
-        if self.chm == 0:
-            self.lut_soc_min = self.lut_soc_min0
-        elif self.chm == 1:
-            self.lut_soc_min = self.lut_soc_min1
-        elif self.chm == 2:
-            self.lut_soc_min = self.lut_soc_min2
-        else:
-            print("BatteryMonitor.calculate:  bad chem value=", chem)
-            exit(1)
+        if self.chm != chem:
+            self.chemistry.assign_all_mod(chem)
+            self.chm = chem
         self.reset = reset
         d_delta_q = charge_curr * dt
         if charge_curr > 0. and not self.tweak_test:
@@ -186,7 +165,7 @@ class Coulombs:
 
         # Normalize
         self.soc = self.q / self.q_capacity
-        self.soc_min = self.lut_soc_min.interp(self.temp_lim)
+        self.soc_min = self.chemistry.lut_min_soc.interp(self.temp_lim)
         self.q_min = self.soc_min * self.q_capacity
 
         # Save and return
