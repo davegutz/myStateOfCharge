@@ -275,10 +275,10 @@ void Chemistry::pretty_print(void)
   Serial.printf("  low_voc%7.3f, V\n", low_voc);
   Serial.printf("  v_sat%7.3f, V\n", v_sat);
   Serial.printf("  ChargeTransfer:\n");
-  Serial.printf("  c_sd%9.3g; EKK, farad\n", c_sd);
+  Serial.printf("  c_sd%9.3g; EKF, farad\n", c_sd);
   Serial.printf("  r_0%9.6f, ohm\n", r_0);
   Serial.printf("  r_ct%9.6f, ohm\n", r_ct);
-  Serial.printf("  r_sd%9.6f; EKF, ohm\n", r_sd);
+  Serial.printf("  r_sd%9.3f; EKF, ohm\n", r_sd);
   Serial.printf("  r_ss%9.6f; SS init, ohm\n", r_ss);
   Serial.printf("  tau_ct%7.3f, s\n", tau_ct);
   Serial.printf("  tau_sd%9.3g; EKF, s\n", tau_sd);

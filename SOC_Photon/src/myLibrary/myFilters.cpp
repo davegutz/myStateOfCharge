@@ -590,11 +590,21 @@ LagExp::LagExp() : DiscreteFilter() {}
 LagExp::LagExp(const double T, const double tau, const double min, const double max)
     : DiscreteFilter(T, tau, min, max)
 {
-  LagExp::assignCoeff(tau);
+  LagExp::assignCoeff(tau, T);
 }
 LagExp::~LagExp() {}
 // operators
 // functions
+void LagExp::assignCoeff(double tau, double T)
+{
+  tau_ = tau;
+  T_ = T;
+  double eTt = exp(-T_ / tau_);
+  double meTt = 1 - eTt;
+  a_ = tau_ / T_ - eTt / meTt;
+  b_ = 1.0 / meTt - tau_ / T_;
+  c_ = meTt / T_;
+}
 double LagExp::calculate(double in, int RESET)
 {
   if (RESET > 0)
@@ -604,16 +614,17 @@ double LagExp::calculate(double in, int RESET)
     rate_ = 0;
   }
   LagExp::rateState(in);
-  return (rate_);
+  return (lstate_);
 }
-double LagExp::calculate(double in, int RESET, const double T)
+double LagExp::calculate(double in, int RESET, const double tau, const double T)
 {
   if (RESET > 0)
   {
     lstate_ = in;
     rstate_ = in;
   }
-  LagExp::rateState(in, T);
+  assignCoeff(tau, T);
+  LagExp::rateState(in);
   return (lstate_);
 }
 void LagExp::rateState(double in)
@@ -621,20 +632,6 @@ void LagExp::rateState(double in)
   rate_ = c_ * (a_ * rstate_ + b_ * in - lstate_);
   rstate_ = in;
   lstate_ = fmax(fmin(lstate_ + T_ * rate_, max_), min_);
-}
-void LagExp::rateState(double in, const double T)
-{
-  T_ = T;
-  assignCoeff(tau_);
-  rateState(in);
-}
-void LagExp::assignCoeff(double tau)
-{
-  double eTt = exp(-T_ / tau_);
-  double meTt = 1 - eTt;
-  a_ = tau_ / T_ - eTt / meTt;
-  b_ = 1.0 / meTt - tau_ / T_;
-  c_ = meTt / T_;
 }
 double LagExp::state(void) { return (lstate_); };
 

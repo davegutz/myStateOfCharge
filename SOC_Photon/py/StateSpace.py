@@ -142,7 +142,7 @@ if __name__ == '__main__':
     r_ctOld = 0.0016
     r_ct = 0.0077
     tau_ct = 0.2
-    tau_dif = 4
+    tau_dif = 83
     c_ct = tau_ct / r_ctOld
     c_dif = tau_dif / r_ct
     dt = 0.1
@@ -204,7 +204,7 @@ if __name__ == '__main__':
         print('Model_1l::')
         print('tau_dif', tau_dif)
 
-        n = 200
+        n = 12
         t = []
         inp_ = 0
         inp = []
@@ -217,7 +217,7 @@ if __name__ == '__main__':
             t.append(i*dt)
             reset = t[i] == 0.
             if t[i] > dt:
-                inp_ = 17.
+                inp_ = -75./0.4*t[i]
             inp.append(inp_)
             ss.calc_x_dot([inp_, 0])
             ss.update(dt, reset)

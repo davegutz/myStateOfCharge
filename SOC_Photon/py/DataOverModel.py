@@ -966,7 +966,7 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.legend(loc=4)
     plt.subplot(333)
     plt.plot(mo.time, mo.ib_sel, linestyle='-', color='blue', label='ib_sel'+old_str)
-    plt.plot(mv.time, mv.ib_in, linestyle='-', color='cyan', label='ib_in'+new_str)
+    # plt.plot(mv.time, mv.ib_in, linestyle='-', color='cyan', label='ib_in'+new_str)
     plt.plot(so.time, so.ib_s, linestyle='--', color='black', label='ib_in_s'+old_str)
     plt.plot(smv.time, smv.ib_in_s, linestyle=':', color='red', label='ib_in_s'+new_str)
     plt.xlabel('sec')

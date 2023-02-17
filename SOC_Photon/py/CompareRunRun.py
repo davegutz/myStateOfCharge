@@ -141,8 +141,9 @@ if __name__ == '__main__':
 
         # Regression
         # keys = [('ampHiFail v20221028.txt', 'pro0p_2022'), ('ampHiFail v20221220.txt', 'pro0p_2022')]
-        keys = [('ampHiFail vA20221220.txt', 'soc1a_2022'), ('ampHiFail v20230128.txt', 'pro0p')]
+        # keys = [('ampHiFail vA20221220.txt', 'soc1a_2022'), ('ampHiFail v20230128.txt', 'pro0p')]
         # keys = [('rapidTweakRegression vA20221220.txt', 'soc1a_2022'), ('rapidTweakRegression v20230125.txt', 'pro0p_2022')]
+        keys = [('rapidTweakRegression vA20221220.txt', 'soc1a_2022'), ('rapidTweakRegression vA20230217.txt', 'pro1a_2023')]
 
         # Compare
         # keys = [('ampHiFail v20221220.txt', 'pro0p'), ('ampHiFail vA20221220.txt', 'soc1a')]
