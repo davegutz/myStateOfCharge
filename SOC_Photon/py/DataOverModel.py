@@ -648,6 +648,8 @@ def overall(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
             plt.subplot(332)
             plt.plot(mo.time, mo.x, color='blue', linestyle='-', label='x'+old_str)
             plt.plot(mv.time, mv.x_ekf, color='red', linestyle='--', label='x'+new_str)
+            plt.plot(mo.time, mo.soc_ekf, color='cyan',  linestyle='-.', label='x=soc_ekf'+old_str)
+            plt.plot(mv.time, mv.soc_ekf, color='orange', linestyle=':', label='x=soc_ekf'+new_str)
             plt.legend(loc=1)
             plt.subplot(333)
             plt.plot(mo.time, mo.y, color='blue', linestyle='-', label='y'+old_str)
@@ -1316,8 +1318,8 @@ class SavedData:
                     self.c_time_s = np.array(sel.c_time) - self.time_ref
                     i_end = min(i_end, len(self.c_time_s))
                 if ekf is not None:
-                    self.c_time_s = np.array(ekf.c_time) - self.time_ref
-                    i_end = min(i_end, len(self.c_time_s))
+                    self.c_time_e = np.array(ekf.c_time) - self.time_ref
+                    i_end = min(i_end, len(self.c_time_e))
             else:
                 i_end = np.where(self.time <= time_end)[0][-1] + 1
                 if sel is not None:
@@ -1326,8 +1328,8 @@ class SavedData:
                     i_end = min(i_end, i_end_sel)
                     self.zero_end = min(self.zero_end, i_end-1)
                 if ekf is not None:
-                    self.c_time_s = np.array(ekf.c_time) - self.time_ref
-                    i_end_ekf = np.where(self.c_time_s <= time_end)[0][-1] + 1
+                    self.c_time_e = np.array(ekf.c_time) - self.time_ref
+                    i_end_ekf = np.where(self.c_time_e <= time_end)[0][-1] + 1
                     i_end = min(i_end, i_end_ekf)
                     self.zero_end = min(self.zero_end, i_end - 1)
             self.cTime = self.cTime[:i_end]
@@ -1489,7 +1491,7 @@ class SavedData:
             self.hx = None
             self.H = None
         else:
-            self.c_time_s = np.array(ekf.c_time[:i_end])
+            self.c_time_e = np.array(ekf.c_time[:i_end])
             self.Fx = np.array(ekf.Fx_[:i_end])
             self.Bu = np.array(ekf.Bu_[:i_end])
             self.Q = np.array(ekf.Q_[:i_end])
@@ -1512,7 +1514,6 @@ class SavedData:
         s = "{},".format(self.unit[self.i])
         s += "{},".format(self.hm[self.i])
         s += "{:13.3f},".format(self.cTime[self.i])
-        # s += "{},".format(self.T[self.i])
         s += "{:8.3f},".format(self.ib[self.i])
         s += "{:7.2f},".format(self.vsat[self.i])
         s += "{:5.2f},".format(self.dv_dyn[self.i])

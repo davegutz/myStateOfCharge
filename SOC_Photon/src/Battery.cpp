@@ -42,7 +42,7 @@ Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code)
     voc_(NOMINAL_VB), voc_stat_(NOMINAL_VB), vsat_(NOMINAL_VB)
 {
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // Center in hysteresis
-    ChargeTransfer_ = new LagExp(EKF_NOM_DT, NOM_TAU_CT, -RATED_BATT_CAP, RATED_BATT_CAP);
+    ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_.tau_ct, -RATED_BATT_CAP, RATED_BATT_CAP);  // Update time and time constant changed on the fly
     hys_ = new Hysteresis(chem_.hys_cap, chem_);
 }
 Battery::~Battery() {}
@@ -226,11 +226,11 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     // Battery management system model
     boolean voltage_low, bms_charging;
     if ( !bms_off_ )
-        voltage_low = voc_stat_ < V_BATT_DOWN;
+        voltage_low = voc_stat_ < chem_.vb_down;
     else
-        voltage_low = voc_stat_ < V_BATT_RISING;
+        voltage_low = voc_stat_ < chem_.vb_rising;
     bms_charging = ib_ > IB_MIN_UP;
-    bms_off_ = (temp_c_ <= chem_.low_t) || ( voltage_low && !Sen->Flt->vb_fa() && !sp.tweak_test() );    // KISS
+    bms_off_ = (temp_c_ <= bms_.low_t) || ( voltage_low && !Sen->Flt->vb_fa() && !sp.tweak_test() );    // KISS
     Sen->bms_off = bms_off_;
     ib_charge_ = ib_;
     if ( bms_off_ && !bms_charging )
@@ -399,9 +399,9 @@ void BatteryMonitor::init_soc_ekf(const float soc)
 boolean BatteryMonitor::is_sat(const boolean reset)
 {
     if ( reset)
-        return ( temp_c_ > chem_.low_t && voc_filt_ >= vsat_ );
+        return ( temp_c_ > bms_.low_t && voc_filt_ >= vsat_ );
     else
-        return ( temp_c_ > chem_.low_t && (voc_filt_ >= vsat_ || soc_ >= MXEPS) );
+        return ( temp_c_ > bms_.low_t && (voc_filt_ >= vsat_ || soc_ >= MXEPS) );
 }
 
 // Print
@@ -595,11 +595,11 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     if ( reset ) vb_ = voc_stat_;
     boolean voltage_low, bms_charging;
     if ( !bms_off_ )
-        voltage_low = voc_stat_ < V_BATT_DOWN_SIM;
+        voltage_low = voc_stat_ < chem_.vb_down_sim;
     else
-        voltage_low = voc_stat_ < V_BATT_RISING_SIM;
+        voltage_low = voc_stat_ < chem_.vb_rising_sim;
     bms_charging = ib_in_ > IB_MIN_UP;
-    bms_off_ = (temp_c_ <= chem_.low_t) || (voltage_low && !sp.tweak_test());
+    bms_off_ = (temp_c_ <= bms_.low_t) || (voltage_low && !sp.tweak_test());
     float ib_charge_fut = ib_in_;  // Pass along current to charge unless bms_off
     if ( bms_off_ && sp.mod_ib() && !bms_charging)
         ib_charge_fut = 0.;
@@ -633,7 +633,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     #if PLATFORM_ID == PLATFORM_ARGON
 
         if ( sp.debug()==75 ) Serial.printf("BatterySim::calculate: temp_c_, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
-            temp_c_, soc_, voc_stat_, chem_.low_voc);
+            temp_c_, soc_, voc_stat_, bms_.low_voc);
 
         if ( sp.debug()==76 ) Serial.printf("BatterySim::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in=%7.3f,ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, VB_DC_DC=%7.3f, vb=%7.3f\n",
             soc_, temp_c_, ib_in_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, VB_DC_DC, vb_);

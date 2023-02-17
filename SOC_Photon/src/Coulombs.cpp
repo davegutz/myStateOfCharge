@@ -66,15 +66,20 @@ void Chemistry::assign_BB()
   dvoc    = 0.;     // Adjustment for calibration error, V (systematic error; may change in future)
   hys_cap = 3.6e3;  // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data. // div 10 again 9/29/2022 // div 10 again 11/30/2022
                     // tau_null = 1 / 0.005 / 3.6e3 = 0.056 s
-  low_voc = 9.0;    // Voltage threshold for BMS to turn off battery;
-  low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
-  r_0     = 0.0046; // ChargeTransfer R0, ohms   
-  r_ct  = 0.0077;   // ChargeTransfer diffusion resistance, ohms
-  r_sd    = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
-  tau_ct = NOM_TAU_CT;  // ChargeTransfer diffusion time constant, s (=1/Rct/Cct)
+  low_voc = 9.0;    // Voltage threshold for BMS to turn off battery, V (9.)
+  low_t   = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C (0)
+  r_0     = 0.0046; // ChargeTransfer R0, ohms (0.0046)
+  r_ct  = 0.0077;   // ChargeTransfer diffusion resistance, ohms (0.0077)
+  r_sd    = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms (70.)
+  tau_ct = 83.;     // ChargeTransfer diffusion time constant, s (=1/Rct/Cct) (83.)
   tau_sd  = 2.5e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
   c_sd    = tau_sd / r_sd;
-  v_sat   = 13.85;  // Saturation threshold at temperature, deg C
+  vb_off  = 10.;    // Shutoff point in Mon, V (10.)
+  vb_down = 9.8;    // Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V (9.8)
+  vb_down_sim = 9.5;  // Shutoff point in Sim, V (9.5)
+  vb_rising = 10.3;  // Shutoff point when off, V (10.3)
+  vb_rising_sim = 9.75; // Shutoff point in Sim when off, V (9.75)
+  v_sat   = 13.85;  // Saturation threshold at temperature, deg C (13.85)
 
   // VOC_SOC table
   assign_voc_soc(N_S_BB, M_T_BB, X_SOC_BB, Y_T_BB, T_VOC_BB);
@@ -99,10 +104,15 @@ void Chemistry::assign_CH()
   r_0     = 0.0046*3.;  // ChargeTransfer R0, ohms
   r_ct    = 0.0077*0.76;// ChargeTransfer diffusion resistance, ohms
   r_sd    = 70;     // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
-  tau_ct = NOM_TAU_CT*0.3;   // ChargeTransfer diffusion time constant, s (=1/Rct/Cct)
+  tau_ct  = 24.9;   // ChargeTransfer diffusion time constant, s (=1/Rct/Cct)
   tau_sd  = 2.5e7;  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
   c_sd    = tau_sd / r_sd;
-  v_sat   = 13.85;  // Saturation threshold at temperature, deg C
+  vb_off  = 11.85;      // Shutoff point in Mon, V (11.85, 1.85 higher than BB.  Add 1.85 to BB numbers as initial guess)
+  vb_down = 11.65;      // Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V (11.65)
+  vb_down_sim = 11.35;  // Shutoff point in Sim, V (11.35)
+  vb_rising = 12.15;    // Shutoff point when off, V (12.15)
+  vb_rising_sim = 11.6; // Shutoff point in Sim when off, V (11.6)
+  v_sat   = 13.85;      // Saturation threshold at temperature, deg C (13.85)
 
   // VOC_SOC table
   assign_voc_soc(N_S_CH, M_T_CH, X_SOC_CH, Y_T_CH, T_VOC_CH);

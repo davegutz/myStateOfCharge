@@ -110,7 +110,7 @@ class Battery(Coulombs):
     def __init__(self, bat_v_sat=13.85, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  r_sd=70., tau_sd=2.5e7, r_0=0.0046, tau_ct=83., r_ct=0.0077,
                  temp_c=RATED_TEMP, tweak_test=False, sres0=1., sresct=1., stauct=1.,
-                 scale_r_ss=1., s_hys=1., dvoc=0., chem=0, coul_eff=0.9985):
+                 scale_r_ss=1., s_hys=1., dvoc=0., coul_eff=0.9985, mod_code=0):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -118,10 +118,11 @@ class Battery(Coulombs):
         so equation error when soc<=0 to match data.    See Battery.h
         """
         # Parents
-        Coulombs.__init__(self, q_cap_rated,  q_cap_rated, t_rated, t_rlim, tweak_test, coul_eff_=coul_eff)
+        Coulombs.__init__(self, q_cap_rated,  q_cap_rated, t_rated, t_rlim, tweak_test, coul_eff_=coul_eff,
+                          mod_code=mod_code)
 
         # Defaults
-        self.chem = chem
+        self.chem = mod_code
         from pyDAGx import myTables
         # Battleborn Bmon=0, Bsim=0
         t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
@@ -239,15 +240,15 @@ class Battery(Coulombs):
 
     def calc_h_jacobian(self, soc_lim, temp_c):
         if soc_lim > 0.5:
-            dv_dsoc = (self.lut_voc.interp(soc_lim, temp_c) - self.lut_voc.interp(soc_lim-0.01, temp_c)) / 0.01
+            dv_dsoc = (self.chemistry.lut_voc_soc.interp(soc_lim, temp_c) - self.chemistry.lut_voc_soc.interp(soc_lim-0.01, temp_c)) / 0.01
         else:
-            dv_dsoc = (self.lut_voc.interp(soc_lim+0.01, temp_c) - self.lut_voc.interp(soc_lim, temp_c)) / 0.01
+            dv_dsoc = (self.chemistry.lut_voc_soc.interp(soc_lim+0.01, temp_c) - self.chemistry.lut_voc_soc.interp(soc_lim, temp_c)) / 0.01
         return dv_dsoc
 
     def calc_soc_voc(self, soc, temp_c):
         """SOC-OCV curve fit method per Zhang, etal """
         dv_dsoc = self.calc_h_jacobian(soc, temp_c)
-        voc = self.lut_voc.interp(soc, temp_c) + self.dvoc
+        voc = self.chemistry.lut_voc_soc.interp(soc, temp_c) + self.dvoc
         # print("soc=", soc, "temp_c=", temp_c, "dvoc=", self.dvoc, "voc=", voc)
         return voc, dv_dsoc
 
@@ -266,13 +267,13 @@ class BatteryMonitor(Battery, EKF1x1):
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  scale=1., r_sd=70., tau_sd=2.5e7, r_0=0.0046, tau_ct=83., r_ct=0.0077, temp_c=RATED_TEMP, hys_scale=1.,
                  tweak_test=False, dv_hys=0., sres0=1., sresct=1., stauct=1., scaler_q=None, scaler_r=None,
-                 scale_r_ss=1., s_hys=1., dvoc=1., eframe_mult=cp_eframe_mult, scale_hys_cap=1., chem=0,
+                 scale_r_ss=1., s_hys=1., dvoc=1., eframe_mult=cp_eframe_mult, scale_hys_cap=1., mod_code=0,
                  coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1., myCH_Tuner=1):
         q_cap_rated_scaled = q_cap_rated * scale
         Battery.__init__(self, bat_v_sat=bat_v_sat, q_cap_rated=q_cap_rated_scaled, t_rated=t_rated, t_rlim=t_rlim,
                          r_sd=r_sd, tau_sd=tau_sd, r_0=r_0, tau_ct=tau_ct, r_ct=r_ct, temp_c=temp_c,
                          tweak_test=tweak_test, sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss,
-                         s_hys=s_hys, dvoc=dvoc, chem=chem, coul_eff=coul_eff)
+                         s_hys=s_hys, dvoc=dvoc, coul_eff=coul_eff, mod_code=mod_code)
 
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
@@ -352,8 +353,12 @@ class BatteryMonitor(Battery, EKF1x1):
 
     # BatteryMonitor::calculate()
     def calculate(self, chem, temp_c, vb, ib, dt, reset, updateTimeIn, q_capacity=None, dc_dc_on=None,  # BatteryMonitor
-                  rp=None, u_old=None, z_old=None, bms_off_init=None):
-        self.chm = chem
+                  rp=None, u_old=None, z_old=None, x_old=None, bms_off_init=None):
+        if self.chm != chem:
+            self.chemistry.assign_all_mod(chem)
+            self.chm = chem
+
+        # old stuff  TODO:  delete
         if self.chm == 0:
             self.lut_voc = self.lut_voc0
         elif self.chm == 1:
@@ -363,6 +368,7 @@ class BatteryMonitor(Battery, EKF1x1):
         else:
             print("BatteryMonitor.calculate:  bad chem value=", chem)
             exit(1)
+
         self.temp_c = temp_c
         self.vsat = calc_vsat(self.temp_c)
         self.dt = dt
@@ -421,6 +427,9 @@ class BatteryMonitor(Battery, EKF1x1):
             self.R = self.scaler_r.calculate(ddq_dt)  # TODO this doesn't work right
             self.Q = EKF_Q_SD_NORM**2  # override
             self.R = EKF_R_SD_NORM**2  # override
+            # if reset and x_old is not None:
+            if x_old is not None:
+                self.x_ekf = x_old
             self.predict_ekf(u=ddq_dt, u_old=u_old)  # u = d(q)/dt
             self.update_ekf(z=self.voc_stat, x_min=0., x_max=1., z_old=z_old)  # z = voc, voc_filtered = hx
             self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
@@ -573,12 +582,12 @@ class BatterySim(Battery):
     def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
                  scale=1., r_sd=70., tau_sd=2.5e7, r_0=0.0046, tau_ct=83., r_ct=0.0077, stauct=1., temp_c=RATED_TEMP,
                  hys_scale=1., tweak_test=False, dv_hys=0., sres0=1., sresct=1., scale_r_ss=1., s_hys=1., dvoc=0.,
-                 scale_hys_cap=1., chem=0, coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1.,
+                 scale_hys_cap=1., mod_code=0, coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1.,
                  myCH_Tuner=1):
         Battery.__init__(self, bat_v_sat=bat_v_sat, q_cap_rated=q_cap_rated, t_rated=t_rated, t_rlim=t_rlim, r_sd=r_sd,
                          tau_sd=tau_sd, r_0=r_0, tau_ct=tau_ct, r_ct=r_ct, temp_c=temp_c, tweak_test=tweak_test,
                          sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc,
-                         chem=chem, coul_eff=coul_eff)
+                         coul_eff=coul_eff, mod_code=mod_code)
         self.lut_voc = None
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A

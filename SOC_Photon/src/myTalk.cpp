@@ -1030,7 +1030,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                       chit("XT5;", QUEUE);    // Wait time after cycle to print
                       chit("XC3;", QUEUE);    // Number of injection cycles
                       chit("W2;", QUEUE);     // Wait
-                      chit("v2;", QUEUE);     // Data collection
+                      chit("v4;", QUEUE);     // Data collection
                     }
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
                     {

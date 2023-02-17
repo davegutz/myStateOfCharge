@@ -146,12 +146,12 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         scale *= scale_in
     s_q = Scale(1., 3., 0.000005, 0.00005)
     s_r = Scale(1., 3., 0.001, 1.)   # t_ib_fail = 1000
-    sim = BatterySim(chem=chm_s[0], temp_c=temp_c, scale=scale, tweak_test=tweak_test,
+    sim = BatterySim(mod_code=chm_s[0], temp_c=temp_c, scale=scale, tweak_test=tweak_test,
                      dv_hys=dv_hys_init, sres0=sres0, sresct=sresct, stauct=stauct_sim, scale_r_ss=scale_r_ss,
                      s_hys=s_hys_sim, dvoc=dvoc_sim, scale_hys_cap=scale_hys_cap_sim, coul_eff=coul_eff,
                      s_cap_chg=s_cap_chg, s_cap_dis=s_cap_dis, s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis,
                      myCH_Tuner=myCH_Tuner)
-    mon = BatteryMonitor(chem=chm_m[0], r_sd=rsd, tau_sd=tau_sd, r_0=r_0, tau_ct=tau_ct, r_ct=r_ct,
+    mon = BatteryMonitor(mod_code=chm_m[0], r_sd=rsd, tau_sd=tau_sd, r_0=r_0, tau_ct=tau_ct, r_ct=r_ct,
                          temp_c=temp_c, scale=scale, tweak_test=tweak_test,
                          dv_hys=dv_hys_init, sres0=sres0, sresct=sresct, stauct=stauct_mon, scaler_q=s_q, scaler_r=s_r,
                          scale_r_ss=scale_r_ss, s_hys=s_hys_mon, dvoc=dvoc_mon, eframe_mult=eframe_mult,
@@ -244,15 +244,18 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         if drive_ekf:
             u_old = mon_old.u[i]
             z_old = mon_old.z[i]
+            x_old = mon_old.x[i]
         else:
             u_old = None
             z_old = None
+            x_old = None
         if rp.modeling == 0:
             mon.calculate(_chm_m, Tb_, vb_, ib_, T, rp=rp, reset=reset, updateTimeIn=updateTimeIn, u_old=u_old,
-                          z_old=z_old, bms_off_init=bms_off_init)
+                          z_old=z_old, x_old=x_old, bms_off_init=bms_off_init)
         else:
             mon.calculate(_chm_m, Tb_, vb_ + randn() * v_std + dv_sense, ib_ + randn() * i_std + di_sense, T, rp=rp,
-                          reset=reset, updateTimeIn=updateTimeIn, u_old=u_old, z_old=z_old, bms_off_init=bms_off_init)
+                          reset=reset, updateTimeIn=updateTimeIn, u_old=u_old, z_old=z_old, x_old=x_old,
+                          bms_off_init=bms_off_init)
         ib_charge = mon.ib_charge
         sat = is_sat(Tb_, mon.voc_filt, mon.soc)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)

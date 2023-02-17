@@ -18,6 +18,8 @@ of the totals and standardize the calculations."""
 
 # Constants
 import numpy as np
+from pyDAGx import myTables
+from Chemistry_BMS import Chemistry, BMS
 
 dqdt = 0.01  # Change of charge with temperature, fraction/deg C.  From literature.  0.01 is commonly used
 coul_eff = 0.9985  # Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
@@ -27,7 +29,7 @@ class Coulombs:
     """Coulomb Counting"""
 
     def __init__(self, q_cap_rated, q_cap_rated_scaled, t_rated, t_rlim=0.017, tweak_test=False,
-                 coul_eff_=0.9985):
+                 coul_eff_= 0.9985, mod_code=0):
         self.q_cap_rated = q_cap_rated
         self.q_cap_rated_scaled = q_cap_rated_scaled
         self.t_rated = t_rated
@@ -60,6 +62,7 @@ class Coulombs:
         self.tweak_test = tweak_test
         self.reset = False
         self.lut_soc_min = self.lut_soc_min0
+        self.chemistry = Chemistry(mod_code=mod_code)
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""

@@ -28,13 +28,24 @@
 
 class Sensors;
 
+// Battery Management System - built into battery
+struct BMS
+{
+  float low_voc;    // Voltage threshold for BMS to turn off battery, V
+  float low_t;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
+  float vb_off;     // Shutoff point in Mon, V
+  float vb_down;    // Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V
+  float vb_rising;  // Shutoff point when off, V
+  float vb_down_sim;    // Shutoff point in Sim, V
+  float vb_rising_sim;  // Shutoff point in Sim when off, V
+};
+
+
 // Battery chemistry
-struct Chemistry
+struct Chemistry: public BMS
 {
   uint8_t *sp_mod_code;  // Chemistry code integer
   float dqdt;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
-  float low_voc;    // Voltage threshold for BMS to turn off battery, V
-  float low_t;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C 
   uint8_t m_t = 0;  // Number temperature breakpoints for voc table
   float *y_t;       // Temperature breakpoints for voc table
   uint8_t n_s = 0;  // Number of soc breakpoints voc table
@@ -125,20 +136,21 @@ public:
   virtual float vsat(void) = 0;
 protected:
   boolean resetting_ = false;  // Sticky flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
-  float coul_eff_;   // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
+  float coul_eff_;    // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
   double q_;          // Present charge available to use, except q_min_, C
   double q_capacity_; // Saturation charge at temperature, C
   double q_cap_rated_;// Rated capacity at t_rated_, saved for future scaling, C
   double q_cap_rated_scaled_;// Applied rated capacity at t_rated_, after scaling, C
-  float q_min_;      // Floor on charge available to use, C
+  float q_min_;       // Floor on charge available to use, C
   boolean sat_;       // Indication that battery is saturated, T=saturated
-  float soc_;        // Fraction of saturation charge (q_capacity_) available (0-1)
-  float soc_min_;    // As battery cools, the voltage drops and there appears a minimum soc it can deliver
+  float soc_;         // Fraction of saturation charge (q_capacity_) available (0-1)
+  float soc_min_;     // As battery cools, the voltage drops and there appears a minimum soc it can deliver
   double *sp_delta_q_;// Charge since saturated, C
   float *sp_t_last_;  // Last battery temperature for rate limit memory, deg C
-  float t_rated_;    // Rated temperature, deg C
-  float t_rlim_;     // Tb rate limit, deg C / s
-  Chemistry chem_; // Storage of chemistry information
+  float t_rated_;     // Rated temperature, deg C
+  float t_rlim_;      // Tb rate limit, deg C / s
+  Chemistry chem_;    // Chemistry
+  BMS bms_;           // Battery Management System
 };
 
 #endif
