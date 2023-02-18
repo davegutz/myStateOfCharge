@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
         # data_file_old_txt = 'ampHiFail v20221220.txt'; unit_key = 'pro0p'
         # data_file_old_txt = 'ampHiFail vA20221220.txt';  unit_key = 'soc1a'
-        data_file_old_txt = 'rapidTweakRegression v20230217 CHINS.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; sres0_in = 3.0; sresct_in = 0.76; stauct_in = 0.3
+        # data_file_old_txt = 'rapidTweakRegression v20230217 CHINS.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; sres0_in = 3.0; sresct_in = 0.76; stauct_in = 0.3
         # data_file_old_txt = 'flatSit v20220214 CHINS 20220214.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; sres0_in = 3.0; sresct_in = 0.76; stauct_in = 0.3;
         # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in = 4.8;
         # data_file_old_txt = 'rapidTweakRegression vA20230217.txt'; unit_key = 'pro1a_2023'
@@ -115,11 +115,9 @@ if __name__ == '__main__':
         # The following CHINS runs were sources of figures in the .odt report.  Chem is in data stream
         # in the following line I forgot to renom sp on load so scale_hys was 1.5 by mistake for baseline run.
         # data_file_old_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in = 1.05; s_hys_in = 1.5; s_hys_in = 1.15; #stauct_in=0.1; s_hys_cap_in=1.;
-        # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 3.0; sresct_in = 0.76; stauct_in = 0.3; s_hys_chg_in = 4.; s_hys_dis_in = 0.7; s_cap_chg_in = 90; s_cap_dis_in = 10; tune_in = True; myCH_Tuner_in = 1  # 0.9 tune 1
-        # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 3.0; sresct_in = 0.76; stauct_in = 0.3; s_hys_chg_in = 1.5; s_hys_dis_in = 2.; s_cap_chg_in = 4; s_cap_dis_in = 40; tune_in = True; myCH_Tuner_in = 1  # 0.8 tune 1
         # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 3.0; sresct_in = 0.76; stauct_in = 0.3; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True; myCH_Tuner_in = 3  # 0.9 tune 4, 5
         # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 3.0; sresct_in = 0.76; stauct_in = 0.3; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True; myCH_Tuner_in = 3  # 0.8 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
-        # data_file_old_txt = 'steps v20230128 20230214.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 3.0; sresct_in = 0.76; stauct_in = 0.3; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True; myCH_Tuner_in = 3  # ; time_end_in = 450  # 0.4 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
+        data_file_old_txt = 'steps v20230128 20230214.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 3.0; sresct_in = 0.76; stauct_in = 0.3; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True; myCH_Tuner_in = 3  # ; time_end_in = 450  # 0.4 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
 
         # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
         # data_file_old_txt = 'vb_mess.txt'; unit_key = 'pro1a_2022';
