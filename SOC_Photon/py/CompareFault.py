@@ -724,10 +724,10 @@ if __name__ == '__main__':
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
         # input_files = ['CH 20230128.txt']; chm_in = 1
-        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; scale_in = 1.05; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 4  # 0.9 - 1.0 Tune 3
-        # input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt', 'serial_20230212_202717.txt',
-        #                'serial_20230215_064843.txt', 'serial_20230215_165025.txt', 'serial_20230216_145024.txt', 'serial_20230217_072709.txt',
-        #                'serial_20230217_185204.txt', 'serial_20230218_050029.txt']; chm_in = 1; scale_in = 1.05; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 3  # 0.9 - 1.0 Tune 4
+        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; scale_in = 1.05; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 4  # 0.9 - 1.0 Tune 3
+        input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt', 'serial_20230212_202717.txt',
+                       'serial_20230215_064843.txt', 'serial_20230215_165025.txt', 'serial_20230216_145024.txt', 'serial_20230217_072709.txt',
+                       'serial_20230217_185204.txt', 'serial_20230218_050029.txt', 'serial_20230218_134250.txt']; chm_in = 1; scale_in = 1.05; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 3  # 0.9 - 1.0 Tune 4
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'

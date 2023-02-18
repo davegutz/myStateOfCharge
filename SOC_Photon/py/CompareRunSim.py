@@ -117,7 +117,8 @@ if __name__ == '__main__':
         # data_file_old_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in = 1.05; s_hys_in = 1.5; s_hys_in = 1.15; #stauct_in=0.1; s_hys_cap_in=1.;
         # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True # 0.9 tune 4, 5
         # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # 0.8 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
-        data_file_old_txt = 'steps v20230128 20230214.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.4 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
+        # data_file_old_txt = 'steps v20230128 20230214.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.4 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
+        data_file_old_txt = 'steps v20230128 20230218.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.4 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
 
         # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
         # data_file_old_txt = 'vb_mess.txt'; unit_key = 'pro1a_2022';

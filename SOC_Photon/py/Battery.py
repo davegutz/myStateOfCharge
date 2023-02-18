@@ -648,9 +648,10 @@ class BatterySim(Battery):
             self.sat_ib_max = ib_charge_fut
         self.ib_fut = min(ib_charge_fut, self.sat_ib_max)  # the feedback of self.ib
         self.ib_charge = ib_charge_fut  # same time plane as volt calcs
-        if (self.q <= 0.) & (self.ib_charge < 0.):
-            print("q", self.q, "empty")
-            self.ib_charge = 0.  # empty
+        if self.mod > 0.:
+            if (self.q <= 0.) & (self.ib_charge < 0.):
+                print("q", self.q, "empty")
+                self.ib_charge = 0.  # empty
         self.model_cutback = (self.voc_stat > self.vsat) & (self.ib_fut == self.sat_ib_max)
         self.model_saturated = self.model_cutback & (self.ib_fut < self.ib_sat)
         if reset and sat_init is not None:
