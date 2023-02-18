@@ -89,6 +89,7 @@ class Chemistry(BMS):
         self.vb_rising = 10.3  # Shutoff point when off, V (10.3)
         self.vb_rising_sim = 9.75  # Shutoff point in Sim when off, V (9.75)
         self.nom_vsat = 13.85  # Saturation threshold at temperature, deg C (13.85)
+        self.r_ss = self.r_0 + self.r_ct
 
         # Tables Battleborn Bmon=0, Bsim=0
         # VOC_SOC table
@@ -154,6 +155,7 @@ class Chemistry(BMS):
         self.vb_rising = 12.15  # Shutoff point when off, V (12.15)
         self.vb_rising_sim = 11.6  # Shutoff point in Sim when off, V (11.6)
         self.nom_vsat = 13.85  # Saturation threshold at temperature, deg C (13.85)
+        self.r_ss = self.r_0 + self.r_ct
 
         # Tables CHINS Bmon=1, Bsim=1
         # VOC_SOC table

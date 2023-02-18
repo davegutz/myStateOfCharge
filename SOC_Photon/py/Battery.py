@@ -102,7 +102,6 @@ class Battery(Coulombs):
                             or 20 - 40 A for a 100 Ah battery"""
 
     def __init__(self, bat_v_sat=13.85, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
-                 r_sd=70., tau_sd=2.5e7, r_0=0.0046, tau_ct=83., r_ct=0.0077,
                  temp_c=RATED_TEMP, tweak_test=False, sres0=1., sresct=1., stauct=1.,
                  scale_r_ss=1., s_hys=1., dvoc=0., coul_eff=0.9985, mod_code=0):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
@@ -137,13 +136,11 @@ class Battery(Coulombs):
         self.dvoc_dt = BATT_DVOC_DT  # Change of VOC with operating temperature in
         # range 0 - 50 C, V/deg C
         self.dt = 0  # Update time, s
-        self.r_sd = r_sd
-        self.tau_sd = tau_sd
-        self.r_0 = r_0*sres0
-        self.tau_ct = tau_ct*stauct
-        self.r_ct = r_ct*sresct
-        self.c_ct = self.tau_ct / self.r_ct
-        self.ChargeTransfer = LagExp(dt=EKF_NOM_DT, max_=100., min_=-100., tau=self.tau_ct)
+        self.chemistry.r_0 *= sres0
+        self.chemistry.tau_ct *= stauct
+        self.chemistry.r_ct *= sresct
+        self.chemistry.r_ss *= scale_r_ss
+        self.ChargeTransfer = LagExp(dt=EKF_NOM_DT, max_=100., min_=-100., tau=self.chemistry.tau_ct)
         self.temp_c = temp_c
         self.saved = Saved()  # for plots and prints
         self.dv_hys = 0.  # Placeholder so BatterySim can be plotted
@@ -152,7 +149,7 @@ class Battery(Coulombs):
         self.mod = 7
         self.sel = 0
         self.tweak_test = tweak_test
-        self.r_ss = (self.r_0 + self.r_ct) * scale_r_ss
+        # self.r_ss = (self.r_0 + self.r_ct) * scale_r_ss
         self.s_hys = s_hys
 
     def __str__(self, prefix=''):
@@ -161,12 +158,12 @@ class Battery(Coulombs):
         s += "  chem    = {:7.3f}  // Chemistry: 0=Battleborn, 1=CHINS\n".format(self.chem)
         s += "  temp_c  = {:7.3f}  // Battery temperature, deg C\n".format(self.temp_c)
         s += "  dvoc_dt = {:9.6f}  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n".format(self.dvoc_dt)
-        s += "  r_0     = {:9.6f}  // Charge Transfer R0, ohms\n".format(self.r_0)
-        s += "  r_ct    = {:9.6f}  // Charge Transfer resistance, ohms\n".format(self.r_ct)
-        s += "  tau_ct = {:9.6f}  // Charge Transfer time constant, s (=1/Rdif/Cdif)\n".format(self.tau_ct)
-        s += "  r_ss    = {:9.6f}  // Steady state equivalent battery resistance, for solver, Ohms\n".format(self.r_ss)
-        s += "  r_sd    = {:9.6f}  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n".format(self.r_sd)
-        s += "  tau_sd  = {:9.1f}  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n".format(self.tau_sd)
+        s += "  r_0     = {:9.6f}  // Charge Transfer R0, ohms\n".format(self.chemistry.r_0)
+        s += "  r_ct    = {:9.6f}  // Charge Transfer resistance, ohms\n".format(self.chemistry.r_ct)
+        s += "  tau_ct = {:9.6f}  // Charge Transfer time constant, s (=1/Rdif/Cdif)\n".format(self.chemistry.tau_ct)
+        s += "  r_ss    = {:9.6f}  // Steady state equivalent battery resistance, for solver, Ohms\n".format(self.chemistry.r_ss)
+        s += "  r_sd    = {:9.6f}  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n".format(self.chemistry.r_sd)
+        s += "  tau_sd  = {:9.1f}  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n".format(self.chemistry.tau_sd)
         s += "  bms_off  = {:7.1f}      // BMS off\n".format(self.bms_off)
         s += "  dv_dsoc = {:9.6f}  // Derivative scaled, V/fraction\n".format(self.dv_dsoc)
         s += "  ib =      {:7.3f}  // Battery terminal current, A\n".format(self.ib)
@@ -228,7 +225,8 @@ class BatteryMonitor(Battery, EKF1x1):
                  coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1., myCH_Tuner=1):
         q_cap_rated_scaled = q_cap_rated * scale
         Battery.__init__(self, bat_v_sat=bat_v_sat, q_cap_rated=q_cap_rated_scaled, t_rated=t_rated, t_rlim=t_rlim,
-                         r_sd=r_sd, tau_sd=tau_sd, r_0=r_0, tau_ct=tau_ct, r_ct=r_ct, temp_c=temp_c,
+                         # r_sd=r_sd, tau_sd=tau_sd, r_0=r_0, tau_ct=tau_ct, r_ct=r_ct,
+                         temp_c=temp_c,
                          tweak_test=tweak_test, sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss,
                          s_hys=s_hys, dvoc=dvoc, coul_eff=coul_eff, mod_code=mod_code)
 
@@ -345,7 +343,8 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Dynamic emf
         self.vb = vb
-        self.voc = self.vb - (self.ChargeTransfer.calculate(self.ib, reset, dt)*self.r_ct + self.ib*self.r_0)
+        self.voc = self.vb - (self.ChargeTransfer.calculate(self.ib, reset, dt)*self.chemistry.r_ct +
+                              self.ib*self.chemistry.r_0)
         if self.bms_off and voltage_low:
             self.voc_stat = self.vb
             self.voc = self.vb
@@ -441,10 +440,8 @@ class BatteryMonitor(Battery, EKF1x1):
 
     def ekf_predict(self):
         """Process model"""
-        # self.Fx = math.exp(-self.dt / self.tau_sd)
-        # self.Bu = (1. - self.Fx)*self.r_sd
-        self.Fx = 1. - self.dt_eframe / self.tau_sd
-        self.Bu = self.dt_eframe / self.tau_sd * self.r_sd
+        self.Fx = 1. - self.dt_eframe / self.chemistry.tau_sd
+        self.Bu = self.dt_eframe / self.chemistry.tau_sd * self.chemistry.r_sd
         return self.Fx, self.Bu
 
     def ekf_update(self):
@@ -530,8 +527,9 @@ class BatterySim(Battery):
                  hys_scale=1., tweak_test=False, dv_hys=0., sres0=1., sresct=1., scale_r_ss=1., s_hys=1., dvoc=0.,
                  scale_hys_cap=1., mod_code=0, coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1.,
                  myCH_Tuner=1):
-        Battery.__init__(self, bat_v_sat=bat_v_sat, q_cap_rated=q_cap_rated, t_rated=t_rated, t_rlim=t_rlim, r_sd=r_sd,
-                         tau_sd=tau_sd, r_0=r_0, tau_ct=tau_ct, r_ct=r_ct, temp_c=temp_c, tweak_test=tweak_test,
+        Battery.__init__(self, bat_v_sat=bat_v_sat, q_cap_rated=q_cap_rated, t_rated=t_rated, t_rlim=t_rlim,
+                         # r_sd=r_sd, tau_sd=tau_sd, r_0=r_0, tau_ct=tau_ct, r_ct=r_ct,
+                         temp_c=temp_c, tweak_test=tweak_test,
                          sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc,
                          coul_eff=coul_eff, mod_code=mod_code)
         self.lut_voc = None
@@ -635,7 +633,8 @@ class BatterySim(Battery):
             self.ib = 0.
 
         # Charge transfer dynamics
-        self.vb = self.voc + (self.ChargeTransfer.calculate(self.ib, reset, dt)*self.r_ct + self.ib*self.r_0)
+        self.vb = self.voc + (self.ChargeTransfer.calculate(self.ib, reset, dt)*self.chemistry.r_ct +
+                              self.ib*self.chemistry.r_0)
         if self.bms_off:
             self.vb = self.voc
         if self.bms_off and dc_dc_on:

@@ -44,7 +44,7 @@ class Coulombs:
         self.temp_lim = 0.
         self.t_last = 0.
         self.sat = True
-        self.chm = 0
+        self.chm = mod_code
         self.coul_eff = coul_eff_
         self.tweak_test = tweak_test
         self.reset = False

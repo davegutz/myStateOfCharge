@@ -725,9 +725,9 @@ if __name__ == '__main__':
         # input_files = ['fault_20221206.txt']
         # input_files = ['CH 20230128.txt']; chm_in = 1
         input_files = ['hist v20230205 20230206.txt']; chm_in = 1; scale_in = 1.05; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 4  # 0.9 - 1.0 Tune 3
-        input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt', 'serial_20230212_202717.txt',
-                       'serial_20230215_064843.txt', 'serial_20230215_165025.txt', 'serial_20230216_145024.txt', 'serial_20230217_072709.txt',
-                       'serial_20230217_185204.txt', 'serial_20230218_050029.txt']; chm_in = 1; scale_in = 1.05; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 3  # 0.9 - 1.0 Tune 4
+        # input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt', 'serial_20230212_202717.txt',
+        #                'serial_20230215_064843.txt', 'serial_20230215_165025.txt', 'serial_20230216_145024.txt', 'serial_20230217_072709.txt',
+        #                'serial_20230217_185204.txt', 'serial_20230218_050029.txt']; chm_in = 1; scale_in = 1.05; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 3  # 0.9 - 1.0 Tune 4
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'
@@ -792,7 +792,7 @@ if __name__ == '__main__':
                 h_20C_resamp_100.dt[i] = h_20C_resamp_100.time[i] - h_20C_resamp_100.time[i-1]
         mon_old_100, sim_old_100 = bandaid(h_20C_resamp_100, chm_in=chm_in)
         mon_ver_100, sim_ver_100, sim_s_ver_100 =\
-            replicate(mon_old_100, sim_old=sim_old_100, init_time=1., verbose=True, t_max=t_max_in, sres0=sres0_in,
+            replicate(mon_old_100, sim_old=sim_old_100, init_time=1., verbose=False, t_max=t_max_in, sres0=sres0_in,
                       sresct=sresct_in, stauct_mon=stauct_in, stauct_sim=stauct_in, use_vb_sim=False,
                       s_hys_sim=s_hys_in, s_hys_mon=s_hys_in, scale_hys_cap_mon=s_hys_cap_in,
                       scale_hys_cap_sim=s_hys_cap_in, s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in,
