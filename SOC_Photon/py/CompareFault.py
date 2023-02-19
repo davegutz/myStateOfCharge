@@ -50,15 +50,15 @@ HYS_SOC_MIN_MARG = 0.15  # add to soc_min to set thr for detecting low endpoint 
 
 
 # Add schedule lookups and do some rack and stack
-def add_stuff(d_ra, mon, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
+def add_stuff(d_ra, mon, ib_band=0.5):
     voc_soc = []
     soc_min = []
     vsat = []
     time_sec = []
     dt = []
     for i in range(len(d_ra.time)):
-        voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
-        soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
+        voc_soc.append(mon.chemistry.lut_voc_soc.interp(d_ra.soc[i], d_ra.Tb[i]))
+        soc_min.append((mon.chemistry.lut_min_soc.interp(d_ra.Tb[i])))
         vsat.append(mon.chemistry.nom_vsat + (d_ra.Tb[i] - mon.chemistry.rated_temp) * mon.chemistry.dvoc_dt)
         time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
         if i > 0:
@@ -876,22 +876,6 @@ if __name__ == '__main__':
         # date_ = datetime.now().strftime("%y%m%d")
         skip = 1
 
-        # Battleborn Bmon=0, Bsim=0  TODO:  should not duplicate here.  import it after init of Mon/Sim.  Same remark chem=1 CHINS
-        t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00]
-        t_y_t0 = [5.,  11.1,  20.,   30.,   40.]
-        t_voc0 = [4.00, 4.00,  9.00,  11.80, 12.50, 12.60, 12.67, 12.76, 12.82, 12.93, 12.98, 13.03, 13.07, 13.11, 13.17, 13.22, 13.59, 14.45,
-                  4.00, 4.00,  10.00, 12.30, 12.60, 12.65, 12.71, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.60, 14.46,
-                  4.00, 12.22, 12.66, 12.74, 12.80, 12.85, 12.89, 12.95, 12.99, 13.05, 13.08, 13.13, 13.18, 13.21, 13.25, 13.27, 13.72, 14.50,
-                  4.00, 4.00, 12.00, 12.65, 12.75, 12.80, 12.85, 12.95, 13.00, 13.08, 13.12, 13.16, 13.20, 13.24, 13.26, 13.27, 13.72, 14.50,
-                  4.00, 4.00, 4.00,  4.00,  10.50, 11.93, 12.78, 12.83, 12.89, 12.97, 13.06, 13.10, 13.13, 13.16, 13.19, 13.20, 13.72, 14.50]
-        x0 = np.array(t_x_soc0)
-        y0 = np.array(t_y_t0)
-        data_interp0 = np.array(t_voc0)
-        lut_voc = myTables.TableInterp2D(x0, y0, data_interp0)
-        t_x_soc_min = [5., 11.1,  20.,   30., 40.]
-        t_soc_min = [0.07, 0.05,  -0.05, 0.00, 0.20]
-        lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
-
         # Save these
         t_max_in = None
         sres0_in = 1.
@@ -902,10 +886,8 @@ if __name__ == '__main__':
         s_hys_cap_in = 1.
         s_cap_chg_in = 1.
         s_cap_dis_in = 1.
-        coul_eff_in = 0.9985
         s_hys_chg_in = 1.
         s_hys_dis_in = 1.
-        myCH_Tuner_in = 1
         scale_in = 1
         rated_batt_cap_in = 108.4  # A-hr capacity of test article
 
@@ -914,10 +896,10 @@ if __name__ == '__main__':
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
         # input_files = ['CH 20230128.txt']; chm_in = 1
-        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; scale_in = 1.05; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 4  # 0.9 - 1.0 Tune 3
+        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; rated_batt_cap_in = 100.; scale_in = 1.05; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 4  # 0.9 - 1.0 Tune 3
         input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt', 'serial_20230212_202717.txt',
                        'serial_20230215_064843.txt', 'serial_20230215_165025.txt', 'serial_20230216_145024.txt', 'serial_20230217_072709.txt',
-                       'serial_20230217_185204.txt', 'serial_20230218_050029.txt', 'serial_20230218_134250.txt']; chm_in = 1; scale_in = 1.05; rated_batt_cap_in = 105.; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 3  # 0.9 - 1.0 Tune 4
+                       'serial_20230217_185204.txt', 'serial_20230218_050029.txt', 'serial_20230218_134250.txt']; chm_in = 1;  rated_batt_cap_in = 100.; scale_in = 1.05; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.  # 0.9 - 1.0 Tune 4
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'
@@ -929,7 +911,7 @@ if __name__ == '__main__':
                   'e_w_f', 'fltw', 'falw')
 
         # Load configuration
-        mon = BatteryMonitor(mod_code=chm_in)
+        batt = BatteryMonitor(mod_code=chm_in)
 
         # cat files
         cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
@@ -958,15 +940,15 @@ if __name__ == '__main__':
             print("data from", temp_flt_file, "empty after loading")
             exit(1)
         f_raw = np.unique(f_raw)
-        f = add_stuff_f(f_raw, mon, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in)
+        f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in)
         print("\nf:\n", f, "\n")
-        f = filter_Tb(f, 20., mon, tb_band=100., rated_batt_cap=rated_batt_cap_in)
+        f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)
 
         # Sort unique
         h_raw = np.unique(h_raw)
-        h = add_stuff(h_raw, mon, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
+        h = add_stuff(h_raw, batt, ib_band=IB_BAND)
         print("\nh:\n", h, "\n")
-        h_20C = filter_Tb(h, 20., mon, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
+        h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
         # Shift time and add data
         time0 = h_20C.time[0]
         h_20C.time -= time0
