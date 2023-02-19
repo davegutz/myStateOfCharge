@@ -21,20 +21,17 @@ import numpy.lib.recfunctions as rf
 import matplotlib.pyplot as plt
 from Hysteresis_20220917d import Hysteresis_20220917d
 from Hysteresis_20220926 import Hysteresis_20220926
-from Battery import is_sat, low_t, IB_MIN_UP
+from Battery import Battery, BatteryMonitor, is_sat
 from MonSim import replicate
 from Battery import overall_batt
 from Util import cat
 from resample import resample
-from CompareHist import add_stuff_f, add_stuff
 from DataOverModel import tune_r
 
+low_t = 4.  # Minimum temperature for valid saturation check, because BMS shuts off battery low.
+IB_MIN_UP = 0.2  # Min up charge current for come alive, BMS logic, and fault
+
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
-BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
-BATT_V_SAT = 13.8
-BATT_DQDT = 0.01  # Change of charge with temperature, fraction / deg C (0.01 from literature)
-BATT_DVOC_DT = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V / deg C
-RATED_BATT_CAP = 108.4  # A-hr capacity of test article
 IB_BAND = 1.  # Threshold to declare charging or discharging
 TB_BAND = 25.  # Band around temperature to group data and correct
 HYS_SCALE_20220917d = 0.3  # Original hys_remodel scalar inside photon code
@@ -80,6 +77,212 @@ CC_DIFF_LO_SOC_SCLR = 4.  # Large to disable cc_ctf
 r_0 = 0.0046  # Randles R0, ohms
 r_ct = 0.0077  # Randles diffusion resistance, ohms
 r_ss = r_0 + r_ct
+
+
+# Add schedule lookups and do some rack and stack
+def add_stuff(d_ra, mon, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
+    voc_soc = []
+    soc_min = []
+    vsat = []
+    time_sec = []
+    dt = []
+    for i in range(len(d_ra.time)):
+        voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
+        soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
+        vsat.append(mon.chemistry.nom_vsat + (d_ra.Tb[i] - mon.chemistry.rated_temp) * mon.chemistry.dvoc_dt)
+        time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
+        if i > 0:
+            dt.append(float(d_ra.time[i] - d_ra.time[i - 1]))
+        else:
+            dt.append(float(d_ra.time[1] - d_ra.time[0]))
+    time_min = (d_ra.time-d_ra.time[0])/60.
+    time_day = (d_ra.time-d_ra.time[0])/3600./24.
+    d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'vsat', np.array(vsat, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_sel', np.array(d_mod.ib, dtype=float))
+    if hasattr(d_mod, 'voc_dyn'):
+        voc = d_mod.voc_dyn.copy()
+        d_mod = rf.rec_append_fields(d_mod, 'voc', np.array(voc, dtype=float))
+    d_mod = calc_fault(d_ra, d_mod)
+    voc_stat_chg = np.copy(d_mod.voc_stat)
+    voc_stat_dis = np.copy(d_mod.voc_stat)
+    for i in range(len(voc_stat_chg)):
+        if d_mod.ib[i] > -ib_band:
+            voc_stat_dis[i] = None
+        elif d_mod.ib[i] < ib_band:
+            voc_stat_chg[i] = None
+    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_chg', np.array(voc_stat_chg, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_dis', np.array(voc_stat_dis, dtype=float))
+    if hasattr(d_mod, 'voc_dyn'):
+        dv_hys = d_mod.voc_dyn - d_mod.voc_stat
+    else:
+        dv_hys = d_mod.voc - d_mod.voc_stat
+    d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'dV_hys', np.array(dv_hys, dtype=float))
+    dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE_20220917d
+    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
+    if hasattr(d_mod, 'voc_dyn'):
+        dv_hys_required = d_mod.voc_dyn - voc_soc + dv_hys
+    else:
+        dv_hys_required = d_mod.voc - voc_soc + dv_hys
+    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_required', np.array(dv_hys_required, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'dt', np.array(dt, dtype=float))
+
+    dv_hys_rescaled = d_mod.dv_hys_unscaled
+    pos = dv_hys_rescaled >= 0
+    neg = dv_hys_rescaled < 0
+    dv_hys_rescaled[pos] *= HYS_RESCALE_CHG
+    dv_hys_rescaled[neg] *= HYS_RESCALE_DIS
+    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_rescaled', np.array(dv_hys_rescaled, dtype=float))
+    if hasattr(d_mod, 'voc_dyn'):
+        voc_stat_rescaled = d_mod.voc_dyn - d_mod.dv_hys_rescaled
+    else:
+        voc_stat_rescaled = d_mod.voc - d_mod.dv_hys_rescaled
+    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_rescaled', np.array(voc_stat_rescaled, dtype=float))
+
+    return d_mod
+
+
+# Add schedule lookups and do some rack and stack
+def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., voc_soc_tbl=None, soc_min_tbl=None):
+    voc_soc = []
+    soc_min = []
+    vsat = []
+    time_sec = []
+    cc_diff_thr = []
+    cc_dif = []
+    ewhi_thr = []
+    ewlo_thr = []
+    ib_diff_thr = []
+    ib_quiet_thr = []
+    ib_diff = []
+    dt = []
+    for i in range(len(d_ra.time)):
+        soc = d_ra.soc[i]
+        voc_stat = d_ra.voc_stat[i]
+        Tb = d_ra.Tb[i]
+        ib_diff_ = d_ra.ibah[i] - d_ra.ibnh[i]
+        cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
+        ib_diff.append(ib_diff_)
+        C_rate = d_ra.ib[i] / rated_batt_cap
+        voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
+        cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = \
+            fault_thr_bb(Tb, soc, voc_soc[i], voc_stat, C_rate, soc_min_tbl=soc_min_tbl)
+        cc_dif.append(cc_dif_)
+        cc_diff_thr.append(cc_diff_thr_)
+        ewhi_thr.append(ewhi_thr_)
+        ewlo_thr.append(ewlo_thr_)
+        ib_diff_thr.append(ib_diff_thr_)
+        ib_quiet_thr.append(ib_quiet_thr_)
+        soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
+        vsat.append(mon.chemistry.nom_vsat + (d_ra.Tb[i] - mon.chemistry.rated_temp) * mon.chemistry.dvoc_dt)
+        time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
+        if i > 0:
+            dt.append(float(d_ra.time[i] - d_ra.time[i - 1]))
+        else:
+            dt.append(float(d_ra.time[1] - d_ra.time[0]))
+    time_min = (d_ra.time-d_ra.time[0])/60.
+    time_day = (d_ra.time-d_ra.time[0])/3600./24.
+    d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'vsat', np.array(vsat, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_diff', np.array(ib_diff, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'cc_diff_thr', np.array(cc_diff_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'cc_dif', np.array(cc_dif, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ewhi_thr', np.array(ewhi_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ewlo_thr', np.array(ewlo_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_diff_thr', np.array(ib_diff_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_quiet_thr', np.array(ib_quiet_thr, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'dt', np.array(dt, dtype=float))
+    d_mod = calc_fault(d_ra, d_mod)
+    voc_stat_chg = np.copy(d_mod.voc_stat)
+    voc_stat_dis = np.copy(d_mod.voc_stat)
+    for i in range(len(voc_stat_chg)):
+        if d_mod.ib[i] > -ib_band:
+            voc_stat_dis[i] = None
+        elif d_mod.ib[i] < ib_band:
+            voc_stat_chg[i] = None
+    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_chg', np.array(voc_stat_chg, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_dis', np.array(voc_stat_dis, dtype=float))
+    dv_hys = d_mod.voc - d_mod.voc_stat
+    d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'dV_hys', np.array(dv_hys, dtype=float))
+    dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE_20220917d
+    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
+    dv_hys_required = d_mod.voc - voc_soc + dv_hys
+    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_required', np.array(dv_hys_required, dtype=float))
+
+    dv_hys_rescaled = d_mod.dv_hys_unscaled
+    pos = dv_hys_rescaled >= 0
+    neg = dv_hys_rescaled < 0
+    dv_hys_rescaled[pos] *= HYS_RESCALE_CHG
+    dv_hys_rescaled[neg] *= HYS_RESCALE_DIS
+    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_rescaled', np.array(dv_hys_rescaled, dtype=float))
+    voc_stat_rescaled = d_mod.voc - d_mod.dv_hys_rescaled
+    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_rescaled', np.array(voc_stat_rescaled, dtype=float))
+
+    # vb = d_mod.vb.copy()
+    # d_mod = rf.rec_append_fields(d_mod, 'vb', np.array(vb, dtype=float))
+    voc_dyn = d_mod.voc.copy()
+    d_mod = rf.rec_append_fields(d_mod, 'voc_dyn', np.array(voc_dyn, dtype=float))
+    ib = d_mod.ib.copy()
+    # d_mod = rf.rec_append_fields(d_mod, 'ib', np.array(ib, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_sel', np.array(ib, dtype=float))
+    d_zero = d_mod.ib.copy()*0.
+    d_mod = rf.rec_append_fields(d_mod, 'tweak_sclr_amp', np.array(d_zero, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'tweak_sclr_noa', np.array(d_zero, dtype=float))
+
+    return d_mod
+
+
+# Calculate thresholds from global input values listed above (review these)
+def fault_thr_bb(Tb, soc, voc_soc, voc_stat, C_rate, soc_min_tbl=lut_soc_min_bb):
+    vsat_ = NOM_VSAT_BB + (Tb-25.)*DVOC_DT_BB
+
+    # cc_diff
+    soc_min = soc_min_tbl.interp(Tb)
+    if soc <= max(soc_min+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS):
+        cc_diff_empty_sclr_ = CC_DIFF_LO_SOC_SCLR
+    else:
+        cc_diff_empty_sclr_ = 1.
+    cc_diff_sclr_ = 1.  # ram adjusts during data collection
+    cc_diff_thr = CC_DIFF_SOC_DIS_THRESH * cc_diff_sclr_ * cc_diff_empty_sclr_
+
+    # wrap
+    if soc >= WRAP_SOC_HI_OFF:
+        ewsat_sclr_ = WRAP_SOC_HI_SCLR
+        ewmin_sclr_ = 1.
+    elif soc <= max(soc_min+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS):
+        ewsat_sclr_ = 1.
+        ewmin_sclr_ = WRAP_SOC_LO_SCLR
+    elif voc_soc > (vsat_ - WRAP_HI_SAT_MARG) or \
+            (voc_stat > (vsat_ - WRAP_HI_SAT_MARG) and C_rate > WRAP_MOD_C_RATE and soc > WRAP_SOC_MOD_OFF):
+        ewsat_sclr_ = WRAP_HI_SAT_SCLR
+        ewmin_sclr_ = 1.
+    else:
+        ewsat_sclr_ = 1.
+        ewmin_sclr_ = 1.
+    ewhi_sclr_ = 1.  # ram adjusts during data collection
+    ewhi_thr = r_ss * WRAP_HI_A * ewhi_sclr_ * ewsat_sclr_ * ewmin_sclr_
+    ewlo_sclr_ = 1.  # ram adjusts during data collection
+    ewlo_thr = r_ss * WRAP_LO_A * ewlo_sclr_ * ewsat_sclr_ * ewmin_sclr_
+
+    # ib_diff
+    ib_diff_sclr_ = 1.  # ram adjusts during data collection
+    ib_diff_thr = IBATT_DISAGREE_THRESH * ib_diff_sclr_
+
+    # ib_quiet
+    ib_quiet_sclr_ = 1.  # ram adjusts during data collection
+    ib_quiet_thr = QUIET_A * ib_quiet_sclr_
+
+    return cc_diff_thr, ewhi_thr, ewlo_thr, ib_diff_thr, ib_quiet_thr
 
 
 def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None, long_term=True):
@@ -521,25 +724,26 @@ def calculate_capacity(q_cap_rated_scaled=None, dqdt=None, temp=None, t_rated=No
 
 
 # Make an array useful for analysis (around temp) and add some metrics
-def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100., nom_vsat=13.85):
+def filter_Tb(raw, temp_corr, mon, tb_band=5., rated_batt_cap=100.):
     h = raw[abs(raw.Tb - temp_corr) < tb_band]
 
     sat_ = np.copy(h.Tb)
     bms_off_ = np.copy(h.Tb)
     for i in range(len(h.Tb)):
-        sat_[i] = is_sat(h.Tb[i], h.voc[i], h.soc[i], nom_vsat=nom_vsat)
+        sat_[i] = is_sat(h.Tb[i], h.voc[i], h.soc[i], mon.chemistry.nom_vsat, mon.chemistry.dvoc_dt, mon.chemistry.low_t)
         # h.bms_off[i] = (h.Tb[i] < low_t) or ((h.voc[i] < low_voc) and (h.ib[i] < IB_MIN_UP))
-        bms_off_[i] = (h.Tb[i] < low_t) or ((h.voc_stat[i] < 10.5) and (h.ib[i] < IB_MIN_UP))
+        bms_off_[i] = (h.Tb[i] < low_t) or ((h.voc_stat[i] < 10.5) and (h.ib[i] < Battery.IB_MIN_UP))
 
     # Correct for temp
-    q_cap = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=h.Tb, t_rated=BATT_RATED_TEMP)
+    q_cap = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=mon.chemistry.dqdt, temp=h.Tb, t_rated=mon.chemistry.rated_temp)
     dq = (h.soc - 1.) * q_cap
-    dq -= BATT_DQDT * q_cap * (temp_corr - h.Tb)
-    q_cap_r = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=temp_corr, t_rated=BATT_RATED_TEMP)
+    dq -= mon.chemistry.dqdt * q_cap * (temp_corr - h.Tb)
+    q_cap_r = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=mon.chemistry.dqdt, temp=temp_corr,
+                                 t_rated=mon.chemistry.rated_temp)
     soc_r = 1. + dq / q_cap_r
     h = rf.rec_append_fields(h, 'soc_r', soc_r)
-    h.voc_stat_r = h.voc_stat - (h.Tb - temp_corr) * BATT_DVOC_DT
-    h.voc_stat_rescaled_r = h.voc_stat_rescaled - (h.Tb - temp_corr) * BATT_DVOC_DT
+    h.voc_stat_r = h.voc_stat - (h.Tb - temp_corr) * mon.chemistry.dvoc_dt
+    h.voc_stat_rescaled_r = h.voc_stat_rescaled - (h.Tb - temp_corr) * mon.chemistry.dvoc_dt
 
     # delineate charging and discharging
     voc_stat_r_chg = np.copy(h.voc_stat)
@@ -607,7 +811,7 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100., nom_vsat=13.85):
             ioc = hys_redesign.ioc
             dv_dot = hys_redesign.dv_dot
             voc_stat = voc - dvh
-            voc_stat_r = voc_stat - (tb - temp_corr) * BATT_DVOC_DT
+            voc_stat_r = voc_stat - (tb - temp_corr) * mon.chemistry.dvoc_dt
             dv_hys_redesign.append(dvh)
             res_redesign.append(res)
             ioc_redesign.append(max(min(ioc, 40.), -40.))
@@ -718,6 +922,7 @@ if __name__ == '__main__':
         s_hys_dis_in = 1.
         myCH_Tuner_in = 1
         scale_in = 1
+        rated_batt_cap_in = 108.4  # A-hr capacity of test article
 
         # User inputs
         # input_files = ['fail 20221125.txt']
@@ -727,7 +932,7 @@ if __name__ == '__main__':
         # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; scale_in = 1.05; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 4  # 0.9 - 1.0 Tune 3
         input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt', 'serial_20230212_202717.txt',
                        'serial_20230215_064843.txt', 'serial_20230215_165025.txt', 'serial_20230216_145024.txt', 'serial_20230217_072709.txt',
-                       'serial_20230217_185204.txt', 'serial_20230218_050029.txt', 'serial_20230218_134250.txt']; chm_in = 1; scale_in = 1.05; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 3  # 0.9 - 1.0 Tune 4
+                       'serial_20230217_185204.txt', 'serial_20230218_050029.txt', 'serial_20230218_134250.txt']; chm_in = 1; scale_in = 1.05; rated_batt_cap_in = 105.; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 3  # 0.9 - 1.0 Tune 4
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'
@@ -737,6 +942,9 @@ if __name__ == '__main__':
         path_to_temp = '../dataReduction/temp'
         cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
                   'e_w_f', 'fltw', 'falw')
+
+        # Load configuration
+        mon = BatteryMonitor(mod_code=chm_in)
 
         # cat files
         cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
@@ -765,15 +973,16 @@ if __name__ == '__main__':
             print("data from", temp_flt_file, "empty after loading")
             exit(1)
         f_raw = np.unique(f_raw)
-        f = add_stuff_f(f_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
+        f = add_stuff_f(f_raw, mon, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND,
+                        rated_batt_cap=rated_batt_cap_in)
         print("\nf:\n", f, "\n")
-        f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=RATED_BATT_CAP, nom_vsat=NOM_VSAT_BB)
+        f = filter_Tb(f, 20., mon, tb_band=100., rated_batt_cap=rated_batt_cap_in)
 
         # Sort unique
         h_raw = np.unique(h_raw)
-        h = add_stuff(h_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
+        h = add_stuff(h_raw, mon, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
         print("\nh:\n", h, "\n")
-        h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        h_20C = filter_Tb(h, 20., mon, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
         # Shift time and add data
         time0 = h_20C.time[0]
         h_20C.time -= time0
@@ -791,13 +1000,12 @@ if __name__ == '__main__':
             else:
                 h_20C_resamp_100.dt[i] = h_20C_resamp_100.time[i] - h_20C_resamp_100.time[i-1]
         mon_old_100, sim_old_100 = bandaid(h_20C_resamp_100, chm_in=chm_in)
-        mon_ver_100, sim_ver_100, sim_s_ver_100 =\
+        mon_ver_100, sim_ver_100, sim_s_ver_100, mon_r, sim_r =\
             replicate(mon_old_100, sim_old=sim_old_100, init_time=1., verbose=False, t_max=t_max_in, sres0=sres0_in,
                       sresct=sresct_in, stauct_mon=stauct_in, stauct_sim=stauct_in, use_vb_sim=False,
                       s_hys_sim=s_hys_in, s_hys_mon=s_hys_in, scale_hys_cap_mon=s_hys_cap_in,
                       scale_hys_cap_sim=s_hys_cap_in, s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in,
-                      coul_eff=coul_eff_in, s_hys_chg=s_hys_chg_in, s_hys_dis=s_hys_dis_in, myCH_Tuner=myCH_Tuner_in,
-                      scale_in=scale_in)
+                      s_hys_chg=s_hys_chg_in, s_hys_dis=s_hys_dis_in, scale_in=scale_in)
 
         # Plots
         n_fig = 0

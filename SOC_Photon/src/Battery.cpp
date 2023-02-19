@@ -36,7 +36,7 @@ extern PublishPars pp;  // For publishing
 // constructors
 Battery::Battery() {}
 Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code)
-    : Coulombs(sp_delta_q, sp_t_last, (RATED_BATT_CAP*3600), RATED_TEMP, T_RLIM, sp_mod_code, COULOMBIC_EFF),
+    : Coulombs(sp_delta_q, sp_t_last, (RATED_BATT_CAP*3600), T_RLIM, sp_mod_code, COULOMBIC_EFF_SCALE),
 	bms_off_(false), ds_voc_soc_(0), dt_(0.1), dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.),
     dv_voc_soc_(0.), ib_(0.), ibs_(0.), ioc_(0.), print_now_(false), sr_(1.), temp_c_(NOMINAL_TB), vb_(NOMINAL_VB),
     voc_(NOMINAL_VB), voc_stat_(NOMINAL_VB), vsat_(NOMINAL_VB)
@@ -98,7 +98,7 @@ float Battery::calc_soc_voc_slope(const float soc, const float temp_c)
 */  
 float_t Battery::calc_vsat(void)
 {
-    return ( nom_vsat_ + (temp_c_-25.)*chem_.dvoc_dt );
+    return ( nom_vsat_ + (temp_c_-chem_.rated_temp)*chem_.dvoc_dt );
 }
 
 // Print
@@ -166,7 +166,7 @@ BatteryMonitor::~BatteryMonitor() {}
         Sen->Ib         Shunt current Ib, A
         Sen->T          Update time, sec
         q_capacity_     Saturation charge at temperature, C
-        q_cap_rated_scaled_   Applied rated capacity at t_rated_, after scaling, C
+        q_cap_rated_scaled_   Applied rated capacity at rated_temp, after scaling, C
         RATED_BATT_CAP  Nominal battery bank capacity (assume actual not known), Ah
     Outputs:
         vsat_           Saturation threshold at temperature, V

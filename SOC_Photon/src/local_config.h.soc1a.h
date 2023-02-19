@@ -28,7 +28,7 @@ const String unit = "soc1a_20230217";  // voc(soc), hys, res, slr, RANDLES
 // Two 12 V 100 Ah series battery bank would have RATED_BATT_CAP 100, NS 2, and NP 1
 // Four 12 V 200 Ah with two in parallel joined with two more in series
 //   would have  RATED_BATT_CAP 200, NS 2, and NP 2
-#define COULOMBIC_EFF         0.9985  // Coulombic efficiency of battery, fraction of charge that gets used
+#define COULOMBIC_EFF_SCALE   1.0     // Scalar on Coulombic efficiency of battery, fraction of charge that gets used (1.0)
 #define MON_CHEM              0       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
 #define SIM_CHEM              0       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
 #define RATED_BATT_CAP        100.    // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah

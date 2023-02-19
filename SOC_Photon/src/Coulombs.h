@@ -33,8 +33,8 @@ class Coulombs
 {
 public:
   Coulombs();
-  Coulombs(double *sp_delta_q, float *sp_t_last, const float q_cap_rated, const float t_rated, const float t_rlim,
-    uint8_t *sp_mod_code, const float coul_eff);
+  Coulombs(double *sp_delta_q, float *sp_t_last, const float q_cap_rated, const float t_rlim,
+    uint8_t *sp_mod_code, const double s_coul_eff);
   ~Coulombs();
   // operators
   // functions
@@ -64,7 +64,7 @@ public:
   virtual float vsat(void) = 0;
 protected:
   boolean resetting_ = false;  // Sticky flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
-  float coul_eff_;    // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
+  double coul_eff_;    // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
   double q_;          // Present charge available to use, except q_min_, C
   double q_capacity_; // Saturation charge at temperature, C
   double q_cap_rated_;// Rated capacity at t_rated_, saved for future scaling, C
@@ -75,7 +75,6 @@ protected:
   float soc_min_;     // As battery cools, the voltage drops and there appears a minimum soc it can deliver
   double *sp_delta_q_;// Charge since saturated, C
   float *sp_t_last_;  // Last battery temperature for rate limit memory, deg C
-  float t_rated_;     // Rated temperature, deg C
   float t_rlim_;      // Tb rate limit, deg C / s
   Chemistry chem_;    // Chemistry
   BMS bms_;           // Battery Management System

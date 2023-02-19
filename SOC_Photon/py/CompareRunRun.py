@@ -20,8 +20,9 @@ Coulomb Counter built in."""
 
 import numpy as np
 from DataOverModel import SavedData, SavedDataSim, write_clean_file, overall
-from CompareHist import add_stuff_f, over_fault, filter_Tb, X_SOC_MIN_BB, T_SOC_MIN_BB, IB_BAND, RATED_BATT_CAP
+from CompareFault import add_stuff_f, over_fault, filter_Tb, IB_BAND
 from pyDAGx import myTables
+from Battery import Battery
 
 # Battleborn Bmon=0, Bsim=0
 t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17, 0.20, 0.25, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.99, 0.995,
@@ -47,7 +48,8 @@ lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
 
 
 # Load from files
-def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zero_zero_in, time_end_in):
+def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zero_zero_in, time_end_in,
+              rated_batt_cap=Battery.RATED_BATT_CAP):
     title_key = "unit,"  # Find one instance of title
     title_key_sel = "unit_s,"  # Find one instance of title
     unit_key_sel = "unit_sel"
@@ -123,7 +125,7 @@ def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zer
         f_raw = np.unique(f_raw)
         f = add_stuff_f(f_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
         print("\nf:\n", f, "\n")
-        f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=RATED_BATT_CAP)
+        f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=rated_batt_cap)
     else:
         f = None
     return mon, sim, f, data_file_clean, temp_flt_file_clean
@@ -139,6 +141,18 @@ if __name__ == '__main__':
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
+        # Transient  inputs
+        skip = 1
+        zero_zero_in = False
+        time_end_in = None
+        plot_init_in = False
+        long_term_in = False
+        plot_overall_in = True
+        rated_batt_cap_in = 108.4
+        pathToSavePdfTo = '../dataReduction/figures'
+        path_to_data = '../dataReduction'
+        path_to_temp = '../dataReduction/temp'
+
         # Regression
         # keys = [('ampHiFail v20221028.txt', 'pro0p_2022'), ('ampHiFail v20221220.txt', 'pro0p_2022')]
         # keys = [('ampHiFail vA20221220.txt', 'soc1a_2022'), ('ampHiFail v20230128.txt', 'pro0p')]
@@ -150,17 +164,6 @@ if __name__ == '__main__':
         # keys = [('rapidTweakRegression v20221220.txt', 'pro0p_2022'), ('rapidTweakRegression vA20221220.txt', 'soc1a_2022')]
         # keys = [('offSitHysBms v20221220.txt', 'pro0p_2022'), ('offSitHysBms vA20221220.txt', 'soc1a_2022')]
 
-        # Transient  inputs
-        skip = 1
-        zero_zero_in = False
-        time_end_in = None
-        plot_init_in = False
-        long_term_in = False
-        plot_overall_in = True
-        pathToSavePdfTo = '../dataReduction/figures'
-        path_to_data = '../dataReduction'
-        path_to_temp = '../dataReduction/temp'
-
         # Regression suite
         data_file_old_txt = keys[0][0]
         unit_key_old = keys[0][1]
@@ -169,9 +172,11 @@ if __name__ == '__main__':
 
         # Load data
         mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
-            load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key_old, zero_zero_in, time_end_in)
+            load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key_old, zero_zero_in, time_end_in,
+                      rated_batt_cap=rated_batt_cap_in)
         mon_new, sim_new, f_new, dummy1, dummy2 = \
-            load_data(data_file_new_txt, skip, path_to_data, path_to_temp, unit_key_new, zero_zero_in, time_end_in)
+            load_data(data_file_new_txt, skip, path_to_data, path_to_temp, unit_key_new, zero_zero_in, time_end_in,
+                      rated_batt_cap=rated_batt_cap_in)
 
         # Plots
         n_fig = 0
@@ -182,8 +187,7 @@ if __name__ == '__main__':
         plot_title = filename + '   ' + date_time
         if temp_flt_file_clean and len(f.time) > 1:
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                          n_fig=n_fig, x_sch=X_SOC_MIN_BB, z_sch=T_SOC_MIN_BB, voc_reset=0.,
-                                          long_term=long_term_in)
+                                          n_fig=n_fig, voc_reset=0., long_term=long_term_in)
         if plot_overall_in:
             n_fig, fig_files = overall(mon_old, mon_new, sim_old, sim_new, sim_new, filename, fig_files,
                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all

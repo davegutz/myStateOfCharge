@@ -19,110 +19,23 @@ from pyDAGx import myTables
 import numpy as np
 import numpy.lib.recfunctions as rf
 import matplotlib.pyplot as plt
-from Hysteresis_20220917d import Hysteresis_20220917d
-from Hysteresis_20220926 import Hysteresis_20220926
-from Battery import is_sat, low_t, IB_MIN_UP
 from resample import resample
 from MonSim import replicate
-from Battery import overall_batt, cp_eframe_mult
+from Battery import overall_batt
 from Util import cat
+from CompareFault import filter_Tb, add_stuff_f, add_stuff
 
-#  For this battery Battleborn 100 Ah with 1.084 x capacity
-BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
-BATT_V_SAT = 13.8
-BATT_DQDT = 0.01  # Change of charge with temperature, fraction / deg C (0.01 from literature)
-BATT_DVOC_DT = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V / deg C
 RATED_BATT_CAP = 108.4  # A-hr capacity of test article
 IB_BAND = 1.  # Threshold to declare charging or discharging
 TB_BAND = 15.  # Band around temperature to group data and correct
-HYS_SCALE_20220917d = 0.3  # Original hys_remodel scalar inside photon code
-HYS_SCALE_20220926 = 1.0  # Original hys_remodel scalar inside photon code
 
 #  Rescale parameters design.  Minimal tuning attempt
 #  This didn't work because low soc response of original design is too slow
-HYS_RESCALE_CHG = 0.5  # Attempt to rescale to match voc_soc to all data
-HYS_RESCALE_DIS = 0.3  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_05 = 0.  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_11 = 0.  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_20 = 0.  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_30 = -0.03  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
-
-#  Redesign Hysteresis_20220917d.  Make a new Hysteresis_20220926.py with new curve
-HYS_CAP_REDESIGN = 3.6e4  # faster time constant needed
-HYS_SOC_MIN_MARG = 0.15  # add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
-HYS_IB_THR = 1.  # ignore reset if opposite situation exists
-
-# Battleborn properties for fault thresholds
-X_SOC_MIN_BB = [5.,   11.1,   20.,  30.,  40.]  # Temperature breakpoints for soc_min table
-T_SOC_MIN_BB = [0.10, 0.07,  0.05, 0.00, 0.20]  # soc_min(t).  At 40C BMS shuts off at 12V
-lut_soc_min_bb = myTables.TableInterp1D(np.array(X_SOC_MIN_BB), np.array(T_SOC_MIN_BB))
-HDB_VBATT = 0.05  # Half deadband to filter vb, V (0.05)
-V_SAT_BB = 13.85  # Saturation threshold at temperature, deg C
-NOM_VSAT_BB = V_SAT_BB - HDB_VBATT  # Center in hysteresis
-DVOC_DT_BB = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V/deg C
-WRAP_HI_A = 32.  # Wrap high voltage threshold, A (32 after testing; 16=0.2v)
-WRAP_LO_A = -32.  # Wrap high voltage threshold, A (-32, -20 too small on truck -16=-0.2v)
-WRAP_HI_SAT_MARG = 0.2  # Wrap voltage margin to saturation, V (0.2)
-WRAP_HI_SAT_SCLR = 2.0  # Wrap voltage margin scalar when saturated (2.0)
-WRAP_MOD_C_RATE = .05  # Moderate charge rate threshold to engage wrap threshold 0
-WRAP_SOC_MOD_OFF = 0.85  # Disable e_wrap_lo when nearing saturated and moderate C_rate (0.85)
-IBATT_DISAGREE_THRESH = 10.  # Signal selection threshold for current disagree test, A (10.)
-QUIET_A = 0.005  # Quiet set threshold, sec (0.005, 0.01 too large in truck)
-NOMINAL_TB = 15.  # Middle of the road Tb for decent reversionary operation, deg C (15.)
-WRAP_SOC_HI_OFF = 0.97  # Disable e_wrap_hi when saturated
-WRAP_SOC_HI_SCLR = 1000.  # Huge to disable e_wrap
-WRAP_SOC_LO_OFF_ABS = 0.35  # Disable e_wrap when near empty (soc lo any Tb)
-WRAP_SOC_LO_OFF_REL = 0.2  # Disable e_wrap when near empty (soc lo for high Tb where soc_min=.2, voltage cutback)
-WRAP_SOC_LO_SCLR = 60.  # Large to disable e_wrap (60. for startup)
-CC_DIFF_SOC_DIS_THRESH = 0.2  # Signal selection threshold for Coulomb counter EKF disagree test (0.2)
-CC_DIFF_LO_SOC_SCLR = 4.  # Large to disable cc_diff
-r_0 = 0.0046  # Randles R0, ohms
-r_ct = 0.0077  # Randles diffusion resistance, ohms
-r_ss = r_0 + r_ct
-
-
-# Calculate thresholds from global input values listed above (review these)
-def fault_thr_bb(Tb, soc, voc_soc, voc_stat, C_rate, soc_min_tbl=lut_soc_min_bb):
-    vsat_ = NOM_VSAT_BB + (Tb-25.)*DVOC_DT_BB
-
-    # cc_diff
-    soc_min = soc_min_tbl.interp(Tb)
-    if soc <= max(soc_min+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS):
-        cc_diff_empty_sclr_ = CC_DIFF_LO_SOC_SCLR
-    else:
-        cc_diff_empty_sclr_ = 1.
-    cc_diff_sclr_ = 1.  # ram adjusts during data collection
-    cc_diff_thr = CC_DIFF_SOC_DIS_THRESH * cc_diff_sclr_ * cc_diff_empty_sclr_
-
-    # wrap
-    if soc >= WRAP_SOC_HI_OFF:
-        ewsat_sclr_ = WRAP_SOC_HI_SCLR
-        ewmin_sclr_ = 1.
-    elif soc <= max(soc_min+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS):
-        ewsat_sclr_ = 1.
-        ewmin_sclr_ = WRAP_SOC_LO_SCLR
-    elif voc_soc > (vsat_ - WRAP_HI_SAT_MARG) or \
-            (voc_stat > (vsat_ - WRAP_HI_SAT_MARG) and C_rate > WRAP_MOD_C_RATE and soc > WRAP_SOC_MOD_OFF):
-        ewsat_sclr_ = WRAP_HI_SAT_SCLR
-        ewmin_sclr_ = 1.
-    else:
-        ewsat_sclr_ = 1.
-        ewmin_sclr_ = 1.
-    ewhi_sclr_ = 1.  # ram adjusts during data collection
-    ewhi_thr = r_ss * WRAP_HI_A * ewhi_sclr_ * ewsat_sclr_ * ewmin_sclr_
-    ewlo_sclr_ = 1.  # ram adjusts during data collection
-    ewlo_thr = r_ss * WRAP_LO_A * ewlo_sclr_ * ewsat_sclr_ * ewmin_sclr_
-
-    # ib_diff
-    ib_diff_sclr_ = 1.  # ram adjusts during data collection
-    ib_diff_thr = IBATT_DISAGREE_THRESH * ib_diff_sclr_
-
-    # ib_quiet
-    ib_quiet_sclr_ = 1.  # ram adjusts during data collection
-    ib_quiet_thr = QUIET_A * ib_quiet_sclr_
-
-    return cc_diff_thr, ewhi_thr, ewlo_thr, ib_diff_thr, ib_quiet_thr
 
 
 def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_title=None, n_fig=None, subtitle=None,
@@ -368,8 +281,7 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     return n_fig, fig_files
 
 
-def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None,
-               x_sch=None, z_sch=None, voc_reset=0., long_term=True):
+def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None, long_term=True):
     if fig_files is None:
         fig_files = []
 
@@ -605,169 +517,6 @@ def calc_fault(d_ra, d_mod):
     return d_mod
 
 
-# Add schedule lookups and do some rack and stack
-def add_stuff(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
-    voc_soc = []
-    soc_min = []
-    vsat = []
-    time_sec = []
-    dt = []
-    for i in range(len(d_ra.time)):
-        voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
-        soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
-        vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
-        time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
-        if i > 0:
-            dt.append(float(d_ra.time[i] - d_ra.time[i - 1]))
-        else:
-            dt.append(float(d_ra.time[1] - d_ra.time[0]))
-    time_min = (d_ra.time-d_ra.time[0])/60.
-    time_day = (d_ra.time-d_ra.time[0])/3600./24.
-    d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'vsat', np.array(vsat, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'ib_sel', np.array(d_mod.ib, dtype=float))
-    if hasattr(d_mod, 'voc_dyn'):
-        voc = d_mod.voc_dyn.copy()
-        d_mod = rf.rec_append_fields(d_mod, 'voc', np.array(voc, dtype=float))
-    d_mod = calc_fault(d_ra, d_mod)
-    voc_stat_chg = np.copy(d_mod.voc_stat)
-    voc_stat_dis = np.copy(d_mod.voc_stat)
-    for i in range(len(voc_stat_chg)):
-        if d_mod.ib[i] > -ib_band:
-            voc_stat_dis[i] = None
-        elif d_mod.ib[i] < ib_band:
-            voc_stat_chg[i] = None
-    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_chg', np.array(voc_stat_chg, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_dis', np.array(voc_stat_dis, dtype=float))
-    if hasattr(d_mod, 'voc_dyn'):
-        dv_hys = d_mod.voc_dyn - d_mod.voc_stat
-    else:
-        dv_hys = d_mod.voc - d_mod.voc_stat
-    d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'dV_hys', np.array(dv_hys, dtype=float))
-    dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE_20220917d
-    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
-    if hasattr(d_mod, 'voc_dyn'):
-        dv_hys_required = d_mod.voc_dyn - voc_soc + dv_hys
-    else:
-        dv_hys_required = d_mod.voc - voc_soc + dv_hys
-    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_required', np.array(dv_hys_required, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'dt', np.array(dt, dtype=float))
-
-    dv_hys_rescaled = d_mod.dv_hys_unscaled
-    pos = dv_hys_rescaled >= 0
-    neg = dv_hys_rescaled < 0
-    dv_hys_rescaled[pos] *= HYS_RESCALE_CHG
-    dv_hys_rescaled[neg] *= HYS_RESCALE_DIS
-    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_rescaled', np.array(dv_hys_rescaled, dtype=float))
-    if hasattr(d_mod, 'voc_dyn'):
-        voc_stat_rescaled = d_mod.voc_dyn - d_mod.dv_hys_rescaled
-    else:
-        voc_stat_rescaled = d_mod.voc - d_mod.dv_hys_rescaled
-    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_rescaled', np.array(voc_stat_rescaled, dtype=float))
-
-    return d_mod
-
-
-# Add schedule lookups and do some rack and stack
-def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
-    voc_soc = []
-    soc_min = []
-    vsat = []
-    time_sec = []
-    cc_diff_thr = []
-    cc_dif = []
-    ewhi_thr = []
-    ewlo_thr = []
-    ib_diff_thr = []
-    ib_quiet_thr = []
-    ib_diff = []
-    dt = []
-    for i in range(len(d_ra.time)):
-        soc = d_ra.soc[i]
-        voc_stat = d_ra.voc_stat[i]
-        Tb = d_ra.Tb[i]
-        ib_diff_ = d_ra.ibah[i] - d_ra.ibnh[i]
-        cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
-        ib_diff.append(ib_diff_)
-        C_rate = d_ra.ib[i] / RATED_BATT_CAP
-        voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
-        cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = \
-            fault_thr_bb(Tb, soc, voc_soc[i], voc_stat, C_rate, soc_min_tbl=soc_min_tbl)
-        cc_dif.append(cc_dif_)
-        cc_diff_thr.append(cc_diff_thr_)
-        ewhi_thr.append(ewhi_thr_)
-        ewlo_thr.append(ewlo_thr_)
-        ib_diff_thr.append(ib_diff_thr_)
-        ib_quiet_thr.append(ib_quiet_thr_)
-        soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
-        vsat.append(BATT_V_SAT + (d_ra.Tb[i] - BATT_RATED_TEMP) * BATT_DVOC_DT)
-        time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
-        if i > 0:
-            dt.append(float(d_ra.time[i] - d_ra.time[i - 1]))
-        else:
-            dt.append(float(d_ra.time[1] - d_ra.time[0]))
-    time_min = (d_ra.time-d_ra.time[0])/60.
-    time_day = (d_ra.time-d_ra.time[0])/3600./24.
-    d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'vsat', np.array(vsat, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'ib_diff', np.array(ib_diff, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'cc_diff_thr', np.array(cc_diff_thr, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'cc_dif', np.array(cc_dif, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'ewhi_thr', np.array(ewhi_thr, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'ewlo_thr', np.array(ewlo_thr, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'ib_diff_thr', np.array(ib_diff_thr, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'ib_quiet_thr', np.array(ib_quiet_thr, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'dt', np.array(dt, dtype=float))
-    d_mod = calc_fault(d_ra, d_mod)
-    voc_stat_chg = np.copy(d_mod.voc_stat)
-    voc_stat_dis = np.copy(d_mod.voc_stat)
-    for i in range(len(voc_stat_chg)):
-        if d_mod.ib[i] > -ib_band:
-            voc_stat_dis[i] = None
-        elif d_mod.ib[i] < ib_band:
-            voc_stat_chg[i] = None
-    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_chg', np.array(voc_stat_chg, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_dis', np.array(voc_stat_dis, dtype=float))
-    dv_hys = d_mod.voc - d_mod.voc_stat
-    d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'dV_hys', np.array(dv_hys, dtype=float))
-    dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE_20220917d
-    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
-    dv_hys_required = d_mod.voc - voc_soc + dv_hys
-    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_required', np.array(dv_hys_required, dtype=float))
-
-    dv_hys_rescaled = d_mod.dv_hys_unscaled
-    pos = dv_hys_rescaled >= 0
-    neg = dv_hys_rescaled < 0
-    dv_hys_rescaled[pos] *= HYS_RESCALE_CHG
-    dv_hys_rescaled[neg] *= HYS_RESCALE_DIS
-    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_rescaled', np.array(dv_hys_rescaled, dtype=float))
-    voc_stat_rescaled = d_mod.voc - d_mod.dv_hys_rescaled
-    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_rescaled', np.array(voc_stat_rescaled, dtype=float))
-
-    # vb = d_mod.vb.copy()
-    # d_mod = rf.rec_append_fields(d_mod, 'vb', np.array(vb, dtype=float))
-    voc_dyn = d_mod.voc.copy()
-    d_mod = rf.rec_append_fields(d_mod, 'voc_dyn', np.array(voc_dyn, dtype=float))
-    ib = d_mod.ib.copy()
-    # d_mod = rf.rec_append_fields(d_mod, 'ib', np.array(ib, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'ib_sel', np.array(ib, dtype=float))
-    d_zero = d_mod.ib.copy()*0.
-    d_mod = rf.rec_append_fields(d_mod, 'tweak_sclr_amp', np.array(d_zero, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'tweak_sclr_noa', np.array(d_zero, dtype=float))
-
-    return d_mod
-
-
 # Fake stuff to get replicate to accept inputs and run
 def bandaid(h):
     res = np.zeros(len(h.time))
@@ -794,154 +543,6 @@ def bandaid(h):
 def calculate_capacity(q_cap_rated_scaled=None, dqdt=None, temp=None, t_rated=None):
     q_cap = q_cap_rated_scaled * (1. + dqdt * (temp - t_rated))
     return q_cap
-
-
-# Make an array useful for analysis (around temp) and add some metrics
-def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100., nom_vsat=13.85):
-    h = raw[abs(raw.Tb - temp_corr) < tb_band]
-
-    sat_ = np.copy(h.Tb)
-    bms_off_ = np.copy(h.Tb)
-    for i in range(len(h.Tb)):
-        sat_[i] = is_sat(h.Tb[i], h.voc_dyn[i], h.soc[i], nom_vsat=nom_vsat)
-        # h.bms_off[i] = (h.Tb[i] < low_t) or ((h.voc_dyn[i] < low_voc) and (h.ib[i] < IB_MIN_UP))
-        bms_off_[i] = (h.Tb[i] < low_t) or ((h.voc_stat[i] < 10.5) and (h.ib[i] < IB_MIN_UP))
-
-    # Correct for temp
-    q_cap = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=h.Tb, t_rated=BATT_RATED_TEMP)
-    dq = (h.soc - 1.) * q_cap
-    dq -= BATT_DQDT * q_cap * (temp_corr - h.Tb)
-    q_cap_r = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=BATT_DQDT, temp=temp_corr, t_rated=BATT_RATED_TEMP)
-    soc_r = 1. + dq / q_cap_r
-    h = rf.rec_append_fields(h, 'soc_r', soc_r)
-    h.voc_stat_r = h.voc_stat - (h.Tb - temp_corr) * BATT_DVOC_DT
-    h.voc_stat_rescaled_r = h.voc_stat_rescaled - (h.Tb - temp_corr) * BATT_DVOC_DT
-
-    # delineate charging and discharging
-    voc_stat_r_chg = np.copy(h.voc_stat)
-    voc_stat_r_dis = np.copy(h.voc_stat)
-    voc_stat_rescaled_r_chg = np.copy(h.voc_stat_rescaled)
-    voc_stat_rescaled_r_dis = np.copy(h.voc_stat_rescaled)
-    for i in range(len(voc_stat_r_chg)):
-        if h.ib[i] > -0.5:
-            voc_stat_r_dis[i] = None
-            voc_stat_rescaled_r_dis[i] = None
-        elif h.ib[i] < 0.5:
-            voc_stat_r_chg[i] = None
-            voc_stat_rescaled_r_chg[i] = None
-
-    # Hysteresis_20220917d confirm equals data with HYS_SCALE_20220917d
-    if len(h.time) > 1:
-        hys_remodel = Hysteresis_20220917d(scale=HYS_SCALE_20220917d)  # Battery hysteresis model - drift of voc
-        t_s_min = h.time_min[0]
-        t_e_min = h.time_min[-1]
-        dt_hys_min = 1.
-        dt_hys_sec = dt_hys_min * 60.
-        hys_time_min = np.arange(t_s_min, t_e_min, dt_hys_min, dtype=float)
-        # Note:  Hysteresis_20220917d instantiates hysteresis state to 0. unless told otherwise
-        dv_hys_remodel = []
-        for i in range(len(hys_time_min)):
-            t_sec = hys_time_min[i] * 60.
-            ib = np.interp(t_sec, h.time_sec, h.ib)
-            soc = np.interp(t_sec, h.time_sec, h.soc)
-            hys_remodel.calculate_hys(ib, soc)
-            dvh = hys_remodel.update(dt_hys_sec)
-            dv_hys_remodel.append(dvh)
-        dv_hys_remodel = np.array(dv_hys_remodel)
-        dv_hys_remodel_ = np.copy(h.soc)
-        for i in range(len(h.time)):
-            t_min = int(float(h.time[i]) / 60.)
-            dv_hys_remodel_[i] = np.interp(t_min, hys_time_min, dv_hys_remodel)
-
-    # Hysteresis_20220926 redesign.
-    if len(h.time) > 1:
-        hys_redesign = Hysteresis_20220926(scale=HYS_SCALE_20220926, cap=HYS_CAP_REDESIGN)  # Battery hysteresis model - drift of voc
-        t_s_min = h.time_min[0]
-        t_e_min = h.time_min[-1]
-        dt_hys_min = 1.
-        dt_hys_sec = dt_hys_min * 60.
-        hys_time_min = np.arange(t_s_min, t_e_min, dt_hys_min, dtype=float)
-        # Note:  Hysteresis_20220926 instantiates hysteresis state to 0. unless told otherwise
-        dv_hys_redesign = []
-        res_redesign = []
-        ioc_redesign = []
-        dv_dot_redesign = []
-        voc_stat_redesign = []
-        voc_stat_redesign_r = []
-        for i in range(len(hys_time_min)):
-            t_sec = hys_time_min[i] * 60
-            tb = np.interp(t_sec, h.time_sec, h.Tb)
-            ib = np.interp(t_sec, h.time_sec, h.ib)
-            soc = np.interp(t_sec, h.time_sec, h.soc)
-            soc_min = np.interp(t_sec, h.time_sec, h.soc_min)
-            sat = np.interp(t_sec, h.time_sec, sat_)
-            bms_off = np.interp(t_sec, h.time_sec, bms_off_) > 0.5
-            voc = np.interp(t_sec, h.time_sec, h.voc_dyn)
-            e_wrap = np.interp(t_sec, h.time_sec, h.e_wrap)
-            hys_redesign.calculate_hys(ib, soc)
-            init_low = bms_off or (soc < (soc_min + HYS_SOC_MIN_MARG) and ib > HYS_IB_THR)
-            dvh = hys_redesign.update(dt_hys_sec, init_high=sat, init_low=init_low, e_wrap=e_wrap)
-            res = hys_redesign.res
-            ioc = hys_redesign.ioc
-            dv_dot = hys_redesign.dv_dot
-            voc_stat = voc - dvh
-            voc_stat_r = voc_stat - (tb - temp_corr) * BATT_DVOC_DT
-            dv_hys_redesign.append(dvh)
-            res_redesign.append(res)
-            ioc_redesign.append(max(min(ioc, 40.), -40.))
-            dv_dot_redesign.append(dv_dot)
-            voc_stat_redesign.append(voc_stat)
-            voc_stat_redesign_r.append(voc_stat_r)
-        dv_hys_redesign_ = np.copy(h.soc)
-        res_redesign_ = np.copy(h.soc)
-        ioc_redesign_ = np.copy(h.soc)
-        dv_dot_redesign_ = np.copy(h.soc)
-        voc_stat_redesign_ = np.copy(h.soc)
-        voc_stat_redesign_r_ = np.copy(h.soc)
-        for i in range(len(h.time)):
-            t_min = h.time_min[i]
-            dv_hys_redesign_[i] = np.interp(t_min, hys_time_min, dv_hys_redesign)
-            res_redesign_[i] = np.interp(t_min, hys_time_min, res_redesign)
-            ioc_redesign_[i] = np.interp(t_min, hys_time_min, ioc_redesign)
-            dv_dot_redesign_[i] = np.interp(t_min, hys_time_min, dv_dot_redesign)
-            voc_stat_redesign_[i] = np.interp(t_min, hys_time_min, voc_stat_redesign)
-            voc_stat_redesign_r_[i] = np.interp(t_min, hys_time_min, voc_stat_redesign_r)
-        voc_stat_redesign_r_chg = np.copy(voc_stat_redesign_r_)
-        voc_stat_redesign_r_dis = np.copy(voc_stat_redesign_r_)
-        dv_hys_redesign_chg = np.copy(dv_hys_redesign_)
-        dv_hys_redesign_dis = np.copy(dv_hys_redesign_)
-        res_redesign_chg = np.copy(res_redesign_)
-        res_redesign_dis = np.copy(res_redesign_)
-        for i in range(len(voc_stat_r_chg)):
-            if h.ib[i] > -0.5:
-                voc_stat_redesign_r_dis[i] = None
-                dv_hys_redesign_dis[i] = None
-                res_redesign_dis[i] = None
-            elif h.ib[i] < 0.5:
-                voc_stat_redesign_r_chg[i] = None
-                dv_hys_redesign_chg[i] = None
-                res_redesign_chg[i] = None
-        h = rf.rec_append_fields(h, 'voc_stat_redesign_r_dis', voc_stat_redesign_r_dis)
-        h = rf.rec_append_fields(h, 'voc_stat_redesign_r_chg', voc_stat_redesign_r_chg)
-        h = rf.rec_append_fields(h, 'dv_hys_redesign_dis', dv_hys_redesign_dis)
-        h = rf.rec_append_fields(h, 'dv_hys_redesign_chg', dv_hys_redesign_chg)
-        h = rf.rec_append_fields(h, 'res_redesign_dis', res_redesign_dis)
-        h = rf.rec_append_fields(h, 'res_redesign_chg', res_redesign_chg)
-        h = rf.rec_append_fields(h, 'sat', sat_)
-        h = rf.rec_append_fields(h, 'bms_off', bms_off_)
-        h = rf.rec_append_fields(h, 'dv_hys_remodel', dv_hys_remodel_)
-        h = rf.rec_append_fields(h, 'voc_stat_r_dis', voc_stat_r_dis)
-        h = rf.rec_append_fields(h, 'voc_stat_r_chg', voc_stat_r_chg)
-        h = rf.rec_append_fields(h, 'voc_stat_rescaled_r_dis', voc_stat_rescaled_r_dis)
-        h = rf.rec_append_fields(h, 'voc_stat_rescaled_r_chg', voc_stat_rescaled_r_chg)
-        h = rf.rec_append_fields(h, 'ioc_redesign', ioc_redesign_)
-        h = rf.rec_append_fields(h, 'dv_dot_redesign', dv_dot_redesign_)
-        h = rf.rec_append_fields(h, 'dv_hys_redesign', dv_hys_redesign_)
-        h = rf.rec_append_fields(h, 'res_redesign', res_redesign_)
-        h = rf.rec_append_fields(h, 'voc_stat_redesign', voc_stat_redesign_)
-        h = rf.rec_append_fields(h, 'voc_stat_redesign_r', voc_stat_redesign_r_)
-
-    return h
 
 
 # Table lookup vector
@@ -983,6 +584,7 @@ if __name__ == '__main__':
 
         # Save these
         t_max_in = None
+        rated_batt_cap_in = 108.4
 
         # User inputs
         # input_files = ['coldCharge1 v20221028.txt']
@@ -1027,7 +629,8 @@ if __name__ == '__main__':
             print("data from", temp_flt_file, "empty after loading")
             exit(1)
         f_raw = np.unique(f_raw)
-        f = add_stuff_f(f_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
+        f = add_stuff_f(f_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND,
+                        rated_batt_cap=rated_batt_cap_in)
         print("\nf:\n", f, "\n")
         f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=RATED_BATT_CAP)
 

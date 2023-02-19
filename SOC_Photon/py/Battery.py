@@ -17,7 +17,7 @@
 
 import numpy as np
 from EKF1x1 import EKF1x1
-from Coulombs import Coulombs, dqdt
+from Coulombs import Coulombs
 from Hysteresis import Hysteresis
 import matplotlib.pyplot as plt
 from TFDelay import TFDelay
@@ -40,57 +40,41 @@ class Retained:
         return 0b1000 & int(self.modeling)
 
 
-# Battery constants
-RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
-BATT_DVOC_DT = 0.004  # 5/30/2022
-""" Change of VOC with operating temperature in range 0 - 50 C (0.004) V/deg C
-                            >3.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C"""
-BATT_V_SAT = 13.8  # Normal battery cell saturation for SOC=99.7, V (13.8)
-NOM_SYS_VOLT = 12.  # Nominal system output, V, at which the reported amps are used (12)
-low_voc = 9.  # Minimum voltage for battery below which BMS shuts off current
-# low_t = 8.  # Minimum temperature for valid saturation check, because BMS shuts off battery low.
-low_t = 4.  # Minimum temperature for valid saturation check, because BMS shuts off battery low.
-# Heater should keep >8, too
-mxeps_bb = 1-1e-6  # Numerical maximum of coefficient model with scaled soc
-mneps_bb = 1e-6  # Numerical minimum of coefficient model without scaled soc
-# DQDT = 0.01  # Change of charge with temperature, fraction/deg C.  From literature.  0.01 is commonly used
-CAP_DROOP_C = 20.  # Temperature below which a floor on q arises, C (20)
-TCHARGE_DISPLAY_DEADBAND = 0.1  # Inside this +/- deadband, charge time is displayed '---', A
-max_voc = 1.2*NOM_SYS_VOLT  # Prevent windup of battery model, V
-batt_vmax = 14.3  # Observed max voltage of 14.3 V at 25C for 12V prototype bank, V
-DF1 = 0.02  # Weighted selection lower transition drift, fraction
-DF2 = 0.70  # Threshold to reset Coulomb Counter if different from ekf, fraction (0.05)
-EKF_CONV = 2e-3  # EKF tracking error indicating convergence, V (1e-3)
-EKF_T_CONV = 30.  # EKF set convergence test time, sec (30.)
-EKF_T_RESET = (EKF_T_CONV/2.)  # EKF reset test time, sec ('up 1, down 2')
-EKF_NOM_DT = 0.1  # EKF nominal update time, s (initialization; actual value varies)
-TAU_Y_FILT = 5.  # EKF y-filter time constant, sec (5.)
-MIN_Y_FILT = -0.5  # EKF y-filter minimum, V (-0.5)
-MAX_Y_FILT = 0.5  # EKF y-filter maximum, V (0.5)
-WN_Y_FILT = 0.1  # EKF y-filter-2 natural frequency, r/s (0.1)
-ZETA_Y_FILT = 0.9  # EKF y-filter-2 damping factor (0.9)
-TMAX_FILT = 3.  # Maximum y-filter-2 sample time, s (3.)
-EKF_Q_SD_NORM = 0.0015  # Standard deviation of normal EKF process uncertainty, V (0.0015)
-EKF_R_SD_NORM = 0.5  # Standard deviation of normal EKF state uncertainty, fraction (0-1) (0.5)
-IMAX_NUM = 100000.  # Overflow protection since ib past value used
-HYS_SOC_MIN_MARG = 0.15  # Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
-HYS_SOC_MAX = 0.99  # Detect high endpoint condition for reset of hysteresis
-HYS_E_WRAP_THR = 0.1  # Detect e_wrap going the other way; need to reset dv_hys at endpoints
-HYS_IB_THR = 1.  # Ignore reset if opposite situation exists
-IB_MIN_UP = 0.2  # Min up charge current for come alive, BMS logic, and fault
-cp_eframe_mult = 20  # Run EKF 20 times slower than Coulomb Counter
-READ_DELAY = 100  # nominal read time, ms
-EKF_EFRAME_MULT = 20  # Multiframe rate consistent with READ_DELAY (20 for READ_DELAY=100)
-VB_DC_DC = 13.5  # Estimated dc-dc charger, V
-HDB_VBATT = 0.05  # Half deadband to filter vb, V (0.05)
-WRAP_ERR_FILT = 4.  # Wrap error filter time constant, s (4)
-MAX_WRAP_ERR_FILT = 10.  # Anti-windup wrap error filter, V (10)
-F_MAX_T_WRAP = 2.8  # Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (2.8)
-D_SOC_S = 0.  # Bias on soc to voc-soc lookup to simulate error in estimation, esp cold battery near 0 C
-
-
 class Battery(Coulombs):
+    # Battery constants
     RATED_BATT_CAP = 100.
+    NOM_SYS_VOLT = 12.  # Nominal system output, V, at which the reported amps are used (12)
+    mxeps_bb = 1 - 1e-6  # Numerical maximum of coefficient model with scaled soc
+    TCHARGE_DISPLAY_DEADBAND = 0.1  # Inside this +/- deadband, charge time is displayed '---', A
+    DF1 = 0.02  # Weighted selection lower transition drift, fraction
+    DF2 = 0.70  # Threshold to reset Coulomb Counter if different from ekf, fraction (0.05)
+    EKF_CONV = 2e-3  # EKF tracking error indicating convergence, V (1e-3)
+    EKF_T_CONV = 30.  # EKF set convergence test time, sec (30.)
+    EKF_T_RESET = (EKF_T_CONV / 2.)  # EKF reset test time, sec ('up 1, down 2')
+    EKF_NOM_DT = 0.1  # EKF nominal update time, s (initialization; actual value varies)
+    TAU_Y_FILT = 5.  # EKF y-filter time constant, sec (5.)
+    MIN_Y_FILT = -0.5  # EKF y-filter minimum, V (-0.5)
+    MAX_Y_FILT = 0.5  # EKF y-filter maximum, V (0.5)
+    WN_Y_FILT = 0.1  # EKF y-filter-2 natural frequency, r/s (0.1)
+    ZETA_Y_FILT = 0.9  # EKF y-filter-2 damping factor (0.9)
+    TMAX_FILT = 3.  # Maximum y-filter-2 sample time, s (3.)
+    EKF_Q_SD_NORM = 0.0015  # Standard deviation of normal EKF process uncertainty, V (0.0015)
+    EKF_R_SD_NORM = 0.5  # Standard deviation of normal EKF state uncertainty, fraction (0-1) (0.5)
+    IMAX_NUM = 100000.  # Overflow protection since ib past value used
+    HYS_SOC_MIN_MARG = 0.15  # Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
+    HYS_SOC_MAX = 0.99  # Detect high endpoint condition for reset of hysteresis
+    HYS_E_WRAP_THR = 0.1  # Detect e_wrap going the other way; need to reset dv_hys at endpoints
+    HYS_IB_THR = 1.  # Ignore reset if opposite situation exists
+    IB_MIN_UP = 0.2  # Min up charge current for come alive, BMS logic, and fault
+    cp_eframe_mult = 20  # Run EKF 20 times slower than Coulomb Counter
+    READ_DELAY = 100  # nominal read time, ms
+    EKF_EFRAME_MULT = 20  # Multiframe rate consistent with READ_DELAY (20 for READ_DELAY=100)
+    VB_DC_DC = 13.5  # Estimated dc-dc charger, V
+    HDB_VBATT = 0.05  # Half deadband to filter vb, V (0.05)
+    WRAP_ERR_FILT = 4.  # Wrap error filter time constant, s (4)
+    MAX_WRAP_ERR_FILT = 10.  # Anti-windup wrap error filter, V (10)
+    F_MAX_T_WRAP = 2.8  # Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (2.8)
+    D_SOC_S = 0.  # Bias on soc to voc-soc lookup to simulate error in estimation, esp cold battery near 0 C
     # """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
     #                         what gets delivered, e.g. Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
     #                         or 20 - 40 A for a 100 Ah battery"""
@@ -101,9 +85,8 @@ class Battery(Coulombs):
                             what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
                             or 20 - 40 A for a 100 Ah battery"""
 
-    def __init__(self, bat_v_sat=13.85, q_cap_rated=RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
-                 temp_c=RATED_TEMP, tweak_test=False, sres0=1., sresct=1., stauct=1.,
-                 scale_r_ss=1., s_hys=1., dvoc=0., coul_eff=0.9985, mod_code=0):
+    def __init__(self, q_cap_rated=RATED_BATT_CAP*3600, t_rlim=0.017, t_rated=25., temp_c=25., tweak_test=False,
+                 sres0=1., sresct=1., stauct=1., scale_r_ss=1., s_hys=1., dvoc=0., mod_code=0, s_coul_eff=1.):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -111,19 +94,17 @@ class Battery(Coulombs):
         so equation error when soc<=0 to match data.    See Battery.h
         """
         # Parents
-        Coulombs.__init__(self, q_cap_rated,  q_cap_rated, t_rated, t_rlim, tweak_test, coul_eff_=coul_eff,
-                          mod_code=mod_code)
+        Coulombs.__init__(self, q_cap_rated,  q_cap_rated, t_rated, t_rlim, tweak_test, mod_code=mod_code)
 
         # Defaults
         self.chem = mod_code
-        from pyDAGx import myTables
         self.dvoc = dvoc
         self.nz = None
         self.q = 0  # Charge, C
-        self.voc = NOM_SYS_VOLT  # Model open circuit voltage, V
+        self.voc = Battery.NOM_SYS_VOLT  # Model open circuit voltage, V
         self.voc_stat = self.voc  # Static model open circuit voltage from charge process, V
         self.dv_dyn = 0.  # Model current induced back emf, V
-        self.vb = NOM_SYS_VOLT  # Battery voltage at post, V
+        self.vb = Battery.NOM_SYS_VOLT  # Battery voltage at post, V
         self.ib = 0.  # Current into battery post, A
         self.ib_in = 0.  # Current into calculate, A
         self.ib_charge = 0.  # Current into count_coulombs, A
@@ -131,16 +112,15 @@ class Battery(Coulombs):
         self.dv_dsoc = 0.  # Slope of soc-voc curve, V/%
         self.tcharge = 0.  # Charging time to 100%, hr
         self.sr = 1  # Resistance scalar
-        self.nom_vsat = bat_v_sat  # Normal battery cell saturation for SOC=99.7, V
-        self.vsat = bat_v_sat  # Saturation voltage, V
-        self.dvoc_dt = BATT_DVOC_DT  # Change of VOC with operating temperature in
+        self.vsat = self.chemistry.nom_vsat
         # range 0 - 50 C, V/deg C
         self.dt = 0  # Update time, s
         self.chemistry.r_0 *= sres0
         self.chemistry.tau_ct *= stauct
         self.chemistry.r_ct *= sresct
         self.chemistry.r_ss *= scale_r_ss
-        self.ChargeTransfer = LagExp(dt=EKF_NOM_DT, max_=100., min_=-100., tau=self.chemistry.tau_ct)
+        self.chemistry.coul_eff *= s_coul_eff
+        self.ChargeTransfer = LagExp(dt=Battery.EKF_NOM_DT, max_=100., min_=-100., tau=self.chemistry.tau_ct)
         self.temp_c = temp_c
         self.saved = Saved()  # for plots and prints
         self.dv_hys = 0.  # Placeholder so BatterySim can be plotted
@@ -149,7 +129,6 @@ class Battery(Coulombs):
         self.mod = 7
         self.sel = 0
         self.tweak_test = tweak_test
-        # self.r_ss = (self.r_0 + self.r_ct) * scale_r_ss
         self.s_hys = s_hys
 
     def __str__(self, prefix=''):
@@ -157,7 +136,7 @@ class Battery(Coulombs):
         s = prefix + "Battery:\n"
         s += "  chem    = {:7.3f}  // Chemistry: 0=Battleborn, 1=CHINS\n".format(self.chem)
         s += "  temp_c  = {:7.3f}  // Battery temperature, deg C\n".format(self.temp_c)
-        s += "  dvoc_dt = {:9.6f}  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n".format(self.dvoc_dt)
+        s += "  dvoc_dt = {:9.6f}  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n".format(self.chemistry.dvoc_dt)
         s += "  r_0     = {:9.6f}  // Charge Transfer R0, ohms\n".format(self.chemistry.r_0)
         s += "  r_ct    = {:9.6f}  // Charge Transfer resistance, ohms\n".format(self.chemistry.r_ct)
         s += "  tau_ct = {:9.6f}  // Charge Transfer time constant, s (=1/Rdif/Cdif)\n".format(self.chemistry.tau_ct)
@@ -189,7 +168,7 @@ class Battery(Coulombs):
         self.soc = soc
         self.voc = voc
         self.voc_stat = voc
-        self.vsat = self.nom_vsat + (self.temp_c - RATED_TEMP) * self.dvoc_dt
+        self.vsat = self.chemistry.nom_vsat + (self.temp_c - self.chemistry.rated_temp) * self.chemistry.dvoc_dt
         self.sat = self.voc >= self.vsat
 
     def calc_h_jacobian(self, soc_lim, temp_c):
@@ -218,17 +197,14 @@ class Battery(Coulombs):
 class BatteryMonitor(Battery, EKF1x1):
     """Extend Battery class to make a monitor"""
 
-    def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
-                 scale=1., r_sd=70., tau_sd=2.5e7, r_0=0.0046, tau_ct=83., r_ct=0.0077, temp_c=RATED_TEMP, hys_scale=1.,
-                 tweak_test=False, dv_hys=0., sres0=1., sresct=1., stauct=1., scaler_q=None, scaler_r=None,
-                 scale_r_ss=1., s_hys=1., dvoc=1., eframe_mult=cp_eframe_mult, scale_hys_cap=1., mod_code=0,
-                 coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1., myCH_Tuner=1):
+    def __init__(self, q_cap_rated=Battery.RATED_BATT_CAP*3600, t_rated=25., t_rlim=0.017, scale=1.,
+                 temp_c=25., hys_scale=1., tweak_test=False, dv_hys=0., sres0=1., sresct=1., stauct=1.,
+                 scaler_q=None, scaler_r=None, scale_r_ss=1., s_hys=1., dvoc=1., eframe_mult=Battery.cp_eframe_mult,
+                 scale_hys_cap=1., mod_code=0, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1., s_coul_eff=1.):
         q_cap_rated_scaled = q_cap_rated * scale
-        Battery.__init__(self, bat_v_sat=bat_v_sat, q_cap_rated=q_cap_rated_scaled, t_rated=t_rated, t_rlim=t_rlim,
-                         # r_sd=r_sd, tau_sd=tau_sd, r_0=r_0, tau_ct=tau_ct, r_ct=r_ct,
-                         temp_c=temp_c,
+        Battery.__init__(self, q_cap_rated=q_cap_rated_scaled, t_rated=t_rated, t_rlim=t_rlim, temp_c=temp_c,
                          tweak_test=tweak_test, sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss,
-                         s_hys=s_hys, dvoc=dvoc, coul_eff=coul_eff, mod_code=mod_code)
+                         s_hys=s_hys, dvoc=dvoc, mod_code=mod_code, s_coul_eff=s_coul_eff)
 
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
@@ -249,24 +225,25 @@ class BatteryMonitor(Battery, EKF1x1):
         # self.Q = 0.001*0.001  # EKF process uncertainty
         # self.R = 0.1*0.1  # EKF state uncertainty
         if scaler_q is None:
-            self.scaler_q = Scale(1, 4, EKF_Q_SD_NORM, EKF_Q_SD_NORM)
+            self.scaler_q = Scale(1, 4, Battery.EKF_Q_SD_NORM, Battery.EKF_Q_SD_NORM)
         else:
             self.scaler_q = scaler_q
         if scaler_r is None:
-            self.scaler_r = Scale(1, 4, EKF_R_SD_NORM, EKF_R_SD_NORM)
+            self.scaler_r = Scale(1, 4, Battery.EKF_R_SD_NORM, Battery.EKF_R_SD_NORM)
         else:
             self.scaler_r = scaler_r
-        self.Q = EKF_Q_SD_NORM * EKF_Q_SD_NORM  # EKF process uncertainty
-        self.R = EKF_R_SD_NORM * EKF_R_SD_NORM  # EKF state uncertainty
+        self.Q = Battery.EKF_Q_SD_NORM * Battery.EKF_Q_SD_NORM  # EKF process uncertainty
+        self.R = Battery.EKF_R_SD_NORM * Battery.EKF_R_SD_NORM  # EKF state uncertainty
         self.hys = Hysteresis(scale=hys_scale, dv_hys=dv_hys, scale_cap=scale_hys_cap, s_cap_chg=s_cap_chg,
                               s_cap_dis=s_cap_dis, s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis, chem=self.chem,
                               chemistry=self.chemistry)  # Battery hysteresis model - drift of voc
         self.soc_s = 0.  # Model information
-        self.EKF_converged = TFDelay(False, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT)
-        self.y_filt_lag = LagTustin(0.1, TAU_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
-        self.WrapErrFilt = LagTustin(0.1, WRAP_ERR_FILT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT)
+        self.EKF_converged = TFDelay(False, Battery.EKF_T_CONV, Battery.EKF_T_RESET, Battery.EKF_NOM_DT)
+        self.y_filt_lag = LagTustin(0.1, Battery.TAU_Y_FILT, Battery.MIN_Y_FILT, Battery.MAX_Y_FILT)
+        self.WrapErrFilt = LagTustin(0.1, Battery.WRAP_ERR_FILT, -Battery.MAX_WRAP_ERR_FILT, Battery.MAX_WRAP_ERR_FILT)
         self.y_filt = 0.
-        self.y_filt_2Ord = General2Pole(0.1, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT)
+        self.y_filt_2Ord = General2Pole(0.1, Battery.WN_Y_FILT, Battery.ZETA_Y_FILT, Battery.MIN_Y_FILT,
+                                        Battery.MAX_Y_FILT)
         self.y_filt2 = 0.
         self.ib = 0.
         self.vb = 0.
@@ -281,7 +258,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.eframe = 0
         self.eframe_mult = eframe_mult
         self.dt_eframe = self.dt*self.eframe_mult
-        self.sdb_voc = SlidingDeadband(HDB_VBATT)
+        self.sdb_voc = SlidingDeadband(Battery.HDB_VBATT)
         self.e_wrap = 0.
         self.e_wrap_filt = 0.
 
@@ -314,13 +291,13 @@ class BatteryMonitor(Battery, EKF1x1):
             self.chm = chem
 
         self.temp_c = temp_c
-        self.vsat = calc_vsat(self.temp_c, self.chemistry.nom_vsat)
+        self.vsat = calc_vsat(self.temp_c, self.chemistry.nom_vsat, self.chemistry.dvoc_dt)
         self.dt = dt
         self.ib_in = ib
         self.mod = rp.modeling
         self.T_Rlim.update(x=self.temp_c, reset=reset, dt=self.dt, max_=0.017, min_=-.017)
         T_rate = self.T_Rlim.rate
-        self.ib = max(min(self.ib_in, IMAX_NUM), -IMAX_NUM)  # Overflow protection since ib past value used
+        self.ib = max(min(self.ib_in, Battery.IMAX_NUM), -Battery.IMAX_NUM)  # Overflow protection since ib past value used
 
         # Table lookup
         self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
@@ -330,11 +307,11 @@ class BatteryMonitor(Battery, EKF1x1):
             voltage_low = self.voc_stat < self.chemistry.vb_down
         else:
             voltage_low = self.voc_stat < self.chemistry.vb_rising
-        bms_charging = self.ib > IB_MIN_UP
+        bms_charging = self.ib > Battery.IB_MIN_UP
         if reset and bms_off_init is not None:
             self.bms_off = bms_off_init
         else:
-            self.bms_off = (self.temp_c <= low_t) or (voltage_low and not rp.tweak_test())  # KISS
+            self.bms_off = (self.temp_c <= self.chemistry.low_t) or (voltage_low and not rp.tweak_test())  # KISS
         self.ib_charge = self.ib
         if self.bms_off and not bms_charging:
             self.ib_charge = 0.
@@ -352,26 +329,26 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Hysteresis model
         self.hys.calculate_hys(self.ib, self.soc, self.chm)
-        init_low = self.bms_off or (self.soc < (self.soc_min + HYS_SOC_MIN_MARG) and self.ib > HYS_IB_THR)
+        init_low = self.bms_off or (self.soc < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and self.ib > Battery.HYS_IB_THR)
         self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=self.e_wrap,
                                       chem=self.chm, scale_in=self.s_hys)
         self.voc_stat = self.voc - self.dv_hys
         self.e_wrap = self.voc_soc - self.voc_stat
         self.ioc = self.hys.ioc
-        self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap, dt=min(self.dt, F_MAX_T_WRAP), reset=reset)
+        self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap, dt=min(self.dt, Battery.F_MAX_T_WRAP), reset=reset)
 
         # EKF 1x1
-        self.eframe_mult = max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/1000./self.dt + 0.9999), 1)
+        self.eframe_mult = max(int(float(Battery.READ_DELAY)*float(Battery.EKF_EFRAME_MULT)/1000./self.dt + 0.9999), 1)
         if self.eframe == 0:
             self.dt_eframe = self.dt * float(self.eframe_mult)
             ddq_dt = self.ib
             if ddq_dt > 0. and not self.tweak_test:
-                ddq_dt *= self.coul_eff
-            ddq_dt -= dqdt*self.q_capacity*T_rate
+                ddq_dt *= self.chemistry.coul_eff
+            ddq_dt -= self.chemistry.dqdt*self.q_capacity*T_rate
             self.Q = self.scaler_q.calculate(ddq_dt)  # TODO this doesn't work right
             self.R = self.scaler_r.calculate(ddq_dt)  # TODO this doesn't work right
-            self.Q = EKF_Q_SD_NORM**2  # override
-            self.R = EKF_R_SD_NORM**2  # override
+            self.Q = Battery.EKF_Q_SD_NORM**2  # override
+            self.R = Battery.EKF_R_SD_NORM**2  # override
             # if reset and x_old is not None:
             if x_old is not None:
                 self.x_ekf = x_old
@@ -379,12 +356,14 @@ class BatteryMonitor(Battery, EKF1x1):
             self.update_ekf(z=self.voc_stat, x_min=0., x_max=1., z_old=z_old)  # z = voc, voc_filtered = hx
             self.soc_ekf = self.x_ekf  # x = Vsoc (0-1 ideal capacitor voltage) proxy for soc
             self.q_ekf = self.soc_ekf * self.q_capacity
-            self.y_filt = self.y_filt_lag.calculate(in_=self.y_ekf, dt=min(self.dt_eframe, EKF_T_RESET), reset=False)
-            self.y_filt2 = self.y_filt_2Ord.calculate(in_=self.y_ekf, dt=min(self.dt_eframe, TMAX_FILT), reset=False)
+            self.y_filt = self.y_filt_lag.calculate(in_=self.y_ekf, dt=min(self.dt_eframe, Battery.EKF_T_RESET),
+                                                    reset=False)
+            self.y_filt2 = self.y_filt_2Ord.calculate(in_=self.y_ekf, dt=min(self.dt_eframe, Battery.TMAX_FILT),
+                                                      reset=False)
             # EKF convergence
-            conv = abs(self.y_filt) < EKF_CONV
-            self.EKF_converged.calculate(conv, EKF_T_CONV, EKF_T_RESET, min(self.dt_eframe, EKF_T_RESET), False)
-            # print('dt', self.dt, 'dt_eframe', self.dt_eframe, 'eframe_mult', self.eframe_mult, 'ib', self.ib, 'temp_c', self.temp_c, 'T_rate', T_rate, 'ddq_dt', ddq_dt )
+            conv = abs(self.y_filt) < Battery.EKF_CONV
+            self.EKF_converged.calculate(conv, Battery.EKF_T_CONV, Battery.EKF_T_RESET,
+                                         min(self.dt_eframe, Battery.EKF_T_RESET), False)
         self.eframe += 1
         if reset or self.eframe >= self.eframe_mult:  # '>=' ensures reset with changes on the fly
             self.eframe = 0
@@ -409,9 +388,9 @@ class BatteryMonitor(Battery, EKF1x1):
 
     def calc_charge_time(self, q, q_capacity, charge_curr, soc):
         delta_q = q - q_capacity
-        if charge_curr > TCHARGE_DISPLAY_DEADBAND:
+        if charge_curr > Battery.TCHARGE_DISPLAY_DEADBAND:
             self.tcharge = min(-delta_q / charge_curr / 3600., 24.)
-        elif charge_curr < -TCHARGE_DISPLAY_DEADBAND:
+        elif charge_curr < -Battery.TCHARGE_DISPLAY_DEADBAND:
             self.tcharge = max((q_capacity + delta_q - self.q_min) / charge_curr / 3600., -24.)
         elif charge_curr >= 0.:
             self.tcharge = 24.
@@ -458,7 +437,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.q_ekf = self.soc_ekf * self.q_capacity
 
     def regauge(self, temp_c):
-        if self.converged_ekf() and abs(self.soc_ekf - self.soc) > DF2:
+        if self.converged_ekf() and abs(self.soc_ekf - self.soc) > Battery.DF2:
             print("Resetting Coulomb Counter Monitor from ", self.soc, " to EKF=", self.soc_ekf, "...")
             self.apply_soc(self.soc_ekf, temp_c)
             print("confirmed ", self.soc)
@@ -522,16 +501,13 @@ class BatteryMonitor(Battery, EKF1x1):
 class BatterySim(Battery):
     """Extend Battery class to make a model"""
 
-    def __init__(self, bat_v_sat=13.8, q_cap_rated=Battery.RATED_BATT_CAP*3600, t_rated=RATED_TEMP, t_rlim=0.017,
-                 scale=1., r_sd=70., tau_sd=2.5e7, r_0=0.0046, tau_ct=83., r_ct=0.0077, stauct=1., temp_c=RATED_TEMP,
-                 hys_scale=1., tweak_test=False, dv_hys=0., sres0=1., sresct=1., scale_r_ss=1., s_hys=1., dvoc=0.,
-                 scale_hys_cap=1., mod_code=0, coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1.,
-                 myCH_Tuner=1):
-        Battery.__init__(self, bat_v_sat=bat_v_sat, q_cap_rated=q_cap_rated, t_rated=t_rated, t_rlim=t_rlim,
-                         # r_sd=r_sd, tau_sd=tau_sd, r_0=r_0, tau_ct=tau_ct, r_ct=r_ct,
-                         temp_c=temp_c, tweak_test=tweak_test,
-                         sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss, s_hys=s_hys, dvoc=dvoc,
-                         coul_eff=coul_eff, mod_code=mod_code)
+    def __init__(self, q_cap_rated=Battery.RATED_BATT_CAP*3600, t_rated=25., t_rlim=0.017, scale=1., stauct=1.,
+                 temp_c=25., hys_scale=1., tweak_test=False, dv_hys=0., sres0=1., sresct=1., scale_r_ss=1.,
+                 s_hys=1., dvoc=0., scale_hys_cap=1., mod_code=0, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1.,
+                 s_hys_dis=1., s_coul_eff=1.):
+        Battery.__init__(self, q_cap_rated=q_cap_rated, t_rated=t_rated, t_rlim=t_rlim, temp_c=temp_c,
+                         tweak_test=tweak_test, sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss,
+                         s_hys=s_hys, dvoc=dvoc, mod_code=mod_code, s_coul_eff=s_coul_eff)
         self.lut_voc = None
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A
@@ -596,18 +572,18 @@ class BatterySim(Battery):
         self.ib_in = curr_in
         if reset:
             self.ib_fut = self.ib_in
-        self.ib = max(min(self.ib_fut, IMAX_NUM), -IMAX_NUM)
+        self.ib = max(min(self.ib_fut, Battery.IMAX_NUM), -Battery.IMAX_NUM)
         self.mod = rp.modeling
         soc_lim = max(min(soc, 1.), -0.2)  # dag 9/3/2022
 
         # VOC-OCV model
-        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc + D_SOC_S, temp_c)
+        self.voc_stat, self.dv_dsoc = self.calc_soc_voc(soc + Battery.D_SOC_S, temp_c)
         # slightly beyond but don't windup
         self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)
 
         # Hysteresis model
         self.hys.calculate_hys(curr_in, self.soc, self.chm)
-        init_low = self.bms_off or (self.soc < (self.soc_min + HYS_SOC_MIN_MARG) and self.ib > HYS_IB_THR)
+        init_low = self.bms_off or (self.soc < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and self.ib > Battery.HYS_IB_THR)
         self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=0.,
                                       chem=self.chm, scale_in=self.s_hys)
         self.voc = self.voc_stat + self.dv_hys
@@ -621,11 +597,11 @@ class BatterySim(Battery):
             voltage_low = self.voc_stat < self.chemistry.vb_down_sim
         else:
             voltage_low = self.voc_stat < self.chemistry.vb_rising_sim
-        bms_charging = self.ib_in > IB_MIN_UP
+        bms_charging = self.ib_in > Battery.IB_MIN_UP
         if reset and bms_off_init is not None:
             self.bms_off = bms_off_init
         else:
-            self.bms_off = (self.temp_c < low_t) or (voltage_low and not self.tweak_test)
+            self.bms_off = (self.temp_c < self.chemistry.low_t) or (voltage_low and not self.tweak_test)
         ib_charge_fut = self.ib_in
         if self.bms_off and not bms_charging:
             ib_charge_fut = 0.
@@ -638,11 +614,11 @@ class BatterySim(Battery):
         if self.bms_off:
             self.vb = self.voc
         if self.bms_off and dc_dc_on:
-            self.vb = VB_DC_DC
+            self.vb = Battery.VB_DC_DC
         self.dv_dyn = self.vb - self.voc
 
         # Saturation logic, both full and empty
-        self.vsat = self.nom_vsat + (temp_c - 25.) * self.dvoc_dt
+        self.vsat = self.chemistry.nom_vsat + (temp_c - 25.) * self.chemistry.dvoc_dt
         self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
         if self.tweak_test or (not rp.modeling):
             self.sat_ib_max = ib_charge_fut
@@ -682,7 +658,7 @@ class BatterySim(Battery):
         self.charge_curr = charge_curr
         self.d_delta_q = self.charge_curr * dt
         if self.charge_curr > 0. and not self.tweak_test:
-            self.d_delta_q *= self.coul_eff
+            self.d_delta_q *= self.chemistry.coul_eff
 
         # Rate limit temperature
         self.temp_lim = max(min(temp_c, self.t_last + self.t_rlim*dt), self.t_last - self.t_rlim*dt)
@@ -703,7 +679,7 @@ class BatterySim(Battery):
 
         # Integration can go to -50%
         self.q_capacity = self.calculate_capacity(self.temp_lim)
-        self.delta_q += self.d_delta_q - dqdt*self.q_capacity*(self.temp_lim-self.t_last)
+        self.delta_q += self.d_delta_q - self.chemistry.dqdt*self.q_capacity*(self.temp_lim-self.t_last)
         self.delta_q = max(min(self.delta_q, 0.), -self.q_capacity*1.5)
         self.q = self.q_capacity + self.delta_q
 
@@ -765,21 +741,21 @@ class BatterySim(Battery):
 
 
 # Other functions
-def is_sat(temp_c, voc, soc, nom_vsat):
-    vsat = sat_voc(temp_c, nom_vsat)
-    return temp_c > low_t and (voc >= vsat or soc >= mxeps_bb)
+def is_sat(temp_c, voc, soc, nom_vsat, dvoc_dt, low_t):
+    vsat = sat_voc(temp_c, nom_vsat, dvoc_dt)
+    return temp_c > low_t and (voc >= vsat or soc >= Battery.mxeps_bb)
 
 
-def calculate_capacity(temp_c, t_sat, q_sat):
+def calculate_capacity(temp_c, t_sat, q_sat, dqdt):
     return q_sat * (1-dqdt*(temp_c - t_sat))
 
 
-def calc_vsat(temp_c, vsat):
-    return sat_voc(temp_c, vsat)
+def calc_vsat(temp_c, vsat, dvoc_dt):
+    return sat_voc(temp_c, vsat, dvoc_dt)
 
 
-def sat_voc(temp_c, vsat):
-    return vsat + (temp_c-25.)*BATT_DVOC_DT
+def sat_voc(temp_c, vsat, dvoc_dt):
+    return vsat + (temp_c-25.)*dvoc_dt
 
 
 class Saved:

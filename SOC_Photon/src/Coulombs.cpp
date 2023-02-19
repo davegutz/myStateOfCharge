@@ -34,11 +34,14 @@ extern PublishPars pp;    // For publishing
 
 // class Coulombs
 Coulombs::Coulombs() {}
-Coulombs::Coulombs(double *sp_delta_q, float *sp_t_last, const float q_cap_rated, const float t_rated, const float t_rlim,
-  uint8_t *sp_mod_code, const float coul_eff)
-  : coul_eff_(coul_eff), q_(q_cap_rated), q_capacity_(q_cap_rated), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated),
-    q_min_(0.), sat_(true), soc_(1.), soc_min_(0.), sp_delta_q_(sp_delta_q), sp_t_last_(sp_t_last), t_rated_(t_rated), t_rlim_(0.017),
-    chem_(sp_mod_code) {}
+Coulombs::Coulombs(double *sp_delta_q, float *sp_t_last, const float q_cap_rated, const float t_rlim,
+  uint8_t *sp_mod_code, const double s_coul_eff)
+  : q_(q_cap_rated), q_capacity_(q_cap_rated), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated),
+    q_min_(0.), sat_(true), soc_(1.), soc_min_(0.), sp_delta_q_(sp_delta_q), sp_t_last_(sp_t_last), t_rlim_(0.017),
+    chem_(sp_mod_code)
+    {
+      coul_eff_ = (chem_.coul_eff*s_coul_eff);
+    }
 Coulombs::~Coulombs() {}
 
 
@@ -61,7 +64,7 @@ void Coulombs::pretty_print(void)
   Serial.printf(" soc%8.4f\n", soc_);
   Serial.printf(" soc_min%8.4f\n", soc_min_);
   Serial.printf(" t_last%5.1f dg C\n", *sp_t_last_);
-  Serial.printf(" t_rat%5.1f dg C\n", t_rated_);
+  Serial.printf(" rated_t%5.1f dg C\n", chem_.rated_temp);
   Serial.printf(" t_rlim%7.3f dg C / s\n", t_rlim_);
   Serial.printf("Coulombs::");
   chem_.pretty_print();
@@ -122,7 +125,7 @@ void Coulombs::apply_soc(const float soc, const float temp_c)
 // Capacity
 double Coulombs::calculate_capacity(const float temp_c)
 {
-  return( q_cap_rated_scaled_ * (1+chem_.dqdt*(temp_c - t_rated_)) );
+  return( q_cap_rated_scaled_ * (1+chem_.dqdt*(temp_c - chem_.rated_temp)) );
 }
 
 /* Coulombs::count_coulombs:  Count coulombs based on true=actual capacity
@@ -132,7 +135,7 @@ Inputs:
   charge_curr     Charge, A
   sat             Indication that battery is saturated, T=saturated
   tlast           Past value of battery temperature used for rate limit memory, deg C
-  coul_eff_       Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
+  coul_eff        Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
 Outputs:
   q_capacity_     Saturation charge at temperature, C
   *sp_delta_q_    Charge change since saturated, C

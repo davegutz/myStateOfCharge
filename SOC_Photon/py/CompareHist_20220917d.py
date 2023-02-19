@@ -21,8 +21,11 @@ import numpy.lib.recfunctions as rf
 import matplotlib.pyplot as plt
 from Hysteresis_20220917d import Hysteresis_20220917d
 from Hysteresis_20220926 import Hysteresis_20220926
-from Battery import is_sat, low_t, low_voc, IB_MIN_UP
+from Battery import is_sat
 from Util import cat
+
+low_t = 4.  # Minimum temperature for valid saturation check, because BMS shuts off battery low.
+IB_MIN_UP = 0.2  # Min up charge current for come alive, BMS logic, and fault
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -375,7 +378,7 @@ def filter_Tb(raw, temp_corr, tb_band=5., rated_batt_cap=100.):
     h.sat = np.copy(h.Tb)
     h.bms_off = np.copy(h.Tb)
     for i in range(len(h.Tb)):
-        h.sat[i] = is_sat(h.Tb[i], h.voc_dyn[i], h.soc[i])
+        h.sat[i] = is_sat(h.Tb[i], h.voc_dyn[i], h.soc[i], low_t)
         # h.bms_off[i] = (h.Tb[i] < low_t) or ((h.voc_dyn[i] < low_voc) and (h.ib[i] < IB_MIN_UP))
         h.bms_off[i] = (h.Tb[i] < low_t) or ((h.voc_stat[i] < 10.5) and (h.ib[i] < IB_MIN_UP))
 

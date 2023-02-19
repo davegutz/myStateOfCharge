@@ -24,7 +24,7 @@ if __name__ == '__main__':
     from MonSim import replicate, save_clean_file
     from DataOverModel import overall
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
-    from CompareHist import over_fault, X_SOC_MIN_BB, T_SOC_MIN_BB
+    from CompareHist import over_fault
     import matplotlib.pyplot as plt
     plt.rcParams['axes.grid'] = True
     from datetime import datetime
@@ -63,12 +63,11 @@ if __name__ == '__main__':
         sresct_in = 1.
         stauct_in = 1
         s_hys_cap_in = 1.
-        coul_eff_in = 0.9985  # Battleborn
+        s_coul_eff_in = 1.
         s_cap_chg_in = 1.
         s_cap_dis_in = 1.
         s_hys_chg_in = 1.
         s_hys_dis_in = 1.
-        myCH_Tuner_in = 3
         tune_in = False
 
         # Save these
@@ -116,9 +115,9 @@ if __name__ == '__main__':
         # in the following line I forgot to renom sp on load so scale_hys was 1.5 by mistake for baseline run.
         # data_file_old_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in = 1.05; s_hys_in = 1.5; s_hys_in = 1.15; #stauct_in=0.1; s_hys_cap_in=1.;
         # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True # 0.9 tune 4, 5
-        # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # 0.8 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
+        data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # 0.8 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
         # data_file_old_txt = 'steps v20230128 20230214.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.4 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
-        data_file_old_txt = 'steps v20230128 20230218.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.4 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
+        # data_file_old_txt = 'steps v20230128 20230218.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.1 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
 
         # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
         # data_file_old_txt = 'vb_mess.txt'; unit_key = 'pro1a_2022';
@@ -159,21 +158,15 @@ if __name__ == '__main__':
 
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
-        mon_ver, sim_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
-                                                sres0=sres0_in, sresct=sresct_in, t_ib_fail=t_ib_fail,
-                                                use_ib_mon=use_ib_mon_in,
-                                                scale_in=scale_in, use_vb_raw=use_vb_raw,
-                                                scale_r_ss=scale_r_ss_in, s_hys_sim=s_hys_in,
-                                                s_hys_mon=s_hys_in, dvoc_sim=dvoc_sim_in,
-                                                dvoc_mon=dvoc_mon_in, Bmon=Bmon_in, Bsim=Bsim_in,
-                                                drive_ekf=drive_ekf_in, dTb_in=dTb, verbose=False,
-                                                use_vb_sim=use_vb_sim_in, scale_hys_cap_sim=s_hys_cap_in,
-                                                scale_hys_cap_mon=s_hys_cap_in,
-                                                stauct_mon=stauct_in, stauct_sim=stauct_in,
-                                                coul_eff=coul_eff_in,
-                                                s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in,
-                                                s_hys_chg=s_hys_chg_in, s_hys_dis=s_hys_dis_in,
-                                                myCH_Tuner=myCH_Tuner_in)
+        mon_ver, sim_ver, sim_s_ver, mon, sim = \
+            replicate(mon_old, sim_old=sim_old, init_time=init_time, sres0=sres0_in, sresct=sresct_in,
+                      t_ib_fail=t_ib_fail, use_ib_mon=use_ib_mon_in, scale_in=scale_in, use_vb_raw=use_vb_raw,
+                      scale_r_ss=scale_r_ss_in, s_hys_sim=s_hys_in, s_hys_mon=s_hys_in, dvoc_sim=dvoc_sim_in,
+                      dvoc_mon=dvoc_mon_in, Bmon=Bmon_in, Bsim=Bsim_in, drive_ekf=drive_ekf_in,
+                      dTb_in=dTb, verbose=False, use_vb_sim=use_vb_sim_in, scale_hys_cap_sim=s_hys_cap_in,
+                      scale_hys_cap_mon=s_hys_cap_in, stauct_mon=stauct_in, stauct_sim=stauct_in,
+                      s_coul_eff=s_coul_eff_in, s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in, s_hys_chg=s_hys_chg_in,
+                      s_hys_dis=s_hys_dis_in)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots
@@ -185,8 +178,7 @@ if __name__ == '__main__':
         plot_title = filename + '   ' + date_time
         if temp_flt_file_clean and len(f.time) > 1:
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                          n_fig=n_fig, x_sch=X_SOC_MIN_BB, z_sch=T_SOC_MIN_BB, voc_reset=0.,
-                                          long_term=long_term_in)
+                                          n_fig=n_fig, voc_reset=0., long_term=long_term_in)
         if plot_overall_in:
             n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',

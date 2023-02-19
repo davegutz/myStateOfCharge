@@ -21,7 +21,7 @@ import numpy.lib.recfunctions as rf
 import matplotlib.pyplot as plt
 from Hysteresis_20220917d import Hysteresis_20220917d
 from Hysteresis_20220926 import Hysteresis_20220926
-from Battery import is_sat, low_t, IB_MIN_UP
+from Battery import is_sat
 from resample import resample
 from MonSim import replicate
 from Battery import overall_batt, cp_eframe_mult

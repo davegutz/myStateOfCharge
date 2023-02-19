@@ -21,15 +21,11 @@ import numpy as np
 from pyDAGx import myTables
 from Chemistry_BMS import Chemistry, BMS
 
-dqdt = 0.01  # Change of charge with temperature, fraction/deg C.  From literature.  0.01 is commonly used
-coul_eff = 0.9985  # Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
-
 
 class Coulombs:
     """Coulomb Counting"""
 
-    def __init__(self, q_cap_rated, q_cap_rated_scaled, t_rated, t_rlim=0.017, tweak_test=False,
-                 coul_eff_= 0.9985, mod_code=0):
+    def __init__(self, q_cap_rated, q_cap_rated_scaled, t_rated, t_rlim=0.017, tweak_test=False, mod_code=0):
         self.q_cap_rated = q_cap_rated
         self.q_cap_rated_scaled = q_cap_rated_scaled
         self.t_rated = t_rated
@@ -45,7 +41,6 @@ class Coulombs:
         self.t_last = 0.
         self.sat = True
         self.chm = mod_code
-        self.coul_eff = coul_eff_
         self.tweak_test = tweak_test
         self.reset = False
         self.chemistry = Chemistry(mod_code=mod_code)
@@ -75,7 +70,7 @@ class Coulombs:
         s += "  tweak_test =    {:d}          // Driving signal injection completely using software inj_soft_bias\n"\
             .format(self.tweak_test)
         s += "  coul_eff =   {:8.4f}      // Coulombic efficiency- fraction of charging turned into usable Coulombs\n".\
-            format(self.coul_eff)
+            format(self.chemistry.coul_eff)
         return s
 
     def apply_cap_scale(self, scale):
@@ -116,11 +111,10 @@ class Coulombs:
     def calculate_capacity(self, temp_c):
         """Capacity"""
         try:
-            res = self.q_cap_rated_scaled * (1. + dqdt * (temp_c - self.t_rated))
+            res = self.q_cap_rated_scaled * (1. + self.chemistry.dqdt * (temp_c - self.chemistry.rated_temp))
         except:
             res = 1
         return res
-        # return self.q_cap_rated_scaled * (1. + dqdt * (temp_c - self.t_rated))
 
     def count_coulombs(self, chem, dt, reset, temp_c, charge_curr, sat, soc_init=None):
         """Count coulombs based on true=actual capacity
@@ -138,7 +132,7 @@ class Coulombs:
         self.reset = reset
         d_delta_q = charge_curr * dt
         if charge_curr > 0. and not self.tweak_test:
-            d_delta_q *= self.coul_eff
+            d_delta_q *= self.chemistry.coul_eff
         self.sat = sat
 
         # Rate limit temperature
@@ -159,7 +153,7 @@ class Coulombs:
 
         # Integration
         self.q_capacity = self.calculate_capacity(self.temp_lim)
-        self.delta_q = max(min(self.delta_q + d_delta_q - dqdt*self.q_capacity*(self.temp_lim-self.t_last),
+        self.delta_q = max(min(self.delta_q + d_delta_q - self.chemistry.dqdt*self.q_capacity*(self.temp_lim-self.t_last),
                                0.0), -self.q_capacity*1.5)
         self.q = self.q_capacity + self.delta_q
 

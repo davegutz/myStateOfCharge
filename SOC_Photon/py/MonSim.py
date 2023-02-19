@@ -22,7 +22,7 @@ import numpy as np
 from numpy.random import randn
 import Battery
 from Battery import Battery, BatteryMonitor, BatterySim, is_sat, Retained
-from Battery import overall_batt, cp_eframe_mult
+from Battery import overall_batt
 from TFDelay import TFDelay
 from MonSimNomConfig import *  # Global config parameters.   Overwrite in your own calls for studies
 from datetime import datetime, timedelta
@@ -98,9 +98,9 @@ def save_clean_file_sim(sim_ver, csv_file, unit_key):
 def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2,
               t_ib_fail=None, ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=None, Bmon=None, use_vb_raw=False,
               scale_r_ss=1., s_hys_sim=1., s_hys_mon=1., dvoc_sim=0., dvoc_mon=0., drive_ekf=False, dTb_in=None,
-              verbose=True, t_max=None, eframe_mult=cp_eframe_mult, sres0=1., sresct=1., stauct_sim=1., stauct_mon=1,
-              use_vb_sim=False, scale_hys_cap_sim=1., scale_hys_cap_mon=1., coul_eff=0.9985, s_cap_chg=1., s_cap_dis=1.,
-              s_hys_chg=1., s_hys_dis=1., myCH_Tuner=1):
+              verbose=True, t_max=None, eframe_mult=Battery.cp_eframe_mult, sres0=1., sresct=1., stauct_sim=1.,
+              stauct_mon=1, use_vb_sim=False, scale_hys_cap_sim=1., scale_hys_cap_mon=1., s_cap_chg=1., s_cap_dis=1.,
+              s_hys_chg=1., s_hys_dis=1., s_coul_eff=1.):
     if sim_old is not None and len(sim_old.time) < len(mon_old.time):
         t = sim_old.time
     else:
@@ -148,15 +148,13 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
     s_r = Scale(1., 3., 0.001, 1.)   # t_ib_fail = 1000
     sim = BatterySim(mod_code=chm_s[0], temp_c=temp_c, scale=scale, tweak_test=tweak_test,
                      dv_hys=dv_hys_init, sres0=sres0, sresct=sresct, stauct=stauct_sim, scale_r_ss=scale_r_ss,
-                     s_hys=s_hys_sim, dvoc=dvoc_sim, scale_hys_cap=scale_hys_cap_sim, coul_eff=coul_eff,
-                     s_cap_chg=s_cap_chg, s_cap_dis=s_cap_dis, s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis,
-                     myCH_Tuner=myCH_Tuner)
-    mon = BatteryMonitor(mod_code=chm_m[0], r_sd=rsd, tau_sd=tau_sd, r_0=r_0, tau_ct=tau_ct, r_ct=r_ct,
-                         temp_c=temp_c, scale=scale, tweak_test=tweak_test,
-                         dv_hys=dv_hys_init, sres0=sres0, sresct=sresct, stauct=stauct_mon, scaler_q=s_q, scaler_r=s_r,
+                     s_hys=s_hys_sim, dvoc=dvoc_sim, scale_hys_cap=scale_hys_cap_sim, s_coul_eff=s_coul_eff,
+                     s_cap_chg=s_cap_chg, s_cap_dis=s_cap_dis, s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis)
+    mon = BatteryMonitor(mod_code=chm_m[0], temp_c=temp_c, scale=scale, tweak_test=tweak_test, dv_hys=dv_hys_init,
+                         sres0=sres0, sresct=sresct, stauct=stauct_mon, scaler_q=s_q, scaler_r=s_r,
                          scale_r_ss=scale_r_ss, s_hys=s_hys_mon, dvoc=dvoc_mon, eframe_mult=eframe_mult,
-                         scale_hys_cap=scale_hys_cap_mon, coul_eff=coul_eff, s_cap_chg=s_cap_chg, s_cap_dis=s_cap_dis,
-                         s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis, myCH_Tuner=myCH_Tuner)
+                         scale_hys_cap=scale_hys_cap_mon, s_coul_eff=s_coul_eff, s_cap_chg=s_cap_chg,
+                         s_cap_dis=s_cap_dis, s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis)
     # need Tb input.   perhaps need higher order to enforce basic type 1 response
     Is_sat_delay = TFDelay(in_=mon_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
     bms_off_init = mon_old.bms_off[0]
@@ -257,7 +255,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
                           reset=reset, updateTimeIn=updateTimeIn, u_old=u_old, z_old=z_old, x_old=x_old,
                           bms_off_init=bms_off_init)
         ib_charge = mon.ib_charge
-        sat = is_sat(Tb_, mon.voc_filt, mon.soc, mon.chemistry.nom_vsat)
+        sat = is_sat(Tb_, mon.voc_filt, mon.soc, mon.chemistry.nom_vsat, mon.chemistry.dvoc_dt, mon.chemistry.low_t)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
         if rp.modeling == 0:
             mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb_, charge_curr=ib_charge, sat=saturated)
@@ -289,7 +287,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         print('mon:  ', str(mon))
         print('sim:  ', str(sim))
 
-    return mon.saved, sim.saved, sim.saved_s
+    return mon.saved, sim.saved, sim.saved_s, mon, sim
 
 
 if __name__ == '__main__':
