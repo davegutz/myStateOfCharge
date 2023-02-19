@@ -53,6 +53,7 @@ class Chemistry(BMS):
         self.r_sd = 0.  # Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
         self.c_sd = 0.  # Equivalent model for EKF reference.  Parasitic discharge equivalent, Farads
         self.r_ss = 0.  # Equivalent model for state space model initialization, ohms
+        self.dv_min_abs = 0.  # Absolute value of +/- hysteresis limit, V
         self.lut_voc_soc = None
         self.lut_min_soc = None
         self.lut_r_hys = None
@@ -94,6 +95,7 @@ class Chemistry(BMS):
         self.vb_rising_sim = 9.75  # Shutoff point in Sim when off, V (9.75)
         self.nom_vsat = 13.85  # Saturation threshold at temperature, deg C (13.85)
         self.r_ss = self.r_0 + self.r_ct
+        self.dv_min_abs = 0.3  # Absolute value of +/- hysteresis limit, V
 
         # Tables Battleborn Bmon=0, Bsim=0
         # VOC_SOC table
@@ -162,6 +164,7 @@ class Chemistry(BMS):
         self.vb_rising_sim = 9.75  # Shutoff point in Sim when off, V (9.75)
         self.nom_vsat = 13.85  # Saturation threshold at temperature, deg C (13.85)
         self.r_ss = self.r_0 + self.r_ct
+        self.dv_min_abs = 0.06  # Absolute value of +/- hysteresis limit, V
 
         # Tables CHINS Bmon=1, Bsim=1
         # VOC_SOC table
@@ -190,8 +193,8 @@ class Chemistry(BMS):
         schp8 = [0.004, 0.004, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.014, 0.012]
         schp9 = [0.004, 0.004, 0.4, 0.4, .2, .09, 0.04, 0.006, 0.006, 0.006]
         t_r1 = schp4 + schp8 + schp8 + schp9
-        t_dv_min1 = [-0.3, -0.3, -0.3, -0.3]
-        t_dv_max1 = [0.3, 0.3, 0.3, 0.3]
+        t_dv_min1 = [-0.06, -0.06, -0.06, -0.06]
+        t_dv_max1 = [0.06, 0.1, 0.1, 0.06]
         SRs1p4 = [1., 1., .2, .2, .2, .2, 1., 1., 1., 1.]
         SRs1p8 = [1., 1., .2, .2, .2, 1., 1., 1., 1., 1.]
         SRs1p9 = [1., 1., .1, .1, .2, 1., 1., 1., 1., 1.]

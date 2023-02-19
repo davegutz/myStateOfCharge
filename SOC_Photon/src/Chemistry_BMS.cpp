@@ -58,12 +58,51 @@ void Chemistry::assign_all_mod(const String mod_str)
 }
 
 // BattleBorn Chemistry
+// BattleBorn 100 Ah, 12v LiFePO4
+// See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
+// >13.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
+const uint8_t M_T_BB  = 5;    // Number temperature breakpoints for voc table
+const uint8_t N_S_BB  = 18;   // Number soc breakpoints for voc table
+const float Y_T_BB[M_T_BB] =  //Temperature breakpoints for voc table
+        { 5., 11.1, 20., 30., 40. }; 
+const float X_SOC_BB[N_S_BB] =      //soc breakpoints for voc table
+        { -0.15, 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99, 0.995, 1.00};
+const float T_VOC_BB[M_T_BB*N_S_BB] = // r(soc, dv) table
+        { 4.00, 4.00,   4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
+          4.00, 4.00,   4.00,  9.50,  12.00, 12.50, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.60, 14.46,
+          4.00, 4.00,   10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
+          4.00, 4.00,   12.00, 12.65, 12.75, 12.80, 12.85, 12.95, 13.00, 13.08, 13.12, 13.16, 13.20, 13.24, 13.26, 13.27, 13.72, 14.50,
+          4.00, 4.00,   4.00,  4.00,  10.50, 11.93, 12.78, 12.83, 12.89, 12.97, 13.06, 13.10, 13.13, 13.16, 13.19, 13.20, 13.72, 14.50};
+const uint8_t N_N_BB = 5;   // Number of temperature breakpoints for x_soc_min table
+const float X_SOC_MIN_BB[N_N_BB] =  { 5.,   11.1,  20.,  30.,  40.};  // Temperature breakpoints for soc_min table
+const float T_SOC_MIN_BB[N_N_BB] =  { 0.10, 0.07,  0.05, 0.00, 0.20}; // soc_min(t).  At 40C BMS shuts off at 12V
+
+// Battleborn Hysteresis
+const uint8_t M_H_BB  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r, t_s
+const uint8_t N_H_BB  = 7;          // Number of dv breakpoints in r(dv) table t_r, t_s
+const float X_DV_BB[N_H_BB] =       // dv breakpoints for r(soc, dv) table t_r. // DAG 6/13/2022 tune x10 to match data
+        { -0.7,  -0.5,  -0.3,  0.0,   0.15,  0.3,   0.7};
+const float Y_SOC_BB[M_H_BB] =      // soc breakpoints for r(soc, dv) table t_r, t_s
+        { 0.0,  0.5,   1.0};
+const float T_R_BB[M_H_BB*N_H_BB] = // r(soc, dv) table.    // DAG 9/29/2022 tune to match hist data
+        { 0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
+          0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
+          0.016, 0.016, 0.016, 0.005, 0.010, 0.010, 0.010};
+const float T_S_BB[M_H_BB*N_H_BB] = // r(soc, dv) table. Not used yet for BB
+        { 1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1, 1, 1, 1, 1};
+const float T_DV_MAX_BB[M_H_BB] =   // dv_max(soc) table.  Pulled values from insp of T_R_BB where flattens
+        {0.7, 0.3, 0.15};
+const float T_DV_MIN_BB[M_H_BB] =   // dv_max(soc) table.  Pulled values from insp of T_R_BB where flattens
+        {-0.7, -0.5, -0.3};
 void Chemistry::assign_BB()
 {
   // Constants
   rated_temp = 25.;   // Temperature at RATED_BATT_CAP, deg C (25)
   coul_eff = 0.9985;  // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs (0.9985)
   dqdt    = 0.01;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
+  dv_min_abs = 0.3;   // Absolute value of +/- hysteresis limit, V (0.3)
   dvoc_dt = 0.004;    // Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
   dvoc    = 0.;       // Adjustment for calibration error, V (systematic error; may change in future, 0.)
   hys_cap = 3.6e3;    // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data. // div 10 again 9/29/2022 // div 10 again 11/30/2022 (3.6e3)
@@ -94,12 +133,50 @@ void Chemistry::assign_BB()
 }
 
 // CHINS Chemistry
+// CHINS 100 Ah, 12v LiFePO4.  Initial data from manual
+const uint8_t M_T_CH  = 4;    // Number temperature breakpoints for voc table
+const uint8_t N_S_CH  = 20;   // Number soc breakpoints for voc table
+const float Y_T_CH[M_T_CH] =  //Temperature breakpoints for voc table
+        { 5.,  11.1,   11.2,  40. }; 
+const float X_SOC_CH[N_S_CH] =      //soc breakpoints for voc table
+        { -0.10, -0.06, -0.035,  0.00, 0.05, 0.10, 0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.98,  0.99,  1.00};
+const float T_VOC_CH[M_T_CH*N_S_CH] = // r(soc, dv) table
+        { 4.00, 4.00,  4.00,  4.00,  4.00,  4.00,  10.00, 10.95, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.30, 13.30, 13.30, 13.50, 14.70,
+          4.00, 4.00,  4.00,  4.00,  4.00,  9.50,  12.97, 13.00, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.30, 13.30, 13.30, 13.50, 14.70,
+          4.00, 11.50, 12.33, 12.61, 12.81, 12.92, 12.97, 13.00, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.30, 13.30, 13.30, 13.50, 14.70,
+          4.00, 11.50, 12.33, 12.61, 12.81, 12.92, 12.97, 13.00, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.30, 13.30, 13.30, 13.50, 14.70};
+const uint8_t N_N_CH = 4;   // Number of temperature breakpoints for x_soc_min table
+const float X_SOC_MIN_CH[N_N_CH] =  { 5.0,   11.1,  11.2,  40.0};  // Temperature breakpoints for soc_min table
+const float T_SOC_MIN_CH[N_N_CH] =  { -0.15, -0.15, -0.15, -0.15}; // soc_min(t)
+
+// CHINS Hysteresis
+const uint8_t M_H_CH  = 4;          // Number of soc breakpoints in r(soc, dv) table t_r, t_s
+const uint8_t N_H_CH  = 10;         // Number of dv breakpoints in r(dv) table t_r, t_s
+const float X_DV_CH[N_H_CH] =       // dv breakpoints for r(soc, dv) table t_r, t_s
+        { -.10, -.05, -.04, 0.0, .02, .04, .05, .06, .07, .10};
+const float Y_SOC_CH[M_H_CH] =      // soc breakpoints for r(soc, dv) table t_r, t_s
+        { .47, .75, .80, .86 };
+const float T_R_CH[M_H_CH*N_H_CH] = // r(soc, dv) table
+        { 0.003, 0.003, 0.4, 0.4, 0.4, 0.4, 0.010, 0.010, 0.010, 0.010,
+          0.004, 0.004, 0.4, 0.4, 0.4, 0.4, 0.4,   0.4,   0.014, 0.012,
+          0.004, 0.004, 0.4, 0.4, 0.4, 0.4, 0.4,   0.4,   0.014, 0.012,
+          0.004, 0.004, 0.4, 0.4, .2, .09,  0.04,  0.006, 0.006, 0.006};
+const float T_S_CH[M_H_CH*N_H_CH] = // s(soc, dv) table
+        { 1., 1., .2, .2, .2, .2, 1., 1., 1., 1.,
+          1., 1., .2, .2, .2, 1., 1., 1., 1., 1.,
+          1., 1., .2, .2, .2, 1., 1., 1., 1., 1.,
+          1., 1., .1, .1, .2, 1., 1., 1., 1., 1.};
+const float T_DV_MAX_CH[M_H_CH] =   // dv_max(soc) table.  Pulled values from insp of T_R_CH where flattens
+        { 0.06, 0.1,   0.1,   0.06};
+const float T_DV_MIN_CH[M_H_CH] =   // dv_max(soc) table.  Pulled values from insp of T_R_CH where flattens
+        {-0.06, -0.06, -0.06, -0.06};
 void Chemistry::assign_CH()
 {
   // Constants
   rated_temp = 25.;   // Temperature at RATED_BATT_CAP, deg C (25)
   coul_eff = 0.9976;  // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs (0.9976 for sres=1.6)
   dqdt    = 0.01;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
+  dv_min_abs = 0.06;  // Absolute value of +/- hysteresis limit, V (0.06)
   dvoc_dt = 0.004;    // Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
   dvoc    = 0.;       // Adjustment for calibration error, V (systematic error; may change in future, 0.)
   hys_cap = 1.e4;     // Capacitance of hysteresis, Farads.  tau_null = 1 / 0.001 / 1.8e4 = 0.056 s (1e4)
@@ -130,6 +207,21 @@ void Chemistry::assign_CH()
 }
 
 // Spare
+// SP spare to reserve memory, perhaps for LION
+const uint8_t M_T_SP  = 4;    // Number temperature breakpoints for voc table
+const uint8_t N_S_SP  = 18;   // Number soc breakpoints for voc table
+const float Y_T_SP[M_T_SP] =  //Temperature breakpoints for voc table
+        { 5., 11.1, 20., 40. }; 
+const float X_SOC_SP[N_S_SP] =      //soc breakpoints for voc table
+        { -0.15, 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99, 0.995, 1.00};
+const float T_VOC_SP[M_T_SP*N_S_SP] = // r(soc, dv) table
+        { 4.00, 4.00,  4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
+          4.00, 4.00,  4.00,  9.50,  12.00, 12.50, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.2,  13.23, 13.60, 14.46,
+          4.00, 4.00,  10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
+          4.00, 4.00,  10.50, 13.10, 13.27, 13.31, 13.44, 13.46, 13.40, 13.44, 13.48, 13.52, 13.56, 13.60, 13.64, 13.68, 14.22, 15.00};
+const uint8_t N_N_SP = 4;   // Number of temperature breakpoints for x_soc_min table
+const float X_SOC_MIN_SP[N_N_SP] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
+const float T_SOC_MIN_SP[N_N_SP] =  { 0.10, 0.07,  0.05, 0.0}; // soc_min(t)
 void Chemistry::assign_SP()
 {
   // Constants

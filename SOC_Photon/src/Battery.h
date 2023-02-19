@@ -62,97 +62,7 @@ const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1,
 const float MXEPS = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness) (1-1e-6)
 #define HYS_SOC_MIN_MARG 0.15     // Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis (0.15)
 #define HYS_IB_THR      1.0       // Ignore reset if opposite situation exists, A (1.0)
-#define HYS_DV_MIN      0.3       // Minimum value of hysteresis reset, V (0.3 for CHINS)
 
-// BattleBorn 100 Ah, 12v LiFePO4
-// See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
-// >13.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
-const uint8_t M_T_BB  = 5;    // Number temperature breakpoints for voc table
-const uint8_t N_S_BB  = 18;   // Number soc breakpoints for voc table
-const float Y_T_BB[M_T_BB] =  //Temperature breakpoints for voc table
-        { 5., 11.1, 20., 30., 40. }; 
-const float X_SOC_BB[N_S_BB] =      //soc breakpoints for voc table
-        { -0.15, 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99, 0.995, 1.00};
-const float T_VOC_BB[M_T_BB*N_S_BB] = // r(soc, dv) table
-        { 4.00, 4.00,   4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
-          4.00, 4.00,   4.00,  9.50,  12.00, 12.50, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.60, 14.46,
-          4.00, 4.00,   10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
-          4.00, 4.00,   12.00, 12.65, 12.75, 12.80, 12.85, 12.95, 13.00, 13.08, 13.12, 13.16, 13.20, 13.24, 13.26, 13.27, 13.72, 14.50,
-          4.00, 4.00,   4.00,  4.00,  10.50, 11.93, 12.78, 12.83, 12.89, 12.97, 13.06, 13.10, 13.13, 13.16, 13.19, 13.20, 13.72, 14.50};
-const uint8_t N_N_BB = 5;   // Number of temperature breakpoints for x_soc_min table
-const float X_SOC_MIN_BB[N_N_BB] =  { 5.,   11.1,  20.,  30.,  40.};  // Temperature breakpoints for soc_min table
-const float T_SOC_MIN_BB[N_N_BB] =  { 0.10, 0.07,  0.05, 0.00, 0.20}; // soc_min(t).  At 40C BMS shuts off at 12V
-
-// Battleborn Hysteresis
-const uint8_t M_H_BB  = 3;          // Number of soc breakpoints in r(soc, dv) table t_r, t_s
-const uint8_t N_H_BB  = 7;          // Number of dv breakpoints in r(dv) table t_r, t_s
-const float X_DV_BB[N_H_BB] =       // dv breakpoints for r(soc, dv) table t_r. // DAG 6/13/2022 tune x10 to match data
-        { -0.7,  -0.5,  -0.3,  0.0,   0.15,  0.3,   0.7};
-const float Y_SOC_BB[M_H_BB] =      // soc breakpoints for r(soc, dv) table t_r, t_s
-        { 0.0,  0.5,   1.0};
-const float T_R_BB[M_H_BB*N_H_BB] = // r(soc, dv) table.    // DAG 9/29/2022 tune to match hist data
-        { 0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
-          0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
-          0.016, 0.016, 0.016, 0.005, 0.010, 0.010, 0.010};
-const float T_S_BB[M_H_BB*N_H_BB] = // r(soc, dv) table. Not used yet for BB
-        { 1, 1, 1, 1, 1, 1, 1,
-          1, 1, 1, 1, 1, 1, 1,
-          1, 1, 1, 1, 1, 1, 1};
-const float T_DV_MAX_BB[M_H_BB] =   // dv_max(soc) table.  Pulled values from insp of T_R_BB where flattens
-        {0.7, 0.3, 0.15};
-const float T_DV_MIN_BB[M_H_BB] =   // dv_max(soc) table.  Pulled values from insp of T_R_BB where flattens
-        {-0.7, -0.5, -0.3};
-
-// CHINS 100 Ah, 12v LiFePO4.  Initial data from manual
-const uint8_t M_T_CH  = 4;    // Number temperature breakpoints for voc table
-const uint8_t N_S_CH  = 18;   // Number soc breakpoints for voc table
-const float Y_T_CH[M_T_CH] =  //Temperature breakpoints for voc table
-        { 5., 11.1, 20., 40. }; 
-const float X_SOC_CH[N_S_CH] =      //soc breakpoints for voc table
-        { -0.15, 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.98,  0.99, 1.00};
-const float T_VOC_CH[M_T_CH*N_S_CH] = // r(soc, dv) table
-        { 4.00, 4.00,  4.00,  4.00,  10.00, 11.00, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
-          4.00, 4.00,  4.00,  9.50,  12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
-          4.00, 4.00,  10.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70,
-          4.00, 4.00,  11.00, 12.87, 12.91, 12.95, 12.99, 13.05, 13.10, 13.16, 13.18, 13.21, 13.24, 13.30, 13.30, 13.30, 13.50, 14.70};
-const uint8_t N_N_CH = 4;   // Number of temperature breakpoints for x_soc_min table
-const float X_SOC_MIN_CH[N_N_CH] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
-const float T_SOC_MIN_CH[N_N_CH] =  { 0.10, 0.07,  0.05, 0.03}; // soc_min(t)
-
-// CHINS Hysteresis
-const uint8_t M_H_CH  = 2;          // Number of soc breakpoints in r(soc, dv) table t_r, t_s
-const uint8_t N_H_CH  = 9;          // Number of dv breakpoints in r(dv) table t_r, t_s
-const float X_DV_CH[N_H_CH] =       // dv breakpoints for r(soc, dv) table t_r, t_s
-        { -0.10,  -0.05,  -0.04, 0.0,  0.02, 0.03, 0.06,  0.07,  0.10};
-const float Y_SOC_CH[M_H_CH] =      // soc breakpoints for r(soc, dv) table t_r, t_s
-        { 0.80, 0.86 };
-const float T_R_CH[M_H_CH*N_H_CH] = // r(soc, dv) table
-        { 0.004,  0.004,  0.4,   0.4,  0.4,  0.4,  0.4,   0.014, 0.012,
-          0.004,  0.004,  0.4,   0.4,  .2,  .1,    0.006, 0.006, 0.006};
-const float T_S_CH[M_H_CH*N_H_CH] = // s(soc, dv) table
-        { 1.,    1.,    .2,   .2,   .2,   1.,   1.,    1.,   1.,
-          1.,    1.,    .1,   .1,   .2,   1.,   1.,    1.,   1.};
-const float T_DV_MAX_CH[M_H_CH] =   // dv_max(soc) table.  Pulled values from insp of T_R_CH where flattens
-        {0.3,  0.3};
-const float T_DV_MIN_CH[M_H_CH] =   // dv_max(soc) table.  Pulled values from insp of T_R_CH where flattens
-        {-0.3, -0.3};
-
-
-// SP spare to reserve memory, perhaps for LION
-const uint8_t M_T_SP  = 4;    // Number temperature breakpoints for voc table
-const uint8_t N_S_SP  = 18;   // Number soc breakpoints for voc table
-const float Y_T_SP[M_T_SP] =  //Temperature breakpoints for voc table
-        { 5., 11.1, 20., 40. }; 
-const float X_SOC_SP[N_S_SP] =      //soc breakpoints for voc table
-        { -0.15, 0.00,  0.05,  0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99, 0.995, 1.00};
-const float T_VOC_SP[M_T_SP*N_S_SP] = // r(soc, dv) table
-        { 4.00, 4.00,  4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
-          4.00, 4.00,  4.00,  9.50,  12.00, 12.50, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.2,  13.23, 13.60, 14.46,
-          4.00, 4.00,  10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
-          4.00, 4.00,  10.50, 13.10, 13.27, 13.31, 13.44, 13.46, 13.40, 13.44, 13.48, 13.52, 13.56, 13.60, 13.64, 13.68, 14.22, 15.00};
-const uint8_t N_N_SP = 4;   // Number of temperature breakpoints for x_soc_min table
-const float X_SOC_MIN_SP[N_N_SP] =  { 5.,   11.1,  20.,  40.};  // Temperature breakpoints for soc_min table
-const float T_SOC_MIN_SP[N_N_SP] =  { 0.10, 0.07,  0.05, 0.0}; // soc_min(t)
 // Hysteresis: reservoir model of battery electrical hysteresis
 // Use variable resistor and capacitor to create hysteresis from an RC circuit
 class Hysteresis
@@ -192,6 +102,7 @@ protected:
   TableInterp2D *hys_Ts_;// dv-soc 2-D table scalar
   TableInterp1D *hys_Tx_;// soc 1-D table, V_max
   TableInterp1D *hys_Tn_;// soc 1-D table, V_min
+  float dv_min_abs_;   // Absolute value of +/- hysteresis limit, V
 };
 
 

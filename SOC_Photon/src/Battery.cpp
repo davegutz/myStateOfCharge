@@ -625,7 +625,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     if ( sp.tweak_test() || !sp.mod_ib() ) sat_ib_max_ = ib_charge_fut;   // Disable cutback when real world or when doing tweak_test test
     ib_fut_ = min(ib_charge_fut, sat_ib_max_);      // the feedback of ib_
     ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past value
-    if ( (q_ <= 0.) && (ib_charge_ < 0.) ) ib_charge_ = 0.;   //  empty
+    if ( (q_ <= 0.) && (ib_charge_ < 0.) && sp.mod_ib() ) ib_charge_ = 0.;   //  empty
     model_cutback_ = (voc_stat_ > vsat_) && (ib_fut_ == sat_ib_max_);
     model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
@@ -749,7 +749,7 @@ float BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Battery
     reset_temp_past = reset_temp;
     resetting_ = false;     // one pass flag
 
-    // Integration can go to -10%
+    // Integration can go to -20%
     q_capacity_ = calculate_capacity(temp_lim);
     if ( !reset_temp )
     {
@@ -831,6 +831,7 @@ Hysteresis::Hysteresis(const float cap, Chemistry chem)
     hys_Ts_ = new TableInterp2D(chem.n_h, chem.m_h, chem.x_dv, chem.y_soc, chem.t_s);
     hys_Tx_ = new TableInterp1D(chem.m_h, chem.y_soc, chem.t_x);
     hys_Tn_ = new TableInterp1D(chem.m_h, chem.y_soc, chem.t_n);
+    dv_min_abs_ = chem.dv_min_abs;
 
 }
 
@@ -900,6 +901,7 @@ void Hysteresis::pretty_print()
     Serial.printf("  disab%d\n", disabled_);
     Serial.printf("  dv_dot%7.3f, V/s\n", dv_dot_);
     Serial.printf("  dv_hys%7.3f, V, SH\n", dv_hys_);
+    Serial.printf("  dv_min_abs%7.3f, V, SH\n", dv_min_abs_);
     Serial.printf("  ib%7.3f, A\n", ib_);
     Serial.printf("  ibs%7.3f, A\n", ibs_);
     Serial.printf("  ioc%7.3f, A\n", ioc_);
@@ -927,12 +929,12 @@ float Hysteresis::update(const double dt, const boolean init_high, const boolean
 
     if ( init_high )
     {
-        dv_hys_ = -HYS_DV_MIN;
+        dv_hys_ = -dv_min_abs_;
         dv_dot_ = 0.;
     }
     else if ( init_low )
     {
-        dv_hys_ = max(HYS_DV_MIN, -e_wrap);
+        dv_hys_ = max(dv_min_abs_, -e_wrap);
         dv_dot_ = 0.;
     }
     else if ( reset_temp )

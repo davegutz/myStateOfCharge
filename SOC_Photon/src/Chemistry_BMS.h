@@ -63,6 +63,7 @@ struct Chemistry: public BMS
   float *t_x;       // r_max(soc) table
   float *t_n;       // r_min(soc) table
   float v_sat;      // Saturation threshold at temperature, deg C
+  float dv_min_abs; // Absolute value of +/- hysteresis limit, V
   float dvoc_dt;    // Change of VOC with operating temperature in range 0 - 50 C V/deg C
   float dvoc;       // Adjustment for calibration error, V
   float r_0;        // ChargeTransfer R0, ohms

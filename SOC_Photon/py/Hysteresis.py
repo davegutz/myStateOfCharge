@@ -22,15 +22,11 @@ import numpy as np
 from pyDAGx.myTables import TableInterp2D, TableInterp1D
 from unite_pictures import cleanup_fig_files
 
-HYS_DV_MIN = 0.3
-
 
 class Hysteresis:
     # Use variable resistor to create hysteresis from an RC circuit
 
-    def __init__(self, scale=1., dv_hys=0.0, chem=0, scale_cap=1.,s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1.,
-                 t_dv0=None, t_soc0=None, t_r0=None, t_dv_min0=None, t_dv_max0=None, t_s0=None,
-                 t_dv1=None, t_soc1=None, t_r1=None, t_dv_min1=None, t_dv_max1=None, t_s1=None,
+    def __init__(self, scale=1., dv_hys=0.0, chem=0, scale_cap=1., s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1.,
                  chemistry=None):
         # Defaults
         self.chm = chem
@@ -44,6 +40,8 @@ class Hysteresis:
         self.luts = chemistry.lut_s_hys
         self.lu_x = chemistry.lu_x_hys
         self.lu_n = chemistry.lu_n_hys
+        self.dv_min_abs = chemistry.dv_min_abs
+        print('dv_min_abs', self.dv_min_abs)
         print('chm', self.chm, 'cap', self.cap)
         self.scale = scale
         self.disabled = self.scale < 1e-5
@@ -133,10 +131,10 @@ class Hysteresis:
         # so break that too by setting it to 0
 
         if init_low:
-            self.dv_hys = max(HYS_DV_MIN, -e_wrap)
+            self.dv_hys = max(self.dv_min_abs, -e_wrap)
             self.dv_dot = 0.  # break positive feedback loop
         if init_high:
-            self.dv_hys = -HYS_DV_MIN
+            self.dv_hys = -self.dv_min_abs
             self.dv_dot = 0.  # break positive feedback loop
 
         # normal ODE integration
