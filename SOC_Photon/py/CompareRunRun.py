@@ -22,29 +22,7 @@ import numpy as np
 from DataOverModel import SavedData, SavedDataSim, write_clean_file, overall
 from CompareFault import add_stuff_f, over_fault, filter_Tb, IB_BAND
 from pyDAGx import myTables
-from Battery import Battery
-
-# Battleborn Bmon=0, Bsim=0
-t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17, 0.20, 0.25, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.99, 0.995,
-            1.00]
-t_y_t0 = [5., 11.1, 20., 30., 40.]
-t_voc0 = [4.00, 4.00, 9.00, 11.80, 12.50, 12.60, 12.67, 12.76, 12.82, 12.93, 12.98, 13.03, 13.07, 13.11, 13.17,
-          13.22, 13.59, 14.45,
-          4.00, 4.00, 10.00, 12.30, 12.60, 12.65, 12.71, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20,
-          13.23, 13.60, 14.46,
-          4.00, 12.22, 12.66, 12.74, 12.80, 12.85, 12.89, 12.95, 12.99, 13.05, 13.08, 13.13, 13.18, 13.21, 13.25,
-          13.27, 13.72, 14.50,
-          4.00, 4.00, 12.00, 12.65, 12.75, 12.80, 12.85, 12.95, 13.00, 13.08, 13.12, 13.16, 13.20, 13.24, 13.26,
-          13.27, 13.72, 14.50,
-          4.00, 4.00, 4.00, 4.00, 10.50, 11.93, 12.78, 12.83, 12.89, 12.97, 13.06, 13.10, 13.13, 13.16, 13.19,
-          13.20, 13.72, 14.50]
-x0 = np.array(t_x_soc0)
-y0 = np.array(t_y_t0)
-data_interp0 = np.array(t_voc0)
-lut_voc = myTables.TableInterp2D(x0, y0, data_interp0)
-t_x_soc_min = [5., 11.1, 20., 30., 40.]
-t_soc_min = [0.07, 0.05, -0.05, 0.00, 0.20]
-lut_soc_min = myTables.TableInterp1D(np.array(t_x_soc_min), np.array(t_soc_min))
+from Battery import Battery, BatteryMonitor
 
 
 # Load from files
@@ -96,6 +74,7 @@ def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zer
 
     mon = SavedData(data=mon_raw, sel=sel_raw, ekf=ekf_raw, time_end=time_end_in,
                         zero_zero=zero_zero_in)
+    batt = BatteryMonitor(mon.chm[0])
 
     # Load sim _s v24 portion of real-time run (old)
     data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
@@ -123,9 +102,9 @@ def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zer
         print("data from", temp_flt_file, "empty after loading")
     if temp_flt_file_clean:
         f_raw = np.unique(f_raw)
-        f = add_stuff_f(f_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
+        f = add_stuff_f(f_raw, batt, ib_band=IB_BAND)
         print("\nf:\n", f, "\n")
-        f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=rated_batt_cap)
+        f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap)
     else:
         f = None
     return mon, sim, f, data_file_clean, temp_flt_file_clean
@@ -187,7 +166,7 @@ if __name__ == '__main__':
         plot_title = filename + '   ' + date_time
         if temp_flt_file_clean and len(f.time) > 1:
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                          n_fig=n_fig, voc_reset=0., long_term=long_term_in)
+                                          n_fig=n_fig, long_term=long_term_in)
         if plot_overall_in:
             n_fig, fig_files = overall(mon_old, mon_new, sim_old, sim_new, sim_new, filename, fig_files,
                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all

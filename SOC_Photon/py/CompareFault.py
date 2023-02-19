@@ -28,9 +28,6 @@ from Util import cat
 from resample import resample
 from DataOverModel import tune_r
 
-low_t = 4.  # Minimum temperature for valid saturation check, because BMS shuts off battery low.
-IB_MIN_UP = 0.2  # Min up charge current for come alive, BMS logic, and fault
-
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 IB_BAND = 1.  # Threshold to declare charging or discharging
 TB_BAND = 25.  # Band around temperature to group data and correct
@@ -50,33 +47,6 @@ VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
 #  Redesign Hysteresis_20220917d.  Make a new Hysteresis_20220926.py with new curve
 HYS_CAP_REDESIGN = 3.6e4  # faster time constant needed
 HYS_SOC_MIN_MARG = 0.15  # add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
-HYS_IB_THR = 1.  # ignore reset if opposite situation exists
-
-# Battleborn properties for fault thresholds
-X_SOC_MIN_BB = [5.,   11.1,   20.,  30.,  40.]  # Temperature breakpoints for soc_min table
-T_SOC_MIN_BB = [0.10, 0.07,  0.05, 0.00, 0.20]  # soc_min(t).  At 40C BMS shuts off at 12V
-lut_soc_min_bb = myTables.TableInterp1D(np.array(X_SOC_MIN_BB), np.array(T_SOC_MIN_BB))
-HDB_VBATT = 0.05  # Half deadband to filter vb, V (0.05)
-V_SAT_BB = 13.85  # Saturation threshold at temperature, deg C
-NOM_VSAT_BB = V_SAT_BB - HDB_VBATT  # Center in hysteresis
-DVOC_DT_BB = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V/deg C
-WRAP_HI_A = 32.  # Wrap high voltage threshold, A (32 after testing; 16=0.2v)
-WRAP_LO_A = -32.  # Wrap high voltage threshold, A (-32, -20 too small on truck -16=-0.2v)
-WRAP_HI_SAT_MARG = 0.2  # Wrap voltage margin to saturation, V (0.2)
-WRAP_HI_SAT_SCLR = 2.0  # Wrap voltage margin scalar when saturated (2.0)
-IBATT_DISAGREE_THRESH = 10.  # Signal selection threshold for current disagree test, A (10.)
-QUIET_A = 0.005  # Quiet set threshold, sec (0.005, 0.01 too large in truck)
-NOMINAL_TB = 15.  # Middle of the road Tb for decent reversionary operation, deg C (15.)
-WRAP_SOC_HI_OFF = 0.97  # Disable e_wrap_hi when saturated
-WRAP_SOC_HI_SCLR = 1000.  # Huge to disable e_wrap
-WRAP_SOC_LO_OFF_ABS = 0.35  # Disable e_wrap when near empty (soc lo any Tb)
-WRAP_SOC_LO_OFF_REL = 0.2  # Disable e_wrap when near empty (soc lo for high Tb where soc_min=.2, voltage cutback)
-WRAP_SOC_LO_SCLR = 60.  # Large to disable e_wrap (60. for startup)
-CC_DIFF_SOC_DIS_THRESH = 0.2  # Signal selection threshold for Coulomb counter EKF disagree test (0.2)
-CC_DIFF_LO_SOC_SCLR = 4.  # Large to disable cc_ctf
-r_0 = 0.0046  # Randles R0, ohms
-r_ct = 0.0077  # Randles diffusion resistance, ohms
-r_ss = r_0 + r_ct
 
 
 # Add schedule lookups and do some rack and stack
@@ -148,7 +118,7 @@ def add_stuff(d_ra, mon, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
 
 
 # Add schedule lookups and do some rack and stack
-def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., voc_soc_tbl=None, soc_min_tbl=None):
+def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100.):
     voc_soc = []
     soc_min = []
     vsat = []
@@ -169,16 +139,17 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., voc_soc_tbl=None, s
         cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
         ib_diff.append(ib_diff_)
         C_rate = d_ra.ib[i] / rated_batt_cap
-        voc_soc.append(voc_soc_tbl.interp(d_ra.soc[i], d_ra.Tb[i]))
+        voc_soc.append(mon.chemistry.lut_voc_soc.interp(d_ra.soc[i], d_ra.Tb[i]))
+        BB = BatteryMonitor(0)
         cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = \
-            fault_thr_bb(Tb, soc, voc_soc[i], voc_stat, C_rate, soc_min_tbl=soc_min_tbl)
+            fault_thr_bb(Tb, soc, voc_soc[i], voc_stat, C_rate, BB)
         cc_dif.append(cc_dif_)
         cc_diff_thr.append(cc_diff_thr_)
         ewhi_thr.append(ewhi_thr_)
         ewlo_thr.append(ewlo_thr_)
         ib_diff_thr.append(ib_diff_thr_)
         ib_quiet_thr.append(ib_quiet_thr_)
-        soc_min.append((soc_min_tbl.interp(d_ra.Tb[i])))
+        soc_min.append((BB.chemistry.lut_min_soc.interp(d_ra.Tb[i]) ))
         vsat.append(mon.chemistry.nom_vsat + (d_ra.Tb[i] - mon.chemistry.rated_temp) * mon.chemistry.dvoc_dt)
         time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
         if i > 0:
@@ -243,11 +214,25 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., voc_soc_tbl=None, s
 
 
 # Calculate thresholds from global input values listed above (review these)
-def fault_thr_bb(Tb, soc, voc_soc, voc_stat, C_rate, soc_min_tbl=lut_soc_min_bb):
-    vsat_ = NOM_VSAT_BB + (Tb-25.)*DVOC_DT_BB
+def fault_thr_bb(Tb, soc, voc_soc, voc_stat, C_rate, bb):
+    # There is no fault logic in the python code, so hard code it here
+    WRAP_HI_A = 32.  # Wrap high voltage threshold, A (32 after testing; 16=0.2v)
+    WRAP_LO_A = -32.  # Wrap high voltage threshold, A (-32, -20 too small on truck -16=-0.2v)
+    WRAP_HI_SAT_MARG = 0.2  # Wrap voltage margin to saturation, V (0.2)
+    WRAP_HI_SAT_SCLR = 2.0  # Wrap voltage margin scalar when saturated (2.0)
+    IBATT_DISAGREE_THRESH = 10.  # Signal selection threshold for current disagree test, A (10.)
+    QUIET_A = 0.005  # Quiet set threshold, sec (0.005, 0.01 too large in truck)
+    WRAP_SOC_HI_OFF = 0.97  # Disable e_wrap_hi when saturated
+    WRAP_SOC_HI_SCLR = 1000.  # Huge to disable e_wrap
+    WRAP_SOC_LO_OFF_ABS = 0.35  # Disable e_wrap when near empty (soc lo any Tb)
+    WRAP_SOC_LO_OFF_REL = 0.2  # Disable e_wrap when near empty (soc lo for high Tb where soc_min=.2, voltage cutback)
+    WRAP_SOC_LO_SCLR = 60.  # Large to disable e_wrap (60. for startup)
+    CC_DIFF_SOC_DIS_THRESH = 0.2  # Signal selection threshold for Coulomb counter EKF disagree test (0.2)
+    CC_DIFF_LO_SOC_SCLR = 4.  # Large to disable cc_ctf
+    vsat_ = bb.chemistry.nom_vsat + (Tb-25.)*bb.chemistry.dvoc_dt
 
     # cc_diff
-    soc_min = soc_min_tbl.interp(Tb)
+    soc_min = bb.chemistry.lut_min_soc.interp(Tb)
     if soc <= max(soc_min+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS):
         cc_diff_empty_sclr_ = CC_DIFF_LO_SOC_SCLR
     else:
@@ -270,9 +255,9 @@ def fault_thr_bb(Tb, soc, voc_soc, voc_stat, C_rate, soc_min_tbl=lut_soc_min_bb)
         ewsat_sclr_ = 1.
         ewmin_sclr_ = 1.
     ewhi_sclr_ = 1.  # ram adjusts during data collection
-    ewhi_thr = r_ss * WRAP_HI_A * ewhi_sclr_ * ewsat_sclr_ * ewmin_sclr_
+    ewhi_thr = bb.chemistry.r_ss * WRAP_HI_A * ewhi_sclr_ * ewsat_sclr_ * ewmin_sclr_
     ewlo_sclr_ = 1.  # ram adjusts during data collection
-    ewlo_thr = r_ss * WRAP_LO_A * ewlo_sclr_ * ewsat_sclr_ * ewmin_sclr_
+    ewlo_thr = bb.chemistry.r_ss * WRAP_LO_A * ewlo_sclr_ * ewsat_sclr_ * ewmin_sclr_
 
     # ib_diff
     ib_diff_sclr_ = 1.  # ram adjusts during data collection
@@ -732,7 +717,7 @@ def filter_Tb(raw, temp_corr, mon, tb_band=5., rated_batt_cap=100.):
     for i in range(len(h.Tb)):
         sat_[i] = is_sat(h.Tb[i], h.voc[i], h.soc[i], mon.chemistry.nom_vsat, mon.chemistry.dvoc_dt, mon.chemistry.low_t)
         # h.bms_off[i] = (h.Tb[i] < low_t) or ((h.voc[i] < low_voc) and (h.ib[i] < IB_MIN_UP))
-        bms_off_[i] = (h.Tb[i] < low_t) or ((h.voc_stat[i] < 10.5) and (h.ib[i] < Battery.IB_MIN_UP))
+        bms_off_[i] = (h.Tb[i] < mon.chemistry.low_t) or ((h.voc_stat[i] < 10.5) and (h.ib[i] < Battery.IB_MIN_UP))
 
     # Correct for temp
     q_cap = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=mon.chemistry.dqdt, temp=h.Tb, t_rated=mon.chemistry.rated_temp)
@@ -805,7 +790,7 @@ def filter_Tb(raw, temp_corr, mon, tb_band=5., rated_batt_cap=100.):
             voc = np.interp(t_sec, h.time_sec, h.voc)
             e_wrap = np.interp(t_sec, h.time_sec, h.e_wrap)
             hys_redesign.calculate_hys(ib, soc)
-            init_low = bms_off or (soc < (soc_min + HYS_SOC_MIN_MARG) and ib > HYS_IB_THR)
+            init_low = bms_off or (soc < (soc_min + HYS_SOC_MIN_MARG) and ib > Battery.HYS_IB_THR)
             dvh = hys_redesign.update(dt_hys_sec, init_high=sat, init_low=init_low, e_wrap=e_wrap)
             res = hys_redesign.res
             ioc = hys_redesign.ioc
@@ -973,8 +958,7 @@ if __name__ == '__main__':
             print("data from", temp_flt_file, "empty after loading")
             exit(1)
         f_raw = np.unique(f_raw)
-        f = add_stuff_f(f_raw, mon, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND,
-                        rated_batt_cap=rated_batt_cap_in)
+        f = add_stuff_f(f_raw, mon, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in)
         print("\nf:\n", f, "\n")
         f = filter_Tb(f, 20., mon, tb_band=100., rated_batt_cap=rated_batt_cap_in)
 

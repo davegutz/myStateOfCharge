@@ -629,8 +629,7 @@ if __name__ == '__main__':
             print("data from", temp_flt_file, "empty after loading")
             exit(1)
         f_raw = np.unique(f_raw)
-        f = add_stuff_f(f_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND,
-                        rated_batt_cap=rated_batt_cap_in)
+        f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in)
         print("\nf:\n", f, "\n")
         f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=RATED_BATT_CAP)
 
