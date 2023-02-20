@@ -32,6 +32,8 @@ extern CommandPars cp;  // Various parameters shared at system level
 extern PublishPars pp;  // For publishing
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
+#define PLATFORM_PHOTON 6
+
 // Print consolidation
 void print_all_header(void)
 {
@@ -314,9 +316,16 @@ void load_ib_vb(const boolean reset, Sensors *Sen, Pins *myPins, BatteryMonitor 
   // Load voltage Vb
   // Outputs:  Sen->Vb
   Sen->vb_load(myPins->Vb_pin);
-  if ( !sp.mod_vb_dscn() )  Sen->Flt->vb_check(Sen, Mon, VBATT_MIN, VBATT_MAX, reset);
+  if ( !sp.mod_vb_dscn() )  Sen->Flt->vb_check(Sen, Mon, VB_MIN, VB_MAX, reset);
   else                      Sen->Flt->vb_check(Sen, Mon, -1.0, 1.0, reset);
   if ( sp.debug()==15 ) Sen->vb_print();
+
+  // Backup battery VBAT
+  #if (PLATFORM_ID == PLATFORM_PHOTON)
+    Sen->vbat_load(myPins->VBAT_pin);
+    Sen->Flt->vbat_check(Sen, Mon, VBAT_MIN, VBAT_MAX, reset);
+    if ( sp.debug()==17 ) Sen->vbat_print();
+  #endif
 
   // Power calculation
   Sen->Wb = Sen->Vb*Sen->Ib;
@@ -373,6 +382,10 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
     disp_1 = "*fail";
   else if ( Sen->bms_off )
     disp_1 = " off ";
+  #if (PLATFORM_ID == PLATFORM_PHOTON )
+    else if ( Sen->Flt->vbat_fa() && (blink==1 || blink==2) )
+      disp_0 = "VBAT";
+  #endif
 
   // Ib
   sprintf(cp.buffer, "%6.1f", pp.pubList.Ib);

@@ -33,6 +33,7 @@ extern CommandPars cp;  // Various parameters shared at system level
 extern PublishPars pp;  // For publishing
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
+#define PLATFORM_PHOTON 6
 
 // class TempSensor
 // constructors
@@ -176,7 +177,7 @@ void Shunt::sample(const boolean reset_loc, const float T)
 
 // Class Fault
 Fault::Fault(const double T, uint8_t *preserving):
-  cc_diff_(0.), cc_diff_sclr_(1), cc_diff_empty_sclr_(1), disab_ib_fa_(false), disab_tb_fa_(false), disab_vb_fa_(false), 
+  cc_diff_(0.), cc_diff_sclr_(1), cc_diff_empty_sclr_(1), disab_ib_fa_(false), disab_tb_fa_(false), disab_vb_fa_(false), disab_vbat_fa_(false),
   ewhi_sclr_(1), ewlo_sclr_(1), ewmin_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0), fail_tb_(false),
   ib_diff_sclr_(1), ib_quiet_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), latched_fail_(false), 
   latched_fail_fake_(false), tb_sel_stat_(1), tb_stale_time_sclr_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
@@ -185,10 +186,11 @@ Fault::Fault(const double T, uint8_t *preserving):
   IbErrFilt = new LagTustin(T, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
   IbdHiPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
   IbdLoPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
-  IbAmpHardFail  = new TFDelay(false, IBATT_HARD_SET, IBATT_HARD_RESET, T);
-  IbNoAmpHardFail  = new TFDelay(false, IBATT_HARD_SET, IBATT_HARD_RESET, T);
+  IbAmpHardFail  = new TFDelay(false, IB_HARD_SET, IB_HARD_RESET, T);
+  IbNoAmpHardFail  = new TFDelay(false, IB_HARD_SET, IB_HARD_RESET, T);
   TbStaleFail  = new TFDelay(false, TB_STALE_SET, TB_STALE_RESET, T);
-  VbHardFail  = new TFDelay(false, VBATT_HARD_SET, VBATT_HARD_RESET, T);
+  VbHardFail  = new TFDelay(false, VB_HARD_SET, VB_HARD_RESET, T);
+  VbatHardFail  = new TFDelay(false, VBAT_HARD_SET, VBAT_HARD_RESET, T);
   QuietPer  = new TFDelay(false, QUIET_S, QUIET_R, T);
   WrapErrFilt = new LagTustin(T, WRAP_ERR_FILT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT);  // actual update time provided run time
   WrapHi = new TFDelay(false, WRAP_HI_S, WRAP_HI_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
@@ -319,11 +321,14 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" ib_quiet %7.3f  thr=%7.3f Fq v\n\n", ib_quiet_, ib_quiet_thr_);
 
   Serial.printf(" soc  %7.3f  voc %7.3f  voc_soc %7.3f\n", Mon->soc(), Mon->voc(), Mon->voc_soc());
-  Serial.printf(" dis_tb_fa %d  dis_vb_fa %d  dis_ib_fa %d\n", disab_tb_fa_, disab_vb_fa_, disab_ib_fa_);
+  Serial.printf(" dis_tb_fa %d  dis_vb_fa %d  dis_vbat_fa %d dis_ib_fa %d\n", disab_tb_fa_, disab_vb_fa_, disab_vbat_fa_, disab_ib_fa_);
   Serial.printf(" bms_off   %d\n\n", Mon->bms_off());
 
   Serial.printf(" Tbh=%7.3f  Tbm=%7.3f\n", Sen->Tb_hdwe, Sen->Tb_model);
   Serial.printf(" Vbh %7.3f  Vbm %7.3f\n", Sen->Vb_hdwe, Sen->Vb_model);
+  #if (PLATFORM_ID == PLATFORM_PHOTON)
+    Serial.printf(" VBAT%7.3f\n", Sen->VBAT_hdwe);
+  #endif
   Serial.printf(" imh %7.3f  imm %7.3f\n", Sen->Ib_amp_hdwe, Sen->Ib_amp_model);
   Serial.printf(" inh %7.3f  inm %7.3f\n\n", Sen->Ib_noa_hdwe, Sen->Ib_noa_model);
 
@@ -334,6 +339,9 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
 
   Serial.printf(" bare det n  %d  x \n", Sen->ShuntNoAmp->bare_detected());
   Serial.printf(" bare det m  %d  x \n", Sen->ShuntAmp->bare_detected());
+  #if (PLATFORM_ID == PLATFORM_PHOTON )
+    Serial.printf(" vbat    %d  %d 'Fq v'\n", vbat_flt(), vbat_fa());
+  #endif
   Serial.printf(" ib_dsc  %d  %d 'Fq v'\n", ib_dscn_flt(), ib_dscn_fa());
   Serial.printf(" ibd_lo  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_lo_flt(), ib_diff_lo_fa());
   Serial.printf(" ibd_hi  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_hi_flt(), ib_diff_hi_fa());
@@ -350,7 +358,11 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf("   ");
   bitMapPrint(cp.buffer, falw_, NUM_FA);
   Serial.println(cp.buffer);
-  Serial.printf("  CBA98765x3210 xxA9876543210\n");
+  #if (PLATFORM_ID == PLATFORM_PHOTON )
+    Serial.printf("  DCBA98765x3210 xBA9876543210\n");
+  #else
+    Serial.printf("  CBA98765x3210 xxA9876543210\n");
+  #endif
   Serial.printf("  fltw=%d     falw=%d\n", fltw_, falw_);
   if ( cp.fake_faults )
     Serial.printf("fake_faults=>redl\n");
@@ -369,6 +381,9 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 
   Serial1.printf(" Tbh=%7.3f  Tbm=%7.3f\n", Sen->Tb_hdwe, Sen->Tb_model);
   Serial1.printf(" Vbh %7.3f  Vbm %7.3f\n", Sen->Vb_hdwe, Sen->Vb_model);
+  #if (PLATFORM_ID == PLATFORM_PHOTON )
+    Serial1.printf(" VBAT%7.3f\n", Sen->VBAT_hdwe);
+  #endif
   Serial1.printf(" imh %7.3f  imm %7.3f\n", Sen->Ib_amp_hdwe, Sen->Ib_amp_model);
   Serial1.printf(" inh %7.3f  inm %7.3f\n\n", Sen->Ib_noa_hdwe, Sen->Ib_noa_model);
 
@@ -378,6 +393,9 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 
   Serial1.printf(" bare n  %d  x \n", Sen->ShuntNoAmp->bare_detected());
   Serial1.printf(" bare m  %d  x \n", Sen->ShuntAmp->bare_detected());
+  #if (PLATFORM_ID == PLATFORM_PHOTON )
+    Serial1.printf(" vbat    %d  %d 'Fq v'\n", vbat_flt(), vbat_fa());
+  #endif
   Serial1.printf(" ib_dsc  %d  %d 'Fq v'\n", ib_dscn_flt(), ib_dscn_fa());
   Serial1.printf(" ibd_lo  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_lo_flt(), ib_diff_lo_fa());
   Serial1.printf(" ibd_hi  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_hi_flt(), ib_diff_hi_fa());
@@ -394,7 +412,11 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("   ");
   bitMapPrint(cp.buffer, falw_, NUM_FA);
   Serial1.println(cp.buffer);
-  Serial1.printf("  CBA98765x3210 xxA9876543210\n");
+  #if (PLATFORM_ID == PLATFORM_PHOTON )
+    Serial1.printf("  DCBA98765x3210 xBA9876543210\n");
+  #else
+    Serial1.printf("  CBA98765x3210 xxA9876543210\n");
+  #endif
   Serial1.printf("  fltw=%d     falw=%d\n", fltw_, falw_);
   if ( cp.fake_faults )
     Serial1.printf("fake_faults=>redl\n");
@@ -631,8 +653,8 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     }
     else
     {
-      failAssign( ib_amp_fa() || IbAmpHardFail->calculate(ib_amp_flt(), IBATT_HARD_SET, IBATT_HARD_RESET, Sen->T, reset_loc), IB_AMP_FA );
-      failAssign( ib_noa_fa() || IbNoAmpHardFail->calculate(ib_noa_flt(), IBATT_HARD_SET, IBATT_HARD_RESET, Sen->T, reset_loc), IB_NOA_FA);
+      failAssign( ib_amp_fa() || IbAmpHardFail->calculate(ib_amp_flt(), IB_HARD_SET, IB_HARD_RESET, Sen->T, reset_loc), IB_AMP_FA );
+      failAssign( ib_noa_fa() || IbNoAmpHardFail->calculate(ib_noa_flt(), IB_HARD_SET, IB_HARD_RESET, Sen->T, reset_loc), IB_NOA_FA);
     }
 }
 
@@ -670,10 +692,29 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
   else
   {
     faultAssign( (Sen->vb_hdwe()<=_vb_min && Sen->ib_hdwe()*sp.nP()>IB_MIN_UP) || (Sen->vb_hdwe()>=_vb_max), VB_FLT);
-    failAssign( vb_fa() || VbHardFail->calculate(vb_flt(), VBATT_HARD_SET, VBATT_HARD_RESET, Sen->T, reset_loc), VB_FA);
+    failAssign( vb_fa() || VbHardFail->calculate(vb_flt(), VB_HARD_SET, VB_HARD_RESET, Sen->T, reset_loc), VB_FA);
   }
 }
 
+// Check analog VBAT.  Latches
+void Fault::vbat_check(Sensors *Sen, BatteryMonitor *Mon, const float _vbat_min, const float _vbat_max, const boolean reset)
+{
+  boolean reset_loc = reset | reset_all_faults_;
+  if ( reset_loc )
+  {
+    failAssign(false, VBAT_FA);
+  }
+  if ( disab_vbat_fa_ )
+  {
+    faultAssign(false, VBAT_FLT);
+    failAssign( false, VBAT_FA);
+  }
+  else
+  {
+    faultAssign( (Sen->vbat_hdwe()<=_vbat_min) || (Sen->vbat_hdwe()>=_vbat_max), VBAT_FLT);
+    failAssign( vbat_fa() || VbatHardFail->calculate(vbat_flt(), VBAT_HARD_SET, VBAT_HARD_RESET, Sen->T, reset_loc), VBAT_FA);
+  }
+}
 
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors):
@@ -959,7 +1000,7 @@ void Sensors::vb_load(const uint16_t vb_pin)
   if ( !sp.mod_vb_dscn() )
   {
     Vb_raw = analogRead(vb_pin);
-    Vb_hdwe =  float(Vb_raw)*VB_CONV_GAIN*sp.Vb_scale() + float(VBATT_A) + sp.Vb_bias_hdwe();
+    Vb_hdwe =  float(Vb_raw)*VB_CONV_GAIN*sp.Vb_scale() + float(VB_A) + sp.Vb_bias_hdwe();
   }
   else
   {
@@ -969,9 +1010,23 @@ void Sensors::vb_load(const uint16_t vb_pin)
   sample_time_vb_hdwe_ = millis();
 }
 
+// Load analog VBAT
+void Sensors::vbat_load(const uint16_t vbat_pin)
+{
+  VBAT_raw = analogRead(vbat_pin);
+  VBAT_hdwe =  float(VBAT_raw)*VBAT_CONV_GAIN + float(VBAT_A);
+}
+
 // Print analog voltage
 void Sensors::vb_print()
 {
   Serial.printf("reset, T, vb_dscn, Vb_raw, sp.Vb_bias_hdwe(), Vb_hdwe, vb_flt(), vb_fa(), wv_fa=, %d, %7.3f, %d, %d, %7.3f,  %7.3f, %d, %d, %d,\n",
     reset, T, sp.mod_vb_dscn(), Vb_raw, sp.Vb_bias_hdwe(), Vb_hdwe, Flt->vb_flt(), Flt->vb_fa(), Flt->wrap_vb_fa());
+}
+
+// Print analog voltage
+void Sensors::vbat_print()
+{
+  Serial.printf("reset, T, Vbat_raw, Vbat_hdwe, vbat_flt(), vbat_fa()=, %d, %7.3f, %d,   %7.3f, %d, %d,\n",
+    reset, T, VBAT_raw, VBAT_hdwe, Flt->vbat_flt(), Flt->vbat_fa());
 }

@@ -32,8 +32,8 @@ const String unit = "pro0p_20230219";  // voc(soc), hys, res, slr, RANDLES
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'Di'), A
 #define VOLT_BIAS             1.8   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
-#define VBATT_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
-#define VBATT_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
+#define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
+#define VB_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
 #define VB_SCALE              1.0   // Scale Vb sensor (* 'SV')
 
 // Battery.  One 12 V 100 Ah battery bank would have RATED_BATT_CAP 100, NS 1, and NP 1

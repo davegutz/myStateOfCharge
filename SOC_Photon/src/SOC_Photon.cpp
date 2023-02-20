@@ -64,9 +64,10 @@ void loop();
   #define PLATFORM_ID 12
 #endif
 #define PLATFORM_ARGON 12
+#define PLATFORM_PHOTON 6
 
 #include "constants.h"
-
+// Prevent mixing up local_config files (still could sneak soc0p through as pro0p)
 #ifdef HEADER_PHOTON
   #if (PLATFORM_ID != PLATFORM_PHOTON)
     #error
@@ -169,7 +170,7 @@ void setup()
   // A3 - Backup Ib amp (called by old ADS name Non Amplified, noa)
   // A4 - Ib amp common
   // A5 - Primary Ib amp (called by old ADS name Amplified, amp)
-  myPins = new Pins(D6, D7, A1, A2, A3, A4, A5);
+  myPins = new Pins(D6, D7, A0, A1, A2, A3, A4, A5);
   pinMode(myPins->status_led, OUTPUT);
   digitalWrite(myPins->status_led, LOW);
 

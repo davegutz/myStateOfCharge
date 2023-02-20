@@ -47,8 +47,10 @@
 #define MAX_TEMP_READS        10        // Number of consequetive temp queries allowed (10)
 #define TEMP_RANGE_CHECK      -5.       // Minimum expected temp reading, C (-5.)
 #define TEMP_RANGE_CHECK_MAX  70.       // Maximum allowed temp reading, C (70.)
-#define VBATT_S               1.017     // Vb sense scalar (1.017)
-#define VBATT_A               0.0       // Vb sense adder, V (0)
+#define VB_S                  1.017     // Vb sense scalar (1.017)
+#define VB_A                  0.0       // Vb sense adder, V (0)
+#define VBAT_S                1.        // VBAT sense scalar (1.)
+#define VBAT_A                0.0       // Vb sense adder, V (0)
 #define PHOTON_ADC_COUNT      4096      // Photon ADC range, counts (4096)
 #define PHOTON_ADC_VOLT       3.3       // Photon ADC range, V (3.3)
 #define SCREEN_WIDTH          128       // OLED display width, in pixels (128)
@@ -67,7 +69,7 @@
                                             // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
     #endif
 #elif PLATFORM_ID == PLATFORM_ARGON
-    #define NSUM              2400      // Number of saved SRAM summaries (2400)
+    #define NSUM              2200      // Number of saved SRAM summaries (2300)
                                         //If too large, will get compile error 'Insufficient room for .data and .bss sections!' or flashing red
 #endif
 #define NFLT                  7         // Number of saved SRAM/EERAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)
@@ -84,13 +86,17 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define TAU_ERR_FILT          5.        // Current sensor difference filter time constant, s (5.)
 #define MAX_ERR_FILT          10.       // Current sensor difference Filter maximum windup, A (10.)
 #define MAX_ERR_T             10.       // Maximum update time allowed to avoid instability, s (10.)
-#define IBATT_HARD_SET        1.        // Signal selection volt range fail persistence, s (1.)
-#define IBATT_HARD_RESET      1.        // Signal selection volt range fail reset persistence, s (1.)
-#define VBATT_MAX             17.       // Signal selection hard fault threshold, V (17. < VB_CONV_GAIN*4095)
-#define VBATT_MIN             8.        // Signal selection hard fault threshold, V (0.  < 8. < 10 bms shutoff)
+#define IB_HARD_SET           1.        // Signal selection volt range fail persistence, s (1.)
+#define IB_HARD_RESET         1.        // Signal selection volt range fail reset persistence, s (1.)
+#define VB_MAX                17.       // Signal selection hard fault threshold, V (17. < VB_CONV_GAIN*4095)
+#define VB_MIN                8.        // Signal selection hard fault threshold, V (0.  < 8. < 10 bms shutoff)
+#define VBAT_MAX              5.        // Signal selection hard fault threshold, V (5. < VBAT_CONV_GAIN*4095)
+#define VBAT_MIN              2.5       // Signal selection hard fault threshold, V (1.65 is Photon specsheet, 2.5)
 #define IB_MIN_UP             0.2       // Min up charge current for come alive, BMS logic, and fault
-#define VBATT_HARD_SET        1.        // Signal selection volt range fail persistence, s (1.)
-#define VBATT_HARD_RESET      1.        // Signal selection volt range fail reset persistence, s (1.)
+#define VB_HARD_SET           1.        // Signal selection volt range fail persistence, s (1.)
+#define VB_HARD_RESET         1.        // Signal selection volt range fail reset persistence, s (1.)
+#define VBAT_HARD_SET         1.        // Signal selection volt range fail persistence, s (1.)
+#define VBAT_HARD_RESET       1.        // Signal selection volt range fail reset persistence, s (1.)
 #define TB_NOISE              0.        // Tb added noise amplitude, deg C pk-pk
 #define TB_NOISE_SEED         0xe2      // Tb added noise seed 0-255 = 0x00-0xFF (0xe2) 
 #define VB_NOISE              0.        // Vb added noise amplitude, V pk-pk
@@ -149,8 +155,9 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 
 
 // Voltage measurement gains
-const float VB_CONV_GAIN = float(PHOTON_ADC_VOLT) * float(VBATT_SENSE_R_HI + VBATT_SENSE_R_LO) /
-                              float(VBATT_SENSE_R_LO) / float(PHOTON_ADC_COUNT) * float(VBATT_S);
+const float VB_CONV_GAIN = float(PHOTON_ADC_VOLT) * float(VB_SENSE_R_HI + VB_SENSE_R_LO) /
+                              float(VB_SENSE_R_LO) / float(PHOTON_ADC_COUNT) * float(VB_S);
+const float VBAT_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VBAT_S);
 const float VC_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VC_S);
 const float VO_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VO_S);
 

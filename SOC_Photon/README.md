@@ -264,6 +264,10 @@ SOC calculation is equivalently a very slow time constant (integrator) so filter
 
   Smaller NFLT/NSLT in constants.h or sp in retained.h
 
+### Problem:  The application overflows SRAM on compilation (Argon only?)
+
+  Smaller NFLT/NSLT in constants.h or sp in retained.h
+
 ### Problem:  . ? h
 
   CoolTerm - Options - Terminal:  Enter Key Emulation:  CR
