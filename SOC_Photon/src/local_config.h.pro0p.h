@@ -2,6 +2,8 @@
 #define local_config_h
 
 const String unit = "pro0p_20230219";  // voc(soc), hys, res, slr, RANDLES
+#define HEADER_PHOTON
+#undef HEADER_ARGON
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

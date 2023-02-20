@@ -67,6 +67,17 @@ void loop();
 
 #include "constants.h"
 
+#ifdef HEADER_PHOTON
+  #if (PLATFORM_ID != PLATFORM_PHOTON)
+    #error
+  #endif
+#endif
+#ifdef HEADER_ARGON
+  #if (PLATFORM_ID != PLATFORM_ARGON)
+    #error
+  #endif
+#endif
+
 // Dependent includes.   Easier to sp.debug code if remove unused include files
 #include "mySync.h"
 #include "mySubs.h"
