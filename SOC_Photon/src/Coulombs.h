@@ -51,7 +51,7 @@ public:
   virtual float count_coulombs(const double dt, const boolean reset, const float temp_c, const float charge_curr,
     const boolean sat, const double delta_q_ekf);
   double delta_q() { return(*sp_delta_q_); };
-  uint8_t mod_code() { return (*chem_.sp_mod_code); };
+  uint8_t mod_code() { return (*(chem_.sp_mod_code)); };
   virtual void pretty_print();
   double q(){ return (q_); };
   float q_cap_rated(){ return (q_cap_rated_); };

@@ -169,27 +169,29 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
               case ( 'm' ):  // Bm:  Monitor chemistry change
                 INT_in = cp.input_str.substring(2).toInt();
-                sp.put_mon_chm(max(min(INT_in, UINT8_MAX), 0));
                 switch ( INT_in )
                 {
                   case ( 0 ):  // Bm0: Mon Battleborn
-                    Serial.printf("Mon chem %d", Mon->mod_code());
+                    Serial.printf("Mon chem %d", sp.mon_chm());
+                    sp.put_mon_chm(max(min(INT_in, UINT8_MAX), 0));
                     Mon->assign_all_mod("Battleborn");
-                    Serial.printf(" to %d\n", Mon->mod_code());
+                    Serial.printf(" to %d\n", sp.mon_chm());
                     cp.cmd_reset();
                     break;
 
                   case ( 1 ):  // Bm1: Mon CHINS
-                    Serial.printf("Mon chem %d", Mon->mod_code());
+                    Serial.printf("Mon chem %d", sp.mon_chm());
+                    sp.put_mon_chm(max(min(INT_in, UINT8_MAX), 0));
                     Mon->assign_all_mod("CHINS");
-                    Serial.printf(" to %d\n", Mon->mod_code());
+                    Serial.printf(" to %d\n", sp.mon_chm());
                     cp.cmd_reset();
                     break;
 
                   case ( 2 ):  // Bm2: Mon Spare
-                    Serial.printf("Mon chem %d", Mon->mod_code());
+                    Serial.printf("Mon chem %d", sp.mon_chm());
+                    sp.put_mon_chm(max(min(INT_in, UINT8_MAX), 0));
                     Mon->assign_all_mod("Spare");
-                    Serial.printf(" to %d\n", Mon->mod_code());
+                    Serial.printf(" to %d\n", sp.mon_chm());
                     cp.cmd_reset();
                     break;
 
@@ -200,27 +202,29 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 's' ):  // Bs:  Simulation chemistry change
                 INT_in = cp.input_str.substring(2).toInt();
-                sp.put_sim_chm(max(min(INT_in, UINT8_MAX), 0));
                 switch ( INT_in )
                 {
                   case ( 0 ):  // Bs0: Sim Battleborn
-                    Serial.printf("Sim chem %d", Sen->Sim->mod_code());
+                    Serial.printf("Sim chem %d", sp.sim_chm());
+                    sp.put_sim_chm(max(min(INT_in, UINT8_MAX), 0));
                     Sen->Sim->assign_all_mod("Battleborn");
-                    Serial.printf(" to %d\n", Sen->Sim->mod_code());
+                    Serial.printf(" to %d\n", sp.sim_chm());
                     cp.cmd_reset();
                     break;
 
                   case ( 1 ):  // Bs1: Sim CHINS
-                    Serial.printf("Sim chem %d", Sen->Sim->mod_code());
+                    Serial.printf("Sim chem %d", sp.sim_chm());
+                    sp.put_sim_chm(max(min(INT_in, UINT8_MAX), 0));
                     Sen->Sim->assign_all_mod("CHINS");
-                    Serial.printf(" to %d\n", Sen->Sim->mod_code());
+                    Serial.printf(" to %d\n", sp.sim_chm());
                     cp.cmd_reset();
                     break;
 
                   case ( 2 ):  // Bs2: Sim Spare
-                    Serial.printf("Sim chem %d", Sen->Sim->mod_code());
+                    Serial.printf("Sim chem %d", sp.sim_chm());
+                    sp.put_sim_chm(max(min(INT_in, UINT8_MAX), 0));
                     Sen->Sim->assign_all_mod("Spare");
-                    Serial.printf(" to %d\n", Sen->Sim->mod_code());
+                    Serial.printf(" to %d\n", sp.sim_chm());
                     cp.cmd_reset();
                     break;
 
