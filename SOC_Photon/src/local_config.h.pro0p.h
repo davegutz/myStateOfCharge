@@ -9,7 +9,8 @@ const String unit = "pro0p_20230219";  // voc(soc), hys, res, slr, RANDLES
 
 // Miscellaneous
 #define ASK_DURING_BOOT       1   // Flag to ask for application of this file to * retained adjustements
-#define MODELING              247 // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn    
+#define MODELING              247 // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn
+#define USE_VBAT                  // Enable VBAT>2 v check
 // #define USE_BLE
 
 // Sensor biases

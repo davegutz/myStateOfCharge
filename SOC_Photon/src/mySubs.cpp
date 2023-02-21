@@ -322,9 +322,11 @@ void load_ib_vb(const boolean reset, Sensors *Sen, Pins *myPins, BatteryMonitor 
 
   // Backup battery VBAT
   #if (PLATFORM_ID == PLATFORM_PHOTON)
-    Sen->vbat_load(myPins->VBAT_pin);
-    Sen->Flt->vbat_check(Sen, Mon, VBAT_MIN, VBAT_MAX, reset);
-    if ( sp.debug()==17 ) Sen->vbat_print();
+    #ifdef USE_VBAT
+      Sen->vbat_load(myPins->VBAT_pin);
+      Sen->Flt->vbat_check(Sen, Mon, VBAT_MIN, VBAT_MAX, reset);
+      if ( sp.debug()==17 ) Sen->vbat_print();
+    #endif
   #endif
 
   // Power calculation

@@ -1283,7 +1283,9 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  v15: vb raw\n");
   // Serial.printf("  v16: Tb\n");
   #if (PLATFORM_ID == PLATFORM_PHOTON)
-    Serial.printf("  v17: vbat raw\n");
+    #ifdef USE_VBAT
+      Serial.printf("  v17: vbat raw\n");
+    #endif
   #endif
   // Serial.printf("  v34: EKF detail\n");
   // Serial.printf("  v35: ChargeTransfer balance\n");
