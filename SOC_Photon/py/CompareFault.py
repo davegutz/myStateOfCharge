@@ -229,6 +229,9 @@ def fault_thr_bb(Tb, soc, voc_soc, voc_stat, C_rate, bb):
     WRAP_SOC_LO_SCLR = 60.  # Large to disable e_wrap (60. for startup)
     CC_DIFF_SOC_DIS_THRESH = 0.2  # Signal selection threshold for Coulomb counter EKF disagree test (0.2)
     CC_DIFF_LO_SOC_SCLR = 4.  # Large to disable cc_ctf
+    WRAP_MOD_C_RATE = .05 # Moderate charge rate threshold to engage wrap threshold 0
+    WRAP_SOC_MOD_OFF = 0.85  # Disable e_wrap_lo when nearing saturated and moderate C_rate (0.85)
+
     vsat_ = bb.chemistry.nom_vsat + (Tb-25.)*bb.chemistry.dvoc_dt
 
     # cc_diff

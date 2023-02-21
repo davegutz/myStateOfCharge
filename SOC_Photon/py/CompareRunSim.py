@@ -76,7 +76,7 @@ if __name__ == '__main__':
         # Regression suite
 
         # data_file_old_txt = 'ampHiFail v20230219.txt'; unit_key = 'pro0p'
-        data_file_old_txt = 'ampHiFail v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05
+        # data_file_old_txt = 'ampHiFail v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05
         # data_file_old_txt = 'ampHiFail vA20221220.txt';  unit_key = 'soc1a'
         # data_file_old_txt = 'rapidTweakRegression v20230219 CHINS.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05
         # data_file_old_txt = 'flatSit v20220214 CHINS 20220214.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05
@@ -88,9 +88,12 @@ if __name__ == '__main__':
 
         # data_file_old_txt = 'offSitHysBms v20221220.txt'; unit_key = 'pro0p_2022'   # ; time_end_in = 137.
         # data_file_old_txt = 'offSitHysBms vA20221220.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
+        # data_file_old_txt = 'offSitHysBms v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05;  #; time_end_in = 10.
         # data_file_old_txt = 'Xm0VbFail.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
 
         # data_file_old_txt = 'triTweakDisch v20221220.txt'  #; time_end_in=25.4
+        # data_file_old_txt = 'triTweakDisch v20230219.txt'; unit_key = 'pro0p';  #; time_end_in = 10.
+        data_file_old_txt = 'triTweakDisch v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05;  #; time_end_in = 10.
         # data_file_old_txt = 'coldStart v20221220.txt'  #; time_end_in=112
 
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
