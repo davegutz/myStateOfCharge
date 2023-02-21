@@ -91,12 +91,12 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define VB_MAX                17.       // Signal selection hard fault threshold, V (17. < VB_CONV_GAIN*4095)
 #define VB_MIN                8.        // Signal selection hard fault threshold, V (0.  < 8. < 10 bms shutoff)
 #define VBAT_MAX              5.        // Signal selection hard fault threshold, V (5. < VBAT_CONV_GAIN*4095)
-#define VBAT_MIN              2.5       // Signal selection hard fault threshold, V (1.65 is Photon specsheet, 2.5)
+#define VBAT_MIN              2.        // Signal selection hard fault threshold, V (1.65 is Photon specsheet, 2.0)
 #define IB_MIN_UP             0.2       // Min up charge current for come alive, BMS logic, and fault
 #define VB_HARD_SET           1.        // Signal selection volt range fail persistence, s (1.)
 #define VB_HARD_RESET         1.        // Signal selection volt range fail reset persistence, s (1.)
-#define VBAT_HARD_SET         1.        // Signal selection volt range fail persistence, s (1.)
-#define VBAT_HARD_RESET       1.        // Signal selection volt range fail reset persistence, s (1.)
+#define VBAT_HARD_SET         300.      // Signal selection volt range fail persistence, s (takes time to charge caps on sensor pin, 300.)
+#define VBAT_HARD_RESET       3.        // Signal selection volt range fail reset persistence, s (3.)
 #define TB_NOISE              0.        // Tb added noise amplitude, deg C pk-pk
 #define TB_NOISE_SEED         0xe2      // Tb added noise seed 0-255 = 0x00-0xFF (0xe2) 
 #define VB_NOISE              0.        // Vb added noise amplitude, V pk-pk
