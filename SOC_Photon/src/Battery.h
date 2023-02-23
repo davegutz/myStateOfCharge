@@ -32,6 +32,7 @@
 #include "myLibrary/myFilters.h"
 #include "constants.h"
 #include "myLibrary/iterate.h"
+#include "Hysteresis.h"
 class Sensors;
 #define t_float float
 
@@ -62,48 +63,6 @@ const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1,
 const float MXEPS = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness) (1-1e-6)
 #define HYS_SOC_MIN_MARG 0.15     // Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis (0.15)
 #define HYS_IB_THR      1.0       // Ignore reset if opposite situation exists, A (1.0)
-
-// Hysteresis: reservoir model of battery electrical hysteresis
-// Use variable resistor and capacitor to create hysteresis from an RC circuit
-class Hysteresis
-{
-public:
-  Hysteresis();
-  Hysteresis(const float cap, Chemistry chem);
-  ~Hysteresis();
-  // operators
-  // functions
-  float calculate(const float ib, const float soc);
-  float dv_max(const float soc) { return hys_Tx_->interp(soc); };
-  float dv_min(const float soc) { return hys_Tn_->interp(soc); };
-  void init(const float dv_init);
-  float look_hys(const float dv, const float soc);
-  float look_slr(const float dv, const float soc);
-  void pretty_print();
-  float update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap, const boolean reset);
-  float ibs() { return ibs_; };
-  float ioc() { return ioc_; };
-  float dv_hys() { return dv_hys_; };
-  void dv_hys(const float st) { dv_hys_ = max(min(st, dv_max(soc_)), dv_min(soc_)); };
-//   float scale() { return sp.hys_scale(); };
-protected:
-  boolean disabled_;    // Hysteresis disabled by low scale input < 1e-5, T=disabled
-  float cap_;          // Capacitance, Farads
-  float res_;          // Variable resistance value, ohms
-  float slr_;          // Variable scalar
-  float soc_;          // State of charge input, dimensionless
-  float ib_;           // Current in, A
-  float ibs_;          // Scaled current in, A
-  float ioc_;          // Current out, A
-  float dv_hys_;       // State, voc_-voc_stat_, V
-  float dv_dot_;       // Calculated voltage rate, V/s
-  float tau_;          // Null time constant, sec
-  TableInterp2D *hys_T_;// dv-soc 2-D table, V
-  TableInterp2D *hys_Ts_;// dv-soc 2-D table scalar
-  TableInterp1D *hys_Tx_;// soc 1-D table, V_max
-  TableInterp1D *hys_Tn_;// soc 1-D table, V_min
-  float dv_min_abs_;   // Absolute value of +/- hysteresis limit, V
-};
 
 
 // Battery Class

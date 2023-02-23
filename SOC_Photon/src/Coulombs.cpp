@@ -66,7 +66,7 @@ void Coulombs::pretty_print(void)
   Serial.printf(" t_last%5.1f dg C\n", *sp_t_last_);
   Serial.printf(" rated_t%5.1f dg C\n", chem_.rated_temp);
   Serial.printf(" t_rlim%7.3f dg C / s\n", t_rlim_);
-  Serial.printf("Coulombs::");
+  Serial.printf("Coulombs (mod_code=%d) ", *chem_.sp_mod_code);
   chem_.pretty_print();
 }
 

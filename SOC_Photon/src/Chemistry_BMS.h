@@ -28,6 +28,7 @@
 // Battery Management System - built into battery
 struct BMS
 {
+public:
   float low_voc;    // Voltage threshold for BMS to turn off battery, V
   float low_t;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
   float vb_off;     // Shutoff point in Mon, V
@@ -41,6 +42,7 @@ struct BMS
 // Battery chemistry
 struct Chemistry: public BMS
 {
+public:
   uint8_t *sp_mod_code;  // Chemistry code integer
   float rated_temp; // Temperature at RATED_BATT_CAP, deg C
   double coul_eff;  // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
@@ -73,12 +75,28 @@ struct Chemistry: public BMS
   float r_sd;       // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms
   float c_sd;       // Equivalent model for EKF reference.  Parasitic discharge equivalent, Farads
   float r_ss;       // Equivalent model for state space model initialization, ohms
+  TableInterp1D *hys_Tn_;     // soc 1-D table, V_min
+  TableInterp2D *hys_Ts_;     // dv-soc 2-D table scalar
+  TableInterp1D *hys_Tx_;     // soc 1-D table, V_max
+  TableInterp2D *hys_T_;      // dv-soc 2-D table, V
   TableInterp2D *voc_T_;      // SOC-VOC 2-D table, V
   TableInterp1D *soc_min_T_;  // SOC-MIN 1-D table, V
+  Chemistry();
+  Chemistry(const String mod_str)
+  {
+    sp_mod_code = new uint8_t(-1);
+    assign_all_chm(mod_str);
+  }
+  Chemistry(uint8_t *mod_code)
+  {
+    sp_mod_code = mod_code;
+    String mod_str = decode(*sp_mod_code);
+    assign_all_chm(mod_str);
+  }
   void assign_BB();   // Battleborn assignment
   void assign_CH();   // CHINS assignment
   void assign_SP();   // Spare assignment
-  void assign_all_mod(const String mod_str);  // Assignment executive
+  void assign_all_chm(const String mod_str);  // Assignment executive
   void assign_hys(const int _n_h, const int _m_h, const float *x, const float *y, const float *t, const float *s,
     const float *tx, const float *tn); // Worker bee Hys
   void assign_soc_min(const int _n_n, const float *x, const float *t);  // Worker bee SOC_MIN
@@ -86,18 +104,6 @@ struct Chemistry: public BMS
   String decode(const uint8_t mod);
   uint8_t encode(const String mod_str);
   void pretty_print();
-  Chemistry();
-  Chemistry(const String mod_str)
-  {
-    sp_mod_code = new uint8_t(-1);
-    assign_all_mod(mod_str);
-  }
-  Chemistry(uint8_t *mod_code)
-  {
-    sp_mod_code = mod_code;
-    String mod_str = decode(*sp_mod_code);
-    assign_all_mod(mod_str);
-  }
 };
 
 

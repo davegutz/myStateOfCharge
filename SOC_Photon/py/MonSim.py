@@ -133,6 +133,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
     except:
         rp.modeling = mon_old.mod_data[0]
     print("rp.modeling is ", rp.modeling)
+    print('use_ib_mon is', use_ib_mon)
     tweak_test = rp.tweak_test()
     temp_c = mon_old.Tb[0]
     if dTb_in is not None:
@@ -280,12 +281,18 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         #     print('time=', t[i])
         #     print('sim:  ', str(sim))
         #     print(t[i])
+        if verbose:
+            print("{:9.3f}".format(t[i]), "{:4.0f}".format(mon_old.chm[i]), "{:4.0f}".format(sim_old.chm_s[i]), "{:9.3f}".format(sim_old.ib_in_s[i]), "{:9.3f}".format(sim_old.dv_hys_s[i]), "{:9.3f}".format(mon_old.ib[i]), "{:9.3f}".format(mon_old.dv_hys[i]),
+                  "{:9.3f}".format(sim.saved_s.ib_in_s[i]), "{:9.3f}".format(sim.hys.ibs), "{:9.3f}".format(sim.hys.ioc), "{:4.0f}".format(sim.sat), "{:9.3f}".format(sim.hys.disabled), "{:9.3f}".format(sim.hys.dv_dot), "{:9.3f}".format(sim.saved.dv_hys[i]),
+                  "{:9.3f}".format(mon.saved.ib[i]), "{:9.3f}".format(mon.hys.ibs), "{:9.3f}".format(mon.hys.ioc), "{:4.0f}".format(mon.sat), "{:9.3f}".format(mon.hys.disabled), "{:9.3f}".format(mon.hys.dv_dot), "{:9.3f}".format(mon.saved.dv_hys[i]))
 
     # Data
     if verbose:
+        print('   time mo.chm so.chm so.ib_in_s so.dv_hys  mo.ib  mo.dv_hys   smv.ib_in_s sim.ibs sim.ioc    sim.sat     sim.dis sim.dv_dot smv.dv_hys   mv.ib   mon.ibs   mon.ioc   mon.sat   mon.dis    mon.dv_dot  mv.dv_hys')
         print('time=', now)
         print('mon:  ', str(mon))
         print('sim:  ', str(sim))
+
 
     return mon.saved, sim.saved, sim.saved_s, mon, sim
 

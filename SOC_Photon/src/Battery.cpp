@@ -43,7 +43,7 @@ Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code)
 {
     nom_vsat_   = chem_.v_sat - HDB_VBATT;   // Center in hysteresis
     ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_.tau_ct, -RATED_BATT_CAP, RATED_BATT_CAP);  // Update time and time constant changed on the fly
-    hys_ = new Hysteresis(chem_.hys_cap, chem_);
+    hys_ = new Hysteresis(&chem_);
 }
 Battery::~Battery() {}
 // operators
@@ -424,6 +424,7 @@ void BatteryMonitor::pretty_print(Sensors *Sen)
     Serial.printf("  voc_soc%7.3f; V\n", voc_soc_);
     Serial.printf("  voc_stat%7.3f; V\n", voc_stat_);
     Serial.printf("  y_filt%7.3f; Res EKF, V\n", y_filt_);
+    hys_->pretty_print();
 }
 
 // Reset Coulomb Counter to EKF under restricted conditions especially new boot no history of saturation
@@ -818,143 +819,5 @@ void BatterySim::pretty_print(void)
     Serial.printf("  sat_ib_max%7.3f, A\n", sat_ib_max_);
     Serial.printf("  sat_ib_null%7.3f, A\n", sat_ib_null_);
     Serial.printf(" *sp_s_cap_model%7.3f Slr\n", sp.s_cap_model());
+    hys_->pretty_print();
 }
-
-
-Hysteresis::Hysteresis()
-: disabled_(false), cap_(0), res_(0), soc_(0), ib_(0), ibs_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0){};
-Hysteresis::Hysteresis(const float cap, Chemistry chem)
-: disabled_(false), cap_(cap), res_(0), soc_(0), ib_(0), ibs_(0), ioc_(0), dv_hys_(0), dv_dot_(0), tau_(0)
-{
-    // Characteristic table
-    hys_T_ = new TableInterp2D(chem.n_h, chem.m_h, chem.x_dv, chem.y_soc, chem.t_r);
-    hys_Ts_ = new TableInterp2D(chem.n_h, chem.m_h, chem.x_dv, chem.y_soc, chem.t_s);
-    hys_Tx_ = new TableInterp1D(chem.m_h, chem.y_soc, chem.t_x);
-    hys_Tn_ = new TableInterp1D(chem.m_h, chem.y_soc, chem.t_n);
-    dv_min_abs_ = chem.dv_min_abs;
-
-}
-
-// Calculate
-float Hysteresis::calculate(const float ib, const float soc)
-{
-    ib_ = ib;
-    soc_ = soc;
-
-    // Disabled logic
-    disabled_ = sp.hys_scale() < 1e-5;
-
-    // Calculate
-    if ( disabled_ )
-    {
-        res_ = 0.;
-        slr_ = 1.;
-        ibs_ = ib;
-        ioc_ = ib;
-        dv_dot_ = 0.;
-    }
-    else
-    {
-        res_ = look_hys(dv_hys_, soc_);
-        slr_ = look_slr(dv_hys_, soc_);
-        ibs_ = ib_ * slr_;
-        ioc_ = dv_hys_ / res_;
-        dv_dot_ = (ibs_ - dv_hys_/res_) / cap_;  // Capacitor ode
-    }
-
-    return ( dv_dot_ );
-}
-
-// Initialize
-void Hysteresis::init(const float dv_init)
-{
-    dv_hys_ = dv_init;
-}
-
-// Table lookup
-float Hysteresis::look_hys(const float dv, const float soc)
-{
-    float res;         // return value
-    if ( disabled_ )
-        res = 0.;
-    else
-        res = hys_T_->interp(dv, soc);
-    return res;
-}
-
-float Hysteresis::look_slr(const float dv, const float soc)
-{
-    float slr;         // return value
-    if ( disabled_ )
-        slr = 1.;
-    else
-        slr = hys_Ts_->interp(dv, soc);
-    return slr;
-}
-
-// Print
-void Hysteresis::pretty_print()
-{
-    float res = look_hys(0., 0.8);
-    Serial.printf("Hysteresis:\n");
-    Serial.printf("  cap%10.1f, F\n", cap_);
-    Serial.printf("  disab%d\n", disabled_);
-    Serial.printf("  dv_dot%7.3f, V/s\n", dv_dot_);
-    Serial.printf("  dv_hys%7.3f, V, SH\n", dv_hys_);
-    Serial.printf("  dv_min_abs%7.3f, V, SH\n", dv_min_abs_);
-    Serial.printf("  ib%7.3f, A\n", ib_);
-    Serial.printf("  ibs%7.3f, A\n", ibs_);
-    Serial.printf("  ioc%7.3f, A\n", ioc_);
-    Serial.printf("  res%6.4f, null Ohm\n", res_);
-    Serial.printf("  res%7.3f, ohm\n", res_);
-    Serial.printf("  slr%7.3f,\n", slr_);
-    Serial.printf("  soc%8.4f\n", soc_);
-    Serial.printf("  sp.hys_scale()%6.2f Slr\n", sp.hys_scale());
-    Serial.printf("  tau%10.1f, null, s\n", res*cap_);
-    Serial.printf("  r(soc, dv):\n");
-    hys_T_->pretty_print();
-    Serial.printf("  s(soc, dv):\n");
-    hys_Ts_->pretty_print();
-    Serial.printf("  r_max(soc):\n");
-    hys_Tx_->pretty_print();
-    Serial.printf("  r_min(soc):\n");
-    hys_Tn_->pretty_print();
-}
-
-// Dynamic update
-float Hysteresis::update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap, const boolean reset_temp)
-{
-    float dv_max = hys_Tx_->interp(soc_);
-    float dv_min = hys_Tn_->interp(soc_);
-
-    if ( init_high )
-    {
-        dv_hys_ = -dv_min_abs_;
-        dv_dot_ = 0.;
-    }
-    else if ( init_low )
-    {
-        dv_hys_ = max(dv_min_abs_, -e_wrap);
-        dv_dot_ = 0.;
-    }
-    else if ( reset_temp )
-    {
-        ioc_ = ib_;
-        res_ = look_hys(0., soc_);
-        slr_ = 1.;
-        dv_dot_ = 0.;
-        dv_hys_ = 0.;
-        res_ = look_hys(dv_hys_, soc_);
-        slr_ = look_slr(dv_hys_, soc_);
-        ioc_ = ib_ * slr_;
-        #ifdef DEBUG_INIT
-            if ( sp.debug()==-1 ) Serial.printf("ib%7.3f ibs%7.3f ioc%7.3f dv%9.6f res%7.3f slr%7.3f\n", ib_, ibs_, ioc_, dv_hys_, res_, slr_);
-        #endif
-    }
-
-    // Normal ODE integration
-    dv_hys_ += dv_dot_ * dt;
-    dv_hys_ = max(min(dv_hys_, dv_max), dv_min);
-    return (dv_hys_ * (sp.hys_scale())); // Scale on output only.   Don't retain it for feedback to ode
-}
-

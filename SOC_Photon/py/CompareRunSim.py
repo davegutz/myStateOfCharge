@@ -92,8 +92,8 @@ if __name__ == '__main__':
         # data_file_old_txt = 'Xm0VbFail.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
 
         # data_file_old_txt = 'triTweakDisch v20221220.txt'  #; time_end_in=25.4
-        # data_file_old_txt = 'triTweakDisch v20230219.txt'; unit_key = 'pro0p';  #; time_end_in = 10.
-        data_file_old_txt = 'triTweakDisch v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05;  #; time_end_in = 10.
+        # data_file_old_txt = 'triTweakDisch v20230219.txt'; unit_key = 'pro0p'; scale_in = 1.05  #;time_end_in = 2.
+        data_file_old_txt = 'triTweakDisch v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05  # ; time_end_in = 35.
         # data_file_old_txt = 'coldStart v20221220.txt'  #; time_end_in=112
 
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'

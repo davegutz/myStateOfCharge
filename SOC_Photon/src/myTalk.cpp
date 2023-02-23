@@ -178,6 +178,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     sp.put_mon_chm(max(min(INT_in, UINT8_MAX), 0));
                     Mon->assign_all_mod("Battleborn");
                     Serial.printf(" to %d\n", sp.mon_chm());
+                    Mon->hys_pretty_print();
+                    Mon->chem_pretty_print();
                     cp.cmd_reset();
                     break;
 
@@ -186,6 +188,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     sp.put_mon_chm(max(min(INT_in, UINT8_MAX), 0));
                     Mon->assign_all_mod("CHINS");
                     Serial.printf(" to %d\n", sp.mon_chm());
+                    Mon->hys_pretty_print();
+                    Mon->chem_pretty_print();
                     cp.cmd_reset();
                     break;
 

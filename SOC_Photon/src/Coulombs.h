@@ -44,8 +44,9 @@ public:
   void apply_soc(const float soc, const float temp_c);
   void apply_delta_q_t(const boolean reset);
   void apply_delta_q_t(const double delta_q, const float temp_c);
-  void assign_all_mod(const String mod_str) { chem_.assign_all_mod(mod_str); };
+  void assign_all_mod(const String mod_str) { chem_.assign_all_chm(mod_str); };
   double calculate_capacity(const float temp_c);
+  void chem_pretty_print () { chem_.pretty_print(); };
   double coul_eff() { return ( coul_eff_ ); };
   void coul_eff(const double coul_eff) { coul_eff_ = coul_eff; };
   virtual float count_coulombs(const double dt, const boolean reset, const float temp_c, const float charge_curr,
