@@ -343,7 +343,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" bare det n  %d  x \n", Sen->ShuntNoAmp->bare_detected());
   Serial.printf(" bare det m  %d  x \n", Sen->ShuntAmp->bare_detected());
   #if (PLATFORM_ID == PLATFORM_PHOTON )
-    Serial.printf(" vbat    %d  %d 'Fq v'\n", vbat_flt(), vbat_fa());
+    Serial.printf(" vbat    %d  %d \n", vbat_flt(), vbat_fa());
   #endif
   Serial.printf(" ib_dsc  %d  %d 'Fq v'\n", ib_dscn_flt(), ib_dscn_fa());
   Serial.printf(" ibd_lo  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_lo_flt(), ib_diff_lo_fa());
@@ -397,7 +397,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf(" bare n  %d  x \n", Sen->ShuntNoAmp->bare_detected());
   Serial1.printf(" bare m  %d  x \n", Sen->ShuntAmp->bare_detected());
   #if (PLATFORM_ID == PLATFORM_PHOTON )
-    Serial1.printf(" vbat    %d  %d 'Fq v'\n", vbat_flt(), vbat_fa());
+    Serial1.printf(" vbat    %d  %d \n", vbat_flt(), vbat_fa());
   #endif
   Serial1.printf(" ib_dsc  %d  %d 'Fq v'\n", ib_dscn_flt(), ib_dscn_fa());
   Serial1.printf(" ibd_lo  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_lo_flt(), ib_diff_lo_fa());
@@ -714,7 +714,10 @@ void Fault::vbat_check(Sensors *Sen, BatteryMonitor *Mon, const float _vbat_min,
   }
   else
   {
-    faultAssign( (Sen->vbat_hdwe()<=_vbat_min) || (Sen->vbat_hdwe()>=_vbat_max), VBAT_FLT);
+    if ( reset_loc )
+      faultAssign(false, VBAT_FLT);
+    else
+      faultAssign( (Sen->vbat_hdwe()<=_vbat_min) || (Sen->vbat_hdwe()>=_vbat_max), VBAT_FLT);
     failAssign( vbat_fa() || VbatHardFail->calculate(vbat_flt(), VBAT_HARD_SET, VBAT_HARD_RESET, Sen->T, reset_loc), VBAT_FA);
   }
 }

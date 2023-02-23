@@ -65,7 +65,7 @@
     #ifdef DEBUG_INIT
         #define NSUM              60       // Number of saved SRAM summaries (80)
     #else
-        #define NSUM              110       // Number of saved SRAM summaries (110)   TODO:   Use PLATFORM_ID around verbose hogs
+        #define NSUM              100       // Number of saved SRAM summaries (110)   TODO:   Use PLATFORM_ID around verbose hogs
                                             // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
     #endif
 #elif PLATFORM_ID == PLATFORM_ARGON
@@ -75,7 +75,7 @@
 #define NFLT                  7         // Number of saved SRAM/EERAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)
 #define NHIS                  56        // Number of saved SRAM history data slices.  If too large, will get compile error BACKUPSRAM (56)
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)
-#define HDB_VBATT             0.05      // Half deadband to filter Vb, V (0.05)
+#define HDB_VB             0.05      // Half deadband to filter Vb, V (0.05)
 #define T_SAT                 10        // Saturation time, sec (10, >=10 for no sat ib lo fault of -100 A)
 const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define TEMP_PARASITIC        true      // DS18 sensor power. true means leave it on all the time (true)
@@ -95,7 +95,7 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define IB_MIN_UP             0.2       // Min up charge current for come alive, BMS logic, and fault
 #define VB_HARD_SET           1.        // Signal selection volt range fail persistence, s (1.)
 #define VB_HARD_RESET         1.        // Signal selection volt range fail reset persistence, s (1.)
-#define VBAT_HARD_SET         300.      // Signal selection volt range fail persistence, s (takes time to charge caps on sensor pin, 300.)
+#define VBAT_HARD_SET         600.      // Signal selection volt range fail persistence, s (takes time to charge caps on sensor pin, 600.)
 #define VBAT_HARD_RESET       3.        // Signal selection volt range fail reset persistence, s (3.)
 #define TB_NOISE              0.        // Tb added noise amplitude, deg C pk-pk
 #define TB_NOISE_SEED         0xe2      // Tb added noise seed 0-255 = 0x00-0xFF (0xe2) 

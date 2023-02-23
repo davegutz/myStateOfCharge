@@ -41,7 +41,7 @@ Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code)
     dv_voc_soc_(0.), ib_(0.), ibs_(0.), ioc_(0.), print_now_(false), sr_(1.), temp_c_(NOMINAL_TB), vb_(NOMINAL_VB),
     voc_(NOMINAL_VB), voc_stat_(NOMINAL_VB), vsat_(NOMINAL_VB)
 {
-    nom_vsat_   = chem_.v_sat - HDB_VBATT;   // Center in hysteresis
+    nom_vsat_   = chem_.v_sat - HDB_VB;   // Center in hysteresis
     ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_.tau_ct, -RATED_BATT_CAP, RATED_BATT_CAP);  // Update time and time constant changed on the fly
     hys_ = new Hysteresis(&chem_);
 }
@@ -146,11 +146,11 @@ BatteryMonitor::BatteryMonitor():
     q_ekf_(RATED_BATT_CAP*3600.), soc_ekf_(1.0), tcharge_(0.), tcharge_ekf_(0.), voc_filt_(NOMINAL_VB), voc_soc_(NOMINAL_VB),
     y_filt_(0.)
 {
-    voc_filt_ = chem_.v_sat-HDB_VBATT;
+    voc_filt_ = chem_.v_sat-HDB_VB;
     // EKF
     this->Q_ = EKF_Q_SD_NORM*EKF_Q_SD_NORM;
     this->R_ = EKF_R_SD_NORM*EKF_R_SD_NORM;
-    SdVb_ = new SlidingDeadband(HDB_VBATT);  // Noise filter
+    SdVb_ = new SlidingDeadband(HDB_VB);  // Noise filter
     EKF_converged = new TFDelay(false, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT); // Convergence test debounce.  Initializes false
     ice_ = new Iterator("EKF solver");
 }

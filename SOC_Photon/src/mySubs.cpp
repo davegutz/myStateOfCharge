@@ -303,7 +303,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
 
 // Load high fidelity signals; filtered in hardware the same bandwidth, sampled the same
 // Outputs:   Sen->Ib_model_in, Sen->Ib_hdwe, 
-void load_ib_vb(const boolean reset, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon)
+void load_ib_vb(const boolean reset, const boolean reset_temp, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon)
 {
   // Load shunts Ib
   // Outputs:  Sen->Ib_model_in, Sen->Ib_hdwe, Sen->Vb, Sen->Wb
@@ -324,7 +324,7 @@ void load_ib_vb(const boolean reset, Sensors *Sen, Pins *myPins, BatteryMonitor 
   #if (PLATFORM_ID == PLATFORM_PHOTON)
     #ifdef USE_VBAT
       Sen->vbat_load(myPins->VBAT_pin);
-      Sen->Flt->vbat_check(Sen, Mon, VBAT_MIN, VBAT_MAX, reset);
+      Sen->Flt->vbat_check(Sen, Mon, VBAT_MIN, VBAT_MAX, reset_temp);
       if ( sp.debug()==17 ) Sen->vbat_print();
     #endif
   #endif
@@ -489,7 +489,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 
   // Load Ib and Vb
   // Outputs: Sen->Ib_model_in, Sen->Ib, Sen->Vb 
-  load_ib_vb(reset, Sen, myPins, Mon);
+  load_ib_vb(reset, reset_temp, Sen, myPins, Mon);
   Sen->Flt->ib_wrap(reset, Sen, Mon);
   Sen->Flt->ib_quiet(reset, Sen);
   Sen->Flt->cc_diff(Sen, Mon);
