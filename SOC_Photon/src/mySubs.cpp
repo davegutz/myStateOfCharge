@@ -320,15 +320,6 @@ void load_ib_vb(const boolean reset, const boolean reset_temp, Sensors *Sen, Pin
   else                      Sen->Flt->vb_check(Sen, Mon, -1.0, 1.0, reset);
   if ( sp.debug()==15 ) Sen->vb_print();
 
-  // Backup battery VBAT
-  #if (PLATFORM_ID == PLATFORM_PHOTON)
-    #ifdef USE_VBAT
-      Sen->vbat_load(myPins->VBAT_pin);
-      Sen->Flt->vbat_check(Sen, Mon, VBAT_MIN, VBAT_MAX, reset_temp);
-      if ( sp.debug()==17 ) Sen->vbat_print();
-    #endif
-  #endif
-
   // Power calculation
   Sen->Wb = Sen->Vb*Sen->Ib;
 }
@@ -384,10 +375,6 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
     disp_1 = "*fail";
   else if ( Sen->bms_off )
     disp_1 = " off ";
-  #if (PLATFORM_ID == PLATFORM_PHOTON )
-    else if ( Sen->Flt->vbat_fa() && (blink==1 || blink==2) )
-      disp_0 = "VBAT";
-  #endif
 
   // Ib
   sprintf(cp.buffer, "%6.1f", pp.pubList.Ib);

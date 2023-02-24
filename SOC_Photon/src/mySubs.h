@@ -50,18 +50,16 @@ struct Pins
 {
   uint16_t pin_1_wire;  // 1-wire Plenum temperature sensor
   uint16_t status_led;  // On-board led
-  uint16_t VBAT_pin;   // Backup battery VBAT voltage
   uint16_t Vb_pin;      // Battery voltage, e.g. Battleborn, CHINS
   uint16_t Vcn_pin;     // No Amp (n) common voltage
   uint16_t Von_pin;     // No Amp (n) output voltage
   uint16_t Vcm_pin;     // Amp (m) common voltage
   uint16_t Vom_pin;     // Amp (m) output voltage
   Pins(void) {}
-  Pins(uint16_t pin_1_wire, uint16_t status_led, uint16_t VBAT_pin, uint16_t Vb_pin, uint16_t Vcn_pin, uint16_t Von_pin, uint16_t Vcm_pin, uint16_t Vom_pin)
+  Pins(uint16_t pin_1_wire, uint16_t status_led, uint16_t Vb_pin, uint16_t Vcn_pin, uint16_t Von_pin, uint16_t Vcm_pin, uint16_t Vom_pin)
   {
     this->pin_1_wire = pin_1_wire;
     this->status_led = status_led;
-    this->VBAT_pin = VBAT_pin;
     this->Vb_pin = Vb_pin;
     this->Vcn_pin = Vcn_pin;
     this->Von_pin = Von_pin;

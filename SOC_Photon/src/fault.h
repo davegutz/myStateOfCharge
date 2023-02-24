@@ -35,7 +35,6 @@ struct Flt_st
   unsigned long t = 1L; // Timestamp seconds since start of epoch
   int16_t Tb_hdwe = 0;  // Battery temperature, hardware, C
   int16_t vb_hdwe = 0;  // Battery measured potential, hardware, V
-  int16_t vbat_hdwe = 0;// VBAT measured potential, hardware, V
   int16_t ib_amp_hdwe = 0;  // Battery measured input current, amp, A
   int16_t ib_noa_hdwe = 0;  // Battery measured input current, no amp, A
   int16_t Tb = 0;       // Battery temperature, filtered, C

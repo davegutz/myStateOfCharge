@@ -133,8 +133,7 @@ protected:
 #define IB_DSCN_FLT   10  // Dual faulted quiet error, T = disconnected shunt
 #define IB_AMP_BARE   11  // Unconnected ib bus, T = bare bus
 #define IB_NOA_BARE   12  // Unconnected ib bus, T = bare bus
-#define VBAT_FLT      13  // Momentary isolation of VBAT failure, T=faulted
-#define NUM_FLT       14  // Number of these
+#define NUM_FLT       13  // Number of these
 
 // Fail word bits.   A couple don't latch because single sensor fail in dual sensor system
 #define TB_FA         0   // Peristed, latched isolation of Tb failure, heals because soft type, T=failed
@@ -148,8 +147,7 @@ protected:
 #define IB_DIFF_HI_FA 8   // Persisted sensor difference error, latches because hard type, T = fail
 #define IB_DIFF_LO_FA 9   // Persisted sensor difference error, latches because hard type, T = fail
 #define IB_DSCN_FA    10  // Dual persisted quiet error, heals functional type, T = disconnected shunt
-#define VBAT_FA       11  // Peristed, latched isolation of VBAT failure, latches because hard type, T=failed
-#define NUM_FA        12  // Number of these
+#define NUM_FA        11  // Number of these
 
 #define faultSet(bit) (bitSet(fltw_, bit) )
 #define failSet(bit) (bitSet(falw_, bit) )
@@ -179,8 +177,6 @@ public:
   boolean disab_tb_fa() { return disab_tb_fa_; };
   void disab_vb_fa(const boolean dis) { disab_vb_fa_ = dis; };
   boolean disab_vb_fa() { return disab_vb_fa_; };
-  void disab_vbat_fa(const boolean dis) { disab_vbat_fa_ = dis; };
-  boolean disab_vbat_fa() { return disab_vbat_fa_; };
   boolean dscn_fa() { return failRead(IB_DSCN_FA); };
   boolean dscn_flt() { return faultRead(IB_DSCN_FLT); };
   void ewhi_sclr(const float sclr) { ewhi_sclr_ = sclr; };
@@ -250,13 +246,10 @@ public:
   void tb_stale_time_sclr(const float sclr) { tb_stale_time_sclr_ = sclr; };
   float tb_stale_time_sclr() { return tb_stale_time_sclr_; };
   void vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, const float _vb_max, const boolean reset);  // Range check Vb
-  void vbat_check(Sensors *Sen, BatteryMonitor *Mon, const float _vbat_min, const float _vbat_max, const boolean reset);  // Range check VBAT
   boolean vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
   int8_t vb_sel_stat() { return vb_sel_stat_; };
   boolean vb_fa() { return failRead(VB_FA); };
   boolean vb_flt() { return faultRead(VB_FLT); };
-  boolean vbat_fa() { return failRead(VBAT_FA); };
-  boolean vbat_flt() { return faultRead(VBAT_FLT); };
   boolean wrap_fa() { return ( failRead(WRAP_HI_FA) || failRead(WRAP_LO_FA) ); };
   boolean wrap_hi_fa() { return failRead(WRAP_HI_FA); };
   boolean wrap_hi_flt() { return faultRead(WRAP_HI_FLT); };
@@ -274,7 +267,6 @@ protected:
   RateLagExp *QuietRate;    // Linear filter to calculate rate for quiet
   TFDelay *TbStaleFail;     // Persistence stale tb one-wire data
   TFDelay *VbHardFail;      // Persistence vb hard fail amp
-  TFDelay *VbatHardFail;    // Persistence vbat hard fail amp
   LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
   boolean cc_diff_fa_;      // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
@@ -283,7 +275,6 @@ protected:
   boolean disab_ib_fa_;     // Disable hard fault range failures for ib
   boolean disab_tb_fa_;     // Disable hard fault range failures for tb
   boolean disab_vb_fa_;     // Disable hard fault range failures for vb
-  boolean disab_vbat_fa_;   // Disable hard fault range failures for vbat
   float ewhi_sclr_;         // Scale wrap hi detection thresh, scalar
   float ewlo_sclr_;         // Scale wrap lo detection thresh, scalar
   float ewmin_sclr_;        // Scale wrap detection thresh when voc(soc) less than min, scalar
@@ -324,9 +315,7 @@ public:
   ~Sensors();
   int Vb_raw;                 // Raw analog read, integer
   float Vb;                   // Selected battery bank voltage, V
-  int VBAT_raw;               // Raw analog read, integer
   float Vb_hdwe;              // Sensed battery bank voltage, V
-  float VBAT_hdwe;            // Sensed backup battery voltage, V
   float Vb_model;             // Modeled battery bank voltage, V
   float Tb;                   // Selected battery bank temp, C
   float Tb_filt;              // Selected filtered battery bank temp, C
@@ -411,15 +400,12 @@ public:
   void vb_add(const float add) { vb_add_ = add; };
   float vb_hdwe() { return Vb_hdwe / sp.nS(); };                  // Battery select hardware unit voltage, V
   void vb_load(const uint16_t vb_pin);                            // Analog read of Vb
-  float vbat_hdwe() { return VBAT_hdwe / sp.nS(); };              // VBAT select hardware unit voltage, V
-  void vbat_load(const uint16_t vbat_pin);                        // Analog read of VBAT
   float vb_model() { return (Vb_model / sp.nS()); };              // Battery select model unit voltage, V
   float Vb_add();
   float Vb_noise();
   float Vb_noise_amp() { return ( Vb_noise_amp_ ); };
   void Vb_noise_amp(const float noise) { Vb_noise_amp_ = noise; };
   void vb_print(void);                  // Print Vb result
-  void vbat_print(void);                // Print VBAT result
   Fault *Flt;
 protected:
   void choose_(void);   // Deliberate choice based on inputs and results

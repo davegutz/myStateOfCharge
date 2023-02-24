@@ -49,8 +49,6 @@
 #define TEMP_RANGE_CHECK_MAX  70.       // Maximum allowed temp reading, C (70.)
 #define VB_S                  1.017     // Vb sense scalar (1.017)
 #define VB_A                  0.0       // Vb sense adder, V (0)
-#define VBAT_S                1.        // VBAT sense scalar (1.)
-#define VBAT_A                0.0       // Vb sense adder, V (0)
 #define PHOTON_ADC_COUNT      4096      // Photon ADC range, counts (4096)
 #define PHOTON_ADC_VOLT       3.3       // Photon ADC range, V (3.3)
 #define SCREEN_WIDTH          128       // OLED display width, in pixels (128)
@@ -90,13 +88,9 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define IB_HARD_RESET         1.        // Signal selection volt range fail reset persistence, s (1.)
 #define VB_MAX                17.       // Signal selection hard fault threshold, V (17. < VB_CONV_GAIN*4095)
 #define VB_MIN                8.        // Signal selection hard fault threshold, V (0.  < 8. < 10 bms shutoff)
-#define VBAT_MAX              5.        // Signal selection hard fault threshold, V (5. < VBAT_CONV_GAIN*4095)
-#define VBAT_MIN              2.        // Signal selection hard fault threshold, V (1.65 is Photon specsheet, 2.0)
 #define IB_MIN_UP             0.2       // Min up charge current for come alive, BMS logic, and fault
 #define VB_HARD_SET           1.        // Signal selection volt range fail persistence, s (1.)
 #define VB_HARD_RESET         1.        // Signal selection volt range fail reset persistence, s (1.)
-#define VBAT_HARD_SET         600.      // Signal selection volt range fail persistence, s (takes time to charge caps on sensor pin, 600.)
-#define VBAT_HARD_RESET       3.        // Signal selection volt range fail reset persistence, s (3.)
 #define TB_NOISE              0.        // Tb added noise amplitude, deg C pk-pk
 #define TB_NOISE_SEED         0xe2      // Tb added noise seed 0-255 = 0x00-0xFF (0xe2) 
 #define VB_NOISE              0.        // Vb added noise amplitude, V pk-pk
@@ -157,7 +151,6 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 // Voltage measurement gains
 const float VB_CONV_GAIN = float(PHOTON_ADC_VOLT) * float(VB_SENSE_R_HI + VB_SENSE_R_LO) /
                               float(VB_SENSE_R_LO) / float(PHOTON_ADC_COUNT) * float(VB_S);
-const float VBAT_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VBAT_S);
 const float VC_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VC_S);
 const float VO_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VO_S);
 

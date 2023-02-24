@@ -534,12 +534,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
           case ( 'F' ):  // Fault stuff
             switch ( cp.input_str.charAt(1) )
             {
-              case ( 'B' ):  //   FB<>:  Fault disable vbat hard
-                INT_in = cp.input_str.substring(2).toInt();
-                Serial.printf("Sen->Flt->disab_vbat_fa %d to ", Sen->Flt->disab_vbat_fa());
-                Sen->Flt->disab_vbat_fa(INT_in);
-                Serial.printf("%d\n", Sen->Flt->disab_vbat_fa());
-                break;
 
               case ( 'c' ):  //   Fc<>: scale cc_diff threshold
                 scale = cp.input_str.substring(2).toFloat();
@@ -651,7 +645,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( sp.debug() )
             {
               case ( -1 ):  // l-1:
-                // Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt_amp  ,Ishunt_noa  ,Vbat_fo*10-110  ,voc_s*10-110  ,dv_dyn_s*10  ,v_s*10-110  , voc_dyn*10-110,,,,,,,,,,,\n");
+                // Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt_amp  ,Ishunt_noa  ,Vb_fo*10-110  ,voc_s*10-110  ,dv_dyn_s*10  ,v_s*10-110  , voc_dyn*10-110,,,,,,,,,,,\n");
                 break;
               case ( 1 ):  // l1:
                 print_serial_header();
@@ -1226,7 +1220,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" *SV= "); Serial.printf("%6.3f", sp.Vb_scale()); Serial.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
 
   Serial.printf("\nF<?>   Faults\n");
-  Serial.printf("  FB=  "); Serial.print(Sen->Flt->disab_vbat_fa()); Serial.println(": disab Vbat rng");
   Serial.printf("  Fc= "); Serial.printf("%6.3f", Sen->Flt->cc_diff_sclr()); Serial.printf(": sclr cc_diff thr ^ [1]\n"); 
   Serial.printf("  Fd= "); Serial.printf("%6.3f", Sen->Flt->ib_diff_sclr()); Serial.printf(": sclr ib_diff thr ^ [1]\n"); 
   Serial.printf("  Ff= "); Serial.printf("%d", cp.fake_faults); Serial.printf(": faults faked (ignored)[%d]\n", FAKE_FAULTS); 
@@ -1286,11 +1279,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  v14: vshunt and Ib raw\n");
   Serial.printf("  v15: vb raw\n");
   // Serial.printf("  v16: Tb\n");
-  #if (PLATFORM_ID == PLATFORM_PHOTON)
-    #ifdef USE_VBAT
-      Serial.printf("  v17: vbat raw\n");
-    #endif
-  #endif
   // Serial.printf("  v34: EKF detail\n");
   // Serial.printf("  v35: ChargeTransfer balance\n");
   // Serial.printf("  v37: EKF short\n");
