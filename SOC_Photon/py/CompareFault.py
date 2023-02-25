@@ -554,7 +554,7 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.plot(mv.time, mv.soc, linestyle='--', color='cyan', label='soc'+new_str)
     # plt.plot(so.time, so.soc_s, linestyle='-.', color='black', label='soc_s'+old_str)
     plt.plot(sv.time, smv.soc_s, linestyle=':', color='magenta', label='soc_s'+new_str)
-    plt.plot(mo.time, mo.soc_ekf, linestyle='-', color='blue', label='soc_ekf'+old_str)
+    plt.plot(mo.time, mo.soc_ekf, linestyle='-', color='green', label='soc_ekf'+old_str)
     plt.plot(mv.time, mv.soc_ekf, linestyle='--', color='red', label='soc_ekf'+new_str)
     plt.xlabel('sec')
     plt.legend(loc=4)
@@ -615,16 +615,16 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
 
 
 def calc_fault(d_ra, d_mod):
-    dscn_fa = np.bool8(d_ra.falw & 2 ** 10)
-    ib_diff_fa = np.bool8((d_ra.falw & 2 ** 8) | (d_ra.falw & 2 ** 9))
-    wv_fa = np.bool8(d_ra.falw & 2 ** 7)
-    wl_fa = np.bool8(d_ra.falw & 2 ** 6)
-    wh_fa = np.bool8(d_ra.falw & 2 ** 5)
-    ccd_fa = np.bool8(d_ra.falw & 2 ** 4)
-    ib_noa_fa = np.bool8(d_ra.falw & 2 ** 3)
-    ib_amp_fa = np.bool8(d_ra.falw & 2 ** 2)
-    vb_fa = np.bool8(d_ra.falw & 2 ** 1)
-    tb_fa = np.bool8(d_ra.falw & 2 ** 0)
+    dscn_fa = np.bool_(d_ra.falw & 2 ** 10)
+    ib_diff_fa = np.bool_((d_ra.falw & 2 ** 8) | (d_ra.falw & 2 ** 9))
+    wv_fa = np.bool_(d_ra.falw & 2 ** 7)
+    wl_fa = np.bool_(d_ra.falw & 2 ** 6)
+    wh_fa = np.bool_(d_ra.falw & 2 ** 5)
+    ccd_fa = np.bool_(d_ra.falw & 2 ** 4)
+    ib_noa_fa = np.bool_(d_ra.falw & 2 ** 3)
+    ib_amp_fa = np.bool_(d_ra.falw & 2 ** 2)
+    vb_fa = np.bool_(d_ra.falw & 2 ** 1)
+    tb_fa = np.bool_(d_ra.falw & 2 ** 0)
     e_wrap = d_mod.voc_soc - d_mod.voc
     d_mod = rf.rec_append_fields(d_mod, 'e_wrap', np.array(e_wrap, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'dscn_fa', np.array(dscn_fa, dtype=float))
@@ -639,13 +639,13 @@ def calc_fault(d_ra, d_mod):
     d_mod = rf.rec_append_fields(d_mod, 'tb_fa', np.array(tb_fa, dtype=float))
 
     try:
-        ib_diff_flt = np.bool8(d_ra.fltw & 2 ** 8) | (d_ra.fltw & 2 ** 9)
-        wh_flt = np.bool8(d_ra.fltw & 2 ** 5)
-        wl_flt = np.bool8(d_ra.fltw & 2 ** 6)
-        red_loss = np.bool8(d_ra.fltw & 2 ** 7)
-        dscn_flt = np.bool8(d_ra.fltw & 2 ** 10)
-        vb_flt = np.bool8(d_ra.fltw & 2 ** 1)
-        tb_flt = np.bool8(d_ra.fltw & 2 ** 0)
+        ib_diff_flt = np.bool_(d_ra.fltw & 2 ** 8) | (d_ra.fltw & 2 ** 9)
+        wh_flt = np.bool_(d_ra.fltw & 2 ** 5)
+        wl_flt = np.bool_(d_ra.fltw & 2 ** 6)
+        red_loss = np.bool_(d_ra.fltw & 2 ** 7)
+        dscn_flt = np.bool_(d_ra.fltw & 2 ** 10)
+        vb_flt = np.bool_(d_ra.fltw & 2 ** 1)
+        tb_flt = np.bool_(d_ra.fltw & 2 ** 0)
         d_mod = rf.rec_append_fields(d_mod, 'ib_diff_flt', np.array(ib_diff_flt, dtype=float))
         d_mod = rf.rec_append_fields(d_mod, 'wh_flt', np.array(wh_flt, dtype=float))
         d_mod = rf.rec_append_fields(d_mod, 'wl_flt', np.array(wl_flt, dtype=float))
@@ -903,7 +903,7 @@ if __name__ == '__main__':
         input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt', 'serial_20230212_202717.txt',
                        'serial_20230215_064843.txt', 'serial_20230215_165025.txt', 'serial_20230216_145024.txt', 'serial_20230217_072709.txt',
                        'serial_20230217_185204.txt', 'serial_20230218_050029.txt', 'serial_20230218_134250.txt', 'serial_20230219_164928.txt',
-                       'serial_20230220_134304.txt', 'serial_20230223_055858.txt']; chm_in = 1;  rated_batt_cap_in = 100.; scale_in = 1.05; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.  # 0.9 - 1.0 Tune 4
+                       'serial_20230220_134304.txt', 'serial_20230223_055858.txt', 'serial_20230224_171855.txt']; chm_in = 1;  rated_batt_cap_in = 100.; scale_in = 1.05; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.  # 0.9 - 1.0 Tune 4
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'

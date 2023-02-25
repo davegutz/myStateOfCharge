@@ -41,8 +41,6 @@ class Hysteresis:
         self.lu_x = chemistry.lu_x_hys
         self.lu_n = chemistry.lu_n_hys
         self.dv_min_abs = chemistry.dv_min_abs
-        print('dv_min_abs', self.dv_min_abs)
-        print('chm', self.chm, 'cap', self.cap)
         self.scale = scale
         self.disabled = self.scale < 1e-5
         self.res = 0.
