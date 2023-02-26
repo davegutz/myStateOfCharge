@@ -116,7 +116,8 @@ class Coulombs:
             res = 1
         return res
 
-    def count_coulombs(self, chem, dt, reset, temp_c, charge_curr, sat, soc_init=None):
+    def count_coulombs(self, chem, dt, reset, temp_c, charge_curr, sat, soc_init=None, use_soc_in=False,
+                       soc_in=0.):
         """Count coulombs based on true=actual capacity
         Inputs:
             dt              Integration step, s
@@ -125,6 +126,8 @@ class Coulombs:
             sat             Indicator that battery is saturated (VOC>threshold(temp)), T/F
             t_last          Past value of battery temperature used for rate limit memory, deg C
             coul_eff        Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
+            use_soc_in      Command to drive integrator with input mon_soc
+            soc_in          Auxiliary integrator setting, fraction soc
         """
         if self.chm != chem:
             self.chemistry.assign_all_mod(chem)
@@ -153,9 +156,14 @@ class Coulombs:
 
         # Integration
         self.q_capacity = self.calculate_capacity(self.temp_lim)
-        self.delta_q = max(min(self.delta_q + d_delta_q - self.chemistry.dqdt*self.q_capacity*(self.temp_lim-self.t_last),
-                               0.0), -self.q_capacity*1.5)
-        self.q = self.q_capacity + self.delta_q
+        if use_soc_in:
+            self.soc = soc_in
+            self.q = self.q_capacity * self.soc
+            self.delta_q = self.q - self.q_capacity
+        else:
+            self.delta_q = max(min(self.delta_q + d_delta_q - self.chemistry.dqdt*self.q_capacity*(self.temp_lim-self.t_last),
+                                   0.0), -self.q_capacity*1.5)
+            self.q = self.q_capacity + self.delta_q
 
         # Normalize
         self.soc = self.q / self.q_capacity

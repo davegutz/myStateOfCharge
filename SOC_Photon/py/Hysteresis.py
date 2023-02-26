@@ -51,6 +51,7 @@ class Hysteresis:
         self.ioc = 0.
         self.dv_hys = dv_hys
         self.dv_dot = 0.
+        self.tau = 0.
         self.saved = Saved()
 
     def __str__(self, prefix=''):
@@ -88,6 +89,7 @@ class Hysteresis:
             self.ioc = self.dv_hys / self.res
             self.ibs = self.ib * self.slr
             self.dv_dot = (self.ibs - self.ioc) / (self.cap*self.scale_cap)
+            self.tau = self.res * self.cap * self.scale_cap
             if self.dv_hys >= 0.:
                 self.dv_dot /= self.s_cap_chg
             else:
@@ -123,6 +125,14 @@ class Hysteresis:
         self.chm = chem
         dv_max = self.lu_x.interp(x=self.soc)
         dv_min = self.lu_n.interp(x=self.soc)
+
+        # Aliasing - return
+        if self.tau < dt * 4.:
+            if self.ib >= 0:
+                self.dv_hys = dv_max
+            else:
+                self.dv_hys = dv_min
+            return self.dv_hys
 
         # Reset if at endpoints.   e_wrap is an actual measurement of hysteresis if trust sensors.  But once
         # dv_hys is reset it regenerates e_wrap so e_wrap in logic breaks that.   Also, dv_hys regenerates dv_dot

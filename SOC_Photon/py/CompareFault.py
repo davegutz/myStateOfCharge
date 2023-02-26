@@ -450,7 +450,7 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
     plt.plot(hi.time, hi.cc_dif, color='black', linestyle='-', label='cc_diff')
     plt.plot(hi.time, hi.cc_diff_thr, color='red', linestyle='--', label='cc_diff_thr')
     plt.plot(hi.time, -hi.cc_diff_thr, color='red', linestyle='--')
-    plt.ylim(-.01, .01)
+    # plt.ylim(-.01, .01)
     plt.legend(loc=1)
     plt.subplot(339)
     plt.plot(hi.time, hi.ib_diff_flt + 2, color='cyan', linestyle='-', label='ib_diff_flt+2')
@@ -507,6 +507,8 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.plot(mo.time, mo.soc, color='black', linestyle='-', label='soc')
     plt.plot(mv.time, mv.soc, color='cyan', linestyle='--', label='soc_ver')
     plt.plot(smv.time, smv.soc_s, color='orange', linestyle='-.', label='soc_s_ver')
+    plt.plot(mo.time, mo.soc_ekf, color='blue', linestyle='-', label='soc_ekf')
+    plt.plot(mv.time, mv.soc_ekf, color='red', linestyle='--', label='soc_ekf_ver')
     plt.legend(loc=1)
     plt.subplot(337)
     plt.plot(mo.time, mo.voc_stat, color='black', linestyle='-', label='voc_stat')
@@ -516,11 +518,16 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.subplot(338)
     plt.plot(mo.time, mo.e_wrap, color='black', linestyle='-', label='e_wrap')
     plt.plot(mv.time, np.array(mv.voc_soc) - np.array(mv.voc_stat), color='cyan', linestyle='--', label='e_wrap_ver')
+    plt.plot(mo.time, np.array(mo.soc_ekf) - np.array(mo.soc), color='blue', linestyle='-', label='cc_dif')
+    plt.plot(mv.time, np.array(mv.soc_ekf) - np.array(mv.soc), color='red', linestyle='--', label='cc_dif_ver')
+    plt.plot(mo.time, mo.cc_diff_thr, color='cyan', linestyle='--', label='cc_diff_thr')
+    plt.plot(mo.time, -mo.cc_diff_thr, color='cyan', linestyle='--')
     # plt.plot(smv.time, np.array(smv.voc_soc_s) - np.array(smv.voc_stat_s), color='orange', linestyle='-.', label='e_wrap_filt_s_ver')
     if hasattr(mo, 'ewhi_thr'):
         plt.plot(mo.time, mo.ewhi_thr, color='red', linestyle='-.', label='ewhi_thr')
     if hasattr(mo, 'ewlo_thr'):
         plt.plot(mo.time, mo.ewlo_thr, color='red', linestyle='-.', label='ewlo_thr')
+    plt.ylim(-.5, .5)
     plt.legend(loc=1)
     plt.subplot(339)
     if hasattr(mo, 'dv_dyn'):
@@ -892,6 +899,7 @@ if __name__ == '__main__':
         s_hys_chg_in = 1.
         s_hys_dis_in = 1.
         scale_in = 1
+        use_mon_soc_in = True  # Reconstruction of soc using sub-sampled data is poor.  Drive everything with soc from Monitor
         rated_batt_cap_in = 108.4  # A-hr capacity of test article
 
         # User inputs
@@ -950,7 +958,8 @@ if __name__ == '__main__':
 
         # Sort unique
         h_raw = np.unique(h_raw)
-        h = add_stuff(h_raw, batt, ib_band=IB_BAND)
+        h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in)
+        # h = add_stuff(h_raw, batt, ib_band=IB_BAND)
         print("\nh:\n", h, "\n")
         h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
         # Shift time and add data
@@ -975,7 +984,7 @@ if __name__ == '__main__':
                       sresct=sresct_in, stauct_mon=stauct_in, stauct_sim=stauct_in, use_vb_sim=False,
                       s_hys_sim=s_hys_in, s_hys_mon=s_hys_in, scale_hys_cap_mon=s_hys_cap_in,
                       scale_hys_cap_sim=s_hys_cap_in, s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in,
-                      s_hys_chg=s_hys_chg_in, s_hys_dis=s_hys_dis_in, scale_in=scale_in)
+                      s_hys_chg=s_hys_chg_in, s_hys_dis=s_hys_dis_in, scale_in=scale_in, use_mon_soc=use_mon_soc_in)
 
         # Plots
         n_fig = 0

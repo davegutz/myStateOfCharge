@@ -269,8 +269,6 @@ def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, n_fig=None, o
     dv_dot_cap[n-1] = dv_dot_cap[n-2]
     dv_bleed[-1] = dv_bleed[-2]
 
-    print('dv', dv_hys_calc_f[-1], 'dvdot', dv_dot_calc[-1], 'Cdvdot', cap*dv_dot_calc[-1], 'ib', ib_f[-1], 'ioc_req', ioc_calc_from_dot[-1], 'r_req', r_calc_from_dot[-1])
-
     plt.figure()  # GP 3 Tune R
     n_fig += 1
     plt.subplot(321)
