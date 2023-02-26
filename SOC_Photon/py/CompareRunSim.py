@@ -1,5 +1,5 @@
 # MonSim:  Monitor and Simulator replication of Particle Photon Application
-# Copyright (C) 2022 Dave Gutz
+# Copyright (C) 2023 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -22,14 +22,17 @@ Coulomb Counter built in."""
 if __name__ == '__main__':
     import sys
     from MonSim import replicate, save_clean_file
-    from DataOverModel import overall
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
     from CompareHist import over_fault
     import matplotlib.pyplot as plt
     plt.rcParams['axes.grid'] = True
     from datetime import datetime
     from CompareRunRun import load_data
-    from DataOverModel import tune_r
+    from DataOverModel import dom_plot
+    from PlotSimS import sim_s_plot
+    from PlotEKF import ekf_plot
+    from PlotGP import tune_r, gp_plot
+    from PlotOffOn import off_on_plot
 
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
@@ -79,7 +82,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'ampHiFail v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05
         # data_file_old_txt = 'ampHiFail vA20221220.txt';  unit_key = 'soc1a'
         # data_file_old_txt = 'rapidTweakRegression v20230219 CHINS.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05
-        # data_file_old_txt = 'flatSit v20220214 CHINS 20220214.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05
+        data_file_old_txt = 'flatSit v20220219 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05
         # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in = 4.8;
         # data_file_old_txt = 'rapidTweakRegression vA20230217.txt'; unit_key = 'pro1a_2023'
         # data_file_old_txt = 'rapidTweakRegression vA20230219.txt'; unit_key = 'pro1a_2023'
@@ -93,7 +96,7 @@ if __name__ == '__main__':
 
         # data_file_old_txt = 'triTweakDisch v20221220.txt'  #; time_end_in=25.4
         # data_file_old_txt = 'triTweakDisch v20230219.txt'; unit_key = 'pro0p'; scale_in = 1.05  #;time_end_in = 2.
-        data_file_old_txt = 'triTweakDisch v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05  # ; time_end_in = 35.
+        # data_file_old_txt = 'triTweakDisch v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05  # ; time_end_in = 35.
         # data_file_old_txt = 'coldStart v20221220.txt'  #; time_end_in=112
 
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
@@ -185,12 +188,25 @@ if __name__ == '__main__':
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                           n_fig=n_fig, long_term=long_term_in)
         if plot_overall_in:
-            n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+            n_fig, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
                                        new_str='_ver')
+            n_fig, fig_files = ekf_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
+                                        new_str='_ver')
+            n_fig, fig_files = sim_s_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                       plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
+                                       new_str='_ver')
+            n_fig, fig_files = gp_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                       plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
+                                       new_str='_ver')
+            n_fig, fig_files = off_on_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                           plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
+                                           new_str='_ver')
         if tune_in:
             n_fig, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename, fig_files,
                                       plot_title=plot_title, n_fig=n_fig, old_str='', new_str='_ver')
+
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
         cleanup_fig_files(fig_files)

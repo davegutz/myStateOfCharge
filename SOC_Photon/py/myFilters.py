@@ -1,5 +1,5 @@
 # Filter classes
-# Copyright (C) 2022 Dave Gutz
+# Copyright (C) 2023 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -224,6 +224,30 @@ class AB2Integrator(DiscreteIntegrator):
         s += "\n  "
         s += DiscreteIntegrator.__str__(self, prefix + 'AB2Integrator:')
         return s
+
+
+class inline_exp_lag:
+    """Inline exponential lag"""
+    def __init__(self, tau):
+        self.tau = tau
+        self.rstate = 0.
+        self.lstate = 0.
+        self.inp = 0.
+        self.rate = 0.
+
+    def update(self, inp, T, reset=False):
+        if reset:
+            self.lstate = inp
+            self.rstate = inp
+        eTt = np.exp(-T/self.tau)
+        meTt = 1. - eTt
+        a = self.tau/T - eTt/meTt
+        b = 1./meTt - self.tau/T
+        c = meTt/T
+        self.rate = c * (a*self.rstate + b*inp - self.lstate)
+        self.rstate = inp
+        self.lstate = self.lstate + T*self.rate
+        return self.lstate
 
 
 class TustinIntegrator(DiscreteIntegrator):

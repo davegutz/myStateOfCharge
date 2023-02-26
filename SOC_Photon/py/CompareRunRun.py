@@ -1,5 +1,5 @@
 # MonSim:  Monitor and Simulator replication of Particle Photon Application
-# Copyright (C) 2022 Dave Gutz
+# Copyright (C) 2023 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@ the EKF and Coulomb Counter.   The SIM is a battery model, that also has a
 Coulomb Counter built in."""
 
 import numpy as np
-from DataOverModel import SavedData, SavedDataSim, write_clean_file, overall
+from DataOverModel import SavedData, SavedDataSim, write_clean_file, dom_plot
 from CompareFault import add_stuff_f, over_fault, filter_Tb, IB_BAND
 from pyDAGx import myTables
 from Battery import Battery, BatteryMonitor
@@ -168,8 +168,8 @@ if __name__ == '__main__':
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                           n_fig=n_fig, long_term=long_term_in)
         if plot_overall_in:
-            n_fig, fig_files = overall(mon_old, mon_new, sim_old, sim_new, sim_new, filename, fig_files,
-                                       plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
+            n_fig, fig_files = dom_plot(mon_old, mon_new, sim_old, sim_new, sim_new, filename, fig_files,
+                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo,
                                 listWithImagesExtensions=["png"])

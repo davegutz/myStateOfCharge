@@ -13,7 +13,7 @@ from Scale import Scale
 if __name__ == '__main__':
     # from DataOverModel import SavedData, SavedDataSim, write_clean_file, overall
     # from DataOverModel import SavedData
-    from DataOverModel import overall
+    from DataOverModel import dom_plot
 
     def main():
         y = np.sqrt(-1)

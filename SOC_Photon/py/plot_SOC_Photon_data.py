@@ -1,5 +1,5 @@
 # plot_soc_photon_data:  plot known data structure
-# Copyright (C) 2022 Dave Gutz
+# Copyright (C) 2023 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
