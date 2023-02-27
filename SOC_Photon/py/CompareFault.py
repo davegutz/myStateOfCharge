@@ -273,7 +273,7 @@ def fault_thr_bb(Tb, soc, voc_soc, voc_stat, C_rate, bb):
     return cc_diff_thr, ewhi_thr, ewlo_thr, ib_diff_thr, ib_quiet_thr
 
 
-def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None, long_term=True):
+def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None, long_term=True, cc_dif_tol=0.2):
     if fig_files is None:
         fig_files = []
 
@@ -302,8 +302,8 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
         plt.legend(loc=0)
         plt.subplot(336)
         plt.plot(hi.soc, hi.soc_ekf, marker='+', markersize='3', linestyle='-', color='blue', label='soc_ekf')
-        plt.plot([0, 1], [0.2, 1.2], linestyle=':', color='red')
-        plt.plot([0, 1], [-0.2, 0.8], linestyle=':', color='red')
+        plt.plot([0, 1], [cc_dif_tol, 1.+cc_dif_tol], linestyle=':', color='red')
+        plt.plot([0, 1], [-cc_dif_tol, 1.-cc_dif_tol], linestyle=':', color='red')
         plt.xlim(0, 1)
         plt.ylim(0, 1)
         plt.xlabel('soc')
@@ -899,6 +899,7 @@ if __name__ == '__main__':
         s_hys_chg_in = 1.
         s_hys_dis_in = 1.
         scale_in = 1
+        cc_dif_tol_in = 0.2
         use_mon_soc_in = True  # Reconstruction of soc using sub-sampled data is poor.  Drive everything with soc from Monitor
         rated_batt_cap_in = 108.4  # A-hr capacity of test article
 
@@ -911,7 +912,8 @@ if __name__ == '__main__':
         input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt', 'serial_20230212_202717.txt',
                        'serial_20230215_064843.txt', 'serial_20230215_165025.txt', 'serial_20230216_145024.txt', 'serial_20230217_072709.txt',
                        'serial_20230217_185204.txt', 'serial_20230218_050029.txt', 'serial_20230218_134250.txt', 'serial_20230219_164928.txt',
-                       'serial_20230220_134304.txt', 'serial_20230223_055858.txt', 'serial_20230224_171855.txt', 'serial_20230225_180933.txt']; chm_in = 1;  rated_batt_cap_in = 100.; scale_in = 1.05; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.  # 0.9 - 1.0 Tune 4
+                       'serial_20230220_134304.txt', 'serial_20230223_055858.txt', 'serial_20230224_171855.txt', 'serial_20230225_180933.txt',
+                       'serial_20230227_130855.txt']; chm_in = 1;  rated_batt_cap_in = 100.; scale_in = 1.05; cc_dif_tol_in = 0.5
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'
@@ -994,7 +996,7 @@ if __name__ == '__main__':
         plot_title = filename + '   ' + date_time
         if len(f.time) > 1:
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                          n_fig=n_fig)
+                                          n_fig=n_fig, cc_dif_tol=cc_dif_tol_in)
         if len(h_20C.time) > 1:
             n_fig, fig_files = overall_batt(mon_ver_100, sim_ver_100, suffix='_100',
                                             filename=filename, fig_files=fig_files,

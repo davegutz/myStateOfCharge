@@ -23,7 +23,7 @@ if __name__ == '__main__':
     import sys
     from MonSim import replicate, save_clean_file
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
-    from CompareHist import over_fault
+    from CompareFault import over_fault
     import matplotlib.pyplot as plt
     plt.rcParams['axes.grid'] = True
     from datetime import datetime
@@ -72,6 +72,7 @@ if __name__ == '__main__':
         s_hys_chg_in = 1.
         s_hys_dis_in = 1.
         tune_in = False
+        cc_dif_tol_in = 0.2
 
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
@@ -79,11 +80,12 @@ if __name__ == '__main__':
         # Regression suite
 
         # data_file_old_txt = 'ampHiFail v20230219.txt'; unit_key = 'pro0p'
-        # data_file_old_txt = 'ampHiFail v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05
+        # data_file_old_txt = 'ampHiFail v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'ampHiFail vA20221220.txt';  unit_key = 'soc1a'
-        # data_file_old_txt = 'rapidTweakRegression v20230219 CHINS.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05
-        data_file_old_txt = 'flatSit v20220219 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05
-        # data_file_old_txt = 'flatSit v20220219 CH1.txt'; unit_key = 'pro0p_2023';  scale_in = 1.00
+        data_file_old_txt = 'rapidTweakRegression v20230219 CHINS.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; cc_dif_tol_in = 0.5
+        # data_file_old_txt = 'rapidTweakRegression v20230219 CH4.txt'; unit_key = 'pro0p_2023';  scale_in = 4.
+        # data_file_old_txt = 'flatSit v20220219 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; cc_dif_tol_in = 0.5
+        # data_file_old_txt = 'flatSit v20220219 CH1.txt'; unit_key = 'pro0p_2023';  scale_in = 1.00; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in = 4.8;
         # data_file_old_txt = 'rapidTweakRegression vA20230217.txt'; unit_key = 'pro1a_2023'
         # data_file_old_txt = 'rapidTweakRegression vA20230219.txt'; unit_key = 'pro1a_2023'
@@ -96,8 +98,8 @@ if __name__ == '__main__':
         # data_file_old_txt = 'Xm0VbFail.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
 
         # data_file_old_txt = 'triTweakDisch v20221220.txt'  #; time_end_in=25.4
-        # data_file_old_txt = 'triTweakDisch v20230219.txt'; unit_key = 'pro0p'; scale_in = 1.05  #;time_end_in = 2.
-        # data_file_old_txt = 'triTweakDisch v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05  # ; time_end_in = 35.
+        # data_file_old_txt = 'triTweakDisch v20230219.txt'; unit_key = 'pro0p'; scale_in = 1.05; cc_dif_tol_in = 0.5  #;time_end_in = 2.
+        # data_file_old_txt = 'triTweakDisch v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05; cc_dif_tol_in = 0.5  # ; time_end_in = 35.
         # data_file_old_txt = 'coldStart v20221220.txt'  #; time_end_in=112
 
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
@@ -187,17 +189,17 @@ if __name__ == '__main__':
         plot_title = filename + '   ' + date_time
         if temp_flt_file_clean and len(f.time) > 1:
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                          n_fig=n_fig, long_term=long_term_in)
+                                          n_fig=n_fig, long_term=long_term_in, cc_dif_tol=cc_dif_tol_in)
         if plot_overall_in:
             n_fig, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                       plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
-                                       new_str='_ver')
+                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
+                                        new_str='_ver')
             n_fig, fig_files = ekf_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                         plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
                                         new_str='_ver')
             n_fig, fig_files = sim_s_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                       plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
-                                       new_str='_ver')
+                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
+                                        new_str='_ver')
             n_fig, fig_files = gp_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
                                        new_str='_ver')

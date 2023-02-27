@@ -86,7 +86,8 @@ class Battery(Coulombs):
                             or 20 - 40 A for a 100 Ah battery"""
 
     def __init__(self, q_cap_rated=RATED_BATT_CAP*3600, t_rlim=0.017, t_rated=25., temp_c=25., tweak_test=False,
-                 sres0=1., sresct=1., stauct=1., scale_r_ss=1., s_hys=1., dvoc=0., mod_code=0, s_coul_eff=1.):
+                 sres0=1., sresct=1., stauct=1., scale_r_ss=1., s_hys=1., dvoc=0., mod_code=0, s_coul_eff=1.,
+                 scale_cap=1.):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
         etal.pdf.'  SOC-OCV curve fit './Battery State/BattleBorn Rev1.xls:Model Fit' using solver with min slope
@@ -120,7 +121,8 @@ class Battery(Coulombs):
         self.chemistry.r_ct *= sresct
         self.chemistry.r_ss *= scale_r_ss
         self.chemistry.coul_eff *= s_coul_eff
-        self.ChargeTransfer = LagExp(dt=Battery.EKF_NOM_DT, max_=100., min_=-100., tau=self.chemistry.tau_ct)
+        self.ChargeTransfer = LagExp(dt=Battery.EKF_NOM_DT, max_=Battery.RATED_BATT_CAP*scale_cap,
+                                     min_=-Battery.RATED_BATT_CAP*scale_cap, tau=self.chemistry.tau_ct)
         self.temp_c = temp_c
         self.saved = Saved()  # for plots and prints
         self.dv_hys = 0.  # Placeholder so BatterySim can be plotted
@@ -204,7 +206,7 @@ class BatteryMonitor(Battery, EKF1x1):
         q_cap_rated_scaled = q_cap_rated * scale
         Battery.__init__(self, q_cap_rated=q_cap_rated_scaled, t_rated=t_rated, t_rlim=t_rlim, temp_c=temp_c,
                          tweak_test=tweak_test, sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss,
-                         s_hys=s_hys, dvoc=dvoc, mod_code=mod_code, s_coul_eff=s_coul_eff)
+                         s_hys=s_hys, dvoc=dvoc, mod_code=mod_code, s_coul_eff=s_coul_eff, scale_cap=scale)
 
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
@@ -507,7 +509,7 @@ class BatterySim(Battery):
                  s_hys_dis=1., s_coul_eff=1.):
         Battery.__init__(self, q_cap_rated=q_cap_rated, t_rated=t_rated, t_rlim=t_rlim, temp_c=temp_c,
                          tweak_test=tweak_test, sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss,
-                         s_hys=s_hys, dvoc=dvoc, mod_code=mod_code, s_coul_eff=s_coul_eff)
+                         s_hys=s_hys, dvoc=dvoc, mod_code=mod_code, s_coul_eff=s_coul_eff, scale_cap=scale)
         self.lut_voc = None
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A
