@@ -97,18 +97,16 @@ void debug_h(BatteryMonitor *Mon, Sensors *Sen)
 // Q quick print critical parameters
 void debug_q(BatteryMonitor *Mon, Sensors *Sen)
 {
-  Serial.printf("ib_amp_fail = %d,\nib_noa_fail = %d,\nvb_fail = %d,\n\
-Tb  = %7.3f,\nvb  = %7.3f,\nvoc = %7.3f,\nvoc_filt  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc_m = %8.4f,\n\
-soc_ekf= %8.4f,\nsoc = %8.4f,\nmodeling = %d,\n",
+  Serial.printf("ib_amp_fail %d\nib_noa_fail %d\nvb_fail %d\nTb%7.3f\nvb%7.3f\nvoc%7.3f\nvoc_filt%7.3f\nvsat%7.3f\nib%7.3f\nsoc_m%8.4f\n\
+soc_ekf%8.4f\nsoc%8.4f\nsoc_inf%8.4f\nmodeling = %d\n",
     Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
     Mon->temp_c(), Mon->vb(), Mon->voc(), Mon->voc_filt(), Mon->vsat(), Mon->ib(), Sen->Sim->soc(), Mon->soc_ekf(),
-    Mon->soc(), sp.modeling());
-  Serial1.printf("ib_amp_fail = %d,\nib_noa_fail = %d,\nvb_fail = %d,\n\
-Tb  = %7.3f,\nvb  = %7.3f,\nvoc = %7.3f,\nvoc_filt  = %7.3f,\nvsat = %7.3f,\nib  = %7.3f,\nsoc_m = %8.4f,\n\
-soc_ekf= %8.4f,\nsoc = %8.4f,\nmodeling = %d,\n",
+    Mon->soc(), Mon->soc_inf(), sp.modeling());
+  Serial1.printf("ib_amp_fail %d\nib_noa_fail %d\nvb_fail %d\nTb%7.3f\nvb%7.3f\nvoc%7.3f\nvoc_filt%7.3f\nvsat%7.3f\nib%7.3f\nsoc_m%8.4f\n\
+soc_ekf%8.4f\nsoc%8.4f\nsoc_inf%8.4f\nmodeling = %d\n",
       Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
       Mon->temp_c(), Mon->vb(), Mon->voc(), Mon->voc_filt(), Mon->vsat(), Mon->ib(), Sen->Sim->soc(), Mon->soc_ekf(),
-      Mon->soc(), sp.modeling());
+    Mon->soc(), Mon->soc_inf(), sp.modeling());
   if ( Sen->Flt->falw() || Sen->Flt->fltw() ) chit("Pf;", QUEUE);
 }
 

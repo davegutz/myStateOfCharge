@@ -319,7 +319,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" e_wrap   %7.3f  thr=%7.3f Fo^%7.3f Fi^\n", e_wrap_filt_, ewlo_thr_, ewhi_thr_);
   Serial.printf(" ib_quiet %7.3f  thr=%7.3f Fq v\n\n", ib_quiet_, ib_quiet_thr_);
 
-  Serial.printf(" soc  %7.3f  voc %7.3f  voc_soc %7.3f\n", Mon->soc(), Mon->voc(), Mon->voc_soc());
+  Serial.printf(" soc  %7.3f  soc_inf %7.3f voc %7.3f  voc_soc %7.3f\n", Mon->soc(), Mon->soc_inf(), Mon->voc(), Mon->voc_soc());
   Serial.printf(" dis_tb_fa %d  dis_vb_fa %d  dis_ib_fa %d\n", disab_tb_fa_, disab_vb_fa_, disab_ib_fa_);
   Serial.printf(" bms_off   %d\n\n", Mon->bms_off());
 
@@ -364,7 +364,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf(" e_wrap   %7.3f  thr=%7.3f Fo^%7.3f Fi^\n", e_wrap_filt_, ewlo_thr_, ewhi_thr_);
   Serial1.printf(" ib_quiet %7.3f  thr=%7.3f Fq v\n\n", ib_quiet_, ib_quiet_thr_);
 
-  Serial1.printf(" soc  %7.3f  voc %7.3f  voc_soc %7.3f\n", Mon->soc(), Mon->voc(), Mon->voc_soc());
+  Serial1.printf(" soc  %7.3f  soc_inf %7.3f voc %7.3f  voc_soc %7.3f\n", Mon->soc(), Mon->soc_inf(), Mon->voc(), Mon->voc_soc());
   Serial1.printf(" dis_tb_fa %d  dis_vb_fa %d  dis_ib_fa %d\n", disab_tb_fa_, disab_vb_fa_, disab_ib_fa_);
   Serial1.printf(" bms_off   %d\n\n", Mon->bms_off());
 
