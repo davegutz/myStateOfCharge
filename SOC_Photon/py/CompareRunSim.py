@@ -82,7 +82,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'ampHiFail v20230219.txt'; unit_key = 'pro0p'
         # data_file_old_txt = 'ampHiFail v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'ampHiFail vA20221220.txt';  unit_key = 'soc1a'
-        data_file_old_txt = 'rapidTweakRegression v20230219 CHINS.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; cc_dif_tol_in = 0.5
+        # data_file_old_txt = 'rapidTweakRegression v20230219 CHINS.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'rapidTweakRegression v20230219 CH4.txt'; unit_key = 'pro0p_2023';  scale_in = 4.
         # data_file_old_txt = 'flatSit v20220219 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'flatSit v20220219 CH1.txt'; unit_key = 'pro0p_2023';  scale_in = 1.00; cc_dif_tol_in = 0.5
@@ -103,7 +103,9 @@ if __name__ == '__main__':
         # data_file_old_txt = 'coldStart v20221220.txt'  #; time_end_in=112
 
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
+        # data_file_old_txt = 'ampHiFailFf v20230219 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'ampLoFail v20221028.txt'
+        # data_file_old_txt = 'ampLoFail v20230219 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'
         # data_file_old_txt = 'rapidTweakRegression40C v20221028.txt'  # ; time_end_in=4.8;
         # data_file_old_txt = 'slowTweakRegression v20221028.txt'
@@ -112,6 +114,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'offSitHysBmsNoise v20221028.txt'  # ; time_end_in=50
         # data_file_old_txt = 'ampHiFailSlow v20221028.txt'  # ; time_end_in=360
         # data_file_old_txt = 'vHiFail v20221028.txt'
+        data_file_old_txt = 'vHiFail v20230219 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'pulseEKF v20221028.txt'; init_time_in=-0.001;  # TODO:  broken
         # data_file_old_txt = 'pulseSS v20221028.txt'; init_time_in=-0.001;
         # data_file_old_txt = 'tbFailMod v20221220.txt'
