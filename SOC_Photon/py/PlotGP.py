@@ -151,7 +151,7 @@ def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.plot(mo.time, mo.vb, color='blue', linestyle='-', label='vb' + old_str)
     plt.plot(smv.time, smv.vb_s, color='cyan', linestyle='--', label='vb_s' + new_str)
     plt.plot(mo.time, mo.voc_stat, color='orange', linestyle='-.', label='voc_stat' + old_str)
-    plt.plot(smv.time, smv.voc_stat_s, color='pink', linestyle=':', label='voc_stat_s' + new_str)
+    plt.plot(smv.time, smv.voc_stat_s, color='red', linestyle=':', label='voc_stat_s' + new_str)
     plt.xlabel('state-of-charge')
     plt.legend(loc=2)
     plt.subplot(337)

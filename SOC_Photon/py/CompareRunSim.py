@@ -83,6 +83,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'ampHiFail vA20221220.txt';  unit_key = 'soc1a'
         # data_file_old_txt = 'rapidTweakRegression v20230219 CHINS.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05
         data_file_old_txt = 'flatSit v20220219 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05
+        # data_file_old_txt = 'flatSit v20220219 CH1.txt'; unit_key = 'pro0p_2023';  scale_in = 1.00
         # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in = 4.8;
         # data_file_old_txt = 'rapidTweakRegression vA20230217.txt'; unit_key = 'pro1a_2023'
         # data_file_old_txt = 'rapidTweakRegression vA20230219.txt'; unit_key = 'pro1a_2023'

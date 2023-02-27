@@ -107,6 +107,7 @@ void Battery::pretty_print(void)
     Serial.printf("Battery:\n");
     Serial.printf("  bms_off=%d;\n", bms_off_);
     Serial.printf("  c_sd=%9.3g;  farad\n", chem_.c_sd);
+    Serial.printf("  ds_voc_soc=%10.6f; frac\n", ds_voc_soc_);
     Serial.printf("  dt=%7.3f; s\n", dt_);
     Serial.printf("  dv_dsoc=%10.6f; V/frac\n", dv_dsoc_);
     Serial.printf("  dv_dyn= %7.3f; V\n", dv_dyn_);

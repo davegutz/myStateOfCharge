@@ -135,7 +135,8 @@ void Chemistry::assign_BB()
 }
 
 // CHINS Chemistry
-// CHINS 100 Ah, 12v LiFePO4.  Initial data from manual
+// CHINS 100 Ah, 12v LiFePO4
+// 2023-02-27:  tune to data.  Add slight slope 0.8-0.98 to make models deterministic
 const uint8_t M_T_CH = 4;    // Number temperature breakpoints for voc table
 const uint8_t N_S_CH = 20;   // Number soc breakpoints for voc table
 const float Y_T_CH[M_T_CH] = // Temperature breakpoints for voc table
@@ -143,10 +144,10 @@ const float Y_T_CH[M_T_CH] = // Temperature breakpoints for voc table
 const float X_SOC_CH[N_S_CH] = // soc breakpoints for voc table
     {-0.10, -0.06, -0.035, 0.00, 0.05, 0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.98,  0.99, 1.00};
 const float T_VOC_CH[M_T_CH * N_S_CH] = // r(soc, dv) table
-    {4.00, 4.00,  4.00,  4.00,  4.00,  4.00,  10.00, 10.95, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.30, 13.30, 13.30, 13.50, 14.70,
-     4.00, 4.00,  4.00,  4.00,  4.00,  9.50,  12.97, 13.00, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.30, 13.30, 13.30, 13.50, 14.70,
-     4.00, 11.50, 12.33, 12.61, 12.81, 12.92, 12.97, 13.00, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.30, 13.30, 13.30, 13.50, 14.70,
-     4.00, 11.50, 12.33, 12.61, 12.81, 12.92, 12.97, 13.00, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.30, 13.30, 13.30, 13.50, 14.70};
+    {4.00, 4.00,  4.00,  4.00,  4.00,  4.00,  10.00, 10.95, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.29, 13.30, 13.31, 13.50, 14.70,
+     4.00, 4.00,  4.00,  4.00,  4.00,  9.50,  12.97, 13.00, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.29, 13.30, 13.31, 13.50, 14.70,
+     4.00, 11.50, 12.33, 12.61, 12.81, 12.92, 12.97, 13.00, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.29, 13.30, 13.31, 13.50, 14.70,
+     4.00, 11.50, 12.33, 12.61, 12.81, 12.92, 12.97, 13.00, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.29, 13.30, 13.31, 13.50, 14.70};
 const uint8_t N_N_CH = 4;                                        // Number of temperature breakpoints for x_soc_min table
 const float X_SOC_MIN_CH[N_N_CH] = {5.0, 11.1, 11.2, 40.0};      // Temperature breakpoints for soc_min table
 const float T_SOC_MIN_CH[N_N_CH] = {-0.15, -0.15, -0.15, -0.15}; // soc_min(t)
