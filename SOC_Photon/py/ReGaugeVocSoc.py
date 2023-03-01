@@ -28,9 +28,10 @@ from Chemistry_BMS import Chemistry
 
 # New class with observation def added
 class newChem(Chemistry):
-    def __init__(self, mod_code=0, rated_batt_cap=100.):
+    def __init__(self, mod_code=0, rated_batt_cap=100., scale=1.):
         Chemistry.__init__(self, mod_code=mod_code)
         self.rated_batt_cap = rated_batt_cap
+        self.scale = scale
 
     # Assign CHINS chemistry form observation (obs)
     def assign_CH_obs(self):
@@ -102,7 +103,7 @@ class newChem(Chemistry):
         self.assign_CH_obs()
 
     # Regauge
-    def regauge(self, new_rated_batt_cap=100.):
+    def regauge(self, new_rated_batt_cap=100., new_scale=1.):
         return 0
 
     def __str__(self, prefix=''):
@@ -127,9 +128,9 @@ if __name__ == '__main__':
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         date_ = datetime.now().strftime("%y%m%d")
 
-        obs = newChem(mod_code=1, rated_batt_cap=105.)  # CHINS with RATED_BATT_CAP in local_config.h
+        obs = newChem(mod_code=1, rated_batt_cap=100., scale=1.05)  # CHINS with RATED_BATT_CAP in local_config.h
         obs.assign_all_mod()
-        obs.regauge(new_rated_batt_cap=110.)  # rescale and fix
+        obs.regauge(new_rated_batt_cap=105., new_scale=1.05)  # rescale and fix
         print('chemistry for observation', obs)  # print the result
 
         pathToSavePdfTo = '../dataReduction/figures'

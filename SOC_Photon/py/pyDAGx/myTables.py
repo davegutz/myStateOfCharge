@@ -68,9 +68,9 @@ class TableInterp1D:
         r_val = self.v[low] + dx * (self.v[high] - self.v[low])
         return float(r_val)
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix='', spacer='  '):
         s = prefix + "(TableInterp1D):\n"
-        s += "  x = ["
+        s += spacer + "x = ["
         count = 1
         N = len(self.x)
         for X in self.x:
@@ -79,7 +79,7 @@ class TableInterp1D:
                 s += ","
                 count += 1
         s += "]\n"
-        s += "  t = ["
+        s += spacer + "t = ["
         count = 1
         N = len(self.x)
         for X in self.x:
@@ -88,7 +88,6 @@ class TableInterp1D:
                 s += ","
                 count += 1
         s += "]\n"
-        s += "\n"
         return s
 
 
@@ -125,9 +124,9 @@ class TableInterp2D:
         r1 = self.v[temp2] + dx1 * (self.v[high2*self.n + high1] - self.v[temp2])
         return float(r0 + dx2 * (r1 - r0))
 
-    def __str__(self, prefix=''):
+    def __str__(self, prefix='', spacer='  '):
         s = prefix + "(TableInterp2D):\n"
-        s += "  x = ["
+        s += spacer + "x = ["
         count = 1
         N = len(self.x)
         for X in self.x:
@@ -136,7 +135,7 @@ class TableInterp2D:
                 s += ","
                 count += 1
         s += "]\n"
-        s += "  y = ["
+        s += spacer + "y = ["
         count = 1
         N = len(self.y)
         for Y in self.y:
@@ -145,7 +144,7 @@ class TableInterp2D:
                 s += ","
                 count += 1
         s += "]\n"
-        s += "  t = ["
+        s += spacer + "t = ["
         countM = 1
         M = len(self.y)
         for Y in self.y:
