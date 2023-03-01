@@ -314,6 +314,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.bms_off = bms_off_init
         else:
             self.bms_off = (self.temp_c <= self.chemistry.low_t) or (voltage_low and not rp.tweak_test())  # KISS
+            print('MON:    soc', self.soc, 'voc_stat', self.voc_stat, 'vb_down', self.chemistry.vb_down, 'charging', bms_charging, 'voltage_low', voltage_low, 'tweak_test', rp.tweak_test(), 'bms_off', self.bms_off)
         self.ib_charge = self.ib
         if self.bms_off and not bms_charging:
             self.ib_charge = 0.
@@ -636,6 +637,7 @@ class BatterySim(Battery):
             self.model_saturated = sat_init
             self.sat = sat_init
         self.sat = self.model_saturated
+        print('SIM:   soc', self.soc, 'q', self.q, 'voc_stat', self.voc_stat, 'vb_down', self.chemistry.vb_down, 'charging', bms_charging, 'voltage_low', voltage_low, 'tweak_test', rp.tweak_test(), 'bms_off', self.bms_off, 'ib', self.ib, 'ib_charge', self.ib_charge)
 
         return self.vb
 

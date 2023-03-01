@@ -17,6 +17,7 @@
 import numpy as np
 from pyDAGx import myTables
 
+
 class BMS:
     """Battery Management System Properties"""
     def __init__(self):
@@ -32,10 +33,11 @@ class BMS:
 class Chemistry(BMS):
     """Properties of battery"""
     def __init__(self, mod_code=0):
+        BMS.__init__(self)
         self.rated_temp = 0.  # Temperature at RATED_BATT_CAP, deg C
         self.coul_eff = 0.  # Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
         self.cap = 0.  # Hysteresis capacitance, F
-        self.mod_code = 0  # Chemistry code integer
+        self.mod_code = mod_code  # Chemistry code integer
         self.dqdt = 0.  # Change of charge with temperature, fraction/deg C (0.01 from literature)
         self.m_t = 0  # Number temperature breakpoints for voc table
         self.n_s = 0  # Number of soc breakpoints voc table
@@ -203,3 +205,48 @@ class Chemistry(BMS):
         self.lut_s_hys = myTables.TableInterp2D(t_dv1, t_soc1, t_s1)
         self.lu_x_hys = myTables.TableInterp1D(t_soc1, t_dv_max1)
         self.lu_n_hys = myTables.TableInterp1D(t_soc1, t_dv_min1)
+
+    def __str__(self, prefix=''):
+        s = prefix + "Chemistry:\n"
+        s += "  mod_code =     {:2.0f}      // Chemistry code integer\n".format(self.mod_code)
+        s += "  low_voc   =    {:7.3f}  // Voltage threshold for BMS to turn off battery, V\n".format(self.low_voc)
+        s += "  low_t     =    {:7.3f}  // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C\n".format(self.low_t)
+        s += "  vb_off    =    {:7.3f}  // Shutoff point in Mon, V\n".format(self.vb_off)
+        s += "  vb_down   =    {:7.3f}  // Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V\n".format(self.vb_down)
+        s += "  vb_rising =    {:7.3f}  // Shutoff point when off, V\n".format(self.vb_rising)
+        s += "  vb_down_sim=   {:7.3f}  // Shutoff point in Sim, V\n".format(self.vb_down_sim)
+        s += "  vb_rising_sim ={:7.3f}  // Shutoff point in Sim when off, V\n".format(self.vb_rising_sim)
+        self.lut_r_hys = None
+        self.lut_s_hys = None
+        self.lu_x_hys = None
+        self.lu_n_hys = None
+        s += "  rated_temp =   {:7.3f}  // Temperature at RATED_BATT_CAP, deg C\n".format(self.rated_temp)
+        s += "  coul_eff =      {:6.4f}  // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs\n".format(self.coul_eff)
+        s += "  cap      =  {:10.1f}  // Hysteresis capacitance, Farads\n".format(self.cap)
+        s += "  dqdt      =    {:7.3f}  // Change of charge with temperature, fraction/deg C (0.01 from literature)\n".format(self.dqdt)
+        s += "  dv_min_abs=    {:7.3f}  // Absolute value of +/- hysteresis limit, V\n".format(self.dv_min_abs)
+        s += "  m_t =          {:2.0f}      // Number temperature breakpoints for voc table\n".format(self.m_t)
+        s += "  n_s =          {:2.0f}      // Number of soc breakpoints voc table\n".format(self.n_s)
+        s += "  n_n =          {:2.0f}      // Number temperature breakpoints for soc_min table\n".format(self.n_n)
+        s += "  n_h =          {:2.0f}      // Number of dv breakpoints in r(soc, dv) table t_r, t_s\n".format(self.n_h)
+        s += "  m_h =          {:2.0f}      // Number of soc breakpoints in r(soc, dv) table t_r, t_s\n".format(self.m_h)
+        s += "  hys_cap =      {:7.0f}      // Capacitance of hysteresis, Farads\n".format(self.hys_cap)
+        s += "  nom_vsat =      {:7.3f}  // Saturation threshold at temperature, deg C\n".format(self.nom_vsat)
+        s += "  dvoc_dt =       {:7.3f}  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n".format(self.dvoc_dt)
+        s += "  dvoc =          {:7.3f}  // Adjustment for calibration error, V\n".format(self.dvoc)
+        s += "  dvoc =          {:7.3f}  // Adjustment for calibration error, V\n".format(self.dvoc)
+        s += "  c_sd =        {:9.3f}  // Equivalent model for EKF reference.  Parasitic discharge equivalent, Farads\n".format(self.c_sd)
+        s += "  r_0 =         {:9.3f}  // ChargeTransfer R0, ohms\n".format(self.r_0)
+        s += "  r_ct =        {:9.3f}  // ChargeTransfer charge transfer resistance, ohms\n".format(self.r_ct)
+        s += "  tau_ct =      {:9.3f}  // ChargeTransfer charge transfer time constant, s (=1/Rct/Cct)\n".format(self.tau_ct)
+        s += "  r_sd =        {:9.3f}  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n".format(self.r_sd)
+        s += "  tau_sd =      {:9.3f}  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n".format(self.tau_sd)
+        s += "  r_ss =        {:9.3f}  // Equivalent model for state space model initialization, ohms\n".format(self.r_ss)
+        print(self.lut_voc_soc)
+        s += "  \n{}:\n".format(self.lut_voc_soc.__str__('voc(t, soc)'))
+        s += "  \n{}:\n".format(self.lut_min_soc.__str__('soc_min(temp_c)'))
+        s += "  r(soc, dv) = \n {}:\n".format(self.lut_r_hys)
+        s += "  s(soc, dv) = \n {}:\n".format(self.lut_s_hys)
+        s += "  r_max(soc) = \n {}:\n".format(self.lu_x_hys)
+        s += "  r_min(soc) = \n {}:\n".format(self.lu_n_hys)
+        return s

@@ -18,26 +18,26 @@ __version__ = '$Revision: 1.1 $'
 __date__ = '$Date: 2022/01/25 09:42:00 $'
 
 
-def binsearch(x, v, n):
+def binsearch(x_, v_, n):
     # Initialize to high and low
     low = 0
     high = n - 1
     # Check endpoints
-    if x >= v[high]:
+    if x_ >= v_[high]:
         low = high
         dx = 0.
-    elif x <= v[low]:
+    elif x_ <= v_[low]:
         high = low
         dx = 0.
     # else search
     else:
         while high - low > 1:
             mid = int((low + high) / 2)
-            if v[mid] > x:
+            if v_[mid] > x_:
                 high = mid
             else:
                 low = mid
-        dx = (x - v[low]) / (v[high] - v[low])
+        dx = (x_ - v_[low]) / (v_[high] - v_[low])
     return high, low, dx
 
 
@@ -53,20 +53,33 @@ class TableInterp1D:
     x = {x1, x2, ...xn}
     v = {v1, v2, ...vn}"""
 
-    def __init__(self, x, v):
-        self.n = len(x)
-        self.x = x
-        if len(v) != self.n:
-            raise Error("length of array 'v' =", len(v),
-                        " inconsistent with length of 'x' = ", len(x))
-        self.v = v
+    def __init__(self, x_, v_):
+        self.n = len(x_)
+        self.x = x_
+        if len(v_) != self.n:
+            raise Error("length of array 'v' =", len(v_),
+                        " inconsistent with length of 'x' = ", len(x_))
+        self.v = v_
 
-    def interp(self, x):
+    def interp(self, x_):
         if self.n < 1:
             return self.v[0]
-        high, low, dx = binsearch(x, self.x, self.n)
+        high, low, dx = binsearch(x_, self.x, self.n)
         r_val = self.v[low] + dx * (self.v[high] - self.v[low])
         return float(r_val)
+
+    def __str__(self, prefix=''):
+        s = prefix + "(TableInterp1D):\n"
+        s += "  x = ["
+        for X in self.x:
+            s += " {:7.3f},".format(X)
+        s += "]\n"
+        s += "  t = ["
+        for X in self.x:
+            s += " {:7.3f},".format(self.interp(X))
+        s += "]\n"
+        s += "\n"
+        return s
 
 
 class TableInterp2D:
@@ -91,16 +104,34 @@ class TableInterp2D:
                         " inconsistent with lengths of 'x' * 'y' = ", len(x), "*", len(y))
         self.v = v
 
-    def interp(self, x, y):
+    def interp(self, x_, y_):
         if self.n < 1 or self.m < 1:
             return self.v[0]
-        high1, low1, dx1 = binsearch(x, self.x, self.n)
-        high2, low2, dx2 = binsearch(y, self.y, self.m)
+        high1, low1, dx1 = binsearch(x_, self.x, self.n)
+        high2, low2, dx2 = binsearch(y_, self.y, self.m)
         temp1 = low2 * self.n + low1
         temp2 = high2 * self.n + low1
         r0 = self.v[temp1] + dx1 * (self.v[low2*self.n + high1] - self.v[temp1])
         r1 = self.v[temp2] + dx1 * (self.v[high2*self.n + high1] - self.v[temp2])
         return float(r0 + dx2 * (r1 - r0))
+
+    def __str__(self, prefix=''):
+        s = prefix + "(TableInterp2D):\n"
+        s += "  x = ["
+        for X in self.x:
+            s += " {:7.3f},".format(X)
+        s += "]\n"
+        s += "  y = ["
+        for Y in self.y:
+            s += " {:7.3f},".format(Y)
+        s += "]\n"
+        s += "  t = ["
+        for Y in self.y:
+            for X in self.x:
+                s += " {:7.3f},".format(self.interp(X, Y))
+            s += "\n"
+        s += "]\n"
+        return s
 
 
 if __name__ == '__main__':
