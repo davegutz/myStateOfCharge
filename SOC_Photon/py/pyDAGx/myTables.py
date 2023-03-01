@@ -71,12 +71,22 @@ class TableInterp1D:
     def __str__(self, prefix=''):
         s = prefix + "(TableInterp1D):\n"
         s += "  x = ["
+        count = 1
+        N = len(self.x)
         for X in self.x:
-            s += " {:7.3f},".format(X)
+            s += " {:7.3f}".format(X)
+            if count < N:
+                s += ","
+                count += 1
         s += "]\n"
         s += "  t = ["
+        count = 1
+        N = len(self.x)
         for X in self.x:
-            s += " {:7.3f},".format(self.interp(X))
+            s += " {:7.3f}".format(self.interp(X))
+            if count < N:
+                s += ","
+                count += 1
         s += "]\n"
         s += "\n"
         return s
@@ -118,18 +128,37 @@ class TableInterp2D:
     def __str__(self, prefix=''):
         s = prefix + "(TableInterp2D):\n"
         s += "  x = ["
+        count = 1
+        N = len(self.x)
         for X in self.x:
-            s += " {:7.3f},".format(X)
+            s += " {:7.3f}".format(X)
+            if count < N:
+                s += ","
+                count += 1
         s += "]\n"
         s += "  y = ["
+        count = 1
+        N = len(self.y)
         for Y in self.y:
-            s += " {:7.3f},".format(Y)
+            s += " {:7.3f}".format(Y)
+            if count < N:
+                s += ","
+                count += 1
         s += "]\n"
         s += "  t = ["
+        countM = 1
+        M = len(self.y)
         for Y in self.y:
+            count = 1
+            N = len(self.x)
             for X in self.x:
-                s += " {:7.3f},".format(self.interp(X, Y))
-            s += "\n"
+                s += " {:7.3f}".format(self.interp(X, Y))
+                if count < N:
+                    s += ","
+                    count += 1
+            if countM < M:
+                s += ",\n"
+            countM += 1
         s += "]\n"
         return s
 

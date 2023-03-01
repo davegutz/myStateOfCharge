@@ -216,10 +216,6 @@ class Chemistry(BMS):
         s += "  vb_rising =    {:7.3f}  // Shutoff point when off, V\n".format(self.vb_rising)
         s += "  vb_down_sim=   {:7.3f}  // Shutoff point in Sim, V\n".format(self.vb_down_sim)
         s += "  vb_rising_sim ={:7.3f}  // Shutoff point in Sim when off, V\n".format(self.vb_rising_sim)
-        self.lut_r_hys = None
-        self.lut_s_hys = None
-        self.lu_x_hys = None
-        self.lu_n_hys = None
         s += "  rated_temp =   {:7.3f}  // Temperature at RATED_BATT_CAP, deg C\n".format(self.rated_temp)
         s += "  coul_eff =      {:6.4f}  // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs\n".format(self.coul_eff)
         s += "  cap      =  {:10.1f}  // Hysteresis capacitance, Farads\n".format(self.cap)
@@ -242,11 +238,10 @@ class Chemistry(BMS):
         s += "  r_sd =        {:9.3f}  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n".format(self.r_sd)
         s += "  tau_sd =      {:9.3f}  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n".format(self.tau_sd)
         s += "  r_ss =        {:9.3f}  // Equivalent model for state space model initialization, ohms\n".format(self.r_ss)
-        print(self.lut_voc_soc)
-        s += "  \n{}:\n".format(self.lut_voc_soc.__str__('voc(t, soc)'))
-        s += "  \n{}:\n".format(self.lut_min_soc.__str__('soc_min(temp_c)'))
-        s += "  r(soc, dv) = \n {}:\n".format(self.lut_r_hys)
-        s += "  s(soc, dv) = \n {}:\n".format(self.lut_s_hys)
-        s += "  r_max(soc) = \n {}:\n".format(self.lu_x_hys)
-        s += "  r_min(soc) = \n {}:\n".format(self.lu_n_hys)
+        s += "  \n{}".format(self.lut_voc_soc.__str__('voc(t, soc)'))
+        s += "  \n{}".format(self.lut_min_soc.__str__('soc_min(temp_c)'))
+        s += "  \n{}".format(self.lut_r_hys.__str__('res(dv_hys)'))
+        s += "  \n{}".format(self.lut_s_hys.__str__('slr(dv_hys)'))
+        s += "  \n{}".format(self.lu_x_hys.__str__('dv_max(soc)'))
+        s += "  \n{}".format(self.lu_n_hys.__str__('dv_min(soc)'))
         return s
