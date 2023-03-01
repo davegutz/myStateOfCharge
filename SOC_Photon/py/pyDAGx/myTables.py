@@ -41,6 +41,18 @@ def binsearch(x_, v_, n):
     return high, low, dx
 
 
+# Check if given array is Monotonic
+def isMonotonic(A):
+    x_, y_ = [], []
+    x_.extend(A)
+    y_.extend(A)
+    x_.sort()
+    y_.sort(reverse=True)
+    if x_ == A or y_ == A:
+        return True
+    return False
+
+
 class Error(Exception):
     """Lookup Table Error"""
     pass

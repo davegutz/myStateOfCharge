@@ -59,6 +59,7 @@ class newChem(Chemistry):
         self.nom_vsat = 13.85  # Saturation threshold at temperature, deg C (13.85)
         self.r_ss = self.r_0 + self.r_ct
         self.dv_min_abs = 0.06  # Absolute value of +/- hysteresis limit, V
+        self.t_dv = None
 
         # Tables CHINS Bmon=1, Bsim=1
         # VOC_SOC table
@@ -82,7 +83,7 @@ class newChem(Chemistry):
         # Hysteresis tables
         self.cap = 1e4  # scaled later
         t_soc1 = [.47, .75, .80, .86]
-        t_dv1 = [-.10, -.05, -.04, 0.0, .02, .04, .05, .06, .07, .10]
+        self.t_dv = [-.10, -.05, -.04, 0.0, .02, .04, .05, .06, .07, .10]
         schp4 = [0.003, 0.003, 0.4, 0.4, 0.4, 0.4, 0.010, 0.010, 0.010, 0.010]
         schp8 = [0.004, 0.004, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.014, 0.012]
         schp9 = [0.004, 0.004, 0.4, 0.4, .2, .09, 0.04, 0.006, 0.006, 0.006]
@@ -93,8 +94,8 @@ class newChem(Chemistry):
         SRs1p8 = [1., 1., .2, .2, .2, 1., 1., 1., 1., 1.]
         SRs1p9 = [1., 1., .1, .1, .2, 1., 1., 1., 1., 1.]
         t_s1 = SRs1p4 + SRs1p8 + SRs1p8 + SRs1p9
-        self.lut_r_hys = myTables.TableInterp2D(t_dv1, t_soc1, t_r1)
-        self.lut_s_hys = myTables.TableInterp2D(t_dv1, t_soc1, t_s1)
+        self.lut_r_hys = myTables.TableInterp2D(self.t_dv, t_soc1, t_r1)
+        self.lut_s_hys = myTables.TableInterp2D(self.t_dv, t_soc1, t_s1)
         self.lu_x_hys = myTables.TableInterp1D(t_soc1, t_dv_max1)
         self.lu_n_hys = myTables.TableInterp1D(t_soc1, t_dv_min1)
 
@@ -104,6 +105,7 @@ class newChem(Chemistry):
 
     # Regauge
     def regauge(self, new_rated_batt_cap=100., new_scale=1.):
+        print('t_dv monotonic?: ', myTables.isMonotonic(self.t_dv))
         return 0
 
     def __str__(self, prefix=''):
