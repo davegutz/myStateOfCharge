@@ -18,7 +18,101 @@ __version__ = '$Revision: 1.1 $'
 __date__ = '$Date: 2022/01/25 09:42:00 $'
 
 import numpy as np
-import Iterate
+
+
+class Iterate:
+    def __init__(self, desc=''):
+        self.count = 0
+        self.desc = desc
+        self.de = 0.
+        self.des = 0.
+        self.dx = 0.
+        self.e = 0.
+        self.ep = 0.
+        self.limited = False
+        self.x = 0.
+        self.xmax = 0.
+        self.xmin = 0.
+        self.xp = 0.
+
+    # Initialize
+    def init(self, xmax=0., xmin=0., eInit=0.):
+        self.xmax = xmax
+        self.xmin = xmin
+        self.e = eInit
+        self.ep = self.e
+        self.xp = self.xmax
+        self.x = self.xmin  # Do min and max first
+        self.dx = self.x - self.xp
+        self.de = self.e - self.ep
+        self.count = 0
+
+    # Increment counter
+    def increment(self):
+        self.count += 1
+
+    # Generic iteration calculation, method of successive approximations for
+    # success_count then Newton-Rapheson as needed - works with iterateInit.
+    # Inputs:  self.e
+    # Outputs:  self.x
+    def iterate(self, verbose=False, success_count=0, en_no_soln=False):
+        self.de = self.e - self.ep
+        self.des = np.sign(self.de)*max(abs(self.de), 1e-16)
+        self.dx = self.x - self.xp
+        if verbose:
+            s = self.desc + '(' + "{:2d}".format(self.count) + ':'
+            s += " xmin{:12.8f}".format(self.xmin)
+            s += " x{:12.8f}".format(self.x)
+            s += " xmax{:12.8f}".format(self.xmax)
+            s += " e{:12.8f}".format(self.e)
+            s += " des{:12.8f}".format(self.des)
+            s += " dx{:12.8f}".format(self.dx)
+            s += " de{:12.8f}".format(self.de)
+            s += " e{:12.8f}".format(self.e)
+            print(s)
+
+        # Check min max sign change
+        no_soln = False
+        if self.count == 2:
+            if self.e*self.ep >= 0 and en_no_soln:  # No solution possible
+                no_soln = True
+                if abs(self.ep) < abs(self.e):
+                    self.x = self.xp
+                self.ep = self.e
+                self.limited = False
+                if verbose:
+                    print(self.desc, ':No soln')  # Leaving x at most likely limit value and recalculating...
+                return self.e
+            else:
+                no_soln = False
+
+        # Stop after recalc and no_soln
+        if self.count == 3 and no_soln is True:
+            self.e = 0.
+            return self.e
+        self.xp = self.x
+        self.ep = self.e
+        if self.count == 1:
+            self.x = self.xmax  # Do min and max first
+        else:
+            if self.count > success_count:
+                self.x = max(min(self.x - self.e/self.des*self.dx, self.xmax), self.xmin)
+                if self.e > 0:
+                    self.xmax = self.xp
+                else:
+                    self.xmin = self.xp
+            else:
+                if self.e > 0:
+                    self.xmax = self.xp
+                    self.x = (self.xmin + self.x) / 2.
+                else:
+                    self.xmin = self.xp
+                    self.x = (self.xmax + self.x) / 2.
+            if self.x == self.xmax or self.x == self.xmin:
+                self.limited = False
+            else:
+                self.limited = True
+        return self.e
 
 
 def binsearch(x_, v_, n):
@@ -145,21 +239,21 @@ class TableInterp2D:
         return float(r0 + dx2 * (r1 - r0))
 
     # Reverse interpolation
-    def r_interp(self, t_, y_):
+    def r_interp(self, t_, y_, verbose=False):
         ice = Iterate("TableInterp2D.r_interp")
         SOLV_ERR = 1e-12
         SOLV_MAX_COUNTS = 25
         SOLV_SUCC_COUNTS = 4
         if self.is_monotonic:
             xmin = self.x[0]
-            xmax = self.x[end]
+            xmax = self.x[-1]
             ice.init(xmax, xmin, 2*SOLV_ERR)  # init ice.e > SOLV_ERR
             while abs(ice.e) > SOLV_ERR and ice.count < SOLV_MAX_COUNTS and abs(ice.dx) > 0.:
                 ice.increment()
                 x_ = ice.x
                 v_solved = self.interp(x_, y_)
-                ice.e(v_solved - t_)
-                ice.iterate(verbose=True, success_count=SOLV_SUCC_COUNTS, en_no_soln=True)
+                ice.e = v_solved - t_
+                ice.iterate(verbose=verbose, success_count=SOLV_SUCC_COUNTS, en_no_soln=True)
             return x_
         else:
             print('r_interp(myTables.py):  table not monotonic in z')
