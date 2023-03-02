@@ -32,6 +32,18 @@ class newChem(Chemistry):
         Chemistry.__init__(self, mod_code=mod_code)
         self.rated_batt_cap = rated_batt_cap
         self.scale = scale
+        self.t_dv = None
+        self.t_dv_max = None
+        self.t_dv_min = None
+        self.t_r = None
+        self.t_s = None
+        self.t_soc = None
+        self.t_soc_max = None
+        self.t_soc_min = None
+        self.t_voc = None
+        self.t_x_soc = None
+        self.t_x_soc_min = None
+        self.t_y_t = None
 
     # Assign CHINS chemistry form observation (obs)
     def assign_CH_obs(self):
@@ -59,7 +71,6 @@ class newChem(Chemistry):
         self.nom_vsat = 13.85  # Saturation threshold at temperature, deg C (13.85)
         self.r_ss = self.r_0 + self.r_ct
         self.dv_min_abs = 0.06  # Absolute value of +/- hysteresis limit, V
-        self.t_dv = None
 
         # Tables CHINS Bmon=1, Bsim=1
         # VOC_SOC table
@@ -70,19 +81,20 @@ class newChem(Chemistry):
                   4.00, 4.00,  4.00,  4.00,  4.00,  9.50,  12.97, 13.00, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.29, 13.30, 13.31, 13.50, 14.70,
                   4.00, 11.50, 12.33, 12.61, 12.81, 12.92, 12.97, 13.00, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.29, 13.30, 13.31, 13.50, 14.70,
                   4.00, 11.50, 12.33, 12.61, 12.81, 12.92, 12.97, 13.00, 13.03, 13.06, 13.09, 13.12, 13.17, 13.22, 13.25, 13.29, 13.30, 13.31, 13.50, 14.70]
-        x1 = np.array(t_x_soc1)
-        y1 = np.array(t_y_t1)
-        data_interp1 = np.array(t_voc1)
-        self.lut_voc_soc = myTables.TableInterp2D(x1, y1, data_interp1)
+        self.t_x_soc = np.array(t_x_soc1)
+        self.t_y_t = np.array(t_y_t1)
+        self.t_voc = np.array(t_voc1)
+        self.lut_voc_soc = myTables.TableInterp2D(self.t_x_soc, self.t_y_t, self.t_voc)
 
         # Min SOC table
-        t_x_soc_min1 = t_y_t1
+        self.t_x_soc_min = self.t_y_t.copy()
         t_soc_min1 = [-0.15, -0.15, -0.15, -0.15]
-        self.lut_min_soc = myTables.TableInterp1D(np.array(t_x_soc_min1), np.array(t_soc_min1))
+        self.t_soc_min = np.array(t_soc_min1)
+        self.lut_min_soc = myTables.TableInterp1D(self.t_x_soc_min, self.t_soc_min)
 
         # Hysteresis tables
         self.cap = 1e4  # scaled later
-        t_soc1 = [.47, .75, .80, .86]
+        self.t_soc = [.47, .75, .80, .86]
         self.t_dv = [-.10, -.05, -.04, 0.0, .02, .04, .05, .06, .07, .10]
         schp4 = [0.003, 0.003, 0.4, 0.4, 0.4, 0.4, 0.010, 0.010, 0.010, 0.010]
         schp8 = [0.004, 0.004, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.014, 0.012]
@@ -93,11 +105,14 @@ class newChem(Chemistry):
         SRs1p4 = [1., 1., .2, .2, .2, .2, 1., 1., 1., 1.]
         SRs1p8 = [1., 1., .2, .2, .2, 1., 1., 1., 1., 1.]
         SRs1p9 = [1., 1., .1, .1, .2, 1., 1., 1., 1., 1.]
-        t_s1 = SRs1p4 + SRs1p8 + SRs1p8 + SRs1p9
-        self.lut_r_hys = myTables.TableInterp2D(self.t_dv, t_soc1, t_r1)
-        self.lut_s_hys = myTables.TableInterp2D(self.t_dv, t_soc1, t_s1)
-        self.lu_x_hys = myTables.TableInterp1D(t_soc1, t_dv_max1)
-        self.lu_n_hys = myTables.TableInterp1D(t_soc1, t_dv_min1)
+        self.t_s = SRs1p4 + SRs1p8 + SRs1p8 + SRs1p9
+        self.t_r = np.array(t_r1)
+        self.t_dv_max = np.array(t_dv_max1)
+        self.t_dv_min = np.array(t_dv_min1)
+        self.lut_r_hys = myTables.TableInterp2D(self.t_dv, self.t_soc, self.t_r)
+        self.lut_s_hys = myTables.TableInterp2D(self.t_dv, self.t_soc, self.t_s)
+        self.lu_x_hys = myTables.TableInterp1D(self.t_soc, self.t_dv_max)
+        self.lu_n_hys = myTables.TableInterp1D(self.t_soc, self.t_dv_min)
 
     # Assign chemistry, anytime
     def assign_all_mod(self, mod_code=0):
