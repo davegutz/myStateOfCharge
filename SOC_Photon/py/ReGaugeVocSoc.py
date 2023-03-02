@@ -19,15 +19,27 @@ RATED_BATT_CAPACITY/RATED_TEMP that may have soc breakpoints < 0.   Rescale and 
 q=0 at soc=0 when temp_c is RATED_TEMP."""
 
 import numpy as np
-import Battery
-from Battery import overall_batt
-from datetime import datetime, timedelta
+from datetime import datetime
 from pyDAGx import myTables
 from Chemistry_BMS import Chemistry
 
 
+def pretty_print_vec(vec, prefix='', spacer=''):
+    s = prefix + "(vector):\n"
+    s += spacer + prefix + " = ["
+    count = 1
+    N = len(vec)
+    for X in vec:
+        s += " {:6.3f}".format(X)
+        if count < N:
+            s += ","
+            count += 1
+    s += "]\n"
+    print(s)
+
+
 # New class with observation def added
-class newChem(Chemistry):
+class localChem(Chemistry):
     def __init__(self, mod_code=0, rated_batt_cap=100., scale=1.):
         Chemistry.__init__(self, mod_code=mod_code)
         self.rated_batt_cap = rated_batt_cap
@@ -35,6 +47,8 @@ class newChem(Chemistry):
         self.t_dv = None
         self.t_dv_max = None
         self.t_dv_min = None
+        # self.lut_min_soc = None
+        # self.lut_voc_soc = None
         self.t_r = None
         self.t_s = None
         self.t_soc = None
@@ -119,14 +133,26 @@ class newChem(Chemistry):
         self.assign_CH_obs()
 
     # Regauge
+    # Assuming flat voc(soc), may simply scale soc as a practical matter
     def regauge(self, new_rated_batt_cap=100., new_scale=1.):
         print('t_dv monotonic?: ', myTables.isMonotonic(self.t_dv))
-        temp_c = 25.
+        temp_c = self.rated_temp
         print('  x    v')
         for v in np.arange(0., 15., 0.1):
             x = self.lut_voc_soc.r_interp(v, temp_c, verbose=False)
             print("{:8.4f}".format(x), "{:8.4f}".format(v))
-        return 0
+        s_off_old = self.lut_voc_soc.r_interp(self.vb_off, temp_c, verbose=False)
+        print('vb_off', self.vb_off, 's_off_old', s_off_old)
+        scale = 1. - s_off_old
+        pretty_print_vec(self.t_x_soc, prefix='t_x_soc', spacer='  ')
+        print(' soc   soc_scale v_old   v_new')
+        for soc in self.t_x_soc:
+            soc_scale = 1. - (1. - soc)*scale
+            v_old = self.lut_voc_soc.interp(soc, temp_c)
+            v_new = self.lut_voc_soc.interp(soc_scale, temp_c)
+            print("{:6.3f}".format(soc), "{:6.3f}".format(soc_scale), "{:6.2f}".format(v_old), "{:6.2f}".format(v_new))
+
+        return 0.
 
     def __str__(self, prefix=''):
         s = "new Chemistry:\n"
@@ -150,7 +176,7 @@ if __name__ == '__main__':
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         date_ = datetime.now().strftime("%y%m%d")
 
-        obs = newChem(mod_code=1, rated_batt_cap=100., scale=1.05)  # CHINS with RATED_BATT_CAP in local_config.h
+        obs = localChem(mod_code=1, rated_batt_cap=100., scale=1.05)  # CHINS with RATED_BATT_CAP in local_config.h
         obs.assign_all_mod()
         obs.regauge(new_rated_batt_cap=105., new_scale=1.05)  # rescale and fix
         print('chemistry for observation', obs)  # print the result
