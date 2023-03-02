@@ -20,7 +20,7 @@ __date__ = '$Date: 2023/03/02 13:15:02 $'
 import numpy as np
 
 
-class Iterator:
+class Iterate:
     def __init__(self, desc=''):
         self.count = 0
         self.desc = desc
@@ -46,6 +46,10 @@ class Iterator:
         self.dx = self.x - self.xp
         self.de = self.e - self.ep
         self.count = 0
+
+    # Increment counter
+    def increment(self):
+        self.count += 1
 
     # Generic iteration calculation, method of successive approximations for
     # success_count then Newton-Rapheson as needed - works with iterateInit.

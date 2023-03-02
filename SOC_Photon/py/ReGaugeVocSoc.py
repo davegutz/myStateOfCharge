@@ -121,6 +121,11 @@ class newChem(Chemistry):
     # Regauge
     def regauge(self, new_rated_batt_cap=100., new_scale=1.):
         print('t_dv monotonic?: ', myTables.isMonotonic(self.t_dv))
+        temp_c = 25.
+        print('  x    v')
+        for v in np.arange(9., 15., 0.1):
+            x = self.lut_voc_soc.r_interp(v, temp_c)
+            print(x, v)
         return 0
 
     def __str__(self, prefix=''):

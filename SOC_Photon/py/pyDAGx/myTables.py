@@ -17,6 +17,9 @@ __author__ = 'Dave Gutz <davegutz@alum.mit.edu>'
 __version__ = '$Revision: 1.1 $'
 __date__ = '$Date: 2022/01/25 09:42:00 $'
 
+import numpy as np
+import Iterate
+
 
 def binsearch(x_, v_, n):
     # Initialize to high and low
@@ -48,7 +51,7 @@ def isMonotonic(A):
     y_.extend(A)
     x_.sort()
     y_.sort(reverse=True)
-    if x_ == A or y_ == A:
+    if all(np.array(x_) == np.array(A)) or all(np.array(y_) == np.array(A)):
         return True
     return False
 
@@ -73,10 +76,11 @@ class TableInterp1D:
                         " inconsistent with length of 'x' = ", len(x_))
         self.v = v_
 
+    # Interpolation
     def interp(self, x_):
         if self.n < 1:
             return self.v[0]
-        high, low, dx = binsearch(x_, self.x, self.n)
+        high, low, dx = binsearch(x_, self.x, self.n)  # clips
         r_val = self.v[low] + dx * (self.v[high] - self.v[low])
         return float(r_val)
 
@@ -115,15 +119,19 @@ class TableInterp2D:
      ...............
          vm1, vm2, ...vmn}"""
 
-    def __init__(self, x, y, v):
-        self.n = len(x)
-        self.m = len(y)
-        self.x = x
-        self.y = y
-        if len(v) != self.n*self.m:
-            raise Error("length of array 'v' =", len(v),
-                        " inconsistent with lengths of 'x' * 'y' = ", len(x), "*", len(y))
-        self.v = v
+    def __init__(self, x_, y_, v_):
+        self.n = len(x_)
+        self.m = len(y_)
+        self.x = x_
+        self.y = y_
+        if len(v_) != self.n*self.m:
+            raise Error("length of array 'v' =", len(v_),
+                        " inconsistent with lengths of 'x' * 'y' = ", len(x_), "*", len(y_))
+        self.v = v_
+        self.is_monotonic = True
+        for j in range(self.m):
+            if not isMonotonic(self.v[j*self.n:j*self.n+self.n]):
+                self.is_monotonic = False
 
     def interp(self, x_, y_):
         if self.n < 1 or self.m < 1:
@@ -135,6 +143,27 @@ class TableInterp2D:
         r0 = self.v[temp1] + dx1 * (self.v[low2*self.n + high1] - self.v[temp1])
         r1 = self.v[temp2] + dx1 * (self.v[high2*self.n + high1] - self.v[temp2])
         return float(r0 + dx2 * (r1 - r0))
+
+    # Reverse interpolation
+    def r_interp(self, t_, y_):
+        ice = Iterate("TableInterp2D.r_interp")
+        SOLV_ERR = 1e-12
+        SOLV_MAX_COUNTS = 25
+        SOLV_SUCC_COUNTS = 4
+        if self.is_monotonic:
+            xmin = self.x[0]
+            xmax = self.x[end]
+            ice.init(xmax, xmin, 2*SOLV_ERR)  # init ice.e > SOLV_ERR
+            while abs(ice.e) > SOLV_ERR and ice.count < SOLV_MAX_COUNTS and abs(ice.dx) > 0.:
+                ice.increment()
+                x_ = ice.x
+                v_solved = self.interp(x_, y_)
+                ice.e(v_solved - t_)
+                ice.iterate(verbose=True, success_count=SOLV_SUCC_COUNTS, en_no_soln=True)
+            return x_
+        else:
+            print('r_interp(myTables.py):  table not monotonic in z')
+            return np.nan
 
     def __str__(self, prefix='', spacer='  '):
         s = prefix + "(TableInterp2D):\n"
