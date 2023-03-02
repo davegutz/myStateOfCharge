@@ -80,12 +80,10 @@ if __name__ == '__main__':
         # Regression suite
 
         # data_file_old_txt = 'ampHiFail v20230219.txt'; unit_key = 'pro0p'
-        # data_file_old_txt = 'ampHiFail v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05; cc_dif_tol_in = 0.5
+        # data_file_old_txt = 'ampHiFail v20230303 CH.txt'; unit_key = 'pro0p'; scale_in = 1.118; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'ampHiFail vA20221220.txt';  unit_key = 'soc1a'
-        # data_file_old_txt = 'rapidTweakRegression v20230219 CHINS.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; cc_dif_tol_in = 0.5
-        # data_file_old_txt = 'rapidTweakRegression v20230219 CH4.txt'; unit_key = 'pro0p_2023';  scale_in = 4.
-        # data_file_old_txt = 'flatSit v20220219 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; cc_dif_tol_in = 0.5
-        # data_file_old_txt = 'flatSit v20220219 CH1.txt'; unit_key = 'pro0p_2023';  scale_in = 1.00; cc_dif_tol_in = 0.5
+        # data_file_old_txt = 'rapidTweakRegression v20230303 CHINS.txt'; unit_key = 'pro0p_2023';  scale_in = 1.118; cc_dif_tol_in = 0.5
+        # data_file_old_txt = 'flatSit v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.118; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in = 4.8;
         # data_file_old_txt = 'rapidTweakRegression vA20230217.txt'; unit_key = 'pro1a_2023'
         # data_file_old_txt = 'rapidTweakRegression vA20230219.txt'; unit_key = 'pro1a_2023'
@@ -94,18 +92,18 @@ if __name__ == '__main__':
 
         # data_file_old_txt = 'offSitHysBms v20221220.txt'; unit_key = 'pro0p_2022'   # ; time_end_in = 137.
         # data_file_old_txt = 'offSitHysBms vA20221220.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
-        data_file_old_txt = 'offSitHysBms v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05; cc_dif_tol_in = 0.5  # ; time_end_in = 10.
+        data_file_old_txt = 'offSitHysBms v20230303 CH.txt'; unit_key = 'pro0p'; scale_in = 1.118; cc_dif_tol_in = 0.5  # ; time_end_in = 10.
         # data_file_old_txt = 'Xm0VbFail.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
 
         # data_file_old_txt = 'triTweakDisch v20221220.txt'  #; time_end_in=25.4
-        # data_file_old_txt = 'triTweakDisch v20230219.txt'; unit_key = 'pro0p'; scale_in = 1.05; cc_dif_tol_in = 0.5  #;time_end_in = 2.
-        # data_file_old_txt = 'triTweakDisch v20230219 CH.txt'; unit_key = 'pro0p'; scale_in = 1.05; cc_dif_tol_in = 0.5  # ; time_end_in = 35.
+        # data_file_old_txt = 'triTweakDisch v20230219.txt'; unit_key = 'pro0p'; scale_in = 1.118; cc_dif_tol_in = 0.5  #;time_end_in = 2.
+        # data_file_old_txt = 'triTweakDisch v20230303 CH.txt'; unit_key = 'pro0p'; scale_in = 1.118; cc_dif_tol_in = 0.5  # ; time_end_in = 35.
         # data_file_old_txt = 'coldStart v20221220.txt'  #; time_end_in=112
 
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
-        # data_file_old_txt = 'ampHiFailFf v20230219 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; cc_dif_tol_in = 0.5
+        # data_file_old_txt = 'ampHiFailFf v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.118; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'ampLoFail v20221028.txt'
-        # data_file_old_txt = 'ampLoFail v20230219 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; cc_dif_tol_in = 0.5
+        # data_file_old_txt = 'ampLoFail v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.118; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'
         # data_file_old_txt = 'rapidTweakRegression40C v20221028.txt'  # ; time_end_in=4.8;
         # data_file_old_txt = 'slowTweakRegression v20221028.txt'
@@ -114,7 +112,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'offSitHysBmsNoise v20221028.txt'  # ; time_end_in=50
         # data_file_old_txt = 'ampHiFailSlow v20221028.txt'  # ; time_end_in=360
         # data_file_old_txt = 'vHiFail v20221028.txt'
-        # data_file_old_txt = 'vHiFail v20230219 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.05; cc_dif_tol_in = 0.5
+        # data_file_old_txt = 'vHiFail v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.118; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'pulseEKF v20221028.txt'; init_time_in=-0.001;  # TODO:  broken
         # data_file_old_txt = 'pulseSS v20221028.txt'; init_time_in=-0.001;
         # data_file_old_txt = 'tbFailMod v20221220.txt'
@@ -127,11 +125,11 @@ if __name__ == '__main__':
 
         # The following CHINS runs were sources of figures in the .odt report.  Chem is in data stream
         # in the following line I forgot to renom sp on load so scale_hys was 1.5 by mistake for baseline run.
-        # data_file_old_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in = 1.05; s_hys_in = 1.5; s_hys_in = 1.15; #stauct_in=0.1; s_hys_cap_in=1.;
-        # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True # 0.9 tune 4, 5
-        # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # 0.8 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
-        # data_file_old_txt = 'steps v20230128 20230214.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.4 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
-        # data_file_old_txt = 'steps v20230128 20230218.txt'; unit_key = 'soc0p';  scale_in = 1.05; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.1 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
+        # data_file_old_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in = 1.118; s_hys_in = 1.5; s_hys_in = 1.15; #stauct_in=0.1; s_hys_cap_in=1.;
+        # data_file_old_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in = 1.118; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True # 0.9 tune 4, 5
+        # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in = 1.118; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # 0.8 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
+        # data_file_old_txt = 'steps v20230128 20230214.txt'; unit_key = 'soc0p';  scale_in = 1.118; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.4 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
+        # data_file_old_txt = 'steps v20230128 20230218.txt'; unit_key = 'soc0p';  scale_in = 1.118; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.1 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
 
         # data_file_old_txt = 'coldCharge v20221028 20221210.txt'; unit_key = 'soc0_2022'; use_vb_sim_in = True
         # data_file_old_txt = 'vb_mess.txt'; unit_key = 'pro1a_2022';
