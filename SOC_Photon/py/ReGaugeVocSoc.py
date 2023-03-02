@@ -44,11 +44,12 @@ class localChem(Chemistry):
         Chemistry.__init__(self, mod_code=mod_code)
         self.rated_batt_cap = rated_batt_cap
         self.scale = scale
+        self.new_rated_batt_cap = None
+        self.new_scale = None
         self.t_dv = None
         self.t_dv_max = None
         self.t_dv_min = None
-        # self.lut_min_soc = None
-        # self.lut_voc_soc = None
+        self.s_off_old = None
         self.t_r = None
         self.t_s = None
         self.t_soc = None
@@ -58,8 +59,13 @@ class localChem(Chemistry):
         self.t_x_soc = None
         self.t_x_soc_min = None
         self.t_y_t = None
+        self.t_voc_new = None
+        self.lut_voc_soc_new = None
+        self.t_soc_min_new = None
+        self.lut_min_soc_new = None
 
     # Assign CHINS chemistry form observation (obs)
+    # Hardcoded in here so can change Chemistry object with result
     def assign_CH_obs(self):
         # Constants
         # self.cap = see below
@@ -134,31 +140,72 @@ class localChem(Chemistry):
 
     # Regauge
     # Assuming flat voc(soc), may simply scale soc as a practical matter
-    def regauge(self, new_rated_batt_cap=100., new_scale=1.):
+    def regauge(self):
         print('t_dv monotonic?: ', myTables.isMonotonic(self.t_dv))
         temp_c = self.rated_temp
         print('  x    v')
         for v in np.arange(0., 15., 0.1):
             x = self.lut_voc_soc.r_interp(v, temp_c, verbose=False)
             print("{:8.4f}".format(x), "{:8.4f}".format(v))
-        s_off_old = self.lut_voc_soc.r_interp(self.vb_off, temp_c, verbose=False)
-        print('vb_off', self.vb_off, 's_off_old', s_off_old)
-        scale = 1. - s_off_old
+        self.s_off_old = self.lut_voc_soc.r_interp(self.vb_off, temp_c, verbose=False)
+        print('vb_off', self.vb_off, 's_off_old', self.s_off_old)
+        scale = 1. - self.s_off_old
         pretty_print_vec(self.t_x_soc, prefix='t_x_soc', spacer='  ')
         print(' soc   soc_scale v_old   v_new')
-        for soc in self.t_x_soc:
-            soc_scale = 1. - (1. - soc)*scale
-            v_old = self.lut_voc_soc.interp(soc, temp_c)
-            v_new = self.lut_voc_soc.interp(soc_scale, temp_c)
-            print("{:6.3f}".format(soc), "{:6.3f}".format(soc_scale), "{:6.2f}".format(v_old), "{:6.2f}".format(v_new))
-
-        return 0.
+        t_voc_new = []
+        for temp_c in self.t_y_t:
+            for soc in self.t_x_soc:
+                soc_scale = 1. - (1. - soc)*scale
+                v_old = self.lut_voc_soc.interp(soc, temp_c)
+                v_new = self.lut_voc_soc.interp(soc_scale, temp_c)
+                t_voc_new.append(v_new)
+                print("{:6.3f}".format(soc), "{:6.3f}".format(soc_scale), "{:6.2f}".format(v_old), "{:6.2f}".format(v_new))
+        self.t_voc_new = np.array(t_voc_new)
+        self.lut_voc_soc_new = myTables.TableInterp2D(self.t_x_soc, self.t_y_t, t_voc_new)
+        self.new_rated_batt_cap = self.scale*self.rated_batt_cap*(1.-self.s_off_old)
+        self.new_scale = self.scale - self.s_off_old
+        t_soc_min_new = []
+        for temp_c in self.t_y_t:
+            t_soc_min_new.append(self.lut_voc_soc_new.r_interp(self.vb_off, temp_c))
+        self.t_soc_min_new = np.array(t_soc_min_new)
+        self.lut_min_soc_new = myTables.TableInterp1D(self.t_x_soc_min, self.t_soc_min_new)
 
     def __str__(self, prefix=''):
         s = "new Chemistry:\n"
         s += "\n  "
         s += Chemistry.__str__(self)
+        s += "\nObs lut_voc_soc:\n"
+        s += self.lut_voc_soc.__str__()
+        s += "\nNew lut_voc_soc:\n"
+        s += self.lut_voc_soc_new.__str__()
+        s += "\nNew lut_soc_min:\n"
+        s += self.lut_min_soc_new.__str__()
+        s += "\nIn app use \n#define RATED_BATT_CAP        {:5.1f}   // Nominal battery unit capacity at RATED_TEMP.  (* 'Sc' or '*BS'/'*BP'), Ah\n".\
+            format(self.new_rated_batt_cap)
+        s += "In Python use RATED_BATT_CAP " + "{:7.2f}".format(self.rated_batt_cap)
+        s += "  and scale  {:7.3f}\n".format(self.new_scale)
+
         return s
+
+    def plot(self, filename='', fig_files=None, plot_title=None, n_fig=None):
+        N = len(self.t_x_soc)
+        M = len(self.t_y_t)
+        plt.figure()  # GP 1
+        n_fig += 1
+        plt.subplot(111)
+        plt.title(plot_title + ' New Schedule')
+        for j in range(M):
+            t_voc_x = self.t_voc[j*N:(j+1)*N]
+            plt.plot(self.t_x_soc, t_voc_x, color='black', linestyle='-')
+        for j in range(M):
+            t_voc_x = self.t_voc_new[j*N:(j+1)*N]
+            plt.plot(self.t_x_soc, t_voc_x, color='red', linestyle='--')
+        # plt.legend(loc=1)
+        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_files.append(fig_file_name)
+        plt.savefig(fig_file_name, format="png")
+
+        return n_fig, fig_files
 
 
 # Plots
@@ -168,7 +215,7 @@ def overall():
 
 if __name__ == '__main__':
     import sys
-    from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
+    from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
     import matplotlib.pyplot as plt
     plt.rcParams['axes.grid'] = True
 
@@ -178,20 +225,19 @@ if __name__ == '__main__':
 
         obs = localChem(mod_code=1, rated_batt_cap=100., scale=1.05)  # CHINS with RATED_BATT_CAP in local_config.h
         obs.assign_all_mod()
-        obs.regauge(new_rated_batt_cap=105., new_scale=1.05)  # rescale and fix
-        print('chemistry for observation', obs)  # print the result
-
-        pathToSavePdfTo = '../dataReduction/figures'
-        path_to_data = '../dataReduction'
-        path_to_temp = '../dataReduction/temp'
+        obs.regauge()  # rescale and fix
+        print('chemistry for observation', obs)  # print the observation
 
         # Plots
         n_fig = 0
         fig_files = []
         data_root = 'ReGaugeVocSoc.py'
+        pathToSavePdfTo = '../dataReduction/figures'
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        # unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
+        n_fig, fig_files = obs.plot(filename, fig_files=fig_files, plot_title=plot_title, n_fig=n_fig)
+        precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
+        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
         cleanup_fig_files(fig_files)
 
         plt.show()
