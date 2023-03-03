@@ -93,7 +93,7 @@ class Hysteresis_20220926:
         if self.disabled:
             self.res = 0.
         else:
-            self.res = self.lut.interp(x=dv, y=soc)
+            self.res = self.lut.interp(x_=dv, y_=soc)
         return self.res
 
     def save(self, time):
@@ -106,8 +106,8 @@ class Hysteresis_20220926:
         self.saved.ioc.append(self.ioc)
 
     def update(self, dt, trusting_sensors=False, init_high=False, init_low=False, e_wrap=0.):
-        dv_max = self.lu_x.interp(x=self.soc)
-        dv_min = self.lu_n.interp(x=self.soc)
+        dv_max = self.lu_x.interp(x_=self.soc)
+        dv_min = self.lu_n.interp(x_=self.soc)
 
         # Reset if at endpoints.   e_wrap is an actual measurement of hysteresis if trust sensors.  But once
         # dv_hys is reset it regenerates e_wrap so e_wrap in logic breaks that.   Also, dv_hys regenerates dv_dot

@@ -84,7 +84,7 @@ class Hysteresis_20220917d:
         if self.disabled:
             self.res = 0.
         else:
-            self.res = self.lut.interp(x=dv, y=soc)
+            self.res = self.lut.interp(x_=dv, y_=soc)
         return self.res
 
     def save(self, time):
