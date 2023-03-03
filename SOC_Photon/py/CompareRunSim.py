@@ -92,7 +92,7 @@ if __name__ == '__main__':
 
         # data_file_old_txt = 'offSitHysBms v20221220.txt'; unit_key = 'pro0p_2022'   # ; time_end_in = 137.
         # data_file_old_txt = 'offSitHysBms vA20221220.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
-        data_file_old_txt = 'offSitHysBms v20230303 CH.txt'; unit_key = 'pro0p'; scale_in = 1.123; cc_dif_tol_in = 0.5  # ; time_end_in = 10.
+        data_file_old_txt = 'offSitHysBms v20230303 CH.txt'; unit_key = 'pro0p'; scale_in = 1.123; cc_dif_tol_in = 0.5  #; time_end_in = 159
         # data_file_old_txt = 'Xm0VbFail.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
 
         # data_file_old_txt = 'triTweakDisch v20221220.txt'  #; time_end_in=25.4

@@ -17,9 +17,7 @@
 of the totals and standardize the calculations."""
 
 # Constants
-import numpy as np
-from pyDAGx import myTables
-from Chemistry_BMS import Chemistry, BMS
+from Chemistry_BMS import Chemistry
 
 
 class Coulombs:

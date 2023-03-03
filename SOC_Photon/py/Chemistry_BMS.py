@@ -160,7 +160,7 @@ class Chemistry(BMS):
         self.tau_sd = 2.5e7  # Equivalent model for EKF reference.	Parasitic discharge time constant, sec (2.5e7)
         self.c_sd = self.tau_sd / self.r_sd
         self.vb_off = 10.  # Shutoff point in Mon, V (10.)
-        self.vb_down = 9.8  # Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V (9.8)
+        self.vb_down = 9.6  # Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V (9.6)
         self.vb_down_sim = 9.5  # Shutoff point in Sim, V (9.5)
         self.vb_rising = 10.3  # Shutoff point when off, V (10.3)
         self.vb_rising_sim = 9.75  # Shutoff point in Sim when off, V (9.75)

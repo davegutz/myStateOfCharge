@@ -40,7 +40,7 @@ def pretty_print_vec(vec, prefix='', spacer=''):
 
 # New class with observation def added
 class localChem(Chemistry):
-    def __init__(self, mod_code=0, rated_batt_cap=100., scale=1.):
+    def __init__(self, mod_code=0, rated_batt_cap=100., scale=1., keep_sim_happy=0.5):
         Chemistry.__init__(self, mod_code=mod_code)
         self.rated_batt_cap = rated_batt_cap
         self.scale = scale
@@ -63,10 +63,11 @@ class localChem(Chemistry):
         self.lut_voc_soc_new = None
         self.t_soc_min_new = None
         self.lut_min_soc_new = None
+        self.keep_sim_happy = keep_sim_happy
 
     # Assign CHINS chemistry form observation (obs)
     # Hardcoded in here so can change Chemistry object with result
-    def assign_CH_obs(self):
+    def assign_obs(self):
         # Constants
         # self.cap = see below
         self.rated_temp = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -136,7 +137,7 @@ class localChem(Chemistry):
 
     # Assign chemistry, anytime
     def assign_all_mod(self, mod_code=0):
-        self.assign_CH_obs()
+        self.assign_obs()
 
     # Regauge
     # Assuming flat voc(soc), may simply scale soc as a practical matter
@@ -147,8 +148,8 @@ class localChem(Chemistry):
         for v in np.arange(0., 15., 0.1):
             x = self.lut_voc_soc.r_interp(v, temp_c, verbose=False)
             print("{:8.4f}".format(x), "{:8.4f}".format(v))
-        self.s_off_old = self.lut_voc_soc.r_interp(self.vb_down_sim-0.5, temp_c, verbose=False)
-        print('vb_down_sim-0.5', self.vb_down_sim-0.5, 's_off_old', self.s_off_old)
+        self.s_off_old = self.lut_voc_soc.r_interp(self.vb_down_sim-self.keep_sim_happy, temp_c, verbose=False)
+        print('vb_down_sim-keep_sim_happy', self.vb_down_sim-self.keep_sim_happy, 's_off_old', self.s_off_old)
         scale = 1. - self.s_off_old
         pretty_print_vec(self.t_x_soc, prefix='t_x_soc', spacer='  ')
         print(' soc   soc_scale v_old   v_new')
@@ -219,11 +220,17 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     plt.rcParams['axes.grid'] = True
 
+    #  Instructions:
+    #  Copy current values of obs battery from Chemistry_BMS for mod_code entered below in localChem, into assign_obs above
+    #  Check values below in localChem() for mod_code, rated_batt_cap, scale
+    #    mod_code agrees with entries (for proper plotting and book-keeping)
+    #    rated_batt_cap from Battery.RATED_BATT_CAP in Python, not #define in app
+    #    scale from scale_in in CompareRunSim.   If doesn't appear in CompareRunSim there is a default value of 1.
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         date_ = datetime.now().strftime("%y%m%d")
 
-        obs = localChem(mod_code=1, rated_batt_cap=100., scale=1.05)  # CHINS with RATED_BATT_CAP in local_config.h
+        obs = localChem(mod_code=1, rated_batt_cap=100., scale=1.05)  # rated_batt_cap/scale in Python
         obs.assign_all_mod()
         obs.regauge()  # rescale and fix
         print('chemistry for observation', obs)  # print the observation

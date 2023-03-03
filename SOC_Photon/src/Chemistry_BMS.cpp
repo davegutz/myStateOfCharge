@@ -194,7 +194,7 @@ void Chemistry::assign_CH()
     c_sd = tau_sd / r_sd;
     // These following are the same as BattleBorn.   I haven't observed what they really are
     vb_off = 10.;         // Shutoff point in Mon, V (10.)
-    vb_down = 9.8;        // Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V (9.8)
+    vb_down = 9.6;        // Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V (9.6)
     vb_down_sim = 9.5;    // Shutoff point in Sim, V (9.5)
     vb_rising = 10.3;     // Shutoff point when off, V (10.3)
     vb_rising_sim = 9.75; // Shutoff point in Sim when off, V (9.75)

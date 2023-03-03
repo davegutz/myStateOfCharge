@@ -292,6 +292,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.chemistry.assign_all_mod(chem)
             self.chm = chem
 
+        voc_stat_past = self.voc_stat
         self.temp_c = temp_c
         self.vsat = calc_vsat(self.temp_c, self.chemistry.nom_vsat, self.chemistry.dvoc_dt)
         self.dt = dt
@@ -304,7 +305,7 @@ class BatteryMonitor(Battery, EKF1x1):
         # Table lookup
         self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
 
-        # Battery management system model
+        # Battery management system model (uses past value bms_off and voc_stat)
         if not self.bms_off:
             voltage_low = self.voc_stat < self.chemistry.vb_down
         else:
@@ -314,7 +315,6 @@ class BatteryMonitor(Battery, EKF1x1):
             self.bms_off = bms_off_init
         else:
             self.bms_off = (self.temp_c <= self.chemistry.low_t) or (voltage_low and not rp.tweak_test())  # KISS
-            print('MON:    soc', self.soc, 'voc_stat', self.voc_stat, 'vb_down', self.chemistry.vb_down, 'charging', bms_charging, 'voltage_low', voltage_low, 'tweak_test', rp.tweak_test(), 'bms_off', self.bms_off)
         self.ib_charge = self.ib
         if self.bms_off and not bms_charging:
             self.ib_charge = 0.
@@ -386,6 +386,12 @@ class BatteryMonitor(Battery, EKF1x1):
 
         self.dv_dyn = self.dv_dyn
         self.voc_ekf = self.hx
+        # check bms_off for offSit
+        # print('MON:  tweak_test, soc, ib_charge, vb, voc_stat, voc_stat_past, vb_down, vb_rising, charging, voltage_low,  bms_off',
+        #       "{:3d}".format(rp.tweak_test()), "{:9.5f}".format(self.soc), "{:7.3f}".format(self.ib_charge), "{:7.3f}".format(self.vb),
+        #       "{:7.3f}".format(self.voc_stat), "{:7.3f}".format(voc_stat_past), "{:7.3f}".format(self.chemistry.vb_down),
+        #       "{:7.3f}".format(self.chemistry.vb_rising), "{:3d}".format(bms_charging), "{:3d}".format(voltage_low),
+        #       "{:3.0f}".format(self.bms_off))
 
         return self.soc_ekf
 
@@ -637,7 +643,7 @@ class BatterySim(Battery):
             self.model_saturated = sat_init
             self.sat = sat_init
         self.sat = self.model_saturated
-        print('SIM:   soc', self.soc, 'q', self.q, 'voc_stat', self.voc_stat, 'vb_down', self.chemistry.vb_down, 'charging', bms_charging, 'voltage_low', voltage_low, 'tweak_test', rp.tweak_test(), 'bms_off', self.bms_off, 'ib', self.ib, 'ib_charge', self.ib_charge)
+        # print('SIM:   soc', self.soc, 'q', self.q, 'voc_stat', self.voc_stat, 'vb_down', self.chemistry.vb_down, 'charging', bms_charging, 'voltage_low', voltage_low, 'tweak_test', rp.tweak_test(), 'bms_off', self.bms_off, 'ib', self.ib, 'ib_charge', self.ib_charge)
 
         return self.vb
 
