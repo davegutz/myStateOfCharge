@@ -204,7 +204,7 @@ float Coulombs::count_coulombs(const double dt, const boolean reset_temp, const 
     soc_min_ = chem_.soc_min_T_->interp(temp_lim);
     q_min_ = soc_min_ * q_capacity_;
 
-    // if ( sp.debug==96 )
+    // if ( sp.debug()==96 )
     //     Serial.printf("cc:,reset_temp,dt,voc, Voc_filt, V_sat, temp_c, temp_lim, sat, charge_curr, d_d_q, d_q, q, q_cap, soc, %d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%7.3f,%10.6f,%9.1f,%9.1f,%9.1f,%7.4f,\n",
     //                 reset, dt, pp.pubList.Voc, pp.pubList.Voc_filt,  this->Vsat(), temp_c, temp_lim, sat, charge_curr, d_delta_q, *sp_delta_q_, q_, q_capacity_, soc_);
 
