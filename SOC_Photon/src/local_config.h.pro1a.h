@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "pro1a_20230219";  // voc(soc), hys, res, slr, RANDLES
+const String unit = "pro1a_20230219";  // scale CHINS
 #undef HEADER_PHOTON
 #define HEADER_ARGON
 

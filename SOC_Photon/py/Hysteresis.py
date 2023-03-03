@@ -106,8 +106,8 @@ class Hysteresis:
             self.res = 0.
             self.slr = 1.
         else:
-            self.res = self.lut.interp(x=dv, y=soc)
-            self.slr = self.luts.interp(x=dv, y=soc)
+            self.res = self.lut.interp(x_=dv, y_=soc)
+            self.slr = self.luts.interp(x_=dv, y_=soc)
         return self.res, self.slr
 
     def save(self, time):
@@ -123,8 +123,8 @@ class Hysteresis:
 
     def update(self, dt, trusting_sensors=False, init_high=False, init_low=False, scale_in=1., e_wrap=0., chem=0):
         self.chm = chem
-        dv_max = self.lu_x.interp(x=self.soc)
-        dv_min = self.lu_n.interp(x=self.soc)
+        dv_max = self.lu_x.interp(x_=self.soc)
+        dv_min = self.lu_n.interp(x_=self.soc)
 
         # Aliasing - return
         if self.tau < dt * 4.:

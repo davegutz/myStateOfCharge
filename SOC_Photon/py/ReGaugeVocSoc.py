@@ -147,8 +147,8 @@ class localChem(Chemistry):
         for v in np.arange(0., 15., 0.1):
             x = self.lut_voc_soc.r_interp(v, temp_c, verbose=False)
             print("{:8.4f}".format(x), "{:8.4f}".format(v))
-        self.s_off_old = self.lut_voc_soc.r_interp(self.vb_off, temp_c, verbose=False)
-        print('vb_off', self.vb_off, 's_off_old', self.s_off_old)
+        self.s_off_old = self.lut_voc_soc.r_interp(self.vb_down_sim-0.5, temp_c, verbose=False)
+        print('vb_down_sim-0.5', self.vb_down_sim-0.5, 's_off_old', self.s_off_old)
         scale = 1. - self.s_off_old
         pretty_print_vec(self.t_x_soc, prefix='t_x_soc', spacer='  ')
         print(' soc   soc_scale v_old   v_new')
