@@ -49,7 +49,7 @@ class localChem(Chemistry):
         self.t_dv = None
         self.t_dv_max = None
         self.t_dv_min = None
-        self.s_off_old = None
+        self.s_off_obs = None
         self.t_r = None
         self.t_s = None
         self.t_soc = None
@@ -63,11 +63,11 @@ class localChem(Chemistry):
         self.lut_voc_soc_new = None
         self.t_soc_min_new = None
         self.lut_min_soc_new = None
-        self.keep_sim_happy = keep_sim_happy
+        self.keep_sim_happy = None  # Schedule -0.5 v so that sim shuts off lower than monitor because sim stops running when q=0
 
     # Assign CHINS chemistry form observation (obs)
     # Hardcoded in here so can change Chemistry object with result
-    def assign_obs(self):
+    def assign_obs(self, keep_sim_happy=0.5):
         # Constants
         # self.cap = see below
         self.rated_temp = 25.  # Temperature at RATED_BATT_CAP, deg C
@@ -106,6 +106,9 @@ class localChem(Chemistry):
         self.t_y_t = np.array(t_y_t1)
         self.t_voc = np.array(t_voc1)
         self.lut_voc_soc = myTables.TableInterp2D(self.t_x_soc, self.t_y_t, self.t_voc)
+        self.keep_sim_happy = keep_sim_happy
+        self.s_off_obs = self.lut_voc_soc.r_interp(self.vb_down_sim-self.keep_sim_happy, self.rated_temp)
+        print('s_off_obs', self.s_off_obs)
 
         # Min SOC table
         self.t_x_soc_min = self.t_y_t.copy()
@@ -148,9 +151,7 @@ class localChem(Chemistry):
         for v in np.arange(0., 15., 0.1):
             x = self.lut_voc_soc.r_interp(v, temp_c, verbose=False)
             print("{:8.4f}".format(x), "{:8.4f}".format(v))
-        self.s_off_old = self.lut_voc_soc.r_interp(self.vb_down_sim-self.keep_sim_happy, temp_c, verbose=False)
-        print('vb_down_sim-keep_sim_happy', self.vb_down_sim-self.keep_sim_happy, 's_off_old', self.s_off_old)
-        scale = 1. - self.s_off_old
+        scale = 1. - self.s_off_obs
         pretty_print_vec(self.t_x_soc, prefix='t_x_soc', spacer='  ')
         print(' soc   soc_scale v_old   v_new')
         t_voc_new = []
@@ -163,8 +164,9 @@ class localChem(Chemistry):
                 print("{:6.3f}".format(soc), "{:6.3f}".format(soc_scale), "{:6.2f}".format(v_old), "{:6.2f}".format(v_new))
         self.t_voc_new = np.array(t_voc_new)
         self.lut_voc_soc_new = myTables.TableInterp2D(self.t_x_soc, self.t_y_t, t_voc_new)
-        self.new_rated_batt_cap = self.scale*self.rated_batt_cap*(1.-self.s_off_old)
-        self.new_scale = self.scale - self.s_off_old
+        self.new_rated_batt_cap = self.scale*self.rated_batt_cap*(1.-self.s_off_obs)
+        # self.new_scale = self.scale - self.s_off_obs
+        self.new_scale = self.new_rated_batt_cap / self.rated_batt_cap
         t_soc_min_new = []
         for temp_c in self.t_y_t:
             t_soc_min_new.append(self.lut_voc_soc_new.r_interp(self.vb_off, temp_c))
