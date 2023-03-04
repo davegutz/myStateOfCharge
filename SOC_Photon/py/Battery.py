@@ -387,8 +387,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.dv_dyn = self.dv_dyn
         self.voc_ekf = self.hx
         # check bms_off for offSit
-        # print('MON:  tweak_test, soc, ib_charge, vb, voc_stat, voc_stat_past, vb_down, vb_rising, charging, voltage_low,  bms_off',
-        #       "{:3d}".format(rp.tweak_test()), "{:9.5f}".format(self.soc), "{:7.3f}".format(self.ib_charge), "{:7.3f}".format(self.vb),
+        # print('MON:  tweak_test, soc, ib_in, ib_charge, vb, voc_stat, voc_stat_past, vb_down, vb_rising, charging, voltage_low,  bms_off',
+        #       "{:3d}".format(rp.tweak_test()), "{:9.5f}".format(self.soc), "{:7.3f}".format(self.ib_in), "{:7.3f}".format(self.ib_charge), "{:7.3f}".format(self.vb),
         #       "{:7.3f}".format(self.voc_stat), "{:7.3f}".format(voc_stat_past), "{:7.3f}".format(self.chemistry.vb_down),
         #       "{:7.3f}".format(self.chemistry.vb_rising), "{:3d}".format(bms_charging), "{:3d}".format(voltage_low),
         #       "{:3.0f}".format(self.bms_off))

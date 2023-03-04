@@ -1010,13 +1010,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                   case ( 6 ):  // Xp6:  Program a pulse for EKF test
-                    chit("XS;Dm0;Dn0;v0;Xm7;Ca.5;Pm;Dr100;DP20;v4;", QUEUE);  // setup
+                    chit("XS;Dm0;Dn0;v0;Xm255;Ca.5;Pm;Dr100;DP20;v4;", QUEUE);  // setup
                     chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
                     chit("W10;Pm;v0;", QUEUE);  // finish
                     break;
 
                   case ( 7 ):  // Xp7:  Program a pulse for State Space test
-                    chit("XS;Dm0;Dn0;v0;Xm7;Ca.5;Pm;Dr100;DP1;v2;", QUEUE);  // setup
+                    chit("XS;Dm0;Dn0;v0;Xm255;Ca.5;Pm;Dr100;DP1;v2;", QUEUE);  // setup
                     chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
                     chit("W10;Pm;v0;", QUEUE);  // finish
                     break;

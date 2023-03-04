@@ -170,6 +170,7 @@ class Coulombs:
 
         # Save and return
         self.t_last = self.temp_lim
+        # print('Mon CC:  charge_curr', charge_curr, 'dt', dt, 'd_delta_q', d_delta_q,'temp_lim', self.temp_lim, 't_last', self.t_last, 'cap', self.q_capacity)
         return self.soc
 
     def load(self, delta_q, t_last):
