@@ -404,7 +404,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("v0; to return\n");
 }
 
-// Redundancy loss.   Here in cpp because sp circular reference in .h files
+// Redundancy loss.   Here in cpp because sp circular reference in .h files due to sp.ib_select()
 boolean Fault::red_loss_calc() { return (ib_sel_stat_!=1 || (sp.ib_select()!=0 && !cp.fake_faults)
   || ib_diff_fa() || vb_fail()); };
 

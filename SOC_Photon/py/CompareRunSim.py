@@ -87,9 +87,6 @@ if __name__ == '__main__':
         # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in = 4.8;
         # data_file_old_txt = 'rapidTweakRegression vA20230217.txt'; unit_key = 'pro1a_2023'
         # data_file_old_txt = 'rapidTweakRegression vA20230219.txt'; unit_key = 'pro1a_2023'
-
-        # data_file_old_txt = 'ekf CHINS v20230128 20230128.txt'; unit_key = 'soc0p'; # time_end_in = 99.;
-
         # data_file_old_txt = 'offSitHysBms v20221220.txt'; unit_key = 'pro0p_2022'   # ; time_end_in = 137.
         # data_file_old_txt = 'offSitHysBms vA20221220.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
         # data_file_old_txt = 'offSitHysBms v20230303 CH.txt'; unit_key = 'pro0p'; scale_in = 1.123; cc_dif_tol_in = 0.5  #; time_end_in = 159
@@ -103,7 +100,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
         # data_file_old_txt = 'ampHiFailFf v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.123; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'ampLoFail v20221028.txt'
-        data_file_old_txt = 'ampLoFail v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.123; cc_dif_tol_in = 0.5
+        # data_file_old_txt = 'ampLoFail v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.123; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'
         # data_file_old_txt = 'rapidTweakRegression40C v20221028.txt'  # ; time_end_in=4.8;
         # data_file_old_txt = 'slowTweakRegression v20221028.txt'
@@ -113,10 +110,13 @@ if __name__ == '__main__':
         # data_file_old_txt = 'ampHiFailSlow v20221028.txt'  # ; time_end_in=360
         # data_file_old_txt = 'vHiFail v20221028.txt'
         # data_file_old_txt = 'vHiFail v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.123; cc_dif_tol_in = 0.5
+        # data_file_old_txt = 'vHiFailFf v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.123; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'pulseEKF v20221028.txt'; init_time_in=-0.001;  # TODO:  broken
         # data_file_old_txt = 'pulseSS v20221028.txt'; init_time_in=-0.001;
         # data_file_old_txt = 'tbFailMod v20221220.txt'
+        # data_file_old_txt = 'tbFailMod v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.123; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'tbFailHdwe v20221028.txt'
+        data_file_old_txt = 'tbFailHdwe v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.123; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'EKF_Track v20221028.txt'
         # data_file_old_txt = 'EKF_Track Dr2000 v20221028.txt'
         # data_file_old_txt = 'on_off_on v20221028.txt'  # ; time_end_in=6
