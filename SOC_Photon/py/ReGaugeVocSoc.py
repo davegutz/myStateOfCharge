@@ -186,7 +186,7 @@ class localChem(Chemistry):
         s += "\nIn app use \n#define UNIT_CAP_RATED        {:5.1f}   // Nominal battery unit capacity at RATED_TEMP.  (* 'Sc' or '*BS'/'*BP'), Ah\n".\
             format(self.new_rated_batt_cap)
         s += "In Python use UNIT_CAP_RATED " + "{:7.2f}".format(self.rated_batt_cap)
-        s += "  and scale  {:7.3f}\n".format(self.new_scale)
+        s += "  and allow ucrs over UART to automatically set simulation values (in replicate())"
 
         return s
 
