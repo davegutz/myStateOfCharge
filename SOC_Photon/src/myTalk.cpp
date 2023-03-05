@@ -452,21 +452,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%7.3f\n", sp.ib_scale_noa());
                 break;
 
-              case ( 'c' ):  // * Sc<>: scale capacity
-                Serial.printf("sp.s_cap_model%7.3f to ", sp.s_cap_model());
-                scale = cp.input_str.substring(2).toFloat();
-                sp.put_s_cap_model(scale);
-                Serial.printf("%7.3f\n", sp.s_cap_model());
-            
-                Serial.printf("Sim.q_cap_rated%7.3f %7.3f to ", scale, Sen->Sim->q_cap_scaled());
-            
-                Sen->Sim->apply_cap_scale(sp.s_cap_model());
-                if ( sp.modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
-            
-                Serial.printf("%7.3f\n", Sen->Sim->q_cap_scaled());
-                Serial.printf("Sim:"); Sen->Sim->pretty_print(); Sen->Sim->Coulombs::pretty_print();
-                break;
-            
               case ( 'G' ):  // * SG<>: scale shunt gain both shunts simultaneously
                 scale = cp.input_str.substring(2).toFloat();
                 Serial.printf("sh gn scl%7.3f/%7.3f to", Sen->ShuntAmp->sp_shunt_gain_sclr(), Sen->ShuntNoAmp->sp_shunt_gain_sclr());
@@ -501,6 +486,36 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("ShuntNoAmp.sclr%7.3f to", Sen->ib_noa_sclr());
                 Sen->ib_noa_sclr(cp.input_str.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->ib_noa_sclr());
+                break;
+
+              case ( 'q' ):  // * Sq<>: scale capacity sim
+                Serial.printf("sp.s_cap_sim%7.3f to ", sp.s_cap_sim());
+                scale = cp.input_str.substring(2).toFloat();
+                sp.put_s_cap_sim(scale);
+                Serial.printf("%7.3f\n", sp.s_cap_sim());
+            
+                Serial.printf("Sim.q_cap_rated%7.3f %7.3f to ", scale, Sen->Sim->q_cap_rated_scaled());
+            
+                Sen->Sim->apply_cap_scale(sp.s_cap_sim());
+                if ( sp.modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
+            
+                Serial.printf("%7.3f\n", Sen->Sim->q_cap_rated_scaled());
+                Serial.printf("Sim:"); Sen->Sim->pretty_print(); Sen->Sim->Coulombs::pretty_print();
+                break;
+            
+              case ( 'Q' ):  // * SQ<>: scale capacity mon
+                Serial.printf("sp.s_cap_mon%7.3f to ", sp.s_cap_mon());
+                scale = cp.input_str.substring(2).toFloat();
+                sp.put_s_cap_mon(scale);
+                Serial.printf("%7.3f\n", sp.s_cap_mon());
+            
+                Serial.printf("Mon.q_cap_rated%7.3f %7.3f to ", scale, Mon->q_cap_rated_scaled());
+            
+                Mon->apply_cap_scale(sp.s_cap_mon());
+                // if ( sp.modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
+            
+                Serial.printf("%7.3f\n", Mon->q_cap_rated_scaled());
+                Serial.printf("Mon:"); Mon->pretty_print(Sen); Mon->Coulombs::pretty_print();
                 break;
             
               case ( 'r' ):  //   Sr<>:  scalar resistor
@@ -1210,11 +1225,12 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  DN= "); Serial.printf("%6.3f", Sen->Ib_noa_noise_amp()); Serial.printf(": noa noise mod, A pk-pk [%6.3f]\n", IB_NOA_NOISE); 
   Serial.printf(" *SA= "); Serial.printf("%6.3f", sp.ib_scale_amp()); Serial.printf(": scale amp [%6.3f]\n", CURR_SCALE_AMP); 
   Serial.printf(" *SB= "); Serial.printf("%6.3f", sp.ib_scale_noa()); Serial.printf(": scale noa [%6.3f]\n", CURR_SCALE_NOA); 
-  Serial.printf(" *Sc=  "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println(": sp. Scalar cap"); 
   Serial.printf(" *SG= "); Serial.printf("%6.3f/%6.3f", Sen->ShuntAmp->sp_shunt_gain_sclr(), Sen->ShuntAmp->sp_shunt_gain_sclr());
   Serial.printf(": sp. scale shunt gains [1]\n"); 
   Serial.printf(" *Sh= "); Serial.printf("%6.3f", sp.hys_scale()); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
   Serial.printf("  SH= "); Serial.printf("%6.3f", Sen->Sim->hys_state()); Serial.printf(": hys states [0]\n");
+  Serial.printf(" *Sq=  "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.println(": sp. Scalar cap sim"); 
+  Serial.printf(" *SQ=  "); Serial.print(Mon->q_capacity()/Mon->q_capacity()); Serial.println(": sp. Scalar cap mon"); 
   Serial.printf("  Sr=  "); Serial.print(Sen->Sim->Sr()); Serial.println(": Scalar res sim"); 
   Serial.printf(" *Sk=  "); Serial.print(sp.cutback_gain_sclr()); Serial.println(": Sat mod ctbk sclr"); 
   Serial.printf(" *SV= "); Serial.printf("%6.3f", sp.Vb_scale()); Serial.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 

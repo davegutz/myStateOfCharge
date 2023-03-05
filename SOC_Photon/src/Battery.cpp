@@ -36,13 +36,13 @@ extern PublishPars pp;  // For publishing
 // constructors
 Battery::Battery() {}
 Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code)
-    : Coulombs(sp_delta_q, sp_t_last, (RATED_BATT_CAP*3600), T_RLIM, sp_mod_code, COULOMBIC_EFF_SCALE),
+    : Coulombs(sp_delta_q, sp_t_last, (NOM_UNIT_CAP*3600), T_RLIM, sp_mod_code, COULOMBIC_EFF_SCALE),
 	bms_off_(false), ds_voc_soc_(0), dt_(0.1), dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.),
     dv_voc_soc_(0.), ib_(0.), ibs_(0.), ioc_(0.), print_now_(false), sr_(1.), temp_c_(NOMINAL_TB), vb_(NOMINAL_VB),
     voc_(NOMINAL_VB), voc_stat_(NOMINAL_VB), vsat_(NOMINAL_VB)
 {
     nom_vsat_   = chem_.v_sat - HDB_VB;   // Center in hysteresis
-    ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_.tau_ct, -RATED_BATT_CAP, RATED_BATT_CAP);  // Update time and time constant changed on the fly
+    ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_.tau_ct, -NOM_UNIT_CAP, NOM_UNIT_CAP);  // Update time and time constant changed on the fly
     hys_ = new Hysteresis(&chem_);
 }
 Battery::~Battery() {}
@@ -144,7 +144,7 @@ float Battery::voc_soc_tab(const float soc, const float temp_c)
 BatteryMonitor::BatteryMonitor():
     Battery(&sp.delta_q_, &sp.t_last_, &sp.mon_chm_),
 	amp_hrs_remaining_ekf_(0.), amp_hrs_remaining_soc_(0.), dt_eframe_(0.1), eframe_(0), ib_charge_(0.),
-    q_ekf_(RATED_BATT_CAP*3600.), soc_ekf_(1.0), tcharge_(0.), tcharge_ekf_(0.), voc_filt_(NOMINAL_VB), voc_soc_(NOMINAL_VB),
+    q_ekf_(NOM_UNIT_CAP*3600.), soc_ekf_(1.0), tcharge_(0.), tcharge_ekf_(0.), voc_filt_(NOMINAL_VB), voc_soc_(NOMINAL_VB),
     y_filt_(0.)
 {
     voc_filt_ = chem_.v_sat-HDB_VB;
@@ -168,7 +168,7 @@ BatteryMonitor::~BatteryMonitor() {}
         Sen->T          Update time, sec
         q_capacity_     Saturation charge at temperature, C
         q_cap_rated_scaled_   Applied rated capacity at rated_temp, after scaling, C
-        RATED_BATT_CAP  Nominal battery bank capacity (assume actual not known), Ah
+        NOM_UNIT_CAP    Nominal battery bank capacity (assume actual not known), Ah
     Outputs:
         vsat_           Saturation threshold at temperature, V
         voc_            Charging voltage estimated from Vb and RC model, V
@@ -295,9 +295,9 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
 
     // Charge time if used ekf 
     if ( ib_charge_ > 0.1 )
-        tcharge_ekf_ = min(RATED_BATT_CAP / ib_charge_ * (1. - soc_ekf_), 24.);
+        tcharge_ekf_ = min(NOM_UNIT_CAP / ib_charge_ * (1. - soc_ekf_), 24.);
     else if ( ib_charge_ < -0.1 )
-        tcharge_ekf_ = max(RATED_BATT_CAP / ib_charge_ * soc_ekf_, -24.);
+        tcharge_ekf_ = max(NOM_UNIT_CAP / ib_charge_ * soc_ekf_, -24.);
     else if ( ib_charge_ >= 0. )
         tcharge_ekf_ = 24.*(1. - soc_ekf_);
     else 
@@ -425,6 +425,7 @@ void BatteryMonitor::pretty_print(Sensors *Sen)
     Serial.printf("  voc_soc%7.3f; V\n", voc_soc_);
     Serial.printf("  voc_stat%7.3f; V\n", voc_stat_);
     Serial.printf("  y_filt%7.3f; Res EKF, V\n", y_filt_);
+    Serial.printf(" *sp_s_cap_mon%7.3f Slr\n", sp.s_cap_mon());
     hys_->pretty_print();
 }
 
@@ -504,7 +505,7 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
 // Battery model class for reference use mainly in jumpered hardware testing
 BatterySim::BatterySim() :
     Battery(&sp.delta_q_model_, &sp.t_last_model_, &sp.sim_chm_), duty_(0UL), ib_fut_(0.), ib_in_(0.), model_cutback_(true),
-    q_(RATED_BATT_CAP*3600.), sample_time_(0UL), sample_time_z_(0UL), sat_ib_max_(0.)
+    q_(NOM_UNIT_CAP*3600.), sample_time_(0UL), sample_time_z_(0UL), sat_ib_max_(0.)
 {
     // ChargeTransfer dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery
@@ -771,8 +772,8 @@ float BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Battery
         double cTime;
         if ( sp.tweak_test() ) cTime = float(Sen->now)/1000.;
         else cTime = Sen->control_time;
-        sprintf(cp.buffer, "unit_sim, %13.3f, %d, %d, %7.5f,%7.5f, %7.5f,%7.5f,%7.5f,%7.5f, %7.3f,%7.3f,%7.3f,%7.3f,  %d,  %9.1f,  %8.5f, %d, %c",
-            cTime, sp.sim_chm(),  bms_off_, Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, ib_charge_, ioc_, model_saturated_, *sp_delta_q_, soc_, reset_temp,'\0');
+        sprintf(cp.buffer, "unit_sim, %13.3f, %d, %7.0f, %d, %7.5f,%7.5f, %7.5f,%7.5f,%7.5f,%7.5f, %7.3f,%7.3f,%7.3f,%7.3f,  %d,  %9.1f,  %8.5f, %d, %c",
+            cTime, sp.sim_chm(), q_cap_rated_scaled_, bms_off_, Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, ib_charge_, ioc_, model_saturated_, *sp_delta_q_, soc_, reset_temp,'\0');
         Serial.println(cp.buffer);
     }
 
@@ -819,6 +820,6 @@ void BatterySim::pretty_print(void)
     Serial.printf("  sat_cb_gn%7.1f\n", sat_cutback_gain_);
     Serial.printf("  sat_ib_max%7.3f, A\n", sat_ib_max_);
     Serial.printf("  sat_ib_null%7.3f, A\n", sat_ib_null_);
-    Serial.printf(" *sp_s_cap_model%7.3f Slr\n", sp.s_cap_model());
+    Serial.printf(" *sp_s_cap_sim%7.3f Slr\n", sp.s_cap_sim());
     hys_->pretty_print();
 }

@@ -72,7 +72,8 @@ SavedPars::SavedPars(SerialRAM *ram)
         preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving_);
         shunt_gain_sclr_eeram_.a16 = next_;  next_ += sizeof(shunt_gain_sclr_);
         sim_chm_eeram_.a16 =  next_;  next_ += sizeof(sim_chm_);
-        s_cap_model_eeram_.a16 = next_;  next_ += sizeof(s_cap_model_);
+        s_cap_mon_eeram_.a16 = next_;  next_ += sizeof(s_cap_mon_);
+        s_cap_sim_eeram_.a16 = next_;  next_ += sizeof(s_cap_sim_);
         Tb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Tb_bias_hdwe_);
         time_now_eeram_.a16 = next_; next_ += sizeof(time_now_);
         type_eeram_.a16 =  next_;  next_ += sizeof(type_);
@@ -126,7 +127,8 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(preserving_, uint8_t(0), uint8_t(1)) ||
         is_val_corrupt(shunt_gain_sclr_, float(-1e6), float(1e6)) ||
         is_val_corrupt(sim_chm_, uint8_t(0), uint8_t(10)) ||
-        is_val_corrupt(s_cap_model_, float(0.), float(1000.)) ||
+        is_val_corrupt(s_cap_mon_, float(0.), float(1000.)) ||
+        is_val_corrupt(s_cap_sim_, float(0.), float(1000.)) ||
         is_val_corrupt(Tb_bias_hdwe_, float(-500.), float(500.)) ||
         // is_val_corrupt(time_now_, 0UL, 0UL) ||
         is_val_corrupt(type_, uint8_t(0), uint8_t(10)) ||
@@ -169,7 +171,8 @@ boolean SavedPars::is_corrupt()
         get_preserving();
         get_shunt_gain_sclr();
         get_sim_chm();
-        get_s_cap_model();
+        get_s_cap_mon();
+        get_s_cap_sim();
         get_Tb_bias_hdwe();
         get_time_now();
         get_type();
@@ -213,7 +216,8 @@ int SavedPars::num_diffs()
     if ( float(NS) != nS_ ) n++;
     if ( float(1.) != shunt_gain_sclr_ ) n++;
     if ( uint8_t(SIM_CHEM) != sim_chm_ ) n++;
-    if ( float(1.) != s_cap_model_ ) n++;
+    if ( float(1.) != s_cap_mon_ ) n++;
+    if ( float(1.) != s_cap_sim_ ) n++;
     if ( float(TEMP_BIAS) != Tb_bias_hdwe_ ) n++;
     if ( uint8_t(0) != type_ ) n++;
     if ( float(VOLT_BIAS) != Vb_bias_hdwe_ ) n++;
@@ -270,7 +274,8 @@ void SavedPars::pretty_print(const boolean all)
     if ( all || float(NS) != nS_ )              Serial.printf(" nS            %7.3f    %7.3f *BS<> eg '2P1S'\n", NS, nS_);
     if ( all || float(1.) != shunt_gain_sclr_ )  Serial.printf(" shunt_gn_slr%7.3f  %7.3f *SG\n", 1., shunt_gain_sclr_);
     if ( all || SIM_CHEM != sim_chm_ )          Serial.printf(" sim chem            %d          %d *Bs<>\n", SIM_CHEM, sim_chm_);
-    if ( all || float(1.) != s_cap_model_ )     Serial.printf(" s_cap_model%7.3f  %7.3f *Sc<>\n", 1., s_cap_model_);
+    if ( all || float(1.) != s_cap_mon_ )     Serial.printf(" s_cap_mon%7.3f  %7.3f *SQ<>\n", 1., s_cap_mon_);
+    if ( all || float(1.) != s_cap_sim_ )     Serial.printf(" s_cap_sim%7.3f  %7.3f *Sq<>\n", 1., s_cap_sim_);
     if ( all || float(TEMP_BIAS) != Tb_bias_hdwe_ )     Serial.printf(" Tb_bias_hdwe%7.3f  %7.3f *Dt<> dg C\n", TEMP_BIAS, Tb_bias_hdwe_);
     if ( all )                                  Serial.printf(" time_now %d %s *U<> Unix time\n", (int)Time.now(), Time.timeStr().c_str());
     if ( all || uint8_t(0) != type_ )           Serial.printf(" type inj %d  %d *Xt<> 1=sin, 2=sq, 3=tri, 4=1C, 5=-1C, 8=cos\n", 0, type_);
@@ -421,7 +426,8 @@ void SavedPars::reset_pars()
     put_preserving(uint8_t(0));
     put_shunt_gain_sclr(float(1.));
     put_sim_chm(uint8_t(SIM_CHEM));
-    put_s_cap_model(float(1.));
+    put_s_cap_mon(float(1.));
+    put_s_cap_sim(float(1.));
     put_Tb_bias_hdwe(float(TEMP_BIAS));
     put_type(uint8_t(0));    
     put_t_last(float(RATED_TEMP));    

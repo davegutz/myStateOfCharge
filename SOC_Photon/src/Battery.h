@@ -36,7 +36,7 @@
 class Sensors;
 #define t_float float
 
-#define RATED_TEMP      25.       // Temperature at RATED_BATT_CAP, deg C (25)
+#define RATED_TEMP      25.       // Temperature at NOM_UNIT_CAP, deg C (25)
 #define TCHARGE_DISPLAY_DEADBAND  0.1 // Inside this +/- deadband, charge time is displayed '---', A
 #define T_RLIM          0.017     // Temperature sensor rate limit to minimize jumps in Coulomb counting, deg C/s (0.017 allows 1 deg for 1 minute)
 const float VB_DC_DC = 13.5;      // DC-DC charger estimated voltage, V (13.5 < v_sat = 13.85)
@@ -79,7 +79,7 @@ public:
   float calc_soc_voc_slope(float soc, float temp_c);
   float calc_vsat(void);
   virtual float calculate(const float temp_C, const float soc_frac, float curr_in, const double dt, const boolean dc_dc_on);
-  float C_rate() { return ib_ / RATED_BATT_CAP; }
+  float C_rate() { return ib_ / NOM_UNIT_CAP; }
   String decode(const uint8_t mod);
   float dqdt() { return chem_.dqdt; };
   void ds_voc_soc(const float _ds) { ds_voc_soc_ = _ds; };

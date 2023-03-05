@@ -25,7 +25,7 @@ from Battery import overall_batt
 from Util import cat
 from CompareFault import filter_Tb, add_stuff_f, add_stuff
 
-RATED_BATT_CAP = 108.4  # A-hr capacity of test article
+UNIT_CAP_RATED = 108.4  # A-hr capacity of test article
 IB_BAND = 1.  # Threshold to declare charging or discharging
 TB_BAND = 15.  # Band around temperature to group data and correct
 
@@ -631,7 +631,7 @@ if __name__ == '__main__':
         f_raw = np.unique(f_raw)
         f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in)
         print("\nf:\n", f, "\n")
-        f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=RATED_BATT_CAP)
+        f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=UNIT_CAP_RATED)
 
         # Sort unique
         h_raw = np.unique(h_raw)
@@ -644,18 +644,18 @@ if __name__ == '__main__':
         h = add_stuff(h_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
         print("\nh:\n", h, "\n")
         # voc_soc05 = look_it(x0, lut_voc, 5.)
-        # h_05C = filter_Tb(h, 5., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        # h_05C = filter_Tb(h, 5., tb_band=TB_BAND, rated_batt_cap=UNIT_CAP_RATED)
         # voc_soc11 = look_it(x0, lut_voc, 11.1)
-        # h_11C = filter_Tb(h, 11.1, tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        # h_11C = filter_Tb(h, 11.1, tb_band=TB_BAND, rated_batt_cap=UNIT_CAP_RATED)
         # voc_soc20 = look_it(x0, lut_voc, 20.)
-        # h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        # h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=UNIT_CAP_RATED)
         # voc_soc30 = look_it(x0, lut_voc, 30.)
-        # h_30C = filter_Tb(h, 30., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        # h_30C = filter_Tb(h, 30., tb_band=TB_BAND, rated_batt_cap=UNIT_CAP_RATED)
         # voc_soc40 = look_it(x0, lut_voc, 40.)
-        # h_40C = filter_Tb(h, 40., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        # h_40C = filter_Tb(h, 40., tb_band=TB_BAND, rated_batt_cap=UNIT_CAP_RATED)
         voc_soc20 = look_it(x0, lut_voc, 20.)
         print('filter h')
-        h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=UNIT_CAP_RATED)
         T_300new = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
         T_300old = 0.3  # still allows Randles to run (t_max=0.31 in Battery.py)
         # T_300new = 10  # For long histories

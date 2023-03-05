@@ -82,14 +82,14 @@ void print_serial_header(void)
 {
   if ( ( sp.debug()==1 || sp.debug()==2 || sp.debug()==3 || sp.debug()==4 ) )
   {
-    Serial.printf ("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
-    Serial1.printf("unit,               hm,                  cTime,       dt,       chm,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
+    Serial.printf ("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
+    Serial1.printf("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,\n");
   }
 }
 void print_serial_sim_header(void)
 {
   if ( sp.debug()==2  || sp.debug()==3 || sp.debug()==4 ) // print_serial_sim_header
-    Serial.printf("unit_m,  c_time,       chm_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,\n");
+    Serial.printf("unit_m,  c_time,       chm_s, qcrs_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,\n");
 }
 void print_signal_sel_header(void)
 {
@@ -119,9 +119,9 @@ void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
   if ( sp.tweak_test() ) cTime = double(Sen->now)/1000.;
   else cTime = Sen->control_time;
 
-  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d,  %d,  %d,  %d,  %d, %4.1f,%6.3f,%10.3f,%10.3f,%10.3f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
+  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d, %7.0f, %d,  %d,  %d,  %d, %4.1f,%6.3f,%10.3f,%10.3f,%10.3f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
-    sp.mon_chm(), pubList->sat, sp.ib_select(), sp.modeling(), Mon->bms_off(),
+    sp.mon_chm(), Mon->q_cap_rated_scaled(), pubList->sat, sp.ib_select(), sp.modeling(), Mon->bms_off(),
     Mon->Tb(), Mon->vb(), Mon->ib(), Mon->ib_charge(), Mon->ioc(), Mon->voc_soc(), 
     Mon->vsat(), Mon->dv_dyn(), Mon->voc_stat(), Mon->hx(),
     Mon->y_ekf(),

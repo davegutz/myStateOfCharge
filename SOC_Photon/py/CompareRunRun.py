@@ -27,7 +27,7 @@ from Battery import Battery, BatteryMonitor
 
 # Load from files
 def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zero_zero_in, time_end_in,
-              rated_batt_cap=Battery.RATED_BATT_CAP):
+              rated_batt_cap=Battery.UNIT_CAP_RATED, legacy=False):
     title_key = "unit,"  # Find one instance of title
     title_key_sel = "unit_s,"  # Find one instance of title
     unit_key_sel = "unit_sel"
@@ -38,8 +38,12 @@ def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zer
     temp_flt_file = 'flt_compareRunSim.txt'
     data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
                                        skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp)
-    cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib', 'ib_charge', 'ioc', 'voc_soc',
-            'vsat', 'dv_dyn', 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
+    if not legacy:
+        cols = ('cTime', 'dt', 'chm', 'qcrs', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib', 'ib_charge', 'ioc', 'voc_soc',
+                'vsat', 'dv_dyn', 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
+    else:
+        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib', 'ib_charge', 'ioc', 'voc_soc',
+                'vsat', 'dv_dyn', 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
     mon_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
                                 encoding=None).view(np.recarray)
 
@@ -80,8 +84,12 @@ def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zer
     data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
                                            unit_key=unit_key_sim, skip=skip, path_to_data=path_to_data,
                                            path_to_temp=path_to_temp)
-    cols_sim = ('c_time', 'chm_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
-                'ib_in_s', 'ib_charge_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
+    if not legacy:
+        cols_sim = ('c_time', 'chm_s', 'qcrs_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
+                    'ib_in_s', 'ib_charge_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
+    else:
+        cols_sim = ('c_time', 'chm_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
+                    'ib_in_s', 'ib_charge_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
     if data_file_sim_clean:
         sim_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
                                     dtype=float, encoding=None).view(np.recarray)
@@ -128,36 +136,36 @@ if __name__ == '__main__':
         long_term_in = False
         plot_overall_in = True
         rated_batt_cap_in = 108.4
+        legacy_in_old = False
+        legacy_in_new = False
         pathToSavePdfTo = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
 
         # Regression
-        # keys = [('ampHiFail v20221028.txt', 'pro0p_2022'), ('ampHiFail v20221220.txt', 'pro0p_2022')]
-        # keys = [('ampHiFail vA20221220.txt', 'soc1a_2022'), ('ampHiFail v20230128.txt', 'pro0p')]
-        # keys = [('rapidTweakRegression vA20221220.txt', 'soc1a_2022'), ('rapidTweakRegression v20230125.txt', 'pro0p_2022')]
-        # keys = [('rapidTweakRegression vA20221220.txt', 'soc1a_2022'), ('rapidTweakRegression vA20230217.txt', 'pro1a_2023')]
-        # keys = [('ampHiFail v20230128.txt', 'pro0p_20221220'), ('ampHiFail v20230303 CH.txt', 'pro0p_2023')]
-        keys = [( 'flatSit v20230303 CH;1.txt', 'pro0p_2023'), ( 'flatSit v20230303 CH.txt', 'pro0p_2023')]
-
+        # keys = [('ampHiFail vA20221220.txt', 'soc1a_2022', 'legacy'), ('ampHiFail v20230128.txt', 'pro0p', 'legacy')]
+        # keys = [('ampHiFail v20230128.txt', 'pro0p_20221220', 'legacy'), ('ampHiFail v20230303 CH.txt', 'pro0p_2023', 'legacy')]
+        # keys = [('ampHiFail v20230303 CH.txt', 'pro0p_2023', 'legacy'), ('ampHiFail v20230305 CH.txt', 'pro0p_2023')];
         # Compare
-        # keys = [('ampHiFail v20221220.txt', 'pro0p'), ('ampHiFail vA20221220.txt', 'soc1a')]
-        # keys = [('rapidTweakRegression v20221220.txt', 'pro0p_2022'), ('rapidTweakRegression vA20221220.txt', 'soc1a_2022')]
-        # keys = [('offSitHysBms v20221220.txt', 'pro0p_2022'), ('offSitHysBms vA20221220.txt', 'soc1a_2022')]
+        keys = [('offSitHysBms v20221220.txt', 'pro0p_2022', 'legacy'), ('offSitHysBms vA20221220.txt', 'soc1a_2022', 'legacy')]
 
         # Regression suite
         data_file_old_txt = keys[0][0]
         unit_key_old = keys[0][1]
+        if len(keys[0]) > 2 and keys[0][2] == 'legacy':
+            legacy_in_old = True
         data_file_new_txt = keys[1][0]
         unit_key_new = keys[1][1]
+        if len(keys[1]) > 2 and keys[1][2] == 'legacy':
+            legacy_in_new = True
 
         # Load data
         mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
             load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key_old, zero_zero_in, time_end_in,
-                      rated_batt_cap=rated_batt_cap_in)
+                      rated_batt_cap=rated_batt_cap_in, legacy=legacy_in_old)
         mon_new, sim_new, f_new, dummy1, dummy2 = \
             load_data(data_file_new_txt, skip, path_to_data, path_to_temp, unit_key_new, zero_zero_in, time_end_in,
-                      rated_batt_cap=rated_batt_cap_in)
+                      rated_batt_cap=rated_batt_cap_in, legacy=legacy_in_new)
 
         # Plots
         n_fig = 0

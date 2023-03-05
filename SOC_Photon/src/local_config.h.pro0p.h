@@ -36,17 +36,17 @@ const String unit = "pro0p_20230219";  // scale CHINS
 #define VB_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
 #define VB_SCALE              1.0   // Scale Vb sensor (* 'SV')
 
-// Battery.  One 12 V 100 Ah battery bank would have RATED_BATT_CAP 100, NS 1, and NP 1
-// Two 12 V 100 Ah series battery bank would have RATED_BATT_CAP 100, NS 2, and NP 1
+// Battery.  One 12 V 100 Ah battery bank would have NOM_UNIT_CAP 100, NS 1, and NP 1
+// Two 12 V 100 Ah series battery bank would have NOM_UNIT_CAP 100, NS 2, and NP 1
 // Four 12 V 200 Ah with two in parallel joined with two more in series
-//   would have  RATED_BATT_CAP 200, NS 2, and NP 2
+//   would have  NOM_UNIT_CAP 200, NS 2, and NP 2
 #define COULOMBIC_EFF_SCALE   1.0     // Scalar on Coulombic efficiency of battery, fraction of charge that gets used (1.0)
 #define MON_CHEM              1       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
 #define SIM_CHEM              1       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
-#define RATED_BATT_CAP        112.7   // Nominal battery unit capacity at RATED_TEMP.  (* 'Sc' or '*BS'/'*BP'), Ah
+#define NOM_UNIT_CAP          112.7   // Nominal battery unit capacity at RATED_TEMP.  (* 'Sc' or '*BS'/'*BP'), Ah
 #define HYS_SCALE             1.0     // Scalar on hysteresis (1.0)
-#define NS                    1.0     // Number of series batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BS')
-#define NP                    2.0     // Number of parallel batteries in bank.  Fractions scale and remember RATED_BATT_CAP (* 'BP')
+#define NS                    1.0     // Number of series batteries in bank.  Fractions scale and remember NOM_UNIT_CAP (* 'BS')
+#define NP                    2.0     // Number of parallel batteries in bank.  Fractions scale and remember NOM_UNIT_CAP (* 'BP')
 
 // Faults
 #define FAKE_FAULTS           false   // What to do with faults, T=detect and display them but don't change signals

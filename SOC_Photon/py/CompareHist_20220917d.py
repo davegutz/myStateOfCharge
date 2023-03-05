@@ -28,11 +28,11 @@ low_t = 4.  # Minimum temperature for valid saturation check, because BMS shuts 
 IB_MIN_UP = 0.2  # Min up charge current for come alive, BMS logic, and fault
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
-BATT_RATED_TEMP = 25.  # Temperature at RATED_BATT_CAP, deg C
+BATT_RATED_TEMP = 25.  # Temperature at UNIT_CAP_RATED, deg C
 BATT_V_SAT = 13.8
 BATT_DQDT = 0.01  # Change of charge with temperature, fraction / deg C (0.01 from literature)
 BATT_DVOC_DT = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V / deg C
-RATED_BATT_CAP = 108.4  # A-hr capacity of test article
+UNIT_CAP_RATED = 108.4  # A-hr capacity of test article
 IB_BAND = 1.  # Threshold to declare charging or discharging
 TB_BAND = 5.  # Band around temperature to group data and correct
 HYS_SCALE_20220917d = 0.3  # Original hys_remodel scalar inside photon code
@@ -574,15 +574,15 @@ if __name__ == '__main__':
         h = add_stuff(h_raw, voc_soc_tbl=lut_voc, soc_min_tbl=lut_soc_min, ib_band=IB_BAND)
         print(h)
         voc_soc05 = look_it(x0, lut_voc, 5.)
-        h_05C = filter_Tb(h, 5., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        h_05C = filter_Tb(h, 5., tb_band=TB_BAND, rated_batt_cap=UNIT_CAP_RATED)
         voc_soc11 = look_it(x0, lut_voc, 11.1)
-        h_11C = filter_Tb(h, 11.1, tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        h_11C = filter_Tb(h, 11.1, tb_band=TB_BAND, rated_batt_cap=UNIT_CAP_RATED)
         voc_soc20 = look_it(x0, lut_voc, 20.)
-        h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        h_20C = filter_Tb(h, 20., tb_band=TB_BAND, rated_batt_cap=UNIT_CAP_RATED)
         voc_soc30 = look_it(x0, lut_voc, 30.)
-        h_30C = filter_Tb(h, 30., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        h_30C = filter_Tb(h, 30., tb_band=TB_BAND, rated_batt_cap=UNIT_CAP_RATED)
         voc_soc40 = look_it(x0, lut_voc, 40.)
-        h_40C = filter_Tb(h, 40., tb_band=TB_BAND, rated_batt_cap=RATED_BATT_CAP)
+        h_40C = filter_Tb(h, 40., tb_band=TB_BAND, rated_batt_cap=UNIT_CAP_RATED)
 
         # Plots
         n_fig = 0

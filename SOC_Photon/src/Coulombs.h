@@ -57,7 +57,7 @@ public:
   virtual void pretty_print();
   double q(){ return (q_); };
   float q_cap_rated(){ return (q_cap_rated_); };
-  float q_cap_scaled(){ return (q_cap_rated_scaled_); };
+  float q_cap_rated_scaled(){ return (q_cap_rated_scaled_); };
   float q_capacity(){ return (q_capacity_); };
   double q_inf(){ return (q_inf_); };
   float soc() { return(soc_); };

@@ -142,16 +142,25 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         lut_dTb = myTables.TableInterp1D( np.array(dTb_in[0, :]), np.array(dTb_in[1, :]))
 
     # Setup
-    scale = model_bat_cap / Battery.RATED_BATT_CAP
-    if scale_in:
-        scale *= scale_in
+    if hasattr(mon_old, 'qcrs'):
+        scale_mon = mon_old.qcrs[0] / (Battery.UNIT_CAP_RATED*3600)
+    else:
+        scale_mon = unit_cap_rated / Battery.UNIT_CAP_RATED
+        if scale_in:
+            scale_mon *= scale_in
+    if sim_old is not None and hasattr(sim_old, 'qcrs_s'):
+        scale_sim = sim_old.qcrs_s[0] / (Battery.UNIT_CAP_RATED*3600)
+    else:
+        scale_sim = unit_cap_rated / Battery.UNIT_CAP_RATED
+        if scale_in:
+            scale_sim *= scale_in
     s_q = Scale(1., 3., 0.000005, 0.00005)
     s_r = Scale(1., 3., 0.001, 1.)   # t_ib_fail = 1000
-    sim = BatterySim(mod_code=chm_s[0], temp_c=temp_c, scale=scale, tweak_test=tweak_test,
+    sim = BatterySim(mod_code=chm_s[0], temp_c=temp_c, scale=scale_sim, tweak_test=tweak_test,
                      dv_hys=dv_hys_init, sres0=sres0, sresct=sresct, stauct=stauct_sim, scale_r_ss=scale_r_ss,
                      s_hys=s_hys_sim, dvoc=dvoc_sim, scale_hys_cap=scale_hys_cap_sim, s_coul_eff=s_coul_eff,
                      s_cap_chg=s_cap_chg, s_cap_dis=s_cap_dis, s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis)
-    mon = BatteryMonitor(mod_code=chm_m[0], temp_c=temp_c, scale=scale, tweak_test=tweak_test, dv_hys=dv_hys_init,
+    mon = BatteryMonitor(mod_code=chm_m[0], temp_c=temp_c, scale=scale_mon, tweak_test=tweak_test, dv_hys=dv_hys_init,
                          sres0=sres0, sresct=sresct, stauct=stauct_mon, scaler_q=s_q, scaler_r=s_r,
                          scale_r_ss=scale_r_ss, s_hys=s_hys_mon, dvoc=dvoc_mon, eframe_mult=eframe_mult,
                          scale_hys_cap=scale_hys_cap_mon, s_coul_eff=s_coul_eff, s_cap_chg=s_cap_chg,
@@ -300,7 +309,6 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         print('time=', now)
         print('mon:  ', str(mon))
         print('sim:  ', str(sim))
-
 
     return mon.saved, sim.saved, sim.saved_s, mon, sim
 

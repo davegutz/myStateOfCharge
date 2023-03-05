@@ -100,7 +100,7 @@ const float T_DV_MIN_BB[M_H_BB] = // dv_max(soc) table.  Pulled values from insp
 void Chemistry::assign_BB()
 {
     // Constants
-    rated_temp = 25.;  // Temperature at RATED_BATT_CAP, deg C (25)
+    rated_temp = 25.;  // Temperature at NOM_UNIT_CAP, deg C (25)
     coul_eff = 0.9985; // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs (0.9985)
     dqdt = 0.01;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
     dv_min_abs = 0.3;  // Absolute value of +/- hysteresis limit, V (0.3)
@@ -176,7 +176,7 @@ const float T_DV_MIN_CH[M_H_CH] = // dv_max(soc) table.  Pulled values from insp
 void Chemistry::assign_CH()
 {
     // Constants
-    rated_temp = 25.;  // Temperature at RATED_BATT_CAP, deg C (25)
+    rated_temp = 25.;  // Temperature at NOM_UNIT_CAP, deg C (25)
     coul_eff = 0.9976; // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs (0.9976 for sres=1.6)
     dqdt = 0.01;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
     dv_min_abs = 0.06; // Absolute value of +/- hysteresis limit, V (0.06)

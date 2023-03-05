@@ -42,7 +42,7 @@ class Retained:
 
 class Battery(Coulombs):
     # Battery constants
-    RATED_BATT_CAP = 100.
+    UNIT_CAP_RATED = 100.
     NOM_SYS_VOLT = 12.  # Nominal system output, V, at which the reported amps are used (12)
     mxeps_bb = 1 - 1e-6  # Numerical maximum of coefficient model with scaled soc
     TCHARGE_DISPLAY_DEADBAND = 0.1  # Inside this +/- deadband, charge time is displayed '---', A
@@ -85,7 +85,7 @@ class Battery(Coulombs):
                             what gets delivered, e.g.Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
                             or 20 - 40 A for a 100 Ah battery"""
 
-    def __init__(self, q_cap_rated=RATED_BATT_CAP*3600, t_rlim=0.017, t_rated=25., temp_c=25., tweak_test=False,
+    def __init__(self, q_cap_rated=UNIT_CAP_RATED*3600, t_rlim=0.017, t_rated=25., temp_c=25., tweak_test=False,
                  sres0=1., sresct=1., stauct=1., scale_r_ss=1., s_hys=1., dvoc=0., mod_code=0, s_coul_eff=1.,
                  scale_cap=1.):
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
@@ -121,8 +121,8 @@ class Battery(Coulombs):
         self.chemistry.r_ct *= sresct
         self.chemistry.r_ss *= scale_r_ss
         self.chemistry.coul_eff *= s_coul_eff
-        self.ChargeTransfer = LagExp(dt=Battery.EKF_NOM_DT, max_=Battery.RATED_BATT_CAP*scale_cap,
-                                     min_=-Battery.RATED_BATT_CAP*scale_cap, tau=self.chemistry.tau_ct)
+        self.ChargeTransfer = LagExp(dt=Battery.EKF_NOM_DT, max_=Battery.UNIT_CAP_RATED*scale_cap,
+                                     min_=-Battery.UNIT_CAP_RATED*scale_cap, tau=self.chemistry.tau_ct)
         self.temp_c = temp_c
         self.saved = Saved()  # for plots and prints
         self.dv_hys = 0.  # Placeholder so BatterySim can be plotted
@@ -199,7 +199,7 @@ class Battery(Coulombs):
 class BatteryMonitor(Battery, EKF1x1):
     """Extend Battery class to make a monitor"""
 
-    def __init__(self, q_cap_rated=Battery.RATED_BATT_CAP*3600, t_rated=25., t_rlim=0.017, scale=1.,
+    def __init__(self, q_cap_rated=Battery.UNIT_CAP_RATED*3600, t_rated=25., t_rlim=0.017, scale=1.,
                  temp_c=25., hys_scale=1., tweak_test=False, dv_hys=0., sres0=1., sresct=1., stauct=1.,
                  scaler_q=None, scaler_r=None, scale_r_ss=1., s_hys=1., dvoc=1., eframe_mult=Battery.cp_eframe_mult,
                  scale_hys_cap=1., mod_code=0, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1., s_hys_dis=1., s_coul_eff=1.):
@@ -376,9 +376,9 @@ class BatteryMonitor(Battery, EKF1x1):
 
         # Charge time
         if self.ib > 0.1:
-            self.tcharge_ekf = min(Battery.RATED_BATT_CAP/self.ib * (1. - self.soc_ekf), 24.)
+            self.tcharge_ekf = min(Battery.UNIT_CAP_RATED/self.ib * (1. - self.soc_ekf), 24.)
         elif self.ib < -0.1:
-            self.tcharge_ekf = max(Battery.RATED_BATT_CAP/self.ib * self.soc_ekf, -24.)
+            self.tcharge_ekf = max(Battery.UNIT_CAP_RATED/self.ib * self.soc_ekf, -24.)
         elif self.ib >= 0.:
             self.tcharge_ekf = 24.*(1. - self.soc_ekf)
         else:
@@ -457,6 +457,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.time_day.append(time / 3600. / 24.)
         self.saved.dt.append(dt)
         self.saved.chm.append(self.chm)
+        self.saved.qcrs.append(self.q_cap_rated_scaled)
         self.saved.ib.append(self.ib)
         self.saved.ib_in.append(self.ib_in)
         self.saved.ib_charge.append(self.ib_charge)
@@ -510,7 +511,7 @@ class BatteryMonitor(Battery, EKF1x1):
 class BatterySim(Battery):
     """Extend Battery class to make a model"""
 
-    def __init__(self, q_cap_rated=Battery.RATED_BATT_CAP*3600, t_rated=25., t_rlim=0.017, scale=1., stauct=1.,
+    def __init__(self, q_cap_rated=Battery.UNIT_CAP_RATED*3600, t_rated=25., t_rlim=0.017, scale=1., stauct=1.,
                  temp_c=25., hys_scale=1., tweak_test=False, dv_hys=0., sres0=1., sresct=1., scale_r_ss=1.,
                  s_hys=1., dvoc=0., scale_hys_cap=1., mod_code=0, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1.,
                  s_hys_dis=1., s_coul_eff=1.):
@@ -519,7 +520,7 @@ class BatterySim(Battery):
                          s_hys=s_hys, dvoc=dvoc, mod_code=mod_code, s_coul_eff=s_coul_eff, scale_cap=scale)
         self.lut_voc = None
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
-        # self.sat_ib_null = 0.1*Battery.RATED_BATT_CAP  # Current cutback value for voc=vsat, A
+        # self.sat_ib_null = 0.1*Battery.UNIT_CAP_RATED  # Current cutback value for voc=vsat, A
         self.sat_ib_null = 0.  # Current cutback value for soc=1, A
         # self.sat_cutback_gain = 4.8  # Gain to retard ib when voc exceeds vsat, dimensionless
         self.sat_cutback_gain = 1000.  # Gain to retard ib when soc approaches 1, dimensionless
@@ -739,6 +740,7 @@ class BatterySim(Battery):
     def save_s(self, time):
         self.saved_s.time.append(time)
         self.saved_s.chm_s.append(self.chm)
+        self.saved_s.qcrs_s.append(self.q_cap_rated_scaled)
         self.saved_s.bmso_s.append(self.bms_off)
         self.saved_s.Tb_s.append(self.temp_c)
         self.saved_s.Tbl_s.append(self.temp_lim)
@@ -784,6 +786,7 @@ class Saved:
         self.time_day = []
         self.dt = []
         self.chm = []
+        self.qcrs = []
         self.bmso = []
         self.ib = []
         self.ib_in = []
@@ -1199,6 +1202,7 @@ class SavedS:
         self.unit = []  # text title
         self.c_time = []  # Control time, s
         self.chm_s = []
+        self.qcrs_s = []
         self.bmso_s = []
         self.Tb_s = []
         self.Tbl_s = []

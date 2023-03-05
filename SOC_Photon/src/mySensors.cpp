@@ -624,7 +624,7 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       failAssign(false, IB_AMP_FA);
       failAssign(false, IB_NOA_FA);
     }
-    float current_max = RATED_BATT_CAP * sp.nP();
+    float current_max = NOM_UNIT_CAP * sp.nP();
     faultAssign( abs(Sen->ShuntAmp->Ishunt_cal()) >= current_max && !disab_ib_fa_, IB_AMP_FLT );
     faultAssign( abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max && !disab_ib_fa_, IB_NOA_FLT );
     if ( disab_ib_fa_ )

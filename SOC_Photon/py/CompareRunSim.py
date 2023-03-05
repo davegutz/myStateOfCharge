@@ -74,6 +74,7 @@ if __name__ == '__main__':
         tune_in = False
         cc_dif_tol_in = 0.2
         verbose_in = False
+        legacy_in = False
 
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
@@ -81,7 +82,8 @@ if __name__ == '__main__':
         # Regression suite
 
         # data_file_old_txt = 'ampHiFail v20230219.txt'; unit_key = 'pro0p'
-        # data_file_old_txt = 'ampHiFail v20230303 CH.txt'; unit_key = 'pro0p'; scale_in = 1.127; cc_dif_tol_in = 0.5
+        data_file_old_txt = 'ampHiFail v20230303 CH.txt'; unit_key = 'pro0p'; scale_in = 1.127; cc_dif_tol_in = 0.5; legacy_in = True
+        data_file_old_txt = 'ampHiFail v20230305 CH.txt'; unit_key = 'pro0p'; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'ampHiFail vA20221220.txt';  unit_key = 'soc1a'
         # data_file_old_txt = 'rapidTweakRegression v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'flatSit v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
@@ -114,7 +116,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'vHiFailFf v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'pulseEKF v20221028.txt'; init_time_in=-0.001;  # TODO:  broken
         # data_file_old_txt = 'pulseSS v20221028.txt'; init_time_in=-0.001;
-        data_file_old_txt = 'pulseSS v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5; verbose_in = True
+        # data_file_old_txt = 'pulseSS v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5; verbose_in = True
         # data_file_old_txt = 'tbFailMod v20221220.txt'
         # data_file_old_txt = 'tbFailMod v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'tbFailHdwe v20221028.txt'
@@ -157,7 +159,8 @@ if __name__ == '__main__':
 
         # # Load mon v4 (old)
         mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
-            load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zero_zero_in, time_end_in)
+            load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zero_zero_in, time_end_in,
+                      legacy=legacy_in)
 
         # How to initialize
         if mon_old.time[0] == 0.:  # no initialization flat detected at beginning of recording

@@ -69,7 +69,8 @@ public:
     float hys_scale() { return hys_scale_; }
     uint8_t mon_chm() { return mon_chm_; }
     uint8_t sim_chm() { return sim_chm_; }
-    float s_cap_model() { return s_cap_model_; }
+    float s_cap_mon() { return s_cap_mon_; }
+    float s_cap_sim() { return s_cap_sim_; }
     float t_last() { return t_last_; }
     float t_last_model() { return t_last_model_; }
     float Ib_bias_all() { return Ib_bias_all_; }
@@ -140,7 +141,8 @@ public:
         void get_preserving() { preserving_ = rP_->read(preserving_eeram_.a16); }
         void get_shunt_gain_sclr() { float value; rP_->get(shunt_gain_sclr_eeram_.a16, value); shunt_gain_sclr_ = value; }
         void get_sim_chm() { sim_chm_ = rP_->read(sim_chm_eeram_.a16); }
-        void get_s_cap_model() { float value; rP_->get(s_cap_model_eeram_.a16, value); s_cap_model_ = value; }
+        void get_s_cap_mon() { float value; rP_->get(s_cap_mon_eeram_.a16, value); s_cap_mon_ = value; }
+        void get_s_cap_sim() { float value; rP_->get(s_cap_sim_eeram_.a16, value); s_cap_sim_ = value; }
         void get_Tb_bias_hdwe() { float value; rP_->get(Tb_bias_hdwe_eeram_.a16, value); Tb_bias_hdwe_ = value; }
         void get_time_now() { time_t value; rP_->get(time_now_eeram_.a16, value); time_now_ = value; Time.setTime(value); }
         void get_type() { type_ = rP_->read(type_eeram_.a16); }
@@ -197,7 +199,8 @@ public:
         void put_shunt_gain_sclr(const float input) { shunt_gain_sclr_ = input; }
         void put_sim_chm(const uint8_t input) { sim_chm_ = input; }
         void put_sim_chm() {}
-        void put_s_cap_model(const float input) { s_cap_model_ = input; }
+        void put_s_cap_mon(const float input) { s_cap_mon_ = input; }
+        void put_s_cap_sim(const float input) { s_cap_sim_ = input; }
         void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_ = input; }
         void put_time_now(const time_t input) { time_now_ = input; }
         void put_type(const uint8_t input) { type_ = input; }
@@ -239,7 +242,8 @@ public:
         void put_shunt_gain_sclr(const float input) { rP_->put(shunt_gain_sclr_eeram_.a16, input); shunt_gain_sclr_ = input; }
         void put_sim_chm(const uint8_t input) { rP_->write(sim_chm_eeram_.a16, input); sim_chm_ = input; }
         void put_sim_chm() { rP_->write(sim_chm_eeram_.a16, sim_chm_); }
-        void put_s_cap_model(const float input) { rP_->put(s_cap_model_eeram_.a16, input); s_cap_model_ = input; }
+        void put_s_cap_mon(const float input) { rP_->put(s_cap_mon_eeram_.a16, input); s_cap_mon_ = input; }
+        void put_s_cap_sim(const float input) { rP_->put(s_cap_sim_eeram_.a16, input); s_cap_sim_ = input; }
         void put_Tb_bias_hdwe(const float input) { rP_->put(Tb_bias_hdwe_eeram_.a16, input); Tb_bias_hdwe_ = input; }
         void put_time_now(const time_t input) { rP_->put(time_now_eeram_.a16, input); time_now_ = input; Time.setTime(time_now_); }
         void put_type(const uint8_t input) { rP_->write(type_eeram_.a16, input); type_ = input; }
@@ -279,7 +283,8 @@ protected:
     uint8_t preserving_;    // Preserving fault buffer
     uint8_t sim_chm_;       // Simulation battery chemistry type
     float shunt_gain_sclr_; // Shunt gain scalar
-    float s_cap_model_;     // Scalar on battery model size
+    float s_cap_mon_;       // Scalar on battery monitor size
+    float s_cap_sim_;       // Scalar on battery model size
     float Tb_bias_hdwe_;    // Bias on Tb sensor, deg C
     time_t time_now_;       // Time now, Unix time since epoch
     uint8_t type_;          // Injected waveform type.   0=sine, 1=square, 2=triangle
@@ -314,7 +319,8 @@ protected:
         address16b preserving_eeram_;
         address16b shunt_gain_sclr_eeram_;
         address16b sim_chm_eeram_;
-        address16b s_cap_model_eeram_;
+        address16b s_cap_mon_eeram_;
+        address16b s_cap_sim_eeram_;
         address16b Tb_bias_hdwe_eeram_;
         address16b time_now_eeram_;
         address16b type_eeram_;

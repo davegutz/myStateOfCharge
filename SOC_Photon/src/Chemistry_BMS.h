@@ -44,7 +44,7 @@ struct Chemistry: public BMS
 {
 public:
   uint8_t *sp_mod_code;  // Chemistry code integer
-  float rated_temp; // Temperature at RATED_BATT_CAP, deg C
+  float rated_temp; // Temperature at NOM_UNIT_CAP, deg C
   double coul_eff;  // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
   float dqdt;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
   uint8_t m_t = 0;  // Number temperature breakpoints for voc table

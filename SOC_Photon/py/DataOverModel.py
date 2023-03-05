@@ -398,6 +398,7 @@ class SavedData:
             self.ib_charge = None  # BMS switched current, A
             self.vb = None  # Bank voltage, V
             self.chm = None  # Battery chemistry code
+            self.qcrs = None  # Unit capacity rated scaled, Coulombs
             self.sat = None  # Indication that battery is saturated, T=saturated
             self.sel = None  # Current source selection, 0=amp, 1=no amp
             self.mod = None  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
@@ -467,6 +468,8 @@ class SavedData:
             self.voc_soc = np.array(data.voc_soc[:i_end])
             self.vb = np.array(data.vb[:i_end])
             self.chm = np.array(data.chm[:i_end])
+            if hasattr(data, 'qcrs'):
+                self.qcrs = data.qcrs[:i_end]
             self.sat = np.array(data.sat[:i_end])
             self.sel = np.array(data.sel[:i_end])
             self.mod_data = np.array(data.mod[:i_end])
@@ -666,6 +669,7 @@ class SavedDataSim:
             self.unit = None  # text title
             self.c_time = None  # Control time, s
             self.chm_s = None
+            self.qcrs_s = None  # Unit capacity rated scaled, Coulombs
             self.bms_off_s = None
             self.Tb_s = None
             self.Tbl_s = None
@@ -697,6 +701,8 @@ class SavedDataSim:
             self.time_min = self.time / 60.
             self.time_day = self.time / 3600. / 24.
             self.chm_s = data.chm_s[:i_end]
+            if hasattr(data, 'qcrs_s'):
+                self.qcrs_s = data.qcrs_s[:i_end]
             self.bms_off_s = data.bmso_s[:i_end]
             self.Tb_s = data.Tb_s[:i_end]
             self.Tbl_s = data.Tbl_s[:i_end]
