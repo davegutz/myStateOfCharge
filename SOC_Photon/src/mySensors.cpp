@@ -303,8 +303,8 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
   // wrap_vb latches because vb is single sensor
   ewhi_thr_ = Mon->r_ss()*WRAP_HI_A*ewhi_sclr_*ewsat_sclr_*ewmin_sclr_;
-  // if ( sp.debug()==-23 ) Serial.printf("e_wrap, reset_loc, r_ss, ewhi_sclr, ewsat_sclr, ewmin_sclr, ewhi_thr, %7.3f, %d, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f,\n",
-  //   e_wrap_, reset_loc, Mon->r_ss(), ewhi_sclr_, ewsat_sclr_, ewmin_sclr_, ewhi_thr_);
+  if ( sp.debug()==-23 ) Serial.printf("soc, e_wrap, reset_loc, r_ss, ewhi_sclr, ewsat_sclr, ewmin_sclr, ewhi_thr, %8.4f, %7.3f, %d, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f,\n",
+    Mon->soc(), e_wrap_, reset_loc, Mon->r_ss(), ewhi_sclr_, ewsat_sclr_, ewmin_sclr_, ewhi_thr_);
   faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
   ewlo_thr_ = Mon->r_ss()*WRAP_LO_A*ewlo_sclr_*ewsat_sclr_*ewmin_sclr_;
   faultAssign( (e_wrap_filt_ <= ewlo_thr_), WRAP_LO_FLT);

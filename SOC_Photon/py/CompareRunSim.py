@@ -90,45 +90,76 @@ if __name__ == '__main__':
         # data_file_old_txt = 'rapidTweakRegression v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'flatSit v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'rapidTweakRegression vA20221220.txt'; unit_key = 'soc1a'  # ; time_end_in = 4.8;
-        # data_file_old_txt = 'rapidTweakRegression vA20230217.txt'; unit_key = 'pro1a_2023'
-        # data_file_old_txt = 'rapidTweakRegression vA20230219.txt'; unit_key = 'pro1a_2023'
-        # data_file_old_txt = 'rapidTweakRegression vA20230305 BB.txt'; unit_key = 'pro1a_2023'
-        data_file_old_txt = 'rapidTweakRegression v20230305 CH.txt'; unit_key = 'pro0p_2023'
+        # data_file_old_txt = 'rapidTweakRegression vA20230217.txt'; unit_key = 'pro1a'
+        # data_file_old_txt = 'rapidTweakRegression vA20230219.txt'; unit_key = 'pro1a'
+        # data_file_old_txt = 'rapidTweakRegression vA20230305 BB.txt'; unit_key = 'pro1a'
+        # data_file_old_txt = 'rapidTweakRegression v20230305 CH.txt'; unit_key = 'pro0p'
 
-        # data_file_old_txt = 'offSitHysBms v20221220.txt'; unit_key = 'pro0p_2022'   # ; time_end_in = 137.
+        # data_file_old_txt = 'offSitHysBms v20221220.txt'; unit_key = 'pro0p'   # ; time_end_in = 137.
         # data_file_old_txt = 'offSitHysBms vA20221220.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
         # data_file_old_txt = 'offSitHysBms v20230303 CH.txt'; unit_key = 'pro0p'; scale_in = 1.127; cc_dif_tol_in = 0.5  #; time_end_in = 159
+        # data_file_old_txt = 'offSitHysBms vA20230305 BB.txt'; unit_key = 'pro1a'
+        # data_file_old_txt = 'offSitHysBms v20230305 CH.txt'; unit_key = 'pro0p'
+
         # data_file_old_txt = 'Xm0VbFail.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
 
         # data_file_old_txt = 'triTweakDisch v20221220.txt'  #; time_end_in=25.4
         # data_file_old_txt = 'triTweakDisch v20230219.txt'; unit_key = 'pro0p'; scale_in = 1.127; cc_dif_tol_in = 0.5  #;time_end_in = 2.
         # data_file_old_txt = 'triTweakDisch v20230303 CH.txt'; unit_key = 'pro0p'; scale_in = 1.127; cc_dif_tol_in = 0.5  # ; time_end_in = 35.
+        # data_file_old_txt = 'triTweakDisch vA20230305 BB.txt'; unit_key = 'pro1a'
+        # data_file_old_txt = 'triTweakDisch v20230305 CH.txt'; unit_key = 'pro0p'
+
+        data_file_old_txt = 'coldStart vA20230305 BB.txt'; unit_key = 'pro1a'
         # data_file_old_txt = 'coldStart v20221220.txt'  #; time_end_in=112
 
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
         # data_file_old_txt = 'ampHiFailFf v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
+        # data_file_old_txt = 'ampHiFailFf vA20230305 BB.txt'; unit_key = 'pro1a'
+        # data_file_old_txt = 'ampHiFailFf v20230305 CH.txt'; unit_key = 'pro0p'
+
         # data_file_old_txt = 'ampLoFail v20221028.txt'
         # data_file_old_txt = 'ampLoFail v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
+        # data_file_old_txt = 'ampLoFail vA20230305 BB.txt'; unit_key = 'pro1a'
+        # data_file_old_txt = 'ampLoFail v20230305 CH.txt'; unit_key = 'pro0p'
+
         # data_file_old_txt = 'ampHiFailNoise v20221028.txt'
+        # data_file_old_txt = 'ampHiFailNoise vA20230305 BB.txt'; unit_key = 'pro1a'
+        # data_file_old_txt = 'ampHiFailNoise v20230305 CH.txt'; unit_key = 'pro0p'
+
         # data_file_old_txt = 'rapidTweakRegression40C v20221028.txt'  # ; time_end_in=4.8;
+        # data_file_old_txt = 'rapidTweakRegression40C vA20230305 BB.txt'; unit_key = 'pro1a'
+        # data_file_old_txt = 'rapidTweakRegression40C v20230305 CH.txt'; unit_key = 'pro0p'
+
         # data_file_old_txt = 'slowTweakRegression v20221028.txt'
+
         # data_file_old_txt = 'satSit v20221028.txt'
         # data_file_old_txt = 'satSitHys v20221028.txt'
+
         # data_file_old_txt = 'offSitHysBmsNoise v20221028.txt'  # ; time_end_in=50
+
         # data_file_old_txt = 'ampHiFailSlow v20221028.txt'  # ; time_end_in=360
+
         # data_file_old_txt = 'vHiFail v20221028.txt'
         # data_file_old_txt = 'vHiFail v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
+
         # data_file_old_txt = 'vHiFailFf v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
+
         # data_file_old_txt = 'pulseEKF v20221028.txt'; init_time_in=-0.001;  # TODO:  broken
+
         # data_file_old_txt = 'pulseSS v20221028.txt'; init_time_in=-0.001;
         # data_file_old_txt = 'pulseSS v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5; verbose_in = True
+
         # data_file_old_txt = 'tbFailMod v20221220.txt'
         # data_file_old_txt = 'tbFailMod v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
+
         # data_file_old_txt = 'tbFailHdwe v20221028.txt'
         # data_file_old_txt = 'tbFailHdwe v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
+
         # data_file_old_txt = 'EKF_Track v20221028.txt'
         # data_file_old_txt = 'EKF_Track Dr2000 v20221028.txt'
+
         # data_file_old_txt = 'on_off_on v20221028.txt'  # ; time_end_in=6
+
         # data_file_old_txt = 'dwell noise Ca.5 v20221028.txt'  # ; dTb = [[0., 18000.],  [0, 8.]]
         # data_file_old_txt = 'dwell Ca.5 v20221028.txt'  # ; time_end_in=0.5  # ; dTb = [[0., 18000.],  [0, 8.]]
 

@@ -70,7 +70,7 @@ void loop();
 // Prevent mixing up local_config files (still could sneak soc0p through as pro0p)
 #ifdef HEADER_PHOTON
   #if (PLATFORM_ID != PLATFORM_PHOTON)
-    #error
+    #error "copy local_config.xxxx.h to local_config.h"
   #endif
 #endif
 #ifdef HEADER_ARGON

@@ -932,7 +932,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'a' ): // Xa<>:  injection amplitude
-                sp.put_amp(cp.input_str.substring(2).toFloat());
+                sp.put_amp(cp.input_str.substring(2).toFloat()*sp.nP());
                 Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", sp.amp(), sp.inj_bias());
                 break;
 

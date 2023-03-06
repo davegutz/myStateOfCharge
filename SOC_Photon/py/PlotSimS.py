@@ -173,7 +173,7 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n
 
         plt.figure()  # sim_s  3
         n_fig += 1
-        plt.subplot(221)
+        plt.subplot(321)
         plt.title(plot_title + ' sim_s 3')
         plt.plot(mo.time, mo.soc, color='blue', linestyle='-', label='soc'+old_str)
         plt.plot(mv.time, mv.soc, color='red', linestyle='--', label='soc'+new_str)
@@ -190,7 +190,7 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n
             plt.plot(sv.time, np.array(sv.soc_s)-.2, color='orange', linestyle='-', label='sv.soc_s'+new_str+'-0.2')
         plt.plot(smv.time, np.array(smv.soc_s)-.2, color='black', linestyle='--', label='smv.soc_s'+new_str+'-0.2')
         plt.legend(loc=1)
-        plt.subplot(222)
+        plt.subplot(322)
         if mo.vb_h is not None:
             plt.plot(mo.soc, mo.vb_h, color='magenta', linestyle=':', label='vb_hdwe'+old_str)
         plt.plot(mo.soc, mo.voc_stat, color='cyan', linestyle=':', label='voc_stat'+old_str)
@@ -206,7 +206,19 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n
         plt.plot(mv.soc, mv.vsat, color='black', linestyle='--', label='vsat'+new_str)
         plt.plot(mv.soc, mv.voc_stat, color='orange', linestyle='--', label='voc_stat'+new_str)
         plt.legend(loc=1)
-        plt.subplot(224)
+        plt.subplot(323)
+        if mo.voc_soc is not None:
+            plt.plot(mo.time, mo.voc_soc-mo.voc_stat, color='blue', linestyle='-', label='e_wrap = voc_soc - voc_stat'+old_str)
+        plt.plot(mv.time, np.array(mv.voc_soc)-np.array(mv.voc_stat), color='red', linestyle='--', label='e_wrap = voc_soc - voc_stat' + new_str)
+        plt.legend(loc=1)
+        plt.subplot(324)
+        if mo.voc_soc is not None:
+            plt.plot(mo.time, mo.voc_soc, color='blue', linestyle='-', label='voc_soc'+old_str)
+            plt.plot(mo.time, mo.voc_stat, color='red', linestyle='-', label='voc_stat' + old_str)
+        plt.plot(mv.time, mv.voc_soc, color='green', linestyle='--', label='voc_soc' + new_str)
+        plt.plot(mv.time, mv.voc_stat, color='cyan', linestyle='--', label='voc_stat' + new_str)
+        plt.legend(loc=1)
+        plt.subplot(325)
         if mo.vb_h is not None:
             plt.plot(mo.time, mo.vb_h, color='magenta', linestyle=':', label='vb_hdwe'+old_str)
         plt.plot(mo.time, mo.voc_stat, color='cyan', linestyle=':', label='voc_stat'+old_str)
@@ -221,6 +233,11 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n
         plt.plot(mo.time, mo.vsat, color='red', linestyle='-', label='vsat'+old_str)
         plt.plot(mv.time, mv.vsat, color='black', linestyle='--', label='vsat'+new_str)
         plt.plot(mv.time, mv.voc_stat, color='orange', linestyle='-.', label='voc_stat'+new_str)
+        plt.legend(loc=1)
+        plt.subplot(326)
+        if mo.voc_soc is not None:
+            plt.plot(mo.soc, mo.voc_soc, color='blue', linestyle='-', label='voc_soc'+old_str)
+            plt.plot(mo.soc, mo.voc_stat, color='red', linestyle='-', label='voc_stat' + old_str)
         plt.legend(loc=1)
 
         plt.figure()  # sim_s  4
