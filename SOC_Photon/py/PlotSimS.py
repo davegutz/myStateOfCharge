@@ -191,7 +191,7 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n
         plt.plot(smv.time, np.array(smv.soc_s)-.2, color='black', linestyle='--', label='smv.soc_s'+new_str+'-0.2')
         plt.legend(loc=1)
         plt.subplot(322)
-        if mo.vb_h is not None:
+        if mo.vb_h is not None and max(mo.vb_h) > 1.:
             plt.plot(mo.soc, mo.vb_h, color='magenta', linestyle=':', label='vb_hdwe'+old_str)
         plt.plot(mo.soc, mo.voc_stat, color='cyan', linestyle=':', label='voc_stat'+old_str)
         if mo.voc_soc is not None:
@@ -214,12 +214,14 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n
         plt.subplot(324)
         if mo.voc_soc is not None:
             plt.plot(mo.time, mo.voc_soc, color='blue', linestyle='-', label='voc_soc'+old_str)
-            plt.plot(mo.time, mo.voc_stat, color='red', linestyle='-', label='voc_stat' + old_str)
+            plt.plot(mo.time, mo.voc_stat, color='red', linestyle='--', label='voc_stat' + old_str)
+        plt.plot(so.time, so.voc_stat_s, color='magenta', linestyle='-.', label='voc_stat_s' + old_str)
         plt.plot(mv.time, mv.voc_soc, color='green', linestyle='--', label='voc_soc' + new_str)
-        plt.plot(mv.time, mv.voc_stat, color='cyan', linestyle='--', label='voc_stat' + new_str)
+        plt.plot(mv.time, mv.voc_stat, color='cyan', linestyle='-.', label='voc_stat' + new_str)
+        plt.plot(smv.time, smv.voc_stat_s, color='orange', linestyle=':', label='voc_stat_s' + new_str)
         plt.legend(loc=1)
         plt.subplot(325)
-        if mo.vb_h is not None:
+        if mo.vb_h is not None and max(mo.vb_h) > 1.:
             plt.plot(mo.time, mo.vb_h, color='magenta', linestyle=':', label='vb_hdwe'+old_str)
         plt.plot(mo.time, mo.voc_stat, color='cyan', linestyle=':', label='voc_stat'+old_str)
         if mo.voc_soc is not None:

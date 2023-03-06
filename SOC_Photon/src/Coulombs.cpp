@@ -195,6 +195,7 @@ float Coulombs::count_coulombs(const double dt, const boolean reset_temp, const 
     {
       delta_q_inf_ = *sp_delta_q_;
     }
+    // if ( sp.debug()==-24 )Serial.printf("Mon:  charge_curr%7.3f d_delta_q%10.6f delta_q%10.1f temp_lim%7.3f t_last%7.3f\n", charge_curr, d_delta_q, *sp_delta_q_, temp_lim, *sp_t_last_);
     q_ = q_capacity_ + *sp_delta_q_;
     q_inf_ = q_capacity_ + delta_q_inf_;
 

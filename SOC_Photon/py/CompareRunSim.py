@@ -109,7 +109,8 @@ if __name__ == '__main__':
         # data_file_old_txt = 'triTweakDisch vA20230305 BB.txt'; unit_key = 'pro1a'
         # data_file_old_txt = 'triTweakDisch v20230305 CH.txt'; unit_key = 'pro0p'
 
-        data_file_old_txt = 'coldStart vA20230305 BB.txt'; unit_key = 'pro1a'
+        # data_file_old_txt = 'coldStart vA20230305 BB.txt'; unit_key = 'pro1a'
+        data_file_old_txt = 'coldStart v20230305 CH.txt'; unit_key = 'pro0p'
         # data_file_old_txt = 'coldStart v20221220.txt'  #; time_end_in=112
 
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'

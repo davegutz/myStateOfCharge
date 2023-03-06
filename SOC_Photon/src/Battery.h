@@ -110,6 +110,7 @@ public:
   float voc_soc_tab(const float soc, const float temp_c);
   float vsat() { return vsat_; };
 protected:
+  boolean bms_charging_; // Indicator that battery is charging, T = charging, changing soc and voltage
   boolean bms_off_; // Indicator that battery management system is off, T = off preventing current flow
   float ds_voc_soc_;    // VOC(SOC) delta soc on input
   float dt_;       // Update time, s
@@ -127,6 +128,7 @@ protected:
   float vb_;       // Battery terminal voltage, V
   float voc_;      // Static model open circuit voltage, V
   float voc_stat_; // Static, table lookup value of voc before applying hysteresis, V
+  boolean voltage_low_; // Battery below BMS, T = BMS will turn off
   float vsat_;     // Saturation threshold at temperature, V
   // EKF declarations
   LagExp *ChargeTransfer_; // ChargeTransfer model {ib, vb} --> {voc}, ioc=ib for Battery version

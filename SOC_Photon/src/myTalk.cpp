@@ -350,6 +350,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 cp.cmd_reset();
                 break;
 
+              case ( 'I' ):  // * DI<>:  Bias all current sensors without reset (same way as Da and Db)
+                Serial.printf("sp.Ib_bias_all%7.3f to", sp.Ib_bias_all());
+                sp.put_Ib_bias_all(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\nreset\n", sp.Ib_bias_all());
+                break;
+
               case ( 'm' ):  //   Dm<>:  Amp signal adder for faults
                 Serial.printf("ib_amp_add%7.3f to", Sen->ib_amp_add());
                 Sen->ib_amp_add(cp.input_str.substring(2).toFloat());
@@ -1012,6 +1018,18 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Xs1;Di0;Dm0;Dn0;Dv0;DT0;DV0;DI0;Xu0;Xv1;Dr100;", ASAP);
                     break;
 
+                  case ( 2 ):  // Xp2:  
+                    chit("Xp0;", QUEUE);
+                    chit("Xtc;", QUEUE);
+                    chit("Di-40;", QUEUE);
+                    break;
+
+                  case ( 3 ):  // Xp3:  
+                    chit("Xp0;", QUEUE);
+                    chit("Xtc;", QUEUE);
+                    chit("Di40;", QUEUE);
+                    break;
+
                   case ( 4 ):  // Xp4:  
                     chit("Xp0;", QUEUE);
                     chit("Xtc;", QUEUE);
@@ -1207,9 +1225,10 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Cm=  model (& ekf if mod)- '(0-1.1)'\n"); 
 
   Serial.printf("\nD/S<?> Adj e.g.:\n");
-  Serial.printf(" *DA= "); Serial.printf("%6.3f", sp.Ib_bias_amp()); Serial.printf(": delta amp, A [%6.3f]\n", CURR_BIAS_AMP); 
-  Serial.printf(" *DB= "); Serial.printf("%6.3f", sp.Ib_bias_noa()); Serial.printf(": delta noa, A [%6.3f]\n", CURR_BIAS_NOA); 
-  Serial.printf(" *Di= "); Serial.printf("%6.3f", sp.Ib_bias_all()); Serial.printf(": delta all, A [%6.3f]\n", CURR_BIAS_ALL); 
+  Serial.printf(" *DA= "); Serial.printf("%6.3f", sp.Ib_bias_amp()); Serial.printf(": delta amp, A [%6.3f]\n", CURR_BIAS_AMP);
+  Serial.printf(" *DB= "); Serial.printf("%6.3f", sp.Ib_bias_noa()); Serial.printf(": delta noa, A [%6.3f]\n", CURR_BIAS_NOA);
+  Serial.printf(" *Di= "); Serial.printf("%6.3f", sp.Ib_bias_all()); Serial.printf(": delta all, A [%6.3f]\n", CURR_BIAS_ALL);
+  Serial.printf(" *DI= "); Serial.printf("%6.3f", sp.Ib_bias_all()); Serial.printf(": delta all no reset, A [%6.3f]\n", CURR_BIAS_ALL);
   Serial.printf(" *Dc= "); Serial.printf("%6.3f", sp.Vb_bias_hdwe()); Serial.printf(": delta, V [%6.3f]\n", VOLT_BIAS); 
   Serial.printf("  DE= "); Serial.printf("%d", cp.eframe_mult); Serial.printf(": eframe mult Dr [20]\n");
   Serial.printf("  DP=  "); Serial.print(cp.print_mult); Serial.println(": print mult Dr [4]"); 
@@ -1333,6 +1352,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" Xp= <?>, scripted tests...\n"); 
   Serial.printf("  Xp-1: Off, modeling false\n");
   Serial.printf("  Xp0: reset tests\n");
+  Serial.printf("  Xp2: -0.4C soft disch, reset xp0 or Di0\n");
+  Serial.printf("  Xp3: +0.4C soft chg\n");
   Serial.printf("  Xp4: -1C soft disch, reset xp0 or Di0\n");
   Serial.printf("  Xp5: +1C soft chg\n");
   Serial.printf("  Xp6: +/-500 A pulse EKF\n");
