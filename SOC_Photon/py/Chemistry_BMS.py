@@ -95,7 +95,7 @@ class Chemistry(BMS):
         self.vb_down_sim = 9.5  # Shutoff point in Sim, V (9.5)
         self.vb_rising = 10.3  # Shutoff point when off, V (10.3)
         self.vb_rising_sim = 9.75  # Shutoff point in Sim when off, V (9.75)
-        self.nom_vsat = 13.85  # Saturation threshold at temperature, deg C (13.85)
+        self.nom_vsat = 13.85 - 0.05  # Saturation threshold at temperature, deg C (13.85 - 0.05 HDB_VB)
         self.r_ss = self.r_0 + self.r_ct
         self.dv_min_abs = 0.3  # Absolute value of +/- hysteresis limit, V
 
@@ -164,7 +164,7 @@ class Chemistry(BMS):
         self.vb_down_sim = 9.5  # Shutoff point in Sim, V (9.5)
         self.vb_rising = 10.3  # Shutoff point when off, V (10.3)
         self.vb_rising_sim = 9.75  # Shutoff point in Sim when off, V (9.75)
-        self.nom_vsat = 13.85  # Saturation threshold at temperature, deg C (13.85)
+        self.nom_vsat = 13.85 - 0.05  # Saturation threshold at temperature, deg C (13.85 - 0.05 HDB_VB)
         self.r_ss = self.r_0 + self.r_ct
         self.dv_min_abs = 0.06  # Absolute value of +/- hysteresis limit, V
 
