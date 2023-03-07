@@ -113,7 +113,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'triTweakDisch v20230305 CH.txt'; unit_key = 'pro0p'
 
         # data_file_old_txt = 'coldStart vA20230305 BB.txt'; unit_key = 'pro1a'; cutback_gain_sclr_in = 0.5; ds_voc_soc_in = 0.06
-        data_file_old_txt = 'coldStart v20230305 CH.txt'; unit_key = 'pro0p'; cutback_gain_sclr_in = 0.5; ds_voc_soc_in = 0.06
+        # data_file_old_txt = 'coldStart v20230305 CH.txt'; unit_key = 'pro0p'; cutback_gain_sclr_in = 0.5; ds_voc_soc_in = 0.06
 
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
         # data_file_old_txt = 'ampHiFailFf v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
@@ -137,10 +137,9 @@ if __name__ == '__main__':
         # data_file_old_txt = 'slowTweakRegression v20230305 CH.txt'; unit_key = 'pro0p'
 
         # data_file_old_txt = 'satSit vA20230305 BB.txt'; unit_key = 'pro1a'
-        # data_file_old_txt = 'satSitHys v20221028.txt'
+        data_file_old_txt = 'satSit v20230305 CH.txt'; unit_key = 'pro0p'
 
         # data_file_old_txt = 'flatSitHys vA20230305 BB.txt'; unit_key = 'pro1a'
-        # data_file_old_txt = 'satSitHys v20221028.txt'
 
         # data_file_old_txt = 'offSitHysBmsNoise vA20230305 BB.txt'; unit_key = 'pro1a'
         # data_file_old_txt = 'offSitHysBmsNoise v20221028.txt'  # ; time_end_in=50
