@@ -201,6 +201,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
         plt.plot(mo.time, mo.ib_sel_stat-2, color='black', linestyle='-', label='ib_sel_stat'+old_str+'-2')
         plt.plot(mo.time, mo.vb_sel-2, color='green', linestyle='--', label='vb_sel_stat'+old_str+'-2')
         plt.plot(mo.time, mo.tb_sel-2, color='red', linestyle='-.', label='tb_sel_stat'+old_str+'-2')
+        plt.plot(mo.time, np.array(mo.chm)-0.5, color='blue', linestyle='-', label='chm'+old_str+'-0.5')
+        plt.plot(mv.time, np.array(mv.chm)-0.5, color='red', linestyle='--', label='chm'+new_str+'-0.5')
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)

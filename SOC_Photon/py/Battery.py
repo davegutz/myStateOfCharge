@@ -514,7 +514,7 @@ class BatterySim(Battery):
     def __init__(self, q_cap_rated=Battery.UNIT_CAP_RATED*3600, t_rated=25., t_rlim=0.017, scale=1., stauct=1.,
                  temp_c=25., hys_scale=1., tweak_test=False, dv_hys=0., sres0=1., sresct=1., scale_r_ss=1.,
                  s_hys=1., dvoc=0., scale_hys_cap=1., mod_code=0, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1.,
-                 s_hys_dis=1., s_coul_eff=1.):
+                 s_hys_dis=1., s_coul_eff=1., cutback_gain_sclr=1., ds_voc_soc=0.):
         Battery.__init__(self, q_cap_rated=q_cap_rated, t_rated=t_rated, t_rlim=t_rlim, temp_c=temp_c,
                          tweak_test=tweak_test, sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss,
                          s_hys=s_hys, dvoc=dvoc, mod_code=mod_code, s_coul_eff=s_coul_eff, scale_cap=scale)
@@ -523,7 +523,8 @@ class BatterySim(Battery):
         # self.sat_ib_null = 0.1*Battery.UNIT_CAP_RATED  # Current cutback value for voc=vsat, A
         self.sat_ib_null = 0.  # Current cutback value for soc=1, A
         # self.sat_cutback_gain = 4.8  # Gain to retard ib when voc exceeds vsat, dimensionless
-        self.sat_cutback_gain = 1000.  # Gain to retard ib when soc approaches 1, dimensionless
+        self.sat_cutback_gain = 1000.*cutback_gain_sclr  # Gain to retard ib when soc approaches 1, dimensionless
+        self.ds_voc_soc = ds_voc_soc
         self.model_cutback = False  # Indicate that modeled current being limited on saturation cutback,
         # T = cutback limited
         self.model_saturated = False  # Indicator of maximal cutback, T = cutback saturated
@@ -629,11 +630,12 @@ class BatterySim(Battery):
 
         # Saturation logic, both full and empty
         self.vsat = self.chemistry.nom_vsat + (temp_c - 25.) * self.chemistry.dvoc_dt
-        self.sat_ib_max = self.sat_ib_null + (1 - self.soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
+        self.sat_ib_max = self.sat_ib_null + (1 - self.soc - self.ds_voc_soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
         if self.tweak_test or (not rp.modeling):
             self.sat_ib_max = ib_charge_fut
         self.ib_fut = min(ib_charge_fut, self.sat_ib_max)  # the feedback of self.ib
-        self.ib_charge = ib_charge_fut  # same time plane as volt calcs
+        # self.ib_charge = ib_charge_fut  # same time plane as volt calcs.  (This prevents sat logic from working)
+        self.ib_charge = self.ib_fut  # same time plane as volt calcs
         if self.mod > 0.:
             if (self.q <= 0.) & (self.ib_charge < 0.):
                 print("q", self.q, "empty")

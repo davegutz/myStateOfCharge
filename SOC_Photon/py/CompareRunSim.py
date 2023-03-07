@@ -75,6 +75,8 @@ if __name__ == '__main__':
         cc_dif_tol_in = 0.2
         verbose_in = False
         legacy_in = False
+        cutback_gain_sclr_in = 1.
+        ds_voc_soc_in = 0.
 
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
@@ -93,6 +95,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'rapidTweakRegression vA20230217.txt'; unit_key = 'pro1a'
         # data_file_old_txt = 'rapidTweakRegression vA20230219.txt'; unit_key = 'pro1a'
         # data_file_old_txt = 'rapidTweakRegression vA20230305 BB.txt'; unit_key = 'pro1a'
+        # data_file_old_txt = 'rapidTweakRegression vA20230305 CH.txt'; unit_key = 'pro1a'
         # data_file_old_txt = 'rapidTweakRegression v20230305 CH.txt'; unit_key = 'pro0p'
 
         # data_file_old_txt = 'offSitHysBms v20221220.txt'; unit_key = 'pro0p'   # ; time_end_in = 137.
@@ -109,8 +112,8 @@ if __name__ == '__main__':
         # data_file_old_txt = 'triTweakDisch vA20230305 BB.txt'; unit_key = 'pro1a'
         # data_file_old_txt = 'triTweakDisch v20230305 CH.txt'; unit_key = 'pro0p'
 
-        # data_file_old_txt = 'coldStart vA20230305 BB.txt'; unit_key = 'pro1a'
-        # data_file_old_txt = 'coldStart v20230305 CH.txt'; unit_key = 'pro0p'
+        # data_file_old_txt = 'coldStart vA20230305 BB.txt'; unit_key = 'pro1a'; cutback_gain_sclr_in = 0.5; ds_voc_soc_in = 0.06
+        data_file_old_txt = 'coldStart v20230305 CH.txt'; unit_key = 'pro0p'; cutback_gain_sclr_in = 0.5; ds_voc_soc_in = 0.06
 
         # data_file_old_txt = 'ampHiFailFf v20221028.txt'
         # data_file_old_txt = 'ampHiFailFf v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
@@ -164,12 +167,7 @@ if __name__ == '__main__':
 
         # data_file_old_txt = 'tbFailHdwe v20221028.txt'
         # data_file_old_txt = 'tbFailHdwe v20230303 CH.txt'; unit_key = 'pro0p_2023';  scale_in = 1.127; cc_dif_tol_in = 0.5
-        data_file_old_txt = 'tbFailHdwe vA20230305 BB.txt'; unit_key = 'pro1a'
-
-        # data_file_old_txt = 'EKF_Track v20221028.txt'
-        # data_file_old_txt = 'EKF_Track Dr2000 v20221028.txt'
-
-        # data_file_old_txt = 'on_off_on v20221028.txt'  # ; time_end_in=6
+        # data_file_old_txt = 'tbFailHdwe vA20230305 BB.txt'; unit_key = 'pro1a'
 
         # data_file_old_txt = 'dwell noise Ca.5 v20221028.txt'  # ; dTb = [[0., 18000.],  [0, 8.]]
         # data_file_old_txt = 'dwell Ca.5 v20221028.txt'  # ; time_end_in=0.5  # ; dTb = [[0., 18000.],  [0, 8.]]
@@ -230,7 +228,7 @@ if __name__ == '__main__':
                       dTb_in=dTb, verbose=verbose_in, use_vb_sim=use_vb_sim_in, scale_hys_cap_sim=s_hys_cap_in,
                       scale_hys_cap_mon=s_hys_cap_in, stauct_mon=stauct_in, stauct_sim=stauct_in,
                       s_coul_eff=s_coul_eff_in, s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in, s_hys_chg=s_hys_chg_in,
-                      s_hys_dis=s_hys_dis_in)
+                      s_hys_dis=s_hys_dis_in, cutback_gain_sclr=cutback_gain_sclr_in, ds_voc_soc=ds_voc_soc_in)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots

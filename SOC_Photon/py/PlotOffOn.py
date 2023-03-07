@@ -105,6 +105,7 @@ def off_on_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, 
         plt.plot(so.time, so.ib_in_s, linestyle='--', color='cyan', label='ib_in_s' + old_str)
         plt.plot(mo.time, mo.ib_charge, linestyle='-.', color='blue', label='ib_charge' + old_str)
         plt.plot(mv.time, mv.ib_charge, linestyle=':', color='orange', label='ib_charge' + new_str)
+        plt.plot(smv.time, smv.ib_charge_s, linestyle='-.', color='blue', label='ib_charge_s' + old_str)
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
