@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "pro0p_20230219";  // scale CHINS
+const String unit = "pro0p_20230305";  // scale CHINS
 #define HEADER_PHOTON
 #undef HEADER_ARGON
 
