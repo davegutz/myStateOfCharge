@@ -651,8 +651,10 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
             reset, sp.mod_ib(), temp_c_, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
 
     #endif
-    // if ( sp.debug()==-24 ) Serial.printf("Sim:  ib%7.3f soc%8.4f reset     %d tau_ct%9.5f r_ct%7.3f r_0%7.3f dv_dyn%7.3f dv_hys%7.3f voc_stat%7.3f                 voc%7.3f vb%7.3f ib_charge%7.3f ",
-    //     ib_, soc_, reset, chem_.tau_ct, chem_.r_ct, chem_.r_0, dv_dyn_, dv_hys_, voc_stat_, voc_, vb_, ib_charge_);
+    // if ( sp.debug()==-24 ) Serial.printf("Sim:  ib%7.3f soc%8.4f reset %d  ib_charge%7.3f ib_in%7.3f voltlow %d bmsoff %d bmscha %d ib_chg_fut%7.3f\n",
+    //     ib_, soc_, reset, ib_charge_, ib_in_, voltage_low_, bms_off_, bms_charging_, ib_charge_fut);
+    // if ( sp.debug()==-24 ) Serial.printf("Sim:  ib%7.3f soc%8.4f reset     %d tau_ct%9.5f r_ct%7.3f r_0%7.3f dv_dyn%7.3f dv_hys%7.3f voc_stat%7.3f                 voc%7.3f vb%7.3f ib_charge%7.3f ib_in%7.3f",
+    //     ib_, soc_, reset, chem_.tau_ct, chem_.r_ct, chem_.r_0, dv_dyn_, dv_hys_, voc_stat_, voc_, vb_, ib_charge_, ib_in_);
 
     return ( vb_ );
 }
@@ -765,7 +767,7 @@ float BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Battery
         *sp_delta_q_ = max(min(*sp_delta_q_, 0.), -q_capacity_*1.2);
     }
     // if ( sp.debug()==-24 )Serial.printf("Sim:  charge_curr%7.3f d_delta_q%10.6f delta_q%10.1f temp_lim%7.3f t_last%7.3f\n", charge_curr, d_delta_q, *sp_delta_q_, temp_lim, *sp_t_last_);
-    // q_ = q_capacity_ + *sp_delta_q_;
+    q_ = q_capacity_ + *sp_delta_q_;
 
     // Normalize
     soc_ = q_ / q_capacity_;

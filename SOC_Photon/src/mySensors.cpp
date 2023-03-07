@@ -927,7 +927,7 @@ void Sensors::shunt_select_initial()
     // Otherwise it generates signals for feedback into hdwe
     else
         Ib_model_in = mod_add;
-    if ( sp.debug()==-24 ) Serial.printf("Ib_bias_all%7.3f mod_add%7.3f Ib_model_in%7.3f\n", sp.Ib_bias_all(), mod_add, Ib_model_in);
+    // if ( sp.debug()==-24 ) Serial.printf("Ib_bias_all%7.3f mod_add%7.3f Ib_model_in%7.3f\n", sp.Ib_bias_all(), mod_add, Ib_model_in);
 }
 
 // Load and filter Tb
