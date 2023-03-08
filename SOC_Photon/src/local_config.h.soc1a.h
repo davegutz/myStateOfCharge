@@ -34,7 +34,7 @@ const String unit = "soc1a_20230305";  // scale CHINS
 #define MON_CHEM              0       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
 #define SIM_CHEM              0       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
 #define NOM_UNIT_CAP          108.4   // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
-#define HYS_SCALE             1.0      // Scalar on hysteresis (1.0)
+#define HYS_SCALE             1.0     // Scalar on hysteresis (1.0)
 #define NS                    1.0     // Number of series batteries in bank.  Fractions scale and remember NOM_UNIT_CAP (* 'BS')
 #define NP                    1.0     // Number of parallel batteries in bank.  Fractions scale and remember NOM_UNIT_CAP (* 'BP')
 
