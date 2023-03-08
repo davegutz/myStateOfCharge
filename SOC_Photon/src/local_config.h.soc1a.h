@@ -39,7 +39,7 @@ const String unit = "soc1a_20230305";  // scale CHINS
 #define NP                    1.0     // Number of parallel batteries in bank.  Fractions scale and remember NOM_UNIT_CAP (* 'BP')
 
 // Faults
-#define FAKE_FAULTS           false   // What to do with faults, T=detect and display them but don't change signals
+#define FAKE_FAULTS           true   // What to do with faults, T=detect and display them but don't change signals
 // #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
 #define CC_DIFF_SOC_DIS_THRESH  0.2   // Signal selection threshold for Coulomb counter EKF disagree test (0.2, 0.1 too small on truck)
 
