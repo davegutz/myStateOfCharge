@@ -84,7 +84,6 @@ protected:
   float *sp_t_last_;  // Last battery temperature for rate limit memory, deg C
   float t_rlim_;      // Tb rate limit, deg C / s
   Chemistry chem_;    // Chemistry
-  BMS bms_;           // Battery Management System
 };
 
 #endif
