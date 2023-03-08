@@ -86,11 +86,11 @@ if __name__ == '__main__':
         # data_file_old_txt = 'ampHiFail v20230305 CH.txt'; unit_key = 'pro0p'; cc_dif_tol_in = 0.5
         # data_file_old_txt = 'ampHiFail vA20230305 BB.txt'; unit_key = 'pro1a'
 
-        data_file_old_txt = 'rapidTweakRegression vA20230305 BB.txt'; unit_key = 'pro1a'
+        # data_file_old_txt = 'rapidTweakRegression vA20230305 BB.txt'; unit_key = 'pro1a'
         # data_file_old_txt = 'rapidTweakRegression vA20230305 CH.txt'; unit_key = 'pro1a'
         # data_file_old_txt = 'rapidTweakRegression v20230305 CH.txt'; unit_key = 'pro0p'
 
-        # data_file_old_txt = 'offSitHysBms vA20230305 BB.txt'; unit_key = 'pro1a'
+        data_file_old_txt = 'offSitHysBms vA20230305 BB.txt'; unit_key = 'pro1a'
         # data_file_old_txt = 'offSitHysBms v20230305 CH.txt'; unit_key = 'pro0p'
 
         # data_file_old_txt = 'Xm0VbFail.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
