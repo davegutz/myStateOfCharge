@@ -116,7 +116,7 @@ public:
     boolean mod_vb() { return ( 1<<1 & modeling_ || mod_vb_dscn() ); }  // Using Sim as source of vb
     boolean mod_vb_dscn() { return ( 1<<5 & modeling_ ); }              // Nothing connected to vb on A1
     // get
-    #if PLATFORM_ID == PLATFORM_ARGON
+    #ifdef CONFIG_ARGON
         void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp_ = value; }
         void get_cutback_gain_sclr() { float value; rP_->get(cutback_gain_sclr_eeram_.a16, value); cutback_gain_sclr_ = value; }
         void get_debug() { int value; rP_->get(debug_eeram_.a16, value); debug_ = value; }
@@ -168,7 +168,7 @@ public:
     void print_fault_header();
     void print_history_array();
     // put
-    #if (PLATFORM_ID==6)  // Photon
+    #ifdef CONFIG_PHOTON
         void put_all_dynamic();
         void put_amp(const float input) { amp_ = input; }
         void put_cutback_gain_sclr(const float input) { cutback_gain_sclr_ = input; }
@@ -211,7 +211,7 @@ public:
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_ = input; }
         void put_Vb_scale(const float input) { Vb_scale_ = input; }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
-    #elif PLATFORM_ID == PLATFORM_ARGON
+    #else
         void put_all_dynamic();
         void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp_ = input; }
         void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr_ = input; }
@@ -294,7 +294,7 @@ protected:
     float t_last_model_;    // Battery temperature past value for rate limit memory, deg C
 
     uint8_t modeling_;       // Driving saturation calculation with model.  Bits specify which signals use model
-    #if PLATFORM_ID == PLATFORM_ARGON
+    #ifdef CONFIG_ARGON
         address16b amp_eeram_;
         address16b cutback_gain_sclr_eeram_;
         address16b debug_eeram_;

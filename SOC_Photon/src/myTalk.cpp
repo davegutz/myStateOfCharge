@@ -34,8 +34,6 @@ extern CommandPars cp;            // Various parameters shared at system level
 extern SavedPars sp;              // Various parameters to be static at system level and saved through power cycle
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 
-#define PLATFORM_PHOTON 6
-
 // Process asap commands
 void asap()
 {
@@ -1308,7 +1306,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   // Serial.printf("   v7: EKF solver init\n");
   // Serial.printf("   v8: ChargeTransfer SS init\n");
   Serial.printf("  v12: EKF\n");
-  #if PLATFORM_ID == PLATFORM_ARGON
+  #ifdef CONFIG_ARGON
     Serial.printf(" v-13: ib_dscn\n");
   #endif
   Serial.printf("  v14: vshunt and Ib raw\n");
@@ -1317,7 +1315,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   // Serial.printf("  v34: EKF detail\n");
   // Serial.printf("  v35: ChargeTransfer balance\n");
   // Serial.printf("  v37: EKF short\n");
-  #if PLATFORM_ID == PLATFORM_ARGON
+  #ifdef CONFIG_ARGON
     Serial.printf("  v75: voc_low check mod\n");
     Serial.printf("  v76: vb model\n");
     Serial.printf("  v78: Batt model sat\n");

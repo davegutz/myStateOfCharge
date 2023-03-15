@@ -27,6 +27,7 @@ from MonSim import replicate
 from Battery import overall_batt, cp_eframe_mult
 from Util import cat
 from CompareHist import fault_thr_bb
+import os
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 BATT_RATED_TEMP = 25.  # Temperature at UNIT_CAP_RATED, deg C
@@ -932,6 +933,8 @@ if __name__ == '__main__':
         path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
+        if not os.path.isdir(path_to_temp):
+            os.mkdir(path_to_temp)
         cols_h = ('time', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc_dyn', 'voc_stat', 'tweak_sclr_amp',
                   'tweak_sclr_noa', 'falw')
         cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',

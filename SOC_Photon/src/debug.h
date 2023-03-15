@@ -35,7 +35,7 @@ void debug_4(BatteryMonitor *Mon, Sensors *Sen);
 void debug_5(BatteryMonitor *Mon, Sensors *Sen);
 void debug_m7(BatteryMonitor *Mon, Sensors *Sen);
 void debug_12(BatteryMonitor *Mon, Sensors *Sen);
-#if PLATFORM_ID == PLATFORM_ARGON
+#ifdef CONFIG_ARGON
     void debug_m13(Sensors *Sen);
 #endif
 void debug_q(BatteryMonitor *Mon, Sensors *Sen);

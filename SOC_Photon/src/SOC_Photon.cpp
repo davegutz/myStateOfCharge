@@ -3,7 +3,7 @@
 /******************************************************/
 
 #include "Particle.h"
-#line 1 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 1 "/home/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
 /*
  * Project SOC_Photon
   * Description:
@@ -59,22 +59,22 @@
 // This works when I'm using two platforms:   PHOTON = 6 and ARGON = 12
 void setup();
 void loop();
-#line 54 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 54 "/home/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
 #ifndef PLATFORM_ID
-  #define PLATFORM_ID 12
+  #define PLATFORM_ID 13
 #endif
-#define PLATFORM_ARGON 12
-#define PLATFORM_PHOTON 6
 
 #include "constants.h"
 // Prevent mixing up local_config files (still could sneak soc0p through as pro0p)
-#ifdef HEADER_PHOTON
-  #if (PLATFORM_ID != PLATFORM_PHOTON)
+#ifdef CONFIG_PHOTON
+  #undef ARDUINO
+  #if (PLATFORM_ID > 9)
     #error "copy local_config.xxxx.h to local_config.h"
   #endif
 #endif
-#ifdef HEADER_ARGON
-  #if (PLATFORM_ID != PLATFORM_ARGON)
+#ifdef CONFIG_ARGON
+  #undef ARDUINO
+  #if (PLATFORM_ID < 9)
     #error
   #endif
 #endif
@@ -90,7 +90,7 @@ void loop();
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
 
-#if ( PLATFORM_ID == PLATFORM_ARGON )
+#ifdef CONFIG_ARGON
   #include "hardware/SerialRAM.h"
   SerialRAM ram;
   #ifdef USE_BLE
@@ -105,7 +105,7 @@ extern CommandPars cp;            // Various parameters to be common at system l
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
 
-#if ( PLATFORM_ID == PLATFORM_ARGON )
+#ifdef CONFIG_ARGON
   SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
 #else
   retained Flt_st saved_hist[NHIS];    // For displaying faults
@@ -123,12 +123,14 @@ String hm_string = "00:00";     // time, hh:mm
 Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_SSD1306 *display;      // Main OLED display
 
-  #if ( PLATFORM_ID == PLATFORM_ARGON ) & defined( USE_BLE )
+#ifdef CONFIG_ARGON
+  #ifdef USE_BLE
   // First parameter is the transmit buffer size, second parameter is the receive buffer size
   BleSerialPeripheralStatic<32, 256> bleSerial;
   const unsigned long TRANSMIT_PERIOD_MS = 2000;
   unsigned long lastTransmit = 0;
   int counter = 0;
+  #endif
 #endif
 
 // Setup
@@ -150,7 +152,7 @@ void setup()
   Serial1.begin(115200);
   Serial1.flush();
   // EERAM
-  #if ( PLATFORM_ID == PLATFORM_ARGON )
+  #ifdef CONFIG_ARGON
     ram.begin(0, 0);
     ram.setAutoStore(true);
     delay(1000);
@@ -305,7 +307,8 @@ void loop()
   summarizing = Summarize->update(millis(), false);
   summarizing = summarizing || boot_summ;
 
-  #if ( PLATFORM_ID == PLATFORM_ARGON ) & defined( USE_BLE )
+  #ifdef CONFIG_ARGON
+    #ifdef USE_BLE
     // This must be called from loop() on every call to loop.
     bleSerial.loop();
     // Print out anything we receive
@@ -320,6 +323,7 @@ void loop()
         // Log.info("counter=%d", counter);
         // Serial.printf("passing argon bleSerial\n");
     }
+    #endif
   #endif
 
   // Sample temperature
@@ -407,7 +411,7 @@ void loop()
   {
     oled_display(display, Sen, Mon);
 
-    #if ( PLATFORM_ID == PLATFORM_ARGON )
+    #ifdef CONFIG_ARGON
       // Save EERAM dynamic parameters.  Saves critical few state parameters
       sp.put_all_dynamic();
     #endif

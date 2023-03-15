@@ -380,6 +380,9 @@ if __name__ == '__main__':
         pathToSavePdfTo = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
+        import os
+        if not os.path.isdir(path_to_temp):
+            os.mkdir(path_to_temp)
 
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,

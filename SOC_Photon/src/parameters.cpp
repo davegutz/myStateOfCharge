@@ -33,7 +33,7 @@ SavedPars::SavedPars()
   nflt_ = int( NFLT ); 
   nhis_ = int( NHIS ); 
 }
-#if PLATFORM_ID == 6
+#ifdef CONFIG_PHOTON
     SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
     {
         nhis_ = nhis;
@@ -45,7 +45,7 @@ SavedPars::SavedPars()
 SavedPars::SavedPars(SerialRAM *ram)
 {
     next_ = 0x000;
-    #if PLATFORM_ID == PLATFORM_ARGON
+    #ifdef CONFIG_ARGON
         rP_ = ram;
         // Memory map
         amp_eeram_.a16 = next_; next_ += sizeof(amp_);
@@ -145,7 +145,7 @@ boolean SavedPars::is_corrupt()
 }
 
 // Assign all save EERAM to RAM
-#if PLATFORM_ID == PLATFORM_ARGON
+#ifdef CONFIG_ARGON
     void SavedPars::load_all()
     {
         get_amp();
@@ -230,7 +230,7 @@ int SavedPars::num_diffs()
 // Print memory map
 void SavedPars::mem_print()
 {
-    #if PLATFORM_ID == PLATFORM_ARGON
+    #ifdef CONFIG_ARGON
         Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
         Serial.printf("Temp mem map print\n");
         for ( uint16_t i=0x0000; i<MAX_EERAM; i++ ) Serial.printf("0x%X ", rP_->read(i));
@@ -292,7 +292,7 @@ void SavedPars::pretty_print(const boolean all)
     //     print_fault_array();
     //     print_fault_header();
     // }
-    #if PLATFORM_ID == PLATFORM_ARGON
+    #ifdef CONFIG_ARGON
         Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
         // Serial.printf("Temp mem map print\n");
         // mem_print();

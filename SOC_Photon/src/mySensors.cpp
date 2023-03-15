@@ -33,8 +33,6 @@ extern CommandPars cp;  // Various parameters shared at system level
 extern PublishPars pp;  // For publishing
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
-#define PLATFORM_PHOTON 6
-
 // class TempSensor
 // constructors
 TempSensor::TempSensor(const uint16_t pin, const bool parasitic, const uint16_t conversion_delay)
@@ -266,7 +264,7 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
   ib_quiet_thr_ = QUIET_A*ib_quiet_sclr_;
   faultAssign( !sp.mod_ib() && abs(ib_quiet_)<=ib_quiet_thr_ && !reset_loc, IB_DSCN_FLT );   // initializes false
   failAssign( QuietPer->calculate(dscn_flt(), QUIET_S, QUIET_R, Sen->T, reset_loc), IB_DSCN_FA);
-  #if PLATFORM_ID == PLATFORM_ARGON
+  #ifdef CONFIG_ARGON
     if ( sp.debug()==-13 ) debug_m13(Sen);
   #endif
 }

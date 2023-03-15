@@ -32,8 +32,6 @@ extern CommandPars cp;  // Various parameters shared at system level
 extern PublishPars pp;  // For publishing
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
-#define PLATFORM_PHOTON 6
-
 // Print consolidation
 void print_all_header(void)
 {

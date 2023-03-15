@@ -14,14 +14,6 @@
 #ifndef _SerialRAM_h
 #define _SerialRAM_h
 
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include "arduino.h"
-#else
-	#if PLATFORM_ID == PLATFORM_ARGON
-		// #include "WProgram.h"
-	#endif
-#endif
-
 const uint16_t MAX_EERAM = 0x07FF;
 
 typedef union {

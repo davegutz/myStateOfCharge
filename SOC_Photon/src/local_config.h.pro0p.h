@@ -2,8 +2,8 @@
 #define local_config_h
 
 const String unit = "pro0p_20230305";  // scale CHINS
-#define HEADER_PHOTON
-#undef HEADER_ARGON
+#define CONFIG_PHOTON
+#undef CONFIG_ARGON
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

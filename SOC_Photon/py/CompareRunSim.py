@@ -17,7 +17,7 @@
 a monitor object (MON) and a simulation object (SIM).   The monitor is
 the EKF and Coulomb Counter.   The SIM is a battery model, that also has a
 Coulomb Counter built in."""
-
+import os
 
 if __name__ == '__main__':
     import sys
@@ -40,6 +40,8 @@ if __name__ == '__main__':
         pathToSavePdfTo = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
+        if not os.path.isdir(path_to_temp):
+            os.mkdir(path_to_temp)
 
         # Transient  inputs
         t_ib_fail = None

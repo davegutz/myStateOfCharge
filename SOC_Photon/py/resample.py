@@ -112,6 +112,9 @@ if __name__ == '__main__':
         data_file = 'data20220926.txt'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
+        import os
+        if not os.path.isdir(path_to_temp):
+            os.mkdir(path_to_temp)
         cols = ('time', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc_dyn', 'voc_stat', 'tweak_sclr_amp',
                 'tweak_sclr_noa', 'falw')
 

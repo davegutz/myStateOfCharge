@@ -921,6 +921,9 @@ if __name__ == '__main__':
         path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
+        import os
+        if not os.path.isdir(path_to_temp):
+            os.mkdir(path_to_temp)
         cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
                   'e_w_f', 'fltw', 'falw')
 

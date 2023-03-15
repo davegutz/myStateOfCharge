@@ -38,7 +38,7 @@ void debug_12(BatteryMonitor *Mon, Sensors *Sen)
   Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc());
 }
 
-#if PLATFORM_ID == PLATFORM_ARGON
+#ifdef CONFIG_ARGON
   // sp.debug()==-13 ib_dscn for Arduino.
   // Start Arduino serial plotter.  Toggle v like 'v0;v-13;' to produce legend
   void debug_m13(Sensors *Sen)

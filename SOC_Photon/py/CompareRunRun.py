@@ -141,6 +141,9 @@ if __name__ == '__main__':
         pathToSavePdfTo = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
+        import os
+        if not os.path.isdir(path_to_temp):
+            os.mkdir(path_to_temp)
 
         # Regression
         # keys = [('ampHiFail vA20221220.txt', 'soc1a_2022', 'legacy'), ('ampHiFail v20230128.txt', 'pro0p', 'legacy')]
