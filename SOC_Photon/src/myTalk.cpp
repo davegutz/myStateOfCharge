@@ -834,8 +834,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
           case ( 'U' ):  // U<>:  Unix time since epoch
             Serial.printf("Time.now() %d --> %s to:::> ", (int)Time.now(), Time.timeStr().c_str());
+            Serial1.printf("Time.now() %d --> %s to:::> ", (int)Time.now(), Time.timeStr().c_str());
             sp.put_time_now((time_t)cp.input_str.substring(1).toInt());
             Serial.printf("%d --> %s\n", (int)Time.now(), Time.timeStr().c_str());
+            Serial1.printf("%d --> %s\n", (int)Time.now(), Time.timeStr().c_str());
             break;
 
           case ( 'v' ):  // v<>:  verbose level
@@ -1293,6 +1295,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("\ns  curr select mode (-1=noa, 0=auto, 1=amp) = "); Serial.println(sp.ib_select());
 
   Serial.printf(" \n*U= "); Serial.printf("%ld", Time.now()); Serial.printf(": Unix time [auto when wifi]\n"); 
+  Serial1.printf(" \n*U= "); Serial1.printf("%ld", Time.now()); Serial1.printf(": Unix time [auto when wifi]\n"); 
 
   Serial.printf("\nv= "); Serial.print(sp.debug()); Serial.println(": verbosity, -128 - +128. [4]");
   Serial.printf("  -<>: Negative - Arduino plot compatible\n");

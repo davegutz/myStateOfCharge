@@ -340,7 +340,7 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
   // Initialize to ekf when not saturated
   Mon->count_coulombs(Sen->T, reset_temp, Sen->Tb_filt, Mon->ib_charge(), Sen->saturated, Mon->delta_q_ekf());
 
-  // Charge time for display
+  // Charge charge time for display
   Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->Ib, Mon->soc());
 }
 
@@ -673,20 +673,18 @@ void rapid_print(Sensors *Sen, BatteryMonitor *Mon)
 // Time synchro for web information
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip)
 {
-  if (now - *last_sync > ONE_DAY_MILLIS) 
+  *last_sync = millis();
+
+  // Request time synchronization from the Particle Cloud
+  if ( Particle.connected() ) Particle.syncTime();
+
+  // Refresh millis() at turn of Time.now
+  int count = 0;
+  long time_begin = Time.now();  // Seconds since start of epoch
+  while ( Time.now()==time_begin && ++count<1100 )  // Time.now() truncates to seconds
   {
-    *last_sync = millis();
-
-    // Request time synchronization from the Particle Cloud
-    if ( Particle.connected() ) Particle.syncTime();
-
-    // Refresh millis() at turn of Time.now
-    long time_begin = Time.now();  // Seconds since start of epoch
-    while ( Time.now()==time_begin )
-    {
-      delay(1);
-      *millis_flip = millis()%1000;
-    }
+    delay(1);
+    *millis_flip = millis()%1000;
   }
 }
 

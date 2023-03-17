@@ -3,7 +3,7 @@
 /******************************************************/
 
 #include "Particle.h"
-#line 1 "/home/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 1 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
 /*
  * Project SOC_Photon
   * Description:
@@ -59,7 +59,7 @@
 // This works when I'm using two platforms:   PHOTON = 6 and ARGON = 12
 void setup();
 void loop();
-#line 54 "/home/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 54 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
 #ifndef PLATFORM_ID
   #define PLATFORM_ID 13
 #endif
@@ -290,7 +290,7 @@ void loop()
   // Synchronize
   now = millis();
   time_now = Time.now();
-  sync_time(now, &last_sync, &millis_flip);      // Refresh time synchronization
+  if ( now - last_sync > ONE_DAY_MILLIS || reset )  sync_time(now, &last_sync, &millis_flip); 
   char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
   Sen->control_time = decimalTime(&current_time, tempStr, Sen->now, millis_flip);
   hm_string = String(tempStr);

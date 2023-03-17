@@ -281,7 +281,7 @@ void loop()
   // Synchronize
   now = millis();
   time_now = Time.now();
-  sync_time(now, &last_sync, &millis_flip);      // Refresh time synchronization
+  if ( now - last_sync > ONE_DAY_MILLIS || reset )  sync_time(now, &last_sync, &millis_flip); 
   char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
   Sen->control_time = decimalTime(&current_time, tempStr, Sen->now, millis_flip);
   hm_string = String(tempStr);
