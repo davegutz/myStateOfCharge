@@ -1,7 +1,8 @@
 [Desktop Entry]
 Name=puTTY
 Comment=UART monitor
-Exec=sudo nice --20 putty -load "def"
+;Exec=sudo nice --20 putty -load "def"
+Exec=sudo puTTY_Forever.sh
 Icon=/opt/CoolTermLinux/appicon_128.png
 Terminal=true
 Type=Application
