@@ -1,0 +1,3 @@
+:loop
+putty
+goto loop
