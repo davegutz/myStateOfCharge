@@ -75,7 +75,7 @@ public:
   // functions
   boolean bare_detected() { return ( bare_detected_ ); };
   void dscn_cmd(const boolean cmd) { dscn_cmd_ = cmd; };
-  unsigned long int dt(void) { return sample_time_ - sample_time_z_; };
+  unsigned long int dt() { return sample_time_ - sample_time_z_; };
   void convert(const boolean disconnect);
   float Ishunt_cal() { return Ishunt_cal_; };
   void pretty_print();

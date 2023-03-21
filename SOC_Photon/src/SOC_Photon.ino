@@ -245,10 +245,6 @@ void loop()
   // Synchronization
   boolean read;
   static Sync *ReadSensors = new Sync(READ_DELAY);
-  #ifndef USE_ADS
-    boolean samp;
-    static Sync *SampIb = new Sync(SAMP_DELAY);
-  #endif
   boolean read_temp;
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
   boolean display_and_remember;
@@ -288,9 +284,6 @@ void loop()
   read_temp = ReadTemp->update(millis(), reset);
   read = ReadSensors->update(millis(), reset);
   elapsed = ReadSensors->now() - start;
-  #ifndef USE_ADS
-    samp = SampIb->update(millis(), reset);
-  #endif
   control = ControlSync->update(millis(), reset);
   display_and_remember = DisplayUserSync->update(millis(), reset);
   boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !sp.modeling();
@@ -327,7 +320,7 @@ void loop()
 
   // Sample Ib
   #ifndef USE_ADS
-    if ( samp )
+    if ( read )
     {
       static unsigned int t_us_last = micros();
       unsigned int t_us_now = micros();
