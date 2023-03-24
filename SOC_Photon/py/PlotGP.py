@@ -23,18 +23,15 @@ Dependencies:
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from datetime import datetime
-from MonSim import replicate, save_clean_file, save_clean_file_sim
-from Battery import overall_batt
+from myFilters import inline_exp_lag
 # below suppresses runtime error display******************
 # import os
 # os.environ["KIVY_NO_CONSOLELOG"] = "1"
 # from kivy.utils import platform  # failed experiment to run BLE data plotting realtime on android
 # if platform != 'linux':
 #     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
-from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 plt.rcParams.update({'figure.max_open_warning': 0})
-from myFilters import inline_exp_lag
+
 
 def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fig=None, plot_init_in=False,
             old_str='_old', new_str='_new'):
