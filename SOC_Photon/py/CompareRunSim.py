@@ -33,13 +33,16 @@ if __name__ == '__main__':
     from PlotEKF import ekf_plot
     from PlotGP import tune_r, gp_plot
     from PlotOffOn import off_on_plot
+    import easygui
+    import os
+
 
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         date_ = datetime.now().strftime("%y%m%d")
-        pathToSavePdfTo = '../dataReduction/figures'
-        path_to_data = '../dataReduction'
-        path_to_temp = '../dataReduction/temp'
+        pathToSavePdfTo = './figures'
+        path_to_data = './'
+        path_to_temp = './temp'
         if not os.path.isdir(path_to_temp):
             os.mkdir(path_to_temp)
 
@@ -79,6 +82,7 @@ if __name__ == '__main__':
         legacy_in = False
         cutback_gain_sclr_in = 1.
         ds_voc_soc_in = 0.
+        data_file_old_txt = None
 
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
@@ -157,7 +161,7 @@ if __name__ == '__main__':
         # data_file_old_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in = 1.127; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # 0.8 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
         # data_file_old_txt = 'steps v20230128 20230214.txt'; unit_key = 'soc0p';  scale_in = 1.127; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.4 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
         # data_file_old_txt = 'steps v20230128 20230218.txt'; unit_key = 'soc0p';  scale_in = 1.127; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.1 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
-        data_file_old_txt = 'steps vA20230305 20230321 BB.txt'; unit_key = 'soc1a'  # ;
+        # data_file_old_txt = 'steps vA20230305 20230321 BB.txt'; unit_key = 'soc1a'  # ;
 
         # data_file_old_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; s_hys_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
         # data_file_old_txt = 'real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; s_hys_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
@@ -173,10 +177,18 @@ if __name__ == '__main__':
         # unit_key_sim = "unit_sim"
         # temp_flt_file = 'flt_compareRunSim.txt'
 
+        # detect running interactively
+        # this is written to run in pwd of call
+        if data_file_old_txt is None:
+            path_to_data = easygui.fileopenbox(msg="choose your data file to plot")
+            data_file = easygui.fileopenbox(msg="pick new file name, return to keep", title="get new file name")
+            if data_file is None:
+                data_file = path_to_data
+            unit_key = easygui.enterbox(msg="enter soc0p, soc1a, soc0a, or soc1a", title="get unit_key", default="soc1a")
+
         # # Load mon v4 (old)
         mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
-            load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zero_zero_in, time_end_in,
-                      legacy=legacy_in)
+            load_data(data_file, skip, unit_key, zero_zero_in, time_end_in, legacy=legacy_in)
 
         # How to initialize
         if mon_old.time[0] == 0.:  # no initialization flat detected at beginning of recording

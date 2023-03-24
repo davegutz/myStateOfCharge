@@ -334,13 +334,16 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
     return n_fig, fig_files
 
 
-def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, path_to_data='.', path_to_temp='.',
-                     comment_str='#'):
-    data_file = path_to_data+'/'+txt_file
-    csv_file = path_to_temp+'/'+txt_file.replace('.txt', type_ + '.csv', 1)
+def write_clean_file(path_to_data, type_, title_key, unit_key, skip=1, comment_str='#'):
+    import os
+    (path, basename) = os.path.split(path_to_data)
+    path_to_temp = path + '/temp'
+    if not os.path.isdir(path_to_temp):
+        os.mkdir(path_to_temp)
+    csv_file = path_to_temp+'/'+basename.replace('.txt', type_ + '.csv', 1)
     # Header
     have_header_str = None
-    with open(data_file, "r", encoding='cp437') as input_file:
+    with open(path_to_data, "r", encoding='cp437') as input_file:
         with open(csv_file, "w") as output:
             try:
                 for line in input_file:
@@ -356,7 +359,7 @@ def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, path_to_data=
     num_skips = 0
     length = 0
     unit_key_found = False
-    with open(data_file, "r", encoding='cp437') as input_file:  # reads all characters even bad ones
+    with open(path_to_data, "r", encoding='cp437') as input_file:  # reads all characters even bad ones
         with open(csv_file, "a") as output:
             for line in input_file:
                 if line.__contains__(unit_key):
@@ -374,7 +377,7 @@ def write_clean_file(txt_file, type_, title_key, unit_key, skip=1, path_to_data=
         csv_file = None
         print("I(write_clean_file): no data to write")
         if not unit_key_found:
-            print("W(write_clean_file):  unit_key not found in ", txt_file, ".  Looking with ", unit_key)
+            print("W(write_clean_file):  unit_key not found in ", basename, ".  Looking with ", unit_key)
     else:
         print("Wrote(write_clean_file):", csv_file, num_lines, "lines", num_skips, "skips", length, "fields")
     return csv_file

@@ -26,8 +26,7 @@ from Battery import Battery, BatteryMonitor
 
 
 # Load from files
-def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zero_zero_in, time_end_in,
-              rated_batt_cap=Battery.UNIT_CAP_RATED, legacy=False):
+def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_batt_cap=Battery.UNIT_CAP_RATED, legacy=False):
     title_key = "unit,"  # Find one instance of title
     title_key_sel = "unit_s,"  # Find one instance of title
     unit_key_sel = "unit_sel"
@@ -36,8 +35,7 @@ def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zer
     title_key_sim = "unit_m,"  # Find one instance of title
     unit_key_sim = "unit_sim"
     temp_flt_file = 'flt_compareRunSim.txt'
-    data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
-                                       skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp)
+    data_file_clean = write_clean_file(path_to_data, type_='_mon', title_key=title_key, unit_key=unit_key, skip=skip)
     if not legacy:
         cols = ('cTime', 'dt', 'chm', 'qcrs', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib', 'ib_charge', 'ioc', 'voc_soc',
                 'vsat', 'dv_dyn', 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
@@ -48,9 +46,8 @@ def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zer
                                 encoding=None).view(np.recarray)
 
     # Load sel (old)
-    sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
-                                      unit_key=unit_key_sel, skip=skip, path_to_data=path_to_data,
-                                      path_to_temp=path_to_temp)
+    sel_file_clean = write_clean_file(path_to_data, type_='_sel', title_key=title_key_sel,
+                                      unit_key=unit_key_sel, skip=skip)
     cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
                 'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_diff', 'ib_diff_f',
                 'voc_soc', 'e_w', 'e_w_f',
@@ -66,9 +63,9 @@ def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zer
         sel_raw = None
 
     # Load ekf (old)
-    ekf_file_clean = write_clean_file(data_file_old_txt, type_='_ekf', title_key=title_key_ekf,
-                                      unit_key=unit_key_ekf, skip=skip, path_to_data=path_to_data,
-                                      path_to_temp=path_to_temp)
+    ekf_file_clean = write_clean_file(path_to_data, type_='_ekf', title_key=title_key_ekf,
+                                      unit_key=unit_key_ekf, skip=skip)
+
     cols_ekf = ('c_time', 'Fx_', 'Bu_', 'Q_', 'R_', 'P_', 'S_', 'K_', 'u_', 'x_', 'y_', 'z_', 'x_prior_',
                 'P_prior_', 'x_post_', 'P_post_', 'hx_', 'H_')
     ekf_raw = None
@@ -81,9 +78,8 @@ def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zer
     batt = BatteryMonitor(mon.chm[0])
 
     # Load sim _s v24 portion of real-time run (old)
-    data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
-                                           unit_key=unit_key_sim, skip=skip, path_to_data=path_to_data,
-                                           path_to_temp=path_to_temp)
+    data_file_sim_clean = write_clean_file(path_to_data, type_='_sim', title_key=title_key_sim,
+                                           unit_key=unit_key_sim, skip=skip)
     if not legacy:
         cols_sim = ('c_time', 'chm_s', 'qcrs_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
                     'ib_in_s', 'ib_charge_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
@@ -98,9 +94,8 @@ def load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key, zer
         sim = None
 
     # Load fault
-    temp_flt_file_clean = write_clean_file(data_file_old_txt, type_='_flt', title_key='fltb', unit_key='unit_f',
-                                           skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp,
-                                           comment_str='---')
+    temp_flt_file_clean = write_clean_file(path_to_data, type_='_flt', title_key='fltb',
+                                           unit_key='unit_f', skip=skip, comment_str='---')
     cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
               'e_w_f', 'fltw', 'falw')
     if temp_flt_file_clean:
