@@ -908,12 +908,12 @@ if __name__ == '__main__':
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
         # input_files = ['CH 20230128.txt']; chm_in = 1
-        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; rated_batt_cap_in = 100.; scale_in = 1.127; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 4  # 0.9 - 1.0 Tune 3
-        input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt', 'serial_20230212_202717.txt',
-                       'serial_20230215_064843.txt', 'serial_20230215_165025.txt', 'serial_20230216_145024.txt', 'serial_20230217_072709.txt',
-                       'serial_20230217_185204.txt', 'serial_20230218_050029.txt', 'serial_20230218_134250.txt', 'serial_20230219_164928.txt',
-                       'serial_20230220_134304.txt', 'serial_20230223_055858.txt', 'serial_20230224_171855.txt', 'serial_20230225_180933.txt',
-                       'serial_20230227_130855.txt']; chm_in = 1;  rated_batt_cap_in = 100.; scale_in = 1.127; cc_dif_tol_in = 0.5
+        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; rated_batt_cap_in = 100.; scale_in = 1.127; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 4  # 0.9 - 1.0 Tune 3
+        # input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt', 'serial_20230212_202717.txt',
+        #                'serial_20230215_064843.txt', 'serial_20230215_165025.txt', 'serial_20230216_145024.txt', 'serial_20230217_072709.txt',
+        #                'serial_20230217_185204.txt', 'serial_20230218_050029.txt', 'serial_20230218_134250.txt', 'serial_20230219_164928.txt',
+        #                'serial_20230220_134304.txt', 'serial_20230223_055858.txt', 'serial_20230224_171855.txt', 'serial_20230225_180933.txt',
+        #                'serial_20230227_130855.txt']; chm_in = 1;  rated_batt_cap_in = 100.; scale_in = 1.127; cc_dif_tol_in = 0.5
         # temp_hist_file = 'hist20221028.txt'
         # temp_flt_file = 'flt20221028.txt'
         temp_hist_file = 'hist_CompareFault.txt'
@@ -934,9 +934,9 @@ if __name__ == '__main__':
         cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
 
         # Load history
+        temp_hist_file = os.path.join(path_to_temp, temp_hist_file)
         temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
-                                                skip=skip, path_to_data=path_to_temp, path_to_temp=path_to_temp,
-                                                comment_str='---')
+                                                skip=skip, comment_str='---')
         if temp_hist_file_clean:
             h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
                                   encoding=None).view(np.recarray)
@@ -947,8 +947,7 @@ if __name__ == '__main__':
 
         # Load fault
         temp_flt_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
-                                               skip=skip, path_to_data=path_to_temp, path_to_temp=path_to_temp,
-                                               comment_str='---')
+                                               skip=skip, comment_str='---')
         if temp_flt_file_clean:
             f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
                                   encoding=None).view(np.recarray)

@@ -167,11 +167,13 @@ if __name__ == '__main__':
             legacy_in_new = True
 
         # Load data
+        data_file = os.path.join(os.getcwd(), data_file_old_txt)
         mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
-            load_data(data_file_old_txt, skip, path_to_data, path_to_temp, unit_key_old, zero_zero_in, time_end_in,
+            load_data(data_file, skip, unit_key_old, zero_zero_in, time_end_in,
                       rated_batt_cap=rated_batt_cap_in, legacy=legacy_in_old)
+        data_file_new = os.path.join(os.getcwd(), data_file_new_txt)
         mon_new, sim_new, f_new, dummy1, dummy2 = \
-            load_data(data_file_new_txt, skip, path_to_data, path_to_temp, unit_key_new, zero_zero_in, time_end_in,
+            load_data(data_file_new, skip, unit_key_new, zero_zero_in, time_end_in,
                       rated_batt_cap=rated_batt_cap_in, legacy=legacy_in_new)
 
         # Plots
