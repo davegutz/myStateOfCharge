@@ -181,9 +181,11 @@ if __name__ == '__main__':
         # this is written to run in pwd of call
         if data_file_txt is None:
             path_to_data = easygui.fileopenbox(msg="choose your data file to plot")
-            data_file = easygui.fileopenbox(msg="pick new file name, return to keep", title="get new file name")
+            data_file = easygui.filesavebox(msg="pick new file name, return to keep", title="get new file name")
             if data_file is None:
                 data_file = path_to_data
+            else:
+                os.rename(path_to_data, data_file)
             unit_key = easygui.enterbox(msg="enter soc0p, soc1p, soc0a, or soc1a", title="get unit_key", default="soc1a")
             # Put configurations unique to this build of logic here
             if unit_key == 'soc0p':
