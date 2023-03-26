@@ -137,6 +137,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define WRAP_SOC_MOD_OFF    0.85        // Disable e_wrap_lo when nearing saturated and moderate C_rate (0.85)
 #define VC_S                1.0         // Vc sense scalar (1.0)
 #define VO_S                1.0         // Vo sense scalar (1.0)
+#define AMP_FILT_TAU        4.0         // Ib filters time constant for calibration only, s (4.0)
 
 // Conversion gains
 #ifdef USE_ADS

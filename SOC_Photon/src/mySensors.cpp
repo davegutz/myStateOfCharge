@@ -702,6 +702,9 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors):
   Prbn_Ib_noa_ = new PRBS_7(IB_NOA_NOISE_SEED);
   Flt = new Fault(T, &sp.preserving_);
   Serial.printf("Vb sense ADC pin started\n");
+  AmpFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
+  NoaFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
+  VbFilt = new LagExp(T, AMP_FILT_TAU, 0., NOMINAL_VB*2.);
 }
 
 // Deliberate choice based on results and inputs
@@ -889,7 +892,7 @@ void Sensors::shunt_print()
 // Inputs: sp.ib_select (user override), Mon (EKF status)
 // States:  Ib_fail_noa_
 // Outputs:  Ib_hdwe, Ib_model_in, Vb_sel_status_
-void Sensors::shunt_select_initial()
+void Sensors::shunt_select_initial(const boolean reset)
 {
     // Current signal selection, based on if there or not.
     // Over-ride 'permanent' with Talk(sp.ib_select) = Talk('s')
@@ -912,7 +915,9 @@ void Sensors::shunt_select_initial()
     Ib_amp_model = Ib_model*ib_amp_sclr() + Ib_amp_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Sm/Dm
     Ib_noa_model = Ib_model*ib_noa_sclr() + Ib_noa_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Sn/Dn
     Ib_amp_hdwe = ShuntAmp->Ishunt_cal() + hdwe_add;    // Sense fault injection feeds logic, not model
+    Ib_amp_hdwe_f = AmpFilt->calculate(Ib_amp_hdwe, reset, AMP_FILT_TAU, T);
     Ib_noa_hdwe = ShuntNoAmp->Ishunt_cal() + hdwe_add;  // Sense fault injection feeds logic, not model
+    Ib_noa_hdwe_f = NoaFilt->calculate(Ib_noa_hdwe, reset, AMP_FILT_TAU, T);
 
     // Initial choice
     // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model(past), Ib_noa_model(past)
@@ -954,12 +959,13 @@ void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp)
 }
 
 // Load analog voltage
-void Sensors::vb_load(const uint16_t vb_pin)
+void Sensors::vb_load(const uint16_t vb_pin, const boolean reset)
 {
   if ( !sp.mod_vb_dscn() )
   {
     Vb_raw = analogRead(vb_pin);
     Vb_hdwe =  float(Vb_raw)*VB_CONV_GAIN*sp.Vb_scale() + float(VB_A) + sp.Vb_bias_hdwe();
+    Vb_hdwe_f = VbFilt->calculate(Vb_hdwe, reset, AMP_FILT_TAU, T);
   }
   else
   {

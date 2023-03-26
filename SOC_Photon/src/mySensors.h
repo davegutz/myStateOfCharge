@@ -238,7 +238,7 @@ public:
   boolean reset_all_faults() { return reset_all_faults_; };
   void select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ib signals
-  void shunt_select_initial();   // Choose between shunts for model
+  void shunt_select_initial(const boolean reset);   // Choose between shunts for model
   boolean tb_fa() { return failRead(TB_FA); };
   boolean tb_flt() { return faultRead(TB_FLT); };
   int8_t tb_sel_status() { return tb_sel_stat_; };
@@ -316,6 +316,7 @@ public:
   int Vb_raw;                 // Raw analog read, integer
   float Vb;                   // Selected battery bank voltage, V
   float Vb_hdwe;              // Sensed battery bank voltage, V
+  float Vb_hdwe_f;            // Sensed, filtered battery bank voltage, V
   float Vb_model;             // Modeled battery bank voltage, V
   float Tb;                   // Selected battery bank temp, C
   float Tb_filt;              // Selected filtered battery bank temp, C
@@ -326,8 +327,10 @@ public:
   float Vshunt;               // Sensed shunt voltage, V
   float Ib;                   // Selected battery bank current, A
   float Ib_amp_hdwe;          // Sensed amp battery bank current, A
+  float Ib_amp_hdwe_f;        // Sensed, filtered amp battery bank current, A
   float Ib_amp_model;         // Modeled amp battery bank current, A
   float Ib_noa_hdwe;          // Sensed noa battery bank current, A
+  float Ib_noa_hdwe_f;        // Sensed, filtered noa battery bank current, A
   float Ib_noa_model;         // Modeled noa battery bank current, A
   float Ib_hdwe;              // Sensed battery bank current, A
   float Ib_hdwe_model;        // Selected model hardware signal, A
@@ -390,7 +393,7 @@ public:
   unsigned long int sample_time_ib(void) { return sample_time_ib_; };
   unsigned long int sample_time_vb(void) { return sample_time_vb_; };
   void shunt_print();         // Print selection result
-  void shunt_select_initial();   // Choose between shunts for model
+  void shunt_select_initial(const boolean reset);   // Choose between shunts for model
   void temp_load_and_filter(Sensors *Sen, const boolean reset_temp);
   float Tb_noise();
   float Tb_noise_amp() { return ( Tb_noise_amp_ ); };
@@ -399,7 +402,7 @@ public:
   float vb_add() { return ( vb_add_ ); };
   void vb_add(const float add) { vb_add_ = add; };
   float vb_hdwe() { return Vb_hdwe / sp.nS(); };                  // Battery select hardware unit voltage, V
-  void vb_load(const uint16_t vb_pin);                            // Analog read of Vb
+  void vb_load(const uint16_t vb_pin, const boolean reset);       // Analog read of Vb
   float vb_model() { return (Vb_model / sp.nS()); };              // Battery select model unit voltage, V
   float Vb_add();
   float Vb_noise();
@@ -408,6 +411,9 @@ public:
   void vb_print(void);                  // Print Vb result
   Fault *Flt;
 protected:
+  LagExp *AmpFilt;      // Noise filter for calibration
+  LagExp *NoaFilt;      // Noise filter for calibration
+  LagExp *VbFilt;       // Noise filter for calibration
   void choose_(void);   // Deliberate choice based on inputs and results
   PRBS_7 *Prbn_Tb_;     // Tb noise generator model only
   PRBS_7 *Prbn_Vb_;     // Vb noise generator model only

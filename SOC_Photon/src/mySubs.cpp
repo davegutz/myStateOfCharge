@@ -308,12 +308,12 @@ void load_ib_vb(const boolean reset, const boolean reset_temp, Sensors *Sen, Pin
   Sen->ShuntAmp->convert( sp.mod_ib_amp_dscn() );
   Sen->ShuntNoAmp->convert( sp.mod_ib_noa_dscn() );
   Sen->Flt->shunt_check(Sen, Mon, reset);
-  Sen->shunt_select_initial();
+  Sen->shunt_select_initial(reset);
   if ( sp.debug()==14 ) Sen->shunt_print();
 
   // Load voltage Vb
   // Outputs:  Sen->Vb
-  Sen->vb_load(myPins->Vb_pin);
+  Sen->vb_load(myPins->Vb_pin, reset);
   if ( !sp.mod_vb_dscn() )  Sen->Flt->vb_check(Sen, Mon, VB_MIN, VB_MAX, reset);
   else                      Sen->Flt->vb_check(Sen, Mon, -1.0, 1.0, reset);
   if ( sp.debug()==15 ) Sen->vb_print();
@@ -442,9 +442,9 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   if ( sp.debug()==99 ) // Calibration mode
   {
     Serial.printf("Tb, Vb, imh, inh | SV, Dc | SA, DA| SB, DB = %7.2fdeg C %7.3fv %7.3fA %7.3fA | %7.3f %7.3fv  |  %7.3f %7.3fA | %7.3f %7.3fA,\n",
-    Sen->Tb_hdwe, Sen->Vb_hdwe, Sen->Ib_amp_hdwe, Sen->Ib_noa_hdwe, sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.Ib_bias_amp(), sp.ib_scale_noa(), sp.Ib_bias_noa());
+    Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.Ib_bias_amp(), sp.ib_scale_noa(), sp.Ib_bias_noa());
     Serial1.printf("Tb, Vb, imh, inh | SV, Dc | SA, DA| SB, DB = %7.2fdeg C %7.3fv %7.3fA %7.3fA | %7.3f %7.3fv  |  %7.3f %7.3fA | %7.3f %7.3fA,\n",
-    Sen->Tb_hdwe, Sen->Vb_hdwe, Sen->Ib_amp_hdwe, Sen->Ib_noa_hdwe, sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.Ib_bias_amp(), sp.ib_scale_noa(), sp.Ib_bias_noa());
+    Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.Ib_bias_amp(), sp.ib_scale_noa(), sp.Ib_bias_noa());
   }
   else if ( sp.debug()!=4 && sp.debug()!=-2 )  // Normal display
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
