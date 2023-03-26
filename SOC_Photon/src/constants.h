@@ -46,7 +46,7 @@
 #define MAX_TEMP_READS        10        // Number of consequetive temp queries allowed (10)
 #define TEMP_RANGE_CHECK      -5.       // Minimum expected temp reading, C (-5.)
 #define TEMP_RANGE_CHECK_MAX  70.       // Maximum allowed temp reading, C (70.)
-#define VB_S                  1.017     // Vb sense scalar (1.017)
+#define VB_S                  1.0       // Vb sense scalar (1.0)
 #define VB_A                  0.0       // Vb sense adder, V (0)
 #define PHOTON_ADC_COUNT      4096      // Photon ADC range, counts (4096)
 #define PHOTON_ADC_VOLT       3.3       // Photon ADC range, V (3.3)
@@ -140,11 +140,11 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 
 // Conversion gains
 #ifdef USE_ADS
-    const float SHUNT_NOA_GAIN = SHUNT_GAIN * CURR_SCALE_NOA;
-    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2 * CURR_SCALE_AMP;
+    const float SHUNT_NOA_GAIN = SHUNT_GAIN;
+    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
 #else
-    const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2 * CURR_SCALE_AMP;
-    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2 * CURR_SCALE_AMP;
+    const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
+    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
 #endif
 
 

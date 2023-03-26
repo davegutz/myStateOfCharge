@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "pro0p_20230305";  // scale CHINS
+const String unit = "pro0p_20230326";  // scale CHINS
 #define CONFIG_PHOTON
 #undef CONFIG_ARGON
 
@@ -16,9 +16,9 @@ const String unit = "pro0p_20230305";  // scale CHINS
 #define USE_ADS                 // Instead of using ADS device to read amp by I2C, use analog pins
 #ifdef USE_ADS
     #define CURR_BIAS_AMP         -0.94 // Calibration of amplified shunt sensor (* 'DA'), A
-    #define CURR_SCALE_AMP        0.984 // Hardware to match data (* 'SA')
+    #define CURR_SCALE_AMP        0.968 // Hardware to match data (* 'SA')
     #define CURR_BIAS_NOA         -0.17 // Calibration of non-amplified shunt sensor (* 'DB'), A
-    #define CURR_SCALE_NOA        1.033 // Hardware to match data (* 'SB')
+    #define CURR_SCALE_NOA        1.016 // Hardware to match data (* 'SB')
     #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)
 #else
     #define CURR_BIAS_AMP         0.0   // Calibration of amplified shunt sensor (* 'DA'), A
@@ -34,7 +34,7 @@ const String unit = "pro0p_20230305";  // scale CHINS
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
 #define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
 #define VB_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
-#define VB_SCALE              1.0   // Scale Vb sensor (* 'SV')
+#define VB_SCALE              1.017  // Scale Vb sensor (* 'SV')
 
 // Battery.  One 12 V 100 Ah battery bank would have NOM_UNIT_CAP 100, NS 1, and NP 1
 // Two 12 V 100 Ah series battery bank would have NOM_UNIT_CAP 100, NS 2, and NP 1
