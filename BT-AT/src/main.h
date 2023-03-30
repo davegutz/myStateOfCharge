@@ -63,19 +63,27 @@ void setup()
 {
   // put your setup code here, to run once:
   Serial.begin(9600);	/* Define baud rate for serial communication */
-  Serial1.begin(38400); /* Define baud rate for serial1 communication */
+  Serial1.begin(115200); /* Define baud rate for serial1 communication */
+  ////////IF YOU DON'T GET ANY JOY WITH 115200 TRY 38400 INSTEAD/////////
+  ////// ALSO, WAIT A REALLY LONG TIME FOR PHONE TO FIND NEW DEVICE (MAYBE UP TO 1 MIN)
 }
 
 void loop()
 {
   if (string_complete)
   {
-    Serial.printf("%s\n", input_string.c_str());
     Serial1.write(input_string.c_str());
+    Serial.printf("wrote '%s' to Serial1\n", input_string.c_str());
     input_string = "";
     string_complete = false;
   }
-  if (Serial1.available()) Serial.write(Serial1.read());
+  delay(1000);
+  if (Serial1.available())
+  {
+    Serial1.printf("from Serial1:");
+    Serial.write(Serial1.read());
+  }
+  delay(1000);
 }
 
 

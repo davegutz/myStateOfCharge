@@ -9,7 +9,7 @@ const String unit = "pro1a_20230326";  // scale CHINS
 
 // Miscellaneous
 #define ASK_DURING_BOOT       1   // Flag to ask for application of this file to * retained adjustements
-#define MODELING              247 // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn 
+#define MODELING              247 // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn
 
 // Sensor biases
 #define CURR_BIAS_AMP         0.5   // Calibration of amplified shunt sensor (* 'DA'), A

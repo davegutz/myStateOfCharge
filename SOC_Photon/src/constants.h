@@ -62,7 +62,7 @@
     #ifdef DEBUG_INIT
         #define NSUM              55       // Number of saved SRAM summaries (80)
     #else
-        #define NSUM              105       // Number of saved SRAM summaries (110)   TODO:   Use PLATFORM_ID around verbose hogs
+        #define NSUM              90       // Number of saved SRAM summaries (110)   TODO:   Use PLATFORM_ID around verbose hogs
                                             // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
     #endif
 #else
@@ -138,6 +138,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define VC_S                1.0         // Vc sense scalar (1.0)
 #define VO_S                1.0         // Vo sense scalar (1.0)
 #define AMP_FILT_TAU        4.0         // Ib filters time constant for calibration only, s (4.0)
+#define S1BAUD              115200      // default Serial1 baud when able to run AT to set it using AT+BAUD8
 
 // Conversion gains
 #ifdef USE_ADS

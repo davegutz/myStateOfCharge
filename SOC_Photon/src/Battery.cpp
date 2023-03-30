@@ -35,10 +35,10 @@ extern PublishPars pp;  // For publishing
 // class Battery
 // constructors
 Battery::Battery() {}
-Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code)
+Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, const float d_voc_soc)
     : Coulombs(sp_delta_q, sp_t_last, (NOM_UNIT_CAP*3600), T_RLIM, sp_mod_code, COULOMBIC_EFF_SCALE), bms_charging_(false),
 	bms_off_(false), ds_voc_soc_(0), dt_(0.1), dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.),
-    dv_voc_soc_(0.), ib_(0.), ibs_(0.), ioc_(0.), print_now_(false), sr_(1.), temp_c_(NOMINAL_TB), vb_(NOMINAL_VB),
+    dv_voc_soc_(d_voc_soc), ib_(0.), ibs_(0.), ioc_(0.), print_now_(false), sr_(1.), temp_c_(NOMINAL_TB), vb_(NOMINAL_VB),
     voc_(NOMINAL_VB), voc_stat_(NOMINAL_VB), voltage_low_(false), vsat_(NOMINAL_VB)
 {
     nom_vsat_   = chem_.v_sat - HDB_VB;   // Center in hysteresis
@@ -144,7 +144,7 @@ float Battery::voc_soc_tab(const float soc, const float temp_c)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery monitor class
 BatteryMonitor::BatteryMonitor():
-    Battery(&sp.delta_q_, &sp.t_last_, &sp.mon_chm_),
+    Battery(&sp.delta_q_, &sp.t_last_, &sp.mon_chm_, VM),
 	amp_hrs_remaining_ekf_(0.), amp_hrs_remaining_soc_(0.), dt_eframe_(0.1), eframe_(0), ib_charge_(0.),
     q_ekf_(NOM_UNIT_CAP*3600.), soc_ekf_(1.0), tcharge_(0.), tcharge_ekf_(0.), voc_filt_(NOMINAL_VB), voc_soc_(NOMINAL_VB),
     y_filt_(0.)
@@ -507,7 +507,7 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
 BatterySim::BatterySim() :
-    Battery(&sp.delta_q_model_, &sp.t_last_model_, &sp.sim_chm_), duty_(0UL), ib_fut_(0.), ib_in_(0.), model_cutback_(true),
+    Battery(&sp.delta_q_model_, &sp.t_last_model_, &sp.sim_chm_, VS), duty_(0UL), ib_fut_(0.), ib_in_(0.), model_cutback_(true),
     q_(NOM_UNIT_CAP*3600.), sample_time_(0UL), sample_time_z_(0UL), sat_ib_max_(0.)
 {
     // ChargeTransfer dynamic model for EKF

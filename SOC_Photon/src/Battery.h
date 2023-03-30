@@ -63,14 +63,19 @@ const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1,
 const float MXEPS = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness) (1-1e-6)
 #define HYS_SOC_MIN_MARG 0.15     // Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis (0.15)
 #define HYS_IB_THR      1.0       // Ignore reset if opposite situation exists, A (1.0)
-
+#ifndef VM
+  #define VM 0.0
+#endif
+#ifndef VS
+  #define VS 0.0
+#endif
 
 // Battery Class
 class Battery : public Coulombs
 {
 public:
   Battery();
-  Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code);
+  Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, const float d_voc_soc);
   ~Battery();
   // operators
   // functions

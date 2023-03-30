@@ -149,7 +149,7 @@ void setup()
   // Compile and flash onto the SOC_Photon target temporarily to set baud rate.  Directions
   // for HC-06 inside SOC_Photon.ino of ../../BT-AT/src.   AT+BAUD8; to set 115200.
   // Serial1.blockOnOverrun(false); doesn't work:  it's a mess; partial lines galore
-  Serial1.begin(115200);
+  Serial1.begin(S1BAUD);
   Serial1.flush();
   // EERAM
   #ifdef CONFIG_ARGON

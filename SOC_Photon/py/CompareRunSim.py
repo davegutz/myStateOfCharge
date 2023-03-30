@@ -35,7 +35,7 @@ if __name__ == '__main__':
     from PlotOffOn import off_on_plot
     import easygui
     import os
-
+    from Util import cat
 
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
@@ -83,6 +83,7 @@ if __name__ == '__main__':
         cutback_gain_sclr_in = 1.
         ds_voc_soc_in = 0.
         data_file_txt = None
+        temp_file = None
 
         # Save these
         # data_file_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
@@ -161,7 +162,10 @@ if __name__ == '__main__':
         # data_file_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in = 1.127; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # 0.8 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
         # data_file_txt = 'steps v20230128 20230214.txt'; unit_key = 'soc0p';  scale_in = 1.127; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.4 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
         # data_file_txt = 'steps v20230128 20230218.txt'; unit_key = 'soc0p';  scale_in = 1.127; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.1 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
+
+        # Repeat of CHINS steps but for BB in truck
         # data_file_txt = 'steps vA20230305 20230324 BB.txt'; unit_key = 'soc1a'  ; tune_in = True; dvoc_mon_in = 0.16; dvoc_sim_in = 0.16;
+        temp_file = 'steps vA20230326 20230328.txt'; cat(temp_file, ('puttyLog20230328_113851.csv', 'puttyLog20230328_131552.csv'), in_path=path_to_data, out_path=path_to_temp); unit_key = 'soc1a'; tune_in = True; dvoc_mon_in = 0.11; dvoc_sim_in = dvoc_mon_in; sres0_in = 2.5; sresct_in = 0.13; stauct_in = 1;
 
         # data_file_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; s_hys_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
         # data_file_txt = 'real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; s_hys_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
@@ -179,7 +183,7 @@ if __name__ == '__main__':
 
         # detect running interactively
         # this is written to run in pwd of call
-        if data_file_txt is None:
+        if data_file_txt is None and temp_file is None:
             path_to_data = easygui.fileopenbox(msg="choose your data file to plot")
             data_file = easygui.filesavebox(msg="pick new file name, return to keep", title="get new file name")
             if data_file is None:
@@ -197,8 +201,12 @@ if __name__ == '__main__':
             elif unit_key == 'soc1a':
                 pass
         else:
-            path_to_data = os.path.join(os.getcwd(), data_file_txt)
-            data_file = path_to_data
+            if temp_file is None:
+                path_to_data = os.path.join(os.getcwd(), data_file_txt)
+                data_file = path_to_data
+            else:
+                path_to_temp = os.path.join(path_to_temp, temp_file)
+                data_file = path_to_temp
 
         # # Load mon v4 (old)
         mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
