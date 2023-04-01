@@ -266,6 +266,8 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
   failAssign( QuietPer->calculate(dscn_flt(), QUIET_S, QUIET_R, Sen->T, reset_loc), IB_DSCN_FA);
   #ifdef CONFIG_ARGON
     if ( sp.debug()==-13 ) debug_m13(Sen);
+    if ( sp.debug()==-23 ) debug_m23(Sen);
+    if ( sp.debug()==-24 ) debug_m24(Sen);
   #endif
 }
 

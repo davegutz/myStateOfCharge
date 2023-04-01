@@ -60,6 +60,42 @@ void debug_12(BatteryMonitor *Mon, Sensors *Sen)
     max(min(Sen->Flt->ib_rate(),2), -2), max(min(Sen->Flt->ib_quiet(), 2), -2),
     Sen->Flt->ib_dscn_fa(), Sen->Flt->ib_dscn_fa());
   }
+
+  // sp.debug()==-23 vb for Arduino.
+  // Start Arduino serial plotter.  Toggle v like 'v0;v-23;' to produce legend
+  void debug_m23(Sensors *Sen)
+  {
+
+    // Arduinio header
+    static int8_t last_call = 0;
+    if ( sp.debug()!=last_call && sp.debug()==-23 )
+      Serial.printf("Vb_hdwe-Vb_hdwe_f:\n");
+    last_call = sp.debug();
+
+    // Plot
+    if ( sp.debug()!=-23)
+      return;
+    else
+        Serial.printf("%7.3f\n", Sen->Vb_hdwe - Sen->Vb_hdwe_f);
+  }
+
+  // sp.debug()==-24 Vb, Ib for Arduino.
+  // Start Arduino serial plotter.  Toggle v like 'v0;v-23;' to produce legend
+  void debug_m24(Sensors *Sen)
+  {
+
+    // Arduinio header
+    static int8_t last_call = 0;
+    if ( sp.debug()!=last_call && sp.debug()==-23 )
+      Serial.printf("Vb_hdwe-Vb_hdwe_f:, Ib_hdwe:\n");
+    last_call = sp.debug();
+
+    // Plot
+    if ( sp.debug()!=-24)
+      return;
+    else
+        Serial.printf("%7.3f, %7.3f\n", Sen->Vb_hdwe - Sen->Vb_hdwe_f, Sen->Ib_hdwe);
+  }
 #endif
 
 // sp.debug()==5 Charge time
