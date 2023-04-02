@@ -165,8 +165,9 @@ if __name__ == '__main__':
 
         # Repeat of CHINS steps but for BB in truck
         # data_file_txt = 'steps vA20230305 20230324 BB.txt'; unit_key = 'soc1a'  ; tune_in = True; dvoc_mon_in = 0.16; dvoc_sim_in = 0.16;
-        temp_file = 'steps vA20230326 20230328.txt'; cat(temp_file, ('puttyLog20230328_113851.csv', 'puttyLog20230328_131552.csv'), in_path=path_to_data, out_path=path_to_temp); unit_key = 'soc1a'; tune_in = True; dvoc_mon_in = 0.11; dvoc_sim_in = dvoc_mon_in; sres0_in = 2.5; sresct_in = 0.13; stauct_in = 1;
-
+        # temp_file = 'steps vA20230326 20230328.txt'; cat(temp_file, ('puttyLog20230328_113851.csv', 'puttyLog20230328_131552.csv'), in_path=path_to_data, out_path=path_to_temp); unit_key = 'soc1a'; tune_in = True; dvoc_mon_in = 0.11; dvoc_sim_in = dvoc_mon_in; sres0_in = 2.5; sresct_in = 0.13; stauct_in = 1.;
+        temp_file = 'steps vA20230326 20230328.txt'; cat(temp_file, ('puttyLog20230328_113851.csv', 'puttyLog20230328_131552.csv'), in_path=path_to_data, out_path=path_to_temp); unit_key = 'soc1a'; tune_in = True; dvoc_mon_in = 0.11; dvoc_sim_in = dvoc_mon_in;
+        # data_file_txt = 'puttyLog20230328_131552_short.txt'; unit_key = 'soc1a'; tune_in = True; dvoc_mon_in = 0.11; dvoc_sim_in = dvoc_mon_in; sres0_in = 2.5; sresct_in = 0.13; stauct_in = 1;
         # data_file_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; s_hys_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
         # data_file_txt = 'real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; s_hys_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
         # data_file_txt = 'real world Xp20 30C 20220917.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -11110

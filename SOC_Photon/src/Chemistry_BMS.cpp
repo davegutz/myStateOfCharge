@@ -62,6 +62,7 @@ void Chemistry::assign_all_chm(const String mod_str)
 // BattleBorn 100 Ah, 12v LiFePO4
 // See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
 // >13.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
+// 20230401:  Hysteresis tuned to soc=0.7 step data
 const uint8_t M_T_BB = 5;    // Number temperature breakpoints for voc table
 const uint8_t N_S_BB = 18;   // Number soc breakpoints for voc table
 const float Y_T_BB[M_T_BB] = // Temperature breakpoints for voc table
@@ -84,17 +85,17 @@ const uint8_t N_H_BB = 7;     // Number of dv breakpoints in r(dv) table t_r, t_
 const float X_DV_BB[N_H_BB] = // dv breakpoints for r(soc, dv) table t_r. // DAG 6/13/2022 tune x10 to match data
     {-0.7, -0.5, -0.3, 0.0, 0.15, 0.3, 0.7};
 const float Y_SOC_BB[M_H_BB] = // soc breakpoints for r(soc, dv) table t_r, t_s
-    {0.0, 0.5, 1.0};
+    {0.0, 0.5, 0.7};
 const float T_R_BB[M_H_BB * N_H_BB] = // r(soc, dv) table.    // DAG 9/29/2022 tune to match hist data
     {0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
      0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
-     0.016, 0.016, 0.016, 0.005, 0.010, 0.010, 0.010};
+     0.016, 0.016, 0.013, 0.005, 0.007, 0.010, 0.010};
 const float T_S_BB[M_H_BB * N_H_BB] = // r(soc, dv) table. Not used yet for BB
     {1, 1, 1, 1, 1, 1, 1,
      1, 1, 1, 1, 1, 1, 1,
      1, 1, 1, 1, 1, 1, 1};
 const float T_DV_MAX_BB[M_H_BB] = // dv_max(soc) table.  Pulled values from insp of T_R_BB where flattens
-    {0.7, 0.3, 0.15};
+    {0.7,  0.3,  0.2};
 const float T_DV_MIN_BB[M_H_BB] = // dv_max(soc) table.  Pulled values from insp of T_R_BB where flattens
     {-0.7, -0.5, -0.3};
 void Chemistry::assign_BB()
@@ -111,8 +112,8 @@ void Chemistry::assign_BB()
     Serial.printf("BB dv_min_abs=%7.3f, cap=%7.1f\n", dv_min_abs, hys_cap);
     low_voc = 9.0;  // Voltage threshold for BMS to turn off battery, V (9.)
     low_t = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C (0)
-    r_0 = 0.0046;   // ChargeTransfer R0, ohms (0.0046)
-    r_ct = 0.0077;  // ChargeTransfer diffusion resistance, ohms (0.0077)
+    r_0 = 0.0113;   // ChargeTransfer R0, ohms (0.0113)
+    r_ct = 0.001;  // ChargeTransfer diffusion resistance, ohms (0.001)
     r_sd = 70;      // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms (70.)
     tau_ct = 83.;   // ChargeTransfer diffusion time constant, s (=1/Rct/Cct) (83.)
     tau_sd = 2.5e7; // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (2.5e7)

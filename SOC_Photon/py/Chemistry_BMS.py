@@ -84,8 +84,8 @@ class Chemistry(BMS):
                             # tau_null = 1 / 0.005 / 3.6e3 = 0.056 s
         self.low_voc = 9.0  # Voltage threshold for BMS to turn off battery, V (9.0)
         self.low_t = 0  # Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C (0)
-        self.r_0 = 0.0046  # ChargeTransfer R0, ohms (0.0046)
-        self.r_ct = 0.0077  # ChargeTransfer diffusion resistance, ohms (0.0077)
+        self.r_0 = 0.0113  # ChargeTransfer R0, ohms (0.0113)
+        self.r_ct = 0.001  # ChargeTransfer diffusion resistance, ohms (0.001)
         self.r_sd = 70  # Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms (70.)
         self.tau_ct = 83.  # ChargeTransfer diffusion time constant, s (=1/Rct/Cct) (83.)
         self.tau_sd = 2.5e7  # Equivalent model for EKF reference.	Parasitic discharge time constant, sec (1.87e7)
@@ -127,15 +127,15 @@ class Chemistry(BMS):
         # Hysteresis tables
         self.cap = 3.6e3
         t_dv0 = [-0.7,   -0.5,  -0.3,  0.0,   0.15,   0.3,   0.7]
-        t_soc0 = [0, .5, 1]
-        t_r0 = [0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
-                0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
-                0.016, 0.016, 0.016, 0.005, 0.010, 0.010, 0.010]
+        t_soc0 = [0, .5, .7]
         t_s0 = [1., 1., 1., 1., 1., 1., 1.,
                 1., 1., 1., 1., 1., 1., 1.,
                 1., 1., 1., 1., 1., 1., 1.]
         t_dv_min0 = [-0.7, -0.5, -0.3]
-        t_dv_max0 = [0.7, 0.3, 0.15]
+        t_dv_max0 = [0.7,  0.3,  0.2]
+        t_r0 = [0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
+                0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
+                0.016, 0.016, 0.013, 0.005, 0.007, 0.010, 0.010]
         self.lut_r_hys = myTables.TableInterp2D(t_dv0, t_soc0, t_r0)
         self.lut_s_hys = myTables.TableInterp2D(t_dv0, t_soc0, t_s0)
         self.lu_x_hys = myTables.TableInterp1D(t_soc0, t_dv_max0)
