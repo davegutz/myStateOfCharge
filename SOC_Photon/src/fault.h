@@ -41,6 +41,7 @@ struct Flt_st
   int16_t vb = 0;       // Battery measured potential, filtered, V
   int16_t ib = 0;       // Battery measured input current, filtered, A
   int16_t soc = 0;      // Battery state of charge, free Coulomb counting algorithm, frac
+  int16_t soc_min = 0;  // Battery min state of charge, frac
   int16_t soc_ekf = 0;  // Battery state of charge, ekf, frac
   int16_t voc = 0;      // Battery open circuit voltage measured vb-ib*Z, V
   int16_t voc_stat = 0; // Stored charge voltage from measurement, V
@@ -73,6 +74,7 @@ public:
     void get_vb()           { int16_t value;        rP_->get(vb_eeram_.a16, value);           vb = value; };
     void get_ib()           { int16_t value;        rP_->get(ib_eeram_.a16, value);           ib = value; };
     void get_soc()          { int16_t value;        rP_->get(soc_eeram_.a16, value);          soc = value; };
+    void get_soc_min()      { int16_t value;        rP_->get(soc_min_eeram_.a16, value);      soc_min = value; };
     void get_soc_ekf()      { int16_t value;        rP_->get(soc_ekf_eeram_.a16, value);      soc_ekf = value; };
     void get_voc()          { int16_t value;        rP_->get(voc_eeram_.a16, value);          voc = value; };
     void get_voc_stat()     { int16_t value;        rP_->get(voc_stat_eeram_.a16, value);     voc_stat = value; };
@@ -96,6 +98,7 @@ public:
     void put_vb(const int16_t value)              { vb = value; };
     void put_ib(const int16_t value)              { ib = value; };
     void put_soc(const int16_t value)             { soc = value; };
+    void put_soc_min(const int16_t value)         { soc_min = value; };
     void put_soc_ekf(const int16_t value)         { soc_ekf = value; };
     void put_voc(const int16_t value)             { voc = value; };
     void put_voc_stat(const int16_t value)        { voc_stat = value; };
@@ -113,6 +116,7 @@ public:
     void put_vb()           { rP_->put(vb_eeram_.a16, vb); };
     void put_ib()           { rP_->put(ib_eeram_.a16, ib); };
     void put_soc()          { rP_->put(soc_eeram_.a16, soc); };
+    void put_soc_min()      { rP_->put(soc_min_eeram_.a16, soc_min); };
     void put_soc_ekf()      { rP_->put(soc_ekf_eeram_.a16, soc_ekf); };
     void put_voc()          { rP_->put(voc_eeram_.a16, voc); };
     void put_voc_stat()     { rP_->put(voc_stat_eeram_.a16, voc_stat); };
@@ -128,6 +132,7 @@ public:
     void put_vb(const int16_t value)              { rP_->put(vb_eeram_.a16, value);           vb = value; };
     void put_ib(const int16_t value)              { rP_->put(ib_eeram_.a16, value);           ib = value; };
     void put_soc(const int16_t value)             { rP_->put(soc_eeram_.a16, value);          soc = value; };
+    void put_soc_min(const int16_t value)         { rP_->put(soc_min_eeram_.a16, value);      soc_min = value; };
     void put_soc_ekf(const int16_t value)         { rP_->put(soc_ekf_eeram_.a16, value);      soc_ekf = value; };
     void put_voc(const int16_t value)             { rP_->put(voc_eeram_.a16, value);          voc = value; };
     void put_voc_stat(const int16_t value)        { rP_->put(voc_stat_eeram_.a16, value);     voc_stat = value; };
@@ -149,6 +154,7 @@ protected:
     address16b vb_eeram_;
     address16b ib_eeram_;
     address16b soc_eeram_;
+    address16b soc_min_eeram_;
     address16b soc_ekf_eeram_;
     address16b voc_eeram_;
     address16b voc_stat_eeram_;

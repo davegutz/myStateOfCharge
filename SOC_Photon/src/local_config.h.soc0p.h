@@ -1,7 +1,7 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "soc0p_20230326";  // scale CHINS
+const String unit = "soc0p_20230403";  // scale CHINS
 #define CONFIG_PHOTON
 #undef CONFIG_ARGON
 

@@ -668,6 +668,7 @@ void rapid_print(Sensors *Sen, BatteryMonitor *Mon)
 {
   create_rapid_string(&pp.pubList, Sen, Mon);
   Serial.println(cp.buffer);
+  Serial1.println(cp.buffer);
 }
 
 // Time synchro for web information
