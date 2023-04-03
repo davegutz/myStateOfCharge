@@ -168,6 +168,19 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
   return ( cTime );
 }
 
+// Non-blocking delay
+void delay_no_block(const unsigned long int interval)
+{
+  unsigned long int previousMillis = millis();
+  unsigned long currentMillis = previousMillis;
+  while( currentMillis - previousMillis < interval )
+  {
+   	previousMillis = currentMillis;
+    currentMillis = millis();
+  }
+}
+
+// Harvest charge caused temperature change.   More charge becomes available as battery warms
 void harvest_temp_change(const float temp_c, BatteryMonitor *Mon, BatterySim *Sim)
 {
   sp.put_delta_q(sp.delta_q() - Mon->dqdt() * Mon->q_capacity() * (temp_c - sp.t_last()));

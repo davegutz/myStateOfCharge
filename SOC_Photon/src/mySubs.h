@@ -72,6 +72,7 @@ struct Pins
 // Headers
 void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
 double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip);
+void delay_no_block(const unsigned long int interval);
 void finish_request(void);
 void get_string(String *source);
 void harvest_temp_change(const float temp_c, BatteryMonitor *Mon, BatterySim *Sim);
