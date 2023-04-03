@@ -60,9 +60,9 @@
 #define F_Z_T                 0.80      // Temperature filter zeta (0.80)
 #ifdef CONFIG_PHOTON
     #ifdef DEBUG_INIT
-        #define NSUM              55       // Number of saved SRAM summaries (80)
+        #define NSUM              30       // Number of saved SRAM summaries (55)
     #else
-        #define NSUM              90       // Number of saved SRAM summaries (110)   TODO:   Use PLATFORM_ID around verbose hogs
+        #define NSUM              65       // Number of saved SRAM summaries (90)   TODO:   Use PLATFORM_ID around verbose hogs
                                             // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
     #endif
 #else

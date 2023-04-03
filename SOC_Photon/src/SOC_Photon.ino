@@ -66,7 +66,7 @@
 #ifdef CONFIG_ARGON
   #undef ARDUINO
   #if (PLATFORM_ID < 9)
-    #error
+    #error "copy local_config.xxxx.h to local_config.h"
   #endif
 #endif
 
