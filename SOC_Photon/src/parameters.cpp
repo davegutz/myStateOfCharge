@@ -314,8 +314,8 @@ void SavedPars::print_fault_array()
 // Print faults
 void SavedPars::print_fault_header()
 {
-  Serial.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
-  Serial1.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
+  Serial.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
+  Serial1.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_mini, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
 }
 
 // Print history
