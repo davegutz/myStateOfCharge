@@ -177,7 +177,6 @@ void delay_no_block(const unsigned long int interval)
   unsigned long currentMillis = previousMillis;
   while( currentMillis - previousMillis < interval )
   {
-   	previousMillis = currentMillis;
     currentMillis = millis();
   }
 }

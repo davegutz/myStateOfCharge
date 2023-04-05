@@ -138,7 +138,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define VC_S                1.0         // Vc sense scalar (1.0)
 #define VO_S                1.0         // Vo sense scalar (1.0)
 #define AMP_FILT_TAU        4.0         // Ib filters time constant for calibration only, s (4.0)
-#define S1BAUD              115200      // default Serial1 baud when able to run AT to set it using AT+BAUD8
+#define S1BAUD              230400      // default Serial1 baud when able to run AT to set it using AT+BAUD9
 
 // Conversion gains
 #ifdef USE_ADS

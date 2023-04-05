@@ -17,6 +17,7 @@ Type AT+NAME=Hackster and press Send. It will return a OK message.
 // https://mcuoneclipse.com/2013/06/19/using-the-hc-06-bluetooth-module/
 
 // SOC_Particle
+//  AT;
 //  AT+BAUD8;
 //  AT+NAMEsoc1a;
 
@@ -59,11 +60,23 @@ void serialEvent();
 boolean string_complete = false;
 String input_string;
 
+// Non-blocking delay
+void delay_no_block(const unsigned long int interval)
+{
+  unsigned long int previousMillis = millis();
+  unsigned long currentMillis = previousMillis;
+  while( currentMillis - previousMillis < interval )
+  {
+    currentMillis = millis();
+  }
+}
+
 void setup()
 {
   // put your setup code here, to run once:
-  Serial.begin(9600);	/* Define baud rate for serial communication */
+  Serial.begin(230400);	/* Define baud rate for serial communication */
   Serial1.begin(115200); /* Define baud rate for serial1 communication */
+  // Serial1.begin(115200); /* Define baud rate for serial1 communication */
   // Serial1.begin(38400); /* Define baud rate for serial1 communication */
   ////////IF YOU DON'T GET ANY JOY WITH 115200 TRY 38400 INSTEAD/////////
   ////// ALSO, WAIT A REALLY LONG TIME FOR PHONE TO FIND NEW DEVICE (MAYBE UP TO 1 MIN)
@@ -78,13 +91,13 @@ void loop()
     input_string = "";
     string_complete = false;
   }
-  delay(1000);
+  delay_no_block(100);
   if (Serial1.available())
   {
     Serial1.printf("from Serial1:");
     Serial.write(Serial1.read());
   }
-  delay(1000);
+  delay_no_block(100);
 }
 
 

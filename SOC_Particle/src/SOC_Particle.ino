@@ -130,7 +130,7 @@ void setup()
 
   // Serial
   // Serial.blockOnOverrun(false);  doesn't work
-  Serial.begin(115200);
+  Serial.begin(230400);
   Serial.flush();
   delay(1000);          // Ensures a clean display on Serial startup on CoolTerm
   Serial.println("Hi!");
