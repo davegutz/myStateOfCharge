@@ -186,7 +186,7 @@ float Coulombs::count_coulombs(const double dt, const boolean reset_temp, const 
 
     // Integration.   Can go to negative
     q_capacity_ = calculate_capacity(temp_lim);
-    if ( !reset_temp )
+    if ( !reset_temp && !cp.inf_reset )
     {
       *sp_delta_q_ = max(min(*sp_delta_q_ + d_delta_q, 0.0), -q_capacity_*1.5);
       delta_q_inf_ += d_delta_q_inf;
@@ -194,7 +194,8 @@ float Coulombs::count_coulombs(const double dt, const boolean reset_temp, const 
     else
     {
       delta_q_inf_ = *sp_delta_q_;
-      delta_q_abs_ = 0.;
+      delta_q_abs_ = *sp_delta_q_ / 2.;
+      cp.inf_reset = false;
     }
     // if ( sp.debug()==-24 )Serial.printf("Mon:  charge_curr%7.3f d_delta_q%10.6f delta_q%10.1f temp_lim%7.3f t_last%7.3f\n", charge_curr, d_delta_q, *sp_delta_q_, temp_lim, *sp_t_last_);
     q_ = q_capacity_ + *sp_delta_q_;

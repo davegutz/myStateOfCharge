@@ -779,6 +779,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Sen->Flt->reset_all_faults(true);
                 break;
 
+              case ( 'i' ):  // Ri:  Reset infinite counter
+                Serial.printf("Reset infinite counter\n");
+                cp.inf_reset = true;
+                break;
+
               case ( 'r' ):  // Rr:  small reset counters
                 Serial.printf("CC reset\n");
                 Sen->Sim->apply_soc(1.0, Sen->Tb_filt);
@@ -1287,6 +1292,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("\nR<?>   Reset\n");
   Serial.printf("  Rb= "); Serial.printf("batteries to present inputs\n");
   Serial.printf("  Rf= "); Serial.printf("fault logic latches\n");
+  Serial.printf("  Ri= "); Serial.printf("infinite counter\n");
   Serial.printf("  Rr= "); Serial.printf("saturate Mon and equalize Sim & Mon\n");
   Serial.printf("  RR= "); Serial.printf("DEPLOY\n");
   Serial.printf("  Rs= "); Serial.printf("small.  Reinitialize filters\n");

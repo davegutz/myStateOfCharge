@@ -1,6 +1,6 @@
 Present=1
 HostName=
-LogFileName=/home/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/dataReduction/puttyLog&Y&M&D_&T.csv
+LogFileName=/home/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/dataReduction/puttyLog&Y&M&D_&T.csv
 LogType=2
 LogFileClash=-1
 LogFlush=1

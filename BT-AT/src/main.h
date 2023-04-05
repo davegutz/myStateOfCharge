@@ -16,9 +16,9 @@ Type AT+NAME=Hackster and press Send. It will return a OK message.
 // hc-06
 // https://mcuoneclipse.com/2013/06/19/using-the-hc-06-bluetooth-module/
 
-// SOC_Photon
-//  AT+BAUD8
-//  AT+NAMEsoc1a
+// SOC_Particle
+//  AT+BAUD8;
+//  AT+NAMEsoc1a;
 
 // AT+BAUD4;    OK9600
 // AT+BAUD8;    OK115200
@@ -64,6 +64,7 @@ void setup()
   // put your setup code here, to run once:
   Serial.begin(9600);	/* Define baud rate for serial communication */
   Serial1.begin(115200); /* Define baud rate for serial1 communication */
+  // Serial1.begin(38400); /* Define baud rate for serial1 communication */
   ////////IF YOU DON'T GET ANY JOY WITH 115200 TRY 38400 INSTEAD/////////
   ////// ALSO, WAIT A REALLY LONG TIME FOR PHONE TO FIND NEW DEVICE (MAYBE UP TO 1 MIN)
 }

@@ -48,6 +48,7 @@ struct CommandPars
   boolean dc_dc_on;         // DC-DC charger is on
   uint8_t eframe_mult;      // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
   boolean fake_faults;      // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
+  boolean inf_reset;        // Use talk to reset infinite counter
   boolean model_cutback;    // On model cutback
   boolean model_saturated;  // Sim on cutback and saturated
   unsigned long num_v_print;// Number of print echos made, for checking on BLE
@@ -64,6 +65,7 @@ struct CommandPars
     dc_dc_on = false;
     eframe_mult = EKF_EFRAME_MULT;
     fake_faults = FAKE_FAULTS;
+    inf_reset = false;
     model_cutback = false;
     model_saturated = false;
     num_v_print = 0UL;
@@ -109,6 +111,7 @@ struct CommandPars
     Serial.printf(" dc_dc_on %d\n", dc_dc_on);
     Serial.printf(" eframe_mult %d\n", eframe_mult);
     Serial.printf(" fake_faults %d\n", fake_faults);
+    Serial.printf(" inf_reset %d\n", inf_reset);
     Serial.printf(" model_cutback %d\n", model_cutback);
     Serial.printf(" model_saturated %d\n", model_saturated);
     Serial.printf(" print_mult %d\n", print_mult);
