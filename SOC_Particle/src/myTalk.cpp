@@ -696,6 +696,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 chit("Ph;", SOON);
                 // chit("Hd;", SOON);
                 chit("Pf;", SOON);
+                chit("Q;", SOON);
                 break;
 
               case ( 'e' ):  // Pe:  Print EKF

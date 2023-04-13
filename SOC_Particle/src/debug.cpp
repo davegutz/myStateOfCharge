@@ -134,15 +134,15 @@ void debug_h(BatteryMonitor *Mon, Sensors *Sen)
 void debug_q(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("ib_amp_fail %d\nib_noa_fail %d\nvb_fail %d\nTb%7.3f\nvb%7.3f\nvoc%7.3f\nvoc_filt%7.3f\nvsat%7.3f\nib%7.3f\nsoc_m%8.4f\n\
-soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling = %d\ndq_inf%10.1f\ndq_abs%10.1f\n",
+soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling = %d\ndq_inf/dq_abs%10.1f/%10.1f = %8.4f\n",
     Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
     Mon->temp_c(), Mon->vb(), Mon->voc(), Mon->voc_filt(), Mon->vsat(), Mon->ib(), Sen->Sim->soc(), Mon->soc_ekf(),
-    Mon->soc(), Mon->soc_min(), Mon->soc_inf(), sp.modeling(), Mon->delta_q_inf(), Mon->delta_q_abs());
+    Mon->soc(), Mon->soc_min(), Mon->soc_inf(), sp.modeling(), Mon->delta_q_inf(), Mon->delta_q_abs(), Mon->delta_q_inf()/Mon->delta_q_abs());
   Serial1.printf("ib_amp_fail %d\nib_noa_fail %d\nvb_fail %d\nTb%7.3f\nvb%7.3f\nvoc%7.3f\nvoc_filt%7.3f\nvsat%7.3f\nib%7.3f\nsoc_m%8.4f\n\
-soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling = %d\ndq_inf%10.1f\ndq_abs%10.1f\n",
+soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling = %d\ndq_inf/dq_abs%10.1f/%10.1f = %8.4f\n",
       Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
       Mon->temp_c(), Mon->vb(), Mon->voc(), Mon->voc_filt(), Mon->vsat(), Mon->ib(), Sen->Sim->soc(), Mon->soc_ekf(),
-    Mon->soc(), Mon->soc_min(), Mon->soc_inf(), sp.modeling(), Mon->delta_q_inf(), Mon->delta_q_abs());
+    Mon->soc(), Mon->soc_min(), Mon->soc_inf(), sp.modeling(), Mon->delta_q_inf(), Mon->delta_q_abs(), Mon->delta_q_inf()/Mon->delta_q_abs());
   if ( Sen->Flt->falw() || Sen->Flt->fltw() ) chit("Pf;", QUEUE);
 }
 
