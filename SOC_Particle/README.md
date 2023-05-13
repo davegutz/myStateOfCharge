@@ -34,12 +34,18 @@ Use temperature, voltage and bipolar current measurements with a programmable lo
 <!-- TOC -->
 
 ## Abstract
-Users of rechargeable battery banks need to know how much charge remains.  This becomes important for estimating the range of travel for an electric car, for example – the 'gas gauge replacement.'   In my case, when truck camping with my CPAP machine I need to know if there is enough charge in the RV battery bank to power the CPAP overnight.   I've never woke up gasping and I want to minimize that possibility.   Old technology batteries, e.g. Lead-acid, have a steep curve relationship between terminal voltage and state-of-charge (SoC).   This makes it easy to use a voltmeter as a SoC gauge.  Newer batteries developed for electric cars are different.  The flat voltage-SoC characteristic of modern LiFeP04 batteries – safe to install in sleeping quarters and efficient charge handlers – makes it nearly impossible to guess SoC from voltage measurement.   Further complicating the task, the electrical hysteresis where voltage depends on direction of charging/discharging and time history is large compared to the SoC characteristic.   Hysteresis uncertainty approaches the entire SoC curve from fully discharged to fully charged.   A 'smart,' reliable monitor is needed.  Smart would be capabilities that keep track of the time history to as accurately as possible predict time remaining for current usage.   Reliable would be features that keep the system operational in the presence of common failures, allowing the user to repair the system at their convenience with no downtime.  At present, my system is designed for a couple, one-off prototypes and relies on calibration of inexpensive components for precision.  The known condition of full saturation is easily detected and used to re-calibrate the device on the fly.  Hardware RC filtering is needed to clean up the sensor signals from noise injected by AC inverter devices.  A 1 Hz low-pass anti-alias filter in hardware is all that is needed.   Since SoC is a long term, e.g. 24 hour integration process – a very slow low-pass filter in itself, no precision is lost using the hardware RC filtering.   Therefore, advanced software filtering is not required for the main task of counting Coulomb charge.   An Extended Kalman Filter (EKF) advanced filtering is useful, however, to detect component failures and establish reliability.   I used Mathworks' EKF prototype.  I created my own 'reservoir' charge model to track hysteresis.  I found that reasonable reliability is achieved with simplex temperature sensing, simplex voltage sensing, and dual current sensing.   The combination of two current signals, one voltage sensor, the EKF, and known SoC characteristic (voltage-currrent-time history) enables the equivalent of triplex current sensing.   Quiet signal detection logic detects that a current sensor is disconnected either by wiring or failure to help isolate.  For strictly hardware reliability reasons, the 1-wire temperature sensor and the mini-OLED display are line replaceable.   Faults and history are recorded in EERAM for later retrieval.   A standalone Python data reduction program (DRP) allows comparing history with a model to understand operation.   The DRP also serves as regression machine to compare software changes with past changes, to develop component maps for characterizing a system, and to investigate problems.  Some learnings:   The system needs to run at about 0.1 seconds update to accurately capture by integration the peaks and valleys of battery bank usage.  The EKF needs to run double precision as well as slower update rate, about 0.5 seconds, to handle the numerics of the system.   It is possible to self-calibrate by comparing total charge history to total discharge history between known charge states – full charge.   By triangulation of data history, the charging efficiency of the batteries needs to be estimated to complement the history data.  System uncertainty for this home-made system is large so that this self-calibration adds no value and was omitted from the published version.    Simple scalar-adder calibration of the installed current sensor using a clamping current meter is sufficient to establish monitor precision within about a half hour of time remaining estimate.  To calibrate the system, the user needs to be intentionally discharged and recharged at expected operating temperatures to characterize the SoC-voltage (voc(soc)) map and hysteresis model.  Triangulation of data, IE. repeated calibration runs from full charge to full discharge, allows estimation of the battery capacity versus rated while calibrating the current sensors (full charge condition is repeatable).  In the case of a CPAP system, I used a couple household fans to simulate actual load and ran data collection overnight in the driveway with the fans while I slept in the house with  my CPAP.  Battery life may be monitored by repeat calibration.   Most of my findings are preliminary based on my observations of prototypes and a lot of experience in the development of computer controlled systems.   I took advantage of my 'skunk works' arrangement in retirement.    Rigorous study is needed to establish the findings as fact for some product device.
+Users of rechargeable battery banks need to know how much charge remains.  This becomes important for estimating the range of travel for an electric car, for example – the 'gas gauge replacement.'   In my case, when truck camping with my CPAP machine I need to know if there is enough charge in the RV battery bank to power the CPAP overnight.   I've never woke up gasping and I want to minimize that possibility.   Old technology batteries, e.g. Lead-acid, have a steep curve relationship between terminal voltage and state-of-charge (SoC).   This makes it easy to use a voltmeter as a SoC gauge.  Newer batteries developed for electric cars are different.  The flat voltage-SoC characteristic of modern LiFeP04 batteries – safe to install in sleeping quarters and efficient charge handlers – makes it nearly impossible to guess SoC from voltage measurement.   Further complicating the task, the electrical hysteresis where voltage depends on direction of charging/discharging and time history is large compared to the SoC characteristic.   Hysteresis uncertainty approaches the entire SoC curve from fully discharged to fully charged.   A 'smart,' reliable monitor is needed.  Smart would be capabilities that keep track of the time history to as accurately as possible predict time remaining for current usage.   Reliable would be features that keep the system operational in the presence of common failures, allowing the user to repair the system at their convenience with no downtime.  At present, my system is designed for a couple, one-off prototypes and relies on calibration of inexpensive components for precision.  The known condition of full saturation is easily detected and used to re-calibrate the device on the fly.  Hardware RC filtering is needed to clean up the sensor signals from noise injected by AC inverter devices.  A 1 Hz low-pass anti-alias filter in hardware is all that is needed.   Since SoC is a long term, e.g. 24 hour integration process – a very slow low-pass filter in itself, no precision is lost using the hardware RC filtering.   Therefore, advanced software filtering is not required for the main task of counting Coulomb charge.   An Extended Kalman Filter (EKF) advanced filtering is useful, however, to detect component failures and establish reliability.   I used Mathworks' EKF prototype.  I created my own 'reservoir' charge model to track hysteresis.  I found that reasonable reliability is achieved with simplex temperature sensing, simplex voltage sensing, and dual current sensing.   The combination of two current signals, one voltage sensor, the EKF, and known SoC characteristic (voltage-current-time history) enables the equivalent of triplex current sensing.   Quiet signal detection logic detects that a current sensor is disconnected either by wiring or failure to help isolate.  For strictly hardware reliability reasons, the 1-wire temperature sensor and the mini-OLED display are line replaceable.   Faults and history are recorded in EERAM for later retrieval.   A standalone Python data reduction program (DRP) allows comparing history with a model to understand operation.   The DRP also serves as regression machine to compare software changes with past changes, to develop component maps for characterizing a system, and to investigate problems.  Some learnings:   The system needs to run at about 0.1 seconds update to accurately capture by integration the peaks and valleys of battery bank usage.  The EKF needs to run double precision as well as slower update rate, about 0.5 seconds, to handle the numerics of the system.   It is possible to self-calibrate by comparing total charge history to total discharge history between known charge states – full charge.   By triangulation of data history, the charging efficiency of the batteries needs to be estimated to complement the history data.  System uncertainty for this home-made system is large so that this self-calibration adds no value and was omitted from the published version.    Simple scalar-adder calibration of the installed current sensor using a clamping current meter is sufficient to establish monitor precision within about a half hour of time remaining estimate.  To calibrate the system, the user needs to be intentionally discharged and recharged at expected operating temperatures to characterize the SoC-voltage (voc(soc)) map and hysteresis model.  Triangulation of data, IE. repeated calibration runs from full charge to full discharge, allows estimation of the battery capacity versus rated while calibrating the current sensors (full charge condition is repeatable).  In the case of a CPAP system, I used a couple household fans to simulate actual load and ran data collection overnight in the driveway with the fans while I slept in the house with  my CPAP.  Battery life may be monitored by repeat calibration.   Most of my findings are preliminary based on my observations of prototypes and a lot of experience in the development of computer controlled systems.   I took advantage of my 'skunk works' arrangement in retirement.    Rigorous study is needed to establish the findings as fact for some product device.
 
 
 ## Off-the-Shelf Hardware Description
-I used prototype boards to connect various off-the-shelf devices into a reliable, maintainable box.  The heart of the system is the Particle programmable logic controller (PLC).   I've incorporated both the Particle Photon device gen 1 device and the Particle Argon gen 3 device.   Figure board layout shows the latest Argon schematic using Stripboard, a prototyping 0.1 inch spaced board that underneath connects vertical elements with layered copper conductors and over the top and bottom connects signals into bus bars and horizontal elements that connect v+ and v- into bus bars.   The Photon is no longer available, so I didn't bother to show a schematic.  It is similar without the 47L16 device but with a battery connected to VBAT.   The Argon will disappear soon too probably in 2023.   The recommended replacement is Photon 2.  In the future I suggest getting the Photon 2 developer kit that has headers and other peripherals such as USB installed.
-<img src="doc/board layout.png" /> Figure:  State of Charge Wiring Diagram Board Layout
+I used prototype boards to connect various off-the-shelf devices into a reliable, maintainable box.  The heart of the system is the Particle programmable logic controller (PLC).   I've incorporated both the Particle Photon device gen 1 device and the Particle Argon gen 3 device.   Figure board layout shows the latest Argon schematic using Stripboard, a prototyping 0.1 inch spaced board that underneath connects vertical elements with layered copper conductors and over the top and bottom connects signals into bus bars and horizontal elements that connect v+ and v- into bus bars.   The Photon is no longer available, so I didn't bother to show a schematic.  It is similar without the 47L16 device but with a battery connected to 'VBAT.'   The Argon will disappear soon too probably in 2023.   The recommended replacement is Photon 2.  In the future I suggest getting the Photon 2 developer kit that has headers and other peripherals such as USB installed.
+
+![layout](doc/board layout.png)
+ <b>Fig.1 - State of Charge Wiring Diagram Board Layout</b>
+
+<img src="doc/board layout.png" alt="State of Charge Wiring Diagram Board Layout"/>
+ <b>Fig.1a - State of Charge Wiring Diagram Board Layout</b>
+
 
 It doesn't matter which of the old generation boards are used.   The Photon uses an external CR2040 battery to energy EERAM while the Argon uses a peripheral 47L16 EERAM device that saves to EEPROM when it detects loss of power, using an external capacitor to power itself while doing so.   The SOC_Particle application uses #define to configure for either board.   When the use 'Configure for device' on the Particle Workbench Visual Studio IDE and select the Particle device, Argon and give it a name, it automatically configures the global #defines to allow you to select the correct #define locally for your own use.   Giving it a name checks that you're loading the proper device that you configured for.  
 
@@ -77,7 +83,7 @@ In the spirit of Software Engineering principles, I document perceived requireme
     4. CPU hard and soft resets must not change the state of operation, either soc, display, or serial bus.
     5. Serial streams shall have an absolute Julian-type time for easy plotting and comparison.
     6. Built-in test function, engaged using 'talk' function.
-    7. Load software using USB. WiFi to truck or phone (hotspot) may not be reliable.  Related requirement: provide holes to press Particle Device buttons: sometimes setup long-press needed or manual flash request needed with these devices.
+    7. Load software using USB. Wi-Fi to truck or phone (hotspot) may not be reliable.  Related requirement: provide holes to press Particle Device buttons: sometimes setup long-press needed or manual flash request needed with these devices.
     8. Likewise, monitor USB using laptop or phone. 'Talk' function should change serial monitor and inject signals for debugging.
     9. Device shall have no effect on system operation.  Monitor function only.
     10. Bluetooth serial interface required. ***This did not work due to age of Android phone (6 yrs) not compatible with the latest Bluetooth devices.
@@ -123,7 +129,7 @@ In the spirit of Software Engineering principles, I document perceived requireme
     1. An EKF is no more accurate than the open loop voc(soc) curves.  As a solver, it does seem to follow through troughs without divergence – a pleasant surprise.
     2. A Coulomb Counter implementation is very accurate but needs to calibrate every couple cycles to avoid 'infinite wander.'  This should happen naturally as the battery charges fully each day.
     3. Blynk phone monitor implemented, as well as Particle Cloud, but found to be impractical because
-       a. Seldom near WiFi when camping.
+       a. Seldom near Wi-Fi when camping.
        b. OLED display works well.
        c. 'Talk' interface works well. Can use with phone while on the go. Need to buy dongle for the phone (Android only): Micro USB 2.0 OTG Cable ($6 on Amazon).
     4. Shunt monitor seems to have 0 V bias at 0 A current so this is assumed when scaling inputs.
@@ -132,7 +138,7 @@ In the spirit of Software Engineering principles, I document perceived requireme
     7. An iterative solver for voc(soc) model works extremely well given calculable derivative for the equations from reference. PI observer removed in favor of solver. The solver could be used to initialize soc for the Coulomb Counter but probably not worth the trouble.  Leave this device in more future possible usage. An EKF then replaced the solver because it essentially does the same thing and was much quieter and could be used for fault detection / isolation.
     8. Note that there is no effect of the device on system operation so debugging via serial can be more extensive than usual.
     9. Two-pole filters and update time framing, determined experimentally and by experience to provide best possible Coulomb Counter and display behavior.
-    10. WiFi turned off immediately. Can be turned on by 'Talk('w')'
+    10. Wi-Fi turned off immediately. Can be turned on by 'Talk('w')'
     11. Battery temperature changes very slowly, well within capabilities of DS18B sensor.
     12. 12-bit AD sufficiently accurate for Coulomb Counting. Precision is what matters and it is fine, even with bit flipping.
     13. All constants in header files (Battery.h and constants.h and retained.h and command.h).
@@ -208,8 +214,8 @@ A disadvantage of this design is that 4 A/D are needed for two sensors.   Each s
 
 All information including code, data sheets, scripts, the source for this document is organized in the open GitHub repository https://github.com/davegutz/myStateOfCharge.   The MIT license is applied to make all this information open.
 Most information is in the primary application folder SOC_Particle, named after the first prototype:  a Particle Photon PLC running a 'state of charge' counting algorithm.
-Moving alphabetically, the first folder 'Battery State' is a record regarding the theory of LiFeP04 battery state of charge (SoC) monitoring.   The subfolder 'EKF' is a record of theory of Extended Kalman Filter as applied to SoC.   Inside the 'sandbox' folder are Python models of this topic.
-The second folder 'dataReduction' collects raw CoolTerm data capture files '.txt.'   The README.md file at the top level has a listing of the different types of scripts run using the 'talk' function through CoolTerm UART transmit/receive interface to generate these files.   That is normally done as regression testing to understand code change.   Those are sometimes renamed as '.xls', '.xlsx', or '.ods' to plot by hand using Microsoft Excel or Open Document Spreadsheet.   By renaming them the hand work is remembered in the repository and not over-written by the next regression test runs through the script series.   The '.stc' files are CoolTerm configuration files that are useful to save.  The subfolder 'figures' is a permanent collection of data reduction runs, see the 'py' folder of the data reduction Python scripts.  The subfolder 'temp' is a scratch folder used by the Python scripts.   The '.csv' files in there are useful for debugging the Python scripts.
+Moving alphabetically, the first folder 'Battery State' is a record regarding the theory of LiFeP04 battery state of charge (SoC) monitoring.   The sub-folder 'EKF' is a record of theory of Extended Kalman Filter as applied to SoC.   Inside the 'sandbox' folder are Python models of this topic.
+The second folder 'dataReduction' collects raw CoolTerm data capture files '.txt.'   The README.md file at the top level has a listing of the different types of scripts run using the 'talk' function through CoolTerm UART transmit/receive interface to generate these files.   That is normally done as regression testing to understand code change.   Those are sometimes renamed as '.xls', '.xlsx', or '.ods' to plot by hand using Microsoft Excel or Open Document Spreadsheet.   By renaming them the hand work is remembered in the repository and not over-written by the next regression test runs through the script series.   The '.stc' files are CoolTerm configuration files that are useful to save.  The sub-folder 'figures' is a permanent collection of data reduction runs, see the 'py' folder of the data reduction Python scripts.  The sub-folder 'temp' is a scratch folder used by the Python scripts.   The '.csv' files in there are useful for debugging the Python scripts.
 The folder 'datasheets' has hardware datasheets as well as snapshots of any hand-drawn schematics in 'Schematics' and a folder 'pSpice' with LTSpice modeling of the circuits.
 The folder 'lib' is created by Visual Studio Particle Workbench to import Particle-specific code libraries.
 The folder 'py' was mentioned before.   It is the Python scripts used for data reduction.   It was handy to run the same scripts to overlay data on predicted model results.   So any design work could be performed by iterating on a particular script run that has a problem, modifying the Python model of the application to find solutions.   Inside 'py' is a folder 'pyDAGx' where I store my own Python libraries.   The 'venv' folder is maintained by pyCharm IDE.
@@ -339,7 +345,7 @@ OLED board carefully off to the side.  Will need a hobby box to contain the fina
    1. Temperature derivative on counting is a new concept. I believe I am pioneering this idea of technology.  That the temperature effects are large enough to fundamentally increase the order of Coulomb Counting. 
    2. My notion seems to be backed up by high sensitivity
 7. Dynamic Model 
-   1. Not sure this is even needed to due to low bandwidth of daily charge cycle.  Average out. 
+   1. Not sure if this is even needed to due to low bandwidth of daily charge cycle.  Average out. 
    2. Leave this in design for now for study.  Able to disable
 8. EKF 
    1. Failure isolation 
@@ -359,7 +365,7 @@ OLED board carefully off to the side.  Will need a hobby box to contain the fina
 6. Real runs using battery heater to establish VOC(SoC, Tb) and determine capacity, which should be > rating.
 
 ## Boot checklist - after new software load
-1. Synchronize time if necessary. Use hotspot on phone.  Press left button and hold 3 sec to get blink blue. Use particle app to '+' device. Reset using right button to complete the process.  Time is UTC.  Unfortunately for device soc1a, the bar code on the Argon is hidden inside the case.   Then you must use the talk('U') feature of the interface programs.   This will work over Bluetooth for Argon.   Use Unix Epoch website and subtract (hours from Zulu)* 3600 and paste onto U.
+1. Synchronize time if necessary. Use hotspot on phone.  Press left button and hold 3 sec to get blink blue. Use particle app to '+' device. Reset using right button to complete the process.  Time is UTC.  Unfortunately for device _soc1a_, the bar code on the Argon is hidden inside the case.   Then you must use the talk('U') feature of the interface programs.   This will work over Bluetooth for Argon.   Use Unix Epoch website and subtract (hours from Zulu)* 3600 and paste onto U.
 2. Update the version in local_config.h for 'unit ='.
 3. Start CoolTerm record. Record Hd, Pf, Pa, brief v1 burst for the previous load.
 4. On restart after load, check the retained parameter list (SRAM battery backed up).  The list is displayed on startup for convenience.  Go slowly with this if you've been tuning.
@@ -381,460 +387,24 @@ Dynamic Randles Model
 Dynamic Hysteresis Model
 Coulombic Efficiency
 
-
 ## Calibration
+See this [document](Calibrate 20230513.odt)
 
-The goal of calibration is to accurately predict battery charge and current.   Knowing current it is convenient to also display the time remaining either to discharge or to charge.
+## Appendix 1.   Nomenclature
 
-Tuning the Temperature Sensor
-Tuning the Voltage Sensors
-Tuning the Current Sensors
-Tuning the Coulombic Efficiency
-Tuning the Model
-An observer of the raw activity on voltage and current measurement will notice that battery terminal voltage Vb will bounce dramatically as the input current Ib changes.   The characteristic of interest for charge is the relationship between the open circuit voltage Voc and the State-of-Charge (SoC) when nothing is changing at the terminals.   Knowing that, and having an accurate model of the things that change when current changes, allows predicting Voc(SoC) when current changes.   Then the State-of-Charge is known.
+| Application | Off-line  | Description                                                                 |
+|-------------|-----------|-----------------------------------------------------------------------------|
+| _tau_ct_    | _tau_ct_  | Battery chemistry charge transfer time constant, s                          |
+| _tau_dif_   | _tau_dif_ | Battery chemistry diffusion time constant, s                                |
+| _r_ct_      | _r_ct_    | Battery chemistry charge transfer resistance, Ohm                           |
+| _r_dif_     | _r_dif_   | Battery chemistry diffusion resistance, Ohm                                 |
+| _r_sd_      | _r_sd_    | Battery chemistry lumped parameter Randles model equivalent resistance, Ohm |
+| _r0_        | _r0_      | Battery chemistry direct resistance, Ohm                                    | 
+| _sres_in_   |           | Scalar applied to all Randles model resistances for off-line tuning         |
 
-What's its used for is up to the designer.   This application uses it as a surrogate for a third current sensor to isolate current sensor failures.
-There are no intermediate sensors in the battery chemistry to help with that process.   That would be nice.
 
-The two main model pieces are the charging dynamics and the hysteresis.   These may be represented by a dynamic linear model usually called the Randles model after a man named Randles and a dynamic non-linear hysteresis model of some sort.    I relied on industry literature to discover this and to provide me with a starting point on their design.   The construction I discuss elsewhere.
 
-The method I have chosen is to embed the models in the application.   Therefore I replicate the models off-line and tune using data to drive the models and compare the result to data.   Assuming the sensors themselves are already calibrated, then using known Ib to drive the models I look to match Vb.  The application generates a ton of data.  To collect good fidelity of the Randles model, at least every 0.3 seconds is required to prevent aliasing the fast time constant.   I use 0.2 seconds.   The default execution speed of the application is 0.1 seconds (Dr=100 ms) for best fidelity during operation.  I leave that and simply collect the data slower than it is created (DP=2).   The parameter DP sets how often to print the application data out UART while it runs at 0.1 s (100 ms)  seconds update.  Then the off-line model may run its dynamics at 0.2 s without aliasing.   If aliasing is observed by divergence of the Randles model, it has been mis-tuned.   So long runs at 0.2 s are collected and drive the model. 
-
-There are two processes performed simultaneously.   Because for the model tuning process to work, the off-line model must agree with the on-line application.   The Baseline of Figure 5 is declared as such because the model may be seen to agree with the application by overlaying data.   Then with that agreement assured, and the same 'Ib' input to both then the model can be tuned to make the 'Vb' agree.
-
-The off-line data is marked as '_ver' for 'verification.'   In Figure 5you can see that 'ib_charge_s_ver' overlays 'ib_charge_s' which intern overlay 'ib_in_s' and 'ib_sel.'   That last variable, 'ib_sel' is the final, selected value of current that is driving everything.
-
-This verifies the integrity of the models required for the matching process to be valid.
-A glossary is included in Appendix 1.   Nomenclature to help.  Figure 4  Is a Functional Block Diagram of the data match process.   There are many modes to run this match.   The one illustrated is one that inputs current to all paths and outputs voltages from each block.   It is useful for troubleshooting to sometimes drive one path with a voltage from another path but the simplest one shown here is the most straightforward for data match discussed in this tuning section.
-
-Before beginning tuning I check the following matches for the four Mon/Sim legs of Figure 4:
-    • 'dv_hys'	'dv_hys_s'	'dy_hys_ver'		'dv_hys_s_ver'
-    • 'dv_dyn'	'dv_dyn_s'	'dv_dyn_ver'		'dv_dyn_s_ver'
-    • 'soc'		'soc_s'		'soc_ver'		'soc_s_ver' 
-    • 'vb'		'vb_s'		'vb_ver' 		'vb_s_ver'
-
-The characteristics most readily available to tune a match between off-line vb, 'vb_s_ver' and on-line vb, 'vb' are
-    • Resistance values in the off-line Randles models: r_ct, r_dif, r0
-    • Time constant values in the off-line Randles models:  tau_ct, tau_dif
-    • Hysteresis tables in the off-line models: x_dv, y_soc, t_r, t_dv_max, t_dv_min
-    • voc(soc) table in off-line models:  t_x_soc, t_y_t, t_voc
-    • Diffusion time constant in the off-line models: tau_dif 
-    • Battery capacity, NOM_UNIT_CAP
-    • Coulombic charge efficiency, COULOMBIC_EFF
-
-Quick studies are possible using simple scaling parameters.   The most useful are
-	Resistance scaling of all the resistance values in the off-line Randles models: 'sres_in'
-	Time constant scaling in the off-line Randles models:  stauct, staudif
-	Hysteresis scaling of the off-line models: 'scale_hys_mon_in' and 'scale_hys_sim_in'
-
-The initial generation of these model elements using a Battleborn prototype system on my RV truck was complicated, time consuming, and full of guess work until data congealed in a match.   Eventually, small changes in test parameters and special testing to isolate parameter effects won out.
-The approach of confirming all four legs of this paradigm match, drives quality into the process.
-This CHINS installation does not yet know what the Coulombic Efficiency and capacity are.   Several runs and recharges to full discharge are required to triangulate those values.    For now, the Battleborn observations are used:  0.985 and 105 A-h.
-
-Black Box Paradigm
-To review and add perspective:  the tuning process may be considered a black-box process.
-
-There are three signal measurements.  'b' stands for 'bank' consolidation of multiple batteries in a bank
-    • Current into the battery terminals, Ib
-    • Voltage at the battery terminals, Vb
-    • Temperature of the battery chemistry, Tb
-
-There are four models each with two components
-    • Application BatteryMonitor Randles
-    • Application BatteryMonitor Hysteresis
-    • Application BatterySim Randles
-    • Application BatterySim Hysteresis
-    • Off-line Python BatteryMonitor Randles
-    • Off-line Python BatteryMonitor Hysteresis
-    • Off-line Python BatterySim Randles
-    • Off-line Python BatterySim Hysteresis
-      
-
-
-There are many characteristics to observe
-    • Capacity, Coulombs from counting – observe exhaustion and saturation for various conditions to triangulate
-    • Current step response – initial step and subsequent settling times to extract time constants.   Hold at least 3x longer than hysteresis time constant (~45 minutes)
-    • Predicted voc(soc) – hysteresis time constant and resistance values
-    • Predicted voc(soc) – mismatch between discharge-charge
-    • Long-term settling – hysteresis time constant (=1/RC)
-
-There are an infinite number of data conditions to observe, such as
-    • Moment of saturation – accumulated current measurements should be zero for a perfect model match result.  Measures Coulombic Efficiency and confirms sensor calibrations
-    • Moment of exhaustion – need to know minimum Coulomb state at all operating temperatures
-    • Slow discharge-charge – schedule development because hysteresis small
-    • Rapid discharge-charge
-    • Step current changes – detection of gains especially Randles resistance
-    • Difference between discharge-charge of the voc(soc) curve.   It should be zero and flat for a perfect model match result.  Adjust dynamics, scalars, and schedules.
-    • Leverage the fact that the Randles model always passes output current equal to input current
-    • Leverage the fact that the linear Randles model is linear and therefore symmetrical for discharge-charge
-    • Leverage the fact that the hysteresis will be near zero for very slow discharge rates
-      
-The task is to match the predicted Vb of the off-line Sim model to the measured Vb under all operating conditions.  And ensure that there remains a perfect match between the four component models at all times.   Then we can use the models for anything.
-
-A perfect match won't be possible.   The difference between discharge-charge of voc(soc), Volts at State-of-charge,  is a reasonable measure of overall success.
-
-Initial Tuning
-The very first step is to calibrate the sensors.   After that we assume they are valid.   It will become obvious if they are incorrect, unfortunately after a lot of work.   So do that first, carefully.
-
-The next first step is to make sure that all the model components are consistent with each other.    The real world data does not have to match at this point.   There are four versions of the Randles model and four versions of the hysteresis model.   The application has two of each, one set called in the BatteryMonitor object and the other set called in the BatterySim object.
-
-The off-line model has two of each and every effort was made to duplicate the C++ code of the application in Python code of the off-line model.   The plot sets carefully overlay all four models to allow them to be validated easily.
-
-Driving the models with data is a time tested way to drive model verification.   Collect data from the application and drive the models and view matches.   So the basic verification is to collect Ib, Vb, and Tb.  Drive the off-line model with the Ib and Tb data and over-plot Vb.
-Data Collecting
-There are two ways to gather data: transient verbose continuous streaming into CoolTerm at 0.1 or slower intervals and steady-state fault logging at 30 minute intervals.   Interestingly, the slow fault logging is sufficient for most tuning except Randles model.
-
-The Randles model is also the one that makes most sense to tune first, since it is linear and symmetrical.   After it is tuned, assuming it doesn't vary with operating condition, it is relatively easy to extract the hysteresis.
-
-To generate enough degrees of freedom for tuning we will need some charging, some discharging, rapid and slow, all state-of-charge. 
-
-Tuning Step 1
-The results of initial tuning are shown in Figure 5, Figure 6, and Figure 7 for transients soc=0.9, transients soc=0.8, and steady-state fault log from soc=0.9-1.0.   For these I've made following initial changes:
-    • schedule tune to center about steady-state
-    • Randles tune all resistances by 1.6x Battleborn
-    • Randles tune tau_dif to be 0.3x Battleborn
-    • Hysteresis variable
-The hysteresis transfer function is of the form:
-
-	tau = Rh * gain_scalar / (Rh * Ch * tau_scalar * s + 1)
-
-So we need to make two adjustments to match data.   These I call s_hys, and s_cap.   The first is the gain_scalar and the second is the tau_scalar.    Baseline is Battleborn:
-
-```
-y_soc_bb  = [0.0,   0.5,  1.0],  soc brkpt
-x_dv_bb   = [-0.7, -0.5,  -0.3,  0.0,   0.15,  0.3,   0.7], dv_hys brkpt
-t_r_bb    = [0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
-		 0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
-		 0.016, 0.016, 0.016, 0.005, 0.010, 0.010, 0.010]; Rh values
-t_dv_max_bb  = [0.7, 0.3,  0.15]
-t_dv_min_bb  = [-0.7, -0.5, -0.3]
-hys_cap =  3.6e3				tau_null = 3.6e3 * 0.005 = 18 s;  Ch value
-
-Condition
-Randles s_res
-Randles
-s_tau_dif
-Hysteresis
-s_cap_chg
-Hysteresis
-s_hys_chg
-Hysteresis
-s_cap_dis
-Hysteresis
-s_hys_dis
-0.9-1.0 Flt
-1.6
-0.3
-90
-8
-10
-2
-0.9 Trans
-1.6
-0.3
-90
-4
-10
-0.7
-0.8 Trans
-1.6
-0.3
-4
-1.5
-40
-2
-```
-Table 1: CHINS Battery Initial Tuning #1 – Non-schedule data
-
-The Randles values in the table apply to all the Randles resistances simultaneously and to the diffusion time constant.  The hysteresis values in the Table apply to t_r and hys_cap, (Rh and Ch).
-
-
-
-
-
-
-
-The end result of this tuning step is a difference between discharge-charge voc(soc) of +/-0.05 volts – see the red and green lines voc_stat_chg_ver and voc_stat_dis_ver.   This is very good and would cause an uncertainty of about 20% soc.   This should make a useful reference model.
-
-EKF differences, not shown, should sort themselves out after re-running the application with these changes.  Anyway, you should not spend much time looking at EKF until the rest of the application is tuned and re-run.
-Tuning Step 2
-The challenge is to turn these results into hysteresis schedules.  This is denoted as myCH_Tuner=3 in the Python code.  The CHINS values are:
-
-y_soc_ch  = [0.8,   0.86,  0.92,  0.95];                          soc brkpt
-x_dv_ch   = [-0.1,    -.05,  -.04,  0.0,  0.06,  0.07,  0.1];  dv_hys brkpt
-t_r_ch    = [0.004,  0.004,  0.4,  0.4,  0.4,   0.010, 0.008,
-		 0.003,   0.003,  0.4,  0.4,  0.003, 0.003, 0.003,
-		 0.003,   0.003,  0.4,  0.4,  0.003, 0.003, 0.003,
-		 0.03,    0.03,   0.4,  0.4,  0.08,  0.08,  0.08];     Rh values
-t_dv_max_ch  = [0.3,  0.3,  0.3,  0.3]
-t_dv_min_ch  = [-0.3, -0.3, -0.3, -0.3]
-hys_cap =  1e4				tau_null = 1e4 * 0.4 = 4000 s;  Ch value
-Table 2: CHINS Initial Hysteresis Tuning - Changed Later
-
-
-
-
-and the results results are shown in Figure 8, Figure 9, and Figure 10.
-
-
-
-
-
-
-
-
-
-Now the end result of this tuning step is a difference between discharge-charge voc(soc) of between 0.05 and 0.10 volts – see the red and green lines voc_stat_chg_ver and voc_stat_dis_ver.   This is nearly as good as tuning attempt 1 and would cause an uncertainty of about +/- 20% soc.  This should make a useful reference model.
-
-But it could be improved.  We can never match charging transients because the hysteresis model lacks a restriction on the supply current into the hysteresis capacitor.   See the red ellipses on the figures.   This should be added in a future version.   Also the 0.9-1.0 tuning lacks transient data to properly tune.   This should be gotten later.    Also we don't have the full state-of-charge range.   The modeling and scheduling is especially important near zero charge to alert the user that they're running low.   This should be gotten later.  Finally the hysteresis capacitance is 10000 f.  The Battleborn was 3600 and the maximum value to allow 15 A of the 30 A charge controller to charge at 0.0014 v/s observed is about 10000 f.   So next time around I would tune everything with 3600 just to be foolishly consistent.
-
-When the restriction on hysteresis supply is added later, there are a couple other improvements needed:
-    • Set tau_ct to the present tau_dif.  The present tau_ct is too fast to be useful and doesn't seem to exist anyway.
-    • The present tau_dif is probably the 400 second hysteresis time constant.   So delete it and use the non-linear hysteresis model instead.   Since that is non-linear than tau_dif becomes undefined
-    • This allows minimum update time to be as long as 10 seconds (tau_ct ~ 20 for CHINS).   This further allows much more prolonged data capture and faster design times.   I would still execute the monitor at 0.1 seconds to capture all the 1 Hz bandwidth sensed current changes.  If we miss peaks the accumulated Coulomb counting errors would be large.
-
-EKF differences, not shown, should sort themselves out after re-running the application with these changes.  Anyway, you should not spend much time looking at EKF until the rest of the application is tuned and re-run.   We will need to keep an eye on the EKF during these early times because the voc(soc) schedule for CHINS is flat at high soc.  This EKF's ability to solve to a flat line is TBD.   A pure numerical solver would not be able to.   The EKF has a soc input to favor it 'probably' close to the Coulomb counter.
-
-
-A couple tips on tuning hysteresis:
-    • The resistance is high around null to create a hysteresis band.   Tau = R*C so check that Tau is about 2.5 hours, or 7500.   This will have to be tuned again to match the real world battery relaxation time period 
-    • use the right side to tune the shape of increasing dv / current and the left for decreasing
-    • Set s_hys_chg/dis = 0 to see what the scripts think the ideal R is
-    • Need 45 minute transients to see the slow ~500 second hysteresis time constant.
-    • You can calculate requirements for the hysteresis capacitance, C.   When running with s_hys_chg/dis = 0 as described a couple lines previous, the required rate of change of voltage is available.  The maximum supply current is known.   Therefore the maximum C that allows charging to keep up with the required (check =observed) voltage is known.
-
-
-Let's revisit the purpose of this tuning.  The accuracy of the things we're tuning affect how well the EKF tracks reality for purposes of detecting sensor faults.   The thresholds of faults have been tuned out to +/-0.2 soc and beyond due to unmodeled variations.   So the <0.05 V tuning accuracy that we observe above are within the needs of the fault detection.  This level of effort is needed to achieve the +/-0.2 result on thresholds, however.
-
-It's fair to ask if the sensor redundancy is worth the effort.   I am considering simplifying to one current sensor and simply throwing a generic, displayed fault light when we're sure there's something wrong.
-
-Schedule Tuning – at the end
-The original process used .xls/.ods spreadsheets.   Lately I used the plots from tuning hysteresis.   When the red and green curves above were aligned after tuning hysteresis, I would tune voc(soc) to run the schedule line (black) through the middle of the red and green.   Spreadsheets not required.
-Yet More Tuning
-I was able to eliminate the charging supply current problem mentioned with the 'ellipses' in the previous section.  I scheduled a scalar on the ib input to the hysteresis model.   The scalar is a function of dv_hys like the resistance model is and works well.    Here's the final resistance / scalar schedules, Table 4, where t_r is the resistance schedule and t_s  is the scalar schedule.   The suffix '1' is for the CHINS battery.   '0' is for the Battleborn battery that did not need additional scaling.  The t_s schedule for Battleborn is unity 1.
-
-And the final tuned transients appear below in Figure 11, Figure 12, and Figure 13.   Notice that the 0.9 – 1.0 fault run map is missing and a low content transient is added.   The reconstruction of transient behavior from 30 minute fault data using CompareFault.py does not do a good job of capturing the Randles dynamics so the hysteresis modeling is poor.   Eventually I modified the  Python model to simply run to minimum or maximum hysteresis depending on negative or positive sign of charge current.  The Randles model in the reconstructed mode is ignored.   So don't use it to tune hysteresis logic or schedules.   But it can be used to estimate voc_soc scheduling.
-
-
-
-
-
-
-
-
-
-
-Final accuracy.
-
-
-Condition
-Randles r_0
-Randles
-r_ct
-Randles
-tau_ct
-all
-0.0138
-0.0059
-24.9
-Table 3: CHINS Battery Final Tuning
-
-Schedule is flat.
-
-self.cap1 = 1e4  # scaled later
-t_soc1 = [.47, .75, .80, .86]
-t_dv1 = [-.10,   -.05,   -.04, 0.0,  .02,  .04, .05,   .06,   .07,   .10]
-schp4 = [0.003,  0.003,  0.4,  0.4,  0.4,  0.4, 0.010, 0.010, 0.010, 0.010]
-schp8 = [0.004,  0.004,  0.4,  0.4,  0.4,  0.4, 0.4,   0.4,   0.014, 0.012]
-schp9 = [0.004,  0.004,  0.4,  0.4,  .2,  .09,  0.04,  0.006, 0.006, 0.006]
-t_r1 = schp4 + schp8 + schp8 + schp9
-t_dv_min1 = [-0.3, -0.3, -0.3, -0.3]
-t_dv_max1 = [0.3, 0.3, 0.3, 0.3]
-SRs1p4 = [1.,    1.,    .2,   .2,   .2,   .2,  1.,    1.,    1.,   1.]
-SRs1p8 = [ 1.,    1.,    .2,   .2,   .2,   1.,  1.,    1.,    1.,   1.]
-SRs1p9 = [ 1.,    1.,    .1,   .1,   .2,   1.,  1.,    1.,    1.,   1.]
-t_s1 =  SRs1p4 + SRs1p8 + SRs1p8 + SRs1p9
-Table 4: CHINS Final Hysteresis Scheduling
-t_x_soc1 = [-0.100,  -0.060,  -0.035,   0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.980,   0.990,   1.000]
-t_y_t1 = [5.,  11.1,   11.2,  40.]
-t_voc1 = [4.000,   4.000,   4.000,   4.000,   4.000,   4.000,   4.000,   5.370,  10.042,  12.683,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700,
-          4.000,   4.000,   4.000,   4.000,   4.000,   4.000,   6.963,  10.292,  12.971,  13.025,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700,
-          4.000,   4.000,   4.000,   9.000,  12.453,  12.746,  12.869,  12.931,  12.971,  13.025,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700,
-          4.000,   4.000,   4.000,   9.000,  12.453,  12.746,  12.869,  12.931,  12.971,  13.025,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700]
-
-Table 5: CHINS Final voc(soc)
-
-Finally
-Make sure to test the logic after making these extensive tuning changes.    Following are some of the problems I found and how I fixed them.
-    • soc_ekf != soc steady-state.   In the model with tight constraints, there's no reason the EKF should differ at steady-state.  When I entered the new voc_soc schedule it had a long flat section.   Normally, such flat sections, or valleys even, cause solvers to be indeterminate. The EKF does a fair job of finding a solution because it has soc_ekf as a reference, an independent Coulomb counter, in addition to the voc_stat error.   But it's not perfect.   I added a 0.01 change at either end of the flat:  -0.01 at 0.80 and +0.01 at 0.98, where 0.00 at 0.90.
-    • The Bs and Bm talk adjustments did not have the desired effect.   When compiled, the proper chemistry behavior occurred.   But changing the chemistry with adjustment did not engage the desired chemistry.  The class structure of the C++ code was missing the proper inheritance between the stored chemistry and the point of use.
-Retune Battleborn
-After learning more with the CHINS tuning it was worth another look at the Battleborn tuning.
-
-I ran a 15 A discharge and 30 A charge around soc=0.8 on the truck with the newly installed Argon Beta configuration.   Warning:  these transients have excessive noise because I forgot a 47 micro-Farad capacitor on the Vb sensor input.   This was corrected later and illustrates another need for testing to verify proper implementation both hardware and software.
-
-As-installed are shown in Figure 14.  You see that the vb_s_ver traces all trend below vb.   It appears that the initial calibration curves have shifted 0.11 volts higher.   I double and triple-checked the Vb calibration to be sure it is correct now.   To investigate I did not reinstall the Photon soc0 device to recheck because that device is hard-wired into the house and also was re-calibrated at that new install.  So I don’t know if an error was made in initial calibration or the battery has shifted over time.
-
-
-   I adjusted the voc(soc) curve output biases and re-ran the Python scripts:  Figure 15,  Figure 16, and Figure 17 where now I also focused on the discharge and charge phases of the transients – the short initial minutes when Randles dynamics are active.
-
-
-
-
-
-The overall view now show a match of vb_s_ver and vb.   Moving on to the focused views we can now observe that the Randles resistance values need tuning to capture the initial jump better.  I increased r_0 to from 0.0046 Ohms to 0.0113 Ohms to capture the initial step and then reduced r_ct from 0.0077 Ohms to 0.001 Ohms to preserve the overall resistance sum of 0.0123 Ohms.  It is apparent by inspection that this will match up the discharge traces but there is a non-linear trend obvious in the charge trace caused by something else.
-
-The something else is the hysteresis model that I proceeded to tweak by reducing resistance in the hysteresis to allow voltage to rise faster.   The final results are shown in Figure 18, Figure 19, and Figure 20.   The hysteresis tweak was small and arbitrary.   Mainly my goal was to make the smallest possible tweak because the dataset is so small.   I pulled the soc=1 curve down to 0.8 and reduced the resistance slightly while increasing the maximum limit on modeled hysteresis to 0.2 volts.
-
-
-
-
-
-There is an artifact in the tuned transients just after 5800 seconds.   This is caused by the data reduction program interpolating incoming data and I ignore it for now.
-
-The final schedules are below.   The highlights indicate what changed from the original.  I saw no reason the change tau_ct with this data set.
-
-Condition
-Randles r_0
-Randles
-r_ct
-Randles
-tau_ct
-all
-0.0113
-0.0010
-83
-Table 6: Battleborn Battery Final Tuning
-
-self.cap1 = 1e4  # scaled later
-t_dv0 = [-0.7,   -0.5,  -0.3,  0.0,   0.15,   0.3,   0.7]
-t_soc0 = [0, .5, .7]
-t_s0 = [1., 1., 1., 1., 1., 1., 1.,
-        1., 1., 1., 1., 1., 1., 1.,
-        1., 1., 1., 1., 1., 1., 1.]
-t_dv_min0 = [-0.7, -0.5, -0.3]
-t_dv_max0 = [0.7,  0.3,  0.2]
-t_r0 = [0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
-        0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
-        0.016, 0.016, 0.013, 0.005, 0.007, 0.010, 0.010]
-Table 7: Battleborn Final Hysteresis Scheduling
-t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17, 0.20, 0.25, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.99, 0.995,
-            1.00]
-t_y_t0 = [5., 11.1, 20., 30., 40.]
-t_voc0 = [4.00, 4.00, 4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
-          4.00, 4.00, 4.00,  9.50,  12.00, 12.50, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.60, 14.46,
-          4.00, 4.00, 10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
-          4.00, 4.00, 12.00, 12.65, 12.75, 12.80, 12.85, 12.95, 13.00, 13.08, 13.12, 13.16, 13.20, 13.24, 13.26, 13.27, 13.72, 14.50,
-          4.00, 4.00, 4.00,  4.00,  10.50, 11.93, 12.78, 12.83, 12.89, 12.97, 13.06, 13.10, 13.13, 13.16, 13.19, 13.20, 13.72, 14.50]
-                 + 0.11
-Table 8: Battleborn Final voc(soc) Scheduling.  ‘+ 0.11’ Indicates Permanent Adjustment to Output 
-Values of Table (VM=VS=0.11)
-
-There are a couple curiosities in the final tuning results.
-    • Very little hysteresis in Battleborn after relaxing to 0 current.   There was no need to build flats into the schedules as in the CHINS (see the resistance = 0.4 values around 0 current in Table 4.)   We may yet need that with more data. 
-    • Double losses in CHINS:   r_0 and r_ct.  They have purposely designed for low cost – are increased losses a result?
-    • Shift of voc(soc) for Battleborn?   Time will tell.
-    • Future Battleborn results will demonstrate that adding the missing 47 micro-Farad capacitor fixed the Vb noise.
-
-Again, the hysteresis accuracy contributes to better fault detection and isolation by improving the accuracy of the EKF model.   Coulomb counting of accurately measured current is what drives accuracy of Amp-Hours display on the device.   The calibration performed here does not verify the accuracy of Coulomb Counting.
-
-Since voltage sensing resets Coulomb Counters at saturation, memory of accumulated current measurement error gets lost.    For this reason, an ‘infinity counter’ is being added that does not get reset.  It will provide feedback to a user willing to dive deep and monitor that counter.   Errors in counting accumulated over many discharge / charge cycles indicate either
-    • Current sensing error – CURR_BIAS_*, CURR_SCALE_*, SHUNT_GAIN (DA, DB, SB, SA, SG)
-    • Coulombic efficiency error – coul_eff ( not adjustable)
-I believe that errors in the calibration are so large and variable of the battery so frequent that trying to tune the Coulombic efficiency more than the crude attempts contained in the code are a waste of time.   The ‘game’ is to satisfactorily tune the current sensors to predict when the battery may die overnight withing about a half hour.   And this will be difficult to prove, further supporting the claim that the fine tuning of Coulombic efficiency is a waste of effort.   Despite the difficulty, it must be attempted.   Amp-Hours remaining will be added to data collection and for history monitoring.
-VBAT
-It seemed like a good idea to monitor the VBAT EEPROM backup power battery voltage to alert the user when the battery dies.   This applies to the Photon only.   Argon uses EERAM device with a capacitor.   The VBAT monitor did not work because the ADC converters appear to discharge the battery when connected to VBAT.   The documentation for Particle device devices say the converters draw about 1/10 the power as the VBAT input.   For some reason, this appears to be incorrect.   The Photon is used inside the house while the Argon is used in the truck RV.   The need for VBAT failure detection inside the house is unimportant.
-Nomenclature
-Capital letters always denote 'bank' parameters, what may be observed in the installation with several 100 A-h batteries in series-parallel configuration.   'nP' and 'nS' refer to the number of parallel and serial batteries respectively.   If the bank is something other than 100 A-h batteries nP and nS may be scalar values.  EG one 200 A-h battery would be nP=2, nS=1.   Also, capacity may be scaled as well though it's most convenient to study these systems in 'units' of 100 A-h battery.  My convention is the use the capacity scalar to manage the life effects.   EG a new battery at 105% capacity would use scalar 'NOM_UNIT_CAP' and 'Sc' ('NOM_UNIT_CAP' and 'scale_in' in off-line).   If these conventions are followed rigidly, then any data collected on the installed application may be converted into lower-case 'unit' parameters by simply multiplying and dividing by nS and nP making sure the scaling parameters are duplicated in the off-line model as parameter inputs input by hand.
-
-
-Recommendations
-    1. Procure TSC2010-IDT chips going forward.
-    2. Procure 1% 1/4 watt resistors going forward.
-
-Appendix 1.   Nomenclature
-
-Application
-Off-line
-Description
-
-
-
-
-
-
-
-
-
-tau_ct
-tau_ct
-Battery chemistry charge transfer time constant, s
-tau_dif
-tau_dif
-Battery chemistry diffusion time constant, s
-
-
-
-
-
-
-
-
-
-r_ct
-r_ct
-Battery chemistry charge transfer resistance, Ohm
-r_dif
-r_dif
-Battery chemistry diffusion resistance, Ohm
-r_sd
-r_sd
-Battery chemistry lumped parameter Randles model equivalent resistance, Ohm
-r0
-r0
-Battery chemistry direct resistance, Ohm
-
-
-
-
-
-
-
-sres_in
-Scalar applied to all Randles model resistances for off-line tuning
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Appendix 2:  Regression Suite
+## Appendix 2:  Regression Suite
     • All these must self initialize – correct the application until they do
     • You have to start and stop data recording.  Use ctr-R and shift-ctr-R in CoolTerm.   You may use Arduino Serial but it is a little messier because it doesn't support multiple windows.
     • Open two talk windows (ctr-T in CoolTerm) and copy-paste the two lines in the talk windows (start and reset in items below)
@@ -846,18 +416,19 @@ Appendix 2:  Regression Suite
     • Copy and paste the lines into CoolTerm 'transmit' windows (ctr-T).  Or run in line mode (Options – Terminal – Line Mode) and use communication bar like in Arduino Serial App still copy and paste.
     • Example set of plots, from offSitHysBms begin here:   Figure 21.
        
-       ampHiFail:
-           start:  	Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;
-           reset: Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
+    ampHiFail:
+        start:  	Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;
+        reset: Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;
             ▪ Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)
             ▪ 'diff' will be displayed. After a bit more, current display will change to 0.
             ▪ To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).
 
-rapidTweakRegression:
-      start:  Ff0;HR;Xp10;
-        ◦ Should run three very large current discharge/recharge cycles without fault
-        ◦ Best test for seeing time skews and checking fault logic for false trips
-rapidTweakRegression vA CH: Bm1;Bs1;SQ1.127;Sq1.127;Ff0;HR;Xp10;  for CompareRunRun.py Argon vs Photon builds.   This is the only test for that.
+    rapidTweakRegression:
+        start:  Ff0;HR;Xp10;
+            ◦ Should run three very large current discharge/recharge cycles without fault
+            ◦ Best test for seeing time skews and checking fault logic for false trips
+
+    rapidTweakRegression vA CH: Bm1;Bs1;SQ1.127;Sq1.127;Ff0;HR;Xp10;  for CompareRunRun.py Argon vs Photon builds.   This is the only test for that.
       
 	offSitHysBms: operate around BMS off, starting above from about 11v, go below, come back up.  EXAMPLE PLOTS START HERE:  Figure 21.
 		start:  Ff0;D^0;Xp0;Xm247;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;
@@ -957,46 +528,41 @@ rapidTweakRegression vA CH: Bm1;Bs1;SQ1.127;Sq1.127;Ff0;HR;Xp10;  for CompareRun
         ◦ This is the shortest of all tests.  Useful for quick checks.
   
  	tbFailMod:
-start:Ff0;D^0;Ca.5;Xp0;W4;Xm247;DP1;Dr100;W2;HR;Pf;v2;Xv.002;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
-        		reset:Hd;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;
+        start:Ff0;D^0;Ca.5;Xp0;W4;Xm247;DP1;Dr100;W2;HR;Pf;v2;Xv.002;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
+        reset:Hd;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;
         ◦  Run for 60 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.
-          
-tbFailHdwe:  This script sometimes doesn't work but test performs fine manually
-start:Ff0;D^0;Ca.5;Xp0;W4;Xm246;DP1;Dr100;W2;HR;Pf;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
+
+    tbFailHdwe:  This script sometimes doesn't work but test performs fine manually
+        start:Ff0;D^0;Ca.5;Xp0;W4;Xm246;DP1;Dr100;W2;HR;Pf;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;
 		reset: Hd;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;
-        ◦ Should momentary flash '***' then clear itself.  All within 60 seconds.
-        ◦ 'Xp0' in reset puts Xm back to 247.
-        ◦ 
+            ◦ Should momentary flash '***' then clear itself.  All within 60 seconds.
+            ◦ 'Xp0' in reset puts Xm back to 247.
 
 
 
-Special Testing (e.g. Gorilla Testing)
 
-Scale battery
-App:  NOM_UNIT_CAP in local_config.h
-Python:  scale_in in CompareRunSim.py or CompareRunRun.py (+Battery. NOM_UNIT_CAP)
-Notes:  talk 'Sc' scales the on-board model in BatterySim only, not BatteryMonitor	
+## Appendix 3:  Special Testing (e.g. Gorilla Testing)
+
+    Scale battery
+    App:  NOM_UNIT_CAP in local_config.h
+    Python:  scale_in in CompareRunSim.py or CompareRunRun.py (+Battery. NOM_UNIT_CAP)
+    Notes:  talk 'Sc' scales the on-board model in BatterySim only, not BatteryMonitor	
+
  	dwell noise Ca.5:
-  Ff0;HR;Di.1;Dv0;Dr100;DP1;v4;Ca.5;DT.05;DV0.05;DM.2;DN2;
-    Xp0;v0;Hd;DT0;DV0;DM0;DN0;Di0;Dv0;DP4;
-  # Dwell for >5 minutes. This operating condition found EKF failure one time.  Led to multi-framing the EKF (update time = 2.0).  Before change, update time of EKF was so short (0.1) that internal filter parameters were truncating. When plotted shows EKF staying on point, not wandering off.  Beware, a dwell has most parameters changing slowly.  Auto-scaling in python plots combined with truncation in data stream (but not python) makes some interesting artifacts.
+        start:  Ff0;HR;Di.1;Dv0;Dr100;DP1;v4;Ca.5;DT.05;DV0.05;DM.2;DN2;
+        reset: Xp0;v0;Hd;DT0;DV0;DM0;DN0;Di0;Dv0;DP4;
 
- dwell Ca.5:
-  Ff0;HR;Di.1;Dr100;DP1;v4;Ca.5;
-    Xp0;v0;Hd;DT0;DV0;DM0;DN0;Di0;Dv0;DP4;
-  # Dwell for >5 minutes. This operating condition found EKF failure one time.  Led to multi-framing the EKF (update time = 2.0).  Before change, update time of EKF was so short (0.1) that internal filter parameters were truncating. When plotted shows EKF staying on point, not wandering off. Auto-scaling in python plots combined with truncation in data stream (but not python) makes some interesting artifacts.
+    Dwell for >5 minutes. This operating condition found EKF failure one time.  Led to multi-framing the EKF (update time = 2.0).  Before change, update time of EKF was so short (0.1) that internal filter parameters were truncating. When plotted shows EKF staying on point, not wandering off.  Beware, a dwell has most parameters changing slowly.  Auto-scaling in python plots combined with truncation in data stream (but not python) makes some interesting artifacts.
 
+    dwell Ca.5:
+        start:  Ff0;HR;Di.1;Dr100;DP1;v4;Ca.5;
+        reset: Xp0;v0;Hd;DT0;DV0;DM0;DN0;Di0;Dv0;DP4;
 
-
-
+    Dwell for >5 minutes. This operating condition found EKF failure one time.  Led to multi-framing the EKF (update time = 2.0).  Before change, update time of EKF was so short (0.1) that internal filter parameters were truncating. When plotted shows EKF staying on point, not wandering off. Auto-scaling in python plots combined with truncation in data stream (but not python) makes some interesting artifacts.
 
 
-
-
-Appendix 3.   Links
-'Truck Camping ALL STUFF.gsheet'	Multiple tabbed spreadsheet of parts manifest, settings, hardware schematics, and what all. https://docs.google.com/spreadsheets/d/19PZ2GmKIlw14doqwePp9xxWH96coLm8WmXdIwlzdxjE/edit#gid=167481175
-
-
+## Appendix 3.   Links
+'Truck Camping ALL STUFF.gsheet'	Multiply tabbed spreadsheet of the parts manifest, settings, hardware schematics, and what all. https://docs.google.com/spreadsheets/d/19PZ2GmKIlw14doqwePp9xxWH96coLm8WmXdIwlzdxjE/edit#gid=167481175
 
 
 ## Powering your device
@@ -1036,7 +602,7 @@ On laptop (same as desktop)
     pull from GitHub repository changes just made on desktop
     compile
     flash to target 'soc0'
-    be sure to build OS and flash OS too the first time
+    be sure to build OS and flash OS too; the first time
 
 View results
   pycharm
@@ -1056,7 +622,7 @@ View results
   A5  = Filtered Vo of 'amp' amp circuit
   D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
   D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
-  D6  = Y-C of DS18 for Tbatt and 4k7 3v3 jumper pullup
+  D6  = Y-C of DS18 for Tb and 4k7 3v3 jumper pullup
   VIN = 5V Rail 1A maximum from 7805CT home-made 12-->5 V regulator
   3v3 = 3v3 rail out supply to common of amp circuits, supply of OPA333, and R-OLED
   micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm).   There is sufficient power in Particle devices to power the peripherals of this project on USB only
@@ -1161,11 +727,11 @@ SOC calculation is equivalently a very slow time constant (integrator) so filter
   GND = to 2 GND rails
   A1  = L of 20k ohm from 12v and H of 4k7 ohm + 47uF to ground
   A3  = H of 'no amp' amp circuit
-  A3  = 8k2/1uF filter of of Vc of both amp circuits (yes, single point of failure for both amps)
+  A3  = 8k2/1uF filter of Vc of both amp circuits (yes, single point of failure for both amps)
   A5  = H of 'amp' amp circuit
   D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
   D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
-  D6  = Y-C of DS18 for Tbatt and 4k7 3v3 jumper pullup
+  D6  = Y-C of DS18 for Tb and 4k7 3v3 jumper pullup
   VIN = 5V Rail 1A maximum from 7805CT home-made 12-->5 V regulator
   3v3 = 3v3 rail out supply to common of amp circuits, supply of OPA333, and R-OLED
   micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm).   There is sufficient power in Particle devices to power the peripherals of this project on USB only
@@ -1177,14 +743,14 @@ SOC calculation is equivalently a very slow time constant (integrator) so filter
 
 ## FAQ
 
-### Problem:  CLI starts acting funny:  cannot login, gives strange errors ("cannot find module semver")
+### Problem:  CLI starts acting funny:  cannot log in, gives strange errors ("cannot find module semver")
 
     Solution:  Manually reset CLI installation.  https://community.particle.io/t/how-to-manually-reset-your-cli-installation/54018
 
 ### Problem:  Software loads but does nothing or doesn't work sensibly at all
 
   This can happen with a new Particle device first time.   This can happen with a feature added to code that requires certain
-  OS configuration.   Its easy to be fooled by this because it appears that the application loads correctly and some stuff even works.
+  OS configuration.   It's easy to be fooled by this because it appears that the application loads correctly and some stuff even works.
 
     Solution:  run  Particle: Flash Application and Device OS (local).   You may have to compile same before running this.  Once this is done the redo loop is Flash Application (local) only.
 
@@ -1201,11 +767,11 @@ SOC calculation is equivalently a very slow time constant (integrator) so filter
 
 ### Problem:  Messages from devices:  "HTTP error 401 from ... - The access token provided is invalid."
 
-  This means you haven't signed into the particle cloud during this session.   May proceed anyway.   If want message to go away, go to "Welcome to Particle Workbench" and click on "LOGIN."   Enter username and password for particle.io.  Usually hit enter for the 6-digit code - unless you set one up.
+  This means you haven't signed in to the particle cloud during this session.   May proceed anyway.   If you want message to go away, go to "Welcome to Particle Workbench" and click on "LOGIN."   Enter username and password for particle.io.  Usually hit enter for the 6-digit code - unless you set one up.
 
 ### Problem:  Hiccups in Arduino plots
 
-  These are caused by time slips.   You notice that the Arduino plot x-axis is not time rather sample number.   So if a sample is missed due to time slip in Photon then it appears to be a time slip on the plot.   Usually this is caused by running Wifi.   Turn off Wifi.
+  These are caused by time slips.   You notice that the Arduino plot x-axis is not time rather sample number.   So if a sample is missed due to time slip in Photon then it appears to be a time slip on the plot.   Usually this is caused by running Wi-Fi.   Turn off Wi-Fi.
 
 ### Problem:  Experimentation with 'modeling' and running near saturation results in numerical lockup
 
@@ -1217,11 +783,11 @@ SOC calculation is equivalently a very slow time constant (integrator) so filter
 
 ### Problem:  The application overflows APP_FLASH on compilation
 
-  Too much text being stored by Serial.printf statements.   May temporarily co-exist with the limit by reducinig NSUM summary memory size.
+  Too much text being stored by Serial.printf statements.   May temporarily co-exist with the limit by reducing NSUM summary memory size.
 
 ### Problem:  'Insufficient room for heap.' or 'Insufficient room for .data and .bss sections!' on compilation, or flashing red lights after flash
 
-  You probaby added some code and overflowed PROM.  Smaller NSUM in constants.h or rp in retained.h or cp in command.h
+  You probably added some code and overflowed PROM.  Smaller NSUM in constants.h or rp in retained.h or cp in command.h
 
 ### Problem:  The application overflows BACKUPSRAM on compilation
 
@@ -1235,11 +801,11 @@ SOC calculation is equivalently a very slow time constant (integrator) so filter
 
   CoolTerm - Options - Terminal:  Enter Key Emulation:  CR
 
-### Problem:  cTime very long.  If look at year, it is 1999.
+### Problem:  cTime very long.  If you look at year, it is 1999.
 
-  The Photon ALPHA VBAT battery died or was disconnected.  Restore the battery.  Connect the photon to the network.   Use Particle app on phone to connect it to wifi at least once.
+  The Photon ALPHA VBAT battery died or was disconnected.  Restore the battery.  Connect the photon to the network.   Use Particle app on phone to connect it to Wi-Fi at least once.
 
-  The Argon device hasn't synchronized since last power up.   Connect to wifi.  It is most convenient to setup the Argon devices' default wifi to be your phone running hotspot.   Then just do Particle setup from the phone - start and exit.   TODO:  may be possible to save time information to the Argon EERAM.
+  The Argon device hasn't synchronized since last power up.   Connect to Wi-Fi.  It is most convenient to set up the Argon devices' default Wi-Fi to be your phone running hotspot.   Then just do Particle setup from the phone - start and exit.   TODO:  may be possible to save time information to the Argon EERAM.
 
 ### Problem:  Tbh = Tbm in display 'Pf' (print faults)
 
@@ -1258,18 +824,18 @@ See 'State of Charge Monitor.odt' for full set of requirements, testing, discuss
 ## Changelog
 
 20221220 Beta 
-  - Functional
-    a. hys_cap Hysteresis Capacitance decreased by factor of 10 to match cold charging (coldCharge v20221028 20221210.txt) (7 deg C).
-    b. The voc-soc curve shifts low about 0.07 (7% soc) on cold days, causing cc_diff and e_wrap_lo faults.   As a result, an additional scalar was put on saturation scalar for those fault logics.
+  - Functional 
+    - hys_cap Hysteresis Capacitance decreased by factor of 10 to match cold charging (coldCharge v20221028 20221210.txt) (7 deg C). 
+    - The voc-soc curve shifts low about 0.07 (7% soc) on cold days, causing cc_diff and e_wrap_lo faults.   As a result, an additional scalar was put on saturation scalar for those fault logics.
 
-  - Argon Related.   Cannot get Photon anymore.   Also will not have Argon available but Photon 2 will be someday.   Argon very much like Photon 2 with no EERAM 47L16 built into the A/S (retained).   Retained on Argon lasts only for reset.   For power, bought EERAM 47L16.
-    a. parameters.cpp/.h to manage EERAM 47L16 dump.   rp --> sp
-    b. BLE logic.  Nominally disabled (#undef USE_BLE) because there is no good UART terminal for BLE.   Using HC-06 same as Photon
+  - Argon Related.   Cannot get Photon anymore.   Also, will not have Argon available but Photon 2 will be someday.   Argon very much like Photon 2 with no EERAM 47L16 built into the A/S (retained).   Retained on Argon lasts only for reset.   For power, bought EERAM 47L16. 
+    - parameters.cpp/.h to manage EERAM 47L16 dump.   rp --> sp 
+    - BLE logic.  Nominally disabled (#undef USE_BLE) because there is no good UART terminal for BLE.   Using HC-06 same as Photon
 
-  - Simulation neatness
-    a. Everything in python verification model is lower case for battery unit (12 VDC bank).
-    b. nP and  nS done at hardware interfaces (mySensors.cpp/h and myCloud.cpp/h::assign_publist)
-    c. load function defined
-    d. add_stuff consolidated in one place
-    e. Complete set of overplotting functions:   run/run and run/sim
+  - Simulation neatness 
+    - Everything in python verification model is lower case for battery unit (12 VDC bank)
+    - nP and  nS done at hardware interfaces (mySensors.cpp/h and myCloud.cpp/h::assign_publist)
+    - load function defined 
+    - add_stuff consolidated in one place 
+    - Complete set of over-plotting functions:   run/run and run/sim
 
