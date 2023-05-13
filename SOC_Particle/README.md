@@ -614,23 +614,23 @@ View results
 ## Device Interfaces
 
 ### Particle Argon Device - assumed at least 1A max
-
-  GND = to 2 GND rails
-  A1  = L of 20k ohm from 12v and H of 4k7 ohm + 47uF to ground
-  A3  = Filtered Vo of 'no amp' amp circuit
-  A3  = Filtered Vc of both amp circuits (yes, single point of failure for both amps)
-  A5  = Filtered Vo of 'amp' amp circuit
-  D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
-  D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
-  D6  = Y-C of DS18 for Tb and 4k7 3v3 jumper pullup
-  VIN = 5V Rail 1A maximum from 7805CT home-made 12-->5 V regulator
-  3v3 = 3v3 rail out supply to common of amp circuits, supply of OPA333, and R-OLED
-  micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm).   There is sufficient power in Particle devices to power the peripherals of this project on USB only
-  USB  = 5v supply to VC-HC-06, R-1-wire
-  TX  = RX of HC-06
-  RX  = TX of HC-06
-  D0-SDA = SDA-47L16 EERAM, Y-OLED
-  D1-SCL = SCL-47L16 EERAM, B-OLED
+- Argon
+  + GND = to 2 GND rails
+  + A1  = L of 20k ohm from 12v and H of 4k7 ohm + 47uF to ground
+  + A3  = Filtered Vo of 'no amp' amp circuit
+  + A3  = Filtered Vc of both amp circuits (yes, single point of failure for both amps)
+  + A5  = Filtered Vo of 'amp' amp circuit
+  + D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
+  + D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
+  + D6  = Y-C of DS18 for Tb and 4k7 3v3 jumper pullup
+  + VIN = 5V Rail 1A maximum from 7805CT home-made 12-->5 V regulator
+  + 3v3 = 3v3 rail out supply to common of amp circuits, supply of OPA333, and R-OLED
+  + micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm).   There is sufficient power in Particle devices to power the peripherals of this project on USB only
+  + USB  = 5v supply to VC-HC-06, R-1-wire
+  + TX  = RX of HC-06
+  + RX  = TX of HC-06
+  + D0-SDA = SDA-47L16 EERAM, Y-OLED
+  + D1-SCL = SCL-47L16 EERAM, B-OLED
 
 ### Voltage regulator (LM7805)
 
@@ -641,22 +641,18 @@ GND = Gnd rail
 Vo  = 5v rail
 
 ### Passive Ib shunt and Vb low pass filters (LPF)
-
-1 Hz LPF built into board.
-Use pSpice circuit model (SOC_photon/datasheets/opa333_asd1013_5beta.asc) to verify filters because
-OPA333 10uF high cap interacts with 1uF filter cap.  The Vb filter is a little more straightforward and same goals.
-Goal of filter design is 2*pi r/s = 1 hz -3dB bandwidth.  Large PWM inverter noise from system enters at 60 Hz.
-SOC calculation is equivalently a very slow time constant (integrator) so filter is between noise and usage.
+- 1 Hz LPF built into board.
+- Use pSpice circuit model (SOC_photon/datasheets/opa333_asd1013_5beta.asc) to verify filters because OPA333 10uF high cap interacts with 1uF filter cap.  The Vb filter is a little more straightforward and same goals
+- Goal of filter design is 2*pi r/s = 1 hz -3dB bandwidth.  Large PWM inverter noise from system enters at 60 Hz
+- SOC calculation is equivalently a very slow time constant (integrator) so filter is between noise and usage
 
 ### Amp circuit 'amp'
-
-  Ti OPA333.  Vc formed by 2x 4k7 voltage divider on 3v3 rail to ground.  A4 to A3 and A5 with 106 10uF high cap.
-  See notes about 'LPF'
-  V+   = 3v3 rail
-  V-   = Gnd rail
-  Vo   = 8k2/1uF LPF to A5 of device, 98k to pin+
-  pin- = 5k1 of G-Shunt
-  pin+ = 98k of Vc, 98k of Vo, and 5k1 of Y-Shunt
+- Ti OPA333.  Vc formed by 2x 4k7 voltage divider on 3v3 rail to ground.  A4 to A3 and A5 with 106 10uF high cap. See notes about 'LPF'
+    + V+   = 3v3 rail 
+    + V-   = Gnd rail 
+    + Vo   = 8k2/1uF LPF to A5 of device, 98k to pin+ 
+    + pin- = 5k1 of G-Shunt 
+    + pin+ = 98k of Vc, 98k of Vo, and 5k1 of Y-Shunt
 
 ### No Amp circuit 'no amp'
 
@@ -664,82 +660,79 @@ SOC calculation is equivalently a very slow time constant (integrator) so filter
   For Photon Alpha, direct feed to ADS-1013 and no OPA333
 
 ### EERAM for Argon (47L16)
+- 47L16
+  + V+   = 5v rail 
+  + Vcap = Cap 106 10uF to Gnd rail.  Storage that powers EEPROM save on power loss 
+  + V-   = Gnd rail 
+  + SDA  = D0-SDA of Device 
+  + SCL  = D1-SCL of Device
 
-  V+   = 5v rail
-  Vcap = Cap 106 10uF to Gnd rail.  Storage that powers EEPROM save on power loss
-  V-   = Gnd rail
-  SDA  = D0-SDA of Device
-  SCL  = D1-SCL of Device
-
-### 1-wire Temp (MAXIM DS18B20)  library at "https://github.com/particle-iot/OneWireLibrary"
-
-  Y-C   = Device D6
-  R-VDD = 3V3 Rail
-  B-GND = GND Rail
+### 1-wire Temp (MAXIM DS18B20)  
+- Temperature sensor library at "https://github.com/particle-iot/OneWireLibrary"
+  + Y-C   = Device D6 
+  + R-VDD = 3V3 Rail 
+  + B-GND = GND Rail
 
 ### Display SSD1306-compatible OLED 128x32
 
-  Amazon:  5 Pieces I2C Display Module 0.91 Inch I2C OLED Display Module Blue I2C OLED Screen Driver DC 3.3V~5V(Blue Display Color)
-  Code from Adafruit SSD1306 library
-  1-GND = Gnd
-  2-VCC = 3v3
-  3-SCL = Device D1-SCL
-  4-SDA = Device D0-SDA
+Amazon:  5 Pieces I2C Display Module 0.91 Inch I2C OLED Display Module Blue I2C OLED Screen Driver DC 3.3V~5V(Blue Display Color).  Code from Adafruit SSD1306 library
+  + 1-GND = Gnd 
+  + 2-VCC = 3v3 
+  + 3-SCL = Device D1-SCL 
+  + 4-SDA = Device D0-SDA
 
 ### Shunt 75mv = 100A
-
-  Use custom harness that contains Shunt as junction box to obtain 12v, Gnd, Vshunts
-  R-12v
-  B-Gnd
-  Y-Yellow shunt high
-  G-Green shunt low
+- Use custom harness that contains Shunt as junction box to obtain 12v, Gnd, Vshunts
+  + R-12v 
+  + B-Gnd 
+  + Y-Yellow shunt high 
+  + G-Green shunt low
 
 ### HC-06 Bluetooth Module
-
-  Attach directly to 5V and TX/RX
-  VC  = 5v rail
-  GND = Gnd rail
-  TX  = RX of Device
-  RX  = TX of Device
+- Attach directly to 5V and TX/RX
+  + VC  = 5v rail 
+  + GND = Gnd rail 
+  + TX  = RX of Device 
+  + RX  = TX of Device
 
 ### ASD 1013 12-bit PHOTON ALPHA ONLY *****Amplified with OPA333 my custom board.   Avoids using negative absolute voltages on inputs - centers on 3v3 / 2
 
 - HiLetgo ADS1015 12 Bit Analog to Digital Development Board ADC Converter Module ADC Development Board for Arduino
-  $8.29 in Aug 2021
-  I2C used.
-  Code from Adafruit ADS1X15 library.   Differential = A0-A1
-  Ti OPA333 Used.   $11.00 for 5 Amazon OPA333AIDBVR SOT23-5 mounted on SOT23-6
-  No special code for OPA.  Hardware only.   Pre-amp for ADC 5:1.
-  1-V 3v3:  0.1uF to ground for transient power draws of the ADC
-  2-G = Gnd
-  3-SCL = Photon D1
-  4-SDA  = Photon D0
-  5-ADDR = 3v3
-  6-ALERT = NC
-  7-A0 = Green from shunt
-  8-A1 = Yellow from shunt
-  9-A2 = NC
-  10-A3 = NC
+  $8.29 in Aug 2021 
+- I2C used
+- Code from Adafruit ADS1X15 library.   Differential = A0-A1 
+- Ti OPA333 Used.   $11.00 for 5 Amazon OPA333AIDBVR SOT23-5 mounted on SOT23-6 
+- No special code for OPA.  Hardware only.   Pre-amp for ADC 5:1. 
+  + 1 - V 3v3:  0.1uF to ground for transient power draws of the ADC 
+  + 2 - G = Gnd 
+  + 3 - SCL = Photon D1 
+  + 4 - SDA  = Photon D0 
+  + 5 - ADDR = 3v3 
+  + 6 - ALERT = NC 
+  + 7 - A0 = Green from shunt 
+  + 8 - A1 = Yellow from shunt 
+  + 9 - A2 = NC 
+  + 10 -A3 = NC
 
 ### Particle Photon Device 1A max PHOTON ALPHA
 
 - Particle Photon boards have 9 PWM pins: D0, D1, D2, D3, A4, A5, WKP, RX, TX
-  GND = to 2 GND rails
-  A1  = L of 20k ohm from 12v and H of 4k7 ohm + 47uF to ground
-  A3  = H of 'no amp' amp circuit
-  A3  = 8k2/1uF filter of Vc of both amp circuits (yes, single point of failure for both amps)
-  A5  = H of 'amp' amp circuit
-  D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
-  D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup
-  D6  = Y-C of DS18 for Tb and 4k7 3v3 jumper pullup
-  VIN = 5V Rail 1A maximum from 7805CT home-made 12-->5 V regulator
-  3v3 = 3v3 rail out supply to common of amp circuits, supply of OPA333, and R-OLED
-  micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm).   There is sufficient power in Particle devices to power the peripherals of this project on USB only
-  5v  = supply to VC-HC-06, R-1-wire
-  TX  = RX of HC-06
-  RX  = TX of HC-06
-  SDA = SDA-ADS-1013 amp, SDA-ADS-1013 no amp, Y-OLED
-  SCL = SCL-ADS-1013 amp, SCL-ADS-1013 no amp, B-OLED
+  + GND = to 2 GND rails 
+  + A1  = L of 20k ohm from 12v and H of 4k7 ohm + 47uF to ground 
+  + A3  = H of 'no amp' amp circuit 
+  + A3  = 8k2/1uF filter of Vc of both amp circuits (yes, single point of failure for both amps)
+  + A5  = H of 'amp' amp circuit 
+  + D0  = SCA of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup 
+  + D1  = SCL of ASD, SCA of OLED, and 4k7 3v3 jumper I2C pullup 
+  + D6  = Y-C of DS18 for Tb and 4k7 3v3 jumper pullup 
+  + VIN = 5V Rail 1A maximum from 7805CT home-made 12-->5 V regulator 
+  + 3v3 = 3v3 rail out supply to common of amp circuits, supply of OPA333, and R-OLED 
+  + micro USB = Serial Monitor on PC (either Particle Workbench monitor or CoolTerm).   There is sufficient power in Particle devices to power the peripherals of this project on USB only 
+  + 5v  = supply to VC-HC-06, R-1-wire 
+  + TX  = RX of HC-06 
+  + RX  = TX of HC-06 
+  + SDA = SDA-ADS-1013 amp, SDA-ADS-1013 no amp, Y-OLED 
+  + SCL = SCL-ADS-1013 amp, SCL-ADS-1013 no amp, B-OLED
 
 ## FAQ
 
