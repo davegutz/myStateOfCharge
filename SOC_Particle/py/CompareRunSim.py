@@ -192,13 +192,13 @@ if __name__ == '__main__':
                 data_file = path_to_data
             else:
                 os.rename(path_to_data, data_file)
-            unit_key = easygui.enterbox(msg="enter soc0p, soc1p, soc0a, or soc1a", title="get unit_key", default="soc1a")
+            unit_key = easygui.enterbox(msg="enter pro0p, pro1a, soc0p, soc1a", title="get unit_key", default="pro1a")
             # Put configurations unique to this build of logic here
-            if unit_key == 'soc0p':
+            if unit_key == 'pro0p':
                 pass
-            elif unit_key == 'soc1p':
+            elif unit_key == 'pro1a':
                 pass
-            elif unit_key == 'soc0a':
+            elif unit_key == 'soc0p':
                 pass
             elif unit_key == 'soc1a':
                 pass
