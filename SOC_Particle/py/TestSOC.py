@@ -1,4 +1,4 @@
-#  Graphical interface to test State of Charge application
+#  Graphical interface to Test State of Charge application
 #  Run in PyCharm
 #     or
 #  'python3 TestSOC.py
@@ -77,20 +77,37 @@ class ExRoot:
 
 # Executive class to control the global variables
 class ExTarget:
-    def __init__(self, level=None, proc=None):
+    def __init__(self, level=None, proc=None, battery=None, key=None):
         self.script_loc = os.path.dirname(os.path.abspath(__file__))
         self.config_path = os.path.join(self.script_loc, 'root_config.ini')
         self.version = None
+        self.version_button = None
+        self.battery = battery
+        self.battery_button = None
         self.level = level
+        self.level_button = None
         self.proc = proc
+        self.proc_button = None
+        self.key = key
+        self.key_button = None
         self.root_config = None
         self.load_root_config(self.config_path)
 
-    def enter_version(self):
-        self.version = tk.simpledialog.askstring(title=self.level, prompt="Enter version <vYYYYMMDD>:")
+    def enter_battery(self):
+        self.battery = tk.simpledialog.askstring(title=self.level, prompt="Enter battery e.g. 'BB for Battleborn', 'CH' for CHINS:")
+        self.battery_button.config(text=self.battery)
+
+    def enter_key(self):
+        self.key = tk.simpledialog.askstring(title=self.level, prompt="Enter key e.g. 'pro0p', 'pro1a', 'soc0p', 'soc1a':")
+        self.key_button.config(text=self.key)
 
     def enter_proc(self):
         self.proc = tk.simpledialog.askstring(title=self.level, prompt="Enter Processor e.g. 'A', 'P', 'P2':")
+        self.proc_button.config(text=self.proc)
+
+    def enter_version(self):
+        self.version = tk.simpledialog.askstring(title=self.level, prompt="Enter version <vYYYYMMDD>:")
+        self.version_button.config(text=self.version)
 
     def load_root_config(self, config_file_path):
         self.root_config = configparser.ConfigParser()
@@ -132,8 +149,8 @@ class ExTarget:
 # Configuration for entire folder selection read with filepaths
 cwd_path = os.getcwd()
 ex_root = ExRoot()
-ex_base = ExTarget('base', 'A')
-ex_test = ExTarget('test', 'A')
+Base = ExTarget('Base', 'A')
+Test = ExTarget('Test', 'A')
 
 # Define frames
 window_width = 500
@@ -142,46 +159,11 @@ base_width = 175
 test_width = 175
 pad_x_frames = 1
 pad_y_frames = 2
-
-# root = tk.Tk()
-# # root.maxsize(window_width, 800)
-# root.title('State of Charge')
-# icon_path = os.path.join(ex_root.script_loc, 'TestSOC_Icon.png')
-# root.iconphoto(False, tk.PhotoImage(file=icon_path))
-#
-# # Checks
-# bg_color = "lightgray"
-# box_color = "lightgray"
+bg_color = "lightgray"
+box_color = "lightgray"
 # relief = tk.FLAT
+
 #
-# config_header0 = tk.Label(root, text='Item', bg=box_color, fg="blue", width=item_width)
-# config_header0.grid(row=0, column=0, pady=2)
-# config_header1 = tk.Label(root, text='Base', bg=box_color, fg="blue", width=base_width)
-# config_header1.grid(row=0, column=1, pady=2)
-# config_header2 = tk.Label(root, text='Test', bg=box_color, fg="blue", width=test_width)
-# config_header2.grid(row=0, column=2, pady=2)
-#
-#
-# # Version row
-# version_desc = tk.Label(root, text='Version', bg=box_color, fg="blue", width=item_width)
-# config_header0.grid(row=1, column=0, pady=2)
-# base_version_button = tk.Button(root, text=ex_base.version, command=ex_base.enter_version,
-#                                 fg="blue", bg=bg_color)
-# config_header0.grid(row=1, column=1, pady=2)
-# test_version_button = tk.Button(root, text=ex_test.version, command=ex_test.enter_version,
-#                                 fg="blue", bg=bg_color)
-# config_header0.grid(row=1, column=2, pady=2)
-#
-# # Processor row
-# proc_desc = tk.Label(root, text='Processor', bg=box_color, fg="red", width=item_width)
-# base_proc_button = tk.Button(root, text=ex_base.proc, command=ex_base.enter_proc,
-#                                 fg="red", bg=bg_color)
-# test_proc_button = tk.Button(root, text=ex_test.proc, command=ex_test.enter_proc,
-#                                 fg="red", bg=bg_color)
-#
-#
-#
-# #
 # # if platform.system() == 'Darwin':
 # #     folder_button = tktt.TTButton(recordings_frame, text=ex_root.rec_folder, command=select_re,
 # #                                   fg="blue", bg=bg_color)
@@ -189,40 +171,50 @@ pad_y_frames = 2
 # #     folder_button = tk.Button(recordings_frame, text=ex_root.rec_folder, command=select_recordings_folder,
 # #                               fg="blue", bg=bg_color)
 # # folder_button.pack(ipadx=5, pady=5)
-# #
-#
-#
-# pic_path = os.path.join(ex_root.script_loc, 'TestSOC.png')
-# image = tk.Frame(root, borderwidth=2, bg=box_color)
-# # image.pack(side=tk.TOP, fill="x")
-# image.picture = tk.PhotoImage(file=pic_path)
-# image.label = tk.Label(image, image=image.picture)
-# # image.label.pack()
 
-
-# creating main tkinter window/toplevel
+# Master and header
 master = tk.Tk()
-l1 = tk.Label(master, text="Height")
-l2 = tk.Label(master, text="Width")
-l1.grid(row=0, column=0, sticky=tk.W, pady=2)
-l2.grid(row=1, column=0, sticky=tk.W, pady=2)
-e1 = tk.Entry(master)
-e2 = tk.Entry(master)
-e1.grid(row=0, column=1, pady=2)
-e2.grid(row=1, column=1, pady=2)
-c1 = tk.Checkbutton(master, text="Preserve")
-c1.grid(row=2, column=0, sticky=tk.W, columnspan=2)
+# master.maxsize(window_width, 800)
+master.title('State of Charge')
+icon_path = os.path.join(ex_root.script_loc, 'TestSOC_Icon.png')
+master.iconphoto(False, tk.PhotoImage(file=icon_path))
+tk.Label(master, text="Item", fg="blue").grid(row=0, column=0, sticky=tk.N, pady=2)
+tk.Label(master, text="Base", fg="blue").grid(row=0, column=1, sticky=tk.N, pady=2)
+tk.Label(master, text="Test", fg="blue").grid(row=0, column=2, sticky=tk.N, pady=2)
 
-# adding image (remember image should be PNG and not JPG)
-pic_path = os.path.join(ex_root.script_loc, 'capture1.png')
-picture = tk.PhotoImage(file=pic_path)
+# Version row
+tk.Label(master, text="Version").grid(row=1, column=0, pady=2)
+Base.version_button = tk.Button(master, text=Base.version, command=Base.enter_version, fg="blue", bg=bg_color)
+Base.version_button.grid(row=1, column=1, pady=2)
+Test.version_button = tk.Button(master, text=Test.version, command=Test.enter_version, fg="blue", bg=bg_color)
+Test.version_button.grid(row=1, column=2, pady=2)
+
+# Processor row
+tk.Label(master, text="Processor").grid(row=2, column=0, pady=2)
+Base.proc_button = tk.Button(master, text=Base.proc, command=Base.enter_proc, fg="red", bg=bg_color)
+Base.proc_button.grid(row=2, column=1, pady=2)
+Test.proc_button = tk.Button(master, text=Test.proc, command=Test.enter_proc, fg="red", bg=bg_color)
+Test.proc_button.grid(row=2, column=2, pady=2)
+
+# Battery row
+tk.Label(master, text="Battery").grid(row=3, column=0, pady=2)
+Base.battery_button = tk.Button(master, text=Base.proc, command=Base.enter_battery, fg="green", bg=bg_color)
+Base.battery_button.grid(row=3, column=1, pady=2)
+Test.battery_button = tk.Button(master, text=Test.proc, command=Test.enter_battery, fg="green", bg=bg_color)
+Test.battery_button.grid(row=3, column=2, pady=2)
+
+# Key row
+tk.Label(master, text="Key").grid(row=4, column=0, pady=2)
+Base.key_button = tk.Button(master, text=Base.proc, command=Base.enter_key, fg="purple", bg=bg_color)
+Base.key_button.grid(row=4, column=1, pady=2)
+Test.key_button = tk.Button(master, text=Test.proc, command=Test.enter_key, fg="purple", bg=bg_color)
+Test.key_button.grid(row=4, column=2, pady=2)
+
+# Image
+pic_path = os.path.join(ex_root.script_loc, 'TestSOC.png')
+picture = tk.PhotoImage(file=pic_path).subsample(4, 4)
 label = tk.Label(master, image=picture)
-label.grid(row=0, column=2, columnspan=2, rowspan=2, padx=5, pady=5)
-
-b1 = tk.Button(master, text="Zoom in")
-b2 = tk.Button(master, text="Zoom out")
-b1.grid(row=2, column=2, sticky=tk.E)
-b2.grid(row=2, column=3, sticky=tk.E)
+label.grid(row=0, column=3, columnspan=2, rowspan=4, padx=5, pady=5)
 
 # Begin
 # root.mainloop()
