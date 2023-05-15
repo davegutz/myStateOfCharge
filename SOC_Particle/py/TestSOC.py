@@ -143,66 +143,65 @@ test_width = 175
 pad_x_frames = 1
 pad_y_frames = 2
 
-root = tk.Tk()
-# root.maxsize(window_width, 800)
-root.title('State of Charge')
-icon_path = os.path.join(ex_root.script_loc, 'TestSOC_Icon.png')
-root.iconphoto(False, tk.PhotoImage(file=icon_path))
-
-# Checks
-bg_color = "lightgray"
-box_color = "lightgray"
-relief = tk.FLAT
-
-config_header0 = tk.Label(root, text='Item', bg=box_color, fg="blue", width=item_width)
-config_header0.grid(row=0, column=0, pady=2)
-config_header1 = tk.Label(root, text='Base', bg=box_color, fg="blue", width=base_width)
-config_header1.grid(row=0, column=1, pady=2)
-config_header2 = tk.Label(root, text='Test', bg=box_color, fg="blue", width=test_width)
-config_header2.grid(row=0, column=2, pady=2)
-
-
-# Version row
-version_desc = tk.Label(root, text='Version', bg=box_color, fg="blue", width=item_width)
-config_header0.grid(row=1, column=0, pady=2)
-base_version_button = tk.Button(root, text=ex_base.version, command=ex_base.enter_version,
-                                fg="blue", bg=bg_color)
-config_header0.grid(row=1, column=1, pady=2)
-test_version_button = tk.Button(root, text=ex_test.version, command=ex_test.enter_version,
-                                fg="blue", bg=bg_color)
-config_header0.grid(row=1, column=2, pady=2)
-
-# Processor row
-proc_desc = tk.Label(root, text='Processor', bg=box_color, fg="red", width=item_width)
-base_proc_button = tk.Button(root, text=ex_base.proc, command=ex_base.enter_proc,
-                                fg="red", bg=bg_color)
-test_proc_button = tk.Button(root, text=ex_test.proc, command=ex_test.enter_proc,
-                                fg="red", bg=bg_color)
-
-
-
+# root = tk.Tk()
+# # root.maxsize(window_width, 800)
+# root.title('State of Charge')
+# icon_path = os.path.join(ex_root.script_loc, 'TestSOC_Icon.png')
+# root.iconphoto(False, tk.PhotoImage(file=icon_path))
 #
-# if platform.system() == 'Darwin':
-#     folder_button = tktt.TTButton(recordings_frame, text=ex_root.rec_folder, command=select_re,
-#                                   fg="blue", bg=bg_color)
-# else:
-#     folder_button = tk.Button(recordings_frame, text=ex_root.rec_folder, command=select_recordings_folder,
-#                               fg="blue", bg=bg_color)
-# folder_button.pack(ipadx=5, pady=5)
+# # Checks
+# bg_color = "lightgray"
+# box_color = "lightgray"
+# relief = tk.FLAT
 #
-
-
-pic_path = os.path.join(ex_root.script_loc, 'TestSOC.png')
-image = tk.Frame(root, borderwidth=2, bg=box_color)
-# image.pack(side=tk.TOP, fill="x")
-image.picture = tk.PhotoImage(file=pic_path)
-image.label = tk.Label(image, image=image.picture)
-# image.label.pack()
+# config_header0 = tk.Label(root, text='Item', bg=box_color, fg="blue", width=item_width)
+# config_header0.grid(row=0, column=0, pady=2)
+# config_header1 = tk.Label(root, text='Base', bg=box_color, fg="blue", width=base_width)
+# config_header1.grid(row=0, column=1, pady=2)
+# config_header2 = tk.Label(root, text='Test', bg=box_color, fg="blue", width=test_width)
+# config_header2.grid(row=0, column=2, pady=2)
+#
+#
+# # Version row
+# version_desc = tk.Label(root, text='Version', bg=box_color, fg="blue", width=item_width)
+# config_header0.grid(row=1, column=0, pady=2)
+# base_version_button = tk.Button(root, text=ex_base.version, command=ex_base.enter_version,
+#                                 fg="blue", bg=bg_color)
+# config_header0.grid(row=1, column=1, pady=2)
+# test_version_button = tk.Button(root, text=ex_test.version, command=ex_test.enter_version,
+#                                 fg="blue", bg=bg_color)
+# config_header0.grid(row=1, column=2, pady=2)
+#
+# # Processor row
+# proc_desc = tk.Label(root, text='Processor', bg=box_color, fg="red", width=item_width)
+# base_proc_button = tk.Button(root, text=ex_base.proc, command=ex_base.enter_proc,
+#                                 fg="red", bg=bg_color)
+# test_proc_button = tk.Button(root, text=ex_test.proc, command=ex_test.enter_proc,
+#                                 fg="red", bg=bg_color)
+#
+#
+#
+# #
+# # if platform.system() == 'Darwin':
+# #     folder_button = tktt.TTButton(recordings_frame, text=ex_root.rec_folder, command=select_re,
+# #                                   fg="blue", bg=bg_color)
+# # else:
+# #     folder_button = tk.Button(recordings_frame, text=ex_root.rec_folder, command=select_recordings_folder,
+# #                               fg="blue", bg=bg_color)
+# # folder_button.pack(ipadx=5, pady=5)
+# #
+#
+#
+# pic_path = os.path.join(ex_root.script_loc, 'TestSOC.png')
+# image = tk.Frame(root, borderwidth=2, bg=box_color)
+# # image.pack(side=tk.TOP, fill="x")
+# image.picture = tk.PhotoImage(file=pic_path)
+# image.label = tk.Label(image, image=image.picture)
+# # image.label.pack()
 
 
 # creating main tkinter window/toplevel
 master = tk.Tk()
-master.maxsize(window_width, 800)
 l1 = tk.Label(master, text="Height")
 l2 = tk.Label(master, text="Width")
 l1.grid(row=0, column=0, sticky=tk.W, pady=2)
@@ -213,11 +212,13 @@ e1.grid(row=0, column=1, pady=2)
 e2.grid(row=1, column=1, pady=2)
 c1 = tk.Checkbutton(master, text="Preserve")
 c1.grid(row=2, column=0, sticky=tk.W, columnspan=2)
-img = tk.PhotoImage(file=pic_path)
-img1 = img.subsample(2, 2)
-print(cwd_path)
-pic_path = os.path.join(ex_root.script_loc, 'TestSOC.png')
-tk.Label(master, text='Version', bg=box_color, fg="blue").grid(row=0, column=2, columnspan=2, rowspan=2, padx=5, pady=5)
+
+# adding image (remember image should be PNG and not JPG)
+pic_path = os.path.join(ex_root.script_loc, 'capture1.png')
+picture = tk.PhotoImage(file=pic_path)
+label = tk.Label(master, image=picture)
+label.grid(row=0, column=2, columnspan=2, rowspan=2, padx=5, pady=5)
+
 b1 = tk.Button(master, text="Zoom in")
 b2 = tk.Button(master, text="Zoom out")
 b1.grid(row=2, column=2, sticky=tk.E)
