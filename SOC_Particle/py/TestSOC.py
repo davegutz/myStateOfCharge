@@ -164,47 +164,47 @@ box_color = "lightgray"
 
 # Master and header
 master = tk.Tk()
-master.maxsize(window_width, 1900)
 master.title('State of Charge')
+master.wm_minsize(width=300, height=500)
 icon_path = os.path.join(ex_root.script_loc, 'TestSOC_Icon.png')
 master.iconphoto(False, tk.PhotoImage(file=icon_path))
 tk.Label(master, text="Item", fg="blue").grid(row=0, column=0, sticky=tk.N, pady=2)
-tk.Label(master, text="Base", fg="blue").grid(row=0, column=1, sticky=tk.N, pady=2)
-tk.Label(master, text="Test", fg="blue").grid(row=0, column=2, sticky=tk.N, pady=2)
+tk.Label(master, text="Base", fg="blue").grid(row=0, column=4, sticky=tk.N, pady=2)
+tk.Label(master, text="Test", fg="blue").grid(row=0, column=1, sticky=tk.N, pady=2)
 
 # Version row
 tk.Label(master, text="Version").grid(row=1, column=0, pady=2)
-Base.version_button = tk.Button(master, text=Base.version, command=Base.enter_version, fg="blue", bg=bg_color)
-Base.version_button.grid(row=1, column=1, pady=2)
 Test.version_button = tk.Button(master, text=Test.version, command=Test.enter_version, fg="blue", bg=bg_color)
-Test.version_button.grid(row=1, column=2, pady=2)
+Test.version_button.grid(row=1, column=1, pady=2)
+Base.version_button = tk.Button(master, text=Base.version, command=Base.enter_version, fg="blue", bg=bg_color)
+Base.version_button.grid(row=1, column=4, pady=2)
 
 # Processor row
 tk.Label(master, text="Processor").grid(row=2, column=0, pady=2)
-Base.proc_button = tk.Button(master, text=Base.proc, command=Base.enter_proc, fg="red", bg=bg_color)
-Base.proc_button.grid(row=2, column=1, pady=2)
 Test.proc_button = tk.Button(master, text=Test.proc, command=Test.enter_proc, fg="red", bg=bg_color)
-Test.proc_button.grid(row=2, column=2, pady=2)
+Test.proc_button.grid(row=2, column=1, pady=2)
+Base.proc_button = tk.Button(master, text=Base.proc, command=Base.enter_proc, fg="red", bg=bg_color)
+Base.proc_button.grid(row=2, column=4, pady=2)
 
 # Battery row
 tk.Label(master, text="Battery").grid(row=3, column=0, pady=2)
-Base.battery_button = tk.Button(master, text=Base.proc, command=Base.enter_battery, fg="green", bg=bg_color)
-Base.battery_button.grid(row=3, column=1, pady=2)
 Test.battery_button = tk.Button(master, text=Test.proc, command=Test.enter_battery, fg="green", bg=bg_color)
-Test.battery_button.grid(row=3, column=2, pady=2)
+Test.battery_button.grid(row=3, column=1, pady=2)
+Base.battery_button = tk.Button(master, text=Base.proc, command=Base.enter_battery, fg="green", bg=bg_color)
+Base.battery_button.grid(row=3, column=4, pady=2)
 
 # Key row
 tk.Label(master, text="Key").grid(row=4, column=0, pady=2)
-Base.key_button = tk.Button(master, text=Base.proc, command=Base.enter_key, fg="purple", bg=bg_color)
-Base.key_button.grid(row=4, column=1, pady=2)
 Test.key_button = tk.Button(master, text=Test.proc, command=Test.enter_key, fg="purple", bg=bg_color)
-Test.key_button.grid(row=4, column=2, pady=2)
+Test.key_button.grid(row=4, column=1, pady=2)
+Base.key_button = tk.Button(master, text=Base.proc, command=Base.enter_key, fg="purple", bg=bg_color)
+Base.key_button.grid(row=4, column=4, pady=2)
 
 # Image
 pic_path = os.path.join(ex_root.script_loc, 'TestSOC.png')
-picture = tk.PhotoImage(file=pic_path).subsample(4, 4)
+picture = tk.PhotoImage(file=pic_path).subsample(5, 5)
 label = tk.Label(master, image=picture)
-label.grid(row=0, column=3, columnspan=2, rowspan=4, padx=5, pady=5)
+label.grid(row=0, column=2, columnspan=2, rowspan=4, padx=5, pady=5)
 
 # Begin
 master.mainloop()
