@@ -161,20 +161,10 @@ pad_x_frames = 1
 pad_y_frames = 2
 bg_color = "lightgray"
 box_color = "lightgray"
-# relief = tk.FLAT
-
-#
-# # if platform.system() == 'Darwin':
-# #     folder_button = tktt.TTButton(recordings_frame, text=ex_root.rec_folder, command=select_re,
-# #                                   fg="blue", bg=bg_color)
-# # else:
-# #     folder_button = tk.Button(recordings_frame, text=ex_root.rec_folder, command=select_recordings_folder,
-# #                               fg="blue", bg=bg_color)
-# # folder_button.pack(ipadx=5, pady=5)
 
 # Master and header
 master = tk.Tk()
-# master.maxsize(window_width, 800)
+master.maxsize(window_width, 1900)
 master.title('State of Charge')
 icon_path = os.path.join(ex_root.script_loc, 'TestSOC_Icon.png')
 master.iconphoto(False, tk.PhotoImage(file=icon_path))
@@ -217,6 +207,5 @@ label = tk.Label(master, image=picture)
 label.grid(row=0, column=3, columnspan=2, rowspan=4, padx=5, pady=5)
 
 # Begin
-# root.mainloop()
 master.mainloop()
 
