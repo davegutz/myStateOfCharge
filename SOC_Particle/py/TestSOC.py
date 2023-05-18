@@ -35,10 +35,6 @@ else:
     import tkinter as tk
 
 
-def addToClipBoard(text):
-    pyperclip.copy(text)
-
-
 # Executive class to control the global variables
 class ExRoot:
     def __init__(self):
@@ -134,16 +130,21 @@ class ExTarget:
 
 
 # Global methods
+def addToClipBoard(text):
+    pyperclip.copy(text)
+
+
 def lookup_start():
-    master.clipboard_append(option.get())
-    master.update()  # on clipboard after window closed
     start.set(master.clipboard_get())
-    print('start', start.get())
     addToClipBoard(start.get())
 
 
-def show(*args):
+def show_option(*args):
     option_show.set(option.get())
+
+
+def show_start(*args):
+    start_show.set(start.get())
 
 
 # r = Tk()
@@ -232,7 +233,7 @@ sel = tk.OptionMenu(master, option, *sel_list)
 sel.grid(row=5, column=0, columnspan=1, padx=5, pady=5)
 sel_label = tk.Label(master, textvariable=option)
 sel_label.grid(row=5, column=2, columnspan=2, padx=5, pady=5)
-option.trace_add('write', show)
+option.trace_add('write', show_option)
 start = tk.StringVar(master)
 start.set('')
 start_show = tk.StringVar(master)
@@ -241,7 +242,7 @@ start_button = tk.Button(master, text='start to buffer', command=lookup_start, f
 start_button.grid(row=6, column=0, padx=5, pady=5)
 start_label = tk.Label(master, textvariable=start)
 start_label.grid(row=6, column=2, padx=5, pady=5)
-start.trace_add('write', start)
+start.trace_add('write', show_start)
 
 # Begin
 master.mainloop()
