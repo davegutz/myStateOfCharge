@@ -135,7 +135,7 @@ def addToClipBoard(text):
 
 
 def lookup_start():
-    start.set(master.clipboard_get())
+    start.set(option.get())
     addToClipBoard(start.get())
 
 
@@ -237,7 +237,7 @@ option.trace_add('write', show_option)
 start = tk.StringVar(master)
 start.set('')
 start_show = tk.StringVar(master)
-start_show.set(master.clipboard_get())
+start_show.set(pyperclip.paste())
 start_button = tk.Button(master, text='start to buffer', command=lookup_start, fg="purple", bg=bg_color)
 start_button.grid(row=6, column=0, padx=5, pady=5)
 start_label = tk.Label(master, textvariable=start)
