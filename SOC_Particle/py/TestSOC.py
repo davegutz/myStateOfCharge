@@ -133,6 +133,19 @@ class ExTarget:
         return self.root_config
 
 
+# Global methods
+def lookup_start():
+    master.clipboard_append(option.get())
+    master.update()  # on clipboard after window closed
+    start.set(master.clipboard_get())
+    print('start', start.get())
+    addToClipBoard(start.get())
+
+
+def show(*args):
+    option_show.set(option.get())
+
+
 # r = Tk()
 # r.withdraw()
 # r.clipboard_clear()
@@ -205,6 +218,30 @@ pic_path = os.path.join(ex_root.script_loc, 'TestSOC.png')
 picture = tk.PhotoImage(file=pic_path).subsample(5, 5)
 label = tk.Label(master, image=picture)
 label.grid(row=0, column=2, columnspan=2, rowspan=4, padx=5, pady=5)
+
+# Transient string
+sel_list = ['ampHiFail', 'rapidTweakRegression', 'offSitHysBms', 'triTweakDisch', 'coldStart', 'ampHiFailFf',
+            'ampLoFail', 'ampHiFailNoise', 'rapidTweakRegression40C', 'slowTweakRegression', 'satSit', 'flatSitHys',
+            'offSitHysBmsNoise', 'ampHiFailSlow', 'vHiFail', 'vHiFailFf', 'pulseEKF', 'pulseSS', 'tbFailMod',
+            'tbFailHdwe']
+option = tk.StringVar(master)
+option.set(sel_list[0])  # default, TODO:  set/get from .ini
+option_show = tk.StringVar(master)
+option_show.set(sel_list[0])  # default, TODO:  set/get from .ini
+sel = tk.OptionMenu(master, option, *sel_list)
+sel.grid(row=5, column=0, columnspan=1, padx=5, pady=5)
+sel_label = tk.Label(master, textvariable=option)
+sel_label.grid(row=5, column=2, columnspan=2, padx=5, pady=5)
+option.trace_add('write', show)
+start = tk.StringVar(master)
+start.set('')
+start_show = tk.StringVar(master)
+start_show.set(master.clipboard_get())
+start_button = tk.Button(master, text='start to buffer', command=lookup_start, fg="purple", bg=bg_color)
+start_button.grid(row=6, column=0, padx=5, pady=5)
+start_label = tk.Label(master, textvariable=start)
+start_label.grid(row=6, column=2, padx=5, pady=5)
+start.trace_add('write', start)
 
 # Begin
 master.mainloop()
