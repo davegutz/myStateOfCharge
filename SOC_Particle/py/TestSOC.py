@@ -34,6 +34,18 @@ if platform.system() == 'Darwin':
 else:
     import tkinter as tk
 
+# Transient string
+sel_list = ['ampHiFail', 'rapidTweakRegression', 'offSitHysBms', 'triTweakDisch', 'coldStart', 'ampHiFailFf',
+            'ampLoFail', 'ampHiFailNoise', 'rapidTweakRegression40C', 'slowTweakRegression', 'satSit', 'flatSitHys',
+            'offSitHysBmsNoise', 'ampHiFailSlow', 'vHiFail', 'vHiFailFf', 'pulseEKF', 'pulseSS', 'tbFailMod',
+            'tbFailHdwe']
+lookup = {'ampHiFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;'),
+          'rapidTweakRegression': ('Ff0;HR;Xp10;', '',)}
+    # , 'offSitHysBms', 'triTweakDisch', 'coldStart', 'ampHiFailFf',
+    #         'ampLoFail', 'ampHiFailNoise', 'rapidTweakRegression40C', 'slowTweakRegression', 'satSit', 'flatSitHys',
+    #         'offSitHysBmsNoise', 'ampHiFailSlow', 'vHiFail', 'vHiFailFf', 'pulseEKF', 'pulseSS', 'tbFailMod',
+    #         'tbFailHdwe']
+
 
 # Executive class to control the global variables
 class ExRoot:
@@ -134,29 +146,29 @@ def addToClipBoard(text):
     pyperclip.copy(text)
 
 
-def lookup_start():
-    start.set(option.get())
+def grab_start():
     addToClipBoard(start.get())
 
 
+def grab_reset():
+    addToClipBoard(reset.get())
+
+
+def lookup_start():
+    start_val, reset_val = lookup.get(option.get())
+    start.set(start_val)
+    start_button.config(text=start.get())
+    reset.set(reset_val)
+    reset_button.config(text=reset.get())
+
+
 def show_option(*args):
+    lookup_start()
     option_show.set(option.get())
 
 
 def show_start(*args):
     start_show.set(start.get())
-
-
-# r = Tk()
-# r.withdraw()
-# r.clipboard_clear()
-# r.clipboard_append('Has clipboard?')
-# r.update()  # now it stays on the clipboard after the window is closed
-# print('on clipboard:', r.clipboard_get())
-# result = r.selection_get(selection="CLIPBOARD")
-# print('result:', result)
-# addToClipBoard(result)
-# r.destroy()
 
 
 # --- main ---
@@ -220,11 +232,6 @@ picture = tk.PhotoImage(file=pic_path).subsample(5, 5)
 label = tk.Label(master, image=picture)
 label.grid(row=0, column=2, columnspan=2, rowspan=4, padx=5, pady=5)
 
-# Transient string
-sel_list = ['ampHiFail', 'rapidTweakRegression', 'offSitHysBms', 'triTweakDisch', 'coldStart', 'ampHiFailFf',
-            'ampLoFail', 'ampHiFailNoise', 'rapidTweakRegression40C', 'slowTweakRegression', 'satSit', 'flatSitHys',
-            'offSitHysBmsNoise', 'ampHiFailSlow', 'vHiFail', 'vHiFailFf', 'pulseEKF', 'pulseSS', 'tbFailMod',
-            'tbFailHdwe']
 option = tk.StringVar(master)
 option.set(sel_list[0])  # default, TODO:  set/get from .ini
 option_show = tk.StringVar(master)
@@ -236,12 +243,22 @@ sel_label.grid(row=5, column=2, columnspan=2, padx=5, pady=5)
 option.trace_add('write', show_option)
 start = tk.StringVar(master)
 start.set('')
+reset = tk.StringVar(master)
+reset.set('')
+
 start_show = tk.StringVar(master)
 start_show.set(pyperclip.paste())
-start_button = tk.Button(master, text='start to buffer', command=lookup_start, fg="purple", bg=bg_color)
-start_button.grid(row=6, column=0, padx=5, pady=5)
-start_label = tk.Label(master, textvariable=start)
-start_label.grid(row=6, column=2, padx=5, pady=5)
+
+start_label = tk.Label(master, text='grab start:')
+start_label.grid(row=6, column=0, padx=5, pady=5)
+start_button = tk.Button(master, text=start_show.get(), command=grab_start, fg="purple", bg=bg_color)
+start_button.grid(row=6, column=1, columnspan=4, padx=5, pady=5)
+
+reset_label = tk.Label(master, text='grab reset:')
+reset_label.grid(row=7, column=0, padx=5, pady=5)
+reset_button = tk.Button(master, text=start_show.get(), command=grab_reset, fg="purple", bg=bg_color)
+reset_button.grid(row=7, column=1, columnspan=4, padx=5, pady=5)
+
 start.trace_add('write', show_start)
 
 # Begin
