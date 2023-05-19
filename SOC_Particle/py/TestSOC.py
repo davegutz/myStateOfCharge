@@ -167,10 +167,6 @@ def show_option(*args):
     option_show.set(option.get())
 
 
-def show_start(*args):
-    start_show.set(start.get())
-
-
 # --- main ---
 # Configuration for entire folder selection read with filepaths
 cwd_path = os.getcwd()
@@ -246,20 +242,15 @@ start.set('')
 reset = tk.StringVar(master)
 reset.set('')
 
-start_show = tk.StringVar(master)
-start_show.set(pyperclip.paste())
-
 start_label = tk.Label(master, text='grab start:')
 start_label.grid(row=6, column=0, padx=5, pady=5)
-start_button = tk.Button(master, text=start_show.get(), command=grab_start, fg="purple", bg=bg_color)
-start_button.grid(row=6, column=1, columnspan=4, padx=5, pady=5)
+start_button = tk.Button(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=200, justify=tk.LEFT)
+start_button.grid(row=6, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
 reset_label = tk.Label(master, text='grab reset:')
-reset_label.grid(row=7, column=0, padx=5, pady=5)
-reset_button = tk.Button(master, text=start_show.get(), command=grab_reset, fg="purple", bg=bg_color)
-reset_button.grid(row=7, column=1, columnspan=4, padx=5, pady=5)
-
-start.trace_add('write', show_start)
+reset_label.grid(row=8, column=0, padx=5, pady=5)
+reset_button = tk.Button(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=200, justify=tk.LEFT)
+reset_button.grid(row=8, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
 # Begin
 master.mainloop()
