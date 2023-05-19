@@ -266,6 +266,7 @@ option.set(sel_list[0])  # default, TODO:  set/get from .ini
 option_show = tk.StringVar(master)
 option_show.set(sel_list[0])  # default, TODO:  set/get from .ini
 sel = tk.OptionMenu(master, option, *sel_list)
+sel.config(width=25)
 sel.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky=tk.W)
 option.trace_add('write', show_option)
 
