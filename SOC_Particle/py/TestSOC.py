@@ -210,19 +210,26 @@ def lookup_start():
 
 def modeling_handler(*args):
     cf['modeling'] = modeling.get()
-    print('cf,modeling', cf['modeling'])
     if modeling.get() is True:
-        ref_label.grid_remove()
-        Ref.version_button.grid_remove()
-        Ref.proc_button.grid_remove()
-        Ref.battery_button.grid_remove()
-        Ref.key_button.grid_remove()
+        ref_remove()
     else:
-        ref_label.grid()
-        Ref.version_button.grid()
-        Ref.proc_button.grid()
-        Ref.battery_button.grid()
-        Ref.key_button.grid()
+        ref_restore()
+
+
+def ref_remove():
+    ref_label.grid_remove()
+    Ref.version_button.grid_remove()
+    Ref.proc_button.grid_remove()
+    Ref.battery_button.grid_remove()
+    Ref.key_button.grid_remove()
+
+
+def ref_restore():
+    ref_label.grid()
+    Ref.version_button.grid()
+    Ref.proc_button.grid()
+    Ref.battery_button.grid()
+    Ref.key_button.grid()
 
 
 def save_cf():
