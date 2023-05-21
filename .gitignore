@@ -54,3 +54,6 @@ SOC_Particle/src/SOC_Particle.cpp
 SOC_Particle/src/local_config.h
 SOC_Particle/src/SOC_Particle.cpp
 SOC_Particle/src/local_config.h
+SOC_Particle/py/TestSOC.bak
+SOC_Particle/py/TestSOC.dat
+SOC_Particle/py/TestSOC.dir
