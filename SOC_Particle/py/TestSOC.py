@@ -211,6 +211,18 @@ def lookup_start():
 def modeling_handler(*args):
     cf['modeling'] = modeling.get()
     print('cf,modeling', cf['modeling'])
+    if modeling.get() is True:
+        ref_label.grid_remove()
+        Ref.version_button.grid_remove()
+        Ref.proc_button.grid_remove()
+        Ref.battery_button.grid_remove()
+        Ref.key_button.grid_remove()
+    else:
+        ref_label.grid()
+        Ref.version_button.grid()
+        Ref.proc_button.grid()
+        Ref.battery_button.grid()
+        Ref.key_button.grid()
 
 
 def save_cf():
@@ -260,7 +272,8 @@ modeling_button = tk.Checkbutton(master, text='Modeling', bg=bg_color, variable=
                                  onvalue=True, offvalue=False)
 modeling_button.grid(row=0, column=3, pady=2, sticky=tk.N)
 modeling.trace_add('write', modeling_handler)
-tk.Label(master, text="Ref", fg="blue").grid(row=0, column=4, sticky=tk.N, pady=2)
+ref_label = tk.Label(master, text="Ref", fg="blue")
+ref_label.grid(row=0, column=4, sticky=tk.N, pady=2)
 
 
 # Version row
