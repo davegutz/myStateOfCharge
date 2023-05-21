@@ -28,6 +28,7 @@ if platform.system() == 'Darwin':
     import ttwidgets as tktt
 else:
     import tkinter as tk
+import tkinter.simpledialog
 result_ready = 0
 thread_active = 0
 
