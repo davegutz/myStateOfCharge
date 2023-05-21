@@ -34,6 +34,7 @@ thread_active = 0
 
 
 def default_cf(cf_):
+    cf_['modeling'] = True
     cf_['option'] = 'ampHiFail'
     cf_['cf_test'] = {"version": "v20230520", "processor": "A", "battery": "CH", "key": "pro1a"}
     cf_['cf_ref'] = {"version": "v20230510", "processor": "A", "battery": "CH", "key": "pro1a"}
@@ -207,12 +208,17 @@ def lookup_start():
         ev4_label.config(text='')
 
 
+def modeling_handler(*args):
+    cf['modeling'] = modeling.get()
+    print('cf,modeling', cf['modeling'])
+
+
 def save_cf():
     print('saved:', list(cf.items()))
     cf.close()
 
 
-def show_option(*args):
+def option_handler(*args):
     print('option', option.get())
     lookup_start()
     option_ = option.get()
@@ -247,8 +253,15 @@ master.wm_minsize(width=min_width, height=main_height)
 icon_path = os.path.join(ex_root.script_loc, 'TestSOC_Icon.png')
 master.iconphoto(False, tk.PhotoImage(file=icon_path))
 tk.Label(master, text="Item", fg="blue").grid(row=0, column=0, sticky=tk.N, pady=2)
-tk.Label(master, text="Ref", fg="blue").grid(row=0, column=4, sticky=tk.N, pady=2)
 tk.Label(master, text="Test", fg="blue").grid(row=0, column=1, sticky=tk.N, pady=2)
+modeling = tk.BooleanVar(master)
+modeling.set(cf['modeling'])
+modeling_button = tk.Checkbutton(master, text='Modeling', bg=bg_color, variable=modeling,
+                                 onvalue=True, offvalue=False)
+modeling_button.grid(row=0, column=3, pady=2, sticky=tk.N)
+modeling.trace_add('write', modeling_handler)
+tk.Label(master, text="Ref", fg="blue").grid(row=0, column=4, sticky=tk.N, pady=2)
+
 
 # Version row
 tk.Label(master, text="Version").grid(row=1, column=0, pady=2)
@@ -282,7 +295,7 @@ Ref.key_button.grid(row=4, column=4, pady=2)
 pic_path = os.path.join(ex_root.script_loc, 'TestSOC.png')
 picture = tk.PhotoImage(file=pic_path).subsample(5, 5)
 label = tk.Label(master, image=picture)
-label.grid(row=0, column=2, columnspan=2, rowspan=4, padx=5, pady=5)
+label.grid(row=1, column=2, columnspan=2, rowspan=3, padx=5, pady=5)
 
 option = tk.StringVar(master)
 option.set(cf['option'])
@@ -291,7 +304,7 @@ option_show.set(cf['option'])
 sel = tk.OptionMenu(master, option, *sel_list)
 sel.config(width=25)
 sel.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky=tk.W)
-option.trace_add('write', show_option)
+option.trace_add('write', option_handler)
 
 start = tk.StringVar(master)
 start.set('')
@@ -321,6 +334,7 @@ ev4_label.grid(row=13, column=1, columnspan=4, padx=5, pady=5)
 
 # Begin
 atexit.register(save_cf)  # shelve needs to be handled
-show_option()
+modeling_handler()
+option_handler()
 master.mainloop()
 
