@@ -19,11 +19,12 @@
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
 import os
-import pyperclip
-import configparser
-import platform
 import shelve
 import atexit
+import platform
+import subprocess
+import pyperclip
+import configparser
 if platform.system() == 'Darwin':
     import ttwidgets as tktt
 else:
@@ -31,6 +32,7 @@ else:
 import tkinter.simpledialog
 result_ready = 0
 thread_active = 0
+global putty_shell
 
 
 def default_cf(cf_):
@@ -216,6 +218,21 @@ def modeling_handler(*args):
         ref_restore()
 
 
+def option_handler(*args):
+    print('option', option.get())
+    lookup_start()
+    option_ = option.get()
+    option_show.set(option_)
+    cf['option'] = option_
+    print(list(cf.items()))
+
+
+def putty_cmd():
+    command = tk.simpledialog.askstring(title='putty', prompt="Enter putty command")
+    print(command, file=putty_shell.stdin, flush=True)
+    cmd_button.config(text=command)
+
+
 def ref_remove():
     ref_label.grid_remove()
     Ref.version_button.grid_remove()
@@ -237,13 +254,10 @@ def save_cf():
     cf.close()
 
 
-def option_handler(*args):
-    print('option', option.get())
-    lookup_start()
-    option_ = option.get()
-    option_show.set(option_)
-    cf['option'] = option_
-    print(list(cf.items()))
+def start_putty():
+    global putty_shell
+    putty_shell = subprocess.Popen(['putty', '-load', 'test'], stdin=subprocess.PIPE, bufsize=1, universal_newlines=True)
+    print('starting putty   putty -load test')
 
 
 # --- main ---
@@ -326,31 +340,39 @@ sel.config(width=25)
 sel.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky=tk.W)
 option.trace_add('write', option_handler)
 
+putty_shell = None
+putty_label = tk.Label(master, text='start putty:')
+putty_label.grid(row=6, column=0, padx=5, pady=5)
+putty_button = tk.Button(master, text='putty -load test', command=start_putty, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+putty_button.grid(row=6, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
+cmd_button = tk.Button(master, text='enter putty command', command=putty_cmd, fg="green", bg=bg_color)
+cmd_button.grid(row=6, column=4, pady=2)
+
 start = tk.StringVar(master)
 start.set('')
 start_label = tk.Label(master, text='grab start:')
-start_label.grid(row=6, column=0, padx=5, pady=5)
+start_label.grid(row=7, column=0, padx=5, pady=5)
 start_button = tk.Button(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-start_button.grid(row=6, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+start_button.grid(row=7, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
 reset = tk.StringVar(master)
 reset.set('')
 reset_label = tk.Label(master, text='grab reset:')
-reset_label.grid(row=8, column=0, padx=5, pady=5)
+reset_label.grid(row=9, column=0, padx=5, pady=5)
 reset_button = tk.Button(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-reset_button.grid(row=8, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+reset_button.grid(row=9, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
 ev1_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev1_label.grid(row=10, column=1, columnspan=4, padx=5, pady=5)
+ev1_label.grid(row=11, column=1, columnspan=4, padx=5, pady=5)
 
 ev2_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev2_label.grid(row=11, column=1, columnspan=4, padx=5, pady=5)
+ev2_label.grid(row=12, column=1, columnspan=4, padx=5, pady=5)
 
 ev3_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev3_label.grid(row=12, column=1, columnspan=4, padx=5, pady=5)
+ev3_label.grid(row=13, column=1, columnspan=4, padx=5, pady=5)
 
 ev4_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev4_label.grid(row=13, column=1, columnspan=4, padx=5, pady=5)
+ev4_label.grid(row=14, column=1, columnspan=4, padx=5, pady=5)
 
 # Begin
 atexit.register(save_cf)  # shelve needs to be handled
