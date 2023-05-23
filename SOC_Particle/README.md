@@ -63,6 +63,10 @@ All the hardware if the least expensive possible.   Battery uncertainty drives a
 
 The initial battery used to test the system, and use on RV trips, was the Battleborn 100 A-h LiFeP04.   It is the most expensive battery available and comes with an industry-leading BMS that prevents damage from misuse.  I thought that was important for the first prototype.    Chins batteries are available at 1/3 the price.
 
+## Software Installation
+[Windows Software Installation](doc/InstallationWindows.md)
+
+[Linux Software Installation](doc/InstallationLinux.md)
 
 ## Requirements
 In the spirit of Software Engineering principles, I document perceived requirements.   Many of these arose out of testing.
