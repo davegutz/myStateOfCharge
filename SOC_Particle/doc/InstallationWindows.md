@@ -2,7 +2,7 @@
 
 Particle Workbench extension to Visual Studio Code is used to develop and configure the real-time code for the different Particle devices and installations.   Header files set the differences.   Particle 'configure for device' chooses the device options that then interact with the headers.
 
-A serial port tool is required to interact.  puTTY is the most effective and integrates best wtih the SOC_Test.py tool on both Windows and Linux.
+A serial port tool is required to interact.  puTTY is the most effective and integrates best with the TestSOC.py tool on both Windows and Linux.
 
 ## Installing GitHub
 
