@@ -283,7 +283,7 @@ tk.Label(master, text="Item", fg="blue").grid(row=0, column=0, sticky=tk.N, pady
 tk.Label(master, text="Test", fg="blue").grid(row=0, column=1, sticky=tk.N, pady=2)
 modeling = tk.BooleanVar(master)
 modeling.set(cf['modeling'])
-modeling_button = tk.Checkbutton(master, text='Modeling', bg=bg_color, variable=modeling,
+modeling_button = tk.Checkbutton(master, text='Ref is Model', bg=bg_color, variable=modeling,
                                  onvalue=True, offvalue=False)
 modeling_button.grid(row=0, column=3, pady=2, sticky=tk.N)
 modeling.trace_add('write', modeling_handler)
@@ -342,14 +342,14 @@ putty_button.grid(row=6, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
 
 start = tk.StringVar(master)
 start.set('')
-start_label = tk.Label(master, text='grab start:')
+start_label = tk.Label(master, text='copy start:')
 start_label.grid(row=7, column=0, padx=5, pady=5)
 start_button = tk.Button(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
 start_button.grid(row=7, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
 reset = tk.StringVar(master)
 reset.set('')
-reset_label = tk.Label(master, text='grab reset:')
+reset_label = tk.Label(master, text='copy reset:')
 reset_label.grid(row=9, column=0, padx=5, pady=5)
 reset_button = tk.Button(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
 reset_button.grid(row=9, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
