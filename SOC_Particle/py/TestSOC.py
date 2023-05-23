@@ -227,12 +227,6 @@ def option_handler(*args):
     print(list(cf.items()))
 
 
-def putty_cmd():
-    command = tk.simpledialog.askstring(title='putty', prompt="Enter putty command")
-    print(command, file=putty_shell.stdin, flush=True)
-    cmd_button.config(text=command)
-
-
 def ref_remove():
     ref_label.grid_remove()
     Ref.version_button.grid_remove()
@@ -345,8 +339,6 @@ putty_label = tk.Label(master, text='start putty:')
 putty_label.grid(row=6, column=0, padx=5, pady=5)
 putty_button = tk.Button(master, text='putty -load test', command=start_putty, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
 putty_button.grid(row=6, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
-cmd_button = tk.Button(master, text='enter putty command', command=putty_cmd, fg="green", bg=bg_color)
-cmd_button.grid(row=6, column=4, pady=2)
 
 start = tk.StringVar(master)
 start.set('')
