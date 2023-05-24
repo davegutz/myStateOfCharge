@@ -23,15 +23,11 @@ import shelve
 import atexit
 import psutil
 import shutil
-import platform
 import pyperclip
 import subprocess
 import configparser
-if platform.system() == 'Darwin':
-    import ttwidgets as tktt
-else:
-    import tkinter as tk
-    from tkinter import ttk
+import tkinter as tk
+from tkinter import ttk
 import tkinter.simpledialog
 result_ready = 0
 thread_active = 0
@@ -131,7 +127,7 @@ class ExTarget:
         self.key_button = None
         self.root_config = None
         self.load_root_config(self.config_path)
-        print('ExTarget:  version', self.version, 'proc', self.proc, 'battery', self.battery, 'key', self.key )
+        print('ExTarget:  version', self.version, 'proc', self.proc, 'battery', self.battery, 'key', self.key)
 
     def enter_battery(self):
         self.battery = tk.simpledialog.askstring(title=self.level, prompt="Enter battery e.g. 'BB for Battleborn', 'CH' for CHINS:")
@@ -185,7 +181,7 @@ def addToClipBoard(text):
 
 
 def create_test_path():
-    test_path.set(os.path.join(path_to_data, Test.version, option.get() + '.csv'))
+    test_path.set(os.path.join(Test.version_path, option.get() + '_' + Test.proc + '_' + Test.battery + '.csv'))
 
 
 def grab_start():
@@ -271,9 +267,8 @@ def save_cf():
 
 
 def save_data():
-    data_path = os.path.join(Test.version_path, option.get() + '_' + Test.proc + '_' + Test.battery + '.csv')
-    print('copied ', putty_test_csv_path.get(), '\nto\n', data_path)
-    shutil.copyfile(putty_test_csv_path.get(), data_path)
+    shutil.copyfile(putty_test_csv_path.get(), test_path.get())
+    print('copied ', putty_test_csv_path.get(), '\nto\n', test_path.get())
     save_data_button.config(bg='green', text='data saved')
 
 
@@ -314,7 +309,7 @@ master.iconphoto(False, tk.PhotoImage(file=icon_path))
 tk.Label(master, text="Item", fg="blue").grid(row=0, column=0, sticky=tk.N, pady=2)
 tk.Label(master, text="Test", fg="blue").grid(row=0, column=1, sticky=tk.N, pady=2)
 modeling = tk.BooleanVar(master)
-modeling.set(cf['modeling'])
+modeling.set(bool(cf['modeling']))
 modeling_button = tk.Checkbutton(master, text='Ref is Model', bg=bg_color, variable=modeling,
                                  onvalue=True, offvalue=False)
 modeling_button.grid(row=0, column=3, pady=2, sticky=tk.N)
@@ -360,9 +355,9 @@ label.grid(row=1, column=2, columnspan=2, rowspan=3, padx=5, pady=5)
 # Option
 tk.ttk.Separator(master, orient='horizontal').grid(row=5, columnspan=5, pady=5, sticky='ew')
 option = tk.StringVar(master)
-option.set(cf['option'])
+option.set(str(cf['option']))
 option_show = tk.StringVar(master)
-option_show.set(cf['option'])
+option_show.set(str(cf['option']))
 sel = tk.OptionMenu(master, option, *sel_list)
 sel.config(width=20)
 sel.grid(row=6, padx=5, pady=5, sticky=tk.W)
@@ -416,4 +411,3 @@ atexit.register(save_cf)  # shelve needs to be handled
 modeling_handler()
 option_handler()
 master.mainloop()
-
