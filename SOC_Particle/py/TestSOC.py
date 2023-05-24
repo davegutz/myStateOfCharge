@@ -181,7 +181,7 @@ def addToClipBoard(text):
 
 
 def create_test_path():
-    test_path.set(os.path.join(Test.version_path, option.get() + '_' + Test.proc + '_' + Test.battery + '.csv'))
+    test_path.set(os.path.join(Test.version_path, cf['option'] + '_' + Test.proc + '_' + Test.battery + '.csv'))
 
 
 def grab_start():
@@ -243,6 +243,9 @@ def option_handler(*args):
     option_show.set(option_)
     cf['option'] = option_
     print(list(cf.items()))
+    create_test_path()
+    test_label.config(text=test_path.get())
+    save_data_button.config(bg=bg_color)
 
 
 def ref_remove():
