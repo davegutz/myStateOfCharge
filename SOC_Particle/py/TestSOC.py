@@ -177,6 +177,11 @@ def addToClipBoard(text):
     pyperclip.copy(text)
 
 
+def create_test_path():
+    test_path.set(os.path.join(path_to_data, Test.version, option.get(), '.csv'))
+    print('test_path:', test_path.get())
+
+
 def grab_start():
     addToClipBoard(start.get())
 
@@ -267,7 +272,6 @@ def start_putty():
 
 # --- main ---
 # Configuration for entire folder selection read with filepaths
-cwd_path = os.getcwd()
 ex_root = ExRoot()
 cf = shelve.open("TestSOC", writeback=True)
 if len(cf.keys()) == 0:
@@ -288,6 +292,10 @@ bg_color = "lightgray"
 master = tk.Tk()
 master.title('State of Charge')
 master.wm_minsize(width=min_width, height=main_height)
+pwd_path = tk.StringVar(master)
+pwd_path.set(os.getcwd())
+path_to_data = os.path.join(pwd_path.get(), '../dataReduction')
+print(path_to_data)
 icon_path = os.path.join(ex_root.script_loc, 'TestSOC_Icon.png')
 master.iconphoto(False, tk.PhotoImage(file=icon_path))
 tk.Label(master, text="Item", fg="blue").grid(row=0, column=0, sticky=tk.N, pady=2)
@@ -336,14 +344,19 @@ picture = tk.PhotoImage(file=pic_path).subsample(5, 5)
 label = tk.Label(master, image=picture)
 label.grid(row=1, column=2, columnspan=2, rowspan=3, padx=5, pady=5)
 
+# Option
 option = tk.StringVar(master)
 option.set(cf['option'])
 option_show = tk.StringVar(master)
 option_show.set(cf['option'])
 sel = tk.OptionMenu(master, option, *sel_list)
-sel.config(width=25)
-sel.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky=tk.W)
+sel.config(width=15)
+sel.grid(row=5, padx=5, pady=5, sticky=tk.W)
 option.trace_add('write', option_handler)
+test_path = tk.StringVar(master)
+create_test_path()
+test_label = tk.Label(master, text=test_path.get(), wraplength=wrap_length)
+test_label.grid(row=5, column=1, columnspan=4, padx=5, pady=5)
 
 putty_shell = None
 putty_label = tk.Label(master, text='start putty:')
