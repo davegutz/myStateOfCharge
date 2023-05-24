@@ -22,6 +22,7 @@ import os
 import shelve
 import atexit
 import psutil
+import shutil
 import platform
 import pyperclip
 import subprocess
@@ -115,8 +116,11 @@ class ExTarget:
         self.cf = cf_
         self.script_loc = os.path.dirname(os.path.abspath(__file__))
         self.config_path = os.path.join(self.script_loc, 'root_config.ini')
+        self.dataReduction_path = os.path.join(self.script_loc, '../dataReduction')
         self.version = self.cf['version']
         self.version_button = None
+        self.version_path = os.path.join(self.dataReduction_path, self.version)
+        os.makedirs(self.version_path, exist_ok=True)
         self.battery = self.cf['battery']
         self.battery_button = None
         self.level = level
@@ -148,6 +152,8 @@ class ExTarget:
         self.version = tk.simpledialog.askstring(title=self.level, prompt="Enter version <vYYYYMMDD>:")
         self.cf['version'] = self.version
         self.version_button.config(text=self.version)
+        self.version_path = os.path.join(self.dataReduction_path, self.version)
+        os.makedirs(self.version_path, exist_ok=True)
 
     def load_root_config(self, config_file_path):
         self.root_config = configparser.ConfigParser()
@@ -264,6 +270,13 @@ def save_cf():
     cf.close()
 
 
+def save_data():
+    data_path = os.path.join(Test.version_path, option.get() + '_' + Test.proc + '_' + Test.battery + '.csv')
+    print('copied ', putty_test_csv_path.get(), '\nto\n', data_path)
+    shutil.copyfile(putty_test_csv_path.get(), data_path)
+    save_data_button.config(bg='green', text='data saved')
+
+
 def start_putty():
     global putty_shell
     putty_shell = subprocess.Popen(['putty', '-load', 'test'], stdin=subprocess.PIPE, bufsize=1, universal_newlines=True)
@@ -364,6 +377,8 @@ putty_label = tk.Label(master, text='start putty:')
 putty_label.grid(row=7, column=0, padx=5, pady=5)
 putty_button = tk.Button(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
 putty_button.grid(row=7, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
+putty_test_csv_path = tk.StringVar(master)
+putty_test_csv_path.set(os.path.join(path_to_data, 'putty_test.csv'))
 
 start = tk.StringVar(master)
 start.set('')
@@ -391,10 +406,10 @@ ev3_label.grid(row=14, column=1, columnspan=4, padx=5, pady=5)
 ev4_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
 ev4_label.grid(row=15, column=1, columnspan=4, padx=5, pady=5)
 
-kill_putty_label = tk.Label(master, text='kill putty:')
-kill_putty_label.grid(row=16, column=0, padx=5, pady=5)
-kill_putty_button = tk.Button(master, text='kill putty', command=kill_putty, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-kill_putty_button.grid(row=16, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+save_data_label = tk.Label(master, text='save data:')
+save_data_label.grid(row=16, column=0, padx=5, pady=5)
+save_data_button = tk.Button(master, text='save_data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+save_data_button.grid(row=16, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
 # Begin
 atexit.register(save_cf)  # shelve needs to be handled
