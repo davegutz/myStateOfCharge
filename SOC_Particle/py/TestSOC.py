@@ -30,6 +30,7 @@ if platform.system() == 'Darwin':
     import ttwidgets as tktt
 else:
     import tkinter as tk
+    from tkinter import ttk
 import tkinter.simpledialog
 result_ready = 0
 thread_active = 0
@@ -178,8 +179,7 @@ def addToClipBoard(text):
 
 
 def create_test_path():
-    test_path.set(os.path.join(path_to_data, Test.version, option.get(), '.csv'))
-    print('test_path:', test_path.get())
+    test_path.set(os.path.join(path_to_data, Test.version, option.get() + '.csv'))
 
 
 def grab_start():
@@ -345,55 +345,56 @@ label = tk.Label(master, image=picture)
 label.grid(row=1, column=2, columnspan=2, rowspan=3, padx=5, pady=5)
 
 # Option
+tk.ttk.Separator(master, orient='horizontal').grid(row=5, columnspan=5, pady=5, sticky='ew')
 option = tk.StringVar(master)
 option.set(cf['option'])
 option_show = tk.StringVar(master)
 option_show.set(cf['option'])
 sel = tk.OptionMenu(master, option, *sel_list)
-sel.config(width=15)
-sel.grid(row=5, padx=5, pady=5, sticky=tk.W)
+sel.config(width=20)
+sel.grid(row=6, padx=5, pady=5, sticky=tk.W)
 option.trace_add('write', option_handler)
 test_path = tk.StringVar(master)
 create_test_path()
 test_label = tk.Label(master, text=test_path.get(), wraplength=wrap_length)
-test_label.grid(row=5, column=1, columnspan=4, padx=5, pady=5)
+test_label.grid(row=6, column=1, columnspan=4, padx=5, pady=5)
 
 putty_shell = None
 putty_label = tk.Label(master, text='start putty:')
-putty_label.grid(row=6, column=0, padx=5, pady=5)
+putty_label.grid(row=7, column=0, padx=5, pady=5)
 putty_button = tk.Button(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-putty_button.grid(row=6, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
+putty_button.grid(row=7, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
 
 start = tk.StringVar(master)
 start.set('')
 start_label = tk.Label(master, text='copy start:')
-start_label.grid(row=7, column=0, padx=5, pady=5)
+start_label.grid(row=8, column=0, padx=5, pady=5)
 start_button = tk.Button(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-start_button.grid(row=7, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+start_button.grid(row=8, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
 reset = tk.StringVar(master)
 reset.set('')
 reset_label = tk.Label(master, text='copy reset:')
-reset_label.grid(row=9, column=0, padx=5, pady=5)
+reset_label.grid(row=10, column=0, padx=5, pady=5)
 reset_button = tk.Button(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-reset_button.grid(row=9, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+reset_button.grid(row=10, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
 ev1_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev1_label.grid(row=11, column=1, columnspan=4, padx=5, pady=5)
+ev1_label.grid(row=12, column=1, columnspan=4, padx=5, pady=5)
 
 ev2_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev2_label.grid(row=12, column=1, columnspan=4, padx=5, pady=5)
+ev2_label.grid(row=13, column=1, columnspan=4, padx=5, pady=5)
 
 ev3_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev3_label.grid(row=13, column=1, columnspan=4, padx=5, pady=5)
+ev3_label.grid(row=14, column=1, columnspan=4, padx=5, pady=5)
 
 ev4_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev4_label.grid(row=14, column=1, columnspan=4, padx=5, pady=5)
+ev4_label.grid(row=15, column=1, columnspan=4, padx=5, pady=5)
 
 kill_putty_label = tk.Label(master, text='kill putty:')
-kill_putty_label.grid(row=15, column=0, padx=5, pady=5)
+kill_putty_label.grid(row=16, column=0, padx=5, pady=5)
 kill_putty_button = tk.Button(master, text='kill putty', command=kill_putty, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-kill_putty_button.grid(row=15, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+kill_putty_button.grid(row=16, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
 # Begin
 atexit.register(save_cf)  # shelve needs to be handled
