@@ -270,9 +270,23 @@ def save_cf():
 
 
 def save_data():
-    shutil.copyfile(putty_test_csv_path.get(), test_path.get())
-    print('copied ', putty_test_csv_path.get(), '\nto\n', test_path.get())
-    save_data_button.config(bg='green', text='data saved')
+    if os.path.getsize(putty_test_csv_path.get()) > 512:  # bytes
+        # create empty file
+        try:
+            open(empty_csv_path.get(), 'x')
+        except FileExistsError:
+            pass
+        shutil.copyfile(putty_test_csv_path.get(), test_path.get())
+        print('copied ', putty_test_csv_path.get(), '\nto\n', test_path.get())
+        save_data_button.config(bg='green', text='data saved')
+        shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
+        try:
+            os.remove(empty_csv_path.get())
+        except OSError:
+            pass
+        print('emptied', putty_test_csv_path.get())
+    else:
+        print('putty test file is too small (<512 bytes) probably already done')
 
 
 def start_putty():
@@ -377,6 +391,8 @@ putty_button = tk.Button(master, text='putty -load test', command=start_putty, f
 putty_button.grid(row=7, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
 putty_test_csv_path = tk.StringVar(master)
 putty_test_csv_path.set(os.path.join(path_to_data, 'putty_test.csv'))
+empty_csv_path = tk.StringVar(master)
+empty_csv_path.set(os.path.join(path_to_data, 'empty.csv'))
 
 start = tk.StringVar(master)
 start.set('')
