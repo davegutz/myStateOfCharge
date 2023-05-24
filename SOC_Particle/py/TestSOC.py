@@ -21,9 +21,10 @@
 import os
 import shelve
 import atexit
+import psutil
 import platform
-import subprocess
 import pyperclip
+import subprocess
 import configparser
 if platform.system() == 'Darwin':
     import ttwidgets as tktt
@@ -184,6 +185,16 @@ def grab_reset():
     addToClipBoard(reset.get())
 
 
+def kill_putty():
+    num = 0
+    for proc in psutil.process_iter():
+        if proc.name() == "putty.exe":
+            proc.terminate()
+            num += 1
+    if num == 0:
+        print('putty.exe not found')
+
+
 def lookup_start():
     start_val, reset_val, ev_val = lookup.get(option.get())
     start.set(start_val)
@@ -337,7 +348,7 @@ option.trace_add('write', option_handler)
 putty_shell = None
 putty_label = tk.Label(master, text='start putty:')
 putty_label.grid(row=6, column=0, padx=5, pady=5)
-putty_button = tk.Button(master, text='putty -load test', command=start_putty, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+putty_button = tk.Button(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
 putty_button.grid(row=6, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
 
 start = tk.StringVar(master)
@@ -365,6 +376,11 @@ ev3_label.grid(row=13, column=1, columnspan=4, padx=5, pady=5)
 
 ev4_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
 ev4_label.grid(row=14, column=1, columnspan=4, padx=5, pady=5)
+
+kill_putty_label = tk.Label(master, text='kill putty:')
+kill_putty_label.grid(row=15, column=0, padx=5, pady=5)
+kill_putty_button = tk.Button(master, text='kill putty', command=kill_putty, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+kill_putty_button.grid(row=15, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
 # Begin
 atexit.register(save_cf)  # shelve needs to be handled
