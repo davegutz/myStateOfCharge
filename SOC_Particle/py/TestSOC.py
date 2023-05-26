@@ -423,7 +423,8 @@ ev4_label.grid(row=15, column=1, columnspan=4, padx=5, pady=5)
 save_data_label = tk.Label(master, text='save data:')
 save_data_label.grid(row=16, column=0, padx=5, pady=5)
 save_data_button = tk.Button(master, text='save_data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-save_data_button.grid(row=16, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+save_data_button.grid(row=16, column=1, padx=5, pady=5)
+tk.ttk.Separator(master, orient='horizontal').grid(row=17, columnspan=5, pady=5, sticky='ew')
 
 # Begin
 atexit.register(save_cf)  # shelve needs to be handled
