@@ -121,6 +121,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
 
 def compareRunRun(keys=None, dir_data_path=None, dir_data_new_path=None,
                   pathToSavePdfTo='../dataReduction/figures', path_to_temp='../dataReduction/temp'):
+
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
     # Transient  inputs
@@ -141,14 +142,14 @@ def compareRunRun(keys=None, dir_data_path=None, dir_data_new_path=None,
         os.mkdir(path_to_temp)
 
     # Regression
-    if keys is None:
+    # if keys is None:
         # keys = [('ampHiFail vA20221220.txt', 'soc1a_2022', 'legacy'), ('ampHiFail v20230128.txt', 'pro0p', 'legacy')]
         # keys = [('ampHiFail v20230128.txt', 'pro0p_20221220', 'legacy'), ('ampHiFail v20230303 CH.txt', 'pro0p_2023', 'legacy')]
         # keys = [('ampHiFail v20230303 CH.txt', 'pro0p_2023', 'legacy'), ('ampHiFail v20230305 CH.txt', 'pro0p_2023')];
         # keys = [('ampHiFail vA20221220.txt', 'soc1a_2022', 'legacy'), ('ampHiFail vA20230305 BB.txt', 'pro1a_2023')];
         # keys = [('rapidTweakRegression vA20230219.txt', 'pro1a_2023', 'legacy'), ('rapidTweakRegression vA20230305 BB.txt', 'pro1a_2023')];
         # keys = [('rapidTweakRegression v20230305 CH.txt', 'pro0p_2023'), ('rapidTweakRegression vA20230305 BB.txt', 'pro1a_2023')];
-        keys = [('rapidTweakRegression v20230305 CH.txt', 'pro0p'), ('rapidTweakRegression vA20230305 CH.txt', 'pro1a')]
+        # keys = [('rapidTweakRegression v20230305 CH.txt', 'pro0p'), ('rapidTweakRegression vA20230305 CH.txt', 'pro1a')]
         # keys = [('offSitHysBms vA20221220.txt', 'soc1a', 'legacy'), ('offSitHysBms vA20230305 BB.txt', 'pro1a_2023')];
         # keys = [('offSitHysBms v20230303 CH.txt', 'pro0p_2023', 'legacy'), ('offSitHysBms v20230305 CH.txt', 'pro0p_2023')];
         # keys = [('ampLoFail v20230303 CH.txt', 'pro0p', 'legacy'), ('ampLoFail v20230305 CH.txt', 'pro0p')]
@@ -167,14 +168,14 @@ def compareRunRun(keys=None, dir_data_path=None, dir_data_new_path=None,
     if len(keys[1]) > 2 and keys[1][2] == 'legacy':
         legacy_in_new = True
 
-    # Load data
-    if data_file_path is None:
-        data_file_path = os.path.join(os.getcwd(), data_file_old_txt)
+    # Load old ref data
+    data_file_path = os.path.join(dir_data_path, data_file_old_txt)
     mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
         load_data(data_file_path, skip, unit_key_old, zero_zero_in, time_end_in,
                   rated_batt_cap=rated_batt_cap_in, legacy=legacy_in_old)
-    if data_file_new_path is None:
-        data_file_new_path = os.path.join(os.getcwd(), data_file_new_txt)
+
+    # Load new test data
+    data_file_new_path = os.path.join(dir_data_new_path, data_file_new_txt)
     mon_new, sim_new, f_new, dummy1, dummy2 = \
         load_data(data_file_new_path, skip, unit_key_new, zero_zero_in, time_end_in,
                   rated_batt_cap=rated_batt_cap_in, legacy=legacy_in_new)
@@ -183,7 +184,6 @@ def compareRunRun(keys=None, dir_data_path=None, dir_data_new_path=None,
     n_fig = 0
     fig_files = []
     data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
-    # filename = data_root + sys.argv[0].split('\\')[-1]
     filename = data_root + sys.argv[0].split('/')[-1]
     plot_title = filename + '   ' + date_time
     if temp_flt_file_clean and len(f.time) > 1:

@@ -187,14 +187,20 @@ def compare_run_sim():
         compareRunSim(data_file_path=test_path.get(), unit_key=Test.key, pathToSavePdfTo=Test.version_path+'./figures',
                       path_to_temp=Test.version_path+'./temp')
     else:
-        keys = [('rapidTweakRegression v20230305 CH.txt', 'pro0p'), ('rapidTweakRegression vA20230305 CH.txt', 'pro1a')]
-        compareRunRun(keys=keys, dir_data_path=, dir_data_new_path=,
+        # keys = [('rapidTweakRegression v20230305 CH.txt', 'pro0p'), ('rapidTweakRegression vA20230305 CH.txt', 'pro1a')]
+        keys = [(create_file_txt(cf['option'], Test.proc, Test.battery), Test.key),
+                (create_file_txt(cf['option'], Ref.proc, Ref.battery), Ref.key)]
+        compareRunRun(keys=keys, dir_data_path=Ref.version_path, dir_data_new_path=Test.version_path,
                       pathToSavePdfTo=Test.version_path+'./figures',
                       path_to_temp=Test.version_path+'./temp')
 
 
+def create_file_txt(option_, proc_, battery_):
+    return option_ + '_' + proc_ + '_' + battery_ + '.csv'
+
+
 def create_test_path():
-    test_path.set(os.path.join(Test.version_path, cf['option'] + '_' + Test.proc + '_' + Test.battery + '.csv'))
+    test_path.set(os.path.join(Test.version_path, create_file_txt(cf['option'], Test.proc, Test.battery)))
 
 
 def grab_start():
