@@ -129,12 +129,20 @@ class ExTarget:
         self.key_button = None
         self.root_config = None
         self.load_root_config(self.config_path)
+        self.file_txt = None
+        self.file_path = None
         print('ExTarget:  version', self.version, 'proc', self.proc, 'battery', self.battery, 'key', self.key)
+
+    def create_file_path(self):
+        self.file_txt = create_file_txt(cf['option'], self.proc, self.battery)
+        self.file_path = os.path.join(self.version_path, self.file_txt)
 
     def enter_battery(self):
         self.battery = tk.simpledialog.askstring(title=self.level, prompt="Enter battery e.g. 'BB for Battleborn', 'CH' for CHINS:")
         self.cf['battery'] = self.battery
         self.battery_button.config(text=self.battery)
+        self.create_file_path()
+        test_label.config(text=Test.file_path)
 
     def enter_key(self):
         self.key = tk.simpledialog.askstring(title=self.level, prompt="Enter key e.g. 'pro0p', 'pro1a', 'soc0p', 'soc1a':")
@@ -145,6 +153,8 @@ class ExTarget:
         self.proc = tk.simpledialog.askstring(title=self.level, prompt="Enter Processor e.g. 'A', 'P', 'P2':")
         self.cf['processor'] = self.proc
         self.proc_button.config(text=self.proc)
+        self.create_file_path()
+        test_label.config(text=Test.file_path)
 
     def enter_version(self):
         self.version = tk.simpledialog.askstring(title=self.level, prompt="Enter version <vYYYYMMDD>:")
@@ -152,6 +162,8 @@ class ExTarget:
         self.version_button.config(text=self.version)
         self.version_path = os.path.join(self.dataReduction_path, self.version)
         os.makedirs(self.version_path, exist_ok=True)
+        self.create_file_path()
+        test_label.config(text=Test.file_path)
 
     def load_root_config(self, config_file_path):
         self.root_config = configparser.ConfigParser()
@@ -184,12 +196,13 @@ def addToClipBoard(text):
 
 def compare_run_sim():
     if modeling.get():
-        compareRunSim(data_file_path=test_path.get(), unit_key=Test.key, pathToSavePdfTo=Test.version_path+'./figures',
+        compareRunSim(data_file_path=Test.file_path, unit_key=Test.key, pathToSavePdfTo=Test.version_path+'./figures',
                       path_to_temp=Test.version_path+'./temp')
     else:
         # keys = [('rapidTweakRegression v20230305 CH.txt', 'pro0p'), ('rapidTweakRegression vA20230305 CH.txt', 'pro1a')]
-        keys = [(create_file_txt(cf['option'], Test.proc, Test.battery), Test.key),
-                (create_file_txt(cf['option'], Ref.proc, Ref.battery), Ref.key)]
+        print('Test', Test.file_path, Test.key)
+        print('Ref', Ref.file_path, Ref.key)
+        keys = [(Test.file_txt, Test.key), (Ref.file_txt, Ref.key)]
         compareRunRun(keys=keys, dir_data_path=Ref.version_path, dir_data_new_path=Test.version_path,
                       pathToSavePdfTo=Test.version_path+'./figures',
                       path_to_temp=Test.version_path+'./temp')
@@ -197,10 +210,6 @@ def compare_run_sim():
 
 def create_file_txt(option_, proc_, battery_):
     return option_ + '_' + proc_ + '_' + battery_ + '.csv'
-
-
-def create_test_path():
-    test_path.set(os.path.join(Test.version_path, create_file_txt(cf['option'], Test.proc, Test.battery)))
 
 
 def grab_start():
@@ -262,8 +271,8 @@ def option_handler(*args):
     option_show.set(option_)
     cf['option'] = option_
     print(list(cf.items()))
-    create_test_path()
-    test_label.config(text=test_path.get())
+    Test.create_file_path()
+    test_label.config(text=Test.file_path)
     save_data_button.config(bg=bg_color)
 
 
@@ -295,8 +304,8 @@ def save_data():
             open(empty_csv_path.get(), 'x')
         except FileExistsError:
             pass
-        shutil.copyfile(putty_test_csv_path.get(), test_path.get())
-        print('copied ', putty_test_csv_path.get(), '\nto\n', test_path.get())
+        shutil.copyfile(putty_test_csv_path.get(), Test.file_path)
+        print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
         save_data_button.config(bg='green', text='data saved')
         shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
         try:
@@ -398,9 +407,9 @@ sel = tk.OptionMenu(master, option, *sel_list)
 sel.config(width=20)
 sel.grid(row=6, padx=5, pady=5, sticky=tk.W)
 option.trace_add('write', option_handler)
-test_path = tk.StringVar(master)
-create_test_path()
-test_label = tk.Label(master, text=test_path.get(), wraplength=wrap_length)
+Test.create_file_path()
+Ref.create_file_path()
+test_label = tk.Label(master, text=Test.file_path, wraplength=wrap_length)
 test_label.grid(row=6, column=1, columnspan=4, padx=5, pady=5)
 
 putty_shell = None
