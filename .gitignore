@@ -58,3 +58,5 @@ SOC_Particle/py/TestSOC.bak
 SOC_Particle/py/TestSOC.dat
 SOC_Particle/py/TestSOC.dir
 SOC_Particle/dataReduction/putty_test.csv
+SOC_Particle/dataReduction/v20230305/temp
+SOC_Particle/dataReduction/v20230403/temp

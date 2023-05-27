@@ -29,6 +29,8 @@ import configparser
 import tkinter as tk
 from tkinter import ttk
 import tkinter.simpledialog
+from CompareRunSim import compareRunSim
+from CompareRunRun import compareRunRun
 result_ready = 0
 thread_active = 0
 global putty_shell
@@ -178,6 +180,17 @@ class ExTarget:
 # Global methods
 def addToClipBoard(text):
     pyperclip.copy(text)
+
+
+def compare_run_sim():
+    if modeling.get():
+        compareRunSim(data_file_path=test_path.get(), unit_key=Test.key, pathToSavePdfTo=Test.version_path+'./figures',
+                      path_to_temp=Test.version_path+'./temp')
+    else:
+        keys = [('rapidTweakRegression v20230305 CH.txt', 'pro0p'), ('rapidTweakRegression vA20230305 CH.txt', 'pro1a')]
+        compareRunRun(keys=keys, dir_data_path=, dir_data_new_path=,
+                      pathToSavePdfTo=Test.version_path+'./figures',
+                      path_to_temp=Test.version_path+'./temp')
 
 
 def create_test_path():
@@ -425,6 +438,9 @@ save_data_label.grid(row=16, column=0, padx=5, pady=5)
 save_data_button = tk.Button(master, text='save_data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
 save_data_button.grid(row=16, column=1, padx=5, pady=5)
 tk.ttk.Separator(master, orient='horizontal').grid(row=17, columnspan=5, pady=5, sticky='ew')
+
+run_button = tk.Button(master, text='compare run', command=compare_run_sim, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+run_button.grid(row=18, column=0, padx=5, pady=5)
 
 # Begin
 atexit.register(save_cf)  # shelve needs to be handled

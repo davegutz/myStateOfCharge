@@ -23,6 +23,12 @@ from DataOverModel import SavedData, SavedDataSim, write_clean_file, dom_plot
 from CompareFault import add_stuff_f, over_fault, filter_Tb, IB_BAND
 from pyDAGx import myTables
 from Battery import Battery, BatteryMonitor
+import sys
+from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
+import matplotlib.pyplot as plt
+from datetime import datetime
+
+plt.rcParams['axes.grid'] = True
 
 
 # Load from files
@@ -113,34 +119,29 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     return mon, sim, f, data_file_clean, temp_flt_file_clean
 
 
-if __name__ == '__main__':
-    import sys
-    from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
-    import matplotlib.pyplot as plt
-    plt.rcParams['axes.grid'] = True
-    from datetime import datetime
+def compareRunRun(keys=None, dir_data_path=None, dir_data_new_path=None,
+                  pathToSavePdfTo='../dataReduction/figures', path_to_temp='../dataReduction/temp'):
+    date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
-    def main():
-        date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+    # Transient  inputs
+    skip = 1
+    zero_zero_in = False
+    time_end_in = None
+    plot_init_in = False
+    long_term_in = False
+    plot_overall_in = True
+    rated_batt_cap_in = 108.4
+    legacy_in_old = False
+    legacy_in_new = False
+    # path_to_data = '../dataReduction'
+    import os
+    if not os.path.isdir(pathToSavePdfTo):
+        os.mkdir(pathToSavePdfTo)
+    if not os.path.isdir(path_to_temp):
+        os.mkdir(path_to_temp)
 
-        # Transient  inputs
-        skip = 1
-        zero_zero_in = False
-        time_end_in = None
-        plot_init_in = False
-        long_term_in = False
-        plot_overall_in = True
-        rated_batt_cap_in = 108.4
-        legacy_in_old = False
-        legacy_in_new = False
-        pathToSavePdfTo = '../dataReduction/figures'
-        path_to_data = '../dataReduction'
-        path_to_temp = '../dataReduction/temp'
-        import os
-        if not os.path.isdir(path_to_temp):
-            os.mkdir(path_to_temp)
-
-        # Regression
+    # Regression
+    if keys is None:
         # keys = [('ampHiFail vA20221220.txt', 'soc1a_2022', 'legacy'), ('ampHiFail v20230128.txt', 'pro0p', 'legacy')]
         # keys = [('ampHiFail v20230128.txt', 'pro0p_20221220', 'legacy'), ('ampHiFail v20230303 CH.txt', 'pro0p_2023', 'legacy')]
         # keys = [('ampHiFail v20230303 CH.txt', 'pro0p_2023', 'legacy'), ('ampHiFail v20230305 CH.txt', 'pro0p_2023')];
@@ -156,44 +157,46 @@ if __name__ == '__main__':
         # keys = [('ampHiFail v20230305 CH.txt', 'pro0p_2023'), ('ampHiFail vA20230305 BB.txt', 'pro1a_2023')];
         # keys = [('slowTweakRegression v20230305 CH.txt', 'pro0p_2023'), ('slowTweakRegression vA20230305 BB.txt', 'pro1a_2023')];
 
-        # Regression suite
-        data_file_old_txt = keys[0][0]
-        unit_key_old = keys[0][1]
-        if len(keys[0]) > 2 and keys[0][2] == 'legacy':
-            legacy_in_old = True
-        data_file_new_txt = keys[1][0]
-        unit_key_new = keys[1][1]
-        if len(keys[1]) > 2 and keys[1][2] == 'legacy':
-            legacy_in_new = True
+    # Regression suite
+    data_file_old_txt = keys[0][0]
+    unit_key_old = keys[0][1]
+    if len(keys[0]) > 2 and keys[0][2] == 'legacy':
+        legacy_in_old = True
+    data_file_new_txt = keys[1][0]
+    unit_key_new = keys[1][1]
+    if len(keys[1]) > 2 and keys[1][2] == 'legacy':
+        legacy_in_new = True
 
-        # Load data
-        data_file = os.path.join(os.getcwd(), data_file_old_txt)
-        mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
-            load_data(data_file, skip, unit_key_old, zero_zero_in, time_end_in,
-                      rated_batt_cap=rated_batt_cap_in, legacy=legacy_in_old)
-        data_file_new = os.path.join(os.getcwd(), data_file_new_txt)
-        mon_new, sim_new, f_new, dummy1, dummy2 = \
-            load_data(data_file_new, skip, unit_key_new, zero_zero_in, time_end_in,
-                      rated_batt_cap=rated_batt_cap_in, legacy=legacy_in_new)
+    # Load data
+    if data_file_path is None:
+        data_file_path = os.path.join(os.getcwd(), data_file_old_txt)
+    mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
+        load_data(data_file_path, skip, unit_key_old, zero_zero_in, time_end_in,
+                  rated_batt_cap=rated_batt_cap_in, legacy=legacy_in_old)
+    if data_file_new_path is None:
+        data_file_new_path = os.path.join(os.getcwd(), data_file_new_txt)
+    mon_new, sim_new, f_new, dummy1, dummy2 = \
+        load_data(data_file_new_path, skip, unit_key_new, zero_zero_in, time_end_in,
+                  rated_batt_cap=rated_batt_cap_in, legacy=legacy_in_new)
 
-        # Plots
-        n_fig = 0
-        fig_files = []
-        data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
-        # filename = data_root + sys.argv[0].split('\\')[-1]
-        filename = data_root + sys.argv[0].split('/')[-1]
-        plot_title = filename + '   ' + date_time
-        if temp_flt_file_clean and len(f.time) > 1:
-            n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                          n_fig=n_fig, long_term=long_term_in)
-        if plot_overall_in:
-            n_fig, fig_files = dom_plot(mon_old, mon_new, sim_old, sim_new, sim_new, filename, fig_files,
-                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
-        precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
-        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo,
-                                listWithImagesExtensions=["png"])
-        cleanup_fig_files(fig_files)
+    # Plots
+    n_fig = 0
+    fig_files = []
+    data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
+    # filename = data_root + sys.argv[0].split('\\')[-1]
+    filename = data_root + sys.argv[0].split('/')[-1]
+    plot_title = filename + '   ' + date_time
+    if temp_flt_file_clean and len(f.time) > 1:
+        n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
+                                      n_fig=n_fig, long_term=long_term_in)
+    if plot_overall_in:
+        n_fig, fig_files = dom_plot(mon_old, mon_new, sim_old, sim_new, sim_new, filename, fig_files,
+                                    plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
+    precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
+    unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo,
+                            listWithImagesExtensions=["png"])
+    cleanup_fig_files(fig_files)
 
-        plt.show()
+    plt.show()
 
-    main()
+    compareRunRun()
