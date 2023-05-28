@@ -200,4 +200,6 @@ def compareRunRun(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
 
     plt.show()
 
+
+if __name__ == '__main__':
     compareRunRun()

@@ -276,4 +276,6 @@ def compareRunSim(data_file_path=None, unit_key=None, time_end_in=None, pathToSa
 
     plt.show()
 
+
+if __name__ == '__main__':
     compareRunSim()

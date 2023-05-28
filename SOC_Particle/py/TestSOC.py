@@ -225,6 +225,7 @@ def compare_run():
         tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
         return
     if modeling.get():
+        print('compareRunSim')
         compareRunSim(data_file_path=Test.file_path, unit_key=Test.key, pathToSavePdfTo=Test.version_path+'./figures',
                       path_to_temp=Test.version_path+'./temp')
     else:
@@ -234,6 +235,7 @@ def compare_run():
         print('TestSOC compare_run:  Ref', Ref.file_path, Ref.key)
         print('TestSOC compare_run:  Test', Test.file_path, Test.key)
         keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
+        print('compareRunRun')
         compareRunRun(keys=keys, dir_data_ref_path=Ref.version_path, dir_data_test_path=Test.version_path,
                       pathToSavePdfTo=Test.version_path+'./figures',
                       path_to_temp=Test.version_path+'./temp')
