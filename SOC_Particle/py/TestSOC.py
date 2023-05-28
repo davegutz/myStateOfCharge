@@ -241,6 +241,7 @@ def compare_run():
                       path_to_temp=Test.version_path+'./temp')
 
 
+# puTTY generates '\0' characters
 def copy_clean(src, dst):
     file_in = open(src, 'r')
     data = file_in.read()
@@ -350,7 +351,6 @@ def save_data():
             open(empty_csv_path.get(), 'x')
         except FileExistsError:
             pass
-        # shutil.copyfile(putty_test_csv_path.get(), Test.file_path)
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
         save_data_button.config(bg='green', text='data saved')
