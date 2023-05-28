@@ -68,8 +68,8 @@ lookup = {'ampHiFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.000
           'ampHiFailSlow': ('Ff0;D^0;Xm247;Ca0.5;Pf;v2;W2;Dr100;DP1;HR;Dm6;Dn0.0001;Fc0.02;Fd0.5;', 'Hd;Xp0;Pf;Rf;W2;+v0;Dr100;DE20;Fc1;Fd1;Rf;Pf;', ("Should detect and switch amp current failure. Will be slow (~6 min) detection as it waits for the EKF to wind up to produce a cc_diff fault.", "Will display “diff” on OLED due to 6 A difference before switch (not cc_diff).", "EKF should tend to follow voltage while soc wanders away.")),
           'vHiFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.8;', 'Dv0;Hd;Xp0;Rf;W50;+v0;Dr100;Rf;Pf;DP4;', ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.")),
           'vHiFailFf': ('Ff1;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.8;', 'Dv0;Ff0;Hd;Xp0;Rf;W50;+v0;Dr100;Rf;Pf;DP4;', ("Run for about 1 minute.", "Should detect voltage failure (see DOM1 fig 2 or 3) but not display anything on OLED.")),
-          'pulseEKF': ("Xp6; doesn't work now", 'n/a', ("Xp6 # TODO: doesn't work now.",)),
-          'pulseSS': ("Xp7 doesn't work now", 'n/a', ("Should generate a very short <10 sec data burst with a pulse.  Look at plots for good overlay. e_wrap will have a delay.", "This is the shortest of all tests.  Useful for quick checks.")),
+          'pulseEKF': ("Xp6; doesn't work", 'n/a', ("Xp6 # TODO: doesn't work now.",)),
+          'pulseSS': ("Xp7;", 'n/a', ("Should generate a very short <10 sec data burst with a pulse.  Look at plots for good overlay. e_wrap will have a delay.", "This is the shortest of all tests.  Useful for quick checks.")),
           'tbFailMod': ('Ff0;D^0;Ca.5;Xp0;W4;Xm247;DP1;Dr100;W2;HR;Pf;v2;Xv.002;Xu1;W200;Xu0;Xv1;W100;v0;Pf;', 'Hd;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;', ("Run for 60 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.",)),
           'tbFailHdwe': ('Ff0;D^0;Ca.5;Xp0;W4;Xm246;DP1;Dr100;W2;HR;Pf;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;', 'Hd;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;', ("Should momentary flash '***' then clear itself.  All within 60 seconds.", "'Xp0' in reset puts Xm back to 247.")),
           }
@@ -204,10 +204,11 @@ class ExTarget:
         else:
             self.label.config(bg='pink')
         self.key_exists_in_file = False
-        for line in open(self.file_path, 'r'):
-            if re.search(self.key, line):
-                self.key_exists_in_file = True
-                break
+        if os.path.isfile(self.file_path):
+            for line in open(self.file_path, 'r'):
+                if re.search(self.key, line):
+                    self.key_exists_in_file = True
+                    break
         if self.key_exists_in_file:
             self.key_button.config(bg='lightgreen')
         else:
@@ -347,6 +348,8 @@ def save_data():
         except OSError:
             pass
         print('emptied', putty_test_csv_path.get())
+        print('updating Test file label')
+        Test.create_file_path()
     else:
         print('putty test file is too small (<512 bytes) probably already done')
 
