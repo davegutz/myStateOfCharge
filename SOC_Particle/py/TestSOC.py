@@ -19,6 +19,7 @@
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
 import os
+import re
 import shelve
 import atexit
 import psutil
@@ -132,6 +133,7 @@ class ExTarget:
         self.file_txt = None
         self.file_path = None
         self.file_exists = None
+        self.key_exists_in_file = None
         self.label = None
         print('ExTarget:  version', self.version, 'proc', self.proc, 'battery', self.battery, 'key', self.key)
 
@@ -151,6 +153,7 @@ class ExTarget:
         self.key = tk.simpledialog.askstring(title=self.level, prompt="Enter key e.g. 'pro0p', 'pro1a', 'soc0p', 'soc1a':")
         self.cf['key'] = self.key
         self.key_button.config(text=self.key)
+        self.update_file_label()
 
     def enter_proc(self):
         self.proc = tk.simpledialog.askstring(title=self.level, prompt="Enter Processor e.g. 'A', 'P', 'P2':")
@@ -197,6 +200,15 @@ class ExTarget:
             self.label.config(bg='lightgreen')
         else:
             self.label.config(bg='pink')
+        self.key_exists_in_file = False
+        for line in open(self.file_path, 'r'):
+            if re.search(self.key, line):
+                self.key_exists_in_file = True
+                break
+        if self.key_exists_in_file:
+            print('key exists')
+        else:
+            print('key does not exist')
 
 
 # Global methods

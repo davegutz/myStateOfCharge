@@ -22,7 +22,6 @@ import numpy as np
 from DataOverModel import SavedData, SavedDataSim, write_clean_file, dom_plot
 from CompareFault import add_stuff_f, over_fault, filter_Tb, IB_BAND
 from Battery import Battery, BatteryMonitor
-import sys
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
 import matplotlib.pyplot as plt
 from datetime import datetime
