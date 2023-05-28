@@ -241,6 +241,15 @@ def compare_run():
                       path_to_temp=Test.version_path+'./temp')
 
 
+def copy_clean(src, dst):
+    file_in = open(src, 'r')
+    data = file_in.read()
+    file_in.close()
+    file_out = open(dst, 'w')
+    file_out.write(data.replace('\0', ''))
+    file_out.close()
+
+
 def create_file_txt(option_, proc_, battery_):
     return option_ + '_' + proc_ + '_' + battery_ + '.csv'
 
@@ -341,7 +350,8 @@ def save_data():
             open(empty_csv_path.get(), 'x')
         except FileExistsError:
             pass
-        shutil.copyfile(putty_test_csv_path.get(), Test.file_path)
+        # shutil.copyfile(putty_test_csv_path.get(), Test.file_path)
+        copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
         save_data_button.config(bg='green', text='data saved')
         shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
