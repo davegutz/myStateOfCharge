@@ -242,10 +242,10 @@ def compareRunSim(data_file_path=None, unit_key=None, time_end_in=None, pathToSa
     # Plots
     n_fig = 0
     fig_files = []
-    data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
-    # filename = data_root + sys.argv[0].split('\\')[-1]
-    filename = data_root + sys.argv[0].split('/')[-1]
-    plot_title = filename + '   ' + date_time
+    data_root_test = data_file_clean.split('/')[-1].replace('.csv', '')
+    dir_root_test = data_file_clean.split('/')[-3].split('\\')[-1]
+    filename = data_root_test
+    plot_title = dir_root_test + '/' + data_root_test + '   ' + date_time
     if temp_flt_file_clean and len(f.time) > 1:
         n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                       n_fig=n_fig, long_term=long_term_in, cc_dif_tol=cc_dif_tol_in)
