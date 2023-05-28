@@ -251,23 +251,23 @@ def compareRunSim(data_file_path=None, unit_key=None, time_end_in=None, pathToSa
                                       n_fig=n_fig, long_term=long_term_in, cc_dif_tol=cc_dif_tol_in)
     if plot_overall_in:
         n_fig, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                    plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
-                                    new_str='_ver')
+                                    plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, ref_str='',
+                                    test_str='_ver')
         n_fig, fig_files = ekf_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                    plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
-                                    new_str='_ver')
+                                    plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, ref_str='',
+                                    test_str='_ver')
         n_fig, fig_files = sim_s_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                    plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
-                                    new_str='_ver')
+                                      plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, ref_str='',
+                                      test_str='_ver')
         n_fig, fig_files = gp_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                   plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
-                                   new_str='_ver')
+                                   plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, ref_str='',
+                                   test_str='_ver')
         n_fig, fig_files = off_on_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                       plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, old_str='',
-                                       new_str='_ver')
+                                       plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, ref_str='',
+                                       test_str='_ver')
     if tune_in:
         n_fig, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename, fig_files,
-                                  plot_title=plot_title, n_fig=n_fig, old_str='', new_str='_ver')
+                                  plot_title=plot_title, n_fig=n_fig, ref_str='', test_str='_ver')
 
     precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
     print('filename', filename, 'path', pathToSavePdfTo)

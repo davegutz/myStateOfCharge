@@ -131,18 +131,21 @@ class ExTarget:
         self.load_root_config(self.config_path)
         self.file_txt = None
         self.file_path = None
+        self.file_exists = None
+        self.label = None
         print('ExTarget:  version', self.version, 'proc', self.proc, 'battery', self.battery, 'key', self.key)
 
     def create_file_path(self):
         self.file_txt = create_file_txt(cf['option'], self.proc, self.battery)
         self.file_path = os.path.join(self.version_path, self.file_txt)
+        self.file_exists = os.path.isfile(self.file_path)
+        self.update_file_label()
 
     def enter_battery(self):
         self.battery = tk.simpledialog.askstring(title=self.level, prompt="Enter battery e.g. 'BB for Battleborn', 'CH' for CHINS:")
         self.cf['battery'] = self.battery
         self.battery_button.config(text=self.battery)
         self.create_file_path()
-        test_label.config(text=Test.file_path)
 
     def enter_key(self):
         self.key = tk.simpledialog.askstring(title=self.level, prompt="Enter key e.g. 'pro0p', 'pro1a', 'soc0p', 'soc1a':")
@@ -154,7 +157,7 @@ class ExTarget:
         self.cf['processor'] = self.proc
         self.proc_button.config(text=self.proc)
         self.create_file_path()
-        test_label.config(text=Test.file_path)
+        self.label.config(text=self.file_path)
 
     def enter_version(self):
         self.version = tk.simpledialog.askstring(title=self.level, prompt="Enter version <vYYYYMMDD>:")
@@ -163,7 +166,7 @@ class ExTarget:
         self.version_path = os.path.join(self.dataReduction_path, self.version)
         os.makedirs(self.version_path, exist_ok=True)
         self.create_file_path()
-        test_label.config(text=Test.file_path)
+        self.label.config(text=self.file_path)
 
     def load_root_config(self, config_file_path):
         self.root_config = configparser.ConfigParser()
@@ -188,22 +191,29 @@ class ExTarget:
             print('Saved', config_path_)
         return self.root_config
 
+    def update_file_label(self):
+        self.label.config(text=self.file_path)
+        if self.file_exists:
+            self.label.config(bg='lightgreen')
+        else:
+            self.label.config(bg='pink')
+
 
 # Global methods
 def addToClipBoard(text):
     pyperclip.copy(text)
 
 
-def compare_run_sim():
+def compare_run():
     if modeling.get():
         compareRunSim(data_file_path=Test.file_path, unit_key=Test.key, pathToSavePdfTo=Test.version_path+'./figures',
                       path_to_temp=Test.version_path+'./temp')
     else:
         # keys = [('rapidTweakRegression v20230305 CH.txt', 'pro0p'), ('rapidTweakRegression vA20230305 CH.txt', 'pro1a')]
-        print('Test', Test.file_path, Test.key)
-        print('Ref', Ref.file_path, Ref.key)
-        keys = [(Test.file_txt, Test.key), (Ref.file_txt, Ref.key)]
-        compareRunRun(keys=keys, dir_data_path=Ref.version_path, dir_data_new_path=Test.version_path,
+        print('TestSOC compare_run:  Ref', Ref.file_path, Ref.key)
+        print('TestSOC compare_run:  Test', Test.file_path, Test.key)
+        keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
+        compareRunRun(keys=keys, dir_data_ref_path=Ref.version_path, dir_data_test_path=Test.version_path,
                       pathToSavePdfTo=Test.version_path+'./figures',
                       path_to_temp=Test.version_path+'./temp')
 
@@ -272,7 +282,7 @@ def option_handler(*args):
     cf['option'] = option_
     print(list(cf.items()))
     Test.create_file_path()
-    test_label.config(text=Test.file_path)
+    Ref.create_file_path()
     save_data_button.config(bg=bg_color)
 
 
@@ -407,16 +417,18 @@ sel = tk.OptionMenu(master, option, *sel_list)
 sel.config(width=20)
 sel.grid(row=6, padx=5, pady=5, sticky=tk.W)
 option.trace_add('write', option_handler)
+Test.label = tk.Label(master, text=Test.file_path, wraplength=wrap_length)
+Test.label.grid(row=6, column=1, columnspan=4, padx=5, pady=5)
+Ref.label = tk.Label(master, text=Ref.file_path, wraplength=wrap_length)
+Ref.label.grid(row=7, column=1, columnspan=4, padx=5, pady=5)
 Test.create_file_path()
 Ref.create_file_path()
-test_label = tk.Label(master, text=Test.file_path, wraplength=wrap_length)
-test_label.grid(row=6, column=1, columnspan=4, padx=5, pady=5)
 
 putty_shell = None
 putty_label = tk.Label(master, text='start putty:')
-putty_label.grid(row=7, column=0, padx=5, pady=5)
+putty_label.grid(row=8, column=0, padx=5, pady=5)
 putty_button = tk.Button(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-putty_button.grid(row=7, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
+putty_button.grid(row=8, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
 putty_test_csv_path = tk.StringVar(master)
 putty_test_csv_path.set(os.path.join(path_to_data, 'putty_test.csv'))
 empty_csv_path = tk.StringVar(master)
@@ -425,37 +437,37 @@ empty_csv_path.set(os.path.join(path_to_data, 'empty.csv'))
 start = tk.StringVar(master)
 start.set('')
 start_label = tk.Label(master, text='copy start:')
-start_label.grid(row=8, column=0, padx=5, pady=5)
+start_label.grid(row=9, column=0, padx=5, pady=5)
 start_button = tk.Button(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-start_button.grid(row=8, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+start_button.grid(row=9, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
 reset = tk.StringVar(master)
 reset.set('')
 reset_label = tk.Label(master, text='copy reset:')
-reset_label.grid(row=10, column=0, padx=5, pady=5)
+reset_label.grid(row=11, column=0, padx=5, pady=5)
 reset_button = tk.Button(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-reset_button.grid(row=10, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+reset_button.grid(row=11, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
 ev1_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev1_label.grid(row=12, column=1, columnspan=4, padx=5, pady=5)
+ev1_label.grid(row=13, column=1, columnspan=4, padx=5, pady=5)
 
 ev2_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev2_label.grid(row=13, column=1, columnspan=4, padx=5, pady=5)
+ev2_label.grid(row=14, column=1, columnspan=4, padx=5, pady=5)
 
 ev3_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev3_label.grid(row=14, column=1, columnspan=4, padx=5, pady=5)
+ev3_label.grid(row=15, column=1, columnspan=4, padx=5, pady=5)
 
 ev4_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev4_label.grid(row=15, column=1, columnspan=4, padx=5, pady=5)
+ev4_label.grid(row=16, column=1, columnspan=4, padx=5, pady=5)
 
 save_data_label = tk.Label(master, text='save data:')
-save_data_label.grid(row=16, column=0, padx=5, pady=5)
+save_data_label.grid(row=17, column=0, padx=5, pady=5)
 save_data_button = tk.Button(master, text='save_data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-save_data_button.grid(row=16, column=1, padx=5, pady=5)
-tk.ttk.Separator(master, orient='horizontal').grid(row=17, columnspan=5, pady=5, sticky='ew')
+save_data_button.grid(row=17, column=1, padx=5, pady=5)
+tk.ttk.Separator(master, orient='horizontal').grid(row=18, columnspan=5, pady=5, sticky='ew')
 
-run_button = tk.Button(master, text='compare run', command=compare_run_sim, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-run_button.grid(row=18, column=0, padx=5, pady=5)
+run_button = tk.Button(master, text='compare run', command=compare_run, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+run_button.grid(row=19, column=0, padx=5, pady=5)
 
 # Begin
 atexit.register(save_cf)  # shelve needs to be handled
