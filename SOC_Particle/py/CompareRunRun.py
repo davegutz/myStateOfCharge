@@ -169,30 +169,33 @@ def compareRunRun(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
 
     # Load old ref data
     data_file_ref_path = os.path.join(dir_data_ref_path, data_file_ref_txt)
-    mon_ref, sim_ref, f_ref, data_file_clean, temp_flt_file_clean = \
+    mon_ref, sim_ref, f_ref, data_file_ref_clean, temp_flt_file_ref_clean = \
         load_data(data_file_ref_path, skip, unit_key_ref, zero_zero_in, time_end_in,
                   rated_batt_cap=rated_batt_cap_in, legacy=legacy_in_ref)
 
     # Load new test data
     data_file_test_path = os.path.join(dir_data_test_path, data_file_test_txt)
-    mon_test, sim_test, f_test, dummy1, dummy2 = \
+    mon_test, sim_test, f_test, data_file_test_clean, temp_flt_file_test_clean = \
         load_data(data_file_test_path, skip, unit_key_test, zero_zero_in, time_end_in,
                   rated_batt_cap=rated_batt_cap_in, legacy=legacy_in_test)
 
     # Plots
     n_fig = 0
     fig_files = []
-    data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
-    filename = data_root + sys.argv[0].split('/')[-1]
-    plot_title = filename + '   ' + date_time
-    if temp_flt_file_clean and len(f_ref.time) > 1:
+    data_root_ref = data_file_ref_clean.split('/')[-1].replace('.csv', '')
+    data_root_test = data_file_test_clean.split('/')[-1].replace('.csv', '')
+    dir_root_ref = dir_data_ref_path.split('/')[-1].split('\\')[-1]
+    dir_root_test = dir_data_test_path.split('/')[-1].split('\\')[-1]
+    filename = data_root_ref + '__' + data_root_test
+    plot_title = dir_root_ref + '/' + data_root_ref + '__' + dir_root_test + '/' + data_root_test + '   ' + date_time
+    if temp_flt_file_ref_clean and len(f_ref.time) > 1:
         n_fig, fig_files = over_fault(f_ref, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                       n_fig=n_fig, long_term=long_term_in)
     if plot_overall_in:
         n_fig, fig_files = dom_plot(mon_ref, mon_test, sim_ref, sim_test, sim_test, filename, fig_files,
                                     plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
     precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
-    unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo,
+    unite_pictures_into_pdf(outputPdfName=filename+'-'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo,
                             listWithImagesExtensions=["png"])
     cleanup_fig_files(fig_files)
 
