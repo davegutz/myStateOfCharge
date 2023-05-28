@@ -293,6 +293,7 @@ def ref_remove():
     Ref.battery_button.grid_remove()
     Ref.key_button.grid_remove()
     Ref.label.grid_remove()
+    run_button.config(text='Compare Run Sim')
 
 
 def ref_restore():
@@ -302,6 +303,7 @@ def ref_restore():
     Ref.battery_button.grid()
     Ref.key_button.grid()
     Ref.label.grid()
+    run_button.config(text='Compare Run Run')
 
 
 def save_cf():
@@ -468,7 +470,7 @@ save_data_button = tk.Button(master, text='save_data', command=save_data, fg="re
 save_data_button.grid(row=17, column=1, padx=5, pady=5)
 tk.ttk.Separator(master, orient='horizontal').grid(row=18, columnspan=5, pady=5, sticky='ew')
 
-run_button = tk.Button(master, text='compare run', command=compare_run, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+run_button = tk.Button(master, text='Compare', command=compare_run, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
 run_button.grid(row=19, column=0, padx=5, pady=5)
 
 # Begin
