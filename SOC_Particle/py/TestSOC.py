@@ -22,6 +22,8 @@ import os
 import re
 import shelve
 import atexit
+import tkinter.messagebox
+
 import psutil
 import shutil
 import pyperclip
@@ -150,7 +152,8 @@ class ExTarget:
         self.create_file_path()
 
     def enter_key(self):
-        self.key = tk.simpledialog.askstring(title=self.level, prompt="Enter key e.g. 'pro0p', 'pro1a', 'soc0p', 'soc1a':")
+        self.key = tk.simpledialog.askstring(title=self.level, initialvalue=self.key,
+                                             prompt="Enter key e.g. 'pro0p', 'pro1a', 'soc0p', 'soc1a':")
         self.cf['key'] = self.key
         self.key_button.config(text=self.key)
         self.update_file_label()
@@ -206,9 +209,9 @@ class ExTarget:
                 self.key_exists_in_file = True
                 break
         if self.key_exists_in_file:
-            print('key exists')
+            self.key_button.config(bg='lightgreen')
         else:
-            print('key does not exist')
+            self.key_button.config(bg='pink')
 
 
 # Global methods
@@ -217,11 +220,16 @@ def addToClipBoard(text):
 
 
 def compare_run():
+    if not Test.key_exists_in_file:
+        tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
+        return
     if modeling.get():
         compareRunSim(data_file_path=Test.file_path, unit_key=Test.key, pathToSavePdfTo=Test.version_path+'./figures',
                       path_to_temp=Test.version_path+'./temp')
     else:
-        # keys = [('rapidTweakRegression v20230305 CH.txt', 'pro0p'), ('rapidTweakRegression vA20230305 CH.txt', 'pro1a')]
+        if not Ref.key_exists_in_file:
+            tkinter.messagebox.showwarning(message="Ref Key '" + Ref.key + "' does not exist in" + Ref.file_txt)
+            return
         print('TestSOC compare_run:  Ref', Ref.file_path, Ref.key)
         print('TestSOC compare_run:  Test', Test.file_path, Test.key)
         keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
