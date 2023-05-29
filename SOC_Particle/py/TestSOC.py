@@ -263,6 +263,17 @@ def grab_reset():
     addToClipBoard(reset.get())
 
 
+def kill_figures():
+    num = 0
+    for proc in psutil.process_iter():
+        print(proc.name())
+        if proc.name().__contains__("Figure"):
+            proc.terminate()
+            num += 1
+    if num == 0:
+        print('Figure (s) not found')
+
+
 def kill_putty():
     num = 0
     for proc in psutil.process_iter():
@@ -316,7 +327,7 @@ def option_handler(*args):
     print(list(cf.items()))
     Test.create_file_path()
     Ref.create_file_path()
-    save_data_button.config(bg=bg_color)
+    save_data_button.config(bg=bg_color, text='save data')
 
 
 def ref_remove():
@@ -501,7 +512,7 @@ ev4_label.grid(row=16, column=1, columnspan=4, padx=5, pady=5)
 
 save_data_label = tk.Label(master, text='save data:')
 save_data_label.grid(row=17, column=0, padx=5, pady=5)
-save_data_button = tk.Button(master, text='save_data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+save_data_button = tk.Button(master, text='save data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
 save_data_button.grid(row=17, column=1, padx=5, pady=5)
 tk.ttk.Separator(master, orient='horizontal').grid(row=18, columnspan=5, pady=5, sticky='ew')
 
