@@ -1,7 +1,8 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "pro0p_20230403";  // scale CHINS
+#include "version.h"
+const String unit = "pro0p_" + version;
 #define CONFIG_PHOTON
 #undef CONFIG_ARGON
 
