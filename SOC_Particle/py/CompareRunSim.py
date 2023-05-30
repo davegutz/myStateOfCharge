@@ -275,6 +275,7 @@ def compareRunSim(data_file_path=None, unit_key=None, time_end_in=None, pathToSa
     cleanup_fig_files(fig_files)
 
     plt.show()
+    return True
 
 
 if __name__ == '__main__':
