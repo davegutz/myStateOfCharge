@@ -247,6 +247,8 @@ An almost third situation was software morphing.   Particle requires software ve
 
 It’s all done using a system of two-letter codes.   The user connects a computer to the PLC and fires up some serial interface program such as puTTY.   Callbacks in the application watch for the codes, decode them, and make changes to the program.
 
+There is another [section](doc/TestSOC.md) that describes how to interface with puTTY using a python script [TestSOC.py](../SOC_Particle/py/TestSOC.py).
+
 I used Serial transmit / receive to communicate with the PLC.   Particle provides an API to instantly transmit serial information to the application.  There are built-in callback functions ('serialEvent()' and 'serialEvent1()')  for the two serial lines that the user populates with whatever commands they want.   The user is expected to pair this function with 'Serial.available()' function called within the callback to parse out user input. The callback function executes each minor frame – call of 'loop().'   Particle devices work like Arduino, so calls to 'loop()' happen as fast as the application is able to.   The user is responsible for managing time frames.
 
 Below [\ref {f2}] is a functional block diagram (FBD) of the user interface.
