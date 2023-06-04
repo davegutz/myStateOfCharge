@@ -33,7 +33,7 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.simpledialog
 from CompareRunSim import compare_run_sim
-from CompareRunRun import compareRunRun
+from CompareRunRun import compare_run_run
 result_ready = 0
 thread_active = 0
 global putty_shell
@@ -85,7 +85,7 @@ class ExRoot:
         self.load_root_config(self.config_path)
 
     def enter_version(self):
-        self.version = tk.simpledialog.askstring(title=self.level, prompt="Enter version <vYYYYMMDD>:")
+        self.version = tk.simpledialog.askstring(title=__file__, prompt="Enter version <vYYYYMMDD>:")
 
     def load_root_config(self, config_file_path):
         self.root_config = configparser.ConfigParser()
@@ -216,7 +216,7 @@ class ExTarget:
 
 
 # Global methods
-def addToClipBoard(text):
+def add_to_clip_board(text):
     pyperclip.copy(text)
 
 
@@ -227,7 +227,7 @@ def compare_run():
     if modeling.get():
         print('compare_run_sim')
         compare_run_sim(data_file_path=Test.file_path, unit_key=Test.key, save_pdf_path=Test.version_path+'./figures',
-                      path_to_temp=Test.version_path+'./temp')
+                        path_to_temp=Test.version_path+'./temp')
     else:
         if not Ref.key_exists_in_file:
             tkinter.messagebox.showwarning(message="Ref Key '" + Ref.key + "' does not exist in" + Ref.file_txt)
@@ -235,10 +235,10 @@ def compare_run():
         print('TestSOC compare_run:  Ref', Ref.file_path, Ref.key)
         print('TestSOC compare_run:  Test', Test.file_path, Test.key)
         keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
-        print('compareRunRun')
-        compareRunRun(keys=keys, dir_data_ref_path=Ref.version_path, dir_data_test_path=Test.version_path,
-                      save_pdf_path=Test.version_path+'./figures',
-                      path_to_temp=Test.version_path+'./temp')
+        print('compare_run_run')
+        compare_run_run(keys=keys, dir_data_ref_path=Ref.version_path, dir_data_test_path=Test.version_path,
+                        save_pdf_path=Test.version_path+'./figures',
+                        path_to_temp=Test.version_path+'./temp')
 
 
 # puTTY generates '\0' characters
@@ -256,11 +256,11 @@ def create_file_txt(option_, proc_, battery_):
 
 
 def grab_start():
-    addToClipBoard(start.get())
+    add_to_clip_board(start.get())
 
 
 def grab_reset():
-    addToClipBoard(reset.get())
+    add_to_clip_board(reset.get())
 
 
 def kill_figures():

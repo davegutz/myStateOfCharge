@@ -117,7 +117,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     return mon, sim, f, data_file_clean, temp_flt_file_clean
 
 
-def compareRunRun(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
+def compare_run_run(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
                   save_pdf_path='../dataReduction/figures', path_to_temp='../dataReduction/temp'):
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
@@ -202,4 +202,4 @@ def compareRunRun(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
 
 
 if __name__ == '__main__':
-    compareRunRun()
+    compare_run_run()
