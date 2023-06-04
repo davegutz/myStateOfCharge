@@ -143,12 +143,15 @@ class ExTarget:
         print('ExTarget:  version', self.version, 'proc', self.proc, 'battery', self.battery, 'key', self.key)
 
     def create_file_path(self, name_override=None):
+        print('create_file_path')
         if name_override is None:
             self.file_txt = create_file_txt(cf['option'], self.proc, self.battery)
         else:
             self.file_txt = create_file_txt(name_override, self.proc, self.battery)
+            self.update_file_label()
         self.file_path = os.path.join(self.version_path, self.file_txt)
         self.file_exists = os.path.isfile(self.file_path)
+        print('file_exists', self.file_exists, 'file_path', self.file_path)
         self.update_file_label()
 
     def enter_battery(self):
@@ -269,15 +272,16 @@ def grab_reset():
     add_to_clip_board(reset.get())
 
 
-def kill_figures():
-    num = 0
-    for proc in psutil.process_iter():
-        print(proc.name())
-        if proc.name().__contains__("Figure"):
-            proc.terminate()
-            num += 1
-    if num == 0:
-        print('Figure (s) not found')
+# This will never work.   All sorts of web activity explaining why
+# def kill_figures():
+#     num = 0
+#     for proc in psutil.process_iter():
+#         print(proc.name())
+#         if proc.name().__contains__("Figure"):
+#             proc.terminate()
+#             num += 1
+#     if num == 0:
+#         print('Figure (s) not found')
 
 
 def kill_putty():
@@ -369,10 +373,12 @@ def save_data():
         except FileExistsError:
             pass
         # For custom option, redefine Test.file_path if requested
+        new_file_txt = None
         if option.get() == 'custom':
             new_file_txt = tk.simpledialog.askstring(title=__file__, prompt="custom file name string:")
-            if new_file_txt is  not None:
+            if new_file_txt is not None:
                 Test.create_file_path(name_override=new_file_txt)
+                Test.label.config(text=Test.file_path)
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
         save_data_button.config(bg='green', text='data saved')
@@ -383,7 +389,7 @@ def save_data():
             pass
         print('emptied', putty_test_csv_path.get())
         print('updating Test file label')
-        Test.create_file_path()
+        Test.create_file_path(name_override=new_file_txt)
     else:
         print('putty test file is too small (<512 bytes) probably already done')
 
