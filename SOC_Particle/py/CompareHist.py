@@ -718,7 +718,7 @@ if __name__ == '__main__':
                                           n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
 
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
-        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=path_to_pdfs)
+        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=path_to_pdfs)
         cleanup_fig_files(fig_files)
 
         plt.show()

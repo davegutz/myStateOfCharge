@@ -43,7 +43,7 @@ def precleanup_fig_files(output_pdf_name='unite_pictures.pdf', path_to_pdfs='.')
 
 
 # ----------------------------------------------------------------------
-def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', pathToSavePdfTo='.', pathToPictures='.', splitType="picture",
+def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', save_pdf_path='.', pathToPictures='.', splitType="picture",
                             numberOfEntitiesInOnePdf=9, listWithImagesExtensions=["png", "jpg"],
                             picturesAreInRootFolder=True, nameOfPart="picture"):
     if numberOfEntitiesInOnePdf < 1:
@@ -71,11 +71,11 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', pathToSavePdfTo=
                             endNumber = len(picturesPathsForEachFolder)
                         filename = []
                         if numberOfEntitiesInOnePdf > 1:
-                            filename = os.path.join(pathToSavePdfTo, outputPdfName + "_" + nameOfPart + "_" + str(
+                            filename = os.path.join(save_pdf_path, outputPdfName + "_" + nameOfPart + "_" + str(
                                 numberOfFoldersAdded + 1) + '-' + str(endNumber) + "_of_" + str(
                                 len(picturesPathsForEachFolder)) + ".pdf")
                         elif numberOfEntitiesInOnePdf == 1:
-                            filename = os.path.join(pathToSavePdfTo, outputPdfName + "_" + nameOfPart + "_" + str(
+                            filename = os.path.join(save_pdf_path, outputPdfName + "_" + nameOfPart + "_" + str(
                                 numberOfFoldersAdded + 1) + "_of_" + str(len(picturesPathsForEachFolder)) + ".pdf")
                         c = canvas.Canvas(filename)
                     for jPicture in iFolder:
@@ -104,11 +104,11 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', pathToSavePdfTo=
                                 endNumber = totalNumberOfPictures
                             filename = []
                             if numberOfEntitiesInOnePdf > 1:
-                                filename = os.path.join(pathToSavePdfTo, outputPdfName + "_" + nameOfPart + "_" + str(
+                                filename = os.path.join(save_pdf_path, outputPdfName + "_" + nameOfPart + "_" + str(
                                     numberOfPicturesAdded + 1) + '-' + str(endNumber) + "_of_" + str(
                                     totalNumberOfPictures) + ".pdf")
                             elif numberOfEntitiesInOnePdf == 1:
-                                filename = os.path.join(pathToSavePdfTo, outputPdfName + "_" + nameOfPart + "_" + str(
+                                filename = os.path.join(save_pdf_path, outputPdfName + "_" + nameOfPart + "_" + str(
                                     numberOfPicturesAdded + 1) + "_of_" + str(totalNumberOfPictures) + ".pdf")
                             c = canvas.Canvas(filename)
                         img = utils.ImageReader(jPicture)
@@ -124,7 +124,7 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', pathToSavePdfTo=
                     c.save()
                     print("created", filename)
             elif splitType == "none":
-                filename = os.path.join(pathToSavePdfTo, outputPdfName + ".pdf")
+                filename = os.path.join(save_pdf_path, outputPdfName + ".pdf")
                 c = canvas.Canvas(filename)
                 for iFolder in picturesPathsForEachFolder:
                     for jPicture in iFolder:
@@ -157,11 +157,11 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', pathToSavePdfTo=
                             endNumber = totalNumberOfPictures
                         filename = []
                         if numberOfEntitiesInOnePdf > 1:
-                            filename = os.path.join(pathToSavePdfTo, outputPdfName + "_" + nameOfPart + "_" + str(
+                            filename = os.path.join(save_pdf_path, outputPdfName + "_" + nameOfPart + "_" + str(
                                 numberOfPicturesAdded + 1) + '-' + str(endNumber) + "_of_" + str(
                                 totalNumberOfPictures) + ".pdf")
                         elif numberOfEntitiesInOnePdf == 1:
-                            filename = os.path.join(pathToSavePdfTo, outputPdfName + "_" + nameOfPart + "_" + str(
+                            filename = os.path.join(save_pdf_path, outputPdfName + "_" + nameOfPart + "_" + str(
                                 numberOfPicturesAdded + 1) + "_of_" + str(totalNumberOfPictures) + ".pdf")
                         c = canvas.Canvas(filename)
                     img = utils.ImageReader(iPicture)
@@ -177,7 +177,7 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', pathToSavePdfTo=
                     c.save()
                     print("created", filename)
             elif splitType == "none":
-                filename = os.path.join(pathToSavePdfTo, outputPdfName + ".pdf")
+                filename = os.path.join(save_pdf_path, outputPdfName + ".pdf")
                 c = canvas.Canvas(filename)
                 for iPicture in picturesInsideFolderWithPictures:
                     img = utils.ImageReader(iPicture)
@@ -197,7 +197,7 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', pathToSavePdfTo=
 # ----------------------------------------------------------------------
 if __name__ == "__main__":
     outputPdfName = "pdf_with_pictures"
-    pathToSavePdfTo = "D:\\pictures"
+    save_pdf_path = "D:\\pictures"
     pathToPictures = "D:\\pictures"
     splitType = "picture"
     numberOfEntitiesInOnePdf = 1
@@ -205,5 +205,5 @@ if __name__ == "__main__":
     picturesAreInRootFolder = False
     nameOfPart = "volume"
 
-    unite_pictures_into_pdf(outputPdfName, pathToSavePdfTo, pathToPictures, splitType, numberOfEntitiesInOnePdf,
+    unite_pictures_into_pdf(outputPdfName, save_pdf_path, pathToPictures, splitType, numberOfEntitiesInOnePdf,
                             listWithImagesExtensions, picturesAreInRootFolder, nameOfPart)

@@ -18,7 +18,6 @@ a monitor object (MON) and a simulation object (SIM).   The monitor is
 the EKF and Coulomb Counter.   The SIM is a battery model, that also has a
 Coulomb Counter built in."""
 
-import sys
 from MonSim import replicate, save_clean_file
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
 from CompareFault import over_fault
@@ -35,11 +34,11 @@ import os
 plt.rcParams['axes.grid'] = True
 
 
-def compareRunSim(data_file_path=None, unit_key=None, time_end_in=None, pathToSavePdfTo='./figures', path_to_temp='./temp'):
+def compare_run_sim(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_path='./figures', path_to_temp='./temp'):
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     date_ = datetime.now().strftime("%y%m%d")
-    if not os.path.isdir(pathToSavePdfTo):
-        os.mkdir(pathToSavePdfTo)
+    if not os.path.isdir(save_pdf_path):
+        os.mkdir(save_pdf_path)
     if not os.path.isdir(path_to_temp):
         os.mkdir(path_to_temp)
 
@@ -82,79 +81,16 @@ def compareRunSim(data_file_path=None, unit_key=None, time_end_in=None, pathToSa
     data_file_txt = None
     temp_file = None
 
-    # Save these
+    # Save these examples
     # data_file_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
-
-    # Regression suite
-
     # data_file_txt = 'ampHiFail v20230305 CH.txt'; unit_key = 'pro0p'; cc_dif_tol_in = 0.5
     # data_file_txt = 'ampHiFail vA20230305 BB.txt'; unit_key = 'pro1a'
-
-    # data_file_txt = 'rapidTweakRegression vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'rapidTweakRegression vA20230305 CH.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'rapidTweakRegression vA20230403 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'rapidTweakRegression v20230305 CH.txt'; unit_key = 'pro0p'
-    #
-    # data_file_txt = 'offSitHysBms vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'offSitHysBms v20230305 CH.txt'; unit_key = 'pro0p'
-
-    # data_file_txt = 'Xm0VbFail.txt'; unit_key = 'soc1a'  #; time_end_in = 10.
-
-    # data_file_txt = 'triTweakDisch vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'triTweakDisch v20230305 CH.txt'; unit_key = 'pro0p'
-
     # data_file_txt = 'coldStart vA20230305 BB.txt'; unit_key = 'pro1a'; cutback_gain_sclr_in = 0.5; ds_voc_soc_in = 0.06
-    # data_file_txt = 'coldStart v20230305 CH.txt'; unit_key = 'pro0p'; cutback_gain_sclr_in = 0.5; ds_voc_soc_in = 0.06
-
-    # data_file_txt = 'ampHiFailFf vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'ampHiFailFf v20230305 CH.txt'; unit_key = 'pro0p'
-
-    # data_file_txt = 'ampLoFail vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'ampLoFail v20230305 CH.txt'; unit_key = 'pro0p'
-
-    # data_file_txt = 'ampHiFailNoise vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'ampHiFailNoise v20230305 CH.txt'; unit_key = 'pro0p'
-
-    # data_file_txt = 'rapidTweakRegression40C vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'rapidTweakRegression40C v20230305 CH.txt'; unit_key = 'pro0p'
-
-    # data_file_txt = 'slowTweakRegression vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'slowTweakRegression v20230305 CH.txt'; unit_key = 'pro0p'
-
-    # data_file_txt = 'satSit vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'satSit v20230305 CH.txt'; unit_key = 'pro0p'
-
-    # data_file_txt = 'flatSitHys vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'flatSitHys v20230305 CH.txt'; unit_key = 'pro0p'
-
-    # data_file_txt = 'offSitHysBmsNoise vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'offSitHysBmsNoise v20230305 CH.txt'; unit_key = 'pro0p'
-
-    # data_file_txt = 'ampHiFailSlow vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'ampHiFailSlow v20230305 CH.txt'; unit_key = 'pro0p'
-
-    # data_file_txt = 'vHiFail vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'vHiFail v20230305 CH.txt'; unit_key = 'pro0p'
-
-    # data_file_txt = 'vHiFailFf vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'vHiFailFf v20230305 CH.txt'; unit_key = 'pro0p'
-
-    # data_file_txt = 'pulseEKF v20221028.txt'; init_time_in=-0.001;  # TODO:  broken
-
-    # data_file_txt = 'pulseSS vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'pulseSS v20230305 CH.txt'; unit_key = 'pro0p'
-
-    # data_file_txt = 'tbFailMod vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'tbFailMod v20230305 CH.txt'; unit_key = 'pro0p'
-
-    # data_file_txt = 'tbFailHdwe vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'tbFailHdwe v20230305 CH.txt'; unit_key = 'pro0p'
-
     # data_file_txt = 'dwell noise Ca.5 v20221028.txt'  # ; dTb = [[0., 18000.],  [0, 8.]]
     # data_file_txt = 'dwell Ca.5 v20221028.txt'  # ; time_end_in=0.5  # ; dTb = [[0., 18000.],  [0, 8.]]
 
     # The following CHINS runs were sources of figures in the .odt report.  Chem is in data stream
-    # in the following line I forgot to renom sp on load so scale_hys was 1.5 by mistake for baseline run.
+    # in the following line I forgot to nominalize sp on load so scale_hys was 1.5 by mistake for baseline run.
     # data_file_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in = 1.127; s_hys_in = 1.5; s_hys_in = 1.15; #stauct_in=0.1; s_hys_cap_in=1.;
     # data_file_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in = 1.127; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True # 0.9 tune 4, 5
     # data_file_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in = 1.127; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # 0.8 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
@@ -171,14 +107,6 @@ def compareRunSim(data_file_path=None, unit_key=None, time_end_in=None, pathToSa
     # data_file_txt = 'real world Xp20 30C 20220917.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -11110
     # data_file_txt = 'real world Xp20 v20220917a.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -69900
 
-    # title_key = "unit,"  # Find one instance of title
-    # title_key_sel = "unit_s,"  # Find one instance of title
-    # unit_key_sel = "unit_sel"
-    # title_key_ekf = "unit_e,"  # Find one instance of title
-    # unit_key_ekf = "unit_ekf"
-    # title_key_sim = "unit_m,"  # Find one instance of title
-    # unit_key_sim = "unit_sim"
-    # temp_flt_file = 'flt_compareRunSim.txt'
     if data_file_path is None:
         if data_file_txt is not None:
             path_to_data = os.path.join(os.getcwd(), data_file_txt)
@@ -269,9 +197,9 @@ def compareRunSim(data_file_path=None, unit_key=None, time_end_in=None, pathToSa
         n_fig, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename, fig_files,
                                   plot_title=plot_title, n_fig=n_fig, ref_str='', test_str='_ver')
 
-    precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
-    print('filename', filename, 'path', pathToSavePdfTo)
-    unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
+    precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
+    print('filename', filename, 'path', save_pdf_path)
+    unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=save_pdf_path)
     cleanup_fig_files(fig_files)
 
     plt.show()
@@ -279,4 +207,4 @@ def compareRunSim(data_file_path=None, unit_key=None, time_end_in=None, pathToSa
 
 
 if __name__ == '__main__':
-    compareRunSim()
+    compare_run_sim()

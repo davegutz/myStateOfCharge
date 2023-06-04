@@ -688,7 +688,7 @@ if __name__ == '__main__':
                                             mv1=mon_ver_300new, sv1=sim_ver_300new, rv1=randles_ver_300new,
                                             suffix1='_300new', plot_title=plot_title, n_fig=n_fig, use_time_day=True)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
-        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=path_to_pdfs)
+        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=path_to_pdfs)
         cleanup_fig_files(fig_files)
 
         plt.show()

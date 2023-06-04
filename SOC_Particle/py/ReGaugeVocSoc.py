@@ -241,12 +241,12 @@ if __name__ == '__main__':
         n_fig = 0
         fig_files = []
         data_root = 'ReGaugeVocSoc.py'
-        pathToSavePdfTo = '../dataReduction/figures'
+        save_pdf_path = '../dataReduction/figures'
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         n_fig, fig_files = obs.plot(filename, fig_files=fig_files, plot_title=plot_title, n_fig=n_fig)
-        precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
-        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
+        precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
+        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=save_pdf_path)
         cleanup_fig_files(fig_files)
 
         plt.show()

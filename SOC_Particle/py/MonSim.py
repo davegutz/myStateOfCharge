@@ -377,7 +377,7 @@ if __name__ == '__main__':
         unit_key_sel = "unit_sel"
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
-        pathToSavePdfTo = '../dataReduction/figures'
+        save_pdf_path = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
         import os
@@ -453,7 +453,7 @@ if __name__ == '__main__':
                                         n_fig=n_fig, suffix='_ver')  # sim over mon verify
         n_fig, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                    plot_title=plot_title, n_fig=n_fig)  # all over all
-        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo)
+        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=save_pdf_path)
         cleanup_fig_files(fig_files)
 
         plt.show()

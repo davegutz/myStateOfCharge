@@ -219,7 +219,7 @@ if __name__ == '__main__':
         n_fig, fig_files = overall(tfd_long.saved, filename, fig_files, plot_title='long '+plot_title, n_fig=n_fig)
         n_fig, fig_files = overall(tfd_short.saved, filename, fig_files, plot_title='short '+plot_title, n_fig=n_fig)
 
-        # unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
+        # unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path='figures')
         # cleanup_fig_files(fig_files)
         plt.show()
 

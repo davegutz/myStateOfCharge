@@ -118,7 +118,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
 
 
 def compareRunRun(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
-                  pathToSavePdfTo='../dataReduction/figures', path_to_temp='../dataReduction/temp'):
+                  save_pdf_path='../dataReduction/figures', path_to_temp='../dataReduction/temp'):
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
@@ -134,8 +134,8 @@ def compareRunRun(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
     legacy_in_test = False
     # path_to_data = '../dataReduction'
     import os
-    if not os.path.isdir(pathToSavePdfTo):
-        os.mkdir(pathToSavePdfTo)
+    if not os.path.isdir(save_pdf_path):
+        os.mkdir(save_pdf_path)
     if not os.path.isdir(path_to_temp):
         os.mkdir(path_to_temp)
 
@@ -193,8 +193,8 @@ def compareRunRun(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
     if plot_overall_in:
         n_fig, fig_files = dom_plot(mon_ref, mon_test, sim_ref, sim_test, sim_test, filename, fig_files,
                                     plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
-    precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=pathToSavePdfTo)
-    unite_pictures_into_pdf(outputPdfName=filename+'-'+date_time+'.pdf', pathToSavePdfTo=pathToSavePdfTo,
+    precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
+    unite_pictures_into_pdf(outputPdfName=filename+'-'+date_time+'.pdf', save_pdf_path=save_pdf_path,
                             listWithImagesExtensions=["png"])
     cleanup_fig_files(fig_files)
 

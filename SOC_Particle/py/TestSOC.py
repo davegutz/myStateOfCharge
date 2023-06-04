@@ -32,7 +32,7 @@ import configparser
 import tkinter as tk
 from tkinter import ttk
 import tkinter.simpledialog
-from CompareRunSim import compareRunSim
+from CompareRunSim import compare_run_sim
 from CompareRunRun import compareRunRun
 result_ready = 0
 thread_active = 0
@@ -225,8 +225,8 @@ def compare_run():
         tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
         return
     if modeling.get():
-        print('compareRunSim')
-        compareRunSim(data_file_path=Test.file_path, unit_key=Test.key, pathToSavePdfTo=Test.version_path+'./figures',
+        print('compare_run_sim')
+        compare_run_sim(data_file_path=Test.file_path, unit_key=Test.key, save_pdf_path=Test.version_path+'./figures',
                       path_to_temp=Test.version_path+'./temp')
     else:
         if not Ref.key_exists_in_file:
@@ -237,7 +237,7 @@ def compare_run():
         keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
         print('compareRunRun')
         compareRunRun(keys=keys, dir_data_ref_path=Ref.version_path, dir_data_test_path=Test.version_path,
-                      pathToSavePdfTo=Test.version_path+'./figures',
+                      save_pdf_path=Test.version_path+'./figures',
                       path_to_temp=Test.version_path+'./temp')
 
 

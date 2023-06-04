@@ -270,7 +270,7 @@ if __name__ == '__main__':
 
         n_fig, fig_files = overall(hys.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
 
-        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', pathToSavePdfTo='figures')
+        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path='figures')
         cleanup_fig_files(fig_files)
         plt.show()
 

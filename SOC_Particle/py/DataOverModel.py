@@ -334,7 +334,7 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
     return n_fig, fig_files
 
 
-def write_clean_file(path_to_data, type_, title_key, unit_key, skip=1, comment_str='#'):
+def write_clean_file(path_to_data, type_=None, title_key=None, unit_key=None, skip=1, comment_str='#'):
     import os
     (path, basename) = os.path.split(path_to_data)
     path_to_temp = path + '/temp'
@@ -844,7 +844,7 @@ if __name__ == '__main__':
         # n_fig, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename, fig_files,
         #                           plot_title=plot_title, n_fig=n_fig, ref_str='', test_str='_ver')
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf',
-                                pathToSavePdfTo='../dataReduction/figures')
+                                save_pdf_path='../dataReduction/figures')
         cleanup_fig_files(fig_files)
 
         plt.show()
