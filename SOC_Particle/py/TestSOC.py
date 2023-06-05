@@ -235,8 +235,9 @@ def compare_run():
         return
     if modeling.get():
         print('compare_run_sim')
-        compare_run_sim(data_file_path=Test.file_path, unit_key=Test.key, save_pdf_path=Test.version_path+'./figures',
-                        path_to_temp=Test.version_path+'./temp')
+        compare_run_sim(data_file_path=Test.file_path, unit_key=Test.key,
+                        save_pdf_path=os.path.join(Test.version_path, './figures'),
+                        path_to_temp=os.path.join(Test.version_path, './temp'))
     else:
         if not Ref.key_exists_in_file:
             tkinter.messagebox.showwarning(message="Ref Key '" + Ref.key + "' does not exist in" + Ref.file_txt)
@@ -379,6 +380,7 @@ def save_data():
             if new_file_txt is not None:
                 Test.create_file_path(name_override=new_file_txt)
                 Test.label.config(text=Test.file_path)
+                print('Test.file_path', Test.file_path)
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
         save_data_button.config(bg='green', text='data saved')
