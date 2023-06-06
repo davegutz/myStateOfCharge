@@ -34,6 +34,7 @@ from tkinter import ttk
 import tkinter.simpledialog
 from CompareRunSim import compare_run_sim
 from CompareRunRun import compare_run_run
+from tkinter import filedialog, messagebox
 result_ready = 0
 thread_active = 0
 global putty_shell
@@ -229,6 +230,7 @@ def add_to_clip_board(text):
     pyperclip.copy(text)
 
 
+# Compare run driver
 def compare_run():
     if not Test.key_exists_in_file:
         tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
@@ -249,6 +251,62 @@ def compare_run():
         compare_run_run(keys=keys, dir_data_ref_path=Ref.version_path, dir_data_test_path=Test.version_path,
                         save_pdf_path=Test.version_path+'./figures',
                         path_to_temp=Test.version_path+'./temp')
+
+
+# Choose file to perform compare_run_run on
+def compare_run_run_choose():
+    # Select file
+    print('compare_run_run_choose')
+    testpaths = filedialog.askopenfilenames(title='Choose test file(s)', filetypes=[('csv', '.csv')])
+    if testpaths is None or testpaths == '':
+        print("No file chosen")
+    else:
+        for testpath in testpaths:
+            test_folder_path, test_parent, test_basename, test_txt, test_key = contain_all(testpath)
+            if test_key != '':
+                refpath = filedialog.askopenfilename(title='Choose reference file', filetypes=[('csv', '.csv')])
+                ref_folder_path, ref_parent, ref_basename, ref_txt, ref_key = contain_all(refpath)
+                keys = [(ref_txt, ref_key), (test_txt, test_key)]
+                print('compare_run_run')
+                compare_run_run(keys=keys, dir_data_ref_path=ref_folder_path,
+                                dir_data_test_path=test_folder_path,
+                                save_pdf_path=test_folder_path + './figures',
+                                path_to_temp=test_folder_path + './temp')
+            else:
+                tk.messagebox.showerror(message='key not found in' + testpath)
+
+
+# Choose file to perform compare_run_sim on
+def compare_run_sim_choose():
+    # Select file
+    print('compare_run_sim_choose')
+    testpaths = filedialog.askopenfilenames(title='Please select files', filetypes=[('csv', '.csv')])
+    if testpaths is None or testpaths == '':
+        print("No file chosen")
+    else:
+        for testpath in testpaths:
+            test_folder_path, test_parent, basename, test_txt, key = contain_all(testpath)
+            if key != '':
+                compare_run_sim(data_file_path=testpath, unit_key=key,
+                                save_pdf_path=os.path.join(test_folder_path, './figures'),
+                                path_to_temp=os.path.join(test_folder_path, './temp'))
+            else:
+                tk.messagebox.showerror(message='key not found in' + testpath)
+
+
+# Split all information contained in file path
+def contain_all(testpath):
+    folder_path, basename = os.path.split(testpath)
+    parent, txt = os.path.split(folder_path)
+    # get key
+    key = ''
+    with open(testpath, 'r') as file:
+        for line in file:
+            if line.__contains__(txt):
+                us_loc = line.find('_' + txt)
+                key = line[:us_loc]
+                break
+    return folder_path, parent, basename, txt, key
 
 
 # puTTY generates '\0' characters
@@ -533,10 +591,18 @@ save_data_label = tk.Label(master, text='save data:')
 save_data_label.grid(row=17, column=0, padx=5, pady=5)
 save_data_button = tk.Button(master, text='save data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
 save_data_button.grid(row=17, column=1, padx=5, pady=5)
-tk.ttk.Separator(master, orient='horizontal').grid(row=18, columnspan=5, pady=5, sticky='ew')
 
+tk.ttk.Separator(master, orient='horizontal').grid(row=18, columnspan=5, pady=5, sticky='ew')
 run_button = tk.Button(master, text='Compare', command=compare_run, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
 run_button.grid(row=19, column=0, padx=5, pady=5)
+
+tk.ttk.Separator(master, orient='horizontal').grid(row=20, columnspan=5, pady=5, sticky='ew')
+choose_label = tk.Label(master, text='choose existing files:')
+choose_label.grid(row=21, column=0, padx=5, pady=5)
+run_sim_choose_button = tk.Button(master, text='Compare Run Sim Choose', command=compare_run_sim_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+run_sim_choose_button.grid(row=21, column=1, padx=5, pady=5)
+run_run_choose_button = tk.Button(master, text='Compare Run Run Choose', command=compare_run_run_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+run_run_choose_button.grid(row=21, column=2, padx=5, pady=5)
 
 # Begin
 atexit.register(save_cf)  # shelve needs to be handled
