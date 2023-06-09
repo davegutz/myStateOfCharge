@@ -144,7 +144,6 @@ class ExTarget:
         print('ExTarget:  version', self.version, 'proc', self.proc, 'battery', self.battery, 'key', self.key)
 
     def create_file_path(self, name_override=None):
-        print('create_file_path')
         if name_override is None:
             self.file_txt = create_file_txt(cf['option'], self.proc, self.battery)
         else:
@@ -152,7 +151,6 @@ class ExTarget:
             self.update_file_label()
         self.file_path = os.path.join(self.version_path, self.file_txt)
         self.file_exists = os.path.isfile(self.file_path)
-        print('file_exists', self.file_exists, 'file_path', self.file_path)
         self.update_file_label()
 
     def enter_battery(self):
@@ -247,7 +245,6 @@ def compare_run():
         print('TestSOC compare_run:  Ref', Ref.file_path, Ref.key)
         print('TestSOC compare_run:  Test', Test.file_path, Test.key)
         keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
-        print('compare_run_run')
         compare_run_run(keys=keys, dir_data_ref_path=Ref.version_path, dir_data_test_path=Test.version_path,
                         save_pdf_path=Test.version_path+'./figures',
                         path_to_temp=Test.version_path+'./temp')
@@ -264,10 +261,9 @@ def compare_run_run_choose():
         for testpath in testpaths:
             test_folder_path, test_parent, test_basename, test_txt, test_key = contain_all(testpath)
             if test_key != '':
-                refpath = filedialog.askopenfilename(title='Choose reference file', filetypes=[('csv', '.csv')])
-                ref_folder_path, ref_parent, ref_basename, ref_txt, ref_key = contain_all(refpath)
-                keys = [(ref_txt, ref_key), (test_txt, test_key)]
-                print('compare_run_run')
+                ref_path = filedialog.askopenfilename(title='Choose reference file', filetypes=[('csv', '.csv')])
+                ref_folder_path, ref_parent, ref_basename, ref_txt, ref_key = contain_all(ref_path)
+                keys = [ref_key, test_key]
                 compare_run_run(keys=keys, dir_data_ref_path=ref_folder_path,
                                 dir_data_test_path=test_folder_path,
                                 save_pdf_path=test_folder_path + './figures',
@@ -304,7 +300,7 @@ def contain_all(testpath):
         for line in file:
             if line.__contains__(txt):
                 us_loc = line.find('_' + txt)
-                key = line[:us_loc]
+                key = (basename, line[:us_loc])
                 break
     return folder_path, parent, basename, txt, key
 
@@ -388,7 +384,6 @@ def modeling_handler(*args):
 
 
 def option_handler(*args):
-    print('option', option.get())
     lookup_start()
     option_ = option.get()
     option_show.set(option_)
