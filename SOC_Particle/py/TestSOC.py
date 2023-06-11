@@ -34,7 +34,7 @@ from tkinter import ttk
 import tkinter.simpledialog
 from CompareRunSim import compare_run_sim
 from CompareRunRun import compare_run_run
-from tkinter import filedialog, messagebox
+from tkinter import filedialog
 result_ready = 0
 thread_active = 0
 global putty_shell
@@ -43,7 +43,7 @@ global putty_shell
 def default_cf(cf_):
     cf_['modeling'] = True
     cf_['option'] = 'ampHiFail'
-    cf_['cf_test'] = {"version": "v20230520", "processor": "A", "battery": "CH", "key": "pro1a"}
+    cf_['cf_test'] = {"version": "v20230530", "processor": "A", "battery": "CH", "key": "pro1a"}
     cf_['cf_ref'] = {"version": "v20230510", "processor": "A", "battery": "CH", "key": "pro1a"}
     return cf_
 
@@ -457,7 +457,6 @@ def save_data_as():
         except FileExistsError:
             pass
         # For custom option, redefine Test.file_path if requested
-        new_file_txt = None
         if option.get() == 'custom':
             new_file_txt = tk.simpledialog.askstring(title=__file__, prompt="custom file name string:")
             if new_file_txt is not None:
@@ -505,15 +504,16 @@ Ref = ExTarget(cf_=cf_ref)
 Test = ExTarget(cf_=cf_test)
 
 # Define frames
-min_width = 300
+min_width = 800
 main_height = 500
-wrap_length = 300
+wrap_length = 800
 bg_color = "lightgray"
 
 # Master and header
 master = tk.Tk()
 master.title('State of Charge')
 master.wm_minsize(width=min_width, height=main_height)
+# master.geometry('%dx%d' % (master.winfo_screenwidth(), master.winfo_screenheight()))
 pwd_path = tk.StringVar(master)
 pwd_path.set(os.getcwd())
 path_to_data = os.path.join(pwd_path.get(), '../dataReduction')
@@ -587,7 +587,7 @@ putty_shell = None
 putty_label = tk.Label(master, text='start putty:')
 putty_label.grid(row=8, column=0, padx=5, pady=5)
 putty_button = tk.Button(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-putty_button.grid(row=8, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
+putty_button.grid(sticky="W", row=8, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
 putty_test_csv_path = tk.StringVar(master)
 putty_test_csv_path.set(os.path.join(path_to_data, 'putty_test.csv'))
 empty_csv_path = tk.StringVar(master)
@@ -597,34 +597,36 @@ start = tk.StringVar(master)
 start.set('')
 start_label = tk.Label(master, text='copy start:')
 start_label.grid(row=9, column=0, padx=5, pady=5)
-start_button = tk.Button(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-start_button.grid(row=9, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+start_button = tk.Button(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
+                         justify=tk.LEFT)
+start_button.grid(sticky="W", row=9, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
 reset = tk.StringVar(master)
 reset.set('')
 reset_label = tk.Label(master, text='copy reset:')
 reset_label.grid(row=11, column=0, padx=5, pady=5)
-reset_button = tk.Button(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-reset_button.grid(row=11, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+reset_button = tk.Button(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
+                         justify=tk.LEFT)
+reset_button.grid(sticky="W", row=11, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
 ev1_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev1_label.grid(row=13, column=1, columnspan=4, padx=5, pady=5)
+ev1_label.grid(sticky="W", row=13, column=1, columnspan=4, padx=5, pady=5)
 
 ev2_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev2_label.grid(row=14, column=1, columnspan=4, padx=5, pady=5)
+ev2_label.grid(sticky="W", row=14, column=1, columnspan=4, padx=5, pady=5)
 
 ev3_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev3_label.grid(row=15, column=1, columnspan=4, padx=5, pady=5)
+ev3_label.grid(sticky="W", row=15, column=1, columnspan=4, padx=5, pady=5)
 
 ev4_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev4_label.grid(row=16, column=1, columnspan=4, padx=5, pady=5)
+ev4_label.grid(sticky="W", row=16, column=1, columnspan=4, padx=5, pady=5)
 
 save_data_label = tk.Label(master, text='save data:')
 save_data_label.grid(row=17, column=0, padx=5, pady=5)
 save_data_button = tk.Button(master, text='save data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-save_data_button.grid(row=17, column=1, padx=5, pady=5)
+save_data_button.grid(sticky="W", row=17, column=1, padx=5, pady=5)
 save_data_as_button = tk.Button(master, text='save as', command=save_data_as, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-save_data_as_button.grid(row=17, column=2, padx=5, pady=5)
+save_data_as_button.grid(sticky="W", row=17, column=2, padx=5, pady=5)
 
 tk.ttk.Separator(master, orient='horizontal').grid(row=18, columnspan=5, pady=5, sticky='ew')
 run_button = tk.Button(master, text='Compare', command=compare_run, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
@@ -634,9 +636,9 @@ tk.ttk.Separator(master, orient='horizontal').grid(row=20, columnspan=5, pady=5,
 choose_label = tk.Label(master, text='choose existing files:')
 choose_label.grid(row=21, column=0, padx=5, pady=5)
 run_sim_choose_button = tk.Button(master, text='Compare Run Sim Choose', command=compare_run_sim_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-run_sim_choose_button.grid(row=21, column=1, padx=5, pady=5)
+run_sim_choose_button.grid(sticky="W", row=21, column=1, padx=5, pady=5)
 run_run_choose_button = tk.Button(master, text='Compare Run Run Choose', command=compare_run_run_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-run_run_choose_button.grid(row=21, column=2, padx=5, pady=5)
+run_run_choose_button.grid(sticky="W", row=21, column=2, padx=5, pady=5)
 
 # Begin
 atexit.register(save_cf)  # shelve needs to be handled
