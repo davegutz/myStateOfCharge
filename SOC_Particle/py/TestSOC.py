@@ -449,6 +449,43 @@ def save_data():
         print('putty test file is too small (<512 bytes) probably already done')
 
 
+def save_data_as():
+    if os.path.getsize(putty_test_csv_path.get()) > 512:  # bytes
+        # create empty file
+        try:
+            open(empty_csv_path.get(), 'x')
+        except FileExistsError:
+            pass
+        # For custom option, redefine Test.file_path if requested
+        new_file_txt = None
+        if option.get() == 'custom':
+            new_file_txt = tk.simpledialog.askstring(title=__file__, prompt="custom file name string:")
+            if new_file_txt is not None:
+                Test.create_file_path(name_override=new_file_txt)
+                Test.label.config(text=Test.file_path)
+                print('Test.file_path', Test.file_path)
+        else:
+            new_file_txt = tk.simpledialog.askstring(title=__file__, prompt="custom file name string:",
+                                                     initialvalue=Test.file_txt)
+            if new_file_txt is not None:
+                Test.create_file_path(name_override=new_file_txt)
+                Test.label.config(text=Test.file_path)
+                print('Test.file_path', Test.file_path)
+        copy_clean(putty_test_csv_path.get(), Test.file_path)
+        print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
+        save_data_button.config(bg='green', text='data saved')
+        shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
+        try:
+            os.remove(empty_csv_path.get())
+        except OSError:
+            pass
+        print('emptied', putty_test_csv_path.get())
+        print('updating Test file label')
+        Test.create_file_path(name_override=new_file_txt)
+    else:
+        print('putty test file is too small (<512 bytes) probably already done')
+
+
 def start_putty():
     global putty_shell
     putty_shell = subprocess.Popen(['putty', '-load', 'test'], stdin=subprocess.PIPE, bufsize=1, universal_newlines=True)
@@ -586,6 +623,8 @@ save_data_label = tk.Label(master, text='save data:')
 save_data_label.grid(row=17, column=0, padx=5, pady=5)
 save_data_button = tk.Button(master, text='save data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
 save_data_button.grid(row=17, column=1, padx=5, pady=5)
+save_data_as_button = tk.Button(master, text='save as', command=save_data_as, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+save_data_as_button.grid(row=17, column=2, padx=5, pady=5)
 
 tk.ttk.Separator(master, orient='horizontal').grid(row=18, columnspan=5, pady=5, sticky='ew')
 run_button = tk.Button(master, text='Compare', command=compare_run, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)

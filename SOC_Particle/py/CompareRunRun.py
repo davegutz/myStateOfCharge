@@ -118,7 +118,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
 
 
 def compare_run_run(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
-                  save_pdf_path='../dataReduction/figures', path_to_temp='../dataReduction/temp'):
+                    save_pdf_path='../dataReduction/figures', path_to_temp='../dataReduction/temp'):
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
