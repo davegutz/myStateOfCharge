@@ -34,7 +34,8 @@ def precleanup_fig_files(output_pdf_name='unite_pictures.pdf', path_to_pdfs='.')
     from glob import glob
     from os import chdir, remove
     # chdir(path_to_pdfs)
-    for file in glob(path_to_pdfs+'/'+output_pdf_name + '*.pdf'):
+    # for file in glob(path_to_pdfs+'/'+output_pdf_name + '*.pdf'):
+    for file in glob(os.path.join(path_to_pdfs, output_pdf_name+'*.pdf')):
         print("removing", file)
         try:
             remove(file)
