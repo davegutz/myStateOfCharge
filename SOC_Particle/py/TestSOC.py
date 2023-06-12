@@ -43,8 +43,8 @@ global putty_shell
 def default_cf(cf_):
     cf_['modeling'] = True
     cf_['option'] = 'ampHiFail'
-    cf_['cf_test'] = {"version": "v20230530", "processor": "A", "battery": "CH", "key": "pro1a"}
-    cf_['cf_ref'] = {"version": "v20230510", "processor": "A", "battery": "CH", "key": "pro1a"}
+    cf_['cf_test'] = {"version": "g20230530", "processor": "A", "battery": "CH", "key": "pro1a"}
+    cf_['cf_ref'] = {"version": "v20230403", "processor": "A", "battery": "CH", "key": "pro1a"}
     return cf_
 
 
