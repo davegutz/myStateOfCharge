@@ -64,9 +64,11 @@ lookup = {'custom': ('', '', ("For general purpose running", "'save data' will p
           'ampHiFailNoise': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;Ff0;', 'Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Noisy ampHiFail.  Should detect and switch amp current failure.", "Start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).")),
           'rapidTweakRegression40C': ('Ff0;HR;D^15;Xp10;', 'D^0;', ("Should run three very large current discharge/recharge cycles without fault",)),
           'slowTweakRegression': ('Ff0;HR;Xp11;', 'v0;', ("Should run one very large slow (~15 min) current discharge/recharge cycle without fault.   It will take 60 seconds to start changing current.",)),
-          'satSit': ('Ff0;D^0;Xp0;Xm247;Ca0.993;Rb;Rf;Dr100;DP1;Xts;Xa17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;DP4;', ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat", "for CH set Ca0.993;")),
+          'satSitBB': ('Ff0;D^0;Xp0;Xm247;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;DP4;', ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",)),
+          'satSitCH': ('Ff0;D^0;Xp0;Xm247;Ca0.993;Rb;Rf;Dr100;DP1;Xts;Xa17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;Ca.993;W5;Pf;Rf;Pf;v0;DP4;', ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",)),
           'flatSitHys': ('Ff0;D^0;Xp0;Xm247;Ca0.9;Rb;Rf;Dr100;DP1;Xts;Xa-81;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;Ca.9;W5;Pf;Rf;Pf;v0;DP4;', ("Operate around 0.9.  For CHINS, will check EKF with flat voc(soc).   Takes about 10 minutes.", "Make sure EKF soc (soc_ekf) tracks actual soc without wandering.")),
-          'offSitHysBmsNoise': ('Ff0;D^0;Xp0;Xm247;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.")),
+          'offSitHysBmsNoiseBB': ('Ff0;D^0;Xp0;Xm247;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.")),
+          'offSitHysBmsNoiseCH': ('Ff0;D^0;Xp0;Xm247;Ca0.014;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.014;W5;Pf;Rf;Pf;v0;DP4;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.")),
           'ampHiFailSlow': ('Ff0;D^0;Xm247;Ca0.5;Pf;v2;W2;Dr100;DP1;HR;Dm6;Dn0.0001;Fc0.02;Fd0.5;', 'Hd;Xp0;Pf;Rf;W2;+v0;Dr100;DE20;Fc1;Fd1;Rf;Pf;', ("Should detect and switch amp current failure. Will be slow (~6 min) detection as it waits for the EKF to wind up to produce a cc_diff fault.", "Will display “diff” on OLED due to 6 A difference before switch (not cc_diff).", "EKF should tend to follow voltage while soc wanders away.")),
           'vHiFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.8;', 'Dv0;Hd;Xp0;Rf;W50;+v0;Dr100;Rf;Pf;DP4;', ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.")),
           'vHiFailFf': ('Ff1;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.8;', 'Dv0;Ff0;Hd;Xp0;Rf;W50;+v0;Dr100;Rf;Pf;DP4;', ("Run for about 1 minute.", "Should detect voltage failure (see DOM1 fig 2 or 3) but not display anything on OLED.")),
@@ -491,157 +493,158 @@ def start_putty():
     print('starting putty   putty -load test')
 
 
-# --- main ---
-# Configuration for entire folder selection read with filepaths
-ex_root = ExRoot()
-cf = shelve.open("TestSOC", writeback=True)
-if len(cf.keys()) == 0:
-    cf = default_cf(cf)
-print(list(cf.items()))
-cf_test = cf['cf_test']
-cf_ref = cf['cf_ref']
-Ref = ExTarget(cf_=cf_ref)
-Test = ExTarget(cf_=cf_test)
+if __name__ == '__main__':
+    # --- main ---
+    # Configuration for entire folder selection read with filepaths
+    ex_root = ExRoot()
+    cf = shelve.open("TestSOC", writeback=True)
+    if len(cf.keys()) == 0:
+        cf = default_cf(cf)
+    print(list(cf.items()))
+    cf_test = cf['cf_test']
+    cf_ref = cf['cf_ref']
+    Ref = ExTarget(cf_=cf_ref)
+    Test = ExTarget(cf_=cf_test)
 
-# Define frames
-min_width = 800
-main_height = 500
-wrap_length = 800
-bg_color = "lightgray"
+    # Define frames
+    min_width = 800
+    main_height = 500
+    wrap_length = 800
+    bg_color = "lightgray"
 
-# Master and header
-master = tk.Tk()
-master.title('State of Charge')
-master.wm_minsize(width=min_width, height=main_height)
-# master.geometry('%dx%d' % (master.winfo_screenwidth(), master.winfo_screenheight()))
-pwd_path = tk.StringVar(master)
-pwd_path.set(os.getcwd())
-path_to_data = os.path.join(pwd_path.get(), '../dataReduction')
-print(path_to_data)
-icon_path = os.path.join(ex_root.script_loc, 'TestSOC_Icon.png')
-master.iconphoto(False, tk.PhotoImage(file=icon_path))
-tk.Label(master, text="Item", fg="blue").grid(row=0, column=0, sticky=tk.N, pady=2)
-tk.Label(master, text="Test", fg="blue").grid(row=0, column=1, sticky=tk.N, pady=2)
-modeling = tk.BooleanVar(master)
-modeling.set(bool(cf['modeling']))
-modeling_button = tk.Checkbutton(master, text='modeling', bg=bg_color, variable=modeling,
-                                 onvalue=True, offvalue=False)
-modeling_button.grid(row=0, column=3, pady=2, sticky=tk.N)
-modeling.trace_add('write', modeling_handler)
-ref_label = tk.Label(master, text="Ref", fg="blue")
-ref_label.grid(row=0, column=4, sticky=tk.N, pady=2)
+    # Master and header
+    master = tk.Tk()
+    master.title('State of Charge')
+    master.wm_minsize(width=min_width, height=main_height)
+    # master.geometry('%dx%d' % (master.winfo_screenwidth(), master.winfo_screenheight()))
+    pwd_path = tk.StringVar(master)
+    pwd_path.set(os.getcwd())
+    path_to_data = os.path.join(pwd_path.get(), '../dataReduction')
+    print(path_to_data)
+    icon_path = os.path.join(ex_root.script_loc, 'TestSOC_Icon.png')
+    master.iconphoto(False, tk.PhotoImage(file=icon_path))
+    tk.Label(master, text="Item", fg="blue").grid(row=0, column=0, sticky=tk.N, pady=2)
+    tk.Label(master, text="Test", fg="blue").grid(row=0, column=1, sticky=tk.N, pady=2)
+    modeling = tk.BooleanVar(master)
+    modeling.set(bool(cf['modeling']))
+    modeling_button = tk.Checkbutton(master, text='modeling', bg=bg_color, variable=modeling,
+                                     onvalue=True, offvalue=False)
+    modeling_button.grid(row=0, column=3, pady=2, sticky=tk.N)
+    modeling.trace_add('write', modeling_handler)
+    ref_label = tk.Label(master, text="Ref", fg="blue")
+    ref_label.grid(row=0, column=4, sticky=tk.N, pady=2)
 
 
-# Version row
-tk.Label(master, text="Version").grid(row=1, column=0, pady=2)
-Test.version_button = tk.Button(master, text=Test.version, command=Test.enter_version, fg="blue", bg=bg_color)
-Test.version_button.grid(row=1, column=1, pady=2)
-Ref.version_button = tk.Button(master, text=Ref.version, command=Ref.enter_version, fg="blue", bg=bg_color)
-Ref.version_button.grid(row=1, column=4, pady=2)
+    # Version row
+    tk.Label(master, text="Version").grid(row=1, column=0, pady=2)
+    Test.version_button = tk.Button(master, text=Test.version, command=Test.enter_version, fg="blue", bg=bg_color)
+    Test.version_button.grid(row=1, column=1, pady=2)
+    Ref.version_button = tk.Button(master, text=Ref.version, command=Ref.enter_version, fg="blue", bg=bg_color)
+    Ref.version_button.grid(row=1, column=4, pady=2)
 
-# Processor row
-tk.Label(master, text="Processor").grid(row=2, column=0, pady=2)
-Test.proc_button = tk.Button(master, text=Test.proc, command=Test.enter_proc, fg="red", bg=bg_color)
-Test.proc_button.grid(row=2, column=1, pady=2)
-Ref.proc_button = tk.Button(master, text=Ref.proc, command=Ref.enter_proc, fg="red", bg=bg_color)
-Ref.proc_button.grid(row=2, column=4, pady=2)
+    # Processor row
+    tk.Label(master, text="Processor").grid(row=2, column=0, pady=2)
+    Test.proc_button = tk.Button(master, text=Test.proc, command=Test.enter_proc, fg="red", bg=bg_color)
+    Test.proc_button.grid(row=2, column=1, pady=2)
+    Ref.proc_button = tk.Button(master, text=Ref.proc, command=Ref.enter_proc, fg="red", bg=bg_color)
+    Ref.proc_button.grid(row=2, column=4, pady=2)
 
-# Battery row
-tk.Label(master, text="Battery").grid(row=3, column=0, pady=2)
-Test.battery_button = tk.Button(master, text=Test.battery, command=Test.enter_battery, fg="green", bg=bg_color)
-Test.battery_button.grid(row=3, column=1, pady=2)
-Ref.battery_button = tk.Button(master, text=Ref.battery, command=Ref.enter_battery, fg="green", bg=bg_color)
-Ref.battery_button.grid(row=3, column=4, pady=2)
+    # Battery row
+    tk.Label(master, text="Battery").grid(row=3, column=0, pady=2)
+    Test.battery_button = tk.Button(master, text=Test.battery, command=Test.enter_battery, fg="green", bg=bg_color)
+    Test.battery_button.grid(row=3, column=1, pady=2)
+    Ref.battery_button = tk.Button(master, text=Ref.battery, command=Ref.enter_battery, fg="green", bg=bg_color)
+    Ref.battery_button.grid(row=3, column=4, pady=2)
 
-# Key row
-tk.Label(master, text="Key").grid(row=4, column=0, pady=2)
-Test.key_button = tk.Button(master, text=Test.key, command=Test.enter_key, fg="purple", bg=bg_color)
-Test.key_button.grid(row=4, column=1, pady=2)
-Ref.key_button = tk.Button(master, text=Ref.key, command=Ref.enter_key, fg="purple", bg=bg_color)
-Ref.key_button.grid(row=4, column=4, pady=2)
+    # Key row
+    tk.Label(master, text="Key").grid(row=4, column=0, pady=2)
+    Test.key_button = tk.Button(master, text=Test.key, command=Test.enter_key, fg="purple", bg=bg_color)
+    Test.key_button.grid(row=4, column=1, pady=2)
+    Ref.key_button = tk.Button(master, text=Ref.key, command=Ref.enter_key, fg="purple", bg=bg_color)
+    Ref.key_button.grid(row=4, column=4, pady=2)
 
-# Image
-pic_path = os.path.join(ex_root.script_loc, 'TestSOC.png')
-picture = tk.PhotoImage(file=pic_path).subsample(5, 5)
-label = tk.Label(master, image=picture)
-label.grid(row=1, column=2, columnspan=2, rowspan=3, padx=5, pady=5)
+    # Image
+    pic_path = os.path.join(ex_root.script_loc, 'TestSOC.png')
+    picture = tk.PhotoImage(file=pic_path).subsample(5, 5)
+    label = tk.Label(master, image=picture)
+    label.grid(row=1, column=2, columnspan=2, rowspan=3, padx=5, pady=5)
 
-# Option
-tk.ttk.Separator(master, orient='horizontal').grid(row=5, columnspan=5, pady=5, sticky='ew')
-option = tk.StringVar(master)
-option.set(str(cf['option']))
-option_show = tk.StringVar(master)
-option_show.set(str(cf['option']))
-sel = tk.OptionMenu(master, option, *sel_list)
-sel.config(width=20)
-sel.grid(row=6, padx=5, pady=5, sticky=tk.W)
-option.trace_add('write', option_handler)
-Test.label = tk.Label(master, text=Test.file_path, wraplength=wrap_length)
-Test.label.grid(row=6, column=1, columnspan=4, padx=5, pady=5)
-Ref.label = tk.Label(master, text=Ref.file_path, wraplength=wrap_length)
-Ref.label.grid(row=7, column=1, columnspan=4, padx=5, pady=5)
-Test.create_file_path()
-Ref.create_file_path()
+    # Option
+    tk.ttk.Separator(master, orient='horizontal').grid(row=5, columnspan=5, pady=5, sticky='ew')
+    option = tk.StringVar(master)
+    option.set(str(cf['option']))
+    option_show = tk.StringVar(master)
+    option_show.set(str(cf['option']))
+    sel = tk.OptionMenu(master, option, *sel_list)
+    sel.config(width=20)
+    sel.grid(row=6, padx=5, pady=5, sticky=tk.W)
+    option.trace_add('write', option_handler)
+    Test.label = tk.Label(master, text=Test.file_path, wraplength=wrap_length)
+    Test.label.grid(row=6, column=1, columnspan=4, padx=5, pady=5)
+    Ref.label = tk.Label(master, text=Ref.file_path, wraplength=wrap_length)
+    Ref.label.grid(row=7, column=1, columnspan=4, padx=5, pady=5)
+    Test.create_file_path()
+    Ref.create_file_path()
 
-putty_shell = None
-putty_label = tk.Label(master, text='start putty:')
-putty_label.grid(row=8, column=0, padx=5, pady=5)
-putty_button = tk.Button(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-putty_button.grid(sticky="W", row=8, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
-putty_test_csv_path = tk.StringVar(master)
-putty_test_csv_path.set(os.path.join(path_to_data, 'putty_test.csv'))
-empty_csv_path = tk.StringVar(master)
-empty_csv_path.set(os.path.join(path_to_data, 'empty.csv'))
+    putty_shell = None
+    putty_label = tk.Label(master, text='start putty:')
+    putty_label.grid(row=8, column=0, padx=5, pady=5)
+    putty_button = tk.Button(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    putty_button.grid(sticky="W", row=8, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
+    putty_test_csv_path = tk.StringVar(master)
+    putty_test_csv_path.set(os.path.join(path_to_data, 'putty_test.csv'))
+    empty_csv_path = tk.StringVar(master)
+    empty_csv_path.set(os.path.join(path_to_data, 'empty.csv'))
 
-start = tk.StringVar(master)
-start.set('')
-start_label = tk.Label(master, text='copy start:')
-start_label.grid(row=9, column=0, padx=5, pady=5)
-start_button = tk.Button(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
-                         justify=tk.LEFT)
-start_button.grid(sticky="W", row=9, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+    start = tk.StringVar(master)
+    start.set('')
+    start_label = tk.Label(master, text='copy start:')
+    start_label.grid(row=9, column=0, padx=5, pady=5)
+    start_button = tk.Button(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
+                             justify=tk.LEFT)
+    start_button.grid(sticky="W", row=9, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
-reset = tk.StringVar(master)
-reset.set('')
-reset_label = tk.Label(master, text='copy reset:')
-reset_label.grid(row=11, column=0, padx=5, pady=5)
-reset_button = tk.Button(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
-                         justify=tk.LEFT)
-reset_button.grid(sticky="W", row=11, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+    reset = tk.StringVar(master)
+    reset.set('')
+    reset_label = tk.Label(master, text='copy reset:')
+    reset_label.grid(row=11, column=0, padx=5, pady=5)
+    reset_button = tk.Button(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
+                             justify=tk.LEFT)
+    reset_button.grid(sticky="W", row=11, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
-ev1_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev1_label.grid(sticky="W", row=13, column=1, columnspan=4, padx=5, pady=5)
+    ev1_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev1_label.grid(sticky="W", row=13, column=1, columnspan=4, padx=5, pady=5)
 
-ev2_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev2_label.grid(sticky="W", row=14, column=1, columnspan=4, padx=5, pady=5)
+    ev2_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev2_label.grid(sticky="W", row=14, column=1, columnspan=4, padx=5, pady=5)
 
-ev3_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev3_label.grid(sticky="W", row=15, column=1, columnspan=4, padx=5, pady=5)
+    ev3_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev3_label.grid(sticky="W", row=15, column=1, columnspan=4, padx=5, pady=5)
 
-ev4_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-ev4_label.grid(sticky="W", row=16, column=1, columnspan=4, padx=5, pady=5)
+    ev4_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev4_label.grid(sticky="W", row=16, column=1, columnspan=4, padx=5, pady=5)
 
-save_data_label = tk.Label(master, text='save data:')
-save_data_label.grid(row=17, column=0, padx=5, pady=5)
-save_data_button = tk.Button(master, text='save data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-save_data_button.grid(sticky="W", row=17, column=1, padx=5, pady=5)
-save_data_as_button = tk.Button(master, text='save as', command=save_data_as, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-save_data_as_button.grid(sticky="W", row=17, column=2, padx=5, pady=5)
+    save_data_label = tk.Label(master, text='save data:')
+    save_data_label.grid(row=17, column=0, padx=5, pady=5)
+    save_data_button = tk.Button(master, text='save data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    save_data_button.grid(sticky="W", row=17, column=1, padx=5, pady=5)
+    save_data_as_button = tk.Button(master, text='save as', command=save_data_as, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    save_data_as_button.grid(sticky="W", row=17, column=2, padx=5, pady=5)
 
-tk.ttk.Separator(master, orient='horizontal').grid(row=18, columnspan=5, pady=5, sticky='ew')
-run_button = tk.Button(master, text='Compare', command=compare_run, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-run_button.grid(row=19, column=0, padx=5, pady=5)
+    tk.ttk.Separator(master, orient='horizontal').grid(row=18, columnspan=5, pady=5, sticky='ew')
+    run_button = tk.Button(master, text='Compare', command=compare_run, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    run_button.grid(row=19, column=0, padx=5, pady=5)
 
-tk.ttk.Separator(master, orient='horizontal').grid(row=20, columnspan=5, pady=5, sticky='ew')
-choose_label = tk.Label(master, text='choose existing files:')
-choose_label.grid(row=21, column=0, padx=5, pady=5)
-run_sim_choose_button = tk.Button(master, text='Compare Run Sim Choose', command=compare_run_sim_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-run_sim_choose_button.grid(sticky="W", row=21, column=1, padx=5, pady=5)
-run_run_choose_button = tk.Button(master, text='Compare Run Run Choose', command=compare_run_run_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-run_run_choose_button.grid(sticky="W", row=21, column=2, padx=5, pady=5)
+    tk.ttk.Separator(master, orient='horizontal').grid(row=20, columnspan=5, pady=5, sticky='ew')
+    choose_label = tk.Label(master, text='choose existing files:')
+    choose_label.grid(row=21, column=0, padx=5, pady=5)
+    run_sim_choose_button = tk.Button(master, text='Compare Run Sim Choose', command=compare_run_sim_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    run_sim_choose_button.grid(sticky="W", row=21, column=1, padx=5, pady=5)
+    run_run_choose_button = tk.Button(master, text='Compare Run Run Choose', command=compare_run_run_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    run_run_choose_button.grid(sticky="W", row=21, column=2, padx=5, pady=5)
 
-# Begin
-atexit.register(save_cf)  # shelve needs to be handled
-modeling_handler()
-option_handler()
-master.mainloop()
+    # Begin
+    atexit.register(save_cf)  # shelve needs to be handled
+    modeling_handler()
+    option_handler()
+    master.mainloop()
