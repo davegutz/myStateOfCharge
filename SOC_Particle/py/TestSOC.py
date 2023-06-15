@@ -3,7 +3,7 @@
 #     or
 #  'python3 TestSOC.py
 #
-#  2023-May-15  Dave Gutz   Create
+#  2023-Jun-15  Dave Gutz   Create
 # Copyright (C) 2023 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
@@ -18,35 +18,20 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-import os
-import re
-import shelve
-import atexit
-import tkinter.messagebox
+"""Define a class to manage configuration using files for memory (poor man's database)"""
 
-import psutil
+from configparser import ConfigParser
+import re
+# import tkinter as tk
+from tkinter import ttk, filedialog
+import tkinter.simpledialog
+import tkinter.messagebox
+from CompareRunSim import compare_run_sim
+from CompareRunRun import compare_run_run
 import shutil
 import pyperclip
 import subprocess
-import configparser
-import tkinter as tk
-from tkinter import ttk
-import tkinter.simpledialog
-from CompareRunSim import compare_run_sim
-from CompareRunRun import compare_run_run
-from tkinter import filedialog
-result_ready = 0
-thread_active = 0
 global putty_shell
-
-
-def default_cf(cf_):
-    cf_['modeling'] = True
-    cf_['option'] = 'ampHiFail'
-    cf_['cf_test'] = {"version": "g20230530", "processor": "A", "battery": "CH", "key": "pro1a"}
-    cf_['cf_ref'] = {"version": "v20230403", "processor": "A", "battery": "CH", "key": "pro1a"}
-    return cf_
-
 
 # Transient string
 sel_list = ['custom', 'ampHiFail', 'rapidTweakRegression', 'offSitHysBms', 'triTweakDisch', 'coldStart', 'ampHiFailFf',
@@ -79,6 +64,43 @@ lookup = {'custom': ('', '', ("For general purpose running", "'save data' will p
           }
 
 
+# Begini - configuration class using .ini files
+class Begini(ConfigParser):
+
+    def __init__(self, name, def_dict_):
+        ConfigParser.__init__(self)
+
+        (config_path, config_basename) = os.path.split(name)
+        config_txt = os.path.splitext(config_basename)[0] + '.ini'
+        self.config_file_path = os.path.join(config_path, config_txt)
+        print('config file', self.config_file_path)
+        if os.path.isfile(self.config_file_path):
+            self.read(self.config_file_path)
+        else:
+            cfg_file = open(self.config_file_path, 'w')
+            self.read_dict(def_dict_)
+            self.write(cfg_file)
+            cfg_file.close()
+            print('wrote', self.config_file_path)
+        print(self.sections())
+
+    # Get an item
+    def get_item(self, ind, item):
+        return self[ind][item]
+
+    # Put an item
+    def put_item(self, ind, item, value):
+        self[ind][item] = value
+        self.save_to_file()
+
+    # Save again
+    def save_to_file(self):
+        cfg_file = open(self.config_file_path, 'w')
+        self.write(cfg_file)
+        cfg_file.close()
+        print('wrote', self.config_file_path)
+
+
 # Executive class to control the global variables
 class ExRoot:
     def __init__(self):
@@ -92,7 +114,7 @@ class ExRoot:
         self.version = tk.simpledialog.askstring(title=__file__, prompt="Enter version <vYYYYMMDD>:")
 
     def load_root_config(self, config_file_path):
-        self.root_config = configparser.ConfigParser()
+        self.root_config = ConfigParser()
         if os.path.isfile(config_file_path):
             self.root_config.read(config_file_path)
         else:
@@ -117,24 +139,25 @@ class ExRoot:
 
 # Executive class to control the global variables
 class ExTarget:
-    def __init__(self, cf_=None, level=None):
+    def __init__(self, cf_, ind, level=None):
         self.cf = cf_
+        self.ind = ind
         self.script_loc = os.path.dirname(os.path.abspath(__file__))
         self.config_path = os.path.join(self.script_loc, 'root_config.ini')
         self.dataReduction_path = os.path.join(self.script_loc, '../dataReduction')
-        self.version = self.cf['version']
+        self.version = self.cf[self.ind]['version']
         self.version_button = None
         if self.version is None:
             self.version = 'undefined'
         self.version_path = os.path.join(self.dataReduction_path, self.version)
         os.makedirs(self.version_path, exist_ok=True)
-        self.battery = self.cf['battery']
+        self.battery = self.cf[self.ind]['battery']
         self.battery_button = None
         self.level = level
         self.level_button = None
-        self.proc = self.cf['processor']
+        self.proc = self.cf[self.ind]['processor']
         self.proc_button = None
-        self.key = self.cf['key']
+        self.key = self.cf[self.ind]['key']
         self.key_button = None
         self.root_config = None
         self.load_root_config(self.config_path)
@@ -147,37 +170,42 @@ class ExTarget:
 
     def create_file_path(self, name_override=None):
         if name_override is None:
-            self.file_txt = create_file_txt(cf['option'], self.proc, self.battery)
+            self.file_txt = create_file_txt(cf['others']['option'], self.proc, self.battery)
         else:
             self.file_txt = create_file_txt(name_override, self.proc, self.battery)
-            self.update_file_label()
         self.file_path = os.path.join(self.version_path, self.file_txt)
+        self.update_file_label()
         self.file_exists = os.path.isfile(self.file_path)
         self.update_file_label()
 
     def enter_battery(self):
-        self.battery = tk.simpledialog.askstring(title=self.level, prompt="Enter battery e.g. 'BB for Battleborn', 'CH' for CHINS:")
-        self.cf['battery'] = self.battery
+        self.battery = tk.simpledialog.askstring(title=self.level,
+                                                 prompt="Enter battery e.g. 'BB for Battleborn', 'CH' for CHINS:")
+        self.cf[self.ind]['battery'] = self.battery
+        self.cf.save_to_file()
         self.battery_button.config(text=self.battery)
         self.create_file_path()
 
     def enter_key(self):
         self.key = tk.simpledialog.askstring(title=self.level, initialvalue=self.key,
                                              prompt="Enter key e.g. 'pro0p', 'pro1a', 'soc0p', 'soc1a':")
-        self.cf['key'] = self.key
+        self.cf[self.ind]['key'] = self.key
+        self.cf.save_to_file()
         self.key_button.config(text=self.key)
         self.update_file_label()
 
     def enter_proc(self):
         self.proc = tk.simpledialog.askstring(title=self.level, prompt="Enter Processor e.g. 'A', 'P', 'P2':")
-        self.cf['processor'] = self.proc
+        self.cf[self.ind]['processor'] = self.proc
+        self.cf.save_to_file()
         self.proc_button.config(text=self.proc)
         self.create_file_path()
         self.label.config(text=self.file_path)
 
     def enter_version(self):
         self.version = tk.simpledialog.askstring(title=self.level, prompt="Enter version <vYYYYMMDD>:")
-        self.cf['version'] = self.version
+        self.cf[self.ind]['version'] = self.version
+        self.cf.save_to_file()
         self.version_button.config(text=self.version)
         self.version_path = os.path.join(self.dataReduction_path, self.version)
         os.makedirs(self.version_path, exist_ok=True)
@@ -185,7 +213,7 @@ class ExTarget:
         self.label.config(text=self.file_path)
 
     def load_root_config(self, config_file_path):
-        self.root_config = configparser.ConfigParser()
+        self.root_config = ConfigParser()
         if os.path.isfile(config_file_path):
             self.root_config.read(config_file_path)
         else:
@@ -329,28 +357,6 @@ def grab_reset():
     add_to_clip_board(reset.get())
 
 
-# This will never work.   All sorts of web activity explaining why
-# def kill_figures():
-#     num = 0
-#     for proc in psutil.process_iter():
-#         print(proc.name())
-#         if proc.name().__contains__("Figure"):
-#             proc.terminate()
-#             num += 1
-#     if num == 0:
-#         print('Figure (s) not found')
-
-
-def kill_putty():
-    num = 0
-    for proc in psutil.process_iter():
-        if proc.name() == "putty.exe":
-            proc.terminate()
-            num += 1
-    if num == 0:
-        print('putty.exe not found')
-
-
 def lookup_start():
     start_val, reset_val, ev_val = lookup.get(option.get())
     start.set(start_val)
@@ -378,7 +384,7 @@ def lookup_start():
 
 
 def modeling_handler(*args):
-    cf['modeling'] = modeling.get()
+    cf['others']['modeling'] = str(modeling.get())
     if modeling.get() is True:
         ref_remove()
     else:
@@ -389,7 +395,7 @@ def option_handler(*args):
     lookup_start()
     option_ = option.get()
     option_show.set(option_)
-    cf['option'] = option_
+    cf['others']['option'] = option_
     print(list(cf.items()))
     Test.create_file_path()
     Ref.create_file_path()
@@ -414,11 +420,6 @@ def ref_restore():
     Ref.key_button.grid()
     Ref.label.grid()
     run_button.config(text='Compare Run Run')
-
-
-def save_cf():
-    print('saved:', list(cf.items()))
-    cf.close()
 
 
 def save_data():
@@ -494,17 +495,33 @@ def start_putty():
 
 
 if __name__ == '__main__':
-    # --- main ---
-    # Configuration for entire folder selection read with filepaths
+    import os
+    import tkinter as tk
+    from tkinter import ttk
+    from TestSOC import sel_list
+    result_ready = 0
+    thread_active = 0
+
     ex_root = ExRoot()
-    cf = shelve.open("TestSOC", writeback=True)
-    if len(cf.keys()) == 0:
-        cf = default_cf(cf)
-    print(list(cf.items()))
-    cf_test = cf['cf_test']
-    cf_ref = cf['cf_ref']
-    Ref = ExTarget(cf_=cf_ref)
-    Test = ExTarget(cf_=cf_test)
+
+    # Configuration for entire folder selection read with filepaths
+    defaults = ConfigParser()
+    def_dict = {'test': {"version": "g20230530",
+                         "processor": "A",
+                         "battery": "BB",
+                         "key": "pro1"},
+                'ref':  {"version": "v20230403",
+                         "processor": "A",
+                         "battery": "BB",
+                         "key": "pro1"},
+                'others': {"option": "custom",
+                           'modeling': True}
+                }
+
+    cf = Begini(__file__, def_dict)
+
+    Ref = ExTarget(cf, 'test')
+    Test = ExTarget(cf, 'ref')
 
     # Define frames
     min_width = 800
@@ -526,14 +543,13 @@ if __name__ == '__main__':
     tk.Label(master, text="Item", fg="blue").grid(row=0, column=0, sticky=tk.N, pady=2)
     tk.Label(master, text="Test", fg="blue").grid(row=0, column=1, sticky=tk.N, pady=2)
     modeling = tk.BooleanVar(master)
-    modeling.set(bool(cf['modeling']))
+    modeling.set(bool(cf['others']['modeling']))
     modeling_button = tk.Checkbutton(master, text='modeling', bg=bg_color, variable=modeling,
                                      onvalue=True, offvalue=False)
     modeling_button.grid(row=0, column=3, pady=2, sticky=tk.N)
     modeling.trace_add('write', modeling_handler)
     ref_label = tk.Label(master, text="Ref", fg="blue")
     ref_label.grid(row=0, column=4, sticky=tk.N, pady=2)
-
 
     # Version row
     tk.Label(master, text="Version").grid(row=1, column=0, pady=2)
@@ -572,9 +588,9 @@ if __name__ == '__main__':
     # Option
     tk.ttk.Separator(master, orient='horizontal').grid(row=5, columnspan=5, pady=5, sticky='ew')
     option = tk.StringVar(master)
-    option.set(str(cf['option']))
+    option.set(str(cf['others']['option']))
     option_show = tk.StringVar(master)
-    option_show.set(str(cf['option']))
+    option_show.set(str(cf['others']['option']))
     sel = tk.OptionMenu(master, option, *sel_list)
     sel.config(width=20)
     sel.grid(row=6, padx=5, pady=5, sticky=tk.W)
@@ -583,8 +599,8 @@ if __name__ == '__main__':
     Test.label.grid(row=6, column=1, columnspan=4, padx=5, pady=5)
     Ref.label = tk.Label(master, text=Ref.file_path, wraplength=wrap_length)
     Ref.label.grid(row=7, column=1, columnspan=4, padx=5, pady=5)
-    Test.create_file_path()
-    Ref.create_file_path()
+    Test.create_file_path(cf['others']['option'])
+    Ref.create_file_path(cf['others']['option'])
 
     putty_shell = None
     putty_label = tk.Label(master, text='start putty:')
@@ -644,7 +660,4 @@ if __name__ == '__main__':
     run_run_choose_button.grid(sticky="W", row=21, column=2, padx=5, pady=5)
 
     # Begin
-    atexit.register(save_cf)  # shelve needs to be handled
-    modeling_handler()
-    option_handler()
     master.mainloop()
