@@ -41,16 +41,21 @@ class Begini(ConfigParser):
             print('wrote', self.config_file_path)
         print(self.sections())
 
-    # Config file
-    def load_from_file_else_default(self, path):
-        config = ConfigParser()
-        if os.path.isfile(path):
-            config.read(path)
-        else:
-            cfg_file = open(path, 'w')
-            config.write(cfg_file)
-            cfg_file.close()
-        return config
+    # Get an item
+    def get_item(self, ind, item):
+        return self[ind][item]
+
+    # Put an item
+    def put_item(self, ind, item, value):
+        self[ind][item] = value
+        self.save_to_file()
+
+    # Save again
+    def save_to_file(self):
+        cfg_file = open(self.config_file_path, 'w')
+        self.write(cfg_file)
+        cfg_file.close()
+        print('wrote', self.config_file_path)
 
 
 # Executive class to control the global variables
@@ -91,24 +96,25 @@ class ExRoot:
 
 # Executive class to control the global variables
 class ExTarget:
-    def __init__(self, cf_=None, level=None):
+    def __init__(self, cf_, ind, level=None):
         self.cf = cf_
+        self.ind = ind
         self.script_loc = os.path.dirname(os.path.abspath(__file__))
         self.config_path = os.path.join(self.script_loc, 'root_config.ini')
         self.dataReduction_path = os.path.join(self.script_loc, '../dataReduction')
-        self.version = self.cf['version']
+        self.version = self.cf[self.ind]['version']
         self.version_button = None
         if self.version is None:
             self.version = 'undefined'
         self.version_path = os.path.join(self.dataReduction_path, self.version)
         os.makedirs(self.version_path, exist_ok=True)
-        self.battery = self.cf['battery']
+        self.battery = self.cf[self.ind]['battery']
         self.battery_button = None
         self.level = level
         self.level_button = None
-        self.proc = self.cf['processor']
+        self.proc = self.cf[self.ind]['processor']
         self.proc_button = None
-        self.key = self.cf['key']
+        self.key = self.cf[self.ind]['key']
         self.key_button = None
         self.root_config = None
         self.load_root_config(self.config_path)
@@ -132,27 +138,31 @@ class ExTarget:
     def enter_battery(self):
         self.battery = tk.simpledialog.askstring(title=self.level,
                                                  prompt="Enter battery e.g. 'BB for Battleborn', 'CH' for CHINS:")
-        self.cf['battery'] = self.battery
+        self.cf[self.ind]['battery'] = self.battery
+        self.cf.save_to_file()
         self.battery_button.config(text=self.battery)
         self.create_file_path()
 
     def enter_key(self):
         self.key = tk.simpledialog.askstring(title=self.level, initialvalue=self.key,
                                              prompt="Enter key e.g. 'pro0p', 'pro1a', 'soc0p', 'soc1a':")
-        self.cf['key'] = self.key
+        self.cf[self.ind]['key'] = self.key
+        self.cf.save_to_file()
         self.key_button.config(text=self.key)
         self.update_file_label()
 
     def enter_proc(self):
         self.proc = tk.simpledialog.askstring(title=self.level, prompt="Enter Processor e.g. 'A', 'P', 'P2':")
-        self.cf['processor'] = self.proc
+        self.cf[self.ind]['processor'] = self.proc
+        self.cf.save_to_file()
         self.proc_button.config(text=self.proc)
         self.create_file_path()
         self.label.config(text=self.file_path)
 
     def enter_version(self):
         self.version = tk.simpledialog.askstring(title=self.level, prompt="Enter version <vYYYYMMDD>:")
-        self.cf['version'] = self.version
+        self.cf[self.ind]['version'] = self.version
+        self.cf.save_to_file()
         self.version_button.config(text=self.version)
         self.version_path = os.path.join(self.dataReduction_path, self.version)
         os.makedirs(self.version_path, exist_ok=True)
@@ -204,11 +214,30 @@ def create_file_txt(option_, proc_, battery_):
     return option_ + '_' + proc_ + '_' + battery_ + '.csv'
 
 
+def modeling_handler(*args):
+    cf['modeling'] = modeling.get()
+    if modeling.get() is True:
+        ref_remove()
+    else:
+        ref_restore()
+
+
+def option_handler(*args):
+    lookup_start()
+    option_ = option.get()
+    option_show.set(option_)
+    cf['option'] = option_
+    print(list(cf.items()))
+    Test.create_file_path()
+    Ref.create_file_path()
+    save_data_button.config(bg=bg_color, text='save data')
+
+
 if __name__ == '__main__':
     import os
     import tkinter as tk
     from tkinter import ttk
-    from TestSOC import modeling_handler, option_handler, sel_list
+    from TestSOC import sel_list
     result_ready = 0
     thread_active = 0
     global putty_shell
@@ -231,10 +260,8 @@ if __name__ == '__main__':
 
     cf = Begini(__file__, def_dict)
 
-    cf_test = cf['test']
-    cf_ref = cf['ref']
-    Ref = ExTarget(cf_=cf_ref)
-    Test = ExTarget(cf_=cf_test)
+    Ref = ExTarget(cf, 'test')
+    Test = ExTarget(cf, 'ref')
 
     # Define frames
     min_width = 800
