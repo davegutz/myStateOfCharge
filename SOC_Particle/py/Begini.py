@@ -25,10 +25,20 @@ import tkinter.simpledialog
 class Begini(ConfigParser):
 
     def __init__(self, name, def_dict_):
-        self.name = name
-        print(def_dict_)
         ConfigParser.__init__(self)
-        self.read_dict(def_dict_)
+
+        (config_path, config_basename) = os.path.split(name)
+        config_txt = os.path.splitext(config_basename)[0] + '.ini'
+        self.config_file_path = os.path.join(config_path, config_txt)
+        print('config file', self.config_file_path)
+        if os.path.isfile(self.config_file_path):
+            self.read(self.config_file_path)
+        else:
+            cfg_file = open(self.config_file_path, 'w')
+            self.read_dict(def_dict_)
+            self.write(cfg_file)
+            cfg_file.close()
+            print('wrote', self.config_file_path)
         print(self.sections())
 
     # Config file
@@ -114,8 +124,8 @@ class ExTarget:
             self.file_txt = create_file_txt(cf['others']['option'], self.proc, self.battery)
         else:
             self.file_txt = create_file_txt(name_override, self.proc, self.battery)
-            self.update_file_label()
         self.file_path = os.path.join(self.version_path, self.file_txt)
+        self.update_file_label()
         self.file_exists = os.path.isfile(self.file_path)
         self.update_file_label()
 
