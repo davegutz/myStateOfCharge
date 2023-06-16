@@ -170,6 +170,7 @@ class ExTarget:
         if name_override is None:
             self.file_txt = create_file_txt(cf['others']['option'], self.unit, self.battery)
             self.key = create_file_key(self.version, self.unit, self.battery)
+            print('version', self.version, 'key', self.key)
         else:
             self.file_txt = create_file_txt(name_override, self.unit, self.battery)
             self.key = create_file_key(name_override, self.unit, self.battery)
@@ -241,11 +242,14 @@ class ExTarget:
     def update_key_label(self):
         self.key_label.config(text=self.key)
         self.key_exists_in_file = False
+        print('key', self.key, 'file', self.file_path)
+        print('isfile', os.path.isfile(self.file_path))
         if os.path.isfile(self.file_path):
             for line in open(self.file_path, 'r'):
                 if re.search(self.key, line):
                     self.key_exists_in_file = True
                     break
+        print('key exists', self.key_exists_in_file)
         if self.key_exists_in_file:
             self.key_label.config(bg='lightgreen')
         else:
