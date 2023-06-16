@@ -659,4 +659,6 @@ if __name__ == '__main__':
     run_run_choose_button.grid(sticky="W", row=21, column=2, padx=5, pady=5)
 
     # Begin
+    modeling_handler()
+    option_handler()
     master.mainloop()
