@@ -82,7 +82,6 @@ class Begini(ConfigParser):
             self.write(cfg_file)
             cfg_file.close()
             print('wrote', self.config_file_path)
-        print(self.sections())
 
     # Get an item
     def get_item(self, ind, item):
@@ -155,10 +154,9 @@ class ExTarget:
         self.battery_button = None
         self.level = level
         self.level_button = None
-        self.proc = self.cf[self.ind]['processor']
-        self.proc_button = None
-        self.key = self.cf[self.ind]['key']
-        self.key_button = None
+        self.unit = self.cf[self.ind]['unit']
+        self.unit_button = None
+        self.key_label = None
         self.root_config = None
         self.load_root_config(self.config_path)
         self.file_txt = None
@@ -166,41 +164,38 @@ class ExTarget:
         self.file_exists = None
         self.key_exists_in_file = None
         self.label = None
-        print('ExTarget:  version', self.version, 'proc', self.proc, 'battery', self.battery, 'key', self.key)
+        self.key = None
 
-    def create_file_path(self, name_override=None):
+    def create_file_path_and_key(self, name_override=None):
         if name_override is None:
-            self.file_txt = create_file_txt(cf['others']['option'], self.proc, self.battery)
+            self.file_txt = create_file_txt(cf['others']['option'], self.unit, self.battery)
+            self.key = create_file_key(cf['others']['option'], self.unit, self.battery)
         else:
-            self.file_txt = create_file_txt(name_override, self.proc, self.battery)
+            self.file_txt = create_file_txt(name_override, self.unit, self.battery)
+            self.key = create_file_key(name_override, self.unit, self.battery)
         self.file_path = os.path.join(self.version_path, self.file_txt)
         self.update_file_label()
         self.file_exists = os.path.isfile(self.file_path)
         self.update_file_label()
+        self.update_key_label()
 
     def enter_battery(self):
         self.battery = tk.simpledialog.askstring(title=self.level,
-                                                 prompt="Enter battery e.g. 'BB for Battleborn', 'CH' for CHINS:")
+                                                 prompt="Enter battery e.g. 'bb for Battleborn', 'ch' for CHINS:")
         self.cf[self.ind]['battery'] = self.battery
         self.cf.save_to_file()
         self.battery_button.config(text=self.battery)
-        self.create_file_path()
+        self.create_file_path_and_key()
+        self.update_key_label()
 
-    def enter_key(self):
-        self.key = tk.simpledialog.askstring(title=self.level, initialvalue=self.key,
-                                             prompt="Enter key e.g. 'pro0p', 'pro1a', 'soc0p', 'soc1a':")
-        self.cf[self.ind]['key'] = self.key
+    def enter_unit(self):
+        self.unit = tk.simpledialog.askstring(title=self.level, initialvalue=self.unit,
+                                             prompt="Enter unit e.g. 'pro0p', 'pro1a', 'soc0p', 'soc1a':")
+        self.cf[self.ind]['unit'] = self.unit
         self.cf.save_to_file()
-        self.key_button.config(text=self.key)
+        self.unit_button.config(text=self.unit)
+        self.update_key_label()
         self.update_file_label()
-
-    def enter_proc(self):
-        self.proc = tk.simpledialog.askstring(title=self.level, prompt="Enter Processor e.g. 'A', 'P', 'P2':")
-        self.cf[self.ind]['processor'] = self.proc
-        self.cf.save_to_file()
-        self.proc_button.config(text=self.proc)
-        self.create_file_path()
-        self.label.config(text=self.file_path)
 
     def enter_version(self):
         self.version = tk.simpledialog.askstring(title=self.level, prompt="Enter version <vYYYYMMDD>:")
@@ -209,7 +204,8 @@ class ExTarget:
         self.version_button.config(text=self.version)
         self.version_path = os.path.join(self.dataReduction_path, self.version)
         os.makedirs(self.version_path, exist_ok=True)
-        self.create_file_path()
+        self.create_file_path_and_key()
+        self.update_key_label()
         self.label.config(text=self.file_path)
 
     def load_root_config(self, config_file_path):
@@ -248,9 +244,22 @@ class ExTarget:
                     self.key_exists_in_file = True
                     break
         if self.key_exists_in_file:
-            self.key_button.config(bg='lightgreen')
+            self.key_label.config(bg='lightgreen')
         else:
-            self.key_button.config(bg='pink')
+            self.key_label.config(bg='pink')
+
+    def update_key_label(self):
+        self.key_label.config(text=self.key)
+        self.key_exists_in_file = False
+        if os.path.isfile(self.file_path):
+            for line in open(self.file_path, 'r'):
+                if re.search(self.key, line):
+                    self.key_exists_in_file = True
+                    break
+        if self.key_exists_in_file:
+            self.key_label.config(bg='lightgreen')
+        else:
+            self.key_label.config(bg='pink')
 
 
 # Global methods
@@ -345,8 +354,12 @@ def copy_clean(src, dst):
     file_out.close()
 
 
-def create_file_txt(option_, proc_, battery_):
-    return option_ + '_' + proc_ + '_' + battery_ + '.csv'
+def create_file_key(option_, unit_, battery_):
+    return option_ + '_' + unit_ + '_' + battery_
+
+
+def create_file_txt(option_, unit_, battery_):
+    return option_ + '_' + unit_ + '_' + battery_ + '.csv'
 
 
 def grab_start():
@@ -397,17 +410,16 @@ def option_handler(*args):
     option_show.set(option_)
     cf['others']['option'] = option_
     cf.save_to_file()
-    Test.create_file_path()
-    Ref.create_file_path()
+    Test.create_file_path_and_key()
+    Ref.create_file_path_and_key()
     save_data_button.config(bg=bg_color, text='save data')
 
 
 def ref_remove():
     ref_label.grid_remove()
     Ref.version_button.grid_remove()
-    Ref.proc_button.grid_remove()
+    Ref.unit_button.grid_remove()
     Ref.battery_button.grid_remove()
-    Ref.key_button.grid_remove()
     Ref.label.grid_remove()
     run_button.config(text='Compare Run Sim')
 
@@ -415,9 +427,8 @@ def ref_remove():
 def ref_restore():
     ref_label.grid()
     Ref.version_button.grid()
-    Ref.proc_button.grid()
+    Ref.unit_button.grid()
     Ref.battery_button.grid()
-    Ref.key_button.grid()
     Ref.label.grid()
     run_button.config(text='Compare Run Run')
 
@@ -434,7 +445,7 @@ def save_data():
         if option.get() == 'custom':
             new_file_txt = tk.simpledialog.askstring(title=__file__, prompt="custom file name string:")
             if new_file_txt is not None:
-                Test.create_file_path(name_override=new_file_txt)
+                Test.create_file_path_and_key(name_override=new_file_txt)
                 Test.label.config(text=Test.file_path)
                 print('Test.file_path', Test.file_path)
         copy_clean(putty_test_csv_path.get(), Test.file_path)
@@ -447,7 +458,7 @@ def save_data():
             pass
         print('emptied', putty_test_csv_path.get())
         print('updating Test file label')
-        Test.create_file_path(name_override=new_file_txt)
+        Test.create_file_path_and_key(name_override=new_file_txt)
     else:
         print('putty test file is too small (<512 bytes) probably already done')
 
@@ -463,14 +474,14 @@ def save_data_as():
         if option.get() == 'custom':
             new_file_txt = tk.simpledialog.askstring(title=__file__, prompt="custom file name string:")
             if new_file_txt is not None:
-                Test.create_file_path(name_override=new_file_txt)
+                Test.create_file_path_and_key(name_override=new_file_txt)
                 Test.label.config(text=Test.file_path)
                 print('Test.file_path', Test.file_path)
         else:
             new_file_txt = tk.simpledialog.askstring(title=__file__, prompt="custom file name string:",
                                                      initialvalue=Test.file_txt)
             if new_file_txt is not None:
-                Test.create_file_path(name_override=new_file_txt)
+                Test.create_file_path_and_key(name_override=new_file_txt)
                 Test.label.config(text=Test.file_path)
                 print('Test.file_path', Test.file_path)
         copy_clean(putty_test_csv_path.get(), Test.file_path)
@@ -483,7 +494,7 @@ def save_data_as():
             pass
         print('emptied', putty_test_csv_path.get())
         print('updating Test file label')
-        Test.create_file_path(name_override=new_file_txt)
+        Test.create_file_path_and_key(name_override=new_file_txt)
     else:
         print('putty test file is too small (<512 bytes) probably already done')
 
@@ -506,21 +517,19 @@ if __name__ == '__main__':
     # Configuration for entire folder selection read with filepaths
     defaults = ConfigParser()
     def_dict = {'test': {"version": "g20230530",
-                         "processor": "A",
-                         "battery": "BB",
-                         "key": "pro1"},
+                         "unit": "pro1a",
+                         "battery": "bb"},
                 'ref':  {"version": "v20230403",
-                         "processor": "A",
-                         "battery": "BB",
-                         "key": "pro1"},
+                         "unit": "pro1a",
+                         "battery": "bb"},
                 'others': {"option": "custom",
                            'modeling': True}
                 }
 
     cf = Begini(__file__, def_dict)
 
-    Ref = ExTarget(cf, 'test')
-    Test = ExTarget(cf, 'ref')
+    Ref = ExTarget(cf, 'ref')
+    Test = ExTarget(cf, 'test')
 
     # Define frames
     min_width = 800
@@ -557,12 +566,12 @@ if __name__ == '__main__':
     Ref.version_button = tk.Button(master, text=Ref.version, command=Ref.enter_version, fg="blue", bg=bg_color)
     Ref.version_button.grid(row=1, column=4, pady=2)
 
-    # Processor row
-    tk.Label(master, text="Processor").grid(row=2, column=0, pady=2)
-    Test.proc_button = tk.Button(master, text=Test.proc, command=Test.enter_proc, fg="red", bg=bg_color)
-    Test.proc_button.grid(row=2, column=1, pady=2)
-    Ref.proc_button = tk.Button(master, text=Ref.proc, command=Ref.enter_proc, fg="red", bg=bg_color)
-    Ref.proc_button.grid(row=2, column=4, pady=2)
+    # Unit row
+    tk.Label(master, text="Unit").grid(row=2, column=0, pady=2)
+    Test.unit_button = tk.Button(master, text=Test.unit, command=Test.enter_unit, fg="purple", bg=bg_color)
+    Test.unit_button.grid(row=2, column=1, pady=2)
+    Ref.unit_button = tk.Button(master, text=Ref.unit, command=Ref.enter_unit, fg="purple", bg=bg_color)
+    Ref.unit_button.grid(row=2, column=4, pady=2)
 
     # Battery row
     tk.Label(master, text="Battery").grid(row=3, column=0, pady=2)
@@ -573,10 +582,10 @@ if __name__ == '__main__':
 
     # Key row
     tk.Label(master, text="Key").grid(row=4, column=0, pady=2)
-    Test.key_button = tk.Button(master, text=Test.key, command=Test.enter_key, fg="purple", bg=bg_color)
-    Test.key_button.grid(row=4, column=1, pady=2)
-    Ref.key_button = tk.Button(master, text=Ref.key, command=Ref.enter_key, fg="purple", bg=bg_color)
-    Ref.key_button.grid(row=4, column=4, pady=2)
+    Test.key_label = tk.Label(master, text=Test.key)
+    Test.key_label.grid(row=4, column=1,  padx=5, pady=5)
+    Ref.key_label = tk.Label(master, text=Ref.key)
+    Ref.key_label.grid(row=4, column=4, padx=5, pady=5)
 
     # Image
     pic_path = os.path.join(ex_root.script_loc, 'TestSOC.png')
@@ -598,8 +607,8 @@ if __name__ == '__main__':
     Test.label.grid(row=6, column=1, columnspan=4, padx=5, pady=5)
     Ref.label = tk.Label(master, text=Ref.file_path, wraplength=wrap_length)
     Ref.label.grid(row=7, column=1, columnspan=4, padx=5, pady=5)
-    Test.create_file_path(cf['others']['option'])
-    Ref.create_file_path(cf['others']['option'])
+    Test.create_file_path_and_key(cf['others']['option'])
+    Ref.create_file_path_and_key(cf['others']['option'])
 
     putty_shell = None
     putty_label = tk.Label(master, text='start putty:')

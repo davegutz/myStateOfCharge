@@ -36,8 +36,15 @@ extern PublishPars pp;            // For publishing
 void assign_publist(Publish* pubList, const unsigned long now, const String unit, const String hm_string,
   Sensors* Sen, const int num_timeouts, BatteryMonitor* Mon)
 {
+  String batt;
+  if ( sp.mon_chm() == 0 )
+    batt = "_bb";
+  else if ( sp.mon_chm() == 1 )
+    batt = "_ch";
+  else
+    batt = "_un";
   pubList->now = now;
-  pubList->unit = unit;
+  pubList->unit = unit + batt.c_str();
   pubList->hm_string =hm_string;
   pubList->Tb = Sen->Tb;
   pubList->Ib = Sen->Ib;

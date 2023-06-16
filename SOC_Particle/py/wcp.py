@@ -31,7 +31,7 @@ def wcp(filepaths=None, silent=False, supported='*'):
     # Make filetypes compatible with askopenfilenames tuple format
     supported_ext = []
     for typ in supported:
-        supported_ext.append(('all audio format', typ))
+        supported_ext.append(('you may enter file type filter press enter', typ))
 
     # Request list of files in a browse dialog
     if filepaths is None:

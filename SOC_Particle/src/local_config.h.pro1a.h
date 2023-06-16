@@ -2,7 +2,7 @@
 #define local_config_h
 
 #include "version.h"
-const String unit = "pro1a_" + version;
+const String unit = version + "_pro1a";
 #undef CONFIG_PHOTON
 #define CONFIG_ARGON
 

@@ -2,7 +2,7 @@
 #define local_config_h
 
 #include "version.h"
-const String unit = "soc1a_" + version;
+const String unit = version + "_soc1a";
 #undef CONFIG_PHOTON
 #define CONFIG_ARGON
 
