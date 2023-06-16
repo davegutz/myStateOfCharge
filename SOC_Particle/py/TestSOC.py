@@ -396,7 +396,7 @@ def option_handler(*args):
     option_ = option.get()
     option_show.set(option_)
     cf['others']['option'] = option_
-    print(list(cf.items()))
+    cf.save_to_file()
     Test.create_file_path()
     Ref.create_file_path()
     save_data_button.config(bg=bg_color, text='save data')
@@ -498,7 +498,6 @@ if __name__ == '__main__':
     import os
     import tkinter as tk
     from tkinter import ttk
-    from TestSOC import sel_list
     result_ready = 0
     thread_active = 0
 
