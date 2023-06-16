@@ -169,7 +169,7 @@ class ExTarget:
     def create_file_path_and_key(self, name_override=None):
         if name_override is None:
             self.file_txt = create_file_txt(cf['others']['option'], self.unit, self.battery)
-            self.key = create_file_key(cf['others']['option'], self.unit, self.battery)
+            self.key = create_file_key(self.version, self.unit, self.battery)
         else:
             self.file_txt = create_file_txt(name_override, self.unit, self.battery)
             self.key = create_file_key(name_override, self.unit, self.battery)
@@ -237,16 +237,6 @@ class ExTarget:
             self.label.config(bg='lightgreen')
         else:
             self.label.config(bg='pink')
-        self.key_exists_in_file = False
-        if os.path.isfile(self.file_path):
-            for line in open(self.file_path, 'r'):
-                if re.search(self.key, line):
-                    self.key_exists_in_file = True
-                    break
-        if self.key_exists_in_file:
-            self.key_label.config(bg='lightgreen')
-        else:
-            self.key_label.config(bg='pink')
 
     def update_key_label(self):
         self.key_label.config(text=self.key)
@@ -354,8 +344,8 @@ def copy_clean(src, dst):
     file_out.close()
 
 
-def create_file_key(option_, unit_, battery_):
-    return option_ + '_' + unit_ + '_' + battery_
+def create_file_key(version_, unit_, battery_):
+    return version_ + '_' + unit_ + '_' + battery_
 
 
 def create_file_txt(option_, unit_, battery_):
