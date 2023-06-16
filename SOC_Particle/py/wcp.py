@@ -49,6 +49,7 @@ def wcp(filepaths=None, silent=False, supported='*'):
     for filepath in filepaths:
         destpath = filepath.replace(source, target)
         shutil.copyfile(filepath, destpath)
+        shutil.copystat(filepath, destpath)
         print('copied', filepath, 'to', destpath)
 
 
