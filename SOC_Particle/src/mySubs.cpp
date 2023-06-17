@@ -35,7 +35,7 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
 // Print consolidation
 void print_all_header(void)
 {
-    print_serial_header();
+  print_serial_header();
   if ( sp.debug()==2  )
   {
     print_serial_sim_header();
@@ -55,7 +55,7 @@ void print_all_header(void)
 }
 void print_rapid_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
-  static uint8_t last_read_debug = sp.debug();     // Remember first time with new debug to print headers
+  static uint8_t last_read_debug = 0;     // Remember first time with new debug to print headers
   if ( ( sp.debug()==1 || sp.debug()==2 || sp.debug()==3 || sp.debug()==4 ) )
   {
     if ( reset || (last_read_debug != sp.debug()) )

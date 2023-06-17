@@ -51,7 +51,7 @@ lookup = {'custom': ('', '', ("For general purpose running", "'save data' will p
           'rapidTweakRegression40C': ('Ff0;HR;D^15;Xp10;', 'D^0;', ("Should run three very large current discharge/recharge cycles without fault",)),
           'slowTweakRegression': ('Ff0;HR;Xp11;', 'v0;', ("Should run one very large slow (~15 min) current discharge/recharge cycle without fault.   It will take 60 seconds to start changing current.",)),
           'satSitBB': ('Ff0;D^0;Xp0;Xm247;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;DP4;', ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",)),
-          'satSitCH': ('Ff0;D^0;Xp0;Xm247;Ca0.993;Rb;Rf;Dr100;DP1;Xts;Xa17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;Ca.993;W5;Pf;Rf;Pf;v0;DP4;', ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",)),
+          'satSitCH': ('Ff0;D^0;Xp0;Xm247;Ca0.992;Rb;Rf;Dr100;DP1;Xts;Xa17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;Ca.992;W5;Pf;Rf;Pf;v0;DP4;', ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",)),
           'flatSitHys': ('Ff0;D^0;Xp0;Xm247;Ca0.9;Rb;Rf;Dr100;DP1;Xts;Xa-81;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;Ca.9;W5;Pf;Rf;Pf;v0;DP4;', ("Operate around 0.9.  For CHINS, will check EKF with flat voc(soc).   Takes about 10 minutes.", "Make sure EKF soc (soc_ekf) tracks actual soc without wandering.")),
           'offSitHysBmsNoiseBB': ('Ff0;D^0;Xp0;Xm247;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.")),
           'offSitHysBmsNoiseCH': ('Ff0;D^0;Xp0;Xm247;Ca0.014;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.014;W5;Pf;Rf;Pf;v0;DP4;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.")),
@@ -354,12 +354,13 @@ def create_file_txt(option_, unit_, battery_):
     return option_ + '_' + unit_ + '_' + battery_ + '.csv'
 
 
-def grab_start():
-    add_to_clip_board(start.get())
-
-
 def grab_reset():
     add_to_clip_board(reset.get())
+
+
+def grab_start():
+    add_to_clip_board(start.get())
+    save_data_button.config(bg=bg_color, text='save data')
 
 
 def lookup_start():

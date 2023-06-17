@@ -1061,10 +1061,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                   case ( 9 ): case( 10 ): case ( 11 ): case( 12 ):  // Xp9: Xp10: Xp11: Xp12:  Program regression
-                              // Regression tests 9=tweak, 10=tweak w data, 11=cycle, 12 1/2 cycle
+                    // Regression tests 9=tweak, 10=tweak w data, 11=cycle, 12 1/2 cycle
                     chit("Xp0;", QUEUE);      // Reset nominal
                     chit("v0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
-                    // chit("Bm0;Bs0;", QUEUE);  // Set Battleborn configuration
                     chit("Xm255;", QUEUE);     // Modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
                     chit("Xts;", QUEUE);      // Start up a sine wave
                     chit("Ca1;", QUEUE);      // After restarting with sine running, soc will not be at 1.  Reset them all to 1
