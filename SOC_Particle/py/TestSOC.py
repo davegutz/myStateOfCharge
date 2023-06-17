@@ -271,7 +271,7 @@ def compare_run():
                         path_to_temp=os.path.join(Test.version_path, './temp'))
     else:
         if not Ref.key_exists_in_file:
-            tkinter.messagebox.showwarning(message="Ref Key '" + Ref.key + "' does not exist in" + Ref.file_txt)
+            tkinter.messagebox.showwarning(message="Ref Key '" + Ref.key + "' does not exist in " + Ref.file_txt)
             return
         print('TestSOC compare_run:  Ref', Ref.file_path, Ref.key)
         print('TestSOC compare_run:  Test', Test.file_path, Test.key)
@@ -360,7 +360,7 @@ def grab_reset():
 
 def grab_start():
     add_to_clip_board(start.get())
-    save_data_button.config(bg=bg_color, text='save data')
+    save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data')
 
 
 def lookup_start():
@@ -396,6 +396,15 @@ def modeling_handler(*args):
     else:
         ref_restore()
 
+# def on_enter(e):
+#     print('on enter')
+#     save_data_button.config(activebackground='green')
+#
+#
+# def on_leave(e):
+#     print('on leave')
+#     save_data_button.config(bg=bg_color)
+#
 
 def option_handler(*args):
     lookup_start()
@@ -405,7 +414,7 @@ def option_handler(*args):
     cf.save_to_file()
     Test.create_file_path_and_key()
     Ref.create_file_path_and_key()
-    save_data_button.config(bg=bg_color, text='save data')
+    save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data')
 
 
 def ref_remove():
@@ -445,7 +454,7 @@ def save_data():
                 print('Test.file_path', Test.file_path)
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
-        save_data_button.config(bg='green', text='data saved')
+        save_data_button.config(bg='green', activebackground='green', fg='red', activeforeground='red', text='data saved')
         shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
         try:
             os.remove(empty_csv_path.get())
@@ -456,6 +465,7 @@ def save_data():
         Test.create_file_path_and_key(name_override=new_file_txt)
     else:
         print('putty test file is too small (<512 bytes) probably already done')
+        tkinter.messagebox.showwarning(message="Nothing to save")
 
 
 def save_data_as():
@@ -481,7 +491,7 @@ def save_data_as():
                 print('Test.file_path', Test.file_path)
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
-        save_data_button.config(bg='green', text='data saved')
+        save_data_button.config(bg='green', activebackground='green', fg='red', activeforeground='red', text='data saved')
         shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
         try:
             os.remove(empty_csv_path.get())
@@ -492,6 +502,7 @@ def save_data_as():
         Test.create_file_path_and_key(name_override=new_file_txt)
     else:
         print('putty test file is too small (<512 bytes) probably already done')
+        tkinter.messagebox.showwarning(message="Nothing to save")
 
 
 def start_putty():
@@ -647,6 +658,8 @@ if __name__ == '__main__':
     save_data_label.grid(row=17, column=0, padx=5, pady=5)
     save_data_button = tk.Button(master, text='save data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
     save_data_button.grid(sticky="W", row=17, column=1, padx=5, pady=5)
+    # save_data_button.bind("<Enter>", on_enter)
+    # save_data_button.bind("<Leave>", on_leave)
     save_data_as_button = tk.Button(master, text='save as', command=save_data_as, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
     save_data_as_button.grid(sticky="W", row=17, column=2, padx=5, pady=5)
 
