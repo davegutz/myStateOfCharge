@@ -356,11 +356,15 @@ def create_file_txt(option_, unit_, battery_):
 
 def grab_reset():
     add_to_clip_board(reset.get())
+    reset_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
+    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
 def grab_start():
     add_to_clip_board(start.get())
     save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data')
+    start_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
+    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
 def lookup_start():
@@ -406,6 +410,7 @@ def modeling_handler(*args):
 #     save_data_button.config(bg=bg_color)
 #
 
+
 def option_handler(*args):
     lookup_start()
     option_ = option.get()
@@ -415,6 +420,8 @@ def option_handler(*args):
     Test.create_file_path_and_key()
     Ref.create_file_path_and_key()
     save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data')
+    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
 def ref_remove():
@@ -466,6 +473,8 @@ def save_data():
     else:
         print('putty test file is too small (<512 bytes) probably already done')
         tkinter.messagebox.showwarning(message="Nothing to save")
+    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
 def save_data_as():
@@ -503,6 +512,8 @@ def save_data_as():
     else:
         print('putty test file is too small (<512 bytes) probably already done')
         tkinter.messagebox.showwarning(message="Nothing to save")
+    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
 def start_putty():
