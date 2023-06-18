@@ -180,6 +180,7 @@ class ExTarget:
         self.file_exists = os.path.isfile(self.file_path)
         self.update_file_label()
         self.update_key_label()
+        print('file_txt', self.file_txt)
 
     def enter_battery(self):
         self.battery = tk.simpledialog.askstring(title=self.level,
@@ -208,7 +209,7 @@ class ExTarget:
         os.makedirs(self.version_path, exist_ok=True)
         self.create_file_path_and_key()
         self.update_key_label()
-        self.label.config(text=self.file_path)
+        self.label.config(text=self.file_txt)
 
     def load_root_config(self, config_file_path):
         self.root_config = ConfigParser()
@@ -234,7 +235,7 @@ class ExTarget:
         return self.root_config
 
     def update_file_label(self):
-        self.label.config(text=self.file_path)
+        self.label.config(text=self.file_txt)
         if self.file_exists:
             self.label.config(bg='lightgreen')
         else:
@@ -457,7 +458,7 @@ def save_data():
             new_file_txt = tk.simpledialog.askstring(title=__file__, prompt="custom file name string:")
             if new_file_txt is not None:
                 Test.create_file_path_and_key(name_override=new_file_txt)
-                Test.label.config(text=Test.file_path)
+                Test.label.config(text=Test.file_txt)
                 print('Test.file_path', Test.file_path)
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
@@ -489,14 +490,14 @@ def save_data_as():
             new_file_txt = tk.simpledialog.askstring(title=__file__, prompt="custom file name string:")
             if new_file_txt is not None:
                 Test.create_file_path_and_key(name_override=new_file_txt)
-                Test.label.config(text=Test.file_path)
+                Test.label.config(text=Test.file_txt)
                 print('Test.file_path', Test.file_path)
         else:
             new_file_txt = tk.simpledialog.askstring(title=__file__, prompt="custom file name string:",
                                                      initialvalue=Test.file_txt)
             if new_file_txt is not None:
                 Test.create_file_path_and_key(name_override=new_file_txt)
-                Test.label.config(text=Test.file_path)
+                Test.label.config(text=Test.file_txt)
                 print('Test.file_path', Test.file_path)
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
@@ -620,18 +621,18 @@ if __name__ == '__main__':
     sel.config(width=20)
     sel.grid(row=6, padx=5, pady=5, sticky=tk.W)
     option.trace_add('write', option_handler)
-    Test.label = tk.Label(master, text=Test.file_path, wraplength=wrap_length)
-    Test.label.grid(row=6, column=1, columnspan=4, padx=5, pady=5)
-    Ref.label = tk.Label(master, text=Ref.file_path, wraplength=wrap_length)
-    Ref.label.grid(row=7, column=1, columnspan=4, padx=5, pady=5)
+    Test.label = tk.Label(master, text=Test.file_txt)
+    Test.label.grid(row=6, column=1, padx=5, pady=5)
+    Ref.label = tk.Label(master, text=Ref.file_txt)
+    Ref.label.grid(row=6, column=4, padx=5, pady=5)
     Test.create_file_path_and_key(cf['others']['option'])
     Ref.create_file_path_and_key(cf['others']['option'])
 
     putty_shell = None
     putty_label = tk.Label(master, text='start putty:')
-    putty_label.grid(row=8, column=0, padx=5, pady=5)
+    putty_label.grid(row=7, column=0, padx=5, pady=5)
     putty_button = tk.Button(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-    putty_button.grid(sticky="W", row=8, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
+    putty_button.grid(sticky="W", row=7, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
     putty_test_csv_path = tk.StringVar(master)
     putty_test_csv_path.set(os.path.join(path_to_data, 'putty_test.csv'))
     empty_csv_path = tk.StringVar(master)
@@ -640,51 +641,49 @@ if __name__ == '__main__':
     start = tk.StringVar(master)
     start.set('')
     start_label = tk.Label(master, text='copy start:')
-    start_label.grid(row=9, column=0, padx=5, pady=5)
+    start_label.grid(row=8, column=0, padx=5, pady=5)
     start_button = tk.Button(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
-                             justify=tk.LEFT)
-    start_button.grid(sticky="W", row=9, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+                             justify=tk.LEFT, font=("Arial", 8))
+    start_button.grid(sticky="W", row=8, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
     reset = tk.StringVar(master)
     reset.set('')
     reset_label = tk.Label(master, text='copy reset:')
-    reset_label.grid(row=11, column=0, padx=5, pady=5)
+    reset_label.grid(row=10, column=0, padx=5, pady=5)
     reset_button = tk.Button(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
-                             justify=tk.LEFT)
-    reset_button.grid(sticky="W", row=11, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+                             justify=tk.LEFT, font=("Arial", 8))
+    reset_button.grid(sticky="W", row=10, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
 
     ev1_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev1_label.grid(sticky="W", row=13, column=1, columnspan=4, padx=5, pady=5)
+    ev1_label.grid(sticky="W", row=12, column=1, columnspan=4, padx=5, pady=5)
 
     ev2_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev2_label.grid(sticky="W", row=14, column=1, columnspan=4, padx=5, pady=5)
+    ev2_label.grid(sticky="W", row=13, column=1, columnspan=4, padx=5, pady=5)
 
     ev3_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev3_label.grid(sticky="W", row=15, column=1, columnspan=4, padx=5, pady=5)
+    ev3_label.grid(sticky="W", row=14, column=1, columnspan=4, padx=5, pady=5)
 
     ev4_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev4_label.grid(sticky="W", row=16, column=1, columnspan=4, padx=5, pady=5)
+    ev4_label.grid(sticky="W", row=15, column=1, columnspan=4, padx=5, pady=5)
 
     save_data_label = tk.Label(master, text='save data:')
-    save_data_label.grid(row=17, column=0, padx=5, pady=5)
+    save_data_label.grid(row=16, column=0, padx=5, pady=5)
     save_data_button = tk.Button(master, text='save data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-    save_data_button.grid(sticky="W", row=17, column=1, padx=5, pady=5)
-    # save_data_button.bind("<Enter>", on_enter)
-    # save_data_button.bind("<Leave>", on_leave)
+    save_data_button.grid(sticky="W", row=16, column=1, padx=5, pady=5)
     save_data_as_button = tk.Button(master, text='save as', command=save_data_as, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-    save_data_as_button.grid(sticky="W", row=17, column=2, padx=5, pady=5)
+    save_data_as_button.grid(sticky="W", row=16, column=2, padx=5, pady=5)
 
-    tk.ttk.Separator(master, orient='horizontal').grid(row=18, columnspan=5, pady=5, sticky='ew')
+    tk.ttk.Separator(master, orient='horizontal').grid(row=17, columnspan=5, pady=5, sticky='ew')
     run_button = tk.Button(master, text='Compare', command=compare_run, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-    run_button.grid(row=19, column=0, padx=5, pady=5)
+    run_button.grid(row=18, column=0, padx=5, pady=5)
 
-    tk.ttk.Separator(master, orient='horizontal').grid(row=20, columnspan=5, pady=5, sticky='ew')
+    tk.ttk.Separator(master, orient='horizontal').grid(row=19, columnspan=5, pady=5, sticky='ew')
     choose_label = tk.Label(master, text='choose existing files:')
-    choose_label.grid(row=21, column=0, padx=5, pady=5)
+    choose_label.grid(row=20, column=0, padx=5, pady=5)
     run_sim_choose_button = tk.Button(master, text='Compare Run Sim Choose', command=compare_run_sim_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-    run_sim_choose_button.grid(sticky="W", row=21, column=1, padx=5, pady=5)
+    run_sim_choose_button.grid(sticky="W", row=20, column=1, padx=5, pady=5)
     run_run_choose_button = tk.Button(master, text='Compare Run Run Choose', command=compare_run_run_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-    run_run_choose_button.grid(sticky="W", row=21, column=2, padx=5, pady=5)
+    run_run_choose_button.grid(sticky="W", row=20, column=2, padx=5, pady=5)
 
     # Begin
     modeling_handler()
