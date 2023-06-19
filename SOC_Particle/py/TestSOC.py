@@ -475,7 +475,7 @@ def save_data():
                 Test.create_file_path_and_key(name_override=new_file_txt)
                 Test.label.config(text=Test.file_txt)
                 print('Test.file_path', Test.file_path)
-        if os.path.getsize(Test.file_path) > 0:  # bytes
+        if os.path.isfile(Test.file_path) and os.path.getsize(Test.file_path) > 0:  # bytes
             confirmation = tk.messagebox.askyesno('query overwrite', 'File exists:  overwrite?')
             if confirmation is False:
                 print('reset and use clear')
