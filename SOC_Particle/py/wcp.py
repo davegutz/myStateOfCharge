@@ -1,7 +1,8 @@
+#!/usr/bin/env python3
 #  wcp:  wild copy tool
 #  Run in PyCharm
 #     or
-#  'python wcp.py
+#  'python3 wcp
 #
 #  2023-Jun-15  Dave Gutz   Create
 # Copyright (C) 2023 Dave Gutz
@@ -19,7 +20,6 @@
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
 """Use wildcards to copy new files"""
-
 import os
 import shutil
 from tkinter import filedialog, messagebox, simpledialog
@@ -29,7 +29,7 @@ from configparser import ConfigParser
 
 # Begini - configuration class using .ini files
 def parse_tuple(input_):
-    return tuple(k.strip() for k in input_[1:-1].split(','))
+    return tuple(k.strip() for k in input_[:-1].split(','))
 
 
 class Begini(ConfigParser):
@@ -48,21 +48,16 @@ class Begini(ConfigParser):
             self.read_dict(def_dict_)
             self.write(cfg_file)
             cfg_file.close()
-            print('wrote', self.config_file_path)
+            print('updated', self.config_file_path)
 
     # Get an item
     def get_item(self, ind, item):
         return self[ind][item]
 
-    # Get a tuple item in tuple form now
-    def get_tuple_item(self, ind, item):
-        return tuple(self[ind][item])
-
     # Get a tuple item in list form now
     def get_tuple_item_as_strlist(self, ind, item):
         list_of = self[ind][item]
         list_of_tuple = parse_tuple(list_of)
-        print('listof', list_of_tuple)
         list_str = ""
         for str_ in list_of_tuple:
             list_str += '"' + str_ + '"' + ' '
@@ -86,13 +81,13 @@ class Begini(ConfigParser):
         cfg_file = open(self.config_file_path, 'w')
         self.write(cfg_file)
         cfg_file.close()
-        print('wrote', self.config_file_path)
+        print('updated', self.config_file_path)
 
 
 def wcp(filepaths=None, silent=False, supported='*'):
 
     # Configuration for entire folder selection read with filepaths
-    def_dict = {'mem':  {'source': 'source',
+    def_dict = {'wcp':  {'source': 'source',
                          'target': 'target',
                          'filepaths': ['file1', 'file2', 'file3']},
                 }
@@ -108,21 +103,19 @@ def wcp(filepaths=None, silent=False, supported='*'):
     if filepaths is None:
         root = tk.Tk()
         root.withdraw()
-        print('list', cf.get_tuple_item_as_strlist('mem', 'filepaths'))
         filepaths = filedialog.askopenfilenames(title='Please select files', filetypes=supported_ext,
-                                                initialfile=cf.get_tuple_item_as_strlist('mem', 'filepaths'))
-        print('filepaths', filepaths)
-        cf.put_tuple_item('mem', 'filepaths', filepaths)
+                                                initialfile=cf.get_tuple_item_as_strlist('wcp', 'filepaths'))
+        cf.put_tuple_item('wcp', 'filepaths', filepaths)
         if filepaths is None or filepaths == '':
             if silent is False:
                 input('\nNo files chosen')
             else:
                 messagebox.showinfo(title='Message:', message='No files chosen')
             return None
-    source = tk.simpledialog.askstring('wcp source target', 'source string', initialvalue=cf.get_item('mem', 'source'))
-    cf.put_item('mem', 'source', source)
-    target = tk.simpledialog.askstring('wcp source target', 'target string', initialvalue=cf.get_item('mem', 'target'))
-    cf.put_item('mem', 'target', target)
+    source = tk.simpledialog.askstring('wcp source target', 'source string', initialvalue=cf.get_item('wcp', 'source'))
+    cf.put_item('wcp', 'source', source)
+    target = tk.simpledialog.askstring('wcp source target', 'target string', initialvalue=cf.get_item('wcp', 'target'))
+    cf.put_item('wcp', 'target', target)
     for filepath in filepaths:
         destpath = filepath.replace(source, target)
         if destpath != filepath:
