@@ -126,7 +126,7 @@ def wcp(filepaths=None, silent=False, supported='*'):
             else:
                 print(filepath, 'not found')
         else:
-            print("did not find source= '", source, "' in", filepath)
+            print("did not find '{:s}' in {:s}".format(source, filepath))
 
 
 if __name__ == '__main__':
