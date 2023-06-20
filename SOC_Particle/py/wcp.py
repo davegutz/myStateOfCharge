@@ -28,10 +28,14 @@ from configparser import ConfigParser
 
 
 # Begini - configuration class using .ini files
+def parse_tuple(input_):
+    return tuple(k.strip() for k in input_[1:-1].split(','))
+
+
 class Begini(ConfigParser):
 
     def __init__(self, name, def_dict_):
-        ConfigParser.__init__(self)
+        ConfigParser.__init__(self, converters={'tuple': parse_tuple})
 
         (config_path, config_basename) = os.path.split(name)
         config_txt = os.path.splitext(config_basename)[0] + '.ini'
@@ -50,9 +54,31 @@ class Begini(ConfigParser):
     def get_item(self, ind, item):
         return self[ind][item]
 
+    # Get a tuple item in tuple form now
+    def get_tuple_item(self, ind, item):
+        return tuple(self[ind][item])
+
+    # Get a tuple item in list form now
+    def get_tuple_item_as_strlist(self, ind, item):
+        list_of = self[ind][item]
+        list_of_tuple = parse_tuple(list_of)
+        print('listof', list_of_tuple)
+        list_str = ""
+        for str_ in list_of_tuple:
+            list_str += '"' + str_ + '"' + ' '
+        return list_str
+
     # Put an item
     def put_item(self, ind, item, value):
         self[ind][item] = value
+        self.save_to_file()
+
+    # Put a tuple item
+    def put_tuple_item(self, ind, item, tuple_value):
+        value_list = ''
+        for value in tuple_value:
+            value_list += value + ','
+        self[ind][item] = value_list
         self.save_to_file()
 
     # Save again
@@ -67,7 +93,8 @@ def wcp(filepaths=None, silent=False, supported='*'):
 
     # Configuration for entire folder selection read with filepaths
     def_dict = {'mem':  {'source': 'source',
-                         'target': 'target'},
+                         'target': 'target',
+                         'filepaths': ['file1', 'file2', 'file3']},
                 }
     cf = Begini(__file__, def_dict)
     # print(list(cf))
@@ -81,7 +108,11 @@ def wcp(filepaths=None, silent=False, supported='*'):
     if filepaths is None:
         root = tk.Tk()
         root.withdraw()
-        filepaths = filedialog.askopenfilenames(title='Please select files', filetypes=supported_ext)
+        print('list', cf.get_tuple_item_as_strlist('mem', 'filepaths'))
+        filepaths = filedialog.askopenfilenames(title='Please select files', filetypes=supported_ext,
+                                                initialfile=cf.get_tuple_item_as_strlist('mem', 'filepaths'))
+        print('filepaths', filepaths)
+        cf.put_tuple_item('mem', 'filepaths', filepaths)
         if filepaths is None or filepaths == '':
             if silent is False:
                 input('\nNo files chosen')
@@ -102,7 +133,7 @@ def wcp(filepaths=None, silent=False, supported='*'):
             else:
                 print(filepath, 'not found')
         else:
-            print('did not find source', source, 'in', filepath)
+            print("did not find source= '", source, "' in", filepath)
 
 
 if __name__ == '__main__':
