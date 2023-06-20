@@ -24,9 +24,53 @@ import os
 import shutil
 from tkinter import filedialog, messagebox, simpledialog
 import tkinter as tk
+from configparser import ConfigParser
+
+
+# Begini - configuration class using .ini files
+class Begini(ConfigParser):
+
+    def __init__(self, name, def_dict_):
+        ConfigParser.__init__(self)
+
+        (config_path, config_basename) = os.path.split(name)
+        config_txt = os.path.splitext(config_basename)[0] + '.ini'
+        self.config_file_path = os.path.join(config_path, config_txt)
+        print('config file', self.config_file_path)
+        if os.path.isfile(self.config_file_path):
+            self.read(self.config_file_path)
+        else:
+            cfg_file = open(self.config_file_path, 'w')
+            self.read_dict(def_dict_)
+            self.write(cfg_file)
+            cfg_file.close()
+            print('wrote', self.config_file_path)
+
+    # Get an item
+    def get_item(self, ind, item):
+        return self[ind][item]
+
+    # Put an item
+    def put_item(self, ind, item, value):
+        self[ind][item] = value
+        self.save_to_file()
+
+    # Save again
+    def save_to_file(self):
+        cfg_file = open(self.config_file_path, 'w')
+        self.write(cfg_file)
+        cfg_file.close()
+        print('wrote', self.config_file_path)
 
 
 def wcp(filepaths=None, silent=False, supported='*'):
+
+    # Configuration for entire folder selection read with filepaths
+    def_dict = {'mem':  {'source': 'source',
+                         'target': 'target'},
+                }
+    cf = Begini(__file__, def_dict)
+    # print(list(cf))
 
     # Make filetypes compatible with askopenfilenames tuple format
     supported_ext = []
@@ -44,13 +88,21 @@ def wcp(filepaths=None, silent=False, supported='*'):
             else:
                 messagebox.showinfo(title='Message:', message='No files chosen')
             return None
-    source = tk.simpledialog.askstring('wcp source target', 'source string')
-    target = tk.simpledialog.askstring('wcp source target', 'target string')
+    source = tk.simpledialog.askstring('wcp source target', 'source string', initialvalue=cf.get_item('mem', 'source'))
+    cf.put_item('mem', 'source', source)
+    target = tk.simpledialog.askstring('wcp source target', 'target string', initialvalue=cf.get_item('mem', 'target'))
+    cf.put_item('mem', 'target', target)
     for filepath in filepaths:
         destpath = filepath.replace(source, target)
-        shutil.copyfile(filepath, destpath)
-        shutil.copystat(filepath, destpath)
-        print('copied', filepath, 'to', destpath)
+        if destpath != filepath:
+            if os.path.exists(filepath):
+                shutil.copyfile(filepath, destpath)
+                shutil.copystat(filepath, destpath)
+                print('copied', filepath, 'to', destpath)
+            else:
+                print(filepath, 'not found')
+        else:
+            print('did not find source', source, 'in', filepath)
 
 
 if __name__ == '__main__':

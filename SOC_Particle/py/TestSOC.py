@@ -22,7 +22,6 @@
 
 from configparser import ConfigParser
 import re
-# import tkinter as tk
 from tkinter import ttk, filedialog
 import tkinter.simpledialog
 import tkinter.messagebox
@@ -533,7 +532,6 @@ if __name__ == '__main__':
     ex_root = ExRoot()
 
     # Configuration for entire folder selection read with filepaths
-    defaults = ConfigParser()
     def_dict = {'test': {"version": "g20230530",
                          "unit": "pro1a",
                          "battery": "bb"},
