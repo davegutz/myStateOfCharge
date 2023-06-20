@@ -19,7 +19,7 @@
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
 """Define a class to manage configuration using files for memory (poor man's database)"""
-
+import time
 from configparser import ConfigParser
 import re
 from tkinter import ttk, filedialog
@@ -260,6 +260,31 @@ def add_to_clip_board(text):
 
 
 # Compare run driver
+def clear_data():
+    enter_size = os.path.getsize(putty_test_csv_path.get())  # bytes
+    if enter_size > 512:
+        time.sleep(1.)
+        wait_size = os.path.getsize(putty_test_csv_path.get())  # bytes
+        if wait_size > enter_size:
+            print('stop data first')
+            tkinter.messagebox.showwarning(message="stop data first")
+        # create empty file
+        try:
+            open(empty_csv_path.get(), 'x')
+        except FileExistsError:
+            pass
+        shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
+        try:
+            os.remove(empty_csv_path.get())
+        except OSError:
+            pass
+        print('emptied', putty_test_csv_path.get())
+        reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    else:
+        print('putty test file is too small (<512 bytes) probably already done')
+        tkinter.messagebox.showwarning(message="Nothing to clear")
+
+
 def compare_run():
     if not Test.key_exists_in_file:
         tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
@@ -400,16 +425,6 @@ def modeling_handler(*args):
     else:
         ref_restore()
 
-# def on_enter(e):
-#     print('on enter')
-#     save_data_button.config(activebackground='green')
-#
-#
-# def on_leave(e):
-#     print('on leave')
-#     save_data_button.config(bg=bg_color)
-#
-
 
 def option_handler(*args):
     lookup_start()
@@ -459,6 +474,12 @@ def save_data():
                 Test.create_file_path_and_key(name_override=new_file_txt)
                 Test.label.config(text=Test.file_txt)
                 print('Test.file_path', Test.file_path)
+        if os.path.isfile(Test.file_path) and os.path.getsize(Test.file_path) > 0:  # bytes
+            confirmation = tk.messagebox.askyesno('query overwrite', 'File exists:  overwrite?')
+            if confirmation is False:
+                print('reset and use clear')
+                tkinter.messagebox.showwarning(message='reset and use clear')
+                return
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
         save_data_button.config(bg='green', activebackground='green', fg='red', activeforeground='red', text='data saved')
@@ -498,6 +519,12 @@ def save_data_as():
                 Test.create_file_path_and_key(name_override=new_file_txt)
                 Test.label.config(text=Test.file_txt)
                 print('Test.file_path', Test.file_path)
+        if os.path.getsize(Test.file_path) > 0:  # bytes
+            confirmation = tk.messagebox.askyesno('query overwrite', 'File exists:  overwrite?')
+            if confirmation is False:
+                print('reset and use clear')
+                tkinter.messagebox.showwarning(message='reset and use clear')
+                return
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
         save_data_button.config(bg='green', activebackground='green', fg='red', activeforeground='red', text='data saved')
@@ -670,6 +697,8 @@ if __name__ == '__main__':
     save_data_button.grid(sticky="W", row=16, column=1, padx=5, pady=5)
     save_data_as_button = tk.Button(master, text='save as', command=save_data_as, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
     save_data_as_button.grid(sticky="W", row=16, column=2, padx=5, pady=5)
+    clear_data_button = tk.Button(master, text='clear', command=clear_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.RIGHT)
+    clear_data_button.grid(sticky="W", row=16, column=3, padx=5, pady=5)
 
     tk.ttk.Separator(master, orient='horizontal').grid(row=17, columnspan=5, pady=5, sticky='ew')
     run_button = tk.Button(master, text='Compare', command=compare_run, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
