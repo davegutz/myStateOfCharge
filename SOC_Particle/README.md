@@ -68,6 +68,8 @@ The initial battery used to test the system, and use on RV trips, was the Battle
 
 [Linux Software Installation](doc/InstallationLinux.md)
 
+[macOS Software Installation](doc/InstallationMacOS.md)
+
 ## Requirements
 In the spirit of Software Engineering principles, I document perceived requirements.   Many of these arose out of testing.
 
