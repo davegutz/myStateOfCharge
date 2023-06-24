@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include "application.h"
+#include "local_config.h"
 
 // you can exclude onewire_search by defining that to 0
 #ifndef ONEWIRE_SEARCH
@@ -89,9 +90,10 @@ private:
       return GPIO_ReadInputDataBit(PIN_MAP[_pin].gpio_peripheral, PIN_MAP[_pin].gpio_pin);
     }
   #endif
+
   // Assume all other platforms are STM32F2xx until proven otherwise
   // #elif PLATFORM_ID == 6 || PLATFORM_ID == 8 || PLATFORM_ID == 10 // Photon(P0),P1,Electron
-  #ifdef CONFIG_PHOTON
+  #if defined(CONFIG_PHOTON)
     // Fast pin access for STM32F2xx microcontroller
     STM32_Pin_Info* PIN_MAP = HAL_Pin_Map(); // Pointer required for highest access speed
 
@@ -120,8 +122,9 @@ private:
       // the HAL_GPIO_Read function.
       return HAL_GPIO_Read(_pin);
     }
+  #endif
 
-  #else
+  #if defined(ARGON)
 
     inline void digitalWriteFastLow() {
       pinResetFast(_pin);
@@ -147,6 +150,34 @@ private:
       return pinReadFast(_pin);
     }
   #endif
+
+  #if defined(CONFIG_PHOTON2)
+
+    inline void digitalWriteFastLow() {
+      pinResetFast(_pin);
+    }
+
+    inline void digitalWriteFastHigh() {
+      pinSetFast(_pin);
+    }
+
+    inline void pinModeFastOutput(void){
+      // This could probably be speed up by digging a little deeper past
+      // the HAL_Pin_Mode function.
+      HAL_Pin_Mode(_pin, OUTPUT);
+    }
+
+    inline void pinModeFastInput(void){
+      // This could probably be speed up by digging a little deeper past
+      // the HAL_Pin_Mode function.
+      HAL_Pin_Mode(_pin, INPUT);
+    }
+
+    inline uint8_t digitalReadFast(void){
+      return pinReadFast(_pin);
+    }
+  #endif
+
 /**************End conditional fast pin access for Core and Photon*************/
 
 #if ONEWIRE_SEARCH

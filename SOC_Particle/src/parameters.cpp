@@ -41,6 +41,14 @@ SavedPars::SavedPars()
         history_ = hist;
         fault_ = faults;
     }
+#elif defined(CONFIG_PHOTON2)
+    SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
+    {
+        nhis_ = nhis;
+        nflt_ = nflt;
+        history_ = hist;
+        fault_ = faults;
+    }
 #endif
 SavedPars::SavedPars(SerialRAM *ram)
 {

@@ -636,7 +636,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
     
-    #ifdef CONFIG_ARGON
+    #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
 
         if ( sp.debug()==75 ) Serial.printf("BatterySim::calculate: temp_c_, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
             temp_c_, soc_, voc_stat_, chem_.low_voc);

@@ -1,0 +1,354 @@
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2023.06.24 13:55:38 =~=~=~=~=~=~=~=~=~=~=~=
+=  0.060, cap=10000.0
+Sel chg:  Amp->bare 1 NoAmp->bare 1 ib_diff_fa 1 wh_fa 0 wl_fa 0 wv_fa 0 cc_diff_fa_ 50
+ sp.ib_select() 0 ib_sel_stat 0 vb_sel_stat 1 tb_sel_stat 1 vb_fail 0 Tb_fail 0
+  fake 0 ibss 0 ibssl 1 vbss 1 vbssl 1 tbss 1  tbssl 1 latched_fail 1 latched_fail_fake 0
+  preserving 0
+Small reset
+soft reset...
+Pr;echo: Pr, 4
+echo: Pr, 0
+
+saved parameters (sp):
+             defaults    current EERAM values
+ inj amp  0.000    0.000 *Xa<> A pk
+ cut_gn_slr  1.000    1.000 *Sk<>
+ debug  0  0 *v<>
+ delta_q       0.0        0.0 *DQ<>
+ dq_sim        0.0        0.0 *Ca<>, *Cm<>, C
+ inj frq  0.000    0.000 *Xf<> r/s
+ hys_scale       1.000      1.000 *Sh<>
+ Ib_bias_all  0.000    0.000 *Di<> A
+ bias_amp -0.940   -0.940 *DA<>
+ bias_noa -0.170   -0.170 *DB<>
+ ib_scale_amp  0.968    0.968 *SA<>
+ ib_scale_noa  1.016    1.016 *SB<>
+ ib_select 0  0 *s<> -1=noa, 0=auto, 1=amp
+ iflt                           0 flt ptr
+ inj_bias  0.000    0.000 *Xb<> A
+ isum                           -1 tbl ptr
+ modeling 247  247 *Xm<>
+ mon chem            1          1 *Bm<> 0=Battleborn, 1=CHINS, 2=Spare
+ preserving 0  0 *Xm<>
+ nP              2.000      2.000 *BP<> eg '2P1S'
+ nS              1.000      1.000 *BS<> eg '2P1S'
+ shunt_gn_slr  1.000    1.000 *SG
+ sim chem            1          1 *Bs<>
+ s_cap_mon  1.000    1.000 *SQ<>
+ s_cap_sim  1.000    1.000 *Sq<>
+ Tb_bias_hdwe  0.000    0.000 *Dt<> dg C
+ time_now 946684833 Sat Jan  1 00:00:33 2000 *U<> Unix time
+ type inj 0  0 *Xt<> 1=sin, 2=sq, 3=tri, 4=1C, 5=-1C, 8=cos
+ t_last 25.00  25.00 dg C
+ t_last_sim 25.00  25.00 dg C
+ Vb_bias_hdwe   1.800    1.800 *Dv<>,*Dc<> V
+ sclr vb         1.017      1.017 *SV<>
+
+
+command parameters(cp):
+ dc_dc_on 0
+ eframe_mult 20
+ fake_faults 0
+ inf_reset 0
+ model_cutback 1
+ model_saturated 1
+ print_mult 4
+ publishS 0
+ soft_reset 0
+ s_t_sat  1.000
+ tb_bias_mod  0.000
+ write_summary 0
+v1;echo: v1, 4
+echo: v1, 0
+sp.debug 0 to 1
+unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min,
+g20230530_pro2p2_ch, 2000-01-01T00:00:43,        39.508, 2.099,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69962,   0.000383, 1.00000,1.00000,1.00000,0.01400,
+preserving fault buffer
+g20230530_pro2p2_ch, 2000-01-01T00:00:52,        48.023, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69962,   0.000383, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:01:00,        56.466, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69962,   0.000383, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:01:09,        64.908, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69949,   0.000514, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:01:17,        73.350, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69949,   0.000514, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:01:25,        81.792, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69949,   0.000514, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:01:34,        90.236, 2.096,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69949,   0.000514, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:01:42,        98.681, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69949,   0.000514, 1.00000,1.00000,1.00000,0.01400,
+Dg20230530_pro2p2_ch, 2000-01-01T00:01:51,       107.123, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69940,   0.000601, 1.00000,1.00000,1.00000,0.01400,
+r100;echo: Dr100, 4
+echo: Dr100, 0
+ReadSensors 100 to 100
+g20230530_pro2p2_ch, 2000-01-01T00:01:59,       115.565, 2.101,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69940,   0.000601, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:02:08,       124.023, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69940,   0.000601, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:02:16,       132.466, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69940,   0.000601, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:02:25,       140.908, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69940,   0.000601, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:02:33,       149.350, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69936,   0.000644, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:02:41,       157.792, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69936,   0.000644, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:02:50,       166.234, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69936,   0.000644, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:02:58,       174.675, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69936,   0.000644, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:03:07,       183.117, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69936,   0.000644, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:03:15,       191.559, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69933,   0.000666, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:03:24,       200.001, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69933,   0.000666, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:03:32,       208.444, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69933,   0.000666, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:03:41,       216.886, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69933,   0.000666, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:03:49,       225.328, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69933,   0.000666, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:03:57,       233.769, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69933,   0.000673, 1.00000,1.00000,1.00000,0.01400,
+Drg20230530_pro2p2_ch, 2000-01-01T00:04:06,       242.212, 2.095,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69933,   0.000673, 1.00000,1.00000,1.00000,0.01400,
+3000;echo: Dr3000, 4
+echo: Dr3000, 0
+ReadSensors 100 to 3000
+g20230530_pro2p2_ch, 2000-01-01T00:04:16,       250.654, 2.100,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69933,   0.000673, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:04:33,       265.395, 4.189,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69979,   0.000210, 1.00000,1.00000,1.00000,0.01400,
+DP1;echo: DP1, 4
+echo: DP1, 0
+Print int 4 to 1
+g20230530_pro2p2_ch, 2000-01-01T00:04:46,       278.025, 4.193,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69988,   0.000115, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:04:50,       282.218, 4.197,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69990,   0.000101, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:04:54,       286.415, 4.252,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69991,   0.000094, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:04:59,       290.667, 4.252,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69991,   0.000087, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:05:03,       294.919, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69992,   0.000079, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:05:07,       299.170, 4.252,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:05:11,       303.422, 4.252,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:05:16,       307.674, 4.252,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:05:20,       311.926, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:05:24,       316.177, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:05:28,       320.428, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:05:33,       324.679, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:05:37,       328.930, 4.253,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:05:41,       333.183, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:05:45,       337.434, 4.208,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:05:50,       341.642, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:05:54,       345.893, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:05:58,       350.144, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:06:02,       354.395, 4.253,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:06:07,       358.648, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:06:11,       362.899, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:06:15,       367.150, 4.252,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:06:19,       371.402, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:06:24,       375.653, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:06:28,       379.904, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:06:32,       384.155, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:06:36,       388.406, 4.252,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:06:41,       392.658, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:06:45,       396.909, 4.252,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:06:49,       401.161, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:06:53,       405.412, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:06:58,       409.663, 4.253,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:07:02,       413.916, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:07:06,       418.167, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:07:10,       422.418, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:07:15,       426.669, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+g20230530_pro2p2_ch, 2000-01-01T00:07:19,       430.920, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+v5;g20230530_pro2p2_ch, 2000-01-01T00:07:23,       435.171, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+Dr010echo: v5, 4
+100;g20230530_pro2p2_ch, 2000-01-01T00:07:27,       439.422, 4.251,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000072, 1.00000,1.00000,1.00000,0.01400,
+echo: Dr010100, 4
+g20230530_pro2p2_ch, 2000-01-01T00:07:32,       443.673, 4.256,   1,  405720, 1,  0,  247,  0, 25.0,14.640,     0.000,     0.000,   -15.000,14.70000,    13.80000,0.00000,14.70000,14.69993,   0.000065, 1.00000,1.00000,1.00000,0.01400,
+echo: v5, 0
+sp.debug 1 to 5
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+echo: Dr010100, 0
+ ? 'h'
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+Doled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+r100oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+;oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+echo: Dr100, 4
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+echo: Dr100, 0
+ReadSensors 3000 to 100
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,
+oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt,  25, 14.64,   0.0,  222, 24.0,222,

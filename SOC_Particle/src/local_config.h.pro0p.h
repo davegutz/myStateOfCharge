@@ -5,6 +5,7 @@
 const String unit = version + "_pro0p";
 #define CONFIG_PHOTON
 #undef CONFIG_ARGON
+#undef CONFIG_PHOTON2
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

@@ -35,7 +35,7 @@ void debug_4(BatteryMonitor *Mon, Sensors *Sen);
 void debug_5(BatteryMonitor *Mon, Sensors *Sen);
 void debug_m7(BatteryMonitor *Mon, Sensors *Sen);
 void debug_12(BatteryMonitor *Mon, Sensors *Sen);
-#ifdef CONFIG_ARGON
+#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     void debug_m13(Sensors *Sen);
     void debug_m23(Sensors *Sen);
     void debug_m24(Sensors *Sen);

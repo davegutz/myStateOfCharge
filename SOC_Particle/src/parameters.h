@@ -168,7 +168,7 @@ public:
     void print_fault_header();
     void print_history_array();
     // put
-    #ifdef CONFIG_PHOTON
+    #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)
         void put_all_dynamic();
         void put_amp(const float input) { amp_ = input; }
         void put_cutback_gain_sclr(const float input) { cutback_gain_sclr_ = input; }

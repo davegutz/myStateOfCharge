@@ -58,18 +58,16 @@
 #define F_MAX_T_TEMP          18.0      // Maximum call update time filters (18.0)
 #define F_W_T                 0.05      // Temperature filter wn, r/s (0.05)   
 #define F_Z_T                 0.80      // Temperature filter zeta (0.80)
-#ifdef CONFIG_PHOTON
+#if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)
     #ifdef DEBUG_INIT
         #define NSUM              15       // Number of saved SRAM summaries (55)
     #else
         #define NSUM              40       // Number of saved SRAM summaries (90)   TODO:   Use PLATFORM_ID around verbose hogs
                                             // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
     #endif
-#else
-    #ifdef CONFIG_ARGON
+#elif defined(CONFIG_ARGON)
         #define NSUM              2200      // Number of saved SRAM summaries (2300)
                                         //If too large, will get compile error 'Insufficient room for .data and .bss sections!' or flashing red
-    #endif
 #endif
 #define NFLT                  7         // Number of saved SRAM/EERAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)
 #define NHIS                  56        // Number of saved SRAM history data slices.  If too large, will get compile error BACKUPSRAM (56)

@@ -88,7 +88,7 @@ public:
   void put(const Flt_st input);
   void put_nominal();
 
-  #ifdef CONFIG_PHOTON
+  #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)
     void put_t(const unsigned long value)         { t = value; };
     void put_Tb_hdwe(const int16_t value)         { Tb_hdwe = value; };
     void put_vb_hdwe(const int16_t value)         { vb_hdwe = value; };
@@ -105,8 +105,7 @@ public:
     void put_e_wrap_filt(const int16_t value)     { e_wrap_filt = value; };
     void put_fltw(const uint16_t value)           { fltw = value; };
     void put_falw(const uint16_t value)           { falw = value; };
-  #else
-  #ifdef CONFIG_ARGON
+  #elif defined(CONFIG_ARGON)
     void put_t()            { rP_->put(t_eeram_.a16, t); };
     void put_Tb_hdwe()      { rP_->put(Tb_hdwe_eeram_.a16, Tb_hdwe); };
     void put_vb_hdwe()      { rP_->put(vb_hdwe_eeram_.a16, vb_hdwe); };
@@ -139,7 +138,6 @@ public:
     void put_e_wrap_filt(const int16_t value)     { rP_->put(e_wrap_filt_eeram_.a16, value);  e_wrap_filt = value; };
     void put_fltw(const uint16_t value)           { rP_->put(fltw_eeram_.a16, value);         fltw = value; };
     void put_falw(const uint16_t value)           { rP_->put(falw_eeram_.a16, value);         falw = value; };
-  #endif
   #endif
 
 protected:

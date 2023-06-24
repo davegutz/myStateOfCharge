@@ -3,7 +3,7 @@
 /******************************************************/
 
 #include "Particle.h"
-#line 1 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 1 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/src/SOC_Particle.ino"
 /*
  * Project SOC_Photon
   * Description:
@@ -56,25 +56,29 @@
 //
 // See README.md
 */
-// This works when I'm using two platforms:   PHOTON = 6 and ARGON = 12
+// This works when I'm using two platforms:   PHOTON = 6 and ARGON = 12 and PHOTON2 = 
 void setup();
 void loop();
-#line 54 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Photon/src/SOC_Photon.ino"
+#line 54 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/src/SOC_Particle.ino"
 #ifndef PLATFORM_ID
   #define PLATFORM_ID 13
 #endif
 
 #include "constants.h"
 // Prevent mixing up local_config files (still could sneak soc0p through as pro0p)
-#ifdef CONFIG_PHOTON
+#if defined(CONFIG_PHOTON)
   #undef ARDUINO
   #if (PLATFORM_ID > 9)
     #error "copy local_config.xxxx.h to local_config.h"
   #endif
-#endif
-#ifdef CONFIG_ARGON
+#elif defined(CONFIG_ARGON)
   #undef ARDUINO
   #if (PLATFORM_ID < 9)
+    #error "copy local_config.xxxx.h to local_config.h"
+  #endif
+#elif defined(CONFIG_PHOTON2)
+  #undef ARDUINO
+  #if (PLATFORM_ID < 12)
     #error "copy local_config.xxxx.h to local_config.h"
   #endif
 #endif
@@ -90,7 +94,7 @@ void loop();
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
 
-#ifdef CONFIG_ARGON
+#if defined(CONFIG_ARGON)
   #include "hardware/SerialRAM.h"
   SerialRAM ram;
   #ifdef USE_BLE
@@ -123,7 +127,7 @@ String hm_string = "00:00";     // time, hh:mm
 Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_SSD1306 *display;      // Main OLED display
 
-#ifdef CONFIG_ARGON
+#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
   #ifdef USE_BLE
   // First parameter is the transmit buffer size, second parameter is the receive buffer size
   BleSerialPeripheralStatic<32, 256> bleSerial;
@@ -139,7 +143,7 @@ void setup()
 
   // Serial
   // Serial.blockOnOverrun(false);  doesn't work
-  Serial.begin(115200);
+  Serial.begin(230400);
   Serial.flush();
   delay(1000);          // Ensures a clean display on Serial startup on CoolTerm
   Serial.println("Hi!");
@@ -300,7 +304,7 @@ void loop()
   summarizing = Summarize->update(millis(), false);
   summarizing = summarizing || boot_summ;
 
-  #ifdef CONFIG_ARGON
+  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     #ifdef USE_BLE
     // This must be called from loop() on every call to loop.
     bleSerial.loop();
@@ -400,6 +404,7 @@ void loop()
   }  // end read (high speed frame)
 
   // OLED and Bluetooth display drivers.   Also convenient update time for saving parameters (remember)
+  #ifndef CONFIG_PHOTON2
   if ( display_and_remember )
   {
     oled_display(display, Sen, Mon);
@@ -408,8 +413,8 @@ void loop()
       // Save EERAM dynamic parameters.  Saves critical few state parameters
       sp.put_all_dynamic();
     #endif
-
   }
+  #endif
 
   // Discuss things with the user
   // When open interactive serial monitor such as CoolTerm

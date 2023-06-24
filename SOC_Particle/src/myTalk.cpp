@@ -1315,20 +1315,20 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   // Serial.printf("   v7: EKF solver init\n");
   // Serial.printf("   v8: ChargeTransfer SS init\n");
   Serial.printf("  v12: EKF\n");
-  #ifdef CONFIG_ARGON
+  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     Serial.printf(" v-13: ib_dscn\n");
   #endif
   Serial.printf("  v14: vshunt and Ib raw\n");
   Serial.printf("  v15: vb raw\n");
   // Serial.printf("  v16: Tb\n");
-  #ifdef CONFIG_ARGON
+  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     Serial.printf(" v-23: Vb_hdwe_ac\n");
     Serial.printf(" v-24: Vb_hdwe_ac, Ib_hdwe\n");
   #endif
   // Serial.printf("  v34: EKF detail\n");
   // Serial.printf("  v35: ChargeTransfer balance\n");
   // Serial.printf("  v37: EKF short\n");
-  #ifdef CONFIG_ARGON
+  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     Serial.printf("  v75: voc_low check mod\n");
     Serial.printf("  v76: vb model\n");
     Serial.printf("  v78: Batt model sat\n");
