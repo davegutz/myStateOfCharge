@@ -173,7 +173,7 @@ class ExTarget:
             print('version', self.version, 'key', self.key)
         else:
             self.file_txt = create_file_txt(name_override, self.unit, self.battery)
-            self.key = create_file_key(name_override, self.unit, self.battery)
+            self.key = create_file_key(self.version, self.unit, self.battery)
         self.file_path = os.path.join(self.version_path, self.file_txt)
         self.update_file_label()
         self.file_exists = os.path.isfile(self.file_path)
@@ -388,6 +388,7 @@ def grab_reset():
 def grab_start():
     add_to_clip_board(start.get())
     save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data')
+    save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data as')
     start_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
@@ -435,6 +436,7 @@ def option_handler(*args):
     Test.create_file_path_and_key()
     Ref.create_file_path_and_key()
     save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data')
+    save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data as')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
@@ -483,6 +485,7 @@ def save_data():
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
         save_data_button.config(bg='green', activebackground='green', fg='red', activeforeground='red', text='data saved')
+        save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='data saved')
         shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
         try:
             os.remove(empty_csv_path.get())
@@ -519,7 +522,7 @@ def save_data_as():
                 Test.create_file_path_and_key(name_override=new_file_txt)
                 Test.label.config(text=Test.file_txt)
                 print('Test.file_path', Test.file_path)
-        if os.path.getsize(Test.file_path) > 0:  # bytes
+        if os.path.isfile(Test.file_path) and os.path.getsize(Test.file_path) > 0:  # bytes
             confirmation = tk.messagebox.askyesno('query overwrite', 'File exists:  overwrite?')
             if confirmation is False:
                 print('reset and use clear')
@@ -527,7 +530,8 @@ def save_data_as():
                 return
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
-        save_data_button.config(bg='green', activebackground='green', fg='red', activeforeground='red', text='data saved')
+        save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='data saved')
+        save_data_as_button.config(bg='green', activebackground='green', fg='red', activeforeground='red', text='data saved as')
         shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
         try:
             os.remove(empty_csv_path.get())
