@@ -54,6 +54,8 @@ public:
   double delta_q() { return(*sp_delta_q_); };
   double delta_q_abs(){ return (delta_q_abs_); };
   double delta_q_inf() { return(delta_q_inf_); };
+  double delta_q_neg(){ return (delta_q_neg_); };
+  double delta_q_pos(){ return (delta_q_pos_); };
   uint8_t mod_code() { return (*(chem_.sp_mod_code)); };
   virtual void pretty_print();
   double q(){ return (q_); };
@@ -66,12 +68,16 @@ public:
   float soc_min() { return(soc_min_); };
   boolean sat() { return(sat_); };
   float t_last() { return(*sp_t_last_); };
+  double time_neg() { return(time_neg_); };
+  double time_pos() { return(time_pos_); };
   virtual float vsat(void) = 0;
 protected:
   boolean resetting_ = false;  // Sticky flag to coordinate user testing of coulomb counters, T=performing an external reset of counter
   double coul_eff_;   // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
   double delta_q_abs_;// Total charge book-kept since reset, not reset on saturation, C
   double delta_q_inf_;// Charge since initialized, C
+  double delta_q_neg_;// Total negative charge book-kept since reset, not reset on saturation, C
+  double delta_q_pos_;// Total positive charge book-kept since reset, not reset on saturation, C
   double q_;          // Present charge available to use, except q_min_, C
   double q_capacity_; // Saturation charge at temperature, C
   double q_cap_rated_;// Rated capacity at t_rated_, saved for future scaling, C
@@ -85,6 +91,8 @@ protected:
   double *sp_delta_q_;// Charge since saturated, C
   float *sp_t_last_;  // Last battery temperature for rate limit memory, deg C
   float t_rlim_;      // Tb rate limit, deg C / s
+  double time_neg_;   // Time spent accumulating delta_q_neg_, s
+  double time_pos_;   // Time spent accumulating delta_q_pos_, s
   Chemistry chem_;    // Chemistry
 };
 

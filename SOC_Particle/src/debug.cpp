@@ -134,15 +134,27 @@ void debug_h(BatteryMonitor *Mon, Sensors *Sen)
 void debug_q(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("ib_amp_fail %d\nib_noa_fail %d\nvb_fail %d\nTb%7.3f\nvb%7.3f\nvoc%7.3f\nvoc_filt%7.3f\nvsat%7.3f\nib%7.3f\nsoc_m%8.4f\n\
-soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling = %d\ndq_inf/dq_abs%10.1f/%10.1f = %8.4f\n",
+soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling = %d\n",
     Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
     Mon->temp_c(), Mon->vb(), Mon->voc(), Mon->voc_filt(), Mon->vsat(), Mon->ib(), Sen->Sim->soc(), Mon->soc_ekf(),
-    Mon->soc(), Mon->soc_min(), Mon->soc_inf(), sp.modeling(), Mon->delta_q_inf(), Mon->delta_q_abs(), Mon->delta_q_inf()/Mon->delta_q_abs());
+    Mon->soc(), Mon->soc_min(), Mon->soc_inf(), sp.modeling());
+  Serial.printf("dq_inf/dq_abs%10.1f/%10.1f = %8.4f coul_eff*=%9.6f, DAB+=%9.6f\nDQn%10.1f Tn%10.1f DQp%10.1f Tp%10.1f\n",
+    Mon->delta_q_inf(), Mon->delta_q_abs(), Mon->delta_q_inf()/Mon->delta_q_abs(),
+    -Mon->delta_q_neg()/Mon->delta_q_pos(),
+    -(Mon->delta_q_neg()/Mon->time_neg() + Mon->delta_q_pos()/Mon->time_pos()),
+    Mon->delta_q_neg(), Mon->time_neg(), Mon->delta_q_pos(), Mon->time_pos());
+
   Serial1.printf("ib_amp_fail %d\nib_noa_fail %d\nvb_fail %d\nTb%7.3f\nvb%7.3f\nvoc%7.3f\nvoc_filt%7.3f\nvsat%7.3f\nib%7.3f\nsoc_m%8.4f\n\
-soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling = %d\ndq_inf/dq_abs%10.1f/%10.1f = %8.4f\n",
-      Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
-      Mon->temp_c(), Mon->vb(), Mon->voc(), Mon->voc_filt(), Mon->vsat(), Mon->ib(), Sen->Sim->soc(), Mon->soc_ekf(),
-    Mon->soc(), Mon->soc_min(), Mon->soc_inf(), sp.modeling(), Mon->delta_q_inf(), Mon->delta_q_abs(), Mon->delta_q_inf()/Mon->delta_q_abs());
+soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling = %d\n",
+    Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
+    Mon->temp_c(), Mon->vb(), Mon->voc(), Mon->voc_filt(), Mon->vsat(), Mon->ib(), Sen->Sim->soc(), Mon->soc_ekf(),
+    Mon->soc(), Mon->soc_min(), Mon->soc_inf(), sp.modeling());
+  Serial1.printf("dq_inf/dq_abs%10.1f/%10.1f = %8.4f coul_eff*=%9.6f, DAB+=%9.6f\nDQn%10.1f Tn%10.1f DQp%10.1f Tp%10.1f\n",
+    Mon->delta_q_inf(), Mon->delta_q_abs(), Mon->delta_q_inf()/Mon->delta_q_abs(),
+    -Mon->delta_q_neg()/Mon->delta_q_pos(),
+    -(Mon->delta_q_neg()/Mon->time_neg() + Mon->delta_q_pos()/Mon->time_pos()),
+    Mon->delta_q_neg(), Mon->time_neg(), Mon->delta_q_pos(), Mon->time_pos());
+
   if ( Sen->Flt->falw() || Sen->Flt->fltw() ) chit("Pf;", QUEUE);
 }
 

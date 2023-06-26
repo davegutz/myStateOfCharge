@@ -124,7 +124,7 @@ private:
     }
   #endif
 
-  #if defined(ARGON)
+  #if defined(CONFIG_ARGON)
 
     inline void digitalWriteFastLow() {
       pinResetFast(_pin);

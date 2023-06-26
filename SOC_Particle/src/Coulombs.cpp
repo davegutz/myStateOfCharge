@@ -53,6 +53,8 @@ void Coulombs::pretty_print(void)
   Serial.printf(" coul_eff%9.5f\n", coul_eff_);
   Serial.printf(" delta_q%9.1f, C\n", *sp_delta_q_);
   Serial.printf(" delta_q_inf/delta_q_abs%9.1f / %9.1f = %8.4f, C\n", delta_q_inf_, delta_q_abs_, delta_q_inf_/delta_q_abs_);
+  Serial.printf(" delta_q_neg%9.1f C, time_neg%9.1f s\n", delta_q_neg_, time_neg_);
+  Serial.printf(" delta_q_pos%9.1f C, time_pos%9.1f s\n", delta_q_pos_, time_pos_);
   Serial.printf(" mod %s\n", chem_.decode(mod_code()).c_str());
   Serial.printf(" mod_code %d\n", mod_code());
   Serial.printf(" q%9.1f, C\n", q_);
@@ -190,13 +192,27 @@ float Coulombs::count_coulombs(const double dt, const boolean reset_temp, const 
     {
       *sp_delta_q_ = max(min(*sp_delta_q_ + d_delta_q, 0.0), -q_capacity_*1.5);
       delta_q_inf_ += d_delta_q_inf;
+      if ( d_delta_q > 0. )
+      {
+        delta_q_pos_ += d_delta_q;
+        time_pos_ += dt;
+      }
+      else
+      {
+        delta_q_neg_ += d_delta_q;
+        time_neg_ += dt;
+      }
       delta_q_abs_ += abs(d_delta_q_inf) / 2.;
     }
     else
     {
-      delta_q_inf_ = *sp_delta_q_;
       delta_q_abs_ = *sp_delta_q_ / 2.;
+      delta_q_inf_ = *sp_delta_q_;
+      delta_q_neg_ = *sp_delta_q_;
+      delta_q_pos_ = 0.;
       cp.inf_reset = false;
+      time_neg_ = 0.;
+      time_pos_ = 0.;
     }
     // if ( sp.debug()==-24 )Serial.printf("Mon:  charge_curr%7.3f d_delta_q%10.6f delta_q%10.1f temp_lim%7.3f t_last%7.3f\n", charge_curr, d_delta_q, *sp_delta_q_, temp_lim, *sp_t_last_);
     q_ = q_capacity_ + *sp_delta_q_;
