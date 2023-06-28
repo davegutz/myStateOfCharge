@@ -38,7 +38,7 @@ extern SavedPars sp;
 void asap()
 {
   get_string(&cp.asap_str);
-  // if ( cp.token ) Serial.printf("asap:  talk('%s;')\n", cp.input_string.c_str());
+  // if ( cp.token ) Serial.printf("asap:  talk('%s;')\n", cp.input_str.c_str());
 }
 
 // Process chat strings
@@ -47,12 +47,12 @@ void chat()
   if ( cp.soon_str.length() )  // Do SOON first
   {
     get_string(&cp.soon_str);
-    // if ( cp.token ) Serial.printf("chat (SOON):  talk('%s;')\n", cp.input_string.c_str());
+    // if ( cp.token ) Serial.printf("chat (SOON):  talk('%s;')\n", cp.input_str.c_str());
   }
   else  // Do QUEUE only after SOON empty
   {
     get_string(&cp.queue_str);
-    // if ( cp.token ) Serial.printf("chat (QUEUE):  talk('%s;')\n", cp.input_string.c_str());
+    // if ( cp.token ) Serial.printf("chat (QUEUE):  talk('%s;')\n", cp.input_str.c_str());
   }
 }
 
@@ -84,11 +84,11 @@ void get_string(String *source)
     // get the new byte, add to input and check for completion
     char inChar = source->charAt(0);
     source->remove(0, 1);
-    cp.input_string += inChar;
+    cp.input_str += inChar;
     if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
     {
       finish_request();
-      cp.input_string = ">" + cp.input_string;
+      cp.input_str = ">" + cp.input_str;
       break;  // enable reading multiple inputs
     }
   }
@@ -139,12 +139,12 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
 void finish_request(void)
 {
   // Remove whitespace
-  cp.input_string.trim();
-  cp.input_string.replace("\0","");
-  cp.input_string.replace(";","");
-  cp.input_string.replace(",","");
-  cp.input_string.replace(" ","");
-  cp.input_string.replace("=","");
+  cp.input_str.trim();
+  cp.input_str.replace("\0","");
+  cp.input_str.replace(";","");
+  cp.input_str.replace(",","");
+  cp.input_str.replace(" ","");
+  cp.input_str.replace("=","");
   cp.token = true;  // token:  temporarily inhibits while loop until talk() call resets token
 }
 
@@ -167,8 +167,8 @@ void serialEvent()
     // get the new byte:
     char inChar = (char)Serial.read();
 
-    // add it to the cp.input_string:
-    cp.input_string += inChar;
+    // add it to the cp.input_str:
+    cp.input_str += inChar;
 
     // if the incoming character is a newline, set a flag
     // so the main loop can do something about it:
@@ -178,7 +178,7 @@ void serialEvent()
       break;  // enable reading multiple inputs
     }
   }
-  // if ( cp.token ) Serial.printf("serialEvent:  %s\n", cp.input_string.c_str());
+  // if ( cp.token ) Serial.printf("serialEvent:  %s\n", cp.input_str.c_str());
 }
 
 /*
@@ -194,8 +194,8 @@ void serialEvent1()
   {
     // get the new byte:
     char inChar = (char)Serial1.read();
-    // add it to the cp.input_string:
-    cp.input_string += inChar;
+    // add it to the cp.input_str:
+    cp.input_str += inChar;
     // if the incoming character is a newline, set a flag
     // so the main loop can do something about it:
     if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',')
@@ -217,7 +217,7 @@ void talk()
   if (cp.token)
   {
     // Categorize the requests
-    char key = cp.input_string.charAt(0);
+    char key = cp.input_str.charAt(0);
     if ( key == '-' )
       request = ASAP;
     else if ( key == '+' )
@@ -226,7 +226,7 @@ void talk()
       request = SOON;
     else if ( key == '>' )
     {
-      cp.input_string = cp.input_string.substring(1);  // Delete the leading '>'
+      cp.input_str = cp.input_str.substring(1);  // Delete the leading '>'
       request = INCOMING;
     }
     else
@@ -236,39 +236,39 @@ void talk()
     }
 
     // Limited echoing of Serial1 commands available
-    Serial.printf ("echo: %s, %d\n", cp.input_string.c_str(), request);
-    Serial1.printf("echo: %s, %d\n", cp.input_string.c_str(), request);
+    Serial.printf ("echo: %s, %d\n", cp.input_str.c_str(), request);
+    Serial1.printf("echo: %s, %d\n", cp.input_str.c_str(), request);
 
     // Deal with each request
     switch ( request )
     {
       case ( NEW ):  // Defaults to QUEUE
-        // Serial.printf("new:%s,\n", cp.input_string.substring(0).c_str());
-        chit( cp.input_string.substring(0) + ";", QUEUE);
+        // Serial.printf("new:%s,\n", cp.input_str.substring(0).c_str());
+        chit( cp.input_str.substring(0) + ";", QUEUE);
         break;
 
       case ( ASAP ):
-        // Serial.printf("asap:%s,\n", cp.input_string.substring(1).c_str());
-        chit( cp.input_string.substring(1)+";", ASAP);
+        // Serial.printf("asap:%s,\n", cp.input_str.substring(1).c_str());
+        chit( cp.input_str.substring(1)+";", ASAP);
         break;
 
       case ( SOON ):
-        // Serial.printf("soon:%s,\n", cp.input_string.substring(1).c_str());
-        chit( cp.input_string.substring(1)+";", SOON);
+        // Serial.printf("soon:%s,\n", cp.input_str.substring(1).c_str());
+        chit( cp.input_str.substring(1)+";", SOON);
         break;
 
       case ( QUEUE ):
-        // Serial.printf("queue:%s,\n", cp.input_string.substring(1).c_str());
-        chit( cp.input_string.substring(1)+";", QUEUE);
+        // Serial.printf("queue:%s,\n", cp.input_str.substring(1).c_str());
+        chit( cp.input_str.substring(1)+";", QUEUE);
         break;
 
       case ( INCOMING ):
-        // Serial.printf("IN:%s,\n", cp.input_string.c_str());
-        switch ( cp.input_string.charAt(0) )
+        // Serial.printf("IN:%s,\n", cp.input_str.c_str());
+        switch ( cp.input_str.charAt(0) )
         {
 
           case ( 'b' ):  // Fault buffer
-            switch ( cp.input_string.charAt(1) )
+            switch ( cp.input_str.charAt(1) )
             {
               case ( 'd' ):  // bd: fault buffer dump
                 Serial.printf("\n");
@@ -284,57 +284,57 @@ void talk()
                 break;
 
               default:
-                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+                Serial.print(cp.input_str.charAt(1)); Serial.println(" ? 'h'");
             }
             break;
 
           case ( 'B' ):  // B: battery
-            switch ( cp.input_string.charAt(1) )
+            switch ( cp.input_str.charAt(1) )
             {
 
               case ( 'm' ):  //   Bm<>:  mon_chm
-                Serial.printf("Print mon_chm %d to ", sp.mon_chm);
-                sp.put_mon_chm(max(min(cp.input_string.substring(2).toInt(), UINT8_MAX), 0));
-                Serial.printf("%d\n", sp.mon_chm);
+                Serial.printf("Print mon_chm %d to ", sp.mon_chm());
+                sp.put_mon_chm(max(min(cp.input_str.substring(2).toInt(), UINT8_MAX), 0));
+                Serial.printf("%d\n", sp.mon_chm());
                 break;
 
               case ( 'P' ):  // BP<>:  Number of parallel batteries in bank, e.g. '2P1S'
-                FP_in = cp.input_string.substring(2).toFloat();
+                FP_in = cp.input_str.substring(2).toFloat();
                 if ( FP_in>0 )  // Apply crude limit to prevent user error
                 {
-                  Serial.printf("nP%5.2f to", sp.nP);
+                  Serial.printf("nP%5.2f to", sp.nP());
                   sp.put_nP(FP_in);
-                  Serial.printf("%5.2f\n", sp.nP);
+                  Serial.printf("%5.2f\n", sp.nP());
                 }
                 else
                   Serial.printf("err%5.2f; <=0\n", FP_in);
                 break;
 
               case ( 'S' ):  // BS<>:  Number of series batteries in bank, e.g. '2P1S'
-                FP_in = cp.input_string.substring(2).toFloat();
+                FP_in = cp.input_str.substring(2).toFloat();
                 if ( FP_in>0 )  // Apply crude limit to prevent user error
                 {
-                  Serial.printf("nP%5.2f to", sp.nS);
+                  Serial.printf("nP%5.2f to", sp.nS());
                   sp.put_nS(FP_in);
-                  Serial.printf("%5.2f\n", sp.nS);
+                  Serial.printf("%5.2f\n", sp.nS());
                 }
                 else
                   Serial.printf("err%5.2f; <=0\n", FP_in);
                 break;
 
               case ( 's' ):  //   Bs<>:  sim_chm
-                Serial.printf("Print sim_chm %d to ", sp.sim_chm);
-                sp.put_sim_chm(max(min(cp.input_string.substring(2).toInt(), UINT8_MAX), 0));
-                Serial.printf("%d\n", sp.sim_chm);
+                Serial.printf("Print sim_chm %d to ", sp.sim_chm());
+                sp.put_sim_chm(max(min(cp.input_str.substring(2).toInt(), UINT8_MAX), 0));
+                Serial.printf("%d\n", sp.sim_chm());
                 break;
 
               default:
-                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+                Serial.print(cp.input_str.charAt(1)); Serial.println(" ? 'h'");
             }
             break;
 
           case ( 'P' ):  // P: print
-            switch ( cp.input_string.charAt(1) )
+            switch ( cp.input_str.charAt(1) )
             {
 
               case ( 'S' ):  // PS: print saved pars
@@ -343,183 +343,183 @@ void talk()
                 break;
 
               default:
-                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+                Serial.print(cp.input_str.charAt(1)); Serial.println(" ? 'h'");
             }
             break;
 
           case ( 'R' ):  // R: reset
-            switch ( cp.input_string.charAt(1) )
+            switch ( cp.input_str.charAt(1) )
             {
 
               case ( 'S' ):  // RS: reset saved pars
-                sp.nominal();
+                sp.reset_pars();
                 sp.pretty_print(true);
                 break;
 
               default:
-                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+                Serial.print(cp.input_str.charAt(1)); Serial.println(" ? 'h'");
             }
             break;
 
           case ( 'D' ):
-            switch ( cp.input_string.charAt(1) )
+            switch ( cp.input_str.charAt(1) )
             {
               case ( 'A' ):  // * DA<>:  Amp sensor bias
-                Serial.printf("sp.Ib_bias_amp%7.3f to", sp.Ib_bias_amp);
-                sp.put_Ib_bias_amp(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.Ib_bias_amp);
+                Serial.printf("sp.Ib_bias_amp%7.3f to", sp.Ib_bias_amp());
+                sp.put_Ib_bias_amp(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.Ib_bias_amp());
                 break;
 
               case ( 'B' ):  // * DB<>:  No Amp sensor bias
-                Serial.printf("sp.ib_bias_noa%7.3f to", sp.Ib_bias_noa);
-                sp.put_Ib_bias_noa(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.Ib_bias_noa);
+                Serial.printf("sp.ib_bias_noa%7.3f to", sp.Ib_bias_noa());
+                sp.put_Ib_bias_noa(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.Ib_bias_noa());
                 break;
 
               case ( 'c' ):  // * Dc<>:  Vb bias
-                Serial.printf("sp.Vb_bias_hdwe%7.3f to", sp.Vb_bias_hdwe);
-                sp.put_Vb_bias_hdwe(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.Vb_bias_hdwe);
+                Serial.printf("sp.Vb_bias_hdwe%7.3f to", sp.Vb_bias_hdwe());
+                sp.put_Vb_bias_hdwe(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.Vb_bias_hdwe());
                 break;
 
               case ( 'E' ):  //   DE<>:  EKF execution frame multiplier
                 Serial.printf("Eframe mult %d to ", cp.eframe_mult);
-                cp.assign_eframe_mult(max(min(cp.input_string.substring(2).toInt(), UINT8_MAX), 0));
+                cp.assign_eframe_mult(max(min(cp.input_str.substring(2).toInt(), UINT8_MAX), 0));
                 Serial.printf("%d\n", cp.eframe_mult);
                 break;
 
               case ( 'i' ):  // * Di<>:  Bias all current sensors (same way as Da and Db)
-                Serial.printf("sp.ib_bias_all%7.3f to", sp.Ib_bias_all);
-                sp.put_Ib_bias_all(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\nreset\n", sp.Ib_bias_all);
+                Serial.printf("sp.ib_bias_all%7.3f to", sp.Ib_bias_all());
+                sp.put_Ib_bias_all(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\nreset\n", sp.Ib_bias_all());
                 cp.cmd_reset();
                 break;
 
               case ( 'P' ):  //   DP<>:  PRINT multiplier
                 Serial.printf("Print int %d to ", cp.print_mult);
-                cp.assign_print_mult(max(min(cp.input_string.substring(2).toInt(), UINT8_MAX), 0));
+                cp.assign_print_mult(max(min(cp.input_str.substring(2).toInt(), UINT8_MAX), 0));
                 Serial.printf("%d\n", cp.print_mult);
                 break;
 
               case ( 'Q' ):  // * DQ<>:  delta_q
-                Serial.printf("sp.delta_q%7.3f to", sp.delta_q);
-                sp.put_delta_q(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\nreset\n", sp.delta_q);
+                Serial.printf("sp.delta_q%7.3f to", sp.delta_q());
+                sp.put_delta_q(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\nreset\n", sp.delta_q());
                 break;
 
               case ( 't' ):  // * Dt<>:  Temp bias change hardware
-                Serial.printf("sp.Tb_bias_hdwe%7.3f to", sp.Tb_bias_hdwe);
-                sp.put_Tb_bias_hdwe(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\nreset\n", sp.Tb_bias_hdwe);
+                Serial.printf("sp.Tb_bias_hdwe%7.3f to", sp.Tb_bias_hdwe());
+                sp.put_Tb_bias_hdwe(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\nreset\n", sp.Tb_bias_hdwe());
                 cp.cmd_reset();
                 break;
 
               default:
-                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+                Serial.print(cp.input_str.charAt(1)); Serial.println(" ? 'h'");
             }
             break;
 
           case ( 'S' ):
-            switch ( cp.input_string.charAt(1) )
+            switch ( cp.input_str.charAt(1) )
             {
               case ( 'A' ):  // * SA<>:  Amp sensor scalar
-                Serial.printf("sp.ib_bias_amp%7.3f to ", sp.ib_scale_amp);
-                sp.put_ib_scale_amp(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.ib_scale_amp);
+                Serial.printf("sp.ib_bias_amp%7.3f to ", sp.ib_scale_amp());
+                sp.put_ib_scale_amp(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.ib_scale_amp());
                 break;
 
               case ( 'B' ):  // * SB<>:  No Amp sensor scalar
-                Serial.printf("sp.Ib_scale_noa%7.3f to ", sp.ib_scale_noa);
-                sp.put_ib_scale_noa(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.ib_scale_noa);
+                Serial.printf("sp.Ib_scale_noa%7.3f to ", sp.ib_scale_noa());
+                sp.put_ib_scale_noa(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.ib_scale_noa());
                 break;
 
               case ( 'c' ):  // * Sc<>: scale capacity
-                Serial.printf("sp.s_cap_model%7.3f to ", sp.s_cap_model);
-                scale = cp.input_string.substring(2).toFloat();
-                sp.put_s_cap_model(scale);
-                Serial.printf("%7.3f\n", sp.s_cap_model);
+                Serial.printf("sp.s_cap_sim%7.3f to ", sp.s_cap_sim());
+                scale = cp.input_str.substring(2).toFloat();
+                sp.put_s_cap_sim(scale);
+                Serial.printf("%7.3f\n", sp.s_cap_sim());
                 break;
                        
               case ( 'G' ):  // * SG<>:  Shunt gain scalar
-                Serial.printf("sp.shunt_gain_sclr%7.3f to ", sp.shunt_gain_sclr);
-                sp.put_shunt_gain_sclr(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.shunt_gain_sclr);
+                Serial.printf("sp.shunt_gain_sclr%7.3f to ", sp.shunt_gain_sclr());
+                sp.put_shunt_gain_sclr(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.shunt_gain_sclr());
                 break;
            
               case ( 'h' ):  //   Sh<>: scale hysteresis
-                Serial.printf("sp.hys_sale%7.3f to ", sp.hys_scale);
-                sp.put_hys_scale(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.hys_scale);
+                Serial.printf("sp.hys_sale%7.3f to ", sp.hys_scale());
+                sp.put_hys_scale(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.hys_scale());
                 break;
 
               case ( 'k' ):  // * Sk<>:  scale cutback gain for sim rep of BMS
-                scale = cp.input_string.substring(2).toFloat();
-                Serial.printf("sp.cutback_gain_sclr%7.3f to ", sp.cutback_gain_sclr);
+                scale = cp.input_str.substring(2).toFloat();
+                Serial.printf("sp.cutback_gain_sclr%7.3f to ", sp.cutback_gain_sclr());
                 sp.put_cutback_gain_sclr(scale);
-                Serial.printf("%7.3f\n", sp.cutback_gain_sclr);
+                Serial.printf("%7.3f\n", sp.cutback_gain_sclr());
                 break;
             
               case ( 'V' ):  // * SV<>:  Vb sensor scalar
-                Serial.printf("sp.Vb_scale%7.3f to", sp.Vb_scale);
-                sp.put_Vb_scale(cp.input_string.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.Vb_scale);
+                Serial.printf("sp.Vb_scale%7.3f to", sp.Vb_scale());
+                sp.put_Vb_scale(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.Vb_scale());
                 break;
 
               default:
-                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+                Serial.print(cp.input_str.charAt(1)); Serial.println(" ? 'h'");
             }
             break;
 
           case ( 'F' ):  // Fault stuff
-            switch ( cp.input_string.charAt(1) )
+            switch ( cp.input_str.charAt(1) )
             {
 
               case ( 'f' ):  //   Ff<>:  fake faults
-                INT_in = cp.input_string.substring(2).toInt();
-                Serial.printf("cp.fake_faults, sp.ib_select %d, %d to ", cp.fake_faults, sp.ib_select);
+                INT_in = cp.input_str.substring(2).toInt();
+                Serial.printf("cp.fake_faults, sp.ib_select() %d, %d to ", cp.fake_faults, sp.ib_select());
                 cp.fake_faults = INT_in;
                 sp.put_ib_select(INT_in);
-                Serial.printf("%d, %d\n", cp.fake_faults, sp.ib_select);
+                Serial.printf("%d, %d\n", cp.fake_faults, sp.ib_select());
                 break;
 
               default:
-                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+                Serial.print(cp.input_str.charAt(1)); Serial.println(" ? 'h'");
             }
             break;
 
 
           case ( 's' ):  // s<>:  select amp or noa
-            if ( cp.input_string.substring(1).toInt()>0 )
+            if ( cp.input_str.substring(1).toInt()>0 )
             {
               sp.put_ib_select(1);
             }
-            else if ( cp.input_string.substring(1).toInt()<0 )
+            else if ( cp.input_str.substring(1).toInt()<0 )
               sp.put_ib_select(-1);
             else
               sp.put_ib_select(0);
-            Serial.printf("Sig ( -1=noa, 0=auto, 1=amp,) set %d\n", sp.ib_select);
+            Serial.printf("Sig ( -1=noa, 0=auto, 1=amp,) set %d\n", sp.ib_select());
             break;
 
           case ( 'v' ):  // v<>:  verbose level
-            Serial.printf("sp.debug %d to ", sp.debug);
-            sp.put_debug(cp.input_string.substring(1).toInt());
-            Serial.printf("%d\n", sp.debug);
+            Serial.printf("sp.debug %d to ", sp.debug());
+            sp.put_debug(cp.input_str.substring(1).toInt());
+            Serial.printf("%d\n", sp.debug());
             break;
 
           case ( 'V' ):
-            switch ( cp.input_string.charAt(1) )
+            switch ( cp.input_str.charAt(1) )
             {
 
               default:
-                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+                Serial.print(cp.input_str.charAt(1)); Serial.println(" ? 'h'");
             }
             break;
 
           case ( 'W' ):  // W<>:  wait.  Skip
-            if ( cp.input_string.substring(1).length() )
+            if ( cp.input_str.substring(1).length() )
             {
-              INT_in = cp.input_string.substring(1).toInt();
+              INT_in = cp.input_str.substring(1).toInt();
               if ( INT_in > 0 )
               {
                 for ( int i=0; i<INT_in; i++ )
@@ -535,10 +535,10 @@ void talk()
             break;
 
           case ( 'X' ):  // X
-            switch ( cp.input_string.charAt(1) )
+            switch ( cp.input_str.charAt(1) )
             {
               case ( 'd' ):  // Xd<>:  on/off dc-dc charger manual setting
-                if ( cp.input_string.substring(2).toInt()>0 )
+                if ( cp.input_str.substring(2).toInt()>0 )
                   cp.dc_dc_on = true;
                 else
                   cp.dc_dc_on = false;
@@ -546,18 +546,18 @@ void talk()
                 break;
 
               case ( 'm' ):  // Xm<>:  code for modeling level
-                INT_in =  cp.input_string.substring(2).toInt();
+                INT_in =  cp.input_str.substring(2).toInt();
                 if ( INT_in>=0 && INT_in<1000 )
                 {
-                  Serial.printf("modeling %d to ", sp.modeling);
+                  Serial.printf("modeling %d to ", sp.modeling());
                   sp.put_modeling(INT_in);
-                  Serial.printf("%d\n", sp.modeling);
+                  Serial.printf("%d\n", sp.modeling());
                 }
                 else
                 {
                   Serial.printf("err %d, modeling 0-7. 'h'\n", INT_in);
                 }
-                Serial.printf("Modeling %d\n", sp.modeling);
+                Serial.printf("Modeling %d\n", sp.modeling());
                 Serial.printf("tweak_test %d\n", sp.tweak_test());
                 Serial.printf("mod_ib %d\n", sp.mod_ib());
                 Serial.printf("mod_vb %d\n", sp.mod_vb());
@@ -565,70 +565,70 @@ void talk()
                 break;
 
               case ( 'a' ): // Xa<>:  injection amplitude
-                sp.put_amp(cp.input_string.substring(2).toFloat());
-                Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", sp.amp, sp.inj_bias);
+                sp.put_amp(cp.input_str.substring(2).toFloat());
+                Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", sp.amp(), sp.inj_bias());
                 break;
 
               case ( 'b' ): // Xb<>:  injection bias
-                sp.put_inj_bias(cp.input_string.substring(2).toFloat());
-                Serial.printf("Inj_bias set%7.3f\n", sp.inj_bias);
+                sp.put_inj_bias(cp.input_str.substring(2).toFloat());
+                Serial.printf("Inj_bias set%7.3f\n", sp.inj_bias());
                 break;
 
               case ( 'f' ): // Xf<>:  injection freq
-                sp.put_freq(cp.input_string.substring(2).toFloat());
-                Serial.printf("Inj freq set%7.3f\n", sp.freq);
+                sp.put_freq(cp.input_str.substring(2).toFloat());
+                Serial.printf("Inj freq set%7.3f\n", sp.freq());
                 break;
 
               case ( 't' ): // Xt<>:  injection type
-                switch ( cp.input_string.charAt(2) )
+                switch ( cp.input_str.charAt(2) )
                 {
                   case ( 'n' ):  // Xtn:  none
                     sp.put_type(0);
-                    Serial.printf("Set none. sp.type %d\n", sp.type);
+                    Serial.printf("Set none. sp.type %d\n", sp.type());
                     break;
 
                   case ( 's' ):  // Xts:  sine
                     sp.put_type(1);
-                    Serial.printf("Set sin. sp.type %d\n", sp.type);
+                    Serial.printf("Set sin. sp.type %d\n", sp.type());
                     break;
 
                   case ( 'q' ):  // Xtq:  square
                     sp.put_type(2);
-                    Serial.printf("Set square. sp.type %d\n", sp.type);
+                    Serial.printf("Set square. sp.type %d\n", sp.type());
                     break;
 
                   case ( 't' ):  // Xtt:  triangle
                     sp.put_type(3);
-                    Serial.printf("Set tri. sp.type %d\n", sp.type);
+                    Serial.printf("Set tri. sp.type %d\n", sp.type());
                     break;
 
                   case ( 'c' ):  // Xtc:  charge rate
                     sp.put_type(4);
-                    Serial.printf("Set 1C charge. sp.type %d\n", sp.type);
+                    Serial.printf("Set 1C charge. sp.type %d\n", sp.type());
                     break;
 
                   case ( 'd' ):  // Xtd:  discharge rate
                     sp.put_type(5);
-                    Serial.printf("Set 1C disch. sp.type %d\n", sp.type);
+                    Serial.printf("Set 1C disch. sp.type %d\n", sp.type());
                     break;
 
                   case ( 'o' ):  // Xto:  cosine
                     sp.put_type(8);
-                    Serial.printf("Set cos. sp.type %d\n", sp.type);
+                    Serial.printf("Set cos. sp.type %d\n", sp.type());
                     break;
 
                   default:
-                    Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+                    Serial.print(cp.input_str.charAt(1)); Serial.println(" ? 'h'");
                 }
                 break;
 
               case ( 'o' ): // Xo<>:  injection dc offset
-                sp.put_inj_bias(max(min(cp.input_string.substring(2).toFloat(), 18.3), -18.3));
-                Serial.printf("inj_bias set%7.3f\n", sp.inj_bias);
+                sp.put_inj_bias(max(min(cp.input_str.substring(2).toFloat(), 18.3), -18.3));
+                Serial.printf("inj_bias set%7.3f\n", sp.inj_bias());
                 break;
 
               default:
-                Serial.print(cp.input_string.charAt(1)); Serial.println(" ? 'h'");
+                Serial.print(cp.input_str.charAt(1)); Serial.println(" ? 'h'");
             }
             break;
 
@@ -637,12 +637,12 @@ void talk()
             break;
 
           default:
-            Serial.print(cp.input_string.charAt(0)); Serial.println(" ? 'h'");
+            Serial.print(cp.input_str.charAt(0)); Serial.println(" ? 'h'");
             break;
         }
     }
 
-    cp.input_string = "";
+    cp.input_str = "";
     cp.token = false;
   }  // if ( cp.token )
 }
@@ -659,23 +659,23 @@ void talkH()
   Serial.printf("\nc  clear talk, esp '-c;'\n");
 
   Serial.printf("\nB<?> Battery e.g.:\n");
-  Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='LI' [%d]\n", sp.mon_chm, MON_CHEM); 
-  Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='LI' [%d]\n", sp.sim_chm, SIM_CHEM); 
-  Serial.printf(" *BP=  %4.2f.  parallel in bank [%4.2f]'\n", sp.nP, NP); 
-  Serial.printf(" *BS=  %4.2f.  series in bank [%4.2f]'\n", sp.nS, NS); 
+  Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='LI' [%d]\n", sp.mon_chm(), MON_CHEM); 
+  Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='LI' [%d]\n", sp.sim_chm(), SIM_CHEM); 
+  Serial.printf(" *BP=  %4.2f.  parallel in bank [%4.2f]'\n", sp.nP(), NP); 
+  Serial.printf(" *BS=  %4.2f.  series in bank [%4.2f]'\n", sp.nS(), NS); 
 
   Serial.printf("\nD/S<?> Adj e.g.:\n");
-  Serial.printf(" *Di= "); Serial.printf("%6.3f", sp.Ib_bias_all); Serial.printf(": delta all, A [%6.3f]\n", CURR_BIAS_ALL); 
-  Serial.printf(" *DA= "); Serial.printf("%6.3f", sp.Ib_bias_amp); Serial.printf(": delta amp, A [%6.3f]\n", CURR_BIAS_AMP); 
-  Serial.printf(" *DB= "); Serial.printf("%6.3f", sp.Ib_bias_noa); Serial.printf(": delta noa, A [%6.3f]\n", CURR_BIAS_NOA); 
-  Serial.printf(" *SA= "); Serial.printf("%6.3f", sp.ib_scale_amp); Serial.printf(": scale amp [%6.3f]\n", CURR_SCALE_AMP); 
-  Serial.printf(" *SB= "); Serial.printf("%6.3f", sp.ib_scale_noa); Serial.printf(": scale noa [%6.3f]\n", CURR_SCALE_NOA); 
-  Serial.printf(" *Dc= "); Serial.printf("%6.3f", sp.Vb_bias_hdwe); Serial.printf(": delta, V [%6.3f]\n", VOLT_BIAS); 
-  Serial.printf(" *Dt= "); Serial.printf("%6.3f", sp.Tb_bias_hdwe); Serial.printf(": delta hdwe, deg C [%6.3f]\n", TEMP_BIAS); 
-  Serial.printf(" *SG= "); Serial.printf("%6.3f", sp.shunt_gain_sclr); Serial.printf(": sp. scale shunt gains [1]\n"); 
-  Serial.printf(" *Sh= "); Serial.printf("%6.3f", sp.hys_scale); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
-  Serial.printf(" *Sk=  "); Serial.print(sp.cutback_gain_sclr); Serial.println(": Sat mod ctbk sclr"); 
-  Serial.printf(" *SV= "); Serial.printf("%6.3f", sp.Vb_scale); Serial.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
+  Serial.printf(" *Di= "); Serial.printf("%6.3f", sp.Ib_bias_all()); Serial.printf(": delta all, A [%6.3f]\n", CURR_BIAS_ALL); 
+  Serial.printf(" *DA= "); Serial.printf("%6.3f", sp.Ib_bias_amp()); Serial.printf(": delta amp, A [%6.3f]\n", CURR_BIAS_AMP); 
+  Serial.printf(" *DB= "); Serial.printf("%6.3f", sp.Ib_bias_noa()); Serial.printf(": delta noa, A [%6.3f]\n", CURR_BIAS_NOA); 
+  Serial.printf(" *SA= "); Serial.printf("%6.3f", sp.ib_scale_amp()); Serial.printf(": scale amp [%6.3f]\n", CURR_SCALE_AMP); 
+  Serial.printf(" *SB= "); Serial.printf("%6.3f", sp.ib_scale_noa()); Serial.printf(": scale noa [%6.3f]\n", CURR_SCALE_NOA); 
+  Serial.printf(" *Dc= "); Serial.printf("%6.3f", sp.Vb_bias_hdwe()); Serial.printf(": delta, V [%6.3f]\n", VOLT_BIAS); 
+  Serial.printf(" *Dt= "); Serial.printf("%6.3f", sp.Tb_bias_hdwe()); Serial.printf(": delta hdwe, deg C [%6.3f]\n", TEMP_BIAS); 
+  Serial.printf(" *SG= "); Serial.printf("%6.3f", sp.shunt_gain_sclr()); Serial.printf(": sp. scale shunt gains [1]\n"); 
+  Serial.printf(" *Sh= "); Serial.printf("%6.3f", sp.hys_scale()); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
+  Serial.printf(" *Sk=  "); Serial.print(sp.cutback_gain_sclr()); Serial.println(": Sat mod ctbk sclr"); 
+  Serial.printf(" *SV= "); Serial.printf("%6.3f", sp.Vb_scale()); Serial.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
 
   Serial.printf("\nF<?>   Faults\n");
   // Serial.printf("  Fc= "); Serial.printf("%6.3f", Sen->Flt->cc_diff_sclr()); Serial.printf(": sclr cc_diff thr ^ [1]\n"); 
@@ -692,7 +692,7 @@ void talkH()
   Serial.printf("\nR<?>   Reset\n");
   Serial.printf("  RS= "); Serial.printf("SavedPars: Reinitialize saved\n");
 
-  Serial.printf("\nv= "); Serial.print(sp.debug); Serial.println(": verbosity, -128 - +128. [4]");
+  Serial.printf("\nv= "); Serial.print(sp.debug()); Serial.println(": verbosity, -128 - +128. [4]");
   Serial.printf("  -<>: Negative - Arduino plot compatible\n");
 
   Serial.printf("\nW<?> - iters to wait\n");

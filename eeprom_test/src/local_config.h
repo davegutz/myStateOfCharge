@@ -2,12 +2,16 @@
 #define local_config_h
 
 const String unit = "pro1a_20221130b";  // tune hys
+#undef CONFIG_PHOTON
+#define CONFIG_ARGON
+#undef CONFIG_PHOTON2
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
 // Miscelaneous
 #define ASK_DURING_BOOT       1   // Flag to ask for application of this file to * retained adjustements
 #define MODELING              7   // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model    
+#define HYS_SCALE             1.0     // Scalar on hysteresis (1.0)
 
 // Sensor biases
 #define SHUNT_GAIN            -1333.// Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)
@@ -19,6 +23,11 @@ const String unit = "pro1a_20221130b";  // tune hys
 #define VOLT_BIAS             1.8   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
 #define VB_SCALE              1.0   // Scale Vb sensor (* 'SV')
+#define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms (5k6)  100/5.6  = 17.86
+#define SHUNT_AMP_R2          100000.   // Amplifed shunt ADS resistance, ohms (100k) 0.075v  = 1.34 v => 3.3/2+1.34 = 2.99 < 3.3
+#define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
+#define VB_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
+#define NOM_UNIT_CAP          100.    // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
 
 // Battery.  One 12 V 100 Ah battery bank would have RATED_BATT_CAP 100, NS 1, and NP 1
 // Two 12 V 100 Ah series battery bank would have RATED_BATT_CAP 100, NS 2, and NP 1

@@ -14,12 +14,6 @@
 #ifndef _SerialRAM_h
 #define _SerialRAM_h
 
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include "arduino.h"
-#else
-	#include "WProgram.h"
-#endif
-
 const uint16_t MAX_EERAM = 0x07FF;
 
 typedef union {
@@ -58,11 +52,9 @@ public:
 	const T &put(uint16_t idx, const T &t) //Address, data
 	{
 		const uint8_t *ptr = (const uint8_t *)&t;
-		Serial.printf("put write idx %X size %d: ", idx, sizeof(T));
 		write(idx, ptr, sizeof(T)); //Address, data, sizeOfData
 		return t;
 	}
-
 };
 
 

@@ -61,7 +61,7 @@ void setup() {
   Serial.printf("Check corruption\n");
   if ( sp.is_corrupt() ) 
   {
-    sp.nominal();
+    sp.reset_pars();
     Serial.printf("Fixed corruption\n");
   }
   sp.pretty_print(true);
@@ -76,18 +76,18 @@ void loop()
   talk();   // Collect user inputs
 
   static uint16_t count = 0;
-  if ( count==0 )
+  if ( count==100 )
   {
     unsigned int num = 0;
     unsigned long int now = micros();
-    num = sp.read_all();
+    num = sp.load_all();
     unsigned long int then = micros();
-    sp.assign_all();
+    // sp.assign_all();
     float all = ( (then - now) - (micros() - then) ) /1e6;
     Serial.printf("\nread each avg %7.6f s, all %7.6fs\n\n", all/float(num), all);
     sp.mem_print();
   }
-  if (++count == 500) count = 0;
+  if (++count == 200) count = 0;
 
   delay(100);
 
