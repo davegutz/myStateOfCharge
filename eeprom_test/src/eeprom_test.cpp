@@ -18,7 +18,6 @@ void loop();
 #endif
 
 #if (PLATFORM_ID==12)  // Argon only
-  #include "hardware/BleSerialPeripheralRK.h"
   SerialLogHandler logHandler;
 #endif
 
@@ -27,7 +26,6 @@ SerialRAM ram;
 
 #if (PLATFORM_ID==12)  // Argon only
   // First parameter is the transmit buffer size, second parameter is the receive buffer size
-  BleSerialPeripheralStatic<32, 256> bleSerial;
   const unsigned long TRANSMIT_PERIOD_MS = 2000;
   unsigned long lastTransmit = 0;
   int counter = 0;

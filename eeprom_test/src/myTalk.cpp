@@ -24,14 +24,12 @@
 #ifndef ARDUINO
 #include "application.h" // Should not be needed if file .ino or Arduino
 #endif
-#include "retained.h"
 #include "command.h"
 #include "myTalk.h"
 #include "parameters.h"
 #include <math.h>
 
 extern CommandPars cp;          // Various parameters shared at system level
-extern RetainedPars rp;         // Various parameters to be static at system level
 // extern Flt_st mySum[NSUM];      // Summaries for saving charge history
 // extern Flt_st myFlt[NFLT];      // Summaries for saving charge history
 extern SavedPars sp;
@@ -551,7 +549,6 @@ void talk()
                 INT_in =  cp.input_string.substring(2).toInt();
                 if ( INT_in>=0 && INT_in<1000 )
                 {
-                  boolean reset = sp.modeling != INT_in;
                   Serial.printf("modeling %d to ", sp.modeling);
                   sp.put_modeling(INT_in);
                   Serial.printf("%d\n", sp.modeling);

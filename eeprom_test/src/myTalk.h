@@ -23,7 +23,6 @@
 
 #ifndef _MY_TALK_H
 #define _MY_TALK_H
-#include "retained.h"
 
 enum urgency {INCOMING, ASAP, SOON, QUEUE, NEW};
 typedef enum urgency urgency;
