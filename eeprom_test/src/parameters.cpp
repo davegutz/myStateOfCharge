@@ -614,8 +614,8 @@ boolean eSavedPars::is_corrupt()
         get_t_last_model(); num++;
         get_Vb_bias_hdwe(); num++;
         get_Vb_scale(); num++;
-        for ( int i=0; i<nflt_; i++ ){ fault_[i].get();  num++;}
-        for ( int i=0; i<nhis_; i++ ){history_[i].get();  num++;}
+        // for ( int i=0; i<nflt_; i++ ){ fault_[i].get();  num++;}
+        // for ( int i=0; i<nhis_; i++ ){history_[i].get();  num++;}
         return num;
     }
 #endif

@@ -434,18 +434,18 @@ public:
         void get_ihis() { int value; EEPROM.get(ihis_eeprom_, value); ihis_ = value; }
         void get_inj_bias() { float value; EEPROM.get(inj_bias_eeprom_, value); inj_bias_ = value; }
         void get_isum() { int value; EEPROM.get(isum_eeprom_, value); isum_ = value; }
-        void get_modeling() { modeling_ = rP_->read(modeling_eeprom); }
-        void get_mon_chm() { mon_chm_ = rP_->read(mon_chm_eeprom); }
+        void get_modeling() {  uint8_t value; modeling_ = EEPROM.get(modeling_eeprom_, value); }
+        void get_mon_chm() {  uint8_t value; mon_chm_ = EEPROM.get(mon_chm_eeprom_, value); mon_chm_ = value;}
         void get_nP() { float value; EEPROM.get(nP_eeprom_, value); nP_ = value; }
         void get_nS() { float value; EEPROM.get(nS_eeprom_, value); nS_ = value; }
-        void get_preserving() { preserving_ = rP_->read(preserving_eeprom); }
+        void get_preserving() {  uint8_t value; preserving_ = EEPROM.get(preserving_eeprom_, value); preserving_ = value; }
         void get_shunt_gain_sclr() { float value; EEPROM.get(shunt_gain_sclr_eeprom_, value); shunt_gain_sclr_ = value; }
-        void get_sim_chm() { sim_chm_ = rP_->read(sim_chm_eeprom); }
+        void get_sim_chm() { uint8_t value;  sim_chm_ = EEPROM.get(sim_chm_eeprom_, value); sim_chm_ = value; }
         void get_s_cap_mon() { float value; EEPROM.get(s_cap_mon_eeprom_, value); s_cap_mon_ = value; }
         void get_s_cap_sim() { float value; EEPROM.get(s_cap_sim_eeprom_, value); s_cap_sim_ = value; }
         void get_Tb_bias_hdwe() { float value; EEPROM.get(Tb_bias_hdwe_eeprom_, value); Tb_bias_hdwe_ = value; }
         void get_time_now() { time_t value; EEPROM.get(time_now_eeprom_, value); time_now_ = value; Time.setTime(value); }
-        void get_type() { type_ = rP_->read(type_eeprom); }
+        void get_type() { uint8_t value; type_ = EEPROM.get(type_eeprom_, value); type_ = value;}
         void get_t_last() { float value; EEPROM.get(t_last_eeprom_, value); t_last_ = value; }
         void get_t_last_model() { float value; EEPROM.get(t_last_model_eeprom_, value); t_last_model_ = value; }
         void get_Vb_bias_hdwe() { float value; EEPROM.get(Vb_bias_hdwe_eeprom_, value); Vb_bias_hdwe_ = value; }
@@ -532,20 +532,20 @@ public:
         void put_ihis(const int input) { EEPROM.put(ihis_eeprom_, input); ihis_ = input; }
         void put_inj_bias(const float input) { EEPROM.put(inj_bias_eeprom_, input); inj_bias_ = input; }
         void put_isum(const int input) { EEPROM.put(isum_eeprom_, input); isum_ = input; }
-        void put_modeling(const uint8_t input) { rP_->write(modeling_eeprom_, input); modeling_ = input; }
-        void put_mon_chm(const uint8_t input) { rP_->write(mon_chm_eeprom_, input); mon_chm_ = input; }
-        void put_mon_chm() { rP_->write(mon_chm_eeprom_, mon_chm_); }
+        void put_modeling(const uint8_t input) { EEPROM.put(modeling_eeprom_, input); modeling_ = input; }
+        void put_mon_chm(const uint8_t input) { EEPROM.put(mon_chm_eeprom_, input); mon_chm_ = input; }
+        void put_mon_chm() { EEPROM.put(mon_chm_eeprom_, mon_chm_); }
         void put_nP(const float input) { EEPROM.put(nP_eeprom_, input); nP_ = input; }
         void put_nS(const float input) { EEPROM.put(nS_eeprom_, input); nS_ = input; }
-        void put_preserving(const uint8_t input) { rP_->write(preserving_eeprom_, input); preserving_ = input; }
+        void put_preserving(const uint8_t input) { EEPROM.put(preserving_eeprom_, input); preserving_ = input; }
         void put_shunt_gain_sclr(const float input) { EEPROM.put(shunt_gain_sclr_eeprom_, input); shunt_gain_sclr_ = input; }
-        void put_sim_chm(const uint8_t input) { rP_->write(sim_chm_eeprom_, input); sim_chm_ = input; }
-        void put_sim_chm() { rP_->write(sim_chm_eeprom_, sim_chm_); }
+        void put_sim_chm(const uint8_t input) { EEPROM.put(sim_chm_eeprom_, input); sim_chm_ = input; }
+        void put_sim_chm() { EEPROM.put(sim_chm_eeprom_, sim_chm_); }
         void put_s_cap_mon(const float input) { EEPROM.put(s_cap_mon_eeprom_, input); s_cap_mon_ = input; }
         void put_s_cap_sim(const float input) { EEPROM.put(s_cap_sim_eeprom_, input); s_cap_sim_ = input; }
         void put_Tb_bias_hdwe(const float input) { EEPROM.put(Tb_bias_hdwe_eeprom_, input); Tb_bias_hdwe_ = input; }
         void put_time_now(const time_t input) { EEPROM.put(time_now_eeprom_, input); time_now_ = input; Time.setTime(time_now_); }
-        void put_type(const uint8_t input) { rP_->write(type_eeprom_, input); type_ = input; }
+        void put_type(const uint8_t input) { EEPROM.put(type_eeprom_, input); type_ = input; }
         void put_t_last(const float input) { EEPROM.put(t_last_eeprom_, input); t_last_ = input; }
         void put_t_last() { EEPROM.put(t_last_eeprom_, t_last_); }
         void put_t_last_model(const float input) { EEPROM.put(t_last_model_eeprom_, input); t_last_model_ = input; }

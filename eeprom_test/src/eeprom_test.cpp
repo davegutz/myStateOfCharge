@@ -100,7 +100,7 @@ void loop()
   }
   if ( count==120 )
   {
-    Serial.printf("\nsizeof EEPROM %d\n", EEPROM.length());
+    Serial.printf("\n\nsizeof EEPROM %d\n", EEPROM.length());
     unsigned int num = 0;
     unsigned long int now = micros();
     num = esp.load_all();
