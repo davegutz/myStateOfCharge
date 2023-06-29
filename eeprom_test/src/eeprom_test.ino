@@ -31,18 +31,21 @@ SerialRAM ram;
 #include "constants.h"
 #include "parameters.h"
 
+
 extern CommandPars cp;            // Various parameters to be common at system level
 // extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 // extern Flt_st myFlt[NFLT];        // Summaries for saving fault history
 extern SavedPars sp;              // Various parameters to be common at system level
+extern eSavedPars esp;              // Various parameters to be common at system level
 
 // retained Flt_st mySum[NSUM];          // Summaries
 // retained Flt_st myFlt[NFLT];          // Summaries
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level
-#if (PLATFORM_ID==6) // Photon
+#if defined(CONFIG_PHOTON) // Photon
   retained SavedPars sp = SavedPars(&ram);           // Various parameters to be common at system level
-#elif (PLATFORM_ID==12)  // Argon
+#elif defined(CONFIG_ARGON)  // Argon
   SavedPars sp = SavedPars(&ram);           // Various parameters to be common at system level
+  eSavedPars esp = eSavedPars();             // Various parameters to be common at system level
 #endif
 
 void setup() {
@@ -86,6 +89,18 @@ void loop()
     float all = ( (then - now) - (micros() - then) ) /1e6;
     Serial.printf("\nread each avg %7.6f s, all %7.6fs\n\n", all/float(num), all);
     sp.mem_print();
+  }
+  if ( count==120 )
+  {
+    Serial.printf("\nsizeof EEPROM %d\n", EEPROM.length());
+    unsigned int num = 0;
+    unsigned long int now = micros();
+    num = esp.load_all();
+    Serial.printf("num %d\n", num);
+    unsigned long int then = micros();
+    float all = ( (then - now) - (micros() - then) ) /1e6;
+    Serial.printf("\neread each eavg %7.6f s, eall %7.6fs\n\n", all/float(num), all);
+    esp.mem_print();
   }
   if (++count == 200) count = 0;
 

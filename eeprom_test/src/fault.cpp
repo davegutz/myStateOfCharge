@@ -225,6 +225,27 @@ Flt_ram::~Flt_ram(){}
     rP_ = ram;
     nominal();
   }
+  void Flt_ram::instantiate(int *next)
+  {
+    t_eeram_.a16 = *next; *next += sizeof(t);
+    Tb_hdwe_eeram_.a16 = *next; *next += sizeof(Tb_hdwe);
+    vb_hdwe_eeram_.a16 = *next; *next += sizeof(vb_hdwe);
+    ib_amp_hdwe_eeram_.a16 = *next; *next += sizeof(ib_amp_hdwe);
+    ib_noa_hdwe_eeram_.a16 = *next; *next += sizeof(ib_noa_hdwe);
+    Tb_eeram_.a16 = *next; *next += sizeof(Tb);
+    vb_eeram_.a16 = *next; *next += sizeof(vb);
+    ib_eeram_.a16 = *next; *next += sizeof(ib);
+    soc_eeram_.a16 = *next; *next += sizeof(soc);
+    soc_min_eeram_.a16 = *next; *next += sizeof(soc_min);
+    soc_ekf_eeram_.a16 = *next; *next += sizeof(soc_ekf);
+    voc_eeram_.a16 = *next; *next += sizeof(voc);
+    voc_stat_eeram_.a16 = *next; *next += sizeof(voc_stat);
+    e_wrap_filt_eeram_.a16 = *next; *next += sizeof(e_wrap_filt);
+    fltw_eeram_.a16 = *next; *next += sizeof(fltw);
+    falw_eeram_.a16 = *next; *next += sizeof(falw);
+    // rP_ = ram;
+    nominal();
+  }
 #endif
 
 // Save all

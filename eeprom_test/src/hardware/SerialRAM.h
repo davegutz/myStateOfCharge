@@ -15,6 +15,7 @@
 #define _SerialRAM_h
 
 const uint16_t MAX_EERAM = 0x07FF;
+const uint16_t MAX_EEPROM = 4096;
 
 typedef union {
 	uint16_t a16;

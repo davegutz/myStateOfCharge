@@ -445,3 +445,428 @@ void SavedPars::reset_pars()
     put_Vb_bias_hdwe(float(VOLT_BIAS));
     put_Vb_scale(float(VB_SCALE));
  }
+
+
+
+
+
+// class eSavedPars 
+// eSavedPars::eSavedPars()
+// {
+//   nflt_ = int( NFLT ); 
+//   nhis_ = int( NHIS ); 
+// }
+#ifdef CONFIG_PHOTON
+    SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
+    {
+        nhis_ = nhis;
+        nflt_ = nflt;
+        history_ = hist;
+        fault_ = faults;
+    }
+#elif defined(CONFIG_PHOTON2)
+    SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
+    {
+        nhis_ = nhis;
+        nflt_ = nflt;
+        history_ = hist;
+        fault_ = faults;
+    }
+#endif
+eSavedPars::eSavedPars()
+{
+    next_ = 0;
+    #ifdef CONFIG_ARGON
+        // rP_ = ram;
+      nflt_ = int( NFLT ); 
+    nhis_ = int( NHIS ); 
+        // Memory map
+        amp_eeprom_ = next_; next_ += sizeof(amp_);
+        cutback_gain_sclr_eeprom_ = next_; next_ += sizeof(cutback_gain_sclr_);
+        debug_eeprom_ = next_; next_ += sizeof(debug_);
+        delta_q_eeprom_ = next_;  next_ += sizeof(delta_q_);
+        delta_q_model_eeprom_ = next_;  next_ += sizeof(delta_q_model_);
+        freq_eeprom_ = next_; next_ += sizeof(freq_);
+        hys_scale_eeprom_ = next_; next_ += sizeof(hys_scale_);
+        Ib_bias_all_eeprom_ =  next_;  next_ += sizeof(Ib_bias_all_);
+        Ib_bias_amp_eeprom_ =  next_;  next_ += sizeof(Ib_bias_amp_);
+        Ib_bias_noa_eeprom_ =  next_;  next_ += sizeof(Ib_bias_noa_);
+        ib_scale_amp_eeprom_ =  next_;  next_ += sizeof(ib_scale_amp_);
+        ib_scale_noa_eeprom_ =  next_;  next_ += sizeof(ib_scale_noa_);
+        ib_select_eeprom_ =  next_;  next_ += sizeof(ib_select_);
+        iflt_eeprom_ =  next_;  next_ += sizeof(iflt_);
+        ihis_eeprom_ =  next_;  next_ += sizeof(ihis_);
+        inj_bias_eeprom_ =  next_;  next_ += sizeof(inj_bias_);
+        isum_eeprom_ =  next_;  next_ += sizeof(isum_);
+        mon_chm_eeprom_ =  next_;  next_ += sizeof(mon_chm_);
+        modeling_eeprom_ =  next_;  next_ += sizeof(modeling_);
+        nP_eeprom_ = next_; next_ += sizeof(nP_);
+        nS_eeprom_ = next_; next_ += sizeof(nS_);
+        preserving_eeprom_ =  next_;  next_ += sizeof(preserving_);
+        shunt_gain_sclr_eeprom_ = next_;  next_ += sizeof(shunt_gain_sclr_);
+        sim_chm_eeprom_ =  next_;  next_ += sizeof(sim_chm_);
+        s_cap_mon_eeprom_ = next_;  next_ += sizeof(s_cap_mon_);
+        s_cap_sim_eeprom_ = next_;  next_ += sizeof(s_cap_sim_);
+        Tb_bias_hdwe_eeprom_ = next_; next_ += sizeof(Tb_bias_hdwe_);
+        time_now_eeprom_ = next_; next_ += sizeof(time_now_);
+        type_eeprom_ =  next_;  next_ += sizeof(type_);
+        t_last_eeprom_ =  next_;  next_ += sizeof(t_last_);
+        t_last_model_eeprom_ =  next_; next_ += sizeof(t_last_model_);
+        Vb_bias_hdwe_eeprom_ = next_; next_ += sizeof(Vb_bias_hdwe_);
+        Vb_scale_eeprom_ = next_; next_ += sizeof(Vb_scale_);
+        nflt_ = int( NFLT ); 
+        fault_ = new Flt_ram[nflt_];
+        for ( int i=0; i<nflt_; i++ )
+        {
+            fault_[i].instantiate(&next_);
+        }
+        nhis_ = int( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
+        history_ = new Flt_ram[nhis_];
+        for ( int i=0; i<nhis_; i++ )
+        {
+            history_[i].instantiate(&next_);
+        }
+    #endif
+}
+eSavedPars::~eSavedPars() {}
+// operators
+// functions
+
+// Corruption test on bootup.  Needed because retained parameter memory is not managed by the compiler as it relies on
+// battery.  Small compilation changes can change where in this memory the program points, too
+boolean eSavedPars::is_corrupt()
+{
+    boolean corruption = 
+        is_val_corrupt(amp_, float(-1e6), float(1e6)) ||
+        is_val_corrupt(cutback_gain_sclr_, float(-1000.), float(1000.)) ||
+        is_val_corrupt(debug_, -100, 100) ||
+        is_val_corrupt(delta_q_, -1e8, 1e5) ||
+        is_val_corrupt(delta_q_model_, -1e8, 1e5) ||
+        is_val_corrupt(freq_, float(0.), float(2.)) ||
+        is_val_corrupt(Ib_bias_all_, float(-1e5), float(1e5)) ||
+        is_val_corrupt(Ib_bias_amp_, float(-1e5), float(1e5)) ||
+        is_val_corrupt(Ib_bias_noa_, float(-1e5), float(1e5)) ||
+        is_val_corrupt(ib_scale_amp_, float(-1e6), float(1e6)) ||
+        is_val_corrupt(ib_scale_noa_, float(-1e6), float(1e6)) ||
+        is_val_corrupt(ib_select_, int8_t(-1), int8_t(1)) ||
+        is_val_corrupt(iflt_, -1, nflt_+1) ||
+        is_val_corrupt(ihis_, -1, nhis_+1) ||
+        is_val_corrupt(inj_bias_, float(-100.), float(100.)) ||
+        is_val_corrupt(isum_, -1, NSUM+1) ||
+        // is_val_corrupt(modeling_, uint8_t(0), uint8_t(255)) ||  // pointless to check this
+        is_val_corrupt(mon_chm_, uint8_t(0), uint8_t(10)) ||
+        is_val_corrupt(nP_, float(1e-6), float(100.)) ||
+        is_val_corrupt(nS_, float(1e-6), float(100.)) ||
+        is_val_corrupt(preserving_, uint8_t(0), uint8_t(1)) ||
+        is_val_corrupt(shunt_gain_sclr_, float(-1e6), float(1e6)) ||
+        is_val_corrupt(sim_chm_, uint8_t(0), uint8_t(10)) ||
+        is_val_corrupt(s_cap_mon_, float(0.), float(1000.)) ||
+        is_val_corrupt(s_cap_sim_, float(0.), float(1000.)) ||
+        is_val_corrupt(Tb_bias_hdwe_, float(-500.), float(500.)) ||
+        // is_val_corrupt(time_now_, 0UL, 0UL) ||
+        is_val_corrupt(type_, uint8_t(0), uint8_t(10)) ||
+        is_val_corrupt(t_last_, float(-10.), float(70.)) ||
+        is_val_corrupt(t_last_model_, float(-10.), float(70.)) ||
+        is_val_corrupt(Vb_bias_hdwe_, float(-10.), float(70.)) ||
+        is_val_corrupt(Vb_scale_, float(-1e6), float(1e6)) ;
+        if ( corruption )
+        {
+            Serial.printf("corrupt*********\n");
+            pretty_print(true);
+        }
+        return corruption;
+}
+
+// Assign all save EERAM to RAM
+#ifdef CONFIG_ARGON
+    int eSavedPars::load_all()
+    {
+        int num = 0;
+        get_amp(); num++;
+        get_cutback_gain_sclr(); num++;
+        get_debug(); num++;
+        get_delta_q(); num++;
+        get_delta_q_model(); num++;
+        get_freq(); num++;
+        get_hys_scale(); num++;
+        get_Ib_bias_all(); num++;
+        get_Ib_bias_amp(); num++;
+        get_Ib_bias_noa(); num++;
+        get_ib_scale_amp(); num++;
+        get_ib_scale_noa(); num++;
+        get_ib_select(); num++;
+        get_iflt(); num++;
+        get_inj_bias(); num++;
+        get_isum(); num++;
+        get_modeling(); num++;
+        get_mon_chm(); num++;
+        get_nP(); num++;
+        get_nS(); num++;
+        get_preserving(); num++;
+        get_shunt_gain_sclr(); num++;
+        get_sim_chm(); num++;
+        get_s_cap_mon(); num++;
+        get_s_cap_sim(); num++;
+        get_Tb_bias_hdwe(); num++;
+        get_time_now(); num++;
+        get_type(); num++;
+        get_t_last(); num++;
+        get_t_last_model(); num++;
+        get_Vb_bias_hdwe(); num++;
+        get_Vb_scale(); num++;
+        for ( int i=0; i<nflt_; i++ ){ fault_[i].get();  num++;}
+        for ( int i=0; i<nhis_; i++ ){history_[i].get();  num++;}
+        return num;
+    }
+#endif
+
+// Number of differences between nominal EERAM and actual (don't count integator memories because they always change)
+int eSavedPars::num_diffs()
+{
+    int n = 0;
+    // Don't count memories
+    // if ( float(RATED_TEMP) != t_last_ )    //   n++;
+    // if ( float(RATED_TEMP) != t_last_model_ )    //   n++;
+    // if ( 0. != delta_q_ )    //   n++;
+    // if ( 0. != delta_q_model_ )    //   n++;
+    // if ( int(-1) != iflt_ )    //     n++;
+    // if ( int(-1) != isum_ )    //     n++;
+    // if ( uint8_t(0) != preserving_ )    //     n++;
+    // if ( 0UL < time_now ) n++;
+    if ( float(0.) != amp_ ) n++;
+    if ( float(1.) != cutback_gain_sclr_ ) n++;
+    if ( int(0) != debug_ ) n++;
+    if ( float(0.) != freq_ ) n++;
+    if ( float(HYS_SCALE) != hys_scale_ ) n++;
+    if ( float(CURR_BIAS_ALL) != Ib_bias_all_ ) n++;
+    if ( float(CURR_BIAS_AMP) != Ib_bias_amp_ ) n++;
+    if ( float(CURR_BIAS_NOA) != Ib_bias_noa_ ) n++;
+    if ( float(CURR_SCALE_AMP) != ib_scale_amp_ ) n++;
+    if ( float(CURR_SCALE_NOA) != ib_scale_noa_ ) n++;
+    if ( int8_t(FAKE_FAULTS) != ib_select_ ) n++;
+    if ( float(0.) != inj_bias_ ) n++;
+    if ( uint8_t(MODELING) != modeling_ ) n++;
+    if ( uint8_t(MON_CHEM) != mon_chm_ ) n++;
+    if ( float(NP) != nP_ ) n++;
+    if ( float(NS) != nS_ ) n++;
+    if ( float(1.) != shunt_gain_sclr_ ) n++;
+    if ( uint8_t(SIM_CHEM) != sim_chm_ ) n++;
+    if ( float(1.) != s_cap_mon_ ) n++;
+    if ( float(1.) != s_cap_sim_ ) n++;
+    if ( float(TEMP_BIAS) != Tb_bias_hdwe_ ) n++;
+    if ( uint8_t(0) != type_ ) n++;
+    if ( float(VOLT_BIAS) != Vb_bias_hdwe_ ) n++;
+    if ( float(VB_SCALE) != Vb_scale_ ) n++;
+    return ( n );
+}
+
+// Configuration functions
+
+// Print memory map
+void eSavedPars::mem_print()
+{
+    #ifdef CONFIG_ARGON
+        Serial.printf("SavedPars::SavedPars - MEMORY MAP %d < %d\n", next_, MAX_EEPROM);
+        Serial.printf("Temp mem map print\n");
+        for ( int i=0; i<MAX_EEPROM; i++ ) Serial.printf("%d ", EEPROM.read(i));
+    #endif
+}
+
+// Manage changes to modeling configuration
+void eSavedPars::modeling(const uint8_t input, Sensors *Sen)
+{
+    modeling_ = input;
+    put_modeling(modeling_);
+    Sen->ShuntAmp->dscn_cmd(mod_ib_amp_dscn());
+    Sen->ShuntNoAmp->dscn_cmd(mod_ib_noa_dscn());
+}
+
+// Print
+void eSavedPars::pretty_print(const boolean all)
+{
+    Serial.printf("saved parameters (sp):\n");
+    Serial.printf("             defaults    current EERAM values\n");
+    if ( all || float(0.) != amp_ )             Serial.printf(" inj amp%7.3f  %7.3f *Xa<> A pk\n", 0., amp_);
+    if ( all || 1. != cutback_gain_sclr_ )      Serial.printf(" cut_gn_slr%7.3f  %7.3f *Sk<>\n", 1., cutback_gain_sclr_);
+    if ( all || int(0) != debug_ )              Serial.printf(" debug  %d  %d *v<>\n", int(0), debug_);
+    if ( all )                                  Serial.printf(" delta_q%10.1f %10.1f *DQ<>\n", double(0.), delta_q_);
+    if ( all )                                  Serial.printf(" dq_sim %10.1f %10.1f *Ca<>, *Cm<>, C\n", double(0.), delta_q_model_);
+    if ( all || float(0.) != freq_ )            Serial.printf(" inj frq%7.3f  %7.3f *Xf<> r/s\n", 0., freq_);
+    if ( all || float(HYS_SCALE) != hys_scale_ ) Serial.printf(" hys_scale     %7.3f    %7.3f *Sh<>\n", HYS_SCALE, hys_scale_);
+    if ( all || float(CURR_BIAS_ALL) != Ib_bias_all_ )  Serial.printf(" Ib_bias_all%7.3f  %7.3f *Di<> A\n", CURR_BIAS_ALL, Ib_bias_all_);
+    if ( all || float(CURR_BIAS_AMP) != Ib_bias_amp_ )  Serial.printf(" bias_amp%7.3f  %7.3f *DA<>\n", CURR_BIAS_AMP, Ib_bias_amp_);
+    if ( all || float(CURR_BIAS_NOA) != Ib_bias_noa_ )  Serial.printf(" bias_noa%7.3f  %7.3f *DB<>\n", CURR_BIAS_NOA, Ib_bias_noa_);
+    if ( all || float(CURR_SCALE_AMP) != ib_scale_amp_ )Serial.printf(" ib_scale_amp%7.3f  %7.3f *SA<>\n", CURR_SCALE_AMP, ib_scale_amp_);
+    if ( all || float(CURR_SCALE_NOA) != ib_scale_noa_ )Serial.printf(" ib_scale_noa%7.3f  %7.3f *SB<>\n", CURR_SCALE_NOA, ib_scale_noa_);
+    if ( all || int8_t(FAKE_FAULTS) != ib_select_ )     Serial.printf(" ib_select %d  %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select_);
+    if ( all )                                  Serial.printf(" iflt                           %d flt ptr\n", iflt_);
+    if ( all || float(0.) != inj_bias_ )        Serial.printf(" inj_bias%7.3f  %7.3f *Xb<> A\n", 0., inj_bias_);
+    if ( all )                                  Serial.printf(" isum                           %d tbl ptr\n", isum_);
+    if ( all || uint8_t(MODELING) != modeling_ ) Serial.printf(" modeling %d  %d *Xm<>\n", uint8_t(MODELING), modeling_);
+    if ( all || MON_CHEM != mon_chm_ )          Serial.printf(" mon chem            %d          %d *Bm<> 0=Battleborn, 1=CHINS, 2=Spare\n", MON_CHEM, mon_chm_);
+    if ( all )                                  Serial.printf(" preserving %d  %d *Xm<>\n", uint8_t(0), preserving_);
+    if ( all || float(NP) != nP_ )              Serial.printf(" nP            %7.3f    %7.3f *BP<> eg '2P1S'\n", NP, nP_);
+    if ( all || float(NS) != nS_ )              Serial.printf(" nS            %7.3f    %7.3f *BS<> eg '2P1S'\n", NS, nS_);
+    if ( all || float(1.) != shunt_gain_sclr_ )  Serial.printf(" shunt_gn_slr%7.3f  %7.3f *SG\n", 1., shunt_gain_sclr_);
+    if ( all || SIM_CHEM != sim_chm_ )          Serial.printf(" sim chem            %d          %d *Bs<>\n", SIM_CHEM, sim_chm_);
+    if ( all || float(1.) != s_cap_mon_ )     Serial.printf(" s_cap_mon%7.3f  %7.3f *SQ<>\n", 1., s_cap_mon_);
+    if ( all || float(1.) != s_cap_sim_ )     Serial.printf(" s_cap_sim%7.3f  %7.3f *Sq<>\n", 1., s_cap_sim_);
+    if ( all || float(TEMP_BIAS) != Tb_bias_hdwe_ )     Serial.printf(" Tb_bias_hdwe%7.3f  %7.3f *Dt<> dg C\n", TEMP_BIAS, Tb_bias_hdwe_);
+    if ( all )                                  Serial.printf(" time_now %d %s *U<> Unix time\n", (int)Time.now(), Time.timeStr().c_str());
+    if ( all || uint8_t(0) != type_ )           Serial.printf(" type inj %d  %d *Xt<> 1=sin, 2=sq, 3=tri, 4=1C, 5=-1C, 8=cos\n", 0, type_);
+    if ( all )                                  Serial.printf(" t_last %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_);
+    if ( all )                                  Serial.printf(" t_last_sim %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_model_);
+    if ( all || float(VOLT_BIAS) != Vb_bias_hdwe_ )     Serial.printf(" Vb_bias_hdwe %7.3f  %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe_);
+    if ( all || float(VB_SCALE) != Vb_scale_ )   Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n\n", VB_SCALE, Vb_scale_);
+    // if ( all )
+    // {
+    //     Serial.printf("history array (%d):\n", nhis_);
+    //     print_history_array();
+    //     print_fault_header();
+    //     Serial.printf("fault array (%d):\n", nflt_);
+    //     print_fault_array();
+    //     print_fault_header();
+    // }
+    #ifdef CONFIG_ARGON
+        Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
+        // Serial.printf("Temp mem map print\n");
+        // mem_print();
+    #endif
+}
+
+// Print faults
+void eSavedPars::print_fault_array()
+{
+  int i = iflt_;  // Last one written was iflt
+  int n = -1;
+  while ( ++n < nflt_ )
+  {
+    if ( ++i > (nflt_-1) ) i = 0; // circular buffer
+    fault_[i].print("unit_f");
+  }
+}
+
+// Print faults
+void eSavedPars::print_fault_header()
+{
+  Serial.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
+  Serial1.printf ("fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
+}
+
+// Print history
+void eSavedPars::print_history_array()
+{
+  int i = ihis_;  // Last one written was ihis
+  int n = -1;
+  while ( ++n < nhis_ )
+  {
+    if ( ++i > (nhis_-1) ) i = 0; // circular buffer
+    history_[i].print("unit_h");
+  }
+}
+
+// Dynamic parameters saved
+// This saves a lot of througput.   Without it, there are many put calls each 'read' minor frame at 1 ms each call
+void eSavedPars::put_all_dynamic()
+{
+    static uint8_t blink = 0;
+    switch ( blink++ )
+    {
+        case ( 0 ):
+            put_delta_q();
+            break;
+
+        case ( 1 ):
+            put_delta_q_model();
+            break;
+
+        case ( 2 ):
+            put_hys_scale();
+            break;
+
+        case ( 3 ):
+            put_mon_chm();
+            break;
+
+        case ( 4 ):
+            put_sim_chm();
+            break;
+
+        case ( 5 ):
+            put_t_last();
+            break;
+
+        case ( 6 ):
+            put_t_last_model();
+            break;
+
+        case ( 7 ):
+            put_time_now(Time.now());  // If happen to connect to wifi (assume updated automatically), save new time
+            blink = 0;
+            break;
+
+        default:
+            blink = 0;
+            break;
+    }
+}
+ 
+ // Bounce history elements
+Flt_st eSavedPars::put_history(Flt_st input, const uint8_t i)
+{
+    Flt_st bounced_sum;
+    bounced_sum.copy_to_Flt_ram_from(history_[i]);
+    history_[i].put(input);
+    return bounced_sum;
+}
+
+// Reset arrays
+void eSavedPars::reset_flt()
+{
+    for ( int i=0; i<nflt_; i++ )
+    {
+        fault_[i].put_nominal();
+    }
+ }
+void eSavedPars::reset_his()
+{
+    for ( int i=0; i<nhis_; i++ )
+    {
+        history_[i].put_nominal();
+    }
+ }
+void eSavedPars::reset_pars()
+{
+    put_amp(float(0));
+    put_cutback_gain_sclr(float(1.));
+    put_debug(int(0));
+    put_delta_q(double(0.));
+    put_delta_q_model(double(0.));
+    put_freq(float(0));
+    put_hys_scale(HYS_SCALE);
+    put_Ib_bias_all(float(CURR_BIAS_ALL));
+    put_Ib_bias_amp(float(CURR_BIAS_AMP));
+    put_Ib_bias_noa(float(CURR_BIAS_NOA));
+    put_ib_scale_amp(float(CURR_SCALE_AMP));
+    put_ib_scale_noa(float(CURR_SCALE_NOA));
+    put_ib_select(int8_t(FAKE_FAULTS));
+    put_iflt(int(-1));
+    put_ihis(int(-1));
+    put_inj_bias(float(0.));
+    put_isum(int(-1));
+    put_modeling(uint8_t(MODELING));
+    put_mon_chm(uint8_t(MON_CHEM));
+    put_nP(float(NP));
+    put_nS(float(NS));
+    put_preserving(uint8_t(0));
+    put_shunt_gain_sclr(float(1.));
+    put_sim_chm(uint8_t(SIM_CHEM));
+    put_s_cap_mon(float(1.));
+    put_s_cap_sim(float(1.));
+    put_Tb_bias_hdwe(float(TEMP_BIAS));
+    put_type(uint8_t(0));    
+    put_t_last(float(RATED_TEMP));    
+    put_t_last_model(float(RATED_TEMP));  
+    put_Vb_bias_hdwe(float(VOLT_BIAS));
+    put_Vb_scale(float(VB_SCALE));
+ }

@@ -82,6 +82,7 @@ public:
     void get_fltw()         { uint16_t value;       rP_->get(fltw_eeram_.a16, value);         fltw = value; };
     void get_falw()         { uint16_t value;       rP_->get(falw_eeram_.a16, value);         falw = value; };
     void instantiate(SerialRAM *ram, uint16_t *next);
+    void instantiate(int *next);
   #endif
 
   void get();
