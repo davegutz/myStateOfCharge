@@ -627,8 +627,8 @@ protected:
         int t_last_model_eeprom_;
         int Vb_bias_hdwe_eeprom_;
         int Vb_scale_eeprom_;
-        Flt_ram *fault_;
-        Flt_ram *history_;
+        Flt_prom *fault_;
+        Flt_prom *history_;
     #else
         Flt_st *fault_;
         Flt_st *history_;

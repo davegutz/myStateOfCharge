@@ -175,6 +175,10 @@ void Flt_st::put_nominal()
   copy_to_Flt_ram_from(source);
 }
 
+
+
+
+
 // Class fault ram to interface Flt_st to ram
 Flt_ram::Flt_ram()
 {
@@ -225,27 +229,6 @@ Flt_ram::~Flt_ram(){}
     rP_ = ram;
     nominal();
   }
-  void Flt_ram::instantiate(int *next)
-  {
-    t_eeram_.a16 = *next; *next += sizeof(t);
-    Tb_hdwe_eeram_.a16 = *next; *next += sizeof(Tb_hdwe);
-    vb_hdwe_eeram_.a16 = *next; *next += sizeof(vb_hdwe);
-    ib_amp_hdwe_eeram_.a16 = *next; *next += sizeof(ib_amp_hdwe);
-    ib_noa_hdwe_eeram_.a16 = *next; *next += sizeof(ib_noa_hdwe);
-    Tb_eeram_.a16 = *next; *next += sizeof(Tb);
-    vb_eeram_.a16 = *next; *next += sizeof(vb);
-    ib_eeram_.a16 = *next; *next += sizeof(ib);
-    soc_eeram_.a16 = *next; *next += sizeof(soc);
-    soc_min_eeram_.a16 = *next; *next += sizeof(soc_min);
-    soc_ekf_eeram_.a16 = *next; *next += sizeof(soc_ekf);
-    voc_eeram_.a16 = *next; *next += sizeof(voc);
-    voc_stat_eeram_.a16 = *next; *next += sizeof(voc_stat);
-    e_wrap_filt_eeram_.a16 = *next; *next += sizeof(e_wrap_filt);
-    fltw_eeram_.a16 = *next; *next += sizeof(fltw);
-    falw_eeram_.a16 = *next; *next += sizeof(falw);
-    // rP_ = ram;
-    nominal();
-  }
 #endif
 
 // Save all
@@ -273,6 +256,93 @@ void Flt_ram::put(const Flt_st value)
 
 // nominalize
 void Flt_ram::put_nominal()
+{
+  Flt_st source;
+  source.nominal();
+  put(source);
+}
+
+
+
+
+
+// Class fault ram to interface Flt_st to ram
+Flt_prom::Flt_prom()
+{
+  Flt_st();
+}
+Flt_prom::~Flt_prom(){}
+
+// Load all
+#ifdef CONFIG_ARGON
+  void Flt_prom::get()
+  {
+    get_t();
+    get_Tb_hdwe();
+    get_vb_hdwe();
+    get_ib_amp_hdwe();
+    get_ib_noa_hdwe();
+    get_Tb();
+    get_vb();
+    get_ib();
+    get_soc();
+    get_soc_ekf();
+    get_voc();
+    get_voc_stat();
+    get_e_wrap_filt();
+    get_fltw();
+    get_falw();
+  }
+
+// Initialize each structure
+  void Flt_prom::instantiate(int *next)
+  {
+    t_eeprom_ = *next; *next += sizeof(t);
+    Tb_hdwe_eeprom_ = *next; *next += sizeof(Tb_hdwe);
+    vb_hdwe_eeprom_ = *next; *next += sizeof(vb_hdwe);
+    ib_amp_hdwe_eeprom_ = *next; *next += sizeof(ib_amp_hdwe);
+    ib_noa_hdwe_eeprom_ = *next; *next += sizeof(ib_noa_hdwe);
+    Tb_eeprom_ = *next; *next += sizeof(Tb);
+    vb_eeprom_ = *next; *next += sizeof(vb);
+    ib_eeprom_ = *next; *next += sizeof(ib);
+    soc_eeprom_ = *next; *next += sizeof(soc);
+    soc_min_eeprom_ = *next; *next += sizeof(soc_min);
+    soc_ekf_eeprom_ = *next; *next += sizeof(soc_ekf);
+    voc_eeprom_ = *next; *next += sizeof(voc);
+    voc_stat_eeprom_ = *next; *next += sizeof(voc_stat);
+    e_wrap_filt_eeprom_ = *next; *next += sizeof(e_wrap_filt);
+    fltw_eeprom_ = *next; *next += sizeof(fltw);
+    falw_eeprom_ = *next; *next += sizeof(falw);
+    // rP_ = ram;
+    nominal();
+  }
+#endif
+
+// Save all
+void Flt_prom::put(const Flt_st value)
+{
+  copy_to_Flt_ram_from(value);
+  #ifdef CONFIG_ARGON
+    put_t();
+    put_Tb_hdwe();
+    put_vb_hdwe();
+    put_ib_amp_hdwe();
+    put_ib_noa_hdwe();
+    put_Tb();
+    put_vb();
+    put_ib();
+    put_soc();
+    put_soc_ekf();
+    put_voc();
+    put_voc_stat();
+    put_e_wrap_filt();
+    put_fltw();
+    put_falw();
+  #endif
+}
+
+// nominalize
+void Flt_prom::put_nominal()
 {
   Flt_st source;
   source.nominal();

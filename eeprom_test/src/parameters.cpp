@@ -478,8 +478,8 @@ eSavedPars::eSavedPars()
     next_ = 0;
     #ifdef CONFIG_ARGON
         // rP_ = ram;
-      nflt_ = int( NFLT ); 
-    nhis_ = int( NHIS ); 
+        nflt_ = int( NFLT ); 
+        nhis_ = int( NHIS ); 
         // Memory map
         amp_eeprom_ = next_; next_ += sizeof(amp_);
         cutback_gain_sclr_eeprom_ = next_; next_ += sizeof(cutback_gain_sclr_);
@@ -515,13 +515,13 @@ eSavedPars::eSavedPars()
         Vb_bias_hdwe_eeprom_ = next_; next_ += sizeof(Vb_bias_hdwe_);
         Vb_scale_eeprom_ = next_; next_ += sizeof(Vb_scale_);
         nflt_ = int( NFLT ); 
-        fault_ = new Flt_ram[nflt_];
+        fault_ = new Flt_prom[nflt_];
         for ( int i=0; i<nflt_; i++ )
         {
             fault_[i].instantiate(&next_);
         }
         nhis_ = int( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
-        history_ = new Flt_ram[nhis_];
+        history_ = new Flt_prom[nhis_];
         for ( int i=0; i<nhis_; i++ )
         {
             history_[i].instantiate(&next_);
@@ -614,8 +614,8 @@ boolean eSavedPars::is_corrupt()
         get_t_last_model(); num++;
         get_Vb_bias_hdwe(); num++;
         get_Vb_scale(); num++;
-        // for ( int i=0; i<nflt_; i++ ){ fault_[i].get();  num++;}
-        // for ( int i=0; i<nhis_; i++ ){history_[i].get();  num++;}
+        for ( int i=0; i<nflt_; i++ ){ fault_[i].get();  num++;}
+        for ( int i=0; i<nhis_; i++ ){history_[i].get();  num++;}
         return num;
     }
 #endif
