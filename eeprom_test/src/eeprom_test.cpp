@@ -69,6 +69,9 @@ void setup() {
   ram.setAutoStore(true);
   delay(1000);
   sp.load_all();
+  // sp.reset_pars();
+  esp.load_all();
+  // esp.reset_pars();
   Serial.printf("Check corruption\n");
   if ( sp.is_corrupt() ) 
   {
@@ -104,6 +107,7 @@ void loop()
     unsigned int num = 0;
     unsigned long int now = micros();
     num = esp.load_all();
+    esp.reset_pars();
     Serial.printf("num %d\n", num);
     unsigned long int then = micros();
     float all = ( (then - now) - (micros() - then) ) /1e6;
