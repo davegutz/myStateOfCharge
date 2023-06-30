@@ -162,17 +162,20 @@ void Flt_st::print(const String code)
 }
 
 // Regular put
-void Flt_st::put(Flt_st source)
+int Flt_st::put(Flt_st source)
 {
   copy_to_Flt_ram_from(source);
+  return 0;
 }
 
 // nominalize
-void Flt_st::put_nominal()
+int Flt_st::put_nominal()
 {
+  int n = 0;
   Flt_st source;
   source.nominal();
   copy_to_Flt_ram_from(source);
+  return n;
 }
 
 
@@ -188,7 +191,7 @@ Flt_ram::~Flt_ram(){}
 
 // Load all
 #ifdef CONFIG_ARGON
-  void Flt_ram::get()
+  int Flt_ram::get()
   {
     get_t();
     get_Tb_hdwe();
@@ -205,6 +208,7 @@ Flt_ram::~Flt_ram(){}
     get_e_wrap_filt();
     get_fltw();
     get_falw();
+    return 15;
   }
 
 // Initialize each structure
@@ -232,8 +236,9 @@ Flt_ram::~Flt_ram(){}
 #endif
 
 // Save all
-void Flt_ram::put(const Flt_st value)
+int Flt_ram::put(const Flt_st value)
 {
+  int n = 0;
   copy_to_Flt_ram_from(value);
   #ifdef CONFIG_ARGON
     put_t();
@@ -251,15 +256,19 @@ void Flt_ram::put(const Flt_st value)
     put_e_wrap_filt();
     put_fltw();
     put_falw();
+    n += 15;
   #endif
+  return n;
 }
 
 // nominalize
-void Flt_ram::put_nominal()
+int Flt_ram::put_nominal()
 {
+  int n = 0;
   Flt_st source;
   source.nominal();
-  put(source);
+  n += put(source);
+  return n;
 }
 
 
@@ -275,7 +284,7 @@ Flt_prom::~Flt_prom(){}
 
 // Load all
 #ifdef CONFIG_ARGON
-  void Flt_prom::get()
+  int Flt_prom::get()
   {
     get_t();
     get_Tb_hdwe();
@@ -292,6 +301,7 @@ Flt_prom::~Flt_prom(){}
     get_e_wrap_filt();
     get_fltw();
     get_falw();
+    return 15;
   }
 
 // Initialize each structure
@@ -319,8 +329,9 @@ Flt_prom::~Flt_prom(){}
 #endif
 
 // Save all
-void Flt_prom::put(const Flt_st value)
+int Flt_prom::put(const Flt_st value)
 {
+  int n = 0;
   copy_to_Flt_ram_from(value);
   #ifdef CONFIG_ARGON
     put_t();
@@ -338,13 +349,17 @@ void Flt_prom::put(const Flt_st value)
     put_e_wrap_filt();
     put_fltw();
     put_falw();
+    n += 15;
   #endif
+  return n;
 }
 
 // nominalize
-void Flt_prom::put_nominal()
+int Flt_prom::put_nominal()
 {
+  int n = 0;
   Flt_st source;
   source.nominal();
-  put(source);
+  n += put(source);
+  return n;
 }

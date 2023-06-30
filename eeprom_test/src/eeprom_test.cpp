@@ -94,27 +94,26 @@ void loop()
   {
     unsigned int num = 0;
     unsigned long int now = micros();
-    num = sp.load_all();
+    // num = sp.load_all();
     unsigned long int then = micros();
-    // sp.assign_all();
-    float all = ( (then - now) - (micros() - then) ) /1e6;
-    Serial.printf("\nread each avg %7.6f s, all %7.6fs\n\n", all/float(num), all);
+    num = sp.reset_pars();
     sp.mem_print();
+    float all = (then - now) /1e6;
+    Serial.printf("\nnum %d read each avg %7.6f s, all %7.6fs\n\n", num, all/float(num), all);
   }
   if ( count==120 )
   {
     Serial.printf("\n\nsizeof EEPROM %d\n", EEPROM.length());
     unsigned int num = 0;
     unsigned long int now = micros();
-    num = esp.load_all();
-    esp.reset_pars();
-    Serial.printf("num %d\n", num);
+    // num = esp.load_all();
+    num = esp.reset_pars();
     unsigned long int then = micros();
-    float all = ( (then - now) - (micros() - then) ) /1e6;
-    Serial.printf("\neread each eavg %7.6f s, eall %7.6fs\n\n", all/float(num), all);
     esp.mem_print();
+    float all = (then - now) /1e6;
+    Serial.printf("\nnum %d eread each eavg %7.6f s, eall %7.6fs\n\n", num, all/float(num), all);
   }
-  if (++count == 200) count = 0;
+  if (++count == 1000) count = 0;
 
   delay(100);
 

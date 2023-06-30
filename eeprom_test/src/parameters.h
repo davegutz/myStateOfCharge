@@ -95,10 +95,10 @@ public:
 
     // functions
     boolean is_corrupt();
-    void large_reset() { reset_pars(); reset_flt(); reset_his(); }
-    void reset_flt();
-    void reset_his();
-    void reset_pars();
+    int large_reset() { int n = 0; n += reset_pars(); n += reset_flt(); n += reset_his(); return n; }
+    int reset_flt();
+    int reset_his();
+    int reset_pars();
     uint8_t modeling() { return modeling_; }
     void modeling(const uint8_t input, Sensors *Sen);
     boolean mod_all_dscn() { return ( 111<modeling_ ); }                // Bare all
@@ -252,7 +252,7 @@ public:
         void put_t_last_model() { rP_->put(t_last_model_eeram_.a16, t_last_model_); }
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe_ = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale_ = input; }
-        void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
+        int put_fault(const Flt_st input, const uint8_t i) { return fault_[i].put(input); }
     #endif
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
@@ -395,10 +395,10 @@ public:
 
     // functions
     boolean is_corrupt();
-    void large_reset() { reset_pars(); reset_flt(); reset_his(); }
-    void reset_flt();
-    void reset_his();
-    void reset_pars();
+    int large_reset() { int n = 0; n += reset_pars(); n += reset_flt(); n += reset_his(); return n;}
+    int reset_flt();
+    int reset_his();
+    int reset_pars();
     uint8_t modeling() { return modeling_; }
     void modeling(const uint8_t input, Sensors *Sen);
     boolean mod_all_dscn() { return ( 111<modeling_ ); }                // Bare all
@@ -552,7 +552,7 @@ public:
         void put_t_last_model() { EEPROM.put(t_last_model_eeprom_, t_last_model_); }
         void put_Vb_bias_hdwe(const float input) { EEPROM.put(Vb_bias_hdwe_eeprom_, input); Vb_bias_hdwe_ = input; }
         void put_Vb_scale(const float input) { EEPROM.put(Vb_scale_eeprom_, input); Vb_scale_ = input; }
-        void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
+        int put_fault(const Flt_st input, const uint8_t i) { return fault_[i].put(input); }
     #endif
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);

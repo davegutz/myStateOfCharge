@@ -51,12 +51,12 @@ struct Flt_st
   unsigned long dummy = 0;  // padding to absorb Wire.write corruption
   void assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen);
   void copy_to_Flt_ram_from(Flt_st input);
-  void get() {};
+  int get() {return 0;};
   void nominal();
   void pretty_print(const String code);
   void print(const String code);
-  void put(Flt_st source);
-  void put_nominal();
+  int put(Flt_st source);
+  int put_nominal();
 };
 
 class Flt_ram : public Flt_st
@@ -85,9 +85,9 @@ public:
     void instantiate(int *next);
   #endif
 
-  void get();
-  void put(const Flt_st input);
-  void put_nominal();
+  int get();
+  int put(const Flt_st input);
+  int put_nominal();
 
   #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)
     void put_t(const unsigned long value)         { t = value; };
@@ -194,9 +194,9 @@ public:
     void instantiate(int *next);
   #endif
 
-  void get();
-  void put(const Flt_st input);
-  void put_nominal();
+  int get();
+  int put(const Flt_st input);
+  int put_nominal();
 
   #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)
     void put_t(const unsigned long value)         { t = value; };

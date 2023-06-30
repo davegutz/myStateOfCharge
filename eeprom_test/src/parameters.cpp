@@ -189,8 +189,8 @@ boolean SavedPars::is_corrupt()
         get_t_last_model(); num++;
         get_Vb_bias_hdwe(); num++;
         get_Vb_scale(); num++;
-        for ( int i=0; i<nflt_; i++ ){ fault_[i].get();  num++;}
-        for ( int i=0; i<nhis_; i++ ){history_[i].get();  num++;}
+        for ( int i=0; i<nflt_; i++ ) num += fault_[i].get();
+        for ( int i=0; i<nhis_; i++ ) num += history_[i].get();
         return num;
     }
 #endif
@@ -396,21 +396,25 @@ Flt_st SavedPars::put_history(Flt_st input, const uint8_t i)
 }
 
 // Reset arrays
-void SavedPars::reset_flt()
+int SavedPars::reset_flt()
 {
+    int n = 0;
     for ( int i=0; i<nflt_; i++ )
     {
-        fault_[i].put_nominal();
+        n += fault_[i].put_nominal();
     }
+    return n;
  }
-void SavedPars::reset_his()
+int SavedPars::reset_his()
 {
+    int n = 0;
     for ( int i=0; i<nhis_; i++ )
     {
-        history_[i].put_nominal();
+        n += history_[i].put_nominal();
     }
+    return n;
  }
-void SavedPars::reset_pars()
+int SavedPars::reset_pars()
 {
     put_amp(float(0));
     put_cutback_gain_sclr(float(1.));
@@ -444,6 +448,7 @@ void SavedPars::reset_pars()
     put_t_last_model(float(RATED_TEMP));  
     put_Vb_bias_hdwe(float(VOLT_BIAS));
     put_Vb_scale(float(VB_SCALE));
+    return 32;
  }
 
 
@@ -821,21 +826,25 @@ Flt_st eSavedPars::put_history(Flt_st input, const uint8_t i)
 }
 
 // Reset arrays
-void eSavedPars::reset_flt()
+int eSavedPars::reset_flt()
 {
+    int n = 0;
     for ( int i=0; i<nflt_; i++ )
     {
-        fault_[i].put_nominal();
+        n += fault_[i].put_nominal();
     }
+    return n;
  }
-void eSavedPars::reset_his()
+int eSavedPars::reset_his()
 {
+    int n = 0;
     for ( int i=0; i<nhis_; i++ )
     {
-        history_[i].put_nominal();
+        n += history_[i].put_nominal();
     }
+    return n;
  }
-void eSavedPars::reset_pars()
+int eSavedPars::reset_pars()
 {
     put_amp(float(0));
     put_cutback_gain_sclr(float(1.));
@@ -869,4 +878,5 @@ void eSavedPars::reset_pars()
     put_t_last_model(float(RATED_TEMP));  
     put_Vb_bias_hdwe(float(VOLT_BIAS));
     put_Vb_scale(float(VB_SCALE));
+    return 32;
  }
