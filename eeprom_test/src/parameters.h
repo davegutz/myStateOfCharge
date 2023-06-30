@@ -95,7 +95,28 @@ public:
 
     // functions
     boolean is_corrupt();
-    int large_reset() { int n = 0; n += reset_pars(); n += reset_flt(); n += reset_his(); return n; }
+    int large_reset()
+    {
+        int N = 0;
+        int n = 0;
+        unsigned long now, then;
+        then = micros();
+        n = reset_pars();
+        N += n;
+        now = micros();
+        Serial.printf("reset_pars n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
+        then = micros();
+        n = reset_flt();
+        N += n;
+        now = micros();
+        Serial.printf("reset_flt n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
+        then = micros();
+        n = reset_his();
+        N += n;
+        now = micros();
+        Serial.printf("reset_his n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
+        return N;
+    }
     int reset_flt();
     int reset_his();
     int reset_pars();
@@ -395,7 +416,28 @@ public:
 
     // functions
     boolean is_corrupt();
-    int large_reset() { int n = 0; n += reset_pars(); n += reset_flt(); n += reset_his(); return n;}
+    int large_reset()
+    {
+        int N = 0;
+        int n = 0;
+        unsigned long now, then;
+        then = micros();
+        n = reset_pars();
+        N += n;
+        now = micros();
+        Serial.printf("ereset_pars n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
+        then = micros();
+        n = reset_flt();
+        N += n;
+        now = micros();
+        Serial.printf("ereset_flt n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
+        then = micros();
+        n = reset_his();
+        N += n;
+        now = micros();
+        Serial.printf("ereset_his n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
+        return N;
+    }
     int reset_flt();
     int reset_his();
     int reset_pars();

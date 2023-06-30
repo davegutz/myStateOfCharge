@@ -89,6 +89,7 @@ void loop()
   chat();   // Work on internal chit-chat
   talk();   // Collect user inputs
 
+/*
   static uint16_t count = 0;
   if ( count==100 )
   {
@@ -96,9 +97,9 @@ void loop()
     unsigned long int now = micros();
     // num = sp.load_all();
     unsigned long int then = micros();
-    num = sp.reset_pars();
+    num = sp.large_reset();
     sp.mem_print();
-    float all = (then - now) /1e6;
+    float all = float(then - now) /1e6;
     Serial.printf("\nnum %d read each avg %7.6f s, all %7.6fs\n\n", num, all/float(num), all);
   }
   if ( count==120 )
@@ -107,13 +108,14 @@ void loop()
     unsigned int num = 0;
     unsigned long int now = micros();
     // num = esp.load_all();
-    num = esp.reset_pars();
+    num = esp.large_reset();
     unsigned long int then = micros();
     esp.mem_print();
-    float all = (then - now) /1e6;
+    float all = float(then - now) /1e6;
     Serial.printf("\nnum %d eread each eavg %7.6f s, eall %7.6fs\n\n", num, all/float(num), all);
   }
   if (++count == 1000) count = 0;
+*/
 
   delay(100);
 

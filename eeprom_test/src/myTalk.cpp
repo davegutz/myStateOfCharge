@@ -289,11 +289,11 @@ void talk()
                 now = micros();
                 n = sp.large_reset();
                 then = micros();
-                Serial.printf("n %d avg %10.6f\n", n, float((then - now)/1e6/float(n)));
+                Serial.printf("n %d avg %10.6f\n", n, float(then - now)/1e6/float(n));
                 now = micros();
                 n = esp.large_reset();
                 then = micros();
-                Serial.printf("en %d eavg %10.6f\n", n, float((then - now)/1e6/float(n)));
+                Serial.printf("en %d eavg %10.6f\n", n, float(then - now)/1e6/float(n));
                 break;
 
               default:
