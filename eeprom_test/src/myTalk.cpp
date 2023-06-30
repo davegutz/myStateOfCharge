@@ -284,6 +284,20 @@ void talk()
                 esp.print_fault_header();
                 break;
 
+              case ( 'L' ):  // bL: Fault buffer get
+                Serial.printf("bL large load\n");
+                #if defined(CONFIG_ARGON)
+                  now = micros();
+                  n = sp.load_all();
+                  then = micros();
+                  Serial.printf("n %d avg %10.6f\n", n, float(then - now)/1e6/float(n));
+                #endif
+                now = micros();
+                n = esp.load_all();
+                then = micros();
+                Serial.printf("en %d eavg %10.6f\n", n, float(then - now)/1e6/float(n));
+                break;
+
               case ( 'R' ):  // bR: Fault buffer reset
                 Serial.printf("bR large reset\n");
                 now = micros();
@@ -394,11 +408,15 @@ void talk()
             {
               case ( 'A' ):  // * DA<>:  Amp sensor bias
                 Serial.printf("sp.Ib_bias_amp%7.3f to", sp.Ib_bias_amp());
+                then = micros();
                 sp.put_Ib_bias_amp(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.Ib_bias_amp());
+                now = micros();
+                Serial.printf("%7.3f in %10.6f s\n", sp.Ib_bias_amp(), float(now - then)/1.e6);
                 Serial.printf("esp.Ib_bias_amp%7.3f to", esp.Ib_bias_amp());
+                then = micros();
                 esp.put_Ib_bias_amp(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", esp.Ib_bias_amp());
+                now = micros();
+                Serial.printf("%7.3f in %10.6f s\n", esp.Ib_bias_amp(), float(now - then)/1.e6);
                 break;
 
               case ( 'B' ):  // * DB<>:  No Amp sensor bias

@@ -1,10 +1,15 @@
 #ifndef local_config_h
 #define local_config_h
 
-const String unit = "pro1a_20221130b";  // tune hys
 #undef CONFIG_PHOTON
 #define CONFIG_ARGON
 #undef CONFIG_PHOTON2
+// #undef CONFIG_ARGON
+// #define CONFIG_PHOTON2
+#include "application.h"  // Should not be needed if file ino or Arduino
+SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
+#include <Arduino.h>      // Used instead of Print.h - breaks Serial
+const String unit = "pro1a_20221130b";  // tune hys
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

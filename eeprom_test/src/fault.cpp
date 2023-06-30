@@ -283,7 +283,7 @@ Flt_prom::Flt_prom()
 Flt_prom::~Flt_prom(){}
 
 // Load all
-#ifdef CONFIG_ARGON
+#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
   int Flt_prom::get()
   {
     get_t();

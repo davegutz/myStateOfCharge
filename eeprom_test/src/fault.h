@@ -173,7 +173,7 @@ class Flt_prom : public Flt_st
 public:
   Flt_prom();
   ~Flt_prom();
-  #ifdef CONFIG_ARGON
+  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     void get_t()            { unsigned long value;  EEPROM.get(t_eeprom_, value);            t = value; };
     void get_Tb_hdwe()      { int16_t value;        EEPROM.get(Tb_hdwe_eeprom_, value);      Tb_hdwe = value; };
     void get_vb_hdwe()      { int16_t value;        EEPROM.get(vb_hdwe_eeprom_, value);      vb_hdwe = value; };
@@ -198,7 +198,7 @@ public:
   int put(const Flt_st input);
   int put_nominal();
 
-  #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)
+  #if defined(CONFIG_PHOTON)
     void put_t(const unsigned long value)         { t = value; };
     void put_Tb_hdwe(const int16_t value)         { Tb_hdwe = value; };
     void put_vb_hdwe(const int16_t value)         { vb_hdwe = value; };
@@ -215,7 +215,7 @@ public:
     void put_e_wrap_filt(const int16_t value)     { e_wrap_filt = value; };
     void put_fltw(const uint16_t value)           { fltw = value; };
     void put_falw(const uint16_t value)           { falw = value; };
-  #elif defined(CONFIG_ARGON)
+  #elif defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     void put_t()            { EEPROM.put(t_eeprom_, t); };
     void put_Tb_hdwe()      { EEPROM.put(Tb_hdwe_eeprom_, Tb_hdwe); };
     void put_vb_hdwe()      { EEPROM.put(vb_hdwe_eeprom_, vb_hdwe); };
@@ -252,7 +252,7 @@ public:
 
 protected:
   SerialRAM *rP_;
-  #ifdef CONFIG_ARGON
+  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     int t_eeprom_;
     int Tb_hdwe_eeprom_;
     int vb_hdwe_eeprom_;

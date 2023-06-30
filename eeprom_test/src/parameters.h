@@ -231,7 +231,7 @@ public:
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_ = input; }
         void put_Vb_scale(const float input) { Vb_scale_ = input; }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
-    #else
+    #elif defined(CONFIG_ARGON)
         void put_all_dynamic();
         void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp_ = input; }
         void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr_ = input; }
@@ -274,6 +274,49 @@ public:
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe_ = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale_ = input; }
         int put_fault(const Flt_st input, const uint8_t i) { return fault_[i].put(input); }
+    #elif defined(CONFIG_PHOTON2)
+        void put_all_dynamic();
+        void put_amp(const float input) { amp_ = input; }
+        void put_cutback_gain_sclr(const float input) { cutback_gain_sclr_ = input; }
+        void put_debug(const int input) { debug_ = input; }
+        void put_delta_q(const double input) { delta_q_ = input; }
+        void put_delta_q() {}
+        void put_delta_q_model(const double input) { delta_q_model_ = input; }
+        void put_delta_q_model() {}
+        void put_freq(const float input) { freq_ = input; }
+        void put_hys_scale(const float input) { hys_scale_ = input; }
+        void put_hys_scale() {}
+        void put_Ib_bias_all(const float input) { Ib_bias_all_ = input; }
+        void put_Ib_bias_amp(const float input) { Ib_bias_amp_ = input; }
+        void put_Ib_bias_noa(const float input) { Ib_bias_noa_ = input; }
+        void put_ib_scale_amp(const float input) { ib_scale_amp_ = input; }
+        void put_ib_scale_noa(const float input) { ib_scale_noa_ = input; }
+        void put_ib_select(const int8_t input) { ib_select_ = input; }
+        void put_iflt(const int input) { iflt_ = input; }
+        void put_ihis(const int input) { ihis_ = input; }
+        void put_inj_bias(const float input) { inj_bias_ = input; }
+        void put_isum(const int input) { isum_ = input; }
+        void put_modeling(const uint8_t input) { modeling_ = input; }
+        void put_mon_chm(const uint8_t input) { mon_chm_ = input; }
+        void put_mon_chm() {}
+        void put_nP(const float input) { nP_ = input; }
+        void put_nS(const float input) { nS_ = input; }
+        void put_preserving(const uint8_t input) { preserving_ = input; }
+        void put_shunt_gain_sclr(const float input) { shunt_gain_sclr_ = input; }
+        void put_sim_chm(const uint8_t input) { sim_chm_ = input; }
+        void put_sim_chm() {}
+        void put_s_cap_mon(const float input) { s_cap_mon_ = input; }
+        void put_s_cap_sim(const float input) { s_cap_sim_ = input; }
+        void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_ = input; }
+        void put_time_now(const time_t input) { time_now_ = input; }
+        void put_type(const uint8_t input) { type_ = input; }
+        void put_t_last(const float input) { t_last_ = input; }
+        void put_t_last() {}
+        void put_t_last_model(const float input) { t_last_model_ = input; }
+        void put_t_last_model() {}
+        void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_ = input; }
+        void put_Vb_scale(const float input) { Vb_scale_ = input; }
+        void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     #endif
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
@@ -371,7 +414,7 @@ class eSavedPars
 {
 public:
     // eSavedPars();
-    // SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt);
+    // eSavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt);
     eSavedPars();
     ~eSavedPars();
     friend Sensors;
@@ -458,7 +501,7 @@ public:
     boolean mod_vb() { return ( 1<<1 & modeling_ || mod_vb_dscn() ); }  // Using Sim as source of vb
     boolean mod_vb_dscn() { return ( 1<<5 & modeling_ ); }              // Nothing connected to vb on A1
     // get
-    #ifdef CONFIG_ARGON
+    #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
         void get_amp() { float value; EEPROM.get(amp_eeprom_, value); amp_ = value; }
         void get_cutback_gain_sclr() { float value; EEPROM.get(cutback_gain_sclr_eeprom_, value); cutback_gain_sclr_ = value; }
         void get_debug() { int value; EEPROM.get(debug_eeprom_, value); debug_ = value; }
@@ -509,7 +552,7 @@ public:
     void print_fault_header();
     void print_history_array();
     // put
-    #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)
+    #if defined(CONFIG_PHOTON)
         void put_all_dynamic();
         void put_amp(const float input) { amp_ = input; }
         void put_cutback_gain_sclr(const float input) { cutback_gain_sclr_ = input; }
@@ -552,7 +595,7 @@ public:
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_ = input; }
         void put_Vb_scale(const float input) { Vb_scale_ = input; }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
-    #else
+    #elif defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
         void put_all_dynamic();
         void put_amp(const float input) { EEPROM.put(amp_eeprom_, input); amp_ = input; }
         void put_cutback_gain_sclr(const float input) { EEPROM.put(cutback_gain_sclr_eeprom_, input); cutback_gain_sclr_ = input; }
@@ -635,7 +678,7 @@ protected:
     float t_last_model_;    // Battery temperature past value for rate limit memory, deg C
 
     uint8_t modeling_;       // Driving saturation calculation with model.  Bits specify which signals use model
-    #ifdef CONFIG_ARGON
+    #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
         int amp_eeprom_;
         int cutback_gain_sclr_eeprom_;
         int debug_eeprom_;

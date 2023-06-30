@@ -41,14 +41,6 @@ SavedPars::SavedPars()
         history_ = hist;
         fault_ = faults;
     }
-#elif defined(CONFIG_PHOTON2)
-    SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
-    {
-        nhis_ = nhis;
-        nflt_ = nflt;
-        history_ = hist;
-        fault_ = faults;
-    }
 #endif
 SavedPars::SavedPars(SerialRAM *ram)
 {
@@ -462,15 +454,7 @@ int SavedPars::reset_pars()
 //   nhis_ = int( NHIS ); 
 // }
 #ifdef CONFIG_PHOTON
-    SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
-    {
-        nhis_ = nhis;
-        nflt_ = nflt;
-        history_ = hist;
-        fault_ = faults;
-    }
-#elif defined(CONFIG_PHOTON2)
-    SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
+    eSavedPars::eSavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
     {
         nhis_ = nhis;
         nflt_ = nflt;
@@ -582,8 +566,8 @@ boolean eSavedPars::is_corrupt()
         return corruption;
 }
 
-// Assign all save EERAM to RAM
-#ifdef CONFIG_ARGON
+// Assign all save EEPROM to RAM
+#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     int eSavedPars::load_all()
     {
         int num = 0;

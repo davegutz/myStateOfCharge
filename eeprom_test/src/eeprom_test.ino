@@ -1,22 +1,10 @@
-// For Photon
-#if (PLATFORM_ID==6 || PLATFORM_ID==12)  // Photon, Argon
-  #include "application.h"  // Should not be needed if file ino or Arduino
-  SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
-  #include <Arduino.h>      // Used instead of Print.h - breaks Serial
-#else
-  using namespace std;
-  #undef max
-  #undef min
-#endif
+#include "local_config.h"
+#include "constants.h"
 
-#if (PLATFORM_ID==12)  // Argon only
+#if defined(CONFIG_ARGON)
   SerialLogHandler logHandler;
-#endif
-
-#include "hardware/SerialRAM.h"
-SerialRAM ram;
-
-#if (PLATFORM_ID==12)  // Argon only
+  #include "hardware/SerialRAM.h"
+  SerialRAM ram;
   // First parameter is the transmit buffer size, second parameter is the receive buffer size
   const unsigned long TRANSMIT_PERIOD_MS = 2000;
   unsigned long lastTransmit = 0;
@@ -27,8 +15,6 @@ SerialRAM ram;
 // Globals
 #include "myTalk.h"
 #include "command.h"
-#include "local_config.h"
-#include "constants.h"
 #include "parameters.h"
 
 
@@ -41,10 +27,13 @@ extern eSavedPars esp;              // Various parameters to be common at system
 // retained Flt_st mySum[NSUM];          // Summaries
 // retained Flt_st myFlt[NFLT];          // Summaries
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level
-#if defined(CONFIG_PHOTON) // Photon
+#if defined(CONFIG_PHOTON)
   retained SavedPars sp = SavedPars(&ram);           // Various parameters to be common at system level
-#elif defined(CONFIG_ARGON)  // Argon
+#elif defined(CONFIG_ARGON)
   SavedPars sp = SavedPars(&ram);           // Various parameters to be common at system level
+  eSavedPars esp = eSavedPars();             // Various parameters to be common at system level
+#elif defined(CONFIG_PHOTON2)
+  SavedPars sp = SavedPars();           // Various parameters to be common at system level
   eSavedPars esp = eSavedPars();             // Various parameters to be common at system level
 #endif
 
@@ -53,15 +42,22 @@ void setup() {
   delay(100);
   Serial.println("Hi");
 
-  // I2C
-  Wire1.begin();
 
 
-  ram.begin(0, 0);
-  ram.setAutoStore(true);
+  #if defined(CONFIG_ARGON)
+    // I2C
+    Wire1.begin();
+    ram.begin(0, 0);
+    ram.setAutoStore(true);
+  #endif
   delay(1000);
-  sp.load_all();
-  // sp.reset_pars();
+  // #if defined(CONFIG_PHOTON)
+  //   sp.reset_pars();
+  #if defined(CONFIG_ARGON)
+    sp.load_all();
+  // #elif defined(CONFIG_PHOTON2)
+  //   sp.reset_pars();
+  #endif
   esp.load_all();
   // esp.reset_pars();
   Serial.printf("Check corruption\n");
