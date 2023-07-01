@@ -173,10 +173,7 @@ int Flt_st::put_nominal()
 {
   int n = 0;
   Flt_st source;
-  Serial.printf("calling nominal\n");
-  delay(100);
   source.nominal();
-  source.pretty_print("put_nominal");///////////////////
   copy_to_Flt_ram_from(source);
   return n;
 }
