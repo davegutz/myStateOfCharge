@@ -116,7 +116,7 @@ public:
     boolean mod_vb() { return ( 1<<1 & modeling_ || mod_vb_dscn() ); }  // Using Sim as source of vb
     boolean mod_vb_dscn() { return ( 1<<5 & modeling_ ); }              // Nothing connected to vb on A1
     // get
-    #ifdef CONFIG_ARGON
+    #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
         void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp_ = value; }
         void get_cutback_gain_sclr() { float value; rP_->get(cutback_gain_sclr_eeram_.a16, value); cutback_gain_sclr_ = value; }
         void get_debug() { int value; rP_->get(debug_eeram_.a16, value); debug_ = value; }
@@ -167,7 +167,7 @@ public:
     void print_fault_header();
     void print_history_array();
     // put
-    #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)
+    #if defined(CONFIG_PHOTON)
         void put_all_dynamic();
         void put_amp(const float input) { amp_ = input; }
         void put_cutback_gain_sclr(const float input) { cutback_gain_sclr_ = input; }
@@ -293,7 +293,10 @@ protected:
     float t_last_model_;    // Battery temperature past value for rate limit memory, deg C
 
     uint8_t modeling_;       // Driving saturation calculation with model.  Bits specify which signals use model
-    #ifdef CONFIG_ARGON
+    #if defined(CONFIG_PHOTON)
+        Flt_st *fault_;
+        Flt_st *history_;
+    #else
         address16b amp_eeram_;
         address16b cutback_gain_sclr_eeram_;
         address16b debug_eeram_;
@@ -330,9 +333,6 @@ protected:
         SerialRAM *rP_;
         Flt_ram *fault_;
         Flt_ram *history_;
-    #else
-        Flt_st *fault_;
-        Flt_st *history_;
     #endif
     uint16_t next_;
     uint16_t nflt_;         // Length of Flt_ram array for faults

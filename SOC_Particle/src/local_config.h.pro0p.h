@@ -4,15 +4,12 @@
 #include "version.h"
 const String unit = version + "_pro0p";
 #define CONFIG_PHOTON
-#undef CONFIG_ARGON
-#undef CONFIG_PHOTON2
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
 // Miscellaneous
 #define ASK_DURING_BOOT       1   // Flag to ask for application of this file to * retained adjustements
 #define MODELING              247 // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn
-// #define USE_BLE
 
 // Sensor biases
 #define USE_ADS                 // Instead of using ADS device to read amp by I2C, use analog pins

@@ -64,7 +64,7 @@ class Flt_ram : public Flt_st
 public:
   Flt_ram();
   ~Flt_ram();
-  #ifdef CONFIG_ARGON
+#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     void get_t()            { unsigned long value;  rP_->get(t_eeram_.a16, value);            t = value; };
     void get_Tb_hdwe()      { int16_t value;        rP_->get(Tb_hdwe_eeram_.a16, value);      Tb_hdwe = value; };
     void get_vb_hdwe()      { int16_t value;        rP_->get(vb_hdwe_eeram_.a16, value);      vb_hdwe = value; };
@@ -88,7 +88,7 @@ public:
   void put(const Flt_st input);
   void put_nominal();
 
-  #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)
+  #if defined(CONFIG_PHOTON)
     void put_t(const unsigned long value)         { t = value; };
     void put_Tb_hdwe(const int16_t value)         { Tb_hdwe = value; };
     void put_vb_hdwe(const int16_t value)         { vb_hdwe = value; };
@@ -105,7 +105,7 @@ public:
     void put_e_wrap_filt(const int16_t value)     { e_wrap_filt = value; };
     void put_fltw(const uint16_t value)           { fltw = value; };
     void put_falw(const uint16_t value)           { falw = value; };
-  #elif defined(CONFIG_ARGON)
+#elif defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     void put_t()            { rP_->put(t_eeram_.a16, t); };
     void put_Tb_hdwe()      { rP_->put(Tb_hdwe_eeram_.a16, Tb_hdwe); };
     void put_vb_hdwe()      { rP_->put(vb_hdwe_eeram_.a16, vb_hdwe); };
@@ -142,7 +142,7 @@ public:
 
 protected:
   SerialRAM *rP_;
-  #ifdef CONFIG_ARGON
+  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     address16b t_eeram_;
     address16b Tb_hdwe_eeram_;
     address16b vb_hdwe_eeram_;

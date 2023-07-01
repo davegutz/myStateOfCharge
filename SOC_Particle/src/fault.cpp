@@ -118,6 +118,7 @@ void Flt_st::pretty_print(const String code)
     Serial.printf("fltw %d falw %d\n", this->fltw, this->falw);
   }
 }
+
 void Flt_st::print(const String code)
 {
   char buffer[32] = "---";
@@ -183,7 +184,7 @@ Flt_ram::Flt_ram()
 Flt_ram::~Flt_ram(){}
 
 // Load all
-#ifdef CONFIG_ARGON
+#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
   void Flt_ram::get()
   {
     get_t();
@@ -203,7 +204,7 @@ Flt_ram::~Flt_ram(){}
     get_falw();
   }
 
-// Initialize each structure
+  // Initialize each structure
   void Flt_ram::instantiate(SerialRAM *ram, uint16_t *next)
   {
     t_eeram_.a16 = *next; *next += sizeof(t);
@@ -231,7 +232,7 @@ Flt_ram::~Flt_ram(){}
 void Flt_ram::put(const Flt_st value)
 {
   copy_to_Flt_ram_from(value);
-  #ifdef CONFIG_ARGON
+  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     put_t();
     put_Tb_hdwe();
     put_vb_hdwe();

@@ -27,6 +27,11 @@
 #define CONSTANTS_H_
 
 // Disable flags if needed for debugging, usually commented
+#undef CONFIG_PHOTON
+#undef CONFIG_ARGON
+#undef CONFIG_PHOTON2
+#undef CONFIG_BARE
+#undef CONFIG_CONFIG_USE_BLE
 #include "local_config.h"       // this is not in GitHub repository.  Normally empty file
 
 // Constants always defined

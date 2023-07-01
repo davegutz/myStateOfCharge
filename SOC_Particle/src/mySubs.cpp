@@ -368,7 +368,9 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   static uint8_t blink = 0;
   String disp_0, disp_1, disp_2;
 
-  display->clearDisplay();
+  #ifndef CONFIG_BARE
+    display->clearDisplay();
+  #endif
   display->setTextSize(1);              // Normal 1:1 pixel scale
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner
@@ -450,7 +452,9 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   String dispBot = disp_0 + disp_1 + " " + disp_2;
 
   // Display
-  display->display();
+  #ifndef CONFIG_BARE
+    display->display();
+  #endif
 
   // Text basic Bluetooth (use serial bluetooth app)
   if ( sp.debug()==99 ) // Calibration mode

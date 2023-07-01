@@ -94,10 +94,10 @@ void loop();
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
 
-#if defined(CONFIG_ARGON)
+#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
   #include "hardware/SerialRAM.h"
   SerialRAM ram;
-  #ifdef USE_BLE
+  #ifdef CONFIG_USE_BLE
     #include <BleSerialPeripheralRK.h>
     SerialLogHandler logHandler;
   #endif
@@ -109,7 +109,7 @@ extern CommandPars cp;            // Various parameters to be common at system l
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
 
-#ifdef CONFIG_ARGON
+#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
   SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
 #else
   retained Flt_st saved_hist[NHIS];    // For displaying faults
@@ -128,7 +128,7 @@ Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_SSD1306 *display;      // Main OLED display
 
 #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
-  #ifdef USE_BLE
+  #ifdef CONFIG_USE_BLE
   // First parameter is the transmit buffer size, second parameter is the receive buffer size
   BleSerialPeripheralStatic<32, 256> bleSerial;
   const unsigned long TRANSMIT_PERIOD_MS = 2000;
@@ -156,13 +156,13 @@ void setup()
   Serial1.begin(S1BAUD);
   Serial1.flush();
   // EERAM
-  #ifdef CONFIG_ARGON
+  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     ram.begin(0, 0);
     ram.setAutoStore(true);
     delay(1000);
     sp.load_all();
     // Argon built-in BLE does not have friendly UART terminal app available.  Using HC-06
-    #ifdef USE_BLE
+    #ifdef CONFIG_USE_BLE
       bleSerial.setup();
       bleSerial.advertise();
       Serial.printf("BLE mac=>%s\n", BLE.address().toString().c_str());
@@ -305,7 +305,7 @@ void loop()
   summarizing = summarizing || boot_summ;
 
   #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
-    #ifdef USE_BLE
+    #ifdef CONFIG_USE_BLE
     // This must be called from loop() on every call to loop.
     bleSerial.loop();
     // Print out anything we receive
@@ -404,17 +404,15 @@ void loop()
   }  // end read (high speed frame)
 
   // OLED and Bluetooth display drivers.   Also convenient update time for saving parameters (remember)
-  #ifndef CONFIG_PHOTON2
   if ( display_and_remember )
   {
     oled_display(display, Sen, Mon);
 
-    #ifdef CONFIG_ARGON
+    #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
       // Save EERAM dynamic parameters.  Saves critical few state parameters
       sp.put_all_dynamic();
     #endif
   }
-  #endif
 
   // Discuss things with the user
   // When open interactive serial monitor such as CoolTerm
