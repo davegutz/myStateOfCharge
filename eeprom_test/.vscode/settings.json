@@ -5,7 +5,7 @@
         "*.ino": "cpp",
         "cmath": "cpp"
     },
-    "particle.targetDevice": "pro1a",
-    "particle.firmwareVersion": "5.1.0",
-    "particle.targetPlatform": "argon"
+    "particle.targetDevice": "pro2p2",
+    "particle.firmwareVersion": "5.4.0",
+    "particle.targetPlatform": "p2"
 }

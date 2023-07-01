@@ -33,7 +33,7 @@ SavedPars::SavedPars()
   nflt_ = int( NFLT ); 
   nhis_ = int( NHIS ); 
 }
-#ifdef CONFIG_PHOTON
+#if defined(CONFIG_PHOTON)  || defined(CONFIG_PHOTON2)
     SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
     {
         nhis_ = nhis;
@@ -465,7 +465,7 @@ int SavedPars::reset_pars()
 eSavedPars::eSavedPars()
 {
     next_ = 0;
-    #ifdef CONFIG_ARGON
+    #if defined(CONFIG_ARGON)  || defined(CONFIG_PHOTON2)
         // rP_ = ram;
         nflt_ = int( NFLT ); 
         nhis_ = int( NHIS ); 

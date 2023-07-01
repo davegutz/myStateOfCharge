@@ -50,7 +50,7 @@ class SavedPars
 {
 public:
     SavedPars();
-    // SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt);
+    SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt);
     SavedPars(SerialRAM *ram);
     ~SavedPars();
     friend Sensors;
@@ -107,14 +107,14 @@ public:
         Serial.printf("reset_pars n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
         then = micros();
         n = reset_flt();
-        N += n;
         now = micros();
+        N += n;
         Serial.printf("reset_flt n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
-        then = micros();
-        n = reset_his();
-        N += n;
-        now = micros();
-        Serial.printf("reset_his n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
+        // then = micros();
+        // n = reset_his();
+        // now = micros();
+        // N += n;
+        // Serial.printf("reset_his n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
         return N;
     }
     int reset_flt();
@@ -274,49 +274,6 @@ public:
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe_ = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale_ = input; }
         int put_fault(const Flt_st input, const uint8_t i) { return fault_[i].put(input); }
-    #elif defined(CONFIG_PHOTON2)
-        void put_all_dynamic();
-        void put_amp(const float input) { amp_ = input; }
-        void put_cutback_gain_sclr(const float input) { cutback_gain_sclr_ = input; }
-        void put_debug(const int input) { debug_ = input; }
-        void put_delta_q(const double input) { delta_q_ = input; }
-        void put_delta_q() {}
-        void put_delta_q_model(const double input) { delta_q_model_ = input; }
-        void put_delta_q_model() {}
-        void put_freq(const float input) { freq_ = input; }
-        void put_hys_scale(const float input) { hys_scale_ = input; }
-        void put_hys_scale() {}
-        void put_Ib_bias_all(const float input) { Ib_bias_all_ = input; }
-        void put_Ib_bias_amp(const float input) { Ib_bias_amp_ = input; }
-        void put_Ib_bias_noa(const float input) { Ib_bias_noa_ = input; }
-        void put_ib_scale_amp(const float input) { ib_scale_amp_ = input; }
-        void put_ib_scale_noa(const float input) { ib_scale_noa_ = input; }
-        void put_ib_select(const int8_t input) { ib_select_ = input; }
-        void put_iflt(const int input) { iflt_ = input; }
-        void put_ihis(const int input) { ihis_ = input; }
-        void put_inj_bias(const float input) { inj_bias_ = input; }
-        void put_isum(const int input) { isum_ = input; }
-        void put_modeling(const uint8_t input) { modeling_ = input; }
-        void put_mon_chm(const uint8_t input) { mon_chm_ = input; }
-        void put_mon_chm() {}
-        void put_nP(const float input) { nP_ = input; }
-        void put_nS(const float input) { nS_ = input; }
-        void put_preserving(const uint8_t input) { preserving_ = input; }
-        void put_shunt_gain_sclr(const float input) { shunt_gain_sclr_ = input; }
-        void put_sim_chm(const uint8_t input) { sim_chm_ = input; }
-        void put_sim_chm() {}
-        void put_s_cap_mon(const float input) { s_cap_mon_ = input; }
-        void put_s_cap_sim(const float input) { s_cap_sim_ = input; }
-        void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_ = input; }
-        void put_time_now(const time_t input) { time_now_ = input; }
-        void put_type(const uint8_t input) { type_ = input; }
-        void put_t_last(const float input) { t_last_ = input; }
-        void put_t_last() {}
-        void put_t_last_model(const float input) { t_last_model_ = input; }
-        void put_t_last_model() {}
-        void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_ = input; }
-        void put_Vb_scale(const float input) { Vb_scale_ = input; }
-        void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     #endif
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
@@ -471,13 +428,13 @@ public:
         Serial.printf("ereset_pars n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
         then = micros();
         n = reset_flt();
-        N += n;
         now = micros();
+        N += n;
         Serial.printf("ereset_flt n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
         then = micros();
         n = reset_his();
-        N += n;
         now = micros();
+        N += n;
         Serial.printf("ereset_his n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
         return N;
     }
