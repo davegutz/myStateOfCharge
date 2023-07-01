@@ -50,7 +50,7 @@ void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
 }
 
 // Copy function
-void Flt_st::copy_to_Flt_ram_from(Flt_st input)
+int Flt_st::copy_to_Flt_ram_from(Flt_st input)
 {
   t = input.t;
   Tb_hdwe = input.Tb_hdwe;
@@ -68,10 +68,11 @@ void Flt_st::copy_to_Flt_ram_from(Flt_st input)
   e_wrap_filt =input.e_wrap_filt;
   fltw = input.fltw;
   falw = input.falw;
+  return 17;
 }
 
 // Nominal values
-void Flt_st::nominal()
+int Flt_st::nominal()
 {
   this->t = 1L;
   this->Tb_hdwe = int16_t(0);
@@ -90,6 +91,7 @@ void Flt_st::nominal()
   this->fltw = uint16_t(0);
   this->falw = uint16_t(0);
   this->dummy = 0L;
+  return 17;
 }
 
 // Print functions
@@ -164,8 +166,9 @@ void Flt_st::print(const String code)
 // Regular put
 int Flt_st::put(Flt_st source)
 {
-  copy_to_Flt_ram_from(source);
-  return 0;
+  int n;
+  n = copy_to_Flt_ram_from(source);
+  return n;
 }
 
 // nominalize
@@ -174,7 +177,7 @@ int Flt_st::put_nominal()
   int n = 0;
   Flt_st source;
   source.nominal();
-  copy_to_Flt_ram_from(source);
+  n = copy_to_Flt_ram_from(source);
   return n;
 }
 
