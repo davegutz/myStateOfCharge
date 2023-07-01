@@ -28,21 +28,21 @@ void loop();
 
 
 extern CommandPars cp;            // Various parameters to be common at system level
-// extern Flt_st mySum[NSUM];        // Summaries for saving charge history
-// extern Flt_st myFlt[NFLT];        // Summaries for saving fault history
+extern Flt_st mySum[NSUM];        // Summaries for saving charge history
+extern Flt_st myFlt[NFLT];        // Summaries for saving fault history
 extern SavedPars sp;              // Various parameters to be common at system level
 extern eSavedPars esp;              // Various parameters to be common at system level
 
-// retained Flt_st mySum[NSUM];          // Summaries
-// retained Flt_st myFlt[NFLT];          // Summaries
+retained Flt_st mySum[NSUM];          // Summaries
+retained Flt_st myFlt[NFLT];          // Summaries
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level
 #if defined(CONFIG_PHOTON)
-  retained SavedPars sp = SavedPars(&ram);           // Various parameters to be common at system level
+  SavedPars sp = SavedPars(mySum, NSUM, myFlt, NFLT);
 #elif defined(CONFIG_ARGON)
   SavedPars sp = SavedPars(&ram);           // Various parameters to be common at system level
   eSavedPars esp = eSavedPars();             // Various parameters to be common at system level
 #elif defined(CONFIG_PHOTON2)
-  SavedPars sp = SavedPars();           // Various parameters to be common at system level
+  SavedPars sp = SavedPars(mySum, NSUM, myFlt, NFLT);
   eSavedPars esp = eSavedPars();             // Various parameters to be common at system level
 #endif
 

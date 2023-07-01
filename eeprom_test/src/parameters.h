@@ -110,11 +110,11 @@ public:
         now = micros();
         N += n;
         Serial.printf("reset_flt n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
-        // then = micros();
-        // n = reset_his();
-        // now = micros();
-        // N += n;
-        // Serial.printf("reset_his n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
+        then = micros();
+        n = reset_his();
+        now = micros();
+        N += n;
+        Serial.printf("reset_his n %d avg%10.6f\n", n, float(now-then)/1.e6/float(n));
         return N;
     }
     int reset_flt();
