@@ -251,7 +251,7 @@ public:
   #endif
 
 protected:
-  SerialRAM *rP_;
+  // SerialRAM *rP_;
   #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     int t_eeprom_;
     int Tb_hdwe_eeprom_;

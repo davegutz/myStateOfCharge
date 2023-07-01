@@ -336,7 +336,7 @@ int Flt_prom::put(const Flt_st value)
 {
   int n = 0;
   copy_to_Flt_ram_from(value);
-  #ifdef CONFIG_ARGON
+  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     put_t();
     put_Tb_hdwe();
     put_vb_hdwe();
