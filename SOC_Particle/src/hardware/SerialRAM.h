@@ -43,16 +43,25 @@ public:
 	template <typename T>
 	T &get(uint16_t idx, T &t)
 	{
-		uint8_t *ptr = (uint8_t *)&t;
-		read(idx, ptr, sizeof(T)); //Address, data, sizeOfData
+		#ifndef CONFIG_BARE
+			uint8_t *ptr = (uint8_t *)&t;
+			read(idx, ptr, sizeof(T)); //Address, data, sizeOfData
+		#else
+			t = T (0);
+		#endif
 		return t;
 	}
 
 	template <typename T>
 	const T &put(uint16_t idx, const T &t) //Address, data
 	{
-		const uint8_t *ptr = (const uint8_t *)&t;
-		write(idx, ptr, sizeof(T)); //Address, data, sizeOfData
+		#ifndef CONFIG_BARE
+			const uint8_t *ptr = (const uint8_t *)&t;
+			write(idx, ptr, sizeof(T)); //Address, data, sizeOfData
+		#else
+			T x = t;
+			x = x;
+		#endif
 		return t;
 	}
 };

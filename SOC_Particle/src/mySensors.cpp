@@ -939,7 +939,11 @@ void Sensors::shunt_select_initial(const boolean reset)
 void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp)
 {
   reset_temp_ = reset_temp;
-  Tb_hdwe = SensorTb->sample(Sen);
+  #ifndef CONFIG_BARE
+    Tb_hdwe = SensorTb->sample(Sen);
+  #else
+    Tb_hdwe = RATED_TEMP;
+  #endif
 
   // Filter and add rate limited bias
   if ( reset_temp_ && Tb_hdwe>TEMP_RANGE_CHECK_MAX )  // Bootup T=85.5 C
