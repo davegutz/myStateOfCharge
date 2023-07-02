@@ -19,11 +19,14 @@ Use temperature, voltage and bipolar current measurements with a programmable lo
   * [Cost](#cost)
   * [Battery Heating](#battery-heating)
   * [Hardware notes](#hardware-notes)
-    * [Calibrating mV - A](#calibrating-mv---a)
+  * [Calibrating mV - A](#calibrating-mv---a)
   * [Accuracy](#accuracy)
   * [Calibration checklist](#calibration-checklist)
   * [Boot checklist - after new software load](#boot-checklist---after-new-software-load)
   * [Throughput](#throughput)
+  * [Dynamic Randles Model](#dynamic-randles-model)
+  * [Dynamic Hysteresis Model](#dynamic-hysteresis-model)
+  * [Coulombic Efficiency](#coulombic-efficiency)
   * [Calibration](#calibration)
   * [Powering your device](#powering-your-device)
   * [Redo Loop](#redo-loop)
@@ -391,10 +394,12 @@ OLED board carefully off to the side.  Will need a hobby box to contain the fina
   pro1a   0.002         0.051
   pro2p2  0.002         not measured
   ```
+  5. A Serial.print statement uses about 0.004 seconds.   Best way to measure is to simply 'Dr1;DP100;v1;' and watch dt.
 
-Dynamic Randles Model
-Dynamic Hysteresis Model
-Coulombic Efficiency
+
+## Dynamic Randles Model
+## Dynamic Hysteresis Model
+## Coulombic Efficiency
 
 ## Calibration
 See this [document](Calibrate 20230513.odt)
