@@ -258,8 +258,6 @@ void setup()
 // Loop
 void loop()
 {
-
- unsigned long then_l = micros();
   // Synchronization
   boolean read;
   static Sync *ReadSensors = new Sync(READ_DELAY);
@@ -308,7 +306,6 @@ void loop()
   if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
   summarizing = Summarize->update(millis(), false);
   summarizing = summarizing || boot_summ;
- Serial.printf("top loop %10.6f\n", float(micros()-then_l)/1.e6);
 
   #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     #ifdef CONFIG_USE_BLE
@@ -333,31 +330,26 @@ void loop()
   // Outputs:   Sen->Tb,  Sen->Tb_filt
   if ( read_temp )
   {
- unsigned long then_t = micros();
     Sen->T_temp = ReadTemp->updateTime();
     Sen->temp_load_and_filter(Sen, reset_temp);
- Serial.printf("temp %10.6f\n", float(micros()-then_t)/1.e6);
   }
 
   // Sample Ib
   #ifndef USE_ADS
     if ( read )
     {
- unsigned long then_x = micros();
       static unsigned int t_us_last = micros();
       unsigned int t_us_now = micros();
       float T = float(t_us_now - t_us_last) / 1e6;
       t_us_last = t_us_now;
       Sen->ShuntAmp->sample(reset, T);
       Sen->ShuntNoAmp->sample(reset, T);
- Serial.printf("sample %10.6f\n", float(micros()-then_x)/1.e6);
       }
   #endif
   
   // Input all other sensors and do high rate calculations
   if ( read )
   {
-  unsigned long then_r = micros();
     Sen->reset = reset;
     
     // Check for really slow data capture and run EKF each read frame
@@ -412,23 +404,18 @@ void loop()
 
     // Print
     print_rapid_data(reset, Sen, Mon);
- unsigned long now_r = micros();
- Serial.printf("read %10.6f\n", float(now_r-then_r)/1.e6);
 
   }  // end read (high speed frame)
 
   // OLED and Bluetooth display drivers.   Also convenient update time for saving parameters (remember)
   if ( display_and_remember )
   {
- unsigned long then_d = micros();
     oled_display(display, Sen, Mon);
 
     #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
       // Save EERAM dynamic parameters.  Saves critical few state parameters
       sp.put_all_dynamic();
     #endif
- unsigned long now_d = micros();
- Serial.printf("display %10.6f\n", float(now_d-then_d)/1.e6);
   }
 
   // Discuss things with the user
@@ -437,7 +424,6 @@ void loop()
   // right in the "Send String" box then press "Send."
   // String definitions are below.
   // Control
- unsigned long then_c = micros();
   if ( control ){} // placeholder
   // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
   asap();
@@ -446,13 +432,11 @@ void loop()
     chat();         // Work on internal chit-chat
   }
   talk(Mon, Sen);   // Collect user inputs
- Serial.printf("shat %10.6f\n", float(micros()-then_c)/1.e6);
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
   if ( (!boot_wait && summarizing) || cp.write_summary )
   {
- unsigned long then_s = micros();
     sp.put_ihis(sp.ihis()+1);
     if ( sp.ihis()>sp.nhis()-1 ) sp.put_ihis(0);  // wrap buffer
     Flt_st hist_snap, hist_bounced;
@@ -465,8 +449,6 @@ void loop()
 
     Serial.printf("Summ...\n");
     cp.write_summary = false;
- unsigned long now_s = micros();
- Serial.printf("summ %10.6f\n", float(now_s-then_s)/1.e6);
   }
 
   // Initialize complete once sensors and models started and summary written
@@ -481,5 +463,4 @@ void loop()
     Serial.printf("soft reset...\n");
   }
   cp.soft_reset = false;
- Serial.printf("loop %10.6f\n", float(micros()-then_l)/1.e6);
 } // loop
