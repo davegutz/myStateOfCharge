@@ -132,7 +132,11 @@ void Shunt::convert(const boolean disconnect)
   #ifdef USE_ADS
     if ( !bare_detected_ && !dscn_cmd_ )
     {
-      vshunt_int_ = readADC_Differential_0_1(name_);
+      #ifndef CONFIG_BARE
+        vshunt_int_ = readADC_Differential_0_1(name_);
+      #else
+        vshunt_int_ = 0;
+      #endif
       sample_time_z_ = sample_time_;
       sample_time_ = millis();
     }

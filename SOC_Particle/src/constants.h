@@ -32,7 +32,7 @@
 #undef CONFIG_PHOTON2
 #undef CONFIG_BARE
 #undef CONFIG_CONFIG_USE_BLE
-#include "local_config.h"       // this is not in GitHub repository.  Normally empty file
+#include "local_config.h"       // this is not in GitHub repository.  Copy appropriate local_config??.h to match configure
 
 // Constants always defined
 #define ONE_HOUR_MILLIS       3600000UL // Number of milliseconds in one hour (60*60*1000)
@@ -67,7 +67,7 @@
     #ifdef DEBUG_INIT
         #define NSUM              5       // Number of saved SRAM summaries (55)
     #else
-        #define NSUM              30       // Number of saved SRAM summaries (90)   TODO:   Use PLATFORM_ID around verbose hogs
+        #define NSUM              20       // Number of saved SRAM summaries (90)   TODO:   Use PLATFORM_ID around verbose hogs
                                             // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
     #endif
 #elif defined(CONFIG_ARGON)

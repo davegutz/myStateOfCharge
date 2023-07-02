@@ -384,14 +384,15 @@ OLED board carefully off to the side.  Will need a hobby box to contain the fina
 6. Check Xm=0 before walk away from installed system. 
 
 ## Throughput
-1. Driven by ADC read of ADS1013 device (current AD).  For Argon with EERAM 47L16 it is ADC write of parameters at 0.001 each. Manage this with blink logic in put_all_dynamic() of 'SavedPars' object, called with display update time DISPLAY_USER_DELAY (1.2 sec) in ino file.
+1. Photon throughput driven by ADC read of ADS1013 device (current AD).  For Argon with EERAM 47L16 it is ADC write of parameters at 0.001 each. Manage this with blink logic in put_all_dynamic() of 'SavedPars' object, called with display update time DISPLAY_USER_DELAY (1.2 sec) in ino file.
 2. There is a 6×1.2 delay between some transient events and when it is remembered by the EERAM.  If you're pushing buttons rapidly and repeating scripts you may run into stale data issue especially remembered charge states 'delta_q...' --> soc...
-3. Probably wiring quality drives the conversion count for (busy wait for I2C comm). Or could be flaky ADS devices.
+3. Probably wiring quality drives the conversion count for Photon ADS (busy wait for I2C comm). Or could be flaky ADS devices.
 4. Per unit throughput (sec).   There is no ADS for pro1a and pro2p2.
   ```
-          CONFIG_BARE   undef
-  pro0p   0.035         0.080
-  pro1a   0.002         0.051
+                                                                    (every 6 sec) 
+          CONFIG_BARE   normal  sense_syn_sel   monitor   publishS  temp_load_and_filter  ADS Amp  ADS NoAmp convert
+  pro0p   0.001         0.035   0.034600        0.000281  0.000096  0.044650              0.031940 0.001910
+  pro1a   0.002         0.003   0.002060        0.000377  0.000190  0.048500
   pro2p2  0.002         not measured
   ```
   5. A Serial.print statement uses about 0.004 seconds.   Best way to measure is to simply 'Dr1;DP100;v1;' and watch dt.

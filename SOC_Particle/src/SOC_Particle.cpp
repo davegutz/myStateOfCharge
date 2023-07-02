@@ -373,7 +373,6 @@ void loop()
     // Outputs: Sen->Ib, Sen->Vb, Sen->Tb_filt, sp.inj_bias
     sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen);
     Sen->T =  double(Sen->dt_ib())/1000.;
-    Sen->temp_load_and_filter(Sen, reset_temp);
 
     // Calculate Ah remaining`
     // Inputs:  sp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_filt
