@@ -384,12 +384,13 @@ OLED board carefully off to the side.  Will need a hobby box to contain the fina
 1. Driven by ADC read of ADS1013 device (current AD).  For Argon with EERAM 47L16 it is ADC write of parameters at 0.001 each. Manage this with blink logic in put_all_dynamic() of 'SavedPars' object, called with display update time DISPLAY_USER_DELAY (1.2 sec) in ino file.
 2. There is a 6×1.2 delay between some transient events and when it is remembered by the EERAM.  If you're pushing buttons rapidly and repeating scripts you may run into stale data issue especially remembered charge states 'delta_q...' --> soc...
 3. Probably wiring quality drives the conversion count for (busy wait for I2C comm). Or could be flaky ADS devices.
-4. Per unit
- pro0p: amp 62 cts, 0.0320 sec; noa 200 cts, 0.0460 sec
- soc0p:
- pro1a: amp 46 cts, 0.0330 sec; noa 1 cts, 0.0030 sec
- soc1a: delete ADS:  ~0.0015 sec
-
+4. Per unit throughput (sec)
+  ```
+          CONFIG_BARE   undef
+  pro0p   0.035         0.080
+  pro1a   0.002         0.051
+  pro2p2  0.002         not measured
+  ```
 
 Dynamic Randles Model
 Dynamic Hysteresis Model
