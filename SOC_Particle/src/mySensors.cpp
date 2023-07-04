@@ -146,6 +146,7 @@ void Shunt::convert(const boolean disconnect)
     }
     vshunt_ = computeVolts(vshunt_int_);
   #else
+    bare_detected_ = Vc_ < VC_BARE_DETECTED;
     if ( !bare_detected_ && !dscn_cmd_ )
     {
       vshunt_ = Vo_Vc_;
@@ -337,8 +338,8 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" tb_s_st %d  vb_s_st %d  ib_s_st %d\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_);
   Serial.printf(" fake_faults %d latched_fail %d latched_fail_fake %d preserving %d\n\n", cp.fake_faults, latched_fail_, latched_fail_fake_, *sp_preserving_);
 
-  Serial.printf(" bare det n  %d  x \n", Sen->ShuntNoAmp->bare_detected());
-  Serial.printf(" bare det m  %d  x \n", Sen->ShuntAmp->bare_detected());
+  Serial.printf(" bare det n  %d  x \n", ib_noa_bare());
+  Serial.printf(" bare det m  %d  x \n", ib_amp_bare());
   Serial.printf(" ib_dsc  %d  %d 'Fq v'\n", ib_dscn_flt(), ib_dscn_fa());
   Serial.printf(" ibd_lo  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_lo_flt(), ib_diff_lo_fa());
   Serial.printf(" ibd_hi  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_hi_flt(), ib_diff_hi_fa());
@@ -627,8 +628,15 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       failAssign(false, IB_NOA_FA);
     }
     float current_max = NOM_UNIT_CAP * sp.nP();
-    faultAssign( abs(Sen->ShuntAmp->Ishunt_cal()) >= current_max && !disab_ib_fa_, IB_AMP_FLT );
-    faultAssign( abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max && !disab_ib_fa_, IB_NOA_FLT );
+    faultAssign( Sen->ShuntAmp->bare_detected(), IB_AMP_BARE);
+    faultAssign( Sen->ShuntNoAmp->bare_detected(), IB_NOA_BARE);
+    #ifndef CONFIG_BARE
+      faultAssign( ( ib_amp_bare() || Sen->ShuntAmp->Ishunt_cal() >= current_max ) && !disab_ib_fa_, IB_AMP_FLT );
+      faultAssign( ( ib_noa_bare() || abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max ) && !disab_ib_fa_, IB_NOA_FLT );
+    #else
+      faultAssign( Sen->ShuntAmp->Ishunt_cal() >= current_max && !disab_ib_fa_, IB_AMP_FLT );
+      faultAssign( abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max && !disab_ib_fa_, IB_NOA_FLT );
+    #endif
     if ( disab_ib_fa_ )
     {
       failAssign( false, IB_AMP_FA );

@@ -73,12 +73,12 @@ void loop();
   #endif
 #elif defined(CONFIG_ARGON)
   #undef ARDUINO
-  #if (PLATFORM_ID < 9)
+  #if (PLATFORM_ID < 9) || (PLATFORM_ID > 12)
     #error "copy local_config.xxxx.h to local_config.h"
   #endif
 #elif defined(CONFIG_PHOTON2)
   #undef ARDUINO
-  #if (PLATFORM_ID < 12)
+  #if (PLATFORM_ID < 20)
     #error "copy local_config.xxxx.h to local_config.h"
   #endif
 #endif

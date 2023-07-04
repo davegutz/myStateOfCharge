@@ -109,7 +109,6 @@ void Chemistry::assign_BB()
     dvoc = 0.;         // Adjustment for calibration error, V (systematic error; may change in future, 0.)
     hys_cap = 3.6e3;   // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data. // div 10 again 9/29/2022 // div 10 again 11/30/2022 (3.6e3)
                        // tau_null = 1 / 0.005 / 3.6e3 = 0.056 s
-    Serial.printf("BB dv_min_abs=%7.3f, cap=%7.1f\n", dv_min_abs, hys_cap);
     low_voc = 9.0;  // Voltage threshold for BMS to turn off battery, V (9.)
     low_t = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C (0)
     r_0 = 0.0113;   // ChargeTransfer R0, ohms (0.0113)

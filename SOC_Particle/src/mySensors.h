@@ -193,6 +193,7 @@ public:
   boolean fail_tb() { return fail_tb_; };
   uint16_t fltw() { return fltw_; };
   uint16_t falw() { return falw_; };
+  boolean ib_amp_bare() { return faultRead(IB_AMP_BARE);  };
   boolean ib_amp_fa() { return failRead(IB_AMP_FA); };
   boolean ib_amp_flt() { return faultRead(IB_AMP_FLT);  };
   void ib_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
@@ -202,6 +203,7 @@ public:
   float ib_diff_thr() { return ib_diff_thr_; };
   boolean ib_dscn_fa() { return failRead(IB_DSCN_FA); };
   boolean ib_dscn_flt() { return faultRead(IB_DSCN_FLT); };
+  boolean ib_noa_bare() { return faultRead(IB_NOA_BARE); };
   boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
   boolean ib_noa_flt() { return faultRead(IB_NOA_FLT); };
   void ib_quiet_sclr(const float sclr) { ib_quiet_sclr_ = sclr; };

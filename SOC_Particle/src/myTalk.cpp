@@ -1320,7 +1320,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   #endif
   Serial.printf("  v14: vshunt and Ib raw\n");
   Serial.printf("  v15: vb raw\n");
-  // Serial.printf("  v16: Tb\n");
+  Serial.printf("  v16: Tb\n");
   #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
     Serial.printf(" v-23: Vb_hdwe_ac\n");
     Serial.printf(" v-24: Vb_hdwe_ac, Ib_hdwe\n");
