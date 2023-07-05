@@ -2,10 +2,9 @@
 #define local_config_h
 
 #include "version.h"
-const String unit = version + "_pro2p2";
+const String unit = version + "_pro3p2";
 #define CONFIG_PHOTON2
 #define CONFIG_BARE
-#define CONFIG_CONFIG_USE_BLE
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

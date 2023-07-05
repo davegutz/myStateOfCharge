@@ -196,6 +196,7 @@ class ExTarget:
         self.cf[self.ind]['unit'] = self.unit
         self.cf.save_to_file()
         self.unit_button.config(text=self.unit)
+        self.create_file_path_and_key()
         self.update_key_label()
         self.update_file_label()
 

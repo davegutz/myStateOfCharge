@@ -39,5 +39,5 @@
     "particle.firmwareVersion": "5.4.0",
     "particle.targetPlatform": "p2",
     "C_Cpp.errorSquiggles": "disabled",
-    "particle.targetDevice": "pro2p2"
+    "particle.targetDevice": "pro3p2"
 }
