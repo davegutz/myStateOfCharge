@@ -589,7 +589,8 @@ if __name__ == '__main__':
         # User inputs
         # input_files = ['coldCharge1 v20221028.txt']
         # input_files = ['fault_20221206.txt']
-        input_files = ['hist_v20221028c_20221213.txt']
+        # input_files = ['hist_v20221028c_20221213.txt']
+        input_files = ['g20230530/Hd_20230714_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;
         # input_files = ['CH 20230128.txt']
         # t_max_in = 20.
         # exclusions = [(0, 1665334404)]  # before faults
@@ -612,28 +613,33 @@ if __name__ == '__main__':
 
         # Load history
         temp_hist_file = os.path.join(path_to_temp, temp_hist_file)
-        temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
+        temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_h',
                                                 skip=skip, comment_str='---')
         if temp_hist_file_clean:
             h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
                                   encoding=None).view(np.recarray)
         else:
-            print("data from", temp_hist_file, "empty after loading")
+            print("data from temp hist", temp_hist_file, "empty after loading")
             exit(1)
 
         # Load fault
-        temp_flt_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
+        temp_flt_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_h',
                                                skip=skip, comment_str='---')
         if temp_flt_file_clean:
             f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
                                   encoding=None).view(np.recarray)
         else:
-            print("data from", temp_flt_file, "empty after loading")
+            print("data from temp flt", temp_flt_file, "empty after loading")
             exit(1)
+
+        # Load configuration
+        from Battery import BatteryMonitor
+        batt = BatteryMonitor(mod_code=chm_in)
+
         f_raw = np.unique(f_raw)
         f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in)
         print("\nf:\n", f, "\n")
-        f = filter_Tb(f, 20., tb_band=100., rated_batt_cap=UNIT_CAP_RATED)
+        f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=UNIT_CAP_RATED)
 
         # Sort unique
         h_raw = np.unique(h_raw)

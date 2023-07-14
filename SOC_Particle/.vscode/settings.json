@@ -36,8 +36,12 @@
         "chrono": "cpp",
         "xhash": "cpp"
     },
-    "particle.firmwareVersion": "5.4.0",
-    "particle.targetPlatform": "p2",
+    "particle.firmwareVersion": "5.1.0",
+    "particle.targetPlatform": "argon",
     "C_Cpp.errorSquiggles": "disabled",
+<<<<<<< Updated upstream
     "particle.targetDevice": "pro3p2"
+=======
+    "particle.targetDevice": "soc1a"
+>>>>>>> Stashed changes
 }

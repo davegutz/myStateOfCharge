@@ -229,6 +229,12 @@ float Coulombs::count_coulombs(const double dt, const boolean reset_temp, const 
     //                 reset, dt, pp.pubList.Voc, pp.pubList.Voc_filt,  this->Vsat(), temp_c, temp_lim, sat, charge_curr, d_delta_q, *sp_delta_q_, q_, q_capacity_, soc_);
 
     // Save and return
+    if ( sp.debug()==-99 )
+      Serial.printf("sat, dt, temp_c, temp_c_z, charge_curr, dq, dqt+, ddq, q, soc, %d, %7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%12.1f,%10.7f,\n",
+       sat, dt, temp_c, *sp_t_last_, charge_curr, charge_curr * dt, chem_.dqdt*q_capacity_*(temp_lim - *sp_t_last_), d_delta_q, q_, soc_);
+    if ( sp.debug()==-99 )
+      Serial1.printf("sat, dt, temp_c, temp_c_z, charge_curr, dq, dqt+, ddq, q, soc, %d, %7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%12.1f,%10.7f,\n",
+       sat, dt, temp_c, *sp_t_last_, charge_curr, charge_curr * dt, chem_.dqdt*q_capacity_*(temp_lim - *sp_t_last_), d_delta_q, q_, soc_);
     *sp_t_last_ = temp_lim;
     return ( soc_ );
 }

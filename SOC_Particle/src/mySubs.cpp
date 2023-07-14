@@ -80,9 +80,9 @@ void print_serial_header(void)
 {
   if ( ( sp.debug()==1 || sp.debug()==2 || sp.debug()==3 || sp.debug()==4 ) )
   {
-    Serial.printf ("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min,\n");
+    Serial.printf ("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min, Tbl,\n");
     #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
-      Serial1.printf("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min,\n");
+      Serial1.printf("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min, Tbl,\n");
     #endif
   }
 }
@@ -119,13 +119,13 @@ void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
   if ( sp.tweak_test() ) cTime = double(Sen->now)/1000.;
   else cTime = Sen->control_time;
 
-  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d, %7.0f, %d,  %d,  %d,  %d, %4.1f,%6.3f,%10.3f,%10.3f,%10.3f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%7.5f,%c", \
+  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d, %7.0f, %d,  %d,  %d,  %d, %6.3f,%6.3f,%10.3f,%10.3f,%10.3f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%7.5f,%6.3f,%c", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
     sp.mon_chm(), Mon->q_cap_rated_scaled(), pubList->sat, sp.ib_select(), sp.modeling(), Mon->bms_off(),
     Mon->Tb(), Mon->vb(), Mon->ib(), Mon->ib_charge(), Mon->ioc(), Mon->voc_soc(), 
     Mon->vsat(), Mon->dv_dyn(), Mon->voc_stat(), Mon->hx(),
     Mon->y_ekf(),
-    Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(), Mon->soc_min(),
+    Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(), Mon->soc_min(), sp.t_last(),
     '\0');
 }
 
