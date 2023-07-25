@@ -1,4 +1,7 @@
-fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2023.07.15 22:04:50 =~=~=~=~=~=~=~=~=~=~=~=
+Hd;echo: Hd, 4
+echo: Hd, 0
+
 unit_h, 2023-07-13T17:34:29, 1689269669,  28.500,  13.748,  -1.553,  -1.750,  28.500,  13.748,  -1.553,  0.9649,  0.0074,  0.9941,  13.767,  13.768,  -0.382, 0, 0,
 unit_h, 2023-07-13T17:59:49, 1689271189,  28.432,  13.292,  -1.005,  -1.148,  28.432,  13.292,  -1.005,  0.9564,  0.0078,  0.9854,  13.305,  13.312,   0.037, 0, 0,
 unit_h, 2023-07-13T18:27:56, 1689272876,  28.243,  13.266,  -1.170,  -0.928,  28.243,  13.266,  -1.170,  0.9534,  0.0088,  0.9349,  13.281,  13.286,   0.064, 0, 0,
@@ -64,3 +67,75 @@ unit_h, 2023-07-14T22:07:19, 1689372439,  26.932,  13.297,  -1.827,  -2.188,  26
 unit_h, 2023-07-14T22:35:27, 1689374127,  26.182,  13.332,  -1.992,  -2.023,  26.182,  13.332,  -1.992,  0.9914,  0.0191,  0.7603,  13.357,  13.367,   0.180, 0, 0,
 unit_h, 2023-07-14T23:03:34, 1689375814,  25.493,  13.268,  -2.102,  -2.462,  25.493,  13.268,  -2.102,  0.9892,  0.0225,  0.7692,  13.293,  13.305,   0.054, 0, 0,
 unit_h, 2023-07-14T23:31:42, 1689377502,  24.868,  13.281,  -1.225,  -1.585,  24.868,  13.281,  -1.225,  0.9841,  0.0256,  0.7671,  13.297,  13.307,   0.058, 0, 0,
+fltb,  date,                time,    Tb_h, vb_h, ibah, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+
+echo: Pr, 0
+
+saved parameters (sp):
+             defaults    current EERAM values
+ inj amp  0.000    0.000 *Xa<> A pk
+ cut_gn_slr  1.000    1.000 *Sk<>
+ debug  0  0 *v<>
+ delta_q       0.0    -5722.1 *DQ<>
+ dq_sim        0.0    -5724.2 *Ca<>, *Cm<>, C
+ inj frq  0.000    0.000 *Xf<> r/s
+ hys_scale       1.000      1.000 *Sh<>
+ Ib_bias_all  0.000    0.000 *Di<> A
+ bias_amp -0.130   -0.130 *DA<>
+ bias_noa  0.440    0.440 *DB<>
+ ib_scale_amp  1.000    1.000 *SA<>
+ ib_scale_noa  1.000    1.000 *SB<>
+ ib_select 1  1 *s<> -1=noa, 0=auto, 1=amp
+ iflt                           4 flt ptr
+ inj_bias  0.000    0.000 *Xb<> A
+ isum                           106 tbl ptr
+ modeling 0  0 *Xm<>
+ mon chem            0          0 *Bm<> 0=Battleborn, 1=CHINS, 2=Spare
+ preserving 0  0 *Xm<>
+ nP              1.000      1.000 *BP<> eg '2P1S'
+ nS              1.000      1.000 *BS<> eg '2P1S'
+ shunt_gn_slr  1.000    1.000 *SG
+ sim chem            0          0 *Bs<>
+ s_cap_mon  1.000    1.000 *SQ<>
+ s_cap_sim  1.000    1.000 *Sq<>
+ Tb_bias_hdwe  0.000    0.000 *Dt<> dg C
+ time_now 1689449922 Sat Jul 15 19:38:42 2023 *U<> Unix time
+ type inj 0  0 *Xt<> 1=sin, 2=sq, 3=tri, 4=1C, 5=-1C, 8=cos
+ t_last 25.00  29.81 dg C
+ t_last_sim 25.00  29.81 dg C
+ Vb_bias_hdwe   0.000    0.060 *Dv<>,*Dc<> V
+ sclr vb         1.012      1.013 *SV<>
+
+SavedPars::SavedPars - MEMORY MAP 0x700 < 0x7FF
+
+command parameters(cp):
+ dc_dc_on 0
+ eframe_mult 20
+ fake_faults 1
+ inf_reset 0
+ model_cutback 0
+ model_saturated 0
+ print_mult 4
+ publishS 0
+ soft_reset 0
+ s_t_sat  1.000
+ tb_bias_mod  0.000
+ write_summary 0
+echo: Q, 0
+ib_amp_fail 0
+ib_noa_fail 0
+vb_fail 0
+Tb 29.807
+vb 13.311
+voc 13.330
+voc_filt 13.355
+vsat 13.819
+ib -1.554
+soc_m  0.9860
+soc_ekf  0.9601
+soc  0.9860
+soc_min  0.0010
+soc_inf  0.9927
+modeling = 0
+dq_inf/dq_abs   -2984.2/  249029.4 =  -0.0120 coul_eff*= 1.415927, DAB+=-3.096835
+DQn -264658.0 Tn  153499.8 DQp  186915.0 Tp   38771.1

@@ -2,16 +2,10 @@
 #define local_config_h
 
 #include "version.h"
-<<<<<<< Updated upstream
-const String unit = version + "_pro3p2";
-#define CONFIG_PHOTON2
-#define CONFIG_BARE
-=======
 const String unit = version + "_soc1a";
 #undef CONFIG_PHOTON
 #define CONFIG_ARGON
 #undef CONFIG_PHOTON2
->>>>>>> Stashed changes
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
@@ -28,7 +22,8 @@ const String unit = version + "_soc1a";
 #define SHUNT_AMP_R1          5100.     // Amplifed shunt ADS resistance, ohms (5k1)  100/5.1  = 19.61
 #define SHUNT_AMP_R2          100000.   // Amplifed shunt ADS resistance, ohms (100k) 0.075v  = 1.47 v => 3.3/2+1.47 = 3.12 < 3.3
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'Di'), A
-#define VOLT_BIAS             0.06  // Bias on Vb sensor (* 'Dc'), V
+#define VOLT_BIAS             0.06
+  // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
 #define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
 #define VB_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)

@@ -405,7 +405,8 @@ boolean BatteryMonitor::is_sat(const boolean reset)
     if ( reset)
         return ( temp_c_ > chem_.low_t && voc_filt_ >= vsat_ );
     else
-        return ( temp_c_ > chem_.low_t && (voc_filt_ >= vsat_ || soc_ >= MXEPS) );
+        // dag 20230716 return ( temp_c_ > chem_.low_t && (voc_filt_ >= vsat_ || soc_ >= MXEPS) );
+        return ( temp_c_ > chem_.low_t && (voc_filt_ >= vsat_) );
 }
 
 // Print
