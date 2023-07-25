@@ -96,7 +96,11 @@ Shunt::Shunt(const String name, const uint8_t port, float *sp_shunt_gain_sclr,fl
       setGain(GAIN_EIGHT, GAIN_TWO); // First argument is differential, second is single-ended.
     if (!begin(port_)) {
       Serial.printf("FAILED init ADS SHUNT MON %s\n", name_.c_str());
-      bare_detected_ = true;
+      #ifndef CONFIG_BARE
+        bare_detected_ = true;
+      #else
+        bare_detected_ = false;
+      #endif
     }
     else Serial.printf("SHUNT MON %s started\n", name_.c_str());
   #else
@@ -146,7 +150,11 @@ void Shunt::convert(const boolean disconnect)
     }
     vshunt_ = computeVolts(vshunt_int_);
   #else
-    bare_detected_ = Vc_ < VC_BARE_DETECTED;
+    #ifndef CONFIG_BARE
+      bare_detected_ = Vc_ < VC_BARE_DETECTED;
+    #else
+      bare_detected_ = false;
+    #endif
     if ( !bare_detected_ && !dscn_cmd_ )
     {
       vshunt_ = Vo_Vc_;
