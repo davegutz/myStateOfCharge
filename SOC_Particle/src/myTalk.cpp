@@ -1068,7 +1068,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Xts;", QUEUE);      // Start up a sine wave
                     chit("Ca1;", QUEUE);      // After restarting with sine running, soc will not be at 1.  Reset them all to 1
                     chit("Dm1;Dn1;", ASAP);   // Slight positive current so sat logic is functional.  ASAP so synchronized and ib_diff flat.
-                    chit("DP1;", QUEUE);      // Fast data collection (may cause trouble in CoolTerm.  if so, try Dr200)
+                    #ifdef CONFIG_PHOTON2
+                      chit("DP4;", QUEUE);      // until serial fix for P2 released
+                    #else
+                      chit("DP1;", QUEUE);      // Fast data collection (may cause trouble in CoolTerm.  if so, try Dr200)
+                    #endif
                     chit("Rb;", QUEUE);       // Reset battery states
                     // chit("Pa;", QUEUE);       // Print all for record
                     if ( INT_in == 10 )  // Xp10:  rapid tweak
