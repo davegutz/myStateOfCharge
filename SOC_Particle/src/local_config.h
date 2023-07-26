@@ -19,11 +19,10 @@ const String unit = version + "_soc1a";
 #define CURR_BIAS_NOA         0.44  // Calibration of non-amplified shunt sensor (* 'DB'), A
 #define CURR_SCALE_NOA        1.00  // Hardware to match data (* 'SB')
 #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SG'), A/V (1333 is 100A/0.075V)
-#define SHUNT_AMP_R1          5100.     // Amplifed shunt ADS resistance, ohms (5k1)  100/5.1  = 19.61
+#define SHUNT_AMP_R1          5100.     // Amplifed shunt ADS resistance, ohms (5k1)  10((0/5.1  = 19.61
 #define SHUNT_AMP_R2          100000.   // Amplifed shunt ADS resistance, ohms (100k) 0.075v  = 1.47 v => 3.3/2+1.47 = 3.12 < 3.3
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'Di'), A
-#define VOLT_BIAS             0.06
-  // Bias on Vb sensor (* 'Dc'), V
+#define VOLT_BIAS             0.0   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
 #define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
 #define VB_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
