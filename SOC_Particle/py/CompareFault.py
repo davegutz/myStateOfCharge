@@ -910,7 +910,8 @@ if __name__ == '__main__':
         # input_files = ['CH 20230128.txt']; chm_in = 1
         # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; rated_batt_cap_in = 100.; scale_in = 1.127; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 4  # 0.9 - 1.0 Tune 3
         # input_files = ['g20230530/Hd_20230714_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;
-        input_files = ['g20230530/hist_Dc06_20230715_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;
+        # input_files = ['g20230530/hist_Dc06_20230715_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;
+        input_files = ['g20230530/Hd_Dc06_20230725_soc1a_bb.csv']
         # input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt', 'serial_20230212_202717.txt',
         #                'serial_20230215_064843.txt', 'serial_20230215_165025.txt', 'serial_20230216_145024.txt', 'serial_20230217_072709.txt',
         #                'serial_20230217_185204.txt', 'serial_20230218_050029.txt', 'serial_20230218_134250.txt', 'serial_20230219_164928.txt',
@@ -937,7 +938,7 @@ if __name__ == '__main__':
 
         # Load history
         temp_hist_file = os.path.join(path_to_temp, temp_hist_file)
-        temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_h',
+        temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
                                                 skip=skip, comment_str='---')
         if temp_hist_file_clean:
             h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
@@ -948,7 +949,7 @@ if __name__ == '__main__':
             exit(1)
 
         # Load fault
-        temp_flt_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_h',
+        temp_flt_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
                                                skip=skip, comment_str='---')
         if temp_flt_file_clean:
             f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
@@ -995,8 +996,8 @@ if __name__ == '__main__':
         # Plots
         n_fig = 0
         fig_files = []
-        data_root = temp_hist_file_clean.split('/')[-1].replace('.csv', '-')
-        filename = data_root + sys.argv[0].split('/')[-1]
+        data_root = temp_hist_file_clean.split('/')[-1].replace('.csv', '_')
+        filename = data_root + sys.argv[0].split('/')[-1].split('\\')[-1].split('.')[-2]
         plot_title = filename + '   ' + date_time
         if len(f.time) > 1:
             n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',

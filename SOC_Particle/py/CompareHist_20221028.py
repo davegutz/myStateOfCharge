@@ -944,7 +944,7 @@ if __name__ == '__main__':
         cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
 
         # Load history
-        temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='hist', unit_key='unit_h',
+        temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='hist', unit_key='unit_f',
                                                 skip=skip, path_to_data=path_to_temp, path_to_temp=path_to_temp,
                                                 comment_str='---')
         if temp_hist_file_clean:

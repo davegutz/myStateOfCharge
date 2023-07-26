@@ -591,7 +591,8 @@ if __name__ == '__main__':
         # input_files = ['fault_20221206.txt']
         # input_files = ['hist_v20221028c_20221213.txt']
         # input_files = ['g20230530/Hd_20230714_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;
-        input_files = ['g20230530/hist_Dc06_20230715_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;  # TODO:  fix this
+        # input_files = ['g20230530/hist_Dc06_20230715_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;  # TODO:  fix this
+        input_files = ['g20230530/Hd_Dc06_20230725_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;  # TODO:  fix this
         # input_files = ['CH 20230128.txt']
         # t_max_in = 20.
         # exclusions = [(0, 1665334404)]  # before faults
@@ -614,7 +615,7 @@ if __name__ == '__main__':
 
         # Load history
         temp_hist_file = os.path.join(path_to_temp, temp_hist_file)
-        temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_h',
+        temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
                                                 skip=skip, comment_str='---')
         if temp_hist_file_clean:
             h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
@@ -624,7 +625,7 @@ if __name__ == '__main__':
             exit(1)
 
         # Load fault
-        temp_flt_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_h',
+        temp_flt_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
                                                skip=skip, comment_str='---')
         if temp_flt_file_clean:
             f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
