@@ -613,6 +613,7 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.legend(loc=3)
     plt.subplot(339)
     plt.plot(mo.time, mo.Tb, color='blue', linestyle='-', label='Tb'+ref_str)
+    plt.plot(mv.time, mv.tau_hys, color='cyan', linestyle='--', label='tau_hys' + test_str)
     plt.legend(loc=3)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)

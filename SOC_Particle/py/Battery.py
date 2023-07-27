@@ -126,6 +126,7 @@ class Battery(Coulombs):
         self.temp_c = temp_c
         self.saved = Saved()  # for plots and prints
         self.dv_hys = 0.  # Placeholder so BatterySim can be plotted
+        self.tau_hys = 0.  # Placeholder so BatterySim can be plotted
         self.dv_dyn = 0.  # Placeholder so BatterySim can be plotted
         self.bms_off = False
         self.mod = 7
@@ -158,6 +159,7 @@ class Battery(Coulombs):
         s += "  dvoc_ =   {:7.3f}  // Delta voltage, V\n".format(self.dvoc)
         s += "  dt_ =     {:7.3f}  // Update time, s\n".format(self.dt)
         s += "  dv_hys  = {:7.3f}  // Hysteresis delta v, V\n".format(self.dv_hys)
+        s += "  tau_hys = {:7.3f}  // Hysteresis time const, s\n".format(self.tau_hys)
         s += "  tweak_test={:d}     // Driving signal injection completely using software inj_soft_bias\n".format(self.tweak_test)
         s += "\n  "
         s += Coulombs.__str__(self, prefix + 'Battery:')
@@ -333,8 +335,8 @@ class BatteryMonitor(Battery, EKF1x1):
         # Hysteresis model
         self.hys.calculate_hys(self.ib, self.soc, self.chm)
         init_low = self.bms_off or (self.soc < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and self.ib > Battery.HYS_IB_THR)
-        self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=self.e_wrap,
-                                      chem=self.chm, scale_in=self.s_hys)
+        self.dv_hys, self.tau_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=self.e_wrap,
+                                                    chem=self.chm, scale_in=self.s_hys)
         self.voc_stat = self.voc - self.dv_hys
         self.e_wrap = self.voc_soc - self.voc_stat
         self.ioc = self.hys.ioc
@@ -464,6 +466,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.ioc.append(self.ioc)
         self.saved.vb.append(self.vb)
         self.saved.dv_hys.append(self.dv_hys)
+        self.saved.tau_hys.append(self.tau_hys)
         self.saved.dv_dyn.append(self.dv_dyn)
         self.saved.voc.append(self.voc)
         self.saved.voc_soc.append(self.voc_soc)
@@ -595,8 +598,8 @@ class BatterySim(Battery):
         # Hysteresis model
         self.hys.calculate_hys(curr_in, self.soc, self.chm)
         init_low = self.bms_off or (self.soc < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and self.ib > Battery.HYS_IB_THR)
-        self.dv_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=0.,
-                                      chem=self.chm, scale_in=self.s_hys)
+        self.dv_hys, self.tau_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=0.,
+                                                    chem=self.chm, scale_in=self.s_hys)
         self.voc = self.voc_stat + self.dv_hys
         self.ioc = self.hys.ioc
 
@@ -724,6 +727,7 @@ class BatterySim(Battery):
         self.saved.ioc.append(self.ioc)
         self.saved.vb.append(self.vb)
         self.saved.dv_hys.append(self.dv_hys)
+        self.saved.tau_hys.append(self.tau_hys)
         self.saved.dv_dyn.append(self.dv_dyn)
         self.saved.voc.append(self.voc)
         self.saved.voc_stat.append(self.voc_stat)
@@ -751,6 +755,7 @@ class BatterySim(Battery):
         self.saved_s.voc_stat_s.append(self.voc_stat)
         self.saved_s.dv_dyn_s.append(self.dv_dyn)
         self.saved_s.dv_hys_s.append(self.dv_hys)
+        self.saved_s.tau_hys_s.append(self.tau_hys)
         self.saved_s.vb_s.append(self.vb)
         self.saved_s.ib_s.append(self.ib)
         self.saved_s.ib_in_s.append(self.ib_in)
@@ -760,6 +765,7 @@ class BatterySim(Battery):
         self.saved_s.dq_s.append(self.delta_q)
         self.saved_s.soc_s.append(self.soc)
         self.saved_s.reset_s.append(self.reset)
+        self.saved_s.tau_s.append(self.tau_hys)
 
 
 # Other functions
@@ -799,6 +805,7 @@ class Saved:
         self.voc_soc = []
         self.voc_stat = []
         self.dv_hys = []
+        self.tau_hys = []
         self.dv_dyn = []
         self.soc = []
         self.soc_ekf = []
@@ -941,6 +948,8 @@ def overall_batt(mv, sv, filename,
         plt.subplot(325)
         plt.plot(mv.time, mv.dv_hys, color='green', linestyle='-', label='dv_hys'+suffix)
         plt.plot(sv.time, sv.dv_hys, color='black', linestyle='--', label='dv_hys_s'+suffix)
+        plt.plot(mv.time, mv.tau_hys, color='cyan', linestyle='-', label='tau_hys'+suffix)
+        plt.plot(sv.time, sv.tau_hys, color='red', linestyle='--', label='tau_hys_s'+suffix)
         plt.legend(loc=1)
         plt.subplot(326)
         plt.plot(mv.time, mv.vb, color='green', linestyle='-', label='vb'+suffix)
@@ -1040,6 +1049,7 @@ def overall_batt(mv, sv, filename,
         plt.legend(loc=1)
         plt.subplot(224)
         plt.plot(sv.time, sv.dv_hys, color='red', linestyle='-', label='dv_hys, V'+suffix)
+        plt.plot(sv.time, sv.tau_hys, color='blue', linestyle='--', label='tau_hys, V'+suffix)
         plt.legend(loc=2)
         fig_file_name = filename + "_" + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -1122,20 +1132,24 @@ def overall_batt(mv, sv, filename,
 
         plt.figure()
         n_fig += 1
-        plt.subplot(311)
+        plt.subplot(321)
         plt.title(plot_title + ' Battover 2')
         plt.plot(mv.time, mv.ib, color='green',   linestyle='-', label='ib'+suffix)
         plt.plot(mv1.time, mv1.ib, color='black', linestyle='--', label='ib' + suffix1)
         plt.plot(mv.time, mv.ioc, color='magenta', linestyle='-.', label='ioc'+suffix)
         plt.plot(mv1.time, mv1.ioc, color='blue', linestyle=':', label='ioc' + suffix1)
         plt.legend(loc=1)
-        plt.subplot(312)
+        plt.subplot(322)
         plt.plot(mv.time, mv.dv_dyn, color='green', linestyle='-', label='dv_dyn'+suffix)
         plt.plot(mv1.time, mv1.dv_dyn, color='black', linestyle='--', label='dv_dyn'+suffix1)
         plt.legend(loc=1)
-        plt.subplot(313)
+        plt.subplot(323)
         plt.plot(mv.time, mv.dv_hys, color='green', linestyle='-', label='dv_hys'+suffix)
         plt.plot(mv1.time, mv1.dv_hys, color='black', linestyle='--', label='dv_hys'+suffix1)
+        plt.legend(loc=1)
+        plt.subplot(324)
+        plt.plot(mv.time, mv.tau_hys, color='green', linestyle='-', label='tau_hys'+suffix)
+        plt.plot(mv1.time, mv1.tau_hys, color='black', linestyle='--', label='tau_hys'+suffix1)
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(n_fig) + ".png"
         fig_files.append(fig_file_name)
@@ -1213,6 +1227,8 @@ class SavedS:
         self.voc_stat_s = []
         self.dv_dyn_s = []
         self.dv_hys_s = []
+        self.tau_hys_s = []
+        self.tau_s = []
         self.vb_s = []
         self.ib_s = []
         self.ib_in_s = []
@@ -1227,7 +1243,7 @@ class SavedS:
         self.reset_s = []
 
     def __str__(self):
-        s = "unit_m,c_time,Tb_s,Tbl_s,vsat_s,voc_stat_s,dv_dyn_s,vb_s,ib_s,sat_s,ddq_s,dq_s,q_s,qcap_s,soc_s,reset_s,\n"
+        s = "unit_m,c_time,Tb_s,Tbl_s,vsat_s,voc_stat_s,dv_dyn_s,vb_s,ib_s,sat_s,ddq_s,dq_s,q_s,qcap_s,soc_s,reset_s,tau_s,\n"
         for i in range(len(self.time)):
             s += 'sim,'
             s += "{:13.3f},".format(self.time[i])
@@ -1246,5 +1262,6 @@ class SavedS:
             s += "{:5.3f},".format(self.qcap_s[i])
             s += "{:7.3f},".format(self.soc_s[i])
             s += "{:d},".format(self.reset_s[i])
+            s += "{:7.3f},".format(self.tau_s[i])
             s += "\n"
         return s
