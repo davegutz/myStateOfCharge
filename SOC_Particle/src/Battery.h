@@ -60,7 +60,9 @@ const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1,
 #define SOLV_MAX_STEP   0.2       // EKF initialization solver max step size of soc, fraction (0.2)
 #define HYS_INIT_COUNTS 30        // Maximum initialization iterations hysteresis (50)
 #define HYS_INIT_TOL    1e-8      // Initialization tolerance hysteresis (1e-8)
-const float MXEPS = 1-1e-6;      // Level of soc that indicates mathematically saturated (threshold is lower for robustness) (1-1e-6)
+// const float MXEPS = 1-1e-6;       // Level of soc that indicates mathematically saturated (threshold is lower for robustness) (1-1e-6) dag 8/3/2023
+const float MXEPS = 1.05;         // Level of soc that indicates mathematically saturated (threshold is higher to catch volt failure modes) (1.05)
+
 #define HYS_SOC_MIN_MARG 0.15     // Add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis (0.15)
 #define HYS_IB_THR      1.0       // Ignore reset if opposite situation exists, A (1.0)
 #ifndef VM

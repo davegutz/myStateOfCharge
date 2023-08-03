@@ -402,11 +402,13 @@ void BatteryMonitor::init_soc_ekf(const float soc)
 */
 boolean BatteryMonitor::is_sat(const boolean reset)
 {
+    static boolean sat_mem;
     if ( reset)
-        return ( temp_c_ > chem_.low_t && voc_filt_ >= vsat_ );
+        sat_mem = temp_c_ > chem_.low_t && (voc_filt_ >= vsat_);
     else
         // dag 20230716 return ( temp_c_ > chem_.low_t && (voc_filt_ >= vsat_ || soc_ >= MXEPS) );
-        return ( temp_c_ > chem_.low_t && (voc_filt_ >= vsat_) );
+        sat_mem = temp_c_ > chem_.low_t && (voc_filt_ >= vsat_ || (soc_ >= MXEPS && !sat_mem) );
+    return sat_mem;
 }
 
 // Print
