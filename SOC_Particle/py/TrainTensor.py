@@ -84,7 +84,7 @@ def train_model(model, dataset, epochs, batch_size, label_name, df, validation_s
 
 
 # Load data
-train_df = pd.read_csv(".//temp//dv_long_soc0p_ch_rep.csv", skipinitialspace =True)
+train_df = pd.read_csv(".//temp//dv_train_soc0p_ch_rep.csv", skipinitialspace =True)
 # test_df = pd.read_csv("https://download.mlcc.google.com/mledu-datasets/california_housing_test.csv")
 train_df['dv'] = train_df['voc_stat'] - train_df['voc_soc']
 
