@@ -174,13 +174,15 @@ def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
         plt.subplot(331)
         plt.title(plot_title + ' Hyst 1')
         # plt.plot(mo.time, mo.dv_hys_required, linestyle='-', color='black', label='dv_hys_required'+ref_str)
-        plt.plot(mo.time, -mo.e_wrap, linestyle='-', color='red', label='-e_wrap' + ref_str)
+        if mo.e_wrap is not None:
+            plt.plot(mo.time, -mo.e_wrap, linestyle='-', color='red', label='-e_wrap' + ref_str)
         plt.plot(mv.time, (np.array(mv.voc_stat) - np.array(mv.voc_soc)), linestyle='--', color='blue',
                  label='-e_wrap' + test_str)
         plt.plot(mo.time, mo.dv_hys, linestyle='-.', color='orange', label='dv_hys' + ref_str)
         plt.plot(mv.time, mv.dv_hys, marker='.', markersize='1', markevery=48, linestyle='None', color='magenta',
                  label='dv_hys' + test_str)
-        plt.plot(so.time, so.dv_hys_s, linestyle=':', color='cyan', label='dv_hys_s' + ref_str)
+        if so is not None:
+            plt.plot(so.time, so.dv_hys_s, linestyle=':', color='cyan', label='dv_hys_s' + ref_str)
         if hasattr(sv, 'dv_hys'):
             plt.plot(sv.time, sv.dv_hys, marker='.', markersize='1', markevery=64, linestyle='None', color='black',
                      label='dv_hys_s' + test_str)
@@ -193,11 +195,13 @@ def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
         plt.legend(loc=4)
         plt.subplot(332)
         # plt.plot(mo.soc, mo.dv_hys_required, linestyle='-', color='black', label='dv_hys_required'+ref_str)
-        plt.plot(mo.soc, -mo.e_wrap, linestyle='--', color='red', label='-e_wrap' + ref_str)
+        if mo.e_wrap is not None:
+            plt.plot(mo.soc, -mo.e_wrap, linestyle='--', color='red', label='-e_wrap' + ref_str)
         plt.plot(mo.soc, mo.dv_hys, linestyle='-.', color='orange', label='dv_hys' + ref_str)
         plt.plot(mv.soc, mv.dv_hys, marker='.', markersize='1', markevery=4, linestyle='None', color='magenta',
                  label='dv_hys' + test_str)
-        plt.plot(so.soc_s, so.dv_hys_s, linestyle=':', color='cyan', label='dv_hys_s' + ref_str)
+        if so is not None:
+            plt.plot(so.soc_s, so.dv_hys_s, linestyle=':', color='cyan', label='dv_hys_s' + ref_str)
         if hasattr(sv, 'dv_hys'):
             plt.plot(sv.soc, sv.dv_hys, marker='.', markersize='1', markevery=5, linestyle='None', color='black',
                      label='dv_hys_s' + test_str)
@@ -210,7 +214,8 @@ def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
         plt.legend(loc=4)
         plt.subplot(333)
         plt.plot(mo.time, mo.soc, linestyle='-', color='green', label='soc' + ref_str)
-        plt.plot(so.time, so.soc_s, linestyle='--', color='blue', label='soc_s' + ref_str)
+        if so is not None:
+            plt.plot(so.time, so.soc_s, linestyle='--', color='blue', label='soc_s' + ref_str)
         plt.plot(mv.time, mv.soc, linestyle='-.', color='red', label='soc' + test_str)
         if hasattr(sv, 'soc'):
             plt.plot(sv.time, sv.soc, linestyle=':', color='cyan', label='soc_s' + test_str)
@@ -219,19 +224,23 @@ def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
         plt.xlabel('sec')
         plt.legend(loc=4)
         plt.subplot(334)
-        plt.plot(mo.time, mo.ib_sel, linestyle='-', color='black', label='ib_sel' + ref_str)
+        if mo.ib_sel is not None:
+            plt.plot(mo.time, mo.ib_sel, linestyle='-', color='black', label='ib_sel' + ref_str)
         plt.plot(mo.time, mo.ioc, linestyle='--', color='cyan', label='ioc' + ref_str)
         plt.xlabel('sec')
         plt.legend(loc=4)
         plt.subplot(335)
-        plt.plot(mo.soc, mo.ib_sel, linestyle='-', color='black', label='ib_sel' + ref_str)
+        if mo.ib_sel is not None:
+            plt.plot(mo.soc, mo.ib_sel, linestyle='-', color='black', label='ib_sel' + ref_str)
         plt.plot(mo.soc, mo.ioc, linestyle='--', color='cyan', label='ioc' + ref_str)
         plt.xlabel('soc')
         plt.legend(loc=4)
         plt.subplot(336)
-        plt.plot(so.time, so.vb_s, color='black', linestyle='-', label='vb_s' + ref_str)
+        if so is not None:
+            plt.plot(so.time, so.vb_s, color='black', linestyle='-', label='vb_s' + ref_str)
         plt.plot(mo.time, mo.vb, color='orange', linestyle='--', label='vb' + ref_str)
-        plt.plot(so.time, so.voc_stat_s, color='magenta', linestyle='-', label='voc_stat_s' + ref_str)
+        if so is not None:
+            plt.plot(so.time, so.voc_stat_s, color='magenta', linestyle='-', label='voc_stat_s' + ref_str)
         plt.plot(mo.time, mo.voc_stat, color='pink', linestyle='--', label='voc_stat' + ref_str)
         plt.plot(mo.time, mo.voc_soc, marker='.', markersize='1', markevery=32, linestyle='None', color='black',
                  label='voc_soc' + ref_str)

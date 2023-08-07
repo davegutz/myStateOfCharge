@@ -121,10 +121,11 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
     sat_init = mon_old.sat[0]
     dv_hys_init = mon_old.dv_hys[0]
     chm_m = mon_old.chm
-    chm_s = sim_old.chm_s
     if sim_old is not None:
+        chm_s = sim_old.chm_s
         sat_s_init = sim_old.sat_s[0]
     else:
+        chm_s = chm_m
         sat_s_init = mon_old.voc_stat[0] > mon_old.vsat[0]
     t_len = len(t)
     rp = Retained()
@@ -343,6 +344,7 @@ if __name__ == '__main__':
         Bmon_in = None
         Bsim_in = None
         skip = 1
+        zero_zero_in = False
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
@@ -408,7 +410,7 @@ if __name__ == '__main__':
         if sel_file_clean:
             sel_old_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,
                                         encoding=None).view(np.recarray)
-        mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, time_end=time_end)
+        mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, time_end=time_end, zero_zero=zero_zero_in)
 
         # Load _m v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,

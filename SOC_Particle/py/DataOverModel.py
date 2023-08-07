@@ -794,6 +794,7 @@ if __name__ == '__main__':
 
         # Transient  inputs
         time_end = None
+        zero_zero_in = False
         # time_end = 1500.
 
         # Load data (must end in .txt) txt_file, type, title_key, unit_key
@@ -807,7 +808,7 @@ if __name__ == '__main__':
                 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
                                     encoding=None).view(np.recarray)
-        mon_old = SavedData(mon_old_raw, time_end)
+        mon_old = SavedData(mon_old_raw, time_end, zero_zero=zero_zero_in)
         cols_sim = ('unit_m', 'c_time', 'chm_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s',
                     'ib_s', 'ib_in_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
         try:

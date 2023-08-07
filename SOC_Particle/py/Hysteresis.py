@@ -150,9 +150,9 @@ class Hysteresis:
         self.dv_hys += self.dv_dot * dt
         self.dv_hys = max(min(self.dv_hys, dv_max), dv_min)
         if self.dv_hys >= 0.:
-            return max(min(self.dv_hys*self.scale*self.s_hys_chg, dv_max), dv_min)
+            return max(min(self.dv_hys*self.scale*self.s_hys_chg, dv_max), dv_min), self.tau
         else:
-            return max(min(self.dv_hys*self.scale*self.s_hys_dis, dv_max), dv_min)
+            return max(min(self.dv_hys*self.scale*self.s_hys_dis, dv_max), dv_min), self.tau
 
 
 class Saved:
