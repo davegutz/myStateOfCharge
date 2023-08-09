@@ -22,34 +22,33 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense, SimpleRNN, LSTM
-import seaborn as sns
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
 
 # The following lines adjust the granularity of reporting.
 pd.options.display.max_rows = 10
 pd.options.display.float_format = "{:.1f}".format
 
 
-def create_LSTM(hidden_units, dense_units, input_shape, activation, my_learning_rate):
-    """
-    :param hidden_units:
-    :param dense_units:
-    :param input_shape:
-    :param activation:
-    :return:
-    """
-    return model
+def create_lstm(hidden_units=3, num_in=1, time_steps=12, learning_rate=0.01):
+    lstm = Sequential()
+    lstm.add(LSTM(hidden_units, input_shape=(time_steps, num_in), activation='relu'))
+    lstm.add(Dense(units=1, activation='relu'))
+    lstm.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+                 metrics=[tf.keras.metrics.MeanSquaredError()])
+    return lstm
 
 
 # Plotting function
-def plot_the_loss_curve(epochs, mse_training, mse_validation):
+def plot_the_loss_curve(epochs_, mse_training, mse_validation):
     """Plot a curve of loss vs. epoch."""
 
     plt.figure()
     plt.xlabel("Epoch")
     plt.ylabel("Mean Squared Error")
 
-    plt.plot(epochs, mse_training, label="Training Loss")
-    plt.plot(epochs, mse_validation, label="Validation Loss")
+    plt.plot(epochs_, mse_training, label="Training Loss")
+    plt.plot(epochs_, mse_validation, label="Validation Loss")
 
     # mse_training is a pandas Series, so convert it to a list first.
     merged_mse_lists = mse_training.tolist() + mse_validation
@@ -64,123 +63,110 @@ def plot_the_loss_curve(epochs, mse_training, mse_validation):
 
 
 # Plot the result
-def plot_result(trainY, testY, train_predict, test_predict):
-    actual = np.append(trainY, testY)
-    predictions = np.append(train_predict, test_predict)
+def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
+    actual = np.append(trn_y, val_y, tst_y)
+    predictions = np.append(trn_pred, val_pred, tst_pred)
     rows = len(actual)
     plt.figure(figsize=(15, 6), dpi=80)
     plt.plot(range(rows), actual)
     plt.plot(range(rows), predictions)
-    plt.axvline(x=len(trainY), color='r')
+    plt.axvline(x=len(trn_y), color='r')
     plt.legend(['Actual', 'Predictions'])
     plt.xlabel('Observation number after given time steps')
     plt.ylabel('Sunspots scaled')
     plt.title('Actual and Predicted Values. The Red Line Separates The Training And Test Examples')
 
 
-
-def print_error(trainY, testY, train_predict, test_predict):
+def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
     # Error of predictions
-    train_rmse = math.sqrt(mean_squared_error(trainY, train_predict))
-    test_rmse = math.sqrt(mean_squared_error(testY, test_predict))
+    trn_rmse = math.sqrt(mean_squared_error(trn_y, trn_pred))
+    val_rmse = math.sqrt(mean_squared_error(val_y, val_pred))
+    tst_rmse = math.sqrt(mean_squared_error(tst_y, tst_pred))
+
     # Print RMSE
-    print('Train RMSE: %.3f RMSE' % (train_rmse))
-    print('Test RMSE: %.3f RMSE' % (test_rmse))
+    print('Train RMSE: %.3f RMSE' % trn_rmse)
+    print('Validate RMSE: %.3f RMSE' % val_rmse)
+    print('Test RMSE: %.3f RMSE' % tst_rmse)
 
 
-def train_model(model, dataset, epochs, batch_size, label_name, df, validation_split=0.1, verbose=0):
+def process_battery_attributes(df):
+    # column names of continuous features
+    data = df[['Tb', 'ib', 'soc']]
+    with pd.option_context('mode.chained_assignment', None):
+        data['Tb'] = data['Tb'].map(lambda x: x/50.)
+        data['ib'] = data['ib'].map(lambda x: x/50.)
+        data['Tb'] = data['soc'].map(lambda x: x/1.)
+        y = df['dv'] / 5.
+
+    return data, y
+
+
+def train_model(mod, x, y, epochs_=20, batch_size=1, verbose=0):
     """Feed a dataset into the model in order to train it."""
 
-    # Create Normalization layers to normalize the median_house_value data.
-    # Because median_house_value is our label (i.e., the target value we're
-    # predicting), these layers won't be added to our model.
-    train_dv_normalized = tf.keras.layers.Normalization(axis=None)
-    train_dv_normalized.adapt(np.array(df[label_name]))
-
-    # Split the dataset into features and label.
-    features = {name:np.array(value) for name, value in dataset.items()}
-    label = train_dv_normalized(np.array(features.pop(label_name)))
-    history = model.fit(x=features, y=label, batch_size=batch_size, epochs=epochs, shuffle=False,
-                        validation_split=validation_split, verbose=2)
+    # train the model
+    print("[INFO] training model...")
+    hist = mod.fit(x=x, y=y, batch_size=batch_size, epochs=epochs_, shuffle=False, verbose=verbose)
 
     # Get details that will be useful for plotting the loss curve.
-    epochs = history.epoch
-    hist = pd.DataFrame(history.history)
-    mse = hist["mean_squared_error"]
-    return epochs, mse, history.history
+    epochs_ = history.epoch
+    hist = pd.DataFrame(hist.history)
+    mserr = hist["mean_squared_error"]
+    return epochs_, mserr, hist.history
 
 
 # Load data and normalize
-train_df = pd.read_csv(".//temp//dv_train_soc0p_ch_rep.csv", skipinitialspace =True)
-test_df = pd.read_csv(".//temp//dv_test_soc0p_ch_rep.csv", skipinitialspace =True)
+print("[INFO] loading train/validation attributes...")
+train_df = pd.read_csv(".//temp//dv_train_soc0p_ch_rep.csv", skipinitialspace=True)
+train_df['dv'] = train_df['voc_soc'] - train_df['voc_stat']
+train_df = train_df[['Tb', 'ib', 'soc', 'dv']]
+print("[INFO] loading test attributes...")
+test_df = pd.read_csv(".//temp//dv_test_soc0p_ch_rep.csv", skipinitialspace=True)
+test_df['dv'] = test_df['voc_soc'] - test_df['voc_stat']
+test_df = test_df[['Tb', 'ib', 'soc', 'dv']]
+# Split training data into train and validation
+train_attr, validate_attr = train_test_split(train_df, test_size=0.2, shuffle=False)
+test_attr, test_val_attr = train_test_split(test_df, test_size=None, shuffle=False)
+train_attr, train_y = process_battery_attributes(train_attr)
+validate_attr, validate_y = process_battery_attributes(validate_attr)
+test_attr, test_y = process_battery_attributes(test_attr)
+train_x = train_attr['ib']
+validate_x = validate_attr['ib']
+test_x = test_attr['ib']
 
-train_df['Tb'] = train_df['Tb'] / 50.
-train_df['ib'] = train_df['ib'] / 50.
-train_df['soc'] = train_df['soc'] / 1.
-train_df['dv'] = (train_df['voc_soc'] - train_df['voc_stat']) / 5.
-trainX = [[],[]]
-trainX[0][:] = train_df['ib']
-trainX[1][:] = train_df['soc']
-trainY = train_df['dv']
+# Create model
+model = create_lstm(hidden_units=3, time_steps=12, learning_rate=0.01)
 
-test_df['Tb'] = test_df['Tb'] / 50.
-Tb_boundaries = np.linspace(0, 50, 3)
-test_df['ib'] = test_df['ib'] / 50.
-test_df['soc'] = test_df['soc'] / 1.
-test_df['dv'] = (test_df['voc_soc'] - test_df['voc_stat']) / 5.
-testX = [[],[]]
-testX[0][:] = test_df['ib']
-testX[1][:] = test_df['soc']
-testY = test_df['dv']
-
-inputs = {
-    'Tb':
-        tf.keras.layers.Input(shape=(1,), dtype=tf.float32, name='Tb'),
-    'ib':
-        tf.keras.layers.Input(shape=(1,), dtype=tf.float32, name='ib'),
-    'soc':
-        tf.keras.layers.Input(shape=(1,), dtype=tf.float32, name='soc'),
-}
-
-Tb = tf.keras.layers.Normalization(name='Tb_norm', axis=None)
-Tb.adapt(train_df['Tb'])
-Tb = Tb(inputs.get('Tb'))
-Tb = tf.keras.layers.Discretization(bin_boundaries=Tb_boundaries, name='discretization_Tb')(Tb)
-
-ib = tf.keras.layers.Normalization(name='ib_norm', axis=None)
-ib.adapt(train_df['ib'])
-ib = ib(inputs.get('ib'))
-
-soc = tf.keras.layers.Normalization(name='soc_norm', axis=None)
-soc.adapt(train_df['soc'])
-soc = soc(inputs.get('soc'))
-
-
-# Create model and train
-time_steps = 12
-hidden_units = 3
-learning_rate = 0.01
-epochs = 20
-batch_size = 1
-validation_split = 0.2
-model = Sequential()
-input_layer = tf.keras.layers.Concatenate()(
-    [ib, soc])
-model.add(LSTM(hidden_units, input_shape=(time_steps, 2), activation='relu'))(input_layer)
-model.add(Dense(units=1, activation='relu'))
-model.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-              metrics=[tf.keras.metrics.MeanSquaredError()])
-epochs, mse, history = train_model(model, train_df, epochs, batch_size, label_name='dv', df=train_df,
-                                   validation_split=validation_split, verbose=2)
+# Train model
+print("[INFO] training model...")
+epochs, mse, history = train_model(model, train_x, train_y, epochs_=20, batch_size=1, verbose=2)
 plot_the_loss_curve(epochs, mse, history["val_mean_squared_error"])
 
 # make predictions
-train_predict = model.predict(trainX)
-test_predict = model.predict(testX)
+print("[INFO] predicting 'dv'...")
+train_predict = model.predict(train_x)
+validate_predict = model.predict(validate_x)
+test_predict = model.predict(test_x)
 
 # Print error
-print_error(trainY, testY, train_predict, test_predict)
+print_error(trn_y=train_y, val_y=validate_y, tst_y=test_y, trn_pred=train_predict, val_pred=validate_predict,
+            tst_pred=test_predict)
 
 # Plot result
-plot_result(trainY, testY, train_predict, test_predict)
+plot_result(trn_y=train_y, val_y=validate_y, tst_y=test_y, trn_pred=train_predict, val_pred=validate_predict,
+            tst_pred=test_predict)
 plt.show()
+
+# Tb_boundaries = np.linspace(0, 50, 3)
+# inputs = {
+#     'Tb':
+#         tf.keras.layers.Input(shape=(1,), dtype=tf.float32, name='Tb'),
+#     'ib':
+#         tf.keras.layers.Input(shape=(1,), dtype=tf.float32, name='ib'),
+#     'soc':
+#         tf.keras.layers.Input(shape=(1,), dtype=tf.float32, name='soc'),
+# }
+# Tb = tf.keras.layers.Normalization(name='Tb_norm', axis=None)
+# Tb.adapt(train_df['Tb'])
+# Tb = Tb(inputs.get('Tb'))
+# Tb = tf.keras.layers.Discretization(bin_boundaries=Tb_boundaries, name='discretization_Tb')(Tb)
