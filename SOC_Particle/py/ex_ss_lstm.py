@@ -41,9 +41,7 @@ def get_XYol(dat, time_steps):
     n_ol = rows_x - time_steps
     X = np.zeros((n_ol, time_steps, 1))
     for i in range(n_ol):
-        iend = i + time_steps
-        slice = np.reshape(train_data[i:iend], (1, time_steps, 1))
-        # print(i, ':', iend, '=>', slice)
+        slice = np.reshape(dat[i:i+time_steps], (1, time_steps, 1))
         X[i] = slice
     return X, Y
 
@@ -96,10 +94,10 @@ time_steps = 12
 train_data, test_data, data = get_train_test(sunspots_url)
 trainX, trainY = get_XY(train_data, time_steps)
 testX, testY = get_XY(test_data, time_steps)
-trainXol, trainYol = get_XY(train_data, 1)
-testXol, testYol = get_XY(test_data, 1)
-trainXolx, trainYolx = get_XYol(train_data, time_steps)
-testXolx, testYolx = get_XYol(test_data, time_steps)
+# trainXol, trainYol = get_XY(train_data, 1)
+# testXol, testYol = get_XY(test_data, 1)
+trainXol, trainYol = get_XYol(train_data, time_steps)
+testXol, testYol = get_XYol(test_data, time_steps)
 
 # Create model and train
 model = create_LSTM(hidden_units=3, dense_units=1, input_shape=(time_steps, 1), activation=['tanh', 'tanh'])
@@ -108,23 +106,8 @@ model.fit(trainX, trainY, epochs=20, batch_size=1, verbose=2)
 # make predictions
 train_predict = model.predict(trainX)
 test_predict = model.predict(testX)
-
-# overlapping predictions; 'ol' = overlapping
-n = train_data.shape[0]
-n_ol = n - time_steps
-trainXol_ = np.zeros((n_ol, time_steps, 1))
-for i in range(n_ol):
-    slice = np.reshape(train_data[i:i+time_steps], (1, time_steps, 1))
-    trainXol_[i] = slice
-n = test_data.shape[0]
-n_ol = n - time_steps
-testXol_ = np.zeros((n_ol, time_steps, 1))
-for i in range(n_ol):
-    slice = np.reshape(test_data[i:i+time_steps], (1, time_steps, 1))
-    testXol_[i] = slice
-
-train_predictol = model.predict(trainXol_)
-test_predictol = model.predict(testXol_)
+train_predictol = model.predict(trainXol)
+test_predictol = model.predict(testXol)
 
 # Print error
 print_error(trainY, testY, train_predict, test_predict)
