@@ -34,6 +34,14 @@ def get_XY(dat, time_steps):
     return X, Y
 
 
+def get_XYol(dat, time_steps):
+    Y_ind = np.arange(time_steps, len(dat), time_steps)
+    Y = dat[Y_ind]
+    rows_x = len(Y)
+    X = dat[range(rows_x)]
+    X = np.reshape(X, (rows_x, time_steps, 1))
+    return X, Y
+
 def create_LSTM(hidden_units, dense_units, input_shape, activation):
     model = Sequential()
     model.add(LSTM(hidden_units, input_shape=input_shape, activation=activation[0]))
@@ -66,7 +74,7 @@ def plot_result(trainY, testY, train_predict, test_predict, train_data, test_dat
     plt.title('Actual and Predicted Values. The Red Line Separates The Training And Test Examples')
 
     actual = np.append(train_data, test_data)
-    predictions = np.append(train_predict, test_predict)
+    predictions = np.append(train_data_predict, test_data_predict)
     rows = len(actual)
     plt.figure(figsize=(15, 6), dpi=80)
     plt.plot(range(rows), actual)
@@ -82,6 +90,10 @@ time_steps = 12
 train_data, test_data, data = get_train_test(sunspots_url)
 trainX, trainY = get_XY(train_data, time_steps)
 testX, testY = get_XY(test_data, time_steps)
+trainXol, trainYol = get_XY(train_data, 1)
+testXol, testYol = get_XY(test_data, 1)
+# trainXol, trainYol = get_XYol(train_data, time_steps)
+# testXol, testYol = get_XYol(test_data, time_steps)
 
 # Create model and train
 model = create_LSTM(hidden_units=3, dense_units=1, input_shape=(time_steps, 1),
@@ -95,27 +107,28 @@ test_predict = model.predict(testX)
 # overlapping predictions; 'ol' = overlapping
 n = train_data.shape[0]
 n_ol = n - time_steps
-trainXol = np.zeros((n_ol, time_steps, 1))
+trainXol_ = np.zeros((n_ol, time_steps, 1))
 for i in range(n_ol):
     iend = i + time_steps
     slice = np.reshape(train_data[i:iend], (1, time_steps, 1))
-    print(i, ':', iend, '=>', slice)
-    trainXol[i] = slice
+    # print(i, ':', iend, '=>', slice)
+    trainXol_[i] = slice
 n = test_data.shape[0]
 n_ol = n - time_steps
-testXol = np.zeros((n_ol, time_steps, 1))
+testXol_ = np.zeros((n_ol, time_steps, 1))
 for i in range(n_ol):
     iend = i + time_steps
     slice = np.reshape(test_data[i:iend], (1, time_steps, 1))
-    print(i, ':', iend, '=>', slice)
-    testXol[i] = slice
+    # print(i, ':', iend, '=>', slice)
+    testXol_[i] = slice
 
-train_data_predict = model.predict(trainXol)
-test_data_predict = model.predict(testXol)
+train_predictol = model.predict(trainXol_)
+test_predictol = model.predict(testXol_)
 
 # Print error
 print_error(trainY, testY, train_predict, test_predict)
 
 # Plot result
-plot_result(trainY, testY, train_predict, test_predict, train_data,  test_data, train_data_predict, test_data_predict)
+tsQ2 = int(time_steps / 2)
+plot_result(trainY, testY, train_predict, test_predict, trainYol[tsQ2:-tsQ2],  testYol[tsQ2:-tsQ2], train_predictol[:-1], test_predictol[:-1])
 plt.show()
