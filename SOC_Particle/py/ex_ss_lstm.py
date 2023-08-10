@@ -35,12 +35,18 @@ def get_XY(dat, time_steps):
 
 
 def get_XYol(dat, time_steps):
-    Y_ind = np.arange(time_steps, len(dat), time_steps)
+    Y_ind = np.arange(1, len(dat), 1)
     Y = dat[Y_ind]
-    rows_x = len(Y)
-    X = dat[range(rows_x)]
-    X = np.reshape(X, (rows_x, time_steps, 1))
+    rows_x = len(Y) + 1
+    n_ol = rows_x - time_steps
+    X = np.zeros((n_ol, time_steps, 1))
+    for i in range(n_ol):
+        iend = i + time_steps
+        slice = np.reshape(train_data[i:iend], (1, time_steps, 1))
+        # print(i, ':', iend, '=>', slice)
+        X[i] = slice
     return X, Y
+
 
 def create_LSTM(hidden_units, dense_units, input_shape, activation):
     model = Sequential()
@@ -92,12 +98,11 @@ trainX, trainY = get_XY(train_data, time_steps)
 testX, testY = get_XY(test_data, time_steps)
 trainXol, trainYol = get_XY(train_data, 1)
 testXol, testYol = get_XY(test_data, 1)
-# trainXol, trainYol = get_XYol(train_data, time_steps)
-# testXol, testYol = get_XYol(test_data, time_steps)
+trainXolx, trainYolx = get_XYol(train_data, time_steps)
+testXolx, testYolx = get_XYol(test_data, time_steps)
 
 # Create model and train
-model = create_LSTM(hidden_units=3, dense_units=1, input_shape=(time_steps, 1),
-                   activation=['tanh', 'tanh'])
+model = create_LSTM(hidden_units=3, dense_units=1, input_shape=(time_steps, 1), activation=['tanh', 'tanh'])
 model.fit(trainX, trainY, epochs=20, batch_size=1, verbose=2)
 
 # make predictions
@@ -109,17 +114,13 @@ n = train_data.shape[0]
 n_ol = n - time_steps
 trainXol_ = np.zeros((n_ol, time_steps, 1))
 for i in range(n_ol):
-    iend = i + time_steps
-    slice = np.reshape(train_data[i:iend], (1, time_steps, 1))
-    # print(i, ':', iend, '=>', slice)
+    slice = np.reshape(train_data[i:i+time_steps], (1, time_steps, 1))
     trainXol_[i] = slice
 n = test_data.shape[0]
 n_ol = n - time_steps
 testXol_ = np.zeros((n_ol, time_steps, 1))
 for i in range(n_ol):
-    iend = i + time_steps
-    slice = np.reshape(test_data[i:iend], (1, time_steps, 1))
-    # print(i, ':', iend, '=>', slice)
+    slice = np.reshape(test_data[i:i+time_steps], (1, time_steps, 1))
     testXol_[i] = slice
 
 train_predictol = model.predict(trainXol_)
