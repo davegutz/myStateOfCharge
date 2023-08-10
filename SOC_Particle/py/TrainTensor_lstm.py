@@ -105,11 +105,11 @@ def train_model(mod, x, y, epochs_=20, batch_size=1, verbose=0):
     """Feed a dataset into the model in order to train it."""
 
     # train the model
-    print("[INFO] training model...")
+
     hist = mod.fit(x=x, y=y, batch_size=batch_size, epochs=epochs_, shuffle=False, verbose=verbose)
 
     # Get details that will be useful for plotting the loss curve.
-    epochs_ = history.epoch
+    epochs_ = hist.epoch
     hist = pd.DataFrame(hist.history)
     mserr = hist["mean_squared_error"]
     return epochs_, mserr, hist.history
@@ -139,7 +139,7 @@ model = create_lstm(hidden_units=3, time_steps=12, learning_rate=0.01)
 
 # Train model
 print("[INFO] training model...")
-epochs, mse, history = train_model(model, train_x, train_y, epochs_=20, batch_size=1, verbose=2)
+epochs, mse, history = train_model(model, train_x, train_y, epochs_=2, batch_size=1, verbose=2)
 plot_the_loss_curve(epochs, mse, history["val_mean_squared_error"])
 
 # make predictions

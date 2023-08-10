@@ -52,7 +52,7 @@ def print_error(trainY, testY, train_predict, test_predict):
 
 
 # Plot the result
-def plot_result(trainY, testY, train_predict, test_predict):
+def plot_result(trainY, testY, train_predict, test_predict, train_data, test_data, train_data_predict, test_data_predict):
     actual = np.append(trainY, testY)
     predictions = np.append(train_predict, test_predict)
     rows = len(actual)
@@ -65,6 +65,17 @@ def plot_result(trainY, testY, train_predict, test_predict):
     plt.ylabel('Sunspots scaled')
     plt.title('Actual and Predicted Values. The Red Line Separates The Training And Test Examples')
 
+    actual = np.append(train_data, test_data)
+    predictions = np.append(train_predict, test_predict)
+    rows = len(actual)
+    plt.figure(figsize=(15, 6), dpi=80)
+    plt.plot(range(rows), actual)
+    plt.plot(range(rows), predictions)
+    plt.axvline(x=len(train_data), color='r')
+    plt.legend(['Actual', 'Predictions'])
+    plt.xlabel('Observation number after given time steps')
+    plt.ylabel('Sunspots scaled')
+    plt.title('Actual and Predicted Values. The Red Line Separates The Training And Test Examples')
 
 sunspots_url = 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/monthly-sunspots.csv'
 time_steps = 12
@@ -81,9 +92,30 @@ model.fit(trainX, trainY, epochs=20, batch_size=1, verbose=2)
 train_predict = model.predict(trainX)
 test_predict = model.predict(testX)
 
+# overlapping predictions; 'ol' = overlapping
+n = train_data.shape[0]
+n_ol = n - time_steps
+trainXol = np.zeros((n_ol, time_steps, 1))
+for i in range(n_ol):
+    iend = i + time_steps
+    slice = np.reshape(train_data[i:iend], (1, time_steps, 1))
+    print(i, ':', iend, '=>', slice)
+    trainXol[i] = slice
+n = test_data.shape[0]
+n_ol = n - time_steps
+testXol = np.zeros((n_ol, time_steps, 1))
+for i in range(n_ol):
+    iend = i + time_steps
+    slice = np.reshape(test_data[i:iend], (1, time_steps, 1))
+    print(i, ':', iend, '=>', slice)
+    testXol[i] = slice
+
+train_data_predict = model.predict(trainXol)
+test_data_predict = model.predict(testXol)
+
 # Print error
 print_error(trainY, testY, train_predict, test_predict)
 
 # Plot result
-plot_result(trainY, testY, train_predict, test_predict)
+plot_result(trainY, testY, train_predict, test_predict, train_data,  test_data, train_data_predict, test_data_predict)
 plt.show()
