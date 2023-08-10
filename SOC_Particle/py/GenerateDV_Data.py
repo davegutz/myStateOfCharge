@@ -38,9 +38,10 @@ ib = 0.
 soc = float(1.)
 vb = 13.3
 vsat = 13.7
-dv_max = 0.25
-dv_ds = 1.  # change in voltage for soc
-dv_di = 0.015  # change in voltage for current
+v_normal = 13.3
+dv_max = 0.4
+dv_ds = 0.2  # change in voltage for soc
+dv_di = 0.02  # change in voltage for current
 voc = vb
 voc_stat = vb
 dv = dv_max
@@ -60,16 +61,20 @@ with open(csv_file, "w") as output:
         ib_hys = 0.
         if 8. < tod < 16.:
             ib_charge = 8.
-            ib_hys = dv_max
         elif tod > 21. or tod < 6.:
             ib_charge = -5.
-            ib_hys = -dv_max
         if sat and ib_charge > 0.:
             ib_charge = 0.
+        ib_hys = ib_charge / 10.
+        if sat:
+            ib_hys = -dv_max
         ib = ib_charge
         q += ib_charge * T
         soc = max(min(q / qcrs, 1.), 0.)
-        voc_soc = vsat + 0.02 - (1. - soc) * dv_ds
+        if soc > 0.97:
+            voc_soc = vsat + 0.02 - (1. - soc) * dv_ds
+        else:
+            voc_soc = v_normal - (1. - soc) * dv_ds
         dv = Hyst.calculate(-ib_hys, reset, T) - dv_max
         voc_stat = voc_soc + dv
         dv_dyn = ib_charge * dv_di
