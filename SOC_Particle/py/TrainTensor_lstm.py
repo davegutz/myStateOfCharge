@@ -67,22 +67,24 @@ def plot_the_loss_curve(epochs_, mse_training, mse_validation):
 
     plt.ylim([bottom_of_y_axis, top_of_y_axis])
     plt.legend()
-    plt.show()
 
 
 # Plot the result
 def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
-    actual = np.append(trn_y, val_y, tst_y)
-    predictions = np.append(trn_pred, val_pred, tst_pred)
+    actual = np.append(trn_y, val_y)
+    actual = np.append(actual, tst_y)
+    predictions = np.append(trn_pred, val_pred)
+    predictions = np.append(predictions, tst_pred)
     rows = len(actual)
     plt.figure(figsize=(15, 6), dpi=80)
     plt.plot(range(rows), actual)
     plt.plot(range(rows), predictions)
     plt.axvline(x=len(trn_y), color='r')
+    plt.axvline(x=len(trn_y)+len(val_y), color='r')
     plt.legend(['Actual', 'Predictions'])
     plt.xlabel('Observation number after given time steps')
-    plt.ylabel('Sunspots scaled')
-    plt.title('Actual and Predicted Values. The Red Line Separates The Training And Test Examples')
+    plt.ylabel('dv scaled')
+    plt.title('Actual and Predicted Values. The Red Line Separates The Training, Validation, and Test Examples')
 
 
 def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
@@ -162,7 +164,7 @@ test_predict = model.predict(test_x)
 # Print error
 print_error(trn_y=train_y, val_y=validate_y, tst_y=test_y, trn_pred=train_predict, val_pred=validate_predict,
             tst_pred=test_predict)
-
+print(type(train_y), type(validate_y), type(test_y), type(train_predict), type(validate_predict), type(test_predict))
 # Plot result
 plot_result(trn_y=train_y, val_y=validate_y, tst_y=test_y, trn_pred=train_predict, val_pred=validate_predict,
             tst_pred=test_predict)
