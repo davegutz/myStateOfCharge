@@ -30,7 +30,7 @@ tau = 90.  # seconds hyst time constant
 time_start = 1691689394  # time of start simulation
 T = 5.  # seconds update time
 ctime = 0.  # seconds since boot
-days_data = 1  # days of data collection
+days_data = 4  # days of data collection
 time = time_start
 time_end = time_start + float(days_data) * 24. * 3600.
 n = int((float(days_data) * 24. * 3600.)/ T) + 1
@@ -38,6 +38,7 @@ ib = 0.
 soc = float(1.)
 vb = 13.3
 vsat = 13.7
+v_sat = 14.6
 v_normal = 13.3
 dv_max = 0.2
 dv_min = -0.06
@@ -73,7 +74,7 @@ with open(csv_file, "w") as output:
         q += ib_charge * T
         soc = max(min(q / qcrs, 1.), 0.)
         if soc > 0.98:
-            voc_soc = vsat + 0.02 - (1. - soc) * dv_ds
+            voc_soc = v_sat + 0.02 - (1. - soc) * dv_ds
         else:
             voc_soc = v_normal - (1. - soc) * dv_ds
         dv = Hyst.calculate(ib_hys, reset, T)
