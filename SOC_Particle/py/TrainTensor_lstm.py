@@ -127,14 +127,16 @@ def train_model(mod, x, y, epochs_=20, batch_size=1, verbose=0):
 # Load data and normalize
 print("[INFO] loading train/validation attributes...")
 # train_df = pd.read_csv(".//temp//dv_train_soc0p_ch_rep.csv", skipinitialspace=True)
-train_df = pd.read_csv(".//generateDV_Data.csv", skipinitialspace=True)
-train_df['dv'] = train_df['voc_soc'] - train_df['voc_stat']
-train_df = train_df[['Tb', 'ib', 'soc', 'dv']]
+train = pd.read_csv(".//generateDV_Data.csv", skipinitialspace=True)
+train['voc'] = train['vb'] - train['dv_dyn']
+train['dv'] = train['voc'] - train['voc_stat']
+train_df = train[['Tb', 'ib', 'soc', 'dv']]
 print("[INFO] loading test attributes...")
 # test_df = pd.read_csv(".//temp//dv_test_soc0p_ch_rep.csv", skipinitialspace=True)
-test_df = pd.read_csv(".//generateDV_Data.csv", skipinitialspace=True)
-test_df['dv'] = test_df['voc_soc'] - test_df['voc_stat']
-test_df = test_df[['Tb', 'ib', 'soc', 'dv']]
+test = pd.read_csv(".//generateDV_Data.csv", skipinitialspace=True)
+test['voc'] = test['vb'] - test['dv_dyn']
+test['dv'] = test['voc'] - test['voc_stat']
+test_df = test[['Tb', 'ib', 'soc', 'dv']]
 # Split training data into train and validation
 train_attr, validate_attr = train_test_split(train_df, test_size=0.2, shuffle=False)
 test_attr, test_val_attr = train_test_split(test_df, test_size=None, shuffle=False)
@@ -152,7 +154,8 @@ model = create_LSTM(hidden_units=3, dense_units=1, input_shape=(time_steps, 1), 
 
 # Train model
 print("[INFO] training model...")
-epochs, mse, history = train_model(model, train_x, train_y, epochs_=2, batch_size=1, verbose=1)
+epochs, mse, history = train_model(model, train_x, train_y, epochs_=20
+                                   , batch_size=1, verbose=1)
 plot_the_loss_curve(epochs, mse, history["loss"])
 
 # make predictions
@@ -164,7 +167,6 @@ test_predict = model.predict(test_x)
 # Print error
 print_error(trn_y=train_y, val_y=validate_y, tst_y=test_y, trn_pred=train_predict, val_pred=validate_predict,
             tst_pred=test_predict)
-print(type(train_y), type(validate_y), type(test_y), type(train_predict), type(validate_predict), type(test_predict))
 # Plot result
 plot_result(trn_y=train_y, val_y=validate_y, tst_y=test_y, trn_pred=train_predict, val_pred=validate_predict,
             tst_pred=test_predict)
