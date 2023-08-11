@@ -26,11 +26,11 @@ sel = 1
 mod = 0
 bmso = 0
 Tb = 25.
-tau = 30.  # seconds hyst time constant
+tau = 90.  # seconds hyst time constant
 time_start = 1691689394  # time of start simulation
 T = 5.  # seconds update time
 ctime = 0.  # seconds since boot
-days_data = 3  # days of data collection
+days_data = 1  # days of data collection
 time = time_start
 time_end = time_start + float(days_data) * 24. * 3600.
 n = int((float(days_data) * 24. * 3600.)/ T) + 1
@@ -39,13 +39,14 @@ soc = float(1.)
 vb = 13.3
 vsat = 13.7
 v_normal = 13.3
-dv_max = 0.4
+dv_max = 0.2
+dv_min = -0.06
 dv_ds = 0.2  # change in voltage for soc
 dv_di = 0.02  # change in voltage for current
 voc = vb
 voc_stat = vb
 dv = dv_max
-Hyst = LagExp(dt=T, max_=dv_max, min_=0., tau=tau)
+Hyst = LagExp(dt=T, max_=dv_max, min_=dv_min, tau=tau)
 q = qcrs  # Coulombs charge
 reset = True
 csv_file = "generateDV_Data.csv"
@@ -63,22 +64,23 @@ with open(csv_file, "w") as output:
             ib_charge = 8.
         elif tod > 21. or tod < 6.:
             ib_charge = -5.
-        if sat and ib_charge > 0.:
+        if soc >= 1. and ib_charge > 0.:
             ib_charge = 0.
-        ib_hys = ib_charge / 10.
+        ib_hys = ib_charge / 90.
         if sat:
-            ib_hys = -dv_max
+            ib_hys = dv_min
         ib = ib_charge
         q += ib_charge * T
         soc = max(min(q / qcrs, 1.), 0.)
-        if soc > 0.97:
+        if soc > 0.98:
             voc_soc = vsat + 0.02 - (1. - soc) * dv_ds
         else:
             voc_soc = v_normal - (1. - soc) * dv_ds
-        dv = Hyst.calculate(-ib_hys, reset, T) - dv_max
-        voc_stat = voc_soc + dv
+        dv = Hyst.calculate(ib_hys, reset, T)
+        voc_stat = voc_soc
         dv_dyn = ib_charge * dv_di
-        vb = voc_stat + dv_dyn
+        voc = voc_stat + dv
+        vb = voc + dv_dyn
         ioc = float('nan')
         voc_ekf = float('nan')
         y_ekf = float('nan')
