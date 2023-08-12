@@ -170,7 +170,7 @@ rows_tst = int(len(test_y) / batch_size)
 test_x = test_x.to_numpy('float')[:rows_tst*batch_size].reshape(rows_tst, batch_size, 1)
 test_y = test_y.to_numpy('float')[:rows_tst*batch_size].reshape(rows_tst, batch_size, 1)
 # model = create_LSTM(hidden_units=16, dense_units=1, input_shape=(time_steps, 1),
-model=create_LSTM(hidden_units=12, dense_units=1, input_shape=(train_x.shape[1], train_x.shape[2]),
+model=create_LSTM(hidden_units=4, dense_units=1, input_shape=(train_x.shape[1], train_x.shape[2]),
                                       activation=['relu', 'sigmoid', 'linear'], learning_rate=0.0001)
 # model = create_lstm(hidden_units=3, time_steps=12, learning_rate=0.01)
 
