@@ -159,7 +159,7 @@ test_x = test_attr['ib']
 
 # Create model
 time_steps = 120
-batch_size = 12
+batch_size = 6
 rows_train = int(len(train_y) / batch_size)
 train_x = train_x.to_numpy('float')[:rows_train*batch_size].reshape(rows_train, batch_size, 1)
 train_y = train_y.to_numpy('float')[:rows_train*batch_size].reshape(rows_train, batch_size, 1)
@@ -171,12 +171,12 @@ test_x = test_x.to_numpy('float')[:rows_tst*batch_size].reshape(rows_tst, batch_
 test_y = test_y.to_numpy('float')[:rows_tst*batch_size].reshape(rows_tst, batch_size, 1)
 # model = create_LSTM(hidden_units=16, dense_units=1, input_shape=(time_steps, 1),
 model=create_LSTM(hidden_units=12, dense_units=1, input_shape=(train_x.shape[1], train_x.shape[2]),
-                                      activation=['tanh', 'sigmoid', 'linear'], learning_rate=0.01)
+                                      activation=['relu', 'sigmoid', 'linear'], learning_rate=0.0001)
 # model = create_lstm(hidden_units=3, time_steps=12, learning_rate=0.01)
 
 # Train model
 print("[INFO] training model...")
-epochs, mse, history = train_model(model, train_x, train_y, epochs_=10, batch_size=batch_size, verbose=1)
+epochs, mse, history = train_model(model, train_x, train_y, epochs_=30, batch_size=batch_size, verbose=1)
 plot_the_loss_curve(epochs, mse, history["loss"])
 
 # make predictions
