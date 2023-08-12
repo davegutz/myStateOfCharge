@@ -21,7 +21,7 @@ import pandas as pd
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from keras.models import Sequential
-from keras.layers import Dense, SimpleRNN, LSTM
+from keras.layers import Dense, SimpleRNN, LSTM, Dropout
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 
@@ -30,22 +30,17 @@ pd.options.display.max_rows = 10
 pd.options.display.float_format = "{:.1f}".format
 
 
-# def create_lstm(hidden_units=3, num_in=1, time_steps=12, learning_rate=0.01):
-#     lstm = Sequential()
-#     lstm.add(LSTM(hidden_units, input_shape=(time_steps, num_in), activation='relu'))
-#     lstm.add(Dense(units=1, activation='relu'))
-#     lstm.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-#                  metrics=[tf.keras.metrics.MeanSquaredError()])
-#     return lstm
-
-
 def create_LSTM(hidden_units, dense_units, input_shape, activation, learning_rate=0.01):
     lstm = Sequential()
     # lstm.add(SimpleRNN(hidden_units, input_shape=input_shape, activation=activation[0]))
     lstm.add(LSTM(hidden_units, input_shape=input_shape, activation=activation[0], recurrent_activation=activation[1]))
+    lstm.add(Dropout(0.2))
+    # lstm.add(LSTM(hidden_units, activation=activation[0], recurrent_activation=activation[1]))
+    # lstm.add(Dropout(0.2))
     lstm.add(Dense(units=dense_units, activation=activation[2]))
     # lstm.compile(loss='mean_squared_error', optimizer='adam')
     lstm.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate))
+    lstm.summary()
     return lstm
 
 
@@ -164,13 +159,24 @@ test_x = test_attr['ib']
 
 # Create model
 time_steps = 120
-model = create_LSTM(hidden_units=2, dense_units=1, input_shape=(time_steps, 1), activation=['tanh', 'sigmoid', 'tanh'],
-                    learning_rate=0.1)
+batch_size = 12
+rows_train = int(len(train_y) / batch_size)
+train_x = train_x.to_numpy('float')[:rows_train*batch_size].reshape(rows_train, batch_size, 1)
+train_y = train_y.to_numpy('float')[:rows_train*batch_size].reshape(rows_train, batch_size, 1)
+rows_val = int(len(validate_y) / batch_size)
+validate_x = validate_x.to_numpy('float')[:rows_val*batch_size].reshape(rows_val, batch_size, 1)
+validate_y = validate_y.to_numpy('float')[:rows_val*batch_size].reshape(rows_val, batch_size, 1)
+rows_tst = int(len(test_y) / batch_size)
+test_x = test_x.to_numpy('float')[:rows_tst*batch_size].reshape(rows_tst, batch_size, 1)
+test_y = test_y.to_numpy('float')[:rows_tst*batch_size].reshape(rows_tst, batch_size, 1)
+# model = create_LSTM(hidden_units=16, dense_units=1, input_shape=(time_steps, 1),
+model=create_LSTM(hidden_units=120, dense_units=1, input_shape=(train_x.shape[1], train_x.shape[2]),
+                                      activation=['tanh', 'sigmoid', 'linear'], learning_rate=0.01)
 # model = create_lstm(hidden_units=3, time_steps=12, learning_rate=0.01)
 
 # Train model
 print("[INFO] training model...")
-epochs, mse, history = train_model(model, train_x, train_y, epochs_=10, batch_size=6, verbose=1)
+epochs, mse, history = train_model(model, train_x, train_y, epochs_=10, batch_size=batch_size, verbose=1)
 plot_the_loss_curve(epochs, mse, history["loss"])
 
 # make predictions
@@ -180,11 +186,11 @@ validate_predict = model.predict(validate_x)
 test_predict = model.predict(test_x)
 
 # Print error
-print_error(trn_y=train_y, val_y=validate_y, tst_y=test_y, trn_pred=train_predict, val_pred=validate_predict,
+print_error(trn_y=train_y[:,batch_size-1,:], val_y=validate_y[:,batch_size-1,:], tst_y=test_y[:,batch_size-1,:], trn_pred=train_predict, val_pred=validate_predict,
             tst_pred=test_predict)
 # Plot result
 plot_input(trn_x=train_x, val_x=validate_x, tst_x=test_x)
-plot_result(trn_y=train_y, val_y=validate_y, tst_y=test_y, trn_pred=train_predict, val_pred=validate_predict,
+plot_result(trn_y=train_y[:,batch_size-1,:], val_y=validate_y[:,batch_size-1,:], tst_y=test_y[:,batch_size-1,:], trn_pred=train_predict, val_pred=validate_predict,
             tst_pred=test_predict)
 plt.show()
 
